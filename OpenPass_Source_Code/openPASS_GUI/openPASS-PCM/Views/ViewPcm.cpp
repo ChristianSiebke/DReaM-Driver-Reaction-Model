@@ -12,6 +12,8 @@
 #include "ui_ViewPcm.h"
 #include "GUI_Definitions.h"
 
+#include <math.h>
+
 const WindowInterface::ID ViewPcm::ViewID = QStringLiteral("openPASS.PCM");
 
 ViewPcm::ViewPcm(WindowInterface *const window,

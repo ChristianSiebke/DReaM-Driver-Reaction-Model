@@ -7,3 +7,4 @@ SUBDIRS = \
     openPASS-PCM/openPASS-PCM.pro \
     openPASS-PCM_Evaluation/openPASS-PCM_Eval.pro \
     openPASS-System/openPASS-System.pro \
+  #  openPASS-Simulation/openPASS-Simulation.pro

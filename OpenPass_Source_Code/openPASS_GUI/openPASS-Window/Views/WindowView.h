@@ -15,6 +15,7 @@
 #include <QMainWindow>
 #include <QMap>
 #include <QPair>
+#include <QCloseEvent>
 
 class WindowPresenter;
 
@@ -31,12 +32,11 @@ public:
                         QWidget * const parent = nullptr);
     virtual ~WindowView();
 
-private Q_SLOTS:
-    void sidebar_clicked();
+public Q_SLOTS:
+    void initialize_view();
 
 private Q_SLOTS:
-    void clearSimulation();
-    void updateSimulation();
+    void sidebar_clicked();
 
 private Q_SLOTS:
     void clearViews();
@@ -44,6 +44,9 @@ private Q_SLOTS:
 
 private Q_SLOTS:
     void clearMenu();
+
+protected:
+    void closeEvent(QCloseEvent * event) override;
 
 private:
     using ViewItem = QPair<WindowInterface::Widget *, WindowInterface::Menu>;
@@ -59,3 +62,4 @@ private:
 };
 
 #endif // WINDOWVIEW_H
+

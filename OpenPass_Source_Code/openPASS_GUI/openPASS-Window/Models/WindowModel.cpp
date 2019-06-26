@@ -12,7 +12,6 @@
 
 WindowModel::WindowModel(QObject * const parent)
     : WindowInterface(parent)
-    , simulation(nullptr)
 {
 }
 
@@ -98,15 +97,4 @@ WindowModel::ViewList WindowModel::list() const
         list.insert(it, view);
     }
     return list;
-}
-
-void WindowModel::setSimulationWidget(WindowInterface::Widget * const widget)
-{
-    simulation = widget;
-    Q_EMIT modifiedSimulationWidget();
-}
-
-WindowInterface::Widget * WindowModel::getSimulationWidget() const
-{
-    return simulation;
 }

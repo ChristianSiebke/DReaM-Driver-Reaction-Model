@@ -27,6 +27,7 @@ protected:
     static QString const KeyAgentConfigFile;
     static QString const KeyRunConfigFile;
     static QString const KeySceneryConfigFile;
+    static QString const KeyScenarioFile;
     static QString const KeyLogFileMaster;
     static QString const KeyLogFileSlave;
     static QString const KeyLogLevel;

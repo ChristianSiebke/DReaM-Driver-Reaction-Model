@@ -12,7 +12,8 @@
 
 #include <QCoreApplication>
 #include <QDir>
-#include <qprocess.h>
+#include <QProcess>
+//#include <qprocess.h>
 
 SimulationModel::SimulationModel(ProjectInterface * const project, QObject *parent)
     : QObject(parent)
@@ -31,7 +32,8 @@ SimulationModel::SimulationModel(ProjectInterface * const project, QObject *pare
             this, &SimulationModel::update);
 
     // update process state
-    connect(_process, SIGNAL(finished(int exitCode)), this, SLOT(setSimulationStatus()));
+    connect(_process, static_cast<void (QProcess::*)(int)>(&QProcess::finished),
+            this, &SimulationModel::setSimulationStatus);
 }
 
 bool SimulationModel::load(QString const &filepath)
@@ -44,9 +46,24 @@ bool SimulationModel::save(QString const &filepath) const
     return _project->save(filepath);
 }
 
+bool SimulationModel::setSceneryConfigFile(const ProjectInterface::SceneryConfig &sceneryConfig)
+{
+    return _project->setSceneryConfigFile(sceneryConfig);
+}
+
 ProjectInterface::SceneryConfig SimulationModel::getSceneryConfigFile() const
 {
     return _project->getSceneryConfigFile();
+}
+
+bool SimulationModel::setScenarioFile(const ProjectInterface::ScenarioFile &scenarioFile)
+{
+    return _project->setScenarioFile(scenarioFile);
+}
+
+ProjectInterface::ScenarioFile SimulationModel::getScenarioFile() const
+{
+    return _project->getScenarioFile();
 }
 
 bool SimulationModel::setAgentConfigFile(ProjectInterface::AgentConfig const &agentConfig)
@@ -85,10 +102,10 @@ bool SimulationModel::getSimulationStatus() const
     return simulationStatus;
 }
 
-bool SimulationModel::startSimulation()
+bool SimulationModel::startSimulation(QString filepath)
 {
     QDir const root = QDir(QCoreApplication::applicationDirPath());
-    QString master = (root.canonicalPath()).append("/OpenPassMaster.exe");
+    QString master = (root.canonicalPath()).append("/OpenPassMaster.exe --frameworkConfigFile %1").arg(filepath);
     if (!master.isNull()){
         _process->start(master);
         simulationStatus = true;

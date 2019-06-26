@@ -50,6 +50,7 @@ void ProjectXMLSaveModel::saveProject(QXmlStreamWriter &xml, const ProjectModel 
     xml.writeTextElement(KeyAgentConfigFile, project->getAgentConfigFile());
     xml.writeTextElement(KeyRunConfigFile, project->getRunConfigFile());
     xml.writeTextElement(KeySceneryConfigFile, project->getSceneryConfigFile());
+    xml.writeTextElement(KeyScenarioFile, project->getScenarioFile());
     xml.writeTextElement(KeyLogFileMaster, project->getLogMaster());
     xml.writeTextElement(KeyLogFileSlave, project->getLogSlave());
     xml.writeTextElement(KeyLogLevel, QString::number(project->getLogLevel()));

@@ -17,6 +17,7 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QFileDialog>
+#include <QFile>
 #include <QKeyEvent>
 #include <QStandardPaths>
 #include <QString>
@@ -123,9 +124,9 @@ void ProjectView::on_logLevelSpinBox_valueChanged(int level)
 void ProjectView::on_logMasterBrowseButton_clicked()
 {
     QDir const root = QDir(QCoreApplication::applicationDirPath());
-    QString const filepath = QFileDialog::getOpenFileName(
+    QString const filepath = QFileDialog::getSaveFileName(
                                  this, tr("openPASS / Directory to save Log files"), root.canonicalPath(),
-                                 QStringLiteral("Log Master File (*.xml);;All files (*)"));
+                                 QStringLiteral("Log Master File (*.log);;All files (*)"));
     if (!filepath.isNull())
     {
         projectPresenter->setLogMaster(filepath);
@@ -136,9 +137,9 @@ void ProjectView::on_logMasterBrowseButton_clicked()
 void ProjectView::on_logSlaveBrowseButton_clicked()
 {
     QDir const root = QDir(QCoreApplication::applicationDirPath());
-    QString const filepath = QFileDialog::getOpenFileName(
+    QString const filepath = QFileDialog::getSaveFileName(
                                  this, tr("openPASS / Directory to save Log files"), root.canonicalPath(),
-                                 QStringLiteral("Log Slave File (*.xml);;All files (*)"));
+                                 QStringLiteral("Log Slave File (*.log);;All files (*)"));
     if (!filepath.isNull())
     {
         projectPresenter->setLogSlave(filepath);

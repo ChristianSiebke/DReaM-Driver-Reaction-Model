@@ -100,6 +100,19 @@ void SimulationView::on_agentBrowserButton_clicked()
     }
 }
 
+// Import the Scenery Configuration
+void SimulationView::on_sceneryBrowserButton_clicked()
+{
+    QDir const root = QDir(QCoreApplication::applicationDirPath());
+    QString const filepath = QFileDialog::getOpenFileName(
+                this, tr("openPASS / Import Scenery Configuration"), root.canonicalPath(),
+                QStringLiteral("Scenery Configuration (*.xml);;All files (*)"));
+    if (!filepath.isNull())
+    {
+        _simulationPresenter->setSceneryConfig(filepath);
+    }
+}
+
 // Import the Run Configuration (load file path for the Master)
 void SimulationView::on_runBrowserButton_clicked()
 {
@@ -113,6 +126,19 @@ void SimulationView::on_runBrowserButton_clicked()
     }
 }
 
+// Import the Open Scenario File
+void SimulationView::on_scenarioBrowserButton_clicked()
+{
+    QDir const root = QDir(QCoreApplication::applicationDirPath());
+    QString const filepath = QFileDialog::getOpenFileName(
+                this, tr("openPASS / Import Open Scenario File"), root.canonicalPath(),
+                QStringLiteral("Open Scenario File (*.xosc);;All files (*)"));
+    if (!filepath.isNull())
+    {
+        _simulationPresenter->setScenarioFile(filepath);
+    }
+}
+
 // Start/Stop simulation
 void SimulationView::on_simulationButton_clicked()
 {
@@ -120,10 +146,12 @@ void SimulationView::on_simulationButton_clicked()
         QDir const root = QDir(QCoreApplication::applicationDirPath());
         const QString filepath = QFileDialog::getSaveFileName(
                     this, QStringLiteral("openPASS / Save to Simulate Project"),
-                    root.canonicalPath(), QStringLiteral("XML File (*.xml)"));
+                    root.canonicalPath(), QStringLiteral("XML File (*.xml)"));   
+        _simulationPresenter->saveProject(filepath);
+
         if (!filepath.isNull()){
-            _simulationPresenter->startSimulation();
-//            ui->simulationButton->setText("Stop Simulation");
+            _simulationPresenter->startSimulation(filepath);
+            ui->simulationButton->setText("Stop Simulation");
         }
     }
     else
@@ -133,13 +161,16 @@ void SimulationView::on_simulationButton_clicked()
 // update the information displayed in the View
 void SimulationView::updateView()
 {
-    ui->sceneryEdit->setText(_simulationPresenter->getSceneryConfig());
+    ui->sceneryConfEdit->setText(_simulationPresenter->getSceneryConfig());
     ui->agentConfEdit->setText(_simulationPresenter->getAgentConfigFile());
     ui->runConfEdit->setText(_simulationPresenter->getRunConfigFile());
+    ui->scenarioFileEdit->setText(_simulationPresenter->getScenarioFile());
     ui->simulationButton->setEnabled(_simulationPresenter->getProjectStatus());
 
     if (_simulationPresenter->getSimulationStatus())
         ui->simulationButton->setText("Stop Simulation");
     else
+    {
         ui->simulationButton->setText("Start Simulation");
+    }
 }

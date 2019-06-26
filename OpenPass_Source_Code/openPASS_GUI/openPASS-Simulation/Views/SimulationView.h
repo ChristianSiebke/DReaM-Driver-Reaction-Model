@@ -53,7 +53,10 @@ private Q_SLOTS: // Define actions in the Menu-bar
 private Q_SLOTS: // Define actions for the Browse Buttons
     void on_agentBrowserButton_clicked();
     void on_runBrowserButton_clicked();
+    void on_sceneryBrowserButton_clicked();
     void on_simulationButton_clicked();
+    void on_scenarioBrowserButton_clicked();
+
 
 private Q_SLOTS: // Update actions from the Browser Buttons and also the load action
     void updateView();

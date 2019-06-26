@@ -25,8 +25,8 @@ QMAKE_TARGET_DESCRIPTION = openPASS Component
 QMAKE_TARGET_COMPANY = Volkswagen Group of America
 QMAKE_TARGET_COPYRIGHT = Volkswagen Group of America
 
-Release:DESTDIR = $$DIR_RELEASE
-Debug:DESTDIR = $$DIR_DEBUG
+Release:DESTDIR = $${DIR_RELEASE}$${SUBDIR_LIB_GUIS}
+Debug:DESTDIR = $${DIR_DEBUG}$${SUBDIR_LIB_GUIS}
 win32: TARGET_EXT = .dll
 
 include(Interfaces/Interfaces.pri)

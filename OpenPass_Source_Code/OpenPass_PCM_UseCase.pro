@@ -27,9 +27,9 @@ DIR_PRO = $${PWD}
 win32 {
 DIR_PRO ~= s,/,\\,g
 DIR_BIN ~= s,/,\\,g
-copydata.commands = xcopy $$DIR_PRO\openPASS_Resource\OpenPass_PCM_UseCase $$DIR_BIN /S /D
+copydata.commands = xcopy $$DIR_PRO\openPASS_Resource\OpenPass_PCM_UseCase $$DIR_BIN\components\ /S /D
 } else {
-copydata.commands = cp -ru $$DIR_PRO/openPASS_Resource/OpenPass_PCM_UseCase $$DIR_BIN
+copydata.commands = cp -ru $$DIR_PRO/openPASS_Resource/OpenPass_PCM_UseCase $$DIR_BIN/components/
 }
 first.depends = $(first) copydata
 export(first.depends)

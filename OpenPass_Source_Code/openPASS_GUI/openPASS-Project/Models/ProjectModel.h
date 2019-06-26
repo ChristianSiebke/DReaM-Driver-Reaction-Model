@@ -47,6 +47,10 @@ public:
     virtual ProjectInterface::AgentConfig getAgentConfigFile() const override;
 
 public:
+    virtual bool setScenarioFile(ProjectInterface::ScenarioFile const &scenarioFile) override;
+    virtual ProjectInterface::ScenarioFile getScenarioFile() const override;
+
+public:
     virtual bool setRunConfigFile(ProjectInterface::RunConfig const &runConfig) override;
     virtual ProjectInterface::RunConfig getRunConfigFile() const override;
 
@@ -80,6 +84,7 @@ protected:
     static ProjectInterface::AgentConfig const DefaultAgent;
     static ProjectInterface::RunConfig const DefaultRunConfig;
     static ProjectInterface::SceneryConfig const DefaultScenery;
+    static ProjectInterface::ScenarioFile const DefaultScenario;
     static ProjectInterface::LogMaster const DefaultLogMaster;
     static ProjectInterface::LogSlave const DefaultLogSlave;
 
@@ -90,6 +95,7 @@ protected:
     ProjectInterface::AgentConfig _agent;
     ProjectInterface::RunConfig _runConfig;
     ProjectInterface::SceneryConfig _scenery;
+    ProjectInterface::ScenarioFile _scenario;
     ProjectInterface::LogMaster _logMaster;
     ProjectInterface::LogSlave _logSlave;
     ProjectInterface::LogLevel _logLevel;

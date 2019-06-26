@@ -38,6 +38,7 @@ public:
     using AgentConfig = QString;
     using RunConfig = QString;
     using SceneryConfig = QString;
+    using ScenarioFile = QString;
     using LogMaster = QString;
     using LogSlave = QString;
     using LogLevel = unsigned int;
@@ -81,6 +82,10 @@ public:
 public:
     virtual bool setRunConfigFile(ProjectInterface::RunConfig const &runConfig) = 0;
     virtual ProjectInterface::RunConfig getRunConfigFile() const = 0;
+
+public:
+    virtual bool setScenarioFile(ProjectInterface::ScenarioFile const &scenarioFile) = 0;
+    virtual ProjectInterface::ScenarioFile getScenarioFile() const = 0;
 
 public:
     virtual bool setSceneryConfigFile(ProjectInterface::SceneryConfig const &sceneryConfig) = 0;

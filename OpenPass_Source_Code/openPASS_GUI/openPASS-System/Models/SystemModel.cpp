@@ -16,6 +16,8 @@
 #include "Models/SystemXMLLoadModel.h"
 #include "Models/SystemXMLSaveModel.h"
 
+#include <QCoreApplication>
+
 SystemModel::SystemModel(ComponentInterface * const component,
                          ProjectInterface * const project,
                          QObject * const parent)
@@ -25,7 +27,8 @@ SystemModel::SystemModel(ComponentInterface * const component,
     , systems(new SystemMapModel(this))
 {
     // Load components
-    components->loadFromDirectory(_project->getLibrary());
+    components->loadFromDirectory(QDir(QCoreApplication::applicationDirPath() + SUBDIR_LIB_COMPONENT));
+ //   components->loadFromDirectory(_project->getLibrary());
 }
 
 bool SystemModel::clear()

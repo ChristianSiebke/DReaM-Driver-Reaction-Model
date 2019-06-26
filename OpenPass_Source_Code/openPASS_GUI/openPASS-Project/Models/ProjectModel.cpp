@@ -28,6 +28,7 @@ ProjectInterface::Result const ProjectModel::DefaultResult = QStringLiteral("");
 ProjectInterface::AgentConfig const ProjectModel::DefaultAgent = QStringLiteral("");
 ProjectInterface::RunConfig const ProjectModel::DefaultRunConfig = QStringLiteral("");
 ProjectInterface::SceneryConfig const ProjectModel::DefaultScenery = QStringLiteral("");
+ProjectInterface::ScenarioFile const ProjectModel::DefaultScenario = QStringLiteral("");
 ProjectInterface::LogMaster const ProjectModel::DefaultLogMaster = QStringLiteral("");
 ProjectInterface::LogSlave const ProjectModel::DefaultLogSlave = QStringLiteral("");
 
@@ -39,6 +40,7 @@ ProjectModel::ProjectModel(QObject *parent)
     , _agent(DefaultAgent)
     , _runConfig(DefaultRunConfig)
     , _scenery(DefaultScenery)
+    , _scenario(DefaultScenario)
     , _logMaster(DefaultLogMaster)
     , _logSlave(DefaultLogSlave)
     , _logLevel(0)
@@ -83,6 +85,7 @@ bool ProjectModel::clear()
     setAgentConfigFile(DefaultAgent);
     setRunConfigFile(DefaultRunConfig);
     setSceneryConfigFile(DefaultScenery);
+    setScenarioFile(DefaultScenario);
     setLogMaster(DefaultLogMaster);
     setLogSlave(DefaultLogSlave);
     setLogLevel(0);
@@ -210,6 +213,20 @@ ProjectInterface::SceneryConfig ProjectModel::getSceneryConfigFile() const
     return _scenery;
 }
 
+bool ProjectModel::setScenarioFile(ProjectInterface::ScenarioFile const &scenarioFile)
+{
+    // Update the path to the directory containing the Open Scenario File
+    _scenario = scenarioFile;
+    Q_EMIT update();
+    return true;
+}
+ProjectInterface::ScenarioFile ProjectModel::getScenarioFile() const
+{
+    // Get the path of the directory containing the Open Scenario File
+    return _scenario;
+}
+
+
 bool ProjectModel::setLogMaster(ProjectInterface::LogMaster const &logMaster)
 {
     // Update the path to the directory containing the Log File of the Master
@@ -268,7 +285,8 @@ bool ProjectModel::getProjectStatus() const
 {
     if ((!_logSlave.isEmpty())&&(!_logMaster.isEmpty())
             &&(!_result.isEmpty())&&(!_agent.isEmpty())
-            &&(!_runConfig.isEmpty())&&(!_scenery.isEmpty()))
+            &&(!_runConfig.isEmpty())&&(!_scenery.isEmpty())
+            &&(!_scenario.isEmpty()))
         return true;
     return false;
 }

@@ -38,9 +38,24 @@ bool SimulationPresenter::saveProject(QString const &filepath) const
     return _simulationModel->save(filepath);
 }
 
+bool SimulationPresenter::setSceneryConfig(ProjectInterface::SceneryConfig const &sceneryConfig)
+{
+    return _simulationModel->setSceneryConfigFile(sceneryConfig);
+}
+
 ProjectInterface::SceneryConfig SimulationPresenter::getSceneryConfig() const
 {
     return _simulationModel->getSceneryConfigFile();
+}
+
+bool SimulationPresenter::setScenarioFile(ProjectInterface::ScenarioFile const &scenarioFile)
+{
+    return _simulationModel->setScenarioFile(scenarioFile);
+}
+
+ProjectInterface::ScenarioFile SimulationPresenter::getScenarioFile() const
+{
+    return _simulationModel->getScenarioFile();
 }
 
 bool SimulationPresenter::setAgentConfigFile(ProjectInterface::AgentConfig const &agentConfig)
@@ -73,9 +88,9 @@ bool SimulationPresenter::getSimulationStatus() const
     return _simulationModel->getSimulationStatus();
 }
 
-bool SimulationPresenter::startSimulation() const
+bool SimulationPresenter::startSimulation(QString filepath) const
 {
-    return _simulationModel->startSimulation();
+    return _simulationModel->startSimulation(filepath);
 }
 
 bool SimulationPresenter::stopSimulation() const

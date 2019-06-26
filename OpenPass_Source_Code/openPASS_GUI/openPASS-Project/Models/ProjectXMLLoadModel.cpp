@@ -62,6 +62,8 @@ bool ProjectXMLLoadModel::loadProject(QXmlStreamReader & xml,
             project->setRunConfigFile(xml.readElementText());
         else if (xml.name() == KeySceneryConfigFile)
             project->setSceneryConfigFile(xml.readElementText());
+        else if (xml.name() == KeyScenarioFile)
+            project->setScenarioFile(xml.readElementText());
         else if (xml.name() == KeyLogFileMaster)
             project->setLogMaster(xml.readElementText());
         else if (xml.name() == KeyLogFileSlave)

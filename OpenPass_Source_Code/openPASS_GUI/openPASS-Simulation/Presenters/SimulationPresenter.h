@@ -30,7 +30,12 @@ public:
     virtual bool saveProject(QString const &filepath) const;
 
 public:
+    virtual bool setSceneryConfig(ProjectInterface::SceneryConfig const &sceneryConfig);
     virtual ProjectInterface::SceneryConfig getSceneryConfig() const;
+
+public:
+    virtual bool setScenarioFile(ProjectInterface::ScenarioFile const &scenarioFile);
+    virtual ProjectInterface::ScenarioFile getScenarioFile() const;
 
 public:
     virtual bool setAgentConfigFile(ProjectInterface::AgentConfig const &agentConfig);
@@ -45,7 +50,7 @@ public:
     virtual bool getSimulationStatus() const;
 
 public:
-    virtual bool startSimulation() const;
+    virtual bool startSimulation(QString filepath) const;
     virtual bool stopSimulation() const;
 
 private:

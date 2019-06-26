@@ -16,6 +16,7 @@ QString const ProjectXMLBaseModel::KeyResultPath = QStringLiteral("ResultPath");
 QString const ProjectXMLBaseModel::KeyAgentConfigFile = QStringLiteral("AgentConfigFile");
 QString const ProjectXMLBaseModel::KeyRunConfigFile = QStringLiteral("RunConfigFile");
 QString const ProjectXMLBaseModel::KeySceneryConfigFile = QStringLiteral("SceneryConfigFile");
+QString const ProjectXMLBaseModel::KeyScenarioFile = QStringLiteral("ScenarioConfigFile");
 QString const ProjectXMLBaseModel::KeyLogFileMaster = QStringLiteral("LogFileMaster");
 QString const ProjectXMLBaseModel::KeyLogFileSlave = QStringLiteral("LogFileSlave");
 QString const ProjectXMLBaseModel::KeyLogLevel = QStringLiteral("LogLevel");
@@ -27,6 +28,7 @@ QList<QString> const ProjectXMLBaseModel::KeyListFrameworkConfig = {
     ProjectXMLBaseModel::KeyAgentConfigFile,
     ProjectXMLBaseModel::KeyRunConfigFile,
     ProjectXMLBaseModel::KeySceneryConfigFile,
+    ProjectXMLBaseModel::KeyScenarioFile,
     ProjectXMLBaseModel::KeyLogFileMaster,
     ProjectXMLBaseModel::KeyLogFileSlave,
     ProjectXMLBaseModel::KeyLogLevel,

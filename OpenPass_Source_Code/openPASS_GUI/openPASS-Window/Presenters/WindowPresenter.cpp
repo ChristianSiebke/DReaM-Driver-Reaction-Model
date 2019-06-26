@@ -18,16 +18,9 @@ WindowPresenter::WindowPresenter(WindowModel * const windowModel,
     // Connect WindowModel with WindowPresenter
     connect(windowModel, &WindowModel::modified,
             this, &WindowPresenter::modified);
-    connect(windowModel, &WindowModel::modifiedSimulationWidget,
-            this, &WindowPresenter::modifiedSimulationWidget);
 }
 
 WindowModel::ViewList WindowPresenter::list() const
 {
     return windowModel->list();
-}
-
-WindowInterface::Widget * WindowPresenter::getSimulationWidget() const
-{
-    return windowModel->getSimulationWidget();
 }
