@@ -101,6 +101,14 @@ bool SlaveConfigImporter::ImportExperimentConfig(QDomElement experimentConfigEle
     }
     experimentConfig.randomSeed = static_cast<std::uint32_t>(randomSeed);
 
+    bool logCyclicsToCsv;
+    if (!ParseBool(experimentConfigElement, "LoggingCyclicsToCsv", logCyclicsToCsv))
+    {
+        LOG_INTERN(LogLevel::Info) << "Tag LogCyclicsToCsv undefined, falling back to default value false.";
+        logCyclicsToCsv = false;
+    }
+    experimentConfig.logCyclicsToCsv = logCyclicsToCsv;
+
     // Logging groups
     QDomElement loggingGroupsElement;
     if (!GetFirstChildElement(experimentConfigElement, "LoggingGroups", loggingGroupsElement) ||

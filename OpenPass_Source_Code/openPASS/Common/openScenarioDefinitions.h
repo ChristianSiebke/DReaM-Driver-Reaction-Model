@@ -11,41 +11,66 @@
 
 #include "Interfaces/scenarioActionInterface.h"
 
+#include <optional>
 #include <string>
+#include <vector>
 
+namespace openScenario {
+
+struct ActorInformation
+{
+    std::optional<bool> triggeringAgentsAsActors{};
+    std::optional<std::vector<std::string>> actors{};
+};
+
+// OSCOrientation
+enum class OrientationType
+{
+    Undefined = 0,
+    Relative,
+    Absolute
+};
+
+// OSCOrientation
+struct Orientation
+{
+    std::optional<OrientationType> type{};
+    std::optional<double> h{};
+    std::optional<double> p{};
+    std::optional<double> r{};
+};
+
+// OSCPosition
+struct RoadPosition
+{
+    std::optional<Orientation> orientation{};
+    std::string roadId{};
+    double s{};
+    double t{};
+};
+
+struct LanePosition
+{
+    std::optional<Orientation> orientation{};
+    std::string roadId{};
+    int laneId{};
+    std::optional<double> offset{};
+    double s{};
+};
+
+// All action classes
 class Action : public ScenarioActionInterface
 {
 public:
-    Action(const std::vector<std::string>& eventDetectorNames,
-           const std::vector<std::string>& actors,
-           const std::string& sequenceNames);
+    Action(const std::string& sequenceName):
+        ScenarioActionInterface(),
+        sequenceName{sequenceName}
+    {}
     Action() = delete;
     Action(const Action&) = delete;
     Action(Action&&) = delete;
     Action& operator=(const Action&) = delete;
     Action& operator=(Action&&) = delete;
-
-    /*!
-     * ------------------------------------------------------------------------
-     * \brief GetEventDetectorNames returns the collection of names of the
-     *        event detectors that relate to this action.
-     *
-     * \returns a reference to the collection of names of the event detectors
-     *          that relate to this action.
-     * ------------------------------------------------------------------------
-     */
-    const std::vector<std::string>& GetEventDetectorNames() const;
-
-    /*!
-     * ------------------------------------------------------------------------
-     * \brief GetActors returns the collection of names of the actor entities
-     *        this action will target.
-     *
-     * \returns a reference to the collection of names of the actor entities
-     *          this action will target.
-     * ------------------------------------------------------------------------
-     */
-    const std::vector<std::string>& GetActors() const;
 
     /*!
      * ------------------------------------------------------------------------
@@ -56,25 +81,27 @@ public:
      *          a part.
      * ------------------------------------------------------------------------
      */
-    const std::string& GetSequenceName() const;
+    const std::string& GetSequenceName() const
+    {
+        return sequenceName;
+    }
+
 private:
-    std::vector<std::string> eventDetectorNames;
-    std::vector<std::string> actors;
-    std::string sequenceName;
+    const std::string sequenceName;
 };
 
 class GlobalAction : public Action
 {
 public:
-    GlobalAction(const std::vector<std::string>& eventDetectorNames,
-                 const std::vector<std::string>& actors,
-                 const std::string& sequenceNames);
+    GlobalAction(const std::string& sequenceName):
+        Action(sequenceName)
+    {
+    }
     GlobalAction() = delete;
     GlobalAction(const GlobalAction&) = delete;
     GlobalAction(GlobalAction&&) = delete;
     GlobalAction& operator=(const GlobalAction&) = delete;
     GlobalAction& operator=(GlobalAction&&) = delete;
-private:
 };
 
 enum GlobalEntityActionType
@@ -86,12 +113,13 @@ enum GlobalEntityActionType
 class GlobalEntityAction : public GlobalAction
 {
 public:
-    GlobalEntityAction(const std::vector<std::string>& eventDetectorNames,
-                       const std::vector<std::string>& actors,
-                       const std::string& sequenceNames,
-                       GlobalEntityActionType type,
-                       const std::string& name);
-
+    GlobalEntityAction(const std::string& sequenceName,
+                                      GlobalEntityActionType type,
+                                      const std::string& name):
+        GlobalAction(sequenceName),
+        type{type},
+        name{name}
+    {}
     GlobalEntityAction() = delete;
     GlobalEntityAction(const GlobalEntityAction&) = delete;
     GlobalEntityAction(GlobalEntityAction&&) = delete;
@@ -105,7 +133,11 @@ public:
      * \returns GlobalEntityActionType::Delete or GlobalEntityActionType::Add.
      * ------------------------------------------------------------------------
      */
-    GlobalEntityActionType GetType() const;
+    GlobalEntityActionType GetType() const
+    {
+        return type;
+    }
+
     /*!
      * ------------------------------------------------------------------------
      * \brief GetName returns the name of the entity specified by this action.
@@ -113,26 +145,28 @@ public:
      * \returns the name of the entity specified by this action.
      * ------------------------------------------------------------------------
      */
-    const std::string& GetName() const;
+    const std::string& GetName() const
+    {
+        return name;
+    }
+
 private:
-    GlobalEntityActionType type;
-    std::string name;
+    const GlobalEntityActionType type;
+    const std::string name;
     // we'll ignore the "Add" element's "Position" child, even though required by standard
 };
 
 class PrivateAction : public Action
 {
 public:
-    PrivateAction(const std::vector<std::string>& eventDetectorNames,
-                  const std::vector<std::string>& actors,
-                  const std::string& sequenceNames);
-
+    PrivateAction(const std::string& sequenceName):
+        Action(sequenceName)
+    {}
     PrivateAction() = delete;
     PrivateAction(const PrivateAction&) = delete;
     PrivateAction(PrivateAction&&) = delete;
     PrivateAction& operator=(const PrivateAction&) = delete;
     PrivateAction& operator=(PrivateAction&&) = delete;
-private:
 };
 
 enum PrivateLateralLaneChangeActionType
@@ -144,13 +178,15 @@ enum PrivateLateralLaneChangeActionType
 class PrivateLateralLaneChangeAction : public PrivateAction
 {
 public:
-    PrivateLateralLaneChangeAction(const std::vector<std::string>& eventDetectorNames,
-                                   const std::vector<std::string>& actors,
-                                   const std::string& sequenceNames,
-                                   PrivateLateralLaneChangeActionType type,
-                                   int value,
-                                   const std::string& object = "");
-
+    PrivateLateralLaneChangeAction(const std::string& sequenceName,
+                                                                PrivateLateralLaneChangeActionType type,
+                                                                int value,
+                                                                const std::string& object = ""):
+        PrivateAction(sequenceName),
+        type{type},
+        value{value},
+        object{object}
+    {}
     PrivateLateralLaneChangeAction() = delete;
     PrivateLateralLaneChangeAction(const PrivateLateralLaneChangeAction&) = delete;
     PrivateLateralLaneChangeAction(PrivateLateralLaneChangeAction&&) = delete;
@@ -166,7 +202,10 @@ public:
      *          PrivateLateralLaneChangeActionType::Relative.
      * ------------------------------------------------------------------------
      */
-    PrivateLateralLaneChangeActionType GetType() const;
+    PrivateLateralLaneChangeActionType GetType() const
+    {
+        return type;
+    }
 
     /*!
      * ------------------------------------------------------------------------
@@ -176,7 +215,11 @@ public:
      * \returns the lane offset value specified as a target by this Action.
      * ------------------------------------------------------------------------
      */
-    int GetValue() const;
+    int GetValue() const
+    {
+        return value;
+    }
+
     /*!
      * ------------------------------------------------------------------------
      * \brief GetObject returns the name of the entity from which relative
@@ -186,11 +229,15 @@ public:
      *          specified. Returns "" if no such entity was specified.
      * ------------------------------------------------------------------------
      */
-    const std::string& GetObject() const;
+    const std::string& GetObject() const
+    {
+        return object;
+    }
+
 private:
-    PrivateLateralLaneChangeActionType type;
-    int value;
-    std::string object; // optional
+    const PrivateLateralLaneChangeActionType type;
+    const int value;
+    const std::string object; // optional
     // we'll ignore the LaneChange element's "Dynamics" tag for now
     // we'll ignore the LaneChange element's "targetLaneOffset" attribute for now
 };
@@ -198,25 +245,24 @@ private:
 class UserDefinedAction : public Action
 {
 public:
-    UserDefinedAction(const std::vector<std::string>& eventDetectorNames,
-                      const std::vector<std::string>& actors,
-                      const std::string& sequenceNames);
+    UserDefinedAction(const std::string& sequenceName):
+        Action(sequenceName)
+    {}
     UserDefinedAction() = delete;
     UserDefinedAction(const UserDefinedAction&) = delete;
     UserDefinedAction(UserDefinedAction&&) = delete;
     UserDefinedAction& operator=(const UserDefinedAction&) = delete;
     UserDefinedAction& operator=(UserDefinedAction&&) = delete;
-private:
 };
 
 class UserDefinedCommandAction : public UserDefinedAction
 {
 public:
-    UserDefinedCommandAction(const std::vector<std::string>& eventDetectorNames,
-                             const std::vector<std::string>& actors,
-                             const std::string& sequenceNames,
-                             const std::string& command);
-
+    UserDefinedCommandAction(const std::string& sequenceName,
+                             const std::string& command):
+        UserDefinedAction(sequenceName),
+        command{command}
+    {}
     UserDefinedCommandAction() = delete;
     UserDefinedCommandAction(const UserDefinedCommandAction&) = delete;
     UserDefinedCommandAction(UserDefinedCommandAction&&) = delete;
@@ -230,7 +276,13 @@ public:
      * \returns the command string specified for this Action
      * ------------------------------------------------------------------------
      */
-    const std::string& GetCommand() const;
+    const std::string& GetCommand() const
+    {
+        return command;
+    }
+
 private:
-    std::string command;
+    const std::string command;
 };
+
+} // namespace openScenario

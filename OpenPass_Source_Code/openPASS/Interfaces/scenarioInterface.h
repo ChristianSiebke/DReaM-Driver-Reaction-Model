@@ -19,7 +19,9 @@
 
 #include <string>
 #include <vector>
-#include "spawnPointDefinitions.h"
+
+#include "Common/eventDetectorDefinitions.h"
+#include "Common/spawnPointDefinitions.h"
 #include "Interfaces/scenarioActionInterface.h"
 #include "CoreFramework/CoreShare/parameters.h"
 
@@ -139,13 +141,7 @@ public:
     //-----------------------------------------------------------------------------
     //! Adds a event detector to the event detectors map.
     //-----------------------------------------------------------------------------
-    virtual void AddEventDetector(const std::string& eventDetectorType, SimulationCommon::EventDetectorParameters eventDetectorParameters) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Adds a manipulator to the manipulators map.
-    //-----------------------------------------------------------------------------
-    virtual void AddManipulator(const std::string& manipulatorType,
-                                SimulationCommon::ManipulatorParameters manipulatorParameters) = 0;
+    virtual void AddConditionalEventDetector(const openScenario::ConditionalEventDetectorInformation &eventDetectorInformation) = 0;
 
     //-------------------------------------------------------------------------
     //! \brief AddAction Adds a shared_ptr to an action to the actions map
@@ -159,21 +155,14 @@ public:
     //!
     //! @return                         list of event detector
     //-----------------------------------------------------------------------------
-    virtual std::list<SimulationCommon::EventDetectorParameters> GetEventDetectors() = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns the manipulators.
-    //!
-    //! @return                         list of manipulators
-    //-----------------------------------------------------------------------------
-    virtual std::list<SimulationCommon::ManipulatorParameters> GetManipulators() = 0;
+    virtual const std::vector<openScenario::ConditionalEventDetectorInformation>& GetEventDetectorInformations() = 0;
 
     //-------------------------------------------------------------------------
     //! \brief GetActions Returns the actions of the scenario
     //!
     //! \returns list of actions
     //-------------------------------------------------------------------------
-    virtual std::list<std::shared_ptr<ScenarioActionInterface>> GetActions() const = 0;
+    virtual std::vector<std::shared_ptr<ScenarioActionInterface>> GetActions() const = 0;
 
     //-------------------------------------------------------------------------
     //! \brief Returns the desired end time of the simulation.

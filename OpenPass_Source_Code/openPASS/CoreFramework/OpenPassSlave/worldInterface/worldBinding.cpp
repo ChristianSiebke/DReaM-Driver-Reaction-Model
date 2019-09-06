@@ -16,9 +16,11 @@ namespace SimulationSlave
 {
 
 WorldBinding::WorldBinding(std::string libraryPath,
-                           CallbackInterface *callbacks) :
+                           CallbackInterface *callbacks,
+                           StochasticsInterface* stochastics) :
         libraryPath(libraryPath),
-        callbacks(callbacks)
+        callbacks(callbacks),
+        stochastics(stochastics)
 {}
 
 WorldBinding::~WorldBinding()
@@ -31,7 +33,8 @@ WorldInterface *WorldBinding::Instantiate()
     if(!library)
     {
         library = new (std::nothrow) WorldLibrary(libraryPath,
-                                                  callbacks);
+                                                  callbacks,
+                                                  stochastics);
         if(!library)
         {
             return nullptr;

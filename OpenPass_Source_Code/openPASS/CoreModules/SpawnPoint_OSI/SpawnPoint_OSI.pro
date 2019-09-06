@@ -23,9 +23,7 @@ SUBDIRS += \
 
 INCLUDEPATH += \
     $$SUBDIRS \
-        ../../Common \
         ../../CoreFramework/OpenPassSlave/Framework \
-	../../Interfaces \
         ..
 
 SOURCES += \

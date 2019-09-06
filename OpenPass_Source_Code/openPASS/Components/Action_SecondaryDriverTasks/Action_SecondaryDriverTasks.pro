@@ -20,10 +20,8 @@ include(../../../global.pri)
 
 SUBDIRS += .\
 
-INCLUDEPATH += $$SUBDIRS \
-            ../../Common \
-            ../../Interfaces \
-            ..
+#INCLUDEPATH += \
+
 
 SOURCES += \
     $$getFiles(SUBDIRS, cpp) \

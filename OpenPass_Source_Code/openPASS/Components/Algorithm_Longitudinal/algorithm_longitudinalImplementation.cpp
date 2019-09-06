@@ -20,7 +20,7 @@
 #include "Common/longitudinalSignal.h"
 #include "Common/accelerationSignal.h"
 #include "Common/parametersVehicleSignal.h"
-#include "globalDefinitions.h"
+#include "Common/globalDefinitions.h"
 
 void AlgorithmLongitudinalImplementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time)
 {

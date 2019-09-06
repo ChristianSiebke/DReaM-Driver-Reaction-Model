@@ -29,14 +29,16 @@ class WorldLibrary
 public:
     typedef const std::string &(*WorldInterface_GetVersion)();
     typedef WorldInterface *(*WorldInterface_CreateInstanceType)(
-            const CallbackInterface *callbacks);
+            const CallbackInterface *callbacks, StochasticsInterface* stochastics);
     typedef void (*WorldInterface_DestroyInstanceType)(WorldInterface *implementation);
 
 
     WorldLibrary(const std::string &worldLibraryPath,
-                 CallbackInterface *callbacks) :
+                 CallbackInterface *callbacks,
+                 StochasticsInterface* stochastics) :
            worldLibraryPath(worldLibraryPath),
-           callbacks(callbacks)
+           callbacks(callbacks),
+           stochastics(stochastics)
     {}
 
     WorldLibrary(const WorldLibrary&) = delete;
@@ -85,6 +87,7 @@ private:
     WorldInterface *worldInterface = nullptr;
     QLibrary *library = nullptr;
     CallbackInterface *callbacks;
+    StochasticsInterface* stochastics;
     WorldInterface_GetVersion getVersionFunc{nullptr};
     WorldInterface_CreateInstanceType createInstanceFunc{nullptr};
     WorldInterface_DestroyInstanceType destroyInstanceFunc{nullptr};

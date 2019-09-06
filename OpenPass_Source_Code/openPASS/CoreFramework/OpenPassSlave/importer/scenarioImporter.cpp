@@ -17,15 +17,16 @@
 #include <QFile>
 #include <QFileInfo>
 
-#include "CoreFramework/CoreShare/log.h"
-#include "CoreFramework/CoreShare/parameters.h"
+#include "eventDetectorImporter.h"
+#include "manipulatorImporter.h"
 #include "scenario.h"
 #include "scenarioImporter.h"
 #include "xmlParser.h"
-#include "manipulatorImporter.h"
+#include "CoreFramework/CoreShare/log.h"
+#include "CoreFramework/CoreShare/parameters.h"
 
 // local helper macros
-#define CHECKFALSE(element) \
+#define SCENARIOCHECKFALSE(element) \
     do { \
         if (!(element)) \
         { \
@@ -123,7 +124,7 @@ void ScenarioImporter::ImportCatalogs(QDomElement& documentRoot, ScenarioInterfa
     std::string catalogPath;
 
     QDomElement catalogsElement;
-    CHECKFALSE(SimulationCommon::GetFirstChildElement(documentRoot, "Catalogs", catalogsElement));
+    SCENARIOCHECKFALSE(SimulationCommon::GetFirstChildElement(documentRoot, "Catalogs", catalogsElement));
 
     if (ImportCatalog(catalogPath, "VehicleCatalog", catalogsElement))
     {
@@ -141,22 +142,22 @@ void ScenarioImporter::ImportRoadNetwork(QDomElement& documentRoot, std::string&
     QDomElement roadNetworkElement;
     QDomElement logicsElement;
 
-    CHECKFALSE(SimulationCommon::GetFirstChildElement(documentRoot, "RoadNetwork", roadNetworkElement))
-    CHECKFALSE(SimulationCommon::GetFirstChildElement(roadNetworkElement, "Logics", logicsElement))
-    CHECKFALSE(SimulationCommon::ParseAttributeString(logicsElement, "filepath", sceneryPath));
+    SCENARIOCHECKFALSE(SimulationCommon::GetFirstChildElement(documentRoot, "RoadNetwork", roadNetworkElement))
+    SCENARIOCHECKFALSE(SimulationCommon::GetFirstChildElement(roadNetworkElement, "Logics", logicsElement))
+    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeString(logicsElement, "filepath", sceneryPath));
 }
 
 void ScenarioImporter::ImportStoryboard(QDomElement& documentRoot, std::vector<ScenarioEntity>& entities,
                                         ScenarioInterface* scenario)
 {
     QDomElement storyboardElement;
-    CHECKFALSE(SimulationCommon::GetFirstChildElement(documentRoot, "Storyboard", storyboardElement))
+    SCENARIOCHECKFALSE(SimulationCommon::GetFirstChildElement(documentRoot, "Storyboard", storyboardElement))
 
     //Import Init
     QDomElement initElement;
     // for initial entitiy parameters we just use first child "Init" --> others will be ignore
-    CHECKFALSE(SimulationCommon::GetFirstChildElement(storyboardElement, "Init", initElement))
-    ImportInitElement(initElement, entities, scenario);
+    SCENARIOCHECKFALSE(SimulationCommon::GetFirstChildElement(storyboardElement, "Init", initElement))
+    ImportInitElement(initElement, entities);
 
     // Import Story
     QDomElement storyElement;
@@ -169,8 +170,9 @@ void ScenarioImporter::ImportStoryboard(QDomElement& documentRoot, std::vector<S
     ImportEndConditionsFromStoryboard(storyboardElement, scenario);
 }
 
-void ScenarioImporter::ImportStoryElement(QDomElement& storyElement, const std::vector<ScenarioEntity>& entities,
-        ScenarioInterface* scenario)
+void ScenarioImporter::ImportStoryElement(QDomElement& storyElement,
+                                          const std::vector<ScenarioEntity>& entities,
+                                          ScenarioInterface* scenario)
 {
     // none of these tags are urgently required
     QDomElement actElement;
@@ -184,19 +186,22 @@ void ScenarioImporter::ImportStoryElement(QDomElement& storyElement, const std::
                 while (!seqElement.isNull())
                 {
                     std::string sequenceName;
-                    SimulationCommon::ParseAttributeString(seqElement, "name", sequenceName);
+                    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeString(seqElement, "name", sequenceName));
+
+                    int numberOfExecutions;
+                    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeInt(seqElement, "numberOfExecutions", numberOfExecutions));
 
                     QDomElement actorsElement;
-                    std::vector<std::string> actors;
+                    openScenario::ActorInformation actorInformation;
                     if (SimulationCommon::GetFirstChildElement(seqElement, "Actors", actorsElement)) // just one actors per sequence
                     {
-                        actors = ImportActors(actorsElement, entities);
+                        actorInformation = ImportActors(actorsElement, entities);
                     }
 
                     QDomElement maneuverElement;
                     if (SimulationCommon::GetFirstChildElement(seqElement, "Maneuver", maneuverElement)) // just one maneuver per sequence
                     {
-                        ImportManeuverElement(maneuverElement, entities, scenario, sequenceName, actors);
+                        ImportManeuverElement(maneuverElement, entities, scenario, sequenceName, actorInformation, numberOfExecutions);
                     }
 
                     seqElement = seqElement.nextSiblingElement("Sequence");
@@ -207,60 +212,79 @@ void ScenarioImporter::ImportStoryElement(QDomElement& storyElement, const std::
     }
 }
 
-void ScenarioImporter::ImportManeuverElement(QDomElement& maneuverElement, const std::vector<ScenarioEntity>& entities,
-        ScenarioInterface* scenario, std::string& sequenceName, std::vector<std::string>& actors)
+openScenario::ActorInformation ScenarioImporter::ImportActors(QDomElement& actorsElement,
+                                                              const std::vector<ScenarioEntity>& entities)
+{
+    openScenario::ActorInformation actorInformation;
+
+    QDomElement entityElement;
+    SimulationCommon::GetFirstChildElement(actorsElement, "Entity", entityElement);
+
+    while (!entityElement.isNull())
+    {
+        std::string entityName;
+        SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeString(entityElement, "name", entityName))
+        if (!ContainsEntity(entities, entityName))
+        {
+            throw std::runtime_error(std::string("Actor element references entity '") + entityName +
+                                     "' which isn't declared in 'Entities'");
+        }
+
+        if (actorInformation.actors.has_value())
+        {
+            actorInformation.actors.value().push_back(entityName);
+        }
+        else
+        {
+            actorInformation.actors.emplace({entityName});
+        }
+
+        entityElement = entityElement.nextSiblingElement("Entity");
+    }
+
+    QDomElement byConditionElement;
+    SimulationCommon::GetFirstChildElement(actorsElement, "ByCondition", byConditionElement);
+
+    if(!byConditionElement.isNull())
+    {
+        std::string actor;
+        SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeString(byConditionElement, "actor", actor))
+        if(actor == "triggeringEntity")
+        {
+            actorInformation.triggeringAgentsAsActors.emplace(true);
+        }
+    }
+
+    return actorInformation;
+}
+
+void ScenarioImporter::ImportManeuverElement(QDomElement& maneuverElement,
+                                             const std::vector<ScenarioEntity>& entities,
+                                             ScenarioInterface* scenario,
+                                             const std::string& sequenceName,
+                                             const openScenario::ActorInformation &actorInformation,
+                                             const int numberOfExecutions)
 {
     // handle parameterdeclaration element(s) for event(s)
     QDomElement parameterDeclarationElement;
     SimulationCommon::GetFirstChildElement(maneuverElement, "ParameterDeclaration", parameterDeclarationElement);
-
-    std::queue<SimulationCommon::EventDetectorParameters> eventDetectorParametersList;
-    while (!parameterDeclarationElement.isNull())
-    {
-        SimulationCommon::EventDetectorParameters eventDetectorParameters;
-        ImportParameterDeclarationElement(parameterDeclarationElement, &eventDetectorParameters);
-        eventDetectorParametersList.push(eventDetectorParameters);
-
-        parameterDeclarationElement = parameterDeclarationElement.nextSiblingElement("ParameterDeclaration");
-    }
 
     // handle event element
     QDomElement eventElement;
     SimulationCommon::GetFirstChildElement(maneuverElement, "Event", eventElement);
     while (!eventElement.isNull())
     {
-        SimulationCommon::EventDetectorParameters eventDetectorParameters;
-        //EventDetector
-        if (!eventDetectorParametersList.empty())
-        {
-            eventDetectorParameters = eventDetectorParametersList.front();
-            eventDetectorParametersList.pop();
-        }
-        else
-        {
-            eventDetectorParameters = SimulationCommon::EventDetectorParameters();
-        }
-        eventDetectorParameters.AddParameterStringVector("Actors", actors);
-        std::vector<std::string> eventDetectorNames;
-        ParseEventDetectorData(eventElement,
-                             entities,
-                             scenario,
-                             eventDetectorNames,
-                             sequenceName,
-                             &eventDetectorParameters);
+        openScenario::ConditionalEventDetectorInformation conditionalEventDetectorInformation = EventDetectorImporter::ImportEventDetector(eventElement,
+                                                                                                                                           sequenceName,
+                                                                                                                                           numberOfExecutions,
+                                                                                                                                           actorInformation,
+                                                                                                                                           entities);
+
+        scenario->AddConditionalEventDetector(conditionalEventDetectorInformation);
 
         std::shared_ptr<ScenarioActionInterface> action = ManipulatorImporter::ImportManipulator(eventElement,
-                                                                                         eventDetectorNames,
-                                                                                         actors,
-                                                                                         sequenceName);
-        if (action.get() != nullptr)
-        {
-            scenario->AddAction(action);
-        }
-        else
-        {
-            ParseManipulatorData(eventElement, scenario, eventDetectorNames, sequenceName, actors);
-        }
+                                                                                                 sequenceName);
+        scenario->AddAction(action);
 
         eventElement = eventElement.nextSiblingElement("Event");
     }
@@ -317,10 +341,10 @@ void ScenarioImporter::ImportPositionElement(ScenarioEntity& scenarioEntity, QDo
     double offset;
 
     QDomElement laneElement;
-    CHECKFALSE(SimulationCommon::GetFirstChildElement(firstChildOfActionElement, "Lane", laneElement))
-    CHECKFALSE(SimulationCommon::ParseAttributeDouble(laneElement, "s", s));
-    CHECKFALSE(SimulationCommon::ParseAttributeInt(laneElement, "laneId", laneId));
-    CHECKFALSE(SimulationCommon::ParseAttributeString(laneElement, "roadId", roadId));
+    SCENARIOCHECKFALSE(SimulationCommon::GetFirstChildElement(firstChildOfActionElement, "Lane", laneElement))
+    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeDouble(laneElement, "s", s));
+    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeInt(laneElement, "laneId", laneId));
+    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeString(laneElement, "roadId", roadId));
 
     SpawnInfo& spawnInfo = scenarioEntity.spawnInfo;
     spawnInfo.s.value = s;
@@ -355,9 +379,9 @@ void ScenarioImporter::SetStochasticsDataHelper(SpawnAttribute& attribute, QDomE
     double lowerBound;
     double upperBound;
 
-    CHECKFALSE(SimulationCommon::ParseAttributeDouble(stochasticsElement, "stdDeviation", stdDeviation));
-    CHECKFALSE(SimulationCommon::ParseAttributeDouble(stochasticsElement, "lowerBound", lowerBound));
-    CHECKFALSE(SimulationCommon::ParseAttributeDouble(stochasticsElement, "upperBound", upperBound));
+    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeDouble(stochasticsElement, "stdDeviation", stdDeviation));
+    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeDouble(stochasticsElement, "lowerBound", lowerBound));
+    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeDouble(stochasticsElement, "upperBound", upperBound));
 
     attribute.mean = attribute.value;
     attribute.isStochastic = true;
@@ -371,7 +395,7 @@ void ScenarioImporter::SetStochasticsData(ScenarioEntity& scenarioEntity, QDomEl
     SpawnInfo& spawnInfo = scenarioEntity.spawnInfo;
 
     std::string type;
-    CHECKFALSE(SimulationCommon::ParseAttributeString(stochasticsElement, "value", type));
+    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeString(stochasticsElement, "value", type));
 
     if (type == "offset")
     {
@@ -399,24 +423,23 @@ void ScenarioImporter::SetOrientationData(ScenarioEntity& scenarioEntity, QDomEl
     std::string type;
     double heading;
 
-    CHECKFALSE(SimulationCommon::ParseAttributeString(orientationElement, "type", type));
+    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeString(orientationElement, "type", type));
     if (type != "relative")
     {
         LOG_INTERN(LogLevel::Warning) << "Scenario Importer: only relative orientation is allowed.";
         throw std::runtime_error("Scenario Importer: only relative orientation is allowed.");
     }
 
-    CHECKFALSE(SimulationCommon::ParseAttributeDouble(orientationElement, "h", heading));
+    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeDouble(orientationElement, "h", heading));
 
     scenarioEntity.spawnInfo.heading = heading;
 }
 
 void ScenarioImporter::ImportPrivateElement(QDomElement& privateElement,
-        std::vector<ScenarioEntity>& entities,
-        ScenarioInterface* scenario)
+        std::vector<ScenarioEntity>& entities)
 {
     std::string object;
-    CHECKFALSE(SimulationCommon::ParseAttributeString(privateElement, "object", object));
+    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeString(privateElement, "object", object));
 
     ScenarioEntity* scenarioEntity = GetEntityByName(entities, object);
 
@@ -460,27 +483,25 @@ void ScenarioImporter::ImportPrivateElement(QDomElement& privateElement,
     }
 }
 
-void ScenarioImporter::ImportPrivateElements(QDomElement& actionsElement, std::vector<ScenarioEntity>& entities,
-        ScenarioInterface* scenario)
+void ScenarioImporter::ImportPrivateElements(QDomElement& actionsElement, std::vector<ScenarioEntity>& entities)
 {
     QDomElement privateElement;
     SimulationCommon::GetFirstChildElement(actionsElement, "Private", privateElement);
 
     while (!privateElement.isNull())
     {
-        ImportPrivateElement(privateElement, entities, scenario);
+        ImportPrivateElement(privateElement, entities);
         privateElement = privateElement.nextSiblingElement("Private");
     }
 }
 
-void ScenarioImporter::ImportInitElement(QDomElement& initElement, std::vector<ScenarioEntity>& entities,
-        ScenarioInterface* scenario)
+void ScenarioImporter::ImportInitElement(QDomElement& initElement, std::vector<ScenarioEntity>& entities)
 {
     // for initial entitiy parameters we just use first child "Actions" --> others will be ignore
     QDomElement actionsElement;
     SimulationCommon::GetFirstChildElement(initElement, "Actions", actionsElement);
 
-    ImportPrivateElements(actionsElement, entities, scenario);
+    ImportPrivateElements(actionsElement, entities);
 }
 
 void ScenarioImporter::ImportEndConditionsFromStoryboard(const QDomElement& storyboardElement, ScenarioInterface* scenario)
@@ -590,18 +611,6 @@ void ScenarioImporter::ParseSimulationTime(const QDomElement& byValueElement, do
     }
 }
 
-void ScenarioImporter::AddToEntities(const ScenarioEntity& scenarioEntity, ScenarioInterface* scenario)
-{
-    if (scenarioEntity.name == "Ego")
-    {
-        scenario->SetEgoEntity(scenarioEntity);
-    }
-    else
-    {
-        scenario->AddScenarioEntity(scenarioEntity);
-    }
-}
-
 void ScenarioImporter::ValidityCheckForSpawnParameters(const ScenarioEntity& scenarioEntity)
 {
     if (scenarioEntity.spawnInfo.s.value == -999 || scenarioEntity.spawnInfo.TStart == -999)
@@ -610,88 +619,37 @@ void ScenarioImporter::ValidityCheckForSpawnParameters(const ScenarioEntity& sce
     }
 }
 
-void ScenarioImporter::ImportByEntityElement(QDomElement& byEntityElement, const std::vector<ScenarioEntity>& entities,
-        ParameterInterface* eventDetectorParameters)
-{
-    QDomElement triggeringEntitiesElement;
-    if (SimulationCommon::GetFirstChildElement(byEntityElement, "TriggeringEntities", triggeringEntitiesElement))
-    {
-        std::string rule;
-        if (SimulationCommon::ParseAttributeString(triggeringEntitiesElement, "rule", rule))
-        {
-            eventDetectorParameters->AddParameterString("AgentGroup", rule);
-        }
-
-        QDomElement entityElement;
-        SimulationCommon::GetFirstChildElement(triggeringEntitiesElement, "Entity", entityElement);
-
-        std::vector<std::string> triggeringAgents;
-        while (!entityElement.isNull())
-        {
-            std::string entityName;
-            CHECKFALSE(SimulationCommon::ParseAttributeString(entityElement, "name", entityName));
-
-            if (!ContainsEntity(entities, entityName))
-            {
-                throw std::runtime_error(std::string("TriggeringEntity '") + entityName + "' not declared in 'Entities'");
-            }
-
-            triggeringAgents.push_back(entityName);
-            entityElement = entityElement.nextSiblingElement("Entity");
-        }
-
-        eventDetectorParameters->AddParameterStringVector("TriggeringAgents", triggeringAgents);
-    }
-}
-
-void ScenarioImporter::ImportConditionByValueElement(QDomElement& byValueElement, ParameterInterface &conditionParameters)
-{
-    QDomElement simulationTimeElement;
-    if (SimulationCommon::GetFirstChildElement(byValueElement, "SimulationTime", simulationTimeElement))
-    {
-        double value;
-        CHECKFALSE(SimulationCommon::ParseAttributeDouble(simulationTimeElement, "value", value));
-
-        std::string rule;
-        CHECKFALSE(SimulationCommon::ParseAttributeString(simulationTimeElement, "rule", rule));
-
-        conditionParameters.AddParameterDouble("value", value);
-        conditionParameters.AddParameterString("rule", rule);
-        conditionParameters.AddParameterString("type", "SimulationTimeCondition");
-    }
-}
-
 void ScenarioImporter::ImportParameterElement(QDomElement& parameterElement, ParameterInterface *parameters)
 {
     std::string parameterName;
-    CHECKFALSE(SimulationCommon::ParseAttributeString(parameterElement, "name", parameterName));
+    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeString(parameterElement, "name", parameterName));
 
     std::string parameterType;
-    CHECKFALSE(SimulationCommon::ParseAttributeString(parameterElement, "type", parameterType));
+    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeString(parameterElement, "type", parameterType));
 
     switch (parameterTypes.at(parameterType))
     {
         case 0:
             bool parameterValueBool;
-            CHECKFALSE(SimulationCommon::ParseAttributeBool(parameterElement, "value", parameterValueBool));
+            SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeBool(parameterElement, "value", parameterValueBool));
             parameters->AddParameterBool(parameterName, parameterValueBool);
             break;
 
         case 1:
             int parameterValueInt;
-            CHECKFALSE(SimulationCommon::ParseAttributeInt(parameterElement, "value", parameterValueInt));
+            SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeInt(parameterElement, "value", parameterValueInt));
             parameters->AddParameterInt(parameterName, parameterValueInt);
             break;
 
         case 2:
             double parameterValueDouble;
-            CHECKFALSE(SimulationCommon::ParseAttributeDouble(parameterElement, "value", parameterValueDouble));
+            SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeDouble(parameterElement, "value", parameterValueDouble));
             parameters->AddParameterDouble(parameterName, parameterValueDouble);
             break;
 
         case 3:
             std::string parameterValueString;
-            CHECKFALSE(SimulationCommon::ParseAttributeString(parameterElement, "value", parameterValueString));
+            SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeString(parameterElement, "value", parameterValueString));
             parameters->AddParameterString(parameterName, parameterValueString);
             break;
     }
@@ -710,129 +668,6 @@ void ScenarioImporter::ImportParameterDeclarationElement(QDomElement& parameterD
             parameterElement = parameterElement.nextSiblingElement("Parameter");
         }
     }
-}
-
-void ScenarioImporter::ParseManipulatorData(QDomElement& eventElement, ScenarioInterface* scenario,
-        std::vector<std::string>& eventDetectorNames, std::string& seqName, std::vector<std::string>& actors)
-{
-    QDomElement actionElement;
-    if (SimulationCommon::GetFirstChildElement(eventElement, "Action", actionElement))
-    {
-        std::string manipulatorName;
-        CHECKFALSE(SimulationCommon::ParseAttributeString(actionElement, "name", manipulatorName));
-
-        //Parse manipulator parameters
-        SimulationCommon::ManipulatorParameters manipulatorParameters;
-
-        const std::vector<std::string> eventDetectorNamesVector = eventDetectorNames;
-        manipulatorParameters.AddParameterStringVector("EventDetector", eventDetectorNamesVector);
-        manipulatorParameters.AddParameterString("SequenceName", seqName);
-        manipulatorParameters.AddParameterStringVector("Actors", actors);
-
-        QDomElement parameterDeclarationElement;
-        if (SimulationCommon::GetFirstChildElement(actionElement, "ParameterDeclaration", parameterDeclarationElement))
-        {
-            ImportParameterDeclarationElement(parameterDeclarationElement, &manipulatorParameters);
-        }
-
-        scenario->AddManipulator(manipulatorName, manipulatorParameters);
-    }
-}
-
-std::string ScenarioImporter::ImportConditionElement(QDomElement& conditionElement, const std::vector<ScenarioEntity>& entities, ScenarioInterface *scenario, std::string &seqName, ParameterInterface *parameters)
-{
-    //Parse event detector name
-    std::string eventDetectorType;
-    CHECKFALSE(SimulationCommon::ParseAttributeString(conditionElement, "name", eventDetectorType));
-
-    //Parse event detector parameters
-    parameters->AddParameterString("SequenceName", seqName);
-
-    QDomElement byEntityElement;
-    //Parse specific entity
-    if (SimulationCommon::GetFirstChildElement(conditionElement, "ByEntity", byEntityElement))
-    {
-        ImportByEntityElement(byEntityElement, entities, parameters);
-    }
-
-    QDomElement parameterDeclarationElement;
-    if (SimulationCommon::GetFirstChildElement(conditionElement, "ParameterDeclaration", parameterDeclarationElement))
-    {
-        ImportParameterDeclarationElement(parameterDeclarationElement, parameters);
-    }
-
-    // handle children elements (conditions)
-
-    QDomElement byValueElement;
-    if (SimulationCommon::GetFirstChildElement(conditionElement, "ByValue", byValueElement))
-    {
-        ParameterInterface &conditionParameters = parameters->InitializeListItem("conditions");
-        ImportConditionByValueElement(byValueElement, conditionParameters);
-    }
-
-    // SimulationCommon::EventDetectorParameters eventDetectorParameters = *(static_cast<SimulationCommon::EventDetectorParameters*>(parameters));
-    //Add event detector to the scenario
-    scenario->AddEventDetector(eventDetectorType, *dynamic_cast<SimulationCommon::EventDetectorParameters*>(parameters));
-
-    return eventDetectorType;
-}
-
-void ScenarioImporter::ImportStartConditionsElement(QDomElement& startConditionsElement, const std::vector<ScenarioEntity>& entities, ScenarioInterface *scenario, std::vector<std::string> &eventDetecorNames, std::string &seqName, ParameterInterface *parameters)
-{
-    QDomElement conditionGroupElement;
-    CHECKFALSE(SimulationCommon::GetFirstChildElement(startConditionsElement, "ConditionGroup", conditionGroupElement));
-
-    QDomElement conditionElement;
-    CHECKFALSE(SimulationCommon::GetFirstChildElement(conditionGroupElement, "Condition", conditionElement));
-
-    while (!conditionElement.isNull())
-    {
-        std::string eventDetectorName = ImportConditionElement(conditionElement, entities, scenario, seqName, parameters);
-        eventDetecorNames.push_back(eventDetectorName);
-        conditionElement = conditionElement.nextSiblingElement("Condition");
-    }
-}
-
-void ScenarioImporter::ParseEventDetectorData(QDomElement& eventElement, const std::vector<ScenarioEntity>& entities, ScenarioInterface *scenario, std::vector<std::string> &eventDetectorNames, std::string &seqName, ParameterInterface *parameters)
-{
-    //once per event
-    QDomElement startConditionsElement;
-    if (SimulationCommon::GetFirstChildElement(eventElement, "StartConditions", startConditionsElement))
-    {
-        while (!startConditionsElement.isNull())
-        {
-            ImportStartConditionsElement(startConditionsElement, entities, scenario, eventDetectorNames, seqName, parameters);
-
-            startConditionsElement = startConditionsElement.nextSiblingElement("StartConditions");
-        }
-    }
-}
-
-std::vector<std::string> ScenarioImporter::ImportActors(QDomElement& actorsElement,
-        const std::vector<ScenarioEntity>& entities)
-{
-    std::vector<std::string> actors;
-
-    QDomElement entityElement;
-    SimulationCommon::GetFirstChildElement(actorsElement, "Entity", entityElement);
-
-    while (!entityElement.isNull())
-    {
-        std::string entityName;
-        if (SimulationCommon::ParseAttributeString(entityElement, "name", entityName))
-        {
-            if (!ContainsEntity(entities, entityName))
-            {
-                throw std::runtime_error(std::string("Actor element references entity '") + entityName +
-                                         "' which isn't declared in 'Entities'");
-            }
-
-            actors.push_back(entityName);
-            entityElement = entityElement.nextSiblingElement("Entity");
-        }
-    }
-
-    return actors;
 }
 
 bool ScenarioImporter::ImportCatalogDirectory(std::string& catalogPath, QDomElement& catalogElement)
@@ -867,7 +702,7 @@ bool ScenarioImporter::ImportCatalog(std::string& catalogPath, const std::string
 bool ScenarioImporter::ImportEntities(QDomElement& documentRoot, std::vector<ScenarioEntity>& entities, std::map<std::string, std::list<std::string>> &groups)
 {
     QDomElement entitiesElement;
-    CHECKFALSE(SimulationCommon::GetFirstChildElement(documentRoot, "Entities", entitiesElement));
+    SCENARIOCHECKFALSE(SimulationCommon::GetFirstChildElement(documentRoot, "Entities", entitiesElement));
 
     if (entitiesElement.isNull())
     {
@@ -876,7 +711,7 @@ bool ScenarioImporter::ImportEntities(QDomElement& documentRoot, std::vector<Sce
     }
 
     QDomElement entityElement;
-    CHECKFALSE(SimulationCommon::GetFirstChildElement(entitiesElement, "Object", entityElement));
+    SCENARIOCHECKFALSE(SimulationCommon::GetFirstChildElement(entitiesElement, "Object", entityElement));
 
     while (!entityElement.isNull())
     {
@@ -1036,23 +871,6 @@ ScenarioEntity* ScenarioImporter::GetEntityByName(std::vector<ScenarioEntity>& e
     return nullptr;
 }
 
-bool ScenarioImporter::ContainsEntity(const std::vector<ScenarioEntity>& entities, const std::string& entityName)
-{
-    auto entitiesFound = std::find_if(entities.cbegin(),
-                                      entities.cend(),
-                                      [entityName](const ScenarioEntity & elem)
-    {
-        return elem.name == entityName;
-    });
-
-    if (entitiesFound != entities.cend())
-    {
-        return true;
-    }
-
-    return false;
-}
-
 void ScenarioImporter::CategorizeEntities(const std::vector<ScenarioEntity>& entities, const std::map<std::string, std::list<std::string>> &groups, ScenarioInterface* scenario)
 {
     for (const auto& entity : entities)
@@ -1066,4 +884,18 @@ void ScenarioImporter::CategorizeEntities(const std::vector<ScenarioEntity>& ent
 
     scenario->AddScenarioGroupsByEntityNames(groups);
 }
+
+bool ScenarioImporter::ContainsEntity(const std::vector<ScenarioEntity>& entities,
+                                      const std::string& entityName)
+{
+    auto entitiesFound = std::find_if(entities.cbegin(),
+                                      entities.cend(),
+                                      [entityName](const ScenarioEntity& elem)
+    {
+        return elem.name == entityName;
+    });
+
+    return entitiesFound != entities.cend();
+}
+
 } //namespace Importer

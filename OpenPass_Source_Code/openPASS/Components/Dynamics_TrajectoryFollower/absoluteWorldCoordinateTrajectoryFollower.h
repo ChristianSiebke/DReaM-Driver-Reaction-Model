@@ -20,6 +20,10 @@
 
 #pragma once
 
+#include "Common/globalDefinitions.h"
+#include "Common/vector2d.h"
+#include "Interfaces/modelInterface.h"
+
 #include "trajectoryFollowerCommonBase.h"
 
 /*!
@@ -43,7 +47,8 @@ public:
             const std::map<int, ObservationInterface*> *observations,
             const CallbackInterface *callbacks,
             AgentInterface *agent,
-            TrajectoryInterface *trajectory);
+            TrajectoryInterface *trajectory,
+            SimulationSlave::EventNetworkInterface * const eventNetwork);
 
     AbsoluteWorldCoordinateTrajectoryFollower(const AbsoluteWorldCoordinateTrajectoryFollower&) = delete;
     AbsoluteWorldCoordinateTrajectoryFollower(AbsoluteWorldCoordinateTrajectoryFollower&&) = delete;
@@ -59,7 +64,7 @@ public:
     *
     * @param[in]     time           Current scheduling time
     */
-    virtual void Trigger(int time);
+    virtual void CalculateNextTimestep(int time) override;
 
 private:
     Common::Vector2d CalculateScaledVector(const Position &previousPosition, const Position &nextPosition, const double &factor);

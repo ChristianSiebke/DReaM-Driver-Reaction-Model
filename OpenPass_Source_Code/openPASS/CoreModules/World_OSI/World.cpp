@@ -27,13 +27,13 @@ extern "C" WORLD_SHARED_EXPORT const std::string &OpenPASS_GetVersion()
 }
 
 extern "C" WORLD_SHARED_EXPORT WorldInterface *OpenPASS_CreateInstance(
-        CallbackInterface *callbacks)
+        CallbackInterface *callbacks, StochasticsInterface* stochastics)
 {
     Callbacks = callbacks;
 
     try
     {
-        return (WorldInterface*)(new (std::nothrow) WorldImplementation(callbacks));
+        return (WorldInterface*)(new (std::nothrow) WorldImplementation(callbacks, stochastics));
     }
     catch(const std::runtime_error &ex)
     {

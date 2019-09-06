@@ -23,11 +23,13 @@
 //-----------------------------------------------------------------------------
 //! Primitive signal class for double values
 //-----------------------------------------------------------------------------
-class DoubleSignal : public SignalInterface
+class DoubleSignal : public ComponentStateSignalInterface
 {
 public:
-    DoubleSignal(double inValue) : value(inValue)
-    {}
+    DoubleSignal(ComponentState state, double inValue) : value(inValue)
+    {
+        componentState = state;
+    }
     DoubleSignal(const DoubleSignal &) = default;
     DoubleSignal(DoubleSignal &&) = default;
     DoubleSignal &operator=(const DoubleSignal &) = default;
@@ -48,11 +50,13 @@ public:
 //-----------------------------------------------------------------------------
 //! Primitive signal class for integer values
 //-----------------------------------------------------------------------------
-class IntSignal : public SignalInterface
+class IntSignal : public ComponentStateSignalInterface
 {
 public:
-    IntSignal(int inValue) : value(inValue)
-    {}
+    IntSignal(int inValue, ComponentState state) : value(inValue)
+    {
+        componentState = state;
+    }
     IntSignal(const IntSignal &) = default;
     IntSignal(IntSignal &&) = default;
     IntSignal &operator=(const IntSignal &) = default;
@@ -73,11 +77,13 @@ public:
 //-----------------------------------------------------------------------------
 //! Primitive signal class for boolean values
 //-----------------------------------------------------------------------------
-class BoolSignal : public SignalInterface
+class BoolSignal : public ComponentStateSignalInterface
 {
 public:
-    BoolSignal(bool inValue) : value(inValue)
-    {}
+    BoolSignal(bool inValue, ComponentState state) : value(inValue)
+    {
+        componentState = state;
+    }
     BoolSignal(const BoolSignal &) = default;
     BoolSignal(BoolSignal &&) = default;
     BoolSignal &operator=(const BoolSignal &) = default;

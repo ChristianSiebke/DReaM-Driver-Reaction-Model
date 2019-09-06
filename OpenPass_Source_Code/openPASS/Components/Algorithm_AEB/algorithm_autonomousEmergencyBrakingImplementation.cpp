@@ -18,8 +18,9 @@
 #include <limits>
 
 #include "algorithm_autonomousEmergencyBrakingImplementation.h"
-#include "sensorFusionQuery.h"
 #include "boundingBoxCalculation.h"
+#include "Common/eventTypes.h"
+#include "Components/SensorFusion_OSI/sensorFusionQuery.h"
 
 AlgorithmAutonomousEmergencyBrakingImplementation::AlgorithmAutonomousEmergencyBrakingImplementation(
     std::string componentName,
@@ -241,12 +242,12 @@ double AlgorithmAutonomousEmergencyBrakingImplementation::CalculateTTC()
 
 void AlgorithmAutonomousEmergencyBrakingImplementation::UpdateAcceleration(const int time)
 {
-    std::shared_ptr<AgentBasedEvent> event;
+    std::shared_ptr<VehicleComponentEvent> event;
 
     if(componentState == ComponentState::Acting && activeAcceleration != brakingAcceleration)
     {
         activeAcceleration = brakingAcceleration;
-        event = std::make_shared<AgentBasedEvent>(time,
+        event = std::make_shared<VehicleComponentEvent>(time,
                                            COMPONENTNAME,
                                            "",
                                            EventDefinitions::EventType::AEBActive,
@@ -255,7 +256,7 @@ void AlgorithmAutonomousEmergencyBrakingImplementation::UpdateAcceleration(const
     else if (componentState == ComponentState::Disabled && activeAcceleration != 0.0)
     {
         activeAcceleration = 0.0;
-        event = std::make_shared<AgentBasedEvent>(time,
+        event = std::make_shared<VehicleComponentEvent>(time,
                                            COMPONENTNAME,
                                            "",
                                            EventDefinitions::EventType::AEBInactive,

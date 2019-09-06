@@ -19,10 +19,10 @@
 #include "Interfaces/agentInterface.h"
 #include "Interfaces/eventInterface.h"
 #include "Interfaces/observationInterface.h"
-#include "Interfaces/respawnInterface.h"
 #include "Interfaces/runResultInterface.h"
 
 using Events = std::map<EventDefinitions::EventCategory, std::list<std::shared_ptr<EventInterface>>>;
+using EventContainer = std::list<std::shared_ptr<EventInterface>>;
 
 namespace SimulationSlave
 {
@@ -46,7 +46,7 @@ public:
 
     virtual Events *GetArchivedEvents() = 0;
 
-    virtual std::list<std::shared_ptr<EventInterface>> *GetActiveEventCategory(EventDefinitions::EventCategory eventCategory) = 0;
+    virtual EventContainer GetActiveEventCategory(const EventDefinitions::EventCategory eventCategory) = 0;
 
     virtual void RemoveOldEvents(int time) = 0;
 
@@ -56,12 +56,9 @@ public:
 
     virtual void Clear() = 0;
 
-    virtual void Respawn(int time) = 0;
-
     virtual void AddCollision(const int agentId) = 0;
 
-    virtual void Initialize(RespawnInterface *respawner,
-                            RunResultInterface *runResult,
+    virtual void Initialize(RunResultInterface *runResult,
                             ObservationInterface *observer) = 0;
 };
 

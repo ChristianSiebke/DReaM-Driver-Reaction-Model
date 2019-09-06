@@ -54,6 +54,7 @@ struct OutputTags
     const QString SENSORS = "Sensors";
     const QString SENSOR = "Sensor";
     const QString CYCLICS = "Cyclics";
+    const QString CYCLICSFILE = "CyclicsFile";
     const QString HEADER = "Header";
     const QString SAMPLES = "Samples";
     const QString SAMPLE = "Sample";

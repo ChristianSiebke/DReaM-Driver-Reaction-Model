@@ -18,10 +18,10 @@
 
 #include <functional>
 #include <memory>
-#include "worldInterface.h"
+#include "Interfaces/worldInterface.h"
+#include "Interfaces/spawnControlInterface.h"
 #include "taskBuilder.h"
 #include "schedulerTasks.h"
-#include "spawnControlInterface.h"
 #include "spawnControl.h"
 
 namespace SimulationSlave

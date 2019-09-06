@@ -61,8 +61,6 @@ extern "C" SPAWNPOINT_SHARED_EXPORT SpawnPointInterface *OpenPASS_CreateInstance
 
         return nullptr;
     }
-
-    throw std::runtime_error("Neither try nor catch was called in SpawnPoint");
 }
 
 extern "C" SPAWNPOINT_SHARED_EXPORT void OpenPASS_DestroyInstance(SpawnPointInterface *implementation)

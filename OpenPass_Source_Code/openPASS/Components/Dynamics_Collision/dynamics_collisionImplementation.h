@@ -34,7 +34,6 @@
 #pragma once
 
 #include "Interfaces/modelInterface.h"
-#include "Interfaces/observationInterface.h"
 #include "Common/dynamicsSignal.h"
 
 /**

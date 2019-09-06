@@ -25,11 +25,11 @@
 #include <map>
 #include <vector>
 
-#include "Common/agentBasedEvent.h"
+#include "Common/agentBasedManipulatorEvent.h"
 #include "Common/collisionEvent.h"
+#include "Common/vehicleComponentEvent.h"
 #include "Interfaces/eventNetworkInterface.h"
 #include "Interfaces/observationInterface.h"
-#include "Interfaces/respawnInterface.h"
 #include "Interfaces/runResultInterface.h"
 #include "Interfaces/worldInterface.h"
 
@@ -67,7 +67,7 @@ public:
     *
     * @return	     List of active events.
     */
-    virtual std::list<std::shared_ptr<EventInterface>> *GetActiveEventCategory(EventCategory eventCategory);  
+    virtual EventContainer GetActiveEventCategory(const EventCategory eventCategory);
 
     /*!
     * \brief Removes archived events which are older than a certain time stamp.
@@ -103,16 +103,6 @@ public:
     virtual void Clear();
 
     /*!
-    * \brief Triggers the respawner
-    *
-    * \details Triggers the respawn function of the respawner at a certain time stamp.
-    *
-    *
-    * @param[in]     time    Time stamp in milliseconds.
-    */
-    virtual void Respawn(int time);
-
-    /*!
     * \brief Adds a collision id to the RunResult
     *
     * \details Adds a collision id to the RunResult
@@ -128,12 +118,10 @@ public:
     * \details Initalizes the EventNetwork.
     *
     *
-    * @param[in]     respawner    Pointer to the respawner.
     * @param[in]     runResult    Pointer to the runResult.
     * @param[in]     observer     Pointer to the observer.
     */
-    void Initialize(RespawnInterface *respawner,
-                    RunResultInterface *runResult,
+    void Initialize(RunResultInterface *runResult,
                     ObservationInterface *observer);
 
 private:
@@ -151,7 +139,6 @@ private:
     Events activeEvents;
     Events archivedEvents;
     ObservationInterface *observer {nullptr};
-    RespawnInterface *respawner {nullptr};
     RunResultInterface *runResult {nullptr};
 
     int eventId {0};

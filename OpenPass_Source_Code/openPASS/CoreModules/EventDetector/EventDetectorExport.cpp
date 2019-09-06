@@ -29,10 +29,8 @@ extern "C" EVENT_DETECTOR_SHARED_EXPORT const std::string& OpenPASS_GetVersion()
     return version;
 }
 
-extern "C" EVENT_DETECTOR_SHARED_EXPORT EventDetectorInterface* OpenPASS_CreateInstance(
+extern "C" EVENT_DETECTOR_SHARED_EXPORT EventDetectorInterface* OpenPASS_CreateCollisionDetectorInstance(
     WorldInterface* world,
-    SimulationCommon::EventDetectorParameters* parameters,
-    std::string eventType,
     SimulationSlave::EventNetworkInterface* eventNetwork,
     const CallbackInterface* callbacks,
     StochasticsInterface* stochastics)
@@ -41,40 +39,37 @@ extern "C" EVENT_DETECTOR_SHARED_EXPORT EventDetectorInterface* OpenPASS_CreateI
 
     try
     {
-        switch (EventDefinitions::eventTypesMap.at(eventType))
-        {
-            case EventDefinitions::EventType::Collision:
-                return static_cast<EventDetectorInterface*>(new CollisionDetector(
-                            world,
-                            parameters,
-                            eventNetwork,
-                            callbacks,
-                            stochastics));
-
-            case EventDefinitions::EventType::Conditional:
-                return static_cast<EventDetectorInterface*>(new ConditionalEventDetector(
-                                                 world,
-                                                 parameters,
-                                                 eventNetwork,
-                                                 callbacks,
-                                                 stochastics));
-            default:
-                if (Callbacks != nullptr)
-                {
-                    Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, "Invalid eventDetectorType. Can not be instantiated.");
-                }
-
-                return nullptr;
-        }
+        return static_cast<EventDetectorInterface*>(new CollisionDetector(world,
+                                                                          eventNetwork,
+                                                                          callbacks,
+                                                                          stochastics));
     }
-    catch (const std::bad_alloc&)
+    catch (...)
     {
         if (Callbacks != nullptr)
         {
-            Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, "Failed to allocate memory.");
+            Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, "unexpected exception");
         }
 
         return nullptr;
+    }
+}
+extern "C" EVENT_DETECTOR_SHARED_EXPORT EventDetectorInterface* OpenPASS_CreateConditionalDetectorInstance(
+    WorldInterface* world,
+    const openScenario::ConditionalEventDetectorInformation& eventDetectorInformation,
+    SimulationSlave::EventNetworkInterface* eventNetwork,
+    const CallbackInterface* callbacks,
+    StochasticsInterface* stochastics)
+{
+    Callbacks = callbacks;
+
+    try
+    {
+        return static_cast<EventDetectorInterface*>(new ConditionalEventDetector(world,
+                                                                                 eventDetectorInformation,
+                                                                                 eventNetwork,
+                                                                                 callbacks,
+                                                                                 stochastics));
     }
     catch (...)
     {

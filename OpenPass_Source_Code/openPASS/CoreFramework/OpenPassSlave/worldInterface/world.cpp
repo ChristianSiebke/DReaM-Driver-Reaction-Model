@@ -9,4 +9,4 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
-#include "world.h"
+#include "worldInterface/world.h"

@@ -11,13 +11,23 @@
 #pragma once
 
 #include "EventDetectorCommonBase.h"
-#include "ConditionInterface.h"
+
+// template for overload pattern used in CheckCondition()
+template<class... Ts> struct overload : Ts... { using Ts::operator()...; };
+template<class... Ts> overload(Ts...) -> overload<Ts...>;
+
+struct ConditionMetaInformation
+{
+    WorldInterface * const world {};
+    int currentTime {};
+};
+using ConditionVisitorVariant = std::variant<std::vector<const AgentInterface*>, bool>;
 
 class ConditionalEventDetector : public EventDetectorCommonBase
 {
 public:
     ConditionalEventDetector(WorldInterface *world,
-                             ParameterInterface *parameters,
+                             const openScenario::ConditionalEventDetectorInformation& eventDetectorInformation,
                              SimulationSlave::EventNetworkInterface *eventNetwork,
                              const CallbackInterface *callbacks,
                              StochasticsInterface *stochastics);
@@ -31,33 +41,11 @@ public:
     virtual void Trigger(int time) override;
 
 private:
-    using Conditions = std::list<std::shared_ptr<ConditionInterface>>;
+    const openScenario::ConditionalEventDetectorInformation eventDetectorInformation;
+    int executionCounter{0};
+    int maximumNumberOfExecutions{1};
 
-    Conditions conditions;
-    bool triggered{false};
-
-    void ParseParameters(const ParameterInterface* const parameters);
-
-    /*!
-     * ------------------------------------------------------------------------
-     * \brief GetConditions Get the conditions for which the event detector
-     *        will activate.
-     *
-     * \returns the conditions for which the event detector will activate.
-     * ------------------------------------------------------------------------
-     */
-    Conditions GetConditions() const;
-
-    /*!
-     * ------------------------------------------------------------------------
-     * \brief AllConditionsMet Checks if all conditions parameters are met.
-     *
-     * \param[in] time the time at which the check is made.
-     *
-     * \returns true if all conditions are met, false otherwise.
-     * ------------------------------------------------------------------------
-     */
-    bool AllConditionsMet(int time) const;
+    void Reset() override;
 
     /*!
      * ------------------------------------------------------------------------
@@ -68,5 +56,76 @@ private:
      *            EventNetwork.
      * ------------------------------------------------------------------------
      */
-    void TriggerEventInsertion(int time);
+    void TriggerEventInsertion(int time, const std::vector<const AgentInterface*> triggeringAgents);
+
+    /*!
+     * ------------------------------------------------------------------------
+     * \brief IsBelowMaximumNumberOfExecutions determines if the EventDetector
+     *        should still be allowed to execute.
+     *
+     * \return true if the number of times the EventDetector is less than the
+     *         maximum number of executions specified for it; otherwise false
+     * ------------------------------------------------------------------------
+     */
+    bool IsBelowMaximumNumberOfExecutions();
+
+    /*!
+     * ------------------------------------------------------------------------
+     * \brief GetActors gets the actors to be targeted by the Events emitted by
+     *        the EventDetector; this can either be those targeted as Actors in
+     *        the openScenario file, or those specified as TriggeringEntities
+     *        if TriggeringAgentsAsActors is set
+     *
+     * \param[in] triggeringAgents the collection of triggeringAgents as was
+     *            specified in the TriggeringEntities section of the
+     *            openScenario file
+     *
+     * \return the collection of AgentInterfaces for the Actors to be targeted
+     *         by the Events emitted by the EventDetector
+     * ------------------------------------------------------------------------
+     */
+    std::vector<const AgentInterface*> GetActors(const std::vector<const AgentInterface*> triggeringAgents = {});
+
+    /*!
+     * ------------------------------------------------------------------------
+     * \brief EvaluateConditionsAtTime evaluates all conditions for the
+     *        specified time. TriggeringAgents who meet all conditions are
+     *        placed into the triggeringAgents collection.
+     *
+     * \param[in] time the time at which the conditions are being evaluated
+     *
+     * \param[out] triggeringAgents the collection into which the
+     *             TriggeringAgents who meet all conditions are placed
+     *
+     * \return true if all conditions are met; false otherwise
+     * ------------------------------------------------------------------------
+     */
+    bool EvaluateConditionsAtTime(const int time,
+                                  std::vector<const AgentInterface*>& triggeringAgents);
+
+    /*!
+     * ------------------------------------------------------------------------
+     * \brief CheckCondition utilizes the overload pattern to build a variant
+     *        visitor on the fly to appropriately evaluate whether a Condition
+     *        is met.
+     *
+     * \param[in] cmi meta-information related to evaluating a Condition
+     *                variant
+     *
+     * \return lambda function for evaluating a Condition variant
+     * ------------------------------------------------------------------------
+     */
+    auto CheckCondition(const ConditionMetaInformation& cmi)
+    {
+        return [cmi](auto&& condition)
+        {
+            return std::visit(overload{
+                                  [&](const openScenario::ReachPositionRoadCondition& reachPositionCondition) { return ConditionVisitorVariant{reachPositionCondition.IsMet(cmi.world)}; },
+                                  [&](const openScenario::RelativeLaneCondition& relativeLaneCondition) { return ConditionVisitorVariant{relativeLaneCondition.IsMet(cmi.world)}; },
+                                  [&](const openScenario::RelativeSpeedCondition& relativeSpeedCondition) { return ConditionVisitorVariant{relativeSpeedCondition.IsMet(cmi.world)}; },
+                                  [&](const openScenario::TimeToCollisionCondition& timeToCollisionCondition) { return ConditionVisitorVariant{timeToCollisionCondition.IsMet(cmi.world)}; },
+                                  [&](const openScenario::SimulationTimeCondition& simulationTimeCondition) { return ConditionVisitorVariant{simulationTimeCondition.IsMet(cmi.currentTime)}; }
+                              }, condition);
+        };
+    }
 };

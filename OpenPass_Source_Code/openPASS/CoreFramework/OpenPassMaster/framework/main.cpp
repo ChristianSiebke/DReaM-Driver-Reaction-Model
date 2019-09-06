@@ -23,22 +23,24 @@
 //! simulation tool.
 //-----------------------------------------------------------------------------
 
+#include <QCommandLineParser>
 #include <QCoreApplication>
-#include <list>
+#include <QDebug>
+#include <QDir>
+#include <QLibrary>
 #include <QProcess>
 #include <QThreadPool>
 #include <QtConcurrent>
-#include <QDir>
-#include <QDebug>
-#include <QCommandLineParser>
-#include <sstream>
-#include <QLibrary>
+
+#include <list>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <utility>
-#include "masterConfigImporter.h"
-#include "masterConfig.h"
+
 #include "log.h"
+#include "masterConfig.h"
+#include "masterConfigImporter.h"
 #include "processManager.h"
 
 using namespace SimulationMaster;

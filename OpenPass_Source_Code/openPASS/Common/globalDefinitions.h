@@ -21,6 +21,7 @@
 #include <string>
 #include <tuple>
 #include <vector>
+#include <list>
 #include <map>
 
 //-----------------------------------------------------------------------------
@@ -154,86 +155,6 @@ struct Position
     double curvature {0};
 };
 
-struct RoadPosition
-{
-    RoadPosition() = default;
-    RoadPosition(double s,
-                 double t,
-                 double hdg):
-        s(s),
-        t(t),
-        hdg(hdg) {}
-
-    double s {0};
-    double t {0};
-    double hdg {0};
-
-    bool operator==(const RoadPosition& other) const
-    {
-        return s == other.s && t == other.t && hdg == other.hdg;
-    }
-};
-
-struct GlobalRoadPosition
-{
-    GlobalRoadPosition() = default;
-    GlobalRoadPosition(std::string roadId, int laneId, double s, double t, double hdg) :
-        roadId{roadId},
-        laneId{laneId},
-        roadPosition(s, t, hdg)
-    {}
-
-    std::string roadId {};
-    int laneId {-999};
-    RoadPosition roadPosition {};
-};
-
-enum class MeasurementPoint
-{
-    Front,
-    Reference,
-    Rear
-};
-
-namespace CommonTrafficSign {
-enum Type
-{
-    Undefined = 0,
-    MaximumSpeedLimit = 274,
-    MinimumSpeedLimit = 275,
-    EndOfMaximumSpeedLimit = 278,
-    EndOfMinimumSpeedLimit = 279,
-    EndOffAllSpeedLimitsAndOvertakingRestrictions = 282,
-    TownBegin = 310,
-    TownEnd = 311,
-    Zone30Begin = 2741, //274.1
-    Zone30End = 2742, // 274.2
-    TrafficCalmedDistrictBegin = 3251, // 325.1
-    TrafficCalmedDistrictEnd = 3252, // 325.2
-    EnvironmentalZoneBegin = 2701, // 270.1
-    EnvironmentalZoneEnd = 2702, // 270.2
-    OvertakingBanBegin = 276,
-    OvertakingBanEnd = 280,
-    OvertakingBanForTrucksBegin = 277,
-    OvertakingBanForTrucksEnd = 281,
-    RightOfWayBegin = 306,
-    RightOfWayEnd = 307,
-    RightOfWayNextIntersection = 301,
-    Stop = 206,
-    DoNotEnter = 267,
-    HighWayBegin = 3301, // 330.1
-    HighWayEnd = 3302, // 330.2
-    HighWayExit = 333
-};
-
-struct Entity
-{
-    Type type;
-    double distanceToStartOfRoad;
-    double relativeDistance;
-    double value;
-};
-}
 
 //! Enum of potential types of marks.
 enum class MarkType
@@ -255,13 +176,15 @@ enum class ObjectType
     NumberOfObjectTypes
 };
 
-enum ObjectTypeOSI
+enum ObjectTypeOSI : int
 {
     None    = 0x00, // default at initialization
     Vehicle = 0x01,
     Object  = 0x02,
     Any     = Vehicle | Object
 };
+
+using CollisionPartner = std::pair<ObjectTypeOSI, int>;
 
 enum class LightState
 {

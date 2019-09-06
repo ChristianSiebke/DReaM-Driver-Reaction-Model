@@ -15,6 +15,15 @@
 #include "CoreFramework/CoreShare/parameters.h"
 #include "Interfaces/scenarioActionInterface.h"
 
+#define CHECKFALSE(element) \
+    do { \
+        if (!(element)) \
+        { \
+            throw std::runtime_error("Checkfalse in manipulator importer failed"); \
+        } \
+    } \
+    while (0);
+
 namespace Importer
 {
 class ManipulatorImporter
@@ -44,8 +53,6 @@ public:
      * ------------------------------------------------------------------------
      */
     static std::shared_ptr<ScenarioActionInterface> ImportManipulator(QDomElement& eventElement,
-                                                              const std::vector<std::string>& eventDetectorNames,
-                                                              const std::vector<std::string>& actors,
                                                               const std::string& sequenceName);
 
 private:
@@ -60,8 +67,6 @@ private:
      * ------------------------------------------------------------------------
      */
     static std::shared_ptr<ScenarioActionInterface> ImportManipulatorFromPrivateElement(QDomElement& privateElement,
-                                                                                const std::vector<std::string>& eventDetectorNames,
-                                                                                const std::vector<std::string>& actors,
                                                                                 const std::string& sequenceName);
 
     /*!
@@ -75,8 +80,6 @@ private:
      * ------------------------------------------------------------------------
      */
     static std::shared_ptr<ScenarioActionInterface> ImportManipulatorFromGlobalElement(QDomElement& globalElement,
-                                                                               const std::vector<std::string>& eventDetectorNames,
-                                                                               const std::vector<std::string>& actors,
                                                                                const std::string& sequenceName);
 
     /*!
@@ -90,8 +93,8 @@ private:
      * ------------------------------------------------------------------------
      */
     static std::shared_ptr<ScenarioActionInterface> ImportManipulatorFromUserDefinedElement(QDomElement& userDefinedElement,
-                                                                                    const std::vector<std::string>& eventDetectorNames,
-                                                                                    const std::vector<std::string>& actors,
                                                                                     const std::string& sequenceName);
+
+    [[ noreturn ]] static void LogAndThrowError(const std::string &message);
 };
 } // Importer

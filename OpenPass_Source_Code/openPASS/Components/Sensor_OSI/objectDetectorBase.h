@@ -40,10 +40,10 @@
 
 #include "Interfaces/modelInterface.h"
 #include "Interfaces/observationInterface.h"
+#include "Interfaces/profilesInterface.h"
 #include "Common/primitiveSignals.h"
 #include "Common/vector3d.h"
-#include "sensorDataSignal.h"
-#include "Interfaces/profilesInterface.h"
+#include "Common/sensorDataSignal.h"
 
 #include "osi/osi_sensorviewconfiguration.pb.h"
 #include "osi/osi_sensorview.pb.h"
@@ -126,7 +126,7 @@ public:
     /*!
      * For testing
      */
-    osi3::SensorData getSensorData()
+    const osi3::SensorData& getSensorData()
     {
         return sensorData;
     }
@@ -185,7 +185,7 @@ protected:
    * @param[in] distanceReferencePointToFront   distance from the reference point to the front
    * @return bounding box of object
    */
-   virtual polygon_t CalculateBoundingBox(const osi3::Dimension3d dimension, const osi3::Vector3d position, const osi3::Orientation3d orientation);
+   static polygon_t CalculateBoundingBox(const osi3::Dimension3d dimension, const osi3::Vector3d position, const osi3::Orientation3d orientation);
 
    /*!
    * \brief Translates the polygon from local coordinates to global coordinates
@@ -195,7 +195,7 @@ protected:
    * @param[in] yaw                     yaw of the sensor in global coordinates
    * @return polygon in global coordinates
    */
-   virtual polygon_t TransformPolygonToGlobalCoordinates(polygon_t polygon, point_t sensorPositionGlobal, double yaw);
+   polygon_t TransformPolygonToGlobalCoordinates(polygon_t polygon, point_t sensorPositionGlobal, double yaw) const;
 
    /*!
    * \brief Translates a point from global coordinates to local coordinates
@@ -214,7 +214,7 @@ protected:
    * @param[in] yaw                 yaw of the vehicle in global coordinates
    * @return position of the sensor in global coordinates
    */
-   virtual point_t CalculateGlobalSensorPosition (point_t vehiclePosition, double yaw);
+   point_t CalculateGlobalSensorPosition (point_t vehiclePosition, double yaw) const;
 
    /*!
    * \brief Calculates the relative velocity or acceleration between this vehicle and another in local vehicle coordinates

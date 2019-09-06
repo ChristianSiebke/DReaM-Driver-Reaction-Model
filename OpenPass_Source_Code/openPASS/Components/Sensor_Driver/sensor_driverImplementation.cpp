@@ -16,6 +16,8 @@
 #include <memory>
 #include <qglobal.h>
 
+#include "Interfaces/worldInterface.h"
+
 #include "sensor_driverImplementation.h"
 #include "Signals/sensorDriverSignal.h"
 
@@ -109,9 +111,20 @@ void SensorDriverImplementation::GetOwnVehicleInformation()
 
 void SensorDriverImplementation::GetTrafficRuleInformation()
 {
+    const double visibilityDistance = GetWorld()->GetVisibilityDistance();
     trafficRuleInformation.laneEgo    = GetTrafficRuleLaneInformationEgo();
     trafficRuleInformation.laneLeft   = GetTrafficRuleLaneInformationLeft();
     trafficRuleInformation.laneRight  = GetTrafficRuleLaneInformationRight();
+    trafficRuleInformation.laneMarkingsLeft = GetAgent()->GetLaneMarkingsInRange(visibilityDistance, 0, Side::Left);
+    trafficRuleInformation.laneMarkingsRight = GetAgent()->GetLaneMarkingsInRange(visibilityDistance, 0, Side::Right);
+    if(GetAgent()->ExistsLaneLeft())
+    {
+        trafficRuleInformation.laneMarkingsLeftOfLeftLane = GetAgent()->GetLaneMarkingsInRange(visibilityDistance, 1, Side::Left);
+    }
+    if(GetAgent()->ExistsLaneRight())
+    {
+        trafficRuleInformation.laneMarkingsLeftOfLeftLane = GetAgent()->GetLaneMarkingsInRange(visibilityDistance, -1, Side::Right);
+    }
 }
 
 LaneInformationTrafficRules SensorDriverImplementation::GetTrafficRuleLaneInformationEgo()

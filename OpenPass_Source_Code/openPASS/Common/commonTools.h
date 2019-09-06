@@ -23,6 +23,8 @@
 class CommonHelper
 {
 public:
+    static constexpr double EPSILON = 0.001; //!Treat values smaller than epsilon as zero for geometric calculations
+
     static double ConvertagentViewDirectionToRadian(AgentViewDirection agentViewDirection)
     {
         double viewDirection = INFINITY;
@@ -152,6 +154,60 @@ public:
         newPoint.Rotate(direction * (-1));
 
         return newPoint;
+    }
+
+    //-----------------------------------------------------------------------------
+    //! @brief Round doubles.
+    //!
+    //! Rounds doubles to a given amount of decimals.
+    //!
+    //! @param[in] value            Value which is rounded
+    //! @param[in] decimals         Amount of decimals.
+    //!
+    //! @return                     Rounded value.
+    //-----------------------------------------------------------------------------
+    static double roundDoubleWithDecimals(double value, int decimals)
+    {
+        return std::floor((value * (std::pow(10, decimals))) + 0.5)/(std::pow(10.0, decimals));
+    }
+
+    static std::optional<Common::Vector2d> CalculateIntersection(const Common::Vector2d& firstStartPoint, const Common::Vector2d& firstAxis,
+                                                          const Common::Vector2d& secondStartPoint, const Common::Vector2d& secondAxis)
+    {
+        //Solve linear equation firstStartPoint + lambda * firstAxis = secondStart + kappa * secondAxis
+        double determinant = - firstAxis.x * secondAxis.y + firstAxis.y * secondAxis.x; //Determinant of matrix (firstAxis -secondAxis)
+        if (std::abs(determinant) < EPSILON)
+        {
+            return std::nullopt;
+        }
+        double lambda = (- (secondStartPoint.x - firstStartPoint.x) * secondAxis.y
+                         + (secondStartPoint.y - firstStartPoint.y) * secondAxis.x)
+                        / determinant;
+        double intersectionPointX = firstStartPoint.x + lambda * firstAxis.x;
+        double intersectionPointY = firstStartPoint.y + lambda * firstAxis.y;
+        return std::make_optional<Common::Vector2d>(intersectionPointX, intersectionPointY);
+    }
+
+    //-----------------------------------------------------------------------------
+    //! @brief Calculate linear interpolated points with constant spacing.
+    //!
+    //! @param[in] start            Start of interval
+    //! @param[in] end              End of interval
+    //! @param[in] totalPoints      Total number of points returned (includes start
+    //!                             and end point)
+    //!
+    //! @return                     Vector of interpolated points.
+    //-----------------------------------------------------------------------------
+    static std::vector<double> InterpolateLinear(const double start, const double end, const int totalPoints)
+    {
+        std::vector<double> elements;
+
+        for(int i = 0; i < totalPoints; ++i)
+        {
+            elements.push_back(start + (i * ((end-start) / (totalPoints-1))));
+            //elements.push_back(start + (i * ((end-start+1) / (totalPoints))));  //not correct implemented yet
+        }
+        return elements;
     }
 };
 

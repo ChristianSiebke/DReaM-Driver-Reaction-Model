@@ -13,7 +13,7 @@
 #include <QLibrary>
 #include <sstream>
 #include "eventDetectorLibrary.h"
-#include "observationBinding.h"
+#include "observationInterface/observationBinding.h"
 #include "eventDetector.h"
 #include "CoreFramework/CoreShare/log.h"
 
@@ -43,8 +43,14 @@ bool EventDetectorLibrary::Init()
         return false;
     }
 
-    createInstanceFunc = (EventDetectorInterface_CreateInstanceType)library->resolve(DllCreateInstanceId.c_str());
-    if(!createInstanceFunc)
+    createCollisionDetectorInstanceFunc = (EventDetectorInterface_CreateCollisionDetectorInstanceType)library->resolve(DllCreateCollisionDetectorInstanceId.c_str());
+    if(!createCollisionDetectorInstanceFunc)
+    {
+        LOG_INTERN(LogLevel::Error) << "could not instantiate class from DLL";
+        return false;
+    }
+    createConditionalDetectorInstanceFunc = (EventDetectorInterface_CreateConditionalDetectorInstanceType)library->resolve(DllCreateConditionalDetectorInstanceId.c_str());
+    if(!createConditionalDetectorInstanceFunc)
     {
         LOG_INTERN(LogLevel::Error) << "could not instantiate class from DLL";
         return false;
@@ -130,11 +136,9 @@ bool EventDetectorLibrary::ReleaseEventDetector(EventDetector *eventDetector)
     return true;
 }
 
-EventDetector *EventDetectorLibrary::CreateEventDetector(std::string eventDetectorType,
-                                                         ParameterInterface* parameters,
-                                                         EventNetworkInterface* eventNetwork,
-                                                         WorldInterface *world,
-                                                         StochasticsInterface *stochastics)
+EventDetector *EventDetectorLibrary::CreateCollisionDetector(EventNetworkInterface* eventNetwork,
+                                                             WorldInterface *world,
+                                                             StochasticsInterface *stochastics)
 {
     if(!library)
     {
@@ -149,16 +153,50 @@ EventDetector *EventDetectorLibrary::CreateEventDetector(std::string eventDetect
         }
     }
 
-    auto eventDetectorInterface = createInstanceFunc(world,
-                                                     parameters,
-                                                     eventDetectorType,
-                                                     eventNetwork,
-                                                     callbacks,
-                                                     stochastics);
+    auto eventDetectorInterface = createCollisionDetectorInstanceFunc(world,
+                                                                      eventNetwork,
+                                                                      callbacks,
+                                                                      stochastics);
 
     if(!eventDetectorInterface)
     {
-        throw std::runtime_error("Could not create EventDetector: " + eventDetectorType);
+        throw std::runtime_error("Could not create CollisionEventDetector");
+    }
+
+    EventDetector *eventDetector = new EventDetector(eventDetectorInterface,
+                                                     this);
+
+    eventDetectors.push_back(eventDetector);
+    return eventDetector;
+}
+
+EventDetector *EventDetectorLibrary::CreateConditionalDetector(const openScenario::ConditionalEventDetectorInformation &eventDetectorInformation,
+                                                               EventNetworkInterface *eventNetwork,
+                                                               WorldInterface *world,
+                                                               StochasticsInterface *stochastics)
+{
+    if(!library)
+    {
+        return nullptr;
+    }
+
+    if(!library->isLoaded())
+    {
+        if(!library->load())
+        {
+            return nullptr;
+        }
+    }
+
+    auto eventDetectorInterface = createConditionalDetectorInstanceFunc(world,
+                                                                        eventDetectorInformation,
+                                                                        eventNetwork,
+                                                                        callbacks,
+                                                                        stochastics);
+
+    if(!eventDetectorInterface)
+    {
+        throw std::runtime_error("Could not create Conditional Event Detector");
     }
 
     EventDetector *eventDetector = new EventDetector(eventDetectorInterface,

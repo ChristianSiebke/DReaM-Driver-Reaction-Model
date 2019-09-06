@@ -61,7 +61,7 @@ public:
     *
     * @return	     Id.
     */
-    virtual int GetId()
+    virtual int GetId() const
     {
         return eventId;
     }
@@ -71,7 +71,7 @@ public:
     *
     * @return	     Time in milliseconds.
     */
-    virtual int GetEventTime()
+    virtual int GetEventTime() const
     {
         return time;
     }
@@ -91,7 +91,7 @@ public:
     *
     * @return	     Event Id.
     */
-    virtual int GetTriggeringEventId()
+    virtual int GetTriggeringEventId() const
     {
         return triggeringEventId;
     }
@@ -101,7 +101,7 @@ public:
     *
     * @return	     Name of source component as string.
     */
-    virtual std::string GetSource()
+    virtual std::string GetSource() const
     {
         return source;
     }
@@ -111,7 +111,7 @@ public:
     *
     * @return	     Sequence name as string.
     */
-    virtual std::string GetSequenceName()
+    virtual std::string GetSequenceName() const
     {
         return sequenceName;
     }
@@ -121,7 +121,7 @@ public:
     *
     * @return	     Type of the EventDetector.
     */
-    virtual EventDefinitions::EventType GetEventType()
+    virtual EventDefinitions::EventType GetEventType() const
     {
         return eventType;
     }

@@ -133,7 +133,6 @@ bool ManipulatorLibrary::ReleaseManipulator(Manipulator *manipulator)
 
 Manipulator *ManipulatorLibrary::CreateManipulator(std::shared_ptr<ScenarioActionInterface> action,
                                                    const std::string& manipulatorType,
-                                                   SimulationCommon::ManipulatorParameters* parameters,
                                                    EventNetworkInterface* eventNetwork,
                                                    WorldInterface* world)
 {
@@ -152,7 +151,6 @@ Manipulator *ManipulatorLibrary::CreateManipulator(std::shared_ptr<ScenarioActio
 
     auto manipulatorInterface = createInstanceFunc(world,
                                                    action,
-                                                   parameters,
                                                    manipulatorType,
                                                    eventNetwork,
                                                    callbacks);

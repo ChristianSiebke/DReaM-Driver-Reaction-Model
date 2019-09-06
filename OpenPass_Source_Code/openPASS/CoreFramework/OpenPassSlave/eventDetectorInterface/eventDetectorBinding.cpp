@@ -48,25 +48,19 @@ std::vector<const EventDetector*> EventDetectorBinding::Instantiate(const std::s
 
     std::vector<const EventDetector*> eventDetectors;
 
-    //Instantiates all default eventDetectors
-    for(auto eventDetectorType : defaultEventDetectorTypes)
-    {
-        const auto eventDetector = library->CreateEventDetector(eventDetectorType,
-                                                                nullptr,
-                                                                eventNetwork,
+    //Instantiates default CollisionEventDetectors
+    const auto eventDetector = library->CreateCollisionDetector(eventNetwork,
                                                                 world,
                                                                 stochastics);
-        eventDetectors.push_back(eventDetector);
-    }
+    eventDetectors.push_back(eventDetector);
 
     //Instantiates an eventdetector for each true flag
-    for(auto eventDetectorParameters : scenario->GetEventDetectors())
+    for(auto eventDetectorInformation : scenario->GetEventDetectorInformations())
     {
-        const auto eventDetector = library->CreateEventDetector(eventDetectorParameters.GetType(),
-                                                                &eventDetectorParameters,
-                                                                eventNetwork,
-                                                                world,
-                                                                stochastics);
+        const auto eventDetector = library->CreateConditionalDetector(eventDetectorInformation,
+                                                                      eventNetwork,
+                                                                      world,
+                                                                      stochastics);
         eventDetectors.push_back(eventDetector);
     }
 

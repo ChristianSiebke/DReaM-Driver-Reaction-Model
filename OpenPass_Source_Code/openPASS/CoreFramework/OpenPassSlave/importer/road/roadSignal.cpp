@@ -10,9 +10,14 @@
 #include "roadSignal.h"
 #include <exception>
 
-RoadSignalType RoadSignal::GetType() const
+std::string RoadSignal::GetType() const
 {
     return signal.type;
+}
+
+std::string RoadSignal::GetSubType() const
+{
+    return signal.subtype;
 }
 
 std::string RoadSignal::GetId() const
@@ -22,42 +27,18 @@ std::string RoadSignal::GetId() const
 
 double RoadSignal::GetValue() const
 {
-    if(signal.unit == RoadSignalUnit::Undefined ||
-       signal.unit == RoadSignalUnit::Meter ||
-       signal.unit == RoadSignalUnit::MetersPerSecond ||
-       signal.unit == RoadSignalUnit::Kilogram ||
-       signal.unit == RoadSignalUnit::Percent)
-    {
-        return signal.value;
-    }
-    if(signal.unit == RoadSignalUnit::Kilometer)
-    {
-        return signal.value * convert_km;
-    }
-    if(signal.unit == RoadSignalUnit::Feet)
-    {
-        return signal.value * convert_ft;
-    }
-    if(signal.unit == RoadSignalUnit::LandMile)
-    {
-        return signal.value * convert_mile;
-    }
-    if(signal.unit == RoadSignalUnit::MilesPerHour)
-    {
-        return signal.value * convert_mph;
-    }
-    if(signal.unit == RoadSignalUnit::KilometersPerHour)
-    {
-        return signal.value * convert_km_h;
-    }
-    if(signal.unit == RoadSignalUnit::MetricTons)
-    {
-        return signal.value * convert_t;
-    }
-
-    throw std::runtime_error("RoadSignal::GetValue with unrecognized unit");
+    return signal.value;
 }
 
+RoadSignalUnit RoadSignal::GetUnit() const
+{
+    return signal.unit;
+}
+
+std::string RoadSignal::GetText() const
+{
+    return signal.text;
+}
 
 double RoadSignal::GetS() const
 {
@@ -108,5 +89,10 @@ double RoadSignal::GetYaw() const
 bool RoadSignal::GetIsDynamic() const
 {
     return signal.dynamic == "yes";
+}
+
+std::list<std::string> RoadSignal::GetDependencies() const
+{
+    return signal.dependencyIds;
 }
 

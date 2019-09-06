@@ -32,12 +32,13 @@
 
 #pragma once
 
+#include <vector>
+
 #include "Interfaces/modelInterface.h"
 #include "Interfaces/observationInterface.h"
-#include "Common/primitiveSignals.h"
 #include "Common/accelerationSignal.h"
-#include "agentBasedEvent.h"
-#include <vector>
+#include "Common/vehicleComponentEvent.h"
+#include "Common/primitiveSignals.h"
 #include "Common/sensorDataSignal.h"
 #include "osi/osi_sensordata.pb.h"
 

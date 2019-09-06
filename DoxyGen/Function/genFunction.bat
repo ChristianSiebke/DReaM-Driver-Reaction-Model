@@ -13,7 +13,7 @@ set SourceDir=../../Source
 set SourceDir=../../OpenPass_Source_Code
 )
 
-set OSDocumentationDir=../
+set DocumentationDir=../
 
 doxygen Function.doxy -d markdown
 

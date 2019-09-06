@@ -13,11 +13,14 @@
 //-----------------------------------------------------------------------------
 
 #include "ManipulatorExport.h"
+#include "Interfaces/callbackInterface.h"
+#include "Interfaces/eventNetworkInterface.h"
 #include "Interfaces/scenarioActionInterface.h"
 #include "Common/openScenarioDefinitions.h"
-#include "CoreFramework/CoreShare/parameters.h"
 #include "CollisionManipulator.h"
 #include "ComponentStateChangeManipulator.h"
+#include "LaneChangeManipulator.h"
+#include "RemoveAgentsManipulator.h"
 
 
 const std::string version = "0.0.1";
@@ -31,7 +34,6 @@ extern "C" MANIPULATOR_SHARED_EXPORT const std::string& OpenPASS_GetVersion()
 extern "C" MANIPULATOR_SHARED_EXPORT ManipulatorInterface* OpenPASS_CreateInstance(
     WorldInterface* world,
     std::shared_ptr<ScenarioActionInterface> action,
-    SimulationCommon::ManipulatorParameters* parameters,
     std::string manipulatorType,
     SimulationSlave::EventNetworkInterface* eventNetwork,
     const CallbackInterface* callbacks)
@@ -40,40 +42,58 @@ extern "C" MANIPULATOR_SHARED_EXPORT ManipulatorInterface* OpenPASS_CreateInstan
 
     try
     {
-        if (manipulatorType == "ComponentStateChangeManipulator")
-        {
-            return static_cast<ManipulatorInterface*>(new (std::nothrow) ComponentStateChangeManipulator(
-                                                          world,
-                                                          parameters,
-                                                          eventNetwork,
-                                                          callbacks));
-        }
-        else if (manipulatorType == "CollisionManipulator")
+        if (manipulatorType == "CollisionManipulator")
         {
             return static_cast<ManipulatorInterface*>(new (std::nothrow) CollisionManipulator(
                                                           world,
-                                                          parameters,
                                                           eventNetwork,
                                                           callbacks));
         }
         else
         {
-            std::shared_ptr<UserDefinedCommandAction> castedUserDefinedCommandAction = std::dynamic_pointer_cast<UserDefinedCommandAction>(action);
-            if (castedUserDefinedCommandAction.get() != nullptr)
+            if (std::dynamic_pointer_cast<openScenario::UserDefinedCommandAction>(action).get() != nullptr)
             {
-                std::string command = castedUserDefinedCommandAction->GetCommand();
-                std::size_t firstSplitInCommand = command.find(' ');
-                std::string commandType = command.substr(0, firstSplitInCommand);
+                std::shared_ptr<openScenario::UserDefinedCommandAction> userDefinedCommandAction = std::dynamic_pointer_cast<openScenario::UserDefinedCommandAction>(action);
+
+                const auto command = userDefinedCommandAction->GetCommand();
+                const auto firstSplitInCommand = command.find(' ');
+                const auto commandType = command.substr(0, firstSplitInCommand);
 
                 if (commandType == "SetComponentState")
                 {
                     return static_cast<ManipulatorInterface*>(new (std::nothrow) ComponentStateChangeManipulator(
                                                                   world,
-                                                                  castedUserDefinedCommandAction,
+                                                                  userDefinedCommandAction,
                                                                   eventNetwork,
                                                                   callbacks
                                                                   ));
                 }
+            }
+            else if (std::dynamic_pointer_cast<openScenario::GlobalEntityAction>(action).get() != nullptr)
+            {
+                std::shared_ptr<openScenario::GlobalEntityAction> globalAction = std::dynamic_pointer_cast<openScenario::GlobalEntityAction>(action);
+
+                const auto actionType = globalAction->GetType();
+                if (actionType == openScenario::GlobalEntityActionType::Delete)
+                {
+                    return static_cast<ManipulatorInterface*>(new (std::nothrow) RemoveAgentsManipulator(
+                                                                  world,
+                                                                  globalAction,
+                                                                  eventNetwork,
+                                                                  callbacks
+                                                                  ));
+                }
+            }
+            else if (std::dynamic_pointer_cast<openScenario::PrivateLateralLaneChangeAction>(action).get() != nullptr)
+            {
+                std::shared_ptr<openScenario::PrivateLateralLaneChangeAction> laneChangeAction = std::dynamic_pointer_cast<openScenario::PrivateLateralLaneChangeAction>(action);
+
+                    return static_cast<ManipulatorInterface*>(new (std::nothrow) LaneChangeManipulator(
+                                                                  world,
+                                                                  laneChangeAction,
+                                                                  eventNetwork,
+                                                                  callbacks
+                                                                  ));
             }
         }
     }
@@ -87,7 +107,7 @@ extern "C" MANIPULATOR_SHARED_EXPORT ManipulatorInterface* OpenPASS_CreateInstan
         return nullptr;
     }
 
-    return nullptr;
+    throw std::runtime_error("Unable to instantiate unknown manipulator type '" + manipulatorType + "'");
 }
 
 extern "C" MANIPULATOR_SHARED_EXPORT void OpenPASS_DestroyInstance(ManipulatorInterface* implementation)

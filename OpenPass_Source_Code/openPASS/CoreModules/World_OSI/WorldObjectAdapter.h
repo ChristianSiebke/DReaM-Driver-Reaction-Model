@@ -29,7 +29,6 @@ public:
     const OWL::Interfaces::WorldObject& GetBaseTrafficObject() const;
 
     virtual double GetLaneRemainder(Side) const = 0;
-    virtual double GetLaneDirection() const = 0;
 
 
 protected:

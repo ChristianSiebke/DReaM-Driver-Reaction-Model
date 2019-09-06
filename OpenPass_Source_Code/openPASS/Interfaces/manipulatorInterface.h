@@ -10,7 +10,6 @@
 #pragma once
 
 #include <vector>
-#include "Interfaces/eventNetworkInterface.h"
 
 class ManipulatorInterface
 {
@@ -25,8 +24,6 @@ public:
     virtual void Trigger(int time) = 0;
 
     virtual int GetCycleTime() = 0;
-
-    virtual int GetPriority()=0;
 };
 
 

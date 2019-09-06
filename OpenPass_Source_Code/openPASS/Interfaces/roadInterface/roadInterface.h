@@ -38,6 +38,28 @@
 #include "Interfaces/roadInterface/roadGeometrySpiralInterface.h"
 
 //-----------------------------------------------------------------------------
+//! Struct containing values for parametric cubic polynomial geometry
+//! @param[in]  aU                   constant factor of the polynomial for u
+//! @param[in]  bU                   linear factor of the polynomial for u
+//! @param[in]  cU                   quadratic factor of the polynomial for u
+//! @param[in]  dU                   cubic factor of the polynomial for u
+//! @param[in]  aV                   constant factor of the polynomial for v
+//! @param[in]  bV                   linear factor of the polynomial for v
+//! @param[in]  cV                   quadratic factor of the polynomial for v
+//! @param[in]  dV                   cubic factor of the polynomial for v
+//-----------------------------------------------------------------------------
+struct ParamPoly3Parameters{
+    double aU;
+    double bU;
+    double cU;
+    double dU;
+    double aV;
+    double bV;
+    double cV;
+    double dV;
+};
+
+//-----------------------------------------------------------------------------
 //! Class representing a road.
 //-----------------------------------------------------------------------------
 class RoadInterface
@@ -131,6 +153,25 @@ public:
                           double b,
                           double c,
                           double d) = 0;
+    //-----------------------------------------------------------------------------
+    //! Adds a parametric cubic polynomial geometry to a road by creating a new
+    //! RoadGeometryparamPoly3 object and adding it to the stored list of geometries.
+    //! Each coordinate is calculated in a local (u,v) coordinate system
+    //!
+    //! @param[in]  s                   start position s-coordinate
+    //! @param[in]  x                   start position x inertial
+    //! @param[in]  y                   start position y inertial
+    //! @param[in]  hdg                 start orientation (inertial heading)
+    //! @param[in]  length              length of the element's reference line
+    //! @param[in]  parameters          Factors for the polynomials describing the road
+    //! @return                          false if an error has occurred, true otherwise
+    //-----------------------------------------------------------------------------
+    virtual bool AddGeometryParamPoly3(double s,
+                          double x,
+                          double y,
+                          double hdg,
+                          double length,
+                          ParamPoly3Parameters parameters) = 0;
 
     //-----------------------------------------------------------------------------
     //! Adds an elevation profile defined via a cubic polynomial to a road by creating

@@ -36,5 +36,4 @@ HEADERS += \
 
 LIBS += \
     -lopen_simulation_interface \
-    -lzmq \
     -lprotobuf

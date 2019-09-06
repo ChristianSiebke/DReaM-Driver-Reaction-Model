@@ -28,12 +28,19 @@
 #include <iostream>
 #include <vector>
 #include <memory>
-#include "Interfaces/parameterInterface.h"
-#include "Interfaces/stochasticsInterface.h"
-#include "Interfaces/worldInterface.h"
-#include "Interfaces/observationInterface.h"
+
+#include "Interfaces/agentInterface.h"
 #include "Interfaces/callbackInterface.h"
-#include "Interfaces/eventNetworkInterface.h"
+#include "Interfaces/signalInterface.h"
+
+class ObservationInterface;
+class ParameterInterface;
+class StochasticsInterface;
+class WorldInterface;
+
+namespace SimulationSlave {
+class EventNetworkInterface;
+};
 
 //-----------------------------------------------------------------------------
 //! Provides functionality to print information of signals

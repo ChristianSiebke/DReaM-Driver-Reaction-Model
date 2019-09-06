@@ -17,6 +17,9 @@
 
 #include "trajectoryFollowerCommonBase.h"
 
+#include "Interfaces/observationInterface.h"
+#include "Common/componentStateChangeEvent.h"
+
 TrajectoryFollowerCommonBase::TrajectoryFollowerCommonBase(std::string componentName,
         bool isInit,
         int priority,
@@ -28,8 +31,9 @@ TrajectoryFollowerCommonBase::TrajectoryFollowerCommonBase(std::string component
         const ParameterInterface* parameters,
         const std::map<int, ObservationInterface*>* observations,
         const CallbackInterface* callbacks,
-        AgentInterface* agent) :
-    UnrestrictedModelInterface(
+        AgentInterface* agent,
+        SimulationSlave::EventNetworkInterface * const eventNetwork) :
+    UnrestrictedEventModelInterface(
         componentName,
         isInit,
         priority,
@@ -41,13 +45,13 @@ TrajectoryFollowerCommonBase::TrajectoryFollowerCommonBase(std::string component
         parameters,
         observations,
         callbacks,
-        agent)
+        agent,
+        eventNetwork),
+    cycleTimeInSeconds{static_cast<double>(cycleTime) / 1000.0}
 {
-    currentWorldPosition.xPos = 0;
-    currentWorldPosition.yPos = 0;
-    currentWorldPosition.yawAngle = 0;
-
-    cycleTimeInSeconds = static_cast<double>(cycleTime) / 1000.0;
+    dynamicsOutputSignal.positionX = 0;
+    dynamicsOutputSignal.positionY = 0;
+    dynamicsOutputSignal.yaw = 0;
 
     ParseParameters(parameters);
 }
@@ -118,10 +122,6 @@ void TrajectoryFollowerCommonBase::UpdateInput(int localLinkId, const std::share
                 }
             }
         }
-        else if (localLinkId == 83)
-        {
-            HandleCompCtrlSignalInput(data);
-        }
         else
         {
             const std::string msg = COMPONENTNAME + " invalid signaltype";
@@ -138,15 +138,8 @@ void TrajectoryFollowerCommonBase::UpdateOutput(int localLinkId, std::shared_ptr
     {
         try
         {
-            data = std::make_shared<DynamicsSignal const>(componentState,
-                    currentAcceleration,
-                    currentVelocity,
-                    currentWorldPosition.xPos,
-                    currentWorldPosition.yPos,
-                    currentWorldPosition.yawAngle,
-                    currentYawRate,
-                    0.0,
-                    distance);
+            dynamicsOutputSignal.componentState = componentState;
+            data = std::make_shared<DynamicsSignal const>(dynamicsOutputSignal);
         }
         catch (const std::bad_alloc&)
         {
@@ -165,36 +158,22 @@ void TrajectoryFollowerCommonBase::UpdateOutput(int localLinkId, std::shared_ptr
     }
 }
 
-Position TrajectoryFollowerCommonBase::GetLastWorldPosition()
+void TrajectoryFollowerCommonBase::Trigger(int time)
 {
-    return currentWorldPosition;
-}
+    const auto stateChangeEventList = GetEventNetwork()->GetActiveEventCategory(EventDefinitions::EventCategory::ComponentStateChange);
 
-double TrajectoryFollowerCommonBase::GetLastVelocity()
-{
-    return currentVelocity;
-}
-
-double TrajectoryFollowerCommonBase::GetLastAcceleration()
-{
-    return currentAcceleration;
-}
-
-void TrajectoryFollowerCommonBase::HandleCompCtrlSignalInput(const std::shared_ptr<SignalInterface const>& data)
-{
-    const std::shared_ptr<CompCtrlToAgentCompSignal const> ccSignal =
-        std::dynamic_pointer_cast<CompCtrlToAgentCompSignal const>(data);
-    if (!ccSignal)
+    for (const auto &stateChangeEvent : stateChangeEventList)
     {
-        ThrowInvalidSignalTypeError();
-    }
-    else
-    {
-        if (ccSignal->GetMaxReachableState() != ComponentState::Undefined)
+        const auto &componentChangeEvent = std::dynamic_pointer_cast<ComponentChangeEvent>(stateChangeEvent);
+
+        if (componentChangeEvent->GetComponentName() == COMPONENTNAME
+            && std::find(componentChangeEvent->actingAgents.begin(), componentChangeEvent->actingAgents.end(), GetAgent()->GetId()) != componentChangeEvent->actingAgents.end())
         {
-            UpdateState(ccSignal->GetMaxReachableState());
+            UpdateState(componentChangeEvent->GetGoalState());
         }
     }
+
+    CalculateNextTimestep(time);
 }
 
 void TrajectoryFollowerCommonBase::HandleCompCtrlSignalOutput(std::shared_ptr<SignalInterface const>& data)
@@ -226,9 +205,9 @@ void TrajectoryFollowerCommonBase::UpdateState(const ComponentState newState)
             if (canBeActivated)
             {
                 componentState = newState;
-                std::shared_ptr<AgentBasedEvent> event = std::make_shared<AgentBasedEvent>(currentTime,
+                std::shared_ptr<VehicleComponentEvent> event = std::make_shared<VehicleComponentEvent>(currentTime,
                         GetComponentName(),
-                        "TEST_ACTIVATE",
+                        "TrajectoryFollower_Activate",
                         EventDefinitions::EventType::TrajectoryFollowerActivated,
                         GetAgent()->GetId());
 
@@ -239,9 +218,9 @@ void TrajectoryFollowerCommonBase::UpdateState(const ComponentState newState)
         {
             canBeActivated = false;
             componentState = newState;
-            std::shared_ptr<AgentBasedEvent> event = std::make_shared<AgentBasedEvent>(currentTime,
+            std::shared_ptr<VehicleComponentEvent> event = std::make_shared<VehicleComponentEvent>(currentTime,
                     GetComponentName(),
-                    "TEST_DEACTIVATE",
+                    "TrajectoryFollower_Deactivate",
                     EventDefinitions::EventType::TrajectoryFollowerDeactivated,
                     GetAgent()->GetId());
 
@@ -254,16 +233,29 @@ void TrajectoryFollowerCommonBase::UpdateState(const ComponentState newState)
     }
 }
 
-void TrajectoryFollowerCommonBase::ThrowCouldNotInstantiateSignalError()
+[[ noreturn ]] void TrajectoryFollowerCommonBase::ThrowCouldNotInstantiateSignalError()
 {
     const std::string msg = COMPONENTNAME + " could not instantiate signal";
     LOG(CbkLogLevel::Debug, msg);
     throw std::runtime_error(msg);
 }
 
-void TrajectoryFollowerCommonBase::ThrowInvalidSignalTypeError()
+[[ noreturn ]] void TrajectoryFollowerCommonBase::ThrowInvalidSignalTypeError()
 {
     const std::string msg = COMPONENTNAME + " invalid signaltype";
     LOG(CbkLogLevel::Debug, msg);
     throw std::runtime_error(msg);
+}
+
+void TrajectoryFollowerCommonBase::HandleEndOfTrajectory()
+{
+    dynamicsOutputSignal.velocity = 0;
+    dynamicsOutputSignal.acceleration = 0;
+    dynamicsOutputSignal.travelDistance = 0;
+    dynamicsOutputSignal.yawRate = 0;
+
+    if(automaticDeactivation)
+    {
+        UpdateState(ComponentState::Disabled);
+    }
 }

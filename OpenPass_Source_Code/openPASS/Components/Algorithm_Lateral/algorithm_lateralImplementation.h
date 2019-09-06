@@ -163,7 +163,7 @@ public:
     */
     void Trigger(int time);
 
-private:
+protected:
     // --- module internal functions
 
     // --- module internal variables

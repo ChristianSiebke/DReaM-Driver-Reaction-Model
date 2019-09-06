@@ -15,6 +15,9 @@
 #include <memory>
 #include <qglobal.h>
 #include <cassert>
+
+#include "Interfaces/stochasticsInterface.h"
+
 #include "objectDetectorBase.h"
 
 ObjectDetectorBase::ObjectDetectorBase(
@@ -213,8 +216,7 @@ point_t ObjectDetectorBase::TransformPointToLocalCoordinates(point_t point, poin
     return pointLocal;
 }
 
-polygon_t ObjectDetectorBase::TransformPolygonToGlobalCoordinates(polygon_t polygon, point_t sensorPositionGlobal,
-        double yaw)
+polygon_t ObjectDetectorBase::TransformPolygonToGlobalCoordinates(polygon_t polygon, point_t sensorPositionGlobal, double yaw) const
 {
     polygon_t tempBox;
     polygon_t polygonGlobal;
@@ -226,7 +228,7 @@ polygon_t ObjectDetectorBase::TransformPolygonToGlobalCoordinates(polygon_t poly
     return polygonGlobal;
 }
 
-point_t ObjectDetectorBase::CalculateGlobalSensorPosition(point_t vehiclePosition, double yaw)
+point_t ObjectDetectorBase::CalculateGlobalSensorPosition(point_t vehiclePosition, double yaw) const
 {
     point_t sensorPositionVehicle{position.longitudinal, position.lateral};
     point_t sensorPositionGlobal;

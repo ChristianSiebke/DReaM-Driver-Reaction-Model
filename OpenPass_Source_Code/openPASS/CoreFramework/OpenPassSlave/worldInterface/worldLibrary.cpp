@@ -141,7 +141,7 @@ WorldInterface *WorldLibrary::CreateWorld()
     worldInterface = nullptr;
     try
     {
-        worldInterface = createInstanceFunc(callbacks);
+        worldInterface = createInstanceFunc(callbacks, stochastics);
     }
     catch(std::runtime_error const &ex)
     {

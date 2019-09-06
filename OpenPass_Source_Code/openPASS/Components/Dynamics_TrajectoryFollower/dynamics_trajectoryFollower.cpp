@@ -19,7 +19,7 @@
 #include "roadCoordinateTrajectoryFollower.h"
 #include "CoreFramework/OpenPassSlave/importer/trajectoryImporter.h"
 
-const std::string Version = "0.0.1";
+const std::string Version = "0.1.0";
 static const CallbackInterface* Callbacks = nullptr;
 
 extern "C" DYNAMICS_TRAJECTORY_FOLLOWER_SHARED_EXPORT const std::string& OpenPASS_GetVersion()
@@ -39,7 +39,8 @@ extern "C" DYNAMICS_TRAJECTORY_FOLLOWER_SHARED_EXPORT ModelInterface* OpenPASS_C
     const ParameterInterface* parameters,
     const std::map<int, ObservationInterface*>* observations,
     AgentInterface* agent,
-    const CallbackInterface* callbacks)
+    const CallbackInterface* callbacks,
+    SimulationSlave::EventNetworkInterface * const eventNetwork)
 {
     Callbacks = callbacks;
 
@@ -82,8 +83,8 @@ extern "C" DYNAMICS_TRAJECTORY_FOLLOWER_SHARED_EXPORT ModelInterface* OpenPASS_C
                                              observations,
                                              callbacks,
                                              agent,
-                                             &trajectory));
-                break;
+                                             &trajectory,
+                                             eventNetwork));
 
             case TrajectoryType::WorldCoordinatesAbsolute:
                 return (ModelInterface*)(new (std::nothrow) AbsoluteWorldCoordinateTrajectoryFollower(
@@ -99,8 +100,8 @@ extern "C" DYNAMICS_TRAJECTORY_FOLLOWER_SHARED_EXPORT ModelInterface* OpenPASS_C
                                              observations,
                                              callbacks,
                                              agent,
-                                             &trajectory));
-                break;
+                                             &trajectory,
+                                             eventNetwork));
 
             default:
                 throw std::runtime_error("Trajectory type could not be determined.");

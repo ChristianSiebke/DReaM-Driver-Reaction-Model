@@ -22,6 +22,7 @@ SUBDIRS += \
     . \
     Localization \
     OWL \
+    RoutePlanning \
     ../../Common \
     ../../Interfaces \
     ../../Interfaces/OpenScenarioInterfaces

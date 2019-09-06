@@ -96,18 +96,9 @@ const std::map<std::string, std::vector<ScenarioEntity*>> &Scenario::GetScenario
     return scenarioGroups;
 }
 
-void Scenario::AddEventDetector(const std::string& eventDetectorType,
-                                SimulationCommon::EventDetectorParameters eventDetectorParameters)
+void Scenario::AddConditionalEventDetector(const openScenario::ConditionalEventDetectorInformation &eventDetectorInformation)
 {
-    eventDetectorParameters.SetType(eventDetectorType);
-    eventDetectors.push_back(eventDetectorParameters);
-}
-
-void Scenario::AddManipulator(const std::string& manipulatorType,
-                              SimulationCommon::ManipulatorParameters manipulatorParameters)
-{
-    manipulatorParameters.SetType(manipulatorType);
-    manipulators.push_back(manipulatorParameters);
+    eventDetectorInformations.emplace_back(eventDetectorInformation);
 }
 
 void Scenario::AddAction(std::shared_ptr<ScenarioActionInterface> action)
@@ -115,17 +106,12 @@ void Scenario::AddAction(std::shared_ptr<ScenarioActionInterface> action)
     actions.push_back(action);
 }
 
-std::list<SimulationCommon::EventDetectorParameters> Scenario::GetEventDetectors()
+const std::vector<openScenario::ConditionalEventDetectorInformation>& Scenario::GetEventDetectorInformations()
 {
-    return eventDetectors;
+    return eventDetectorInformations;
 }
 
-std::list<SimulationCommon::ManipulatorParameters> Scenario::GetManipulators()
-{
-    return manipulators;
-}
-
-std::list<std::shared_ptr<ScenarioActionInterface>> Scenario::GetActions() const
+std::vector<std::shared_ptr<ScenarioActionInterface>> Scenario::GetActions() const
 {
     return actions;
 }

@@ -14,11 +14,12 @@
 //-----------------------------------------------------------------------------
 
 #include "componentControllerImplementation.h"
-#include "Common/compCtrlToAgentCompSignal.h"
-#include "Common/eventTypes.h"
 #include "Common/agentCompToCompCtrlSignal.h"
 #include "Common/primitiveSignals.h"
+#include "Interfaces/eventNetworkInterface.h"
+#include "Common/eventTypes.h"
 #include "Common/componentStateChangeEvent.h"
+#include "Common/componentWarningEvent.h"
 
 ComponentControllerImplementation::ComponentControllerImplementation(std::string componentName,
                                                                      bool isInit,
@@ -59,15 +60,12 @@ void ComponentControllerImplementation::UpdateInput(int localLinkId, const std::
     {
         const auto signal = SignalCast<AgentCompToCompCtrlSignal const>(data, localLinkId);
 
-        // check if the localLinkId is already registered
         if (stateManager.LocalLinkIdIsRegistered(localLinkId))
         {
-            // update the information for the previously registered component at localLinkId
             stateManager.UpdateComponentCurrentState(localLinkId, signal->GetCurrentState());
         }
         else
         {
-            // register the component identified in the signal to localLinkId in the StateManager and ComponentController
             std::shared_ptr<ComponentStateInformation> componentStateInformation;
 
             ComponentType componentType = signal->GetComponentType();
@@ -88,6 +86,21 @@ void ComponentControllerImplementation::UpdateInput(int localLinkId, const std::
 
             stateManager.AddComponent(localLinkId, componentStateInformation);
         }
+
+        const auto warning = signal->GetComponentWarning();
+        if (warning)
+        {
+            const auto warningComponent = stateManager.GetComponent(localLinkId);
+            const auto componentWarningEvent = std::make_shared<ComponentWarningEvent>(time,
+                                                                                       COMPONENTNAME,
+                                                                                       "",
+                                                                                       GetAgent()->GetId(),
+                                                                                       warningComponent->GetComponentName(),
+                                                                                       warning.value());
+            GetEventNetwork()->InsertEvent(componentWarningEvent);
+
+            driverWarnings.try_emplace(warningComponent->GetComponentName(), warning.value());
+        }
     }
     else
     {
@@ -104,14 +117,30 @@ void ComponentControllerImplementation::UpdateOutput(int localLinkId, std::share
 
     ComponentState maxReachableState = ComponentState::Undefined;
 
-    // if the link id is registered...
     if (stateManager.LocalLinkIdIsRegistered(localLinkId))
     {
-        // if the component type at the link id is ComponentType::VehicleComponent
+        const auto componentAtLocalLinkId = stateManager.GetComponent(localLinkId);
         maxReachableState = stateManager.GetComponent(localLinkId)->GetMaxReachableState();
-    }
 
-    data = std::make_shared<CompCtrlToAgentCompSignal const>(maxReachableState, stateManager.GetVehicleComponentNamesToTypeAndStateMap());
+        if (componentAtLocalLinkId->GetComponentType() == ComponentType::Driver)
+        {
+            data = std::make_shared<CompCtrlToDriverCompSignal const>(maxReachableState,
+                                                                      stateManager.GetVehicleComponentNamesToTypeAndStateMap(),
+                                                                      driverWarnings.size() > 0
+                                                                        ? std::make_optional(driverWarnings)
+                                                                        : std::nullopt);
+            // clear all warnings to forward to avoid unwanted repeats
+            driverWarnings.clear();
+        }
+        else
+        {
+            data = std::make_shared<CompCtrlToAgentCompSignal const>(maxReachableState, stateManager.GetVehicleComponentNamesToTypeAndStateMap());
+        }
+    }
+    else
+    {
+        data = std::make_shared<CompCtrlToAgentCompSignal const>(maxReachableState, stateManager.GetVehicleComponentNamesToTypeAndStateMap());
+    }
 }
 
 /*
@@ -126,17 +155,16 @@ void ComponentControllerImplementation::Trigger(int time)
     const auto stateChangeEventList = GetEventNetwork()->GetActiveEventCategory(EventDefinitions::EventCategory::ComponentStateChange);
     const auto agentId = GetAgent()->GetId();
     std::list<std::shared_ptr<ComponentChangeEvent const>> castedStateChangeEventListForAgentId;
-    if (stateChangeEventList)
-    {
-        // filter state change event list by this agentid
-        for (const auto &stateChangeEvent : *stateChangeEventList)
-        {
-            const auto &castedStateChangeEvent = std::dynamic_pointer_cast<ComponentChangeEvent>(stateChangeEvent);
 
-            if (castedStateChangeEvent && castedStateChangeEvent->agentId == agentId)
-            {
-               castedStateChangeEventListForAgentId.push_back(castedStateChangeEvent);
-            }
+    // filter state change event list by this agentid
+    for (const auto &stateChangeEvent : stateChangeEventList)
+    {
+        const auto &componentChangeEvent = std::dynamic_pointer_cast<ComponentChangeEvent>(stateChangeEvent);
+        const auto &actingAgentIds = componentChangeEvent->actingAgents;
+
+        if (componentChangeEvent && std::find(actingAgentIds.begin(), actingAgentIds.end(), agentId) != actingAgentIds.end())
+        {
+           castedStateChangeEventListForAgentId.push_back(componentChangeEvent);
         }
     }
 

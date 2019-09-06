@@ -13,8 +13,9 @@
 //-----------------------------------------------------------------------------
 
 #include "sensorGeometric2D.h"
-#include "boostGeometryCommon.h"
 #include <QtGlobal>
+#include <numeric>
+#include "Common/boostGeometryCommon.h"
 #include "CoreModules/World_OSI/WorldData.h"
 
 SensorGeometric2D::SensorGeometric2D(
@@ -69,26 +70,103 @@ void SensorGeometric2D::Trigger(int time)
     sensorData = {};
     sensorData.mutable_timestamp()->set_seconds((time + latencyInMs) / 1000);
     sensorData.mutable_timestamp()->set_nanos(((time + latencyInMs) % 1000) * 1e6);
-    DetectObjects();
+    SensorDetectionResults results = DetectObjects();
     sensorData = ApplyLatency(time, sensorData);
+
+    Observe(time, ApplyLatencyToResults(time, results));
 }
 
 void SensorGeometric2D::UpdateInput(int, const std::shared_ptr<SignalInterface const> &, int)
 {
 }
 
+void SensorGeometric2D::Observe(const int time, const SensorDetectionResults& results)
+{
+    std::vector<OWL::Id> visibleIds;
+    std::transform(results.visibleMovingObjects.begin(),
+                   results.visibleMovingObjects.end(),
+                   std::back_inserter(visibleIds),
+                   [](const auto object) -> OWL::Id
+    {
+        return object.id().value();
+    });
+    std::vector<OWL::Id> detectedIds;
+    std::transform(results.detectedMovingObjects.begin(),
+                   results.detectedMovingObjects.end(),
+                   std::back_inserter(detectedIds),
+                   [](const auto object) -> OWL::Id
+    {
+        return object.id().value();
+    });
 
-bool SensorGeometric2D::OpeningAngleWithinHalfCircle()
+    _observer->Insert(time,
+                      GetAgent()->GetId(),
+                      LoggingGroup::SensorExtended,
+                      "Sensor" + std::to_string(id) + "_VisibleAgents",
+                      CreateAgentIdListString(visibleIds));
+    _observer->Insert(time,
+                      GetAgent()->GetId(),
+                      LoggingGroup::SensorExtended,
+                      "Sensor" + std::to_string(id) + "_DetectedAgents",
+                      CreateAgentIdListString(detectedIds));
+}
+
+std::string SensorGeometric2D::CreateAgentIdListString(const std::vector<OWL::Id>& owlIds) const
+{
+    const auto worldData = static_cast<OWL::WorldData*>(world->GetWorldData());
+
+    std::vector<std::string> agentIds;
+    std::transform(owlIds.begin(),
+                   owlIds.end(),
+                   std::back_inserter(agentIds),
+                   [worldData](const auto owlId) -> std::string
+    {
+        return std::to_string(worldData->GetAgentId(owlId));
+    });
+
+    return std::accumulate(agentIds.begin(),
+                           agentIds.end(),
+                           std::string(""),
+                           [](const auto& first, const auto& second) -> std::string
+    {
+        return first + ';' + second;
+    }).erase(0,1);
+}
+
+SensorDetectionResults SensorGeometric2D::ApplyLatencyToResults(const int time, const SensorDetectionResults& results)
+{
+    latentSensorDetectionResultsBuffer.emplace(time + latencyInMs, results);
+
+    // because maps are sorted, find the first instance of a time in the buffer after the time requested by the parameters of the function
+    auto latentResultsIterForTime = std::find_if_not(latentSensorDetectionResultsBuffer.begin(),
+                                                     latentSensorDetectionResultsBuffer.end(),
+                                                     [time](const auto& timeToResultsPair) -> bool
+    {
+        return timeToResultsPair.first <= time;
+    });
+
+    // if it exists, get the previous element of the map - the most recent latent result to the time specified in the parameters
+    SensorDetectionResults resultsByLatency;
+    if (std::prev(latentResultsIterForTime) != latentSensorDetectionResultsBuffer.end())
+    {
+        resultsByLatency = std::prev(latentResultsIterForTime)->second;
+        latentSensorDetectionResultsBuffer.erase(latentSensorDetectionResultsBuffer.begin(), std::prev(latentResultsIterForTime));
+    }
+
+    return resultsByLatency;
+}
+
+bool SensorGeometric2D::OpeningAngleWithinHalfCircle() const
 {
     return openingAngleH < M_PI;
 }
 
-bool SensorGeometric2D::OpeningAngleWithinFullCircle()
+bool SensorGeometric2D::OpeningAngleWithinFullCircle() const
 {
     return openingAngleH < 2 * M_PI;
 }
 
-polygon_t SensorGeometric2D::CreateFourPointDetectionField()
+polygon_t SensorGeometric2D::CreateFourPointDetectionField() const
 {
     polygon_t detectionField;
 
@@ -106,7 +184,7 @@ polygon_t SensorGeometric2D::CreateFourPointDetectionField()
     return detectionField;
 }
 
-polygon_t SensorGeometric2D::CreateFivePointDetectionField()
+polygon_t SensorGeometric2D::CreateFivePointDetectionField() const
 {
     polygon_t detectionField;
 
@@ -124,8 +202,20 @@ polygon_t SensorGeometric2D::CreateFivePointDetectionField()
     return detectionField;
 }
 
+point_t SensorGeometric2D::GetHostVehiclePosition(const osi3::MovingObject* hostVehicle) const
+{
+    point_t bbCenterToRear{hostVehicle->vehicle_attributes().bbcenter_to_rear().x(), hostVehicle->vehicle_attributes().bbcenter_to_rear().y()};
+    bt::rotate_transformer<bg::radian, double, 2, 2> rotate(-hostVehicle->base().orientation().yaw());
+    bt::translate_transformer<double, 2, 2> bbCenter(hostVehicle->base().position().x(), hostVehicle->base().position().y());
+    point_t rotatedBbCenterToRear;
+    point_t ownPosition;
+    bg::transform(bbCenterToRear, rotatedBbCenterToRear, rotate);
+    bg::transform(rotatedBbCenterToRear, ownPosition, bbCenter);
 
-void SensorGeometric2D::DetectObjects()
+    return ownPosition;
+}
+
+std::pair<point_t, polygon_t> SensorGeometric2D::CreateSensorDetectionField(const osi3::MovingObject* hostVehicle) const
 {
     polygon_t detectionField;
 
@@ -142,9 +232,83 @@ void SensorGeometric2D::DetectObjects()
         bg::append(detectionField, point_t{0, 0});
     }
 
+    const auto ownPosition = GetHostVehiclePosition(hostVehicle);
+    double yaw = hostVehicle->base().orientation().yaw();
+
+    point_t sensorPositionGlobal = CalculateGlobalSensorPosition(ownPosition, yaw);
+    detectionField = TransformPolygonToGlobalCoordinates(detectionField, sensorPositionGlobal, yaw);
+
+    return std::make_pair(sensorPositionGlobal, detectionField);
+}
+
+SensorDetectionResults SensorGeometric2D::DetectObjects()
+{
+    SensorDetectionResults results;
     osi3::SensorViewConfiguration sensorViewConfig = GenerateSensorViewConfiguration();
     osi3::SensorView sensorView = static_cast<OWL::Interfaces::WorldData*>(world->GetWorldData())->GetSensorView(sensorViewConfig, GetAgent()->GetId());
 
+    const auto hostVehicle = FindHostVehicleInSensorView(sensorView);
+
+    const auto [sensorPositionGlobal, detectionField] = CreateSensorDetectionField(hostVehicle);
+    const auto [movingObjectsInDetectionField, stationaryObjectsInDetectionField] = GetObjectsInDetectionAreaFromSensorView(sensorView,
+                                                                                                                            sensorPositionGlobal,
+                                                                                                                            detectionField);
+    if (enableVisualObstruction)
+    {
+        multi_polygon_t brightArea{CalcInitialBrightArea(sensorPositionGlobal)};
+        bg::correct(brightArea);
+
+        //Remove shadows from brightArea
+        ApplyVisualObstructionToDetectionArea(brightArea,
+                                              sensorPositionGlobal,
+                                              movingObjectsInDetectionField);
+        ApplyVisualObstructionToDetectionArea(brightArea,
+                                              sensorPositionGlobal,
+                                              stationaryObjectsInDetectionField);
+
+        std::tie(results.visibleMovingObjects, results.detectedMovingObjects) = CalcVisualObstruction(movingObjectsInDetectionField, brightArea);
+        std::tie(results.visibleStationaryObjects, results.detectedStationaryObjects) = CalcVisualObstruction(stationaryObjectsInDetectionField, brightArea);
+    }
+    else
+    {
+        std::transform(movingObjectsInDetectionField.begin(),
+                       movingObjectsInDetectionField.end(),
+                       std::back_inserter(results.visibleMovingObjects),
+                       [](const auto movingObject) -> osi3::MovingObject
+        {
+            return *movingObject;
+        });
+        results.detectedMovingObjects = results.visibleMovingObjects;
+        std::transform(stationaryObjectsInDetectionField.begin(),
+                       stationaryObjectsInDetectionField.end(),
+                       std::back_inserter(results.visibleStationaryObjects),
+                       [](const auto stationaryObject) -> osi3::StationaryObject
+        {
+            return *stationaryObject;
+        });
+        results.detectedStationaryObjects = results.visibleStationaryObjects;
+    }
+
+    const auto ownPosition = GetHostVehiclePosition(hostVehicle);
+    const auto yaw = hostVehicle->base().orientation().yaw();
+    const auto yawRate = hostVehicle->base().orientation_rate().yaw();
+    const point_t ownVelocity{hostVehicle->base().velocity().x(), hostVehicle->base().velocity().y()};
+    const point_t ownAcceleration{hostVehicle->base().acceleration().x(), hostVehicle->base().acceleration().y()};
+
+    for (const auto& object : results.detectedMovingObjects)
+    {
+        AddMovingObjectToSensorData(object, ownVelocity, ownAcceleration, ownPosition, yaw, yawRate);
+    }
+    for (const auto& object : results.detectedStationaryObjects)
+    {
+        AddStationaryObjectToSensorData(object, ownPosition, yaw);
+    }
+
+    return results;
+}
+
+const osi3::MovingObject* SensorGeometric2D::FindHostVehicleInSensorView(const osi3::SensorView& sensorView)
+{
     const auto hostVehicleIt = std::find_if(sensorView.global_ground_truth().moving_object().cbegin(),
                                             sensorView.global_ground_truth().moving_object().cend(),
                                             [sensorView](const osi3::MovingObject& object)
@@ -157,69 +321,46 @@ void SensorGeometric2D::DetectObjects()
         throw std::runtime_error("Host vehicle not in SensorView");
     }
 
-    osi3::MovingObject hostVehicle = *hostVehicleIt;
-    double yaw = hostVehicle.base().orientation().yaw();
-    double yawRate = hostVehicle.base().orientation_rate().yaw();
+    return &(*hostVehicleIt);
+}
 
-    point_t bbCenterToRear{hostVehicle.vehicle_attributes().bbcenter_to_rear().x(), hostVehicle.vehicle_attributes().bbcenter_to_rear().y()};
-    bt::rotate_transformer<bg::radian, double, 2, 2> rotate(-yaw);
-    bt::translate_transformer<double, 2, 2> bbCenter(hostVehicle.base().position().x(), hostVehicle.base().position().y());
-    point_t rotatedBbCenterToRear;
-    point_t ownPosition;
-    bg::transform(bbCenterToRear, rotatedBbCenterToRear, rotate);
-    bg::transform(rotatedBbCenterToRear, ownPosition, bbCenter);
-
-    point_t sensorPositionGlobal = CalculateGlobalSensorPosition(ownPosition, yaw);
-    detectionField = TransformPolygonToGlobalCoordinates(detectionField, sensorPositionGlobal, yaw);
-    point_t ownVelocity{hostVehicle.base().velocity().x(), hostVehicle.base().velocity().y()};
-    point_t ownAcceleration{hostVehicle.base().acceleration().x(), hostVehicle.base().acceleration().y()};
-
-    std::vector<osi3::MovingObject> movingObjectsInDetectionField;
-    for (const osi3::MovingObject& object : sensorView.global_ground_truth().moving_object())
+std::pair<std::vector<const osi3::MovingObject*>, std::vector<const osi3::StationaryObject*>> SensorGeometric2D::GetObjectsInDetectionAreaFromSensorView(const osi3::SensorView& sensorView,
+                                                                                                                                                         const point_t& sensorPositionGlobal,
+                                                                                                                                                         const polygon_t& detectionField) const
+{
+    std::vector<const osi3::MovingObject*> movingObjectsInDetectionField;
+    for (const auto& movingObject : sensorView.global_ground_truth().moving_object())
     {
-        if (object.id().value() == sensorView.host_vehicle_id().value())
+        if(ObjectIsInDetectionArea(movingObject, sensorPositionGlobal, detectionField) && movingObject.id().value() != sensorView.host_vehicle_id().value())
         {
-            continue;
-        }
-        polygon_t objectBoundingBox = CalculateBoundingBox(object.base().dimension(), object.base().position(),
-                                                      object.base().orientation());
-
-        double distanceToObjectBoundary = bg::distance(sensorPositionGlobal, objectBoundingBox);
-
-        if (distanceToObjectBoundary <= detectionRange &&
-           (openingAngleH>= 2 * M_PI || bg::intersects(detectionField, objectBoundingBox)))
-        {
-            movingObjectsInDetectionField.push_back(object);
+            movingObjectsInDetectionField.emplace_back(&movingObject);
         }
     }
 
-    std::vector<osi3::StationaryObject> stationaryObjectsInDetectionField;
-    for (const osi3::StationaryObject& object : sensorView.global_ground_truth().stationary_object())
+    std::vector<const osi3::StationaryObject*> stationaryObjectsInDetectionField;
+    for (const auto& stationaryObject : sensorView.global_ground_truth().stationary_object())
     {
-        polygon_t objectBoundingBox = CalculateBoundingBox(object.base().dimension(), object.base().position(),
-                                                      object.base().orientation());
-
-        double distanceToObjectBoundary = bg::distance(sensorPositionGlobal, objectBoundingBox);
-
-        if (distanceToObjectBoundary <= detectionRange &&
-           (openingAngleH>= 2 * M_PI || bg::intersects(detectionField, objectBoundingBox)))
+        if (ObjectIsInDetectionArea(stationaryObject, sensorPositionGlobal, detectionField))
         {
-            stationaryObjectsInDetectionField.push_back(object);
+            stationaryObjectsInDetectionField.emplace_back(&stationaryObject);
         }
     }
 
-    if (enableVisualObstruction)
-    {
-        CalcVisualObstruction(movingObjectsInDetectionField, stationaryObjectsInDetectionField, sensorPositionGlobal);
-    }
-    for (auto &object : movingObjectsInDetectionField)
-    {
-        AddMovingObjectToSensorData(object, ownVelocity, ownAcceleration, ownPosition, yaw, yawRate);
-    }
-    for (auto &object : stationaryObjectsInDetectionField)
-    {
-        AddStationaryObjectToSensorData(object, ownPosition, yaw);
-    }
+    return std::make_pair(movingObjectsInDetectionField, stationaryObjectsInDetectionField);
+}
+
+template<typename T>
+bool SensorGeometric2D::ObjectIsInDetectionArea(const T& object,
+                                                const point_t& sensorPositionGlobal,
+                                                const polygon_t& detectionField) const
+{
+    polygon_t objectBoundingBox = CalculateBoundingBox(object.base().dimension(), object.base().position(),
+                                                  object.base().orientation());
+
+    double distanceToObjectBoundary = bg::distance(sensorPositionGlobal, objectBoundingBox);
+
+    return distanceToObjectBoundary <= detectionRange &&
+           (openingAngleH >= 2 * M_PI || bg::intersects(detectionField, objectBoundingBox));
 }
 
 osi3::SensorViewConfiguration SensorGeometric2D::GenerateSensorViewConfiguration()
@@ -236,70 +377,47 @@ osi3::SensorViewConfiguration SensorGeometric2D::GenerateSensorViewConfiguration
     return viewConfiguration;
 }
 
-void SensorGeometric2D::CalcVisualObstruction(std::vector<osi3::MovingObject> &movingObjects, std::vector<osi3::StationaryObject> &stationaryObjects, point_t sensorPositionGlobal)
+template<typename T>
+void SensorGeometric2D::ApplyVisualObstructionToDetectionArea(multi_polygon_t& brightArea,
+                                                              const point_t& sensorPositionGlobal,
+                                                              const std::vector<const T*>& objects)
 {
-    multi_polygon_t brightArea{CalcInitialBrightArea(sensorPositionGlobal)};
-    bg::correct(brightArea);
-
-    //Remove shadows from brightArea
-    for (auto &object : movingObjects)
+    for (const auto object : objects)
     {
-        polygon_t objectBoundingBoxGlobal = CalculateBoundingBox(object.base().dimension(), object.base().position(),
-                                                      object.base().orientation());
+        polygon_t objectBoundingBoxGlobal = CalculateBoundingBox(object->base().dimension(),
+                                                                 object->base().position(),
+                                                                 object->base().orientation());
         auto temporaryShadow = CalcObjectShadow(objectBoundingBoxGlobal, sensorPositionGlobal);
         multi_polygon_t newBrightArea;
         bg::difference(brightArea, temporaryShadow, newBrightArea);
         brightArea = newBrightArea;
     }
-    for (auto &object : stationaryObjects)
+}
+
+template<typename T>
+std::pair<std::vector<T>, std::vector<T>> SensorGeometric2D::CalcVisualObstruction(const std::vector<const T*>& objects,
+                                                                                   const multi_polygon_t &brightArea)
+{
+    std::vector<T> visibleObjects;
+    std::vector<T> detectedObjects;
+    for (const auto object : objects)
     {
-        polygon_t objectBoundingBoxGlobal = CalculateBoundingBox(object.base().dimension(), object.base().position(),
-                                                      object.base().orientation());
-        auto temporaryShadow = CalcObjectShadow(objectBoundingBoxGlobal, sensorPositionGlobal);
-        multi_polygon_t newBrightArea;
-        bg::difference(brightArea, temporaryShadow, newBrightArea);
-        brightArea = newBrightArea;
-    }
+        polygon_t objectBoundingBoxGlobal = CalculateBoundingBox(object->base().dimension(),
+                                                                 object->base().position(),
+                                                                 object->base().orientation());
 
-    //Remove shadowed objects
-    auto movingObjectsCopy = movingObjects;
-    auto stationaryObjectsCopy = stationaryObjects;
-
-    for (auto &object : movingObjectsCopy)
-    {
-        polygon_t objectBoundingBoxGlobal = CalculateBoundingBox(object.base().dimension(),
-                                                                 object.base().position(),
-                                                                 object.base().orientation());
-
-        if (CalcObjectVisibilityPercentage(objectBoundingBoxGlobal, brightArea) < requiredPercentageOfVisibleArea)
+        const auto visiblePercent = CalcObjectVisibilityPercentage(objectBoundingBoxGlobal, brightArea);
+        if (visiblePercent >= MIN_VISIBLE_UNOBSTRUCTED_PERCENTAGE)
         {
-            movingObjects.erase(std::remove_if(movingObjects.begin(),
-                                               movingObjects.end(),
-                                               [object](const osi3::MovingObject& listObject)
-                                               {
-                                                  return object.id().value() == listObject.id().value();
-                                               }),
-                                movingObjects.end());
+            visibleObjects.emplace_back(*object);
+        }
+        if (visiblePercent >= requiredPercentageOfVisibleArea)
+        {
+            detectedObjects.emplace_back(*object);
         }
     }
 
-    for (auto &object : stationaryObjectsCopy)
-    {
-        polygon_t objectBoundingBoxGlobal = CalculateBoundingBox(object.base().dimension(),
-                                                                 object.base().position(),
-                                                                 object.base().orientation());
-
-        if (CalcObjectVisibilityPercentage(objectBoundingBoxGlobal, brightArea) < requiredPercentageOfVisibleArea)
-        {
-            stationaryObjects.erase(std::remove_if(stationaryObjects.begin(),
-                                                   stationaryObjects.end(),
-                                                   [object](const osi3::StationaryObject& listObject)
-                                                   {
-                                                       return object.id().value() == listObject.id().value();
-                                                   }),
-                                    stationaryObjects.end());
-        }
-    }
+    return std::make_pair(visibleObjects, detectedObjects);
 }
 
 void SensorGeometric2D::AddMovingObjectToSensorData(osi3::MovingObject object, point_t ownVelocity, point_t ownAcceleration, point_t ownPosition, double yaw, double yawRate)
@@ -428,7 +546,7 @@ multi_polygon_t SensorGeometric2D::CalcObjectShadow(const polygon_t& boundingBox
     return shadowM;
 }
 
-double SensorGeometric2D::CalcObjectVisibilityPercentage(const polygon_t &boundingBox, multi_polygon_t &brightArea)
+double SensorGeometric2D::CalcObjectVisibilityPercentage(const polygon_t &boundingBox, const multi_polygon_t &brightArea)
 {
     polygon_t tmpBBox = boundingBox;
     bg::correct(tmpBBox);

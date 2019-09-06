@@ -31,6 +31,7 @@
 namespace OWL {
 
 using Lane              = Interfaces::Lane;
+using LaneBoundary      = Interfaces::LaneBoundary;
 using Section           = Interfaces::Section;
 using Road              = Interfaces::Road;
 using Junction          = Interfaces::Junction;
@@ -95,7 +96,14 @@ public:
     virtual Interfaces::StationaryObject& AddStationaryObject(void* linkedObject) = 0;
 
     //!Creates a new TrafficSign and returns it
-    virtual Interfaces::TrafficSign& AddTrafficSign() = 0;
+    virtual Interfaces::TrafficSign& AddTrafficSign(const std::string odId) = 0;
+
+    //! Adds a traffic sign to the assigned signs of lane
+    //!
+    //! \param laneId       OSI Id of the lane
+    //! \param trafficSign  traffic sign to assign
+    //!
+    virtual void AssignTrafficSignToLane(OWL::Id laneId, Interfaces::TrafficSign& trafficSign) = 0;
 
     //!Deletes the moving object with the specified Id
     virtual void RemoveMovingObjectById(Id id) = 0; // change Id to MovingObject
@@ -106,23 +114,50 @@ public:
     //!Returns the mapping of OSI Ids to OpenDrive Ids for roads
     virtual const std::unordered_map<Id, std::string>& GetRoadIdMapping() const = 0;
 
+    //!Returns the mapping of OSI Ids to OpenDrive Ids for junctions
+    virtual const std::unordered_map<Id, std::string>& GetJunctionIdMapping() const = 0;
+
+    //!Returns the mapping of OpenDrive Ids to OSI Ids for trafficSigns
+    virtual const std::unordered_map<std::string, Id>& GetTrafficSignIdMapping() const = 0;
+
     //!Returns an invalid lane
     virtual const Implementation::InvalidLane& GetInvalidLane() const = 0;
 
     //!Returns a map of all lanes with their OSI Id
     virtual const std::unordered_map<Id, Lane*>& GetLanes() const = 0;
 
+    //!Returns a map of all lane boundaries with their OSI Id
+    virtual const std::unordered_map<Id, LaneBoundary*>& GetLaneBoundaries() const = 0;
+
     //!Returns a map of all sections with their OSI Id
     virtual const std::map<Id, Section*>& GetSections() const = 0;
+
+    //!Returns a map of all junctions with their OSI Id
+    virtual const std::unordered_map<Id, Junction*>& GetJunctions() const = 0;
 
     //!Returns a map of all traffic signs with their OSI Id
     virtual const std::unordered_map<Id, TrafficSign*>& GetTrafficSigns() const = 0;
 
     //!Creates a new lane with parameters specified by the OpenDrive lane
     //!
-    //!@param odSection OpenDrive section to add lane to
-    //!@param odLane    OpenDrive lane to add
-    virtual void AddLane(RoadLaneSectionInterface& odSection, const RoadLaneInterface& odLane) = 0;
+    //!@param odSection         OpenDrive section to add lane to
+    //!@param odLane            OpenDrive lane to add
+    //!@param laneBoundaries    Osi Ids of the left lane boundaries of the new lane
+    virtual void AddLane(RoadLaneSectionInterface& odSection, const RoadLaneInterface& odLane, const std::vector<Id> laneBoundaries) = 0;
+
+    //! Creates a new lane boundary specified by the OpenDrive RoadMark
+    //!
+    //! \param odLaneRoadMark   OpenDrive roadMark (= laneBoundary) to add
+    //! \param sectionStart     Start s coordinate of the section
+    //! \param side             Specifies which side of a double line to add (or Single if not a double line)
+    //! \return Osi id of the newly created laneBoundary
+    virtual Id AddLaneBoundary(const RoadLaneRoadMark &odLaneRoadMark, double sectionStart, LaneMarkingSide side) = 0;
+
+    //! Sets the ids of the center lane boundaries for a section
+    //!
+    //! \param odSection        OpenDrive section for which to set the center line
+    //! \param laneBoundaryIds  Osi ids of the center lane boundaries
+    virtual void SetCenterLaneBoundary(const RoadLaneSectionInterface& odSection, std::vector<Id> laneBoundaryIds) = 0;
 
     //!Creates a new section with parameters specified by the OpenDrive section
     //!
@@ -143,8 +178,11 @@ public:
     //!Adds a connection road (path) to a junction
     virtual void AddJunctionConnection(const JunctionInterface* odJunction, const RoadInterface& odRoad) = 0;
 
+    //!Adds a priority entry of to connecting roads to a junction
+    virtual void AddJunctionPriority(const JunctionInterface* odJunction, const std::string& high, const std::string& low) = 0;
+
     //!Adds a new lane geometry joint to the end of the current list of joints of the specified lane
-    //! and a new geometry element
+    //! and a new geometry element and the boundary points of all affected right lane boundaries
     //!
     //! @param pointLeft    left point of the new joint
     //! @param pointCenter  reference point of the new joint
@@ -159,6 +197,17 @@ public:
                                       const double sOffset,
                                       const double curvature,
                                       const double heading) = 0;
+
+    //! Adds a new boundary point to the center line of the specified section
+    //!
+    //! \param odSection    section to add boundary point to
+    //! \param pointCenter  point to add
+    //! \param sOffset      s offset of the new point
+    //! \param heading      heading of the road at sOffset
+    virtual void AddCenterLinePoint(const RoadLaneSectionInterface& odSection,
+                                    const Common::Vector2d& pointCenter,
+                                    const double sOffset,
+                                    double heading) = 0;
 
     //!Sets successorOdLane as successor of odLane
     virtual void AddLaneSuccessor(/* const */ RoadLaneInterface& odLane,
@@ -180,6 +229,12 @@ public:
     //!Sets predecessorSection as predecessor of section in OSI
     virtual void SetSectionPredecessor(const RoadLaneSectionInterface& section,  const RoadLaneSectionInterface& predecessorSection) = 0;
 
+    //!Sets a junction as the successor of a road
+    virtual void SetRoadSuccessorJunction(const RoadInterface& road,  const JunctionInterface* successorJunction) = 0;
+
+    //!Sets a junction as the predecessor of a road
+    virtual void SetRoadPredecessorJunction(const RoadInterface& road,  const JunctionInterface* predecessorJunction) = 0;
+
     //!Currently not implemented
     virtual void ConnectLanes(/*const*/ RoadLaneSectionInterface& firstOdSection,
                                         /*const*/ RoadLaneSectionInterface& secondOdSection,
@@ -188,6 +243,24 @@ public:
 
     //!Resets the world for new run; deletes all moving objects
     virtual void Reset() = 0;
+
+    /*!
+     * \brief Retrieves the OWL Id of an agent
+     *
+     * \param   agentId[in]     Agent id (as used in AgentInterface)
+     *
+     * \return  OWL Id of the underlying OSI object
+     */
+    virtual OWL::Id GetOwlId(int agentId) = 0;
+
+    /*!
+     * \brief Retrieves the simualtion framework Id of an agent associated to the given OWL Id
+     *
+     * \param   owlId[in]     OWL Id
+     *
+     * \return  Agent Id of the associated agent
+     */
+    virtual int GetAgentId(const OWL::Id owlId) const = 0;
 };
 
 }
@@ -256,20 +329,17 @@ public:
                                                                           double absYawMin,
                                                                           double absYawMax);
 
-    /*!
-     * \brief Retrieves the OWL Id of an agent
-     *
-     * \param   agentId[in]     Agent id (as used in AgentInterface)
-     *
-     * \return  OWL Id of the underlying OSI object
-     */
-    OWL::Id GetOwlId(int agentId);
+    OWL::Id GetOwlId(int agentId) override;
+    int GetAgentId(const OWL::Id owlId) const override;
 
-    void AddLane(RoadLaneSectionInterface &odSection, const RoadLaneInterface& odLane) override;
+    void AddLane(RoadLaneSectionInterface &odSection, const RoadLaneInterface& odLane, const std::vector<Id> laneBoundaries) override;
+    Id AddLaneBoundary(const RoadLaneRoadMark &odLaneRoadMark, double sectionStart, LaneMarkingSide side) override;
+    virtual void SetCenterLaneBoundary(const RoadLaneSectionInterface& odSection, std::vector<Id> laneBoundaryIds) override;
     void AddSection(const RoadInterface& odRoad, const RoadLaneSectionInterface& odSection) override;
     void AddRoad(const RoadInterface& odRoad) override;
     void AddJunction(const JunctionInterface* odJunction) override;
     void AddJunctionConnection(const JunctionInterface* odJunction, const RoadInterface& odRoad) override;
+    void AddJunctionPriority(const JunctionInterface* odJunction,  const std::string& high, const std::string& low) override;
 
     void AddLanePairing(/* const */ RoadLaneInterface& odLane,
                                     /* const */ RoadLaneInterface& predecessorOdLane,
@@ -286,14 +356,16 @@ public:
                                 bool isPrev) override;
     void SetRoadSuccessor(const RoadInterface& road,  const RoadInterface& successorRoad) override;
     void SetRoadPredecessor(const RoadInterface& road,  const RoadInterface& predecessorRoad) override;
-    void SetRoadSuccessorIntersection(const RoadInterface& road,  const RoadInterface& successorIntersection);
-    void SetRoadPredecessorIntersection(const RoadInterface& road,  const RoadInterface& predecessorIntersection);
+    void SetRoadSuccessorJunction(const RoadInterface& road,  const JunctionInterface* successorJunction) override;
+    void SetRoadPredecessorJunction(const RoadInterface& road,  const JunctionInterface* predecessorJunction) override;
     void SetSectionSuccessor(const RoadLaneSectionInterface& section,  const RoadLaneSectionInterface& successorSection) override;
     void SetSectionPredecessor(const RoadLaneSectionInterface& section,  const RoadLaneSectionInterface& predecessorSection) override;
 
     Interfaces::MovingObject& AddMovingObject(void* linkedObject) override;
     Interfaces::StationaryObject& AddStationaryObject(void* linkedObject) override;
-    Interfaces::TrafficSign& AddTrafficSign() override;
+    Interfaces::TrafficSign& AddTrafficSign(const std::string odId) override;
+
+    void AssignTrafficSignToLane(OWL::Id laneId, Interfaces::TrafficSign &trafficSign) override;
 
     void RemoveMovingObjectById(Id id) override;
 
@@ -305,6 +377,11 @@ public:
                               const double curvature,
                               const double heading) override;
 
+    virtual void AddCenterLinePoint(const RoadLaneSectionInterface& odSection,
+                                    const Common::Vector2d& pointCenter,
+                                    const double sOffset,
+                                    double heading) override;
+
     const std::unordered_map<Id, MovingObject*>& GetMovingObjects() const;
     const std::unordered_map<Id, StationaryObject*>& GetStationaryObjects() const;
 
@@ -314,8 +391,10 @@ public:
     CMovingObject& GetMovingObjectById(Id id) const;
 
     const std::unordered_map<Id, Lane*>& GetLanes() const override;
+    const std::unordered_map<Id, LaneBoundary*>& GetLaneBoundaries() const override;
     const std::map<Id, Section*>& GetSections() const override;
     const std::unordered_map<Id, Road*>& GetRoads() const override;
+    const std::unordered_map<Id, Junction *>& GetJunctions() const override;
     const std::unordered_map<Id, Interfaces::TrafficSign*>& GetTrafficSigns() const override;
     const Implementation::InvalidLane& GetInvalidLane() const override {return invalidLane;}
 
@@ -327,7 +406,15 @@ public:
     {
         return roadIdMapping;
     }
+    const std::unordered_map<Id, std::string>& GetJunctionIdMapping() const override
+    {
+        return junctionIdMapping;
+    }
 
+    const std::unordered_map<std::string, Id>& GetTrafficSignIdMapping() const override
+    {
+        return trafficSignIdMapping;
+    }
     /*!
      * \brief Normalizes angles to +/- PI
      *
@@ -412,14 +499,17 @@ private:
 
     std::unordered_map<Id, OdId>              laneIdMapping;
     std::unordered_map<Id, std::string>       roadIdMapping;
+    std::unordered_map<Id, std::string>       junctionIdMapping;
+    std::unordered_map<std::string, Id>         trafficSignIdMapping;
 
-    std::unordered_map<Id, Lane*>             lanes;
-    std::map<Id, Section*>          sections;
-    std::unordered_map<Id, Road*>             roads;
-    std::unordered_map<std::string, Junction*>  junctions;
-    std::unordered_map<Id, StationaryObject*> stationaryObjects;
-    std::unordered_map<Id, MovingObject*>     movingObjects;
-    std::unordered_map<Id, Interfaces::TrafficSign*>      trafficSigns;
+    std::unordered_map<Id, Lane*>               lanes;
+    std::unordered_map<Id, LaneBoundary*>       laneBoundaries;
+    std::map<Id, Section*>                      sections;
+    std::unordered_map<Id, Road*>               roads;
+    std::unordered_map<Id, Junction*>           junctions;
+    std::unordered_map<Id, StationaryObject*>   stationaryObjects;
+    std::unordered_map<Id, MovingObject*>       movingObjects;
+    std::unordered_map<Id, Interfaces::TrafficSign*>  trafficSigns;
 
     std::unordered_map<const RoadInterface*, osi3::world::Road*>                   osiRoads;
     std::unordered_map<const RoadLaneSectionInterface*, osi3::world::RoadSection*> osiSections;

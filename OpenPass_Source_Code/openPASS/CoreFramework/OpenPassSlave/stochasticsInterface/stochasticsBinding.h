@@ -21,6 +21,8 @@
 #include "CoreFramework/CoreShare/callbacks.h"
 #include "Interfaces/stochasticsInterface.h"
 
+//class StochasticsInterface;
+
 namespace SimulationSlave
 {
 

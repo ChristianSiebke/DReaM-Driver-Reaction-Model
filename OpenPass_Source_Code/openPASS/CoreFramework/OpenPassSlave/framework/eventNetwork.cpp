@@ -38,16 +38,16 @@ Events *EventNetwork::GetArchivedEvents()
     return &archivedEvents;
 }
 
-std::list<std::shared_ptr<EventInterface> > *EventNetwork::GetActiveEventCategory(EventCategory eventCategory)
+EventContainer EventNetwork::GetActiveEventCategory(const EventCategory eventCategory)
 {
     auto iterator = activeEvents.find(eventCategory);
     if(iterator == activeEvents.end())
     {
-        return nullptr;
+        return {};
     }
     else
     {
-        return &(iterator->second);
+        return iterator->second;
     }
 }
 
@@ -113,16 +113,7 @@ void EventNetwork::Clear()
     archivedEvents.clear();
 
     observer = nullptr;
-    respawner = nullptr;
     runResult = nullptr;
-}
-
-void EventNetwork::Respawn(int time)
-{
-    if(respawner != nullptr)
-    {
-        respawner->RespawnAgent(time);
-    }
 }
 
 void EventNetwork::AddCollision(const int agentId)
@@ -133,12 +124,10 @@ void EventNetwork::AddCollision(const int agentId)
     }
 }
 
-void EventNetwork::Initialize(RespawnInterface *respawner,
-                              RunResultInterface *runResult,
+void EventNetwork::Initialize(RunResultInterface *runResult,
                               ObservationInterface* observer)
 {
     this->observer = observer;
-    this->respawner = respawner;
     this->runResult = runResult;
 }
 
@@ -160,8 +149,12 @@ EventCategory EventNetwork::DefineEventCategory(EventType eventType)
             eventCategory = EventCategory::ComponentStateChange;
             break;
 
+        case EventType::Conditional:
+            eventCategory = EventCategory::AgentBasedManipulation;
+            break;
+
         default:
-            eventCategory = EventCategory::AgentBased;
+            eventCategory = EventCategory::VehicleComponent;
             break;
     }
 

@@ -23,11 +23,14 @@
 #include <QtGlobal>
 #include <functional>
 
-#include "Interfaces/worldInterface.h"
+#include "Interfaces/agentInterface.h"
+#include "Interfaces/callbackInterface.h"
 #include "Interfaces/trafficObjectInterface.h"
-#include "Localization/Localization.h"
-#include "Localization/LocalizationCache.h"
+#include "Interfaces/worldInterface.h"
+#include "Interfaces/stochasticsInterface.h"
+#include "Localization.h"
 #include "WorldData.h"
+#include "WorldDataQuery.h"
 #include "WorldObjectAdapter.h"
 
 constexpr double zeroBaseline = 1e-9;
@@ -41,7 +44,7 @@ class AgentAdapter final : public WorldObjectAdapter, public AgentInterface
 public:
     const std::string MODULENAME = "AGENTADAPTER";
 
-    AgentAdapter(WorldInterface* world, const CallbackInterface* callbacks, World::Localization::Cache& localizationCache);
+    AgentAdapter(WorldInterface* world, const CallbackInterface* callbacks, OWL::Interfaces::WorldData* worldData, const World::Localization::Localizer& localizer);
     AgentAdapter(const AgentAdapter&) = delete;
     AgentAdapter(AgentAdapter&&) = delete;
     AgentAdapter& operator=(const AgentAdapter&) = delete;
@@ -80,7 +83,13 @@ public:
     }
 
 
-    std::vector<CommonTrafficSign::Entity> GetTrafficSignsInRange(double searchDistance, int relativeLane = 0) const;
+    std::vector<CommonTrafficSign::Entity> GetTrafficSignsInRange(double searchDistance, int relativeLane = 0) const override;
+
+    std::vector<LaneMarking::Entity> GetLaneMarkingsInRange(double searchDistance, int relativeLane, Side side) const override;
+
+    RelativeWorldView::Junctions GetRelativeJunctions (double range) const override;
+
+    RelativeWorldView::Lanes GetRelativeLanes (double range) const override;
 
     double GetSpeedGoalMin() const override
     {
@@ -190,12 +199,7 @@ public:
 
     RoadPosition GetRoadPosition() const override
     {
-        auto coor = GetBaseTrafficObject().GetRoadCoordinate();
-        RoadPosition pos;
-        pos.s = coor.s;
-        pos.t = coor.t;
-        pos.hdg = coor.hdg;
-        return pos;
+        return GetBaseTrafficObject().GetLocatedPosition().referencePoint.roadPosition;
     }
 
     void UpdateCollision(std::pair<ObjectTypeOSI, int> collisionPartner) override;
@@ -636,6 +640,11 @@ public:
         GetBaseTrafficObject().SetDistanceReferencPointToLeadingEdge(distanceReferencePointToLeadingEdge);
     }
 
+    void UpdateRoute(Route route)
+    {
+        this->route = route;
+    }
+
     bool Locate() override;
 
     void Unlocate() override;
@@ -693,11 +702,15 @@ public:
 
     double GetDistanceToStartOfRoad(MeasurementPoint mp) const override;
 
+    double GetDistanceToStartOfRoad(MeasurementPoint mp, std::string roadId) const override;
+
     double GetLaneWidth(int relativeLane = 0, double distance = 0.0) const override;
 
-    double GetLaneWidthRightDrivingAndStopLane() override;
+    double GetLaneWidthRightDrivingAndStopLane() const override;
 
-    double GetLaneCurvature(int relativeLane = 0, double distance = 0.0) override;
+    double GetLaneCurvature(int relativeLane = 0, double distance = 0.0) const override;
+
+    double GetLaneDirection(int relativeLane = 0, double distance = 0.0) const override;
 
     bool IsEgoAgent() const override;
 
@@ -728,13 +741,13 @@ public:
 
     bool ExistsLaneRight() const override;
 
-    bool IsLaneStopLane(int laneId, double distance = 0.0) override;
+    bool IsLaneStopLane(int laneId, double distance = 0.0) const override;
 
-    bool IsLaneDrivingLane(int laneId, double distance = 0.0) override;
+    bool IsLaneDrivingLane(int laneId, double distance = 0.0) const override;
 
-    bool IsLaneExitLane(int laneId, double distance = 0.0) override;
+    bool IsLaneExitLane(int laneId, double distance = 0.0) const override;
 
-    bool IsLaneRamp(int laneId, double distance = 0.0) override;
+    bool IsLaneRamp(int laneId, double distance = 0.0) const override;
 
     double GetDistanceToEndOfLane(double sightDistance, int relativeLane = 0) const override;
 
@@ -758,35 +771,42 @@ public:
 
     double GetPositionLateral() const override;
 
-    double GetLaneDirection() const override;
-
     void Unregister() const override;
 
     double GetLaneRemainder(Side side) const override;
 
-    GlobalRoadPosition GetBoundaryPoint(Side side) const override;
-
-    virtual const std::list<SensorParameter>& GetSensorParameters() const
+    virtual const std::list<SensorParameter>& GetSensorParameters() const override
 
     {
         return sensorParameters;
     }
 
-    virtual void SetSensorParameters(std::list<SensorParameter> sensorParameters)
+    virtual void SetSensorParameters(std::list<SensorParameter> sensorParameters) override
     {
         this->sensorParameters = sensorParameters;
     }
 
-    virtual std::vector<const WorldObjectInterface*> GetObjectsInRange(int relativeLane, double backwardsRange,
+    virtual std::vector<const WorldObjectInterface*> GetObjectsInRange(int relativeLane, double backwardRange,
             double forwardRange, MeasurementPoint mp) const override;
 
-    virtual std::vector<const AgentInterface*> GetAgentsInRange(int relativeLane, double backwardsRange,
+    virtual std::vector<const AgentInterface*> GetAgentsInRange(int relativeLane, double backwardRange,
             double forwardRange, MeasurementPoint mp) const override;
 
     virtual std::vector<const AgentInterface*> GetAgentsInRangeAbsolute(int laneId, double minDistance,
             double maxDistance) const override;
 
-    std::list<int> GetSecondaryCoveredLanes() override;
+    virtual double GetDistanceToConnectorEntrance(std::string intersectingConnectorId, int intersectingLaneId, std::string ownConnectorId) const override;
+
+    virtual double GetDistanceToConnectorDeparture(std::string intersectingConnectorId, int intersectingLaneId, std::string ownConnectorId) const override;
+
+    std::set<int> GetSecondaryCoveredLanes() override;
+
+    virtual const Route& GetRoute() const override
+    {
+        return route;
+    }
+
+    double GetDistanceToNextJunction() const override;
 
 protected:
     //-----------------------------------------------------------------------------
@@ -843,30 +863,45 @@ public:
     virtual std::vector<void *> GetCollisionData(int collisionPartnerId,
                                                  int collisionDataId) const override
     {
+        Q_UNUSED(collisionPartnerId);
+        Q_UNUSED(collisionDataId);
+
         throw std::runtime_error("not implemented");
     }
     virtual void SetVelocityX(double velocityX) override
     {
+        Q_UNUSED(velocityX);
+
         throw std::runtime_error("not implemented");
     }
     virtual void SetVelocityY(double velocityY) override
     {
+        Q_UNUSED(velocityY);
+
         throw std::runtime_error("not implemented");
     }
     virtual void SetDistanceCOGtoFrontAxle(double distanceCOGtoFrontAxle) override
     {
+        Q_UNUSED(distanceCOGtoFrontAxle);
+
         throw std::runtime_error("not implemented");
     }
     virtual void SetDistanceCOGtoLeadingEdge(double distanceCOGtoLeadingEdge) override
     {
+        Q_UNUSED(distanceCOGtoLeadingEdge);
+
         throw std::runtime_error("not implemented");
     }
     virtual void SetAccelerationX(double accelerationX) override
     {
+        Q_UNUSED(accelerationX);
+
         throw std::runtime_error("not implemented");
     }
     virtual void SetAccelerationY(double accelerationY) override
     {
+        Q_UNUSED(accelerationY);
+
         throw std::runtime_error("not implemented");
     }
     virtual bool InitAgentParameter(int id,
@@ -875,6 +910,12 @@ public:
                                     const AgentSpawnItem *agentSpawnItem,
                                     const SpawnItemParameterInterface &spawnItemParameter) override
     {
+        Q_UNUSED(id);
+        Q_UNUSED(agentTypeId);
+        Q_UNUSED(spawnTime);
+        Q_UNUSED(agentSpawnItem);
+        Q_UNUSED(spawnItemParameter);
+
         throw std::runtime_error("not implemented");
     }
     virtual int GetAgentTypeId() const override
@@ -887,10 +928,14 @@ public:
     }
     virtual double GetDistanceToFrontAgent(int laneId) override
     {
+        Q_UNUSED(laneId);
+
         throw std::runtime_error("not implemented");
     }
     virtual double GetDistanceToRearAgent(int laneId) override
     {
+        Q_UNUSED(laneId);
+
         throw std::runtime_error("not implemented");
     }
     virtual void SetSpecialAgentMarker() override
@@ -927,13 +972,20 @@ public:
     }
     virtual LaneChangeState EstimateLaneChangeState(double thresholdLooming) override
     {
+        Q_UNUSED(thresholdLooming);
+
         throw std::runtime_error("not implemented");
     }
-    virtual std::list<AgentInterface *> GetAllAgentsInLane(int laneID,
+    virtual std::list<AgentInterface *> GetAllAgentsInLane(int laneId,
                                                            double minDistance,
                                                            double maxDistance,
                                                            double AccSensDist) override
     {
+        Q_UNUSED(laneId);
+        Q_UNUSED(minDistance);
+        Q_UNUSED(maxDistance);
+        Q_UNUSED(AccSensDist);
+
         throw std::runtime_error("not implemented");
     }
     virtual bool IsBicycle() const override
@@ -954,137 +1006,224 @@ public:
     }
     virtual double GetDistanceToNearestMark(MarkType markType) const override
     {
+        Q_UNUSED(markType);
+
         throw std::runtime_error("not implemented");
     }
     virtual double GetOrientationOfNearestMark(MarkType markType) const override
     {
+        Q_UNUSED(markType);
+
         throw std::runtime_error("not implemented");
     }
     virtual double GetViewDirectionToNearestMark(MarkType markType) const override
     {
+        Q_UNUSED(markType);
+
         throw std::runtime_error("not implemented");
     }
     virtual double GetDistanceToNearestMarkInViewDirection(MarkType markType,
                                                            AgentViewDirection agentViewDirection) const override
     {
+        Q_UNUSED(markType);
+        Q_UNUSED(agentViewDirection);
+
         throw std::runtime_error("not implemented");
     }
     virtual double GetDistanceToNearestMarkInViewDirection(MarkType markType,
                                                            double mainViewDirection) const override
     {
+        Q_UNUSED(markType);
+        Q_UNUSED(mainViewDirection);
+
         throw std::runtime_error("not implemented");
     }
     virtual double GetOrientationOfNearestMarkInViewDirection(MarkType markType,
                                                               AgentViewDirection agentViewDirection)const override
     {
+        Q_UNUSED(markType);
+        Q_UNUSED(agentViewDirection);
+
         throw std::runtime_error("not implemented");
     }
     virtual double GetOrientationOfNearestMarkInViewDirection(MarkType markType,
                                                               double mainViewDirection) const override
     {
+        Q_UNUSED(markType);
+        Q_UNUSED(mainViewDirection);
+
         throw std::runtime_error("not implemented");
     }
     virtual double GetDistanceToNearestMarkInViewRange(MarkType markType,
                                                        AgentViewDirection agentViewDirection, double range) const override
     {
+        Q_UNUSED(markType);
+        Q_UNUSED(agentViewDirection);
+        Q_UNUSED(range);
+
         throw std::runtime_error("not implemented");
     }
     virtual double GetDistanceToNearestMarkInViewRange(MarkType markType, double mainViewDirection,
                                                        double range) const override
     {
+        Q_UNUSED(markType);
+        Q_UNUSED(mainViewDirection);
+        Q_UNUSED(range);
+
         throw std::runtime_error("not implemented");
     }
     virtual double GetOrientationOfNearestMarkInViewRange(MarkType markType,
                                                           AgentViewDirection agentViewDirection, double range) const override
     {
+        Q_UNUSED(markType);
+        Q_UNUSED(agentViewDirection);
+        Q_UNUSED(range);
+
         throw std::runtime_error("not implemented");
     }
     virtual double GetOrientationOfNearestMarkInViewRange(MarkType markType, double mainViewDirection,
                                                           double range) const override
     {
+        Q_UNUSED(markType);
+        Q_UNUSED(mainViewDirection);
+        Q_UNUSED(range);
+
         throw std::runtime_error("not implemented");
     }
     virtual double GetViewDirectionToNearestMarkInViewRange(MarkType markType,
                                                             AgentViewDirection agentViewDirection, double range) const override
     {
+        Q_UNUSED(markType);
+        Q_UNUSED(agentViewDirection);
+        Q_UNUSED(range);
+
         throw std::runtime_error("not implemented");
     }
     virtual double GetViewDirectionToNearestMarkInViewRange(MarkType markType, double mainViewDirection,
                                                             double range) const override
     {
+        Q_UNUSED(markType);
+        Q_UNUSED(mainViewDirection);
+        Q_UNUSED(range);
+
         throw std::runtime_error("not implemented");
     }
     virtual std::string GetTypeOfNearestObject(AgentViewDirection agentViewDirection,
                                                double range) const override
     {
+        Q_UNUSED(agentViewDirection);
+        Q_UNUSED(range);
+
         throw std::runtime_error("not implemented");
     }
     virtual std::string GetTypeOfNearestObject(double mainViewDirection,
                                                double range) const override
     {
+        Q_UNUSED(mainViewDirection);
+        Q_UNUSED(range);
+
         throw std::runtime_error("not implemented");
     }
     virtual double GetDistanceToNearestObjectInViewRange(ObjectType objectType,
                                                          AgentViewDirection agentViewDirection,
                                                          double range) const override
     {
+        Q_UNUSED(objectType);
+        Q_UNUSED(agentViewDirection);
+        Q_UNUSED(range);
+
         throw std::runtime_error("not implemented");
     }
     virtual double GetDistanceToNearestObjectInViewRange(ObjectType objectType,
                                                          double mainViewDirection,
                                                          double range) const override
     {
+        Q_UNUSED(objectType);
+        Q_UNUSED(mainViewDirection);
+        Q_UNUSED(range);
+
         throw std::runtime_error("not implemented");
     }
     virtual double GetViewDirectionToNearestObjectInViewRange(ObjectType objectType,
                                                               AgentViewDirection agentViewDirection,
                                                               double range) const override
     {
+        Q_UNUSED(objectType);
+        Q_UNUSED(agentViewDirection);
+        Q_UNUSED(range);
+
         throw std::runtime_error("not implemented");
     }
     virtual double GetViewDirectionToNearestObjectInViewRange(ObjectType objectType,
                                                               double mainViewDirection,
                                                               double range) const override
     {
+        Q_UNUSED(objectType);
+        Q_UNUSED(mainViewDirection);
+        Q_UNUSED(range);
+
         throw std::runtime_error("not implemented");
     }
     virtual int GetIdOfNearestAgent(AgentViewDirection agentViewDirection,
                                     double range) const override
     {
+        Q_UNUSED(agentViewDirection);
+        Q_UNUSED(range);
+
         throw std::runtime_error("not implemented");
     }
     virtual int GetIdOfNearestAgent(double mainViewDirection,
                                     double range) const override
     {
+        Q_UNUSED(mainViewDirection);
+        Q_UNUSED(range);
+
         throw std::runtime_error("not implemented");
     }
     virtual double GetDistanceToNearestAgentInViewRange(AgentViewDirection agentViewDirection,
                                                         double range) const override
     {
+        Q_UNUSED(agentViewDirection);
+        Q_UNUSED(range);
+
         throw std::runtime_error("not implemented");
     }
     virtual double GetDistanceToNearestAgentInViewRange(double mainViewDirection,
                                                         double range) const override
     {
+        Q_UNUSED(mainViewDirection);
+        Q_UNUSED(range);
+
         throw std::runtime_error("not implemented");
     }
     virtual double GetViewDirectionToNearestAgentInViewRange(AgentViewDirection agentViewDirection,
                                                              double range) const override
     {
+        Q_UNUSED(agentViewDirection);
+        Q_UNUSED(range);
+
         throw std::runtime_error("not implemented");
     }
     virtual double GetViewDirectionToNearestAgentInViewRange(double mainViewDirection,
                                                              double range) const override
     {
+        Q_UNUSED(mainViewDirection);
+        Q_UNUSED(range);
+
         throw std::runtime_error("not implemented");
     }
     virtual double GetVisibilityToNearestAgentInViewRange(double mainViewDirection,
                                                         double range) const override
     {
+        Q_UNUSED(mainViewDirection);
+        Q_UNUSED(range);
+
         throw std::runtime_error("not implemented");
     }
     virtual AgentViewDirection GetAgentViewDirectionToNearestMark(MarkType markType) const override
     {
+        Q_UNUSED(markType);
+
         throw std::runtime_error("not implemented");
     }
     virtual double GetYawAcceleration() override
@@ -1093,6 +1232,8 @@ public:
     }
     virtual void SetYawAcceleration(double yawAcceleration) override
     {
+        Q_UNUSED(yawAcceleration);
+
         throw std::runtime_error("not implemented");
     }
     virtual const std::vector<int> *GetTrajectoryTime() const override
@@ -1117,6 +1258,8 @@ public:
     }
     virtual void SetAccelerationIntention(double accelerationIntention) override
     {
+        Q_UNUSED(accelerationIntention);
+
         throw std::runtime_error("not implemented");
     }
     virtual double GetAccelerationIntention() const override
@@ -1125,6 +1268,8 @@ public:
     }
     virtual void SetDecelerationIntention(double decelerationIntention) override
     {
+        Q_UNUSED(decelerationIntention);
+
         throw std::runtime_error("not implemented");
     }
     virtual double GetDecelerationIntention() const override
@@ -1133,6 +1278,8 @@ public:
     }
     virtual void SetAngleIntention(double angleIntention) override
     {
+        Q_UNUSED(angleIntention);
+
         throw std::runtime_error("not implemented");
     }
     virtual double GetAngleIntention() const override
@@ -1141,6 +1288,8 @@ public:
     }
     virtual void SetCollisionState(bool collisionState) override
     {
+        Q_UNUSED(collisionState);
+
         throw std::runtime_error("not implemented");
     }
     virtual bool GetCollisionState() const override
@@ -1152,12 +1301,18 @@ public:
         throw std::runtime_error("not implemented");
     }
 
+#ifdef TESTING
+    void SetRoute(Route route)
+    {
+        this->route = route;
+    }
+#endif
 
 private:
     WorldInterface* world;
     const CallbackInterface* callbacks;
     OWL::Interfaces::WorldData* worldData;
-    World::Localization::BaseTrafficObjectLocator locator;
+    const World::Localization::Localizer& localizer;
 
     OWL::Interfaces::MovingObject& GetBaseTrafficObject()
     {
@@ -1181,7 +1336,7 @@ private:
     void UpdateEgoVehicle();
 
 
-    std::map<int, Remainder> remainder;
+    std::map<int, World::Localization::Remainder> remainder;
 
     struct LaneObjParameters
     {
@@ -1219,10 +1374,9 @@ private:
     bool flasherSwitch = false;
     double distanceTraveled = 0.0;
 
-    polygon_t boundingBox2D;
     World::Localization::Result locateResult;
     mutable std::vector<GlobalRoadPosition> boundaryPoints;
-    mutable World::Localization::Remainders remainders;
+    Route route;
 
     std::vector<std::pair<ObjectTypeOSI, int>> collisionPartners;
     bool isValid = true;

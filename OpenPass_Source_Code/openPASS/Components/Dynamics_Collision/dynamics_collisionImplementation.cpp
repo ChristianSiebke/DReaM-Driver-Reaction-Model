@@ -14,8 +14,11 @@
 //! @brief This file contains the implementation header file
 //-----------------------------------------------------------------------------
 
-#include "dynamics_collisionImplementation.h"
 #include <qglobal.h>
+
+#include "dynamics_collisionImplementation.h"
+
+#include "Interfaces/worldInterface.h"
 
 DynamicsCollisionImplementation::DynamicsCollisionImplementation(std::string componentName,
                                                                  bool isInit,
@@ -136,10 +139,17 @@ void DynamicsCollisionImplementation::Trigger(int time)
         dynamicsSignal.yaw = GetAgent()->GetYaw();
         dynamicsSignal.yawRate = GetAgent()->GetYawRate();
     }
+
     if (isActive)
     {
         const double deceleration = 10.0;
         velocity -= deceleration * GetCycleTime() * 0.001;
+
+        if (velocity < 0.0)
+        {
+            isActive = false;
+        }
+
         velocity = std::max(0.0, velocity);
         // change of path coordinate since last time step [m]
         double ds = velocity * static_cast<double>(GetCycleTime()) * 0.001;
@@ -153,7 +163,7 @@ void DynamicsCollisionImplementation::Trigger(int time)
         double y = GetAgent()->GetPositionY() + dy;
 
         dynamicsSignal.velocity = velocity;
-        dynamicsSignal.acceleration = 0.0;
+        dynamicsSignal.acceleration = isActive ? -deceleration : 0.0;
         dynamicsSignal.positionX = x;
         dynamicsSignal.positionY = y;
         dynamicsSignal.travelDistance = ds;

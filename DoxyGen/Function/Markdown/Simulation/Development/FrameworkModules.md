@@ -2,7 +2,7 @@
 
 \tableofcontents
 
-[//]: <> (Please sort by alphabet.)
+[//]: <> "Please sort by alphabet."
 
 The modules of openPASS are split the two major categories `Framework Modules` and `Agent Modules` and defined within [SystemConfigBlueprint](\ref io_input_systemconfigblueprint).
 `Framework Modules` are instantiated once for the entire simulation  and **all of them are necessary**.
@@ -39,8 +39,8 @@ Then the AgentType with the components and channels is build by the DynamicAgent
 
 \section dev_framework_modules_eventdetectors EventDetectors
 
-[//]: <> (Please refer to each section!)
-* [TimeTriggerDetector](\ref dev_framework_modules_eventdetectors_timetrigger)
+[//]: <> "Please refer to each section!"
+* [ConditionalEventDetector](\ref dev_conditionaleventdetector)
 * [CollisionDetector](\ref dev_framework_modules_eventdetectors_collision)
 
 EventDetectors are used to trigger Manipulators. They are waiting for specific behaviors or settings during the simulation. Once an Event occurs it is forwarded to the related Manipulator.
@@ -62,32 +62,6 @@ The class structure of the EventDetectors is showed in the following diagram:
 
 ![EventDetectors](EventDetectors.svg)
 
-\subsection dev_framework_modules_eventdetectors_timetrigger TimeTriggerDetector
-* **Description:**
-    Triggers only once at a specified time value, configured by the detector parameters in the [Scenario File](\ref
-    io_input_scenario).
-    Time specified in seconds as a double.
-    The rule is required and only "greater_than" is accepted as valid.
-
-```xml
-<StartConditions>
-    <ConditionGroup>
-        <Condition name="Conditional">
-            <ByValue>
-                <SimulationTime value="5.0" rule="greater_than" />
-            </ByValue>
-        </Condition>
-    </ConditionGroup>
-</StartConditions>
-```
-
-* **Event:** TimeTriggerEvent (AgentBasedEvent)
-  Parameter:
-
-    |Name|Description|
-    |----|------------|
-    |AgentId|Id of the acting agent.|
-
 ---
 
 \subsection dev_framework_modules_eventdetectors_collision CollisionDetector
@@ -106,13 +80,21 @@ The class structure of the EventDetectors is showed in the following diagram:
 * **Event:** CollisionEvent (CollisionEvent)
   Parameter:
 
-    |Name|Description|
-    |-----|------------|
-    |CollisionWithAgent|Determines whether this collision involved two agents or one agent and one traffic object.|
-    |CollisionAgentId|Agent id of the first agent.|
-    |CollisionOpponentId|Id of either the second agent or the traffic object.|
+  |Name|Description|
+  |-----|------------|
+  |CollisionWithAgent|Determines whether this collision involved two agents or one agent and one traffic object.|
+  |CollisionAgentId|Agent id of the first agent.|
+  |CollisionOpponentId|Id of either the second agent or the traffic object.|
 
 ---
+
+\subsection dev_framework_modules_eventdetectors_conditional ConditionalEventDetector
+
+For a detailed description on ConditionalEventDetectors, and the Conditions which trigger them, please refer to the [Scenario](\ref scenario_storyboard_story_maneuver_conditions) page.
+
+---
+
+
 
 \section dev_framework_modules_eventnetwork EventNetwork
 
@@ -136,7 +118,7 @@ List of Modules which use the EventNetwork:
 
 \section dev_framework_modules_manipulators Manipulators
 
-[//]: <> (Please refer to each section!)
+[//]: <> "Please refer to each section!"
 * [CollisionManipulator](\ref dev_framework_modules_manipulators_collision)
 * [ComponentStateChangeManipulator](\ref dev_framework_modules_manipulators_componentstatechange)
 
@@ -314,12 +296,12 @@ These are some examples:
 
 s defines the s-coordinate of the vehicle on the road.
 laneId specifies the id of the lane on which the car will be placed.
-roadId specifies the openDrive road on which the car will be placed.
+roadId specifies the OpenDRIVE road on which the car will be placed.
 offset defines the offset of the vehicle from the middle of the lane.
 A negative offset moves the vehicle to the right and positive offset to the left.
 
 It is possible to add stochastics to the placement of ego and scenario vehicles.
-The optional xml-tag Stochastics below the lane tag specifies the probablities.
+The optional xml-tag Stochastics below the lane tag specifies the probabilities.
 
 ```xml
 <Position>
@@ -373,7 +355,7 @@ Afterwards numbers are drawn from said generator.
 
 The following types of random numbers are currently available:
 
-[//]: <> (Please refer to each section!)
+[//]: <> "Please refer to each section!"
 * Uniform: Expects upper and lower boundary
 * Normal: Expects means and standard deviation
 * Binomial: Expects upper range number and probability
@@ -391,3 +373,68 @@ The following types of random numbers are currently available:
 \subsection dev_framework_modules_world_interfacesadapter Interfaces and Adapter
 
 ![World Interfaces and Adapter](World.svg)
+
+\subsection dev_framework_modules_world_localization Localization
+
+Generally, the position of an agent is stored with respect to [world coordinates (x,y)](\ref dev_concepts_coordinatesystems_world).
+As queries on the world operates in [road coordinates (s,t)](\ref dev_concepts_coordinatesystems_road), the position of the agent needs to be transformed.
+The transformation is performed by the [localization algorithm](\ref localization).
+
+\subsection dev_framework_modules_world_trafficsigns Traffic Signs
+
+The world currently supports a variety of traffic signs. At the moment it can only interpret traffic signs according to the German regulations "StVo".
+Traffic signs can contain optional supplementary traffic signs. Supplementary signs are dependent on a main traffic sign and contain additional information.
+The following traffic signs are supported:
+
+| TrafficSign                                   | StVo Type | Subtype     | Value and Units   |
+|-----------------------------------------------|-----------|-------------|-------------------|
+| Stop                                          | 206       | -           | -                 |
+| DoNotEnter                                    | 267       | -           | -                 |
+| EnvironmentalZoneBegin                        | 270.1     | -           | -                 |
+| EnvironmentalZoneEnd                          | 270.2     | -           | -                 |
+| MaximumSpeedLimit                             | 274       | X           | The subtype "X" is used to define the speedlimit in km/h. Afterwards the world converts it to m/s. |
+| SpeedLimitZoneBegin                           | 274.1     | -/20        | The subtype is used to define the speedlimit in km/h. Afterwards the world converts it to m/s. No subtype = 30km/h, 20 = 20km/h |
+| SpeedLimitZoneEnd                             | 274.2     | -/20        | The subtype is used to define the speedlimit in km/h. Afterwards the world converts it to m/s. No subtype = 30km/h, 20 = 20km/h |
+| MinimumSpeedLimit                             | 275       | X           | The subtype is used to define the speedlimit in km/h. Afterwards the world converts it to m/s. |
+| OvertakingBanBegin                            | 276       | -           | -                 |
+| OvertakingBanTrucksBegin                      | 277       | -           | -                 |
+| EndOfMaximumSpeedLimit                        | 278       | X           | The subtype "X" is used to define the speedlimit in km/h. Afterwards the world converts it to m/s. |
+| EndOfMinimumSpeedLimit                        | 279       | X           | The subtype "X" is used to define the speedlimit in km/h. Afterwards the world converts it to m/s. |
+| OvertakingBanEnd                              | 280       | -           | -                 |
+| OvertakingBanTrucksEnd                        | 281       | -           | -                 |
+| EndOffAllSpeedLimitsAndOvertakingRestrictions | 282       | -           | -                 |
+| RightOfWayNextIntersection                    | 301       | -           | -                 |
+| RightOfWayBegin                               | 306       | -           | -                 |
+| RightOfWayEnd                                 | 307       | -           | -                 |
+| TownBegin                                     | 310       | -           | This sign contains a text describing the name of the town |
+| TownEnd                                       | 311       | -           | This sign contains a text describing the name of the town |
+| TrafficCalmedDistrictBegin                    | 325.1     | -           | -                 |
+| TrafficCalmedDistrictEnd                      | 325.2     | -           | -                 |
+| HighWayBegin                                  | 330.1     | -           | -                 |
+| HighWayEnd                                    | 330.2     | -           | -                 |
+| HighWayExit                                   | 333       | -           | -                 |
+| HighwayExitPole                               | 450       | 50/51/52    | The subtype describes the distance to the highway exit in m. 50 = 100m, 51 = 200m, 52 = 300m |
+| AnnounceRightLaneEnd                          | 531       | 10/11/12/13 | The subtype describes the number of continuing lanes after the right lane ends. 10 = 1 lane, 11 = 2 lanes, 12 = 3 lanes, 13 = 4 lanes |
+| AnnounceLeftLaneEnd                           | 531       | 20/21/22/23 | The subtype describes the number of continuing lanes after the left lane ends. 10 = 1 lane, 11 = 2 lanes, 12 = 3 lanes, 13 = 4 lanes |
+| DistanceIndication                            | 1004      | 30/31/32	  | For subtype 30 the value describes the distance in m. For subtype 31 the value describes the distance in km. Subtype 32 has a STOP in 100m |
+
+\subsection dev_framework_modules_world_lanemarking Lane Markings
+
+The world also supports lane markings (i.e. printed lines between two lanes) according to the OpenDRIVE standard.
+The following attributes of the "roadMark" tag in the scenery file are stored in the world and can be retrieved by the GetLaneMarkings query: sOffset, type, weight, color.
+The weight is converted into a width in meter: 0.15 for standard and 0.3 for bold. Lane markings are also converted to OSI LaneBoundaries.
+For the OpenDRIVE type "solid solid", "solid broken", "broken solid", and "broken broken" two LaneBoundaries are created in OSI with a fixed lateral distance of 0.15m.
+
+\subsection dev_framework_modules_world_getobstruction GetObstruction
+
+The GetObstruction function calculates the lateral distance an agent must travel in order to align with either the left or right boundary of a target object occupying the same lane.
+
+The calculation adheres to the following process:
+
+1. Project the agent's MainLaneLocator along the lane to the nearest and furthest s-coordinate of the target object, capturing the projected points
+2. Create a straight line from the two captured points
+3. Calculate the Euclidean distance of each of the target object's corners to the created line
+4. Return the left-most and right-most points with respect to the created line
+
+
+![Example for the calculation of GetObstruction](GetObstruction.png)

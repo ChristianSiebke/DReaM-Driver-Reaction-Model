@@ -22,6 +22,15 @@
 
 #include "trajectoryFollowerCommonBase.h"
 
+struct DynamicsInformation
+{
+    const RoadPosition previousPosition;
+    const Common::Vector2d direction;
+    const double deltaHeading;
+    const double velocity;
+    const double acceleration;
+};
+
 /*!
  * \brief Makes an agent strictly follow a predefined path.
  *
@@ -43,13 +52,14 @@ public:
             const std::map<int, ObservationInterface*> *observations,
             const CallbackInterface *callbacks,
             AgentInterface *agent,
-            TrajectoryInterface *trajectory);
+            TrajectoryInterface *trajectory,
+            SimulationSlave::EventNetworkInterface * const eventNetwork);
 
     RoadCoordinateTrajectoryFollower(const RoadCoordinateTrajectoryFollower&) = delete;
     RoadCoordinateTrajectoryFollower(RoadCoordinateTrajectoryFollower&&) = delete;
     RoadCoordinateTrajectoryFollower& operator=(const RoadCoordinateTrajectoryFollower&) = delete;
     RoadCoordinateTrajectoryFollower& operator=(RoadCoordinateTrajectoryFollower&&) = delete;
-    virtual ~RoadCoordinateTrajectoryFollower() = default;
+    virtual ~RoadCoordinateTrajectoryFollower() override = default;
 
     /*!
     * \brief Process data within component.
@@ -59,31 +69,28 @@ public:
     *
     * @param[in]     time           Current scheduling time
     */
-    virtual void Trigger(int time);
+    virtual void CalculateNextTimestep(int time) override;
 
 private:
-    Common::Vector2d CalculateScaledVector(const RoadPosition &previousPosition, const RoadPosition &nextPosition, const double &factor);
-    double CalculateScaledDeltaHeading(const RoadPosition &previousPosition, const RoadPosition &nextPosition, const double &factor);
-
-    RoadPosition CalculateStartPosition(const RoadPosition &previousPosition, const RoadPosition &nextPosition);
-    std::pair<int, RoadPosition> CalculateStartCoordinate(const std::pair<int, RoadPosition> &previousPosition, const std::pair<int, RoadPosition> &nextPosition);
+    void Init();
 
     void TriggerWithActiveAccelerationInput();
     void TriggerWithInactiveAccelerationInput();
 
-    void UpdateDynamics(const RoadPosition &previousPosition,
-                        const Common::Vector2d &direction,
-                        const double &deltaHeading,
-                        const double &velocity,
-                        const double &acceleration);
+    DynamicsInformation PrepareDynamicsInformationWithoutExternalAccelaration(const RoadPosition previousPosition,
+                                                   const RoadPosition nextPosition,
+                                                   const double additionalDistance);
 
-    RoadCoordinateTrajectory roadTrajectory {};
+    void UpdateDynamics(const DynamicsInformation dynamicsInformation);
+
+    RoadCoordinateTrajectory roadTrajectory;
+    const bool isRelativeTrajectory;
+
     RoadCoordinateTrajectory::iterator previousTrajectoryIterator {};
     RoadCoordinateTrajectory::iterator nextTrajectoryIterator {};
 
     double percentageTraveledBetweenCoordinates {0};
-    RoadPosition lastRoadPosition;
-    bool isRelativeTrajectory {false};
+    RoadPosition lastRoadPosition {};
     RoadPosition startPosition {};
     int startLaneId {};
 };

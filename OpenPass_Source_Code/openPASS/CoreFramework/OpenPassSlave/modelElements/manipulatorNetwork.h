@@ -10,8 +10,13 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include "Interfaces/manipulatorNetworkInterface.h"
-#include "Interfaces/worldInterface.h"
+
+class ScenarioInterface;
+class WorldInterface;
 
 namespace SimulationSlave
 {

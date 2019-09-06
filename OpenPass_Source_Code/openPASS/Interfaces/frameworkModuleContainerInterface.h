@@ -10,19 +10,20 @@
 
 #pragma once
 
-#include "Interfaces/agentFactoryInterface.h"
-#include "Interfaces/agentBlueprintProviderInterface.h"
-#include "Interfaces/configurationContainerInterface.h"
-#include "Interfaces/eventDetectorNetworkInterface.h"
-#include "Interfaces/eventNetworkInterface.h"
-#include "Interfaces/manipulatorNetworkInterface.h"
-#include "Interfaces/observationNetworkInterface.h"
 #include "Interfaces/samplerInterface.h"
-#include "Interfaces/spawnPointNetworkInterface.h"
 #include "Interfaces/stochasticsInterface.h"
-#include "Interfaces/worldInterface.h"
+
+class AgentBlueprintProviderInterface;
+class WorldInterface;
 
 namespace SimulationSlave {
+
+class AgentFactoryInterface;
+class EventDetectorNetworkInterface;
+class EventNetworkInterface;
+class ManipulatorNetworkInterface;
+class ObservationNetworkInterface;
+class SpawnPointNetworkInterface;
 
 class FrameworkModuleContainerInterface
 {

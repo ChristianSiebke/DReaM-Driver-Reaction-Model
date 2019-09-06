@@ -33,15 +33,12 @@
 #include "WorldObjectAdapter.h"
 
 namespace OWL {
-Interfaces::Lane::Lane() : forwardLaneStream{this}, reverseLaneStream{this} {}
-Interfaces::Section::Section() : forwardSectionStream{this}, reverseSectionStream{this} {}
 
 namespace Implementation {
 
-Lane::Lane(osi3::world::RoadLane* osiLane, const Interfaces::Section* section, bool isInStreamDirection) :
+Lane::Lane(osi3::world::RoadLane* osiLane, const Interfaces::Section* section) :
     osiLane(osiLane),
     section(section),
-    isInStreamDirection(isInStreamDirection),
     leftLane(section ? new InvalidLane() : nullptr),
     rightLane(section ? new InvalidLane() : nullptr)
 {
@@ -52,19 +49,6 @@ Lane::~Lane()
     for (auto laneGeometryElement : laneGeometryElements)
     {
         delete laneGeometryElement;
-    }
-}
-
-void Lane::UpdateStreamId()
-{
-    for (const auto& laneStream : reverseLaneStream)
-    {
-        if ((laneStream.IsInStreamDirection() && !laneStream.GetPrevious())
-                || (!laneStream.IsInStreamDirection() && !laneStream.GetNext()))
-        {
-            streamId = laneStream.GetId();
-            return;
-        }
     }
 }
 
@@ -124,7 +108,7 @@ std::tuple<const Primitive::LaneGeometryJoint*, const Primitive::LaneGeometryJoi
                                            laneGeometryJoints.cend(),
                                            [distance](const Primitive::LaneGeometryJoint & joint)
     {
-        return joint.projectionAxes.sOffset > distance;
+        return joint.sOffset > distance;
     });
 
 
@@ -164,8 +148,8 @@ const Primitive::LaneGeometryJoint::Points  Lane::GetInterpolatedPointsAtDistanc
                 return nextJoint->points;
             }
 
-    double interpolationFactor = (distance - prevJoint->projectionAxes.sOffset) / (nextJoint->projectionAxes.sOffset -
-                                                                                   prevJoint->projectionAxes.sOffset);
+    double interpolationFactor = (distance - prevJoint->sOffset) / (nextJoint->sOffset -
+                                                                    prevJoint->sOffset);
 
     interpolatedPoints.left = prevJoint->points.left * (1.0 - interpolationFactor) + nextJoint->points.left *
             interpolationFactor;
@@ -198,8 +182,8 @@ double Lane::GetCurvature(double distance) const
                 return 0.0;
             }
 
-    double interpolationFactor = (distance - prevJoint->projectionAxes.sOffset) / (nextJoint->projectionAxes.sOffset -
-                                                                                   prevJoint->projectionAxes.sOffset);
+    double interpolationFactor = (distance - prevJoint->sOffset) / (nextJoint->sOffset -
+                                                                    prevJoint->sOffset);
     double interpolatedCurvature = (1 - interpolationFactor) * prevJoint->curvature + interpolationFactor *
             nextJoint->curvature;
 
@@ -227,8 +211,8 @@ double Lane::GetWidth(double distance) const
                 return 0.0;
             }
 
-    double interpolationFactor = (distance - prevJoint->projectionAxes.sOffset) / (nextJoint->projectionAxes.sOffset -
-                                                                                   prevJoint->projectionAxes.sOffset);
+    double interpolationFactor = (distance - prevJoint->sOffset) / (nextJoint->sOffset -
+                                                                    prevJoint->sOffset);
     double nextWidth = (nextJoint->points.left - nextJoint->points.right).Length();
     double prevWidth = (prevJoint->points.left - prevJoint->points.right).Length();
     double interpolatedWidth = (1.0 - interpolationFactor) * prevWidth + interpolationFactor * nextWidth;
@@ -249,7 +233,7 @@ double Lane::GetDirection(double distance) const
     else
         if (prevJoint && !nextJoint)
         {
-            return prevJoint->projectionAxes.sHdg;
+            return prevJoint->sHdg;
         }
         else
             if (nextJoint && !prevJoint)
@@ -257,22 +241,12 @@ double Lane::GetDirection(double distance) const
                 return 0.0;
             }
 
-    double interpolationFactor = (distance - prevJoint->projectionAxes.sOffset) / (nextJoint->projectionAxes.sOffset -
-                                                                                   prevJoint->projectionAxes.sOffset);
-    double interpolatedDirection = (1.0 - interpolationFactor) * prevJoint->projectionAxes.sHdg + interpolationFactor *
-            nextJoint->projectionAxes.sHdg;
+    double interpolationFactor = (distance - prevJoint->sOffset) / (nextJoint->sOffset -
+                                                                    prevJoint->sOffset);
+    double interpolatedDirection = (1.0 - interpolationFactor) * prevJoint->sHdg + interpolationFactor *
+            nextJoint->sHdg;
 
     return interpolatedDirection;
-}
-
-const Interfaces::Lane* Lane::GetNext() const
-{
-    return next;
-}
-
-const Interfaces::Lane* Lane::GetPrevious() const
-{
-    return previous;
 }
 
 const Interfaces::Lane& Lane::GetLeftLane() const
@@ -285,31 +259,41 @@ const Interfaces::Lane& Lane::GetRightLane() const
     return *rightLane;
 }
 
-bool Lane::IsInStreamDirection() const
+const std::vector<Id> Lane::GetLeftLaneBoundaries() const
 {
-    return isInStreamDirection;
+    std::vector<Id> laneBoundaries;
+    for(const auto& laneBoundary : osiLane->base_lane().classification().left_lane_boundary_id())
+    {
+        laneBoundaries.push_back(laneBoundary.value());
+    }
+    return laneBoundaries;
 }
 
-Id Lane::GetStreamId() const
+const std::vector<Id> Lane::GetRightLaneBoundaries() const
 {
-    return streamId;
+    std::vector<Id> laneBoundaries;
+    for(const auto& laneBoundary : osiLane->base_lane().classification().right_lane_boundary_id())
+    {
+        laneBoundaries.push_back(laneBoundary.value());
+    }
+    return laneBoundaries;
 }
 
 double Lane::GetDistance(MeasurementPoint measurementPoint) const
 {
     if (laneGeometryElements.empty())
     {
-        throw std::logic_error("Unexpected Lane without LaneGeometryElements");
+        throw std::runtime_error("Unexpected Lane without LaneGeometryElements");
     }
 
     if (measurementPoint == MeasurementPoint::RoadStart)
     {
-        return laneGeometryElements.front()->joints.current.projectionAxes.sOffset;
+        return laneGeometryElements.front()->joints.current.sOffset;
     }
 
     if (measurementPoint == MeasurementPoint::RoadEnd)
     {
-        return laneGeometryElements.back()->joints.next.projectionAxes.sOffset;
+        return laneGeometryElements.back()->joints.next.sOffset;
     }
 
     throw std::invalid_argument("measurement point not within valid bounds");
@@ -324,7 +308,7 @@ bool Lane::Covers(double distance) const
 {
     if (GetDistance(MeasurementPoint::RoadStart) <= distance)
     {
-        return next ?
+        return next.empty() ?
                     GetDistance(MeasurementPoint::RoadEnd) > distance :
                     GetDistance(MeasurementPoint::RoadEnd) >= distance;
 
@@ -342,6 +326,10 @@ void Lane::SetLeftLane(const Interfaces::Lane& lane)
 
     leftLane = &lane;
     osiLane->mutable_left_adjacent_lane_id()->set_value(lane.GetId());
+    for (const auto& laneBoundary : lane.GetRightLaneBoundaries())
+    {
+        osiLane->mutable_base_lane()->mutable_classification()->add_left_lane_boundary_id()->set_value(laneBoundary);
+    }
 }
 
 void Lane::SetRightLane(const Interfaces::Lane& lane)
@@ -356,6 +344,14 @@ void Lane::SetRightLane(const Interfaces::Lane& lane)
     osiLane->mutable_right_adjacent_lane_id()->set_value(lane.GetId());
 }
 
+void Lane::SetLeftLaneBoundaries(const std::vector<Id> laneBoundaries)
+{
+    for(const auto& laneBoundary : laneBoundaries)
+    {
+        osiLane->mutable_base_lane()->mutable_classification()->add_left_lane_boundary_id()->set_value(laneBoundary);
+    }
+}
+
 void Lane::SetLaneType(LaneType specifiedType)
 {
     laneType =  specifiedType;
@@ -364,6 +360,11 @@ void Lane::SetLaneType(LaneType specifiedType)
 const Interfaces::WorldObjects& Lane::GetWorldObjects() const
 {
     return worldObjects;
+}
+
+const Interfaces::TrafficSigns &Lane::GetTrafficSigns() const
+{
+    return trafficSigns;
 }
 
 //const Interfaces::MovingObjects& Lane::GetMovingObjects() const
@@ -401,6 +402,11 @@ void Lane::AddWorldObject(Interfaces::WorldObject& worldObject)
         }
 }
 
+void Lane::AddTrafficSign(Interfaces::TrafficSign& trafficSign)
+{
+    trafficSigns.push_back(&trafficSign);
+}
+
 void Lane::ClearMovingObjects()
 {
     worldObjects.clear();
@@ -415,24 +421,14 @@ void Lane::AddLanePairing(const Interfaces::Lane& prevLane, const Interfaces::La
     pairing->mutable_successor_lane_id()->set_value(nextLane.GetId());
 }
 
-void Lane::AddNext(const Interfaces::Lane& lane)
+void Lane::AddNext(const Interfaces::Lane* lane)
 {
-    if (next)
-    {
-        throw std::logic_error("Lanes are not allowed to have more than one successor");
-    }
-    next = &lane;
-    UpdateStreamId();
+    next.push_back(lane->GetId());
 }
 
-void Lane::AddPrevious(const Interfaces::Lane& lane)
+void Lane::AddPrevious(const Interfaces::Lane* lane)
 {
-    if (previous)
-    {
-        throw std::logic_error("Lanes are not allowed to have more than one predecessor");
-    }
-    previous = &lane;
-    UpdateStreamId();
+    previous.push_back(lane->GetId());
 }
 
 const Interfaces::LaneGeometryElements& Lane::GetLaneGeometryElements() const
@@ -453,15 +449,8 @@ void Lane::AddLaneGeometryJoint(const Common::Vector2d& pointLeft,
     newJoint.points.reference = pointCenter;
     newJoint.points.right     = pointRight;
     newJoint.curvature        = curvature;
-
-    Common::Vector2d proj = pointLeft;
-    proj.Sub(pointRight);
-    newJoint.projectionAxes.t = proj;
-    proj.Rotate(-M_PI_2);
-    newJoint.projectionAxes.s = proj;
-    newJoint.projectionAxes.curvatureCorrection = { 1, 3 };
-    newJoint.projectionAxes.sHdg = heading;
-    newJoint.projectionAxes.sOffset = sOffset;
+    newJoint.sHdg = heading;
+    newJoint.sOffset = sOffset;
 
     if (laneGeometryJoints.empty())
     {
@@ -471,16 +460,17 @@ void Lane::AddLaneGeometryJoint(const Common::Vector2d& pointLeft,
 
     const Primitive::LaneGeometryJoint& previousJoint = laneGeometryJoints.back();
 
-    //newJoint.projectionAxes.sOffset = previousJoint.projectionAxes.sOffset + std::hypot(pointCenter.x - previousJoint.points.reference.x,
-    //                                                                                   pointCenter.y - previousJoint.points.reference.y);
-    //newJoint.projectionAxes.sHdg = -2.0 * std::acos(proj.Dot(previousJoint.projectionAxes.s) / (proj.Length() * previousJoint.projectionAxes.s.Length()));
+    if (previousJoint.sOffset >= sOffset)
+    {
+        return; //Do not add the same point twice
+    }
 
-    Primitive::LaneGeometryElement* newElement = new Primitive::LaneGeometryElement(previousJoint, newJoint);
+    Primitive::LaneGeometryElement* newElement = new Primitive::LaneGeometryElement(previousJoint, newJoint, this);
     laneGeometryElements.push_back(newElement);
     laneGeometryJoints.push_back(newJoint);
 }
 
-Section::Section(osi3::world::RoadSection* osiSection, bool isInStreamDirection) : osiSection(osiSection), isInStreamDirection(isInStreamDirection)
+Section::Section(osi3::world::RoadSection* osiSection) : osiSection(osiSection)
 {}
 
 Id Section::GetId() const
@@ -490,55 +480,12 @@ Id Section::GetId() const
 
 void Section::AddNext(const Interfaces::Section &section)
 {
-    if (next)
-    {
-        throw std::logic_error("Sections are not allowed to have more than one successor");
-    }
-    next = &section;
-    UpdateStreamId();
+    nextSections.push_back(&section);
 }
 
 void Section::AddPrevious(const Interfaces::Section &section)
 {
-    if (previous)
-    {
-        throw std::logic_error("Section are not allowed to have more than one predecessor");
-    }
-    previous = &section;
-    UpdateStreamId();
-}
-
-const Interfaces::Section *Section::GetNext() const
-{
-    return next;
-}
-
-const Interfaces::Section *Section::GetPrevious() const
-{
-    return previous;
-}
-
-bool Section::IsInStreamDirection() const
-{
-    return isInStreamDirection;
-}
-
-void Section::UpdateStreamId()
-{
-    for (const auto& sectionStream : reverseSectionStream)
-    {
-        if ((sectionStream.IsInStreamDirection() && !sectionStream.GetPrevious())
-                || (!sectionStream.IsInStreamDirection() && !sectionStream.GetNext()))
-        {
-            streamId = sectionStream.GetId();
-            return;
-        }
-    }
-}
-
-Id Section::GetStreamId() const
-{
-    return streamId;
+    previousSections.push_back(&section);
 }
 
 void Section::AddLane(const Interfaces::Lane& lane)
@@ -620,13 +567,25 @@ double Section::GetLength() const
     return sum / lanes.size();
 }
 
+void Section::SetCenterLaneBoundary(std::vector<Id> laneBoundaryId)
+{
+    centerLaneBoundary = laneBoundaryId;
+}
+
+std::vector<Id> Section::GetCenterLaneBoundary() const
+{
+    return centerLaneBoundary;
+}
+
 double Section::GetSOffset() const
 {
     return osiSection->s_offset();
 }
 
 
-Road::Road(osi3::world::Road* osiRoad) : osiRoad(osiRoad)
+Road::Road(osi3::world::Road* osiRoad, bool isInStreamDirection) :
+    osiRoad(osiRoad),
+    isInStreamDirection(isInStreamDirection)
 {
 }
 
@@ -654,6 +613,43 @@ double Road::GetLength() const
         length += section->GetLength();
     }
     return length;
+}
+
+Id Road::GetSuccessor() const
+{
+    return successor;
+}
+
+Id Road::GetPredecessor() const
+{
+    return predecessor;
+}
+
+void Road::SetSuccessor(Id successor)
+{
+    this->successor = successor;
+}
+
+void Road::SetPredecessor(Id predecessor)
+{
+    this->predecessor = predecessor;
+}
+
+bool Road::IsInStreamDirection() const
+{
+    return isInStreamDirection;
+}
+
+double Road::GetDistance(MeasurementPoint mp) const
+{
+    if (mp == MeasurementPoint::RoadStart)
+    {
+        return 0;
+    }
+    else
+    {
+        return GetLength();
+    }
 }
 
 StationaryObject::StationaryObject(osi3::StationaryObject* osiStationaryObject, void* linkedObject) :
@@ -714,9 +710,9 @@ double StationaryObject::GetAbsAccelerationDouble() const
     return 0.0;
 }
 
-RoadPosition StationaryObject::GetRoadCoordinate() const
+ObjectPosition StationaryObject::GetLocatedPosition() const
 {
-    return roadCoordinate;
+    return position;
 }
 
 Id StationaryObject::GetId() const
@@ -766,26 +762,26 @@ void StationaryObject::ClearLaneAssignments()
     assignedLanes.clear();
 }
 
-double StationaryObject::GetDistance(MeasurementPoint measurementPoint) const
+double StationaryObject::GetDistance(MeasurementPoint measurementPoint, const std::string& roadId) const
 {
-    if (measurementPoint == MeasurementPoint::RoadEnd)
+    if (position.touchedRoads.count(roadId) == 0)
     {
-        Primitive::Dimension dimension = GetDimension();
-        return roadCoordinate.s + WorldObjectCommon::GetFrontDeltaS(dimension.length, dimension.width, roadCoordinate.hdg,
-                                                                    dimension.length / 2.0);
+        return std::numeric_limits<double>::quiet_NaN();
     }
-    if (measurementPoint == MeasurementPoint::RoadStart)
+    switch (measurementPoint)
     {
-        Primitive::Dimension dimension = GetDimension();
-        return roadCoordinate.s - WorldObjectCommon::GetFrontDeltaS(dimension.length, dimension.width, roadCoordinate.hdg,
-                                                                    dimension.length / 2.0);
+        case MeasurementPoint::RoadStart:
+            return position.touchedRoads.at(roadId).sStart;
+        case MeasurementPoint::RoadEnd:
+            return position.touchedRoads.at(roadId).sEnd;
+        default:
+            throw std::invalid_argument("Invalid measurement point");
     }
-    throw std::invalid_argument("measurement point not within valid bounds");
 }
 
-void StationaryObject::SetRoadCoordinate(const RoadPosition& newCoordinate)
+void StationaryObject::SetLocatedPosition(const ObjectPosition& position)
 {
-    roadCoordinate = newCoordinate;
+    this->position = position;
 }
 
 MovingObject::MovingObject(osi3::MovingObject* osiMovingObject, void* linkedObject) :
@@ -826,29 +822,21 @@ double MovingObject::GetDistanceReferencePointToLeadingEdge() const
     return osiObject->base().dimension().length() * 0.5 - osiObject->vehicle_attributes().bbcenter_to_rear().x();
 }
 
-double MovingObject::GetDistance(MeasurementPoint measurementPoint) const
+double MovingObject::GetDistance(MeasurementPoint measurementPoint, const std::string& roadId) const
 {
-    if (measurementPoint == MeasurementPoint::RoadEnd)
+    if (position.touchedRoads.count(roadId) == 0)
     {
-        if (!frontDistance.IsValid())
-        {
-            Primitive::Dimension dimension = GetDimension();
-            frontDistance.Update(roadCoordinate.s + WorldObjectCommon::GetFrontDeltaS(dimension.length, dimension.width, roadCoordinate.hdg,
-                                                                                      GetDistanceReferencePointToLeadingEdge()));
-        }
-        return frontDistance.Get();
+        return std::numeric_limits<double>::quiet_NaN();
     }
-    if (measurementPoint == MeasurementPoint::RoadStart)
+    switch (measurementPoint)
     {
-        if (!rearDistance.IsValid())
-        {
-            Primitive::Dimension dimension = GetDimension();
-            rearDistance.Update(roadCoordinate.s + WorldObjectCommon::GetRearDeltaS(dimension.length, dimension.width, roadCoordinate.hdg,
-                                                                                    GetDistanceReferencePointToLeadingEdge()));
-        }
-        return rearDistance.Get();
+        case MeasurementPoint::RoadStart:
+            return position.touchedRoads.at(roadId).sStart;
+        case MeasurementPoint::RoadEnd:
+            return position.touchedRoads.at(roadId).sEnd;
+        default:
+            throw std::invalid_argument("Invalid measurement point");
     }
-    throw std::invalid_argument("measurement point not within valid bounds");
 }
 
 void MovingObject::SetDimension(const Primitive::Dimension& newDimension)
@@ -935,14 +923,14 @@ void MovingObject::SetZ(const double newZ)
     osiPosition->set_z(newZ);
 }
 
-RoadPosition MovingObject::GetRoadCoordinate() const
+ObjectPosition MovingObject::GetLocatedPosition() const
 {
-    return roadCoordinate;
+    return position;
 }
 
-void MovingObject::SetRoadCoordinate(const RoadPosition& newCoordinate)
+void MovingObject::SetLocatedPosition(const ObjectPosition& position)
 {
-    roadCoordinate = newCoordinate;
+    this->position = position;
 }
 
 Primitive::AbsOrientation MovingObject::GetAbsOrientation() const
@@ -999,29 +987,26 @@ void MovingObject::SetIndicatorState(IndicatorState indicatorState)
                     osi3::MovingObject_VehicleClassification_LightState_IndicatorState_INDICATOR_STATE_OFF);
         return;
     }
-    else
-        if (indicatorState == IndicatorState::IndicatorState_Left)
-        {
-            osiObject->mutable_vehicle_classification()->mutable_light_state()->set_indicator_state(
-                        osi3::MovingObject_VehicleClassification_LightState_IndicatorState_INDICATOR_STATE_LEFT);
-            return;
-        }
-        else
-            if (indicatorState == IndicatorState::IndicatorState_Right)
-            {
-                osiObject->mutable_vehicle_classification()->mutable_light_state()->set_indicator_state(
-                            osi3::MovingObject_VehicleClassification_LightState_IndicatorState_INDICATOR_STATE_RIGHT);
-                return;
-            }
-            else
-                if (indicatorState == IndicatorState::IndicatorState_Warn)
-                {
-                    osiObject->mutable_vehicle_classification()->mutable_light_state()->set_indicator_state(
-                                osi3::MovingObject_VehicleClassification_LightState_IndicatorState_INDICATOR_STATE_WARNING);
-                    return;
-                }
+    else if (indicatorState == IndicatorState::IndicatorState_Left)
+    {
+        osiObject->mutable_vehicle_classification()->mutable_light_state()->set_indicator_state(
+                    osi3::MovingObject_VehicleClassification_LightState_IndicatorState_INDICATOR_STATE_LEFT);
+        return;
+    }
+    else if (indicatorState == IndicatorState::IndicatorState_Right)
+    {
+        osiObject->mutable_vehicle_classification()->mutable_light_state()->set_indicator_state(
+                    osi3::MovingObject_VehicleClassification_LightState_IndicatorState_INDICATOR_STATE_RIGHT);
+        return;
+    }
+    else if (indicatorState == IndicatorState::IndicatorState_Warn)
+    {
+        osiObject->mutable_vehicle_classification()->mutable_light_state()->set_indicator_state(
+                    osi3::MovingObject_VehicleClassification_LightState_IndicatorState_INDICATOR_STATE_WARNING);
+        return;
+    }
 
-    throw std::logic_error("Indicator state is not supported");
+    throw std::invalid_argument("Indicator state is not supported");
 }
 
 IndicatorState MovingObject::GetIndicatorState() const
@@ -1176,7 +1161,7 @@ double MovingObject::GetAbsVelocityDouble() const
 
     double angleBetween = velocityAngle - orientation.yaw;
 
-    if ((std::abs(angleBetween) - M_PI_2) > 0)
+    if (std::abs(angleBetween) > M_PI_2 && std::abs(angleBetween) < 3 * M_PI_2)
     {
         sign = -1.0;
     }
@@ -1342,16 +1327,152 @@ TrafficSign::TrafficSign(osi3::TrafficSign* osiObject) : osiSign{osiObject}
 {
 }
 
-CommonTrafficSign::Type TrafficSign::GetType() const
+void TrafficSign::SetSpecification(RoadSignalInterface* signal)
 {
-    return  OpenDriveTypeMapper::OsiToOdTrafficSignType(osiSign->main_sign().classification().type());
+    const auto mutableOsiClassification = osiSign->mutable_main_sign()->mutable_classification();
+    const std::string odType = signal->GetType();
+
+    if(trafficSignsTypeOnly.find(odType) != trafficSignsTypeOnly.end())
+    {
+        mutableOsiClassification->set_type(trafficSignsTypeOnly.at(odType));
+    }
+    else if(trafficSignsWithText.find(odType) != trafficSignsWithText.end())
+    {
+        mutableOsiClassification->set_type(trafficSignsWithText.at(odType));
+        mutableOsiClassification->mutable_value()->set_text(signal->GetText());
+    }
+    else if(trafficSignsPredefinedValueAndUnit.find(odType) != trafficSignsPredefinedValueAndUnit.end())
+    {
+        const auto &specification = trafficSignsPredefinedValueAndUnit.at(odType);
+
+        mutableOsiClassification->mutable_value()->set_value_unit(specification.first);
+
+        const auto subType = signal->GetSubType();
+        if(specification.second.find(subType) != specification.second.end())
+        {
+            const auto &valueAndType = specification.second.at(subType);
+
+            mutableOsiClassification->mutable_value()->set_value(valueAndType.first);
+            mutableOsiClassification->set_type(valueAndType.second);
+        }
+        else
+        {
+            const std::string message = "Invalid subtype: " + subType + " of traffic sign type: " + odType;
+            throw std::invalid_argument(message);
+        }
+    }
+    else if(trafficSignsSubTypeDefinesValue.find(odType) != trafficSignsSubTypeDefinesValue.end())
+    {
+        const auto &valueAndUnit = trafficSignsSubTypeDefinesValue.at(odType);
+
+        mutableOsiClassification->set_type(valueAndUnit.first);
+
+        const double value = std::stoi(signal->GetSubType());
+        mutableOsiClassification->mutable_value()->set_value(value);
+        mutableOsiClassification->mutable_value()->set_value_unit(valueAndUnit.second);
+    }
+    else {
+        const std::string message = "Invalid traffic sign type: " + odType;
+        throw std::invalid_argument(message);
+    }
+}
+
+void TrafficSign::AddSupplementarySign(RoadSignalInterface* odSignal)
+{
+    auto *supplementarySign = osiSign->add_supplementary_sign();
+
+    if (odSignal->GetType() == "1004")
+    {
+        supplementarySign->mutable_classification()->set_type(osi3::TrafficSign_SupplementarySign_Classification_Type::TrafficSign_SupplementarySign_Classification_Type_TYPE_SPACE);
+        auto osiValue = supplementarySign->mutable_classification()->mutable_value()->Add();
+
+        if (odSignal->GetSubType() == "30")
+        {
+            osiValue->set_value(odSignal->GetValue());
+            osiValue->set_value_unit(osi3::TrafficSignValue_Unit::TrafficSignValue_Unit_UNIT_METER);
+            osiValue->set_text(std::to_string(odSignal->GetValue()) + " m");
+        }
+        else if (odSignal->GetSubType() == "31")
+        {
+            osiValue->set_value(odSignal->GetValue());
+            osiValue->set_value_unit(osi3::TrafficSignValue_Unit::TrafficSignValue_Unit_UNIT_KILOMETER);
+            osiValue->set_text(std::to_string(odSignal->GetValue()) + " km");
+        }
+        else if (odSignal->GetSubType() == "32")
+        {
+            osiValue->set_value(100.0);
+            osiValue->set_value_unit(osi3::TrafficSignValue_Unit::TrafficSignValue_Unit_UNIT_METER);
+            osiValue->set_text("STOP 100 m");
+        }
+        else
+        {
+            throw std::logic_error("Invalid supplementary sign subtype for type 1004");
+        }
+    }
+    else
+    {
+        throw std::logic_error("Invalid supplementary sign type: " + odSignal->GetType());
+    }
+}
+
+std::pair<double, CommonTrafficSign::Unit> TrafficSign::GetValueAndUnitInSI(const double osiValue, const osi3::TrafficSignValue_Unit osiUnit) const
+{
+    if (unitConversionMap.find(osiUnit) != unitConversionMap.end())
+    {
+        const auto& conversionParameters = unitConversionMap.at(osiUnit);
+
+        return {osiValue * conversionParameters.first, conversionParameters.second};
+    }
+    else
+    {
+        return {osiValue, CommonTrafficSign::Unit::None};
+    }
 }
 
 
-void TrafficSign::SetType(RoadSignalType type)
+CommonTrafficSign::Entity TrafficSign::GetSpecification(const double relativeDistance) const
 {
-    auto osiType = OpenDriveTypeMapper::TrafficSignType(type);
-    osiSign->mutable_main_sign()->mutable_classification()->set_type(osiType);
+    CommonTrafficSign::Entity specification;
+
+    specification.distanceToStartOfRoad = s;
+    specification.relativeDistance = relativeDistance;
+
+    const auto osiType = osiSign->main_sign().classification().type();
+
+    if (typeConversionMap.find(osiType) != typeConversionMap.end())
+    {
+        specification.type = typeConversionMap.at(osiType);
+    }
+
+    const auto osiMainSign = osiSign->main_sign().classification().value();
+    const auto valueAndUnit = GetValueAndUnitInSI(osiMainSign.value(), osiMainSign.value_unit());
+
+    specification.value = valueAndUnit.first;
+    specification.unit = valueAndUnit.second;
+    specification.text = osiSign->main_sign().classification().value().text();
+
+    for (int i = 0; i < osiSign->supplementary_sign().size(); i++)
+    {
+        CommonTrafficSign::Entity supplementarySignSpecification;
+        supplementarySignSpecification.distanceToStartOfRoad = s;
+        supplementarySignSpecification.relativeDistance = s - relativeDistance;
+
+        auto osiSupplementarySign = osiSign->supplementary_sign().Get(i);
+
+        if(osiSupplementarySign.classification().type() == osi3::TrafficSign_SupplementarySign_Classification_Type::TrafficSign_SupplementarySign_Classification_Type_TYPE_SPACE)
+        {
+            supplementarySignSpecification.type = CommonTrafficSign::Type::DistanceIndication;
+
+            auto osiSupplementarySignValueStruct = osiSupplementarySign.classification().value().Get(i);
+            const auto supplementarySignValueAndUnit = GetValueAndUnitInSI(osiSupplementarySignValueStruct.value(), osiSupplementarySignValueStruct.value_unit());
+            supplementarySignSpecification.value = supplementarySignValueAndUnit.first;
+            supplementarySignSpecification.unit = supplementarySignValueAndUnit.second;
+            supplementarySignSpecification.text = osiSupplementarySignValueStruct.text();
+        }
+        specification.supplementarySigns.push_back(supplementarySignSpecification);
+    }
+
+    return specification;
 }
 
 bool TrafficSign::IsValidForLane(OWL::Id laneId) const
@@ -1371,7 +1492,75 @@ void TrafficSign::CopyToGroundTruth(osi3::GroundTruth& target) const
 {
     auto newTrafficSign = target.add_traffic_sign();
     newTrafficSign->CopyFrom(*osiSign);
-} // namespace Implementation
+}
+
+LaneBoundary::LaneBoundary(osi3::LaneBoundary *osiLaneBoundary, double width, double sStart, double sEnd, LaneMarkingSide side) :
+    osiLaneBoundary(osiLaneBoundary),
+    sStart(sStart),
+    sEnd(sEnd),
+    width(width),
+    side(side)
+{
+}
+
+Id LaneBoundary::GetId() const
+{
+    return osiLaneBoundary->id().value();
+}
+
+double LaneBoundary::GetWidth() const
+{
+    return width;
+}
+
+double LaneBoundary::GetSStart() const
+{
+    return sStart;
+}
+
+double LaneBoundary::GetSEnd() const
+{
+    return sEnd;
+}
+
+LaneMarking::Type LaneBoundary::GetType() const
+{
+    return OpenDriveTypeMapper::OsiToOdLaneMarkingType(osiLaneBoundary->classification().type());
+}
+
+LaneMarking::Color LaneBoundary::GetColor() const
+{
+    return OpenDriveTypeMapper::OsiToOdLaneMarkingColor(osiLaneBoundary->classification().color());
+}
+
+LaneMarkingSide LaneBoundary::GetSide() const
+{
+    return side;
+}
+
+void LaneBoundary::AddBoundaryPoint(const Common::Vector2d &point, double heading)
+{
+    constexpr double doubleLineDistance = 0.15;
+    auto boundaryPoint = osiLaneBoundary->add_boundary_line();
+    switch (side)
+    {
+    case LaneMarkingSide::Single :
+        boundaryPoint->mutable_position()->set_x(point.x);
+        boundaryPoint->mutable_position()->set_y(point.y);
+        break;
+    case LaneMarkingSide::Left :
+        boundaryPoint->mutable_position()->set_x(point.x - doubleLineDistance * std::sin(heading));
+        boundaryPoint->mutable_position()->set_y(point.y + doubleLineDistance * std::cos(heading));
+        break;
+    case LaneMarkingSide::Right :
+        boundaryPoint->mutable_position()->set_x(point.x + doubleLineDistance * std::sin(heading));
+        boundaryPoint->mutable_position()->set_y(point.y - doubleLineDistance * std::cos(heading));
+        break;
+    }
+    boundaryPoint->set_width(width);
+}
+
+// namespace Implementation
 
 }
 

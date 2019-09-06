@@ -26,12 +26,13 @@
 #include <memory>
 #include <tuple>
 #include "Interfaces/eventInterface.h"
-#include "Interfaces/parameterInterface.h"
-#include "Interfaces/stochasticsInterface.h"
-#include "Interfaces/worldInterface.h"
-#include "Interfaces/callbackInterface.h"
 #include "Interfaces/runResultInterface.h"
 #include "Common/observationTypes.h"
+
+class CallbackInterface;
+class ParameterInterface;
+class StochasticsInterface;
+class WorldInterface;
 
 //! Interface which has to be provided by observation modules
 class ObservationInterface

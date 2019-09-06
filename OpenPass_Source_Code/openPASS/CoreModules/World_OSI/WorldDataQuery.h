@@ -9,373 +9,279 @@
 *******************************************************************************/
 #pragma once
 
+#include <numeric>
 #include <utility>
 #include <tuple>
 #include "OWL/DataTypes.h"
 #include "WorldData.h"
 #include <numeric>
+#include <algorithm>
+
+//! This class represents one element of a Stream. StreamInfo can contain elements of the following types:
+//! OWL::Lane
+//! OWL::Road
+template<typename T>
+struct StreamInfo
+{
+    const T* element;  //!element represented by this object
+    double sOffset;         //!S Offset of the start point of the element from the beginning of the stream
+    bool inStreamDirection; //!Specifies whether the direction of the element is the same as the direction of the stream
+
+    const T& operator()() const
+    {
+        return *element;
+    }
+
+    //! Transform the s coordinate on the element to the s coordinate on the element stream
+    //!
+    //! \param elementPosition position relative to the start of the element
+    //! \return position relative to the start of the element stream
+    double GetStreamPosition (double elementPosition) const
+    {
+        return sOffset + (inStreamDirection ? elementPosition : -elementPosition);
+    }
+
+    //! Returns the element stream position of the start of lane
+    double StartS () const
+    {
+        return sOffset - (inStreamDirection ? 0 : element->GetLength());
+    }
+
+    //! Returns the element stream position of the end of lane
+    double EndS () const
+    {
+        return sOffset + (inStreamDirection ? element->GetLength() : 0);
+    }
+};
+
+//! This class represent a consecutive sequence of elements.
+//! It is used by various queries to search along consecutive elements within a range starting at some start point
+//! The elements supported by this class are:
+//! OWL::Lane*
+//! OWL::Road*
+template<typename T>
+class Stream
+{
+public:
+    Stream() = default;
+    explicit Stream(const std::vector<StreamInfo<T>>& elements) :
+        elements(elements)
+    {}
+
+    const std::vector<StreamInfo<T>>& GetElements() const
+    {
+        return elements;
+    }
+
+    //! Returns an element stream that has the same lanes in reverse order
+    Stream<T> Reverse() const;
+
+    //! Transform the sCoordinate on the given element to a position on the stream
+    //! The element must be part of the stream
+    double GetPositionByElementAndS(const T& element, double sCoordinate) const;
+
+    //! Returns the element and s coordinate corresponding to the given position on the stream
+    std::pair<double, const T*> GetElementAndSByPosition(double position) const;
+
+    //! Returns true if the specified element is contained in this element stream, false otherwise
+    bool Contains(const T& element) const;
+
+private:
+    std::vector<StreamInfo<T>> elements;
+};
+
+using LaneStreamInfo = StreamInfo<OWL::Interfaces::Lane>;
+using LaneStream = Stream<OWL::Interfaces::Lane>;
+using RoadStreamInfo = StreamInfo<OWL::Interfaces::Road>;
+using RoadStream = Stream<OWL::Interfaces::Road>;
 
 //! Helper class for complex queries on the world data
 class WorldDataQuery
 {
 public:
-    WorldDataQuery(OWL::Interfaces::WorldData& worldData);
+    WorldDataQuery(const OWL::Interfaces::WorldData& worldData);
 
     //! Checks if object is of type T and within the specified range when supplied an offset
     //! Returns true if so; false, otherwise
     //!
-    //! @param worldObject object to check
-    //! @param minS minimum valid s position within the road
-    //! @param maxS maximum valid s position within the road
+    //! \param worldObject  object to check
+    //! \param minS         minimum valid s position within the road
+    //! \param maxS         maximum valid s position within the road
+    //! \param lane         lane on which the object is
     template<typename T>
-    bool ObjectIsOfTypeAndWithinRange(const OWL::Interfaces::WorldObject * const worldObject, const double minS, const double maxS) const
+    bool ObjectIsOfTypeAndWithinRange(const OWL::Interfaces::WorldObject * const worldObject, const double minS, const double maxS, const LaneStreamInfo& lane) const
     {
+        const auto& roadId = worldData.GetRoadIdMapping().at(lane.element->GetRoad().GetId());
         return (worldObject->Is<T>() &&
-                worldObject->GetDistance(OWL::MeasurementPoint::RoadEnd) > minS &&
-                worldObject->GetDistance(OWL::MeasurementPoint::RoadStart) < maxS);
+                lane.GetStreamPosition(worldObject->GetDistance(OWL::MeasurementPoint::RoadEnd, roadId) - lane.element->GetDistance(OWL::MeasurementPoint::RoadStart)) > minS &&
+                lane.GetStreamPosition(worldObject->GetDistance(OWL::MeasurementPoint::RoadStart, roadId) - lane.element->GetDistance(OWL::MeasurementPoint::RoadStart)) < maxS);
     }
 
-    //!Returns first object of type T in the ForwardLaneStream starting at the lane with given OpenDrive Id and s coordinate.
-    //! Objects partially inside the search range are also considered.
-    //! Return nullptr if there is no object in maxSearchLength
-    //!
-    //! @param roadId the string identifier of the road to begin searching in
-    //! @param laneId OpenDrive id of lane to search in
-    //! @param initialSearchDistance start s coordinates for search
-    //! @param maxSearchLength maximum look ahead distance
+    //! Searches along a lane stream starting at initialSearchDistance and returns the first object
+    //! found that is of type T. Returns a nullptr if there is no such object within maxSearchLength
+    //! T can be one of WorldObject, MovingObject or StationaryObject
     template <typename T>
-    OWL::Interfaces::WorldObject* GetNextObjectInLane(std::string roadId, OWL::OdId laneId, double initialSearchDistance,
+    OWL::Interfaces::WorldObject* GetNextObjectInLane(const LaneStream& laneStream, double initialSearchDistance,
             double maxSearchLength) const
     {
-        const auto& lane = GetLaneByOdId(roadId, laneId, initialSearchDistance);
-        if (!lane.Exists())
+        const auto& lanesOnStream = laneStream.GetElements();
+        for (const auto& lane : lanesOnStream)
         {
-            return nullptr;
-        }
-
-        maxSearchLength = std::max(0.0, maxSearchLength); //supress negative search distances
-
-        auto previousRoadLength = lane.GetRoad().GetLength();
-        auto previousRoadId = lane.GetRoad().GetId();
-
-        // these values track the previous roads and the sum of their lengths in order to track how far we have searched over adjacent rows
-        std::vector<double> previousRoadLengths{};
-        double previousRoadLengthSum{0.0};
-        for (const auto& lane : lane.forwardLaneStream)
-        {
-            if (lane.GetRoad().GetId() != previousRoadId)
+            if (lane.EndS() < initialSearchDistance) //Ignore lanes ending before initialSearchDistance
             {
-                previousRoadLengths.emplace_back(previousRoadLength);
+                continue;
             }
-            previousRoadLengthSum = std::accumulate(previousRoadLengths.begin(), previousRoadLengths.end(), 0.0);
-
-            if (lane.GetDistance(OWL::MeasurementPoint::RoadStart) + previousRoadLengthSum > initialSearchDistance + maxSearchLength)
+            if (lane.StartS() > initialSearchDistance + maxSearchLength) //Stop if reached maxSearchLength
             {
                 break;
             }
-
-            OWL::Interfaces::WorldObjects worldObjects = lane.GetWorldObjects();
-
-            worldObjects.sort([](const OWL::Interfaces::WorldObject * const wo1,
-                                 const OWL::Interfaces::WorldObject * const wo2)
+            const auto& roadId = worldData.GetRoadIdMapping().at(lane.element->GetRoad().GetId());
+            double positionOfFoundObject = std::numeric_limits<double>::infinity();
+            OWL::Interfaces::WorldObject* foundObject{nullptr};
+            for (const auto& object : lane.element->GetWorldObjects())
             {
-                return wo1->GetDistance(OWL::MeasurementPoint::RoadStart) <
-                       wo2->GetDistance(OWL::MeasurementPoint::RoadStart);
-            });
-
-            double rangeStart = initialSearchDistance - previousRoadLengthSum;
-            double rangeEnd = initialSearchDistance + maxSearchLength - previousRoadLengthSum;
-            if (!lane.IsInStreamDirection())
-            {
-                rangeStart = lane.GetSection().GetLength() - initialSearchDistance + maxSearchLength - previousRoadLengthSum;
-                rangeEnd = lane.GetSection().GetLength() - initialSearchDistance - previousRoadLengthSum;
-            }
-            for (OWL::Interfaces::WorldObject* worldObject : worldObjects)
-            {
-                if(ObjectIsOfTypeAndWithinRange<T>(worldObject, rangeStart, rangeEnd))
+                if (ObjectIsOfTypeAndWithinRange<T>(object, initialSearchDistance, initialSearchDistance + maxSearchLength, lane))
                 {
-                    return worldObject;
-                }
-            }
-
-            previousRoadLength = lane.GetRoad().GetLength();
-            previousRoadId = lane.GetRoad().GetId();
-        }
-
-        return nullptr;
-    }
-
-    //!Returns first object of type T in the ReverseLaneStream starting at the lane with given OpenDrive Id and initialSearchDistance + maxSearchLength.
-    //! Objects partially inside the search range are also considered.
-    //! Return nullptr if there is no object in maxSearchLength
-    //!
-    //! @param roadId the string identifier of the road to begin searching in
-    //! @param laneId OpenDrive id of lane to search in
-    //! @param initialSearchDistance start s coordinates for search
-    //! @param maxSearchLength maximum look ahead distance
-    template <typename T>
-    const OWL::Interfaces::WorldObject* GetLastObjectInLane(std::string roadId, OWL::OdId laneId, double initialSearchDistance,
-            double maxSearchLength) const
-    {
-        // gets the objects in the range sorted from closest to furthest
-        const auto objectsInRange = GetObjectsOfTypeInRange<T>(roadId, laneId, initialSearchDistance, initialSearchDistance + maxSearchLength);
-        if (objectsInRange.size() > 0)
-        {
-            return *(objectsInRange.end()-1);
-        }
-
-        return nullptr;
-    }
-
-    //!Returns first object of type T in the ReverseLaneStream starting at the lane with given OpenDrive Id and s coordinate.
-    //! Objects partially inside the search range are also considered.
-    //! Return nullptr if there is no object in maxSearchLength
-    //!
-    //! @param roadId the string identifier of the road to begin searching in
-    //! @param laneId OpenDrive id of lane to search in
-    //! @param initialSearchDistance start s coordinates for search
-    //! @param maxSearchLength maximum look ahead distance
-    template <typename T>
-    OWL::Interfaces::WorldObject* GetClosestObjectInUpstream(std::string roadId, OWL::OdId laneId,
-            double initialSearchDistance,
-            double maxSearchLength) const
-    {
-        //supress negative search distances
-        maxSearchLength = std::max(0.0, maxSearchLength);
-
-        const auto& lane = GetLaneByOdId(roadId, laneId, initialSearchDistance);
-        if (!lane.Exists())
-        {
-            return nullptr;
-        }
-
-        double referenceSearchPosition = initialSearchDistance;
-        double remainingSearchLength = maxSearchLength;
-        auto previousRoadId = lane.GetRoad().GetId();
-        for (const auto& lane : lane.reverseLaneStream)
-        {
-            if (remainingSearchLength <= 0.0)
-            {
-                break;
-            }
-
-            if (lane.GetRoad().GetId() != previousRoadId)
-            {
-                previousRoadId = lane.GetRoad().GetId();
-                remainingSearchLength -= referenceSearchPosition;
-                // set the new reference to the end of the 'road'
-                referenceSearchPosition = lane.GetDistance(OWL::MeasurementPoint::RoadStart) + lane.GetLength();
-            }
-
-            OWL::Interfaces::WorldObjects worldObjects = lane.GetWorldObjects();
-            worldObjects.sort([](const OWL::Interfaces::WorldObject * const wo1,
-                                 const OWL::Interfaces::WorldObject * const wo2)
-            {
-                return wo1->GetDistance(OWL::MeasurementPoint::RoadEnd) <
-                       wo2->GetDistance(OWL::MeasurementPoint::RoadEnd);
-            });
-
-            for (auto worldObject : worldObjects)
-            {
-                double minimumSearchPosition = std::min(initialSearchDistance - maxSearchLength, 0.0);
-                if (ObjectIsOfTypeAndWithinRange<T>(worldObject, minimumSearchPosition, referenceSearchPosition))
-                {
-                    return worldObject;
-                }
-            }
-        }
-
-        return nullptr;
-    }
-
-    //!Returns first object of type T in the ForwardLaneStream starting at the lane with given OpenDrive Id and initialSearchDistance - maxSearchLength.
-    //! Objects partially inside the search range are also considered.
-    //! Return nullptr if there is no object in maxSearchLength
-    //!
-    //! @param roadId the string identifier of the road to begin searching in
-    //! @param laneId OpenDrive id of lane to search in
-    //! @param initialSearchDistance start s coordinates for search
-    //! @param maxSearchLength maximum look ahead distance
-    template <typename T>
-    OWL::Interfaces::WorldObject* GetFarthestObjectInUpstream(std::string roadId, OWL::OdId laneId,
-            double initialSearchDistance,
-            double maxSearchLength) const
-    {
-        //supress negative search distances
-        maxSearchLength = std::max(0.0, maxSearchLength);
-
-        const auto& lane = GetLaneByOdId(roadId, laneId, initialSearchDistance);
-        if (!lane.Exists())
-        {
-            return nullptr;
-        }
-
-        double referenceSearchPosition = initialSearchDistance;
-        double remainingSearchLength = maxSearchLength;
-        auto previousRoadId = lane.GetRoad().GetId();
-        OWL::Interfaces::WorldObject* farthestObject = nullptr;
-        for (const auto& lane : lane.reverseLaneStream)
-        {
-            if (remainingSearchLength <= 0.0)
-            {
-                break;
-            }
-
-            if (lane.GetRoad().GetId() != previousRoadId)
-            {
-                previousRoadId = lane.GetRoad().GetId();
-                remainingSearchLength -= referenceSearchPosition;
-                // set the new reference to the end of the 'road'
-                referenceSearchPosition = lane.GetDistance(OWL::MeasurementPoint::RoadStart) + lane.GetLength();
-            }
-
-            OWL::Interfaces::WorldObjects worldObjects = lane.GetWorldObjects();
-            worldObjects.sort([](const OWL::Interfaces::WorldObject * const wo1,
-                                 const OWL::Interfaces::WorldObject * const wo2)
-            {
-                return wo1->GetDistance(OWL::MeasurementPoint::RoadEnd) <
-                       wo2->GetDistance(OWL::MeasurementPoint::RoadEnd);
-            });
-
-            for (auto worldObject : worldObjects)
-            {
-                double minimumSearchPosition = std::min(initialSearchDistance - maxSearchLength, 0.0);
-                if (ObjectIsOfTypeAndWithinRange<T>(worldObject, minimumSearchPosition, referenceSearchPosition))
-                {
-                    farthestObject = worldObject;
-                }
-            }
-        }
-
-        return farthestObject;
-    }
-
-    //!Returns the objects of type T in the ForwardLaneStream, sorted from nearest to furthest, starting at the lane with given roadId, laneId and initialSearchDistance.
-    //! Objects partially inside the search range are also considered.
-    //! Return an empty collection if there is no object in maxSearchLength
-    //!
-    //! @param roadId the string identifier of the road to begin searching in
-    //! @param laneId OpenDrive id of lane to search in
-    //! @param initialSearchDistance start s coordinates for search
-    //! @param maxSearchLength maximum look ahead distance
-    template<typename T>
-    std::vector<const OWL::Interfaces::WorldObject*> GetObjectsOfTypeInRange(const std::string& roadId,
-                                                                             const OWL::OdId laneId,
-                                                                             const double startDistance,
-                                                                             const double endDistance) const
-    {
-        const double maxSearchLength = std::max(0.0, endDistance - startDistance); //supress negative search distances
-        const auto& lane = GetLaneByOdId(roadId, laneId, startDistance);
-        std::vector<const OWL::Interfaces::WorldObject*> objectsInRange{};
-        if (!lane.Exists())
-        {
-            return objectsInRange;
-        }
-
-        double previousRoadLengthEstimate = lane.GetRoad().GetLength();
-        auto previousRoadId = lane.GetRoad().GetId();
-
-        std::vector<double> previousRoadLengths{};
-        double previousRoadLengthSum{0.0};
-        for (const auto& lane : lane.forwardLaneStream)
-        {
-            if (lane.GetRoad().GetId() != previousRoadId)
-            {
-                previousRoadLengths.emplace_back(previousRoadLengthEstimate);
-            }
-            previousRoadLengthSum = std::accumulate(previousRoadLengths.begin(), previousRoadLengths.end(), 0.0);
-
-            if ((lane.IsInStreamDirection() ? lane.GetDistance(OWL::MeasurementPoint::RoadStart) : (lane.GetSection().GetLength() - lane.GetDistance(OWL::MeasurementPoint::RoadEnd))) + previousRoadLengthSum > startDistance + maxSearchLength)
-            {
-                break;
-            }
-
-            OWL::Interfaces::WorldObjects worldObjects = lane.GetWorldObjects();
-
-            worldObjects.sort([](const OWL::Interfaces::WorldObject * const wo1,
-                                 const OWL::Interfaces::WorldObject * const wo2)
-            {
-                return wo1->GetDistance(OWL::MeasurementPoint::RoadStart) <
-                       wo2->GetDistance(OWL::MeasurementPoint::RoadStart);
-            });
-
-            double rangeStart = startDistance - previousRoadLengthSum;
-            double rangeEnd = startDistance + maxSearchLength - previousRoadLengthSum;
-            if (!lane.IsInStreamDirection())
-            {
-                rangeStart = lane.GetRoad().GetLength() - (startDistance + maxSearchLength - previousRoadLengthSum);
-                rangeEnd = lane.GetRoad().GetLength() - (startDistance - previousRoadLengthSum);
-            }
-            for (OWL::Interfaces::WorldObject* worldObject : worldObjects)
-            {
-                if(ObjectIsOfTypeAndWithinRange<T>(worldObject, rangeStart, rangeEnd))
-                {
-                    if (std::find(objectsInRange.cbegin(), objectsInRange.cend(), worldObject) == objectsInRange.cend())
+                    if (lane.GetStreamPosition(object->GetDistance(OWL::MeasurementPoint::RoadStart, roadId) - lane.element->GetDistance(OWL::MeasurementPoint::RoadStart)) < positionOfFoundObject)
                     {
-                        objectsInRange.emplace_back(worldObject);
+                        foundObject = object;
+                        positionOfFoundObject = lane.GetStreamPosition(object->GetDistance(OWL::MeasurementPoint::RoadStart, roadId));
                     }
                 }
             }
-            previousRoadLengthEstimate = lane.GetRoad().GetLength();
-            previousRoadId = lane.GetRoad().GetId();
+            if (foundObject)
+            {
+                return foundObject;
+            }
         }
-
-        return objectsInRange;
+        return nullptr;
     }
 
-    //!Returns the first object in the ReverseLaneStream with specified streamId
-    const OWL::Interfaces::WorldObject* GetFirstObjectDownstream(OWL::Id streamId) const;
+    //! Searches along a lane stream in reverse direction starting at initialSearchDistance + maxSearchLength and returns the first object
+    //! found that is of type T. Returns a nullptr if there is no such object within maxSearchLength
+    //! T can be one of WorldObject, MovingObject or StationaryObject
+    template <typename T>
+    OWL::Interfaces::WorldObject* GetLastObjectInLane(const LaneStream& laneStream, double initialSearchDistance,
+            double maxSearchLength) const
+    {
+        const auto& lanesOnStream = laneStream.GetElements();
+        for (auto lane = lanesOnStream.crbegin(); lane != lanesOnStream.crend(); ++lane)
+        {
+            if (lane->StartS() > initialSearchDistance + maxSearchLength) //Ignore lanes behind maxSearchLength
+            {
+                continue;
+            }
+            if (lane->EndS() < initialSearchDistance) //Stop if reached initialSearchDistance
+            {
+                break;
+            }
+            const auto& roadId = worldData.GetRoadIdMapping().at(lane->element->GetRoad().GetId());
+            double positionOfFoundObject = -std::numeric_limits<double>::infinity();
+            OWL::Interfaces::WorldObject* foundObject{nullptr};
+            for (const auto& object : lane->element->GetWorldObjects())
+            {
+                if (ObjectIsOfTypeAndWithinRange<T>(object, initialSearchDistance, initialSearchDistance + maxSearchLength, *lane))
+                {
+                    if (lane->GetStreamPosition(object->GetDistance(OWL::MeasurementPoint::RoadStart, roadId) - lane->element->GetDistance(OWL::MeasurementPoint::RoadStart)) > positionOfFoundObject)
+                    {
+                        foundObject = object;
+                        positionOfFoundObject = lane->GetStreamPosition(object->GetDistance(OWL::MeasurementPoint::RoadStart, roadId));
+                    }
+                }
+            }
+            if (foundObject)
+            {
+                return foundObject;
+            }
+        }
+        return nullptr;
+    }
 
-    //! Returns all MovingObjects in the ForwardLaneStream starting at the lane with given OpenDrive Id and startDistance
-    //! ending at endDistance.
-    //! Objects partially inside the search interval are also considered.
-    std::vector<const OWL::Interfaces::WorldObject*> GetMovingObjectsInRange(std::string roadId, OWL::OdId laneId,
-            double startDistance,
-            double endDistance) const;
+    //! Searches along a lane stream starting at initialSearchDistance and returns the all objects
+    //! found until initialSearchDistance + maxSearchLength that are of type T.
+    //! Returns an empty vector if there is no such object within maxSearchLength
+    //! T can be one of WorldObject, MovingObject or StationaryObject
+    template<typename T>
+    std::vector<const OWL::Interfaces::WorldObject*> GetObjectsOfTypeInRange(const LaneStream& laneStream,
+                                                                             const double startDistance,
+                                                                             const double endDistance) const
+    {
+        const auto& lanesOnStream = laneStream.GetElements();
+        std::vector<const OWL::Interfaces::WorldObject*> foundObjects;
+        for (const auto& lane : lanesOnStream)
+        {
+            if (lane.EndS() < startDistance) //Ignore lanes ending before startDistance
+            {
+                continue;
+            }
+            if (lane.StartS() > endDistance) //Stop if reached endDistance
+            {
+                break;
+            }
+            const auto& roadId = worldData.GetRoadIdMapping().at(lane.element->GetRoad().GetId());
+            auto sortedObjects = lane.element->GetWorldObjects();
+            if (lane.inStreamDirection)
+            {
+                sortedObjects.sort(
+                                [lane, roadId](OWL::Interfaces::WorldObject* first, OWL::Interfaces::WorldObject* second)
+                                {
+                                    return first->GetDistance(OWL::MeasurementPoint::RoadStart, roadId) < second->GetDistance(OWL::MeasurementPoint::RoadStart, roadId);
+                                }
+                                );
+            }
+            else
+            {
+                sortedObjects.sort(
+                                [lane, roadId](OWL::Interfaces::WorldObject* first, OWL::Interfaces::WorldObject* second)
+                                {
+                                    return first->GetDistance(OWL::MeasurementPoint::RoadStart, roadId) > second->GetDistance(OWL::MeasurementPoint::RoadStart, roadId);
+                                }
+                                );
+            }
+            for (const auto object : sortedObjects)
+            {
+                if (ObjectIsOfTypeAndWithinRange<T>(object, startDistance, endDistance, lane))
+                {
+                    if (std::count(foundObjects.begin(), foundObjects.end(), object) == 0)
+                    {
+                        foundObjects.push_back(object);
+                    }
+                }
+            }
+        }
+        return foundObjects;
+    }
 
-    //! Returns all WorldObjects in the ForwardLaneStream starting at the lane with given OpenDrive Id and startDistance
-    //! ending at endDistance.
-    //! Objects partially inside the search interval are also considered.
-    std::vector<const OWL::Interfaces::WorldObject*> GetWorldObjectsInRange(std::string roadId, OWL::OdId id,
-            double startDistance,
-            double endDistance) const;
-
-    //! Iterates over ForwardLaneStream until either the type of the next lane does not match one of the specified LaneTypes
+    //! Iterates over a LaneStream until either the type of the next lane does not match one of the specified LaneTypes
     //! or maxSearchLength is reached. Returns the relative distance to the end of last matching lane.
     //! Returns INFINITY if end of lane is outside maxSearchLength.
     //! Returns 0 if lane does not exist or LaneType does not match at initialSearchDistance
     //!
+    //! @param laneStream lane stream to search along
     //! @param id OpenDrive Id of lane
     //! @param initialSearchPosition start s-coordinate
     //! @param maxSearchLength maxmium look ahead distance
     //! @param requestedLaneTypes filter of LaneTypes
-    double GetDistanceToEndOfLane(std::string roadId, OWL::OdId id, double initialSearchPosition, double maxSearchLength,
-                                  std::list<OWL::LaneType> requestedLaneTypes) const;
-
-    //! Returns relative distance to start of last lane in ReverseLaneStream.
-    //! Returns INFINITY if end of lane is outside maxSearchLength.
-    //! Returns 0 if lane does not exist at initialSearchDistance.
-    //!
-    //! @param id OpenDrive Id of lane
-    //! @param initialSearchPosition start s-coordinate
-    //! @param maxSearchLength maxmium look ahead distance
-    double GetDistanceToStartOfLane(std::string roadId, OWL::OdId id, double initialSearchDistance,
-                                    double maxSearchLength) const;
+    double GetDistanceToEndOfLane(const LaneStream& laneStream, double initialSearchPosition, double maxSearchLength,
+                                  std::list<LaneType> requestedLaneTypes) const;
 
     //! Checks if given s-coordinate is valid for specified laneId.
     //!
+    //! @param roadId OpenDrive id of road
     //! @param laneId OpenDrive Id of lane
     //! @param distance s-coordinate
     bool IsSValidOnLane(std::string roadId, OWL::OdId laneId, double distance);
 
     //! Returns number of lanes at given s-coordinate
     //!
+    //! @param roadId OpenDrive id of road
     //! @param distance s-coordinate
     int GetNumberOfLanes(std::string roadId, double distance);
 
     //! Returns lane at specified distance.
     //! Returns InvalidLane if there is no lane at given distance and OpenDriveId
     //!
+    //! @param roadId OpenDrive id of road
     //! @param odLaneId OpendDrive Id of Lane
     //! @param distance s-coordinate
     OWL::CLane& GetLaneByOdId(std::string odRoadId, OWL::OdId odLaneId, double distance) const;
@@ -387,12 +293,21 @@ public:
     //! @param distance s-coordinate
     OWL::CSection* GetSectionByDistance(std::string odRoadId, double distance) const;
 
+    //! Returns the OWL road with the specified OpenDrive id
+    OWL::CRoad *GetRoadByOdId(std::string odRoadId) const;
+
+    //! Returns the junction with the specified OpenDrive id
+    const OWL::Interfaces::Junction *GetJunctionByOdId(const std::string &odJunctionId) const;
+
+    //! Returns the junction that the specified Connector is part of
+    const OWL::Interfaces::Junction *GetJunctionOfConnector(const std::string &connectingRoadId) const;
+
     //! Returns all lanes of given LaneType at specified distance.
     //!
     //! @param distance s-coordinate
     //! @param requestedLaneTypes filter of laneTypes
     OWL::CLanes GetLanesOfLaneTypeAtDistance(std::string roadId, double distance,
-            std::list<OWL::LaneType> requestedLaneTypes) const;
+            std::list<LaneType> requestedLaneTypes) const;
 
     //! Returns next s where there is a valid lane with given laneId.
     //! Returns INFINITY if no valid is s is found.
@@ -430,16 +345,21 @@ public:
     //! Returns start and end s-coordinate of lane stream
     std::pair<double, double> GetLimitingDistances(OWL::CLane& lane) const;
 
-    //! Returns OpenDrive Id of lane at given distance for specified streamId
-    OWL::OdId GetLaneId(OWL::Id streamId, double endDistance) const;
-
-    //! Returns all TrafficSigns valid for the lanes in ForwardLaneStream
+    //! Returns all TrafficSigns valid for the lanes in LaneStream within startDistance and startDistance + searchRange
     //!
-    //! @param laneId OpenDrive Id of lane
-    //! @param distance s-coordinate
-    std::vector<OWL::Interfaces::TrafficSign*> GetTrafficSignsInRange(std::string roadId, OWL::OdId laneId,
-            double startDistance, double searchRange) const;
+    //! @param laneStream lane stream to search in
+    //! @param startDistance s-coordinate of search start
+    //! @param searchRange  range of search
+    std::vector<std::pair<double, OWL::Interfaces::TrafficSign *>> GetTrafficSignsInRange(LaneStream laneStream, double startDistance, double searchRange) const;
 
+
+    //! Retrieves all lane markings within the given range on the given side of the lane inside the range
+    //!
+    //! \param laneStream       lane stream to search in
+    //! \param startDistance    s coordinate
+    //! \param range            search range
+    //! \param side             side of the lane
+    std::vector<LaneMarking::Entity> GetLaneMarkings(const LaneStream &laneStream, double startDistance, double range, Side side) const;
 
     LaneQueryResult QueryLane(std::string roadId, int laneId, double distance) const;
 
@@ -447,19 +367,152 @@ public:
 
     LaneQueryResult BuildLaneQueryResult(OWL::CLane& lane) const;
 
-    std::pair<bool, double> GetLateralDistance(GlobalRoadPosition src, GlobalRoadPosition dst) const;
+    std::vector<JunctionConnection> GetConnectionsOnJunction(std::string junctionId, std::string incomingRoadId) const;
 
+    //! Returns all intersections of the specified connector with other connectors in the junction
+    //!
+    //! \param connectingRoadId OpenDrive id of connector
+    //! \return intersections of connecting road with other roads
+    //!
+    std::vector<IntersectingConnection> GetIntersectingConnections(std::string connectingRoadId) const;
+
+    //! Returns all priorities between the connectors of a junction
+    //!
+    //! \param junctionId   OpenDrive id of the junction
+    std::vector<JunctionConnectorPriority> GetPrioritiesOnJunction(std::string junctionId) const;
+    
+    RoadNetworkElement GetRoadSuccessor(std::string roadId) const;
+
+    RoadNetworkElement GetRoadPredecessor(std::string roadId) const;
+
+    //! Returns all moving objects on the specified connector and the lanes leading to this connector inside
+    //! a certain range
+    //!
+    //! \param connectingRoadId OpenDrive id of the connector
+    //! \param range            Search range measured backwards from the end of the connector
+    //! \return moving objects in search range on connecting and incoming road
+    std::vector<const OWL::Interfaces::WorldObject*> GetMovingObjectsInRangeOfJunctionConnection(std::string connectingRoadId, double range) const;
+
+    //! Returns the distance from the front of the specified to the first intersection point of its road with the specified connector.
+    //! If the object is not yet on the junction all possible route the object can take are considered and the minimum distance is returned
+    //!
+    //! \param object           object to calculate the distance for
+    //! \param connectingRoadId OpenDrive id of connector intersecting with the route of the object
+    //!
+    //! \return distance of object to first intersection with connecting road
+    double GetDistanceUntilObjectEntersConnector(const ObjectPosition position, std::string intersectingConnectorId, int intersectingLaneId, std::string ownConnectorId) const;
+
+    //! Returns the distance from the rear of the specified to the last intersection point of its road with the specified connector.
+    //! If the object is not yet on the junction all possible route the object can take are considered and the maximum distance is returned
+    //!
+    //! \param object           object to calculate the distance for
+    //! \param connectingRoadId OpenDrive id of connector intersecting with the route of the object
+    //!
+    //! \return distance of rear of object to last intersection with connecting road
+    double GetDistanceUntilObjectLeavesConnector(const ObjectPosition position, std::string intersectingConnectorId, int intersectingLaneId, std::string ownConnectorId) const;
+
+    //! Creates the longest possible laneStream along the given route that contains the given startLane
+    //!
+    //! \param route        OpenDrive ids of the roads along which the laneStream should flow
+    //! \param startRoadId  OpenDrive id of the road of the startLane
+    //! \param startLaneId  OpenDrive id of the startLane
+    //! \param startDistance    s coordinate on the startLane
+    //! \return
+    //!
+    std::shared_ptr<const LaneStream> CreateLaneStream(const std::vector<RouteElement>& route, std::string startRoadId, OWL::OdId startLaneId, double startDistance) const;
+
+    //! \brief Creates a RoadStream from the given route
+    //!
+    //! \param route    Route containing the OpenDrive ids of the Roads along which the roadStream should flow
+    //!
+    //! \return a RoadStream across the Roads specified in route
+    //!
+    std::shared_ptr<const RoadStream> CreateRoadStream(const std::vector<RouteElement>& route) const;
+
+    //! \brief GetDistanceBetweenObjects gets the distance between two ObjectPositions on a RoadStream
+    //!
+    //! \param roadStream the RoadStream in which to get the distance between two ObjectPositions
+    //! \param object the first object from whom the distance is calculated
+    //! \param targetObject the target object from whom the distance is calculated (if this object is behind, the distance is negative)
+    //!
+    //! \return the distance between object and targetObject on roadStream
+    double GetDistanceBetweenObjects(const RoadStream& roadStream,
+                                     const ObjectPosition& object,
+                                     const ObjectPosition& targetObject) const;
+
+    //! \brief GetNextJunctionIdOnRoute gets the OdId of the next Junction on route
+    //! 
+    //! \param route the Route on which to get the next Junction's OdId
+    //! \param startPos the ObjectPosition from which to find the next Junction
+    //! 
+    //! \return the OdId of the first Junction after startPos on route
+    std::string GetNextJunctionIdOnRoute(const Route& route, const ObjectPosition& startPos) const;
+
+    //! \brief GetDistanceToJunction gets the distance to the Junction with junctionId from objectPos on route
+    //!
+    //! \param route the Route along which to calculate the distance
+    //! \param objectPos the objectPos from which to find the distance to the Junction with junctionId
+    //! \param junctionId the OdId of the Junction to whom the distance is calculated
+    //!
+    //! \return the distance from objectPos to the Junction with junctionId
+    double GetDistanceToJunction(const Route& route, const ObjectPosition& objectPos, const std::string& junctionId) const;
+
+    //! Calculates the obstruction with an object i.e. how far to left or the right the object is from my position
+    //! For more information see the [markdown documentation](\ref dev_framework_modules_world_getobstruction)
+    //!
+    //! \param laneStream       own lane stream
+    //! \param tCoordinate      own t coordinate
+    //! \param otherPosition    position of the other object
+    //! \param objectCorners    corners of the other object
+    //! \return obstruction with other object
+    Obstruction GetObstruction(const LaneStream& laneStream, double tCoordinate, const ObjectPosition& otherPosition, const std::vector<Common::Vector2d>& objectCorners) const;
+
+    //! Returns the world position that corresponds to a position on a lane
+    //!
+    //! \param lane             lane in the network
+    //! \param distanceOnLane   s coordinate on the lane
+    //! \param offset           t coordinate on the lane
+    Position GetPositionByDistanceAndLane(const OWL::Interfaces::Lane& lane, double distanceOnLane, double offset) const;
+
+    //! Returns the relative distances (start and end) and the connecting road id of all junctions on the road stream in range
+    //!
+    //! \param roadStream       road stream to search
+    //! \param startPosition    start search position on the road stream
+    //! \param range            range of search
+    //! \return information about all junctions in range
+    RelativeWorldView::Junctions GetRelativeJunctions (const RoadStream& roadStream, double startPosition, double range) const;
+
+    //! Returns information about all lanes on the roadStream in range. These info are the relative distances (start and end),
+    //! the laneId relative to the ego lane, the successors and predecessors if existing and the information wether the intended
+    //! driving direction of the lane is the same as the direction of the roadStream. If the ego lane prematurely ends, then
+    //! the further lane ids are relative to the middle of the road.
+    //!
+    //! \param roadStream       road stream to search
+    //! \param startPosition    start search position on the road stream
+    //! \param startLaneId      ego lane id
+    //! \param range            range of search
+    //! \return information about all lanes in range
+    RelativeWorldView::Lanes GetRelativeLanes (const RoadStream& roadStream, double startPosition, int startLaneId, double range) const;
 
 private:
-    OWL::Interfaces::WorldData& worldData;
+    const OWL::Interfaces::WorldData& worldData;
 
-    std::tuple<bool, double, OWL::Lane const* const> GetWidthOfIntermediateLanesLeft(
-        OWL::CLane& lane,
-        double distance,
-        OWL::Id targetStreamId) const;
+    //! Returns the most upstream lane on the specified route such that there is a continous stream of lanes regarding successor/predecessor relation
+    //! up to the start lane
+    OWL::CLane* GetOriginatingRouteLane(std::vector<RouteElement> route, std::string startRoadId, OWL::OdId startLaneId, double startDistance) const;
+    
+    OWL::CRoad* GetOriginatingRouteRoad(const std::vector<std::string>& route, const std::string& startRoadId, const OWL::OdId startLaneId, const double startDistance) const;
 
-    std::tuple<bool, double, OWL::Lane const* const> GetWidthOfIntermediateLanesRight(
-        OWL::CLane& lane,
-        double distance,
-        OWL::Id targetStreamId) const;
+    //! Returns the ids of the stream of roads leading the connecting road including the connecting road itself
+    std::vector<RouteElement> GetRouteLeadingToConnector(std::string connectingRoadId) const;
+
+    //! Returns the WorldPosition corresponding to the (s,t) position on the lane, if s is valid on the lane
+    //! Otherwise the bool in the pair is false
+    std::pair<bool, Position> CalculatePositionIfOnLane(double sCoordinate, double tCoordinate, const OWL::Interfaces::Lane& lane) const;
+
+    int FindNextEgoLaneId(const OWL::Interfaces::Lanes& lanesOnSection, bool inStreamDirection, std::map<int, OWL::Id> previousSectionLaneIds) const;
+
+    std::map<int, OWL::Id> AddLanesOfSection(const OWL::Interfaces::Lanes& lanesOnSection, bool inStreamDirection,
+                                             int currentOwnLaneId, const std::map<int, OWL::Id>& previousSectionLaneIds,
+                                             std::vector<RelativeWorldView::Lane>& previousSectionLanes, RelativeWorldView::LanesInterval& laneInterval) const;
 };

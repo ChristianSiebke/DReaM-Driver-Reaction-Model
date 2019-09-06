@@ -10,7 +10,6 @@
 *******************************************************************************/
 
 #include "road.h"
-#include "roadElementTypes.h"
 
 extern "C"
 {
@@ -90,18 +89,24 @@ bool RoadLane::AddRoadMark(double sOffset,
                            RoadLaneRoadDescriptionType type,
                            RoadLaneRoadMarkType roadMark,
                            RoadLaneRoadMarkColor color,
-                           RoadLaneRoadMarkLaneChange laneChange)
+                           RoadLaneRoadMarkLaneChange laneChange,
+                           RoadLaneRoadMarkWeight weight)
 {
     RoadLaneRoadMark* laneRoadMark = new (std::nothrow) RoadLaneRoadMark(sOffset,
-            type,
-            roadMark,
-            color,
-            laneChange);
+                                                                         type,
+                                                                         roadMark,
+                                                                         color,
+                                                                         laneChange,
+                                                                         weight);
     if (!laneRoadMark)
     {
         return false;
     }
 
+    for (auto roadMark : roadMarks)
+    {
+        roadMark->LimitSEnd(sOffset);
+    }
     roadMarks.push_back(laneRoadMark);
 
     return true;
@@ -1371,6 +1376,7 @@ double RoadGeometryPoly3::GetCurvature(double side,
     Common::Vector2d delta;
     Common::Vector2d pos(0.0, a);
 
+    // find x for specified geometry offset
     while (s < geometryOffset)
     {
         lastPos = pos;
@@ -1389,7 +1395,7 @@ double RoadGeometryPoly3::GetCurvature(double side,
         if (s + deltaLength > geometryOffset)
         {
             // rescale last step
-            double scale = (geometryOffset - s) / deltaLength;
+            const double scale = (geometryOffset - s) / deltaLength;
 
             delta.Scale(scale);
             deltaLength = geometryOffset - s;
@@ -1398,7 +1404,12 @@ double RoadGeometryPoly3::GetCurvature(double side,
         s += deltaLength;
     }
 
-    return 2 * c + 6 * d * (lastPos + delta).x;
+    // use the two-dimensional equation of curvature
+    const double x = (lastPos + delta).x;
+    const double firstDerivativeEvaluation = 3 * d * std::pow(x, 2.0) + 2 * c * x + b;
+    const double secondDerivativeEvaluation = 6 * d * x + 2 * c;
+
+    return std::abs(secondDerivativeEvaluation) / std::pow(1 + std::pow(firstDerivativeEvaluation, 2.0), 3.0 / 2.0);
 }
 
 double RoadGeometryPoly3::GetDir(double side,
@@ -1427,6 +1438,259 @@ double RoadGeometryPoly3::GetDir(double side,
         lastPos = pos;
         pos.x += 1.0;
         pos.y = a + b * pos.x + c * pos.x * pos.x + d * pos.x * pos.x * pos.x;
+
+        delta = pos - lastPos;
+        double deltaLength = delta.Length();
+
+        if (0.0 == deltaLength)
+        {
+            LOG_INTERN(LogLevel::Warning) << "could not calculate road geometry correctly";
+            return 0.0;
+        }
+
+        if (s + deltaLength > geometryOffset)
+        {
+            // rescale last step
+            double scale = (geometryOffset - s) / deltaLength;
+
+            delta.Scale(scale);
+            deltaLength = geometryOffset - s;
+        }
+
+        s += deltaLength;
+    }
+
+    Common::Vector2d direction;
+    if (0 < geometryOffset)
+    {
+        direction = delta;
+    }
+    else // account for start point
+    {
+        direction.x = 1.0;
+    }
+
+    direction.Rotate(hdg);
+    if (!direction.Norm())
+    {
+        LOG_INTERN(LogLevel::Error) << "division by 0";
+    }
+
+    if (1.0 < direction.y)
+    {
+        direction.y = 1.0;
+    }
+
+    if (-1.0 > direction.y)
+    {
+        direction.y = -1.0;
+    }
+
+    double angle = std::asin(direction.y);
+
+    if (0.0 <= direction.x)
+    {
+        return angle;
+    }
+    else
+    {
+        return M_PI - angle;
+    }
+}
+Common::Vector2d RoadGeometryParamPoly3::GetCoord(double side,
+        double geometryOffset,
+        double previousWidth,
+        double laneOffset,
+        double laneWidth,
+        int corner)
+{
+    if (0.0 == parameters.aV && 0.0 == parameters.bV && 0.0 == parameters.cV && 0.0 ==  parameters.dV)
+    {
+        return GetCoordLine(side,
+                            geometryOffset,
+                            previousWidth,
+                            laneOffset,
+                            laneWidth,
+                            corner);
+    }
+
+    double s = 0.0;
+    Common::Vector2d lastPos;
+    Common::Vector2d delta;
+    double p = 0.0;
+    Common::Vector2d pos(parameters.aU, parameters.aV);
+
+    while (s < geometryOffset)
+    {
+        lastPos = pos;
+        p += 1/length;
+        pos.x = parameters.aU + parameters.bU * p + parameters.cU * p * p + parameters.dU * p * p * p;
+        pos.y = parameters.aV + parameters.bV * p + parameters.cV * p * p + parameters.dV * p * p * p;
+
+        delta = pos - lastPos;
+        double deltaLength = delta.Length();
+
+        if (0.0 == deltaLength)
+        {
+            LOG_INTERN(LogLevel::Warning) << "could not calculate road geometry correctly";
+            return Common::Vector2d();
+        }
+
+        if (s + deltaLength > geometryOffset)
+        {
+            // rescale last step
+            double scale = (geometryOffset - s) / deltaLength;
+
+            delta.Scale(scale);
+            deltaLength = geometryOffset - s;
+        }
+
+        s += deltaLength;
+    }
+
+    Common::Vector2d offset(lastPos + delta);
+
+    Common::Vector2d norm;
+    if (0 < geometryOffset)
+    {
+        norm = delta;
+    }
+    else // account for start point
+    {
+        norm.x = 1.0;
+    }
+
+    norm.Rotate(-M_PI_2); // pointing to right side
+    if (!norm.Norm())
+    {
+        LOG_INTERN(LogLevel::Error) << "division by 0";
+    }
+
+    offset.Add(norm * -laneOffset);
+
+    if (0 < side) // left side
+    {
+        if (0 < corner) // left corner
+        {
+            offset.Add(norm * (-laneWidth - previousWidth));
+        }
+        else
+            if (0 == corner) // middle corner
+            {
+                offset.Add(norm * (-laneWidth / 2 - previousWidth));
+            }
+            else // right corner
+            {
+                offset.Add(norm * -previousWidth);
+            }
+    }
+    else // right side
+    {
+        if (0 < corner) // left corner
+        {
+            offset.Add(norm * previousWidth);
+        }
+        else
+            if (0 == corner) // middle corner
+            {
+                offset.Add(norm * (laneWidth / 2 + previousWidth));
+            }
+            else // right corner
+            {
+                offset.Add(norm * (laneWidth + previousWidth));
+            }
+    }
+
+    offset.Rotate(hdg);
+
+    offset.x += x;
+    offset.y += y;
+    return offset;
+}
+
+double RoadGeometryParamPoly3::GetCurvature(double side,
+                                       double geometryOffset,
+                                       double previousWidth,
+                                       double laneOffset,
+                                       double laneWidth)
+{
+    if (0.0 == parameters.aV && 0.0 == parameters.bV && 0.0 == parameters.cV && 0.0 ==  parameters.dV)
+    {
+        return GetCurvatureLine(side,
+                                geometryOffset,
+                                previousWidth,
+                                laneOffset,
+                                laneWidth);
+    }
+
+    double s = 0.0;
+    Common::Vector2d lastPos;
+    Common::Vector2d delta;
+    double p = 0.0;
+    Common::Vector2d pos(parameters.aU, parameters.aV);
+
+    while (s < geometryOffset)
+    {
+        lastPos = pos;
+        p += 1/length;
+        pos.x = parameters.aU + parameters.bU * p + parameters.cU * p * p + parameters.dU * p * p * p;
+        pos.y = parameters.aV + parameters.bV * p + parameters.cV * p * p + parameters.dV * p * p * p;
+
+        delta = pos - lastPos;
+        double deltaLength = delta.Length();
+
+        if (0.0 == deltaLength)
+        {
+            LOG_INTERN(LogLevel::Warning) << "could not calculate road geometry correctly";
+            return 0.0;
+        }
+
+        if (s + deltaLength > geometryOffset)
+        {
+            // rescale last step
+            double scale = (geometryOffset - s) / deltaLength;
+
+            delta.Scale(scale);
+            deltaLength = geometryOffset - s;
+        }
+
+        s += deltaLength;
+    }
+
+    return (((parameters.bU + 2 * parameters.cU * p + 3 * parameters.dU * p * p) * (2 * parameters.cV + 6 * parameters.dV * p))
+            - ((parameters.bV + 2 * parameters.cV * p + 3 * parameters.dV * p * p) * (2 * parameters.cU + 6 * parameters.dU * p)))
+            /std::sqrt(std::pow(((parameters.bU + 2 * parameters.cU * p + 3 * parameters.dU * p * p) * (parameters.bU + 2 * parameters.cU * p + 3 * parameters.dU * p * p)
+            + (parameters.bV + 2 * parameters.cV * p + 3 * parameters.dV * p * p) * (parameters.bV + 2 * parameters.cV * p + 3 * parameters.dV * p * p)),3));
+}
+
+double RoadGeometryParamPoly3::GetDir(double side,
+                                 double geometryOffset,
+                                 double previousWidth,
+                                 double laneOffset,
+                                 double laneWidth)
+{
+    Q_UNUSED(side);
+    Q_UNUSED(previousWidth);
+    Q_UNUSED(laneOffset);
+    Q_UNUSED(laneWidth);
+
+    if (0.0 == parameters.aV && 0.0 == parameters.bV && 0.0 == parameters.cV && 0.0 ==  parameters.dV)
+    {
+        return GetDirLine(geometryOffset);
+    }
+
+    double s = 0.0;
+    Common::Vector2d lastPos;
+    Common::Vector2d delta;
+    double p = 0.0;
+    Common::Vector2d pos(parameters.aU, parameters.aV);
+
+    while (s < geometryOffset)
+    {
+        lastPos = pos;
+        p += 1/length;
+        pos.x = parameters.aU + parameters.bU * p + parameters.cU * p * p + parameters.dU * p * p * p;
+        pos.y = parameters.aV + parameters.bV * p + parameters.cV * p * p + parameters.dV * p * p * p;
 
         delta = pos - lastPos;
         double deltaLength = delta.Length();
@@ -1613,6 +1877,29 @@ bool Road::AddGeometryPoly3(double s,
             b,
             c,
             d);
+    if (!roadGeometry)
+    {
+        return false;
+    }
+
+    geometries.push_back(roadGeometry);
+
+    return true;
+}
+
+bool Road::AddGeometryParamPoly3(double s,
+                                 double x,
+                                 double y,
+                                 double hdg,
+                                 double length,
+                                 ParamPoly3Parameters parameters)
+{
+    RoadGeometry* roadGeometry = new (std::nothrow) RoadGeometryParamPoly3(s,
+            x,
+            y,
+            hdg,
+            length,
+            parameters);
     if (!roadGeometry)
     {
         return false;

@@ -17,18 +17,13 @@
 #include <QtGlobal>
 
 CollisionManipulator::CollisionManipulator(WorldInterface* world,
-        ParameterInterface* parameters,
         SimulationSlave::EventNetworkInterface* eventNetwork,
         const CallbackInterface* callbacks):
     ManipulatorCommonBase(world,
-                          parameters,
                           eventNetwork,
                           callbacks)
 {
     cycleTime = 100;
-    priority = PriorityLevel::PriorityLevelZero;
-    eventCategory = EventDefinitions::EventCategory::Collision;
-    eventTypes.push_back(EventDefinitions::EventType::Collision);
 }
 
 void CollisionManipulator::Trigger(int time)
@@ -60,8 +55,11 @@ void CollisionManipulator::Trigger(int time)
             auto pair = std::make_pair(ObjectTypeOSI::Object, event->collisionOpponentId);
             for (auto partner : collisionAgent->GetCollisionPartners())
             {
-                AgentInterface* partnerAgent = world->GetAgent(partner.second);
-                partnerAgent->UpdateCollision(pair);
+                if (partner.first == ObjectTypeOSI::Vehicle)
+                {
+                    AgentInterface* partnerAgent = world->GetAgent(partner.second);
+                    partnerAgent->UpdateCollision(pair);
+                }
             }
 
             collisionAgent->UpdateCollision(pair);
@@ -121,4 +119,10 @@ void CollisionManipulator::UpdateCollision(AgentInterface* agent, AgentInterface
             UpdateCollision(world->GetAgent(partner.second), agent);
         }
     }
+}
+
+
+EventContainer CollisionManipulator::GetEvents()
+{
+    return eventNetwork->GetActiveEventCategory(EventDefinitions::EventCategory::Collision);
 }

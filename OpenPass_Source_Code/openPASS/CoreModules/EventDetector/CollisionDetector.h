@@ -20,7 +20,14 @@
 #pragma once
 
 #include "EventDetectorCommonBase.h"
+
 #include "Common/boostGeometryCommon.h"
+#include "Common/vector2d.h"
+
+class AgentInterface;
+class TrafficObjectInterface;
+class WorldObjectInterface;
+
 
 typedef enum
 {
@@ -70,7 +77,6 @@ class CollisionDetector : public EventDetectorCommonBase
 {
 public:
     CollisionDetector(WorldInterface *world,
-                      ParameterInterface* parameters,
                       SimulationSlave::EventNetworkInterface *eventNetwork,
                       const CallbackInterface *callbacks,
                       StochasticsInterface *stochastics);

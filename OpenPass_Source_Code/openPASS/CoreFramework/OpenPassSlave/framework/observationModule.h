@@ -22,7 +22,7 @@
 #include <map>
 
 #include "Interfaces/observationInterface.h"
-#include "observationLibrary.h"
+#include "observationInterface/observationLibrary.h"
 #include "CoreFramework/CoreShare/log.h"
 
 namespace SimulationSlave

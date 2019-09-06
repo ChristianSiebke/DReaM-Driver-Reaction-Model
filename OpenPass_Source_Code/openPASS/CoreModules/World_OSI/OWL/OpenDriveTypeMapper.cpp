@@ -17,13 +17,13 @@
 
 #include "OpenDriveTypeMapper.h"
 
-#include "roadInterface/roadElementTypes.h"
+#include "Interfaces/roadInterface/roadElementTypes.h"
 
 #include "osi/osi_road.pb.h"
 #include "osi/osi_lane.pb.h"
 #include "OWL/DataTypes.h"
 
-osi3::world::Road_Type OpenDriveTypeMapper::RoadType(const RoadTypeInformation odRoadType)
+osi3::world::Road_Type OpenDriveTypeMapper::OdToOsiRoadType(const RoadTypeInformation odRoadType)
 {
     osi3::world::Road_Type osiType;
 
@@ -61,7 +61,7 @@ osi3::world::Road_Type OpenDriveTypeMapper::RoadType(const RoadTypeInformation o
     return osiType;
 }
 
-osi3::Lane_Classification_Type OpenDriveTypeMapper::LaneType(const RoadLaneType odLaneType)
+osi3::Lane_Classification_Type OpenDriveTypeMapper::OdToOsiLaneType(const RoadLaneType odLaneType)
 {
     osi3::Lane_Classification_Type osiType;
 
@@ -80,253 +80,226 @@ osi3::Lane_Classification_Type OpenDriveTypeMapper::LaneType(const RoadLaneType 
     return osiType;
 }
 
-osi3::TrafficSign_MainSign_Classification_Type OpenDriveTypeMapper::TrafficSignType(const RoadSignalType odSignalType)
+static osi3::TrafficSignValue_Unit TrafficSignUnit(const RoadSignalUnit unit)
 {
-    osi3::TrafficSign_MainSign_Classification_Type osiType;
-
-    switch (odSignalType)
+    switch(unit)
     {
-    case RoadSignalType::Undefined:
-        osiType = osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_OTHER;
-        break;
-    case RoadSignalType::MaximumSpeedLimit:
-        osiType = osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_SPEED_LIMIT_BEGIN;
-        break;
-    case RoadSignalType::MinimumSpeedLimit:
-        osiType = osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_MINIMUM_SPEED_BEGIN;
-        break;
-    case RoadSignalType::EndOfMaximumSpeedLimit:
-        osiType = osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_SPEED_LIMIT_END;
-        break;
-    case RoadSignalType::EndOfMinimumSpeedLimit:
-        osiType = osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_MINIMUM_SPEED_END;
-        break;
-    case RoadSignalType::EndOffAllSpeedLimitsAndOvertakingRestrictions:
-        osiType = osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_ALL_RESTRICTIONS_END;
-        break;
-    case RoadSignalType::TownBegin:
-        osiType = osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_TOWN_BEGIN;
-        break;
-    case RoadSignalType::TownEnd:
-        osiType = osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_TOWN_END;
-        break;
-    case RoadSignalType::Zone30Begin:
-        osiType = osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_SPEED_LIMIT_ZONE_BEGIN;
-        break;
-    case RoadSignalType::Zone30End:
-        osiType = osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_SPEED_LIMIT_ZONE_END;
-        break;
-    case RoadSignalType::TrafficCalmedDistrictBegin:
-        osiType = osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_LIVING_STREET_BEGIN;
-        break;
-    case RoadSignalType::TrafficCalmedDistrictEnd:
-        osiType = osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_LIVING_STREET_END;
-        break;
-    case RoadSignalType::EnvironmentalZoneBegin:
-        osiType = osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_ENVIRONMENTAL_ZONE_BEGIN;
-        break;
-    case RoadSignalType::EnvironmentalZoneEnd:
-        osiType = osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_ENVIRONMENTAL_ZONE_END;
-        break;
-    case RoadSignalType::OvertakingBanBegin:
-        osiType = osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_OVERTAKING_BAN_BEGIN;
-        break;
-    case RoadSignalType::OvertakingBanEnd:
-        osiType = osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_OVERTAKING_BAN_END;
-        break;
-    case RoadSignalType::OvertakingBanForTrucksBegin:
-        osiType = osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_OVERTAKING_BAN_FOR_TRUCKS_BEGIN;
-        break;
-    case RoadSignalType::OvertakingBanForTrucksEnd:
-        osiType = osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_OVERTAKING_BAN_FOR_TRUCKS_END;
-        break;
-    case RoadSignalType::RightOfWayBegin:
-        osiType = osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_RIGHT_OF_WAY_BEGIN;
-        break;
-    case RoadSignalType::RightOfWayEnd:
-        osiType = osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_RIGHT_OF_WAY_END;
-        break;
-    case RoadSignalType::RightOfWayNextIntersection:
-        osiType = osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_RIGHT_OF_WAY_NEXT_INTERSECTION;
-        break;
-    case RoadSignalType::Stop:
-        osiType = osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_STOP;
-        break;
-    case RoadSignalType::DoNotEnter:
-        osiType = osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_DO_NOT_ENTER;
-        break;
-    case RoadSignalType::HighWayBegin:
-        osiType = osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_HIGHWAY_BEGIN;
-        break;
-    case RoadSignalType::HighWayEnd:
-        osiType = osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_HIGHWAY_END;
-        break;
-    case RoadSignalType::HighWayExit:
-        osiType = osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_HIGHWAY_EXIT;
-        break;
+        case RoadSignalUnit::Undefined:
+            return osi3::TrafficSignValue_Unit::TrafficSignValue_Unit_UNIT_OTHER;
+         case RoadSignalUnit::Meter:
+            return osi3::TrafficSignValue_Unit::TrafficSignValue_Unit_UNIT_METER;
+         case RoadSignalUnit::Kilometer:
+            return osi3::TrafficSignValue_Unit::TrafficSignValue_Unit_UNIT_KILOMETER;
+         case RoadSignalUnit::Feet:
+            return osi3::TrafficSignValue_Unit::TrafficSignValue_Unit_UNIT_FEET;
+         case RoadSignalUnit::LandMile:
+            return osi3::TrafficSignValue_Unit::TrafficSignValue_Unit_UNIT_MILE;
+         case RoadSignalUnit::MilesPerHour:
+            return osi3::TrafficSignValue_Unit::TrafficSignValue_Unit_UNIT_MILE_PER_HOUR;
+         case RoadSignalUnit::KilometersPerHour:
+            return osi3::TrafficSignValue_Unit::TrafficSignValue_Unit_UNIT_KILOMETER_PER_HOUR;
+         case RoadSignalUnit::MetricTons:
+            return osi3::TrafficSignValue_Unit::TrafficSignValue_Unit_UNIT_METRIC_TON;
+         case RoadSignalUnit::Percent:
+            return osi3::TrafficSignValue_Unit::TrafficSignValue_Unit_UNIT_PERCENTAGE;
+         default:
+            return osi3::TrafficSignValue_Unit::TrafficSignValue_Unit_UNIT_UNKNOWN;
+    }
+}
+
+static std::pair<double, osi3::TrafficSignValue_Unit> ConvertOdValueAndUnitToOsi(const double odValue, const RoadSignalUnit odUnit)
+{
+    double osiValue = odValue;
+    osi3::TrafficSignValue_Unit osiUnit = TrafficSignUnit(odUnit);
+
+    if(osiUnit == osi3::TrafficSignValue_Unit::TrafficSignValue_Unit_UNIT_UNKNOWN)
+    {
+        if(odUnit == RoadSignalUnit::MetersPerSecond)
+        {
+            osiUnit = osi3::TrafficSignValue_Unit::TrafficSignValue_Unit_UNIT_KILOMETER_PER_HOUR;
+            osiValue = odValue * 3.6;
+        }
+        else if(odUnit == RoadSignalUnit::Kilogram)
+        {
+            osiUnit = osi3::TrafficSignValue_Unit::TrafficSignValue_Unit_UNIT_METRIC_TON;
+            osiValue = odValue / 1000.0;
+        }
     }
 
-    return osiType;
+    return {osiValue, osiUnit};
 }
 
 
-OWL::LaneType OpenDriveTypeMapper::OdToOwlLaneType(const RoadLaneType laneType)
+osi3::LaneBoundary::Classification::Type OpenDriveTypeMapper::OdToOsiLaneMarkingType(RoadLaneRoadMarkType type, OWL::LaneMarkingSide side)
+{
+    switch (type)
+    {
+    case  RoadLaneRoadMarkType::None:
+        return osi3::LaneBoundary_Classification_Type_TYPE_NO_LINE;
+    case  RoadLaneRoadMarkType::Solid:
+        return osi3::LaneBoundary_Classification_Type_TYPE_SOLID_LINE;
+    case  RoadLaneRoadMarkType::Broken:
+        return osi3::LaneBoundary_Classification_Type_TYPE_DASHED_LINE;
+    case  RoadLaneRoadMarkType::Solid_Solid:
+        return osi3::LaneBoundary_Classification_Type_TYPE_SOLID_LINE;
+    case  RoadLaneRoadMarkType::Solid_Broken:
+        if (side == OWL::LaneMarkingSide::Right)
+        {
+            return osi3::LaneBoundary_Classification_Type_TYPE_DASHED_LINE;
+        }
+        else
+        {
+            return osi3::LaneBoundary_Classification_Type_TYPE_SOLID_LINE;
+        }
+    case  RoadLaneRoadMarkType::Broken_Solid:
+        if (side == OWL::LaneMarkingSide::Right)
+        {
+            return osi3::LaneBoundary_Classification_Type_TYPE_SOLID_LINE;
+        }
+        else
+        {
+            return osi3::LaneBoundary_Classification_Type_TYPE_DASHED_LINE;
+        }
+    case  RoadLaneRoadMarkType::Broken_Broken:
+        return osi3::LaneBoundary_Classification_Type_TYPE_DASHED_LINE;
+    case  RoadLaneRoadMarkType::Botts_Dots:
+        return osi3::LaneBoundary_Classification_Type_TYPE_BOTTS_DOTS;
+    case  RoadLaneRoadMarkType::Grass:
+        return osi3::LaneBoundary_Classification_Type_TYPE_GRASS_EDGE;
+    case  RoadLaneRoadMarkType::Curb:
+        return osi3::LaneBoundary_Classification_Type_TYPE_CURB;
+    case RoadLaneRoadMarkType::Undefined:
+        return osi3::LaneBoundary_Classification_Type_TYPE_NO_LINE;
+    default:
+        throw std::invalid_argument("Invalid type");
+    }
+}
+
+osi3::LaneBoundary::Classification::Color OpenDriveTypeMapper::OdToOsiLaneMarkingColor(RoadLaneRoadMarkColor color)
+{
+    switch (color)
+    {
+        case RoadLaneRoadMarkColor::Undefined:
+            return osi3::LaneBoundary_Classification_Color_COLOR_OTHER;
+        case RoadLaneRoadMarkColor::White:
+            return osi3::LaneBoundary_Classification_Color_COLOR_WHITE;
+        case RoadLaneRoadMarkColor::Blue:
+            return osi3::LaneBoundary_Classification_Color_COLOR_BLUE;
+        case RoadLaneRoadMarkColor::Green:
+            return osi3::LaneBoundary_Classification_Color_COLOR_GREEN;
+        case RoadLaneRoadMarkColor::Red:
+            return osi3::LaneBoundary_Classification_Color_COLOR_RED;
+        case RoadLaneRoadMarkColor::Yellow:
+        case RoadLaneRoadMarkColor::Orange:
+            return osi3::LaneBoundary_Classification_Color_COLOR_YELLOW;
+        default:
+            throw std::invalid_argument("Invalid color");
+    }
+}
+
+LaneType OpenDriveTypeMapper::OdToOwlLaneType(const RoadLaneType laneType)
 {
     switch (laneType)
     {
         case RoadLaneType::None:
-            return OWL::LaneType::None;
+            return LaneType::None;
         case RoadLaneType::Driving:
-            return OWL::LaneType::Driving;
+            return LaneType::Driving;
         case RoadLaneType::Stop:
-            return OWL::LaneType::Stop;
+            return LaneType::Stop;
         case RoadLaneType::Shoulder:
-            return OWL::LaneType::Shoulder;
+            return LaneType::Shoulder;
         case RoadLaneType::Biking:
-            return OWL::LaneType::Biking;
+            return LaneType::Biking;
         case RoadLaneType::Sidewalk:
-            return OWL::LaneType::Sidewalk;
+            return LaneType::Sidewalk;
         case RoadLaneType::Border:
-            return OWL::LaneType::Border;
+            return LaneType::Border;
         case RoadLaneType::Restricted:
-            return OWL::LaneType::Restricted;
+            return LaneType::Restricted;
         case RoadLaneType::Parking:
-            return OWL::LaneType::Parking;
+            return LaneType::Parking;
         case RoadLaneType::Bidirectional:
-            return OWL::LaneType::Bidirectional;
+            return LaneType::Bidirectional;
         case RoadLaneType::Median:
-            return OWL::LaneType::Median;
+            return LaneType::Median;
         case RoadLaneType::Special1:
-            return OWL::LaneType::Special1;
+            return LaneType::Special1;
         case RoadLaneType::Special2:
-            return OWL::LaneType::Special2;
+            return LaneType::Special2;
         case RoadLaneType::Special3:
-            return OWL::LaneType::Special3;
+            return LaneType::Special3;
         case RoadLaneType::Roadworks:
-            return OWL::LaneType::Roadworks;
+            return LaneType::Roadworks;
         case RoadLaneType::Tram:
-            return OWL::LaneType::Tram;
+            return LaneType::Tram;
         case RoadLaneType::Rail:
-            return OWL::LaneType::Rail;
+            return LaneType::Rail;
         case RoadLaneType::Entry:
-            return OWL::LaneType::Entry;
+            return LaneType::Entry;
         case RoadLaneType::Exit:
-            return OWL::LaneType::Exit;
+            return LaneType::Exit;
         case RoadLaneType::OffRamp:
-            return OWL::LaneType::OffRamp;
+            return LaneType::OffRamp;
         case RoadLaneType::OnRamp:
-            return OWL::LaneType::OnRamp;
+            return LaneType::OnRamp;
         default:
-            return OWL::LaneType::Undefined;
+            return LaneType::Undefined;
     }
 }
 
-CommonTrafficSign::Type OpenDriveTypeMapper::OsiToOdTrafficSignType(const osi3::TrafficSign_MainSign_Classification_Type trafficSignType)
+LaneMarking::Color OpenDriveTypeMapper::OsiToOdLaneMarkingColor(const osi3::LaneBoundary_Classification_Color color)
 {
-    if(trafficSignType == osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_OTHER)
+    if(color == osi3::LaneBoundary_Classification_Color::LaneBoundary_Classification_Color_COLOR_WHITE)
     {
-        return CommonTrafficSign::Type::Undefined;
+        return LaneMarking::Color::White;
     }
-    if(trafficSignType == osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_SPEED_LIMIT_BEGIN)
+    if(color == osi3::LaneBoundary_Classification_Color::LaneBoundary_Classification_Color_COLOR_YELLOW)
     {
-        return CommonTrafficSign::Type::MaximumSpeedLimit;
+        return LaneMarking::Color::Yellow;
     }
-    if(trafficSignType == osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_SPEED_LIMIT_END)
+    if(color == osi3::LaneBoundary_Classification_Color::LaneBoundary_Classification_Color_COLOR_GREEN)
     {
-        return CommonTrafficSign::Type::EndOfMaximumSpeedLimit;
+        return LaneMarking::Color::Green;
     }
-    if(trafficSignType == osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_MINIMUM_SPEED_BEGIN)
+    if(color == osi3::LaneBoundary_Classification_Color::LaneBoundary_Classification_Color_COLOR_RED)
     {
-        return CommonTrafficSign::Type::MinimumSpeedLimit;
+        return LaneMarking::Color::Red;
     }
-    if(trafficSignType == osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_MINIMUM_SPEED_END)
+    if(color == osi3::LaneBoundary_Classification_Color::LaneBoundary_Classification_Color_COLOR_BLUE)
     {
-        return CommonTrafficSign::Type::EndOfMinimumSpeedLimit;
-    }
-    if(trafficSignType == osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_ALL_RESTRICTIONS_END)
-    {
-        return CommonTrafficSign::Type::EndOffAllSpeedLimitsAndOvertakingRestrictions;
-    }
-    if(trafficSignType == osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_TOWN_BEGIN)
-    {
-        return CommonTrafficSign::Type::TownBegin;
-    }
-    if(trafficSignType == osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_TOWN_END)
-    {
-        return CommonTrafficSign::Type::TownEnd;
-    }
-    if(trafficSignType == osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_SPEED_LIMIT_ZONE_BEGIN)
-    {
-        return CommonTrafficSign::Type::Zone30Begin;
-    }
-    if(trafficSignType == osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_SPEED_LIMIT_ZONE_END)
-    {
-        return CommonTrafficSign::Type::Zone30End;
-    }
-    if(trafficSignType == osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_LIVING_STREET_BEGIN)
-    {
-        return CommonTrafficSign::Type::TrafficCalmedDistrictBegin;
-    }
-    if(trafficSignType == osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_LIVING_STREET_END)
-    {
-        return CommonTrafficSign::Type::TrafficCalmedDistrictEnd;
-    }
-    if(trafficSignType == osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_ENVIRONMENTAL_ZONE_BEGIN)
-    {
-        return CommonTrafficSign::Type::EnvironmentalZoneBegin;
-    }
-    if(trafficSignType == osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_ENVIRONMENTAL_ZONE_END)
-    {
-        return CommonTrafficSign::Type::EnvironmentalZoneEnd;
-    }
-    if(trafficSignType == osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_OVERTAKING_BAN_BEGIN)
-    {
-        return CommonTrafficSign::Type::OvertakingBanBegin;
-    }
-    if(trafficSignType == osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_OVERTAKING_BAN_END)
-    {
-        return CommonTrafficSign::Type::OvertakingBanEnd;
-    }
-    if(trafficSignType == osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_OVERTAKING_BAN_FOR_TRUCKS_BEGIN)
-    {
-        return CommonTrafficSign::Type::OvertakingBanForTrucksBegin;
-    }
-    if(trafficSignType == osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_OVERTAKING_BAN_FOR_TRUCKS_END)
-    {
-        return CommonTrafficSign::Type::OvertakingBanForTrucksEnd;
-    }
-    if(trafficSignType == osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_RIGHT_OF_WAY_BEGIN)
-    {
-        return CommonTrafficSign::Type::RightOfWayBegin;
-    }
-    if(trafficSignType == osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_RIGHT_OF_WAY_END)
-    {
-        return CommonTrafficSign::Type::RightOfWayEnd;
-    }
-    if(trafficSignType == osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_RIGHT_OF_WAY_NEXT_INTERSECTION)
-    {
-        return CommonTrafficSign::Type::RightOfWayNextIntersection;
-    }
-    if(trafficSignType == osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_STOP)
-    {
-        return CommonTrafficSign::Type::Stop;
-    }
-    if(trafficSignType == osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_DO_NOT_ENTER)
-    {
-        return CommonTrafficSign::Type::DoNotEnter;
-    }
-    if(trafficSignType == osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_HIGHWAY_BEGIN)
-    {
-        return CommonTrafficSign::Type::HighWayBegin;
-    }
-    if(trafficSignType == osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_HIGHWAY_END)
-    {
-        return CommonTrafficSign::Type::HighWayEnd;
-    }
-    if(trafficSignType == osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_HIGHWAY_EXIT)
-    {
-        return CommonTrafficSign::Type::HighWayExit;
+        return LaneMarking::Color::Blue;
     }
 
-    throw std::logic_error("Type of traffic sign not supported.");
+    throw std::invalid_argument("Type of lane marking color not supported.");
+}
+
+LaneMarking::Type OpenDriveTypeMapper::OsiToOdLaneMarkingType(const osi3::LaneBoundary_Classification_Type type)
+{
+    if (type == osi3::LaneBoundary_Classification_Type_TYPE_NO_LINE)
+    {
+        return LaneMarking::Type::None;
+    }
+    if (type == osi3::LaneBoundary_Classification_Type_TYPE_SOLID_LINE)
+    {
+        return LaneMarking::Type::Solid;
+    }
+    if (type == osi3::LaneBoundary_Classification_Type_TYPE_DASHED_LINE)
+    {
+        return LaneMarking::Type::Broken;
+    }
+    if (type == osi3::LaneBoundary_Classification_Type_TYPE_BOTTS_DOTS)
+    {
+        return LaneMarking::Type::Botts_Dots;
+    }
+    if (type == osi3::LaneBoundary_Classification_Type_TYPE_GRASS_EDGE)
+    {
+        return LaneMarking::Type::Grass;
+    }
+    if (type == osi3::LaneBoundary_Classification_Type_TYPE_CURB)
+    {
+        return LaneMarking::Type::Curb;
+    }
+
+    throw std::invalid_argument("Type of lane marking not supported.");
 }

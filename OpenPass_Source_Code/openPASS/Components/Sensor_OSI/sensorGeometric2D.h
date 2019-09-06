@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "WorldData.h"
 #include "objectDetectorBase.h"
 #include "osi/osi_sensorview.pb.h"
 #include "osi/osi_sensordata.pb.h"
@@ -26,6 +27,14 @@ struct ObjectView
     double minAngle;
     double maxAngle;
     double distance;
+};
+
+struct SensorDetectionResults
+{
+    std::vector<osi3::MovingObject> visibleMovingObjects;
+    std::vector<osi3::MovingObject> detectedMovingObjects;
+    std::vector<osi3::StationaryObject> visibleStationaryObjects;
+    std::vector<osi3::StationaryObject> detectedStationaryObjects;
 };
 
 //-----------------------------------------------------------------------------
@@ -66,7 +75,7 @@ public:
      *
      * For further explanation of the calculation see the [documentation](\ref dev_agent_modules_geometric2d)
     */
-    void DetectObjects();
+    SensorDetectionResults DetectObjects();
 
 protected:
 
@@ -80,7 +89,8 @@ protected:
 
 
 private:
-
+    void Observe(const int time, const SensorDetectionResults& results);
+    SensorDetectionResults ApplyLatencyToResults(const int time, const SensorDetectionResults& results);
     /**
      * \brief Calculate if objects in the detection field visually obstruct other objects and remove those whose visibility percentage is below the threshold
      *
@@ -90,7 +100,9 @@ private:
      * \param stationaryObjects     list of stationary objects in the detection field for which visual obstruction should be applied
      * \param sensorPositionGlobal  sensor postion in global coordinates
     */
-    void CalcVisualObstruction(std::vector<osi3::MovingObject> &movingObjects, std::vector<osi3::StationaryObject> &stationaryObjects, point_t sensorPositionGlobal);
+    template<typename T>
+    std::pair<std::vector<T>, std::vector<T>> CalcVisualObstruction(const std::vector<const T*>& objects,
+                                                                                  const multi_polygon_t& brightArea);
 
     /**
      * Calculate the polygon to approximate the detection area
@@ -106,7 +118,7 @@ private:
      * \param sensorPosition Position of the sensor (light source)
      * \returns shadow polygon
     */
-    multi_polygon_t CalcObjectShadow(const polygon_t& boundingBox, point_t sensorPosition);
+    static multi_polygon_t CalcObjectShadow(const polygon_t& boundingBox, point_t sensorPosition);
 
     /**
      * Calculate how many percent of an object are inside the bright area
@@ -114,7 +126,7 @@ private:
      * \param brightArea
      * \returns percentage of the visible area of the object
      */
-    double CalcObjectVisibilityPercentage(const polygon_t& boundingBox, multi_polygon_t& brightArea);
+    static double CalcObjectVisibilityPercentage(const polygon_t& boundingBox, const multi_polygon_t &brightArea);
     
     /*!
      * \brief Adds the information of a detected moving object as DetectedMovingObject to the sensor data
@@ -140,26 +152,48 @@ private:
     /*!
      * \brief Returns true if opening angle is smaller than pi
      */
-    bool OpeningAngleWithinHalfCircle();
+    bool OpeningAngleWithinHalfCircle() const;
 
     /*!
      * \brief Returns true if opening angle is smaller than two pi
      */
-    bool OpeningAngleWithinFullCircle();
+    bool OpeningAngleWithinFullCircle() const;
 
     /*!
      * \brief Creates the detection field for angles smaller than pi
      */
-    polygon_t CreateFourPointDetectionField();
+    polygon_t CreateFourPointDetectionField() const;
 
     /*!
      * \brief Creates the detection field for angles between pi and two pi
      */
-    polygon_t CreateFivePointDetectionField();
+    polygon_t CreateFivePointDetectionField() const;
+
+    point_t GetHostVehiclePosition(const osi3::MovingObject* hostVehicle) const;
+
+    std::pair<point_t, polygon_t> CreateSensorDetectionField(const osi3::MovingObject* hostVehicle) const;
+    template<typename T>
+    static void ApplyVisualObstructionToDetectionArea(multi_polygon_t& brightArea,
+                                                      const point_t& sensorPositionGlobal,
+                                                      const std::vector<const T*>& objects);
+    template<typename T>
+    bool ObjectIsInDetectionArea(const T& object,
+                                 const point_t& sensorPositionGlobal,
+                                 const polygon_t& detectionField) const;
+
+    std::pair<std::vector<const osi3::MovingObject*>, std::vector<const osi3::StationaryObject*>> GetObjectsInDetectionAreaFromSensorView(const osi3::SensorView& sensorView,
+                                                                                                                                          const point_t& sensorPositionGlobal,
+                                                                                                                                          const polygon_t& detectionField) const;
+
+    static const osi3::MovingObject* FindHostVehicleInSensorView(const osi3::SensorView& sensorView);
+    std::string CreateAgentIdListString(const std::vector<OWL::Id>& owlIds) const;
 
     bool enableVisualObstruction = false;
     double requiredPercentageOfVisibleArea = 0.001;
     double detectionRange;
     double openingAngleH;
+    std::map<int, SensorDetectionResults> latentSensorDetectionResultsBuffer;
+
+    static constexpr double MIN_VISIBLE_UNOBSTRUCTED_PERCENTAGE = 0.0001;
 };
 

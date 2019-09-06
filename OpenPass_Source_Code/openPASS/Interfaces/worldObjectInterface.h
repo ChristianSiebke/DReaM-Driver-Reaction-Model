@@ -11,6 +11,7 @@
 
 #include "Common/globalDefinitions.h"
 #include "Common/boostGeometryCommon.h"
+#include "Common/worldDefinitions.h"
 #include <unordered_map>
 
 class WorldObjectInterface;
@@ -57,11 +58,16 @@ public:
         return GetDistanceToStartOfRoad(MeasurementPoint::Front);
     }
 
-    virtual double GetLaneDirection() const = 0;
-
-    /// \brief  Get distance w.r.t. the specified measurement point
+    /// \brief  Get distance (s coordinate) w.r.t. the specified measurement point on the route
+    /// \param mp   point where s coordinate is measured
     /// \return distance
     virtual double GetDistanceToStartOfRoad(MeasurementPoint mp) const = 0;
+
+    /// \brief  Get distance (s coordinate) w.r.t. the specified measurement point on the specified road
+    /// \param mp       point where s coordinate is measured
+    /// \param roadId   OpenDrive id of the road
+    /// \return distance
+    virtual double GetDistanceToStartOfRoad(MeasurementPoint mp, std::string roadId) const = 0;
 
     virtual double GetDistanceReferencePointToLeadingEdge() const = 0;
 
@@ -79,11 +85,6 @@ public:
     /// \brief Distance w.r.t. to the lane boundary for the outmost boundary point
     /// \return distance in m
     virtual double GetLaneRemainder(Side) const = 0;
-
-    /// \brief Gets the coordinate of the outmost boundary point for a given side
-    /// \param side Side of interest
-    /// \return Position with respect to a lane
-    virtual GlobalRoadPosition GetBoundaryPoint(Side side) const = 0;
 
     virtual bool Locate() = 0;
     virtual void Unlocate() = 0;

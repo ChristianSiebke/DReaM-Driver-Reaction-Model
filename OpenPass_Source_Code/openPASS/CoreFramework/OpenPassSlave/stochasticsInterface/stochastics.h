@@ -18,15 +18,17 @@
 
 #pragma once
 
+#ifndef SIMULATIONSLAVE_STOCHASTICS_DEFINED
+
 #include "CoreFramework/CoreShare/log.h"
 #include "Interfaces/stochasticsInterface.h"
-#include "stochasticsBinding.h"
-#include "stochasticsLibrary.h"
+#include "stochasticsInterface/stochasticsBinding.h"
+#include "stochasticsInterface/stochasticsLibrary.h"
 
 namespace SimulationSlave
 {
 
-class Stochastics: public StochasticsInterface
+class Stochastics : public StochasticsInterface
 {
 public:
     Stochastics(StochasticsBinding *stochasticsBinding) :
@@ -108,3 +110,4 @@ private:
 
 } // namespace SimulationSlave
 
+#endif   // SIMULATIONSLAVE_STOCHASTICS_DEFINED

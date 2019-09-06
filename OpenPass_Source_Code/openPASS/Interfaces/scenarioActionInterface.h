@@ -23,8 +23,6 @@ public:
     ScenarioActionInterface& operator=(ScenarioActionInterface&&) = delete;
     virtual ~ScenarioActionInterface() = default;
 
-    virtual const std::vector<std::string>& GetEventDetectorNames() const = 0;
-    virtual const std::vector<std::string>& GetActors() const = 0;
     virtual const std::string& GetSequenceName() const = 0;
 private:
 };

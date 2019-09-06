@@ -15,15 +15,16 @@
 
 #include "CollisionDetector.h"
 
+#include "Interfaces/agentInterface.h"
+#include "Interfaces/trafficObjectInterface.h"
+#include "Interfaces/worldObjectInterface.h"
 
 CollisionDetector::CollisionDetector(WorldInterface *world,
-                                     ParameterInterface *parameters,
                                      SimulationSlave::EventNetworkInterface *eventNetwork,
                                      const CallbackInterface *callbacks,
                                      StochasticsInterface *stochastics):
     EventDetectorCommonBase(
         world,
-        parameters,
         eventNetwork,
         callbacks,
         stochastics)
@@ -88,7 +89,7 @@ void CollisionDetector::GetMinMax4(std::array<double, 4> &input,
     maxValue = input[0];
     minValue = input[0];
 
-    for(int index = 1; index < 4; ++index)
+    for(size_t index = 1; index < 4; ++index)
     {
         if(input[index] > maxValue)
         {
@@ -767,12 +768,12 @@ bool CollisionDetector::DetectIntersectionOfTwoWorldObjects(const WorldObjectInt
 void CollisionDetector::DetectedCollisionWithObject(int time, AgentInterface *agent, const WorldObjectInterface *other)
 {
     std::shared_ptr<CollisionEvent> event = std::make_shared<CollisionEvent>(time,
-                                                                             COMPONENTNAME,
-                                                                             sequenceName,
-                                                                             eventType,
-                                                                             false,
-                                                                             agent->GetId(),
-                                                                             other->GetId());
+                                                                                                                              COMPONENTNAME,
+                                                                                                                              "Collision",
+                                                                                                                              eventType,
+                                                                                                                              false,
+                                                                                                                              agent->GetId(),
+                                                                                                                              other->GetId());
 
     eventNetwork->InsertEvent(event);
 }
@@ -780,12 +781,12 @@ void CollisionDetector::DetectedCollisionWithObject(int time, AgentInterface *ag
 void CollisionDetector::DetectedCollisionWithAgent(int time, AgentInterface *agent, AgentInterface *other)
 {
     std::shared_ptr<CollisionEvent> event = std::make_shared<CollisionEvent>(time,
-                                                                             COMPONENTNAME,
-                                                                             sequenceName,
-                                                                             eventType,
-                                                                             true,
-                                                                             agent->GetId(),
-                                                                             other->GetId());
+                                                                                                                               COMPONENTNAME,
+                                                                                                                               "Collision",
+                                                                                                                               eventType,
+                                                                                                                               true,
+                                                                                                                               agent->GetId(),
+                                                                                                                               other->GetId());
 
     eventNetwork->InsertEvent(event);
 }

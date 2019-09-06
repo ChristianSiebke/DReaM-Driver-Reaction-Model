@@ -12,11 +12,12 @@
 /** \file  SpawnControl.cpp */
 //-----------------------------------------------------------------------------
 
-#include "commonTools.h"
 #include "spawnControl.h"
 #include "spawnPointNetwork.h"
 
+#include "Common/commonTools.h"
 #include "Common/boostGeometryCommon.h"
+
 #include <boost/geometry/geometries/adapted/c_array.hpp>
 
 namespace SimulationSlave {
@@ -177,11 +178,11 @@ bool SpawnControl::AdaptVelocityForAgentBlueprint(AgentBlueprintInterface* agent
 
     while (opponentSearchDistance <= maxSearchDistance)
     {
-        const WorldObjectInterface* opponent = world->GetNextObjectInLane(spawningRoadId, spawningLaneId,
-                                               opponentSearchDistance);
+        const WorldObjectInterface* opponent = world->GetNextObjectInLane(Route{spawningRoadId}, spawningRoadId, spawningLaneId,
+                                               opponentSearchDistance, true);
         if (!opponent)
         {
-            const auto freeSpace = world->GetDistanceToEndOfDrivingLane(spawningRoadId, spawningLaneId, spawningDistance,
+            const auto freeSpace = world->GetDistanceToEndOfDrivingLane(Route{spawningRoadId}, spawningRoadId, spawningLaneId, spawningDistance,
                                    maxSearchDistance);
 
             // free space too small - no rescue
@@ -257,12 +258,12 @@ int SpawnControl::CalculateHoldbackTime(AgentBlueprintInterface* agentBlueprint)
 
     while (opponentSearchDistance <= maxSearchDistance)
     {
-        const WorldObjectInterface* opponent = world->GetNextObjectInLane(spawningRoadId, spawningLaneId,
-                                               opponentSearchDistance);
+        const WorldObjectInterface* opponent = world->GetNextObjectInLane(Route{spawningRoadId}, spawningRoadId, spawningLaneId,
+                                               opponentSearchDistance, true);
 
         if (!opponent)
         {
-            if (fullBrakingDistance > world->GetDistanceToEndOfDrivingLane(spawningRoadId, spawningLaneId, spawningDistance,
+            if (fullBrakingDistance > world->GetDistanceToEndOfDrivingLane(Route{spawningRoadId}, spawningRoadId, spawningLaneId, spawningDistance,
                     maxSearchDistance))
             {
                 return -1;

@@ -10,17 +10,17 @@
 
 #include <exception>
 #include <cmath>
+#include <qglobal.h>
+
 #include "TrafficObjectAdapter.h"
-#include "Localization/LocalizationCache.h"
 
 //TODO: replace GlobalObject with injected shared_pointer to locator
 
-TrafficObjectAdapter::TrafficObjectAdapter(OWL::Interfaces::WorldData& worldData,
-        World::Localization::Cache& localizationCache,
+TrafficObjectAdapter::TrafficObjectAdapter(OWL::Interfaces::WorldData& worldData, const World::Localization::Localizer& localizer,
         OWL::Primitive::AbsPosition position,
         OWL::Primitive::Dimension dimension, OWL::Primitive::AbsOrientation orientation) :
     WorldObjectAdapter{worldData.AddStationaryObject(static_cast<void*>(this))},
-    locator{baseTrafficObject, worldData, localizationCache}
+    localizer{localizer}
 {
     baseTrafficObject.SetReferencePointPosition(position);
     baseTrafficObject.SetDimension(dimension);
@@ -46,25 +46,28 @@ void TrafficObjectAdapter::InitLaneDirection(double hdg)
 
 double TrafficObjectAdapter::GetDistanceToStartOfRoad(MeasurementPoint mp) const
 {
-    if (mp == MeasurementPoint::Front)
-    {
-        return GetBaseTrafficObject().GetDistance(OWL::MeasurementPoint::RoadEnd);
-    }
-    if (mp == MeasurementPoint::Rear)
-    {
-        return GetBaseTrafficObject().GetDistance(OWL::MeasurementPoint::RoadStart);
-    }
-    if (mp == MeasurementPoint::Reference)
-    {
-        auto value = GetBaseTrafficObject().GetRoadCoordinate().s;
-        return value;
-    }
+    return GetDistanceToStartOfRoad(mp, GetBaseTrafficObject().GetLocatedPosition().referencePoint.roadId);
+}
 
-    throw std::invalid_argument("measurement point not within valid bounds");
+double TrafficObjectAdapter::GetDistanceToStartOfRoad(MeasurementPoint mp, std::string roadId) const
+{
+    switch (mp)
+    {
+        case MeasurementPoint::Front:
+            return GetBaseTrafficObject().GetDistance(OWL::MeasurementPoint::RoadEnd, roadId);
+        case MeasurementPoint::Rear:
+            return GetBaseTrafficObject().GetDistance(OWL::MeasurementPoint::RoadStart, roadId);
+        case MeasurementPoint::Reference:
+            return GetBaseTrafficObject().GetLocatedPosition().referencePoint.roadPosition.s;
+        default:
+            throw std::invalid_argument("Invalid measurement point");
+    }
 }
 
 double TrafficObjectAdapter::GetVelocity(VelocityScope velocityScope) const
 {
+    Q_UNUSED(velocityScope);
+
     //TrafficObjects don't move
     return 0.0;
 }
@@ -76,46 +79,23 @@ double TrafficObjectAdapter::GetLaneDirection() const
 
 double TrafficObjectAdapter::GetLaneRemainder(Side side) const
 {
-    if (remainders.empty())
-    {
-        // Update only on request
-        remainders = locator.GetLaneRemainders();
-    }
-
-    assert(!remainders.empty());
-    return side == Side::Left ? remainders.begin()->left : remainders.rbegin()->right;
-}
-
-GlobalRoadPosition TrafficObjectAdapter::GetBoundaryPoint(Side side) const
-{
-    if (boundaryPoints.empty())
-    {
-        // Update only on request
-        boundaryPoints = locator.GetBoundaryPoints();
-    }
-    assert(!boundaryPoints.empty());
-    return side == Side::Left ? *boundaryPoints.begin() : *boundaryPoints.rbegin();
+    return side == Side::Left ? locateResult.remainder.left : locateResult.remainder.right;
 }
 
 bool TrafficObjectAdapter::Locate()
 {
     // reset on-demand values
-    remainders.clear();
     boundaryPoints.clear();
 
-    locateResult = locator.Locate(GetBoundingBox2D(), GetLength() + GetWidth());
-    if (!locateResult.isLocalizable)
-    {
-        return false;
-    }
+    locateResult = localizer.Locate(GetBoundingBox2D(), baseTrafficObject, Route{});
 
-    baseTrafficObject.SetRoadCoordinate(locateResult.globalRoadPosition.roadPosition);
+    baseTrafficObject.SetLocatedPosition(locateResult.position);
     return true;
 }
 
 void TrafficObjectAdapter::Unlocate()
 {
-    locator.Unlocate();
+    localizer.Unlocate(baseTrafficObject);
 }
 
 TrafficObjectAdapter::~TrafficObjectAdapter()

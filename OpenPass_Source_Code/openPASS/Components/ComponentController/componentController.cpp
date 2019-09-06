@@ -15,7 +15,7 @@
 #include "componentController.h"
 #include "componentControllerImplementation.h"
 
-const std::string Version = "0.0.1";
+const std::string Version = "0.1.0";
 static const CallbackInterface *Callbacks = nullptr;
 
 extern "C" COMPONENT_CONTROLLER_SHARED_EXPORT const std::string &OpenPASS_GetVersion()

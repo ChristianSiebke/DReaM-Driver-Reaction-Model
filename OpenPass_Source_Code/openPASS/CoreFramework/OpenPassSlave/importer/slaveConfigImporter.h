@@ -132,7 +132,7 @@ public:
 
 private:
     static std::string GetLibrary(const QDomElement& root, std::string key, std::string tag);
-    static constexpr auto supportedConfigVersion = "0.6.0";
+    static constexpr auto supportedConfigVersion = "0.6.1";
 
     //! \brief Identifier with correspondiong default values for mandatory libraries
     //! \note: The identifier is identical to the XML tag
@@ -140,7 +140,7 @@ private:
     {
         {"EventDetectorLibrary", "EventDetector"},
         {"ManipulatorLibrary", "Manipulator"},
-        {"SpawnPointLibrary", "SpawnPoint"},
+        {"SpawnPointLibrary", "SpawnPoint_OSI"},
         {"WorldLibrary", "World"},
         {"ObservationLibrary", "Observation"},
         {"StochasticsLibrary", "Stochastics"}

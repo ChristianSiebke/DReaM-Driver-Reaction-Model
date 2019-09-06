@@ -18,6 +18,7 @@
 
 #include "callbacks.h"
 #include "Interfaces/worldInterface.h"
+#include "Interfaces/stochasticsInterface.h"
 
 namespace SimulationSlave
 {
@@ -29,7 +30,8 @@ class WorldBinding
 {
 public:
     WorldBinding(std::string libraryPath,
-                 CallbackInterface *callbacks);
+                 CallbackInterface *callbacks,
+                 StochasticsInterface* stochastics);
     WorldBinding(const WorldBinding&) = delete;
     WorldBinding(WorldBinding&&) = delete;
     WorldBinding& operator=(const WorldBinding&) = delete;
@@ -53,6 +55,7 @@ private:
     const std::string libraryPath;
     WorldLibrary *library = nullptr;
     CallbackInterface *callbacks;
+    StochasticsInterface* stochastics;
 };
 
 } // namespace SimulationSlave

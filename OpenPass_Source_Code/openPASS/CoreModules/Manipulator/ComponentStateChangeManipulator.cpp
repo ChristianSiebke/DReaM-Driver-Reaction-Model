@@ -33,34 +33,7 @@ std::vector<std::string> TokenizeString(const std::string& str, const char delim
 }
 
 ComponentStateChangeManipulator::ComponentStateChangeManipulator(WorldInterface *world,
-                                               ParameterInterface *parameters,
-                                               SimulationSlave::EventNetworkInterface *eventNetwork,
-                                               const CallbackInterface *callbacks):
-    ManipulatorCommonBase(world,
-                          parameters,
-                          eventNetwork,
-                          callbacks)
-{
-    cycleTime = 100;
-    priority = PriorityLevel::PriorityLevelThree;
-
-    eventCategory = EventDefinitions::EventCategory::AgentBased;
-    eventType = EventDefinitions::EventType::ComponentStateChange;
-
-    try
-    {
-        componentName = parameters->GetParametersString().at("Name");
-        componentStateName = parameters->GetParametersString().at("ComponentState");
-    }
-    catch(...)
-    {
-        const std::string msg = COMPONENTNAME + ":ComponentStateChangeManipulator could not init parameters";
-        LOG(CbkLogLevel::Error, msg);
-        throw std::runtime_error(msg);
-    }
-}
-ComponentStateChangeManipulator::ComponentStateChangeManipulator(WorldInterface *world,
-                                std::shared_ptr<UserDefinedCommandAction> action,
+                                std::shared_ptr<openScenario::UserDefinedCommandAction> action,
                                 SimulationSlave::EventNetworkInterface *eventNetwork,
                                 const CallbackInterface *callbacks):
     ManipulatorCommonBase(world,
@@ -90,8 +63,6 @@ ComponentStateChangeManipulator::ComponentStateChangeManipulator(WorldInterface 
     }
 
     cycleTime = 100;
-    priority = PriorityLevelThree;
-    eventCategory = EventDefinitions::EventCategory::AgentBased;
     eventType = EventDefinitions::EventType::ComponentStateChange;
 }
 
@@ -101,22 +72,39 @@ void ComponentStateChangeManipulator::Trigger(int time)
 
     for (std::shared_ptr<EventInterface> eventInterface : GetEvents())
     {
-        std::shared_ptr<AgentBasedEvent> triggeringEvent = std::dynamic_pointer_cast<AgentBasedEvent>(eventInterface);
+        std::shared_ptr<AgentBasedManipulationEvent> triggeringEvent = std::dynamic_pointer_cast<AgentBasedManipulationEvent>(eventInterface);
 
-        for (const auto& actor : GetActors(triggeringEvent))
-        {
-            std::shared_ptr<ComponentChangeEvent> event =
+        std::shared_ptr<ComponentChangeEvent> event =
                 std::make_shared<ComponentChangeEvent>(time,
                                                             COMPONENTNAME,
                                                             sequenceName,
                                                             eventType,
-                                                            actor->GetId(),
+                                                            triggeringEvent->triggeringAgents,
+                                                            triggeringEvent->actingAgents,
                                                             componentName,
                                                             componentStateName);
 
-            event->SetTriggeringEventId(triggeringEvent->GetId());
+         event->SetTriggeringEventId(triggeringEvent->GetId());
 
-            eventNetwork->InsertEvent(event);
+         eventNetwork->InsertEvent(event);
+    }
+}
+
+EventContainer ComponentStateChangeManipulator::GetEvents()
+{
+    EventContainer manipulatorSpecificEvents{};
+
+    const auto &conditionalEvents = eventNetwork->GetActiveEventCategory(EventDefinitions::EventCategory::AgentBasedManipulation);
+
+    for(const auto &event: conditionalEvents)
+    {
+        const auto conditionalEvent = std::static_pointer_cast<AgentBasedManipulationEvent>(event);
+
+        if(conditionalEvent && conditionalEvent.get()->GetSequenceName() == sequenceName)
+        {
+            manipulatorSpecificEvents.emplace_back(event);
         }
     }
+
+    return manipulatorSpecificEvents;
 }

@@ -16,15 +16,54 @@
 
 enum class ComponentState
 {
-    Acting,
-    Armed,
+    Undefined = 0,
     Disabled,
-    Undefined
+    Armed,
+    Acting
 };
 
 const std::map<std::string, ComponentState> ComponentStateMapping = { { "Acting",   ComponentState::Acting   },
                                                                       { "Armed",    ComponentState::Armed    },
                                                                       { "Disabled", ComponentState::Disabled } };
+
+enum class ComponentWarningLevel
+{
+    INFO = 0,
+    WARNING
+};
+
+const std::map<ComponentWarningLevel, std::string> ComponentWarningLevelMapping = { { ComponentWarningLevel::INFO   , "Info"    },
+                                                                                    { ComponentWarningLevel::WARNING, "Warning" } };
+
+enum class ComponentWarningType
+{
+    OPTIC = 0,
+    ACOUSTIC,
+    HAPTIC
+};
+
+const std::map<ComponentWarningType, std::string> ComponentWarningTypeMapping = { { ComponentWarningType::OPTIC   , "Optic"    },
+                                                                                  { ComponentWarningType::ACOUSTIC, "Acoustic" },
+                                                                                  { ComponentWarningType::HAPTIC  , "Haptic"   } };
+
+enum class ComponentWarningIntensity
+{
+    LOW = 0,
+    MEDIUM,
+    HIGH
+};
+
+const std::map<ComponentWarningIntensity, std::string> ComponentWarningIntensityMapping = { { ComponentWarningIntensity::LOW   , "Low"    },
+                                                                                            { ComponentWarningIntensity::MEDIUM, "Medium" },
+                                                                                            { ComponentWarningIntensity::HIGH  , "High"   } };
+
+struct ComponentWarningInformation
+{
+    bool activity;
+    ComponentWarningLevel level;
+    ComponentWarningType type;
+    ComponentWarningIntensity intensity;
+};
 
 //-----------------------------------------------------------------------------
 //! This interface provides access to common signal operations

@@ -18,35 +18,24 @@ DEFINES += SENSOR_OBJECT_DETECTOR_LIBRARY
 CONFIG += OPENPASS_LIBRARY
 include(../../../global.pri)
 
-#for OSI config parsing
-QT += xml
-
-SUBDIRS += .
-
-INCLUDEPATH += $$SUBDIRS \
-    ../../Common \
-    ../../CoreFramework/CoreShare \
-    ../../Interfaces \
-    ../../Interfaces/RoadInterface \
+INCLUDEPATH += \
     ../../CoreModules/World_OSI
 
 SOURCES += \
-    $$getFiles(SUBDIRS, cpp) \
-    $$getFiles(SUBDIRS, cc) \
-    $$getFiles(SUBDIRS, c) \
+    ../../CoreModules/World_OSI/OWL/DataTypes.cpp \
+    ../../CoreModules/World_OSI/OWL/OpenDriveTypeMapper.cpp \
+    ../../CoreModules/World_OSI/WorldData.cpp \
+    ../../CoreModules/World_OSI/WorldDataException.cpp \
+    ../../Common/vector2d.cpp \
+    objectDetectorBase.cpp \
+    sensorGeometric2D.cpp \
+    sensorObjectDetectorFactory.cpp
 
 HEADERS += \
-    $$getFiles(SUBDIRS, hpp) \
-    $$getFiles(SUBDIRS, h)
+    ../../CoreModules/World_OSI/WorldData.h \
+    objectDetectorBase.h \
+    sensorGeometric2D.h \
+    sensorObjectDetectorFactory.h \
+    sensorObjectDetectorGlobal.h
 
-win32 {
-LIBS += \
-    -lopen_simulation_interface \
-    -lzmq \
-    -lprotobuf
-} else {
-LIBS += \
-    -lopen_simulation_interface \
-    -lzmq \
-    -lprotobuf
-}
+LIBS += -lopen_simulation_interface -lprotobuf

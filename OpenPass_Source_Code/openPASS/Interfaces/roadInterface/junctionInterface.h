@@ -14,6 +14,12 @@
 #include "Interfaces/roadInterface/connectionInterface.h"
 #include <map>
 
+struct Priority
+{
+    std::string high;
+    std::string low;
+};
+
 //-----------------------------------------------------------------------------
 //! Class representing a junction
 //-----------------------------------------------------------------------------
@@ -30,8 +36,11 @@ public:
 
     virtual ConnectionInterface* AddConnection(std::string id,std::string incomingRoadId, std::string connectingRoadId, ContactPointType conatctPoint) = 0;
 
+    virtual void AddPriority(Priority priority) = 0;
 
     virtual std::map<std::string, ConnectionInterface*> GetConnections() const = 0;
+
+    virtual const std::vector<Priority>& GetPriorities() const = 0;
 
     virtual std::string GetId() const = 0;
 

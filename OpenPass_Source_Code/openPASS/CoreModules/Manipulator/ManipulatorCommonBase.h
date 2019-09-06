@@ -29,24 +29,16 @@
 
 #pragma once
 
-#include "Interfaces/worldInterface.h"
+#include "Interfaces/eventNetworkInterface.h"
 #include "Interfaces/manipulatorInterface.h"
 #include "Interfaces/scenarioActionInterface.h"
+#include "Interfaces/worldInterface.h"
 
 //Event Categories
-#include "Common/agentBasedEvent.h"
+#include "Common/agentBasedManipulatorEvent.h"
 #include "Common/collisionEvent.h"
 
 #define EVENT_DETECTOR "EventDetector"
-
-//PriorityLevel for the scheduler. Zero is executed last and the highest value is exectued first.
-enum PriorityLevel
-{
-    PriorityLevelZero,
-    PriorityLevelOne,
-    PriorityLevelTwo,
-    PriorityLevelThree
-};
 
 //-----------------------------------------------------------------------------
 /** \brief This is the parent class for all Manipulators providing the basic functionality.
@@ -57,9 +49,12 @@ class ManipulatorCommonBase : public ManipulatorInterface
 {
 public:
     ManipulatorCommonBase(WorldInterface *world,
-                          ParameterInterface *parameters,
                           SimulationSlave::EventNetworkInterface *eventNetwork,
-                          const CallbackInterface *callbacks);
+                          const CallbackInterface *callbacks):
+        world(world),
+        eventNetwork(eventNetwork),
+        callbacks(callbacks)
+    {}
 
     ManipulatorCommonBase(WorldInterface *world,
                           std::shared_ptr<ScenarioActionInterface> action,
@@ -88,13 +83,6 @@ public:
     */
     virtual int GetCycleTime();
 
-    /*!
-    * \brief Returns the schedule priority.
-    *
-    * @return     priority.
-    */
-    int GetPriority();
-
 protected:
     /*!
      * \brief Log
@@ -117,20 +105,9 @@ protected:
     *
     * param[in]     manipulated event
     */
-    std::list<std::shared_ptr<EventInterface>> GetEvents();
+    virtual EventContainer GetEvents() = 0;
 
-    /*!
-     * \brief Returns all agents that get influenced by the Manipulator.
-     * \details     First looks wether specific agents names were set as actors.
-     *              If not returns the agent which is defined in the event.
-     *
-     * \return      List of all manipulated agents.
-     */
-    std::list<AgentInterface *> GetActors(std::shared_ptr<AgentBasedEvent> event);
-
-    EventDefinitions::EventCategory eventCategory = EventDefinitions::EventCategory::Undefined;
     std::list<EventDefinitions::EventType> eventTypes;
-    std::vector<std::string> actorNames;
 
     WorldInterface *world = nullptr;
     ParameterInterface *parameters = nullptr;
@@ -138,7 +115,6 @@ protected:
     const CallbackInterface *callbacks = nullptr;
 
     int cycleTime {};
-    PriorityLevel priority {PriorityLevelZero};
     std::string sequenceName {""};
 
     EventDefinitions::EventType eventType = EventDefinitions::EventType::Undefined;

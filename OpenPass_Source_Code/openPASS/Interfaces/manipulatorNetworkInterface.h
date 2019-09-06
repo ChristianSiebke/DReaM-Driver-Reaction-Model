@@ -10,13 +10,14 @@
 
 #pragma once
 
-#include "Interfaces/eventNetworkInterface.h"
-#include "Interfaces/scenarioInterface.h"
+#include <string>
+#include <vector>
 
-namespace SimulationSlave
-{
+class ScenarioInterface;
 
-//Forward declarations
+namespace SimulationSlave {
+
+class EventNetworkInterface;
 class Manipulator;
 
 class ManipulatorNetworkInterface

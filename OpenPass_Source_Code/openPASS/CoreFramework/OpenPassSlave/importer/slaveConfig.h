@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "../Interfaces/slaveConfigInterface.h"
+#include "Interfaces/slaveConfigInterface.h"
 #include "profiles.h"
 
 namespace Configuration {

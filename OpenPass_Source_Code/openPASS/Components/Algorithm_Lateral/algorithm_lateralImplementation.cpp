@@ -19,10 +19,10 @@
 #include "algorithm_lateralImplementation.h"
 #include "Common/steeringSignal.h"
 #include "Common/parametersVehicleSignal.h"
-#include "Components/Sensor_Driver/Signals/sensorDriverSignal.h"
 #include "Common/lateralSignal.h"
 #include "Common/commonTools.h"
-#include "globalDefinitions.h"
+#include "Common/globalDefinitions.h"
+#include "Components/Sensor_Driver/Signals/sensorDriverSignal.h"
 
 void AlgorithmLateralImplementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time)
 {

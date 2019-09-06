@@ -16,27 +16,29 @@
 
 #pragma once
 
+#include "worldInterface/world.h"
 #include "Interfaces/frameworkModuleContainerInterface.h"
 
 #include "agentFactory.h"
 #include "agentBlueprintProvider.h"
-#include "Interfaces/configurationContainerInterface.h"
 #include "directories.h"
-#include "eventDetectorBinding.h"
+#include "eventDetectorInterface/eventDetectorBinding.h"
 #include "eventDetectorNetwork.h"
 #include "eventNetwork.h"
 #include "frameworkModules.h"
-#include "manipulatorBinding.h"
+#include "manipulatorInterface/manipulatorBinding.h"
 #include "manipulatorNetwork.h"
 #include "modelBinding.h"
-#include "observationBinding.h"
+#include "observationInterface/observationBinding.h"
 #include "observationNetwork.h"
 #include "sampler.h"
-#include "spawnPointBinding.h"
+#include "spawnPointInterface/spawnPointBinding.h"
 #include "spawnPointNetwork.h"
-#include "stochastics.h"
-#include "stochasticsBinding.h"
-#include "world.h"
+#include "stochasticsInterface/stochastics.h"
+#include "stochasticsInterface/stochasticsBinding.h"
+
+#include "Interfaces/agentBlueprintInterface.h"
+#include "Interfaces/configurationContainerInterface.h"
 
 namespace SimulationSlave {
 
@@ -75,14 +77,14 @@ public:
     AgentBlueprintProviderInterface* GetAgentBlueprintProvider() override;
 
 private:
+    StochasticsBinding stochasticsBinding;
+    Stochastics stochastics;
+
     WorldBinding worldBinding;
     World world;
 
     SpawnPointBinding spawnPointBinding;
     SpawnPointNetwork spawnPointNetwork;
-
-    StochasticsBinding stochasticsBinding;
-    Stochastics stochastics;
 
     ObservationBinding observationBinding;
     ObservationNetwork observationNetwork;

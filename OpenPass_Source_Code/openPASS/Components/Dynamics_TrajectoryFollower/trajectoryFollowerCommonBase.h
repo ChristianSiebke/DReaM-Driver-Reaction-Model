@@ -56,22 +56,24 @@
 #pragma once
 
 #include "Interfaces/modelInterface.h"
-#include "globalDefinitions.h"
+#include "Interfaces/eventNetworkInterface.h"
 #include "CoreFramework/OpenPassSlave/importer/trajectory.h"
 
-#include "Common/lateralSignal.h"
-#include "Common/dynamicsSignal.h"
+#include "Common/vector2d.h"
 #include "Common/accelerationSignal.h"
-#include "Common/compCtrlToAgentCompSignal.h"
+#include "Common/vehicleComponentEvent.h"
 #include "Common/agentCompToCompCtrlSignal.h"
-#include "Common/agentBasedEvent.h"
+#include "Common/compCtrlToAgentCompSignal.h"
+#include "Common/dynamicsSignal.h"
+#include "Common/globalDefinitions.h"
+#include "Common/lateralSignal.h"
 
 /*!
  * \brief Makes an agent strictly follow a predefined path.
  *
  * \ingroup Dynamics_TrajectoryFollower
  */
-class TrajectoryFollowerCommonBase : public UnrestrictedModelInterface
+class TrajectoryFollowerCommonBase : public UnrestrictedEventModelInterface
 {
 public:
     const std::string COMPONENTNAME = "Dynamics_TrajectoryFollower";
@@ -87,7 +89,8 @@ public:
                                  const ParameterInterface *parameters,
                                  const std::map<int, ObservationInterface*> *observations,
                                  const CallbackInterface *callbacks,
-                                 AgentInterface *agent);
+                                 AgentInterface *agent,
+                                 SimulationSlave::EventNetworkInterface * const eventNetwork);
 
     TrajectoryFollowerCommonBase(const TrajectoryFollowerCommonBase&) = delete;
     TrajectoryFollowerCommonBase(TrajectoryFollowerCommonBase&&) = delete;
@@ -107,7 +110,7 @@ public:
     * @param[in]     data           Referenced signal (copied by sending component)
     * @param[in]     time           Current scheduling time
     */
-    void UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time);
+    void UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time) override;
 
     /*!
     * \brief Update outputs.
@@ -121,7 +124,7 @@ public:
     * @param[out]    data           Referenced signal (copied by this component)
     * @param[in]     time           Current scheduling time
     */
-    void UpdateOutput(int localLinkId, std::shared_ptr<SignalInterface const> &data, int time);
+    void UpdateOutput(int localLinkId, std::shared_ptr<SignalInterface const> &data, int time) override;
 
     /*!
     * \brief Process data within component.
@@ -131,44 +134,42 @@ public:
     *
     * @param[in]     time           Current scheduling time
     */
-    virtual void Trigger(int time) = 0;
+    void Trigger(int time) override;
 
-    //only for unit tests
-    Position GetLastWorldPosition();
-    double GetLastVelocity();
-    double GetLastAcceleration();
+    /*!
+    * \brief Calculates dynamics for next timestep.
+    *
+    * @param[in]     time           Current scheduling time
+    */
+    virtual void CalculateNextTimestep(int time) = 0;
 
 protected:
     bool initialization {true};
-
-    Position currentWorldPosition;
-    double currentVelocity {0.0};
-    double currentAcceleration {0.0};
-    double currentYawRate {0.0};
-    double distance {0.0};
-
-    Position lastWorldPosition;
-    int lastCoordinateTimestamp {0};
-    double lastVelocity {0.0};
-
-    bool inputAccelerationActive {false};
-    double inputAcceleration {0.0};
-
-    double cycleTimeInSeconds {0.0};
-
     bool enforceTrajectory{false};
     bool automaticDeactivation{false};
+    bool inputAccelerationActive {false};
 
     int currentTime{0};
 
-    void HandleCompCtrlSignalInput(const std::shared_ptr<SignalInterface const> &data);
+    double inputAcceleration {0.0};
+    const double cycleTimeInSeconds {0.0};
+
+    DynamicsSignal dynamicsOutputSignal{};
+
+    int lastCoordinateTimestamp {0};
+    double lastVelocity {0.0};
+    Position lastWorldPosition;
+
     void HandleCompCtrlSignalOutput(std::shared_ptr<SignalInterface const> &data);
 
-    void ThrowCouldNotInstantiateSignalError();
-    void ThrowInvalidSignalTypeError();
+    [[ noreturn ]] void ThrowCouldNotInstantiateSignalError();
+    [[ noreturn ]] void ThrowInvalidSignalTypeError();
 
     ComponentState GetState() const;
     void UpdateState(const ComponentState newState);
+
+    void HandleEndOfTrajectory();
+
 private:
     ComponentState componentState {ComponentState::Disabled};
     bool canBeActivated{true};

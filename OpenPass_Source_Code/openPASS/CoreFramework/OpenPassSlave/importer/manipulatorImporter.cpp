@@ -17,64 +17,47 @@
 namespace Importer
 {
 std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulator(QDomElement& eventElement,
-                                                                        const std::vector<std::string>& eventDetectorNames,
-                                                                        const std::vector<std::string>& actors,
-                                                                        const std::string& sequenceName)
+                                                                                const std::string& sequenceName)
 {
     QDomElement actionElement;
-    if (SimulationCommon::GetFirstChildElement(eventElement, "Action", actionElement))
-    {
-        QDomElement actionTypeElement;
-        if (SimulationCommon::GetFirstChildElement(actionElement, "UserDefined", actionTypeElement))
-        {
-            return ImportManipulatorFromUserDefinedElement(actionTypeElement,
-                                                           eventDetectorNames,
-                                                           actors,
-                                                           sequenceName);
-        }
-        else if (SimulationCommon::GetFirstChildElement(actionElement, "Private", actionTypeElement))
-        {
-            return ImportManipulatorFromPrivateElement(actionTypeElement,
-                                                       eventDetectorNames,
-                                                       actors,
-                                                       sequenceName);
-        }
-        else if (SimulationCommon::GetFirstChildElement(actionElement, "Global", actionTypeElement))
-        {
-            return ImportManipulatorFromGlobalElement(actionTypeElement,
-                                                      eventDetectorNames,
-                                                      actors,
-                                                      sequenceName);
-        }
-    }
+    CHECKFALSE(SimulationCommon::GetFirstChildElement(eventElement, "Action", actionElement));
 
-    return std::shared_ptr<ScenarioActionInterface>(nullptr);
+    QDomElement actionTypeElement;
+    if (SimulationCommon::GetFirstChildElement(actionElement, "UserDefined", actionTypeElement))
+    {
+        return ImportManipulatorFromUserDefinedElement(actionTypeElement,
+                                                       sequenceName);
+    }
+    else if (SimulationCommon::GetFirstChildElement(actionElement, "Private", actionTypeElement))
+    {
+        return ImportManipulatorFromPrivateElement(actionTypeElement,
+                                                   sequenceName);
+    }
+    else if (SimulationCommon::GetFirstChildElement(actionElement, "Global", actionTypeElement))
+    {
+        return ImportManipulatorFromGlobalElement(actionTypeElement,
+                                                  sequenceName);
+    }
+    else {
+        LogAndThrowError("Invalid Action Type in openScenario file");
+    }
 }
 
 std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorFromUserDefinedElement(QDomElement& userDefinedElement,
-                                                                                              const std::vector<std::string>& eventDetectorNames,
-                                                                                              const std::vector<std::string>& actors,
-                                                                                              const std::string& sequenceName)
+                                                                                                      const std::string& sequenceName)
 {
     QDomElement userDefinedChildElement;
-    if (SimulationCommon::GetFirstChildElement(userDefinedElement, "Command", userDefinedChildElement))
-    {
-        std::string command = userDefinedChildElement.text().toStdString();
-        boost::algorithm::trim(command);
+    CHECKFALSE(SimulationCommon::GetFirstChildElement(userDefinedElement, "Command", userDefinedChildElement))
 
-        return std::shared_ptr<ScenarioActionInterface>(std::make_shared<UserDefinedCommandAction>(eventDetectorNames,
-                                                                                           actors,
-                                                                                           sequenceName,
-                                                                                           command));
-    }
+    std::string command = userDefinedChildElement.text().toStdString();
+    boost::algorithm::trim(command);
 
-    return std::shared_ptr<ScenarioActionInterface>(nullptr);
+    return std::shared_ptr<ScenarioActionInterface>(std::make_shared<openScenario::UserDefinedCommandAction>(sequenceName,
+                                                                                                             command));
 }
 
 std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorFromPrivateElement(QDomElement& privateElement,
-                                                                                          const std::vector<std::string>& eventDetectorNames,
-                                                                                          const std::vector<std::string>& actors,
-                                                                                          const std::string& sequenceName)
+                                                                                                  const std::string& sequenceName)
 {
     QDomElement privateChildElement;
     if(SimulationCommon::GetFirstChildElement(privateElement, "Lateral", privateChildElement))
@@ -83,79 +66,79 @@ std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorF
         if (SimulationCommon::GetFirstChildElement(privateChildElement, "LaneChange", lateralChildElement))
         {
             QDomElement targetElement;
-            if (SimulationCommon::GetFirstChildElement(lateralChildElement, "Target", targetElement))
+            CHECKFALSE(SimulationCommon::GetFirstChildElement(lateralChildElement, "Target", targetElement));
+
+            QDomElement typeElement;
+            if (SimulationCommon::GetFirstChildElement(targetElement, "Relative", typeElement))
             {
-                QDomElement typeElement;
-                if (SimulationCommon::GetFirstChildElement(targetElement, "Relative", typeElement))
-                {
-                    std::string object;
-                    double value{};
+                std::string object;
+                double value{};
 
-                    if (SimulationCommon::ParseAttributeString(typeElement, "object", object)
-                        && SimulationCommon::ParseAttributeDouble(typeElement, "value", value))
-                    {
-                        return std::shared_ptr<ScenarioActionInterface>(std::make_shared<PrivateLateralLaneChangeAction>(eventDetectorNames,
-                                                                                                                 actors,
-                                                                                                                 sequenceName,
-                                                                                                                 PrivateLateralLaneChangeActionType::Relative,
-                                                                                                                 static_cast<int>(std::rint(value)),
-                                                                                                                 object));
-                    }
+                CHECKFALSE(SimulationCommon::ParseAttributeString(typeElement, "object", object));
+                CHECKFALSE(SimulationCommon::ParseAttributeDouble(typeElement, "value", value));
 
-                }
-                else if (SimulationCommon::GetFirstChildElement(targetElement, "Absolute", typeElement))
-                {
-                    double value;
+                return std::shared_ptr<ScenarioActionInterface>(std::make_shared<openScenario::PrivateLateralLaneChangeAction>(sequenceName,
+                                                                                                                               openScenario::PrivateLateralLaneChangeActionType::Relative,
+                                                                                                                               static_cast<int>(std::rint(value)),
+                                                                                                                               object));
+            }
+            else
+            {
+                CHECKFALSE(SimulationCommon::GetFirstChildElement(targetElement, "Absolute", typeElement));
 
-                    if (SimulationCommon::ParseAttributeDouble(typeElement, "value", value))
-                    {
-                        return std::shared_ptr<ScenarioActionInterface>(std::make_shared<PrivateLateralLaneChangeAction>(eventDetectorNames,
-                                                                                                                 actors,
-                                                                                                                 sequenceName,
-                                                                                                                 PrivateLateralLaneChangeActionType::Absolute,
-                                                                                                                 static_cast<int>(std::rint(value))));
-                    }
-                }
+                double value;
+                CHECKFALSE(SimulationCommon::ParseAttributeDouble(typeElement, "value", value));
+
+                return std::shared_ptr<ScenarioActionInterface>(std::make_shared<openScenario::PrivateLateralLaneChangeAction>(sequenceName,
+                                                                                                                               openScenario::PrivateLateralLaneChangeActionType::Absolute,
+                                                                                                                               static_cast<int>(std::rint(value))));
             }
         }
+        else
+        {
+            LogAndThrowError("Invalid PrivateAction-Lateral Type in openScenario file");
+        }
     }
-
-    return std::shared_ptr<ScenarioActionInterface>(nullptr);
+    else
+    {
+        LogAndThrowError("Invalid PrivateAction Type in openScenario file");
+    }
 }
 
 std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorFromGlobalElement(QDomElement &globalElement,
-                                                                                         const std::vector<std::string>& eventDetectorNames,
-                                                                                         const std::vector<std::string>& actors,
                                                                                          const std::string& sequenceName)
 {
-    QDomElement globalChildElement;
-    if (SimulationCommon::GetFirstChildElement(globalElement, "Entity", globalChildElement))
+    QDomElement globalActionTypeElement;
+    if (SimulationCommon::GetFirstChildElement(globalElement, "Entity", globalActionTypeElement))
     {
         std::string name;
-        SimulationCommon::ParseAttributeString(globalChildElement, "name", name);
+        CHECKFALSE(SimulationCommon::ParseAttributeString(globalActionTypeElement, "name", name));
 
-        QDomElement globalChildIdentifierElement;
-        if (SimulationCommon::GetFirstChild(globalChildElement, globalChildIdentifierElement))
+        QDomElement entityTypeElement;
+        if (SimulationCommon::GetFirstChildElement(globalActionTypeElement, "Add",entityTypeElement))
         {
-            if (globalChildIdentifierElement.tagName().toStdString() == "Add")
-            {
-                return std::shared_ptr<ScenarioActionInterface>(std::make_shared<GlobalEntityAction>(eventDetectorNames,
-                                                                                             actors,
-                                                                                             sequenceName,
-                                                                                             GlobalEntityActionType::Add,
-                                                                                             name));
-            }
-            else if (globalChildIdentifierElement.tagName().toStdString() == "Delete")
-            {
-                return std::shared_ptr<ScenarioActionInterface>(std::make_shared<GlobalEntityAction>(eventDetectorNames,
-                                                                                             actors,
-                                                                                             sequenceName,
-                                                                                             GlobalEntityActionType::Delete,
-                                                                                             name));
-            }
+                return std::shared_ptr<ScenarioActionInterface>(std::make_shared<openScenario::GlobalEntityAction>(sequenceName,
+                                                                                                                   openScenario::GlobalEntityActionType::Add,
+                                                                                                                   name));
+        }
+        else
+        {
+           CHECKFALSE(SimulationCommon::GetFirstChildElement(globalActionTypeElement, "Delete",entityTypeElement));
+
+           return std::shared_ptr<ScenarioActionInterface>(std::make_shared<openScenario::GlobalEntityAction>(sequenceName,
+                                                                                                              openScenario::GlobalEntityActionType::Delete,
+                                                                                                              name));
         }
     }
+    else
+    {
+        LogAndThrowError("Invalid GlobalAction Type in openScenario file");
+    }
+}
 
-    return std::shared_ptr<ScenarioActionInterface>(nullptr);
+[[ noreturn ]] void ManipulatorImporter::LogAndThrowError(const std::string &message)
+{
+    LOG_INTERN(LogLevel::Error) << message;
+    throw std::runtime_error(message);
 }
 }

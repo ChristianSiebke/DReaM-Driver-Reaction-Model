@@ -30,11 +30,19 @@ ConnectionInterface *Junction::AddConnection(std::string id, std::string incomin
     return connection;
 }
 
-
+void Junction::AddPriority(Priority priority)
+{
+    priorities.emplace_back(priority);
+}
 
 std::map<std::string, ConnectionInterface *> Junction::GetConnections() const
 {
     return connections;
+}
+
+const std::vector<Priority> &Junction::GetPriorities() const
+{
+    return  priorities;
 }
 
 std::string Junction::GetId() const

@@ -16,6 +16,7 @@
 
 #pragma once
 #include "Common/globalDefinitions.h"
+#include "Common/worldDefinitions.h"
 
 //! This struct is used to transport data of an object as seen be the driver
 struct ObjectInformation
@@ -114,6 +115,14 @@ struct TrafficRuleInformation
     LaneInformationTrafficRules laneEgo;
     //! Data about the lane to right (in driving direction) of the mainLane
     LaneInformationTrafficRules laneRight;
+    //! List of lane markings on the left side of mainLane
+    std::vector<LaneMarking::Entity> laneMarkingsLeft;
+    //! List of lane markings on the right side of mainLane
+    std::vector<LaneMarking::Entity> laneMarkingsRight;
+    //! List of lane markings on the left side of lane to the left
+    std::vector<LaneMarking::Entity> laneMarkingsLeftOfLeftLane;
+    //! List of lane markings on the right side of lane to the right
+    std::vector<LaneMarking::Entity> laneMarkingsRightOfRightLane;
 };
 
 //! This struct contains infrastructure information of surrounding lanes that describe its geometric features

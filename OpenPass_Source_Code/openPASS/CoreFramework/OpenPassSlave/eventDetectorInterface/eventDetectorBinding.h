@@ -64,8 +64,6 @@ public:
 private:
     void ValidateEventDetector(EventDetector* eventDetector, std::vector<EventDetector *> *eventDetectorList,  std::string eventDetectorType);
 
-    std::vector<std::string> defaultEventDetectorTypes = {"Collision"};
-
     EventDetectorLibrary* library = nullptr;
     CallbackInterface *callbacks {nullptr};
 };

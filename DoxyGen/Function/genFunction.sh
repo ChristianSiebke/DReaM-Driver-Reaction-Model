@@ -13,10 +13,7 @@ rm -rf html
 [ ! -d "../../Source" ] && SourceDir='../../OpenPass_Source_Code'
 
 export SourceDir
-
-OSDocumentationDir='../'
-
-export OSDocumentationDir
+export DocumentationDir='../'
 
 doxygen Function.doxy -d markdown
 

@@ -9,24 +9,24 @@
 *******************************************************************************/
 #pragma once
 
-#include "ConditionInterface.h"
+#include "ConditionCommonBase.h"
 #include "Interfaces/parameterInterface.h"
 
-class SimulationTimeCondition : public ConditionInterface
+class SimulationTimeCondition : public ConditionCommonBase
 {
 public:
     SimulationTimeCondition(const ParameterInterface &parameters);
-    virtual ~SimulationTimeCondition() = default;
+    virtual ~SimulationTimeCondition() override = default;
 
-    virtual bool IsMet(double value) const override;
+    bool IsMet(const int value) const;
 
     SimulationTimeCondition() = delete;
-    SimulationTimeCondition(const SimulationTimeCondition&) = delete;
+    SimulationTimeCondition(const SimulationTimeCondition&) = default;
     SimulationTimeCondition(SimulationTimeCondition&&) = delete;
     SimulationTimeCondition& operator=(const SimulationTimeCondition&) = delete;
     SimulationTimeCondition& operator=(SimulationTimeCondition&&) = delete;
 
 private:
     Rule rule;
-    double targetValue;
+    int targetValue;
 };

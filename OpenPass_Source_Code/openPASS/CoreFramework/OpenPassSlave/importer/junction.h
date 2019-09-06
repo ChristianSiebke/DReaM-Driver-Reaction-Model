@@ -26,17 +26,22 @@ public:
     {
         this->id = id;
     }
-    ~Junction();
+    ~Junction() override;
 
-    virtual ConnectionInterface* AddConnection(std::string id,std::string incomingRoadId, std::string connectingRoadId, ContactPointType contactPoint);
+    virtual ConnectionInterface* AddConnection(std::string id,std::string incomingRoadId, std::string connectingRoadId, ContactPointType contactPoint) override;
+
+    virtual void AddPriority(Priority priority) override;
 
     virtual std::map<std::string, ConnectionInterface*> GetConnections() const override;
+
+    virtual const std::vector<Priority>& GetPriorities() const override;
 
     std::string GetId() const override;
 
 private:
     std::string id;
     std::map<std::string, ConnectionInterface*> connections;
+    std::vector<Priority> priorities;
 };
 
 #endif // JUNCTION_H

@@ -52,27 +52,17 @@ std::vector<const Manipulator*> ManipulatorBinding::Instantiate(const std::strin
     {
         const auto manipulator = library->CreateManipulator(nullptr,
                                                             manipulatorType,
-                                                            nullptr,
                                                             eventNetwork,
                                                             world);
+
         manipulators.push_back(manipulator);
     }
 
-    //Instantiates a manipulators
-    for(auto manipulatorParameters : scenario->GetManipulators())
-    {
-        const auto manipulator = library->CreateManipulator(nullptr,
-                                                            manipulatorParameters.GetType(),
-                                                            &manipulatorParameters,
-                                                            eventNetwork,
-                                                            world);
-        manipulators.push_back(manipulator);
-    }
+    //Instantiates all manipulators
     for(const auto& action : scenario->GetActions())
     {
         const auto manipulator = library->CreateManipulator(action,
                                                             "",
-                                                            nullptr,
                                                             eventNetwork,
                                                             world);
         manipulators.push_back(manipulator);

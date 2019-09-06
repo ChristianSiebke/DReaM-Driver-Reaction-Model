@@ -31,7 +31,6 @@ public:
     typedef const std::string &(*ManipulatorInterface_GetVersion)();
     typedef ManipulatorInterface *(*ManipulatorInterface_CreateInstanceType)(WorldInterface *world,
                                                                              std::shared_ptr<ScenarioActionInterface> action,
-                                                                             SimulationCommon::ManipulatorParameters* parameters,
                                                                              std::string manipulatorType,
                                                                              EventNetworkInterface* eventNetwork,
                                                                              const CallbackInterface *callbacks);
@@ -89,7 +88,6 @@ public:
     //-----------------------------------------------------------------------------
     Manipulator *CreateManipulator(std::shared_ptr<ScenarioActionInterface> action,
                                    const std::string& manipulatorType,
-                                   SimulationCommon::ManipulatorParameters *parameters,
                                    EventNetworkInterface* eventNetwork,
                                    WorldInterface* world);
 

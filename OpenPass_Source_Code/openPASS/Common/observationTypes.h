@@ -23,6 +23,7 @@ enum class LoggingGroup
     RoadPosition,
     Vehicle,
     Sensor,
+    SensorExtended,
     Driver
 };
 

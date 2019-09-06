@@ -20,9 +20,10 @@ enum struct EventCategory
 {
     Undefined = 0,
     Basic,
-    AgentBased,
+    AgentBasedManipulation,
     Collision,
-    ComponentStateChange
+    ComponentStateChange,
+    VehicleComponent
 };
 
 enum struct EventType
@@ -33,8 +34,11 @@ enum struct EventType
     AEBActive,
     AEBInactive,
     ComponentStateChange,
+    ComponentWarning,
+    LaneChange,
+    RemoveAgent,
     TrajectoryFollowerActivated,
-    TrajectoryFollowerDeactivated
+    TrajectoryFollowerDeactivated,
 };
 
 const std::string EventTypeStrings[] =
@@ -45,10 +49,11 @@ const std::string EventTypeStrings[] =
     "AEBActive",
     "AEBInactive",
     "ComponentStateChange",
+    "ComponentWarning",
+    "LaneChange",
+    "RemoveAgent",
     "TrajectoryFollowerActivated",
     "TrajectoryFollowerDeactivated"
 };
 
-const std::map<std::string, EventType> eventTypesMap = {{"Collision", EventType::Collision},
-                                                        {"Conditional", EventType::Conditional}};
 }//namespace EventDefinitions

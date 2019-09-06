@@ -20,10 +20,10 @@
 #include <QDomDocument>
 #include "Interfaces/scenarioInterface.h"
 #include "CoreFramework/CoreShare/parameters.h"
+#include "Common/openScenarioDefinitions.h"
 
 namespace Importer
 {
-
 const std::map<std::string, int> parameterTypes = {{"bool",    0 },
                                                    {"integer", 1 },
                                                    {"double",  2 },
@@ -57,38 +57,6 @@ public:
     //Import EventDetectors and Manipulators
     static void ImportParameterElement(QDomElement& parameterElement, ParameterInterface *parameters);
 
-    //Import Manipulators
-    static void ParseManipulatorData(QDomElement& eventElement, ScenarioInterface *scenario, std::vector<std::string> &eventDetectorNames, std::string &seqName, std::vector<std::string> &actors);
-
-    /*!
-     * \brief Imports a ByEntity condition element of a OpenSCENARIO storyboard DOM
-     *
-     * \param[in]   byEntityElement   The DOM root of the by-entity element
-     * \param[in]   entities          Objects from 'Entities' tag
-     * \param[out]  eventDetectorParameters   Triggering entity names are stored here
-     */
-    static void ImportByEntityElement(QDomElement& byEntityElement, const std::vector<ScenarioEntity>& entities, ParameterInterface *eventDetectorParameters);
-
-    /*!
-     * \brief Imports a condition element of a OpenSCENARIO storyboard DOM
-     *
-     * \param[in]   conditionElement   The DOM root of the condition element
-     * \param[in]   entities           Objects from 'Entities' tag
-     * \param[out]  scenario           The relevant event detector data is imported into this scenario
-     * \param[in]   seqName            Name of the containing sequence
-     */
-    static std::string ImportConditionElement(QDomElement& conditionElement, const std::vector<ScenarioEntity>& entities, ScenarioInterface *scenario, std::string &seqName, ParameterInterface *parameters);
-
-    /*!
-     * \brief Imports a event element of a OpenSCENARIO storyboard DOM
-     *
-     * \param[in]   eventElement   The DOM root of the event element
-     * \param[in]   entities       Objects from 'Entities' tag
-     * \param[out]  scenario       The relevant event detector data is imported into this scenario
-     * \param[in]   seqName        Name of the containing sequence
-     */
-    static void ParseEventDetectorData(QDomElement& eventElement, const std::vector<ScenarioEntity>& entities, ScenarioInterface *scenario, std::vector<std::string> &eventDetecorNames, std::string &seqName, ParameterInterface *parameters);
-
     /*!
      * \brief Imports the directory tag of a catalog
      *
@@ -109,19 +77,6 @@ public:
      * \return      True on successful parsing, false otherwise.
      */
     static bool ImportCatalog(std::string& catalogPath, const std::string& catalogName, QDomElement& catalogsElement);
-    
-    /*!
-     * ------------------------------------------------------------------------
-     * \brief ImportConditionByValueElement Imports a Condition ByValue element
-     *        into a condition parameter interface.
-     *
-     * \param[in] byValueElement the ByValue element to parse for condition
-     *            details.
-     * \param[out] conditionParameters If successfully parsed, the ByValue
-     *             element's condition details are imported into this object.
-     * ------------------------------------------------------------------------
-     */
-    static void ImportConditionByValueElement(QDomElement &byValueElement, ParameterInterface &conditionParameters);
 
 private:
     /*!
@@ -160,7 +115,7 @@ private:
      * \param[in]   entities        Objects from 'Entities' tag
      * \param[out]  scenario        Init element data is imported into this scenario
      */
-    static void ImportInitElement(QDomElement& initElement, std::vector<ScenarioEntity>& entities, ScenarioInterface *scenario);
+    static void ImportInitElement(QDomElement& initElement, std::vector<ScenarioEntity>& entities);
 
     /*!
      * \brief Imports the simulation end conditions
@@ -201,17 +156,6 @@ private:
      * 								 invalid rule is provided
      */
     static void ParseSimulationTime(const QDomElement &byValueElement, double& value, std::string& rule);
-
-    /*!
-     * \brief Adds entity spawn parameters to the scenario
-     *
-     * If spawn parameter object name is 'Ego', the ego parameters will be set in the scenario.
-     * Otherwise, the spawn parameters will be added to the list of entities in the scenario.
-     *
-     * \param[in]   scenarioEntity   Scenario entiry to add to the scenario
-     * \param[out]  scenario         Scenario to store parameters in
-     */
-    static void AddToEntities(const ScenarioEntity& scenarioEntity, ScenarioInterface* scenario);
 
     /*!
      * \brief Validates spawn parameters
@@ -274,16 +218,6 @@ private:
     static void ImportStoryElement(QDomElement& storyElement, const std::vector<ScenarioEntity>& entities, ScenarioInterface *scenario);
 
     /*!
-     * \brief Imports a maneuvre element of a OpenSCENARIO storyboard DOM
-     *
-     * \param[in]   maneuverElement   The DOM root of the maneuver element
-     * \param[in]   entities          Objects from 'Entities' tag
-     * \param[out]  scenario          The maneuver data is imported into this scenario
-     * \param[out]  actors            Actors from the maneuver are imported into this container
-     */
-    static void ImportManeuverElement(QDomElement& maneuverElement, const std::vector<ScenarioEntity>& entities, ScenarioInterface *scenario, std::string &sequenceName, std::vector<std::string> &actors);
-
-    /*!
      * \brief Imports actors from of a OpenSCENARIO story DOM
      *
      * \param[in]   actorsElement   The DOM root of the actors element
@@ -291,7 +225,18 @@ private:
      *
      * \return  Actor names referenced in the DOM
      */
-    static std::vector<std::string> ImportActors(QDomElement& actorsElement, const std::vector<ScenarioEntity>& entities);
+    static openScenario::ActorInformation ImportActors(QDomElement& actorsElement,
+                                                       const std::vector<ScenarioEntity>& entities);
+
+    /*!
+     * \brief Imports a maneuvre element of a OpenSCENARIO storyboard DOM
+     *
+     * \param[in]   maneuverElement   The DOM root of the maneuver element
+     * \param[in]   entities          Objects from 'Entities' tag
+     * \param[out]  scenario          The maneuver data is imported into this scenario
+     * \param[out]  actors            Actors from the maneuver are imported into this container
+     */
+    static void ImportManeuverElement(QDomElement& maneuverElement, const std::vector<ScenarioEntity>& entities, ScenarioInterface *scenario, const std::string& sequenceName, const openScenario::ActorInformation &actorInformation, const int numberOfExecutions);
 
     static void SetStochasticsDataHelper(SpawnAttribute &attribute, QDomElement& stochasticsElement);
     static void SetStochasticsData(ScenarioEntity& scenarioEntity, QDomElement& stochasticsElement);
@@ -302,9 +247,8 @@ private:
      *
      * \param[in]      privateElement    The DOM root of the storyboard/init/action element
      * \param[inout]   entities          Objects from 'Entities' tag. Containing spawn information will be set by this method call.
-     * \param[out]     scenario          The private element data is imported into this scenario
      */
-    static void ImportPrivateElement(QDomElement& privateElement, std::vector<ScenarioEntity>& entities, ScenarioInterface* scenario);
+    static void ImportPrivateElement(QDomElement& privateElement, std::vector<ScenarioEntity>& entities);
 
     /*!
      * \brief Imports all private elements of a OpenSCENARIO actions DOM
@@ -313,31 +257,20 @@ private:
      * \param[inout]   entities          Objects from 'Entities' tag. Containing spawn information will be set by this method call.
      * \param[out]     scenario          The private element data is imported into this scenario
      */
-    static void ImportPrivateElements(QDomElement& actionsElement, std::vector<ScenarioEntity>& entities, ScenarioInterface *scenario);
+    static void ImportPrivateElements(QDomElement& actionsElement, std::vector<ScenarioEntity>& entities);
 
     static void ImportParameterDeclarationElement(QDomElement& parameterDeclarationElement, ParameterInterface *parameters);
 
     /*!
-     * \brief Imports the start conditions of a OpenSCENARIO Storyboard/Maneuver/Event DOM
-     *
-     * \param[in]   startConditionsElement    The DOM root of the start conditions element
-     * \param[in]   entities                  Objects from 'Entities' tag
-     * \param[out]  scenario                  The private element data is imported into this scenario
-     * \param[in]   eventDetectorNames        The names of the used event detectors
-     * \param[in]   seqName                   The name of the containing sequence
-     */
-    static void ImportStartConditionsElement(QDomElement& startConditionsElement, const std::vector<ScenarioEntity>& entities, ScenarioInterface *scenario, std::vector<std::string> &eventDetecorNames, std::string &seqName, ParameterInterface *parameters);
-
-    /*!
      * \brief Tests, if a entity with a given name is included in the provided vector of scenario entities
      *
-     * \param[in]   entities        Vector of entities to test against
-     * \param[in]   entityName      Name of the entity to check for existence
+     * \param[in] entities Vector of entities to test against
+     * \param entityName Name of the entity to check for existence
      *
-     * \return true, if entityName is included in entities, false otherwise.
+     * \return true, if entityName is included in entities, false otherwise
      */
-    static bool ContainsEntity(const std::vector<ScenarioEntity>& entities, const std::string& entityName);
-
+    static bool ContainsEntity(const std::vector<ScenarioEntity>& entities,
+                               const std::string& entityName);
     /*!
      * \brief Returns the entity object contained in a vector of entities, selected by its name
      *

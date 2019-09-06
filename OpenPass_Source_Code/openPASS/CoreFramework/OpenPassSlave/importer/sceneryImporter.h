@@ -20,7 +20,6 @@
 #include <list>
 #include <QDomDocument>
 #include "scenery.h"
-#include "utilities.h"
 #include "Interfaces/roadInterface/junctionInterface.h"
 #include "Interfaces/roadInterface/connectionInterface.h"
 
@@ -79,12 +78,41 @@ public:
     static bool ParseJunctions(QDomElement &documentRoot,
                            Scenery *scenery);
 
-
-
+    //-----------------------------------------------------------------------------
+    //! @brief Parses connections into a junction object.
+    //! @note  Use this entry point only for testing or within the class context
+    //!
+    //!
+    //! @param[in]  junctionElement      DOM element containing the OpenDRIVE junction
+    //! @param[out] junction             Junction with the contents of the DOM element
+    //!
+    //! @return                         False if an error occurred, true otherwise
+    //-----------------------------------------------------------------------------
     static bool ParseJunctionConnections(QDomElement &junctionElement, JunctionInterface *junction);
 
+    //-----------------------------------------------------------------------------
+    //! @brief Parses connection links into a connection object.
+    //! @note  Use this entry point only for testing or within the class context
+    //!
+    //!
+    //! @param[in]  junctionElement      DOM element containing the OpenDRIVE junction
+    //! @param[out] junction             Connection with the contents of the DOM element
+    //!
+    //! @return                         False if an error occurred, true otherwise
+    //-----------------------------------------------------------------------------
     static bool ParseJunctionConnectionLinks(QDomElement &connectionElement, ConnectionInterface *connection);
 
+    //-----------------------------------------------------------------------------
+    //! @brief Parses priorities into a junction object.
+    //! @note  Use this entry point only for testing or within the class context
+    //!
+    //!
+    //! @param[in]  junctionElement      DOM element containing the OpenDRIVE junction
+    //! @param[out] junction             Junction with the contents of the DOM element
+    //!
+    //! @return                         False if an error occurred, true otherwise
+    //-----------------------------------------------------------------------------
+    static bool ParseJunctionPriorities(QDomElement &junctionElement, JunctionInterface *junction);
 
 private:
 
@@ -329,16 +357,6 @@ public:
     static void ParseOptionalInterval(QDomElement &repeatElement, std::string startAttribute, std::string endAttribute, OptionalInterval &interval);
 
  private:
-    //-----------------------------------------------------------------------------
-    //! @brief Converts a potential signal type into a known RoadSignalType
-    //!
-    //! @param[in]  element         element to be parsed
-    //! @param[out] signalType      parsed result
-    //!
-    //! @return                     true if parsing was successful
-    //-----------------------------------------------------------------------------
-    static bool ParseSignalType(std::string element, RoadSignalType& signalType);
-
     //-----------------------------------------------------------------------------
     //! @brief Converts a potential signal unit into a known RoadSignalUnit
     //!

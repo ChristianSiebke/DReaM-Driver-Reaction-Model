@@ -15,31 +15,6 @@
 namespace OWL {
 namespace Primitive {
 
-/// \brief Correction factors of the s coordinate
-///
-/// If a road makes a curvature, the s coordinate needs to be
-/// scaled to correct for the different lengths of the lanes
-/// If the reference lines are not in parallel, points smaller
-/// than 0 and larger than maximum needs to be cropped
-struct CurvatureCorrection
-{
-    double scale;   //!< \brief Multiply with scale to correct projection lenghts
-    double maximum; //!< \brief Value needs to be within interval [0 maximum]
-};
-
-/// \brief Offset between reference line of the road and reference line of the lane
-///
-/// s coordintes always refer to the reference line of the lane
-/// t coordinate is normal to the reference line of the current lane
-struct ProjectionAxes
-{
-    Common::Vector2d s; //!< \brief s coordinate projection axis
-    Common::Vector2d t; //!< \brief t coordinate projection axis
-    double sOffset;     //!< \brief Offset with respect to the start of the road
-    double sHdg;        //!< \brief Heading of the s projection axis
-    CurvatureCorrection curvatureCorrection; //!< \sa CurvatureCorrection
-};
-
 struct LaneGeometryJoint
 {
     /// \brief Tripple describing the sampled points of the lane
@@ -52,7 +27,8 @@ struct LaneGeometryJoint
     } points;
 
     double curvature;              //!< \brief Curvature of the reference line at this joint
-    ProjectionAxes projectionAxes; //!< \brief Projection axes originating at the reference point
+    double sOffset;     //!< \brief Offset with respect to the start of the road
+    double sHdg;        //!< \brief Heading of the s projection axis
 };
 
 } // namespace Primitive

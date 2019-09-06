@@ -17,12 +17,29 @@
 
 #include <map>
 #include <list>
-#include "Interfaces/worldInterface.h"
+#include "Interfaces/callbackInterface.h"
 #include "Interfaces/sceneryInterface.h"
-#include "Localization/LocalizationCache.h"
+#include "Interfaces/worldInterface.h"
 #include "Common/vector3d.h"
 #include "WorldData.h"
 #include "WorldDataQuery.h"
+#include "Localization.h"
+
+namespace Internal
+{
+struct ConversionStatus
+{
+    bool status;
+    std::string error_message{};
+};
+
+using PathInJunctionConnector = std::function<void(JunctionInterface*, RoadInterface *, RoadInterface *, RoadInterface *, ContactPointType,
+                                                   ContactPointType, std::map<int, int>)>;
+
+ConversionStatus ConnectJunction(SceneryInterface *scenery, JunctionInterface *junction,
+                                    PathInJunctionConnector connectPathInJunction);
+
+} // namespace Internal
 
 //-----------------------------------------------------------------------------
 //! Class for the convertion of a scenery, i.e. the roads in it; the road geometry
@@ -34,7 +51,7 @@ class SceneryConverter
 public:
     SceneryConverter(SceneryInterface *scenery,
                      OWL::Interfaces::WorldData& worldData,
-                     World::Localization::Cache& localizationCache,
+                     const World::Localization::Localizer& localizer,
                      const CallbackInterface *callbacks);
     SceneryConverter(const SceneryConverter&) = delete;
     SceneryConverter(SceneryConverter&&) = delete;
@@ -245,7 +262,7 @@ private:
     //! @param[in]  laneIdMapping           mapping of the lane ids between the incoming road and the path
     //! @return                         False, if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    void ConnectPathInJunction(RoadInterface *incomingRoad, RoadInterface *connectingRoad, RoadInterface*outgoingRoad,
+    void ConnectPathInJunction(JunctionInterface* junction, RoadInterface *incomingRoad, RoadInterface *connectingRoad, RoadInterface*outgoingRoad,
                                ContactPointType incomingContactPoint, ContactPointType outgoingContactPoint, std::map<int, int> laneIdMapping);
 
     //-----------------------------------------------------------------------------
@@ -284,10 +301,12 @@ private:
                         double length, double height, double width,
                         double yaw, double pitch, double roll);
 
+    std::vector<OWL::Id> CreateLaneBoundaries(RoadLaneInterface &odLane, RoadLaneSectionInterface &odSection);
+
     SceneryInterface *scenery;
     OWL::Interfaces::WorldData& worldData;
     WorldDataQuery worldDataQuery{worldData};
-    World::Localization::Cache& localizationCache;
+    const World::Localization::Localizer& localizer;
     const CallbackInterface *callbacks;
 };
 

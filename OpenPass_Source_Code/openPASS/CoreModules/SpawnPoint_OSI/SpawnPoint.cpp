@@ -14,6 +14,10 @@
 
 #include "SpawnPoint.h"
 
+#include "Interfaces/agentInterface.h"
+#include "Interfaces/worldInterface.h"
+
+
 //Constructor for testing only
 SpawnPoint::SpawnPoint(WorldInterface* world,
                        const ParameterInterface* parameters,
@@ -207,8 +211,8 @@ SpawnInfo SpawnPoint::GetNextSpawnCarInfoFront(LaneParameters laneParameters, do
         double rearLength)
 {
     const std::string roadId = egoSpawnParameters.egoRoadId;
-    const auto& referenceObject = GetWorld()->GetLastObjectInLane(roadId, laneParameters.laneId,
-                                                                  egoSpawnParameters.s.value - egoSpawnParameters.spawnRadius);
+    const auto& referenceObject = GetWorld()->GetLastObjectInLane(Route{roadId}, roadId, laneParameters.laneId,
+                                                                  egoSpawnParameters.s.value - egoSpawnParameters.spawnRadius, true);
 
     if (referenceObject == nullptr)
     {
@@ -244,8 +248,8 @@ SpawnInfo SpawnPoint::GetNextSpawnCarInfoRear(LaneParameters laneParameters, dou
     const std::string roadId = egoSpawnParameters.egoRoadId;
     const int laneId = laneParameters.laneId;
 
-    const auto& referenceObject = GetWorld()->GetFarthestObjectInUpstream(roadId, laneParameters.laneId,
-                                                                   egoSpawnParameters.s.value + egoSpawnParameters.spawnRadius);
+    const auto& referenceObject = GetWorld()->GetLastObjectInLane(Route{roadId}, roadId, laneParameters.laneId,
+                                                                   egoSpawnParameters.s.value + egoSpawnParameters.spawnRadius, false);
 
     if (referenceObject == nullptr)
     {
@@ -275,7 +279,7 @@ SpawnInfo SpawnPoint::GetNextSpawnCarInfoPreRunRegular(LaneParameters laneParame
     const std::string roadId = egoSpawnParameters.egoRoadId;
     double spawnDistance = 0;
 
-    const auto firstObjectDownstream = GetWorld()->GetFirstObjectDownstream(laneParameters.streamId);
+    const auto firstObjectDownstream = GetWorld()->GetNextObjectInLane(Route{roadId}, roadId, laneParameters.laneId, 0.0, true, std::numeric_limits<double>::max());
 
     if (firstObjectDownstream == nullptr ||
             firstObjectDownstream->GetDistanceToStartOfRoad(MeasurementPoint::Rear) > egoSpawnParameters.s.value +
@@ -284,7 +288,7 @@ SpawnInfo SpawnPoint::GetNextSpawnCarInfoPreRunRegular(LaneParameters laneParame
         spawnDistance = egoSpawnParameters.s.value + egoSpawnParameters.spawnRadius;
         while (spawnDistance > egoSpawnParameters.s.value - egoSpawnParameters.spawnRadius)
         {
-            if (GetWorld()->GetDistanceToEndOfDrivingLane(roadId, laneParameters.laneId, spawnDistance, egoSpawnParameters.spawnRadius) > spawnPointConstants.minimumDistanceToEndOfLane)
+            if (GetWorld()->GetDistanceToEndOfDrivingLane(Route{roadId}, roadId, laneParameters.laneId, spawnDistance, egoSpawnParameters.spawnRadius) > spawnPointConstants.minimumDistanceToEndOfLane)
             {
                 break;
             }
@@ -304,14 +308,7 @@ SpawnInfo SpawnPoint::GetNextSpawnCarInfoPreRunRegular(LaneParameters laneParame
         spawnDistance = frontCarDistance - seperation;
     }
 
-    int laneId = -999;
-    if (spawnDistance >= 0)
-    {
-        laneId = GetWorld()->GetLaneId(laneParameters.streamId, spawnDistance);
-        assert(laneId != -999); // must be valid if SpawnDistance calculation is right
-    }
-
-    return SpawnInfo(GetPreRunTimeTillSpawn(), spawnDistance, egoVelocity, roadId, laneId, laneParameters.offset, 0);
+    return SpawnInfo(GetPreRunTimeTillSpawn(), spawnDistance, egoVelocity, roadId, laneParameters.laneId, laneParameters.offset, 0);
 }
 
 SpawnInfo SpawnPoint::GetNextSpawnCarInfoRegular(std::string roadId, int laneId, double gapInSeconds, double egoVelocity,
@@ -319,7 +316,7 @@ SpawnInfo SpawnPoint::GetNextSpawnCarInfoRegular(std::string roadId, int laneId,
 {
     double timeTillSpawn;
 
-    const auto& referenceObject = GetWorld()->GetNextObjectInLane(roadId, laneId, 0.0); //get first in downstream
+    const auto& referenceObject = GetWorld()->GetNextObjectInLane(Route{roadId}, roadId, laneId, 0.0, true); //get first in downstream
     if (referenceObject)
     {
         double frontCarDistance = referenceObject->GetDistanceToStartOfRoad();
@@ -620,7 +617,7 @@ bool SpawnPoint::CalculateSpawnParameter(AgentBlueprintInterface* agentBlueprint
     spawnParameter.SpawningLaneId = spawnInfo.ILane;
 
     double distance = spawnInfo.s.value - laneParameters.distanceToLaneStart;
-    Position pos = GetWorld()->GetPositionByDistanceAndLane(distance, laneParameters.offset, spawnInfo.roadId, laneParameters.laneId);
+    Position pos = GetWorld()->LaneCoord2WorldCoord(distance, laneParameters.offset, spawnInfo.roadId, laneParameters.laneId);
     LogCurrentDebugStatus(" spawn item at x=" + std::to_string(pos.xPos) + ", y=" + std::to_string(pos.yPos));
 
     double spawnV = spawnInfo.velocity.value;
@@ -671,7 +668,7 @@ bool SpawnPoint::IsLaneParameterAlreadyListed(LaneParameters laneParameters)
 bool SpawnPoint::NewAgentIntersectsWithExistingAgent(int laneId, double offset)
 {
     double distance = spawnInfo.s.value - currentDistanceToLaneStart;
-    Position pos = GetWorld()->GetPositionByDistanceAndLane(distance, offset, spawnInfo.roadId, laneId);
+    Position pos = GetWorld()->LaneCoord2WorldCoord(distance, offset, spawnInfo.roadId, laneId);
     VehicleModelParameters vehicleModelParameters = currentBluePrint->GetVehicleModelParameters();
 
     return GetWorld()->IntersectsWithAgent(pos.xPos,
@@ -721,7 +718,7 @@ bool SpawnPoint::IsOffsetValidForLane(std::string roadId, int laneId, double dis
     }
 
     //Check if lane width > vehicle width
-    double laneWidth = GetWorld()->GetLaneWidth(roadId, laneId, distanceFromStart);
+    double laneWidth = GetWorld()->GetLaneWidth(Route{roadId}, roadId, laneId, distanceFromStart, 0);
     if (vehicleWidth > laneWidth + std::abs(offset))
     {
         LogError("Invalid offset. Lane width < vehicle width: " + std::to_string(laneId) + ". Distance from start: " +
@@ -835,6 +832,9 @@ void SpawnPoint::LogError(std::string message)
 bool SpawnPoint::AreSpawningCoordinatesValid(std::string roadId, int laneId, double distanceReferencePoint,
         double offset)
 {
+    if (laneId >= 0) //HOTFIX: Spawning on left lanes is currently not supported
+    {        return false;
+    }
     if (!GetWorld()->IsSValidOnLane(roadId, laneId, distanceReferencePoint))
     {
         LogWarning("S is not valid for vehicle on lane: " + std::to_string(laneId) + ". Invalid s: " + std::to_string(
@@ -856,7 +856,7 @@ bool SpawnPoint::AreSpawningCoordinatesValid(std::string roadId, int laneId, dou
         return false;
     }
 
-    if (GetWorld()->GetDistanceToEndOfDrivingLane(roadId, laneId, distanceReferencePoint,
+    if (GetWorld()->GetDistanceToEndOfDrivingLane(Route{roadId}, roadId, laneId, distanceReferencePoint,
                                            INFINITY) < spawnPointConstants.minimumDistanceToEndOfLane)
     {
         LogWarning("End of lane: " + std::to_string(laneId) + " is too close.");

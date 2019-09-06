@@ -17,6 +17,7 @@
 #pragma once
 
 #include "Interfaces/modelInterface.h"
+#include "Common/compCtrlToAgentCompSignal.h"
 #include "componentControllerCommon.h"
 #include "stateManager.h"
 
@@ -109,7 +110,7 @@ private:
     std::map<int, std::string> driverOutputChannels;
 
 protected:
-    std::map<int, std::pair<std::string, ComponentType>> channelIdToComponentNameAndTypeMap;
+    Warnings driverWarnings;
 
     StateManager stateManager;
 };

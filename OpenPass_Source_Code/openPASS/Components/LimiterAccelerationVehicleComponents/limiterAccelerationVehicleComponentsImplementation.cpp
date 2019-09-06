@@ -13,8 +13,11 @@
 //! @brief This file contains the implementation of the header file
 //-----------------------------------------------------------------------------
 
-#include "limiterAccelerationVehicleComponentsImplementation.h"
 #include <qglobal.h>
+
+#include "Interfaces/worldInterface.h"
+
+#include "limiterAccelerationVehicleComponentsImplementation.h"
 
 void LimiterAccelerationVehicleComponentsImplementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time)
 {

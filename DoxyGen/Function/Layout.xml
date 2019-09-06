@@ -12,7 +12,9 @@
         <tab type="user" url="@ref localization" title="Localization" />           
         <tab type="user" url="@ref adas" title="Advanced Driver Assistance Systems" />        
       </tab>
-      <tab type="user" url="@ref io" title="Input &amp; Output" />
+      <tab type="user" url="@ref io" title="Input &amp; Output">
+        <tab type="user" url="@ref scenario" title="Scenario" />
+	  </tab>
     </tab>
     <tab type="usergroup" visible="yes" title="Developer Information">
       <tab type="modules" visible="yes" title="" intro=""/>

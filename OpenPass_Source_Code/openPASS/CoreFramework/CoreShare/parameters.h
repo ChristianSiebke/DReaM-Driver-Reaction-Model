@@ -135,69 +135,6 @@ class ObservationParameters : public Parameters
 class WorldParameters : public Parameters
 {};
 
-class EventDetectorConditionParameters : public Parameters
-{
-public:
-    enum class ConditionType {
-        SimulationTimeCondition = 0
-    };
-    ConditionType GetType() const
-    {
-        return conditionType;
-    }
-
-    void SetType(const ConditionType conditionType)
-    {
-        this->conditionType = conditionType;
-    }
-private:
-    ConditionType conditionType;
-};
-
-class EventDetectorParameters : public Parameters
-{
-public:
-    std::string GetType() const
-    {
-        return type;
-    }
-
-    void SetType(std::string type)
-    {
-        this->type = type;
-    }
-
-    virtual const std::list<EventDetectorConditionParameters> &GetConditionParameters() const
-    {
-        return conditionParameters;
-    }
-
-    void AddConditionParameters(const EventDetectorConditionParameters conditionParameters)
-    {
-        this->conditionParameters.push_back(conditionParameters);
-    }
-
-private:
-    std::string type;
-    std::list<EventDetectorConditionParameters> conditionParameters;
-};
-
-class ManipulatorParameters : public Parameters
-{
-public:
-    std::string GetType() const
-    {
-        return type;
-    }
-    void SetType(const std::string& type)
-    {
-        this->type = type;
-    }
-
-private:
-    std::string type;
-};
-
 } // namespace SimulationCommon
 
 

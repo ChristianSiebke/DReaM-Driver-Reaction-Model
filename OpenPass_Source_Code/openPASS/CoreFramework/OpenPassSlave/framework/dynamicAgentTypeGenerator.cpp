@@ -234,6 +234,11 @@ void DynamicAgentTypeGenerator::GatherComponentWithParameters(std::string compon
         std::shared_ptr<SimulationSlave::AgentType> agentType,
         ParameterInterface* parameters, std::string componentNameInSystemConfigBlueprint, int channelOffset)
 {
+    if (systemConfigBlueprint->GetSystems().at(0)->GetComponents().count(componentNameInSystemConfigBlueprint) == 0)
+    {
+        throw std::logic_error("Could not find compenent " + componentNameInSystemConfigBlueprint + " in systemConfigBlueprint");
+    }
+
     auto componentTypeFromSystemConfigBlueprint = systemConfigBlueprint->GetSystems().at(0)->GetComponents().at(componentNameInSystemConfigBlueprint);
 
     auto componentType = std::make_shared<SimulationSlave::ComponentType>(componentName,

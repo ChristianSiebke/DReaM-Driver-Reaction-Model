@@ -15,6 +15,10 @@
 #include <cassert>
 #include <sstream>
 #include <QDir>
+
+#include "Interfaces/stochasticsInterface.h"
+#include "Interfaces/worldInterface.h"
+
 #include "observation_logImplementation.h"
 #include "runStatisticCalculation.h"
 
@@ -33,6 +37,7 @@ ObservationLogImplementation::ObservationLogImplementation(SimulationSlave::Even
     try
     {
         fileHandler.SetSceneryFile(parameters->GetParametersString().at("SceneryFile"));
+        fileHandler.SetCsvOutput(parameters->GetParametersBool().at("LoggingCyclicsToCsv"));
         auto loggingGroupsfromConfig = parameters->GetParametersStringVector().at("LoggingGroups");
         for (auto loggingGroup : loggingGroupsfromConfig)
         {
@@ -59,6 +64,11 @@ ObservationLogImplementation::ObservationLogImplementation(SimulationSlave::Even
             if (loggingGroup == "Sensor")
             {
                 loggingGroups.push_back(LoggingGroup::Sensor);
+                continue;
+            }
+            if (loggingGroup == "SensorExtended")
+            {
+                loggingGroups.push_back(LoggingGroup::SensorExtended);
                 continue;
             }
             if (loggingGroup == "Driver")

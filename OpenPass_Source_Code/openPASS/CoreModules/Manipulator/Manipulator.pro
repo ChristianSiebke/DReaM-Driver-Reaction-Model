@@ -29,10 +29,8 @@ INCLUDEPATH += $$SUBDIRS \
 SOURCES += \
     $$getFiles(SUBDIRS, cpp) \
     $$getFiles(SUBDIRS, cc) \
-    $$getFiles(SUBDIRS, c) \
-    ../../Common/openScenarioDefinitions.cpp
+    $$getFiles(SUBDIRS, c)
 
 HEADERS += \
     $$getFiles(SUBDIRS, hpp) \
-    $$getFiles(SUBDIRS, h) \
-    ../../Common/openScenarioDefinitions.h
+    $$getFiles(SUBDIRS, h)

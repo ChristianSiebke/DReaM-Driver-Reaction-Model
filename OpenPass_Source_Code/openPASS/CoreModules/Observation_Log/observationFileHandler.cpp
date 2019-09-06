@@ -16,6 +16,9 @@
 #include <sstream>
 #include <QDir>
 #include <QString>
+
+#include "Interfaces/worldInterface.h"
+
 #include "observationFileHandler.h"
 
 void ObservationFileHandler::WriteStartOfFile()
@@ -54,8 +57,10 @@ void ObservationFileHandler::WriteStartOfFile()
         QFile::remove(finalPath);
     }
 
-    file = std::make_shared<QFile>(tmpPath);
-    if (!file->open(QIODevice::WriteOnly))
+    RemoveCsvCyclics(folder);
+
+    xmlFile = std::make_shared<QFile>(tmpPath);
+    if (!xmlFile->open(QIODevice::WriteOnly))
     {
         std::stringstream ss;
         ss << COMPONENTNAME << " could not create file: " << tmpPath.toStdString();
@@ -63,15 +68,15 @@ void ObservationFileHandler::WriteStartOfFile()
         throw std::runtime_error(ss.str());
     }
 
-    fileStream = std::make_shared<QXmlStreamWriter>(file.get());
-    fileStream->setAutoFormatting(true);
-    fileStream->writeStartDocument();
-    fileStream->writeStartElement(outputTags.SIMULATIONOUTPUT);
-    fileStream->writeAttribute(outputAttributes.SCHEMAVERSION, outputFileVersion);
-    fileStream->writeStartElement(outputTags.SCENERYFILE);
-    fileStream->writeCharacters(QString::fromStdString(sceneryFile));
-    fileStream->writeEndElement();
-    fileStream->writeStartElement(outputTags.RUNRESULTS);
+    xmlFileStream = std::make_shared<QXmlStreamWriter>(xmlFile.get());
+    xmlFileStream->setAutoFormatting(true);
+    xmlFileStream->writeStartDocument();
+    xmlFileStream->writeStartElement(outputTags.SIMULATIONOUTPUT);
+    xmlFileStream->writeAttribute(outputAttributes.SCHEMAVERSION, outputFileVersion);
+    xmlFileStream->writeStartElement(outputTags.SCENERYFILE);
+    xmlFileStream->writeCharacters(QString::fromStdString(sceneryFile));
+    xmlFileStream->writeEndElement();
+    xmlFileStream->writeStartElement(outputTags.RUNRESULTS);
 }
 
 void ObservationFileHandler::WriteRun(const RunResultInterface& runResult, RunStatistic runStatistic,
@@ -84,33 +89,53 @@ void ObservationFileHandler::WriteRun(const RunResultInterface& runResult, RunSt
     //    LOG(CbkLogLevel::Debug, ss.str());
 
     // init new run result
-    fileStream->writeStartElement(outputTags.RUNRESULT);
-    fileStream->writeAttribute(outputAttributes.RUNID, QString::number(runNumber));
+    xmlFileStream->writeStartElement(outputTags.RUNRESULT);
+    xmlFileStream->writeAttribute(outputAttributes.RUNID, QString::number(runNumber));
 
     // write RunStatisticsTag
-    fileStream->writeStartElement(outputTags.RUNSTATISTICS);
+    xmlFileStream->writeStartElement(outputTags.RUNSTATISTICS);
 
-    runStatistic.WriteStatistics(fileStream);
+    runStatistic.WriteStatistics(xmlFileStream);
 
     // close RunStatisticsTag
-    fileStream->writeEndElement();
+    xmlFileStream->writeEndElement();
 
-    AddEvents(fileStream, eventNetwork);
+    AddEvents(xmlFileStream, eventNetwork);
 
-    AddAgents(fileStream, world);
+    AddAgents(xmlFileStream, world);
 
     // write CyclicsTag
-    fileStream->writeStartElement(outputTags.CYCLICS);
+    xmlFileStream->writeStartElement(outputTags.CYCLICS);
 
-    AddHeader(fileStream, cyclics);
+    if(writeCyclicsToCsv)
+    {
+        QString runPrefix = "";
+        if (runNumber < 10)
+        {
+            runPrefix = "00";
+        }
+        else if (runNumber < 100)
+        {
+            runPrefix = "0";
+        }
+        QString csvFilename = "Cyclics_Run_" + runPrefix + QString::number(runNumber) + ".csv";
 
-    AddSamples(fileStream, cyclics);
+        AddReference(xmlFileStream, csvFilename);
+
+        WriteCsvCyclics(csvFilename, cyclics);
+    }
+    else
+    {
+        AddHeader(xmlFileStream, cyclics);
+
+        AddSamples(xmlFileStream, cyclics);
+    }
 
     // close CyclicsTag
-    fileStream->writeEndElement();
+    xmlFileStream->writeEndElement();
 
     // close RunResultTag
-    fileStream->writeEndElement();
+    xmlFileStream->writeEndElement();
 
     ++runNumber;
 }
@@ -118,20 +143,20 @@ void ObservationFileHandler::WriteRun(const RunResultInterface& runResult, RunSt
 void ObservationFileHandler::WriteEndOfFile()
 {
     // close RunResultsTag
-    fileStream->writeEndElement();
+    xmlFileStream->writeEndElement();
 
     // close SimulationOutputTag
-    fileStream->writeEndElement();
+    xmlFileStream->writeEndElement();
 
-    fileStream->writeEndDocument();
-    file->flush();
-    file->close();
+    xmlFileStream->writeEndDocument();
+    xmlFile->flush();
+    xmlFile->close();
 
     // finalize results
     // using copy/remove instead of rename, since latter is failing on some systems
-    if (file->copy(finalPath))
+    if (xmlFile->copy(finalPath))
     {
-        file->remove();
+        xmlFile->remove();
     }
 }
 
@@ -328,9 +353,62 @@ void ObservationFileHandler::AddSamples(std::shared_ptr<QXmlStreamWriter> fStrea
     fStream->writeEndElement();
 }
 
+void ObservationFileHandler::AddReference(std::shared_ptr<QXmlStreamWriter> fStream, QString filename)
+{
+    // write CyclicsFileTag
+    fStream->writeStartElement(outputTags.CYCLICSFILE);
+
+    fStream->writeCharacters(filename);
+
+    // close CyclicsFileTag
+    fStream->writeEndElement();
+}
+
 std::string ObservationFileHandler::GetEventString(EventDefinitions::EventType eventType)
 {
     int keyIndex = static_cast<int>(eventType);
     return EventDefinitions::EventTypeStrings[keyIndex];
 }
 
+
+void ObservationFileHandler::RemoveCsvCyclics(QString directory)
+{
+    QDirIterator it(directory, QStringList() << "Cyclics_Run*.csv", QDir::Files, QDirIterator::NoIteratorFlags);
+    while (it.hasNext())
+    {
+        it.next();
+        QFileInfo fileInfo = it.fileInfo();
+        if (fileInfo.baseName().startsWith("Cyclics_Run_") && fileInfo.suffix() == "csv")
+        {
+            QFile::remove(fileInfo.filePath());
+        }
+    }
+}
+
+void ObservationFileHandler::WriteCsvCyclics(QString filename, ObservationCyclics& cyclics)
+{
+    QString path = folder + QDir::separator() + filename;
+
+    csvFile = std::make_shared<QFile>(path);
+    if (!csvFile->open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        std::stringstream ss;
+        ss << COMPONENTNAME << " could not create file: " << tmpPath.toStdString();
+        //        LOG(CbkLogLevel::Error, ss.str());
+        throw std::runtime_error(ss.str());
+    }
+
+    QTextStream stream( csvFile.get() );
+
+    stream << "Timestep, " << QString::fromStdString(cyclics.GetHeader()) << '\n';
+
+    auto timeSteps = cyclics.GetTimeSteps();
+    for (unsigned int timeStepNumber = 0; timeStepNumber < timeSteps->size(); ++timeStepNumber)
+    {
+        stream << QString::number(timeSteps->at(timeStepNumber)) << ", " << QString::fromStdString(cyclics.GetSamplesLine(timeStepNumber)) << '\n';
+    }
+
+    csvFile->flush();
+
+    csvFile->close();
+}

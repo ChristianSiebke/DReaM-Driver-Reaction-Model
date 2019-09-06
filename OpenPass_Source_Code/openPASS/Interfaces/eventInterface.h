@@ -38,19 +38,19 @@ public:
 
     virtual void SetEventId(const int eventId) = 0;
 
-    virtual int GetId() = 0;
+    virtual int GetId() const = 0;
 
-    virtual int GetEventTime() = 0;
+    virtual int GetEventTime() const = 0;
 
     virtual void SetTriggeringEventId(const int triggeringEventId) = 0;
 
-    virtual int GetTriggeringEventId() = 0;
+    virtual int GetTriggeringEventId() const = 0;
 
-    virtual std::string GetSource() = 0;
+    virtual std::string GetSource() const = 0;
 
-    virtual std::string GetSequenceName() = 0;
+    virtual std::string GetSequenceName() const = 0;
 
-    virtual EventDefinitions::EventType GetEventType() = 0;
+    virtual EventDefinitions::EventType GetEventType() const = 0;
 
     virtual std::list<std::pair<std::string, std::string>> GetEventParametersAsString() = 0;
 };

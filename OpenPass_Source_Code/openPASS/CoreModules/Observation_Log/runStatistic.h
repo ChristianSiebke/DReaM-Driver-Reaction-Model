@@ -14,7 +14,8 @@
 #include <string>
 #include <list>
 #include <QXmlStreamWriter>
-#include "observationTypes.h"
+
+#include "Common/observationTypes.h"
 #include "Interfaces/observationInterface.h"
 
 enum class StopReason
@@ -43,9 +44,7 @@ public:
 
     static QString BoolToString(bool b);
 
-    ~RunStatistic()
-    {
-    }
+    ~RunStatistic() = default;
 
 private:
     std::uint32_t _randomSeed;

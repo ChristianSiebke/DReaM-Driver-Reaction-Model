@@ -13,8 +13,10 @@
 
 #include <string>
 #include <QFile>
+#include <QFileInfo>
 #include <QTextStream>
 #include <QXmlStreamWriter>
+#include <QDirIterator>
 
 #include "Interfaces/observationInterface.h"
 #include "Interfaces/eventNetworkInterface.h"
@@ -59,6 +61,11 @@ public:
         sceneryFile = fileName;
     }
 
+    void SetCsvOutput (bool writeCsv)
+    {
+        writeCyclicsToCsv = writeCsv;
+    }
+
     /*!
      * \brief Creates the output file as simulationOutput.tmp and writes the basic header information
      */
@@ -82,10 +89,12 @@ public:
     void WriteEndOfFile();
 
 private:
-    std::shared_ptr<QXmlStreamWriter> fileStream;
+    std::shared_ptr<QXmlStreamWriter> xmlFileStream;
 
     int runNumber;                                               //!< run number
     std::string sceneryFile;
+
+    bool writeCyclicsToCsv {false};
 
     const OutputAttributes outputAttributes;
     const OutputTags outputTags;
@@ -95,8 +104,8 @@ private:
     QString finalFilename;
     QString tmpPath;
     QString finalPath;
-    std::shared_ptr<QFile> file;
-
+    std::shared_ptr<QFile> xmlFile;
+    std::shared_ptr<QFile> csvFile;
 
     //add infos to the file stream
     /*!
@@ -177,13 +186,37 @@ private:
     void AddSamples(std::shared_ptr<QXmlStreamWriter> fStream, ObservationCyclics& cyclics);
 
     /*!
+    * \brief Writes the filename for the cyclics file into the simulation output during full logging.
+    *
+    * @param[in]     fStream            Shared pointer of the stream writer.
+    * @param[in]     filename           Name of the file, where cyclics are written to.
+    */
+    void AddReference(std::shared_ptr<QXmlStreamWriter> fStream, QString filename);
+
+    /*!
     * \brief Returns the event type as string.
     *
     * @param[in]     eventType      Event type.
     *
     * @return        Event type as string.
     */
+
     std::string GetEventString(EventDefinitions::EventType eventType);
+
+    /*!
+    * \brief Removes old cyclic files from directory.
+    *
+    * @param[in]    directory           directory to delete teh cyclic files
+    */
+    void RemoveCsvCyclics(QString directory);
+
+    /*!
+    * \brief Writes the cyclics of one run to a csv.
+    *
+    * @param[in]    runId               Id of the current run
+    * @param[in]    cyclics             Cyclics of the current run
+    */
+    void WriteCsvCyclics(QString runId, ObservationCyclics& cyclics);
 
 private:
     const QString outputFileVersion = "0.2.0";

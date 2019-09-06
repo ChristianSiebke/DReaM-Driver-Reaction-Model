@@ -32,9 +32,9 @@ public:
     //! Constructor
     //-----------------------------------------------------------------------------
     SensorDriverSignal(OwnVehicleInformation ownVehicleInformation,
-                            TrafficRuleInformation trafficRuleInformation,
-                            GeometryInformation geometryInformation,
-                            SurroundingObjects surroundingObjects) :
+                       TrafficRuleInformation trafficRuleInformation,
+                       GeometryInformation geometryInformation,
+                       SurroundingObjects surroundingObjects) :
         ownVehicleInformation(ownVehicleInformation),
         trafficRuleInformation(trafficRuleInformation),
         geometryInformation(geometryInformation),

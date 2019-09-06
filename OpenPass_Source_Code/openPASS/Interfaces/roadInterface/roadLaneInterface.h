@@ -56,7 +56,10 @@ public:
     //! Adds a new roadmark to a road lane.
     //!
     //! @param[in]  sOffset             Offset relative to the preceding lane section
-    //! @param[in]  roadMark            RoadMark
+    //! @param[in]  roadMark            type of the road mark
+    //! @param[in]  color               color of the road mark
+    //! @param[in]  laneChange          allowed laneChange across the road mark
+    //! @param[in]  weight              weight of the road mark
     //!
     //! @return                         False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
@@ -64,7 +67,8 @@ public:
                              RoadLaneRoadDescriptionType descType,
                              RoadLaneRoadMarkType roadMark,
                              RoadLaneRoadMarkColor color,
-                             RoadLaneRoadMarkLaneChange laneChange) = 0;
+                             RoadLaneRoadMarkLaneChange laneChange,
+                             RoadLaneRoadMarkWeight weight) = 0;
 
     //-----------------------------------------------------------------------------
     //! Adds the ID of a successor lane to a road lane.

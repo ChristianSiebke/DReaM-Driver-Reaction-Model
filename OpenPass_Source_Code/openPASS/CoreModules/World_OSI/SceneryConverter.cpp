@@ -19,7 +19,10 @@
 #include <cmath>
 #include <tuple>
 #include <sstream>
+#include <functional>
 #include <QFile>
+#include <variant>
+
 #include "SceneryConverter.h"
 #include "GeometryConverter.h"
 #include "TrafficObjectAdapter.h"
@@ -28,13 +31,79 @@
 #include "WorldData.h"
 #include "WorldDataQuery.h"
 
+namespace Internal
+{
+
+using PathInJunctionConnector = std::function<void(JunctionInterface*, RoadInterface *, RoadInterface *, RoadInterface *, ContactPointType,
+                                                   ContactPointType, std::map<int, int>)>;
+
+ConversionStatus ConnectJunction(SceneryInterface *scenery, JunctionInterface *junction,
+                                 PathInJunctionConnector connectPathInJunction)
+{
+    for (auto &entry : junction->GetConnections())
+    {
+        ConnectionInterface *connection = entry.second;
+
+        std::string incomingRoadId = connection->GetIncommingRoadId();
+        auto* incomingRoad = scenery->GetRoad(incomingRoadId);
+
+        std::string connectingId = connection->GetConnectingRoadId();
+        auto* connectingRoad = scenery->GetRoad(connectingId);
+
+        std::string outgoingRoadId;
+
+        ContactPointType incomingContactPoint;
+        ContactPointType outgoingContactPoint;
+
+        for (auto roadLink : connectingRoad->GetRoadLinks())
+        {
+            if (roadLink->GetType() == RoadLinkType::Predecessor)
+            {
+                incomingContactPoint = roadLink->GetContactPoint();
+            }
+            if (roadLink->GetType() == RoadLinkType::Successor)
+            {
+                outgoingRoadId = roadLink->GetElementId();
+                outgoingContactPoint = roadLink->GetContactPoint();
+            }
+        }
+
+        auto* outgoingRoad = scenery->GetRoad(outgoingRoadId);
+
+        if (!incomingRoad || !connectingRoad || !outgoingRoad)
+        {
+            return {false, "Road linkage of junction " + junction->GetId() +
+                               ": Potentially wrong ID of incoming, connecting, or outgoing road."};
+        }
+
+        if (incomingRoad->GetLaneSections().empty())
+        {
+            return {false, "Road linkage of junction " + junction->GetId() + ": Incoming road (" +
+                               incomingRoad->GetId() + ") has no sections"};
+        }
+
+        if (connectingRoad->GetLaneSections().empty())
+        {
+            return {false, "Road linkage of junction " + junction->GetId() + ": Connecting road (" +
+                               incomingRoad->GetId() + ") has no sections"};
+        }
+
+        auto laneIdMapping = connection->GetLinks();
+        connectPathInJunction(junction, incomingRoad, connectingRoad, outgoingRoad, incomingContactPoint, outgoingContactPoint,
+                              laneIdMapping);
+    }
+
+    return {true};
+}
+} // namespace
+
 SceneryConverter::SceneryConverter(SceneryInterface* scenery,
                                    OWL::Interfaces::WorldData& worldData,
-                                   World::Localization::Cache& localizationCache,
+                                   const World::Localization::Localizer& localizer,
                                    const CallbackInterface* callbacks) :
     scenery(scenery),
     worldData(worldData),
-    localizationCache{localizationCache},
+    localizer(localizer),
     callbacks(callbacks)
 {}
 
@@ -120,11 +189,16 @@ bool SceneryConverter::MarkDirections()
     {
         RoadInterface* road = pendingRoads.front();
 
+        MarkDirectionRoad(road, true); // first road in cluster defines direction within cluster
+        if(road->GetJunctionId() != "-1")
+        {
+            pendingRoads.pop_front();
+            continue;
+        }
+
         std::list<RoadInterface*> tmpCluster; // contains currently processed cluster
         tmpCluster.splice(tmpCluster.end(), pendingRoads, pendingRoads.begin());
 
-        MarkDirectionRoad(road,
-                          true); // first road in cluster defines direction within cluster
 
         LOG(CbkLogLevel::Debug, "process road cluster");
 
@@ -216,25 +290,22 @@ bool SceneryConverter::MarkDirections()
                     {
                         connectedRoadInDirection = !roadInDirection;
                     }
-                    else
-                        if (ContactPointType::End == connectedContactPointType)
-                        {
-                            connectedRoadInDirection = roadInDirection;
-                        }
-                }
-                else
-                    if (RoadLinkType::Successor == connectedRoadLinkType)
+                    else if (ContactPointType::End == connectedContactPointType)
                     {
-                        if (ContactPointType::Start == connectedContactPointType)
-                        {
-                            connectedRoadInDirection = roadInDirection;
-                        }
-                        else
-                            if (ContactPointType::End == connectedContactPointType)
-                            {
-                                connectedRoadInDirection = !roadInDirection;
-                            }
+                        connectedRoadInDirection = roadInDirection;
                     }
+                }
+                else if (RoadLinkType::Successor == connectedRoadLinkType)
+                {
+                    if (ContactPointType::Start == connectedContactPointType)
+                    {
+                        connectedRoadInDirection = roadInDirection;
+                    }
+                    else if (ContactPointType::End == connectedContactPointType)
+                    {
+                        connectedRoadInDirection = !roadInDirection;
+                    }
+                }
 
                 MarkDirectionRoad(connectedRoad,
                                   connectedRoadInDirection);
@@ -293,11 +364,18 @@ bool SceneryConverter::ConnectLaneToSection(RoadLaneInterface* currentLane,
         ContactPointType currentContactPoint,
         RoadLaneSectionInterface* otherLaneSection)
 {
-    assert(currentLane->GetId()); // no center lanes
+    if (currentLane->GetId() == 0)
+    {
+        return true;
+    } // no center lanes
 
     if (currentContactPoint == ContactPointType::Start)
     {
         // process predecessor
+        if (currentLane->GetPredecessor().empty())
+        {
+            return true;
+        }
         RoadLaneInterface* otherLane = GetOtherLane(otherLaneSection, currentLane->GetPredecessor().front());
         if (otherLane && !ConnectLaneToLane(currentLane,
                                             currentContactPoint,
@@ -310,6 +388,10 @@ bool SceneryConverter::ConnectLaneToSection(RoadLaneInterface* currentLane,
     else
     {
         // process successor
+        if (currentLane->GetSuccessor().empty())
+        {
+            return true;
+        }
         RoadLaneInterface* otherLane = GetOtherLane(otherLaneSection, currentLane->GetSuccessor().front());
         if (otherLane && !ConnectLaneToLane(currentLane,
                                             currentContactPoint,
@@ -478,70 +560,57 @@ bool SceneryConverter::ConnectRoadInternal(RoadInterface* road)
     return true;
 }
 
+
+
 bool SceneryConverter::ConnectJunction(JunctionInterface* junction)
 {
     worldData.AddJunction(junction);
-    for (auto& entry : junction->GetConnections())
+    // this indirection to an internal function is a first step towards better testability. please do not remove.
+    if(auto [status, error_message] = Internal::ConnectJunction(scenery, junction,
+                         [&](JunctionInterface* junction, RoadInterface *incomingRoad, RoadInterface *connectingRoad, RoadInterface *outgoingRoad,
+                             ContactPointType incomingContactPoint, ContactPointType outgoingContactPoint,
+                             std::map<int, int> laneIdMapping) {
+                             ConnectPathInJunction(junction, incomingRoad, connectingRoad, outgoingRoad, incomingContactPoint,
+                                                   outgoingContactPoint, laneIdMapping);
+                         });
+        status)
     {
-        ConnectionInterface* connection = entry.second;
 
-        std::string incomingRoadId = connection->GetIncommingRoadId();
-        std::string connectingId = connection->GetConnectingRoadId();
-        RoadInterface* incomingRoad = scenery->GetRoad(incomingRoadId);
-        RoadInterface* connectingRoad = scenery->GetRoad(connectingId);
-        std::string outgoingRoadId;
-        ContactPointType incomingContactPoint;
-        ContactPointType outgoingContactPoint;
-        for (auto roadLink : connectingRoad->GetRoadLinks())
+        for (const auto& priority : junction->GetPriorities())
         {
-            if (roadLink->GetType() == RoadLinkType::Predecessor)
-            {
-                incomingContactPoint = roadLink->GetContactPoint();
-            }
-            if (roadLink->GetType() == RoadLinkType::Successor)
-            {
-                outgoingRoadId = roadLink->GetElementId();
-                outgoingContactPoint = roadLink->GetContactPoint();
-            }
+            worldData.AddJunctionPriority(junction, priority.high, priority.low);
         }
-        RoadInterface* outgoingRoad = scenery->GetRoad(outgoingRoadId);
-
-        if (incomingRoad == nullptr || connectingRoad == nullptr || outgoingRoad == nullptr)
-        {
-            return false;
-        }
-
-        if ((connectingRoad->GetLaneSections().size() > 0) && incomingRoad->GetLaneSections().size() > 0)
-        {
-            std::map<int, int> laneIdMapping = connection->GetLinks();
-
-            ConnectPathInJunction(incomingRoad, connectingRoad, outgoingRoad, incomingContactPoint, outgoingContactPoint,
-                                  laneIdMapping);
-        }
-        else
-        {
-            if (incomingRoad->GetLaneSections().size() == 0)
-            {
-                LOG(CbkLogLevel::Error, "Connecting Road has no sections " + connectingRoad->GetId());
-            }
-
-            if (connectingRoad->GetLaneSections().size() == 0)
-            {
-                LOG(CbkLogLevel::Error, "Connecting Road has no sections " + connectingRoad->GetId());
-            }
-
-
-        }
-
+        return true;
     }
-
-    return true;
+    else
+    {
+        LOG(CbkLogLevel::Error, error_message);
+        return false;
+    }
 }
 
-void SceneryConverter::ConnectPathInJunction(RoadInterface* incomingRoad, RoadInterface* connectingRoad,
+void SceneryConverter::ConnectPathInJunction(JunctionInterface* junction, RoadInterface* incomingRoad, RoadInterface* connectingRoad,
         RoadInterface* outgoingRoad, ContactPointType incomingContactPoint, ContactPointType outgoingContactPoint,
         std::map<int, int> laneIdMapping)
 {
+    if (incomingContactPoint == ContactPointType::Start)
+    {
+        worldData.SetRoadPredecessorJunction(*incomingRoad, junction);
+    }
+    else
+    {
+        worldData.SetRoadSuccessorJunction(*incomingRoad, junction);
+    }
+
+    if (outgoingContactPoint == ContactPointType::Start)
+    {
+        worldData.SetRoadPredecessorJunction(*outgoingRoad, junction);
+    }
+    else
+    {
+        worldData.SetRoadSuccessorJunction(*outgoingRoad, junction);
+    }
+
     RoadLaneSectionInterface* incomingRoadSection;
     if (incomingContactPoint == ContactPointType::Start)
     {
@@ -551,6 +620,7 @@ void SceneryConverter::ConnectPathInJunction(RoadInterface* incomingRoad, RoadIn
     {
         incomingRoadSection = incomingRoad->GetLaneSections().back();
     }
+
     RoadLaneSectionInterface* connectingRoadFirstSection = connectingRoad->GetLaneSections().front();
     RoadLaneSectionInterface* connectingRoadLastSection = connectingRoad->GetLaneSections().back();
     RoadLaneSectionInterface* outgoingRoadSection;
@@ -562,6 +632,7 @@ void SceneryConverter::ConnectPathInJunction(RoadInterface* incomingRoad, RoadIn
     {
         outgoingRoadSection = outgoingRoad->GetLaneSections().back();
     }
+
     for (auto lanePair : laneIdMapping)
     {
         RoadLaneInterface* incomingLane = incomingRoadSection->GetLanes().at(lanePair.first);
@@ -569,21 +640,15 @@ void SceneryConverter::ConnectPathInJunction(RoadInterface* incomingRoad, RoadIn
         ConnectLaneToLane(incomingLane, incomingContactPoint, connectingLane);
     }
 
-    for (auto outgoingLane : outgoingRoadSection->GetLanes())
+    for (auto connectingLane : connectingRoadLastSection->GetLanes())
     {
-        //! If isInStreamdirection is false, then the next lane in the forwardLaneStream
-        //! is the predecessor instead of the successor
-        int connectingLaneId;
-        if (outgoingContactPoint == ContactPointType::Start)
+        if (connectingLane.first == 0) //Do not try to connect the center lane
         {
-            connectingLaneId = outgoingLane.second->GetPredecessor().front();
+            continue;
         }
-        else
-        {
-            connectingLaneId = outgoingLane.second->GetSuccessor().front();
-        }
-        RoadLaneInterface* connectingLane = connectingRoadLastSection->GetLanes().at(connectingLaneId);
-        ConnectLaneToLane(outgoingLane.second, outgoingContactPoint, connectingLane);
+        int outgoingLaneId = connectingLane.second->GetSuccessor().front();
+        RoadLaneInterface* outgoingLane = outgoingRoadSection->GetLanes().at(outgoingLaneId);
+        ConnectLaneToLane(outgoingLane, outgoingContactPoint, connectingLane.second);
     }
 }
 
@@ -673,10 +738,31 @@ void SceneryConverter::CreateObjects()
                 OWL::Primitive::AbsPosition pos{x, y, 0};
                 OWL::Primitive::Dimension dim{object->GetLength(), object->GetWidth(), object->GetHeight()};
                 OWL::Primitive::AbsOrientation orientation{object->GetHdg(), object->GetPitch(), object->GetRoll()};
-                new TrafficObjectAdapter(worldData, localizationCache, pos, dim, orientation);
+                new TrafficObjectAdapter(worldData, localizer, pos, dim, orientation);
             }
         }
     }
+}
+
+std::vector<OWL::Id> SceneryConverter::CreateLaneBoundaries(RoadLaneInterface &odLane, RoadLaneSectionInterface& odSection)
+{
+    std::vector<OWL::Id> laneBoundaries;
+    for (const auto& roadMarkEntry : odLane.getRoadMarks())
+    {
+        switch (roadMarkEntry->GetType())
+        {
+        case RoadLaneRoadMarkType::Solid_Solid :
+        case RoadLaneRoadMarkType::Solid_Broken :
+        case RoadLaneRoadMarkType::Broken_Solid :
+        case RoadLaneRoadMarkType::Broken_Broken :
+            laneBoundaries.push_back(worldData.AddLaneBoundary(*roadMarkEntry, odSection.GetStart(), OWL::LaneMarkingSide::Left));
+            laneBoundaries.push_back(worldData.AddLaneBoundary(*roadMarkEntry, odSection.GetStart(), OWL::LaneMarkingSide::Right));
+            break;
+        default :
+            laneBoundaries.push_back(worldData.AddLaneBoundary(*roadMarkEntry, odSection.GetStart(), OWL::LaneMarkingSide::Single));
+        }
+    }
+    return laneBoundaries;
 }
 
 void SceneryConverter::CreateTrafficSigns()
@@ -685,27 +771,47 @@ void SceneryConverter::CreateTrafficSigns()
     {
         RoadInterface* road = item.second;
 
+        std::vector<std::pair<RoadSignalInterface*, std::list<std::string>>> dependentSignals;
+
         for (RoadSignalInterface* signal : road->GetRoadSignals())
         {
+            // Gather all dependent signals
+            if(!signal->GetDependencies().empty())
+            {
+                dependentSignals.emplace_back(signal, signal->GetDependencies());
+                continue;
+            }
+
             auto section = worldDataQuery.GetSectionByDistance(road->GetId(), signal->GetS());
 
-            if (section == nullptr) //potenzieller odrive fehler
+            if (section == nullptr) // potential error in OpenDRIVE file
             {
                 LOG(CbkLogLevel::Warning, "Object ignored: s-coordinate not within road");
                 continue;
             }
 
-            OWL::Interfaces::TrafficSign& trafficSign = worldData.AddTrafficSign();
+            OWL::Interfaces::TrafficSign& trafficSign = worldData.AddTrafficSign(signal->GetId());
+
             trafficSign.SetS(signal->GetS());
-            trafficSign.SetValue(signal->GetValue());
-            trafficSign.SetType(signal->GetType());
+            trafficSign.SetSpecification(signal);
+
             for (auto lane : section->GetLanes())
             {
                 OWL::OdId odId = worldData.GetLaneIdMapping().at(lane->GetId());
                 if (signal->IsValidForLane(odId))
                 {
-                    trafficSign.SetValidForLane(lane->GetId());
+                    worldData.AssignTrafficSignToLane(lane->GetId(), trafficSign);
                 }
+            }
+        }
+
+        // First instantiate all signals and then add dependencies accordingly afterwards
+        for (const auto [supplementarySign, parentIds] : dependentSignals)
+        {
+            for (const auto parentId : parentIds)
+            {
+                auto parentSign = worldData.GetTrafficSigns().at(worldData.GetTrafficSignIdMapping().at(parentId));
+                parentSign->AddSupplementarySign(supplementarySign);
             }
         }
     }
@@ -772,8 +878,20 @@ void SceneryConverter::CreateRoads()
             for (auto laneEntry : odSection.GetLanes())
             {
                 RoadLaneInterface& odLane = *(laneEntry.second);
-
-                worldData.AddLane(odSection, odLane);
+                if (odLane.GetId() == 0)
+                {
+                    auto laneBoundaries = CreateLaneBoundaries(odLane, odSection);
+                    worldData.SetCenterLaneBoundary(odSection, laneBoundaries);
+                }
+            }
+            for (auto laneEntry : odSection.GetLanes())
+            {
+                RoadLaneInterface& odLane = *(laneEntry.second);
+                if (odLane.GetId() != 0)
+                {
+                    auto laneBoundaries = CreateLaneBoundaries(odLane, odSection);
+                    worldData.AddLane(odSection, odLane, laneBoundaries);
+                }
             }
         }
     }

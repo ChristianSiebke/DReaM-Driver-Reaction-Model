@@ -62,13 +62,13 @@ HIDE_UNDOC_CLASSES     = NO
 # spaces.
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = $(OSDocumentationDir) \
-                        $(OSDocumentationDir)/Function/Markdown \
-                        $(OSDocumentationDir)/Function/Markdown/Simulation \
-                        $(OSDocumentationDir)/Function/Markdown/Simulation/Architecture \
-                        $(OSDocumentationDir)/Function/Markdown/Simulation/Development \
-                        $(OSDocumentationDir)/Function/Markdown/Simulation/Input_Output \
-                        $(OSDocumentationDir)/Function/Markdown/Simulation/Tests \
+INPUT                  = $(DocumentationDir) \
+                        $(DocumentationDir)/Function/Markdown \
+                        $(DocumentationDir)/Function/Markdown/Simulation \
+                        $(DocumentationDir)/Function/Markdown/Simulation/Architecture \
+                        $(DocumentationDir)/Function/Markdown/Simulation/Development \
+                        $(DocumentationDir)/Function/Markdown/Simulation/Input_Output \
+                        $(DocumentationDir)/Function/Markdown/Simulation/Tests \
                         $(SourceDir)
 
 FILE_PATTERNS          = *.md \
@@ -102,7 +102,7 @@ EXCLUDE_PATTERNS        = */openpass-thirdpartylibraries/*
 # that contain images that are to be included in the documentation (see the
 # \image command).
 
-IMAGE_PATH             = $(OSDocumentationDir)
+IMAGE_PATH             = $(DocumentationDir)
 
 
 

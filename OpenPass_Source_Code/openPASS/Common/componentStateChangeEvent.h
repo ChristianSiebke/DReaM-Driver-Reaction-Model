@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "agentBasedEvent.h"
+#include "agentBasedManipulatorEvent.h"
 #include "Interfaces/signalInterface.h"
 
 //-----------------------------------------------------------------------------
@@ -30,30 +30,32 @@
  *
  * \ingroup Event */
 //-----------------------------------------------------------------------------
-class ComponentChangeEvent : public AgentBasedEvent
+class ComponentChangeEvent : public AgentBasedManipulationEvent
 {
 public:
     ComponentChangeEvent(int time,
                               const std::string& source,
                               const std::string& sequenceName,
                               EventDefinitions::EventType eventType,
-                              int agentId,
+                              std::vector<int> triggeringAgents,
+                              std::vector<int> actingAgents,
                               const std::string& componentName,
                               const std::string& goalStateName):
-        AgentBasedEvent(time,
+        AgentBasedManipulationEvent(time,
                         source,
                         sequenceName,
                         eventType,
-                        agentId),
+                        triggeringAgents,
+                        actingAgents),
         componentName(componentName),
         goalStateName(goalStateName)
     {
         goalState = ComponentStateMapping.at(goalStateName);
     }
-    ComponentChangeEvent(const AgentBasedEvent&) = delete;
-    ComponentChangeEvent(AgentBasedEvent&&) = delete;
-    ComponentChangeEvent& operator=(const AgentBasedEvent&) = delete;
-    ComponentChangeEvent& operator=(AgentBasedEvent&&) = delete;
+    ComponentChangeEvent(const ComponentChangeEvent&) = delete;
+    ComponentChangeEvent(ComponentChangeEvent&&) = delete;
+    ComponentChangeEvent& operator=(const ComponentChangeEvent&) = delete;
+    ComponentChangeEvent& operator=(ComponentChangeEvent&&) = delete;
     virtual ~ComponentChangeEvent() = default;
 
     /*!
@@ -88,7 +90,7 @@ public:
     */
     virtual std::list<std::pair<std::string, std::string>> GetEventParametersAsString()
     {
-        std::list<std::pair<std::string, std::string>> eventParameters = AgentBasedEvent::GetEventParametersAsString();
+        std::list<std::pair<std::string, std::string>> eventParameters = AgentBasedManipulationEvent::GetEventParametersAsString();
 
         eventParameters.push_back(std::pair<std::string, std::string>("ComponentName", componentName));
         eventParameters.push_back(std::pair<std::string, std::string>("State", goalStateName));

@@ -37,12 +37,7 @@ class ComponentStateChangeManipulator : public ManipulatorCommonBase
 {
 public:
     ComponentStateChangeManipulator(WorldInterface *world,
-                              ParameterInterface *parameters,
-                              SimulationSlave::EventNetworkInterface *eventNetwork,
-                              const CallbackInterface *callbacks);
-
-    ComponentStateChangeManipulator(WorldInterface *world,
-                                    std::shared_ptr<UserDefinedCommandAction> action,
+                                    std::shared_ptr<openScenario::UserDefinedCommandAction> action,
                                     SimulationSlave::EventNetworkInterface *eventNetwork,
                                     const CallbackInterface *callbacks);
 
@@ -59,6 +54,8 @@ public:
     virtual void Trigger(int time);
 
 private:
+    EventContainer GetEvents() override;
+
     std::string componentName = "";
     std::string componentStateName = "";
 };

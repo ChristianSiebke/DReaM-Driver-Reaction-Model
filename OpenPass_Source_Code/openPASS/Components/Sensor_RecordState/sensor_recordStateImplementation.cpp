@@ -16,6 +16,9 @@
 
 #include <memory>
 #include <qglobal.h>
+
+#include "Interfaces/worldInterface.h"
+
 #include "sensor_recordStateImplementation.h"
 
 SensorRecordStateImplementation::SensorRecordStateImplementation(
@@ -189,7 +192,7 @@ void SensorRecordStateImplementation::ObserveEgo()
     int frontAgentId = -1;
     const auto roadId = GetAgent()->GetRoadId();
     const auto searchStartDistance = GetAgent()->GetDistanceToStartOfRoad(MeasurementPoint::Front);
-    const auto* frontAgent = GetWorld()->GetNextAgentInLane(roadId, indexLaneEgo, searchStartDistance);
+    const auto* frontAgent = GetWorld()->GetNextAgentInLane(Route{roadId}, roadId, indexLaneEgo, searchStartDistance, true);
 
     if (frontAgent)
     {
@@ -205,7 +208,7 @@ void SensorRecordStateImplementation::ObserveEgo()
 
 std::string SensorRecordStateImplementation::SecondaryLanesToString()
 {
-    std::list<int> secondaryList = GetAgent()->GetSecondaryCoveredLanes();
+    const auto secondaryList = GetAgent()->GetSecondaryCoveredLanes();
     std::string listOfSecondaryLanes{""};
     for (auto objectIt = secondaryList.cbegin(); objectIt != secondaryList.cend(); objectIt++)
     {

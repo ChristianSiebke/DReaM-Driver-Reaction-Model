@@ -26,16 +26,18 @@
 class AgentCompToCompCtrlSignal : public SignalInterface
 {
 public:
-    const std::string COMPONENTNAME = "AgentCompToCompCtrlSignal";
+    static constexpr char COMPONENTNAME[] = "AgentCompToCompCtrlSignal";
     //-----------------------------------------------------------------------------
     //! Constructor
     //-----------------------------------------------------------------------------
-    AgentCompToCompCtrlSignal(ComponentType componentType,
+    AgentCompToCompCtrlSignal(const ComponentType componentType,
                               const std::string& agentComponentName,
-                              ComponentState currentState):
+                              const ComponentState currentState,
+                              const std::optional<ComponentWarningInformation>& warning = std::nullopt):
         componentType(componentType),
         agentComponentName(agentComponentName),
-        currentState(currentState)
+        currentState(currentState),
+        warning(warning)
     {}
 
     AgentCompToCompCtrlSignal() = delete;
@@ -98,23 +100,47 @@ public:
         return currentState;
     }
 
+    /*!
+     * \brief GetComponentWarning returns the warning from the agent component sending the signal,
+     *        if one exists
+     *
+     * \return The warning information from the agent component sending the signal
+     */
+    std::optional<ComponentWarningInformation> GetComponentWarning() const
+    {
+        return warning;
+    }
+
 private:
-    const ComponentType componentType;      //!< Type of the component
-    const std::string agentComponentName;   //!< Name of the component
-    const ComponentState currentState;      //!< Current component state
+    const ComponentType componentType;                         //!< Type of the component
+    const std::string agentComponentName;                      //!< Name of the component
+    const ComponentState currentState;                         //!< Current component state
+    const std::optional<ComponentWarningInformation> warning;  //!< Warning Information
 };
 
 class VehicleCompToCompCtrlSignal : public AgentCompToCompCtrlSignal
 {
 public:
-    const std::string COMPONENTNAME = "VehicleCompToCompCtrlSignal";
+    static constexpr char COMPONENTNAME[] = "VehicleCompToCompCtrlSignal";
     VehicleCompToCompCtrlSignal(const ComponentType componentType,
-                                               const std::string& agentComponentName,
-                                               const ComponentState currentState,
-                                               const AdasType adasType):
+                                const std::string& agentComponentName,
+                                const ComponentState currentState,
+                                const AdasType adasType):
         AgentCompToCompCtrlSignal(componentType,
-                                                 agentComponentName,
-                                                 currentState),
+                                  agentComponentName,
+                                  currentState),
+        adasType(adasType)
+    {}
+
+    VehicleCompToCompCtrlSignal(const ComponentType componentType,
+                                const std::string& agentComponentName,
+                                const ComponentState currentState,
+                                const std::optional<ComponentWarningInformation>& warning,
+                                const AdasType adasType):
+        AgentCompToCompCtrlSignal(componentType,
+                                  agentComponentName,
+                                  currentState,
+                                  warning),
         adasType(adasType)
     {}
 

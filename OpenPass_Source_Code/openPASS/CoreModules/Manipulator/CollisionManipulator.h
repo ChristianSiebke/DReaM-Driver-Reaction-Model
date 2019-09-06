@@ -34,7 +34,6 @@ class CollisionManipulator : public ManipulatorCommonBase
 {
 public:
     CollisionManipulator(WorldInterface *world,
-                         ParameterInterface *parameters,
                          SimulationSlave::EventNetworkInterface *eventNetwork,
                          const CallbackInterface *callbacks);
 
@@ -51,6 +50,7 @@ public:
     virtual void Trigger(int time);
 
 private:
+    EventContainer GetEvents() override;
 
     /** This function updates the collisionPartners of
     * the agent, the opponent and recursively of all

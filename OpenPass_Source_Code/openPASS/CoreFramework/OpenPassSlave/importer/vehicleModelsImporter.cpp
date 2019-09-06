@@ -426,6 +426,9 @@ void VehicleModelsImporter::ImportPedestrianModel(QDomElement& pedestrianElement
     modelParameters.gearRatios.push_back(0.0);
     modelParameters.gearRatios.push_back(1.0);
     modelParameters.numberOfGears = 1;
+    modelParameters.maximumEngineTorque = 100;
+    modelParameters.maximumEngineSpeed = 1e5;
+    modelParameters.minimumEngineSpeed = 1;
 
     vehicleModelsMap[pedestrianModelName] = modelParameters;
 }

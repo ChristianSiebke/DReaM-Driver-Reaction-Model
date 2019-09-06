@@ -16,6 +16,7 @@
 
 #include <string>
 #include "Common/globalDefinitions.h"
+#include "Common/eventDetectorDefinitions.h"
 #include "Interfaces/scenarioInterface.h"
 #include "Interfaces/scenarioActionInterface.h"
 
@@ -81,16 +82,14 @@ public:
     const std::vector<ScenarioEntity*> &GetScenarioEntities() override;
     const std::map<std::string, std::vector<ScenarioEntity*>> &GetScenarioGroups() override;
 
-    void AddEventDetector(const std::string& eventDetectorType, SimulationCommon::EventDetectorParameters eventDetectorParameters) override;
-    void AddManipulator(const std::string& manipulatorType, SimulationCommon::ManipulatorParameters manipulatorParameters) override;
+    void AddConditionalEventDetector(const openScenario::ConditionalEventDetectorInformation &eventDetectorInformation) override;
     void AddAction(std::shared_ptr<ScenarioActionInterface> action) override;
 
     std::string GetEventDetectorLibraryName();
-    std::list<SimulationCommon::EventDetectorParameters> GetEventDetectors() override;
+    const std::vector<openScenario::ConditionalEventDetectorInformation>& GetEventDetectorInformations() override;
 
     std::string GetManipulatorLibraryName();
-    std::list<SimulationCommon::ManipulatorParameters> GetManipulators() override;
-    std::list<std::shared_ptr<ScenarioActionInterface>> GetActions() const override;
+    std::vector<std::shared_ptr<ScenarioActionInterface> > GetActions() const override;
 
     int GetEndTime() const override;
     void SetEndTime(const double endTime) override;
@@ -100,9 +99,8 @@ private:
     std::vector<ScenarioEntity> entities;
     std::map<std::string, std::vector<ScenarioEntity*>> scenarioGroups;
 
-    std::list<SimulationCommon::EventDetectorParameters> eventDetectors;
-    std::list<SimulationCommon::ManipulatorParameters> manipulators;
-    std::list<std::shared_ptr<ScenarioActionInterface>> actions;
+    std::vector<openScenario::ConditionalEventDetectorInformation> eventDetectorInformations;
+    std::vector<std::shared_ptr<ScenarioActionInterface>> actions;
 
     std::string vehicleCatalogPath;     //!< The path of the vehicle catalog (relative to Scenario.xosc)
     std::string pedestrianCatalogPath;  //!< The path of the pedestrian catalog (relative to Scenario.xosc)

@@ -21,18 +21,19 @@
 #include <iterator>
 #include <tuple>
 
+#include "Common/globalDefinitions.h"
+
 #include "Interfaces/worldObjectInterface.h"
 #include "Interfaces/roadInterface/roadInterface.h"
 #include "Interfaces/roadInterface/roadLaneInterface.h"
 #include "Interfaces/roadInterface/roadLaneSectionInterface.h"
 #include "Interfaces/roadInterface/roadSignalInterface.h"
-#include "OpenDriveTypeMapper.h"
 
+#include "OWL/OpenDriveTypeMapper.h"
 #include "OWL/LaneGeometryElement.h"
 #include "OWL/LaneGeometryJoint.h"
 #include "OWL/Primitives.h"
 
-#include "globalDefinitions.h"
 #include "osi/osi_common.pb.h"
 #include "osi/osi_groundtruth.pb.h"
 #include "osi/osi_trafficsign.pb.h"
@@ -47,6 +48,8 @@ using OdId = int64_t;
 
 using Angle = float;
 
+using Priorities = std::vector<std::pair<Id, Id>>;
+
 constexpr double EVENTHORIZON = 2000;
 
 enum class MeasurementPoint
@@ -55,58 +58,23 @@ enum class MeasurementPoint
     RoadEnd
 };
 
-
-/// \brief Info on the type of a point, related to an agent
-enum class PointType
+enum class LaneMarkingSide
 {
-    Reference,
-    MainLaneLocator,
-    CornerLeftRear,
-    CornerLeftFront,
-    CornerRightFront,
-    CornerRightRear,
-    EdgeLeft,
-    EdgeRight
+    Left,
+    Right,
+    Single
 };
 
-
-enum class LaneType
+struct IntersectionInfo
 {
-    Undefined = 0,
-    None,
-    Driving,
-    Stop,
-    Shoulder,
-    Biking,
-    Sidewalk,
-    Border,
-    Restricted,
-    Parking,
-    Bidirectional,
-    Median,
-    Special1,
-    Special2,
-    Special3,
-    Roadworks,
-    Tram,
-    Rail,
-    Entry,
-    Exit,
-    OffRamp,
-    OnRamp
+    Id intersectingRoad;
+    IntersectingConnectionRank relativeRank;
+
+    //! For each pair of lanes on the own road (first id) and the intersecting road (second id)
+    //! this contains the start s and end s of the intersection on the own lane
+    std::map<std::pair<Id, Id>, std::pair<double, double>> sOffsets;
 };
 
-struct SearchablePoint
-{
-    Primitive::AbsCoordinate coordinate;
-    PointType pointType;
-};
-
-struct LocatedPoint
-{
-    RoadPosition coordinate;
-    PointType pointType;
-};
 
 template<typename T>
 struct Lazy
@@ -145,71 +113,16 @@ public:
     }
 };
 
-template<typename T>
-class ForwardStream : public std::iterator < std::forward_iterator_tag, T >
-{
-public:
-    T* item;
-
-    ForwardStream(T* item) : item{item} {}
-    ForwardStream() : item{nullptr} {}
-
-    ForwardStream& operator++()
-    {
-        item = item->IsInStreamDirection() ? item->GetNext() : item->GetPrevious();
-        return *this;
-    }
-
-    ForwardStream operator++(int)
-    {
-        ForwardStream tmp(*this);
-        item = item->IsInStreamDirection() ? item->GetNext() : item->GetPrevious();
-        return tmp;
-    }
-
-    T& operator*() const { return *item; }
-    T* operator->() const { return item; }
-    bool operator!=(const ForwardStream& other) const { return !(*this == other); }
-    bool operator==(const ForwardStream& other) const { return item == other.item; }
-};
-
-template<typename T>
-class ReverseStream : public std::iterator<std::forward_iterator_tag, T>
-{
-public:
-    T* item;
-
-    ReverseStream(T* item) : item{item} {}
-    ReverseStream() : item{nullptr} {}
-
-    ReverseStream& operator++()
-    {
-        item = item->IsInStreamDirection() ? item->GetPrevious() : item->GetNext();
-        return *this;
-    }
-
-    ReverseStream operator++(int)
-    {
-        ReverseStream tmp(*this);
-        item = item->IsInStreamDirection() ? item->GetPrevious() : item->GetNext();
-        return tmp;
-    }
-
-    T& operator*() const { return *item; }
-    T* operator->() const { return item; }
-    bool operator!=(const ReverseStream& other) const { return !(*this == other); }
-    bool operator==(const ReverseStream& other) const { return item == other.item; }
-};
-
-
 namespace Interfaces {
 class Lane;
+class LaneBoundary;
 class Section;
 class Road;
 class Junction;
 class WorldObject;
 class StationaryObject;
 class MovingObject;
+class TrafficSign;
 
 using LaneGeometryElements = std::vector<Primitive::LaneGeometryElement*>;
 using LaneGeometryJoints   = std::vector<Primitive::LaneGeometryJoint>;
@@ -219,83 +132,12 @@ using Roads                = std::list<const Road*>;
 using WorldObjects         = std::list<WorldObject*>;
 using MovingObjects        = std::list<MovingObject*>;
 using StationaryObjects    = std::list<StationaryObject*>;
-
-
-//! Represents consecutive lanes as specified by the OpenDrive successor definitons
-class ForwardLaneStream
-{
-private:
-    Lane* current{nullptr};
-public:
-    ForwardLaneStream() : current{nullptr} {}
-
-    //! Constructs a ForwardLaneStream starting at the given lane
-    //! @param current  starting lane of the stream
-    ForwardLaneStream(Lane* current) : current{current} {}
-
-    //! Returns an Iterator for lanes in downstream direction defined by the OpenDrive successors
-    ForwardStream<const Lane> begin() const { return {current}; }
-    ForwardStream<const Lane> end() const { return {nullptr}; }
-};
-
-//! Represents consecutive lanes in reverse order as specified by the OpenDrive predecessor definitons
-class ReverseLaneStream
-{
-private:
-    Lane* current{nullptr};
-public:
-    ReverseLaneStream() : current{nullptr} {}
-
-    //! Constructs a ReverseLaneStream starting at the given lane
-    //! @param current  starting lane of the stream
-    ReverseLaneStream(Lane* current) : current{current} {}
-
-    //! Returns an Iterator for lanes in upstream direction defined by the OpenDrive predecessors
-    ReverseStream<const Lane> begin() const { return {current}; }
-    ReverseStream<const Lane> end() const { return {nullptr}; }
-};
-
-
-//! Represents consecutive sections. This is primary derived from the OpenDrive laneSections order.
-class ForwardSectionStream
-{
-private:
-    Section* current{nullptr};
-public:
-    ForwardSectionStream() : current{nullptr} {}
-
-    //! Constructs a ForwardSectionStream starting at the given section
-    //! @param current  starting section of the stream
-    ForwardSectionStream(Section* current) : current{current} {}
-
-    //! Returns an Iterator for sections in downstream direction.
-    ForwardStream<const Section> begin() const { return {current}; }
-    ForwardStream<const Section> end() const { return {nullptr}; }
-};
-
-//! Represents consecutive sections in reverse order. This is primary derived from the OpenDrive laneSections order.
-class ReverseSectionStream
-{
-private:
-    Section* current{nullptr};
-public:
-    ReverseSectionStream() : current{nullptr} {}
-
-    //! Constructs a ReverseSectionStream starting at the given section
-    //! @param current  starting section of the stream
-    ReverseSectionStream(Section* current) : current{current} {}
-
-    //! Returns an Iterator for sections in upstream direction.
-    ReverseStream<const Section> begin() const { return {current}; }
-    ReverseStream<const Section> end() const { return {nullptr}; }
-};
-
+using TrafficSigns         = std::list<TrafficSign*>;
 
 //! This class represents a single lane inside a section
 class Lane
 {
 public:
-    Lane();
     virtual ~Lane() = default;
 
     /*!
@@ -349,11 +191,11 @@ public:
     //! @param distance s coordinate
     virtual const Primitive::LaneGeometryJoint::Points GetInterpolatedPointsAtDistance(double distance) const = 0;
 
-    //!Returns the sucessor of this lane or nullptr if the lane has no successor
-    virtual const Lane* GetNext() const = 0;
+    //!Returns the ids of all successors of this lane
+    virtual const std::vector<Id> GetNext() const = 0;
 
-    //!Returns the predecessor of this lane or nullptr if the lane has no predecessor
-    virtual const Lane* GetPrevious() const = 0;
+    //!Returns the ids of all predecessors of this lane
+    virtual const std::vector<Id> GetPrevious() const = 0;
 
     //!Returns the (possibly invalid) lane to the right of this lane
     virtual const Lane& GetLeftLane() const = 0;
@@ -361,16 +203,11 @@ public:
     //!Returns the (possibly invalid) lane to the right of this lane
     virtual const Lane& GetRightLane() const = 0;
 
-    //!Returns whether the direction of the lane aligns with the lane stream direction
-    //!If false, then the next lane in the forwardLaneStream
-    //!is the predecessor instead of the successor
-    virtual bool IsInStreamDirection() const = 0;
+    //! Returns the ids of all left lane boundaries
+    virtual const std::vector<Id> GetLeftLaneBoundaries() const = 0;
 
-    //!Calculates the stream id of the lane, i.e. the Id of the first lane in the stream
-    virtual void UpdateStreamId() = 0;
-
-    //!Returns the stream id of the lane, i.e. the Id of the first lane in the stream
-    virtual Id GetStreamId() const = 0;
+    //! Returns the ids of all right lane boundaries
+    virtual const std::vector<Id> GetRightLaneBoundaries() const = 0;
 
     //!Returns the s coordinate of the lane start if measure point is road start
     //! or the s coordinate of the lane end if measure point is road end
@@ -380,10 +217,10 @@ public:
     virtual bool Covers(double distance) const = 0;
 
     //!Sets the sucessor of the lane. Throws an error if the lane already has a sucessor
-    virtual void AddNext(const Interfaces::Lane& lane) = 0;
+    virtual void AddNext(const Lane* lane) = 0;
 
     //!Sets the predecessor of the lane. Throws an error if the lane already has a predecessor
-    virtual void AddPrevious(const Interfaces::Lane& lane) = 0;
+    virtual void AddPrevious(const Lane* lane) = 0;
 
     //!Adds a new lane geometry joint to the end of the current list of joints
     //!
@@ -409,9 +246,16 @@ public:
     //!Sets lane to the right of this lane
     virtual void SetRightLane(const Interfaces::Lane& lane) = 0;
 
+    //! Adds the ids to the list of left lane boundaries
+    //! \param laneBoundaries   ids to add
+    //!
+    virtual void SetLeftLaneBoundaries(const std::vector<OWL::Id> laneBoundaries) = 0;
 
     //!Returns a vector of all WorldObjects that are currently in this lane
     virtual const Interfaces::WorldObjects& GetWorldObjects() const = 0;
+
+    //!Returns a vector of all traffic signs that are assigned to this lane
+    virtual const Interfaces::TrafficSigns& GetTrafficSigns() const = 0;
 
     //!Adds a MovingObject to the list of objects currently in this lane
     virtual void AddMovingObject(OWL::Interfaces::MovingObject& movingObject) = 0;
@@ -422,22 +266,51 @@ public:
     //!Adds a WorldObject to the list of objects currently in this lane
     virtual void AddWorldObject(Interfaces::WorldObject& worldObject) = 0;
 
+    virtual void AddTrafficSign (Interfaces::TrafficSign &trafficSign) = 0;
+
     //!Removes all MovingObjects from the list of objects currently in this lane while keeping StationaryObjects
     virtual void ClearMovingObjects() = 0;
-
-    //!ForwardLaneStream starting with this lane
-    const ForwardLaneStream forwardLaneStream;
-
-    //!ReverseLaneStream starting with this lane
-    const ReverseLaneStream reverseLaneStream;
 };
 
+//! This class represents the boundary between two lanes
+class LaneBoundary
+{
+public:
+    virtual ~LaneBoundary() = default;
+
+    //! Returns the OSI Id
+    virtual Id GetId() const = 0;
+
+    //! Returns the width of the boundary
+    virtual double GetWidth() const = 0;
+
+    //! Returns the s coordinate, where this boundary starts
+    virtual double GetSStart() const = 0;
+
+    //! Returns the s coordinate, where this boundary ends
+    virtual double GetSEnd() const = 0;
+
+    //! Returns the type of the boundary
+    virtual LaneMarking::Type GetType() const = 0;
+
+    //! Return the color of the boundary
+    virtual LaneMarking::Color GetColor() const = 0;
+
+    //! Returns the side (Left/Right) of this boundary if it is part of a double line, or Single otherwise
+    virtual LaneMarkingSide GetSide() const = 0;
+
+    //! Adds a new point the end of the list of boundary points
+    //!
+    //! \param point    point to add
+    //! \param heading  heading of the lane
+    //!
+    virtual void AddBoundaryPoint(const Common::Vector2d& point, double heading) = 0;
+};
 
 //!This class represents one section of a road.
 class Section
 {
 public:
-    Section();
     virtual ~Section() = default;
 
     //!Returns the OSI Id of the section
@@ -448,23 +321,6 @@ public:
 
     //!Sets the predecessor of the section. Throws an error if the section already has a predecessor
     virtual void AddPrevious(const Interfaces::Section& section) = 0;
-
-    //!Returns the sucessor of this section or nullptr if section lane has no successor
-    virtual const Section* GetNext() const = 0;
-
-    //!Returns the predecessor of this section or nullptr if the section has no predecessor
-    virtual const Section* GetPrevious() const = 0;
-
-    //!Returns whether the direction of the section aligns with the section stream direction
-    //!If false, then the next lane in the forwardSectionStream
-    //!is the predecessor instead of the successor
-    virtual bool IsInStreamDirection() const = 0;
-
-    //!Calculates the stream id of the section, i.e. the Id of the first section in the stream
-    virtual void UpdateStreamId() = 0;
-
-    //!Returns the stream id of the section, i.e. the Id of the first section in the stream
-    virtual Id GetStreamId() const = 0;
 
     //!Adds a lane to this section
     virtual void AddLane(const Interfaces::Lane& lane) = 0;
@@ -494,11 +350,13 @@ public:
     //!Returns the length of the section
     virtual double GetLength() const = 0;
 
-    //!ForwardLaneStream starting with this section
-    const ForwardSectionStream forwardSectionStream;
+    //! Sets the ids of the lane boundaries of the center lane
+    //! \param laneBoundaryId   ids of center lane boundaries
+    //!
+    virtual void SetCenterLaneBoundary(std::vector<Id> laneBoundaryId) = 0;
 
-    //!ReverseLaneStream starting with this section
-    const ReverseSectionStream reverseSectionStream;
+    //! Returns the ids of the lane boundaries of the center lane
+    virtual std::vector<Id> GetCenterLaneBoundary() const = 0;
 };
 
 //!This class represents a road in the world
@@ -518,6 +376,28 @@ public:
 
     //!Returns the length of the road
     virtual double GetLength() const = 0;
+
+    //!Returns the id of the successor of the road (i.e. next road or junction)
+    virtual Id GetSuccessor() const = 0;
+
+    //!Returns the id of the predecessor of the road (i.e. previous road or junction)
+    virtual Id GetPredecessor() const = 0;
+
+    //! Sets the successor of the road
+    //! \param successor    id of successor (road or junction)
+    virtual void SetSuccessor(Id successor) = 0;
+
+    //! Sets the predecessor of the road
+    //! \param predecessor  id of predecessor (road or junction)
+    virtual void SetPredecessor(Id predecessor) = 0;
+
+    //!Returns true if the direction of the road is the same as the direction of the road stream,
+    //! false otherwise
+    virtual bool IsInStreamDirection() const = 0;
+
+    //! Returns the distance to a point on the road, relative to the road itself
+    //! \param mp the point on the road to measure
+    virtual double GetDistance(MeasurementPoint mp) const = 0;
 };
 
 //!This class represents a junction in the world
@@ -527,13 +407,25 @@ public:
     virtual ~Junction() = default;
 
     //!Returns the Id of the Junction
-    virtual std::string GetId() const = 0;
+    virtual Id GetId() const = 0;
 
     //!Adds a connecting road to this road
     virtual void AddConnectingRoad(const Interfaces::Road* connectingRoad) = 0;
 
     //!Returns a vector of all connecting roads that this road consists of
     virtual const Roads& GetConnectingRoads() const = 0;
+
+    //!Adds a priority entry for this junction
+    virtual void AddPriority(Id high, Id low) = 0;
+
+    //!Returns all priorities of connectors in this junction
+    virtual const Priorities& GetPriorities() const = 0;
+
+    //!Adds intersection info for the road with roadId to the junction
+    virtual void AddIntersectionInfo(const std::string& roadId, const IntersectionInfo& intersectionInfo) = 0;
+
+    //!Gets all of this junction's roads' intersection info
+    virtual const std::map<std::string, std::vector<IntersectionInfo>>& GetIntersections() const = 0;
 };
 
 //!Common base for all objects in the world that can be on the road and have a position and a dimension
@@ -571,7 +463,7 @@ public:
     virtual double GetAbsAccelerationDouble() const = 0;
 
     //!Returns the road coordinates of the object
-    virtual RoadPosition GetRoadCoordinate() const = 0;
+    virtual ObjectPosition GetLocatedPosition() const = 0;
 
     //!Assigns a lane to this object
     virtual void AddLaneAssignment(const Interfaces::Lane& lane) = 0;
@@ -592,12 +484,9 @@ public:
     virtual void SetAbsOrientation(const Primitive::AbsOrientation& newOrientation) = 0;
 
     //!Sets the road coordinates of the object
-    virtual void SetRoadCoordinate(const RoadPosition& newCoordinate) = 0;
+    virtual void SetLocatedPosition(const ObjectPosition& position) = 0;
 
-    //!Returns the s coordinate of the point with the highest s coordinate if measurement is
-    //! road end or the s coordinate of the point with the lowest s coordinate if measurement is
-    //! road start
-    virtual double GetDistance(MeasurementPoint measurementPoint) const = 0;
+    virtual double GetDistance(MeasurementPoint measurementPoint, const std::string& roadId) const = 0;
 
     //!Returns the WorldObjectInterface that this WorldObject is linked to and casts it to T*
     //! T can be
@@ -655,12 +544,12 @@ class StationaryObject : public Interfaces::WorldObject
 public:
     virtual ~StationaryObject() = default;
 
-    virtual RoadPosition GetRoadCoordinate() const = 0;
+    virtual ObjectPosition GetLocatedPosition() const = 0;
 
     virtual void SetReferencePointPosition(const Primitive::AbsPosition& newPosition) = 0;
     virtual void SetDimension(const Primitive::Dimension& newDimension) = 0;
     virtual void SetAbsOrientation(const Primitive::AbsOrientation& newOrientation) = 0;
-    virtual void SetRoadCoordinate(const RoadPosition& newCoordinate) = 0;
+    virtual void SetLocatedPosition(const ObjectPosition& position) = 0;
 };
 
 
@@ -669,7 +558,7 @@ class MovingObject : public Interfaces::WorldObject
 public:
     virtual ~MovingObject() = default;
 
-    virtual RoadPosition GetRoadCoordinate() const = 0;
+    virtual ObjectPosition GetLocatedPosition() const = 0;
     virtual Primitive::LaneOrientation GetLaneOrientation() const = 0;
 
     virtual Primitive::AbsVelocity GetAbsVelocity() const = 0;
@@ -690,7 +579,7 @@ public:
     virtual void SetY(const double newY) = 0;
     virtual void SetZ(const double newZ) = 0;
 
-    virtual void SetRoadCoordinate(const RoadPosition& newCoordinate) = 0;
+    virtual void SetLocatedPosition(const ObjectPosition& position) = 0;
 
     virtual void SetAbsOrientation(const Primitive::AbsOrientation& newOrientation) = 0;
     virtual void SetYaw(const double newYaw) = 0;
@@ -727,14 +616,14 @@ public:
 
     virtual std::string GetId() const = 0;
     virtual double GetS() const = 0;
-    virtual double GetValue() const = 0;
-    virtual CommonTrafficSign::Type GetType() const = 0;
+    virtual std::pair<double, CommonTrafficSign::Unit> GetValueAndUnitInSI(const double osiValue, const osi3::TrafficSignValue_Unit osiUnit) const = 0;
+    virtual CommonTrafficSign::Entity GetSpecification(const double relativeDistance) const = 0;
     virtual bool IsValidForLane(OWL::Id laneId) const = 0;
 
     virtual void SetS(double sPos) = 0;
-    virtual void SetValue(double speed) = 0;
     virtual void SetValidForLane(OWL::Id laneId) = 0;
-    virtual void SetType(RoadSignalType type) = 0;
+    virtual void SetSpecification(RoadSignalInterface* signal) = 0;
+    virtual void AddSupplementarySign(RoadSignalInterface* odSignal) = 0;
 
     /*!
      * \brief Copies the underlying OSI object to the given GroundTruth
@@ -757,7 +646,7 @@ public:
     //! @param[in] osiLane  representation of the road in OpenDrive
     //! @param[in] section  section that this lane is part of
     //! @param[in] isInStreamDirection  flag whether this lane is in the same direction as the LaneStream it belongs to
-    Lane(osi3::world::RoadLane* osiLane, const Interfaces::Section* section, bool isInStreamDirection);
+    Lane(osi3::world::RoadLane* osiLane, const Interfaces::Section* section);
     ~Lane() override;
 
     void CopyToGroundTruth(osi3::GroundTruth& target) const override;
@@ -773,23 +662,26 @@ public:
     double GetCurvature(double distance) const override;
     double GetWidth(double distance) const override;
     double GetDirection(double distance) const override;
-
-    const Interfaces::Lane* GetNext() const override;
-    const Interfaces::Lane* GetPrevious() const override;
+    const std::vector<Id> GetNext() const override
+    {
+        return next;
+    }
+    const std::vector<Id> GetPrevious() const override
+    {
+        return previous;
+    }
     const Interfaces::Lane& GetLeftLane() const override;
     const Interfaces::Lane& GetRightLane() const override;
-    bool IsInStreamDirection() const override;
-
-    void UpdateStreamId() override;
-    Id GetStreamId() const override;
+    const std::vector<Id> GetLeftLaneBoundaries() const override;
+    const std::vector<Id> GetRightLaneBoundaries() const override;
 
     double GetDistance(MeasurementPoint measurementPoint) const override;
     LaneType GetLaneType() const override;
     bool Covers(double distance) const override;
 
     void AddLanePairing(const Interfaces::Lane& prevLane, const Interfaces::Lane& nextLane);
-    void AddNext(const Interfaces::Lane& lane) override;
-    void AddPrevious(const Interfaces::Lane& lane) override;
+    void AddNext(const Interfaces::Lane* lane) override;
+    void AddPrevious(const Interfaces::Lane* lane) override;
     const Interfaces::LaneGeometryElements& GetLaneGeometryElements() const override;
     void AddLaneGeometryJoint(const Common::Vector2d& pointLeft,
                               const Common::Vector2d& pointCenter,
@@ -800,15 +692,18 @@ public:
 
     void SetLeftLane(const Interfaces::Lane& lane) override;
     void SetRightLane(const Interfaces::Lane& lane) override;
+    void SetLeftLaneBoundaries(const std::vector<OWL::Id> laneBoundaries) override;
     void SetLaneType(LaneType specifiedType) override;
 
     const Interfaces::WorldObjects& GetWorldObjects() const override;
     //    const Interfaces::MovingObjects& GetMovingObjects() const override;
     //    const Interfaces::StationaryObjects& GetStationaryObjects() const override;
+    const Interfaces::TrafficSigns& GetTrafficSigns() const override;
 
     void AddMovingObject(OWL::Interfaces::MovingObject& movingObject) override;
     void AddStationaryObject(OWL::Interfaces::StationaryObject& stationaryObject) override;
     void AddWorldObject(Interfaces::WorldObject& worldObject) override;
+    void AddTrafficSign (Interfaces::TrafficSign &trafficSign) override;
     void ClearMovingObjects() override;
 
     std::tuple<const Primitive::LaneGeometryJoint*, const Primitive::LaneGeometryJoint*> GetNeighbouringJoints(
@@ -824,15 +719,14 @@ private:
     Interfaces::WorldObjects worldObjects;
     Interfaces::MovingObjects movingObjects;
     Interfaces::StationaryObjects stationaryObjects;
+    Interfaces::TrafficSigns trafficSigns;
     const Interfaces::Section* section;
     Interfaces::LaneGeometryJoints laneGeometryJoints;
     Interfaces::LaneGeometryElements laneGeometryElements;
-    bool isInStreamDirection;
-    const Interfaces::Lane* next{nullptr};
-    const Interfaces::Lane* previous{nullptr};
+    std::vector<Id> next;
+    std::vector<Id> previous;
     const Interfaces::Lane* leftLane;
     const Interfaces::Lane* rightLane;
-    Id streamId{InvalidId};
     bool leftLaneIsDummy{section == nullptr};
     bool rightLaneIsDummy{section == nullptr};
 };
@@ -840,11 +734,10 @@ private:
 class InvalidLane : public Lane
 {
 public:
-    InvalidLane() : Lane(new osi3::world::RoadLane(), nullptr, true)
+    InvalidLane() : Lane(new osi3::world::RoadLane(), nullptr)
     {
         // set 'invalid' id
         osiLane->mutable_id()->set_value(InvalidId);
-        UpdateStreamId();
     }
 
     virtual ~InvalidLane();
@@ -862,20 +755,35 @@ public:
     }
 };
 
+class LaneBoundary : public Interfaces::LaneBoundary
+{
+public:
+    LaneBoundary(osi3::LaneBoundary* osiLaneBoundary, double width, double sStart, double sEnd, LaneMarkingSide side);
+    virtual Id GetId() const override;
+    virtual double GetWidth() const override;
+    virtual double GetSStart() const override;
+    virtual double GetSEnd() const override;
+    virtual LaneMarking::Type GetType() const override;
+    virtual LaneMarking::Color GetColor() const override;
+    virtual LaneMarkingSide GetSide() const override;
+    virtual void AddBoundaryPoint(const Common::Vector2d& point, double heading) override;
+
+private:
+    osi3::LaneBoundary* osiLaneBoundary;    //! underlying OSI object
+    double sStart;                          //! s coordinate where this boundary starts
+    double sEnd;                            //! s coordinate where this boundary ends
+    double width;                           //! width of the line
+    LaneMarkingSide side;                   //! Side (Left/Right) if this boundary is part of a double line or Single otherwise
+};
+
 class Section : public Interfaces::Section
 {
 public:
-    Section(osi3::world::RoadSection* osiSection, bool isInStreamDirection);
+    Section(osi3::world::RoadSection* osiSection);
     Id GetId() const override;
 
     void AddNext(const Interfaces::Section& section) override;
     void AddPrevious(const Interfaces::Section& section) override;
-    const Interfaces::Section* GetNext() const override;
-    const Interfaces::Section* GetPrevious() const override;
-
-    bool IsInStreamDirection() const override;
-    void UpdateStreamId() override;
-    Id GetStreamId() const override;
 
     void AddLane(const Interfaces::Lane& lane) override;
     const Interfaces::Lanes& GetLanes() const override;
@@ -890,18 +798,18 @@ public:
     double GetSOffset() const override;
     double GetLength() const override;
 
+    virtual void SetCenterLaneBoundary(std::vector<Id> laneBoundaryIds) override;
+    virtual std::vector<Id> GetCenterLaneBoundary() const override;
+
 protected:
     osi3::world::RoadSection* osiSection;
 
 private:
     Interfaces::Lanes lanes;
     const Interfaces::Road* road;
-    const Interfaces::Section* next{nullptr};
-    const Interfaces::Section* previous{nullptr};
     Interfaces::Sections nextSections;
     Interfaces::Sections previousSections;
-    bool isInStreamDirection;
-    Id streamId{InvalidId};
+    std::vector<Id> centerLaneBoundary;
 
 public:
     Section(const Section&) = delete;
@@ -915,7 +823,7 @@ public:
 class InvalidSection : public Section
 {
 public:
-    InvalidSection() : Section(new osi3::world::RoadSection(), true)
+    InvalidSection() : Section(new osi3::world::RoadSection())
     {
         // set 'invalid' id
         osiSection->mutable_id()->set_value(InvalidId);
@@ -931,7 +839,7 @@ public:
 class Road : public Interfaces::Road
 {
 public:
-    Road(osi3::world::Road* osiRoad);
+    Road(osi3::world::Road* osiRoad, bool isInStreamDirection);
 
     Road(const Road&) = delete;
     Road& operator=(const Road&) = delete;
@@ -944,18 +852,27 @@ public:
     const Interfaces::Sections& GetSections() const override;
     void AddSection(Interfaces::Section& section) override;
     double GetLength() const override;
+    Id GetSuccessor() const override;
+    Id GetPredecessor() const override;
+    void SetSuccessor(Id successor) override;
+    void SetPredecessor(Id predecessor) override;
+    bool IsInStreamDirection() const override;
+    double GetDistance(MeasurementPoint mp) const override;
 
 protected:
     osi3::world::Road* osiRoad;
 
 private:
     Interfaces::Sections sections;
+    Id successor{InvalidId};
+    Id predecessor{InvalidId};
+    bool isInStreamDirection;
 };
 
 class InvalidRoad : public Road
 {
 public:
-    InvalidRoad() : Road(new osi3::world::Road())
+    InvalidRoad() : Road(new osi3::world::Road(), true)
     {
         // set 'invalid' id
         osiRoad->mutable_id()->set_value(InvalidId);
@@ -971,13 +888,13 @@ public:
 class Junction : public Interfaces::Junction
 {
 public:
-    Junction(std::string id) :
+    Junction(Id id) :
         id(id)
     {}
 
     virtual ~Junction() override = default;
 
-    virtual std::string GetId() const override
+    virtual Id GetId() const override
     {
         return id;
     }
@@ -992,14 +909,54 @@ public:
         return connectingRoads;
     }
 
+    virtual void AddPriority(Id high, Id low) override
+    {
+        priorities.emplace_back(std::pair{high, low});
+    }
+
+    virtual const Priorities& GetPriorities() const override
+    {
+        return priorities;
+    }
+
+    virtual void AddIntersectionInfo(const std::string& roadId, const IntersectionInfo& intersectionInfo) override
+    {
+        auto& intersectionInfos = intersections[roadId];
+
+        // if roadId already has intersection info registered to it, check if any intersection info is registered for the intersectionInfo.intersectingRoad
+        auto existingIntersectionInfoForRoadPairIter = std::find_if(intersectionInfos.begin(),
+                                                                          intersectionInfos.end(),
+                                                                          [&intersectionInfo](const auto& existingIntersectionInfo) -> bool
+        {
+            return intersectionInfo.intersectingRoad == existingIntersectionInfo.intersectingRoad;
+        });
+
+        // if it does, add the new sOffsets to the already existing intersectionInfo for the pair of roads
+        if (existingIntersectionInfoForRoadPairIter != intersectionInfos.end())
+        {
+            existingIntersectionInfoForRoadPairIter->sOffsets.insert(intersectionInfo.sOffsets.begin(), intersectionInfo.sOffsets.end());
+        }
+        else
+        {
+            intersectionInfos.emplace_back(intersectionInfo);
+        }
+    }
+
+    virtual const std::map<std::string, std::vector<IntersectionInfo>>& GetIntersections() const override
+    {
+        return intersections;
+    }
+
     Junction(const Junction&) = delete;
     Junction& operator=(const Junction&) = delete;
     Junction(Junction&&) = delete;
     Junction& operator=(Junction&&) = delete;
 
 private:
-    std::string id;
+    Id id;
     std::list<const Interfaces::Road*> connectingRoads;
+    Priorities priorities;
+    std::map<std::string, std::vector<IntersectionInfo>> intersections;
 };
 
 class StationaryObject : public Interfaces::StationaryObject
@@ -1014,7 +971,7 @@ public:
     virtual Primitive::AbsPosition GetReferencePointPosition() const override;
     virtual double GetAbsVelocityDouble() const override;
     virtual double GetAbsAccelerationDouble() const override;
-    virtual RoadPosition GetRoadCoordinate() const override;
+    virtual ObjectPosition GetLocatedPosition() const override;
 
     void SetReferencePointPosition(const Primitive::AbsPosition& newPosition) override;
     void SetDimension(const Primitive::Dimension& newDimension) override;
@@ -1024,14 +981,14 @@ public:
     void AddLaneAssignment(const Interfaces::Lane& lane) override;
     const Interfaces::Lanes& GetLaneAssignments() const override;
     void ClearLaneAssignments() override;
-    double GetDistance(MeasurementPoint measurementPoint) const override;
-    void SetRoadCoordinate(const RoadPosition& newCoordinate) override;
+    double GetDistance(MeasurementPoint measurementPoint, const std::string& roadId) const override;
+    void SetLocatedPosition(const ObjectPosition& position) override;
 
     void CopyToGroundTruth(osi3::GroundTruth& target) const override;
 private:
     osi3::StationaryObject* osiObject;
     Interfaces::Lanes assignedLanes;
-    RoadPosition roadCoordinate{0.0, 0.0, 0.0};
+    ObjectPosition position;
 };
 
 class MovingObject : public Interfaces::MovingObject
@@ -1044,7 +1001,7 @@ public:
 
     virtual Primitive::Dimension GetDimension() const override;
     virtual Primitive::AbsPosition GetReferencePointPosition() const override;
-    virtual RoadPosition GetRoadCoordinate() const override;
+    virtual ObjectPosition GetLocatedPosition() const override;
     virtual double GetDistanceReferencePointToLeadingEdge() const override;
 
     virtual Primitive::AbsOrientation GetAbsOrientation() const override;
@@ -1058,7 +1015,7 @@ public:
 
     virtual Primitive::AbsOrientationRate GetAbsOrientationRate() const override;
 
-    virtual double GetDistance(MeasurementPoint measurementPoint) const override;
+    virtual double GetDistance(MeasurementPoint measurementPoint, const std::string& roadId) const override;
 
     virtual void SetDimension(const Primitive::Dimension& newDimension) override;
     virtual void SetLength(const double newLength) override;
@@ -1071,7 +1028,7 @@ public:
     virtual void SetY(const double newY) override;
     virtual void SetZ(const double newZ) override;
 
-    virtual void SetRoadCoordinate(const RoadPosition& newCoordinate) override;
+    virtual void SetLocatedPosition(const ObjectPosition& position) override;
 
     virtual void SetAbsOrientation(const Primitive::AbsOrientation& newOrientation) override;
     virtual void SetYaw(const double newYaw) override;
@@ -1102,7 +1059,7 @@ public:
     void CopyToGroundTruth(osi3::GroundTruth& target) const override;
 private:
     osi3::MovingObject* osiObject;
-    RoadPosition roadCoordinate{0.0, 0.0, 0.0}; //currently as "lane" coord -> t is not constant over road
+    ObjectPosition position;
     Interfaces::Lanes assignedLanes;
 
     mutable Lazy<double> frontDistance;
@@ -1138,21 +1095,13 @@ public:
         return s;
     }
 
-    virtual double GetValue() const override
-    {
-        return osiSign->main_sign().classification().value().value();
-    }
+    virtual std::pair<double, CommonTrafficSign::Unit> GetValueAndUnitInSI(const double osiValue, const osi3::TrafficSignValue_Unit osiUnit) const override;
 
-    virtual CommonTrafficSign::Type GetType() const override;
-
+    virtual CommonTrafficSign::Entity GetSpecification(const double relativeDistance) const override;
 
     virtual void SetS(double sPos) override
     {
         s = sPos;
-    }
-    virtual void SetValue(double value) override
-    {
-        osiSign->mutable_main_sign()->mutable_classification()->mutable_value()->set_value(value);
     }
 
     virtual void SetValidForLane(OWL::Id laneId) override
@@ -1160,7 +1109,9 @@ public:
         osiSign->mutable_main_sign()->mutable_classification()->add_assigned_lane_id()->set_value(laneId);
     }
 
-    virtual void SetType(RoadSignalType type) override;
+    virtual void SetSpecification(RoadSignalInterface* signal) override;
+
+    virtual void AddSupplementarySign(RoadSignalInterface* odSignal) override;
 
     virtual bool IsValidForLane(OWL::Id laneId) const override;
 

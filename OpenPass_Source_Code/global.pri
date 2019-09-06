@@ -12,6 +12,11 @@
 include(defaults.pri)
 include(ccache.pri)
 
+!isEmpty(INTERFACE_OVERRIDE_PATH) {
+    INCLUDEPATH += $$INTERFACE_OVERRIDE_PATH
+    INCLUDEPATH += $$INTERFACE_OVERRIDE_PATH/CoreFramework/OpenPassSlave
+}
+
 INCLUDEPATH += $$PWD/openPASS
 CONFIG += c++17
 
@@ -81,6 +86,8 @@ OPENPASS_EXECUTABLE {
     QT -= gui
     TEMPLATE = app
     CONFIG -= app_bundle
+    CONFIG += no_include_pwd
+    INCLUDEPATH += .
     QMAKE_CFLAGS += -isystem $$EXTRA_INCLUDE_PATH
     QMAKE_CXXFLAGS += -isystem $$EXTRA_INCLUDE_PATH
     Debug:DESTDIR = $${DESTDIR_SLAVE}
@@ -88,4 +95,42 @@ OPENPASS_EXECUTABLE {
     #debug/release predicates are buggy on linux qmake
     unix:DESTDIR=$${DESTDIR_SLAVE}
     QMAKE_PRE_LINK += $$sprintf($$QMAKE_MKDIR_CMD, $$DESTDIR)
+}
+
+##################################################################
+# Configuration specific for open pass testing projects          #
+# Usage:                                                         #
+# set "CONFIG += OPENPASS_TESTING" before including this file    #
+##################################################################
+
+OPENPASS_TESTING {
+    message("[$$TARGET] Building test")
+
+    QT += xml
+    TEMPLATE = app
+    CONFIG += console
+    CONFIG += testcase
+    CONFIG -= app_bundle
+    CONFIG += COPY_RESOURCES
+
+    QMAKE_CFLAGS += -isystem $$EXTRA_INCLUDE_PATH
+    QMAKE_CXXFLAGS += -isystem $$EXTRA_INCLUDE_PATH
+    Debug:DESTDIR = $${DIR_DEBUG}
+    Release:DESTDIR = $${DIR_RELEASE}
+    #debug/release predicates are buggy on linux qmake
+    unix:DESTDIR=$${DIR_DEBUG}
+
+    QMAKE_PRE_LINK += $$sprintf($$QMAKE_MKDIR_CMD, $$DESTDIR)
+
+    # reduce gtest warnings
+    # CCFLAG += -Wno-zero-as-null-pointer-constant -Wno-padded
+
+    #INCLUDEPATH += ../TestClasses
+    LIBS += -lgtest -lgmock
+
+    CONFIG(CODECOVERAGE) {
+        message("[$$TARGET] Enabling code coverage generation")
+        QMAKE_LFLAGS += -lgcov --coverage
+        QMAKE_CXXFLAGS += -fprofile-arcs -ftest-coverage
+    }
 }

@@ -36,8 +36,11 @@
 #include "Interfaces/worldInterface.h"
 #include "Interfaces/eventDetectorInterface.h"
 
-#include "Common/agentBasedEvent.h"
+#include "Common/agentBasedManipulatorEvent.h"
 #include "Common/collisionEvent.h"
+#include "Common/vehicleComponentEvent.h"
+#include "Common/openScenarioDefinitions.h"
+#include "Common/eventDetectorDefinitions.h"
 
 #define SCENARIO_AGENT "ScenarioAgent"
 
@@ -55,15 +58,19 @@ class EventDetectorCommonBase : public EventDetectorInterface
 {
 public:
     EventDetectorCommonBase(WorldInterface *world,
-                            ParameterInterface* parameters,
-                            SimulationSlave::EventNetworkInterface* eventNetwork,
+                            SimulationSlave::EventNetworkInterface *eventNetwork,
                             const CallbackInterface *callbacks,
-                            StochasticsInterface *stochastics);
+                            StochasticsInterface *stochastics):
+    world(world),
+    eventNetwork(eventNetwork),
+    callbacks(callbacks),
+    stochastics(stochastics)
+    {}
     EventDetectorCommonBase(const EventDetectorCommonBase&) = delete;
     EventDetectorCommonBase(EventDetectorCommonBase&&) = delete;
     EventDetectorCommonBase& operator=(const EventDetectorCommonBase&) = delete;
     EventDetectorCommonBase& operator=(EventDetectorCommonBase&&) = delete;
-    ~EventDetectorCommonBase();
+    ~EventDetectorCommonBase() = default;
 
     /*!
     * \brief Triggers the functionality of this class
@@ -103,30 +110,14 @@ protected:
              int line,
              const std::string &message);
 
-    /*!
-     * \brief Returns all agents that can trigger the EventDetector
-     * \details     First looks wether specific agents names were set as actors.
-     *              If not returns the agent group which trigger the EventDetector.
-     *
-     * \return      Agents which trigger the EventDetector.
-     */
-    std::list<AgentInterface*> GetTriggeringScenarioAgents();
-    std::list<AgentInterface*> GetActingScenarioAgents();
-
-
     EventDefinitions::EventType eventType;
 
     WorldInterface *world {nullptr};
     SimulationSlave::EventNetworkInterface* eventNetwork {nullptr};
     const CallbackInterface *callbacks {nullptr};
-    ParameterInterface* parameters {nullptr};
     StochasticsInterface* stochastics {nullptr};
 
     int cycleTime = 1000;
-    std::vector<std::string> triggeringAgents;
-    std::vector<std::string> actingAgents;
-    std::string sequenceName {""};
-    AgentCategory agentCategory = AgentCategory::Any;
 
     const std::string COMPONENTNAME {"EventDetector"};
 };

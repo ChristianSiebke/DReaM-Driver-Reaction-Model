@@ -26,7 +26,8 @@ AbsoluteWorldCoordinateTrajectoryFollower::AbsoluteWorldCoordinateTrajectoryFoll
         const std::map<int, ObservationInterface*> *observations,
         const CallbackInterface *callbacks,
         AgentInterface *agent,
-        TrajectoryInterface *trajectory) :
+        TrajectoryInterface *trajectory,
+        SimulationSlave::EventNetworkInterface * const eventNetwork) :
     TrajectoryFollowerCommonBase(
         componentName,
         isInit,
@@ -39,7 +40,8 @@ AbsoluteWorldCoordinateTrajectoryFollower::AbsoluteWorldCoordinateTrajectoryFoll
         parameters,
         observations,
         callbacks,
-        agent)
+        agent,
+        eventNetwork)
 {
     absoluteWorldTrajectory = *(trajectory->GetWorldCoordinates());
     previousTrajectoryIterator = absoluteWorldTrajectory.begin();
@@ -55,21 +57,12 @@ void AbsoluteWorldCoordinateTrajectoryFollower::TriggerWithActiveAccelerationInp
 
     if(velocity <= 0.0)
     {
-        currentVelocity = 0;
-        currentAcceleration = 0;
-        currentYawRate = 0;
-        distance = 0;
-
-        if(automaticDeactivation)
-        {
-            UpdateState(ComponentState::Disabled);
-        }
-
+        HandleEndOfTrajectory();
         return;
     }
 
     double remainingDistance = velocity * cycleTimeInSeconds;
-    distance = remainingDistance;
+    dynamicsOutputSignal.travelDistance = remainingDistance;
     double percentageTraveledBetweenCoordinates = 0.0;
 
     while (remainingDistance > 0.0)
@@ -128,7 +121,7 @@ void AbsoluteWorldCoordinateTrajectoryFollower::TriggerWithInactiveAccelerationI
         }
         else
         {
-            remainingTime = 0;
+            remainingTime = 1.0;
             timeBetweenCoordinates = 1.0;
         }
     }
@@ -141,7 +134,7 @@ void AbsoluteWorldCoordinateTrajectoryFollower::TriggerWithInactiveAccelerationI
     const double deltaYawAngle = CalculateScaledDeltaYawAngle(previousPosition, nextPosition, percentageTraveledBetweenCoordinates);
 
     deltaS += direction.Length();
-    distance = deltaS;
+    dynamicsOutputSignal.travelDistance = deltaS;
 
     const double velocity = deltaS / cycleTimeInSeconds;
     const double acceleration = (velocity - lastVelocity) / cycleTimeInSeconds;
@@ -151,7 +144,7 @@ void AbsoluteWorldCoordinateTrajectoryFollower::TriggerWithInactiveAccelerationI
     UpdateDynamics(previousPosition, direction, deltaYawAngle, velocity, acceleration);
 }
 
-void AbsoluteWorldCoordinateTrajectoryFollower::Trigger(int time)
+void AbsoluteWorldCoordinateTrajectoryFollower::CalculateNextTimestep(int time)
 {
     currentTime = time;
 
@@ -160,8 +153,8 @@ void AbsoluteWorldCoordinateTrajectoryFollower::Trigger(int time)
         return;
     }
 
-    lastWorldPosition = currentWorldPosition;
-    lastVelocity = currentVelocity;
+    lastWorldPosition = {dynamicsOutputSignal.positionX, dynamicsOutputSignal.positionY, dynamicsOutputSignal.yaw, 0.0};
+    lastVelocity = dynamicsOutputSignal.velocity;
 
     if (previousTrajectoryIterator != absoluteWorldTrajectory.end() &&
             (nextTrajectoryIterator) != absoluteWorldTrajectory.end())
@@ -185,15 +178,7 @@ void AbsoluteWorldCoordinateTrajectoryFollower::Trigger(int time)
     }
     else
     {
-        currentVelocity = 0;
-        currentAcceleration = 0;
-        currentYawRate = 0;
-        distance = 0;
-
-        if(automaticDeactivation)
-        {
-            UpdateState(ComponentState::Disabled);
-        }
+        HandleEndOfTrajectory();
     }
 }
 
@@ -249,12 +234,12 @@ void AbsoluteWorldCoordinateTrajectoryFollower::UpdateDynamics(const Position &p
                                                                const double &velocity,
                                                                const double &acceleration)
 {
-    currentWorldPosition.xPos = previousPosition.xPos + direction.x;
-    currentWorldPosition.yPos = previousPosition.yPos + direction.y;
-    currentWorldPosition.yawAngle = previousPosition.yawAngle + deltaYawAngle;
+    dynamicsOutputSignal.positionX = previousPosition.xPos + direction.x;
+    dynamicsOutputSignal.positionY = previousPosition.yPos + direction.y;
+    dynamicsOutputSignal.yaw = previousPosition.yawAngle + deltaYawAngle;
 
-    currentYawRate = (currentWorldPosition.yawAngle - lastWorldPosition.yawAngle) / cycleTimeInSeconds;
+    dynamicsOutputSignal.yawRate = (dynamicsOutputSignal.yaw - lastWorldPosition.yawAngle) / cycleTimeInSeconds;
 
-    currentVelocity = velocity;
-    currentAcceleration = acceleration;
+    dynamicsOutputSignal.velocity = velocity;
+    dynamicsOutputSignal.acceleration = acceleration;
 }

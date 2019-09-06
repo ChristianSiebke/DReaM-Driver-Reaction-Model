@@ -23,10 +23,20 @@
 #include "Interfaces/signalInterface.h"
 #include "Common/globalDefinitions.h"
 
+using Warnings = std::map<std::string, ComponentWarningInformation>;
+
+/*!
+ * --------------------------------------------------------------------------------
+ * \brief The CompCtrlToAgentCompSignal class facilitates communication with the
+ *        agent component, defining the max reachable state of the component as
+ *        well as the states of other components connected to the
+ *        ComponentController
+ * --------------------------------------------------------------------------------
+ */
 class CompCtrlToAgentCompSignal : public SignalInterface
 {
 public:
-    const std::string COMPONENTNAME = "CompCtrlToAgentCompSignal";
+    static constexpr char COMPONENTNAME[] = "CompCtrlToAgentCompSignal";
     //-----------------------------------------------------------------------------
     //! Constructor
     //-----------------------------------------------------------------------------
@@ -75,4 +85,46 @@ public:
 private:
     const ComponentState maxReachableState;     //!< Highest reachable state
     const std::map<std::string, std::pair<ComponentType, ComponentState>> vehicleComponentStates;   //!< Current state of all components
+};
+
+/*!
+ * --------------------------------------------------------------------------------
+ * \brief The CompCtrlToDriverCompSignal class facilitates communication with the
+ *        driver component, allowing for warnings to be forwarded to the driver
+ *        alongside standard agent component information.
+ * --------------------------------------------------------------------------------
+ */
+class CompCtrlToDriverCompSignal : public CompCtrlToAgentCompSignal
+{
+public:
+    static constexpr char COMPONENTNAME[] = "CompCtrlToDriverCompSignal";
+    //-----------------------------------------------------------------------------
+    //! Constructor
+    //-----------------------------------------------------------------------------
+    CompCtrlToDriverCompSignal(const ComponentState &maxReachableState,
+                               const std::map<std::string, std::pair<ComponentType, ComponentState>> &vehicleComponentStates,
+                               const std::optional<std::map<std::string, ComponentWarningInformation>>& warnings = std::nullopt):
+        CompCtrlToAgentCompSignal(maxReachableState,
+                                  vehicleComponentStates),
+        warnings(warnings)
+    {}
+
+    CompCtrlToDriverCompSignal() = delete;
+    CompCtrlToDriverCompSignal(const CompCtrlToDriverCompSignal&) = delete;
+    CompCtrlToDriverCompSignal(CompCtrlToDriverCompSignal&&) = delete;
+    CompCtrlToDriverCompSignal& operator=(const CompCtrlToDriverCompSignal&) = delete;
+    CompCtrlToDriverCompSignal& operator=(CompCtrlToDriverCompSignal&&) = delete;
+    virtual ~CompCtrlToDriverCompSignal() = default;
+
+    /*!
+     * \brief GetWarnings gets all warnings from the signal (if any exist), by component name
+     *
+     * \return all warnings for the driver known by the ComponentController (if any exist), by component name
+     */
+    const std::optional<Warnings>& GetWarnings() const
+    {
+        return warnings;
+    }
+private:
+    const std::optional<Warnings> warnings; //!< Contains all warnings for the driver known by the ComponentController (if any exist) by component name
 };

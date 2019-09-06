@@ -205,7 +205,9 @@ ComponentInterface* ModelLibrary::CreateComponent(std::shared_ptr<ComponentType>
 
     try
     {
-        if (modelLibraryName == "ComponentController")
+        const auto &version = getVersionFunc();
+
+        if (version == "0.1.0")
         {
             implementation = createEventInstanceFunc(componentName,
                                                      componentType->GetInit(),

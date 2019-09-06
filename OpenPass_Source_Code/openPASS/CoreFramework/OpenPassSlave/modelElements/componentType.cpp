@@ -14,7 +14,6 @@
 
 #include "componentType.h"
 #include "CoreFramework/CoreShare/log.h"
-#include "modelLibrary.h"
 #include "CoreFramework/CoreShare/parameters.h"
 
 namespace SimulationSlave

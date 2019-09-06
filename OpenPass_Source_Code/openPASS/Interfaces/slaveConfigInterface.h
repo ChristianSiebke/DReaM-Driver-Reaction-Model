@@ -31,6 +31,7 @@ struct ExperimentConfig
 
     int experimentId;
     int numberOfInvocations;
+    bool logCyclicsToCsv;
     std::uint32_t randomSeed;
     std::vector<std::string> loggingGroups;         //!< Holds the names of enabled logging groups
     Libraries libraries;

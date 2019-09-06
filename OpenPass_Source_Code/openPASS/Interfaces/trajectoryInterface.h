@@ -10,7 +10,8 @@
 
 #pragma once
 
-#include "globalDefinitions.h"
+#include "Common/globalDefinitions.h"
+#include "Common/worldDefinitions.h"
 
 enum class TrajectoryType {
     WorldCoordinatesAbsolute = 0,

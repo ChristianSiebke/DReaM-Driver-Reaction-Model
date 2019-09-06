@@ -230,11 +230,12 @@ This section contains information about the general experiment setup. These valu
 | RandomSeed          | Random seed for the entire experiment. The seed must be within the bounds of unsigned integers   | Obligatory                      |
 | Libraries           | Name of the core module Libraries to use. If a name is not specified the default name is assumed | Obligatory                      |
 | LoggingGroups       | List of logging groups to be activated                                                           | Obligatory (empty list allowed) |
+| LoggingCyclicsToCsv | Determine if cyclics are written to a separate csv-file instead of the xml output                | Optional (default: false)       |
 
 Example:
 This experiment has the id 0.
 During this experiment the simulation runs 10 invocations and the first invocation starts with the random seed 5327.
-It produces output with all possible agent attributes logged for the visualization.
+It produces output with all possible agent attributes logged for the visualization. The cyclics are written to csv-files. For each run a new csv-file is created.
 
 ```xml
 <ExperimentConfig>
@@ -253,6 +254,7 @@ It produces output with all possible agent attributes logged for the visualizati
         <LoggingGroup>Sensor</LoggingGroup>
         <LoggingGroup>Driver</LoggingGroup>
     </LoggingGroups>
+	<LoggingCyclicsToCsv>true</LoggingCyclicsToCsv>
 </ExperimentConfig>
 ```
 
@@ -610,6 +612,7 @@ This section describes the possible sensor profiles of all vehicle profiles.
         <Double Key="LatencyMax" Value="0"/>
         <Double Key="FailureProbability" Value="0"/>
         <Bool Key="EnableVisualObstruction" Value="false"/>
+        <Double Key="RequiredPercentageOfVisibleArea" Value="0.001" />
     </SensorProfile>
     ...
 </SensorProfiles>
@@ -628,177 +631,22 @@ The parameters depending on the sensor type. The SensorGeometric2D needs the fol
 |---------|-----------|
 |LatencyMean|Mean value of the latency|
 |LatencySD|Standard deviation of the latency|
-|LatencyMin|Minimum value of the latencyy|
-|LatencyMax|Maximum value of the latencyy|
+|LatencyMin|Minimum value of the latency|
+|LatencyMax|Maximum value of the latency|
 |FailureProbability|How likely the sensor fails to detected an object|
 |DetectionRange|Range in which the sensor can detect objects|
 |OpeningAngleH|Angle of the circular sector|
 |EnableVisualObstruction|Wether this sensor uses [visual obstruction](\ref dev_agent_modules_geometric2d_obstruction)|
+|RequiredPercentageOfVisibleArea|Fraction of the area of an object that has to be in the sensor detection field in order for being detected|Geometric2D|
 
 ---
 
 \subsection io_input_scenario Scenario.xosc
 
-This file is necessary for the simulation to work. It describes the initial setup of the scenario. The initial position and dynamics of ego and scenario agents are listed here. This file also contains the EventDetector and Manipulators used to enforce certain behavior in the scenario. This file is modeled after the OpenSCENARIO standard. But to match the needs of the simulator some additions were made.
+This file is necessary for the simulation to work. It describes the initial setup of the scenario.
 
-**Entities**
-This section describes all entity objects participating in the simulation.
-An object with the name "Ego" has to exist and is always mapped to the ego agent in the simulation.
-Currently, the only reference type is `CatalogReference` which refers to a filename and AgentProfile name within this file.
+For further information see the [Scenario.xosc documentation](\ref scenario).
 
-Example:
-```xml
-<Entities>
-    <Object name="Ego">
-        <CatalogReference catalogName="ProfilesCatalog.xml" entryName="MiddleClassCarAgent"/>
-    </Object>
-    <Object name="ScenarioAgent1">
-        <CatalogReference catalogName="ProfilesCatalog.xml" entryName="MiddleClassCarAgent"/>
-    </Object>
-    <Object name="ScenarioAgent2">
-        <CatalogReference catalogName="ProfilesCatalog.xml" entryName="MiddleClassCarAgent"/>
-    </Object>
-</Entities>
-```
-
-**Init**
-Here the initial position and dynamics of ego and scenario agents are defined.
-One ego agent is required. Scenario agents are optional.
-
-One agent gets defined by a complete _Private_ tag.
-The _Position_ tag with a valid _Lane_ tag is Obligatory otherwise the agent can **not** be placed.
-The _Longitudinal_ tag is optional.
-The _Stochastics_ tag is optional and can be added per agent for up to 4 parameter. If the stochastics tag is used the initial value is being used as mean value.
-
-
-Current possible stochastic variables: 
-
-|Tag|Description|
-|---|-----------|
-| "s" | Longitudinal distance in m |
-| "offset" | Lateral distance in m |
-| "velocity" | start velocity in m/s |
-| "rate" | start acceleration in m/s^2 |
-
-|Tag|Attribute|Description|
-|---|---------|-----------|
-|Private|object|Name of the agent defined. Those need to be unique. In order to define the ego agent set this value to "Ego"|
-|Lane|roadId|Id of the road the agent gets spawned on|
-|Lane|s|s-coordinate of the agent pivot point in relation to the road|
-|Lane|laneId|Id of the lane|
-|Lane|offset|t-coordinate of the agent pivot point in relation to the current lane. The pivot points must still be inside the defined laneId otherwise it is invalid|
-|Stochastics|value|Here is defined which value has a stochastic variation. So far options are: "s", "offset"|
-|Stochastics|stdDeviation|Standard deviation|
-|Stochastics|lowerBound|Minimum value|
-|Stochastics|upperBound|Maximum value|
-|Orientation|h|heading angle in radiant. Rotation is counterclockwise|
-|Orientation|type|only relative is allowed|
-|Dynamics|time|Per time value in ms used to calculate initial velocity|
-|Dynamics|distance|Distance made per time in m used to calculate initial velocity|
-|Dynamics|rate|Used to describe acceleration. Currently not used by the simulation|
-
-Example:
-
-```xml
-<Init>
-    <Actions>
-        <Private object="ScenarioAgentLeft1">
-            <Action>
-                <Position>
-                    <Lane roadId="1" s="250.0" laneId="-1" offset="-0.2"> <!-- position  -->
-                        <Stochastics value="s" stdDeviation="10" lowerBound="20" upperBound="300"/>
-                        <Stochastics value="offset" stdDeviation="0.5" lowerBound="60" upperBound="20"/>
-                        <Orientation type="relative" h="-0.1"/>
-                    </Lane>
-                </Position>
-            </Action>
-            <Action>
-                <Longitudinal>
-                    <Speed>
-                        <Dynamics time="100" distance="1.0" rate="0.5" shape="linear"/>
-                        <Stochastics value="velocity" stdDeviation="2.0" lowerBound="0.0" upperBound="40.0"/>
-                        <Stochastics value="acceleration" stdDeviation="0.5" lowerBound="0.0" upperBound="1.0"/>
-                    </Speed>
-                </Longitudinal>
-            </Action>
-        </Private>
-    </Actions>
-</Init>
-```
-
----
-
-**Story**
-
-Here the [EventDetectors](\ref dev_framework_modules_eventdetectors) and [Manipulators](\ref dev_framework_modules_manipulators) used by this scenario are defined.
-For each combination of EventDetectors and manipulators an according _Sequence_ must be defined.
-
-The _Actors_ tag is mandatory. This can be used to assign targets for the manipulator. If no _Entity_ tags are included, all agents are selected as targets for the manipulator. Names provided to the _Entity_ tags relate to those from the "Init"-tag.
-
-|Tag|Attribute|Description|
-|---|---------|-----------|
-|Entity|name|Name of the agent as specified in the _Init_ tag|
-|Action|name|Name of the Manipulator|
-|Condition|name|Type of the event detector|
-|SimulationTime|value|Time with which to compare, using rule, to the current simulation time to determine if the event is triggered in seconds|
-|SimulationTime|rule|The rule for which to determine if the event is triggered|
-
-Example:
-
-```xml
-<Story name="ActivateTFStory">
-    <Act name="Act1">
-        <Sequence name="ActivateTFSequence" numberOfExecutions="1">
-            <Actors>
-                <Entity name="Ego"/>
-            </Actors>
-            <Maneuver name="ActivateTFManuever">
-                <Event name="ActivateTFEvent" priority="overwrite">
-                    <Action name="ActivateTFAction">
-                        <UserDefined>
-                            <Command>SetComponentState DynamicsTrajectoryFollower Acting</Command>
-                        </UserDefined>
-                    </Action>
-                    <StartConditions>
-                        <ConditionGroup>
-                            <Condition name="Conditional">
-                                <ByValue>
-                                    <SimulationTime value="5.0" rule="greater_than" />
-                                </ByValue>
-                            </Condition>
-                        </ConditionGroup>
-                    </StartConditions>
-                </Event>
-            </Maneuver>
-        </Sequence>
-        ...
-    </Act>
-</Story>
-```
-
----
-
-**EndConditions**
-
-Here the end conditions for the simulation are defined. One SimulationTime condition is required. Any other or additional conditions are not supported.
-
-| Tag            | Attribute | Description                    |
-|----------------|-----------|--------------------------------|
-| SimulationTime | value     | The time in ms to be simulated |
-
-Example:
-
-```xml
-<EndConditions>
-    <ConditionGroup>
-        <Condition name="EndTime" rule="greater_than" edge="rising">
-            <ByValue>
-                <SimulationTime value="30.0" rule="greater_than" />
-            </ByValue>
-        </Condition>
-    </ConditionGroup>
-</EndConditions>
-```
 
 ---
 

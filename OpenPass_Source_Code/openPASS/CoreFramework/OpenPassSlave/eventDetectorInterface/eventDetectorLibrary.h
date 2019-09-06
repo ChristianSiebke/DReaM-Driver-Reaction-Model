@@ -28,9 +28,12 @@ class EventDetectorLibrary
 {
 public:
     typedef const std::string &(*EventDetectorInterface_GetVersion)();
-    typedef EventDetectorInterface *(*EventDetectorInterface_CreateInstanceType)(WorldInterface *world,
-                                                                                 ParameterInterface* parameters,
-                                                                                 std::string eventDetectorType,
+    typedef EventDetectorInterface *(*EventDetectorInterface_CreateCollisionDetectorInstanceType)(WorldInterface *world,
+                                                                                 EventNetworkInterface* eventNetwork,
+                                                                                 const CallbackInterface *callbacks,
+                                                                                 StochasticsInterface *stochastics);
+    typedef EventDetectorInterface *(*EventDetectorInterface_CreateConditionalDetectorInstanceType)(WorldInterface *world,
+                                                                                 const openScenario::ConditionalEventDetectorInformation &eventDetectorInformation,
                                                                                  EventNetworkInterface* eventNetwork,
                                                                                  const CallbackInterface *callbacks,
                                                                                  StochasticsInterface *stochastics);
@@ -84,15 +87,19 @@ public:
     /// \param stochastics
     /// \return instance of event detector
     ///
-    EventDetector *CreateEventDetector(std::string eventDetectorType,
-                                       ParameterInterface *parameters,
-                                       EventNetworkInterface *eventNetwork,
-                                       WorldInterface *world,
-                                       StochasticsInterface *stochastics);
+    EventDetector *CreateCollisionDetector(EventNetworkInterface *eventNetwork,
+                                           WorldInterface *world,
+                                           StochasticsInterface *stochastics);
+
+    EventDetector *CreateConditionalDetector(const openScenario::ConditionalEventDetectorInformation &eventDetectorInformation,
+                                             EventNetworkInterface *eventNetwork,
+                                             WorldInterface *world,
+                                             StochasticsInterface *stochastics);
 
 private:
     const std::string DllGetVersionId = "OpenPASS_GetVersion";
-    const std::string DllCreateInstanceId = "OpenPASS_CreateInstance";
+    const std::string DllCreateCollisionDetectorInstanceId = "OpenPASS_CreateCollisionDetectorInstance";
+    const std::string DllCreateConditionalDetectorInstanceId = "OpenPASS_CreateConditionalDetectorInstance";
     const std::string DllDestroyInstanceId = "OpenPASS_DestroyInstance";
 
     std::string libraryPath;
@@ -100,7 +107,8 @@ private:
     QLibrary *library = nullptr;
     CallbackInterface *callbacks;
     EventDetectorInterface_GetVersion getVersionFunc{nullptr};
-    EventDetectorInterface_CreateInstanceType createInstanceFunc{nullptr};
+    EventDetectorInterface_CreateCollisionDetectorInstanceType createCollisionDetectorInstanceFunc{nullptr};
+    EventDetectorInterface_CreateConditionalDetectorInstanceType createConditionalDetectorInstanceFunc{nullptr};
     EventDetectorInterface_DestroyInstanceType destroyInstanceFunc{nullptr};
 };
 

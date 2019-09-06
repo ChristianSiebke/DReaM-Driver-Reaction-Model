@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <string>
+#include <list>
 #include <vector>
 
 //-----------------------------------------------------------------------------
@@ -142,17 +143,25 @@ enum class RoadLaneRoadMarkLaneChange // http://www.opendrive.org/docs/OpenDRIVE
 };
 
 //-----------------------------------------------------------------------------
-//! LaneChange of the lane line
+//! Color of the road mark
 //-----------------------------------------------------------------------------
 enum class RoadLaneRoadMarkColor // http://www.opendrive.org/docs/OpenDRIVEFormatSpecRev1.4H.pdf page 92
 {
     Undefined = 0,
-    Standard, // == White
     Blue,
     Green,
     Red,
     Yellow,
-    White
+    White,
+    Orange
+};
+
+//! Weight of the road mark
+enum class RoadLaneRoadMarkWeight // http://www.opendrive.org/docs/OpenDRIVEFormatSpecRev1.4H.pdf page 92
+{
+    Undefined = 0,
+    Standard,
+    Bold
 };
 
 enum class RoadElementOrientation
@@ -160,39 +169,6 @@ enum class RoadElementOrientation
     both,
     positive,
     negative,
-};
-
-//-----------------------------------------------------------------------------
-//! Type of signals
-//-----------------------------------------------------------------------------
-enum class RoadSignalType // according to StVO
-{
-    Undefined = 0,
-    MaximumSpeedLimit = 274,
-    MinimumSpeedLimit = 275,
-    EndOfMaximumSpeedLimit = 278,
-    EndOfMinimumSpeedLimit = 279,
-    EndOffAllSpeedLimitsAndOvertakingRestrictions = 282,
-    TownBegin = 310,
-    TownEnd = 311,
-    Zone30Begin = 2741, //274.1
-    Zone30End = 2742, // 274.2
-    TrafficCalmedDistrictBegin = 3251, // 325.1
-    TrafficCalmedDistrictEnd = 3252, // 325.2
-    EnvironmentalZoneBegin = 2701, // 270.1
-    EnvironmentalZoneEnd = 2702, // 270.2
-    OvertakingBanBegin = 276,
-    OvertakingBanEnd = 280,
-    OvertakingBanForTrucksBegin = 277,
-    OvertakingBanForTrucksEnd = 281,
-    RightOfWayBegin = 306,
-    RightOfWayEnd = 307,
-    RightOfWayNextIntersection = 301,
-    Stop = 206,
-    DoNotEnter = 267,
-    HighWayBegin = 3301, // 330.1
-    HighWayEnd = 3302, // 330.2
-    HighWayExit = 333
 };
 
 //-----------------------------------------------------------------------------
@@ -235,7 +211,7 @@ struct RoadSignalSpecification
     std::string orientation{};
     double zOffset{0};
     std::string country{};
-    RoadSignalType type{};
+    std::string type{};
     std::string subtype{};
     double value{0};
     RoadSignalUnit unit{};
@@ -249,6 +225,7 @@ struct RoadSignalSpecification
     double yaw{0};
 
     RoadElementValidity validity;
+    std::list<std::string> dependencyIds {};
 };
 
 

@@ -20,7 +20,6 @@
 #include "CoreFramework/CoreShare/log.h"
 #include "Interfaces/observationNetworkInterface.h"
 #include "observationModule.h"
-#include "respawner.h"
 #include "runInstantiator.h"
 #include "runResult.h"
 #include "scheduler.h"
@@ -57,8 +56,6 @@ void RunInstantiator::ClearRun()
 bool RunInstantiator::InitializeFrameworkModules(ExperimentConfig& experimentConfig, ScenarioInterface* scenario)
 {
     CHECKFALSE(stochastics->Instantiate(frameworkModules.stochasticsLibrary));
-    stochastics->InitGenerator(experimentConfig.randomSeed);
-
     CHECKFALSE(world->Instantiate());
 
     CHECKFALSE(eventDetectorNetwork->Instantiate(frameworkModules.eventDetectorLibrary,
@@ -70,6 +67,7 @@ bool RunInstantiator::InitializeFrameworkModules(ExperimentConfig& experimentCon
                eventNetwork));
 
     SimulationCommon::ObservationParameters observationParameters;
+    observationParameters.AddParameterBool("LoggingCyclicsToCsv", experimentConfig.logCyclicsToCsv);
     observationParameters.AddParameterStringVector("LoggingGroups", experimentConfig.loggingGroups);
     observationParameters.AddParameterString("SceneryFile", scenario->GetSceneryPath());
 
@@ -110,6 +108,7 @@ bool RunInstantiator::ExecuteRun()
     InvocationControl invocationControl(experimentConfig.numberOfInvocations);
     while (invocationControl.Progress())
     {
+        stochastics->InitGenerator(experimentConfig.randomSeed + invocationControl.CurrentInvocation());
         LOG_INTERN(LogLevel::DebugCore) << std::endl << "### run number: " << invocationControl.CurrentInvocation() << " ###";
 
         agentFactory->ResetIds();
@@ -139,16 +138,13 @@ bool RunInstantiator::ExecuteRun()
         // otherwise dangling references might exists in Schedule
         Scheduler scheduler(world, spawnPointNetwork, eventDetectorNetwork, manipulatorNetwork, observationNetwork);
 
-        Respawner respawner(scheduler, spawnPointNetwork->GetSpawnPoint());
-
         // prepare result storage
         RunResult runResult;
 
         // TODO: This is a workaround, as the OSI use case only imports a single observation library -> implement new observation concept
         auto& observationModule = *(observationNetwork->GetObservationModules().begin()->second);
 
-        eventNetwork->Initialize(&respawner,
-                                 &runResult,
+        eventNetwork->Initialize(&runResult,
                                  observationModule.GetImplementation());
 
         auto schedulerReturnState = scheduler.Run(

@@ -12,23 +12,22 @@
 
 #include "Interfaces/trafficObjectInterface.h"
 #include "WorldObjectAdapter.h"
-#include "Localization/Localization.h"
+#include "Localization.h"
 
 class TrafficObjectAdapter : public WorldObjectAdapter, public TrafficObjectInterface
 {
 private:
     double laneDirection;
-    World::Localization::BaseTrafficObjectLocator locator;
+    const World::Localization::Localizer& localizer;
 
     World::Localization::Result locateResult;
     mutable std::vector<GlobalRoadPosition> boundaryPoints;
-    mutable World::Localization::Remainders remainders;
 
     void InitLaneDirection(double hdg);
 
 public:
     TrafficObjectAdapter(OWL::Interfaces::WorldData& worldData,
-                         World::Localization::Cache& localizationCache,
+                         const World::Localization::Localizer& localizer,
                          OWL::Primitive::AbsPosition position,
                          OWL::Primitive::Dimension dimension,
                          OWL::Primitive::AbsOrientation orientation);
@@ -36,10 +35,10 @@ public:
     ObjectTypeOSI GetType() const override;
     double GetDistanceToStartOfRoad() const override;
     double GetDistanceToStartOfRoad(MeasurementPoint mp) const override;
+    double GetDistanceToStartOfRoad(MeasurementPoint mp, std::string roadId) const override;
     double GetVelocity(VelocityScope velocityScope = VelocityScope::Absolute) const override;
-    double GetLaneDirection() const override;
+    double GetLaneDirection() const;
     double GetLaneRemainder(Side side) const override;
-    GlobalRoadPosition GetBoundaryPoint(Side side) const override;
     bool Locate() override;
     void Unlocate() override;
 

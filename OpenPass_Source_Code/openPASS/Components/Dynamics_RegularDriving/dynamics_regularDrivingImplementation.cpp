@@ -19,11 +19,11 @@
 #include <cmath>
 #include "dynamics_regularDrivingImplementation.h"
 #include "Common/longitudinalSignal.h"
-#include "commonTools.h"
+#include "Common/commonTools.h"
 #include "Common/accelerationSignal.h"
 #include "Common/steeringSignal.h"
 #include "Common/parametersVehicleSignal.h"
-#include "globalDefinitions.h"
+#include "Common/globalDefinitions.h"
 
 void DynamicsRegularDrivingImplementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time)
 {
