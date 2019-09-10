@@ -11,11 +11,10 @@
 #ifndef SYSTEMVIEW_H
 #define SYSTEMVIEW_H
 
+#include "openPASS-System/SystemInterface.h"
+#include "openPASS-Project/ProjectInterface.h"
 #include "openPASS-Window/WindowInterface.h"
 #include "Views/WidgetView.h"
-
-class ProjectInterface;
-class SystemInterface;
 
 namespace Ui {
 class SystemView;
@@ -27,8 +26,8 @@ class SystemView : public WidgetView
 
 public:
     explicit SystemView(WindowInterface * const window,
-                        ProjectInterface * const project,
                         SystemInterface * const system,
+                        ProjectInterface * const project,
                         QWidget * const parent = nullptr);
     virtual ~SystemView();
 
@@ -37,14 +36,20 @@ protected:
 
 protected Q_SLOTS:
     void actionNewSystem_clicked();
+    void actionClear_clicked();
     void actionLoadSystem_clicked();
     void actionSaveSystem_clicked();
     void actionSaveScreenshot_clicked();
+    void activateDynamicMode(bool checked);
+
+protected:
+    virtual bool eventFilter(QObject *watched, QEvent *event) override;
 
 protected:
     WindowInterface * const window;
-    ProjectInterface * const project;
+    QString directory;
     SystemInterface * const system;
+    bool * const dynamicMode;
 
 protected:
     Ui::SystemView * const ui;

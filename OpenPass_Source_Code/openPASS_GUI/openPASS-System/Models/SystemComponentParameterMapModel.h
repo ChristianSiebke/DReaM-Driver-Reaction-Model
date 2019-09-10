@@ -38,6 +38,9 @@ public:
     virtual SystemComponentParameterMapInterface::ID getID(SystemComponentParameterMapInterface::Item * const item) const override;
     virtual SystemComponentParameterMapInterface::Item * getItem(SystemComponentParameterMapInterface::ID const & id) const override;
 
+public:
+    virtual QList<Item*> values() const override;
+
 protected:
     SystemComponentParameterMapInterface::Map parameters;
 };

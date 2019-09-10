@@ -31,12 +31,16 @@ void WindowModel::add(WindowInterface::ID const & id,
     // Take ownership of button, actions and submenus
     objects << button;
     button->setParent(nullptr);
-    for (WindowInterface::Action * const action : menu)
+
+
+    for (WindowInterface::Widget * const item : menu)
     {
-        if (action != nullptr)
+        objects << item;
+        item->setParent(nullptr);
+
+        WindowInterface::Action * action = qobject_cast<WindowInterface::Action *>(item);
+        if(action)
         {
-            objects << action;
-            action->setParent(nullptr);
             if (action->menu() != nullptr)
             {
                 objects << action->menu();

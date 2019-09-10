@@ -26,7 +26,8 @@ HEADERS += \
     $$PWD/SystemComponentTitleView.h \
     $$PWD/SystemItemView.h \
     $$PWD/SystemView.h \
-    $$PWD/WidgetView.h
+    $$PWD/WidgetView.h \
+    $$PWD/SystemTabView.h
 
 SOURCES += \
     $$PWD/DoubleSpinBoxView.cpp \
@@ -46,7 +47,8 @@ SOURCES += \
     $$PWD/SystemComponentTitleView.cpp \
     $$PWD/SystemItemView.cpp \
     $$PWD/SystemView.cpp \
-    $$PWD/WidgetView.cpp
+    $$PWD/WidgetView.cpp \
+    $$PWD/SystemTabView.cpp
 
 FORMS += \
     $$PWD/SystemComponentInputItemView.ui \
@@ -56,4 +58,5 @@ FORMS += \
     $$PWD/SystemComponentParameterItemView.ui \
     $$PWD/SystemComponentScheduleView.ui \
     $$PWD/SystemComponentTitleView.ui \
-    $$PWD/SystemView.ui
+    $$PWD/SystemView.ui \
+    $$PWD/SystemTabView.ui

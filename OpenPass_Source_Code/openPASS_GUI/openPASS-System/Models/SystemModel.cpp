@@ -10,7 +10,6 @@
 
 #include "Models/SystemModel.h"
 
-#include "openPASS-Project/ProjectInterface.h"
 #include "Models/SystemComponentManagerModel.h"
 #include "Models/SystemMapModel.h"
 #include "Models/SystemXMLLoadModel.h"
@@ -19,16 +18,14 @@
 #include <QCoreApplication>
 
 SystemModel::SystemModel(ComponentInterface * const component,
-                         ProjectInterface * const project,
                          QObject * const parent)
     : SystemInterface(parent)
+    , component(component)
     , components(new SystemComponentManagerModel(component, this))
-    , _project(project)
     , systems(new SystemMapModel(this))
 {
     // Load components
     components->loadFromDirectory(QDir(QCoreApplication::applicationDirPath() + SUBDIR_LIB_COMPONENT));
- //   components->loadFromDirectory(_project->getLibrary());
 }
 
 bool SystemModel::clear()
@@ -41,10 +38,10 @@ bool SystemModel::clear()
     return false;
 }
 
-bool SystemModel::load(QString const & filepath)
+bool SystemModel::load(QString const & filepath, bool const * const dynamicMode)
 {
     clear();
-    if (SystemXMLLoadModel::load(filepath, *systems->begin(), components))
+    if (SystemXMLLoadModel::load(filepath, systems, components, dynamicMode))
     {
         Q_EMIT loaded();
         return true;
@@ -52,10 +49,10 @@ bool SystemModel::load(QString const & filepath)
     return false;
 }
 
-bool SystemModel::load(QIODevice * const device)
+bool SystemModel::load(QIODevice * const device, bool const * const dynamicMode)
 {
     clear();
-    if (SystemXMLLoadModel::load(device, *systems->begin(), components))
+    if (SystemXMLLoadModel::load(device, systems, components, dynamicMode))
     {
         Q_EMIT loaded();
         return true;
@@ -63,9 +60,9 @@ bool SystemModel::load(QIODevice * const device)
     return false;
 }
 
-bool SystemModel::save(QString const & filepath) const
+bool SystemModel::save(QString const & filepath, bool const * const dynamicMode) const
 {
-    if (SystemXMLSaveModel::save(filepath, systems))
+    if (SystemXMLSaveModel::save(filepath, systems, dynamicMode))
     {
         Q_EMIT saved();
         return true;
@@ -73,9 +70,9 @@ bool SystemModel::save(QString const & filepath) const
     return false;
 }
 
-bool SystemModel::save(QIODevice * const device) const
+bool SystemModel::save(QIODevice * const device, bool const * const dynamicMode) const
 {
-    if (SystemXMLSaveModel::save(device, systems))
+    if (SystemXMLSaveModel::save(device, systems, dynamicMode))
     {
         Q_EMIT saved();
         return true;
@@ -91,4 +88,9 @@ SystemComponentManagerInterface * SystemModel::getComponents() const
 SystemMapInterface * SystemModel::getSystems() const
 {
     return systems;
+}
+
+SystemInterface * SystemModel::createSystemModel()
+{
+    return new SystemModel(component);
 }

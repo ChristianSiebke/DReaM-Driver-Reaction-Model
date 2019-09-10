@@ -70,6 +70,9 @@ public:
     virtual bool remove(SystemConnectionMapInterface::Component const * const component) = 0;
     virtual bool remove(SystemConnectionMapInterface::Source const * const source) = 0;
     virtual bool remove(SystemConnectionMapInterface::Target const * const target) = 0;
+
+public:
+    virtual QList<Item*> values() const = 0;
 };
 
 #endif // SYSTEMCONNECTIONMAPINTERFACE_H

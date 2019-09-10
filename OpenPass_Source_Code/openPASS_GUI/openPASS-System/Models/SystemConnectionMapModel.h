@@ -50,6 +50,9 @@ protected:
     virtual SystemConnectionMapInterface::ID next() const;
     virtual bool remove(QList<SystemConnectionMapInterface::ID> const & ids);
 
+public:
+    virtual QList<Item*> values() const override;
+
 protected:
     SystemConnectionMapInterface::Map connections;
 };

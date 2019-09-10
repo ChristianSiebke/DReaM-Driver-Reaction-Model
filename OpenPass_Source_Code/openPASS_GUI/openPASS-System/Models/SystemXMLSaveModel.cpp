@@ -21,21 +21,23 @@
 #include "openPASS-System/SystemMapInterface.h"
 
 bool SystemXMLSaveModel::save(QString const & filepath,
-                              SystemMapInterface const * const systems)
+                              SystemMapInterface const * const systems,
+                              const bool * const dynamicMode)
 {
     // Can we open the file in write only mode?
     QFile file(filepath);
     if (file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
         // Save system to file
-        return save(&file, systems);
+        return save(&file, systems, dynamicMode);
     }
     // Return failure
     return false;
 }
 
 bool SystemXMLSaveModel::save(QIODevice * const device,
-                              SystemMapInterface const * const systems)
+                              SystemMapInterface const * const systems,
+                              const bool * const dynamicMode)
 {
     // Initialize xml stream writer
     QXmlStreamWriter xml(device);
@@ -44,7 +46,12 @@ bool SystemXMLSaveModel::save(QIODevice * const device,
 
     // Save system to xml stream
     xml.writeStartDocument();
+
     xml.writeStartElement(KeySystems);
+
+    if(*dynamicMode)
+        xml.writeAttribute("dynamic", "true");
+
     for (SystemItemInterface const * const system : *systems)
     {
         saveSystem(xml, system);

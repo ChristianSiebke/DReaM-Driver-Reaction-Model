@@ -54,7 +54,7 @@ public:
     using Action = QPushButton;                     //!< The button in the menu of the stacked widget
     using ActionTitle = QString;                    //!< The title of the button in the stacked widget's menu
     using ActionMenu = QMenu;                       //!< The drop down menu of the button in the stacked widget's menu
-    using Menu = QList<WindowInterface::Action *>;  //!< The list of buttons in the menu of the stacked widget
+    using Menu = QList<WindowInterface::Widget *>;  //!< The list of widgets in the menu of the stacked widget
 
 public:
     explicit WindowInterface(QObject * const parent = nullptr)

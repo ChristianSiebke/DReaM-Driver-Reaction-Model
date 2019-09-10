@@ -47,6 +47,9 @@ public:
 public:
     virtual SystemComponentParameterMapInterface::ID getID(SystemComponentParameterMapInterface::Item * const item) const = 0;
     virtual SystemComponentParameterMapInterface::Item * getItem(SystemComponentParameterMapInterface::ID const & id) const = 0;
+
+public:
+    virtual QList<Item*> values() const = 0;
 };
 
 #endif // SYSTEMCOMPONENTPARAMETERMAPINTERFACE_H

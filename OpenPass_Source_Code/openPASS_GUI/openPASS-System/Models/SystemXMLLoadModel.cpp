@@ -16,56 +16,79 @@
 #include <QXmlStreamReader>
 
 bool SystemXMLLoadModel::load(QString const & filepath,
-                              SystemItemInterface * const system,
-                              SystemComponentManagerInterface const * const manager)
+                              SystemMapInterface * const systems,
+                              SystemComponentManagerInterface const * const manager,
+                              bool const * const dynamicMode)
 {
     // Does the file exist and can we open it?
     QFile file(filepath);
     if ((file.exists()) && (file.open(QIODevice::ReadOnly | QIODevice::Text)))
     {
         // Load component from file
-        return load(&file, system, manager);
+        return load(&file, systems, manager, dynamicMode);
     }
     // Return failure
     return false;
 }
 
 bool SystemXMLLoadModel::load(QIODevice * const device,
-                              SystemItemInterface * const system,
-                              SystemComponentManagerInterface const * const manager)
+                              SystemMapInterface * const systems,
+                              SystemComponentManagerInterface const * const manager,
+                              bool const * const dynamicMode)
 {
     // Initialize xml stream reader
     QXmlStreamReader xml(device);
+    bool success = true;
 
     // Verify xml header
     if ((xml.readNext() == QXmlStreamReader::TokenType::StartDocument) &&
             (xml.readNext() == QXmlStreamReader::TokenType::StartElement) &&
             (xml.name() == KeySystems))
     {
-        // Verify first system
-        xml.readNext();
-        if ((xml.readNext() == QXmlStreamReader::TokenType::StartElement) &&
-                (xml.name() == KeySystem))
+        if(*dynamicMode && xml.attributes().value("dynamic").toString() != "true")
+            return false;
+
+        while(xml.readNextStartElement())
         {
             // Load first system from xml stream
-            return loadSystemItem(xml, system, manager);
+            if(xml.name() == KeySystem)
+                success = loadSystemItem(xml, systems, manager) && success;
+            else
+                xml.skipCurrentElement();
         }
-        return false;
+        return success;
     }
     return false;
 }
 
 bool SystemXMLLoadModel::loadSystemItem(QXmlStreamReader & xml,
-                                        SystemItemInterface * const system,
+                                        SystemMapInterface * const systems,
                                         SystemComponentManagerInterface const * const manager)
 {
     bool success = true;
     QList<QString> keys = KeyListSystem;
+    SystemMapInterface::Item *system = nullptr;
+
+    // determine ID and create system
+    xml.readNextStartElement();
+    if(xml.name() == KeySystemID)
+    {
+        keys.removeAll(xml.name().toString());
+        SystemMapInterface::ID const id = xml.readElementText().toInt();
+        systems->add(id);
+        system = systems->getItem(id);
+    }
+    else
+        return false;
+
     while (xml.readNextStartElement())
     {
         keys.removeAll(xml.name().toString());
         if (xml.name() == KeySystemTitle)
+        {
             system->setTitle(xml.readElementText());
+            Q_EMIT systems->modifiedTitle(system->getID());
+        }
         else if (xml.name() == KeySystemPriority)
             system->setPriority(xml.readElementText().toUInt());
         else if (xml.name() == KeySystemComponents)

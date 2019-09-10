@@ -22,6 +22,7 @@
 #include <QStandardItemModel>
 #include <QVariant>
 #include <QWheelEvent>
+#include <QMessageBox>
 
 QString const SystemItemView::DragDropMimeDataFormat =
         QStringLiteral("application/x-qabstractitemmodeldatalist");
@@ -29,10 +30,12 @@ QPoint const SystemItemView::MouseInvalidPosition = QPoint(-1, -1);
 
 SystemItemView::SystemItemView(SystemItemInterface * const system,
                                SystemComponentManagerInterface const * const components,
+                               bool const * const dynamicMode,
                                QWidget * const parent)
     : QScrollArea(parent)
     , system(system)
     , components(components)
+    , dynamicMode(dynamicMode)
 
 {
     setAcceptDrops(true);
@@ -50,14 +53,35 @@ void SystemItemView::dragEnterEvent(QDragEnterEvent * event)
 
 void SystemItemView::dropEvent(QDropEvent * event)
 {
+    QMessageBox message;
+
+    // Info about restricted mode
+    message.setText("You are working in dynamic mode. In this mode, you can only build systems which are "
+                    "compatible with a profile-based agent configuration."
+                    " In the current release, you are limited to one algorithm and multiple sensors.");
+
+    message.setInformativeText("Please, reconsider your action.");
+    message.setStandardButtons(QMessageBox::Ok);
+
+
     if (event->mimeData()->hasFormat(DragDropMimeDataFormat))
     {
         QStandardItemModel * const item = new QStandardItemModel();
         if (item->dropMimeData(event->mimeData(), Qt::CopyAction, 0, 0, QModelIndex()))
         {
-            system->getComponents()->add(components->lookupItemByTitle(
-                                             item->data(item->index(0, 0)).toString()),
-                                         widget()->mapFromParent(event->pos()));
+            ComponentItemInterface * component = components->lookupItemByTitle( item->data(item->index(0, 0)).toString() );
+
+            if(*dynamicMode)
+            {
+                ComponentItemInterface::Type type = component->getType();
+
+                if( (type == ComponentItemInterface::Type::Algorithm && !algoIncluded() ) || type == ComponentItemInterface::Type::Sensor)
+                    system->getComponents()->add(component, widget()->mapFromParent(event->pos()));
+                else
+                    message.exec();
+            }
+            else
+                system->getComponents()->add(component, widget()->mapFromParent(event->pos()));
         }
         delete item;
         event->accept();
@@ -87,4 +111,18 @@ void SystemItemView::mouseMoveEvent(QMouseEvent * event)
 void SystemItemView::wheelEvent(QWheelEvent * event)
 {
     event->ignore();
+}
+
+bool SystemItemView::algoIncluded()
+{
+    for(auto item : *(system->getComponents()))
+        if(item->getType() == ComponentItemInterface::Type::Algorithm)
+            return true;
+
+    return false;
+}
+
+SystemItemInterface * SystemItemView::getSystem() const
+{
+    return system;
 }
