@@ -1,31 +1,34 @@
-/*********************************************************************
-* Copyright (c) 2017 ITK Engineering GmbH
+/*******************************************************************************
+* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+*               2018 AMFD GmbH
+*               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
 * which is available at https://www.eclipse.org/legal/epl-2.0/
 *
 * SPDX-License-Identifier: EPL-2.0
-**********************************************************************/
+*******************************************************************************/
 
 //-----------------------------------------------------------------------------
-//! @file  stochastics.h
+//! @file  Stochastics.h
 //! @brief This file contains the internal representation of the stochastics.
 //!        For more information see stochastics.dll documentation.
 //-----------------------------------------------------------------------------
 
-#ifndef STOCHASTICS_H
-#define STOCHASTICS_H
+#pragma once
 
-#include "log.h"
-#include "stochasticsInterface.h"
-#include "stochasticsBinding.h"
-#include "stochasticsLibrary.h"
+#ifndef SIMULATIONSLAVE_STOCHASTICS_DEFINED
+
+#include "CoreFramework/CoreShare/log.h"
+#include "Interfaces/stochasticsInterface.h"
+#include "stochasticsInterface/stochasticsBinding.h"
+#include "stochasticsInterface/stochasticsLibrary.h"
 
 namespace SimulationSlave
 {
 
-class Stochastics: public StochasticsInterface
+class Stochastics : public StochasticsInterface
 {
 public:
     Stochastics(StochasticsBinding *stochasticsBinding) :
@@ -39,9 +42,14 @@ public:
 
     virtual ~Stochastics() = default;
 
-    double GetUniformDistributed(double a, double b){
-        return implementation->GetUniformDistributed(a,b);
+    int GetBinomialDistributed(int upperRangeNum, double probSuccess){
+        return implementation->GetBinomialDistributed(upperRangeNum, probSuccess);
     }
+
+    double GetUniformDistributed(double a, double b){
+        return implementation->GetUniformDistributed(a, b);
+    }
+
     double GetNormalDistributed(double mean, double stdDeviation){
         return implementation->GetNormalDistributed(mean, stdDeviation);
     }
@@ -62,6 +70,14 @@ public:
         return implementation->GetSpecialDistributed(distributionName, args);
     }
 
+    double GetRandomCdfLogNormalDistributed(double mean, double stdDeviation){
+        return implementation->GetRandomCdfLogNormalDistributed(mean, stdDeviation);
+    }
+
+    double GetPercentileLogNormalDistributed(double mean, double stdDeviation, double probability){
+        return implementation->GetPercentileLogNormalDistributed(mean, stdDeviation, probability);
+    }
+
     std::uint32_t GetRandomSeed() const{
         return implementation->GetRandomSeed();
     }
@@ -74,12 +90,12 @@ public:
         return implementation->InitGenerator(seed);
     }
 
-    bool Instantiate(SimulationCommon::RunConfig::StochasticsInstance *stochasticsInstance)
+    bool Instantiate(std::string libraryPath)
     {
-        if((!stochasticsBinding) || (!stochasticsInstance)){
+        if(!stochasticsBinding){
             return false;
         }else if(!implementation){
-            implementation = stochasticsBinding->Instantiate(stochasticsInstance);
+            implementation = stochasticsBinding->Instantiate(libraryPath);
             if(!implementation){
                 return false;
             }
@@ -93,4 +109,5 @@ private:
 };
 
 } // namespace SimulationSlave
-#endif // STOCHASTICS_H
+
+#endif   // SIMULATIONSLAVE_STOCHASTICS_DEFINED

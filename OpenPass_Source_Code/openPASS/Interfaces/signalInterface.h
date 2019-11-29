@@ -1,13 +1,13 @@
-/*********************************************************************
-* Copyright (c) 2017 ITK Engineering GmbH
-* Copyright (c) 2018 in-tech GmbH.
+/*******************************************************************************
+* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+*               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
 * which is available at https://www.eclipse.org/legal/epl-2.0/
 *
 * SPDX-License-Identifier: EPL-2.0
-**********************************************************************/
+*******************************************************************************/
 
 #pragma once
 
@@ -16,15 +16,54 @@
 
 enum class ComponentState
 {
-    Acting,
-    Armed,
+    Undefined = 0,
     Disabled,
-    Undefined
+    Armed,
+    Acting
 };
 
 const std::map<std::string, ComponentState> ComponentStateMapping = { { "Acting",   ComponentState::Acting   },
                                                                       { "Armed",    ComponentState::Armed    },
                                                                       { "Disabled", ComponentState::Disabled } };
+
+enum class ComponentWarningLevel
+{
+    INFO = 0,
+    WARNING
+};
+
+const std::map<ComponentWarningLevel, std::string> ComponentWarningLevelMapping = { { ComponentWarningLevel::INFO   , "Info"    },
+                                                                                    { ComponentWarningLevel::WARNING, "Warning" } };
+
+enum class ComponentWarningType
+{
+    OPTIC = 0,
+    ACOUSTIC,
+    HAPTIC
+};
+
+const std::map<ComponentWarningType, std::string> ComponentWarningTypeMapping = { { ComponentWarningType::OPTIC   , "Optic"    },
+                                                                                  { ComponentWarningType::ACOUSTIC, "Acoustic" },
+                                                                                  { ComponentWarningType::HAPTIC  , "Haptic"   } };
+
+enum class ComponentWarningIntensity
+{
+    LOW = 0,
+    MEDIUM,
+    HIGH
+};
+
+const std::map<ComponentWarningIntensity, std::string> ComponentWarningIntensityMapping = { { ComponentWarningIntensity::LOW   , "Low"    },
+                                                                                            { ComponentWarningIntensity::MEDIUM, "Medium" },
+                                                                                            { ComponentWarningIntensity::HIGH  , "High"   } };
+
+struct ComponentWarningInformation
+{
+    bool activity;
+    ComponentWarningLevel level;
+    ComponentWarningType type;
+    ComponentWarningIntensity intensity;
+};
 
 //-----------------------------------------------------------------------------
 //! This interface provides access to common signal operations
@@ -44,7 +83,6 @@ public:
     //-----------------------------------------------------------------------------
     explicit virtual operator std::string() const = 0;
 
-    int senderID = -1;
 private:
     friend std::ostream &operator<<(std::ostream &,
                                     const SignalInterface &);

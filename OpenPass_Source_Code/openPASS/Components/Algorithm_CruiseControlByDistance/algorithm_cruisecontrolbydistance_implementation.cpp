@@ -11,7 +11,7 @@
 
 #include <qglobal.h>
 #include "algorithm_cruisecontrolbydistance_implementation.h"
-#include "primitiveSignals.h"
+#include "Common/primitiveSignals.h"
 
 void Algorithm_CruiseControlByDistance_Implementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time)
 {

@@ -11,8 +11,8 @@
 
 #include <memory>
 #include <qglobal.h>
+#include "Common/primitiveSignals.h"
 #include "sensor_distance_implementation.h"
-#include "primitiveSignals.h"
 
 Sensor_Distance_Implementation::Sensor_Distance_Implementation(int componentId,
                                                                bool isInit,

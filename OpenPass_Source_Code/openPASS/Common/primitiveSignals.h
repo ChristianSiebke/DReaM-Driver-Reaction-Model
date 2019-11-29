@@ -1,12 +1,13 @@
-/*********************************************************************
-* Copyright (c) 2017 ITK Engineering GmbH
+/*******************************************************************************
+* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+*               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
 * which is available at https://www.eclipse.org/legal/epl-2.0/
 *
 * SPDX-License-Identifier: EPL-2.0
-**********************************************************************/
+*******************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  primitiveSignals.h
@@ -17,16 +18,18 @@
 #ifndef PRIMITIVESIGNALS_H
 #define PRIMITIVESIGNALS_H
 
-#include "modelInterface.h"
+#include "Interfaces/modelInterface.h"
 
 //-----------------------------------------------------------------------------
 //! Primitive signal class for double values
 //-----------------------------------------------------------------------------
-class DoubleSignal : public SignalInterface
+class DoubleSignal : public ComponentStateSignalInterface
 {
 public:
-    DoubleSignal(double inValue) : value(inValue)
-    {}
+    DoubleSignal(ComponentState state, double inValue) : value(inValue)
+    {
+        componentState = state;
+    }
     DoubleSignal(const DoubleSignal &) = default;
     DoubleSignal(DoubleSignal &&) = default;
     DoubleSignal &operator=(const DoubleSignal &) = default;
@@ -47,11 +50,13 @@ public:
 //-----------------------------------------------------------------------------
 //! Primitive signal class for integer values
 //-----------------------------------------------------------------------------
-class IntSignal : public SignalInterface
+class IntSignal : public ComponentStateSignalInterface
 {
 public:
-    IntSignal(int inValue) : value(inValue)
-    {}
+    IntSignal(int inValue, ComponentState state) : value(inValue)
+    {
+        componentState = state;
+    }
     IntSignal(const IntSignal &) = default;
     IntSignal(IntSignal &&) = default;
     IntSignal &operator=(const IntSignal &) = default;
@@ -72,11 +77,13 @@ public:
 //-----------------------------------------------------------------------------
 //! Primitive signal class for boolean values
 //-----------------------------------------------------------------------------
-class BoolSignal : public SignalInterface
+class BoolSignal : public ComponentStateSignalInterface
 {
 public:
-    BoolSignal(bool inValue) : value(inValue)
-    {}
+    BoolSignal(bool inValue, ComponentState state) : value(inValue)
+    {
+        componentState = state;
+    }
     BoolSignal(const BoolSignal &) = default;
     BoolSignal(BoolSignal &&) = default;
     BoolSignal &operator=(const BoolSignal &) = default;
@@ -92,6 +99,31 @@ public:
     }
 
     bool value; //!< signal content
+};
+
+//-----------------------------------------------------------------------------
+//! Primitive signal class for componentState values
+//-----------------------------------------------------------------------------
+class ComponentStateSignal : public ComponentStateSignalInterface
+{
+public:
+    ComponentStateSignal(ComponentState state)
+    {
+        componentState = state;
+    }
+    ComponentStateSignal(const ComponentStateSignal&) = default;
+    ComponentStateSignal(ComponentStateSignal&&) = default;
+    ComponentStateSignal& operator=(const ComponentStateSignal&) = default;
+    ComponentStateSignal& operator=(ComponentStateSignal&&) = default;
+    virtual ~ComponentStateSignal() = default;
+
+    //-----------------------------------------------------------------------------
+    //! Converts signal to string
+    //-----------------------------------------------------------------------------
+    virtual operator std::string() const
+    {
+        return "";
+    }
 };
 
 #endif // PRIMITIVESIGNALS_H

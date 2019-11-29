@@ -1,13 +1,13 @@
-/*********************************************************************
-* Copyright (c) 2017 ITK Engineering GmbH
-* Copyright (c) 2018 in-tech GmbH
+/*******************************************************************************
+* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+*               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
 * which is available at https://www.eclipse.org/legal/epl-2.0/
 *
 * SPDX-License-Identifier: EPL-2.0
-**********************************************************************/
+*******************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  roadLaneInterface.h
@@ -56,7 +56,10 @@ public:
     //! Adds a new roadmark to a road lane.
     //!
     //! @param[in]  sOffset             Offset relative to the preceding lane section
-    //! @param[in]  roadMark            RoadMark
+    //! @param[in]  roadMark            type of the road mark
+    //! @param[in]  color               color of the road mark
+    //! @param[in]  laneChange          allowed laneChange across the road mark
+    //! @param[in]  weight              weight of the road mark
     //!
     //! @return                         False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
@@ -64,7 +67,8 @@ public:
                              RoadLaneRoadDescriptionType descType,
                              RoadLaneRoadMarkType roadMark,
                              RoadLaneRoadMarkColor color,
-                             RoadLaneRoadMarkLaneChange laneChange) = 0;
+                             RoadLaneRoadMarkLaneChange laneChange,
+                             RoadLaneRoadMarkWeight weight) = 0;
 
     //-----------------------------------------------------------------------------
     //! Adds the ID of a successor lane to a road lane.
@@ -96,14 +100,14 @@ public:
     //!
     //! @return                         RoadLaneTypeType of the road lane
     //-----------------------------------------------------------------------------
-    virtual RoadLaneTypeType GetType() const = 0;
+    virtual RoadLaneType GetType() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the widths of the road lane.
     //!
     //! @return                         RoadLaneTypeType of the road lane
     //-----------------------------------------------------------------------------
-    virtual std::list< RoadLaneWidth*> &GetWidths() = 0;
+    virtual const std::list<RoadLaneWidth*> &GetWidths() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the successors of a road lane, can have at most one element.
@@ -147,7 +151,7 @@ public:
     //! @return                         RoadLaneRoadMarkType
     //-----------------------------------------------------------------------------
 
-    virtual std::list<RoadLaneRoadMark*> &getRoadMarks() = 0;
+    virtual const std::list<RoadLaneRoadMark*> &getRoadMarks() const = 0;
 
 };
 

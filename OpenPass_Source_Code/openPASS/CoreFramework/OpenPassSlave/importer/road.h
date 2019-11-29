@@ -1,16 +1,16 @@
-/******************************************************************************
-* Copyright (c) 2017 ITK Engineering GmbH.
-* Copyright (c) 2018 in-tech GmbH.
+/*******************************************************************************
+* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+*               2016, 2017, 2018 ITK Engineering GmbH
 *
-* This program and the accompanying materials are made available under the
-* terms of the Eclipse Public License 2.0 which is available at
-* https://www.eclipse.org/legal/epl-2.0/
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
 *
 * SPDX-License-Identifier: EPL-2.0
-******************************************************************************/
+*******************************************************************************/
 
 //-----------------------------------------------------------------------------
-//! @file  road.h
+//! @file  Road.h
 //! @brief This file contains the internal representation of a road in a
 //!        scenery.
 //-----------------------------------------------------------------------------
@@ -28,12 +28,13 @@
 #include <algorithm>
 #include <list>
 #include <map>
-#include "log.h"
-#include "roadInterface.h"
+#include "Common/vector2d.h"
+#include "Interfaces/worldInterface.h"
+#include "Interfaces/roadInterface/roadInterface.h"
+#include "CoreFramework/CoreShare/log.h"
+
 #include "road/roadSignal.h"
 #include "road/roadObject.h"
-#include "vector2d.h"
-#include "worldInterface.h"
 
 class Road;
 class RoadLane;
@@ -141,7 +142,7 @@ class RoadLane : public RoadLaneInterface
 public:
     RoadLane(RoadLaneSectionInterface *laneSection,
              int id,
-             RoadLaneTypeType type) :
+             RoadLaneType type) :
         laneSection(laneSection),
         id(id),
         type(type)
@@ -202,7 +203,7 @@ public:
     //!
     //! @return                         RoadLaneTypeType of the road lane
     //-----------------------------------------------------------------------------
-    RoadLaneTypeType GetType() const
+    RoadLaneType GetType() const
     {
         return type;
     }
@@ -212,7 +213,7 @@ public:
     //!
     //! @return                         RoadLaneTypeType of the road lane
     //-----------------------------------------------------------------------------
-    std::list< RoadLaneWidth*> &GetWidths()
+    const std::list< RoadLaneWidth*> &GetWidths() const
     {
         return widths;
     }
@@ -277,17 +278,23 @@ public:
     //! @param[in]  roadMark            Type of the road mark
     //! @param[in]  color               Color of the road mark
     //! @param[in]  laneChange          Allowed lane change directions
+    //! @param[in]  weight              Weight of the road mark (standard or bold)
     //!
     //! @return                         False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    bool AddRoadMark(double sOffset, RoadLaneRoadDescriptionType type, RoadLaneRoadMarkType roadMark, RoadLaneRoadMarkColor color, RoadLaneRoadMarkLaneChange laneChange);
+    bool AddRoadMark(double sOffset,
+                     RoadLaneRoadDescriptionType type,
+                     RoadLaneRoadMarkType roadMark,
+                     RoadLaneRoadMarkColor color,
+                     RoadLaneRoadMarkLaneChange laneChange,
+                     RoadLaneRoadMarkWeight weight);
 
     //-----------------------------------------------------------------------------
     //! Returns the road marks of the road
     //!
     //! @return                         List of road marks
     //-----------------------------------------------------------------------------
-    std::list<RoadLaneRoadMark*> &getRoadMarks()
+    const std::list<RoadLaneRoadMark*> &getRoadMarks() const
     {
         return roadMarks;
     }
@@ -295,7 +302,7 @@ public:
 private:
     RoadLaneSectionInterface *laneSection;
     int id;
-    RoadLaneTypeType type;
+    RoadLaneType type;
     // using lists to indicate empty predecessor/successor
     std::list<RoadLaneWidth*> widths;
     std::list<int> predecessor;
@@ -323,7 +330,7 @@ public:
     RoadLaneSection(RoadLaneSection&&) = delete;
     RoadLaneSection& operator=(const RoadLaneSection&) = delete;
     RoadLaneSection& operator=(RoadLaneSection&&) = delete;
-    virtual ~RoadLaneSection();
+    ~RoadLaneSection();
 
 
     //-----------------------------------------------------------------------------
@@ -335,7 +342,7 @@ public:
     //! @return                         False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
     RoadLane *AddRoadLane(int id,
-                          RoadLaneTypeType type);
+                          RoadLaneType type);
 
     //-----------------------------------------------------------------------------
     //! Returns the stored road lanes as a mapping from their respective IDs.
@@ -1145,6 +1152,164 @@ private:
 };
 
 //-----------------------------------------------------------------------------
+//! Class representing a road form defined via a parametric cubic polynomial as a RoadGeometry.
+//-----------------------------------------------------------------------------
+class RoadGeometryParamPoly3 : public RoadGeometry
+{
+public:
+    RoadGeometryParamPoly3(double s,
+                      double x,
+                      double y,
+                      double hdg,
+                      double length,
+                      ParamPoly3Parameters parameters) :
+        RoadGeometry(s, x, y, hdg, length),
+        parameters(parameters)
+    {}
+    RoadGeometryParamPoly3(const RoadGeometryParamPoly3&) = delete;
+    RoadGeometryParamPoly3(RoadGeometryParamPoly3&&) = delete;
+    RoadGeometryParamPoly3& operator=(const RoadGeometryParamPoly3&) = delete;
+    RoadGeometryParamPoly3& operator=(RoadGeometryParamPoly3&&) = delete;
+    virtual ~RoadGeometryParamPoly3() = default;
+
+    //-----------------------------------------------------------------------------
+    //! Calculates the x/y coordinates as vector. Wrapper for RoadGeometry:GetCoordLine
+    //! if all 4 factors regarding V (aV, bV, cV, and dV) are 0.
+    //!
+    //! @param[in]  side                side of road (1: left, -1: right)
+    //! @param[in]  geometryOffset      offset within geometry section
+    //! @param[in]  previousWidth       sum of widths of inner lanes
+    //! @param[in]  laneOffset          lane offset
+    //! @param[in]  laneWidth           width of lane
+    //! @param[in]  corner              position in lane (1: left, 0: middle, -1: right)
+    //! @return                         vector with the x/y coordinates
+    //-----------------------------------------------------------------------------
+    virtual Common::Vector2d GetCoord(double side,
+                                      double geometryOffset,
+                                      double previousWidth,
+                                      double laneOffset,
+                                      double laneWidth,
+                                      int corner);
+
+    //-----------------------------------------------------------------------------
+    //! Calculates the curvature. Wrapper for RoadGeometry:GetCurvatureLine
+    //! if all 4 factors regarding V (aV, bV, cV, and dV) are 0.
+    //!
+    //! @param[in]  side                side of road (1: left, -1: right)
+    //! @param[in]  geometryOffset      offset within geometry section
+    //! @param[in]  previousWidth       sum of widths of inner lanes
+    //! @param[in]  laneOffset          lane offset
+    //! @param[in]  laneWidth           width of lane
+    //! @return                         curvature
+    //-----------------------------------------------------------------------------
+    virtual double GetCurvature(double side,
+                                double geometryOffset,
+                                double previousWidth,
+                                double laneOffset,
+                                double laneWidth);
+
+    //-----------------------------------------------------------------------------
+    //! Calculates the direction. Wrapper for RoadGeometry:GetDirLine if all 4 factors
+    //! regarding V (aV, bV, cV, and dV) are 0.
+    //!
+    //! @param[in]  side                side of road (1: left, -1: right); unused
+    //! @param[in]  geometryOffset      offset within geometry section
+    //! @param[in]  previousWidth       sum of widths of inner lanes; unused
+    //! @param[in]  laneOffset          lane offset; unused
+    //! @param[in]  laneWidth           width of lane; unused
+    //! @return                         direction
+    //-----------------------------------------------------------------------------
+    virtual double GetDir(double side,
+                          double geometryOffset,
+                          double previousWidth,
+                          double laneOffset,
+                          double laneWidth);
+
+    //-----------------------------------------------------------------------------
+    //! Returns the constant factor of the polynomial for the u coordinate.
+    //!
+    //! @return                         constant factor of the polynomial
+    //-----------------------------------------------------------------------------
+    double GetAU() const
+    {
+        return  parameters.aU;
+    }
+
+    //-----------------------------------------------------------------------------
+    //! Returns the linear factor of the polynomial for the u coordinate.
+    //!
+    //! @return                         linear factor of the polynomial
+    //-----------------------------------------------------------------------------
+    double GetBU() const
+    {
+        return parameters.bU;
+    }
+
+    //-----------------------------------------------------------------------------
+    //! Returns the quadratic factor of the polynomial for the u coordinate.
+    //!
+    //! @return                         quadratic factor of the polynomial
+    //-----------------------------------------------------------------------------
+    double GetCU() const
+    {
+        return parameters.cU;
+    }
+
+    //-----------------------------------------------------------------------------
+    //! Returns the cubic factor of the polynomial for the u coordinate.
+    //!
+    //! @return                         cubic factor of the polynomial
+    //-----------------------------------------------------------------------------
+    double GetD() const
+    {
+        return parameters.dU;
+    }
+
+    //-----------------------------------------------------------------------------
+    //! Returns the constant factor of the polynomial for the v coordinate.
+    //!
+    //! @return                         constant factor of the polynomial
+    //-----------------------------------------------------------------------------
+    double GetAV() const
+    {
+        return parameters.aV;
+    }
+
+    //-----------------------------------------------------------------------------
+    //! Returns the linear factor of the polynomial for the v coordinate.
+    //!
+    //! @return                         linear factor of the polynomial
+    //-----------------------------------------------------------------------------
+    double GetBV() const
+    {
+        return parameters.bV;
+    }
+
+    //-----------------------------------------------------------------------------
+    //! Returns the quadratic factor of the polynomial for the v coordinate.
+    //!
+    //! @return                         quadratic factor of the polynomial
+    //-----------------------------------------------------------------------------
+    double GetCV() const
+    {
+        return parameters.cV;
+    }
+
+    //-----------------------------------------------------------------------------
+    //! Returns the cubic factor of the polynomial for the v coordinate.
+    //!
+    //! @return                         cubic factor of the polynomial
+    //-----------------------------------------------------------------------------
+    double GetDV() const
+    {
+        return parameters.dV;
+    }
+
+private:
+    ParamPoly3Parameters parameters;
+};
+
+//-----------------------------------------------------------------------------
 //! Class representing a road.
 //-----------------------------------------------------------------------------
 class Road :public RoadInterface
@@ -1242,6 +1407,27 @@ public:
                           double d);
 
     //-----------------------------------------------------------------------------
+    //! Adds a parametric cubic polynomial geometry to a road by creating a new
+    //! RoadGeometryparamPoly3 object and adding it to the stored list of geometries.
+    //! Each coordinate is calculated in a local (u,v) coordinate system
+    //!
+    //! @param[in]  s                   start position s-coordinate
+    //! @param[in]  x                   start position x inertial
+    //! @param[in]  y                   start position y inertial
+    //! @param[in]  hdg                 start orientation (inertial heading)
+    //! @param[in]  length              length of the element's reference line
+    //! @param[in]  parameters          Factors of the two polynomials describing the road
+    //! @return                          false if an error has occurred, true otherwise
+    //-----------------------------------------------------------------------------
+    bool AddGeometryParamPoly3(double s,
+                          double x,
+                          double y,
+                          double hdg,
+                          double length,
+                          ParamPoly3Parameters parameters);
+
+
+    //-----------------------------------------------------------------------------
     //! Adds an elevation profile defined via a cubic polynomial to a road by creating
     //! a new RoadElevation object and adding it to the stored list of elevations.
     //!
@@ -1311,21 +1497,21 @@ public:
     //!
     //! @return                         created road signal
     //-----------------------------------------------------------------------------
-    RoadSignal *AddRoadSignal(const RoadSignalSpecification &signal);
+    void AddRoadSignal(const RoadSignalSpecification &signal);
 
     void AddRoadType(const RoadTypeSpecification &info);
 
-    // todo: add documentation
-    RoadObject* AddRoadObject(const RoadObjectSpecification &object);
+    void AddRoadObject(const RoadObjectSpecification &object);
 
-    RoadTypeInformation GetRoadType(double start);
+    RoadTypeInformation GetRoadType(double start) const;
+
 
     //-----------------------------------------------------------------------------
     //! Returns the ID of the road.
     //!
     //! @return                         ID of the road
     //-----------------------------------------------------------------------------
-    const std::string &GetId() const
+    const std::string GetId() const
     {
         return id;
     }
@@ -1335,7 +1521,7 @@ public:
     //!
     //! @return                         list of elevation profiles
     //-----------------------------------------------------------------------------
-    std::list<RoadElevation*> &GetElevations()
+    std::list<RoadElevation*> & GetElevations()
     {
         return elevations;
     }
@@ -1345,7 +1531,17 @@ public:
     //!
     //! @return                         list of lane offsets
     //-----------------------------------------------------------------------------
-    std::list<RoadLaneOffset*> &GetLaneOffsets()
+    std::list<RoadLaneOffset*> & GetLaneOffsets()
+    {
+        return laneOffsets;
+    }
+
+    //-----------------------------------------------------------------------------
+    //! Returns the stored list of lane offsets.
+    //!
+    //! @return                         list of lane offsets
+    //-----------------------------------------------------------------------------
+    const std::list<RoadLaneOffset*> & GetLaneOffsets() const
     {
         return laneOffsets;
     }
@@ -1355,7 +1551,7 @@ public:
     //!
     //! @return                         list of road geometries
     //-----------------------------------------------------------------------------
-    std::list<RoadGeometryInterface*> &GetGeometries()
+    std::list<RoadGeometryInterface*> & GetGeometries()
     {
         return geometries;
     }
@@ -1365,7 +1561,7 @@ public:
     //!
     //! @return                         list of road links
     //-----------------------------------------------------------------------------
-    std::list<RoadLinkInterface*> &GetRoadLinks()
+    std::list<RoadLinkInterface*> & GetRoadLinks()
     {
         return links;
     }
@@ -1375,7 +1571,7 @@ public:
     //!
     //! @return                         list of lane sections
     //-----------------------------------------------------------------------------
-    std::list<RoadLaneSectionInterface*> &GetLaneSections()
+    std::vector<RoadLaneSectionInterface*> & GetLaneSections()
     {
         return laneSections;
     }
@@ -1423,15 +1619,29 @@ public:
         return inDirection;
     }
 
+    virtual void SetJunctionId(const std::string& junctionId)
+    {
+        this->junctionId = junctionId;
+    }
+
+    virtual std::string GetJunctionId()
+    {
+        return junctionId;
+    }
+
+
 private:
     const std::string id;
     std::list<RoadElevation*> elevations;
     std::list<RoadLaneOffset*> laneOffsets;
     std::list<RoadGeometryInterface*> geometries;
     std::list<RoadLinkInterface*> links;
-    std::list<RoadLaneSectionInterface*> laneSections;
+    std::vector<RoadLaneSectionInterface*> laneSections;
     std::vector<RoadSignalInterface*> roadSignals;
     std::vector<RoadObjectInterface*> roadObjects;
     std::vector<RoadTypeSpecification> roadTypes;
     bool inDirection = true;
+    std::string junctionId;
 };
+
+

@@ -14,11 +14,9 @@
 //!        interact with the framework.
 //-----------------------------------------------------------------------------
 
-#ifndef CALLBACKS_H
-#define CALLBACKS_H
+#pragma once
 
-#include <string>
-#include "callbackInterface.h"
+#include "Interfaces/callbackInterface.h"
 
 namespace SimulationCommon
 {
@@ -51,5 +49,3 @@ public:
 };
 
 } // namespace SimulationCommon
-
-#endif // CALLBACKS_H

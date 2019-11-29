@@ -1,12 +1,13 @@
-/*********************************************************************
-* Copyright (c) 2017 ITK Engineering GmbH
+/*******************************************************************************
+* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+*               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
 * which is available at https://www.eclipse.org/legal/epl-2.0/
 *
 * SPDX-License-Identifier: EPL-2.0
-**********************************************************************/
+*******************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  wordLibrary.h
@@ -14,12 +15,11 @@
 //!        worldInterface.
 //-----------------------------------------------------------------------------
 
-#ifndef WORLDLIBRARY_H
-#define WORLDLIBRARY_H
+#pragma once
 
 #include <QLibrary>
 #include "worldBinding.h"
-#include "callbackInterface.h"
+#include "Interfaces/callbackInterface.h"
 
 namespace SimulationSlave
 {
@@ -29,16 +29,16 @@ class WorldLibrary
 public:
     typedef const std::string &(*WorldInterface_GetVersion)();
     typedef WorldInterface *(*WorldInterface_CreateInstanceType)(
-            const CallbackInterface *callbacks);
+            const CallbackInterface *callbacks, StochasticsInterface* stochastics);
     typedef void (*WorldInterface_DestroyInstanceType)(WorldInterface *implementation);
 
 
     WorldLibrary(const std::string &worldLibraryPath,
-                 const std::string &libraryName,
-                 CallbackInterface *callbacks) :
+                 CallbackInterface *callbacks,
+                 StochasticsInterface* stochastics) :
            worldLibraryPath(worldLibraryPath),
-           libraryName(libraryName),
-           callbacks(callbacks)
+           callbacks(callbacks),
+           stochastics(stochastics)
     {}
 
     WorldLibrary(const WorldLibrary&) = delete;
@@ -83,16 +83,16 @@ private:
     const std::string DllCreateInstanceId = "OpenPASS_CreateInstance";
     const std::string DllDestroyInstanceId = "OpenPASS_DestroyInstance";
 
-    std::string worldLibraryPath;
-    std::string libraryName;
+    const std::string worldLibraryPath;
     WorldInterface *worldInterface = nullptr;
     QLibrary *library = nullptr;
     CallbackInterface *callbacks;
-    WorldInterface_GetVersion getVersionFunc;
-    WorldInterface_CreateInstanceType createInstanceFunc;
-    WorldInterface_DestroyInstanceType destroyInstanceFunc;
+    StochasticsInterface* stochastics;
+    WorldInterface_GetVersion getVersionFunc{nullptr};
+    WorldInterface_CreateInstanceType createInstanceFunc{nullptr};
+    WorldInterface_DestroyInstanceType destroyInstanceFunc{nullptr};
 };
 
 } // namespace SimulationSlave
 
-#endif // WORLDLIBRARY_H
+
