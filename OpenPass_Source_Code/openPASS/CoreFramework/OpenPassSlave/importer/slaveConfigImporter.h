@@ -41,9 +41,8 @@ public:
     *
     * @param[in]     loggingGroupsElement   Element containing the logging groups information
     * @param[out]    loggingGroups          Vector where the logging groups get saved
-    * @return        true, if successful
     */
-    static bool ImportLoggingGroups(QDomElement loggingGroupsElement, std::vector<std::string>& loggingGroups);
+    static void ImportLoggingGroups(QDomElement loggingGroupsElement, std::vector<std::string>& loggingGroups);
 
     /*!
     * \brief Imports the libraries used by the simulator
@@ -60,9 +59,8 @@ public:
     *
     * @param[in]     experimentConfigElement    Element containing the information
     * @param[out]    experimentConfig           Struct into which the values get saved
-    * @return        true, if successful
     */
-    static bool ImportExperimentConfig(QDomElement experimentConfigElement,
+    static void ImportExperimentConfig(QDomElement experimentConfigElement,
                                        ExperimentConfig& experimentConfig);
 
     /*!
@@ -70,9 +68,8 @@ public:
     *
     * @param[in]     scenarioConfigElement    Element containing the information
     * @param[out]    scenarioConfig           Struct into which the values get saved
-    * @return        true, if successful
     */
-    static bool ImportScenarioConfig(QDomElement scenarioConfigElement,
+    static void ImportScenarioConfig(QDomElement scenarioConfigElement,
                                      const std::string configurationDir,
                                      ScenarioConfig& scenarioConfig);
 
@@ -81,9 +78,8 @@ public:
     *
     * @param[in]     environmentConfigElement    Element containing the information
     * @param[out]    environmentConfig           Struct into which the values get saved
-    * @return        true, if successful
     */
-    static bool ImportEnvironmentConfig(QDomElement environmentConfigElement,
+    static void ImportEnvironmentConfig(QDomElement environmentConfigElement,
                                         EnvironmentConfig& environmentConfig);
 
     /*!
@@ -91,9 +87,8 @@ public:
     *
     * @param[in]     trafficConfigElement    Element containing the information
     * @param[out]    trafficConfig           Struct into which the values get saved
-    * @return        true, if successful
     */
-    static bool ImportTrafficParameter(QDomElement trafficConfigElement,
+    static void ImportTrafficParameter(QDomElement trafficConfigElement,
                                        TrafficConfig& trafficConfig);
 
     /*!
@@ -101,9 +96,8 @@ public:
     *
     * @param[in]     trafficConfigElement    Element containing the information
     * @param[out]    trafficConfig           Struct into which the values get saved
-    * @return        true, if successful
     */
-    static bool ImportLaneParameter(QDomElement trafficConfigElement,
+    static void ImportLaneParameter(QDomElement trafficConfigElement,
                                     TrafficConfig& trafficConfig);
 
     /*!
@@ -111,9 +105,8 @@ public:
     *
     * @param[in]     trafficConfigElement    Element containing the information
     * @param[out]    trafficConfig           Struct into which the values get saved
-    * @return        true, if successful
     */
-    static bool ImportTrafficConfig(QDomElement trafficConfigElement,
+    static void ImportTrafficConfig(QDomElement trafficConfigElement,
                                     TrafficConfig& trafficConfig);
 
     //Overall import function

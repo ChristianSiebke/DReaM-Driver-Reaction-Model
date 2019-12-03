@@ -1,4 +1,4 @@
-﻿/*******************************************************************************
+/*******************************************************************************
 * Copyright (c) 2018, 2019 in-tech GmbH
 *               2017, 2018 ITK Engineering GmbH
 *
@@ -18,6 +18,9 @@
 #include "slaveConfigImporter.h"
 #include "CoreFramework/CoreShare/log.h"
 
+namespace TAG = openpass::importer::xml::slaveConfigImporter::tag;
+namespace ATTRIBUTE = openpass::importer::xml::slaveConfigImporter::attribute;
+
 using namespace Importer;
 using namespace SimulationCommon;
 
@@ -35,7 +38,7 @@ std::string SlaveConfigImporter::GetLibrary(const QDomElement& root, std::string
 ExperimentConfig::Libraries SlaveConfigImporter::ImportLibraries(QDomElement rootElement)
 {
     QDomElement libsRoot;
-    if (!SimulationCommon::GetFirstChildElement(rootElement, "Libraries", libsRoot))
+    if (!SimulationCommon::GetFirstChildElement(rootElement, TAG::libraries, libsRoot))
     {
         LOG_INTERN(LogLevel::Warning) << "No libraries found. Falling back to default values";
         return defaultLibraryMapping;
@@ -49,56 +52,35 @@ ExperimentConfig::Libraries SlaveConfigImporter::ImportLibraries(QDomElement roo
     return libs;
 }
 
-bool SlaveConfigImporter::ImportLoggingGroups(QDomElement loggingGroupsElement,
+void SlaveConfigImporter::ImportLoggingGroups(QDomElement loggingGroupsElement,
         std::vector<std::string>& loggingGroups)
 {
-    const auto& loggingGroupElements = loggingGroupsElement.elementsByTagName("LoggingGroup");
+    const auto& loggingGroupElements = loggingGroupsElement.elementsByTagName(TAG::loggingGroup);
 
     for (auto i = loggingGroupElements.length() - 1; i >= 0; --i)
     {
         const auto& loggingGroupElement = loggingGroupElements.at(i).toElement();
 
-        if (loggingGroupElement.isNull())
-        {
-            LOG_INTERN(LogLevel::Error) << "Error parsing LoggingGroup elements";
-            return false;
-        }
+        ThrowIfFalse(!loggingGroupElement.isNull(), "Error parsing LoggingGroup elements");
 
         std::string groupName = loggingGroupElement.text().toStdString();
 
-        if (groupName.length() == 0)
-        {
-            LOG_INTERN(LogLevel::Error) << "Invalid LoggingGroup name (empty string)";
-            return false;
-        }
+        ThrowIfFalse(groupName.length() != 0, "Invalid LoggingGroup name (empty string)");
 
         loggingGroups.push_back(groupName);
     }
-
-    return true;
 }
 
-bool SlaveConfigImporter::ImportExperimentConfig(QDomElement experimentConfigElement,
+void SlaveConfigImporter::ImportExperimentConfig(QDomElement experimentConfigElement,
         ExperimentConfig& experimentConfig)
 {
-    if (!ParseInt(experimentConfigElement, "ExperimentID", experimentConfig.experimentId))
-    {
-        LOG_INTERN(LogLevel::Error) << "ExperimentID not valid.";
-        return false;
-    }
+    ThrowIfFalse(ParseInt(experimentConfigElement, "ExperimentID", experimentConfig.experimentId), "ExperimentID not valid.");
 
-    if (!ParseInt(experimentConfigElement, "NumberOfInvocations", experimentConfig.numberOfInvocations))
-    {
-        LOG_INTERN(LogLevel::Error) << "NumberOfInvocations not valid.";
-        return false;
-    }
+    ThrowIfFalse(ParseInt(experimentConfigElement, "NumberOfInvocations", experimentConfig.numberOfInvocations), "NumberOfInvocations not valid.");
 
     unsigned long randomSeed;
-    if (!ParseULong(experimentConfigElement, "RandomSeed", randomSeed))
-    {
-        LOG_INTERN(LogLevel::Error) << "RandomSeed not valid.";
-        return false;
-    }
+    ThrowIfFalse(ParseULong(experimentConfigElement, "RandomSeed", randomSeed), "RandomSeed not valid.");
+
     experimentConfig.randomSeed = static_cast<std::uint32_t>(randomSeed);
 
     bool logCyclicsToCsv;
@@ -111,241 +93,165 @@ bool SlaveConfigImporter::ImportExperimentConfig(QDomElement experimentConfigEle
 
     // Logging groups
     QDomElement loggingGroupsElement;
-    if (!GetFirstChildElement(experimentConfigElement, "LoggingGroups", loggingGroupsElement) ||
-            !ImportLoggingGroups(loggingGroupsElement, experimentConfig.loggingGroups))
-    {
-        LOG_INTERN(LogLevel::Error) << "Could not import LoggingGroups.";
-        return false;
-    }
+    ThrowIfFalse(GetFirstChildElement(experimentConfigElement, TAG::loggingGroups, loggingGroupsElement),
+                 "Could not import LoggingGroups.");
+
+    ImportLoggingGroups(loggingGroupsElement, experimentConfig.loggingGroups);
 
     experimentConfig.libraries = ImportLibraries(experimentConfigElement);
-
-    return true;
 }
 
-bool SlaveConfigImporter::ImportScenarioConfig(QDomElement scenarioConfigElement,
+void SlaveConfigImporter::ImportScenarioConfig(QDomElement scenarioConfigElement,
         const std::string configurationDir,
         ScenarioConfig& scenarioConfig)
 {
     std::string scenarioFilename;
-    if (!ParseString(scenarioConfigElement, "OpenScenarioFile", scenarioFilename))
-    {
-        LOG_INTERN(LogLevel::Error) << "OpenScenarioFile not valid.";
-        return false;
-    }
+    ThrowIfFalse(ParseString(scenarioConfigElement, "OpenScenarioFile", scenarioFilename),
+                 "OpenScenarioFile not valid.");
 
     scenarioConfig.scenarioPath = Directories::Concat(configurationDir, scenarioFilename);
-
-    return true;
 }
 
-bool SlaveConfigImporter::ImportEnvironmentConfig(QDomElement environmentConfigElement,
+void SlaveConfigImporter::ImportEnvironmentConfig(QDomElement environmentConfigElement,
         EnvironmentConfig& environmentConfig)
 {
     //Parse all time of days
     QDomElement timeOfDaysElement;
-    if (!GetFirstChildElement(environmentConfigElement, "TimeOfDays", timeOfDaysElement)
-            || !ImportProbabilityMap(timeOfDaysElement, "Value", "TimeOfDay", environmentConfig.timeOfDays))
-    {
-        LOG_INTERN(LogLevel::Error) << "Could not import TimeOfDays.";
-        return false;
-    }
+    ThrowIfFalse(GetFirstChildElement(environmentConfigElement, TAG::timeOfDays, timeOfDaysElement)
+                    && ImportProbabilityMap(timeOfDaysElement, "Value", TAG::timeOfDay, environmentConfig.timeOfDays),
+                 "Could not import TimeOfDays.");
 
     //Parse all visibility distances
     QDomElement visibilityDistancesElement;
-    if (!GetFirstChildElement(environmentConfigElement, "VisibilityDistances", visibilityDistancesElement)
-            || !ImportProbabilityMap(visibilityDistancesElement, "Value", "VisibilityDistance",
-                                     environmentConfig.visibilityDistances))
-    {
-        LOG_INTERN(LogLevel::Error) << "Could not import VisibilityDistances.";
-        return false;
-    }
-
+    ThrowIfFalse(GetFirstChildElement(environmentConfigElement, TAG::visibilityDistances, visibilityDistancesElement)
+                    && ImportProbabilityMap(visibilityDistancesElement, "Value", TAG::visibilityDistance, environmentConfig.visibilityDistances),
+        "Could not import VisibilityDistances.");
 
     //Parse all frictions
     QDomElement frictionsElement;
-    if (!GetFirstChildElement(environmentConfigElement, "Frictions", frictionsElement)
-            || !ImportProbabilityMap(frictionsElement, "Value", "Friction", environmentConfig.frictions))
-    {
-        LOG_INTERN(LogLevel::Error) << "Could not import Frictions.";
-        return false;
-    }
-
+    ThrowIfFalse(GetFirstChildElement(environmentConfigElement, TAG::frictions, frictionsElement)
+                    && ImportProbabilityMap(frictionsElement, "Value", TAG::friction, environmentConfig.frictions),
+                 "Could not import Frictions.");
 
     //Parse all weathers
     QDomElement weathersElement;
-    if (!GetFirstChildElement(environmentConfigElement, "Weathers", weathersElement)
-            || !ImportProbabilityMap(weathersElement, "Value", "Weather", environmentConfig.weathers))
-    {
-        LOG_INTERN(LogLevel::Error) << "Could not import Weathers.";
-        return false;
-    }
-
-    return true;
+    ThrowIfFalse(GetFirstChildElement(environmentConfigElement, TAG::weathers, weathersElement)
+                    && ImportProbabilityMap(weathersElement, "Value", TAG::weather, environmentConfig.weathers),
+                 "Could not import Weathers.");
 }
 
-bool SlaveConfigImporter::ImportTrafficParameter(QDomElement trafficParameterElement,
+void SlaveConfigImporter::ImportTrafficParameter(QDomElement trafficParameterElement,
         TrafficConfig& trafficConfig)
 {
     QDomElement trafficVolumesElement;
-    if (!GetFirstChildElement(trafficParameterElement, "TrafficVolumes", trafficVolumesElement)
-            || !ImportProbabilityMap(trafficVolumesElement, "Value", "TrafficVolume", trafficConfig.trafficVolumes))
-    {
-        LOG_INTERN(LogLevel::Error) << "Could not import TrafficVolumes.";
-        return false;
-    }
+    ThrowIfFalse(GetFirstChildElement(trafficParameterElement, TAG::trafficVolumes, trafficVolumesElement)
+                    && ImportProbabilityMap(trafficVolumesElement, "Value", TAG::trafficVolume, trafficConfig.trafficVolumes),
+                 "Could not import TrafficVolumes.");
 
     QDomElement platoonRatesElement;
-    if (!GetFirstChildElement(trafficParameterElement, "PlatoonRates", platoonRatesElement)
-            || !ImportProbabilityMap(platoonRatesElement, "Value", "PlatoonRate", trafficConfig.platoonRates))
-    {
-        LOG_INTERN(LogLevel::Error) << "Could not import PlatoonRates.";
-        return false;
-    }
+    ThrowIfFalse(GetFirstChildElement(trafficParameterElement, TAG::platoonRates, platoonRatesElement)
+                    && ImportProbabilityMap(platoonRatesElement, "Value", TAG::platoonRate, trafficConfig.platoonRates),
+                 "Could not import PlatoonRates.");
 
     QDomElement velocitiesElement;
-    if (!GetFirstChildElement(trafficParameterElement, "Velocities", velocitiesElement)
-            || !ImportProbabilityMap(velocitiesElement, "Value", "Velocity", trafficConfig.velocities))
-    {
-        LOG_INTERN(LogLevel::Error) << "Could not import Velocities.";
-        return false;
-    }
+    ThrowIfFalse(GetFirstChildElement(trafficParameterElement, TAG::velocities, velocitiesElement)
+                    && ImportProbabilityMap(velocitiesElement, "Value", TAG::velocity, trafficConfig.velocities),
+                 "Could not import Velocities.");
 
     QDomElement homogenitiesElement;
-    if (!GetFirstChildElement(trafficParameterElement, "Homogenities", homogenitiesElement)
-            || !ImportProbabilityMap(homogenitiesElement, "Value", "Homogenity", trafficConfig.homogenities))
-    {
-        LOG_INTERN(LogLevel::Error) << "Could not import Homogenities.";
-        return false;
-    }
-
-    return true;
+    ThrowIfFalse(GetFirstChildElement(trafficParameterElement, TAG::homogenities, homogenitiesElement)
+                    && ImportProbabilityMap(homogenitiesElement, "Value", TAG::homogenity, trafficConfig.homogenities),
+                 "Could not import Homogenities.");
 }
 
-bool SlaveConfigImporter::ImportLaneParameter(QDomElement trafficConfigElement, TrafficConfig& trafficConfig)
+void SlaveConfigImporter::ImportLaneParameter(QDomElement trafficConfigElement, TrafficConfig& trafficConfig)
 {
     QDomElement regularLaneElement;
-    if (!GetFirstChildElement(trafficConfigElement, "RegularLane", regularLaneElement)
-            || !ImportProbabilityMap(regularLaneElement, "Name", "AgentProfile", trafficConfig.regularLaneAgents))
-    {
-        LOG_INTERN(LogLevel::Error) << "Could not import RegularLane.";
-        return false;
-    }
+    ThrowIfFalse(GetFirstChildElement(trafficConfigElement, TAG::regularLane, regularLaneElement)
+                    && ImportProbabilityMap(regularLaneElement, "Name", TAG::agentProfile, trafficConfig.regularLaneAgents),
+                 "Could not import RegularLane.");
 
     QDomElement rightMostLaneElement;
-    if (!GetFirstChildElement(trafficConfigElement, "RightMostLane", rightMostLaneElement)
-            || !ImportProbabilityMap(rightMostLaneElement, "Name", "AgentProfile", trafficConfig.rightMostLaneAgents))
-    {
-        LOG_INTERN(LogLevel::Error) << "Could not import RightMostLane.";
-        return false;
-    }
-
-    return true;
+    ThrowIfFalse(GetFirstChildElement(trafficConfigElement, TAG::rightMostLane, rightMostLaneElement)
+                    && ImportProbabilityMap(rightMostLaneElement, "Name", TAG::agentProfile, trafficConfig.rightMostLaneAgents),
+                 "Could not import RightMostLane.");
 }
 
-bool SlaveConfigImporter::ImportTrafficConfig(QDomElement trafficConfigElement, TrafficConfig& trafficConfig)
+void SlaveConfigImporter::ImportTrafficConfig(QDomElement trafficConfigElement, TrafficConfig& trafficConfig)
 {
     QDomElement trafficParameterElement;
-    if (!GetFirstChildElement(trafficConfigElement, "TrafficParameter", trafficParameterElement)
-            || !ImportTrafficParameter(trafficParameterElement, trafficConfig))
-    {
-        LOG_INTERN(LogLevel::Error) << "Could not import TrafficParameter.";
-        return false;
-    }
+    ThrowIfFalse(GetFirstChildElement(trafficConfigElement, TAG::trafficParameter, trafficParameterElement),
+                 "Could not import TrafficParameter.");
 
-    if (!ImportLaneParameter(trafficConfigElement, trafficConfig))
-    {
-        LOG_INTERN(LogLevel::Error) << "Could not import LaneParameter.";
-        return false;
-    }
-
-    return true;
+    ImportTrafficParameter(trafficParameterElement, trafficConfig);
+    ImportLaneParameter(trafficConfigElement, trafficConfig);
 }
 
 bool SlaveConfigImporter::Import(const std::string& configurationDir,
                                  const std::string& slaveConfigFile,
                                  Configuration::SlaveConfig& slaveConfig)
 {
-    std::locale::global(std::locale("C"));
+    try
+    {
+        std::locale::global(std::locale("C"));
 
-    QFile xmlFile(slaveConfigFile.c_str()); // automatic object will be closed on destruction
-    if (!xmlFile.open(QIODevice::ReadOnly))
-    {
-        LOG_INTERN(LogLevel::Warning) << "an error occurred during slave configuration import";
-        return false;
-    }
+        QFile xmlFile(slaveConfigFile.c_str()); // automatic object will be closed on destruction
+        ThrowIfFalse(xmlFile.open(QIODevice::ReadOnly), "an error occurred during slave configuration import");
 
-    QByteArray xmlData(xmlFile.readAll());
-    QDomDocument document;
-    if (!document.setContent(xmlData))
-    {
-        LOG_INTERN(LogLevel::Warning) << "invalid xml file format of file " << slaveConfigFile;
-        return false;
-    }
+        QByteArray xmlData(xmlFile.readAll());
+        QDomDocument document;
+        ThrowIfFalse(document.setContent(xmlData), "invalid xml file format of file " + slaveConfigFile);
 
-    QDomElement documentRoot = document.documentElement();
-    if (documentRoot.isNull())
-    {
-        return false;
-    }
+        QDomElement documentRoot = document.documentElement();
+        if (documentRoot.isNull())
+        {
+            return false;
+        }
 
-    std::string configVersion;
-    ParseAttributeString(documentRoot, "SchemaVersion", configVersion);
-    if (configVersion.compare(supportedConfigVersion) != 0)
-    {
-        LOG_INTERN(LogLevel::Error) << "SlaveConfig version not supported. Supported version is " <<
-                                    supportedConfigVersion;
-        return false;
-    }
+        std::string configVersion;
+        ParseAttributeString(documentRoot, ATTRIBUTE::schemaVersion, configVersion);
+        ThrowIfFalse(configVersion.compare(supportedConfigVersion) == 0, "SlaveConfig version not suppored. Supported version is " + std::string(supportedConfigVersion));
 
-    //Import profiles catalog
-    std::string profilesCatalog;
-    if (!ParseString(documentRoot, "ProfilesCatalog", profilesCatalog))
-    {
-        LOG_INTERN(LogLevel::Error) << "Could not import ProfilesCatalog.";
-        return false;
-    }
-    else
-    {
+        //Import profiles catalog
+        std::string profilesCatalog;
+        ThrowIfFalse(ParseString(documentRoot, "ProfilesCatalog", profilesCatalog), "Could not import Proifles Catalog.");
+
         slaveConfig.SetProfilesCatalog(Directories::Concat(configurationDir, profilesCatalog));
+
+
+        //Import experiment config
+        QDomElement experimentConfigElement;
+        ThrowIfFalse(GetFirstChildElement(documentRoot, TAG::experimentConfig, experimentConfigElement),
+                     "Could not import ExperimentConfig.");
+
+        ImportExperimentConfig(experimentConfigElement, slaveConfig.GetExperimentConfig());
+
+        //Import scenario config
+        QDomElement scenarioConfigElement;
+        ThrowIfFalse(GetFirstChildElement(documentRoot, TAG::scenarioConfig, scenarioConfigElement),
+                     "Could not import ScenarioConfig.");
+
+        ImportScenarioConfig(scenarioConfigElement, configurationDir, slaveConfig.GetScenarioConfig());
+
+        //Import environment config
+        QDomElement environmentConfigElement;
+        ThrowIfFalse(GetFirstChildElement(documentRoot, TAG::environmentConfig, environmentConfigElement),
+                     "Could not import EnvironmentConfig.");
+
+        ImportEnvironmentConfig(environmentConfigElement, slaveConfig.GetEnvironmentConfig());
+
+        //Import traffic config
+        QDomElement trafficConfigElement;
+        ThrowIfFalse(GetFirstChildElement(documentRoot, TAG::trafficConfig, trafficConfigElement),
+                     "Could not import TrafficConfig.");
+
+        ImportTrafficConfig(trafficConfigElement, slaveConfig.GetTrafficConfig());
+
+        return true;
     }
-
-
-    //Import experiment config
-    QDomElement experimentConfigElement;
-    if (!GetFirstChildElement(documentRoot, "ExperimentConfig", experimentConfigElement)
-            || !ImportExperimentConfig(experimentConfigElement, slaveConfig.GetExperimentConfig()))
+    catch (const std::runtime_error& e)
     {
-        LOG_INTERN(LogLevel::Error) << "Could not import ExperimentConfig.";
+        LOG_INTERN(LogLevel::Error) << "SlaveConfig import failed: " + std::string(e.what());
         return false;
     }
-
-    //Import scenario config
-    QDomElement scenarioConfigElement;
-    if (!GetFirstChildElement(documentRoot, "ScenarioConfig", scenarioConfigElement)
-            || !ImportScenarioConfig(scenarioConfigElement, configurationDir, slaveConfig.GetScenarioConfig()))
-    {
-        LOG_INTERN(LogLevel::Error) << "Could not import ScenarioConfig.";
-        return false;
-    }
-
-    //Import environment config
-    QDomElement environmentConfigElement;
-    if (!GetFirstChildElement(documentRoot, "EnvironmentConfig", environmentConfigElement)
-            || !ImportEnvironmentConfig(environmentConfigElement, slaveConfig.GetEnvironmentConfig()))
-    {
-        LOG_INTERN(LogLevel::Error) << "Could not import EnvironmentConfig.";
-        return false;
-    }
-
-    //Import traffic config
-    QDomElement trafficConfigElement;
-    if (!GetFirstChildElement(documentRoot, "TrafficConfig", trafficConfigElement)
-            || !ImportTrafficConfig(trafficConfigElement, slaveConfig.GetTrafficConfig()))
-    {
-        LOG_INTERN(LogLevel::Error) << "Could not import TrafficConfig.";
-        return false;
-    }
-
-    return true;
 }

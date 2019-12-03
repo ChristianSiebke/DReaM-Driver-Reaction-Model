@@ -43,7 +43,7 @@ TEST(ProfilesImporter_UnitTests, ImportAllVehicleComponentsOfVehicleProfileSucce
 
     VehicleProfile resultProfiles;
 
-    ASSERT_TRUE(ProfilesImporter::ImportAllVehicleComponentsOfVehicleProfile(fakeDocumentRoot, resultProfiles));
+    EXPECT_NO_THROW(ProfilesImporter::ImportAllVehicleComponentsOfVehicleProfile(fakeDocumentRoot, resultProfiles));
 
     ASSERT_EQ(resultProfiles.vehicleComponents.size(), (size_t )1);
 
@@ -91,8 +91,10 @@ TEST(ProfilesImporter_UnitTests, ImportAllVehicleComponentsOfVehicleProfileUnsuc
 
     VehicleProfile resultProfiles;
 
-    ASSERT_FALSE(ProfilesImporter::ImportAllVehicleComponentsOfVehicleProfile(fakeDocumentRootMissingComponentsTag, resultProfiles));
-    ASSERT_FALSE(ProfilesImporter::ImportAllVehicleComponentsOfVehicleProfile(fakeDocumentRootProbabilitySumAboveOne, resultProfiles));
+    EXPECT_THROW(ProfilesImporter::ImportAllVehicleComponentsOfVehicleProfile(fakeDocumentRootMissingComponentsTag, resultProfiles),
+                 std::runtime_error);
+    EXPECT_THROW(ProfilesImporter::ImportAllVehicleComponentsOfVehicleProfile(fakeDocumentRootProbabilitySumAboveOne, resultProfiles),
+                 std::runtime_error);
 }
 
 TEST(ProfilesImporter_UnitTests, ImportAllSensorsOfVehicleProfileSuccessful)
@@ -114,7 +116,7 @@ TEST(ProfilesImporter_UnitTests, ImportAllSensorsOfVehicleProfileSuccessful)
 
     VehicleProfile resultProfiles;
 
-    ASSERT_TRUE(ProfilesImporter::ImportAllSensorsOfVehicleProfile(fakeDocumentRoot, resultProfiles));
+    EXPECT_NO_THROW(ProfilesImporter::ImportAllSensorsOfVehicleProfile(fakeDocumentRoot, resultProfiles));
 
     std::list<SensorParameter> resultSensors = resultProfiles.sensors;
 
@@ -173,9 +175,12 @@ TEST(ProfilesImporter_UnitTests, ImportAllSensorsOfVehicleProfileUnsuccessful)
 
     VehicleProfile resultProfiles;
 
-    ASSERT_FALSE(ProfilesImporter::ImportAllSensorsOfVehicleProfile(fakeDocumentRootSensorsTagMissing, resultProfiles));
-    ASSERT_FALSE(ProfilesImporter::ImportAllSensorsOfVehicleProfile(fakeDocumentRootPositionTagMissing, resultProfiles));
-    ASSERT_FALSE(ProfilesImporter::ImportAllSensorsOfVehicleProfile(fakeDocumentRootProfileTagMissing, resultProfiles));
+    EXPECT_THROW(ProfilesImporter::ImportAllSensorsOfVehicleProfile(fakeDocumentRootSensorsTagMissing, resultProfiles),
+                 std::runtime_error);
+    EXPECT_THROW(ProfilesImporter::ImportAllSensorsOfVehicleProfile(fakeDocumentRootPositionTagMissing, resultProfiles),
+                 std::runtime_error);
+    EXPECT_THROW(ProfilesImporter::ImportAllSensorsOfVehicleProfile(fakeDocumentRootProfileTagMissing, resultProfiles),
+                 std::runtime_error);
 }
 
 TEST(ProfilesImporter_UnitTests, ImportAllSensorProfilesOfSensorProfilesSuccessful)
@@ -195,7 +200,7 @@ TEST(ProfilesImporter_UnitTests, ImportAllSensorProfilesOfSensorProfilesSuccessf
 
     std::list<SensorProfile> resultSensorProfiles;
 
-    ASSERT_TRUE(ProfilesImporter::ImportSensorProfiles(fakeDocumentRoot, resultSensorProfiles));
+    EXPECT_NO_THROW(ProfilesImporter::ImportSensorProfiles(fakeDocumentRoot, resultSensorProfiles));
     ASSERT_EQ(resultSensorProfiles.size(), (size_t ) 2);
 
 
@@ -227,8 +232,10 @@ TEST(ProfilesImporter_UnitTests, ImportAllSensorProfilesOfSensorProfilesUnsucces
 
     std::list<SensorProfile> resultSensorProfiles;
 
-    ASSERT_FALSE(ProfilesImporter::ImportSensorProfiles(fakeDocumentRootNameTagMissing, resultSensorProfiles));
-    ASSERT_FALSE(ProfilesImporter::ImportSensorProfiles(fakeDocumentRootTypeTagMissing, resultSensorProfiles));
+    EXPECT_THROW(ProfilesImporter::ImportSensorProfiles(fakeDocumentRootNameTagMissing, resultSensorProfiles),
+                 std::runtime_error);
+    EXPECT_THROW(ProfilesImporter::ImportSensorProfiles(fakeDocumentRootTypeTagMissing, resultSensorProfiles),
+                 std::runtime_error);
 }
 
 
@@ -284,9 +291,12 @@ TEST(ProfilesImporter_UnitTests, ImportAgentProfilesUnsuccessfully)
 
     std::unordered_map<std::string, AgentProfile> agentProfiles {};
 
-    ASSERT_FALSE(ProfilesImporter::ImportAgentProfiles(fakeDocumentRootMissingAtLeastOneElement, agentProfiles));
-    ASSERT_FALSE(ProfilesImporter::ImportAgentProfiles(fakeDocumentRootWrongProbabilities, agentProfiles));
-    ASSERT_FALSE(ProfilesImporter::ImportAgentProfiles(fakeDocumentRootMissingTag, agentProfiles));
+    EXPECT_THROW(ProfilesImporter::ImportAgentProfiles(fakeDocumentRootMissingAtLeastOneElement, agentProfiles),
+                 std::runtime_error);
+    EXPECT_THROW(ProfilesImporter::ImportAgentProfiles(fakeDocumentRootWrongProbabilities, agentProfiles),
+                 std::runtime_error);
+    EXPECT_THROW(ProfilesImporter::ImportAgentProfiles(fakeDocumentRootMissingTag, agentProfiles),
+                 std::runtime_error);
 }
 
 TEST(ProfilesImporter_UnitTests, ImportDriverProfilesSuccessfully)
@@ -305,7 +315,7 @@ TEST(ProfilesImporter_UnitTests, ImportDriverProfilesSuccessfully)
 
     DriverProfiles driverProfiles;
 
-    ASSERT_TRUE(ProfilesImporter::ImportDriverProfiles(fakeDocumentRoot, driverProfiles));
+    EXPECT_NO_THROW(ProfilesImporter::ImportDriverProfiles(fakeDocumentRoot, driverProfiles));
 
     ASSERT_EQ(driverProfiles.size(), (size_t) 2);
 
@@ -343,8 +353,10 @@ TEST(ProfilesImporter_UnitTests, ImportDriverProfilesUnsuccessfully)
 
     DriverProfiles driverProfiles;
 
-    ASSERT_FALSE(ProfilesImporter::ImportDriverProfiles(fakeDocumentRootWithoutType, driverProfiles));
-    ASSERT_FALSE(ProfilesImporter::ImportDriverProfiles(fakeDocumentRootWithDuplicateNames, driverProfiles));
+    EXPECT_THROW(ProfilesImporter::ImportDriverProfiles(fakeDocumentRootWithoutType, driverProfiles),
+                               std::runtime_error);
+    EXPECT_THROW(ProfilesImporter::ImportDriverProfiles(fakeDocumentRootWithDuplicateNames, driverProfiles),
+                               std::runtime_error);
 
 }
 
@@ -372,7 +384,7 @@ TEST(ProfilesImporter_UnitTests, ImportAllVehicleComponentProfilesSuccessfully)
 
     std::unordered_map<std::string, VehicleComponentProfiles> fakeVehicleComponentProfiles;
 
-    ASSERT_TRUE(ProfilesImporter::ImportAllVehicleComponentProfiles(fakeDocumentRoot, fakeVehicleComponentProfiles));
+    EXPECT_NO_THROW(ProfilesImporter::ImportAllVehicleComponentProfiles(fakeDocumentRoot, fakeVehicleComponentProfiles));
 
     ASSERT_EQ(fakeVehicleComponentProfiles.at("ComponentA").size(), static_cast<size_t>(2));
     ASSERT_EQ(fakeVehicleComponentProfiles.at("ComponentB").size(), static_cast<size_t>(2));

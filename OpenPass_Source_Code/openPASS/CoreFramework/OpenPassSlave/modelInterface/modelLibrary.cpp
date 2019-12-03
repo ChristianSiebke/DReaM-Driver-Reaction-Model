@@ -53,44 +53,49 @@ bool ModelLibrary::Init()
     getVersionFunc = (ModelInterface_GetVersion)library->resolve(DllGetVersionId.c_str());
     if (!getVersionFunc)
     {
-        LOG_INTERN(LogLevel::Error) << "could not retrieve version information from DLL";
+        LOG_INTERN(LogLevel::Error) << "could not resolve " << DllGetVersionId.c_str() << " from DLL";
         return false;
     }
 
     createInstanceFunc = (ModelInterface_CreateInstanceType)library->resolve(DllCreateInstanceId.c_str());
     if (!createInstanceFunc)
     {
+        LOG_INTERN(LogLevel::Error) << "could not resolve " << DllCreateInstanceId.c_str() << " from DLL";
         return false;
     }
 
     createEventInstanceFunc = (UnrestrictedEventModelInterface_CreateInstanceType)library->resolve(DllCreateInstanceId.c_str());
     if(!createEventInstanceFunc)
     {
+        LOG_INTERN(LogLevel::Error) << "could not resolve " << DllCreateInstanceId.c_str() << " from DLL";
         return false;
     }
 
     destroyInstanceFunc = (ModelInterface_DestroyInstanceType)library->resolve(DllDestroyInstanceId.c_str());
     if (!destroyInstanceFunc)
     {
-        LOG_INTERN(LogLevel::Warning) << "model could not be released";
+        LOG_INTERN(LogLevel::Error) << "could not resolve " << DllDestroyInstanceId.c_str() << " from DLL";
         return false;
     }
 
     updateInputFunc = (ModelInterface_UpdateInputType)library->resolve(DllUpdateInputId.c_str());
     if (!updateInputFunc)
     {
+        LOG_INTERN(LogLevel::Error) << "could not resolve " << DllUpdateInputId.c_str() << " from DLL";
         return false;
     }
 
     updateOutputFunc = (ModelInterface_UpdateOutputType)library->resolve(DllUpdateOutputId.c_str());
     if (!updateOutputFunc)
     {
+        LOG_INTERN(LogLevel::Error) << "could not resolve " << DllUpdateOutputId.c_str() << " from DLL";
         return false;
     }
 
     triggerFunc = (ModelInterface_TriggerType)library->resolve(DllTriggerId.c_str());
     if (!triggerFunc)
     {
+        LOG_INTERN(LogLevel::Error) << "could not resolve " << DllTriggerId.c_str() << " from DLL";
         return false;
     }
 

@@ -15,15 +15,6 @@
 #include "CoreFramework/CoreShare/parameters.h"
 #include "Interfaces/scenarioActionInterface.h"
 
-#define CHECKFALSE(element) \
-    do { \
-        if (!(element)) \
-        { \
-            throw std::runtime_error("Checkfalse in manipulator importer failed"); \
-        } \
-    } \
-    while (0);
-
 namespace Importer
 {
 class ManipulatorImporter
@@ -94,7 +85,5 @@ private:
      */
     static std::shared_ptr<ScenarioActionInterface> ImportManipulatorFromUserDefinedElement(QDomElement& userDefinedElement,
                                                                                     const std::string& sequenceName);
-
-    [[ noreturn ]] static void LogAndThrowError(const std::string &message);
 };
 } // Importer

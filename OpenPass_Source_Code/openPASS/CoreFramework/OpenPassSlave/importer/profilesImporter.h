@@ -26,7 +26,7 @@ public:
     * @param[out]    agentProfiles           Map into which the values get saved
     * @return	     true, if successful
     */
-    static bool ImportAgentProfiles(QDomElement agentProfilesElement,
+    static void ImportAgentProfiles(QDomElement agentProfilesElement,
                                     std::unordered_map<std::string, AgentProfile> &agentProfiles);
 
     /*!
@@ -36,8 +36,8 @@ public:
     * @param[out]    driverProfiles           Map into which the values get saved
     * @return	     true, if successful
     */
-    static bool ImportDriverProfiles(QDomElement driverProfilesElement,
-                                     DriverProfiles &driverProfiles);
+    static void ImportDriverProfiles(QDomElement driverProfilesElement,
+                                                           DriverProfiles &driverProfiles);
 
 
     /*!
@@ -47,7 +47,7 @@ public:
     * @param[out]    vehicleComponentProfilesMap        Map into which the values get saved
     * @return	     true, if successful
     */
-    static bool ImportAllVehicleComponentProfiles(QDomElement vehicleComponentProfilesElement,
+    static void ImportAllVehicleComponentProfiles(QDomElement vehicleComponentProfilesElement,
                                       std::unordered_map<std::string, VehicleComponentProfiles> &vehicleComponentProfilesMap);
 
     /*!
@@ -57,7 +57,7 @@ public:
     * @param[out]    sensorProfiles           Map into which the values get saved
     * @return	     true, if successful
     */
-    static bool ImportSensorProfiles(QDomElement sensorProfilesElement,
+    static void ImportSensorProfiles(QDomElement sensorProfilesElement,
                                      std::list<SensorProfile> &sensorProfiles);
 
     /*!
@@ -67,7 +67,7 @@ public:
     * @param[out]    agentProfiles           Map into which the values get saved
     * @return	     true, if successful
     */
-    static bool ImportVehicleProfiles(QDomElement vehicleProfilesElement,
+    static void ImportVehicleProfiles(QDomElement vehicleProfilesElement,
                                          std::unordered_map<std::string, VehicleProfile> &vehicleProfiles);
 
     /*!
@@ -76,8 +76,7 @@ public:
      * \param vehicleProfile         VehicleProfile to fill
      * \return
      */
-    static bool ImportVehicleProfile(QDomElement vehicleProfileElement,
-                                     VehicleProfile &vehicleProfile);
+    static VehicleProfile ImportVehicleProfile(QDomElement vehicleProfileElement);
 
     /*!
      * \brief Imports all VehicleComponentes contained in one VehicleProfile
@@ -85,7 +84,7 @@ public:
      * \param vehicleProfile         VehicleProfile to fill
      * \return
      */
-    static bool ImportAllVehicleComponentsOfVehicleProfile(QDomElement vehicleProfileElement,
+    static void ImportAllVehicleComponentsOfVehicleProfile(QDomElement vehicleProfileElement,
                                                            VehicleProfile &vehicleProfile);
 
     /*!
@@ -94,7 +93,7 @@ public:
      * \param vehicleComponent         VehicleComponent to fill
      * \return
      */
-    static bool ImportVehicleComponent(QDomElement vehicleComponentElement,
+    static void ImportVehicleComponent(QDomElement vehicleComponentElement,
                                        VehicleComponent &vehicleComponent);
 
 
@@ -104,7 +103,7 @@ public:
      * \param sensorLinksElement      Map into which SensorLinks are saved
      * \return
      */
-    static bool ImportSensorLinksOfComponent(QDomElement sensorLinksElement,
+    static void ImportSensorLinksOfComponent(QDomElement sensorLinksElement,
                                              std::list<SensorLink> &sensorLinks);
 
     /*!
@@ -113,7 +112,7 @@ public:
      * \param vehicleProfile         VehicleProfile to fill
      * \return
      */
-    static bool ImportAllSensorsOfVehicleProfile(QDomElement vehicleProfileElement,
+    static void ImportAllSensorsOfVehicleProfile(QDomElement vehicleProfileElement,
                                                  VehicleProfile &vehicleProfile);
 
     /*!
@@ -122,7 +121,7 @@ public:
      * \param sensorParameter         SensorParameter to fill
      * \return
      */
-    static bool ImportSensorParameters(QDomElement sensorElement,
+    static void ImportSensorParameters(QDomElement sensorElement,
                                        SensorParameter &sensorParameter);
 
     //Overall import function

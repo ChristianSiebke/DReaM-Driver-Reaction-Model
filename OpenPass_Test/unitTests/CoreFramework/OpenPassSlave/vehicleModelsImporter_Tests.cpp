@@ -163,8 +163,7 @@ TEST(VehicleModelsImporter, GivenUnknwonVehicleType_DoesNotImport)
     VehicleModelMap vehicleModelMap;
     VehicleModelParameters vehicleModelParameters;
 
-    ASSERT_THROW(VehicleModelsImporter::ImportVehicleModel(fakeVehicleRoot, vehicleModelMap), std::runtime_error);
-    ASSERT_THROW(vehicleModelMap.at("invalidCar"), std::out_of_range);
+    ASSERT_THROW(VehicleModelsImporter::ImportVehicleModel(fakeVehicleRoot, vehicleModelMap), std::out_of_range);
 }
 
 TEST(VehicleModelsImporter, GivenValidPedestrian_ImportsCorrectValues)

@@ -58,25 +58,14 @@ public:
     static void ImportParameterElement(QDomElement& parameterElement, ParameterInterface *parameters);
 
     /*!
-     * \brief Imports the directory tag of a catalog
-     *
-     * \param[out]  catalogPath     Value of the catalog's directory tag
-     * \param[in]   catalogElement  Catalog DOM element
-     *
-     * \return      True on successful parsing, false otherwise.
-     */
-    static bool ImportCatalogDirectory(std::string& catalogPath, QDomElement& catalogElement);
-
-    /*!
      * \brief Imports a catalog tag
      *
-     * \param[out]  catalogPath         Value of the catalog's directory tag
      * \param[in]   catalogName         Name of the catalog to import
      * \param[in]   catatalogsElement   DOM element holding all available catalogs
      *
      * \return      True on successful parsing, false otherwise.
      */
-    static bool ImportCatalog(std::string& catalogPath, const std::string& catalogName, QDomElement& catalogsElement);
+    static std::string ImportCatalog(const std::string& catalogName, QDomElement& catalogsElement);
 
 private:
     /*!
@@ -86,7 +75,7 @@ private:
      *
      * \return  true if import succeeds and version matches, falso otherwise
      */
-    static bool ImportAndValidateVersion(QDomElement& documentRoot);
+    static void ImportAndValidateVersion(QDomElement& documentRoot);
 
     /*!
      * \brief Imports catalogs from OpenSCENARIO DOM
@@ -174,7 +163,7 @@ private:
      * \param[in]   documentRoot    The DOM root of the scenario file
      * \param[out]  entities        Entity element data is imported into this container
      */
-    static bool ImportEntities(QDomElement& documentRoot, std::vector<ScenarioEntity>& entities, std::map<std::string, std::list<std::string> > &groups);
+    static void ImportEntities(QDomElement& documentRoot, std::vector<ScenarioEntity>& entities, std::map<std::string, std::list<std::string> > &groups);
 
     /*!
      * \brief Imports an entity of a OpenSCENARIO Entities DOM
@@ -182,7 +171,7 @@ private:
      * \param[in]   entityElement   The DOM root of the entity element
      * \param[out]  entity          Entity element data is imported into this container
      */
-    static bool ImportEntity(QDomElement& entityElement, ScenarioEntity& entity);
+    static void ImportEntity(QDomElement& entityElement, ScenarioEntity& entity);
 
     /*!
      * \brief Imports a group definition of a OpenSCENARIO Selection DOM
@@ -190,7 +179,7 @@ private:
      * \param[in]   selectionElement	The DOM node of the selection element
      * \param[out]  groups 				Groups element data is imported into this container
      */
-    static bool ImportSelectionElements(QDomElement &entitiesElement, std::map<std::string, std::list<std::string>> &groups);
+    static void ImportSelectionElements(QDomElement &entitiesElement, std::map<std::string, std::list<std::string>> &groups);
 
     /*!
      * \brief Imports a list of members of a OpenSCENARIO Members DOM
@@ -198,7 +187,7 @@ private:
      * \param[in]   membersElement  The DOM root of the members element
      * \param[out]  members			Members element data is imported into this container
      */
-    static bool ImportMembers(const QDomElement &membersElement, std::list<std::string> &members);
+    static void ImportMembers(const QDomElement &membersElement, std::list<std::string> &members);
 
     /*!
      * \brief Imports a catalog reference of an entity of a OpenSCENARIO Entities DOM
@@ -206,7 +195,7 @@ private:
      * \param[in]   catalogReferenceElement   The DOM root of the catalog reference element
      * \param[out]  entity                    Catalog refrence data is imported into this container
      */
-    static bool ImportEntityCatalogReference(QDomElement& catalogReferenceElement, ScenarioEntity& entity);
+    static void ImportEntityCatalogReference(QDomElement& catalogReferenceElement, ScenarioEntity& entity);
 
     /*!
      * \brief Imports a story element of a OpenSCENARIO storyboard DOM

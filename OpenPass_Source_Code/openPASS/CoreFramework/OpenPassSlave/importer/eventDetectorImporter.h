@@ -13,6 +13,7 @@
 #include <QDomDocument>
 #include "Interfaces/scenarioInterface.h"
 #include "Common/eventDetectorDefinitions.h"
+#include "importerLoggingHelper.h"
 
 namespace Importer
 {

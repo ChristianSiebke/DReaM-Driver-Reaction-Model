@@ -11,8 +11,12 @@
 #include "manipulatorImporter.h"
 #include "xmlParser.h"
 #include "Common/openScenarioDefinitions.h"
+#include "importerLoggingHelper.h"
 
 #include <boost/algorithm/string/trim.hpp>
+
+namespace TAG = openpass::importer::xml::manipulatorImporter::tag;
+namespace ATTRIBUTE = openpass::importer::xml::manipulatorImporter::attribute;
 
 namespace Importer
 {
@@ -20,34 +24,37 @@ std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulator(
                                                                                 const std::string& sequenceName)
 {
     QDomElement actionElement;
-    CHECKFALSE(SimulationCommon::GetFirstChildElement(eventElement, "Action", actionElement));
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(eventElement, TAG::action, actionElement),
+                  "Could not import Manipulator. Tag " + std::string(TAG::action) + " is missing.");
 
     QDomElement actionTypeElement;
-    if (SimulationCommon::GetFirstChildElement(actionElement, "UserDefined", actionTypeElement))
+    if (SimulationCommon::GetFirstChildElement(actionElement, TAG::userDefined, actionTypeElement))
     {
         return ImportManipulatorFromUserDefinedElement(actionTypeElement,
                                                        sequenceName);
     }
-    else if (SimulationCommon::GetFirstChildElement(actionElement, "Private", actionTypeElement))
+
+    if (SimulationCommon::GetFirstChildElement(actionElement, TAG::Private, actionTypeElement))
     {
         return ImportManipulatorFromPrivateElement(actionTypeElement,
                                                    sequenceName);
     }
-    else if (SimulationCommon::GetFirstChildElement(actionElement, "Global", actionTypeElement))
+
+    if (SimulationCommon::GetFirstChildElement(actionElement, TAG::global, actionTypeElement))
     {
         return ImportManipulatorFromGlobalElement(actionTypeElement,
                                                   sequenceName);
     }
-    else {
-        LogAndThrowError("Invalid Action Type in openScenario file");
-    }
+
+    LogErrorAndThrow("Invalid Action Type in openScenario file");
 }
 
 std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorFromUserDefinedElement(QDomElement& userDefinedElement,
                                                                                                       const std::string& sequenceName)
 {
     QDomElement userDefinedChildElement;
-    CHECKFALSE(SimulationCommon::GetFirstChildElement(userDefinedElement, "Command", userDefinedChildElement))
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(userDefinedElement, TAG::command, userDefinedChildElement),
+                  "Could not import Manipulator from user defined element. Tag " + std::string(TAG::command) + " is missing.");
 
     std::string command = userDefinedChildElement.text().toStdString();
     boost::algorithm::trim(command);
@@ -60,22 +67,25 @@ std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorF
                                                                                                   const std::string& sequenceName)
 {
     QDomElement privateChildElement;
-    if(SimulationCommon::GetFirstChildElement(privateElement, "Lateral", privateChildElement))
+    if(SimulationCommon::GetFirstChildElement(privateElement, TAG::lateral, privateChildElement))
     {
         QDomElement lateralChildElement;
-        if (SimulationCommon::GetFirstChildElement(privateChildElement, "LaneChange", lateralChildElement))
+        if (SimulationCommon::GetFirstChildElement(privateChildElement, TAG::laneChange, lateralChildElement))
         {
             QDomElement targetElement;
-            CHECKFALSE(SimulationCommon::GetFirstChildElement(lateralChildElement, "Target", targetElement));
+            ThrowIfFalse(SimulationCommon::GetFirstChildElement(lateralChildElement, TAG::target, targetElement),
+                        "Could not import Manipulator from private element. Tag " + std::string(TAG::target) + " is missing.");
 
             QDomElement typeElement;
-            if (SimulationCommon::GetFirstChildElement(targetElement, "Relative", typeElement))
+            if (SimulationCommon::GetFirstChildElement(targetElement, TAG::relative, typeElement))
             {
                 std::string object;
                 double value{};
 
-                CHECKFALSE(SimulationCommon::ParseAttributeString(typeElement, "object", object));
-                CHECKFALSE(SimulationCommon::ParseAttributeDouble(typeElement, "value", value));
+                ThrowIfFalse(SimulationCommon::ParseAttributeString(typeElement, ATTRIBUTE::object, object),
+                              "Could not import Manipulator from private element. Type tag requires a " + std::string(ATTRIBUTE::object) + " attribute.");
+                ThrowIfFalse(SimulationCommon::ParseAttributeDouble(typeElement, ATTRIBUTE::value, value),
+                              "Could not import Manipulator from private element. Type tag requires a " + std::string(ATTRIBUTE::value) + " attribute.");
 
                 return std::shared_ptr<ScenarioActionInterface>(std::make_shared<openScenario::PrivateLateralLaneChangeAction>(sequenceName,
                                                                                                                                openScenario::PrivateLateralLaneChangeActionType::Relative,
@@ -84,38 +94,37 @@ std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorF
             }
             else
             {
-                CHECKFALSE(SimulationCommon::GetFirstChildElement(targetElement, "Absolute", typeElement));
+                ThrowIfFalse(SimulationCommon::GetFirstChildElement(targetElement, TAG::absolute, typeElement),
+                              "Could not import Manipulator from private element. Tag " + std::string(TAG::absolute) + " is missing.");
 
                 double value;
-                CHECKFALSE(SimulationCommon::ParseAttributeDouble(typeElement, "value", value));
+                ThrowIfFalse(SimulationCommon::ParseAttributeDouble(typeElement, ATTRIBUTE::value, value),
+                              "Could not import Manipulator from private element. Type tag requires a " + std::string(ATTRIBUTE::value) + " attribute.");
 
                 return std::shared_ptr<ScenarioActionInterface>(std::make_shared<openScenario::PrivateLateralLaneChangeAction>(sequenceName,
                                                                                                                                openScenario::PrivateLateralLaneChangeActionType::Absolute,
                                                                                                                                static_cast<int>(std::rint(value))));
             }
         }
-        else
-        {
-            LogAndThrowError("Invalid PrivateAction-Lateral Type in openScenario file");
-        }
+
+        LogErrorAndThrow("Invalid PrivateAction-Lateral Type in openScenario file");
     }
-    else
-    {
-        LogAndThrowError("Invalid PrivateAction Type in openScenario file");
-    }
+
+    LogErrorAndThrow("Invalid PrivateAction Type in openScenario file");
 }
 
 std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorFromGlobalElement(QDomElement &globalElement,
                                                                                          const std::string& sequenceName)
 {
     QDomElement globalActionTypeElement;
-    if (SimulationCommon::GetFirstChildElement(globalElement, "Entity", globalActionTypeElement))
+    if (SimulationCommon::GetFirstChildElement(globalElement, TAG::entity, globalActionTypeElement))
     {
         std::string name;
-        CHECKFALSE(SimulationCommon::ParseAttributeString(globalActionTypeElement, "name", name));
+        ThrowIfFalse(SimulationCommon::ParseAttributeString(globalActionTypeElement, ATTRIBUTE::name, name),
+                      "Could not import Manipulator from global element. Entity tag requires a " + std::string(ATTRIBUTE::name) + " attribute.");
 
         QDomElement entityTypeElement;
-        if (SimulationCommon::GetFirstChildElement(globalActionTypeElement, "Add",entityTypeElement))
+        if (SimulationCommon::GetFirstChildElement(globalActionTypeElement, TAG::add, entityTypeElement))
         {
                 return std::shared_ptr<ScenarioActionInterface>(std::make_shared<openScenario::GlobalEntityAction>(sequenceName,
                                                                                                                    openScenario::GlobalEntityActionType::Add,
@@ -123,22 +132,15 @@ std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorF
         }
         else
         {
-           CHECKFALSE(SimulationCommon::GetFirstChildElement(globalActionTypeElement, "Delete",entityTypeElement));
+           ThrowIfFalse(SimulationCommon::GetFirstChildElement(globalActionTypeElement, TAG::Delete, entityTypeElement),
+                         "Could not import Manipulator from global element. Tag " + std::string(TAG::Delete) + " is missing.");
 
            return std::shared_ptr<ScenarioActionInterface>(std::make_shared<openScenario::GlobalEntityAction>(sequenceName,
                                                                                                               openScenario::GlobalEntityActionType::Delete,
                                                                                                               name));
         }
     }
-    else
-    {
-        LogAndThrowError("Invalid GlobalAction Type in openScenario file");
-    }
-}
 
-[[ noreturn ]] void ManipulatorImporter::LogAndThrowError(const std::string &message)
-{
-    LOG_INTERN(LogLevel::Error) << message;
-    throw std::runtime_error(message);
+    LogErrorAndThrow("Invalid GlobalAction Type in openScenario file.");
 }
 }

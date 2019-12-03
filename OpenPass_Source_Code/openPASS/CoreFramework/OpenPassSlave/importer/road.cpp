@@ -10,6 +10,7 @@
 *******************************************************************************/
 
 #include "road.h"
+#include "importerLoggingHelper.h"
 
 extern "C"
 {
@@ -61,12 +62,7 @@ bool RoadLane::AddWidth(double sOffset,
 
 bool RoadLane::AddSuccessor(int id)
 {
-    if (!successor.empty())
-    {
-        LOG_INTERN(LogLevel::Error) << "added more than one successor to road lane.";
-        return false;
-    }
-
+    ThrowIfFalse(successor.empty(), "added more than one successor to road lane.");
     successor.push_back(id);
 
     return true;
@@ -74,12 +70,7 @@ bool RoadLane::AddSuccessor(int id)
 
 bool RoadLane::AddPredecessor(int id)
 {
-    if (!predecessor.empty())
-    {
-        LOG_INTERN(LogLevel::Error) << "added more than one predecessor to road lane.";
-        return false;
-    }
-
+    ThrowIfFalse(predecessor.empty(), "added more than one predecessor to road lane.");
     predecessor.push_back(id);
 
     return true;

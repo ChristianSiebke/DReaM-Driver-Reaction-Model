@@ -11,14 +11,8 @@
 #include "eventDetectorImporter.h"
 #include "xmlParser.h"
 
-#define CHECKFALSE(element) \
-    do { \
-        if (!(element)) \
-        { \
-            throw std::runtime_error("Checkfalse in eventDetector importer failed"); \
-        } \
-    } \
-    while (0);
+namespace TAG = openpass::importer::xml::eventDetectorImporter::tag;
+namespace ATTRIBUTE = openpass::importer::xml::eventDetectorImporter::attribute;
 
 namespace Importer
 {
@@ -29,20 +23,23 @@ namespace Importer
                                                                                                  const std::vector<ScenarioEntity>& entities)
     {
         QDomElement startConditionsElement;
-        CHECKFALSE(SimulationCommon::GetFirstChildElement(eventElement, "StartConditions", startConditionsElement));
+        ThrowIfFalse(SimulationCommon::GetFirstChildElement(eventElement, TAG::startConditions, startConditionsElement),
+                      "Could not import EventDetector. Tag " + std::string(TAG::startConditions) + " missing.");
 
         QDomElement conditionGroupElement;
-        CHECKFALSE(SimulationCommon::GetFirstChildElement(startConditionsElement, "ConditionGroup", conditionGroupElement));
+        ThrowIfFalse(SimulationCommon::GetFirstChildElement(startConditionsElement, TAG::conditionGroup, conditionGroupElement),
+                      "Could not import EventDetector. Tag " + std::string(TAG::conditionGroup) + " missing.");
 
         QDomElement conditionElement;
-        CHECKFALSE(SimulationCommon::GetFirstChildElement(conditionGroupElement, "Condition", conditionElement));
+        ThrowIfFalse(SimulationCommon::GetFirstChildElement(conditionGroupElement, TAG::condition, conditionElement),
+                      "Could not import EventDetector. Tag " + std::string(TAG::condition) + " missing.");
 
         openScenario::ConditionCollection conditions{};
 
         while (!conditionElement.isNull())
         {
             conditions.emplace_back(ImportConditionElement(conditionElement, entities));
-            conditionElement = conditionElement.nextSiblingElement("Condition");
+            conditionElement = conditionElement.nextSiblingElement(TAG::condition);
         }
 
         return openScenario::ConditionalEventDetectorInformation{actorInformation,
@@ -55,20 +52,20 @@ namespace Importer
                                                                           const std::vector<ScenarioEntity>& entities)
     {
         QDomElement byEntityElement;
+
         //Parse specific entity
-        if (SimulationCommon::GetFirstChildElement(conditionElement, "ByEntity", byEntityElement))
+        if (SimulationCommon::GetFirstChildElement(conditionElement, TAG::byEntity, byEntityElement))
         {
             return ImportByEntityElement(byEntityElement, entities);
         }
 
         QDomElement byValueElement;
-        if (SimulationCommon::GetFirstChildElement(conditionElement, "ByValue", byValueElement))
+        if (SimulationCommon::GetFirstChildElement(conditionElement, TAG::byValue, byValueElement))
         {
             return ImportConditionByValueElement(byValueElement);
         }
 
-        LOG_INTERN(LogLevel::Error) << "No valid Condition found";
-        throw std::runtime_error("No valid Condition found");
+        LogErrorAndThrow("No valid Condition found.");
     }
 
     openScenario::Condition EventDetectorImporter::ImportByEntityElement(QDomElement byEntityElement,
@@ -77,7 +74,8 @@ namespace Importer
         std::vector<std::string> triggeringEntities;
 
         QDomElement triggeringEntitiesElement;
-        CHECKFALSE(SimulationCommon::GetFirstChildElement(byEntityElement, "TriggeringEntities", triggeringEntitiesElement));
+        ThrowIfFalse(SimulationCommon::GetFirstChildElement(byEntityElement, TAG::triggeringEntities, triggeringEntitiesElement),
+                      "Could not import by entity element. " + std::string(TAG::triggeringEntities) + " missing.");
 
         QDomElement entityElement;
         SimulationCommon::GetFirstChildElement(triggeringEntitiesElement, "Entity", entityElement);
@@ -85,37 +83,40 @@ namespace Importer
         while (!entityElement.isNull())
         {
             std::string entityName;
-            CHECKFALSE(SimulationCommon::ParseAttributeString(entityElement, "name", entityName));
+            ThrowIfFalse(SimulationCommon::ParseAttributeString(entityElement, ATTRIBUTE::name, entityName),
+                          "Could not import by entity element. Entity requires a " + std::string(ATTRIBUTE::name) + " attribute.");
 
-            if (!ContainsEntity(entities, entityName))
-            {
-                throw std::runtime_error(std::string("TriggeringEntity '") + entityName + "' not declared in 'Entities'");
-            }
+            ThrowIfFalse(ContainsEntity(entities, entityName), "TriggeringEntity '" + entityName + "' not declared in 'Entities'");
 
             triggeringEntities.push_back(entityName);
-            entityElement = entityElement.nextSiblingElement("Entity");
+            entityElement = entityElement.nextSiblingElement(TAG::entity);
         }
 
         QDomElement entityConditionElement;
-        CHECKFALSE(SimulationCommon::GetFirstChildElement(byEntityElement, "EntityCondition", entityConditionElement));
+        ThrowIfFalse(SimulationCommon::GetFirstChildElement(byEntityElement, TAG::entityCondition, entityConditionElement),
+                      "Could not import by entity element. " + std::string(TAG::entityCondition) + " missing.");
 
         QDomElement reachPositionElement;
         if (SimulationCommon::GetFirstChildElement(entityConditionElement, "ReachPosition", reachPositionElement))
         {
             double tolerance;
-            CHECKFALSE(SimulationCommon::ParseAttributeDouble(reachPositionElement, "tolerance", tolerance));
+            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(reachPositionElement, ATTRIBUTE::tolerance, tolerance),
+                          "Could not import by entity element. Reach position requires a " + std::string(ATTRIBUTE::tolerance) + " attribute.");
 
             QDomElement positionElement;
-            CHECKFALSE(SimulationCommon::GetFirstChildElement(reachPositionElement, "Position", positionElement));
+            ThrowIfFalse(SimulationCommon::GetFirstChildElement(reachPositionElement, TAG::position, positionElement),
+                          "Could not import by entity element. " + std::string(TAG::position) + " missing.");
 
             QDomElement roadElement;
-            if(SimulationCommon::GetFirstChildElement(positionElement, "Road", roadElement))
+            if(SimulationCommon::GetFirstChildElement(positionElement, TAG::road, roadElement))
             {
                 double sCoordinate;
-                CHECKFALSE(SimulationCommon::ParseAttributeDouble(roadElement, "s", sCoordinate));
+                ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadElement, ATTRIBUTE::s, sCoordinate),
+                              "Could not import by entity element. Road requires a " + std::string(ATTRIBUTE::s) + " attribute.");
 
                 std::string roadId;
-                CHECKFALSE(SimulationCommon::ParseAttributeString(roadElement, "roadId", roadId));
+                ThrowIfFalse(SimulationCommon::ParseAttributeString(roadElement, ATTRIBUTE::roadId, roadId),
+                              "Could not import by entity element. Road requires a " + std::string(ATTRIBUTE::roadId) + " attribute.");
 
                 // this return must occur across two lines to appropriately construct the std::variant
                 auto condition = openScenario::ReachPositionRoadCondition(triggeringEntities,
@@ -127,16 +128,19 @@ namespace Importer
             }
 
             QDomElement relativeLaneElement;
-            if(SimulationCommon::GetFirstChildElement(positionElement, "RelativeLane", relativeLaneElement))
+            if(SimulationCommon::GetFirstChildElement(positionElement, TAG::relativeLane, relativeLaneElement))
             {
                 std::string referenceEntityName;
-                CHECKFALSE(SimulationCommon::ParseAttributeString(relativeLaneElement, "object", referenceEntityName));
+                ThrowIfFalse(SimulationCommon::ParseAttributeString(relativeLaneElement, ATTRIBUTE::object, referenceEntityName),
+                              "Could not import by entity element. RelativeLane requires a " + std::string(ATTRIBUTE::object) + " attribute.");
 
                 int deltaLane;
-                CHECKFALSE(SimulationCommon::ParseAttributeInt(relativeLaneElement, "dLane", deltaLane));
+                ThrowIfFalse(SimulationCommon::ParseAttributeInt(relativeLaneElement, ATTRIBUTE::dLane, deltaLane),
+                              "Could not import by entity element. RelativeLane requires a " + std::string(ATTRIBUTE::dLane) + " attribute.");
 
                 double deltaS;
-                CHECKFALSE(SimulationCommon::ParseAttributeDouble(relativeLaneElement, "ds", deltaS));
+                ThrowIfFalse(SimulationCommon::ParseAttributeDouble(relativeLaneElement, ATTRIBUTE::ds, deltaS),
+                              "Could not import by entity element. RelativeLane requires a " + std::string(ATTRIBUTE::ds) + " attribute.");
 
                 auto condition = openScenario::RelativeLaneCondition(triggeringEntities,
                                                                      referenceEntityName,
@@ -149,16 +153,19 @@ namespace Importer
         }
 
         QDomElement relativeSpeedElement;
-        if (SimulationCommon::GetFirstChildElement(entityConditionElement, "RelativeSpeed", relativeSpeedElement))
+        if (SimulationCommon::GetFirstChildElement(entityConditionElement, TAG::relativeSpeed, relativeSpeedElement))
         {
             std::string referenceEntityName;
-            CHECKFALSE(SimulationCommon::ParseAttributeString(relativeSpeedElement, "entity", referenceEntityName));
+            ThrowIfFalse(SimulationCommon::ParseAttributeString(relativeSpeedElement, ATTRIBUTE::entity, referenceEntityName),
+                          "Could not import by entity element. RelativeSpeed requires a " + std::string(ATTRIBUTE::entity) + " attribute.");
 
             double tolerance;
-            CHECKFALSE(SimulationCommon::ParseAttributeDouble(relativeSpeedElement, "value", tolerance));
+            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(relativeSpeedElement, ATTRIBUTE::value, tolerance),
+                          "Could not import by entity element. RelativeSpeed requires a " + std::string(ATTRIBUTE::value) + " attribute.");
 
             std::string ruleString;
-            CHECKFALSE(SimulationCommon::ParseAttributeString(relativeSpeedElement, "rule", ruleString));
+            ThrowIfFalse(SimulationCommon::ParseAttributeString(relativeSpeedElement, ATTRIBUTE::rule, ruleString),
+                          "Could not import by entity element. RelativeSpeed requires a " + std::string(ATTRIBUTE::rule) + " attribute.");
 
             auto condition = openScenario::RelativeSpeedCondition(triggeringEntities,
                                                                   referenceEntityName,
@@ -168,22 +175,27 @@ namespace Importer
         }
 
         QDomElement timeToCollisionElement;
-        if (SimulationCommon::GetFirstChildElement(entityConditionElement, "TimeToCollision", timeToCollisionElement))
+        if (SimulationCommon::GetFirstChildElement(entityConditionElement, TAG::timeToCollision, timeToCollisionElement))
         {
             double targetTTC;
-            CHECKFALSE(SimulationCommon::ParseAttributeDouble(timeToCollisionElement, "value", targetTTC));
+            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(timeToCollisionElement, ATTRIBUTE::value, targetTTC),
+                          "Could not import by entity element. TimeToCollision requires a " + std::string(ATTRIBUTE::value) + " attribute.");
 
             std::string ruleString;
-            CHECKFALSE(SimulationCommon::ParseAttributeString(timeToCollisionElement, "rule", ruleString));
+            ThrowIfFalse(SimulationCommon::ParseAttributeString(timeToCollisionElement, ATTRIBUTE::rule, ruleString),
+                          "Could not import by entity element. TimeToCollision requires a " + std::string(ATTRIBUTE::rule) + " attribute.");
 
             QDomElement targetElement;
-            CHECKFALSE(SimulationCommon::GetFirstChildElement(timeToCollisionElement, "Target", targetElement));
+            ThrowIfFalse(SimulationCommon::GetFirstChildElement(timeToCollisionElement, TAG::target, targetElement),
+                          "Could not import by entity element. " + std::string(TAG::target) + " missing.");
 
             QDomElement entityElement;
-            CHECKFALSE(SimulationCommon::GetFirstChildElement(targetElement, "Entity", entityElement));
+            ThrowIfFalse(SimulationCommon::GetFirstChildElement(targetElement, TAG::entity, entityElement),
+                          "Could not import by entity element. " + std::string(TAG::entity) + " missing.");
 
             std::string targetEntityName;
-            CHECKFALSE(SimulationCommon::ParseAttributeString(entityElement, "name", targetEntityName));
+            ThrowIfFalse(SimulationCommon::ParseAttributeString(entityElement, ATTRIBUTE::name, targetEntityName),
+                          "Could not import by entity element. TimeToCollision requires a " + std::string(ATTRIBUTE::name) + " attribute.");
 
             auto condition = openScenario::TimeToCollisionCondition(triggeringEntities,
                                                                     targetEntityName,
@@ -194,33 +206,28 @@ namespace Importer
         }
 
         // if no element was parsed successfully
-        LOG_INTERN(LogLevel::Error) << "No valid ByEntity Condition found";
-        throw std::runtime_error("No valid ByEntity Condition found");
+        LogErrorAndThrow("No valid ByEntity Condition found.");
     }
 
     openScenario::Condition EventDetectorImporter::ImportConditionByValueElement(QDomElement& byValueElement)
     {
         QDomElement simulationTimeElement;
-        if (SimulationCommon::GetFirstChildElement(byValueElement, "SimulationTime", simulationTimeElement))
-        {
-            double value;
-            CHECKFALSE(SimulationCommon::ParseAttributeDouble(simulationTimeElement, "value", value));
+        ThrowIfFalse(SimulationCommon::GetFirstChildElement(byValueElement, TAG::simulationTime, simulationTimeElement), "No valid ByValue Condition found.");
 
-            std::string ruleString;
-            CHECKFALSE(SimulationCommon::ParseAttributeString(simulationTimeElement, "rule", ruleString));
+        double value;
+        ThrowIfFalse(SimulationCommon::ParseAttributeDouble(simulationTimeElement, ATTRIBUTE::value, value),
+                      "Could not import by value element. SimulationTime requires a " + std::string(ATTRIBUTE::value) + " attribute.");
 
-            openScenario::Rule rule = ruleConversionMap.at(ruleString);
+        std::string ruleString;
+        ThrowIfFalse(SimulationCommon::ParseAttributeString(simulationTimeElement, ATTRIBUTE::rule, ruleString),
+                      "Could not import by value element. SimulationTime requires a " + std::string(ATTRIBUTE::rule) + " attribute.");
 
-            // this return must occur across two lines to appropriately construct the std::variant
-            openScenario::SimulationTimeCondition condition = openScenario::SimulationTimeCondition(rule,
-                                                                                                    value);
-            return condition;
-        }
-        else
-        {
-            LOG_INTERN(LogLevel::Error) << "No valid ByValue Condition found";
-            throw std::runtime_error("No valid ByValue Condition found");
-        }
+        openScenario::Rule rule = ruleConversionMap.at(ruleString);
+
+        // this return must occur across two lines to appropriately construct the std::variant
+        openScenario::SimulationTimeCondition condition = openScenario::SimulationTimeCondition(rule,
+                                                                                                value);
+        return condition;
     }
 
     bool EventDetectorImporter::ContainsEntity(const std::vector<ScenarioEntity>& entities,

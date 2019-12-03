@@ -11,34 +11,24 @@
 #include "profilesImporter.h"
 #include "CoreFramework/CoreShare/log.h"
 
+namespace TAG = openpass::importer::xml::profilesImporter::tag;
+namespace ATTRIBUTE = openpass::importer::xml::profilesImporter::attribute;
 using namespace Importer;
 using namespace SimulationCommon;
 
-bool ProfilesImporter::ImportAgentProfiles(QDomElement agentProfilesElement,
-        std::unordered_map<std::string, AgentProfile>& agentProfiles)
+void ProfilesImporter::ImportAgentProfiles(QDomElement agentProfilesElement,
+                                           std::unordered_map<std::string, AgentProfile>& agentProfiles)
 {
     QDomElement agentProfileElement;
-    if (!GetFirstChildElement(agentProfilesElement, "AgentProfile", agentProfileElement))
-    {
-        LOG_INTERN(LogLevel::Error) << "At least one agent profile is required.";
-        return false;
-    }
+    ThrowIfFalse(GetFirstChildElement(agentProfilesElement, TAG::agentProfile, agentProfileElement), "At least one agent profile is required");
 
     while (!agentProfileElement.isNull())
     {
         std::string agentProfileName;
-        if (!ParseAttributeString(agentProfileElement, "Name", agentProfileName))
-        {
-            LOG_INTERN(LogLevel::Error) << "AgentProfile name is invalid.";
-            return false;
-        }
+        ThrowIfFalse(ParseAttributeString(agentProfileElement, ATTRIBUTE::name, agentProfileName), "AgentProfile name is invalid.");
 
         std::string profileType;
-        if (!ParseAttributeString(agentProfileElement, "Type", profileType))
-        {
-            LOG_INTERN(LogLevel::Error) << "AgentProfile type is invalid.";
-            return false;
-        }
+        ThrowIfFalse(ParseAttributeString(agentProfileElement, ATTRIBUTE::type, profileType), "AgentProifle type is invalid.");
 
         AgentProfile agentProfile;
 
@@ -48,125 +38,86 @@ bool ProfilesImporter::ImportAgentProfiles(QDomElement agentProfilesElement,
 
             //Parses all driver profiles
             QDomElement driverProfilesElement;
-            if (!GetFirstChildElement(agentProfileElement, "DriverProfiles", driverProfilesElement)
-                    || !ImportProbabilityMap(driverProfilesElement, "Name", "DriverProfile", agentProfile.driverProfiles))
-            {
-                LOG_INTERN(LogLevel::Error) << "Could not import DriverProfiles.";
-                return false;
-            }
+            ThrowIfFalse((GetFirstChildElement(agentProfileElement, TAG::driverProfiles, driverProfilesElement)
+                           && ImportProbabilityMap(driverProfilesElement, ATTRIBUTE::name, TAG::driverProfile, agentProfile.driverProfiles)),
+                          "Could not import DriverProfiles.");
 
             //Parses all vehicle profiles
             QDomElement vehicleProfilesElement;
-            if (!GetFirstChildElement(agentProfileElement, "VehicleProfiles", vehicleProfilesElement)
-                    || !ImportProbabilityMap(vehicleProfilesElement, "Name", "VehicleProfile", agentProfile.vehicleProfiles))
-            {
-                LOG_INTERN(LogLevel::Error) << "Could not import VehicleProfiles.";
-                return false;
-            }
+            ThrowIfFalse((GetFirstChildElement(agentProfileElement, TAG::vehicleProfiles, vehicleProfilesElement)
+                           && ImportProbabilityMap(vehicleProfilesElement, ATTRIBUTE::name, TAG::vehicleProfile, agentProfile.vehicleProfiles)),
+                          "Could not import VehicleProfiles");
         }
-
         else
-            if (profileType == "Static")
-            {
-                agentProfile.type = AgentProfileType::Static;
-                QDomElement systemElement;
-                if (!GetFirstChildElement(agentProfileElement, "System", systemElement))
-                {
-                    LOG_INTERN(LogLevel::Error) << "Could not import System.";
-                    return false;
-                }
+        {
+            ThrowIfFalse(profileType != "Static", "Invalid agent profile type.");
 
-                std::string systemConfigFile;
-                if (!ParseString(systemElement, "File", systemConfigFile))
-                {
-                    LOG_INTERN(LogLevel::Error) << "Could not import SystemConfig file.";
-                    return false;
-                }
-                agentProfile.systemConfigFile = systemConfigFile;
+            agentProfile.type = AgentProfileType::Static;
+            QDomElement systemElement;
+            ThrowIfFalse(GetFirstChildElement(agentProfileElement, TAG::system, systemElement), "Could not import System.");
 
-                int systemId;
-                if (!ParseInt(systemElement, "Id", systemId))
-                {
-                    LOG_INTERN(LogLevel::Error) << "Could not import System id.";
-                    return false;
-                }
-                agentProfile.systemId = systemId;
+            std::string systemConfigFile;
+            ThrowIfFalse(ParseString(systemElement, ATTRIBUTE::file, systemConfigFile), "Could not import SystemConfig file.");
 
-                std::string vehicleModel;
-                if (!ParseString(agentProfileElement, "VehicleModel", vehicleModel))
-                {
-                    LOG_INTERN(LogLevel::Error) << "Could not import VehicleModel.";
-                    return false;
-                }
-                agentProfile.vehicleModel = vehicleModel;
-            }
+            agentProfile.systemConfigFile = systemConfigFile;
 
-            else
-            {
-                LOG_INTERN(LogLevel::Error) << "Invalid agent profile type.";
-                return false;
-            }
+            int systemId;
+            ThrowIfFalse(ParseInt(systemElement, ATTRIBUTE::id, systemId), "Could not import System id.");
+
+            agentProfile.systemId = systemId;
+
+            std::string vehicleModel;
+            ThrowIfFalse(ParseString(agentProfileElement, ATTRIBUTE::vehicleModel, vehicleModel), "Could not import VehicleModel.");
+
+            agentProfile.vehicleModel = vehicleModel;
+        }
 
         auto insertReturn = agentProfiles.insert({agentProfileName, agentProfile});
-        if (!insertReturn.second)
-        {
-            LOG_INTERN(LogLevel::Error) << "AgentProfile names need to be unique.";
-            return false;
-        }
+        ThrowIfFalse(insertReturn.second, "AgentProfile names need to be unique.");
 
-        agentProfileElement = agentProfileElement.nextSiblingElement("AgentProfile");
+        agentProfileElement = agentProfileElement.nextSiblingElement(TAG::agentProfile);
     }
-
-    return true;
 }
 
-bool ProfilesImporter::ImportDriverProfiles(QDomElement driverProfilesElement, DriverProfiles& driverProfiles)
+void ProfilesImporter::ImportDriverProfiles(QDomElement driverProfilesElement,
+                                                                         DriverProfiles& driverProfiles)
 {
     QDomElement driverProfileElement;
-    if (!GetFirstChildElement(driverProfilesElement, "DriverProfile", driverProfileElement))
-    {
-        LOG_INTERN(LogLevel::Error) << "At least one driver profile is required.";
-        return false;
-    }
+    ThrowIfFalse(GetFirstChildElement(driverProfilesElement, TAG::driverProfile, driverProfileElement), "At least one driver profile is required.");
 
     while (!driverProfileElement.isNull())
     {
         std::string profileName;
         auto parameters = std::make_shared<ModelParameters>();
 
-        if (!ParseAttributeString(driverProfileElement, "Name", profileName)
-                || !ParameterImporter::ImportParameters(driverProfileElement, *parameters))
+        ThrowIfFalse(ParseAttributeString(driverProfileElement, ATTRIBUTE::name, profileName),
+                     "Could not import driver profile name.");
+
+        try
         {
-            LOG_INTERN(LogLevel::Error) << "Could not import driver profile.";
-            return false;
+            ParameterImporter::ImportParameters(driverProfileElement, *parameters);
+        }
+        catch(const std::runtime_error &error)
+        {
+            LogErrorAndThrow("Could not import driver profile parameters: " + std::string(error.what()));
         }
 
-        if (parameters->GetParametersString().find("Type") == parameters->GetParametersString().end())
-        {
-            LOG_INTERN(LogLevel::Error) << "Driver profile needs a type.";
-            return false;
-        }
+        ThrowIfFalse(parameters->GetParametersString().find(ATTRIBUTE::type) != parameters->GetParametersString().end(), "Driver profile needs a type.");
 
         auto insertReturn = driverProfiles.emplace(profileName, parameters);
-        if (!insertReturn.second)
-        {
-            LOG_INTERN(LogLevel::Error) << "Driver profile names need to be unique.";
-            return false;
-        }
+        ThrowIfFalse(insertReturn.second, "Driver profile names need to be unique.");
 
-        driverProfileElement = driverProfileElement.nextSiblingElement("DriverProfile");
+        driverProfileElement = driverProfileElement.nextSiblingElement(TAG::driverProfile);
     }
-
-    return true;
 }
 
 
-bool ProfilesImporter::ImportAllVehicleComponentProfiles(QDomElement vehicleComponentProfilesElement,
-        std::unordered_map<std::string, VehicleComponentProfiles>& vehicleComponentProfilesMap)
+void ProfilesImporter::ImportAllVehicleComponentProfiles(QDomElement vehicleComponentProfilesElement,
+                                                                                                    std::unordered_map<std::string, VehicleComponentProfiles>& vehicleComponentProfilesMap)
 {
     QDomElement vehicleComponentProfileElement;
 
-    if (GetFirstChildElement(vehicleComponentProfilesElement, "VehicleComponentProfile", vehicleComponentProfileElement))
+    if (GetFirstChildElement(vehicleComponentProfilesElement, TAG::vehicleComponentProfile, vehicleComponentProfileElement))
     {
         while (!vehicleComponentProfileElement.isNull())
         {
@@ -174,22 +125,16 @@ bool ProfilesImporter::ImportAllVehicleComponentProfiles(QDomElement vehicleComp
             std::string profileName;
             auto parameters = std::make_shared<SimulationCommon::ModelParameters>();
 
-            if (!ParseAttributeString(vehicleComponentProfileElement, "Type", componentType))
-            {
-                LOG_INTERN(LogLevel::Error) << "Could not import component type.";
-                return false;
-            }
+            ThrowIfFalse(ParseAttributeString(vehicleComponentProfileElement, ATTRIBUTE::type, componentType), "Could not import component type.");
+            ThrowIfFalse(ParseAttributeString(vehicleComponentProfileElement, ATTRIBUTE::name, profileName), "Could not import profile name.");
 
-            if (!ParseAttributeString(vehicleComponentProfileElement, "Name", profileName))
+            try
             {
-                LOG_INTERN(LogLevel::Error) << "Could not import profile name.";
-                return false;
+                ParameterImporter::ImportParameters(vehicleComponentProfileElement, *parameters);
             }
-
-            if (!ParameterImporter::ImportParameters(vehicleComponentProfileElement, *parameters))
+            catch (const std::runtime_error &error)
             {
-                LOG_INTERN(LogLevel::Error) << "Could not import component parameters.";
-                return false;
+                LogErrorAndThrow("Could not import vehicle component parameters: " + std::string(error.what()));
             }
 
             if (vehicleComponentProfilesMap.count(componentType) == 0)
@@ -199,23 +144,19 @@ bool ProfilesImporter::ImportAllVehicleComponentProfiles(QDomElement vehicleComp
             }
 
             auto insertReturn = vehicleComponentProfilesMap.at(componentType).emplace(profileName, parameters);
-            if (!insertReturn.second)
-            {
-                LOG_INTERN(LogLevel::Error) << "Component profile names need to be unique.";
-                return false;
-            }
+
+            ThrowIfFalse(insertReturn.second, "Component profile names need to be unqiue.");
+
             vehicleComponentProfileElement = vehicleComponentProfileElement.nextSiblingElement(
-                                                 QString::fromStdString("VehicleComponentProfile"));
+                                                 QString::fromStdString(TAG::vehicleComponentProfile));
         }
     }
-
-    return true;
 }
 
-bool ProfilesImporter::ImportSensorProfiles(QDomElement sensorProfilesElement, std::list<SensorProfile>& sensorProfiles)
+void ProfilesImporter::ImportSensorProfiles(QDomElement sensorProfilesElement, std::list<SensorProfile>& sensorProfiles)
 {
     QDomElement sensorProfileElement;
-    GetFirstChildElement(sensorProfilesElement, "SensorProfile", sensorProfileElement);
+    GetFirstChildElement(sensorProfilesElement, TAG::sensorProfile, sensorProfileElement);
 
     while (!sensorProfileElement.isNull())
     {
@@ -223,361 +164,204 @@ bool ProfilesImporter::ImportSensorProfiles(QDomElement sensorProfilesElement, s
         std::string sensorType;
         auto parameters = std::make_shared<SimulationCommon::Parameters>();
 
-        if (!ParseAttributeString(sensorProfileElement, "Name", profileName))
-        {
-            LOG_INTERN(LogLevel::Error) << "Sensor profile needs a name.";
-            return false;
-        }
+        ThrowIfFalse(ParseAttributeString(sensorProfileElement, ATTRIBUTE::name, profileName), "Sensor profile needs a name.");
 
-        if (!ParseAttributeString(sensorProfileElement, "Type", sensorType))
-        {
-            LOG_INTERN(LogLevel::Error) << "Sensor profile needs a type.";
-            return false;
-        }
+        ThrowIfFalse(ParseAttributeString(sensorProfileElement, ATTRIBUTE::type, sensorType), "Sensor profile needs a type.");
 
-        if (!ParameterImporter::ImportParameters(sensorProfileElement, *parameters))
+        try
         {
-            LOG_INTERN(LogLevel::Error) << "Could not import sensor parameters.";
-            return false;
+            ParameterImporter::ImportParameters(sensorProfileElement, *parameters);
+        }
+        catch(const std::runtime_error &error)
+        {
+            LogErrorAndThrow("Could not import sensor parameters: " + std::string(error.what()));
         }
 
         sensorProfiles.emplace_back(SensorProfile{profileName, sensorType, parameters});
-        sensorProfileElement = sensorProfileElement.nextSiblingElement("SensorProfile");
+        sensorProfileElement = sensorProfileElement.nextSiblingElement(TAG::sensorProfile);
     }
-
-    return true;
 }
 
-bool ProfilesImporter::ImportSensorLinksOfComponent(QDomElement sensorLinksElement, std::list<SensorLink>& sensorLinks)
+void ProfilesImporter::ImportSensorLinksOfComponent(QDomElement sensorLinksElement, std::list<SensorLink>& sensorLinks)
 {
     QDomElement sensorLinkElement;
-    GetFirstChildElement(sensorLinksElement, "SensorLink", sensorLinkElement);
+    GetFirstChildElement(sensorLinksElement, TAG::sensorLink, sensorLinkElement);
 
     while (!sensorLinkElement.isNull())
     {
         int sensorId;
         std::string inputId;
 
-        if (!ParseAttributeInt(sensorLinkElement, "SensorId", sensorId))
-        {
-            LOG_INTERN(LogLevel::Error) << "Sensor link needs a SensorId.";
-            return false;
-        }
-
-        if (!ParseAttributeString(sensorLinkElement, "InputId", inputId))
-        {
-            LOG_INTERN(LogLevel::Error) << "Sensor link needs a InputId.";
-            return false;
-        }
+        ThrowIfFalse(ParseAttributeInt(sensorLinkElement, ATTRIBUTE::sensorId, sensorId), "Sensor link needs a SensorId.");
+        ThrowIfFalse(ParseAttributeString(sensorLinkElement, ATTRIBUTE::inputId, inputId), "Sensor link needs a InputId.");
 
         SensorLink sensorLink{};
         sensorLink.sensorId = sensorId;
         sensorLink.inputId = inputId;
         sensorLinks.push_back(sensorLink);
 
-        sensorLinkElement = sensorLinkElement.nextSiblingElement("SensorLink");
+        sensorLinkElement = sensorLinkElement.nextSiblingElement(TAG::sensorLink);
     }
-
-    return true;
 }
 
-bool ProfilesImporter::ImportVehicleComponent(QDomElement vehicleComponentElement, VehicleComponent& vehicleComponent)
+void ProfilesImporter::ImportVehicleComponent(QDomElement vehicleComponentElement, VehicleComponent& vehicleComponent)
 {
-    ParseAttributeString(vehicleComponentElement, "Type", vehicleComponent.type);
+    ThrowIfFalse(ParseAttributeString(vehicleComponentElement, ATTRIBUTE::type, vehicleComponent.type), " Could not import vehicle component type");
 
     QDomElement profilesElement;
-    GetFirstChildElement(vehicleComponentElement, "Profiles", profilesElement);
-    if (!ImportProbabilityMap(profilesElement, "Name", "Profile", vehicleComponent.componentProfiles, false))
-    {
-        LOG_INTERN(LogLevel::Error) << "Could not import ComponentProfile.";
-        return false;
-    }
+    GetFirstChildElement(vehicleComponentElement, TAG::profiles, profilesElement);
+    ThrowIfFalse(ImportProbabilityMap(profilesElement, ATTRIBUTE::name, "Profile", vehicleComponent.componentProfiles, false), "Could not import ComponentProfile.");
 
     QDomElement sensorLinksElement;
-    GetFirstChildElement(vehicleComponentElement, "SensorLinks", sensorLinksElement);
-    if (!ImportSensorLinksOfComponent(sensorLinksElement, vehicleComponent.sensorLinks))
-    {
-        LOG_INTERN(LogLevel::Error) << "Could not import SensorLinks.";
-        return false;
-    }
-
-    return true;
+    GetFirstChildElement(vehicleComponentElement, TAG::sensorLinks, sensorLinksElement);
+    ImportSensorLinksOfComponent(sensorLinksElement, vehicleComponent.sensorLinks);
 }
 
-bool ProfilesImporter::ImportAllVehicleComponentsOfVehicleProfile(QDomElement vehicleProfileElement,
-        VehicleProfile& vehicleProfile)
+void ProfilesImporter::ImportAllVehicleComponentsOfVehicleProfile(QDomElement vehicleProfileElement,
+                                                                                                                     VehicleProfile& vehicleProfile)
 {
     QDomElement vehicleComponentsElement;
-    if (!GetFirstChildElement(vehicleProfileElement, "Components", vehicleComponentsElement))
-    {
-        LOG_INTERN(LogLevel::Error) << "Missing Components tag.";
-        return false;
-    }
-
+    ThrowIfFalse(GetFirstChildElement(vehicleProfileElement, TAG::components, vehicleComponentsElement), "Missing Components tag.");
 
     QDomElement componentElement;
-    GetFirstChildElement(vehicleComponentsElement, "Component", componentElement);
+    GetFirstChildElement(vehicleComponentsElement, TAG::component, componentElement);
     while (!componentElement.isNull())
     {
         VehicleComponent vehicleComponent;
-        if (!ImportVehicleComponent(componentElement, vehicleComponent))
-        {
-            LOG_INTERN(LogLevel::Error) << "Failed to import Component";
-            return false;
-        }
+        ImportVehicleComponent(componentElement, vehicleComponent);
 
         vehicleProfile.vehicleComponents.push_back(vehicleComponent);
-        componentElement = componentElement.nextSiblingElement("Component");
+        componentElement = componentElement.nextSiblingElement(TAG::component);
     }
-
-    return true;
 }
 
-bool ProfilesImporter::ImportSensorParameters(QDomElement sensorElement, SensorParameter& sensor)
+void ProfilesImporter::ImportSensorParameters(QDomElement sensorElement, SensorParameter& sensor)
 {
-    if (!ParseAttributeInt(sensorElement, "Id", sensor.id))
-    {
-        LOG_INTERN(LogLevel::Error) << "Sensor needs an Id.";
-        return false;
-    }
+    ThrowIfFalse(ParseAttributeInt(sensorElement, ATTRIBUTE::id, sensor.id), "Sensor needs an Id.");
 
     QDomElement positionElement;
-    if (!GetFirstChildElement(sensorElement, "Position", positionElement))
-    {
-        LOG_INTERN(LogLevel::Error) << "Sensor needs a Position.";
-        return false;
-    }
-
-    if (!ParseAttributeString(positionElement, "Name", sensor.sensorPosition.name))
-    {
-        LOG_INTERN(LogLevel::Error) << "Sensorposition needs a Name.";
-        return false;
-    }
-
-    if (!ParseAttributeDouble(positionElement, "Longitudinal", sensor.sensorPosition.longitudinal))
-    {
-        LOG_INTERN(LogLevel::Error) << "Sensorposition needs a Longitudinal.";
-        return false;
-    }
-
-    if (!ParseAttributeDouble(positionElement, "Lateral", sensor.sensorPosition.lateral))
-    {
-        LOG_INTERN(LogLevel::Error) << "Sensorposition needs a Lateral.";
-        return false;
-    }
-
-    if (!ParseAttributeDouble(positionElement, "Height", sensor.sensorPosition.height))
-    {
-        LOG_INTERN(LogLevel::Error) << "Sensorposition needs a Height.";
-        return false;
-    }
-
-    if (!ParseAttributeDouble(positionElement, "Pitch", sensor.sensorPosition.pitch))
-    {
-        LOG_INTERN(LogLevel::Error) << "Sensorposition needs a Pitch.";
-        return false;
-    }
-
-    if (!ParseAttributeDouble(positionElement, "Yaw", sensor.sensorPosition.yaw))
-    {
-        LOG_INTERN(LogLevel::Error) << "Sensorposition needs a Yaw.";
-        return false;
-    }
-
-    if (!ParseAttributeDouble(positionElement, "Roll", sensor.sensorPosition.roll))
-    {
-        LOG_INTERN(LogLevel::Error) << "Sensorposition needs a Roll.";
-        return false;
-    }
+    ThrowIfFalse(GetFirstChildElement(sensorElement, TAG::position, positionElement), "Sensor needs a position.");
+    ThrowIfFalse(ParseAttributeString(positionElement, ATTRIBUTE::name, sensor.sensorPosition.name), "Sensorposition needs a Name.");
+    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::longitudinal, sensor.sensorPosition.longitudinal), "Sensorposition needs a Longitudinal.");
+    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::lateral, sensor.sensorPosition.lateral), "Sensorposition needs a Lateral.");
+    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::height, sensor.sensorPosition.height), "Sensorposition needs a Height.");
+    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::pitch, sensor.sensorPosition.pitch), "Sensorposition needs a Pitch.");
+    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::yaw, sensor.sensorPosition.yaw), "Sensorposition needs a Yaw.");
+    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::roll, sensor.sensorPosition.roll), "Sensorposition needs a Roll.");
 
     QDomElement profileElement;
-    if (!GetFirstChildElement(sensorElement, "Profile", profileElement))
-    {
-        LOG_INTERN(LogLevel::Error) << "Sensor needs a Profile.";
-        return false;
-    }
-
-    if (!ParseAttributeString(profileElement, "Type", sensor.sensorProfile.type))
-    {
-        LOG_INTERN(LogLevel::Error) << "SensorProfile needs a Type.";
-        return false;
-    }
-
-    if (!ParseAttributeString(profileElement, "Name", sensor.sensorProfile.name))
-    {
-        LOG_INTERN(LogLevel::Error) << "SensorProfile needs a Name.";
-        return false;
-    }
-
-    return true;
+    ThrowIfFalse(GetFirstChildElement(sensorElement, TAG::profile, profileElement), "Sensor needs a Profile.");
+    ThrowIfFalse(ParseAttributeString(profileElement, ATTRIBUTE::type, sensor.sensorProfile.type), "SensorProfile needs a Type.");
+    ThrowIfFalse(ParseAttributeString(profileElement, ATTRIBUTE::name, sensor.sensorProfile.name), "SensorProfile needs a Name.");
 }
 
-bool ProfilesImporter::ImportAllSensorsOfVehicleProfile(QDomElement vehicleProfileElement,
+void ProfilesImporter::ImportAllSensorsOfVehicleProfile(QDomElement vehicleProfileElement,
         VehicleProfile& vehicleProfile)
 {
     QDomElement sensorsElement;
-    if (!GetFirstChildElement(vehicleProfileElement, "Sensors", sensorsElement))
-    {
-        LOG_INTERN(LogLevel::Error) << "VehicleProfile has no Sensors Element";
-        return false;
-    }
+    ThrowIfFalse(GetFirstChildElement(vehicleProfileElement, TAG::sensors, sensorsElement), "VehicleProfile has no Sensors Element.");
 
     QDomElement sensorElement;
-    GetFirstChildElement(sensorsElement, "Sensor", sensorElement);
+    GetFirstChildElement(sensorsElement, TAG::sensor, sensorElement);
     while (!sensorElement.isNull())
     {
         SensorParameter sensor;
-        if (!ImportSensorParameters(sensorElement, sensor))
-        {
-            LOG_INTERN(LogLevel::Error) << "Failed to import Sensor";
-            return false;
-        }
+        ImportSensorParameters(sensorElement, sensor);
 
         vehicleProfile.sensors.push_back(sensor);
-        sensorElement = sensorElement.nextSiblingElement("Sensor");
+        sensorElement = sensorElement.nextSiblingElement(TAG::sensor);
     }
-
-    return true;
 }
 
-bool ProfilesImporter::ImportVehicleProfile(QDomElement vehicleProfileElement, VehicleProfile& vehicleProfile)
+VehicleProfile ProfilesImporter::ImportVehicleProfile(QDomElement vehicleProfileElement)
 {
+    VehicleProfile vehicleProfile;
+
     QDomElement vehicleModelElement;
-    if (!GetFirstChildElement(vehicleProfileElement, "Model", vehicleModelElement))
-    {
-        LOG_INTERN(LogLevel::Error) << "VehicleProfile has no VehicleModel Element";
-        return false;
-    }
-    if (!ParseAttributeString(vehicleModelElement, "Name", vehicleProfile.vehicleModel))
-    {
-        LOG_INTERN(LogLevel::Error) << "Model needs a Name";
-        return false;
-    }
+    ThrowIfFalse(GetFirstChildElement(vehicleProfileElement, TAG::model, vehicleModelElement), "VehicleProfile has no VehicleModel Element.");
+    ThrowIfFalse(ParseAttributeString(vehicleModelElement, ATTRIBUTE::name, vehicleProfile.vehicleModel), "VehicleModel name is missing.");
 
-    if (!ImportAllVehicleComponentsOfVehicleProfile(vehicleProfileElement, vehicleProfile))
-    {
-        LOG_INTERN(LogLevel::Error) << "Failed to import Vehicle Components";
-        return false;
-    }
+    ImportAllVehicleComponentsOfVehicleProfile(vehicleProfileElement, vehicleProfile);
+    ImportAllSensorsOfVehicleProfile(vehicleProfileElement, vehicleProfile);
 
-    if (!ImportAllSensorsOfVehicleProfile(vehicleProfileElement, vehicleProfile))
-    {
-        LOG_INTERN(LogLevel::Error) << "Failed to import Sensors";
-        return false;
-    }
-
-    return true;
+    return vehicleProfile;
 }
 
-bool ProfilesImporter::ImportVehicleProfiles(QDomElement vehicleProfilesElement,
+void ProfilesImporter::ImportVehicleProfiles(QDomElement vehicleProfilesElement,
         std::unordered_map<std::string, VehicleProfile>& vehicleProfiles)
 {
     QDomElement vehicleProfileElement;
-    GetFirstChildElement(vehicleProfilesElement, "VehicleProfile", vehicleProfileElement);
+    GetFirstChildElement(vehicleProfilesElement, TAG::vehicleProfile, vehicleProfileElement);
 
     while (!vehicleProfileElement.isNull())
     {
         std::string profileName;
-        VehicleProfile vehicleProfile;
+        ThrowIfFalse(ParseAttributeString(vehicleProfileElement, ATTRIBUTE::name, profileName), "Vehicle profile name is missing.");
 
-        if (!ParseAttributeString(vehicleProfileElement, "Name", profileName))
-        {
-            LOG_INTERN(LogLevel::Error) << "Vehicle profile needs a name.";
-            return false;
-        }
-
-        if (!ImportVehicleProfile(vehicleProfileElement, vehicleProfile))
-        {
-            LOG_INTERN(LogLevel::Error) << "Failed to import VehicleProfile";
-            return false;
-        }
+        auto vehicleProfile = ImportVehicleProfile(vehicleProfileElement);
 
         vehicleProfiles.insert(std::make_pair<std::string&, VehicleProfile&>(profileName, vehicleProfile));
 
-        vehicleProfileElement = vehicleProfileElement.nextSiblingElement("VehicleProfile");
+        vehicleProfileElement = vehicleProfileElement.nextSiblingElement(TAG::vehicleProfile);
     }
-
-    return true;
 }
 
 bool ProfilesImporter::Import(const std::string& filename, Profiles& profiles)
 {
-    std::locale::global(std::locale("C"));
-
-    QFile xmlFile(filename.c_str()); // automatic object will be closed on destruction
-    if (!xmlFile.open(QIODevice::ReadOnly))
+    try
     {
-        LOG_INTERN(LogLevel::Warning) << "an error occurred during profilesCatalog import";
+        std::locale::global(std::locale("C"));
+
+        QFile xmlFile(filename.c_str()); // automatic object will be closed on destruction
+        ThrowIfFalse(xmlFile.open(QIODevice::ReadOnly), "an error occurred during profilesCatalog import");
+
+        QByteArray xmlData(xmlFile.readAll());
+        QDomDocument document;
+        ThrowIfFalse(document.setContent(xmlData), "invalid xml file format of file " + filename);
+
+        QDomElement documentRoot = document.documentElement();
+        ThrowIfFalse(!documentRoot.isNull(), "invalid document root " + filename);
+
+        std::string configVersion;
+        ParseAttributeString(documentRoot, ATTRIBUTE::schemaVersion, configVersion);
+        ThrowIfFalse(configVersion.compare(supportedConfigVersion) == 0, "ProfilesCatalog version is not supported. Supported version is " + std::string(supportedConfigVersion));
+
+        //Import agent profiles
+        QDomElement agentProfilesElement;
+        ThrowIfFalse(GetFirstChildElement(documentRoot, TAG::agentProfiles, agentProfilesElement),
+                     "AgentProfiles element is missing.");
+        ImportAgentProfiles(agentProfilesElement, profiles.GetAgentProfiles());
+
+        //Import driver profiles
+        QDomElement driverProfilesElement;
+        ThrowIfFalse(GetFirstChildElement(documentRoot, TAG::driverProfiles, driverProfilesElement),
+                     "DriverProfiles element is missing.");
+        ImportDriverProfiles(driverProfilesElement, profiles.GetDriverProfiles());
+
+        //Import all VehicleComponent profiles
+        QDomElement vehicleComponentProfilesElement;
+        ThrowIfFalse(GetFirstChildElement(documentRoot, TAG::vehicleComponentProfiles, vehicleComponentProfilesElement),
+                     "VehicleComponentProfiles element is missing.");
+        ImportAllVehicleComponentProfiles(vehicleComponentProfilesElement, profiles.GetVehicleComponentProfiles());
+
+        //Import vehicle profiles
+        QDomElement vehicleProfilesElement;
+        ThrowIfFalse(GetFirstChildElement(documentRoot, TAG::vehicleProfiles, vehicleProfilesElement),
+                     "VehicleProfiles element is missing.");
+        ImportVehicleProfiles(vehicleProfilesElement, profiles.GetVehicleProfiles());
+
+        //Import sensor profiles
+        QDomElement sensorProfilesElement;
+        ThrowIfFalse(GetFirstChildElement(documentRoot, TAG::sensorProfiles, sensorProfilesElement),
+                     "SensorProfiles element is missing.");
+        ImportSensorProfiles(sensorProfilesElement, profiles.GetSensorProfiles());
+
+        return true;
+    }
+    catch (std::runtime_error& e)
+    {
+        LOG_INTERN(LogLevel::Error) << "Profiles import failed: " + std::string(e.what());
         return false;
     }
 
-    QByteArray xmlData(xmlFile.readAll());
-    QDomDocument document;
-    if (!document.setContent(xmlData))
-    {
-        LOG_INTERN(LogLevel::Warning) << "invalid xml file format of file " << filename;
-        return false;
-    }
-
-    QDomElement documentRoot = document.documentElement();
-    if (documentRoot.isNull())
-    {
-        return false;
-    }
-
-    std::string configVersion;
-    ParseAttributeString(documentRoot, "SchemaVersion", configVersion);
-    if (configVersion.compare(supportedConfigVersion) != 0)
-    {
-        LOG_INTERN(LogLevel::Error) << "ProfilesCatalog version not supported. Supported version is " <<
-                                    supportedConfigVersion;
-        return false;
-    }
-
-    //Import agent profiles
-    QDomElement agentProfilesElement;
-    if (!GetFirstChildElement(documentRoot, "AgentProfiles", agentProfilesElement)
-            || !ImportAgentProfiles(agentProfilesElement, profiles.GetAgentProfiles()))
-    {
-        LOG_INTERN(LogLevel::Error) << "Could not import AgentProfiles.";
-        return false;
-    }
-
-    //Import driver profiles
-    QDomElement driverProfilesElement;
-    if (!GetFirstChildElement(documentRoot, "DriverProfiles", driverProfilesElement)
-            || !ImportDriverProfiles(driverProfilesElement, profiles.GetDriverProfiles()))
-    {
-        LOG_INTERN(LogLevel::Error) << "Could not import DriverProfiles.";
-        return false;
-    }
-
-    //Import all VehicleComponent profiles
-    QDomElement vehicleComponentProfilesElement;
-    if (!GetFirstChildElement(documentRoot, "VehicleComponentProfiles", vehicleComponentProfilesElement)
-            || !ImportAllVehicleComponentProfiles(vehicleComponentProfilesElement, profiles.GetVehicleComponentProfiles()))
-    {
-        LOG_INTERN(LogLevel::Error) << "Could not import VehicleComponentProfiles.";
-        return false;
-    }
-
-    //Import vehicle profiles
-    QDomElement vehicleProfilesElement;
-    if (!GetFirstChildElement(documentRoot, "VehicleProfiles", vehicleProfilesElement)
-            || !ImportVehicleProfiles(vehicleProfilesElement, profiles.GetVehicleProfiles()))
-    {
-        LOG_INTERN(LogLevel::Error) << "Could not import VehicleProfiles.";
-        return false;
-    }
-
-    //Import sensor profiles
-    QDomElement sensorProfilesElement;
-    if (!GetFirstChildElement(documentRoot, "SensorProfiles", sensorProfilesElement)
-            || !ImportSensorProfiles(sensorProfilesElement, profiles.GetSensorProfiles()))
-    {
-        LOG_INTERN(LogLevel::Error) << "Could not import SensorProfiles.";
-        return false;
-    }
-
-    return true;
 }

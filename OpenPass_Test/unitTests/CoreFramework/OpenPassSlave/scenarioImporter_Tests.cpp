@@ -25,8 +25,6 @@ using ::testing::DontCare;
 
 TEST(ScenarioImporter_UnitTests, ImportPositionElementLaneWithStocastics)
 {
-    bool testOutcome = true;
-
     QDomElement positionElement = documentRootFromString(
               "<Position>"
                      "<Lane roadId=\"RoadId1\" s=\"1470.0\" laneId=\"-4\" offset=\"0.5\" > "
@@ -37,14 +35,8 @@ TEST(ScenarioImporter_UnitTests, ImportPositionElementLaneWithStocastics)
               );
 
     ScenarioEntity scenarioEntity;
-    try
-    {
-        ScenarioImporter::ImportPositionElement(scenarioEntity,positionElement);
-    }
-    catch (...)
-    {
-        testOutcome = false;
-    }
+
+    EXPECT_NO_THROW(ScenarioImporter::ImportPositionElement(scenarioEntity,positionElement));
 
     ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.ILane,-4);
     ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.TStart,0);
@@ -62,14 +54,10 @@ TEST(ScenarioImporter_UnitTests, ImportPositionElementLaneWithStocastics)
     ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.offset.lowerBoundary,44);
     ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.offset.upperBoundary,54);
     ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.offset.stdDeviation,4);
-
-    ASSERT_TRUE(testOutcome);
 }
 
 TEST(ScenarioImporter_UnitTests, ImportPositionElementLaneWithOrientation)
 {
-    bool testOutcome = true;
-
     QDomElement positionElement = documentRootFromString(
               "<Position>"
                      "<Lane roadId=\"RoadId1\" s=\"1470.0\" laneId=\"-4\" offset=\"0.5\" > "
@@ -79,14 +67,9 @@ TEST(ScenarioImporter_UnitTests, ImportPositionElementLaneWithOrientation)
               );
 
     ScenarioEntity scenarioEntity;
-    try
-    {
-        ScenarioImporter::ImportPositionElement(scenarioEntity,positionElement);
-    }
-    catch (...)
-    {
-        testOutcome = false;
-    }
+
+    EXPECT_NO_THROW(ScenarioImporter::ImportPositionElement(scenarioEntity,positionElement));
+
 
     ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.s.value, 1470.0);
     ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.ILane, -4);
@@ -94,14 +77,11 @@ TEST(ScenarioImporter_UnitTests, ImportPositionElementLaneWithOrientation)
     ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.offset.value,0.5);
 
     ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.heading,1.57);
-    ASSERT_TRUE(testOutcome);
 }
 
 
 TEST(ScenarioImporter_UnitTests, ImportPositionElementLane)
 {
-    bool testOutcome = true;
-
     QDomElement positionElement = documentRootFromString(
               "<Position>"
                     "<Lane roadId=\"RoadId1\" s=\"1470.0\" laneId=\"-4\" offset=\"0.5\" /> "
@@ -110,27 +90,16 @@ TEST(ScenarioImporter_UnitTests, ImportPositionElementLane)
 
     ScenarioEntity scenarioEntity;
 
-    try
-    {
-        ScenarioImporter::ImportPositionElement(scenarioEntity,positionElement);
-    }
-    catch (...)
-    {
-        testOutcome = false;
-    }
+    EXPECT_NO_THROW(ScenarioImporter::ImportPositionElement(scenarioEntity,positionElement));
 
     ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.s.value, 1470.0);
     ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.ILane, -4);
     ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.TStart, 0);
     ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.offset.value, 0.5);
-
-    ASSERT_TRUE(testOutcome);
 }
 
 TEST(ScenarioImporter_UnitTests, ImportLongitudinalWithStochastics)
 {
-    bool testOutcome = true;
-
     QDomElement positionElement = documentRootFromString(
         "<Longitudinal>"
             "<Speed>"
@@ -145,14 +114,8 @@ TEST(ScenarioImporter_UnitTests, ImportLongitudinalWithStochastics)
     );
 
     ScenarioEntity scenarioEntity;
-    try
-    {
-        ScenarioImporter::ImportLongitudinalElement(scenarioEntity, positionElement);
-    }
-    catch (...)
-    {
-        testOutcome = false;
-    }
+
+    EXPECT_NO_THROW(ScenarioImporter::ImportLongitudinalElement(scenarioEntity, positionElement));
 
     SpawnAttribute velocity = scenarioEntity.spawnInfo.velocity;
     ASSERT_DOUBLE_EQ(velocity.value, 27.7);
@@ -169,13 +132,10 @@ TEST(ScenarioImporter_UnitTests, ImportLongitudinalWithStochastics)
     ASSERT_DOUBLE_EQ(acceleration.lowerBoundary, 0.0);
     ASSERT_DOUBLE_EQ(acceleration.upperBoundary, 4.0);
     ASSERT_TRUE(acceleration.isStochastic);
-
-    ASSERT_TRUE(testOutcome);
 }
 
 TEST(ScenarioImporter_UnitTests, ImportVehicleCatalog_ReturnsSuccess)
 {
-    bool testOutcome = true;
     std::string catalogPath{};
 
     QDomElement catalogsElement = documentRootFromString(
@@ -189,22 +149,12 @@ TEST(ScenarioImporter_UnitTests, ImportVehicleCatalog_ReturnsSuccess)
               "</Catalogs>"
               );
 
-    try
-    {
-        ScenarioImporter::ImportCatalog(catalogPath, "VehicleCatalog", catalogsElement);
-    }
-    catch (...)
-    {
-        testOutcome = false;
-    }
-
-    ASSERT_THAT(testOutcome, Eq(true));
+    ASSERT_NO_THROW(catalogPath = ScenarioImporter::ImportCatalog("VehicleCatalog", catalogsElement));
     EXPECT_THAT(catalogPath, StrEq("vpath"));
 }
 
 TEST(ScenarioImporter_UnitTests, ImportPedestrianCatalog_ReturnsSuccess)
 {
-    bool testOutcome = true;
     std::string catalogPath{};
 
     QDomElement catalogsElement = documentRootFromString(
@@ -218,70 +168,8 @@ TEST(ScenarioImporter_UnitTests, ImportPedestrianCatalog_ReturnsSuccess)
               "</Catalogs>"
               );
 
-    try
-    {
-        testOutcome = testOutcome && ScenarioImporter::ImportCatalog(catalogPath, "PedestrianCatalog", catalogsElement);
-    }
-    catch (...)
-    {
-        testOutcome = false;
-    }
-
-    ASSERT_THAT(testOutcome, Eq(true));
+    ASSERT_NO_THROW(catalogPath = ScenarioImporter::ImportCatalog("PedestrianCatalog", catalogsElement));
     EXPECT_THAT(catalogPath, StrEq("ppath"));
-}
-
-TEST(ScenarioImporter_UnitTests, ImportCatalogDirectory_ReturnsSuccess)
-{
-    bool testOutcome = true;
-    std::string catalogPath{};
-
-    QDomElement catalogElement = documentRootFromString(
-                "<AnyCatalog name=\"anycat\">"
-                    "<Directory path=\"anypath\"/>"
-                "</AnyCatalog>"
-              );
-
-    try
-    {
-        testOutcome = testOutcome && ScenarioImporter::ImportCatalogDirectory(catalogPath, catalogElement);
-    }
-    catch (...)
-    {
-        testOutcome = false;
-    }
-
-    ASSERT_THAT(testOutcome, Eq(true));
-    EXPECT_THAT(catalogPath, StrEq("anypath"));
-}
-
-TEST(ScenarioImporter_UnitTests, ImportInvalidCatalogDirectory_ReturnsError)
-{
-    bool testOutcome = false;
-    std::string catalogPath{};
-
-    QDomElement catalogElement1 = documentRootFromString(
-                "<AnyCatalog name=\"anycat\">"
-                    "<Directory/>"
-                "</AnyCatalog>"
-              );
-
-    QDomElement catalogElement2 = documentRootFromString(
-                "<AnyCatalog name=\"anycat\">"
-                "</AnyCatalog>"
-              );
-
-    try
-    {
-        testOutcome = testOutcome || ScenarioImporter::ImportCatalogDirectory(catalogPath, catalogElement1);
-        testOutcome = testOutcome || ScenarioImporter::ImportCatalogDirectory(catalogPath, catalogElement2);
-    }
-    catch (...)
-    {
-        testOutcome = false;
-    }
-
-    ASSERT_THAT(testOutcome, Eq(false));
 }
 
 TEST(ScenarioImporter_UnitTests, ImportStoryboardWithoutEndCondition_Throws)

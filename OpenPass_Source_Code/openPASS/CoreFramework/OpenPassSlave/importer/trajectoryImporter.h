@@ -14,6 +14,7 @@
 #include <QFile>
 #include <cassert>
 #include "Interfaces/trajectoryInterface.h"
+#include "importerLoggingHelper.h"
 
 namespace Importer
 {
@@ -24,8 +25,8 @@ public:
     static bool Import(const std::string filename, TrajectoryInterface *trajectories);
 
 private:
-    static bool ImportTrajectory(QDomElement trajectoryElement, TrajectoryInterface *trajectory);
-    static bool DetermineTrajectoryType(QDomElement trajectoryElement, TrajectoryInterface *trajectory);
+    static void ImportTrajectory(QDomElement trajectoryElement, TrajectoryInterface *trajectory);
+    static void DetermineTrajectoryType(QDomElement trajectoryElement, TrajectoryInterface *trajectory);
 };
 
 } //namespace Importer

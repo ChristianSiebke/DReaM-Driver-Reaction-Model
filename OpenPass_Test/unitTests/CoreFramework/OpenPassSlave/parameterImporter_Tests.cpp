@@ -26,7 +26,7 @@ TEST(ParameterImporter_UnitTests, ImportParametersSuccessfully)
                 );
 
     SimulationCommon::ModelParameters resultModelParameters;
-    ASSERT_TRUE(ParameterImporter::ImportParameters(fakeDocumentRoot, resultModelParameters));
+    EXPECT_NO_THROW(ParameterImporter::ImportParameters(fakeDocumentRoot, resultModelParameters));
 
     auto resultBools = resultModelParameters.GetParametersBool();
     auto resultInts = resultModelParameters.GetParametersInt();
@@ -72,7 +72,7 @@ TEST(ParameterImporter_UnitTests, ImportParametersWithOneSimpleParameterListSucc
 
     SimulationCommon::ModelParameters resultModelParameters;
 
-    ASSERT_TRUE(ParameterImporter::ImportParameters(fakeDocumentRoot, resultModelParameters));
+    EXPECT_NO_THROW(ParameterImporter::ImportParameters(fakeDocumentRoot, resultModelParameters));
 
     auto resultBools = resultModelParameters.GetParametersBool();
     auto resultStrings = resultModelParameters.GetParametersString();
@@ -115,7 +115,7 @@ TEST(ParameterImporter_UnitTests, ImportParametersWithTwoSimpleParameterListsSuc
                 );
 
     SimulationCommon::ModelParameters resultModelParameters;
-    ASSERT_TRUE(ParameterImporter::ImportParameters(fakeDocumentRoot, resultModelParameters));
+    EXPECT_NO_THROW(ParameterImporter::ImportParameters(fakeDocumentRoot, resultModelParameters));
 
     auto resultParameterLists = resultModelParameters.GetParameterLists();
 
@@ -153,7 +153,7 @@ TEST(ParameterImporter_UnitTests, ImportParametersWithRecursiveParameterListsSuc
 
     SimulationCommon::ModelParameters resultModelParameters;
 
-    ASSERT_TRUE(ParameterImporter::ImportParameters(fakeDocumentRoot, resultModelParameters));
+    EXPECT_NO_THROW(ParameterImporter::ImportParameters(fakeDocumentRoot, resultModelParameters));
     auto resultParameterLists = resultModelParameters.GetParameterLists();
 
     auto resultMainList = resultParameterLists.at("MainList");
@@ -178,7 +178,7 @@ TEST(ParameterImporter_UnitTests, ImportStochasticDsitributionSuccessfully)
 
     SimulationCommon::ModelParameters resultModelParameters;
 
-    ASSERT_TRUE(ParameterImporter::ImportParameters(fakeDocumentRoot, resultModelParameters));
+    EXPECT_NO_THROW(ParameterImporter::ImportParameters(fakeDocumentRoot, resultModelParameters));
 
     const auto &resultNormalDitributions = resultModelParameters.GetParametersNormalDistribution();
 

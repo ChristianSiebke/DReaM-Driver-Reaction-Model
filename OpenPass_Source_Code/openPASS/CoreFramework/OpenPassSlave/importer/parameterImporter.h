@@ -14,45 +14,46 @@
 
 #include "Interfaces/parameterInterface.h"
 #include "xmlParser.h"
+#include "importerLoggingHelper.h"
 
 namespace SimulationCommon {
 
 class ParameterImporter
 {
 public:
-    static bool ImportBoolParameters(
+    static void ImportBoolParameters(
         QDomElement componentParameterSetElement,
         ParameterInterface& componentParameterSet);
 
-    static bool ImportIntParameters(
+    static void ImportIntParameters(
         QDomElement componentParameterSetElement,
         ParameterInterface& componentParameterSet);
 
-    static bool ImportIntVectorParameters(
+    static void ImportIntVectorParameters(
         QDomElement componentParameterSetElement,
         ParameterInterface& componentParameterSet);
 
-    static bool ImportDoubleParameters(
+    static void ImportDoubleParameters(
         QDomElement componentParameterSetElement,
         ParameterInterface& componentParameterSet);
 
-    static bool ImportDoubleVectorParameters(
+    static void ImportDoubleVectorParameters(
         QDomElement componentParameterSetElement,
         ParameterInterface& componentParameterSet);
 
-    static bool ImportStringParameters(
+    static void ImportStringParameters(
         QDomElement componentParameterSetElement,
         ParameterInterface& componentParameterSet);
 
-    static bool ImportNormalDistributionParameters(
+    static void ImportNormalDistributionParameters(
         QDomElement componentParameterSetElement,
         ParameterInterface& componentParameterSet);
 
-    static bool ImportParameterLists(
+    static void ImportParameterLists(
         QDomElement componentParameterSetElement,
         ParameterInterface& componentParameterSet);
 
-    static bool ImportParameters(
+    static void ImportParameters(
         QDomElement componentParameterSetElement,
         ParameterInterface& componentParameterSet);
 };

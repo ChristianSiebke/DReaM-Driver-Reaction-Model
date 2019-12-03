@@ -52,11 +52,7 @@ extern "C" DYNAMICS_TRAJECTORY_FOLLOWER_SHARED_EXPORT ModelInterface* OpenPASS_C
                                      + "/configs/"
                                      + parameters->GetParametersString().at("TrajectoryFile");
 
-        if (!Importer::TrajectoryImporter::Import(trajectoryPath, &trajectory))
-        {
-            const std::string msg = componentName + " could not import trajectory";
-            Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, msg);
-        }
+        Importer::TrajectoryImporter::Import(trajectoryPath, &trajectory);
     }
     catch (...)
     {

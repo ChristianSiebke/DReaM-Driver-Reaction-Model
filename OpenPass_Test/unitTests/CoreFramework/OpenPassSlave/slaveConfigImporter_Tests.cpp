@@ -37,9 +37,8 @@ TEST(SlaveConfigImporter_UnitTests, ImportExperimentConfigSuccessfully)
 
     ExperimentConfig experimentConfig;
 
-    bool importResult = SlaveConfigImporter::ImportExperimentConfig(fakeDocumentRoot, experimentConfig);
+    EXPECT_NO_THROW(SlaveConfigImporter::ImportExperimentConfig(fakeDocumentRoot, experimentConfig));
 
-    ASSERT_THAT(importResult,                         true);
     EXPECT_THAT(experimentConfig.experimentId,        1337);
     EXPECT_THAT(experimentConfig.numberOfInvocations, 5);
     EXPECT_THAT(experimentConfig.randomSeed,          12345);
@@ -76,9 +75,9 @@ TEST(SlaveConfigImporter_UnitTests, ImportExperimentConfigUnsuccessfully)
 
     ExperimentConfig experimentConfig;
 
-    ASSERT_FALSE(SlaveConfigImporter::ImportExperimentConfig(fakeDocumentRootMissingLoggingTag, experimentConfig));
-    ASSERT_FALSE(SlaveConfigImporter::ImportExperimentConfig(fakeDocumentRootWrongDataType, experimentConfig));
-    ASSERT_FALSE(SlaveConfigImporter::ImportExperimentConfig(fakeDocumentRootWrongTagName, experimentConfig));
+    ASSERT_THROW(SlaveConfigImporter::ImportExperimentConfig(fakeDocumentRootMissingLoggingTag, experimentConfig), std::runtime_error);
+    ASSERT_THROW(SlaveConfigImporter::ImportExperimentConfig(fakeDocumentRootWrongDataType, experimentConfig), std::runtime_error);
+    ASSERT_THROW(SlaveConfigImporter::ImportExperimentConfig(fakeDocumentRootWrongTagName, experimentConfig), std::runtime_error);
 }
 
 TEST(SlaveConfigImporter_UnitTests, ImportValidLoggingGroups_Succeeds)
@@ -96,9 +95,8 @@ TEST(SlaveConfigImporter_UnitTests, ImportValidLoggingGroups_Succeeds)
 
     std::vector<std::string> loggingGroups;
 
-    bool importResult = SlaveConfigImporter::ImportLoggingGroups(fakeDocumentRoot, loggingGroups);
+    EXPECT_NO_THROW(SlaveConfigImporter::ImportLoggingGroups(fakeDocumentRoot, loggingGroups));
 
-    ASSERT_THAT(importResult, true);
     EXPECT_THAT(loggingGroups, UnorderedElementsAre("Group01", "Group02", "AnotherGroup"));
 }
 
@@ -113,11 +111,7 @@ TEST(SlaveConfigImporter_UnitTests, ImportEmptyLoggingGroupString_Fails)
             );
 
     std::vector<std::string> loggingGroups;
-
-    bool importResult = SlaveConfigImporter::ImportLoggingGroups(fakeDocumentRootEmptyString, loggingGroups);
-
-    ASSERT_THAT(importResult, false);
-    EXPECT_THAT(loggingGroups, SizeIs(0));
+    ASSERT_THROW(SlaveConfigImporter::ImportLoggingGroups(fakeDocumentRootEmptyString, loggingGroups), std::runtime_error);
 }
 
 
@@ -209,7 +203,7 @@ TEST(SlaveConfigImporter_UnitTests, ImportScenarioConfigSuccessfully)
 
     ScenarioConfig scenarioConfig;
 
-    ASSERT_THAT(SlaveConfigImporter::ImportScenarioConfig(fakeDocumentRoot, "configs", scenarioConfig), true);
+    EXPECT_NO_THROW(SlaveConfigImporter::ImportScenarioConfig(fakeDocumentRoot, "configs", scenarioConfig));
     ASSERT_THAT(scenarioConfig.scenarioPath, EndsWith("configs/scenarioFile.xml"));
 }
 
@@ -224,7 +218,7 @@ TEST(SlaveConfigImporter_UnitTests, ImportScenarioConfigUnsuccessfullyMissingTag
 
     ScenarioConfig scenarioConfig;
 
-    ASSERT_THAT(SlaveConfigImporter::ImportScenarioConfig(fakeDocumentRoot, "configs", scenarioConfig), false);
+    ASSERT_THROW(SlaveConfigImporter::ImportScenarioConfig(fakeDocumentRoot, "configs", scenarioConfig), std::runtime_error);
 }
 
 TEST(SlaveConfigImporter_UnitTests, ImportEnvironmentConfigSuccessfully)
@@ -253,7 +247,7 @@ TEST(SlaveConfigImporter_UnitTests, ImportEnvironmentConfigSuccessfully)
 
     EnvironmentConfig environmentConfig;
 
-    ASSERT_TRUE(SlaveConfigImporter::ImportEnvironmentConfig(fakeDocumentRoot, environmentConfig));
+    EXPECT_NO_THROW(SlaveConfigImporter::ImportEnvironmentConfig(fakeDocumentRoot, environmentConfig));
 
     ASSERT_EQ(environmentConfig.timeOfDays.at("12"), 0.5);
     ASSERT_EQ(environmentConfig.timeOfDays.at("18"), 0.5);
@@ -326,11 +320,12 @@ TEST(SlaveConfigImporter_UnitTests, ImportEnvironmentConfigUnsuccessfully)
 
     EnvironmentConfig environmentConfig;
 
-    ASSERT_FALSE(SlaveConfigImporter::ImportEnvironmentConfig(fakeDocumentRootWrongProbabilities,
-                 environmentConfig));
-    ASSERT_FALSE(SlaveConfigImporter::ImportEnvironmentConfig(fakeDocumentRootMissingAtLeastOneElement,
-                 environmentConfig));
-    ASSERT_FALSE(SlaveConfigImporter::ImportEnvironmentConfig(fakeDocumentRootMissingTag, environmentConfig));
+    ASSERT_THROW(SlaveConfigImporter::ImportEnvironmentConfig(fakeDocumentRootWrongProbabilities, environmentConfig),
+                 std::runtime_error);
+    ASSERT_THROW(SlaveConfigImporter::ImportEnvironmentConfig(fakeDocumentRootMissingAtLeastOneElement, environmentConfig),
+                 std::runtime_error);
+    ASSERT_THROW(SlaveConfigImporter::ImportEnvironmentConfig(fakeDocumentRootMissingTag, environmentConfig),
+                 std::runtime_error);
 }
 
 TEST(SlaveConfigImporter_UnitTests, ImportTrafficParameterSuccessfully)
@@ -357,7 +352,7 @@ TEST(SlaveConfigImporter_UnitTests, ImportTrafficParameterSuccessfully)
 
     TrafficConfig trafficConfig;
 
-    ASSERT_TRUE(SlaveConfigImporter::ImportTrafficParameter(fakeDocumentRoot, trafficConfig));
+    EXPECT_NO_THROW(SlaveConfigImporter::ImportTrafficParameter(fakeDocumentRoot, trafficConfig));
 
     ASSERT_EQ(trafficConfig.trafficVolumes.at(900.0), 0.5);
     ASSERT_EQ(trafficConfig.trafficVolumes.at(1500.0), 0.5);
@@ -407,8 +402,8 @@ TEST(SlaveConfigImporter_UnitTests, ImportTrafficParameterUnsuccessfully)
 
     TrafficConfig trafficConfig;
 
-    ASSERT_FALSE(SlaveConfigImporter::ImportTrafficParameter(fakeDocumentRootMissingTag, trafficConfig));
-    ASSERT_FALSE(SlaveConfigImporter::ImportTrafficParameter(fakeDocumentRootAtLeastOneEntryMissing, trafficConfig));
+    ASSERT_THROW(SlaveConfigImporter::ImportTrafficParameter(fakeDocumentRootMissingTag, trafficConfig), std::runtime_error);
+    ASSERT_THROW(SlaveConfigImporter::ImportTrafficParameter(fakeDocumentRootAtLeastOneEntryMissing, trafficConfig), std::runtime_error);
 }
 
 TEST(SlaveConfigImporter_UnitTests, ImportLaneParameterSuccessfully)
@@ -427,7 +422,7 @@ TEST(SlaveConfigImporter_UnitTests, ImportLaneParameterSuccessfully)
 
     TrafficConfig trafficConfig;
 
-    ASSERT_TRUE(SlaveConfigImporter::ImportLaneParameter(fakeDocumentRoot, trafficConfig));
+    EXPECT_NO_THROW(SlaveConfigImporter::ImportLaneParameter(fakeDocumentRoot, trafficConfig));
 
     ASSERT_EQ(trafficConfig.regularLaneAgents.at("Grandpa"), 0.5);
     ASSERT_EQ(trafficConfig.regularLaneAgents.at("Grandma"), 0.5);
@@ -457,6 +452,6 @@ TEST(SlaveConfigImporter_UnitTests, ImportLaneParameterUnsuccessfully)
 
     TrafficConfig trafficConfig;
 
-    ASSERT_FALSE(SlaveConfigImporter::ImportLaneParameter(fakeDocumentRootMissingTag, trafficConfig));
-    ASSERT_FALSE(SlaveConfigImporter::ImportLaneParameter(fakeDocumentRootAtLeastOneEntryMissing, trafficConfig));
+    ASSERT_THROW(SlaveConfigImporter::ImportLaneParameter(fakeDocumentRootMissingTag, trafficConfig), std::runtime_error);
+    ASSERT_THROW(SlaveConfigImporter::ImportLaneParameter(fakeDocumentRootAtLeastOneEntryMissing, trafficConfig), std::runtime_error);
 }

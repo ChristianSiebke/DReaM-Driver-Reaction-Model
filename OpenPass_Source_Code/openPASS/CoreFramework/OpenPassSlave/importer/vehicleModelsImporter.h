@@ -19,6 +19,14 @@
 #include "vehicleModels.h"
 
 namespace Importer {
+
+const std::unordered_map<std::string, AgentVehicleType> vehicleTypeConversionMap = {{"car", AgentVehicleType::Car},
+                                                                                    {"van", AgentVehicleType::Car},
+                                                                                    {"truck", AgentVehicleType::Truck},
+                                                                                    {"bus", AgentVehicleType::Truck},
+                                                                                    {"motorbike", AgentVehicleType::Motorbike},
+                                                                                    {"bicycle", AgentVehicleType::Bicycle}};
+
 /*!
  * \brief Container for axle parameters in OpenSCENARIO vehicle model
  */
@@ -128,18 +136,6 @@ private:
      * \param[out]  vehicleModels       Storage for the imported pedestrian models (NOTE: internaly shared with vehicles)
      */
     static void ImportPedestrianCatalog(QDomElement& catalogElement, Configuration::VehicleModels& vehicleModels);
-
-    /*!
-     * \brief Imports the vehicle type for an agent
-     *
-     * \param[in]   vehicleTypeString   Type string of the vehicle category (from OpenSCENARIO catalog file)
-     * \param[out]  agentVehicleType    Mapped type of the vehicle
-     *
-     * Supported vehicle model categories are `car`, `van`, `truck`, `bus`, `motorbike` and `bicycle`.
-     * `van` and `bus` are mapped to `car` and `truck`, respectively.
-     * Unsupported model categories are mapped to AgentVehicleType::Undefined and a warning is issued.
-     */
-    static void ImportAgentVehicleType(const std::string& vehicleTypeString, AgentVehicleType& agentVehicleType);
 
     /*!
      * \brief Imports the model's bounding box from OpenSCENARIO DOM

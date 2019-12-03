@@ -27,6 +27,39 @@ using namespace Configuration;
 
 namespace Importer
 {
+const std::unordered_map<std::string, RoadLaneType> roadLaneTypeConversionMap = {
+                                                                                 {"none", RoadLaneType::None},
+                                                                                 {"driving", RoadLaneType::Driving},
+                                                                                 {"stop", RoadLaneType::Stop},
+                                                                                 {"shoulder", RoadLaneType::Shoulder},
+                                                                                 {"biking", RoadLaneType::Biking},
+                                                                                 {"sidewalk", RoadLaneType::Sidewalk},
+                                                                                 {"border", RoadLaneType::Border},
+                                                                                 {"restricted", RoadLaneType::Restricted},
+                                                                                 {"parking", RoadLaneType::Parking},
+                                                                                 {"bidirectional", RoadLaneType::Bidirectional},
+                                                                                 {"median", RoadLaneType::Median},
+                                                                                 {"special1", RoadLaneType::Special1},
+                                                                                 {"special2", RoadLaneType::Special2},
+                                                                                 {"special3", RoadLaneType::Special3},
+                                                                                 {"roadworks", RoadLaneType::Roadworks},
+                                                                                 {"tram", RoadLaneType::Tram},
+                                                                                 {"rail", RoadLaneType::Rail},
+                                                                                 {"entry", RoadLaneType::Entry},
+                                                                                 {"exit", RoadLaneType::Exit},
+                                                                                 {"offRamp", RoadLaneType::OffRamp},
+                                                                                 {"onRamp", RoadLaneType::OnRamp}
+                                                                                };
+
+const std::unordered_map<std::string, RoadTypeInformation> roadTypeConversionMap = {
+                                                                                    {"unknown", RoadTypeInformation::Unknown},
+                                                                                    {"rural", RoadTypeInformation::Rural},
+                                                                                    {"town", RoadTypeInformation::Town},
+                                                                                    {"motorway", RoadTypeInformation::Motorway},
+                                                                                    {"lowSpeed", RoadTypeInformation::LowSpeed},
+                                                                                    {"pedestrian", RoadTypeInformation::Pedestrian},
+                                                                                    {"bicycle", RoadTypeInformation::Bicycle}
+                                                                                   };
 
 class SceneryImporter
 {
@@ -59,10 +92,8 @@ public:
     //!
     //! @param[in]  documentRoot        DOM element containing the OpenDRIVE road
     //! @param[out] scenery             Scenery with the contents of the DOM element
-    //!
-    //! @return                         False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    static bool ParseRoads(QDomElement &documentRoot,
+    static void ParseRoads(QDomElement &documentRoot,
                            Scenery *scenery);
 
     //-----------------------------------------------------------------------------
@@ -72,10 +103,8 @@ public:
     //!
     //! @param[in]  documentRoot        DOM element containing the OpenDRIVE road
     //! @param[out] scenery             Scenery with the contents of the DOM element
-    //!
-    //! @return                         False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    static bool ParseJunctions(QDomElement &documentRoot,
+    static void ParseJunctions(QDomElement &documentRoot,
                            Scenery *scenery);
 
     //-----------------------------------------------------------------------------
@@ -85,10 +114,8 @@ public:
     //!
     //! @param[in]  junctionElement      DOM element containing the OpenDRIVE junction
     //! @param[out] junction             Junction with the contents of the DOM element
-    //!
-    //! @return                         False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    static bool ParseJunctionConnections(QDomElement &junctionElement, JunctionInterface *junction);
+    static void ParseJunctionConnections(QDomElement &junctionElement, JunctionInterface *junction);
 
     //-----------------------------------------------------------------------------
     //! @brief Parses connection links into a connection object.
@@ -100,7 +127,7 @@ public:
     //!
     //! @return                         False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    static bool ParseJunctionConnectionLinks(QDomElement &connectionElement, ConnectionInterface *connection);
+    static void ParseJunctionConnectionLinks(QDomElement &connectionElement, ConnectionInterface *connection);
 
     //-----------------------------------------------------------------------------
     //! @brief Parses priorities into a junction object.
@@ -109,10 +136,8 @@ public:
     //!
     //! @param[in]  junctionElement      DOM element containing the OpenDRIVE junction
     //! @param[out] junction             Junction with the contents of the DOM element
-    //!
-    //! @return                         False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    static bool ParseJunctionPriorities(QDomElement &junctionElement, JunctionInterface *junction);
+    static void ParseJunctionPriorities(QDomElement &junctionElement, JunctionInterface *junction);
 
 private:
 
@@ -129,10 +154,8 @@ private:
     //! @param[in]  rootElement         DOM element containing the OpenDRIVE lanes
     //! @param[out] laneSection         Lane section with the contents of the DOM
     //!                                 elements
-    //!
-    //! @return                         False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    static bool ParseLanes(QDomElement &rootElement,
+    static void ParseLanes(QDomElement &rootElement,
                            RoadLaneSectionInterface *laneSection);
 
 
@@ -145,10 +168,8 @@ private:
     //! @param[in]  leftCenterRight     left/center/right lane road mark
     //! @param[in]  roadLaneElement     DOM element containing the OpenDRIVE road lane
     //! @param[out] roadLane            Road lane with the contents of the DOM element
-    //!
-    //! @return                         False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    static bool ParseLaneRoadMark(std::string leftCenterRight, QDomElement &roadLaneElement, RoadLaneInterface* roadLane);
+    static void ParseLaneRoadMark(std::string leftCenterRight, QDomElement &roadLaneElement, RoadLaneInterface* roadLane);
 
     //-----------------------------------------------------------------------------
     //! @brief Parses the road geometry into a road object.
@@ -162,10 +183,8 @@ private:
     //!
     //! @param[in]  roadElement         DOM element containing the OpenDRIVE road
     //! @param[out] road                Road with the contents of the DOM element
-    //!
-    //! @return                         False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    static bool ParseGeometries(QDomElement &roadElement,
+    static void ParseGeometries(QDomElement &roadElement,
                                 RoadInterface *road);
 
     //-----------------------------------------------------------------------------
@@ -177,10 +196,8 @@ private:
     //!
     //! @param[in]  roadElement         DOM element containing the OpenDRIVE road
     //! @param[out] road                Road with the contents of the DOM element
-    //!
-    //! @return                         False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    static bool ParseElevationProfile(QDomElement &roadElement,
+    static void ParseElevationProfile(QDomElement &roadElement,
                                       RoadInterface *road);
 
     //-----------------------------------------------------------------------------
@@ -197,10 +214,8 @@ private:
     //!
     //! @param[in]  roadElement         DOM element containing the OpenDRIVE road
     //! @param[out] road                Road with the contents of the DOM element
-    //!
-    //! @return                         False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    static bool ParseRoadLinks(QDomElement &roadElement, RoadInterface *road);
+    static void ParseRoadLinks(QDomElement &roadElement, RoadInterface *road);
 
     //-----------------------------------------------------------------------------
     //! @brief Parses the lanes specification into a road object.
@@ -215,10 +230,8 @@ private:
     //!
     //! @param[in]  roadElement         DOM element containing the OpenDRIVE road
     //! @param[out] road                Road with the contents of the DOM element
-    //!
-    //! @return                         False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    static bool ParseRoadLanes(QDomElement &roadElement, RoadInterface *road);
+    static void ParseRoadLanes(QDomElement &roadElement, RoadInterface *road);
 
 
 
@@ -238,10 +251,8 @@ public:
     //!
     //! @param[in]  roadElement         DOM element containing the OpenDRIVE road
     //! @param[out] road                Road with the contents of the DOM element
-    //!
-    //! @return                         False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    static bool ParseSignals(QDomElement &roadElement, RoadInterface *road);
+    static void ParseSignals(QDomElement &roadElement, RoadInterface *road);
 
     //-----------------------------------------------------------------------------
     //! @brief Parses multiple OpenDRIVE road objects into a road object.
@@ -252,10 +263,8 @@ public:
     //!
     //! @param[in]  roadElement         DOM element containing the OpenDRIVE road
     //! @param[out] road                Road with the contents of the DOM element
-    //!
-    //! @return                         False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    static bool ParseObjects(QDomElement &roadElement, RoadInterface *road);
+    static void ParseObjects(QDomElement &roadElement, RoadInterface *road);
 
     //-----------------------------------------------------------------------------
     //! @brief Parses a single OpenDRIVE object into a road object.
@@ -266,20 +275,16 @@ public:
     //!
     //! @param[in]  objectElement       DOM element containing the OpenDRIVE object
     //! @param[out] road                Road with the contents of the DOM element
-    //!
-    //! @return                         False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    static bool ParseObject(QDomElement &objectElement, RoadInterface *road);
+    static void ParseObject(QDomElement &objectElement, RoadInterface *road);
 
     //-----------------------------------------------------------------------------
     //! @brief Converts a validitiy tag into a vector with increasing lane numbers
     //!
     //! @param[in]  rootElement     root element containing a validity sub-tag
     //! @param[out] validities      parsed result
-    //!
-    //! @return                     true if parsing was successful
     //-----------------------------------------------------------------------------
-    static bool ParseElementValidity(const QDomElement &rootElement, RoadElementValidity &validity);
+    static void ParseElementValidity(const QDomElement &rootElement, RoadElementValidity &validity);
 
 
     //-----------------------------------------------------------------------------
@@ -287,10 +292,8 @@ public:
     //!
     //! @param[in]  roadElement         DOM element containing the OpenDRIVE road
     //! @param[out] road                Road with the contents of the DOM element
-    //!
-    //! @return                         False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    static bool ParseRoadTypes(QDomElement &roadElement, RoadInterface *road);
+    static void ParseRoadTypes(QDomElement &roadElement, RoadInterface *road);
 
     //-----------------------------------------------------------------------------
     //! @brief Parses repeat tag of objects.
@@ -315,10 +318,8 @@ public:
     //! @param[in]  repeatElement       DOM element containing the OpenDRIVE repeat element
     //! @param[in]  object              DOM element of the parent object
     //! @param[out] objectRepetitions   Reference to a list of repeated road objects
-    //!
-    //! @return                         False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    static bool ParseRepeat(QDomElement &repeatElement, RoadObjectSpecification object, std::list<RoadObjectSpecification> &objectRepitions);
+    static void ParseRepeat(QDomElement &repeatElement, RoadObjectSpecification object, std::list<RoadObjectSpecification> &objectRepitions);
 
     //-----------------------------------------------------------------------------
     //! @brief Calculates and applies attributes to repeated objects.
@@ -334,10 +335,8 @@ public:
     //! @param[in]  object              Base road object
     //! @param[out] objectRepetitions   Reference to a list of repeated road objects
     //!                                 to apply the data to
-    //!
-    //! @return                         False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    static bool ApplyRepeat(ObjectRepeat objectRepeat, RoadObjectSpecification object, std::list<RoadObjectSpecification> &objectRepitions);
+    static void ApplyRepeat(ObjectRepeat objectRepeat, RoadObjectSpecification object, std::list<RoadObjectSpecification> &objectRepitions);
 
     //-----------------------------------------------------------------------------
     //! @brief Add all objects from List to Road
@@ -362,19 +361,15 @@ public:
     //!
     //! @param[in]  element         element to be parsed
     //! @param[out] signalType      parsed result
-    //!
-    //! @return                     true if parsing was successful
     //-----------------------------------------------------------------------------
-    static bool ParseSignalUnit(std::string element, RoadSignalUnit& signalUnit);
+    static void ParseSignalUnit(std::string element, RoadSignalUnit& signalUnit);
 
     //-----------------------------------------------------------------------------
     //! @brief Checks the values which are not enumerations of validity (if possible)
     //!
     //! @param[in]  signal          signal to be checked
-    //!
-    //! @return                     true if all values are in bounds
     //-----------------------------------------------------------------------------
-    static bool checkRoadSignalBoundaries(RoadSignalSpecification signal);
+    static void checkRoadSignalBoundaries(RoadSignalSpecification signal);
 
     constexpr static const double SAMPLING_RATE = 1.0; // 1m sampling rate of reference line
 };

@@ -272,4 +272,19 @@ typedef Log<LogOutputPolicy> LogFile;
     else if(static_cast<int>(level) > static_cast<int>(LogFile::ReportingLevel()) || !LogOutputPolicy::IsOpen()) ; \
     else LogFile().Get(__FILE__, __LINE__, level)
 
+
+[[noreturn]] static void LogErrorAndThrow(const std::string &message)
+{
+    LOG_INTERN(LogLevel::Error) << message;
+    throw std::runtime_error(message);
+}
+
+static void ThrowIfFalse(bool success, const std::string &message)
+{
+    if (!success)
+    {
+        LogErrorAndThrow(message);
+    }
+}
+
 #endif // LOG_H
