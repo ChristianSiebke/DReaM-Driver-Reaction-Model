@@ -1,5 +1,5 @@
 # /*********************************************************************
-# * Copyright (c) 2018, 2019 ITK Engineering GmbH
+# * Copyright (c) 2018 ITK Engineering GmbH
 # * Copyright (c) 2018 in-tech GmbH
 # *
 # * This program and the accompanying materials are made
@@ -55,31 +55,8 @@ QMAKE_LFLAGS += -Wl,-rpath=\'\$\$ORIGIN\'
 
 win32:DEFINES+=_USE_MATH_DEFINES
 
-######################################################################
-# Configuration specific for open pass gui library                   #
-# Usage:                                                             #
-# set "CONFIG += OPENPASS_LIBRARY_GUI" before including this file    #
-######################################################################
-OPENPASS_LIBRARY_GUI {
-    message("[$$TARGET] Set library configuration")
-    TEMPLATE = lib
-    CONFIG += shared
-    CONFIG -= lib_bundle
-    QMAKE_LFLAGS += -L$$system_path($$EXTRA_LIB_PATH)
-    QMAKE_CFLAGS += -isystem $$EXTRA_INCLUDE_PATH
-    QMAKE_CXXFLAGS += -isystem $$EXTRA_INCLUDE_PATH
-    #Debug:DESTDIR = $${DESTDIR_SLAVE}$${SUBDIR_LIB_GUIS}
-    #Release:DESTDIR = $${DESTDIR_SLAVE}$${SUBDIR_LIB_GUIS}
-    Debug:DESTDIR = $${DESTDIR_SLAVE}
-    Release:DESTDIR = $${DESTDIR_SLAVE}
-    #debug/release predicates are buggy on linux qmake
-    #unix:DESTDIR=$${DESTDIR_SLAVE}$${SUBDIR_LIB_GUIS}
-    unix:DESTDIR=$${DESTDIR_SLAVE}
-    message("[$$TARGET] Build path set to $$DESTDIR")
-}
-
 ##################################################################
-# Configuration specific for open pass simulation libraries      #
+# Configuration specific for open pass libraries                 #
 # Usage:                                                         #
 # set "CONFIG += OPENPASS_LIBRARY" before including this file    #
 ##################################################################

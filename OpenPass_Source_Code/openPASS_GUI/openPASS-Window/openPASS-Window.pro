@@ -13,9 +13,7 @@
 # SPDX-License-Identifier: EPL-2.0
 #-----------------------------------------------------------------------------/
 
-CONFIG += OPENPASS_LIBRARY_GUI
-include(../../global.pri)
-
+include(../../Global.pri)
 TARGET = Window
 TEMPLATE = lib
 CONFIG += plugin c++11 no_keywords
@@ -26,6 +24,9 @@ QMAKE_TARGET_PRODUCT = openPASS
 QMAKE_TARGET_DESCRIPTION = openPASS Window
 QMAKE_TARGET_COMPANY = Volkswagen Group of America
 QMAKE_TARGET_COPYRIGHT = Volkswagen Group of America
+
+Release:DESTDIR = $$DIR_RELEASE
+Debug:DESTDIR = $$DIR_DEBUG
 
 win32: TARGET_EXT = .dll
 
