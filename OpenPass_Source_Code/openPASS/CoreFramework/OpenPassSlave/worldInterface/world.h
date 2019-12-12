@@ -51,11 +51,6 @@ public:
         return implementation->GetAgentByName(scenarioName);
     }
 
-    std::vector<AgentInterface*> GetAgentsByGroupType(const AgentCategory& agentCategory) override
-    {
-        return implementation->GetAgentsByGroupType(agentCategory);
-    }
-
     const std::vector<const WorldObjectInterface*>& GetWorldObjects() const override
     {
         return implementation->GetWorldObjects();
@@ -323,16 +318,6 @@ public:
     int GetLaneId(uint64_t streamId, double endDistance) const override
     {
         return implementation->GetLaneId(streamId, endDistance);
-    }
-
-    LaneQueryResult QueryLane(std::string roadId, int laneId, double distance) const override
-    {
-        return implementation->QueryLane(roadId, laneId, distance);
-    }
-
-    std::list<LaneQueryResult> QueryLanes(std::string roadId, double startDistance, double endDistance) const override
-    {
-        return implementation->QueryLanes(roadId, startDistance, endDistance);
     }
 
     bool IntersectsWithAgent(double x, double y, double rotation, double length, double width, double center) override

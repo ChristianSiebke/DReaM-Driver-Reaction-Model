@@ -15,7 +15,9 @@ SUBDIRS = \
         CoreModules/EventDetector \
         CoreModules/Manipulator \
         CoreModules/Observation_Log \
-        CoreModules/SpawnPoint_OSI \
+        CoreModules/SpawnPoints/SpawnPointScenario_OSI \
+        CoreModules/SpawnPoints/SpawnPointPreRunCommon_OSI \
+        CoreModules/SpawnPoints/SpawnPointRuntimeCommon_OSI \
         CoreModules/Stochastics \
         CoreModules/World_OSI \
         Components/Action_LongitudinalDriver \

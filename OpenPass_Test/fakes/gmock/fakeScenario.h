@@ -16,8 +16,6 @@
 class FakeScenario : public ScenarioInterface
 {
 public:
-    MOCK_METHOD0(GetEgoEntity,
-                 const ScenarioEntity&());
     MOCK_METHOD0(GetScenarioEntities,
                  const std::vector<ScenarioEntity*>&());
     MOCK_METHOD0(GetVehicleCatalogPath,
@@ -32,8 +30,6 @@ public:
                  const std::string & ());
     MOCK_METHOD1(SetSceneryPath,
                  void(const std::string&));
-    MOCK_METHOD1(SetEgoEntity,
-                 void(const ScenarioEntity&));
     MOCK_METHOD1(AddScenarioEntity,
                  void(const ScenarioEntity&));
     MOCK_METHOD1(AddScenarioGroupsByEntityNames,
@@ -52,6 +48,6 @@ public:
                        int());
     MOCK_METHOD1(SetEndTime,
                  void(const double));
+    MOCK_CONST_METHOD0(GetEntities,
+                       const std::vector<ScenarioEntity>&());
 };
-
-

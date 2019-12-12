@@ -26,6 +26,7 @@
 #include "runStatistic.h"
 #include "observationCyclics.h"
 #include "observationFileHandler.h"
+#include "Common/runtimeInformation.h"
 
 //-----------------------------------------------------------------------------
 /** \brief This class adds the RunStatistic information to the simulation output.

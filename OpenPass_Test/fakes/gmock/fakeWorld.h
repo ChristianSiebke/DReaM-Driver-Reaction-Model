@@ -10,6 +10,8 @@
 #pragma once
 
 #include "gmock/gmock.h"
+
+#include "Interfaces/parameterInterface.h"
 #include "Interfaces/worldInterface.h"
 #include "Common/globalDefinitions.h"
 
@@ -52,12 +54,9 @@ class FakeWorld : public WorldInterface
     MOCK_CONST_METHOD0(GetVisibilityDistance, double());
     MOCK_CONST_METHOD2(GetLaneId, int(uint64_t streamId, double endDistance));
     MOCK_METHOD2(GetNumberOfLanes, int(std::string roadId, double distance));
-    MOCK_CONST_METHOD3(QueryLane, LaneQueryResult(std::string roadId, int laneId, double distance));
     MOCK_METHOD3(GetBoundingBoxAroundAgent, polygon_t(AgentInterface*agent, double width, double length));
     MOCK_CONST_METHOD4(LaneCoord2WorldCoord, Position(double distanceOnLane, double offset, std::string roadId, int laneId));
     MOCK_CONST_METHOD2(RoadCoord2WorldCoord, Position(RoadPosition roadCoord, std::string roadID));
-    MOCK_METHOD1(GetAgentsByGroupType, std::vector<AgentInterface*>(const AgentCategory &agentCategory));
-    MOCK_CONST_METHOD3(QueryLanes, std::list<LaneQueryResult>(std::string roadId, double startDistance, double endDistance));
     MOCK_CONST_METHOD4(GetObstruction, Obstruction (const Route& route, const GlobalRoadPosition& ownPosition, const ObjectPosition& otherPosition, const std::vector<Common::Vector2d>& objectCorners));
     MOCK_CONST_METHOD0(GetTimeOfDay, std::string());
     MOCK_CONST_METHOD5(GetTrafficSignsInRange, std::vector<CommonTrafficSign::Entity>(const Route& route, std::string roadId, int laneId, double startDistance, double searchRange));

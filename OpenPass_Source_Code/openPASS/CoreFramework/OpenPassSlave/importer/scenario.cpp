@@ -43,11 +43,6 @@ void Scenario::SetSceneryPath(const std::string& sceneryPath)
     this->sceneryPath = sceneryPath;
 }
 
-void Scenario::SetEgoEntity(const ScenarioEntity& egoEntity)
-{
-    this->egoEntity = egoEntity;
-}
-
 void Scenario::AddScenarioEntity(const ScenarioEntity& entity)
 {
     entities.push_back(entity);
@@ -73,9 +68,9 @@ void Scenario::AddScenarioGroupsByEntityNames(const std::map<std::string, std::l
     }
 }
 
-const ScenarioEntity &Scenario::GetEgoEntity()
+const std::vector<ScenarioEntity> &Scenario::GetEntities() const
 {
-    return egoEntity;
+    return entities;
 }
 
 const std::vector<ScenarioEntity*> &Scenario::GetScenarioEntities()

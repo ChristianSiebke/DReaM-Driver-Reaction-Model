@@ -19,7 +19,6 @@ class FakeAgent : public FakeWorldObject, public AgentInterface
 {
   public:
     MOCK_CONST_METHOD0(GetAgentId, int());
-    MOCK_CONST_METHOD0(GetSpawnTime, int());
     MOCK_CONST_METHOD0(GetVehicleType, AgentVehicleType());
     MOCK_CONST_METHOD0(GetVehicleModelType, std::string());
     MOCK_CONST_METHOD0(GetVehicleModelParameters, VehicleModelParameters());
@@ -98,9 +97,9 @@ class FakeAgent : public FakeWorldObject, public AgentInterface
     MOCK_CONST_METHOD0(GetLightState, LightState());
     MOCK_METHOD1(SetFlasher, void(bool flasherSwitch));
     MOCK_CONST_METHOD0(GetFlasher, bool());
-    MOCK_METHOD5(InitAgentParameter, bool(int id, int agentTypeId, int spawnTime, const AgentSpawnItem *agentSpawnItem,
+    MOCK_METHOD4(InitAgentParameter, bool(int id, int agentTypeId, const AgentSpawnItem *agentSpawnItem,
                                           const SpawnItemParameterInterface &spawnItemParameter));
-    MOCK_METHOD3(InitAgentParameter, bool(int id, int spawnTime, AgentBlueprintInterface *agentBlueprint));
+    MOCK_METHOD2(InitAgentParameter, bool(int id, AgentBlueprintInterface *agentBlueprint));
     MOCK_CONST_METHOD0(IsValid, bool());
     MOCK_CONST_METHOD0(GetAgentTypeId, int());
     MOCK_CONST_METHOD1(GetRoadId, std::string(MeasurementPoint mp));

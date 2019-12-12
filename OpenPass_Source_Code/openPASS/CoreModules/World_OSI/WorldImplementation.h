@@ -131,8 +131,6 @@ public:
 
     AgentInterface* GetAgentByName(const std::string& scenarioName) override;
 
-    std::vector<AgentInterface*> GetAgentsByGroupType(const AgentCategory& agentCategory) override;
-
     // Agent functions
     AgentInterface* GetNextAgentInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection) const override;
     AgentInterface* GetNextAgentInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection, double searchDistance) const override;
@@ -152,9 +150,6 @@ public:
     WorldObjectInterface* GetLastObjectInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection, double searchDistance) const override;
 
     int GetLaneId(uint64_t streamId, double endDistance) const override;
-
-    LaneQueryResult QueryLane(std::string roadId, int laneId, double distance) const override;
-    std::list<LaneQueryResult> QueryLanes(std::string roadId, double startDistance, double endDistance) const override;
 
     std::vector<const AgentInterface*> GetAgentsInRange(Route route, std::string roadId, int laneId, double startDistance,
                                                         double backwardRange, double forwardRange) const override;
@@ -330,8 +325,6 @@ protected:
 private:
     void InitTrafficObjects();
 
-    LaneQueryResult BuildLaneQueryResult(OWL::CLane& lane) const;
-
     OWL::WorldData worldData;
     WorldDataQuery worldDataQuery{worldData};
     World::Localization::Localizer localizer{worldData};
@@ -355,5 +348,3 @@ private:
 
     StochasticNavigation navigation;
 };
-
-LaneQueryResult LaneQueryResultFromLane(OWL::CLane& lane, int laneId);

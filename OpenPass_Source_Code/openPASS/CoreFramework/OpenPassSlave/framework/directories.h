@@ -11,6 +11,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 namespace openpass::core {
 
@@ -45,9 +46,17 @@ public:
     /// \brief  Concats a path and a file with the seperator used by the current system
     /// \param  path     e.g. /the_path
     /// \param  file     e.g. the_file
-    /// \return Concaternated string, e.g. /the_path/the_file
+    /// \return Concatenated string, e.g. /the_path/the_file
     ///
     static const std::string Concat(const std::string& path, const std::string& file);
+
+    /// \brief  Concats a path and multiple filenames with the seperator used by the current system
+    /// \param  path            e.g. /the_path
+    /// \param  filenames     e.g. the_filenames
+    /// \return Vector of concatenated strings, e.g. /the_path/the_filename
+    ///
+    static const std::vector<std::string> Concat(const std::string& path, const std::vector<std::string>& filenames);
+
 private:
 
     /// \brief  Internally used to get a cononical path w.r.t to the application path

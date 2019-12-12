@@ -40,7 +40,6 @@ TEST(ScenarioImporter_UnitTests, ImportPositionElementLaneWithStocastics)
     EXPECT_NO_THROW(ScenarioImporter::ImportPositionElement(scenarioEntity,positionElement));
 
     ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.ILane,-4);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.TStart,0);
 
     ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.s.value,1470.0);
     ASSERT_TRUE(scenarioEntity.spawnInfo.s.isStochastic);
@@ -74,7 +73,6 @@ TEST(ScenarioImporter_UnitTests, ImportPositionElementLaneWithOrientation)
 
     ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.s.value, 1470.0);
     ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.ILane, -4);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.TStart, 0);
     ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.offset.value,0.5);
 
     ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.heading,1.57);
@@ -95,7 +93,6 @@ TEST(ScenarioImporter_UnitTests, ImportPositionElementLane)
 
     ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.s.value, 1470.0);
     ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.ILane, -4);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.TStart, 0);
     ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.offset.value, 0.5);
 }
 

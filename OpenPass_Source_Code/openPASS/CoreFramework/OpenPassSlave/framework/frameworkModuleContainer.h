@@ -84,9 +84,6 @@ private:
     WorldBinding worldBinding;
     World world;
 
-    SpawnPointBinding spawnPointBinding;
-    SpawnPointNetwork spawnPointNetwork;
-
     ObservationBinding observationBinding;
     ObservationNetwork observationNetwork;
 
@@ -105,6 +102,9 @@ private:
     AgentBlueprintProvider agentBlueprintProvider;
 
     EventNetwork eventNetwork;
+
+    std::map<std::string, SpawnPointBinding> spawnPointBindings {};
+    SpawnPointNetwork spawnPointNetwork;
 };
 
 } //namespace SimulationSlave

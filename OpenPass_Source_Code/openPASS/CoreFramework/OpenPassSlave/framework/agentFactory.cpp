@@ -60,12 +60,10 @@ void AgentFactory::Clear()
     agentList.clear();
 }
 
-Agent* AgentFactory::AddAgent(AgentBlueprintInterface* agentBlueprint,
-                              int spawnTime)
+Agent* AgentFactory::AddAgent(AgentBlueprintInterface* agentBlueprint)
 {
     Agent *agent = CreateAgent(lastAgentId,
-                               agentBlueprint,
-                               spawnTime);
+                               agentBlueprint);
     if(!agent)
     {
         LOG_INTERN(LogLevel::Error) << "could not create agent";
@@ -87,14 +85,11 @@ Agent* AgentFactory::AddAgent(AgentBlueprintInterface* agentBlueprint,
 }
 
 Agent *AgentFactory::CreateAgent(int id,
-                                 AgentBlueprintInterface* agentBlueprint,
-                                 int spawnTime)
+                                 AgentBlueprintInterface* agentBlueprint)
 {
     LOG_INTERN(LogLevel::DebugCore) << "instantiate agent (id " << id << ")";
 
     Agent *agent = new (std::nothrow) Agent(id,
-                                            agentBlueprint,
-                                            spawnTime,
                                             world);
     if(!agent)
     {

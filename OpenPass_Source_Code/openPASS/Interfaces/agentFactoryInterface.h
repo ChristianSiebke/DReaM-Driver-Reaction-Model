@@ -56,8 +56,7 @@ public:
     //!
     //! @return                         The added agent
     //-----------------------------------------------------------------------------
-    virtual Agent *AddAgent(AgentBlueprintInterface* agentBlueprint,
-                            int spawnTime) = 0;
+    virtual Agent *AddAgent(AgentBlueprintInterface* agentBlueprint) = 0;
 };
 
 } //namespace SimulationSlave

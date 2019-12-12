@@ -18,6 +18,7 @@
 
 #include "Interfaces/callbackInterface.h"
 #include "Interfaces/modelInterface.h"
+#include "Interfaces/parameterInterface.h"
 #include "Common/primitiveSignals.h"
 #include "Components/Sensor_Driver/Signals/sensorDriverSignal.h"
 

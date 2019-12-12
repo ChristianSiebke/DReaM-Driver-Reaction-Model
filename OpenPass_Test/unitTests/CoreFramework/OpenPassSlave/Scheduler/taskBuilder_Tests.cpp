@@ -6,7 +6,7 @@
 
 #include "fakeEventDetectorNetwork.h"
 #include "fakeManipulatorNetwork.h"
-#include "fakeSpawnControl.h"
+#include "fakeSpawnPointNetwork.h"
 #include "fakeWorld.h"
 #include "eventDetector.h"
 
@@ -28,8 +28,6 @@ using namespace SimulationSlave::Scheduling;
 
 TEST(TaskBuilder, CommonTaskCreation_Works)
 {
-    NiceMock<FakeSpawnControl> fakeSpawnControl;
-
     NiceMock<FakeEventDetector> fakeEventDetector;
     NiceMock<FakeManipulatorNetwork> fakeManipulatorNetwork;
 
@@ -47,7 +45,14 @@ TEST(TaskBuilder, CommonTaskCreation_Works)
 
     NiceMock<FakeWorld> fakeWorld;
     RunResult runResult{};
-    TaskBuilder taskBuilder(currentTime, runResult , 100, &fakeWorld, &fakeSpawnControl, nullptr, &fakeEventDetectorNetwork, &fakeManipulatorNetwork);
+    TaskBuilder taskBuilder(currentTime,
+                            runResult,
+                            100,
+                            &fakeWorld,
+                            nullptr,
+                            nullptr,
+                            &fakeEventDetectorNetwork,
+                            &fakeManipulatorNetwork);
 
     auto commonTasks = taskBuilder.CreateCommonTasks();
     ASSERT_THAT(commonTasks, SizeIs(Gt(size_t(0))));
@@ -58,7 +63,6 @@ TEST(TaskBuilder, CommonTaskCreation_Works)
 
 TEST(TaskBuilder, FinalizeRecurringTaskCreation_Works)
 {
-    NiceMock<FakeSpawnControl> fakeSpawnControl;
     NiceMock<FakeEventDetectorNetwork> fakeEventDetectorNetwork;
     NiceMock<FakeManipulatorNetwork> fakeManipulatorNetwork;
 
@@ -66,7 +70,14 @@ TEST(TaskBuilder, FinalizeRecurringTaskCreation_Works)
 
     NiceMock<FakeWorld> fakeWorld;
     RunResult runResult{};
-    TaskBuilder taskBuilder(currentTime, runResult , 100, &fakeWorld, &fakeSpawnControl, nullptr, &fakeEventDetectorNetwork, &fakeManipulatorNetwork);
+    TaskBuilder taskBuilder(currentTime,
+                            runResult,
+                            100,
+                            &fakeWorld,
+                            nullptr,
+                            nullptr,
+                            &fakeEventDetectorNetwork,
+                            &fakeManipulatorNetwork);
 
     auto finalizeTasks = taskBuilder.CreateFinalizeRecurringTasks();
     ASSERT_THAT(finalizeTasks, SizeIs(Gt(size_t(0))));

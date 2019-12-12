@@ -70,8 +70,7 @@ public:
     //!
     //! @return                         The added agent
     //-----------------------------------------------------------------------------
-    Agent *AddAgent(AgentBlueprintInterface* agentBlueprint,
-                    int spawnTime);
+    Agent *AddAgent(AgentBlueprintInterface* agentBlueprint);
 
 private:
     //-----------------------------------------------------------------------------
@@ -105,8 +104,7 @@ private:
     //! @return                         The created agent
     //-----------------------------------------------------------------------------
     Agent* CreateAgent(int id,
-                       AgentBlueprintInterface* agentBlueprint,
-                       int spawnTime);
+                       AgentBlueprintInterface* agentBlueprint);
 
     int lastAgentId = 0;
     ModelBinding *modelBinding;

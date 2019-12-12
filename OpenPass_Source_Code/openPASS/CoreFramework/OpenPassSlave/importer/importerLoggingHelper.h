@@ -111,6 +111,8 @@ namespace openpass::importer::xml::profilesImporter::tag
     constexpr char sensorLinks[] {"SensorLinks"};
     constexpr char sensorProfile[] {"SensorProfile"};
     constexpr char sensorProfiles[] {"SensorProfiles"};
+    constexpr char spawnPointProfile[] {"SpawnPointProfile"};
+    constexpr char spawnPointProfiles[] {"SpawnPointProfiles"};
     constexpr char system[] {"System"};
     constexpr char vehicleComponentProfile[] {"VehicleComponentProfile"};
     constexpr char vehicleComponentProfiles[] {"VehicleComponentProfiles"};

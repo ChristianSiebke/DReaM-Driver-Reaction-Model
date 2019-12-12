@@ -44,7 +44,7 @@ TEST(AgentParser, RecurringComponent_IsParsed)
 {
     NiceMock<FakeWorld> fakeWorld;
     NiceMock<FakeAgentBlueprint> fakeAgentBlueprint;
-    Agent testAgent(0, &fakeAgentBlueprint, 0, &fakeWorld);
+    Agent testAgent(0, &fakeWorld);
 
     Channel testChannel(1);
     Component testTargetComponent("", &testAgent);
@@ -81,7 +81,7 @@ TEST(AgentParser, ThreeRecurringComponents_AreParsed)
 {
     NiceMock<FakeWorld> fakeWorld;
     NiceMock<FakeAgentBlueprint> fakeAgentBlueprint;
-    Agent testAgent(0, &fakeAgentBlueprint, 0, &fakeWorld);
+    Agent testAgent(0, &fakeWorld);
 
     Channel testChannel(1);
     Component testTargetComponent("", &testAgent);
@@ -136,7 +136,7 @@ TEST(AgentParser, NonRecurringComponent_IsParsed)
 {
     NiceMock<FakeWorld> fakeWorld;
     NiceMock<FakeAgentBlueprint> fakeAgentBlueprint;
-    Agent testAgent(0, &fakeAgentBlueprint, 0, &fakeWorld);
+    Agent testAgent(0, &fakeWorld);
 
     Channel testChannel(1);
     Component testTargetComponent("", &testAgent);
@@ -172,7 +172,7 @@ TEST(AgentParser, MixedComponents_AreParsedWithRightTaskType)
 {
     NiceMock<FakeWorld> fakeWorld;
     NiceMock<FakeAgentBlueprint> fakeAgentBlueprint;
-    Agent testAgent(0, &fakeAgentBlueprint, 0, &fakeWorld);
+    Agent testAgent(0, &fakeWorld);
 
     Channel testChannel(1);
     Component testTargetComponent("", &testAgent);

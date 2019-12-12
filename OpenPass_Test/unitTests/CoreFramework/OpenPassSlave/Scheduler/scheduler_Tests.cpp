@@ -7,7 +7,6 @@
 #include <functional>
 
 #include "fakeWorld.h"
-#include "fakeSpawnControl.h"
 #include "fakeSpawnPointNetwork.h"
 #include "fakeEventDetectorNetwork.h"
 #include "fakeManipulatorNetwork.h"
@@ -62,8 +61,6 @@ TEST(DISABLED_Scheduler, RunWorks)
     NiceMock<FakeWorld> fakeWorld;
 
     NiceMock<FakeSpawnPointNetwork> fakeSpawnPointNetwork;
-    SpawnPoint *spawnPoint{nullptr};
-    ON_CALL(fakeSpawnPointNetwork, GetSpawnPoint()).WillByDefault(Return(spawnPoint));
 
     NiceMock<FakeEventDetector> fakeEventDetector;
     NiceMock<FakeManipulatorNetwork> fakeManipulatorNetwork;

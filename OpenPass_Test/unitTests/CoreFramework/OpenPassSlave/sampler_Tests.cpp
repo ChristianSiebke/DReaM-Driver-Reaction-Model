@@ -1,5 +1,8 @@
+#include <cfloat>
+
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "dontCare.h"
 
 #include "fakeStochastics.h"
 #include "sampler.h"
@@ -7,6 +10,7 @@
 using ::testing::_;
 using ::testing::Return;
 using ::testing::NiceMock;
+using ::testing::DontCare;
 
 const openpass::common::RuntimeInformation fakeRti{openpass::common::Version{0,0,0}, {"", "", ""}};
 
@@ -95,4 +99,22 @@ TEST(Sampler_UnitTests, SampleIntProbabilityInvalidProbabilities)
     {
         ASSERT_TRUE(true);
     }
+}
+
+TEST(Sampler_UnitTests, SampleNormalDistributionProbability_AppropriatelyHandlesZeroProbability)
+{
+    openpass::parameter::NormalDistribution impossibleParameter = DontCare<openpass::parameter::NormalDistribution>();
+    openpass::parameter::NormalDistribution expectedParameter{DontCare<double>(),
+                                                                         DontCare<double>(),
+                                                                         DontCare<double>(),
+                                                                         DontCare<double>()};
+    NormalDistributionProbabilities fakeProbabilities{{impossibleParameter, DBL_EPSILON},
+                                                      {expectedParameter, 1.0}};
+    NiceMock<FakeStochastics> fakeStochastics;
+    ON_CALL(fakeStochastics, GetUniformDistributed(_,_)).WillByDefault(Return(0.0));
+
+    Sampler sampler(fakeStochastics, fakeRti);
+    const auto sampledNormalDistributionParameter = sampler.SampleNormalDistributionProbability(fakeProbabilities);
+
+    EXPECT_THAT(sampledNormalDistributionParameter, expectedParameter);
 }

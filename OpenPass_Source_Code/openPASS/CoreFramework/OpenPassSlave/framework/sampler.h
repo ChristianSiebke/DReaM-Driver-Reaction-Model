@@ -46,7 +46,7 @@ public:
     virtual std::string SampleStringProbability(StringProbabilities probabilities) const override;
     virtual int SampleIntProbability(IntProbabilities probabilities) const override;
     virtual double SampleDoubleProbability(DoubleProbabilities probabilities) const override;
-    virtual std::unique_ptr<ParameterInterface> SampleSpawnPointParameters(const TrafficConfig &trafficConfig) const override;
+    virtual openpass::parameter::NormalDistribution SampleNormalDistributionProbability(NormalDistributionProbabilities probabilities) const override;
     virtual std::unique_ptr<ParameterInterface> SampleWorldParameters(const EnvironmentConfig &environmentConfig) const override;
 
 private:

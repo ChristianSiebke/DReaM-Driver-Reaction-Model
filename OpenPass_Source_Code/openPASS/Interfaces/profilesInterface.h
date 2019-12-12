@@ -18,6 +18,7 @@
 using StringProbabilities = std::unordered_map<std::string, double>;
 using DriverProfiles = std::unordered_map<std::string, openpass::parameter::Container>;
 using VehicleComponentProfiles = std::unordered_map<std::string, openpass::parameter::Container>;
+using SpawnPointProfiles = std::unordered_map<std::string, openpass::parameter::Container>;
 
 enum class AgentProfileType
 {
@@ -73,6 +74,8 @@ public:
     * @return        agentProfiles
     */
     virtual std::unordered_map<std::string, AgentProfile>& GetAgentProfiles() = 0;
+
+    virtual SpawnPointProfiles& GetSpawnPointProfiles() = 0;
 
     /*!
     * \brief Returns a pointer to the driverProfiles

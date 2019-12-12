@@ -20,10 +20,55 @@
 #include <string>
 #include <vector>
 
+#include "Common/worldDefinitions.h"
 #include "Common/eventDetectorDefinitions.h"
-#include "Common/spawnPointDefinitions.h"
 #include "Interfaces/scenarioActionInterface.h"
 #include "CoreFramework/CoreShare/parameters.h"
+
+struct SpawnAttribute
+{
+    bool isStochastic = false;
+    double value = -999;
+    double mean = -999;
+    double stdDeviation = -999;
+    double lowerBoundary = -999;
+    double upperBoundary = -999;
+};
+
+struct SpawnInfo
+{
+public:
+    SpawnInfo() {}
+    SpawnInfo(double s,
+              double v,
+              std::string roadId,
+              int lane,
+              double offset,
+              double acceleration,
+              double heading = 0):
+        roadId(roadId),
+        ILane(lane),
+        heading(heading)
+    {
+        this->s.value = s;
+        this->offset.value = offset;
+        this->velocity.value = v;
+        this->acceleration.value = acceleration;
+    }
+
+    std::string roadId = "";
+    int ILane = -999;
+    double heading = 0;
+    std::optional<Route> route {std::nullopt};
+
+    //TODO CK Make offset optional
+    SpawnAttribute offset;
+    SpawnAttribute s;
+    SpawnAttribute velocity;
+
+    //TODO CK make acceleration optional
+    SpawnAttribute acceleration;
+};
 
 /*!
  * \brief References an element inside a catalog
@@ -101,11 +146,6 @@ public:
     virtual void SetSceneryPath(const std::string& sceneryPath) = 0;
 
     //-----------------------------------------------------------------------------
-    //! Sets the ego entity of the scenario.
-    //-----------------------------------------------------------------------------
-    virtual void SetEgoEntity(const ScenarioEntity& egoEntity) = 0;
-
-    //-----------------------------------------------------------------------------
     //! Adds one scenario entity to the scenery entities of the scenario.
     //-----------------------------------------------------------------------------
     virtual void AddScenarioEntity(const ScenarioEntity& entity) = 0;
@@ -116,12 +156,7 @@ public:
     //-----------------------------------------------------------------------------
     virtual void AddScenarioGroupsByEntityNames(const std::map<std::string, std::list<std::string>> &groupDefinitions) = 0;
 
-    //-----------------------------------------------------------------------------
-    //! Returns the ego entity of the scenario.
-    //!
-    //! @return                         ScenarioEntity of ego vehicle
-    //-----------------------------------------------------------------------------
-    virtual const ScenarioEntity& GetEgoEntity() = 0;
+    virtual const std::vector<ScenarioEntity>& GetEntities() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the ego entity of the scenario.

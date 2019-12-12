@@ -18,6 +18,7 @@
 
 #include "Interfaces/slaveConfigInterface.h"
 #include "profiles.h"
+#include "Common/spawnPointLibraryDefinitions.h"
 
 namespace Configuration {
 
@@ -34,9 +35,9 @@ public:
 
     virtual ScenarioConfig &GetScenarioConfig() override;
 
-    virtual EnvironmentConfig &GetEnvironmentConfig() override;
+    virtual SpawnPointLibraryInfoCollection& GetSpawnPointsConfig() override;
 
-    virtual TrafficConfig &GetTrafficConfig() override;
+    virtual EnvironmentConfig &GetEnvironmentConfig() override;
 
     virtual const std::string& GetProfilesCatalog() const override;
 
@@ -45,8 +46,8 @@ public:
 private:
     ExperimentConfig experimentConfig {};
     ScenarioConfig scenarioConfig {};
+    SpawnPointLibraryInfoCollection spawnPointsConfig {};
     EnvironmentConfig environmentConfig {};
-    TrafficConfig trafficConfig {};
     std::string profilesCatalog {};
 };
 

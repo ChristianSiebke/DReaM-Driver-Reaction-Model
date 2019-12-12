@@ -61,6 +61,15 @@ TEST(Directories, Concat)
     ASSERT_THAT(Directories::Concat(directories.libraryDir, "the_library"), "/path/lib/the_library");
 }
 
+TEST(Directories, ConcatVector)
+{
+    Directories directories("/path", "lib", "configs", "results");
+    std::vector<std::string> libraries = {"the_library", "the_other_library"};
+    auto concatLibraries = Directories::Concat(directories.libraryDir, libraries);
+    ASSERT_THAT(concatLibraries[0], "/path/lib/the_library");
+    ASSERT_THAT(concatLibraries[1], "/path/lib/the_other_library");
+}
+
 TEST(Directories, SamePath)
 {
     Directories directories("/path", ".", ".", ".");
@@ -112,6 +121,15 @@ TEST(Directories, Concat)
 {
     Directories directories("C:\\path", "lib", "configs", "results");
     ASSERT_THAT(Directories::Concat(directories.libraryDir, "the_library"), "C:/path/lib/the_library");
+}
+
+TEST(Directories, ConcatVector)
+{
+    Directories directories("C:\\path", "lib", "configs", "results");
+    std::vector<std::string> libraries = {"the_library", "the_other_library"};
+    auto concatLibraries = Directories::Concat(directories.libraryDir, libraries);
+    ASSERT_THAT(concatLibraries[0], "C:/path/lib/the_library");
+    ASSERT_THAT(concatLibraries[1], "C:/path/lib/the_other_library");
 }
 
 TEST(Directories, SamePath)

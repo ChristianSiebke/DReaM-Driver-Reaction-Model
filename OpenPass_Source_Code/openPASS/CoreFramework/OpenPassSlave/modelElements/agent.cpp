@@ -31,12 +31,8 @@ namespace SimulationSlave
 {
 
 Agent::Agent(int id,
-             AgentBlueprintInterface* agentBlueprint,
-             int spawnTime,
              WorldInterface *world):
-    spawnTime(spawnTime),
     id(id),
-    agentBlueprint(agentBlueprint),
     world(world)
 {
     SetAgentAdapter(world->CreateAgentAdapterForAgent());
@@ -75,7 +71,6 @@ bool Agent::Instantiate(AgentBlueprintInterface* agentBlueprint,
 {
     // setup
     if(!agentInterface->InitAgentParameter(id,
-                                           spawnTime,
                                            agentBlueprint))
     {
         return false;

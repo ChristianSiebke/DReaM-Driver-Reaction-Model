@@ -31,7 +31,7 @@ void ProfilesImporter::ImportAgentProfiles(QDomElement agentProfilesElement,
         ThrowIfFalse(ParseAttributeString(agentProfileElement, ATTRIBUTE::name, agentProfileName), "AgentProfile name is invalid.");
 
         std::string profileType;
-        ThrowIfFalse(ParseAttributeString(agentProfileElement, ATTRIBUTE::type, profileType), "AgentProifle type is invalid.");
+        ThrowIfFalse(ParseAttributeString(agentProfileElement, ATTRIBUTE::type, profileType), "AgentProfile type is invalid.");
 
         AgentProfile agentProfile;
 
@@ -53,7 +53,7 @@ void ProfilesImporter::ImportAgentProfiles(QDomElement agentProfilesElement,
         }
         else
         {
-            ThrowIfFalse(profileType != "Static", "Invalid agent profile type.");
+            ThrowIfFalse(profileType == "Static", "Invalid agent profile type.");
 
             agentProfile.type = AgentProfileType::Static;
             QDomElement systemElement;
@@ -79,6 +79,33 @@ void ProfilesImporter::ImportAgentProfiles(QDomElement agentProfilesElement,
         ThrowIfFalse(insertReturn.second, "AgentProfile names need to be unique.");
 
         agentProfileElement = agentProfileElement.nextSiblingElement(TAG::agentProfile);
+    }
+}
+
+void ProfilesImporter::ImportSpawnPointProfiles(const QDomElement& spawnPointProfilesElement, SpawnPointProfiles& spawnPointProfiles)
+{
+    QDomElement spawnPointProfileElement;
+    GetFirstChildElement(spawnPointProfilesElement, TAG::spawnPointProfile, spawnPointProfileElement);
+
+    while (!spawnPointProfileElement.isNull())
+    {
+        std::string profileName;
+        ThrowIfFalse(ParseAttributeString(spawnPointProfileElement, "Name", profileName), "Could not import spawn point profile.");
+
+        openpass::parameter::Container parameters {};
+        try
+        {
+            parameters = openpass::parameter::Import(spawnPointProfileElement);
+        }
+        catch(const std::runtime_error &error)
+        {
+            LogErrorAndThrow("Could not import driver profile parameters: " + std::string(error.what()));
+        }
+
+        auto insertReturn = spawnPointProfiles.emplace(profileName, parameters);
+        ThrowIfFalse(insertReturn.second, "Spawn point profile names need to be unique");
+
+        spawnPointProfileElement = spawnPointProfileElement.nextSiblingElement(TAG::spawnPointProfile);
     }
 }
 
@@ -359,6 +386,12 @@ bool ProfilesImporter::Import(const std::string& filename, Profiles& profiles)
         ThrowIfFalse(GetFirstChildElement(documentRoot, TAG::sensorProfiles, sensorProfilesElement),
                      "SensorProfiles element is missing.");
         ImportSensorProfiles(sensorProfilesElement, profiles.GetSensorProfiles());
+        
+        //Import spawn point profiles
+        QDomElement spawnPointProfilesElement;
+        ThrowIfFalse(GetFirstChildElement(documentRoot, TAG::spawnPointProfiles, spawnPointProfilesElement),
+                     "SpawnPointProfiles element is missing.");
+        ImportSpawnPointProfiles(spawnPointProfilesElement, profiles.GetSpawnPointProfiles());
 
         return true;
     }

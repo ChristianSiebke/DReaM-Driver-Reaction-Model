@@ -62,22 +62,22 @@ public:
 
     virtual void AddSensor(openpass::sensors::Parameter parameters) = 0;
 
-    virtual AgentCategory                       GetAgentCategory() = 0;
-    virtual std::string                         GetAgentProfileName() = 0;
-    virtual std::string                         GetVehicleProfileName() = 0;
-    virtual std::string                         GetVehicleModelName() = 0;
-    virtual std::string                         GetDriverProfileName() = 0;
-    virtual std::string                         GetObjectName() = 0;
+    virtual AgentCategory                           GetAgentCategory() const = 0;
+    virtual std::string                             GetAgentProfileName() const = 0;
+    virtual std::string                             GetVehicleProfileName() const = 0;
+    virtual std::string                             GetVehicleModelName() const = 0;
+    virtual std::string                             GetDriverProfileName() const = 0;
+    virtual std::string                             GetObjectName() const = 0;
 
-    virtual VehicleModelParameters              GetVehicleModelParameters() = 0;
-    virtual openpass::sensors::Parameters          GetSensorParameters()  = 0;
-    virtual VehicleComponentProfileNames        GetVehicleComponentProfileNames() = 0;
-    virtual SimulationSlave::AgentTypeInterface& GetAgentType() = 0;
-    virtual SpawnParameter&                      GetSpawnParameter() = 0;
-    virtual double                              GetSpeedGoalMin() = 0;
+    virtual VehicleModelParameters                  GetVehicleModelParameters() const = 0;
+    virtual openpass::sensors::Parameters           GetSensorParameters() const = 0;
+    virtual VehicleComponentProfileNames            GetVehicleComponentProfileNames() const = 0;
+    virtual SimulationSlave::AgentTypeInterface&    GetAgentType() const = 0;
+    virtual SpawnParameter&                         GetSpawnParameter() = 0;
+    virtual const SpawnParameter&                   GetSpawnParameter() const = 0;
+    virtual double                                  GetSpeedGoalMin() const = 0;
 
-    virtual void                        SetObjectName(std::string objectName) = 0;
-    virtual void Reset() = 0;
+    virtual void                                    SetObjectName(std::string objectName) = 0;
 };
 
 

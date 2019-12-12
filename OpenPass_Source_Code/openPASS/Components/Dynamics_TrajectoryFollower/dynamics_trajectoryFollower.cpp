@@ -14,6 +14,7 @@
 
 #include <QCoreApplication>
 
+#include "Interfaces/parameterInterface.h"
 #include "dynamics_trajectoryFollower.h"
 #include "absoluteWorldCoordinateTrajectoryFollower.h"
 #include "roadCoordinateTrajectoryFollower.h"

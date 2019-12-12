@@ -15,6 +15,7 @@
 #include "Interfaces/agentBlueprintProviderInterface.h"
 #include "Interfaces/samplerInterface.h"
 #include "Interfaces/scenarioInterface.h"
+#include "Common/spawnPointLibraryDefinitions.h"
 
 namespace SimulationSlave
 {
@@ -35,32 +36,29 @@ public:
     //! or create a new instance (which is then also stored), then create a new spawn
     //! point using the provided parameters.
     //!
-    //! @param[in]  libraryPath         Path of the spawnpoint library
+    //! @param[in]  libraryInfos         Information for the SpawnPointLibrary
     //! @param[in]  agentFactory        Factory for the agents
-    //! @param[in]  agentSampler        AgentSampelr
-    //! @param[in]  parameters          SpawnPoint parameters
+    //! @param[in]  agentBlueprintProvider        AgentBlueprintProvider
     //! @param[in]  sampler             Sampler
-    //! @param[in]  scenario            Scenario
     //! @return                         true, if successful
     //-----------------------------------------------------------------------------
-    virtual bool Instantiate(std::string libraryPath,
-                             AgentFactoryInterface *agentFactory,
-                             AgentBlueprintProviderInterface *agentBlueprintProvider,
-                             ParameterInterface *parameters,
-                             const SamplerInterface &sampler,
-                             ScenarioInterface *scenario) = 0;
+    virtual bool Instantiate(const SpawnPointLibraryInfoCollection& libraryInfos,
+                             AgentFactoryInterface* agentFactory,
+                             AgentBlueprintProviderInterface* agentBlueprintProvider,
+                             const SamplerInterface * const sampler,
+                             ScenarioInterface* scenario,
+                             const SpawnPointProfiles& spawnPointProfiles) = 0;
+
+    virtual bool TriggerPreRunSpawnPoints() = 0;
+
+    virtual bool TriggerRuntimeSpawnPoints(const int timestamp) = 0;
+
+    virtual std::vector<Agent*> ConsumeNewAgents() = 0;
 
     //-----------------------------------------------------------------------------
-    //! Clears the spawnpoint.
+    //! Clears all spawnpoints.
     //-----------------------------------------------------------------------------
     virtual void Clear() = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Gets the spawnpoint
-    //!
-    //! @return                         Pointer to spawnpoint
-    //-----------------------------------------------------------------------------
-    virtual SpawnPoint* GetSpawnPoint() = 0;
 };
 
 } //SimulationSlave

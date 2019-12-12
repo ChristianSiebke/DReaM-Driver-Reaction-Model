@@ -12,6 +12,7 @@
 /** \brief SensorObjectDetectorFactory.cpp */
 //-----------------------------------------------------------------------------
 
+#include "Interfaces/parameterInterface.h"
 #include "sensorObjectDetectorFactory.h"
 #include "sensorGeometric2D.h"
 

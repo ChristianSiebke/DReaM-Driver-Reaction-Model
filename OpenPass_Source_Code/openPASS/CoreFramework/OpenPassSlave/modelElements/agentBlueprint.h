@@ -116,58 +116,63 @@ public:
     *
     * @return     agentCategory
     */
-    virtual AgentCategory               GetAgentCategory();
+    virtual AgentCategory               GetAgentCategory() const override;
 
     /*!
     * \brief Returns the agent profile name
     *
     * @return     agentProfileName
     */
-    virtual std::string                 GetAgentProfileName();
+    virtual std::string                 GetAgentProfileName() const override;
 
     /*!
     * \brief Returns the vehicle profile name
     *
     * @return     vehicleProfileName
     */
-    virtual std::string                 GetVehicleProfileName();
+    virtual std::string                 GetVehicleProfileName() const override;
 
     /*!
     * \brief Returns the vehicle model name
     *
     * @return     vehicleModelName
     */
-    virtual std::string                 GetVehicleModelName();
+    virtual std::string                 GetVehicleModelName() const override;
 
     /*!
     * \brief Returns the driver profile name
     *
     * @return     driverProfileName
     */
-    virtual std::string                 GetDriverProfileName();
+    virtual std::string                 GetDriverProfileName() const override;
 
     /*!
     * \brief Returns the object name
     *
     * @return     objectName
     */
-    virtual std::string                 GetObjectName();
+    virtual std::string                 GetObjectName() const override;
 
     /*!
     * \brief Returns the vehicle model parameter
     *
     * @return     vehicleModelParameters
     */
-    virtual VehicleModelParameters       GetVehicleModelParameters();
+    virtual VehicleModelParameters       GetVehicleModelParameters() const override;
 
-    virtual openpass::sensors::Parameters GetSensorParameters();
+    /*!
+    * \brief Returns the sensor parameter
+    *
+    * @return     sensorParameter
+    */
+    virtual openpass::sensors::Parameters GetSensorParameters() const override;
 
     /*!
     * \brief Returns the vehicle components profile names
     *
     * @return     vehicleComponentProfileNames
     */
-    virtual VehicleComponentProfileNames            GetVehicleComponentProfileNames();
+    virtual VehicleComponentProfileNames            GetVehicleComponentProfileNames() const override;
 
     virtual void SetAgentType(std::shared_ptr<SimulationSlave::AgentTypeInterface> agentType);
 
@@ -176,26 +181,28 @@ public:
     *
     * @return     agentType
     */
-    virtual SimulationSlave::AgentTypeInterface& GetAgentType();
+    virtual SimulationSlave::AgentTypeInterface& GetAgentType() const override;
 
     /*!
     * \brief Returns the spawn parameter as reference
     *
     * @return     spawnParameter
     */
-    virtual SpawnParameter&             GetSpawnParameter();
+    virtual SpawnParameter&             GetSpawnParameter() override;
+
+    /*!
+    * \brief Returns the spawn parameter as reference
+    *
+    * @return     spawnParameter
+    */
+    virtual const SpawnParameter&       GetSpawnParameter() const override;
 
     /*!
     * \brief Returns the minimum speed goal
     *
     * @return     speedGoalMin
     */
-    virtual double                      GetSpeedGoalMin();
-
-    /*!
-    * \brief Resets the entire AgentBlueprint
-    */
-    virtual void Reset();
+    virtual double                      GetSpeedGoalMin() const override;
 
 private:
     AgentCategory agentCategory {AgentCategory::Common};

@@ -28,21 +28,6 @@
 #include "invocationControl.h"
 #include "parameters.h"
 
-
-#define CHECKFALSE(element) \
-    do { \
-    if(!(element)) \
-    { \
-    LOG_INTERN(LogLevel::Warning) << "an error occurred during run generation"; \
-    if(world->isInstantiated()) \
-    { \
-        world->Reset(); \
-    }\
-    return false;\
-    } \
-    } \
-    while(0);
-
 namespace SimulationSlave {
 
 void RunInstantiator::ClearRun()
@@ -55,16 +40,16 @@ void RunInstantiator::ClearRun()
 
 bool RunInstantiator::InitializeFrameworkModules(ExperimentConfig& experimentConfig, ScenarioInterface* scenario)
 {
-    CHECKFALSE(stochastics->Instantiate(frameworkModules.stochasticsLibrary));
-    CHECKFALSE(world->Instantiate());
+    ThrowIfFalse(stochastics->Instantiate(frameworkModules.stochasticsLibrary), "Failed to Instantiate Stochastics");
+    ThrowIfFalse(world->Instantiate(), "Failed to Instantiate World");
 
-    CHECKFALSE(eventDetectorNetwork->Instantiate(frameworkModules.eventDetectorLibrary,
-               scenario,
-               eventNetwork,
-               stochastics));
-    CHECKFALSE(manipulatorNetwork->Instantiate(frameworkModules.manipulatorLibrary,
-               scenario,
-               eventNetwork));
+    ThrowIfFalse(eventDetectorNetwork->Instantiate(frameworkModules.eventDetectorLibrary,
+                 scenario,
+                 eventNetwork,
+                 stochastics), "Failed to Instantiate EventDetectorNetwork");
+    ThrowIfFalse(manipulatorNetwork->Instantiate(frameworkModules.manipulatorLibrary,
+                 scenario,
+                 eventNetwork), "Failed to Instantiate ManipulatorNetwork");
 
     openpass::parameter::Container observationParameters
     {
@@ -79,11 +64,23 @@ bool RunInstantiator::InitializeFrameworkModules(ExperimentConfig& experimentCon
         { 0, { frameworkModules.observationLibrary, observationParameters } }
     };
 
-    CHECKFALSE(observationNetwork->Instantiate(observationInstances,
-               stochastics,
-               world,
-               eventNetwork));
-    CHECKFALSE(observationNetwork->InitAll());
+    ThrowIfFalse(observationNetwork->Instantiate(observationInstances,
+                 stochastics,
+                 world,
+                 eventNetwork), "Failed to Instantiate ObservationNetwork");
+    ThrowIfFalse(observationNetwork->InitAll(), "ObservationNetwork failed to InitAll");
+
+    return true;
+}
+
+bool RunInstantiator::InitializeSpawnPointNetwork()
+{
+    ThrowIfFalse(spawnPointNetwork->Instantiate(frameworkModules.spawnPointLibraries,
+                 agentFactory,
+                 agentBlueprintProvider,
+                 &sampler,
+                 configurationContainer.GetScenario(),
+                 configurationContainer.GetProfiles()->GetSpawnPointProfiles()), "Failed to instantiate SpawnPointNetwork");
 
     return true;
 }
@@ -122,13 +119,11 @@ bool RunInstantiator::ExecuteRun()
 
         observationNetwork->InitRun();
 
-        auto spawnPointParameter = sampler.SampleSpawnPointParameters(slaveConfig->GetTrafficConfig());
-        CHECKFALSE(spawnPointNetwork->Instantiate(frameworkModules.spawnPointLibrary,
-                   agentFactory,
-                   agentBlueprintProvider,
-                   spawnPointParameter.get(),
-                   sampler,
-                   scenario));
+        if(!InitializeSpawnPointNetwork())
+        {
+            LOG_INTERN(LogLevel::Error) << "Failed to initialize spawn point network";
+            return false;
+        }
 
         LOG_INTERN(LogLevel::DebugCore) << std::endl << "### start scheduling ###";
 

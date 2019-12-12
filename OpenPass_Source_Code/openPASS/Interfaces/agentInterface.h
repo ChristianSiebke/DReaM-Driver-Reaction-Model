@@ -26,9 +26,9 @@
 #include "Common/worldDefinitions.h"
 #include "Common/sensorDefinitions.h"
 #include "Interfaces/worldObjectInterface.h"
-#include "Interfaces/spawnPointInterface.h"
 #include "Interfaces/signalInterface.h"
 #include "Interfaces/profilesInterface.h"
+#include "Interfaces/spawnItemParameterInterface.h"
 
 /**
 * \brief Agent Interface within the openPASS framework.
@@ -50,13 +50,6 @@ public:
     // @return                Id of agent
     //-----------------------------------------------------------------------------
     virtual int GetAgentId() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Retrieves time of spawn event of this agent
-    //!
-    //! @return                Spawn time
-    //-----------------------------------------------------------------------------
-    virtual int GetSpawnTime() const = 0;
 
     //! Retrieves type of vehicle of agent
     //!
@@ -606,7 +599,6 @@ public:
     //-----------------------------------------------------------------------------
     virtual bool InitAgentParameter(int id,
                                     int agentTypeId,
-                                    int spawnTime,
                                     const AgentSpawnItem *agentSpawnItem,
                                     const SpawnItemParameterInterface &spawnItemParameter) = 0;
 
@@ -616,7 +608,6 @@ public:
     //! @return    true for success
     //-----------------------------------------------------------------------------
     virtual bool InitAgentParameter(int id,
-                                    int spawnTime,
                                     AgentBlueprintInterface* agentBlueprint) = 0;
 
     //-----------------------------------------------------------------------------

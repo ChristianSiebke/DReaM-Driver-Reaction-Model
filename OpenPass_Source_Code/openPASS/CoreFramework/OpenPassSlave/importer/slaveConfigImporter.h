@@ -83,31 +83,13 @@ public:
                                         EnvironmentConfig& environmentConfig);
 
     /*!
-    * \brief Imports the TrafficParameter subsection of trafficConfig the slave configuration
-    *
-    * @param[in]     trafficConfigElement    Element containing the information
-    * @param[out]    trafficConfig           Struct into which the values get saved
-    */
-    static void ImportTrafficParameter(QDomElement trafficConfigElement,
-                                       TrafficConfig& trafficConfig);
-
-    /*!
-    * \brief Imports the LaneParameter subsection of trafficConfig the slave configuration
-    *
-    * @param[in]     trafficConfigElement    Element containing the information
-    * @param[out]    trafficConfig           Struct into which the values get saved
-    */
-    static void ImportLaneParameter(QDomElement trafficConfigElement,
-                                    TrafficConfig& trafficConfig);
-
-    /*!
-    * \brief Imports the TrafficConfig section of the slave configuration
-    *
-    * @param[in]     trafficConfigElement    Element containing the information
-    * @param[out]    trafficConfig           Struct into which the values get saved
-    */
-    static void ImportTrafficConfig(QDomElement trafficConfigElement,
-                                    TrafficConfig& trafficConfig);
+     * \brief ImportSpawnPointsConfig Imports the SpawnPointConfig section of the slave configuration
+     * \param spawnPointsConfigElement Element containing the information
+     * \param spawnPointsInfo struct into which the values get saved
+     * \return
+     */
+    static void ImportSpawnPointsConfig(const QDomElement& spawnPointsConfigElement,
+                                        SpawnPointLibraryInfoCollection& spawnPointsInfo);
 
     //Overall import function
     /*!
@@ -125,7 +107,7 @@ public:
 
 private:
     static std::string GetLibrary(const QDomElement& root, std::string key, std::string tag);
-    static constexpr auto supportedConfigVersion = "0.6.1";
+    static constexpr auto supportedConfigVersion = "0.7.0";
 
     //! \brief Identifier with correspondiong default values for mandatory libraries
     //! \note: The identifier is identical to the XML tag
@@ -133,7 +115,6 @@ private:
     {
         {"EventDetectorLibrary", "EventDetector"},
         {"ManipulatorLibrary", "Manipulator"},
-        {"SpawnPointLibrary", "SpawnPoint_OSI"},
         {"WorldLibrary", "World"},
         {"ObservationLibrary", "Observation"},
         {"StochasticsLibrary", "Stochastics"}

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2018 AMFD GmbH
 *
 * This program and the accompanying materials are made
@@ -149,15 +149,27 @@ double Sampler::SampleDoubleProbability(DoubleProbabilities probabilities) const
     throw std::logic_error("Could not find matching probability within range.");
 }
 
-std::unique_ptr<ParameterInterface> Sampler::SampleSpawnPointParameters(const TrafficConfig& trafficConfig) const
+openpass::parameter::NormalDistribution Sampler::SampleNormalDistributionProbability(NormalDistributionProbabilities probabilities) const
 {
-    return openpass::parameter::make<SimulationCommon::Parameters>(
-        runtimeInformation, openpass::parameter::Container {
-            { "TrafficVolume", SampleDoubleProbability(trafficConfig.trafficVolumes) },
-            { "PlatoonRate", SampleDoubleProbability(trafficConfig.platoonRates) },
-            { "Velocity", SampleDoubleProbability(trafficConfig.velocities) },
-            { "Homogenity", SampleDoubleProbability(trafficConfig.homogenities) }}
-    );
+    double roll = stochastics.GetUniformDistributed(0, 1);
+    double probability = 0.0;
+
+    for (auto entry : probabilities)
+    {
+        probability += entry.second;
+
+        if (probability == 0.0)
+        {
+            continue;
+        }
+
+        if (roll <= probability)
+        {
+            return entry.first;
+        }
+    }
+
+    throw std::logic_error("Could not find matching probability within range.");
 }
 
 std::unique_ptr<ParameterInterface> Sampler::SampleWorldParameters(const EnvironmentConfig& environmentConfig) const

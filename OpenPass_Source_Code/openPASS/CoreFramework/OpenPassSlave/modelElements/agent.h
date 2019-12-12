@@ -43,8 +43,6 @@ class Agent
 {
 public:
     Agent(int id,
-          AgentBlueprintInterface* agentType,
-          int spawnTime,
           WorldInterface *world);
     Agent(const Agent&) = delete;
     Agent(Agent&&) = delete;
@@ -80,9 +78,7 @@ public:
 private:
     // framework parameters
     std::vector<int> idsCollisionPartners;
-    int spawnTime;
     int id;
-    AgentBlueprintInterface* agentBlueprint = nullptr;
     WorldInterface *world = nullptr;
     std::map<int, Channel*> channels;
     std::map<std::string, ComponentInterface*> components;

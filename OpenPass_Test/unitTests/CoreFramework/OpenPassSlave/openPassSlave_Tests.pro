@@ -42,7 +42,6 @@ DEPENDENCIES = \
     $$OPEN_SRC/CoreFramework/CoreShare/parameters.cpp
 
 AGENTSAMPLER_TESTS = \
-    $$UNIT_UNDER_TEST/framework/agentProfileSampler.cpp \
     $$UNIT_UNDER_TEST/framework/dynamicProfileSampler.h \
     $$UNIT_UNDER_TEST/framework/dynamicProfileSampler.cpp \
     $$UNIT_UNDER_TEST/framework/dynamicParametersSampler.cpp \

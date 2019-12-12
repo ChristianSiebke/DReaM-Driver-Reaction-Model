@@ -18,8 +18,6 @@
 
 #include "dynamicAgentTypeGenerator.h"
 #include "Interfaces/agentBlueprintProviderInterface.h"
-#include "Interfaces/agentBlueprintInterface.h"
-#include "agentProfileSampler.h"
 #include "Interfaces/configurationContainerInterface.h"
 
 class AgentBlueprintProvider : public AgentBlueprintProviderInterface
@@ -33,24 +31,21 @@ public:
     * \details First samples the agent profile and then depending on wether it is a static or dynamic profile samples the dynamic
     * profiles and builds an AgentType from this or loads the AgentType from the specified SystemConfig
     *
-    * @param[in/out]    agentBlueprint          All results get stored in the agent blueprint
-    * @param[in]        laneCategory            Category of the lane the agent will be spawned in only relevant for common agents
-    * @param[in]        scenarioAgentIterator    Iterator for scenario agent arrays.
+    * @param[in]        agentProfileName    name of agent profile to sample
     *
-    * @return           true if Agent was succesfully sampled
+    * @return           sampled AgentBlueprint if successful
     */
-    virtual bool SampleAgent(AgentBlueprintInterface& agentBlueprint, LaneCategory laneCategory,
-                             unsigned int scenarioAgentIterator) override;
+    virtual AgentBlueprint SampleAgent(const std::string& agentProfileName) const override;
 
     /*!
      * \brief Store sampled information in AgentBlueprint for dynamic AgentProfile
      * \param agentBlueprint            All results get stored in the agent blueprint
      * \param agentBuildInformation     AgentBuildInformation with information to store into the agentBlueprint
      * \param driverProfileName         name of sampled DriverProfile
-     * \return
      */
-    bool GenerateDynamicAgentBlueprint(AgentBlueprintInterface& agentBlueprint, AgentBuildInformation agentBuildInformation,
-                                       std::string& driverProfileName);
+    void GenerateDynamicAgentBlueprint(AgentBlueprintInterface& agentBlueprint,
+                                       AgentBuildInformation agentBuildInformation,
+                                       std::string& driverProfileName) const;
 
     /*!
     * \brief Store sampled information in AgentBlueprint for static AgentProfile
@@ -59,14 +54,13 @@ public:
     * @param[in]        systemConfigName        Name of systemConfiguration holding the system information
     * @param[in]        systemId                Id of system to build (referes to given systemConfig
     * @param[in]        vehicleModelName        Name of vehicle model for system
-    *
-    * @return           true if Agent was succesfully sampled
     */
-    bool GenerateStaticAgentBlueprint(AgentBlueprintInterface& agentBlueprint, std::string systemConfigName, int systemId,
-                                      std::string vehicleModelName);
+    void GenerateStaticAgentBlueprint(AgentBlueprintInterface& agentBlueprint,
+                                      std::string systemConfigName,
+                                      int systemId,
+                                      std::string vehicleModelName) const;
 
 private:
-    AgentProfileSampler agentProfileSampler;
     const SamplerInterface& sampler;
     ProfilesInterface* profiles;
     std::unordered_map<std::string, AgentProfile>& agentProfiles;

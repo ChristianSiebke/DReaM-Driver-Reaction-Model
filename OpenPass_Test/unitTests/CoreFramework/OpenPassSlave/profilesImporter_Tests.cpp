@@ -410,3 +410,58 @@ TEST(ProfilesImporter_ImportAllVehicleComponentProfiles, GivenValidXml_ImportsVa
     EXPECT_THAT(fakeVehicleComponentProfiles.at("ComponentB"), SizeIs(2));
     EXPECT_THAT(fakeVehicleComponentProfiles.at("ComponentC"), SizeIs(1));
 }
+
+TEST(ProfilesImporter_UnitTests, ImportSpawnPointProfilesSuccessfully)
+{
+    QDomElement fakeDocumentRoot = documentRootFromString(
+                "<root>"
+                    "<SpawnPointProfile Name=\"ExampleProfile\">"
+                        "<String Key=\"Road\" Value=\"R0\"/>"
+                        "<IntVector Key=\"Lanes\" Value=\"-1,-2\"/>"
+                    "</SpawnPointProfile>"
+                    "<SpawnPointProfile Name=\"AnotherExampleProfile\">"
+                        "<String Key=\"Road\" Value=\"R0\"/>"
+                        "<IntVector Key=\"Lanes\" Value=\"-1,-2\"/>"
+                    "</SpawnPointProfile>"
+                "</root>"
+                );
+    SpawnPointProfiles spawnPointProfiles;
+
+    EXPECT_NO_THROW(ProfilesImporter::ImportSpawnPointProfiles(fakeDocumentRoot, spawnPointProfiles));
+
+    ASSERT_THAT(spawnPointProfiles, SizeIs(2));
+
+    auto resultParameter = spawnPointProfiles.at("ExampleProfile");
+    ASSERT_THAT(resultParameter, SizeIs(2));
+}
+
+TEST(ProfilesImporter_UnitTests, ImportSpawnPointProfilesUnsuccessfully)
+{
+
+    QDomElement fakeDocumentRootMissingName = documentRootFromString(
+                "<root>"
+                  "<SpawnPointProfile>"
+                      "<String Key=\"Road\" Value=\"R0\"/>"
+                      "<IntVector Key=\"Lanes\" Value=\"-1,-2\"/>"
+                  "</SpawnPointProfile>"
+                "</root>"
+                );
+
+    QDomElement fakeDocumentRootDuplicateNames = documentRootFromString(
+                "<root>"
+                 "<SpawnPointProfile Name=\"ExampleProfile\">"
+                     "<String Key=\"Road\" Value=\"R0\"/>"
+                     "<IntVector Key=\"Lanes\" Value=\"-1,-2\"/>"
+                 "</SpawnPointProfile>"
+                 "<SpawnPointProfile Name=\"ExampleProfile\">"
+                     "<String Key=\"Road\" Value=\"R0\"/>"
+                     "<IntVector Key=\"Lanes\" Value=\"-1,-2\"/>"
+                 "</SpawnPointProfile>"
+                "</root>"
+                );
+
+    SpawnPointProfiles spawnPointProfiles;
+
+    EXPECT_THROW(ProfilesImporter::ImportSpawnPointProfiles(fakeDocumentRootMissingName, spawnPointProfiles), std::runtime_error);
+    EXPECT_THROW(ProfilesImporter::ImportSpawnPointProfiles(fakeDocumentRootDuplicateNames, spawnPointProfiles), std::runtime_error);
+}

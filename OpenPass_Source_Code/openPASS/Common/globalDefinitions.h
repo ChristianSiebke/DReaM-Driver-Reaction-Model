@@ -539,4 +539,5 @@ private:
     double yawAngle;
 };
 
+
 #endif // GLOBALDEFINITIONS

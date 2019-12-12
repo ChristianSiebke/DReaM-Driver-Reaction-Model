@@ -22,8 +22,6 @@ FrameworkModuleContainer::FrameworkModuleContainer(
         stochastics(&stochasticsBinding),
         worldBinding(frameworkModules.worldLibrary, callbacks, &stochastics),
         world(&worldBinding),
-        spawnPointBinding(runtimeInformation, callbacks),
-        spawnPointNetwork(&spawnPointBinding, &world),
         observationBinding(runtimeInformation, callbacks),
         observationNetwork(&observationBinding),
         eventDetectorBinding(callbacks),
@@ -34,8 +32,13 @@ FrameworkModuleContainer::FrameworkModuleContainer(
         agentFactory(&modelBinding, &world, &stochastics, &observationNetwork, &eventNetwork),
         sampler(stochastics, runtimeInformation),
         agentBlueprintProvider(configurationContainer, sampler),
-        eventNetwork()
+        eventNetwork(),
+        spawnPointNetwork(&spawnPointBindings, &world, runtimeInformation)
 {
+    for(const auto& libraryInfo : frameworkModules.spawnPointLibraries)
+    {
+        spawnPointBindings.emplace(libraryInfo.libraryName, SpawnPointBinding(callbacks));
+    }
 }
 
 AgentFactoryInterface* FrameworkModuleContainer::GetAgentFactory()

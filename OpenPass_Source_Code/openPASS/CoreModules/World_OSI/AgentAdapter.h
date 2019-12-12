@@ -57,7 +57,6 @@ public:
     }
 
     bool InitAgentParameter(int id,
-                            int spawnTime,
                             AgentBlueprintInterface* agentBlueprint) override;
 
     //////////////////////////////////////////////////////////
@@ -94,11 +93,6 @@ public:
     double GetSpeedGoalMin() const override
     {
         return speedGoalMin;
-    }
-
-    int GetSpawnTime() const
-    {
-        return spawnTime;
     }
 
     double GetDistanceReferencePointToFrontAxle() const override
@@ -921,13 +915,11 @@ public:
     }
     virtual bool InitAgentParameter(int id,
                                     int agentTypeId,
-                                    int spawnTime,
                                     const AgentSpawnItem *agentSpawnItem,
                                     const SpawnItemParameterInterface &spawnItemParameter) override
     {
         Q_UNUSED(id);
         Q_UNUSED(agentTypeId);
-        Q_UNUSED(spawnTime);
         Q_UNUSED(agentSpawnItem);
         Q_UNUSED(spawnItemParameter);
 
@@ -1407,7 +1399,6 @@ private:
     VehicleModelParameters vehicleModelParameters;
 
     double speedGoalMin;
-    int spawnTime;
 
     bool completlyInWorld = false;
 

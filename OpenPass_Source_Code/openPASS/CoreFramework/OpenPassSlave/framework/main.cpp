@@ -114,9 +114,9 @@ int main(int argc, char* argv[])
         libraries.at("EventDetectorLibrary"),
         libraries.at("ManipulatorLibrary"),
         libraries.at("ObservationLibrary"),
-        libraries.at("SpawnPointLibrary"),
         libraries.at("StochasticsLibrary"),
-        libraries.at("WorldLibrary")
+        libraries.at("WorldLibrary"),
+        configurationContainer.GetSlaveConfig()->GetSpawnPointsConfig()
     };
 
     SimulationCommon::Callbacks callbacks;

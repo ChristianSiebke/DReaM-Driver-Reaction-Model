@@ -15,6 +15,11 @@ std::unordered_map<std::string, AgentProfile>& Profiles::GetAgentProfiles()
     return agentProfiles;
 }
 
+SpawnPointProfiles& Profiles::GetSpawnPointProfiles()
+{
+    return spawnPointProfiles;
+}
+
 DriverProfiles& Profiles::GetDriverProfiles()
 {
     return driverProfiles;

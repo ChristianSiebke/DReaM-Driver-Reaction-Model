@@ -17,6 +17,7 @@
 #include <numeric>
 #include "Common/boostGeometryCommon.h"
 #include "CoreModules/World_OSI/WorldData.h"
+#include "Interfaces/parameterInterface.h"
 
 SensorGeometric2D::SensorGeometric2D(
         std::string componentName,

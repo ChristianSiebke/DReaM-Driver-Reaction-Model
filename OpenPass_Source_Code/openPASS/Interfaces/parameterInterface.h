@@ -106,7 +106,7 @@ public:
                                                 const openpass::parameter::NormalDistribution value) = 0;
 
     //-----------------------------------------------------------------------------
-    //! Retrieves the runetime information from the interface
+    //! Retrieves the runtime information from the interface
     //!
     //! @return                RuntimeInformation
     //-----------------------------------------------------------------------------

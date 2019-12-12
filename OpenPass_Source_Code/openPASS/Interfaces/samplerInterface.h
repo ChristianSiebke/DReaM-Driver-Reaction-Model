@@ -119,33 +119,30 @@ public:
     * \details Determines which entry of the probability map gets selected
     *           according to a uniform distributed roll.
     *
+    * @param[in]    probabilities       NormalDistribution probability map
+    * @return       Sampled NormalDistribution entry
+    */
+    virtual openpass::parameter::NormalDistribution SampleNormalDistributionProbability(NormalDistributionProbabilities probabilities) const = 0;
+
+    /*!
+    * \brief Samples an entry of a probability map
+    *
+    * \details Determines which entry of the probability map gets selected
+    *           according to a uniform distributed roll.
+    *
     * @param[in]    probabilities       Int probability map
     * @return       Sampled integer
     */
     virtual int SampleIntProbability(IntProbabilities probabilities) const = 0;
 
     /*!
-    * \brief Samples all SpawnPoint parameters
-    *
-    * \details Samples all parameters for the SpawnPoint defined under the
-    *           TrafficConfig according to the specified probabilities
-    *
-    * @param[in]    trafficConfig       Traffic configuration
-    * @returns      parameters          Sampled parameters get stored here
-    */
-    virtual std::unique_ptr<ParameterInterface> SampleWorldParameters(const EnvironmentConfig& environmentConfig) const = 0;
-
-    /*!
     * \brief Samples all World parameters
     *
     * \details Samples all parameters for the World defined under the
-    *           Environment according to the specified probabilities
+    *           EnvironmentConfig according to the specified probabilities
     *
-    * @param[in]    environmentConfig       Environment configuration
-    * @returns      parameters          Sampled parameters get stored here
+    * @param[in]    environmentConfig   EnvironmentConfig
+    * @returns      parameters          Sampled parameters
     */
-    virtual std::unique_ptr<ParameterInterface> SampleSpawnPointParameters(const TrafficConfig& trafficConfig) const = 0;
+    virtual std::unique_ptr<ParameterInterface> SampleWorldParameters(const EnvironmentConfig& environmentConfig) const = 0;
 };
-
-
-

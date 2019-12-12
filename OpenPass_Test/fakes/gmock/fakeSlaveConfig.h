@@ -19,10 +19,10 @@ class FakeSlaveConfig : public SlaveConfigInterface {
       ExperimentConfig &());
   MOCK_METHOD0(GetScenarioConfig,
       ScenarioConfig &());
+  MOCK_METHOD0(GetSpawnPointsConfig,
+      SpawnPointLibraryInfoCollection &());
   MOCK_METHOD0(GetEnvironmentConfig,
       EnvironmentConfig &());
-  MOCK_METHOD0(GetTrafficConfig,
-      TrafficConfig &());
   MOCK_CONST_METHOD0(GetProfilesCatalog,
                std::string& ());
   MOCK_METHOD1(SetProfilesCatalog,

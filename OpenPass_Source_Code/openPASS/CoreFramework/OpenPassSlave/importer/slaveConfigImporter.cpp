@@ -141,51 +141,46 @@ void SlaveConfigImporter::ImportEnvironmentConfig(QDomElement environmentConfigE
                  "Could not import Weathers.");
 }
 
-void SlaveConfigImporter::ImportTrafficParameter(QDomElement trafficParameterElement,
-        TrafficConfig& trafficConfig)
+void SlaveConfigImporter::ImportSpawnPointsConfig(const QDomElement &spawnPointsConfigElement,
+                                                  SpawnPointLibraryInfoCollection& spawnPointsInfo)
 {
-    QDomElement trafficVolumesElement;
-    ThrowIfFalse(GetFirstChildElement(trafficParameterElement, TAG::trafficVolumes, trafficVolumesElement)
-                    && ImportProbabilityMap(trafficVolumesElement, "Value", TAG::trafficVolume, trafficConfig.trafficVolumes),
-                 "Could not import TrafficVolumes.");
+    QDomElement spawnPointElement;
+    ThrowIfFalse(GetFirstChildElement(spawnPointsConfigElement, "SpawnPoint", spawnPointElement),
+                 "No SpawnPoints were successfully imported");
 
-    QDomElement platoonRatesElement;
-    ThrowIfFalse(GetFirstChildElement(trafficParameterElement, TAG::platoonRates, platoonRatesElement)
-                    && ImportProbabilityMap(platoonRatesElement, "Value", TAG::platoonRate, trafficConfig.platoonRates),
-                 "Could not import PlatoonRates.");
+    while (!spawnPointElement.isNull())
+    {
+        SpawnPointLibraryInfo spawnPointInfo;
 
-    QDomElement velocitiesElement;
-    ThrowIfFalse(GetFirstChildElement(trafficParameterElement, TAG::velocities, velocitiesElement)
-                    && ImportProbabilityMap(velocitiesElement, "Value", TAG::velocity, trafficConfig.velocities),
-                 "Could not import Velocities.");
+        ThrowIfFalse(ParseString(spawnPointElement, "Library", spawnPointInfo.libraryName),
+            "SpawnPoint library name missing.");
 
-    QDomElement homogenitiesElement;
-    ThrowIfFalse(GetFirstChildElement(trafficParameterElement, TAG::homogenities, homogenitiesElement)
-                    && ImportProbabilityMap(homogenitiesElement, "Value", TAG::homogenity, trafficConfig.homogenities),
-                 "Could not import Homogenities.");
-}
+        std::string type;
+        ThrowIfFalse(ParseString(spawnPointElement, "Type", type),
+                     "SpawnPoint Type missing");
+        const auto& spawnPointTypeIter = std::find_if(spawnPointTypeMapping.cbegin(),
+                                                      spawnPointTypeMapping.cend(),
+                                                      [&type](const auto& spawnPointTypePair) -> bool
+                                                      {
+                                                          return spawnPointTypePair.second == type;
+                                                      });
+        ThrowIfFalse(spawnPointTypeIter != spawnPointTypeMapping.cend(),
+                     "SpawnPoint Type invalid");
+        spawnPointInfo.type = spawnPointTypeIter->first;
 
-void SlaveConfigImporter::ImportLaneParameter(QDomElement trafficConfigElement, TrafficConfig& trafficConfig)
-{
-    QDomElement regularLaneElement;
-    ThrowIfFalse(GetFirstChildElement(trafficConfigElement, TAG::regularLane, regularLaneElement)
-                    && ImportProbabilityMap(regularLaneElement, "Name", TAG::agentProfile, trafficConfig.regularLaneAgents),
-                 "Could not import RegularLane.");
+        ThrowIfFalse(ParseInt(spawnPointElement, "Priority", spawnPointInfo.priority),
+                     "SpawnPoint Priority missing");
 
-    QDomElement rightMostLaneElement;
-    ThrowIfFalse(GetFirstChildElement(trafficConfigElement, TAG::rightMostLane, rightMostLaneElement)
-                    && ImportProbabilityMap(rightMostLaneElement, "Name", TAG::agentProfile, trafficConfig.rightMostLaneAgents),
-                 "Could not import RightMostLane.");
-}
+        std::string spawnPointProfile;
+        if(ParseString(spawnPointElement, "Profile", spawnPointProfile))
+        {
+            spawnPointInfo.profileName.emplace(spawnPointProfile);
+        }
 
-void SlaveConfigImporter::ImportTrafficConfig(QDomElement trafficConfigElement, TrafficConfig& trafficConfig)
-{
-    QDomElement trafficParameterElement;
-    ThrowIfFalse(GetFirstChildElement(trafficConfigElement, TAG::trafficParameter, trafficParameterElement),
-                 "Could not import TrafficParameter.");
+        spawnPointsInfo.emplace_back(spawnPointInfo);
 
-    ImportTrafficParameter(trafficParameterElement, trafficConfig);
-    ImportLaneParameter(trafficConfigElement, trafficConfig);
+        spawnPointElement = spawnPointElement.nextSiblingElement("SpawnPoint");
+    }
 }
 
 bool SlaveConfigImporter::Import(const std::string& configurationDir,
@@ -241,12 +236,11 @@ bool SlaveConfigImporter::Import(const std::string& configurationDir,
 
         ImportEnvironmentConfig(environmentConfigElement, slaveConfig.GetEnvironmentConfig());
 
-        //Import traffic config
-        QDomElement trafficConfigElement;
-        ThrowIfFalse(GetFirstChildElement(documentRoot, TAG::trafficConfig, trafficConfigElement),
-                     "Could not import TrafficConfig.");
-
-        ImportTrafficConfig(trafficConfigElement, slaveConfig.GetTrafficConfig());
+        //Import spawnpoints config
+        QDomElement spawnPointsConfigElement;
+        ThrowIfFalse(GetFirstChildElement(documentRoot, "SpawnPointsConfig", spawnPointsConfigElement),
+                     "Could not import SpawnPointsConfig.");
+        ImportSpawnPointsConfig(spawnPointsConfigElement, slaveConfig.GetSpawnPointsConfig());
 
         return true;
     }

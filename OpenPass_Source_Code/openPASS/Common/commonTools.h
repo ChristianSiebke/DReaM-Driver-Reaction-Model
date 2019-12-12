@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2018 AMFD GmbH
 *               2016, 2017, 2018, 2019 ITK Engineering GmbH
 *
@@ -16,6 +16,7 @@
 #include "globalDefinitions.h"
 #include "math.h"
 #include "vector2d.h"
+#include <unordered_map>
 
 //-----------------------------------------------------------------------------
 //! @brief defines common helper functions like conversion from and to enums.
@@ -208,6 +209,20 @@ public:
             //elements.push_back(start + (i * ((end-start+1) / (totalPoints))));  //not correct implemented yet
         }
         return elements;
+    }
+
+    template <typename T>
+    static inline constexpr T PerHourToPerSecond(T value) noexcept
+    {
+        static_assert(std::is_floating_point_v<T>, "the value must be a floating point data type");
+        return value/static_cast<T>(3600.0);
+    }
+
+    template <typename T>
+    static inline constexpr T KilometerPerHourToMeterPerSecond(T kmH) noexcept
+    {
+        static_assert(std::is_floating_point_v<T>, "kmH must be a floating point data type");
+        return kmH/static_cast<T>(3.6);
     }
 };
 
@@ -441,4 +456,32 @@ public:
     }
 };
 
+namespace helper::map
+{
+/// @brief queries a map for a given key and returns the value if available
+template <typename KeyType, typename ValueType>
+std::optional<ValueType> query(const std::map<KeyType, ValueType>& the_map, KeyType the_value)
+{
+    const auto& iter = the_map.find(the_value);
+    return iter == the_map.end() ? std::nullopt : std::make_optional(iter->second);
+}
+template <typename ValueType>
+std::optional<ValueType> query(const std::map<std::string, ValueType>& the_map, std::string the_value)
+{
+    const auto& iter = the_map.find(the_value);
+    return iter == the_map.end() ? std::nullopt : std::make_optional(iter->second);
+}
+template <typename KeyType, typename ValueType>
+std::optional<ValueType> query(const std::unordered_map<KeyType, ValueType>& the_map, KeyType the_value)
+{
+    const auto& iter = the_map.find(the_value);
+    return iter == the_map.end() ? std::nullopt : std::make_optional(iter->second);
+}
+template <typename ValueType>
+std::optional<ValueType> query(const std::unordered_map<std::string, ValueType>& the_map, std::string the_value)
+{
+    const auto& iter = the_map.find(the_value);
+    return iter == the_map.end() ? std::nullopt : std::make_optional(iter->second);
+}
+}
 #endif // COMMONTOOLS

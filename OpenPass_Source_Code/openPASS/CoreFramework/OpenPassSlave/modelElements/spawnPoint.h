@@ -32,10 +32,10 @@ class SpawnPoint
 {
 public:    
     SpawnPoint(AgentFactoryInterface *agentFactory,
-               SpawnPointInterface *implementation,
+               std::unique_ptr<SpawnPointInterface>&& implementation,
                SpawnPointLibrary *library) :
         library(library),
-        implementation(implementation),
+        implementation(std::move(implementation)),
         agentFactory(agentFactory)
     {
         LOG_INTERN(LogLevel::DebugCore) << "created spawn point " << id;
@@ -48,11 +48,7 @@ public:
     //-----------------------------------------------------------------------------
     //! Destructor, releases the spawn point from the stored library.
     //-----------------------------------------------------------------------------
-    virtual ~SpawnPoint()
-    {
-        library->ReleaseSpawnPoint(this);
-        LOG_INTERN(LogLevel::DebugCore) << "destroyed spawn point " << id;
-    }
+    virtual ~SpawnPoint() = default;
 
     //-----------------------------------------------------------------------------
     //! Return the ID of the respective spawn point instance.
@@ -79,9 +75,9 @@ public:
     //!
     //! @return                         Spawn point interface
     //-----------------------------------------------------------------------------
-    SpawnPointInterface *GetImplementation()
+    SpawnPointInterface* GetImplementation()
     {
-        return implementation;
+        return implementation.get();
     }
 
     //-----------------------------------------------------------------------------
@@ -94,27 +90,9 @@ public:
         return library;
     }
 
-    Agent* respawnAgent(int time)
-    {
-        AgentBlueprint agentBlueprint;
-
-        try
-        {
-            GetLibrary()->GenerateAgent(GetImplementation(), &agentBlueprint);
-        }
-        catch(...)
-        {
-            return nullptr;
-        }
-
-        Agent *agent = GetAgentFactory()->AddAgent(&agentBlueprint, time);
-
-        return agent;
-    }
-
 private:
     SpawnPointLibrary *library;
-    SpawnPointInterface *implementation;
+    std::unique_ptr<SpawnPointInterface> implementation;
     AgentFactoryInterface *agentFactory;
     int id = 0;
 };

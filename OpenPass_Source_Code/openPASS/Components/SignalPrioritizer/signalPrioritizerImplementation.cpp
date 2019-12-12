@@ -16,6 +16,7 @@
 #include <qglobal.h>
 #include "signalPrioritizerImplementation.h"
 #include "Common/primitiveSignals.h"
+#include "Interfaces/parameterInterface.h"
 
 SignalPrioritizerImplementation::SignalPrioritizerImplementation(
         std::string componentName,

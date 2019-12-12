@@ -26,7 +26,8 @@ SUBDIRS = \
     sensorFusionOSI_Tests \
     sensorOSI_Tests \
     signalPrioritizer_Tests \
-    spawnPoint_Tests \
+    spawnPointScenario_Tests \
+    spawnPointWorldAnalyzer_Tests \
     worldOSI_Tests
 
 algorithmAEB_Tests.file = \
@@ -74,8 +75,11 @@ sensorOSI_Tests.file = \
 signalPrioritizer_Tests.file = \
     $$PWD/Components/SignalPrioritizer/signalPrioritizer_Tests.pro
 
-spawnPoint_Tests.file = \
-    $$PWD/CoreModules/SpawnPoint_OSI/spawnPoint_Tests.pro
+spawnPointScenario_Tests.file = \
+    $$PWD/CoreModules/SpawnPointScenario_OSI/spawnPointScenario_Tests.pro
+
+spawnPointWorldAnalyzer_Tests.file = \
+    $$PWD/CoreModules/SpawnPointWorldAnalyzer/spawnPointWorldAnalyzer_Tests.pro
 
 worldOSI_Tests.file = \
     $$PWD/CoreModules/World_OSI/worldOSI_Tests.pro

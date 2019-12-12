@@ -26,39 +26,52 @@
 #include "Interfaces/samplerInterface.h"
 #include "Interfaces/scenarioInterface.h"
 #include "Interfaces/spawnPointNetworkInterface.h"
+#include "Common/runtimeInformation.h"
+#include "spawnPointLibraryDefinitions.h"
+#include "spawnPoint.h"
 
 namespace SimulationSlave {
-class SpawnPoint;
 class SpawnPointBinding;
 
 class SpawnPointNetwork : public SpawnPointNetworkInterface
 {
 public:
-    SpawnPointNetwork(SpawnPointBinding* spawnPointBinding, WorldInterface* world);
+    SpawnPointNetwork(std::map<std::string, SpawnPointBinding> *spawnPointBindings,
+                      WorldInterface* world,
+                      const openpass::common::RuntimeInformation& runtimeInformation);
     SpawnPointNetwork(const SpawnPointNetwork&) = delete;
     SpawnPointNetwork(SpawnPointNetwork&&) = delete;
     SpawnPointNetwork& operator=(const SpawnPointNetwork&) = delete;
     SpawnPointNetwork& operator=(SpawnPointNetwork&&) = delete;
-    virtual ~SpawnPointNetwork();
+    virtual ~SpawnPointNetwork() override = default;
 
-    bool Instantiate(std::string libraryPath,
+    bool Instantiate(const SpawnPointLibraryInfoCollection& libraryInfos,
                      AgentFactoryInterface* agentFactory,
                      AgentBlueprintProviderInterface* agentBlueprintProvider,
-                     ParameterInterface* parameters,
-                     const SamplerInterface& sampler,
-                     ScenarioInterface* scenario);
+                     const SamplerInterface * const sampler,
+                     ScenarioInterface* scenario,
+                     const SpawnPointProfiles& spawnPointProfiles) override;
 
-    void Clear();
+    bool TriggerPreRunSpawnPoints() override;
 
-    SpawnPoint* GetSpawnPoint()
+    bool TriggerRuntimeSpawnPoints(const int timestamp) override;
+
+    std::vector<Agent*> ConsumeNewAgents() override
     {
-        return spawnPoint;
+        std::vector<Agent*> tmpAgents;
+        std::swap(tmpAgents, newAgents);
+        return tmpAgents;
     }
 
+    void Clear() override;
+
 private:
-    SpawnPointBinding* spawnPointBinding;
+    std::map<std::string, SpawnPointBinding> * spawnPointBindings;
     WorldInterface* world;
-    SpawnPoint* spawnPoint {nullptr};
+    const openpass::common::RuntimeInformation& runtimeInformation;
+    std::multimap<int, std::unique_ptr<SpawnPoint>> preRunSpawnPoints;
+    std::multimap<int, std::unique_ptr<SpawnPoint>> runtimeSpawnPoints;
+    std::vector<Agent*> newAgents {};
 };
 
 } // namespace SimulationSlave

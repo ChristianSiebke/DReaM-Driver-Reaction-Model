@@ -302,25 +302,6 @@ AgentInterface* WorldImplementation::GetAgentByName(const std::string& scenarioN
     return nullptr;
 }
 
-// TODO JT check and remove this method
-std::vector<AgentInterface*> WorldImplementation::GetAgentsByGroupType(const AgentCategory& agentCategory)
-{
-    const std::map<int, AgentInterface*> agents = agentNetwork.GetAgents();
-
-    std::vector<AgentInterface*> agentsWithGroupType;
-
-    for (auto iterator = agents.begin(); iterator != agents.end(); iterator++)
-    {
-        AgentInterface* agent = iterator->second;
-        if (agentCategory == AgentCategory::Any  || agent->GetAgentCategory() == agentCategory)
-        {
-            agentsWithGroupType.push_back(agent);
-        }
-    }
-
-    return agentsWithGroupType;
-}
-
 //// Agent functions
 AgentInterface* WorldImplementation::GetNextAgentInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection) const
 {
@@ -879,17 +860,6 @@ void WorldImplementation::InitTrafficObjects()
         trafficObjects.push_back(trafficObject);
         worldObjects.push_back(trafficObject);
     }
-}
-
-LaneQueryResult WorldImplementation::QueryLane(std::string roadId, int laneId, double distance) const
-{
-    return worldDataQuery.QueryLane(roadId, laneId, distance);
-}
-
-std::list<LaneQueryResult> WorldImplementation::QueryLanes(std::string roadId, double startDistance,
-        double endDistance) const
-{
-    return worldDataQuery.QueryLanes(roadId, startDistance, endDistance);
 }
 
 int WorldImplementation::GetLaneId(uint64_t streamId, double endDistance) const

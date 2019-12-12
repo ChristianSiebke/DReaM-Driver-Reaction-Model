@@ -15,7 +15,6 @@
 #include "CoreFramework/CoreShare/log.h"
 #include "runResult.h"
 #include "scheduler.h"
-#include "spawnControl.h"
 //-----------------------------------------------------------------------------
 /** \file  Scheduler.cpp */
 //-----------------------------------------------------------------------------
@@ -48,12 +47,11 @@ SchedulerReturnState Scheduler::Run(
     }
     currentTime = startTime;
 
-    SpawnControl spawnControl(spawnPointNetwork, world, frameworkUpdateRate);
     TaskBuilder taskBuilder(currentTime,
                             runResult,
                             frameworkUpdateRate,
                             world,
-                            &spawnControl,
+                            spawnPointNetwork,
                             observationNetwork,
                             eventDetectorNetwork,
                             manipulatorNetwork);
@@ -72,26 +70,26 @@ SchedulerReturnState Scheduler::Run(
 
     if (ExecuteTasks(taskList->GetBootstrapTasks()) == false)
     {
-        return ParseAbortReason(spawnControl, currentTime);
+        return SchedulerReturnState::AbortInvocation;
     }
 
     while (currentTime <= endTime)
     {
         if (!ExecuteTasks(taskList->GetCommonTasks(currentTime)))
         {
-            return ParseAbortReason(spawnControl, currentTime);
+            return SchedulerReturnState::AbortSimulation;
         }
 
-        UpdateAgents(spawnControl, world);
+        UpdateAgents(world);
 
         if (!ExecuteTasks(taskList->ConsumeNonRecurringTasks(currentTime)))
         {
-            return ParseAbortReason(spawnControl, currentTime);
+            return SchedulerReturnState::AbortSimulation;
         }
 
         if (!ExecuteTasks(taskList->GetRecurringTasks(currentTime)))
         {
-            return ParseAbortReason(spawnControl, currentTime);
+            return SchedulerReturnState::AbortSimulation;
         }
 
         currentTime = taskList->GetNextTimestamp(currentTime);
@@ -107,7 +105,7 @@ SchedulerReturnState Scheduler::Run(
 
     if (!ExecuteTasks(taskList->GetFinalizeTasks()))
     {
-        return ParseAbortReason(spawnControl, currentTime);
+        return SchedulerReturnState::AbortSimulation;
     }
 
     LOG_INTERN(LogLevel::DebugCore) << "Scheduler: End of operation (end time reached)";
@@ -128,34 +126,9 @@ bool Scheduler::ExecuteTasks(T tasks)
     return true;
 }
 
-SchedulerReturnState Scheduler::ParseAbortReason(const SpawnControl& spawnControl, int currentTime)
+void Scheduler::UpdateAgents(WorldInterface* world)
 {
-    LOG_INTERN(LogLevel::DebugCore) << "Scheduler (time = " << std::to_string(currentTime) << "): A task aborted execution "
-                                    << "[TaskType: " << std::to_string(failedTaskItem->taskType) << "] "
-                                    << "[AgentId: " << std::to_string(failedTaskItem->agentId) << "]";
-
-    if (spawnControl.GetError() == SpawnControlError::IncompleteScenario)
-    {
-        LOG_INTERN(LogLevel::Warning) << "Scheduler (time = " << std::to_string(currentTime) << "): "
-                                      << "Agent placement has some issues in the initialization phase";
-        return SchedulerReturnState::AbortInvocation;
-    }
-
-    if (spawnControl.GetError() == SpawnControlError::AgentGenerationError)
-    {
-        LOG_INTERN(LogLevel::Error) << "Scheduler (time = " << std::to_string(currentTime) << "): "
-                                    << "Agent generation error";
-        return SchedulerReturnState::AbortSimulation;
-    }
-
-    LOG_INTERN(LogLevel::Error) << "Scheduler (time = " << std::to_string(currentTime) << "): "
-                                << "An unspecific error occurred during the time loop";
-    return SchedulerReturnState::AbortSimulation;
-}
-
-void Scheduler::UpdateAgents(SpawnControlInterface& spawnControl, WorldInterface* world)
-{
-    for (const auto& agent : spawnControl.PullNewAgents())
+    for (const auto& agent : spawnPointNetwork->ConsumeNewAgents())
     {
         ScheduleAgentTasks(*agent);
     }

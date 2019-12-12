@@ -8,6 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
+#include <algorithm>
 #include "directories.h"
 #include <QDir>
 
@@ -37,6 +38,21 @@ const std::string openpass::core::Directories::Concat(const std::string& path, c
     return QDir(QString::fromStdString(path) +
                 QDir::separator() +
                 QString::fromStdString(file)).absolutePath().toStdString();
+}
+
+const std::vector<std::string> Directories::Concat(const std::string& path, const std::vector<std::string>& filenames)
+{
+    std::vector<std::string> result {};
+
+    std::transform(filenames.cbegin(),
+                   filenames.cend(),
+                   std::back_inserter(result),
+                   [&path] (const auto &extension) -> std::string
+    {
+        return Directories::Concat(path, extension);
+    });
+
+    return result;
 }
 
 } // namespace openpass::core

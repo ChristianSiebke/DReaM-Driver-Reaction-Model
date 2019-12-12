@@ -21,6 +21,7 @@
 #include "boundingBoxCalculation.h"
 #include "Common/eventTypes.h"
 #include "Components/SensorFusion_OSI/sensorFusionQuery.h"
+#include "Interfaces/parameterInterface.h"
 
 AlgorithmAutonomousEmergencyBrakingImplementation::AlgorithmAutonomousEmergencyBrakingImplementation(
     std::string componentName,

@@ -24,6 +24,7 @@
 #include "Interfaces/eventNetworkInterface.h"
 #include "Interfaces/observationInterface.h"
 #include "Interfaces/callbackInterface.h"
+#include "Common/runtimeInformation.h"
 
 namespace SimulationSlave {
 

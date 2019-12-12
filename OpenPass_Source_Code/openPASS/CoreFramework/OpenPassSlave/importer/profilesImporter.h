@@ -30,6 +30,13 @@ public:
                                     std::unordered_map<std::string, AgentProfile> &agentProfiles);
 
     /*!
+     * \brief ImportSpawnPointProfiles Imports the SpawnPointProfiles section of the profiles catalog
+     * \param spawnPointProfilesElement Element containing the information
+     * \param spawnPointProfiles Map into which the values get saved
+     */
+    static void ImportSpawnPointProfiles(const QDomElement& spawnPointProfilesElement, SpawnPointProfiles& spawnPointProfiles);
+
+    /*!
     * \brief Imports the DriverProfiles section of the profiles catalog
     *
     * @param[in]     driverProfilesElement    Element containing the information
@@ -137,7 +144,7 @@ public:
 
 private:
     static constexpr auto profilesCatalogFile = "ProfilesCatalog.xml";
-    static constexpr auto supportedConfigVersion = "0.2.1";
+    static constexpr auto supportedConfigVersion = "0.3.0";
 
 };
 } //namespace Importer

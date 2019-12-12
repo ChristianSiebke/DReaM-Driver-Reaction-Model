@@ -338,13 +338,6 @@ public:
     //! @param side side to check (left/right)
     bool ExistsDrivingLaneOnSide(std::string roadId, OWL::OdId laneId, double distance, Side side);
 
-    //! Returns OSI Id of last lane in ReverseLaneStream.
-    //! Returns -999 for invalid lane
-    OWL::Id GetStreamId(OWL::CLane& lane) const;
-
-    //! Returns start and end s-coordinate of lane stream
-    std::pair<double, double> GetLimitingDistances(OWL::CLane& lane) const;
-
     //! Returns all TrafficSigns valid for the lanes in LaneStream within startDistance and startDistance + searchRange
     //!
     //! @param laneStream lane stream to search in
@@ -360,12 +353,6 @@ public:
     //! \param range            search range
     //! \param side             side of the lane
     std::vector<LaneMarking::Entity> GetLaneMarkings(const LaneStream &laneStream, double startDistance, double range, Side side) const;
-
-    LaneQueryResult QueryLane(std::string roadId, int laneId, double distance) const;
-
-    std::list<LaneQueryResult> QueryLanes(std::string roadId, double startDistance, double endDistance) const;
-
-    LaneQueryResult BuildLaneQueryResult(OWL::CLane& lane) const;
 
     std::vector<JunctionConnection> GetConnectionsOnJunction(std::string junctionId, std::string incomingRoadId) const;
 

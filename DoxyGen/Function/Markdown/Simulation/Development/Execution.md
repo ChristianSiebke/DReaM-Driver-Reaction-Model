@@ -108,7 +108,6 @@ The slave uses the following core libraries:
 
 * EventDetector
 * Manipulator
-* SpawnPoint
 * Stochastics
 * World
 * Observation
@@ -122,7 +121,6 @@ The core retrieves this information from the `<Libraries>` tag in the `slaveConf
     <Libraries>
       <EventDetectorLibrary>EventDetector</EventDetectorLibrary>
       <ManipulatorLibrary>Manipulator</ManipulatorLibrary>
-      <SpawnPointLibrary>SpawnPoint</SpawnPointLibrary>
       <StochasticsLibrary>Stochastics</StochasticsLibrary>
       <WorldLibrary>World</WorldLibrary>
       <ObservationLibrary>Observation</ObservationLibrary>
@@ -132,5 +130,5 @@ The core retrieves this information from the `<Libraries>` tag in the `slaveConf
 </slaveConfig>
 ```
 
-If a mandatory library is missing, the slave tries to load a defaulted one, which is for e.g. `<SpawnPointLibrary>` `SpawnPoint.dll` under Windows or `libSpawnPoint.so` under Linux, respectively.
+If a mandatory library is missing, the slave tries to load a defaulted one, which is for e.g. `<WorldLibrary>` `World.dll` under Windows or `libWorld.so` under Linux, respectively.
 In such cases, a warning will be pushed to the log each.

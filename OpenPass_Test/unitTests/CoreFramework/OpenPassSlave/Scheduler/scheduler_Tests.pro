@@ -35,7 +35,6 @@ HEADERS += \
     $$UNIT_UNDER_TEST/runResult.h \
     $$UNIT_UNDER_TEST/scheduler.h \
     $$UNIT_UNDER_TEST/schedulerTasks.h \
-    $$UNIT_UNDER_TEST/spawnControl.h \
     $$UNIT_UNDER_TEST/taskBuilder.h \
     $$UNIT_UNDER_TEST/tasks.h
 
@@ -44,7 +43,6 @@ SOURCES += \
     $$UNIT_UNDER_TEST/runResult.cpp \
     $$UNIT_UNDER_TEST/scheduler.cpp \
     $$UNIT_UNDER_TEST/schedulerTasks.cpp \
-    $$UNIT_UNDER_TEST/spawnControl.cpp \
     $$UNIT_UNDER_TEST/taskBuilder.cpp \
     $$UNIT_UNDER_TEST/tasks.cpp \
     $$OPEN_PASS_SLAVE/eventDetectorInterface/eventDetectorBinding.cpp \
@@ -60,7 +58,6 @@ SOURCES += \
     $$OPEN_SRC/CoreFramework/CoreShare/log.cpp \
     $$OPEN_SRC/CoreFramework/CoreShare/parameters.cpp \
     taskBuilder_Tests.cpp \
-    spawnControl_Tests.cpp \
     schedulerTasks_Tests.cpp \
     agentParser_Tests.cpp \
     scheduler_Tests.cpp

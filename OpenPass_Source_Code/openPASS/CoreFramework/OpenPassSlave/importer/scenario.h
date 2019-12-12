@@ -74,11 +74,10 @@ public:
      */
     void SetSceneryPath(const std::string& sceneryPath) override;
 
-    void SetEgoEntity(const ScenarioEntity& egoEntity) override;
     void AddScenarioEntity(const ScenarioEntity& entity) override;
     void AddScenarioGroupsByEntityNames(const std::map<std::string, std::list<std::string>> &groupDefinitions) override;
 
-    const ScenarioEntity &GetEgoEntity() override;
+    const std::vector<ScenarioEntity> &GetEntities() const override;
     const std::vector<ScenarioEntity*> &GetScenarioEntities() override;
     const std::map<std::string, std::vector<ScenarioEntity*>> &GetScenarioGroups() override;
 

@@ -35,7 +35,6 @@ AgentAdapter::~AgentAdapter()
 }
 
 bool AgentAdapter::InitAgentParameter(int id,
-                                      int spawnTime,
                                       AgentBlueprintInterface* agentBlueprint)
 {
     VehicleModelParameters vehicleModelParameters = agentBlueprint->GetVehicleModelParameters();
@@ -49,7 +48,6 @@ bool AgentAdapter::InitAgentParameter(int id,
     this->agentTypeName = agentBlueprint->GetAgentProfileName();
     this->objectName = agentBlueprint->GetObjectName();
     this->speedGoalMin = agentBlueprint->GetSpeedGoalMin();
-    this->spawnTime = spawnTime;
 
     if (vehicleType != AgentVehicleType::Car &&
             vehicleType != AgentVehicleType::Truck &&

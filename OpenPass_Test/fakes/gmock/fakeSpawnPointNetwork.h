@@ -19,15 +19,20 @@ class FakeSpawnPointNetwork : public SpawnPointNetworkInterface
 {
 public:
     MOCK_METHOD6(Instantiate,
-                 bool(std::string, AgentFactoryInterface*,
+                 bool(const SpawnPointLibraryInfoCollection&,
+                      AgentFactoryInterface*,
                       AgentBlueprintProviderInterface*,
-                      ParameterInterface*,
-                      const SamplerInterface&,
-                      ScenarioInterface*));
+                      const SamplerInterface * const,
+                      ScenarioInterface*,
+                      const SpawnPointProfiles&));
+    MOCK_METHOD0(TriggerPreRunSpawnPoints,
+                 bool());
+    MOCK_METHOD1(TriggerRuntimeSpawnPoints,
+                 bool(const int));
+    MOCK_METHOD0(ConsumeNewAgents,
+                 std::vector<Agent*>());
     MOCK_METHOD0(Clear,
                  void());
-    MOCK_METHOD0(GetSpawnPoint,
-                 SpawnPoint * ());
 };
 
 }  // namespace SimulationSlave

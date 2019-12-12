@@ -27,14 +27,14 @@ ScenarioConfig &SlaveConfig::GetScenarioConfig()
     return scenarioConfig;
 }
 
+SpawnPointLibraryInfoCollection& SlaveConfig::GetSpawnPointsConfig()
+{
+    return spawnPointsConfig;
+}
+
 EnvironmentConfig &SlaveConfig::GetEnvironmentConfig()
 {
     return environmentConfig;
-}
-
-TrafficConfig &SlaveConfig::GetTrafficConfig()
-{
-    return trafficConfig;
 }
 
 const std::string &SlaveConfig::GetProfilesCatalog() const

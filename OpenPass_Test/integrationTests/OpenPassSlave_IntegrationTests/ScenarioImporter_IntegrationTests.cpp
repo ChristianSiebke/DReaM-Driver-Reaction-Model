@@ -19,6 +19,7 @@
 
 using ::testing::NiceMock;
 using ::testing::Eq;
+using ::testing::Ne;
 
 using namespace Configuration;
 using namespace Importer;
@@ -49,14 +50,19 @@ TEST(ScenarioImporter_IntegrationTests, ImportScenario_WithMinimalInfoForOpenPas
     ScenarioImporter importer;
     ASSERT_TRUE(importer.Import(testScenarioFile.string(), &scenario));
 
-    ScenarioEntity resultEgoEntity = scenario.GetEgoEntity();
+    const auto entities = scenario.GetEntities();
+    const auto resultEgoEntityIter = std::find_if(entities.cbegin(),
+                                                  entities.cend(),
+                                                  [](const auto& entity) -> bool
+    {
+        return entity.name == "Ego";
+    });
+    ASSERT_THAT(resultEgoEntityIter, Ne(entities.cend()));
+    ScenarioEntity resultEgoEntity = *resultEgoEntityIter;
     SpawnInfo resultSpawnInfoEgo = resultEgoEntity.spawnInfo;
-
-    ASSERT_EQ(resultEgoEntity.name, "Ego");
 
     ASSERT_EQ(resultSpawnInfoEgo.ILane, -3);
     ASSERT_EQ(resultSpawnInfoEgo.s.value, 1000.0);
-    ASSERT_EQ(resultSpawnInfoEgo.TStart, 0.0);
     ASSERT_EQ(resultSpawnInfoEgo.velocity.value, 5.0);
     ASSERT_EQ(resultSpawnInfoEgo.acceleration.value, 0.5);
 
@@ -70,7 +76,6 @@ TEST(ScenarioImporter_IntegrationTests, ImportScenario_WithMinimalInfoForOpenPas
 
     ASSERT_EQ(resultSpawnInfoScenery.ILane, -3);
     ASSERT_EQ(resultSpawnInfoScenery.s.value, 1000.0);
-    ASSERT_EQ(resultSpawnInfoScenery.TStart, 0.0);
     ASSERT_EQ(resultSpawnInfoScenery.velocity.value, 5.0);
     ASSERT_EQ(resultSpawnInfoScenery.acceleration.value, 0.5);
 }
@@ -83,14 +88,19 @@ TEST(ScenarioImporter_IntegrationTests, ImportScenario_WithMoreInfoThanOpenPassN
     ScenarioImporter importer;
     ASSERT_TRUE(importer.Import(testScenarioFile.string(), &scenario));
 
-    ScenarioEntity resultEgoEntity = scenario.GetEgoEntity();
+    const auto entities = scenario.GetEntities();
+    const auto resultEgoEntityIter = std::find_if(entities.cbegin(),
+                                                  entities.cend(),
+                                                  [](const auto& entity) -> bool
+    {
+        return entity.name == "Ego";
+    });
+    ASSERT_THAT(resultEgoEntityIter, Ne(entities.cend()));
+    ScenarioEntity resultEgoEntity = *resultEgoEntityIter;
     SpawnInfo resultSpawnInfoEgo = resultEgoEntity.spawnInfo;
-
-    ASSERT_EQ(resultEgoEntity.name, "Ego");
 
     ASSERT_EQ(resultSpawnInfoEgo.ILane, -3);
     ASSERT_EQ(resultSpawnInfoEgo.s.value, 1000.0);
-    ASSERT_EQ(resultSpawnInfoEgo.TStart, 0.0);
     ASSERT_EQ(resultSpawnInfoEgo.velocity.value, 5.0);
     ASSERT_EQ(resultSpawnInfoEgo.acceleration.value, 0.5);
 
@@ -104,7 +114,6 @@ TEST(ScenarioImporter_IntegrationTests, ImportScenario_WithMoreInfoThanOpenPassN
 
     ASSERT_EQ(resultSpawnInfoScenery.ILane, -3);
     ASSERT_EQ(resultSpawnInfoScenery.s.value, 1000.0);
-    ASSERT_EQ(resultSpawnInfoScenery.TStart, 0.0);
     ASSERT_EQ(resultSpawnInfoScenery.velocity.value, -999.0);
     ASSERT_EQ(resultSpawnInfoScenery.acceleration.value, -999);
 }

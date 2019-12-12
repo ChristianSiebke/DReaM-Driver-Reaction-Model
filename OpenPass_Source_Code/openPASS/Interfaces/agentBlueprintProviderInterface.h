@@ -16,8 +16,9 @@
 
 #pragma once
 
-#include "Interfaces/agentBlueprintInterface.h"
+#include <optional>
 
+class AgentBlueprint;
 class AgentBlueprintProviderInterface
 {
 public:
@@ -29,15 +30,10 @@ public:
     * \details Samples an entired agent from a given SystemConfig or from a dynamically built agent
     *
     *
-    * @param[in/out]    agentBlueprint          All results get stored in the agent blueprint
-    * @param[in]        laneCategory            Category of the lane the agent will be spawned in only relevant for common agents
-    * @param[in]        scenarioAgentIterator     Iterator for scenario agent arrays.
+    * @param[in]        agentProfileName    Name of AgentProfile to sample
     *
-    * @return           true if Agent was succesfully sampled
+    * @return           Sampled AgentBlueprint if successful
     */
-    virtual bool SampleAgent(AgentBlueprintInterface& agentBlueprint,
-                             LaneCategory laneCategory,
-                             unsigned int scenarioAgentIterator) = 0;
-
+    virtual AgentBlueprint SampleAgent(const std::string& agentProfileName) const = 0;
 };
 

@@ -61,10 +61,12 @@ Example
 \section scenario_entities Entities
 
 The <Entities> tag defines all agents that are present at the start of the simulation at a predefined position.
-These are exactly one ego and an arbitrary number of scenario agents (possibly zero).
+There may be any arbitrary number of Scenario Agents (zero Scenario Agents is valid).
 Each agent is described by a name and a reference to a vehicle profile in the [ProfilesCatalog](\ref io_input_profilescatalog) (Important Note: This deviates from the OpenSCENARIO standard).
-The ego agent has to be named "Ego".
-Entities can also be grouped into selections. The selection called "ScenarioAgents" is special: The SpawnPoint will only spawn scenario agents that are part of this selection.
+To specify a Scenario Agent as the Ego Agent, the Agent must be named "Ego".
+Entities can also be grouped into selections.
+The selection called "ScenarioAgents" is special: The SpawnPoint will only spawn scenario agents that are part of this selection.
+The Ego Agent need not be included in the "ScenarioAgents" selection; it will always be spawned.
 
 Example
 ```xml
@@ -103,7 +105,7 @@ The schema is as follows:
 |Position	|Private		|-							|1		     |
 |Lane		|Position		|roadId, laneId, s, offset	|1			 |
 |Orientation|Lane			|type, h					|0 or 1		 |
-|Longitudinal|Action		|-							|0 or 1		 |
+|Longitudinal|Action		|-							|1		     |
 |Speed		|Longitudinal	|-							|1			 |
 |Dynamics	|Speed			|rate, shape				|1			 |
 |Target		|Speed			|-							|1			 |
@@ -160,6 +162,16 @@ Example
 					<Position>
 						<Lane roadId="1" s="50.0" laneId="-3" offset="0.0"/>
 					</Position>
+				</Action>
+				<Action>
+					<Longitudinal>
+						<Speed>
+							<Dynamics rate="0.0" shape="linear" />
+							<Target>
+								<Absolute value="10.0" />
+							</Target>
+						</Speed>
+					</Longitudinal>
 				</Action>
 			</Private>
 		</Actions>

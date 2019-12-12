@@ -17,6 +17,7 @@
 
 #include "trajectoryFollowerCommonBase.h"
 
+#include "Interfaces/parameterInterface.h"
 #include "Interfaces/observationInterface.h"
 #include "Common/componentStateChangeEvent.h"
 

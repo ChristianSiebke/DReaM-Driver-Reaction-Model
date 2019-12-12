@@ -20,6 +20,7 @@
 #include <list>
 #include <string>
 #include <QLibrary>
+#include "Common/runtimeInformation.h"
 #include "Interfaces/modelInterface.h"
 #include "Interfaces/componentInterface.h"
 #include "Interfaces/observationNetworkInterface.h"

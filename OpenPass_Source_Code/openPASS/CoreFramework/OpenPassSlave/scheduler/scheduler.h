@@ -19,10 +19,8 @@
 #include <functional>
 #include <memory>
 #include "Interfaces/worldInterface.h"
-#include "Interfaces/spawnControlInterface.h"
 #include "taskBuilder.h"
 #include "schedulerTasks.h"
-#include "spawnControl.h"
 
 namespace SimulationSlave
 {
@@ -118,7 +116,7 @@ private:
     * @param[out]    SpawnControl           controlling of spawning
     * @param[out]    WorldInterface         world
     */
-    void UpdateAgents(SpawnControlInterface &spawnControl, WorldInterface *world);
+    void UpdateAgents(WorldInterface *world);
 
     /*!
     * \brief ExecuteTasks
@@ -131,8 +129,6 @@ private:
     */
     template<typename T>
     bool ExecuteTasks(T tasks);
-
-    SchedulerReturnState ParseAbortReason(const SpawnControl& spawnControl, int currentTime);
 
     std::unique_ptr<SchedulerTasks> taskList;
 

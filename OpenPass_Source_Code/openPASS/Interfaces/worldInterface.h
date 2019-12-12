@@ -32,37 +32,6 @@ class SceneryInterface;
 class TrafficObjectInterface;
 class WorldObjectInterface;
 
-class LaneQueryResult
-{
-public:
-    static LaneQueryResult InvalidResult()
-    {
-        return LaneQueryResult(false);
-    }
-
-    LaneQueryResult(uint64_t streamId, double startDistance, double endDistance, LaneCategory laneCategory,
-                    bool isDrivingLane) :
-        valid{true},
-        streamId{streamId},
-        startDistance{startDistance},
-        endDistance{endDistance},
-        laneCategory{laneCategory},
-        isDrivingLane{isDrivingLane}
-    {}
-
-    bool valid { false };
-    uint64_t streamId { 0 };
-    double startDistance { 0.0 };
-    double endDistance { 0.0 };
-    LaneCategory laneCategory { LaneCategory::Undefined };
-    bool isDrivingLane { false };
-
-private:
-    LaneQueryResult(bool valid) : valid{valid}
-    {
-    }
-};
-
 //-----------------------------------------------------------------------------
 //! Provides access to world representation
 //-----------------------------------------------------------------------------
@@ -871,10 +840,6 @@ public:
     //-----------------------------------------------------------------------------
     virtual double GetFriction() const = 0;
 
-    virtual LaneQueryResult QueryLane(std::string roadId, int laneId, double distance) const = 0;
-
-    virtual std::list<LaneQueryResult> QueryLanes(std::string roadId, double startDistance, double endDistance) const = 0;
-
     //-----------------------------------------------------------------------------
     //! Converts stream Id for lane at given distance into  OpenDriveID
     //! Returns -999 if stream Id is invalid for given distance
@@ -912,13 +877,6 @@ public:
     //! @return
     //-----------------------------------------------------------------------------
     virtual AgentInterface* GetAgentByName(const std::string& scenarioName) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns a list with all agents n the specified group
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual std::vector<AgentInterface*> GetAgentsByGroupType(const AgentCategory& agentCategory) = 0;
 
     //-----------------------------------------------------------------------------
     //! \brief GetNextConnectingRoadIdOnRoute gets the next connecting Road (Road

@@ -21,7 +21,7 @@
 #include <list>
 
 #include "tasks.h"
-#include "Interfaces/spawnControlInterface.h"
+#include "Interfaces/spawnPointNetworkInterface.h"
 #include "Interfaces/worldInterface.h"
 #include "runResult.h"
 #include "observationNetwork.h"
@@ -64,7 +64,7 @@ private:
 
 
     WorldInterface* const world;
-    SpawnControlInterface* const spawnControl;
+    SpawnPointNetworkInterface* const spawnPointNetwork;
     ObservationNetworkInterface* const observationNetwork;
     EventDetectorNetworkInterface* const eventDetectorNetwork;
     ManipulatorNetworkInterface* const manipulatorNetwork;
@@ -90,13 +90,14 @@ private:
     void BuildManipulatorTasks();
 
 public:
-    TaskBuilder(const int &currentTime, RunResult &runResult,
-                const int frameworkUpdateRate,
-                WorldInterface* const world,
-                SpawnControlInterface* const spawnControl,
-                ObservationNetworkInterface * const observationNetwork,
-                EventDetectorNetworkInterface* const eventDetectorNetwork,
-                ManipulatorNetworkInterface* const manipulatorNetwork);
+    TaskBuilder(const int &currentTime,
+                          RunResult &runResult,
+                          const int frameworkUpdateRate,
+                          WorldInterface* const world,
+                          SpawnPointNetworkInterface* const spawnPointNetwork,
+                          ObservationNetworkInterface * const observationNetwork,
+                          EventDetectorNetworkInterface* const eventDetectorNetwork,
+                          ManipulatorNetworkInterface* const manipulatorNetwork);
 
     virtual ~TaskBuilder() = default;
     /*!

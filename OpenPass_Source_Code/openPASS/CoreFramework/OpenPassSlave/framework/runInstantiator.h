@@ -88,6 +88,7 @@ private:
     bool InitializeFrameworkModules(ExperimentConfig& experimentConfig,
                                     ScenarioInterface* scenario);
 
+    bool InitializeSpawnPointNetwork();
     void ClearRun();
 
     QMutex stopMutex;

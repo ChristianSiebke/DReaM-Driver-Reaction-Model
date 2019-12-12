@@ -342,7 +342,6 @@ void ScenarioImporter::ImportPositionElement(ScenarioEntity& scenarioEntity, QDo
 
     SpawnInfo& spawnInfo = scenarioEntity.spawnInfo;
     spawnInfo.s.value = s;
-    spawnInfo.TStart = 0; // always presimulation spawning
     spawnInfo.ILane = laneId;
     spawnInfo.roadId = roadId;
 
@@ -610,8 +609,8 @@ void ScenarioImporter::ParseSimulationTime(const QDomElement& byValueElement, do
 
 void ScenarioImporter::ValidityCheckForSpawnParameters(const ScenarioEntity& scenarioEntity)
 {
-    ThrowIfFalse((scenarioEntity.spawnInfo.s.value != -999
-                    && scenarioEntity.spawnInfo.TStart != -999),
+    // If scenarioEntity.spawnInfo.s.value != -999 resolves to false, the value is -999 -- unset
+    ThrowIfFalse(scenarioEntity.spawnInfo.s.value != -999,
                  "no position information available.");
 }
 
@@ -807,10 +806,6 @@ void ScenarioImporter::CategorizeEntities(const std::vector<ScenarioEntity>& ent
 {
     for (const auto& entity : entities)
     {
-        if (entity.name == "Ego")
-        {
-            scenario->SetEgoEntity(entity);
-        }
         scenario->AddScenarioEntity(entity);
     }
 

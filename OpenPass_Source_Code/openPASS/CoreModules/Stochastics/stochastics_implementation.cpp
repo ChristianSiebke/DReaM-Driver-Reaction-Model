@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2018 AMFD GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
@@ -24,7 +24,7 @@ StochasticsImplementation::StochasticsImplementation(const CallbackInterface *ca
     uniformDistribution(0, 1),
     binomialDistribution(1, 0.5),
     normalDistribution(0, 1),
-    exponentialDistribution(1),
+    exponentialDistribution(1.0),
     callbacks(callbacks)
 {
 }
@@ -59,8 +59,14 @@ double StochasticsImplementation::GetNormalDistributed(double mean, double stdDe
 
 double StochasticsImplementation::GetExponentialDistributed(double lambda)
 {
+    if(lambda <= 0.0)
+    {
+        throw std::runtime_error("Exponential distribution requires lambda greater than zero.");
+    }
+
     double draw = exponentialDistribution(baseGenerator);
     LOG(CbkLogLevel::Debug, "GetExponentialDistributed " + std::to_string(draw));
+
     return draw / lambda;
 }
 
