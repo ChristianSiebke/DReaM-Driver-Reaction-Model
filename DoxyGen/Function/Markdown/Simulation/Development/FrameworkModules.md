@@ -237,6 +237,7 @@ The following traffic signs are supported:
 
 | TrafficSign                                   | StVo Type | Subtype     | Value and Units   |
 |-----------------------------------------------|-----------|-------------|-------------------|
+| GiveWay                                       | 205       | -           | -                 |
 | Stop                                          | 206       | -           | -                 |
 | DoNotEnter                                    | 267       | -           | -                 |
 | EnvironmentalZoneBegin                        | 270.1     | -           | -                 |

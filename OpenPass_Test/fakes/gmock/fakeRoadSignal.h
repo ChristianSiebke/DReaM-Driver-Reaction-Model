@@ -27,5 +27,5 @@ public:
     MOCK_CONST_METHOD0(GetUnit, RoadSignalUnit ());
     MOCK_CONST_METHOD0(GetText, std::string ());
     MOCK_CONST_METHOD0(GetDependencies, std::list<std::string> ());
+    MOCK_CONST_METHOD0(GetIsDynamic, bool());
 };
-

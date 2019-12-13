@@ -9,7 +9,9 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
+#include <optional>
 #include <sstream>
+
 #include "xmlParser.h"
 
 namespace SimulationCommon
@@ -324,10 +326,16 @@ bool ParseAttribute<std::string>(QDomElement element, const std::string &attribu
    return ParseAttributeString(element, attributeName, result);
 }
 
-bool ParseAttributeString(QDomElement element, const std::string &attributeName, std::string &result)
+bool ParseAttributeString(QDomElement element, const std::string &attributeName, std::string &result, std::optional<std::string> defaultValue /* = std::nullopt */)
 {
     if(!element.hasAttribute(QString::fromStdString(attributeName)))
     {
+        if (defaultValue.has_value())
+        {
+            result = defaultValue.value();
+            return true;
+        }
+
         return false;
     }
 
@@ -342,10 +350,16 @@ bool ParseAttributeString(QDomElement element, const std::string &attributeName,
     return true;
 }
 
-bool ParseAttributeDouble(QDomElement element, const std::string &attributeName, double &result)
+bool ParseAttributeDouble(QDomElement element, const std::string &attributeName, double &result, std::optional<double> defaultValue /* = std::nullopt */)
 {
     if(!element.hasAttribute(QString::fromStdString(attributeName)))
     {
+        if (defaultValue.has_value())
+        {
+            result = defaultValue.value();
+            return true;
+        }
+
         return false;
     }
 

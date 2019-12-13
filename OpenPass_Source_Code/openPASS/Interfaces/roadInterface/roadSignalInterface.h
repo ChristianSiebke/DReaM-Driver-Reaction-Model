@@ -32,5 +32,6 @@ public:
     virtual RoadSignalUnit GetUnit() const = 0;
     virtual std::string GetText() const = 0;
     virtual std::list<std::string> GetDependencies() const = 0;
+    virtual bool GetIsDynamic() const = 0;
 };
 

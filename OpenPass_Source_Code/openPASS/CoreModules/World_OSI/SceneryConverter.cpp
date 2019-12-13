@@ -775,6 +775,12 @@ void SceneryConverter::CreateTrafficSigns()
 
         for (RoadSignalInterface* signal : road->GetRoadSignals())
         {
+            if (signal->GetIsDynamic())
+            {
+                LOG(CbkLogLevel::Warning, std::string("Ignoring dynamic signal: ") + signal->GetId());
+                continue;
+            }
+
             // Gather all dependent signals
             if(!signal->GetDependencies().empty())
             {
@@ -793,7 +799,13 @@ void SceneryConverter::CreateTrafficSigns()
             OWL::Interfaces::TrafficSign& trafficSign = worldData.AddTrafficSign(signal->GetId());
 
             trafficSign.SetS(signal->GetS());
-            trafficSign.SetSpecification(signal);
+
+            if (!trafficSign.SetSpecification(signal))
+            {
+                const std::string message = "Unsupported traffic sign type: " + signal->GetType() + (" (id: " + signal->GetId() + ")");
+                LOG(CbkLogLevel::Warning, message);
+                continue;
+            }
 
             for (auto lane : section->GetLanes())
             {

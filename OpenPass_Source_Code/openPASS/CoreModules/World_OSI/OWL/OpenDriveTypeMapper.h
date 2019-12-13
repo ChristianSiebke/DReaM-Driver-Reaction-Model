@@ -34,14 +34,14 @@ const std::map<std::string, std::pair<osi3::TrafficSignValue_Unit, std::map<std:
 {
     {"274.1", {osi3::TrafficSignValue_Unit::TrafficSignValue_Unit_UNIT_KILOMETER_PER_HOUR,
                     {
-                        {"",     {30.0, osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_SPEED_LIMIT_ZONE_BEGIN}},
+                        {"",    {30.0, osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_SPEED_LIMIT_ZONE_BEGIN}},
                         {"20",  {20.0, osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_SPEED_LIMIT_ZONE_BEGIN}}
                     }
               }
     },
     {"274.2", {osi3::TrafficSignValue_Unit::TrafficSignValue_Unit_UNIT_KILOMETER_PER_HOUR,
                     {
-                        {"",     {30.0, osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_SPEED_LIMIT_ZONE_END}},
+                        {"",    {30.0, osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_SPEED_LIMIT_ZONE_END}},
                         {"20",  {20.0, osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_SPEED_LIMIT_ZONE_END}}
                     }
               }
@@ -83,6 +83,7 @@ const std::map<std::string, osi3::TrafficSign_MainSign_Classification_Type> traf
 {
     {"-1", osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_OTHER},
     {"none", osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_OTHER},
+    {"205", osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_GIVE_WAY},
     {"206", osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_STOP},
     {"267", osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_DO_NOT_ENTER},
     {"270.1", osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_ENVIRONMENTAL_ZONE_BEGIN},
@@ -129,6 +130,7 @@ const std::map<osi3::TrafficSignValue_Unit, std::pair<double, CommonTrafficSign:
 const std::map<osi3::TrafficSign_MainSign_Classification_Type, CommonTrafficSign::Type> typeConversionMap =
 {
     {osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_STOP, CommonTrafficSign::Type::Stop},
+    {osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_GIVE_WAY, CommonTrafficSign::Type::GiveWay},
     {osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_DO_NOT_ENTER, CommonTrafficSign::Type::DoNotEnter},
     {osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_ENVIRONMENTAL_ZONE_BEGIN, CommonTrafficSign::Type::EnvironmentalZoneBegin},
     {osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_ENVIRONMENTAL_ZONE_END, CommonTrafficSign::Type::EnvironmentalZoneEnd},

@@ -148,17 +148,16 @@ void SceneryImporter::ParseLaneRoadMark(std::string leftCenterRight, QDomElement
     }
 
     QDomElement roadLaneRoadMarkElement;
-    ThrowIfFalse(SimulationCommon::GetFirstChildElement(roadLaneElement, TAG::roadMark, roadLaneRoadMarkElement),
-                  "Could not parse lane road mark. Tag " + std::string(TAG::roadMark) + " is missing.");
+    SimulationCommon::GetFirstChildElement(roadLaneElement, TAG::roadMark, roadLaneRoadMarkElement);
 
     while (!roadLaneRoadMarkElement.isNull())
     {
         double roadLaneSOffset;
-        ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadLaneRoadMarkElement, ATTRIBUTE::sOffset, roadLaneSOffset),
+        ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadLaneRoadMarkElement, ATTRIBUTE::sOffset, roadLaneSOffset, 0.0),
                       "Could not parse lane road mark. RoadMark tag requires a " + std::string(ATTRIBUTE::sOffset) + " attribute.");
 
         std::string roadMarkTypeStr;
-        ThrowIfFalse(SimulationCommon::ParseAttributeString(roadLaneRoadMarkElement, ATTRIBUTE::type, roadMarkTypeStr),
+        ThrowIfFalse(SimulationCommon::ParseAttributeString(roadLaneRoadMarkElement, ATTRIBUTE::type, roadMarkTypeStr, "none"),
                       "Could not parse lane road mark. RoadMark tag requires a " + std::string(ATTRIBUTE::type) + " attribute.");
         RoadLaneRoadMarkType roadMarkType = RoadLaneRoadMarkType::Undefined;
         if (roadMarkTypeStr == "none")
@@ -203,7 +202,7 @@ void SceneryImporter::ParseLaneRoadMark(std::string leftCenterRight, QDomElement
         }
 
         std::string roadMarkColorStr;
-        ThrowIfFalse(SimulationCommon::ParseAttributeString(roadLaneRoadMarkElement, ATTRIBUTE::color, roadMarkColorStr),
+        ThrowIfFalse(SimulationCommon::ParseAttributeString(roadLaneRoadMarkElement, ATTRIBUTE::color, roadMarkColorStr, "standard"),
                       "Could not parse lane road mark. RoadMark tag requires a " + std::string(ATTRIBUTE::color) + " attribute.");
         RoadLaneRoadMarkColor color = RoadLaneRoadMarkColor::Undefined;
         if (roadMarkColorStr == "standard" || roadMarkColorStr == "white")
@@ -234,10 +233,10 @@ void SceneryImporter::ParseLaneRoadMark(std::string leftCenterRight, QDomElement
         RoadLaneRoadMarkLaneChange roadChange = RoadLaneRoadMarkLaneChange::Undefined;
 
         std::string weightStr;
-        ThrowIfFalse(SimulationCommon::ParseAttributeString(roadLaneRoadMarkElement, ATTRIBUTE::weight, weightStr),
+        ThrowIfFalse(SimulationCommon::ParseAttributeString(roadLaneRoadMarkElement, ATTRIBUTE::weight, weightStr, "standard"),
                       "Could not parse lane road mark. RoadMark tag requires a " + std::string(ATTRIBUTE::weight) + " attribute.");
         RoadLaneRoadMarkWeight weight = RoadLaneRoadMarkWeight::Undefined;
-        if (weightStr == "standard" )
+        if (weightStr == "standard")
         {
             weight = RoadLaneRoadMarkWeight::Standard;
         }
@@ -684,7 +683,7 @@ void SceneryImporter::ParseSignals(QDomElement& roadElement,
                               "Could not parse signals. Signal tag requires a " + std::string(ATTRIBUTE::id) + " attribute.");
                 ThrowIfFalse(ParseAttributeString(signalElement, ATTRIBUTE::name,        signal.name),
                               "Could not parse signals. Signal tag requires a " + std::string(ATTRIBUTE::name) + " attribute.");
-                ThrowIfFalse(ParseAttributeString(signalElement, ATTRIBUTE::dynamic,     signal.dynamic),
+                ThrowIfFalse(ParseAttributeString(signalElement, ATTRIBUTE::dynamic,     signal.dynamic, "no"),
                               "Could not parse signals. Signal tag requires a " + std::string(ATTRIBUTE::dynamic) + " attribute.");
                 ThrowIfFalse(ParseAttributeString(signalElement, ATTRIBUTE::orientation, signal.orientation),
                               "Could not parse signals. Signal tag requires a " + std::string(ATTRIBUTE::orientation) + " attribute.");
@@ -694,7 +693,6 @@ void SceneryImporter::ParseSignals(QDomElement& roadElement,
                         "Could not parse signals. Signal tag requires a " + std::string(ATTRIBUTE::type) + " attribute.");
                 ThrowIfFalse(ParseAttributeString(signalElement, ATTRIBUTE::subtype,     signal.subtype),
                               "Could not parse signals. Signal tag requires a " + std::string(ATTRIBUTE::subtype) + " attribute.");
-
                 // optional
                 std::string signalUnit;
                 ParseAttributeDouble(signalElement, ATTRIBUTE::value, signal.value);
@@ -993,29 +991,19 @@ void SceneryImporter::ParseRoadLanes(QDomElement& roadElement,
         while (!laneOffsetElement.isNull())
         {
             double laneOffsetS, laneOffsetA, laneOffsetB, laneOffsetC, laneOffsetD;
-            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(laneOffsetElement,
-                       ATTRIBUTE::s,
-                       laneOffsetS),
+            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(laneOffsetElement, ATTRIBUTE::s, laneOffsetS, 0.0),
                           "Could not parse road lanes. LaneOffset tag requires a " + std::string(ATTRIBUTE::s) + " attribute.");
 
-            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(laneOffsetElement,
-                       ATTRIBUTE::a,
-                       laneOffsetA),
+            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(laneOffsetElement, ATTRIBUTE::a, laneOffsetA, 0.0),
                           "Could not parse road lanes. LaneOffset tag requires a " + std::string(ATTRIBUTE::a) + " attribute.");
 
-            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(laneOffsetElement,
-                       ATTRIBUTE::b,
-                       laneOffsetB),
+            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(laneOffsetElement, ATTRIBUTE::b, laneOffsetB, 0.0),
                          "Could not parse road lanes. LaneOffset tag requires a " + std::string(ATTRIBUTE::b) + " attribute.");
 
-            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(laneOffsetElement,
-                       ATTRIBUTE::c,
-                       laneOffsetC),
+            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(laneOffsetElement, ATTRIBUTE::c, laneOffsetC, 0.0),
                           "Could not parse road lanes. LaneOffset tag requires a " + std::string(ATTRIBUTE::c) + " attribute.");
 
-            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(laneOffsetElement,
-                       ATTRIBUTE::d,
-                       laneOffsetD),
+            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(laneOffsetElement, ATTRIBUTE::d, laneOffsetD, 0.0),
                           "Could not parse road lanes. LaneOffset tag requires a " + std::string(ATTRIBUTE::d) + " attribute.");
 
             road->AddLaneOffset(laneOffsetS,

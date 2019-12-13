@@ -27,44 +27,44 @@ public:
     /// @brief Returns the type of the signal (e.g. code according to StVO)
     /// @return type
     //-----------------------------------------------------------------------------
-    std::string GetType() const;
+    std::string GetType() const override;
 
     //-----------------------------------------------------------------------------
     /// @brief Returns the type of the signal (e.g. code according to StVO)
     /// @return type
     //-----------------------------------------------------------------------------
-    std::string GetSubType() const;
+    std::string GetSubType() const override;
 
     //-----------------------------------------------------------------------------
     /// @brief Returns the unique identification string of the signal
     /// @return id
     //-----------------------------------------------------------------------------
-    virtual std::string GetId() const;
+    virtual std::string GetId() const override;
 
     //-----------------------------------------------------------------------------
     /// @brief Returns the value
     /// @return value
     //-----------------------------------------------------------------------------
-    double GetValue() const;
+    double GetValue() const override;
 
     //-----------------------------------------------------------------------------
     /// @brief Returns the unit
     /// @return unit
     //-----------------------------------------------------------------------------
-    RoadSignalUnit GetUnit() const;
+    RoadSignalUnit GetUnit() const override;
 
     //-----------------------------------------------------------------------------
     /// @brief Returns the text on the signal
     /// @return text
     //-----------------------------------------------------------------------------
-    std::string GetText() const;
+    std::string GetText() const override;
 
     //-----------------------------------------------------------------------------
     /// @brief Returns the s coordinate of the signal
     ///
     /// @return s [m]
     //-----------------------------------------------------------------------------
-    double GetS() const;
+    double GetS() const override;
 
     //-----------------------------------------------------------------------------
     /// @brief Returns the t coordinate of the signal
@@ -89,7 +89,7 @@ public:
     //!
     //! @return             true if signal is valid
     //-----------------------------------------------------------------------------
-    bool IsValidForLane(int laneId) const;
+    bool IsValidForLane(int laneId) const override;
 
 
     //-----------------------------------------------------------------------------
@@ -119,7 +119,6 @@ public:
     /// @return height [m]
     //-----------------------------------------------------------------------------
     virtual double GetPitch() const;
-
     //-----------------------------------------------------------------------------
     /// @brief Returns the roll of the signal
     ///
@@ -139,9 +138,9 @@ public:
     ///
     /// @return true if dynamic == "yes"
     //-----------------------------------------------------------------------------
-    virtual bool GetIsDynamic() const;
+    virtual bool GetIsDynamic() const override;
 
-    virtual std::list<std::string> GetDependencies() const;
+    virtual std::list<std::string> GetDependencies() const override;
 
 private:
     RoadInterface* road;
@@ -152,5 +151,5 @@ public:
     RoadSignal(RoadSignal&&) = delete;
     RoadSignal& operator=(const RoadSignal&) = delete;
     RoadSignal& operator=(RoadSignal&&) = delete;
-    virtual ~RoadSignal() = default;
+    virtual ~RoadSignal() override = default;
 };

@@ -51,9 +51,9 @@ extern bool ParseULong(QDomElement rootElement, const std::string &tag, unsigned
 
 extern bool ParseBool(QDomElement rootElement, const std::string &tag, bool &result);
 
-extern bool ParseAttributeString(QDomElement element, const std::string &attributeName, std::string &result);
+extern bool ParseAttributeString(QDomElement element, const std::string &attributeName, std::string &result, std::optional<std::string> defaultValue = std::nullopt);
 
-extern bool ParseAttributeDouble(QDomElement element, const std::string &attributeName, double &result);
+extern bool ParseAttributeDouble(QDomElement element, const std::string &attributeName, double &result, std::optional<double> defaultValue = std::nullopt);
 
 extern bool ParseAttributeInt(QDomElement element, const std::string &attributeName, int &result);
 
