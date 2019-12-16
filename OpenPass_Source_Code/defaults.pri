@@ -18,6 +18,7 @@ win32 {
         DESTDIR_TESTS=$$DESTDIR
     }
 
+<<<<<<< HEAD
     isEmpty(DESTDIR_GUI){
         DESTDIR_GUI = "C:\OpenPASS"
     }
@@ -28,6 +29,14 @@ win32 {
 
     isEmpty(EXTRA_LIB_PATH) {
         EXTRA_LIB_PATH="C:\OpenPASS\thirdParty\lib"
+=======
+    isEmpty(EXTRA_INCLUDE_PATH) {
+        EXTRA_INCLUDE_PATH="$$PWD\..\deps\thirdParty\include"
+    }
+
+    isEmpty(EXTRA_LIB_PATH) {
+        EXTRA_LIB_PATH="$$PWD\..\deps\thirdParty\lib\win"
+>>>>>>> eclipse/servant
     }
 }
 
@@ -40,6 +49,7 @@ unix {
         DESTDIR_TESTS=$$DESTDIR
     }
 
+<<<<<<< HEAD
     isEmpty(DESTDIR_GUI){
         DESTDIR_GUI = "/OpenPASS"
     }
@@ -50,5 +60,13 @@ unix {
 
     isEmpty(EXTRA_LIB_PATH) {
         EXTRA_LIB_PATH=/OpenPASS/thirdParty/lib
+=======
+    isEmpty(EXTRA_INCLUDE_PATH) {
+        EXTRA_INCLUDE_PATH="$$PWD/../deps/thirdParty/include"
+    }
+
+    isEmpty(EXTRA_LIB_PATH) {
+        EXTRA_LIB_PATH=$$PWD/../deps/thirdParty/lib
+>>>>>>> eclipse/servant
     }
 }

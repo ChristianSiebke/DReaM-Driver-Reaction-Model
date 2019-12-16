@@ -16,6 +16,7 @@
 
 CONFIG += OPENPASS_LIBRARY_GUI
 include(../../global.pri)
+
 TARGET = System
 TEMPLATE = lib
 CONFIG += plugin c++17 no_keywords
