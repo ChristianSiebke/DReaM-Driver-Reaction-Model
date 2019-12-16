@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<systems dynamic="true">
+  <system>
+    <id>0</id>
+    <title>AebOSI</title>
+    <priority>0</priority>
+    <components>
+      <component>
+        <id>0</id>
+        <library>Algorithm_AEB</library>
+        <title>AEB</title>
+        <schedule>
+          <priority>0</priority>
+          <offset>0</offset>
+          <cycle>1</cycle>
+          <response>0</response>
+        </schedule>
+        <parameters>
+          <parameter>
+            <!--parameter's title: CollisionDetectionLongitudinalBoundary-->
+            <id>0</id>
+            <type>double</type>
+            <unit>m</unit>
+            <value>4</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: CollisionDetectionLateralBoundary-->
+            <id>1</id>
+            <type>double</type>
+            <unit>m</unit>
+            <value>1.5</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: TTC-->
+            <id>2</id>
+            <type>double</type>
+            <unit>s</unit>
+            <value>2</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: Acceleration-->
+            <id>3</id>
+            <type>double</type>
+            <unit>m/s^2</unit>
+            <value>-3</value>
+          </parameter>
+        </parameters>
+        <position>
+          <x>715</x>
+          <y>348</y>
+        </position>
+      </component>
+      <component>
+        <id>1</id>
+        <library>Sensor_OSI</library>
+        <title>Geometric2D</title>
+        <schedule>
+          <priority>0</priority>
+          <offset>0</offset>
+          <cycle>1</cycle>
+          <response>0</response>
+        </schedule>
+        <parameters>
+          <parameter>
+            <!--parameter's title: Longitudinal-->
+            <id>0</id>
+            <type>double</type>
+            <unit>m</unit>
+            <value>3.7</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: Lateral-->
+            <id>1</id>
+            <type>double</type>
+            <unit>m</unit>
+            <value>1.09</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: Height-->
+            <id>2</id>
+            <type>double</type>
+            <unit>m</unit>
+            <value>0.5</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: Pitch-->
+            <id>3</id>
+            <type>double</type>
+            <unit>rad</unit>
+            <value>0</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: Yaw-->
+            <id>4</id>
+            <type>double</type>
+            <unit>rad</unit>
+            <value>0</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: Roll-->
+            <id>5</id>
+            <type>double</type>
+            <unit>rad</unit>
+            <value>0</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: FailureProbability-->
+            <id>6</id>
+            <type>double</type>
+            <unit></unit>
+            <value>0</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: Latency-->
+            <id>7</id>
+            <type>normalDistribution</type>
+            <unit>s</unit>
+            <value>0,0,0,0</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: OpeningAngleH-->
+            <id>8</id>
+            <type>double</type>
+            <unit>rad</unit>
+            <value>0.262</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: EnableVisualObstruction-->
+            <id>9</id>
+            <type>bool</type>
+            <unit></unit>
+            <value>true</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: DetectionRange-->
+            <id>10</id>
+            <type>double</type>
+            <unit>m</unit>
+            <value>150</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: RequiredPercentageOfVisibileArea-->
+            <id>11</id>
+            <type>double</type>
+            <unit></unit>
+            <value>0</value>
+          </parameter>
+        </parameters>
+        <position>
+          <x>40</x>
+          <y>20</y>
+        </position>
+      </component>
+      <component>
+        <id>2</id>
+        <library>Sensor_OSI</library>
+        <title>Geometric2D</title>
+        <schedule>
+          <priority>0</priority>
+          <offset>0</offset>
+          <cycle>1</cycle>
+          <response>0</response>
+        </schedule>
+        <parameters>
+          <parameter>
+            <!--parameter's title: Longitudinal-->
+            <id>0</id>
+            <type>double</type>
+            <unit>m</unit>
+            <value>3.7</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: Lateral-->
+            <id>1</id>
+            <type>double</type>
+            <unit>m</unit>
+            <value>-1.09</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: Height-->
+            <id>2</id>
+            <type>double</type>
+            <unit>m</unit>
+            <value>0.5</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: Pitch-->
+            <id>3</id>
+            <type>double</type>
+            <unit>rad</unit>
+            <value>0</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: Yaw-->
+            <id>4</id>
+            <type>double</type>
+            <unit>rad</unit>
+            <value>0</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: Roll-->
+            <id>5</id>
+            <type>double</type>
+            <unit>rad</unit>
+            <value>0</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: FailureProbability-->
+            <id>6</id>
+            <type>double</type>
+            <unit></unit>
+            <value>0</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: Latency-->
+            <id>7</id>
+            <type>normalDistribution</type>
+            <unit>s</unit>
+            <value>0,0,0,0</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: OpeningAngleH-->
+            <id>8</id>
+            <type>double</type>
+            <unit>rad</unit>
+            <value>0.262</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: EnableVisualObstruction-->
+            <id>9</id>
+            <type>bool</type>
+            <unit></unit>
+            <value>true</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: DetectionRange-->
+            <id>10</id>
+            <type>double</type>
+            <unit>m</unit>
+            <value>150</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: RequiredPercentageOfVisibileArea-->
+            <id>11</id>
+            <type>double</type>
+            <unit></unit>
+            <value>0</value>
+          </parameter>
+        </parameters>
+        <position>
+          <x>46</x>
+          <y>433</y>
+        </position>
+      </component>
+    </components>
+    <connections>
+      <connection>
+        <id>0</id>
+        <source>
+          <!--component title: Geometric2D-->
+          <component>1</component>
+          <!--output title: sensor data-->
+          <output>0</output>
+        </source>
+        <target>
+          <!--component title: AEB-->
+          <component>0</component>
+          <!--input title: Camera-->
+          <input>0</input>
+        </target>
+      </connection>
+      <connection>
+        <id>1</id>
+        <source>
+          <!--component title: Geometric2D-->
+          <component>2</component>
+          <!--output title: sensor data-->
+          <output>0</output>
+        </source>
+        <target>
+          <!--component title: AEB-->
+          <component>0</component>
+          <!--input title: Camera-->
+          <input>0</input>
+        </target>
+      </connection>
+    </connections>
+  </system>
+  <system>
+    <id>1</id>
+    <title>BasicTrajectoryFollower</title>
+    <priority>0</priority>
+    <components>
+      <component>
+        <id>0</id>
+        <library>Dynamics_TrajectoryFollower</library>
+        <title>Dynamics_TrajectoryFollower</title>
+        <schedule>
+          <priority>0</priority>
+          <offset>0</offset>
+          <cycle>1</cycle>
+          <response>0</response>
+        </schedule>
+        <parameters>
+          <parameter>
+            <!--parameter's title: TrajectoryFile-->
+            <id>0</id>
+            <type>string</type>
+            <unit></unit>
+            <value>Trajectory.xml</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: AutomaticDeactivation-->
+            <id>1</id>
+            <type>bool</type>
+            <unit></unit>
+            <value>true</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: EnforceTrajectory-->
+            <id>2</id>
+            <type>bool</type>
+            <unit></unit>
+            <value>true</value>
+          </parameter>
+        </parameters>
+        <position>
+          <x>40</x>
+          <y>20</y>
+        </position>
+      </component>
+    </components>
+    <connections/>
+  </system>
+</systems>

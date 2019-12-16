@@ -25,7 +25,7 @@ SystemModel::SystemModel(ComponentInterface * const component,
     , systems(new SystemMapModel(this))
 {
     // Load components
-    components->loadFromDirectory(QDir(QCoreApplication::applicationDirPath() + SUBDIR_LIB_COMPONENT));
+    components->loadFromDirectory(QDir(QCoreApplication::applicationDirPath() + "/components"));
 }
 
 bool SystemModel::clear()

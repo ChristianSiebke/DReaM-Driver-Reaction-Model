@@ -46,7 +46,7 @@ void SystemTabView::on_systemTabs_tabBarDoubleClicked(int index)
         ui->systemTabs->setTabText(index, newName);
         SystemItemView *view= qobject_cast<SystemItemView*>( ui->systemTabs->widget(index) );
 
-        if(0!=view)
+        if(nullptr!=view)
             view->getSystem()->setTitle(newName);
     }
 }
@@ -64,7 +64,7 @@ void SystemTabView::removeTab(int index)
     SystemItemView *view = qobject_cast<SystemItemView*> (ui->systemTabs->widget(index));
     int ret;
 
-    if(0!=view)
+    if(nullptr!=view)
     {
         warning.setText("The whole System will be deleted!");
         warning.setInformativeText("Do you want to continue?");
@@ -97,7 +97,7 @@ void SystemTabView::changeTabTitle(const SystemMapInterface::ID &id)
     {
        view = qobject_cast<SystemItemView*>(ui->systemTabs->widget(tabID));
 
-       if(0!=view)
+       if(nullptr!=view)
            if(view->getSystem()->getID() == id)
                 break;
     }

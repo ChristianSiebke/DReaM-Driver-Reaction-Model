@@ -43,8 +43,8 @@ SystemView::SystemView(WindowInterface * const window,
     ui->layout->insertWidget(1,new SystemComponentManagerView(system->getComponents(), dynamicMode, this), 0);
 
     // create radio buttons for activating/deactivating dynamic mode
-    QRadioButton * dynamicMode_on = new QRadioButton("dynamic mode", this);
-    QRadioButton * staticMode_on = new QRadioButton("static mode", this);
+    QRadioButton * dynamicMode_on = new QRadioButton("Dynamic Mode", this);
+    QRadioButton * staticMode_on = new QRadioButton("Static Mode", this);
 
     dynamicMode_on->setObjectName("dynamic");
     staticMode_on->setObjectName("static");
@@ -57,10 +57,10 @@ SystemView::SystemView(WindowInterface * const window,
     // Register view
     window->add(ViewID, WindowInterface::createButton(tr("System Editor"), 0, 04000), this, {
                     WindowInterface::createAction(tr("Clear"), this, &SystemView::actionClear_clicked),
-                    WindowInterface::createAction(tr("New System"), this, &SystemView::actionNewSystem_clicked),
-                    WindowInterface::createAction(tr("Load System"), this, &SystemView::actionLoadSystem_clicked),
-                    WindowInterface::createAction(tr("Save System"), this, &SystemView::actionSaveSystem_clicked),
+                    WindowInterface::createAction(tr("Load"), this, &SystemView::actionLoadSystem_clicked),
+                    WindowInterface::createAction(tr("Save"), this, &SystemView::actionSaveSystem_clicked),
                     WindowInterface::createAction(tr("Save Screenshot"), this, &SystemView::actionSaveScreenshot_clicked),
+                    WindowInterface::createAction(tr("New System"), this, &SystemView::actionNewSystem_clicked),
                     dynamicMode_on, staticMode_on,
                 });
 
@@ -183,8 +183,9 @@ bool SystemView::eventFilter(QObject *watched, QEvent *event)
         !radioButton->isChecked() && (mouseEvent->type() == QMouseEvent::MouseButtonPress) && (mouseEvent->button() == Qt::LeftButton) )
     {
         warning.setText("You are going to activate the dynamic mode. In this mode, you can only build systems compatible with the profile-based agent configuration ansatz. "
-                        "In the current implementation, you will be bound to systems that only consist of one algorithm and multiple sensors. "
-                        "Furthermore, not all components will be supported. Before activating the mode, the entire worksheet will be cleared.");
+                        "This means that you are going to configure the sensors + vehicle component (algorithm) part of a vehicle profile. "
+                        "The connections you draw between algorithm and sensor thereby correspond to the sensorLinks of the vehicle profile. "
+                        "Finally, not all components will be supported. Hence, the entire worksheet will be cleared before continuing.");
         warning.setInformativeText("Do you want to continue?");
         warning.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         ret=warning.exec();
@@ -216,6 +217,7 @@ bool SystemView::eventFilter(QObject *watched, QEvent *event)
             radioButton->toggle();
     }
 
+
     return QWidget::eventFilter(watched, event);
 
 }
@@ -227,4 +229,11 @@ void SystemView::activateDynamicMode(bool checked)
     // Update the component manager
     findChild<SystemComponentManagerView *>(QString(), Qt::FindDirectChildrenOnly)->updateManagerView();
     findChild<SystemComponentManagerView *>(QString(), Qt::FindDirectChildrenOnly)->show();
+
+    Q_EMIT dynamicModeActicated(*dynamicMode);
+}
+
+bool SystemView::isDynamicMode() const
+{
+    return *dynamicMode;
 }

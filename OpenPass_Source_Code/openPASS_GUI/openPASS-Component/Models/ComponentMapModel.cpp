@@ -36,6 +36,7 @@ bool ComponentMapModel::add(ComponentMapInterface::Name const & name,
         map.insert(name, item);
         item->setParent(this);
         Q_EMIT added();
+        Q_EMIT item->modifiedName();
         return true;
     }
     return false;
@@ -114,7 +115,7 @@ bool ComponentMapModel::setName(ComponentMapInterface::Item * const item,
     if ((contains(item)) && (!contains(name)))
     {
         map.insert(name, map.take(item->getName()));
-        Q_EMIT modifiedName();
+        Q_EMIT item->modifiedName();
         return true;
     }
     return false;
@@ -155,7 +156,9 @@ bool ComponentMapModel::remove(ComponentMapInterface::Name const & name)
     if (map.contains(name))
     {
         delete map.take(name);
+       // map.take(name)->setParent(nullptr);
         Q_EMIT removed();
+
         return true;
     }
     return false;
@@ -163,10 +166,37 @@ bool ComponentMapModel::remove(ComponentMapInterface::Name const & name)
 
 bool ComponentMapModel::remove(ComponentMapInterface::Item * const item)
 {
-    return ((contains(item)) ? remove(getName(item)) : false);
+    if(map.values().contains(item))
+    {
+        map.take(item->getName())->setParent(nullptr);
+        Q_EMIT removed();
+
+        return true;
+    }
+
+    return false;
 }
 
 bool ComponentMapModel::remove(ComponentMapInterface::Index const & index)
 {
     return ((contains(index)) ? remove(getName(index)) : false);
+}
+
+// removes all Components matching 'type'
+bool ComponentMapModel::remove(ComponentItemInterface::Type const & type)
+{
+    bool success = true;
+    for(auto item : map.values())
+    {
+        if(item->getType() == type)
+            success = success && remove(item);
+    }
+
+    return success;
+}
+
+
+QList<ComponentMapInterface::Item *> ComponentMapModel::values() const
+{
+    return map.values();
 }

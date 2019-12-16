@@ -31,6 +31,8 @@
 #include <QPushButton>
 #include <QString>
 #include <QWidget>
+#include <QLineEdit>
+#include <QLabel>
 
 static ServiceManagerInterface::ID const WindowInterfaceID =
         ServiceManagerInterfaceID("openPASS.Window.WindowInterface");
@@ -54,7 +56,8 @@ public:
     using Action = QPushButton;                     //!< The button in the menu of the stacked widget
     using ActionTitle = QString;                    //!< The title of the button in the stacked widget's menu
     using ActionMenu = QMenu;                       //!< The drop down menu of the button in the stacked widget's menu
-    using Menu = QList<WindowInterface::Widget *>;  //!< The list of widgets in the menu of the stacked widget
+// using Menu = QList<WindowInterface::Action *>;  //!< The list of buttons in the menu of the stacked widget
+    using Menu = QList<WindowInterface::Widget*>;
 
 public:
     explicit WindowInterface(QObject * const parent = nullptr)
@@ -148,6 +151,7 @@ public:
         action->setMenu(menu);
         return action;
     }
+
 
     //-----------------------------------------------------------------------------
     //! Creates a separator in the menu bar of a Window View.

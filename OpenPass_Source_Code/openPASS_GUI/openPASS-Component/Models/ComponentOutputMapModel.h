@@ -22,6 +22,7 @@ public:
     virtual ~ComponentOutputMapModel() = default;
 
 public:
+    virtual bool add(ComponentOutputMapInterface::Item * const item) override;
     virtual bool add(ComponentOutputMapInterface::ID const & id) override;
     virtual bool add(ComponentOutputMapInterface::ID const & id,
                      ComponentOutputMapInterface::Item * const item) override;
@@ -64,6 +65,9 @@ public:
     virtual bool remove(ComponentOutputMapInterface::ID const & id) override;
     virtual bool remove(ComponentOutputMapInterface::Item * const item) override;
     virtual bool remove(ComponentOutputMapInterface::Index const & index) override;
+
+public:
+    virtual Item * createOutput() const override;
 
 protected:
     ComponentOutputMapInterface::Map map;

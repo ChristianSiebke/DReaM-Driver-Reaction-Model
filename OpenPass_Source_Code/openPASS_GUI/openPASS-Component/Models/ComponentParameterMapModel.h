@@ -23,9 +23,12 @@ public:
     virtual ~ComponentParameterMapModel() = default;
 
 public:
+    virtual bool add(Item * const item) override;
     virtual bool add(ComponentParameterMapInterface::ID const & id) override;
     virtual bool add(ComponentParameterMapInterface::ID const & id,
                      ComponentParameterMapInterface::Item * const item) override;
+
+    virtual ComponentParameterMapInterface::Item * createParameter() const override;
 
 public:
     virtual ComponentParameterMapInterface::Iterator begin() override;

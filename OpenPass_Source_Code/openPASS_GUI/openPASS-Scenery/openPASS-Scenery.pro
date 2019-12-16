@@ -13,6 +13,9 @@
 # SPDX-License-Identifier: EPL-2.0
 #-----------------------------------------------------------------------------/
 
+CONFIG += OPENPASS_LIBRARY_GUI
+include(../../global.pri)
+
 TARGET = Scenery
 TEMPLATE = lib
 CONFIG += plugin c++11 no_keywords
@@ -24,8 +27,6 @@ QMAKE_TARGET_DESCRIPTION = openPASS Scenery
 QMAKE_TARGET_COMPANY = Volkswagen Group of America
 QMAKE_TARGET_COPYRIGHT = Volkswagen Group of America
 
-release: DESTDIR = ../build/release
-debug: DESTDIR = ../build/debug
 win32: TARGET_EXT = .dll
 
 

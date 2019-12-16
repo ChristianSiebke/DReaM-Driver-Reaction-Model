@@ -32,6 +32,8 @@ public:
 protected:
     static bool loadProject(QXmlStreamReader & xml,
                             ProjectModel * const project);
+    static bool loadSlaveConfig(QXmlStreamReader & xml,
+                                ProjectModel * const project);
 };
 
 #endif // PROJECTXMLLOADMODEL_H

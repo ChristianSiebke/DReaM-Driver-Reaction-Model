@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 ******************************************************************************/
 
-#include "ProjectView.h"
+#include "Views/ProjectView.h"
 #include "ui_ProjectView.h"
 
 #include "Models/ProjectModel.h"
@@ -31,11 +31,11 @@ ProjectView::ProjectView(WindowInterface *const window,
     , window(window)
     , projectPresenter(projectPresenter)
     , ui(new Ui::ProjectView)
-    , actionMenuNew(WindowInterface::createAction(tr("New Project"), this,
+    , actionMenuNew(WindowInterface::createAction(tr("Clear"), this,
                                                   &ProjectView::actionProjectNew))
-    , actionMenuLoad(WindowInterface::createAction(tr("Load Project"), this,
+    , actionMenuLoad(WindowInterface::createAction(tr("Load"), this,
                                                    &ProjectView::actionProjectLoad))
-    , actionMenuSave(WindowInterface::createAction(tr("Save Project"), this,
+    , actionMenuSave(WindowInterface::createAction(tr("Save"), this,
                                                    &ProjectView::actionProjectSave))
 {
     // Create UI
@@ -55,7 +55,7 @@ ProjectView::ProjectView(WindowInterface *const window,
             this, &ProjectView::updateView);
 
     // Register view
-    window->add(ViewID, WindowInterface::createButton(tr("Project"), 0, 01000), this,
+    window->add(ViewID, WindowInterface::createButton(tr("Master Configuration"), 0, 01000), this,
     {actionMenuNew, actionMenuLoad, actionMenuSave});
 }
 
@@ -73,6 +73,7 @@ ProjectView::~ProjectView()
 void ProjectView::actionProjectNew()
 {
     projectPresenter->createNewProject();
+    ui->titleEdit->setText("");
 }
 
 // Set the Menu-bar action LOAD
@@ -84,6 +85,10 @@ void ProjectView::actionProjectLoad()
                                  QStringLiteral("Project (*.xml);;All files (*)"));
     if (!filepath.isNull())
     {
+        QString filename = QFileInfo(filepath).fileName();
+        filename.chop(4);
+
+        ui->titleEdit->setText(filename);
         projectPresenter->loadProject(filepath);
     }
 }
@@ -92,8 +97,16 @@ void ProjectView::actionProjectLoad()
 void ProjectView::actionProjectSave()
 {
     QDir const root = QDir(QCoreApplication::applicationDirPath());
+
+    QString default_file;
+
+    if( !ui->titleEdit->text().isEmpty())
+        default_file = root.canonicalPath() + "/" + ui->titleEdit->text();
+    else
+       default_file = root.canonicalPath();
+
     QString const filepath = QFileDialog::getSaveFileName(
-                                 this, tr("openPASS / Save Project"), root.canonicalPath(),
+                                 this, tr("openPASS / Save Project"),default_file ,
                                  QStringLiteral("XML File (*.xml)"));
     if (!filepath.isNull())
     {
@@ -106,7 +119,7 @@ void ProjectView::on_libraryBrowseButton_clicked()
 {
     QDir const root = QDir(QCoreApplication::applicationDirPath());
     QString const filepath = QFileDialog::getExistingDirectory(
-                                 this, tr("openPASS / Import Component Library"),
+                                 this, tr("openPASS / Directory for simulation libraries"),
                                  root.canonicalPath());
     if (!filepath.isNull())
     {
@@ -125,8 +138,8 @@ void ProjectView::on_logMasterBrowseButton_clicked()
 {
     QDir const root = QDir(QCoreApplication::applicationDirPath());
     QString const filepath = QFileDialog::getSaveFileName(
-                                 this, tr("openPASS / Directory to save Log files"), root.canonicalPath(),
-                                 QStringLiteral("Log Master File (*.log);;All files (*)"));
+                                 this, tr("openPASS / Select a Master log file"), root.canonicalPath(),
+                                 QStringLiteral("Master log file (*.log);;All files (*)"));
     if (!filepath.isNull())
     {
         projectPresenter->setLogMaster(filepath);
@@ -138,8 +151,8 @@ void ProjectView::on_logSlaveBrowseButton_clicked()
 {
     QDir const root = QDir(QCoreApplication::applicationDirPath());
     QString const filepath = QFileDialog::getSaveFileName(
-                                 this, tr("openPASS / Directory to save Log files"), root.canonicalPath(),
-                                 QStringLiteral("Log Slave File (*.log);;All files (*)"));
+                                 this, tr("openPASS / Select a Slave log file"), root.canonicalPath(),
+                                 QStringLiteral("Slave log file (*.log);;All files (*)"));
     if (!filepath.isNull())
     {
         projectPresenter->setLogSlave(filepath);
@@ -151,7 +164,7 @@ void ProjectView::on_outputBrowseButton_clicked()
 {
     QDir const root = QDir(QCoreApplication::applicationDirPath());
     QString const filepath = QFileDialog::getExistingDirectory(
-                                 this, tr("openPASS / Directory to save results"),
+                                 this, tr("openPASS / Directory for simulation results"),
                                  root.canonicalPath());
     if (!filepath.isNull())
     {
@@ -164,11 +177,23 @@ void ProjectView::on_slaveBrowseButton_clicked()
 {
     QDir const root = QDir(QCoreApplication::applicationDirPath());
     QString const filepath = QFileDialog::getOpenFileName(
-                                 this, tr("openPASS / Select the openPASS Slave"), root.canonicalPath(),
+                                 this, tr("openPASS / Select the openPASS slave"), root.canonicalPath(),
                                  QStringLiteral("Slave (*.exe)"));
     if (!filepath.isNull())
     {
         projectPresenter->setSlave(filepath);
+    }
+}
+
+void ProjectView::on_configBrowseButton_clicked()
+{
+    QDir const root = QDir(QCoreApplication::applicationDirPath());
+    QString const filepath = QFileDialog::getExistingDirectory(
+                                 this, tr("openPASS / Directory for configuration files"),
+                                 root.canonicalPath());
+    if (!filepath.isNull())
+    {
+        projectPresenter->setConfigPath(filepath);
     }
 }
 
@@ -181,4 +206,5 @@ void ProjectView::updateView()
     ui->logSlavePathEdit->setText(projectPresenter->getLogSlave());
     ui->outputPathEdit->setText(projectPresenter->getResultPath());
     ui->slaveEdit->setText(projectPresenter->getSlave());
+    ui->configPathEdit->setText(projectPresenter->getConfigPath());
 }

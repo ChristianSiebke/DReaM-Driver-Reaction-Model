@@ -20,6 +20,9 @@ QPushButton {
   width: 16px;
 }</string>
   </property>
+  <property name="locale">
+   <locale language="C" country="AnyCountry"/>
+  </property>
   <layout class="QVBoxLayout" name="layout">
    <property name="spacing">
     <number>1</number>

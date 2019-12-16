@@ -17,12 +17,21 @@ ComponentOutputMapModel::ComponentOutputMapModel(QObject * const parent)
 {
 }
 
+bool ComponentOutputMapModel::add(ComponentOutputMapInterface::Item * const item)
+{
+    map.insert(generateID(), item);
+    item->setParent(this);
+    Q_EMIT added(item);
+    return true;
+}
+
 bool ComponentOutputMapModel::add(ComponentOutputMapInterface::ID const & id)
 {
     if (!contains(id))
     {
-        map.insert(id, new ComponentOutputItemModel(this));
-        Q_EMIT added();
+        ComponentOutputItemModel * item = new ComponentOutputItemModel(this);
+        map.insert(id, item);
+        Q_EMIT added(item);
         return true;
     }
     return false;
@@ -35,7 +44,7 @@ bool ComponentOutputMapModel::add(ComponentOutputMapInterface::ID const & id,
     {
         map.insert(id, item);
         item->setParent(this);
-        Q_EMIT added();
+        Q_EMIT added(item);
         return true;
     }
     return false;
@@ -150,8 +159,8 @@ bool ComponentOutputMapModel::remove(ComponentOutputMapInterface::ID const & id)
 {
     if (map.contains(id))
     {
+        Q_EMIT removed(map.value(id));
         delete map.take(id);
-        Q_EMIT removed();
         return true;
     }
     return false;
@@ -159,10 +168,22 @@ bool ComponentOutputMapModel::remove(ComponentOutputMapInterface::ID const & id)
 
 bool ComponentOutputMapModel::remove(ComponentOutputMapInterface::Item * const item)
 {
-    return ((contains(item)) ? remove(getID(item)) : false);
+    if(map.values().contains(item))
+    {
+        map.take(item->getID())->setParent(nullptr);
+        Q_EMIT removed(item);
+        return true;
+    }
+
+    return false;
 }
 
 bool ComponentOutputMapModel::remove(ComponentOutputMapInterface::Index const & index)
 {
     return ((contains(index)) ? remove(getID(index)) : false);
+}
+
+ComponentOutputMapInterface::Item * ComponentOutputMapModel::createOutput() const
+{
+    return new ComponentOutputItemModel;
 }

@@ -165,8 +165,8 @@ void WindowView::updateViews()
 
 void WindowView::closeEvent(QCloseEvent * event)
 {
-    if (QMessageBox::Yes != QMessageBox::question(this, "Close Confirmation?",
-            "Are you sure you want to exit?", QMessageBox::Yes | QMessageBox::No))
+    if (QMessageBox::Yes != QMessageBox::question(this, "Close OpenPASS?",
+            "All unsaved settings will be lost! Are you sure you want to exit?", QMessageBox::Yes | QMessageBox::No))
         {
             event->ignore();
         }

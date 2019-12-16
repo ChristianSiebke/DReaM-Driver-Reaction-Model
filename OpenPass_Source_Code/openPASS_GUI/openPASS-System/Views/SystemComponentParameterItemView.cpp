@@ -17,6 +17,7 @@
 #include "Views/SystemComponentParameterValueFloatView.h"
 #include "Views/SystemComponentParameterValueIntView.h"
 #include "Views/SystemComponentParameterValueStringView.h"
+#include "Views/SystemComponentParameterValueNormalDistributionView.h"
 
 SystemComponentParameterItemView::SystemComponentParameterItemView(SystemComponentParameterItemInterface * const parameter,
                                                                    QWidget * const parent)
@@ -51,6 +52,11 @@ SystemComponentParameterItemView::SystemComponentParameterItemView(SystemCompone
     // Setup value / string
     if (parameter->getType() == QStringLiteral("string"))
         ui->layout->addWidget(new SystemComponentParameterValueStringView
+                              (parameter, this), 0, Qt::AlignRight);
+
+    // Setup value / string
+    if (parameter->getType() == QStringLiteral("normalDistribution"))
+        ui->layout->addWidget(new SystemComponentParameterValueNormalDistributionView
                               (parameter, this), 0, Qt::AlignRight);
 }
 

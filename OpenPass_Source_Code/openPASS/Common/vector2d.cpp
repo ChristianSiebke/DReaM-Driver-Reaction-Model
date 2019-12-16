@@ -12,7 +12,7 @@
 #include <cmath>
 #include "vector2d.h"
 
-#define EPSILON 1e-9
+double constexpr EPSILON = 1e-9;
 
 namespace Common {
 
@@ -70,8 +70,10 @@ double Vector2d::Cross(const Vector2d &in) const
 
 bool Vector2d::Norm()
 {
-    double length = std::sqrt(x * x + y * y);
-    if (0 == length) {
+    double length = Length();
+
+    if (std::abs(length) < EPSILON)
+    {
         return false;
     }
 
@@ -83,7 +85,7 @@ bool Vector2d::Norm()
 
 double Vector2d::Length() const
 {
-    return std::sqrt(x * x + y * y);
+    return std::hypot(x, y);
 }
 
 double Vector2d::Angle() const
@@ -110,6 +112,11 @@ bool Vector2d::operator==(const Vector2d &in) const
 {
     return (std::abs(x - in.x) < EPSILON) &&
            (std::abs(y - in.y) < EPSILON);
+}
+
+bool Vector2d::operator!=(const Vector2d &in) const
+{
+    return !operator==(in);
 }
 
 } // namespace Common

@@ -32,8 +32,7 @@ void WindowModel::add(WindowInterface::ID const & id,
     objects << button;
     button->setParent(nullptr);
 
-
-    for (WindowInterface::Widget * const item : menu)
+    for(WindowInterface::Widget * const item : menu)
     {
         objects << item;
         item->setParent(nullptr);
@@ -47,6 +46,7 @@ void WindowModel::add(WindowInterface::ID const & id,
                 action->menu()->setParent(nullptr);
             }
         }
+
     }
 
     // Verify button for required property 'type'

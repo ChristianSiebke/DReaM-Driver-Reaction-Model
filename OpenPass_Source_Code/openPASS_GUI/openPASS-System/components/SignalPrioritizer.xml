@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component>
+  <type>Algorithm</type>
+  <title>SignalPrioritizer</title>
+  <schedule>
+    <offset>0</offset>
+    <cycle>1</cycle>
+    <response>0</response>
+  </schedule>
+  <parameters>
+    <parameter>
+      <id>0</id>
+      <type>int</type>
+      <title>Priority Input 1</title>
+      <unit></unit>
+      <value>1</value>
+    </parameter>
+    <parameter>
+      <id>1</id>
+      <type>int</type>
+      <title>Priority Input 2</title>
+      <unit></unit>
+      <value>2</value>
+    </parameter>
+    <parameter>
+      <id>2</id>
+      <type>int</type>
+      <title>Priority Input 3</title>
+      <unit></unit>
+      <value>3</value>
+    </parameter>
+    <parameter>
+      <id>3</id>
+      <type>int</type>
+      <title>Priority Input 4</title>
+      <unit></unit>
+      <value>4</value>
+    </parameter>
+  </parameters>
+  <inputs>
+    <input>
+      <id>0</id>
+      <type>any</type>
+      <title>Input 1</title>
+      <unit></unit>
+      <cardinality>1</cardinality>
+    </input>
+    <input>
+      <id>1</id>
+      <type>any</type>
+      <title>Input 2</title>
+      <unit></unit>
+      <cardinality>1</cardinality>
+    </input>
+    <input>
+      <id>2</id>
+      <type>any</type>
+      <title>Input 3</title>
+      <unit></unit>
+      <cardinality>1</cardinality>
+    </input>
+    <input>
+      <id>3</id>
+      <type>any</type>
+      <title>Input 4</title>
+      <unit></unit>
+      <cardinality>1</cardinality>
+    </input>
+  </inputs>
+  <outputs>
+    <output>
+      <id>0</id>
+      <type>any</type>
+      <title>Prioritized Signal</title>
+      <unit></unit>
+    </output>
+  </outputs>
+</component>

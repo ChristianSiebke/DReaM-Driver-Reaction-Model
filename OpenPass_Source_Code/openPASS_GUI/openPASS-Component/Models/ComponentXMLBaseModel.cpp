@@ -76,6 +76,8 @@ QList<QString> const ComponentXMLBaseModel::ConvertComponentType = {
     QStringLiteral("Action"),
     QStringLiteral("Algorithm"),
     QStringLiteral("Sensor"),
+    QStringLiteral("Misc"),
+    QStringLiteral("Logical"),
 };
 
 QString ComponentXMLBaseModel::convertComponentTypeToString(ComponentItemInterface::Type const & type)

@@ -65,9 +65,14 @@ public:
     virtual bool remove(ComponentMapInterface::Name const & name) override;
     virtual bool remove(ComponentMapInterface::Item * const item) override;
     virtual bool remove(ComponentMapInterface::Index const & index) override;
+    virtual bool remove(ComponentItemInterface::Type const & type) override;
+
+public:
+    virtual QList<Item*> values() const override;
 
 protected:
     ComponentMapInterface::Map map;
 };
 
 #endif // COMPONENTMAPMODEL_H
+

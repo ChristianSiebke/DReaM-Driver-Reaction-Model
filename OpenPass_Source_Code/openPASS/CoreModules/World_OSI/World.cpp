@@ -1,12 +1,13 @@
-/******************************************************************************
-* Copyright (c) 2018 in-tech GmbH
+/*******************************************************************************
+* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+*               2016, 2017, 2018 ITK Engineering GmbH
 *
-* This program and the accompanying materials are made available under the
-* terms of the Eclipse Public License 2.0 which is available at
-* https://www.eclipse.org/legal/epl-2.0/
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
 *
 * SPDX-License-Identifier: EPL-2.0
-******************************************************************************/
+*******************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  world.cpp
@@ -14,8 +15,8 @@
 //-----------------------------------------------------------------------------
 
 #include "World.h"
-#include "WorldImplementation.h"
-#include "worldInterface.h"
+#include "CoreModules/World_OSI/WorldImplementation.h"
+#include "Interfaces/worldInterface.h"
 
 const std::string Version = "0.0.1";
 static const CallbackInterface *Callbacks = nullptr;
@@ -26,13 +27,13 @@ extern "C" WORLD_SHARED_EXPORT const std::string &OpenPASS_GetVersion()
 }
 
 extern "C" WORLD_SHARED_EXPORT WorldInterface *OpenPASS_CreateInstance(
-        CallbackInterface *callbacks)
+        CallbackInterface *callbacks, StochasticsInterface* stochastics)
 {
     Callbacks = callbacks;
 
     try
     {
-        return (WorldInterface*)(new (std::nothrow) WorldImplementation(callbacks));
+        return (WorldInterface*)(new (std::nothrow) WorldImplementation(callbacks, stochastics));
     }
     catch(const std::runtime_error &ex)
     {

@@ -60,7 +60,7 @@ void SystemComponentManagerView::updateManagerView()
     }
 
     // Load again the components
-    if (_components->loadFromDirectory(QDir(QCoreApplication::applicationDirPath() + SUBDIR_LIB_COMPONENT)))
+    if (_components->loadFromDirectory(QDir(QCoreApplication::applicationDirPath() + SUBDIR_COMPONENTS)))
     {
             for (unsigned char index = 0; index < ui->tree->topLevelItemCount(); ++index)
             {
@@ -72,7 +72,7 @@ void SystemComponentManagerView::updateManagerView()
                     QTreeWidgetItem *item = new QTreeWidgetItem(ui->tree->topLevelItem(index), {title}, 0);
 
                     // conditions for dynamic mode. Item is removed if component is not compatible with dynamic mode
-                    if ( isForbidden(type, title) )
+                    if ( isForbidden(_components->lookupItemByTitle(title)) )
                     {
                         ui->tree->topLevelItem(index)->removeChild(item);
                         delete item;
@@ -98,40 +98,35 @@ void SystemComponentManagerView::on_button_clicked()
 
 int SystemComponentManagerView::numberOfInputs(const ComponentItemInterface::Title &title)
 {
-    ComponentItemInterface const * const component = _components->lookupItemByName(title);
+    ComponentItemInterface const * const component = _components->lookupItemByTitle(title);
 
-    return component->getInputs()->count();
+    if(component)
+        return component->getInputs()->count();
+
+    return 0;
 }
 
 int SystemComponentManagerView::numberOfOutputs(const ComponentItemInterface::Title &title)
 {
-    ComponentItemInterface const * const component = _components->lookupItemByName(title);
+    ComponentItemInterface const * const component = _components->lookupItemByTitle(title);
 
-    return component->getOutputs()->count();
+    if(component)
+        return component->getOutputs()->count();
+
+    return 0;
 }
 
 int SystemComponentManagerView::numberOfParameters(const ComponentItemInterface::Title &title)
 {
-    ComponentItemInterface const * const component = _components->lookupItemByName(title);
+    ComponentItemInterface const * const component = _components->lookupItemByTitle(title);
 
-    return component->getParameters()->count();
+    if(component)
+        return component->getParameters()->count();
+
+    return 0;
 }
 
-bool SystemComponentManagerView::isForbidden(const ComponentItemInterface::Type &type,
-                                                      const ComponentItemInterface::Title &title)
+bool SystemComponentManagerView::isForbidden(ComponentItemInterface const * const item)
 {
-    switch(type)
-    {
-        case ComponentItemInterface::Type::Action:
-            return *dynamicMode;
-
-        case ComponentItemInterface::Type::Sensor:
-            return *dynamicMode && (numberOfInputs(title) != 0 || numberOfOutputs(title) !=1 || numberOfParameters(title) <6 );
-
-        case ComponentItemInterface::Type::Algorithm:
-            return *dynamicMode && ( numberOfOutputs(title) !=0 );
-
-        default:
-            return false;
-    }
+    return *dynamicMode && !dynamicComponents.contains(item->getName());
 }

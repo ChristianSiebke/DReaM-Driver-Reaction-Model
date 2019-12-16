@@ -74,7 +74,7 @@ bool SystemXMLLoadModel::loadSystemItem(QXmlStreamReader & xml,
     if(xml.name() == KeySystemID)
     {
         keys.removeAll(xml.name().toString());
-        SystemMapInterface::ID const id = xml.readElementText().toInt();
+        SystemMapInterface::ID const id = xml.readElementText().toUInt();
         systems->add(id);
         system = systems->getItem(id);
     }
@@ -287,6 +287,9 @@ bool SystemXMLLoadModel::loadSystemConnectionItem(QXmlStreamReader & xml,
 {
     bool success = true;
     QList<QString> keys = KeyListSystemConnection;
+    QList<QPair<SystemComponentMapInterface::ID, SystemComponentInputMapInterface::ID>> targetList;
+    QPair<SystemComponentMapInterface::ID, SystemComponentInputMapInterface::ID> currentTarget;
+
     SystemConnectionMapInterface::ID id = 0;
     SystemComponentMapInterface::ID sourceComponentID = 0;
     SystemComponentOutputMapInterface::ID sourceOutputID = 0;
@@ -301,14 +304,46 @@ bool SystemXMLLoadModel::loadSystemConnectionItem(QXmlStreamReader & xml,
             success = loadSystemConnectionItemSource(
                         xml, sourceComponentID, sourceOutputID) && success;
         else if (xml.name() == KeySystemConnectionTarget)
+        {
             success = loadSystemConnectionItemTarget(
                         xml, targetComponentID, targetInputID) && success;
+
+            currentTarget.first = targetComponentID;
+            currentTarget.second = targetInputID;
+            targetList << currentTarget;
+        }
         else
             xml.skipCurrentElement();
     }
     if (success && keys.isEmpty())
     {
         SystemComponentMapInterface::Item const * const sourceComponent =
+                        components->getItem(sourceComponentID);
+
+        for(auto targetListElement : targetList)
+        {
+            SystemComponentMapInterface::Item const * const targetComponent =
+                            components->getItem(targetListElement.first);
+
+            if (sourceComponent && targetComponent)
+            {
+                SystemConnectionMapInterface::Source const * const source =
+                        sourceComponent->getOutputs()->getItem(sourceOutputID);
+                SystemConnectionMapInterface::Target const * const target =
+                        targetComponent->getInputs()->getItem(targetListElement.second);
+                if (source && target)
+                {
+                    id = connections->generateID();
+                    connections->add(id, source, target);
+                }
+                else
+                    success = false;
+            }
+            else
+                success = false;
+        }
+
+   /*     SystemComponentMapInterface::Item const * const sourceComponent =
                 components->getItem(sourceComponentID);
         SystemComponentMapInterface::Item const * const targetComponent =
                 components->getItem(targetComponentID);
@@ -323,9 +358,10 @@ bool SystemXMLLoadModel::loadSystemConnectionItem(QXmlStreamReader & xml,
                 connections->add(id, source, target);
             }
         }
-        return true;
+        return true;*/
     }
-    return false;
+    return success;
+   // return false;
 }
 
 bool SystemXMLLoadModel::loadSystemConnectionItemSource(QXmlStreamReader & xml,

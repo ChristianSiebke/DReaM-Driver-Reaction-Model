@@ -14,6 +14,8 @@
 #ifndef VECTOR2D_H
 #define VECTOR2D_H
 
+#include <ostream>
+
 namespace Common {
 
 /*!
@@ -119,13 +121,46 @@ public:
      */
     double Angle() const;
 
+    /// \brief Overload << operator for Vector2d
+    friend std::ostream& operator<<(std::ostream& os, const Vector2d& vector)
+    {
+        return os << "(" << vector.x << ", " << vector.y << ")";
+    }
+
     Vector2d operator-(const Vector2d &in) const;
     Vector2d operator+(const Vector2d &in) const;
     Vector2d operator*(double in) const;
+
+    /*!
+     * \brief Comparison operator taking EPSILON of 1e-9 into account
+     *
+     * \param    in[in]    Vector to compare to
+     *
+     * \return   true if vectors are considered equal, false otherwise
+     */
     bool operator==(const Vector2d &in) const;
+
+    /*!
+     * \brief Inequality operator taking EPSILON of 1e-9 into account
+     *
+     * \param    in[in]    Vector to compare to
+     *
+     * \return   false if vectors are considered equal, true otherwise
+     */
+    bool operator!=(const Vector2d &in) const;
 
     double x;
     double y;
+};
+
+struct Line
+{
+   explicit Line(const Common::Vector2d& startPoint,  const Common::Vector2d& endPoint) :
+        startPoint{startPoint},
+        directionalVector{endPoint - startPoint}{}
+
+    Common::Vector2d startPoint;
+    Common::Vector2d directionalVector;
 };
 
 } // namespace Common

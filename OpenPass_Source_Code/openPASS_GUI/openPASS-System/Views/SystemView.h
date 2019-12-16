@@ -34,6 +34,9 @@ public:
 protected:
     static WindowInterface::ID const ViewID;
 
+Q_SIGNALS:
+    void dynamicModeActicated(bool dynamicMode) const;
+
 protected Q_SLOTS:
     void actionNewSystem_clicked();
     void actionClear_clicked();
@@ -41,6 +44,9 @@ protected Q_SLOTS:
     void actionSaveSystem_clicked();
     void actionSaveScreenshot_clicked();
     void activateDynamicMode(bool checked);
+
+public:
+    bool isDynamicMode() const;
 
 protected:
     virtual bool eventFilter(QObject *watched, QEvent *event) override;

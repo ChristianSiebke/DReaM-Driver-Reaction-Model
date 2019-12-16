@@ -19,7 +19,7 @@ ProjectPresenter::ProjectPresenter(ProjectModel *projectModel,
 {
     // Signals-Signals connection declaration for the Menu-bar Actions
     connect(projectModel, &ProjectModel::cleared,
-            this, &ProjectPresenter::reseted);
+            this, &ProjectPresenter::updateView);
     connect(projectModel, &ProjectModel::loaded,
             this, &ProjectPresenter::loaded);
     connect(projectModel, &ProjectModel::saved,
@@ -48,6 +48,16 @@ bool ProjectPresenter::saveProject(QString const &filepath) const
 bool ProjectPresenter::simulate() const
 {
     return _projectModel->simulate();
+}
+
+bool ProjectPresenter::setConfigPath(const ProjectInterface::Config &config)
+{
+    return _projectModel->setConfigPath(config);
+}
+
+ProjectInterface::Config ProjectPresenter::getConfigPath() const
+{
+    return _projectModel->getConfigPath();
 }
 
 bool ProjectPresenter::setLibraryPath(ProjectInterface::Library const &library)

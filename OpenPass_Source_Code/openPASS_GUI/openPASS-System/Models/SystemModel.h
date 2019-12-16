@@ -38,6 +38,9 @@ public:
     virtual SystemComponentManagerInterface * getComponents() const override;
     virtual SystemMapInterface * getSystems() const override;
 
+public:
+    virtual SystemInterface* createSystemModel() override;
+
 protected:
     ComponentInterface * const component;
     SystemComponentManagerInterface * const components;

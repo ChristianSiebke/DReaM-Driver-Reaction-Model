@@ -11,6 +11,7 @@
 #include "Views/SystemComponentItemView.h"
 #include "ui_SystemComponentItemView.h"
 
+#include "Views/SystemView.h"
 #include "Views/SystemComponentInputItemView.h"
 #include "Views/SystemComponentOutputItemView.h"
 #include "Views/SystemComponentParameterItemView.h"
@@ -79,6 +80,14 @@ SystemComponentItemView::SystemComponentItemView(SystemComponentItemInterface * 
         ui->outputs->addWidget(outputView);
     }
 
+    // connect to SystemView in order to be informed when dynamic mode is activated
+    SystemView const * const systemView = qobject_cast<SystemView const * const>(parent->parent()->parent()->parent()->parent()->parent()->parent());
+    if(systemView)
+    {
+        connect(systemView, &SystemView::dynamicModeActicated, this, &SystemComponentItemView::enableTitleEdit);
+        enableTitleEdit(systemView->isDynamicMode());
+    }
+
     // Show UI
     show();
 
@@ -90,6 +99,11 @@ SystemComponentItemView::~SystemComponentItemView()
 {
     // Destroy UI
     delete ui;
+}
+
+void SystemComponentItemView::enableTitleEdit(bool enabled)
+{
+    ui->actionRename->setEnabled(!enabled);
 }
 
 SystemComponentItemInterface * SystemComponentItemView::getInterface() const

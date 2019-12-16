@@ -59,6 +59,9 @@ public:
     virtual SystemConnectionMapInterface::Item * getItem(SystemConnectionMapInterface::ID const & id) const = 0;
 
 public:
+    virtual SystemConnectionMapInterface::ID generateID() const = 0;
+
+public:
     virtual bool clear() = 0;
     virtual bool add(SystemConnectionMapInterface::ID const & id,
                      SystemConnectionMapInterface::Source const * const source,
@@ -72,7 +75,7 @@ public:
     virtual bool remove(SystemConnectionMapInterface::Target const * const target) = 0;
 
 public:
-    virtual QList<Item*> values() const = 0;
+    virtual QList<Item * > values() const = 0;
 };
 
 #endif // SYSTEMCONNECTIONMAPINTERFACE_H

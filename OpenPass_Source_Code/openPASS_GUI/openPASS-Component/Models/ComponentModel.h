@@ -29,3 +29,4 @@ public:
 };
 
 #endif // COMPONENTMODEL_H
+

@@ -37,8 +37,7 @@ protected Q_SLOTS:
     void on_button_clicked();
 
 private:
-    bool isForbidden(ComponentItemInterface::Type const & type,
-                              ComponentItemInterface::Title const & title);
+    bool isForbidden(ComponentItemInterface const * const item);
 
     int numberOfOutputs(ComponentItemInterface::Title const & title);
     int numberOfInputs(ComponentItemInterface::Title const & title);
@@ -47,6 +46,9 @@ private:
 private:
     SystemComponentManagerInterface * const _components;
     bool const * const dynamicMode;
+
+private:
+    QList<ComponentItemInterface::Name> const dynamicComponents ={"Algorithm_AEB", "Sensor_OSI", "Dynamics_TrajectoryFollower"} ;
 
 protected:
     Ui::SystemComponentManagerView * const ui;

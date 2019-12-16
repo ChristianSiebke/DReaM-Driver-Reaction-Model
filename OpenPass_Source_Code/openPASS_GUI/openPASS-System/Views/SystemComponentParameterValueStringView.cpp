@@ -9,7 +9,6 @@
 ******************************************************************************/ 
 
 #include "Views/SystemComponentParameterValueStringView.h"
-
 #include "openPASS-System/SystemComponentParameterItemInterface.h"
 
 SystemComponentParameterValueStringView::SystemComponentParameterValueStringView(SystemComponentParameterItemInterface * const parameter,
@@ -17,19 +16,18 @@ SystemComponentParameterValueStringView::SystemComponentParameterValueStringView
     : QLineEdit(parent)
     , parameter(parameter)
 {
-    setMinimumSize(0, 20);
-    setMaximumSize(64, 20);
+
     setFrame(false);
     connect(parameter, &SystemComponentParameterItemInterface::modifiedValue,
             this, &SystemComponentParameterValueStringView::updateView);
-    connect(this, &SystemComponentParameterValueStringView::textChanged,
+    connect(this, &SystemComponentParameterValueStringView::editingFinished,
             this, &SystemComponentParameterValueStringView::updateInterface);
     updateView();
 }
 
-void SystemComponentParameterValueStringView::updateInterface(QString const & text)
+void SystemComponentParameterValueStringView::updateInterface()
 {
-    parameter->setValue(text);
+   parameter->setValue(text());
 }
 
 void SystemComponentParameterValueStringView::updateView()
