@@ -28,16 +28,11 @@ SUBDIR_LIB_SIMS = "/lib"
 DEFINES += SUBDIR_LIB_SIM=\\\"/lib\\\"
 
 ## gui libraries destination sub-directory ##
-<<<<<<< HEAD
 SUBDIR_LIB_GUIS = "/bin/gui"
 SUBDIR_COMPONENTS = "\components"
 
 DEFINES += SUBDIR_LIB_GUI=\\\"/bin/gui\\\"
 DEFINES += SUBDIR_COMPONENTS=\\\"/components\\\"
-=======
-SUBDIR_LIB_GUIS = "/gui"
-DEFINES += SUBDIR_LIB_GUI=\\\"/gui\\\"
->>>>>>> eclipse/servant
 
 ## Qt plugins sub-directory ##
 DEFINES += SUBDIR_LIB_PLUGIN=\\\"/plugin\\\"
@@ -76,20 +71,10 @@ OPENPASS_LIBRARY_GUI {
     QMAKE_LFLAGS += -L$$system_path($$EXTRA_LIB_PATH)
     QMAKE_CFLAGS += -isystem $$EXTRA_INCLUDE_PATH
     QMAKE_CXXFLAGS += -isystem $$EXTRA_INCLUDE_PATH
-<<<<<<< HEAD
     Debug:DESTDIR = $${DESTDIR_GUI}$${SUBDIR_LIB_GUIS}
     Release:DESTDIR = $${DESTDIR_GUI}$${SUBDIR_LIB_GUIS}
     #debug/release predicates are buggy on linux qmake
     unix:DESTDIR=$${DESTDIR_GUI}$${SUBDIR_LIB_GUIS}
-=======
-    #Debug:DESTDIR = $${DESTDIR_SLAVE}$${SUBDIR_LIB_GUIS}
-    #Release:DESTDIR = $${DESTDIR_SLAVE}$${SUBDIR_LIB_GUIS}
-    Debug:DESTDIR = $${DESTDIR_SLAVE}
-    Release:DESTDIR = $${DESTDIR_SLAVE}
-    #debug/release predicates are buggy on linux qmake
-    #unix:DESTDIR=$${DESTDIR_SLAVE}$${SUBDIR_LIB_GUIS}
-    unix:DESTDIR=$${DESTDIR_SLAVE}
->>>>>>> eclipse/servant
     message("[$$TARGET] Build path set to $$DESTDIR")
 }
 
