@@ -16,6 +16,7 @@
 //-----------------------------------------------------------------------------
 
 #include <string>
+#include <memory>
 
 #include "Interfaces/slaveConfigInterface.h"
 #include "Interfaces/stochasticsInterface.h"
@@ -130,9 +131,9 @@ public:
     *           TrafficConfig according to the specified probabilities
     *
     * @param[in]    trafficConfig       Traffic configuration
-    * @param[out]   parameters          Sampled parameters get stored here
+    * @returns      parameters          Sampled parameters get stored here
     */
-    virtual void SampleWorldParameters(EnvironmentConfig& environmentConfig, ParameterInterface* parameters) const = 0;
+    virtual std::unique_ptr<ParameterInterface> SampleWorldParameters(const EnvironmentConfig& environmentConfig) const = 0;
 
     /*!
     * \brief Samples all World parameters
@@ -141,9 +142,9 @@ public:
     *           Environment according to the specified probabilities
     *
     * @param[in]    environmentConfig       Environment configuration
-    * @param[out]   parameters          Sampled parameters get stored here
+    * @returns      parameters          Sampled parameters get stored here
     */
-    virtual void SampleSpawnPointParameters(TrafficConfig& trafficConfig, ParameterInterface* parameters) const = 0;
+    virtual std::unique_ptr<ParameterInterface> SampleSpawnPointParameters(const TrafficConfig& trafficConfig) const = 0;
 };
 
 

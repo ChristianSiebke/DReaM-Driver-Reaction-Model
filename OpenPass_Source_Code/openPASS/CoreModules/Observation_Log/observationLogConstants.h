@@ -14,6 +14,7 @@
 
 struct OutputAttributes
 {
+    const QString FRAMEWORKVERSION = "FrameworkVersion";
     const QString SCHEMAVERSION = "SchemaVersion";
     const QString RUNID = "RunId";
     const QString FAILUREPROBABITLITY= "FailureProbability";

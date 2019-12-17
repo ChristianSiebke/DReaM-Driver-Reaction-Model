@@ -15,8 +15,10 @@
 #include <sstream>
 
 #include "CoreFramework/CoreShare/log.h"
-#include "observationBinding.h"
 #include "Interfaces/observationInterface.h"
+#include "parameterbuilder.h"
+#include "parameters.h"
+#include "observationBinding.h"
 #include "observationLibrary.h"
 #include "observationModule.h"
 
@@ -180,7 +182,9 @@ bool ObservationLibrary::ReleaseObservationModule(ObservationModule* observation
     return true;
 }
 
-ObservationModule* ObservationLibrary::CreateObservationModule(ParameterInterface* parameters,
+ObservationModule* ObservationLibrary::CreateObservationModule(
+        const openpass::common::RuntimeInformation& runtimeInformation,
+        const openpass::parameter::Container& parameters,
         StochasticsInterface* stochastics,
         WorldInterface* world,
         EventNetworkInterface* eventNetwork)
@@ -198,13 +202,15 @@ ObservationModule* ObservationLibrary::CreateObservationModule(ParameterInterfac
         }
     }
 
+    auto module_parameters = openpass::parameter::make<SimulationCommon::Parameters>(runtimeInformation, parameters);
+
     ObservationInterface* observationInterface = nullptr;
     try
     {
         observationInterface = createInstanceFunc(stochastics,
                                world,
                                eventNetwork,
-                               parameters,
+                               module_parameters.get(),
                                callbacks);
     }
     catch (std::runtime_error const& ex)
@@ -223,7 +229,10 @@ ObservationModule* ObservationLibrary::CreateObservationModule(ParameterInterfac
         return nullptr;
     }
 
-    ObservationModule* observationModule = new (std::nothrow) ObservationModule(observationInterface, this);
+    ObservationModule* observationModule = new (std::nothrow) ObservationModule(
+                observationInterface,
+                std::move(module_parameters),
+                this);
     if (!observationModule)
     {
         return nullptr;

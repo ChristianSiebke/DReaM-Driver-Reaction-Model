@@ -14,8 +14,9 @@
 
 namespace SimulationSlave {
 
-SpawnPointBinding::SpawnPointBinding(CallbackInterface* callbacks) :
-    callbacks(callbacks)
+SpawnPointBinding::SpawnPointBinding(const openpass::common::RuntimeInformation &runtimeInformation, CallbackInterface* callbacks) :
+    runtimeInformation{runtimeInformation},
+    callbacks{callbacks}
 {}
 
 SpawnPointBinding::~SpawnPointBinding()

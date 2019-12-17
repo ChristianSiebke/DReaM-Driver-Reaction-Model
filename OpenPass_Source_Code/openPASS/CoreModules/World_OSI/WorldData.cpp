@@ -81,6 +81,11 @@ osi3::SensorView WorldData::GetSensorView(osi3::SensorViewConfiguration& conf, i
     return sv;
 }
 
+const osi3::GroundTruth &WorldData::GetOsiGroundTruth() const
+{
+    return osiGroundTruth.groundtruth();
+}
+
 OWL::Id WorldData::GetOwlId(int agentId)
 {
     const auto& movingObject = std::find_if(movingObjects.cbegin(),

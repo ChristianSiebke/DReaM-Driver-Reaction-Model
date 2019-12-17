@@ -279,7 +279,7 @@ typedef Log<LogOutputPolicy> LogFile;
     throw std::runtime_error(message);
 }
 
-static void ThrowIfFalse(bool success, const std::string &message)
+[[maybe_unused]] static void ThrowIfFalse(bool success, const std::string &message)
 {
     if (!success)
     {

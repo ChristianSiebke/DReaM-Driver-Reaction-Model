@@ -29,10 +29,14 @@ namespace SimulationCommon {
 class Parameters : public ParameterInterface
 {
 public:
-    Parameters() = default;
     virtual ~Parameters() override = default;
 
+    Parameters(const openpass::common::RuntimeInformation& runtimeInformation) :
+        runtimeInformation(runtimeInformation)
+    {}
+
     Parameters(const ParameterInterface& other) :
+        runtimeInformation{other.GetRuntimeInformation()},
         parametersDouble{ other.GetParametersDouble()},
         parametersInt{other.GetParametersInt()},
         parametersBool{other.GetParametersBool()},
@@ -53,11 +57,16 @@ public:
     bool AddParameterBoolVector(std::string name, const std::vector<bool> value) override;
     bool AddParameterStringVector(std::string name, const std::vector<std::string> value) override;
     bool AddParameterNormalDistribution(std::string name,
-                                        const StochasticDefintions::NormalDistributionParameter value) override;
+                                        const openpass::parameter::NormalDistribution value) override;
 
     ParameterInterface& InitializeListItem(std::string key) override;
 
     //NOTE: The primitive getters are in header on purpose
+
+    virtual const openpass::common::RuntimeInformation& GetRuntimeInformation() const override
+    {
+        return runtimeInformation;
+    }
 
     virtual const std::map<std::string, double>& GetParametersDouble() const override
     {
@@ -99,7 +108,7 @@ public:
         return parametersStringVector;
     }
 
-    virtual const std::map<std::string, const StochasticDefintions::NormalDistributionParameter>&
+    virtual const std::map<std::string, const openpass::parameter::NormalDistribution>&
     GetParametersNormalDistribution() const override
     {
         return parametersNormalDistribution;
@@ -111,6 +120,7 @@ public:
     }
 
 protected:
+    const openpass::common::RuntimeInformation& runtimeInformation;
     std::map<std::string, double> parametersDouble;
     std::map<std::string, int> parametersInt;
     std::map<std::string, bool> parametersBool;
@@ -119,21 +129,41 @@ protected:
     std::map<std::string, const std::vector<int>> parametersIntVector;
     std::map<std::string, const std::vector<bool>> parametersBoolVector;
     std::map<std::string, const std::vector<std::string>> parametersStringVector;
-    std::map<std::string, const StochasticDefintions::NormalDistributionParameter> parametersNormalDistribution;
+    std::map<std::string, const openpass::parameter::NormalDistribution> parametersNormalDistribution;
     std::map<std::string, ParameterLists> parameterLists;
 };
 
 class ModelParameters : public Parameters
-{};
+{
+public:
+    ModelParameters (const openpass::common::RuntimeInformation& runtimeInformation) :
+        Parameters(runtimeInformation)
+    {}
+};
 
 class SpawnPointParameters : public Parameters
-{};
+{
+public:
+    SpawnPointParameters (const openpass::common::RuntimeInformation& runtimeInformation) :
+        Parameters(runtimeInformation)
+    {}
+};
 
 class ObservationParameters : public Parameters
-{};
+{
+public:
+    ObservationParameters (const openpass::common::RuntimeInformation& runtimeInformation) :
+        Parameters(runtimeInformation)
+    {}
+};
 
 class WorldParameters : public Parameters
-{};
+{
+public:
+    WorldParameters (const openpass::common::RuntimeInformation& runtimeInformation) :
+        Parameters(runtimeInformation)
+    {}
+};
 
 } // namespace SimulationCommon
 

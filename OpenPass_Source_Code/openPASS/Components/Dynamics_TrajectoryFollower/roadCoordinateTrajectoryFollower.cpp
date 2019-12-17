@@ -264,6 +264,7 @@ void RoadCoordinateTrajectoryFollower::UpdateDynamics(const DynamicsInformation 
 
     dynamicsOutputSignal.velocity = dynamicsInformation.velocity;
     dynamicsOutputSignal.acceleration = dynamicsInformation.acceleration;
+    dynamicsOutputSignal.centripetalAcceleration = dynamicsOutputSignal.yawRate * dynamicsOutputSignal.velocity;
 
     lastRoadPosition = currentRoadPosition;
     lastWorldPosition = {dynamicsOutputSignal.positionX,

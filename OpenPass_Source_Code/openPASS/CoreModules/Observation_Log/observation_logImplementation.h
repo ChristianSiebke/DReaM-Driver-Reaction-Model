@@ -54,7 +54,7 @@ public:
 
     virtual void Insert(int time, int agentId, LoggingGroup group, const std::string& key, const std::string& value) override;
     virtual void InsertEvent(std::shared_ptr<EventInterface> event) override;
-    virtual void SlavePreHook(const std::string& path) override;
+    virtual void SlavePreHook() override;
     virtual void SlavePreRunHook() override;
     virtual void SlavePostRunHook(const RunResultInterface& runResult) override;
     virtual void SlaveUpdateHook(int, RunResultInterface&) override {}
@@ -82,6 +82,7 @@ public:
     }
 
 private:
+    const openpass::common::RuntimeInformation& runtimeInformation;
     RunStatistic runStatistic = RunStatistic(-1);
     std::vector<LoggingGroup> loggingGroups{LoggingGroup::Trace};
     ObservationCyclics cyclics;

@@ -34,49 +34,27 @@ DynamicAgentTypeGenerator& DynamicAgentTypeGenerator::GatherBasicComponents()
 DynamicAgentTypeGenerator& DynamicAgentTypeGenerator::GatherDriverComponents()
 {
     auto driverParameters = profiles->GetDriverProfiles().at(sampledProfiles.driverProfileName);
+    auto driverModule = openpass::parameter::Get<std::string>(driverParameters, "Type"); // Existence checked by ProfilesImporter
 
-    if (driverParameters->GetParametersString().count("SensorDriverModule") > 0)
+    if (auto driverParameterModule = openpass::parameter::Get<std::string>(driverParameters, "ParametersModule"))
     {
-        const auto& sensorDriverModuleName = driverParameters->GetParametersString().at("SensorDriverModule");
-        GatherComponent(sensorDriverModuleName, agentBuildInformation.agentType);
+        GatherComponentWithParameters(driverParameterModule.value(), agentBuildInformation.agentType, driverParameters);
+        GatherComponent(driverModule.value(), agentBuildInformation.agentType);
     }
     else
     {
-        GatherComponent("Sensor_Driver", agentBuildInformation.agentType);
+        GatherComponentWithParameters(driverModule.value(), agentBuildInformation.agentType, driverParameters);
     }
 
-    if (driverParameters->GetParametersString().count("AlgorithmLateralModule") > 0)
-    {
-        const auto& algorithmLateralModuleName = driverParameters->GetParametersString().at("AlgorithmLateralModule");
-        GatherComponent(algorithmLateralModuleName, agentBuildInformation.agentType);
-    }
-    else
-    {
-        GatherComponent("AlgorithmLateralDriver", agentBuildInformation.agentType);
-    }
+    auto sensorDriverModule = openpass::parameter::Get<std::string>(driverParameters, "SensorDriverModule");
+    GatherComponent(sensorDriverModule.value_or("Sensor_Driver"), agentBuildInformation.agentType);
 
-    if (driverParameters->GetParametersString().count("AlgorithmLongitudinalModule") > 0)
-    {
-        const auto& algorithmLongitudinalModuleName = driverParameters->GetParametersString().at("AlgorithmLongitudinalModule");
-        GatherComponent(algorithmLongitudinalModuleName, agentBuildInformation.agentType);
-    }
-    else
-    {
-        GatherComponent("AlgorithmLongitudinalDriver", agentBuildInformation.agentType);
-    }
+    auto algorithmLateralModule = openpass::parameter::Get<std::string>(driverParameters, "AlgorithmLateralModule");
+    GatherComponent(algorithmLateralModule.value_or("AlgorithmLateralDriver"), agentBuildInformation.agentType);
 
-    const auto& driverModule = driverParameters->GetParametersString().at("Type");
+    auto algorithmLongitudinalModule = openpass::parameter::Get<std::string>(driverParameters, "AlgorithmLongitudinalModule");
+    GatherComponent(algorithmLongitudinalModule.value_or("AlgorithmLongitudinalDriver"), agentBuildInformation.agentType);
 
-    if (driverParameters->GetParametersString().count("ParametersModule") > 0)
-    {
-        const auto& parametersModuleName = driverParameters->GetParametersString().at("ParametersModule");
-        GatherComponentWithParameters(parametersModuleName, agentBuildInformation.agentType, driverParameters.get());
-        GatherComponent(driverModule, agentBuildInformation.agentType);
-    }
-    else
-    {
-        GatherComponentWithParameters(driverModule, agentBuildInformation.agentType, driverParameters.get());
-    }
 
     for (const auto& componentName : defaultComponents.driverComponentNames)
     {
@@ -90,8 +68,7 @@ DynamicAgentTypeGenerator& DynamicAgentTypeGenerator::GatherVehicleComponents()
 {
     std::shared_ptr<SimulationSlave::AgentType> agentType = agentBuildInformation.agentType;
     VehicleComponentProfileNames vehicleComponentProfileNames = sampledProfiles.vehicleComponentProfileNames;
-    std::unordered_map<std::string, VehicleComponentProfiles> possibleVehicleComponentProfiles =
-        profiles->GetVehicleComponentProfiles();
+    auto possibleVehicleComponentProfiles = profiles->GetVehicleComponentProfiles();
 
     if (!vehicleComponentProfileNames.empty())
     {
@@ -125,14 +102,17 @@ DynamicAgentTypeGenerator& DynamicAgentTypeGenerator::GatherVehicleComponents()
                                              vehicleProfile.vehicleComponents.end(), [vehicleComponentProfile](VehicleComponent curComponent)
         { return curComponent.type == vehicleComponentProfile.first; });
 
+        openpass::parameter::internal::ParameterList parameterList;
         for (auto link : matchedComponent->sensorLinks)
         {
-            auto& parameterListItem = parameters->InitializeListItem("SensorLinks");
-            parameterListItem.AddParameterInt("SensorId", link.sensorId);
-            parameterListItem.AddParameterString("InputId", link.inputId);
+            openpass::parameter::internal::ParameterSet param;
+            param.emplace_back("SensorId", link.sensorId);
+            param.emplace_back("InputId", link.inputId);
+            parameterList.emplace_back(param);
         }
+        parameters.emplace_back("SensorLinks", parameterList);
 
-        GatherComponentWithParameters(vehicleComponentProfile.first, agentType, parameters.get());
+        GatherComponentWithParameters(vehicleComponentProfile.first, agentType, parameters);
     }
 
     return *this;
@@ -144,40 +124,43 @@ DynamicAgentTypeGenerator& DynamicAgentTypeGenerator::GatherSensors()
 
     GatherComponent(sensorFusionModulName, agentBuildInformation.agentType);
 
-    int inputIdSensorFusion = systemConfigBlueprint->GetSystems().at(0)->GetComponents().at(sensorFusionModulName)->GetInputLinks().at(
-                                  0);
+    int inputIdSensorFusion = systemConfigBlueprint->GetSystems().at(0)->GetComponents().at(sensorFusionModulName)->GetInputLinks().at(0);
     int sensorNumber = 0;
     auto vehicleProfile = profiles->GetVehicleProfiles().at(sampledProfiles.vehicleProfileName);
 
     const auto sensorProfilesFromConfig = profiles->GetSensorProfiles();
 
-    for (const SensorParameter& sensor : vehicleProfile.sensors)
+    for (const auto& sensor : vehicleProfile.sensors)
     {
-        auto matchedSensorProfile = std::find_if(sensorProfilesFromConfig.begin(),
-                                    sensorProfilesFromConfig.end(), [sensor](SensorProfile curProfile)
-        { return curProfile.name == sensor.sensorProfile.name && curProfile.type == sensor.sensorProfile.type; });
+        const auto matchedSensorProfile = std::find_if(
+            sensorProfilesFromConfig.begin(), sensorProfilesFromConfig.end(),
+            [sensor](const auto& profile)
+            {
+              return profile.name == sensor.profile.name && profile.type == sensor.profile.type;
+            });
 
         if (matchedSensorProfile == sensorProfilesFromConfig.end())
         {
             throw std::runtime_error("Could not find SensorProfile");
         }
 
-        auto curParameters = std::make_shared<SimulationCommon::Parameters>(*matchedSensorProfile->parameters);
-        systemConfigBlueprint->AddModelParameters(curParameters);
+        // clone first from profile
+        auto sensorParam = openpass::parameter::Container(matchedSensorProfile->parameter);
 
-        curParameters->AddParameterString("Name", matchedSensorProfile->name);
-        curParameters->AddParameterString("Type", matchedSensorProfile->type);
-        curParameters->AddParameterInt("Id", sensor.id);
-        curParameters->AddParameterDouble("Longitudinal", sensor.sensorPosition.longitudinal);
-        curParameters->AddParameterDouble("Lateral", sensor.sensorPosition.lateral);
-        curParameters->AddParameterDouble("Height", sensor.sensorPosition.height);
-        curParameters->AddParameterDouble("Pitch", sensor.sensorPosition.pitch);
-        curParameters->AddParameterDouble("Yaw", sensor.sensorPosition.yaw);
-        curParameters->AddParameterDouble("Roll", sensor.sensorPosition.roll);
-        curParameters->AddParameterDouble("Latency", dynamicParameters.sensorLatencies.at(sensor.id));
+        // add specific information
+        sensorParam.emplace_back("Name", matchedSensorProfile->name);
+        sensorParam.emplace_back("Type", matchedSensorProfile->type);
+        sensorParam.emplace_back("Id", sensor.id);
+        sensorParam.emplace_back("Longitudinal", sensor.position.longitudinal);
+        sensorParam.emplace_back("Lateral", sensor.position.lateral);
+        sensorParam.emplace_back("Height", sensor.position.height);
+        sensorParam.emplace_back("Pitch", sensor.position.pitch);
+        sensorParam.emplace_back("Yaw", sensor.position.yaw);
+        sensorParam.emplace_back("Roll", sensor.position.roll);
+        sensorParam.emplace_back("Latency", dynamicParameters.sensorLatencies.at(sensor.id));
 
         const std::string uniqueSensorName =  "Sensor_" + std::to_string(sensor.id);
-        GatherComponentWithParameters(uniqueSensorName, agentBuildInformation.agentType, curParameters.get(),
+        GatherComponentWithParameters(uniqueSensorName, agentBuildInformation.agentType, sensorParam,
                                       "SensorObjectDetector", sensorNumber);
 
         if (sensorNumber > 0)
@@ -187,9 +170,9 @@ DynamicAgentTypeGenerator& DynamicAgentTypeGenerator::GatherSensors()
         }
 
         // clone sensor and set specific parameters
-        SensorParameter sensorParameter(sensor);
-        sensorParameter.sensorProfile.parameters = curParameters;
-        agentBuildInformation.sensorParameters.push_back(sensorParameter);
+        openpass::sensors::Parameter clonedSensor(sensor);
+        clonedSensor.profile.parameter = sensorParam;
+        agentBuildInformation.sensorParameters.push_back(clonedSensor);
 
         sensorNumber++;
     }
@@ -225,14 +208,14 @@ void DynamicAgentTypeGenerator::GatherComponent(const std::string componentName,
 
 void DynamicAgentTypeGenerator::GatherComponentWithParameters(std::string componentName,
         std::shared_ptr<SimulationSlave::AgentType> agentType,
-        ParameterInterface* parameters)
+        const openpass::parameter::Container &parameters)
 {
     GatherComponentWithParameters(componentName, agentType, parameters, componentName, 0);
 }
 
 void DynamicAgentTypeGenerator::GatherComponentWithParameters(std::string componentName,
         std::shared_ptr<SimulationSlave::AgentType> agentType,
-        ParameterInterface* parameters, std::string componentNameInSystemConfigBlueprint, int channelOffset)
+        const openpass::parameter::Container &parameters, std::string componentNameInSystemConfigBlueprint, int channelOffset)
 {
     if (systemConfigBlueprint->GetSystems().at(0)->GetComponents().count(componentNameInSystemConfigBlueprint) == 0)
     {

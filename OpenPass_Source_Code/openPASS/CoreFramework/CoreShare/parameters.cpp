@@ -67,7 +67,7 @@ bool Parameters::AddParameterStringVector(std::string name, const std::vector<st
 }
 
 bool Parameters::AddParameterNormalDistribution(std::string name,
-        const StochasticDefintions::NormalDistributionParameter value)
+        const openpass::parameter::NormalDistribution value)
 {
     return CheckedInsert(parametersNormalDistribution, name, value);
 }
@@ -75,7 +75,7 @@ bool Parameters::AddParameterNormalDistribution(std::string name,
 ParameterInterface& Parameters::InitializeListItem(std::string key)
 {
     auto& element = parameterLists[key];
-    element.emplace_back(std::make_shared<ModelParameters>());
+    element.emplace_back(std::make_shared<ModelParameters>(runtimeInformation)); // TODO: does only model parameters should have parameter lists?
     return *element.back().get();
 }
 

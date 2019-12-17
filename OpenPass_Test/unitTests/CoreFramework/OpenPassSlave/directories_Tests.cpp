@@ -15,6 +15,8 @@
 
 using ::testing::Eq;
 
+using namespace openpass::core;
+
 #ifndef WIN32
 
 TEST(Directories, ParseRelativePaths)

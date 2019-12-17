@@ -250,6 +250,11 @@ public:
         world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateYawRate, this, value));
     }
 
+    void SetCentripetalAcceleration(double value) override
+    {
+        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateCentripetalAcceleration, this, value));
+    }
+
     void SetDistanceTraveled(double distanceTraveled) override
     {
         world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateDistanceTraveled, this, distanceTraveled));
@@ -392,6 +397,11 @@ public:
         return GetBaseTrafficObject().GetAbsOrientationRate().yawRate;
     }
 
+    double GetCentripetalAcceleration() const override
+    {
+        return centripetalAcceleration;
+    }
+
     void UpdateWidth(double width)
     {
         OWL::Primitive::Dimension dimension = baseTrafficObject.GetDimension();
@@ -518,6 +528,11 @@ public:
         OWL::Primitive::AbsOrientationRate orientationRate = GetBaseTrafficObject().GetAbsOrientationRate();
         orientationRate.yawRate = yawRate;
         GetBaseTrafficObject().SetAbsOrientationRate(orientationRate);
+    }
+
+    void UpdateCentripetalAcceleration(double centripetalAcceleration)
+    {
+        this->centripetalAcceleration  = centripetalAcceleration;
     }
 
     void UpdateDistanceReferencePointToFrontAxle(double distanceReferencePointToFrontAxle)
@@ -775,13 +790,13 @@ public:
 
     double GetLaneRemainder(Side side) const override;
 
-    virtual const std::list<SensorParameter>& GetSensorParameters() const override
+    virtual const openpass::sensors::Parameters& GetSensorParameters() const override
 
     {
         return sensorParameters;
     }
 
-    virtual void SetSensorParameters(std::list<SensorParameter> sensorParameters) override
+    virtual void SetSensorParameters(openpass::sensors::Parameters sensorParameters) override
     {
         this->sensorParameters = sensorParameters;
     }
@@ -1369,6 +1384,7 @@ private:
     double accelPedal = 0.;
     double brakePedal = 0.;
     double steeringWheelAngle = 0.0;
+    double centripetalAcceleration = 0.0;
     double engineSpeed = 0.;
     bool hornSwitch = false;
     bool flasherSwitch = false;
@@ -1395,5 +1411,5 @@ private:
 
     bool completlyInWorld = false;
 
-    std::list<SensorParameter> sensorParameters;
+    openpass::sensors::Parameters sensorParameters;
 };

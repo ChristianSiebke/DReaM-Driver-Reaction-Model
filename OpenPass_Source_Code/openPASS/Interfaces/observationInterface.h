@@ -69,9 +69,8 @@ public:
     //-----------------------------------------------------------------------------
     //! Called by framework in slave before all simulation runs start
     //!
-    //! @param[in]     path          Directory where simulation results will be stored
     //-----------------------------------------------------------------------------
-    virtual void SlavePreHook(const std::string& path) = 0;
+    virtual void SlavePreHook() = 0;
 
     //-----------------------------------------------------------------------------
     //! Called by framework in slave before each simulation run starts be stored

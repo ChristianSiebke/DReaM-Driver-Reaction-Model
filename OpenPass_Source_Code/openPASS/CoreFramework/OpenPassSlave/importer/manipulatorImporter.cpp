@@ -12,7 +12,7 @@
 #include "xmlParser.h"
 #include "Common/openScenarioDefinitions.h"
 #include "importerLoggingHelper.h"
-
+#include <cmath>
 #include <boost/algorithm/string/trim.hpp>
 
 namespace TAG = openpass::importer::xml::manipulatorImporter::tag;

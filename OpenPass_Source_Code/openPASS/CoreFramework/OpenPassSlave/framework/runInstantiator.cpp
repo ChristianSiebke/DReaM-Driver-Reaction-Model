@@ -66,22 +66,24 @@ bool RunInstantiator::InitializeFrameworkModules(ExperimentConfig& experimentCon
                scenario,
                eventNetwork));
 
-    SimulationCommon::ObservationParameters observationParameters;
-    observationParameters.AddParameterBool("LoggingCyclicsToCsv", experimentConfig.logCyclicsToCsv);
-    observationParameters.AddParameterStringVector("LoggingGroups", experimentConfig.loggingGroups);
-    observationParameters.AddParameterString("SceneryFile", scenario->GetSceneryPath());
+    openpass::parameter::Container observationParameters
+    {
+        { "LoggingCyclicsToCsv", experimentConfig.logCyclicsToCsv},
+        { "LoggingGroups", experimentConfig.loggingGroups },
+        { "SceneryFile", scenario->GetSceneryPath() }
+    };
 
     // TODO: This is a workaround, as the OSI use case only imports a single observation library -> implement new observation concept
     std::map<int, ObservationInstance> observationInstances
     {
-        { 0, { frameworkModules.observationLibrary, &observationParameters } }
+        { 0, { frameworkModules.observationLibrary, observationParameters } }
     };
 
     CHECKFALSE(observationNetwork->Instantiate(observationInstances,
                stochastics,
                world,
                eventNetwork));
-    CHECKFALSE(observationNetwork->InitAll(outputDir));
+    CHECKFALSE(observationNetwork->InitAll());
 
     return true;
 }
@@ -115,20 +117,16 @@ bool RunInstantiator::ExecuteRun()
 
         ClearRun();
 
-        SimulationCommon::WorldParameters worldParameters;
-        sampler.SampleWorldParameters(slaveConfig->GetEnvironmentConfig(), &worldParameters);
-
-        world->ExtractParameter(&worldParameters);
+        auto worldParameter = sampler.SampleWorldParameters(slaveConfig->GetEnvironmentConfig());
+        world->ExtractParameter(worldParameter.get());
 
         observationNetwork->InitRun();
 
-        SimulationCommon::SpawnPointParameters spawnPointParameters;
-        sampler.SampleSpawnPointParameters(slaveConfig->GetTrafficConfig(), &spawnPointParameters);
-
+        auto spawnPointParameter = sampler.SampleSpawnPointParameters(slaveConfig->GetTrafficConfig());
         CHECKFALSE(spawnPointNetwork->Instantiate(frameworkModules.spawnPointLibrary,
                    agentFactory,
                    agentBlueprintProvider,
-                   &spawnPointParameters,
+                   spawnPointParameter.get(),
                    sampler,
                    scenario));
 

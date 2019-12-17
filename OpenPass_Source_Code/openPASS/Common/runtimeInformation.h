@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2019 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -10,12 +10,22 @@
 
 #pragma once
 
-#include <QDomDocument>
-#include "Common/parameter.h"
+#include "version.h"
 
-namespace openpass::parameter
+namespace openpass::common {
+struct RuntimeInformation
 {
+    struct Versions
+    {
+        Version framework;
+    } versions;
 
-Container Import(QDomElement parameterElement);
+    struct Directories
+    {
+        std::string configuration;
+        std::string output;
+        std::string library;
+    } directories;
+};
 
-} //namespace openpass::parameter
+} // namespace openpass::common

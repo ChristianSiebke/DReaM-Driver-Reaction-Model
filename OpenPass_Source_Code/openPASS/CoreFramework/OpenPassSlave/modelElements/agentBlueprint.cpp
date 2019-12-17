@@ -70,7 +70,7 @@ void AgentBlueprint::SetObjectName(std::string objectName)
     this->objectName = objectName;
 }
 
-void AgentBlueprint::AddSensor(SensorParameter parameters)
+void AgentBlueprint::AddSensor(openpass::sensors::Parameter parameters)
 {
     sensorParameters.push_back(parameters);
 }
@@ -110,7 +110,7 @@ VehicleModelParameters AgentBlueprint::GetVehicleModelParameters()
     return vehicleModelParameters;
 }
 
-std::list<SensorParameter> AgentBlueprint::GetSensorParameters()
+openpass::sensors::Parameters AgentBlueprint::GetSensorParameters()
 {
     return sensorParameters;
 }

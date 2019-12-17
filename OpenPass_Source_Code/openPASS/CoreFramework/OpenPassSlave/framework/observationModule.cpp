@@ -16,9 +16,11 @@
 namespace SimulationSlave {
 
 ObservationModule::ObservationModule(ObservationInterface* implementation,
+                                     std::unique_ptr<ParameterInterface> parameter,
                                      ObservationLibrary* library) :
-    implementation(implementation),
-    library(library)
+    implementation{implementation},
+    parameter{std::move(parameter)},
+    library{library}
 {}
 
 ObservationModule::~ObservationModule()

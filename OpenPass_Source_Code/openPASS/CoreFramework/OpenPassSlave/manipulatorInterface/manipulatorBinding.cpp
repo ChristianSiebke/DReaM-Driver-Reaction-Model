@@ -16,7 +16,7 @@ namespace SimulationSlave
 {
 
 ManipulatorBinding::ManipulatorBinding(CallbackInterface *callbacks) :
-    callbacks(callbacks)
+    callbacks{callbacks}
 {}
 
 ManipulatorBinding::~ManipulatorBinding()

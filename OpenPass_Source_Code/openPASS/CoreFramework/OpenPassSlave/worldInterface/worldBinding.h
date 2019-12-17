@@ -20,8 +20,7 @@
 #include "Interfaces/worldInterface.h"
 #include "Interfaces/stochasticsInterface.h"
 
-namespace SimulationSlave
-{
+namespace SimulationSlave {
 
 class WorldLibrary;
 class FrameworkConfig;

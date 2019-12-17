@@ -14,9 +14,13 @@
 //-----------------------------------------------------------------------------
 
 #include "sampler.h"
+#include "parameterbuilder.h"
+#include "parameters.h"
+#include <cmath>
 
-Sampler::Sampler(StochasticsInterface &stochastics):
-    stochastics(stochastics)
+Sampler::Sampler(StochasticsInterface &stochastics, const openpass::common::RuntimeInformation &runtimeInformation):
+    stochastics {stochastics},
+    runtimeInformation { runtimeInformation }
 {
 }
 
@@ -66,7 +70,7 @@ double Sampler::RollForStochasticAttribute(double mean, double stdDev, double lo
 
 size_t Sampler::RollUniformDistributedVectorIndex(size_t vectorSize) const
 {
-    size_t index = static_cast<size_t>(floor(stochastics.GetUniformDistributed(0, 1) * vectorSize));
+    size_t index = static_cast<size_t>(std::floor(stochastics.GetUniformDistributed(0, 1) * vectorSize));
 
     if (vectorSize == index)
     {
@@ -145,41 +149,25 @@ double Sampler::SampleDoubleProbability(DoubleProbabilities probabilities) const
     throw std::logic_error("Could not find matching probability within range.");
 }
 
-void Sampler::SampleSpawnPointParameters(TrafficConfig& trafficConfig, ParameterInterface* parameters) const
+std::unique_ptr<ParameterInterface> Sampler::SampleSpawnPointParameters(const TrafficConfig& trafficConfig) const
 {
-    //Sample traffic volume
-    double trafficVolume = SampleDoubleProbability(trafficConfig.trafficVolumes);
-    parameters->AddParameterDouble("TrafficVolume", trafficVolume);
-
-    //Sample platoon rate
-    double platoonRate = SampleDoubleProbability(trafficConfig.platoonRates);
-    parameters->AddParameterDouble("PlatoonRate", platoonRate);
-
-    //Sample velocity
-    double velocity = SampleDoubleProbability(trafficConfig.velocities);
-    parameters->AddParameterDouble("Velocity", velocity);
-
-    //Sample homogenity
-    double homogenity = SampleDoubleProbability(trafficConfig.homogenities);
-    parameters->AddParameterDouble("Homogenity", homogenity);
+    return openpass::parameter::make<SimulationCommon::Parameters>(
+        runtimeInformation, openpass::parameter::Container {
+            { "TrafficVolume", SampleDoubleProbability(trafficConfig.trafficVolumes) },
+            { "PlatoonRate", SampleDoubleProbability(trafficConfig.platoonRates) },
+            { "Velocity", SampleDoubleProbability(trafficConfig.velocities) },
+            { "Homogenity", SampleDoubleProbability(trafficConfig.homogenities) }}
+    );
 }
 
-void Sampler::SampleWorldParameters(EnvironmentConfig& environmentConfig, ParameterInterface* parameters) const
+std::unique_ptr<ParameterInterface> Sampler::SampleWorldParameters(const EnvironmentConfig& environmentConfig) const
 {
-    //Sample time of day
-    std::string timeOfDay = SampleStringProbability(environmentConfig.timeOfDays);
-    parameters->AddParameterString("TimeOfDay", timeOfDay);
-
-    //Sample visibility distance
-    int visibilityDistance = SampleIntProbability(environmentConfig.visibilityDistances);
-    parameters->AddParameterInt("VisibilityDistance", visibilityDistance);
-
-    //Sample friction
-    double friction = SampleDoubleProbability(environmentConfig.frictions);
-    parameters->AddParameterDouble("Friction", friction);
-
-    //Sample weather
-    std::string weather = SampleStringProbability(environmentConfig.weathers);
-    parameters->AddParameterString("Weather", weather);
+    return openpass::parameter::make<SimulationCommon::Parameters>(
+        runtimeInformation, openpass::parameter::Container {
+            { "TimeOfDay", SampleStringProbability(environmentConfig.timeOfDays) },
+            { "VisibilityDistance", SampleIntProbability(environmentConfig.visibilityDistances) },
+            { "Friction", SampleDoubleProbability(environmentConfig.frictions) },
+            { "Weather", SampleStringProbability(environmentConfig.weathers) }}
+    );
 }
 

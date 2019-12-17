@@ -24,11 +24,11 @@
 #include <map>
 #include <iostream>
 
+#include "Common/parameter.h"
 #include "CoreFramework/CoreShare/log.h"
 #include "componentType.h"
 #include "systemConfig.h"
 #include "agentType.h"
-#include "parameters.h"
 #include "parameterImporter.h"
 #include "xmlParser.h"
 
@@ -59,7 +59,7 @@ public:
 
 
 private:
-    static bool ImportSystemParameters(QDomElement &parametersElement, ParameterInterface* parameters);
+    static openpass::parameter::Container ImportSystemParameters(QDomElement &parametersElement);
     static bool ImportSystemConfigContent(const std::string &filename, QDomDocument& document);
 
 };

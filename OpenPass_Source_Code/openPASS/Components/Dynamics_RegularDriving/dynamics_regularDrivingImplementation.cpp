@@ -279,6 +279,7 @@ void DynamicsRegularDrivingImplementation::Trigger(int time)
     // change of yaw angle due to ds and curvature [radiant]
     double dpsi = std::atan(steeringCurvature*ds);
     dynamicsSignal.yawRate = dpsi / (GetCycleTime() * 0.001);
+    dynamicsSignal.centripetalAcceleration = dynamicsSignal.yawRate * v;
     // new yaw angle in current time step [radiant]
     double psi = agent->GetYaw() + dpsi;
     dynamicsSignal.yaw = psi;

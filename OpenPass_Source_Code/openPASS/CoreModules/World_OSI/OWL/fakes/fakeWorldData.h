@@ -23,6 +23,7 @@ class WorldData : public OWL::Interfaces::WorldData
 public:
     MOCK_METHOD0(Clear, void());
     MOCK_METHOD0(Reset, void());
+    MOCK_CONST_METHOD0(GetOsiGroundTruth, const osi3::GroundTruth& ());
     MOCK_CONST_METHOD0(GetRoads,
                        const std::unordered_map<OWL::Id, OWL::Interfaces::Road*>& ());
     MOCK_METHOD1(AddMovingObject,

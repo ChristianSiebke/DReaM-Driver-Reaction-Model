@@ -48,7 +48,7 @@ public:
                              EventNetworkInterface* eventNetwork) override;
     virtual const std::map<int, ObservationModule*>& GetObservationModules() override;
 
-    virtual bool InitAll(const std::string& path) override;
+    virtual bool InitAll() override;
     virtual bool InitRun() override;
     virtual bool UpdateTimeStep(int time, RunResult& runResult) override;
     virtual bool FinalizeRun(const RunResult& result) override;

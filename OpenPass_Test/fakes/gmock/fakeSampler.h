@@ -34,10 +34,10 @@ public:
                        double(DoubleProbabilities));
     MOCK_CONST_METHOD1(SampleIntProbability,
                        int(IntProbabilities));
-    MOCK_CONST_METHOD2(SampleWorldParameters,
-                       void(EnvironmentConfig&, ParameterInterface*));
-    MOCK_CONST_METHOD2(SampleSpawnPointParameters,
-                       void(TrafficConfig&, ParameterInterface*));
+    MOCK_CONST_METHOD1(SampleWorldParameters,
+                       std::unique_ptr<ParameterInterface>(const EnvironmentConfig&));
+    MOCK_CONST_METHOD1(SampleSpawnPointParameters,
+                       std::unique_ptr<ParameterInterface>(const TrafficConfig&));
 };
 
 

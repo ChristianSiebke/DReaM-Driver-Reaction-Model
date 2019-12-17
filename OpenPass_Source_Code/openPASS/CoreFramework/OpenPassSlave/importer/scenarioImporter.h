@@ -55,7 +55,7 @@ public:
     static void ImportStoryboard(QDomElement& documentRoot, std::vector<ScenarioEntity>& entities, ScenarioInterface* scenario);
 
     //Import EventDetectors and Manipulators
-    static void ImportParameterElement(QDomElement& parameterElement, ParameterInterface *parameters);
+    static void ImportParameterElement(QDomElement& parameterElement, openpass::parameter::Container& parameters);
 
     /*!
      * \brief Imports a catalog tag
@@ -248,7 +248,7 @@ private:
      */
     static void ImportPrivateElements(QDomElement& actionsElement, std::vector<ScenarioEntity>& entities);
 
-    static void ImportParameterDeclarationElement(QDomElement& parameterDeclarationElement, ParameterInterface *parameters);
+    static void ImportParameterDeclarationElement(QDomElement& parameterDeclarationElement, openpass::parameter::Container& parameters);
 
     /*!
      * \brief Tests, if a entity with a given name is included in the provided vector of scenario entities

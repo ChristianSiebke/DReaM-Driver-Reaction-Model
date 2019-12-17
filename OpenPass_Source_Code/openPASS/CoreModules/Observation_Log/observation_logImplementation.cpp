@@ -31,6 +31,7 @@ ObservationLogImplementation::ObservationLogImplementation(SimulationSlave::Even
                          world,
                          parameters,
                          callbacks),
+    runtimeInformation(parameters->GetRuntimeInformation()),
     eventNetwork(eventNetwork)
 {
     // read parameters
@@ -124,10 +125,10 @@ void ObservationLogImplementation::InsertEvent(std::shared_ptr<EventInterface> e
     eventNetwork->InsertEvent(event);
 }
 
-void ObservationLogImplementation::SlavePreHook(const std::string& path)
+void ObservationLogImplementation::SlavePreHook()
 {
-    fileHandler.SetOutputDir(path);
-    fileHandler.WriteStartOfFile();
+    fileHandler.SetOutputDir(runtimeInformation.directories.output);
+    fileHandler.WriteStartOfFile(runtimeInformation.versions.framework.str());
 }
 
 void ObservationLogImplementation::SlavePreRunHook()

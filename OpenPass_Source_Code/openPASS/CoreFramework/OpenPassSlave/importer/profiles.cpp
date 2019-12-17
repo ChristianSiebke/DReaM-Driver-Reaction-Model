@@ -54,7 +54,7 @@ StringProbabilities& Profiles::GetVehicleProfileProbabilities(std::string agentP
     }
 }
 
-std::list<SensorProfile>& Profiles::GetSensorProfiles()
+openpass::sensors::Profiles& Profiles::GetSensorProfiles()
 {
     return sensorProfiles;
 }

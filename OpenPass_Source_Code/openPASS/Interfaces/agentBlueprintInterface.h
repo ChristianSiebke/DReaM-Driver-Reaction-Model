@@ -58,7 +58,7 @@ public:
     virtual void SetSpeedGoalMin(double speedGoalMin) = 0;
     virtual void SetAgentType(std::shared_ptr<SimulationSlave::AgentTypeInterface> agentType) = 0;
 
-    virtual void AddSensor(SensorParameter parameters) = 0;
+    virtual void AddSensor(openpass::sensors::Parameter parameters) = 0;
 
     virtual AgentCategory                       GetAgentCategory() = 0;
     virtual std::string                         GetAgentProfileName() = 0;
@@ -68,7 +68,7 @@ public:
     virtual std::string                         GetObjectName() = 0;
 
     virtual VehicleModelParameters              GetVehicleModelParameters() = 0;
-    virtual std::list<SensorParameter>          GetSensorParameters()  = 0;
+    virtual openpass::sensors::Parameters          GetSensorParameters()  = 0;
     virtual VehicleComponentProfileNames        GetVehicleComponentProfileNames() = 0;
     virtual SimulationSlave::AgentTypeInterface& GetAgentType() = 0;
     virtual SpawnParameter&                      GetSpawnParameter() = 0;

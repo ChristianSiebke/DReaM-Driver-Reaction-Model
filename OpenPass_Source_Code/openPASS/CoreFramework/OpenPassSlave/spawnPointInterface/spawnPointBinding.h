@@ -33,7 +33,7 @@ class SpawnPoint;
 class SpawnPointBinding
 {
 public:
-    SpawnPointBinding(CallbackInterface* callbacks);
+    SpawnPointBinding(const openpass::common::RuntimeInformation &runtimeInformation, CallbackInterface* callbacks);
     SpawnPointBinding(const SpawnPointBinding&) = delete;
     SpawnPointBinding(SpawnPointBinding&&) = delete;
     SpawnPointBinding& operator=(const SpawnPointBinding&) = delete;
@@ -69,6 +69,7 @@ public:
 
 private:
     SpawnPointLibrary* library {nullptr};
+    const openpass::common::RuntimeInformation& runtimeInformation;
     CallbackInterface* callbacks;
 };
 

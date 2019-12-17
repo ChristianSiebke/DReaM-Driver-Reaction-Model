@@ -83,12 +83,12 @@ public:
         return modelLibrary;
     }
 
-    ParameterInterface *GetModelParameters()
+    const openpass::parameter::Container& GetModelParameters()
     {
-        return parameters;
+        return this->parameters;
     }
 
-    void SetModelParameter(ParameterInterface* parameters)
+    void SetModelParameter(const openpass::parameter::Container parameters)
     {
         this->parameters = parameters;
     }
@@ -105,7 +105,7 @@ private:
     std::string modelLibrary = "";
     std::map<int, int> inputs;
     std::map<int, int> outputs;
-    ParameterInterface* parameters = nullptr;
+    openpass::parameter::Container parameters{};
 };
 
 } // namespace SimulationSlave

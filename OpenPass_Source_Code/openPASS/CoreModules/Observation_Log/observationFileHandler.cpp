@@ -18,10 +18,10 @@
 #include <QString>
 
 #include "Interfaces/worldInterface.h"
-
+#include "Common/sensorDefinitions.h"
 #include "observationFileHandler.h"
 
-void ObservationFileHandler::WriteStartOfFile()
+void ObservationFileHandler::WriteStartOfFile(const std::string& frameworkVersion)
 {
     runNumber = 0;
 
@@ -72,6 +72,7 @@ void ObservationFileHandler::WriteStartOfFile()
     xmlFileStream->setAutoFormatting(true);
     xmlFileStream->writeStartDocument();
     xmlFileStream->writeStartElement(outputTags.SIMULATIONOUTPUT);
+    xmlFileStream->writeAttribute(outputAttributes.FRAMEWORKVERSION, QString::fromStdString(frameworkVersion));
     xmlFileStream->writeAttribute(outputAttributes.SCHEMAVERSION, outputFileVersion);
     xmlFileStream->writeStartElement(outputTags.SCENERYFILE);
     xmlFileStream->writeCharacters(QString::fromStdString(sceneryFile));
@@ -261,7 +262,7 @@ void ObservationFileHandler::AddAgent(std::shared_ptr<QXmlStreamWriter> fStream,
 
 void ObservationFileHandler::AddSensors(std::shared_ptr<QXmlStreamWriter> fStream, const AgentInterface* agent)
 {
-    const std::list<SensorParameter> sensorParameters = agent->GetSensorParameters();
+    const openpass::sensors::Parameters sensorParameters = agent->GetSensorParameters();
 
     if (ContainsSensor(sensorParameters))
     {
@@ -276,51 +277,50 @@ void ObservationFileHandler::AddSensors(std::shared_ptr<QXmlStreamWriter> fStrea
     }
 }
 
-bool ObservationFileHandler::ContainsSensor(const std::list<SensorParameter>& sensorParameters) const
+bool ObservationFileHandler::ContainsSensor(const openpass::sensors::Parameters& sensorParameters) const
 {
     return !sensorParameters.empty();
 }
 
 void ObservationFileHandler::AddSensor(std::shared_ptr<QXmlStreamWriter> fStream,
-                                       const SensorParameter& sensorParameter)
+                                       const openpass::sensors::Parameter& sensorParameter)
 {
     fStream->writeStartElement(outputTags.SENSOR);
 
     fStream->writeAttribute(outputAttributes.ID, QString::number(sensorParameter.id));
 
-    fStream->writeAttribute(outputAttributes.TYPE, QString::fromStdString(sensorParameter.sensorProfile.type));
+    fStream->writeAttribute(outputAttributes.TYPE, QString::fromStdString(sensorParameter.profile.type));
     fStream->writeAttribute(outputAttributes.MOUNTINGPOSITIONLONGITUDINAL,
-                            QString::number(sensorParameter.sensorPosition.longitudinal));
+                            QString::number(sensorParameter.position.longitudinal));
     fStream->writeAttribute(outputAttributes.MOUNTINGPOSITIONLATERAL,
-                            QString::number(sensorParameter.sensorPosition.lateral));
+                            QString::number(sensorParameter.position.lateral));
     fStream->writeAttribute(outputAttributes.MOUNTINGPOSITIONHEIGHT,
-                            QString::number(sensorParameter.sensorPosition.height));
-    fStream->writeAttribute(outputAttributes.ORIENTATIONPITCH, QString::number(sensorParameter.sensorPosition.pitch));
-    fStream->writeAttribute(outputAttributes.ORIENTATIONYAW, QString::number(sensorParameter.sensorPosition.yaw));
-    fStream->writeAttribute(outputAttributes.ORIENTATIONROLL, QString::number(sensorParameter.sensorPosition.roll));
+                            QString::number(sensorParameter.position.height));
+    fStream->writeAttribute(outputAttributes.ORIENTATIONPITCH, QString::number(sensorParameter.position.pitch));
+    fStream->writeAttribute(outputAttributes.ORIENTATIONYAW, QString::number(sensorParameter.position.yaw));
+    fStream->writeAttribute(outputAttributes.ORIENTATIONROLL, QString::number(sensorParameter.position.roll));
 
-    const auto& sensorProfile = sensorParameter.sensorProfile.parameters;
+    const auto& parameters = sensorParameter.profile.parameter;
 
-    fStream->writeAttribute(outputAttributes.LATENCY, QString::number(sensorProfile->GetParametersDouble().at("Latency")));
-
-    if (sensorProfile->GetParametersDouble().count("OpeningAngleH"))
+    if (auto latency = openpass::parameter::Get<double>(parameters, "Latency"))
     {
-        fStream->writeAttribute(outputAttributes.OPENINGANGLEH,
-                                QString::number(sensorProfile->GetParametersDouble().at("OpeningAngleH")));
-    }
-    if (sensorProfile->GetParametersDouble().count("OpeningAngleV"))
-    {
-        fStream->writeAttribute(outputAttributes.OPENINGANGLEV,
-                                QString::number(sensorProfile->GetParametersDouble().at("OpeningAngleV")));
-    }
-    if (sensorProfile->GetParametersDouble().count("DetectionRange"))
-    {
-        fStream->writeAttribute(outputAttributes.DETECTIONRANGE,
-                                QString::number(sensorProfile->GetParametersDouble().at("DetectionRange")));
+       fStream->writeAttribute(outputAttributes.LATENCY, QString::number(latency.value()));
     }
 
-    //fStream->writeAttribute(SensorFailureProbabilityAttribute, QString::number(sensorParameters.failureProbability));
-    //fStream->writeAttribute(SensorLatencyAttribute, QString::number(sensorParameters.latency));
+    if (auto openingAngleH = openpass::parameter::Get<double>(parameters, "OpeningAngleH"))
+    {
+        fStream->writeAttribute(outputAttributes.OPENINGANGLEH, QString::number(openingAngleH.value()));
+    }
+
+    if (auto openingAngleV = openpass::parameter::Get<double>(parameters, "OpeningAngleV"))
+    {
+        fStream->writeAttribute(outputAttributes.OPENINGANGLEV, QString::number(openingAngleV.value()));
+    }
+
+    if (auto detectionRange = openpass::parameter::Get<double>(parameters, "DetectionRange"))
+    {
+        fStream->writeAttribute(outputAttributes.DETECTIONRANGE, QString::number(detectionRange.value()));
+    }
 
     fStream->writeEndElement(); // Close Sensor Tag for this sensor
 }

@@ -31,11 +31,9 @@ namespace SimulationSlave {
 class RunInstantiator
 {
 public:
-    RunInstantiator(std::string outputDir,
-                    ConfigurationContainerInterface& configurationContainer,
+    RunInstantiator(ConfigurationContainerInterface& configurationContainer,
                     FrameworkModuleContainerInterface& frameworkModuleContainer,
                     FrameworkModules& frameworkModules) :
-        outputDir(outputDir),
         configurationContainer(configurationContainer),
         observationNetwork(frameworkModuleContainer.GetObservationNetwork()),
         agentFactory(frameworkModuleContainer.GetAgentFactory()),
@@ -94,8 +92,6 @@ private:
 
     QMutex stopMutex;
     bool stopped = true;
-
-    const std::string outputDir;
 
     ConfigurationContainerInterface& configurationContainer;
     ObservationNetworkInterface* observationNetwork {nullptr};

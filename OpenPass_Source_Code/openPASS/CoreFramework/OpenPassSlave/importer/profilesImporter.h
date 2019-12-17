@@ -48,7 +48,7 @@ public:
     * @return	     true, if successful
     */
     static void ImportAllVehicleComponentProfiles(QDomElement vehicleComponentProfilesElement,
-                                      std::unordered_map<std::string, VehicleComponentProfiles> &vehicleComponentProfilesMap);
+                                                  std::unordered_map<std::string, VehicleComponentProfiles> &vehicleComponentProfilesMap);
 
     /*!
     * \brief Imports the SensorProfiles section of the profiles catalog
@@ -58,7 +58,7 @@ public:
     * @return	     true, if successful
     */
     static void ImportSensorProfiles(QDomElement sensorProfilesElement,
-                                     std::list<SensorProfile> &sensorProfiles);
+                                     openpass::sensors::Profiles &sensorProfiles);
 
     /*!
     * \brief Imports the AgentProfiles section of the profiles catalog
@@ -122,7 +122,7 @@ public:
      * \return
      */
     static void ImportSensorParameters(QDomElement sensorElement,
-                                       SensorParameter &sensorParameter);
+                                       openpass::sensors::Parameter &sensorParameter);
 
     //Overall import function
     /*!

@@ -109,7 +109,7 @@ public:
     * @param[in]     name           Name of the sensor
     * @param[in]     parameters     Parameters of the sensor
     */
-    virtual void AddSensor(SensorParameter parameters);
+    virtual void AddSensor(openpass::sensors::Parameter parameters);
 
     /*!
     * \brief Returns the agent category
@@ -160,7 +160,7 @@ public:
     */
     virtual VehicleModelParameters       GetVehicleModelParameters();
 
-    virtual std::list<SensorParameter>  GetSensorParameters();
+    virtual openpass::sensors::Parameters GetSensorParameters();
 
     /*!
     * \brief Returns the vehicle components profile names
@@ -208,7 +208,7 @@ private:
 
     SpawnParameter spawnParameter;
     VehicleModelParameters vehicleModelParameters;
-    std::list<SensorParameter> sensorParameters;
+    openpass::sensors::Parameters sensorParameters;
 
     std::shared_ptr<SimulationSlave::AgentTypeInterface> agentType {nullptr};
     double speedGoalMin = 30.0 / 3.6;

@@ -10,219 +10,135 @@
 
 #include "parameterImporter.h"
 #include "CoreFramework/CoreShare/log.h"
+#include "CoreFramework/CoreShare/xmlParser.h"
 
+namespace openpass::parameter::internal {
 
-namespace TAG = openpass::importer::xml::parameterImporter::tag;
-namespace ATTRIBUTE = openpass::importer::xml::parameterImporter::attribute;
 using namespace SimulationCommon;
 
-void ParameterImporter::ImportBoolParameters(QDomElement componentParameterSetElement,
-                                             ParameterInterface& componentParameterSet)
+template <typename T>
+ParameterSet ImportParameter(QDomElement domElement, const std::string& elementName)
 {
-    QDomElement boolParameterElement;
-    if (SimulationCommon::GetFirstChildElement(componentParameterSetElement, TAG::Bool, boolParameterElement))
+    ParameterSet param;
+
+    QDomElement parameterElement;
+    if (GetFirstChildElement(domElement, elementName, parameterElement))
     {
-        //Iterates over all int parameters
-        while (!boolParameterElement.isNull())
+        while (!parameterElement.isNull())
         {
-            std::string boolParameterName;
-            bool boolParameterValue;
+            std::string parameterName;
+            T parameterValue;
 
-            ThrowIfFalse(SimulationCommon::ParseAttributeString(boolParameterElement, ATTRIBUTE::key, boolParameterName)
-                            && SimulationCommon::ParseAttributeBool(boolParameterElement, ATTRIBUTE::value, boolParameterValue)
-                            && componentParameterSet.AddParameterBool(boolParameterName, boolParameterValue),
-                         "Could not import bool parameter.");
+            ThrowIfFalse(ParseAttributeString(parameterElement, "Key", parameterName) &&
+                         ParseAttribute<T>(parameterElement, "Value", parameterValue),
+                         "Could not import parameter of type " + elementName);
 
-            boolParameterElement = boolParameterElement.nextSiblingElement(TAG::Bool);
+            param.emplace_back(parameterName, parameterValue);
+            parameterElement = parameterElement.nextSiblingElement(QString::fromStdString(elementName));
         }
     }
+
+    return param;
 }
 
-void ParameterImporter::ImportIntParameters(QDomElement componentParameterSetElement,
-                                            ParameterInterface& componentParameterSet)
+template <>
+ParameterSet ImportParameter<NormalDistribution>(QDomElement domElement, const std::string& elementName)
 {
-    QDomElement intParameterElement;
-    if (SimulationCommon::GetFirstChildElement(componentParameterSetElement, TAG::Int, intParameterElement))
+    ParameterSet param;
+
+    QDomElement parameterElement;
+    if (SimulationCommon::GetFirstChildElement(domElement, elementName, parameterElement))
     {
-        //Iterates over all int parameters
-        while (!intParameterElement.isNull())
+        while (!parameterElement.isNull())
         {
-            std::string intParameterName;
-            int intParameterValue;
+            std::string parameterName;
+            NormalDistribution parameterValue;
 
-            ThrowIfFalse(SimulationCommon::ParseAttributeString(intParameterElement, ATTRIBUTE::key, intParameterName)
-                            && SimulationCommon::ParseAttributeInt(intParameterElement, ATTRIBUTE::value, intParameterValue)
-                            && componentParameterSet.AddParameterInt(intParameterName, intParameterValue),
-                         "Could not import int parameter.");
+            ThrowIfFalse(SimulationCommon::ParseAttribute(parameterElement, "Key", parameterName) &&
+                         SimulationCommon::ParseAttribute(parameterElement, "Mean", parameterValue.mean) &&
+                         SimulationCommon::ParseAttribute(parameterElement, "SD", parameterValue.standardDeviation) &&
+                         SimulationCommon::ParseAttribute(parameterElement, "Min", parameterValue.min) &&
+                         SimulationCommon::ParseAttribute(parameterElement, "Max", parameterValue.max),
+                         "Could not import parameter of type " + elementName);
 
-            intParameterElement = intParameterElement.nextSiblingElement(TAG::Int);
+            param.emplace_back(parameterName, parameterValue);
+            parameterElement = parameterElement.nextSiblingElement(QString::fromStdString(elementName));
         }
     }
+
+    return param;
 }
 
-void ParameterImporter::ImportIntVectorParameters(QDomElement componentParameterSetElement,
-                                                  ParameterInterface& componentParameterSet)
+static ParameterSet ImportParameterFlat(QDomElement domElement)
 {
-    QDomElement intVectorParameterElement;
-    if (SimulationCommon::GetFirstChildElement(componentParameterSetElement, TAG::intVector, intVectorParameterElement))
-    {
-        //Iterates over all int vector parameters
-        while (!intVectorParameterElement.isNull())
-        {
-            std::string intVectorParameterName;
-            std::vector<int> intVectorParameterValue;
+    ParameterSet param;
 
-            ThrowIfFalse(SimulationCommon::ParseAttributeString(intVectorParameterElement, ATTRIBUTE::key, intVectorParameterName)
-                            && SimulationCommon::ParseAttributeIntVector(intVectorParameterElement, ATTRIBUTE::value, &intVectorParameterValue)
-                            && componentParameterSet.AddParameterIntVector(intVectorParameterName, intVectorParameterValue),
-                         "Could not import int vector parameter.");
+    auto boolParams = ImportParameter<bool>(domElement, "Bool");
+    auto intParams = ImportParameter<int>(domElement, "Int");
+    auto intVectorParams = ImportParameter<std::vector<int>>(domElement, "IntVector");
+    auto doubleParams = ImportParameter<double>(domElement, "Double");
+    auto doubleVectorParams = ImportParameter<std::vector<double>>(domElement, "DoubleVector");
+    auto stringParams = ImportParameter<std::string>(domElement, "String");
+    auto normalDistributionParams = ImportParameter<openpass::parameter::NormalDistribution>(domElement, "NormalDistribution");
 
-            intVectorParameterElement = intVectorParameterElement.nextSiblingElement(TAG::intVector);
-        }
-    }
+    param.insert(param.end(), boolParams.begin(), boolParams.end());
+    param.insert(param.end(), intParams.begin(), intParams.end());
+    param.insert(param.end(), intVectorParams.begin(), intVectorParams.end());
+    param.insert(param.end(), doubleParams.begin(), doubleParams.end());
+    param.insert(param.end(), doubleVectorParams.begin(), doubleVectorParams.end());
+    param.insert(param.end(), stringParams.begin(), stringParams.end());
+    param.insert(param.end(), normalDistributionParams.begin(), normalDistributionParams.end());
+
+    return param;
 }
 
-void ParameterImporter::ImportDoubleParameters(QDomElement componentParameterSetElement,
-                                               ParameterInterface& componentParameterSet)
+static Container ImportParameterLists(QDomElement parameterElement)
 {
-    QDomElement doubleParameterElement;
-    if (SimulationCommon::GetFirstChildElement(componentParameterSetElement, TAG::Double, doubleParameterElement))
+    QDomElement lists;
+
+    Container param;
+
+    if (SimulationCommon::GetFirstChildElement(parameterElement, "List", lists))
     {
-        //Iterates over all double parameters
-        while (!doubleParameterElement.isNull())
+        while (!lists.isNull())
         {
-            std::string doubleParameterName;
-            double doubleParameterValue;
+            std::string name;
+            ThrowIfFalse(SimulationCommon::ParseAttributeString(lists, "Name", name),
+                         "Parameter list needs a Name.");
 
-            ThrowIfFalse(SimulationCommon::ParseAttributeString(doubleParameterElement, ATTRIBUTE::key, doubleParameterName)
-                            && SimulationCommon::ParseAttributeDouble(doubleParameterElement, ATTRIBUTE::value, doubleParameterValue)
-                            && componentParameterSet.AddParameterDouble(doubleParameterName, doubleParameterValue),
-                         "Could not import double parameter.");
-
-            doubleParameterElement = doubleParameterElement.nextSiblingElement(TAG::Double);
-        }
-    }
-}
-
-void ParameterImporter::ImportDoubleVectorParameters(QDomElement componentParameterSetElement,
-                                                     ParameterInterface& componentParameterSet)
-{
-    QDomElement doubleVectorParameterElement;
-    if (SimulationCommon::GetFirstChildElement(componentParameterSetElement, TAG::doubleVector, doubleVectorParameterElement))
-    {
-        //Iterates over all double vector parameters
-        while (!doubleVectorParameterElement.isNull())
-        {
-            std::string doubleVectorParameterName;
-            std::vector<double> doubleVectorParameterValue;
-
-            ThrowIfFalse(SimulationCommon::ParseAttributeString(doubleVectorParameterElement, ATTRIBUTE::key, doubleVectorParameterName)
-                            && SimulationCommon::ParseAttributeDoubleVector(doubleVectorParameterElement, ATTRIBUTE::value, &doubleVectorParameterValue)
-                            && componentParameterSet.AddParameterDoubleVector(doubleVectorParameterName, doubleVectorParameterValue),
-                         "Could not import double vector parameter.");
-
-            doubleVectorParameterElement = doubleVectorParameterElement.nextSiblingElement(TAG::doubleVector);
-        }
-    }
-}
-
-void ParameterImporter::ImportStringParameters(QDomElement componentParameterSetElement,
-                                               ParameterInterface& componentParameterSet)
-{
-    QDomElement stringParameterElement;
-    if (SimulationCommon::GetFirstChildElement(componentParameterSetElement, TAG::string, stringParameterElement))
-    {
-        //Iterates over all string parameters
-        while (!stringParameterElement.isNull())
-        {
-            std::string stringParameterName;
-            std::string stringParameterValue;
-
-            ThrowIfFalse(SimulationCommon::ParseAttributeString(stringParameterElement, ATTRIBUTE::key, stringParameterName)
-                            && SimulationCommon::ParseAttributeString(stringParameterElement, ATTRIBUTE::value, stringParameterValue)
-                            && componentParameterSet.AddParameterString(stringParameterName, stringParameterValue),
-                         "Could not import string parameter.");
-
-            stringParameterElement = stringParameterElement.nextSiblingElement(TAG::string);
-        }
-    }
-}
-
-void ParameterImporter::ImportNormalDistributionParameters(QDomElement componentParameterSetElement,
-                                                           ParameterInterface& componentParameterSet)
-{
-    QDomElement normalDistributionParameterElement;
-    if (SimulationCommon::GetFirstChildElement(componentParameterSetElement, TAG::normalDistribution,
-            normalDistributionParameterElement))
-    {
-        //Iterates over all string parameters
-        while (!normalDistributionParameterElement.isNull())
-        {
-            std::string normalDistributionParameterName;
-            StochasticDefintions::NormalDistributionParameter normalDistribution;
-
-            ThrowIfFalse(SimulationCommon::ParseAttributeString(normalDistributionParameterElement, ATTRIBUTE::key, normalDistributionParameterName)
-                            && SimulationCommon::ParseAttributeDouble(normalDistributionParameterElement, ATTRIBUTE::mean, normalDistribution.mean)
-                            && SimulationCommon::ParseAttributeDouble(normalDistributionParameterElement, ATTRIBUTE::sd, normalDistribution.standardDeviation)
-                            && SimulationCommon::ParseAttributeDouble(normalDistributionParameterElement, ATTRIBUTE::min, normalDistribution.min)
-                            && SimulationCommon::ParseAttributeDouble(normalDistributionParameterElement, ATTRIBUTE::max, normalDistribution.max)
-                            && componentParameterSet.AddParameterNormalDistribution(normalDistributionParameterName, normalDistribution),
-                         "Could not import normal distribution parameter.");
-
-            normalDistributionParameterElement = normalDistributionParameterElement.nextSiblingElement(TAG::normalDistribution);
-        }
-    }
-}
-
-void ParameterImporter::ImportParameterLists(QDomElement componentParameterSetElement,
-                                             ParameterInterface& componentParameterSet)
-{
-    QDomElement parameterListsElement;
-    if (SimulationCommon::GetFirstChildElement(componentParameterSetElement, TAG::list, parameterListsElement))
-    {
-        //Iterates over all parameter lists
-        while (!parameterListsElement.isNull())
-        {
-            std::string parameterListName;
-
-            ThrowIfFalse(SimulationCommon::ParseAttributeString(parameterListsElement, ATTRIBUTE::name, parameterListName), "Could not import string parameter.");
-
-            // Parse all list items
-            QDomElement parameterListElement;
-            if (SimulationCommon::GetFirstChildElement(parameterListsElement, TAG::listItem, parameterListElement))
+            QDomElement listItem;
+            if (SimulationCommon::GetFirstChildElement(lists, "ListItem", listItem))
             {
-                while (!parameterListElement.isNull())
+                ParameterList parameterList;
+                while (!listItem.isNull())
                 {
-                    auto& listItem = componentParameterSet.InitializeListItem(parameterListName);
-
-                    try
-                    {
-                        ImportParameters(parameterListElement, listItem);
-                    }
-                    catch(std::runtime_error error)
-                    {
-                        LogErrorAndThrow("Could not import parameter list." + std::string(error.what()));
-                    }
-
-                    parameterListElement = parameterListElement.nextSiblingElement(TAG::listItem);
+                    parameterList.emplace_back(ImportParameterFlat(listItem));
+                    listItem = listItem.nextSiblingElement("ListItem");
                 }
+                param.emplace_back(name, parameterList);
             }
 
-            parameterListsElement = parameterListsElement.nextSiblingElement(TAG::list);
+            lists = lists.nextSiblingElement("List");
         }
     }
+
+    return param;
 }
 
-void ParameterImporter::ImportParameters(QDomElement componentParameterSetElement,
-                                         ParameterInterface& componentParameterSet)
+} // namespace openpass::parameter::internal
+
+namespace openpass::parameter {
+
+openpass::parameter::Container Import(QDomElement parameterElement)
 {
-    //Parse Bool Parameters
-    ImportBoolParameters(componentParameterSetElement, componentParameterSet);
-    ImportIntParameters(componentParameterSetElement, componentParameterSet);
-    ImportIntVectorParameters(componentParameterSetElement, componentParameterSet);
-    ImportDoubleParameters(componentParameterSetElement, componentParameterSet);
-    ImportDoubleVectorParameters(componentParameterSetElement, componentParameterSet);
-    ImportNormalDistributionParameters(componentParameterSetElement, componentParameterSet);
-    ImportStringParameters(componentParameterSetElement, componentParameterSet);
-    ImportParameterLists(componentParameterSetElement, componentParameterSet);
+    auto parameterSet = openpass::parameter::internal::ImportParameterFlat(parameterElement);
+    auto parameterLists = openpass::parameter::internal::ImportParameterLists(parameterElement);
+
+    openpass::parameter::Container param;
+    param.insert(param.end(), parameterSet.begin(), parameterSet.end());
+    param.insert(param.end(), parameterLists.begin(), parameterLists.end());
+
+    return param;
 }
+
+} // openpass::parameter

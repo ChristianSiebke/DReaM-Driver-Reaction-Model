@@ -26,12 +26,12 @@ public:
                      std::string worldLibrary) :
         logLevel{logLevel},
         libraryDir{libraryDir},
-        eventDetectorLibrary{Directories::Concat(libraryDir, eventDetectorLibrary)},
-        manipulatorLibrary{Directories::Concat(libraryDir, manipulatorLibrary)},
-        observationLibrary{Directories::Concat(libraryDir, observationLibrary)},
-        spawnPointLibrary{Directories::Concat(libraryDir, spawnPointLibrary)},
-        stochasticsLibrary{Directories::Concat(libraryDir, stochasticsLibrary)},
-        worldLibrary{Directories::Concat(libraryDir, worldLibrary)}
+        eventDetectorLibrary{openpass::core::Directories::Concat(libraryDir, eventDetectorLibrary)},
+        manipulatorLibrary{openpass::core::Directories::Concat(libraryDir, manipulatorLibrary)},
+        observationLibrary{openpass::core::Directories::Concat(libraryDir, observationLibrary)},
+        spawnPointLibrary{openpass::core::Directories::Concat(libraryDir, spawnPointLibrary)},
+        stochasticsLibrary{openpass::core::Directories::Concat(libraryDir, stochasticsLibrary)},
+        worldLibrary{openpass::core::Directories::Concat(libraryDir, worldLibrary)}
     {}
     const int logLevel;
     const std::string libraryDir;

@@ -20,8 +20,8 @@ public:
                  void());
     MOCK_METHOD1(MasterPostHook,
                  void(const std::string& filename));
-    MOCK_METHOD1(SlavePreHook,
-                 void(const std::string& path));
+    MOCK_METHOD0(SlavePreHook,
+                 void());
     MOCK_METHOD0(SlavePreRunHook,
                  void());
     MOCK_METHOD2(SlaveUpdateHook,

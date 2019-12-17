@@ -32,6 +32,7 @@ class ObservationModule
 {
 public:
     ObservationModule(ObservationInterface *implementation,
+                      std::unique_ptr<ParameterInterface> parameter,
                       ObservationLibrary *library);
     ObservationModule(const ObservationModule&) = delete;
     ObservationModule(ObservationModule&&) = delete;
@@ -56,6 +57,7 @@ public:
 
 private:
     ObservationInterface *implementation;
+    std::unique_ptr<ParameterInterface> parameter;
     ObservationLibrary *library;
     int id = 0;
 };

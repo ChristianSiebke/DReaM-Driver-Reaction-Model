@@ -10,11 +10,14 @@
 
 #include "profilesImporter.h"
 #include "CoreFramework/CoreShare/log.h"
+#include "Common/sensorDefinitions.h"
+#include "importerLoggingHelper.h"
+
+using namespace Importer;
+using namespace SimulationCommon;
 
 namespace TAG = openpass::importer::xml::profilesImporter::tag;
 namespace ATTRIBUTE = openpass::importer::xml::profilesImporter::attribute;
-using namespace Importer;
-using namespace SimulationCommon;
 
 void ProfilesImporter::ImportAgentProfiles(QDomElement agentProfilesElement,
                                            std::unordered_map<std::string, AgentProfile>& agentProfiles)
@@ -80,7 +83,7 @@ void ProfilesImporter::ImportAgentProfiles(QDomElement agentProfilesElement,
 }
 
 void ProfilesImporter::ImportDriverProfiles(QDomElement driverProfilesElement,
-                                                                         DriverProfiles& driverProfiles)
+                                            DriverProfiles& driverProfiles)
 {
     QDomElement driverProfileElement;
     ThrowIfFalse(GetFirstChildElement(driverProfilesElement, TAG::driverProfile, driverProfileElement), "At least one driver profile is required.");
@@ -88,21 +91,20 @@ void ProfilesImporter::ImportDriverProfiles(QDomElement driverProfilesElement,
     while (!driverProfileElement.isNull())
     {
         std::string profileName;
-        auto parameters = std::make_shared<ModelParameters>();
-
         ThrowIfFalse(ParseAttributeString(driverProfileElement, ATTRIBUTE::name, profileName),
                      "Could not import driver profile name.");
 
+		openpass::parameter::Container parameters {};
         try
         {
-            ParameterImporter::ImportParameters(driverProfileElement, *parameters);
+	        parameters = openpass::parameter::Import(driverProfileElement);
         }
         catch(const std::runtime_error &error)
         {
             LogErrorAndThrow("Could not import driver profile parameters: " + std::string(error.what()));
         }
 
-        ThrowIfFalse(parameters->GetParametersString().find(ATTRIBUTE::type) != parameters->GetParametersString().end(), "Driver profile needs a type.");
+        ThrowIfFalse(openpass::parameter::Get<std::string>(parameters, ATTRIBUTE::type).has_value(), "Driver profile needs a type.");
 
         auto insertReturn = driverProfiles.emplace(profileName, parameters);
         ThrowIfFalse(insertReturn.second, "Driver profile names need to be unique.");
@@ -113,7 +115,7 @@ void ProfilesImporter::ImportDriverProfiles(QDomElement driverProfilesElement,
 
 
 void ProfilesImporter::ImportAllVehicleComponentProfiles(QDomElement vehicleComponentProfilesElement,
-                                                                                                    std::unordered_map<std::string, VehicleComponentProfiles>& vehicleComponentProfilesMap)
+                                                         std::unordered_map<std::string, VehicleComponentProfiles>& vehicleComponentProfilesMap)
 {
     QDomElement vehicleComponentProfileElement;
 
@@ -123,14 +125,14 @@ void ProfilesImporter::ImportAllVehicleComponentProfiles(QDomElement vehicleComp
         {
             std::string componentType;
             std::string profileName;
-            auto parameters = std::make_shared<SimulationCommon::ModelParameters>();
 
             ThrowIfFalse(ParseAttributeString(vehicleComponentProfileElement, ATTRIBUTE::type, componentType), "Could not import component type.");
             ThrowIfFalse(ParseAttributeString(vehicleComponentProfileElement, ATTRIBUTE::name, profileName), "Could not import profile name.");
 
+			openpass::parameter::Container parameters {};
             try
             {
-                ParameterImporter::ImportParameters(vehicleComponentProfileElement, *parameters);
+                parameters = openpass::parameter::Import(vehicleComponentProfileElement);
             }
             catch (const std::runtime_error &error)
             {
@@ -144,7 +146,6 @@ void ProfilesImporter::ImportAllVehicleComponentProfiles(QDomElement vehicleComp
             }
 
             auto insertReturn = vehicleComponentProfilesMap.at(componentType).emplace(profileName, parameters);
-
             ThrowIfFalse(insertReturn.second, "Component profile names need to be unqiue.");
 
             vehicleComponentProfileElement = vehicleComponentProfileElement.nextSiblingElement(
@@ -153,7 +154,7 @@ void ProfilesImporter::ImportAllVehicleComponentProfiles(QDomElement vehicleComp
     }
 }
 
-void ProfilesImporter::ImportSensorProfiles(QDomElement sensorProfilesElement, std::list<SensorProfile>& sensorProfiles)
+void ProfilesImporter::ImportSensorProfiles(QDomElement sensorProfilesElement, openpass::sensors::Profiles& sensorProfiles)
 {
     QDomElement sensorProfileElement;
     GetFirstChildElement(sensorProfilesElement, TAG::sensorProfile, sensorProfileElement);
@@ -161,23 +162,25 @@ void ProfilesImporter::ImportSensorProfiles(QDomElement sensorProfilesElement, s
     while (!sensorProfileElement.isNull())
     {
         std::string profileName;
-        std::string sensorType;
-        auto parameters = std::make_shared<SimulationCommon::Parameters>();
-
         ThrowIfFalse(ParseAttributeString(sensorProfileElement, ATTRIBUTE::name, profileName), "Sensor profile needs a name.");
 
+        std::string sensorType;
         ThrowIfFalse(ParseAttributeString(sensorProfileElement, ATTRIBUTE::type, sensorType), "Sensor profile needs a type.");
 
+        openpass::parameter::Container parameters {};
         try
         {
-            ParameterImporter::ImportParameters(sensorProfileElement, *parameters);
+        	parameters = openpass::parameter::Import(sensorProfileElement);
         }
         catch(const std::runtime_error &error)
         {
             LogErrorAndThrow("Could not import sensor parameters: " + std::string(error.what()));
         }
 
-        sensorProfiles.emplace_back(SensorProfile{profileName, sensorType, parameters});
+        ThrowIfFalse(openpass::parameter::Get<openpass::parameter::NormalDistribution>(parameters, ATTRIBUTE::latency).has_value(),
+            "Sensor profile parameter needs a latency");
+
+        sensorProfiles.emplace_back(openpass::sensors::Profile{profileName, sensorType, parameters});
         sensorProfileElement = sensorProfileElement.nextSiblingElement(TAG::sensorProfile);
     }
 }
@@ -218,13 +221,14 @@ void ProfilesImporter::ImportVehicleComponent(QDomElement vehicleComponentElemen
 }
 
 void ProfilesImporter::ImportAllVehicleComponentsOfVehicleProfile(QDomElement vehicleProfileElement,
-                                                                                                                     VehicleProfile& vehicleProfile)
+                                                                  VehicleProfile& vehicleProfile)
 {
     QDomElement vehicleComponentsElement;
     ThrowIfFalse(GetFirstChildElement(vehicleProfileElement, TAG::components, vehicleComponentsElement), "Missing Components tag.");
 
     QDomElement componentElement;
     GetFirstChildElement(vehicleComponentsElement, TAG::component, componentElement);
+
     while (!componentElement.isNull())
     {
         VehicleComponent vehicleComponent;
@@ -235,24 +239,24 @@ void ProfilesImporter::ImportAllVehicleComponentsOfVehicleProfile(QDomElement ve
     }
 }
 
-void ProfilesImporter::ImportSensorParameters(QDomElement sensorElement, SensorParameter& sensor)
+void ProfilesImporter::ImportSensorParameters(QDomElement sensorElement, openpass::sensors::Parameter& sensor)
 {
     ThrowIfFalse(ParseAttributeInt(sensorElement, ATTRIBUTE::id, sensor.id), "Sensor needs an Id.");
 
     QDomElement positionElement;
     ThrowIfFalse(GetFirstChildElement(sensorElement, TAG::position, positionElement), "Sensor needs a position.");
-    ThrowIfFalse(ParseAttributeString(positionElement, ATTRIBUTE::name, sensor.sensorPosition.name), "Sensorposition needs a Name.");
-    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::longitudinal, sensor.sensorPosition.longitudinal), "Sensorposition needs a Longitudinal.");
-    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::lateral, sensor.sensorPosition.lateral), "Sensorposition needs a Lateral.");
-    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::height, sensor.sensorPosition.height), "Sensorposition needs a Height.");
-    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::pitch, sensor.sensorPosition.pitch), "Sensorposition needs a Pitch.");
-    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::yaw, sensor.sensorPosition.yaw), "Sensorposition needs a Yaw.");
-    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::roll, sensor.sensorPosition.roll), "Sensorposition needs a Roll.");
+    ThrowIfFalse(ParseAttributeString(positionElement, ATTRIBUTE::name, sensor.position.name), "Sensorposition needs a Name.");
+    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::longitudinal, sensor.position.longitudinal), "Sensorposition needs a Longitudinal.");
+    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::lateral, sensor.position.lateral), "Sensorposition needs a Lateral.");
+    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::height, sensor.position.height), "Sensorposition needs a Height.");
+    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::pitch, sensor.position.pitch), "Sensorposition needs a Pitch.");
+    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::yaw, sensor.position.yaw), "Sensorposition needs a Yaw.");
+    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::roll, sensor.position.roll), "Sensorposition needs a Roll.");
 
     QDomElement profileElement;
     ThrowIfFalse(GetFirstChildElement(sensorElement, TAG::profile, profileElement), "Sensor needs a Profile.");
-    ThrowIfFalse(ParseAttributeString(profileElement, ATTRIBUTE::type, sensor.sensorProfile.type), "SensorProfile needs a Type.");
-    ThrowIfFalse(ParseAttributeString(profileElement, ATTRIBUTE::name, sensor.sensorProfile.name), "SensorProfile needs a Name.");
+    ThrowIfFalse(ParseAttributeString(profileElement, ATTRIBUTE::type, sensor.profile.type), "SensorProfile needs a Type.");
+    ThrowIfFalse(ParseAttributeString(profileElement, ATTRIBUTE::name, sensor.profile.name), "SensorProfile needs a Name.");
 }
 
 void ProfilesImporter::ImportAllSensorsOfVehicleProfile(QDomElement vehicleProfileElement,
@@ -263,9 +267,10 @@ void ProfilesImporter::ImportAllSensorsOfVehicleProfile(QDomElement vehicleProfi
 
     QDomElement sensorElement;
     GetFirstChildElement(sensorsElement, TAG::sensor, sensorElement);
+
     while (!sensorElement.isNull())
     {
-        SensorParameter sensor;
+        openpass::sensors::Parameter sensor;
         ImportSensorParameters(sensorElement, sensor);
 
         vehicleProfile.sensors.push_back(sensor);
@@ -299,7 +304,6 @@ void ProfilesImporter::ImportVehicleProfiles(QDomElement vehicleProfilesElement,
         ThrowIfFalse(ParseAttributeString(vehicleProfileElement, ATTRIBUTE::name, profileName), "Vehicle profile name is missing.");
 
         auto vehicleProfile = ImportVehicleProfile(vehicleProfileElement);
-
         vehicleProfiles.insert(std::make_pair<std::string&, VehicleProfile&>(profileName, vehicleProfile));
 
         vehicleProfileElement = vehicleProfileElement.nextSiblingElement(TAG::vehicleProfile);

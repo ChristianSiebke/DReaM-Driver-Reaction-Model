@@ -288,6 +288,23 @@ bool Parse(QDomElement rootElement, const std::string &tag, bool & result)
     return ParseBool(rootElement, tag, result  );
 }
 
+template<>
+bool ParseAttribute<bool>(QDomElement element, const std::string &attributeName, bool& result)
+{
+   return ParseAttributeBool(element, attributeName, result);
+}
+
+template<>
+bool ParseAttribute<>(QDomElement element, const std::string &attributeName, std::vector<int>& result)
+{
+   return ParseAttributeIntVector(element, attributeName, &result);
+}
+
+template<>
+bool ParseAttribute<>(QDomElement element, const std::string &attributeName, std::vector<double>& result)
+{
+   return ParseAttributeDoubleVector(element, attributeName, &result);
+}
 
 template<>
 bool ParseAttribute<int>(QDomElement element, const std::string &attributeName, int& result)

@@ -69,7 +69,7 @@ public:
     /*!
      * \brief Creates the output file as simulationOutput.tmp and writes the basic header information
      */
-    void WriteStartOfFile();
+    void WriteStartOfFile(const std::string& frameworkVersion);
 
     /*!
      * \brief This function gets called after each run and writes all information about this run into the output file
@@ -113,7 +113,7 @@ private:
     *
     * @return       true if agent has sensors, otherwise false.
     */
-    inline bool ContainsSensor(const std::list<SensorParameter>& sensorParameters) const;
+    inline bool ContainsSensor(const openpass::sensors::Parameters& sensorParameters) const;
 
     /*!
     * \brief Writes the sensor information into the simulation output.
@@ -122,7 +122,7 @@ private:
     * @param[in]    sensorName          Name of the sensor.
     * @param[in]    sensorParameters    Parameters of the sensor.
     */
-    void AddSensor(std::shared_ptr<QXmlStreamWriter> fStream, const SensorParameter& sensorParameter);
+    void AddSensor(std::shared_ptr<QXmlStreamWriter> fStream, const openpass::sensors::Parameter& sensorParameter);
 
     /*!
     * \brief Writes all sensor information of an agent into the simulation output.

@@ -204,6 +204,8 @@ class FakeAgent : public FakeWorldObject, public AgentInterface
     MOCK_CONST_METHOD2(GetVisibilityToNearestAgentInViewRange, double(double mainViewDirection, double range));
     MOCK_CONST_METHOD0(GetYawRate, double());
     MOCK_METHOD1(SetYawRate, void(double yawRate));
+    MOCK_CONST_METHOD0(GetCentripetalAcceleration, double());
+    MOCK_METHOD1(SetCentripetalAcceleration, void(double centripetalAcceleration));
     MOCK_METHOD0(GetYawAcceleration, double());
     MOCK_METHOD1(SetYawAcceleration, void(double yawAcceleration));
     MOCK_CONST_METHOD0(GetTrajectoryTime, const std::vector<int>*());
@@ -237,8 +239,8 @@ class FakeAgent : public FakeWorldObject, public AgentInterface
     MOCK_CONST_METHOD3(GetLaneMarkingsInRange, std::vector<LaneMarking::Entity> (double searchDistance, int relativeLane, Side side));
     MOCK_CONST_METHOD0(GetSpeedGoalMin, double());
     MOCK_CONST_METHOD0(GetDistanceReferencePointToFrontAxle, double());
-    MOCK_CONST_METHOD0(GetSensorParameters, const std::list<SensorParameter>&());
-    MOCK_METHOD1(SetSensorParameters, void(std::list<SensorParameter> sensorParameters));
+    MOCK_CONST_METHOD0(GetSensorParameters, const openpass::sensors::Parameters&());
+    MOCK_METHOD1(SetSensorParameters, void(openpass::sensors::Parameters sensorParameters));
     MOCK_CONST_METHOD3(GetDistanceToConnectorEntrance, double (std::string intersectingConnectorId, int intersectingLaneId, std::string ownConnectorId));
     MOCK_CONST_METHOD3(GetDistanceToConnectorDeparture, double (std::string intersectingConnectorId, int intersectingLaneId, std::string ownConnectorId));
     MOCK_CONST_METHOD0(GetDistanceToNextJunction, double ());

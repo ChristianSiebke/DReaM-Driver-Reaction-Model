@@ -12,6 +12,8 @@
 
 #include <string>
 
+namespace openpass::core {
+
 /// Directories takes care of a consistent handling of paths and directories
 /// without making the underlying implementation public or a dependency
 ///
@@ -56,3 +58,4 @@ private:
     static const std::string Resolve(const std::string& applicationPath, const std::string& path);
 };
 
+} // openpass::core

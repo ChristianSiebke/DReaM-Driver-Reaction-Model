@@ -24,6 +24,7 @@
 
 #include "Common/globalDefinitions.h"
 #include "Common/worldDefinitions.h"
+#include "Common/sensorDefinitions.h"
 #include "Interfaces/worldObjectInterface.h"
 #include "Interfaces/spawnPointInterface.h"
 #include "Interfaces/signalInterface.h"
@@ -1281,6 +1282,20 @@ public:
     virtual void SetYawAcceleration(double yawAcceleration) = 0;
 
     //-----------------------------------------------------------------------------
+    //! Retrieve the centripetal acceleration of the agent.
+    //!
+    //! @return   Centripetal acceleration [m/s^2]
+    //-----------------------------------------------------------------------------
+    virtual double GetCentripetalAcceleration() const = 0;
+
+    //-----------------------------------------------------------------------------
+    //! Set the centripetal acceleration of the agent.
+    //!
+    //! @param[in]   centripetalAcceleration   The acceleration to set [m/s^2]
+    //-----------------------------------------------------------------------------
+    virtual void SetCentripetalAcceleration(double centripetalAcceleration) = 0;
+
+    //-----------------------------------------------------------------------------
     //! Retrieve the trajectory of time of the agent.
     //!
     //! @return
@@ -1473,9 +1488,9 @@ public:
     //-----------------------------------------------------------------------------
     virtual double GetDistanceReferencePointToFrontAxle() const = 0;
 
-    virtual const std::list<SensorParameter>& GetSensorParameters() const = 0;
+    virtual const openpass::sensors::Parameters& GetSensorParameters() const = 0;
 
-    virtual void SetSensorParameters(std::list<SensorParameter> sensorParameters) = 0;
+    virtual void SetSensorParameters(openpass::sensors::Parameters sensorParameters) = 0;
 
     //-----------------------------------------------------------------------------
     //! \brief GetDistanceToNextJunction gets the distance to the next junction on

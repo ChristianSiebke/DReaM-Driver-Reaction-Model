@@ -17,6 +17,7 @@
 
 #include "slaveConfigImporter.h"
 #include "CoreFramework/CoreShare/log.h"
+#include "importerLoggingHelper.h"
 
 namespace TAG = openpass::importer::xml::slaveConfigImporter::tag;
 namespace ATTRIBUTE = openpass::importer::xml::slaveConfigImporter::attribute;
@@ -109,7 +110,7 @@ void SlaveConfigImporter::ImportScenarioConfig(QDomElement scenarioConfigElement
     ThrowIfFalse(ParseString(scenarioConfigElement, "OpenScenarioFile", scenarioFilename),
                  "OpenScenarioFile not valid.");
 
-    scenarioConfig.scenarioPath = Directories::Concat(configurationDir, scenarioFilename);
+    scenarioConfig.scenarioPath = openpass::core::Directories::Concat(configurationDir, scenarioFilename);
 }
 
 void SlaveConfigImporter::ImportEnvironmentConfig(QDomElement environmentConfigElement,
@@ -216,7 +217,7 @@ bool SlaveConfigImporter::Import(const std::string& configurationDir,
         std::string profilesCatalog;
         ThrowIfFalse(ParseString(documentRoot, "ProfilesCatalog", profilesCatalog), "Could not import Proifles Catalog.");
 
-        slaveConfig.SetProfilesCatalog(Directories::Concat(configurationDir, profilesCatalog));
+        slaveConfig.SetProfilesCatalog(openpass::core::Directories::Concat(configurationDir, profilesCatalog));
 
 
         //Import experiment config

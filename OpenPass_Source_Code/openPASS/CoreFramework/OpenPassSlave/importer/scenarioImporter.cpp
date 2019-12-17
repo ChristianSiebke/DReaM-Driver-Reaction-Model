@@ -23,7 +23,6 @@
 #include "scenarioImporter.h"
 #include "xmlParser.h"
 #include "CoreFramework/CoreShare/log.h"
-#include "CoreFramework/CoreShare/parameters.h"
 
 namespace TAG = openpass::importer::xml::scenarioImporter::tag;
 namespace ATTRIBUTE = openpass::importer::xml::scenarioImporter::attribute;
@@ -74,21 +73,19 @@ bool ScenarioImporter::Import(const std::string& filename, ScenarioInterface* sc
 
 void ScenarioImporter::ImportAndValidateVersion(QDomElement& documentRoot)
 {
-    SimulationCommon::Parameters scenarioParameters;
+    openpass::parameter::Container scenarioParameters;
 
     QDomElement parameterDeclarationElement;
 
     if (SimulationCommon::GetFirstChildElement(documentRoot, TAG::parameterDeclaration, parameterDeclarationElement))
     {
-        ImportParameterDeclarationElement(parameterDeclarationElement, &scenarioParameters);
+        ImportParameterDeclarationElement(parameterDeclarationElement, scenarioParameters);
     }
 
-    const auto version = scenarioParameters.GetParametersString().find("OP_OSC_SchemaVersion");
-
-    ThrowIfFalse(version != scenarioParameters.GetParametersString().cend(),
-                 "Cannot determine scenario version");
-    ThrowIfFalse(version->second.compare(supportedScenarioVersion) == 0,
-                 "Scenario version not supported (" + version->second + "). Supported version is " + supportedScenarioVersion);
+    const auto version = openpass::parameter::Get<std::string>(scenarioParameters, "OP_OSC_SchemaVersion");
+    ThrowIfFalse(version.has_value(), "Cannot determine scenario version");
+    ThrowIfFalse(version.value() == supportedScenarioVersion,
+                 "Scenario version not supported (" + version.value() + "). Supported version is " + supportedScenarioVersion);
 }
 
 void ScenarioImporter::ImportCatalogs(QDomElement& documentRoot, ScenarioInterface* scenario)
@@ -322,7 +319,6 @@ void ScenarioImporter::ImportLongitudinalElement(ScenarioEntity& scenarioEntity,
         {
            SetStochasticsData(scenarioEntity, stochasticElement);
            stochasticElement = stochasticElement.nextSiblingElement(TAG::stochastics);
-
         }
     }
 }
@@ -578,7 +574,7 @@ void ScenarioImporter::ValidityCheckForSpawnParameters(const ScenarioEntity& sce
                  "no position information available.");
 }
 
-void ScenarioImporter::ImportParameterElement(QDomElement& parameterElement, ParameterInterface *parameters)
+void ScenarioImporter::ImportParameterElement(QDomElement& parameterElement, openpass::parameter::Container& parameters)
 {
     std::string parameterName;
     ThrowIfFalse(SimulationCommon::ParseAttributeString(parameterElement, ATTRIBUTE::name, parameterName),
@@ -594,34 +590,34 @@ void ScenarioImporter::ImportParameterElement(QDomElement& parameterElement, Par
             bool parameterValueBool;
             ThrowIfFalse(SimulationCommon::ParseAttributeBool(parameterElement, ATTRIBUTE::value, parameterValueBool),
                           "Could not import Parameter. Paramter tag requires a " + std::string(ATTRIBUTE::value) + " attribute.");
-            parameters->AddParameterBool(parameterName, parameterValueBool);
+            parameters.emplace_back(parameterName, parameterValueBool);
             break;
 
         case 1:
             int parameterValueInt;
             ThrowIfFalse(SimulationCommon::ParseAttributeInt(parameterElement, ATTRIBUTE::value, parameterValueInt),
                           "Could not import Parameter. Paramter tag requires a " + std::string(ATTRIBUTE::value) + " attribute.");
-            parameters->AddParameterInt(parameterName, parameterValueInt);
+            parameters.emplace_back(parameterName, parameterValueInt);
             break;
 
         case 2:
             double parameterValueDouble;
             ThrowIfFalse(SimulationCommon::ParseAttributeDouble(parameterElement, ATTRIBUTE::value, parameterValueDouble),
                           "Could not import Parameter. Paramter tag requires a " + std::string(ATTRIBUTE::value) + " attribute.");
-            parameters->AddParameterDouble(parameterName, parameterValueDouble);
+            parameters.emplace_back(parameterName, parameterValueDouble);
             break;
 
         case 3:
             std::string parameterValueString;
             ThrowIfFalse(SimulationCommon::ParseAttributeString(parameterElement, ATTRIBUTE::value, parameterValueString),
                           "Could not import Parameter. Paramter tag requires a " + std::string(ATTRIBUTE::value) + " attribute.");
-            parameters->AddParameterString(parameterName, parameterValueString);
+            parameters.emplace_back(parameterName, parameterValueString);
             break;
     }
 }
 
 void ScenarioImporter::ImportParameterDeclarationElement(QDomElement& parameterDeclarationElement,
-        ParameterInterface* parameters)
+        openpass::parameter::Container& parameters)
 {
     QDomElement parameterElement;
     if (SimulationCommon::GetFirstChildElement(parameterDeclarationElement, TAG::parameter, parameterElement))
@@ -629,7 +625,6 @@ void ScenarioImporter::ImportParameterDeclarationElement(QDomElement& parameterD
         while (!parameterElement.isNull())
         {
             ImportParameterElement(parameterElement, parameters);
-
             parameterElement = parameterElement.nextSiblingElement(TAG::parameter);
         }
     }

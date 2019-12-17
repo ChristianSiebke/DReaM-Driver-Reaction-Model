@@ -52,6 +52,7 @@ class FrameworkModuleContainer : public FrameworkModuleContainerInterface
 public:
     FrameworkModuleContainer(FrameworkModules frameworkModules,
                              ConfigurationContainerInterface* configurationContainer,
+                             const openpass::common::RuntimeInformation& runtimeInformation,
                              CallbackInterface* callbacks);
 
     virtual ~FrameworkModuleContainer() override = default;

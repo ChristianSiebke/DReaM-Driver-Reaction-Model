@@ -134,6 +134,7 @@ namespace openpass::importer::xml::profilesImporter::attribute
     constexpr char type[] {"Type"};
     constexpr char vehicleModel[] {"VehicleModel"};
     constexpr char yaw[] {"Yaw"};
+    constexpr char latency[] {"Latency"};
 }
 
 namespace openpass::importer::xml::scenarioImporter::tag

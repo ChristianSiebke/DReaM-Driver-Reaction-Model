@@ -163,9 +163,10 @@ TEST_P(LateralDriverUpdateInput, LateralDriver_CheckUpdateInputFunction)
     // Create Signals
     // Signal from Driver to module AlgorithmLateralDriver
     const std::shared_ptr<SignalInterface const> signal0 = std::make_shared<LateralSignal const>(
-                0.,
-                data.input_LateralDeviation, data.input_GainLateralDeviation, data.input_HeadingError,
-                data.input_GainHeadingError, data.input_KappaSet, ComponentState::Acting);
+                                                               ComponentState::Acting,
+                                                               0.,
+                                                               data.input_LateralDeviation, data.input_GainLateralDeviation, data.input_HeadingError,
+                                                               data.input_GainHeadingError, data.input_KappaSet);
     int localLinkId0{0};
     // Signal from Parameters_Vehicle (vehicle model parameters) to module AlgorithmLateralDriver
     VehicleModelParameters vehicleParameters;

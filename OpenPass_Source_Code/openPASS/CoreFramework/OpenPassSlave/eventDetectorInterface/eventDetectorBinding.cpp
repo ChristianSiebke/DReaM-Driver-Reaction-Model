@@ -16,7 +16,7 @@ namespace SimulationSlave
 {
 
 EventDetectorBinding::EventDetectorBinding(CallbackInterface *callbacks) :
-    callbacks(callbacks)
+    callbacks{callbacks}
 {}
 
 EventDetectorBinding::~EventDetectorBinding()

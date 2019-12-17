@@ -11,6 +11,8 @@
 #include "directories.h"
 #include <QDir>
 
+namespace openpass::core {
+
 Directories::Directories(const std::string& applicationDir,
                          const std::string& libraryDir,
                          const std::string& configurationDir,
@@ -30,9 +32,11 @@ const std::string Directories::Resolve(const std::string& applicationPath, const
            QDir(qpath).absolutePath().toStdString();
 }
 
-const std::string Directories::Concat(const std::string& path, const std::string& file)
+const std::string openpass::core::Directories::Concat(const std::string& path, const std::string& file)
 {
     return QDir(QString::fromStdString(path) +
                 QDir::separator() +
                 QString::fromStdString(file)).absolutePath().toStdString();
 }
+
+} // namespace openpass::core

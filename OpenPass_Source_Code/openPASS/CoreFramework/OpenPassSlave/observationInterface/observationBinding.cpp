@@ -15,8 +15,10 @@
 
 namespace SimulationSlave {
 
-ObservationBinding::ObservationBinding(CallbackInterface* callbacks) :
-    callbacks(callbacks)
+ObservationBinding::ObservationBinding(const openpass::common::RuntimeInformation &runtimeInformation,
+                                       CallbackInterface* callbacks) :
+    runtimeInformation{runtimeInformation},
+    callbacks{callbacks}
 {}
 
 ObservationBinding::~ObservationBinding()
@@ -24,8 +26,8 @@ ObservationBinding::~ObservationBinding()
     Unload();
 }
 
-ObservationModule* ObservationBinding::Instantiate(const std::string libraryPath,
-        ParameterInterface* parameters,
+ObservationModule* ObservationBinding::Instantiate(const std::string& libraryPath,
+        const openpass::parameter::Container &parameter,
         StochasticsInterface* stochastics,
         WorldInterface* world,
         EventNetworkInterface* eventNetwork)
@@ -46,7 +48,8 @@ ObservationModule* ObservationBinding::Instantiate(const std::string libraryPath
         }
     }
 
-    return library->CreateObservationModule(parameters,
+    return library->CreateObservationModule(runtimeInformation,
+                                            parameter,
                                             stochastics,
                                             world,
                                             eventNetwork);

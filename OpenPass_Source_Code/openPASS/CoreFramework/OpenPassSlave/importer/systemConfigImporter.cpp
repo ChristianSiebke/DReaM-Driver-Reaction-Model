@@ -18,9 +18,9 @@ namespace TAG = openpass::importer::xml::systemConfigImporter::tag;
 
 namespace Importer {
 
-//! From parameterParser.cpp in openPASS_Source_Code/CoreFramework/CoreShare/
-bool SystemConfigImporter::ImportSystemParameters(QDomElement& parametersElement, ParameterInterface* parameters)
+openpass::parameter::Container SystemConfigImporter::ImportSystemParameters(QDomElement& parametersElement)
 {
+    openpass::parameter::Container param;
     QDomElement parameterElement = parametersElement.firstChildElement("parameter");
     while (!parameterElement.isNull())
     {
@@ -32,11 +32,11 @@ bool SystemConfigImporter::ImportSystemParameters(QDomElement& parametersElement
 
         if (type == "int")
         {
-            ThrowIfFalse(parameters->AddParameterInt(id, value.toInt()), "Unable to add int parameter.");
+            param.emplace_back(id, value.toInt());
         }
         else if (type == "double")
         {
-            ThrowIfFalse(parameters->AddParameterDouble(id, value.toDouble()), "Unable to add double parameter.");
+            param.emplace_back(id, value.toDouble());
         }
         else if (type == "bool")
         {
@@ -46,87 +46,67 @@ bool SystemConfigImporter::ImportSystemParameters(QDomElement& parametersElement
             {
                 valueRobust = true;
             }
-            ThrowIfFalse(parameters->AddParameterBool(id, valueRobust), "Unable to add bool parameter.");
+            param.emplace_back(id, valueRobust);
         }
         else if (type == "string")
         {
-            ThrowIfFalse(parameters->AddParameterString(id, value.toStdString()), "Unable to add string parameter.");
+            param.emplace_back(id, value.toStdString());
         }
         else if (type == "intVector")
         {
             std::vector<int> vector{};
-            try
+            std::stringstream valueStream(value.toStdString());
+
+            int item;
+            while (valueStream >> item)
             {
-                std::stringstream valueStream(value.toStdString());
+                vector.push_back(item);
 
-                int item;
-                while (valueStream >> item)
+                if (valueStream.peek() == ',')
                 {
-                    vector.push_back(item);
-
-                    if (valueStream.peek() == ',')
-                    {
-                        valueStream.ignore();
-                    }
+                    valueStream.ignore();
                 }
             }
-            catch (...)
-            {
-                return false;
-            }
-            ThrowIfFalse(parameters->AddParameterIntVector(id, vector), "an error occurred furing import of parameters");
+            param.emplace_back(id, vector);
         }
         else if (type == "doubleVector")
         {
             std::vector<double>vector {};
-            try
+            std::stringstream valueStream(value.toStdString());
+
+            double item;
+            while (valueStream >> item)
             {
-                std::stringstream valueStream(value.toStdString());
+                vector.push_back(item);
 
-                double item;
-                while (valueStream >> item)
+                if (valueStream.peek() == ',')
                 {
-                    vector.push_back(item);
-
-                    if (valueStream.peek() == ',')
-                    {
-                        valueStream.ignore();
-                    }
+                    valueStream.ignore();
                 }
             }
-            catch (...)
-            {
-                return false;
-            }
-            ThrowIfFalse(parameters->AddParameterDoubleVector(id, vector), "an error occurred during import of parameters");
+            param.emplace_back(id, vector);
         }
         else if (type == "boolVector")
         {
             std::vector<bool> vector{};
-            try
+            std::stringstream valueStream(value.toStdString());
+
+            bool item;
+            while (valueStream >> item)
             {
-                std::stringstream valueStream(value.toStdString());
+                vector.push_back(item);
 
-                bool item;
-                while (valueStream >> item)
+                if (valueStream.peek() == ',')
                 {
-                    vector.push_back(item);
-
-                    if (valueStream.peek() == ',')
-                    {
-                        valueStream.ignore();
-                    }
+                    valueStream.ignore();
                 }
             }
-            catch (...)
-            {
-                return false;
-            }
-            ThrowIfFalse(!parameters->AddParameterBoolVector(id, vector), "an error occurred during import of parameters");
+            param.emplace_back(id, vector);
         }
+    
         parameterElement = parameterElement.nextSiblingElement(TAG::parameter);
     }
-    return true;
+    return param;
 }
 
 
@@ -150,7 +130,7 @@ bool SystemConfigImporter::ImportSystemConfigContent(const std::string& filename
     return true;
 }
 
-bool SystemConfigImporter::Import(const std::string& filename,
+bool SystemConfigImporter::Import(const std::string& filename,                                  
                                   std::shared_ptr<Configuration::SystemConfig> systemConfig)
 {
     QDomDocument document;
@@ -176,7 +156,7 @@ bool SystemConfigImporter::Import(const std::string& filename,
             int agentId;
             ThrowIfFalse(SimulationCommon::ParseInt(systemElement, "id", agentId), "Unable to retrieve agent id.");
             LOG_INTERN(LogLevel::DebugCore) << "agent type id: " << agentId <<
-                                            " *********************************************************";
+                                               " *********************************************************";
 
             // retrieve agent priority
             int agentPriority;
@@ -207,7 +187,7 @@ bool SystemConfigImporter::Import(const std::string& filename,
                     std::string componentId;
                     ThrowIfFalse(SimulationCommon::ParseString(componentElement, "id", componentId), "Unable to retrieve component id.");
                     LOG_INTERN(LogLevel::DebugCore) << "component type id: " << componentId <<
-                                                    " ---------------------------------------------------------";
+                                                       " ---------------------------------------------------------";
 
                     // retrieve component library
                     std::string library;
@@ -248,29 +228,30 @@ bool SystemConfigImporter::Import(const std::string& filename,
                     }
 
                     auto component = std::make_shared<SimulationSlave::ComponentType>(componentId,
-                                     isInitComponent,
-                                     componentPriority,
-                                     offsetTime,
-                                     responseTime,
-                                     cycleTime,
-                                     library);
+                                                                                      isInitComponent,
+                                                                                      componentPriority,
+                                                                                      offsetTime,
+                                                                                      responseTime,
+                                                                                      cycleTime,
+                                                                                      library);
                     ThrowIfFalse(component != nullptr, "Component is null.");
-
-                    auto parameters = systemConfig->AddModelParameters();
-                    component->SetModelParameter(parameters);
-
                     ThrowIfFalse(agent->AddComponent(component), "Unable to add component.");
-
 
                     // parse model parameters
                     LOG_INTERN(LogLevel::DebugCore) << "import model parameters...";
-
                     QDomElement parametersElement;
+
                     ThrowIfFalse(SimulationCommon::GetFirstChildElement(componentElement, TAG::parameters, parametersElement),
                                   "Could not parse model parameters. Tag " + std::string(TAG::parameters) + " is missing.");
 
-                    ThrowIfFalse(ImportSystemParameters(parametersElement, component->GetModelParameters()),
-                                  "Unable to import system parameters");
+                    try
+                    {
+                        component->SetModelParameter(ImportSystemParameters(parametersElement));
+                    }
+                    catch(const std::runtime_error& error)
+                    {
+                        LogErrorAndThrow("Unable to import system parameters: " + std::string(error.what()));
+                    }
 
                     componentElement = componentElement.nextSiblingElement(TAG::component);
                 } // component loop

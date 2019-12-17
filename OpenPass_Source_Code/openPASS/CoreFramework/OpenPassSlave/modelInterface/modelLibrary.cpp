@@ -23,6 +23,8 @@
 #include "modelLibrary.h"
 #include "Interfaces/observationNetworkInterface.h"
 #include "observationModule.h"
+#include "parameterbuilder.h"
+#include "parameters.h"
 
 namespace SimulationSlave {
 
@@ -176,6 +178,7 @@ bool ModelLibrary::ReleaseComponent(ComponentInterface* component)
 
 ComponentInterface* ModelLibrary::CreateComponent(std::shared_ptr<ComponentType> componentType,
         std::string componentName,
+        const openpass::common::RuntimeInformation& runtimeInformation,
         StochasticsInterface* stochastics,
         WorldInterface* world,
         ObservationNetworkInterface* observationNetwork,
@@ -207,6 +210,7 @@ ComponentInterface* ModelLibrary::CreateComponent(std::shared_ptr<ComponentType>
     component->SetObservations(observationNetwork->GetObservationModules());
 
     ModelInterface* implementation = nullptr;
+    auto parameter = openpass::parameter::make<SimulationCommon::Parameters>(runtimeInformation, componentType->GetModelParameters());
 
     try
     {
@@ -222,7 +226,7 @@ ComponentInterface* ModelLibrary::CreateComponent(std::shared_ptr<ComponentType>
                                                      componentType->GetCycleTime(),
                                                      stochastics,
                                                      world,
-                                                     componentType->GetModelParameters(),
+                                                     parameter.get(),
                                                      &component->GetObservations(),
                                                      agent->GetAgentAdapter(),
                                                      callbacks,
@@ -238,7 +242,7 @@ ComponentInterface* ModelLibrary::CreateComponent(std::shared_ptr<ComponentType>
                                                 componentType->GetCycleTime(),
                                                 stochastics,
                                                 world,
-                                                componentType->GetModelParameters(),
+                                                parameter.get(),
                                                 &component->GetObservations(),
                                                 agent->GetAgentAdapter(),
                                                 callbacks);
@@ -261,6 +265,7 @@ ComponentInterface* ModelLibrary::CreateComponent(std::shared_ptr<ComponentType>
     }
 
     component->SetImplementation(implementation);
+    component->SetParameter(std::move(parameter));
 
     ComponentInterface* componentPtr = component.release();
     components.push_back(componentPtr);

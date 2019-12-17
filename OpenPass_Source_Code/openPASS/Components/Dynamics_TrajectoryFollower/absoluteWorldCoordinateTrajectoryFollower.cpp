@@ -242,4 +242,5 @@ void AbsoluteWorldCoordinateTrajectoryFollower::UpdateDynamics(const Position &p
 
     dynamicsOutputSignal.velocity = velocity;
     dynamicsOutputSignal.acceleration = acceleration;
+    dynamicsOutputSignal.centripetalAcceleration = dynamicsOutputSignal.yawRate * dynamicsOutputSignal.velocity;
 }

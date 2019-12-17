@@ -60,11 +60,9 @@ class FakeAgentBlueprint : public AgentBlueprintInterface {
   MOCK_METHOD0(Reset,
       void());
   MOCK_METHOD1(AddSensor,
-      void(SensorParameter));
+      void(openpass::sensors::Parameter));
   MOCK_METHOD0(GetSensorParameters,
-      std::list<SensorParameter>());
+      openpass::sensors::Parameters());
   MOCK_METHOD1(SetAgentType,
       void (std::shared_ptr<SimulationSlave::AgentTypeInterface> agentType));
 };
-
-
