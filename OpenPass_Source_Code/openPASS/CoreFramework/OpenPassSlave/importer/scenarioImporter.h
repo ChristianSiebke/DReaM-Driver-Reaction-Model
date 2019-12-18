@@ -43,7 +43,10 @@ public:
 
     //Public for testing only
     static void ImportLongitudinalElement(ScenarioEntity& scenarioEntity, QDomElement firstChildOfActionElement);
+
     static void ImportPositionElement(ScenarioEntity& scenarioEntity, QDomElement firstChildOfActionElement);
+
+    static void ImportRoutingElement(ScenarioEntity& scenarioEntity, QDomElement firstChildOfActionElement);
 
     /*!
      * \brief Imports the storyboard from OpenSCENARIO DOM

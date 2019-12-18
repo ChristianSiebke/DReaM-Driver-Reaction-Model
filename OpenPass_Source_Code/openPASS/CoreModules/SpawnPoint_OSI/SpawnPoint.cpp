@@ -491,6 +491,7 @@ void SpawnPoint::SetPredefinedParameterHelper(AgentBlueprintInterface* agentBlue
     spawnParameter.SpawningRoadId = spawnInfo.roadId;
     spawnParameter.positionX = spawnInfo.s.value;
     spawnParameter.heading = spawnInfo.heading;
+    spawnParameter.route = spawnInfo.route;
 
     agentBlueprint->SetAgentCategory(agentCategory);
     agentBlueprint->SetObjectName(scenarioEntity.name);

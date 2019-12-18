@@ -91,6 +91,8 @@ bool AgentAdapter::InitAgentParameter(int id,
     UpdateMaxVelocity(vehicleModelParameters.maxVelocity);
     UpdateMaxCurvature(vehicleModelParameters.maxCurvature);
 
+    route = agentBlueprint->GetSpawnParameter().route.value_or(Route());
+
     SetSensorParameters(agentBlueprint->GetSensorParameters());
 
     // spawn tasks are executed before any other task types within current scheduling time

@@ -367,6 +367,43 @@ void ScenarioImporter::ImportPositionElement(ScenarioEntity& scenarioEntity, QDo
     }
 }
 
+void ScenarioImporter::ImportRoutingElement(ScenarioEntity& scenarioEntity, QDomElement firstChildOfActionElement)
+{
+    std::vector<RouteElement> roads;
+    size_t hash{0};
+
+    QDomElement followRouteElement;
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(firstChildOfActionElement, TAG::followRoute, followRouteElement),
+                  "Could not import Routing. Tag " + std::string(TAG::followRoute) + " is missing.");
+    QDomElement routeElement;
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(followRouteElement, TAG::route, routeElement),
+                  "Could not import Routing. Tag " + std::string(TAG::route) + " is missing.");
+    QDomElement waypointElement;
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(routeElement, TAG::waypoint, waypointElement),
+                  "Could not import Routing. Tag " + std::string(TAG::waypoint) + " is missing.");
+    while (!waypointElement.isNull())
+    {
+        QDomElement positionElement;
+        ThrowIfFalse(SimulationCommon::GetFirstChildElement(waypointElement, TAG::position, positionElement),
+                      "Could not import Routing. Tag " + std::string(TAG::position) + " is missing.");
+        QDomElement roadElement;
+        ThrowIfFalse(SimulationCommon::GetFirstChildElement(positionElement, TAG::road, roadElement),
+                      "Could not import Routing. Tag " + std::string(TAG::road) + " is missing.");
+        std::string roadId;
+        ThrowIfFalse(SimulationCommon::ParseAttributeString(roadElement, ATTRIBUTE::roadId, roadId),
+                      "Could not import Routing. Road tag requires a " + std::string(ATTRIBUTE::roadId) + " attribute.");
+        double t;
+        ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadElement, ATTRIBUTE::t, t),
+                      "Could not import Routing. Road tag requires a " + std::string(ATTRIBUTE::t) + " attribute.");
+        bool inRoadDirection = (t <= 0);
+        roads.push_back({roadId, inRoadDirection});
+        hash = hash ^ (std::hash<std::string>{}(roadId) << 1);
+
+        waypointElement = waypointElement.nextSiblingElement(TAG::waypoint);
+    }
+    scenarioEntity.spawnInfo.route = Route{roads, {}, hash};
+}
+
 void ScenarioImporter::SetStochasticsDataHelper(SpawnAttribute& attribute, QDomElement& stochasticsElement)
 {
     double stdDeviation;
@@ -453,6 +490,10 @@ void ScenarioImporter::ImportPrivateElement(QDomElement& privateElement,
         else if (SimulationCommon::GetFirstChildElement(actionElement, TAG::position, firstChildOfActionElement))
         {
             ImportPositionElement(*scenarioEntity, firstChildOfActionElement);
+        }
+        else if (SimulationCommon::GetFirstChildElement(actionElement, "Routing", firstChildOfActionElement))
+        {
+            ImportRoutingElement(*scenarioEntity, firstChildOfActionElement);
         }
 
         actionElement = actionElement.nextSiblingElement(TAG::action);

@@ -157,6 +157,7 @@ namespace openpass::importer::xml::scenarioImporter::tag
     constexpr char entities[] {"Entities"};
     constexpr char entity[] {"Entity"};
     constexpr char event[] {"Event"};
+    constexpr char followRoute[] {"FollowRoute"};
     constexpr char init[] {"Init"};
     constexpr char lane[] {"Lane"};
     constexpr char logics[] {"Logics"};
@@ -169,7 +170,10 @@ namespace openpass::importer::xml::scenarioImporter::tag
     constexpr char parameterDeclaration[] {"ParameterDeclaration"};
     constexpr char position[] {"Position"};
     constexpr char Private[] {"Private"};
+    constexpr char road[] {"Road"};
     constexpr char roadNetwork[] {"RoadNetwork"};
+    constexpr char route[] {"Route"};
+    constexpr char routing[] {"Routing"};
     constexpr char selection[] {"Selection"};
     constexpr char sequence[] {"Sequence"};
     constexpr char speed[] {"Speed"};
@@ -177,6 +181,7 @@ namespace openpass::importer::xml::scenarioImporter::tag
     constexpr char story[] {"Story"};
     constexpr char storyboard[] {"Storyboard"};
     constexpr char target[] {"Target"};
+    constexpr char waypoint[] {"Waypoint"};
 }
 
 namespace openpass::importer::xml::scenarioImporter::attribute
@@ -200,6 +205,7 @@ namespace openpass::importer::xml::scenarioImporter::attribute
     constexpr char rule[] {"rule"};
     constexpr char s[] {"s"};
     constexpr char stdDeviation[] {"stdDeviation"};
+    constexpr char t[] {"t"};
     constexpr char type[] {"type"};
     constexpr char upperBound[] {"upperBound"};
     constexpr char value[] {"value"};

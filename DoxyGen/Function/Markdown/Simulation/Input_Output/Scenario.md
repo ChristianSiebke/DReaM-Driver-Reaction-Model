@@ -308,7 +308,7 @@ Example
                 <Entity name="Agent"/>
             </TriggeringEntities>
             <EntityCondition>
-                <RelativeSpeed entity="referenceEntity" value="10.0" rule"greater_than">
+                <RelativeSpeed entity="referenceEntity" value="10.0" rule="greater_than"/>
             </EntityCondition>
         </ByEntity>
 </Condition>
@@ -319,7 +319,7 @@ Example
 The TimeToCollision Condition evaluates the Time To Collision (TTC) between the specified Triggering Entities and the specified reference Entity.
 When the comparison of the calculated TTC to the specified TTC value using the provided rule is true, this Condition is satisfied.
 
-The TTC is calculated by taking the distance between the two entities and dividing by the difference in velocity between the front entity and back entity (e.g. frontEntityVelocity - backEntityVelocity).
+The TTC is determined by projecting the movement of the agents in timesteps of 0.1s and taking the first timestep, at which the bounding boxes intersect.
 
 Example
 ```xml

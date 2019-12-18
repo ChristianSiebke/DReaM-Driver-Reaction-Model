@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "globalDefinitions.h"
+#include "worldDefinitions.h"
 
 enum class SpawnPointState
 {
@@ -102,6 +103,7 @@ public:
     std::string roadId = "";
     int ILane = -999;
     double heading = 0;
+    std::optional<Route> route = std::nullopt;
 
     SpawnAttribute offset;
     SpawnAttribute s;

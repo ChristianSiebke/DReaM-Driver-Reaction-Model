@@ -20,6 +20,7 @@
 #include "agentTypeInterface.h"
 #include "profilesInterface.h"
 #include "Common/globalDefinitions.h"
+#include "Common/worldDefinitions.h"
 
 #pragma once
 
@@ -38,6 +39,7 @@ struct SpawnParameter
     double gear = -999;
     double yawAngle = -999;
     double heading = 0;
+    std::optional<Route> route{};
 };
 
 class AgentBlueprintInterface

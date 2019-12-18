@@ -22,6 +22,7 @@ using namespace Importer;
 using ::testing::Eq;
 using ::testing::StrEq;
 using ::testing::DontCare;
+using ::testing::ElementsAre;
 
 TEST(ScenarioImporter_UnitTests, ImportPositionElementLaneWithStocastics)
 {
@@ -132,6 +133,48 @@ TEST(ScenarioImporter_UnitTests, ImportLongitudinalWithStochastics)
     ASSERT_DOUBLE_EQ(acceleration.lowerBoundary, 0.0);
     ASSERT_DOUBLE_EQ(acceleration.upperBoundary, 4.0);
     ASSERT_TRUE(acceleration.isStochastic);
+}
+
+std::ostream& operator<<(std::ostream& os, const RouteElement& obj)
+{
+    return os
+            << "road " << obj.roadId << " "
+            << (obj.inRoadDirection ? "in" : "against") << " OpenDrive direction";
+}
+
+TEST(ScenarioImporter_UnitTests, ImportRoutingElement)
+{
+    QDomElement routingElement = documentRootFromString(
+              "<Routing>"
+                    "<FollowRoute>"
+                        "<Route>"
+                            "<Waypoint>"
+                                "<Position>"
+                                    "<Road roadId=\"RoadId1\" t=\"-1.0\" />"
+                                "</Position>"
+                            "</Waypoint>"
+                            "<Waypoint>"
+                                "<Position>"
+                                    "<Road roadId=\"RoadId2\" t=\"1.0\" />"
+                                "</Position>"
+                            "</Waypoint>"
+                            "<Waypoint>"
+                                "<Position>"
+                                    "<Road roadId=\"RoadId3\" t=\"-1.0\" />"
+                                "</Position>"
+                            "</Waypoint>"
+                        "</Route>"
+                    "</FollowRoute>"
+               "</Routing>"
+              );
+
+    ScenarioEntity scenarioEntity;
+
+    ScenarioImporter::ImportRoutingElement(scenarioEntity, routingElement);
+
+    auto route = scenarioEntity.spawnInfo.route;
+    ASSERT_THAT(route.has_value(), Eq(true));
+    ASSERT_THAT(route->roads, ElementsAre(RouteElement{"RoadId1", true}, RouteElement{"RoadId2", false}, RouteElement{"RoadId3", true}));
 }
 
 TEST(ScenarioImporter_UnitTests, ImportVehicleCatalog_ReturnsSuccess)
