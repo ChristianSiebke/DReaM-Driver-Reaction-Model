@@ -286,21 +286,19 @@ Groups are defined:
     - Lane
     - S coordinate
     - T coordinate
+	- Agent in front
+
+- **RoadPositionExtended**
     - Secondary lanes
 
 - **Vehicle**
     - Steering angle
-    - Steering angle rate
-    - Steering torque
-    - Side slip angle
     - Yaw rate
     - Lateral acceleration
     - Accelerator pedal position
     - Decelerator pedal position
     - Motor torque
     - RPM
-    - Gear
-    - Status ADAS
 
 - **Sensor**
     - Number of detected agents
@@ -838,6 +836,15 @@ This section contains some information on how each agent is configured.
 ```xml
 <Agent Id="0" AgentTypeGroupName="Ego" AgentTypeName="MiddleClassCarAgent" VehicleModelType="car_bmw_7" DriverProfileName="Regular">
 ```
+
+The VehicleAttributes tag lists basic information of the vehicle parameters.
+
+|Attribute|Description|
+|---------|-----------|
+|Width|Width of the vehicles bounding box|
+|Length|Length of the vehicles bounding box|
+|Height|Height of the vehicles bounding box|
+|LongitudinalPivotOffset|Distance between the center of the bounding box and the reference point of the agent. Positive distances are closer to the front and Negative distances are closer to the rear of the vehicle.|
 
 The Sensors tag lists all sensors of the agent and their parameters.
 

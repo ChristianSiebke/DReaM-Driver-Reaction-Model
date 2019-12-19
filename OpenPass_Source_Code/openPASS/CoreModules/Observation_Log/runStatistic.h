@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -31,13 +31,9 @@ public:
     void AddStopReason(int time, StopReason reason);
     void WriteStatistics(std::shared_ptr<QXmlStreamWriter> fileStream);
 
-    std::list<int> *GetFollowerIds();
-
     // general
     int StopTime = -1; //this stays on UNDEFINED_NUMBER, if due time out -> replace in c#
     bool EgoCollision = false;
-    int NCollisionsFollowers = 0;
-    int NCollisionsArbitrary = 0;
     double TotalDistanceTraveled = 0.0;
     double EgoDistanceTraveled = 0.0;
     double VisibilityDistance = -999.0; //Visibility distance of world in current run (defined in slaveConfig.xml)

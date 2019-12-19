@@ -154,29 +154,29 @@ bool SystemConfigImporter::Import(const std::string& filename,
         {
             // retrieve agent id
             int agentId;
-            ThrowIfFalse(SimulationCommon::ParseInt(systemElement, "id", agentId), "Unable to retrieve agent id.");
+            ThrowIfFalse(SimulationCommon::ParseInt(systemElement, "id", agentId), systemElement, "Unable to retrieve agent id.");
             LOG_INTERN(LogLevel::DebugCore) << "agent type id: " << agentId <<
                                                " *********************************************************";
 
             // retrieve agent priority
             int agentPriority;
-            ThrowIfFalse(SimulationCommon::ParseInt(systemElement, "priority", agentPriority), "Unable to retrieve agent priority.");
+            ThrowIfFalse(SimulationCommon::ParseInt(systemElement, "priority", agentPriority), systemElement, "Unable to retrieve agent priority.");
             ThrowIfFalse(0 <= agentPriority, "Invalid agent priority.");
 
             LOG_INTERN(LogLevel::DebugCore) << "agent type priority: " << agentPriority;
 
             // create agent
-            ThrowIfFalse(0 == agentTypes.count(agentId), "Duplicate agent."); // avoid duplicate types
+            ThrowIfFalse(0 == agentTypes.count(agentId), systemElement, "Duplicate agent id."); // avoid duplicate types
 
             std::shared_ptr<SimulationSlave::AgentType> agent = std::make_shared<SimulationSlave::AgentType>();
             ThrowIfFalse(agent != nullptr, "Agent is null");
 
-            ThrowIfFalse(agentTypes.insert({agentId, agent}).second, "Unable to add agent.");
+            ThrowIfFalse(agentTypes.insert({agentId, agent}).second, systemElement, "Unable to add agent.");
 
             // parse components
             QDomElement componentsElement;
             ThrowIfFalse(SimulationCommon::GetFirstChildElement(systemElement, TAG::components, componentsElement),
-                          "Unable to parse components. Tag " + std::string(TAG::components) + " is missing.");
+                         systemElement, "Tag " + std::string(TAG::components) + " is missing.");
 
             QDomElement componentElement;
             if (SimulationCommon::GetFirstChildElement(componentsElement, TAG::component, componentElement))
@@ -185,40 +185,40 @@ bool SystemConfigImporter::Import(const std::string& filename,
                 {
                     // retrieve component id
                     std::string componentId;
-                    ThrowIfFalse(SimulationCommon::ParseString(componentElement, "id", componentId), "Unable to retrieve component id.");
+                    ThrowIfFalse(SimulationCommon::ParseString(componentElement, "id", componentId), componentElement, "Unable to retrieve component id.");
                     LOG_INTERN(LogLevel::DebugCore) << "component type id: " << componentId <<
                                                        " ---------------------------------------------------------";
 
                     // retrieve component library
                     std::string library;
-                    ThrowIfFalse(SimulationCommon::ParseString(componentElement, "library", library), "Unable to retrieve component library.");
-                    ThrowIfFalse(!library.empty(), "Component library is empty.");
+                    ThrowIfFalse(SimulationCommon::ParseString(componentElement, "library", library), componentElement, "Unable to retrieve component library.");
+                    ThrowIfFalse(!library.empty(), componentElement, "Component library is empty.");
                     LOG_INTERN(LogLevel::DebugCore) << "library: " << library;
 
                     QDomElement scheduleElement = componentElement.firstChildElement("schedule");
 
                     // retrieve component priority
                     int componentPriority;
-                    ThrowIfFalse(SimulationCommon::ParseInt(scheduleElement, "priority", componentPriority), "Unable to retrieve component priority.");
-                    ThrowIfFalse(0 <= componentPriority, "Invalid component priority.");
+                    ThrowIfFalse(SimulationCommon::ParseInt(scheduleElement, "priority", componentPriority), scheduleElement, "Unable to retrieve component priority.");
+                    ThrowIfFalse(0 <= componentPriority, scheduleElement, "Invalid component priority.");
                     LOG_INTERN(LogLevel::DebugCore) << "component priority: " << componentPriority;
 
                     // retrieve component offset time
                     int offsetTime = 0; // must be set to 0 for init tasks for scheduler
-                    ThrowIfFalse(SimulationCommon::ParseInt(scheduleElement, "offset", offsetTime), "Unable to retrieve component offset time");
-                    ThrowIfFalse(0 <= offsetTime, "Invalid component offset time.");
+                    ThrowIfFalse(SimulationCommon::ParseInt(scheduleElement, "offset", offsetTime), scheduleElement, "Unable to retrieve component offset time");
+                    ThrowIfFalse(0 <= offsetTime, scheduleElement, "Invalid component offset time.");
                     LOG_INTERN(LogLevel::DebugCore) << "offset time: " << offsetTime;
 
                     // retrieve component response time
                     int responseTime = 0; // must be set to 0 for init tasks for scheduler
-                    ThrowIfFalse(SimulationCommon::ParseInt(scheduleElement, "response", responseTime), "Unable to retrieve component response time.");
-                    ThrowIfFalse(0 <= responseTime, "Invalid component response time.");
+                    ThrowIfFalse(SimulationCommon::ParseInt(scheduleElement, "response", responseTime), scheduleElement, "Unable to retrieve component response time.");
+                    ThrowIfFalse(0 <= responseTime, scheduleElement, "Invalid component response time.");
                     LOG_INTERN(LogLevel::DebugCore) << "response time: " << responseTime;
 
                     // retrieve component cycle time
                     int cycleTime = 0; // must be set to 0 for init tasks for scheduler
-                    ThrowIfFalse(SimulationCommon::ParseInt(scheduleElement, "cycle", cycleTime), "Unable to retrieve component cycle time.");
-                    ThrowIfFalse(0 <= cycleTime, "Invalid component cycle time.");
+                    ThrowIfFalse(SimulationCommon::ParseInt(scheduleElement, "cycle", cycleTime), scheduleElement, "Unable to retrieve component cycle time.");
+                    ThrowIfFalse(0 <= cycleTime, scheduleElement, "Invalid component cycle time.");
                     LOG_INTERN(LogLevel::DebugCore) << "cycle time: " << cycleTime;
 
                     bool isInitComponent = false;
@@ -234,15 +234,15 @@ bool SystemConfigImporter::Import(const std::string& filename,
                                                                                       responseTime,
                                                                                       cycleTime,
                                                                                       library);
-                    ThrowIfFalse(component != nullptr, "Component is null.");
-                    ThrowIfFalse(agent->AddComponent(component), "Unable to add component.");
+                    ThrowIfFalse(component != nullptr, componentElement, "Component is null.");
+                    ThrowIfFalse(agent->AddComponent(component), componentElement, "Unable to add component.");
 
                     // parse model parameters
                     LOG_INTERN(LogLevel::DebugCore) << "import model parameters...";
                     QDomElement parametersElement;
 
                     ThrowIfFalse(SimulationCommon::GetFirstChildElement(componentElement, TAG::parameters, parametersElement),
-                                  "Could not parse model parameters. Tag " + std::string(TAG::parameters) + " is missing.");
+                                 componentElement, "Tag " + std::string(TAG::parameters) + " is missing.");
 
                     try
                     {
@@ -260,7 +260,7 @@ bool SystemConfigImporter::Import(const std::string& filename,
             // parse connections
             QDomElement connectionsElement;
             ThrowIfFalse(SimulationCommon::GetFirstChildElement(systemElement, TAG::connections, connectionsElement),
-                          "Could not parse connections. Tag " + std::string(TAG::connections) + " is missing.");
+                         systemElement, "Tag " + std::string(TAG::connections) + " is missing.");
 
             std::map<std::pair<std::string, int>, int> channelMap;
             QDomElement connectionElement;

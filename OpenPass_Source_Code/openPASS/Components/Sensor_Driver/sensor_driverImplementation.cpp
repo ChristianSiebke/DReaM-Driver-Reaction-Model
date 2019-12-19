@@ -117,13 +117,24 @@ void SensorDriverImplementation::GetTrafficRuleInformation()
     trafficRuleInformation.laneRight  = GetTrafficRuleLaneInformationRight();
     trafficRuleInformation.laneMarkingsLeft = GetAgent()->GetLaneMarkingsInRange(visibilityDistance, 0, Side::Left);
     trafficRuleInformation.laneMarkingsRight = GetAgent()->GetLaneMarkingsInRange(visibilityDistance, 0, Side::Right);
-    if(GetAgent()->ExistsLaneLeft())
+
+    const auto laneIntervals = GetAgent()->GetRelativeLanes(0.0);
+
+    if (laneIntervals.size() > 0)
     {
-        trafficRuleInformation.laneMarkingsLeftOfLeftLane = GetAgent()->GetLaneMarkingsInRange(visibilityDistance, 1, Side::Left);
-    }
-    if(GetAgent()->ExistsLaneRight())
-    {
-        trafficRuleInformation.laneMarkingsLeftOfLeftLane = GetAgent()->GetLaneMarkingsInRange(visibilityDistance, -1, Side::Right);
+        const auto relativeLanes = laneIntervals.front().lanes;
+
+        for (auto relativeLane : relativeLanes)
+        {
+            if(relativeLane.relativeId == 1)
+            {
+                trafficRuleInformation.laneMarkingsLeftOfLeftLane = GetAgent()->GetLaneMarkingsInRange(visibilityDistance, 1, Side::Left);
+            }
+            if(relativeLane.relativeId == -1)
+            {
+                trafficRuleInformation.laneMarkingsRightOfRightLane = GetAgent()->GetLaneMarkingsInRange(visibilityDistance, -1, Side::Right);
+            }
+        }
     }
 }
 
@@ -163,8 +174,8 @@ void SensorDriverImplementation::GetGeometryInformation()
 {
     geometryInformation.visibilityDistance            = GetWorld()->GetVisibilityDistance();
     geometryInformation.laneEgo    = GetGeometryLaneInformationEgo();
-    geometryInformation.laneLeft   = GetGeometryLaneInformationLeft();
-    geometryInformation.laneRight  = GetGeometryLaneInformationRight();
+    geometryInformation.laneLeft   = GetGeometryLaneInformation(1);
+    geometryInformation.laneRight  = GetGeometryLaneInformation(-1);
 }
 
 LaneInformationGeometry SensorDriverImplementation::GetGeometryLaneInformationEgo()
@@ -180,30 +191,31 @@ LaneInformationGeometry SensorDriverImplementation::GetGeometryLaneInformationEg
     return laneInformation;
 }
 
-LaneInformationGeometry SensorDriverImplementation::GetGeometryLaneInformationLeft()
+LaneInformationGeometry SensorDriverImplementation::GetGeometryLaneInformation(int relativeLaneId)
 {
     LaneInformationGeometry laneInformation;
-    const int relativeLaneId = 1;
     const double visibilityDistance = GetWorld()->GetVisibilityDistance();
 
-    laneInformation.exists                  = GetAgent()->ExistsLaneLeft();
-    laneInformation.curvature               = GetAgent()->GetLaneCurvature(relativeLaneId);
-    laneInformation.width                   = GetAgent()->GetLaneWidth(relativeLaneId);
-    laneInformation.distanceToEndOfLane     = GetAgent()->GetDistanceToEndOfLane(visibilityDistance, relativeLaneId);
+    laneInformation.exists = false;
 
-    return laneInformation;
-}
+    const auto laneIntervals = GetAgent()->GetRelativeLanes(0.0);
 
-LaneInformationGeometry SensorDriverImplementation::GetGeometryLaneInformationRight()
-{
-    LaneInformationGeometry laneInformation;
-    const int relativeLaneId = -1;
-    const double visibilityDistance = GetWorld()->GetVisibilityDistance();
+    if (!laneIntervals.empty())
+    {
+        const auto& relativeLanes = laneIntervals.front().lanes;
 
-    laneInformation.exists                  = GetAgent()->ExistsLaneRight();
-    laneInformation.curvature               = GetAgent()->GetLaneCurvature(relativeLaneId);
-    laneInformation.width                   = GetAgent()->GetLaneWidth(relativeLaneId);
-    laneInformation.distanceToEndOfLane     = GetAgent()->GetDistanceToEndOfLane(visibilityDistance, relativeLaneId);
+        if (std::find_if(relativeLanes.cbegin(),
+                         relativeLanes.cend(),
+                         [relativeLaneId](const auto& relativeLane) {
+                             return relativeLane.relativeId == relativeLaneId;
+                         }) != relativeLanes.cend())
+        {
+            laneInformation.exists = true;
+            laneInformation.curvature               = GetAgent()->GetLaneCurvature(relativeLaneId);
+            laneInformation.width                   = GetAgent()->GetLaneWidth(relativeLaneId);
+            laneInformation.distanceToEndOfLane     = GetAgent()->GetDistanceToEndOfLane(visibilityDistance, relativeLaneId);
+        }
+    }
 
     return laneInformation;
 }
@@ -212,12 +224,22 @@ void SensorDriverImplementation::GetSurroundingObjectsInformation()
 {
     const double visibilityDistance = GetWorld()->GetVisibilityDistance();
 
-    surroundingObjects.objectFront = GetOtherObjectInformation(GetAgent()->GetObjectInFront(visibilityDistance));
-    surroundingObjects.objectRear = GetOtherObjectInformation(GetAgent()->GetObjectBehind(visibilityDistance));
-    surroundingObjects.objectFrontLeft = GetOtherObjectInformation(GetAgent()->GetObjectInFront(visibilityDistance, 1));
-    surroundingObjects.objectRearLeft = GetOtherObjectInformation(GetAgent()->GetObjectBehind(visibilityDistance, 1));
-    surroundingObjects.objectFrontRight = GetOtherObjectInformation(GetAgent()->GetObjectInFront(visibilityDistance, -1));
-    surroundingObjects.objectRearRight = GetOtherObjectInformation(GetAgent()->GetObjectBehind(visibilityDistance, -1));
+    surroundingObjects.objectFront = GetOtherObjectInformation(GetObject(visibilityDistance, 0, true));
+    surroundingObjects.objectRear = GetOtherObjectInformation(GetObject(visibilityDistance, 0, false));
+    surroundingObjects.objectFrontLeft = GetOtherObjectInformation(GetObject(visibilityDistance, 1, true));
+    surroundingObjects.objectRearLeft = GetOtherObjectInformation(GetObject(visibilityDistance, 1, false));
+    surroundingObjects.objectFrontRight = GetOtherObjectInformation(GetObject(visibilityDistance, -1, true));
+    surroundingObjects.objectRearRight = GetOtherObjectInformation(GetObject(visibilityDistance, -1, false));
+}
+
+const WorldObjectInterface* SensorDriverImplementation::GetObject(double visibilityDistance, int relativeLane, bool forwardSearch)
+{
+    const auto objectsInRange = GetAgent()->GetObjectsInRange(relativeLane, forwardSearch ? 0 : visibilityDistance, forwardSearch ? visibilityDistance : 0, forwardSearch ? MeasurementPoint::Front : MeasurementPoint::Rear);
+    if (objectsInRange.empty())
+    {
+        return nullptr;
+    }
+    return forwardSearch ? objectsInRange.front() : objectsInRange.back();
 }
 
 ObjectInformation SensorDriverImplementation::GetOtherObjectInformation(const WorldObjectInterface* surroundingObject)

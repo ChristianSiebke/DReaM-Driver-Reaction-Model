@@ -18,16 +18,6 @@ using namespace EventDefinitions;
 
 namespace SimulationSlave {
 
-EventNetwork::EventNetwork()
-{
-}
-
-EventNetwork::~EventNetwork()
-{
-    activeEvents.clear();
-    archivedEvents.clear();
-}
-
 Events* EventNetwork::GetActiveEvents()
 {
     return &activeEvents;
@@ -95,7 +85,6 @@ void EventNetwork::Clear()
     activeEvents.clear();
     archivedEvents.clear();
 
-    observer = nullptr;
     runResult = nullptr;
 }
 
@@ -107,10 +96,8 @@ void EventNetwork::AddCollision(const int agentId)
     }
 }
 
-void EventNetwork::Initialize(RunResultInterface *runResult,
-                              ObservationInterface* observer)
+void EventNetwork::Initialize(RunResultInterface *runResult)
 {
-    this->observer = observer;
     this->runResult = runResult;
 }
 } //namespace SimulationSlave

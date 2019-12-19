@@ -119,10 +119,17 @@ private:
     * \brief Writes the sensor information into the simulation output.
     *
     * @param[in]    fStream             Shared pointer of the stream writer.
-    * @param[in]    sensorName          Name of the sensor.
-    * @param[in]    sensorParameters    Parameters of the sensor.
+    * @param[in]    sensorParameter    Parameters of the sensor.
     */
     void AddSensor(std::shared_ptr<QXmlStreamWriter> fStream, const openpass::sensors::Parameter& sensorParameter);
+
+    /*!
+    * \brief Writes the sensor information into the simulation output.
+    *
+    * @param[in]    fStream             Shared pointer of the stream writer.
+    * @param[in]    vehicleModelParameters      Parameters of the vehicle.
+    */
+    void AddVehicleAttributes(std::shared_ptr<QXmlStreamWriter> fStream, const VehicleModelParameters &vehicleModelParameters);
 
     /*!
     * \brief Writes all sensor information of an agent into the simulation output.
@@ -209,7 +216,7 @@ private:
     void WriteCsvCyclics(QString runId, ObservationCyclics& cyclics);
 
 private:
-    const QString outputFileVersion = "0.2.0";
+    const QString outputFileVersion = "0.2.1";
 };
 
 

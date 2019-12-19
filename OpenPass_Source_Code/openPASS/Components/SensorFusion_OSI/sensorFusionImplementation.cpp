@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -55,25 +55,15 @@ void SensorFusionImplementation::UpdateInput(int localLinkId, const std::shared_
     log << COMPONENTNAME << " (component " << GetComponentName() << ", agent " << GetAgent()->GetId() << ", input data for local link " << localLinkId << ": ";
     LOG(CbkLogLevel::Debug, log.str());
 
-    if(localLinkId >= 0 && localLinkId <= 100)
+    const std::shared_ptr<SensorDataSignal const> signal = std::dynamic_pointer_cast<SensorDataSignal const>(data);
+    if(!signal)
     {
-        // from Sensor
-        const std::shared_ptr<SensorDataSignal const> signal = std::dynamic_pointer_cast<SensorDataSignal const>(data);
-        if(!signal)
-        {
-            const std::string msg = COMPONENTNAME + " invalid signaltype";
-            LOG(CbkLogLevel::Debug, msg);
-            throw std::runtime_error(msg);
-        }
-
-        out_sensorData.MergeFrom(signal->sensorData);
-    }
-    else
-    {
-        const std::string msg = COMPONENTNAME + " invalid link";
+        const std::string msg = COMPONENTNAME + " invalid signaltype";
         LOG(CbkLogLevel::Debug, msg);
         throw std::runtime_error(msg);
     }
+
+    out_sensorData.MergeFrom(signal->sensorData);
 }
 
 void SensorFusionImplementation::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterface const> &data, int time)

@@ -129,10 +129,11 @@ private:
     LaneInformationGeometry GetGeometryLaneInformationEgo();
 
     //! \brief Get lane geometry sensor data from the lane left of ego.
-    LaneInformationGeometry GetGeometryLaneInformationLeft();
+    LaneInformationGeometry GetGeometryLaneInformation(int relativeLaneId);
 
-    //! \brief Get lane geometry sensor data from the lane right of ego.
-    LaneInformationGeometry GetGeometryLaneInformationRight();
+    //! \brief Returns the objects in the specified lane in front of (if forwardSearch) or behind (if
+    //! not forwardSearch) the agent.
+    const WorldObjectInterface* GetObject(double visibilityDistance, int relativeLane, bool forwardSearch);
 
     //! \brief Get sensor data of surrounding objects.
     virtual void GetSurroundingObjectsInformation();

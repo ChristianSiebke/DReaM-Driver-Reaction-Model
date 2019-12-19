@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018 2019 in-tech GmbH
+* Copyright (c) 2018 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -149,7 +149,7 @@ TEST(RunStatisticCalculation_Test, CalculateTotalDistanceTraveled_SetsCorrectDis
     ASSERT_THAT(runStatistic.TotalDistanceTraveled, DoubleEq(158.3));
 }
 
-TEST(RunStatisticCalculation_Test, CalculateNumberOfCollisionsEgoAccident)
+TEST(RunStatisticCalculation_Test, DetermineEgoCollisionWithEgoCollision_SetsEgoCollisionTrue)
 {
     NiceMock<FakeWorld> fakeWorld;
 
@@ -160,19 +160,17 @@ TEST(RunStatisticCalculation_Test, CalculateNumberOfCollisionsEgoAccident)
 
     NiceMock<FakeRunResult> runResult;
 
-    std::list<int> collisionIds{ {0} };
+    std::list<int> collisionIds{ {0, 1} };
     ON_CALL(runResult, GetCollisionIds()).WillByDefault(Return(&collisionIds));
 
     RunStatistic runStatistic{0};
 
-    RunStatisticCalculation::CalculateNumberOfCollisions(runStatistic, runResult, &fakeWorld);
+    RunStatisticCalculation::DetermineEgoCollision(runStatistic, runResult, &fakeWorld);
 
     ASSERT_THAT(runStatistic.EgoCollision, Eq(true));
-    ASSERT_THAT(runStatistic.NCollisionsFollowers, Eq(0));
-    ASSERT_THAT(runStatistic.NCollisionsArbitrary, Eq(0));
 }
 
-TEST(RunStatisticCalculation_Test, CalculateNumberOfCollisionsFollowerAndOtherAccidents)
+TEST(RunStatisticCalculation_Test, DetermineEgoCollisionWithoutEgoCollision_SetsEgoCollisionFalse)
 {
     NiceMock<FakeWorld> fakeWorld;
 
@@ -187,12 +185,8 @@ TEST(RunStatisticCalculation_Test, CalculateNumberOfCollisionsFollowerAndOtherAc
     ON_CALL(runResult, GetCollisionIds()).WillByDefault(Return(&collisionIds));
 
     RunStatistic runStatistic{0};
-    runStatistic.GetFollowerIds()->push_back(1);
-    runStatistic.GetFollowerIds()->push_back(2);
 
-    RunStatisticCalculation::CalculateNumberOfCollisions(runStatistic, runResult, &fakeWorld);
+    RunStatisticCalculation::DetermineEgoCollision(runStatistic, runResult, &fakeWorld);
 
     ASSERT_THAT(runStatistic.EgoCollision, Eq(false));
-    ASSERT_THAT(runStatistic.NCollisionsFollowers, Eq(2));
-    ASSERT_THAT(runStatistic.NCollisionsArbitrary, Eq(1));
 }

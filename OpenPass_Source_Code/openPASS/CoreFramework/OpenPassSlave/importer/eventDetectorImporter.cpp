@@ -24,15 +24,15 @@ namespace Importer
     {
         QDomElement startConditionsElement;
         ThrowIfFalse(SimulationCommon::GetFirstChildElement(eventElement, TAG::startConditions, startConditionsElement),
-                      "Could not import EventDetector. Tag " + std::string(TAG::startConditions) + " missing.");
+                     eventElement, "Tag " + std::string(TAG::startConditions) + " missing.");
 
         QDomElement conditionGroupElement;
         ThrowIfFalse(SimulationCommon::GetFirstChildElement(startConditionsElement, TAG::conditionGroup, conditionGroupElement),
-                      "Could not import EventDetector. Tag " + std::string(TAG::conditionGroup) + " missing.");
+                     startConditionsElement, "Tag " + std::string(TAG::conditionGroup) + " missing.");
 
         QDomElement conditionElement;
         ThrowIfFalse(SimulationCommon::GetFirstChildElement(conditionGroupElement, TAG::condition, conditionElement),
-                      "Could not import EventDetector. Tag " + std::string(TAG::condition) + " missing.");
+                     conditionGroupElement, "Tag " + std::string(TAG::condition) + " missing.");
 
         openScenario::ConditionCollection conditions{};
 
@@ -75,7 +75,7 @@ namespace Importer
 
         QDomElement triggeringEntitiesElement;
         ThrowIfFalse(SimulationCommon::GetFirstChildElement(byEntityElement, TAG::triggeringEntities, triggeringEntitiesElement),
-                      "Could not import by entity element. " + std::string(TAG::triggeringEntities) + " missing.");
+                     byEntityElement, "Tag " + std::string(TAG::triggeringEntities) + " is missing.");
 
         QDomElement entityElement;
         SimulationCommon::GetFirstChildElement(triggeringEntitiesElement, "Entity", entityElement);
@@ -84,9 +84,10 @@ namespace Importer
         {
             std::string entityName;
             ThrowIfFalse(SimulationCommon::ParseAttributeString(entityElement, ATTRIBUTE::name, entityName),
-                          "Could not import by entity element. Entity requires a " + std::string(ATTRIBUTE::name) + " attribute.");
+                         entityElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
 
-            ThrowIfFalse(ContainsEntity(entities, entityName), "TriggeringEntity '" + entityName + "' not declared in 'Entities'");
+            ThrowIfFalse(ContainsEntity(entities, entityName),
+                         entityElement, "TriggeringEntity '" + entityName + "' not declared in 'Entities'");
 
             triggeringEntities.push_back(entityName);
             entityElement = entityElement.nextSiblingElement(TAG::entity);
@@ -94,29 +95,29 @@ namespace Importer
 
         QDomElement entityConditionElement;
         ThrowIfFalse(SimulationCommon::GetFirstChildElement(byEntityElement, TAG::entityCondition, entityConditionElement),
-                      "Could not import by entity element. " + std::string(TAG::entityCondition) + " missing.");
+                     byEntityElement, "Tag " + std::string(TAG::entityCondition) + " is missing.");
 
         QDomElement reachPositionElement;
         if (SimulationCommon::GetFirstChildElement(entityConditionElement, "ReachPosition", reachPositionElement))
         {
             double tolerance;
             ThrowIfFalse(SimulationCommon::ParseAttributeDouble(reachPositionElement, ATTRIBUTE::tolerance, tolerance),
-                          "Could not import by entity element. Reach position requires a " + std::string(ATTRIBUTE::tolerance) + " attribute.");
+                         reachPositionElement, "Attribute " + std::string(ATTRIBUTE::tolerance) + " is missing.");
 
             QDomElement positionElement;
             ThrowIfFalse(SimulationCommon::GetFirstChildElement(reachPositionElement, TAG::position, positionElement),
-                          "Could not import by entity element. " + std::string(TAG::position) + " missing.");
+                         reachPositionElement, "Tag " + std::string(TAG::position) + " is missing.");
 
             QDomElement roadElement;
             if(SimulationCommon::GetFirstChildElement(positionElement, TAG::road, roadElement))
             {
                 double sCoordinate;
                 ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadElement, ATTRIBUTE::s, sCoordinate),
-                              "Could not import by entity element. Road requires a " + std::string(ATTRIBUTE::s) + " attribute.");
+                             roadElement, "Attribute " + std::string(ATTRIBUTE::s) + " is missing.");
 
                 std::string roadId;
                 ThrowIfFalse(SimulationCommon::ParseAttributeString(roadElement, ATTRIBUTE::roadId, roadId),
-                              "Could not import by entity element. Road requires a " + std::string(ATTRIBUTE::roadId) + " attribute.");
+                             roadElement, "Attribute " + std::string(ATTRIBUTE::roadId) + " is missing.");
 
                 // this return must occur across two lines to appropriately construct the std::variant
                 auto condition = openScenario::ReachPositionRoadCondition(triggeringEntities,
@@ -132,15 +133,15 @@ namespace Importer
             {
                 std::string referenceEntityName;
                 ThrowIfFalse(SimulationCommon::ParseAttributeString(relativeLaneElement, ATTRIBUTE::object, referenceEntityName),
-                              "Could not import by entity element. RelativeLane requires a " + std::string(ATTRIBUTE::object) + " attribute.");
+                             relativeLaneElement, "Attribute " + std::string(ATTRIBUTE::object) + " is missing.");
 
                 int deltaLane;
                 ThrowIfFalse(SimulationCommon::ParseAttributeInt(relativeLaneElement, ATTRIBUTE::dLane, deltaLane),
-                              "Could not import by entity element. RelativeLane requires a " + std::string(ATTRIBUTE::dLane) + " attribute.");
+                             relativeLaneElement, "Attribute " + std::string(ATTRIBUTE::dLane) + " is missing.");
 
                 double deltaS;
                 ThrowIfFalse(SimulationCommon::ParseAttributeDouble(relativeLaneElement, ATTRIBUTE::ds, deltaS),
-                              "Could not import by entity element. RelativeLane requires a " + std::string(ATTRIBUTE::ds) + " attribute.");
+                             relativeLaneElement, "Attribute " + std::string(ATTRIBUTE::ds) + " is missing.");
 
                 auto condition = openScenario::RelativeLaneCondition(triggeringEntities,
                                                                      referenceEntityName,
@@ -157,15 +158,15 @@ namespace Importer
         {
             std::string referenceEntityName;
             ThrowIfFalse(SimulationCommon::ParseAttributeString(relativeSpeedElement, ATTRIBUTE::entity, referenceEntityName),
-                          "Could not import by entity element. RelativeSpeed requires a " + std::string(ATTRIBUTE::entity) + " attribute.");
+                         relativeSpeedElement, "Attribute " + std::string(ATTRIBUTE::entity) + " is missing.");
 
             double tolerance;
             ThrowIfFalse(SimulationCommon::ParseAttributeDouble(relativeSpeedElement, ATTRIBUTE::value, tolerance),
-                          "Could not import by entity element. RelativeSpeed requires a " + std::string(ATTRIBUTE::value) + " attribute.");
+                         relativeSpeedElement, "Attribute " + std::string(ATTRIBUTE::value) + " is missing.");
 
             std::string ruleString;
             ThrowIfFalse(SimulationCommon::ParseAttributeString(relativeSpeedElement, ATTRIBUTE::rule, ruleString),
-                          "Could not import by entity element. RelativeSpeed requires a " + std::string(ATTRIBUTE::rule) + " attribute.");
+                         relativeSpeedElement, "Attribute " + std::string(ATTRIBUTE::rule) + " is missing.");
 
             auto condition = openScenario::RelativeSpeedCondition(triggeringEntities,
                                                                   referenceEntityName,
@@ -179,23 +180,23 @@ namespace Importer
         {
             double targetTTC;
             ThrowIfFalse(SimulationCommon::ParseAttributeDouble(timeToCollisionElement, ATTRIBUTE::value, targetTTC),
-                          "Could not import by entity element. TimeToCollision requires a " + std::string(ATTRIBUTE::value) + " attribute.");
+                         timeToCollisionElement, "Attribute " + std::string(ATTRIBUTE::value) + " is missing.");
 
             std::string ruleString;
             ThrowIfFalse(SimulationCommon::ParseAttributeString(timeToCollisionElement, ATTRIBUTE::rule, ruleString),
-                          "Could not import by entity element. TimeToCollision requires a " + std::string(ATTRIBUTE::rule) + " attribute.");
+                         timeToCollisionElement, "Attribute " + std::string(ATTRIBUTE::rule) + " is missing.");
 
             QDomElement targetElement;
             ThrowIfFalse(SimulationCommon::GetFirstChildElement(timeToCollisionElement, TAG::target, targetElement),
-                          "Could not import by entity element. " + std::string(TAG::target) + " missing.");
+                         timeToCollisionElement, "Tag " + std::string(TAG::target) + " is missing.");
 
             QDomElement entityElement;
             ThrowIfFalse(SimulationCommon::GetFirstChildElement(targetElement, TAG::entity, entityElement),
-                          "Could not import by entity element. " + std::string(TAG::entity) + " missing.");
+                         targetElement, "Tag " + std::string(TAG::entity) + " is missing.");
 
             std::string targetEntityName;
             ThrowIfFalse(SimulationCommon::ParseAttributeString(entityElement, ATTRIBUTE::name, targetEntityName),
-                          "Could not import by entity element. TimeToCollision requires a " + std::string(ATTRIBUTE::name) + " attribute.");
+                         entityElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
 
             auto condition = openScenario::TimeToCollisionCondition(triggeringEntities,
                                                                     targetEntityName,
@@ -212,15 +213,16 @@ namespace Importer
     openScenario::Condition EventDetectorImporter::ImportConditionByValueElement(QDomElement& byValueElement)
     {
         QDomElement simulationTimeElement;
-        ThrowIfFalse(SimulationCommon::GetFirstChildElement(byValueElement, TAG::simulationTime, simulationTimeElement), "No valid ByValue Condition found.");
+        ThrowIfFalse(SimulationCommon::GetFirstChildElement(byValueElement, TAG::simulationTime, simulationTimeElement),
+                     byValueElement, "Tag " + std::string(TAG::simulationTime) + " is missing.");
 
         double value;
         ThrowIfFalse(SimulationCommon::ParseAttributeDouble(simulationTimeElement, ATTRIBUTE::value, value),
-                      "Could not import by value element. SimulationTime requires a " + std::string(ATTRIBUTE::value) + " attribute.");
+                     simulationTimeElement, "Attribute " + std::string(ATTRIBUTE::value) + " is missing.");
 
         std::string ruleString;
         ThrowIfFalse(SimulationCommon::ParseAttributeString(simulationTimeElement, ATTRIBUTE::rule, ruleString),
-                      "Could not import by value element. SimulationTime requires a " + std::string(ATTRIBUTE::rule) + " attribute.");
+                     simulationTimeElement, "Attribute " + std::string(ATTRIBUTE::rule) + " is missing.");
 
         openScenario::Rule rule = ruleConversionMap.at(ruleString);
 

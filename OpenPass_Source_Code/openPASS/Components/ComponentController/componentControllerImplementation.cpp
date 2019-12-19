@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -56,57 +56,41 @@ void ComponentControllerImplementation::UpdateInput(int localLinkId, const std::
 {
     Q_UNUSED(time);
 
-    if (std::dynamic_pointer_cast<AgentCompToCompCtrlSignal const>(data) != nullptr)
+    const auto signal = SignalCast<AgentCompToCompCtrlSignal const>(data, localLinkId);
+
+    if (stateManager.LocalLinkIdIsRegistered(localLinkId))
     {
-        const auto signal = SignalCast<AgentCompToCompCtrlSignal const>(data, localLinkId);
-
-        if (stateManager.LocalLinkIdIsRegistered(localLinkId))
-        {
-            stateManager.UpdateComponentCurrentState(localLinkId, signal->GetCurrentState());
-        }
-        else
-        {
-            std::shared_ptr<ComponentStateInformation> componentStateInformation;
-
-            ComponentType componentType = signal->GetComponentType();
-            if(componentType == ComponentType::VehicleComponent)
-            {
-                const auto castedSignal = SignalCast<VehicleCompToCompCtrlSignal const>(signal, localLinkId);
-                componentStateInformation = std::shared_ptr<ComponentStateInformation>(new AdasComponentStateInformation(castedSignal->GetComponentType(),
-                                                                                                                        castedSignal->GetAgentComponentName(),
-                                                                                                                        castedSignal->GetCurrentState(),
-                                                                                                                        castedSignal->GetAdasType()));
-            }
-            else
-            {
-                componentStateInformation = std::shared_ptr<ComponentStateInformation>(new ComponentStateInformation(signal->GetComponentType(),
-                                                                                       signal->GetAgentComponentName(),
-                                                                                       signal->GetCurrentState()));
-            }
-
-            stateManager.AddComponent(localLinkId, componentStateInformation);
-        }
-
-        const auto warning = signal->GetComponentWarning();
-        if (warning)
-        {
-            const auto warningComponent = stateManager.GetComponent(localLinkId);
-            const auto componentWarningEvent = std::make_shared<ComponentWarningEvent>(time,
-                                                                                       COMPONENTNAME,
-                                                                                       GetAgent()->GetId(),
-                                                                                       warningComponent->GetComponentName(),
-                                                                                       warning.value());
-            GetEventNetwork()->InsertEvent(componentWarningEvent);
-
-            driverWarnings.try_emplace(warningComponent->GetComponentName(), warning.value());
-        }
+        stateManager.UpdateComponentCurrentState(localLinkId, signal->GetCurrentState());
     }
     else
     {
-        const std::string msg = COMPONENTNAME + " invalid input signal";
-        LOG(CbkLogLevel::Debug, msg);
+        std::shared_ptr<ComponentStateInformation> componentStateInformation;
 
-        throw std::runtime_error(msg);
+        ComponentType componentType = signal->GetComponentType();
+        if(componentType == ComponentType::VehicleComponent)
+        {
+            const auto castedSignal = SignalCast<VehicleCompToCompCtrlSignal const>(signal, localLinkId);
+            componentStateInformation = std::make_shared<AdasComponentStateInformation>(castedSignal->GetComponentType(),
+                                                                                        castedSignal->GetAgentComponentName(),
+                                                                                        castedSignal->GetCurrentState(),
+                                                                                        castedSignal->GetAdasType());
+        }
+        else
+        {
+            componentStateInformation = std::make_shared<ComponentStateInformation>(signal->GetComponentType(),
+                                                                                    signal->GetAgentComponentName(),
+                                                                                    signal->GetCurrentState());
+        }
+
+        stateManager.AddComponent(localLinkId, componentStateInformation);
+    }
+
+    const auto warnings = signal->GetComponentWarnings();
+    if (!warnings.empty())
+    {
+        const auto warningComponent = stateManager.GetComponent(localLinkId);
+
+        driverWarnings.try_emplace(warningComponent->GetComponentName(), warnings);
     }
 }
 
@@ -125,9 +109,7 @@ void ComponentControllerImplementation::UpdateOutput(int localLinkId, std::share
         {
             data = std::make_shared<CompCtrlToDriverCompSignal const>(maxReachableState,
                                                                       stateManager.GetVehicleComponentNamesToTypeAndStateMap(),
-                                                                      driverWarnings.size() > 0
-                                                                        ? std::make_optional(driverWarnings)
-                                                                        : std::nullopt);
+                                                                      driverWarnings);
             // clear all warnings to forward to avoid unwanted repeats
             driverWarnings.clear();
         }

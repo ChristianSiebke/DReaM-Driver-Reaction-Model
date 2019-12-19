@@ -131,26 +131,6 @@ public:
 
     AgentInterface* GetAgentByName(const std::string& scenarioName) override;
 
-    // Agent functions
-    AgentInterface* GetNextAgentInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection) const override;
-    AgentInterface* GetNextAgentInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection, double searchDistance) const override;
-    AgentInterface* GetLastAgentInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection) const override;
-    AgentInterface* GetLastAgentInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection, double searchDistance) const override;
-
-    // Obstacle functions
-    TrafficObjectInterface* GetNextTrafficObjectInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection) const override;
-    TrafficObjectInterface* GetNextTrafficObjectInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection, double searchDistance) const override;
-    TrafficObjectInterface* GetLastTrafficObjectInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection) const override;
-    TrafficObjectInterface* GetLastTrafficObjectInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection, double searchDistance) const override;
-
-    // Generic functions
-    WorldObjectInterface* GetNextObjectInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection) const override;
-    WorldObjectInterface* GetNextObjectInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection, double searchDistance) const override;
-    WorldObjectInterface* GetLastObjectInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection) const override;
-    WorldObjectInterface* GetLastObjectInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection, double searchDistance) const override;
-
-    int GetLaneId(uint64_t streamId, double endDistance) const override;
-
     std::vector<const AgentInterface*> GetAgentsInRange(Route route, std::string roadId, int laneId, double startDistance,
                                                         double backwardRange, double forwardRange) const override;
     std::vector<const WorldObjectInterface*> GetObjectsInRange(Route route, std::string roadId, int laneId, double startDistance,
@@ -163,17 +143,7 @@ public:
     Position LaneCoord2WorldCoord(double distanceOnLane, double offset, std::string roadId,
                                           int laneId) const override;
 
-    std::vector<int> GetDrivingLanesAtDistance(std::string roadId, double distance) const override;
-    std::vector<int> GetStopLanesAtDistance(std::string roadId, double distance) const override;
-    std::vector<int> GetExitLanesAtDistance(std::string roadId, double distance) const override;
-    std::vector<int> GetRampsAtDistance(std::string roadId, double distance) const override;
-
-    bool GetLastValidSOnLane(std::string roadId, int laneId, double distance, double& nextValidS) override;
-    bool GetNextValidSOnLane(std::string roadId, int laneId, double distance, double& nextValidS) override;
     bool IsSValidOnLane(std::string roadId, int laneId, double distance) override;
-    bool ExistsLaneLeft(std::string roadId, int laneId, double distance) override;
-    bool ExistsLaneRight(std::string roadId, int laneId, double distance) override;
-    int GetNumberOfLanes(std::string roadId, double distance) override;
 
 
     double GetLaneCurvature(Route route, std::string roadId, int laneId, double position, double distance = 0.0) const override;
@@ -182,20 +152,12 @@ public:
 
     double GetDistanceToEndOfLane(Route route, std::string roadId, int laneId, double initialSearchDistance,
                                   double maximumSearchLength) override;
-    double GetDistanceToEndOfDrivingLane(Route route, std::string roadId, int laneId, double initialSearchDistance,
-                                         double maximumSearchLength) override;
-    double GetDistanceToEndOfDrivingOrStopLane(Route route, std::string roadId, int laneId, double initialSearchDistance,
-            double maximumSearchLength) override;
-    double GetDistanceToEndOfRamp(Route route, std::string roadId, int laneId, double initialSearchDistance,
-                                  double maximumSearchLength) override;
-    double GetDistanceToEndOfExit(Route route, std::string roadId, int laneId, double initialSearchDistance,
-                                  double maximumSearchLength) override;
+    double GetDistanceToEndOfLane(Route route, std::string roadId, int laneId, double initialSearchDistance,
+                                  double maximumSearchLength, const LaneTypes& laneTypes) override;
 
     double GetDistanceBetweenObjects(const Route& route, const ObjectPosition& objectPos, const ObjectPosition& targetObjectPos) const override;
 
     bool IntersectsWithAgent(double x, double y, double rotation, double length, double width, double center) override;
-
-    polygon_t GetBoundingBoxAroundAgent(AgentInterface* agent, double width, double length) override;
 
     Position RoadCoord2WorldCoord(RoadPosition roadCoord, std::string roadID) const override;
 

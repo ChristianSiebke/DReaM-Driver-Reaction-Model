@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -55,6 +55,11 @@ ObservationLogImplementation::ObservationLogImplementation(SimulationSlave::Even
             if (loggingGroup == "RoadPosition")
             {
                 loggingGroups.push_back(LoggingGroup::RoadPosition);
+                continue;
+            }
+            if (loggingGroup == "RoadPositionExtended")
+            {
+                loggingGroups.push_back(LoggingGroup::RoadPositionExtended);
                 continue;
             }
             if (loggingGroup == "Vehicle")
@@ -139,7 +144,7 @@ void ObservationLogImplementation::SlavePreRunHook()
 
 void ObservationLogImplementation::SlavePostRunHook(const RunResultInterface& runResult)
 {
-    RunStatisticCalculation::CalculateNumberOfCollisions(runStatistic, runResult, GetWorld());
+    RunStatisticCalculation::DetermineEgoCollision(runStatistic, runResult, GetWorld());
     runStatistic.VisibilityDistance = GetWorld()->GetVisibilityDistance();
     RunStatisticCalculation::CalculateTotalDistanceTraveled(runStatistic, GetWorld());
 
@@ -149,48 +154,4 @@ void ObservationLogImplementation::SlavePostRunHook(const RunResultInterface& ru
 void ObservationLogImplementation::SlavePostHook()
 {
     fileHandler.WriteEndOfFile();
-}
-
-void ObservationLogImplementation::GatherFollowers()
-{
-    runStatistic.GetFollowerIds()->clear();
-
-    const AgentInterface* egoAgent = GetWorld()->GetEgoAgent();
-
-    //In case there is no ego agent.
-    if (egoAgent == nullptr)
-    {
-        return;
-    }
-
-    int numberOfFollowers = 0;
-    const AgentInterface* rearAgent = egoAgent->GetAgentBehind(egoAgent->GetMainLaneId());
-
-    while (numberOfFollowers < NFOLLOWERS && rearAgent != nullptr)
-    {
-        numberOfFollowers++;
-
-        runStatistic.GetFollowerIds()->push_back(rearAgent->GetId());
-        int laneId = rearAgent->GetMainLaneId();
-        rearAgent = rearAgent->GetAgentBehind(laneId);
-    }
-}
-
-void ObservationLogImplementation::InformObserverOnSpawn(AgentInterface* agent)
-{
-    if (runStatistic.GetFollowerIds()->size() < NFOLLOWERS)
-    {
-        AgentInterface* egoAgent = GetWorld()->GetEgoAgent();
-
-        if (egoAgent != nullptr)
-        {
-            int egoLaneId = egoAgent->GetMainLaneId();
-
-            if (egoLaneId == agent->GetMainLaneId())
-            {
-                runStatistic.GetFollowerIds()->push_back(agent->GetId());
-            }
-        }
-
-    }
 }

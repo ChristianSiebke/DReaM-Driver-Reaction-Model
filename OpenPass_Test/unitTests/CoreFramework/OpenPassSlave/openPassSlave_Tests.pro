@@ -106,11 +106,6 @@ MANIPULATORIMPORTER_TESTS = \
     \
     manipulatorImporter_Tests.cpp
 
-INVOCATIONCONTROL_TESTS = \
-    $$UNIT_UNDER_TEST/framework/invocationControl.cpp \
-    \
-    invocationControl_Tests.cpp
-
 COMMANDLINERPARSER_TESTS = \
     $$UNIT_UNDER_TEST/framework/commandLineParser.cpp \
     \

@@ -191,7 +191,15 @@ bool ImportProbabilityMap(QDomElement parentElement,
 }
 
 
-
 } // namespace SimulationCommon
 
-
+[[maybe_unused]] static void ThrowIfFalse(bool success, const QDomElement element, const std::string &message)
+{
+    if (!success)
+    {
+        LogErrorAndThrow("Could not import element " + element.tagName().toStdString()
+                         + " (line " + std::to_string(element.lineNumber())
+                         + ", column " + std::to_string(element.columnNumber())
+                         + "): " + message);
+    }
+}

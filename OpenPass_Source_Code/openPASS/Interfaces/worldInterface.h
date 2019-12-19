@@ -32,6 +32,8 @@ class SceneryInterface;
 class TrafficObjectInterface;
 class WorldObjectInterface;
 
+using LaneTypes = std::vector<LaneType>;
+
 //-----------------------------------------------------------------------------
 //! Provides access to world representation
 //-----------------------------------------------------------------------------
@@ -270,183 +272,6 @@ public:
     //-----------------------------------------------------------------------------
     virtual bool CreateWorldScenario(const  std::string &scenarioFilename) = 0;
 
-
-    // Agent functions
-    //-----------------------------------------------------------------------------
-    //! Searches the lane starting at the given distance and returns the first agent found.
-    //! Returns nullptr if no agent is found.
-    //! Internal OWL::EVENTHORIZON is used as maximum search distance.
-    //!
-    //! @param[in] route            Route along which to search
-    //! @param[in] roadId           OpenDriveId of the road to search in
-    //! @param[in] laneId           OpenDriveId of lane to search in
-    //! @param[in] currentDistance  start s coordinate
-    //! @param[in] searchInForwardDirection specifies wether to search in or against the route direction
-    //! @return First agent found along the route
-    //-----------------------------------------------------------------------------
-    virtual AgentInterface* GetNextAgentInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection) const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Searches the lane starting at the given distance and returns the first agent found.
-    //! Returns nullptr if no agent is found.
-    //!
-    //! @param[in] route            Route along which to search
-    //! @param[in] roadId           OpenDriveId of the road to search in
-    //! @param[in] laneId           OpenDriveId of lane to search in
-    //! @param[in] currentDistance  start s coordinate
-    //! @param[in] searchInForwardDirection specifies wether to search in or against the route direction
-    //! @param[in] searchDistance   maximum distance to search
-    //! @return First agent found along the route
-    //-----------------------------------------------------------------------------
-    virtual AgentInterface* GetNextAgentInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection, double searchDistance) const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Searches the lane starting at the given distance and returns the last agent found.
-    //! Returns nullptr if no agent is found.
-    //! Internal OWL::EVENTHORIZON is used as maximum search distance.
-    //!
-    //! @param[in] route            Route along which to search
-    //! @param[in] roadId           OpenDriveId of the road to search in
-    //! @param[in] laneId           OpenDriveId of lane to search in
-    //! @param[in] currentDistance  start s coordinate
-    //! @param[in] searchInForwardDirection specifies wether to search in or against the route direction
-    //! @return Last agent found along the route
-    //-----------------------------------------------------------------------------
-    virtual AgentInterface* GetLastAgentInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection) const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Searches the lane starting at the given distance and returns the last agent found.
-    //! Returns nullptr if no agent is found.
-    //! Internal OWL::EVENTHORIZON is used as maximum search distance.
-    //!
-    //! @param[in] route            Route along which to search
-    //! @param[in] roadId           OpenDriveId of the road to search in
-    //! @param[in] laneId           OpenDriveId of lane to search in
-    //! @param[in] currentDistance  start s coordinate
-    //! @param[in] searchInForwardDirection specifies wether to search in or against the route direction
-    //! @param[in] searchDistance   maximum distance to search
-    //! @return Last agent found along the route
-    //-----------------------------------------------------------------------------
-    virtual AgentInterface* GetLastAgentInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection, double searchDistance) const = 0;
-
-    // Obstacle functions
-    //-----------------------------------------------------------------------------
-    //! Searches the lane starting at the given distance and returns the first traffic object found.
-    //! Returns nullptr if no traffic object is found.
-    //! Internal OWL::EVENTHORIZON is used as maximum search distance.
-    //!
-    //! @param[in] route            Route along which to search
-    //! @param[in] roadId           OpenDriveId of the road to search in
-    //! @param[in] laneId           OpenDriveId of lane to search in
-    //! @param[in] currentDistance  start s coordinate
-    //! @param[in] searchInForwardDirection specifies wether to search in or against the route direction
-    //! @return First traffic object found along the route
-    //-----------------------------------------------------------------------------
-    virtual TrafficObjectInterface* GetNextTrafficObjectInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection) const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Searches the lane starting at the given distance and returns the first traffic object found.
-    //! Returns nullptr if no traffic object is found.
-    //!
-    //! @param[in] route            Route along which to search
-    //! @param[in] roadId           OpenDriveId of the road to search in
-    //! @param[in] laneId           OpenDriveId of lane to search in
-    //! @param[in] currentDistance  start s coordinate
-    //! @param[in] searchInForwardDirection specifies wether to search in or against the route direction
-    //! @param[in] searchDistance   maximum distance to search
-    //! @return First traffic object found along the route
-    //-----------------------------------------------------------------------------
-    virtual TrafficObjectInterface* GetNextTrafficObjectInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection, double searchDistance) const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Searches the lane starting at the given distance and returns the last traffic object found.
-    //! Returns nullptr if no traffic object is found.
-    //! Internal OWL::EVENTHORIZON is used as maximum search distance.
-    //!
-    //! @param[in] route            Route along which to search
-    //! @param[in] roadId           OpenDriveId of the road to search in
-    //! @param[in] laneId           OpenDriveId of lane to search in
-    //! @param[in] currentDistance  start s coordinate
-    //! @param[in] searchInForwardDirection specifies wether to search in or against the route direction
-    //! @return Last traffic object found along the route
-    //-----------------------------------------------------------------------------
-    virtual TrafficObjectInterface* GetLastTrafficObjectInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection) const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Searches the lane starting at the given distance and returns the last traffic object found.
-    //! Returns nullptr if no traffic object is found.
-    //! Internal OWL::EVENTHORIZON is used as maximum search distance.
-    //!
-    //! @param[in] route            Route along which to search
-    //! @param[in] roadId           OpenDriveId of the road to search in
-    //! @param[in] laneId           OpenDriveId of lane to search in
-    //! @param[in] currentDistance  start s coordinate
-    //! @param[in] searchInForwardDirection specifies wether to search in or against the route direction
-    //! @param[in] searchDistance   maximum distance to search
-    //! @return Last traffic object found along the route
-    //-----------------------------------------------------------------------------
-    virtual TrafficObjectInterface* GetLastTrafficObjectInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection, double searchDistance) const = 0;
-
-    // Generic functions
-    //-----------------------------------------------------------------------------
-    //! Searches the lane starting at the given distance and returns the first object found.
-    //! Returns nullptr if no object is found.
-    //! Internal OWL::EVENTHORIZON is used as maximum search distance.
-    //!
-    //! @param[in] route            Route along which to search
-    //! @param[in] roadId           OpenDriveId of the road to search in
-    //! @param[in] laneId           OpenDriveId of lane to search in
-    //! @param[in] currentDistance  start s coordinate
-    //! @param[in] searchInForwardDirection specifies wether to search in or against the route direction
-    //! @return First object found along the route
-    //-----------------------------------------------------------------------------
-    virtual WorldObjectInterface* GetNextObjectInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection) const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Searches the lane starting at the given distance and returns the first object found.
-    //! Returns nullptr if no object is found.
-    //!
-    //! @param[in] route            Route along which to search
-    //! @param[in] roadId           OpenDriveId of the road to search in
-    //! @param[in] laneId           OpenDriveId of lane to search in
-    //! @param[in] currentDistance  start s coordinate
-    //! @param[in] searchInForwardDirection specifies wether to search in or against the route direction
-    //! @param[in] searchDistance   maximum distance to search
-    //! @return First object found along the route
-    //-----------------------------------------------------------------------------
-    virtual WorldObjectInterface* GetNextObjectInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection,
-            double searchDistance) const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Searches the lane starting at the given distance and returns the traffic object found.
-    //! Returns nullptr if no object is found.
-    //! Internal OWL::EVENTHORIZON is used as maximum search distance.
-    //!
-    //! @param[in] route            Route along which to search
-    //! @param[in] roadId           OpenDriveId of the road to search in
-    //! @param[in] laneId           OpenDriveId of lane to search in
-    //! @param[in] currentDistance  start s coordinate
-    //! @param[in] searchInForwardDirection specifies wether to search in or against the route direction
-    //! @return Last object found along the route
-    //-----------------------------------------------------------------------------
-    virtual WorldObjectInterface* GetLastObjectInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection) const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Searches the lane starting at the given distance and returns the last object found.
-    //! Returns nullptr if no object is found.
-    //! Internal OWL::EVENTHORIZON is used as maximum search distance.
-    //!
-    //! @param[in] route            Route along which to search
-    //! @param[in] roadId           OpenDriveId of the road to search in
-    //! @param[in] laneId           OpenDriveId of lane to search in
-    //! @param[in] currentDistance  start s coordinate
-    //! @param[in] searchInForwardDirection specifies wether to search in or against the route direction
-    //! @param[in] searchDistance   maximum distance to search
-    //! @return Last object found along the route
-    //-----------------------------------------------------------------------------
-    virtual WorldObjectInterface* GetLastObjectInLane(Route route, std::string roadId, int laneId, double currentDistance, bool searchInForwardDirection,
-            double searchDistance) const = 0;
-
     //-----------------------------------------------------------------------------
     //! Returns all agents in specified range (also agents partially in search interval).
     //! Returns empty list otherwise.
@@ -511,67 +336,6 @@ public:
     virtual double GetDistanceToConnectorDeparture(const ObjectPosition position, std::string intersectingConnectorId, int intersectingLaneId, std::string ownConnectorId) const = 0;
 
     //-----------------------------------------------------------------------------
-    //! Returns ids of driving lanes at given distance, empty vector otherwise.
-    //!
-    //! @param[in] roadId  OpenDriveId of the road to search in
-    //! @param[in] distance  s coordinate
-    //! @return Ids of lanes with type driving at given distance
-    //-----------------------------------------------------------------------------
-    virtual std::vector<int> GetDrivingLanesAtDistance(std::string roadId, double distance) const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns ids of driving lanes at given distance, empty vector otherwise.
-    //!
-    //! @param[in] roadId  OpenDriveId of the road to look in
-    //! @param[in] distance  s coordinate
-    //! @return Ids of lanes with type stop at given distance
-    //-----------------------------------------------------------------------------
-    virtual std::vector<int> GetStopLanesAtDistance(std::string roadId, double distance) const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns ids of exit lanes at given distance, empty vector otherwise.
-    //!
-    //! @param[in] roadId  OpenDriveId of the road to search in
-    //! @param[in] distance  s coordinate
-    //! @return Ids of lanes with type stop at given distance
-    //-----------------------------------------------------------------------------
-    virtual std::vector<int> GetExitLanesAtDistance(std::string roadId, double distance) const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns ids of onRamps and offRamps at given distance, empty vector otherwise.
-    //!
-    //! @param[in] roadId  OpenDriveId of the road to search in
-    //! @param[in] distance  s coordinate
-    //! @return Ids of lanes with type stop at given distance
-    //-----------------------------------------------------------------------------
-    virtual std::vector<int> GetRampsAtDistance(std::string roadId, double distance) const = 0;
-    //-----------------------------------------------------------------------------
-    //! Retrieve a valid s coordinate on given lane (downstream)
-    //! Internal a step-size is used which is set to 100
-    //! Internal a max. search distance is used (OWL::Eventhorizon)
-    //!
-    //! @param[in] roadId  OpenDriveId of the road to search in
-    //! @param[in] laneId OpenDriveId of lane to search in
-    //! @param[in] distance  start s coordinate
-    //! @param[out] next next valid s coordinate, INFINIT if valid s is not found
-    //! @return true if valid s is found in search range, false otherwise
-    //-----------------------------------------------------------------------------
-    virtual bool GetNextValidSOnLane(std::string roadId, int laneId, double distance, double& next) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Retrieve a valid s coordinate on given lane (upstream)
-    //! Internal a step-size is used which is set to 100
-    //! Internal a max. search distance is used (OWL::Eventhorizon)
-    //!
-    //! @param[in] roadId  OpenDriveId of the road to search in
-    //! @param[in] laneId OpenDriveId of lane to search in
-    //! @param[in] distance  start s coordinate
-    //! @param[out] last last valid s coordinate, -INFINIT if valid s is not found
-    //! @return true if valid s is found in search range, false otherwise
-    //-----------------------------------------------------------------------------
-    virtual bool GetLastValidSOnLane(std::string roadId, int laneId, double distance, double& last) = 0;
-
-    //-----------------------------------------------------------------------------
     //! Retrieve whether s coordinate is valid on given lane.
     //!
     //! @param[in] roadId  OpenDriveId of the road to search in
@@ -580,35 +344,6 @@ public:
     //! @return true if s is valid at given distance, false otherwise
     //-----------------------------------------------------------------------------
     virtual bool IsSValidOnLane(std::string roadId, int laneId, double distance) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Check if a left lane at given distance exists
-    //!
-    //! @param[in] roadId  OpenDriveId of the road to search in
-    //! @param[in] laneId OpenDriveId of lane to search in
-    //! @param[in] distance  s coordinate
-    //! @return true if left lane exists at given distance, false otherwise
-    //-----------------------------------------------------------------------------
-    virtual bool ExistsLaneLeft(std::string roadId, int laneId, double distance) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Check if a right lane at given distance exists
-    //!
-    //! @param[in] roadId  OpenDriveId of the road to search in
-    //! @param[in] laneId OpenDriveId of lane to search in
-    //! @param[in] distance  s coordinate
-    //! @return true if right lane exists at given distance, false otherwise
-    //-----------------------------------------------------------------------------
-    virtual bool ExistsLaneRight(std::string roadId, int laneId, double distance) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns number of lanes at given distance
-    //!
-    //! @param[in] roadId  OpenDriveId of the road to search in
-    //! @param[in] distance  s coordinate
-    //! @return number of lanes at distance.
-    //-----------------------------------------------------------------------------
-    virtual int GetNumberOfLanes(std::string roadId, double distance) = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns interpolated value for the curvature of the lane at distance from the given position.
@@ -667,55 +402,18 @@ public:
                                           double maxSearchLength) = 0;
 
     //-----------------------------------------------------------------------------
-    //! Returns remaining distance to end of lane stream (along given route) or until next non driving lane (0 if this lane is no driving lane)
+    //! Returns remaining distance to end of lane stream (along given route) or until next lane which has non of the specified types.
     //!
     //! @param[in] route    Route along which to search
     //! @param[in] roadId  OpenDriveId of the road to search in
     //! @param[in] laneNumber OpenDriveId of lane to search in
     //! @param[in] distance  s coordinate
     //! @param[in] maxSearchLength maximum search length
+    //! @param[in] laneTypes filter to consider only specified lane types
     //! @return remaining distance
     //-----------------------------------------------------------------------------
-    virtual double GetDistanceToEndOfDrivingLane(Route route, std::string roadId, int laneNumber, double initialSearchDistance,
-            double maxSearchLength) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns remaining distance to end of lane stream (along given route) or until next non driving or stop lane (0 if this lane is no driving or stop lane)
-    //!
-    //! @param[in] route    Route along which to search
-    //! @param[in] roadId  OpenDriveId of the road to search in
-    //! @param[in] laneNumber OpenDriveId of lane to search in
-    //! @param[in] distance  s coordinate
-    //! @param[in] maxSearchLength maximum search length
-    //! @return remaining distance
-    //-----------------------------------------------------------------------------
-    virtual double GetDistanceToEndOfDrivingOrStopLane(Route route, std::string roadId, int laneNumber, double initialSearchDistance,
-            double maxSearchLength) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns remaining distance to end of lane stream (along given route) or until next non ramp lane (0 if this lane is no ramp lane)
-    //!
-    //! @param[in] route    Route along which to search
-    //! @param[in] laneId OpenDriveId of lane to search in
-    //! @param[in] distance  s coordinate
-    //! @param[in] maxSearchLength maximum search length
-    //! @return remaining distance
-    //-----------------------------------------------------------------------------
-    virtual double GetDistanceToEndOfRamp(Route route, std::string roadId, int laneId, double initialSearchDistance,
-                                          double maxSearchLength) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns remaining distance to end of lane stream (along given route) or until next non exit lane (0 if this lane is no exit lane)
-    //!
-    //! @param[in] route    Route along which to search
-    //! @param[in] roadId  OpenDriveId of the road to search in
-    //! @param[in] laneId OpenDriveId of lane to search in
-    //! @param[in] distance  s coordinate
-    //! @param[in] maxSearchLength maximum search length
-    //! @return remaining distance
-    //-----------------------------------------------------------------------------
-    virtual double GetDistanceToEndOfExit(Route route, std::string roadId, int laneId, double initialSearchDistance,
-                                          double maxSearchLength) = 0;
+    virtual double GetDistanceToEndOfLane(Route route, std::string roadId, int laneNumber, double initialSearchDistance,
+                                          double maxSearchLength, const LaneTypes& laneTypes) = 0;
 
     //-----------------------------------------------------------------------------
     //! \brief GetDistanceBetweenObjects gets the distance between two
@@ -738,8 +436,6 @@ public:
     //! @return
     //-----------------------------------------------------------------------------
     virtual bool IntersectsWithAgent(double x, double y, double rotation, double length, double width, double center) = 0;
-
-    virtual polygon_t GetBoundingBoxAroundAgent(AgentInterface* agent, double width, double length) = 0;
 
     virtual Position RoadCoord2WorldCoord(RoadPosition roadCoord, std::string roadID = "") const = 0;
 
@@ -839,16 +535,6 @@ public:
     //! @return                friction
     //-----------------------------------------------------------------------------
     virtual double GetFriction() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Converts stream Id for lane at given distance into  OpenDriveID
-    //! Returns -999 if stream Id is invalid for given distance
-    //!
-    //! @param[in] streamId   stream id of lane
-    //! @param[in] endDistance s coordinate
-    //! @return OpenDriveId of lane at distance
-    //-----------------------------------------------------------------------------
-    virtual int GetLaneId(uint64_t streamId, double endDistance) const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns one agent which is set to be special.

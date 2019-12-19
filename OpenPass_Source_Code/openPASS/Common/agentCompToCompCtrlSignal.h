@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -33,11 +33,11 @@ public:
     AgentCompToCompCtrlSignal(const ComponentType componentType,
                               const std::string& agentComponentName,
                               const ComponentState currentState,
-                              const std::optional<ComponentWarningInformation>& warning = std::nullopt):
+                              const std::vector<ComponentWarningInformation>& warnings = {}):
         componentType(componentType),
         agentComponentName(agentComponentName),
         currentState(currentState),
-        warning(warning)
+        warnings(warnings)
     {}
 
     AgentCompToCompCtrlSignal() = delete;
@@ -106,16 +106,16 @@ public:
      *
      * \return The warning information from the agent component sending the signal
      */
-    std::optional<ComponentWarningInformation> GetComponentWarning() const
+    std::vector<ComponentWarningInformation> GetComponentWarnings() const
     {
-        return warning;
+        return warnings;
     }
 
 private:
     const ComponentType componentType;                         //!< Type of the component
     const std::string agentComponentName;                      //!< Name of the component
     const ComponentState currentState;                         //!< Current component state
-    const std::optional<ComponentWarningInformation> warning;  //!< Warning Information
+    const std::vector<ComponentWarningInformation> warnings;  //!< Warning Information
 };
 
 class VehicleCompToCompCtrlSignal : public AgentCompToCompCtrlSignal
@@ -128,19 +128,20 @@ public:
                                 const AdasType adasType):
         AgentCompToCompCtrlSignal(componentType,
                                   agentComponentName,
-                                  currentState),
+                                  currentState,
+                                  {}),
         adasType(adasType)
     {}
 
     VehicleCompToCompCtrlSignal(const ComponentType componentType,
                                 const std::string& agentComponentName,
                                 const ComponentState currentState,
-                                const std::optional<ComponentWarningInformation>& warning,
+                                const std::vector<ComponentWarningInformation>& warnings,
                                 const AdasType adasType):
         AgentCompToCompCtrlSignal(componentType,
                                   agentComponentName,
                                   currentState,
-                                  warning),
+                                  warnings),
         adasType(adasType)
     {}
 

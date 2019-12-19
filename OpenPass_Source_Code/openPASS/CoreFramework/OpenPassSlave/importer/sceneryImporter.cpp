@@ -48,32 +48,23 @@ void SceneryImporter::ParseLanes(QDomElement& rootElement,
                                  RoadLaneSectionInterface* laneSection)
 {
     QDomElement roadLaneElement;
-
-    QDomNode node = rootElement.firstChildElement("lane");
-
-    if (node.isNull())
-    {
-        return;
-    }
-
-    roadLaneElement = node.toElement();
-    ThrowIfFalse(!roadLaneElement.isNull(), "Road lane element is null.");
+    SimulationCommon::GetFirstChildElement(rootElement, TAG::lane, roadLaneElement);
 
     while (!roadLaneElement.isNull())
     {
         int roadLaneId;
         ThrowIfFalse(SimulationCommon::ParseAttributeInt(roadLaneElement, ATTRIBUTE::id, roadLaneId),
-                      "Could not parse lanes. RoadLane tag requires a " + std::string(ATTRIBUTE::id) + " attribute.");
+                     roadLaneElement, "Attribute " + std::string(ATTRIBUTE::id) + " is missing.");
 
         std::string roadLaneTypeStr;
         ThrowIfFalse(SimulationCommon::ParseAttributeString(roadLaneElement, ATTRIBUTE::type, roadLaneTypeStr),
-                      "Could not parse lanes. RoadLane tag requires a " + std::string(ATTRIBUTE::type) + " attribute.");
+                     roadLaneElement, "Attribute " + std::string(ATTRIBUTE::type) + " is missing.");
 
         RoadLaneType roadLaneType = roadLaneTypeConversionMap.at(roadLaneTypeStr);
 
         RoadLaneInterface* roadLane = laneSection->AddRoadLane(roadLaneId,
                                       roadLaneType);
-        ThrowIfFalse(roadLane, "roadLane is null");
+        ThrowIfFalse(roadLane, roadLaneElement, "Id must be unique");
         LOG_INTERN(LogLevel::DebugCore) << "lane: type " << static_cast<int>(roadLaneType) << ", id=" << roadLaneId;
 
         if (0 != roadLaneId) // skip center lanes
@@ -81,20 +72,20 @@ void SceneryImporter::ParseLanes(QDomElement& rootElement,
             QDomElement roadLaneWidthElement;
             // at least one width element necessary
             ThrowIfFalse(SimulationCommon::GetFirstChildElement(roadLaneElement, TAG::width, roadLaneWidthElement),
-                          "Could not parse lanes. Tag " + std::string(TAG::width) + " is missing.");
+                          roadLaneElement,"Tag " + std::string(TAG::width) + " is missing.");
             while (!roadLaneWidthElement.isNull())
             {
                 double roadLaneSOffset, roadLaneA, roadLaneB, roadLaneC, roadLaneD;
                 ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadLaneWidthElement, ATTRIBUTE::sOffset, roadLaneSOffset),
-                              "Could not parse lanes. Width tag requires a " + std::string(ATTRIBUTE::sOffset) + " attribute.");
+                             roadLaneWidthElement, "Attribute " + std::string(ATTRIBUTE::sOffset) + " is missing.");
                 ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadLaneWidthElement, ATTRIBUTE::a, roadLaneA),
-                              "Could not parse lanes. Width tag requires a " + std::string(ATTRIBUTE::a) + " attribute.");
+                             roadLaneWidthElement, "Attribute " + std::string(ATTRIBUTE::a) + " is missing.");
                 ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadLaneWidthElement, ATTRIBUTE::b, roadLaneB),
-                              "Could not parse lanes. Width tag requires a " + std::string(ATTRIBUTE::b) + " attribute.");
+                             roadLaneWidthElement, "Attribute " + std::string(ATTRIBUTE::b) + " is missing.");
                 ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadLaneWidthElement, ATTRIBUTE::c, roadLaneC),
-                              "Could not parse lanes. Width tag requires a " + std::string(ATTRIBUTE::c) + " attribute.");
+                             roadLaneWidthElement, "Attribute " + std::string(ATTRIBUTE::c) + " is missing.");
                 ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadLaneWidthElement, ATTRIBUTE::d, roadLaneD),
-                              "Could not parse lanes. Width tag requires a " + std::string(ATTRIBUTE::ds) + " attribute.");
+                             roadLaneWidthElement, "Attribute " + std::string(ATTRIBUTE::d) + " is missing.");
 
                 roadLane->AddWidth(roadLaneSOffset,
                                    roadLaneA,
@@ -114,14 +105,14 @@ void SceneryImporter::ParseLanes(QDomElement& rootElement,
             if (SimulationCommon::GetFirstChildElement(roadLaneLinkElement, TAG::successor, roadLaneLinkItemElement))
             {
                 ThrowIfFalse(SimulationCommon::ParseAttributeInt(roadLaneLinkItemElement, ATTRIBUTE::id, roadLaneLinkItemId),
-                              "Could not parse lanes. Link tag requires a " + std::string(ATTRIBUTE::id) + " attribute.");
+                             roadLaneLinkItemElement, "Attribute " + std::string(ATTRIBUTE::id) + " is missing.");
                 roadLane->AddSuccessor(roadLaneLinkItemId);
             }
 
             if (SimulationCommon::GetFirstChildElement(roadLaneLinkElement, TAG::predecessor, roadLaneLinkItemElement))
             {
                 ThrowIfFalse(SimulationCommon::ParseAttributeInt(roadLaneLinkItemElement, ATTRIBUTE::id, roadLaneLinkItemId),
-                              "Could not parse lanes. Link tag requires a " + std::string(ATTRIBUTE::id) + " attribute.");
+                             roadLaneLinkItemElement, "Attribute " + std::string(ATTRIBUTE::id) + " is missing.");
                 roadLane->AddPredecessor(roadLaneLinkItemId);
             }
         }
@@ -154,11 +145,11 @@ void SceneryImporter::ParseLaneRoadMark(std::string leftCenterRight, QDomElement
     {
         double roadLaneSOffset;
         ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadLaneRoadMarkElement, ATTRIBUTE::sOffset, roadLaneSOffset, 0.0),
-                      "Could not parse lane road mark. RoadMark tag requires a " + std::string(ATTRIBUTE::sOffset) + " attribute.");
+                     roadLaneRoadMarkElement, "Attribute " + std::string(ATTRIBUTE::sOffset) + " is missing.");
 
         std::string roadMarkTypeStr;
         ThrowIfFalse(SimulationCommon::ParseAttributeString(roadLaneRoadMarkElement, ATTRIBUTE::type, roadMarkTypeStr, "none"),
-                      "Could not parse lane road mark. RoadMark tag requires a " + std::string(ATTRIBUTE::type) + " attribute.");
+                     roadLaneRoadMarkElement, "Attribute " + std::string(ATTRIBUTE::type) + " is missing.");
         RoadLaneRoadMarkType roadMarkType = RoadLaneRoadMarkType::Undefined;
         if (roadMarkTypeStr == "none")
         {
@@ -203,7 +194,7 @@ void SceneryImporter::ParseLaneRoadMark(std::string leftCenterRight, QDomElement
 
         std::string roadMarkColorStr;
         ThrowIfFalse(SimulationCommon::ParseAttributeString(roadLaneRoadMarkElement, ATTRIBUTE::color, roadMarkColorStr, "standard"),
-                      "Could not parse lane road mark. RoadMark tag requires a " + std::string(ATTRIBUTE::color) + " attribute.");
+                     roadLaneRoadMarkElement, "Attribute " + std::string(ATTRIBUTE::color) + " is missing.");
         RoadLaneRoadMarkColor color = RoadLaneRoadMarkColor::Undefined;
         if (roadMarkColorStr == "standard" || roadMarkColorStr == "white")
         {
@@ -234,7 +225,7 @@ void SceneryImporter::ParseLaneRoadMark(std::string leftCenterRight, QDomElement
 
         std::string weightStr;
         ThrowIfFalse(SimulationCommon::ParseAttributeString(roadLaneRoadMarkElement, ATTRIBUTE::weight, weightStr, "standard"),
-                      "Could not parse lane road mark. RoadMark tag requires a " + std::string(ATTRIBUTE::weight) + " attribute.");
+                     roadLaneRoadMarkElement, "Attribute " + std::string(ATTRIBUTE::weight) + " is missing.");
         RoadLaneRoadMarkWeight weight = RoadLaneRoadMarkWeight::Undefined;
         if (weightStr == "standard")
         {
@@ -257,36 +248,36 @@ void SceneryImporter::ParseGeometries(QDomElement& roadElement,
     // road plan view
     QDomElement roadPlanView;
     ThrowIfFalse(SimulationCommon::GetFirstChildElement(roadElement, TAG::planView, roadPlanView),
-                  "Could not parse geometries. Tag " + std::string(TAG::planView) + " is missing.");
+                 roadElement, "Tag " + std::string(TAG::planView) + " is missing.");
 
     QDomElement roadGeometryHeaderElement;
     ThrowIfFalse(SimulationCommon::GetFirstChildElement(roadPlanView, TAG::geometry, roadGeometryHeaderElement),
-                  "Could not parse geometries. Tag " + std::string(TAG::geometry) + " is missing.");
+                 roadPlanView, "Tag " + std::string(TAG::geometry) + " is missing.");
     while (!roadGeometryHeaderElement.isNull())
     {
         double roadGeometryS;
         ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryHeaderElement, ATTRIBUTE::s, roadGeometryS),
-                      "Could not parse geometries. Geometry tag requires a " + std::string(ATTRIBUTE::s) + " attribute.");
+                     roadGeometryHeaderElement, "Attribute " + std::string(ATTRIBUTE::s) + " is missing.");
         roadGeometryS = CommonHelper::roundDoubleWithDecimals(roadGeometryS, 3);
 
         double roadGeometryX;
         ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryHeaderElement, ATTRIBUTE::x, roadGeometryX),
-                      "Could not parse geometries. Geometry tag requires a " + std::string(ATTRIBUTE::x) + " attribute.");
+                     roadGeometryHeaderElement, "Attribute " + std::string(ATTRIBUTE::x) + " is missing.");
         roadGeometryX = CommonHelper::roundDoubleWithDecimals(roadGeometryX, 3);
 
         double roadGeometryY;
         ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryHeaderElement, ATTRIBUTE::y, roadGeometryY),
-                      "Could not parse geometries. Geometry tag requires a " + std::string(ATTRIBUTE::y) + " attribute.");
+                     roadGeometryHeaderElement, "Attribute " + std::string(ATTRIBUTE::y) + " is missing.");
         roadGeometryY = CommonHelper::roundDoubleWithDecimals(roadGeometryY, 3);
 
         double roadGeometryHdg;
         ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryHeaderElement, ATTRIBUTE::hdg, roadGeometryHdg),
-                      "Could not parse geometries. Geometry tag requires a " + std::string(ATTRIBUTE::hdg) + " attribute.");
+                     roadGeometryHeaderElement, "Attribute " + std::string(ATTRIBUTE::hdg) + " is missing.");
         roadGeometryHdg = CommonHelper::roundDoubleWithDecimals(roadGeometryHdg, 6);
 
         double roadGeometryLength;
         ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryHeaderElement, ATTRIBUTE::length, roadGeometryLength),
-                      "Could not parse geometries. Geometry tag requires a " + std::string(ATTRIBUTE::length) + " attribute.");
+                     roadGeometryHeaderElement, "Attribute " + std::string(ATTRIBUTE::length) + " is missing.");
         roadGeometryLength = CommonHelper::roundDoubleWithDecimals(roadGeometryLength, 3);
 
         QDomElement roadGeometryElement;
@@ -297,36 +288,32 @@ void SceneryImporter::ParseGeometries(QDomElement& roadElement,
                                              roadGeometryY,
                                              roadGeometryHdg,
                                              roadGeometryLength),
-                         "Unable to add geometry line.");
+                        roadGeometryElement,
+                        "Unable to add geometry line.");
         }
         else if (SimulationCommon::GetFirstChildElement(roadGeometryHeaderElement, TAG::arc, roadGeometryElement))
         {
             double roadGeometryCurvature;
-            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement,
-                       ATTRIBUTE::curvature,
-                       roadGeometryCurvature),
-                          "Could not parse geometries. Geometry tag requires a " + std::string(ATTRIBUTE::curvature) + " attribute.");
+            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement, ATTRIBUTE::curvature, roadGeometryCurvature),
+                         roadGeometryElement, "Attribute " + std::string(ATTRIBUTE::curvature) + " is missing.");
             ThrowIfFalse(road->AddGeometryArc(roadGeometryS,
                                             roadGeometryX,
                                             roadGeometryY,
                                             roadGeometryHdg,
                                             roadGeometryLength,
                                             roadGeometryCurvature),
+                         roadGeometryElement,
                           "Unable to add geometry arc");
         }
         else if (SimulationCommon::GetFirstChildElement(roadGeometryHeaderElement, TAG::spiral, roadGeometryElement))
         {
             double roadGeometryCurvStart;
-            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement,
-                       ATTRIBUTE::curvStart,
-                       roadGeometryCurvStart),
-                          "Could not parse geometries. Geometry tag requires a " + std::string(ATTRIBUTE::curvStart) + " attribute.");
+            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement, ATTRIBUTE::curvStart, roadGeometryCurvStart),
+                         roadGeometryElement, "Attribute " + std::string(ATTRIBUTE::curvStart) + " is missing.");
 
             double roadGeometryCurvEnd;
-            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement,
-                       ATTRIBUTE::curvEnd,
-                       roadGeometryCurvEnd),
-                          "Could not parse geometries. Geometry tag requires a " + std::string(ATTRIBUTE::curvEnd) + " attribute.");
+            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement, ATTRIBUTE::curvEnd, roadGeometryCurvEnd),
+                         roadGeometryElement, "Attribute " + std::string(ATTRIBUTE::curvEnd) + " is missing.");
 
             if (roadGeometryCurvStart < 1e-7 && roadGeometryCurvStart > -1e-7)
             {
@@ -344,33 +331,26 @@ void SceneryImporter::ParseGeometries(QDomElement& roadElement,
                                                roadGeometryLength,
                                                roadGeometryCurvStart,
                                                roadGeometryCurvEnd),
+                         roadGeometryElement,
                           "Unable to add geometry spiral.");
         }
         else if (SimulationCommon::GetFirstChildElement(roadGeometryHeaderElement, TAG::poly3, roadGeometryElement))
         {
             double roadGeometryA;
-            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement,
-                       ATTRIBUTE::a,
-                       roadGeometryA),
-                          "Could not parse geometries. Geometry tag requires a " + std::string(ATTRIBUTE::a) + " attribute.");
+            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement, ATTRIBUTE::a, roadGeometryA),
+                         roadGeometryElement, "Attribute " + std::string(ATTRIBUTE::a) + " is missing.");
 
             double roadGeometryB;
-            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement,
-                       ATTRIBUTE::b,
-                       roadGeometryB),
-                          "Could not parse geometries. Geometry tag requires a " + std::string(ATTRIBUTE::b) + " attribute.");
+            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement, ATTRIBUTE::b, roadGeometryB),
+                         roadGeometryElement, "Attribute " + std::string(ATTRIBUTE::b) + " is missing.");
 
             double roadGeometryC;
-            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement,
-                       ATTRIBUTE::c,
-                       roadGeometryC),
-                          "Could not parse geometries. Geometry tag requires a " + std::string(ATTRIBUTE::c) + " attribute.");
+            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement, ATTRIBUTE::c, roadGeometryC),
+                         roadGeometryElement, "Attribute " + std::string(ATTRIBUTE::c) + " is missing.");
 
             double roadGeometryD;
-            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement,
-                       ATTRIBUTE::d,
-                       roadGeometryD),
-                          "Could not parse geometries. Geometry tag requires a " + std::string(ATTRIBUTE::d) + " attribute.");
+            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement, ATTRIBUTE::d, roadGeometryD),
+                         roadGeometryElement, "Attribute " + std::string(ATTRIBUTE::d) + " is missing.");
             ThrowIfFalse(road->AddGeometryPoly3(roadGeometryS,
                                               roadGeometryX,
                                               roadGeometryY,
@@ -380,57 +360,42 @@ void SceneryImporter::ParseGeometries(QDomElement& roadElement,
                                               roadGeometryB,
                                               roadGeometryC,
                                               roadGeometryD),
+                         roadGeometryElement,
                           "Unable to add geometry poly3.");
         }
         else if (SimulationCommon::GetFirstChildElement(roadGeometryHeaderElement, TAG::paramPoly3, roadGeometryElement))
         {
             double roadGeometryaU;
-            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement,
-                       ATTRIBUTE::aU,
-                       roadGeometryaU),
-                          "Could not parse geometries. Geometry tag requires a " + std::string(ATTRIBUTE::aU) + " attribute.");
+            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement, ATTRIBUTE::aU, roadGeometryaU),
+                         roadGeometryElement, "Attribute " + std::string(ATTRIBUTE::aU) + " is missing.");
 
             double roadGeometrybU;
-            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement,
-                       ATTRIBUTE::bU,
-                       roadGeometrybU),
-                          "Could not parse geometries. Geometry tag requires a " + std::string(ATTRIBUTE::bU) + " attribute.");
+            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement, ATTRIBUTE::bU, roadGeometrybU),
+                         roadGeometryElement, "Attribute " + std::string(ATTRIBUTE::bU) + " is missing.");
 
             double roadGeometrycU;
-            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement,
-                       ATTRIBUTE::cU,
-                       roadGeometrycU),
-                          "Could not parse geometries. Geometry tag requires a " + std::string(ATTRIBUTE::cU) + " attribute.");
+            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement, ATTRIBUTE::cU, roadGeometrycU),
+                         roadGeometryElement, "Attribute " + std::string(ATTRIBUTE::cU) + " is missing.");
 
             double roadGeometrydU;
-            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement,
-                       ATTRIBUTE::dU,
-                       roadGeometrydU),
-                          "Could not parse geometries. Geometry tag requires a " + std::string(ATTRIBUTE::dU) + " attribute.");
+            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement, ATTRIBUTE::dU, roadGeometrydU),
+                         roadGeometryElement, "Attribute " + std::string(ATTRIBUTE::dU) + " is missing.");
 
             double roadGeometryaV;
-            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement,
-                       ATTRIBUTE::aV,
-                       roadGeometryaV),
-                          "Could not parse geometries. Geometry tag requires a " + std::string(ATTRIBUTE::aV) + " attribute.");
+            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement, ATTRIBUTE::aV, roadGeometryaV),
+                         roadGeometryElement, "Attribute " + std::string(ATTRIBUTE::aV) + " is missing.");
 
             double roadGeometrybV;
-            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement,
-                       ATTRIBUTE::bV,
-                       roadGeometrybV),
-                          "Could not parse geometries. Geometry tag requires a " + std::string(ATTRIBUTE::bV) + " attribute.");
+            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement, ATTRIBUTE::bV, roadGeometrybV),
+                         roadGeometryElement, "Attribute " + std::string(ATTRIBUTE::bV) + " is missing.");
 
             double roadGeometrycV;
-            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement,
-                       ATTRIBUTE::cV,
-                       roadGeometrycV),
-                          "Could not parse geometries. Geometry tag requires a " + std::string(ATTRIBUTE::cV) + " attribute.");
+            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement, ATTRIBUTE::cV, roadGeometrycV),
+                         roadGeometryElement, "Attribute " + std::string(ATTRIBUTE::cV) + " is missing.");
 
             double roadGeometrydV;
-            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement,
-                       ATTRIBUTE::dV,
-                       roadGeometrydV),
-                          "Could not parse geometries. Geometry tag requires a " + std::string(ATTRIBUTE::dV) + " attribute.");
+            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadGeometryElement, ATTRIBUTE::dV, roadGeometrydV),
+                         roadGeometryElement, "Attribute " + std::string(ATTRIBUTE::dV) + " is missing.");
 
             ParamPoly3Parameters parameters;
             parameters = {roadGeometryaU, roadGeometrybU, roadGeometrycU, roadGeometrydU, roadGeometryaV, roadGeometrybV, roadGeometrycV, roadGeometrydV};
@@ -440,7 +405,8 @@ void SceneryImporter::ParseGeometries(QDomElement& roadElement,
                                                    roadGeometryHdg,
                                                    roadGeometryLength,
                                                    parameters),
-                          "Unable to add geometry param poly3.");
+                         roadGeometryElement,
+                         "Unable to add geometry param poly3.");
         }
         else
         {
@@ -469,30 +435,20 @@ void SceneryImporter::ParseElevationProfile(QDomElement& roadElement,
             while (!elevationElement.isNull())
             {
                 double elevationS, elevationA, elevationB, elevationC, elevationD;
-                ThrowIfFalse(SimulationCommon::ParseAttributeDouble(elevationElement,
-                           ATTRIBUTE::s,
-                           elevationS),
-                              "Could not parse elevation profile. Elevation tag requires a " + std::string(ATTRIBUTE::s) + " attribute.");
+                ThrowIfFalse(SimulationCommon::ParseAttributeDouble(elevationElement, ATTRIBUTE::s, elevationS),
+                             elevationElement, "Attribute " + std::string(ATTRIBUTE::s) + " is missing.");
 
-                ThrowIfFalse(SimulationCommon::ParseAttributeDouble(elevationElement,
-                           ATTRIBUTE::a,
-                           elevationA),
-                              "Could not parse elevation profile. Elevation tag requires a " + std::string(ATTRIBUTE::a) + " attribute.");
+                ThrowIfFalse(SimulationCommon::ParseAttributeDouble(elevationElement, ATTRIBUTE::a, elevationA),
+                             elevationElement, "Attribute " + std::string(ATTRIBUTE::a) + " is missing.");
 
-                ThrowIfFalse(SimulationCommon::ParseAttributeDouble(elevationElement,
-                           ATTRIBUTE::b,
-                           elevationB),
-                              "Could not parse elevation profile. Elevation tag requires a " + std::string(ATTRIBUTE::b) + " attribute.");
+                ThrowIfFalse(SimulationCommon::ParseAttributeDouble(elevationElement, ATTRIBUTE::b, elevationB),
+                             elevationElement, "Attribute " + std::string(ATTRIBUTE::b) + " is missing.");
 
-                ThrowIfFalse(SimulationCommon::ParseAttributeDouble(elevationElement,
-                           ATTRIBUTE::c,
-                           elevationC),
-                              "Could not parse elevation profile. Elevation tag requires a " + std::string(ATTRIBUTE::c) + " attribute.");
+                ThrowIfFalse(SimulationCommon::ParseAttributeDouble(elevationElement, ATTRIBUTE::c, elevationC),
+                             elevationElement, "Attribute " + std::string(ATTRIBUTE::c) + " is missing.");
 
-                ThrowIfFalse(SimulationCommon::ParseAttributeDouble(elevationElement,
-                           ATTRIBUTE::d,
-                           elevationD),
-                              "Could not parse elevation profile. Elevation tag requires a " + std::string(ATTRIBUTE::d) + " attribute.");
+                ThrowIfFalse(SimulationCommon::ParseAttributeDouble(elevationElement, ATTRIBUTE::d, elevationD),
+                             elevationElement, "Attribute " + std::string(ATTRIBUTE::d) + " is missing.");
 
                 road->AddElevation(elevationS,
                                    elevationA,
@@ -537,9 +493,8 @@ void SceneryImporter::ParseRoadLinks(QDomElement& roadElement,
                     }
 
                     std::string roadLinkItem_ElementTypeAttribute;
-                    ThrowIfFalse(SimulationCommon::ParseAttributeString(roadLinkItemElement, ATTRIBUTE::elementType,
-                               roadLinkItem_ElementTypeAttribute),
-                                  "Could not parse road links. LinkItem tag requires a " + std::string(ATTRIBUTE::elementType) + " attribute.");
+                    ThrowIfFalse(SimulationCommon::ParseAttributeString(roadLinkItemElement, ATTRIBUTE::elementType, roadLinkItem_ElementTypeAttribute),
+                                 roadLinkItemElement, "Attribute " + std::string(ATTRIBUTE::elementType) + " is missing.");
 
                     if (0 == roadLinkItem_ElementTypeAttribute.compare(ATTRIBUTE::road))
                     {
@@ -555,14 +510,13 @@ void SceneryImporter::ParseRoadLinks(QDomElement& roadElement,
                     }
 
                     ThrowIfFalse(SimulationCommon::ParseAttributeString(roadLinkItemElement, ATTRIBUTE::elementId, roadLinkElementId),
-                                  "Could not parse road links. LinkItem tag requires a " + std::string(ATTRIBUTE::elementId) + " attribute.");
+                                 roadLinkItemElement, "Attribute " + std::string(ATTRIBUTE::elementId) + " is missing.");
 
                     if (RoadLinkElementType::Road == roadLinkElementType)
                     {
                         std::string roadLinkItem_ContactPointAttribute;
-                        ThrowIfFalse(SimulationCommon::ParseAttributeString(roadLinkItemElement, ATTRIBUTE::contactPoint,
-                                   roadLinkItem_ContactPointAttribute),
-                                      "Could not parse road links. LinkItem tag requries a " + std::string(ATTRIBUTE::contactPoint) + " attribute.");
+                        ThrowIfFalse(SimulationCommon::ParseAttributeString(roadLinkItemElement, ATTRIBUTE::contactPoint, roadLinkItem_ContactPointAttribute),
+                                     roadLinkItemElement, "Attribute " + std::string(ATTRIBUTE::contactPoint) + " is missing.");
 
                         if (0 == roadLinkItem_ContactPointAttribute.compare(ATTRIBUTE::start))
                         {
@@ -584,7 +538,7 @@ void SceneryImporter::ParseRoadLinks(QDomElement& roadElement,
 
                     std::string roadLinkItem_SideAttribute;
                     ThrowIfFalse(SimulationCommon::ParseAttributeString(roadLinkItemElement, ATTRIBUTE::side, roadLinkItem_SideAttribute),
-                                  "Could not parse road links. LinkItem tag requires a " + std::string(ATTRIBUTE::side) + " attribute.");
+                                 roadLinkItemElement, "Attribute " + std::string(ATTRIBUTE::side) + " is missing.");
 
                     if (0 == roadLinkItem_SideAttribute.compare(ATTRIBUTE::left))
                     {
@@ -600,11 +554,11 @@ void SceneryImporter::ParseRoadLinks(QDomElement& roadElement,
                     }
 
                     ThrowIfFalse(SimulationCommon::ParseAttributeString(roadLinkItemElement, ATTRIBUTE::elementId, roadLinkElementId),
-                                  "Could not parse road links. LinkItem tag requires a " + std::string(ATTRIBUTE::elementId) + " attribute.");
+                                 roadLinkItemElement, "Attribute " + std::string(ATTRIBUTE::elementId) + " is missing.");
 
                     std::string roadLinkItem_DirectionAttribute;
                     ThrowIfFalse(SimulationCommon::ParseAttributeString(roadLinkItemElement, ATTRIBUTE::direction, roadLinkItem_DirectionAttribute),
-                                  "Could not parse road links. LinkItem tag requires a " + std::string(ATTRIBUTE::direction) + " attribute.");
+                                 roadLinkItemElement, "Attribute " + std::string(ATTRIBUTE::direction) + " is missing.");
 
                     if (0 == roadLinkItem_DirectionAttribute.compare(ATTRIBUTE::same))
                     {
@@ -634,7 +588,8 @@ void SceneryImporter::ParseRoadLinks(QDomElement& roadElement,
                                          roadLinkContactPoint,
                                          roadLinkDirection,
                                          roadLinkSide),
-                              "Unable to add road link.");
+                             roadLinkItemElement,
+                             "Unable to add road link.");
 
                 roadLinkItemElement = roadLinkItemElement.nextSiblingElement(); // any type of road link element
             } // road link item loop
@@ -670,29 +625,29 @@ void SceneryImporter::ParseSignals(QDomElement& roadElement,
                 RoadSignalSpecification signal;
 
                 ThrowIfFalse(ParseAttributeDouble(signalElement, ATTRIBUTE::s,           signal.s),
-                              "Could not parse signals. Signal tag requires a " + std::string(ATTRIBUTE::s) + " attribute.");
+                             signalElement, "Attribute " + std::string(ATTRIBUTE::s) + " is missing.");
                 ThrowIfFalse(ParseAttributeDouble(signalElement, ATTRIBUTE::t,           signal.t),
-                              "Could not parse signals. Signal tag requires a " + std::string(ATTRIBUTE::t) + " attribute.");
+                             signalElement, "Attribute " + std::string(ATTRIBUTE::t) + " is missing.");
                 ThrowIfFalse(ParseAttributeDouble(signalElement, ATTRIBUTE::zOffset,     signal.zOffset),
-                              "Could not parse signals. Signal tag requires a " + std::string(ATTRIBUTE::zOffset) + " attribute.");
+                             signalElement, "Attribute " + std::string(ATTRIBUTE::zOffset) + " is missing.");
                 ThrowIfFalse(ParseAttributeDouble(signalElement, ATTRIBUTE::hOffset,     signal.hOffset),
-                              "Could not parse signals. Signal tag requires a " + std::string(ATTRIBUTE::hOffset) + " attribute.");
+                             signalElement, "Attribute " + std::string(ATTRIBUTE::hOffset) + " is missing.");
                 ThrowIfFalse(ParseAttributeDouble(signalElement, ATTRIBUTE::pitch,       signal.pitch),
-                              "Could not parse signals. Signal tag requires a " + std::string(ATTRIBUTE::pitch) + " attribute.");
+                             signalElement, "Attribute " + std::string(ATTRIBUTE::pitch) + " is missing.");
                 ThrowIfFalse(ParseAttributeString(signalElement, ATTRIBUTE::id,          signal.id),
-                              "Could not parse signals. Signal tag requires a " + std::string(ATTRIBUTE::id) + " attribute.");
+                             signalElement, "Attribute " + std::string(ATTRIBUTE::id) + " is missing.");
                 ThrowIfFalse(ParseAttributeString(signalElement, ATTRIBUTE::name,        signal.name),
-                              "Could not parse signals. Signal tag requires a " + std::string(ATTRIBUTE::name) + " attribute.");
+                             signalElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
                 ThrowIfFalse(ParseAttributeString(signalElement, ATTRIBUTE::dynamic,     signal.dynamic, "no"),
-                              "Could not parse signals. Signal tag requires a " + std::string(ATTRIBUTE::dynamic) + " attribute.");
+                             signalElement, "Attribute " + std::string(ATTRIBUTE::dynamic) + " is missing.");
                 ThrowIfFalse(ParseAttributeString(signalElement, ATTRIBUTE::orientation, signal.orientation),
-                              "Could not parse signals. Signal tag requires a " + std::string(ATTRIBUTE::orientation) + " attribute.");
+                             signalElement, "Attribute " + std::string(ATTRIBUTE::orientation) + " is missing.");
                 ThrowIfFalse(ParseAttributeString(signalElement, ATTRIBUTE::country,     signal.country),
-                              "Could not parse signals. Signal tag requires a " + std::string(ATTRIBUTE::country) + " attribute.");
+                             signalElement, "Attribute " + std::string(ATTRIBUTE::country) + " is missing.");
                 ThrowIfFalse(ParseAttributeString(signalElement, ATTRIBUTE::type,        signal.type),
-                        "Could not parse signals. Signal tag requires a " + std::string(ATTRIBUTE::type) + " attribute.");
+                             signalElement, "Attribute " + std::string(ATTRIBUTE::type) + " is missing.");
                 ThrowIfFalse(ParseAttributeString(signalElement, ATTRIBUTE::subtype,     signal.subtype),
-                              "Could not parse signals. Signal tag requires a " + std::string(ATTRIBUTE::subtype) + " attribute.");
+                             signalElement, "Attribute " + std::string(ATTRIBUTE::subtype) + " is missing.");
                 // optional
                 std::string signalUnit;
                 ParseAttributeDouble(signalElement, ATTRIBUTE::value, signal.value);
@@ -720,7 +675,7 @@ void SceneryImporter::ParseSignals(QDomElement& roadElement,
                     while (!dependencyElement.isNull())
                     {
                         ThrowIfFalse(ParseAttributeString(dependencyElement, ATTRIBUTE::id, dependencyId),
-                                      "Could not parse signals. Dependency tag requires a " + std::string(ATTRIBUTE::id) + " attribute.");
+                                     dependencyElement, "Attribute " + std::string(ATTRIBUTE::id) + " is missing.");
                         signal.dependencyIds.push_back(dependencyId);
 
                         dependencyElement = dependencyElement.nextSiblingElement(TAG::dependency);
@@ -762,38 +717,38 @@ void SceneryImporter::ParseObject(QDomElement& objectElement, RoadInterface* roa
     RoadObjectSpecification object;
 
     ThrowIfFalse(ParseAttributeType(objectElement, ATTRIBUTE::type, object.type),
-                  "Could not parse object. Object tag requires a " + std::string(ATTRIBUTE::type) + " attribute.");
+                 objectElement, "Attribute " + std::string(ATTRIBUTE::type) + " is missing.");
     ThrowIfFalse(ParseAttributeString(objectElement, ATTRIBUTE::name, object.name),
-                  "Could not parse object. Object tag requires a " + std::string(ATTRIBUTE::name) + " attribute.");
+                 objectElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
     ThrowIfFalse(ParseAttributeString(objectElement, ATTRIBUTE::id, object.id),
-                  "Could not parse object. Object tag requires a " + std::string(ATTRIBUTE::id) + " attribute.");
+                 objectElement, "Attribute " + std::string(ATTRIBUTE::id) + " is missing.");
     ThrowIfFalse(ParseAttributeDouble(objectElement, ATTRIBUTE::s, object.s),
-                  "Could not parse object. Object tag requires a " + std::string(ATTRIBUTE::s) + " attribute.");
+                 objectElement, "Attribute " + std::string(ATTRIBUTE::s) + " is missing.");
     ThrowIfFalse(ParseAttributeDouble(objectElement, ATTRIBUTE::t, object.t),
-                  "Could not parse object. Object tag requires a " + std::string(ATTRIBUTE::t) + " attribute.");
+                 objectElement, "Attribute " + std::string(ATTRIBUTE::t) + " is missing.");
     ThrowIfFalse(ParseAttributeDouble(objectElement, ATTRIBUTE::zOffset, object.zOffset),
-                  "Could not parse object. Object tag requires a " + std::string(ATTRIBUTE::zOffset) + " attribute.");
+                 objectElement, "Attribute " + std::string(ATTRIBUTE::zOffset) + " is missing.");
     ThrowIfFalse(ParseAttributeDouble(objectElement, ATTRIBUTE::validLength, object.validLength),
-                  "Could not parse object. Object tag requires a " + std::string(ATTRIBUTE::validLength) + " attribute.");
+                 objectElement, "Attribute " + std::string(ATTRIBUTE::validLength) + " is missing.");
     ThrowIfFalse(ParseAttributeType(objectElement, ATTRIBUTE::orientation, object.orientation),
-                  "Could not parse object. Object tag requires a " + std::string(ATTRIBUTE::orientation) + " attribute.");
+                 objectElement, "Attribute " + std::string(ATTRIBUTE::orientation) + " is missing.");
     ThrowIfFalse(ParseAttributeDouble(objectElement, ATTRIBUTE::width, object.width),
-                  "Could not parse object. Object tag requires a " + std::string(ATTRIBUTE::width) + " attribute.");
+                 objectElement, "Attribute " + std::string(ATTRIBUTE::width) + " is missing.");
     ThrowIfFalse(ParseAttributeDouble(objectElement, ATTRIBUTE::length, object.length),
-                  "Could not parse object. Object tag requires a " + std::string(ATTRIBUTE::length) + " attribute.");
+                 objectElement, "Attribute " + std::string(ATTRIBUTE::length) + " is missing.");
     ThrowIfFalse(ParseAttributeDouble(objectElement, ATTRIBUTE::height, object.height),
-                  "Could not parse object. Object tag requires a " + std::string(ATTRIBUTE::height) + " attribute.");
+                 objectElement, "Attribute " + std::string(ATTRIBUTE::height) + " is missing.");
     ThrowIfFalse(ParseAttributeDouble(objectElement, ATTRIBUTE::hdg, object.hdg),
-                  "Could not parse object. Object tag requires a " + std::string(ATTRIBUTE::hdg) + " attribute.");
+                 objectElement, "Attribute " + std::string(ATTRIBUTE::hdg) + " is missing.");
     ThrowIfFalse(ParseAttributeDouble(objectElement, ATTRIBUTE::pitch, object.pitch),
-                  "Could not parse object. Object tag requires a " + std::string(ATTRIBUTE::pitch) + " attribute.");
+                 objectElement, "Attribute " + std::string(ATTRIBUTE::pitch) + " is missing.");
     ThrowIfFalse(ParseAttributeDouble(objectElement, ATTRIBUTE::roll, object.roll),
-                 "Could not parse object. Object tag requires a " + std::string(ATTRIBUTE::roll) + " attribute.");
+                 objectElement, "Attribute " + std::string(ATTRIBUTE::roll) + " is missing.");
     ParseAttributeDouble(objectElement, "radius", object.radius);
 
-    ThrowIfFalse(object.checkStandardCompliance(), "limits of object " + object.id + " " + object.name + " are not valid for openDrive standard");
+    ThrowIfFalse(object.checkStandardCompliance(), objectElement, "limits of object are not valid for openDrive standard");
 
-    ThrowIfFalse(object.checkSimulatorCompliance(), "Limits of object " + object.id + " " + object.name + " are not valid for the simulation. The Object will be ignored.");
+    ThrowIfFalse(object.checkSimulatorCompliance(), objectElement, "Limits of object are not valid for the simulation. The Object will be ignored.");
 
     ParseElementValidity(objectElement, object.validity);
 
@@ -844,7 +799,7 @@ void SceneryImporter::ParseOptionalInterval(QDomElement& repeatElement, std::str
         interval.isSet = true;
         return;
     }
-    ThrowIfFalse(!checkStartIsSet && !checkEndIsSet, "Missing intervall parameter in scenery import");
+    ThrowIfFalse(!checkStartIsSet && !checkEndIsSet, repeatElement, "Missing intervall parameter in scenery import");
     return;
 }
 
@@ -855,18 +810,18 @@ void SceneryImporter::ParseRepeat(QDomElement& repeatElement, RoadObjectSpecific
     ObjectRepeat repeat;
 
     ThrowIfFalse(ParseAttributeDouble(repeatElement, ATTRIBUTE::s,            repeat.s),
-                  "Could not parse repeat. Repeat tag requires a " + std::string(ATTRIBUTE::s) + " attribute.");
+                 repeatElement, "Attribute " + std::string(ATTRIBUTE::s) + " is missing.");
     ThrowIfFalse(ParseAttributeDouble(repeatElement, ATTRIBUTE::length,       repeat.length),
-                  "Could not parse repeat. Repeat tag requires a " + std::string(ATTRIBUTE::length) + " attribute.");
+                 repeatElement, "Attribute " + std::string(ATTRIBUTE::length) + " is missing.");
     ThrowIfFalse(ParseAttributeDouble(repeatElement, ATTRIBUTE::distance,     repeat.distance),
-                  "Could not parse repeat. Repeat tag requires a " + std::string(ATTRIBUTE::distance) + " attribute.");
+                 repeatElement, "Attribute " + std::string(ATTRIBUTE::distance) + " is missing.");
 
     ParseOptionalInterval(repeatElement, "tStart", "tEnd", repeat.t);
     ParseOptionalInterval(repeatElement, "widthStart", "widthEnd", repeat.width);
     ParseOptionalInterval(repeatElement, "heightStart", "heightEnd", repeat.height);
     ParseOptionalInterval(repeatElement, "zOffsetStart", "zOffsetEnd", repeat.zOffset);
 
-    ThrowIfFalse(repeat.checkLimits(), "Invalid limits.");
+    ThrowIfFalse(repeat.checkLimits(), repeatElement, "Invalid limits.");
 
     return ApplyRepeat(repeat, object, objectRepitions);
 }
@@ -917,9 +872,9 @@ void SceneryImporter::ParseElementValidity(const QDomElement& rootElement, RoadE
         int toLane;
 
         ThrowIfFalse(ParseAttributeInt(validityElement, ATTRIBUTE::fromLane, fromLane),
-                      "Could not parse validity. Validity tag requires a " + std::string(ATTRIBUTE::fromLane) + " attribute.");
+                     validityElement, "Attribute " + std::string(ATTRIBUTE::fromLane) + " is missing.");
         ThrowIfFalse(ParseAttributeInt(validityElement, ATTRIBUTE::toLane,   toLane),
-                      "Could not parse validity. Validity tag requires a " + std::string(ATTRIBUTE::toLane) + " attribute.");
+                     validityElement, "Attribute " + std::string(ATTRIBUTE::toLane) + " is missing.");
 
         if (fromLane > toLane)
         {
@@ -949,10 +904,10 @@ void SceneryImporter::ParseRoadTypes(QDomElement& roadElement, RoadInterface* ro
         {
             RoadTypeSpecification roadType;
             ThrowIfFalse(ParseAttributeDouble(typeElement, ATTRIBUTE::s,           roadType.s),
-                          "Could not parse road types. Type tag requires a " + std::string(ATTRIBUTE::s) + " attribute.");
+                         typeElement, "Attribute " + std::string(ATTRIBUTE::s) + " is missing.");
             std::string roadTypeStr;
             ThrowIfFalse(ParseAttributeString(typeElement, ATTRIBUTE::type,           roadTypeStr),
-                          "Coult not parse road types. Type tag requires a " + std::string(ATTRIBUTE::type) + " attribute.");
+                         typeElement, "Attribute " + std::string(ATTRIBUTE::type) + " is missing.");
 
             roadType.roadType = roadTypeConversionMap.at(roadTypeStr);
 
@@ -982,7 +937,7 @@ void SceneryImporter::ParseRoadLanes(QDomElement& roadElement,
 {
     QDomElement roadLanesElement;
     ThrowIfFalse(SimulationCommon::GetFirstChildElement(roadElement, TAG::lanes, roadLanesElement),
-                  "Could not parse road lanes. Tag + " + std::string(TAG::lanes) + " is missing.");
+                 roadElement, "Tag + " + std::string(TAG::lanes) + " is missing.");
 
     // parse lane offsets
     QDomElement laneOffsetElement;
@@ -992,19 +947,19 @@ void SceneryImporter::ParseRoadLanes(QDomElement& roadElement,
         {
             double laneOffsetS, laneOffsetA, laneOffsetB, laneOffsetC, laneOffsetD;
             ThrowIfFalse(SimulationCommon::ParseAttributeDouble(laneOffsetElement, ATTRIBUTE::s, laneOffsetS, 0.0),
-                          "Could not parse road lanes. LaneOffset tag requires a " + std::string(ATTRIBUTE::s) + " attribute.");
+                         laneOffsetElement, "Attribute " + std::string(ATTRIBUTE::s) + " is missing.");
 
             ThrowIfFalse(SimulationCommon::ParseAttributeDouble(laneOffsetElement, ATTRIBUTE::a, laneOffsetA, 0.0),
-                          "Could not parse road lanes. LaneOffset tag requires a " + std::string(ATTRIBUTE::a) + " attribute.");
+                         laneOffsetElement, "Attribute " + std::string(ATTRIBUTE::a) + " is missing.");
 
             ThrowIfFalse(SimulationCommon::ParseAttributeDouble(laneOffsetElement, ATTRIBUTE::b, laneOffsetB, 0.0),
-                         "Could not parse road lanes. LaneOffset tag requires a " + std::string(ATTRIBUTE::b) + " attribute.");
+                         laneOffsetElement, "Attribute " + std::string(ATTRIBUTE::b) + " is missing.");
 
             ThrowIfFalse(SimulationCommon::ParseAttributeDouble(laneOffsetElement, ATTRIBUTE::c, laneOffsetC, 0.0),
-                          "Could not parse road lanes. LaneOffset tag requires a " + std::string(ATTRIBUTE::c) + " attribute.");
+                         laneOffsetElement, "Attribute " + std::string(ATTRIBUTE::c) + " is missing.");
 
             ThrowIfFalse(SimulationCommon::ParseAttributeDouble(laneOffsetElement, ATTRIBUTE::d, laneOffsetD, 0.0),
-                          "Could not parse road lanes. LaneOffset tag requires a " + std::string(ATTRIBUTE::d) + " attribute.");
+                         laneOffsetElement, "Attribute " + std::string(ATTRIBUTE::d) + " is missing.");
 
             road->AddLaneOffset(laneOffsetS,
                                 laneOffsetA,
@@ -1019,16 +974,16 @@ void SceneryImporter::ParseRoadLanes(QDomElement& roadElement,
     // parse lane sections
     QDomElement roadLaneSectionElement;
     ThrowIfFalse(SimulationCommon::GetFirstChildElement(roadLanesElement, TAG::laneSection, roadLaneSectionElement),
-                  "Could not parse road lanes. Tag " + std::string(TAG::laneSection) + " is missing.");
+                 roadLanesElement, "Tag " + std::string(TAG::laneSection) + " is missing.");
     while (!roadLaneSectionElement.isNull())
     {
         double roadLaneSectionStart;
         ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadLaneSectionElement, ATTRIBUTE::s, roadLaneSectionStart),
-                      "Could not parse road lanes. LaneSection tag requires a " + std::string(ATTRIBUTE::s) + " attribute.");
+                     roadLaneSectionElement, "Attribute " + std::string(ATTRIBUTE::s) + " is missing.");
 
         // add OpenDrive lane section in ascending order
         RoadLaneSectionInterface* laneSection = road->AddRoadLaneSection(roadLaneSectionStart);
-        ThrowIfFalse(laneSection != nullptr, "laneSection is null");
+        ThrowIfFalse(laneSection != nullptr, roadLanesElement, "Could not add Section");
 
         LOG_INTERN(LogLevel::DebugCore) << "lane section (s=" << roadLaneSectionStart << ")";
 
@@ -1064,16 +1019,16 @@ void SceneryImporter::ParseJunctionConnections(QDomElement& junctionElement, Jun
         {
             std::string id;
             ThrowIfFalse(SimulationCommon::ParseAttributeString(connectionElement, ATTRIBUTE::id, id),
-                          "Could not parse junction connections. Connection tag requires a " + std::string(ATTRIBUTE::id) + " attribute.");
+                         connectionElement, "Attribute " + std::string(ATTRIBUTE::id) + " is missing.");
             std::string incomingRoad;
             ThrowIfFalse(SimulationCommon::ParseAttributeString(connectionElement, ATTRIBUTE::incomingRoad, incomingRoad),
-                          "Could not parse junction connections. Connection tag requires a " + std::string(ATTRIBUTE::incomingRoad) + " attribute.");
+                         connectionElement, "Attribute " + std::string(ATTRIBUTE::incomingRoad) + " is missing.");
             std::string connectingRoad;
             ThrowIfFalse(SimulationCommon::ParseAttributeString(connectionElement, ATTRIBUTE::connectingRoad, connectingRoad),
-                          "Could not parse junction connections. Connection tag requires a " + std::string(ATTRIBUTE::connectingRoad) + " attribute.");
+                         connectionElement, "Attribute " + std::string(ATTRIBUTE::connectingRoad) + " is missing.");
             std::string contactPoint;
             ThrowIfFalse(SimulationCommon::ParseAttributeString(connectionElement, ATTRIBUTE::contactPoint, contactPoint),
-                          "Could not parse junction connections. Connection tag requires a " + std::string(ATTRIBUTE::contactPoint) + " attribute.");
+                         connectionElement, "Attribute " + std::string(ATTRIBUTE::contactPoint) + " is missing.");
 
             ContactPointType roadLinkContactPoint = ContactPointType::Undefined;
 
@@ -1107,11 +1062,11 @@ void SceneryImporter::ParseJunctionConnectionLinks(QDomElement& connectionElemen
         {
             int from;
             ThrowIfFalse(SimulationCommon::ParseAttributeInt(linkElement, ATTRIBUTE::from, from),
-                          "Could not parse junction connection links. Link tag requires a " + std::string(ATTRIBUTE::from) + " attribute.");
+                         linkElement, "Attribute " + std::string(ATTRIBUTE::from) + " is missing.");
 
             int to;
             ThrowIfFalse(SimulationCommon::ParseAttributeInt(linkElement, ATTRIBUTE::to, to),
-                          "Could not parse junction connection links. Link tag requires a " + std::string(ATTRIBUTE::to) + " attribute.");
+                         linkElement, "Attribute " + std::string(ATTRIBUTE::to) + " is missing.");
             connection->AddLink(from, to);
 
             linkElement = linkElement.nextSiblingElement(TAG::laneLink);
@@ -1128,9 +1083,9 @@ void SceneryImporter::ParseJunctionPriorities(QDomElement &junctionElement, Junc
         {
             Priority priority;
             ThrowIfFalse(SimulationCommon::ParseAttributeString(priorityElement, ATTRIBUTE::high, priority.high),
-                          "Could not parse junction priorities. Priority tag requires a " + std::string(ATTRIBUTE::high) + " attribute.");
+                         priorityElement, "Attribute " + std::string(ATTRIBUTE::high) + " is missing.");
             ThrowIfFalse(SimulationCommon::ParseAttributeString(priorityElement, ATTRIBUTE::low, priority.low),
-                          "Could not parse junction priorities. Priority tag requires a " + std::string(ATTRIBUTE::low) + " attribute.");
+                         priorityElement, "Attribute " + std::string(ATTRIBUTE::low) + " is missing.");
 
             junction->AddPriority(priority);
 
@@ -1150,10 +1105,10 @@ void SceneryImporter::ParseRoads(QDomElement& documentRoot,
             // road id
             std::string id;
             ThrowIfFalse(SimulationCommon::ParseAttributeString(roadElement, ATTRIBUTE::id, id),
-                          "Could not parse roads. Road tag requires a " + std::string(ATTRIBUTE::id) + " attribute.");
+                         roadElement, "Attribute " + std::string(ATTRIBUTE::id) + " is missing.");
 
             RoadInterface* road = scenery->AddRoad(id);
-            ThrowIfFalse(road != nullptr, "road is null");
+            ThrowIfFalse(road != nullptr, roadElement, "Could not add Road");
 
             std::string junctionId;
             if (!SimulationCommon::ParseAttributeString(roadElement, ATTRIBUTE::junction, junctionId))
@@ -1194,7 +1149,7 @@ void SceneryImporter::ParseJunctions(QDomElement& documentRoot, Scenery* scenery
         {
             std::string id;
             ThrowIfFalse(SimulationCommon::ParseAttributeString(junctionElement, ATTRIBUTE::id, id),
-                          "Could not parse junctions. Junction tag requires a " + std::string(ATTRIBUTE::id) + " attribute.");
+                         junctionElement, "Attribute " + std::string(ATTRIBUTE::id) + " is missing.");
 
             JunctionInterface* junction = scenery->AddJunction(id);
 

@@ -9,8 +9,12 @@
 *******************************************************************************/
 
 #include "parameterImporter.h"
+#include "importerLoggingHelper.h"
 #include "CoreFramework/CoreShare/log.h"
 #include "CoreFramework/CoreShare/xmlParser.h"
+
+namespace TAG = openpass::importer::xml::parameterImporter::tag;
+namespace ATTRIBUTE = openpass::importer::xml::parameterImporter::attribute;
 
 namespace openpass::parameter::internal {
 
@@ -29,9 +33,10 @@ ParameterSet ImportParameter(QDomElement domElement, const std::string& elementN
             std::string parameterName;
             T parameterValue;
 
-            ThrowIfFalse(ParseAttributeString(parameterElement, "Key", parameterName) &&
-                         ParseAttribute<T>(parameterElement, "Value", parameterValue),
-                         "Could not import parameter of type " + elementName);
+            ThrowIfFalse(ParseAttributeString(parameterElement, ATTRIBUTE::key, parameterName),
+                         parameterElement, "Attribute " + std::string(ATTRIBUTE::key) + " is missing.");
+            ThrowIfFalse(ParseAttribute<T>(parameterElement, ATTRIBUTE::value, parameterValue),
+                         parameterElement, "Attribute " + std::string(ATTRIBUTE::value) + " is missing or of wrong type");
 
             param.emplace_back(parameterName, parameterValue);
             parameterElement = parameterElement.nextSiblingElement(QString::fromStdString(elementName));
@@ -54,12 +59,16 @@ ParameterSet ImportParameter<NormalDistribution>(QDomElement domElement, const s
             std::string parameterName;
             NormalDistribution parameterValue;
 
-            ThrowIfFalse(SimulationCommon::ParseAttribute(parameterElement, "Key", parameterName) &&
-                         SimulationCommon::ParseAttribute(parameterElement, "Mean", parameterValue.mean) &&
-                         SimulationCommon::ParseAttribute(parameterElement, "SD", parameterValue.standardDeviation) &&
-                         SimulationCommon::ParseAttribute(parameterElement, "Min", parameterValue.min) &&
-                         SimulationCommon::ParseAttribute(parameterElement, "Max", parameterValue.max),
-                         "Could not import parameter of type " + elementName);
+            ThrowIfFalse(ParseAttributeString(parameterElement, ATTRIBUTE::key, parameterName),
+                         parameterElement, "Attribute " + std::string(ATTRIBUTE::key) + " is missing.");
+            ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::mean, parameterValue.mean),
+                         parameterElement, "Attribute " + std::string(ATTRIBUTE::mean) + " is missing or of wrong type");
+            ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::sd, parameterValue.standardDeviation),
+                         parameterElement, "Attribute " + std::string(ATTRIBUTE::sd) + " is missing or of wrong type");
+            ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::min, parameterValue.min),
+                         parameterElement, "Attribute " + std::string(ATTRIBUTE::min) + " is missing or of wrong type");
+            ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::max, parameterValue.max),
+                         parameterElement, "Attribute " + std::string(ATTRIBUTE::max) + " is missing or of wrong type");
 
             param.emplace_back(parameterName, parameterValue);
             parameterElement = parameterElement.nextSiblingElement(QString::fromStdString(elementName));
@@ -103,8 +112,8 @@ static Container ImportParameterLists(QDomElement parameterElement)
         while (!lists.isNull())
         {
             std::string name;
-            ThrowIfFalse(SimulationCommon::ParseAttributeString(lists, "Name", name),
-                         "Parameter list needs a Name.");
+            ThrowIfFalse(ParseAttributeString(lists, ATTRIBUTE::name, name),
+                         lists, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
 
             QDomElement listItem;
             if (SimulationCommon::GetFirstChildElement(lists, "ListItem", listItem))

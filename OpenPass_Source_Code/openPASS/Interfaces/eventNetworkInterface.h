@@ -35,31 +35,17 @@ namespace SimulationSlave
 class EventNetworkInterface
 {
 public:
-    EventNetworkInterface() = default;
-    EventNetworkInterface(const EventNetworkInterface&) = delete;
-    EventNetworkInterface(EventNetworkInterface&&) = delete;
-    EventNetworkInterface& operator=(const EventNetworkInterface&) = delete;
-    EventNetworkInterface& operator=(EventNetworkInterface&&) = delete;
     virtual ~EventNetworkInterface() = default;
 
     virtual Events *GetActiveEvents() = 0;
-
     virtual Events *GetArchivedEvents() = 0;
-
     virtual EventContainer GetActiveEventCategory(const EventDefinitions::EventCategory eventCategory) = 0;
-
     virtual void RemoveOldEvents(int time) = 0;
-
     virtual void InsertEvent(std::shared_ptr<EventInterface> event) = 0;
-
     virtual void ClearActiveEvents() = 0;
-
     virtual void Clear() = 0;
-
     virtual void AddCollision(const int agentId) = 0;
-
-    virtual void Initialize(RunResultInterface *runResult,
-                            ObservationInterface *observer) = 0;
+    virtual void Initialize(RunResultInterface *runResult) = 0;
 };
 
 } //namespace SimulationSlave

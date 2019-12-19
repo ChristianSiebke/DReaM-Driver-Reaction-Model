@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -677,7 +677,7 @@ bool SceneryConverter::ConnectRoads()
     return true;
 }
 
-bool SceneryConverter::Convert()
+bool SceneryConverter::ConvertRoads()
 {
     // define a unique directions of roads/lanes within each road cluster
     if (!MarkDirections())
@@ -705,10 +705,13 @@ bool SceneryConverter::Convert()
         return false;
     }
 
+    return true;
+}
+
+void SceneryConverter::ConvertObjects()
+{
     CreateObjects();
     CreateTrafficSigns();
-
-    return true;
 }
 
 void SceneryConverter::CreateObjects()

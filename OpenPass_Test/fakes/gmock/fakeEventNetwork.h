@@ -33,6 +33,6 @@ public:
         void(int));
     MOCK_METHOD1(AddCollision,
         void(const int));
-    MOCK_METHOD2(Initialize,
-        void(RunResultInterface *, ObservationInterface *));
+    MOCK_METHOD1(Initialize,
+        void(RunResultInterface*));
 };

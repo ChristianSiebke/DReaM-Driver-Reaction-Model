@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -125,10 +125,6 @@ public:
     */
     //-----------------------------------------------------------------------------
     virtual void InsertEvent(std::shared_ptr<EventInterface> event) = 0;
-
-    virtual void GatherFollowers() = 0;
-
-    virtual void InformObserverOnSpawn(AgentInterface* agent) = 0;
 
 protected:
     //-----------------------------------------------------------------------------

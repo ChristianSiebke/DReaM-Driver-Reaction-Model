@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *               2016, 2017 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -44,17 +44,8 @@ ParametersVehicleImplementation::ParametersVehicleImplementation(
         parameters,
         observations,
         callbacks,
-        agent),
-    callbacks(callbacks)
+        agent)
 {
-    initialisation = true;
-}
-
-void ParametersVehicleImplementation::Initialize()
-{
-    initialisation = false;
-
-    out_vehicleParameters = GetAgent()->GetVehicleModelParameters();
 }
 
 void ParametersVehicleImplementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const>& data,
@@ -76,7 +67,7 @@ void ParametersVehicleImplementation::UpdateOutput(int localLinkId, std::shared_
         {
             case 1:
                 // vehicle parameters
-                data = std::make_shared<ParametersVehicleSignal const>(out_vehicleParameters);
+                data = std::make_shared<ParametersVehicleSignal const>(GetAgent()->GetVehicleModelParameters());
                 break;
 
             default:
@@ -96,37 +87,4 @@ void ParametersVehicleImplementation::UpdateOutput(int localLinkId, std::shared_
 void ParametersVehicleImplementation::Trigger(int time)
 {
     Q_UNUSED(time);
-
-    if (initialisation)
-    {
-        Initialize();
-    }
-
-
-    // send infos to observer
-    ObservationInterface* observer;
-    try
-    {
-        observer = GetObservations()->at(0);
-        if (observer == nullptr) { throw std::runtime_error(""); }
-    }
-    catch (...)
-    {
-        const std::string msg = COMPONENTNAME + " invalid observation module setup";
-        LOG(CbkLogLevel::Error, msg);
-        throw std::runtime_error(msg);
-    }
-
-    //TODO CK Move into a specific init task of observer
-    if (GetAgent()->GetAgentCategory() == AgentCategory::Ego)
-    {
-        // notify observer of being ego-vehicle
-        observer->GatherFollowers();
-    }
-    else
-        if (time > 0)
-        {
-            // only agents that are spawned not initially should call this function
-            observer->InformObserverOnSpawn(GetAgent());
-        }
 }

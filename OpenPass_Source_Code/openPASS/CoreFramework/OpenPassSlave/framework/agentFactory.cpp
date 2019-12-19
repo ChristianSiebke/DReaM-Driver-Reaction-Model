@@ -42,22 +42,10 @@ AgentFactory::AgentFactory(ModelBinding *modelBinding,
 {
 }
 
-AgentFactory::~AgentFactory()
-{
-}
-
-void AgentFactory::ResetIds()
-{
-    lastAgentId = 0;
-}
-
 void AgentFactory::Clear()
 {
-    for(auto &item : agentList)
-    {
-        delete item;
-    }
     agentList.clear();
+    lastAgentId = INITIAL_AGENT_ID;
 }
 
 Agent* AgentFactory::AddAgent(AgentBlueprintInterface* agentBlueprint)
@@ -78,9 +66,7 @@ Agent* AgentFactory::AddAgent(AgentBlueprintInterface* agentBlueprint)
     }
 
     lastAgentId++;
-
-    agentList.push_back(agent);
-
+    agentList.push_back(std::unique_ptr<Agent>(agent));
     return agent;
 }
 

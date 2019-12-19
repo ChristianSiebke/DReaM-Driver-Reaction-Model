@@ -253,7 +253,26 @@ void ObservationFileHandler::AddAgent(std::shared_ptr<QXmlStreamWriter> fStream,
     fStream->writeAttribute(outputAttributes.VEHICLEMODELTYPE, QString::fromStdString(agent->GetVehicleModelType()));
     fStream->writeAttribute(outputAttributes.DRIVERPROFILENAME, QString::fromStdString(agent->GetDriverProfileName()));
 
+    AddVehicleAttributes(fStream, agent->GetVehicleModelParameters());
     AddSensors(fStream, agent);
+
+    fStream->writeEndElement();
+}
+
+void ObservationFileHandler::AddVehicleAttributes(std::shared_ptr<QXmlStreamWriter> fStream, const VehicleModelParameters &vehicleModelParameters)
+{
+    fStream->writeStartElement(outputTags.VEHICLEATTRIBUTES);
+
+    fStream->writeAttribute(outputAttributes.WIDTH,
+                                            QString::number(vehicleModelParameters.width));
+    fStream->writeAttribute(outputAttributes.LENGTH,
+                                            QString::number(vehicleModelParameters.length));
+    fStream->writeAttribute(outputAttributes.HEIGHT,
+                                            QString::number(vehicleModelParameters.height));
+
+    const double longitudinalPivotOffset = (vehicleModelParameters.length / 2.0) - vehicleModelParameters.distanceReferencePointToLeadingEdge;
+    fStream->writeAttribute(outputAttributes.LONGITUDINALPIVOTOFFSET,
+                                            QString::number(longitudinalPivotOffset));
 
     fStream->writeEndElement();
 }

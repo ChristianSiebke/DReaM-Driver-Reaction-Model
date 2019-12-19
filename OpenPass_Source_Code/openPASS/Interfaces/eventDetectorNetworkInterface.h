@@ -23,10 +23,6 @@ class EventDetectorNetworkInterface
 {
 public:
     EventDetectorNetworkInterface() = default;
-    EventDetectorNetworkInterface(const EventDetectorNetworkInterface&) = delete;
-    EventDetectorNetworkInterface(EventDetectorNetworkInterface&&) = delete;
-    EventDetectorNetworkInterface& operator=(const EventDetectorNetworkInterface&) = delete;
-    EventDetectorNetworkInterface& operator=(EventDetectorNetworkInterface&&) = delete;
     ~EventDetectorNetworkInterface() = default;
 
     virtual bool Instantiate(const std::string libraryPath,

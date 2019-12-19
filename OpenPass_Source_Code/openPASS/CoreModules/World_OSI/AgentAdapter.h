@@ -698,8 +698,6 @@ public:
 
     bool IsCrossingLanes() const override;
 
-    int GetNumberOfLanes() override;
-
     bool IsAgentInWorld() const override;
 
     void SetPosition(Position pos) override;
@@ -715,54 +713,20 @@ public:
 
     double GetLaneWidth(int relativeLane = 0, double distance = 0.0) const override;
 
-    double GetLaneWidthRightDrivingAndStopLane() const override;
-
     double GetLaneCurvature(int relativeLane = 0, double distance = 0.0) const override;
 
     double GetLaneDirection(int relativeLane = 0, double distance = 0.0) const override;
 
     bool IsEgoAgent() const override;
 
-    double GetDistanceToFrontTrafficObject() const;
-
-    std::vector<AgentInterface*> GetAllAgentsInFront() const override;
-
-    std::vector<const TrafficObjectInterface*> GetAllTrafficObjectsInFront() const;
-
-    std::vector<const WorldObjectInterface*> GetAllWorldObjectsInFront() const override;
-
     bool OnRoad(const OWL::Interfaces::Road& road) const;
     bool OnLane(const OWL::Interfaces::Lane& lane) const;
 
-    AgentInterface* GetAgentInFront(int laneId) const override;
-
-    TrafficObjectInterface* GetTrafficObjectInFront(int laneId) const;
-
-    WorldObjectInterface* GetObjectInFront(double previewDistance, int relativeLaneId = 0) const override;
-
-    WorldObjectInterface* GetObjectBehind(double previewDistance, int relativeLaneId = 0) const override;
-
-    const AgentInterface* GetAgentBehind(int laneId) const override;
-
     double GetDistanceToObject(const WorldObjectInterface* otherObject) const override;
-
-    bool ExistsLaneLeft() const override;
-
-    bool ExistsLaneRight() const override;
-
-    bool IsLaneStopLane(int laneId, double distance = 0.0) const override;
-
-    bool IsLaneDrivingLane(int laneId, double distance = 0.0) const override;
-
-    bool IsLaneExitLane(int laneId, double distance = 0.0) const override;
-
-    bool IsLaneRamp(int laneId, double distance = 0.0) const override;
 
     double GetDistanceToEndOfLane(double sightDistance, int relativeLane = 0) const override;
 
-    double GetDistanceToEndOfExit(int laneID, double sightDistance) const override;
-
-    double GetDistanceToEndOfRamp(int laneId, double sightDistance) const override;
+    double GetDistanceToEndOfLane(double sightDistance, int relativeLane, const LaneTypes& laneTypes) const override;
 
     double GetVelocity(VelocityScope velocityScope = VelocityScope::Absolute) const override;
 
@@ -800,9 +764,6 @@ public:
 
     virtual std::vector<const AgentInterface*> GetAgentsInRange(int relativeLane, double backwardRange,
             double forwardRange, MeasurementPoint mp) const override;
-
-    virtual std::vector<const AgentInterface*> GetAgentsInRangeAbsolute(int laneId, double minDistance,
-            double maxDistance) const override;
 
     virtual double GetDistanceToConnectorEntrance(std::string intersectingConnectorId, int intersectingLaneId, std::string ownConnectorId) const override;
 

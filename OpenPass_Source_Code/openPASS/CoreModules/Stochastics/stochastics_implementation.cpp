@@ -154,6 +154,7 @@ void StochasticsImplementation::ReInit()
 
 void StochasticsImplementation::InitGenerator(std::uint32_t seed)
 {
+    LOG(CbkLogLevel::Debug, "Init random generator with " + std::to_string(seed));
     randomSeed = seed;
     baseGenerator.seed(seed);
 

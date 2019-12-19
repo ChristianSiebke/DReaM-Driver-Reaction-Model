@@ -27,7 +27,7 @@ std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulator(
 {
     QDomElement actionElement;
     ThrowIfFalse(SimulationCommon::GetFirstChildElement(eventElement, TAG::action, actionElement),
-                  "Could not import Manipulator. Tag " + std::string(TAG::action) + " is missing.");
+                  eventElement, "Tag " + std::string(TAG::action) + " is missing.");
 
     QDomElement actionTypeElement;
     if (SimulationCommon::GetFirstChildElement(actionElement, TAG::userDefined, actionTypeElement))
@@ -57,7 +57,7 @@ std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorF
 {
     QDomElement userDefinedChildElement;
     ThrowIfFalse(SimulationCommon::GetFirstChildElement(userDefinedElement, TAG::command, userDefinedChildElement),
-                  "Could not import Manipulator from user defined element. Tag " + std::string(TAG::command) + " is missing.");
+                 userDefinedElement, "Tag " + std::string(TAG::command) + " is missing.");
 
     std::string command = userDefinedChildElement.text().toStdString();
     boost::algorithm::trim(command);
@@ -78,7 +78,7 @@ std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorF
         {
             QDomElement targetElement;
             ThrowIfFalse(SimulationCommon::GetFirstChildElement(lateralChildElement, TAG::target, targetElement),
-                        "Could not import Manipulator from private element. Tag " + std::string(TAG::target) + " is missing.");
+                        lateralChildElement, "Tag " + std::string(TAG::target) + " is missing.");
 
             QDomElement typeElement;
             if (SimulationCommon::GetFirstChildElement(targetElement, TAG::relative, typeElement))
@@ -87,9 +87,9 @@ std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorF
                 double value{};
 
                 ThrowIfFalse(SimulationCommon::ParseAttributeString(typeElement, ATTRIBUTE::object, object),
-                              "Could not import Manipulator from private element. Type tag requires a " + std::string(ATTRIBUTE::object) + " attribute.");
+                             typeElement, "Attribute " + std::string(ATTRIBUTE::object) + " is missing.");
                 ThrowIfFalse(SimulationCommon::ParseAttributeDouble(typeElement, ATTRIBUTE::value, value),
-                              "Could not import Manipulator from private element. Type tag requires a " + std::string(ATTRIBUTE::value) + " attribute.");
+                             typeElement, "Atrribute " + std::string(ATTRIBUTE::value) + " is missing.");
 
                 return std::shared_ptr<ScenarioActionInterface>(std::make_shared<openScenario::PrivateLateralLaneChangeAction>(eventName,
                                                                                                                                openScenario::PrivateLateralLaneChangeActionType::Relative,
@@ -99,11 +99,11 @@ std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorF
             else
             {
                 ThrowIfFalse(SimulationCommon::GetFirstChildElement(targetElement, TAG::absolute, typeElement),
-                              "Could not import Manipulator from private element. Tag " + std::string(TAG::absolute) + " is missing.");
+                             targetElement, "Tag " + std::string(TAG::absolute) + " is missing.");
 
                 double value;
                 ThrowIfFalse(SimulationCommon::ParseAttributeDouble(typeElement, ATTRIBUTE::value, value),
-                              "Could not import Manipulator from private element. Type tag requires a " + std::string(ATTRIBUTE::value) + " attribute.");
+                             typeElement, "Attribute " + std::string(ATTRIBUTE::value) + " is missing.");
 
                 return std::shared_ptr<ScenarioActionInterface>(std::make_shared<openScenario::PrivateLateralLaneChangeAction>(eventName,
                                                                                                                                openScenario::PrivateLateralLaneChangeActionType::Absolute,
@@ -124,39 +124,39 @@ std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorF
             {
                 QDomElement catalogReferenceElement;
                 ThrowIfFalse(SimulationCommon::GetFirstChildElement(routingChildElement, TAG::catalogReference, catalogReferenceElement),
-                            "Could not import Manipulator from private element. Tag " + std::string(TAG::trajectory) + " or " + std::string(TAG::catalogReference) + " is missing.");
+                             routingChildElement, "Tag " + std::string(TAG::trajectory) + " or " + std::string(TAG::catalogReference) + " is missing.");
                 std::string catalogName;
                 ThrowIfFalse(SimulationCommon::ParseAttribute(catalogReferenceElement, ATTRIBUTE::catalogName, catalogName),
-                            "Could not import TrajectoryCatalog. Attribute " + std::string(ATTRIBUTE::catalogName) + " is missing.");
+                             catalogReferenceElement, "Attribute " + std::string(ATTRIBUTE::catalogName) + " is missing.");
                 std::string entryName;
                 ThrowIfFalse(SimulationCommon::ParseAttribute(catalogReferenceElement, ATTRIBUTE::entryName, entryName),
-                            "Could not import TrajectoryCatalog. Attribute " + std::string(ATTRIBUTE::entryName) + " is missing.");
+                             catalogReferenceElement, "Attribute " + std::string(ATTRIBUTE::entryName) + " is missing.");
                 trajectoryElement = GetTrajecoryElementFromCatalog(catalogName, trajectoryCatalogPath, entryName);
 
             }
             ThrowIfFalse(SimulationCommon::ParseAttribute(trajectoryElement, ATTRIBUTE::name, trajectory.name),
-                        "Could not import Manipulator from private element. Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
+                         trajectoryElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
             QDomElement vertexElement;
             ThrowIfFalse(SimulationCommon::GetFirstChildElement(trajectoryElement, TAG::vertex, vertexElement),
-                        "Could not import Manipulator from private element. Tag " + std::string(TAG::vertex) + " is missing.");
+                         trajectoryElement, "Tag " + std::string(TAG::vertex) + " is missing.");
             while (!vertexElement.isNull())
             {
                 QDomElement positionElement;
                 ThrowIfFalse(SimulationCommon::GetFirstChildElement(vertexElement, TAG::position, positionElement),
-                            "Could not import Manipulator from private element. Tag " + std::string(TAG::position) + " is missing.");
+                             vertexElement, "Tag " + std::string(TAG::position) + " is missing.");
                 QDomElement worldElement;
                 ThrowIfFalse(SimulationCommon::GetFirstChildElement(positionElement, TAG::world, worldElement),
-                            "Could not import Manipulator from private element. Tag " + std::string(TAG::world) + " is missing.");
+                             positionElement, "Tag " + std::string(TAG::world) + " is missing.");
 
                 openScenario::TrajectoryPoint trajectoryPoint;
                 ThrowIfFalse(SimulationCommon::ParseAttribute(vertexElement, ATTRIBUTE::reference, trajectoryPoint.time),
-                            "Could not import Manipulator from private element. Attribute " + std::string(ATTRIBUTE::reference) + " is missing.");
+                             vertexElement, "Attribute " + std::string(ATTRIBUTE::reference) + " is missing.");
                 ThrowIfFalse(SimulationCommon::ParseAttribute(worldElement, ATTRIBUTE::x, trajectoryPoint.x),
-                            "Could not import Manipulator from private element. Attribute " + std::string(ATTRIBUTE::x) + " is missing.");
+                             worldElement, "Attribute " + std::string(ATTRIBUTE::x) + " is missing.");
                 ThrowIfFalse(SimulationCommon::ParseAttribute(worldElement, ATTRIBUTE::y, trajectoryPoint.y),
-                            "Could not import Manipulator from private element. Attribute " + std::string(ATTRIBUTE::y) + " is missing.");
+                             worldElement, "Attribute " + std::string(ATTRIBUTE::y) + " is missing.");
                 ThrowIfFalse(SimulationCommon::ParseAttribute(worldElement, ATTRIBUTE::h, trajectoryPoint.yaw),
-                            "Could not import Manipulator from private element. Attribute " + std::string(ATTRIBUTE::h) + " is missing.");
+                             worldElement, "Attribute " + std::string(ATTRIBUTE::h) + " is missing.");
                 trajectory.points.push_back(trajectoryPoint);
 
                 vertexElement = vertexElement.nextSiblingElement(TAG::vertex);
@@ -179,7 +179,7 @@ std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorF
     {
         std::string name;
         ThrowIfFalse(SimulationCommon::ParseAttributeString(globalActionTypeElement, ATTRIBUTE::name, name),
-                      "Could not import Manipulator from global element. Entity tag requires a " + std::string(ATTRIBUTE::name) + " attribute.");
+                     globalActionTypeElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
 
         QDomElement entityTypeElement;
         if (SimulationCommon::GetFirstChildElement(globalActionTypeElement, TAG::add, entityTypeElement))
@@ -191,7 +191,7 @@ std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorF
         else
         {
            ThrowIfFalse(SimulationCommon::GetFirstChildElement(globalActionTypeElement, TAG::Delete, entityTypeElement),
-                         "Could not import Manipulator from global element. Tag " + std::string(TAG::Delete) + " is missing.");
+                        globalActionTypeElement, "Tag " + std::string(TAG::Delete) + " is missing.");
 
            return std::shared_ptr<ScenarioActionInterface>(std::make_shared<openScenario::GlobalEntityAction>(eventName,
                                                                                                               openScenario::GlobalEntityActionType::Delete,
@@ -221,16 +221,16 @@ QDomElement ManipulatorImporter::GetTrajecoryElementFromCatalog(const std::strin
 
     QDomElement catalogElement;
     ThrowIfFalse(SimulationCommon::GetFirstChildElement(documentRoot, TAG::catalog, catalogElement),
-                  "Could not import TrajectoryCatalog. Tag " + std::string(TAG::catalog) + " is missing.");
+                 documentRoot, "Tag " + std::string(TAG::catalog) + " is missing.");
 
     QDomElement trajectoryElement;
     ThrowIfFalse(SimulationCommon::GetFirstChildElement(catalogElement, TAG::trajectory, trajectoryElement),
-                  "Could not import TrajectoryCatalog. Tag " + std::string(TAG::trajectory) + " is missing.");
+                 catalogElement, "Tag " + std::string(TAG::trajectory) + " is missing.");
     while (!trajectoryElement.isNull())
     {
         std::string name;
         ThrowIfFalse(SimulationCommon::ParseAttributeString(trajectoryElement, ATTRIBUTE::name, name),
-                      "Could not import TrajectoryCatalog. Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
+                     trajectoryElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
         if (name == entryName)
         {
             return trajectoryElement;

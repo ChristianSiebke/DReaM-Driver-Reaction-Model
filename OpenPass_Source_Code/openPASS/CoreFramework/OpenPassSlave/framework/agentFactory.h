@@ -22,6 +22,7 @@
 
 #include <map>
 #include <list>
+#include <memory>
 
 #include "Interfaces/agentFactoryInterface.h"
 #include "Interfaces/eventNetworkInterface.h"
@@ -39,38 +40,17 @@ class ObservationNetworkInterface;
 class AgentFactory : public AgentFactoryInterface
 {
 public:
+    static constexpr int INITIAL_AGENT_ID {0};
+
     AgentFactory(ModelBinding *modelBinding,
                  WorldInterface *world,
                  Stochastics *stochastics,
                  ObservationNetworkInterface *observationNetwork,
                  SimulationSlave::EventNetworkInterface *eventNetwork);
-    AgentFactory(const AgentFactory&) = delete;
-    AgentFactory(AgentFactory&&) = delete;
-    AgentFactory& operator=(const AgentFactory&) = delete;
-    AgentFactory& operator=(AgentFactory&&) = delete;
-    virtual ~AgentFactory();
+    virtual ~AgentFactory() = default;
 
-    //-----------------------------------------------------------------------------
-    //! Sets the ID of the last added agent to 0.
-    //-----------------------------------------------------------------------------
-    void ResetIds();
-
-    //-----------------------------------------------------------------------------
-    //! Unloads the model bindings.
-    //-----------------------------------------------------------------------------
-    void Clear();
-
-    //-----------------------------------------------------------------------------
-    //! Creates a new agent based on the provided parameters, then adds it to the
-    //! agent network in the world representation. Also adds agents during runtime.
-    //!
-    //! @param[in]  agentBlueprint      agentBlueprint contains all necessary
-    //!                                 informations to create an agent
-    //! @param[in]  spawnTime           Spawn time in ms
-    //!
-    //! @return                         The added agent
-    //-----------------------------------------------------------------------------
-    Agent *AddAgent(AgentBlueprintInterface* agentBlueprint);
+    virtual void Clear() override;
+    virtual Agent *AddAgent(AgentBlueprintInterface* agentBlueprint) override;
 
 private:
     //-----------------------------------------------------------------------------
@@ -106,14 +86,14 @@ private:
     Agent* CreateAgent(int id,
                        AgentBlueprintInterface* agentBlueprint);
 
-    int lastAgentId = 0;
+    int lastAgentId {INITIAL_AGENT_ID};
     ModelBinding *modelBinding;
     WorldInterface *world;
     Stochastics *stochastics;
     ObservationNetworkInterface *observationNetwork;
     EventNetworkInterface *eventNetwork;
 
-    std::list<const Agent*> agentList;
+    std::vector<std::unique_ptr<Agent>> agentList;
 };
 
 } // namespace SimulationSlave

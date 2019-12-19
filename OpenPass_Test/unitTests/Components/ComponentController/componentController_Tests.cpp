@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -28,50 +28,9 @@ using ::testing::DontCare;
 using ::testing::Ne;
 using ::testing::NiceMock;
 using ::testing::Return;
+using ::testing::SizeIs;
 
 using namespace ComponentControl;
-
-TEST(ComponentController_UpdateInput, ReceivesComponentWarningSignal_EmitsEvent)
-{
-    FakeAgent fakeAgent;
-    FakeEventNetwork fakeEventNetwork;
-    ComponentControllerImplementation componentController{DontCare<std::string>(),
-                                                          DontCare<bool>(),
-                                                          DontCare<int>(),
-                                                          DontCare<int>(),
-                                                          DontCare<int>(),
-                                                          DontCare<int>(),
-                                                          nullptr,
-                                                          nullptr,
-                                                          nullptr,
-                                                          nullptr,
-                                                          nullptr,
-                                                          &fakeAgent,
-                                                          &fakeEventNetwork};
-    const int fakeAgentId = 0;
-
-    // register linkId 0 as an undefined component in statemanager
-    const int testLinkId = 0;
-    const std::string testComponentName = "testComponent";
-    const std::shared_ptr<SignalInterface const> testRegistrationData = std::make_shared<AgentCompToCompCtrlSignal const>(ComponentType::Undefined,
-                                                                                                                      testComponentName,
-                                                                                                                      ComponentState::Acting);
-    componentController.UpdateInput(testLinkId, testRegistrationData, DontCare<int>());
-
-    // send test signal
-    const ComponentWarningInformation warning{true,
-                                              ComponentWarningLevel::WARNING,
-                                              ComponentWarningType::OPTIC,
-                                              ComponentWarningIntensity::HIGH};
-    const std::shared_ptr<SignalInterface const> data = std::make_shared<AgentCompToCompCtrlSignal const>(ComponentType::Undefined,
-                                                                                                          testComponentName,
-                                                                                                          ComponentState::Acting,
-                                                                                                          warning);
-    // assert event emission
-    EXPECT_CALL(fakeAgent, GetId()).WillOnce(Return(fakeAgentId));
-    EXPECT_CALL(fakeEventNetwork, InsertEvent(_)).Times(1);
-    componentController.UpdateInput(testLinkId, data, DontCare<int>());
-}
 
 TEST(ComponentController_UpdateOutput, HasComponentWarningSignal_ForwardsWarningToDriver)
 {
@@ -112,10 +71,11 @@ TEST(ComponentController_UpdateOutput, HasComponentWarningSignal_ForwardsWarning
                                               ComponentWarningLevel::WARNING,
                                               ComponentWarningType::OPTIC,
                                               ComponentWarningIntensity::HIGH};
+    std::vector<ComponentWarningInformation> warnings{warning};
     const std::shared_ptr<SignalInterface const> data = std::make_shared<AgentCompToCompCtrlSignal const>(ComponentType::Undefined,
                                                                                                           testComponentName,
                                                                                                           ComponentState::Acting,
-                                                                                                          warning);
+                                                                                                          warnings);
     // send warning to componentController
     componentController.UpdateInput(testLinkId, data, DontCare<int>());
 
@@ -130,14 +90,12 @@ TEST(ComponentController_UpdateOutput, HasComponentWarningSignal_ForwardsWarning
     ASSERT_THAT(compCtrlToDriverDataCastSuccessful, true);
 
     const auto& warningsInDataSignal = castedCompCtrlToDriverData->GetWarnings();
-    ASSERT_THAT(warningsInDataSignal, Ne(std::nullopt));
+    ASSERT_THAT(warningsInDataSignal, SizeIs(1));
 
-    const auto& warningsInData = warningsInDataSignal.value();
-    ASSERT_THAT(warningsInData.size(), 1);
+    const auto& warningsFromTestComponent = warningsInDataSignal.at(testComponentName);
+    ASSERT_THAT(warningsFromTestComponent, SizeIs(1));
 
-    ASSERT_THAT(warningsInData.begin()->first, testComponentName);
-
-    const auto& warningInData = warningsInData.begin()->second;
+    const auto& warningInData = warningsFromTestComponent.front();
     ASSERT_THAT(warningInData.activity, warning.activity);
     ASSERT_THAT(warningInData.level, warning.level);
     ASSERT_THAT(warningInData.type, warning.type);

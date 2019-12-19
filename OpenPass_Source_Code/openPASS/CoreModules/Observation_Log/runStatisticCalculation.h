@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -32,14 +32,11 @@ public:
     static void CalculateTotalDistanceTraveled(RunStatistic& runStatistic, WorldInterface* world);
 
     /*!
-     * \brief Counts the number of collisions in the simulation
-     *
-     * The members `NCollisionsArbitrary`, `NCollisionsFollower` and `EgoCollision` of the first parameter
-     * are used to store the result
+     * \brief Determines whether the ego had a collision and sets the related flag in the RunStatistic
      *
      * \param[out] runStatistic      Result is stored here
      * \param[in]  runResult         Structure to retrieve collisions from
      * \param[in]  world             Pointer to the world
      */
-    static void CalculateNumberOfCollisions(RunStatistic& runStatistic, const RunResultInterface& runResult, WorldInterface* world);
+    static void DetermineEgoCollision(RunStatistic& runStatistic, const RunResultInterface& runResult, WorldInterface* world);
 };

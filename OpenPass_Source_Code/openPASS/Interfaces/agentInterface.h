@@ -30,6 +30,8 @@
 #include "Interfaces/profilesInterface.h"
 #include "Interfaces/spawnItemParameterInterface.h"
 
+using LaneTypes = std::vector<LaneType>;
+
 /**
 * \brief Agent Interface within the openPASS framework.
 * \details This interface provides access to agent parameters, properties, attributes and dynamic states.
@@ -677,13 +679,6 @@ public:
     virtual double GetLaneWidth(int relativeLane = 0, double distance = 0.0) const = 0;
 
     //-----------------------------------------------------------------------------
-    //! Returns the width of a lane right of the agent.
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual double GetLaneWidthRightDrivingAndStopLane() const = 0;
-
-    //-----------------------------------------------------------------------------
     //! Returns the curvature of the lane at the postion given by the relative distance to the agent
     //!
     //! \param relativeLane relative difference of lane relative to agent (positive for left lanes, negative for right lanes, 0 for own lane)
@@ -716,20 +711,6 @@ public:
     virtual double GetDistanceToRearAgent(int laneId) = 0;
 
     //-----------------------------------------------------------------------------
-    //! Returns the AgentInterface of the next agent in front in a specific lane.
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual const AgentInterface *GetAgentInFront(int laneId) const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns the AgentInterface of the next agent behind in a specific lane.
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual const AgentInterface *GetAgentBehind(int laneId) const = 0;
-
-    //-----------------------------------------------------------------------------
     //! Returns the longitudinal distance to another agent. (negative if other agent is behind)
     //!
     //! @return the distance to the other object
@@ -749,44 +730,6 @@ public:
     //! @return
     //-----------------------------------------------------------------------------
     virtual void SetSpecialAgentMarker() = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns true if a left lane exists.
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual bool ExistsLaneLeft() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns true if a right lane exists.
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual bool ExistsLaneRight() const = 0;
-
-    //! Returns true if the given lane at given relative distance and is a driving lane.
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual bool IsLaneDrivingLane(int laneId, double distance = 0.0) const = 0;
-
-    //! Returns true if the given lane at given relative distance is a stop lane.
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual bool IsLaneStopLane(int laneId, double distance = 0.0) const = 0;
-
-    //! Returns true if the given lane at given relative distance is a exit lane.
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual bool IsLaneExitLane(int laneId, double distance = 0.0) const = 0;
-
-    //! Returns true if the given lane at given relative distance is a ramp.
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual bool IsLaneRamp(int laneId, double distance = 0.0) const = 0;
 
     //-----------------------------------------------------------------------------
     //! Sets the flag to mark the agent as obstacle.
@@ -818,22 +761,12 @@ public:
     virtual double GetDistanceToEndOfLane(double sightDistance, int relativeLane = 0) const  = 0;
 
     //-----------------------------------------------------------------------------
-    //! Returns the distance to the end of the current exit lane or infinity, if end of
-    //! lane is farther away then the sightDistance.
-    //!
-    //! @return                distance to the end of the exit lane (in meters)
-    //-----------------------------------------------------------------------------
-    virtual double GetDistanceToEndOfExit(int laneID, double sightDistance) const = 0;
-
-
-    //-----------------------------------------------------------------------------
-    //! Returns the distance to the end of the current ramp or infinity, if end of
-    //! lane is farther away then the sightDistance.
+    //! Returns the distance to the end of the current lane considering until lane of specified type
+    //! or infinity, if end of lane is farther away then the sightDistance.
     //!
     //! @return
     //-----------------------------------------------------------------------------
-    virtual double GetDistanceToEndOfRamp(int laneID, double sightDistance) const = 0;
-
+    virtual double GetDistanceToEndOfLane(double sightDistance, int relativeLane, const LaneTypes& laneTypes) const  = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the lateral position.
@@ -847,13 +780,6 @@ public:
 
     //! Returns true if the agent touches more than one lane
     virtual bool IsCrossingLanes() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns size of lanes in total
-    //!
-    //! @return               number of lanes
-    //-----------------------------------------------------------------------------
-    virtual int GetNumberOfLanes() = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the distance of the front agent to ego.
@@ -915,26 +841,6 @@ public:
     virtual bool IsFirstCarInLane() const = 0;
 
     //-----------------------------------------------------------------------------
-    //! Returns the next object in front for a specific lane.
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual WorldObjectInterface* GetObjectInFront(double previewDistance, int relativeLaneId = 0) const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns the nearest object behind for a specific lane.
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual WorldObjectInterface* GetObjectBehind(double previewDistance, int relativeLaneId = 0) const = 0;
-
-    //! Returns a vector with all AgentInterfaces of the next agents in front in all assigned lanes.
-    virtual std::vector<AgentInterface*> GetAllAgentsInFront() const = 0;
-
-    //! Returns a vector with all WorldObjectInterfaces of the next objects in front in all assigned lanes.
-    virtual std::vector<const WorldObjectInterface*> GetAllWorldObjectsInFront() const = 0;
-
-    //-----------------------------------------------------------------------------
     //! Returns all objects around the agent on given lane inside the given range
     //! Objects partially in range are also considered
     //!
@@ -955,19 +861,6 @@ public:
     //! @param[in]      mp              measurement point for range
     //-----------------------------------------------------------------------------
     virtual std::vector<const AgentInterface *> GetAgentsInRange(int relativeLane, double backwardRange, double forwardRange, MeasurementPoint mp) const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns all agents in specified range (also agents partially in search interval).
-    //! Returns empty list otherwise.
-    //!
-    //! @param[in] laneId OpendDriveId of lane to search in
-    //! @param[in] minDistance  lower bound of search interval (s coordinate)
-    //! @param[in] maxDistance  upper bound of search interval (s coordinate)
-    //!
-    //! @return All agents in specified range
-    //-----------------------------------------------------------------------------
-    virtual std::vector<const AgentInterface*> GetAgentsInRangeAbsolute(int laneId, double minDistance,
-            double maxDistance) const = 0;
 
     //! Returns the s coordinate distance from the front of the agent to the first point where his lane intersects another.
     //! As the agent may not yet be on the junction, it has to be specified which connecting road he will take in the junction

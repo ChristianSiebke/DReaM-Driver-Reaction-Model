@@ -87,8 +87,11 @@ void VehicleModelsImporter::ImportCatalog(const std::string& catalogPath, QDomEl
 
     QByteArray xmlData(xmlFile.readAll());
     QDomDocument document;
+    QString errorMsg;
+    int errorLine;
+    ThrowIfFalse(document.setContent(xmlData, &errorMsg, &errorLine),
+                 "Invalid xml file format of file " + catalogPath + " in line " + std::to_string(errorLine) + " : " + errorMsg.toStdString());
 
-    ThrowIfFalse(document.setContent(xmlData), "Invalid xml format of " + catalogPath);
     const QDomElement documentRoot = document.documentElement();
 
     ThrowIfFalse(!documentRoot.isNull(), "Root xml element not found in " + catalogPath);
@@ -114,15 +117,15 @@ void VehicleModelsImporter::ImportVehicleModelAxles(QDomElement& vehicleElement,
 {
     QDomElement axlesElement;
     ThrowIfFalse(SimulationCommon::GetFirstChildElement(vehicleElement, TAG::axles, axlesElement),
-                 "Vehicle model is missing axles tag");
+                 vehicleElement, "Tag " + std::string(TAG::axles) + " is missing.");
 
     QDomElement frontAxleElement;
     ThrowIfFalse(SimulationCommon::GetFirstChildElement(axlesElement, TAG::front, frontAxleElement),
-                 "Vehicle model is missing front axle tag");
+                 axlesElement, "Tag " + std::string(TAG::front) + " is missing.");
 
     QDomElement rearAxleElement;
     ThrowIfFalse(SimulationCommon::GetFirstChildElement(axlesElement, TAG::rear, rearAxleElement),
-                 "Vehicle model is missing rear axle tag");
+                 axlesElement, "Tag " + std::string(TAG::rear) + " is missing.");
 
     VehicleAxle frontAxleParameters;
     VehicleAxle rearAxleParameters;
@@ -148,13 +151,13 @@ void VehicleModelsImporter::AssignModelParameters(const VehicleAxle& frontAxle, 
 void VehicleModelsImporter::ImportVehicleModelAxle(QDomElement& axleElement, VehicleAxle& axleParameters)
 {
     ThrowIfFalse(SimulationCommon::ParseAttributeDouble(axleElement, ATTRIBUTE::wheelDiameter, axleParameters.wheelDiameter),
-                  "Could not import vehicle model axle. Axle tag requires a " + std::string(ATTRIBUTE::wheelDiameter) + " attribute.");
+                 axleElement, "Attribute " + std::string(ATTRIBUTE::wheelDiameter) + " is missing.");
     ThrowIfFalse(SimulationCommon::ParseAttributeDouble(axleElement, ATTRIBUTE::positionX, axleParameters.positionX),
-                  "Could not import vehicle model axle. Axle tag requires a " + std::string(ATTRIBUTE::positionX) + " attribute.");
+                 axleElement, "Attribute " + std::string(ATTRIBUTE::positionX) + " is missing.");
     ThrowIfFalse(SimulationCommon::ParseAttributeDouble(axleElement, ATTRIBUTE::trackWidth, axleParameters.trackWidth),
-                  "Could not import vehicle model axle. Axle tag requires a " + std::string(ATTRIBUTE::trackWidth) + " attribute.");
+                 axleElement, "Attribute " + std::string(ATTRIBUTE::trackWidth) + " is missing.");
     ThrowIfFalse(SimulationCommon::ParseAttributeDouble(axleElement, ATTRIBUTE::maxSteering, axleParameters.maxSteering),
-                  "Could not import vehicle model axle. Axle tag requires a " + std::string(ATTRIBUTE::maxSteering) + " attribute.");
+                 axleElement, "Attribute " + std::string(ATTRIBUTE::maxSteering) + " is missing.");
 }
 
 void VehicleModelsImporter::ValidateAxles(const VehicleAxle& frontAxle, const VehicleAxle& rearAxle)
@@ -183,27 +186,30 @@ void VehicleModelsImporter::ValidateAxles(const VehicleAxle& frontAxle, const Ve
 void VehicleModelsImporter::ImportModelBoundingBox(QDomElement& modelElement, VehicleModelParameters& modelParameters)
 {
     QDomElement boundingBoxElement;
-    ThrowIfFalse(SimulationCommon::GetFirstChildElement(modelElement, TAG::boundingBox, boundingBoxElement), "Model bounding box is missing");
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(modelElement, TAG::boundingBox, boundingBoxElement),
+                 modelElement, "Tag " + std::string(TAG::boundingBox) + " is missing.");
 
     QDomElement boundingBoxCenterElement;
-    ThrowIfFalse(SimulationCommon::GetFirstChildElement(boundingBoxElement, TAG::center, boundingBoxCenterElement), "Model bounding box center is missing");
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(boundingBoxElement, TAG::center, boundingBoxCenterElement),
+                 boundingBoxElement, "Tag " + std::string(TAG::center) + " is missing.");
 
     QDomElement boundingBoxDimensionElement;
-    ThrowIfFalse(SimulationCommon::GetFirstChildElement(boundingBoxElement, TAG::dimension, boundingBoxDimensionElement), "Model bounding box dimension is missing");
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(boundingBoxElement, TAG::dimension, boundingBoxDimensionElement),
+                 boundingBoxElement, "Tag " + std::string(TAG::dimension) + " is missing.");
 
     double bbCenterX, bbCenterY, bbCenterZ;
     ThrowIfFalse(SimulationCommon::ParseAttributeDouble(boundingBoxCenterElement, ATTRIBUTE::x, bbCenterX),
-                  "Could not import model bounding box. BoundingBoxCenter tag requires a " + std::string(ATTRIBUTE::x) + " attribute.");
+                 boundingBoxCenterElement, "Attribute " + std::string(ATTRIBUTE::x) + " is missing.");
     ThrowIfFalse(SimulationCommon::ParseAttributeDouble(boundingBoxCenterElement, ATTRIBUTE::y, bbCenterY),
-                  "Could not import model bounding box. BoundingBoxCenter tag requires a " + std::string(ATTRIBUTE::y) + " attribute.");
+                 boundingBoxCenterElement, "Attribute " + std::string(ATTRIBUTE::y) + " is missing.");
     ThrowIfFalse(SimulationCommon::ParseAttributeDouble(boundingBoxCenterElement, ATTRIBUTE::z, bbCenterZ),
-                  "Could not import model bounding box. BoundingBoxCenter tag requires a " + std::string(ATTRIBUTE::z) + " attribute.");
+                 boundingBoxCenterElement, "Attribute " + std::string(ATTRIBUTE::z) + " is missing.");
     ThrowIfFalse(SimulationCommon::ParseAttributeDouble(boundingBoxDimensionElement, ATTRIBUTE::width, modelParameters.width),
-                  "Could not import model bounding box. BoundingBoxDimensions tag requires a " + std::string(ATTRIBUTE::width) + " attribute.");
+                 boundingBoxCenterElement, "Attribute " + std::string(ATTRIBUTE::width) + " is missing.");
     ThrowIfFalse(SimulationCommon::ParseAttributeDouble(boundingBoxDimensionElement, ATTRIBUTE::length, modelParameters.length),
-                  "Could not import model bounding box. BoundingBoxDimensions tag requires a " + std::string(ATTRIBUTE::length) + " attribute.");
+                 boundingBoxCenterElement, "Attribute " + std::string(ATTRIBUTE::length) + " is missing.");
     ThrowIfFalse(SimulationCommon::ParseAttributeDouble(boundingBoxDimensionElement, ATTRIBUTE::height, modelParameters.height),
-                  "Could not import model bounding box. BoundingBoxDimensions tag requires a " + std::string(ATTRIBUTE::height) + " attribute.");
+                 boundingBoxCenterElement, "Attribute " + std::string(ATTRIBUTE::height) + " is missing.");
 
     if (bbCenterY != 0.0)
     {
@@ -222,11 +228,14 @@ void VehicleModelsImporter::ImportVehicleModelPerformance(QDomElement& vehicleEl
         VehicleModelParameters& modelParameters)
 {
     QDomElement performanceElement;
-    ThrowIfFalse(SimulationCommon::GetFirstChildElement(vehicleElement, TAG::performance, performanceElement), "Model performance tag is missing");
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(vehicleElement, TAG::performance, performanceElement),
+                 vehicleElement, "Tag " + std::string(TAG::performance) + " is missing.");
 
-    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(performanceElement, ATTRIBUTE::maxSpeed, modelParameters.maxVelocity), "'maxSpeed' performance attribute missing");
+    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(performanceElement, ATTRIBUTE::maxSpeed, modelParameters.maxVelocity),
+                 performanceElement, "Attribute " + std::string(ATTRIBUTE::maxSpeed) + " is missing.");
 
-    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(performanceElement, ATTRIBUTE::mass, modelParameters.weight), "'mass' performance attribute missing");
+    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(performanceElement, ATTRIBUTE::mass, modelParameters.weight),
+                 performanceElement, "Attribute " + std::string(ATTRIBUTE::mass) + " is missing.");
 }
 
 void VehicleModelsImporter::ImportVehicleModelGears(QDomElement& parametersElement,
@@ -262,9 +271,9 @@ void VehicleModelsImporter::ImportVehicleModel(QDomElement& vehicleElement, Vehi
     std::string vehicleModelName;
 
     ThrowIfFalse(SimulationCommon::ParseAttributeString(vehicleElement, ATTRIBUTE::name, vehicleModelName),
-                 "Unable to parse vehicle model name");
+                 vehicleElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
     ThrowIfFalse(vehicleModelsMap.find(vehicleModelName) == vehicleModelsMap.end(),
-                 "Vehicle model '" + vehicleModelName + "' already exists");
+                 vehicleElement, "Vehicle model '" + vehicleModelName + "' already exists");
 
     QDomElement parametersElement;
     if (!SimulationCommon::GetFirstChildElement(vehicleElement, TAG::parameterDeclaration, parametersElement))
@@ -273,10 +282,10 @@ void VehicleModelsImporter::ImportVehicleModel(QDomElement& vehicleElement, Vehi
     }
 
     ThrowIfFalse((modelParameters.vehicleType == AgentVehicleType::Car ||
-            modelParameters.vehicleType == AgentVehicleType::Truck ||
-            modelParameters.vehicleType == AgentVehicleType::Motorbike ||
-            modelParameters.vehicleType == AgentVehicleType::Bicycle),
-                 "VehicleModelCatagory '" + vehicleModelCategory + "' currently not supported");
+                  modelParameters.vehicleType == AgentVehicleType::Truck ||
+                  modelParameters.vehicleType == AgentVehicleType::Motorbike ||
+                  modelParameters.vehicleType == AgentVehicleType::Bicycle),
+                 vehicleElement, "VehicleModelCatagory '" + vehicleModelCategory + "' currently not supported");
 
     ImportModelParameter(parametersElement, "SteeringRatio", modelParameters.steeringRatio);
 
@@ -314,17 +323,19 @@ void VehicleModelsImporter::ImportPedestrianModel(QDomElement& pedestrianElement
 
     std::string pedestrianCategory;
 
-    ThrowIfFalse(SimulationCommon::ParseAttributeString(pedestrianElement, ATTRIBUTE::category, pedestrianCategory), "Unable to parse pedestrian category");
-    ThrowIfFalse(pedestrianCategory == "pedestrian", "Unsupported pedestrian catagory");
+    ThrowIfFalse(SimulationCommon::ParseAttributeString(pedestrianElement, ATTRIBUTE::category, pedestrianCategory),
+                 pedestrianElement, "Attribute " + std::string(ATTRIBUTE::category) + " is missing.");
+    ThrowIfFalse(pedestrianCategory == "pedestrian", pedestrianElement, "Unsupported pedestrian catagory");
 
     std::string pedestrianModelName;
     ThrowIfFalse(SimulationCommon::ParseAttributeString(pedestrianElement, ATTRIBUTE::name, pedestrianModelName),
-                 "Unable to parse pedestrian model name");
+                 pedestrianElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
 
     ThrowIfFalse(vehicleModelsMap.find(pedestrianModelName) == vehicleModelsMap.end(),
-                 "pedestrian model '" + pedestrianModelName + "' already exists");
+                 pedestrianElement, "pedestrian model '" + pedestrianModelName + "' already exists");
 
-    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(pedestrianElement, ATTRIBUTE::mass, modelParameters.weight), "Unable to parse pedestrian mass");
+    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(pedestrianElement, ATTRIBUTE::mass, modelParameters.weight),
+                 pedestrianElement, "Attribute " + std::string(ATTRIBUTE::mass) + " is missing.");
 
     QDomElement parametersElement;
     if (!SimulationCommon::GetFirstChildElement(pedestrianElement, TAG::parameterDeclaration, parametersElement))

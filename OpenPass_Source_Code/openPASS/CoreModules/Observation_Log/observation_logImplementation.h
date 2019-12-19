@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -63,19 +63,6 @@ public:
     virtual void MasterPostHook(const std::string&) override {}
     virtual void SlavePostHook() override;
 
-    //-----------------------------------------------------------------------------
-    /*!
-    * \brief Calculates the ego followers at simulation start
-    */
-    //-----------------------------------------------------------------------------
-    virtual void GatherFollowers() override;
-
-    //-----------------------------------------------------------------------------
-    /*!
-    * \brief Insert the id of the agent into the list of followers of it is behind the ego
-    */
-    //-----------------------------------------------------------------------------
-    virtual void InformObserverOnSpawn(AgentInterface* agent) override;
 
     virtual const std::string SlaveResultFile() override
     {

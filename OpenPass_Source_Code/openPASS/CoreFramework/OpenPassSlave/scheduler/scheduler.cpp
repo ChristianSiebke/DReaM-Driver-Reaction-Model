@@ -21,11 +21,11 @@
 
 namespace SimulationSlave {
 
-Scheduler::Scheduler(WorldInterface* world,
-                     SpawnPointNetworkInterface* spawnPointNetwork,
-                     EventDetectorNetworkInterface* eventDetectorNetwork,
-                     ManipulatorNetworkInterface* manipulatorNetwork,
-                     ObservationNetworkInterface* observationNetwork) :
+Scheduler::Scheduler(WorldInterface& world,
+                     SpawnPointNetworkInterface& spawnPointNetwork,
+                     EventDetectorNetworkInterface& eventDetectorNetwork,
+                     ManipulatorNetworkInterface& manipulatorNetwork,
+                     ObservationNetworkInterface& observationNetwork) :
     world(world),
     spawnPointNetwork(spawnPointNetwork),
     eventDetectorNetwork(eventDetectorNetwork),
@@ -34,82 +34,83 @@ Scheduler::Scheduler(WorldInterface* world,
 {
 }
 
-SchedulerReturnState Scheduler::Run(
+bool Scheduler::Run(
     int startTime,
     int endTime,
     RunResult& runResult,
-    EventNetworkInterface* eventNetwork)
+    EventNetworkInterface& eventNetwork)
 {
     if (startTime > endTime)
     {
         LOG_INTERN(LogLevel::Error) << "start time greater than end time";
-        return SchedulerReturnState::AbortSimulation;
+        return Scheduler::FAILURE;
     }
+
     currentTime = startTime;
 
     TaskBuilder taskBuilder(currentTime,
                             runResult,
-                            frameworkUpdateRate,
-                            world,
-                            spawnPointNetwork,
-                            observationNetwork,
-                            eventDetectorNetwork,
-                            manipulatorNetwork);
+                            FRAMEWORK_UPDATE_RATE,
+                            &world,
+                            &spawnPointNetwork,
+                            &observationNetwork,
+                            &eventDetectorNetwork,
+                            &manipulatorNetwork);
 
     auto bootstrapTasks = taskBuilder.CreateBootstrapTasks();
     auto commonTasks = taskBuilder.CreateCommonTasks();
     auto finalizeRecurringTasks = taskBuilder.CreateFinalizeRecurringTasks();
     auto finalizeTasks = taskBuilder.CreateFinalizeTasks();
 
-    taskList = std::unique_ptr<SchedulerTasks>(new SchedulerTasks(
+    auto taskList = SchedulerTasks(
                    bootstrapTasks,
                    commonTasks,
                    finalizeRecurringTasks,
                    finalizeTasks,
-                   frameworkUpdateRate));
+                   FRAMEWORK_UPDATE_RATE);
 
-    if (ExecuteTasks(taskList->GetBootstrapTasks()) == false)
+    if (ExecuteTasks(taskList.GetBootstrapTasks()) == false)
     {
-        return SchedulerReturnState::AbortInvocation;
+        return Scheduler::FAILURE;
     }
 
     while (currentTime <= endTime)
     {
-        if (!ExecuteTasks(taskList->GetCommonTasks(currentTime)))
+        if (!ExecuteTasks(taskList.GetCommonTasks(currentTime)))
         {
-            return SchedulerReturnState::AbortSimulation;
+            return Scheduler::FAILURE;
         }
 
-        UpdateAgents(world);
+        UpdateAgents(taskList, world);
 
-        if (!ExecuteTasks(taskList->ConsumeNonRecurringTasks(currentTime)))
+        if (!ExecuteTasks(taskList.ConsumeNonRecurringTasks(currentTime)))
         {
-            return SchedulerReturnState::AbortSimulation;
+            return Scheduler::FAILURE;
         }
 
-        if (!ExecuteTasks(taskList->GetRecurringTasks(currentTime)))
+        if (!ExecuteTasks(taskList.GetRecurringTasks(currentTime)))
         {
-            return SchedulerReturnState::AbortSimulation;
+            return Scheduler::FAILURE;
         }
 
-        currentTime = taskList->GetNextTimestamp(currentTime);
+        currentTime = taskList.GetNextTimestamp(currentTime);
 
         if (runResult.IsEndCondition())
         {
             LOG_INTERN(LogLevel::DebugCore) << "Scheduler: End of operation (end condition reached)";
-            return SchedulerReturnState::NoError;
+            return Scheduler::SUCCESS;
         }
 
-        eventNetwork->ClearActiveEvents();
+        eventNetwork.ClearActiveEvents();
     }
 
-    if (!ExecuteTasks(taskList->GetFinalizeTasks()))
+    if (!ExecuteTasks(taskList.GetFinalizeTasks()))
     {
-        return SchedulerReturnState::AbortSimulation;
+        return Scheduler::FAILURE;
     }
 
     LOG_INTERN(LogLevel::DebugCore) << "Scheduler: End of operation (end time reached)";
-    return SchedulerReturnState::NoError;
+    return Scheduler::SUCCESS;
 }
 
 template<typename T>
@@ -119,40 +120,39 @@ bool Scheduler::ExecuteTasks(T tasks)
     {
         if (task.func() == false)
         {
-            failedTaskItem = &task;
             return false;
         }
     }
     return true;
 }
 
-void Scheduler::UpdateAgents(WorldInterface* world)
+void Scheduler::UpdateAgents(SchedulerTasks& taskList, WorldInterface& world)
 {
-    for (const auto& agent : spawnPointNetwork->ConsumeNewAgents())
+    for (const auto& agent : spawnPointNetwork.ConsumeNewAgents())
     {
-        ScheduleAgentTasks(*agent);
+        ScheduleAgentTasks(taskList, *agent);
     }
 
     std::list<int> removedAgents;
-    for (const auto& agentMap : world->GetAgents())
+    for (const auto& agentMap : world.GetAgents())
     {
         AgentInterface* agent = agentMap.second;
         if (!agent->IsValid())
         {
             removedAgents.push_back(agent->GetId());
-            world->QueueAgentRemove(agent);
+            world.QueueAgentRemove(agent);
         }
     }
-    taskList->DeleteAgentTasks(removedAgents);
+    taskList.DeleteAgentTasks(removedAgents);
 }
 
-void Scheduler::ScheduleAgentTasks(const Agent& agent)
+void Scheduler::ScheduleAgentTasks(SchedulerTasks& taskList, const Agent& agent)
 {
     AgentParser agentParser(currentTime);
     agentParser.Parse(agent);
 
-    taskList->ScheduleNewRecurringTasks(agentParser.GetRecurringTasks());
-    taskList->ScheduleNewNonRecurringTasks(agentParser.GetNonRecurringTasks());
+    taskList.ScheduleNewRecurringTasks(agentParser.GetRecurringTasks());
+    taskList.ScheduleNewNonRecurringTasks(agentParser.GetNonRecurringTasks());
 }
 
 } // namespace SimulationSlave

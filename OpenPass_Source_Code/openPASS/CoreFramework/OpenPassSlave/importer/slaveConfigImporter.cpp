@@ -66,7 +66,7 @@ void SlaveConfigImporter::ImportLoggingGroups(QDomElement loggingGroupsElement,
 
         std::string groupName = loggingGroupElement.text().toStdString();
 
-        ThrowIfFalse(groupName.length() != 0, "Invalid LoggingGroup name (empty string)");
+        ThrowIfFalse(groupName.length() != 0, loggingGroupElement, "Invalid LoggingGroup name (empty string)");
 
         loggingGroups.push_back(groupName);
     }
@@ -75,12 +75,15 @@ void SlaveConfigImporter::ImportLoggingGroups(QDomElement loggingGroupsElement,
 void SlaveConfigImporter::ImportExperimentConfig(QDomElement experimentConfigElement,
         ExperimentConfig& experimentConfig)
 {
-    ThrowIfFalse(ParseInt(experimentConfigElement, "ExperimentID", experimentConfig.experimentId), "ExperimentID not valid.");
+    ThrowIfFalse(ParseInt(experimentConfigElement, "ExperimentID", experimentConfig.experimentId),
+                 experimentConfigElement, "ExperimentID not valid.");
 
-    ThrowIfFalse(ParseInt(experimentConfigElement, "NumberOfInvocations", experimentConfig.numberOfInvocations), "NumberOfInvocations not valid.");
+    ThrowIfFalse(ParseInt(experimentConfigElement, "NumberOfInvocations", experimentConfig.numberOfInvocations),
+                 experimentConfigElement, "NumberOfInvocations not valid.");
 
     unsigned long randomSeed;
-    ThrowIfFalse(ParseULong(experimentConfigElement, "RandomSeed", randomSeed), "RandomSeed not valid.");
+    ThrowIfFalse(ParseULong(experimentConfigElement, "RandomSeed", randomSeed),
+                 experimentConfigElement, "RandomSeed not valid.");
 
     experimentConfig.randomSeed = static_cast<std::uint32_t>(randomSeed);
 
@@ -95,7 +98,7 @@ void SlaveConfigImporter::ImportExperimentConfig(QDomElement experimentConfigEle
     // Logging groups
     QDomElement loggingGroupsElement;
     ThrowIfFalse(GetFirstChildElement(experimentConfigElement, TAG::loggingGroups, loggingGroupsElement),
-                 "Could not import LoggingGroups.");
+                 experimentConfigElement, "Tag " + std::string(TAG::loggingGroups) + " is missing.");
 
     ImportLoggingGroups(loggingGroupsElement, experimentConfig.loggingGroups);
 
@@ -108,7 +111,7 @@ void SlaveConfigImporter::ImportScenarioConfig(QDomElement scenarioConfigElement
 {
     std::string scenarioFilename;
     ThrowIfFalse(ParseString(scenarioConfigElement, "OpenScenarioFile", scenarioFilename),
-                 "OpenScenarioFile not valid.");
+                 scenarioConfigElement, "OpenScenarioFile not valid.");
 
     scenarioConfig.scenarioPath = openpass::core::Directories::Concat(configurationDir, scenarioFilename);
 }
@@ -118,46 +121,50 @@ void SlaveConfigImporter::ImportEnvironmentConfig(QDomElement environmentConfigE
 {
     //Parse all time of days
     QDomElement timeOfDaysElement;
-    ThrowIfFalse(GetFirstChildElement(environmentConfigElement, TAG::timeOfDays, timeOfDaysElement)
-                    && ImportProbabilityMap(timeOfDaysElement, "Value", TAG::timeOfDay, environmentConfig.timeOfDays),
-                 "Could not import TimeOfDays.");
+    ThrowIfFalse(GetFirstChildElement(environmentConfigElement, TAG::timeOfDays, timeOfDaysElement),
+                 environmentConfigElement, "Tag " + std::string(TAG::timeOfDays) + " is missing.");
+    ThrowIfFalse(ImportProbabilityMap(timeOfDaysElement, "Value", TAG::timeOfDay, environmentConfig.timeOfDays),
+                 timeOfDaysElement, "Could not import Probabilities.");
 
     //Parse all visibility distances
     QDomElement visibilityDistancesElement;
-    ThrowIfFalse(GetFirstChildElement(environmentConfigElement, TAG::visibilityDistances, visibilityDistancesElement)
-                    && ImportProbabilityMap(visibilityDistancesElement, "Value", TAG::visibilityDistance, environmentConfig.visibilityDistances),
-        "Could not import VisibilityDistances.");
+    ThrowIfFalse(GetFirstChildElement(environmentConfigElement, TAG::visibilityDistances, visibilityDistancesElement),
+                 environmentConfigElement, "Tag " + std::string(TAG::visibilityDistances) + " is missing.");
+    ThrowIfFalse(ImportProbabilityMap(visibilityDistancesElement, "Value", TAG::visibilityDistance, environmentConfig.visibilityDistances),
+                 visibilityDistancesElement, "Could not import Probabilities.");
 
     //Parse all frictions
     QDomElement frictionsElement;
-    ThrowIfFalse(GetFirstChildElement(environmentConfigElement, TAG::frictions, frictionsElement)
-                    && ImportProbabilityMap(frictionsElement, "Value", TAG::friction, environmentConfig.frictions),
-                 "Could not import Frictions.");
+    ThrowIfFalse(GetFirstChildElement(environmentConfigElement, TAG::frictions, frictionsElement),
+                 environmentConfigElement, "Tag " + std::string(TAG::frictions) + " is missing.");
+    ThrowIfFalse(ImportProbabilityMap(frictionsElement, "Value", TAG::friction, environmentConfig.frictions),
+                 frictionsElement, "Could not import Probabilities.");
 
     //Parse all weathers
     QDomElement weathersElement;
-    ThrowIfFalse(GetFirstChildElement(environmentConfigElement, TAG::weathers, weathersElement)
-                    && ImportProbabilityMap(weathersElement, "Value", TAG::weather, environmentConfig.weathers),
-                 "Could not import Weathers.");
+    ThrowIfFalse(GetFirstChildElement(environmentConfigElement, TAG::weathers, weathersElement),
+                 environmentConfigElement, "Tag " + std::string(TAG::weathers) + " is missing.");
+    ThrowIfFalse(ImportProbabilityMap(weathersElement, "Value", TAG::weather, environmentConfig.weathers),
+                 weathersElement, "Could not import Probabilities.");
 }
 
 void SlaveConfigImporter::ImportSpawnPointsConfig(const QDomElement &spawnPointsConfigElement,
                                                   SpawnPointLibraryInfoCollection& spawnPointsInfo)
 {
     QDomElement spawnPointElement;
-    ThrowIfFalse(GetFirstChildElement(spawnPointsConfigElement, "SpawnPoint", spawnPointElement),
-                 "No SpawnPoints were successfully imported");
+    ThrowIfFalse(GetFirstChildElement(spawnPointsConfigElement, TAG::spawnPoint, spawnPointElement),
+                 spawnPointsConfigElement, "Tag " + std::string(TAG::spawnPoint) + " is missing.");
 
     while (!spawnPointElement.isNull())
     {
         SpawnPointLibraryInfo spawnPointInfo;
 
-        ThrowIfFalse(ParseString(spawnPointElement, "Library", spawnPointInfo.libraryName),
-            "SpawnPoint library name missing.");
+        ThrowIfFalse(ParseString(spawnPointElement, TAG::library, spawnPointInfo.libraryName),
+                     spawnPointElement, "Tag " + std::string(TAG::library) + " is missing.");
 
         std::string type;
-        ThrowIfFalse(ParseString(spawnPointElement, "Type", type),
-                     "SpawnPoint Type missing");
+        ThrowIfFalse(ParseString(spawnPointElement, TAG::type, type),
+                     spawnPointElement, "Tag " + std::string(TAG::type) + " is missing.");
         const auto& spawnPointTypeIter = std::find_if(spawnPointTypeMapping.cbegin(),
                                                       spawnPointTypeMapping.cend(),
                                                       [&type](const auto& spawnPointTypePair) -> bool
@@ -165,11 +172,11 @@ void SlaveConfigImporter::ImportSpawnPointsConfig(const QDomElement &spawnPoints
                                                           return spawnPointTypePair.second == type;
                                                       });
         ThrowIfFalse(spawnPointTypeIter != spawnPointTypeMapping.cend(),
-                     "SpawnPoint Type invalid");
+                     spawnPointElement, "SpawnPoint Type invalid");
         spawnPointInfo.type = spawnPointTypeIter->first;
 
-        ThrowIfFalse(ParseInt(spawnPointElement, "Priority", spawnPointInfo.priority),
-                     "SpawnPoint Priority missing");
+        ThrowIfFalse(ParseInt(spawnPointElement, TAG::priority, spawnPointInfo.priority),
+                     spawnPointElement, "Tag " + std::string(TAG::priority) + " is missing.");
 
         std::string spawnPointProfile;
         if(ParseString(spawnPointElement, "Profile", spawnPointProfile))

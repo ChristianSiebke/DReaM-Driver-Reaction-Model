@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -69,7 +69,10 @@ public:
     //!
     //! @return                         False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    bool Convert();
+    bool ConvertRoads();
+
+    //! Places all static traffic objects and all traffic signs in the world
+    void ConvertObjects();
 
     std::tuple<bool, double, double, double> CalculateAbsoluteCoordinates(RoadInterface* road, OWL::CSection* section, const RoadObjectInterface *object) const;
 

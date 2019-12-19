@@ -112,32 +112,21 @@ class FakeAgent : public FakeWorldObject, public AgentInterface
     MOCK_METHOD1(SetPosition, void(Position pos));
     MOCK_CONST_METHOD0(GetDistanceToStartOfRoad, double());
     MOCK_CONST_METHOD2(GetLaneWidth, double(int relativeLane, double distance));
-    MOCK_CONST_METHOD0(GetLaneWidthRightDrivingAndStopLane, double());
     MOCK_CONST_METHOD2(GetLaneCurvature, double(int relativeLane, double distance));
     MOCK_CONST_METHOD2(GetLaneDirection, double(int relativeLane, double distance));
     MOCK_METHOD1(GetDistanceToFrontAgent, double(int laneId));
     MOCK_METHOD1(GetDistanceToRearAgent, double(int laneId));
-    MOCK_CONST_METHOD1(GetAgentInFront, const AgentInterface*(int laneId));
-    MOCK_CONST_METHOD1(GetAgentBehind, const AgentInterface*(int laneId));
     MOCK_CONST_METHOD1(GetDistanceToObject, double(const WorldObjectInterface *otherObject));
     MOCK_METHOD0(RemoveSpecialAgentMarker, void());
     MOCK_METHOD0(SetSpecialAgentMarker, void());
-    MOCK_CONST_METHOD0(ExistsLaneLeft, bool());
-    MOCK_CONST_METHOD0(ExistsLaneRight, bool());
-    MOCK_CONST_METHOD2(IsLaneDrivingLane, bool(int laneId, double distance));
-    MOCK_CONST_METHOD2(IsLaneStopLane, bool(int laneId, double distance));
-    MOCK_CONST_METHOD2(IsLaneExitLane, bool(int laneId, double distance));
-    MOCK_CONST_METHOD2(IsLaneRamp, bool(int laneId, double distance));
     MOCK_METHOD0(SetObstacleFlag, void());
     MOCK_METHOD0(GetDistanceToSpecialAgent, double());
     MOCK_METHOD0(IsObstacle, bool());
     MOCK_CONST_METHOD2(GetDistanceToEndOfLane, double(double sightDistance, int relativeLane));
-    MOCK_CONST_METHOD2(GetDistanceToEndOfExit, double(int laneID, double sightDistance));
-    MOCK_CONST_METHOD2(GetDistanceToEndOfRamp, double(int laneID, double sightDistance));
+    MOCK_CONST_METHOD3(GetDistanceToEndOfLane, double(double sightDistance, int relativeLane, const LaneTypes& laneTypes));
     MOCK_CONST_METHOD0(GetPositionLateral, double());
     MOCK_CONST_METHOD0(IsLeavingWorld, bool());
     MOCK_CONST_METHOD0(IsCrossingLanes, bool());
-    MOCK_METHOD0(GetNumberOfLanes, int());
     MOCK_METHOD0(GetDistanceFrontAgentToEgo, double());
     MOCK_METHOD0(HasTwoLeftLanes, bool());
     MOCK_METHOD0(HasTwoRightLanes, bool());
@@ -147,17 +136,11 @@ class FakeAgent : public FakeWorldObject, public AgentInterface
     MOCK_CONST_METHOD0(IsBicycle, bool());
     MOCK_CONST_METHOD0(Unregister, void());
     MOCK_CONST_METHOD0(IsFirstCarInLane, bool());
-    MOCK_CONST_METHOD2(GetObjectInFront, WorldObjectInterface *(double previewDistance, int relativeLaneId));
-    MOCK_CONST_METHOD2(GetObjectBehind, WorldObjectInterface *(double previewDistance, int relativeLaneId));
-    MOCK_CONST_METHOD0(GetAllAgentsInFront, std::vector<AgentInterface *>());
-    MOCK_CONST_METHOD0(GetAllWorldObjectsInFront, std::vector<const WorldObjectInterface *>());
     MOCK_CONST_METHOD4(GetObjectsInRange,
                        std::vector<const WorldObjectInterface *>(int relativeLane, double backwardsRange,
                                                                  double forwardRange, MeasurementPoint mp));
     MOCK_CONST_METHOD4(GetAgentsInRange, std::vector<const AgentInterface *>(int relativeLane, double backwardsRange,
                                                                              double forwardRange, MeasurementPoint mp));
-    MOCK_CONST_METHOD3(GetAgentsInRangeAbsolute,
-                       std::vector<const AgentInterface *>(int laneId, double minDistance, double maxDistance));
     MOCK_CONST_METHOD0(GetTypeOfNearestMark, MarkType());
     MOCK_CONST_METHOD0(GetTypeOfNearestMarkString, std::string());
     MOCK_CONST_METHOD1(GetDistanceToNearestMark, double(MarkType markType));

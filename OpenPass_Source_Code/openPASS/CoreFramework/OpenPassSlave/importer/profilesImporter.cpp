@@ -23,15 +23,18 @@ void ProfilesImporter::ImportAgentProfiles(QDomElement agentProfilesElement,
                                            std::unordered_map<std::string, AgentProfile>& agentProfiles)
 {
     QDomElement agentProfileElement;
-    ThrowIfFalse(GetFirstChildElement(agentProfilesElement, TAG::agentProfile, agentProfileElement), "At least one agent profile is required");
+    ThrowIfFalse(GetFirstChildElement(agentProfilesElement, TAG::agentProfile, agentProfileElement),
+                 agentProfilesElement, "Tag " + std::string(TAG::agentProfile) + " is missing.");
 
     while (!agentProfileElement.isNull())
     {
         std::string agentProfileName;
-        ThrowIfFalse(ParseAttributeString(agentProfileElement, ATTRIBUTE::name, agentProfileName), "AgentProfile name is invalid.");
+        ThrowIfFalse(ParseAttributeString(agentProfileElement, ATTRIBUTE::name, agentProfileName),
+                     agentProfileElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
 
         std::string profileType;
-        ThrowIfFalse(ParseAttributeString(agentProfileElement, ATTRIBUTE::type, profileType), "AgentProfile type is invalid.");
+        ThrowIfFalse(ParseAttributeString(agentProfileElement, ATTRIBUTE::type, profileType),
+                     agentProfileElement, "Attribute " + std::string(ATTRIBUTE::type) + " is missing.");
 
         AgentProfile agentProfile;
 
@@ -41,15 +44,17 @@ void ProfilesImporter::ImportAgentProfiles(QDomElement agentProfilesElement,
 
             //Parses all driver profiles
             QDomElement driverProfilesElement;
-            ThrowIfFalse((GetFirstChildElement(agentProfileElement, TAG::driverProfiles, driverProfilesElement)
-                           && ImportProbabilityMap(driverProfilesElement, ATTRIBUTE::name, TAG::driverProfile, agentProfile.driverProfiles)),
-                          "Could not import DriverProfiles.");
+            ThrowIfFalse(GetFirstChildElement(agentProfileElement, TAG::driverProfiles, driverProfilesElement),
+                         agentProfileElement, "Tag " + std::string(TAG::driverProfiles) + " is missing.");
+            ThrowIfFalse(ImportProbabilityMap(driverProfilesElement, ATTRIBUTE::name, TAG::driverProfile, agentProfile.driverProfiles),
+                         driverProfilesElement, "Invalid probalities");
 
             //Parses all vehicle profiles
             QDomElement vehicleProfilesElement;
-            ThrowIfFalse((GetFirstChildElement(agentProfileElement, TAG::vehicleProfiles, vehicleProfilesElement)
-                           && ImportProbabilityMap(vehicleProfilesElement, ATTRIBUTE::name, TAG::vehicleProfile, agentProfile.vehicleProfiles)),
-                          "Could not import VehicleProfiles");
+            ThrowIfFalse(GetFirstChildElement(agentProfileElement, TAG::vehicleProfiles, vehicleProfilesElement),
+                         agentProfileElement, "Tag " + std::string(TAG::vehicleProfiles) + " is missing.");
+            ThrowIfFalse(ImportProbabilityMap(vehicleProfilesElement, ATTRIBUTE::name, TAG::vehicleProfile, agentProfile.vehicleProfiles),
+                         vehicleProfilesElement, "Invalid probalities");
         }
         else
         {
@@ -57,26 +62,30 @@ void ProfilesImporter::ImportAgentProfiles(QDomElement agentProfilesElement,
 
             agentProfile.type = AgentProfileType::Static;
             QDomElement systemElement;
-            ThrowIfFalse(GetFirstChildElement(agentProfileElement, TAG::system, systemElement), "Could not import System.");
+            ThrowIfFalse(GetFirstChildElement(agentProfileElement, TAG::system, systemElement),
+                         agentProfileElement, "Tag " + std::string(TAG::system) + " is missing.");
 
             std::string systemConfigFile;
-            ThrowIfFalse(ParseString(systemElement, ATTRIBUTE::file, systemConfigFile), "Could not import SystemConfig file.");
+            ThrowIfFalse(ParseString(systemElement, ATTRIBUTE::file, systemConfigFile),
+                         systemElement, "Attribute " + std::string(ATTRIBUTE::file) + " is missing.");
 
             agentProfile.systemConfigFile = systemConfigFile;
 
             int systemId;
-            ThrowIfFalse(ParseInt(systemElement, ATTRIBUTE::id, systemId), "Could not import System id.");
+            ThrowIfFalse(ParseInt(systemElement, ATTRIBUTE::id, systemId),
+                         systemElement, "Attribute " + std::string(ATTRIBUTE::id) + " is missing.");
 
             agentProfile.systemId = systemId;
 
             std::string vehicleModel;
-            ThrowIfFalse(ParseString(agentProfileElement, ATTRIBUTE::vehicleModel, vehicleModel), "Could not import VehicleModel.");
+            ThrowIfFalse(ParseString(agentProfileElement, ATTRIBUTE::vehicleModel, vehicleModel),
+                         agentProfileElement, "Attribute " + std::string(ATTRIBUTE::vehicleModel) + " is missing.");
 
             agentProfile.vehicleModel = vehicleModel;
         }
 
         auto insertReturn = agentProfiles.insert({agentProfileName, agentProfile});
-        ThrowIfFalse(insertReturn.second, "AgentProfile names need to be unique.");
+        ThrowIfFalse(insertReturn.second, agentProfileElement, "AgentProfile names need to be unique.");
 
         agentProfileElement = agentProfileElement.nextSiblingElement(TAG::agentProfile);
     }
@@ -90,7 +99,8 @@ void ProfilesImporter::ImportSpawnPointProfiles(const QDomElement& spawnPointPro
     while (!spawnPointProfileElement.isNull())
     {
         std::string profileName;
-        ThrowIfFalse(ParseAttributeString(spawnPointProfileElement, "Name", profileName), "Could not import spawn point profile.");
+        ThrowIfFalse(ParseAttributeString(spawnPointProfileElement, ATTRIBUTE::name, profileName),
+                     spawnPointProfilesElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
 
         openpass::parameter::Container parameters {};
         try
@@ -103,7 +113,7 @@ void ProfilesImporter::ImportSpawnPointProfiles(const QDomElement& spawnPointPro
         }
 
         auto insertReturn = spawnPointProfiles.emplace(profileName, parameters);
-        ThrowIfFalse(insertReturn.second, "Spawn point profile names need to be unique");
+        ThrowIfFalse(insertReturn.second, spawnPointProfilesElement, "Spawn point profile names need to be unique");
 
         spawnPointProfileElement = spawnPointProfileElement.nextSiblingElement(TAG::spawnPointProfile);
     }
@@ -113,13 +123,14 @@ void ProfilesImporter::ImportDriverProfiles(QDomElement driverProfilesElement,
                                             DriverProfiles& driverProfiles)
 {
     QDomElement driverProfileElement;
-    ThrowIfFalse(GetFirstChildElement(driverProfilesElement, TAG::driverProfile, driverProfileElement), "At least one driver profile is required.");
+    ThrowIfFalse(GetFirstChildElement(driverProfilesElement, TAG::driverProfile, driverProfileElement),
+                 driverProfilesElement, "Tag " + std::string(TAG::driverProfile) + " is missing.");
 
     while (!driverProfileElement.isNull())
     {
         std::string profileName;
         ThrowIfFalse(ParseAttributeString(driverProfileElement, ATTRIBUTE::name, profileName),
-                     "Could not import driver profile name.");
+                     driverProfileElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
 
 		openpass::parameter::Container parameters {};
         try
@@ -131,10 +142,11 @@ void ProfilesImporter::ImportDriverProfiles(QDomElement driverProfilesElement,
             LogErrorAndThrow("Could not import driver profile parameters: " + std::string(error.what()));
         }
 
-        ThrowIfFalse(openpass::parameter::Get<std::string>(parameters, ATTRIBUTE::type).has_value(), "Driver profile needs a type.");
+        ThrowIfFalse(openpass::parameter::Get<std::string>(parameters, ATTRIBUTE::type).has_value(),
+                     driverProfileElement, "Driver profile needs a type.");
 
         auto insertReturn = driverProfiles.emplace(profileName, parameters);
-        ThrowIfFalse(insertReturn.second, "Driver profile names need to be unique.");
+        ThrowIfFalse(insertReturn.second, driverProfileElement, "Driver profile names need to be unique.");
 
         driverProfileElement = driverProfileElement.nextSiblingElement(TAG::driverProfile);
     }
@@ -153,8 +165,10 @@ void ProfilesImporter::ImportAllVehicleComponentProfiles(QDomElement vehicleComp
             std::string componentType;
             std::string profileName;
 
-            ThrowIfFalse(ParseAttributeString(vehicleComponentProfileElement, ATTRIBUTE::type, componentType), "Could not import component type.");
-            ThrowIfFalse(ParseAttributeString(vehicleComponentProfileElement, ATTRIBUTE::name, profileName), "Could not import profile name.");
+            ThrowIfFalse(ParseAttributeString(vehicleComponentProfileElement, ATTRIBUTE::type, componentType),
+                         vehicleComponentProfileElement, "Attribute " + std::string(ATTRIBUTE::type) + " is missing.");
+            ThrowIfFalse(ParseAttributeString(vehicleComponentProfileElement, ATTRIBUTE::name, profileName),
+                         vehicleComponentProfileElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
 
 			openpass::parameter::Container parameters {};
             try
@@ -173,7 +187,7 @@ void ProfilesImporter::ImportAllVehicleComponentProfiles(QDomElement vehicleComp
             }
 
             auto insertReturn = vehicleComponentProfilesMap.at(componentType).emplace(profileName, parameters);
-            ThrowIfFalse(insertReturn.second, "Component profile names need to be unqiue.");
+            ThrowIfFalse(insertReturn.second, vehicleComponentProfileElement, "Component profile names need to be unqiue.");
 
             vehicleComponentProfileElement = vehicleComponentProfileElement.nextSiblingElement(
                                                  QString::fromStdString(TAG::vehicleComponentProfile));
@@ -189,10 +203,12 @@ void ProfilesImporter::ImportSensorProfiles(QDomElement sensorProfilesElement, o
     while (!sensorProfileElement.isNull())
     {
         std::string profileName;
-        ThrowIfFalse(ParseAttributeString(sensorProfileElement, ATTRIBUTE::name, profileName), "Sensor profile needs a name.");
+        ThrowIfFalse(ParseAttributeString(sensorProfileElement, ATTRIBUTE::name, profileName),
+                     sensorProfileElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
 
         std::string sensorType;
-        ThrowIfFalse(ParseAttributeString(sensorProfileElement, ATTRIBUTE::type, sensorType), "Sensor profile needs a type.");
+        ThrowIfFalse(ParseAttributeString(sensorProfileElement, ATTRIBUTE::type, sensorType),
+                     sensorProfileElement, "Attribute " + std::string(ATTRIBUTE::type) + " is missing.");
 
         openpass::parameter::Container parameters {};
         try
@@ -205,7 +221,7 @@ void ProfilesImporter::ImportSensorProfiles(QDomElement sensorProfilesElement, o
         }
 
         ThrowIfFalse(openpass::parameter::Get<openpass::parameter::NormalDistribution>(parameters, ATTRIBUTE::latency).has_value(),
-            "Sensor profile parameter needs a latency");
+                     sensorProfileElement, "Sensor profile parameter needs a latency");
 
         sensorProfiles.emplace_back(openpass::sensors::Profile{profileName, sensorType, parameters});
         sensorProfileElement = sensorProfileElement.nextSiblingElement(TAG::sensorProfile);
@@ -222,8 +238,10 @@ void ProfilesImporter::ImportSensorLinksOfComponent(QDomElement sensorLinksEleme
         int sensorId;
         std::string inputId;
 
-        ThrowIfFalse(ParseAttributeInt(sensorLinkElement, ATTRIBUTE::sensorId, sensorId), "Sensor link needs a SensorId.");
-        ThrowIfFalse(ParseAttributeString(sensorLinkElement, ATTRIBUTE::inputId, inputId), "Sensor link needs a InputId.");
+        ThrowIfFalse(ParseAttributeInt(sensorLinkElement, ATTRIBUTE::sensorId, sensorId),
+                     sensorLinkElement, "Attribute " + std::string(ATTRIBUTE::sensorId) + " is missing.");
+        ThrowIfFalse(ParseAttributeString(sensorLinkElement, ATTRIBUTE::inputId, inputId),
+                     sensorLinkElement, "Attribute " + std::string(ATTRIBUTE::inputId) + " is missing.");
 
         SensorLink sensorLink{};
         sensorLink.sensorId = sensorId;
@@ -236,11 +254,14 @@ void ProfilesImporter::ImportSensorLinksOfComponent(QDomElement sensorLinksEleme
 
 void ProfilesImporter::ImportVehicleComponent(QDomElement vehicleComponentElement, VehicleComponent& vehicleComponent)
 {
-    ThrowIfFalse(ParseAttributeString(vehicleComponentElement, ATTRIBUTE::type, vehicleComponent.type), " Could not import vehicle component type");
+    ThrowIfFalse(ParseAttributeString(vehicleComponentElement, ATTRIBUTE::type, vehicleComponent.type),
+                 vehicleComponentElement, "Attribute " + std::string(ATTRIBUTE::type) + " is missing.");
 
     QDomElement profilesElement;
-    GetFirstChildElement(vehicleComponentElement, TAG::profiles, profilesElement);
-    ThrowIfFalse(ImportProbabilityMap(profilesElement, ATTRIBUTE::name, "Profile", vehicleComponent.componentProfiles, false), "Could not import ComponentProfile.");
+    ThrowIfFalse(GetFirstChildElement(vehicleComponentElement, TAG::profiles, profilesElement),
+                 vehicleComponentElement, "Tag " + std::string(TAG::profiles) + " is missing.");
+    ThrowIfFalse(ImportProbabilityMap(profilesElement, ATTRIBUTE::name, "Profile", vehicleComponent.componentProfiles, false),
+                 profilesElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
 
     QDomElement sensorLinksElement;
     GetFirstChildElement(vehicleComponentElement, TAG::sensorLinks, sensorLinksElement);
@@ -251,7 +272,8 @@ void ProfilesImporter::ImportAllVehicleComponentsOfVehicleProfile(QDomElement ve
                                                                   VehicleProfile& vehicleProfile)
 {
     QDomElement vehicleComponentsElement;
-    ThrowIfFalse(GetFirstChildElement(vehicleProfileElement, TAG::components, vehicleComponentsElement), "Missing Components tag.");
+    ThrowIfFalse(GetFirstChildElement(vehicleProfileElement, TAG::components, vehicleComponentsElement),
+                 vehicleProfileElement, "Tag " + std::string(TAG::components) + " is missing.");
 
     QDomElement componentElement;
     GetFirstChildElement(vehicleComponentsElement, TAG::component, componentElement);
@@ -268,29 +290,42 @@ void ProfilesImporter::ImportAllVehicleComponentsOfVehicleProfile(QDomElement ve
 
 void ProfilesImporter::ImportSensorParameters(QDomElement sensorElement, openpass::sensors::Parameter& sensor)
 {
-    ThrowIfFalse(ParseAttributeInt(sensorElement, ATTRIBUTE::id, sensor.id), "Sensor needs an Id.");
+    ThrowIfFalse(ParseAttributeInt(sensorElement, ATTRIBUTE::id, sensor.id),
+                 sensorElement, "Attribute " + std::string(ATTRIBUTE::id) + " is missing.");
 
     QDomElement positionElement;
-    ThrowIfFalse(GetFirstChildElement(sensorElement, TAG::position, positionElement), "Sensor needs a position.");
-    ThrowIfFalse(ParseAttributeString(positionElement, ATTRIBUTE::name, sensor.position.name), "Sensorposition needs a Name.");
-    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::longitudinal, sensor.position.longitudinal), "Sensorposition needs a Longitudinal.");
-    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::lateral, sensor.position.lateral), "Sensorposition needs a Lateral.");
-    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::height, sensor.position.height), "Sensorposition needs a Height.");
-    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::pitch, sensor.position.pitch), "Sensorposition needs a Pitch.");
-    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::yaw, sensor.position.yaw), "Sensorposition needs a Yaw.");
-    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::roll, sensor.position.roll), "Sensorposition needs a Roll.");
+    ThrowIfFalse(GetFirstChildElement(sensorElement, TAG::position, positionElement),
+                 sensorElement, "Tag " + std::string(TAG::position) + " is missing.");
+    ThrowIfFalse(ParseAttributeString(positionElement, ATTRIBUTE::name, sensor.position.name),
+                 positionElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
+    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::longitudinal, sensor.position.longitudinal),
+                 positionElement, "Attribute " + std::string(ATTRIBUTE::longitudinal) + " is missing.");
+    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::lateral, sensor.position.lateral),
+                 positionElement, "Attribute " + std::string(ATTRIBUTE::lateral) + " is missing.");
+    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::height, sensor.position.height),
+                 positionElement, "Attribute " + std::string(ATTRIBUTE::height) + " is missing.");
+    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::pitch, sensor.position.pitch),
+                 positionElement, "Attribute " + std::string(ATTRIBUTE::pitch) + " is missing.");
+    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::yaw, sensor.position.yaw),
+                 positionElement, "Attribute " + std::string(ATTRIBUTE::yaw) + " is missing.");
+    ThrowIfFalse(ParseAttributeDouble(positionElement, ATTRIBUTE::roll, sensor.position.roll),
+                 positionElement, "Attribute " + std::string(ATTRIBUTE::roll) + " is missing.");
 
     QDomElement profileElement;
-    ThrowIfFalse(GetFirstChildElement(sensorElement, TAG::profile, profileElement), "Sensor needs a Profile.");
-    ThrowIfFalse(ParseAttributeString(profileElement, ATTRIBUTE::type, sensor.profile.type), "SensorProfile needs a Type.");
-    ThrowIfFalse(ParseAttributeString(profileElement, ATTRIBUTE::name, sensor.profile.name), "SensorProfile needs a Name.");
+    ThrowIfFalse(GetFirstChildElement(sensorElement, TAG::profile, profileElement),
+                 sensorElement, "Tag " + std::string(TAG::profile) + " is missing.");
+    ThrowIfFalse(ParseAttributeString(profileElement, ATTRIBUTE::type, sensor.profile.type),
+                 profileElement, "Attribute " + std::string(ATTRIBUTE::type) + " is missing.");
+    ThrowIfFalse(ParseAttributeString(profileElement, ATTRIBUTE::name, sensor.profile.name),
+                 profileElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
 }
 
 void ProfilesImporter::ImportAllSensorsOfVehicleProfile(QDomElement vehicleProfileElement,
         VehicleProfile& vehicleProfile)
 {
     QDomElement sensorsElement;
-    ThrowIfFalse(GetFirstChildElement(vehicleProfileElement, TAG::sensors, sensorsElement), "VehicleProfile has no Sensors Element.");
+    ThrowIfFalse(GetFirstChildElement(vehicleProfileElement, TAG::sensors, sensorsElement),
+                 vehicleProfileElement, "Tag " + std::string(TAG::sensors) + " is missing.");
 
     QDomElement sensorElement;
     GetFirstChildElement(sensorsElement, TAG::sensor, sensorElement);
@@ -310,8 +345,10 @@ VehicleProfile ProfilesImporter::ImportVehicleProfile(QDomElement vehicleProfile
     VehicleProfile vehicleProfile;
 
     QDomElement vehicleModelElement;
-    ThrowIfFalse(GetFirstChildElement(vehicleProfileElement, TAG::model, vehicleModelElement), "VehicleProfile has no VehicleModel Element.");
-    ThrowIfFalse(ParseAttributeString(vehicleModelElement, ATTRIBUTE::name, vehicleProfile.vehicleModel), "VehicleModel name is missing.");
+    ThrowIfFalse(GetFirstChildElement(vehicleProfileElement, TAG::model, vehicleModelElement),
+                 vehicleProfileElement, "Tag " + std::string(TAG::model) + " is missing.");
+    ThrowIfFalse(ParseAttributeString(vehicleModelElement, ATTRIBUTE::name, vehicleProfile.vehicleModel),
+                 vehicleModelElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
 
     ImportAllVehicleComponentsOfVehicleProfile(vehicleProfileElement, vehicleProfile);
     ImportAllSensorsOfVehicleProfile(vehicleProfileElement, vehicleProfile);
@@ -328,7 +365,8 @@ void ProfilesImporter::ImportVehicleProfiles(QDomElement vehicleProfilesElement,
     while (!vehicleProfileElement.isNull())
     {
         std::string profileName;
-        ThrowIfFalse(ParseAttributeString(vehicleProfileElement, ATTRIBUTE::name, profileName), "Vehicle profile name is missing.");
+        ThrowIfFalse(ParseAttributeString(vehicleProfileElement, ATTRIBUTE::name, profileName),
+                     vehicleProfileElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
 
         auto vehicleProfile = ImportVehicleProfile(vehicleProfileElement);
         vehicleProfiles.insert(std::make_pair<std::string&, VehicleProfile&>(profileName, vehicleProfile));
@@ -348,7 +386,9 @@ bool ProfilesImporter::Import(const std::string& filename, Profiles& profiles)
 
         QByteArray xmlData(xmlFile.readAll());
         QDomDocument document;
-        ThrowIfFalse(document.setContent(xmlData), "invalid xml file format of file " + filename);
+        QString errorMsg;
+        int errorLine;
+        ThrowIfFalse(document.setContent(xmlData, &errorMsg, &errorLine), "Invalid xml format (" + filename + ") in line " + std::to_string(errorLine) + ": " + errorMsg.toStdString());
 
         QDomElement documentRoot = document.documentElement();
         ThrowIfFalse(!documentRoot.isNull(), "invalid document root " + filename);

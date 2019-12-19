@@ -343,20 +343,20 @@ For convex BBoxes the above will give correct detection results.
 
 Both polygons are constructed from corner-points consisting out of the intersection between the opening-angle boundaries at maximum detection range and their corresponding tangents.
 
-\subsubsection dev_agent_modules_geometric2d_function Function
+\subsection dev_agent_modules_geometric2d_function Function
 
 1. Construct the polygon based on the opening-angle
 2. Check if detection-field (polygon) intersects with any BBox (object-detection)
 3. Calculate the distance between sensor and object
 4. if (dist <= range && isIntersecting) -> object is in circular sector (object validation)
 
-\subsubsection dev_agent_modules_geometric2d_cases Cases
+\subsection dev_agent_modules_geometric2d_cases Cases
 
 - For angles < 1.0 * pi a four-corner (kite) polygon can be constructed out of two radiuses and two tangents.
 - For angles > = 1.0 * pi and < 2.0 * pi a five-corner polygon can be constructed of two radiusas an three tangents.
 - For opening-angle of exactly 2.0 * pi the distance information suffices. No polygon is needed.
 
-\subsubsection dev_agent_modules_geometric2d_obstruction Visual Obstruction
+\subsection dev_agent_modules_geometric2d_obstruction Visual Obstruction
 
 Objects in front of others block the sensors line of sight. If an object is large enough it might visually obstruct others.
 

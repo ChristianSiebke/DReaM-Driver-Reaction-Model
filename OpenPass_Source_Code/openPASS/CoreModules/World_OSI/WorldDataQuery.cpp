@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -84,7 +84,7 @@ bool Stream<T>::Contains(const T& element) const
             != elements.cend();
 }
 
-double WorldDataQuery::GetDistanceToEndOfLane(const LaneStream &laneStream, double initialSearchPosition, double maxSearchLength, std::list<LaneType> requestedLaneTypes) const
+double WorldDataQuery::GetDistanceToEndOfLane(const LaneStream &laneStream, double initialSearchPosition, double maxSearchLength, const std::vector<LaneType>& requestedLaneTypes) const
 {
     for (const auto& lane : laneStream.GetElements())
     {
@@ -188,21 +188,6 @@ OWL::CLanes WorldDataQuery::GetLanesOfLaneTypeAtDistance(std::string roadId, dou
     return lanes;
 }
 
-
-bool WorldDataQuery::ExistsDrivingLaneOnSide(std::string roadId, OWL::OdId laneId, double distance, Side side)
-{
-    OWL::CLane& lane = GetLaneByOdId(roadId, laneId, distance);
-
-    if (side == Side::Left)
-    {
-        return lane.GetLeftLane().Exists() && (lane.GetLeftLane().GetLaneType() == LaneType::Driving);
-    }
-    else
-    {
-        return lane.GetRightLane().Exists() && (lane.GetRightLane().GetLaneType() == LaneType::Driving);
-    }
-}
-
 OWL::CLane& WorldDataQuery::GetLaneByOdId(std::string roadId, OWL::OdId odLaneId, double distance) const
 {
     auto section = GetSectionByDistance(roadId, distance);
@@ -232,56 +217,6 @@ bool WorldDataQuery::IsSValidOnLane(std::string roadId, OWL::OdId laneId, double
     }
 
     return GetLaneByOdId(roadId, laneId, distance).Exists();
-}
-
-int WorldDataQuery::GetNumberOfLanes(std::string roadId, double distance)
-{
-    auto section = GetSectionByDistance(roadId, distance);
-    if(!section)
-    {
-        return 0;
-    }
-    return section->GetLanes().size();
-}
-
-
-double WorldDataQuery::GetNextValidSOnLaneInDownstream(std::string roadId, OWL::OdId laneId, double initialDistance,
-        double stepSizeLookingForValidS)
-{
-    double maxSearchLength = OWL::EVENTHORIZON;
-    double nextValidS = initialDistance + stepSizeLookingForValidS;
-    double maxDistance = initialDistance + maxSearchLength;
-
-    while (!IsSValidOnLane(roadId, laneId, nextValidS) && nextValidS < maxDistance)
-    {
-        nextValidS += stepSizeLookingForValidS;
-    }
-
-    if (nextValidS >= maxDistance)
-    {
-        return static_cast<double>(INFINITY);
-    }
-
-    return nextValidS;
-}
-
-double WorldDataQuery::GetLastValidSInUpstream(std::string roadId, OWL::OdId laneId, double initialDistance, double stepSizeLookingForValidS)
-{
-    double maxSearchLength = OWL::EVENTHORIZON;
-    double lastValidSOnLane = initialDistance - stepSizeLookingForValidS;
-    double minDistance = std::max(0.0, initialDistance - maxSearchLength);
-
-    while (!IsSValidOnLane(roadId, laneId, lastValidSOnLane) && lastValidSOnLane > minDistance)
-    {
-        lastValidSOnLane -= stepSizeLookingForValidS;
-    }
-
-    if (lastValidSOnLane < minDistance)
-    {
-        return static_cast<double>(-INFINITY);
-    }
-
-    return lastValidSOnLane;
 }
 
 std::vector<std::pair<double, OWL::Interfaces::TrafficSign *>> WorldDataQuery::GetTrafficSignsInRange(LaneStream laneStream, double startDistance, double searchRange) const
@@ -425,9 +360,12 @@ std::vector<IntersectingConnection> WorldDataQuery::GetIntersectingConnections(s
 {
     std::vector<IntersectingConnection> intersections;
     const auto& junction = GetJunctionOfConnector(connectingRoadId);
-    auto connectionInfos = junction->GetIntersections().at(connectingRoadId);
-    std::transform(std::begin(connectionInfos), std::end(connectionInfos), std::back_inserter(intersections),
-        [&](auto connectionInfo){return IntersectingConnection{worldData.GetRoadIdMapping().at(connectionInfo.intersectingRoad), connectionInfo.relativeRank};});
+    auto connectionInfos = junction->GetIntersections().find(connectingRoadId);
+    if (connectionInfos != junction->GetIntersections().end())
+    {
+        std::transform(connectionInfos->second.cbegin(), connectionInfos->second.cend(), std::back_inserter(intersections),
+                       [&](const OWL::IntersectionInfo& connectionInfo){return IntersectingConnection{worldData.GetRoadIdMapping().at(connectionInfo.intersectingRoad), connectionInfo.relativeRank};});
+    }
     return intersections;
 }
 
@@ -947,7 +885,12 @@ RelativeWorldView::Lanes WorldDataQuery::GetRelativeLanes(const RoadStream& road
         {
             return lanes;
         }
-        for (const auto& section : road().GetSections())
+        auto sections = road().GetSections();
+        if (!road.inStreamDirection)
+        {
+            sections.reverse();
+        }
+        for (const auto& section : sections)
         {
             const double sectionStart = road.GetStreamPosition(section->GetSOffset() + (road.inStreamDirection ? 0 : section->GetLength()));
             const double sectionEnd = road.GetStreamPosition(section->GetSOffset() + (road.inStreamDirection ? section->GetLength() : 0));
