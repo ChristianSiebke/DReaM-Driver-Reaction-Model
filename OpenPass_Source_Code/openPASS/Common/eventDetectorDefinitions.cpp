@@ -25,37 +25,27 @@ std::vector<const AgentInterface *> TimeToCollisionCondition::IsMet(WorldInterfa
     std::vector<const AgentInterface*> conditionMetAgents{};
     for (const auto triggeringAgent : GetTriggeringAgents(world))
     {
-        const auto distanceToReferenceAgent = triggeringAgent->GetDistanceToObject(referenceAgent);
         double ttc;
-        if (distanceToReferenceAgent >= 0) // referenceAgent is in front
-        {
-            ttc = TrafficHelperFunctions::CalculateNetTTC(triggeringAgent->GetVelocity(),
-                                                          referenceAgent->GetVelocity(),
-                                                          distanceToReferenceAgent);
-        }
-        else // triggeringAgent is in front
-        {
-            ttc = TrafficHelperFunctions::CalculateNetTTC(referenceAgent->GetVelocity(),
-                                                          triggeringAgent->GetVelocity(),
-                                                          -distanceToReferenceAgent);
-        }
+        constexpr double timeStep = 100;
+
+        ttc = TtcCalculations::CalculateObjectTTC(*triggeringAgent, *referenceAgent, targetTTC + timeStep / 1000.0, 0.0, 0.0, timeStep);
 
         switch(rule)
         {
             case Rule::LessThan:
-                if (ttc < targetTTC)
+                if (ttc < targetTTC - CommonHelper::EPSILON)
                 {
                     conditionMetAgents.emplace_back(triggeringAgent);
                 }
                 break;
             case Rule::EqualTo:
-                if (ttc == targetTTC)
+                if (std::abs(targetTTC - ttc) < CommonHelper::EPSILON)
                 {
                     conditionMetAgents.emplace_back(triggeringAgent);
                 }
                 break;
             case Rule::GreaterThan:
-                if (ttc > targetTTC)
+                if (ttc > targetTTC + CommonHelper::EPSILON)
                 {
                     conditionMetAgents.emplace_back(triggeringAgent);
                 }

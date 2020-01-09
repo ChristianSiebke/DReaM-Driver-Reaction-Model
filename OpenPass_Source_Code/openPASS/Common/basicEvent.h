@@ -31,27 +31,24 @@ class BasicEvent : public EventInterface
 {
 public:
     BasicEvent(int time,
-               std::string source,
-               std::string sequenceName,
-               EventDefinitions::EventType eventType):
+               std::string eventName,
+               std::string source):
         time(time),
-        source(source),
-        sequenceName(sequenceName),
-        eventType(eventType)
+        name(eventName),
+        source(source)
     {}
     BasicEvent(const BasicEvent&) = delete;
     BasicEvent(BasicEvent&&) = delete;
     BasicEvent& operator=(const BasicEvent&) = delete;
     BasicEvent& operator=(BasicEvent&&) = delete;
-    virtual ~BasicEvent() = default;
-
+    virtual ~BasicEvent() override = default;
 
     /*!
     * \brief Sets the Id of the event.
     *
     * @param[in]	Id of the event.
     */
-    virtual void SetEventId(const int eventId)
+    virtual void SetId(const int eventId) override
     {
         this->eventId = eventId;
     }
@@ -61,7 +58,7 @@ public:
     *
     * @return	     Id.
     */
-    virtual int GetId() const
+    virtual int GetId() const override
     {
         return eventId;
     }
@@ -71,9 +68,19 @@ public:
     *
     * @return	     Time in milliseconds.
     */
-    virtual int GetEventTime() const
+    virtual int GetEventTime() const override
     {
         return time;
+    }
+
+    /*!
+    * \brief Returns the category of the event.
+    *
+    * @return	     EventCategory.
+    */
+    virtual EventDefinitions::EventCategory GetCategory() const override
+    {
+        return EventDefinitions::EventCategory::Basic;
     }
 
     /*!
@@ -81,7 +88,7 @@ public:
     *
     * @param[in]	     Event Id.
     */
-    virtual void SetTriggeringEventId(const int triggeringEventId)
+    virtual void SetTriggeringEventId(const int triggeringEventId) override
     {
         this->triggeringEventId = triggeringEventId;
     }
@@ -91,9 +98,19 @@ public:
     *
     * @return	     Event Id.
     */
-    virtual int GetTriggeringEventId() const
+    virtual int GetTriggeringEventId() const override
     {
         return triggeringEventId;
+    }
+
+    /*!
+    * \brief Returns the name of the event.
+    *
+    * @return	     Name of the event as string.
+    */
+    virtual std::string GetName() const override
+    {
+        return name;
     }
 
     /*!
@@ -101,29 +118,9 @@ public:
     *
     * @return	     Name of source component as string.
     */
-    virtual std::string GetSource() const
+    virtual std::string GetSource() const override
     {
         return source;
-    }
-
-    /*!
-    * \brief Returns the sequenceName of the event.
-    *
-    * @return	     Sequence name as string.
-    */
-    virtual std::string GetSequenceName() const
-    {
-        return sequenceName;
-    }
-
-    /*!
-    * \brief Returns the type of the EventDetector.
-    *
-    * @return	     Type of the EventDetector.
-    */
-    virtual EventDefinitions::EventType GetEventType() const
-    {
-        return eventType;
     }
 
     /*!
@@ -133,19 +130,15 @@ public:
     *
     * @return	     List of string pairs of the event parameters.
     */
-    virtual std::list<std::pair<std::string, std::string>> GetEventParametersAsString()
+    virtual EventParameters GetParametersAsString() override
     {
-        std::list<std::pair<std::string, std::string>> eventParameters;
-
-        return eventParameters;
+        return {};
     }
 
 private:
     int eventId;
     const int time;
     int triggeringEventId {-1};
+    const std::string name;
     const std::string source;
-    const std::string sequenceName;
-    const EventDefinitions::EventType eventType;
 };
-

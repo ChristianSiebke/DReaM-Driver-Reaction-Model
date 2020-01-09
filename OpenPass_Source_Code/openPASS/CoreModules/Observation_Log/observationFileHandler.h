@@ -154,7 +154,7 @@ private:
     * @param[in]     eventParameters    Parameters of an event in string representation.
     */
     void AddEventParameters(std::shared_ptr<QXmlStreamWriter> fStream,
-                            std::list<std::pair<std::string, std::string>> eventParameters);
+                            EventParameters eventParameters);
 
     /*!
     * \brief Writes an event into the simulation output.
@@ -192,16 +192,6 @@ private:
     * @param[in]     filename           Name of the file, where cyclics are written to.
     */
     void AddReference(std::shared_ptr<QXmlStreamWriter> fStream, QString filename);
-
-    /*!
-    * \brief Returns the event type as string.
-    *
-    * @param[in]     eventType      Event type.
-    *
-    * @return        Event type as string.
-    */
-
-    std::string GetEventString(EventDefinitions::EventType eventType);
 
     /*!
     * \brief Removes old cyclic files from directory.

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -57,8 +57,17 @@ public:
     ///
     static const std::vector<std::string> Concat(const std::string& path, const std::vector<std::string>& filenames);
 
-private:
+    /// \brief  Removes the file from a path
+    /// \param  path with file
+    /// \return Resolved string  e.g. /baseDir/path or /path, respectively
+    static const std::string StripFile(const std::string& path);
 
+    /// \brief  Checkes whether a given path is absolute or relative
+    /// \param  path
+    /// \return true if relative path
+    static bool IsRelative(const std::string& path);
+
+private:
     /// \brief  Internally used to get a cononical path w.r.t to the application path
     /// \param  applicationPath  absolute path of the executed file, e.g. /baseDir
     /// \param  path             relative or absolute path, e.g. path or /path

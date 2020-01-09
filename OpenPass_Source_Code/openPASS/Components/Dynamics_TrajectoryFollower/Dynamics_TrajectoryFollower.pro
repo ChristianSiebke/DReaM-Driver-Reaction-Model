@@ -1,5 +1,5 @@
 # /*********************************************************************
-# * Copyright (c) 2017, 2018, 2019 in-tech GmbH
+# * Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -27,7 +27,6 @@ INCLUDEPATH += $$SUBDIRS \
             ../../Common \
             ../../CoreFramework/CoreShare \
             ../../CoreFramework/OpenPassSlave/modelElements \
-            ../../CoreFramework/OpenPassSlave/importer \
             ../../Interfaces \
             ..
 
@@ -35,16 +34,8 @@ SOURCES += $$getFiles(SUBDIRS, cpp) \
            $$getFiles(SUBDIRS, c) \
             ../../Common/vector2d.cpp \
             ../../CoreFramework/CoreShare/log.cpp \
-            ../../CoreFramework/CoreShare/xmlParser.cpp \
-           ../../CoreFramework/OpenPassSlave/importer/csvParser.cpp \
-           ../../CoreFramework/OpenPassSlave/importer/trajectory.cpp \
-           ../../CoreFramework/OpenPassSlave/importer/trajectoryImporter.cpp
 
 HEADERS += $$getFiles(SUBDIRS, h) \
             ../../Common/vector2d.h \
             ../../CoreFramework/CoreShare/log.h \
-            ../../CoreFramework/CoreShare/xmlParser.h \
-           ../../CoreFramework/OpenPassSlave/importer/csvParser.h \
-           ../../CoreFramework/OpenPassSlave/importer/trajectory.h \
-           ../../CoreFramework/OpenPassSlave/importer/trajectoryImporter.h
 

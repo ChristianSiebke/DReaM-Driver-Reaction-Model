@@ -61,12 +61,23 @@
             <component>
                 <id>ComponentController</id>
                 <schedule>
-                    <priority>1</priority>
+                    <priority>200</priority>
                     <offset>0</offset>
                     <cycle>100</cycle>
                     <response>0</response>
                 </schedule>
                 <library>ComponentController</library>
+                <parameters/>
+            </component>
+            <component>
+                <id>OpenScenarioActions</id>
+                <schedule>
+                    <priority>400</priority>
+                    <offset>0</offset>
+                    <cycle>100</cycle>
+                    <response>0</response>
+                </schedule>
+                <library>OpenScenarioActions</library>
                 <parameters/>
             </component>
             <component>
@@ -352,17 +363,6 @@
                 </target>
             </connection>
             <connection>
-                <id>283</id>
-                <source>
-                    <component>Dynamics_TrajectoryFollower</component>
-                    <output>83</output>
-                </source>
-                <target>
-                    <component>ComponentController</component>
-                    <input>100</input>
-                </target>
-            </connection>
-            <connection>
                 <id>301</id>
                 <source>
                     <component>Dynamics_RegularDriving</component>
@@ -562,14 +562,14 @@
                 </target>
             </connection>
             <connection>
-                <id>8301</id>
+                <id>8471</id>
                 <source>
-                    <component>ComponentController</component>
-                    <output>100</output>
+                    <component>OpenScenarioActions</component>
+                    <output>0</output>
                 </source>
                 <target>
                     <component>Dynamics_TrajectoryFollower</component>
-                    <input>83</input>
+                    <input>2</input>
                 </target>
             </connection>
             <connection>

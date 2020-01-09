@@ -17,7 +17,7 @@ namespace ATTRIBUTE = openpass::importer::xml::eventDetectorImporter::attribute;
 namespace Importer
 {
     openScenario::ConditionalEventDetectorInformation EventDetectorImporter::ImportEventDetector(QDomElement& eventElement,
-                                                                                                 const std::string& sequenceName,
+                                                                                                 const std::string& eventName,
                                                                                                  const int numberOfExecutions,
                                                                                                  const openScenario::ActorInformation& actorInformation,
                                                                                                  const std::vector<ScenarioEntity>& entities)
@@ -44,7 +44,7 @@ namespace Importer
 
         return openScenario::ConditionalEventDetectorInformation{actorInformation,
                                                                  numberOfExecutions,
-                                                                 sequenceName,
+                                                                 eventName,
                                                                  conditions};
     }
 

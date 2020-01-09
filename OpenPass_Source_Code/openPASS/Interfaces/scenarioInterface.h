@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -130,6 +130,20 @@ public:
     //! \param[in]      catalogPath     Relative path to the pedestrian catalog file
     //-----------------------------------------------------------------------------
     virtual void SetPedestrianCatalogPath(const std::string& catalogPath) = 0;
+
+    //-----------------------------------------------------------------------------
+    //! \brief Retreives the path to the trajectory catalog file
+    //!
+    //! \return     Relative path to the trajectory catalog
+    //-----------------------------------------------------------------------------
+    virtual const std::string& GetTrajectoryCatalogPath() = 0;
+
+    //-----------------------------------------------------------------------------
+    //! Sets the path to the trajectory catalog file
+    //!
+    //! \param[in]      catalogPath     Relative path to the trajectory catalog file
+    //-----------------------------------------------------------------------------
+    virtual void SetTrajectoryCatalogPath(const std::string& catalogPath) = 0;
 
     //-----------------------------------------------------------------------------
     //! Retreives the path to the scenery file (OpenDRIVE)

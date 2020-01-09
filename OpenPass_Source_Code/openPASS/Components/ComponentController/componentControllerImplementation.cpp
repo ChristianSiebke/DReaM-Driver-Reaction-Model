@@ -93,7 +93,6 @@ void ComponentControllerImplementation::UpdateInput(int localLinkId, const std::
             const auto warningComponent = stateManager.GetComponent(localLinkId);
             const auto componentWarningEvent = std::make_shared<ComponentWarningEvent>(time,
                                                                                        COMPONENTNAME,
-                                                                                       "",
                                                                                        GetAgent()->GetId(),
                                                                                        warningComponent->GetComponentName(),
                                                                                        warning.value());

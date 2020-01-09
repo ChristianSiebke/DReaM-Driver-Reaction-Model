@@ -30,16 +30,14 @@ class LaneChangeEvent : public VehicleComponentEvent
 {
 public:
     LaneChangeEvent(int time,
+                    const std::string eventName,
                     std::string source,
-                    std::string sequenceName,
-                    EventDefinitions::EventType eventType,
                     int agentId,
                     const int deltaLaneId):
         VehicleComponentEvent(time,
-                   source,
-                   sequenceName,
-                   eventType,
-                   agentId),
+                              eventName,
+                              source,
+                              agentId),
         deltaLaneId(deltaLaneId)
     {}
     LaneChangeEvent(const LaneChangeEvent&) = delete;
@@ -49,16 +47,26 @@ public:
     virtual ~LaneChangeEvent() = default;
 
     /*!
+    * \brief Returns the category of the event.
+    *
+    * @return	     EventCategory.
+    */
+    virtual EventDefinitions::EventCategory GetCategory() const override
+    {
+        return EventDefinitions::EventCategory::LaneChange;
+    }
+
+    /*!
     * \brief Returns all parameters of the event as string list.
     * \details Returns the agentId as string list.
     *
     * @return	     List of string pairs of the event parameters.
     */
-    virtual std::list<std::pair<std::string, std::string>> GetEventParametersAsString()
+    virtual EventParameters GetParametersAsString() override
     {
-        auto eventParameters = VehicleComponentEvent::GetEventParametersAsString();
+        auto eventParameters = VehicleComponentEvent::GetParametersAsString();
 
-        eventParameters.push_back(std::pair<std::string, std::string>("DeltaLaneId", std::to_string(deltaLaneId)));
+        eventParameters.push_back({"DeltaLaneId", std::to_string(deltaLaneId)});
 
         return eventParameters;
     }

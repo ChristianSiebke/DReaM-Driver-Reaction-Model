@@ -34,6 +34,7 @@ struct OutputAttributes
     const QString AGENTTYPENAME = "AgentTypeName";
     const QString TIME = "Time";
     const QString TYPE = "Type";
+    const QString NAME = "Name";
     const QString TRIGGERINGEVENTID = "TriggeringEventId";
     const QString KEY = "Key";
     const QString VALUE = "Value";

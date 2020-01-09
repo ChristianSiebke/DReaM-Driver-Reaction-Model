@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2019 in-tech GmbH on behalf of BMW
+* Copyright (c) 2019, 2020 in-tech GmbH on behalf of BMW
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -79,6 +79,47 @@ TEST(Directories, SamePath)
     EXPECT_THAT(directories.outputDir, "/path");
 }
 
+TEST(Directories, StripFile_Absolute)
+{
+    ASSERT_THAT(Directories::StripFile("/path/some.file"), "/path");
+}
+
+TEST(Directories, StripFile_WithoutPath)
+{
+    auto path = Directories::StripFile("some.file");
+    ASSERT_THAT(path, ".");
+}
+
+TEST(Directories, StripFile_Relative)
+{
+    ASSERT_THAT(Directories::StripFile("path/some.file"), "path");
+}
+
+TEST(Directories, IsRelative_Relative)
+{
+    ASSERT_THAT(Directories::IsRelative("path/some.file"), true);
+}
+
+TEST(Directories, IsRelative_Absolute)
+{
+    ASSERT_THAT(Directories::IsRelative("/path/some.file"), false);
+}
+
+TEST(Directories, IsRelative_WithoutPath)
+{
+    ASSERT_THAT(Directories::IsRelative("some.file"), true);
+}
+
+TEST(Directories, IsRelative_WithoutFileRelative)
+{
+    ASSERT_THAT(Directories::IsRelative("path"), true);
+}
+
+TEST(Directories, IsRelative_WithoutFileAbsolute)
+{
+    ASSERT_THAT(Directories::IsRelative("/path"), false);
+}
+
 #else
 
 TEST(Directories, ParseRelativePaths)
@@ -139,6 +180,47 @@ TEST(Directories, SamePath)
     EXPECT_THAT(directories.libraryDir, "C:/path");
     EXPECT_THAT(directories.configurationDir, "C:/path");
     EXPECT_THAT(directories.outputDir, "C:/path");
+}
+
+TEST(Directories, StripFile_Absolute)
+{
+    ASSERT_THAT(Directories::StripFile("C:\\path\\some.file"), "C:/path");
+}
+
+TEST(Directories, StripFile_WithoutPath)
+{
+    auto path = Directories::StripFile("some.file");
+    ASSERT_THAT(path, ".");
+}
+
+TEST(Directories, StripFile_Relative)
+{
+    ASSERT_THAT(Directories::StripFile("path\\some.file"), "path");
+}
+
+TEST(Directories, IsRelative_Relative)
+{
+    ASSERT_THAT(Directories::IsRelative("path\\some.file"), true);
+}
+
+TEST(Directories, IsRelative_Absolute)
+{
+    ASSERT_THAT(Directories::IsRelative("C:\\path\some.file"), false);
+}
+
+TEST(Directories, IsRelative_WithoutPath)
+{
+    ASSERT_THAT(Directories::IsRelative("some.file"), true);
+}
+
+TEST(Directories, IsRelative_WithoutFileRelative)
+{
+    ASSERT_THAT(Directories::IsRelative("path"), true);
+}
+
+TEST(Directories, IsRelative_WithoutFileAbsolute)
+{
+    ASSERT_THAT(Directories::IsRelative("C:\\path"), false);
 }
 
 #endif

@@ -20,9 +20,7 @@ ConditionalEventDetector::ConditionalEventDetector(WorldInterface *world,
                                    callbacks,
                                    stochastics),
            eventDetectorInformation(eventDetectorInformation)
-{
-    eventType = EventDefinitions::EventType::Conditional;
-}
+{}
 
 void ConditionalEventDetector::Reset()
 {
@@ -61,12 +59,11 @@ void ConditionalEventDetector::TriggerEventInsertion(int time, const std::vector
         actingAgentIds.push_back(actingAgent->GetId());
     }
 
-    std::shared_ptr<AgentBasedManipulationEvent> event = std::make_shared<AgentBasedManipulationEvent>(time,
-                                                                                                       COMPONENTNAME,
-                                                                                                       eventDetectorInformation.sequenceName,
-                                                                                                       eventType,
-                                                                                                       triggeringAgentIds,
-                                                                                                       actingAgentIds);
+    auto event = std::make_shared<ConditionalEvent>(time,
+                                                    eventDetectorInformation.eventName,
+                                                    COMPONENTNAME,
+                                                    triggeringAgentIds,
+                                                    actingAgentIds);
 
     eventNetwork->InsertEvent(event);
 

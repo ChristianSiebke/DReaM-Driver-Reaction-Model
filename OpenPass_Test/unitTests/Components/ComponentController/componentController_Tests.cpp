@@ -279,7 +279,6 @@ TEST(StateManager_GetMaxReachableStateOfComponentAtLocalLinkId, ComponentMaxStat
     placeholderEventList.push_back(std::make_shared<ComponentChangeEvent const>(0,
                                                                                 "",
                                                                                 "",
-                                                                                EventDefinitions::EventType::ComponentStateChange,
                                                                                 testing::DontCare<std::vector<int>>(),
                                                                                 actingAgentIds,
                                                                                 componentName,

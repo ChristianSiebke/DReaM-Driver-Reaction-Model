@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -16,9 +16,7 @@
 
 #include "Interfaces/parameterInterface.h"
 #include "dynamics_trajectoryFollower.h"
-#include "absoluteWorldCoordinateTrajectoryFollower.h"
-#include "roadCoordinateTrajectoryFollower.h"
-#include "CoreFramework/OpenPassSlave/importer/trajectoryImporter.h"
+#include "trajectoryFollowerImplementation.h"
 
 const std::string Version = "0.1.0";
 static const CallbackInterface* Callbacks = nullptr;
@@ -45,29 +43,9 @@ extern "C" DYNAMICS_TRAJECTORY_FOLLOWER_SHARED_EXPORT ModelInterface* OpenPASS_C
 {
     Callbacks = callbacks;
 
-    Trajectory trajectory;
-
     try
     {
-        std::string trajectoryPath = QCoreApplication::applicationDirPath().toStdString()
-                                     + "/configs/"
-                                     + parameters->GetParametersString().at("TrajectoryFile");
-
-        Importer::TrajectoryImporter::Import(trajectoryPath, &trajectory);
-    }
-    catch (...)
-    {
-        const std::string msg = componentName + " could not init trajectory parameters";
-        Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, msg);
-    }
-
-    try
-    {
-        switch (trajectory.GetTrajectoryType())
-        {
-            case TrajectoryType::RoadCoordinatesAbsolute:
-            case TrajectoryType::RoadCoordinatesRelative:
-                return (ModelInterface*)(new (std::nothrow) RoadCoordinateTrajectoryFollower(
+                return (ModelInterface*)(new (std::nothrow) TrajectoryFollowerImplementation(
                                              componentName,
                                              isInit,
                                              priority,
@@ -80,30 +58,7 @@ extern "C" DYNAMICS_TRAJECTORY_FOLLOWER_SHARED_EXPORT ModelInterface* OpenPASS_C
                                              observations,
                                              callbacks,
                                              agent,
-                                             &trajectory,
                                              eventNetwork));
-
-            case TrajectoryType::WorldCoordinatesAbsolute:
-                return (ModelInterface*)(new (std::nothrow) AbsoluteWorldCoordinateTrajectoryFollower(
-                                             componentName,
-                                             isInit,
-                                             priority,
-                                             offsetTime,
-                                             responseTime,
-                                             cycleTime,
-                                             stochastics,
-                                             world,
-                                             parameters,
-                                             observations,
-                                             callbacks,
-                                             agent,
-                                             &trajectory,
-                                             eventNetwork));
-
-            default:
-                throw std::runtime_error("Trajectory type could not be determined.");
-
-        }
     }
     catch (const std::runtime_error& ex)
     {

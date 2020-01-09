@@ -13,10 +13,17 @@
 #ifndef COMMONTOOLS
 #define COMMONTOOLS
 
+#include <map>
+#include <unordered_map>
+
 #include "globalDefinitions.h"
 #include "math.h"
 #include "vector2d.h"
-#include <unordered_map>
+
+#include "Interfaces/agentInterface.h"
+#include "Interfaces/worldObjectInterface.h"
+
+#include "Common/boostGeometryCommon.h"
 
 //-----------------------------------------------------------------------------
 //! @brief defines common helper functions like conversion from and to enums.
@@ -233,45 +240,6 @@ class TrafficHelperFunctions
 {
 public:
     //-----------------------------------------------------------------------------
-    //! @brief Calculates the net time to collision between two (moving) objects
-    //!
-    //! Time to collision (TTC) is the time until two objects collide if their
-    //! velocities remain unchanged.
-    //!
-    //! Net in this context means that the carlengths are already substracted from
-    //! the caller, i.e. netDistance = |sDist| - c
-    //!   where c REK-usually \in {carlengthEffective, carlength}
-    //! More sophisticated would be c = dist(refPointRear, FrontEdgeRear) +
-    //!  dist(refPointFront, RearEdgeFront) + MinGap
-    //! where MinGap = 0 for true TTC, >0 for estimated TTC with a safety gap
-    //!
-    //! Default values of the function:
-    //! -1 | netDistance < 0
-    //! 99 | vRear - vFront < 1e-6
-    //!
-    //! Java: computeNetTTC
-    //!
-    //! @param [in]   vRear         velocity of the rear object
-    //! @param [in]   vFront        velocity of the front object
-    //! @param [in]   netDistance   distance between the objects
-    //!
-    //! @return time to collsion between the two objects
-    //-----------------------------------------------------------------------------
-    static double CalculateNetTTC(
-        double vRear,
-        double vFront,
-        double netDistance)
-    {
-        if (netDistance < 0.0)
-        {
-            return -1.0;
-        }
-
-        double deltaV = vRear - vFront;
-        return (deltaV < 1e-6) ? 99.0 : netDistance / deltaV;
-    }
-
-    //-----------------------------------------------------------------------------
     //! @brief Calculates the net time gap between two (moving) objects
     //!
     //! Time gap is the time until two objects collide if the front object stands
@@ -456,8 +424,8 @@ public:
     }
 };
 
-namespace helper::map
-{
+
+namespace helper::map {
 /// @brief queries a map for a given key and returns the value if available
 template <typename KeyType, typename ValueType>
 std::optional<ValueType> query(const std::map<KeyType, ValueType>& the_map, KeyType the_value)
@@ -465,23 +433,180 @@ std::optional<ValueType> query(const std::map<KeyType, ValueType>& the_map, KeyT
     const auto& iter = the_map.find(the_value);
     return iter == the_map.end() ? std::nullopt : std::make_optional(iter->second);
 }
+
 template <typename ValueType>
 std::optional<ValueType> query(const std::map<std::string, ValueType>& the_map, std::string the_value)
 {
     const auto& iter = the_map.find(the_value);
     return iter == the_map.end() ? std::nullopt : std::make_optional(iter->second);
 }
+
 template <typename KeyType, typename ValueType>
 std::optional<ValueType> query(const std::unordered_map<KeyType, ValueType>& the_map, KeyType the_value)
 {
     const auto& iter = the_map.find(the_value);
     return iter == the_map.end() ? std::nullopt : std::make_optional(iter->second);
 }
+
 template <typename ValueType>
 std::optional<ValueType> query(const std::unordered_map<std::string, ValueType>& the_map, std::string the_value)
 {
     const auto& iter = the_map.find(the_value);
     return iter == the_map.end() ? std::nullopt : std::make_optional(iter->second);
 }
-}
+} // namespace helper::map
+
+//-----------------------------------------------------------------------------
+//! @brief Containing functions to calculate time to collision of two objects
+//-----------------------------------------------------------------------------
+class TtcCalculations
+{
+public:
+    //-----------------------------------------------------------------------------
+    //! @brief Structure to hold all necessary world object parameters for TTC calculation
+    //-----------------------------------------------------------------------------
+    struct TtcParameters{
+        double length;
+        double width;
+        double frontLength; // distance from reference point of object to leading edge of object
+        double backLength;  // distance from reference point to back edge of object
+        point_t position;
+        double velocityX;
+        double velocityY;
+        double accelerationX;
+        double accelerationY;
+        double yaw;
+        double yawRate;
+        double yawAcceleration;
+    };
+    //-----------------------------------------------------------------------------
+    //! @brief Calculates the time to collision between two (moving) objects
+    //!
+    //! Time to collision (TTC) is the time until two objects collide if their
+    //! accelerations remain unchanged.
+    //!
+    //!
+    //!
+    //! @param [in]   vRear         velocity of the rear object
+    //! @param [in]   vFront        velocity of the front object
+    //! @param [in]   netDistance   distance between the objects
+    //!
+    //! @return time to collsion between the two objects
+    //-----------------------------------------------------------------------------
+    static double CalculateObjectTTC(const AgentInterface &agent, const WorldObjectInterface &detectedObject, double maxTtc,
+                                     double collisionDetectionLongitudinalBoundary, double collisionDetectionLateralBoundary, double cycleTime)
+    {
+        TtcParameters agentParameters = GetTTCObjectParameters(&agent, collisionDetectionLongitudinalBoundary, collisionDetectionLateralBoundary);
+        TtcParameters objectParameters = GetTTCObjectParameters(&detectedObject, collisionDetectionLongitudinalBoundary, collisionDetectionLateralBoundary);
+
+        return CalculateObjectTTC(agentParameters, objectParameters, maxTtc, cycleTime);
+    }
+
+    static double CalculateObjectTTC(TtcParameters agentParameters, TtcParameters objectParameters, double maxTtc, double cycleTime)
+    {
+        double timestep = cycleTime / 1000.0;
+        double ttc = 0.0;
+
+        while (ttc <= maxTtc)
+        {
+            ttc += timestep;
+            // Propagate parameters 1 timestep ahead
+            PropagateParametersForward(agentParameters, timestep);
+            PropagateParametersForward(objectParameters, timestep);
+            // Calculate the new bounding boxes
+            polygon_t agentBoundingBox = CalculateBoundingBox(agentParameters);
+            polygon_t objectBoundingBox = CalculateBoundingBox(objectParameters);
+            // Check for collision
+            if (bg::intersects(agentBoundingBox, objectBoundingBox))
+            {
+                return ttc;
+            }
+
+        }
+        // No collision detected
+        return std::numeric_limits<double>::max();
+    }
+private:
+    //-----------------------------------------------------------------------------
+    //! @brief Retrieves the parameters to calculate the TTC for a world object
+    //!
+    //! @param [in]   object                                    world object
+    //! @param [in]   collisionDetectionLongitudinalBoundary    longitudinal padding for collision detection
+    //! @param [in]   collisionDetectionLateralBoundary         lateral padding for collision detection
+    //!
+    //! @return parameters needed for TTC calculation
+    //-----------------------------------------------------------------------------
+    static TtcParameters GetTTCObjectParameters(const WorldObjectInterface *object, double collisionDetectionLongitudinalBoundary, double collisionDetectionLateralBoundary)
+    {
+        TtcParameters parameters;
+
+        // Initial bounding box in local coordinate system
+        parameters.length = object->GetLength() + collisionDetectionLongitudinalBoundary;
+        parameters.width  = object->GetWidth() + collisionDetectionLateralBoundary;
+        parameters.frontLength = object->GetDistanceReferencePointToLeadingEdge() + 0.5 * collisionDetectionLongitudinalBoundary; //returns the distance from reference point of object to leading edge of object
+        parameters.backLength = parameters.length - parameters.frontLength; // distance from reference point to back edge of object
+
+        // inital object values at current position
+        parameters.position = { object->GetPositionX(), object->GetPositionY() };
+        parameters.velocityX = object->GetVelocity(VelocityScope::DirectionX);
+        parameters.velocityY = object->GetVelocity(VelocityScope::DirectionY);
+        parameters.accelerationX = object->GetAcceleration() * std::cos(object->GetYaw());
+        parameters.accelerationY = object->GetAcceleration() * std::sin(object->GetYaw());
+        parameters.yaw = object->GetYaw();
+        parameters.yawRate = 0.0;
+        parameters.yawAcceleration = 0.0;
+
+        if (const AgentInterface* objectAsAgent = dynamic_cast<const AgentInterface*>(object)) // cast returns nullptr if unsuccessful
+        {
+            // object is movable -> get acceleration, yawRate and yawAcceleration
+            parameters.yawRate = objectAsAgent->GetYawRate();
+            // Not implemented yet:
+            //parameters.yawAcceleration =  objectAsAgent->GetYawAcceleration();
+        }
+
+        return parameters;
+    }
+
+    //-----------------------------------------------------------------------------
+    //! @brief Calculates the bounding box of world objects in world coordinates
+    //!
+    //! @param [in]   parameters    current state of the world objects reference point
+    //!
+    //! @return bounding box in world coordinates
+    //-----------------------------------------------------------------------------
+    static polygon_t CalculateBoundingBox(const TtcParameters parameters)
+    {
+
+        // construct corner points from reference point position and current yaw angle
+        polygon_t box;
+
+        bg::append(box, point_t{ parameters.position.get<0>() - std::cos(parameters.yaw) * parameters.backLength  + std::sin(parameters.yaw) * 0.5 * parameters.width		,		parameters.position.get<1>() - std::sin(parameters.yaw) * parameters.backLength  - std::cos(parameters.yaw) * 0.5 * parameters.width }); // back right corner
+        bg::append(box, point_t{ parameters.position.get<0>() - std::cos(parameters.yaw) * parameters.backLength  - std::sin(parameters.yaw) * 0.5 * parameters.width		,		parameters.position.get<1>() - std::sin(parameters.yaw) * parameters.backLength  + std::cos(parameters.yaw) * 0.5 * parameters.width }); // back left corner
+        bg::append(box, point_t{ parameters.position.get<0>() + std::cos(parameters.yaw) * parameters.frontLength - std::sin(parameters.yaw) * 0.5 * parameters.width		,		parameters.position.get<1>() + std::sin(parameters.yaw) * parameters.frontLength + std::cos(parameters.yaw) * 0.5 * parameters.width }); // front left corner
+        bg::append(box, point_t{ parameters.position.get<0>() + std::cos(parameters.yaw) * parameters.frontLength + std::sin(parameters.yaw) * 0.5 * parameters.width		,		parameters.position.get<1>() + std::sin(parameters.yaw) * parameters.frontLength - std::cos(parameters.yaw) * 0.5 * parameters.width }); // front right corner
+        bg::append(box, point_t{ parameters.position.get<0>() - std::cos(parameters.yaw) * parameters.backLength  + std::sin(parameters.yaw) * 0.5 * parameters.width		,		parameters.position.get<1>() - std::sin(parameters.yaw) * parameters.backLength  - std::cos(parameters.yaw) * 0.5 * parameters.width }); // back right corner
+        return box;
+    }
+    //-----------------------------------------------------------------------------
+    //! @brief Propagates a world object forward by one timestep
+    //!
+    //! @param [in]   parameters    current state of the world objects reference point
+    //! @param [in]   timestep      time resolution of the TTC simulation
+    //!
+    //-----------------------------------------------------------------------------
+    static void PropagateParametersForward(TtcParameters &parameters, const double timestep)
+    {
+        parameters.position.set<0>(parameters.position.get<0>() + 0.5 * parameters.accelerationX * timestep * timestep + parameters.velocityX * timestep); // x-coordinate
+        parameters.position.set<1>(parameters.position.get<1>() + 0.5 * parameters.accelerationY * timestep * timestep + parameters.velocityY * timestep); // y-coordinate
+        double deltaYaw = 0.5 * parameters.yawAcceleration * timestep * timestep + parameters.yawRate * timestep;
+        parameters.yaw += deltaYaw;
+        parameters.velocityX = std::cos(deltaYaw) * parameters.velocityX - std::sin(deltaYaw) * parameters.velocityY;
+        parameters.velocityY = std::sin(deltaYaw) * parameters.velocityX + std::cos(deltaYaw) * parameters.velocityY;
+        parameters.accelerationX = std::cos(deltaYaw) * parameters.accelerationX - std::sin(deltaYaw) * parameters.accelerationY;
+        parameters.accelerationY = std::sin(deltaYaw) * parameters.accelerationX + std::cos(deltaYaw) * parameters.accelerationY;
+        parameters.velocityX += parameters.accelerationX * timestep;
+        parameters.velocityY += parameters.accelerationY * timestep;
+        parameters.yawRate += parameters.yawAcceleration * timestep;
+    }
+};
 #endif // COMMONTOOLS

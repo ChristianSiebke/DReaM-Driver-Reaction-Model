@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -31,6 +31,16 @@ const std::string& Scenario::GetPedestrianCatalogPath()
 void Scenario::SetPedestrianCatalogPath(const std::string& catalogPath)
 {
     this->pedestrianCatalogPath = catalogPath;
+}
+
+const std::string& Scenario::GetTrajectoryCatalogPath()
+{
+    return trajectoryCatalogPath;
+}
+
+void Scenario::SetTrajectoryCatalogPath(const std::string& catalogPath)
+{
+    trajectoryCatalogPath = catalogPath;
 }
 
 const std::string& Scenario::GetSceneryPath()

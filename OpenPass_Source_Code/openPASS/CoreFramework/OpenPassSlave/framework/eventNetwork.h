@@ -25,8 +25,11 @@
 #include <map>
 #include <vector>
 
-#include "Common/agentBasedManipulatorEvent.h"
+#include "Common/conditionalEvent.h"
+#include "Common/componentStateChangeEvent.h"
+#include "Common/componentWarningEvent.h"
 #include "Common/collisionEvent.h"
+#include "Common/laneChangeEvent.h"
 #include "Common/vehicleComponentEvent.h"
 #include "Interfaces/eventNetworkInterface.h"
 #include "Interfaces/observationInterface.h"
@@ -125,17 +128,6 @@ public:
                     ObservationInterface *observer);
 
 private:
-    /*!
-    * \brief Determines the event category of an EventType
-    *
-    * \details Determines the event category of an EventType.
-    *
-    *
-    * @param[in]     eventType    EventType.
-    * @return	     Event category.
-    */
-    EventCategory DefineEventCategory(EventType eventType);
-
     Events activeEvents;
     Events archivedEvents;
     ObservationInterface *observer {nullptr};

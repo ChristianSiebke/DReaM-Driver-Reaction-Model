@@ -156,18 +156,595 @@
         </Private>
       </Actions>
     </Init>
-    <Story name="StateChangeStory">
+    <Story name="TrajectoryStory">
       <Act name="Act1">
-        <Sequence name="StateChangeSequence" numberOfExecutions="1">
+        <Sequence name="TrajectorySequence" numberOfExecutions="1">
           <Actors>
             <Entity name="TF"/>
           </Actors>
-          <Maneuver name="StateChangeManeuver">
-            <Event name="StateChangeEvent" priority="overwrite">
-              <Action name="ComponentStateChange">
-                <UserDefined>
-                  <Command>SetComponentState Dynamics_TrajectoryFollower Acting</Command>
-                </UserDefined>
+          <Maneuver name="TrajectoryManeuver">
+            <Event name="TrajectoryEvent" priority="overwrite">
+              <Action name="Trajectory">
+                <Private>
+                    <Routing>
+                        <FollowTrajectory>
+                            <Trajectory name="LaneChange" closed="false" domain="time">
+                                <Vertex reference="0">
+                                    <Position>
+                                        <World x="76.17" y="5.625" z="0" h="0.0" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="0.1">
+                                    <Position>
+                                        <World x="79.17" y="5.62485" z="0" h="-0.00005" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="0.2">
+                                    <Position>
+                                        <World x="82.17" y="5.6247" z="0" h="-0.00005" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="0.3">
+                                    <Position>
+                                        <World x="85.17" y="5.62172" z="0" h="-0.00099" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="0.4">
+                                    <Position>
+                                        <World x="88.17" y="5.62092" z="0" h="-0.00027" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="0.5">
+                                    <Position>
+                                        <World x="91.17" y="5.61893" z="0" h="-0.00066" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="0.6">
+                                    <Position>
+                                        <World x="94.16999" y="5.61087" z="0" h="-0.00269" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="0.7">
+                                    <Position>
+                                        <World x="97.16995" y="5.59695" z="0" h="-0.00464" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="0.8">
+                                    <Position>
+                                        <World x="100.16989" y="5.57685" z="0" h="-0.0067" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="0.9">
+                                    <Position>
+                                        <World x="103.16977" y="5.55009" z="0" h="-0.00892" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="1.0">
+                                    <Position>
+                                        <World x="106.16958" y="5.51666" z="0" h="-0.01114" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="1.1">
+                                    <Position>
+                                        <World x="109.16931" y="5.47657" z="0" h="-0.01336" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="1.2">
+                                    <Position>
+                                        <World x="112.16894" y="5.42952" z="0" h="-0.01569" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="1.3">
+                                    <Position>
+                                        <World x="115.16847" y="5.37599" z="0" h="-0.01784" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="1.4">
+                                    <Position>
+                                        <World x="118.16782" y="5.31362" z="0" h="-0.02079" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="1.5">
+                                    <Position>
+                                        <World x="121.16705" y="5.24557" z="0" h="-0.02268" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="1.6">
+                                    <Position>
+                                        <World x="124.16613" y="5.17146" z="0" h="-0.02471" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="1.7">
+                                    <Position>
+                                        <World x="127.16503" y="5.09018" z="0" h="-0.02710" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="1.8">
+                                    <Position>
+                                        <World x="130.16376" y="5.00284" z="0" h="-0.02912" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="1.9">
+                                    <Position>
+                                        <World x="133.16234" y="4.91071" z="0" h="-0.03071" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="2.0">
+                                    <Position>
+                                        <World x="136.16070" y="4.81133" z="0" h="-0.03313" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="2.1">
+                                    <Position>
+                                        <World x="139.15896" y="4.70916" z="0" h="-0.03406" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="2.2">
+                                    <Position>
+                                        <World x="142.15699" y="4.60043" z="0" h="-0.03625" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="2.3">
+                                    <Position>
+                                        <World x="145.15489" y="4.48821" z="0" h="-0.03741" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="2.4">
+                                    <Position>
+                                        <World x="148.15264" y="4.37212" z="0" h="-0.03871" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="2.5">
+                                    <Position>
+                                        <World x="151.15031" y="4.25383" z="0" h="-0.03944" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="2.6">
+                                    <Position>
+                                        <World x="154.14791" y="4.13385" z="0" h="-0.04000" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="2.7">
+                                    <Position>
+                                        <World x="157.14539" y="4.01109" z="0" h="-0.04093" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="2.8">
+                                    <Position>
+                                        <World x="160.14284" y="3.88744" z="0" h="-0.04123" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="2.9">
+                                    <Position>
+                                        <World x="163.14034" y="3.76487" z="0" h="-0.04087" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="3.0">
+                                    <Position>
+                                        <World x="166.13781" y="3.64161" z="0" h="-0.04110" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="3.1">
+                                    <Position>
+                                        <World x="169.13538" y="3.52094" z="0" h="-0.04024" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="3.2">
+                                    <Position>
+                                        <World x="172.13304" y="3.40256" z="0" h="-0.03947" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="3.3">
+                                    <Position>
+                                        <World x="175.13081" y="3.28686" z="0" h="-0.03858" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="3.4">
+                                    <Position>
+                                        <World x="178.12874" y="3.17544" z="0" h="-0.03715" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="3.5">
+                                    <Position>
+                                        <World x="181.12685" y="3.06899" z="0" h="-0.03549" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="3.6">
+                                    <Position>
+                                        <World x="184.12512" y="2.96702" z="0" h="-0.03400" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="3.7">
+                                    <Position>
+                                        <World x="187.12360" y="2.87152" z="0" h="-0.03184" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="3.8">
+                                    <Position>
+                                        <World x="190.12216" y="2.77880" z="0" h="-0.03091" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="3.9">
+                                    <Position>
+                                        <World x="193.12099" y="2.69484" z="0" h="-0.02799" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="4.0">
+                                    <Position>
+                                        <World x="196.11992" y="2.61495" z="0" h="-0.02663" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="4.1">
+                                    <Position>
+                                        <World x="199.11902" y="2.54134" z="0" h="-0.02454" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="4.2">
+                                    <Position>
+                                        <World x="202.11822" y="2.47190" z="0" h="-0.02315" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="4.3">
+                                    <Position>
+                                        <World x="205.11755" y="2.40872" z="0" h="-0.02106" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="4.4">
+                                    <Position>
+                                        <World x="208.11702" y="2.35222" z="0" h="-0.01884" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="4.5">
+                                    <Position>
+                                        <World x="211.11652" y="2.29760" z="0" h="-0.01821" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="4.6">
+                                    <Position>
+                                        <World x="214.11613" y="2.24886" z="0" h="-0.01625" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="4.7">
+                                    <Position>
+                                        <World x="217.11578" y="2.20319" z="0" h="-0.01522" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="4.8">
+                                    <Position>
+                                        <World x="220.11551" y="2.16310" z="0" h="-0.01336" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="4.9">
+                                    <Position>
+                                        <World x="223.11528" y="2.12609" z="0" h="-0.01234" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="5.0">
+                                    <Position>
+                                        <World x="226.11510" y="2.09317" z="0" h="-0.01098" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="5.1">
+                                    <Position>
+                                        <World x="229.11496" y="2.06432" z="0" h="-0.00962" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="5.2">
+                                    <Position>
+                                        <World x="232.11485" y="2.03775" z="0" h="-0.00885" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="5.3">
+                                    <Position>
+                                        <World x="235.11476" y="2.01547" z="0" h="-0.00743" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="5.4">
+                                    <Position>
+                                        <World x="238.11469" y="1.99498" z="0" h="-0.00683" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="5.5">
+                                    <Position>
+                                        <World x="241.11464" y="1.97777" z="0" h="-0.00574" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="5.6">
+                                    <Position>
+                                        <World x="244.11460" y="1.96235" z="0" h="-0.00514" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="5.7">
+                                    <Position>
+                                        <World x="247.11458" y="1.95001" z="0" h="-0.00411" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="5.8">
+                                    <Position>
+                                        <World x="250.11455" y="1.93787" z="0" h="-0.00405" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="5.9">
+                                    <Position>
+                                        <World x="253.11454" y="1.92822" z="0" h="-0.00322" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="6.0">
+                                    <Position>
+                                        <World x="256.11453" y="1.92116" z="0" h="-0.00235" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="6.1">
+                                    <Position>
+                                        <World x="259.11452" y="1.91360" z="0" h="-0.00252" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="6.2">
+                                    <Position>
+                                        <World x="262.11451" y="1.90624" z="0" h="-0.00245" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="6.3">
+                                    <Position>
+                                        <World x="265.11451" y="1.90007" z="0" h="-0.00206" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="6.4">
+                                    <Position>
+                                        <World x="268.11450" y="1.89490" z="0" h="-0.00172" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="6.5">
+                                    <Position>
+                                        <World x="271.11450" y="1.89082" z="0" h="-0.00136" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="6.6">
+                                    <Position>
+                                        <World x="274.11450" y="1.88654" z="0" h="-0.00143" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="6.7">
+                                    <Position>
+                                        <World x="277.11449" y="1.88316" z="0" h="-0.00113" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="6.8">
+                                    <Position>
+                                        <World x="280.11449" y="1.87918" z="0" h="-0.00133" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="6.9">
+                                    <Position>
+                                        <World x="283.11449" y="1.87619" z="0" h="-0.00099" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                                <Vertex reference="7.0">
+                                    <Position>
+                                        <World x="286.11449" y="1.87500" z="0" h="-0.00040" p="0" r="0" />
+                                    </Position>
+                                    <Shape>
+                                        <Polyline />
+                                    </Shape>
+                                </Vertex>
+                            </Trajectory>
+                            <Longitudinal>
+                                <None/>
+                            </Longitudinal>
+                            <Lateral purpose="position"/>
+                        </FollowTrajectory>
+                    </Routing>
+                </Private>
               </Action>
               <StartConditions>
                 <ConditionGroup>

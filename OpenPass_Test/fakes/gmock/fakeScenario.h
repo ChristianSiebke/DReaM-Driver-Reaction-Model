@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2019 in-tech
+* Copyright (c) 2019, 2020 in-tech
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -25,6 +25,10 @@ public:
     MOCK_METHOD0(GetPedestrianCatalogPath,
                  const std::string & ());
     MOCK_METHOD1(SetPedestrianCatalogPath,
+                 void(const std::string&));
+    MOCK_METHOD0(GetTrajectoryCatalogPath,
+                 const std::string & ());
+    MOCK_METHOD1(SetTrajectoryCatalogPath,
                  void(const std::string&));
     MOCK_METHOD0(GetSceneryPath,
                  const std::string & ());

@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "agentBasedManipulatorEvent.h"
+#include "conditionalEvent.h"
 #include "Interfaces/signalInterface.h"
 
 //-----------------------------------------------------------------------------
@@ -30,23 +30,21 @@
  *
  * \ingroup Event */
 //-----------------------------------------------------------------------------
-class ComponentChangeEvent : public AgentBasedManipulationEvent
+class ComponentChangeEvent : public ConditionalEvent
 {
 public:
     ComponentChangeEvent(int time,
-                              const std::string& source,
-                              const std::string& sequenceName,
-                              EventDefinitions::EventType eventType,
-                              std::vector<int> triggeringAgents,
-                              std::vector<int> actingAgents,
-                              const std::string& componentName,
-                              const std::string& goalStateName):
-        AgentBasedManipulationEvent(time,
-                        source,
-                        sequenceName,
-                        eventType,
-                        triggeringAgents,
-                        actingAgents),
+                         const std::string& eventName,
+                         const std::string& source,
+                         std::vector<int> triggeringAgents,
+                         std::vector<int> actingAgents,
+                         const std::string& componentName,
+                         const std::string& goalStateName):
+        ConditionalEvent(time,
+                         eventName,
+                         source,
+                         triggeringAgents,
+                         actingAgents),
         componentName(componentName),
         goalStateName(goalStateName)
     {
@@ -56,7 +54,17 @@ public:
     ComponentChangeEvent(ComponentChangeEvent&&) = delete;
     ComponentChangeEvent& operator=(const ComponentChangeEvent&) = delete;
     ComponentChangeEvent& operator=(ComponentChangeEvent&&) = delete;
-    virtual ~ComponentChangeEvent() = default;
+    virtual ~ComponentChangeEvent() override = default;
+
+    /*!
+    * \brief Returns the category of the event.
+    *
+    * @return	     EventCategory.
+    */
+    virtual EventDefinitions::EventCategory GetCategory() const override
+    {
+        return EventDefinitions::EventCategory::ComponentStateChange;
+    }
 
     /*!
      * \brief Returns the component name for which the event is targeted
@@ -88,12 +96,12 @@ public:
     *
     * @return	     List of string pairs of the event parameters.
     */
-    virtual std::list<std::pair<std::string, std::string>> GetEventParametersAsString()
+    virtual EventParameters GetParametersAsString() override
     {
-        std::list<std::pair<std::string, std::string>> eventParameters = AgentBasedManipulationEvent::GetEventParametersAsString();
+        EventParameters eventParameters = ConditionalEvent::GetParametersAsString();
 
-        eventParameters.push_back(std::pair<std::string, std::string>("ComponentName", componentName));
-        eventParameters.push_back(std::pair<std::string, std::string>("State", goalStateName));
+        eventParameters.push_back({"ComponentName", componentName});
+        eventParameters.push_back({"State", goalStateName});
 
         return eventParameters;
     }

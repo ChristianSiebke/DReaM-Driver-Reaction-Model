@@ -23,7 +23,7 @@ ManipulatorCommonBase::ManipulatorCommonBase(WorldInterface *world,
     eventNetwork(eventNetwork),
     callbacks(callbacks)
 {
-    sequenceName = action->GetSequenceName();
+    eventName = action->GetEventName();
 
 }
 

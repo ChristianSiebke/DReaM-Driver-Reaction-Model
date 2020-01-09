@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -21,6 +21,8 @@
 #include "ComponentStateChangeManipulator.h"
 #include "LaneChangeManipulator.h"
 #include "RemoveAgentsManipulator.h"
+#include "NoOperationManipulator.h"
+#include "TrajectoryManipulator.h"
 
 
 const std::string version = "0.0.1";
@@ -51,10 +53,8 @@ extern "C" MANIPULATOR_SHARED_EXPORT ManipulatorInterface* OpenPASS_CreateInstan
         }
         else
         {
-            if (std::dynamic_pointer_cast<openScenario::UserDefinedCommandAction>(action).get() != nullptr)
+            if (auto userDefinedCommandAction = std::dynamic_pointer_cast<openScenario::UserDefinedCommandAction>(action))
             {
-                std::shared_ptr<openScenario::UserDefinedCommandAction> userDefinedCommandAction = std::dynamic_pointer_cast<openScenario::UserDefinedCommandAction>(action);
-
                 const auto command = userDefinedCommandAction->GetCommand();
                 const auto firstSplitInCommand = command.find(' ');
                 const auto commandType = command.substr(0, firstSplitInCommand);
@@ -68,11 +68,18 @@ extern "C" MANIPULATOR_SHARED_EXPORT ManipulatorInterface* OpenPASS_CreateInstan
                                                                   callbacks
                                                                   ));
                 }
-            }
-            else if (std::dynamic_pointer_cast<openScenario::GlobalEntityAction>(action).get() != nullptr)
-            {
-                std::shared_ptr<openScenario::GlobalEntityAction> globalAction = std::dynamic_pointer_cast<openScenario::GlobalEntityAction>(action);
 
+                if (commandType == "NoOperation")
+                {
+                    return static_cast<ManipulatorInterface*>(new (std::nothrow) NoOperationManipulator(
+                                                                  world,
+                                                                  eventNetwork,
+                                                                  callbacks
+                                                                  ));
+                }
+            }
+            else if (auto globalAction = std::dynamic_pointer_cast<openScenario::GlobalEntityAction>(action))
+            {
                 const auto actionType = globalAction->GetType();
                 if (actionType == openScenario::GlobalEntityActionType::Delete)
                 {
@@ -84,16 +91,23 @@ extern "C" MANIPULATOR_SHARED_EXPORT ManipulatorInterface* OpenPASS_CreateInstan
                                                                   ));
                 }
             }
-            else if (std::dynamic_pointer_cast<openScenario::PrivateLateralLaneChangeAction>(action).get() != nullptr)
+            else if (auto laneChangeAction = std::dynamic_pointer_cast<openScenario::PrivateLateralLaneChangeAction>(action))
             {
-                std::shared_ptr<openScenario::PrivateLateralLaneChangeAction> laneChangeAction = std::dynamic_pointer_cast<openScenario::PrivateLateralLaneChangeAction>(action);
-
-                    return static_cast<ManipulatorInterface*>(new (std::nothrow) LaneChangeManipulator(
-                                                                  world,
-                                                                  laneChangeAction,
-                                                                  eventNetwork,
-                                                                  callbacks
-                                                                  ));
+                return static_cast<ManipulatorInterface*>(new (std::nothrow) LaneChangeManipulator(
+                                                              world,
+                                                              laneChangeAction,
+                                                              eventNetwork,
+                                                              callbacks
+                                                              ));
+            }
+            else if (auto trajectoryAction = std::dynamic_pointer_cast<openScenario::PrivateFollowTrajectoryAction>(action))
+            {
+                return static_cast<ManipulatorInterface*>(new (std::nothrow) TrajectoryManipulator(
+                                                              world,
+                                                              trajectoryAction,
+                                                              eventNetwork,
+                                                              callbacks
+                                                              ));
             }
         }
     }

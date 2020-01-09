@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -53,6 +53,18 @@ const std::vector<std::string> Directories::Concat(const std::string& path, cons
     });
 
     return result;
+}
+
+const std::string Directories::StripFile(const std::string& path)
+{
+    QFileInfo fileInfo(QString::fromStdString(path));
+    return fileInfo.path().toStdString();
+}
+
+bool Directories::IsRelative(const std::string& path)
+{
+    QFileInfo fileInfo(QString::fromStdString(path));
+    return fileInfo.isRelative();
 }
 
 } // namespace openpass::core

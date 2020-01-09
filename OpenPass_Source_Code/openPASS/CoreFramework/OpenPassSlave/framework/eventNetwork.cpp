@@ -64,27 +64,10 @@ void EventNetwork::RemoveOldEvents(int time)
 
 void EventNetwork::InsertEvent(std::shared_ptr<EventInterface> event)
 {
-    EventCategory eventCategory = DefineEventCategory(event->GetEventType());
-
-    event->SetEventId(eventId);
+    event->SetId(eventId);
     eventId++;
 
-    if(eventCategory == EventCategory::Undefined)
-    {
-        return;
-    }
-
-    if(activeEvents.find(eventCategory) != activeEvents.end())
-    {
-        activeEvents.at(eventCategory).push_back(event);
-    }
-    else
-    {
-        std::list<std::shared_ptr<EventInterface>> eventsList;
-        eventsList.push_back(event);
-
-        activeEvents.insert(std::pair<const EventCategory, std::list<std::shared_ptr<EventInterface>>>(eventCategory, eventsList));
-    }
+    activeEvents[event->GetCategory()].push_back(event);
 }
 
 void EventNetwork::ClearActiveEvents()
@@ -129,35 +112,5 @@ void EventNetwork::Initialize(RunResultInterface *runResult,
 {
     this->observer = observer;
     this->runResult = runResult;
-}
-
-EventCategory EventNetwork::DefineEventCategory(EventType eventType)
-{
-    EventCategory eventCategory;
-
-    switch(eventType)
-    {
-        case EventType::Undefined:
-            eventCategory = EventCategory::Undefined;
-            break;
-
-        case EventType::Collision:
-            eventCategory = EventCategory::Collision;
-            break;
-
-        case EventType::ComponentStateChange:
-            eventCategory = EventCategory::ComponentStateChange;
-            break;
-
-        case EventType::Conditional:
-            eventCategory = EventCategory::AgentBasedManipulation;
-            break;
-
-        default:
-            eventCategory = EventCategory::VehicleComponent;
-            break;
-    }
-
-    return eventCategory;
 }
 } //namespace SimulationSlave

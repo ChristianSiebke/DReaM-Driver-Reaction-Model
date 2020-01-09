@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -23,9 +23,11 @@
 #include "scenarioImporter.h"
 #include "xmlParser.h"
 #include "CoreFramework/CoreShare/log.h"
+#include "CoreFramework/OpenPassSlave/framework/directories.h"
 
 namespace TAG = openpass::importer::xml::scenarioImporter::tag;
 namespace ATTRIBUTE = openpass::importer::xml::scenarioImporter::attribute;
+using Directories = openpass::core::Directories;
 
 namespace Importer {
 
@@ -53,7 +55,8 @@ bool ScenarioImporter::Import(const std::string& filename, ScenarioInterface* sc
         ImportRoadNetwork(documentRoot, sceneryPath);
         scenario->SetSceneryPath(sceneryPath);
 
-        ImportCatalogs(documentRoot, scenario);
+        auto path = Directories::StripFile(filename);
+        ImportCatalogs(documentRoot, scenario, path);
 
         std::vector<ScenarioEntity> entities;
         std::map<std::string, std::list<std::string>> groups;
@@ -88,31 +91,25 @@ void ScenarioImporter::ImportAndValidateVersion(QDomElement& documentRoot)
                  "Scenario version not supported (" + version.value() + "). Supported version is " + supportedScenarioVersion);
 }
 
-void ScenarioImporter::ImportCatalogs(QDomElement& documentRoot, ScenarioInterface* scenario)
+void ScenarioImporter::ImportCatalogs(QDomElement& documentRoot, ScenarioInterface* scenario, const std::string& path)
 {
     QDomElement catalogsElement;
     ThrowIfFalse(SimulationCommon::GetFirstChildElement(documentRoot, TAG::catalogs, catalogsElement),
-                  "Could not import Catalogs. Tag " + std::string(TAG::catalogs) + " is missing.");
+                 "Could not import Catalogs. Tag " + std::string(TAG::catalogs) + " is missing.");
 
-    try
+    const auto vehicleCatalogPath = ImportCatalog("VehicleCatalog", catalogsElement);
+    scenario->SetVehicleCatalogPath(vehicleCatalogPath);
+
+    const auto pedestrianCatalogPath = ImportCatalog("PedestrianCatalog", catalogsElement);
+    scenario->SetPedestrianCatalogPath(pedestrianCatalogPath);
+
+    auto trajectoryCatalogPath = ImportCatalog("TrajectoryCatalog", catalogsElement);
+    if (Directories::IsRelative(trajectoryCatalogPath))
     {
-        const auto vehicleCatalogPath = ImportCatalog("VehicleCatalog", catalogsElement);
-        scenario->SetVehicleCatalogPath(vehicleCatalogPath);
-    }
-    catch (const std::runtime_error &error)
-    {
-        LOG_INTERN(LogLevel::Error) << "Could not find VehicleCatalog in openScenario file." << error.what();
+        trajectoryCatalogPath = Directories::Concat(path, trajectoryCatalogPath);
     }
 
-    try
-    {
-        const auto pedestrianCatalogPath = ImportCatalog("PedestrianCatalog", catalogsElement);
-        scenario->SetPedestrianCatalogPath(pedestrianCatalogPath);
-    }
-    catch (const std::runtime_error &error)
-    {
-        LOG_INTERN(LogLevel::Error) << "Could not find PedestrianCatalog in openScenario file." << error.what();
-    }
+    scenario->SetTrajectoryCatalogPath(trajectoryCatalogPath);
 }
 
 void ScenarioImporter::ImportRoadNetwork(QDomElement& documentRoot, std::string& sceneryPath)
@@ -168,10 +165,6 @@ void ScenarioImporter::ImportStoryElement(QDomElement& storyElement,
             {
                 while (!seqElement.isNull())
                 {
-                    std::string sequenceName;
-                    ThrowIfFalse(SimulationCommon::ParseAttributeString(seqElement, ATTRIBUTE::name, sequenceName),
-                                  "Could not import Story. Sequence tag requires a " + std::string(ATTRIBUTE::name) + " attribute.");
-
                     int numberOfExecutions;
                     ThrowIfFalse(SimulationCommon::ParseAttributeInt(seqElement, ATTRIBUTE::numberOfExecutions, numberOfExecutions),
                                   "Could not import Story. Sequence tag requires a " + std::string(ATTRIBUTE::numberOfExecutions) + " attribute.");
@@ -186,7 +179,7 @@ void ScenarioImporter::ImportStoryElement(QDomElement& storyElement,
                     QDomElement maneuverElement;
                     if (SimulationCommon::GetFirstChildElement(seqElement, TAG::maneuver, maneuverElement)) // just one maneuver per sequence
                     {
-                        ImportManeuverElement(maneuverElement, entities, scenario, sequenceName, actorInformation, numberOfExecutions);
+                        ImportManeuverElement(maneuverElement, entities, scenario, actorInformation, numberOfExecutions);
                     }
 
                     seqElement = seqElement.nextSiblingElement(TAG::sequence);
@@ -245,7 +238,6 @@ openScenario::ActorInformation ScenarioImporter::ImportActors(QDomElement& actor
 void ScenarioImporter::ImportManeuverElement(QDomElement& maneuverElement,
                                              const std::vector<ScenarioEntity>& entities,
                                              ScenarioInterface* scenario,
-                                             const std::string& sequenceName,
                                              const openScenario::ActorInformation &actorInformation,
                                              const int numberOfExecutions)
 {
@@ -256,12 +248,17 @@ void ScenarioImporter::ImportManeuverElement(QDomElement& maneuverElement,
     // handle event element
     QDomElement eventElement;
     SimulationCommon::GetFirstChildElement(maneuverElement, TAG::event, eventElement);
+
     while (!eventElement.isNull())
     {
+        std::string eventName;
+        ThrowIfFalse(SimulationCommon::ParseAttributeString(eventElement, ATTRIBUTE::name, eventName),
+                      "Could not import Event. " + std::string(ATTRIBUTE::name) + " attribute is missing.");
+
         try
         {
             openScenario::ConditionalEventDetectorInformation conditionalEventDetectorInformation = EventDetectorImporter::ImportEventDetector(eventElement,
-                                                                                                                                               sequenceName,
+                                                                                                                                               eventName,
                                                                                                                                                numberOfExecutions,
                                                                                                                                                actorInformation,
                                                                                                                                                entities);
@@ -269,7 +266,8 @@ void ScenarioImporter::ImportManeuverElement(QDomElement& maneuverElement,
             scenario->AddConditionalEventDetector(conditionalEventDetectorInformation);
 
             std::shared_ptr<ScenarioActionInterface> action = ManipulatorImporter::ImportManipulator(eventElement,
-                                                                                                     sequenceName);
+                                                                                                     eventName,
+                                                                                                     scenario->GetTrajectoryCatalogPath());
             scenario->AddAction(action);
 
             eventElement = eventElement.nextSiblingElement(TAG::event);

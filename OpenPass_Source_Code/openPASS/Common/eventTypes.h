@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -18,42 +18,13 @@ namespace EventDefinitions
 
 enum struct EventCategory
 {
-    Undefined = 0,
-    Basic,
-    AgentBasedManipulation,
-    Collision,
-    ComponentStateChange,
-    VehicleComponent
-};
-
-enum struct EventType
-{
-    Undefined = 0,
-    Collision,
+    Basic = 0,
     Conditional,
-    AEBActive,
-    AEBInactive,
+    Collision,
     ComponentStateChange,
-    ComponentWarning,
     LaneChange,
-    RemoveAgent,
-    TrajectoryFollowerActivated,
-    TrajectoryFollowerDeactivated,
-};
-
-const std::string EventTypeStrings[] =
-{
-    "Undefined",
-    "Collision",
-    "Conditional",
-    "AEBActive",
-    "AEBInactive",
-    "ComponentStateChange",
-    "ComponentWarning",
-    "LaneChange",
-    "RemoveAgent",
-    "TrajectoryFollowerActivated",
-    "TrajectoryFollowerDeactivated"
+    SetTrajectory,
+    VehicleComponent
 };
 
 }//namespace EventDefinitions

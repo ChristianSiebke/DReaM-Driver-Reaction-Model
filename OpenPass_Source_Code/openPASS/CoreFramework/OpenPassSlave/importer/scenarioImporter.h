@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -88,7 +88,7 @@ private:
      * \param[in]   documentRoot    The DOM root of the scenario file
      * \param[out]  scenario        Catalogs are imported into this scenario
      */
-    static void ImportCatalogs(QDomElement& documentRoot, ScenarioInterface* scenario);
+    static void ImportCatalogs(QDomElement& documentRoot, ScenarioInterface* scenario, const std::string& filePath);
 
     /*!
      * \brief Imports the roadnetwork information from OpenSCENARIO DOM
@@ -228,7 +228,11 @@ private:
      * \param[out]  scenario          The maneuver data is imported into this scenario
      * \param[out]  actors            Actors from the maneuver are imported into this container
      */
-    static void ImportManeuverElement(QDomElement& maneuverElement, const std::vector<ScenarioEntity>& entities, ScenarioInterface *scenario, const std::string& sequenceName, const openScenario::ActorInformation &actorInformation, const int numberOfExecutions);
+    static void ImportManeuverElement(QDomElement& maneuverElement,
+                                      const std::vector<ScenarioEntity>& entities,
+                                      ScenarioInterface *scenario,
+                                      const openScenario::ActorInformation &actorInformation,
+                                      const int numberOfExecutions);
 
     static void SetStochasticsDataHelper(SpawnAttribute &attribute, QDomElement& stochasticsElement);
     static void SetStochasticsData(ScenarioEntity& scenarioEntity, QDomElement& stochasticsElement);

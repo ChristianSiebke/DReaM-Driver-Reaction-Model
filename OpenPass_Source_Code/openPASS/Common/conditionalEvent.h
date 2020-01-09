@@ -26,27 +26,31 @@
  *
  * \ingroup Event */
 //-----------------------------------------------------------------------------
-class AgentBasedManipulationEvent : public BasicEvent
+class ConditionalEvent : public BasicEvent
 {
 public:
-    AgentBasedManipulationEvent(int time,
+    ConditionalEvent(int time,
+                     std::string eventName,
                     std::string source,
-                    std::string sequenceName,
-                    EventDefinitions::EventType eventType,
                     std::vector<int> triggeringAgents,
                     std::vector<int> actingAgents):
         BasicEvent(time,
-                   source,
-                   sequenceName,
-                   eventType),
+                   eventName,
+                   source),
         triggeringAgents(triggeringAgents),
         actingAgents(actingAgents)
     {}
-    AgentBasedManipulationEvent(const AgentBasedManipulationEvent&) = delete;
-    AgentBasedManipulationEvent(AgentBasedManipulationEvent&&) = delete;
-    AgentBasedManipulationEvent& operator=(const AgentBasedManipulationEvent&) = delete;
-    AgentBasedManipulationEvent& operator=(AgentBasedManipulationEvent&&) = delete;
-    ~AgentBasedManipulationEvent() = default;
+    ~ConditionalEvent() override = default;
+
+    /*!
+    * \brief Returns the category of the event.
+    *
+    * @return	     EventCategory.
+    */
+    virtual EventDefinitions::EventCategory GetCategory() const override
+    {
+        return EventDefinitions::EventCategory::Conditional;
+    }
 
     /*!
     * \brief Returns all parameters of the event as string list.
@@ -54,9 +58,9 @@ public:
     *
     * @return	     List of string pairs of the event parameters.
     */
-    std::list<std::pair<std::string, std::string>> GetEventParametersAsString()
+    EventParameters GetParametersAsString() override
     {
-        std::list<std::pair<std::string, std::string>> eventParameters;
+        EventParameters eventParameters;
 
         std::string triggeringAgentsAsString{};
         for (auto &triggeringAgentId : triggeringAgents) {
@@ -71,12 +75,12 @@ public:
         if(triggeringAgentsAsString.size() > 0)
         {
             triggeringAgentsAsString.pop_back();
-            eventParameters.push_back(std::pair<std::string, std::string>("TriggeringAgentIds", triggeringAgentsAsString));
+            eventParameters.push_back({"TriggeringAgentIds", triggeringAgentsAsString});
         }
         if(actingAgentsAsString.size() > 0)
         {
             actingAgentsAsString.pop_back();
-            eventParameters.push_back(std::pair<std::string, std::string>("ActingAgentIds", actingAgentsAsString));
+            eventParameters.push_back({"ActingAgentIds", actingAgentsAsString});
         }
 
         return eventParameters;

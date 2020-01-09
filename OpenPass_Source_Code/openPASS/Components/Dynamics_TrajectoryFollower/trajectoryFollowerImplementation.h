@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -30,7 +30,7 @@
 * |------------|---------------------------|-----------------------------------|
 * | 0          | LateralSignal             | componentState                    |
 * | 1          | AccelerationSignal        | inputAcceleration, componentState |
-* | 83         | CompCtrlToAgentCompSignal | maxReachableState                 |
+* | 2          | TrajectorySignal          | trajectory                        |
 *
 * * \section Dynamics_TrajectoryFollower_Outputs Outputs
 * Output variables:
@@ -50,53 +50,53 @@
 * | Output Id                  | signal class                              | contained variables                                                                            |
 * |----------------------------|-------------------------------------------|------------------------------------------------------------------------------------------------|
 * | 0                          | DynamicsSignal                            | acceleration, velocity, positionX, positionY, yaw, yawRate, steeringWheelAngle, travelDistance |
-* | 83                         | AgentCompToCompCtrlSignal | componentType, componentName, componentState                                                   |
  * @} */
 
 #pragma once
 
 #include "Interfaces/modelInterface.h"
 #include "Interfaces/eventNetworkInterface.h"
-#include "CoreFramework/OpenPassSlave/importer/trajectory.h"
+#include "Common/openScenarioDefinitions.h"
 
 #include "Common/vector2d.h"
 #include "Common/accelerationSignal.h"
 #include "Common/vehicleComponentEvent.h"
-#include "Common/agentCompToCompCtrlSignal.h"
-#include "Common/compCtrlToAgentCompSignal.h"
 #include "Common/dynamicsSignal.h"
 #include "Common/globalDefinitions.h"
 #include "Common/lateralSignal.h"
+
+using openScenario::Trajectory;
+using openScenario::TrajectoryPoint;
 
 /*!
  * \brief Makes an agent strictly follow a predefined path.
  *
  * \ingroup Dynamics_TrajectoryFollower
  */
-class TrajectoryFollowerCommonBase : public UnrestrictedEventModelInterface
+class TrajectoryFollowerImplementation : public UnrestrictedEventModelInterface
 {
 public:
     const std::string COMPONENTNAME = "Dynamics_TrajectoryFollower";
 
-    TrajectoryFollowerCommonBase(std::string componentName,
-                                 bool isInit,
-                                 int priority,
-                                 int offsetTime,
-                                 int responseTime,
-                                 int cycleTime,
-                                 StochasticsInterface *stochastics,
-                                 WorldInterface *world,
-                                 const ParameterInterface *parameters,
-                                 const std::map<int, ObservationInterface*> *observations,
-                                 const CallbackInterface *callbacks,
-                                 AgentInterface *agent,
-                                 SimulationSlave::EventNetworkInterface * const eventNetwork);
+    TrajectoryFollowerImplementation(std::string componentName,
+                                     bool isInit,
+                                     int priority,
+                                     int offsetTime,
+                                     int responseTime,
+                                     int cycleTime,
+                                     StochasticsInterface *stochastics,
+                                     WorldInterface *world,
+                                     const ParameterInterface *parameters,
+                                     const std::map<int, ObservationInterface*> *observations,
+                                     const CallbackInterface *callbacks,
+                                     AgentInterface *agent,
+                                     SimulationSlave::EventNetworkInterface * const eventNetwork);
 
-    TrajectoryFollowerCommonBase(const TrajectoryFollowerCommonBase&) = delete;
-    TrajectoryFollowerCommonBase(TrajectoryFollowerCommonBase&&) = delete;
-    TrajectoryFollowerCommonBase& operator=(const TrajectoryFollowerCommonBase&) = delete;
-    TrajectoryFollowerCommonBase& operator=(TrajectoryFollowerCommonBase&&) = delete;
-    virtual ~TrajectoryFollowerCommonBase() = default;
+    TrajectoryFollowerImplementation(const TrajectoryFollowerImplementation&) = delete;
+    TrajectoryFollowerImplementation(TrajectoryFollowerImplementation&&) = delete;
+    TrajectoryFollowerImplementation& operator=(const TrajectoryFollowerImplementation&) = delete;
+    TrajectoryFollowerImplementation& operator=(TrajectoryFollowerImplementation&&) = delete;
+    virtual ~TrajectoryFollowerImplementation() = default;
 
     /*!
     * \brief Update Inputs
@@ -141,9 +141,9 @@ public:
     *
     * @param[in]     time           Current scheduling time
     */
-    virtual void CalculateNextTimestep(int time) = 0;
+    void CalculateNextTimestep(int time);
 
-protected:
+private:
     bool initialization {true};
     bool enforceTrajectory{false};
     bool automaticDeactivation{false};
@@ -156,11 +156,17 @@ protected:
 
     DynamicsSignal dynamicsOutputSignal{};
 
-    int lastCoordinateTimestamp {0};
-    double lastVelocity {0.0};
-    Position lastWorldPosition;
+    Trajectory trajectory{};
+    std::vector<TrajectoryPoint>::iterator previousTrajectoryIterator {};
+    std::vector<TrajectoryPoint>::iterator nextTrajectoryIterator {};
 
-    void HandleCompCtrlSignalOutput(std::shared_ptr<SignalInterface const> &data);
+    double lastCoordinateTimestamp {0};
+    double lastVelocity {0.0};
+    TrajectoryPoint lastWorldPosition;
+    double percentageTraveledBetweenCoordinates {0};
+
+    ComponentState componentState {ComponentState::Disabled};
+    bool canBeActivated{true};
 
     [[ noreturn ]] void ThrowCouldNotInstantiateSignalError();
     [[ noreturn ]] void ThrowInvalidSignalTypeError();
@@ -170,9 +176,21 @@ protected:
 
     void HandleEndOfTrajectory();
 
-private:
-    ComponentState componentState {ComponentState::Disabled};
-    bool canBeActivated{true};
-
     void ParseParameters(const ParameterInterface *parameters);
+
+    Common::Vector2d CalculateScaledVector(const TrajectoryPoint &previousPosition, const TrajectoryPoint &nextPosition, const double &factor);
+    double CalculateScaledDeltaYawAngle(const TrajectoryPoint &previousPosition, const TrajectoryPoint &nextPosition, const double &factor);
+
+    TrajectoryPoint CalculateStartPosition(const TrajectoryPoint &previousPosition, const TrajectoryPoint &nextPosition);
+    std::pair<int, TrajectoryPoint> CalculateStartCoordinate(const std::pair<int, TrajectoryPoint> &previousPosition, const std::pair<int, TrajectoryPoint> &nextPosition);
+    double CalculateDistanceBetweenWorldCoordinates(TrajectoryPoint previousPosition, TrajectoryPoint nextPosition);
+
+    void TriggerWithActiveAccelerationInput();
+    void TriggerWithInactiveAccelerationInput();
+
+    void UpdateDynamics(const TrajectoryPoint &previousPosition,
+                        const Common::Vector2d &direction,
+                        double deltaYawAngle,
+                        double velocity,
+                        double acceleration);
 };

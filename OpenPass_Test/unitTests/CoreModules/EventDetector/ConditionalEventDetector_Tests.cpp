@@ -96,10 +96,10 @@ public:
 
     void StoreEvent (std::shared_ptr<EventInterface> inputEvent)
     {
-        event = std::dynamic_pointer_cast<AgentBasedManipulationEvent>(inputEvent);
+        event = std::dynamic_pointer_cast<ConditionalEvent>(inputEvent);
     }
 
-    std::shared_ptr<AgentBasedManipulationEvent> event{};
+    std::shared_ptr<ConditionalEvent> event{};
 };
 
 
@@ -142,7 +142,7 @@ TEST_P(ReachPositionConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
         ON_CALL(mockWorld, GetAgentByName("mockAgent2")).WillByDefault(Return(&mockAgent2));
 
         std::vector<int> expectedAgentIds {1, 2};
-        std::shared_ptr<AgentBasedManipulationEvent> referenceEvent = std::make_shared<AgentBasedManipulationEvent>(0, "", "", EventDefinitions::EventType::Undefined, std::vector<int>(), expectedAgentIds);
+        auto referenceEvent = std::make_shared<ConditionalEvent>(0, "", "", std::vector<int>(), expectedAgentIds);
 
         Invocationcontainer container{};
 
@@ -375,10 +375,6 @@ struct TimeToCollisionCondition_Data
     double targetTTC{};
     openScenario::Rule rule{};
 
-    double distanceBetweenAgents{};
-    double triggeringAgentVelocity{};
-    double referenceAgentVelocity{};
-
     bool expectError{};
     int expectNumberOfEvents{};
 };
@@ -404,12 +400,30 @@ TEST_P(TimeToCollisionConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
     testConditionalEventDetectorInformation.conditions.emplace_back(testCondition);
 
     NiceMock<FakeAgent> triggeringAgent;
-    ON_CALL(triggeringAgent, GetDistanceToObject(_)).WillByDefault(Return(GetParam().distanceBetweenAgents));
-    ON_CALL(triggeringAgent, GetVelocity()).WillByDefault(Return(GetParam().triggeringAgentVelocity));
+    ON_CALL(triggeringAgent, GetPositionX()).WillByDefault(Return(0.0));
+    ON_CALL(triggeringAgent, GetPositionY()).WillByDefault(Return(0.0));
+    ON_CALL(triggeringAgent, GetYaw()).WillByDefault(Return(0.0));
+    ON_CALL(triggeringAgent, GetYawRate()).WillByDefault(Return(0.0));
+    ON_CALL(triggeringAgent, GetYawAcceleration()).WillByDefault(Return(0.0));
+    ON_CALL(triggeringAgent, GetVelocity(VelocityScope::DirectionX)).WillByDefault(Return(10.0));
+    ON_CALL(triggeringAgent, GetVelocity(VelocityScope::DirectionY)).WillByDefault(Return(0.0));
+    ON_CALL(triggeringAgent, GetAcceleration()).WillByDefault(Return(0.0));
+    ON_CALL(triggeringAgent, GetLength()).WillByDefault(Return(2.0));
+    ON_CALL(triggeringAgent, GetWidth()).WillByDefault(Return(1.0));
+    ON_CALL(triggeringAgent, GetDistanceReferencePointToLeadingEdge()).WillByDefault(Return(1.0));
 
     NiceMock<FakeAgent> referenceAgent;
-    ON_CALL(referenceAgent, GetDistanceToObject(_)).WillByDefault(Return(-GetParam().distanceBetweenAgents));
-    ON_CALL(referenceAgent, GetVelocity()).WillByDefault(Return(GetParam().referenceAgentVelocity));
+    ON_CALL(referenceAgent, GetPositionX()).WillByDefault(Return(22.0));
+    ON_CALL(referenceAgent, GetPositionY()).WillByDefault(Return(0.0));
+    ON_CALL(referenceAgent, GetYaw()).WillByDefault(Return(0.0));
+    ON_CALL(referenceAgent, GetYawRate()).WillByDefault(Return(0.0));
+    ON_CALL(referenceAgent, GetYawAcceleration()).WillByDefault(Return(0.0));
+    ON_CALL(referenceAgent, GetVelocity(VelocityScope::DirectionX)).WillByDefault(Return(0.0));
+    ON_CALL(referenceAgent, GetVelocity(VelocityScope::DirectionY)).WillByDefault(Return(0.0));
+    ON_CALL(referenceAgent, GetAcceleration()).WillByDefault(Return(0.0));
+    ON_CALL(referenceAgent, GetLength()).WillByDefault(Return(2.0));
+    ON_CALL(referenceAgent, GetWidth()).WillByDefault(Return(1.0));
+    ON_CALL(referenceAgent, GetDistanceReferencePointToLeadingEdge()).WillByDefault(Return(1.0));
 
 
     NiceMock<FakeWorld> mockWorld;
@@ -443,16 +457,15 @@ TEST_P(TimeToCollisionConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
 INSTANTIATE_TEST_CASE_P(TimeToCollisionCondition_AppropriatelyInsertsEventsIntoNetwork,
                         TimeToCollisionConditionTest,
                         Values(
-                            // ------------------------- | entityName      | targetTTC | rule                              | distanceBetweenAgents | triggeringAgentVelocity | referenceAgentVelocity | expectError | expectNumberOfEvents |
-                            TimeToCollisionCondition_Data{"notExisting"    , 1.0       , openScenario::Rule::LessThan      , 0.0                   , -2.0                    , -2.0                   , true        , 0                    },
-                            TimeToCollisionCondition_Data{"referenceAgent" , 2.0       , openScenario::Rule::GreaterThan   , 30.0                  , 5.0                     , 0.0                    , false       , 1                    },
-                            TimeToCollisionCondition_Data{"referenceAgent" , 2.0       , openScenario::Rule::LessThan      , 30.0                  , 5.0                     , 0.0                    , false       , 0                    },
-                            TimeToCollisionCondition_Data{"referenceAgent" , 2.0       , openScenario::Rule::EqualTo       , 10.0                  , 5.0                     , 0.0                    , false       , 1                    },
-                            TimeToCollisionCondition_Data{"referenceAgent" , 2.0       , openScenario::Rule::LessThan      , 10.0                  , 5.0                     , 0.0                    , false       , 0                    },
-                            TimeToCollisionCondition_Data{"referenceAgent" , 2.0       , openScenario::Rule::LessThan      , 9.9                   , 5.0                     , 0.0                    , false       , 1                    },
-                            TimeToCollisionCondition_Data{"referenceAgent" , 2.0       , openScenario::Rule::LessThan      , -9.9                  , 0.0                     , 5.0                    , false       , 1                    },
-                            TimeToCollisionCondition_Data{"referenceAgent" , 2.0       , openScenario::Rule::LessThan      , -10.0                 , 0.0                     , 5.0                    , false       , 0                    },
-                            TimeToCollisionCondition_Data{"referenceAgent" , 2.0       , openScenario::Rule::EqualTo       , -10.0                 , 0.0                     , 5.0                    , false       , 1                    },
-                            TimeToCollisionCondition_Data{"referenceAgent" , 2.0       , openScenario::Rule::LessThan      , -30.0                 , 0.0                     , 5.0                    , false       , 0                    },
-                            TimeToCollisionCondition_Data{"referenceAgent" , 2.0       , openScenario::Rule::GreaterThan   , -30.0                 , 0.0                     , 5.0                    , false       , 1                    }
+                            // ------------------------- | entityName      | targetTTC | rule                              | expectError | expectNumberOfEvents |
+                            TimeToCollisionCondition_Data{"notExisting"    , 1.0       , openScenario::Rule::LessThan      , true        , 0                    },
+                            TimeToCollisionCondition_Data{"referenceAgent" , 1.0       , openScenario::Rule::GreaterThan   , false       , 1                    },
+                            TimeToCollisionCondition_Data{"referenceAgent" , 1.0       , openScenario::Rule::LessThan      , false       , 0                    },
+                            TimeToCollisionCondition_Data{"referenceAgent" , 1.0       , openScenario::Rule::EqualTo       , false       , 0                    },
+                            TimeToCollisionCondition_Data{"referenceAgent" , 2.0       , openScenario::Rule::GreaterThan   , false       , 0                    },
+                            TimeToCollisionCondition_Data{"referenceAgent" , 2.0       , openScenario::Rule::LessThan      , false       , 0                    },
+                            TimeToCollisionCondition_Data{"referenceAgent" , 2.0       , openScenario::Rule::EqualTo       , false       , 1                    },
+                            TimeToCollisionCondition_Data{"referenceAgent" , 3.0       , openScenario::Rule::GreaterThan   , false       , 0                    },
+                            TimeToCollisionCondition_Data{"referenceAgent" , 3.0       , openScenario::Rule::LessThan      , false       , 1                    },
+                            TimeToCollisionCondition_Data{"referenceAgent" , 3.0       , openScenario::Rule::EqualTo       , false       , 0                    }
                         ));

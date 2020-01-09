@@ -19,6 +19,42 @@ using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::SizeIs;
 
+TEST(EventNetwork_UnitTests, InsertEventInNotExistingCategory)
+{
+    auto fakeEvent = std::make_shared<NiceMock<FakeEvent>>();
+    EXPECT_CALL(*fakeEvent, GetCategory()).Times(1).WillOnce(Return(EventDefinitions::EventCategory::Conditional));
+
+    SimulationSlave::EventNetwork eventNetwork;
+
+    eventNetwork.InsertEvent(fakeEvent);
+
+    std::list<std::shared_ptr<EventInterface>> resultAgentBasedEventList =
+        eventNetwork.GetActiveEvents()->at(EventDefinitions::EventCategory::Conditional);
+
+    ASSERT_EQ(resultAgentBasedEventList.size(), size_t(1));
+}
+
+TEST(EventNetwork_UnitTests, InsertEventInExistingCategory)
+{
+    auto fakeEvent = std::make_shared<NiceMock<FakeEvent>>();
+    EXPECT_CALL(*fakeEvent, GetCategory()).Times(1).WillOnce(Return(EventDefinitions::EventCategory::Conditional));
+
+    std::list<std::shared_ptr<EventInterface>> fakeAgentBasedEventList;
+    fakeAgentBasedEventList.push_back(fakeEvent);
+
+    Events fakeEvents{{EventDefinitions::EventCategory::Conditional, fakeAgentBasedEventList}};
+
+    SimulationSlave::EventNetwork eventNetwork;
+    *(eventNetwork.GetActiveEvents()) = fakeEvents;
+
+    eventNetwork.InsertEvent(fakeEvent);
+
+    std::list<std::shared_ptr<EventInterface>> resultAgentBasedEventList =
+        eventNetwork.GetActiveEvents()->at(EventDefinitions::EventCategory::Conditional);
+
+    ASSERT_EQ(resultAgentBasedEventList.size(), size_t(2));
+}
+
 TEST(EventNetwork_UnitTests, GetActiveEventCategoryWithOneExisting)
 {
     auto fakeEvent = std::make_shared<FakeEvent>();
@@ -26,12 +62,12 @@ TEST(EventNetwork_UnitTests, GetActiveEventCategoryWithOneExisting)
     EventContainer fakeEventList;
     fakeEventList.push_back(fakeEvent);
 
-    Events fakeEvents {{EventDefinitions::EventCategory::AgentBasedManipulation, fakeEventList}};
+    Events fakeEvents {{EventDefinitions::EventCategory::Conditional, fakeEventList}};
 
     SimulationSlave::EventNetwork eventNetwork;
     *(eventNetwork.GetActiveEvents()) = fakeEvents;
 
-    EventContainer resultEventList = eventNetwork.GetActiveEventCategory(EventDefinitions::EventCategory::AgentBasedManipulation);
+    EventContainer resultEventList = eventNetwork.GetActiveEventCategory(EventDefinitions::EventCategory::Conditional);
 
     ASSERT_THAT(resultEventList, SizeIs(Ne(0)));
 }
@@ -44,7 +80,7 @@ TEST(EventNetwork_UnitTests, GetActiveEventCategoryWithoutExisting)
     SimulationSlave::EventNetwork eventNetwork;
     *(eventNetwork.GetActiveEvents()) = fakeEvents;
 
-    EventContainer resultEventList = eventNetwork.GetActiveEventCategory(EventDefinitions::EventCategory::AgentBasedManipulation);
+    EventContainer resultEventList = eventNetwork.GetActiveEventCategory(EventDefinitions::EventCategory::Conditional);
 
     ASSERT_THAT(resultEventList, SizeIs(0));
 }
@@ -59,19 +95,19 @@ TEST(EventNetwork_UnitTests, RemoveOldEventsWithTwoOldEventsOfTheSameCategory)
                                            .WillOnce(Return(2))
                                            .WillOnce(Return(actualTime));
 
-    EventContainer fakeAgentBasedEventList;
-    fakeAgentBasedEventList.push_back(fakeEvent);
-    fakeAgentBasedEventList.push_back(fakeEvent);
-    fakeAgentBasedEventList.push_back(fakeEvent);
+    EventContainer fakeConditionalEvents;
+    fakeConditionalEvents.push_back(fakeEvent);
+    fakeConditionalEvents.push_back(fakeEvent);
+    fakeConditionalEvents.push_back(fakeEvent);
 
-    Events fakeEvents {{EventDefinitions::EventCategory::AgentBasedManipulation, fakeAgentBasedEventList}};
+    Events fakeEvents {{EventDefinitions::EventCategory::Conditional, fakeConditionalEvents}};
 
     SimulationSlave::EventNetwork eventNetwork;
     *(eventNetwork.GetArchivedEvents()) = fakeEvents;
 
     eventNetwork.RemoveOldEvents(actualTime);
 
-    EventContainer resultEventList = eventNetwork.GetArchivedEvents()->at(EventDefinitions::EventCategory::AgentBasedManipulation);
+    EventContainer resultEventList = eventNetwork.GetArchivedEvents()->at(EventDefinitions::EventCategory::Conditional);
 
     ASSERT_THAT(resultEventList, SizeIs(1));
 }
@@ -85,32 +121,32 @@ TEST(EventNetwork_UnitTests, RemoveOldEventsWithTwoOldEventsOfDifferentCategorie
                                            .WillOnce(Return(1))
                                            .WillOnce(Return(actualTime));
 
-    EventContainer fakeAgentBasedEventList;
-    fakeAgentBasedEventList.push_back(fakeEventFirst);
-    fakeAgentBasedEventList.push_back(fakeEventFirst);
+    EventContainer fakeConditionalEvents;
+    fakeConditionalEvents.push_back(fakeEventFirst);
+    fakeConditionalEvents.push_back(fakeEventFirst);
 
     auto fakeEventSecond = std::make_shared<NiceMock<FakeEvent>>();
     EXPECT_CALL(*fakeEventSecond, GetEventTime()).Times(2)
                                                  .WillOnce(Return(1))
                                                  .WillOnce(Return(actualTime));
 
-    EventContainer fakeBasicEventList;
-    fakeBasicEventList.push_back(fakeEventSecond);
-    fakeBasicEventList.push_back(fakeEventSecond);
+    EventContainer fakeBasicEvents;
+    fakeBasicEvents.push_back(fakeEventSecond);
+    fakeBasicEvents.push_back(fakeEventSecond);
 
-    Events fakeEvents {{EventDefinitions::EventCategory::AgentBasedManipulation, fakeAgentBasedEventList},
-                       {EventDefinitions::EventCategory::Basic, fakeBasicEventList}};
+    Events fakeEvents {{EventDefinitions::EventCategory::Conditional, fakeConditionalEvents},
+                       {EventDefinitions::EventCategory::Basic, fakeBasicEvents}};
 
     SimulationSlave::EventNetwork eventNetwork;
     *(eventNetwork.GetArchivedEvents()) = fakeEvents;
 
     eventNetwork.RemoveOldEvents(actualTime);
 
-    EventContainer resultAgentBasedEventList = eventNetwork.GetArchivedEvents()->at(EventDefinitions::EventCategory::AgentBasedManipulation);
-    EventContainer resultBasicEventList = eventNetwork.GetArchivedEvents()->at(EventDefinitions::EventCategory::Basic);
+    EventContainer conditionalEvents = eventNetwork.GetArchivedEvents()->at(EventDefinitions::EventCategory::Conditional);
+    EventContainer basicEvents = eventNetwork.GetArchivedEvents()->at(EventDefinitions::EventCategory::Basic);
 
-    ASSERT_THAT(resultAgentBasedEventList, SizeIs(1));
-    ASSERT_THAT(resultBasicEventList, SizeIs(1));
+    ASSERT_THAT(conditionalEvents, SizeIs(1));
+    ASSERT_THAT(basicEvents, SizeIs(1));
 }
 
 TEST(EventNetwork_UnitTests, RemoveOldEventsWithNoOldEvents)
@@ -121,27 +157,27 @@ TEST(EventNetwork_UnitTests, RemoveOldEventsWithNoOldEvents)
     EXPECT_CALL(*fakeEventFirst, GetEventTime()).Times(1)
                                                 .WillOnce(Return(actualTime));
 
-    EventContainer fakeAgentBasedEventList;
-    fakeAgentBasedEventList.push_back(fakeEventFirst);
+    EventContainer fakeConditionalEvents;
+    fakeConditionalEvents.push_back(fakeEventFirst);
 
     auto fakeEventSecond = std::make_shared<NiceMock<FakeEvent>>();
     EXPECT_CALL(*fakeEventSecond, GetEventTime()).Times(1)
                                                  .WillOnce(Return(actualTime));
 
-    EventContainer fakeBasicEventList;
-    fakeBasicEventList.push_back(fakeEventSecond);
+    EventContainer fakeBasicEvents;
+    fakeBasicEvents.push_back(fakeEventSecond);
 
-    Events fakeEvents {{EventDefinitions::EventCategory::AgentBasedManipulation, fakeAgentBasedEventList},
-                       {EventDefinitions::EventCategory::Basic, fakeBasicEventList}};
+    Events fakeEvents {{EventDefinitions::EventCategory::Conditional, fakeConditionalEvents},
+                       {EventDefinitions::EventCategory::Basic, fakeBasicEvents}};
 
     SimulationSlave::EventNetwork eventNetwork;
     *(eventNetwork.GetArchivedEvents()) = fakeEvents;
 
     eventNetwork.RemoveOldEvents(actualTime);
 
-    EventContainer resultAgentBasedEventList = eventNetwork.GetArchivedEvents()->at(EventDefinitions::EventCategory::AgentBasedManipulation);
-    EventContainer resultBasicEventList = eventNetwork.GetArchivedEvents()->at(EventDefinitions::EventCategory::Basic);
+    EventContainer conditionalEvents = eventNetwork.GetArchivedEvents()->at(EventDefinitions::EventCategory::Conditional);
+    EventContainer basicEvents = eventNetwork.GetArchivedEvents()->at(EventDefinitions::EventCategory::Basic);
 
-    ASSERT_THAT(resultAgentBasedEventList, SizeIs(1));
-    ASSERT_THAT(resultBasicEventList, SizeIs(1));
+    ASSERT_THAT(conditionalEvents, SizeIs(1));
+    ASSERT_THAT(basicEvents, SizeIs(1));
 }

@@ -11,7 +11,8 @@ The different parts of the scenario configuration are described in the following
 \section scenario_catalogs Catalog References
 
 The <Catalogs> tag defines references to various other files that describe sub features of OpenSCENARIO.
-We currently support only two of these references: the [VehicleCatalog](\ref io_input_vehiclemodels), which defines the vehicle models, and the [PedestrianCatalog](\ref io_input_pedestrianmodels), which defines the pedestrian models.
+We currently support only three of these references: the [VehicleCatalog](\ref io_input_vehiclemodels), which defines the vehicle models, and the [PedestrianCatalog](\ref io_input_pedestrianmodels), which defines the pedestrian models.
+For the FollowTrajectory action one can also use a TrajectoryCatalog.
 
 Example
 ```xml
@@ -186,7 +187,7 @@ An EventDetector checks in every timestep if its condition is fullfilled.
 In this case it writes an event into the EventNetwork, which then triggers the associated Manipulator.
 The story consists of multiple acts, which itself can consist of multiple sequences.
 The grouping of sequences into acts currently has no effect in the simulator.
-A sequence must consist of exactly one <Actor> tag and one <Maneuver> tag.
+A sequence must consist of exactly one <Actors> tag and one <Maneuver> tag.
 The numberOfExecutions attribute states the maximum number of times that the sequence will by triggered.
 If the numberOfExecutions is -1 then the sequence can triggered an unlimited number of times.
 
@@ -216,6 +217,8 @@ Currently "triggeringEntity" is the only supported condition.
 
 The <Maneuver> tag defines the conditions for the EventDetector and the resulting action in the simulator.
 It contains one or more events each consisting of one action (Note: OpenSCENARIO allows more than one action, but we support only a single action) and one or more start conditions.
+The EventDetector Manipulator pair is currently being tied together through the event name.
+Therefore unique event names are required.
 
 Example
 ```xml
@@ -378,7 +381,6 @@ Depending on the type of the action a different Manipulator is created, that bec
 **Lane Change**
 
 The LaneChangeManipulator writes an event to the EventNetwork which tells the Driver that he should change one or more lanes to the left or right as specified by the <Target> tag.
-This functionality is currently not implemented.
 
 Example
 ```xml
@@ -392,6 +394,64 @@ Example
 			<LaneChange>
 		</Lateral>
 	</Private>
+</Action>
+```
+
+**Follow Trajectory**
+
+The TrajectoryManipulator also an event to the EventNetwork which tells the Driver that he should a given trajectory.
+The trajectory can be defined either directly in the story or in a separate TrajectoryCatalog.
+The Longitudinal and Lateral tag are currently ignored.
+For the points (vertices) of the trajectory we support only World position (and ignore z, pitch and roll).
+
+Example
+```xml
+<Action name="FollowTrajectory">
+    <Private>
+        <Routing>
+            <FollowTrajectory>
+                <Trajectory name="TrajectoryA" closed="false" domain="time">
+                    <Vertex reference="0.0">
+                        <Position>
+                            <World x="1.0" y="2.0" z="0.0" h="0.0" p="0.0" r="0.0" />
+                        </Position>
+                        <Shape>
+                            <Polyline/>
+                        </Shape>
+                    </Vertex>
+                    <Vertex reference="1.0">
+                        <Position>
+                            <World x="2.0" y="3.0" z="0.0" h="0.1" p="0.0" r="0.0" />
+                        </Position>
+                        <Shape>
+                            <Polyline/>
+                        </Shape>
+                    </Vertex>
+                </Trajectory>
+                <Longitudinal>
+                    <None/>
+                </Longitudinal>
+                <Lateral purpose="position"/>
+            </FollowTrajectory>
+        </Routing>
+    </Private>
+</Action>
+```
+
+Example using TrajectoryCatalog
+```xml
+<Action name="FollowTrajectory">
+    <Private>
+        <Routing>
+            <FollowTrajectory>
+                <CatalogReference catalogName="TrajectoryCatalog.xosc" entryName="TrajectoryA">
+                <Longitudinal>
+                    <None/>
+                </Longitudinal>
+                <Lateral purpose="position"/>
+            </FollowTrajectory>
+        </Routing>
+    </Private>
 </Action>
 ```
 

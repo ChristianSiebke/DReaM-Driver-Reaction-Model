@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -50,23 +50,37 @@ namespace openpass::importer::xml::manipulatorImporter::tag
     constexpr char absolute[] {"Absolute"};
     constexpr char action[] {"Action"};
     constexpr char add[] {"Add"};
+    constexpr char catalog[] {"Catalog"};
+    constexpr char catalogReference[] {"CatalogReference"};
     constexpr char command[] {"Command"};
     constexpr char Delete[] {"Delete"};
     constexpr char entity[] {"Entity"};
+    constexpr char followTrajectory[] {"FollowTrajectory"};
     constexpr char global[] {"Global"};
     constexpr char userDefined[] {"UserDefined"};
     constexpr char laneChange[] {"LaneChange"};
     constexpr char lateral[] {"Lateral"};
+    constexpr char position[] {"Position"};
     constexpr char Private[] {"Private"};
     constexpr char relative[] {"Relative"};
+    constexpr char routing[] {"Routing"};
     constexpr char target[] {"Target"};
+    constexpr char trajectory[] {"Trajectory"};
+    constexpr char vertex[] {"Vertex"};
+    constexpr char world[] {"World"};
 }
 
 namespace openpass::importer::xml::manipulatorImporter::attribute
 {
+    constexpr char catalogName[] {"catalogName"};
+    constexpr char entryName[] {"entryName"};
+    constexpr char h[] {"h"};
     constexpr char name[] {"name"};
     constexpr char object[] {"object"};
+    constexpr char reference[] {"reference"};
     constexpr char value[] {"value"};
+    constexpr char x[] {"x"};
+    constexpr char y[] {"y"};
 }
 
 namespace openpass::importer::xml::parameterImporter::tag

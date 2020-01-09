@@ -24,14 +24,12 @@ class ComponentWarningEvent : public VehicleComponentEvent
 public:
     ComponentWarningEvent(const int time,
                           const std::string& source,
-                          const std::string& sequenceName,
                           const int agentId,
                           const std::string& componentName,
                           const ComponentWarningInformation& warning):
         VehicleComponentEvent(time,
+                              "",
                               source,
-                              sequenceName,
-                              EventDefinitions::EventType::ComponentWarning,
                               agentId),
         componentName(componentName),
         warning(warning)
@@ -41,7 +39,7 @@ public:
     ComponentWarningEvent(ComponentWarningEvent&&) = delete;
     ComponentWarningEvent& operator=(const ComponentWarningEvent&) = delete;
     ComponentWarningEvent& operator=(ComponentWarningEvent&&) = delete;
-    virtual ~ComponentWarningEvent() = default;
+    virtual ~ComponentWarningEvent() override = default;
 
     /*!
      * \brief Returns the component name for which the event is targeted
@@ -67,15 +65,15 @@ public:
     *
     * @return	     List of string pairs of the event parameters.
     */
-    virtual std::list<std::pair<std::string, std::string>> GetEventParametersAsString()
+    virtual EventParameters GetParametersAsString() override
     {
-        auto eventParameters = VehicleComponentEvent::GetEventParametersAsString();
+        auto eventParameters = VehicleComponentEvent::GetParametersAsString();
 
-        eventParameters.emplace_back("ComponentName", componentName);
-        eventParameters.emplace_back("Activity", warning.activity ? "true" : "false");
-        eventParameters.emplace_back("Level", ComponentWarningLevelMapping.at(warning.level));
-        eventParameters.emplace_back("Type", ComponentWarningTypeMapping.at(warning.type));
-        eventParameters.emplace_back("Intensity", ComponentWarningIntensityMapping.at(warning.intensity));
+        eventParameters.push_back({"ComponentName", componentName});
+        eventParameters.push_back({"Activity", warning.activity ? "true" : "false"});
+        eventParameters.push_back({"Level", ComponentWarningLevelMapping.at(warning.level)});
+        eventParameters.push_back({"Type", ComponentWarningTypeMapping.at(warning.type)});
+        eventParameters.push_back({"Intensity", ComponentWarningIntensityMapping.at(warning.intensity)});
 
         return eventParameters;
     }

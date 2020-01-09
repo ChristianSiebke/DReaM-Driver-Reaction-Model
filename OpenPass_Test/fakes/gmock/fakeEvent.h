@@ -15,22 +15,22 @@
 
 class FakeEvent : public EventInterface {
  public:
-  MOCK_METHOD1(SetEventId,
+  MOCK_METHOD1(SetId,
       void(int));
   MOCK_CONST_METHOD0(GetId,
       int());
   MOCK_CONST_METHOD0(GetEventTime,
       int());
+  MOCK_CONST_METHOD0(GetCategory,
+      EventDefinitions::EventCategory());
   MOCK_METHOD1(SetTriggeringEventId,
       void(int));
   MOCK_CONST_METHOD0(GetTriggeringEventId,
       int());
   MOCK_CONST_METHOD0(GetSource,
       std::string());
-  MOCK_CONST_METHOD0(GetSequenceName,
+  MOCK_CONST_METHOD0(GetName,
       std::string());
-  MOCK_CONST_METHOD0(GetEventType,
-      EventDefinitions::EventType());
-  MOCK_METHOD0(GetEventParametersAsString,
-      std::list<std::pair<std::string, std::string>>());
+  MOCK_METHOD0(GetParametersAsString,
+      EventParameters());
 };

@@ -162,13 +162,13 @@ void ObservationFileHandler::WriteEndOfFile()
 }
 
 void ObservationFileHandler::AddEventParameters(std::shared_ptr<QXmlStreamWriter> fStream,
-        std::list<std::pair<std::string, std::string>> eventParameters)
+        EventParameters eventParameters)
 {
-    for (auto parameterPair : eventParameters)
+    for (auto parameter : eventParameters)
     {
         fStream->writeStartElement(outputTags.EVENTPARAMETER);
-        fStream->writeAttribute(outputAttributes.KEY, QString::fromStdString(parameterPair.first));
-        fStream->writeAttribute(outputAttributes.VALUE, QString::fromStdString(parameterPair.second));
+        fStream->writeAttribute(outputAttributes.KEY, QString::fromStdString(parameter.key));
+        fStream->writeAttribute(outputAttributes.VALUE, QString::fromStdString(parameter.value));
 
         //Closes EventParameter tag
         fStream->writeEndElement();
@@ -177,13 +177,11 @@ void ObservationFileHandler::AddEventParameters(std::shared_ptr<QXmlStreamWriter
 
 void ObservationFileHandler::AddEvent(std::shared_ptr<QXmlStreamWriter> fStream, std::shared_ptr<EventInterface> event)
 {
-    const std::string eventType = GetEventString(event->GetEventType());
-
     fStream->writeStartElement(outputTags.EVENT);
     fStream->writeAttribute(outputAttributes.ID, QString::number(event->GetId()));
     fStream->writeAttribute(outputAttributes.TIME, QString::number(event->GetEventTime()));
     fStream->writeAttribute(outputAttributes.SOURCE, QString::fromStdString(event->GetSource()));
-    fStream->writeAttribute(outputAttributes.TYPE, QString::fromStdString(eventType));
+    fStream->writeAttribute(outputAttributes.NAME, QString::fromStdString(event->GetName()));
 
     const int& triggeringEventId = event->GetTriggeringEventId();
     if (triggeringEventId >= 0)
@@ -191,7 +189,7 @@ void ObservationFileHandler::AddEvent(std::shared_ptr<QXmlStreamWriter> fStream,
         fStream->writeAttribute(outputAttributes.TRIGGERINGEVENTID, QString::number(triggeringEventId));
     }
 
-    AddEventParameters(fStream, event->GetEventParametersAsString());
+    AddEventParameters(fStream, event->GetParametersAsString());
 
     fStream->writeEndElement();
 }
@@ -363,13 +361,6 @@ void ObservationFileHandler::AddReference(std::shared_ptr<QXmlStreamWriter> fStr
     // close CyclicsFileTag
     fStream->writeEndElement();
 }
-
-std::string ObservationFileHandler::GetEventString(EventDefinitions::EventType eventType)
-{
-    int keyIndex = static_cast<int>(eventType);
-    return EventDefinitions::EventTypeStrings[keyIndex];
-}
-
 
 void ObservationFileHandler::RemoveCsvCyclics(QString directory)
 {

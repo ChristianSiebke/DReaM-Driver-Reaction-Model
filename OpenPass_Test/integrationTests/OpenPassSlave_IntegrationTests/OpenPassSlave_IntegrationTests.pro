@@ -1,5 +1,5 @@
 #/*******************************************************************************
-#* Copyright (c) 2019 in-tech GmbH
+#* Copyright (c) 2019, 2020 in-tech GmbH
 #*
 #* This program and the accompanying materials are made
 #* available under the terms of the Eclipse Public License 2.0
@@ -80,12 +80,6 @@ INC_SYSTEMCONFIG =  $$OPENPASS_SLAVE/importer/systemConfig.h \
                     $$OPENPASS_SLAVE/modelElements/agentType.h \
                     $$OPENPASS_SLAVE/modelElements/componentType.h
 
-SRC_TRAJECTORY =    $$OPENPASS_SLAVE/importer/trajectory.cpp \
-                    $$OPENPASS_SLAVE/importer/trajectoryImporter.cpp
-
-INC_TRAJECTORY =    $$OPENPASS_SLAVE/importer/trajectory.h \
-                    $$OPENPASS_SLAVE/importer/trajectoryImporter.h
-
 SRC_VEHICLEMODELS = $$OPENPASS_SLAVE/importer/vehicleModels.cpp \
                     $$OPENPASS_SLAVE/importer/vehicleModelsImporter.cpp
 
@@ -141,7 +135,6 @@ SOURCES += \
     SceneryImporter_IntegrationTests.cpp \
     SlaveConfigImporter_IntegrationTests.cpp \
     SystemConfigImporter_IntegrationTests.cpp \
-    \ # TrajectoriesImporter_IntegrationTests.cpp \
     VehicleModelsImporter_IntegrationTests.cpp \
     $$SRC_SCENARIO \
     $$SRC_SCENERY \

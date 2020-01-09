@@ -29,7 +29,6 @@ INCLUDEPATH += \
 
 SOURCES += \
     ../../../OpenPass_Source_Code/openPASS/Common/vector2d.cpp \
-    ../../../OpenPass_Source_Code/openPASS/Common/utilities.cpp \
     ../../../OpenPass_Source_Code/openPASS/CoreFramework/CoreShare/cephesMIT/fresnl.c \
     ../../../OpenPass_Source_Code/openPASS/CoreFramework/CoreShare/cephesMIT/polevl.c \
     ../../../OpenPass_Source_Code/openPASS/CoreFramework/CoreShare/cephesMIT/const.c \
