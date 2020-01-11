@@ -28,3 +28,4 @@ public:
 };
 
 #endif // LOGODELEGATE_H
+

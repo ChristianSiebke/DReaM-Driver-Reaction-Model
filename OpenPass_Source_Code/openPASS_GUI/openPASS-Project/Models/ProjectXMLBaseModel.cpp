@@ -10,25 +10,27 @@
 
 #include "ProjectXMLBaseModel.h"
 
-QString const ProjectXMLBaseModel::KeyFrameworkConfiguration = QStringLiteral("FrameworkConfiguration");
-QString const ProjectXMLBaseModel::KeyLibraryPath = QStringLiteral("LibraryPath");
-QString const ProjectXMLBaseModel::KeyResultPath = QStringLiteral("ResultPath");
-QString const ProjectXMLBaseModel::KeyAgentConfigFile = QStringLiteral("AgentConfigFile");
-QString const ProjectXMLBaseModel::KeyRunConfigFile = QStringLiteral("RunConfigFile");
-QString const ProjectXMLBaseModel::KeySceneryConfigFile = QStringLiteral("SceneryConfigFile");
-QString const ProjectXMLBaseModel::KeyLogFileMaster = QStringLiteral("LogFileMaster");
-QString const ProjectXMLBaseModel::KeyLogFileSlave = QStringLiteral("LogFileSlave");
-QString const ProjectXMLBaseModel::KeyLogLevel = QStringLiteral("LogLevel");
-QString const ProjectXMLBaseModel::KeySlavePath = QStringLiteral("SlavePath");
+QString const ProjectXMLBaseModel::KeyMasterConfig = QStringLiteral("masterConfig");
+QString const ProjectXMLBaseModel::KeySlaveConfigs = QStringLiteral("slaveConfigs");
+QString const ProjectXMLBaseModel::KeySlaveConfig = QStringLiteral("slaveConfig");
+QString const ProjectXMLBaseModel::KeyLibraryPath = QStringLiteral("libraries");
+QString const ProjectXMLBaseModel::KeyResultPath = QStringLiteral("results");
+QString const ProjectXMLBaseModel::KeyConfigPath = QStringLiteral("configurations");
+QString const ProjectXMLBaseModel::KeyLogFileMaster = QStringLiteral("logFileMaster");
+QString const ProjectXMLBaseModel::KeyLogFileSlave = QStringLiteral("logFileSlave");
+QString const ProjectXMLBaseModel::KeyLogLevel = QStringLiteral("logLevel");
+QString const ProjectXMLBaseModel::KeySlavePath = QStringLiteral("slave");
 
-QList<QString> const ProjectXMLBaseModel::KeyListFrameworkConfig = {
-    ProjectXMLBaseModel::KeyLibraryPath,
-    ProjectXMLBaseModel::KeyResultPath,
-    ProjectXMLBaseModel::KeyAgentConfigFile,
-    ProjectXMLBaseModel::KeyRunConfigFile,
-    ProjectXMLBaseModel::KeySceneryConfigFile,
-    ProjectXMLBaseModel::KeyLogFileMaster,
-    ProjectXMLBaseModel::KeyLogFileSlave,
+QList<QString> const ProjectXMLBaseModel::KeyListMasterConfig = {
     ProjectXMLBaseModel::KeyLogLevel,
+    ProjectXMLBaseModel::KeyLogFileMaster,
     ProjectXMLBaseModel::KeySlavePath,
+    ProjectXMLBaseModel::KeySlaveConfigs,
+    ProjectXMLBaseModel::KeyLibraryPath
+};
+
+QList<QString> const ProjectXMLBaseModel::KeyListSlaveConfig = {
+    ProjectXMLBaseModel::KeyLogFileSlave,
+    ProjectXMLBaseModel::KeyConfigPath,
+    ProjectXMLBaseModel::KeyResultPath,
 };

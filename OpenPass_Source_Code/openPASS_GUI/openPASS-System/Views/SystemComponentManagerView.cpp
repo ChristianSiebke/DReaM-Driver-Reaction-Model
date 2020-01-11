@@ -11,15 +11,14 @@
 #include "Views/SystemComponentManagerView.h"
 #include "ui_SystemComponentManagerView.h"
 
-#include "openPASS-Project/ProjectInterface.h"
 #include "openPASS-System/SystemComponentManagerInterface.h"
 
 SystemComponentManagerView::SystemComponentManagerView(SystemComponentManagerInterface * const components,
-                                                       ProjectInterface * const project,
+                                                       const bool * const dynamicMode,
                                                        QWidget * const parent)
     : QWidget(parent)
     , _components(components)
-    , _project(project)
+    , dynamicMode(dynamicMode)
     , ui(new Ui::SystemComponentManagerView)
 {
     // Setup UI
@@ -61,16 +60,26 @@ void SystemComponentManagerView::updateManagerView()
     }
 
     // Load again the components
-    if (_components->loadFromDirectory(_project->getLibrary()))
+    if (_components->loadFromDirectory(QDir(QCoreApplication::applicationDirPath() + SUBDIR_COMPONENTS)))
     {
-        for (unsigned char index = 0; index < ui->tree->topLevelItemCount(); ++index)
-        {
-            for (ComponentItemInterface::Title const & title : _components->
-                 listTitlesByType(static_cast<ComponentItemInterface::Type>(index)))
+            for (unsigned char index = 0; index < ui->tree->topLevelItemCount(); ++index)
             {
-                new QTreeWidgetItem(ui->tree->topLevelItem(index), {title}, 0);
+                ComponentItemInterface::Type type = static_cast<ComponentItemInterface::Type>(index);
+
+                for (ComponentItemInterface::Title const & title : _components->listTitlesByType(type))
+                {
+
+                    QTreeWidgetItem *item = new QTreeWidgetItem(ui->tree->topLevelItem(index), {title}, 0);
+
+                    // conditions for dynamic mode. Item is removed if component is not compatible with dynamic mode
+                    if ( isForbidden(_components->lookupItemByTitle(title)) )
+                    {
+                        ui->tree->topLevelItem(index)->removeChild(item);
+                        delete item;
+                    }
+
+                }
             }
-        }
         ui->tree->expandAll();
     }
 }
@@ -85,4 +94,39 @@ void SystemComponentManagerView::on_button_clicked()
     {
         updateManagerView();
     }
+}
+
+int SystemComponentManagerView::numberOfInputs(const ComponentItemInterface::Title &title)
+{
+    ComponentItemInterface const * const component = _components->lookupItemByTitle(title);
+
+    if(component)
+        return component->getInputs()->count();
+
+    return 0;
+}
+
+int SystemComponentManagerView::numberOfOutputs(const ComponentItemInterface::Title &title)
+{
+    ComponentItemInterface const * const component = _components->lookupItemByTitle(title);
+
+    if(component)
+        return component->getOutputs()->count();
+
+    return 0;
+}
+
+int SystemComponentManagerView::numberOfParameters(const ComponentItemInterface::Title &title)
+{
+    ComponentItemInterface const * const component = _components->lookupItemByTitle(title);
+
+    if(component)
+        return component->getParameters()->count();
+
+    return 0;
+}
+
+bool SystemComponentManagerView::isForbidden(ComponentItemInterface const * const item)
+{
+    return *dynamicMode && !dynamicComponents.contains(item->getName());
 }

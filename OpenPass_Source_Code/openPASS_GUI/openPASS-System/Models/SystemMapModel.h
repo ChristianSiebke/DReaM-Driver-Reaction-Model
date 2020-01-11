@@ -34,7 +34,29 @@ public:
     virtual SystemMapInterface::Item * getItem(SystemMapInterface::ID const & id) const override;
 
 public:
+    virtual SystemMapInterface::ID generateID() override;
+    virtual SystemItemInterface::Title generateTitle() override;
+
+public:
+    virtual bool add(SystemMapInterface::ID const & id) override;
+    virtual bool add(SystemMapInterface::ID const & id,
+                     SystemMapInterface::Item * const system) override;
+
+public:
+    virtual bool remove(SystemMapInterface::ID const & id) override;
+
+public:
+    virtual bool contains(SystemItemInterface::ID const & id) override;
+    virtual bool contains(SystemItemInterface::Title const & title) override;
+
+public:
+    virtual int count() const override;
+
+public:
     virtual bool clear() override;
+
+public:
+    virtual QList<Item*> values() const override;
 
 protected:
     SystemMapInterface::Map systems;

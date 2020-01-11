@@ -35,7 +35,7 @@ bool ProjectXMLLoadModel::load(QIODevice * const device, ProjectModel * const pr
     // Verify xml header
     if ((xml.readNext() == QXmlStreamReader::TokenType::StartDocument) &&
             (xml.readNext() == QXmlStreamReader::TokenType::StartElement) &&
-            (xml.name() == KeyFrameworkConfiguration))
+            (xml.name() == KeyMasterConfig))
     {
         // Load project from xml stream
         return loadProject(xml, project);
@@ -48,30 +48,51 @@ bool ProjectXMLLoadModel::loadProject(QXmlStreamReader & xml,
 {
     // Import the elements
     bool success = true;
-    QList<QString> keys = KeyListFrameworkConfig;
+    QList<QString> keys = KeyListMasterConfig;
     while (xml.readNextStartElement())
     {
         keys.removeAll(xml.name().toString());
         if (xml.name() == KeyLibraryPath)
             project->setLibraryPath(xml.readElementText());
-        else if (xml.name() == KeyResultPath)
-            project->setResultPath(xml.readElementText());
-        else if (xml.name() == KeyAgentConfigFile)
-            project->setAgentConfigFile(xml.readElementText());
-        else if (xml.name() == KeyRunConfigFile)
-            project->setRunConfigFile(xml.readElementText());
-        else if (xml.name() == KeySceneryConfigFile)
-            project->setSceneryConfigFile(xml.readElementText());
         else if (xml.name() == KeyLogFileMaster)
             project->setLogMaster(xml.readElementText());
-        else if (xml.name() == KeyLogFileSlave)
-            project->setLogSlave(xml.readElementText());
         else if (xml.name() == KeyLogLevel)
             project->setLogLevel(xml.readElementText().toUInt());
         else if (xml.name() == KeySlavePath)
             project->setSlaveExe(xml.readElementText());
+        else if (xml.name() == KeySlaveConfigs)
+            success = loadSlaveConfig(xml, project) && success;
         else
             xml.skipCurrentElement();
     }
     return success && keys.isEmpty();
+}
+
+bool ProjectXMLLoadModel::loadSlaveConfig(QXmlStreamReader &xml, ProjectModel *const project)
+{
+    bool success = true;
+    QList<QString> keys = KeyListSlaveConfig;
+
+    xml.readNextStartElement();
+    if(xml.name() == KeySlaveConfig)
+    {
+
+        while(xml.readNextStartElement())
+        {
+            keys.removeAll(xml.name().toString());
+
+            if(xml.name() == KeyLogFileSlave)
+                project->setLogSlave(xml.readElementText());
+            else if(xml.name() == KeyConfigPath)
+                project->setConfigPath(xml.readElementText());
+            else if(xml.name() == KeyResultPath)
+                project->setResultPath(xml.readElementText());
+            else
+                xml.skipCurrentElement();
+        }
+
+        return success && keys.isEmpty();
+    }
+
+    return false;
 }

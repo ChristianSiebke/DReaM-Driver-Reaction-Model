@@ -79,3 +79,4 @@ public:
 };
 
 #endif // COMPONENTTYPEDEFMAPINTERFACE_H
+

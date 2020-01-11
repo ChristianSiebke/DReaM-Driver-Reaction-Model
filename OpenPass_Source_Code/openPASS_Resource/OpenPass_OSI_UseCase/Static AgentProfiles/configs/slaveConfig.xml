@@ -1,4 +1,4 @@
-<Combination SchemaVersion="0.6.1" id="544">
+<slaveConfig SchemaVersion="0.6.1" id="544">
     <ProfilesCatalog>ProfilesCatalog.xml</ProfilesCatalog>
     <ExperimentConfig>
         <ExperimentID>123</ExperimentID>
@@ -40,7 +40,7 @@
             <Weather Probability="0.5" Value="Snowy" />
         </Weathers>
     </EnvironmentConfig>
-    
+	
     <TrafficConfig Name="Default Traffic">
         <TrafficParameter>
             <TrafficVolumes>
@@ -71,4 +71,4 @@
             <AgentProfile Name="TruckAgent" Probability="0.4" />
         </RightMostLane>
     </TrafficConfig>
-</Combination>
+</slaveConfig>

@@ -26,10 +26,10 @@ SystemComponentParameterValueBoolView::SystemComponentParameterValueBoolView(Sys
 
 void SystemComponentParameterValueBoolView::updateInterface(bool checked)
 {
-    parameter->setValue((checked) ? QStringLiteral("1") : QStringLiteral("0"));
+    parameter->setValue((checked) ? QStringLiteral("true") : QStringLiteral("false"));
 }
 
 void SystemComponentParameterValueBoolView::updateView()
 {
-    setChecked(parameter->getValue() == QStringLiteral("1"));
+    setChecked(parameter->getValue() == QStringLiteral("true"));
 }

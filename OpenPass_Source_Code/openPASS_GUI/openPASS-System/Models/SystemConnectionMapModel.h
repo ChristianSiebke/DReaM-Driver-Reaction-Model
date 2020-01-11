@@ -32,6 +32,8 @@ public:
 public:
     virtual SystemConnectionMapInterface::ID getID(SystemConnectionMapInterface::Item * const item) const override;
     virtual SystemConnectionMapInterface::Item * getItem(SystemConnectionMapInterface::ID const & id) const override;
+public:
+    virtual SystemConnectionMapInterface::ID generateID() const override;
 
 public:
     virtual bool clear() override;
@@ -49,6 +51,9 @@ public:
 protected:
     virtual SystemConnectionMapInterface::ID next() const;
     virtual bool remove(QList<SystemConnectionMapInterface::ID> const & ids);
+
+public:
+    virtual QList<Item * > values() const override;
 
 protected:
     SystemConnectionMapInterface::Map connections;

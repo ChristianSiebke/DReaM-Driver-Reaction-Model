@@ -1,9 +1,11 @@
 /******************************************************************************
-* Copyright (c) 2017 Volkswagen Group of America.
-* All rights reserved. This program and the accompanying materials
-* are made available under the terms of the Eclipse Public License v1.0
-* which accompanies this distribution, and is available at
-* http://www.eclipse.org/legal/epl-v10.html
+* Copyright (c) 2017, 2019 Volkswagen Group of America.
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
 ******************************************************************************/
 
 #include <QApplication>
@@ -23,8 +25,7 @@ int main(int argc, char *argv[])
     QApplication application(argc, argv);
     application.setApplicationName(QStringLiteral(APPLICATION_NAME));
     application.setApplicationVersion(QStringLiteral(APPLICATION_VERSION));
-    application.addLibraryPath(application.applicationDirPath() + SUBDIR_LIB_PLUGIN);
-    application.addLibraryPath(application.applicationDirPath() + SUBDIR_LIB_GUI);
+    application.addLibraryPath(application.applicationDirPath()  + SUBDIR_LIB_GUI);
 
     // Initialize models
     ServiceManagerModel services;
@@ -33,7 +34,7 @@ int main(int argc, char *argv[])
     // Schedule application
     QTimer::singleShot(0, [&plugins](){
         // Load plugins
-        plugins.loadDirectory(QDir(QApplication::applicationDirPath()));
+        plugins.loadDirectory(QDir(QApplication::applicationDirPath() + SUBDIR_LIB_GUI));
 
         // Emit signal 'started'
         Q_EMIT plugins.started();

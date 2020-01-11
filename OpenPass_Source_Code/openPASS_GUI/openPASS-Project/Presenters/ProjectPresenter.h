@@ -32,6 +32,10 @@ public:
     virtual bool simulate() const;
 
 public:
+    virtual bool setConfigPath(ProjectInterface::Config const &config);
+    virtual ProjectInterface::Config getConfigPath() const;
+
+public:
     virtual bool setLibraryPath(ProjectInterface::Library const &library);
     virtual ProjectInterface::Library getLibraryPath() const;
 
@@ -59,7 +63,6 @@ private:
     ProjectModel * _projectModel;
 
 Q_SIGNALS: // Actions from the menu bar
-    void reseted() const;
     void loaded() const;
     void saved() const;
 

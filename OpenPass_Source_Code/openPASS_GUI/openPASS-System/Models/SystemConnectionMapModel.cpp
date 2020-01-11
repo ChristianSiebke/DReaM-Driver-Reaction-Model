@@ -153,3 +153,21 @@ bool SystemConnectionMapModel::remove(QList<SystemConnectionMapInterface::ID> co
     }
     return true;
 }
+
+QList<SystemConnectionItemInterface *> SystemConnectionMapModel::values() const
+{
+    return connections.values();
+}
+
+SystemConnectionMapInterface::ID SystemConnectionMapModel::generateID() const
+{
+    SystemConnectionMapInterface::ID id = 0;
+    for (SystemConnectionMapInterface::ID key : connections.keys())
+    {
+        if (id <= key)
+        {
+            id = key + 1;
+        }
+    }
+    return id;
+}

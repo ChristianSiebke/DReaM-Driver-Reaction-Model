@@ -19,7 +19,7 @@
 #include "openPASS-System/SystemComponentParameterMapInterface.h"
 #include "openPASS-System/SystemComponentScheduleInterface.h"
 #include "openPASS-System/SystemConnectionMapInterface.h"
-#include "openPASS-System/SystemItemInterface.h"
+#include "openPASS-System/SystemMapInterface.h"
 #include "Models/SystemXMLBaseModel.h"
 
 class QIODevice;
@@ -33,15 +33,17 @@ public:
 
 public:
     static bool load(QString const & filepath,
-                     SystemItemInterface * const system,
-                     SystemComponentManagerInterface const * const manager);
+                     SystemMapInterface * const systems,
+                     SystemComponentManagerInterface const * const manager,
+                     bool const * const dynamicMode);
     static bool load(QIODevice * const device,
-                     SystemItemInterface * const system,
-                     SystemComponentManagerInterface const * const manager);
+                     SystemMapInterface * const systems,
+                     SystemComponentManagerInterface const * const manager,
+                     bool const * const dynamicMode);
 
 protected:
     static bool loadSystemItem(QXmlStreamReader & xml,
-                               SystemItemInterface * const system,
+                               SystemMapInterface * const systems,
                                SystemComponentManagerInterface const * const manager);
 
 protected:

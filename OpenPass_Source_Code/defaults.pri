@@ -18,12 +18,16 @@ win32 {
         DESTDIR_TESTS=$$DESTDIR
     }
 
+    isEmpty(DESTDIR_GUI){
+        DESTDIR_GUI = "C:\OpenPASS"
+    }
+
     isEmpty(EXTRA_INCLUDE_PATH) {
-        EXTRA_INCLUDE_PATH="$$PWD\..\deps\thirdParty\include"
+        EXTRA_INCLUDE_PATH="C:\OpenPASS\thirdParty\include"
     }
 
     isEmpty(EXTRA_LIB_PATH) {
-        EXTRA_LIB_PATH="$$PWD\..\deps\thirdParty\lib\win"
+        EXTRA_LIB_PATH="C:\OpenPASS\thirdParty\lib"
     }
 }
 
@@ -36,11 +40,15 @@ unix {
         DESTDIR_TESTS=$$DESTDIR
     }
 
+    isEmpty(DESTDIR_GUI){
+        DESTDIR_GUI = "/OpenPASS"
+    }
+
     isEmpty(EXTRA_INCLUDE_PATH) {
-        EXTRA_INCLUDE_PATH="$$PWD/../deps/thirdParty/include"
+        EXTRA_INCLUDE_PATH="/OpenPASS/thirdParty/include"
     }
 
     isEmpty(EXTRA_LIB_PATH) {
-        EXTRA_LIB_PATH=$$PWD/../deps/thirdParty/lib
+        EXTRA_LIB_PATH=/OpenPASS/thirdParty/lib
     }
 }

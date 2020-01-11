@@ -11,8 +11,8 @@
 #include "SystemPlugin.h"
 
 #include "openPASS-Component/ComponentInterface.h"
-#include "openPASS-Project/ProjectInterface.h"
 #include "openPASS-Window/WindowInterface.h"
+#include "openPASS-Project/ProjectInterface.h"
 
 #include "Models/SystemModel.h"
 #include "Views/SystemView.h"
@@ -27,12 +27,13 @@ SystemPlugin::SystemPlugin(QObject * const parent)
 bool SystemPlugin::initialize()
 {
     ComponentInterface * const component = ComponentInterface::instance();
-    ProjectInterface * const project = ProjectInterface::instance();
     WindowInterface * const window = WindowInterface::instance();
-    if (component && project && window)
+    ProjectInterface * const project = ProjectInterface::instance();
+
+    if (component && window && project)
     {
-        systemModel = new SystemModel(component, project);
-        systemView = new SystemView(window, project, systemModel);
+        systemModel = new SystemModel(component);
+        systemView = new SystemView(window, systemModel, project);
         return true;
     }
     return false;

@@ -29,8 +29,12 @@ class SystemItemView : public QScrollArea
 public:
     explicit SystemItemView(SystemItemInterface * const system,
                             SystemComponentManagerInterface const * const components,
+                            bool const * const dynamicMode,
                             QWidget * const parent = nullptr);
     virtual ~SystemItemView() = default;
+
+public:
+    SystemItemInterface * getSystem() const;
 
 protected:
     virtual void dragEnterEvent(QDragEnterEvent * event) override;
@@ -39,9 +43,10 @@ protected:
 protected:
     virtual void mousePressEvent(QMouseEvent * event) override;
     virtual void mouseMoveEvent(QMouseEvent * event) override;
-
-protected:
     virtual void wheelEvent(QWheelEvent * event) override;
+
+private:
+    bool algoIncluded();
 
 protected:
     static QString const DragDropMimeDataFormat;
@@ -53,6 +58,7 @@ protected:
 
 protected:
     QPoint mouseGlobalPosition;
+    bool const * const dynamicMode;
 };
 
 #endif // SYSTEMITEMVIEW_H

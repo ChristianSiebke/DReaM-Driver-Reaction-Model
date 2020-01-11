@@ -31,7 +31,7 @@ bool ProjectPlugin::initialize()
     {
         projectModel = new ProjectModel();
         projectPresenter = new ProjectPresenter(projectModel);
-        //projectView = new ProjectView(window, projectPresenter);
+        projectView = new ProjectView(window, projectPresenter);
         return true;
     }
     return false;

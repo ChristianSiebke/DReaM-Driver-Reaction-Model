@@ -12,6 +12,7 @@
 #define SYSTEMMODEL_H
 
 #include "openPASS-System/SystemInterface.h"
+#include "openPASS-Project/ProjectInterface.h"
 
 class ComponentInterface;
 class ProjectInterface;
@@ -23,24 +24,26 @@ class SystemModel : public SystemInterface
 
 public:
     explicit SystemModel(ComponentInterface * const component,
-                         ProjectInterface * const project,
                          QObject * const parent = nullptr);
     virtual ~SystemModel() = default;
 
 public:
     virtual bool clear() override;
-    virtual bool load(QString const & filepath) override;
-    virtual bool load(QIODevice * const device) override;
-    virtual bool save(QString const & filepath) const override;
-    virtual bool save(QIODevice * const device) const override;
+    virtual bool load(QString const & filepath, bool const * const dynamicMode) override;
+    virtual bool load(QIODevice * const device, bool const * const dynamicMode) override;
+    virtual bool save(QString const & filepath, bool const * const dynamicMode) const override;
+    virtual bool save(QIODevice * const device, bool const * const dynamicMode) const override;
 
 public:
     virtual SystemComponentManagerInterface * getComponents() const override;
     virtual SystemMapInterface * getSystems() const override;
 
+public:
+    virtual SystemInterface* createSystemModel() override;
+
 protected:
+    ComponentInterface * const component;
     SystemComponentManagerInterface * const components;
-    ProjectInterface * const _project;
     SystemMapInterface * const systems;
 };
 

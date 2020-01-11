@@ -44,14 +44,17 @@ Q_SIGNALS:
 
 public:
     virtual bool clear() = 0;
-    virtual bool load(QString const & filepath) = 0;
-    virtual bool load(QIODevice * const device) = 0;
-    virtual bool save(QString const & filepath) const = 0;
-    virtual bool save(QIODevice * const device) const = 0;
+    virtual bool load(QString const & filepath, bool const * const dynamicMode) = 0;
+    virtual bool load(QIODevice * const device, bool const * const dynamicMode) = 0;
+    virtual bool save(QString const & filepath, bool const * const dynamicMode) const = 0;
+    virtual bool save(QIODevice * const device, bool const * const dynamicMode) const = 0;
 
 public:
     virtual SystemComponentManagerInterface * getComponents() const = 0;
     virtual SystemMapInterface * getSystems() const = 0;
+
+public:
+    virtual SystemInterface * createSystemModel() = 0;
 };
 
 #endif // SYSTEMINTERFACE_H

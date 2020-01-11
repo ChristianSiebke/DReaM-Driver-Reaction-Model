@@ -19,6 +19,7 @@
 #include <QLabel>
 #include <QPixmap>
 #include <QRect>
+#include <QMessageBox>
 
 WindowView::WindowView(WindowPresenter * const windowPresenter,
                        QWidget * const parent) :
@@ -37,27 +38,43 @@ WindowView::WindowView(WindowPresenter * const windowPresenter,
     resize(desktop.width() * .75, desktop.height() * .65);
 
     // Update UI
-    updateSimulation();
     updateViews();
 
     // Display the application logo
     ui->logo->setPixmap(LogoDelegate::logoRequest());
 
     // Connect WindowPresenter to WindowView
-    connect(windowPresenter, &WindowPresenter::modifiedSimulationWidget,
-            this, &WindowView::updateSimulation);
     connect(windowPresenter, &WindowPresenter::modified,
             this, &WindowView::updateViews);
+
+    show();
 }
 
 WindowView::~WindowView()
 {
     // Clear UI
-    clearSimulation();
     clearViews();
 
     // Destroy UI
     delete ui;
+}
+
+void WindowView::initialize_view()
+{
+    // Open UI on the first registred widget without menu
+    show();
+
+    // Display menu
+    QList<QPushButton *> buttons = ui->sidebar->findChildren<QPushButton *>();
+    if (!buttons.isEmpty())
+    {
+        // Activate the first button in the sidebar
+        QPushButton * button = buttons.first();
+        button->clicked();
+
+        // Update menu
+        connect(button, &QPushButton::clicked, this, &WindowView::sidebar_clicked);
+    }
 }
 
 void WindowView::sidebar_clicked()
@@ -84,31 +101,6 @@ void WindowView::sidebar_clicked()
             }
             ui->views->setCurrentWidget(views[button].first);
         }
-    }
-}
-
-void WindowView::clearSimulation()
-{
-    // Clear simulation
-    while (ui->simulation->count() > 0)
-    {
-        QLayoutItem * const item = ui->simulation->takeAt(0);
-        item->widget()->setParent(nullptr);
-        delete item;
-    }
-}
-
-void WindowView::updateSimulation()
-{
-    // Clear simulation
-    clearSimulation();
-
-    // Add simulation widget
-    WindowInterface::Widget * const widget =
-            windowPresenter->getSimulationWidget();
-    if (widget != nullptr)
-    {
-        ui->simulation->addWidget(widget);
     }
 }
 
@@ -169,4 +161,16 @@ void WindowView::updateViews()
                     this, &WindowView::sidebar_clicked);
         }
     }
+}
+
+void WindowView::closeEvent(QCloseEvent * event)
+{
+    if (QMessageBox::Yes != QMessageBox::question(this, "Close OpenPASS?",
+            "All unsaved settings will be lost! Are you sure you want to exit?", QMessageBox::Yes | QMessageBox::No))
+        {
+            event->ignore();
+        }
+
+    else
+        event->accept();
 }

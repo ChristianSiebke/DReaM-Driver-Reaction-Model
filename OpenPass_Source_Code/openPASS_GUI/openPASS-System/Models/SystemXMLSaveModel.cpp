@@ -21,21 +21,23 @@
 #include "openPASS-System/SystemMapInterface.h"
 
 bool SystemXMLSaveModel::save(QString const & filepath,
-                              SystemMapInterface const * const systems)
+                              SystemMapInterface const * const systems,
+                              const bool * const dynamicMode)
 {
     // Can we open the file in write only mode?
     QFile file(filepath);
     if (file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
         // Save system to file
-        return save(&file, systems);
+        return save(&file, systems, dynamicMode);
     }
     // Return failure
     return false;
 }
 
 bool SystemXMLSaveModel::save(QIODevice * const device,
-                              SystemMapInterface const * const systems)
+                              SystemMapInterface const * const systems,
+                              const bool * const dynamicMode)
 {
     // Initialize xml stream writer
     QXmlStreamWriter xml(device);
@@ -44,7 +46,12 @@ bool SystemXMLSaveModel::save(QIODevice * const device,
 
     // Save system to xml stream
     xml.writeStartDocument();
+
     xml.writeStartElement(KeySystems);
+
+    if(*dynamicMode)
+        xml.writeAttribute("dynamic", "true");
+
     for (SystemItemInterface const * const system : *systems)
     {
         saveSystem(xml, system);
@@ -110,6 +117,7 @@ void SystemXMLSaveModel::saveSystemComponentParameters(QXmlStreamWriter &xml,
     for (SystemComponentParameterMapInterface::Item const * const parameter : *parameters)
     {
         xml.writeStartElement(KeySystemComponentParameter);
+        xml.writeComment(QString("parameter's title: %1").arg(parameter->getTitle()));
         xml.writeTextElement(KeySystemComponentParameterID, QString::number(parameter->getID()));
         xml.writeTextElement(KeySystemComponentParameterType, parameter->getType());
         xml.writeTextElement(KeySystemComponentParameterUnit, parameter->getUnit());
@@ -122,24 +130,78 @@ void SystemXMLSaveModel::saveSystemComponentParameters(QXmlStreamWriter &xml,
 void SystemXMLSaveModel::saveSystemConnection(QXmlStreamWriter &xml,
                                               SystemConnectionMapInterface const * const connections)
 {
+    QList <SystemConnectionMapInterface::Item * > connectionList = connections->values();
+    xml.writeStartElement(KeySystemConnections);
+
+    for (auto connection: connections->values())
+    {
+        if(connectionList.contains(connection))
+        {
+            xml.writeStartElement(KeySystemConnection);
+            xml.writeTextElement(KeySystemConnectionID, QString::number(connection->getID()));
+            xml.writeStartElement(KeySystemConnectionSource);
+            xml.writeComment(QString("component title: %1").arg(connection->getSource()->getComponent()->getTitle()));
+            xml.writeTextElement(KeySystemConnectionSourceComponent, QString::number(
+                                     connection->getSource()->getComponent()->getID()));
+            xml.writeComment(QString("output title: %1").arg(connection->getSource()->getTitle()));
+            xml.writeTextElement(KeySystemConnectionSourceOutput, QString::number(
+                                     connection->getSource()->getID()));
+            xml.writeEndElement();
+
+            // search for connections involving the same source and add target elements
+            for(auto connected : connections->values())
+            {
+                if(connected->getSource() == connection->getSource())
+                {
+                    xml.writeStartElement(KeySystemConnectionTarget);
+                    xml.writeComment(QString("component title: %1").arg(connected->getTarget()->getComponent()->getTitle()));
+                    xml.writeTextElement(KeySystemConnectionTargetComponent, QString::number(
+                                             connected->getTarget()->getComponent()->getID()));
+                    xml.writeComment(QString("input title: %1").arg(connected->getTarget()->getTitle()));
+                    xml.writeTextElement(KeySystemConnectionTargetInput, QString::number(
+                                             connected->getTarget()->getID()));
+                    xml.writeEndElement();
+                    connectionList.removeAll(connected);
+                }
+            }
+
+            xml.writeEndElement();
+        }
+     /*   xml.writeStartElement(KeySystemConnectionTarget);
+        xml.writeComment(QString("component title: %1").arg(connection->getTarget()->getComponent()->getTitle()));
+        xml.writeTextElement(KeySystemConnectionTargetComponent, QString::number(
+                                 connection->getTarget()->getComponent()->getID()));
+        xml.writeComment(QString("input title: %1").arg(connection->getTarget()->getTitle()));
+        xml.writeTextElement(KeySystemConnectionTargetInput, QString::number(
+                                 connection->getTarget()->getID()));
+        xml.writeEndElement();
+        xml.writeEndElement();*/
+    }
+    xml.writeEndElement();
+
+    /*
     xml.writeStartElement(KeySystemConnections);
     for (SystemConnectionMapInterface::Item const * const connection: *connections)
     {
         xml.writeStartElement(KeySystemConnection);
         xml.writeTextElement(KeySystemConnectionID, QString::number(connection->getID()));
         xml.writeStartElement(KeySystemConnectionSource);
+        xml.writeComment(QString("component title: %1").arg(connection->getSource()->getComponent()->getTitle()));
         xml.writeTextElement(KeySystemConnectionSourceComponent, QString::number(
                                  connection->getSource()->getComponent()->getID()));
+        xml.writeComment(QString("output title: %1").arg(connection->getSource()->getTitle()));
         xml.writeTextElement(KeySystemConnectionSourceOutput, QString::number(
                                  connection->getSource()->getID()));
         xml.writeEndElement();
         xml.writeStartElement(KeySystemConnectionTarget);
+        xml.writeComment(QString("component title: %1").arg(connection->getTarget()->getComponent()->getTitle()));
         xml.writeTextElement(KeySystemConnectionTargetComponent, QString::number(
                                  connection->getTarget()->getComponent()->getID()));
+        xml.writeComment(QString("input title: %1").arg(connection->getTarget()->getTitle()));
         xml.writeTextElement(KeySystemConnectionTargetInput, QString::number(
                                  connection->getTarget()->getID()));
         xml.writeEndElement();
         xml.writeEndElement();
     }
-    xml.writeEndElement();
+    xml.writeEndElement();*/
 }

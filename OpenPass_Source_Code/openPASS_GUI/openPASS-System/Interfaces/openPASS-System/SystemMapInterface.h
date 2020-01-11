@@ -28,6 +28,11 @@ public:
     using Iterator = Map::Iterator;
     using ConstIterator = Map::ConstIterator;
 
+Q_SIGNALS:
+    void cleared();
+    void added(SystemItemInterface * const system);
+    void modifiedTitle(SystemMapInterface::ID const & id);
+
 public:
     explicit SystemMapInterface(QObject * const parent = nullptr)
         : QObject(parent) {}
@@ -46,7 +51,29 @@ public:
     virtual SystemMapInterface::Item * getItem(SystemMapInterface::ID const & id) const = 0;
 
 public:
+    virtual SystemMapInterface::ID generateID() = 0;
+    virtual SystemItemInterface::Title generateTitle() =0;
+
+public:
+    virtual bool add(SystemMapInterface::ID const & id) =0;
+    virtual bool add(SystemMapInterface::ID const & id,
+                     SystemMapInterface::Item * const system)  = 0;
+
+public:
+    virtual bool remove(SystemMapInterface::ID const & id) = 0;
+
+public:
+    virtual bool contains(SystemItemInterface::ID const & id) = 0;
+    virtual bool contains(SystemItemInterface::Title const & title) = 0;
+
+public:
+    virtual int count() const = 0;
+
+public:
     virtual bool clear() = 0;
+
+public:
+    virtual QList<Item*> values() const = 0;
 };
 
 #endif // SYSTEMMAPINTERFACE_H
