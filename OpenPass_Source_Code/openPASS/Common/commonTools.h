@@ -209,6 +209,30 @@ public:
         }
         return elements;
     }
+
+    //! Estimate the inertial momentum for rotation around the vehicle's z-axis, assuming
+    //! a cuboid of homogeneous mass density. ( see .e.g. https://en.wikipedia.org/wiki/List_of_moments_of_inertia )
+    //!
+    //! @param[in]    double    mass
+    //! @param[in]    double    length
+    //! @param[in]    double    width
+    //! @return       double    momentInertiaYaw
+    static double CalculateMomentInertiaYaw(double mass, double length, double width) {
+        return mass * (length*length + width*width) / 12;
+    }
+
+    template<typename DT>
+    static DT Saturate(const DT value, const DT limitLow, const DT limitHigh)
+    {
+        if (!(value > limitLow)) {
+            return limitLow;
+        } else if (value > limitHigh) {
+            return limitHigh;
+        } else {
+            return value;
+        }
+    }
+
 };
 
 //-----------------------------------------------------------------------------
@@ -439,6 +463,7 @@ public:
 
         return WillCrashDuringBrake(sFrontAtTtb - sEgoAtTtb, vEgo, assumedBrakeAccelerationEgo, vFrontAtTtb, aFrontAtTtb);
     }
+
 };
 
 #endif // COMMONTOOLS

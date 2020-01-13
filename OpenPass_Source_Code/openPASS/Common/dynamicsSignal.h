@@ -108,13 +108,13 @@ public:
         return stream.str();
     }
 
-    double acceleration = 0.0;
-    double velocity = 0.0;
-    double positionX = 0.0;
-    double positionY = 0.0;
-    double yaw = 0.0;
-    double yawRate = 0.0;
-    double steeringWheelAngle = 0.0;
-    double travelDistance = 0.0;
+    double acceleration = 0.0;//!< host acceleration
+    double velocity = 0.0;//!< host absolute velocity
+    double positionX = 0.0;//!< host positionX
+    double positionY = 0.0;//!< host positionY
+    double yaw = 0.0;//!< host yaw angle
+    double yawRate = 0.0;//!< host yaw velocity
+    double steeringWheelAngle = 0.0;//!< host steering angle
+    double travelDistance = 0.0;//!< distance traveled by host
 };
 
