@@ -223,6 +223,25 @@ The following types of random numbers are currently available:
 
 ![World Interfaces and Adapter](World.svg)
 
+\subsection dev_framework_modules_world_sampling Sampling of World Geometries
+
+Roads are described following the [OpenDRIVE](http://www.opendrive.org/) specification.
+There the geometry of a road is defined algebraically as lines, clothoids and by means of cubic polynomials, whereby primarily only one reference line is defined.
+The lanes can be understood as a stack of parallel lanes, which are given by the width and the offset, now in relation to this reference line, which acts as the underlying coordinate system ('s/t' road coordinates with s along the road).
+Here, too, width and offset are defined algebraically, which means that almost any boundary lines can be defined.
+
+When the world is initialized, these boundary definitions (i.e. algebraic geometries) are converted into piecewise linear elements, which is called sampling.
+The road is scanned at a constant interval along 's', which leads to four-sided (quadrangular) sections of the lanes at common 's' coordinates, so-called lane elements (see LaneElement).
+The scanning is carried out at a scanning rate of 10 centimeters with the aim of achieving a total scanning error of less than 5 centimeters, as required by the representation used internally (c.f. [open simulation interface](https://github.com/OpenSimulationInterface)).
+Note that this error is only guaranteed if geometries do not exhibit extreme curvatures, i.e. a deviation of more than 5 cm within two sampling points (10 cm along s).
+The scanned points define so-called joints, which contain all scanned points at an 's' coordinate across all lane boundaries of the given road.
+The number of these joints is reduced by a [Douglas-Peucker algorithm](https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm), which ensures that the maximum lateral error of each individual point within a joint is less than 5 cm compared to the originally scanned points.
+Note that (a) the boundary points of geometries are always retained and (b) additional points for lane marking transitions are also retained to ensure the maximum accuracy of these edge cases.
+The lane elements are generated with two successive connections, which are ultimately used in the localization at runtime (see [below](\ref dev_framework_modules_world_localization)).
+
+Internally, each lane element receives a constant direction, which is defined by the direction of the vector spanned between the centers of the corresponding connections.
+Each joint also holds the corresponding curvature of the road, so that the curvature can be interpolated linearly within a lane element along the 's' coordinate.
+
 \subsection dev_framework_modules_world_localization Localization
 
 Generally, the position of an agent is stored with respect to [world coordinates (x,y)](\ref dev_concepts_coordinatesystems_world).

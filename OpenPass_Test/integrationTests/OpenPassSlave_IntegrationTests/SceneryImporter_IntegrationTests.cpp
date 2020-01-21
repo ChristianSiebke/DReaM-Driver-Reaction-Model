@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -158,20 +158,20 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectLanes)
     const auto forthSection = relativeLanes.at(3);
     ASSERT_EQ(forthSection.startS, 60.0);
     ASSERT_EQ(forthSection.endS, 100.0);
-    ASSERT_THAT(forthSection.lanes, UnorderedElementsAre(RelativeWorldView::Lane{0, true, LaneType::Stop, 0, 0},
+    ASSERT_THAT(forthSection.lanes, UnorderedElementsAre(RelativeWorldView::Lane{0, true, LaneType::Stop, 0, std::nullopt},
                                                          RelativeWorldView::Lane{-1, true, LaneType::Driving, -1, -1},
-                                                         RelativeWorldView::Lane{-2, true, LaneType::Driving, -2, std::nullopt}));
+                                                         RelativeWorldView::Lane{-2, true, LaneType::Driving, -2, -2}));
 
     const auto fifthSection = relativeLanes.at(4);
     ASSERT_EQ(fifthSection.startS, 100.0);
     ASSERT_EQ(fifthSection.endS, 150.0);
-    ASSERT_THAT(fifthSection.lanes, UnorderedElementsAre(RelativeWorldView::Lane{0, true, LaneType::Driving, 0, std::nullopt},
-                                                         RelativeWorldView::Lane{-1, true, LaneType::Stop, -1, std::nullopt}));
+    ASSERT_THAT(fifthSection.lanes, UnorderedElementsAre(RelativeWorldView::Lane{-1, true, LaneType::Driving, -1, std::nullopt},
+                                                         RelativeWorldView::Lane{-2, true, LaneType::Stop, -2, std::nullopt}));
 
     double maxSearchDistance = 1000.0;
-    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(route, "1", -1, 0.0, maxSearchDistance, {LaneType::Driving, LaneType::Stop}), 150.0);
+    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(route, "1", -1, 0.0, maxSearchDistance, {LaneType::Driving, LaneType::Stop}), 100.0);
     ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(route, "1", -2, 15.0, maxSearchDistance, {LaneType::Driving, LaneType::Stop}), 135.0);
-    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(route, "1", -3, 35.0, maxSearchDistance, {LaneType::Driving, LaneType::Stop}), 65.0);
+    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(route, "1", -3, 35.0, maxSearchDistance, {LaneType::Driving, LaneType::Stop}), 115.0);
 
     ASSERT_DOUBLE_EQ(world.GetLaneWidth(route, "1", -1, 60.0), 3.0);
     ASSERT_DOUBLE_EQ(world.GetLaneWidth(route, "1", -2, 60.0), 4.0);
@@ -344,7 +344,7 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_CheckForCorrectLaneConnections
     std::vector<OWL::Interfaces::Section*> sections = GetDistanceSortedSectionsForRoad(worldData, "1");
 
     const std::vector<int> numberOfLanesPerSection = {1, 2, 3, 3, 2};
-    const std::vector<std::vector<int>> laneConnections = {{ -1}, {-1,-2}, {-1, -2, -3}, {-2, -3, 0}};
+    const std::vector<std::vector<int>> laneConnections = {{ -1}, {-1,-2}, {-1, -2, -3}, {0, -1, -2}};
 
     for(unsigned count = 0; count < 4; count++)
     {

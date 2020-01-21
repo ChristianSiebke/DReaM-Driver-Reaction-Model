@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -70,7 +70,7 @@ public:
     //!
     //! @return                         list of roads
     //-----------------------------------------------------------------------------
-    std::map<std::string, RoadInterface*> &GetRoads()
+    const std::map<std::string, RoadInterface*> &GetRoads() const
     {
         return roads;
     }
@@ -80,7 +80,7 @@ public:
     //!
     //! @return                         list of junctions
     //-----------------------------------------------------------------------------
-    std::map<std::string, JunctionInterface*> &GetJunctions()
+    const std::map<std::string, JunctionInterface*> &GetJunctions() const
     {
         return junctions;
     }
@@ -91,7 +91,7 @@ public:
     //! @param[in]  id                  ID of the junction
     //! @return                         junction with the provided ID
     //-----------------------------------------------------------------------------
-    virtual JunctionInterface *GetJunction(const std::string& id)
+    const JunctionInterface *GetJunction(const std::string& id) const
     {
         JunctionInterface *junction;
         try
@@ -113,7 +113,7 @@ public:
     //! @param[in]  id                  ID of the road
     //! @return                         road with the provided ID
     //-----------------------------------------------------------------------------
-    RoadInterface *GetRoad(const std::string& id)
+    const RoadInterface *GetRoad(const std::string& id) const
     {
         RoadInterface *road;
         try
@@ -127,9 +127,6 @@ public:
 
         return road;
     }
-
-
-
 
 private:
     std::map<std::string, RoadInterface*> roads;

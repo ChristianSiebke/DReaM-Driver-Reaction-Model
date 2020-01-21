@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -223,31 +223,14 @@ double Lane::GetWidth(double distance) const
 
 double Lane::GetDirection(double distance) const
 {
-    const Primitive::LaneGeometryJoint* prevJoint;
-    const Primitive::LaneGeometryJoint* nextJoint;
-    std::tie(prevJoint, nextJoint) = GetNeighbouringJoints(distance);
+    auto [prevJoint, nextJoint] = GetNeighbouringJoints(distance);
 
-    if (!prevJoint && !nextJoint)
+    if (!prevJoint)
     {
         return 0.0;
     }
-    else
-        if (prevJoint && !nextJoint)
-        {
-            return prevJoint->sHdg;
-        }
-        else
-            if (nextJoint && !prevJoint)
-            {
-                return 0.0;
-            }
 
-    double interpolationFactor = (distance - prevJoint->sOffset) / (nextJoint->sOffset -
-                                                                    prevJoint->sOffset);
-    double interpolatedDirection = (1.0 - interpolationFactor) * prevJoint->sHdg + interpolationFactor *
-            nextJoint->sHdg;
-
-    return interpolatedDirection;
+    return prevJoint->sHdg;
 }
 
 const Interfaces::Lane& Lane::GetLeftLane() const

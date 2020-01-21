@@ -1,13 +1,13 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
-*               2016, 2017, 2018 ITK Engineering GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+ * Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+ *               2016, 2017, 2018 ITK Engineering GmbH
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  Road.h
@@ -17,24 +17,18 @@
 
 #pragma once
 
-#ifndef M_PI
-#define M_PI       3.14159265358979323846
-#define M_PI_2     1.57079632679489661923
-#define M_PI_4     0.785398163397448309616
-#endif
-
+#include "Common/vector2d.h"
+#include "CoreFramework/CoreShare/log.h"
+#include "Interfaces/roadInterface/roadInterface.h"
+#include "Interfaces/worldInterface.h"
+#include <algorithm>
 #include <cassert>
 #include <cmath>
-#include <algorithm>
 #include <list>
 #include <map>
-#include "Common/vector2d.h"
-#include "Interfaces/worldInterface.h"
-#include "Interfaces/roadInterface/roadInterface.h"
-#include "CoreFramework/CoreShare/log.h"
 
-#include "road/roadSignal.h"
 #include "road/roadObject.h"
+#include "road/roadSignal.h"
 
 class Road;
 class RoadLane;
@@ -45,32 +39,21 @@ class RoadLaneSection;
 //-----------------------------------------------------------------------------
 class RoadLink : public RoadLinkInterface
 {
-public:
-    RoadLink(RoadLinkType type,
-             RoadLinkElementType elementType,
-             const std::string &elementId,
-             ContactPointType contactPoint,
-             RoadLinkDirectionType direction,
-             RoadLinkSideType side) :
-        type(type),
-        elementType(elementType),
-        elementId(elementId),
-        contactPoint(contactPoint),
-        direction(direction),
-        side(side)
-    {}
-    RoadLink(const RoadLink&) = delete;
-    RoadLink(RoadLink&&) = delete;
-    RoadLink& operator=(const RoadLink&) = delete;
-    RoadLink& operator=(RoadLink&&) = delete;
-    virtual ~RoadLink() = default;
+  public:
+    RoadLink(RoadLinkType type, RoadLinkElementType elementType, const std::string &elementId,
+             ContactPointType contactPoint, RoadLinkDirectionType direction, RoadLinkSideType side)
+        : type(type), elementType(elementType), elementId(elementId), contactPoint(contactPoint), direction(direction),
+          side(side)
+    {
+    }
+    virtual ~RoadLink() override = default;
 
     //-----------------------------------------------------------------------------
     //! Returns the RoadLinkType of the RoadLink.
     //!
     //! @return                         RoadLinkType of the RoadLink
     //-----------------------------------------------------------------------------
-    RoadLinkType GetType() const
+    RoadLinkType GetType() const override
     {
         return type;
     }
@@ -80,7 +63,7 @@ public:
     //!
     //! @return                         RoadLinkElementType of the RoadLink
     //-----------------------------------------------------------------------------
-    RoadLinkElementType GetElementType() const
+    RoadLinkElementType GetElementType() const override
     {
         return elementType;
     }
@@ -90,7 +73,7 @@ public:
     //!
     //! @return                         ID of the RoadLink
     //-----------------------------------------------------------------------------
-    const std::string &GetElementId() const
+    const std::string &GetElementId() const override
     {
         return elementId;
     }
@@ -100,7 +83,7 @@ public:
     //!
     //! @return                         ContactPointType of the RoadLink
     //-----------------------------------------------------------------------------
-    ContactPointType GetContactPoint() const
+    ContactPointType GetContactPoint() const override
     {
         return contactPoint;
     }
@@ -110,7 +93,7 @@ public:
     //!
     //! @return                         RoadLinkDirectionType of the RoadLink
     //-----------------------------------------------------------------------------
-    RoadLinkDirectionType GetDirection() const
+    RoadLinkDirectionType GetDirection() const override
     {
         return direction;
     }
@@ -120,12 +103,12 @@ public:
     //!
     //! @return                         RoadLinkSideType of the RoadLink
     //-----------------------------------------------------------------------------
-    RoadLinkSideType GetSide() const
+    RoadLinkSideType GetSide() const override
     {
         return side;
     }
 
-private:
+  private:
     RoadLinkType type;
     RoadLinkElementType elementType;
     std::string elementId;
@@ -139,19 +122,12 @@ private:
 //-----------------------------------------------------------------------------
 class RoadLane : public RoadLaneInterface
 {
-public:
-    RoadLane(RoadLaneSectionInterface *laneSection,
-             int id,
-             RoadLaneType type) :
-        laneSection(laneSection),
-        id(id),
-        type(type)
-    {}
-    RoadLane(const RoadLane&) = delete;
-    RoadLane(RoadLane&&) = delete;
-    RoadLane& operator=(const RoadLane&) = delete;
-    RoadLane& operator=(RoadLane&&) = delete;
-    virtual ~RoadLane();
+  public:
+    RoadLane(RoadLaneSectionInterface *laneSection, int id, RoadLaneType type)
+        : laneSection(laneSection), id(id), type(type)
+    {
+    }
+    virtual ~RoadLane() override;
 
     //-----------------------------------------------------------------------------
     //! Adds a new polynomial calculating the width of a lane to a road lane.
@@ -164,11 +140,7 @@ public:
     //!
     //! @return                         False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    bool AddWidth(double sOffset,
-                  double a,
-                  double b,
-                  double c,
-                  double d);
+    bool AddWidth(double sOffset, double a, double b, double c, double d) override;
 
     //-----------------------------------------------------------------------------
     //! Adds the ID of a successor lane to a road lane.
@@ -177,7 +149,7 @@ public:
     //!
     //! @return                         False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    bool AddSuccessor(int id);
+    bool AddSuccessor(int id) override;
 
     //-----------------------------------------------------------------------------
     //! Adds the ID of a predecessor lane to a road lane.
@@ -186,14 +158,14 @@ public:
     //!
     //! @return                         False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    bool AddPredecessor(int id);
+    bool AddPredecessor(int id) override;
 
     //-----------------------------------------------------------------------------
     //! Returns the ID of the road lane.
     //!
     //! @return                         ID of the road lane
     //-----------------------------------------------------------------------------
-    int GetId() const
+    int GetId() const override
     {
         return id;
     }
@@ -203,7 +175,7 @@ public:
     //!
     //! @return                         RoadLaneTypeType of the road lane
     //-----------------------------------------------------------------------------
-    RoadLaneType GetType() const
+    RoadLaneType GetType() const override
     {
         return type;
     }
@@ -213,7 +185,7 @@ public:
     //!
     //! @return                         RoadLaneTypeType of the road lane
     //-----------------------------------------------------------------------------
-    const std::list< RoadLaneWidth*> &GetWidths() const
+    const std::list<RoadLaneWidth *> &GetWidths() const override
     {
         return widths;
     }
@@ -223,7 +195,7 @@ public:
     //!
     //! @return                         Successors of the road lane
     //-----------------------------------------------------------------------------
-    const std::list<int> &GetSuccessor() const
+    const std::list<int> &GetSuccessor() const override
     {
         return successor;
     }
@@ -233,7 +205,7 @@ public:
     //!
     //! @return                         Predecessors of the road lane
     //-----------------------------------------------------------------------------
-    const std::list<int> &GetPredecessor() const
+    const std::list<int> &GetPredecessor() const override
     {
         return predecessor;
     }
@@ -244,7 +216,7 @@ public:
     //! @param[in]  inDirection         Flag, if the road lane is in the reference
     //!                                 direction or not
     //-----------------------------------------------------------------------------
-    void SetInDirection(bool inDirection)
+    void SetInDirection(bool inDirection) override
     {
         this->inDirection = inDirection;
     }
@@ -255,7 +227,7 @@ public:
     //! @return                         Flag, if the road lane is in the reference
     //!                                 direction or not
     //-----------------------------------------------------------------------------
-    bool GetInDirection() const
+    bool GetInDirection() const override
     {
         return inDirection;
     }
@@ -265,7 +237,7 @@ public:
     //!
     //! @return                         RoadLaneSection to which the road lane belongs
     //-----------------------------------------------------------------------------
-    RoadLaneSectionInterface *GetLaneSection()
+    RoadLaneSectionInterface *GetLaneSection() const override
     {
         return laneSection;
     }
@@ -282,29 +254,26 @@ public:
     //!
     //! @return                         False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    bool AddRoadMark(double sOffset,
-                     RoadLaneRoadDescriptionType type,
-                     RoadLaneRoadMarkType roadMark,
-                     RoadLaneRoadMarkColor color,
-                     RoadLaneRoadMarkLaneChange laneChange,
-                     RoadLaneRoadMarkWeight weight);
+    bool AddRoadMark(double sOffset, RoadLaneRoadDescriptionType type, RoadLaneRoadMarkType roadMark,
+                     RoadLaneRoadMarkColor color, RoadLaneRoadMarkLaneChange laneChange,
+                     RoadLaneRoadMarkWeight weight) override;
 
     //-----------------------------------------------------------------------------
     //! Returns the road marks of the road
     //!
     //! @return                         List of road marks
     //-----------------------------------------------------------------------------
-    const std::list<RoadLaneRoadMark*> &getRoadMarks() const
+    const std::list<RoadLaneRoadMark *> &GetRoadMarks() const override
     {
         return roadMarks;
     }
 
-private:
+  private:
     RoadLaneSectionInterface *laneSection;
     int id;
     RoadLaneType type;
     // using lists to indicate empty predecessor/successor
-    std::list<RoadLaneWidth*> widths;
+    std::list<RoadLaneWidth *> widths;
     std::list<int> predecessor;
     std::list<int> successor;
     bool inDirection = true;
@@ -312,7 +281,7 @@ private:
     RoadLaneRoadMarkType roadMarkType = RoadLaneRoadMarkType::Undefined;
     double roadMarkTypeSOffset;
 
-    std::list<RoadLaneRoadMark*> roadMarks;
+    std::list<RoadLaneRoadMark *> roadMarks;
 };
 
 //-----------------------------------------------------------------------------
@@ -320,18 +289,11 @@ private:
 //-----------------------------------------------------------------------------
 class RoadLaneSection : public RoadLaneSectionInterface
 {
-public:
-    RoadLaneSection(RoadInterface *road,
-                    double start) :
-        road(road),
-        start(start)
-    {}
-    RoadLaneSection(const RoadLaneSection&) = delete;
-    RoadLaneSection(RoadLaneSection&&) = delete;
-    RoadLaneSection& operator=(const RoadLaneSection&) = delete;
-    RoadLaneSection& operator=(RoadLaneSection&&) = delete;
-    ~RoadLaneSection();
-
+  public:
+    RoadLaneSection(RoadInterface *road, double start) : road(road), start(start)
+    {
+    }
+    virtual ~RoadLaneSection() override;
 
     //-----------------------------------------------------------------------------
     //! Adds and returns a road lane.
@@ -341,8 +303,7 @@ public:
     //!
     //! @return                         False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    RoadLane *AddRoadLane(int id,
-                          RoadLaneType type);
+    RoadLane *AddRoadLane(int id, RoadLaneType type) override;
 
     //-----------------------------------------------------------------------------
     //! Returns the stored road lanes as a mapping from their respective IDs.
@@ -350,7 +311,7 @@ public:
     //! @return                         Stored road lanes as a mapping from their
     //!                                 respective IDs
     //-----------------------------------------------------------------------------
-    std::map<int, RoadLaneInterface*> &GetLanes()
+    const std::map<int, RoadLaneInterface *> &GetLanes() const override
     {
         return lanes;
     }
@@ -360,7 +321,7 @@ public:
     //!
     //! @return                         Starting offset of the road lane section
     //-----------------------------------------------------------------------------
-    double GetStart() const
+    double GetStart() const override
     {
         return start;
     }
@@ -371,7 +332,7 @@ public:
     //! @param[in]  inDirection         Flag, if the road lane is in the reference
     //!                                 direction or not
     //-----------------------------------------------------------------------------
-    void SetInDirection(bool inDirection)
+    void SetInDirection(bool inDirection) override
     {
         this->inDirection = inDirection;
     }
@@ -381,7 +342,7 @@ public:
     //!
     //! @param[in]  laneIndexOffset     Index offset for the road lanes in this section
     //-----------------------------------------------------------------------------
-    void SetLaneIndexOffset(int laneIndexOffset)
+    void SetLaneIndexOffset(int laneIndexOffset) override
     {
         this->laneIndexOffset = laneIndexOffset;
     }
@@ -391,7 +352,7 @@ public:
     //!
     //! @param[in]  Id             ID
     //-----------------------------------------------------------------------------
-    void SetId(int Id)
+    void SetId(int Id) override
     {
         this->Id = Id;
     }
@@ -402,7 +363,7 @@ public:
     //! @return                         Flag, if the lane section is in the reference
     //!                                 direction or not
     //-----------------------------------------------------------------------------
-    bool GetInDirection() const
+    bool GetInDirection() const override
     {
         return inDirection;
     }
@@ -412,7 +373,7 @@ public:
     //!
     //! @return                         Index offset for the road lanes in this section
     //-----------------------------------------------------------------------------
-    int GetLaneIndexOffset() const
+    int GetLaneIndexOffset() const override
     {
         return laneIndexOffset;
     }
@@ -422,7 +383,7 @@ public:
     //!
     //! @return                         ID
     //-----------------------------------------------------------------------------
-    int GetId() const
+    int GetId() const override
     {
         return Id;
     }
@@ -432,15 +393,15 @@ public:
     //!
     //! @return                         Road from which this section is a part of
     //-----------------------------------------------------------------------------
-    RoadInterface *GetRoad()
+    RoadInterface *GetRoad() const override
     {
         return road;
     }
 
-private:
+  private:
     RoadInterface *road;
     const double start;
-    std::map<int, RoadLaneInterface*> lanes; // use map for sorted ids
+    std::map<int, RoadLaneInterface *> lanes; // use map for sorted ids
     bool inDirection = true;
     int laneIndexOffset = 0;
     int Id{0};
@@ -452,90 +413,45 @@ private:
 //-----------------------------------------------------------------------------
 class RoadGeometry : public RoadGeometryInterface
 {
-public:
-    RoadGeometry(double s,
-                 double x,
-                 double y,
-                 double hdg,
-                 double length) :
-        s(s),
-        x(x),
-        y(y),
-        hdg(hdg),
-        length(length)
-    {}
-    RoadGeometry(const RoadGeometry&) = delete;
-    RoadGeometry(RoadGeometry&&) = delete;
-    RoadGeometry& operator=(const RoadGeometry&) = delete;
-    RoadGeometry& operator=(RoadGeometry&&) = delete;
-    virtual ~RoadGeometry() = default;
+  public:
+    RoadGeometry(double s, double x, double y, double hdg, double length) : s{s}, x{x}, y{y}, hdg{hdg}, length{length}
+    {
+    }
+    virtual ~RoadGeometry() override = default;
 
     //-----------------------------------------------------------------------------
     //! Calculates the x/y coordinates as vector.
     //!
-    //! @param[in]  side                side of road (1: left, -1: right)
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes
-    //! @param[in]  laneOffset          lane offset
-    //! @param[in]  laneWidth           width of lane
-    //! @param[in]  corner              position in lane (1: left, 0: middle, -1: right)
-    //! @return                         vector with the x/y coordinates
+    //! @param[in]  sOffset    s offset within geometry section
+    //! @param[in]  tOffset    offset to the left
+    //! @return                coordinates with the x/y coordinates
     //-----------------------------------------------------------------------------
-    virtual Common::Vector2d GetCoord(double side,
-                                      double geometryOffset,
-                                      double previousWidth,
-                                      double laneOffset,
-                                      double laneWidth,
-                                      int corner) = 0;
+    virtual Common::Vector2d GetCoord(double sOffset, double tOffset) const override = 0;
 
     //-----------------------------------------------------------------------------
-    //! Calculates the curvature.
+    //! Calculates the heading.
     //!
-    //! @param[in]  side                side of road (1: left, -1, right)
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes
-    //! @param[in]  laneOffset          lane offset
-    //! @param[in]  laneWidth           width of lane
-    //! @return                         curvature
+    //! @param[in]  sOffset    s offset within geometry section
+    //! @return                heading
     //-----------------------------------------------------------------------------
-    virtual double GetCurvature(double side,
-                                double geometryOffset,
-                                double previousWidth,
-                                double laneOffset,
-                                double laneWidth) = 0;
+    virtual double GetDir(double sOffset) const override = 0;
 
     //-----------------------------------------------------------------------------
-    //! Calculates the direction.
+    //! Retrieves the s offset within the OpenDrive road.
     //!
-    //! @param[in]  side                side of road (1: left, -1, right)
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes
-    //! @param[in]  laneOffset          lane offset
-    //! @param[in]  laneWidth           width of lane
-    //! @return                         direction
+    //! @return s offset
     //-----------------------------------------------------------------------------
-    virtual double GetDir(double side,
-                          double geometryOffset,
-                          double previousWidth,
-                          double laneOffset,
-                          double laneWidth) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Retrieves the offset within the OpenDrive road.
-    //!
-    //! @return                         offset
-    //-----------------------------------------------------------------------------
-    double GetS() const
+    double GetS() const override
     {
         return s;
     }
 
     //-----------------------------------------------------------------------------
-    //! Retrieves the initial direction of the geometry section
+    //! Retrieves the initial heading of the geometry section
     //!
-    //! @return                         initial direction of geometry
+    //! @return initial heading of geometry
     //-----------------------------------------------------------------------------
-    double GetHdg() const
+    double GetHdg() const override
     {
         return hdg;
     }
@@ -543,106 +459,50 @@ public:
     //-----------------------------------------------------------------------------
     //! Retrieves the length of the geometry section
     //!
-    //! @return                         length of geometry section
+    //! @return length of geometry section
     //-----------------------------------------------------------------------------
-    double GetLength() const
+    double GetLength() const override
     {
         return length;
     }
 
-protected:
-    // shared functionality
-
+  protected:
     //-----------------------------------------------------------------------------
-    //! Gets a vector representing a linear road in a x/y coordinate system.
+    //! Gets the coordinate at the s and t offest if the road is linear.
     //!
-    //! @param[in]  side                side of road (1: left, -1: right)
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes
-    //! @param[in]  laneOffset          lane offset
-    //! @param[in]  laneWidth           width of lane
-    //! @param[in]  corner              position in lane (1: left, 0: middle, -1: right)
-    //! @return                         vector with the x/y coordinates
+    //! @param[in]  sOffset    s offset within geometry section
+    //! @param[in]  tOffset    offset to the left
+    //! @return                coordinates with the x/y coordinates
     //-----------------------------------------------------------------------------
-    Common::Vector2d GetCoordLine(double side,
-                                  double geometryOffset,
-                                  double previousWidth,
-                                  double laneOffset,
-                                  double laneWidth,
-                                  int corner);
-
-    //-----------------------------------------------------------------------------
-    //! Returns the curvature of a line, i.e. 0.0.
-    //!
-    //! @param[in]  side                side of road (1: left, -1: right); unused
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes; unused
-    //! @param[in]  laneOffset          lane offset; unused
-    //! @param[in]  laneWidth           width of lane; unused
-    //! @return                         0.0
-    //-----------------------------------------------------------------------------
-    double GetCurvatureLine(double side,
-                            double geometryOffset,
-                            double previousWidth,
-                            double laneOffset,
-                            double laneWidth);
+    Common::Vector2d GetCoordLine(double sOffset, double tOffset) const;
 
     //-----------------------------------------------------------------------------
     //! Returns the direction of the line, i.e. the start orientation.
     //!
-    //! @param[in]  geometryOffset      offset within geometry section; unused
+    //! @param[in]  sOffset      offset within geometry section; unused
     //! @return                         direction
     //-----------------------------------------------------------------------------
-    double GetDirLine(double geometryOffset);
+    double GetDirLine(double sOffset) const;
 
     //-----------------------------------------------------------------------------
-    //! Gets a vector representing an arc in a polar coordinate system.
+    //! Gets the coordinate at the s and t offest if the road is an arc.
     //!
-    //! @param[in]  side                side of road (1: left, -1: right)
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes
-    //! @param[in]  laneOffset          lane offset
-    //! @param[in]  laneWidth           width of lane
-    //! @param[in]  curvature           curvature of the arc
-    //! @param[in]  corner              position in lane (1: left, 0: middle, -1: right)
-    //! @return                         vector with the x/y coordinates
+    //! @param[in]  sOffset    s offset within geometry section
+    //! @param[in]  tOffset    offset to the left
+    //! @param[in]  curvature  curvature of the arc
+    //! @return                coordinates with the x/y coordinates
     //-----------------------------------------------------------------------------
-    Common::Vector2d GetCoordArc(double side,
-                                 double geometryOffset,
-                                 double previousWidth,
-                                 double laneOffset,
-                                 double laneWidth,
-                                 double curvature,
-                                 int corner);
+    Common::Vector2d GetCoordArc(double sOffset, double tOffset, double curvature) const;
 
     //-----------------------------------------------------------------------------
-    //! Returns the curvature of an arc.
-    //!
-    //! @param[in]  side                side of road (1: left, -1: right); unused
-    //! @param[in]  geometryOffset      offset within geometry section; unused
-    //! @param[in]  previousWidth       sum of widths of inner lanes; unused
-    //! @param[in]  laneOffset          lane offset; unused
-    //! @param[in]  laneWidth           width of lane; unused
-    //! @param[in]  curvature           curvature of the arc
-    //! @return                         curvature
-    //-----------------------------------------------------------------------------
-    double GetCurvatureArc(double side,
-                           double geometryOffset,
-                           double previousWidth,
-                           double laneOffset,
-                           double laneWidth,
-                           double curvature);
-
-    //-----------------------------------------------------------------------------
-    //! Returns the direction of an arc, i.e. the initial heading plus the fraction
+    //! Returns the heading of an arc, i.e. the initial heading plus the fraction
     //! of the radius due to the curvature.
     //!
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  curvature           curvature of the arc
-    //! @return                         direction of the arc
+    //! @param[in]  sOffset    s offset within geometry section
+    //! @param[in]  curvature  curvature of the arc
+    //! @return                heading of the arc
     //-----------------------------------------------------------------------------
-    double GetDirArc(double geometryOffset,
-                     double curvature);
+    double GetDirArc(double sOffset, double curvature) const;
 
     double s;
     double x;
@@ -656,69 +516,13 @@ protected:
 //-----------------------------------------------------------------------------
 class RoadGeometryLine : public RoadGeometry
 {
-public:
-    RoadGeometryLine(double s,
-                     double x,
-                     double y,
-                     double hdg,
-                     double length) :
-        RoadGeometry(s, x, y, hdg, length)
-    {}
-    RoadGeometryLine(const RoadGeometryLine&) = delete;
-    RoadGeometryLine(RoadGeometryLine&&) = delete;
-    RoadGeometryLine& operator=(const RoadGeometryLine&) = delete;
-    RoadGeometryLine& operator=(RoadGeometryLine&&) = delete;
-    virtual ~RoadGeometryLine() = default;
-
-    //-----------------------------------------------------------------------------
-    //! Calculates the x/y coordinates as vector. Wrapper for RoadGeometry:GetCoordLine.
-    //!
-    //! @param[in]  side                side of road (1: left, -1: right)
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes
-    //! @param[in]  laneOffset          lane offset
-    //! @param[in]  laneWidth           width of lane
-    //! @param[in]  corner              position in lane (1: left, 0: middle, -1: right)
-    //! @return                         vector with the x/y coordinates
-    //-----------------------------------------------------------------------------
-    virtual Common::Vector2d GetCoord(double side,
-                                      double geometryOffset,
-                                      double previousWidth,
-                                      double laneOffset,
-                                      double laneWidth,
-                                      int corner);
-
-    //-----------------------------------------------------------------------------
-    //! Calculates the curvature. Wrapper for RoadGeometry:GetCurvatureLine.
-    //!
-    //! @param[in]  side                side of road (1: left, -1: right)
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes
-    //! @param[in]  laneOffset          lane offset
-    //! @param[in]  laneWidth           width of lane
-    //! @return                         curvature
-    //-----------------------------------------------------------------------------
-    virtual double GetCurvature(double side,
-                                double geometryOffset,
-                                double previousWidth,
-                                double laneOffset,
-                                double laneWidth);
-
-    //-----------------------------------------------------------------------------
-    //! Calculates the direction. Wrapper for RoadGeometry:GetDirLine.
-    //!
-    //! @param[in]  side                side of road (1: left, -1: right); unused
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes; unused
-    //! @param[in]  laneOffset          lane offset; unused
-    //! @param[in]  laneWidth           width of lane; unused
-    //! @return                         direction
-    //-----------------------------------------------------------------------------
-    virtual double GetDir(double side,
-                          double geometryOffset,
-                          double previousWidth,
-                          double laneOffset,
-                          double laneWidth);
+  public:
+    RoadGeometryLine(double s, double x, double y, double hdg, double length) : RoadGeometry(s, x, y, hdg, length)
+    {
+    }
+    virtual ~RoadGeometryLine() override = default;
+    virtual Common::Vector2d GetCoord(double sOffset, double tOffset) const override;
+    virtual double GetDir(double sOffset) const override;
 };
 
 //-----------------------------------------------------------------------------
@@ -726,74 +530,14 @@ public:
 //-----------------------------------------------------------------------------
 class RoadGeometryArc : public RoadGeometry
 {
-public:
-    RoadGeometryArc(double s,
-                    double x,
-                    double y,
-                    double hdg,
-                    double length,
-                    double curvature) :
-        RoadGeometry(s, x, y, hdg, length),
-        curvature(curvature)
-    {}
-    RoadGeometryArc(const RoadGeometryArc&) = delete;
-    RoadGeometryArc(RoadGeometryArc&&) = delete;
-    RoadGeometryArc& operator=(const RoadGeometryArc&) = delete;
-    RoadGeometryArc& operator=(RoadGeometryArc&&) = delete;
-    virtual ~RoadGeometryArc() = default;
-
-    //-----------------------------------------------------------------------------
-    //! Calculates the x/y coordinates as vector. Wrapper for RoadGeometry:GetCoordArc
-    //! (or RoadGeometry:GetCoordLine, if curvature is 0).
-    //!
-    //! @param[in]  side                side of road (1: left, -1: right)
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes
-    //! @param[in]  laneOffset          lane offset
-    //! @param[in]  laneWidth           width of lane
-    //! @param[in]  corner              position in lane (1: left, 0: middle, -1: right)
-    //! @return                         vector with the x/y coordinates
-    //-----------------------------------------------------------------------------
-    virtual Common::Vector2d GetCoord(double side,
-                                      double geometryOffset,
-                                      double previousWidth,
-                                      double laneOffset,
-                                      double laneWidth,
-                                      int corner);
-
-    //-----------------------------------------------------------------------------
-    //! Calculates the curvature. Wrapper for RoadGeometry:GetCurvatureArc (or
-    //! RoadGeometry:GetCurvatureLine, if curvature is 0).
-    //!
-    //! @param[in]  side                side of road (1: left, -1: right)
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes
-    //! @param[in]  laneOffset          lane offset
-    //! @param[in]  laneWidth           width of lane
-    //! @return                         curvature
-    //-----------------------------------------------------------------------------
-    virtual double GetCurvature(double side,
-                                double geometryOffset,
-                                double previousWidth,
-                                double laneOffset,
-                                double laneWidth);
-
-    //-----------------------------------------------------------------------------
-    //! Calculates the direction. Wrapper for RoadGeometry:GetDirArc (or
-    //! RoadGeometry:GetDirLine, if curvature is 0).
-    //!
-    //! @param[in]  side                side of road (1: left, -1: right); unused
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes; unused
-    //! @param[in]  laneOffset          lane offset; unused
-    //! @param[in]  laneWidth           width of lane; unused
-    //! @return                         direction
-    //-----------------------------------------------------------------------------
-    virtual double GetDir(double side,
-                          double geometryOffset,
-                          double previousWidth,
-                          double laneOffset,
-                          double laneWidth);
+  public:
+    RoadGeometryArc(double s, double x, double y, double hdg, double length, double curvature)
+        : RoadGeometry{s, x, y, hdg, length}, curvature{curvature}
+    {
+    }
+    virtual ~RoadGeometryArc() override = default;
+    virtual Common::Vector2d GetCoord(double sOffset, double tOffset) const override;
+    virtual double GetDir(double sOffset) const override;
 
     //-----------------------------------------------------------------------------
     //! Returns the stored curvature.
@@ -805,7 +549,7 @@ public:
         return curvature;
     }
 
-private:
+  private:
     double curvature;
 };
 
@@ -814,80 +558,14 @@ private:
 //-----------------------------------------------------------------------------
 class RoadGeometrySpiral : public RoadGeometry
 {
-public:
-    RoadGeometrySpiral(double s,
-                       double x,
-                       double y,
-                       double hdg,
-                       double length,
-                       double curvStart,
-                       double curvEnd) :
-        RoadGeometry(s, x, y, hdg, length),
-        curvStart(curvStart),
-        curvEnd(curvEnd)
-    {}
-    RoadGeometrySpiral(const RoadGeometrySpiral&) = delete;
-    RoadGeometrySpiral(RoadGeometrySpiral&&) = delete;
-    RoadGeometrySpiral& operator=(const RoadGeometrySpiral&) = delete;
-    RoadGeometrySpiral& operator=(RoadGeometrySpiral&&) = delete;
-    virtual ~RoadGeometrySpiral() = default;
-
-
-    //-----------------------------------------------------------------------------
-    //! Calculates the x/y coordinates as vector. Wrapper for RoadGeometry:GetCoordLine,
-    //! if start and end curvature of the spiral are 0, for RoadGeometry:GetCoordArc
-    //! if they are equal and to FullCoord otherwise.
-    //!
-    //! @param[in]  side                side of road (1: left, -1: right)
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes
-    //! @param[in]  laneOffset          lane offset
-    //! @param[in]  laneWidth           width of lane
-    //! @param[in]  corner              position in lane (1: left, 0: middle, -1: right)
-    //! @return                         vector with the x/y coordinates
-    //-----------------------------------------------------------------------------
-    virtual Common::Vector2d GetCoord(double side,
-                                      double geometryOffset,
-                                      double previousWidth,
-                                      double laneOffset,
-                                      double laneWidth,
-                                      int corner);
-
-    //-----------------------------------------------------------------------------
-    //! Calculates the curvature. Wrapper for RoadGeometry:GetCurvatureLine,
-    //! if start and end curvature of the spiral are 0, for RoadGeometry:GetCurvatureArc
-    //! if they are equal and to FullCurvature otherwise.
-    //!
-    //! @param[in]  side                side of road (1: left, -1: right)
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes
-    //! @param[in]  laneOffset          lane offset
-    //! @param[in]  laneWidth           width of lane
-    //! @return                         curvature
-    //-----------------------------------------------------------------------------
-    virtual double GetCurvature(double side,
-                                double geometryOffset,
-                                double previousWidth,
-                                double laneOffset,
-                                double laneWidth);
-
-    //-----------------------------------------------------------------------------
-    //! Calculates the direction. Wrapper for RoadGeometry:GetDirLine,
-    //! if start and end curvature of the spiral are 0, for RoadGeometry:GetDirArc
-    //! if they are equal and to FullDir otherwise.
-    //!
-    //! @param[in]  side                side of road (1: left, -1: right); unused
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes; unused
-    //! @param[in]  laneOffset          lane offset; unused
-    //! @param[in]  laneWidth           width of lane; unused
-    //! @return                         direction
-    //-----------------------------------------------------------------------------
-    virtual double GetDir(double side,
-                          double geometryOffset,
-                          double previousWidth,
-                          double laneOffset,
-                          double laneWidth);
+  public:
+    RoadGeometrySpiral(double s, double x, double y, double hdg, double length, double curvStart, double curvEnd)
+        : RoadGeometry{s, x, y, hdg, length}, curvStart{curvStart}, curvEnd{curvEnd}
+    {
+    }
+    virtual ~RoadGeometrySpiral() override = default;
+    virtual Common::Vector2d GetCoord(double sOffset, double tOffset) const override;
+    virtual double GetDir(double sOffset) const override;
 
     //-----------------------------------------------------------------------------
     //! Returns the curvature at the start of the spiral.
@@ -909,116 +587,65 @@ public:
         return curvEnd;
     }
 
-private:
-
+  private:
     //-----------------------------------------------------------------------------
     //! Calculates the x/y coordinates as vector. Only valid if the start and end
     //! curvature of the spiral are either both positive or negative.
     //!
-    //! @param[in]  side                side of road (1: left, -1: right); unused
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes; unused
-    //! @param[in]  laneOffset          lane offset; unused
-    //! @param[in]  laneWidth           width of lane; unused
-    //! @param[in]  corner              position in lane (1: left, 0: middle, -1: right)
-    //! @return                         vector with the x/y coordinates
+    //! @param[in]  sOffset    s offset within geometry section
+    //! @param[in]  tOffset    offset to the left
+    //! @return     vector with the x/y coordinates
     //-----------------------------------------------------------------------------
-    Common::Vector2d HalfCoord(double side,
-                               double geometryOffset,
-                               double previousWidth,
-                               double laneOffset,
-                               double laneWidth,
-                               int corner);
+    Common::Vector2d HalfCoord(double sOffset, double tOffset) const;
 
     //-----------------------------------------------------------------------------
     //! Calculates the x/y coordinates as vector. Returns an empty vector, if start
     //! and end curvature of the spiral have different signs.
     //!
-    //! @param[in]  side                side of road (1: left, -1: right); unused
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes; unused
-    //! @param[in]  laneOffset          lane offset; unused
-    //! @param[in]  laneWidth           width of lane; unused
-    //! @param[in]  corner              position in lane (1: left, 0: middle, -1: right)
-    //! @return                         vector with the x/y coordinates, empty vector,
-    //!                                 if start and end curvature of the spiral have
-    //!                                 different signs
+    //! @param[in]  sOffset    s offset within geometry section
+    //! @param[in]  tOffset    offset to the left
+    //! @return     vector with the x/y coordinates, empty vector,
+    //!             if start and end curvature of the spiral have
+    //!             different signs
     //-----------------------------------------------------------------------------
-    Common::Vector2d FullCoord(double side,
-                               double geometryOffset,
-                               double previousWidth,
-                               double laneOffset,
-                               double laneWidth,
-                               int corner);
+    Common::Vector2d FullCoord(double sOffset, double tOffset) const;
 
     //-----------------------------------------------------------------------------
     //! Calculates the curvature. Only valid if the start and end
     //! curvature of the spiral are either both positive or negative.
     //!
-    //! @param[in]  side                side of road (1: left, -1: right); unused
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes; unused
-    //! @param[in]  laneOffset          lane offset; unused
-    //! @param[in]  laneWidth           width of lane; unused
-    //! @return                         curvature
+    //! @param[in]  sOffset    s offset within geometry section
+    //! @return                curvature
     //-----------------------------------------------------------------------------
-    double HalfCurvature(double side,
-                         double geometryOffset,
-                         double previousWidth,
-                         double laneOffset,
-                         double laneWidth);
+    double HalfCurvature(double sOffset) const;
 
     //-----------------------------------------------------------------------------
     //! Calculates the curvature. Returns 0.0, if start
     //! and end curvature of the spiral have different signs.
     //!
-    //! @param[in]  side                side of road (1: left, -1: right); unused
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes; unused
-    //! @param[in]  laneOffset          lane offset; unused
-    //! @param[in]  laneWidth           width of lane; unused
-    //! @return                         curvature, 0.0, if start and end curvature
-    //!                                 of the spiral have different signs
+    //! @param[in]  sOffset    s offset within geometry section
+    //! @return                curvature, 0.0, if start and end curvature
+    //!                        of the spiral have different signs
     //-----------------------------------------------------------------------------
-    double FullCurvature(double side,
-                         double geometryOffset,
-                         double previousWidth,
-                         double laneOffset,
-                         double laneWidth);
+    double FullCurvature(double sOffset) const;
 
     //-----------------------------------------------------------------------------
     //! Calculates the direction. Only valid if the start and end
     //! curvature of the spiral are either both positive or negative.
     //!
-    //! @param[in]  side                side of road (1: left, -1: right); unused
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes; unused
-    //! @param[in]  laneOffset          lane offset; unused
-    //! @param[in]  laneWidth           width of lane; unused
-    //! @return                         direction
+    //! @param[in]  sOffset    s offset within geometry section
+    //! @return                direction
     //-----------------------------------------------------------------------------
-    double HalfDir(double side,
-                   double geometryOffset,
-                   double previousWidth,
-                   double laneOffset,
-                   double laneWidth);
+    double HalfDir(double sOffset) const;
 
     //-----------------------------------------------------------------------------
     //! Calculates the direction. Returns 0.0, if start
     //! and end curvature of the spiral have different signs.
     //!
-    //! @param[in]  side                side of road (1: left, -1: right); unused
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes; unused
-    //! @param[in]  laneOffset          lane offset; unused
-    //! @param[in]  laneWidth           width of lane; unused
-    //! @return                         direction
+    //! @param[in]  sOffset    s offset within geometry section
+    //! @return                direction
     //-----------------------------------------------------------------------------
-    double FullDir(double side,
-                   double geometryOffset,
-                   double previousWidth,
-                   double laneOffset,
-                   double laneWidth);
+    double FullDir(double sOffset) const;
 
     double curvStart;
     double curvEnd;
@@ -1029,80 +656,14 @@ private:
 //-----------------------------------------------------------------------------
 class RoadGeometryPoly3 : public RoadGeometry
 {
-public:
-    RoadGeometryPoly3(double s,
-                      double x,
-                      double y,
-                      double hdg,
-                      double length,
-                      double a,
-                      double b,
-                      double c,
-                      double d) :
-        RoadGeometry(s, x, y, hdg, length),
-        a(a),
-        b(b),
-        c(c),
-        d(d)
-    {}
-    RoadGeometryPoly3(const RoadGeometryPoly3&) = delete;
-    RoadGeometryPoly3(RoadGeometryPoly3&&) = delete;
-    RoadGeometryPoly3& operator=(const RoadGeometryPoly3&) = delete;
-    RoadGeometryPoly3& operator=(RoadGeometryPoly3&&) = delete;
-    virtual ~RoadGeometryPoly3() = default;
-
-    //-----------------------------------------------------------------------------
-    //! Calculates the x/y coordinates as vector. Wrapper for RoadGeometry:GetCoordLine
-    //! if all 4 factors (a, b, c, and d) are 0.
-    //!
-    //! @param[in]  side                side of road (1: left, -1: right)
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes
-    //! @param[in]  laneOffset          lane offset
-    //! @param[in]  laneWidth           width of lane
-    //! @param[in]  corner              position in lane (1: left, 0: middle, -1: right)
-    //! @return                         vector with the x/y coordinates
-    //-----------------------------------------------------------------------------
-    virtual Common::Vector2d GetCoord(double side,
-                                      double geometryOffset,
-                                      double previousWidth,
-                                      double laneOffset,
-                                      double laneWidth,
-                                      int corner);
-
-    //-----------------------------------------------------------------------------
-    //! Calculates the curvature. Wrapper for RoadGeometry:GetCurvatureLine
-    //! if all 4 factors (a, b, c, and d) are 0.
-    //!
-    //! @param[in]  side                side of road (1: left, -1: right)
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes
-    //! @param[in]  laneOffset          lane offset
-    //! @param[in]  laneWidth           width of lane
-    //! @return                         curvature
-    //-----------------------------------------------------------------------------
-    virtual double GetCurvature(double side,
-                                double geometryOffset,
-                                double previousWidth,
-                                double laneOffset,
-                                double laneWidth);
-
-    //-----------------------------------------------------------------------------
-    //! Calculates the direction. Wrapper for RoadGeometry:GetDirLine if all 4 factors
-    //! (a, b, c, and d) are 0.
-    //!
-    //! @param[in]  side                side of road (1: left, -1: right); unused
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes; unused
-    //! @param[in]  laneOffset          lane offset; unused
-    //! @param[in]  laneWidth           width of lane; unused
-    //! @return                         direction
-    //-----------------------------------------------------------------------------
-    virtual double GetDir(double side,
-                          double geometryOffset,
-                          double previousWidth,
-                          double laneOffset,
-                          double laneWidth);
+  public:
+    RoadGeometryPoly3(double s, double x, double y, double hdg, double length, double a, double b, double c, double d)
+        : RoadGeometry(s, x, y, hdg, length), a(a), b(b), c(c), d(d)
+    {
+    }
+    virtual ~RoadGeometryPoly3() override = default;
+    virtual Common::Vector2d GetCoord(double sOffset, double tOffset) const override;
+    virtual double GetDir(double sOffset) const override;
 
     //-----------------------------------------------------------------------------
     //! Returns the constant factor of the polynomial.
@@ -1144,7 +705,7 @@ public:
         return d;
     }
 
-private:
+  private:
     double a;
     double b;
     double c;
@@ -1156,74 +717,14 @@ private:
 //-----------------------------------------------------------------------------
 class RoadGeometryParamPoly3 : public RoadGeometry
 {
-public:
-    RoadGeometryParamPoly3(double s,
-                      double x,
-                      double y,
-                      double hdg,
-                      double length,
-                      ParamPoly3Parameters parameters) :
-        RoadGeometry(s, x, y, hdg, length),
-        parameters(parameters)
-    {}
-    RoadGeometryParamPoly3(const RoadGeometryParamPoly3&) = delete;
-    RoadGeometryParamPoly3(RoadGeometryParamPoly3&&) = delete;
-    RoadGeometryParamPoly3& operator=(const RoadGeometryParamPoly3&) = delete;
-    RoadGeometryParamPoly3& operator=(RoadGeometryParamPoly3&&) = delete;
-    virtual ~RoadGeometryParamPoly3() = default;
-
-    //-----------------------------------------------------------------------------
-    //! Calculates the x/y coordinates as vector. Wrapper for RoadGeometry:GetCoordLine
-    //! if all 4 factors regarding V (aV, bV, cV, and dV) are 0.
-    //!
-    //! @param[in]  side                side of road (1: left, -1: right)
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes
-    //! @param[in]  laneOffset          lane offset
-    //! @param[in]  laneWidth           width of lane
-    //! @param[in]  corner              position in lane (1: left, 0: middle, -1: right)
-    //! @return                         vector with the x/y coordinates
-    //-----------------------------------------------------------------------------
-    virtual Common::Vector2d GetCoord(double side,
-                                      double geometryOffset,
-                                      double previousWidth,
-                                      double laneOffset,
-                                      double laneWidth,
-                                      int corner);
-
-    //-----------------------------------------------------------------------------
-    //! Calculates the curvature. Wrapper for RoadGeometry:GetCurvatureLine
-    //! if all 4 factors regarding V (aV, bV, cV, and dV) are 0.
-    //!
-    //! @param[in]  side                side of road (1: left, -1: right)
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes
-    //! @param[in]  laneOffset          lane offset
-    //! @param[in]  laneWidth           width of lane
-    //! @return                         curvature
-    //-----------------------------------------------------------------------------
-    virtual double GetCurvature(double side,
-                                double geometryOffset,
-                                double previousWidth,
-                                double laneOffset,
-                                double laneWidth);
-
-    //-----------------------------------------------------------------------------
-    //! Calculates the direction. Wrapper for RoadGeometry:GetDirLine if all 4 factors
-    //! regarding V (aV, bV, cV, and dV) are 0.
-    //!
-    //! @param[in]  side                side of road (1: left, -1: right); unused
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes; unused
-    //! @param[in]  laneOffset          lane offset; unused
-    //! @param[in]  laneWidth           width of lane; unused
-    //! @return                         direction
-    //-----------------------------------------------------------------------------
-    virtual double GetDir(double side,
-                          double geometryOffset,
-                          double previousWidth,
-                          double laneOffset,
-                          double laneWidth);
+  public:
+    RoadGeometryParamPoly3(double s, double x, double y, double hdg, double length, ParamPoly3Parameters parameters)
+        : RoadGeometry(s, x, y, hdg, length), parameters(parameters)
+    {
+    }
+    virtual ~RoadGeometryParamPoly3() override = default;
+    virtual Common::Vector2d GetCoord(double sOffset, double tOffset) const override;
+    virtual double GetDir(double sOffset) const override;
 
     //-----------------------------------------------------------------------------
     //! Returns the constant factor of the polynomial for the u coordinate.
@@ -1232,7 +733,7 @@ public:
     //-----------------------------------------------------------------------------
     double GetAU() const
     {
-        return  parameters.aU;
+        return parameters.aU;
     }
 
     //-----------------------------------------------------------------------------
@@ -1305,24 +806,20 @@ public:
         return parameters.dV;
     }
 
-private:
+  private:
     ParamPoly3Parameters parameters;
 };
 
 //-----------------------------------------------------------------------------
 //! Class representing a road.
 //-----------------------------------------------------------------------------
-class Road :public RoadInterface
+class Road : public RoadInterface
 {
-public:
-    Road(const std::string &id) :
-        id(id)
-    {}
-    Road(const Road&) = delete;
-    Road(Road&&) = delete;
-    Road& operator=(const Road&) = delete;
-    Road& operator=(Road&&) = delete;
-    virtual ~Road();
+  public:
+    Road(const std::string &id) : id(id)
+    {
+    }
+    virtual ~Road() override;
 
     //-----------------------------------------------------------------------------
     //! Adds a line geometry to a road by creating a new RoadGeometryLine object and
@@ -1335,11 +832,7 @@ public:
     //! @param[in]  length              length of the element's reference line
     //! @return                         false if an error has occurred, true otherwise
     //-----------------------------------------------------------------------------
-    bool AddGeometryLine(double s,
-                         double x,
-                         double y,
-                         double hdg,
-                         double length);
+    bool AddGeometryLine(double s, double x, double y, double hdg, double length) override;
 
     //-----------------------------------------------------------------------------
     //! Adds an arc geometry to a road by creating a new RoadGeometryArc object and
@@ -1353,12 +846,7 @@ public:
     //! @param[in]  curvature           constant curvature throughout the element
     //! @return                         false if an error has occurred, true otherwise
     //-----------------------------------------------------------------------------
-    bool AddGeometryArc(double s,
-                        double x,
-                        double y,
-                        double hdg,
-                        double length,
-                        double curvature);
+    bool AddGeometryArc(double s, double x, double y, double hdg, double length, double curvature) override;
 
     //-----------------------------------------------------------------------------
     //! Adds a spiral geometry to a road by creating a new RoadGeometrySpiral object and
@@ -1373,13 +861,8 @@ public:
     //! @param[in]  curvEnd             curvature at the end of the element
     //! @return                         false if an error has occurred, true otherwise
     //-----------------------------------------------------------------------------
-    bool AddGeometrySpiral(double s,
-                           double x,
-                           double y,
-                           double hdg,
-                           double length,
-                           double curvStart,
-                           double curvEnd);
+    bool AddGeometrySpiral(double s, double x, double y, double hdg, double length, double curvStart,
+                           double curvEnd) override;
 
     //-----------------------------------------------------------------------------
     //! Adds a cubic polynomial geometry to a road by creating a new RoadGeometryPoly3
@@ -1396,15 +879,8 @@ public:
     //! @param[in]  d                   cubic factor of the polynomial
     //! @return                         false if an error has occurred, true otherwise
     //-----------------------------------------------------------------------------
-    bool AddGeometryPoly3(double s,
-                          double x,
-                          double y,
-                          double hdg,
-                          double length,
-                          double a,
-                          double b,
-                          double c,
-                          double d);
+    bool AddGeometryPoly3(double s, double x, double y, double hdg, double length, double a, double b, double c,
+                          double d) override;
 
     //-----------------------------------------------------------------------------
     //! Adds a parametric cubic polynomial geometry to a road by creating a new
@@ -1419,13 +895,8 @@ public:
     //! @param[in]  parameters          Factors of the two polynomials describing the road
     //! @return                          false if an error has occurred, true otherwise
     //-----------------------------------------------------------------------------
-    bool AddGeometryParamPoly3(double s,
-                          double x,
-                          double y,
-                          double hdg,
-                          double length,
-                          ParamPoly3Parameters parameters);
-
+    bool AddGeometryParamPoly3(double s, double x, double y, double hdg, double length,
+                               ParamPoly3Parameters parameters) override;
 
     //-----------------------------------------------------------------------------
     //! Adds an elevation profile defined via a cubic polynomial to a road by creating
@@ -1438,11 +909,7 @@ public:
     //! @param[in]  d                   cubic factor of the polynomial
     //! @return                         false if an error has occurred, true otherwise
     //-----------------------------------------------------------------------------
-    bool AddElevation(double s,
-                      double a,
-                      double b,
-                      double c,
-                      double d);
+    bool AddElevation(double s, double a, double b, double c, double d) override;
 
     //-----------------------------------------------------------------------------
     //! Adds a lane offset defined via a cubic polynomial to a road by creating a new
@@ -1455,11 +922,7 @@ public:
     //! @param[in]  d                   cubic factor of the polynomial
     //! @return                         false if an error has occurred, true otherwise
     //-----------------------------------------------------------------------------
-    bool AddLaneOffset(double s,
-                       double a,
-                       double b,
-                       double c,
-                       double d);
+    bool AddLaneOffset(double s, double a, double b, double c, double d) override;
 
     //-----------------------------------------------------------------------------
     //! Adds a new link to a road by creating a new RoadLink object and adding it
@@ -1475,12 +938,8 @@ public:
     //!                                 relevant for a neighbor link type
     //! @return                         false if an error has occurred, true otherwise
     //-----------------------------------------------------------------------------
-    bool AddLink(RoadLinkType type,
-                 RoadLinkElementType elementType,
-                 const std::string &elementId,
-                 ContactPointType contactPoint,
-                 RoadLinkDirectionType direction,
-                 RoadLinkSideType side);
+    bool AddLink(RoadLinkType type, RoadLinkElementType elementType, const std::string &elementId,
+                 ContactPointType contactPoint, RoadLinkDirectionType direction, RoadLinkSideType side) override;
 
     //-----------------------------------------------------------------------------
     //! Adds a new lane section to a road by creating a new RoadLaneSection object
@@ -1489,7 +948,7 @@ public:
     //! @param[in]  start               start position s-coordinate
     //! @return                         created road lane section
     //-----------------------------------------------------------------------------
-    RoadLaneSection *AddRoadLaneSection(double start);
+    RoadLaneSection *AddRoadLaneSection(double start) override;
 
     //-----------------------------------------------------------------------------
     //! Adds a new signal a road by creating a new RoadSignal object
@@ -1497,21 +956,20 @@ public:
     //!
     //! @return                         created road signal
     //-----------------------------------------------------------------------------
-    void AddRoadSignal(const RoadSignalSpecification &signal);
+    void AddRoadSignal(const RoadSignalSpecification &signal) override;
 
-    void AddRoadType(const RoadTypeSpecification &info);
+    void AddRoadType(const RoadTypeSpecification &info) override;
 
-    void AddRoadObject(const RoadObjectSpecification &object);
+    void AddRoadObject(const RoadObjectSpecification &object) override;
 
-    RoadTypeInformation GetRoadType(double start) const;
-
+    RoadTypeInformation GetRoadType(double start) const override;
 
     //-----------------------------------------------------------------------------
     //! Returns the ID of the road.
     //!
     //! @return                         ID of the road
     //-----------------------------------------------------------------------------
-    const std::string GetId() const
+    const std::string GetId() const override
     {
         return id;
     }
@@ -1521,7 +979,7 @@ public:
     //!
     //! @return                         list of elevation profiles
     //-----------------------------------------------------------------------------
-    std::list<RoadElevation*> & GetElevations()
+    const std::list<RoadElevation *> &GetElevations() const override
     {
         return elevations;
     }
@@ -1531,17 +989,7 @@ public:
     //!
     //! @return                         list of lane offsets
     //-----------------------------------------------------------------------------
-    std::list<RoadLaneOffset*> & GetLaneOffsets()
-    {
-        return laneOffsets;
-    }
-
-    //-----------------------------------------------------------------------------
-    //! Returns the stored list of lane offsets.
-    //!
-    //! @return                         list of lane offsets
-    //-----------------------------------------------------------------------------
-    const std::list<RoadLaneOffset*> & GetLaneOffsets() const
+    const std::list<RoadLaneOffset *> &GetLaneOffsets() const override
     {
         return laneOffsets;
     }
@@ -1551,7 +999,7 @@ public:
     //!
     //! @return                         list of road geometries
     //-----------------------------------------------------------------------------
-    std::list<RoadGeometryInterface*> & GetGeometries()
+    const std::list<RoadGeometryInterface *> &GetGeometries() const override
     {
         return geometries;
     }
@@ -1561,7 +1009,7 @@ public:
     //!
     //! @return                         list of road links
     //-----------------------------------------------------------------------------
-    std::list<RoadLinkInterface*> & GetRoadLinks()
+    const std::list<RoadLinkInterface *> &GetRoadLinks() const override
     {
         return links;
     }
@@ -1571,7 +1019,7 @@ public:
     //!
     //! @return                         list of lane sections
     //-----------------------------------------------------------------------------
-    std::vector<RoadLaneSectionInterface*> & GetLaneSections()
+    const std::vector<RoadLaneSectionInterface *> &GetLaneSections() const override
     {
         return laneSections;
     }
@@ -1581,7 +1029,7 @@ public:
     //!
     //! @return                         list of signals
     //-----------------------------------------------------------------------------
-    virtual std::vector<RoadSignalInterface*> & GetRoadSignals()
+    const std::vector<RoadSignalInterface *> &GetRoadSignals() const override
     {
         return roadSignals;
     }
@@ -1591,11 +1039,10 @@ public:
     //!
     //! @return                         list of objects
     //-----------------------------------------------------------------------------
-    virtual std::vector<RoadObjectInterface*> & GetRoadObjects()
+    const std::vector<RoadObjectInterface *> &GetRoadObjects() const override
     {
         return roadObjects;
     }
-
 
     //-----------------------------------------------------------------------------
     //! Sets the flag, if the road is in the reference direction or not.
@@ -1603,7 +1050,7 @@ public:
     //! @param[in]  inDirection         Flag, if the road is in the reference
     //!                                 direction or not
     //-----------------------------------------------------------------------------
-    void SetInDirection(bool inDirection)
+    void SetInDirection(bool inDirection) override
     {
         this->inDirection = inDirection;
     }
@@ -1614,34 +1061,31 @@ public:
     //! @return                         Flag, if the road is in the reference
     //!                                 direction or not
     //-----------------------------------------------------------------------------
-    bool GetInDirection() const
+    bool GetInDirection() const override
     {
         return inDirection;
     }
 
-    virtual void SetJunctionId(const std::string& junctionId)
+    virtual void SetJunctionId(const std::string &junctionId) override
     {
         this->junctionId = junctionId;
     }
 
-    virtual std::string GetJunctionId()
+    const std::string GetJunctionId() const override
     {
         return junctionId;
     }
 
-
-private:
+  private:
     const std::string id;
-    std::list<RoadElevation*> elevations;
-    std::list<RoadLaneOffset*> laneOffsets;
-    std::list<RoadGeometryInterface*> geometries;
-    std::list<RoadLinkInterface*> links;
-    std::vector<RoadLaneSectionInterface*> laneSections;
-    std::vector<RoadSignalInterface*> roadSignals;
-    std::vector<RoadObjectInterface*> roadObjects;
+    std::list<RoadElevation *> elevations;
+    std::list<RoadLaneOffset *> laneOffsets;
+    std::list<RoadGeometryInterface *> geometries;
+    std::list<RoadLinkInterface *> links;
+    std::vector<RoadLaneSectionInterface *> laneSections;
+    std::vector<RoadSignalInterface *> roadSignals;
+    std::vector<RoadObjectInterface *> roadObjects;
     std::vector<RoadTypeSpecification> roadTypes;
     bool inDirection = true;
     std::string junctionId;
 };
-
-

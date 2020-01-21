@@ -33,10 +33,10 @@ struct ConversionStatus
     std::string error_message{};
 };
 
-using PathInJunctionConnector = std::function<void(JunctionInterface*, RoadInterface *, RoadInterface *, RoadInterface *, ContactPointType,
+using PathInJunctionConnector = std::function<void(const JunctionInterface*, const RoadInterface *, const RoadInterface *, const RoadInterface *, ContactPointType,
                                                    ContactPointType, std::map<int, int>)>;
 
-ConversionStatus ConnectJunction(SceneryInterface *scenery, JunctionInterface *junction,
+ConversionStatus ConnectJunction(const SceneryInterface* scenery, const JunctionInterface* junction,
                                     PathInJunctionConnector connectPathInJunction);
 
 } // namespace Internal
@@ -221,7 +221,7 @@ private:
     //! @param[in]  otherSection        section on otherRoad to connect to
     //! @return                         False, if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    bool ConnectExternalRoadSuccessor(RoadInterface *currentRoad, RoadInterface *otherRoad, RoadLaneSectionInterface *otherSection);
+    bool ConnectExternalRoadSuccessor(const RoadInterface* currentRoad, const RoadInterface* otherRoad, RoadLaneSectionInterface *otherSection);
 
     //-----------------------------------------------------------------------------
     //! Connects a road with another road by setting predecessor of road, section and lanes
@@ -231,7 +231,7 @@ private:
     //! @param[in]  otherSection        section on otherRoad to connect to
     //! @return                         False, if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    bool ConnectExternalRoadPredecessor(RoadInterface *currentRoad, RoadInterface *otherRoad, RoadLaneSectionInterface *otherSection);
+    bool ConnectExternalRoadPredecessor(const RoadInterface *currentRoad, const RoadInterface *otherRoad, RoadLaneSectionInterface *otherSection);
 
     //-----------------------------------------------------------------------------
     //! Connects a road in the scenery internally in OSI by connecting all of its
@@ -250,7 +250,7 @@ private:
     //! @param[in]  junction            Junction which should be connected
     //! @return                         False, if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    bool ConnectJunction(JunctionInterface *junction);
+    bool ConnectJunction(const JunctionInterface* junction);
 
     //-----------------------------------------------------------------------------
     //! Connects a single path of a junction.
@@ -265,7 +265,7 @@ private:
     //! @param[in]  laneIdMapping           mapping of the lane ids between the incoming road and the path
     //! @return                         False, if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    void ConnectPathInJunction(JunctionInterface* junction, RoadInterface *incomingRoad, RoadInterface *connectingRoad, RoadInterface*outgoingRoad,
+    void ConnectPathInJunction(const JunctionInterface* junction, const RoadInterface *incomingRoad, const RoadInterface *connectingRoad, const RoadInterface*outgoingRoad,
                                ContactPointType incomingContactPoint, ContactPointType outgoingContactPoint, std::map<int, int> laneIdMapping);
 
     //-----------------------------------------------------------------------------

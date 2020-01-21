@@ -524,8 +524,8 @@ Position WorldImplementation::RoadCoord2WorldCoord(RoadPosition roadCoord, std::
         if (roadCoord.s > roadGeometryStart && roadCoord.s < roadGeometryEnd)
         {
             double localS = roadCoord.s - roadGeometryStart;
-            Common::Vector2d coord = roadGeometry->GetCoord(0, localS, 0, roadCoord.t, 0, 0);
-            double dir = roadGeometry->GetDir(0, localS, 0, roadCoord.t, 0);
+            Common::Vector2d coord = roadGeometry->GetCoord(localS, roadCoord.t);
+            double dir = roadGeometry->GetDir(localS);
             worldCoord.xPos = coord.x;
             worldCoord.yPos = coord.y;
             worldCoord.yawAngle = dir + roadCoord.hdg;

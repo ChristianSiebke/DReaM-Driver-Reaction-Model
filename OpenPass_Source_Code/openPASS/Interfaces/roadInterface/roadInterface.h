@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -32,10 +32,6 @@
 #include "roadLaneOffset.h"
 #include "Interfaces/roadInterface/roadGeometryInterface.h"
 #include "Interfaces/roadInterface/roadLinkInterface.h"
-#include "Interfaces/roadInterface/roadGeometryLineInterface.h"
-#include "Interfaces/roadInterface/roadGeometryArcInterface.h"
-#include "Interfaces/roadInterface/roadGeometryPoly3Interface.h"
-#include "Interfaces/roadInterface/roadGeometrySpiralInterface.h"
 
 //-----------------------------------------------------------------------------
 //! Struct containing values for parametric cubic polynomial geometry
@@ -259,7 +255,7 @@ public:
     //!
     //! @return                         list of elevation profiles
     //-----------------------------------------------------------------------------
-    virtual std::list<RoadElevation*> & GetElevations() = 0;
+    virtual const std::list<RoadElevation*> & GetElevations() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the stored list of lane offsets.
@@ -269,41 +265,34 @@ public:
     virtual const std::list<RoadLaneOffset*> & GetLaneOffsets() const = 0;
 
     //-----------------------------------------------------------------------------
-    //! Returns the stored list of lane offsets.
-    //!
-    //! @return                         list of lane offsets
-    //-----------------------------------------------------------------------------
-    virtual std::list<RoadLaneOffset*> & GetLaneOffsets() = 0;
-
-    //-----------------------------------------------------------------------------
     //! Returns the stored list of road geometries.
     //!
     //! @return                         list of road geometries
     //-----------------------------------------------------------------------------
-    virtual std::list<RoadGeometryInterface*> & GetGeometries() = 0;
+    virtual const std::list<RoadGeometryInterface*> & GetGeometries() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the stored list of road links.
     //!
     //! @return                         list of road links
     //-----------------------------------------------------------------------------
-    virtual std::list<RoadLinkInterface*> & GetRoadLinks() = 0;
+    virtual const std::list<RoadLinkInterface*> & GetRoadLinks() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the stored list of lane sections.
     //!
     //! @return                         list of lane sections
     //-----------------------------------------------------------------------------
-    virtual std::vector<RoadLaneSectionInterface*> & GetLaneSections() = 0;
+    virtual const std::vector<RoadLaneSectionInterface*> & GetLaneSections() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the stored list signals
     //!
     //! @return                         list of signals
     //-----------------------------------------------------------------------------
-    virtual std::vector<RoadSignalInterface*> & GetRoadSignals() = 0;
+    virtual const std::vector<RoadSignalInterface*> & GetRoadSignals() const = 0;
 
-    virtual std::vector<RoadObjectInterface*> & GetRoadObjects() = 0;
+    virtual const std::vector<RoadObjectInterface*> & GetRoadObjects() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Sets the flag, if the road is in the reference direction or not.
@@ -327,7 +316,7 @@ public:
 
     virtual void SetJunctionId(const std::string& junctionId) = 0;
 
-    virtual std::string GetJunctionId() = 0;
+    virtual const std::string GetJunctionId() const = 0;
 
 };
 

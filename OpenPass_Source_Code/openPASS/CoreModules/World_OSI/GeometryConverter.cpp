@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -18,19 +18,308 @@
 #include <memory>
 #include <cmath>
 #include <QFile>
+#include <deque>
 
 #include "GeometryConverter.h"
+#include "RamerDouglasPeucker.h"
 #include "WorldToRoadCoordinateConverter.h"
 #include "Common/vector2d.h"
 #include "WorldData.h"
 
-GeometryConverter::GeometryConverter(SceneryInterface *scenery,
-                                     OWL::Interfaces::WorldData& worldData,
-                                     const CallbackInterface *callbacks) :
-    scenery(scenery),
-    worldData(worldData),
-    callbacks(callbacks)
-{}
+void GeometryConverter::CalculateRoads(const SceneryInterface& scenery,
+                                       OWL::Interfaces::WorldData& worldData)
+{
+    for(auto [roadId, road] : scenery.GetRoads())
+    {
+        std::vector<RoadLaneSectionInterface*> roadLaneSections = road->GetLaneSections();
+
+        for (auto roadLaneSectionIt = roadLaneSections.begin();
+             roadLaneSectionIt != roadLaneSections.end();
+             roadLaneSectionIt++)
+        {
+            RoadLaneSectionInterface* roadSection = *roadLaneSectionIt;
+            auto& roadLanes = roadSection->GetLanes();
+
+            if(!roadLanes.empty())
+            {
+                double roadSectionStart = roadSection->GetStart();
+                double roadSectionEnd = std::numeric_limits<double>::max();
+
+                if (std::next(roadLaneSectionIt) != roadLaneSections.end()) // if not a single element in the list
+                {
+                    roadSectionEnd = (*std::next(roadLaneSectionIt))->GetStart();
+                }
+
+                // collect geometry sections
+                CalculateSection(worldData,
+                                 roadSectionStart,
+                                 roadSectionEnd,
+                                 road,
+                                 roadSection);
+            } // if lanes are not empty
+        }
+    }
+}
+
+void GeometryConverter::CalculateSection(OWL::Interfaces::WorldData& worldData,
+                                         double roadSectionStart,
+                                         double roadSectionEnd,
+                                         const RoadInterface* road,
+                                         const RoadLaneSectionInterface *roadSection)
+ {
+     double roadMarkStart = 0;
+     SampledGeometry sampledGeometries;
+     bool firstRoadMark{true};
+
+     while (roadMarkStart + roadSectionStart < roadSectionEnd)
+     {
+         double roadMarkEnd = roadSectionEnd - roadSectionStart;
+         for (const auto& roadLane : roadSection->GetLanes())
+         {
+             for (const auto& roadMark : roadLane.second->GetRoadMarks())
+             {
+                 double sOffset = roadMark->GetSOffset();
+                 if (sOffset > roadMarkStart && sOffset < roadMarkEnd)
+                 {
+                     roadMarkEnd = sOffset;
+                 }
+             }
+         }
+
+         auto sampledGeometry = CalculateSectionBetweenRoadMarkChanges(roadSectionStart + roadMarkStart,
+                                                                       roadSectionStart + roadMarkEnd,
+                                                                       road,
+                                                                       roadSection);
+         if (firstRoadMark)
+         {
+             sampledGeometries = sampledGeometry;
+             firstRoadMark = false;
+         }
+         else
+         {
+             sampledGeometries.Combine(sampledGeometry);
+         }
+
+         roadMarkStart = roadMarkEnd;
+     }
+
+     JointsBuilder jointsBuilder{sampledGeometries};
+
+     jointsBuilder.CalculatePoints()
+                  .CalculateHeadings()
+                  .CalculateCurvatures();
+
+     AddPointsToWorld(worldData, jointsBuilder.GetJoints());
+ }
+
+SampledGeometry GeometryConverter::CalculateSectionBetweenRoadMarkChanges(double roadSectionStart,
+                                                                                    double roadSectionEnd,
+                                                                                    const RoadInterface* road,
+                                                                                    const RoadLaneSectionInterface* roadSection)
+{
+    SampledGeometry sampledGeometries;
+    std::list<RoadGeometryInterface*> roadGeometries = road->GetGeometries();
+    bool firstGeometry{true};
+
+    for(RoadGeometryInterface* roadGeometry: roadGeometries)
+    {
+        auto sampledGeometry = CalculateGeometry(roadSectionStart,
+                                                 roadSectionEnd,
+                                                 road,
+                                                 roadSection,
+                                                 roadGeometry);
+        if (sampledGeometry.borderPoints.empty())
+        {
+            continue;
+        }
+        if (firstGeometry)
+        {
+            sampledGeometries = sampledGeometry;
+            firstGeometry = false;
+        }
+        else
+        {
+            sampledGeometries.Combine(sampledGeometry);
+        }
+    }
+    return sampledGeometries;
+}
+
+SampledGeometry GeometryConverter::CalculateGeometry(double roadSectionStart,
+                                                     double roadSectionEnd,
+                                                     const RoadInterface* road,
+                                                     const RoadLaneSectionInterface *roadSection,
+                                                     const RoadGeometryInterface* roadGeometry)
+{
+    double roadGeometryLength = roadGeometry->GetLength();
+
+    auto roadGeometryStart = roadGeometry->GetS();
+    auto roadGeometryEnd = roadGeometryStart + roadGeometryLength;
+
+    // if section is not affected by geometry
+    if(roadSectionStart > roadGeometryEnd ||
+            roadSectionEnd < roadGeometryStart)
+    {
+        return {};
+    }
+
+    double geometryOffsetStart = CalculateGeometryOffsetStart(roadSectionStart,
+                                                              roadGeometryStart);
+
+    double geometryOffsetEnd = CalculateGeometryOffsetEnd(roadSectionEnd,
+                                                          roadGeometryStart,
+                                                          roadGeometryEnd,
+                                                          roadGeometryLength);
+    auto borderPoints = CalculateJoints(geometryOffsetStart,
+                                        geometryOffsetEnd,
+                                        roadSection,
+                                        road,
+                                        roadGeometry,
+                                        roadGeometryStart,
+                                        roadSectionStart);
+
+    borderPoints = RamerDouglasPeucker::Simplify<BorderPoints>(borderPoints);
+
+    return {borderPoints, roadGeometry->GetDir(geometryOffsetStart), roadGeometry->GetDir(geometryOffsetEnd)};
+}
+
+double GeometryConverter::CalculateGeometryOffsetStart(double roadSectionStart,
+                                                     double roadGeometryStart)
+{
+    // geometry begins within section
+    if(roadSectionStart <= roadGeometryStart)
+    {
+        return 0.0;
+    }
+    // geometry begins before section
+    else
+    {
+        return roadSectionStart - roadGeometryStart;
+    }
+}
+
+double GeometryConverter::CalculateGeometryOffsetEnd(double roadSectionEnd,
+                                                   double roadGeometryStart,
+                                                   double roadGeometryEnd,
+                                                   double roadGeometryLength)
+{
+    // geometry ends within section
+    if(roadSectionEnd >= roadGeometryEnd)
+    {
+        return roadGeometryLength;
+    }
+    // geometry ends after section
+    else
+    {
+        return roadSectionEnd - roadGeometryStart;
+    }
+}
+
+std::vector<BorderPoints> GeometryConverter::CalculateJoints(double geometryOffsetStart,
+                                                             double geometryOffsetEnd,
+                                                             const RoadLaneSectionInterface *roadSection,
+                                                             const RoadInterface *road,
+                                                             const RoadGeometryInterface *roadGeometry,
+                                                             double roadGeometryStart,
+                                                             double roadSectionStart)
+{
+    std::vector<BorderPoints> borderPoints;
+    double geometryOffset = geometryOffsetStart;
+    while (geometryOffset < geometryOffsetEnd + SAMPLING_RATE)
+    {
+        // account for last sample
+        if(geometryOffset > geometryOffsetEnd)
+        {
+            geometryOffset = geometryOffsetEnd;
+        }
+
+        borderPoints.push_back(CalculateBorderPoints(roadSection,
+                                                  road,
+                                                  roadGeometry,
+                                                  geometryOffset,
+                                                  roadGeometryStart + geometryOffset,
+                                                  roadSectionStart));
+
+        geometryOffset += SAMPLING_RATE;
+    }
+    return borderPoints;
+}
+
+BorderPoints GeometryConverter::CalculateBorderPoints(const RoadLaneSectionInterface* roadSection,
+                                                      const RoadInterface* road,
+                                                      const RoadGeometryInterface* roadGeometry,
+                                                      double geometryOffset,
+                                                      double sCoordinate,
+                                                      double roadSectionStart)
+{
+
+    const auto& roadLanes = roadSection->GetLanes();
+    const auto maxLaneId = roadLanes.crbegin()->first;
+    const auto minLaneId = roadLanes.cbegin()->first;
+
+    const double sectionOffset = sCoordinate - roadSectionStart;
+    const double laneOffset = CalculateLaneOffset(road, sCoordinate);
+    const auto centerPoint = roadGeometry->GetCoord(geometryOffset, laneOffset);
+    const double heading = roadGeometry->GetDir(geometryOffset);
+    const double sin_hdg = std::sin(heading);
+    const double cos_hdg = std::cos(heading);
+
+    std::deque<BorderPoint> points;
+
+    // start with positive lanes
+    // 1, 2, 3... -> order necessary to accumulate right starting from center
+    double accumulatedWidth = 0.0;
+    for (int laneId = 1; laneId <= maxLaneId; laneId++)
+    {
+        const auto laneIter = roadLanes.find(laneId);
+        if (laneIter == roadLanes.end())
+        {
+            throw std::runtime_error("Missing lane with id "+ std::to_string(laneId));
+        }
+        const double laneWidth = CalculateLaneWidth(laneIter->second, sectionOffset);
+        accumulatedWidth += laneWidth;
+        const double x = centerPoint.x - accumulatedWidth * sin_hdg;
+        const double y = centerPoint.y + accumulatedWidth * cos_hdg;
+        points.emplace_front(Common::Vector2d{x,y}, roadLanes.at(laneId));
+    }
+
+    points.emplace_back(centerPoint, roadLanes.at(0));
+
+    accumulatedWidth = 0.0;
+    for (int laneId = -1; laneId >= minLaneId; laneId--)
+    {
+        const auto laneIter = roadLanes.find(laneId);
+        if (laneIter == roadLanes.end())
+        {
+            throw std::runtime_error("Missing lane with id "+ std::to_string(laneId));
+        }
+        const double laneWidth = CalculateLaneWidth(laneIter->second, sectionOffset);
+        accumulatedWidth += laneWidth;
+        const double x = centerPoint.x + accumulatedWidth * sin_hdg;
+        const double y = centerPoint.y - accumulatedWidth * cos_hdg;
+        points.emplace_back(Common::Vector2d{x,y}, roadLanes.at(laneId));
+    }
+
+    return BorderPoints{sCoordinate, {points.begin(), points.end()}};
+}
+
+void GeometryConverter::AddPointsToWorld(OWL::Interfaces::WorldData& worldData, const Joints& joints)
+{
+    for (const auto& joint : joints)
+    {
+        for (const auto& [laneId, laneJoint] : joint.laneJoints)
+        {
+            if (laneId == 0)
+            {
+                worldData.AddCenterLinePoint(*laneJoint.lane->GetLaneSection(), laneJoint.center, joint.s, laneJoint.heading);
+            }
+            else
+            {
+                worldData.AddLaneGeometryPoint(*laneJoint.lane, laneJoint.left, laneJoint.center, laneJoint.right, joint.s, laneJoint.curvature, laneJoint.heading);
+            }
+        }
+    }
+}
 
 double GeometryConverter::CalculateCoordZ(RoadInterface *road, double offset)
 {
@@ -119,7 +408,7 @@ const RoadLaneWidth* GeometryConverter::GetRelevantRoadLaneWidth(double sectionO
     }
 }
 
-const RoadLaneOffset* GeometryConverter::GetRelevantRoadLaneOffset(double roadOffset, RoadInterface* road)
+const RoadLaneOffset* GeometryConverter::GetRelevantRoadLaneOffset(double roadOffset, const RoadInterface* road)
 {
     auto laneOffsetIt = road->GetLaneOffsets().begin();
     while(laneOffsetIt != road->GetLaneOffsets().end())
@@ -162,14 +451,14 @@ const RoadLaneOffset* GeometryConverter::GetRelevantRoadLaneOffset(double roadOf
 
 const RoadLaneRoadMark* GeometryConverter::GetRelevantRoadLaneRoadMark(double sectionOffset, const RoadLaneInterface* roadLane)
 {
-    auto roadMarkIt = roadLane->getRoadMarks().begin();
+    auto roadMarkIt = roadLane->GetRoadMarks().begin();
 
-    while(roadMarkIt != roadLane->getRoadMarks().end())
+    while(roadMarkIt != roadLane->GetRoadMarks().end())
     {
         if((*roadMarkIt)->GetSOffset() <= sectionOffset)
         {
             auto roadMarkNextIt = std::next(roadMarkIt);
-            if(roadMarkNextIt == roadLane->getRoadMarks().end() ||
+            if(roadMarkNextIt == roadLane->GetRoadMarks().end() ||
                (*roadMarkNextIt)->GetSOffset() > sectionOffset)
             {
                 break;
@@ -179,7 +468,7 @@ const RoadLaneRoadMark* GeometryConverter::GetRelevantRoadLaneRoadMark(double se
         ++roadMarkIt;
     }
 
-    if(roadMarkIt == roadLane->getRoadMarks().end())
+    if(roadMarkIt == roadLane->GetRoadMarks().end())
     {
         return nullptr;
     }
@@ -195,139 +484,22 @@ double GeometryConverter::CalculateLaneWidth(const RoadLaneInterface *roadLane, 
 
     if(!roadLaneWidth)
     {
-        LOG(CbkLogLevel::Warning, "no lane width given");
-        return 0.0;
+        throw std::runtime_error("No lane width given");
     }
 
     return CalculateWidthAtSectionPosition(roadLaneWidth, sectionOffset);
 }
 
-double GeometryConverter::CalculateLaneOffset(RoadInterface* road, double roadPosition)
+double GeometryConverter::CalculateLaneOffset(const RoadInterface* road, double roadPosition)
 {
     const RoadLaneOffset* roadLaneOffset = GetRelevantRoadLaneOffset(roadPosition, road);
 
-    if(!roadLaneOffset)
+    if (!roadLaneOffset)
     {
-        LOG(CbkLogLevel::Warning, "no lane offset given");
         return 0.0;
     }
 
     return CalculateOffsetAtRoadPosition(roadLaneOffset, roadPosition);
-}
-
-bool GeometryConverter::CalculateLanes(int side,
-                                       RoadLaneSectionInterface* roadSection,
-                                       RoadInterface* road,
-                                       RoadGeometryInterface* roadGeometry,
-                                       double geometryOffset,
-                                       double sectionOffsetStart,
-                                       double sectionOffsetEnd,
-                                       double roadOffset,
-                                       double roadSectionStart,
-                                       int index)
-{
-    Q_UNUSED(sectionOffsetStart);
-    Q_UNUSED(sectionOffsetEnd);
-    Q_UNUSED(index);
-    auto& roadLanes = roadSection->GetLanes();
-    double previousWidth = 0.0;
-    std::list<RoadLaneInterface*> orderedRoadLanes; // ordered from inner lane to outer lane (only one side of road)
-
-    // (OpenDrive) ids of road lanes given in ascending order
-    if(0 < side)
-    {
-        std::map<int, RoadLaneInterface*>::iterator roadLaneIt;
-        for(roadLaneIt = roadLanes.begin();
-            roadLanes.end() != roadLaneIt;
-            ++roadLaneIt)
-        {
-            if(0 < roadLaneIt->first)
-            {
-                orderedRoadLanes.push_back(roadLaneIt->second);
-            }
-        }
-    }
-    else if (0 > side)
-    {
-        std::map<int, RoadLaneInterface*>::reverse_iterator roadLaneIt;
-        for(roadLaneIt = roadLanes.rbegin();
-            roadLanes.rend() != roadLaneIt;
-            ++roadLaneIt)
-        {
-            if(0 > roadLaneIt->first)
-            {
-                orderedRoadLanes.push_back(roadLaneIt->second);
-            }
-        }
-    }
-    else
-    {
-        std::map<int, RoadLaneInterface*>::iterator roadLaneIt;
-        for(roadLaneIt = roadLanes.begin();
-            roadLanes.end() != roadLaneIt;
-            ++roadLaneIt)
-        {
-            if(0 == roadLaneIt->first)
-            {
-                orderedRoadLanes.push_back(roadLaneIt->second);
-            }
-        }
-    }
-
-    for(RoadLaneInterface* roadLane : orderedRoadLanes)
-    {
-        double sectionOffset = roadOffset - roadSectionStart;
-        double laneOffset = CalculateLaneOffset(road, roadOffset);
-        double laneWidth = CalculateLaneWidth(roadLane, sectionOffset);
-
-        Common::Vector2d pointLeft, pointCenter, pointRight;
-
-        pointLeft = roadGeometry->GetCoord(side,
-                                           geometryOffset,
-                                           previousWidth,
-                                           laneOffset,
-                                           laneWidth,
-                                           1);
-
-        pointCenter = roadGeometry->GetCoord(side,
-                                             geometryOffset,
-                                             previousWidth,
-                                             laneOffset,
-                                             laneWidth,
-                                             0);
-
-        pointRight = roadGeometry->GetCoord(side,
-                                            geometryOffset,
-                                            previousWidth,
-                                            laneOffset,
-                                            laneWidth,
-                                            -1);
-
-        double curvature = roadGeometry->GetCurvature(side,
-                                                      geometryOffset,
-                                                      previousWidth,
-                                                      laneOffset,
-                                                      laneWidth);
-        double heading = roadGeometry->GetDir(side,
-                                              geometryOffset,
-                                              previousWidth,
-                                              laneOffset,
-                                              laneWidth);
-        if(roadLane->GetId() == 0)
-        {
-            worldData.AddCenterLinePoint(*roadSection, pointCenter, roadOffset, heading);
-        }
-        else
-        {
-            worldData.AddLaneGeometryPoint(*roadLane,
-                                           pointLeft, pointCenter, pointRight,
-                                           roadOffset, curvature, heading);
-        }
-
-        previousWidth += laneWidth;
-    }
-
-    return true;
 }
 
 double GeometryConverter::CalculateWidthAtSectionPosition(const RoadLaneWidth* width, double position)
@@ -363,315 +535,10 @@ double GeometryConverter::CalculateOffsetAtRoadPosition(const RoadLaneOffset* ro
     return deltaT;
 }
 
-bool GeometryConverter::Convert()
+void GeometryConverter::Convert(const SceneryInterface& scenery, OWL::Interfaces::WorldData& worldData)
 {
-    return CalculateRoads() && CalculateIntersections();
-}
-
-bool GeometryConverter::CalculatePoints(double geometryOffsetStart,
-                                        double geometryOffsetEnd,
-                                        int numberLaneGeomPoints,
-                                        RoadLaneSectionInterface *roadSection,
-                                        RoadInterface *road,
-                                        RoadGeometryInterface *roadGeometry,
-                                        double sectionOffsetStart,
-                                        double sectionOffsetEnd,
-                                        double roadGeometryStart,
-                                        double roadSectionStart,
-                                        bool includeStartPoint)
-{
-    // calculate points
-    double geometryOffset = geometryOffsetStart + (includeStartPoint ? 0 : SAMPLING_RATE);
-    for(int index = 0; index < numberLaneGeomPoints; ++index)
-    {
-        // account for last sample
-        if(geometryOffset > geometryOffsetEnd)
-        {
-            geometryOffset = geometryOffsetEnd;
-        }
-
-        if(!CalculateLanes(0, // center lane
-                           roadSection,
-                           road,
-                           roadGeometry,
-                           geometryOffset,
-                           sectionOffsetStart,
-                           sectionOffsetEnd,
-                           roadGeometryStart + geometryOffset,
-                           roadSectionStart,
-                           index))
-        {
-            return false;
-        }
-
-        if(!CalculateLanes(1, // left lanes
-                           roadSection,
-                           road,
-                           roadGeometry,
-                           geometryOffset,
-                           sectionOffsetStart,
-                           sectionOffsetEnd,
-                           roadGeometryStart + geometryOffset,
-                           roadSectionStart,
-                           index))
-        {
-            return false;
-        }
-
-        if(!CalculateLanes(-1, // right lanes
-                           roadSection,
-                           road,
-                           roadGeometry,
-                           geometryOffset,
-                           sectionOffsetStart,
-                           sectionOffsetEnd,
-                           roadGeometryStart + geometryOffset,
-                           roadSectionStart,
-                           index))
-        {
-            return false;
-        }
-
-        geometryOffset += SAMPLING_RATE;
-    }
-
-    return true;
-}
-
-void GeometryConverter::CalculateGeometryOffsetStart(double roadSectionStart,
-                                                     double roadGeometryStart,
-                                                     double* geometryOffsetStart,
-                                                     double* sectionOffsetStart)
-{
-    // geometry begins within section
-    if(roadSectionStart <= roadGeometryStart)
-    {
-        *geometryOffsetStart = 0.0;
-        *sectionOffsetStart = roadGeometryStart - roadSectionStart;
-    }
-    // geometry begins before section
-    else
-    {
-        *geometryOffsetStart = roadSectionStart - roadGeometryStart;
-        *sectionOffsetStart = 0.0;
-    }
-}
-
-void GeometryConverter::CalculateGeometryOffsetEnd(double roadSectionStart,
-                                                   double roadSectionNextStart,
-                                                   double roadGeometryStart,
-                                                   double roadGeometryEnd,
-                                                   double roadGeometryLength,
-                                                   double* geometryOffsetEnd,
-                                                   double* sectionOffsetEnd)
-{
-    // geometry ends within section
-    if(roadSectionNextStart >= roadGeometryEnd)
-    {
-        *geometryOffsetEnd = roadGeometryLength;
-        *sectionOffsetEnd = roadGeometryEnd - roadSectionStart;
-    }
-    // geometry ends after section
-    else
-    {
-        *geometryOffsetEnd = roadSectionNextStart - roadGeometryStart;
-        *sectionOffsetEnd = roadSectionNextStart;
-    }
-}
-
-bool GeometryConverter::CalculatePointsOfAffectedGeometry(double roadSectionStart,
-                                                          double roadGeometryStart,
-                                                          double roadSectionNextStart,
-                                                          double roadGeometryEnd,
-                                                          double roadGeometryLength,
-                                                          RoadLaneSectionInterface* roadSection,
-                                                          RoadInterface* road,
-                                                          RoadGeometryInterface* roadGeometry,
-                                                          bool includeStartPoint)
-{
-    double geometryOffsetStart;
-    double sectionOffsetStart;
-    CalculateGeometryOffsetStart(roadSectionStart,
-                                 roadGeometryStart,
-                                 &geometryOffsetStart,
-                                 &sectionOffsetStart);
-
-    double geometryOffsetEnd;
-    double sectionOffsetEnd;
-    CalculateGeometryOffsetEnd(roadSectionStart,
-                               roadSectionNextStart,
-                               roadGeometryStart,
-                               roadGeometryEnd,
-                               roadGeometryLength,
-                               &geometryOffsetEnd,
-                               &sectionOffsetEnd);
-
-    // allocate memory (account for last sample in even/odd cases)
-    int numberLaneGeomPoints = static_cast<int>(std::ceil((geometryOffsetEnd - geometryOffsetStart) / SAMPLING_RATE)) +
-            (includeStartPoint ? 1 : 0);
-
-/*
-    for(auto &roadLaneItem : roadLanes)
-    {
-        AllocateLaneGeometry(roadLaneItem.second,
-                             numberLaneGeomPoints,
-                             sectionOffsetStart,
-                             sectionOffsetEnd);
-    }
-*/
-
-    bool status = CalculatePoints(geometryOffsetStart,
-                                  geometryOffsetEnd,
-                                  numberLaneGeomPoints,
-                                  roadSection,
-                                  road,
-                                  roadGeometry,
-                                  sectionOffsetStart,
-                                  sectionOffsetEnd,
-                                  roadGeometryStart,
-                                  roadSectionStart,
-                                  includeStartPoint);
-
-    return status;
-}
-
-bool GeometryConverter::CalculateGeometries(double roadSectionStart,
-                                            double roadSectionNextStart,
-                                            RoadInterface* road,
-                                            RoadLaneSectionInterface *roadSection)
-{
-    double laneBoundaryOffsetStart = 0;
-    bool includeStartPoint = true;
-
-    while (laneBoundaryOffsetStart + roadSectionStart < roadSectionNextStart)
-    {
-        double laneBoundaryOffsetEnd = roadSectionNextStart - roadSectionStart;
-        for (const auto& roadLane : roadSection->GetLanes())
-        {
-            for (const auto& roadMark : roadLane.second->getRoadMarks())
-            {
-                double sOffset = roadMark->GetSOffset();
-                if (sOffset > laneBoundaryOffsetStart && sOffset < laneBoundaryOffsetEnd)
-                {
-                    laneBoundaryOffsetEnd = sOffset;
-                }
-            }
-        }
-
-        if(!CalculateGeometriesBetweenRoadMarks(roadSectionStart + laneBoundaryOffsetStart, roadSectionStart + laneBoundaryOffsetEnd, road, roadSection, includeStartPoint))
-        {
-            return false;
-        }
-        laneBoundaryOffsetStart = laneBoundaryOffsetEnd;
-        includeStartPoint = false;
-    }
-
-    return true;
-}
-
-bool GeometryConverter::CalculateGeometriesBetweenRoadMarks(double roadSectionStart,
-                                                            double roadSectionNextStart,
-                                                            RoadInterface *road,
-                                                            RoadLaneSectionInterface *roadSection,
-                                                            bool includeStartPoint)
-{
-    bool status;
-    std::list<RoadGeometryInterface*> roadGeometries = road->GetGeometries();
-
-    double roadGeometryStart;
-    double roadGeometryEnd;
-
-    for(RoadGeometryInterface* roadGeometry: roadGeometries)
-    {
-        status = CalculateGeometry(roadSectionStart,
-                                   roadSectionNextStart,
-                                   road,
-                                   roadSection,
-                                   roadGeometry,
-                                   roadGeometryStart,
-                                   roadGeometryEnd,
-                                   includeStartPoint);
-
-        if(!status) return status;
-    }
-
-    status = true;
-    return status;
-}
-
-bool GeometryConverter::CalculateGeometry(double roadSectionStart,
-                                          double roadSectionNextStart,
-                                          RoadInterface* road,
-                                          RoadLaneSectionInterface *roadSection,
-                                          RoadGeometryInterface* roadGeometry,
-                                          double& roadGeometryStart,
-                                          double& roadGeometryEnd,
-                                          bool includeStartPoint)
-{
-    double roadGeometryLength = roadGeometry->GetLength();
-
-    roadGeometryStart = roadGeometry->GetS();
-    roadGeometryEnd = roadGeometryStart + roadGeometryLength;
-
-    // if section is affected by geometry
-    if(roadSectionStart < roadGeometryEnd &&
-            roadSectionNextStart > roadGeometryStart)
-    {
-        bool status = CalculatePointsOfAffectedGeometry(roadSectionStart,
-                                                        roadGeometryStart,
-                                                        roadSectionNextStart,
-                                                        roadGeometryEnd,
-                                                        roadGeometryLength,
-                                                        roadSection,
-                                                        road,
-                                                        roadGeometry,
-                                                        includeStartPoint);
-        if(status == false) return status;
-    }
-
-    return true;
-}
-
-bool GeometryConverter::CalculateRoads()
-{
-    for(auto &roadItem : scenery->GetRoads())
-    {
-        RoadInterface *road = roadItem.second;
-
-        std::vector<RoadLaneSectionInterface*> roadLaneSections = road->GetLaneSections();
-
-        //for(size_t i = 0; i < numberOfRoadLaneSections; i++)
-        //for (const auto roadSection : roadLaneSections)
-        for (auto roadLaneSectionIt = roadLaneSections.begin();
-             roadLaneSectionIt != roadLaneSections.end();
-             roadLaneSectionIt++)
-        {
-            RoadLaneSectionInterface* roadSection = *roadLaneSectionIt;
-            std::map<int, RoadLaneInterface*>& roadLanes = roadSection->GetLanes();
-
-            if(!roadLanes.empty())
-            {
-                double roadSectionStart = roadSection->GetStart();
-                double roadSectionNextStart = std::numeric_limits<double>::max();
-
-                if (std::next(roadLaneSectionIt) != roadLaneSections.end()) // if not a single element in the list
-                {
-                    roadSectionNextStart = (*std::next(roadLaneSectionIt))->GetStart();
-                }
-
-                // collect geometry sections
-                bool status;
-                status = CalculateGeometries(roadSectionStart,
-                                             roadSectionNextStart,
-                                             road,
-                                             roadSection);
-
-                if(status == false) return status;
-            } // if lanes are not empty
-        }
-    }
-
-    return true;
+    CalculateRoads(scenery, worldData);
+    CalculateIntersections(worldData);
 }
 
 bool GeometryConverter::IsEqual(const double valueA, const double valueB)
@@ -679,7 +546,7 @@ bool GeometryConverter::IsEqual(const double valueA, const double valueB)
     return std::abs(valueA - valueB) < EPS;
 }
 
-bool GeometryConverter::CalculateIntersections()
+void GeometryConverter::CalculateIntersections(OWL::Interfaces::WorldData& worldData)
 {
     for (const auto& [id, junction]: worldData.GetJunctions())
     {
@@ -689,10 +556,8 @@ bool GeometryConverter::CalculateIntersections()
                        std::inserter(junctionPolygons, junctionPolygons.begin()),
                        BuildRoadPolygons);
 
-        CalculateJunctionIntersectionsFromRoadPolygons(junctionPolygons, junction);
+        CalculateJunctionIntersectionsFromRoadPolygons(worldData, junctionPolygons, junction);
     }
-
-    return true;
 }
 
 std::pair<OWL::Id, std::vector<LaneGeometryPolygon>> GeometryConverter::BuildRoadPolygons(const OWL::Road* const road)
@@ -742,7 +607,8 @@ std::function<LaneGeometryPolygon (const OWL::Primitive::LaneGeometryElement* co
     };
 }
 
-void GeometryConverter::CalculateJunctionIntersectionsFromRoadPolygons(const JunctionPolygons& junctionPolygons,
+void GeometryConverter::CalculateJunctionIntersectionsFromRoadPolygons(OWL::Interfaces::WorldData& worldData,
+                                                                       const JunctionPolygons& junctionPolygons,
                                                                        OWL::Junction* const junction)
 {
     auto roadPolygonsIter = junctionPolygons.begin();
