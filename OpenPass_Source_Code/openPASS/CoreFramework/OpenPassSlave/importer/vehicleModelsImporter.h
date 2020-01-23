@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -10,13 +10,16 @@
 
 #pragma once
 
-#include <QDomDocument>
-#include <QFile>
 #include <assert.h>
 #include <unordered_map>
-#include "xmlParser.h"
+
+#include <QDomDocument>
+#include <QFile>
+
 #include "Common/globalDefinitions.h"
+#include "log.h"
 #include "vehicleModels.h"
+#include "xmlParser.h"
 
 namespace Importer {
 
@@ -231,24 +234,36 @@ private:
     static void ImportVehicleModelGears(QDomElement& parametersElement, VehicleModelParameters& modelParameters);
 
     /*!
+     * \brief Helper for template type deduction with std::optional parameters
+     *
+     * As template type deduction is only able to directly match types, the type passed std::optional arguments has to be
+     * stated explicitly. This wrapper allows to circumvent this restriction.
+     *
+     * \see ImportModelParameter
+     */
+    template<typename T>
+    struct TypeHelper { typedef T type; };
+
+    /*!
      * \brief Imports the value from an model parameter tag
      *
      * \param[in]   parametersElement   Parameters DOM element
      * \param[in]   parameterName       Name of the parameter to import
      * \param[out]  parameterValue      Value of the parsed parameter
+     * \param[in]   defaultValue        An optional default value to use if it cannot be imported
      *
      * \throw   std::runtime_error  On missing model `Parameter` tag or invalid `name` or `value` attribute.
      */
     template<typename T>
-    static void ImportModelParameter(QDomElement& parametersElement, const std::string& parameterName, T& parameterValue)
+    static void ImportModelParameter(QDomElement& parametersElement, const std::string& parameterName, T& parameterValue, std::optional<typename TypeHelper<T>::type> defaultValue = std::nullopt)
     {
         QDomElement parameterElement;
-        if (!SimulationCommon::GetFirstChildElement(parametersElement, "Parameter", parameterElement))
+        if (!SimulationCommon::GetFirstChildElement(parametersElement, "Parameter", parameterElement) && !defaultValue.has_value())
         {
-            throw std::runtime_error("Model parameter '" + parameterName + "' is missing");
+            throw std::runtime_error("Cannot import model parameter '" + parameterName + "'. No parameters defined.");
         }
 
-        do
+        while (!parameterElement.isNull())
         {
             if (parameterElement.attribute("name").toStdString() == parameterName)
             {
@@ -268,10 +283,18 @@ private:
             }
 
             parameterElement = parameterElement.nextSiblingElement("Parameter");
+        }
 
-        } while (!parameterElement.isNull());
-
-        throw std::runtime_error("Model parameter '" + parameterName + "' is missing");
+        if (defaultValue.has_value())
+        {
+            const auto value = defaultValue.value();
+            LOG_INTERN(LogLevel::Warning) << "Using default value " << value << " for model parameter '" << parameterName << "'";
+            parameterValue = defaultValue.value();
+        }
+        else
+        {
+            throw std::runtime_error("Model parameter '" + parameterName + "' is missing");
+        }
     }
 };
 

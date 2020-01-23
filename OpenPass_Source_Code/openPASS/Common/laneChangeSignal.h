@@ -26,7 +26,7 @@
 class LaneChangeSignal : public ComponentStateSignalInterface
 {
 public:
-    static constexpr char COMPONENTNAME[] = "TrajectorySignal";
+    static constexpr char COMPONENTNAME[] = "LaneChangeSignal";
 
 
     //-----------------------------------------------------------------------------
@@ -42,7 +42,7 @@ public:
     //-----------------------------------------------------------------------------
     LaneChangeSignal(LaneChangeSignal &other) :
         LaneChangeSignal(other.componentState,
-                      other.deltaLaneId)
+                         other.deltaLaneId)
 
     {
 

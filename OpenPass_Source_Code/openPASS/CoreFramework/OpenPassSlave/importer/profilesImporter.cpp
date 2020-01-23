@@ -123,8 +123,7 @@ void ProfilesImporter::ImportDriverProfiles(QDomElement driverProfilesElement,
                                             DriverProfiles& driverProfiles)
 {
     QDomElement driverProfileElement;
-    ThrowIfFalse(GetFirstChildElement(driverProfilesElement, TAG::driverProfile, driverProfileElement),
-                 driverProfilesElement, "Tag " + std::string(TAG::driverProfile) + " is missing.");
+    GetFirstChildElement(driverProfilesElement, TAG::driverProfile, driverProfileElement);
 
     while (!driverProfileElement.isNull())
     {

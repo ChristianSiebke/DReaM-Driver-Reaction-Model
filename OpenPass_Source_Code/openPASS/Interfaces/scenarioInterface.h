@@ -134,14 +134,18 @@ public:
     //-----------------------------------------------------------------------------
     //! \brief Retreives the path to the trajectory catalog file
     //!
-    //! \return     Relative path to the trajectory catalog
+    //! The path can either be absolute or relative to the simulator executable
+    //!
+    //! \return     Path to the trajectory catalog file
     //-----------------------------------------------------------------------------
     virtual const std::string& GetTrajectoryCatalogPath() = 0;
 
     //-----------------------------------------------------------------------------
     //! Sets the path to the trajectory catalog file
     //!
-    //! \param[in]      catalogPath     Relative path to the trajectory catalog file
+    //! The path can either be absolute or relative to the simulator executable
+    //!
+    //! \param[in]      catalogPath     Path to the trajectory catalog file
     //-----------------------------------------------------------------------------
     virtual void SetTrajectoryCatalogPath(const std::string& catalogPath) = 0;
 

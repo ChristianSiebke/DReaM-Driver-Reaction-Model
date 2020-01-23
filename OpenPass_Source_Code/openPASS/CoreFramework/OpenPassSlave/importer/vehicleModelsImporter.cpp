@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -285,25 +285,24 @@ void VehicleModelsImporter::ImportVehicleModel(QDomElement& vehicleElement, Vehi
                   modelParameters.vehicleType == AgentVehicleType::Truck ||
                   modelParameters.vehicleType == AgentVehicleType::Motorbike ||
                   modelParameters.vehicleType == AgentVehicleType::Bicycle),
-                 vehicleElement, "VehicleModelCatagory '" + vehicleModelCategory + "' currently not supported");
+                  vehicleElement, "VehicleModelCatagory '" + vehicleModelCategory + "' currently not supported");
 
-    ImportModelParameter(parametersElement, "SteeringRatio", modelParameters.steeringRatio);
+    ImportModelParameter(parametersElement, "SteeringRatio", modelParameters.steeringRatio, 1.0);
 
-    ImportModelParameter(parametersElement, "MomentInertiaRoll", modelParameters.momentInertiaRoll);
-    ImportModelParameter(parametersElement, "MomentInertiaPitch", modelParameters.momentInertiaPitch);
-    ImportModelParameter(parametersElement, "MomentInertiaYaw", modelParameters.momentInertiaYaw);
+    ImportModelParameter(parametersElement, "MomentInertiaRoll", modelParameters.momentInertiaRoll, 0.0);
+    ImportModelParameter(parametersElement, "MomentInertiaPitch", modelParameters.momentInertiaPitch, 0.0);
+    ImportModelParameter(parametersElement, "MomentInertiaYaw", modelParameters.momentInertiaYaw, 0.0);
 
-    ImportModelParameter(parametersElement, "MinimumEngineSpeed", modelParameters.minimumEngineSpeed);
-    ImportModelParameter(parametersElement, "MaximumEngineSpeed", modelParameters.maximumEngineSpeed);
-    ImportModelParameter(parametersElement, "MaximumEngineTorque", modelParameters.maximumEngineTorque);
-    ImportModelParameter(parametersElement, "MinimumEngineTorque", modelParameters.minimumEngineTorque);
+    ImportModelParameter(parametersElement, "MinimumEngineSpeed", modelParameters.minimumEngineSpeed, 0.0);
+    ImportModelParameter(parametersElement, "MaximumEngineSpeed", modelParameters.maximumEngineSpeed, 0.0);
+    ImportModelParameter(parametersElement, "MaximumEngineTorque", modelParameters.maximumEngineTorque, 0.0);
+    ImportModelParameter(parametersElement, "MinimumEngineTorque", modelParameters.minimumEngineTorque, 0.0);
 
-    ImportModelParameter(parametersElement, "AirDragCoefficient", modelParameters.airDragCoefficient);
-    ImportModelParameter(parametersElement, "AxleRatio", modelParameters.axleRatio);
-    ImportModelParameter(parametersElement, "DecelerationFromPowertrainDrag",
-                         modelParameters.decelerationFromPowertrainDrag);
-    ImportModelParameter(parametersElement, "FrictionCoefficient", modelParameters.frictionCoeff);
-    ImportModelParameter(parametersElement, "FrontSurface", modelParameters.frontSurface);
+    ImportModelParameter(parametersElement, "AirDragCoefficient", modelParameters.airDragCoefficient, 0.0);
+    ImportModelParameter(parametersElement, "AxleRatio", modelParameters.axleRatio, 1.0);
+    ImportModelParameter(parametersElement, "DecelerationFromPowertrainDrag", modelParameters.decelerationFromPowertrainDrag, 0.0);
+    ImportModelParameter(parametersElement, "FrictionCoefficient", modelParameters.frictionCoeff, 1.0);
+    ImportModelParameter(parametersElement, "FrontSurface", modelParameters.frontSurface, 0.0);
 
     ImportModelBoundingBox(vehicleElement, modelParameters);
     ImportVehicleModelAxles(vehicleElement, modelParameters);

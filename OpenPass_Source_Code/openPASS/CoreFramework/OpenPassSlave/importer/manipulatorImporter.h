@@ -35,6 +35,7 @@ public:
      * \param[in] eventElement The OpenSCENARIO-adherent Event element from
      *            which to import the manipulator
      * \param[in] eventName The name of the event
+     * \param[in] trajectoryCatalogPath Full path to the trajectory catalog file
      *
      * \returns a std::shared_ptr to a scenario action interface containing
      *          pertinent information from within the eventElement
@@ -52,6 +53,7 @@ private:
      *
      * \param[in] privateElement the Private element to parse
      * \param[in] eventName The name of the event
+     * \param[in] trajectoryCatalogPath Full path to the trajectory catalog file
      *
      * \returns a shared_ptr to the ActionInterface containing the parsed data
      * ------------------------------------------------------------------------
@@ -88,6 +90,6 @@ private:
     static std::shared_ptr<ScenarioActionInterface> ImportManipulatorFromUserDefinedElement(QDomElement& userDefinedElement,
                                                                                     const std::string& eventName);
 
-    static QDomElement GetTrajecoryElementFromCatalog(const std::string& catalogName, const std::string& catalogPath, const std::string& entryName);
+    static QDomElement GetTrajectoryElementFromCatalog(const std::string& catalogName, const std::string& catalogPath, const std::string& entryName);
 };
 } // Importer

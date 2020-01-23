@@ -131,7 +131,7 @@ std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorF
                 std::string entryName;
                 ThrowIfFalse(SimulationCommon::ParseAttribute(catalogReferenceElement, ATTRIBUTE::entryName, entryName),
                              catalogReferenceElement, "Attribute " + std::string(ATTRIBUTE::entryName) + " is missing.");
-                trajectoryElement = GetTrajecoryElementFromCatalog(catalogName, trajectoryCatalogPath, entryName);
+                trajectoryElement = GetTrajectoryElementFromCatalog(catalogName, trajectoryCatalogPath, entryName);
 
             }
             ThrowIfFalse(SimulationCommon::ParseAttribute(trajectoryElement, ATTRIBUTE::name, trajectory.name),
@@ -202,12 +202,11 @@ std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorF
     LogErrorAndThrow("Invalid GlobalAction Type in openScenario file.");
 }
 
-QDomElement ManipulatorImporter::GetTrajecoryElementFromCatalog(const std::string& catalogName, const std::string& catalogPath, const std::string& entryName)
+QDomElement ManipulatorImporter::GetTrajectoryElementFromCatalog(const std::string& catalogName, const std::string& catalogPath, const std::string& entryName)
 {
     std::locale::global(std::locale("C"));
 
-    QString fileName = openpass::core::Directories::Concat(catalogPath, catalogName).c_str();
-    QFile xmlFile(fileName); // automatic object will be closed on destruction
+    QFile xmlFile(QString::fromStdString(catalogPath)); // automatic object will be closed on destruction
     ThrowIfFalse(xmlFile.open(QIODevice::ReadOnly), "Could not open TrajectoryCatalog (" + catalogName + ")");
 
     QByteArray xmlData(xmlFile.readAll());

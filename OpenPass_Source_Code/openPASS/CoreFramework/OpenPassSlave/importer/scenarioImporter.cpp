@@ -104,6 +104,7 @@ void ScenarioImporter::ImportCatalogs(QDomElement& documentRoot, ScenarioInterfa
     scenario->SetPedestrianCatalogPath(pedestrianCatalogPath);
 
     auto trajectoryCatalogPath = ImportCatalog("TrajectoryCatalog", catalogsElement);
+
     if (Directories::IsRelative(trajectoryCatalogPath))
     {
         trajectoryCatalogPath = Directories::Concat(path, trajectoryCatalogPath);

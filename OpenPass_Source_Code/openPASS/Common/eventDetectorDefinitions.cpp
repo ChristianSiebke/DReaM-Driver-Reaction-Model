@@ -121,7 +121,7 @@ std::vector<const AgentInterface*> RelativeLaneCondition::IsMet(WorldInterface *
     const auto referenceAgent = world->GetAgentByName(referenceEntityName);
     if (!referenceAgent)
     {
-        throw std::runtime_error("Reference Entity does not exist for RelativeLane Condition");
+        throw std::runtime_error("Reference Entity '" + referenceEntityName + "' does not exist for RelativeLane Condition");
     }
 
     std::vector<const AgentInterface*> conditionMetAgents{};
