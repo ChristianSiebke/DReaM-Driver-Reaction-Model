@@ -24,6 +24,7 @@ SUBDIRS = \
         Components/Action_SecondaryDriverTasks \
         Components/AgentUpdater \
         Components/Algorithm_AEB \
+        Components/Algorithm_FmuWrapper \
         Components/Algorithm_Lateral \
         Components/Algorithm_Longitudinal \
         Components/AlgorithmAgentFollowingDriverModel \

@@ -151,6 +151,93 @@ The input for this module is the steeringwheel angle and the new acceleration of
 
 ---
 
+\section dev_bmw_agent_modules_fmuwrapper FMU wrapper
+
+The FMU Wrapper provides a connection to arbitrary FMUs (Functional Mock-up Unit).
+A FMU has to be compatible with the FMI 1.0 or FMI 2.0 specification (Functional Mock-up Interface) and has to be ABI (Application Binary Interface) compatible with the OpenPassSlave binary.
+
+Additional reading about FMI is provided by the FMI standard website at https://fmi-standard.org/.
+For interfacing the FMUs in openPASS, the Modelon FMI Library is used, which is recommended on the FMI standard website. See https://jmodelica.org/.
+
+\subsection dev_bmw_agent_modules_fmuwrapper_fmupackage FMU package format
+
+FMI defines a packaging format for FMUs. The used container format is ZIP.
+It basically contains - among other parts -  the compiled FMU code (as *.dll or *.so, depending on the platform) and the `modelDescription.xml`.
+Latter provides meta-data about the FMU, i. e.
+- Author information
+- Model name, identifier and description
+- Generation timestamp
+- Name and datatype of model variables (inputs and outputs)
+
+
+\subsection dev_bmw_agent_modules_fmuwrapper_arch Architectural overview
+
+The wrapper is instantiated as a component of an agent.
+It reads the input variables for the FMU from the simulation and provides it the FMU and reads the output of the FMU and forwards it via signals to other agent components.
+
+![FMU wrapper architectural overview](FmuWrapperOverview.svg)
+
+\subsubsection dev_bmw_agent_modules_fmuwrapper_io_channels Framework channels
+
+The wrapper can use input and output signals via `Channels` as every other agent component does.
+Framework channels (signals) can provide data and can also be written to by the wrapper.
+In addition, the wrapper is able to access the \c AgentInterface and \c WorldInterface methods.
+
+\subsubsection dev_bmw_agent_modules_fmuwrapper_io_fmi FMI variables
+
+Communication with the FMU happens via FMI variables (inputs and outputs).
+The wrapper will read in available variables from `modelDescription.xml` in the FMU package.
+These variables need to be mapped to variables and signals of OpenPASS in the VehicleComponentProfile.
+
+FMI 1.0 supports these standard datatypes:
+- bool
+- integer
+- real
+- string
+
+\subsection dev_bmw_agent_modules_fmuwrapper_config Configuration
+
+Configuration of a particular FMU takes place in the [ProfilesCatalog.xml](\ref io_input_profilescatalog).
+
+For selecting the path of a FMU, common wrapper settings and specifing the type of the FMI, a VehicleComponentProfile is created, i. e.
+
+```xml
+<VehicleComponentProfile Type="FMU1" Name="OSMP">
+    <String Key="FmuPath" Value="resources/OSMP.fmu"/>
+    <Bool Key="Logging" Value="true"/>
+    <Bool Key="CsvOutput" Value="true"/>
+    <Bool Key="UnzipOncePerInstance" Value="false"/>
+    <String Key="FmuType" Value="OSMP"/>
+</VehicleComponentProfile>
+```
+
+| **Key**              | **Type** | **Description**                                                                                                                  |
+|----------------------|----------|----------------------------------------------------------------------------------------------------------------------------------|
+| FmuPath              | string   | Path to FMU file. Relative and absolute paths are supported.                                                                     |
+| Logging              | bool     | If set to true, FMU initialization and execution task are logged to a text file.                                                 |
+| CsvOutput            | bool     | If set to true, FMI outputs are logged to a CSV file.                                                                            |
+| UnzipOncePerInstance | bool     | If set to true, unpack the FMU once for each running instance, instead of once per FMU file (forced to `true` on Linux systems)  |
+| FmuType              | string   | Type of the FMU (currently only "OSMP" supported")                                                                               |
+
+Upon instantiation of the FMU wrapper, it will extract the FMU ZIP file to a subfolder "Unzip", located at the same path as the FMU file itself.
+Then the `modelDescription.xml` is parsed and the FMU is checked for compatibility.
+
+If `CsvOutput` is set to `true`, a subfolder "Output" will be created in the path of the FMU file.
+FMI output data will be logged to files inside this directory, with the agent id appended in the filename.
+This output can then be used for visualization in a spreadsheet application or it may be processed in any other way.
+
+Same goes for `Logging` with the folder "Log".
+
+If `UnzipOncePerInstance` is set to `true`, an integer number will be appended to these subdirectories names.
+
+\subsection dev_bmw_agent_modules_fmuwrapper_osmp OSMP FMU
+
+OSMP is currently the only supported type of FMU.
+It allows the pass input to the FMU as OSI messages as well as recieve output as OSI message.
+For more information on OSMP see https://github.com/OpenSimulationInterface/osi-sensor-model-packaging.
+
+---
+
 \section dev_agent_modules_limiter LimiterAccelerationVehicleComponents
 This module limits the AccelerationSignal from the PrioritizerAccelerationVehicleComponents to the constraints given by the vehicle. The [DynamicsTrajectoryFollower](\ref dev_agent_modules_dynamicsTrajectoryFollower) can then use this signal to calculate a trajectory.
 

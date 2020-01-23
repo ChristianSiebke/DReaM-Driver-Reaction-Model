@@ -13,6 +13,7 @@ TEMPLATE = subdirs
 SUBDIRS = \
     algorithmAEB_Tests \
     algorithmAgentFollowingDriverModel_Tests \
+    algorithmFmuWrapper_Tests \
     algorithmLateral_Tests \
     algorithmLongitudinal_Tests \
     componentController_Tests \
@@ -38,6 +39,9 @@ algorithmAEB_Tests.file = \
 
 algorithmAgentFollowingDriverModel_Tests.file = \
     $$PWD/Components/Algorithm_AFDM/Afdm_Tests.pro
+
+algorithmFmuWrapper_Tests.file = \
+    $$PWD/Components/Algorithm_FmuWrapper/FmuWrapper_Tests.pro
 
 algorithmLateral_Tests.file = \
     $$PWD/Components/Algorithm_Lateral/algorithmLateral_Tests.pro
