@@ -47,9 +47,9 @@ DIR_PRO = $${PWD}
 
 win32 {
 DIR_PRO ~= s,/,\\,g
-copydata.commands = xcopy $$DIR_PRO\components $${DESTDIR_GUI}$${SUBDIR_COMPONENTS}\ /S /D
+copydata.commands = xcopy /s /q /y /i $$DIR_PRO\components $${DESTDIR_GUI}$${SUBDIR_COMPONENTS}\
 } else {
-copydata.commands = cp -ru $$DIR_PRO/components $${DESTDIR_GUI}$${SUBDIR_COMPONENTS}
+copydata.commands = cp -f -R $$DIR_PRO/components $${DESTDIR_GUI}$${SUBDIR_COMPONENTS}
 }
 first.depends = $(first) copydata
 export(first.depends)
