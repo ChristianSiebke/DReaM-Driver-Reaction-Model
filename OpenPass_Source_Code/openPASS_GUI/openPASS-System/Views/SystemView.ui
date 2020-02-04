@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>SystemView</class>
  <widget class="QWidget" name="SystemView">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>16</width>
+    <height>16</height>
+   </rect>
+  </property>
   <property name="styleSheet">
    <string notr="true">QPushButton {
   background-color: #e5e5e5;
@@ -21,9 +29,6 @@ QPushButton:checked {
 }</string>
   </property>
   <layout class="QHBoxLayout" name="layout">
-   <property name="spacing">
-    <number>0</number>
-   </property>
    <property name="leftMargin">
     <number>0</number>
    </property>

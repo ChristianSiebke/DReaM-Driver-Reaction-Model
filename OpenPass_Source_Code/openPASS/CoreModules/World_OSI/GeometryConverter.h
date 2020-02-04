@@ -1,13 +1,13 @@
-/******************************************************************************
-* Copyright (c) 2018 in-tech GmbH
+/*******************************************************************************
+* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+*               2016, 2017 ITK Engineering GmbH
 *
-* This program and the accompanying materials are made available under the
-* terms of the Eclipse Public License 2.0 which is available at
-* https://www.eclipse.org/legal/epl-2.0/
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
 *
 * SPDX-License-Identifier: EPL-2.0
-******************************************************************************/
-
+*******************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  GeometryConverter.h
@@ -16,23 +16,33 @@
 
 #pragma once
 
-#include <list>
 #include <map>
-
-#include "sceneryInterface.h"
+#include <list>
+#include "Interfaces/callbackInterface.h"
+#include "Interfaces/sceneryInterface.h"
+#include "Interfaces/worldInterface.h"
 #include "WorldData.h"
-#include "worldInterface.h"
+
+struct LaneGeometryPolygon
+{
+    OWL::Id roadId;
+    OWL::Id laneId;
+    const OWL::Primitive::LaneGeometryElement * const laneGeometryElement;
+    polygon_t polygon;
+};
+using RoadPolygons = std::pair<OWL::Id, std::vector<LaneGeometryPolygon>>;
+using JunctionPolygons = std::map<OWL::Id, std::vector<LaneGeometryPolygon>>;
 
 //-----------------------------------------------------------------------------
 //! Class for the convertion of the road geometries in a section. First, the roads,
 //! lane sections and lanes have to be converted using SceneryConverter, which then
-//! provides the mappings from OpenDrive to OSI world for those elements.
+//! provides the mappings from OpenDrive to OSI of those elements.
 //-----------------------------------------------------------------------------
 class GeometryConverter
 {
 public:
     GeometryConverter(SceneryInterface *scenery,
-                      OWL::WorldData& worldData,
+                      OWL::Interfaces::WorldData& worldData,
                       const CallbackInterface *callbacks);
 
     GeometryConverter(const GeometryConverter&) = delete;
@@ -42,7 +52,11 @@ public:
     virtual ~GeometryConverter() = default;
 
     //-----------------------------------------------------------------------------
-    //! Converts OpenDrive road geometries to OWL
+    //! Converts OpenDrive road geometries to OSI
+    //!
+    //! Subdivides each OpenDrive road into OSI section objects.
+    //! Each section corresponds to an OpenDrive geometry (limited
+    //! to the borders of an OpenDrive laneSection.
     //!
     //! Notes:
     //! - OpenDrive center lanes are skipped (width=0 by convention)
@@ -111,7 +125,8 @@ private:
     //! Iterates over all geometries to calculate the geometry.
     //!
     //! This function is a part of the Convert function.
-    //! Iterates over all geometries to calculate geometries and lane lengths.
+    //! Iterates over all geometries to calculate geometries and lane lengths for one
+    //! section.
     //!
     //! @param[in]  roadSectionStart       s coordinate of current roadSectionStart
     //! @param[in]  roadSectionNextStart   s coordinate of next roadSectionStart
@@ -122,7 +137,27 @@ private:
     bool CalculateGeometries(double roadSectionStart,
                              double roadSectionNextStart,
                              RoadInterface *road,
-                             std::map<int, RoadLaneInterface*> &roadLanes);
+                             RoadLaneSectionInterface *roadSection);
+
+    //-----------------------------------------------------------------------------
+    //! Iterates over all geometries to calculate the geometry.
+    //!
+    //! This function is a part of the Convert function.
+    //! Iterates over all geometries to calculate geometries and lane lengths between
+    //! two consecutive changes of lane marks.
+    //!
+    //! @param[in]  roadSectionStart       s coordinate of current roadSectionStart
+    //! @param[in]  roadSectionNextStart   s coordinate of next roadSectionStart
+    //! @param[in]  road                   Pointer containing the road
+    //! @param[in]  roadLanes              Map of lanes per Road
+    //! @param[in]  includeStartPoint      flag, wether the first point (i.e s = roadSectionStart) should be included
+    //! @return                     False if an error occurred, true otherwise
+    //-----------------------------------------------------------------------------
+    bool CalculateGeometriesBetweenRoadMarks(double roadSectionStart,
+                                             double roadSectionNextStart,
+                                             RoadInterface *road,
+                                             RoadLaneSectionInterface *roadSection,
+                                             bool includeStartPoint);
 
     //-----------------------------------------------------------------------------
     //! Calculates points if section is affected by geometry.
@@ -133,19 +168,21 @@ private:
     //! @param[in]  roadSectionStart       s coordinate of current roadSectionStart
     //! @param[in]  roadSectionNextStart   s coordinate of next roadSectionStart
     //! @param[in]  road                   Pointer containing the road
-    //! @param[in]  roadLanes              Map of lanes per Road
+    //! @param[in]  roadSection            current section
     //! @param[in]  roadGeometry           Pointer containing the roadGeometry
     //! @param[out] roadGeometryStart      s coordinate of roadGeometryStart
     //! @param[out] roadGeometryEnd        s coordinate of roadGeometryEnd
+    //! @param[in]  includeStartPoint      flag, wether the first point (i.e s = roadSectionStart) should be included
     //! @return                    False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
     bool CalculateGeometry(double roadSectionStart,
                            double roadSectionNextStart,
                            RoadInterface *road,
-                           std::map<int, RoadLaneInterface*> &roadLanes,
+                           RoadLaneSectionInterface *roadSection,
                            RoadGeometryInterface *roadGeometry,
                            double &roadGeometryStart,
-                           double &roadGeometryEnd);
+                           double &roadGeometryEnd,
+                           bool includeStartPoint);
 
     //-----------------------------------------------------------------------------
     //! Allocates lane geometry and calculates points.
@@ -159,9 +196,10 @@ private:
     //! @param[in]  roadSectionNextStart   s coordinate of next roadSectionStart
     //! @param[in]  roadGeometryEnd        s coordinate of roadGeometryEnd
     //! @param[in]  roadGeometryLength     Length of the roadGeometry
-    //! @param[in]  roadLanes              Map of lanes per Road
+    //! @param[in]  roadSection            current section
     //! @param[in]  road                   Pointer containing the road
     //! @param[in]  roadGeometry           Pointer containing the roadGeometry
+    //! @param[in]  includeStartPoint      flag, wether the first point (i.e s = roadSectionStart) should be included
     //! @return                    False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
     bool CalculatePointsOfAffectedGeometry(double roadSectionStart,
@@ -169,9 +207,10 @@ private:
                                            double roadSectionNextStart,
                                            double roadGeometryEnd,
                                            double roadGeometryLength,
-                                           std::map<int, RoadLaneInterface *> &roadLanes,
+                                           RoadLaneSectionInterface *roadSection,
                                            RoadInterface *road,
-                                           RoadGeometryInterface *roadGeometry);
+                                           RoadGeometryInterface *roadGeometry,
+                                           bool includeStartPoint);
 
     //-----------------------------------------------------------------------------
     //! Calculates geometryOffSetStart and SectionOffsetStart.
@@ -222,48 +261,33 @@ private:
     //! @param[in]  geometryOffsetStart    Offset to the start point of the geometry
     //! @param[in]  geometryOffsetEnd      Offset to the end point of the geometry
     //! @param[in]  numberLaneGeomPoints   Number of geometry point in the lane
-    //! @param[in]  roadLanes              Map of lanes per Road
+    //! @param[in]  roadSection            current section
     //! @param[in]  road                   Pointer containing the road
     //! @param[in]  roadGeometry           Pointer containing the roadGeometry
     //! @param[in]  sectionOffsetStart     Offset to the start point of the section
     //! @param[out] sectionOffsetEnd       Offset to the end point of the section
     //! @param[in]  roadGeometryStart      s coordinate of roadGeometryStart
     //! @param[in]  roadSectionStart       s coordinate of current roadSectionStart
+    //! @param[in]  includeStartPoint      flag, wether the first point (i.e s = roadSectionStart) should be included
     //-----------------------------------------------------------------------------
     bool CalculatePoints(double geometryOffsetStart,
                          double geometryOffsetEnd,
                          int numberLaneGeomPoints,
-                         std::map<int, RoadLaneInterface*> &roadLanes,
+                         RoadLaneSectionInterface *roadSection,
                          RoadInterface *road,
                          RoadGeometryInterface *roadGeometry,
                          double sectionOffsetStart,
                          double sectionOffsetEnd,
                          double roadGeometryStart,
-                         double roadSectionStart);
+                         double roadSectionStart,
+                         bool includeStartPoint);
+
 
     //-----------------------------------------------------------------------------
-    //! Reverses geometries if section is opposite to global direction.
-    //!
-    //! This function is a part of the Convert function.
-    //! Reverse geometries if section is opposite to global direction.
-    //!
-    //-----------------------------------------------------------------------------
-    void ReverseGeometries();
-
-    //-----------------------------------------------------------------------------
-    //! Calculates boundarie boxes.
-    //!
-    //! This function is a part of the Convert function.
-    //! Calculates boundarie boxes.
-    //!
-    //-----------------------------------------------------------------------------
-    void CalculateBoundarieBoxes();
-
-    //-----------------------------------------------------------------------------
-    //! Fills lanes according to OpenDrive geometry.
+    //! Fills OSI lanes according to OpenDrive geometry.
     //!
     //! @param[in]  side                 Side of road (1: left, -1: right)
-    //! @param[in]  lanes                OpenDrive road lanes
+    //! @param[in]  roadSection          OpenDrive section
     //! @param[in]  road                 OpenDrive road data structure
     //! @param[in]  roadGeometry         OpenDrive geometric information
     //! @param[in]  geometryOffset       Offset within geometry
@@ -274,8 +298,8 @@ private:
     //! @param[in]  index                Index within lane memory
     //! @return                          True
     //-----------------------------------------------------------------------------
-    bool CalculateLanes(double side,
-                        std::map<int, RoadLaneInterface *> &roadLanes,
+    bool CalculateLanes(int side,
+                        RoadLaneSectionInterface *roadSection,
                         RoadInterface *road,
                         RoadGeometryInterface *roadGeometry,
                         double geometryOffset,
@@ -285,13 +309,6 @@ private:
                         double roadSectionStart,
                         int index);
 
-    //-----------------------------------------------------------------------------
-    //! Calculates lane lengths.
-    //!
-    //! @param[in]  lane                OpenDrive road lane
-    //! @return                         True
-    //-----------------------------------------------------------------------------
-    bool CalculateLaneLength(RoadLaneInterface *lane);
 
     //-----------------------------------------------------------------------------
     //! Calculates the width of the provided lane.
@@ -300,7 +317,7 @@ private:
     //! @param[in]  sectionOffset       Offset within the OpenDrive section
     //! @return                         Lane width, 0.0 if no width was specified
     //-----------------------------------------------------------------------------
-    double CalculateLaneWidth(RoadLaneInterface* roadLane, double sectionOffset);
+    double CalculateLaneWidth(const RoadLaneInterface* roadLane, double sectionOffset);
 
     double CalculateLaneOffset(RoadInterface* road, double roadPosition);
 
@@ -340,11 +357,11 @@ private:
     //! @param[in] roadLane         the RoadLaneInterface input data
     //! @return                     relevant RoadLaneWidth
     //-----------------------------------------------------------------------------
-    const RoadLaneWidth* GetRelevantRoadLaneWidth(double sectionOffset, RoadLaneInterface *roadLane);
+    const RoadLaneWidth* GetRelevantRoadLaneWidth(double sectionOffset, const RoadLaneInterface* roadLane);
 
     const RoadLaneOffset* GetRelevantRoadLaneOffset(double roadOffset, RoadInterface* road);
 
-    const RoadLaneRoadMark* GetRelevantRoadLaneRoadMark(double sectionOffset, RoadLaneInterface* roadLane);
+    const RoadLaneRoadMark* GetRelevantRoadLaneRoadMark(double sectionOffset, const RoadLaneInterface* roadLane);
 
     //-----------------------------------------------------------------------------
     //! Tests if the provided values' difference is smaller than EPS
@@ -356,52 +373,80 @@ private:
     bool IsEqual(const double valueA, const double valueB);
 
     //-----------------------------------------------------------------------------
-    //! Convert OpenDRIVE road mark types to OSI lane boundary types
+    //! \brief CalculateIntersections calculates any intersections on the
+    //!        scenery's junctions
     //!
-    //! @param[in] type                 OpenDRIVE road mark type
-    //! @return                         OSI lane boundary type
+    //! \return true if intersection calculation is successful, false otherwise
     //-----------------------------------------------------------------------------
-    osi3::LaneBoundary::Classification::Type ConvertRoadLaneRoadMarkToOsiLaneBoundaryType(RoadLaneRoadMarkType type);
+    bool CalculateIntersections();
 
     //-----------------------------------------------------------------------------
-    //! Convert OpenDRIVE road mark colors to OSI lane boundary colors
+    //! \brief BuildRoadPolygons builds all polygons for the road and pairs them
+    //!        with the road's id
     //!
-    //! @param[in] color                OpenDRIVE road mark color
-    //! @return                         OSI lane boundary color
+    //! \param[in] road the road for which polygons will be built
+    //! \return the pair of the road id to the collection of polygons for the road
     //-----------------------------------------------------------------------------
-    osi3::LaneBoundary::Classification::Color ConvertRoadLaneRoadMarkColorToOsiLaneBoundaryColor(RoadLaneRoadMarkColor color);
+    static RoadPolygons BuildRoadPolygons(const OWL::Road* const road);
 
     //-----------------------------------------------------------------------------
-    //! Add OSI lane boundary to OSI lane
+    //! \brief CreateBuildPolygonFromLaneGeometryFunction creates a function that
+    //!        builds LaneGeometryPolygons from a LaneGeometryElement for a
+    //!        specific roadId and laneId
     //!
-    //! @param[in] roadMark             OpenDRIVE road mark data
-    //! @param[in] location             OSI lane boundary location (left, right, free, other)
-    //! @param[out] laneBoundary        Already existing or newly created OSI lane boundary
-    //! @return                         true, if a new lane boundary element has been created, false if
-    //!                                 a pointer to an existing one was stored in laneBoundary parameter
+    //! \param[in] roadId the roadId for which the created function will build
+    //!            LaneGeometryPolygons
+    //! \param[in] laneId the laneId for which the created function will build
+    //!            LaneGeometryPolygons
+    //! \return a function that creates LaneGeometryPolygons from
+    //!         LaneGeometryElements for the lane at laneId on the road at roadId
     //-----------------------------------------------------------------------------
-    //bool AddOsiLaneBoundary(osi3::Lane* osiLane, const RoadLaneRoadMark* roadMark, const osi3::LaneBoundary::BoundaryLocation location, osi3::LaneBoundary** laneBoundary);
+    static std::function<LaneGeometryPolygon (const OWL::Primitive::LaneGeometryElement* const)> CreateBuildPolygonFromLaneGeometryFunction(const OWL::Id roadId,
+                                                                                                                                            const OWL::Id laneId);
 
     //-----------------------------------------------------------------------------
-    //! Copy adjacent lane OSI lane boundaries to neighbour lanes
+    //! \brief CalculateJunctionIntersectionsFromRoadPolygons calculates
+    //!        intersections for a junction from polygons created from that
+    //!        junction's roads
     //!
-    //! Since OpenDRIVE only specifies one boundary lane marking, the OSI data is copied to the neighbour lane
-    //!
-    //! @return                         retuns always true
+    //! \param[in] junctionPolygons the map of road ids to LaneGeometryPolygons for
+    //!            the junction
+    //! \param[out] junction the junction to which intersection information should
+    //!             be added, given that any interesections are found
     //-----------------------------------------------------------------------------
-    bool CopyAdjacentBoundaries();
+    void CalculateJunctionIntersectionsFromRoadPolygons(const JunctionPolygons& junctionPolygons,
+                                                        OWL::Junction* const junction);
 
     //-----------------------------------------------------------------------------
-    //! Find an OSI lane by its id in the OpenDRIVE to OSI lane map
+    //! \brief CalculateIntersectionInfoForRoadPolygons calculates intersection
+    //!        information between two sets of RoadPolygons
     //!
-    //! @param[in] id                   OSI lane id
-    //! @return                         OSI lane pointer, if lane exists in map, nullptr otherwise
+    //! \param[in] polygons the base road's set of polygons
+    //! \param[in] polygonsToCompare the potentially-intersecting road's set of
+    //!            polygons
+    //! \param[in] junction the junction for which the intersection info is
+    //!            calculated
+    //! \return the IntersectionInfo between the two sets of RoadPolygons, if an
+    //!         intersection exists between them
     //-----------------------------------------------------------------------------
-    osi3::Lane* GetOsiLaneById(unsigned long id);
+    static std::optional<OWL::IntersectionInfo> CalculateIntersectionInfoForRoadPolygons(const RoadPolygons& polygons,
+                                                                                         const RoadPolygons& polygonsToCompare,
+                                                                                         const OWL::Junction * const junction);
+
+    //-----------------------------------------------------------------------------
+    //! \brief GetRelativeRank Gets the relative rank of an intersecting road with
+    //!        respect to a road
+    //!
+    //! \param[in] roadId the roadId of the road whose relative rank to get
+    //! \param[in] intersectingRoadId the roadId of the intersecting road
+    //! \param[in] junction the junction in which the roads intersect
+    //! \return the relative rank of the intersecting road
+    //-----------------------------------------------------------------------------
+    static IntersectingConnectionRank GetRelativeRank(const OWL::Id roadId, const OWL::Id intersectingRoadId, const OWL::Junction * const junction);
 
     SceneryInterface *scenery;
 
-    OWL::WorldData& worldData;
+    OWL::Interfaces::WorldData& worldData;
 
     constexpr static const double SAMPLING_RATE = 3.0; // 1m sampling rate of reference line
     constexpr static const double EPS = 1e-3;   // epsilon value for geometric comparisons

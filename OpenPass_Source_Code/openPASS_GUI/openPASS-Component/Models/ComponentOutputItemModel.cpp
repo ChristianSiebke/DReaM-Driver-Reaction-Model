@@ -12,7 +12,7 @@
 
 #include "Models/ComponentOutputMapModel.h"
 
-ComponentOutputItemInterface::Type const ComponentOutputItemModel::DefaultType = QStringLiteral("");
+ComponentOutputItemInterface::Type const ComponentOutputItemModel::DefaultType = QStringLiteral("double");
 ComponentOutputItemInterface::Title const ComponentOutputItemModel::DefaultTitle = QStringLiteral("");
 ComponentOutputItemInterface::Unit const ComponentOutputItemModel::DefaultUnit = QStringLiteral("");
 

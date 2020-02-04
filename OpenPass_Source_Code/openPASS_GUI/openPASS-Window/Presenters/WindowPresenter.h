@@ -26,12 +26,8 @@ public:
 public:
     WindowModel::ViewList list() const;
 
-public:
-    WindowInterface::Widget * getSimulationWidget() const;
-
 Q_SIGNALS:
     void modified();
-    void modifiedSimulationWidget();
 
 private:
     WindowModel * const windowModel;

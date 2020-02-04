@@ -22,4 +22,5 @@ HEADERS += \
     $$PWD/PluginManagerInterface.h \
     $$PWD/RandomInterface.h \
     $$PWD/ServiceInterface.h \
-    $$PWD/ServiceManagerInterface.h
+    $$PWD/ServiceManagerInterface.h \
+    $$PWD/IOPluginInterface.h

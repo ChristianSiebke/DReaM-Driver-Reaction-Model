@@ -14,5 +14,5 @@
 
 QPixmap LogoDelegate::logoRequest()
 {
-    return QPixmap(":/Views/Views-openPASS/logo_openpass.png");
+    return QPixmap(":/Views/logo_openpass.png");
 }

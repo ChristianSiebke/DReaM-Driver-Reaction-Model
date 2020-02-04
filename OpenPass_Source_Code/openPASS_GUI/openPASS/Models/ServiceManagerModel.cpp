@@ -19,7 +19,8 @@ ServiceManagerModel::ServiceManagerModel(QObject * const parent) :
 void ServiceManagerModel::add(ServiceManagerInterface::ID const & id,
                               ServiceManagerInterface::Service * const service)
 {
-    services.insert(id, service);
+    if(!services.contains(id))
+            services.insert(id, service);
 }
 
 bool ServiceManagerModel::remove(ServiceManagerInterface::ID const & id)

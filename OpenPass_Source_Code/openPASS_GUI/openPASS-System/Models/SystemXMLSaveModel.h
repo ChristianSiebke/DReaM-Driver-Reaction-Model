@@ -30,9 +30,11 @@ public:
 
 public:
     static bool save(QString const & filepath,
-                     SystemMapInterface const * const systems);
+                     SystemMapInterface const * const systems,
+                     bool const * const dynamicMode);
     static bool save(QIODevice * const device,
-                     SystemMapInterface const * const systems);
+                     SystemMapInterface const * const systems,
+                     const bool * const dynamicMode);
 
 protected:
     static void saveSystem(QXmlStreamWriter & xml,

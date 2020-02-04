@@ -115,3 +115,8 @@ SystemComponentMapInterface::ID SystemComponentMapModel::next() const
     }
     return id;
 }
+
+QList<SystemComponentMapInterface::Item*> SystemComponentMapModel::values() const
+{
+    return components.values();
+}

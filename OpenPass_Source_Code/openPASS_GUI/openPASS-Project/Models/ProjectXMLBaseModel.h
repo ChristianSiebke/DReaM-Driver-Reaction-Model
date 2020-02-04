@@ -16,24 +16,21 @@
 
 class ProjectXMLBaseModel
 {
-public:
-    explicit ProjectXMLBaseModel() = delete;
-    virtual ~ProjectXMLBaseModel() = default;
-
 protected:
-    static QString const KeyFrameworkConfiguration;
+    static QString const KeyMasterConfig;
+    static QString const KeySlaveConfigs;
+    static QString const KeySlaveConfig;
     static QString const KeyLibraryPath;
     static QString const KeyResultPath;
-    static QString const KeyAgentConfigFile;
-    static QString const KeyRunConfigFile;
-    static QString const KeySceneryConfigFile;
+    static QString const KeyConfigPath;
     static QString const KeyLogFileMaster;
     static QString const KeyLogFileSlave;
     static QString const KeyLogLevel;
     static QString const KeySlavePath;
 
 protected:
-    static QList<QString> const KeyListFrameworkConfig;
+    static QList<QString> const KeyListMasterConfig;
+    static QList<QString> const KeyListSlaveConfig;
 };
 
 #endif // PROJECTXMLBASEMODEL_H

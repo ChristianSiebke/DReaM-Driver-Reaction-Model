@@ -55,6 +55,7 @@ private Q_SLOTS: // Define actions in the Menu-bar
 
 private Q_SLOTS: // Define actions for the Browse Buttons
     void on_libraryBrowseButton_clicked();
+    void on_configBrowseButton_clicked();
     void on_logLevelSpinBox_valueChanged(int level);
     void on_logMasterBrowseButton_clicked();
     void on_logSlaveBrowseButton_clicked();

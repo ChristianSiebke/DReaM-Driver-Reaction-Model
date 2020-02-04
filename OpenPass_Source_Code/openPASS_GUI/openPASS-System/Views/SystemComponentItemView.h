@@ -61,6 +61,9 @@ public Q_SLOTS:
     void updateType();
     void updatePosition();
 
+public Q_SLOT:
+    void enableTitleEdit(bool enabled);
+
 protected:
     static QMap<SystemComponentItemInterface::Type, QString> const TypeColorMap;
     static QString const TypeColorDefault;

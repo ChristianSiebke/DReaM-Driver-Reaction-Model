@@ -49,6 +49,9 @@ public:
     virtual bool duplicate(SystemComponentItemModel const * const component,
                            SystemComponentItemInterface::Position const & position);
 
+public:
+    virtual QList<Item*> values() const override;
+
 protected:
     virtual SystemComponentMapInterface::ID next() const;
 

@@ -56,3 +56,8 @@ SystemComponentParameterMapInterface::Item * SystemComponentParameterMapModel::g
 {
     return parameters.value(id, nullptr);
 }
+
+QList<SystemComponentParameterMapInterface::Item *> SystemComponentParameterMapModel::values() const
+{
+    return parameters.values();
+}

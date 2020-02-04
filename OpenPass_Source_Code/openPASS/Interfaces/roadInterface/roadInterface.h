@@ -1,16 +1,16 @@
-/*********************************************************************
-* Copyright (c) 2017 ITK Engineering GmbH
-* Copyright (c) 2018 in-tech GmbH
+/*******************************************************************************
+* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+*               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
 * which is available at https://www.eclipse.org/legal/epl-2.0/
 *
 * SPDX-License-Identifier: EPL-2.0
-**********************************************************************/
+*******************************************************************************/
 
 //-----------------------------------------------------------------------------
-//! @file  roadInterface.h
+//! @file  RoadInterface.h
 //! @brief This file contains a interface representing a road.
 //-----------------------------------------------------------------------------
 
@@ -21,21 +21,43 @@
 #include <algorithm>
 #include <list>
 #include <map>
+
 #include "roadElementTypes.h"
+#include "Interfaces/roadInterface/roadLaneSectionInterface.h"
+#include "Interfaces/roadInterface/roadSignalInterface.h"
+#include "Interfaces/roadInterface/roadObjectInterface.h"
 #include "roadElevation.h"
-#include "roadLaneInterface.h"
-#include "roadLaneOffset.h"
-#include "roadLaneSectionInterface.h"
+#include "Interfaces/roadInterface/roadLaneInterface.h"
 #include "roadLaneWidth.h"
-#include "roadLinkInterface.h"
-#include "roadGeometryInterface.h"
-#include "roadGeometryLineInterface.h"
-#include "roadGeometryArcInterface.h"
-#include "roadGeometryPoly3Interface.h"
-#include "roadGeometrySpiralInterface.h"
-#include "roadObjectInterface.h"
-#include "roadSignalInterface.h"
-#include "vector2d.h"
+#include "roadLaneOffset.h"
+#include "Interfaces/roadInterface/roadGeometryInterface.h"
+#include "Interfaces/roadInterface/roadLinkInterface.h"
+#include "Interfaces/roadInterface/roadGeometryLineInterface.h"
+#include "Interfaces/roadInterface/roadGeometryArcInterface.h"
+#include "Interfaces/roadInterface/roadGeometryPoly3Interface.h"
+#include "Interfaces/roadInterface/roadGeometrySpiralInterface.h"
+
+//-----------------------------------------------------------------------------
+//! Struct containing values for parametric cubic polynomial geometry
+//! @param[in]  aU                   constant factor of the polynomial for u
+//! @param[in]  bU                   linear factor of the polynomial for u
+//! @param[in]  cU                   quadratic factor of the polynomial for u
+//! @param[in]  dU                   cubic factor of the polynomial for u
+//! @param[in]  aV                   constant factor of the polynomial for v
+//! @param[in]  bV                   linear factor of the polynomial for v
+//! @param[in]  cV                   quadratic factor of the polynomial for v
+//! @param[in]  dV                   cubic factor of the polynomial for v
+//-----------------------------------------------------------------------------
+struct ParamPoly3Parameters{
+    double aU;
+    double bU;
+    double cU;
+    double dU;
+    double aV;
+    double bV;
+    double cV;
+    double dV;
+};
 
 //-----------------------------------------------------------------------------
 //! Class representing a road.
@@ -131,6 +153,25 @@ public:
                           double b,
                           double c,
                           double d) = 0;
+    //-----------------------------------------------------------------------------
+    //! Adds a parametric cubic polynomial geometry to a road by creating a new
+    //! RoadGeometryparamPoly3 object and adding it to the stored list of geometries.
+    //! Each coordinate is calculated in a local (u,v) coordinate system
+    //!
+    //! @param[in]  s                   start position s-coordinate
+    //! @param[in]  x                   start position x inertial
+    //! @param[in]  y                   start position y inertial
+    //! @param[in]  hdg                 start orientation (inertial heading)
+    //! @param[in]  length              length of the element's reference line
+    //! @param[in]  parameters          Factors for the polynomials describing the road
+    //! @return                          false if an error has occurred, true otherwise
+    //-----------------------------------------------------------------------------
+    virtual bool AddGeometryParamPoly3(double s,
+                          double x,
+                          double y,
+                          double hdg,
+                          double length,
+                          ParamPoly3Parameters parameters) = 0;
 
     //-----------------------------------------------------------------------------
     //! Adds an elevation profile defined via a cubic polynomial to a road by creating
@@ -201,53 +242,59 @@ public:
     //! and adding it to the stored list of lane sections.
     //!
     //! @param[in]  start               start position s-coordinate
-    //! @return                         created road lane section
     //-----------------------------------------------------------------------------
-    virtual RoadSignalInterface *AddRoadSignal(const RoadSignalSpecification &signal) = 0;
+    virtual void AddRoadSignal(const RoadSignalSpecification &signal) = 0;
 
-    virtual RoadObjectInterface *AddRoadObject(const RoadObjectSpecification &object) = 0;
+    virtual void AddRoadObject(const RoadObjectSpecification &object) = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the ID of the road.
     //!
     //! @return                         ID of the road
     //-----------------------------------------------------------------------------
-    virtual const std::string &GetId() const = 0;
+    virtual const std::string GetId() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the stored list of elevation profiles.
     //!
     //! @return                         list of elevation profiles
     //-----------------------------------------------------------------------------
-    virtual std::list<RoadElevation*> &GetElevations() = 0;
+    virtual std::list<RoadElevation*> & GetElevations() = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the stored list of lane offsets.
     //!
     //! @return                         list of lane offsets
     //-----------------------------------------------------------------------------
-    virtual std::list<RoadLaneOffset*> &GetLaneOffsets() = 0;
+    virtual const std::list<RoadLaneOffset*> & GetLaneOffsets() const = 0;
+
+    //-----------------------------------------------------------------------------
+    //! Returns the stored list of lane offsets.
+    //!
+    //! @return                         list of lane offsets
+    //-----------------------------------------------------------------------------
+    virtual std::list<RoadLaneOffset*> & GetLaneOffsets() = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the stored list of road geometries.
     //!
     //! @return                         list of road geometries
     //-----------------------------------------------------------------------------
-    virtual std::list<RoadGeometryInterface*> &GetGeometries() = 0;
+    virtual std::list<RoadGeometryInterface*> & GetGeometries() = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the stored list of road links.
     //!
     //! @return                         list of road links
     //-----------------------------------------------------------------------------
-    virtual std::list<RoadLinkInterface*> &GetRoadLinks() = 0;
+    virtual std::list<RoadLinkInterface*> & GetRoadLinks() = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the stored list of lane sections.
     //!
     //! @return                         list of lane sections
     //-----------------------------------------------------------------------------
-    virtual std::list<RoadLaneSectionInterface*> &GetLaneSections() = 0;
+    virtual std::vector<RoadLaneSectionInterface*> & GetLaneSections() = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the stored list signals
@@ -276,7 +323,12 @@ public:
 
     virtual void AddRoadType(const RoadTypeSpecification &info) = 0;
 
-    virtual RoadTypeInformation GetRoadType(double start) = 0;
+    virtual RoadTypeInformation GetRoadType(double start) const = 0;
+
+    virtual void SetJunctionId(const std::string& junctionId) = 0;
+
+    virtual std::string GetJunctionId() = 0;
 
 };
+
 

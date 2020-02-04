@@ -12,7 +12,7 @@
 
 #include "Models/ComponentInputMapModel.h"
 
-ComponentInputItemInterface::Type const ComponentInputItemModel::DefaultType = QStringLiteral("");
+ComponentInputItemInterface::Type const ComponentInputItemModel::DefaultType = QStringLiteral("double");
 ComponentInputItemInterface::Title const ComponentInputItemModel::DefaultTitle = QStringLiteral("");
 ComponentInputItemInterface::Unit const ComponentInputItemModel::DefaultUnit = QStringLiteral("");
 ComponentInputItemInterface::Cardinality const ComponentInputItemModel::DefaultCardinality = QStringLiteral("1");
@@ -46,6 +46,7 @@ bool ComponentInputItemModel::setID(ComponentInputItemInterface::ID const & id)
 
 ComponentInputItemInterface::ID ComponentInputItemModel::getID() const
 {
+
     ComponentInputMapModel const * const map =
             qobject_cast<ComponentInputMapModel const * const>(parent());
     return ((map) ? map->getID(const_cast<ComponentInputItemModel *>(this))

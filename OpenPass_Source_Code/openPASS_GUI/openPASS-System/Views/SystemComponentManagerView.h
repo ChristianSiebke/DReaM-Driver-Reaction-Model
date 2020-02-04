@@ -11,10 +11,8 @@
 #ifndef SYSTEMCOMPONENTMANAGERVIEW_H
 #define SYSTEMCOMPONENTMANAGERVIEW_H
 
+#include "openPASS-System/SystemComponentManagerInterface.h"
 #include <QWidget>
-
-class ProjectInterface;
-class SystemComponentManagerInterface;
 
 namespace Ui {
 class SystemComponentManagerView;
@@ -26,7 +24,7 @@ class SystemComponentManagerView : public QWidget
 
 public:
     explicit SystemComponentManagerView(SystemComponentManagerInterface * const components,
-                                        ProjectInterface * const project,
+                                        bool const * const dynamicMode,
                                         QWidget * const parent = nullptr);
     virtual ~SystemComponentManagerView();
 
@@ -39,8 +37,18 @@ protected Q_SLOTS:
     void on_button_clicked();
 
 private:
-    SystemComponentManagerInterface * _components;
-    ProjectInterface * const _project;
+    bool isForbidden(ComponentItemInterface const * const item);
+
+    int numberOfOutputs(ComponentItemInterface::Title const & title);
+    int numberOfInputs(ComponentItemInterface::Title const & title);
+    int numberOfParameters(const ComponentItemInterface::Title &title);
+
+private:
+    SystemComponentManagerInterface * const _components;
+    bool const * const dynamicMode;
+
+private:
+    QList<ComponentItemInterface::Name> const dynamicComponents ={"Algorithm_AEB", "Sensor_OSI", "Dynamics_TrajectoryFollower"} ;
 
 protected:
     Ui::SystemComponentManagerView * const ui;

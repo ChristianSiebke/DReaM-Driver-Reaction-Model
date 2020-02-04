@@ -22,6 +22,7 @@ public:
     virtual ~ComponentInputMapModel() = default;
 
 public:
+    virtual bool add(ComponentInputMapInterface::Item * const item) override;
     virtual bool add(ComponentInputMapInterface::ID const & id) override;
     virtual bool add(ComponentInputMapInterface::ID const & id,
                      ComponentInputMapInterface::Item * const item) override;
@@ -64,6 +65,9 @@ public:
     virtual bool remove(ComponentInputMapInterface::ID const & id) override;
     virtual bool remove(ComponentInputMapInterface::Item * const item) override;
     virtual bool remove(ComponentInputMapInterface::Index const & index) override;
+
+public:
+    virtual Item * createInput() const override;
 
 protected:
     ComponentInputMapInterface::Map map;

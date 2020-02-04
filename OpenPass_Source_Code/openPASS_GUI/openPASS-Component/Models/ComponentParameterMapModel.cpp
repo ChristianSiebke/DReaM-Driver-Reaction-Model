@@ -19,12 +19,26 @@ ComponentParameterMapModel::ComponentParameterMapModel(QObject * const parent)
 {
 }
 
+ComponentParameterMapInterface::Item * ComponentParameterMapModel::createParameter() const
+{
+    return new ComponentParameterItemModel;
+}
+
+bool ComponentParameterMapModel::add(ComponentParameterMapInterface::Item * const item)
+{
+    map.insert(generateID(), item);
+    item->setParent(this);
+    Q_EMIT added(item);
+    return true;
+}
+
 bool ComponentParameterMapModel::add(ComponentParameterMapInterface::ID const & id)
 {
     if (!contains(id))
     {
-        map.insert(id, new ComponentParameterItemModel(this));
-        Q_EMIT added();
+        ComponentParameterItemModel * item = new ComponentParameterItemModel(this);
+        map.insert(id, item);
+        Q_EMIT added(item);
         return true;
     }
     return false;
@@ -37,7 +51,7 @@ bool ComponentParameterMapModel::add(ComponentParameterMapInterface::ID const & 
     {
         map.insert(id, item);
         item->setParent(this);
-        Q_EMIT added();
+        Q_EMIT added(item);
         return true;
     }
     return false;
@@ -152,8 +166,8 @@ bool ComponentParameterMapModel::remove(ComponentParameterMapInterface::ID const
 {
     if (map.contains(id))
     {
+        Q_EMIT removed(map.value(id));
         delete map.take(id);
-        Q_EMIT removed();
         return true;
     }
     return false;
@@ -161,7 +175,14 @@ bool ComponentParameterMapModel::remove(ComponentParameterMapInterface::ID const
 
 bool ComponentParameterMapModel::remove(ComponentParameterMapInterface::Item * const item)
 {
-    return ((contains(item)) ? remove(getID(item)) : false);
+    if(map.values().contains(item))
+    {
+        map.take(item->getID())->setParent(nullptr);
+        Q_EMIT removed(item);
+        return true;
+    }
+
+    return false;
 }
 
 bool ComponentParameterMapModel::remove(ComponentParameterMapInterface::Index const & index)

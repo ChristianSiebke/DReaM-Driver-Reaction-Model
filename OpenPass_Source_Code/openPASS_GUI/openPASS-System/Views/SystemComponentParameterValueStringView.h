@@ -25,7 +25,7 @@ public:
     virtual ~SystemComponentParameterValueStringView() = default;
 
 protected Q_SLOTS:
-    void updateInterface(QString const & text);
+    void updateInterface();
     void updateView();
 
 protected:

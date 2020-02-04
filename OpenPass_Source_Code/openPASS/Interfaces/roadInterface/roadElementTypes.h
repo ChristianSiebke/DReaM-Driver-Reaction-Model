@@ -1,22 +1,24 @@
-/*********************************************************************
-* Copyright (c) 2017 ITK Engineering GmbH
-* Copyright (c) 2018 in-tech GmbH
+/*******************************************************************************
+* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+*               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
 * which is available at https://www.eclipse.org/legal/epl-2.0/
 *
 * SPDX-License-Identifier: EPL-2.0
-**********************************************************************/
+*******************************************************************************/
 
 //-----------------------------------------------------------------------------
-//! @file  roadElementTypes.h
+//! @file  RoadElementTypes.h
 //! @brief This file contains enumerations for different types of roads.
 //-----------------------------------------------------------------------------
 
 #pragma once
 
+#include <algorithm>
 #include <string>
+#include <list>
 #include <vector>
 
 //-----------------------------------------------------------------------------
@@ -36,7 +38,8 @@ enum class RoadLinkType
 enum class RoadLinkElementType
 {
     Undefined = 0,
-    Road
+    Road,
+    Junction
 };
 
 //-----------------------------------------------------------------------------
@@ -72,7 +75,7 @@ enum class RoadLinkSideType
 //-----------------------------------------------------------------------------
 //! Type of lane
 //-----------------------------------------------------------------------------
-enum class RoadLaneTypeType // http://www.opendrive.org/docs/OpenDRIVEFormatSpecRev1.4H.pdf page 93
+enum class RoadLaneType // http://www.opendrive.org/docs/OpenDRIVEFormatSpecRev1.4H.pdf page 93
 {
     Undefined = 0,
     None,
@@ -96,7 +99,6 @@ enum class RoadLaneTypeType // http://www.opendrive.org/docs/OpenDRIVEFormatSpec
     Exit,
     OffRamp,
     OnRamp
-
 };
 
 //-----------------------------------------------------------------------------
@@ -108,14 +110,13 @@ enum class RoadLaneRoadMarkType // http://www.opendrive.org/docs/OpenDRIVEFormat
     None,
     Solid,
     Broken,
-    Solid_Solid , // (for double solid line)
-    Solid_Broken , //(from inside to outside , exception: center lane  - from left to right)
+    Solid_Solid,  // (for double solid line)
+    Solid_Broken,  //(from inside to outside , exception: center lane  - from left to right)
     Broken_Solid, //(from inside to outside, exception: center lane - from left to right)
     Broken_Broken, // (from inside to outside, exception: center lane- from left to right)
     Botts_Dots,
     Grass, //(meaning a grass edge)
     Curb
-
 };
 
 
@@ -127,7 +128,6 @@ enum class RoadLaneRoadDescriptionType // http://www.opendrive.org/docs/OpenDRIV
     Left,
     Right,
     Center
-
 };
 
 //-----------------------------------------------------------------------------
@@ -140,22 +140,28 @@ enum class RoadLaneRoadMarkLaneChange // http://www.opendrive.org/docs/OpenDRIVE
     Both,
     Increase,
     Decrease
-
 };
 
 //-----------------------------------------------------------------------------
-//! LaneChange of the lane line
+//! Color of the road mark
 //-----------------------------------------------------------------------------
 enum class RoadLaneRoadMarkColor // http://www.opendrive.org/docs/OpenDRIVEFormatSpecRev1.4H.pdf page 92
 {
     Undefined = 0,
-    Standard, // == White
     Blue,
     Green,
     Red,
     Yellow,
-    White
+    White,
+    Orange
+};
 
+//! Weight of the road mark
+enum class RoadLaneRoadMarkWeight // http://www.opendrive.org/docs/OpenDRIVEFormatSpecRev1.4H.pdf page 92
+{
+    Undefined = 0,
+    Standard,
+    Bold
 };
 
 enum class RoadElementOrientation
@@ -163,19 +169,6 @@ enum class RoadElementOrientation
     both,
     positive,
     negative,
-};
-
-//-----------------------------------------------------------------------------
-//! Type of signals
-//-----------------------------------------------------------------------------
-enum class RoadSignalType // according to StVO
-{
-    Undefined = 0,
-    MaximumSpeedLimit = 274,
-    MinimumSpeedLimit = 275,
-    EndOfMaximumSpeedLimit = 278,
-    EndOfMinimumSpeedLimit = 279,
-    EndOffAllSpeedLimitsAndOvertakingRestrictions = 282
 };
 
 //-----------------------------------------------------------------------------
@@ -218,7 +211,7 @@ struct RoadSignalSpecification
     std::string orientation{};
     double zOffset{0};
     std::string country{};
-    RoadSignalType type{};
+    std::string type{};
     std::string subtype{};
     double value{0};
     RoadSignalUnit unit{};
@@ -232,6 +225,7 @@ struct RoadSignalSpecification
     double yaw{0};
 
     RoadElementValidity validity;
+    std::list<std::string> dependencyIds {};
 };
 
 
@@ -257,34 +251,43 @@ enum class RoadObjectType
     building,
     parkingSpace,
     wind,
-    patch
+    patch,
+    guardRail,
+    roadSideMarkerPost
 };
 
 struct RoadObjectSpecification // http://www.opendrive.org/docs/OpenDRIVEFormatSpecRev1.4H.pdf page 65
 {
     RoadObjectType type;
-    std::string name;
-    std::string id;
-    double s;
-    double t;
-    double zOffset;
-    double validLength;
+    std::string name {""};
+    std::string id {""};
+    double s {0};
+    double t {0};
+    double zOffset {0};
+    double validLength {0};
     RoadElementOrientation orientation;
-    double width;
-    double length;
-    double radius;
-    double height;
-    double hdg;
-    double pitch;
-    double roll;
+    double width {0};
+    double length {0};
+    double radius {0};
+    double height {0};
+    double hdg {0};
+    double pitch {0};
+    double roll {0};
 
     RoadElementValidity validity;
 
-    bool checkLimits()
+    bool checkStandardCompliance()
     {
         return s >= 0 &&
                validLength >= 0 &&
-               length > 0 && // force physical dimensions
+               length >= 0 &&
+               width >= 0 &&
+               radius >= 0;
+    }
+
+    bool checkSimulatorCompliance()
+    {
+        return length > 0 && // force physical dimensions
                width > 0 &&  // force physical dimensions
                radius == 0;  // do not support radius
     }

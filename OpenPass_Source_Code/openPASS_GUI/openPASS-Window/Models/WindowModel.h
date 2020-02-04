@@ -44,18 +44,13 @@ public:
     virtual bool exists(WindowInterface::ID const & id) const override;
     virtual WindowModel::ViewList list() const;
 
-public:
-    virtual void setSimulationWidget(WindowInterface::Widget * const widget = nullptr) override;
-    virtual WindowInterface::Widget * getSimulationWidget() const override;
-
 Q_SIGNALS:
     void modified();
-    void modifiedSimulationWidget();
 
 private:
     WindowModel::ViewMap views;
     QSet<QObject *> objects;
-    WindowInterface::Widget * simulation;
 };
 
 #endif // WINDOWMODEL_H
+

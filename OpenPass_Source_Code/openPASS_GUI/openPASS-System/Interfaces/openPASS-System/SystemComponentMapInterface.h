@@ -60,6 +60,10 @@ public:
     virtual bool add(ComponentItemInterface const * const component,
                      SystemComponentItemInterface::Position const & position) = 0;
     virtual bool remove(SystemComponentMapInterface::ID const & id) = 0;
+
+
+public:
+    virtual QList<Item*> values() const = 0;
 };
 
 #endif // SYSTEMCOMPONENTMAPINTERFACE_H

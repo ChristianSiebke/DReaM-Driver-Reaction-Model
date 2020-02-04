@@ -20,73 +20,35 @@
 #include <QStandardPaths>
 #include <QString>
 
-ProjectInterface::Directory const ProjectModel::DefaultDirectory =
-        QCoreApplication::applicationDirPath();
-ProjectInterface::Library const ProjectModel::DefaultLibrary =
-        QCoreApplication::applicationDirPath();
-ProjectInterface::Result const ProjectModel::DefaultResult = QStringLiteral("");
-ProjectInterface::AgentConfig const ProjectModel::DefaultAgent = QStringLiteral("");
-ProjectInterface::RunConfig const ProjectModel::DefaultRunConfig = QStringLiteral("");
-ProjectInterface::SceneryConfig const ProjectModel::DefaultScenery = QStringLiteral("");
-ProjectInterface::LogMaster const ProjectModel::DefaultLogMaster = QStringLiteral("");
-ProjectInterface::LogSlave const ProjectModel::DefaultLogSlave = QStringLiteral("");
+ProjectInterface::Library const ProjectModel::DefaultLibrary = QCoreApplication::applicationDirPath().append( QStringLiteral("/bin/lib"));
+ProjectInterface::Config const ProjectModel::DefaultConfig = QCoreApplication::applicationDirPath();
+ProjectInterface::Result const ProjectModel::DefaultResult = QCoreApplication::applicationDirPath();
+ProjectInterface::LogMaster const ProjectModel::DefaultLogMaster = QCoreApplication::applicationDirPath().append( QStringLiteral("/OpenPassMaster.log"));
+ProjectInterface::LogSlave const ProjectModel::DefaultLogSlave = QCoreApplication::applicationDirPath().append( QStringLiteral("/OpenPassSlave.log"));
+ProjectInterface::Slave const ProjectModel::DefaultSlave = QCoreApplication::applicationDirPath().append( QStringLiteral("/bin/OpenPassSlave.exe"));
 
 ProjectModel::ProjectModel(QObject *parent)
     : ProjectInterface(parent)
-    , _directory(DefaultDirectory)
+    , _config(DefaultConfig)
     , _library(DefaultLibrary)
     , _result(DefaultResult)
-    , _agent(DefaultAgent)
-    , _runConfig(DefaultRunConfig)
-    , _scenery(DefaultScenery)
     , _logMaster(DefaultLogMaster)
     , _logSlave(DefaultLogSlave)
     , _logLevel(0)
+    , _slave(DefaultSlave)
 {
-    // Get the path of the application "OpenPass"
-    QDir const root = QDir(QCoreApplication::applicationDirPath());
-
-    // Set a default path to the SLAVE
-    _slave = root.canonicalPath().append("/OpenPassSlave.exe");
-
-    // Lookup Projects directory
-    QList<QDir> const directories = {
-        root.filePath(QStringLiteral("Projects")),
-        root.filePath(QStringLiteral("Projects.lnk")),
-    };
-    for (QDir const & directory : directories)
-    {
-        if (directory.exists())
-        {
-            _directory = directory.canonicalPath();
-        }
-    }
-
-    // Lookup Components library
-    QList<QDir> const libraries = {
-        root.filePath(QStringLiteral("Components")),
-        root.filePath(QStringLiteral("Components.lnk")),
-    };
-    for (QDir const & library : libraries)
-    {
-        if (library.exists())
-        {
-            _library = library.canonicalPath();
-        }
-    }
 }
 
 bool ProjectModel::clear()
 {
     setLibraryPath(DefaultLibrary);
+    setConfigPath(DefaultConfig);
     setResultPath(DefaultResult);
-    setAgentConfigFile(DefaultAgent);
-    setRunConfigFile(DefaultRunConfig);
-    setSceneryConfigFile(DefaultScenery);
     setLogMaster(DefaultLogMaster);
     setLogSlave(DefaultLogSlave);
+    setSlaveExe(DefaultSlave);
     setLogLevel(0);
-    Q_EMIT update();
+    Q_EMIT cleared();
     return true;
 }
 
@@ -114,24 +76,37 @@ bool ProjectModel::save(const QString &filepath) const
 
 bool ProjectModel::simulate()
 {
-    QDir const root = QDir(QCoreApplication::applicationDirPath());
+ /*   QDir const root = QDir(QCoreApplication::applicationDirPath());
     QString master = (root.canonicalPath()).append("/OpenPassMaster.exe");
     QProcess *process = new QProcess(this);
-    process->start(master);
+    process->start(master);*/
 
     return true;
 }
 
-void ProjectModel::setDirectory(const ProjectInterface::Directory &directory)
+bool ProjectModel::setConfigPath(const ProjectInterface::Config &configs)
 {
-    // Update Project directory
-    _directory = directory;
+    _config = configs;
+    Q_EMIT update();
+    return true;
 }
 
-ProjectInterface::Directory ProjectModel::getDirectory() const
+QString ProjectModel::relativeToConfigPath(QString const &filepath) const
 {
-    // Get Project directory
-    return _directory;
+    QDir dir(_config);
+    return dir.relativeFilePath(filepath);
+}
+
+QString ProjectModel::absoluteToConfigPath(QString const &filepath) const
+{
+    QDir dir(_config);
+    return dir.absoluteFilePath(filepath);
+}
+
+ProjectInterface::Config ProjectModel::getConfigPath() const
+{
+    // Get the path of the directory containing the simulation libraries
+    return _config;
 }
 
 bool ProjectModel::setLibraryPath(ProjectInterface::Library const &library)
@@ -148,7 +123,7 @@ ProjectInterface::Library ProjectModel::getLibraryPath() const
     return _library;
 }
 
-QDir ProjectModel::getLibrary()
+QDir ProjectModel::getLibrary() const
 {
     // Get the directory containing the components
     return QDir(_library);
@@ -166,48 +141,6 @@ ProjectInterface::Result ProjectModel::getResultPath() const
 {
     // Get the path of the directory containing the simulation results
     return _result;
-}
-
-bool ProjectModel::setAgentConfigFile(ProjectInterface::AgentConfig const &agentConfig)
-{
-    // Update the path to the directory containing the Agent Configuration File
-    _agent = agentConfig;
-    Q_EMIT update();
-    return true;
-}
-
-ProjectInterface::AgentConfig ProjectModel::getAgentConfigFile() const
-{
-    // Get the path of the directory containing the Agent Configuration File
-    return _agent;
-}
-
-bool ProjectModel::setRunConfigFile(ProjectInterface::RunConfig const &runConfig)
-{
-    // Update the path to the directory containing the Run Configuration File
-    _runConfig = runConfig;
-    Q_EMIT update();
-    return true;
-}
-
-ProjectInterface::RunConfig ProjectModel::getRunConfigFile() const
-{
-    // Get the path of the directory containing the Run Configuration File
-    return _runConfig;
-}
-
-bool ProjectModel::setSceneryConfigFile(ProjectInterface::SceneryConfig const &sceneryConfig)
-{
-    // Update the path to the directory containing the Scenery Configuration File
-    _scenery = sceneryConfig;
-    Q_EMIT update();
-    return true;
-}
-
-ProjectInterface::SceneryConfig ProjectModel::getSceneryConfigFile() const
-{
-    // Get the path of the directory containing the Scenery Configuration File
-    return _scenery;
 }
 
 bool ProjectModel::setLogMaster(ProjectInterface::LogMaster const &logMaster)
@@ -255,6 +188,7 @@ ProjectInterface::LogLevel ProjectModel::getLogLevel() const
 bool ProjectModel::setSlaveExe(ProjectInterface::Slave const &slave)
 {
     _slave = slave;
+    Q_EMIT update();
     return true;
 }
 
@@ -267,8 +201,8 @@ ProjectInterface::Slave ProjectModel::getSlaveExe() const
 bool ProjectModel::getProjectStatus() const
 {
     if ((!_logSlave.isEmpty())&&(!_logMaster.isEmpty())
-            &&(!_result.isEmpty())&&(!_agent.isEmpty())
-            &&(!_runConfig.isEmpty())&&(!_scenery.isEmpty()))
+            &&(!_result.isEmpty())&&(!_config.isEmpty()))
         return true;
+
     return false;
 }

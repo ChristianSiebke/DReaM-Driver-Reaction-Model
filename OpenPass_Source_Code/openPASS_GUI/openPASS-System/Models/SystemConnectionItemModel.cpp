@@ -48,7 +48,7 @@ bool SystemConnectionItemModel::isCompatible(SystemConnectionItemInterface::Sour
                                              SystemConnectionItemInterface::Target const * const target)
 {
     return ((source->getComponent() != target->getComponent()) &&
-            (source->getType() == target->getType()) &&
+            (source->getType() == target->getType() || source->getType() == "any"|| target->getType() == "any" ) &&
             ((source->getUnit() == target->getUnit()) ||
              (source->getUnit() == QStringLiteral("")) ||
              (target->getUnit() == QStringLiteral(""))));

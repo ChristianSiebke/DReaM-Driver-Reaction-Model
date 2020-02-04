@@ -44,15 +44,19 @@ bool ProjectXMLSaveModel::save(QIODevice * const device, const ProjectModel * co
 void ProjectXMLSaveModel::saveProject(QXmlStreamWriter &xml, const ProjectModel * const project)
 {
     // Write the elements to the xml stream
-    xml.writeStartElement(KeyFrameworkConfiguration);
-    xml.writeTextElement(KeyLibraryPath, project->getLibraryPath());
-    xml.writeTextElement(KeyResultPath, project->getResultPath());
-    xml.writeTextElement(KeyAgentConfigFile, project->getAgentConfigFile());
-    xml.writeTextElement(KeyRunConfigFile, project->getRunConfigFile());
-    xml.writeTextElement(KeySceneryConfigFile, project->getSceneryConfigFile());
-    xml.writeTextElement(KeyLogFileMaster, project->getLogMaster());
-    xml.writeTextElement(KeyLogFileSlave, project->getLogSlave());
+    xml.writeStartElement(KeyMasterConfig);
     xml.writeTextElement(KeyLogLevel, QString::number(project->getLogLevel()));
+    xml.writeTextElement(KeyLogFileMaster, project->getLogMaster());
     xml.writeTextElement(KeySlavePath, project->getSlaveExe());
+    xml.writeTextElement(KeyLibraryPath, project->getLibraryPath());
+
+    xml.writeStartElement(KeySlaveConfigs);
+    xml.writeStartElement(KeySlaveConfig);
+    xml.writeTextElement(KeyLogFileSlave, project->getLogSlave());
+    xml.writeTextElement(KeyConfigPath, project->getConfigPath());
+    xml.writeTextElement(KeyResultPath, project->getResultPath());
+
+    xml.writeEndElement();
+    xml.writeEndElement();
     xml.writeEndElement();
 }
