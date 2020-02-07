@@ -35,13 +35,13 @@ public:
                          OWL::Primitive::AbsOrientation orientation,
                          const OpenDriveId odId);
 
+
+    ObjectPosition GetObjectPosition() const;
     ObjectTypeOSI GetType() const override;
-    double GetDistanceToStartOfRoad() const override;
-    double GetDistanceToStartOfRoad(MeasurementPoint mp) const override;
     double GetDistanceToStartOfRoad(MeasurementPoint mp, std::string roadId) const override;
     double GetVelocity(VelocityScope velocityScope = VelocityScope::Absolute) const override;
     double GetLaneDirection() const;
-    double GetLaneRemainder(Side side) const override;
+    double GetLaneRemainder(const std::string& roadId, Side side) const override;
     bool Locate() override;
     void Unlocate() override;
 

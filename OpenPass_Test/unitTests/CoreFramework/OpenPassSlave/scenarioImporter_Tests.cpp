@@ -230,7 +230,7 @@ std::ostream& operator<<(std::ostream& os, const RouteElement& obj)
 {
     return os
             << "road " << obj.roadId << " "
-            << (obj.inRoadDirection ? "in" : "against") << " OpenDrive direction";
+            << (obj.inOdDirection ? "in" : "against") << " OpenDrive direction";
 }
 
 TEST(ScenarioImporter_UnitTests, ImportRoutingElement)
@@ -266,7 +266,7 @@ TEST(ScenarioImporter_UnitTests, ImportRoutingElement)
 
     auto route = scenarioEntity.spawnInfo.route;
     ASSERT_THAT(route.has_value(), Eq(true));
-    ASSERT_THAT(route->roads, ElementsAre(RouteElement{"RoadId1", true}, RouteElement{"RoadId2", false}, RouteElement{"RoadId3", true}));
+    ASSERT_THAT(route.value(), ElementsAre(RouteElement{"RoadId1", true}, RouteElement{"RoadId2", false}, RouteElement{"RoadId3", true}));
 }
 
 TEST(ScenarioImporter_UnitTests, ImportVehicleCatalog_ReturnsSuccess)

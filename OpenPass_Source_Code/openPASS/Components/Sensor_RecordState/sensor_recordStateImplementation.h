@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2018 AMFD GmbH
 *               2016, 2017 ITK Engineering GmbH
 *
@@ -93,7 +93,6 @@ private:
 
     int agentId = 0;
     int timeMSec = 0;
-    int indexLaneEgo{0};
     ObservationInterface* observerInstance {nullptr};
 
     /*!
@@ -101,9 +100,10 @@ private:
      *
      * This function uses AgentInterface::GetSecondaryCoveredLanes and translates it into a string.
      *
-     * @return      secondary lanes as string.
+     * \param[in]     roadId      id if the road for which lanes should be writen
+     * @return    secondary lanes as string.
      */
-    std::string SecondaryLanesToString();
+    std::string SecondaryLanesToString(const std::string& roadId);
 
     /*!
      * \brief Sends all output relevant agent variables to the observer.

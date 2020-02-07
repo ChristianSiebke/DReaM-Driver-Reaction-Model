@@ -13,12 +13,13 @@
 //#include "../deps/thirdParty/include/google/protobuf/stubs/callback.h"
 
 #include "dontCare.h"
-#include "fakeWorld.h"
-#include "fakeParameter.h"
-#include "fakeEventNetwork.h"
-#include "fakeCallback.h"
-#include "fakeStochastics.h"
 #include "fakeAgent.h"
+#include "fakeCallback.h"
+#include "fakeEgoAgent.h"
+#include "fakeEventNetwork.h"
+#include "fakeParameter.h"
+#include "fakeStochastics.h"
+#include "fakeWorld.h"
 
 #include "CoreFramework/CoreShare/parameters.h"
 #include "ConditionalEventDetector.h"
@@ -126,16 +127,15 @@ TEST_P(ReachPositionConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
                                                                       GetParam().roadId);
         testConditionalEventDetectorInformation.conditions.emplace_back(testCondition);
 
-        RoadPosition fakeRoadPosition1 {95.0, DontCare<double>(), DontCare<double>()};
-        RoadPosition fakeRoadPosition2 {115.0, DontCare<double>(), DontCare<double>()};
-
         NiceMock<FakeAgent> mockAgent1;
-        ON_CALL(mockAgent1, GetRoadId(_)).WillByDefault(Return("fakeRoad"));
-        ON_CALL(mockAgent1, GetRoadPosition()).WillByDefault(Return(fakeRoadPosition1));
+        ObjectPosition positionAgent1{{{"fakeRoad", GlobalRoadPosition{"fakeRoad", DontCare<int>(),95.0, DontCare<double>(), DontCare<double>()}}},{},{}};
+        ON_CALL(mockAgent1, GetRoads(_)).WillByDefault(Return(std::vector<std::string>{"fakeRoad"}));
+        ON_CALL(mockAgent1, GetObjectPosition()).WillByDefault(Return(positionAgent1));
 
         NiceMock<FakeAgent> mockAgent2;
-        ON_CALL(mockAgent2, GetRoadId(_)).WillByDefault(Return("fakeRoad"));
-        ON_CALL(mockAgent2, GetRoadPosition()).WillByDefault(Return(fakeRoadPosition2));
+        ObjectPosition positionAgent2{{{"fakeRoad", GlobalRoadPosition{"fakeRoad", DontCare<int>(),115.0, DontCare<double>(), DontCare<double>()}}},{},{}};
+        ON_CALL(mockAgent2, GetRoads(_)).WillByDefault(Return(std::vector<std::string>{"fakeRoad"}));
+        ON_CALL(mockAgent2, GetObjectPosition()).WillByDefault(Return(positionAgent2));
 
         NiceMock<FakeWorld> mockWorld;
         ON_CALL(mockWorld, GetAgentByName("mockAgent1")).WillByDefault(Return(&mockAgent1));
@@ -316,15 +316,16 @@ TEST_P(RelativeLaneConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
                                                              GetParam().tolerance);
     testConditionalEventDetectorInformation.conditions.emplace_back(testCondition);
 
+    const std::string roadId = "SomeRoad";
     NiceMock<FakeAgent> triggeringAgent;
-    RoadPosition triggeringAgentPosition{GetParam().triggeringAgentSCoordinate, DontCare<double>(), DontCare<double>()};
-    ON_CALL(triggeringAgent, GetRoadPosition()).WillByDefault(Return(triggeringAgentPosition));
-    ON_CALL(triggeringAgent, GetMainLaneId(MeasurementPoint::Reference)).WillByDefault(Return(GetParam().triggeringAgentLane));
+    ObjectPosition triggeringAgentPosition{{{"SomeRoad", GlobalRoadPosition{"SomeRoad", GetParam().triggeringAgentLane, GetParam().triggeringAgentSCoordinate, DontCare<double>(), DontCare<double>()}}},{},{}};
+    ON_CALL(triggeringAgent, GetObjectPosition()).WillByDefault(Return(triggeringAgentPosition));
+    ON_CALL(triggeringAgent, GetRoads(_)).WillByDefault(Return(std::vector<std::string>{roadId}));
 
     NiceMock<FakeAgent> referenceAgentOnSameRoad;
-    RoadPosition referenceAgentPosition{GetParam().referenceAgentSCoordinate, DontCare<double>(), DontCare<double>()};
-    ON_CALL(referenceAgentOnSameRoad, GetRoadPosition()).WillByDefault(Return(referenceAgentPosition));
-    ON_CALL(referenceAgentOnSameRoad, GetMainLaneId(MeasurementPoint::Reference)).WillByDefault(Return(GetParam().referenceAgentLane));
+    ObjectPosition referenceAgentPosition{{{"SomeRoad", GlobalRoadPosition{"SomeRoad", GetParam().referenceAgentLane, GetParam().referenceAgentSCoordinate, DontCare<double>(), DontCare<double>()}}},{},{}};
+    ON_CALL(referenceAgentOnSameRoad, GetObjectPosition()).WillByDefault(Return(referenceAgentPosition));
+    ON_CALL(referenceAgentOnSameRoad, GetRoads(_)).WillByDefault(Return(std::vector<std::string>{roadId}));
 
     NiceMock<FakeWorld> mockWorld;
     ON_CALL(mockWorld, GetAgentByName("notExisting")).WillByDefault(Return(nullptr));
@@ -502,11 +503,16 @@ TEST_P(TimeHeadwayConditionTest, TriggerEventInsertionFreeSpaceTrue_AddsEventIfN
     testConditionalEventDetectorInformation.conditions.emplace_back(testCondition);
 
     NiceMock<FakeAgent> triggeringAgent;
-    ON_CALL(triggeringAgent, GetVelocity(VelocityScope::Longitudinal)).WillByDefault(Return(10.0));
-
+    NiceMock<FakeEgoAgent> triggeringEgoAgent;
     NiceMock<FakeAgent> referenceAgent;
-    ON_CALL(triggeringAgent, GetDistanceToObject(&referenceAgent)).WillByDefault(Return(20.0));
 
+    LongitudinalDistance fakeNetDistance;
+    fakeNetDistance.netDistance = 20.0;
+    fakeNetDistance.referencePoint = std::numeric_limits<double>::infinity();
+
+    ON_CALL(triggeringAgent, GetEgoAgent()).WillByDefault(ReturnRef(triggeringEgoAgent));
+    ON_CALL(triggeringAgent, GetVelocity(VelocityScope::Longitudinal)).WillByDefault(Return(10.0));
+    ON_CALL(triggeringEgoAgent, GetDistanceToObject(&referenceAgent)).WillByDefault(Return(fakeNetDistance));
 
     NiceMock<FakeWorld> mockWorld;
     ON_CALL(mockWorld, GetAgentByName("notExisting")).WillByDefault(Return(nullptr));
@@ -554,14 +560,16 @@ TEST_P(TimeHeadwayConditionTest, TriggerEventInsertionFreeSpaceFalse_AddsEventIf
     testConditionalEventDetectorInformation.conditions.emplace_back(testCondition);
 
     NiceMock<FakeAgent> triggeringAgent;
-    ON_CALL(triggeringAgent, GetVelocity(VelocityScope::Longitudinal)).WillByDefault(Return(10.0));
-    ON_CALL(triggeringAgent, GetRoadId(MeasurementPoint::Reference)).WillByDefault(Return("Road"));
-    ON_CALL(triggeringAgent, GetDistanceToStartOfRoad(MeasurementPoint::Reference, "Road")).WillByDefault(Return(15.0));
-
+    NiceMock<FakeEgoAgent> triggeringEgoAgent;
     NiceMock<FakeAgent> referenceAgent;
-    ON_CALL(referenceAgent, GetRoadId(MeasurementPoint::Reference)).WillByDefault(Return("Road"));
-    ON_CALL(referenceAgent, GetDistanceToStartOfRoad(MeasurementPoint::Reference, "Road")).WillByDefault(Return(35.0));
 
+    LongitudinalDistance fakeNetDistance;
+    fakeNetDistance.netDistance = std::numeric_limits<double>::infinity();
+    fakeNetDistance.referencePoint = 20.0;
+
+    ON_CALL(triggeringAgent, GetEgoAgent()).WillByDefault(ReturnRef(triggeringEgoAgent));
+    ON_CALL(triggeringAgent, GetVelocity(VelocityScope::Longitudinal)).WillByDefault(Return(10.0));
+    ON_CALL(triggeringEgoAgent, GetDistanceToObject(&referenceAgent)).WillByDefault(Return(fakeNetDistance));
 
     NiceMock<FakeWorld> mockWorld;
     ON_CALL(mockWorld, GetAgentByName("notExisting")).WillByDefault(Return(nullptr));

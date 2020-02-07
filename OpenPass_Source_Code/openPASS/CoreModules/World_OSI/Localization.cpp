@@ -204,26 +204,12 @@ void CreateLaneAssignments(OWL::Interfaces::WorldObject& object, const std::map<
     }
 }
 
-void IncorporateRoadDirection (const Route& route, GlobalRoadPosition& point)
-{
-    const auto& routeElement = std::find_if(route.roads.cbegin(), route.roads.cend(),
-                                        [&](const auto& routeElement){return routeElement.roadId == point.roadId;});
-    if (routeElement->inRoadDirection)
-    {
-        return;
-    }
-    point.roadPosition.t = -point.roadPosition.t;
-    point.roadPosition.hdg = CommonHelper::SetAngleToValidRange(point.roadPosition.hdg + M_PI);
-}
-
-Result Localizer::BuildResult(const LocatedObject& locatedObject, const Route& route) const
+Result Localizer::BuildResult(const LocatedObject& locatedObject) const
 {
     std::set<int> touchedLaneIds;
     std::map<std::string, RoadInterval> touchedRoads;
 
-    double remainder_left {0.0};
-    double remainder_right {0.0};
-    bool isOnRoute{true};
+    bool isOnRoute = !locatedObject.referencePoint.empty() && !locatedObject.mainLaneLocator.empty();
 
     for (const auto& [lane, laneIntersection] : locatedObject.laneIntersections)
     {
@@ -231,65 +217,15 @@ Result Localizer::BuildResult(const LocatedObject& locatedObject, const Route& r
         touchedRoads[roadId].lanes.push_back(worldData.GetLaneIdMapping().at(lane->GetId()));
         touchedRoads[roadId].sStart = std::min(touchedRoads[roadId].sStart, laneIntersection.s_min);
         touchedRoads[roadId].sEnd = std::max(touchedRoads[roadId].sEnd, laneIntersection.s_max);
-        if (std::find_if(route.roads.cbegin(), route.roads.cend(),
-                         [&](const auto& routeElement){return routeElement.roadId == roadId;}) != route.roads.cend())
-        {
-            touchedLaneIds.insert(worldData.GetLaneIdMapping().at(lane->GetId()));
-            remainder_left = std::max(remainder_left, laneIntersection.min_delta_left);
-            remainder_right = std::max(remainder_right, laneIntersection.min_delta_right);
-        }
+        double remainder_left = std::max(touchedRoads[roadId].remainder.left, laneIntersection.min_delta_left);
+        double remainder_right = std::max(touchedRoads[roadId].remainder.right, laneIntersection.min_delta_right);
+        touchedRoads[roadId].remainder = {remainder_left, remainder_right};
     }
 
-    GlobalRoadPosition mainLaneLocator;
-    const auto& mainRoad = std::find_if(route.roads.cbegin(), route.roads.cend(),
-                                        [&](const auto& routeElement){return locatedObject.mainLaneLocator.count(routeElement.roadId) > 0;});
-    if (mainRoad == route.roads.cend())
-    {
-        isOnRoute = false;
-        //If the mainLaneLocator is not on the route, but on some other road, we take an arbitrary road instead
-        if (locatedObject.mainLaneLocator.size() > 0)
-        {
-            mainLaneLocator = locatedObject.mainLaneLocator.cbegin()->second;
-        }
-    }
-    else
-    {
-        mainLaneLocator = locatedObject.mainLaneLocator.at(mainRoad->roadId);
-        IncorporateRoadDirection(route, mainLaneLocator);
-    }
-
-    GlobalRoadPosition referencePoint;
-    const auto& referenceRoad = std::find_if(route.roads.cbegin(), route.roads.cend(),
-                                        [&](const auto& routeElement){return locatedObject.referencePoint.count(routeElement.roadId) > 0;});
-
-    if (referenceRoad == route.roads.cend())
-    {
-        //If the referencePoint is not on the route, but on some other road, we take an arbitrary road instead
-        if (locatedObject.referencePoint.empty())
-        {
-            isOnRoute = false;
-        }
-        else
-        {
-            referencePoint = locatedObject.referencePoint.cbegin()->second;
-        }
-    }
-    else
-    {
-        referencePoint = locatedObject.referencePoint.at(referenceRoad->roadId);
-        IncorporateRoadDirection(route, referencePoint);
-    }
-
-    Remainder remainder{remainder_left, remainder_right};
-
-    ObjectPosition position{referencePoint, mainLaneLocator, touchedRoads};
+    ObjectPosition position{locatedObject.referencePoint, locatedObject.mainLaneLocator, touchedRoads};
 
     Result result(position,
-                  remainder,
-                  isOnRoute,
-                  touchedLaneIds.size() > 1,
-                  touchedLaneIds,
-                  touchedLaneIds);
+                  isOnRoute);
 
     return result;
 }
@@ -314,7 +250,7 @@ void Localizer::Init()
     }
 }
 
-Result Localizer::Locate(const polygon_t& boundingBox, OWL::Interfaces::WorldObject& object, const Route& route) const
+Result Localizer::Locate(const polygon_t& boundingBox, OWL::Interfaces::WorldObject& object) const
 {
     const auto& referencePointPosition = object.GetReferencePointPosition();
     const auto& orientation = object.GetAbsOrientation();
@@ -345,7 +281,7 @@ Result Localizer::Locate(const polygon_t& boundingBox, OWL::Interfaces::WorldObj
                                                          mainLaneLocator,
                                                          orientation.yaw);
 
-    auto result = BuildResult(locatedObject, route);
+    auto result = BuildResult(locatedObject);
     CreateLaneAssignments(object, locatedObject.laneIntersections);
 
     return result;

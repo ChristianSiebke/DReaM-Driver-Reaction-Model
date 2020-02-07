@@ -36,24 +36,6 @@ using ::testing::Lt;
 using ::testing::AllOf;
 using ::testing::DoubleEq;
 
-TEST(GetDistanceToEndOfLane, AgentLookingForward_CallsForwardSearch)
-{
-    //TODO: Add agents direction
-
-    AgentManager agentManager;
-    auto ego = agentManager.Create(0.0, 5.0);
-
-    ObjectPosition agentPosition{{},{GlobalRoadPosition{"Road1", -1, 5, 0, 0}},{}};
-
-    ON_CALL(ego.movingObject, GetLocatedPosition()).WillByDefault(Return(agentPosition));
-
-    EXPECT_CALL(agentManager.fakeWorld, GetDistanceToEndOfLane(_,_, _, 5.0, 1000)).WillOnce(Return(100));
-
-    ASSERT_THAT(ego.agent.GetDistanceToEndOfLane(1000, -1), Eq(100));
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 TEST(MovingObject_Tests, SetAndGetReferencePointPosition_ReturnsCorrectPosition)
 {
     OWL::Primitive::AbsPosition position;

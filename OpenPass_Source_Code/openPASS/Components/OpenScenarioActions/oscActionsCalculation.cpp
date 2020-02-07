@@ -18,19 +18,19 @@ OscActionsCalculation::OscActionsCalculation(const WorldInterface* world) :
 Trajectory OscActionsCalculation::CalculateSinusiodalLaneChange(double deltaS, double deltaT, double deltaTime, double timeStep, GlobalRoadPosition startPosition, double startTime) const
 {
     Trajectory trajectory;
-    double startT = startPosition.roadPosition.t + (startPosition.laneId > 0 ? 0.5 : -0.5) * world->GetLaneWidth(Route{startPosition.roadId}, startPosition.roadId, startPosition.laneId, startPosition.roadPosition.s);
+    double startT = startPosition.roadPosition.t + (startPosition.laneId > 0 ? 0.5 : -0.5) * world->GetLaneWidth(startPosition.roadId, startPosition.laneId, startPosition.roadPosition.s);
     if (startPosition.laneId > 0)
     {
         for (int laneId = 1; laneId < startPosition.laneId; ++laneId)
         {
-            startT += world->GetLaneWidth(Route{startPosition.roadId}, startPosition.roadId, laneId, startPosition.roadPosition.s);
+            startT += world->GetLaneWidth(startPosition.roadId, laneId, startPosition.roadPosition.s);
         }
     }
     else
     {
         for (int laneId = -1; laneId > startPosition.laneId; --laneId)
         {
-            startT -= world->GetLaneWidth(Route{startPosition.roadId}, startPosition.roadId, laneId, startPosition.roadPosition.s);
+            startT -= world->GetLaneWidth(startPosition.roadId, laneId, startPosition.roadPosition.s);
         }
     }
     for (double timeSinceStart = 0; timeSinceStart <= deltaTime + 0.5 * timeStep; timeSinceStart += timeStep)

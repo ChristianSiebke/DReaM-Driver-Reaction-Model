@@ -53,15 +53,7 @@ public:
 
     virtual const polygon_t& GetBoundingBox2D() const = 0;
 
-    virtual double GetDistanceToStartOfRoad() const
-    {
-        return GetDistanceToStartOfRoad(MeasurementPoint::Front);
-    }
-
-    /// \brief  Get distance (s coordinate) w.r.t. the specified measurement point on the route
-    /// \param mp   point where s coordinate is measured
-    /// \return distance
-    virtual double GetDistanceToStartOfRoad(MeasurementPoint mp) const = 0;
+    virtual ObjectPosition GetObjectPosition() const = 0;
 
     /// \brief  Get distance (s coordinate) w.r.t. the specified measurement point on the specified road
     /// \param mp       point where s coordinate is measured
@@ -84,7 +76,7 @@ public:
 
     /// \brief Distance w.r.t. to the lane boundary for the outmost boundary point
     /// \return distance in m
-    virtual double GetLaneRemainder(Side) const = 0;
+    virtual double GetLaneRemainder(const std::string& roadId, Side) const = 0;
 
     virtual bool Locate() = 0;
     virtual void Unlocate() = 0;

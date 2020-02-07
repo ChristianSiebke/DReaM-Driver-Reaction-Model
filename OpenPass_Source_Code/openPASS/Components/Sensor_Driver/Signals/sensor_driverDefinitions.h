@@ -78,8 +78,6 @@ struct OwnVehicleInformation
     double heading {-999.0};
     //! Angle of the steering wheel
     double steeringWheelAngle {-999.0};
-    //! Wether the agent touches multiple neighbouring lanes
-    bool isCrossingLanes {false};
     //! Distance between the left front point and the left boundary of the lane it is in.
     double distanceToLaneBoundaryLeft {-999.0};
     //! Distance between the right front point and the right boundary of the lane it is in.

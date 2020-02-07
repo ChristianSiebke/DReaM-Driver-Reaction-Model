@@ -19,6 +19,7 @@
 #include "Common/customLaneChangeSignal.h"
 #include "Common/gazeFollowerSignal.h"
 #include "Interfaces/eventNetworkInterface.h"
+#include "Interfaces/egoAgentInterface.h"
 #include "Common/eventTypes.h"
 
 OpenScenarioActionsImplementation::OpenScenarioActionsImplementation(std::string componentName,
@@ -123,9 +124,13 @@ void OpenScenarioActionsImplementation::Trigger([[maybe_unused]]int time)
                 deltaTime = laneChange.dynamicsTarget;
             }
 
-            const auto& roadId = GetAgent()->GetRoadId(MeasurementPoint::Reference);
-            const auto& currentLaneId = GetAgent()->GetMainLaneId(MeasurementPoint::Reference);
-            const auto& currentS = GetAgent()->GetDistanceToStartOfRoad(MeasurementPoint::Reference);
+            const auto& roadId = GetAgent()->GetEgoAgent().GetRoadId();
+            if (GetAgent()->GetObjectPosition().referencePoint.count(roadId) == 0)
+            {
+                throw std::runtime_error("Could not calculate LaneChange trajectory. Reference point is not on route.");
+            }
+            const auto& currentLaneId = GetAgent()->GetObjectPosition().referencePoint.at(roadId).laneId;
+            const auto& currentS = GetAgent()->GetObjectPosition().referencePoint.at(roadId).roadPosition.s;
             int targetLaneId;
             if (laneChange.type == LaneChangeParameter::Type::Absolute)
             {
@@ -134,25 +139,29 @@ void OpenScenarioActionsImplementation::Trigger([[maybe_unused]]int time)
             else
             {
                 const auto object = GetWorld()->GetAgentByName(laneChange.object);
-                targetLaneId = object->GetMainLaneId(MeasurementPoint::Reference) + laneChange.value;
+                if (object->GetObjectPosition().referencePoint.count(roadId) == 0)
+                {
+                    throw std::runtime_error("Could not calculate LaneChange trajectory. Reference agent is not on same road as acting agent.");
+                }
+                targetLaneId = object->GetObjectPosition().referencePoint.at(roadId).laneId + laneChange.value;
             }
             double deltaT;
             if (targetLaneId > currentLaneId) //Change to left
             {
-                deltaT = 0.5 * GetWorld()->GetLaneWidth(Route{roadId}, roadId, currentLaneId, currentS)
-                         + 0.5 * GetWorld()->GetLaneWidth(Route{roadId}, roadId, targetLaneId, currentS);
+                deltaT = 0.5 * GetWorld()->GetLaneWidth(roadId, currentLaneId, currentS)
+                         + 0.5 * GetWorld()->GetLaneWidth(roadId, targetLaneId, currentS);
                 for (int laneId = currentLaneId + 1; laneId < targetLaneId; ++laneId)
                 {
-                    deltaT += GetWorld()->GetLaneWidth(Route{roadId}, roadId, laneId, currentS);
+                    deltaT += GetWorld()->GetLaneWidth(roadId, laneId, currentS);
                 }
             }
             else if(targetLaneId < currentLaneId)//Change to right
             {
-                deltaT = - 0.5 * GetWorld()->GetLaneWidth(Route{roadId}, roadId, currentLaneId, currentS)
-                         - 0.5 * GetWorld()->GetLaneWidth(Route{roadId}, roadId, targetLaneId, currentS);
+                deltaT = - 0.5 * GetWorld()->GetLaneWidth(roadId, currentLaneId, currentS)
+                         - 0.5 * GetWorld()->GetLaneWidth(roadId, targetLaneId, currentS);
                 for (int laneId = currentLaneId - 1; laneId > targetLaneId; --laneId)
                 {
-                    deltaT -= GetWorld()->GetLaneWidth(Route{roadId}, roadId, laneId, currentS);
+                    deltaT -= GetWorld()->GetLaneWidth(roadId, laneId, currentS);
                 }
             }
             else
@@ -163,8 +172,8 @@ void OpenScenarioActionsImplementation::Trigger([[maybe_unused]]int time)
             GlobalRoadPosition startPosition{roadId,
                                              currentLaneId,
                                              currentS,
-                                             GetAgent()->GetPositionLateral(),
-                                             GetAgent()->GetRelativeYaw()}; //TODO: For new routing branch use new method GetObjectPosition
+                                             GetAgent()->GetObjectPosition().referencePoint.at(roadId).roadPosition.t,
+                                             GetAgent()->GetObjectPosition().referencePoint.at(roadId).roadPosition.hdg};
             auto trajectory = calculation.CalculateSinusiodalLaneChange(deltaS, deltaT, deltaTime, GetCycleTime() / 1000.0, startPosition, time / 1000.0);
             this->trajectoryEvent = std::make_shared<TrajectoryEvent>(time, "OscAction", castedLaneChangeEvent->GetName(), GetAgent()->GetId(), trajectory);
         }

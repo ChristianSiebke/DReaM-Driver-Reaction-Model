@@ -90,10 +90,8 @@ void SpawnPointRuntimeCommon::AdjustVelocityForCrash(SpawnDetails& spawnDetails,
     const auto agentFrontLength = spawnDetails.agentBlueprint.GetVehicleModelParameters().distanceReferencePointToLeadingEdge;
     const auto agentRearLength = spawnDetails.agentBlueprint.GetVehicleModelParameters().length - spawnDetails.agentBlueprint.GetVehicleModelParameters().distanceReferencePointToLeadingEdge;
     const auto intendedVelocity = spawnDetails.agentBlueprint.GetSpawnParameter().velocity;
-    const Route routeForRoadId{sceneryInformation.roadId};
+    spawnDetails.agentBlueprint.GetSpawnParameter().velocity = worldAnalyzer.CalculateSpawnVelocityToPreventCrashing(sceneryInformation.roadId,
 
-    spawnDetails.agentBlueprint.GetSpawnParameter().velocity = worldAnalyzer.CalculateSpawnVelocityToPreventCrashing(routeForRoadId,
-                                                                                                                     sceneryInformation.roadId,
                                                                                                                      sceneryInformation.laneId,
                                                                                                                      sceneryInformation.sPosition,
                                                                                                                      agentFrontLength,

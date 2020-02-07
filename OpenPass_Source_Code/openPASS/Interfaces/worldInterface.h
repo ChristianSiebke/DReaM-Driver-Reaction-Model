@@ -276,8 +276,8 @@ public:
     //! Returns all agents in specified range (also agents partially in search interval).
     //! Returns empty list otherwise.
     //!
-    //! @param[in] route            Route along which to search
-    //! @param[in] roadId           OpenDriveId of the road to search in
+    //! @param[in] roadGraph        tree in road network to search in
+    //! @param[in] startNode        root of tree (identifies start road)
     //! @param[in] laneId           OpenDriveId of lane to search in
     //! @param[in] startDistance    start of search (s coordinate)
     //! @param[in] backwardRange    search range against route direction from measured from startDistance
@@ -285,23 +285,23 @@ public:
     //!
     //! @return All agents in specified range
     //-----------------------------------------------------------------------------
-    virtual std::vector<const AgentInterface*> GetAgentsInRange(Route route, std::string roadId, int laneId, double startDistance,
-                                                                double backwardRange, double forwardRange) const = 0;
+    virtual RouteQueryResult<std::vector<const AgentInterface*>> GetAgentsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance,
+                                                                       double backwardRange, double forwardRange) const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns all objects in specified range (also objects partially in search interval).
     //! Returns empty list otherwise.
     //!
-    //! @param[in] route            Route along which to search
-    //! @param[in] roadId  OpenDriveId of the road to search in
-    //! @param[in] laneId OpenDriveId of lane to search in
+    //! @param[in] roadGraph        tree in road network to search in
+    //! @param[in] startNode        root of tree (identifies start road)
+    //! @param[in] laneId           OpenDriveId of lane to search in
     //! @param[in] startDistance    start of search (s coordinate)
     //! @param[in] backwardRange    search range against route direction from measured from startDistance
     //! @param[in] forwardRange     search range in route direction from measured from startDistance
     //!
     //! @return All objects in specified range
     //-----------------------------------------------------------------------------
-    virtual std::vector<const WorldObjectInterface*> GetObjectsInRange(Route route, std::string roadId, int laneId, double startDistance,
+    virtual RouteQueryResult<std::vector<const WorldObjectInterface*>> GetObjectsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance,
                                                                        double backwardRange, double forwardRange) const = 0;
 
     //! Returns all agents on the specified connectingRoad of a junction and on the incoming lanes that lead to this connecting road
@@ -346,74 +346,110 @@ public:
     virtual bool IsSValidOnLane(std::string roadId, int laneId, double distance) = 0;
 
     //-----------------------------------------------------------------------------
+    //! Returns interpolated value for the curvature of the lane at the given position.
+    //! Neighbouring joints are used as interpolation support point.
+    //! Returns 0 if there is no lane at the given position.
+    //!
+    //! @param[in] roadId   OpenDriveId of the road to search in
+    //! @param[in] laneId   OpenDriveId of lane to search in
+    //! @param[in] position s coordinate of search start
+    //! @return curvature at position
+    //-----------------------------------------------------------------------------
+    virtual double GetLaneCurvature(std::string roadId, int laneId, double position) const = 0 ;
+
+    //-----------------------------------------------------------------------------
     //! Returns interpolated value for the curvature of the lane at distance from the given position.
     //! Neighbouring joints are used as interpolation support point.
     //! Returns 0 if there is no lane at the given position or the lane stream ends before the distance
     //!
-    //! @param[in] route    Route along which to search
+    //! @param[in] roadGraph        tree in road network to search in
+    //! @param[in] startNode        root of tree (identifies start road)
+    //! @param[in] laneId           OpenDriveId of lane to search in
+    //! @param[in] position s       coordinate of search start
+    //! @param[in] distance s       coordinate difference from position to the point of interst
+    //! @return curvature at position
+    //-----------------------------------------------------------------------------
+    virtual RouteQueryResult<std::optional<double> > GetLaneCurvature(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double position, double distance) const = 0;
+
+    //-----------------------------------------------------------------------------
+    //! Returns interpolated value for the width of the lane the given position.
+    //! Neighbouring joints are used as interpolation support point.
+    //! Returns 0 if there is no lane at the given position.
+    //!
     //! @param[in] roadId   OpenDriveId of the road to search in
     //! @param[in] laneId   OpenDriveId of lane to search in
     //! @param[in] position s coordinate of search start
-    //! @param[in] distance s coordinate difference from position to the point of interst
-    //! @return curvature at distance from start position
+    //! @return width at position
     //-----------------------------------------------------------------------------
-    virtual double GetLaneCurvature(Route route, std::string roadId, int laneId, double position, double distance = 0.0) const = 0 ;
+    virtual double GetLaneWidth(std::string roadId, int laneId, double position) const = 0 ;
 
     //-----------------------------------------------------------------------------
     //! Returns interpolated value for the width of the lane at distance from the given position.
     //! Neighbouring joints are used as interpolation support point.
     //! Returns 0 if there is no lane at the given position or the lane stream ends before the distance
     //!
-    //! @param[in] route    Route along which to search
-    //! @param[in] roadId   OpenDriveId of the road to search in
-    //! @param[in] laneId   OpenDriveId of lane to search in
-    //! @param[in] position s coordinate of search start
-    //! @param[in] distance s coordinate difference from position to the point of interst
-    //! @return width at distance from start position
+    //! @param[in] roadGraph        tree in road network to search in
+    //! @param[in] startNode        root of tree (identifies start road)
+    //! @param[in] laneId           OpenDriveId of lane to search in
+    //! @param[in] position s       coordinate of search start
+    //! @param[in] distance s       coordinate difference from position to the point of interst
+    //! @return width at position
     //-----------------------------------------------------------------------------
-    virtual double GetLaneWidth(Route route, std::string roadId, int laneId, double position, double distance = 0.0) const = 0 ;
+    virtual RouteQueryResult<std::optional<double> > GetLaneWidth(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double position, double distance) const = 0;
 
     //-----------------------------------------------------------------------------
-    //! Returns interpolated value for the direction (heading) of the lane at distance from the given position.
-    //! Neighbouring joints are used as interpolation support point.
-    //! Returns 0 if there is no lane at the given position or the lane stream ends before the distance
+    //! Returns value for the direction (i.e. heading) of the lane at the given position.
+    //! The heading is constant between two joints
+    //! Returns 0 if there is no lane at the given position.
     //!
-    //! @param[in] route    Route along which to search
     //! @param[in] roadId   OpenDriveId of the road to search in
     //! @param[in] laneId   OpenDriveId of lane to search in
     //! @param[in] position s coordinate of search start
-    //! @param[in] distance s coordinate difference from position to the point of interst
-    //! @return direction at distance from start position
+    //! @return direction at position
     //-----------------------------------------------------------------------------
-    virtual double GetLaneDirection(Route route, std::string roadId, int laneId, double position, double distance = 0.0) const = 0 ;
+    virtual double GetLaneDirection(std::string roadId, int laneId, double position) const = 0 ;
+
+    //-----------------------------------------------------------------------------
+    //! Returns value for the curvature (i.e. heading) of the lane at distance from the given position.
+    //! The heading is constant between two joints
+    //! Returns 0 if there is no lane at the given position or the lane stream ends before the distance
+    //!
+    //! @param[in] roadGraph        tree in road network to search in
+    //! @param[in] startNode        root of tree (identifies start road)
+    //! @param[in] laneId           OpenDriveId of lane to search in
+    //! @param[in] position s       coordinate of search start
+    //! @param[in] distance s       coordinate difference from position to the point of interst
+    //! @return direction at position
+    //-----------------------------------------------------------------------------
+    virtual RouteQueryResult<std::optional<double> > GetLaneDirection(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double position, double distance) const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns remaining distance to end of lane stream (along given route) or until next lane which has non of the following types:
     //! Driving, Exit, OnRamp, OffRamp or Stop
     //!
-    //! @param[in] route    Route along which to search
-    //! @param[in] roadId  OpenDriveId of the road to search in
-    //! @param[in] laneNumber OpenDriveId of lane to search in
-    //! @param[in] distance  s coordinate
-    //! @param[in] maxSearchLength maximum search length
+    //! @param[in] roadGraph        tree in road network to search in
+    //! @param[in] startNode        root of tree (identifies start road)
+    //! @param[in] laneNumber       OpenDriveId of lane to search in
+    //! @param[in] distance         s coordinate
+    //! @param[in] maxSearchLength  maximum search length
     //! @return remaining distance
     //-----------------------------------------------------------------------------
-    virtual double GetDistanceToEndOfLane(Route route, std::string roadId, int laneNumber, double initialSearchDistance,
-                                          double maxSearchLength) = 0;
+    virtual RouteQueryResult<double> GetDistanceToEndOfLane(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double initialSearchDistance,
+                                                                             double maximumSearchLength) const = 0;
 
     //-----------------------------------------------------------------------------
-    //! Returns remaining distance to end of lane stream (along given route) or until next lane which has non of the specified types.
+    //! Returns remaining distance to end of lane stream (along given route) or until next lane which has non of the specified types:
     //!
-    //! @param[in] route    Route along which to search
-    //! @param[in] roadId  OpenDriveId of the road to search in
-    //! @param[in] laneNumber OpenDriveId of lane to search in
-    //! @param[in] distance  s coordinate
-    //! @param[in] maxSearchLength maximum search length
-    //! @param[in] laneTypes filter to consider only specified lane types
+    //! @param[in] roadGraph        tree in road network to search in
+    //! @param[in] startNode        root of tree (identifies start road)
+    //! @param[in] laneNumber       OpenDriveId of lane to search in
+    //! @param[in] distance         s coordinate
+    //! @param[in] maxSearchLength  maximum search length
+    //! @param[in] laneTypes        filter for lane types
     //! @return remaining distance
     //-----------------------------------------------------------------------------
-    virtual double GetDistanceToEndOfLane(Route route, std::string roadId, int laneNumber, double initialSearchDistance,
-                                          double maxSearchLength, const LaneTypes& laneTypes) = 0;
+    virtual RouteQueryResult<double> GetDistanceToEndOfLane(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double initialSearchDistance,
+                                                                             double maximumSearchLength, const LaneTypes& laneTypes) const = 0;
 
     //-----------------------------------------------------------------------------
     //! \brief GetDistanceBetweenObjects gets the distance between two
@@ -427,9 +463,10 @@ public:
     //! \param targetObjectPos the ObjectPosition of the reference object
     //! \return the distance between the ObjectPositions on the Route
     //-----------------------------------------------------------------------------
-    virtual double GetDistanceBetweenObjects(const Route& route,
-                                             const ObjectPosition& objectPos,
-                                             const ObjectPosition& targetObjectPos) const = 0;
+    virtual RouteQueryResult<std::optional<LongitudinalDistance>> GetDistanceBetweenObjects(const RoadGraph& roadGraph,
+                                                                                            RoadGraphVertex startNode,
+                                                                                            const ObjectPosition& objectPos,
+                                                                                            const ObjectPosition& targetObjectPos) const = 0;
     //-----------------------------------------------------------------------------
     //! Retrieve whether a new agent intersects with an existing agent
     //!
@@ -447,8 +484,8 @@ public:
     //! \param otherPosition    position of the other object
     //! \param objectCorners    corners of the other object
     //! \return obstruction with the other object
-    virtual Obstruction GetObstruction(const Route& route, const GlobalRoadPosition& ownPosition, const ObjectPosition& otherPosition,
-                                                 const std::vector<Common::Vector2d>& objectCorners) const = 0;
+    virtual RouteQueryResult<Obstruction> GetObstruction(const RoadGraph& roadGraph, RoadGraphVertex startNode, const GlobalRoadPosition& ownPosition,
+                                                         const ObjectPosition& otherPosition, const std::vector<Common::Vector2d>& objectCorners, const Common::Vector2d& mainLaneLocator) const = 0;
 
     //! Returns all traffic signs valid for a lane inside the range
     //!
@@ -458,8 +495,8 @@ public:
     //! \param startDistance    s coordinate
     //! \param searchRange      range of search (can also be negative)
     //! \return traffic signs in range
-    virtual std::vector<CommonTrafficSign::Entity> GetTrafficSignsInRange(const Route& route, std::string roadId, int laneId,
-            double startDistance, double searchRange) const = 0;
+    virtual RouteQueryResult<std::vector<CommonTrafficSign::Entity>> GetTrafficSignsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId,
+                                                                                            double startDistance, double searchRange) const = 0;
 
     //! Returns all road markings valid for a lane inside the range
     //!
@@ -469,8 +506,8 @@ public:
     //! \param startDistance    s coordinate
     //! \param searchRange      range of search
     //! \return road markings in range (can also be negative)
-    virtual std::vector<CommonTrafficSign::Entity> GetRoadMarkingsInRange(const Route& route, std::string roadId, int laneId,
-            double startDistance, double searchRange) const = 0;
+    virtual RouteQueryResult<std::vector<CommonTrafficSign::Entity>> GetRoadMarkingsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId,
+                                                                                            double startDistance, double searchRange) const = 0;
 
     //! Retrieves all lane markings on the given position on the given side of the lane inside the range
     //!
@@ -479,7 +516,7 @@ public:
     //! \param startDistance    s coordinate
     //! \param range            search range
     //! \param side             side of the lane
-    virtual std::vector<LaneMarking::Entity> GetLaneMarkings(const Route& route, std::string roadId, int laneId, double startDistance, double range, Side side) const = 0;
+    virtual RouteQueryResult<std::vector<LaneMarking::Entity>> GetLaneMarkings(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance, double range, Side side) const = 0;
 
     //! Returns the relative distances (start and end) and the connecting road id of all junctions on the route in range
     //!
@@ -488,7 +525,7 @@ public:
     //! \param startDistance    start s coordinate on the road
     //! \param range            range of search
     //! \return information about all junctions in range
-    virtual RelativeWorldView::Junctions GetRelativeJunctions (const Route& route, std::string roadId, double startDistance, double range) const = 0;
+    virtual RouteQueryResult<RelativeWorldView::Junctions> GetRelativeJunctions (const RoadGraph& roadGraph, RoadGraphVertex startNode, double startDistance, double range) const = 0;
 
     //! Returns information about all lanes on the route in range. These info are the relative distances (start and end),
     //! the laneId relative to the ego lane, the successors and predecessors if existing and the information wether the intended
@@ -501,7 +538,7 @@ public:
     //! \param distance         start s coordinate on the road
     //! \param range            range of search
     //! \return information about all lanes in range
-    virtual RelativeWorldView::Lanes GetRelativeLanes(const Route& route, std::string roadId, int laneId, double distance, double range) const = 0;
+    virtual RouteQueryResult<RelativeWorldView::Lanes> GetRelativeLanes(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, double range) const = 0;
 
     //! Returns all possible connections on the junction, that an agent has when coming from the specified road
     //!
@@ -537,11 +574,9 @@ public:
     //! \return type and OpenDrive Id of next upstream element
     virtual RoadNetworkElement GetRoadPredecessor(std::string roadId) const = 0;
 
-    //! Returns a randomized route starting at the given position
-    //!
-    //! \param start    start Position
-    //! \return randomized route
-    virtual Route GetRoute (GlobalRoadPosition start) const = 0;
+    virtual std::pair<RoadGraph, RoadGraphVertex> GetRoadGraph (const RouteElement& start, int maxDepth) const = 0;
+
+    virtual std::map<RoadGraphEdge, double> GetEdgeWeights (const RoadGraph& roadGraph) const = 0;
 
     //-----------------------------------------------------------------------------
     //! Retrieves the friction
@@ -577,31 +612,4 @@ public:
     //! @return
     //-----------------------------------------------------------------------------
     virtual AgentInterface* GetAgentByName(const std::string& scenarioName) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! \brief GetNextConnectingRoadIdOnRoute gets the next connecting Road (Road
-    //!        within a Junction) OdId on Route shared with ObjectPosition
-    //!        Returns empty string if no such Road found
-    //!
-    //! \param route the Route on which to find the next connecting Road OdId
-    //! \param objectPos the ObjectPosition from which to begin the search
-    //!
-    //! \return the OdId of the first connecting Road on route after objectPos
-    //-----------------------------------------------------------------------------
-    virtual std::string GetNextJunctionIdOnRoute(const Route& route, const ObjectPosition& objectPos) const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! \brief GetDistanceToJunction gets the distance from objectPos to the
-    //!        Junction with junctionId on Route route
-    //!
-    //! \param route the Route on which to calculate the distance from objectPos to
-    //!              Junction with junctionId
-    //! \param objectPos the ObjectPosition from which to get the distance to the
-    //!                  junction
-    //! \param connectingRoadId the Road OdId of the connecting road on the
-    //!                         Junction
-    //!
-    //! \return the distance from objectPos to the junction
-    //-----------------------------------------------------------------------------
-    virtual double GetDistanceToJunction(const Route& route, const ObjectPosition& objectPos, const std::string& junctionId) const = 0;
 };

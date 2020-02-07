@@ -21,12 +21,8 @@ UNIT_UNDER_TEST = $$OPEN_SRC/CoreModules/World_OSI
 SRC_COMMONS = $$OPEN_SRC/Common/vector2d.cpp \
               $$OPEN_SRC/CoreFramework/CoreShare/log.cpp
 INC_COMMONS = $$OPEN_SRC/Common/vector2d.h \
+              $$OPEN_SRC/Common/worldDefinitions.h \
               $$OPEN_SRC/Interfaces/worldinterface.h
-
-INC_COMMONS = \
-            $$OPEN_SRC/Common/Vector2D.h \
-            $$OPEN_SRC/Interfaces/worldinterface.h \
-            $$OPEN_SRC/CoreFramework/CoreShare/log.h
 
 # owl
 SRC_OWL =   \
@@ -53,11 +49,11 @@ INC_OWL =   \
 SRC_WORLD = \
             $$UNIT_UNDER_TEST/AgentAdapter.cpp \
             $$UNIT_UNDER_TEST/AgentNetwork.cpp \
+            $$UNIT_UNDER_TEST/egoAgent.cpp \
             $$UNIT_UNDER_TEST/GeometryConverter.cpp \
             $$UNIT_UNDER_TEST/JointsBuilder.cpp \
             $$UNIT_UNDER_TEST/TrafficObjectAdapter.cpp \
             $$UNIT_UNDER_TEST/SceneryConverter.cpp \
-            $$UNIT_UNDER_TEST/RoutePlanning/StochasticNavigation.cpp \
             $$UNIT_UNDER_TEST/WorldData.cpp \
             $$UNIT_UNDER_TEST/WorldDataQuery.cpp \
             $$UNIT_UNDER_TEST/WorldDataException.cpp \
@@ -67,11 +63,11 @@ SRC_WORLD = \
 INC_WORLD = \
             $$UNIT_UNDER_TEST/AgentAdapter.h \
             $$UNIT_UNDER_TEST/AgentNetwork.h \
+            $$UNIT_UNDER_TEST/egoAgent.h \
             $$UNIT_UNDER_TEST/GeometryConverter.h \
             $$UNIT_UNDER_TEST/JointsBuilder.h \
             $$UNIT_UNDER_TEST/TrafficObjectAdapter.h \
             $$UNIT_UNDER_TEST/SceneryConverter.h \
-            $$UNIT_UNDER_TEST/RoutePlanning/StochasticNavigation.h \
             $$UNIT_UNDER_TEST/WorldData.h \
             $$UNIT_UNDER_TEST/WorldDataQuery.h \
             $$UNIT_UNDER_TEST/WorldDataException.h \
@@ -128,8 +124,8 @@ SOURCES += \
             lane_Tests.cpp \
             sensorView_Tests.cpp \
             datatypes_Tests.cpp \
-            stochasticNavigation_Tests.cpp \
-            worldToRoadCoordinateConverter_Tests.cpp
+            worldToRoadCoordinateConverter_Tests.cpp \
+            egoAgent_Tests.cpp
 
 HEADERS += \
             $$INC_COMMONS \

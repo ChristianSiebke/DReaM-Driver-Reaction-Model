@@ -44,9 +44,9 @@ public:
     ByEntityCondition(const ByEntityCondition&) = default;
     virtual ~ByEntityCondition();
 
-    std::vector<const AgentInterface *> GetTriggeringAgents(WorldInterface* const world) const
+    std::vector<AgentInterface *> GetTriggeringAgents(WorldInterface* const world) const
     {
-        std::vector<const AgentInterface *> triggeringAgents {};
+        std::vector<AgentInterface *> triggeringAgents {};
 
         if(triggeringEntityNames.empty())
         {
@@ -54,7 +54,7 @@ public:
             std::transform(agentMap.cbegin(),
                            agentMap.cend(),
                            std::back_inserter(triggeringAgents),
-                           [] (const auto &agentPair) -> const AgentInterface*
+                           [] (const auto &agentPair) -> AgentInterface*
                            {
                                return agentPair.second;
                            });

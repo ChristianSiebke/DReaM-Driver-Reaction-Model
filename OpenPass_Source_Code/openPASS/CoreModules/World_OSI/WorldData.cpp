@@ -117,6 +117,12 @@ int WorldData::GetAgentId(const OWL::Id owlId) const
     }
 }
 
+void WorldData::SetRoadGraph(const RoadGraph&& roadGraph, const RoadGraphVertexMapping&& vertexMapping)
+{
+    this->roadGraph = roadGraph;
+    this->vertexMapping = vertexMapping;
+}
+
 osi3::GroundTruth WorldData::GetFilteredGroundTruth(const osi3::SensorViewConfiguration& conf, const OWL::Interfaces::MovingObject& reference)
 {
     bool referenceObjectAdded = false;
@@ -830,6 +836,16 @@ const std::unordered_map<Id, Interfaces::RoadMarking*>& WorldData::GetRoadMarkin
 CMovingObject& WorldData::GetMovingObjectById(Id id) const
 {
     return *(movingObjects.at(id));
+}
+
+const RoadGraph& WorldData::GetRoadGraph() const
+{
+    return roadGraph;
+}
+
+const RoadGraphVertexMapping& WorldData::GetRoadGraphVertexMapping() const
+{
+    return vertexMapping;
 }
 
 void WorldData::Reset()

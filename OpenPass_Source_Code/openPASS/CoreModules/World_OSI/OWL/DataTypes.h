@@ -194,10 +194,10 @@ public:
     virtual const Primitive::LaneGeometryJoint::Points GetInterpolatedPointsAtDistance(double distance) const = 0;
 
     //!Returns the ids of all successors of this lane
-    virtual const std::vector<Id> GetNext() const = 0;
+    virtual const std::vector<Id>& GetNext() const = 0;
 
     //!Returns the ids of all predecessors of this lane
-    virtual const std::vector<Id> GetPrevious() const = 0;
+    virtual const std::vector<Id>& GetPrevious() const = 0;
 
     //!Returns the (possibly invalid) lane to the right of this lane
     virtual const Lane& GetLeftLane() const = 0;
@@ -739,11 +739,11 @@ public:
     double GetCurvature(double distance) const override;
     double GetWidth(double distance) const override;
     double GetDirection(double distance) const override;
-    const std::vector<Id> GetNext() const override
+    const std::vector<Id>& GetNext() const override
     {
         return next;
     }
-    const std::vector<Id> GetPrevious() const override
+    const std::vector<Id>& GetPrevious() const override
     {
         return previous;
     }

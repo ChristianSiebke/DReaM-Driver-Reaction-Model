@@ -24,6 +24,7 @@
 #include "WorldData.h"
 #include "WorldDataQuery.h"
 #include "Localization.h"
+#include "Common/worldDefinitions.h"
 
 namespace Internal
 {
@@ -336,4 +337,19 @@ inline bool HasSucceedingElement(std::vector<T, A> const& vector, size_t current
     return vector.size() > currentIndex + 1;
 }
 
+class RoadNetworkBuilder
+{
+public:
+    RoadNetworkBuilder(SceneryInterface& scenery) :
+        scenery(scenery)
+    {}
 
+    //! Converts the road netwerk of OpenDrive into a graph representation
+    //!
+    //! \return graph of the road network and mapping from roads (with direction) to the vertices
+    //!
+    std::pair<RoadGraph, RoadGraphVertexMapping> Build();
+
+private:
+    SceneryInterface& scenery;
+};

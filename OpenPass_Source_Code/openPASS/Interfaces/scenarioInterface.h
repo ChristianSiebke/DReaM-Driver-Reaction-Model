@@ -39,7 +39,7 @@ public:
 
     std::variant<openScenario::LanePosition, openScenario::WorldPosition> position;
 
-    std::optional<Route> route {std::nullopt};
+    std::optional<std::vector<RouteElement>> route {std::nullopt};
 
     double velocity;
     std::optional<openScenario::StochasticAttribute> stochasticVelocity;

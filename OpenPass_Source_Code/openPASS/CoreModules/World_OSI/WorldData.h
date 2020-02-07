@@ -151,6 +151,19 @@ public:
     //!Returns a map of all road markings with their OSI Id
     virtual const std::unordered_map<Id, RoadMarking*>& GetRoadMarkings() const = 0;
 
+
+    //! Sets the road graph as imported from OpenDrive
+    //!
+    //! \param roadGraph        graph representation of road network
+    //! \param vertexMapping    mapping from roads (with direction) to the vertices of the roadGraph
+    virtual void SetRoadGraph (const RoadGraph&& roadGraph, const RoadGraphVertexMapping&& vertexMapping) = 0;
+
+    //! Returns the graph representation of the road network
+    virtual const RoadGraph& GetRoadGraph() const = 0;
+
+    //! Returns the mapping from roads (with direction) to the vertices of the roadGraph
+    virtual const RoadGraphVertexMapping& GetRoadGraphVertexMapping() const = 0;
+
     //!Creates a new lane with parameters specified by the OpenDrive lane
     //!
     //!@param odSection         OpenDrive section to add lane to
@@ -362,6 +375,7 @@ public:
     OWL::Id GetOwlId(int agentId) override;
     int GetAgentId(const OWL::Id owlId) const override;
 
+    void SetRoadGraph (const RoadGraph&& roadGraph, const RoadGraphVertexMapping&& vertexMapping) override;
     void AddLane(RoadLaneSectionInterface &odSection, const RoadLaneInterface& odLane, const std::vector<Id> laneBoundaries) override;
     Id AddLaneBoundary(const RoadLaneRoadMark &odLaneRoadMark, double sectionStart, LaneMarkingSide side) override;
     virtual void SetCenterLaneBoundary(const RoadLaneSectionInterface& odSection, std::vector<Id> laneBoundaryIds) override;
@@ -422,6 +436,8 @@ public:
     CStationaryObject& GetStationaryObjectById(Id id) const;
     CMovingObject& GetMovingObjectById(Id id) const;
 
+    const RoadGraph& GetRoadGraph() const override;
+    const RoadGraphVertexMapping& GetRoadGraphVertexMapping() const override;
     const std::unordered_map<Id, Lane*>& GetLanes() const override;
     const std::unordered_map<Id, LaneBoundary*>& GetLaneBoundaries() const override;
     const std::map<Id, Section*>& GetSections() const override;
@@ -548,6 +564,9 @@ private:
     std::unordered_map<const RoadInterface*, osi3::world::Road*>                   osiRoads;
     std::unordered_map<const RoadLaneSectionInterface*, osi3::world::RoadSection*> osiSections;
     std::unordered_map<const RoadLaneInterface*, osi3::world::RoadLane*>           osiLanes;
+
+    RoadGraph roadGraph;
+    RoadGraphVertexMapping vertexMapping;
 
     osi3::world::WorldInterface osiGroundTruth;
 

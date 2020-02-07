@@ -18,6 +18,7 @@
 #include <qglobal.h>
 
 #include "Interfaces/worldInterface.h"
+#include "Interfaces/egoAgentInterface.h"
 
 #include "sensor_recordStateImplementation.h"
 
@@ -78,7 +79,6 @@ void SensorRecordStateImplementation::UpdateOutput(int ,std::shared_ptr<SignalIn
 void SensorRecordStateImplementation::Trigger(int time)
 {
     timeMSec = time;
-    indexLaneEgo = GetAgent()->GetMainLaneId();
 
     ObserveEgo();
 }
@@ -133,35 +133,37 @@ void SensorRecordStateImplementation::ObserveEgo()
                              "LightStatus",
                              std::to_string(static_cast<int>(GetAgent()->GetLightState())));
 
+    const auto& egoAgent = GetAgent()->GetEgoAgent();
+
     observerInstance->Insert(timeMSec,
                              agentId,
                              LoggingGroup::RoadPosition,
                              "PositionRoute",
-                             std::to_string(GetAgent()->GetDistanceToStartOfRoad()));
+                             std::to_string(egoAgent.GetMainLocatePosition().roadPosition.s));
 
     observerInstance->Insert(timeMSec,
                              agentId,
                              LoggingGroup::RoadPosition,
                              "TCoordinate",
-                             std::to_string(GetAgent()->GetPositionLateral()));
+                             std::to_string(egoAgent.GetPositionLateral()));
 
     observerInstance->Insert(timeMSec,
                              agentId,
                              LoggingGroup::RoadPosition,
                              "Lane",
-                             std::to_string(indexLaneEgo));
+                             std::to_string(egoAgent.GetLaneIdFromRelative(0)));
 
     observerInstance->Insert(timeMSec,
                              agentId,
                              LoggingGroup::RoadPosition,
                              "Road",
-                             GetAgent()->GetRoadId());
+                             egoAgent.GetRoadId());
 
     observerInstance->Insert(timeMSec,
                              agentId,
                              LoggingGroup::RoadPositionExtended,
                              "SecondaryLanes",
-                             SecondaryLanesToString());
+                             SecondaryLanesToString(egoAgent.GetRoadId()));
 
     observerInstance->Insert(timeMSec,
                              agentId,
@@ -188,7 +190,7 @@ void SensorRecordStateImplementation::ObserveEgo()
                              std::to_string(GetAgent()->GetGear()));
 
     int frontAgentId = -1;
-    const auto frontAgents = GetAgent()->GetAgentsInRange(0, 0, std::numeric_limits<double>::max(), MeasurementPoint::Front);
+    const auto frontAgents = egoAgent.GetAgentsInRange(0, std::numeric_limits<double>::max(), 0);
 
     if (!frontAgents.empty())
     {
@@ -202,9 +204,9 @@ void SensorRecordStateImplementation::ObserveEgo()
                              std::to_string(frontAgentId));
 }
 
-std::string SensorRecordStateImplementation::SecondaryLanesToString()
+std::string SensorRecordStateImplementation::SecondaryLanesToString(const std::string& roadId)
 {
-    const auto secondaryList = GetAgent()->GetSecondaryCoveredLanes();
+    const auto secondaryList = GetAgent()->GetObjectPosition().touchedRoads.at(roadId).lanes;
     std::string listOfSecondaryLanes{""};
     for (auto objectIt = secondaryList.cbegin(); objectIt != secondaryList.cend(); objectIt++)
     {

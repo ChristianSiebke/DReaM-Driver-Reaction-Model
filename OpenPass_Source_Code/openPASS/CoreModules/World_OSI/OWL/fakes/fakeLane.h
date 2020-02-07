@@ -83,8 +83,8 @@ public:
                        const std::vector<OWL::Id> ());
     MOCK_METHOD1(SetLeftLaneBoundaries,
                  void (const std::vector<OWL::Id> laneBoundaries));
-    MOCK_CONST_METHOD0(GetNext, const std::vector<OWL::Id> ());
-    MOCK_CONST_METHOD0(GetPrevious, const std::vector<OWL::Id> ());
+    MOCK_CONST_METHOD0(GetNext, const std::vector<OWL::Id>& ());
+    MOCK_CONST_METHOD0(GetPrevious, const std::vector<OWL::Id>& ());
     MOCK_CONST_METHOD0(GetTrafficSigns, const OWL::Interfaces::TrafficSigns& ());
     MOCK_CONST_METHOD0(GetRoadMarkings, const OWL::Interfaces::RoadMarkings& ());
     MOCK_METHOD1(AddTrafficSign, void (OWL::Interfaces::TrafficSign &trafficSign));

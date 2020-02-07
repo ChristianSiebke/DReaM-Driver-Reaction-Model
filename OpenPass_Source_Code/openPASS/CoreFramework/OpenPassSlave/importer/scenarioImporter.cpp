@@ -405,8 +405,7 @@ void ScenarioImporter::ImportPositionElement(ScenarioEntity& scenarioEntity, QDo
 
 void ScenarioImporter::ImportRoutingElement(ScenarioEntity& scenarioEntity, QDomElement firstChildOfActionElement, openScenario::Parameters& parameters)
 {
-    std::vector<RouteElement> roads;
-    size_t hash{0};
+    std::vector<RouteElement> route;
 
     QDomElement followRouteElement;
     ThrowIfFalse(SimulationCommon::GetFirstChildElement(firstChildOfActionElement, TAG::followRoute, followRouteElement),
@@ -428,12 +427,11 @@ void ScenarioImporter::ImportRoutingElement(ScenarioEntity& scenarioEntity, QDom
         std::string roadId = ParseAttribute<std::string>(roadElement, ATTRIBUTE::roadId, parameters);
         double t = ParseAttribute<double>(roadElement, ATTRIBUTE::t, parameters);
         bool inRoadDirection = (t <= 0);
-        roads.push_back({roadId, inRoadDirection});
-        hash = hash ^ (std::hash<std::string>{}(roadId) << 1);
+        route.push_back({roadId, inRoadDirection});
 
         waypointElement = waypointElement.nextSiblingElement(TAG::waypoint);
     }
-    scenarioEntity.spawnInfo.route = Route{roads, {}, hash};
+    scenarioEntity.spawnInfo.route = route;
 }
 
 std::pair<std::string, openScenario::StochasticAttribute> ScenarioImporter::ImportStochastics(QDomElement& stochasticsElement, openScenario::Parameters& parameters)

@@ -28,6 +28,14 @@
 
 using VehicleComponentProfileNames = std::unordered_map<std::string, std::string>;
 
+//! Route from OpenSCENARIO converted into graph
+struct Route
+{
+    RoadGraph roadGraph;
+    RoadGraphVertex root;
+    RoadGraphVertex target;
+};
+
 struct SpawnParameter
 {
     double positionX = -999;

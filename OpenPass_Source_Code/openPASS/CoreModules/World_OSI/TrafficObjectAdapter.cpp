@@ -33,24 +33,19 @@ TrafficObjectAdapter::TrafficObjectAdapter(OWL::Interfaces::WorldData& worldData
     Locate();
 }
 
+ObjectPosition TrafficObjectAdapter::GetObjectPosition() const
+{
+    return GetBaseTrafficObject().GetLocatedPosition();
+}
+
 ObjectTypeOSI TrafficObjectAdapter::GetType() const
 {
     return ObjectTypeOSI::Object;
 }
 
-double TrafficObjectAdapter::GetDistanceToStartOfRoad() const
-{
-    return WorldObjectInterface::GetDistanceToStartOfRoad();
-}
-
 void TrafficObjectAdapter::InitLaneDirection(double hdg)
 {
     laneDirection = GetYaw() - hdg;
-}
-
-double TrafficObjectAdapter::GetDistanceToStartOfRoad(MeasurementPoint mp) const
-{
-    return GetDistanceToStartOfRoad(mp, GetBaseTrafficObject().GetLocatedPosition().referencePoint.roadId);
 }
 
 double TrafficObjectAdapter::GetDistanceToStartOfRoad(MeasurementPoint mp, std::string roadId) const
@@ -62,7 +57,7 @@ double TrafficObjectAdapter::GetDistanceToStartOfRoad(MeasurementPoint mp, std::
         case MeasurementPoint::Rear:
             return GetBaseTrafficObject().GetDistance(OWL::MeasurementPoint::RoadStart, roadId);
         case MeasurementPoint::Reference:
-            return GetBaseTrafficObject().GetLocatedPosition().referencePoint.roadPosition.s;
+            return GetBaseTrafficObject().GetLocatedPosition().referencePoint.at(roadId).roadPosition.s;
         default:
             throw std::invalid_argument("Invalid measurement point");
     }
@@ -81,9 +76,9 @@ double TrafficObjectAdapter::GetLaneDirection() const
     return laneDirection;
 }
 
-double TrafficObjectAdapter::GetLaneRemainder(Side side) const
+double TrafficObjectAdapter::GetLaneRemainder(const std::string& roadId, Side side) const
 {
-    return side == Side::Left ? locateResult.remainder.left : locateResult.remainder.right;
+    return side == Side::Left ? locateResult.position.touchedRoads.at(roadId).remainder.left : locateResult.position.touchedRoads.at(roadId).remainder.right;
 }
 
 bool TrafficObjectAdapter::Locate()
@@ -91,7 +86,7 @@ bool TrafficObjectAdapter::Locate()
     // reset on-demand values
     boundaryPoints.clear();
 
-    locateResult = localizer.Locate(GetBoundingBox2D(), baseTrafficObject, Route{});
+    locateResult = localizer.Locate(GetBoundingBox2D(), baseTrafficObject);
 
     baseTrafficObject.SetLocatedPosition(locateResult.position);
     return true;

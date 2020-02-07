@@ -91,8 +91,14 @@ public:
     MOCK_CONST_METHOD0(GetTrafficSignIdMapping, const std::unordered_map<std::string, OWL::Id>& ());
 
     MOCK_METHOD0(AddRoadMarking, OWL::Interfaces::RoadMarking&());
-
+    
     MOCK_CONST_METHOD0(GetRoadMarkings, const std::unordered_map<OWL::Id, OWL::Interfaces::RoadMarking*>& ());
+
+    MOCK_CONST_METHOD0(GetRoadGraph, const RoadGraph& ());
+    
+    MOCK_METHOD2(SetRoadGraph, void  (const RoadGraph&& roadGraph, const RoadGraphVertexMapping&& vertexMapping));
+
+    MOCK_CONST_METHOD0(GetRoadGraphVertexMapping, const RoadGraphVertexMapping& ());
 
     MOCK_METHOD2(GetSensorView, osi3::SensorView(osi3::SensorViewConfiguration&, int));
 

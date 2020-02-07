@@ -192,7 +192,7 @@ TEST(SpawnPointScenario, Trigger_SpawnsEgoAgentAccordingToScenarioLanePosition)
             .WillByDefault(Return(true));
     ON_CALL(fakeWorld, IsSValidOnLane(roadId, laneId, s))
             .WillByDefault(Return(true));
-    ON_CALL(fakeWorld, GetLaneWidth(_, roadId, laneId, s, 0))
+    ON_CALL(fakeWorld, GetLaneWidth(roadId, laneId, s))
             .WillByDefault(Return(0.75));
     ON_CALL(fakeWorld, LaneCoord2WorldCoord(s, offset, roadId, laneId))
             .WillByDefault(Return(position));
@@ -344,7 +344,7 @@ TEST(SpawnPointScenario, Trigger_SpawnsScenarioAgentAccordingToScenarioLanePosit
             .WillByDefault(Return(true));
     ON_CALL(fakeWorld, IsSValidOnLane(roadId, laneId, s))
             .WillByDefault(Return(true));
-    ON_CALL(fakeWorld, GetLaneWidth(_, roadId, laneId, s, 0))
+    ON_CALL(fakeWorld, GetLaneWidth(roadId, laneId, s))
             .WillByDefault(Return(0.75));
     ON_CALL(fakeWorld, LaneCoord2WorldCoord(s, offset, roadId, laneId))
             .WillByDefault(Return(position));

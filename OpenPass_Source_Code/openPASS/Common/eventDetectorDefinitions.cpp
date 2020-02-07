@@ -8,6 +8,10 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
+
+#include <vector>
+
+#include "Interfaces/egoAgentInterface.h"
 #include "commonTools.h"
 #include "eventDetectorDefinitions.h"
 
@@ -56,35 +60,36 @@ std::vector<const AgentInterface *> TimeToCollisionCondition::IsMet(WorldInterfa
 std::vector<const AgentInterface *> TimeHeadwayCondition::IsMet(WorldInterface* const world) const
 {
     const auto referenceAgent = world->GetAgentByName(referenceEntityName);
+
     if (!referenceAgent)
     {
         throw std::runtime_error("Could not find reference agent for condition 'TimeHeadway'");
     }
 
     std::vector<const AgentInterface*> conditionMetAgents{};
-    for (const auto triggeringAgent : GetTriggeringAgents(world))
+
+    for (auto triggeringAgent : GetTriggeringAgents(world))
     {
         double deltaS{std::numeric_limits<double>::infinity()};
-        if (freeSpace)
-        {
-            deltaS = triggeringAgent->GetDistanceToObject(referenceAgent);
-        }
-        else
-        {
-            const auto roadId = triggeringAgent->GetRoadId(MeasurementPoint::Reference);
-            if (referenceAgent->GetRoadId(MeasurementPoint::Reference) != roadId)
-            {
-                break;
-            }
-            double sOwn = triggeringAgent->GetDistanceToStartOfRoad(MeasurementPoint::Reference, roadId);
-            double sOther = referenceAgent->GetDistanceToStartOfRoad(MeasurementPoint::Reference, roadId);
-            deltaS = sOther - sOwn;
-        }
-        double timeHeadway = deltaS / triggeringAgent->GetVelocity(VelocityScope::Longitudinal);
+        auto longPos = triggeringAgent->GetEgoAgent().GetDistanceToObject(referenceAgent);
 
-        if (CheckEquation(timeHeadway, targetTHW, rule))
+        if (longPos.has_value())
         {
-            conditionMetAgents.emplace_back(triggeringAgent);
+            if (freeSpace)
+            {
+                deltaS = longPos.value().netDistance;
+            }
+            else
+            {
+                deltaS = longPos.value().referencePoint;
+            }
+
+            double timeHeadway = deltaS / triggeringAgent->GetVelocity(VelocityScope::Longitudinal);
+
+            if (CheckEquation(timeHeadway, targetTHW, rule))
+            {
+                conditionMetAgents.emplace_back(triggeringAgent);
+            }
         }
     }
 
@@ -118,13 +123,13 @@ std::vector<const AgentInterface*> ReachPositionRoadCondition::IsMet(WorldInterf
     std::vector<const AgentInterface*> conditionMetAgents{};
     for (const auto agent : GetTriggeringAgents(world))
     {
-        const auto& roadId = agent->GetRoadId(MeasurementPoint::Reference);
+        const auto& roadIds = agent->GetRoads(MeasurementPoint::Reference);
 
-        if(roadId == targetRoadId)
+        if (std::find(roadIds.cbegin(), roadIds.cend(), targetRoadId) != roadIds.end())
         {
-            const auto sCoordinate = agent->GetRoadPosition().s;
+            const auto sCoordinate = agent->GetObjectPosition().referencePoint.at(targetRoadId).roadPosition.s;
 
-            if(std::abs(targetSCoordinate - sCoordinate) <= tolerance)
+            if (std::abs(targetSCoordinate - sCoordinate) <= tolerance)
             {
                 conditionMetAgents.emplace_back(agent);
             }
@@ -145,15 +150,19 @@ std::vector<const AgentInterface*> RelativeLaneCondition::IsMet(WorldInterface *
     std::vector<const AgentInterface*> conditionMetAgents{};
     for (const auto agent : GetTriggeringAgents(world))
     {
-        if (agent->GetRoadId(MeasurementPoint::Reference) == referenceAgent->GetRoadId(MeasurementPoint::Reference)
-            && agent->GetMainLaneId(MeasurementPoint::Reference) == referenceAgent->GetMainLaneId(MeasurementPoint::Reference) + deltaLane)
+        for (const auto& roadId : agent->GetRoads(MeasurementPoint::Reference))
         {
-            const auto agentS = agent->GetRoadPosition().s;
-            const auto referenceS = referenceAgent->GetRoadPosition().s + deltaS;
-
-            if (std::abs(referenceS - agentS) <= tolerance)
+            const auto& referenceAgentRoads = referenceAgent->GetRoads(MeasurementPoint::Reference);
+            if (std::find(referenceAgentRoads.cbegin(), referenceAgentRoads.cend(), roadId) != referenceAgentRoads.cend()
+                && agent->GetObjectPosition().referencePoint.at(roadId).laneId == referenceAgent->GetObjectPosition().referencePoint.at(roadId).laneId + deltaLane)
             {
-                conditionMetAgents.emplace_back(agent);
+                const auto agentS = agent->GetObjectPosition().referencePoint.at(roadId).roadPosition.s;
+                const auto referenceS = referenceAgent->GetObjectPosition().referencePoint.at(roadId).roadPosition.s + deltaS;
+
+                if (std::abs(referenceS - agentS) <= tolerance)
+                {
+                    conditionMetAgents.emplace_back(agent);
+                }
             }
         }
     }

@@ -42,14 +42,12 @@ public:
     WorldAnalyzer& operator=(WorldAnalyzer&&) = delete;
     ~WorldAnalyzer() = default;
 
-    std::optional<ValidLaneSpawningRanges> GetValidLaneSpawningRanges(const Route& routeForRoadId,
-                                                                      const RoadId& roadId,
+    std::optional<ValidLaneSpawningRanges> GetValidLaneSpawningRanges(const RoadId& roadId,
                                                                       const LaneId laneId,
                                                                       const SPosition sStart,
                                                                       const SPosition sEnd) const;
 
-    std::optional<double> GetNextSpawnPosition(const Route& routeForRoadId,
-                                               const RoadId& roadId,
+    std::optional<double> GetNextSpawnPosition(const RoadId& roadId,
                                                const LaneId laneId,
                                                const Range& bounds,
                                                const double agentFrontLength,
@@ -58,8 +56,7 @@ public:
                                                const double gapInSeconds,
                                                const Direction direction) const;
 
-    double CalculateSpawnVelocityToPreventCrashing(const Route& routeForRoadId,
-                                                   const RoadId& roadId,
+    double CalculateSpawnVelocityToPreventCrashing(const RoadId& roadId,
                                                    const LaneId laneId,
                                                    const double intendedSpawnPosition,
                                                    const double agentFrontLength,
@@ -77,8 +74,7 @@ public:
                                      const double offset,
                                      const VehicleModelParameters& vehicleModelParameters) const;
 
-    bool SpawnWillCauseCrash(const Route& route,
-                             const RoadId& roadId,
+    bool SpawnWillCauseCrash(const RoadId& roadId,
                              const LaneId laneId,
                              const SPosition sPosition,
                              const double agentFrontLength,

@@ -965,3 +965,91 @@ void SceneryConverter::CreateRoads()
         }
     }
 }
+
+std::pair<RoadGraph, RoadGraphVertexMapping> RoadNetworkBuilder::Build()
+{
+    RoadGraph roadGraph;
+    RoadGraphVertexMapping vertices;
+
+    for (auto& [roadId, road] : scenery.GetRoads())
+    {
+        bool hasLeftLanes = road->GetLaneSections().front()->GetLanes().crbegin()->first > 0;
+        bool hasRightLanes = road->GetLaneSections().front()->GetLanes().cbegin()->first < 0;
+        if (hasLeftLanes)
+        {
+            RouteElement routeElement{roadId, false};
+            vertices[routeElement] = add_vertex(routeElement, roadGraph);
+        }
+        if (hasRightLanes)
+        {
+            RouteElement routeElement{roadId, true};
+            vertices[routeElement] = add_vertex(routeElement, roadGraph);
+        }
+    }
+
+    for (auto& [roadId, road] : scenery.GetRoads())
+    {
+        bool hasLeftLanes = road->GetLaneSections().front()->GetLanes().crbegin()->first > 0;
+        bool hasRightLanes = road->GetLaneSections().front()->GetLanes().cbegin()->first < 0;
+        for (auto& link : road->GetRoadLinks())
+        {
+            if (link->GetElementType() == RoadLinkElementType::Road)
+            {
+                if (link->GetType() == RoadLinkType::Successor)
+                {
+                    auto& successorId = link->GetElementId();
+                    if (link->GetContactPoint() == ContactPointType::Start)
+                    {
+                        if (hasRightLanes)
+                        {
+                            add_edge(vertices[{roadId, true}], vertices[{successorId, true}], roadGraph);
+                        }
+                        if (hasLeftLanes)
+                        {
+                            add_edge(vertices[{successorId, false}], vertices[{roadId, false}], roadGraph);
+                        }
+                    }
+                    else
+                    {
+                        if (hasRightLanes)
+                        {
+                            add_edge(vertices[{roadId, true}], vertices[{successorId, false}], roadGraph);
+                        }
+                        if (hasLeftLanes)
+                        {
+                            add_edge(vertices[{successorId, false}], vertices[{roadId, true}], roadGraph);
+                        }
+                    }
+                }
+                if (link->GetType() == RoadLinkType::Predecessor)
+                {
+                    auto& predecessorId = link->GetElementId();
+                    if (link->GetContactPoint() == ContactPointType::Start)
+                    {
+                        if (hasRightLanes)
+                        {
+                            add_edge(vertices[{predecessorId, true}], vertices[{roadId, false}], roadGraph);
+                        }
+                        if (hasLeftLanes)
+                        {
+                            add_edge(vertices[{roadId, false}], vertices[{predecessorId, true}], roadGraph);
+                        }
+                    }
+                    else
+                    {
+                        if (hasRightLanes)
+                        {
+                            add_edge(vertices[{predecessorId, true}], vertices[{roadId, true}], roadGraph);
+                        }
+                        if (hasLeftLanes)
+                        {
+                            add_edge(vertices[{roadId, false}], vertices[{predecessorId, false}], roadGraph);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return {roadGraph, vertices};
+}

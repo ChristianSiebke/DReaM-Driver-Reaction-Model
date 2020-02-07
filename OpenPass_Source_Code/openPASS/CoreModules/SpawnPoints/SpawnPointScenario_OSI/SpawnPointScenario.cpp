@@ -100,10 +100,9 @@ bool SpawnPointScenario::ValidateSTCoordinatesOnLane(const STCoordinates &stCoor
     }
 
     //Check if lane width > vehicle width
-    double laneWidth = GetWorld()->GetLaneWidth(Route{lanePosition.roadId},
-                                                lanePosition.roadId,
+    double laneWidth = GetWorld()->GetLaneWidth(lanePosition.roadId,
                                                 lanePosition.laneId,
-                                                stCoordinate.s, 0);
+                                                stCoordinate.s);
     if (vehicleWidth > laneWidth + std::abs(stCoordinate.t))
     {
         return false;
@@ -205,7 +204,6 @@ SpawnParameter SpawnPointScenario::CalculateSpawnParameter(const SpawnInfo& spaw
         spawnParameter.positionX = pos.xPos;
         spawnParameter.positionY = pos.yPos;
         spawnParameter.yawAngle = pos.yawAngle;
-        spawnParameter.route = spawnInfo.route;
 
         if(lanePosition.orientation.has_value())
         {
@@ -241,6 +239,8 @@ SpawnParameter SpawnPointScenario::CalculateSpawnParameter(const SpawnInfo& spaw
         spawnParameter.acceleration = spawnInfo.acceleration.value_or(0.0);
     }
 
+    spawnParameter.route = GetRoute(spawnInfo.route.value_or(std::vector<RouteElement>{}));
+
     return spawnParameter;
 }
 
@@ -250,6 +250,39 @@ double SpawnPointScenario::CalculateAttributeValue(const openScenario::Stochasti
     return Sampler::RollForStochasticAttribute(distribution,
                                                dependencies.stochastics);
 }
+
+std::optional<Route> SpawnPointScenario::GetRoute(const std::vector<RouteElement>& roads)
+{
+    if (roads.empty())
+    {
+        return std::nullopt;
+    }
+
+    constexpr size_t MAX_DEPTH = 10; //! Limits search depths in case of cyclic network
+    auto [roadGraph , root] = GetWorld()->GetRoadGraph(roads.front(), std::max(MAX_DEPTH, roads.size()));
+
+    RoadGraphVertex target = root;
+    for (auto road = roads.begin() + 1; road != roads.end(); ++road)
+    {
+        bool foundSuccessor = false;
+        for (auto [successor, successorsEnd] = adjacent_vertices(target, roadGraph); successor != successorsEnd; ++successor)
+        {
+            if (get(RouteElement(), roadGraph, *successor) == *road)
+            {
+                foundSuccessor = true;
+                target = *successor;
+                break;
+            }
+        }
+        if (!foundSuccessor)
+        {
+            LogError("Invalid route defined in Scenario. Node " + road->roadId + " not reachable");
+        }
+    }
+
+    return Route{roadGraph, root, target};
+}
+
 
 [[noreturn]] void SpawnPointScenario::LogError(const std::string& message)
 {

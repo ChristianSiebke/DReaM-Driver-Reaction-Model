@@ -115,7 +115,8 @@ SRC_WORLD = $$WORLD_OSI/WorldData.cpp \
             $$WORLD_OSI/OWL/OpenDriveTypeMapper.cpp \
             $$WORLD_OSI/Localization.cpp \
             $$WORLD_OSI/WorldToRoadCoordinateConverter.cpp \
-            $$WORLD_OSI/PointQuery.cpp
+            $$WORLD_OSI/PointQuery.cpp \
+            $$WORLD_OSI/egoAgent.cpp
 
 INC_WORLD = $$WORLD_OSI/WorldData.h \
             $$WORLD_OSI/WorldDataQuery.h \
@@ -126,7 +127,8 @@ INC_WORLD = $$WORLD_OSI/WorldData.h \
             $$WORLD_OSI/OWL/OpenDriveTypeMapper.h \
             $$WORLD_OSI/Localization.h \
             $$WORLD_OSI/WorldToRoadCoordinateConverter.h \
-            $$WORLD_OSI/PointQuery.h
+            $$WORLD_OSI/PointQuery.h \
+            $$WORLD_OSI/egoAgent.h
 
 SOURCES += \
     $$OPEN_SRC/Common/eventDetectorDefinitions.cpp \

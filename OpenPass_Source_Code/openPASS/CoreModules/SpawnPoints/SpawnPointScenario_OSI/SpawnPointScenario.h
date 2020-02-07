@@ -110,6 +110,15 @@ private:
     double CalculateAttributeValue(const openScenario::StochasticAttribute &attribute);
 
     /*!
+     * \brief Converts the imported route from OpenScenario into a graph
+     *
+     * \param[in]   roads   route from OpenScenario
+     *
+     * \return  graph of road network from agent's perspective with target node as given by OpenScenario, nullopt if no road in OpenScenario defined
+     */
+    std::optional<Route> GetRoute(const std::vector<RouteElement>& roads);
+
+    /*!
     * \brief Logs a error message.
     *
     * \details Logs a error message.

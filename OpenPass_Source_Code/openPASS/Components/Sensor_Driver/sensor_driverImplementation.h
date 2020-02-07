@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *               2018, 2019 AMFD GmbH
 *
 * This program and the accompanying materials are made
@@ -107,6 +107,12 @@ public:
 
 private:
 
+    //! \brief Calculates a new route for the agent and sets it in the EgoAgent
+    void GetNewRoute();
+
+    //! \brief Updates the current position in the routing graph if neccessary
+    void UpdateGraphPosition();
+
     //! \brief Get sensor data concerning the own vehicle.
     virtual void GetOwnVehicleInformation();
 
@@ -140,6 +146,8 @@ private:
 
     //! \brief Get information of one object.
     virtual ObjectInformation GetOtherObjectInformation(const WorldObjectInterface *surroundingObject);
+
+    EgoAgentInterface& egoAgent;
 
     SensorDriverCalculations sensorDriverCalculations;
 

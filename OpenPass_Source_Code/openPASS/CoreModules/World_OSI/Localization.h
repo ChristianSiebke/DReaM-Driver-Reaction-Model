@@ -26,29 +26,13 @@ namespace Localization {
 using RTreeElement = std::pair<CoarseBoundingBox, const LocalizationElement *>;
 using bg_rTree = boost::geometry::index::rtree<RTreeElement, boost::geometry::index::quadratic<8, 4> >;
 
-//! This struct describes how much space an agent has to next lane boundary on both sides
-struct Remainder
-{
-    Remainder() = default;
-    Remainder(double left, double right) : left{left}, right{right}
-    {}
-
-    double left {0.0};
-    double right {0.0};
-};
-
 //! This struct contains all the information about an objects position in the world, that result
 //! from the Localization
 class Result
 {
 public:
     ObjectPosition position;
-    Remainder remainder;
     bool isOnRoute {false};
-    bool isCrossingLanes {false};
-
-    std::set<int> frontLaneIds {};
-    std::set<int> touchedLaneIds {};
 
     static Result Invalid()
     {
@@ -58,17 +42,9 @@ public:
     Result() = default;
 
     Result(ObjectPosition position,
-           Remainder remainder,
-           bool isOnRoute,
-           bool isCrossingLanes,
-           std::set<int> frontLaneIds,
-           std::set<int> touchedLaneIds) :
+           bool isOnRoute) :
         position{position},
-        remainder{remainder},
-        isOnRoute{isOnRoute},
-        isCrossingLanes{isCrossingLanes},
-        frontLaneIds{frontLaneIds},
-        touchedLaneIds{touchedLaneIds}
+        isOnRoute{isOnRoute}
     {}
 };
 
@@ -125,7 +101,7 @@ public:
 
     void Init();
 
-    Result Locate(const polygon_t& boundingBox, OWL::Interfaces::WorldObject& object, const Route& route) const;
+    Result Locate(const polygon_t& boundingBox, OWL::Interfaces::WorldObject& object) const;
 
     void Unlocate(OWL::Interfaces::WorldObject& object) const;
 
@@ -137,7 +113,7 @@ private:
     //! \param route
     //! \return
     //!
-    Result BuildResult(const LocatedObject& locatedObject, const Route& route) const;
+    Result BuildResult(const LocatedObject& locatedObject) const;
 
     const OWL::Interfaces::WorldData& worldData;
     std::vector<LocalizationElement> elements{};

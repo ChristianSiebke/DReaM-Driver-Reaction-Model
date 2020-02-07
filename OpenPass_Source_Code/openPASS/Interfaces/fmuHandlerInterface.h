@@ -206,6 +206,6 @@ protected:
     int    cycleTime    = 100;      //!< Function Trigger of this model is called again after cycleTime  (ms)
     int    startTime;               //!< Time of FMU start (simulation timebase)
 
-    const AgentInterface* agent;          //!< References the agent interface
+    AgentInterface* agent;          //!< References the agent interface
     const CallbackInterface* callbacks;   //!< References the callback functions of the framework
 };
