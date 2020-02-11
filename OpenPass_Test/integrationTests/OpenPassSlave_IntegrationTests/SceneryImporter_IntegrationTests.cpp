@@ -12,6 +12,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
+#include "agentBlueprint.h"
 #include "scenery.h"
 #include "sceneryImporter.h"
 #include "world.h"
@@ -538,13 +539,25 @@ TEST(SceneryImporter_IntegrationTests, MultipleRoadsWithIntersectingJunctions_Ju
 AgentAdapter* AddAgentToWorld (SimulationSlave::World& world,
                                int id, double x, double y, double width = 1.0, double length = 1.0)
 {
+    VehicleModelParameters vehicleParameter;
+    vehicleParameter.vehicleType = AgentVehicleType::Car;
+    vehicleParameter.width = width;
+    vehicleParameter.length = length;
+    vehicleParameter.distanceReferencePointToLeadingEdge = length / 2.0;
+
+    SpawnParameter spawnParameter;
+    spawnParameter.positionX = x;
+    spawnParameter.positionY = y;
+    spawnParameter.velocity = 1.0;
+    spawnParameter.yawAngle = 0.0;
+
+    AgentBlueprint agentBlueprint;
+    agentBlueprint.SetVehicleModelParameters(vehicleParameter);
+    agentBlueprint.SetSpawnParameter(spawnParameter);
+
     auto agent = static_cast<AgentAdapter*>(world.CreateAgentAdapterForAgent());
     world.AddAgent(id, agent);
-    agent->UpdatePositionX(x);
-    agent->UpdatePositionY(y);
-    agent->UpdateWidth(width);
-    agent->UpdateLength(length);
-    agent->UpdateVelocity(1.0);
+    agent->InitAgentParameter(id, &agentBlueprint);
     return agent;
 }
 

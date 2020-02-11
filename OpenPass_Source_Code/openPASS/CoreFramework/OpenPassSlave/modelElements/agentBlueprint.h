@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -31,77 +31,77 @@ class AgentBlueprint : public AgentBlueprintInterface
 {
 public:
     AgentBlueprint();
-    virtual ~AgentBlueprint();
+    virtual ~AgentBlueprint() override = default;
 
     /*!
     * \brief Sets the vehicle component profile names
     *
     * @param[in]     vehicleComponentProfileNames
     */
-    virtual void SetVehicleComponentProfileNames(VehicleComponentProfileNames vehicleComponentProfileNames);
+    virtual void SetVehicleComponentProfileNames(VehicleComponentProfileNames vehicleComponentProfileNames) override;
 
     /*!
     * \brief Sets the agent category
     *
     * @param[in]     agentCategory
     */
-    virtual void SetAgentCategory(AgentCategory agentCategory);
+    virtual void SetAgentCategory(AgentCategory agentCategory) override;
 
     /*!
     * \brief Sets the agent profile name
     *
     * @param[in]     agentProfileName
     */
-    virtual void SetAgentProfileName(std::string agentProfileName);
+    virtual void SetAgentProfileName(std::string agentProfileName) override;
 
     /*!
     * \brief Sets the vehicle profile name
     *
     * @param[in]     vehicleProfileName
     */
-    virtual void SetVehicleProfileName(std::string vehicleProfileName);
+    virtual void SetVehicleProfileName(std::string vehicleProfileName) override;
 
     /*!
     * \brief Sets the vehicle model name
     *
     * @param[in]     vehicleModelName
     */
-    virtual void SetVehicleModelName(std::string vehicleModelName);
+    virtual void SetVehicleModelName(std::string vehicleModelName) override;
 
     /*!
     * \brief Sets the vehicle model parameter
     *
     * @param[in]     vehicleModelParameters
     */
-    virtual void SetVehicleModelParameters(VehicleModelParameters vehicleModelParameters);
+    virtual void SetVehicleModelParameters(VehicleModelParameters vehicleModelParameters) override;
 
     /*!
     * \brief Sets the driver profile name
     *
     * @param[in]     driverProfileName
     */
-    virtual void SetDriverProfileName(std::string driverProfileName);
+    virtual void SetDriverProfileName(std::string driverProfileName) override;
 
     /*!
     * \brief Sets the spawn parameter
     *
     * @param[in]     spawnParameter
     */
-    virtual void SetSpawnParameter(SpawnParameter spawnParameter);
+    virtual void SetSpawnParameter(SpawnParameter spawnParameter) override;
 
     /*!
     * \brief Sets the minimum speed goal
     *
     * @param[in]     speedGoalMin
     */
-    virtual void SetSpeedGoalMin(double speedGoalMin);
+    virtual void SetSpeedGoalMin(double speedGoalMin) override;
 
     /*!
     * \brief Sets the object name
     *
     * @param[in]     objectName
     */
-    virtual void SetObjectName(std::string objectName);
+    virtual void SetObjectName(std::string objectName) override;
 
     /*!
     * \brief Adds a sensor to the vehicle model parameters
@@ -109,7 +109,7 @@ public:
     * @param[in]     name           Name of the sensor
     * @param[in]     parameters     Parameters of the sensor
     */
-    virtual void AddSensor(openpass::sensors::Parameter parameters);
+    virtual void AddSensor(openpass::sensors::Parameter parameters) override;
 
     /*!
     * \brief Returns the agent category
@@ -174,7 +174,7 @@ public:
     */
     virtual VehicleComponentProfileNames            GetVehicleComponentProfileNames() const override;
 
-    virtual void SetAgentType(std::shared_ptr<SimulationSlave::AgentTypeInterface> agentType);
+    virtual void SetAgentType(std::shared_ptr<SimulationSlave::AgentTypeInterface> agentType) override;
 
     /*!
     * \brief Returns the agent type as pointer

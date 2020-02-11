@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2018 AMFD GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
@@ -52,12 +52,6 @@ public:
     // @return                Id of agent
     //-----------------------------------------------------------------------------
     virtual int GetAgentId() const = 0;
-
-    //! Retrieves type of vehicle of agent
-    //!
-    // @return                Type of vehicle
-    //-----------------------------------------------------------------------------
-    virtual AgentVehicleType GetVehicleType() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Retrieves the type key of an agent
@@ -123,81 +117,11 @@ public:
     virtual double GetVelocityY() const = 0;
 
     //-----------------------------------------------------------------------------
-    //! Retrieves distance from COG to front axle of agent
-    //!
-    // @return                Distance from COG to front axle
-    //-----------------------------------------------------------------------------
-    virtual double GetDistanceCOGtoFrontAxle() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Retrieves weight of agent
-    //!
-    // @return                Weight of agent
-    //-----------------------------------------------------------------------------
-    virtual double GetWeight() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Retrieves distance from ground to COG of agent
-    //!
-    // @return                Distance from ground to COG
-    //-----------------------------------------------------------------------------
-    virtual double GetHeightCOG() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Retrieves distance between the centers of the front and rear wheels
-    //!
-    // @return                Distance between front and rear wheels
-    //-----------------------------------------------------------------------------
-    virtual double GetWheelbase() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Retrieves moment of inertia (roll axis)
-    //!
-    // @return                Moment of inertia for roll axis
-    //-----------------------------------------------------------------------------
-    virtual double GetMomentInertiaRoll() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Retrieves moment of inertia (pitch axis)
-    //!
-    // @return                Moment of inertia for pitch axis
-    //-----------------------------------------------------------------------------
-    virtual double GetMomentInertiaPitch() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Retrieves moment of inertia (yaw axis)
-    //!
-    // @return                Moment of inertia for yaw axis
-    //-----------------------------------------------------------------------------
-    virtual double GetMomentInertiaYaw() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Retrieves friction coefficient
-    //!
-    // @return                Friction coefficient
-    //-----------------------------------------------------------------------------
-    virtual double GetFrictionCoeff() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Retrieves distance between wheels on the same axle
-    //!
-    // @return                Distance between both front wheels (or both rear wheels)
-    //-----------------------------------------------------------------------------
-    virtual double GetTrackWidth() const = 0;
-
-    //-----------------------------------------------------------------------------
     //! Retrieves the current gear number
     //!
     // @return                Gear no.
     //-----------------------------------------------------------------------------
     virtual int GetGear() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Retrieves distance from COG to leading edge
-    //!
-    // @return                Distance from COG to leading edge
-    //-----------------------------------------------------------------------------
-    virtual double GetDistanceCOGtoLeadingEdge() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Retrieves forward acceleration of agent
@@ -250,25 +174,11 @@ public:
     virtual void SetPositionY(double positionY) = 0;
 
     //-----------------------------------------------------------------------------
-    //! Sets width of agents boundary box
+    //! Sets the agents vehicle model parameter
     //!
-    //! @param[in]     width    Width of agent
+    //! @param[in]     parameter    New vehicle model paramter
     //-----------------------------------------------------------------------------
-    virtual void SetWidth(double width) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Sets length of agents boundary box
-    //!
-    //! @param[in]     length    Length of agent
-    //-----------------------------------------------------------------------------
-    virtual void SetLength(double length) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Sets height of agents boundary box
-    //!
-    //! @param[in]     height    Height of agent
-    //-----------------------------------------------------------------------------
-    virtual void SetHeight(double height) = 0;
+    virtual void SetVehicleModelParameter (const VehicleModelParameters &parameter) = 0;
 
     //-----------------------------------------------------------------------------
     //! Sets forward velocity of agent
@@ -320,13 +230,6 @@ public:
     virtual double GetDistanceTraveled() const = 0;
 
     //-----------------------------------------------------------------------------
-    //! Sets distance from COG to front axle of agent
-    //!
-    //! @param[in]     distanceCOGtoFrontAxle    distance from COG to front axle
-    //-----------------------------------------------------------------------------
-    virtual void SetDistanceCOGtoFrontAxle(double distanceCOGtoFrontAxle) = 0;
-
-    //-----------------------------------------------------------------------------
     //! Sets gear of vehicle
     //!
     //! @param[in]     gear    current gear
@@ -362,70 +265,6 @@ public:
     virtual void SetSteeringWheelAngle(double steeringWheelAngle) = 0;
 
     //-----------------------------------------------------------------------------
-    //! Sets weight of agent
-    //!
-    //! @param[in]     weight    agents weight
-    //-----------------------------------------------------------------------------
-    virtual void SetWeight(double weight) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Sets distance from ground to COG of agent
-    //!
-    //! @param[in]     heightCOG    distance from ground to COG
-    //-----------------------------------------------------------------------------
-    virtual void SetHeightCOG(double heightCOG) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Sets distance from reference point to front axle of agent
-    //!
-    //! @param[in]     distanceReferencePointToFrontAxle    distance from reference
-    //!                                                     point to front axle
-    //-----------------------------------------------------------------------------
-    virtual void SetDistanceReferencePointToFrontAxle(double distanceReferencePointToFrontAxle) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Sets distance from reference point to leading edge
-    //!
-    //! @param[in]     distanceReferencePointToLeadingEdge    distance from reference point to leading edge
-    //-----------------------------------------------------------------------------
-    virtual void SetDistanceReferencePointToLeadingEdge(double distanceReferencePointToLeadingEdge) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Sets distance between centers of front and rear wheels
-    //!
-    //! @param[in]     wheelbase    Distance between front and rear wheels.
-    //-----------------------------------------------------------------------------
-    virtual void SetWheelbase(double wheelbase) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Sets steering ratio
-    //!
-    //! @param[in]     steeringRatio    ratio between steering wheel angle and front wheel angle
-    //-----------------------------------------------------------------------------
-    virtual void SetSteeringRatio(double steeringRatio) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Sets moment of inertia for roll axis
-    //!
-    //! @param[in]     momentInertiaRoll    moment of inertia for roll axis
-    //-----------------------------------------------------------------------------
-    virtual void SetMomentInertiaRoll(double momentInertiaRoll) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Sets moment of inertia for pitch axis
-    //!
-    //! @param[in]     momentInertiaPitch    moment of inertia for pitch axis
-    //-----------------------------------------------------------------------------
-    virtual void SetMomentInertiaPitch(double momentInertiaPitch) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Sets moment of inertia for yaw axis
-    //!
-    //! @param[in]     momentInertiaYaw    moment of inertia for yaw axis
-    //-----------------------------------------------------------------------------
-    virtual void SetMomentInertiaYaw(double momentInertiaYaw) = 0;
-
-    //-----------------------------------------------------------------------------
     //! Sets maximum acceleration of the vehicle
     //!
     //! @param[in]     maxAcceleration   maximum acceleration
@@ -438,29 +277,6 @@ public:
     //! @param[in]     maxDeceleration   maximum deceleration
     //-----------------------------------------------------------------------------
     virtual void SetMaxDeceleration(double maxDeceleration) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Sets friction coefficient
-    //!
-    //! @param[in]     frictionCoeff    friction coefficient
-    //-----------------------------------------------------------------------------
-    virtual void SetFrictionCoeff(double frictionCoeff) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Sets distance between wheels on same axle
-    //!
-    //! @param[in]     trackWidth    distance between both front wheels (or both
-    //!                              rear wheels)
-    //-----------------------------------------------------------------------------
-    virtual void SetTrackWidth(double trackWidth) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Sets distance from COG to leading edge
-    //!
-    //! @param[in]     distanceCOGtoLeadingEdge    distance from COG to leading
-    //!                                            edge
-    //-----------------------------------------------------------------------------
-    virtual void SetDistanceCOGtoLeadingEdge(double distanceCOGtoLeadingEdge) = 0;
 
     //-----------------------------------------------------------------------------
     //! Sets forward acceleration of agent
@@ -1364,13 +1180,6 @@ public:
     //! @return               Speed Goal Min
     //-----------------------------------------------------------------------------
     virtual double GetSpeedGoalMin() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Retrieves distance from reference point to front axle of agent
-    //!
-    //! @return               Distance from reference point to front axle
-    //-----------------------------------------------------------------------------
-    virtual double GetDistanceReferencePointToFrontAxle() const = 0;
 
     virtual const openpass::sensors::Parameters& GetSensorParameters() const = 0;
 

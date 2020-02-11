@@ -19,7 +19,6 @@ class FakeAgent : public FakeWorldObject, public AgentInterface
 {
   public:
     MOCK_CONST_METHOD0(GetAgentId, int());
-    MOCK_CONST_METHOD0(GetVehicleType, AgentVehicleType());
     MOCK_CONST_METHOD0(GetVehicleModelType, std::string());
     MOCK_CONST_METHOD0(GetVehicleModelParameters, VehicleModelParameters());
     MOCK_CONST_METHOD0(GetDriverProfileName, std::string());
@@ -29,15 +28,7 @@ class FakeAgent : public FakeWorldObject, public AgentInterface
     MOCK_CONST_METHOD0(IsEgoAgent, bool());
     MOCK_CONST_METHOD0(GetVelocityX, double());
     MOCK_CONST_METHOD0(GetVelocityY, double());
-    MOCK_CONST_METHOD0(GetDistanceCOGtoFrontAxle, double());
-    MOCK_CONST_METHOD0(GetWeight, double());
-    MOCK_CONST_METHOD0(GetHeightCOG, double());
     MOCK_CONST_METHOD0(GetWheelbase, double());
-    MOCK_CONST_METHOD0(GetMomentInertiaRoll, double());
-    MOCK_CONST_METHOD0(GetMomentInertiaPitch, double());
-    MOCK_CONST_METHOD0(GetMomentInertiaYaw, double());
-    MOCK_CONST_METHOD0(GetFrictionCoeff, double());
-    MOCK_CONST_METHOD0(GetTrackWidth, double());
     MOCK_CONST_METHOD0(GetGear, int());
     MOCK_CONST_METHOD0(GetDistanceCOGtoLeadingEdge, double());
     MOCK_CONST_METHOD0(GetAccelerationX, double());
@@ -47,9 +38,7 @@ class FakeAgent : public FakeWorldObject, public AgentInterface
     MOCK_CONST_METHOD0(GetCollisionPartners, std::vector<CollisionPartner>());
     MOCK_METHOD1(SetPositionX, void(double positionX));
     MOCK_METHOD1(SetPositionY, void(double positionY));
-    MOCK_METHOD1(SetWidth, void(double width));
-    MOCK_METHOD1(SetLength, void(double length));
-    MOCK_METHOD1(SetHeight, void(double height));
+    MOCK_METHOD1(SetVehicleModelParameter, void(const VehicleModelParameters &parameter));
     MOCK_METHOD1(SetVelocityX, void(double velocityX));
     MOCK_METHOD1(SetVelocityY, void(double velocityY));
     MOCK_METHOD1(SetVelocity, void(double value));
@@ -57,26 +46,13 @@ class FakeAgent : public FakeWorldObject, public AgentInterface
     MOCK_METHOD1(SetYaw, void(double value));
     MOCK_METHOD1(SetDistanceTraveled, void(double distanceTraveled));
     MOCK_CONST_METHOD0(GetDistanceTraveled, double());
-    MOCK_METHOD1(SetDistanceCOGtoFrontAxle, void(double distanceCOGtoFrontAxle));
     MOCK_METHOD1(SetGear, void(int gear));
     MOCK_METHOD1(SetEngineSpeed, void(double engineSpeed));
     MOCK_METHOD1(SetEffAccelPedal, void(double percent));
     MOCK_METHOD1(SetEffBrakePedal, void(double percent));
     MOCK_METHOD1(SetSteeringWheelAngle, void(double steeringWheelAngle));
-    MOCK_METHOD1(SetWeight, void(double weight));
-    MOCK_METHOD1(SetHeightCOG, void(double heightCOG));
-    MOCK_METHOD1(SetDistanceReferencePointToFrontAxle, void(double distanceReferencePointToFrontAxle));
-    MOCK_METHOD1(SetDistanceReferencePointToLeadingEdge, void(double distanceReferencePointToLeadingEdge));
-    MOCK_METHOD1(SetWheelbase, void(double wheelbase));
-    MOCK_METHOD1(SetSteeringRatio, void(double steeringRatio));
-    MOCK_METHOD1(SetMomentInertiaRoll, void(double momentInertiaRoll));
-    MOCK_METHOD1(SetMomentInertiaPitch, void(double momentInertiaPitch));
-    MOCK_METHOD1(SetMomentInertiaYaw, void(double momentInertiaYaw));
     MOCK_METHOD1(SetMaxAcceleration, void(double maxAcceleration));
     MOCK_METHOD1(SetMaxDeceleration, void(double maxDeceleration));
-    MOCK_METHOD1(SetFrictionCoeff, void(double frictionCoeff));
-    MOCK_METHOD1(SetTrackWidth, void(double trackWidth));
-    MOCK_METHOD1(SetDistanceCOGtoLeadingEdge, void(double distanceCOGtoLeadingEdge));
     MOCK_METHOD1(SetAccelerationX, void(double accelerationX));
     MOCK_METHOD1(SetAccelerationY, void(double accelerationY));
     MOCK_METHOD0(RemoveAgent, void());
@@ -220,7 +196,6 @@ class FakeAgent : public FakeWorldObject, public AgentInterface
                        std::vector<CommonTrafficSign::Entity>(double searchDistance, int relativeLane));
     MOCK_CONST_METHOD3(GetLaneMarkingsInRange, std::vector<LaneMarking::Entity> (double searchDistance, int relativeLane, Side side));
     MOCK_CONST_METHOD0(GetSpeedGoalMin, double());
-    MOCK_CONST_METHOD0(GetDistanceReferencePointToFrontAxle, double());
     MOCK_CONST_METHOD0(GetSensorParameters, const openpass::sensors::Parameters&());
     MOCK_METHOD1(SetSensorParameters, void(openpass::sensors::Parameters sensorParameters));
     MOCK_CONST_METHOD3(GetDistanceToConnectorEntrance, double (std::string intersectingConnectorId, int intersectingLaneId, std::string ownConnectorId));

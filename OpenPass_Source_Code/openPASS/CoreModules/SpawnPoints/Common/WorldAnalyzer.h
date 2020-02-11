@@ -81,12 +81,6 @@ private:
                                                                                       const double firstScenarioAgentSPosition,
                                                                                       const double lastScenarioAgentSPosition);
 
-    const AgentInterface* GetFurthestScenarioAgentInLaneFromPoint(const Route& routeForRoadId,
-                                                                  const RoadId& roadId,
-                                                                  const LaneId laneId,
-                                                                  const SPosition point,
-                                                                  const Direction direction) const;
-
     bool IsOffsetValidForLane(const RoadId& roadId,
                               const LaneId laneId,
                               const SPosition distanceFromStart,

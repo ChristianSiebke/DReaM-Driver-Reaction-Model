@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2018 AMFD GmbH
 *               2016 ITK Engineering GmbH
 *
@@ -30,25 +30,12 @@ AgentAdapter::AgentAdapter(WorldInterface* world,
 {
 }
 
-AgentAdapter::~AgentAdapter()
-{
-}
-
 bool AgentAdapter::InitAgentParameter(int id,
                                       AgentBlueprintInterface* agentBlueprint)
 {
-    VehicleModelParameters vehicleModelParameters = agentBlueprint->GetVehicleModelParameters();
-    this->vehicleModelParameters = vehicleModelParameters;
+    UpdateVehicleModelParameter(agentBlueprint->GetVehicleModelParameters());
 
-    this->vehicleModelType = agentBlueprint->GetVehicleModelName();
-    this->driverProfileName = agentBlueprint->GetDriverProfileName();
-    this->vehicleType = vehicleModelParameters.vehicleType;
-    this->id = id;
-    this->agentCategory = agentBlueprint->GetAgentCategory();
-    this->agentTypeName = agentBlueprint->GetAgentProfileName();
-    this->objectName = agentBlueprint->GetObjectName();
-    this->speedGoalMin = agentBlueprint->GetSpeedGoalMin();
-
+    const auto & vehicleType = this->vehicleModelParameters.vehicleType;
     if (vehicleType != AgentVehicleType::Car &&
             vehicleType != AgentVehicleType::Truck &&
             vehicleType != AgentVehicleType::Motorbike &&
@@ -59,37 +46,28 @@ bool AgentAdapter::InitAgentParameter(int id,
         return false;
     }
 
+    this->vehicleModelType = agentBlueprint->GetVehicleModelName();
+    this->driverProfileName = agentBlueprint->GetDriverProfileName();
+    this->id = id;
+    this->agentCategory = agentBlueprint->GetAgentCategory();
+    this->agentTypeName = agentBlueprint->GetAgentProfileName();
+    this->objectName = agentBlueprint->GetObjectName();
+    this->speedGoalMin = agentBlueprint->GetSpeedGoalMin();
+
     // set default values
-    GetBaseTrafficObject().SetHeight(1.0);
     GetBaseTrafficObject().SetZ(0.0);
     GetBaseTrafficObject().SetPitch(0.0);
     GetBaseTrafficObject().SetRoll(0.0);
 
+    const auto &spawnParameter = agentBlueprint->GetSpawnParameter();
+    UpdateYaw(spawnParameter.yawAngle);
+    GetBaseTrafficObject().SetX(spawnParameter.positionX);
+    GetBaseTrafficObject().SetY(spawnParameter.positionY);
+    GetBaseTrafficObject().SetAbsVelocity(spawnParameter.velocity);
+    GetBaseTrafficObject().SetAbsAcceleration(spawnParameter.acceleration);
+    this->currentGear = static_cast<int>(spawnParameter.gear);
 
-    UpdateWidth(vehicleModelParameters.width);
-    UpdateLength(vehicleModelParameters.length);
-    UpdateDistanceReferencePointToFrontAxle(vehicleModelParameters.distanceReferencePointToFrontAxle);
-    UpdateDistanceReferencePointToLeadingEdge(vehicleModelParameters.distanceReferencePointToLeadingEdge);
-    UpdateYaw(agentBlueprint->GetSpawnParameter().yawAngle); //Yaw is needed to calculate velocity
-    UpdatePositionX(agentBlueprint->GetSpawnParameter().positionX);
-    UpdatePositionY(agentBlueprint->GetSpawnParameter().positionY);
-    UpdateAccelPedal(0.);
-    UpdateBrakePedal(0.);
-    UpdateVelocity(agentBlueprint->GetSpawnParameter().velocity);
-    UpdateAcceleration(agentBlueprint->GetSpawnParameter().acceleration);
-    UpdateGear(agentBlueprint->GetSpawnParameter().gear);
-    UpdateWeight(vehicleModelParameters.weight);
-    UpdateHeightCOG(vehicleModelParameters.heightCOG);
-    UpdateWheelbase(vehicleModelParameters.wheelbase);
-    UpdateFrictionCoeff(vehicleModelParameters.frictionCoeff);
-    UpdateTrackWidth(vehicleModelParameters.trackwidth);
-    UpdateMomentInertiaRoll(vehicleModelParameters.momentInertiaRoll);
-    UpdateMomentInertiaPitch(vehicleModelParameters.momentInertiaPitch);
-    UpdateMomentInertiaYaw(vehicleModelParameters.momentInertiaYaw);
-    UpdateMaxVelocity(vehicleModelParameters.maxVelocity);
-    UpdateMaxCurvature(vehicleModelParameters.maxCurvature);
-
-    route = agentBlueprint->GetSpawnParameter().route.value_or(Route());
+    route = spawnParameter.route.value_or(Route());
 
     SetSensorParameters(agentBlueprint->GetSensorParameters());
 

@@ -131,6 +131,7 @@ INC_WORLD = $$WORLD_OSI/WorldData.h \
 
 SOURCES += \
     $$OPEN_SRC/Common/eventDetectorDefinitions.cpp \
+    $$OPEN_SRC/CoreFramework/OpenPassSlave/modelElements/agentBlueprint.cpp \
     ScenarioImporter_IntegrationTests.cpp \
     SceneryImporter_IntegrationTests.cpp \
     SlaveConfigImporter_IntegrationTests.cpp \

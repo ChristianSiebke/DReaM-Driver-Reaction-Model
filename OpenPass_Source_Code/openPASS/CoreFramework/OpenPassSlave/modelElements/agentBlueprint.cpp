@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -13,10 +13,6 @@
 #include <assert.h>
 
 AgentBlueprint::AgentBlueprint()
-{
-}
-
-AgentBlueprint::~AgentBlueprint()
 {
 }
 
