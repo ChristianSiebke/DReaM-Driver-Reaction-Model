@@ -97,6 +97,7 @@ The <Storyboard> tag contains the initial setup of the scenario as well as manip
 \subsection scenario_storyboard_init Init
 
 The content of the <Init> tag is forwarded to the SpawnPoint to define where it should place the ego and scenario agents.
+The position can either be defined as global coordinates (x and y) with the World tag or as lane coordinates (s and t) with the Lane tag.
 The schema is as follows:
 
 |tag		|parent			|attributes					|multiplicity|
@@ -104,13 +105,20 @@ The schema is as follows:
 |Actions	|Init			|-							|1		     |
 |Private	|Actions		|object						|1 per entity|
 |Position	|Private		|-							|1		     |
-|Lane		|Position		|roadId, laneId, s, offset	|1			 |
+|Lane		|Position		|roadId, laneId, s, offset	|0 or 1		 |
+|World		|Position		|x, y, h	                |0 or 1		 |
 |Orientation|Lane			|type, h					|0 or 1		 |
 |Longitudinal|Action		|-							|1		     |
 |Speed		|Longitudinal	|-							|1			 |
 |Dynamics	|Speed			|rate, shape				|1			 |
 |Target		|Speed			|-							|1			 |
 |Absolute	|Target			|value						|1			 |
+|Routing    |Action         |-                          |0 or 1      |
+|FollowRoute|Routing        |-                          |1           |
+|Route      |FollowRoute    |-                          |1           |
+|Waypoint   |Route          |-                          |at least 1  |
+|Position   |Waypoint       |-                          |1           |
+|Road       |Position       |roadId, t                  |1           |
 
 All listed attributes are required.
 The attributes have the following meaning:
@@ -122,11 +130,16 @@ The attributes have the following meaning:
 |Lane		|laneId		|Id of the lane in the Scenery																	|
 |Lane		|s			|start position on the lane (i.e. distance from the start of the road) of the reference point	|
 |Lane		|offset		|lateral distance of the reference point to the middle of the road (i.e. t coordinate)			|
+|World		|x		    |x coordinate of the reference point			                                                |
+|World		|y		    |y coordinate of the reference point			                                                |
+|World		|h		    |heading			                                                                            |
 |Orientation|type		|has to be "relative"																			|
 |Orientation|h			|heading angle in radiant relative to the lane													|
 |Dynamics	|rate		|acceleration																					|
 |Dynamics	|shape		|unsupported (but required by OpenSCENARIO)														|
 |Absolute	|Value		|velocity																						|
+|Road       |roadId     |Id of the road in the Scenery																	|
+|Road       |t          |negative for driving in roadDirection (i.e on lanes with negative Id) else positive            |
 
 Although OpenSCENARIO also states other ways for defining a position, we currently only support position via the <Lane> tag.
 Unlike OpenSCENARIO we also allow some of these values to be stochastic.
@@ -157,6 +170,24 @@ Example
 						</Speed>
 					</Longitudinal>
 				</Action>
+                <Action>
+                    <Routing>
+                        <FollowRoute>
+                            <Route>
+                                <Waypoint>
+                                    <Position>
+                                        <Road roadId="1" t="-1.0" />
+                                    </Position>
+                                </Waypoint>
+                                <Waypoint>
+                                    <Position>
+                                        <Road roadId="2" t="-1.0" />
+                                    </Position>
+                                </Waypoint>
+                            </Route>
+                        </FollowRoute>
+                    </Routing>
+                </Action>
 			</Private>
 			<Private object="ScenarioAgent">
 				<Action>

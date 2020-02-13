@@ -198,6 +198,7 @@ namespace openpass::importer::xml::scenarioImporter::tag
     constexpr char storyboard[] {"Storyboard"};
     constexpr char target[] {"Target"};
     constexpr char waypoint[] {"Waypoint"};
+    constexpr char world[] {"World"};
 }
 
 namespace openpass::importer::xml::scenarioImporter::attribute
@@ -208,7 +209,7 @@ namespace openpass::importer::xml::scenarioImporter::attribute
     constexpr char edge[] {"edge"};
     constexpr char entryName[] {"entryName"};
     constexpr char filePath[] {"filepath"};
-    constexpr char heading[] {"h"};
+    constexpr char h[] {"h"};
     constexpr char laneId[] {"laneId"};
     constexpr char lowerBound[] {"lowerBound"};
     constexpr char name[] {"name"};
@@ -225,6 +226,8 @@ namespace openpass::importer::xml::scenarioImporter::attribute
     constexpr char type[] {"type"};
     constexpr char upperBound[] {"upperBound"};
     constexpr char value[] {"value"};
+    constexpr char x[] {"x"};
+    constexpr char y[] {"y"};
 }
 
 namespace openpass::importer::xml::sceneryImporter::tag

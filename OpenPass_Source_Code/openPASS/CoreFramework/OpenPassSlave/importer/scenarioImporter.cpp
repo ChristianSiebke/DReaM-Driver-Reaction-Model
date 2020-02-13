@@ -275,6 +275,8 @@ void ScenarioImporter::ImportManeuverElement(QDomElement& maneuverElement,
 
 void ScenarioImporter::ImportLongitudinalElement(ScenarioEntity& scenarioEntity, QDomElement firstChildOfActionElement)
 {
+    SpawnInfo &spawnInfo = scenarioEntity.spawnInfo;
+
     QDomElement speedElement;
     if (SimulationCommon::GetFirstChildElement(firstChildOfActionElement, TAG::speed, speedElement))
     {
@@ -284,7 +286,7 @@ void ScenarioImporter::ImportLongitudinalElement(ScenarioEntity& scenarioEntity,
             double rate;
             if (SimulationCommon::ParseAttributeDouble(dynamicsElement, ATTRIBUTE::rate, rate))
             {
-                scenarioEntity.spawnInfo.acceleration.value = rate;
+                spawnInfo.acceleration = rate;
             }
         }
 
@@ -299,7 +301,7 @@ void ScenarioImporter::ImportLongitudinalElement(ScenarioEntity& scenarioEntity,
                 double velocity;
                 if (SimulationCommon::ParseAttributeDouble(absoluteElement, ATTRIBUTE::value, velocity))
                 {
-                    scenarioEntity.spawnInfo.velocity.value = velocity;
+                    spawnInfo.velocity = velocity;
                 }
             }
         }
@@ -309,52 +311,100 @@ void ScenarioImporter::ImportLongitudinalElement(ScenarioEntity& scenarioEntity,
         SimulationCommon::GetFirstChildElement(speedElement, TAG::stochastics, stochasticElement);
         while (!stochasticElement.isNull())
         {
-           SetStochasticsData(scenarioEntity, stochasticElement);
+            const auto& [attributeName, stochasticInformation] = ImportStochastics(stochasticElement);
+            if (attributeName == "velocity")
+            {
+                spawnInfo.stochasticVelocity = stochasticInformation;
+                spawnInfo.stochasticVelocity.value().mean = spawnInfo.velocity;
+            }
+            else if (attributeName == "rate")
+            {
+                ThrowIfFalse(spawnInfo.acceleration.has_value(), stochasticElement, "Rate attribute is requried in order to use stochastic rates.");
+                spawnInfo.stochasticAcceleration = stochasticInformation;
+                spawnInfo.stochasticAcceleration.value().mean = spawnInfo.acceleration.value();
+            }
+
            stochasticElement = stochasticElement.nextSiblingElement(TAG::stochastics);
         }
     }
 }
 
-void ScenarioImporter::ImportPositionElement(ScenarioEntity& scenarioEntity, QDomElement firstChildOfActionElement)
+openScenario::LanePosition ScenarioImporter::ImportLanePosition(QDomElement positionElement)
 {
-    std::string roadId = "";
-    int laneId;
-    double s;
-    double offset;
+    openScenario::LanePosition lanePosition;
+    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(positionElement, ATTRIBUTE::s, lanePosition.s),
+                 positionElement, "Attribute " + std::string(ATTRIBUTE::s) + " is missing");
+    ThrowIfFalse(SimulationCommon::ParseAttributeInt(positionElement, ATTRIBUTE::laneId, lanePosition.laneId),
+                 positionElement, "Attribute " + std::string(ATTRIBUTE::laneId) + " is missing.");
+    ThrowIfFalse(SimulationCommon::ParseAttributeString(positionElement, ATTRIBUTE::roadId, lanePosition.roadId),
+                 positionElement, "Attribute " + std::string(ATTRIBUTE::roadId) + " is missing.");
 
-    QDomElement laneElement;
-    ThrowIfFalse(SimulationCommon::GetFirstChildElement(firstChildOfActionElement, TAG::lane, laneElement),
-                 firstChildOfActionElement, "Tag " + std::string(TAG::lane) + " is missing.");
-    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(laneElement, ATTRIBUTE::s, s),
-                 laneElement, "Attribute " + std::string(ATTRIBUTE::s) + " is missing");
-    ThrowIfFalse(SimulationCommon::ParseAttributeInt(laneElement, ATTRIBUTE::laneId, laneId),
-                 laneElement, "Attribute " + std::string(ATTRIBUTE::laneId) + " is missing.");
-    ThrowIfFalse(SimulationCommon::ParseAttributeString(laneElement, ATTRIBUTE::roadId, roadId),
-                 laneElement, "Attribute " + std::string(ATTRIBUTE::roadId) + " is missing.");
-
-    SpawnInfo& spawnInfo = scenarioEntity.spawnInfo;
-    spawnInfo.s.value = s;
-    spawnInfo.ILane = laneId;
-    spawnInfo.roadId = roadId;
-
-    bool offsetAvailable = SimulationCommon::ParseAttributeDouble(laneElement, ATTRIBUTE::offset, offset);
-    if (offsetAvailable)
+    double offset{};
+    if(SimulationCommon::ParseAttributeDouble(positionElement, ATTRIBUTE::offset, offset))
     {
-        spawnInfo.offset.value = offset;
+        lanePosition.offset = offset;
     }
 
+    //Parse optional stochastics
     QDomElement stochasticElement;
-    SimulationCommon::GetFirstChildElement(laneElement, TAG::stochastics, stochasticElement);
+    SimulationCommon::GetFirstChildElement(positionElement, TAG::stochastics, stochasticElement);
     while (!stochasticElement.isNull())
     {
-        SetStochasticsData(scenarioEntity, stochasticElement);
+        const auto& stochasticInformation = ImportStochastics(stochasticElement);
+
+        if (stochasticInformation.first == "offset")
+        {
+            ThrowIfFalse(lanePosition.offset.has_value(), stochasticElement, "The offset attribute is required in order to use stochastic offsets.");
+
+            lanePosition.stochasticOffset = stochasticInformation.second;
+            lanePosition.stochasticOffset->mean = lanePosition.offset.value();
+        }
+        else if (stochasticInformation.first == "s")
+        {
+            lanePosition.stochasticS = stochasticInformation.second;
+            lanePosition.stochasticS->mean = lanePosition.s;
+        }
         stochasticElement = stochasticElement.nextSiblingElement(TAG::stochastics);
     }
 
     QDomElement orientationElement;
-    if (SimulationCommon::GetFirstChildElement(laneElement, TAG::orientation, orientationElement))
+    if(SimulationCommon::GetFirstChildElement(positionElement, TAG::orientation, orientationElement))
     {
-        SetOrientationData(scenarioEntity, orientationElement);
+        lanePosition.orientation = ImportOrientation(orientationElement);
+    }
+
+    return lanePosition;
+}
+
+openScenario::WorldPosition ScenarioImporter::ImportWorldPosition(QDomElement positionElement)
+{
+    openScenario::WorldPosition worldPosition;
+    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(positionElement, ATTRIBUTE::x, worldPosition.x),
+                 positionElement, "Attribute " + std::string(ATTRIBUTE::x) + " is missing");
+    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(positionElement, ATTRIBUTE::y, worldPosition.y),
+                 positionElement, "Attribute " + std::string(ATTRIBUTE::y) + " is missing.");
+
+    double heading{};
+    if(SimulationCommon::ParseAttributeDouble(positionElement, ATTRIBUTE::h, heading))
+    {
+        worldPosition.heading = heading;
+    }
+
+    return worldPosition;
+}
+
+void ScenarioImporter::ImportPositionElement(ScenarioEntity& scenarioEntity, QDomElement firstChildOfActionElement)
+{
+    QDomElement positionElement;
+    if(SimulationCommon::GetFirstChildElement(firstChildOfActionElement, TAG::lane, positionElement))
+    {
+        scenarioEntity.spawnInfo.position = ImportLanePosition(positionElement);
+    }
+    else
+    {
+        ThrowIfFalse(SimulationCommon::GetFirstChildElement(firstChildOfActionElement, TAG::world, positionElement),
+                  firstChildOfActionElement, "OSCPosition type not supported. Currently only World and Lane are supported!");
+        scenarioEntity.spawnInfo.position = ImportWorldPosition(positionElement);
     }
 }
 
@@ -395,65 +445,39 @@ void ScenarioImporter::ImportRoutingElement(ScenarioEntity& scenarioEntity, QDom
     scenarioEntity.spawnInfo.route = Route{roads, {}, hash};
 }
 
-void ScenarioImporter::SetStochasticsDataHelper(SpawnAttribute& attribute, QDomElement& stochasticsElement)
+std::pair<std::string, openScenario::StochasticAttribute> ScenarioImporter::ImportStochastics(QDomElement& stochasticsElement)
 {
-    double stdDeviation;
-    double lowerBound;
-    double upperBound;
-
-    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(stochasticsElement, ATTRIBUTE::stdDeviation, stdDeviation),
-                 stochasticsElement, "Attribute " + std::string(ATTRIBUTE::stdDeviation) + " is missing.");
-    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(stochasticsElement, ATTRIBUTE::lowerBound, lowerBound),
-                 stochasticsElement, "Attribute " + std::string(ATTRIBUTE::lowerBound) + " is missing.");
-    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(stochasticsElement, ATTRIBUTE::upperBound, upperBound),
-                 stochasticsElement, "Attribute " + std::string(ATTRIBUTE::upperBound) + " is missing.");
-
-    attribute.mean = attribute.value;
-    attribute.isStochastic = true;
-    attribute.stdDeviation = stdDeviation;
-    attribute.lowerBoundary = lowerBound;
-    attribute.upperBoundary = upperBound;
-}
-
-void ScenarioImporter::SetStochasticsData(ScenarioEntity& scenarioEntity, QDomElement& stochasticsElement)
-{
-    SpawnInfo& spawnInfo = scenarioEntity.spawnInfo;
-
-    std::string type;
-    ThrowIfFalse(SimulationCommon::ParseAttributeString(stochasticsElement, ATTRIBUTE::value, type),
+    std::string attributeName;
+    ThrowIfFalse(SimulationCommon::ParseAttributeString(stochasticsElement, ATTRIBUTE::value, attributeName),
                  stochasticsElement, "Attribute " + std::string(ATTRIBUTE::value) + " is missing.");
 
-    if (type == "offset")
-    {
-        SetStochasticsDataHelper(spawnInfo.offset, stochasticsElement);
-    }
-    else if (type == "s")
-    {
-        SetStochasticsDataHelper(spawnInfo.s, stochasticsElement);
-    }
-    else if (type == "velocity")
-    {
-        SetStochasticsDataHelper(spawnInfo.velocity, stochasticsElement);
-    }
-    else if (type == "rate")
-    {
-        SetStochasticsDataHelper(spawnInfo.acceleration, stochasticsElement);
-    }
+    openScenario::StochasticAttribute stochasticAttribute;
+    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(stochasticsElement, ATTRIBUTE::stdDeviation, stochasticAttribute.stdDeviation),
+                 stochasticsElement, "Attribute " + std::string(ATTRIBUTE::stdDeviation) + " is missing.");
+    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(stochasticsElement, ATTRIBUTE::lowerBound, stochasticAttribute.lowerBoundary),
+                 stochasticsElement, "Attribute " + std::string(ATTRIBUTE::lowerBound) + " is missing.");
+    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(stochasticsElement, ATTRIBUTE::upperBound, stochasticAttribute.upperBoundary),
+                 stochasticsElement, "Attribute " + std::string(ATTRIBUTE::upperBound) + " is missing.");
+
+    return {attributeName, stochasticAttribute};
 }
 
-void ScenarioImporter::SetOrientationData(ScenarioEntity& scenarioEntity, QDomElement& orientationElement)
+openScenario::Orientation ScenarioImporter::ImportOrientation(QDomElement& orientationElement)
 {
-    std::string type;
-    double heading;
+    openScenario::Orientation orientation;
 
+    std::string type;
     ThrowIfFalse(SimulationCommon::ParseAttributeString(orientationElement, ATTRIBUTE::type, type),
                  orientationElement, "Attribute " + std::string(ATTRIBUTE::type) + " is missing.");
     ThrowIfFalse(type == "relative", orientationElement, "Scenario Importer: only relative orientation is allowed.");
+    orientation.type = openScenario::OrientationType::Relative;
 
-    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(orientationElement, ATTRIBUTE::heading, heading),
-                 orientationElement, "Attribute " + std::string(ATTRIBUTE::heading) + " is missing.");
+    double heading;
+    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(orientationElement, ATTRIBUTE::h, heading),
+                 orientationElement, "Attribute " + std::string(ATTRIBUTE::h) + " is missing.");
+    orientation.h = heading;
 
-    scenarioEntity.spawnInfo.heading = heading;
+    return orientation;
 }
 
 void ScenarioImporter::ImportPrivateElement(QDomElement& privateElement,
@@ -482,25 +506,12 @@ void ScenarioImporter::ImportPrivateElement(QDomElement& privateElement,
         {
             ImportPositionElement(*scenarioEntity, firstChildOfActionElement);
         }
-        else if (SimulationCommon::GetFirstChildElement(actionElement, "Routing", firstChildOfActionElement))
+        else if (SimulationCommon::GetFirstChildElement(actionElement, TAG::routing, firstChildOfActionElement))
         {
             ImportRoutingElement(*scenarioEntity, firstChildOfActionElement);
         }
 
         actionElement = actionElement.nextSiblingElement(TAG::action);
-    }
-
-    try
-    {
-        ValidityCheckForSpawnParameters(*scenarioEntity);
-    }
-    catch (const std::runtime_error& error)
-    {
-        LogErrorAndThrow("Import scenario xml failed. Error in importInitElement: " + std::string(error.what()));
-    }
-    catch (...)
-    {
-        LogErrorAndThrow("Import scenario xml failed. An unexpected error occured.");
     }
 }
 
@@ -598,13 +609,6 @@ void ScenarioImporter::ParseSimulationTime(const QDomElement& byValueElement, do
                          simulationTimeElement, "Simulation rule attribute value '" + rule + "' not valid");
         }
     }
-}
-
-void ScenarioImporter::ValidityCheckForSpawnParameters(const ScenarioEntity& scenarioEntity)
-{
-    // If scenarioEntity.spawnInfo.s.value != -999 resolves to false, the value is -999 -- unset
-    ThrowIfFalse(scenarioEntity.spawnInfo.s.value != -999,
-                 "no position information available.");
 }
 
 void ScenarioImporter::ImportParameterElement(QDomElement& parameterElement, openpass::parameter::Container& parameters)

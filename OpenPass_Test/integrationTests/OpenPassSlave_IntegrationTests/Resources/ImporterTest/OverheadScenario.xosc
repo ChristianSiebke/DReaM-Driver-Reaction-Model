@@ -99,6 +99,16 @@
                             <Lane roadId="1" s="1000.0" laneId="-3" offset="0.5"/> <!-- position  -->
                         </Position>
                     </Action>
+                    <Action>
+                        <Longitudinal>
+                            <Speed>
+                                <Dynamics rate="0.5" shape="linear"/>
+                                <Target>
+                                    <Absolute value="5.0"/>
+                                </Target>
+                            </Speed>
+                        </Longitudinal>
+                    </Action>
                 </Private>
             </Actions>
         </Init>

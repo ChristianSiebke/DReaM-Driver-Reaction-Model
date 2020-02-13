@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -24,7 +24,7 @@ using ::testing::StrEq;
 using ::testing::DontCare;
 using ::testing::ElementsAre;
 
-TEST(ScenarioImporter_UnitTests, ImportPositionElementLaneWithStocastics)
+TEST(ScenarioImporter_UnitTests, ImportPositionElementLaneWithStochastics)
 {
     QDomElement positionElement = documentRootFromString(
               "<Position>"
@@ -39,21 +39,29 @@ TEST(ScenarioImporter_UnitTests, ImportPositionElementLaneWithStocastics)
 
     EXPECT_NO_THROW(ScenarioImporter::ImportPositionElement(scenarioEntity,positionElement));
 
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.ILane,-4);
+    const auto& spawnInfo = scenarioEntity.spawnInfo;
+    openScenario::LanePosition lanePosition;
+    ASSERT_NO_THROW(lanePosition = std::get<openScenario::LanePosition>(spawnInfo.position));
 
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.s.value,1470.0);
-    ASSERT_TRUE(scenarioEntity.spawnInfo.s.isStochastic);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.s.mean,1470.0);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.s.lowerBoundary,95);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.s.upperBoundary,105);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.s.stdDeviation,5);
+    ASSERT_EQ(lanePosition.laneId,-4);
 
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.offset.value,0.5);
-    ASSERT_TRUE(scenarioEntity.spawnInfo.offset.isStochastic);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.offset.mean,0.5);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.offset.lowerBoundary,44);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.offset.upperBoundary,54);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.offset.stdDeviation,4);
+    ASSERT_DOUBLE_EQ(lanePosition.s,1470.0);
+    ASSERT_TRUE(lanePosition.stochasticS.has_value());
+
+    const auto &stochasticS = lanePosition.stochasticS.value();
+    ASSERT_DOUBLE_EQ(stochasticS.mean,1470.0);
+    ASSERT_DOUBLE_EQ(stochasticS.lowerBoundary,95);
+    ASSERT_DOUBLE_EQ(stochasticS.upperBoundary,105);
+    ASSERT_DOUBLE_EQ(stochasticS.stdDeviation,5);
+
+    ASSERT_DOUBLE_EQ(lanePosition.offset.value(),0.5);
+    ASSERT_TRUE(lanePosition.stochasticOffset.has_value());
+
+    const auto &stochasticOffset = lanePosition.stochasticOffset.value();
+    ASSERT_DOUBLE_EQ(stochasticOffset.mean,0.5);
+    ASSERT_DOUBLE_EQ(stochasticOffset.lowerBoundary,44);
+    ASSERT_DOUBLE_EQ(stochasticOffset.upperBoundary,54);
+    ASSERT_DOUBLE_EQ(stochasticOffset.stdDeviation,4);
 }
 
 TEST(ScenarioImporter_UnitTests, ImportPositionElementLaneWithOrientation)
@@ -69,21 +77,23 @@ TEST(ScenarioImporter_UnitTests, ImportPositionElementLaneWithOrientation)
     ScenarioEntity scenarioEntity;
 
     EXPECT_NO_THROW(ScenarioImporter::ImportPositionElement(scenarioEntity,positionElement));
+    const auto& spawnInfo = scenarioEntity.spawnInfo;
+    openScenario::LanePosition lanePosition;
+    ASSERT_NO_THROW(lanePosition = std::get<openScenario::LanePosition>(spawnInfo.position));
 
+    ASSERT_DOUBLE_EQ(lanePosition.s, 1470.0);
+    ASSERT_EQ(lanePosition.laneId, -4);
+    ASSERT_DOUBLE_EQ(lanePosition.offset.value(),0.5);
 
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.s.value, 1470.0);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.ILane, -4);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.offset.value,0.5);
-
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.heading,1.57);
+    ASSERT_DOUBLE_EQ(lanePosition.orientation.value().h.value(), 1.57);
 }
 
 
-TEST(ScenarioImporter_UnitTests, ImportPositionElementLane)
+TEST(ScenarioImporter_UnitTests, ImportPositionElementWorld)
 {
     QDomElement positionElement = documentRootFromString(
               "<Position>"
-                    "<Lane roadId=\"RoadId1\" s=\"1470.0\" laneId=\"-4\" offset=\"0.5\" /> "
+                    "<World x=\"10.0\" y=\"-4.0\" h=\"0.5\" /> "
                "</Position>"
               );
 
@@ -91,9 +101,39 @@ TEST(ScenarioImporter_UnitTests, ImportPositionElementLane)
 
     EXPECT_NO_THROW(ScenarioImporter::ImportPositionElement(scenarioEntity,positionElement));
 
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.s.value, 1470.0);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.ILane, -4);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.offset.value, 0.5);
+    const auto& spawnInfo = scenarioEntity.spawnInfo;
+    openScenario::WorldPosition worldPosition;
+    ASSERT_NO_THROW(worldPosition = std::get<openScenario::WorldPosition>(spawnInfo.position));
+
+    ASSERT_THAT(worldPosition.x, Eq(10.0));
+    ASSERT_THAT(worldPosition.y, Eq(-4));
+    ASSERT_THAT(worldPosition.heading.has_value(), Eq(true));
+    ASSERT_THAT(worldPosition.heading.value(), Eq(0.5));
+}
+
+TEST(ScenarioImporter_UnitTests, ImportLongitudinal)
+{
+    QDomElement positionElement = documentRootFromString(
+        "<Longitudinal>"
+            "<Speed>"
+                "<Dynamics rate=\"10.0\" />"
+                "<Target>"
+                    "<Absolute value=\"27.7\" />"
+                "</Target>"
+            "</Speed>"
+        "</Longitudinal>"
+    );
+
+    ScenarioEntity scenarioEntity;
+
+    EXPECT_NO_THROW(ScenarioImporter::ImportLongitudinalElement(scenarioEntity, positionElement));
+
+    ASSERT_THAT(scenarioEntity.spawnInfo.stochasticVelocity.has_value(), Eq(false));
+    ASSERT_THAT(scenarioEntity.spawnInfo.velocity, Eq(27.7));
+
+    ASSERT_THAT(scenarioEntity.spawnInfo.stochasticAcceleration.has_value(), Eq(false));
+    ASSERT_THAT(scenarioEntity.spawnInfo.acceleration.has_value(), Eq(true));
+    ASSERT_THAT(scenarioEntity.spawnInfo.acceleration.value(), Eq(10.0));
 }
 
 TEST(ScenarioImporter_UnitTests, ImportLongitudinalWithStochastics)
@@ -115,21 +155,19 @@ TEST(ScenarioImporter_UnitTests, ImportLongitudinalWithStochastics)
 
     EXPECT_NO_THROW(ScenarioImporter::ImportLongitudinalElement(scenarioEntity, positionElement));
 
-    SpawnAttribute velocity = scenarioEntity.spawnInfo.velocity;
-    ASSERT_DOUBLE_EQ(velocity.value, 27.7);
-    ASSERT_DOUBLE_EQ(velocity.mean, 27.7);
-    ASSERT_DOUBLE_EQ(velocity.stdDeviation, 3.0);
-    ASSERT_DOUBLE_EQ(velocity.lowerBoundary, 12.0);
-    ASSERT_DOUBLE_EQ(velocity.upperBoundary, 40.0);
-    ASSERT_TRUE(velocity.isStochastic);
+    ASSERT_THAT(scenarioEntity.spawnInfo.stochasticVelocity.has_value(), Eq(true));
+    const auto& velocityAttribute = scenarioEntity.spawnInfo.stochasticVelocity.value();
+    ASSERT_DOUBLE_EQ(velocityAttribute.mean, 27.7);
+    ASSERT_DOUBLE_EQ(velocityAttribute.stdDeviation, 3.0);
+    ASSERT_DOUBLE_EQ(velocityAttribute.lowerBoundary, 12.0);
+    ASSERT_DOUBLE_EQ(velocityAttribute.upperBoundary, 40.0);
 
-    SpawnAttribute acceleration = scenarioEntity.spawnInfo.acceleration;
-    ASSERT_DOUBLE_EQ(acceleration.value, 0.0);
-    ASSERT_DOUBLE_EQ(acceleration.mean, 0.0);
-    ASSERT_DOUBLE_EQ(acceleration.stdDeviation, 4.0);
-    ASSERT_DOUBLE_EQ(acceleration.lowerBoundary, 0.0);
-    ASSERT_DOUBLE_EQ(acceleration.upperBoundary, 4.0);
-    ASSERT_TRUE(acceleration.isStochastic);
+    ASSERT_THAT(scenarioEntity.spawnInfo.stochasticAcceleration.has_value(), Eq(true));
+    const auto& accelerationAttribtue = scenarioEntity.spawnInfo.stochasticAcceleration.value();
+    ASSERT_DOUBLE_EQ(accelerationAttribtue.mean, 0.0);
+    ASSERT_DOUBLE_EQ(accelerationAttribtue.stdDeviation, 4.0);
+    ASSERT_DOUBLE_EQ(accelerationAttribtue.lowerBoundary, 0.0);
+    ASSERT_DOUBLE_EQ(accelerationAttribtue.upperBoundary, 4.0);
 }
 
 std::ostream& operator<<(std::ostream& os, const RouteElement& obj)

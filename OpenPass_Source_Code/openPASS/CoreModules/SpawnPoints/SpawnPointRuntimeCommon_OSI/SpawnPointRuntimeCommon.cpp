@@ -122,7 +122,7 @@ bool SpawnPointRuntimeCommon::ShouldSpawnAgent(const SpawnDetails& spawnDetails,
 
     if (worldAnalyzer.AreSpawningCoordinatesValid(parameters.roadId,
                                                   laneId,
-                                                  agentBlueprint.GetSpawnParameter().distance,
+                                                  parameters.spawnLocation,
                                                   0 /* offset */,
                                                   vehicleModelParameters))
     {
@@ -173,8 +173,6 @@ void SpawnPointRuntimeCommon::CalculateSpawnParameter(AgentBlueprintInterface* a
                                                       const double velocity) const
 {
     SpawnParameter& spawnParameter = agentBlueprint->GetSpawnParameter();
-    spawnParameter.SpawningRoadId = roadId;
-    spawnParameter.SpawningLaneId = laneId;
 
     double distance = sPosition;
     Position pos = GetWorld()->LaneCoord2WorldCoord(distance, 0 /* offset */, roadId, laneId);
@@ -199,10 +197,9 @@ void SpawnPointRuntimeCommon::CalculateSpawnParameter(AgentBlueprintInterface* a
         spawnV = std::min(spawnV, curvatureVelocity);
     }
 
-    spawnParameter.distance = sPosition;
     spawnParameter.positionX = pos.xPos;
     spawnParameter.positionY = pos.yPos;
-    spawnParameter.yawAngle  = pos.yawAngle + spawnParameter.heading;
+    spawnParameter.yawAngle  = pos.yawAngle;
     spawnParameter.velocity = spawnV;
     spawnParameter.acceleration = 0;
 }

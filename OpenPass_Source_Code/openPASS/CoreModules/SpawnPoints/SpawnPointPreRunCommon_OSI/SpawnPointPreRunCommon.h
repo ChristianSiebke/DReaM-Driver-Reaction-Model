@@ -139,7 +139,6 @@ private:
      * @return      return true if successful
      */
     bool CalculateSpawnParameter(AgentBlueprintInterface* agentBlueprint,
-                                 const LaneId laneId,
                                  const SpawnInfo& spawnInfo);
 
     /**

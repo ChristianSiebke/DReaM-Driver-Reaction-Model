@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -28,17 +28,12 @@ using VehicleComponentProfileNames = std::unordered_map<std::string, std::string
 
 struct SpawnParameter
 {
-    std::string SpawningRoadId = "";
-    int SpawningLaneId = -999;
-    int nextTimeOffset = -999;
-    double distance = -999;
     double positionX = -999;
     double positionY = -999;
     double velocity = -999;
     double acceleration = -999;
     double gear = -999;
     double yawAngle = -999;
-    double heading = 0;
     std::optional<Route> route{};
 };
 

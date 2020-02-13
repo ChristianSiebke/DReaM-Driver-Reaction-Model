@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2019 in-tech
+* Copyright (c) 2019, 2020 in-tech
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -40,10 +40,8 @@ MATCHER_P(MatchesAgentBlueprint, referenceAgentBlueprint, "matches blueprint")
     const auto actualSpawnParameters = arg->GetSpawnParameter();
     const auto expectedSpawnParameters = referenceAgentBlueprint.GetSpawnParameter();
     if (!(actualSpawnParameters.velocity == expectedSpawnParameters.velocity
-       && actualSpawnParameters.SpawningLaneId == expectedSpawnParameters.SpawningLaneId
-       && actualSpawnParameters.SpawningRoadId == expectedSpawnParameters.SpawningRoadId
        && actualSpawnParameters.positionX == expectedSpawnParameters.positionX
-       && actualSpawnParameters.heading == expectedSpawnParameters.heading))
+       && actualSpawnParameters.yawAngle == expectedSpawnParameters.yawAngle))
     {
         return false;
     }
@@ -58,7 +56,75 @@ MATCHER_P(MatchesAgentBlueprint, referenceAgentBlueprint, "matches blueprint")
 
     return true;
 }
-TEST(SpawnPointScenario, Trigger_SpawnsEgoAgentAccordingToScenario)
+
+TEST(SpawnPointScenario, Trigger_SpawnsEgoAgentAccordingToScenarioWorldPosition)
+{
+    NiceMock<FakeWorld> fakeWorld;
+    NiceMock<FakeScenario> fakeScenario;
+    NiceMock<FakeAgentBlueprintProvider> fakeAgentBlueprintProvider;
+    NiceMock<FakeAgentFactory> fakeAgentFactory;
+    NiceMock<FakeSampler> fakeSampler;
+
+    SpawnPointDependencies dependencies(&fakeAgentFactory, &fakeWorld, &fakeAgentBlueprintProvider, &fakeSampler);
+    dependencies.scenario = &fakeScenario;
+
+    const std::string entityName = "Ego";
+    constexpr double x = 10.0;
+    constexpr double y = 5.0;
+    constexpr double heading = 0.5;
+    constexpr double velocity = 25;
+    constexpr double acceleration = 25;
+
+    openScenario::WorldPosition worldPosition{x, y, heading};
+
+    ScenarioEntity entity;
+    entity.name = entityName;
+    entity.catalogReference.entryName = entityName;
+    entity.spawnInfo.velocity = velocity;
+    entity.spawnInfo.acceleration = acceleration;
+    entity.spawnInfo.position = worldPosition;
+
+    std::vector<ScenarioEntity> entities{entity};
+    std::optional<AgentBlueprint> actualAgentBlueprintOptional;
+    AgentBlueprint actualAgentBlueprint;
+    VehicleModelParameters vehicleModelParameters;
+    vehicleModelParameters.length = 1;
+    vehicleModelParameters.width = 0.5;
+    vehicleModelParameters.distanceReferencePointToLeadingEdge = 0.5;
+    actualAgentBlueprint.SetVehicleModelParameters(vehicleModelParameters);
+    actualAgentBlueprintOptional = actualAgentBlueprint;
+
+    SpawnParameter expectedSpawnParameter;
+    expectedSpawnParameter.velocity = velocity;
+    expectedSpawnParameter.positionX = x;
+    expectedSpawnParameter.positionY = y;
+    expectedSpawnParameter.yawAngle = heading;
+
+    AgentBlueprint expectedAgentBlueprint;
+    expectedAgentBlueprint.SetVehicleModelParameters(vehicleModelParameters);
+    expectedAgentBlueprint.SetAgentProfileName(entityName);
+    expectedAgentBlueprint.SetAgentCategory(AgentCategory::Ego);
+    expectedAgentBlueprint.SetObjectName(entityName);
+    expectedAgentBlueprint.SetSpawnParameter(expectedSpawnParameter);
+
+    ON_CALL(fakeScenario, GetEntities())
+            .WillByDefault(ReturnRef(entities));
+
+    ON_CALL(fakeAgentBlueprintProvider, SampleAgent(entity.catalogReference.entryName))
+            .WillByDefault(Return(actualAgentBlueprint));
+    ON_CALL(fakeWorld, IntersectsWithAgent(_, _, _, _, _, _))
+            .WillByDefault(Return(false));
+
+    SimulationSlave::Agent agent(0, &fakeWorld);
+    // if this is called and the blueprints match, we're creating our Agent correctly
+    EXPECT_CALL(fakeAgentFactory, AddAgent(MatchesAgentBlueprint(expectedAgentBlueprint)))
+            .WillOnce(Return(&agent));
+
+    SpawnPointScenario spawnPointScenario{&dependencies, nullptr};
+    spawnPointScenario.Trigger();
+}
+
+TEST(SpawnPointScenario, Trigger_SpawnsEgoAgentAccordingToScenarioLanePosition)
 {
     NiceMock<FakeWorld> fakeWorld;
     NiceMock<FakeScenario> fakeScenario;
@@ -71,21 +137,24 @@ TEST(SpawnPointScenario, Trigger_SpawnsEgoAgentAccordingToScenario)
 
     const std::string entityName = "Ego";
     const std::string roadId = "ROADID";
-    const int laneId = -1;
-    const double s = 10;
-    const double offset = 0;
-    const double velocity = 25;
-    const double acceleration = 25;
+    constexpr int laneId = -1;
+    constexpr double s = 10;
+    constexpr double offset = 0;
+    constexpr double velocity = 25;
+    constexpr double acceleration = 25;
+
+    openScenario::LanePosition lanePosition;
+    lanePosition.roadId = roadId;
+    lanePosition.laneId = laneId;
+    lanePosition.s = s;
+    lanePosition.offset = offset;
 
     ScenarioEntity entity;
     entity.name = entityName;
     entity.catalogReference.entryName = entityName;
-    entity.spawnInfo.roadId = roadId;
-    entity.spawnInfo.ILane = laneId;
-    entity.spawnInfo.s.value = s;
-    entity.spawnInfo.offset.value = offset;
-    entity.spawnInfo.velocity.value = velocity;
-    entity.spawnInfo.acceleration.value = acceleration;
+    entity.spawnInfo.velocity = velocity;
+    entity.spawnInfo.acceleration = acceleration;
+    entity.spawnInfo.position = lanePosition;
 
     std::vector<ScenarioEntity> entities{entity};
     std::optional<AgentBlueprint> actualAgentBlueprintOptional;
@@ -97,14 +166,15 @@ TEST(SpawnPointScenario, Trigger_SpawnsEgoAgentAccordingToScenario)
     actualAgentBlueprint.SetVehicleModelParameters(vehicleModelParameters);
     actualAgentBlueprintOptional = actualAgentBlueprint;
 
-    const double agentFrontLength = vehicleModelParameters.length - vehicleModelParameters.distanceReferencePointToLeadingEdge;
-
     SpawnParameter expectedSpawnParameter;
+    constexpr double expectedX = 100.0;
+    constexpr double expectedY = 10.0;
+    constexpr double expectedYaw = 1.0;
     expectedSpawnParameter.velocity = velocity;
-    expectedSpawnParameter.SpawningLaneId = laneId;
-    expectedSpawnParameter.SpawningRoadId = roadId;
-    expectedSpawnParameter.positionX = s;
-    expectedSpawnParameter.heading = 0;
+    expectedSpawnParameter.positionX = expectedX;
+    expectedSpawnParameter.positionY = expectedY;
+    expectedSpawnParameter.yawAngle = expectedYaw;
+
     AgentBlueprint expectedAgentBlueprint;
     expectedAgentBlueprint.SetVehicleModelParameters(vehicleModelParameters);
     expectedAgentBlueprint.SetAgentProfileName(entityName);
@@ -112,20 +182,19 @@ TEST(SpawnPointScenario, Trigger_SpawnsEgoAgentAccordingToScenario)
     expectedAgentBlueprint.SetObjectName(entityName);
     expectedAgentBlueprint.SetSpawnParameter(expectedSpawnParameter);
 
-    Position position{s, 0, 0, 0};
+    Position position{expectedX, expectedY, expectedYaw, 0};
 
-    ON_CALL(fakeScenario, GetEntities())
-            .WillByDefault(ReturnRef(entities));
+    ON_CALL(fakeScenario, GetEntities()) .WillByDefault(ReturnRef(entities));
 
     ON_CALL(fakeAgentBlueprintProvider, SampleAgent(entity.catalogReference.entryName))
             .WillByDefault(Return(actualAgentBlueprint));
     ON_CALL(fakeWorld, IsSValidOnLane(roadId, laneId, s))
             .WillByDefault(Return(true));
-    ON_CALL(fakeWorld, IsSValidOnLane(roadId, laneId, s + agentFrontLength))
+    ON_CALL(fakeWorld, IsSValidOnLane(roadId, laneId, s))
             .WillByDefault(Return(true));
-    ON_CALL(fakeWorld, GetLaneWidth(_, roadId, laneId, s + agentFrontLength, 0))
+    ON_CALL(fakeWorld, GetLaneWidth(_, roadId, laneId, s, 0))
             .WillByDefault(Return(0.75));
-    ON_CALL(fakeWorld, LaneCoord2WorldCoord(s + agentFrontLength, offset, roadId, laneId))
+    ON_CALL(fakeWorld, LaneCoord2WorldCoord(s, offset, roadId, laneId))
             .WillByDefault(Return(position));
     ON_CALL(fakeWorld, IntersectsWithAgent(_, _, _, _, _, _))
             .WillByDefault(Return(false));
@@ -139,7 +208,74 @@ TEST(SpawnPointScenario, Trigger_SpawnsEgoAgentAccordingToScenario)
     spawnPointScenario.Trigger();
 }
 
-TEST(SpawnPointScenario, Trigger_SpawnsScenarioAgentAccordingToScenario)
+TEST(SpawnPointScenario, Trigger_SpawnsScenarioAgentAccordingToScenarioWorldPosition)
+{
+    NiceMock<FakeWorld> fakeWorld;
+    NiceMock<FakeScenario> fakeScenario;
+    NiceMock<FakeAgentBlueprintProvider> fakeAgentBlueprintProvider;
+    NiceMock<FakeAgentFactory> fakeAgentFactory;
+    NiceMock<FakeSampler> fakeSampler;
+
+    SpawnPointDependencies dependencies(&fakeAgentFactory, &fakeWorld, &fakeAgentBlueprintProvider, &fakeSampler);
+    dependencies.scenario = &fakeScenario;
+
+    const std::string entityName = "ENTITY";
+    constexpr double x = 10.0;
+    constexpr double y = 5.0;
+    constexpr double heading = 0.5;
+    constexpr double velocity = 25;
+    constexpr double acceleration = 25;
+
+    openScenario::WorldPosition worldPosition{x, y, heading};
+
+    ScenarioEntity entity;
+    entity.name = entityName;
+    entity.catalogReference.entryName = entityName;
+    entity.spawnInfo.velocity = velocity;
+    entity.spawnInfo.acceleration = acceleration;
+    entity.spawnInfo.position = worldPosition;
+
+    std::vector<ScenarioEntity> entities{entity};
+    std::optional<AgentBlueprint> actualAgentBlueprintOptional;
+    AgentBlueprint actualAgentBlueprint;
+    VehicleModelParameters vehicleModelParameters;
+    vehicleModelParameters.length = 1;
+    vehicleModelParameters.width = 0.5;
+    vehicleModelParameters.distanceReferencePointToLeadingEdge = 0.5;
+    actualAgentBlueprint.SetVehicleModelParameters(vehicleModelParameters);
+    actualAgentBlueprintOptional = actualAgentBlueprint;
+
+    SpawnParameter expectedSpawnParameter;
+    expectedSpawnParameter.velocity = velocity;
+    expectedSpawnParameter.positionX = x;
+    expectedSpawnParameter.positionY = y;
+    expectedSpawnParameter.yawAngle = heading;
+
+    AgentBlueprint expectedAgentBlueprint;
+    expectedAgentBlueprint.SetVehicleModelParameters(vehicleModelParameters);
+    expectedAgentBlueprint.SetAgentProfileName(entityName);
+    expectedAgentBlueprint.SetAgentCategory(AgentCategory::Scenario);
+    expectedAgentBlueprint.SetObjectName(entityName);
+    expectedAgentBlueprint.SetSpawnParameter(expectedSpawnParameter);
+
+    ON_CALL(fakeScenario, GetEntities())
+            .WillByDefault(ReturnRef(entities));
+
+    ON_CALL(fakeAgentBlueprintProvider, SampleAgent(entity.catalogReference.entryName))
+            .WillByDefault(Return(actualAgentBlueprint));
+    ON_CALL(fakeWorld, IntersectsWithAgent(_, _, _, _, _, _))
+            .WillByDefault(Return(false));
+
+    SimulationSlave::Agent agent(0, &fakeWorld);
+    // if this is called and the blueprints match, we're creating our Agent correctly
+    EXPECT_CALL(fakeAgentFactory, AddAgent(MatchesAgentBlueprint(expectedAgentBlueprint)))
+            .WillOnce(Return(&agent));
+
+    SpawnPointScenario spawnPointScenario{&dependencies, nullptr};
+    spawnPointScenario.Trigger();
+}
+
+TEST(SpawnPointScenario, Trigger_SpawnsScenarioAgentAccordingToScenarioLanePosition)
 {
     NiceMock<FakeWorld> fakeWorld;
     NiceMock<FakeScenario> fakeScenario;
@@ -152,21 +288,24 @@ TEST(SpawnPointScenario, Trigger_SpawnsScenarioAgentAccordingToScenario)
 
     const std::string entityName = "ENTITY";
     const std::string roadId = "ROADID";
-    const int laneId = -1;
-    const double s = 10;
-    const double offset = 0;
-    const double velocity = 25;
-    const double acceleration = 25;
+    constexpr int laneId = -1;
+    constexpr double s = 10;
+    constexpr double offset = 0;
+    constexpr double velocity = 25;
+    constexpr double acceleration = 25;
+
+    openScenario::LanePosition lanePosition;
+    lanePosition.roadId = roadId;
+    lanePosition.laneId = laneId;
+    lanePosition.s = s;
+    lanePosition.offset = offset;
 
     ScenarioEntity entity;
     entity.name = entityName;
     entity.catalogReference.entryName = entityName;
-    entity.spawnInfo.roadId = roadId;
-    entity.spawnInfo.ILane = laneId;
-    entity.spawnInfo.s.value = s;
-    entity.spawnInfo.offset.value = offset;
-    entity.spawnInfo.velocity.value = velocity;
-    entity.spawnInfo.acceleration.value = acceleration;
+    entity.spawnInfo.velocity = velocity;
+    entity.spawnInfo.acceleration = acceleration;
+    entity.spawnInfo.position = lanePosition;
 
     std::vector<ScenarioEntity> entities{entity};
     std::optional<AgentBlueprint> actualAgentBlueprintOptional;
@@ -178,14 +317,15 @@ TEST(SpawnPointScenario, Trigger_SpawnsScenarioAgentAccordingToScenario)
     actualAgentBlueprint.SetVehicleModelParameters(vehicleModelParameters);
     actualAgentBlueprintOptional = actualAgentBlueprint;
 
-    const double agentFrontLength = vehicleModelParameters.length - vehicleModelParameters.distanceReferencePointToLeadingEdge;
-
     SpawnParameter expectedSpawnParameter;
+    constexpr double expectedX = 100.0;
+    constexpr double expectedY = 10.0;
+    constexpr double expectedYaw = 1.0;
     expectedSpawnParameter.velocity = velocity;
-    expectedSpawnParameter.SpawningLaneId = laneId;
-    expectedSpawnParameter.SpawningRoadId = roadId;
-    expectedSpawnParameter.positionX = s;
-    expectedSpawnParameter.heading = 0;
+    expectedSpawnParameter.positionX = expectedX;
+    expectedSpawnParameter.positionY = expectedY;
+    expectedSpawnParameter.yawAngle = expectedYaw;
+
     AgentBlueprint expectedAgentBlueprint;
     expectedAgentBlueprint.SetVehicleModelParameters(vehicleModelParameters);
     expectedAgentBlueprint.SetAgentProfileName(entityName);
@@ -193,7 +333,7 @@ TEST(SpawnPointScenario, Trigger_SpawnsScenarioAgentAccordingToScenario)
     expectedAgentBlueprint.SetObjectName(entityName);
     expectedAgentBlueprint.SetSpawnParameter(expectedSpawnParameter);
 
-    Position position{s, 0, 0, 0};
+    Position position{expectedX, expectedY, expectedYaw, 0};
 
     ON_CALL(fakeScenario, GetEntities())
             .WillByDefault(ReturnRef(entities));
@@ -202,11 +342,11 @@ TEST(SpawnPointScenario, Trigger_SpawnsScenarioAgentAccordingToScenario)
             .WillByDefault(Return(actualAgentBlueprint));
     ON_CALL(fakeWorld, IsSValidOnLane(roadId, laneId, s))
             .WillByDefault(Return(true));
-    ON_CALL(fakeWorld, IsSValidOnLane(roadId, laneId, s + agentFrontLength))
+    ON_CALL(fakeWorld, IsSValidOnLane(roadId, laneId, s))
             .WillByDefault(Return(true));
-    ON_CALL(fakeWorld, GetLaneWidth(_, roadId, laneId, s + agentFrontLength, 0))
+    ON_CALL(fakeWorld, GetLaneWidth(_, roadId, laneId, s, 0))
             .WillByDefault(Return(0.75));
-    ON_CALL(fakeWorld, LaneCoord2WorldCoord(s + agentFrontLength, offset, roadId, laneId))
+    ON_CALL(fakeWorld, LaneCoord2WorldCoord(s, offset, roadId, laneId))
             .WillByDefault(Return(position));
     ON_CALL(fakeWorld, IntersectsWithAgent(_, _, _, _, _, _))
             .WillByDefault(Return(false));

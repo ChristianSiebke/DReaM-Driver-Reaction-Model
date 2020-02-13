@@ -18,6 +18,16 @@
 
 namespace openScenario {
 
+// This is a custom solution and not according to the openScenario standard
+struct StochasticAttribute
+{
+    double value = -999;
+    double mean = -999;
+    double stdDeviation = -999;
+    double lowerBoundary = -999;
+    double upperBoundary = -999;
+};
+
 struct ActorInformation
 {
     std::optional<bool> triggeringAgentsAsActors{};
@@ -57,6 +67,16 @@ struct LanePosition
     int laneId{};
     std::optional<double> offset{};
     double s{};
+
+    std::optional<StochasticAttribute> stochasticOffset;
+    std::optional<StochasticAttribute> stochasticS;
+};
+
+struct WorldPosition
+{
+    double x{};
+    double y{};
+    std::optional<double> heading;
 };
 
 // All action classes

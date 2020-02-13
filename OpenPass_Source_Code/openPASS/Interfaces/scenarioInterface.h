@@ -25,49 +25,28 @@
 #include "Interfaces/scenarioActionInterface.h"
 #include "CoreFramework/CoreShare/parameters.h"
 
-struct SpawnAttribute
-{
-    bool isStochastic = false;
-    double value = -999;
-    double mean = -999;
-    double stdDeviation = -999;
-    double lowerBoundary = -999;
-    double upperBoundary = -999;
-};
-
 struct SpawnInfo
 {
 public:
     SpawnInfo() {}
-    SpawnInfo(double s,
-              double v,
-              std::string roadId,
-              int lane,
-              double offset,
-              double acceleration,
-              double heading = 0):
-        roadId(roadId),
-        ILane(lane),
-        heading(heading)
+    SpawnInfo(std::variant<openScenario::LanePosition, openScenario::WorldPosition> position,
+                        double v,
+                        double acceleration):
+        position(position)
     {
-        this->s.value = s;
-        this->offset.value = offset;
-        this->velocity.value = v;
-        this->acceleration.value = acceleration;
+        this->velocity = v;
+        this->acceleration = acceleration;
     }
 
-    std::string roadId = "";
-    int ILane = -999;
-    double heading = 0;
+    std::variant<openScenario::LanePosition, openScenario::WorldPosition> position;
+
     std::optional<Route> route {std::nullopt};
 
-    //TODO CK Make offset optional
-    SpawnAttribute offset;
-    SpawnAttribute s;
-    SpawnAttribute velocity;
+    double velocity;
+    std::optional<openScenario::StochasticAttribute> stochasticVelocity;
 
-    //TODO CK make acceleration optional
-    SpawnAttribute acceleration;
+    std::optional<double> acceleration;
+    std::optional<openScenario::StochasticAttribute> stochasticAcceleration;
 };
 
 /*!

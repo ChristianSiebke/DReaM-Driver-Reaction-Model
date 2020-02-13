@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2019 in-tech GmbH
+* Copyright (c) 2017, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -36,21 +36,12 @@ SpawnPointInterface::Agents SpawnPointScenario::Trigger()
         {
             auto agentBlueprint = dependencies.agentBlueprintProvider->SampleAgent(entity.catalogReference.entryName);
             agentBlueprint.SetAgentProfileName(entity.catalogReference.entryName);
-            SetPredefinedParameter(agentBlueprint, entity);
-
-            if(!TryGetSpawnDistance(entity.spawnInfo.roadId,
-                                    entity.spawnInfo.ILane,
-                                    entity.spawnInfo.s))
-            {
-                LogError("Could not generate a value spawn distance for entity " + entity.name);
-            }
-
-            const SpawnInfo spawnInfo = GetNextSpawnCarInfo(entity.spawnInfo.ILane, agentBlueprint, entity);
-            if(!CalculateSpawnParameter(agentBlueprint, spawnInfo))
-            {
-                LogError(" failed to calculate spawn parameters successfully for entity "
-                       + entity.name);
-            }
+            agentBlueprint.SetAgentCategory(entity.name == "Ego"
+                                                ? AgentCategory::Ego
+                                                : AgentCategory::Scenario);
+            agentBlueprint.SetObjectName(entity.name);
+            agentBlueprint.SetSpawnParameter(CalculateSpawnParameter(entity.spawnInfo,
+                                                                     agentBlueprint.GetVehicleModelParameters()));
 
             SimulationSlave::Agent* newAgent = dependencies.agentFactory->AddAgent(&agentBlueprint);
 
@@ -63,6 +54,7 @@ SpawnPointInterface::Agents SpawnPointScenario::Trigger()
                 LogError(" failed to add agent successfully for entity "
                        + entity.name);
             }
+
         }
         catch(const std::runtime_error& error)
         {
@@ -73,176 +65,51 @@ SpawnPointInterface::Agents SpawnPointScenario::Trigger()
     return agents;
 }
 
-SpawnInfo SpawnPointScenario::GenerateSpawnInfo(SpawnInfo spawnInfo, int laneId, double egoVelocity, double rearCarLength)
+bool SpawnPointScenario::ValidateOverlappingAgents(const STCoordinates &stCoordinates,
+                                                             const openScenario::LanePosition& lanePosition,
+                                                             const VehicleModelParameters& vehicleModelParameters)
 {
-    double spawnVelocity = spawnInfo.velocity.value;
-    if (spawnVelocity == -999)
+    const Position position = GetWorld()->LaneCoord2WorldCoord(stCoordinates.s,
+                                                         stCoordinates.t,
+                                                         lanePosition.roadId,
+                                                         lanePosition.laneId);
+
+    if (GetWorld()->IntersectsWithAgent(position.xPos,
+                                        position.yPos,
+                                        position.yawAngle,
+                                        vehicleModelParameters.length,
+                                        vehicleModelParameters.width,
+                                        vehicleModelParameters.distanceReferencePointToLeadingEdge))
     {
-        spawnVelocity = egoVelocity;
+        return false;
     }
-
-    if (spawnInfo.acceleration.value == -999)
-    {
-        spawnInfo.acceleration.value = 0.0;
-    }
-    else
-    {
-        CalculateAttributeValue(spawnInfo.acceleration);
-    }
-
-    return {spawnInfo.s.value + rearCarLength,
-            spawnVelocity,
-            spawnInfo.roadId,
-            laneId,
-            spawnInfo.offset.value,
-            spawnInfo.acceleration.value};
-}
-
-SpawnInfo SpawnPointScenario::GetNextSpawnCarInfo(const int laneId,
-                                                  AgentBlueprintInterface& agentBlueprint,
-                                                  const ScenarioEntity& entity)
-{
-    const double agentLength = agentBlueprint.GetVehicleModelParameters().length;
-    const double agentFrontLength = agentBlueprint.GetVehicleModelParameters().distanceReferencePointToLeadingEdge;
-    const double agentRearLength = agentLength - agentFrontLength;
-
-    double velocity;
-
-    auto velocityAttr = entity.spawnInfo.velocity;
-    CalculateAttributeValue(velocityAttr);
-    if (velocityAttr.value == -999)
-    {
-        LogError("initial velocity not defined for entity " + entity.name);
-    }
-    velocity = velocityAttr.value;
-
-    SpawnInfo spawnInfo = GenerateSpawnInfo(entity.spawnInfo, laneId, velocity, agentRearLength);
-    if (!AreSpawningCoordinatesValid(spawnInfo, agentBlueprint))
-    {
-        LogError("Coordinates of scenery agent are invalid.");
-    }
-
-    return spawnInfo;
-}
-
-void SpawnPointScenario::SetPredefinedParameter(AgentBlueprintInterface& agentBlueprint,
-                                        const ScenarioEntity& scenarioEntity) const
-{
-    const SpawnInfo& spawnInfo = scenarioEntity.spawnInfo;
-    SpawnParameter spawnParameter;
-
-    spawnParameter.velocity = spawnInfo.velocity.value;
-    spawnParameter.SpawningLaneId = spawnInfo.ILane;
-    spawnParameter.SpawningRoadId = spawnInfo.roadId;
-    spawnParameter.positionX = spawnInfo.s.value;
-    spawnParameter.heading = spawnInfo.heading;
-
-    agentBlueprint.SetAgentCategory(scenarioEntity.name == "Ego"
-                                        ? AgentCategory::Ego
-                                        : AgentCategory::Scenario);
-    agentBlueprint.SetObjectName(scenarioEntity.name);
-    agentBlueprint.SetSpawnParameter(spawnParameter);
-}
-
-bool SpawnPointScenario::CalculateSpawnParameter(AgentBlueprintInterface& agentBlueprint,
-                                                 const SpawnInfo& spawnInfo)
-{
-    SpawnParameter& spawnParameter = agentBlueprint.GetSpawnParameter();
-    spawnParameter.SpawningRoadId = spawnInfo.roadId;
-    spawnParameter.SpawningLaneId = spawnInfo.ILane;
-
-    double distance = spawnInfo.s.value;
-    Position pos = GetWorld()->LaneCoord2WorldCoord(distance, spawnInfo.offset.value, spawnInfo.roadId, spawnInfo.ILane);
-
-    double spawnV = spawnInfo.velocity.value;
-
-    //considers adjusted velocity in curvatures
-    double kappa = pos.curvature;
-
-    // Note: This could falsify ego and scenario agents
-    if (kappa != 0.0)
-    {
-        double curvatureVelocity;
-
-        curvatureVelocity = 160 * (1 / (std::sqrt((std::abs(kappa)) / 1000)));
-
-        spawnV = std::min(spawnV, curvatureVelocity);
-    }
-
-    spawnParameter.distance = spawnInfo.s.value;
-    spawnParameter.positionX = pos.xPos;
-    spawnParameter.positionY = pos.yPos;
-    spawnParameter.yawAngle  = pos.yawAngle + agentBlueprint.GetSpawnParameter().heading;
-    spawnParameter.velocity = spawnV;
-    spawnParameter.acceleration = spawnInfo.acceleration.value;
 
     return true;
 }
 
-bool SpawnPointScenario::NewAgentIntersectsWithExistingAgent(const SpawnInfo& spawnInfo,
-                                                     const AgentBlueprintInterface& agentBlueprint)
+bool SpawnPointScenario::ValidateSTCoordinatesOnLane(const STCoordinates &stCoordinate,
+                                                  const openScenario::LanePosition &lanePosition,
+                                                  const double vehicleWidth)
 {
-    Position pos = GetWorld()->LaneCoord2WorldCoord(spawnInfo.s.value, spawnInfo.offset.value, spawnInfo.roadId, spawnInfo.ILane);
-    VehicleModelParameters vehicleModelParameters = agentBlueprint.GetVehicleModelParameters();
-
-    return GetWorld()->IntersectsWithAgent(pos.xPos,
-                                           pos.yPos,
-                                           pos.yawAngle,
-                                           vehicleModelParameters.length,
-                                           vehicleModelParameters.width,
-                                           vehicleModelParameters.distanceReferencePointToLeadingEdge);
-}
-
-bool SpawnPointScenario::TryGetSpawnDistance(std::string roadId, int laneId, SpawnAttribute sAttribute)
-{
-    int trials = sAttribute.isStochastic ? NUMBER_OF_TRIALS_STOCHASTIC : 1;
-
-    for (int trial = 0; trial < trials; trial++)
+    if (!GetWorld()->IsSValidOnLane(lanePosition.roadId,
+                                    lanePosition.laneId,
+                                    stCoordinate.s))
     {
-        CalculateAttributeValue(sAttribute);
-        auto spawnDistance = sAttribute.value;
-
-        if (GetWorld()->IsSValidOnLane(roadId, laneId, spawnDistance))
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-void SpawnPointScenario::CalculateAttributeValue(SpawnAttribute& attribute)
-{
-    if (attribute.isStochastic)
-    {
-        attribute.value = dependencies.sampler->RollForStochasticAttribute(attribute.mean,
-                          attribute.stdDeviation,
-                          attribute.lowerBoundary,
-                          attribute.upperBoundary);
-    }
-}
-
-bool SpawnPointScenario::IsOffsetValidForLane(std::string roadId, int laneId, double distanceFromStart, double offset, double vehicleWidth)
-{
-    if (!GetWorld()->IsSValidOnLane(roadId, laneId, distanceFromStart))
-    {
-        LogError("Invalid offset. Lane is not available: " + std::to_string(laneId) + ". Distance from start: " +
-                 std::to_string(distanceFromStart));
         return false;
     }
 
     //Check if lane width > vehicle width
-    double laneWidth = GetWorld()->GetLaneWidth(Route{roadId}, roadId, laneId, distanceFromStart, 0);
-    if (vehicleWidth > laneWidth + std::abs(offset))
+    double laneWidth = GetWorld()->GetLaneWidth(Route{lanePosition.roadId},
+                                                lanePosition.roadId,
+                                                lanePosition.laneId,
+                                                stCoordinate.s, 0);
+    if (vehicleWidth > laneWidth + std::abs(stCoordinate.t))
     {
-        LogError("Invalid offset. Lane width < vehicle width: " + std::to_string(laneId) + ". Distance from start: " +
-                 std::to_string(distanceFromStart) + ". Lane width: " + std::to_string(laneWidth) + ". Vehicle width: " + std::to_string(
-                     vehicleWidth));
         return false;
     }
 
     //Is vehicle completely inside the lane
-    bool isVehicleCompletelyInLane = (laneWidth - vehicleWidth) * 0.5 >= std::abs(offset);
+    bool isVehicleCompletelyInLane = (laneWidth - vehicleWidth) * 0.5 >= std::abs(stCoordinate.t);
     if (isVehicleCompletelyInLane)
     {
         return true;
@@ -250,68 +117,145 @@ bool SpawnPointScenario::IsOffsetValidForLane(std::string roadId, int laneId, do
 
     //Is vehicle more than 50 % on the lane
     double allowedRange = laneWidth * 0.5;
-    bool outsideAllowedRange =  std::abs(offset) > allowedRange;
+    bool outsideAllowedRange =  std::abs(stCoordinate.t) > allowedRange;
     if (outsideAllowedRange)
     {
-        LogError("Invalid offset. Vehicle not inside allowed range: " + std::to_string(laneId) + ". Invalid offset: " +
-                 std::to_string(offset));
         return false;
     }
 
     //Is vehicle partly on invalid lane
-    bool isOffsetToLeftLane = (offset >= 0);
-    int otherLaneId = isOffsetToLeftLane ? (laneId + 1) : (laneId - 1);
+    bool isOffsetToLeftLane = (stCoordinate.t >= 0);
+    int otherLaneId = isOffsetToLeftLane ? (lanePosition.laneId + 1) : (lanePosition.laneId - 1);
 
-    if (!GetWorld()->IsSValidOnLane(roadId, otherLaneId, distanceFromStart)) //other lane is invalid
+    if (!GetWorld()->IsSValidOnLane(lanePosition.roadId,
+                                    otherLaneId,
+                                    stCoordinate.s)) //other lane is invalid
     {
-        LogError("Invalid offset. Other lane is invalid: " + std::to_string(laneId) + ". Invalid offset: " + std::to_string(
-                     offset));
         return false;
     }
 
     return true;
 }
 
-void SpawnPointScenario::LogWarning(const std::string& message)
+STCoordinates SpawnPointScenario::GetSTCoordinates(const openScenario::LanePosition &lanePosition,
+                                                            const VehicleModelParameters &vehicleModelParameters)
 {
-    std::stringstream log;
-    log.str(std::string());
-    log << COMPONENTNAME << " " << message;
-    LOG(CbkLogLevel::Warning, log.str());
+    if(!lanePosition.stochasticS.has_value() && !lanePosition.stochasticOffset.has_value())
+    {
+        return {lanePosition.s, lanePosition.offset.value_or(0.0)};
+    }
+    else
+    {
+        for (int trial = 0; trial < NUMBER_OF_TRIALS_STOCHASTIC; trial++)
+        {
+            STCoordinates stCoordinates;
+
+            if(lanePosition.stochasticS.has_value())
+            {
+                stCoordinates.s = CalculateAttributeValue(lanePosition.stochasticS.value());
+            }
+            else
+            {
+                stCoordinates.s = lanePosition.s;
+            }
+
+            if(lanePosition.stochasticOffset.has_value())
+            {
+                stCoordinates.t = CalculateAttributeValue(lanePosition.stochasticOffset.value());
+            }
+            else
+            {
+                stCoordinates.t = lanePosition.offset.value_or(0.0);
+            }
+
+
+            if (ValidateOverlappingAgents(stCoordinates,
+                                                             lanePosition,
+                                                             vehicleModelParameters)
+                    && ValidateSTCoordinatesOnLane(stCoordinates,
+                                                             lanePosition,
+                                                             vehicleModelParameters.width))
+            {
+                return stCoordinates;
+            }
+        }
+
+        LogError("Sampling valid stochastic spawn distance failed.");
+    }
 }
 
-void SpawnPointScenario::LogError(const std::string& message)
+SpawnParameter SpawnPointScenario::CalculateSpawnParameter(const SpawnInfo& spawnInfo,
+                                                           const VehicleModelParameters &vehicleModelParameters)
+{
+    SpawnParameter spawnParameter;
+
+    // Define position and orientation
+    // Lane Spawning
+    if(spawnInfo.position.index() == 0)
+    {
+        const auto &lanePosition = std::get<openScenario::LanePosition>(spawnInfo.position);
+
+        const auto &stCoordinate = GetSTCoordinates(lanePosition, vehicleModelParameters);
+        const auto &pos = GetWorld()->LaneCoord2WorldCoord(stCoordinate.s,
+                                                           stCoordinate.t,
+                                                           lanePosition.roadId,
+                                                           lanePosition.laneId);
+
+        spawnParameter.positionX = pos.xPos;
+        spawnParameter.positionY = pos.yPos;
+        spawnParameter.yawAngle = pos.yawAngle;
+        spawnParameter.route = spawnInfo.route;
+
+        if(lanePosition.orientation.has_value())
+        {
+            spawnParameter.yawAngle += lanePosition.orientation.value().h.value_or(0.0);
+        }
+    }
+    // World Spawning
+    else
+    {
+        const auto &worldPosition = std::get<openScenario::WorldPosition>(spawnInfo.position);
+        spawnParameter.positionX = worldPosition.x;
+        spawnParameter.positionY = worldPosition.y;
+        spawnParameter.yawAngle = worldPosition.heading.value_or(0.0);
+    }
+
+    // Define velocity
+    if(spawnInfo.stochasticVelocity.has_value())
+    {
+        spawnParameter.velocity = CalculateAttributeValue(spawnInfo.stochasticVelocity.value());
+    }
+    else
+    {
+        spawnParameter.velocity = spawnInfo.velocity;
+    }
+
+    // Define acceleration
+    if(spawnInfo.stochasticAcceleration.has_value())
+    {
+        spawnParameter.acceleration = CalculateAttributeValue(spawnInfo.stochasticAcceleration.value());
+    }
+    else
+    {
+        spawnParameter.acceleration = spawnInfo.acceleration.value_or(0.0);
+    }
+
+    return spawnParameter;
+}
+
+double SpawnPointScenario::CalculateAttributeValue(const openScenario::StochasticAttribute &attribute)
+{
+        return dependencies.sampler->RollForStochasticAttribute(attribute.mean,
+                                                                attribute.stdDeviation,
+                                                                attribute.lowerBoundary,
+                                                                attribute.upperBoundary);
+}
+
+[[noreturn]] void SpawnPointScenario::LogError(const std::string& message)
 {
     std::stringstream log;
     log.str(std::string());
     log << COMPONENTNAME << " " << message;
     LOG(CbkLogLevel::Error, log.str());
     throw std::runtime_error(log.str());
-}
-
-bool SpawnPointScenario::AreSpawningCoordinatesValid(const SpawnInfo& spawnInfo,
-                                             const AgentBlueprintInterface& agentBlueprint)
-{
-    if (!GetWorld()->IsSValidOnLane(spawnInfo.roadId, spawnInfo.ILane, spawnInfo.s.value))
-    {
-        LogWarning("S is not valid for vehicle on lane: " + std::to_string(spawnInfo.ILane) + ". Invalid s: " + std::to_string(
-                       spawnInfo.s.value));
-        return false;
-    }
-
-    if (!IsOffsetValidForLane(spawnInfo.roadId, spawnInfo.ILane, spawnInfo.s.value, spawnInfo.offset.value, agentBlueprint.GetVehicleModelParameters().width))
-    {
-        LogError("Offset is not valid for vehicle on lane: " + std::to_string(spawnInfo.ILane) + ". Invalid offset: " + std::to_string(
-                     spawnInfo.offset.value));
-
-        return false;
-    }
-
-    if (NewAgentIntersectsWithExistingAgent(spawnInfo, agentBlueprint))
-    {
-        LogWarning("New Agent intersects existing agent on lane: " + std::to_string(spawnInfo.ILane) + ".");
-        return false;
-    }
-
-    return true;
 }

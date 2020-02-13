@@ -95,13 +95,17 @@ SpawnPointInterface::Agents SpawnPointPreRunCommon::GenerateAgentsForRange(const
                 generating = false;
                 break;
             }
-            if (!worldAnalyzer.AreSpawningCoordinatesValid(parameters.roadId, laneId, spawnInfo->s.value, 0 /* offset */, agentBlueprint.GetVehicleModelParameters()))
+            if (!worldAnalyzer.AreSpawningCoordinatesValid(parameters.roadId,
+                                                           laneId,
+                                                           std::get<openScenario::LanePosition>(spawnInfo->position).s,
+                                                           0 /* offset */,
+                                                           agentBlueprint.GetVehicleModelParameters()))
             {
                 generating = false;
                 break;
             }
 
-            if (!CalculateSpawnParameter(&agentBlueprint, laneId, *spawnInfo))
+            if (!CalculateSpawnParameter(&agentBlueprint, *spawnInfo))
             {
                 generating = false;
                 break;
@@ -146,6 +150,8 @@ std::optional<SpawnInfo> SpawnPointPreRunCommon::GetNextSpawnCarInfo(const LaneI
                                                          const double agentFrontLength,
                                                          const double agentRearLength) const
 {
+    std::optional<SpawnInfo> optionalSpawnInfo;
+
     const auto routeForRoadId = Route{parameters.roadId};
     const auto spawnDistance = worldAnalyzer.GetNextSpawnPosition(routeForRoadId,
                                                                   parameters.roadId,
@@ -159,7 +165,7 @@ std::optional<SpawnInfo> SpawnPointPreRunCommon::GetNextSpawnCarInfo(const LaneI
 
     if (!spawnDistance)
     {
-        return std::nullopt;
+        return optionalSpawnInfo;
     }
 
     const auto adjustedVelocity = worldAnalyzer.CalculateSpawnVelocityToPreventCrashing(routeForRoadId,
@@ -170,23 +176,37 @@ std::optional<SpawnInfo> SpawnPointPreRunCommon::GetNextSpawnCarInfo(const LaneI
                                                                                         agentRearLength,
                                                                                         velocity);
 
-    return SpawnInfo(spawnDistance.value(), adjustedVelocity, parameters.roadId, laneId, 0 /* offset */, 0 /* acceleration */);
+    openScenario::LanePosition lanePosition;
+    lanePosition.roadId = parameters.roadId;
+    lanePosition.laneId = laneId;
+    lanePosition.offset = 0.0;
+    lanePosition.s = spawnDistance.value();
+
+    SpawnInfo spawnInfo;
+    spawnInfo.position = lanePosition;
+    spawnInfo.velocity = adjustedVelocity;
+    spawnInfo.acceleration = 0.0;
+
+    optionalSpawnInfo = spawnInfo;
+
+    return optionalSpawnInfo;
 }
 
 
 
 bool SpawnPointPreRunCommon::CalculateSpawnParameter(AgentBlueprintInterface* agentBlueprint,
-                                         const LaneId laneId,
-                                         const SpawnInfo& spawnInfo)
+                                                     const SpawnInfo& spawnInfo)
 {
+    const auto& lanePosition = std::get<openScenario::LanePosition>(spawnInfo.position);
+
     SpawnParameter& spawnParameter = agentBlueprint->GetSpawnParameter();
-    spawnParameter.SpawningRoadId = spawnInfo.roadId;
-    spawnParameter.SpawningLaneId = spawnInfo.ILane;
 
-    double distance = spawnInfo.s.value;
-    Position pos = GetWorld()->LaneCoord2WorldCoord(distance, 0 /* offset */, spawnInfo.roadId, laneId);
+    Position pos = GetWorld()->LaneCoord2WorldCoord(lanePosition.s,
+                                                    lanePosition.offset.value_or(0.0),
+                                                    lanePosition.roadId,
+                                                    lanePosition.laneId);
 
-    double spawnV = spawnInfo.velocity.value;
+    double spawnV = spawnInfo.velocity;
 
     if(agentBlueprint->GetVehicleModelParameters().vehicleType == AgentVehicleType::Truck)
     {
@@ -206,12 +226,11 @@ bool SpawnPointPreRunCommon::CalculateSpawnParameter(AgentBlueprintInterface* ag
         spawnV = std::min(spawnV, curvatureVelocity);
     }
 
-    spawnParameter.distance = spawnInfo.s.value;
     spawnParameter.positionX = pos.xPos;
     spawnParameter.positionY = pos.yPos;
-    spawnParameter.yawAngle  = pos.yawAngle + agentBlueprint->GetSpawnParameter().heading;
+    spawnParameter.yawAngle  = pos.yawAngle;
     spawnParameter.velocity = spawnV;
-    spawnParameter.acceleration = spawnInfo.acceleration.value;
+    spawnParameter.acceleration = spawnInfo.acceleration.value_or(0.0);
 
     return true;
 }

@@ -150,17 +150,6 @@ private:
     static void ParseSimulationTime(const QDomElement &byValueElement, double& value, std::string& rule);
 
     /*!
-     * \brief Validates spawn parameters
-     *
-     * \param[in]   scenarioEntity      The scenario entity to validate
-     *
-     * Throws when validation fails.
-     *
-     * \throw std::runtime_exception    If s-coordinate or start time are not defined
-     */
-    static void ValidityCheckForSpawnParameters(const ScenarioEntity& scenarioEntity);
-
-    /*!
      * \brief Imports the entities element of a OpenSCENARIO DOM
      *
      * \param[in]   documentRoot    The DOM root of the scenario file
@@ -234,9 +223,21 @@ private:
                                       const openScenario::ActorInformation &actorInformation,
                                       const int numberOfExecutions);
 
-    static void SetStochasticsDataHelper(SpawnAttribute &attribute, QDomElement& stochasticsElement);
-    static void SetStochasticsData(ScenarioEntity& scenarioEntity, QDomElement& stochasticsElement);
-    static void SetOrientationData(ScenarioEntity& scenarioEntity, QDomElement& orientationElement);
+    /*!
+     * \brief Imports a stochastic element of in OpenSCENARIO (Note: This is a custom extension of the standard)
+     *
+     * \param[in]   stochasticsElement   The DOM root of the stochastic element
+     * \return     type of the value and stochastic attributes
+     */
+    static std::pair<std::string, openScenario::StochasticAttribute> ImportStochastics(QDomElement& stochasticsElement);
+
+    /*!
+     * \brief Imports a orientation element of a OpenSCENARIO entity
+     *
+     * \param[in]   orientationElement   The DOM root of the orientation element
+     * \return  orientation
+     */
+    static openScenario::Orientation ImportOrientation(QDomElement& orientationElement);
 
     /*!
      * \brief Imports a private element of a OpenSCENARIO Storyboard/Init/Actions DOM
@@ -285,8 +286,24 @@ private:
      */
     static void CategorizeEntities(const std::vector<ScenarioEntity>& entities, const std::map<std::string, std::list<std::string> > &groups, ScenarioInterface* scenario);
 
+    /*!
+     * \brief Imports an openScenario Lane-Position element
+     *
+     * \param[in]   positionElement    XML-Element containing position
+     * \param[out]  LanePosition    openScenario LanePosition
+     */
+    static openScenario::LanePosition ImportLanePosition(QDomElement positionElement);
+
+    /*!
+     * \brief Imports an openScenario World-Position element
+     *
+     * \param[in]   positionElement    XML-Element containing position
+     * \param[out]  WorldPosition    openScenario WorldPosition
+     */
+    static openScenario::WorldPosition ImportWorldPosition(QDomElement positionElement);
+
+
     //! Currently supported "internal" OpenSCENARIO version
-    static constexpr auto supportedScenarioVersion = "0.3.0";
-};
+    static constexpr auto supportedScenarioVersion = "0.3.0";};
 
 } // namespace Importer
