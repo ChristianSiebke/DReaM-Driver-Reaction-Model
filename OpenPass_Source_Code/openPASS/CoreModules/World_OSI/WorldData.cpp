@@ -127,9 +127,10 @@ osi3::GroundTruth WorldData::GetFilteredGroundTruth(const osi3::SensorViewConfig
           conf.mounting_position().position().y(),
           conf.mounting_position().position().z() };
 
+
     const auto& orientation = reference.GetAbsOrientation();
+    relativeSensorPos.RotateYaw(orientation.yaw);
     auto absoluteSensorPos = reference.GetReferencePointPosition() + relativeSensorPos;
-    absoluteSensorPos.RotateYaw(orientation.yaw);
 
     const double yawMax = orientation.yaw + conf.mounting_position().orientation().yaw() + conf.field_of_view_horizontal() / 2.0;
     const double yawMin = orientation.yaw + conf.mounting_position().orientation().yaw() - conf.field_of_view_horizontal() / 2.0;

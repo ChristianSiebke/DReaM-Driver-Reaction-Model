@@ -221,19 +221,21 @@ double AlgorithmAutonomousEmergencyBrakingImplementation::CalculateObjectTTC(con
     own.yaw = 0.0;
     own.yawRate = GetAgent()->GetYawRate();
     own.yawAcceleration = 0.0;   // GetAgent()->GetYawAcceleration() not implemented yet
+
     TtcCalculations::TtcParameters opponent;
     opponent.length = baseStationary.dimension().length() + collisionDetectionLongitudinalBoundary;
     opponent.width = baseStationary.dimension().width() + collisionDetectionLateralBoundary;
     opponent.frontLength =  0.5 * opponent.length;
     opponent.backLength =  0.5 * opponent.length;
     opponent.position = {baseStationary.position().x(), baseStationary.position().y()};
-    opponent.velocityX = 0.0;
+    opponent.velocityX = - GetAgent()->GetVelocity();
     opponent.velocityY = 0.0;
-    opponent.accelerationX = 0.0;
+    opponent.accelerationX = - GetAgent()->GetAcceleration();
     opponent.accelerationY = 0.0;
     opponent.yaw = baseStationary.orientation().yaw();
     opponent.yawRate = 0.0;
     opponent.yawAcceleration = 0.0;
+
     return TtcCalculations::CalculateObjectTTC(own, opponent, ttcBrake * 1.5, GetCycleTime());
 }
 

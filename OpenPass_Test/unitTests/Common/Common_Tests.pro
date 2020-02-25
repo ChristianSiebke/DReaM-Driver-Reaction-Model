@@ -19,7 +19,7 @@ win32:QMAKE_CXXFLAGS += -Wa,-mbig-obj
 
 UNIT_UNDER_TEST = $$OPEN_SRC/Common
 
-INCLUDEPATH += \            
+INCLUDEPATH += \
             $$UNIT_UNDER_TEST \
             $$OPEN_SRC/Interfaces \
             $$OPEN_SRC/CoreFramework/OpenPassSlave/modelElements
