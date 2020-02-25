@@ -252,6 +252,11 @@ struct VehicleModelParameters
     // The air drag coefficient of the vehicle
     double airDragCoefficient = -999.0;
 
+    // The maximum acceleration of the vehicle in m/s2
+    double maxAcceleration = -999.0;
+    // The maximum deceleration of the vehicle in m/s2
+    double maxDeceleration = -999.0;
+
     // -----------------------------------------
     // power train related parameters
     // -----------------------------------------
@@ -292,6 +297,7 @@ struct VehicleModelParameters
     double staticWheelRadius = -999.0;
     // The friction coefficient between road and the vehicles tires
     double frictionCoeff = -999.0;
+
 };
 
 enum class AdasType

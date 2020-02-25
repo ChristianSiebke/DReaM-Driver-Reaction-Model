@@ -22,7 +22,7 @@
 #include <vector>
 #include <cmath>
 
-#include "Common/globalDefinitions.h"
+#include "globalDefinitions.h"
 
 //! \brief This class does all the calculations in the Algorithm_Longitudinal module.
 //!

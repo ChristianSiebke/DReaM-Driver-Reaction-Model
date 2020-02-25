@@ -1,5 +1,5 @@
 # /*********************************************************************
-# * Copyright (c) 2017, 2018, 2019 in-tech GmbH
+# * Copyright (c) 2016 ITK Engineering GmbH
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -9,38 +9,38 @@
 # **********************************************************************/
 
 #-----------------------------------------------------------------------------
-# \file  World_OSI.pro
+# \file  Sensor_Modular_Driver.pro
 # \brief This file contains the information for the QtCreator-project of the
-#        module World_OSI
+#         module Sensor_Modular_Driver
 #-----------------------------------------------------------------------------/
 
-DEFINES += WORLD_LIBRARY
+DEFINES += SENSOR_MODULAR_DRIVER_LIBRARY
 CONFIG += OPENPASS_LIBRARY
+
+DEFINES += WORLD_LIBRARY
+DEFINES += WORLD_CPP
+
 include(../../../global.pri)
 
-SUBDIRS += \
-    . \
-    Localization \
-    OWL \
-    RoutePlanning \
-    ../../Common \
-    ../../Interfaces \
-    ../../Interfaces/OpenScenarioInterfaces
+SUBDIRS +=  . \
+            Container \
+            Signals \
+            ../../Interfaces \
+            ../../Interfaces/roadInterface \
+            ../../Common \
 
-INCLUDEPATH += \
-    $$SUBDIRS \
-    ../../Interfaces \
-    ../../Interfaces/RoadInterface \
-    ../
-    ..
+INCLUDEPATH += $$SUBDIRS \
+            ../../CoreModules/World_OSI \
+            ../../CoreModules/World_OSI/OWL \
+            ../../CoreModules/World_OSI/Localization \
+            ../../Common \
+            ..
 
 SOURCES += \
     $$getFiles(SUBDIRS, cpp) \
     $$getFiles(SUBDIRS, cc) \
-    $$getFiles(SUBDIRS, c)
+    $$getFiles(SUBDIRS, c) \
 
 HEADERS += \
     $$getFiles(SUBDIRS, hpp) \
-    $$getFiles(SUBDIRS, h)
-
-LIBS += -lopen_simulation_interface -lprotobuf
+    $$getFiles(SUBDIRS, h) \

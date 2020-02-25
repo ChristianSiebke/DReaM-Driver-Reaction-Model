@@ -284,6 +284,16 @@ void VehicleModelsImporter::ImportVehicleModelPerformance(QDomElement& vehicleEl
         throw std::runtime_error("'maxSpeed' performance attribute missing");
     }
 
+    if (!SimulationCommon::ParseAttributeDouble(performanceElement, "maxAcceleration", modelParameters.maxAcceleration))
+    {
+        throw std::runtime_error("'maxAcceleration' performance attribute missing");
+    }
+
+    if (!SimulationCommon::ParseAttributeDouble(performanceElement, "maxDeceleration", modelParameters.maxDeceleration))
+    {
+        throw std::runtime_error("'maxDeceleration' performance attribute missing");
+    }
+
     if (!SimulationCommon::ParseAttributeDouble(performanceElement, "mass", modelParameters.weight))
     {
         throw std::runtime_error("'mass' performance attribute missing");
