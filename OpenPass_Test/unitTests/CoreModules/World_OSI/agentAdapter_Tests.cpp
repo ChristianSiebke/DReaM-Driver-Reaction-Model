@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -39,12 +39,13 @@ using ::testing::DoubleEq;
 TEST(GetDistanceToEndOfLane, AgentLookingForward_CallsForwardSearch)
 {
     //TODO: Add agents direction
-    //TODO: How to test with a set mainLaneId? -> private member of test object
 
     AgentManager agentManager;
     auto ego = agentManager.Create(0.0, 5.0);
 
-    ON_CALL(ego.movingObject, GetDistance(_,_)).WillByDefault(Return(5.0));
+    ObjectPosition agentPosition{{},{GlobalRoadPosition{"Road1", -1, 5, 0, 0}},{}};
+
+    ON_CALL(ego.movingObject, GetLocatedPosition()).WillByDefault(Return(agentPosition));
 
     EXPECT_CALL(agentManager.fakeWorld, GetDistanceToEndOfLane(_,_, _, 5.0, 1000)).WillOnce(Return(100));
 

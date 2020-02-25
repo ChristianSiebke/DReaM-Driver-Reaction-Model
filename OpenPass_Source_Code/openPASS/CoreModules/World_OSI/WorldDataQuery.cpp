@@ -484,15 +484,20 @@ double WorldDataQuery::GetDistanceUntilObjectEntersConnector(const ObjectPositio
         return std::numeric_limits<double>::max();
     }
     std::vector<RouteElement> route = GetRouteLeadingToConnector(ownConnectorId);
+    if (std::find_if(route.cbegin(), route.cend(),[&](const auto& element) {return element.roadId == position.mainLocatePoint.roadId;}) == route.end())
+    {
+        route.push_back({position.mainLocatePoint.roadId, position.mainLocatePoint.laneId < 0}); //Hotfix
+    }
     const auto laneStream = CreateLaneStream(route, position.mainLocatePoint.roadId, position.mainLocatePoint.laneId, position.mainLocatePoint.roadPosition.s);
     const auto& laneOfObject = GetLaneByOdId(position.mainLocatePoint.roadId, position.mainLocatePoint.laneId, position.mainLocatePoint.roadPosition.s);
     double sStartOfObjectOnLaneStream = laneStream->GetPositionByElementAndS(laneOfObject, position.touchedRoads.at(position.mainLocatePoint.roadId).sStart);
     double sEndOfObjectOnLaneStream = laneStream->GetPositionByElementAndS(laneOfObject, position.touchedRoads.at(position.mainLocatePoint.roadId).sEnd);
     double frontOfObjectOnLaneStream = std::max(sStartOfObjectOnLaneStream, sEndOfObjectOnLaneStream);
     const auto& intersectingLane = GetLaneByOdId(intersectingConnectorId, intersectingLaneId, 0.0);
-    const auto ownLane = laneStream->GetElements().rbegin()->element;
-    double sStart = intersection->sOffsets.at({intersectingLane.GetId(), ownLane->GetId()}).first;
-    double positionOfIntersectionOnLaneStream = laneStream->GetPositionByElementAndS(*ownLane, sStart);
+    const auto ownLane = std::find_if(laneStream->GetElements().cbegin(), laneStream->GetElements().cend(),
+                 [&](const LaneStreamInfo& element){return worldData.GetRoadIdMapping().at(element.element->GetRoad().GetId()) == ownConnectorId;});
+    double sStart = intersection->sOffsets.at({intersectingLane.GetId(), ownLane->element->GetId()}).first;
+    double positionOfIntersectionOnLaneStream = laneStream->GetPositionByElementAndS(*ownLane->element, sStart);
     return positionOfIntersectionOnLaneStream - frontOfObjectOnLaneStream;
 }
 
@@ -507,15 +512,20 @@ double WorldDataQuery::GetDistanceUntilObjectLeavesConnector(const ObjectPositio
         return std::numeric_limits<double>::max();
     }
     std::vector<RouteElement> route = GetRouteLeadingToConnector(ownConnectorId);
+    if (std::find_if(route.cbegin(), route.cend(),[&](const auto& element) {return element.roadId == position.mainLocatePoint.roadId;}) == route.end())
+    {
+        route.push_back({position.mainLocatePoint.roadId, position.mainLocatePoint.laneId < 0}); //Hotfix
+    }
     const auto laneStream = CreateLaneStream(route, position.mainLocatePoint.roadId, position.mainLocatePoint.laneId, position.mainLocatePoint.roadPosition.s);
     const auto& laneOfObject = GetLaneByOdId(position.mainLocatePoint.roadId, position.mainLocatePoint.laneId, position.mainLocatePoint.roadPosition.s);
     double sStartOfObjectOnLaneStream = laneStream->GetPositionByElementAndS(laneOfObject, position.touchedRoads.at(position.mainLocatePoint.roadId).sStart);
     double sEndOfObjectOnLaneStream = laneStream->GetPositionByElementAndS(laneOfObject, position.touchedRoads.at(position.mainLocatePoint.roadId).sEnd);
     double rearOfObjectOnLaneStream = std::min(sStartOfObjectOnLaneStream, sEndOfObjectOnLaneStream);
     const auto& intersectingLane = GetLaneByOdId(intersectingConnectorId, intersectingLaneId, 0.0);
-    const auto ownLane = laneStream->GetElements().rbegin()->element;
-    double sEnd = intersection->sOffsets.at({intersectingLane.GetId(), ownLane->GetId()}).second;
-    double positionOfIntersectionOnLaneStream = laneStream->GetPositionByElementAndS(*ownLane, sEnd);
+    const auto ownLane = std::find_if(laneStream->GetElements().cbegin(), laneStream->GetElements().cend(),
+                 [&](const LaneStreamInfo& element){return worldData.GetRoadIdMapping().at(element.element->GetRoad().GetId()) == ownConnectorId;});
+    double sEnd = intersection->sOffsets.at({intersectingLane.GetId(), ownLane->element->GetId()}).second;
+    double positionOfIntersectionOnLaneStream = laneStream->GetPositionByElementAndS(*ownLane->element, sEnd);
     return positionOfIntersectionOnLaneStream - rearOfObjectOnLaneStream;
 }
 

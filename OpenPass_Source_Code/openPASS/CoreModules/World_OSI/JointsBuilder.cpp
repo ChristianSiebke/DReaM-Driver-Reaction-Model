@@ -117,7 +117,7 @@ JointsBuilder& JointsBuilder::CalculateCurvatures()
             {
                 nextHeading = laneJoint.heading;
             }
-            auto deltaHeading = std::fmod(nextHeading - previousHeading + M_PI, 2 * M_PI) - M_PI;
+            auto deltaHeading = std::fmod(nextHeading - previousHeading + 3 * M_PI, 2 * M_PI) - M_PI;
             double deltaS;
             if (joint == joints.begin())
             {

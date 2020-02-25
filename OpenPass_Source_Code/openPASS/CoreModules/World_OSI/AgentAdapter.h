@@ -152,6 +152,8 @@ public:
         return GetBaseTrafficObject().GetLocatedPosition().referencePoint.roadPosition;
     }
 
+    double GetMainLocateS() const;
+
     void UpdateCollision(std::pair<ObjectTypeOSI, int> collisionPartner) override;
 
     std::vector<std::pair<ObjectTypeOSI, int>> GetCollisionPartners() const override
