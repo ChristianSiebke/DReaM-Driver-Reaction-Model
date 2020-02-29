@@ -20,7 +20,7 @@
 #include <QDomElement>
 #include <QString>
 #include <vector>
-#include "slaveConfig.h"
+#include "../framework/slaveConfig.h"
 
 namespace SimulationMaster {
 namespace Configuration {

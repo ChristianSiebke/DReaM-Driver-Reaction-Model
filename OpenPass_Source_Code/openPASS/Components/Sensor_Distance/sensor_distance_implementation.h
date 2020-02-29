@@ -70,7 +70,7 @@ class Sensor_Distance_Implementation : public SensorInterface
 public:
     const std::string COMPONENTNAME = "Sensor_Distance";
 
-    Sensor_Distance_Implementation(int componentId,
+    Sensor_Distance_Implementation(std::string componentName,
                                    bool isInit,
                                    int priority,
                                    int offsetTime,

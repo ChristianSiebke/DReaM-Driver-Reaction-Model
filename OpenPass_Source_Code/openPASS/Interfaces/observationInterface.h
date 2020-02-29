@@ -117,18 +117,18 @@ public:
     //! \param key        topic
     //! \param value      value
     //-----------------------------------------------------------------------------
-    virtual void Insert(int time, int agentId, LoggingGroup group, const std::string& key, const std::string& value) = 0;
+    virtual void Insert(int time, int agentId, LoggingGroup group, const std::string& key, const std::string& value) {};
 
     //-----------------------------------------------------------------------------
     /*!
     * \brief Insert the event into the EventNetwork
     */
     //-----------------------------------------------------------------------------
-    virtual void InsertEvent(std::shared_ptr<EventInterface> event) = 0;
+    virtual void InsertEvent(std::shared_ptr<EventInterface> event) {};
 
-    virtual void GatherFollowers() = 0;
+    virtual void GatherFollowers() {};
 
-    virtual void InformObserverOnSpawn(AgentInterface* agent) = 0;
+    virtual void InformObserverOnSpawn(AgentInterface* agent) {};
 
 protected:
     //-----------------------------------------------------------------------------

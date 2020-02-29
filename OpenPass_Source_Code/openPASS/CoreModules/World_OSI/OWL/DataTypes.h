@@ -34,10 +34,10 @@
 #include "OWL/LaneGeometryJoint.h"
 #include "OWL/Primitives.h"
 
-#include "osi/osi_common.pb.h"
-#include "osi/osi_groundtruth.pb.h"
-#include "osi/osi_trafficsign.pb.h"
-#include "osi/osi_worldinterface.pb.h"
+#include "osi3/osi_common.pb.h"
+#include "osi3/osi_groundtruth.pb.h"
+#include "osi3/osi_trafficsign.pb.h"
+#include "osi3/osi_worldinterface.pb.h"
 
 namespace OWL {
 

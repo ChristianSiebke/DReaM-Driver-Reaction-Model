@@ -44,7 +44,7 @@
 
 #include "Interfaces/modelInterface.h"
 #include "Common/sensorDataSignal.h"
-#include "osi/osi_sensordata.pb.h"
+#include "osi3/osi_sensordata.pb.h"
 
 //-----------------------------------------------------------------------------
 /** \brief This class is the SensorFusion module.

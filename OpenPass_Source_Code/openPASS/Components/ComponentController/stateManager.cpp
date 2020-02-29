@@ -9,6 +9,7 @@
 *******************************************************************************/
 
 #include "stateManager.h"
+#include <stdexcept>
 
 using namespace ComponentControl;
 

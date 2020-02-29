@@ -9,6 +9,7 @@
 *******************************************************************************/
 
 #include "profiles.h"
+#include <stdexcept>
 
 std::unordered_map<std::string, AgentProfile>& Profiles::GetAgentProfiles()
 {

@@ -20,10 +20,10 @@
 #include <QString>
 #include <optional>
 
-#include "masterConfig.h"
+#include "../framework/masterConfig.h"
 #include "masterConfigImporter.h"
 #include "xmlParser.h"
-#include "slaveConfig.h"
+#include "../framework/slaveConfig.h"
 
 namespace SimulationMaster {
 namespace Configuration {

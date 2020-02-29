@@ -26,7 +26,7 @@ extern "C" DYNAMICS_LONGITUDINAL_BASICSHARED_EXPORT const std::string &OpenPASS_
 }
 
 extern "C" DYNAMICS_LONGITUDINAL_BASICSHARED_EXPORT ModelInterface *OpenPASS_CreateInstance(
-        int componentId,
+        std::string componentName,
         bool isInit,
         int priority,
         int offsetTime,
@@ -44,7 +44,7 @@ extern "C" DYNAMICS_LONGITUDINAL_BASICSHARED_EXPORT ModelInterface *OpenPASS_Cre
     try
     {
         return (ModelInterface*)(new (std::nothrow) Dynamics_Longitudinal_Basic_Implementation(
-                                     componentId,
+                                     componentName,
                                      isInit,
                                      priority,
                                      offsetTime,

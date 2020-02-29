@@ -74,7 +74,7 @@ void CollisionDetection_Implementation::CalculateAgentGeometry(const AgentInterf
     double agentLength = agent->GetLength();
     double agentWidthHalf = agent->GetWidth() / 2;
     double agentDistanceCenter = agent->GetDistanceCOGtoLeadingEdge();
-    double agentAngle = agent->GetYawAngle();
+    double agentAngle = agent->GetRelativeYaw();
 
     // upper left corner if angle == 0
     resultCorners[UpperLeft].x = agentDistanceCenter - agentLength;
@@ -219,14 +219,14 @@ bool CollisionDetection_Implementation::CalculateIntersectionPoints(const AgentI
     // and assume no movement of other agent
     Common::Vector2d otherVelocityX(other->GetVelocityX(), 0);
     Common::Vector2d otherVelocityY(0, other->GetVelocityY());
-    double otherYawAngle = other->GetYawAngle();
+    double otherYawAngle = other->GetRelativeYaw();
     otherVelocityX.Rotate(otherYawAngle);
     otherVelocityY.Rotate(otherYawAngle);
     Common::Vector2d otherVelocity = otherVelocityX + otherVelocityY;
 
     Common::Vector2d agentVelocityX(agent->GetVelocityX(), 0);
     Common::Vector2d agentVelocityY(0, agent->GetVelocityY());
-    double agentYawAngle = agent->GetYawAngle();
+    double agentYawAngle = agent->GetRelativeYaw();
     agentVelocityX.Rotate(agentYawAngle);
     agentVelocityY.Rotate(agentYawAngle);
     Common::Vector2d agentVelocity = agentVelocityX + agentVelocityY;

@@ -22,8 +22,8 @@
 
 #include "CoreFramework/CoreShare/log.h"
 #include "Interfaces/stochasticsInterface.h"
-#include "stochasticsInterface/stochasticsBinding.h"
-#include "stochasticsInterface/stochasticsLibrary.h"
+#include "../stochasticsInterface/stochasticsBinding.h"
+#include "../stochasticsInterface/stochasticsLibrary.h"
 
 namespace SimulationSlave
 {

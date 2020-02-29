@@ -15,6 +15,7 @@
 #include <iostream>
 #include <fstream>
 #include "observation_state_implementation.h"
+#include "worldInterface.h"
 
 const std::string Observation_State_Implementation::PeriodicTypeStrings[] =
 {
@@ -50,9 +51,9 @@ Observation_State_Implementation::Observation_State_Implementation(StochasticsIn
         Par_WriteOutputForVisualisation = parameters->GetParametersBool().at(0);
 
         // retrieve storage location
-        Par_folder = parameters->GetParametersString().at(0);
-        Par_tmpFilename = parameters->GetParametersString().at(1);
-        Par_finalFilename = parameters->GetParametersString().at(2);
+        Par_folder = parameters->GetParametersString().at("folder");
+        Par_tmpFilename = parameters->GetParametersString().at("tmpFilename");
+        Par_finalFilename = parameters->GetParametersString().at("finalFilename");
     }
     catch(...)
     {
@@ -258,7 +259,7 @@ void Observation_State_Implementation::RecordAgentState(int time, const AgentInt
     Insert(time, agentId, Observation_State_Periodic_YPosition, std::to_string(agent->GetPositionY()));
     Insert(time, agentId, Observation_State_Periodic_VelocityEgo, std::to_string(agent->GetVelocityX()));
     Insert(time, agentId, Observation_State_Periodic_AccelerationEgo, std::to_string(agent->GetAccelerationX()));
-    Insert(time, agentId, Observation_State_Periodic_YawAngle, std::to_string(agent->GetYawAngle()));
+    Insert(time, agentId, Observation_State_Periodic_YawAngle, std::to_string(agent->GetRelativeYaw()));
     Insert(time, agentId, Observation_State_Periodic_PositionRoute, std::to_string(agent->GetRoadPosition().s));
     Insert(time, agentId, Observation_State_Periodic_BrakeLight, std::to_string(agent->GetBrakeLight()));
 }

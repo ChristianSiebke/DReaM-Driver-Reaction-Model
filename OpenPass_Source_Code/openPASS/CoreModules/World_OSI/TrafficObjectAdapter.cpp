@@ -19,7 +19,7 @@
 TrafficObjectAdapter::TrafficObjectAdapter(OWL::Interfaces::WorldData& worldData, const World::Localization::Localizer& localizer,
         OWL::Primitive::AbsPosition position,
         OWL::Primitive::Dimension dimension, OWL::Primitive::AbsOrientation orientation) :
-    WorldObjectAdapter{worldData.AddStationaryObject(static_cast<void*>(this))},
+    WorldObjectAdapter{worldData.AddStationaryObject(static_cast<void*>(static_cast<WorldObjectInterface*>(this)))}, // objects passed as void * need to be casted to WorldObjectInterface*, because they are retrieved by casting to that class
     localizer{localizer}
 {
     baseTrafficObject.SetReferencePointPosition(position);

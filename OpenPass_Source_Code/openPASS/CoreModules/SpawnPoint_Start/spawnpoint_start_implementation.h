@@ -14,6 +14,7 @@
 
 #include <math.h>
 #include "spawnPointInterface.h"
+#include <Interfaces/stochasticsInterface.h>
 
 /**
 * \addtogroup CoreModules_Basic openPASS CoreModules basic

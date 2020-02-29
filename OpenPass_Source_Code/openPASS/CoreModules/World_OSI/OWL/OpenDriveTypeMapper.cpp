@@ -19,8 +19,8 @@
 
 #include "Interfaces/roadInterface/roadElementTypes.h"
 
-#include "osi/osi_road.pb.h"
-#include "osi/osi_lane.pb.h"
+#include "osi3/osi_road.pb.h"
+#include "osi3/osi_lane.pb.h"
 #include "OWL/DataTypes.h"
 
 osi3::world::Road_Type OpenDriveTypeMapper::OdToOsiRoadType(const RoadTypeInformation odRoadType)

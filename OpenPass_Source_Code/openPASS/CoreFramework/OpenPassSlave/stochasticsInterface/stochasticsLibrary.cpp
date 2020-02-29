@@ -19,7 +19,11 @@ namespace SimulationSlave
 
 bool StochasticsLibrary::Init()
 {
-    library = new (std::nothrow) QLibrary(QString::fromStdString(libraryPath));
+    std::string suffix = "";
+#ifndef NDEBUG
+    suffix = "d";
+#endif
+    library = new (std::nothrow) QLibrary(QString::fromStdString(libraryPath+suffix));
     if(!library)
     {
         return false;

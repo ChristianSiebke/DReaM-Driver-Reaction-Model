@@ -14,6 +14,7 @@
 //-----------------------------------------------------------------------------
 
 #include "sampler.h"
+#include <stdexcept>
 
 Sampler::Sampler(StochasticsInterface &stochastics):
     stochastics(stochastics)

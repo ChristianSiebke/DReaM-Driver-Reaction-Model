@@ -25,9 +25,11 @@
 #include <QDir>
 #include <QObject>
 #include <QString>
+#include <opExport.h>
 
 static ServiceManagerInterface::ID const ProjectInterfaceID =
         ServiceManagerInterfaceID("openPASS.Project.ProjectInterface");
+
 
 /**
  * @brief This class defines the items constituing the project configuration:
@@ -43,7 +45,7 @@ static ServiceManagerInterface::ID const ProjectInterfaceID =
  * These items are transmitted as the framework configuration of the simulation
  * for further process to openPASS Master.
  */
-class ProjectInterface : public QObject,
+class PROJECTEXPORT ProjectInterface : public QObject,
         public ServiceInterface<ProjectInterface, ProjectInterfaceID>
 {
     Q_OBJECT

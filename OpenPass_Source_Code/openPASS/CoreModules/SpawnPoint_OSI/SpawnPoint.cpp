@@ -646,7 +646,7 @@ bool SpawnPoint::CalculateSpawnParameter(AgentBlueprintInterface* agentBlueprint
     spawnParameter.yawAngle  = pos.yawAngle + agentBlueprint->GetSpawnParameter().heading;
     spawnParameter.velocity = spawnV;
     spawnParameter.acceleration = spawnInfo.acceleration.value;
-    spawnParameter.nextTimeOffset = ::round(spawnInfo.TStart * 1000 / spawnPointConstants.standardCycleTime) *
+    spawnParameter.nextTimeOffset = (int)::round(spawnInfo.TStart * 1000 / spawnPointConstants.standardCycleTime) *
                                     spawnPointConstants.standardCycleTime;
 
     return true;

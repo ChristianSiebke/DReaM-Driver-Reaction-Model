@@ -21,7 +21,7 @@ public:
 
     void ParseFile(std::string file);
 
-    int GetNumberOfLines();
+    size_t GetNumberOfLines();
 
     std::string GetEntryAt(int row,int column);
 

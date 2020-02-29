@@ -33,6 +33,7 @@
 #include <QFileDialog>
 #include <QProcess>
 #include <QFileSystemWatcher>
+#include <EditDataCommand.h>
 
 TrafficSimulationPresenter::TrafficSimulationPresenter(TrafficSimulationInterface *trafficSimulation,
                                                        TrafficSimulationView *trafficSimulationView,

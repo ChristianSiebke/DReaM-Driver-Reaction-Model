@@ -11,6 +11,7 @@
 //! \brief This file implements a generic 3D vector.
 
 #pragma once
+#include "opExport.h"
 
 namespace Common
 {
@@ -18,7 +19,7 @@ namespace Common
 /*!
  * class for 3d vectors in cartesian coordinate system
  */
-class Vector3d
+class OPENPASSCOMMONEXPORT Vector3d
 {
 public:
     /*!

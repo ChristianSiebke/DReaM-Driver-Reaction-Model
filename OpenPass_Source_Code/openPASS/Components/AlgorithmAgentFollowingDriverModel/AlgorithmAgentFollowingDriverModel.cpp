@@ -15,6 +15,7 @@
 #include "Interfaces/callbackInterface.h"
 #include "AlgorithmAgentFollowingDriverModel.h"
 #include "AlgorithmAgentFollowingDriverModelImplementation.h"
+#include <exception>
 
 const std::string Version = "0.0.1";
 static const CallbackInterface *Callbacks = nullptr;
@@ -176,7 +177,11 @@ extern "C" ALGORITHM_AGENTFOLLOWINGDRIVERMODEL_SHARED_EXPORT bool OpenPASS_Trigg
         if(Callbacks != nullptr)
         {
             std::exception_ptr p = std::current_exception();
-            const std::string exType =  p ? p.__cxa_exception_type()->name() : "null";
+#ifndef _MSC_VER
+            const std::string exType = p ? p.__cxa_exception_type()->name() : "null";
+#else
+            const std::string exType =  "null";
+#endif
 
             Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, "unexpected exception - type: " + exType);
         }

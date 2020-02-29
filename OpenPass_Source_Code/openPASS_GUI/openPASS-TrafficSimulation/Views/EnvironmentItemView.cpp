@@ -28,8 +28,8 @@ EnvironmentItemView::EnvironmentItemView(Type type,
         ui->Index->setText(QString("%1. ").arg(index));
         ui->Unit->setText("");
         ui->valueLayout->insertWidget(2, valueView);
-        connect(valueView, static_cast<void (QTimeEdit::*)(QTime const &)>(&QTimeEdit::timeChanged),
-                this, valueView_timeChanged);
+        connect(valueView,SIGNAL(QTimeEdit::timeChanged(const QTime &)),
+            this, SLOT(valueView_timeChanged(const QTime &)));
         break;
     }
     case Type::VisibilityDistance:
@@ -47,8 +47,8 @@ EnvironmentItemView::EnvironmentItemView(Type type,
         ui->Index->setText( QString("%1. ").arg(index) );
         ui->Unit->setText("[m]");
         ui->valueLayout->insertWidget(2,valueView);
-        connect(valueView, static_cast<void (QDoubleSpinBox::*)(QString const &)>(&QDoubleSpinBox::valueChanged),
-                this, valueView_valueChanged);
+        connect(valueView, SIGNAL(QDoubleSpinBox::valueChanged(const QString &)),
+                this, SLOT(valueView_valueChanged(const QString&)));
         break;
     }
     case Type::Friction:
@@ -66,8 +66,8 @@ EnvironmentItemView::EnvironmentItemView(Type type,
         ui->Index->setText( QString("%1. ").arg(index) );
         ui->Unit->setText("");
         ui->valueLayout->insertWidget(2,valueView);
-        connect(valueView, static_cast<void (QDoubleSpinBox::*)(QString const &)>(&QDoubleSpinBox::valueChanged),
-                this, valueView_valueChanged);
+        connect(valueView, SIGNAL(QDoubleSpinBox::valueChanged(const QString&)),
+                this, SLOT(valueView_valueChanged(const QString&)));
         break;
     }
     case Type::Weather:
@@ -83,8 +83,8 @@ EnvironmentItemView::EnvironmentItemView(Type type,
         ui->Unit->setText("");
         ui->valueLayout->insertWidget(2,valueView);
 
-        connect(valueView, static_cast<void (QComboBox::*)(QString const &)>(&QComboBox::currentTextChanged),
-                this, valueView_valueChanged);
+        connect(valueView, SIGNAL(QComboBox::currentTextChanged(const QString&)),
+                this, SLOT(valueView_valueChanged(const QString&)));
         break;
 
     }

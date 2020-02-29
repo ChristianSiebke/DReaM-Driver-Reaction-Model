@@ -40,7 +40,7 @@
 #include "Common/vehicleComponentEvent.h"
 #include "Common/primitiveSignals.h"
 #include "Common/sensorDataSignal.h"
-#include "osi/osi_sensordata.pb.h"
+#include "osi3/osi_sensordata.pb.h"
 
 class AlgorithmAutonomousEmergencyBrakingImplementation : public AlgorithmInterface
 {

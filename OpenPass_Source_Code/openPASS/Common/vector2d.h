@@ -15,13 +15,14 @@
 #define VECTOR2D_H
 
 #include <ostream>
+#include "opExport.h"
 
 namespace Common {
 
 /*!
  * class for 2d vectors in cartesian coordinate system
  */
-class Vector2d
+class OPENPASSCOMMONEXPORT Vector2d
 {
 public:
     /*!

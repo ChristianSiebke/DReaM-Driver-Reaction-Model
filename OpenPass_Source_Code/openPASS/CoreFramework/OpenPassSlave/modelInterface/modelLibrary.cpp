@@ -31,23 +31,31 @@ bool ModelLibrary::Init()
     #if defined(unix)
     QString path = QString(modelLibraryPath.c_str()) + QString("/lib") + QString(modelLibraryName.c_str());
     #elif defined (WIN32)
-    QString path = QString(modelLibraryPath.c_str()) + QString("/") + QString(modelLibraryName.c_str());
+    std::string suffix = "";
+#ifndef NDEBUG
+    suffix = "d";
+#endif
+    QString path = QString(modelLibraryPath.c_str()) + QString("/") + QString((modelLibraryName+suffix).c_str());
     #else
 #error undefined target platform
     #endif
-
     library = new (std::nothrow) QLibrary(path);
     if (!library)
     {
         return false;
     }
-
-    if (!library->load())
+    try {
+        if (!library->load())
+        {
+            LOG_INTERN(LogLevel::Error) << library->errorString().toStdString();
+            delete library;
+            library = nullptr;
+            return false;
+        }
+    }
+    catch (std::exception e)
     {
-        LOG_INTERN(LogLevel::Error) << library->errorString().toStdString();
-        delete library;
-        library = nullptr;
-        return false;
+        // ignore exceptions during dublicate initialization of libprotobuf
     }
 
     getVersionFunc = (ModelInterface_GetVersion)library->resolve(DllGetVersionId.c_str());

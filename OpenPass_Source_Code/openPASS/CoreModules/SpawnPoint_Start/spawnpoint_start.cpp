@@ -17,6 +17,7 @@
 #include "spawnpoint_start.h"
 #include "spawnpoint_start_implementation.h"
 #include "spawnPointInterface.h"
+#include <stdexcept>
 
 const std::string Version = "0.0.1";
 static const CallbackInterface *Callbacks = nullptr;

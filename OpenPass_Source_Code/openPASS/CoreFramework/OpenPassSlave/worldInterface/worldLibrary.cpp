@@ -17,7 +17,11 @@ namespace SimulationSlave
 
 bool WorldLibrary::Init()
 {
-    library = new (std::nothrow) QLibrary(QString::fromStdString(worldLibraryPath));
+    std::string suffix = "";
+#ifndef NDEBUG
+    suffix = "d";
+#endif
+    library = new (std::nothrow) QLibrary(QString::fromStdString(worldLibraryPath+suffix));
     if(!library)
     {
         return false;

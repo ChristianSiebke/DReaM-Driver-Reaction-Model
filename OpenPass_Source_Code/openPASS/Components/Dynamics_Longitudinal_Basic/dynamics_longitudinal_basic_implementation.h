@@ -74,7 +74,7 @@ public:
     const std::string COMPONENTNAME = "Dynamics_Longitudinal_Basic";
 
     Dynamics_Longitudinal_Basic_Implementation(
-        int componentId,
+        std::string componentName,
         bool isInit,
         int priority,
         int offsetTime,
@@ -87,7 +87,7 @@ public:
         const CallbackInterface *callbacks,
         AgentInterface *agent) :
         DynamicsInterface(
-            componentId,
+            componentName,
             isInit,
             priority,
             offsetTime,

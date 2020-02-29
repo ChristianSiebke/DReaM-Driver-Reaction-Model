@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <utility>
+#include <stdexcept>
 
 #include "schedulerTasks.h"
 

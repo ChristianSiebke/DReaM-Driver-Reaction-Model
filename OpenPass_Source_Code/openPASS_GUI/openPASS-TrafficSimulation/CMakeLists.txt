@@ -1,0 +1,141 @@
+SET (SOURCES TrafficSimulationPlugin.cpp
+			Models/EnvironmentItemModel.cpp
+			Models/EnvironmentModel.cpp
+			Models/ExperimentModel.cpp
+			Models/ScenarioModel.cpp
+			Models/TrafficItemMapModel.cpp
+			Models/TrafficItemModel.cpp
+			Models/TrafficModel.cpp
+			Models/TrafficSimulationModel.cpp
+			Models/TrafficSimulationXMLBaseModel.cpp
+			Models/TrafficSimulationXMLLoadModel.cpp
+			Models/TrafficSimulationXMLSaveModel.cpp
+			../Global/DelegateComboBoxView.cpp
+			../Global/DelegateDoubleView.cpp
+			../Global/DelegateTimeView.cpp
+			Views/DelegateFileBrowseView.cpp
+			#Views/EnvironmentBaseView.cpp
+			Views/EnvironmentDisplayView.cpp
+			Views/EnvironmentItemView.cpp
+			Views/EnvironmentView.cpp
+			Views/ExperimentBaseView.cpp
+			Views/ExperimentView.cpp
+			Views/FileBrowseView.cpp
+			#Views/ScenarioBaseView.cpp
+			Views/ScenarioDisplayView.cpp
+			Views/ScenarioView.cpp
+			Views/StatusBarView.cpp
+			Views/TrafficBaseView.cpp
+			Views/TrafficDisplayView.cpp
+			Views/TrafficItemView.cpp
+			Views/TrafficLanesView.cpp
+			Views/TrafficParametersView.cpp
+			Views/TrafficSimulationView.cpp
+			Views/TrafficView.cpp
+			Views/TrafficVolumeView.cpp
+			Views/WidgetView.cpp
+			Presenters/EnvironmentDisplayPresenter.cpp
+			Presenters/EnvironmentMapPresenter.cpp
+			Presenters/EnvironmentPresenter.cpp
+			Presenters/ExperimentPresenter.cpp
+			Presenters/LibrariesPresenter.cpp
+			Presenters/LoggingGroupsPresenter.cpp
+			Presenters/ScenarioAgentsPresenter.cpp
+			Presenters/ScenarioDisplayPresenter.cpp
+			Presenters/ScenarioPresenter.cpp
+			Presenters/TrafficDisplayPresenter.cpp
+			Presenters/TrafficItemMapPresenter.cpp
+			#Presenters/TrafficLanesPresenter.cpp
+			#Presenters/TrafficParametersPresenter.cpp
+			Presenters/TrafficPresenter.cpp
+			Presenters/TrafficSimulationPresenter.cpp
+)
+SET (HEADERS TrafficSimulationPlugin.h 
+			Models/EnvironmentItemModel.h
+			Models/EnvironmentModel.h
+			Models/ExperimentModel.h
+			Models/ScenarioModel.h
+			Models/TrafficItemMapModel.h
+			Models/TrafficItemModel.h
+			Models/TrafficModel.h
+			Models/TrafficSimulationModel.h
+			Models/TrafficSimulationXMLBaseModel.h
+			Models/TrafficSimulationXMLLoadModel.h
+			Models/TrafficSimulationXMLSaveModel.h
+			../Global/DelegateComboBoxView.h
+			../Global/DelegateDoubleView.h
+			../Global/DelegateTimeView.h
+			../Global/EditDataCommand.h
+			Views/DelegateFileBrowseView.h
+			#Views/EnvironmentBaseView.h
+			Views/EnvironmentDisplayView.h
+			Views/EnvironmentItemView.h
+			Views/EnvironmentView.h
+			Views/ExperimentBaseView.h
+			Views/ExperimentView.h
+			Views/FileBrowseView.h
+			#Views/ScenarioBaseView.h
+			Views/ScenarioDisplayView.h
+			Views/ScenarioView.h
+			Views/StatusBarView.h
+			Views/TrafficBaseView.h
+			Views/TrafficDisplayView.h
+			Views/TrafficItemView.h
+			Views/TrafficLanesView.h
+			Views/TrafficParametersView.h
+			Views/TrafficSimulationView.h
+			Views/TrafficView.h
+			Views/TrafficVolumeView.h
+			Views/WidgetView.h
+			Presenters/EnvironmentDisplayPresenter.h
+			Presenters/EnvironmentMapPresenter.h
+			Presenters/EnvironmentPresenter.h
+			Presenters/ExperimentPresenter.h
+			Presenters/LibrariesPresenter.h
+			Presenters/LoggingGroupsPresenter.h
+			Presenters/ScenarioAgentsPresenter.h
+			Presenters/ScenarioDisplayPresenter.h
+			Presenters/ScenarioPresenter.h
+			Presenters/TrafficDisplayPresenter.h
+			Presenters/TrafficItemMapPresenter.h
+			#Presenters/TrafficLanesPresenter.h
+			#Presenters/TrafficParametersPresenter.h
+			Presenters/TrafficPresenter.h
+			Presenters/TrafficSimulationPresenter.h
+			Interfaces/openPASS-TrafficSimulation/EnvironmentInterface.h
+			Interfaces/openPASS-TrafficSimulation/EnvironmentItemInterface.h
+			Interfaces/openPASS-TrafficSimulation/ExperimentInterface.h
+			Interfaces/openPASS-TrafficSimulation/ScenarioInterface.h
+			Interfaces/openPASS-TrafficSimulation/TrafficInterface.h
+			Interfaces/openPASS-TrafficSimulation/TrafficItemInterface.h
+			Interfaces/openPASS-TrafficSimulation/TrafficItemMapInterface.h
+			Interfaces/openPASS-TrafficSimulation/TrafficSimulationInterface.h
+)
+
+SET(UIS 
+			Views/EnvironmentDisplayView.ui
+			Views/EnvironmentItemView.ui
+			Views/EnvironmentView.ui
+			Views/ExperimentView.ui
+			Views/FileBrowseView.ui
+			Views/ScenarioDisplayView.ui
+			Views/ScenarioView.ui
+			Views/StatusBarView.ui
+			Views/TrafficDisplayView.ui
+			Views/TrafficItemView.ui
+			Views/TrafficLanesView.ui
+			Views/TrafficParametersView.ui
+			Views/TrafficSimulationView.ui
+			Views/TrafficView.ui
+			Views/TrafficVolumeView.ui
+)
+
+
+
+INCLUDE_DIRECTORIES(. Interfaces)
+
+add_definitions(-DTrafficSimulation_LIBRARY)
+
+OPENPASS_GUI_add_plugin(TrafficSimulation "")
+
+target_link_libraries(TrafficSimulation Project)

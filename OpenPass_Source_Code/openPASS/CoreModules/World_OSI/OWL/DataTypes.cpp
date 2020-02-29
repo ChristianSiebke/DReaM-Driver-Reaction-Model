@@ -28,8 +28,8 @@
 #include "OWL/LaneGeometryJoint.h"
 #include "OWL/Primitives.h"
 
-#include "osi/osi_groundtruth.pb.h"
-#include "osi/osi_worldinterface.pb.h"
+#include "osi3/osi_groundtruth.pb.h"
+#include "osi3/osi_worldinterface.pb.h"
 #include "WorldObjectAdapter.h"
 
 namespace OWL {

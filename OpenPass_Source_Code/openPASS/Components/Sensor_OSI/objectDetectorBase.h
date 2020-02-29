@@ -45,9 +45,9 @@
 #include "Common/vector3d.h"
 #include "Common/sensorDataSignal.h"
 
-#include "osi/osi_sensorviewconfiguration.pb.h"
-#include "osi/osi_sensorview.pb.h"
-#include "osi/osi_sensordata.pb.h"
+#include "osi3/osi_sensorviewconfiguration.pb.h"
+#include "osi3/osi_sensorview.pb.h"
+#include "osi3/osi_sensordata.pb.h"
 
 //-----------------------------------------------------------------------------
 /** \brief This class is the common base for all SensorObjectDetectors.

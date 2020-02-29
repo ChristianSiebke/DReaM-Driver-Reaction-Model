@@ -25,7 +25,7 @@ extern "C" SENSOR_DISTANCE_SHARED_EXPORT const std::string &OpenPASS_GetVersion(
     return Version;
 }
 
-extern "C" SENSOR_DISTANCE_SHARED_EXPORT ModelInterface *OpenPASS_CreateInstance(int componentId,
+extern "C" SENSOR_DISTANCE_SHARED_EXPORT ModelInterface *OpenPASS_CreateInstance(std::string componentName,
                                                                            bool isInit,
                                                                            int priority,
                                                                            int offsetTime,
@@ -42,7 +42,7 @@ extern "C" SENSOR_DISTANCE_SHARED_EXPORT ModelInterface *OpenPASS_CreateInstance
 
     try
     {
-        return (ModelInterface*)(new (std::nothrow) Sensor_Distance_Implementation(componentId,
+        return (ModelInterface*)(new (std::nothrow) Sensor_Distance_Implementation(componentName,
                                                                               isInit,
                                                                               priority,
                                                                               offsetTime,

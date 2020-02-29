@@ -16,6 +16,7 @@
 #include <array>
 #include "collisionDetectionInterface.h"
 #include "callbackInterface.h"
+#include "vector2d.h"
 
 /**
 * \addtogroup CoreModules_Basic openPASS CoreModules basic

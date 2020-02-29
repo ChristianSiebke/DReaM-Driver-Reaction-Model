@@ -37,5 +37,5 @@ void TrafficVolumeView::on_VolumeValue_editingFinished()
 
 unsigned int TrafficVolumeView::getID() const
 {
-
+    return ID;
 }

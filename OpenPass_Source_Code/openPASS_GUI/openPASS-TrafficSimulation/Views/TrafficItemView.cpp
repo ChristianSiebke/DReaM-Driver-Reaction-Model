@@ -37,8 +37,8 @@ TrafficItemView::TrafficItemView(Type type,
             ui->Unit->setText(" [1/h]");
             setToolTip("Specifies the target rate of vehicles per hour and per lane.");
             ui->valueLayout->insertWidget(1, valueView);
-            connect(valueView, static_cast<void (QSpinBox::*)(QString const &)>(&QSpinBox::valueChanged),
-                    this, valueView_valueChanged);
+            connect(valueView, SIGNAL(QSpinBox::valueChanged(const QString&)),
+                    this, SLOT(valueView_valueChanged(const QString&)));
             break;
         }
         case Type::PlatoonRate:
@@ -57,8 +57,8 @@ TrafficItemView::TrafficItemView(Type type,
             ui->Unit->setText("");
             setToolTip("Specifies how strong agents are grouped together. A value of 0 corresponds to equally distributed traffic along the road.");
             ui->valueLayout->insertWidget(1,valueView);
-            connect(valueView, static_cast<void (QDoubleSpinBox::*)(QString const &)>(&QDoubleSpinBox::valueChanged),
-                    this, valueView_valueChanged);
+            connect(valueView, SIGNAL(QDoubleSpinBox::valueChanged(const QString&)),
+                    this, SLOT(valueView_valueChanged(const QString&)));
             break;
         }
         case Type::Velocity:
@@ -77,8 +77,8 @@ TrafficItemView::TrafficItemView(Type type,
             ui->Unit->setText("[km/h]");
             setToolTip("Specifies the average velocity on the rightmost lane.");
             ui->valueLayout->insertWidget(1,valueView);
-            connect(valueView, static_cast<void (QDoubleSpinBox::*)(QString const &)>(&QDoubleSpinBox::valueChanged),
-                    this, valueView_valueChanged);
+            connect(valueView, SIGNAL(QDoubleSpinBox::valueChanged(const QString&)),
+                    this, SLOT(valueView_valueChanged(const QString&)));
             break;
         }
         case Type::Homogeneity:
@@ -99,8 +99,8 @@ TrafficItemView::TrafficItemView(Type type,
                        "A homogeneity of 1 results in equal velocities across all lanes. \n"
                        "A value of 0 results in doubled velocity on the left lane, compared to its individual right lane.");
             ui->valueLayout->insertWidget(1,valueView);
-            connect(valueView, static_cast<void (QDoubleSpinBox::*)(QString const &)>(&QDoubleSpinBox::valueChanged),
-                    this, valueView_valueChanged);
+            connect(valueView, SIGNAL(QDoubleSpinBox::valueChanged(const QString&)),
+                    this, SLOT(valueView_valueChanged(const QString&)));
             break;
         }
         case Type::Agent:

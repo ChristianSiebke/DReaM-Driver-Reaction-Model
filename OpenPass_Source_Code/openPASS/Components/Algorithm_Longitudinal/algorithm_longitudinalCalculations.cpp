@@ -18,6 +18,10 @@
 #include <limits>
 #include <map>
 #include <iostream>
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
+#endif
+#include "math.h"
 #include "algorithm_longitudinalCalculations.h"
 
 AlgorithmLongitudinalCalculations::AlgorithmLongitudinalCalculations(double xVel,

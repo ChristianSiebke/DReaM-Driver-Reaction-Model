@@ -40,7 +40,7 @@
 
 #include "log.h"
 #include "masterConfig.h"
-#include "masterConfigImporter.h"
+#include "../importer/masterConfigImporter.h"
 #include "processManager.h"
 
 using namespace SimulationMaster;
@@ -238,7 +238,11 @@ std::string GetExecutable(std::string slave)
     #if WIN32
     if (QString::fromStdString(slave).split(".").last() != "exe")
     {
-        slave += ".exe";
+        std::string suffix = "";
+#ifndef NDEBUG
+        suffix = "d";
+#endif
+        slave += suffix+".exe";
     }
     #endif
 

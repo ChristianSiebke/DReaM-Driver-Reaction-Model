@@ -59,7 +59,7 @@ std::vector<std::string> CSVParser::ParseLine(std::string line)
    return lineData;
 }
 
-int CSVParser::GetNumberOfLines()
+size_t CSVParser::GetNumberOfLines()
 {
     return table.size();
 }

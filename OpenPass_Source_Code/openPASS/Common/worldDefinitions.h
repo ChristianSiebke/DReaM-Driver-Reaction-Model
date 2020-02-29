@@ -11,6 +11,7 @@
 #pragma once
 
 #include "globalDefinitions.h"
+#include <optional>
 
 enum class RoadNetworkElementType
 {
