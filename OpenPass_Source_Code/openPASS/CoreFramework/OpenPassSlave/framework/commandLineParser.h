@@ -13,8 +13,9 @@
 #include <QStringList>
 #include <QCoreApplication>
 #include "QCommandLineParser"
+#include <opExport.h>
 
-struct CommandLineArguments
+struct CORESLAVEEXPORT CommandLineArguments
 {
     int logLevel;
     std::string libPath;
@@ -23,7 +24,7 @@ struct CommandLineArguments
     std::string resultsPath;
 };
 
-struct CommandLineOption
+struct CORESLAVEEXPORT CommandLineOption
 {
     QString name;
     QString description;
@@ -31,7 +32,7 @@ struct CommandLineOption
     QString defaultValue;
 };
 
-class CommandLineParser
+class CORESLAVEEXPORT CommandLineParser
 {
 public:
     static CommandLineArguments Parse(const QStringList& arguments);

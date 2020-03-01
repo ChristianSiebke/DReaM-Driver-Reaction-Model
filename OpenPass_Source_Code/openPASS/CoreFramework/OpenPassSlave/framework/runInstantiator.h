@@ -19,6 +19,7 @@
 #include <string>
 #include <map>
 #include <QMutex>
+#include "opExport.h"
 #include "Interfaces/agentFactoryInterface.h"
 #include "Interfaces/configurationContainerInterface.h"
 #include "frameworkModules.h"
@@ -28,7 +29,7 @@
 
 namespace SimulationSlave {
 
-class RunInstantiator
+class CORESLAVEEXPORT RunInstantiator
 {
 public:
     RunInstantiator(std::string outputDir,

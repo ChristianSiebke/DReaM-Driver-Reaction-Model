@@ -26,6 +26,7 @@
 #include "Interfaces/agentFactoryInterface.h"
 #include "Interfaces/eventNetworkInterface.h"
 #include "Interfaces/worldInterface.h"
+#include <opExport.h>
 
 namespace SimulationSlave
 {

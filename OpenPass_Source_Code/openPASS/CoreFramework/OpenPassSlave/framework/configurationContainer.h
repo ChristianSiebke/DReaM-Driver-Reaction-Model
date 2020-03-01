@@ -40,7 +40,7 @@ namespace Configuration {
 *   \details
 */
 //-----------------------------------------------------------------------------
-class ConfigurationContainer : public ConfigurationContainerInterface
+class CORESLAVEEXPORT ConfigurationContainer : public ConfigurationContainerInterface
 {
 public:
     ConfigurationContainer(const ConfigurationFiles& configurationFiles) :

@@ -23,6 +23,12 @@
 #endif
 
 
+#if defined(CoreSlave_EXPORTS)
+#define CORESLAVEEXPORT OPEXPORT
+#else
+#define CORESLAVEEXPORT OPIMPORT
+#endif
+
 #if defined(Common_EXPORTS)
 #define OPENPASSCOMMONEXPORT OPEXPORT
 #else

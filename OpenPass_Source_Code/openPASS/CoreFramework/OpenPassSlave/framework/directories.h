@@ -11,6 +11,7 @@
 #pragma once
 
 #include <string>
+#include <opExport.h>
 
 /// Directories takes care of a consistent handling of paths and directories
 /// without making the underlying implementation public or a dependency
@@ -20,7 +21,7 @@
 ///
 /// Note that all directories are returned without a trailing path seperator
 /// Use Concat if you need to concat a path and a file with the current systems seperator
-class Directories
+class CORESLAVEEXPORT Directories
 {
 public:
     Directories(const std::string& applicationDir,

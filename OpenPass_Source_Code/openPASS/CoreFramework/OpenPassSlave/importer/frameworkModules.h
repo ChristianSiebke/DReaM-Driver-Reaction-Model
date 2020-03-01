@@ -12,8 +12,9 @@
 
 #include <string>
 #include "directories.h"
+#include <opExport.h>
 
-struct FrameworkModules
+struct CORESLAVEEXPORT FrameworkModules
 {
 public:
     FrameworkModules(int logLevel,

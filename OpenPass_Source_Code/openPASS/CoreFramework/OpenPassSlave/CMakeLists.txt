@@ -11,7 +11,6 @@ framework/dynamicProfileSampler.cpp
 framework/eventNetwork.cpp
 framework/frameworkModuleContainer.cpp
 framework/invocationControl.cpp
-framework/main.cpp
 framework/observationModule.cpp
 framework/observationNetwork.cpp
 framework/runInstantiator.cpp
@@ -166,9 +165,10 @@ eventDetectorInterface/eventDetectorLibrary.h
 INCLUDE_DIRECTORIES(. collisionDetectionInterface observationInterface scheduler worldInterface stochasticsInterface spawnPointInterface modelInterface modelElements importer framework eventDetectorInterface manipulatorInterface)
 
 
+OPENPASS_add_library(CoreSlave SHARED)
+set_target_properties(CoreSlave PROPERTIES FOLDER "CoreFramework")
 
-OPENPASS_add_executable(OpenPassSlave )
-set_target_properties(OpenPassSlave PROPERTIES FOLDER "CoreFramework")
+
 
 set(PCMLibs)
 
@@ -176,6 +176,17 @@ if(BUILD_PCM)
 set(PCMLibs Common_PCM)
 endif(BUILD_PCM)
 
-target_link_libraries(OpenPassSlave CoreShare Common $(PCMLibs))
+target_link_libraries(CoreSlave CoreShare Common $(PCMLibs))
 
-qt5_use_modules(OpenPassSlave Widgets Xml)
+qt5_use_modules(CoreSlave Widgets Xml)
+
+SET (SOURCES 
+framework/main.cpp
+)
+SET (HEADERS 
+)
+
+
+OPENPASS_add_executable(OpenPassSlave )
+set_target_properties(OpenPassSlave PROPERTIES FOLDER "CoreFramework")
+target_link_libraries(OpenPassSlave CoreSlave)

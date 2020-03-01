@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <opExport.h>
 #include "worldInterface/world.h"
 #include "Interfaces/frameworkModuleContainerInterface.h"
 
@@ -47,7 +48,7 @@ namespace SimulationSlave {
 *   \details
 */
 //-----------------------------------------------------------------------------
-class FrameworkModuleContainer : public FrameworkModuleContainerInterface
+class CORESLAVEEXPORT FrameworkModuleContainer : public FrameworkModuleContainerInterface
 {
 public:
     FrameworkModuleContainer(FrameworkModules frameworkModules,

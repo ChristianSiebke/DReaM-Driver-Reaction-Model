@@ -12,10 +12,11 @@
 
 #include <string>
 #include "directories.h"
+#include <opExport.h>
 
 /// Container for configuration file related paths
 /// \see Directories
-struct ConfigurationFiles
+struct CORESLAVEEXPORT ConfigurationFiles
 {
     ConfigurationFiles(std::string configurationDir,
                        std::string systemConfigBlueprintFile,
