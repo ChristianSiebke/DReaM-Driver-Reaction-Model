@@ -9,7 +9,7 @@ IF(OSI_INCLUDE_DIR)
   SET(OSI_FIND_QUIETLY TRUE)
 ENDIF(OSI_INCLUDE_DIR)
 
-FIND_PATH(OSI_INCLUDE_DIR "osi/osi_version.pb.h"
+FIND_PATH(OSI_INCLUDE_DIR "osi3/osi_version.pb.h"
   PATHS
   $ENV{OSI_HOME}/include
   $ENV{EXTERNLIBS}/OSI/include
@@ -24,8 +24,8 @@ FIND_PATH(OSI_INCLUDE_DIR "osi/osi_version.pb.h"
   DOC "OSI - Headers"
 )
 
-SET(OSI_NAMES osi3/open_simulation_interface_pic.lib osi/open_simulation_interface_pic.lib)
-SET(OSI_DBG_NAMES osi3/open_simulation_interface_picd.lib osi/open_simulation_interface_picd.lib)
+SET(OSI_NAMES osi3/open_simulation_interface.lib osi3/open_simulation_interface_pic.lib osi/open_simulation_interface_pic.lib)
+SET(OSI_DBG_NAMES osi3/open_simulation_interfaced.lib osi3/open_simulation_interface_picd.lib osi/open_simulation_interface_picd.lib)
 
 FIND_LIBRARY(OSI_LIBRARY NAMES ${OSI_NAMES}
   PATHS
