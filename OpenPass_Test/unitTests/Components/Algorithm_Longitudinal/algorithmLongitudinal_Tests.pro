@@ -22,10 +22,10 @@ INCLUDEPATH += \
     $$UNIT_UNDER_TEST
 
 HEADERS += \
-    $$UNIT_UNDER_TEST/algorithm_longitudinalImplementation.h \
-    $$UNIT_UNDER_TEST/algorithm_longitudinalCalculations.h \
+    $$UNIT_UNDER_TEST/algo_longImpl.h \
+    $$UNIT_UNDER_TEST/longCalcs.h \
 
 SOURCES += \
-    $$UNIT_UNDER_TEST/algorithm_longitudinalImplementation.cpp \
-    $$UNIT_UNDER_TEST/algorithm_longitudinalCalculations.cpp \
+    $$UNIT_UNDER_TEST/algo_longImpl.cpp \
+    $$UNIT_UNDER_TEST/longCalcs.cpp \
     algorithmLongitudinal_Tests.cpp

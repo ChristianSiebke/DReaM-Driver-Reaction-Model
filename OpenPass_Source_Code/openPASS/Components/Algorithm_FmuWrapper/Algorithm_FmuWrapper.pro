@@ -41,13 +41,11 @@ HEADERS += \
     OsmpFmuHandler.h
 
 win32: {
-    LIBS += \
-        -llibboost_filesystem-mgw71-1_63 \
-        -llibboost_system-mgw71-1_63
+    LIBS += -llibboost_filesystem-mgw81-mt-x64-1_72
 }
 
 unix: {
-    LIBS += -lboost_filesystem -lboost_system
+    LIBS += -lboost_filesystem
 }
 
 LIBS += -lfmilib_shared -lopen_simulation_interface -lprotobuf

@@ -12,7 +12,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "algorithm_longitudinalCalculations.h"
+#include "longCalcs.h"
 
 #include <cmath>
 #include <limits>

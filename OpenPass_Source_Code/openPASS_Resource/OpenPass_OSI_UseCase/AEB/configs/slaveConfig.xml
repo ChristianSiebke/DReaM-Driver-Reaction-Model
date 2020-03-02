@@ -40,18 +40,18 @@
   </Observations>
   <Spawners>
     <Spawner>
-      <Library>SpawnPointScenario_OSI</Library>
+      <Library>SpawnPointScenario</Library>
       <Type>PreRun</Type>
       <Priority>1</Priority>
     </Spawner>
     <Spawner>
-      <Library>SpawnPointPreRunCommon_OSI</Library>
+      <Library>SpawnPointPreRunCommon</Library>
       <Type>PreRun</Type>
       <Priority>0</Priority>
       <Profile>DefaultPreRunCommon</Profile>
     </Spawner>
     <Spawner>
-      <Library>SpawnPointRuntimeCommon_OSI</Library>
+      <Library>SpawnPointRuntimeCommon</Library>
       <Type>Runtime</Type>
       <Priority>0</Priority>
       <Profile>DefaultRuntimeCommon</Profile>

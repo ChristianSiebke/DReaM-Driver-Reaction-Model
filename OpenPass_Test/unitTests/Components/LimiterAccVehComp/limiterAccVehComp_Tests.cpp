@@ -15,7 +15,7 @@
 #include "fakeAgent.h"
 #include "fakeWorld.h"
 
-#include "limiterAccelerationVehicleComponentsImplementation.h"
+#include "limiterAccVehCompImplementation.h"
 
 using ::testing::Return;
 using ::testing::DontCare;

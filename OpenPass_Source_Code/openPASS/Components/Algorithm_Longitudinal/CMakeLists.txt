@@ -7,14 +7,14 @@ add_openpass_target(
 
   HEADERS
     algorithm_longitudinal.h
-    algorithm_longitudinalCalculations.h
+    longCalcs.h
     algorithm_longitudinalGlobal.h
-    algorithm_longitudinalImplementation.h
+    algo_longImpl.h
 
   SOURCES
     algorithm_longitudinal.cpp
-    algorithm_longitudinalCalculations.cpp
-    algorithm_longitudinalImplementation.cpp
+    longCalcs.cpp
+    algo_longImpl.cpp
 
   LIBRARIES
     Qt5::Core

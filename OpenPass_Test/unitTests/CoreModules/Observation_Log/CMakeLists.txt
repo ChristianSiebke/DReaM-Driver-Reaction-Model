@@ -20,7 +20,6 @@ add_openpass_target(
     ${COMPONENT_SOURCE_DIR}/runStatistic.h
     ${COMPONENT_SOURCE_DIR}/runStatisticCalculation.h
 
-
   INCDIRS
     ${COMPONENT_SOURCE_DIR}
 

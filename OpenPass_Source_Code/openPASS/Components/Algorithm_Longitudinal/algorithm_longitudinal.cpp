@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
 
 #include "algorithm_longitudinal.h"
-#include "algorithm_longitudinalImplementation.h"
+#include "algo_longImpl.h"
 
 const std::string Version = "0.0.1";
 static const CallbackInterface *Callbacks = nullptr;

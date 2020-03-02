@@ -43,14 +43,9 @@ SOURCES += \
     $$OPEN_SRC/Components/Algorithm_FmuWrapper/FmiImporter/src/FMI2/fmi2_me_sim.c
 
 win32 {
-    LIBS += \
-        -llibboost_filesystem-mgw71-1_63 \
-        -llibboost_system-mgw71-1_63 \
-        -lshlwapi
+    LIBS += -llibboost_filesystem-mgw81-mt-x64-1_72 -lshlwapi
 } else {
-    LIBS += \
-        -lboost_filesystem \
-        -lboost_system
+    LIBS += -lboost_filesystem
 }
 
 LIBS += -lfmilib_shared -lopen_simulation_interface -lprotobuf

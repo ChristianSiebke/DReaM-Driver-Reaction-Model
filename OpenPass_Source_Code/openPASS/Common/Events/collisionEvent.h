@@ -16,7 +16,7 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-#include "Events/basicEvent.h"
+#include "Common/Events/basicEvent.h"
 
 namespace openpass::events {
 

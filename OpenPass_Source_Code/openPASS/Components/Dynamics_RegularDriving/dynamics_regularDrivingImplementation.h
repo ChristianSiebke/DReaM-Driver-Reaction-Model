@@ -19,7 +19,6 @@
 #include "Common/primitiveSignals.h"
 #include "Common/dynamicsSignal.h"
 #include "Common/globalDefinitions.h"
-#include "Interfaces/observationInterface.h"
 
 
 /** \addtogroup Dynamics_RegularDriving

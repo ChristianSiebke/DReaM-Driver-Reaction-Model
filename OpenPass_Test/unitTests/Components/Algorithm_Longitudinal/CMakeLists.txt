@@ -7,12 +7,12 @@ add_openpass_target(
 
   SOURCES
     algorithmLongitudinal_Tests.cpp
-    ${COMPONENT_SOURCE_DIR}/algorithm_longitudinalCalculations.cpp
-    ${COMPONENT_SOURCE_DIR}/algorithm_longitudinalImplementation.cpp
+    ${COMPONENT_SOURCE_DIR}/longCalcs.cpp
+    ${COMPONENT_SOURCE_DIR}/algo_longImpl.cpp
 
   HEADERS
-    ${COMPONENT_SOURCE_DIR}/algorithm_longitudinalCalculations.h
-    ${COMPONENT_SOURCE_DIR}/algorithm_longitudinalImplementation.h
+    ${COMPONENT_SOURCE_DIR}/longCalcs.h
+    ${COMPONENT_SOURCE_DIR}/algo_longImpl.h
 
   INCDIRS
     ${COMPONENT_SOURCE_DIR}

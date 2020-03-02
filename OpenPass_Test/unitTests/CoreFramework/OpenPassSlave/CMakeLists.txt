@@ -26,11 +26,11 @@ add_openpass_target(
     # EventNetwork
     eventNetwork_Tests.cpp
     ${COMPONENT_SOURCE_DIR}/framework/eventNetwork.cpp
-    ${COMPONENT_SOURCE_DIR}/framework/eventNetworkDataPublisher.cpp
     ${COMPONENT_SOURCE_DIR}/importer/eventDetectorImporter.cpp
 
     # ManipulatorImporter
     manipulatorImporter_Tests.cpp
+    ${COMPONENT_SOURCE_DIR}/importer/oscImporterCommon.cpp
 
     # ParameterImporter
     parameterImporter_Tests.cpp
@@ -40,6 +40,11 @@ add_openpass_target(
     profilesImporter_Tests.cpp
     ${COMPONENT_SOURCE_DIR}/importer/profiles.cpp
     ${COMPONENT_SOURCE_DIR}/importer/profilesImporter.cpp
+
+    # Publishers
+    agentDataPublisher_Tests.cpp
+    ${COMPONENT_SOURCE_DIR}/framework/agentDataPublisher.cpp
+    ${COMPONENT_SOURCE_DIR}/framework/eventNetworkDataPublisher.cpp
 
     # Sampler
     sampler_Tests.cpp
@@ -87,10 +92,10 @@ add_openpass_target(
 
     # EventNetwork
     ${COMPONENT_SOURCE_DIR}/framework/eventNetwork.h
-    ${COMPONENT_SOURCE_DIR}/framework/eventNetworkDataPublisher.h
     ${COMPONENT_SOURCE_DIR}/importer/eventDetectorImporter.h
 
     # ManipulatorImporter
+    ${COMPONENT_SOURCE_DIR}/importer/oscImporterCommon.h
 
     # ParameterImporter
     ${COMPONENT_SOURCE_DIR}/importer/parameterImporter.h
@@ -98,6 +103,10 @@ add_openpass_target(
     # ProfilesImporter
     ${COMPONENT_SOURCE_DIR}/importer/profiles.h
     ${COMPONENT_SOURCE_DIR}/importer/profilesImporter.h
+
+    # Publishers
+    ${COMPONENT_SOURCE_DIR}/framework/agentDataPublisher.h
+    ${COMPONENT_SOURCE_DIR}/framework/eventNetworkDataPublisher.h
 
     # Sampler
     ${COMPONENT_SOURCE_DIR}/framework/sampler.h

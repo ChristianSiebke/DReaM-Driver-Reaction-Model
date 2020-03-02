@@ -14,5 +14,7 @@ add_openpass_target(
 
   INCDIRS
     ${COMPONENT_SOURCE_DIR}
-)
 
+  LIBRARIES
+    Common
+)

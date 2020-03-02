@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "AlgorithmAgentFollowingDriverModelImplementation.h"
+#include "AlgorithmAFDMImplementation.h"
 #include "Common/accelerationSignal.h"
 #include "sensorDriverSignal.h"
 

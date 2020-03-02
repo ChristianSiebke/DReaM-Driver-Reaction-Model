@@ -1,4 +1,4 @@
 #add_subdirectory(SpawnPoint_Start)
-add_subdirectory(SpawnPointPreRunCommon_OSI)
-add_subdirectory(SpawnPointRuntimeCommon_OSI)
-add_subdirectory(SpawnPointScenario_OSI)
+add_subdirectory(SpawnPointPreRunCommon)
+add_subdirectory(SpawnPointRuntimeCommon)
+add_subdirectory(SpawnPointScenario)

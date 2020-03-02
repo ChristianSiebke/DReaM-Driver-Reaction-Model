@@ -20,7 +20,7 @@ add_openpass_target(
 
   INCDIRS
     ../../CoreModules/World_OSI/RoutePlanning
-    
+
   LIBRARIES
     Qt5::Core
 )

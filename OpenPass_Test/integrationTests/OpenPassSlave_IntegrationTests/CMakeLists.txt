@@ -7,10 +7,13 @@ add_openpass_target(
   LINKOSI
 
   SOURCES
+    # Parameter
+    ${COMPONENT_SOURCE_DIR}/importer/parameterImporter.cpp
+
     # Scenario
     ScenarioImporter_IntegrationTests.cpp
-    ${COMPONENT_SOURCE_DIR}/importer/oscImporterCommon.cpp
     ${COMPONENT_SOURCE_DIR}/importer/eventDetectorImporter.cpp
+    ${COMPONENT_SOURCE_DIR}/importer/oscImporterCommon.cpp
     ${COMPONENT_SOURCE_DIR}/importer/scenario.cpp
     ${COMPONENT_SOURCE_DIR}/importer/scenarioImporter.cpp
     ${COMPONENT_SOURCE_DIR}/importer/scenarioImporterHelper.cpp
@@ -63,6 +66,9 @@ add_openpass_target(
     ${OPENPASS_SIMCORE_DIR}/CoreModules/World_OSI/egoAgent.cpp
 
   HEADERS
+    # Parameter
+    ${COMPONENT_SOURCE_DIR}/importer/parameterImporter.h
+
     # Scenario
     ${COMPONENT_SOURCE_DIR}/importer/eventDetectorImporter.h
     ${COMPONENT_SOURCE_DIR}/importer/oscImporterCommon.h
@@ -125,6 +131,7 @@ add_openpass_target(
 
   LIBRARIES
     Qt5::Core
+    Qt5::Xml
     Boost::filesystem
     Common
     CoreShare

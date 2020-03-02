@@ -1,5 +1,5 @@
 set(COMPONENT_TEST_NAME AlgorithmAFDM_Tests)
-set(COMPONENT_SOURCE_DIR ${OPENPASS_SIMCORE_DIR}/Components/AlgorithmAgentFollowingDriverModel)
+set(COMPONENT_SOURCE_DIR ${OPENPASS_SIMCORE_DIR}/Components/AlgorithmAFDM)
 
 add_openpass_target(
   NAME ${COMPONENT_TEST_NAME} TYPE test COMPONENT core
@@ -8,10 +8,10 @@ add_openpass_target(
 
   SOURCES
     Afdm_Tests.cpp
-    ${COMPONENT_SOURCE_DIR}/AlgorithmAgentFollowingDriverModelImplementation.cpp
+    ${COMPONENT_SOURCE_DIR}/AlgorithmAFDMImplementation.cpp
 
   HEADERS
-    ${COMPONENT_SOURCE_DIR}/AlgorithmAgentFollowingDriverModelImplementation.h
+    ${COMPONENT_SOURCE_DIR}/AlgorithmAFDMImplementation.h
 
   INCDIRS
     ${COMPONENT_SOURCE_DIR}

@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
 
 #include "parameters_vehicle.h"
-#include "parameters_vehicleImplementation.h"
+#include "parameters_vehicleImpl.h"
 
 #ifndef PARAMETERS_VEHICLE_TEST
 

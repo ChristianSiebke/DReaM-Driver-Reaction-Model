@@ -13,6 +13,7 @@ add_openpass_target(
     framework/agentFactory.h
     framework/commandLineParser.h
     framework/configurationContainer.h
+    framework/coreDataPublisher.h
     framework/directories.h
     framework/dynamicAgentTypeGenerator.h
     framework/dynamicParametersSampler.h
@@ -99,6 +100,7 @@ add_openpass_target(
     framework/agentFactory.cpp
     framework/commandLineParser.cpp
     framework/configurationContainer.cpp
+    framework/coreDataPublisher.cpp
     framework/directories.cpp
     framework/dynamicAgentTypeGenerator.cpp
     framework/dynamicParametersSampler.cpp
@@ -173,6 +175,7 @@ add_openpass_target(
     collisionDetectionInterface
     eventDetectorInterface
     dataStoreInterface
+    eventDetectorInterface
     framework
     importer
     manipulatorInterface

@@ -8,7 +8,10 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-include_directories("./" "CoreShare")
+include_directories(
+  .
+  CoreShare
+)
 
 set(FOLDER "CoreFramework")
 

@@ -24,7 +24,6 @@ add_openpass_target(
     Generators/laneGeometryElementGenerator_Tests.cpp
     ${COMPONENT_SOURCE_DIR}/AgentAdapter.cpp
     ${COMPONENT_SOURCE_DIR}/AgentNetwork.cpp
-    ${COMPONENT_SOURCE_DIR}/egoAgent.cpp
     ${COMPONENT_SOURCE_DIR}/GeometryConverter.cpp
     ${COMPONENT_SOURCE_DIR}/JointsBuilder.cpp
     ${COMPONENT_SOURCE_DIR}/Localization.cpp
@@ -39,17 +38,21 @@ add_openpass_target(
     ${COMPONENT_SOURCE_DIR}/WorldImplementation.cpp
     ${COMPONENT_SOURCE_DIR}/WorldObjectAdapter.cpp
     ${COMPONENT_SOURCE_DIR}/WorldToRoadCoordinateConverter.cpp
+    ${COMPONENT_SOURCE_DIR}/egoAgent.cpp
 
   HEADERS
+    agentManager_Testhelper.h
+    Generators/laneGeometryElementGenerator.h
+    Generators/laneGenerator.h
     ${COMPONENT_SOURCE_DIR}/AgentAdapter.h
     ${COMPONENT_SOURCE_DIR}/AgentNetwork.h
-    ${COMPONENT_SOURCE_DIR}/egoAgent.h
     ${COMPONENT_SOURCE_DIR}/GeometryConverter.h
     ${COMPONENT_SOURCE_DIR}/JointsBuilder.h
     ${COMPONENT_SOURCE_DIR}/Localization.h
     ${COMPONENT_SOURCE_DIR}/OWL/DataTypes.h
     ${COMPONENT_SOURCE_DIR}/OWL/OpenDriveTypeMapper.h
     ${COMPONENT_SOURCE_DIR}/PointQuery.h
+    ${COMPONENT_SOURCE_DIR}/RamerDouglasPeucker.h
     ${COMPONENT_SOURCE_DIR}/RoutePlanning/RouteCalculation.h
     ${COMPONENT_SOURCE_DIR}/SceneryConverter.h
     ${COMPONENT_SOURCE_DIR}/TrafficObjectAdapter.h
@@ -59,6 +62,7 @@ add_openpass_target(
     ${COMPONENT_SOURCE_DIR}/WorldImplementation.h
     ${COMPONENT_SOURCE_DIR}/WorldObjectAdapter.h
     ${COMPONENT_SOURCE_DIR}/WorldToRoadCoordinateConverter.h
+    ${COMPONENT_SOURCE_DIR}/egoAgent.h
 
   INCDIRS
     ${COMPONENT_SOURCE_DIR}

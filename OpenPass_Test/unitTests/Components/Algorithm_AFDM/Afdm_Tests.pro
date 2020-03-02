@@ -15,7 +15,7 @@ include(../../../testing.pri)
 
 win32:QMAKE_CXXFLAGS += -Wa,-mbig-obj
 
-UNIT_UNDER_TEST = $$OPEN_SRC/Components/AlgorithmAgentFollowingDriverModel
+UNIT_UNDER_TEST = $$OPEN_SRC/Components/AlgorithmAFDM
 
 INCLUDEPATH += \
     . \
@@ -24,9 +24,9 @@ INCLUDEPATH += \
 
 HEADERS += \
     $$OPEN_SRC/Components/Sensor_Driver/Signals/sensorDriverSignal.h \
-    $$UNIT_UNDER_TEST/AlgorithmAgentFollowingDriverModelImplementation.h
+    $$UNIT_UNDER_TEST/AlgorithmAFDMImplementation.h
 
 SOURCES += \
-    $$UNIT_UNDER_TEST/AlgorithmAgentFollowingDriverModelImplementation.cpp \
+    $$UNIT_UNDER_TEST/AlgorithmAFDMImplementation.cpp \
     Afdm_Tests.cpp
     

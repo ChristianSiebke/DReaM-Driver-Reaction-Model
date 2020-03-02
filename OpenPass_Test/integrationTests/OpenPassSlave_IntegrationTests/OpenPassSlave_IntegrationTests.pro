@@ -25,10 +25,7 @@ WORLD_OSI = $$OPEN_SRC/CoreModules/World_OSI
 INCLUDEPATH += . \
     $$OPENPASS_SLAVE \
     $$OPENPASS_SLAVE/framework \
-    $$OPENPASS_SLAVE/importer \
     $$OPENPASS_SLAVE/importer/road \
-    $$OPENPASS_SLAVE/modelElements \
-    $$OPENPASS_SLAVE/worldInterface \
     $$CORE_SHARE \
     $$CORE_SHARE/cephes \
     $$WORLD_OSI \
@@ -164,11 +161,7 @@ HEADERS += \
 LIBS += -lopen_simulation_interface -lprotobuf
 
 win32: {
-    LIBS += \
-        -llibboost_filesystem-mgw71-1_63 \
-        -llibboost_system-mgw71-1_63
+    LIBS += -llibboost_filesystem-mgw81-mt-x64-1_72
 } else {
-    LIBS += \
-        -lboost_filesystem \
-        -lboost_system
+    LIBS += -lboost_filesystem
 }

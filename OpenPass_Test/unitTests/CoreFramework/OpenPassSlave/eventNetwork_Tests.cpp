@@ -7,7 +7,7 @@
 *
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
-#include "Events/basicEvent.h"
+#include "Common/Events/basicEvent.h"
 #include "eventNetwork.h"
 #include "fakeDataStore.h"
 #include "fakeEvent.h"

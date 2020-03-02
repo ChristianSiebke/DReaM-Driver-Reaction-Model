@@ -79,6 +79,42 @@ QMAKE_LFLAGS += -Wl,-rpath=\'\$\$ORIGIN\'
 # set "CONFIG += OPENPASS_GTEST" before including this file      #
 ##################################################################
 
+#thirdparty restructure workaround
+win32 {
+    QMAKE_CFLAGS += -isystem $$PWD\..\deps\thirdParty\win64\boost\include
+    QMAKE_CFLAGS += -isystem $$PWD\..\deps\thirdParty\win64\FMILibrary\include
+    QMAKE_CFLAGS += -isystem $$PWD\..\deps\thirdParty\win64\googletest\include
+    QMAKE_CFLAGS += -isystem $$PWD\..\deps\thirdParty\win64\osi\include
+    QMAKE_CFLAGS += -isystem $$PWD\..\deps\thirdParty\win64\protobuf\include
+    QMAKE_CXXFLAGS += -isystem $$PWD\..\deps\thirdParty\win64\boost\include
+    QMAKE_CXXFLAGS += -isystem $$PWD\..\deps\thirdParty\win64\FMILibrary\include
+    QMAKE_CXXFLAGS += -isystem $$PWD\..\deps\thirdParty\win64\googletest\include
+    QMAKE_CXXFLAGS += -isystem $$PWD\..\deps\thirdParty\win64\osi\include
+    QMAKE_CXXFLAGS += -isystem $$PWD\..\deps\thirdParty\win64\protobuf\include
+    QMAKE_LFLAGS += -L $$PWD\..\deps\thirdParty\win64\boost\lib
+    QMAKE_LFLAGS += -L $$PWD\..\deps\thirdParty\win64\FMILibrary\lib
+    QMAKE_LFLAGS += -L $$PWD\..\deps\thirdParty\win64\googletest\lib
+    QMAKE_LFLAGS += -L $$PWD\..\deps\thirdParty\win64\osi\lib\osi3
+    QMAKE_LFLAGS += -L $$PWD\..\deps\thirdParty\win64\protobuf\lib
+}
+unix {
+    QMAKE_CFLAGS += -isystem $$PWD/../deps/thirdParty/linux64/boost/include
+    QMAKE_CFLAGS += -isystem $$PWD/../deps/thirdParty/linux64/FMILibrary/include
+    QMAKE_CFLAGS += -isystem $$PWD/../deps/thirdParty/linux64/googletest/include
+    QMAKE_CFLAGS += -isystem $$PWD/../deps/thirdParty/linux64/osi/include
+    QMAKE_CFLAGS += -isystem $$PWD/../deps/thirdParty/linux64/protobuf/include
+    QMAKE_CXXFLAGS += -isystem $$PWD/../deps/thirdParty/linux64/boost/include
+    QMAKE_CXXFLAGS += -isystem $$PWD/../deps/thirdParty/linux64/FMILibrary/include
+    QMAKE_CXXFLAGS += -isystem $$PWD/../deps/thirdParty/linux64/googletest/include
+    QMAKE_CXXFLAGS += -isystem $$PWD/../deps/thirdParty/linux64/osi/include
+    QMAKE_CXXFLAGS += -isystem $$PWD/../deps/thirdParty/linux64/protobuf/include
+    QMAKE_LFLAGS += -L $$PWD/../deps/thirdParty/linux64/boost/lib
+    QMAKE_LFLAGS += -L $$PWD/../deps/thirdParty/linux64/FMILibrary/lib
+    QMAKE_LFLAGS += -L $$PWD/../deps/thirdParty/linux64/googletest/lib
+    QMAKE_LFLAGS += -L $$PWD/../deps/thirdParty/linux64/osi/lib/osi3
+    QMAKE_LFLAGS += -L $$PWD/../deps/thirdParty/linux64/protobuf/lib
+}
+
 OPENPASS_GTEST {
     message("[$$TARGET] Building test")
 

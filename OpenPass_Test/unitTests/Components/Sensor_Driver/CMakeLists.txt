@@ -21,3 +21,4 @@ add_openpass_target(
   LIBRARIES
     Qt5::Core
 )
+

@@ -1,0 +1,20 @@
+set(COMPONENT_NAME Dynamics_TrajectoryFollower)
+
+add_compile_definitions(DYNAMICS_TRAJECTORY_FOLLOWER_LIBRARY)
+
+add_openpass_target(
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
+
+  HEADERS
+    dynamics_tf.h
+    tfImplementation.h
+
+  SOURCES
+    dynamics_tf.cpp
+    tfImplementation.cpp
+
+  LIBRARIES
+    Qt5::Core
+    Common
+    CoreShare
+)

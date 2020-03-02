@@ -18,8 +18,8 @@ CONFIG += OPENPASS_GTEST \
           OPENPASS_GTEST_DEFAULT_MAIN
 include(../../testing.pri)
 
-SPAWNER_COMMON = $$OPEN_SRC/CoreModules/SpawnPoints/Common/
-SPAWNER_PRERUN = $$OPEN_SRC/CoreModules/SpawnPoints/SpawnPointPreRunCommon_OSI/
+SPAWNER_COMMON = $$OPEN_SRC/CoreModules/SpawnPoints/Common
+SPAWNER_PRERUN = $$OPEN_SRC/CoreModules/SpawnPoints/SpawnPointPreRunCommon
 
 INCLUDEPATH += . \
     $$OPEN_SRC/CoreModules/SpawnPoints \

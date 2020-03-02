@@ -68,22 +68,20 @@ if(MINGW)
   list(GET _CVER_COMPONENTS 0 _CVER_MAJOR)
   list(GET _CVER_COMPONENTS 1 _CVER_MINOR)
   set(Boost_COMPILER "mgw${_CVER_MAJOR}${_CVER_MINOR}")
-  set(Boost_USE_STATIC_LIBS OFF)
 endif()
+set(Boost_USE_STATIC_LIBS OFF)
 find_package(Boost COMPONENTS filesystem REQUIRED)
-include_directories(${Boost_INCLUDE_DIRS})
-
 
 find_package(Qt5 COMPONENTS Concurrent Core Widgets Xml)
 find_package(FMILibrary)
 
 option(WITH_SIMCORE "Build OSI based scenario simulation" ON)
-option(WITH_GUI "Build GUI" ON)
+option(WITH_GUI "Build GUI" OFF)
 option(WITH_TESTS "Build unit tests" ON)
 
 if(WITH_TESTS)
   find_package(GTest)
-  # as GMock currently doesn't provvide a find_package config, gmock file location is derived from gtest in HelperMacros.cmake
+  # as GMock currently doesn't provide a find_package config, gmock file location is derived from gtest in HelperMacros.cmake
   #find_package(GMock)
 endif()
 

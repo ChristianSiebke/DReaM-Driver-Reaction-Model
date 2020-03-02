@@ -13,6 +13,7 @@ add_openpass_target(
     Localization.h
     LocalizationElement.h
     PointQuery.h
+    RamerDouglasPeucker.h
     SceneryConverter.h
     TrafficObjectAdapter.h
     World.h

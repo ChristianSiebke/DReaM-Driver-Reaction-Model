@@ -62,7 +62,7 @@ dynamicsCollision_Tests.file = \
     $$PWD/Components/Dynamics_Collision/dynamicsCollision_Tests.pro
 
 dynamicsTrajectoryFollower_Tests.file = \
-    $$PWD/Components/Dynamics_TrajectoryFollower/dynamicsTrajectoryFollower_Tests.pro
+    $$PWD/Components/Dynamics_TF/dynamicsTF_Tests.pro
 
 eventDetector_Tests.file = \
     $$PWD/CoreModules/EventDetector/eventDetector_Tests.pro
@@ -95,7 +95,7 @@ signalPrioritizer_Tests.file = \
     $$PWD/Components/SignalPrioritizer/signalPrioritizer_Tests.pro
 
 spawnPointScenario_Tests.file = \
-    $$PWD/CoreModules/SpawnPointScenario_OSI/spawnPointScenario_Tests.pro
+    $$PWD/CoreModules/SpawnPointScenario/spawnPointScenario_Tests.pro
 
 spawnPointRuntimeCommon_Tests.file = \
     $$PWD/CoreModules/SpawnPointRuntimeCommon_OSI/spawnPointRuntimeCommon_Tests.pro

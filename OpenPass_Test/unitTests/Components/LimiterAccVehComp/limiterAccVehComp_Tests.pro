@@ -13,15 +13,15 @@ CONFIG += OPENPASS_GTEST \
 
 include(../../../testing.pri)
 
-UNIT_UNDER_TEST = $$OPEN_SRC/Components/LimiterAccelerationVehicleComponents
+UNIT_UNDER_TEST = $$OPEN_SRC/Components/LimiterAccVehComp
 
 INCLUDEPATH += \
     . \
     $$UNIT_UNDER_TEST
 
 HEADERS += \
-    $$UNIT_UNDER_TEST/limiterAccelerationVehicleComponentsImplementation.h
+    $$UNIT_UNDER_TEST/limiterAccVehCompImplementation.h
 
 SOURCES += \
-    $$UNIT_UNDER_TEST/limiterAccelerationVehicleComponentsImplementation.cpp \
+    $$UNIT_UNDER_TEST/limiterAccVehCompImplementation.cpp \
     ./limiterAccVehComp_Tests.cpp

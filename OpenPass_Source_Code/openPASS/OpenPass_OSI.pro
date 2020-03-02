@@ -16,9 +16,9 @@ SUBDIRS = \
         CoreModules/EventDetector \
         CoreModules/Manipulator \
         CoreModules/Observation_Log \
-        CoreModules/SpawnPoints/SpawnPointScenario_OSI \
-        CoreModules/SpawnPoints/SpawnPointPreRunCommon_OSI \
-        CoreModules/SpawnPoints/SpawnPointRuntimeCommon_OSI \
+        CoreModules/SpawnPoints/SpawnPointScenario \
+        CoreModules/SpawnPoints/SpawnPointPreRunCommon \
+        CoreModules/SpawnPoints/SpawnPointRuntimeCommon \
         CoreModules/Stochastics \
         CoreModules/World_OSI \
         Components/Action_LongitudinalDriver \
@@ -28,12 +28,12 @@ SUBDIRS = \
         Components/Algorithm_FmuWrapper \
         Components/Algorithm_Lateral \
         Components/Algorithm_Longitudinal \
-        Components/AlgorithmAgentFollowingDriverModel \
+        Components/AlgorithmAFDM \
         Components/ComponentController \
         Components/Dynamics_Collision \
         Components/Dynamics_RegularDriving \
-        Components/Dynamics_TrajectoryFollower \
-        Components/LimiterAccelerationVehicleComponents \
+        Components/Dynamics_TF \
+        Components/LimiterAccVehComp \
         Components/OpenScenarioActions \
         Components/Parameters_Vehicle \
         Components/Sensor_Driver \

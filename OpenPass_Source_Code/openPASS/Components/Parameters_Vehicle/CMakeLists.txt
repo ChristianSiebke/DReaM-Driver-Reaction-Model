@@ -8,11 +8,11 @@ add_openpass_target(
   HEADERS
     parameters_vehicle.h
     parameters_vehicleGlobal.h
-    parameters_vehicleImplementation.h
+    parameters_vehicleImpl.h
 
   SOURCES
     parameters_vehicle.cpp
-    parameters_vehicleImplementation.cpp
+    parameters_vehicleImpl.cpp
 
   LIBRARIES
     Qt5::Core
