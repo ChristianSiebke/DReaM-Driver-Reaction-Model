@@ -29,9 +29,9 @@
 #include "WorldDataException.h"
 #include "WorldDataQuery.h"
 
-#include "osi/osi_groundtruth.pb.h"
-#include "osi/osi_sensorviewconfiguration.pb.h"
-#include "osi/osi_worldinterface.pb.h"
+#include "osi3/osi_groundtruth.pb.h"
+#include "osi3/osi_sensorviewconfiguration.pb.h"
+#include "osi3/osi_worldinterface.pb.h"
 
 namespace OWL {
 

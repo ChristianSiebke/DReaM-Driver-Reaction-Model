@@ -45,7 +45,7 @@ struct WorldParameterOSI
     std::string weather {""};
 };
 
-#include "osi/osi_groundtruth.pb.h"
+#include "osi3/osi_groundtruth.pb.h"
 
 /** \addtogroup World
 * @{

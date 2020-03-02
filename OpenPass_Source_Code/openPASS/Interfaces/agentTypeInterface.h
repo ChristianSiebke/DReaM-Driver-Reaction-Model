@@ -17,9 +17,9 @@
 
 #pragma once
 
+#include <list>
 #include <map>
 #include <memory>
-#include <list>
 
 namespace SimulationSlave
 {

@@ -1,6 +1,15 @@
 Thumbs.db
+# qt artifact
+**/build-*
 /.project
 *.autosave
 *.orig
 *.rej
 *.user
+.qmake*
+.directory
+DoxyGen/Function/doxy_build/*
+build
+
+# third party references
+deps/*

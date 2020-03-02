@@ -13,13 +13,14 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "algorithm_autonomousEmergencyBrakingImplementation.h"
-#include "AlgorithmAebOSIUnitTests.h"
-
 #include "fakeAgent.h"
 #include "fakeObservation.h"
 #include "fakeWorldObject.h"
 #include "fakeParameter.h"
+
+#include "AlgorithmAebOSIUnitTests.h"
+#include "algorithm_autonomousEmergencyBrakingImplementation.h"
+
 
 using ::testing::_;
 using ::testing::Return;

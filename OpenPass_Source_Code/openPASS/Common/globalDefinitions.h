@@ -18,11 +18,11 @@
 #ifndef GLOBALDEFINITIONS
 #define GLOBALDEFINITIONS
 
+#include <list>
+#include <map>
 #include <string>
 #include <tuple>
 #include <vector>
-#include <list>
-#include <map>
 
 //-----------------------------------------------------------------------------
 //! @brief Containing the three possible states regarding lane change

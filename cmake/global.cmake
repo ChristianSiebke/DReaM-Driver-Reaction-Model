@@ -1,0 +1,138 @@
+################################################################################
+# Copyright (c) 2020 Uwe Woessner
+# Copyright (c) 2020 in-tech GmbH
+#
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+################################################################################
+#
+# Global cmake file for the openPASS build process
+#
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# NOTE: undocumented feature of cmake
+set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
+
+cmake_policy(SET CMP0020 NEW)   # Automatically link Qt executables to qtmain target on Windows. OLD behavior may be removed in a future version.
+cmake_policy(SET CMP0043 NEW)   # Ignore COMPILE_DEFINITIONS_<Config> properties. OLD behavior may be removed in a future version.
+cmake_policy(SET CMP0054 NEW)   # Only interpret if() arguments as variables or keywords when unquoted. OLD behavior may be removed in a future version.
+
+set(CMAKE_C_STANDARD 90)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+if(USE_CCACHE)
+  set(CMAKE_C_COMPILER_LAUNCHER ccache)
+  set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
+endif()
+
+#set(CMAKE_AUTOMOC ON)
+#set(CMAKE_AUTOUIC ON)
+#set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER "generated")
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+find_package(Protobuf 2.6.1 REQUIRED)
+add_compile_definitions(PROTOBUF_USE_DLLS)
+
+find_package(OSI REQUIRED)
+
+if(MINGW)
+  # Bug in boost-install 1.72.0
+  # setting boost mingw version manually
+  # https://github.com/boostorg/boost_install/issues/33
+  string(REGEX MATCHALL "[0-9]+" _CVER_COMPONENTS ${CMAKE_CXX_COMPILER_VERSION})
+  list(GET _CVER_COMPONENTS 0 _CVER_MAJOR)
+  list(GET _CVER_COMPONENTS 1 _CVER_MINOR)
+  set(Boost_COMPILER "mgw${_CVER_MAJOR}${_CVER_MINOR}")
+endif()
+set(Boost_USE_STATIC_LIBS OFF)
+find_package(Boost COMPONENTS filesystem REQUIRED)
+
+find_package(GTest)
+
+find_package(Qt5 COMPONENTS Concurrent Core Widgets Xml)
+find_package(FMILibrary)
+
+option(WITH_SIMCORE "Build OSI based scenario simulation" ON)
+option(WITH_GUI "Build GUI" OFF)
+
+if(WIN32)
+  set(CMAKE_INSTALL_PREFIX "C:/OpenPASS" CACHE PATH "Destination directory")
+  add_compile_definitions(WIN32)
+  add_compile_definitions(_USE_MATH_DEFINES)
+else()
+  set(CMAKE_INSTALL_PREFIX "/OpenPASS" CACHE PATH "Destination directory")
+  add_compile_definitions(unix)
+  add_link_options(LINKER:-z,defs)
+endif()
+
+#file(MAKE_DIRECTORY ${OPENPASS_DESTDIR})
+#file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}/bin)
+#file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}/bin/plugins)
+#file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}/bin/coreModules)
+#file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}/bin/gui)
+
+add_definitions(-DSUBDIR_LIB_SIM="/lib" -DSUBDIR_LIB_PLUGIN="plugins" -DSUBDIR_LIB_GUI="/gui"  -DSUBDIR_COMPONENTS="/components")
+
+set(CMAKE_BUILD_RPATH \$ORIGIN)
+set(CMAKE_INSTALL_RPATH \$ORIGIN \$ORIGIN/lib)
+
+include(HelperMacros)
+
+#######################################
+
+set(INSTALL_BIN_DIR "." CACHE PATH "Installation directory for executables")
+set(INSTALL_LIB_DIR "lib" CACHE PATH "Installation directory for libraries")
+set(INSTALL_INC_DIR "include" CACHE PATH "Installation directory for headers")
+set(INSTALL_CFG_DIR "cfg" CACHE PATH "Installation directory for config files")
+set(INSTALL_MAN_DIR "share/man" CACHE PATH "Installation directory for manual pages")
+set(INSTALL_PKGCONFIG_DIR "share/pkgconfig" CACHE PATH "Installation directory for pkgconfig (.pc) files")
+
+if(MSVC)
+  set(CMAKE_DEBUG_POSTFIX "d")
+  add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
+  add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
+
+  # get rid of annoying template needs to have dll-interface warnings on VisualStudio
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4251 -wd4335")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4250")
+endif()
+
+# packaging
+if(MSVC)
+# TODO
+elseif(MINGW)
+  get_filename_component(MINGW_PATH ${CMAKE_CXX_COMPILER} PATH)
+  string(REGEX REPLACE "\.a$" "" OSILIB "${OSI_LIBRARIES}")
+  string(REGEX REPLACE "\.a$" "" PROTOLIB "${Protobuf_LIBRARIES}")
+  string(REGEX REPLACE "\/lib\/" "/bin/" PROTOLIB "${PROTOLIB}")
+  string(REGEX REPLACE "\.a$" "" FMILIB "${FMILibrary_LIBRARIES}")
+  set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
+    ${MINGW_PATH}/libgcc_s_seh-1.dll
+    ${MINGW_PATH}/libstdc++-6.dll
+    ${MINGW_PATH}/libwinpthread-1.dll
+    $<TARGET_FILE:Qt5::Core>
+    $<TARGET_FILE:Qt5::Xml>
+    ${OSILIB}
+    ${PROTOLIB}
+    ${FMILIB})
+else()
+# TODO
+#  set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
+#    $<TARGET_FILE:Boost::filesystem>
+#    $<TARGET_FILE:Qt5::Core>
+#    $<TARGET_FILE:Qt5::Xml>
+#    ${OSI_LIBRARIES}
+#    ${Protobuf_LIBRARIES}
+#    ${FMILibrary_LIBRARIES})
+endif()
+
+set(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION .)
+include(InstallRequiredSystemLibraries)

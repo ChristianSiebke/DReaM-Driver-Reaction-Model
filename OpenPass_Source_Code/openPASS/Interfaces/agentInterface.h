@@ -18,17 +18,17 @@
 
 #pragma once
 
-#include <map>
 #include <list>
+#include <map>
 #include <vector>
 
 #include "Common/globalDefinitions.h"
-#include "Common/worldDefinitions.h"
 #include "Common/sensorDefinitions.h"
-#include "Interfaces/worldObjectInterface.h"
-#include "Interfaces/signalInterface.h"
+#include "Common/worldDefinitions.h"
 #include "Interfaces/profilesInterface.h"
+#include "Interfaces/signalInterface.h"
 #include "Interfaces/spawnItemParameterInterface.h"
+#include "Interfaces/worldObjectInterface.h"
 
 using LaneTypes = std::vector<LaneType>;
 

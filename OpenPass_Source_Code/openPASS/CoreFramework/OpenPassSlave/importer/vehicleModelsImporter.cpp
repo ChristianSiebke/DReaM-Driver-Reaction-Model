@@ -8,9 +8,13 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
-#include "vehicleModelsImporter.h"
-#include "math.h"
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
+#endif
+#include <cmath>
+
 #include "importerLoggingHelper.h"
+#include "vehicleModelsImporter.h"
 
 namespace TAG = openpass::importer::xml::vehicleModelsImporter::tag;
 namespace ATTRIBUTE = openpass::importer::xml::vehicleModelsImporter::attribute;

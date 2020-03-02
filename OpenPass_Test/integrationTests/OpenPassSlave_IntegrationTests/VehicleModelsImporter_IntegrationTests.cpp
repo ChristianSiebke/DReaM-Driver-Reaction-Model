@@ -13,8 +13,8 @@
 
 #include <boost/filesystem.hpp>
 
-#include "vehicleModels.h"
-#include "vehicleModelsImporter.h"
+#include "importer/vehicleModels.h"
+#include "importer/vehicleModelsImporter.h"
 
 using ::testing::DoubleEq;
 using ::testing::ElementsAre;

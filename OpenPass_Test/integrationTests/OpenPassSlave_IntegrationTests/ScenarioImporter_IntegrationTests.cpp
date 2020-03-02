@@ -13,8 +13,8 @@
 
 #include <boost/filesystem.hpp>
 
-#include "scenario.h"
-#include "scenarioImporter.h"
+#include "importer/scenario.h"
+#include "importer/scenarioImporter.h"
 #include "fakeScenario.h"
 
 using ::testing::NiceMock;

@@ -23,10 +23,10 @@
 #include "Interfaces/roadInterface/junctionInterface.h"
 #include "Interfaces/worldInterface.h"
 
-#include "osi/osi_groundtruth.pb.h"
-#include "osi/osi_sensorview.pb.h"
-#include "osi/osi_sensorviewconfiguration.pb.h"
-#include "osi/osi_worldinterface.pb.h"
+#include "osi3/osi_groundtruth.pb.h"
+#include "osi3/osi_sensorview.pb.h"
+#include "osi3/osi_sensorviewconfiguration.pb.h"
+#include "osi3/osi_worldinterface.pb.h"
 
 namespace OWL {
 

@@ -17,10 +17,12 @@
 
 #include <string>
 #include <unordered_map>
-#include "agentTypeInterface.h"
-#include "profilesInterface.h"
+
 #include "Common/globalDefinitions.h"
 #include "Common/worldDefinitions.h"
+
+#include "agentTypeInterface.h"
+#include "profilesInterface.h"
 
 #pragma once
 

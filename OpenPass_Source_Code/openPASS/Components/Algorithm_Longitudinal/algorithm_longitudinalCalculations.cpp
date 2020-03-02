@@ -13,6 +13,10 @@
 /** @file  algorithm_longitudinalCalculations.cpp */
 //-----------------------------------------------------------------------------
 
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
+#endif
+#include <cmath>
 #include <cassert>
 #include <array>
 #include <limits>

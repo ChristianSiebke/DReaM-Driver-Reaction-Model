@@ -18,8 +18,8 @@
 
 #include "WorldData.h"
 #include "objectDetectorBase.h"
-#include "osi/osi_sensorview.pb.h"
-#include "osi/osi_sensordata.pb.h"
+#include "osi3/osi_sensorview.pb.h"
+#include "osi3/osi_sensordata.pb.h"
 
 struct ObjectView
 {

@@ -7,8 +7,9 @@
 *
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
-#include "eventDetectorDefinitions.h"
+
 #include "commonTools.h"
+#include "eventDetectorDefinitions.h"
 
 namespace openScenario
 {

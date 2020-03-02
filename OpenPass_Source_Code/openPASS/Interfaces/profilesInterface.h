@@ -10,9 +10,10 @@
 
 #pragma once
 
+#include <list>
 #include <memory>
 #include <unordered_map>
-#include <list>
+
 #include "Common/sensorDefinitions.h"
 
 using StringProbabilities = std::unordered_map<std::string, double>;

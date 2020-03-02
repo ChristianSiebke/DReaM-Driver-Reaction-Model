@@ -10,10 +10,11 @@
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-#include "slaveConfig.h"
-#include "slaveConfigImporter.h"
 
 #include <boost/filesystem.hpp>
+
+#include "importer/slaveConfig.h"
+#include "importer/slaveConfigImporter.h"
 
 using ::testing::NiceMock;
 using ::testing::Eq;

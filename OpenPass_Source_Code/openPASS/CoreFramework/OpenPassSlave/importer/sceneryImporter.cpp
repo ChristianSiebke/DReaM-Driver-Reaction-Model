@@ -606,7 +606,6 @@ void SceneryImporter::checkRoadSignalBoundaries(RoadSignalSpecification signal)
                  signal.height >= 0 &&
                  signal.width >= 0),
             "Invalid road signal boundaries.");
-;
 }
 
 void SceneryImporter::ParseSignals(QDomElement& roadElement,

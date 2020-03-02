@@ -25,10 +25,7 @@ WORLD_OSI = $$OPEN_SRC/CoreModules/World_OSI
 INCLUDEPATH += . \
     $$OPENPASS_SLAVE \
     $$OPENPASS_SLAVE/framework \
-    $$OPENPASS_SLAVE/importer \
     $$OPENPASS_SLAVE/importer/road \
-    $$OPENPASS_SLAVE/modelElements \
-    $$OPENPASS_SLAVE/worldInterface \
     $$CORE_SHARE \
     $$CORE_SHARE/cephes \
     $$WORLD_OSI \

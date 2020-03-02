@@ -8,19 +8,22 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
+#include <cstdint>
 #include <memory>
-#include <qglobal.h>
 #include <string>
 #include <sstream>
-#include <qdir.h>
-#include <cstdint>
-#include <boost/filesystem.hpp>
-#include "Interfaces/agentInterface.h"
-#include "AlgorithmFmuWrapperImplementation.h"
-#include "Common/commonTools.h"
 
+#include <boost/filesystem.hpp>
+
+#include <QtGlobal>
+
+#include "Interfaces/agentInterface.h"
 #include "Interfaces/fmuHandlerInterface.h"
 #include "Interfaces/parameterInterface.h"
+
+#include "Common/commonTools.h"
+
+#include "AlgorithmFmuWrapperImplementation.h"
 #include "OsmpFmuHandler.h"
 
 AlgorithmFmuWrapperImplementation::AlgorithmFmuWrapperImplementation(std::string componentName,

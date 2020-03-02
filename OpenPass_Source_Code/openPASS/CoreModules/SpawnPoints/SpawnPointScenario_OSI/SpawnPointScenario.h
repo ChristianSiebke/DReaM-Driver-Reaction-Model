@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "Common/SpawnPointDefinitions.h"
+#include "../Common/SpawnPointDefinitions.h"
 #include "Interfaces/spawnPointInterface.h"
 #include "Interfaces/worldInterface.h"
 #include "Interfaces/samplerInterface.h"

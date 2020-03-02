@@ -9,12 +9,12 @@
 *******************************************************************************/
 #pragma once
 
-#include "Interfaces/scenarioActionInterface.h"
-
 #include <optional>
-#include <string>
 #include <ostream>
+#include <string>
 #include <vector>
+
+#include "Interfaces/scenarioActionInterface.h"
 
 namespace openScenario {
 

@@ -12,24 +12,28 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "agentBlueprint.h"
-#include "scenery.h"
-#include "sceneryImporter.h"
-#include "world.h"
-#include "WorldData.h"
-#include "AgentAdapter.h"
 #include <algorithm>
-#include "CoreModules/Stochastics/stochastics_implementation.h"
 
 #include <boost/filesystem.hpp>
 
-using ::testing::ElementsAre;
-using ::testing::Eq;
+#include "CoreModules/Stochastics/stochastics_implementation.h"
+#include "importer/scenery.h"
+#include "importer/sceneryImporter.h"
+#include "modelElements/agentBlueprint.h"
+#include "worldInterface/world.h"
+
+#include "AgentAdapter.h"
+#include "WorldData.h"
+
+
 using ::testing::DoubleEq;
 using ::testing::DoubleNear;
+using ::testing::ElementsAre;
+using ::testing::Eq;
+using ::testing::IsEmpty;
+using ::testing::IsTrue;
 using ::testing::Ne;
 using ::testing::UnorderedElementsAre;
-using ::testing::IsEmpty;
 
 using namespace boost::filesystem;
 using namespace Configuration;
@@ -37,7 +41,7 @@ using namespace Importer;
 
 struct TESTSCENERY_FACTORY
 {
-    const std::string libraryPath = "./lib/World_OSI";
+    const std::string libraryName = "World_OSI";
 
     SimulationCommon::Callbacks callbacks;
     StochasticsImplementation stochastics{&callbacks};
@@ -45,14 +49,32 @@ struct TESTSCENERY_FACTORY
     SimulationSlave::World world;
     Scenery scenery;
 
-    TESTSCENERY_FACTORY(std::string sceneryFile) :
-        worldBinding(libraryPath, &callbacks, &stochastics),
+    TESTSCENERY_FACTORY() :
+        worldBinding(libraryName, &callbacks, &stochastics),
         world(&worldBinding)
     {
+    }
+
+    bool instantiate(const std::string& sceneryFile)
+    {
         path sceneryPath = initial_path() / "Resources" / "ImporterTest" / sceneryFile;
-        world.Instantiate();
-        SceneryImporter::Import(sceneryPath.string(), &scenery);
-        world.CreateScenery(&scenery);
+
+        if (!world.Instantiate())
+        {
+            return false;
+        }
+
+        if (!SceneryImporter::Import(sceneryPath.string(), &scenery))
+        {
+            return false;
+        }
+
+        if (!(world.CreateScenery(&scenery)))
+        {
+            return false;
+        }
+
+        return true;
     }
 };
 
@@ -131,7 +153,9 @@ void CheckLaneConnections(OWL::Interfaces::WorldData* worldData, std::list<const
 //! Scope is on World-level
 TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectLanes)
 {
-    TESTSCENERY_FACTORY tsf("IntegrationTestScenery.xodr");
+    TESTSCENERY_FACTORY tsf;
+    ASSERT_THAT(tsf.instantiate("IntegrationTestScenery.xodr"), IsTrue());
+
     auto& world = tsf.world;
 
     Route route{"1"};
@@ -182,7 +206,9 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectLanes)
 
 TEST(SceneryImporter_IntegrationTests, MultipleRoads_ImportWithCorrectLanes)
 {
-    TESTSCENERY_FACTORY tsf("MultipleRoadsIntegrationScenery.xodr");
+    TESTSCENERY_FACTORY tsf;
+    ASSERT_THAT(tsf.instantiate("MultipleRoadsIntegrationScenery.xodr"), IsTrue());
+
     auto& world = tsf.world;
 
     Route route{{{"1", true}, {"2", false}, {"3", true}}, {}, 0};
@@ -251,7 +277,9 @@ TEST(SceneryImporter_IntegrationTests, MultipleRoads_ImportWithCorrectLanes)
 
 TEST(SceneryImporter_IntegrationTests, MultipleRoadsWithJunctions_ImportWithCorrectLanes)
 {
-    TESTSCENERY_FACTORY tsf("MultipleRoadsWithJunctionIntegrationScenery.xodr");
+    TESTSCENERY_FACTORY tsf;
+    ASSERT_THAT(tsf.instantiate("MultipleRoadsWithJunctionIntegrationScenery.xodr"), IsTrue());
+
     auto& world = tsf.world;
 
     Route routeUp{{{"1", true}, {"4", true}, {"2", true}}, {}, 1};
@@ -335,7 +363,9 @@ TEST(SceneryImporter_IntegrationTests, MultipleRoadsWithJunctions_ImportWithCorr
 //! Scope is on WorldData and OWL-Level
 TEST(SceneryImporter_IntegrationTests, SingleRoad_CheckForCorrectLaneConnections)
 {
-    TESTSCENERY_FACTORY tsf("IntegrationTestScenery.xodr");
+    TESTSCENERY_FACTORY tsf;
+    ASSERT_THAT(tsf.instantiate("IntegrationTestScenery.xodr"), IsTrue());
+
     auto& world = tsf.world;
 
     OWL::Interfaces::WorldData* worldData = static_cast<OWL::Interfaces::WorldData*>(world.GetWorldData());
@@ -369,7 +399,9 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_CheckForCorrectLaneConnections
 
 TEST(SceneryImporter_IntegrationTests, MultipleRoads_CheckForCorrectLaneConnections)
 {
-    TESTSCENERY_FACTORY tsf("MultipleRoadsIntegrationScenery.xodr");
+    TESTSCENERY_FACTORY tsf;
+    ASSERT_THAT(tsf.instantiate("MultipleRoadsIntegrationScenery.xodr"), IsTrue());
+
     auto& world = tsf.world;
 
     OWL::Interfaces::WorldData* worldData = static_cast<OWL::Interfaces::WorldData*>(world.GetWorldData());
@@ -411,7 +443,9 @@ TEST(SceneryImporter_IntegrationTests, MultipleRoads_CheckForCorrectLaneConnecti
 
 TEST(SceneryImporter_IntegrationTests, MultipleRoadsWithJunctions_CheckForCorrectLaneConnections)
 {
-    TESTSCENERY_FACTORY tsf("MultipleRoadsWithJunctionIntegrationScenery.xodr");
+    TESTSCENERY_FACTORY tsf;
+    ASSERT_THAT(tsf.instantiate("MultipleRoadsWithJunctionIntegrationScenery.xodr"), IsTrue());
+
     auto& world = tsf.world;
 
     OWL::Interfaces::WorldData* worldData = static_cast<OWL::Interfaces::WorldData*>(world.GetWorldData());
@@ -442,7 +476,9 @@ TEST(SceneryImporter_IntegrationTests, MultipleRoadsWithJunctions_CheckForCorrec
 
 TEST(SceneryImporter_IntegrationTests, MultipleRoadsWithNonIntersectingJunctions_JunctionsHaveNoIntersectionInformation)
 {
-    TESTSCENERY_FACTORY tsf("MultipleRoadsWithJunctionIntegrationScenery.xodr");
+    TESTSCENERY_FACTORY tsf;
+    ASSERT_THAT(tsf.instantiate("MultipleRoadsWithJunctionIntegrationScenery.xodr"), IsTrue());
+
     auto& world = tsf.world;
 
     OWL::Interfaces::WorldData* worldData = static_cast<OWL::Interfaces::WorldData*>(world.GetWorldData());
@@ -462,7 +498,9 @@ MATCHER_P(GeometryDoublePairEq, comparisonPair, "")
 }
 TEST(SceneryImporter_IntegrationTests, MultipleRoadsWithIntersectingJunctions_JunctionsHaveIntersectionInformation)
 {
-    TESTSCENERY_FACTORY tsf("IntersectedJunctionScenery.xodr");
+    TESTSCENERY_FACTORY tsf;
+    ASSERT_THAT(tsf.instantiate("IntersectedJunctionScenery.xodr"), IsTrue());
+
     auto& world = tsf.world;
     OWL::Interfaces::WorldData* worldData = static_cast<OWL::Interfaces::WorldData*>(world.GetWorldData());
     WorldDataQuery worldDataQuery(*worldData);
@@ -563,7 +601,9 @@ AgentAdapter* AddAgentToWorld (SimulationSlave::World& world,
 
 TEST(GetObjectsInRange_IntegrationTests, OneObjectOnQueriedLane)
 {
-    TESTSCENERY_FACTORY tsf("SceneryLeftLaneEnds.xodr");
+    TESTSCENERY_FACTORY tsf;
+    ASSERT_THAT(tsf.instantiate("SceneryLeftLaneEnds.xodr"), IsTrue());
+
     auto& world = tsf.world;
     AddAgentToWorld(world, 0, 10.0, 2.0);
     AddAgentToWorld(world, 1, 10.0, 5.0);
@@ -579,7 +619,9 @@ TEST(GetObjectsInRange_IntegrationTests, OneObjectOnQueriedLane)
 
 TEST(GetObjectsInRange_IntegrationTests, NoObjectOnQueriedLane)
 {
-    TESTSCENERY_FACTORY tsf("SceneryLeftLaneEnds.xodr");
+    TESTSCENERY_FACTORY tsf;
+    ASSERT_THAT(tsf.instantiate("SceneryLeftLaneEnds.xodr"), IsTrue());
+
     auto& world = tsf.world;
     AddAgentToWorld(world, 0, 10.0, 2.0);
     AddAgentToWorld(world, 1, 10.0, 9.0);
@@ -592,7 +634,9 @@ TEST(GetObjectsInRange_IntegrationTests, NoObjectOnQueriedLane)
 
 TEST(GetObjectsInRange_IntegrationTests, TwoObjectsInDifferentSections)
 {
-    TESTSCENERY_FACTORY tsf("SceneryLeftLaneEnds.xodr");
+    TESTSCENERY_FACTORY tsf;
+    ASSERT_THAT(tsf.instantiate("SceneryLeftLaneEnds.xodr"), IsTrue());
+
     auto& world = tsf.world;
     AddAgentToWorld(world, 0, 10.0, 2.0);
     AddAgentToWorld(world, 1, 310.0, 5.0);
@@ -611,7 +655,9 @@ TEST(GetObjectsInRange_IntegrationTests, TwoObjectsInDifferentSections)
 
 TEST(GetObjectsInRange_IntegrationTests, OneObjectOnSectionBorder)
 {
-    TESTSCENERY_FACTORY tsf("SceneryLeftLaneEnds.xodr");
+    TESTSCENERY_FACTORY tsf;
+    ASSERT_THAT(tsf.instantiate("SceneryLeftLaneEnds.xodr"), IsTrue());
+
     auto& world = tsf.world;
     AddAgentToWorld(world, 0, 300.0, 2.0);
     AddAgentToWorld(world, 1, 300.0, 5.0);
@@ -627,7 +673,9 @@ TEST(GetObjectsInRange_IntegrationTests, OneObjectOnSectionBorder)
 
 TEST(GetObjectsInRange_IntegrationTests, MultipleRoads)
 {
-    TESTSCENERY_FACTORY tsf("MultipleRoadsIntegrationScenery.xodr");
+    TESTSCENERY_FACTORY tsf;
+    ASSERT_THAT(tsf.instantiate("MultipleRoadsIntegrationScenery.xodr"), IsTrue());
+
     auto& world = tsf.world;
     AddAgentToWorld(world, 0, 510.0, 6.0);
     AddAgentToWorld(world, 1, 1300.0, 2.0);
@@ -646,7 +694,9 @@ TEST(GetObjectsInRange_IntegrationTests, MultipleRoads)
 
 TEST(Locator_IntegrationTests, AgentOnStraightRoad_CalculatesCorrectLocateResult)
 {
-    TESTSCENERY_FACTORY tsf("MultipleRoadsIntegrationScenery.xodr");
+    TESTSCENERY_FACTORY tsf;
+    ASSERT_THAT(tsf.instantiate("MultipleRoadsIntegrationScenery.xodr"), IsTrue());
+
     auto& world = tsf.world;
     const auto agent1 = AddAgentToWorld(world, 1, 399.0, 1.0, 2.0, 5.0);
     agent1->UpdateRoute(Route{ {{"1", true}, {"2", false}, {"3", true}}, {}, 1});
@@ -672,7 +722,9 @@ TEST(Locator_IntegrationTests, AgentOnStraightRoad_CalculatesCorrectLocateResult
 
 TEST(Locator_IntegrationTests, AgentOnJunction_CalculatesCorrectLocateResult)
 {
-    TESTSCENERY_FACTORY tsf("TJunction.xodr");
+    TESTSCENERY_FACTORY tsf;
+    ASSERT_THAT(tsf.instantiate("TJunction.xodr"), IsTrue());
+
     auto& world = tsf.world;
     AddAgentToWorld(world, 1, 208.0, -2.0, 2.0, 4.0);
     world.SyncGlobalData();
@@ -690,7 +742,9 @@ TEST(Locator_IntegrationTests, AgentOnJunction_CalculatesCorrectLocateResult)
 
 TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectLaneMarkings)
 {
-    TESTSCENERY_FACTORY tsf("IntegrationTestScenery.xodr");
+    TESTSCENERY_FACTORY tsf;
+    ASSERT_THAT(tsf.instantiate("IntegrationTestScenery.xodr"), IsTrue());
+
     auto& world = tsf.world;
 
     Route route{"1"};
@@ -753,7 +807,9 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectLaneMarkings)
 
 TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectTrafficSigns)
 {
-    TESTSCENERY_FACTORY tsf("IntegrationTestScenery.xodr");
+    TESTSCENERY_FACTORY tsf;
+    ASSERT_THAT(tsf.instantiate("IntegrationTestScenery.xodr"), IsTrue());
+
     auto& world = tsf.world;
 
     Route route{"1"};
@@ -808,7 +864,9 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectTrafficSigns)
 
 TEST(SceneryImporter_IntegrationTests, TJunction_ImportWithCorrectConnectionsAndPriorities)
 {
-    TESTSCENERY_FACTORY tsf("TJunction.xodr");
+    TESTSCENERY_FACTORY tsf;
+    ASSERT_THAT(tsf.instantiate("TJunction.xodr"), IsTrue());
+
     auto& world = tsf.world;
 
     auto connections = world.GetConnectionsOnJunction("J0", "R1");
@@ -858,7 +916,9 @@ TEST(SceneryImporter_IntegrationTests, TJunction_ImportWithCorrectConnectionsAnd
 
 TEST(GetObstruction_IntegrationTests, AgentsOnStraightRoad)
 {
-    TESTSCENERY_FACTORY tsf("SceneryLeftLaneEnds.xodr");
+    TESTSCENERY_FACTORY tsf;
+    ASSERT_THAT(tsf.instantiate("SceneryLeftLaneEnds.xodr"), IsTrue());
+
     auto& world = tsf.world;
     auto agent0 = AddAgentToWorld(world, 0, 10.0, 2.0);
     auto agent1 = AddAgentToWorld(world, 1, 100.0, 2.5, 2.0);
@@ -873,7 +933,9 @@ TEST(GetObstruction_IntegrationTests, AgentsOnStraightRoad)
 
 TEST(GetObstruction_IntegrationTests, AgentBehindJunction)
 {
-    TESTSCENERY_FACTORY tsf("TJunction.xodr");
+    TESTSCENERY_FACTORY tsf;
+    ASSERT_THAT(tsf.instantiate("TJunction.xodr"), IsTrue());
+
     auto& world = tsf.world;
     auto agent0 = AddAgentToWorld(world, 0, 10.0, -3.0);
     auto agent1 = AddAgentToWorld(world, 1, 203.5, -10.0, 1.0, 3.0);

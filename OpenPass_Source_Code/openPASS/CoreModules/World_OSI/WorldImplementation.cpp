@@ -12,8 +12,8 @@
 #include "WorldData.h"
 #include "WorldImplementation.h"
 
-#include "osi/osi_sensorview.pb.h"
-#include "osi/osi_sensorviewconfiguration.pb.h"
+#include "osi3/osi_sensorview.pb.h"
+#include "osi3/osi_sensorviewconfiguration.pb.h"
 
 namespace {
     template <typename T>

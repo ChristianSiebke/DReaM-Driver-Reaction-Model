@@ -8,11 +8,15 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
+#include "osi3/osi_detectedobject.pb.h"
+
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-#include "boundingBoxCalculation.h"
+
 #include "fakeAgent.h"
-#include "osi/osi_detectedobject.pb.h"
+
+#include "boundingBoxCalculation.h"
+
 
 using ::testing::Return;
 using ::testing::Lt;

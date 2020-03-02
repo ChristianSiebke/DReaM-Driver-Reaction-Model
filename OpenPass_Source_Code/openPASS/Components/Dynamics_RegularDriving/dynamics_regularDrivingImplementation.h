@@ -11,11 +11,16 @@
 *******************************************************************************/
 #pragma once
 
-#include "Interfaces/modelInterface.h"
-#include "Interfaces/observationInterface.h"
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
+#endif
+#include <cmath>
+
+#include "Common/globalDefinitions.h"
 #include "Common/primitiveSignals.h"
 #include "Common/dynamicsSignal.h"
-#include "globalDefinitions.h"
+#include "Interfaces/modelInterface.h"
+#include "Interfaces/observationInterface.h"
 
 
 /** \addtogroup Dynamics_RegularDriving

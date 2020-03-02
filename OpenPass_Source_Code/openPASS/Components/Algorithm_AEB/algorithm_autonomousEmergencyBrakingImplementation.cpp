@@ -12,17 +12,22 @@
 /** @file  AlgorithmAEBmplementation.cpp */
 //-----------------------------------------------------------------------------
 
-#include <memory>
-#include <qglobal.h>
-#include <QCoreApplication>
 #include <limits>
+#include <memory>
+
+#include <QtGlobal>
+#include <QCoreApplication>
+
+#include "Interfaces/parameterInterface.h"
+
+#include "Common/commonTools.h"
+#include "Common/eventTypes.h"
+
+#include "Components/SensorFusion_OSI/sensorFusionQuery.h"
 
 #include "algorithm_autonomousEmergencyBrakingImplementation.h"
 #include "boundingBoxCalculation.h"
-#include "Common/eventTypes.h"
-#include "Components/SensorFusion_OSI/sensorFusionQuery.h"
-#include "Common/commonTools.h"
-#include "Interfaces/parameterInterface.h"
+
 
 AlgorithmAutonomousEmergencyBrakingImplementation::AlgorithmAutonomousEmergencyBrakingImplementation(
     std::string componentName,

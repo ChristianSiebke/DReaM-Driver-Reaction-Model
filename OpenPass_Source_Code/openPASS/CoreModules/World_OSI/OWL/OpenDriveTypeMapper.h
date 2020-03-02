@@ -16,9 +16,9 @@
 
 #pragma once
 
-#include "osi/osi_road.pb.h"
-#include "osi/osi_lane.pb.h"
-#include "osi/osi_trafficsign.pb.h"
+#include "osi3/osi_road.pb.h"
+#include "osi3/osi_lane.pb.h"
+#include "osi3/osi_trafficsign.pb.h"
 
 #include "Interfaces/roadInterface/roadElementTypes.h"
 #include "Common/globalDefinitions.h"

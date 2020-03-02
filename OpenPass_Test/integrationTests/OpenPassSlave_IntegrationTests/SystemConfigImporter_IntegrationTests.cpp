@@ -10,12 +10,13 @@
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
+
 #include <boost/filesystem.hpp>
 #include <memory>
 
-#include "systemConfigImporter.h"
-#include "systemConfig.h"
-#include "agentType.h"
+#include "importer/systemConfig.h"
+#include "importer/systemConfigImporter.h"
+#include "modelElements/agentType.h"
 
 using namespace boost::filesystem;
 using namespace Configuration;

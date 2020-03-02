@@ -14,10 +14,10 @@
 #include "Interfaces/fmuHandlerInterface.h"
 #include "Interfaces/worldInterface.h"
 #include "Interfaces/agentInterface.h"
-#include "osi/osi_groundtruth.pb.h"
-#include "osi/osi_trafficupdate.pb.h"
-#include "osi/osi_trafficcommand.pb.h"
-#include "osi/osi_sensorview.pb.h"
+#include "osi3/osi_groundtruth.pb.h"
+#include "osi3/osi_trafficupdate.pb.h"
+#include "osi3/osi_trafficcommand.pb.h"
+#include "osi3/osi_sensorview.pb.h"
 #include "Common/openScenarioDefinitions.h"
 
 class CallbackInterface;

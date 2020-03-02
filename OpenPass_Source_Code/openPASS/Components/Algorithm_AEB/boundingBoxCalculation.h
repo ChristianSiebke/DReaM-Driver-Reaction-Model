@@ -12,7 +12,7 @@
 #include <boost/geometry/geometries/adapted/c_array.hpp>
 #include "Common/boostGeometryCommon.h"
 #include "Interfaces/agentInterface.h"
-#include "osi/osi_sensordata.pb.h"
+#include "osi3/osi_sensordata.pb.h"
 
 /** \addtogroup Algorithm_AEB
  * @{

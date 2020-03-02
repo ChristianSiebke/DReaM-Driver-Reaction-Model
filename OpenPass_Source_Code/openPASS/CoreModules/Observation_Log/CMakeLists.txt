@@ -1,0 +1,28 @@
+set(COMPONENT_NAME Observation_Log)
+
+add_compile_definitions(OBSERVATION_LOG_LIBRARY)
+
+add_openpass_target(
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared
+
+  HEADERS
+    observationCyclics.h
+    observationFileHandler.h
+    observationLogConstants.h
+    observationLogGlobal.h
+    observation_log.h
+    observation_logImplementation.h
+    runStatistic.h
+    runStatisticCalculation.h
+
+  SOURCES
+    observationCyclics.cpp
+    observationFileHandler.cpp
+    observation_log.cpp
+    observation_logImplementation.cpp
+    runStatistic.cpp
+    runStatisticCalculation.cpp
+
+  LIBRARIES
+    Qt5::Core
+)
