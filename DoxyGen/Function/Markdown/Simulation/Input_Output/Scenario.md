@@ -219,8 +219,10 @@ In this case it writes an event into the EventNetwork, which then triggers the a
 The story consists of multiple acts, which itself can consist of multiple sequences.
 The grouping of sequences into acts currently has no effect in the simulator.
 A sequence must consist of exactly one <Actors> tag and one <Maneuver> tag.
-The numberOfExecutions attribute states the maximum number of times that the sequence will by triggered.
-If the numberOfExecutions is -1 then the sequence can triggered an unlimited number of times.
+The numberOfExecutions attribute states the maximum number of times that each maneuver will by triggered.
+If the numberOfExecutions is -1 then the maneuver can triggered an unlimited number of times.
+Multiple stories can be added.
+Currently the eventnames of maneuvers across multiple stories must be unique.
 
 Example
 ```xml

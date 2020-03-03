@@ -142,9 +142,13 @@ void ScenarioImporter::ImportStoryboard(QDomElement& documentRoot, std::vector<S
 
     // Import Story
     QDomElement storyElement;
-    if (SimulationCommon::GetFirstChildElement(storyboardElement, TAG::story, storyElement))
+
+    SimulationCommon::GetFirstChildElement(storyboardElement, TAG::story, storyElement);
+
+    while (!storyElement.isNull())
     {
         ImportStoryElement(storyElement, entities, scenario);
+        storyElement = storyElement.nextSiblingElement(TAG::story);
     }
 
     // Import EndCondition

@@ -180,3 +180,19 @@ TEST(ScenarioImporter_IntegrationTests, ImportScenario_WithReferencedButUndeclar
 
     ASSERT_FALSE(ScenarioImporter::Import(testScenarioFile.string(), &scenario));
 }
+
+TEST(ScenarioImporter_IntegrationTests, ImportScenario_WithMultipleStories_Succeeds)
+{
+    const boost::filesystem::path testScenarioFile = boost::filesystem::initial_path() / "Resources" / "ImporterTest" / "MultipleStoriesScenario.xosc";
+    Scenario scenario;
+
+    ScenarioImporter importer;
+    ASSERT_TRUE(importer.Import(testScenarioFile.string(), &scenario));
+
+    const auto &numberOfEventDetectors = scenario.GetEventDetectorInformations().size();
+    const auto &numberOfManipulators = scenario.GetActions().size();
+
+    ASSERT_THAT(numberOfEventDetectors, 2);
+    ASSERT_THAT(numberOfManipulators, 2);
+
+}
