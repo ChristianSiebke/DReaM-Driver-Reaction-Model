@@ -65,6 +65,7 @@ SpawnPointInterface::Agents SpawnPointPreRunCommon::Trigger()
 SpawnPointInterface::Agents SpawnPointPreRunCommon::GenerateAgentsForRange(const LaneId laneId,
                                                                const Range& range)
 {
+    const auto routeForRoadId = Route{parameters.roadId};
     SpawnPointInterface::Agents agents;
     bool generating = true;
 
@@ -95,11 +96,20 @@ SpawnPointInterface::Agents SpawnPointPreRunCommon::GenerateAgentsForRange(const
                 generating = false;
                 break;
             }
+            const auto sPosition = std::get<openScenario::LanePosition>(spawnInfo->position).s;
             if (!worldAnalyzer.AreSpawningCoordinatesValid(parameters.roadId,
                                                            laneId,
-                                                           std::get<openScenario::LanePosition>(spawnInfo->position).s,
+                                                           sPosition,
                                                            0 /* offset */,
-                                                           agentBlueprint.GetVehicleModelParameters()))
+                                                           agentBlueprint.GetVehicleModelParameters())
+                || worldAnalyzer.SpawnWillCauseCrash(routeForRoadId,
+                                                     parameters.roadId,
+                                                     laneId,
+                                                     sPosition,
+                                                     agentFrontLength,
+                                                     agentRearLength,
+                                                     velocity,
+                                                     Direction::BACKWARD))
             {
                 generating = false;
                 break;
