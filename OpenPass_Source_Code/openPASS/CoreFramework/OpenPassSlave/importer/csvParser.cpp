@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -8,33 +8,23 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
-#include <fstream>
-#include <sstream>
-#include <stdlib.h>
-#include <string>
 #include <algorithm>
+#include <cstdlib>
+#include <fstream>
 #include <iostream>
+#include <sstream>
+#include <string>
 
 #include "csvParser.h"
 
-CSVParser::CSVParser()
+void CSVParser::ParseFile(const std::string& file)
 {
-}
-
-CSVParser::~CSVParser()
-{
-}
-
-void CSVParser::ParseFile(std::string file)
-{
-    const char* file_c_str = file.c_str();
-    std::ifstream infile(file_c_str);
-
+    std::ifstream infile(file.c_str());
     std::string line;
 
     while (std::getline(infile, line))
     {
-        if(line.back() == '\r')
+        if (!line.empty() && line.back() == '\r')
         {
             line.pop_back();
         }
@@ -44,30 +34,34 @@ void CSVParser::ParseFile(std::string file)
     }
 }
 
-std::vector<std::string> CSVParser::ParseLine(std::string line)
+std::vector<std::string> CSVParser::ParseLine(const std::string& line)
 {
     std::vector<std::string> lineData;
+    std::stringstream ss;
+    ss.str(line);
+    std::string item;
 
-   std::stringstream ss;
-   ss.str(line);
-   std::string item;
-   while (std::getline(ss, item, ';'))
-   {
-       lineData.push_back(item);
-   }
+    while (std::getline(ss, item, ';'))
+    {
+        lineData.push_back(item);
+    }
 
-   return lineData;
+    return lineData;
 }
 
-int CSVParser::GetNumberOfLines()
+size_t CSVParser::GetNumberOfLines() const
 {
     return table.size();
 }
 
-std::string CSVParser::GetEntryAt(int row, int column)
+std::string CSVParser::GetEntryAt(size_t row, size_t column) const
 {
-    std::vector<std::string> rowEntry = table.at(row);
-
-    if(rowEntry.size() <= (size_t)column) return "";
-    else return rowEntry.at(column);
+    try
+    {
+        return table.at(row).at(column);
+    }
+    catch (const std::out_of_range&)
+    {
+        return "";
+    }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -16,16 +16,16 @@
 class CSVParser
 {
 public:
-    CSVParser();
-    ~CSVParser();
+    CSVParser() = default;
+    ~CSVParser() = default;
 
-    void ParseFile(std::string file);
+    void ParseFile(const std::string& file);
 
-    int GetNumberOfLines();
+    size_t GetNumberOfLines() const;
 
-    std::string GetEntryAt(int row,int column);
+    std::string GetEntryAt(size_t row, size_t column) const;
 
 private:
-    std::vector<std::string> ParseLine(std::string line);
-    std::vector< std::vector<std::string> > table;
+    std::vector<std::string> ParseLine(const std::string& line);
+    std::vector<std::vector<std::string>> table;
 };
