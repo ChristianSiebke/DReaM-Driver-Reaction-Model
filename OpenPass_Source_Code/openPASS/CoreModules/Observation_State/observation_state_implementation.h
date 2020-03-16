@@ -133,6 +133,10 @@ public:
     {
         return "";   //dummy
     }
+    virtual void Insert(int time, int agentId, LoggingGroup group, const std::string& key, const std::string& value) {};
+    virtual void InsertEvent(std::shared_ptr<EventInterface> event) {};
+    virtual void GatherFollowers() {};
+    virtual void InformObserverOnSpawn(AgentInterface* agent) {};
 
 private:
     void RecordAllAgents(int time);
