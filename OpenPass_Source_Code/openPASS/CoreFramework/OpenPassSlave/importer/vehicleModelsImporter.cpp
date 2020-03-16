@@ -8,11 +8,11 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
-#include "vehicleModelsImporter.h"
 #ifndef _USE_MATH_DEFINES
 #define _USE_MATH_DEFINES
 #endif
-#include "math.h"
+#include <cmath>
+#include "vehicleModelsImporter.h"
 
 namespace Importer {
 

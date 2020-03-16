@@ -19,7 +19,7 @@
 #ifndef _USE_MATH_DEFINES
 #define _USE_MATH_DEFINES
 #endif
-#include "math.h"
+#include <cmath>
 #include "Common/accelerationSignal.h"
 #include "Interfaces/modelInterface.h"
 #include "Common/parametersVehicleSignal.h"

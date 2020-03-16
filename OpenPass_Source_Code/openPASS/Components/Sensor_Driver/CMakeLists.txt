@@ -8,10 +8,10 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES sensor_driver.cpp
+set(SOURCES sensor_driver.cpp
 			 sensor_driverCalculations.cpp
 			 sensor_driverImplementation.cpp)
-SET (HEADERS sensor_driver.h
+set(HEADERS sensor_driver.h
 			 sensor_driverCalculations.h
 			 sensor_driverImplementation.h
 			 sensor_driverGlobal.h

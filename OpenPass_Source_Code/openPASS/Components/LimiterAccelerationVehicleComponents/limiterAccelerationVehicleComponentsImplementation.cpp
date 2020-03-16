@@ -13,6 +13,10 @@
 //! @brief This file contains the implementation of the header file
 //-----------------------------------------------------------------------------
 
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
+#endif
+#include <cmath>
 #include <qglobal.h>
 
 #include "Interfaces/worldInterface.h"

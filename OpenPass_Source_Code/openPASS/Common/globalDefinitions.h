@@ -18,6 +18,10 @@
 #ifndef GLOBALDEFINITIONS
 #define GLOBALDEFINITIONS
 
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
+#endif
+#include <cmath>
 #include <string>
 #include <tuple>
 #include <vector>
