@@ -25,10 +25,7 @@ namespace SimulationSlave
 
 bool SpawnPointLibrary::Init()
 {
-    std::string suffix = "";
-#ifndef NDEBUG
-    suffix = "d";
-#endif
+    std::string suffix = DEBUG_POSTFIX;
     library = new (std::nothrow) QLibrary(QString::fromStdString(libraryPath+suffix));
     if(!library)
     {

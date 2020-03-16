@@ -238,11 +238,7 @@ std::string GetExecutable(std::string slave)
     #if WIN32
     if (QString::fromStdString(slave).split(".").last() != "exe")
     {
-        std::string suffix = "";
-#ifndef NDEBUG
-        suffix = "d";
-#endif
-        slave += suffix+".exe";
+        slave += DEBUG_POSTFIX".exe";
     }
     #endif
 

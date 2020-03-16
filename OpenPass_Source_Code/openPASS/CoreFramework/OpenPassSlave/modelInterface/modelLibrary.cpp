@@ -31,10 +31,7 @@ bool ModelLibrary::Init()
     #if defined(unix)
     QString path = QString(modelLibraryPath.c_str()) + QString("/lib") + QString(modelLibraryName.c_str());
     #elif defined (WIN32)
-    std::string suffix = "";
-#ifndef NDEBUG
-    suffix = "d";
-#endif
+    std::string suffix = DEBUG_POSTFIX;
     QString path = QString(modelLibraryPath.c_str()) + QString("/") + QString((modelLibraryName+suffix).c_str());
     #else
 #error undefined target platform

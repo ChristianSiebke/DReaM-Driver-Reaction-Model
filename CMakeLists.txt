@@ -16,7 +16,7 @@
 # requirements to cmake version
 
 # 2.8.7 is too old for identifying clang
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.10)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.15.0)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
@@ -41,17 +41,26 @@ cmake_policy(SET CMP0054 NEW)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+#### Microsoft Visual Studio specific flags
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+   # CMAKE does not yet (3.17) support  CMAKE_CXX_STANDARD 17 for MSVC
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 /wd4251")
+   # get rid of annoying template needs to have dll-interface warnings on VisualStudio
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4251 -wd4335")
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4250")
+   set(CMAKE_DEBUG_POSTFIX "d")
+   add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
+   add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
+   include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+endif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+
+
+set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}   -DDEBUG_POSTFIX=\\\"${CMAKE_DEBUG_POSTFIX}\\\"")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DDEBUG_POSTFIX=\\\"\\\"")
+
 # this is used to override some of cmake's original find-modules
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}")
-
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 /wd4251")
-endif()
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
@@ -116,17 +125,6 @@ set(INSTALL_CFG_DIR "${CMAKE_INSTALL_PREFIX}/cfg" CACHE PATH "Installation direc
 set(INSTALL_MAN_DIR "${CMAKE_INSTALL_PREFIX}/share/man" CACHE PATH "Installation directory for manual pages")
 set(INSTALL_PKGCONFIG_DIR "${CMAKE_INSTALL_PREFIX}/share/pkgconfig" CACHE PATH "Installation directory for pkgconfig (.pc) files")
 
-if(MSVC)
-    set(CMAKE_DEBUG_POSTFIX "d")
-    add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
-    add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
-    include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-endif()
-IF(MSVC)
-# get rid of annoying template needs to have dll-interface warnings on VisualStudio
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4251 -wd4335")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4250")
-ENDIF(MSVC)
 
 include_directories(${PROJECT_SOURCE_DIR}/OpenPass_Source_Code/openPASS)
 
