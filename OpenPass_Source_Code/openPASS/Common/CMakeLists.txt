@@ -8,11 +8,11 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES vector2d.cpp
+set(SOURCES vector2d.cpp
 			 vector3d.cpp
 			 eventDetectorDefinitions.cpp)
 
-SET (HEADERS accelerationSignal.h
+set(HEADERS accelerationSignal.h
 			 agentBasedManipulatorEvent.h
 			 agentCompToCompCtrlSignal.h
 			 basicEvent.h
@@ -45,4 +45,4 @@ SET (HEADERS accelerationSignal.h
 			 opExport.h)
 			 
 
-OPENPASS_add_library(Common SHARED)
+openpass_add_library(Common SHARED)

@@ -8,13 +8,13 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES observationCyclics.cpp
+set(SOURCES observationCyclics.cpp
 			 observationFileHandler.cpp
 			 observation_log.cpp
 			 observation_logImplementation.cpp
 			 runStatistic.cpp
 			 runStatisticCalculation.cpp)
-SET (HEADERS observationCyclics.h
+set(HEADERS observationCyclics.h
 			 observationFileHandler.h
 			 observationLogConstants.h
 			 observationLogGlobal.h

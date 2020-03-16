@@ -8,7 +8,7 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES AgentAdapter.cpp
+set(SOURCES AgentAdapter.cpp
 			AgentNetwork.cpp
 			GeometryConverter.cpp
 			Localization.cpp
@@ -26,7 +26,7 @@ SET (SOURCES AgentAdapter.cpp
 			 OWL/OpenDriveTypeMapper.cpp
 			RoutePlanning/StochasticNavigation.cpp)
 
-SET (HEADERS AgentAdapter.h
+set(HEADERS AgentAdapter.h
 			AgentNetwork.h
 			GeometryConverter.h
 			Localization.h

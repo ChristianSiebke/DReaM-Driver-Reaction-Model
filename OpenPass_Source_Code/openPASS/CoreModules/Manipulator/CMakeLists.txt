@@ -8,13 +8,13 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES CollisionManipulator.cpp
+set(SOURCES CollisionManipulator.cpp
 			 ComponentStateChangeManipulator.cpp
 			 LaneChangeManipulator.cpp
 			 ManipulatorCommonBase.cpp
 			 ManipulatorExport.cpp
 			 RemoveAgentsManipulator.cpp)
-SET (HEADERS CollisionManipulator.h
+set(HEADERS CollisionManipulator.h
 			 ComponentStateChangeManipulator.h
 			 LaneChangeManipulator.h
 			 ManipulatorCommonBase.h

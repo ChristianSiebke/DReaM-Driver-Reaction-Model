@@ -8,9 +8,9 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES dynamics_longitudinal_basic.cpp
+set(SOURCES dynamics_longitudinal_basic.cpp
 			 dynamics_longitudinal_basic_implementation.cpp)
-SET (HEADERS dynamics_longitudinal_basic.h
+set(HEADERS dynamics_longitudinal_basic.h
 			 dynamics_longitudinal_basic_implementation.h
 			 dynamics_longitudinal_basic_global.h)
 

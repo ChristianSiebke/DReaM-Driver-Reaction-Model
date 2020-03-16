@@ -8,10 +8,10 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES objectDetectorBase.cpp
+set(SOURCES objectDetectorBase.cpp
 			 sensorGeometric2D.cpp
 			 sensorObjectDetectorFactory.cpp)
-SET (HEADERS objectDetectorBase.h
+set(HEADERS objectDetectorBase.h
 			 sensorGeometric2D.h
 			 sensorObjectDetectorFactory.h
 			 sensorObjectDetectorGlobal.h)

@@ -8,10 +8,10 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES algorithm_longitudinal.cpp
+set(SOURCES algorithm_longitudinal.cpp
 			 algorithm_longitudinalCalculations.cpp
 			 algorithm_longitudinalImplementation.cpp)
-SET (HEADERS algorithm_longitudinal.h
+set(HEADERS algorithm_longitudinal.h
 			 algorithm_longitudinalCalculations.h
 			 algorithm_longitudinalGlobal.h
 			 algorithm_longitudinalImplementation.h)

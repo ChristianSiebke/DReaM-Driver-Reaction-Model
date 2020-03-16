@@ -8,9 +8,9 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES spawnpoint_start.cpp
+set(SOURCES spawnpoint_start.cpp
 			 spawnpoint_start_implementation.cpp)
-SET (HEADERS spawnpoint_start.h
+set(HEADERS spawnpoint_start.h
 			 spawnpoint_start_implementation.h
 			 spawnpoint_start_global.h)
 

@@ -8,9 +8,9 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES AlgorithmAgentFollowingDriverModel.cpp
+set(SOURCES AlgorithmAgentFollowingDriverModel.cpp
 			 AlgorithmAgentFollowingDriverModelImplementation.cpp)
-SET (HEADERS AlgorithmAgentFollowingDriverModel.h
+set(HEADERS AlgorithmAgentFollowingDriverModel.h
 			 AlgorithmAgentFollowingDriverModelGlobal.h
 			 AlgorithmAgentFollowingDriverModelImplementation.h)
 			 

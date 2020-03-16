@@ -8,12 +8,12 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES componentController.cpp
+set(SOURCES componentController.cpp
 			 componentControllerImplementation.cpp
 			 componentStateInformation.cpp
 			 condition.cpp
 			 stateManager.cpp)
-SET (HEADERS componentController.h
+set(HEADERS componentController.h
 			 componentControllerCommon.h
 			 componentControllerGlobal.h
 			 componentControllerImplementation.h

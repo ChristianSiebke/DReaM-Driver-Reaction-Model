@@ -8,9 +8,9 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES dynamics_collision.cpp
+set(SOURCES dynamics_collision.cpp
 			 dynamics_collisionImplementation.cpp)
-SET (HEADERS dynamics_collision.h
+set(HEADERS dynamics_collision.h
 			 dynamics_collisionImplementation.h
 			 dynamics_collisionGlobal.h)
 

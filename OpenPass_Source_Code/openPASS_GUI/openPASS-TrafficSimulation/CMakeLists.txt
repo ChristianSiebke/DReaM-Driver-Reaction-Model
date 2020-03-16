@@ -8,7 +8,7 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES TrafficSimulationPlugin.cpp
+set(SOURCES TrafficSimulationPlugin.cpp
 			Models/EnvironmentItemModel.cpp
 			Models/EnvironmentModel.cpp
 			Models/ExperimentModel.cpp
@@ -60,7 +60,7 @@ SET (SOURCES TrafficSimulationPlugin.cpp
 			Presenters/TrafficPresenter.cpp
 			Presenters/TrafficSimulationPresenter.cpp
 )
-SET (HEADERS TrafficSimulationPlugin.h 
+set(HEADERS TrafficSimulationPlugin.h 
 			Models/EnvironmentItemModel.h
 			Models/EnvironmentModel.h
 			Models/ExperimentModel.h
@@ -122,7 +122,7 @@ SET (HEADERS TrafficSimulationPlugin.h
 			Interfaces/openPASS-TrafficSimulation/TrafficSimulationInterface.h
 )
 
-SET(UIS 
+set(UIS 
 			Views/EnvironmentDisplayView.ui
 			Views/EnvironmentItemView.ui
 			Views/EnvironmentView.ui
@@ -142,10 +142,10 @@ SET(UIS
 
 
 
-INCLUDE_DIRECTORIES(. Interfaces)
+include_directories(. Interfaces)
 
 add_definitions(-DTrafficSimulation_LIBRARY)
 
-OPENPASS_GUI_add_plugin(TrafficSimulation "")
+openpass_gui_add_plugin(TrafficSimulation "")
 
 target_link_libraries(TrafficSimulation Project)

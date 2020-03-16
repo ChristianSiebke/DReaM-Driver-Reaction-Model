@@ -8,9 +8,9 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES agentUpdater.cpp
+set(SOURCES agentUpdater.cpp
 			 agentUpdaterImplementation.cpp)
-SET (HEADERS agentUpdater.h
+set(HEADERS agentUpdater.h
 			 agentUpdaterGlobal.h
 			 agentUpdaterImplementation.h)
 

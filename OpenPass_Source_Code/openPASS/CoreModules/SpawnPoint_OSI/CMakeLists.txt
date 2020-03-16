@@ -8,10 +8,10 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES SpawnPoint.cpp
+set(SOURCES SpawnPoint.cpp
 			SpawnPointExport.cpp
 			SpawnPointSceneryParser.cpp)
-SET (HEADERS SpawnPoint.h
+set(HEADERS SpawnPoint.h
 			SpawnPointExport.h
 			SpawnPointGlobal.h
 			SpawnPointSceneryParser.h)

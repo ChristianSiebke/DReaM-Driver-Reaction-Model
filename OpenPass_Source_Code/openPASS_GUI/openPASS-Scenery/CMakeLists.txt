@@ -8,26 +8,26 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES SceneryPlugin.cpp
+set(SOURCES SceneryPlugin.cpp
 Models/SceneryModel.cpp
 Views/SceneryView.cpp
 Presenters/SceneryPresenter.cpp
 )
-SET (HEADERS SceneryPlugin.h 
+set(HEADERS SceneryPlugin.h 
 Models/SceneryModel.h
 Views/SceneryView.h
 Presenters/SceneryPresenter.h
 )
 
-SET(UIS 
+set(UIS 
 Views/SceneryView.ui
 )
 
 
-INCLUDE_DIRECTORIES(.)
+include_directories(.)
 
 add_definitions(-DScenery_LIBRARY)
 
-OPENPASS_GUI_add_plugin(Scenery "")
+openpass_gui_add_plugin(Scenery "")
 
 target_link_libraries(Scenery Project openPASSInterfaces)

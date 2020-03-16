@@ -8,9 +8,9 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES limiterAccelerationVehicleComponents.cpp
+set(SOURCES limiterAccelerationVehicleComponents.cpp
 			 limiterAccelerationVehicleComponentsImplementation.cpp)
-SET (HEADERS limiterAccelerationVehicleComponents.h
+set(HEADERS limiterAccelerationVehicleComponents.h
 			 limiterAccelerationVehicleComponentsImplementation.h
 			 limiterAccelerationVehicleComponentsGlobal.h)
 			 

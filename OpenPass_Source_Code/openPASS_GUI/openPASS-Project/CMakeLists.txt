@@ -8,7 +8,7 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES ProjectPlugin.cpp
+set(SOURCES ProjectPlugin.cpp
 Models/ProjectXMLSaveModel.cpp
 Models/ProjectModel.cpp
 Models/ProjectXMLLoadModel.cpp
@@ -16,7 +16,7 @@ Models/ProjectXMLBaseModel.cpp
 Views/ProjectView.cpp
 Presenters/ProjectPresenter.cpp
 )
-SET (HEADERS ProjectPlugin.h 
+set(HEADERS ProjectPlugin.h 
 Models/ProjectModel.h
 Models/ProjectXMLLoadModel.h
 Models/ProjectXMLSaveModel.h
@@ -26,15 +26,15 @@ Presenters/ProjectPresenter.h
 Interfaces/openPASS-Project/ProjectInterface.h
 )
 
-SET(UIS 
+set(UIS 
 Views/ProjectView.ui
 )
 
-INCLUDE_DIRECTORIES(.)
+include_directories(.)
 
 add_definitions(-DProject_LIBRARY)
 
-OPENPASS_GUI_add_plugin(Project "")
+openpass_gui_add_plugin(Project "")
 
 target_link_libraries(Project openPASSInterfaces)
 

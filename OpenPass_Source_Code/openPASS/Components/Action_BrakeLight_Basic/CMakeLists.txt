@@ -8,9 +8,9 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES action_brakelight_basic.cpp
+set(SOURCES action_brakelight_basic.cpp
 			 action_brakelight_basic_implementation.cpp)
-SET (HEADERS action_brakelight_basic.h
+set(HEADERS action_brakelight_basic.h
 			 action_brakelight_basic_implementation.h
 			 action_brakelight_basic_global.h)
 

@@ -8,9 +8,9 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES algorithm_lateral.cpp
+set(SOURCES algorithm_lateral.cpp
 			 algorithm_lateralImplementation.cpp)
-SET (HEADERS algorithm_lateral.h
+set(HEADERS algorithm_lateral.h
 			 algorithm_lateralGlobal.h
 			 algorithm_lateralImplementation.h)
 			 

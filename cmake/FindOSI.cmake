@@ -14,9 +14,9 @@
 #  OSI_LIBRARIES   - List of libraries when using OSI
 #  OSI_FOUND       - True if OSI was found
 
-IF(OSI_INCLUDE_DIR)
-  SET(OSI_FIND_QUIETLY TRUE)
-ENDIF(OSI_INCLUDE_DIR)
+if(OSI_INCLUDE_DIR)
+  set(OSI_FIND_QUIETLY TRUE)
+endif(OSI_INCLUDE_DIR)
 
 FIND_PATH(OSI_INCLUDE_DIR "osi3/osi_version.pb.h"
   PATHS
@@ -33,8 +33,8 @@ FIND_PATH(OSI_INCLUDE_DIR "osi3/osi_version.pb.h"
   DOC "OSI - Headers"
 )
 
-SET(OSI_NAMES osi3/open_simulation_interface.lib osi3/open_simulation_interface_pic.lib osi/open_simulation_interface_pic.lib)
-SET(OSI_DBG_NAMES osi3/open_simulation_interfaced.lib osi3/open_simulation_interface_picd.lib osi/open_simulation_interface_picd.lib)
+set(OSI_NAMES osi3/open_simulation_interface.lib osi3/open_simulation_interface_pic.lib osi/open_simulation_interface_pic.lib)
+set(OSI_DBG_NAMES osi3/open_simulation_interfaced.lib osi3/open_simulation_interface_picd.lib osi/open_simulation_interface_picd.lib)
 
 FIND_LIBRARY(OSI_LIBRARY NAMES ${OSI_NAMES}
   PATHS
@@ -52,9 +52,9 @@ FIND_LIBRARY(OSI_LIBRARY NAMES ${OSI_NAMES}
   DOC "OSI - Library"
 )
 
-INCLUDE(FindPackageHandleStandardArgs)
+include(FindPackageHandleStandardArgs)
 
-IF(MSVC)
+if(MSVC)
   # VisualStudio needs a debug version
   FIND_LIBRARY(OSI_LIBRARY_DEBUG NAMES ${OSI_DBG_NAMES}
     PATHS
@@ -63,24 +63,24 @@ IF(MSVC)
     DOC "OSI - Library (Debug)"
   )
   
-  IF(OSI_LIBRARY_DEBUG AND OSI_LIBRARY)
-    SET(OSI_LIBRARIES optimized ${OSI_LIBRARY} debug ${OSI_LIBRARY_DEBUG})
-  ENDIF(OSI_LIBRARY_DEBUG AND OSI_LIBRARY)
+  if(OSI_LIBRARY_DEBUG AND OSI_LIBRARY)
+    set(OSI_LIBRARIES optimized ${OSI_LIBRARY} debug ${OSI_LIBRARY_DEBUG})
+  endif(OSI_LIBRARY_DEBUG AND OSI_LIBRARY)
 
   FIND_PACKAGE_HANDLE_STANDARD_ARGS(OSI DEFAULT_MSG OSI_LIBRARY OSI_LIBRARY_DEBUG OSI_INCLUDE_DIR)
 
   MARK_AS_ADVANCED(OSI_LIBRARY OSI_LIBRARY_DEBUG OSI_INCLUDE_DIR)
   
-ELSE(MSVC)
+else(MSVC)
   # rest of the world
-  SET(OSI_LIBRARIES ${OSI_LIBRARY})
+  set(OSI_LIBRARIES ${OSI_LIBRARY})
 
   FIND_PACKAGE_HANDLE_STANDARD_ARGS(OSI DEFAULT_MSG OSI_LIBRARY OSI_INCLUDE_DIR)
   
   MARK_AS_ADVANCED(OSI_LIBRARY OSI_INCLUDE_DIR)
   
-ENDIF(MSVC)
+endif(MSVC)
 
-IF(OSI_FOUND)
-  SET(OSI_INCLUDE_DIRS ${OSI_INCLUDE_DIR})
-ENDIF(OSI_FOUND)
+if(OSI_FOUND)
+  set(OSI_INCLUDE_DIRS ${OSI_INCLUDE_DIR})
+endif(OSI_FOUND)

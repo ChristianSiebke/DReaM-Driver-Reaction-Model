@@ -8,9 +8,9 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES stochastics.cpp
+set(SOURCES stochastics.cpp
 			 stochastics_implementation.cpp)
-SET (HEADERS stochastics.h
+set(HEADERS stochastics.h
 			 stochastics_implementation.h
 			 stochastics_global.h)
 

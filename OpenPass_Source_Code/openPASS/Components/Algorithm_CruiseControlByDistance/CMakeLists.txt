@@ -8,9 +8,9 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES algorithm_cruisecontrolbydistance.cpp
+set(SOURCES algorithm_cruisecontrolbydistance.cpp
 			 algorithm_cruisecontrolbydistance_implementation.cpp)
-SET (HEADERS algorithm_cruisecontrolbydistance.h
+set(HEADERS algorithm_cruisecontrolbydistance.h
 			 algorithm_cruisecontrolbydistance_global.h
 			 algorithm_cruisecontrolbydistance_implementation.h)
 

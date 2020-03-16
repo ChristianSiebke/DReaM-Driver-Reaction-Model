@@ -1,4 +1,4 @@
-SET (SOURCES 
+set(SOURCES 
 framework/agentBlueprintProvider.cpp
 framework/agentFactory.cpp
 framework/agentProfileSampler.cpp
@@ -74,7 +74,7 @@ manipulatorInterface/manipulatorLibrary.cpp
 eventDetectorInterface/eventDetectorBinding.cpp
 eventDetectorInterface/eventDetectorLibrary.cpp
 )
-SET (HEADERS 
+set(HEADERS 
 framework/agentBlueprintProvider.h
 framework/agentFactory.h
 framework/agentProfileSampler.h
@@ -162,10 +162,10 @@ eventDetectorInterface/eventDetectorLibrary.h
 
 
 
-INCLUDE_DIRECTORIES(. collisionDetectionInterface observationInterface scheduler worldInterface stochasticsInterface spawnPointInterface modelInterface modelElements importer framework eventDetectorInterface manipulatorInterface)
+include_directories(. collisionDetectionInterface observationInterface scheduler worldInterface stochasticsInterface spawnPointInterface modelInterface modelElements importer framework eventDetectorInterface manipulatorInterface)
 
 
-OPENPASS_add_library(CoreSlave SHARED)
+openpass_add_library(CoreSlave SHARED)
 set_target_properties(CoreSlave PROPERTIES FOLDER "CoreFramework")
 
 
@@ -180,13 +180,13 @@ target_link_libraries(CoreSlave CoreShare Common $(PCMLibs))
 
 qt5_use_modules(CoreSlave Widgets Xml)
 
-SET (SOURCES 
+set(SOURCES 
 framework/main.cpp
 )
-SET (HEADERS 
+set(HEADERS 
 )
 
 
-OPENPASS_add_executable(OpenPassSlave )
+openpass_add_executable(OpenPassSlave )
 set_target_properties(OpenPassSlave PROPERTIES FOLDER "CoreFramework")
 target_link_libraries(OpenPassSlave CoreSlave)

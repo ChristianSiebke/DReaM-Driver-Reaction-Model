@@ -8,7 +8,7 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES AgentConfigurationPlugin.cpp 
+set(SOURCES AgentConfigurationPlugin.cpp 
 			 Models/AgentConfigurationCombinationXMLBaseModel.cpp
 			 Models/AgentConfigurationCombinationXMLSaveModel.cpp
 			 Models/AgentConfigurationModel.cpp
@@ -85,7 +85,7 @@ SET (SOURCES AgentConfigurationPlugin.cpp
 			../Global/DelegateDoubleView.cpp
 			../Global/DelegateTimeView.cpp
 )
-SET (HEADERS AgentConfigurationPlugin.h
+set(HEADERS AgentConfigurationPlugin.h
 			 Models/AgentConfigurationCombinationXMLBaseModel.h
 			 Models/AgentConfigurationCombinationXMLSaveModel.h
 			 Models/AgentConfigurationModel.h
@@ -185,9 +185,9 @@ SET (HEADERS AgentConfigurationPlugin.h
 )
 
 
-INCLUDE_DIRECTORIES(. Interfaces)
+include_directories(. Interfaces)
 
 add_definitions(-DAGENT_LIBRARY)
 
-OPENPASS_GUI_add_plugin(AgentConfiguration "")
+openpass_gui_add_plugin(AgentConfiguration "")
 target_link_libraries(AgentConfiguration openPASSInterfaces Project)

@@ -8,11 +8,11 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES CollisionDetector.cpp
+set(SOURCES CollisionDetector.cpp
 			 ConditionalEventDetector.cpp
 			 EventDetectorCommonBase.cpp
 			 EventDetectorExport.cpp)
-SET (HEADERS CollisionDetector.h
+set(HEADERS CollisionDetector.h
 			 ConditionalEventDetector.h
 			 EventDetectorCommonBase.h
 			 EventDetectorExport.h

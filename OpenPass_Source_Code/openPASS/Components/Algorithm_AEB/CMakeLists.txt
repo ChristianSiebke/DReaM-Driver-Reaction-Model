@@ -8,10 +8,10 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES algorithm_autonomousEmergencyBraking.cpp
+set(SOURCES algorithm_autonomousEmergencyBraking.cpp
 			 algorithm_autonomousEmergencyBrakingImplementation.cpp
 			 boundingBoxCalculation.cpp)
-SET (HEADERS algorithm_autonomousEmergencyBraking.h
+set(HEADERS algorithm_autonomousEmergencyBraking.h
 			 algorithm_autonomousEmergencyBrakingGlobal.h
 			 algorithm_autonomousEmergencyBrakingImplementation.h
 			 boundingBoxCalculation.h)

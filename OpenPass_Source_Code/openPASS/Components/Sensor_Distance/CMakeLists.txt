@@ -8,9 +8,9 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES sensor_distance.cpp
+set(SOURCES sensor_distance.cpp
 			 sensor_distance_implementation.cpp)
-SET (HEADERS sensor_distance.h
+set(HEADERS sensor_distance.h
 			 sensor_distance_implementation.h
 			 sensor_distance_global.h)
 

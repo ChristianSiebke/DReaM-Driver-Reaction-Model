@@ -8,9 +8,9 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES signalPrioritizer.cpp
+set(SOURCES signalPrioritizer.cpp
 			 signalPrioritizerImplementation.cpp)
-SET (HEADERS signalPrioritizer.h
+set(HEADERS signalPrioritizer.h
 			 signalPrioritizerGlobal.h
 			 signalPrioritizerImplementation.h)
 

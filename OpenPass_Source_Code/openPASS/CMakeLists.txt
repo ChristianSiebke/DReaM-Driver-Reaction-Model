@@ -16,11 +16,11 @@ set(BOOST_COMPONENTS locale)
 
 
 find_package(Boost COMPONENTS ${BOOST_COMPONENTS} QUIET)
-IF(WIN32)
+if(WIN32)
       add_definitions("-DBOOST_ALL_NO_LIB")
       add_definitions("-DBOOST_ALL_DYN_LINK")
-ENDIF(WIN32)
-INCLUDE_DIRECTORIES(SYSTEM ${Boost_INCLUDE_DIR})
+endif(WIN32)
+include_directories(SYSTEM ${Boost_INCLUDE_DIR})
 
 ADD_SUBDIRECTORY(Common)
 ADD_SUBDIRECTORY(Components)

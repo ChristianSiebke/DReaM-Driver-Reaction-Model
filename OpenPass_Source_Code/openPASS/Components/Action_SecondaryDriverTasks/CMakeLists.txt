@@ -8,9 +8,9 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES action_secondaryDriverTasks.cpp
+set(SOURCES action_secondaryDriverTasks.cpp
 			 action_secondaryDriverTasksImplementation.cpp)
-SET (HEADERS action_secondaryDriverTasks.h
+set(HEADERS action_secondaryDriverTasks.h
 			 action_secondaryDriverTasksGlobal.h
 			 action_secondaryDriverTasksImplementation.h)
 

@@ -8,9 +8,9 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES sensor_recordState.cpp
+set(SOURCES sensor_recordState.cpp
 			 sensor_recordStateImplementation.cpp)
-SET (HEADERS sensor_recordState.h
+set(HEADERS sensor_recordState.h
 			 sensor_recordStateGlobal.h
 			 sensor_recordStateImplementation.h)
 

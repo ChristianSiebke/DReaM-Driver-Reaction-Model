@@ -8,7 +8,7 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-INCLUDE_DIRECTORIES("./" "CoreShare")
+include_directories("./" "CoreShare")
 ADD_SUBDIRECTORY(CoreShare)
 ADD_SUBDIRECTORY(OpenPassMaster)
 ADD_SUBDIRECTORY(OpenPassSlave)

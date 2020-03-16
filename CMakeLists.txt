@@ -22,19 +22,19 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
 
 # allow only out-of-source builds
-STRING(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" in_source_build)
-IF(in_source_build)
-  MESSAGE(FATAL_ERROR "A separate build directory is required, please create one and run cmake from this directory")
-ENDIF(in_source_build)
+string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" in_source_build)
+if(in_source_build)
+  message(FATAL_ERROR "A separate build directory is required, please create one and run cmake from this directory")
+endif(in_source_build)
 
 
 # project
 PROJECT(OpenPASS CXX C)
 
-IF(POLICY CMP0020)
+if(POLICY CMP0020)
        #qt policy Automatically link Qt executables to qtmain target on Windows.
        cmake_policy(SET CMP0020 NEW)
-ENDIF()
+endif()
 cmake_policy(SET CMP0043 NEW)
 cmake_policy(SET CMP0054 NEW)
 
@@ -60,7 +60,7 @@ set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}   -DDEBUG_POSTFIX=\\\"${CM
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DDEBUG_POSTFIX=\\\"\\\"")
 
 # this is used to override some of cmake's original find-modules
-SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}")
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}")
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
@@ -72,7 +72,7 @@ set(CMAKE_PREFIX_PATH $ENV{EXTERNLIBS}/protobuf ${CMAKE_PREFIX_PATH})
 find_package(Protobuf 2.6.1 REQUIRED)
 add_definitions(-DPROTOBUF_USE_DLLS)
 set(CMAKE_PREFIX_PATH $ENV{EXTERNLIBS}/gtest ${CMAKE_PREFIX_PATH})
-find_package(gtest)
+find_package(GTest)
 set(CMAKE_PREFIX_PATH $ENV{EXTERNLIBS}/qt5 ${CMAKE_PREFIX_PATH})
 find_package(Qt5Core)
 find_package(Qt5Network)
@@ -91,7 +91,7 @@ option(BUILD_BASIC "Build Basic support" OFF)
 option(BUILD_OSI "Build OSI support" ON)
 
 # this is used to override some of cmake's original find-modules
-SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}")
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}")
 
 set(OPENPASS_DESTDIR ${CMAKE_BINARY_DIR}/OpenPASS CACHE PATH "Destination directory")
 file(MAKE_DIRECTORY ${OPENPASS_DESTDIR})
@@ -102,21 +102,21 @@ file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}/bin/gui)
 
 add_definitions(-DSUBDIR_LIB_SIM="/lib" -DSUBDIR_LIB_PLUGIN="plugins" -DSUBDIR_LIB_GUI="/bin/gui"  -DSUBDIR_COMPONENTS="/components")
 
-INCLUDE(HelperMacros)
+include(HelperMacros)
 #######################################
 
-IF(WIN32)
-  SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/windows;${CMAKE_MODULE_PATH}")
-ENDIF()
-IF(UNIX)
-  SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/unix;${CMAKE_MODULE_PATH}")
-ENDIF()
-IF(APPLE)
-  SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/apple;${CMAKE_MODULE_PATH}")
-ENDIF()
-IF(MINGW)
-  SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/mingw;${CMAKE_MODULE_PATH}")
-ENDIF(MINGW)
+if(WIN32)
+  set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/windows;${CMAKE_MODULE_PATH}")
+endif()
+if(UNIX)
+  set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/unix;${CMAKE_MODULE_PATH}")
+endif()
+if(APPLE)
+  set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/apple;${CMAKE_MODULE_PATH}")
+endif()
+if(MINGW)
+  set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/mingw;${CMAKE_MODULE_PATH}")
+endif(MINGW)
 
 set(INSTALL_BIN_DIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Installation directory for executables")
 set(INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "Installation directory for libraries")
@@ -131,4 +131,4 @@ include_directories(${PROJECT_SOURCE_DIR}/OpenPass_Source_Code/openPASS)
     include_directories(${GTEST_INCLUDE_DIRS})
 
 # descend to sources
-ADD_SUBDIRECTORY(OpenPass_Source_Code)
+add_subdirectory(OpenPass_Source_Code)

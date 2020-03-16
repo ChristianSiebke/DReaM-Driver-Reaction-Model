@@ -8,7 +8,7 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES SystemPlugin.cpp
+set(SOURCES SystemPlugin.cpp
 Models/SystemXMLSaveModel.cpp
 Models/SystemComponentInputItemModel.cpp
 Models/SystemXMLLoadModel.cpp
@@ -48,7 +48,7 @@ Views/SystemComponentOutputItemView.cpp
 Views/SystemComponentParameterItemView.cpp
 Views/SystemTabView.cpp
 )
-SET (HEADERS SystemPlugin.h 
+set(HEADERS SystemPlugin.h 
 Models/SystemComponentParameterMapModel.h
 Models/SystemComponentParameterItemModel.h
 Models/SystemComponentScheduleModel.h
@@ -104,7 +104,7 @@ Interfaces/openPASS-System/SystemInterface.h
 Interfaces/openPASS-System/SystemMapInterface.h
 )
 
-SET(UIS 
+set(UIS 
 Views/SystemComponentItemView.ui
 Views/SystemComponentManagerView.ui
 Views/SystemComponentParameterItemView.ui
@@ -117,10 +117,10 @@ Views/SystemTabView.ui
 )
 
 
-INCLUDE_DIRECTORIES(.)
+include_directories(.)
 add_definitions(-DSystem_LIBRARY)
 
-OPENPASS_GUI_add_plugin(System "")
+openpass_gui_add_plugin(System "")
 
 target_link_libraries(System Component Project)
 

@@ -8,11 +8,11 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES world_basic.cpp
+set(SOURCES world_basic.cpp
 			 world_basic_implementation.cpp
 			 agentAdapter.cpp
 			 agentNetwork.cpp)
-SET (HEADERS world_basic.h
+set(HEADERS world_basic.h
 			 world_basic_implementation.h
 			 world_basic_global.h
 			 agentAdapter.h

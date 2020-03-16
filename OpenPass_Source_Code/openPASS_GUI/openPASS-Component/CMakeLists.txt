@@ -8,7 +8,7 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES ComponentPlugin.cpp 
+set(SOURCES ComponentPlugin.cpp 
 Models/ComponentInputItemModel.cpp
 Models/ComponentXMLSaveModel.cpp
 Models/ComponentInputMapModel.cpp
@@ -25,7 +25,7 @@ Models/ComponentOutputMapModel.cpp
 Models/ComponentParameterMapModel.cpp
 Models/ComponentParameterItemModel.cpp 
 )
-SET (HEADERS ComponentPlugin.h 
+set(HEADERS ComponentPlugin.h 
 Models/ComponentParameterItemModel.h
 Models/ComponentOutputMapModel.h
 Models/ComponentParameterMapModel.h
@@ -56,9 +56,9 @@ Interfaces/openPASS-Component/ComponentTypedefMapInterface.h
 )
 
 
-INCLUDE_DIRECTORIES(.)
+include_directories(.)
 
 add_definitions(-DCOMPONENT_LIBRARY)
 
-OPENPASS_GUI_add_plugin(Component "")
+openpass_gui_add_plugin(Component "")
 target_link_libraries(Component openPASSInterfaces)

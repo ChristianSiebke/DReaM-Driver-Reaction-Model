@@ -8,9 +8,9 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES dynamics_regularDriving.cpp
+set(SOURCES dynamics_regularDriving.cpp
 			 dynamics_regularDrivingImplementation.cpp)
-SET (HEADERS dynamics_regularDriving.h
+set(HEADERS dynamics_regularDriving.h
 			 dynamics_regularDrivingImplementation.h
 			 dynamics_regularDrivingGlobal.h)
 

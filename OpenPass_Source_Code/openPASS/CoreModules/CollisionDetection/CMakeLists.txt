@@ -8,9 +8,9 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES collisionDetection.cpp
+set(SOURCES collisionDetection.cpp
 			 collisionDetection_implementation.cpp)
-SET (HEADERS collisionDetection.h
+set(HEADERS collisionDetection.h
 			 collisionDetection_implementation.h
 			 collisionDetection_global.h)
 

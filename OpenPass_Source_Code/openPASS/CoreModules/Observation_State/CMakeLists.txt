@@ -8,9 +8,9 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES observation_state.cpp
+set(SOURCES observation_state.cpp
 			 observation_state_implementation.cpp)
-SET (HEADERS observation_state.h
+set(HEADERS observation_state.h
 			 observation_state_implementation.h
 			 observation_state_global.h
 			 observationtypes.h)

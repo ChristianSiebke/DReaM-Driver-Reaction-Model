@@ -8,9 +8,9 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES sensorFusion.cpp
+set(SOURCES sensorFusion.cpp
 			 sensorFusionImplementation.cpp)
-SET (HEADERS sensorFusion.h
+set(HEADERS sensorFusion.h
 			 sensorFusionGlobal.h
 			 sensorFusionImplementation.h
 			 sensorFusionQuery.h)

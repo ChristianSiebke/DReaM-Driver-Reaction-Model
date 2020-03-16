@@ -8,9 +8,9 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES action_longitudinalDriver.cpp
+set(SOURCES action_longitudinalDriver.cpp
 			 action_longitudinalDriverImplementation.cpp)
-SET (HEADERS action_longitudinalDriver.h
+set(HEADERS action_longitudinalDriver.h
 			 action_longitudinalDriverGlobal.h
 			 action_longitudinalDriverImplementation.h)
 

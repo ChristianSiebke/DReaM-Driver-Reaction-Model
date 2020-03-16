@@ -8,7 +8,7 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-SET (SOURCES dynamics_trajectoryFollower.cpp
+set(SOURCES dynamics_trajectoryFollower.cpp
 			 trajectoryFollowerCommonBase.cpp
 			 roadCoordinateTrajectoryFollower.cpp
 			 absoluteWorldCoordinateTrajectoryFollower.cpp
@@ -18,7 +18,7 @@ SET (SOURCES dynamics_trajectoryFollower.cpp
            ../../CoreFramework/OpenPassSlave/importer/trajectory.cpp
            ../../CoreFramework/OpenPassSlave/importer/trajectoryImporter.cpp
 			 )
-SET (HEADERS dynamics_trajectoryFollower.h
+set(HEADERS dynamics_trajectoryFollower.h
 			 trajectoryFollowerCommonBase.h
 			 roadCoordinateTrajectoryFollower.h
 			 dynamics_trajectoryFollowerGlobal.h
