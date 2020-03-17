@@ -32,7 +32,7 @@ Views/ProjectView.ui
 
 include_directories(.)
 
-add_definitions(-DProject_LIBRARY)
+add_compile_definitions(Project_LIBRARY)
 
 openpass_gui_add_plugin(Project "")
 

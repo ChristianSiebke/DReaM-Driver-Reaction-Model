@@ -15,6 +15,6 @@ set(HEADERS stochastics.h
 			 stochastics_global.h)
 
 
-add_definitions(-DSTOCHASTICS_LIBRARY)
+add_compile_definitions(STOCHASTICS_LIBRARY)
 
 OPENPASS_ADD_MODULE(Stochastics "")

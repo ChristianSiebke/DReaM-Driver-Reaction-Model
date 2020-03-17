@@ -23,7 +23,7 @@ set(HEADERS CollisionManipulator.h
 			 RemoveAgentsManipulator.h)
 
 
-add_definitions(-DMANIPULATOR_LIBRARY)
+add_compile_definitions(MANIPULATOR_LIBRARY)
 include_directories(../../Common ../../Interfaces)
 
 OPENPASS_ADD_MODULE(Manipulator "")

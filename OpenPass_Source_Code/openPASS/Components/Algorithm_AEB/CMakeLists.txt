@@ -20,7 +20,7 @@ include_directories(${OSI_INCLUDE_DIR} ${PROTOBUF_INCLUDE_DIRS})
 
 
 
-add_definitions(-DALGORITHM_AEB_LIBRARY)
+add_compile_definitions(ALGORITHM_AEB_LIBRARY)
 
 OPENPASS_add_component(Algorithm_AEB "")
 

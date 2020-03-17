@@ -14,6 +14,6 @@ set(HEADERS agentUpdater.h
 			 agentUpdaterGlobal.h
 			 agentUpdaterImplementation.h)
 
-add_definitions(-DAGENT_UPDATER_LIBRARY)
+add_compile_definitions(AGENT_UPDATER_LIBRARY)
 
 OPENPASS_add_component(AgentUpdater "")

@@ -14,6 +14,6 @@ set(HEADERS signalPrioritizer.h
 			 signalPrioritizerGlobal.h
 			 signalPrioritizerImplementation.h)
 
-add_definitions(-DSIGNAL_PRIORITIZER_LIBRARY)
+add_compile_definitions(SIGNAL_PRIORITIZER_LIBRARY)
 
 OPENPASS_add_component(SignalPrioritizer "")

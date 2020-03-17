@@ -25,6 +25,6 @@ set(HEADERS dynamics_trajectoryFollower.h
 			 absoluteWorldCoordinateTrajectoryFollower.h)
 
 
-add_definitions(-DDYNAMICS_TRAJECTORY_FOLLOWER_LIBRARY)
+add_compile_definitions(DYNAMICS_TRAJECTORY_FOLLOWER_LIBRARY)
 
 OPENPASS_add_component(Dynamics_TrajectoryFollower "")

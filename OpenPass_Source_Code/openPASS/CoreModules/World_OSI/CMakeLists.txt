@@ -60,7 +60,7 @@ set(HEADERS AgentAdapter.h
 			RoutePlanning/StochasticNavigation.h)
 			
 
-add_definitions(-DWORLD_OSI_LIBRARY -DWORLD_LIBRARY)
+add_compile_definitions(WORLD_OSI_LIBRARY WORLD_LIBRARY)
 include_directories(. ${OSI_INCLUDE_DIR} ${PROTOBUF_INCLUDE_DIRS})
 
 OPENPASS_ADD_MODULE(World_OSI OSI)

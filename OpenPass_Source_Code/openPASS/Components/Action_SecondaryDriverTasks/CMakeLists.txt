@@ -14,6 +14,6 @@ set(HEADERS action_secondaryDriverTasks.h
 			 action_secondaryDriverTasksGlobal.h
 			 action_secondaryDriverTasksImplementation.h)
 
-add_definitions(-DACTION_SECONDARY_DRIVER_TASKS_LIBRARY)
+add_compile_definitions(ACTION_SECONDARY_DRIVER_TASKS_LIBRARY)
 
 OPENPASS_add_component(Action_SecondaryDriverTasks "")

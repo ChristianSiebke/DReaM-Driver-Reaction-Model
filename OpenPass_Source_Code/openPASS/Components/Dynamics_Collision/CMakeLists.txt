@@ -14,6 +14,6 @@ set(HEADERS dynamics_collision.h
 			 dynamics_collisionImplementation.h
 			 dynamics_collisionGlobal.h)
 
-add_definitions(-DDYNAMICS_COLLISION_LIBRARY)
+add_compile_definitions(DYNAMICS_COLLISION_LIBRARY)
 
 OPENPASS_add_component(Dynamics_Collision "")

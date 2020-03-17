@@ -16,6 +16,6 @@ set(HEADERS observation_state.h
 			 observationtypes.h)
 
 
-add_definitions(-DOBSERVATION_STATE_LIBRARY)
+add_compile_definitions(OBSERVATION_STATE_LIBRARY)
 
 OPENPASS_ADD_MODULE(Observation_State "")

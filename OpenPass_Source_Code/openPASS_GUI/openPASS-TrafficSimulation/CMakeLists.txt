@@ -144,7 +144,7 @@ set(UIS
 
 include_directories(. Interfaces)
 
-add_definitions(-DTrafficSimulation_LIBRARY)
+add_compile_definitions(TrafficSimulation_LIBRARY)
 
 openpass_gui_add_plugin(TrafficSimulation "")
 

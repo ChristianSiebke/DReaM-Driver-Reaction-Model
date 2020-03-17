@@ -15,7 +15,7 @@ set(HEADERS algorithm_lateral.h
 			 algorithm_lateralImplementation.h)
 			 
 include_directories(${OSI_INCLUDE_DIR} ${PROTOBUF_INCLUDE_DIRS})
-add_definitions(-DALGORITHM_LATERAL_LIBRARY)
+add_compile_definitions(ALGORITHM_LATERAL_LIBRARY)
 
 OPENPASS_add_component(Algorithm_Lateral "")
 

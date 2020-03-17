@@ -14,6 +14,6 @@ set(HEADERS sensor_recordState.h
 			 sensor_recordStateGlobal.h
 			 sensor_recordStateImplementation.h)
 
-add_definitions(-DSENSOR_RECORD_STATE_LIBRARY)
+add_compile_definitions(SENSOR_RECORD_STATE_LIBRARY)
 
 OPENPASS_add_component(Sensor_RecordState "")

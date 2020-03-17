@@ -118,7 +118,7 @@ Views/SystemTabView.ui
 
 
 include_directories(.)
-add_definitions(-DSystem_LIBRARY)
+add_compile_definitions(System_LIBRARY)
 
 openpass_gui_add_plugin(System "")
 

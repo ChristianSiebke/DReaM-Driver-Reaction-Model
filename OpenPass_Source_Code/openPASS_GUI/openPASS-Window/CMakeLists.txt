@@ -29,7 +29,7 @@ Views/WindowView.ui
 include_directories(.)
 
 
-add_definitions(-DWindow_LIBRARY)
+add_compile_definitions(Window_LIBRARY)
 
 openpass_gui_add_plugin(Window "")
 

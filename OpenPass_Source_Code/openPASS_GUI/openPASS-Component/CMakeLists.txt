@@ -58,7 +58,7 @@ Interfaces/openPASS-Component/ComponentTypedefMapInterface.h
 
 include_directories(.)
 
-add_definitions(-DCOMPONENT_LIBRARY)
+add_compile_definitions(COMPONENT_LIBRARY)
 
 openpass_gui_add_plugin(Component "")
 target_link_libraries(Component openPASSInterfaces)

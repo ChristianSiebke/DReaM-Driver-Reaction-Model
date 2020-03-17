@@ -18,6 +18,6 @@ set(HEADERS sensor_driver.h
 			 Signals/sensorDriverSignal.h
 			 Signals/sensor_driverDefinitions.h)
 
-add_definitions(-DSENSOR_DRIVER_LIBRARY)
+add_compile_definitions(SENSOR_DRIVER_LIBRARY)
 
 OPENPASS_add_component(Sensor_Driver "")

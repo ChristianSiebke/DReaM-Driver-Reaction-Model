@@ -17,6 +17,6 @@ set(HEADERS algorithm_longitudinal.h
 			 algorithm_longitudinalImplementation.h)
 
 
-add_definitions(-DALGORITHM_LONGITUDINAL_LIBRARY)
+add_compile_definitions(ALGORITHM_LONGITUDINAL_LIBRARY)
 
 OPENPASS_add_component(Algorithm_Longitudinal "")

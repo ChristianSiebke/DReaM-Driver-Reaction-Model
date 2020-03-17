@@ -14,6 +14,6 @@ set(HEADERS dynamics_regularDriving.h
 			 dynamics_regularDrivingImplementation.h
 			 dynamics_regularDrivingGlobal.h)
 
-add_definitions(-DDYNAMICS_REGULAR_DRIVING_LIBRARY)
+add_compile_definitions(DYNAMICS_REGULAR_DRIVING_LIBRARY)
 
 OPENPASS_add_component(Dynamics_RegularDriving "")

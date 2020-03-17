@@ -17,7 +17,7 @@ set(HEADERS SpawnPoint.h
 			SpawnPointSceneryParser.h)
 
 
-add_definitions(-DSPAWNPOINT_LIBRARY)
+add_compile_definitions(SPAWNPOINT_LIBRARY)
 include_directories(. ${OSI_INCLUDE_DIR} ${PROTOBUF_INCLUDE_DIRS})
 
 OPENPASS_ADD_MODULE(SpawnPoint_OSI OSI)

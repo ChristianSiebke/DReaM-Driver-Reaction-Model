@@ -187,7 +187,7 @@ set(HEADERS AgentConfigurationPlugin.h
 
 include_directories(. Interfaces)
 
-add_definitions(-DAGENT_LIBRARY)
+add_compile_definitions(AGENT_LIBRARY)
 
 openpass_gui_add_plugin(AgentConfiguration "")
 target_link_libraries(AgentConfiguration openPASSInterfaces Project)

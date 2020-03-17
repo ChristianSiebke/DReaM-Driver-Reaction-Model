@@ -15,7 +15,7 @@ set(HEADERS limiterAccelerationVehicleComponents.h
 			 limiterAccelerationVehicleComponentsGlobal.h)
 			 
 include_directories(${OSI_INCLUDE_DIR} ${PROTOBUF_INCLUDE_DIRS})
-add_definitions(-DLIMITER_ACCELERATION_VEHICLE_COMPONENTS_LIBRARY)
+add_compile_definitions(LIMITER_ACCELERATION_VEHICLE_COMPONENTS_LIBRARY)
 
 OPENPASS_add_component(LimiterAccelerationVehicleComponents "")
 

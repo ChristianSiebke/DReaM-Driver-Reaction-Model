@@ -24,6 +24,6 @@ set(HEADERS observationCyclics.h
 			 runStatisticCalculation.h)
 
 
-add_definitions(-DOBSERVATION_LOG_LIBRARY)
+add_compile_definitions(OBSERVATION_LOG_LIBRARY)
 
 OPENPASS_ADD_MODULE(Observation_Log "")

@@ -22,7 +22,7 @@ set(HEADERS CollisionDetector.h
 			 Conditions/SimulationTimeCondition.h)
 
 
-add_definitions(-DEVENT_DETECTOR_LIBRARY)
+add_compile_definitions(EVENT_DETECTOR_LIBRARY)
 include_directories(../../Common ../../Interfaces)
 
 OPENPASS_ADD_MODULE(EventDetector "")

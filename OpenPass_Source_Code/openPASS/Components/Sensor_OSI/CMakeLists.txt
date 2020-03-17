@@ -18,7 +18,7 @@ set(HEADERS objectDetectorBase.h
 			 
 include_directories(${OSI_INCLUDE_DIR} ${PROTOBUF_INCLUDE_DIRS})
 
-add_definitions(-DSENSOR_OBJECT_DETECTOR_LIBRARY)
+add_compile_definitions(SENSOR_OBJECT_DETECTOR_LIBRARY)
 
 OPENPASS_add_component(Sensor_OSI "")
 

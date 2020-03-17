@@ -17,7 +17,7 @@ set(HEADERS dynamics_longitudinal_basic.h
 			 
 include_directories(${OSI_INCLUDE_DIR} ${PROTOBUF_INCLUDE_DIRS})
 
-add_definitions(-DDYNAMICS_LONGITUDINAL_BASIC_LIBRARY)
+add_compile_definitions(DYNAMICS_LONGITUDINAL_BASIC_LIBRARY)
 
 OPENPASS_add_component(Dynamics_Longitudinal_Basic "")
 

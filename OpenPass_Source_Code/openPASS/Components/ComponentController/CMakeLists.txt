@@ -21,6 +21,6 @@ set(HEADERS componentController.h
 			 condition.h
 			 stateManager.h)
 
-add_definitions(-DCOMPONENT_CONTROLLER_LIBRARY)
+add_compile_definitions(COMPONENT_CONTROLLER_LIBRARY)
 
 OPENPASS_add_component(ComponentController "")

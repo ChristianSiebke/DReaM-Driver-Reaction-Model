@@ -15,7 +15,7 @@ set(HEADERS sensorFusion.h
 			 sensorFusionImplementation.h
 			 sensorFusionQuery.h)
 
-add_definitions(-DSENSOR_FUSION_LIBRARY)
+add_compile_definitions(SENSOR_FUSION_LIBRARY)
 
 include_directories(${OSI_INCLUDE_DIR} ${PROTOBUF_INCLUDE_DIRS})
 

@@ -14,6 +14,6 @@ set(HEADERS parameters_vehicle.h
 			 parameters_vehicleGlobal.h
 			 parameters_vehicleImplementation.h)
 
-add_definitions(-DPARAMETERS_VEHICLE_LIBRARY)
+add_compile_definitions(PARAMETERS_VEHICLE_LIBRARY)
 
 OPENPASS_add_component(Parameters_Vehicle "")
