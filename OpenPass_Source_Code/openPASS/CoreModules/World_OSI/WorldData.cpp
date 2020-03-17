@@ -356,7 +356,7 @@ void WorldData::AddSection(const RoadInterface& odRoad, const RoadLaneSectionInt
     {
         osiRoad = osiRoads.at(&odRoad);
     }
-    catch (std::out_of_range& e)
+    catch (std::out_of_range&)
     {
         throw new OWL::NonExistentOsiRef("Road", odRoad.GetId());
     }

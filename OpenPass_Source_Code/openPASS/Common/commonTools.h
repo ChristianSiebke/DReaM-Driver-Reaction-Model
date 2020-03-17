@@ -16,6 +16,8 @@
 
 #include "globalDefinitions.h"
 #include "vector2d.h"
+#include <optional>
+#include <algorithm>
 
 //-----------------------------------------------------------------------------
 //! @brief defines common helper functions like conversion from and to enums.
