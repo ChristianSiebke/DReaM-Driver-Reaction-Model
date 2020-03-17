@@ -9,7 +9,8 @@
 * SPDX-License-Identifier: EPL-2.0
 ******************************************************************************/
 
-#include <cmath>
+
+#include <Common/opMath.h>
 #include "vector2d.h"
 
 double constexpr EPSILON = 1e-9;

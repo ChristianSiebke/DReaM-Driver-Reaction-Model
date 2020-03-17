@@ -2,6 +2,7 @@
 * Copyright (c) 2017, 2018, 2019 in-tech GmbH
 *               2018, 2019 AMFD GmbH
 *               2016, 2017, 2018, 2019 ITK Engineering GmbH
+*               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -18,10 +19,7 @@
 #ifndef GLOBALDEFINITIONS
 #define GLOBALDEFINITIONS
 
-#ifndef _USE_MATH_DEFINES
-#define _USE_MATH_DEFINES
-#endif
-#include <cmath>
+#include <Common/opMath.h>
 #include <string>
 #include <tuple>
 #include <vector>

@@ -1,5 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2017, 2018, 2019 in-tech GmbH
+*               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -8,6 +9,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
+#include <Common/opMath.h>
 #include <algorithm>
 #include <utility>
 #include <limits>
@@ -16,7 +18,6 @@
 #include <string>
 #include <memory>
 #include <functional>
-#include <cmath>
 #include <tuple>
 #include <sstream>
 #include <functional>
@@ -26,7 +27,6 @@
 #include "SceneryConverter.h"
 #include "GeometryConverter.h"
 #include "TrafficObjectAdapter.h"
-#include "cmath"
 
 #include "WorldData.h"
 #include "WorldDataQuery.h"

@@ -1,5 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -8,10 +9,8 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
-#ifndef _USE_MATH_DEFINES
-#define _USE_MATH_DEFINES
-#endif
-#include <cmath>
+
+#include <Common/opMath.h>
 #include "vehicleModelsImporter.h"
 
 namespace Importer {

@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 ******************************************************************************/
 
-#include <cmath>
+#include <Common/opMath.h>
 #include "vector3d.h"
 
 namespace Common
