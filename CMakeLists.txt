@@ -55,9 +55,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
    include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 endif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 
-
-set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}   -DDEBUG_POSTFIX=\\\"${CMAKE_DEBUG_POSTFIX}\\\"")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DDEBUG_POSTFIX=\\\"\\\"")
+add_compile_definitions($<IF:$<CONFIG:Debug>,DEBUG_POSTFIX=\"${CMAKE_DEBUG_POSTFIX}\",DEBUG_POSTFIX=\"\">)
 
 # this is used to override some of cmake's original find-modules
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}")
