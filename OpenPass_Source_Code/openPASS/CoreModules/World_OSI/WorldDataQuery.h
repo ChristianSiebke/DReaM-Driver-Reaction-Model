@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -225,11 +225,18 @@ public:
 
     //! Returns all TrafficSigns valid for the lanes in LaneStream within startDistance and startDistance + searchRange
     //!
-    //! @param laneStream lane stream to search in
-    //! @param startDistance s-coordinate of search start
-    //! @param searchRange  range of search
+    //! @param laneStream       lane stream to search in
+    //! @param startDistance    s-coordinate of search start
+    //! @param searchRange      range of search (positive)
     std::vector<std::pair<double, OWL::Interfaces::TrafficSign *>> GetTrafficSignsInRange(LaneStream laneStream, double startDistance, double searchRange) const;
 
+
+    //! Returns all RoadMarkings valid for the lanes in LaneStream within startDistance and startDistance + searchRange
+    //!
+    //! @param laneStream       lane stream to search in
+    //! @param startDistance    s-coordinate of search start
+    //! @param searchRange      range of search (positive)
+    std::vector<std::pair<double, OWL::Interfaces::RoadMarking*> > GetRoadMarkingsInRange(LaneStream laneStream, double startDistance, double searchRange) const;
 
     //! Retrieves all lane markings within the given range on the given side of the lane inside the range
     //!

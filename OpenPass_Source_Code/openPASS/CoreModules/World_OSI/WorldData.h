@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -100,12 +100,20 @@ public:
     //!Creates a new TrafficSign and returns it
     virtual Interfaces::TrafficSign& AddTrafficSign(const std::string odId) = 0;
 
+    //!Creates a new RoadMarking and returns it
+    virtual Interfaces::RoadMarking& AddRoadMarking() = 0;
+
     //! Adds a traffic sign to the assigned signs of lane
     //!
     //! \param laneId       OSI Id of the lane
     //! \param trafficSign  traffic sign to assign
-    //!
     virtual void AssignTrafficSignToLane(OWL::Id laneId, Interfaces::TrafficSign& trafficSign) = 0;
+
+    //! Adds a road marking to the assigned road markings of lane
+    //!
+    //! \param laneId       OSI Id of the lane
+    //! \param roadMarking  roadMarking to assign
+    virtual void AssignRoadMarkingToLane(OWL::Id laneId, Interfaces::RoadMarking& roadMarking) = 0;
 
     //!Deletes the moving object with the specified Id
     virtual void RemoveMovingObjectById(Id id) = 0; // change Id to MovingObject
@@ -139,6 +147,9 @@ public:
 
     //!Returns a map of all traffic signs with their OSI Id
     virtual const std::unordered_map<Id, TrafficSign*>& GetTrafficSigns() const = 0;
+
+    //!Returns a map of all road markings with their OSI Id
+    virtual const std::unordered_map<Id, RoadMarking*>& GetRoadMarkings() const = 0;
 
     //!Creates a new lane with parameters specified by the OpenDrive lane
     //!
@@ -304,6 +315,21 @@ public:
                                                                         double absYawMax);
 
     /*!
+     * \brief Retrieves the RoadMarkings located in the given sector (geometric shape)
+     *
+     * \param[in]   origin      Origin of the sector shape
+     * \param[in]   radius      Radius of the sector shape
+     * \param[in]   absYawMin   Right boundary angle of the sector shape
+     * \param[in]   absYawMax   Left boundary angle of the sector shape
+     *
+     * \return      Vector of RoadMarking pointers located in the given sector
+     */
+    std::vector<const Interfaces::RoadMarking*> GetRoadMarkingsInSector(const Primitive::AbsPosition& origin,
+                                                                        double radius,
+                                                                        double absYawMin,
+                                                                        double absYawMax);
+
+    /*!
      * \brief Retrieves the StationaryObjects located in the given sector (geometric shape)
      *
      * \param[in]   origin      Origin of the sector shape
@@ -368,8 +394,10 @@ public:
     Interfaces::MovingObject& AddMovingObject(void* linkedObject) override;
     Interfaces::StationaryObject& AddStationaryObject(void* linkedObject) override;
     Interfaces::TrafficSign& AddTrafficSign(const std::string odId) override;
+    Interfaces::RoadMarking& AddRoadMarking() override;
 
     void AssignTrafficSignToLane(OWL::Id laneId, Interfaces::TrafficSign &trafficSign) override;
+    void AssignRoadMarkingToLane(OWL::Id laneId, Interfaces::RoadMarking& roadMarking) override;
 
     void RemoveMovingObjectById(Id id) override;
 
@@ -400,6 +428,7 @@ public:
     const std::unordered_map<Id, Road*>& GetRoads() const override;
     const std::unordered_map<Id, Junction *>& GetJunctions() const override;
     const std::unordered_map<Id, Interfaces::TrafficSign*>& GetTrafficSigns() const override;
+    const std::unordered_map<Id, Interfaces::RoadMarking*>& GetRoadMarkings() const override;
     const Implementation::InvalidLane& GetInvalidLane() const override {return invalidLane;}
 
     const std::unordered_map<Id, OdId>& GetLaneIdMapping() const override
@@ -514,6 +543,7 @@ private:
     std::unordered_map<Id, StationaryObject*>   stationaryObjects;
     std::unordered_map<Id, MovingObject*>       movingObjects;
     std::unordered_map<Id, Interfaces::TrafficSign*>  trafficSigns;
+    std::unordered_map<Id, Interfaces::RoadMarking*>  roadMarkings;
 
     std::unordered_map<const RoadInterface*, osi3::world::Road*>                   osiRoads;
     std::unordered_map<const RoadLaneSectionInterface*, osi3::world::RoadSection*> osiSections;

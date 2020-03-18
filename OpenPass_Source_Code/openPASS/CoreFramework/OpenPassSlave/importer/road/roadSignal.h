@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -71,7 +71,7 @@ public:
     ///
     /// @return s [m]
     //-----------------------------------------------------------------------------
-    double GetT() const;
+    double GetT() const override;
 
     //-----------------------------------------------------------------------------
     //! Returns the road from which this section is a part of.
@@ -97,14 +97,14 @@ public:
     ///
     /// @return height [m]
     //-----------------------------------------------------------------------------
-    virtual double GetHeight() const;
+    virtual double GetHeight() const override;
 
     //-----------------------------------------------------------------------------
     /// @brief Returns the width of the signal
     ///
     /// @return height [m]
     //-----------------------------------------------------------------------------
-    virtual double GetWidth() const;
+    virtual double GetWidth() const override;
 
     //-----------------------------------------------------------------------------
     /// @brief Returns the length of the signal
@@ -141,6 +141,12 @@ public:
     virtual bool GetIsDynamic() const override;
 
     virtual std::list<std::string> GetDependencies() const override;
+
+    virtual double GetZOffset() const override;
+
+    virtual bool GetOrientation() const override;
+
+    virtual double GetHOffset() const override;
 
 private:
     RoadInterface* road;

@@ -234,7 +234,7 @@ std::vector<std::pair<double, OWL::Interfaces::TrafficSign *>> WorldDataQuery::G
             return foundTrafficSigns;
         }
         auto sortedTrafficSigns = lane().GetTrafficSigns();
-        sortedTrafficSigns.sort([lane](const OWL::Interfaces::TrafficSign* first, const OWL::Interfaces::TrafficSign* second)
+        sortedTrafficSigns.sort([lane](const auto first, const auto second)
         {return lane.GetStreamPosition(first->GetS()) < lane.GetStreamPosition(second->GetS());});
         for (const auto& trafficSign : sortedTrafficSigns)
         {
@@ -248,6 +248,38 @@ std::vector<std::pair<double, OWL::Interfaces::TrafficSign *>> WorldDataQuery::G
     }
 
     return foundTrafficSigns;
+}
+
+std::vector<std::pair<double, OWL::Interfaces::RoadMarking*> > WorldDataQuery::GetRoadMarkingsInRange(LaneStream laneStream, double startDistance, double searchRange) const
+{
+    std::vector<std::pair<double, OWL::Interfaces::RoadMarking *>> foundRoadMarkings{};
+
+    for (const auto& lane : laneStream.GetElements())
+    {
+        if (lane.EndS() < startDistance)
+        {
+            continue;
+        }
+        if (lane.StartS() > startDistance + searchRange)
+        {
+            return foundRoadMarkings;
+        }
+        auto sortedRoadMarkings = lane().GetRoadMarkings();
+        sortedRoadMarkings.sort([lane](const auto first, const auto second)
+                                {return lane.GetStreamPosition(first->GetS()) < lane.GetStreamPosition(second->GetS());});
+
+        for (const auto& roadMarking : sortedRoadMarkings)
+        {
+            double roadMarkingPosition = lane.GetStreamPosition(roadMarking->GetS() - lane().GetDistance(OWL::MeasurementPoint::RoadStart));
+            if (startDistance <= roadMarkingPosition && roadMarkingPosition <= startDistance + searchRange)
+            {
+                foundRoadMarkings.push_back({roadMarkingPosition - startDistance, roadMarking});
+            }
+        }
+
+    }
+
+    return foundRoadMarkings;
 }
 
 std::vector<LaneMarking::Entity> WorldDataQuery::GetLaneMarkings(const LaneStream& laneStream, double startDistance, double range, Side side) const

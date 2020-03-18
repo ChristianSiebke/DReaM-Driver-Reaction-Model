@@ -38,6 +38,7 @@ INC_OWL =   \
             $$UNIT_UNDER_TEST/OWL/fakes/fakeRoad.h \
             $$UNIT_UNDER_TEST/OWL/fakes/fakeOWLJunction.h \
             $$UNIT_UNDER_TEST/OWL/fakes/fakeTrafficSign.h \
+            $$UNIT_UNDER_TEST/OWL/fakes/fakeRoadMarking.h \
             $$UNIT_UNDER_TEST/OWL/fakes/fakeMovingObject.h \
             $$UNIT_UNDER_TEST/OWL/fakes/fakeWorld.h \
             $$UNIT_UNDER_TEST/OWL/fakes/fakeWorldData.h

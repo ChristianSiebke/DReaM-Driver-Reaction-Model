@@ -212,6 +212,33 @@ std::vector<CommonTrafficSign::Entity> WorldImplementation::GetTrafficSignsInRan
     return foundSigns;
 }
 
+std::vector<CommonTrafficSign::Entity> WorldImplementation::GetRoadMarkingsInRange(const Route& route, std::string roadId, int laneId, double startDistance, double searchRange) const
+{
+    std::vector<CommonTrafficSign::Entity> foundMarkings {};
+    auto& lane = worldDataQuery.GetLaneByOdId(roadId, laneId, startDistance);
+    if (!lane.Exists())
+    {
+        return {};
+    }
+    auto laneStream = navigation.GetLaneStream(route, roadId, laneId, startDistance);
+    if (searchRange < 0.0)
+    {
+        laneStream = laneStream.Reverse();
+        searchRange = -searchRange;
+    }
+    startDistance = laneStream.GetPositionByElementAndS(lane, startDistance);
+
+    const auto& roadMarkings = worldDataQuery.GetRoadMarkingsInRange(laneStream,
+                                                       startDistance,
+                                                       searchRange);
+    for (auto& roadMarking : roadMarkings)
+    {
+        foundMarkings.push_back(roadMarking.second->GetSpecification(roadMarking.first));
+    }
+
+    return foundMarkings;
+}
+
 std::vector<LaneMarking::Entity> WorldImplementation::GetLaneMarkings(const Route& route, std::string roadId, int laneId, double startDistance, double range, Side side) const
 {
      auto& lane = worldDataQuery.GetLaneByOdId(roadId, laneId, startDistance);

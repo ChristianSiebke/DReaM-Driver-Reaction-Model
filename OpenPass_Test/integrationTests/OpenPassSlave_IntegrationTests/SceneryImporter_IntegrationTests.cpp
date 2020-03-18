@@ -860,6 +860,89 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectTrafficSigns)
     ASSERT_THAT(trafficSigns.at(4).supplementarySigns.front().type, Eq(CommonTrafficSign::Type::DistanceIndication));
     ASSERT_THAT(trafficSigns.at(4).supplementarySigns.front().value, DoubleEq(200.0));
     ASSERT_THAT(trafficSigns.at(4).supplementarySigns.front().unit, Eq(CommonTrafficSign::Unit::Meter));
+
+    trafficSigns = world.GetTrafficSignsInRange(route, "1", -2, 39, -10);
+    std::sort(trafficSigns.begin(), trafficSigns.end(),
+              [](CommonTrafficSign::Entity first, CommonTrafficSign::Entity second){return first.relativeDistance < second.relativeDistance;});
+    ASSERT_THAT(trafficSigns.size(), Eq(2));
+    ASSERT_THAT(trafficSigns.at(0).relativeDistance, DoubleEq(3.0));
+    ASSERT_THAT(trafficSigns.at(0).type, Eq(CommonTrafficSign::Type::AnnounceLeftLaneEnd));
+    ASSERT_THAT(trafficSigns.at(0).value, Eq(2));
+    ASSERT_THAT(trafficSigns.at(0).supplementarySigns.size(), Eq(0));
+    ASSERT_THAT(trafficSigns.at(1).relativeDistance, DoubleEq(4.0));
+    ASSERT_THAT(trafficSigns.at(1).type, Eq(CommonTrafficSign::Type::SpeedLimitZoneBegin));
+    ASSERT_THAT(trafficSigns.at(1).value, DoubleNear(30 / 3.6, 1e-3));
+    ASSERT_THAT(trafficSigns.at(1).unit, Eq(CommonTrafficSign::Unit::MeterPerSecond));
+    ASSERT_THAT(trafficSigns.at(1).supplementarySigns.size(), Eq(0));
+
+    auto roadMarkings = world.GetRoadMarkingsInRange(route, "1", -2, 11, 90);
+    ASSERT_THAT(roadMarkings.size(), Eq(1));
+    ASSERT_THAT(roadMarkings.at(0).relativeDistance, DoubleEq(30.0));
+    ASSERT_THAT(roadMarkings.at(0).type, Eq(CommonTrafficSign::Type::Stop));
+}
+
+TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectTrafficSignGeometriess)
+{
+    TESTSCENERY_FACTORY tsf("IntegrationTestScenery.xodr");
+    auto& world = tsf.world;
+
+    OWL::Interfaces::WorldData* worldData = static_cast<OWL::Interfaces::WorldData*>(world.GetWorldData());
+    auto& groundtruth = worldData->GetOsiGroundTruth();
+
+    ASSERT_THAT(groundtruth.traffic_sign_size(), Eq(5));
+    auto& trafficSign0 = groundtruth.traffic_sign(0);
+    ASSERT_THAT(trafficSign0.main_sign().base().position().x(), DoubleEq(15));
+    ASSERT_THAT(trafficSign0.main_sign().base().position().y(), DoubleEq(-0.5));
+    ASSERT_THAT(trafficSign0.main_sign().base().position().z(), DoubleEq(1.7));
+    ASSERT_THAT(trafficSign0.main_sign().base().dimension().width(), DoubleEq(0.4));
+    ASSERT_THAT(trafficSign0.main_sign().base().dimension().height(), DoubleEq(0.4));
+    ASSERT_THAT(trafficSign0.main_sign().base().orientation().yaw(), DoubleEq(0.0));
+
+    auto& trafficSign1 = groundtruth.traffic_sign(1);
+    ASSERT_THAT(trafficSign1.main_sign().base().position().x(), DoubleEq(25));
+    ASSERT_THAT(trafficSign1.main_sign().base().position().y(), DoubleEq(-0.5));
+    ASSERT_THAT(trafficSign1.main_sign().base().position().z(), DoubleEq(1.7));
+    ASSERT_THAT(trafficSign1.main_sign().base().dimension().width(), DoubleEq(0.4));
+    ASSERT_THAT(trafficSign1.main_sign().base().dimension().height(), DoubleEq(0.4));
+    ASSERT_THAT(trafficSign1.main_sign().base().orientation().yaw(), DoubleNear(0.1, 1e-3));
+
+    auto& trafficSign2 = groundtruth.traffic_sign(2);
+    ASSERT_THAT(trafficSign2.main_sign().base().position().x(), DoubleEq(35));
+    ASSERT_THAT(trafficSign2.main_sign().base().position().y(), DoubleEq(-0.5));
+    ASSERT_THAT(trafficSign2.main_sign().base().position().z(), DoubleEq(1.7));
+    ASSERT_THAT(trafficSign2.main_sign().base().dimension().width(), DoubleEq(0.4));
+    ASSERT_THAT(trafficSign2.main_sign().base().dimension().height(), DoubleEq(0.4));
+    ASSERT_THAT(trafficSign2.main_sign().base().orientation().yaw(), DoubleEq(-M_PI + 0.1));
+
+    auto& trafficSign3 = groundtruth.traffic_sign(3);
+    ASSERT_THAT(trafficSign3.main_sign().base().position().x(), DoubleEq(36));
+    ASSERT_THAT(trafficSign3.main_sign().base().position().y(), DoubleEq(-0.5));
+    ASSERT_THAT(trafficSign3.main_sign().base().position().z(), DoubleEq(2.0));
+    ASSERT_THAT(trafficSign3.main_sign().base().dimension().width(), DoubleEq(0.5));
+    ASSERT_THAT(trafficSign3.main_sign().base().dimension().height(), DoubleEq(1.0));
+    ASSERT_THAT(trafficSign3.main_sign().base().orientation().yaw(), DoubleEq(0.0));
+
+    auto& trafficSign4 = groundtruth.traffic_sign(4);
+    ASSERT_THAT(trafficSign4.main_sign().base().position().x(), DoubleEq(40));
+    ASSERT_THAT(trafficSign4.main_sign().base().position().y(), DoubleEq(-0.5));
+    ASSERT_THAT(trafficSign4.main_sign().base().position().z(), DoubleEq(1.7));
+    ASSERT_THAT(trafficSign4.main_sign().base().dimension().width(), DoubleEq(0.4));
+    ASSERT_THAT(trafficSign4.main_sign().base().dimension().height(), DoubleEq(0.4));
+    ASSERT_THAT(trafficSign4.main_sign().base().orientation().yaw(), DoubleEq(0.0));
+    ASSERT_THAT(trafficSign4.supplementary_sign(0).base().position().x(), DoubleEq(40));
+    ASSERT_THAT(trafficSign4.supplementary_sign(0).base().position().y(), DoubleEq(-0.5));
+    ASSERT_THAT(trafficSign4.supplementary_sign(0).base().position().z(), DoubleEq(1.3));
+    ASSERT_THAT(trafficSign4.supplementary_sign(0).base().dimension().width(), DoubleEq(0.4));
+    ASSERT_THAT(trafficSign4.supplementary_sign(0).base().dimension().height(), DoubleEq(0.2));
+    ASSERT_THAT(trafficSign4.supplementary_sign(0).base().orientation().yaw(), DoubleEq(0.0));
+
+    auto& roadMarking = groundtruth.road_marking(0);
+    ASSERT_THAT(roadMarking.base().position().x(), DoubleEq(41));
+    ASSERT_THAT(roadMarking.base().position().y(), DoubleEq(0.5));
+    ASSERT_THAT(roadMarking.base().position().z(), DoubleEq(0.0));
+    ASSERT_THAT(roadMarking.base().dimension().width(), DoubleEq(4.0));
+    ASSERT_THAT(roadMarking.base().dimension().height(), DoubleEq(0.0));
+    ASSERT_THAT(roadMarking.base().orientation().yaw(), DoubleEq(0.0));
 }
 
 TEST(SceneryImporter_IntegrationTests, TJunction_ImportWithCorrectConnectionsAndPriorities)

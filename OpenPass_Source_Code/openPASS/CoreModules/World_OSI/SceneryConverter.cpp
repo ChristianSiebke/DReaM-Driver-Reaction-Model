@@ -700,7 +700,7 @@ bool SceneryConverter::ConvertRoads()
 void SceneryConverter::ConvertObjects()
 {
     CreateObjects();
-    CreateTrafficSigns();
+    CreateRoadSignals();
 }
 
 void SceneryConverter::CreateObjects()
@@ -762,7 +762,23 @@ std::vector<OWL::Id> SceneryConverter::CreateLaneBoundaries(RoadLaneInterface &o
     return laneBoundaries;
 }
 
-void SceneryConverter::CreateTrafficSigns()
+Position GetPositionForRoadCoordinates(RoadInterface* road, double s, double t)
+{
+
+    auto& geometries = road->GetGeometries();
+    auto geometry = std::find_if(geometries.cbegin(), geometries.cend(),
+                                 [&](const RoadGeometryInterface* geometry)
+    {return (geometry->GetS() <= s) && (geometry->GetS() + geometry->GetLength() >= s);});
+    if (geometry == geometries.end())
+    {
+        throw std::runtime_error("No valid geometry found");
+    }
+    auto coordinates = (*geometry)->GetCoord(s - (*geometry)->GetS(), t);
+    auto yaw = (*geometry)->GetDir(s - (*geometry)->GetS());
+    return {coordinates.x, coordinates.y, yaw, 0};
+}
+
+void SceneryConverter::CreateRoadSignals()
 {
     for (auto& item : scenery->GetRoads())
     {
@@ -793,35 +809,74 @@ void SceneryConverter::CreateTrafficSigns()
                 continue;
             }
 
-            OWL::Interfaces::TrafficSign& trafficSign = worldData.AddTrafficSign(signal->GetId());
-
-            trafficSign.SetS(signal->GetS());
-
-            if (!trafficSign.SetSpecification(signal))
+            auto position = GetPositionForRoadCoordinates(road, signal->GetS(), signal->GetT());
+            if (OpenDriveTypeMapper::roadMarkings.find(signal->GetType()) != OpenDriveTypeMapper::roadMarkings.end())
             {
-                const std::string message = "Unsupported traffic sign type: " + signal->GetType() + (" (id: " + signal->GetId() + ")");
-                LOG(CbkLogLevel::Warning, message);
-                continue;
+                CreateRoadMarking(signal, position, section->GetLanes());
             }
 
-            for (auto lane : section->GetLanes())
+            else
             {
-                OWL::OdId odId = worldData.GetLaneIdMapping().at(lane->GetId());
-                if (signal->IsValidForLane(odId))
-                {
-                    worldData.AssignTrafficSignToLane(lane->GetId(), trafficSign);
-                }
+                CreateTrafficSign(signal, position, section->GetLanes());
             }
         }
 
         // First instantiate all signals and then add dependencies accordingly afterwards
-        for (const auto [supplementarySign, parentIds] : dependentSignals)
+        for (const auto& [supplementarySign, parentIds] : dependentSignals)
         {
-            for (const auto parentId : parentIds)
+            for (const auto& parentId : parentIds)
             {
                 auto parentSign = worldData.GetTrafficSigns().at(worldData.GetTrafficSignIdMapping().at(parentId));
-                parentSign->AddSupplementarySign(supplementarySign);
+
+                auto position = GetPositionForRoadCoordinates(road, supplementarySign->GetS(), supplementarySign->GetT());
+                parentSign->AddSupplementarySign(supplementarySign, position);
             }
+        }
+    }
+}
+
+void SceneryConverter::CreateTrafficSign(RoadSignalInterface* signal, Position position, const OWL::Interfaces::Lanes& lanes)
+{
+    OWL::Interfaces::TrafficSign& trafficSign = worldData.AddTrafficSign(signal->GetId());
+
+    trafficSign.SetS(signal->GetS());
+
+    if (!trafficSign.SetSpecification(signal, position))
+    {
+        const std::string message = "Unsupported traffic sign type: " + signal->GetType() + (" (id: " + signal->GetId() + ")");
+        LOG(CbkLogLevel::Warning, message);
+        return;
+    }
+
+    for (auto lane : lanes)
+    {
+        OWL::OdId odId = worldData.GetLaneIdMapping().at(lane->GetId());
+        if (signal->IsValidForLane(odId))
+        {
+            worldData.AssignTrafficSignToLane(lane->GetId(), trafficSign);
+        }
+    }
+}
+
+void SceneryConverter::CreateRoadMarking(RoadSignalInterface* signal, Position position, const OWL::Interfaces::Lanes& lanes)
+{
+    OWL::Interfaces::RoadMarking& roadMarking = worldData.AddRoadMarking();
+
+    roadMarking.SetS(signal->GetS());
+
+    if (!roadMarking.SetSpecification(signal, position))
+    {
+        const std::string message = "Unsupported traffic sign type: " + signal->GetType() + (" (id: " + signal->GetId() + ")");
+        LOG(CbkLogLevel::Warning, message);
+        return;
+    }
+
+    for (auto lane : lanes)
+    {
+        OWL::OdId odId = worldData.GetLaneIdMapping().at(lane->GetId());
+        if (signal->IsValidForLane(odId))
+        {
+            worldData.AssignRoadMarkingToLane(lane->GetId(), roadMarking);
         }
     }
 }

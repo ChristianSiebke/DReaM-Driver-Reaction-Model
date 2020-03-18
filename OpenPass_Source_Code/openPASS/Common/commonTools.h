@@ -129,6 +129,12 @@ public:
       }
     }
 
+    //! Returns the same angle but within the range [-PI, PI]
+    static double SetAngleToValidRange(double angel)
+    {
+        return std::fmod(angel + 3 * M_PI, 2 * M_PI) - M_PI;
+    }
+
     static bool CheckPointValid(const Common::Vector2d *point)
     {
         return ((point != nullptr) && (point->x != INFINITY) && (point->y != INFINITY));

@@ -186,21 +186,24 @@ This scenery consists of linear sections only.
     </lanes>
     <objects/>
       <signals>
-         <signal id="1" type="274" subtype="50" s="15" t="-8" hOffset="0.0" pitch="0" roll="0" dynamic="no" country="DEU" name="" orientation="+" zOffset="0">
+         <signal id="1" type="274" subtype="50" s="15" t="-8" width="0.4" height="0.4" zOffset="1.5" hOffset="0" pitch="0" roll="0" dynamic="no" country="DEU" name="" orientation="+">
             <validity toLane="-2" fromLane="-1"/>
          </signal>
-         <signal id="2" type="276" subtype="" s="25" t="-8" hOffset="0.0" pitch="0" roll="0" dynamic="no" country="DEU" name="" orientation="+" zOffset="0">
+         <signal id="2" type="276" subtype="" s="25" t="-8" width="0.4" height="0.4" zOffset="1.5" hOffset="0.1" pitch="0" roll="0" dynamic="no" country="DEU" name="" orientation="+">
             <validity toLane="-2" fromLane="-2"/>
          </signal>
-         <signal id="3" type="274.1" subtype="" s="35" t="-8" hOffset="0.0" pitch="0" roll="0" dynamic="no" country="DEU" name="" orientation="+" zOffset="0">
+         <signal id="3" type="274.1" subtype="" s="35" t="-8" width="0.4" height="0.4" zOffset="1.5" hOffset="0.1" pitch="0" roll="0" dynamic="no" country="DEU" name="" orientation="-">
             <validity toLane="-3" fromLane="-1"/>
          </signal>
-         <signal id="4" type="531" subtype="21" s="36" t="-8" hOffset="0.0" pitch="0" roll="0" dynamic="no" country="DEU" name="" orientation="+" zOffset="0">
+         <signal id="4" type="531" subtype="21" s="36" t="-8" width="0.5" height="1.0" zOffset="1.5" hOffset="0" pitch="0" roll="0" dynamic="no" country="DEU" name="" orientation="+">
          </signal>
-         <signal id="5" type="206" subtype="" s="40" t="-8" hOffset="0.0" pitch="0" roll="0" dynamic="no" country="DEU" name="" orientation="+" zOffset="0">
+         <signal id="5" type="206" subtype="" s="40" t="-8" width="0.4" height="0.4" zOffset="1.5" hOffset="0" pitch="0" roll="0" dynamic="no" country="DEU" name="" orientation="+">
             <validity toLane="-2" fromLane="-2"/>
          </signal>
-         <signal id="6" type="1004" subtype="30" value="200" s="40" t="-8" hOffset="0.0" pitch="0" roll="0" dynamic="no" country="DEU" name="" orientation="+" zOffset="0">
+         <signal id="6" type="294" subtype="" s="41" t="-7" width="4.0" hOffset="0" pitch="0" roll="0" dynamic="no" country="DEU" name="" orientation="+" zOffset="0">
+            <validity toLane="-2" fromLane="-2"/>
+         </signal>
+         <signal id="7" type="1004" subtype="30" value="200" s="40" t="-8" width="0.4" height="0.2" hOffset="0" zOffset="1.2" pitch="0" roll="0" dynamic="no" country="DEU" name="" orientation="+">
             <validity toLane="-2" fromLane="-2"/>
             <dependency id="5" />
          </signal>

@@ -248,9 +248,11 @@ Generally, the position of an agent is stored with respect to [world coordinates
 As queries on the world operates in [road coordinates (s,t)](\ref dev_concepts_coordinatesystems_road), the position of the agent needs to be transformed.
 The transformation is performed by the [localization algorithm](\ref localization).
 
-\subsection dev_framework_modules_world_trafficsigns Traffic Signs
+\subsection dev_framework_modules_world_trafficsigns Traffic Signs and Road Markings
 
-The world currently supports a variety of traffic signs. At the moment it can only interpret traffic signs according to the German regulations "StVo".
+The world currently supports a variety of traffic signs and road markings.
+Both are defined in OpenDRIVE as "RoadSignal".
+At the moment it can only interpret traffic signs according to the German regulations "StVo".
 Traffic signs can contain optional supplementary traffic signs. Supplementary signs are dependent on a main traffic sign and contain additional information.
 The following traffic signs are supported:
 
@@ -286,6 +288,12 @@ The following traffic signs are supported:
 | AnnounceRightLaneEnd                          | 531       | 10/11/12/13 | The subtype describes the number of continuing lanes after the right lane ends. 10 = 1 lane, 11 = 2 lanes, 12 = 3 lanes, 13 = 4 lanes |
 | AnnounceLeftLaneEnd                           | 531       | 20/21/22/23 | The subtype describes the number of continuing lanes after the left lane ends. 10 = 1 lane, 11 = 2 lanes, 12 = 3 lanes, 13 = 4 lanes |
 | DistanceIndication                            | 1004      | 30/31/32	  | For subtype 30 the value describes the distance in m. For subtype 31 the value describes the distance in km. Subtype 32 has a STOP in 100m |
+
+The following road markings are supported:
+
+| RoadMarking                                   | StVo Type | Subtype     | Value and Units   |
+|-----------------------------------------------|-----------|-------------|-------------------|
+| Stop line                                     | 294       | -           | -                 |
 
 \subsection dev_framework_modules_world_lanemarking Lane Markings
 

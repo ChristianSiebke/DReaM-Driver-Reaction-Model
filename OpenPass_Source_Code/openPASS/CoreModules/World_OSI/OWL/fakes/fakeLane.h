@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -86,6 +86,8 @@ public:
     MOCK_CONST_METHOD0(GetNext, const std::vector<OWL::Id> ());
     MOCK_CONST_METHOD0(GetPrevious, const std::vector<OWL::Id> ());
     MOCK_CONST_METHOD0(GetTrafficSigns, const OWL::Interfaces::TrafficSigns& ());
+    MOCK_CONST_METHOD0(GetRoadMarkings, const OWL::Interfaces::RoadMarkings& ());
     MOCK_METHOD1(AddTrafficSign, void (OWL::Interfaces::TrafficSign &trafficSign));
+    MOCK_METHOD1(AddRoadMarking, void (OWL::Interfaces::RoadMarking &roadMarking));
 };
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -450,12 +450,26 @@ public:
     virtual Obstruction GetObstruction(const Route& route, const GlobalRoadPosition& ownPosition, const ObjectPosition& otherPosition,
                                                  const std::vector<Common::Vector2d>& objectCorners) const = 0;
 
-    //-----------------------------------------------------------------------------
-    //! Retrieves all traffic signs in front
+    //! Returns all traffic signs valid for a lane inside the range
     //!
-    //! @return                TrafficSigns
-    //-----------------------------------------------------------------------------
+    //! \param route            route to search along
+    //! \param roadId           OpenDrive Id of the road
+    //! \param laneId           OpenDrive Id of the lane
+    //! \param startDistance    s coordinate
+    //! \param searchRange      range of search (can also be negative)
+    //! \return traffic signs in range
     virtual std::vector<CommonTrafficSign::Entity> GetTrafficSignsInRange(const Route& route, std::string roadId, int laneId,
+            double startDistance, double searchRange) const = 0;
+
+    //! Returns all road markings valid for a lane inside the range
+    //!
+    //! \param route            route to search along
+    //! \param roadId           OpenDrive Id of the road
+    //! \param laneId           OpenDrive Id of the lane
+    //! \param startDistance    s coordinate
+    //! \param searchRange      range of search
+    //! \return road markings in range (can also be negative)
+    virtual std::vector<CommonTrafficSign::Entity> GetRoadMarkingsInRange(const Route& route, std::string roadId, int laneId,
             double startDistance, double searchRange) const = 0;
 
     //! Retrieves all lane markings on the given position on the given side of the lane inside the range

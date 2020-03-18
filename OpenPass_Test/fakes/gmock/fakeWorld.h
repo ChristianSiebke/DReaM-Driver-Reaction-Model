@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -51,6 +51,7 @@ class FakeWorld : public WorldInterface
     MOCK_CONST_METHOD4(GetObstruction, Obstruction (const Route& route, const GlobalRoadPosition& ownPosition, const ObjectPosition& otherPosition, const std::vector<Common::Vector2d>& objectCorners));
     MOCK_CONST_METHOD0(GetTimeOfDay, std::string());
     MOCK_CONST_METHOD5(GetTrafficSignsInRange, std::vector<CommonTrafficSign::Entity>(const Route& route, std::string roadId, int laneId, double startDistance, double searchRange));
+    MOCK_CONST_METHOD5(GetRoadMarkingsInRange, std::vector<CommonTrafficSign::Entity>(const Route& route, std::string roadId, int laneId, double startDistance, double searchRange));
     MOCK_CONST_METHOD6(GetLaneMarkings, std::vector<LaneMarking::Entity> (const Route& route, std::string roadId, int laneId, double startDistance, double range, Side side));
     MOCK_CONST_METHOD6(GetAgentsInRange, std::vector<const AgentInterface*>(Route route, std::string roadId, int laneId, double startDistance, double backwardRange, double forwardRange));
     MOCK_CONST_METHOD6(GetObjectsInRange, std::vector<const WorldObjectInterface*>(Route route, std::string roadId, int laneId, double startDistance, double backwardRange, double forwardRange));

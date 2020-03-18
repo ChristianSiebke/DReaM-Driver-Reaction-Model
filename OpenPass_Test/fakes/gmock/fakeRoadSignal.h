@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2019 in-tech
+* Copyright (c) 2019, 2020 in-tech
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -20,6 +20,7 @@ class FakeRoadSignal: public RoadSignalInterface
 public:
     MOCK_CONST_METHOD0(GetId, std::string ());
     MOCK_CONST_METHOD0(GetS, double ());
+    MOCK_CONST_METHOD0(GetT, double ());
     MOCK_CONST_METHOD1(IsValidForLane, bool (int laneId));
     MOCK_CONST_METHOD0(GetType, std::string ());
     MOCK_CONST_METHOD0(GetSubType, std::string ());
@@ -28,4 +29,9 @@ public:
     MOCK_CONST_METHOD0(GetText, std::string ());
     MOCK_CONST_METHOD0(GetDependencies, std::list<std::string> ());
     MOCK_CONST_METHOD0(GetIsDynamic, bool());
+    MOCK_CONST_METHOD0(GetWidth, double ());
+    MOCK_CONST_METHOD0(GetHeight, double ());
+    MOCK_CONST_METHOD0(GetZOffset, double ());
+    MOCK_CONST_METHOD0(GetOrientation, bool ());
+    MOCK_CONST_METHOD0(GetHOffset, double ());
 };

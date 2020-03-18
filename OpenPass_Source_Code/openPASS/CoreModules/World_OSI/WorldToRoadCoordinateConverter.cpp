@@ -68,7 +68,7 @@ double WorldToRoadCoordinateConverter::CalcT(const Common::Vector2d& point, cons
 double WorldToRoadCoordinateConverter::CalcYaw(double hdg) const
 {
     // Updated for direction awareness - might be an issue, when cars try to turn around
-    return std::fmod((hdg - element.laneGeometryElement.joints.current.sHdg + 3 * M_PI), (2 * M_PI)) - M_PI;
+    return CommonHelper::SetAngleToValidRange(hdg - element.laneGeometryElement.joints.current.sHdg);
 }
 
 Common::Vector2d WorldToRoadCoordinateConverter::ProjectOntoReferenceAxis(const Common::Vector2d& point) const

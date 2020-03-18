@@ -25,6 +25,7 @@
 #include "fakeMovingObject.h"
 #include "fakeAgent.h"
 #include "fakeTrafficSign.h"
+#include "fakeRoadMarking.h"
 #include "fakeOWLJunction.h"
 #include "dontCare.h"
 
@@ -594,6 +595,63 @@ TEST(GetTrafficSignsInRange, ReturnsCorrectTrafficSigns)
     ASSERT_THAT(result.at(1).second, Eq(&fakeSign3));
 
     result = wdQuery.GetTrafficSignsInRange(laneStream.Get(), 1000.0, 1000.0);
+    EXPECT_EQ(result.size(), 0);
+}
+
+TEST(GetRoadMarkingInRange, ReturnsCorrectRoadMarkings)
+{
+    FakeLaneStream laneStream;
+    auto lane1 =laneStream.AddLane(400, true);
+    auto lane2 = laneStream.AddLane(400, true);
+
+    Fakes::RoadMarking fakeSign1;
+    ON_CALL(fakeSign1, GetS()).WillByDefault(Return(100.0));
+
+    Fakes::RoadMarking fakeSign2;
+    ON_CALL(fakeSign2, GetS()).WillByDefault(Return(200.0));
+
+    Fakes::RoadMarking fakeSign3;
+    ON_CALL(fakeSign3, GetS()).WillByDefault(Return(50.0));
+
+    Fakes::RoadMarking fakeSign4;
+    ON_CALL(fakeSign4, GetS()).WillByDefault(Return(250.0));
+
+    OWL::Interfaces::RoadMarkings signsLane1{ {&fakeSign1, &fakeSign2} };
+    ON_CALL(*lane1, GetRoadMarkings()).WillByDefault(ReturnRef(signsLane1));
+    OWL::Interfaces::RoadMarkings signsLane2{ {&fakeSign3, &fakeSign4} };
+    ON_CALL(*lane2, GetRoadMarkings()).WillByDefault(ReturnRef(signsLane2));
+
+    Fakes::WorldData worldData;
+    WorldDataQuery wdQuery(worldData);
+
+    auto result = wdQuery.GetRoadMarkingsInRange(laneStream.Get(), 100.0, 1000.0);
+    EXPECT_EQ(result.size(), 4);
+    ASSERT_THAT(result.at(0).first, DoubleEq(0.0));
+    ASSERT_THAT(result.at(0).second, Eq(&fakeSign1));
+    ASSERT_THAT(result.at(1).first, DoubleEq(100.0));
+    ASSERT_THAT(result.at(1).second, Eq(&fakeSign2));
+    ASSERT_THAT(result.at(2).first, DoubleEq(350.0));
+    ASSERT_THAT(result.at(2).second, Eq(&fakeSign3));
+    ASSERT_THAT(result.at(3).first, DoubleEq(550.0));
+    ASSERT_THAT(result.at(3).second, Eq(&fakeSign4));
+
+    result = wdQuery.GetRoadMarkingsInRange(laneStream.Get(), 100.0, 500.0);
+    EXPECT_EQ(result.size(), 3);
+    ASSERT_THAT(result.at(0).first, DoubleEq(0.0));
+    ASSERT_THAT(result.at(0).second, Eq(&fakeSign1));
+    ASSERT_THAT(result.at(1).first, DoubleEq(100.0));
+    ASSERT_THAT(result.at(1).second, Eq(&fakeSign2));
+    ASSERT_THAT(result.at(2).first, DoubleEq(350.0));
+    ASSERT_THAT(result.at(2).second, Eq(&fakeSign3));
+
+    result = wdQuery.GetRoadMarkingsInRange(laneStream.Get(), 150.0, 400.0);
+    EXPECT_EQ(result.size(), 2);
+    ASSERT_THAT(result.at(0).first, DoubleEq(50.0));
+    ASSERT_THAT(result.at(0).second, Eq(&fakeSign2));
+    ASSERT_THAT(result.at(1).first, DoubleEq(300.0));
+    ASSERT_THAT(result.at(1).second, Eq(&fakeSign3));
+
+    result = wdQuery.GetRoadMarkingsInRange(laneStream.Get(), 1000.0, 1000.0);
     EXPECT_EQ(result.size(), 0);
 }
 

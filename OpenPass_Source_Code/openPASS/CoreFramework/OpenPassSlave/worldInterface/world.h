@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -255,6 +255,12 @@ public:
             double startDistance, double searchRange) const override
     {
         return implementation->GetTrafficSignsInRange(route, roadId, laneId, startDistance, searchRange);
+    }
+
+    virtual std::vector<CommonTrafficSign::Entity> GetRoadMarkingsInRange(const Route& route, std::string roadId, int laneId,
+            double startDistance, double searchRange) const override
+    {
+        return implementation->GetRoadMarkingsInRange(route, roadId, laneId, startDistance, searchRange);
     }
 
     virtual std::vector<LaneMarking::Entity> GetLaneMarkings(const Route& route, std::string roadId, int laneId, double startDistance, double range, Side side) const override

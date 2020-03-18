@@ -213,7 +213,7 @@ void IncorporateRoadDirection (const Route& route, GlobalRoadPosition& point)
         return;
     }
     point.roadPosition.t = -point.roadPosition.t;
-    point.roadPosition.hdg = std::fmod(point.roadPosition.hdg + 2 * M_PI, 2 * M_PI) - M_PI;
+    point.roadPosition.hdg = CommonHelper::SetAngleToValidRange(point.roadPosition.hdg + M_PI);
 }
 
 Result Localizer::BuildResult(const LocatedObject& locatedObject, const Route& route) const

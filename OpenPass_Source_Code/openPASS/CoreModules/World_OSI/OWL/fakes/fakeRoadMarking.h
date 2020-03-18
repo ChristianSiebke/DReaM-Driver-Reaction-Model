@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -10,24 +10,19 @@
 #pragma once
 
 #include <utility>
-
 #include "gmock/gmock.h"
 #include "OWL/DataTypes.h"
 
 #include "Common/globalDefinitions.h"
 
-class RoadSignalInterface;
-
 namespace OWL::Fakes {
-class TrafficSign : public OWL::Interfaces::TrafficSign
+class RoadMarking : public OWL::Interfaces::RoadMarking
 {
 public:
     MOCK_CONST_METHOD0(GetId,
                        std::string());
     MOCK_CONST_METHOD0(GetS,
                        double());
-    MOCK_CONST_METHOD2(GetValueAndUnitInSI,
-                       std::pair<double, CommonTrafficSign::Unit> (const double osiValue, const osi3::TrafficSignValue_Unit osiUnit));
     MOCK_CONST_METHOD1(GetSpecification,
                        CommonTrafficSign::Entity(double));
     MOCK_CONST_METHOD0(GetReferencePointPosition,
@@ -40,8 +35,6 @@ public:
                  void(OWL::Id));
     MOCK_METHOD2(SetSpecification,
                  bool(RoadSignalInterface*, Position position));
-    MOCK_METHOD2(AddSupplementarySign,
-                 void (RoadSignalInterface* odSignal, Position position));
     MOCK_CONST_METHOD1(CopyToGroundTruth,
                        void(osi3::GroundTruth&));
 };
