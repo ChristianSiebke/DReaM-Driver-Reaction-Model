@@ -85,7 +85,7 @@ QVariant LibrariesPresenter::data(const QModelIndex &index, int role) const
        {
             QString lib = libraries->value(RowToLibType[row]);
 
-            if(!QFileInfo::exists(project->getLibrary().absoluteFilePath(lib + QString(".dll"))) && !lib.isEmpty())
+            if(!QFileInfo::exists(project->getLibrary().absoluteFilePath(lib + DEBUG_POSTFIX + QString(".dll"))) && !lib.isEmpty())
                 return QString("%1 (not existing!)").arg(lib);
 
             else

@@ -24,3 +24,7 @@ set_target_properties(openPASS PROPERTIES FOLDER "GUI")
 target_link_libraries(openPASS CoreShare openPASSInterfaces)
 
 qt5_use_modules(openPASS Core Gui Widgets Xml)
+
+add_custom_command(TARGET openPASS POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+                       ${CMAKE_SOURCE_DIR}/OpenPass_Source_Code/openPASS_GUI/openPASS-System/components $<TARGET_FILE_DIR:openPASS>/..)

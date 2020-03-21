@@ -21,8 +21,8 @@
 #include <QStandardPaths>
 #include <QString>
 
-ProjectInterface::Library const ProjectModel::DefaultLibrary = QCoreApplication::applicationDirPath().append( QStringLiteral("/bin/lib"));
-ProjectInterface::Config const ProjectModel::DefaultConfig = QCoreApplication::applicationDirPath().append(QStringLiteral("../OpenPass_Source_Code/openPASS_Resource/OpenPass_OSI_UseCase"));
+ProjectInterface::Library const ProjectModel::DefaultLibrary = QCoreApplication::applicationDirPath().append( QStringLiteral("/lib"));      
+ProjectInterface::Config const ProjectModel::DefaultConfig = QCoreApplication::applicationDirPath().append(QStringLiteral("/configs"));
 ProjectInterface::Result const ProjectModel::DefaultResult = QCoreApplication::applicationDirPath();
 ProjectInterface::LogMaster const ProjectModel::DefaultLogMaster = QCoreApplication::applicationDirPath().append( QStringLiteral("/OpenPassMaster.log"));
 ProjectInterface::LogSlave const ProjectModel::DefaultLogSlave = QCoreApplication::applicationDirPath().append( QStringLiteral("/OpenPassSlave.log"));

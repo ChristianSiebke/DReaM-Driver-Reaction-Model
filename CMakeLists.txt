@@ -64,14 +64,17 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+# default locations for 3rd party libraries
+set(CMAKE_PREFIX_PATH $ENV{EXTERNLIBS}/boost ${CMAKE_PREFIX_PATH})
 set(CMAKE_PREFIX_PATH $ENV{EXTERNLIBS}/osi ${CMAKE_PREFIX_PATH})
-find_package(OSI)
 set(CMAKE_PREFIX_PATH $ENV{EXTERNLIBS}/protobuf ${CMAKE_PREFIX_PATH})
+set(CMAKE_PREFIX_PATH $ENV{EXTERNLIBS}/gtest ${CMAKE_PREFIX_PATH})
+set(CMAKE_PREFIX_PATH $ENV{EXTERNLIBS}/qt5 ${CMAKE_PREFIX_PATH})
+
+find_package(OSI)
 find_package(Protobuf 2.6.1 REQUIRED)
 add_compile_definitions(PROTOBUF_USE_DLLS)
-set(CMAKE_PREFIX_PATH $ENV{EXTERNLIBS}/gtest ${CMAKE_PREFIX_PATH})
 find_package(GTest)
-set(CMAKE_PREFIX_PATH $ENV{EXTERNLIBS}/qt5 ${CMAKE_PREFIX_PATH})
 find_package(Qt5Core)
 find_package(Qt5Network)
 find_package(Qt5Xml)
@@ -126,7 +129,7 @@ set(INSTALL_PKGCONFIG_DIR "${CMAKE_INSTALL_PREFIX}/share/pkgconfig" CACHE PATH "
 
 include_directories(${PROJECT_SOURCE_DIR}/OpenPass_Source_Code/openPASS)
 
-    include_directories(${GTEST_INCLUDE_DIRS})
+include_directories(${GTEST_INCLUDE_DIRS})
 
 # descend to sources
 add_subdirectory(OpenPass_Source_Code)
