@@ -28,6 +28,8 @@ using ValidLaneSpawningRanges = std::vector<Range>;
 using StringProbabilities = std::unordered_map<std::string, double>;
 using VehicleRearAndFrontCoordinates = std::pair<SPosition, SPosition>;
 
+constexpr double PROBABILITY_SUM_TOLERANCE = 1e-5;
+
 enum class Direction
 {
     FORWARD = 0,
@@ -42,97 +44,126 @@ struct TrafficConfig
     StringProbabilities agentProfiles {};
 };
 
+static void ParseProbabilities(const std::vector<std::shared_ptr<ParameterInterface>> &parameterLists,
+                               const std::string &tag,
+                               std::unordered_map<double, double> &result)
+{
+    try
+    {
+        double probabilitySum = 0.0;
+
+        for(const auto& parameterListItem : parameterLists)
+        {
+            const auto& probability = parameterListItem->GetParametersDouble().at("Probability");
+            probabilitySum += probability;
+
+            const auto& value = parameterListItem->GetParametersDouble().at(tag);
+
+            result.emplace(value, probability);
+        }
+
+        if(std::abs(probabilitySum - 1.0) > PROBABILITY_SUM_TOLERANCE)
+        {
+            LogErrorAndThrow(tag + " probability needs to add up to 1.0!");
+        }
+    }
+    catch (const std::out_of_range& error)
+    {
+        const std::string errorMessage = error.what();
+        const std::string fullError = errorMessage + "; SpawnPoint needs at least one " + tag + ".";
+        LogErrorAndThrow(fullError);
+    }
+}
+
+static void ParseProbabilities(const std::vector<std::shared_ptr<ParameterInterface>> &parameterLists,
+                               const std::string &tag,
+                               std::unordered_map<std::string, double> &result)
+{
+    try
+    {
+        double probabilitySum = 0.0;
+
+        for(const auto& parameterListItem : parameterLists)
+        {
+            const auto& probability = parameterListItem->GetParametersDouble().at("Probability");
+            probabilitySum += probability;
+
+            const auto& value = parameterListItem->GetParametersString().at(tag);
+
+            result.emplace(value, probability);
+        }
+
+        if(std::abs(probabilitySum - 1.0) > PROBABILITY_SUM_TOLERANCE)
+        {
+            LogErrorAndThrow(tag + " probability needs to add up to 1.0!");
+        }
+    }
+    catch (const std::out_of_range& error)
+    {
+        const std::string errorMessage = error.what();
+        const std::string fullError = errorMessage + "SpawnPoint needs at least one " + tag + ".";
+        LogErrorAndThrow(fullError);
+    }
+}
+
+static void ParseProbabilities(const std::vector<std::shared_ptr<ParameterInterface>> &parameterLists,
+                               const std::string &tag,
+                               std::unordered_map<openpass::parameter::NormalDistribution, double, hash_fn> &result)
+{
+    try
+    {
+        double probabilitySum = 0.0;
+
+        for(const auto& parameterListItem : parameterLists)
+        {
+            const auto& value = parameterListItem->GetParametersNormalDistribution().at(tag);
+            const auto& probability = parameterListItem->GetParametersDouble().at("Probability");
+            probabilitySum += probability;
+
+            result.emplace(value, probability);
+        }
+
+        if(std::abs(probabilitySum - 1.0) > PROBABILITY_SUM_TOLERANCE)
+        {
+            LogErrorAndThrow(tag + " probability needs to add up to 1.0!");
+        }
+    }
+    catch (const std::out_of_range& error)
+    {
+        const std::string errorMessage = error.what();
+        const std::string fullError = errorMessage + "SpawnPoint needs at least one " + tag + ".";
+        LogErrorAndThrow(fullError);
+    }
+}
+
 static TrafficConfig ConvertParametersIntoTrafficConfig(const ParameterInterface& parameter)
 {
-    TrafficConfig trafficConfig;
-
     try
     {
-        const auto& trafficVolumesParameterListItems = parameter.GetParameterLists().at("TrafficVolumes");
-        std::transform(std::begin(trafficVolumesParameterListItems),
-                       std::end(trafficVolumesParameterListItems),
-                       std::inserter(trafficConfig.trafficVolumes, std::end(trafficConfig.trafficVolumes)),
-                       [](const auto& parameterListItem) -> std::pair<double, double>
-        {
-            const auto& parametersDouble = parameterListItem->GetParametersDouble();
-            const auto& trafficVolume = parametersDouble.at("TrafficVolume");
-            const auto& probability = parametersDouble.at("Probability");
+        TrafficConfig trafficConfig;
 
-            return std::make_pair(trafficVolume, probability);
-        });
+        ParseProbabilities(parameter.GetParameterLists().at("TrafficVolumes"),
+                           "TrafficVolume",
+                           trafficConfig.trafficVolumes);
+
+        ParseProbabilities(parameter.GetParameterLists().at("PlatoonRates"),
+                           "PlatoonRate",
+                           trafficConfig.platoonRates);
+
+        ParseProbabilities(parameter.GetParameterLists().at("AgentProfiles"),
+                           "AgentProfile",
+                           trafficConfig.agentProfiles);
+
+        ParseProbabilities(parameter.GetParameterLists().at("Velocities"),
+                           "Velocity",
+                           trafficConfig.velocities);
+
+        return trafficConfig;
     }
     catch (const std::out_of_range& error)
     {
-        const std::string errorMessage = error.what();
-        const std::string fullError = errorMessage + "SpawnPoint needs at least one traffic volume.";
-        LOG_INTERN(LogLevel::Error) << fullError;
+        LogErrorAndThrow(error.what());
     }
-
-    try
-    {
-        const auto& platoonRatesParameterListItems = parameter.GetParameterLists().at("PlatoonRates");
-        std::transform(std::begin(platoonRatesParameterListItems),
-                       std::end(platoonRatesParameterListItems),
-                       std::inserter(trafficConfig.platoonRates, std::end(trafficConfig.platoonRates)),
-                       [](const auto& parameterListItem) -> std::pair<double, double>
-        {
-           const auto& parametersDouble = parameterListItem->GetParametersDouble();
-           const auto& platoonRate = parametersDouble.at("PlatoonRate");
-           const auto& probability = parametersDouble.at("Probability");
-
-           return std::make_pair(platoonRate, probability);
-        });
-    }
-    catch (const std::out_of_range& error)
-    {
-        const std::string errorMessage = error.what();
-        const std::string fullError = errorMessage + "SpawnPoint needs at least one platoon rate.";
-        LOG_INTERN(LogLevel::Error) << fullError;
-    }
-
-    try
-    {
-        const auto& velocitiesParameterListItems = parameter.GetParameterLists().at("Velocities");
-        std::transform(std::begin(velocitiesParameterListItems),
-                       std::end(velocitiesParameterListItems),
-                       std::inserter(trafficConfig.velocities, std::end(trafficConfig.velocities)),
-                       [](const auto& parameterListItem) -> std::pair<openpass::parameter::NormalDistribution, double>
-        {
-           const auto& velocity = parameterListItem->GetParametersNormalDistribution().at("Velocity");
-           const auto& probability = parameterListItem->GetParametersDouble().at("Probability");
-
-           return std::make_pair(velocity, probability);
-        });
-    }
-    catch (const std::out_of_range& error)
-    {
-        const std::string errorMessage = error.what();
-        const std::string fullError = errorMessage + "SpawnPoint needs at least one velocity.";
-        LOG_INTERN(LogLevel::Error) << fullError;
-    }
-
-    try
-    {
-        const auto& agentProfilesListItems = parameter.GetParameterLists().at("AgentProfiles");
-        std::transform(std::begin(agentProfilesListItems),
-                       std::end(agentProfilesListItems),
-                       std::inserter(trafficConfig.agentProfiles, std::end(trafficConfig.agentProfiles)),
-                       [](const auto& parameterListItem) -> std::pair<std::string, double>
-        {
-            const auto& agentProfile = parameterListItem->GetParametersString().at("AgentProfile");
-            const auto& probability = parameterListItem->GetParametersDouble().at("Probability");
-
-            return std::make_pair(agentProfile, probability);
-        });
-    }
-    catch (const std::out_of_range& error)
-    {
-        const std::string errorMessage = error.what();
-        const std::string fullError = errorMessage + "SpawnPoint needs at least one agent profile.";
-        LOG_INTERN(LogLevel::Error) << fullError;
-    }
-
-    return trafficConfig;
 }
 
 struct SampledTrafficConfig
