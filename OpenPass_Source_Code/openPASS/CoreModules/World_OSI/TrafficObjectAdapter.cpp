@@ -16,11 +16,15 @@
 
 //TODO: replace GlobalObject with injected shared_pointer to locator
 
-TrafficObjectAdapter::TrafficObjectAdapter(OWL::Interfaces::WorldData& worldData, const World::Localization::Localizer& localizer,
-        OWL::Primitive::AbsPosition position,
-        OWL::Primitive::Dimension dimension, OWL::Primitive::AbsOrientation orientation) :
+TrafficObjectAdapter::TrafficObjectAdapter(OWL::Interfaces::WorldData& worldData,
+                                           const World::Localization::Localizer& localizer,
+                                           OWL::Primitive::AbsPosition position,
+                                           OWL::Primitive::Dimension dimension,
+                                           OWL::Primitive::AbsOrientation orientation,
+                                           const OpenDriveId odId) :
     WorldObjectAdapter{worldData.AddStationaryObject(static_cast<void*>(this))},
-    localizer{localizer}
+    localizer{localizer},
+    openDriveId{odId}
 {
     baseTrafficObject.SetReferencePointPosition(position);
     baseTrafficObject.SetDimension(dimension);
@@ -96,6 +100,11 @@ bool TrafficObjectAdapter::Locate()
 void TrafficObjectAdapter::Unlocate()
 {
     localizer.Unlocate(baseTrafficObject);
+}
+
+OpenDriveId TrafficObjectAdapter::GetOpenDriveId() const
+{
+    return openDriveId;
 }
 
 TrafficObjectAdapter::~TrafficObjectAdapter()

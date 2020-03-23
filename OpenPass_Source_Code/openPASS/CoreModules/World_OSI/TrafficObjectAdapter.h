@@ -23,6 +23,8 @@ private:
     World::Localization::Result locateResult;
     mutable std::vector<GlobalRoadPosition> boundaryPoints;
 
+    OpenDriveId openDriveId;
+
     void InitLaneDirection(double hdg);
 
 public:
@@ -30,7 +32,8 @@ public:
                          const World::Localization::Localizer& localizer,
                          OWL::Primitive::AbsPosition position,
                          OWL::Primitive::Dimension dimension,
-                         OWL::Primitive::AbsOrientation orientation);
+                         OWL::Primitive::AbsOrientation orientation,
+                         const OpenDriveId odId);
 
     ObjectTypeOSI GetType() const override;
     double GetDistanceToStartOfRoad() const override;
@@ -41,6 +44,8 @@ public:
     double GetLaneRemainder(Side side) const override;
     bool Locate() override;
     void Unlocate() override;
+
+    OpenDriveId GetOpenDriveId() const override;
 
     // object is not inteded to be copied or assigned
     TrafficObjectAdapter(const TrafficObjectAdapter&) = delete;

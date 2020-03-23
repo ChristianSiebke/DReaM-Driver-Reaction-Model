@@ -52,7 +52,7 @@ void CollisionManipulator::Trigger(int time)
         }
         else
         {
-            auto pair = std::make_pair(ObjectTypeOSI::Object, event->collisionOpponentId);
+            const auto pair = std::make_pair(ObjectTypeOSI::Object, event->collisionOpponentId);
             for (auto partner : collisionAgent->GetCollisionPartners())
             {
                 if (partner.first == ObjectTypeOSI::Vehicle)
@@ -79,10 +79,10 @@ void CollisionManipulator::UpdateCollision(AgentInterface* agent, AgentInterface
     {
         return;
     }
-    std::vector<std::pair<ObjectTypeOSI, int>> collisionPartners = agent->GetCollisionPartners();
-    for (const auto& partner : collisionPartners)
+
+    for (const auto& partner : agent->GetCollisionPartners())
     {
-        if (partner.second == opponent->GetId())
+        if (partner.second == opponent->GetId() && partner.first == ObjectTypeOSI::Vehicle)
         {
             return;
         }
@@ -93,8 +93,7 @@ void CollisionManipulator::UpdateCollision(AgentInterface* agent, AgentInterface
     opponent->UpdateCollision(std::make_pair(agent->GetType(), agent->GetId()));
 
     //Recursion for agent
-    collisionPartners = agent->GetCollisionPartners();
-    for (const auto& partner : collisionPartners)
+    for (const auto& partner : agent->GetCollisionPartners())
     {
         if (partner.first == ObjectTypeOSI::Object)
         {
@@ -107,8 +106,7 @@ void CollisionManipulator::UpdateCollision(AgentInterface* agent, AgentInterface
     }
 
     //Recursion for opponent
-    collisionPartners = opponent->GetCollisionPartners();
-    for (const auto& partner : collisionPartners)
+    for (const auto& partner : opponent->GetCollisionPartners())
     {
         if (partner.first == ObjectTypeOSI::Object)
         {

@@ -730,7 +730,12 @@ void SceneryConverter::CreateObjects()
                 OWL::Primitive::AbsPosition pos{x, y, 0};
                 OWL::Primitive::Dimension dim{object->GetLength(), object->GetWidth(), object->GetHeight()};
                 OWL::Primitive::AbsOrientation orientation{object->GetHdg(), object->GetPitch(), object->GetRoll()};
-                new TrafficObjectAdapter(worldData, localizer, pos, dim, orientation);
+                new TrafficObjectAdapter(worldData,
+                                         localizer,
+                                         pos,
+                                         dim,
+                                         orientation,
+                                         object->GetId());
             }
         }
     }

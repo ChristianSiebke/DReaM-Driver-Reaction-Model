@@ -78,8 +78,6 @@ void SensorRecordStateImplementation::UpdateOutput(int ,std::shared_ptr<SignalIn
 void SensorRecordStateImplementation::Trigger(int time)
 {
     timeMSec = time;
-
-    auto collisionPartners = GetAgent()->GetCollisionPartners();
     indexLaneEgo = GetAgent()->GetMainLaneId();
 
     ObserveEgo();
