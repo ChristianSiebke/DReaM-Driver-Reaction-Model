@@ -25,9 +25,12 @@ SUBDIRS = \
         Components/Algorithm_Lateral \
         Components/Algorithm_Longitudinal \
         Components/AlgorithmAgentFollowingDriverModel \
+        Components/Algorithm_ModularDriver \
         Components/ComponentController \
         Components/Dynamics_Collision \
         Components/Dynamics_RegularDriving \
+        Components/Dynamics_CollisionPostCrash \
+        Components/Dynamics_RegularTwoTrack \
         Components/Dynamics_TrajectoryFollower \
         Components/LimiterAccelerationVehicleComponents \
         Components/Parameters_Vehicle \
@@ -35,4 +38,6 @@ SUBDIRS = \
         Components/Sensor_OSI \
         Components/Sensor_RecordState \
         Components/SensorFusion_OSI \
+        Components/Sensor_Modular_Driver \
+        Components/Sensor_Criticality \
         Components/SignalPrioritizer

@@ -29,6 +29,27 @@ std::string ObservationCyclics::GetHeader()
     return header;
 }
 
+std::string ObservationCyclics::GetAgentHeader()
+{
+    std::string header;
+    std::string columnHeader;
+    for(std::map<std::string, std::vector<std::string>>::iterator it = samples.begin(); it != samples.end(); ++it)
+    {
+        if(it != samples.begin())
+        {
+            header += ", ";
+        }
+        columnHeader = it->first;
+        if(columnHeader.at(1) == '1')
+        {
+            return header;
+        }
+
+        header += columnHeader.erase(0, 3);
+    }
+    return header;
+}
+
 std::string ObservationCyclics::GetSamplesLine(std::uint32_t timeStepNumber)
 {
     std::string sampleLine;
@@ -49,6 +70,39 @@ std::string ObservationCyclics::GetSamplesLine(std::uint32_t timeStepNumber)
     }
 
     return sampleLine;
+}
+
+std::vector<std::string> ObservationCyclics::GetAgentSamplesLine(std::uint32_t timeStepNumber)
+{
+    std::vector<std::string> agentSamplesLines;
+    std::string sampleLine {};
+    std::string agentId {"00"};
+    std::string newAgentId {"00"};
+
+    for (std::map<std::string, std::vector<std::string>>::iterator it = samples.begin(); it != samples.end(); ++it)
+    {
+        newAgentId = it->first.substr(0,2);
+        if(newAgentId != agentId)
+        {
+            agentId = newAgentId;
+            agentSamplesLines.push_back(sampleLine);
+            sampleLine.clear();
+        }
+        const std::vector<std::string>& values = it->second;
+
+        if (!sampleLine.empty())
+        {
+            sampleLine += ", ";
+        }
+
+        // not all channels are sampled until end of simulation time
+        if (timeStepNumber < values.size())
+        {
+            sampleLine += values.at(timeStepNumber);
+        }
+    }
+
+    return agentSamplesLines;
 }
 
 void ObservationCyclics::Clear()

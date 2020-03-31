@@ -1,5 +1,6 @@
 # /*********************************************************************
 # * Copyright (c) 2017, 2018, 2019 in-tech GmbH
+# *               2019 ITK Engineering GmbH
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -9,37 +10,31 @@
 # **********************************************************************/
 
 #-----------------------------------------------------------------------------
-# \file  World_OSI.pro
+# \file  Dynamics_RegularTwoTrack.pro
 # \brief This file contains the information for the QtCreator-project of the
-#        module World_OSI
+# module Dynamics_RegularTwoTrack
 #-----------------------------------------------------------------------------/
 
-DEFINES += WORLD_LIBRARY
+DEFINES += DYNAMICS_REGULAR_TWOTRACK_LIBRARY
 CONFIG += OPENPASS_LIBRARY
 include(../../../global.pri)
 
-SUBDIRS += \
-    . \
-    Localization \
-    OWL \
-    RoutePlanning \
-    ../../Common \
-    ../../Interfaces \
-    ../../Interfaces/OpenScenarioInterfaces
+SUBDIRS +=  . \
+            ../../Common \
+            ../../Common/twoTrack \
+            ../../Interfaces \
+            src \
+            ..
 
-INCLUDEPATH += \
-    $$SUBDIRS \
-    ../../Interfaces \
-    ../../Interfaces/RoadInterface \
-    ..
+INCLUDEPATH += $$SUBDIRS
 
 SOURCES += \
     $$getFiles(SUBDIRS, cpp) \
     $$getFiles(SUBDIRS, cc) \
-    $$getFiles(SUBDIRS, c)
+    $$getFiles(SUBDIRS, c) \
+
 
 HEADERS += \
     $$getFiles(SUBDIRS, hpp) \
-    $$getFiles(SUBDIRS, h)
+    $$getFiles(SUBDIRS, h) \
 
-LIBS += -lopen_simulation_interface -lprotobuf

@@ -27,7 +27,7 @@ win32 {
     }
 
     isEmpty(EXTRA_LIB_PATH) {
-        EXTRA_LIB_PATH="C:\OpenPASS\thirdParty\lib\win"
+        EXTRA_LIB_PATH="C:\OpenPASS\thirdParty\lib"
     }
 }
 

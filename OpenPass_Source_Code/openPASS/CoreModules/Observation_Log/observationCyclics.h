@@ -57,9 +57,19 @@ public:
     std::string GetHeader();
 
     /*!
+     * \brief Returns the string header that is written into the Cyclics_*.csv including agentId
+     */
+    std::string GetAgentHeader();
+
+    /*!
      * \brief Returns a single line of samples for the given timestep for writing into the simulationOutput
      */
     std::string GetSamplesLine(uint32_t timeStepNumber);
+
+    /*!
+     * \brief Returns for each agent a single line of samples for the given timestep for writing into the cyclics_*.csv
+     */
+    std::vector<std::string> GetAgentSamplesLine(uint32_t timeStepNumber);
 
     /*!
      * \brief Returns all timesteps for which samples exist

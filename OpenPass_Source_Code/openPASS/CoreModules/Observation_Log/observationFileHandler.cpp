@@ -400,12 +400,25 @@ void ObservationFileHandler::WriteCsvCyclics(QString filename, ObservationCyclic
 
     QTextStream stream( csvFile.get() );
 
-    stream << "Timestep, " << QString::fromStdString(cyclics.GetHeader()) << '\n';
+    stream << "Timestep, "
+           << "AgentId, "
+           << QString::fromStdString(cyclics.GetAgentHeader())
+           << '\n';
 
     auto timeSteps = cyclics.GetTimeSteps();
+    std::vector<std::string> agentSamplesLines;
     for (unsigned int timeStepNumber = 0; timeStepNumber < timeSteps->size(); ++timeStepNumber)
     {
-        stream << QString::number(timeSteps->at(timeStepNumber)) << ", " << QString::fromStdString(cyclics.GetSamplesLine(timeStepNumber)) << '\n';
+        agentSamplesLines = cyclics.GetAgentSamplesLine(timeStepNumber);
+        for (size_t agentId = 0; agentId < agentSamplesLines.size(); ++agentId)
+        {
+            stream << QString::number(timeSteps->at(timeStepNumber))
+                   << ", "
+                   << QString::fromStdString(std::to_string(agentId))
+                   << ", "
+                   << QString::fromStdString(agentSamplesLines.at(agentId))
+                   << '\n';
+        }
     }
 
     csvFile->flush();

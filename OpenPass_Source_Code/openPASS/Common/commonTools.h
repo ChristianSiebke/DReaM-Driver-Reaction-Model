@@ -221,18 +221,6 @@ public:
         return mass * (length*length + width*width) / 12;
     }
 
-    template<typename DT>
-    static DT Saturate(const DT value, const DT limitLow, const DT limitHigh)
-    {
-        if (!(value > limitLow)) {
-            return limitLow;
-        } else if (value > limitHigh) {
-            return limitHigh;
-        } else {
-            return value;
-        }
-    }
-
 };
 
 //-----------------------------------------------------------------------------

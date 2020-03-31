@@ -1,5 +1,6 @@
 # /*********************************************************************
 # * Copyright (c) 2017, 2018, 2019 in-tech GmbH
+# *               2019 ITK Engineering GmbH
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -9,29 +10,25 @@
 # **********************************************************************/
 
 #-----------------------------------------------------------------------------
-# \file  World_OSI.pro
+# \file  Dynamics_Collision.pro
 # \brief This file contains the information for the QtCreator-project of the
-#        module World_OSI
+# module Dynamics_Collision
 #-----------------------------------------------------------------------------/
 
-DEFINES += WORLD_LIBRARY
+DEFINES += DYNAMICS_COLLISIONPOSTCRASH_LIBRARY
 CONFIG += OPENPASS_LIBRARY
 include(../../../global.pri)
 
-SUBDIRS += \
-    . \
-    Localization \
-    OWL \
-    RoutePlanning \
-    ../../Common \
-    ../../Interfaces \
-    ../../Interfaces/OpenScenarioInterfaces
+CONFIG(debug, release|debug):DEFINES += QT_DEBUG
 
-INCLUDEPATH += \
-    $$SUBDIRS \
-    ../../Interfaces \
-    ../../Interfaces/RoadInterface \
-    ..
+SUBDIRS +=  . \
+            ../../Common \
+            ../../Common/postCrash \
+            ../../Interfaces \
+            src \
+            ..
+
+INCLUDEPATH += $$SUBDIRS
 
 SOURCES += \
     $$getFiles(SUBDIRS, cpp) \
@@ -41,5 +38,3 @@ SOURCES += \
 HEADERS += \
     $$getFiles(SUBDIRS, hpp) \
     $$getFiles(SUBDIRS, h)
-
-LIBS += -lopen_simulation_interface -lprotobuf
