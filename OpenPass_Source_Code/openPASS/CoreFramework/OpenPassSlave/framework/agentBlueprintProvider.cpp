@@ -33,6 +33,11 @@ AgentBlueprint AgentBlueprintProvider::SampleAgent(const std::string& agentProfi
         auto agentProfile = agentProfiles.at(agentProfileName);
         if (agentProfile.type == AgentProfileType::Dynamic)
         {
+            if(systemConfigBlueprint == nullptr)
+            {
+                LogErrorAndThrow("Couldn't instantiate AgentProfile:" + agentProfileName + ". SystemConfigBlueprint is either missing or invalid.");
+            }
+
             SampledProfiles sampledProfiles = SampledProfiles::make(agentProfileName, sampler, profiles)
                     .SampleDriverProfile()
                     .SampleVehicleProfile()

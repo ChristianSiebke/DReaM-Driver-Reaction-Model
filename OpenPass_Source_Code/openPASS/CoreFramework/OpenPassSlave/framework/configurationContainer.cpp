@@ -23,8 +23,8 @@ bool ConfigurationContainer::ImportAllConfigurations()
     systemConfigBlueprint = std::make_shared<SystemConfig>();
     if (!SystemConfigImporter::Import(configurationFiles.systemConfigBlueprintFile, systemConfigBlueprint))
     {
-        LOG_INTERN(LogLevel::Error) << "could not import app configuration";
-        return false;
+        LOG_INTERN(LogLevel::Info) << "could not import systemConfigBlueprint.";
+        systemConfigBlueprint = nullptr;
     }
 
     //Import SlaveConfig

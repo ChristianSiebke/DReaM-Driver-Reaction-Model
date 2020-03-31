@@ -29,6 +29,7 @@ For demonstration purposes all files of an AEB scenario have been added as an ex
 \subsection io_input_systemconfigblueprint systemConfigBlueprint.xml
 
 This file contains the possible agent modules and channels of a dynamically generated agent. The content of this file should only be adjusted by experienced users with knowledge of the simulation architecture. The SystemConfigBlueprint is a special SystemConfig and has the same schema. Only the system with id 0 is used for generating dynamic agents.
+If the simulation uses only statically configured agents (AgentProfile Type attribute is "Static"), this file isn't required.
 
 _AgentComponents_
 All components are listed here. An agent consists of a subset of this components.
