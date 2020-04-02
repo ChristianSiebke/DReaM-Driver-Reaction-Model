@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -20,6 +20,12 @@
 namespace openScenario
 {
 
+namespace ConditionEquality
+{
+//! Maximum difference between two values to be consired equal for OpenSCENARIO rule equal_to
+static constexpr double EPSILON = 1e-12;
+}
+
 enum class Rule
 {
     LessThan = 0,
@@ -37,11 +43,6 @@ public:
     {}
     ByEntityCondition(const ByEntityCondition&) = default;
     virtual ~ByEntityCondition();
-
-    ByEntityCondition() = delete;
-    ByEntityCondition(ByEntityCondition&&) = delete;
-    ByEntityCondition& operator=(const ByEntityCondition&) = delete;
-    ByEntityCondition& operator=(ByEntityCondition&&) = delete;
 
     std::vector<const AgentInterface *> GetTriggeringAgents(WorldInterface* const world) const
     {
@@ -91,18 +92,39 @@ public:
         rule(rule)
     {}
     TimeToCollisionCondition(const TimeToCollisionCondition&) = default;
-    ~TimeToCollisionCondition();
+    virtual ~TimeToCollisionCondition();
 
     std::vector<const AgentInterface*> IsMet(WorldInterface * const world) const;
-
-    TimeToCollisionCondition() = delete;
-    TimeToCollisionCondition(TimeToCollisionCondition&&) = delete;
-    TimeToCollisionCondition& operator=(const TimeToCollisionCondition&) = delete;
-    TimeToCollisionCondition& operator=(TimeToCollisionCondition&&) = delete;
 
 private:
     const std::string referenceEntityName;
     const double targetTTC;
+    const Rule rule;
+};
+
+class TimeHeadwayCondition : public ByEntityCondition
+{
+public:
+    TimeHeadwayCondition(const std::vector<std::string>& triggeringEntityNames,
+                         const std::string& referenceEntityName,
+                         const double targetTHW,
+                         const bool freeSpace,
+                         const Rule rule):
+        ByEntityCondition(triggeringEntityNames),
+        referenceEntityName(referenceEntityName),
+        targetTHW(targetTHW),
+        freeSpace(freeSpace),
+        rule(rule)
+    {}
+    TimeHeadwayCondition(const TimeHeadwayCondition&) = default;
+    virtual ~TimeHeadwayCondition();
+
+    std::vector<const AgentInterface*> IsMet(WorldInterface * const world) const;
+
+private:
+    const std::string referenceEntityName;
+    const double targetTHW;
+    const bool freeSpace;
     const Rule rule;
 };
 
@@ -115,12 +137,8 @@ public:
         tolerance(tolerance)
     {}
     ReachPositionCondition(const ReachPositionCondition&) = default;
-    ~ReachPositionCondition();
+    virtual ~ReachPositionCondition();
 
-    ReachPositionCondition() = delete;
-    ReachPositionCondition(ReachPositionCondition&&) = delete;
-    ReachPositionCondition& operator=(const ReachPositionCondition&) = delete;
-    ReachPositionCondition& operator=(ReachPositionCondition&&) = delete;
 protected:
     const double tolerance{};
 };
@@ -130,26 +148,21 @@ class RelativeSpeedCondition : public ByEntityCondition
 public:
     RelativeSpeedCondition(const std::vector<std::string> &triggeringEntityNames,
                            const std::string &referenceEntityName,
-                           const double tolerance,
+                           const double value,
                            const Rule rule):
         ByEntityCondition(triggeringEntityNames),
         referenceEntityName(referenceEntityName),
-        tolerance(tolerance),
+        value(value),
         rule(rule)
     {}
     RelativeSpeedCondition(const RelativeSpeedCondition&) = default;
-    ~RelativeSpeedCondition();
+    virtual ~RelativeSpeedCondition();
 
     std::vector<const AgentInterface*> IsMet(WorldInterface * const world) const;
 
-    RelativeSpeedCondition() = delete;
-    RelativeSpeedCondition(RelativeSpeedCondition&&) = delete;
-    RelativeSpeedCondition& operator=(const RelativeSpeedCondition&) = delete;
-    RelativeSpeedCondition& operator=(RelativeSpeedCondition&&) = delete;
-
 private:
     const std::string referenceEntityName{};
-    const double tolerance{};
+    const double value{};
     const Rule rule{};
 };
 
@@ -175,14 +188,9 @@ public:
         }
     }
     ReachPositionRoadCondition(const ReachPositionRoadCondition&) = default;
-    ~ReachPositionRoadCondition();
+    virtual ~ReachPositionRoadCondition();
 
     std::vector<const AgentInterface*> IsMet(WorldInterface * const world) const;
-
-    ReachPositionRoadCondition() = delete;
-    ReachPositionRoadCondition(ReachPositionRoadCondition&&) = delete;
-    ReachPositionRoadCondition& operator=(const ReachPositionRoadCondition&) = delete;
-    ReachPositionRoadCondition& operator=(ReachPositionRoadCondition&&) = delete;
 
 private:
     const double targetSCoordinate;
@@ -209,14 +217,9 @@ public:
         }
     }
     RelativeLaneCondition(const RelativeLaneCondition&) = default;
-    ~RelativeLaneCondition();
+    virtual ~RelativeLaneCondition();
 
     std::vector<const AgentInterface*> IsMet(WorldInterface * const world) const;
-
-    RelativeLaneCondition() = delete;
-    RelativeLaneCondition(RelativeLaneCondition&&) = delete;
-    RelativeLaneCondition& operator=(const RelativeLaneCondition&) = delete;
-    RelativeLaneCondition& operator=(RelativeLaneCondition&&) = delete;
 
 private:
     const std::string referenceEntityName;
@@ -233,10 +236,6 @@ public:
     {}
     ByValueCondition(const ByValueCondition&) = default;
     virtual ~ByValueCondition();
-
-    ByValueCondition(ByValueCondition&&) = delete;
-    ByValueCondition& operator=(const ByValueCondition&) = delete;
-    ByValueCondition& operator=(ByValueCondition&&) = delete;
 protected:
     const Rule rule;
 };
@@ -250,15 +249,10 @@ public:
         targetValue(static_cast<int>(targetValueInSeconds * 1000.0))
     {}
     SimulationTimeCondition(const SimulationTimeCondition&) = default;
-    ~SimulationTimeCondition();
+    virtual ~SimulationTimeCondition();
 
     bool IsMet(const int value) const;
     int GetTargetValue() const;
-
-    SimulationTimeCondition() = delete;
-    SimulationTimeCondition(SimulationTimeCondition&&) = delete;
-    SimulationTimeCondition& operator=(const SimulationTimeCondition&) = delete;
-    SimulationTimeCondition& operator=(SimulationTimeCondition&&) = delete;
 
 private:
     const int targetValue;
@@ -268,7 +262,8 @@ using Condition = std::variant<ReachPositionRoadCondition,
                                RelativeLaneCondition,
                                RelativeSpeedCondition,
                                SimulationTimeCondition,
-                               TimeToCollisionCondition>;
+                               TimeToCollisionCondition,
+                               TimeHeadwayCondition>;
 using ConditionCollection = std::vector<Condition>;
 
 struct ConditionalEventDetectorInformation

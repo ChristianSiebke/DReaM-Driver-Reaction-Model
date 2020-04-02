@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -124,6 +124,7 @@ private:
                                   [&](const openScenario::RelativeLaneCondition& relativeLaneCondition) { return ConditionVisitorVariant{relativeLaneCondition.IsMet(cmi.world)}; },
                                   [&](const openScenario::RelativeSpeedCondition& relativeSpeedCondition) { return ConditionVisitorVariant{relativeSpeedCondition.IsMet(cmi.world)}; },
                                   [&](const openScenario::TimeToCollisionCondition& timeToCollisionCondition) { return ConditionVisitorVariant{timeToCollisionCondition.IsMet(cmi.world)}; },
+                                  [&](const openScenario::TimeHeadwayCondition& timeHeadwayCondition) { return ConditionVisitorVariant{timeHeadwayCondition.IsMet(cmi.world)}; },
                                   [&](const openScenario::SimulationTimeCondition& simulationTimeCondition) { return ConditionVisitorVariant{simulationTimeCondition.IsMet(cmi.currentTime)}; }
                               }, condition);
         };

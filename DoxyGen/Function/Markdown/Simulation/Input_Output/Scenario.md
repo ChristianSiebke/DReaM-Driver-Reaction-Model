@@ -297,18 +297,18 @@ To evaluate this Condition, the s-delta is applied to the s-coordinate and the l
 Example
 ```xml
 <Condition name="Conditional">
-        <ByEntity>
-        	<TriggeringEntities rule="any">
-        		<Entity name="Agent"/>
-        	</TriggeringEntities>
-        	<EntityCondition>
-        		<ReachPosition tolerance="3.0">
-        			<Position>
-        				<RelativeLane object="referenceEntity" dLane="-1" ds="-50.0">
-        			</Position>
-        		</ReachPosition>
-        	</EntityCondition>
-        </ByEntity>
+    <ByEntity>
+        <TriggeringEntities rule="any">
+            <Entity name="Agent"/>
+        </TriggeringEntities>
+        <EntityCondition>
+            <ReachPosition tolerance="3.0">
+                <Position>
+                    <RelativeLane object="referenceEntity" dLane="-1" ds="-50.0"/>
+                </Position>
+            </ReachPosition>
+        </EntityCondition>
+    </ByEntity>
 </Condition>
 ```
 
@@ -325,18 +325,18 @@ The tolerance is applied both forward and backward.
 Example
 ```xml
 <Condition name="Conditional">
-        <ByEntity>
-        	<TriggeringEntities rule="any">
-        		<Entity name="Agent"/>
-        	</TriggeringEntities>
-        	<EntityCondition>
-        		<ReachPosition tolerance="3.0">
-        			<Position>
-        				<Road roadId="road1" s="50.0" t="0.0">
-        			</Position>
-        		</ReachPosition>
-        	</EntityCondition>
-        </ByEntity>
+    <ByEntity>
+        <TriggeringEntities rule="any">
+            <Entity name="Agent"/>
+        </TriggeringEntities>
+        <EntityCondition>
+            <ReachPosition tolerance="3.0">
+                <Position>
+                    <Road roadId="road1" s="50.0" t="0.0"/>
+                </Position>
+            </ReachPosition>
+        </EntityCondition>
+    </ByEntity>
 </Condition>
 ```
 
@@ -351,14 +351,14 @@ Below, if the TriggeringEntity has a velocity of 30.0 and the referenceEntity ha
 Example
 ```xml
 <Condition name="Conditional">
-        <ByEntity>
-            <TriggeringEntities rule="any">
-                <Entity name="Agent"/>
-            </TriggeringEntities>
-            <EntityCondition>
-                <RelativeSpeed entity="referenceEntity" value="10.0" rule="greater_than"/>
-            </EntityCondition>
-        </ByEntity>
+    <ByEntity>
+        <TriggeringEntities rule="any">
+            <Entity name="Agent"/>
+        </TriggeringEntities>
+        <EntityCondition>
+            <RelativeSpeed entity="referenceEntity" value="10.0" rule="greater_than"/>
+        </EntityCondition>
+    </ByEntity>
 </Condition>
 ```
 
@@ -384,6 +384,28 @@ Example
 			  </TimeToCollision>
 		</EntityCondition>
 	  </ByEntity>
+</Condition>
+```
+
+**TimeHeadway**
+
+The TimeToCollision Condition evaluates the TimeHeadway (THW) between the specified Triggering Entities and the specified reference Entity.
+When the comparison of the calculated THW to the specified THW value using the provided rule is true, this Condition is satisfied.
+
+The TTC is calculated by dividing the s distance of the agents by the velocity of the triggering agent.
+If the freespace attribute is set to true the net distance of the bounding boxes is considered, otherwise the distance of the reference points.
+
+Example
+```xml
+<Condition name="Conditional">
+    <ByEntity>
+        <TriggeringEntities rule="any">
+			<Entity name="Agent"/>
+		</TriggeringEntities>
+		<EntityCondition>
+			<TimeHeadway value="2.0" rule="less_than" entity="referenceAgent" freespace="true"/>
+		</EntityCondition>
+    </ByEntity>
 </Condition>
 ```
 
@@ -424,7 +446,7 @@ Example
 				<Target>
 					<Absolute value="-1"/>
 				</Target>
-			<LaneChange>
+			</LaneChange>
 		</Lateral>
 	</Private>
 </Action>

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -462,10 +462,145 @@ INSTANTIATE_TEST_CASE_P(TimeToCollisionCondition_AppropriatelyInsertsEventsIntoN
                             TimeToCollisionCondition_Data{"referenceAgent" , 1.0       , openScenario::Rule::GreaterThan   , false       , 1                    },
                             TimeToCollisionCondition_Data{"referenceAgent" , 1.0       , openScenario::Rule::LessThan      , false       , 0                    },
                             TimeToCollisionCondition_Data{"referenceAgent" , 1.0       , openScenario::Rule::EqualTo       , false       , 0                    },
-                            TimeToCollisionCondition_Data{"referenceAgent" , 2.0       , openScenario::Rule::GreaterThan   , false       , 0                    },
-                            TimeToCollisionCondition_Data{"referenceAgent" , 2.0       , openScenario::Rule::LessThan      , false       , 0                    },
                             TimeToCollisionCondition_Data{"referenceAgent" , 2.0       , openScenario::Rule::EqualTo       , false       , 1                    },
                             TimeToCollisionCondition_Data{"referenceAgent" , 3.0       , openScenario::Rule::GreaterThan   , false       , 0                    },
                             TimeToCollisionCondition_Data{"referenceAgent" , 3.0       , openScenario::Rule::LessThan      , false       , 1                    },
                             TimeToCollisionCondition_Data{"referenceAgent" , 3.0       , openScenario::Rule::EqualTo       , false       , 0                    }
+                        ));
+
+// Condition - ByEntity - TimeHeadway
+
+struct TimeHeadwayCondition_Data
+{
+    std::string entityName{};
+    double targetTHW{};
+    openScenario::Rule rule{};
+
+    bool expectError{};
+    int expectNumberOfEvents{};
+};
+
+class TimeHeadwayConditionTest: public ::TestWithParam<TimeHeadwayCondition_Data>
+{
+};
+
+TEST_P(TimeHeadwayConditionTest, TriggerEventInsertionFreeSpaceTrue_AddsEventIfNecessary)
+{
+    openScenario::ConditionalEventDetectorInformation testConditionalEventDetectorInformation;
+    testConditionalEventDetectorInformation.numberOfExecutions = -1;
+    testConditionalEventDetectorInformation.actorInformation.triggeringAgentsAsActors.emplace(true);
+
+    const std::vector<std::string> actors {};
+    testConditionalEventDetectorInformation.actorInformation.actors.emplace(actors);
+
+    const std::vector<std::string> testTriggeringEntitites{"triggeringAgent"};
+    auto testCondition = openScenario::TimeHeadwayCondition(testTriggeringEntitites,
+                                                            GetParam().entityName,
+                                                            GetParam().targetTHW,
+                                                            true,
+                                                            GetParam().rule);
+    testConditionalEventDetectorInformation.conditions.emplace_back(testCondition);
+
+    NiceMock<FakeAgent> triggeringAgent;
+    ON_CALL(triggeringAgent, GetVelocity(VelocityScope::Longitudinal)).WillByDefault(Return(10.0));
+
+    NiceMock<FakeAgent> referenceAgent;
+    ON_CALL(triggeringAgent, GetDistanceToObject(&referenceAgent)).WillByDefault(Return(20.0));
+
+
+    NiceMock<FakeWorld> mockWorld;
+    ON_CALL(mockWorld, GetAgentByName("notExisting")).WillByDefault(Return(nullptr));
+    ON_CALL(mockWorld, GetAgentByName("triggeringAgent")).WillByDefault(Return(&triggeringAgent));
+    ON_CALL(mockWorld, GetAgentByName("referenceAgent")).WillByDefault(Return(&referenceAgent));
+
+    FakeEventNetwork mockEventNetwork;
+    EXPECT_CALL(mockEventNetwork, InsertEvent(_)).Times(GetParam().expectNumberOfEvents);
+
+    bool errorOccurred = false;
+
+    try
+    {
+        ConditionalEventDetector eventDetector(&mockWorld,
+                                               testConditionalEventDetectorInformation,
+                                               &mockEventNetwork,
+                                               nullptr,
+                                               nullptr);
+
+        eventDetector.Trigger(0);
+    }
+    catch (...)
+    {
+        errorOccurred = true;
+    }
+
+    ASSERT_EQ(errorOccurred, GetParam().expectError);
+}
+
+TEST_P(TimeHeadwayConditionTest, TriggerEventInsertionFreeSpaceFalse_AddsEventIfNecessary)
+{
+    openScenario::ConditionalEventDetectorInformation testConditionalEventDetectorInformation;
+    testConditionalEventDetectorInformation.numberOfExecutions = -1;
+    testConditionalEventDetectorInformation.actorInformation.triggeringAgentsAsActors.emplace(true);
+
+    const std::vector<std::string> actors {};
+    testConditionalEventDetectorInformation.actorInformation.actors.emplace(actors);
+
+    const std::vector<std::string> testTriggeringEntitites{"triggeringAgent"};
+    auto testCondition = openScenario::TimeHeadwayCondition(testTriggeringEntitites,
+                                                            GetParam().entityName,
+                                                            GetParam().targetTHW,
+                                                            false,
+                                                            GetParam().rule);
+    testConditionalEventDetectorInformation.conditions.emplace_back(testCondition);
+
+    NiceMock<FakeAgent> triggeringAgent;
+    ON_CALL(triggeringAgent, GetVelocity(VelocityScope::Longitudinal)).WillByDefault(Return(10.0));
+    ON_CALL(triggeringAgent, GetRoadId(MeasurementPoint::Reference)).WillByDefault(Return("Road"));
+    ON_CALL(triggeringAgent, GetDistanceToStartOfRoad(MeasurementPoint::Reference, "Road")).WillByDefault(Return(15.0));
+
+    NiceMock<FakeAgent> referenceAgent;
+    ON_CALL(referenceAgent, GetRoadId(MeasurementPoint::Reference)).WillByDefault(Return("Road"));
+    ON_CALL(referenceAgent, GetDistanceToStartOfRoad(MeasurementPoint::Reference, "Road")).WillByDefault(Return(35.0));
+
+
+    NiceMock<FakeWorld> mockWorld;
+    ON_CALL(mockWorld, GetAgentByName("notExisting")).WillByDefault(Return(nullptr));
+    ON_CALL(mockWorld, GetAgentByName("triggeringAgent")).WillByDefault(Return(&triggeringAgent));
+    ON_CALL(mockWorld, GetAgentByName("referenceAgent")).WillByDefault(Return(&referenceAgent));
+
+    FakeEventNetwork mockEventNetwork;
+    EXPECT_CALL(mockEventNetwork, InsertEvent(_)).Times(GetParam().expectNumberOfEvents);
+
+    bool errorOccurred = false;
+
+    try
+    {
+        ConditionalEventDetector eventDetector(&mockWorld,
+                                               testConditionalEventDetectorInformation,
+                                               &mockEventNetwork,
+                                               nullptr,
+                                               nullptr);
+
+        eventDetector.Trigger(0);
+    }
+    catch (...)
+    {
+        errorOccurred = true;
+    }
+
+    ASSERT_EQ(errorOccurred, GetParam().expectError);
+}
+
+INSTANTIATE_TEST_CASE_P(TimeHeadwayCondition_AppropriatelyInsertsEventsIntoNetwork,
+                        TimeHeadwayConditionTest,
+                        Values(
+                            // --------------------- | entityName      | targetTHW | rule                              | expectError | expectNumberOfEvents |
+                            TimeHeadwayCondition_Data{"notExisting"    , 1.0       , openScenario::Rule::LessThan      , true        , 0                    },
+                            TimeHeadwayCondition_Data{"referenceAgent" , 1.0       , openScenario::Rule::GreaterThan   , false       , 1                    },
+                            TimeHeadwayCondition_Data{"referenceAgent" , 1.0       , openScenario::Rule::LessThan      , false       , 0                    },
+                            TimeHeadwayCondition_Data{"referenceAgent" , 1.0       , openScenario::Rule::EqualTo       , false       , 0                    },
+                            TimeHeadwayCondition_Data{"referenceAgent" , 2.0       , openScenario::Rule::EqualTo       , false       , 1                    },
+                            TimeHeadwayCondition_Data{"referenceAgent" , 3.0       , openScenario::Rule::GreaterThan   , false       , 0                    },
+                            TimeHeadwayCondition_Data{"referenceAgent" , 3.0       , openScenario::Rule::LessThan      , false       , 1                    },
+                            TimeHeadwayCondition_Data{"referenceAgent" , 3.0       , openScenario::Rule::EqualTo       , false       , 0                    }
                         ));

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2019 in-tech GmbH
+* Copyright (c) 2017, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -160,8 +160,8 @@ namespace Importer
             ThrowIfFalse(SimulationCommon::ParseAttributeString(relativeSpeedElement, ATTRIBUTE::entity, referenceEntityName),
                          relativeSpeedElement, "Attribute " + std::string(ATTRIBUTE::entity) + " is missing.");
 
-            double tolerance;
-            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(relativeSpeedElement, ATTRIBUTE::value, tolerance),
+            double value;
+            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(relativeSpeedElement, ATTRIBUTE::value, value),
                          relativeSpeedElement, "Attribute " + std::string(ATTRIBUTE::value) + " is missing.");
 
             std::string ruleString;
@@ -170,7 +170,7 @@ namespace Importer
 
             auto condition = openScenario::RelativeSpeedCondition(triggeringEntities,
                                                                   referenceEntityName,
-                                                                  tolerance,
+                                                                  value,
                                                                   ruleConversionMap.at(ruleString));
             return condition;
         }
@@ -202,6 +202,39 @@ namespace Importer
                                                                     targetEntityName,
                                                                     targetTTC,
                                                                     ruleConversionMap.at(ruleString));
+
+            return condition;
+        }
+
+        QDomElement timeHeadwayElement;
+        if (SimulationCommon::GetFirstChildElement(entityConditionElement, TAG::timeHeadway, timeHeadwayElement))
+        {
+            std::string targetEntityName;
+            ThrowIfFalse(SimulationCommon::ParseAttributeString(timeHeadwayElement, ATTRIBUTE::entity, targetEntityName),
+                         timeHeadwayElement, "Attribute " + std::string(ATTRIBUTE::entity) + " is missing.");
+
+            double targetTHW;
+            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(timeHeadwayElement, ATTRIBUTE::value, targetTHW),
+                         timeHeadwayElement, "Attribute " + std::string(ATTRIBUTE::value) + " is missing.");
+
+            bool freeSpace;
+            ThrowIfFalse(SimulationCommon::ParseAttributeBool(timeHeadwayElement, ATTRIBUTE::freespace, freeSpace),
+                         timeHeadwayElement, "Attribute " + std::string(ATTRIBUTE::freespace) + " is missing.");
+
+            std::string ruleString;
+            ThrowIfFalse(SimulationCommon::ParseAttributeString(timeHeadwayElement, ATTRIBUTE::rule, ruleString),
+                         timeHeadwayElement, "Attribute " + std::string(ATTRIBUTE::rule) + " is missing.");
+
+            bool alongRoute;
+            SimulationCommon::ParseAttributeBool(timeHeadwayElement, ATTRIBUTE::alongRoute, alongRoute);
+            ThrowIfFalse(alongRoute, timeHeadwayElement, "Attribute alongRoute=\"false\" in TimeHeadway condition is currently not supported.");
+
+
+            auto condition = openScenario::TimeHeadwayCondition(triggeringEntities,
+                                                                targetEntityName,
+                                                                targetTHW,
+                                                                freeSpace,
+                                                                ruleConversionMap.at(ruleString));
 
             return condition;
         }

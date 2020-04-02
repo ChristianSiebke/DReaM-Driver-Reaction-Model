@@ -27,15 +27,18 @@ namespace openpass::importer::xml::eventDetectorImporter::tag
     constexpr char simulationTime[] {"SimulationTime"};
     constexpr char startConditions[] {"StartConditions"};
     constexpr char target[] {"Target"};
+    constexpr char timeHeadway[] {"TimeHeadway"};
     constexpr char timeToCollision[] {"TimeToCollision"};
     constexpr char triggeringEntities[] {"TriggeringEntities"};
 }
 
 namespace openpass::importer::xml::eventDetectorImporter::attribute
 {
+    constexpr char alongRoute[] {"alongRoute"};
     constexpr char dLane[] {"dLane"};
     constexpr char ds[] {"ds"};
     constexpr char entity[] {"entity"};
+    constexpr char freespace[] {"freespace"};
     constexpr char name[] {"name"};
     constexpr char object[] {"object"};
     constexpr char roadId[] {"roadId"};

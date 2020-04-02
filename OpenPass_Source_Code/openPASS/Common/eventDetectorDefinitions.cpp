@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -14,13 +14,26 @@
 namespace openScenario
 {
 // OpenScenario ByEntity Conditions
+bool CheckEquation (double lhs, double rhs, Rule rule)
+{
+    switch (rule)
+    {
+        case Rule::LessThan:
+            return lhs < rhs;
+        case Rule::EqualTo:
+            return std::abs(lhs - rhs) < ConditionEquality::EPSILON;
+        case Rule::GreaterThan:
+            return lhs > rhs;
+    }
+    throw std::invalid_argument( "invalid rule" );
+}
 
 std::vector<const AgentInterface *> TimeToCollisionCondition::IsMet(WorldInterface* const world) const
 {
     const auto referenceAgent = world->GetAgentByName(referenceEntityName);
     if (!referenceAgent)
     {
-        throw std::runtime_error("Reference Agent does not exist for TimeToCollision Condition");
+        throw std::runtime_error("Could not find reference agent for condition 'TimeToCollision'");
     }
 
     std::vector<const AgentInterface*> conditionMetAgents{};
@@ -31,26 +44,47 @@ std::vector<const AgentInterface *> TimeToCollisionCondition::IsMet(WorldInterfa
 
         ttc = TtcCalculations::CalculateObjectTTC(*triggeringAgent, *referenceAgent, targetTTC + timeStep / 1000.0, 0.0, 0.0, timeStep);
 
-        switch(rule)
+        if (CheckEquation(ttc, targetTTC, rule))
         {
-            case Rule::LessThan:
-                if (ttc < targetTTC - CommonHelper::EPSILON)
-                {
-                    conditionMetAgents.emplace_back(triggeringAgent);
-                }
+            conditionMetAgents.emplace_back(triggeringAgent);
+        }
+    }
+
+    return conditionMetAgents;
+}
+
+std::vector<const AgentInterface *> TimeHeadwayCondition::IsMet(WorldInterface* const world) const
+{
+    const auto referenceAgent = world->GetAgentByName(referenceEntityName);
+    if (!referenceAgent)
+    {
+        throw std::runtime_error("Could not find reference agent for condition 'TimeHeadway'");
+    }
+
+    std::vector<const AgentInterface*> conditionMetAgents{};
+    for (const auto triggeringAgent : GetTriggeringAgents(world))
+    {
+        double deltaS{std::numeric_limits<double>::infinity()};
+        if (freeSpace)
+        {
+            deltaS = triggeringAgent->GetDistanceToObject(referenceAgent);
+        }
+        else
+        {
+            const auto roadId = triggeringAgent->GetRoadId(MeasurementPoint::Reference);
+            if (referenceAgent->GetRoadId(MeasurementPoint::Reference) != roadId)
+            {
                 break;
-            case Rule::EqualTo:
-                if (std::abs(targetTTC - ttc) < CommonHelper::EPSILON)
-                {
-                    conditionMetAgents.emplace_back(triggeringAgent);
-                }
-                break;
-            case Rule::GreaterThan:
-                if (ttc > targetTTC + CommonHelper::EPSILON)
-                {
-                    conditionMetAgents.emplace_back(triggeringAgent);
-                }
-                break;
+            }
+            double sOwn = triggeringAgent->GetDistanceToStartOfRoad(MeasurementPoint::Reference, roadId);
+            double sOther = referenceAgent->GetDistanceToStartOfRoad(MeasurementPoint::Reference, roadId);
+            deltaS = sOther - sOwn;
+        }
+        double timeHeadway = deltaS / triggeringAgent->GetVelocity(VelocityScope::Longitudinal);
+
+        if (CheckEquation(timeHeadway, targetTHW, rule))
+        {
+            conditionMetAgents.emplace_back(triggeringAgent);
         }
     }
 
@@ -70,26 +104,9 @@ std::vector<const AgentInterface*> RelativeSpeedCondition::IsMet(WorldInterface 
     {
         const double relativeVelocityOfTriggeringAgent = triggeringAgent->GetVelocity() - referenceAgent->GetVelocity();
 
-        switch (rule)
+        if (CheckEquation(relativeVelocityOfTriggeringAgent, value, rule))
         {
-            case Rule::LessThan:
-                if (relativeVelocityOfTriggeringAgent < tolerance)
-                {
-                    conditionMetAgents.emplace_back(triggeringAgent);
-                }
-                break;
-            case Rule::EqualTo:
-                if (relativeVelocityOfTriggeringAgent == tolerance)
-                {
-                    conditionMetAgents.emplace_back(triggeringAgent);
-                }
-                break;
-            case Rule::GreaterThan:
-                if (relativeVelocityOfTriggeringAgent > tolerance)
-                {
-                    conditionMetAgents.emplace_back(triggeringAgent);
-                }
-                break;
+            conditionMetAgents.emplace_back(triggeringAgent);
         }
     }
 
@@ -147,21 +164,7 @@ std::vector<const AgentInterface*> RelativeLaneCondition::IsMet(WorldInterface *
 // OpenScenario ByValue Conditions
 bool SimulationTimeCondition::IsMet(const int value) const
 {
-    if (rule == Rule::LessThan)
-    {
-        return value < targetValue;
-    }
-
-    if (rule == Rule::EqualTo)
-    {
-        return value == targetValue;
-    }
-    if (rule == Rule::GreaterThan)
-    {
-        return value > targetValue;
-    }
-
-    return false;
+    return CheckEquation(value, targetValue, rule);
 }
 
 int SimulationTimeCondition::GetTargetValue() const
@@ -172,6 +175,7 @@ int SimulationTimeCondition::GetTargetValue() const
 // out-of-line virtual function declarations to prevent unnecessary vtable emissions
 ByEntityCondition::~ByEntityCondition(){}
 TimeToCollisionCondition::~TimeToCollisionCondition(){}
+TimeHeadwayCondition::~TimeHeadwayCondition(){}
 ReachPositionCondition::~ReachPositionCondition(){}
 RelativeSpeedCondition::~RelativeSpeedCondition(){}
 ReachPositionRoadCondition::~ReachPositionRoadCondition(){}
