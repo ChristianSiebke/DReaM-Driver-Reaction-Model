@@ -13,7 +13,6 @@
 #define DYNAMICS_TWOTRACK_IMPLEMENTATION_H
 
 #include "modelInterface.h"
-#include "observationInterface.h"
 #include "primitiveSignals.h"
 #include "vectorSignals.h"
 #include "vector2d.h"
@@ -71,7 +70,7 @@ public:
         StochasticsInterface *stochastics,
         WorldInterface *world,
         const ParameterInterface *parameters,
-        const std::map<int, ObservationInterface *> *observations,
+        PublisherInterface * const publisher,
         const CallbackInterface *callbacks,
         AgentInterface *agent);
     Dynamics_TwoTrack_Implementation(const Dynamics_TwoTrack_Implementation &) = delete;

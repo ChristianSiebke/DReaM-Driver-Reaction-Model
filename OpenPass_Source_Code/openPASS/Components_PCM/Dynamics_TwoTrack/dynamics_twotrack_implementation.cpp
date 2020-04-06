@@ -53,7 +53,7 @@ Dynamics_TwoTrack_Implementation::Dynamics_TwoTrack_Implementation(
         StochasticsInterface *stochastics,
         WorldInterface *world,
         const ParameterInterface *parameters,
-        const std::map<int, ObservationInterface *> *observations,
+        PublisherInterface * const publisher,
         const CallbackInterface *callbacks,
         AgentInterface *agent) :
     DynamicsInterface(
@@ -66,7 +66,7 @@ Dynamics_TwoTrack_Implementation::Dynamics_TwoTrack_Implementation(
         stochastics,
         world,
         parameters,
-        observations,
+        publisher,
         callbacks,
         agent)
 {

@@ -37,7 +37,7 @@ extern "C" PARAMETERS_VEHICLE_SHARED_EXPORT ModelInterface *OpenPASS_CreateInsta
         StochasticsInterface *stochastics,
         WorldInterface *world,
         const ParameterInterface *parameters,
-        const std::map<int, ObservationInterface*> *observations,
+        PublisherInterface * const publisher,
         AgentInterface *agent,
         const CallbackInterface *callbacks)
 {
@@ -55,7 +55,7 @@ extern "C" PARAMETERS_VEHICLE_SHARED_EXPORT ModelInterface *OpenPASS_CreateInsta
                                      stochastics,
                                      world,
                                      parameters,
-                                     observations,
+                                     publisher,
                                      callbacks,
                                      agent));
     }

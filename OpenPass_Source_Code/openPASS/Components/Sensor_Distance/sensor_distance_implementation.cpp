@@ -22,7 +22,7 @@ Sensor_Distance_Implementation::Sensor_Distance_Implementation(int componentId,
                                                                int cycleTime,
                                                                StochasticsInterface *stochastics,
                                                                WorldInterface *world,
-                                                               const ParameterInterface *parameters, const std::map<int, ObservationInterface *> *observations,
+                                                               const ParameterInterface *parameters, PublisherInterface * const publisher,
                                                                const CallbackInterface *callbacks,
                                                                AgentInterface *agent) :
     SensorInterface(componentId,
@@ -34,7 +34,7 @@ Sensor_Distance_Implementation::Sensor_Distance_Implementation(int componentId,
                     stochastics,
                     world,
                     parameters,
-                    observations,
+                    publisher,
                     callbacks,
                     agent)
 {

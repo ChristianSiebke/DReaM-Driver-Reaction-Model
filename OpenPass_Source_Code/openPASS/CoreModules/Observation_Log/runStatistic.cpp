@@ -17,9 +17,7 @@
 
 const QString RunStatistic::StopReasonsStrings[] =
 {
-    "Due to time out",
-    "Due to time after crash",
-    "Due to agent reached target position"
+    "Due to time out"
 };
 
 RunStatistic::RunStatistic(std::uint32_t randomSeed):
@@ -28,12 +26,12 @@ RunStatistic::RunStatistic(std::uint32_t randomSeed):
 
 void RunStatistic::AddStopReason(int time, StopReason reason)
 {
-    _stopReason = StopReasonsStrings[static_cast<int>(reason)];
+    _stopReasonIdx = static_cast<int>(reason);
     StopTime = time;
 }
 
 // ----------------------------- writing out --------------------- //
-void RunStatistic::WriteStatistics(std::shared_ptr<QXmlStreamWriter> fileStream)
+void RunStatistic::WriteStatistics(QXmlStreamWriter* fileStream)
 {
     fileStream->writeStartElement("RandomSeed");
     fileStream->writeCharacters(QString::number(_randomSeed));
@@ -44,7 +42,7 @@ void RunStatistic::WriteStatistics(std::shared_ptr<QXmlStreamWriter> fileStream)
     fileStream->writeEndElement();
 
     fileStream->writeStartElement("StopReason");
-    fileStream->writeCharacters(_stopReason);
+    fileStream->writeCharacters(StopReasonsStrings[_stopReasonIdx]);
     fileStream->writeEndElement();
 
     fileStream->writeStartElement("StopTime");
@@ -52,7 +50,7 @@ void RunStatistic::WriteStatistics(std::shared_ptr<QXmlStreamWriter> fileStream)
     fileStream->writeEndElement();
 
     fileStream->writeStartElement("EgoAccident");
-    fileStream->writeCharacters(BoolToString(EgoCollision ));
+    fileStream->writeCharacters(BoolToString(EgoCollision));
     fileStream->writeEndElement();
 
     fileStream->writeStartElement("TotalDistanceTraveled");

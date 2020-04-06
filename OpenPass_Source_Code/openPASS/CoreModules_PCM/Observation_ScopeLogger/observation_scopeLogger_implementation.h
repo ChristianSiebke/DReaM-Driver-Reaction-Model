@@ -18,7 +18,6 @@
 #include <QFile>
 #include <QTextStream>
 #include "agentInterface.h"
-#include "observationInterface.h"
 #include "componentPorts.h"
 #include "XoscWriter/openScenarioWriter.h"
 

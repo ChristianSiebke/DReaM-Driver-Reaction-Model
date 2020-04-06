@@ -71,7 +71,7 @@ TEST_P(ConditionalTimeTriggerTest, TriggerEventInsertion_AddsEventIfNecessary)
 
 INSTANTIATE_TEST_CASE_P(ConditionalTimeTrigger_AppropriatelyInsertsEventsIntoNetwork,
                         ConditionalTimeTriggerTest,
-                        Values(
+                        ::testing::Values(
                             ConditionalTimeTriggerTest_Data{800, 0},
                             ConditionalTimeTriggerTest_Data{1000, 0},
                             ConditionalTimeTriggerTest_Data{1200, 1}
@@ -112,7 +112,7 @@ TEST_P(ReachPositionConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
 {
     openScenario::ConditionalEventDetectorInformation testConditionalEventDetectorInformation;
     testConditionalEventDetectorInformation.numberOfExecutions = -1;
-    testConditionalEventDetectorInformation.actorInformation.triggeringAgentsAsActors.emplace(true);
+    testConditionalEventDetectorInformation.actorInformation.actorIsTriggeringEntity = true;
 
     const std::vector<std::string> actors {"mockAgent1", "mockAgent2"};
     testConditionalEventDetectorInformation.actorInformation.actors.emplace(actors);
@@ -178,7 +178,7 @@ TEST_P(ReachPositionConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
 
 INSTANTIATE_TEST_CASE_P(ReachPositionCondition_AppropriatelyInsertsEventsIntoNetwork,
                         ReachPositionConditionTest,
-                        Values(
+                        ::testing::Values(
                             ReachPositionCondition_Data{20.0 , -1.0 , "fakeRoad" , true,  0, 0},
                             ReachPositionCondition_Data{-20.0, 10.0 , "fakeRoad" , true,  0, 0},
                             ReachPositionCondition_Data{20.0 , 100.0, "fakeRoad" , false, 2, 2},
@@ -212,7 +212,7 @@ TEST_P(RelativeSpeedConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
 {
     openScenario::ConditionalEventDetectorInformation testConditionalEventDetectorInformation;
     testConditionalEventDetectorInformation.numberOfExecutions = -1;
-    testConditionalEventDetectorInformation.actorInformation.triggeringAgentsAsActors.emplace(true);
+    testConditionalEventDetectorInformation.actorInformation.actorIsTriggeringEntity = true;
 
     const std::vector<std::string> actors {};
     testConditionalEventDetectorInformation.actorInformation.actors.emplace(actors);
@@ -266,7 +266,7 @@ TEST_P(RelativeSpeedConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
 
 INSTANTIATE_TEST_CASE_P(RelativeSpeedCondition_AppropriatelyInsertsEventsIntoNetwork,
                         RelativeSpeedConditionTest,
-                        Values(
+                        ::testing::Values(
                             RelativeSpeedCondition_Data{"notExisting"      , DontCare<double>(), DontCare<openScenario::Rule>()   , 20.0, 20.0, DontCare<double>(), true  , 0},
                             RelativeSpeedCondition_Data{"referenceAgent"   , -10.0             , DontCare<openScenario::Rule>()   , 0.0,  0.0,  20.0              , false , 1},
                             RelativeSpeedCondition_Data{"referenceAgent"   , 10.0              , openScenario::Rule::LessThan     , 10.0, 10.0, 19.9              , false , 1},
@@ -303,7 +303,7 @@ TEST_P(RelativeLaneConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
 {
     openScenario::ConditionalEventDetectorInformation testConditionalEventDetectorInformation;
     testConditionalEventDetectorInformation.numberOfExecutions = -1;
-    testConditionalEventDetectorInformation.actorInformation.triggeringAgentsAsActors.emplace(true);
+    testConditionalEventDetectorInformation.actorInformation.actorIsTriggeringEntity = true;
 
     const std::vector<std::string> actors {};
     testConditionalEventDetectorInformation.actorInformation.actors.emplace(actors);
@@ -357,7 +357,7 @@ TEST_P(RelativeLaneConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
 
 INSTANTIATE_TEST_CASE_P(RelativeLaneCondition_AppropriatelyInsertsEventsIntoNetwork,
                         RelativeLaneConditionTest,
-                        Values(
+                        ::testing::Values(
                             // -----------------------| entityName               | deltaLane      | deltaS            | tolerance         | triggeringAgentLane | triggeringAgentSCoordinate | referenceAgentLane | referenceAgentSCoordinate | expectError | expectNumberOfEvents
                             RelativeLaneCondition_Data{"notExisting"             , DontCare<int>(), DontCare<double>(), DontCare<double>(), DontCare<int>()     , DontCare<double>()         , DontCare<int>()    , DontCare<double>()        , true        , 0                    },
                             RelativeLaneCondition_Data{"referenceAgentOnSameRoad", -1             , 30.0              , 10.0              , 0                   , 25.0                       , -1                 , 0.0                       , false       , 0                    },
@@ -388,7 +388,7 @@ TEST_P(TimeToCollisionConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
 {
     openScenario::ConditionalEventDetectorInformation testConditionalEventDetectorInformation;
     testConditionalEventDetectorInformation.numberOfExecutions = -1;
-    testConditionalEventDetectorInformation.actorInformation.triggeringAgentsAsActors.emplace(true);
+    testConditionalEventDetectorInformation.actorInformation.actorIsTriggeringEntity = true;
 
     const std::vector<std::string> actors {};
     testConditionalEventDetectorInformation.actorInformation.actors.emplace(actors);
@@ -457,7 +457,7 @@ TEST_P(TimeToCollisionConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
 
 INSTANTIATE_TEST_CASE_P(TimeToCollisionCondition_AppropriatelyInsertsEventsIntoNetwork,
                         TimeToCollisionConditionTest,
-                        Values(
+                        ::testing::Values(
                             // ------------------------- | entityName      | targetTTC | rule                              | expectError | expectNumberOfEvents |
                             TimeToCollisionCondition_Data{"notExisting"    , 1.0       , openScenario::Rule::LessThan      , true        , 0                    },
                             TimeToCollisionCondition_Data{"referenceAgent" , 1.0       , openScenario::Rule::GreaterThan   , false       , 1                    },
@@ -489,7 +489,7 @@ TEST_P(TimeHeadwayConditionTest, TriggerEventInsertionFreeSpaceTrue_AddsEventIfN
 {
     openScenario::ConditionalEventDetectorInformation testConditionalEventDetectorInformation;
     testConditionalEventDetectorInformation.numberOfExecutions = -1;
-    testConditionalEventDetectorInformation.actorInformation.triggeringAgentsAsActors.emplace(true);
+    testConditionalEventDetectorInformation.actorInformation.actorIsTriggeringEntity = true;
 
     const std::vector<std::string> actors {};
     testConditionalEventDetectorInformation.actorInformation.actors.emplace(actors);
@@ -546,7 +546,7 @@ TEST_P(TimeHeadwayConditionTest, TriggerEventInsertionFreeSpaceFalse_AddsEventIf
 {
     openScenario::ConditionalEventDetectorInformation testConditionalEventDetectorInformation;
     testConditionalEventDetectorInformation.numberOfExecutions = -1;
-    testConditionalEventDetectorInformation.actorInformation.triggeringAgentsAsActors.emplace(true);
+    testConditionalEventDetectorInformation.actorInformation.actorIsTriggeringEntity = true;
 
     const std::vector<std::string> actors {};
     testConditionalEventDetectorInformation.actorInformation.actors.emplace(actors);
@@ -601,7 +601,7 @@ TEST_P(TimeHeadwayConditionTest, TriggerEventInsertionFreeSpaceFalse_AddsEventIf
 
 INSTANTIATE_TEST_CASE_P(TimeHeadwayCondition_AppropriatelyInsertsEventsIntoNetwork,
                         TimeHeadwayConditionTest,
-                        Values(
+                        ::testing::Values(
                             // --------------------- | entityName      | targetTHW | rule                              | expectError | expectNumberOfEvents |
                             TimeHeadwayCondition_Data{"notExisting"    , 1.0       , openScenario::Rule::LessThan      , true        , 0                    },
                             TimeHeadwayCondition_Data{"referenceAgent" , 1.0       , openScenario::Rule::GreaterThan   , false       , 1                    },

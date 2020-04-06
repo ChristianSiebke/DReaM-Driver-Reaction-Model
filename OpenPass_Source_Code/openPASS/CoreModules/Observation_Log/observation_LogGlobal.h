@@ -1,6 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2019 in-tech GmbH
-*               2016, 2017 ITK Engineering GmbH
+* Copyright (c) 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -9,13 +8,10 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
-//-----------------------------------------------------------------------------
-/** @file  ObservationLogGlobal.h
-* @brief This file contains DLL export declarations
-*
-* This class contains all functionality of the module.
-*/
-//-----------------------------------------------------------------------------
+/**
+ * \file  observation_LogGlobal.h
+ * \brief This file contains DLL export declarations
+ */
 
 #pragma once
 

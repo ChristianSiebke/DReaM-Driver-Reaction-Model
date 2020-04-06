@@ -9,7 +9,6 @@
 #define DYNAMICS_COMP2_IMPLEMENTATION_H
 
 #include "modelInterface.h"
-#include "observationInterface.h"
 #include "primitiveSignals.h"
 #include "vectorSignals.h"
 #include "componentPorts.h"
@@ -56,7 +55,7 @@ public:
                                          StochasticsInterface *stochastics,
                                          WorldInterface *world,
                                          const ParameterInterface *parameters,
-                                         const std::map<int, ObservationInterface *> *observations,
+                                         PublisherInterface * const publisher,
                                          const CallbackInterface *callbacks, 
                                          AgentInterface *agent);
 

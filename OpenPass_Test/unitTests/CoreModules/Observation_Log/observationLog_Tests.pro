@@ -34,4 +34,5 @@ SOURCES += \
     $$UNIT_UNDER_TEST/observationFileHandler.cpp \
     $$UNIT_UNDER_TEST/runStatistic.cpp \
     $$UNIT_UNDER_TEST/runStatisticCalculation.cpp \
+    $$OPEN_SRC/Common/vector2d.cpp \
     observationLog_Tests.cpp

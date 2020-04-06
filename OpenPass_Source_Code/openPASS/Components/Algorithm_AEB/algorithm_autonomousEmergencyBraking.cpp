@@ -13,29 +13,30 @@
 //-----------------------------------------------------------------------------
 
 #include "algorithm_autonomousEmergencyBraking.h"
+
 #include "algorithm_autonomousEmergencyBrakingImplementation.h"
 
-const std::string Version = "0.0.1";
+const static std::string VERSION = "0.2.0";
 static const CallbackInterface *Callbacks = nullptr;
 
 extern "C" ALGORITHM_AEB_SHARED_EXPORT const std::string &OpenPASS_GetVersion()
 {
-    return Version;
+    return VERSION;
 }
 
 extern "C" ALGORITHM_AEB_SHARED_EXPORT ModelInterface *OpenPASS_CreateInstance(
-        std::string componentName,
-        bool isInit,
-        int priority,
-        int offsetTime,
-        int responseTime,
-        int cycleTime,
-        StochasticsInterface *stochastics,
-        WorldInterface *world,
-        const ParameterInterface *parameters,
-        const std::map<int, ObservationInterface*> *observations,
-        AgentInterface *agent,
-        const CallbackInterface *callbacks)
+    std::string componentName,
+    bool isInit,
+    int priority,
+    int offsetTime,
+    int responseTime,
+    int cycleTime,
+    StochasticsInterface *stochastics,
+    WorldInterface *world,
+    const ParameterInterface *parameters,
+    PublisherInterface * const publisher,
+    AgentInterface *agent,
+    const CallbackInterface *callbacks)
 {
     Q_UNUSED(world);
 
@@ -43,31 +44,31 @@ extern "C" ALGORITHM_AEB_SHARED_EXPORT ModelInterface *OpenPASS_CreateInstance(
 
     try
     {
-        return (ModelInterface*)(new (std::nothrow) AlgorithmAutonomousEmergencyBrakingImplementation(
-                                     componentName,
-                                     isInit,
-                                     priority,
-                                     offsetTime,
-                                     responseTime,
-                                     cycleTime,
-                                     stochastics,
-                                     parameters,
-                                     observations,
-                                     callbacks,
-                                     agent));
+        return (ModelInterface *)(new (std::nothrow) AlgorithmAutonomousEmergencyBrakingImplementation(
+            componentName,
+            isInit,
+            priority,
+            offsetTime,
+            responseTime,
+            cycleTime,
+            stochastics,
+            parameters,
+            publisher,
+            callbacks,
+            agent));
     }
-    catch(const std::runtime_error &ex)
+    catch (const std::runtime_error &ex)
     {
-        if(Callbacks != nullptr)
+        if (Callbacks != nullptr)
         {
             Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, ex.what());
         }
 
         return nullptr;
     }
-    catch(...)
+    catch (...)
     {
-        if(Callbacks != nullptr)
+        if (Callbacks != nullptr)
         {
             Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, "unexpected exception");
         }
@@ -78,30 +79,30 @@ extern "C" ALGORITHM_AEB_SHARED_EXPORT ModelInterface *OpenPASS_CreateInstance(
 
 extern "C" ALGORITHM_AEB_SHARED_EXPORT void OpenPASS_DestroyInstance(ModelInterface *implementation)
 {
-    delete (AlgorithmAutonomousEmergencyBrakingImplementation*)implementation;
+    delete (AlgorithmAutonomousEmergencyBrakingImplementation *)implementation;
 }
 
 extern "C" ALGORITHM_AEB_SHARED_EXPORT bool OpenPASS_UpdateInput(ModelInterface *implementation,
-                                                                  int localLinkId,
-                                                                  const std::shared_ptr<SignalInterface const> &data,
-                                                                  int time)
+                                                                 int localLinkId,
+                                                                 const std::shared_ptr<SignalInterface const> &data,
+                                                                 int time)
 {
     try
     {
         implementation->UpdateInput(localLinkId, data, time);
     }
-    catch(const std::runtime_error &ex)
+    catch (const std::runtime_error &ex)
     {
-        if(Callbacks != nullptr)
+        if (Callbacks != nullptr)
         {
             Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, ex.what());
         }
 
         return false;
     }
-    catch(...)
+    catch (...)
     {
-        if(Callbacks != nullptr)
+        if (Callbacks != nullptr)
         {
             Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, "unexpected exception");
         }
@@ -113,26 +114,26 @@ extern "C" ALGORITHM_AEB_SHARED_EXPORT bool OpenPASS_UpdateInput(ModelInterface 
 }
 
 extern "C" ALGORITHM_AEB_SHARED_EXPORT bool OpenPASS_UpdateOutput(ModelInterface *implementation,
-                                                                   int localLinkId,
-                                                                   std::shared_ptr<SignalInterface const> &data,
-                                                                   int time)
+                                                                  int localLinkId,
+                                                                  std::shared_ptr<SignalInterface const> &data,
+                                                                  int time)
 {
     try
     {
         implementation->UpdateOutput(localLinkId, data, time);
     }
-    catch(const std::runtime_error &ex)
+    catch (const std::runtime_error &ex)
     {
-        if(Callbacks != nullptr)
+        if (Callbacks != nullptr)
         {
             Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, ex.what());
         }
 
         return false;
     }
-    catch(...)
+    catch (...)
     {
-        if(Callbacks != nullptr)
+        if (Callbacks != nullptr)
         {
             Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, "unexpected exception");
         }
@@ -144,24 +145,24 @@ extern "C" ALGORITHM_AEB_SHARED_EXPORT bool OpenPASS_UpdateOutput(ModelInterface
 }
 
 extern "C" ALGORITHM_AEB_SHARED_EXPORT bool OpenPASS_Trigger(ModelInterface *implementation,
-                                                              int time)
+                                                             int time)
 {
     try
     {
         implementation->Trigger(time);
     }
-    catch(const std::runtime_error &ex)
+    catch (const std::runtime_error &ex)
     {
-        if(Callbacks != nullptr)
+        if (Callbacks != nullptr)
         {
             Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, ex.what());
         }
 
         return false;
     }
-    catch(...)
+    catch (...)
     {
-        if(Callbacks != nullptr)
+        if (Callbacks != nullptr)
         {
             Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, "unexpected exception");
         }

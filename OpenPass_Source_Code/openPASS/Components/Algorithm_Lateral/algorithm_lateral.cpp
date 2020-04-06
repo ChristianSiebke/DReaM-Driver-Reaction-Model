@@ -35,7 +35,7 @@ extern "C" ALGORITHM_LATERAL_SHARED_EXPORT ModelInterface *OpenPASS_CreateInstan
         StochasticsInterface *stochastics,
         WorldInterface *world,
         const ParameterInterface *parameters,
-        const std::map<int, ObservationInterface*> *observations,
+        PublisherInterface * const publisher,
         AgentInterface *agent,
         const CallbackInterface *callbacks)
 {
@@ -54,7 +54,7 @@ extern "C" ALGORITHM_LATERAL_SHARED_EXPORT ModelInterface *OpenPASS_CreateInstan
                                      cycleTime,
                                      stochastics,
                                      parameters,
-                                     observations,
+                                     publisher,
                                      callbacks,
                                      agent));
     }

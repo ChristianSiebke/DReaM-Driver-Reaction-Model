@@ -33,70 +33,28 @@
 class ComponentChangeEvent : public ConditionalEvent
 {
 public:
-    ComponentChangeEvent(int time,
-                         const std::string& eventName,
-                         const std::string& source,
-                         std::vector<int> triggeringAgents,
-                         std::vector<int> actingAgents,
-                         const std::string& componentName,
-                         const std::string& goalStateName):
-        ConditionalEvent(time,
-                         eventName,
-                         source,
-                         triggeringAgents,
-                         actingAgents),
-        componentName(componentName),
-        goalStateName(goalStateName)
+    ComponentChangeEvent(int time, const std::string &eventName, const std::string &source,
+                         std::vector<int> triggeringAgents, std::vector<int> actingAgents,
+                         const std::string &componentName, const std::string &goalStateName) :
+        ConditionalEvent{time, eventName, source, triggeringAgents, actingAgents},
+        componentName{componentName},
+        goalStateName{goalStateName}
     {
         goalState = ComponentStateMapping.at(goalStateName);
-    }
-    ComponentChangeEvent(const ComponentChangeEvent&) = delete;
-    ComponentChangeEvent(ComponentChangeEvent&&) = delete;
-    ComponentChangeEvent& operator=(const ComponentChangeEvent&) = delete;
-    ComponentChangeEvent& operator=(ComponentChangeEvent&&) = delete;
-    virtual ~ComponentChangeEvent() override = default;
 
-    /*!
-    * \brief Returns the category of the event.
-    *
-    * @return	     EventCategory.
-    */
-    virtual EventDefinitions::EventCategory GetCategory() const override
+        parameter.emplace("ComponentName", componentName);
+        parameter.emplace("GoalStateName", goalStateName);
+    }
+
+    ~ComponentChangeEvent() override = default;
+
+    EventDefinitions::EventCategory GetCategory() const override
     {
         return EventDefinitions::EventCategory::ComponentStateChange;
     }
 
-    /*!
-     * \brief Returns the component name for which the event is targeted
-     * @return Component Name
-     */
-    std::string GetComponentName() const {
-        return componentName;
-    }
 
-    /*!
-     * \brief Returns the goal state name for which the event is targeted
-     * @return State Name
-     */
-    std::string GetGoalStateName() const {
-        return goalStateName;
-    }
-
-    /*!
-     * \brief Returns the goal state as a result of the event
-     * @return State
-     */
-    ComponentState GetGoalState() const {
-        return goalState;
-    }
-
-    /*!
-    * \brief Returns all parameters of the event as string list.
-    * \details Returns the agentId as string list.
-    *
-    * @return	     List of string pairs of the event parameters.
-    */
-    virtual EventParameters GetParametersAsString() override
+    EventParameters GetParametersAsString() override
     {
         EventParameters eventParameters = ConditionalEvent::GetParametersAsString();
 
@@ -104,6 +62,33 @@ public:
         eventParameters.push_back({"State", goalStateName});
 
         return eventParameters;
+    }
+
+    /*!
+     * \brief Returns the component name for which the event is targeted
+     * @return Component Name
+     */
+    std::string GetComponentName() const
+    {
+        return componentName;
+    }
+
+    /*!
+     * \brief Returns the goal state name for which the event is targeted
+     * @return State Name
+     */
+    std::string GetGoalStateName() const
+    {
+        return goalStateName;
+    }
+
+    /*!
+     * \brief Returns the goal state as a result of the event
+     * @return State
+     */
+    ComponentState GetGoalState() const
+    {
+        return goalState;
     }
 
 private:

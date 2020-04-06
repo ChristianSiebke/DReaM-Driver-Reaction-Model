@@ -19,14 +19,25 @@
 
 #pragma once
 
+#include <set>
 #include <string>
 #include <tuple>
+
 #include <QFile>
 #include <QTextStream>
-#include "runStatistic.h"
+
+#include "Common/runtimeInformation.h"
+#include "Interfaces/observationInterface.h"
+
 #include "observationCyclics.h"
 #include "observationFileHandler.h"
-#include "Common/runtimeInformation.h"
+#include "runStatistic.h"
+
+namespace SimulationSlave {
+class EventNetworkInterface;
+}
+
+class DataStoreReadInterface;
 
 //-----------------------------------------------------------------------------
 /** \brief This class adds the RunStatistic information to the simulation output.
@@ -43,18 +54,17 @@ public:
     const std::string COMPONENTNAME = "ObservationLog";
 
     ObservationLogImplementation(SimulationSlave::EventNetworkInterface* eventNetwork,
-                                 StochasticsInterface* stochastics,
-                                 WorldInterface* world,
-                                 const ParameterInterface* parameters,
-                                 const CallbackInterface* callbacks);
+                                   StochasticsInterface* stochastics,
+                                   WorldInterface* world,
+                                   const ParameterInterface* parameters,
+                                   const CallbackInterface* callbacks,
+                                   DataStoreReadInterface* dataStore);
     ObservationLogImplementation(const ObservationLogImplementation&) = delete;
     ObservationLogImplementation(ObservationLogImplementation&&) = delete;
     ObservationLogImplementation& operator=(const ObservationLogImplementation&) = delete;
     ObservationLogImplementation& operator=(ObservationLogImplementation&&) = delete;
     virtual ~ObservationLogImplementation() override = default;
 
-    virtual void Insert(int time, int agentId, LoggingGroup group, const std::string& key, const std::string& value) override;
-    virtual void InsertEvent(std::shared_ptr<EventInterface> event) override;
     virtual void SlavePreHook() override;
     virtual void SlavePreRunHook() override;
     virtual void SlavePostRunHook(const RunResultInterface& runResult) override;
@@ -71,11 +81,12 @@ public:
 
 private:
     const openpass::common::RuntimeInformation& runtimeInformation;
-    RunStatistic runStatistic = RunStatistic(-1);
-    std::vector<LoggingGroup> loggingGroups{LoggingGroup::Trace};
-    ObservationCyclics cyclics;
-    ObservationFileHandler fileHandler;
     SimulationSlave::EventNetworkInterface* eventNetwork;
+    DataStoreReadInterface* dataStore;
+    ObservationFileHandler fileHandler;
+    ObservationCyclics cyclics;
+    RunStatistic runStatistic = RunStatistic(-1);
+    std::set<std::string> selectedColumns;
 };
 
 

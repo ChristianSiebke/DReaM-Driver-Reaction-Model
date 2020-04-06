@@ -17,12 +17,6 @@ class ScenarioActionInterface
 {
 public:
     ScenarioActionInterface() = default;
-    ScenarioActionInterface(const ScenarioActionInterface&) = delete;
-    ScenarioActionInterface(ScenarioActionInterface&&) = delete;
-    ScenarioActionInterface& operator=(const ScenarioActionInterface&) = delete;
-    ScenarioActionInterface& operator=(ScenarioActionInterface&&) = delete;
     virtual ~ScenarioActionInterface() = default;
-
     virtual const std::string& GetEventName() const = 0;
-private:
 };

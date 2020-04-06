@@ -25,8 +25,11 @@ INCLUDEPATH += \
             $$OPEN_SRC/CoreFramework/OpenPassSlave/modelElements
 
 HEADERS += \
-    $$UNIT_UNDER_TEST/commonTools.h \
+    $$UNIT_UNDER_TEST/commonTools.h
+
+
 
 SOURCES += \
     $$UNIT_UNDER_TEST/vector2d.cpp \
+    vectorToString_Tests.cpp \
     ttcCalculation_Tests.cpp

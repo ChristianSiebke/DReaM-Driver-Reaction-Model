@@ -1,30 +1,28 @@
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
 #include <vector>
 
 #include "Interfaces/scenarioInterface.h"
-
+#include "eventDetector.h"
 #include "fakeEventDetectorNetwork.h"
 #include "fakeManipulatorNetwork.h"
 #include "fakeSpawnPointNetwork.h"
 #include "fakeWorld.h"
-#include "eventDetector.h"
-
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "taskBuilder.h"
 
 using ::testing::_;
-using ::testing::Invoke;
-using ::testing::Gt;
-using ::testing::SizeIs;
 using ::testing::Contains;
-using ::testing::Not;
-using ::testing::Field;
 using ::testing::Eq;
+using ::testing::Field;
+using ::testing::Gt;
+using ::testing::Invoke;
 using ::testing::NiceMock;
+using ::testing::Not;
 using ::testing::Return;
+using ::testing::SizeIs;
 
 using namespace SimulationSlave;
-using namespace SimulationSlave::Scheduling;
+using namespace openpass::scheduling;
 
 TEST(TaskBuilder, CommonTaskCreation_Works)
 {
@@ -35,7 +33,7 @@ TEST(TaskBuilder, CommonTaskCreation_Works)
     SimulationSlave::EventDetector e1(&fakeEventDetector, &edl);
     SimulationSlave::EventDetector e2(&fakeEventDetector, &edl);
 
-    std::vector<const SimulationSlave::EventDetector*> fakeEventDetectors;
+    std::vector<const SimulationSlave::EventDetector *> fakeEventDetectors;
     fakeEventDetectors.push_back(&e1);
     fakeEventDetectors.push_back(&e2);
 

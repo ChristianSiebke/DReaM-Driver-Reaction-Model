@@ -279,7 +279,7 @@ ChannelBuffer* Component::CreateOutputBuffer(int linkId)
         return nullptr;
     }
 
-    return (ChannelBuffer*)buffer;
+    return buffer;
 }
 
 bool Component::SetInputBuffer(int linkId, ChannelBuffer* buffer)

@@ -1,4 +1,4 @@
-﻿/*******************************************************************************
+/*******************************************************************************
 * Copyright (c) 2017, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
@@ -38,30 +38,30 @@ public:
      * \brief ImportEventDetector parses information from an EventElement for
      *        instantiation of a ConditionalEventDetector.
      *
-     * \param[in] eventElement the element from which to parse
-     *                         ConditionalEventDetector instantiation
-     *                         information
-     * \param[in] eventName the name of the event to which the
-     *                         ConditionalEventDetector will belong
+     * \param[in] eventElement       the element from which to parse
+     *                               ConditionalEventDetector instantiation
+     *                               information
+     * \param[in] eventName          Name of the event used for identification
+     *                               e.g. "MyStory/MyAct/MySequence/MyManeuver/MyEvent"
      * \param[in] numberOfExecutions the maximum number of times the
      *                               ConditionalEventDetector is to emit an
      *                               event
-     * \param[in] actorInformation information detailing what entities are the
-     *                             actors to be targeted by the
-     *                             ConditionalEventDetector's emitted events
-     * \param[in] entities the entities explicitly defined in the openScenario
-     *                     file's Entities element
+     * \param[in] actorInformation   information detailing what entities are the
+     *                               actors to be targeted by the
+     *                               ConditionalEventDetector's emitted events
+     * \param[in] entities           entities defined in openScenario Entities
      *
      * \return a struct containing all information relevant for the
      *         instantiation of a ConditionalEventDetector
      * ------------------------------------------------------------------------
      */
-    static openScenario::ConditionalEventDetectorInformation ImportEventDetector(QDomElement& eventElement,
+    static openScenario::ConditionalEventDetectorInformation ImportEventDetector(QDomElement &eventElement,
                                                                                  const std::string &eventName,
                                                                                  const int numberOfExecutions,
-                                                                                 const openScenario::ActorInformation& actorInformation,
+                                                                                 const openScenario::ActorInformation &actorInformation,
                                                                                  const std::vector<ScenarioEntity>& entities,
                                                                                  openScenario::Parameters& parameters);
+
 private:
     /*!
      * \brief Imports a condition element of a OpenSCENARIO storyboard DOM

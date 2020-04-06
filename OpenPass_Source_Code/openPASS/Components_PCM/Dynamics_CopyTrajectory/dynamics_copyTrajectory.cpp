@@ -60,7 +60,7 @@ extern "C" DYNAMICS_COPYTRAJECTORYSHARED_EXPORT DynamicsInterface *OpenPASS_Crea
     StochasticsInterface *stochastics,
     WorldInterface *world,
     const ParameterInterface *parameters,
-    const std::map<int, ObservationInterface *> *evaluations,
+    PublisherInterface * const publisher,
     AgentInterface *agent,
     const CallbackInterface *callbacks)
 {
@@ -79,7 +79,7 @@ extern "C" DYNAMICS_COPYTRAJECTORYSHARED_EXPORT DynamicsInterface *OpenPASS_Crea
                                                                                            stochastics,
                                                                                            world,
                                                                                            parameters,
-                                                                                           evaluations,
+                                                                                           publisher,
                                                                                            callbacks,
                                                                                            agent));
 }

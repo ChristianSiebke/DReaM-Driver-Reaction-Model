@@ -14,7 +14,6 @@
 #include "Signals/sensor_driverDefinitions.h"
 #include "Common/primitiveSignals.h"
 #include "Interfaces/modelInterface.h"
-#include "Interfaces/observationInterface.h"
 #include "sensor_driverCalculations.h"
 
 /** \addtogroup Sensor_Driver
@@ -38,7 +37,7 @@
 * data              | Referenced signal (copied by sending component)
 * isInit            | Query whether the component was just initialized
 * localLinkId       | Corresponds to "id" of "ComponentInput"
-* observations      | Interface which has to be provided by observation modules
+* publisher         | Publishing instance provided by the framework
 * offsetTime        | Offset time of the component
 * parameters        | Interface provides access to the configuration parameters
 * priority          | Priority of the component
@@ -73,7 +72,7 @@ public:
     //! \param [in] stochastics     Provides access to the stochastics functionality of the framework
     //! \param [in] world           Provides access to world representation
     //! \param [in] parameters      Interface provides access to the configuration parameters
-    //! \param [in] observations    Interface which has to be provided by observation modules
+    //! \param [in] pubisher        Instance  provided by the framework
     //! \param [in] callbacks       Interface for callbacks to framework
     //! \param [in] agent           This interface provides access to agent parameters, properties, attributes and dynamic states
     SensorDriverImplementation(std::string componentName,
@@ -85,7 +84,7 @@ public:
             StochasticsInterface *stochastics,
             WorldInterface *world,
             const ParameterInterface *parameters,
-            const std::map<int, ObservationInterface*> *observations,
+            PublisherInterface * const publisher,
             const CallbackInterface *callbacks,
             AgentInterface *agent);
 

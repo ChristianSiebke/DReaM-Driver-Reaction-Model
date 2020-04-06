@@ -15,13 +15,12 @@
 
 #pragma once
 
-#include <set>
 #include <list>
+#include <set>
 
 #include "tasks.h"
 
-namespace SimulationSlave {
-namespace Scheduling {
+namespace openpass::scheduling {
 
 //-----------------------------------------------------------------------------
 /** \brief managing timing of all given tasks
@@ -172,7 +171,7 @@ private:
     * @param[in]     tasks              tasks to filter by current timestamp
     * @param[out]    list of TaskItems  filtered tasks
     */
-    void GetTasks(int timestamp, std::multiset<TaskItem>& tasks, std::list<TaskItem> &currentTasks);
+    void GetTasks(int timestamp, std::multiset<TaskItem> &tasks, std::list<TaskItem> &currentTasks);
 
     /*!
     * \brief UpdateScheduledTimestamps
@@ -224,6 +223,4 @@ private:
     int lowerBoundOfScheduledTimestamps;
 };
 
-
-} // namespace Scheduling
-} // namespace SimulationSlave
+} // namespace openpass::scheduling

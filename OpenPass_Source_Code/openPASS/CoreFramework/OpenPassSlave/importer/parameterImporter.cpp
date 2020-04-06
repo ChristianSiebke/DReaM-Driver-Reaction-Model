@@ -22,7 +22,7 @@ namespace openpass::parameter::internal {
 using namespace SimulationCommon;
 
 template <typename T>
-ParameterSetLevel3 ImportParameter(QDomElement& domElement, const std::string& elementName)
+ParameterSetLevel3 ImportParameter(const QDomElement& domElement, const std::string& elementName)
 {
     ParameterSetLevel3 param;
 
@@ -48,7 +48,7 @@ ParameterSetLevel3 ImportParameter(QDomElement& domElement, const std::string& e
 }
 
 template <>
-ParameterSetLevel3 ImportParameter<NormalDistribution>(QDomElement& domElement, const std::string& elementName)
+ParameterSetLevel3 ImportParameter<NormalDistribution>(const QDomElement& domElement, const std::string& elementName)
 {
     ParameterSetLevel3 param;
 
@@ -85,7 +85,7 @@ ParameterSetLevel3 ImportParameter<NormalDistribution>(QDomElement& domElement, 
 }
 
 template <>
-ParameterSetLevel3 ImportParameter<LogNormalDistribution>(QDomElement& domElement, const std::string& elementName)
+ParameterSetLevel3 ImportParameter<LogNormalDistribution>(const QDomElement& domElement, const std::string& elementName)
 {
     ParameterSetLevel3 param;
 
@@ -128,7 +128,7 @@ ParameterSetLevel3 ImportParameter<LogNormalDistribution>(QDomElement& domElemen
 }
 
 template <>
-ParameterSetLevel3 ImportParameter<UniformDistribution>(QDomElement& domElement, const std::string& elementName)
+ParameterSetLevel3 ImportParameter<UniformDistribution>(const QDomElement& domElement, const std::string& elementName)
 {
     ParameterSetLevel3 param;
 
@@ -156,7 +156,7 @@ ParameterSetLevel3 ImportParameter<UniformDistribution>(QDomElement& domElement,
 }
 
 template <>
-ParameterSetLevel3 ImportParameter<ExponentialDistribution>(QDomElement& domElement, const std::string& elementName)
+ParameterSetLevel3 ImportParameter<ExponentialDistribution>(const QDomElement& domElement, const std::string& elementName)
 {
     ParameterSetLevel3 param;
 
@@ -185,7 +185,7 @@ ParameterSetLevel3 ImportParameter<ExponentialDistribution>(QDomElement& domElem
     return param;
 }
 
-std::vector<QDomElement> ImportReference(QDomElement& domElement, QDomElement& profilesElement)
+std::vector<QDomElement> ImportReference(const QDomElement& domElement, const QDomElement& profilesElement)
 {
     std::vector<QDomElement> references;
 
@@ -242,7 +242,7 @@ std::vector<QDomElement> ImportReference(QDomElement& domElement, QDomElement& p
     return references;
 }
 
-static ParameterSetLevel3 ImportParameterLevel3WithoutReferences(QDomElement& element)
+static ParameterSetLevel3 ImportParameterLevel3WithoutReferences(const QDomElement& element)
 {
     ParameterSetLevel3 param;
 
@@ -252,6 +252,7 @@ static ParameterSetLevel3 ImportParameterLevel3WithoutReferences(QDomElement& el
     auto doubleParams = ImportParameter<double>(element, TAG::Double);
     auto doubleVectorParams = ImportParameter<std::vector<double>>(element, TAG::DoubleVector);
     auto stringParams = ImportParameter<std::string>(element, TAG::String);
+    auto stringVectorParams = ImportParameter<std::vector<std::string>>(element, TAG::StringVector);
     auto normalDistributionParams = ImportParameter<openpass::parameter::NormalDistribution>(element, TAG::NormalDistribution);
     auto lognormalDistributionParams = ImportParameter<openpass::parameter::LogNormalDistribution>(element, TAG::LogNormalDistribution);
     auto uniformDistributionParams = ImportParameter<openpass::parameter::UniformDistribution>(element, TAG::UniformDistribution);
@@ -263,6 +264,7 @@ static ParameterSetLevel3 ImportParameterLevel3WithoutReferences(QDomElement& el
     param.insert(param.end(), doubleParams.begin(), doubleParams.end());
     param.insert(param.end(), doubleVectorParams.begin(), doubleVectorParams.end());
     param.insert(param.end(), stringParams.begin(), stringParams.end());
+    param.insert(param.end(), stringVectorParams.begin(), stringVectorParams.end());
     param.insert(param.end(), normalDistributionParams.begin(), normalDistributionParams.end());
     param.insert(param.end(), lognormalDistributionParams.begin(), lognormalDistributionParams.end());
     param.insert(param.end(), uniformDistributionParams.begin(), uniformDistributionParams.end());
@@ -271,7 +273,7 @@ static ParameterSetLevel3 ImportParameterLevel3WithoutReferences(QDomElement& el
     return param;
 }
 
-static ParameterSetLevel3 ImportParameterLevel3(QDomElement& domElement, QDomElement& profilesElement)
+static ParameterSetLevel3 ImportParameterLevel3(const QDomElement& domElement, const QDomElement& profilesElement)
 {
     ParameterSetLevel3 param;
     auto elementsToCombine = ImportReference(domElement, profilesElement);
@@ -286,7 +288,7 @@ static ParameterSetLevel3 ImportParameterLevel3(QDomElement& domElement, QDomEle
     return param;
 }
 
-static ParameterSetLevel2 ImportParameterListsLevel2(QDomElement& parameterElement, QDomElement& profilesElement)
+static ParameterSetLevel2 ImportParameterListsLevel2(const QDomElement& parameterElement, const QDomElement& profilesElement)
 {
     QDomElement lists;
 
@@ -321,7 +323,7 @@ static ParameterSetLevel2 ImportParameterListsLevel2(QDomElement& parameterEleme
     return param;
 }
 
-static ParameterSetLevel2 ImportParameterSetLevel2(QDomElement& parameterElement, QDomElement& profilesElement)
+static ParameterSetLevel2 ImportParameterSetLevel2(const QDomElement& parameterElement, const QDomElement& profilesElement)
 {
     ParameterSetLevel2 container;
 
@@ -340,7 +342,7 @@ static ParameterSetLevel2 ImportParameterSetLevel2(QDomElement& parameterElement
     return container;
 }
 
-static ParameterSetLevel1 ImportParameterListsLevel1(QDomElement& parameterElement, QDomElement& profilesElement)
+static ParameterSetLevel1 ImportParameterListsLevel1(const QDomElement& parameterElement, const QDomElement& profilesElement)
 {
     QDomElement lists;
 
@@ -380,7 +382,7 @@ static ParameterSetLevel1 ImportParameterListsLevel1(QDomElement& parameterEleme
 
 namespace openpass::parameter {
 
-ParameterSetLevel1 Import(QDomElement& parameterElement, QDomElement& profilesElement)
+ParameterSetLevel1 Import(const QDomElement& parameterElement, const QDomElement& profilesElement)
 {
     openpass::parameter::ParameterSetLevel1 tempContainer;
 

@@ -31,7 +31,7 @@ OpenScenarioActionsImplementation::OpenScenarioActionsImplementation(std::string
                                                                      StochasticsInterface *stochastics,
                                                                      WorldInterface *world,
                                                                      const ParameterInterface *parameters,
-                                                                     const std::map<int, ObservationInterface *> *observations,
+                                                                     PublisherInterface * const publisher,
                                                                      const CallbackInterface *callbacks,
                                                                      AgentInterface *agent,
                                                                      SimulationSlave::EventNetworkInterface* const eventNetwork) :
@@ -45,7 +45,7 @@ OpenScenarioActionsImplementation::OpenScenarioActionsImplementation(std::string
         stochastics,
         world,
         parameters,
-        observations,
+        publisher,
         callbacks,
         agent,
         eventNetwork),

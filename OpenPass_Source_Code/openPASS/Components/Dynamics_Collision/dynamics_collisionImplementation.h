@@ -56,7 +56,7 @@ public:
         StochasticsInterface *stochastics,
         WorldInterface *world,
         const ParameterInterface *parameters,
-        const std::map<int, ObservationInterface*> *observations,
+        PublisherInterface * const publisher,
         const CallbackInterface *callbacks,
         AgentInterface *agent);
     DynamicsCollisionImplementation(const DynamicsCollisionImplementation&) = delete;

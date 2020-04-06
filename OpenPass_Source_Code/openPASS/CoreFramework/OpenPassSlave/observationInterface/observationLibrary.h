@@ -38,7 +38,8 @@ public:
             WorldInterface* world,
             EventNetworkInterface* eventNetwork,
             const ParameterInterface* parameters,
-            const CallbackInterface* callbacks);
+            const CallbackInterface* callbacks,
+            DataStoreReadInterface* const dataStore);
     typedef void (*ObservationInterface_DestroyInstanceType)(ObservationInterface* implementation);
     typedef bool (*ObservationInterface_MasterPreHook)(ObservationInterface* implementation);
     typedef bool (*ObservationInterface_MasterPostHook)(ObservationInterface* implementation,
@@ -96,7 +97,8 @@ public:
             const openpass::parameter::ParameterSetLevel1 &parameters,
             StochasticsInterface* stochastics,
             WorldInterface* world,
-            EventNetworkInterface* eventNetwork);
+            EventNetworkInterface* eventNetwork,
+            DataStoreReadInterface* const dataStore);
 
     bool SlavePreHook(ObservationInterface* implementation)
     {
@@ -149,6 +151,7 @@ private:
     std::list<ObservationModule*> observationModules;
     QLibrary* library = nullptr;
     CallbackInterface* callbacks;
+
     ObservationInterface_GetVersion getVersionFunc{nullptr};
     ObservationInterface_CreateInstanceType createInstanceFunc{nullptr};
     ObservationInterface_DestroyInstanceType destroyInstanceFunc{nullptr};

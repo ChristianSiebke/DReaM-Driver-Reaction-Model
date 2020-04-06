@@ -28,6 +28,8 @@
 #include "Interfaces/eventNetworkInterface.h"
 #include "Interfaces/worldInterface.h"
 
+class DataStoreWriteInterface;
+
 namespace SimulationSlave
 {
 class Agent;
@@ -46,8 +48,9 @@ public:
                  WorldInterface *world,
                  Stochastics *stochastics,
                  ObservationNetworkInterface *observationNetwork,
-                 SimulationSlave::EventNetworkInterface *eventNetwork);
-    virtual ~AgentFactory() = default;
+                 SimulationSlave::EventNetworkInterface *eventNetwork,
+                 DataStoreWriteInterface* dataStore);
+    virtual ~AgentFactory() override = default;
 
     virtual void Clear() override;
     virtual Agent *AddAgent(AgentBlueprintInterface* agentBlueprint) override;
@@ -83,17 +86,20 @@ private:
     //!
     //! @return                         The created agent
     //-----------------------------------------------------------------------------
-    Agent* CreateAgent(int id,
-                       AgentBlueprintInterface* agentBlueprint);
+    std::unique_ptr<Agent> CreateAgent(int id, AgentBlueprintInterface* agentBlueprint);
 
-    int lastAgentId {INITIAL_AGENT_ID};
+    void PublishProperties(const Agent& agent);
+    
     ModelBinding *modelBinding;
     WorldInterface *world;
     Stochastics *stochastics;
     ObservationNetworkInterface *observationNetwork;
     EventNetworkInterface *eventNetwork;
+    DataStoreWriteInterface *dataStore;
 
     std::vector<std::unique_ptr<Agent>> agentList;
+
+    int lastAgentId {INITIAL_AGENT_ID};
 };
 
 } // namespace SimulationSlave

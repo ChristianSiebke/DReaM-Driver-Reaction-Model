@@ -21,7 +21,7 @@ Dynamics_Collision_Implementation::Dynamics_Collision_Implementation(int compone
                                                                      StochasticsInterface *stochastics,
                                                                      WorldInterface *world,
                                                                      const ParameterInterface *parameters,
-                                                                     const std::map<int, ObservationInterface *> *evaluations,
+                                                                     PublisherInterface * const publisher,
                                                                      const CallbackInterface *callbacks,
                                                                      AgentInterface *agent) :
     DynamicsInterface(componentId,
@@ -33,7 +33,7 @@ Dynamics_Collision_Implementation::Dynamics_Collision_Implementation(int compone
                       stochastics,
                       world,
                       parameters,
-                      evaluations,
+                      publisher,
                       callbacks,
                       agent)
 {

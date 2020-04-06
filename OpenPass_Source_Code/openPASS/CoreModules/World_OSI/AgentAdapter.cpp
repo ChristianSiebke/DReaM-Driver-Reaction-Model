@@ -30,6 +30,10 @@ AgentAdapter::AgentAdapter(WorldInterface* world,
 {
 }
 
+AgentAdapter::~AgentAdapter()
+{
+}
+
 bool AgentAdapter::InitAgentParameter(int id,
                                       AgentBlueprintInterface* agentBlueprint)
 {

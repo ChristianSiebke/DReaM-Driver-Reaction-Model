@@ -224,12 +224,23 @@ private:
      * \param[in]   entities          Objects from 'Entities' tag
      * \param[out]  scenario          The maneuver data is imported into this scenario
      * \param[out]  actors            Actors from the maneuver are imported into this container
-     * \param[in]   parameters      declared parameters
+     * \param[in]   parameters        declared parameters
+     */
+
+    /*!
+     * \brief ImportManeuverElement
+     * \param maneuverElement    The DOM root of the maneuver element
+     * \param entities           Objects from 'Entities' tag
+     * \param scenario           The maneuver data is imported into this scenario
+     * \param actorInformation   Information of actors from the maneuver
+     * \param nameStack          List of names from tree structure e.g. {"myStory", "myAct", "myManeuver"}
+     * \param numberOfExecutions Number of executions
      */
     static void ImportManeuverElement(QDomElement& maneuverElement,
                                       const std::vector<ScenarioEntity>& entities,
                                       ScenarioInterface *scenario,
                                       const openScenario::ActorInformation &actorInformation,
+                                      const std::vector<std::string> &nameStack,
                                       const int numberOfExecutions,
                                       openScenario::Parameters& parameters);
 

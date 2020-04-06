@@ -22,8 +22,6 @@
 class ObservationCyclics
 {
 public:
-    const std::string COMPONENTNAME = "ObservationCyclics";
-
     ObservationCyclics()
     {
     }
@@ -64,9 +62,9 @@ public:
     /*!
      * \brief Returns all timesteps for which samples exist
      */
-    std::vector<int> *GetTimeSteps()
+    std::vector<int>& GetTimeSteps()
     {
-        return &timeSteps;
+        return timeSteps;
     }
 
     /*!

@@ -9,14 +9,15 @@
 *******************************************************************************/
 #pragma once
 
-#include <QtGlobal>
 #include <memory>
 
+#include "Common/globalDefinitions.h"
 #include "Interfaces/signalInterface.h"
 #include "componentControllerCommon.h"
-#include "Common/globalDefinitions.h"
 
 namespace ComponentControl {
+
+using StateMapping = std::map<std::string, std::pair<ComponentType, ComponentState>>;
 
 /*!
  * \brief This class represents a Condition based on all the information the ComponentController has gathered.
@@ -34,7 +35,7 @@ public:
      * \brief Returns wether this Condition is fullfilled.
      * \param componentNameToComponentTypeAndStatesMap    Information the ComponentController has gathered
      */
-    virtual bool IsFullfilled(const std::map<std::string, std::pair<ComponentType, ComponentState>> &componentNameToComponentTypeAndStatesMap) const = 0;
+    virtual bool IsFullfilled(const StateMapping &componentNameToComponentTypeAndStatesMap) const = 0;
 };
 
 /*!
@@ -54,7 +55,7 @@ public:
      * \param componentNameToComponentTypeAndStatesMap    Information the ComponentController has gathered
      * \return ComponentState this expression evaluates to
      */
-    virtual ComponentState Get(const std::map<std::string, std::pair<ComponentType, ComponentState>> &componentNameToComponentTypeAndStateMap) const = 0;
+    virtual ComponentState Get(const StateMapping &componentNameToComponentTypeAndStateMap) const = 0;
 };
 
 /*!
@@ -67,9 +68,12 @@ public:
     /*!
      * \param value The fixed ComponentState
      */
-    FixedComponentStateExpression(ComponentState value);
+    FixedComponentStateExpression(ComponentState value) :
+        value(value)
+    {
+    }
 
-    ComponentState Get(const std::map<std::string, std::pair<ComponentType, ComponentState>> &componentNameToComponentTypeAndStateMap) const override;
+    ComponentState Get(const StateMapping &componentNameToComponentTypeAndStateMap) const override;
 
 private:
     ComponentState value;
@@ -85,9 +89,12 @@ public:
     /*!
      * \param component Name of the component of which the state is evaluated
      */
-    VehicleComponentStateExpression(const std::string& component);
+    VehicleComponentStateExpression(const std::string &component) :
+        component(component)
+    {
+    }
 
-    ComponentState Get(const std::map<std::string, std::pair<ComponentType, ComponentState>> &componentNameToComponentTypeAndStateMap) const override;
+    ComponentState Get(const StateMapping &componentNameToComponentTypeAndStateMap) const override;
 
 private:
     const std::string component;
@@ -103,9 +110,13 @@ private:
 class ComponentStateEquality : public Condition
 {
 public:
-    ComponentStateEquality(std::unique_ptr<ComponentStateExpression> expression1, std::unique_ptr<ComponentStateExpression> expression2);
+    ComponentStateEquality(std::unique_ptr<ComponentStateExpression> expression1, std::unique_ptr<ComponentStateExpression> expression2)
+    {
+        this->expression1 = std::move(expression1);
+        this->expression2 = std::move(expression2);
+    }
 
-    bool IsFullfilled(const std::map<std::string, std::pair<ComponentType, ComponentState>> &componentNameToComponentTypeAndStateMap) const override;
+    bool IsFullfilled(const StateMapping &componentNameToComponentTypeAndStateMap) const override;
 
 private:
     std::unique_ptr<ComponentStateExpression> expression1;

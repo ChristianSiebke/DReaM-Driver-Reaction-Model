@@ -20,7 +20,6 @@
 #include <fstream>
 #include <QTextStream>
 #include "modelInterface.h"
-#include "observationInterface.h"
 #include "primitiveSignals.h"
 #include "vectorSignals.h"
 #include "componentPorts.h"
@@ -79,7 +78,7 @@ public:
                                       int cycleTime,
                                       StochasticsInterface *stochastics,
                                       const ParameterInterface *parameters,
-                                      const std::map<int, ObservationInterface *> *observations,
+                                      PublisherInterface * const publisher,
                                       const CallbackInterface *callbacks, int agentId);
     virtual ~Algorithm_Selector_Implementation();
 

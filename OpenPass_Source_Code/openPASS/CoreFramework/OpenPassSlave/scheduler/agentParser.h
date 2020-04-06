@@ -19,14 +19,13 @@
 
 #pragma once
 
-#include <list>
 #include <functional>
+#include <list>
 
-#include "tasks.h"
 #include "agent.h"
+#include "tasks.h"
 
-namespace SimulationSlave {
-namespace Scheduling {
+namespace openpass::scheduling {
 
 //-----------------------------------------------------------------------------
 /** \brief convert agent to taskItems for Scheduling
@@ -54,11 +53,10 @@ public:
     *
     * @param[in]     Agent    new agent
     */
-    void Parse(const Agent &agent);
+    void Parse(const SimulationSlave::Agent &agent);
 
     std::list<TaskItem> GetNonRecurringTasks();
     std::list<TaskItem> GetRecurringTasks();
 };
 
-} //namespace Scheduler
-} //namespace SimulationSlave
+} // namespace openpass::scheduling

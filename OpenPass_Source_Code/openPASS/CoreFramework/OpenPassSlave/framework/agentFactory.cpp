@@ -12,19 +12,26 @@
 #include <algorithm>
 #include <list>
 #include <sstream>
+
 #include "agent.h"
 #include "agentFactory.h"
 #include "agentType.h"
 #include "channel.h"
 #include "channelBuffer.h"
-#include "Interfaces/componentInterface.h"
-#include "CoreFramework/CoreShare/log.h"
+
+#include "agentDataPublisher.h"
 #include "modelBinding.h"
-#include "Interfaces/observationNetworkInterface.h"
-#include "CoreFramework/CoreShare/parameters.h"
 #include "spawnPoint.h"
 #include "stochastics.h"
+
+#include "CoreFramework/CoreShare/log.h"
+#include "CoreFramework/CoreShare/parameters.h"
+#include "Interfaces/componentInterface.h"
+#include "Interfaces/observationNetworkInterface.h"
 #include "Interfaces/worldInterface.h"
+
+
+class DataStoreInterface;
 
 namespace SimulationSlave
 {
@@ -33,12 +40,14 @@ AgentFactory::AgentFactory(ModelBinding *modelBinding,
                            WorldInterface *world,
                            Stochastics *stochastics,
                            ObservationNetworkInterface *observationNetwork,
-                           EventNetworkInterface *eventNetwork) :
+                           EventNetworkInterface *eventNetwork,
+                           DataStoreWriteInterface* dataStore) :
     modelBinding(modelBinding),
     world(world),
     stochastics(stochastics),
     observationNetwork(observationNetwork),
-    eventNetwork(eventNetwork)
+    eventNetwork(eventNetwork),
+    dataStore(dataStore)
 {
 }
 
@@ -50,54 +59,54 @@ void AgentFactory::Clear()
 
 Agent* AgentFactory::AddAgent(AgentBlueprintInterface* agentBlueprint)
 {
-    Agent *agent = CreateAgent(lastAgentId,
-                               agentBlueprint);
-    if(!agent)
+    auto agent = CreateAgent(lastAgentId, agentBlueprint);
+
+    PublishProperties(*agent);
+    
+    if (!agent)
     {
         LOG_INTERN(LogLevel::Error) << "could not create agent";
         return nullptr;
     }
 
-    if(!world->AddAgent(lastAgentId, agent->GetAgentAdapter()))
+    if (!world->AddAgent(lastAgentId, agent->GetAgentAdapter()))
     {
         LOG_INTERN(LogLevel::Error) << "could not add agent to network";
-        delete agent;
         return nullptr;
     }
 
     lastAgentId++;
-    agentList.push_back(std::unique_ptr<Agent>(agent));
-    return agent;
+    agentList.push_back(std::move(agent));
+
+    return agentList.back().get();
 }
 
-Agent *AgentFactory::CreateAgent(int id,
-                                 AgentBlueprintInterface* agentBlueprint)
+std::unique_ptr<Agent> AgentFactory::CreateAgent(int id, AgentBlueprintInterface* agentBlueprint)
 {
     LOG_INTERN(LogLevel::DebugCore) << "instantiate agent (id " << id << ")";
 
-    Agent *agent = new (std::nothrow) Agent(id,
-                                            world);
-    if(!agent)
+    auto agent = std::make_unique<Agent>(id, world);
+
+    if (!agent)
     {
         return nullptr;
     }
 
-    if(!agent->Instantiate(agentBlueprint,
-                           modelBinding,
-                           stochastics,
-                           observationNetwork,
-                           eventNetwork))
+    if (!agent->Instantiate(agentBlueprint,
+                            modelBinding,
+                            stochastics,
+                            observationNetwork,
+                            eventNetwork,
+                            dataStore))
     {
         LOG_INTERN(LogLevel::Error) << "agent could not be instantiated";
-        delete agent;
         return nullptr;
     }
 
     // link agent internal components
-    if(!ConnectAgentLinks(agent))
+    if (!ConnectAgentLinks(agent.get()))
     {
         LOG_INTERN(LogLevel::Error) << "agent channels could not be created";
-        delete agent;
         return nullptr;
     }
 
@@ -145,6 +154,57 @@ bool AgentFactory::ConnectAgentLinks(Agent *agent)
     }
 
     return true;
+}
+
+void AgentFactory::PublishProperties(const Agent& agent)
+{
+    const auto adapter = agent.GetAgentAdapter();
+    const std::string keyPrefix = "Agents/" + std::to_string(agent.GetId()) + "/";
+    dataStore->PutStatic(keyPrefix + "AgentTypeGroupName", AgentCategoryStrings[static_cast<int>(adapter->GetAgentCategory())]);
+    dataStore->PutStatic(keyPrefix + "AgentTypeName", adapter->GetAgentTypeName());
+    dataStore->PutStatic(keyPrefix + "VehicleModelType", adapter->GetVehicleModelType());
+    dataStore->PutStatic(keyPrefix + "DriverProfileName", adapter->GetDriverProfileName());
+
+    const auto& vehicleModelParameters = adapter->GetVehicleModelParameters();
+    const double longitudinalPivotOffset = (vehicleModelParameters.length / 2.0) - vehicleModelParameters.distanceReferencePointToLeadingEdge;
+    dataStore->PutStatic(keyPrefix + "Vehicle/Width", vehicleModelParameters.width);
+    dataStore->PutStatic(keyPrefix + "Vehicle/Length", vehicleModelParameters.length);
+    dataStore->PutStatic(keyPrefix + "Vehicle/Height", vehicleModelParameters.height);
+    dataStore->PutStatic(keyPrefix + "Vehicle/LongitudinalPivotOffset", longitudinalPivotOffset);
+
+    for (const auto& sensor : adapter->GetSensorParameters())
+    {
+        const std::string sensorKeyPrefix = keyPrefix + "Vehicle/Sensors/" + std::to_string(sensor.id) + "/";
+        dataStore->PutStatic(sensorKeyPrefix + "Type", sensor.profile.type);
+        dataStore->PutStatic(sensorKeyPrefix + "Mounting/Position/Longitudinal", sensor.position.longitudinal);
+        dataStore->PutStatic(sensorKeyPrefix + "Mounting/Position/Lateral", sensor.position.lateral);
+        dataStore->PutStatic(sensorKeyPrefix + "Mounting/Position/Height", sensor.position.height);
+        dataStore->PutStatic(sensorKeyPrefix + "Mounting/Orientation/Yaw", sensor.position.yaw);
+        dataStore->PutStatic(sensorKeyPrefix + "Mounting/Orientation/Pitch", sensor.position.pitch);
+        dataStore->PutStatic(sensorKeyPrefix + "Mounting/Orientation/Roll", sensor.position.roll);
+
+        const auto& parameters = sensor.profile.parameter;
+
+        if (auto latency = openpass::parameter::Get<double>(parameters, "Latency"))
+        {
+            dataStore->PutStatic(sensorKeyPrefix + "Parameters/Latency", latency.value());
+        }
+
+        if (auto openingAngleH = openpass::parameter::Get<double>(parameters, "OpeningAngleH"))
+        {
+            dataStore->PutStatic(sensorKeyPrefix + "Parameters/OpeningAngleH", openingAngleH.value());
+        }
+
+        if (auto openingAngleV = openpass::parameter::Get<double>(parameters, "OpeningAngleV"))
+        {
+            dataStore->PutStatic(sensorKeyPrefix + "Parameters/OpeningAngleV", openingAngleV.value());
+        }
+
+        if (auto detectionRange = openpass::parameter::Get<double>(parameters, "DetectionRange"))
+        {
+            dataStore->PutStatic(sensorKeyPrefix + "Parameters/Range", detectionRange.value());
+        }
+    }
 }
 
 } // namespace SimulationSlave

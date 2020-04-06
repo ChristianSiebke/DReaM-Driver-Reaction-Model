@@ -62,6 +62,7 @@ SOURCES += \
     $$relative_path($$OPEN_SRC)/Common/vector2d.cpp \
     $$UNIT_UNDER_TEST/SpawnPointScenario.cpp \
     $$FRAMEWORK/agentBlueprintProvider.cpp \
+    $$FRAMEWORK/agentDataPublisher.cpp \
     $$FRAMEWORK/dynamicProfileSampler.cpp \
     $$FRAMEWORK/dynamicParametersSampler.cpp \
     $$FRAMEWORK/dynamicAgentTypeGenerator.cpp \

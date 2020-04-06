@@ -35,7 +35,7 @@ extern "C" ACTION_SECONDARY_DRIVER_TASKS_SHARED_EXPORT ModelInterface *OpenPASS_
         StochasticsInterface *stochastics,
         WorldInterface *world,
         const ParameterInterface *parameters,
-        const std::map<int, ObservationInterface*> *observations,
+        PublisherInterface * const publisher,
         AgentInterface *agent,
         const CallbackInterface *callbacks)
 {
@@ -53,7 +53,7 @@ extern "C" ACTION_SECONDARY_DRIVER_TASKS_SHARED_EXPORT ModelInterface *OpenPASS_
                                      stochastics,
                                      world,
                                      parameters,
-                                     observations,
+                                     publisher,
                                      callbacks,
                                      agent));
     }

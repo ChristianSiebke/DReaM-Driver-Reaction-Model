@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -11,16 +11,17 @@
 #include "ConditionalEventDetector.h"
 
 ConditionalEventDetector::ConditionalEventDetector(WorldInterface *world,
-                                                   const openScenario::ConditionalEventDetectorInformation& eventDetectorInformation,
+                                                   const openScenario::ConditionalEventDetectorInformation &eventDetectorInformation,
                                                    SimulationSlave::EventNetworkInterface *eventNetwork,
                                                    const CallbackInterface *callbacks,
                                                    StochasticsInterface *stochastics) :
-           EventDetectorCommonBase(world,
-                                   eventNetwork,
-                                   callbacks,
-                                   stochastics),
-           eventDetectorInformation(eventDetectorInformation)
-{}
+    EventDetectorCommonBase(world,
+                            eventNetwork,
+                            callbacks,
+                            stochastics),
+    eventDetectorInformation(eventDetectorInformation)
+{
+}
 
 void ConditionalEventDetector::Reset()
 {
@@ -31,12 +32,7 @@ void ConditionalEventDetector::Trigger(int time)
 {
     if (IsBelowMaximumNumberOfExecutions())
     {
-        // this collection contains all of the agents who are defined as "TriggeringEntities" and who meet their conditions
-        std::vector<const AgentInterface *> triggeringAgents {};
-        bool allConditionsMet = EvaluateConditionsAtTime(time,
-                                                         triggeringAgents);
-
-        if (allConditionsMet)
+        if (const auto [allConditionsMet, triggeringAgents] = EvaluateConditions(time); allConditionsMet == true)
         {
             TriggerEventInsertion(time, triggeringAgents);
         }
@@ -45,27 +41,20 @@ void ConditionalEventDetector::Trigger(int time)
 
 void ConditionalEventDetector::TriggerEventInsertion(int time, const std::vector<const AgentInterface *> triggeringAgents)
 {
-    const auto actors = GetActors(triggeringAgents);
-
     std::vector<int> triggeringAgentIds{};
-    for(const auto triggeringAgent : triggeringAgents)
+    for (const auto triggeringAgent : triggeringAgents)
     {
         triggeringAgentIds.push_back(triggeringAgent->GetId());
     }
 
+    const auto actors = GetActors(triggeringAgents);
     std::vector<int> actingAgentIds{};
-    for(const auto actingAgent : actors)
+    for (const auto actingAgent : actors)
     {
         actingAgentIds.push_back(actingAgent->GetId());
     }
 
-    auto event = std::make_shared<ConditionalEvent>(time,
-                                                    eventDetectorInformation.eventName,
-                                                    COMPONENTNAME,
-                                                    triggeringAgentIds,
-                                                    actingAgentIds);
-
-    eventNetwork->InsertEvent(event);
+    eventNetwork->InsertEvent(std::make_shared<ConditionalEvent>(time, eventDetectorInformation.eventName, COMPONENTNAME, triggeringAgentIds, actingAgentIds));
 
     executionCounter++;
 }
@@ -78,17 +67,17 @@ bool ConditionalEventDetector::IsBelowMaximumNumberOfExecutions()
 std::vector<const AgentInterface *> ConditionalEventDetector::GetActors(const std::vector<const AgentInterface *> triggeringAgents)
 {
     std::vector<const AgentInterface *> actors{};
-    if (eventDetectorInformation.actorInformation.triggeringAgentsAsActors.value_or(false))
+    if (eventDetectorInformation.actorInformation.actorIsTriggeringEntity)
     {
         actors = triggeringAgents;
     }
 
-    if(eventDetectorInformation.actorInformation.actors.has_value())
+    if (eventDetectorInformation.actorInformation.actors)
     {
-        for (const auto &agentName : eventDetectorInformation.actorInformation.actors.value())
+        for (const auto &agentName : *eventDetectorInformation.actorInformation.actors)
         {
             AgentInterface *agent = world->GetAgentByName(agentName);
-            if(agent != nullptr && std::find(actors.begin(), actors.end(), agent) == actors.end())
+            if (agent && std::find(actors.begin(), actors.end(), agent) == actors.end())
             {
                 actors.push_back(agent);
             }
@@ -98,9 +87,10 @@ std::vector<const AgentInterface *> ConditionalEventDetector::GetActors(const st
     return actors;
 }
 
-bool ConditionalEventDetector::EvaluateConditionsAtTime(const int time,
-                                                        std::vector<const AgentInterface*>& triggeringAgents)
+std::pair<bool, std::vector<const AgentInterface *>> ConditionalEventDetector::EvaluateConditions(const int time)
 {
+    std::vector<const AgentInterface *> triggeringAgents;
+
     // this flag is used to ensure the first set of triggeringAgents found is correctly
     //  added to the triggeringAgents array (an intersection with an empty set is always empty)
     bool isFirstByEntityConditionEvaluated = false;
@@ -110,24 +100,23 @@ bool ConditionalEventDetector::EvaluateConditionsAtTime(const int time,
     // Evaluate if each condition is met. For some conditions, an array of Agents
     // is returned containing those entities described in the openScenario file
     // as "TriggeringEntities" that meet the prescribed condition.
-    for (const auto& condition : eventDetectorInformation.conditions)
+    for (const auto &condition : eventDetectorInformation.conditions)
     {
         auto conditionEvaluation = evaluateCondition(condition);
 
         // if a vector of AgentInterfaces is returned, it contains those TriggeringEntities who meet the condition
-        std::vector<const AgentInterface*>* triggeringEntitiesWhoMeetCondition = std::get_if<std::vector<const AgentInterface*>>(&conditionEvaluation);
+        std::vector<const AgentInterface *> *triggeringEntitiesWhoMeetCondition = std::get_if<std::vector<const AgentInterface *>>(&conditionEvaluation);
         // get_if resolves to nullptr if the type specified is not found
         if (triggeringEntitiesWhoMeetCondition)
         {
             // if there are TriggeringEntities who meet the condition, add or intersect the set of
             //  entities for this condition into the triggeringAgents collection
-            if (triggeringEntitiesWhoMeetCondition->size() > 0)
+            if (!triggeringEntitiesWhoMeetCondition->empty())
             {
                 std::sort(triggeringEntitiesWhoMeetCondition->begin(),
                           triggeringEntitiesWhoMeetCondition->end(),
-                          [](const AgentInterface* agentA, const AgentInterface* agentB) -> bool
-                          {
-                            return agentA->GetId() < agentB->GetId();
+                          [](const AgentInterface *agentA, const AgentInterface *agentB) -> bool {
+                              return agentA->GetId() < agentB->GetId();
                           });
                 if (!isFirstByEntityConditionEvaluated)
                 {
@@ -136,7 +125,7 @@ bool ConditionalEventDetector::EvaluateConditionsAtTime(const int time,
                 }
                 else
                 {
-                    std::vector<const AgentInterface*> intersection{};
+                    std::vector<const AgentInterface *> intersection{};
                     std::set_intersection(triggeringAgents.begin(), triggeringAgents.end(),
                                           triggeringEntitiesWhoMeetCondition->begin(), triggeringEntitiesWhoMeetCondition->end(),
                                           std::back_inserter(intersection));
@@ -144,7 +133,7 @@ bool ConditionalEventDetector::EvaluateConditionsAtTime(const int time,
                     if (intersection.empty())
                     {
                         // this condition was not met; no further condition checking needs to be done
-                        return false;
+                        return {false, {}};
                     }
                     triggeringAgents = intersection;
                 }
@@ -153,18 +142,18 @@ bool ConditionalEventDetector::EvaluateConditionsAtTime(const int time,
             else
             {
                 // this condition was not met; no further condition checking needs to be done
-                return false;
+                return {false, {}};
             }
         }
         else
         {
-            bool* conditionIsMet = std::get_if<bool>(&conditionEvaluation);
+            bool *conditionIsMet = std::get_if<bool>(&conditionEvaluation);
             if (!(conditionIsMet == nullptr))
             {
                 if (!(*conditionIsMet))
                 {
                     // this condition was not met; no further condition checking needs to be done
-                    return false;
+                    return {false, {}};
                 }
             }
             else
@@ -176,5 +165,5 @@ bool ConditionalEventDetector::EvaluateConditionsAtTime(const int time,
         }
     }
 
-    return true;
+    return {true, triggeringAgents};
 }

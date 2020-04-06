@@ -8,82 +8,91 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
-#include "frameworkModules.h"
 #include "frameworkModuleContainer.h"
+
+#include "frameworkModules.h"
 
 namespace SimulationSlave {
 
 FrameworkModuleContainer::FrameworkModuleContainer(
     FrameworkModules frameworkModules,
-    ConfigurationContainerInterface* configurationContainer,
-    const openpass::common::RuntimeInformation& runtimeInformation,
-    CallbackInterface* callbacks) :
-        stochasticsBinding(callbacks),
-        stochastics(&stochasticsBinding),
-        worldBinding(frameworkModules.worldLibrary, callbacks, &stochastics),
-        world(&worldBinding),
-        observationNetwork(&observationBindings),
-        eventDetectorBinding(callbacks),
-        eventDetectorNetwork(&eventDetectorBinding, &world),
-        manipulatorBinding(callbacks),
-        manipulatorNetwork(&manipulatorBinding, &world),
-        modelBinding(frameworkModules.libraryDir, runtimeInformation, callbacks),
-        agentFactory(&modelBinding, &world, &stochastics, &observationNetwork, &eventNetwork),
-        agentBlueprintProvider(configurationContainer, stochastics),
-        eventNetwork(),
-        spawnPointNetwork(&spawnPointBindings, &world, runtimeInformation)
+    ConfigurationContainerInterface *configurationContainer,
+    const openpass::common::RuntimeInformation &runtimeInformation,
+    CallbackInterface *callbacks) :
+    dataStoreBinding(frameworkModules.dataStoreLibrary, runtimeInformation, callbacks),
+    dataStore(&dataStoreBinding),
+    stochasticsBinding(callbacks),
+    stochastics(&stochasticsBinding),
+    worldBinding(frameworkModules.worldLibrary, callbacks, &stochastics),
+    world(&worldBinding),
+    observationNetwork(&observationBindings),
+    eventDetectorBinding(callbacks),
+    eventDetectorNetwork(&eventDetectorBinding, &world),
+    manipulatorBinding(callbacks),
+    manipulatorNetwork(&manipulatorBinding, &world),
+    modelBinding(frameworkModules.libraryDir, runtimeInformation, callbacks),
+    agentFactory(&modelBinding, &world, &stochastics, &observationNetwork, &eventNetwork, &dataStore),
+    agentBlueprintProvider(configurationContainer, stochastics),
+    eventNetwork(&dataStore),
+    spawnPointNetwork(&spawnPointBindings, &world, runtimeInformation)
 {
-    for(const auto& libraryInfo : frameworkModules.spawnPointLibraries)
+    for (const auto &libraryInfo : frameworkModules.spawnPointLibraries)
     {
         spawnPointBindings.emplace(libraryInfo.libraryName, SpawnPointBinding(callbacks));
     }
-    for(const auto& libraryInfo : frameworkModules.observationLibraries)
+
+    for (const auto& libraryInfo : frameworkModules.observationLibraries)
     {
         observationBindings.emplace(libraryInfo.libraryName, ObservationBinding(runtimeInformation, callbacks));
     }
 }
 
-AgentFactoryInterface* FrameworkModuleContainer::GetAgentFactory()
-{
-    return &agentFactory;
-}
-
-AgentBlueprintProviderInterface* FrameworkModuleContainer::GetAgentBlueprintProvider()
+AgentBlueprintProviderInterface *FrameworkModuleContainer::GetAgentBlueprintProvider()
 {
     return &agentBlueprintProvider;
 }
 
-EventDetectorNetworkInterface* FrameworkModuleContainer::GetEventDetectorNetwork()
+AgentFactoryInterface *FrameworkModuleContainer::GetAgentFactory()
+{
+    return &agentFactory;
+}
+
+DataStoreInterface *FrameworkModuleContainer::GetDataStore()
+{
+    return &dataStore;
+}
+
+EventDetectorNetworkInterface *FrameworkModuleContainer::GetEventDetectorNetwork()
 {
     return &eventDetectorNetwork;
 }
 
-EventNetworkInterface* FrameworkModuleContainer::GetEventNetwork()
+EventNetworkInterface *FrameworkModuleContainer::GetEventNetwork()
 {
     return &eventNetwork;
 }
 
-ManipulatorNetworkInterface* FrameworkModuleContainer::GetManipulatorNetwork()
+ManipulatorNetworkInterface *FrameworkModuleContainer::GetManipulatorNetwork()
 {
     return &manipulatorNetwork;
 }
 
-ObservationNetworkInterface* FrameworkModuleContainer::GetObservationNetwork()
+ObservationNetworkInterface *FrameworkModuleContainer::GetObservationNetwork()
 {
     return &observationNetwork;
 }
 
-SpawnPointNetworkInterface* FrameworkModuleContainer::GetSpawnPointNetwork()
+SpawnPointNetworkInterface *FrameworkModuleContainer::GetSpawnPointNetwork()
 {
     return &spawnPointNetwork;
 }
 
-StochasticsInterface* FrameworkModuleContainer::GetStochastics()
+StochasticsInterface *FrameworkModuleContainer::GetStochastics()
 {
     return &stochastics;
 }
 
-WorldInterface* FrameworkModuleContainer::GetWorld()
+WorldInterface *FrameworkModuleContainer::GetWorld()
 {
     return &world;
 }

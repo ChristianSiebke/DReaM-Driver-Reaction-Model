@@ -25,8 +25,7 @@ TestResourceManager::TestResourceManager()
     fakeStochasticsInterface = new testing::NiceMock<FakeStochastics>();
     fakeParameters = new testing::NiceMock<FakeParameter>();
     fakeAgent = new FakeAgent;
-    stubObservation = new testing::NiceMock<FakeObservation>;
-    stubObservations = new std::map<int, ObservationInterface*>({{0, stubObservation}});
+    fakePublisher = new testing::NiceMock<FakePublisher>;
 
     CallbackInterface* callbacks = nullptr;
     std::map<std::string, int> intParameters {{"DebugLoggingType", 0}, {"SensorModelType", 0}};
@@ -43,7 +42,7 @@ TestResourceManager::TestResourceManager()
                 100,
                 fakeStochasticsInterface,
                 fakeParameters,
-                stubObservations,
+                fakePublisher,
                 callbacks,
                 fakeAgent);
 }
@@ -65,15 +64,10 @@ TestResourceManager::~TestResourceManager()
         delete fakeAgent;
         fakeAgent = nullptr;
     }
-    if (stubObservation)
+    if (fakePublisher)
     {
-        delete stubObservation;
-        stubObservation = nullptr;
-    }
-    if (stubObservations)
-    {
-        delete stubObservations;
-        stubObservations = nullptr;
+        delete fakePublisher;
+        fakePublisher = nullptr;
     }
     if (stubLateralDriver)
     {

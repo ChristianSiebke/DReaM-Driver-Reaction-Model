@@ -9,130 +9,98 @@
 *******************************************************************************/
 
 //-----------------------------------------------------------------------------
-/** \file  ObservationLogImplementation */
+/** \file  observation_LogImplementation */
 //-----------------------------------------------------------------------------
 
-#include <cassert>
-#include <sstream>
-#include <QDir>
+#include <unordered_map>
+#include <variant>
+#include <vector>
 
+#include "Common/commonTools.h"
+#include "Common/observationTypes.h"
+#include "Common/openPassUtils.h"
+
+#include "Interfaces/dataStoreInterface.h"
 #include "Interfaces/stochasticsInterface.h"
-#include "Interfaces/worldInterface.h"
 #include "Interfaces/parameterInterface.h"
-#include "observation_logImplementation.h"
-#include "runStatisticCalculation.h"
+#include "Interfaces/worldInterface.h"
 
-ObservationLogImplementation::ObservationLogImplementation(SimulationSlave::EventNetworkInterface* eventNetwork,
+#include "observation_logImplementation.h"
+
+#include "observationCyclics.h"
+#include "runStatisticCalculation.h"
+#include "runStatistic.h"
+
+ObservationLogImplementation::ObservationLogImplementation(
+        SimulationSlave::EventNetworkInterface* eventNetwork,
         StochasticsInterface* stochastics,
         WorldInterface* world,
         const ParameterInterface* parameters,
-        const CallbackInterface* callbacks) :
+        const CallbackInterface* callbacks,
+        DataStoreReadInterface* dataStore) :
     ObservationInterface(stochastics,
                          world,
                          parameters,
-                         callbacks),
+                         callbacks,
+                         dataStore),
     runtimeInformation(parameters->GetRuntimeInformation()),
-    eventNetwork(eventNetwork)
+    eventNetwork(eventNetwork),
+    dataStore(dataStore),
+    fileHandler{*dataStore}
 {
-    // read parameters
-    try
-    {
-        fileHandler.SetSceneryFile(parameters->GetParametersString().at("SceneryFile"));
-        fileHandler.SetCsvOutput(parameters->GetParametersBool().at("LoggingCyclicsToCsv"));
-        auto loggingGroupsfromConfig = parameters->GetParametersStringVector().at("LoggingGroups");
-        for (auto loggingGroup : loggingGroupsfromConfig)
-        {
-            if (loggingGroup == "Trace")
-            {
-                loggingGroups.push_back(LoggingGroup::Trace);
-                continue;
-            }
-            if (loggingGroup == "Visualization")
-            {
-                loggingGroups.push_back(LoggingGroup::Visualization);
-                continue;
-            }
-            if (loggingGroup == "RoadPosition")
-            {
-                loggingGroups.push_back(LoggingGroup::RoadPosition);
-                continue;
-            }
-            if (loggingGroup == "RoadPositionExtended")
-            {
-                loggingGroups.push_back(LoggingGroup::RoadPositionExtended);
-                continue;
-            }
-            if (loggingGroup == "Vehicle")
-            {
-                loggingGroups.push_back(LoggingGroup::Vehicle);
-                continue;
-            }
-            if (loggingGroup == "Sensor")
-            {
-                loggingGroups.push_back(LoggingGroup::Sensor);
-                continue;
-            }
-            if (loggingGroup == "SensorExtended")
-            {
-                loggingGroups.push_back(LoggingGroup::SensorExtended);
-                continue;
-            }
-            if (loggingGroup == "Driver")
-            {
-                loggingGroups.push_back(LoggingGroup::Driver);
-                continue;
-            }
-
-            const std::string msg = "There is no logging group named " + loggingGroup;
-            LOG(CbkLogLevel::Error, msg);
-            throw std::runtime_error(msg);
-        }
-    }
-    catch (...)
-    {
-        const std::string msg = COMPONENTNAME + " could not init parameters";
-        LOG(CbkLogLevel::Error, msg);
-        throw std::runtime_error(msg);
-    }
-}
-
-//-----------------------------------------------------------------------------
-//! \brief Logs a key/value pair
-//!
-//! @param[in]     time      current time
-//! @param[in]     agentId   agent identifier
-//! @param[in]     group     LoggingGroup the key/value pair should be assigned to
-//! @param[in]     key       Key of the value to log
-//! @param[in]     value     Value to log
-//-----------------------------------------------------------------------------
-void ObservationLogImplementation::Insert(int time,
-        int agentId,
-        LoggingGroup group,
-        const std::string& key,
-        const std::string& value)
-{
-    if (std::find(loggingGroups.cbegin(), loggingGroups.cend(), group) == loggingGroups.cend())
-    {
-        //ignore the value, because the specified group isn't logged
-        return;
-    }
-    std::string extendedKey = (agentId < 10 ? "0" : "") + std::to_string(agentId) + ":" + key;
-    cyclics.Insert(time, extendedKey, value);
-}
-
-//-----------------------------------------------------------------------------
-//! \brief Logs an event
-//!
-//! @param[in]     event     Shared pointer to the event to log
-//-----------------------------------------------------------------------------
-void ObservationLogImplementation::InsertEvent(std::shared_ptr<EventInterface> event)
-{
-    eventNetwork->InsertEvent(event);
 }
 
 void ObservationLogImplementation::SlavePreHook()
 {
-    fileHandler.SetOutputDir(runtimeInformation.directories.output);
+    std::string filename{"simulationOutput.xml"};
+
+    try
+    {
+        filename = GetParameters()->GetParametersString().at("OutputFilename");
+    }
+    catch (const std::out_of_range&)
+    {
+        LOG(CbkLogLevel::Warning, "Using default output filename: " + filename);
+    }
+
+    try
+    {
+        fileHandler.SetCsvOutput(GetParameters()->GetParametersBool().at("LoggingCyclicsToCsv"));
+    }
+    catch (const std::out_of_range&)
+    {
+        std::string msg = "Mandatory config parameter 'LoggingCyclicsToCsv' is missing";
+        LOG(CbkLogLevel::Error, msg);
+        throw std::runtime_error(msg);
+    }
+
+    try
+    {
+        for (const auto& loggingGroup : GetParameters()->GetParametersStringVector().at("LoggingGroups"))
+        {
+            try
+            {
+                const auto& groupColumns = LOGGINGGROUP_DEFINITIONS.at(loggingGroup);
+                selectedColumns.insert(groupColumns.begin(), groupColumns.end());
+            }
+            catch (const std::out_of_range&)
+            {
+                std::string msg = "Unsupported LoggingGroup '" + loggingGroup + "'";
+                LOG(CbkLogLevel::Error, msg);
+                throw std::runtime_error(msg);
+            }
+        }
+    }
+    catch (const std::out_of_range&)
+    {
+        const auto& traceColumns = LOGGINGGROUP_DEFINITIONS.at("Trace");
+        selectedColumns.insert(traceColumns.begin(), traceColumns.end());
+
+        LOG(CbkLogLevel::Warning, "No LoggingGroups configured. Defaulting to 'Trace'");
+    }
+
+    fileHandler.SetOutputLocation(runtimeInformation.directories.output, filename);
+    fileHandler.SetSceneryFile(std::get<std::string>(dataStore->GetStatic("SceneryFile").at(0)));
     fileHandler.WriteStartOfFile(runtimeInformation.versions.framework.str());
 }
 
@@ -146,9 +114,24 @@ void ObservationLogImplementation::SlavePostRunHook(const RunResultInterface& ru
 {
     RunStatisticCalculation::DetermineEgoCollision(runStatistic, runResult, GetWorld());
     runStatistic.VisibilityDistance = GetWorld()->GetVisibilityDistance();
-    RunStatisticCalculation::CalculateTotalDistanceTraveled(runStatistic, GetWorld());
 
-    fileHandler.WriteRun(runResult, runStatistic, cyclics, GetWorld(), eventNetwork);
+    const auto dsCyclics = dataStore->GetCyclic(std::nullopt, std::nullopt, "*");
+
+    for (const CyclicRow& dsCyclic : *dsCyclics)
+    {
+        std::stringstream entityStr;
+        entityStr << std::setw(2) << std::setfill('0') << dsCyclic.entityId;
+
+        std::visit(openpass::utils::FlatParameter::to_string([this, &dsCyclic, &entityStr](const std::string& valueStr)
+        {
+            if (selectedColumns.find(dsCyclic.key) != selectedColumns.end())
+            {
+                cyclics.Insert(dsCyclic.timestamp, entityStr.str() + ":" + dsCyclic.key, valueStr);
+            }
+        }), dsCyclic.value);
+    }
+
+    fileHandler.WriteRun(runResult, runStatistic, cyclics);
 }
 
 void ObservationLogImplementation::SlavePostHook()

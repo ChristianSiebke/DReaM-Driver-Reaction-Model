@@ -11,7 +11,6 @@
 #pragma once
 
 #include "gmock/gmock.h"
-#include "Interfaces/observationInterface.h"
 
 class FakeObservation : public ObservationInterface
 {

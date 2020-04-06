@@ -202,7 +202,7 @@ public:
                                      double &agentDistanceFromInitial,
                                      Common::Vector2d &agentReferencePoint,
                                      Common::Vector2d &otherReferencePoint,
-                                     int &agentPenetratingCorner);
+                                     size_t &agentPenetratingCorner);
 
     //-----------------------------------------------------------------------------
     /*! Calculates parameters of point of contact

@@ -29,6 +29,8 @@
 #include "Interfaces/agentInterface.h"
 #include "Interfaces/componentInterface.h"
 
+class DataStoreWriteInterface;
+
 namespace SimulationSlave
 {
 
@@ -42,8 +44,7 @@ class SpawnItemParameter;
 class Agent
 {
 public:
-    Agent(int id,
-          WorldInterface *world);
+    Agent(int id, WorldInterface* world);
     Agent(const Agent&) = delete;
     Agent(Agent&&) = delete;
     Agent& operator=(const Agent&) = delete;
@@ -55,6 +56,7 @@ public:
     Channel *GetChannel(int id) const;
     ComponentInterface *GetComponent(std::string name) const;
     const std::map<std::string, ComponentInterface*> &GetComponents() const;
+
     int GetId() const
     {
         return id;
@@ -64,16 +66,19 @@ public:
                      ModelBinding *modelBinding,
                      StochasticsInterface *stochastics,
                      SimulationSlave::ObservationNetworkInterface *observationNetwork,
-                     EventNetworkInterface *eventNetwork);
+                     EventNetworkInterface *eventNetwork,
+                     DataStoreWriteInterface* dataStore);
 
     bool IsValid() const
     {
         return agentInterface->IsValid();
     }
 
-    AgentInterface *GetAgentAdapter() const;
+    AgentInterface* GetAgentAdapter() const;
 
     void SetAgentAdapter(AgentInterface *agentAdapt);
+
+    void LinkSchedulerTime(int* const schedulerTime);
 
 private:
     // framework parameters
@@ -83,7 +88,10 @@ private:
     std::map<int, Channel*> channels;
     std::map<std::string, ComponentInterface*> components;
 
-    AgentInterface *agentInterface = nullptr;
+    AgentInterface* agentInterface = nullptr;
+    std::unique_ptr<PublisherInterface> publisher;
+
+    int* currentTime = nullptr;
 };
 
 } // namespace SimulationSlave

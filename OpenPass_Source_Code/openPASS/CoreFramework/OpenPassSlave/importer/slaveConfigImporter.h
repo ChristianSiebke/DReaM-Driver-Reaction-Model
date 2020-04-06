@@ -37,14 +37,6 @@ class SlaveConfigImporter
 {
 public:
     /*!
-    * \brief Imports the logging groups for the observer
-    *
-    * @param[in]     loggingGroupsElement   Element containing the logging groups information
-    * @param[out]    loggingGroups          Vector where the logging groups get saved
-    */
-    static void ImportLoggingGroups(QDomElement loggingGroupsElement, std::vector<std::string>& loggingGroups);
-
-    /*!
     * \brief Imports the libraries used by the simulator
     *
     * @param[in]     librariesElement   Element containing the libraries information
@@ -60,7 +52,7 @@ public:
     * @param[in]     experimentConfigElement    Element containing the information
     * @param[out]    experimentConfig           Struct into which the values get saved
     */
-    static void ImportExperimentConfig(QDomElement experimentConfigElement,
+    static void ImportExperiment(QDomElement experimentElement,
                                        ExperimentConfig& experimentConfig);
 
     /*!
@@ -69,7 +61,7 @@ public:
     * @param[in]     scenarioConfigElement    Element containing the information
     * @param[out]    scenarioConfig           Struct into which the values get saved
     */
-    static void ImportScenarioConfig(QDomElement scenarioConfigElement,
+    static void ImportScenario(QDomElement scenarioElement,
                                      const std::string configurationDir,
                                      ScenarioConfig& scenarioConfig);
 
@@ -79,7 +71,7 @@ public:
     * @param[in]     environmentConfigElement    Element containing the information
     * @param[out]    environmentConfig           Struct into which the values get saved
     */
-    static void ImportEnvironmentConfig(QDomElement environmentConfigElement,
+    static void ImportEnvironment(QDomElement environmentElement,
                                         EnvironmentConfig& environmentConfig);
 
     /*!
@@ -88,13 +80,11 @@ public:
      * \param spawnPointsInfo struct into which the values get saved
      * \return
      */
-    static void ImportSpawnPointsConfig(const QDomElement& spawnPointsConfigElement,
+    static void ImportSpawners(const QDomElement& spawnersElement,
                                         SpawnPointLibraryInfoCollection& spawnPointsInfo);
 
-    static void ImportObservationConfig(const QDomElement& librariesElement,
-                                        std::vector<std::string>& loggingGroups,
-                                        bool logCyclicsToCsv,
-                                        ObservationInstanceCollection& observationConfig);
+    static void ImportObservations(const QDomElement& observationsElement,
+                                        ObservationInstanceCollection& observations);
 
     //Overall import function
     /*!
@@ -111,13 +101,14 @@ public:
                        Configuration::SlaveConfig& slaveConfig);
 
 private:
-    static std::string GetLibrary(const QDomElement& root, std::string key, std::string tag);
-    static constexpr auto supportedConfigVersion = "0.7.0";
+    static std::string GetLibrary(const QDomElement& root, const std::string& key, const std::string& tag);
+    static constexpr auto supportedConfigVersion = "0.8.0";
 
     //! \brief Identifier with correspondiong default values for mandatory libraries
     //! \note: The identifier is identical to the XML tag
     inline static const ExperimentConfig::Libraries defaultLibraryMapping =
     {
+        {"DataStoreLibrary", "BasicDataStore"},
         {"EventDetectorLibrary", "EventDetector"},
         {"ManipulatorLibrary", "Manipulator"},
         {"WorldLibrary", "World"},

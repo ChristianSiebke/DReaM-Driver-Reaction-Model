@@ -46,7 +46,8 @@ public:
                              StochasticsInterface* stochastics,
                              WorldInterface* world,
                              EventNetworkInterface* eventNetwork,
-                             const std::string& sceneryPath) override;
+                             const std::string& sceneryPath,
+                             DataStoreReadInterface* dataStore) override;
     virtual const std::map<int, ObservationModule*>& GetObservationModules() override;
 
     virtual bool InitAll() override;

@@ -65,12 +65,15 @@ void ActionSecondaryDriverTasksImplementation::Trigger(int time)
 {
     Q_UNUSED(time);
 
-    if (GetAgent()->GetEffBrakePedal()>0)
+    if (GetAgent()->GetEffBrakePedal() > 0.0)
     {
         GetAgent()->SetBrakeLight(true);
-    }else
+        GetPublisher()->Publish("BrakeLight", true);
+    }
+    else
     {
         GetAgent()->SetBrakeLight(false);
+        GetPublisher()->Publish("BrakeLight", false);
     }
 
     GetAgent()->SetIndicatorState(in_IndicatorState);
@@ -78,4 +81,23 @@ void ActionSecondaryDriverTasksImplementation::Trigger(int time)
     GetAgent()->SetHighBeamLight(in_highBeamLightSwitch);
     GetAgent()->SetHorn(in_hornSwitch);
     GetAgent()->SetFlasher(in_flasherSwitch);
+
+    GetPublisher()->Publish("IndicatorState", static_cast<int>(in_IndicatorState));
+
+    LightState effectiveLightState = LightState::Off;
+
+    if (in_flasherSwitch)
+    {
+        effectiveLightState = LightState::Flash;
+    }
+    else if (in_highBeamLightSwitch)
+    {
+        effectiveLightState = LightState::HighBeam;
+    }
+    else if (in_headLightSwitch)
+    {
+        effectiveLightState = LightState::LowBeam;
+    }
+
+    GetPublisher()->Publish("LightStatus", static_cast<int>(effectiveLightState));
 }

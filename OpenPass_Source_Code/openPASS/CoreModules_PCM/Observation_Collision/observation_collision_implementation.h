@@ -18,7 +18,6 @@
 #include <QTextStream>
 #include <QXmlStreamWriter>
 #include "componentPorts.h"
-#include "observationInterface.h"
 
 /**
 * \addtogroup CoreModules_PCM openPASS CoreModules pcm

@@ -45,7 +45,7 @@ TEST(ObservationCyclics_Test, GetTimeSteps_ReturnsCorrectTimesteps)
     cyclics.Insert(100, "ParameterA", "345");
     cyclics.Insert(150, "ParameterB", "456");
 
-    std::vector<int> timesteps = *cyclics.GetTimeSteps();
+    const auto& timesteps = cyclics.GetTimeSteps();
     ASSERT_THAT(timesteps, ElementsAre(0, 100, 150));
 }
 
@@ -114,39 +114,6 @@ TEST(ObservationCyclics_Test, GetSamplesLineSamplesNotUntilEnd_ReturnsLineWithEm
     ASSERT_THAT(samplesLine, Eq("456, 678, "));
     samplesLine = cyclics.GetSamplesLine(2);
     ASSERT_THAT(samplesLine, Eq(", 789, "));
-}
-
-TEST(RunStatisticCalculation_Test, CalculateTotalDistanceTraveled_SetsCorrectDistances)
-{
-    NiceMock<FakeWorld> fakeWorld;
-
-    NiceMock<FakeAgent> fakeEgo;
-    ON_CALL(fakeEgo, GetDistanceTraveled()).WillByDefault(Return(100.0));
-    ON_CALL(fakeWorld, GetEgoAgent()).WillByDefault(Return(&fakeEgo));
-
-    NiceMock<FakeAgent> fakeAgent1;
-    ON_CALL(fakeAgent1, GetDistanceTraveled()).WillByDefault(Return(50.0));
-    ON_CALL(fakeAgent1, IsEgoAgent()).WillByDefault(Return(false));
-
-    NiceMock<FakeAgent> fakeAgent2;
-    ON_CALL(fakeAgent2, GetDistanceTraveled()).WillByDefault(Return(8.0));
-    ON_CALL(fakeAgent2, IsEgoAgent()).WillByDefault(Return(false));
-
-    NiceMock<FakeAgent> fakeAgent3;
-    ON_CALL(fakeAgent3, GetDistanceTraveled()).WillByDefault(Return(0.3));
-    ON_CALL(fakeAgent3, IsEgoAgent()).WillByDefault(Return(false));
-
-    std::map<int, AgentInterface*> agents{ {0, &fakeEgo}, {1, &fakeAgent1}, {2, &fakeAgent2} };
-    std::list<const AgentInterface*> removedAgents{&fakeAgent3};
-    ON_CALL(fakeWorld, GetAgents()).WillByDefault(ReturnRef(agents));
-    ON_CALL(fakeWorld, GetRemovedAgents()).WillByDefault(ReturnRef(removedAgents));
-
-    RunStatistic runStatistic{0};
-
-    RunStatisticCalculation::CalculateTotalDistanceTraveled(runStatistic, &fakeWorld);
-
-    ASSERT_THAT(runStatistic.EgoDistanceTraveled, DoubleEq(100.0));
-    ASSERT_THAT(runStatistic.TotalDistanceTraveled, DoubleEq(158.3));
 }
 
 TEST(RunStatisticCalculation_Test, DetermineEgoCollisionWithEgoCollision_SetsEgoCollisionTrue)

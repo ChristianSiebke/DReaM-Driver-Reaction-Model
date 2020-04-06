@@ -35,7 +35,6 @@
 #define ACTION_LONGITUDINAL_DRIVER_IMPLEMENTATION_H
 
 #include "Interfaces/modelInterface.h"
-#include "Interfaces/observationInterface.h"
 #include "Common/primitiveSignals.h"
 
 //! \ingroup Action_LongitudinalDriver

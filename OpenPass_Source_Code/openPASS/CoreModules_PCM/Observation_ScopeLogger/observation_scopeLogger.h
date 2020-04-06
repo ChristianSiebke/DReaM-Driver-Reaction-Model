@@ -21,6 +21,5 @@
 #define OBSERVATION_SCOPELOGGER_H
 
 #include "observation_scopeLogger_global.h"
-#include "observationInterface.h"
 
 #endif // OBSERVATION_SCOPELOGGER_H

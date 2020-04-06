@@ -18,8 +18,8 @@
 #include "fakeStochastics.h"
 #include "fakeParameter.h"
 #include "fakeAgent.h"
-#include "fakeObservation.h"
 #include "algorithm_lateralImplementation.h"
+#include "fakePublisher.h"
 
 /**********************************************************/
 // Define fake classes necessary for testing
@@ -37,7 +37,7 @@ public:
             int cycleTime,
             StochasticsInterface* stochastics,
             const ParameterInterface* parameters,
-            const std::map<int, ObservationInterface*> *observations,
+            PublisherInterface * const publisher,
             const CallbackInterface* callbacks,
             AgentInterface* agent) :
             AlgorithmLateralImplementation(
@@ -49,7 +49,7 @@ public:
                 cycleTime,
                 stochastics,
                 parameters,
-                observations,
+                publisher,
                 callbacks,
                 agent){}
 

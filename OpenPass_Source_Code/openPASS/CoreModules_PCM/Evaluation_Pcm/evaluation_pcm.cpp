@@ -9,7 +9,6 @@
 **********************************************************************/
 
 #include "evaluation_pcm.h"
-#include "observationInterface.h"
 #include "evaluation_pcm_implementation.h"
 
 const std::string Version = "1.1.0";    //!< version of the current module - has to be incremented manually

@@ -98,6 +98,7 @@ namespace openpass::importer::xml::parameterImporter::tag
     constexpr char Int[] {"Int"};
     constexpr char IntVector[] {"IntVector"};
     constexpr char String[] {"String"};
+    constexpr char StringVector[] {"StringVector"};
 
     constexpr char NormalDistribution[] {"NormalDistribution"};
     constexpr char LogNormalDistribution[] {"LogNormalDistribution"};
@@ -354,33 +355,24 @@ namespace openpass::importer::xml::sceneryImporter::attribute
 
 namespace openpass::importer::xml::slaveConfigImporter::tag
 {
-    constexpr char agentProfile[] {"AgentProfile"};
-    constexpr char environmentConfig[] {"EnvironmentConfig"};
-    constexpr char experimentConfig[] {"ExperimentConfig"};
+    constexpr char environment[] {"Environment"};
+    constexpr char experiment[] {"Experiment"};
     constexpr char friction[] {"Friction"};
     constexpr char frictions[] {"Frictions"};
     constexpr char homogenities[] {"Homogenities"};
     constexpr char homogenity[] {"Homogenity"};
     constexpr char libraries[] {"Libraries"};
     constexpr char library[] {"Library"};
-    constexpr char loggingGroup[] {"LoggingGroup"};
-    constexpr char loggingGroups[] {"LoggingGroups"};
-    constexpr char platoonRate[] {"PlatoonRate"};
-    constexpr char platoonRates[] {"PlatoonRates"};
+    constexpr char observation[] {"Observation"};
+    constexpr char observations[] {"Observations"};
+    constexpr char parameters[] {"Parameters"};
     constexpr char priority[] {"Priority"};
-    constexpr char regularLane[] {"RegularLane"};
-    constexpr char rightMostLane[] {"RightMostLane"};
-    constexpr char scenarioConfig[] {"ScenarioConfig"};
-    constexpr char spawnPoint[] {"SpawnPoint"};
+    constexpr char scenario[] {"Scenario"};
+    constexpr char spawner[] {"Spawner"};
+    constexpr char spawners[] {"Spawners"};
     constexpr char timeOfDay[] {"TimeOfDay"};
     constexpr char timeOfDays[] {"TimeOfDays"};
-    constexpr char trafficConfig[] {"TrafficConfig"};
-    constexpr char trafficParameter[] {"TrafficParameter"};
-    constexpr char trafficVolume[] {"TrafficVolume"};
-    constexpr char trafficVolumes[] {"TrafficVolumes"};
     constexpr char type[] {"Type"};
-    constexpr char velocities[] {"Velocities"};
-    constexpr char velocity[] {"Velocity"};
     constexpr char visibilityDistance[] {"VisibilityDistance"};
     constexpr char visibilityDistances[] {"VisibilityDistances"};
     constexpr char weather[] {"Weather"};

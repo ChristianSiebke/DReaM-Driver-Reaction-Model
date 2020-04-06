@@ -46,6 +46,7 @@ struct FrameworkModules
 public:
     FrameworkModules(const int logLevel,
                      const std::string& libraryDir,
+                     const std::string& dataStoreLibrary,
                      const std::string& eventDetectorLibrary,
                      const std::string& manipulatorLibrary,
                      const ObservationInstanceCollection& observationLibraries,
@@ -54,6 +55,7 @@ public:
                      const SpawnPointLibraryInfoCollection& spawnPointLibraries) :
         logLevel{logLevel},
         libraryDir{libraryDir},
+        dataStoreLibrary{openpass::core::Directories::Concat(libraryDir, dataStoreLibrary)},
         eventDetectorLibrary{openpass::core::Directories::Concat(libraryDir, eventDetectorLibrary)},
         manipulatorLibrary{openpass::core::Directories::Concat(libraryDir, manipulatorLibrary)},
         observationLibraries{ConcatenateObservationLibraries(libraryDir, observationLibraries)},
@@ -64,6 +66,7 @@ public:
 
     const int logLevel;
     const std::string libraryDir;
+    const std::string dataStoreLibrary;
     const std::string eventDetectorLibrary;
     const std::string manipulatorLibrary;
     const ObservationInstanceCollection observationLibraries;

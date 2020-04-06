@@ -18,18 +18,18 @@
 #include "Common/observationTypes.h"
 #include "Interfaces/observationInterface.h"
 
-enum class StopReason
-{
-    DueToTimeOut
-};
-
 class RunStatistic
 {
 public:
+    enum class StopReason
+    {
+        DueToTimeOut
+    };
+
     RunStatistic(std::uint32_t randomSeed);
 
     void AddStopReason(int time, StopReason reason);
-    void WriteStatistics(std::shared_ptr<QXmlStreamWriter> fileStream);
+    void WriteStatistics(QXmlStreamWriter* fileStream);
 
     // general
     int StopTime = -1; //this stays on UNDEFINED_NUMBER, if due time out -> replace in c#
@@ -47,7 +47,7 @@ private:
     std::list<int> _followerIds;
 
     static const QString StopReasonsStrings[];
-    QString _stopReason = StopReasonsStrings[static_cast<int>(StopReason::DueToTimeOut)];
+    int _stopReasonIdx = static_cast<int>(StopReason::DueToTimeOut);
 }; // class RunStatistic
 
 

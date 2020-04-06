@@ -15,7 +15,6 @@
 //-----------------------------------------------------------------------------
 
 #include "observation_scopeLogger.h"
-#include "observationInterface.h"
 #include "observation_scopeLogger_implementation.h"
 
 const std::string Version = "0.0.1";    //!< The version of the current module - has to be incremented manually

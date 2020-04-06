@@ -12,7 +12,6 @@
 #pragma once
 
 #include "Interfaces/modelInterface.h"
-#include "Interfaces/observationInterface.h"
 #include "Common/primitiveSignals.h"
 
 /** \addtogroup Algorithm_Lateral
@@ -102,7 +101,7 @@ public:
         int cycleTime,
         StochasticsInterface *stochastics,
         const ParameterInterface *parameters,
-        const std::map<int, ObservationInterface*> *observations,
+        PublisherInterface * const publisher,
         const CallbackInterface *callbacks,
         AgentInterface *agent) :
         AlgorithmInterface(
@@ -114,7 +113,7 @@ public:
             cycleTime,
             stochastics,
             parameters,
-            observations,
+            publisher,
             callbacks,
             agent)
     {}

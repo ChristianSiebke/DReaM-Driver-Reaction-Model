@@ -8,17 +8,15 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
-
+#include "algorithm_autonomousEmergencyBrakingImplementation.h"
 #include "fakeAgent.h"
-#include "fakeObservation.h"
 #include "fakeParameter.h"
+#include "fakePublisher.h"
 #include "fakeStochastics.h"
 #include "fakeWorld.h"
 #include "fakeWorldObject.h"
-#include "Interfaces/observationInterface.h"
-#include "algorithm_autonomousEmergencyBrakingImplementation.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 using ::testing::NiceMock;
 
@@ -32,10 +30,10 @@ public:
         delete implementation;
     }
 
-    void SetEgoValues (double velocity, double acceleration, double yawRate);
+    void SetEgoValues(double velocity, double acceleration, double yawRate);
 
-    AlgorithmAutonomousEmergencyBrakingImplementation* implementation;
+    AlgorithmAutonomousEmergencyBrakingImplementation *implementation;
     NiceMock<FakeWorld> fakeWorldInterface;
     NiceMock<FakeAgent> fakeEgoAgent;
-    NiceMock<FakeObservation> fakeObservation;
+    NiceMock<FakePublisher> fakePublisher;
 };

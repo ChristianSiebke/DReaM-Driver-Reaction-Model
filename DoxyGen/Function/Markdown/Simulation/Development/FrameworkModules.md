@@ -35,6 +35,21 @@ Then the AgentType with the components and channels is build by the DynamicAgent
 
 ![AgentBlueprintProviderSequenceDiagram](AgentBlueprintProviderSequence.svg)
 
+\section dev_framework_modules_datastore DataStore
+
+The DataStore accepts arbitrary values from different components (from framework as well as agents).
+The stored values if cyclic and acyclic type are associated with an timestamp, entity id and a key (topic).
+Static values are only associated with a key.
+
+Typically, Observers are using the DataStore to retrieve information about the simulation.
+This can happen during the simulation run and/or at the end of a run.
+For the keys, a generic datatype is used (strings).
+For the values, a set of predefined datatypes is used (bool, char, int, size_t, float, double, string).
+A value can also hold a vector of one of the mentioned datatypes.
+
+For information about the usage, please refer to the implementation's inline documentation.
+
+
 \section dev_framework_modules_eventdetectors EventDetectors
 
 [//]: <> "Please refer to each section!"

@@ -14,7 +14,6 @@
 *
 * This class contains all functionality of the module. */
 //-----------------------------------------------------------------------------
-
 #pragma once
 
 #include "basicEvent.h"
@@ -27,54 +26,32 @@
 class CollisionEvent : public BasicEvent
 {
 public:
-    CollisionEvent(int time,
-                   std::string source,
-                   bool collisionWithAgent,
-                   int collisionAgentId,
-                   int collisionOpponentId):
-        BasicEvent(time,
-                   "Collision",
-                   source),
-        collisionWithAgent(collisionWithAgent),
-        collisionAgentId(collisionAgentId),
-        collisionOpponentId(collisionOpponentId)
-    {}
-    CollisionEvent(const CollisionEvent&) = delete;
-    CollisionEvent(CollisionEvent&&) = delete;
-    CollisionEvent& operator=(const CollisionEvent&) = delete;
-    CollisionEvent& operator=(CollisionEvent&&) = delete;
-    virtual ~CollisionEvent() override = default;
-
-    /*!
-    * \brief Returns the category of the event.
-    *
-    * @return	     EventCategory.
-    */
-    virtual EventDefinitions::EventCategory GetCategory() const override
+    CollisionEvent(int time, std::string source, bool collisionWithAgent, int collisionAgentId, int collisionOpponentId) :
+        BasicEvent{time, "Collision", source, {collisionAgentId, collisionOpponentId}, {}},
+        collisionWithAgent{collisionWithAgent},
+        collisionAgentId{collisionAgentId},
+        collisionOpponentId{collisionOpponentId}
     {
-        return EventDefinitions::EventCategory::Collision;
+        parameter.emplace("CollisionWithAgent", collisionWithAgent);
     }
 
-    /*!
-    * \brief Returns all parameters of the event as string list.
-    * \details Returns the CollisionWithAgent flag and both worldobject ids as string list.
-    *
-    * @return	     List of string pairs of the event parameters.
-    */
-    virtual EventParameters GetParametersAsString() override
-    {
-        EventParameters eventParameters;
+    ~CollisionEvent() override = default;
 
+    EventDefinitions::EventCategory GetCategory() const override
+    {
+        return EventDefinitions::EventCategory::OpenPASS;
+    }
+
+    EventParameters GetParametersAsString() override
+    {
+        EventParameters eventParameters = BasicEvent::GetParametersAsString();
         eventParameters.push_back({"CollisionWithAgent", collisionWithAgent ? "true" : "false"});
         eventParameters.push_back({"CollisionAgentId", std::to_string(collisionAgentId)});
         eventParameters.push_back({"CollisionOpponentId", std::to_string(collisionOpponentId)});
-
         return eventParameters;
     }
 
-
-    bool collisionWithAgent;
-    int collisionAgentId;
-    int collisionOpponentId;
+    [[deprecated("Will be replaced by BasicEvent::parameter")]] bool collisionWithAgent;
+    [[deprecated("Will be replaced by BasicEvent::parameter")]] int collisionAgentId;
+    [[deprecated("Will be replaced by BasicEvent::parameter")]] int collisionOpponentId;
 };
-

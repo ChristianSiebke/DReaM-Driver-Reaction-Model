@@ -13,11 +13,10 @@
 #include "gmock/gmock.h"
 #include "dontCare.h"
 
-#include "fakeEventNetwork.h"
+#include "fakePublisher.h"
 #include "fakeParameter.h"
 #include "fakeAgent.h"
 #include "fakeWorld.h"
-#include "fakeObservation.h"
 
 #include "trajectoryFollowerImplementation.h"
 
@@ -40,22 +39,16 @@ public:
     EventContainer fakeActivatingEventContainer = {fakeEvent};
     EventContainer fakeEmptyEventContainer = {};
 
-    NiceMock<FakeEventNetwork> fakeEventNetwork;
+    NiceMock<FakePublisher> fakePublisher;
 
     std::map<std::string, bool> fakeBools;
     NiceMock<FakeParameter> fakeParameters;
 
     NiceMock<FakeAgent> fakeAgent;
 
-    NiceMock<FakeObservation> fakeObservation;
-    std::map<int, ObservationInterface*> fakeObservations{{0, &fakeObservation}};
-
     std::shared_ptr<TrajectoryFollowerImplementation> trajectoryFollower;
 
     TrajectoryTester(const int cycleTime = 100);
-
-    TrajectoryTester(const int cycleTime,
-                     SimulationSlave::EventNetworkInterface * eventNetwork);
 
     TrajectoryTester(const bool enforceTrajectory,
                      const bool automaticDeactivation,

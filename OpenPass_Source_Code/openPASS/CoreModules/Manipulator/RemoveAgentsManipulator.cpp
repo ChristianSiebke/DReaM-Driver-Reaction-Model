@@ -14,8 +14,6 @@
 
 #include "RemoveAgentsManipulator.h"
 
-#include <QtGlobal>
-
 RemoveAgentsManipulator::RemoveAgentsManipulator(WorldInterface *world,
                                                  std::shared_ptr<openScenario::GlobalEntityAction> action,
                                                  SimulationSlave::EventNetworkInterface *eventNetwork,
@@ -54,9 +52,7 @@ EventContainer RemoveAgentsManipulator::GetEvents()
 {
     EventContainer manipulatorSpecificEvents{};
 
-    const auto &conditionalEvents = eventNetwork->GetActiveEventCategory(EventDefinitions::EventCategory::Conditional);
-
-    for(const auto &event: conditionalEvents)
+    for (const auto &event : eventNetwork->GetActiveEventCategory(EventDefinitions::EventCategory::OpenSCENARIO))
     {
         const auto conditionalEvent = std::static_pointer_cast<ConditionalEvent>(event);
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -17,7 +17,7 @@ struct OutputAttributes
     const QString FRAMEWORKVERSION = "FrameworkVersion";
     const QString SCHEMAVERSION = "SchemaVersion";
     const QString RUNID = "RunId";
-    const QString FAILUREPROBABITLITY= "FailureProbability";
+    const QString FAILUREPROBABITLITY = "FailureProbability";
     const QString LATENCY = "Latency";
     const QString OPENINGANGLEH = "OpeningAngleH";
     const QString OPENINGANGLEV = "OpeningAngleV";
@@ -35,7 +35,6 @@ struct OutputAttributes
     const QString TIME = "Time";
     const QString TYPE = "Type";
     const QString NAME = "Name";
-    const QString TRIGGERINGEVENTID = "TriggeringEventId";
     const QString KEY = "Key";
     const QString VALUE = "Value";
     const QString ID = "Id";
@@ -66,4 +65,28 @@ struct OutputTags
     const QString SAMPLE = "Sample";
     const QString SCENERYFILE = "SceneryFile";
     const QString VEHICLEATTRIBUTES = "VehicleAttributes";
+    const QString TRIGGERINGENTITIES = "TriggeringEntities";
+    const QString AFFECTEDENTITIES = "AffectedEntities";
 };
+
+namespace output::tag {
+static constexpr char ENTITY[] = "Entity";
+static constexpr char PARAMETERS[] = "Parameters";
+static constexpr char PARAMETER[] = "Parameter";
+} // namespace output::tag
+
+namespace output::attribute {
+static constexpr char ID[] = "Id";
+static constexpr char TIME[] = "Time";
+static constexpr char TYPE[] = "Type";
+static constexpr char NAME[] = "Name";
+static constexpr char KEY[] = "Key";
+static constexpr char VALUE[] = "Value";
+} // namespace output::attribute
+
+namespace output::event::tag {
+static constexpr char EVENTS[] = "NewEvents";
+static constexpr char EVENT[] = "Event";
+static constexpr char TRIGGERING_ENTITIES[] = "TriggeringEntities";
+static constexpr char AFFECTED_ENTITIES[] = "AffectedEntities";
+} // namespace output::event::tag

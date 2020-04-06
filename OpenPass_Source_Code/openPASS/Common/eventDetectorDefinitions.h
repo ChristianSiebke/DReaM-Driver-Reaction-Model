@@ -266,10 +266,13 @@ using Condition = std::variant<ReachPositionRoadCondition,
                                TimeHeadwayCondition>;
 using ConditionCollection = std::vector<Condition>;
 
+///
+/// \brief Event specific information collected from an openSCENARIO story
+///
 struct ConditionalEventDetectorInformation
 {
     ActorInformation actorInformation{};
-    int numberOfExecutions{};
+    int numberOfExecutions{};             ///< Specifies number of executions. Use -1 for "unrestricted"
     std::string eventName{};
     ConditionCollection conditions{};
 };

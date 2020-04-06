@@ -25,7 +25,7 @@ SensorFusionImplementation::SensorFusionImplementation(
         StochasticsInterface *stochastics,
         WorldInterface *world,
         const ParameterInterface *parameters,
-        const std::map<int, ObservationInterface*> *observations,
+        PublisherInterface * const publisher,
         const CallbackInterface *callbacks,
         AgentInterface *agent) :
     UnrestrictedModelInterface(
@@ -38,7 +38,7 @@ SensorFusionImplementation::SensorFusionImplementation(
         stochastics,
         world,
         parameters,
-        observations,
+        publisher,
         callbacks,
         agent)
 {

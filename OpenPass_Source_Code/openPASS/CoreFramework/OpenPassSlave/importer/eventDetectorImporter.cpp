@@ -16,38 +16,38 @@ namespace ATTRIBUTE = openpass::importer::xml::eventDetectorImporter::attribute;
 
 namespace Importer
 {
-    openScenario::ConditionalEventDetectorInformation EventDetectorImporter::ImportEventDetector(QDomElement& eventElement,
-                                                                                                 const std::string& eventName,
-                                                                                                 const int numberOfExecutions,
-                                                                                                 const openScenario::ActorInformation& actorInformation,
-                                                                                                 const std::vector<ScenarioEntity>& entities,
-                                                                                                 openScenario::Parameters& parameters)
+openScenario::ConditionalEventDetectorInformation EventDetectorImporter::ImportEventDetector(QDomElement &eventElement,
+                                                                                             const std::string &eventName,
+                                                                                             const int numberOfExecutions,
+                                                                                             const openScenario::ActorInformation &actorInformation,
+                                                                                             const std::vector<ScenarioEntity> &entities,
+                                                                                             openScenario::Parameters& parameters)
+{
+    QDomElement startConditionsElement;
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(eventElement, TAG::startConditions, startConditionsElement),
+                 eventElement, "Tag " + std::string(TAG::startConditions) + " missing.");
+
+    QDomElement conditionGroupElement;
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(startConditionsElement, TAG::conditionGroup, conditionGroupElement),
+                 startConditionsElement, "Tag " + std::string(TAG::conditionGroup) + " missing.");
+
+    QDomElement conditionElement;
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(conditionGroupElement, TAG::condition, conditionElement),
+                 conditionGroupElement, "Tag " + std::string(TAG::condition) + " missing.");
+
+    openScenario::ConditionCollection conditions{};
+
+    while (!conditionElement.isNull())
     {
-        QDomElement startConditionsElement;
-        ThrowIfFalse(SimulationCommon::GetFirstChildElement(eventElement, TAG::startConditions, startConditionsElement),
-                     eventElement, "Tag " + std::string(TAG::startConditions) + " missing.");
-
-        QDomElement conditionGroupElement;
-        ThrowIfFalse(SimulationCommon::GetFirstChildElement(startConditionsElement, TAG::conditionGroup, conditionGroupElement),
-                     startConditionsElement, "Tag " + std::string(TAG::conditionGroup) + " missing.");
-
-        QDomElement conditionElement;
-        ThrowIfFalse(SimulationCommon::GetFirstChildElement(conditionGroupElement, TAG::condition, conditionElement),
-                     conditionGroupElement, "Tag " + std::string(TAG::condition) + " missing.");
-
-        openScenario::ConditionCollection conditions{};
-
-        while (!conditionElement.isNull())
-        {
-            conditions.emplace_back(ImportConditionElement(conditionElement, entities, parameters));
-            conditionElement = conditionElement.nextSiblingElement(TAG::condition);
-        }
-
-        return openScenario::ConditionalEventDetectorInformation{actorInformation,
-                                                                 numberOfExecutions,
-                                                                 eventName,
-                                                                 conditions};
+        conditions.emplace_back(ImportConditionElement(conditionElement, entities, parameters));
+        conditionElement = conditionElement.nextSiblingElement(TAG::condition);
     }
+
+    return openScenario::ConditionalEventDetectorInformation{actorInformation,
+                                                             numberOfExecutions,
+                                                             eventName,
+                                                             conditions};
+}
 
     openScenario::Condition EventDetectorImporter::ImportConditionElement(QDomElement& conditionElement,
                                                                           const std::vector<ScenarioEntity>& entities,

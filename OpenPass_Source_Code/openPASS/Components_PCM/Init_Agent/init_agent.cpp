@@ -31,7 +31,7 @@ extern "C" INIT_AGENTSHARED_EXPORT ModelInterface *OpenPASS_CreateInstance(
     StochasticsInterface *stochastics,
     WorldInterface *world,
     const ParameterInterface *parameters,
-    const std::map<int, ObservationInterface *> *observations,
+    PublisherInterface * const publisher,
     AgentInterface *agent,
     const CallbackInterface *callbacks)
 {
@@ -52,7 +52,7 @@ extern "C" INIT_AGENTSHARED_EXPORT ModelInterface *OpenPASS_CreateInstance(
                                       stochastics,
                                       world,
                                       parameters,
-                                      observations,
+                                      publisher,
                                       callbacks,
                                       agent));
     } catch (const std::runtime_error &ex) {

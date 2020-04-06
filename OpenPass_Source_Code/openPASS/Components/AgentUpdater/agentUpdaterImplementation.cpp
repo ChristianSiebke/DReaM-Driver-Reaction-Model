@@ -17,10 +17,8 @@
 #include "agentUpdaterImplementation.h"
 #include <qglobal.h>
 
-void AgentUpdaterImplementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time)
+void AgentUpdaterImplementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, [[maybe_unused]] int time)
 {
-    Q_UNUSED(time);
-
     if (localLinkId == 0)
         {
             // from DynamicsPrioritizer
@@ -50,16 +48,14 @@ void AgentUpdaterImplementation::UpdateInput(int localLinkId, const std::shared_
         }
 }
 
-void AgentUpdaterImplementation::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterface const> &data, int time)
+void AgentUpdaterImplementation::UpdateOutput([[maybe_unused]] int localLinkId,
+                                              [[maybe_unused]] std::shared_ptr<SignalInterface const> &data,
+                                              [[maybe_unused]] int time)
 {
-    Q_UNUSED(localLinkId);
-    Q_UNUSED(data);
-    Q_UNUSED(time);
 }
 
-void AgentUpdaterImplementation::Trigger(int time)
+void AgentUpdaterImplementation::Trigger([[maybe_unused]] int time)
 {
-    Q_UNUSED(time);
     AgentInterface *agent = GetAgent();
 
     agent->SetAcceleration(acceleration);
@@ -70,5 +66,16 @@ void AgentUpdaterImplementation::Trigger(int time)
     agent->SetYawRate(yawRate);
     agent->SetSteeringWheelAngle(steeringWheelAngle);
     agent->SetCentripetalAcceleration(centripetalAcceleration);
-    agent->SetDistanceTraveled(travelDistance + agent->GetDistanceTraveled());
+
+    GetPublisher()->Publish("XPosition", positionX);
+    GetPublisher()->Publish("YPosition", positionY);
+    GetPublisher()->Publish("VelocityEgo", velocity);
+    GetPublisher()->Publish("AccelerationEgo", acceleration);
+    GetPublisher()->Publish("YawAngle", yaw);
+    GetPublisher()->Publish("YawRate", yawRate);
+    GetPublisher()->Publish("SteeringAngle", steeringWheelAngle);
+
+    totalTravelDistance += travelDistance;
+
+    GetPublisher()->Publish("TotalDistanceTraveled", totalTravelDistance);
 }

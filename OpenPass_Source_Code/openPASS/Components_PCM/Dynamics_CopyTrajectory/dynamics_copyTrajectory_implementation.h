@@ -14,7 +14,6 @@
 
 #include <vector>
 #include "modelInterface.h"
-#include "observationInterface.h"
 
 /** \addtogroup Components_PCM openPASS components pcm
 * @{
@@ -60,7 +59,7 @@ public:
                                            StochasticsInterface *stochastics,
                                            WorldInterface *world,
                                            const ParameterInterface *parameters,
-                                           const std::map<int, ObservationInterface *> *evaluations,
+                                           PublisherInterface * const publisher,
                                            const CallbackInterface *callbacks,
                                            AgentInterface *agent);
     //-----------------------------------------------------------------------------

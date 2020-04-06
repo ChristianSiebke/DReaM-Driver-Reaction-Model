@@ -14,6 +14,7 @@
 #include <memory>
 #include <unordered_map>
 
+#include "Common/parameter.h"
 #include "Common/sensorDefinitions.h"
 
 using StringProbabilities = std::vector<std::pair<std::string, double>>;

@@ -13,7 +13,6 @@
 #define INIT_AGENT_IMPLEMENTATION_H
 
 #include "modelInterface.h"
-#include "observationInterface.h"
 #include "pcm_trajectory.h"
 #include "trajectorySignal.h"
 #include "primitiveSignals.h"
@@ -51,7 +50,7 @@ public:
         StochasticsInterface *stochastics,
         WorldInterface *world,
         const ParameterInterface *parameters,
-        const std::map<int, ObservationInterface *> *observations,
+        PublisherInterface * const publisher,
         const CallbackInterface *callbacks,
         AgentInterface *agent);
     Init_Agent_Implementation(const Init_Agent_Implementation &) = delete;

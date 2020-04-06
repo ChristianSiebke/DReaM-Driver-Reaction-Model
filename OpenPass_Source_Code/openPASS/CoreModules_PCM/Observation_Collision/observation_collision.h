@@ -20,6 +20,5 @@
 #define OBSERVATION_COLLISION_H
 
 #include "observation_collision_global.h"
-#include "observationInterface.h"
 
 #endif // OBSERVATION_COLLISION_H

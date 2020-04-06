@@ -35,6 +35,7 @@ INCLUDEPATH += \
 
 SOURCES += \
     $$SRC_CORESHARE \
+    ../../Common/vector2d.cpp \
     framework/main.cpp \
     framework/processManager.cpp \
     importer/masterConfigImporter.cpp

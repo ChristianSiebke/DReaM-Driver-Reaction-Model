@@ -41,13 +41,14 @@ defineReplace(getFiles) {
 }
 
 SUBDIRS += \
-    observationInterface \
     framework \
     importer \
     importer/road \
     modelElements \
     modelInterface \
     scheduler \
+    dataStoreInterface \
+    observationInterface \
     spawnPointInterface \
     stochasticsInterface \
     worldInterface \

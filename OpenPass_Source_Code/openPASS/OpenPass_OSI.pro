@@ -12,6 +12,7 @@ TEMPLATE = subdirs
 SUBDIRS = \
         CoreFramework/OpenPassMaster \
         CoreFramework/OpenPassSlave \
+        CoreModules/BasicDataStore \
         CoreModules/EventDetector \
         CoreModules/Manipulator \
         CoreModules/Observation_Log \

@@ -8,6 +8,8 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
+#include <stdexcept>
+
 #include "profiles.h"
 
 std::unordered_map<std::string, AgentProfile>& Profiles::GetAgentProfiles()

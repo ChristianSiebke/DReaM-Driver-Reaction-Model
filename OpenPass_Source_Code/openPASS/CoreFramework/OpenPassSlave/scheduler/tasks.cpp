@@ -14,10 +14,9 @@
 /** \file  Tasks.cpp */
 //-----------------------------------------------------------------------------
 
-namespace SimulationSlave {
-namespace Scheduling {
+namespace openpass::scheduling {
 
-void Tasks::AddTask(const TaskItem& newTask)
+void Tasks::AddTask(const TaskItem &newTask)
 {
     tasks.insert(newTask);
 }
@@ -38,13 +37,13 @@ void Tasks::DeleteTasks(int agentId)
     }
 }
 
-bool TaskItem::operator<(const TaskItem& rhs) const
+bool TaskItem::operator<(const TaskItem &rhs) const
 {
     return (priority > rhs.priority ||
             ((priority == rhs.priority) && (taskType < rhs.taskType)));
 }
 
-bool TaskItem::operator==(const TaskItem& rhs) const
+bool TaskItem::operator==(const TaskItem &rhs) const
 {
     return (priority == rhs.priority &&
             cycletime == rhs.cycletime &&
@@ -53,5 +52,4 @@ bool TaskItem::operator==(const TaskItem& rhs) const
             taskType == rhs.taskType);
 }
 
-} // namespace Scheduling
-} // namespace SimulationSlave
+} // namespace openpass::scheduling

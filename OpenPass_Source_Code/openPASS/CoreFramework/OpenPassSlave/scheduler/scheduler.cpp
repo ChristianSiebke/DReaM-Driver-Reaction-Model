@@ -9,23 +9,23 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
+#include "scheduler.h"
+
+#include "CoreFramework/CoreShare/log.h"
 #include "agent.h"
 #include "agentParser.h"
 #include "eventNetwork.h"
-#include "CoreFramework/CoreShare/log.h"
 #include "runResult.h"
-#include "scheduler.h"
-//-----------------------------------------------------------------------------
-/** \file  Scheduler.cpp */
-//-----------------------------------------------------------------------------
 
-namespace SimulationSlave {
+namespace openpass::scheduling {
 
-Scheduler::Scheduler(WorldInterface& world,
-                     SpawnPointNetworkInterface& spawnPointNetwork,
-                     EventDetectorNetworkInterface& eventDetectorNetwork,
-                     ManipulatorNetworkInterface& manipulatorNetwork,
-                     ObservationNetworkInterface& observationNetwork) :
+using namespace SimulationSlave;
+
+Scheduler::Scheduler(WorldInterface &world,
+                     SpawnPointNetworkInterface &spawnPointNetwork,
+                     EventDetectorNetworkInterface &eventDetectorNetwork,
+                     ManipulatorNetworkInterface &manipulatorNetwork,
+                     ObservationNetworkInterface &observationNetwork) :
     world(world),
     spawnPointNetwork(spawnPointNetwork),
     eventDetectorNetwork(eventDetectorNetwork),
@@ -37,8 +37,8 @@ Scheduler::Scheduler(WorldInterface& world,
 bool Scheduler::Run(
     int startTime,
     int endTime,
-    RunResult& runResult,
-    EventNetworkInterface& eventNetwork)
+    RunResult &runResult,
+    EventNetworkInterface &eventNetwork)
 {
     if (startTime > endTime)
     {
@@ -63,11 +63,11 @@ bool Scheduler::Run(
     auto finalizeTasks = taskBuilder.CreateFinalizeTasks();
 
     auto taskList = SchedulerTasks(
-                   bootstrapTasks,
-                   commonTasks,
-                   finalizeRecurringTasks,
-                   finalizeTasks,
-                   FRAMEWORK_UPDATE_RATE);
+        bootstrapTasks,
+        commonTasks,
+        finalizeRecurringTasks,
+        finalizeTasks,
+        FRAMEWORK_UPDATE_RATE);
 
     if (ExecuteTasks(taskList.GetBootstrapTasks()) == false)
     {
@@ -113,10 +113,10 @@ bool Scheduler::Run(
     return Scheduler::SUCCESS;
 }
 
-template<typename T>
+template <typename T>
 bool Scheduler::ExecuteTasks(T tasks)
 {
-    for (const auto& task : tasks)
+    for (const auto &task : tasks)
     {
         if (task.func() == false)
         {
@@ -126,17 +126,18 @@ bool Scheduler::ExecuteTasks(T tasks)
     return true;
 }
 
-void Scheduler::UpdateAgents(SchedulerTasks& taskList, WorldInterface& world)
+void Scheduler::UpdateAgents(SchedulerTasks &taskList, WorldInterface &world)
 {
-    for (const auto& agent : spawnPointNetwork.ConsumeNewAgents())
+    for (const auto &agent : spawnPointNetwork.ConsumeNewAgents())
     {
+        agent->LinkSchedulerTime(&currentTime);
         ScheduleAgentTasks(taskList, *agent);
     }
 
     std::list<int> removedAgents;
-    for (const auto& agentMap : world.GetAgents())
+    for (const auto &agentMap : world.GetAgents())
     {
-        AgentInterface* agent = agentMap.second;
+        AgentInterface *agent = agentMap.second;
         if (!agent->IsValid())
         {
             removedAgents.push_back(agent->GetId());
@@ -146,7 +147,7 @@ void Scheduler::UpdateAgents(SchedulerTasks& taskList, WorldInterface& world)
     taskList.DeleteAgentTasks(removedAgents);
 }
 
-void Scheduler::ScheduleAgentTasks(SchedulerTasks& taskList, const Agent& agent)
+void Scheduler::ScheduleAgentTasks(SchedulerTasks &taskList, const Agent &agent)
 {
     AgentParser agentParser(currentTime);
     agentParser.Parse(agent);
@@ -155,4 +156,4 @@ void Scheduler::ScheduleAgentTasks(SchedulerTasks& taskList, const Agent& agent)
     taskList.ScheduleNewNonRecurringTasks(agentParser.GetNonRecurringTasks());
 }
 
-} // namespace SimulationSlave
+} // namespace openpass::scheduling

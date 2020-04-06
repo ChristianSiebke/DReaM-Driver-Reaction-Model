@@ -8,21 +8,19 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
+#include <map>
 
-#include "fakeAgent.h"
-#include "fakeWorld.h"
-#include "fakeComponent.h"
-#include "fakeAgentBlueprint.h"
-
-#include "schedulerTasks.h"
-#include "agentParser.h"
 #include "Interfaces/componentInterface.h"
+#include "agentParser.h"
 #include "channel.h"
 #include "component.h"
-
-#include <map>
+#include "fakeAgent.h"
+#include "fakeAgentBlueprint.h"
+#include "fakeComponent.h"
+#include "fakeWorld.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
+#include "schedulerTasks.h"
 
 using ::testing::_;
 using ::testing::Contains;
@@ -34,16 +32,7 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 
 using namespace SimulationSlave;
-using namespace SimulationSlave::Scheduling;
-
-//class FakeTaskProvider : public TaskProviderInterface
-//{
-//public:
-//    MOCK_CONST_METHOD1(GetTrigger, std::function<void(int)>(std::string));
-//    MOCK_CONST_METHOD1(GetUpdateOutput, std::function<void(int)>(std::string));
-//    MOCK_CONST_METHOD1(GetUpdateInput, std::function<void(int)>(std::string));
-//};
-
+using namespace openpass::scheduling;
 
 TEST(AgentParser, RecurringComponent_IsParsed)
 {
@@ -54,7 +43,7 @@ TEST(AgentParser, RecurringComponent_IsParsed)
     Channel testChannel(1);
     Component testTargetComponent("", &testAgent);
     testChannel.AddTarget(&testTargetComponent, 0);
-    std::map<int, Channel*> testChannels = {{0, &testChannel}};
+    std::map<int, Channel *> testChannels = {{0, &testChannel}};
 
     auto fakeComponent = new NiceMock<FakeComponent>();
     ON_CALL(*fakeComponent, GetPriority()).WillByDefault(Return(0));
@@ -91,7 +80,7 @@ TEST(AgentParser, ThreeRecurringComponents_AreParsed)
     Channel testChannel(1);
     Component testTargetComponent("", &testAgent);
     testChannel.AddTarget(&testTargetComponent, 0);
-    std::map<int, Channel*> testChannels = {{0, &testChannel}};
+    std::map<int, Channel *> testChannels = {{0, &testChannel}};
 
     auto fakeComponent = new NiceMock<FakeComponent>();
     ON_CALL(*fakeComponent, GetCycleTime()).WillByDefault(Return(100));
@@ -146,7 +135,7 @@ TEST(AgentParser, NonRecurringComponent_IsParsed)
     Channel testChannel(1);
     Component testTargetComponent("", &testAgent);
     testChannel.AddTarget(&testTargetComponent, 0);
-    std::map<int, Channel*> testChannels = {{0, &testChannel}};
+    std::map<int, Channel *> testChannels = {{0, &testChannel}};
 
     auto fakeComponent = new NiceMock<FakeComponent>();
     ON_CALL(*fakeComponent, GetPriority()).WillByDefault(Return(0));
@@ -182,7 +171,7 @@ TEST(AgentParser, MixedComponents_AreParsedWithRightTaskType)
     Channel testChannel(1);
     Component testTargetComponent("", &testAgent);
     testChannel.AddTarget(&testTargetComponent, 0);
-    std::map<int, Channel*> testChannels = {{0, &testChannel}};
+    std::map<int, Channel *> testChannels = {{0, &testChannel}};
 
     auto fakeComponent = new NiceMock<FakeComponent>();
     ON_CALL(*fakeComponent, GetCycleTime()).WillByDefault(Return(100));

@@ -17,9 +17,10 @@
 #define _USE_MATH_DEFINES
 #endif
 #include <cmath>
-
 #include <map>
 #include <unordered_map>
+
+#include <boost/algorithm/string/trim.hpp>
 
 #include "globalDefinitions.h"
 #include "vector2d.h"
@@ -318,6 +319,27 @@ public:
     }
 };
 
+namespace helper::vector {
+
+/// \brief  convenience function to convert a vector into a string using a constom delimiter
+/// \remark Please refer to the standard, how decimals are converted
+/// \param  values     vector of strings
+/// \param  delimiter  string in between the individual values
+/// \return delimiter seperated list as string
+template <typename T>
+std::string to_string(const std::vector<T>& values, const std::string& delimiter = ",")
+{
+    if (values.empty())
+    {
+        return "";
+    }
+
+    std::ostringstream oss;
+    std::copy(values.begin(), values.end(), std::ostream_iterator<T>(oss, delimiter.c_str()));
+
+    return {oss.str(), 0, oss.str().length() - delimiter.size()};
+}
+} // namespace helper::vector
 
 namespace helper::map {
 /// @brief queries a map for a given key and returns the value if available

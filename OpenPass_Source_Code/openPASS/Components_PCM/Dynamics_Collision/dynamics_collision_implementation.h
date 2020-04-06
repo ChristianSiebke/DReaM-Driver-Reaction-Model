@@ -14,7 +14,6 @@
 
 #include <vector>
 #include "modelInterface.h"
-#include "observationInterface.h"
 #include "primitiveSignals.h"
 #include "postCrashDynamic.h"
 #include "componentPorts.h"
@@ -75,7 +74,7 @@ public:
                                       StochasticsInterface *stochastics,
                                       WorldInterface *world,
                                       const ParameterInterface *parameters,
-                                      const std::map<int, ObservationInterface *> *evaluations,
+                                      PublisherInterface * const publisher,
                                       const CallbackInterface *callbacks,
                                       AgentInterface *agent);
     //-----------------------------------------------------------------------------

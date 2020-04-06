@@ -22,7 +22,7 @@ Dynamics_CopyTrajectory_Implementation::Dynamics_CopyTrajectory_Implementation(i
                                                                                StochasticsInterface *stochastics,
                                                                                WorldInterface *world,
                                                                                const ParameterInterface *parameters,
-                                                                               const std::map<int, ObservationInterface *> *evaluations,
+                                                                               PublisherInterface * const publisher,
                                                                                const CallbackInterface *callbacks,
                                                                                AgentInterface *agent) :
     DynamicsInterface(componentId,
@@ -34,7 +34,7 @@ Dynamics_CopyTrajectory_Implementation::Dynamics_CopyTrajectory_Implementation(i
                       stochastics,
                       world,
                       parameters,
-                      evaluations,
+                      publisher,
                       callbacks,
                       agent)
 {

@@ -45,8 +45,6 @@ class FakeAgent : public FakeWorldObject, public AgentInterface
     MOCK_METHOD1(SetVelocity, void(double value));
     MOCK_METHOD1(SetAcceleration, void(double value));
     MOCK_METHOD1(SetYaw, void(double value));
-    MOCK_METHOD1(SetDistanceTraveled, void(double distanceTraveled));
-    MOCK_CONST_METHOD0(GetDistanceTraveled, double());
     MOCK_METHOD1(SetGear, void(int gear));
     MOCK_METHOD1(SetEngineSpeed, void(double engineSpeed));
     MOCK_METHOD1(SetEffAccelPedal, void(double percent));

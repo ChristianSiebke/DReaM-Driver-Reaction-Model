@@ -29,7 +29,7 @@ DynamicsCollisionImplementation::DynamicsCollisionImplementation(std::string com
                                                                  StochasticsInterface *stochastics,
                                                                  WorldInterface *world,
                                                                  const ParameterInterface *parameters,
-                                                                 const std::map<int, ObservationInterface*> *observations,
+                                                                 PublisherInterface * const publisher,
                                                                  const CallbackInterface *callbacks,
                                                                  AgentInterface *agent)
     : UnrestrictedModelInterface { componentName,
@@ -41,7 +41,7 @@ DynamicsCollisionImplementation::DynamicsCollisionImplementation(std::string com
                                    stochastics,
                                    world,
                                    parameters,
-                                   observations,
+                                   publisher,
                                    callbacks,
                                    agent },
       dynamicsSignal{}

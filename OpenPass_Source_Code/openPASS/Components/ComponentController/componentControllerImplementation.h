@@ -42,7 +42,7 @@ public:
         StochasticsInterface *stochastics,
         WorldInterface *world,
         const ParameterInterface *parameters,
-        const std::map<int, ObservationInterface*> *observations,
+        PublisherInterface * const publisher,
         const CallbackInterface *callbacks,
         AgentInterface *agent,
         SimulationSlave::EventNetworkInterface * const eventNetwork);
@@ -91,19 +91,17 @@ public:
     virtual void Trigger(int time);
 
 private:
-    template <typename T>
-    const std::shared_ptr<T const> SignalCast(std::shared_ptr<SignalInterface const> const& baseSignal, int linkId)
+    template <typename T, typename Signal>
+    const std::shared_ptr<T const> SignalCast(Signal&& signal, int linkId)
     {
-        const auto castedSignal = std::dynamic_pointer_cast<T const>(baseSignal);
-
-        if (!castedSignal)
+        if (const auto castedSignal = std::dynamic_pointer_cast<T const>(std::forward<Signal>(signal)))
         {
-            const std::string msg = COMPONENTNAME + " invalid signaltype on link " + std::to_string(linkId);
-            LOG(CbkLogLevel::Debug, msg);
-            throw std::runtime_error(msg);
+            return castedSignal;
         }
 
-        return castedSignal;
+        const std::string msg = COMPONENTNAME + " invalid signaltype on link " + std::to_string(linkId);
+        LOG(CbkLogLevel::Debug, msg);
+        throw std::runtime_error(msg);
     }
 
     std::map<int, std::string> driverInputChannels;

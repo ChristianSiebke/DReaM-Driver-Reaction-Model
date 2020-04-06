@@ -24,6 +24,7 @@
 #include "xmlParser.h"
 #include "CoreFramework/CoreShare/log.h"
 #include "CoreFramework/OpenPassSlave/framework/directories.h"
+#include "Common/openPassUtils.h"
 
 namespace TAG = openpass::importer::xml::scenarioImporter::tag;
 namespace ATTRIBUTE = openpass::importer::xml::scenarioImporter::attribute;
@@ -155,8 +156,8 @@ void ScenarioImporter::ImportStoryboard(QDomElement& documentRoot, std::vector<S
     ImportEndConditionsFromStoryboard(storyboardElement, scenario, parameters);
 }
 
-void ScenarioImporter::ImportStoryElement(QDomElement& storyElement,
-                                          const std::vector<ScenarioEntity>& entities,
+void ScenarioImporter::ImportStoryElement(QDomElement &storyElement,
+                                          const std::vector<ScenarioEntity> &entities,
                                           ScenarioInterface* scenario,
                                           openScenario::Parameters& parameters)
 {
@@ -164,11 +165,25 @@ void ScenarioImporter::ImportStoryElement(QDomElement& storyElement,
     QDomElement actElement;
     if (SimulationCommon::GetFirstChildElement(storyElement, TAG::act, actElement))
     {
+        // Story name is mandatory unless story is empty tag
+        std::string storyName{};
+        ThrowIfFalse(SimulationCommon::ParseAttribute(storyElement, ATTRIBUTE::name, storyName),
+                     storyElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
+
         while (!actElement.isNull())
         {
+            // Act name is mandatory
+            std::string actName;
+            ThrowIfFalse(SimulationCommon::ParseAttribute(actElement, ATTRIBUTE::name, actName),
+                         actElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
+
             QDomElement seqElement;
             if (SimulationCommon::GetFirstChildElement(actElement, TAG::sequence, seqElement))
             {
+                [[deprecated("Will be replaced in openSCENARIO 1-0-0 by ManeuverGroup")]] std::string sequenceName;
+                ThrowIfFalse(SimulationCommon::ParseAttribute(seqElement, ATTRIBUTE::name, sequenceName),
+                             seqElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
+
                 while (!seqElement.isNull())
                 {
                     int numberOfExecutions;
@@ -184,7 +199,9 @@ void ScenarioImporter::ImportStoryElement(QDomElement& storyElement,
                     QDomElement maneuverElement;
                     if (SimulationCommon::GetFirstChildElement(seqElement, TAG::maneuver, maneuverElement)) // just one maneuver per sequence
                     {
-                        ImportManeuverElement(maneuverElement, entities, scenario, actorInformation, numberOfExecutions, parameters);
+                        ImportManeuverElement(maneuverElement, entities, scenario, actorInformation,
+                                              {storyName, actName, sequenceName},
+                                              numberOfExecutions, parameters);
                     }
 
                     seqElement = seqElement.nextSiblingElement(TAG::sequence);
@@ -195,7 +212,7 @@ void ScenarioImporter::ImportStoryElement(QDomElement& storyElement,
     }
 }
 
-openScenario::ActorInformation ScenarioImporter::ImportActors(QDomElement& actorsElement,
+openScenario::ActorInformation ScenarioImporter::ImportActors(QDomElement &actorsElement,
                                                               const std::vector<ScenarioEntity>& entities,
                                                               openScenario::Parameters& parameters)
 {
@@ -225,25 +242,29 @@ openScenario::ActorInformation ScenarioImporter::ImportActors(QDomElement& actor
     QDomElement byConditionElement;
     SimulationCommon::GetFirstChildElement(actorsElement, TAG::byCondition, byConditionElement);
 
-    if(!byConditionElement.isNull())
+    if (!byConditionElement.isNull())
     {
         std::string actor = ParseAttribute<std::string>(byConditionElement, ATTRIBUTE::actor, parameters);
-        if(actor == "triggeringEntity")
-        {
-            actorInformation.triggeringAgentsAsActors.emplace(true);
-        }
+
+        actorInformation.actorIsTriggeringEntity = (actor == "triggeringEntity");
     }
 
     return actorInformation;
 }
 
-void ScenarioImporter::ImportManeuverElement(QDomElement& maneuverElement,
-                                             const std::vector<ScenarioEntity>& entities,
-                                             ScenarioInterface* scenario,
+
+void ScenarioImporter::ImportManeuverElement(QDomElement &maneuverElement,
+                                             const std::vector<ScenarioEntity> &entities,
+                                             ScenarioInterface *scenario,
                                              const openScenario::ActorInformation &actorInformation,
+                                             const std::vector<std::string> &nameStack,
                                              const int numberOfExecutions,
                                              openScenario::Parameters& parameters)
 {
+    std::string maneuverName;
+    ThrowIfFalse(SimulationCommon::ParseAttribute(maneuverElement, ATTRIBUTE::name, maneuverName),
+                 maneuverElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
+
     // handle parameterdeclaration element(s) for event(s)
     QDomElement parameterDeclarationElement;
     SimulationCommon::GetFirstChildElement(maneuverElement, TAG::parameterDeclaration, parameterDeclarationElement);
@@ -256,19 +277,16 @@ void ScenarioImporter::ImportManeuverElement(QDomElement& maneuverElement,
     {
         std::string eventName = ParseAttribute<std::string>(eventElement, ATTRIBUTE::name, parameters);
 
-        openScenario::ConditionalEventDetectorInformation conditionalEventDetectorInformation = EventDetectorImporter::ImportEventDetector(eventElement,
-                                                                                                                                           eventName,
-                                                                                                                                           numberOfExecutions,
-                                                                                                                                           actorInformation,
-                                                                                                                                           entities,
-                                                                                                                                           parameters);
+        std::vector<std::string> eventNameStack{nameStack};
+        eventNameStack.emplace_back(maneuverName);
+        eventNameStack.emplace_back(eventName);
 
-        scenario->AddConditionalEventDetector(conditionalEventDetectorInformation);
+        const auto stackedEventName = openpass::utils::vector::to_string(eventNameStack, "/");
 
-        std::shared_ptr<ScenarioActionInterface> action = ManipulatorImporter::ImportManipulator(eventElement,
-                                                                                                 eventName,
-                                                                                                 scenario->GetTrajectoryCatalogPath(),
-                                                                                                 parameters);
+        auto metaInfo = EventDetectorImporter::ImportEventDetector(eventElement, stackedEventName, numberOfExecutions, actorInformation, entities, parameters);
+        scenario->AddConditionalEventDetector(metaInfo);
+
+        auto action = ManipulatorImporter::ImportManipulator(eventElement, stackedEventName, scenario->GetTrajectoryCatalogPath(), parameters);
         scenario->AddAction(action);
 
         eventElement = eventElement.nextSiblingElement(TAG::event);
@@ -735,10 +753,9 @@ bool ScenarioImporter::ContainsEntity(const std::vector<ScenarioEntity>& entitie
 {
     auto entitiesFound = std::find_if(entities.cbegin(),
                                       entities.cend(),
-                                      [entityName](const ScenarioEntity& elem)
-    {
-        return elem.name == entityName;
-    });
+                                      [entityName](const ScenarioEntity &elem) {
+                                          return elem.name == entityName;
+                                      });
 
     return entitiesFound != entities.cend();
 }

@@ -102,18 +102,18 @@ void StateManager::FlagComponentMaxReachableStateSetByEvent(const int localLinkI
 void StateManager::UpdateMaxReachableStatesForRegisteredComponents(const
         std::list<std::shared_ptr<ComponentChangeEvent const>>& componentStateChangeEventListFilteredByAgent)
 {
-    for (const auto stateChangeEvent : componentStateChangeEventListFilteredByAgent)
+    for (const auto& stateChangeEvent : componentStateChangeEventListFilteredByAgent)
     {
         try
         {
             const auto localLinkId = GetComponentLocalLinkIdByName(stateChangeEvent->GetComponentName());
-            UpdateComponentMaxReachableState(localLinkId, ComponentStateMapping.at(stateChangeEvent->GetGoalStateName()));
+            UpdateComponentMaxReachableState(localLinkId, stateChangeEvent->GetGoalState());
             FlagComponentMaxReachableStateSetByEvent(localLinkId);
         }
         catch (const std::out_of_range& error)
         {
             const std::string errorMessage = error.what();
-            const std::string warning = errorMessage + "The event will be ignored.";
+            const std::string warning = errorMessage + " The event will be ignored.";
             LOG(CbkLogLevel::Warning, warning);
         }
     }
@@ -155,15 +155,15 @@ bool StateManager::LocalLinkIdIsRegistered(const int localLinkId) const
     return (vehicleComponentStateInformations.find(localLinkId) != vehicleComponentStateInformations.end());
 }
 
-std::map<std::string, std::pair<ComponentType, ComponentState>>
-        StateManager::GetVehicleComponentNamesToTypeAndStateMap()
+std::map<std::string, std::pair<ComponentType, ComponentState>> StateManager::GetVehicleComponentNamesToTypeAndStateMap()
 {
     std::map<std::string, std::pair<ComponentType, ComponentState>> vehicleComponentStates;
 
-    for (const auto& vehicleComponentStateInformationIterator : vehicleComponentStateInformations)
+    for (const auto &vehicleComponentStateInformationIterator : vehicleComponentStateInformations)
     {
-        const auto& vehicleComponentStateInformation = vehicleComponentStateInformationIterator.second;
-        vehicleComponentStates.insert({ vehicleComponentStateInformation->GetComponentName(), { vehicleComponentStateInformation->GetComponentType(), vehicleComponentStateInformation->GetCurrentState() } });
+        const auto &vehicleComponentStateInformation = vehicleComponentStateInformationIterator.second;
+        vehicleComponentStates.insert({vehicleComponentStateInformation->GetComponentName(),
+                                       {vehicleComponentStateInformation->GetComponentType(), vehicleComponentStateInformation->GetCurrentState()}});
     }
 
     return vehicleComponentStates;

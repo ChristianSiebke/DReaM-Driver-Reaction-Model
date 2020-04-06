@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2018, 2019 AMFD GmbH
 *               2016, 2017, 2018, 2019 ITK Engineering GmbH
 *
@@ -15,8 +15,7 @@
 //! @brief This file contains several classes for global purposes
 //-----------------------------------------------------------------------------
 
-#ifndef GLOBALDEFINITIONS
-#define GLOBALDEFINITIONS
+#pragma once
 
 #include <list>
 #include <map>
@@ -103,20 +102,19 @@ inline AgentVehicleType GetAgentVehicleType(const std::string &strVehicleType)
 // convert a AgentVehicleType to VehicleType string
 inline std::string GetAgentVehicleTypeStr(const AgentVehicleType &vehicleType)
 {
-    return (vehicleType == AgentVehicleType::Car) ? "Car" :
-            (vehicleType == AgentVehicleType::Pedestrian) ? "Pedestrian" :
-            (vehicleType == AgentVehicleType::Motorbike) ? "Motorbike" :
-            (vehicleType == AgentVehicleType::Bicycle) ? "Bicycle" :
-            (vehicleType == AgentVehicleType::Truck) ? "Truck" : "unknown type";
+    return (vehicleType == AgentVehicleType::Car) ? "Car" : (vehicleType == AgentVehicleType::Pedestrian) ? "Pedestrian" : (vehicleType == AgentVehicleType::Motorbike) ? "Motorbike" : (vehicleType == AgentVehicleType::Bicycle) ? "Bicycle" : (vehicleType == AgentVehicleType::Truck) ? "Truck" : "unknown type";
 }
 
 // convert a string of type code to VehicleType string
 inline std::string GetAgentVehicleTypeStr(const std::string &vehicleTypeCode)
 {
-    try{
+    try
+    {
         AgentVehicleType vehicleType = static_cast<AgentVehicleType>(std::stoi(vehicleTypeCode));
         return GetAgentVehicleTypeStr(vehicleType);
-    } catch(...) {
+    }
+    catch (...)
+    {
         return "unknown type";
     }
 }
@@ -139,22 +137,25 @@ enum class IndicatorState
 
 struct Position
 {
-    Position() {}
+    Position()
+    {
+    }
     Position(double x,
              double y,
              double yaw,
-             double curvature):
+             double curvature) :
         xPos(x),
         yPos(y),
         yawAngle(yaw),
-        curvature(curvature) {}
+        curvature(curvature)
+    {
+    }
 
-    double xPos {0};
-    double yPos {0};
-    double yawAngle {0};
-    double curvature {0};
+    double xPos{0};
+    double yPos{0};
+    double yawAngle{0};
+    double curvature{0};
 };
-
 
 //! Enum of potential types of marks.
 enum class MarkType
@@ -178,10 +179,10 @@ enum class ObjectType
 
 enum ObjectTypeOSI : int
 {
-    None    = 0x00, // default at initialization
+    None = 0x00, // default at initialization
     Vehicle = 0x01,
-    Object  = 0x02,
-    Any     = Vehicle | Object
+    Object = 0x02,
+    Any = Vehicle | Object
 };
 
 using CollisionPartner = std::pair<ObjectTypeOSI, int>;
@@ -301,10 +302,9 @@ enum class AdasType
     Undefined
 };
 
-const std::map<AdasType, std::string> adasTypeToString = { { AdasType::Safety,    "Safety" },
-    { AdasType::Comfort,   "Comfort" },
-    { AdasType::Undefined, "Undefined" }
-};
+const std::map<AdasType, std::string> adasTypeToString = {{AdasType::Safety, "Safety"},
+                                                          {AdasType::Comfort, "Comfort"},
+                                                          {AdasType::Undefined, "Undefined"}};
 
 enum class ComponentType
 {
@@ -330,7 +330,8 @@ public:
         weekday(weekday),
         timeOfDay(timeOfDay),
         libraryName(libraryName)
-    {}
+    {
+    }
     WorldParameter(const WorldParameter &) = delete;
     WorldParameter(WorldParameter &&) = delete;
     WorldParameter &operator=(const WorldParameter &) = delete;
@@ -367,7 +368,8 @@ public:
     AgentSpawnItem(int id, int reference) :
         id(id),
         reference(reference)
-    {}
+    {
+    }
     AgentSpawnItem(const AgentSpawnItem &) = delete;
     AgentSpawnItem(AgentSpawnItem &&) = delete;
     AgentSpawnItem &operator=(const AgentSpawnItem &) = delete;
@@ -538,6 +540,3 @@ private:
     double accelerationY;
     double yawAngle;
 };
-
-
-#endif // GLOBALDEFINITIONS

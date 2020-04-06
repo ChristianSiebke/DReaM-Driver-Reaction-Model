@@ -56,7 +56,7 @@ struct StochasticAttribute
 
 struct ActorInformation
 {
-    std::optional<bool> triggeringAgentsAsActors{};
+    bool actorIsTriggeringEntity{false};
     std::optional<std::vector<std::string>> actors{};
 };
 

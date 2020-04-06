@@ -14,28 +14,27 @@
 //-----------------------------------------------------------------------------
 
 #include <sstream>
-#include <QDir>
-#include <QString>
 
-#include "Interfaces/worldInterface.h"
+#include <QDir>
+#include <QFile>
+#include <QString>
+#include <QTemporaryFile>
+
+#include "Common/openPassTypes.h"
+#include "Common/openPassUtils.h"
 #include "Common/sensorDefinitions.h"
+#include "Interfaces/dataStoreInterface.h"
+#include "Interfaces/worldInterface.h"
 #include "observationFileHandler.h"
+
+ObservationFileHandler::ObservationFileHandler(const DataStoreReadInterface& dataStore) :
+    dataStore{dataStore}
+{
+}
 
 void ObservationFileHandler::WriteStartOfFile(const std::string& frameworkVersion)
 {
     runNumber = 0;
-
-    // retrieve storage location
-
-    tmpFilename = "simulationOutput.tmp";
-    finalFilename = "simulationOutput.xml";
-
-    tmpPath = folder + QDir::separator() + tmpFilename;
-    finalPath = folder + QDir::separator() + finalFilename;
-
-    std::stringstream ss;
-    ss << COMPONENTNAME << " retrieved storage location: " << finalPath.toStdString();
-    //    LOG(CbkLogLevel::Debug, ss.str());
 
     // setup environment
     QDir dir(folder);
@@ -47,11 +46,6 @@ void ObservationFileHandler::WriteStartOfFile(const std::string& frameworkVersio
         throw std::runtime_error(ss.str());
     }
 
-    if (QFile::exists(tmpPath))
-    {
-        QFile::remove(tmpPath);
-    }
-
     if (QFile::exists(finalPath))
     {
         QFile::remove(finalPath);
@@ -59,16 +53,18 @@ void ObservationFileHandler::WriteStartOfFile(const std::string& frameworkVersio
 
     RemoveCsvCyclics(folder);
 
-    xmlFile = std::make_shared<QFile>(tmpPath);
-    if (!xmlFile->open(QIODevice::WriteOnly))
+    xmlFile = std::make_unique<QTemporaryFile>(folder + "/simulationOutput_XXXXXX.tmp");
+    xmlFile->setAutoRemove(false);
+    xmlFile->fileName();   // required for setAutoRemove to be applied, see https://doc.qt.io/qt-5/qtemporaryfile.html#setAutoRemove
+
+    if (!xmlFile->open())
     {
         std::stringstream ss;
-        ss << COMPONENTNAME << " could not create file: " << tmpPath.toStdString();
-        //        LOG(CbkLogLevel::Error, ss.str());
+        ss << COMPONENTNAME << ": could not create file: " << xmlFile->fileName().toStdString();
         throw std::runtime_error(ss.str());
     }
 
-    xmlFileStream = std::make_shared<QXmlStreamWriter>(xmlFile.get());
+    xmlFileStream = std::make_unique<QXmlStreamWriter>(xmlFile.get());
     xmlFileStream->setAutoFormatting(true);
     xmlFileStream->writeStartDocument();
     xmlFileStream->writeStartElement(outputTags.SIMULATIONOUTPUT);
@@ -80,11 +76,8 @@ void ObservationFileHandler::WriteStartOfFile(const std::string& frameworkVersio
     xmlFileStream->writeStartElement(outputTags.RUNRESULTS);
 }
 
-void ObservationFileHandler::WriteRun(const RunResultInterface& runResult, RunStatistic runStatistic,
-                                      ObservationCyclics& cyclics, WorldInterface* world, SimulationSlave::EventNetworkInterface* eventNetwork)
+void ObservationFileHandler::WriteRun([[maybe_unused]] const RunResultInterface& runResult, RunStatistic runStatistic, ObservationCyclics& cyclics)
 {
-    Q_UNUSED(runResult);
-
     std::stringstream ss;
     ss << COMPONENTNAME << " append log to file: " << tmpPath.toStdString();
     //    LOG(CbkLogLevel::Debug, ss.str());
@@ -96,19 +89,33 @@ void ObservationFileHandler::WriteRun(const RunResultInterface& runResult, RunSt
     // write RunStatisticsTag
     xmlFileStream->writeStartElement(outputTags.RUNSTATISTICS);
 
-    runStatistic.WriteStatistics(xmlFileStream);
+    const auto agentIds = dataStore.GetKeys("Statics/Agents");
+
+    for (const auto& agentId : agentIds)
+    {
+        const auto tdtResult = dataStore.GetCyclic(std::nullopt, std::stoi(agentId), "TotalDistanceTraveled");
+        const auto last_tdt_row = (*((*tdtResult).end() - 1)).get();
+
+        if (last_tdt_row.entityId == 0)
+        {
+            runStatistic.EgoDistanceTraveled = std::get<double>(last_tdt_row.value);
+        }
+
+        runStatistic.TotalDistanceTraveled += std::get<double>(last_tdt_row.value);
+    }
+
+    runStatistic.WriteStatistics(xmlFileStream.get());
 
     // close RunStatisticsTag
     xmlFileStream->writeEndElement();
 
-    AddEvents(xmlFileStream, eventNetwork);
-
-    AddAgents(xmlFileStream, world);
+    AddEvents();
+    AddAgents();
 
     // write CyclicsTag
     xmlFileStream->writeStartElement(outputTags.CYCLICS);
 
-    if(writeCyclicsToCsv)
+    if (writeCyclicsToCsv)
     {
         QString runPrefix = "";
         if (runNumber < 10)
@@ -121,15 +128,14 @@ void ObservationFileHandler::WriteRun(const RunResultInterface& runResult, RunSt
         }
         QString csvFilename = "Cyclics_Run_" + runPrefix + QString::number(runNumber) + ".csv";
 
-        AddReference(xmlFileStream, csvFilename);
+        AddReference(csvFilename);
 
         WriteCsvCyclics(csvFilename, cyclics);
     }
     else
     {
-        AddHeader(xmlFileStream, cyclics);
-
-        AddSamples(xmlFileStream, cyclics);
+        AddHeader(cyclics);
+        AddSamples(cyclics);
     }
 
     // close CyclicsTag
@@ -154,144 +160,96 @@ void ObservationFileHandler::WriteEndOfFile()
     xmlFile->close();
 
     // finalize results
-    // using copy/remove instead of rename, since latter is failing on some systems
-    if (xmlFile->copy(finalPath))
-    {
-        xmlFile->remove();
-    }
+    xmlFile->rename(finalPath);
 }
 
-void ObservationFileHandler::AddEventParameters(std::shared_ptr<QXmlStreamWriter> fStream,
-        EventParameters eventParameters)
+void ObservationFileHandler::AddEvents()
 {
-    for (auto parameter : eventParameters)
-    {
-        fStream->writeStartElement(outputTags.EVENTPARAMETER);
-        fStream->writeAttribute(outputAttributes.KEY, QString::fromStdString(parameter.key));
-        fStream->writeAttribute(outputAttributes.VALUE, QString::fromStdString(parameter.value));
+    xmlFileStream->writeStartElement(outputTags.EVENTS);
 
-        //Closes EventParameter tag
-        fStream->writeEndElement();
+    const auto events = dataStore.GetAcyclic(std::nullopt, std::nullopt, "*");
+
+    for (const AcyclicRow& event : *events)
+    {
+        xmlFileStream->writeStartElement(outputTags.EVENT);
+        xmlFileStream->writeAttribute(outputAttributes.TIME, QString::number(event.timestamp));
+        xmlFileStream->writeAttribute(outputAttributes.SOURCE, QString::fromStdString(event.key));
+        xmlFileStream->writeAttribute(outputAttributes.NAME, QString::fromStdString(event.data.name));
+
+        WriteEntities(outputTags.TRIGGERINGENTITIES, event.data.triggeringEntities.entities, true);
+        WriteEntities(outputTags.AFFECTEDENTITIES, event.data.affectedEntities.entities, true);
+        WriteParameter(event.data.parameter, true);
+
+        xmlFileStream->writeEndElement(); // event
     }
+
+    xmlFileStream->writeEndElement(); // events
 }
 
-void ObservationFileHandler::AddEvent(std::shared_ptr<QXmlStreamWriter> fStream, std::shared_ptr<EventInterface> event)
+void ObservationFileHandler::AddAgents()
 {
-    fStream->writeStartElement(outputTags.EVENT);
-    fStream->writeAttribute(outputAttributes.ID, QString::number(event->GetId()));
-    fStream->writeAttribute(outputAttributes.TIME, QString::number(event->GetEventTime()));
-    fStream->writeAttribute(outputAttributes.SOURCE, QString::fromStdString(event->GetSource()));
-    fStream->writeAttribute(outputAttributes.NAME, QString::fromStdString(event->GetName()));
+    xmlFileStream->writeStartElement(outputTags.AGENTS);
 
-    const int& triggeringEventId = event->GetTriggeringEventId();
-    if (triggeringEventId >= 0)
+    const auto agentIds = dataStore.GetKeys("Statics/Agents");
+
+    for (const auto& agentId : agentIds)
     {
-        fStream->writeAttribute(outputAttributes.TRIGGERINGEVENTID, QString::number(triggeringEventId));
+        AddAgent(agentId);
     }
 
-    AddEventParameters(fStream, event->GetParametersAsString());
-
-    fStream->writeEndElement();
+    xmlFileStream->writeEndElement();
 }
 
-void ObservationFileHandler::AddEvents(std::shared_ptr<QXmlStreamWriter> fStream,
-                                       SimulationSlave::EventNetworkInterface* eventNetwork)
+void ObservationFileHandler::AddAgent(const std::string& agentId)
 {
-    // write events
-    fStream->writeStartElement(outputTags.EVENTS);
+    const std::string keyPrefix = "Agents/" + agentId + "/";
 
-    for (const auto& eventList : * (eventNetwork->GetArchivedEvents()))
-    {
-        for (const auto& event : eventList.second)
-        {
-            AddEvent(fStream, event);
-        }
-    }
+    xmlFileStream->writeStartElement(outputTags.AGENT);
 
-    for (const auto& eventList : * (eventNetwork->GetActiveEvents()))
-    {
-        for (const auto& event : eventList.second)
-        {
-            AddEvent(fStream, event);
-        }
-    }
+    xmlFileStream->writeAttribute(outputAttributes.ID, QString::fromStdString(agentId));
+    xmlFileStream->writeAttribute(outputAttributes.AGENTTYPEGROUPNAME, QString::fromStdString(std::get<std::string>(dataStore.GetStatic(keyPrefix + "AgentTypeGroupName").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.AGENTTYPENAME, QString::fromStdString(std::get<std::string>(dataStore.GetStatic(keyPrefix + "AgentTypeName").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.VEHICLEMODELTYPE, QString::fromStdString(std::get<std::string>(dataStore.GetStatic(keyPrefix + "VehicleModelType").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.DRIVERPROFILENAME, QString::fromStdString(std::get<std::string>(dataStore.GetStatic(keyPrefix + "DriverProfileName").at(0))));
 
-    // close EventsTag
-    fStream->writeEndElement();
+    AddVehicleAttributes(agentId);
+    AddSensors(agentId);
+
+    xmlFileStream->writeEndElement();
 }
 
-void ObservationFileHandler::AddAgents(std::shared_ptr<QXmlStreamWriter> fStream, WorldInterface* world)
+void ObservationFileHandler::AddVehicleAttributes(const std::string& agentId)
 {
-    //write Agents
-    fStream->writeStartElement(outputTags.AGENTS);
+    const std::string keyPrefix = "Agents/" + agentId + "/Vehicle/";
 
-    for (const auto& it : world->GetAgents())
-    {
-        const AgentInterface* agent = it.second;
-        AddAgent(fStream, agent);
-    }
+    xmlFileStream->writeStartElement(outputTags.VEHICLEATTRIBUTES);
 
-    for (const auto& it : world->GetRemovedAgents())
-    {
-        const AgentInterface* agent = it;
-        AddAgent(fStream, agent);
-    }
+    xmlFileStream->writeAttribute(outputAttributes.WIDTH, QString::number(std::get<double>(dataStore.GetStatic(keyPrefix + "Width").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.LENGTH, QString::number(std::get<double>(dataStore.GetStatic(keyPrefix + "Length").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.HEIGHT, QString::number(std::get<double>(dataStore.GetStatic(keyPrefix + "Height").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.LONGITUDINALPIVOTOFFSET, QString::number(std::get<double>(dataStore.GetStatic(keyPrefix + "LongitudinalPivotOffset").at(0))));
 
-    fStream->writeEndElement();
+    xmlFileStream->writeEndElement();
 }
 
-void ObservationFileHandler::AddAgent(std::shared_ptr<QXmlStreamWriter> fStream, const AgentInterface* agent)
+void ObservationFileHandler::AddSensors(const std::string& agentId)
 {
-    fStream->writeStartElement(outputTags.AGENT);
+    const std::string keyPrefix = "Statics/Agents/" + agentId + "/Vehicle/Sensors";
+    const auto& sensorIds = dataStore.GetKeys(keyPrefix);
 
-    const auto& agentCategory = static_cast<int>(agent->GetAgentCategory());
-
-    fStream->writeAttribute(outputAttributes.ID, QString::number(agent->GetId()));
-    fStream->writeAttribute(outputAttributes.AGENTTYPEGROUPNAME,
-                            QString::fromStdString(AgentCategoryStrings[agentCategory]));
-    fStream->writeAttribute(outputAttributes.AGENTTYPENAME, QString::fromStdString(agent->GetAgentTypeName()));
-    fStream->writeAttribute(outputAttributes.VEHICLEMODELTYPE, QString::fromStdString(agent->GetVehicleModelType()));
-    fStream->writeAttribute(outputAttributes.DRIVERPROFILENAME, QString::fromStdString(agent->GetDriverProfileName()));
-
-    AddVehicleAttributes(fStream, agent->GetVehicleModelParameters());
-    AddSensors(fStream, agent);
-
-    fStream->writeEndElement();
-}
-
-void ObservationFileHandler::AddVehicleAttributes(std::shared_ptr<QXmlStreamWriter> fStream, const VehicleModelParameters &vehicleModelParameters)
-{
-    fStream->writeStartElement(outputTags.VEHICLEATTRIBUTES);
-
-    fStream->writeAttribute(outputAttributes.WIDTH,
-                                            QString::number(vehicleModelParameters.width));
-    fStream->writeAttribute(outputAttributes.LENGTH,
-                                            QString::number(vehicleModelParameters.length));
-    fStream->writeAttribute(outputAttributes.HEIGHT,
-                                            QString::number(vehicleModelParameters.height));
-
-    const double longitudinalPivotOffset = (vehicleModelParameters.length / 2.0) - vehicleModelParameters.distanceReferencePointToLeadingEdge;
-    fStream->writeAttribute(outputAttributes.LONGITUDINALPIVOTOFFSET,
-                                            QString::number(longitudinalPivotOffset));
-
-    fStream->writeEndElement();
-}
-
-void ObservationFileHandler::AddSensors(std::shared_ptr<QXmlStreamWriter> fStream, const AgentInterface* agent)
-{
-    const openpass::sensors::Parameters sensorParameters = agent->GetSensorParameters();
-
-    if (ContainsSensor(sensorParameters))
+    if (sensorIds.empty())
     {
-        fStream->writeStartElement(outputTags.SENSORS);
-
-        for (const auto& itSensors : sensorParameters)
-        {
-            AddSensor(fStream, itSensors);
-        }
-
-        fStream->writeEndElement();
+        return;
     }
+
+    xmlFileStream->writeStartElement(outputTags.SENSORS);
+
+    for (const auto& sensorId : sensorIds)
+    {
+        AddSensor(agentId, sensorId);
+    }
+
+    xmlFileStream->writeEndElement();
 }
 
 bool ObservationFileHandler::ContainsSensor(const openpass::sensors::Parameters& sensorParameters) const
@@ -299,86 +257,73 @@ bool ObservationFileHandler::ContainsSensor(const openpass::sensors::Parameters&
     return !sensorParameters.empty();
 }
 
-void ObservationFileHandler::AddSensor(std::shared_ptr<QXmlStreamWriter> fStream,
-                                       const openpass::sensors::Parameter& sensorParameter)
+void ObservationFileHandler::AddSensor(const std::string& agentId, const::std::string& sensorId)
 {
-    fStream->writeStartElement(outputTags.SENSOR);
+    const std::string sensorKeyPrefix = "Agents/" + agentId + "/Vehicle/Sensors/" + sensorId + "/";
+    const std::string mountingKeyPrefix = sensorKeyPrefix + "Mounting/";
 
-    fStream->writeAttribute(outputAttributes.ID, QString::number(sensorParameter.id));
+    xmlFileStream->writeStartElement(outputTags.SENSOR);
 
-    fStream->writeAttribute(outputAttributes.TYPE, QString::fromStdString(sensorParameter.profile.type));
-    fStream->writeAttribute(outputAttributes.MOUNTINGPOSITIONLONGITUDINAL,
-                            QString::number(sensorParameter.position.longitudinal));
-    fStream->writeAttribute(outputAttributes.MOUNTINGPOSITIONLATERAL,
-                            QString::number(sensorParameter.position.lateral));
-    fStream->writeAttribute(outputAttributes.MOUNTINGPOSITIONHEIGHT,
-                            QString::number(sensorParameter.position.height));
-    fStream->writeAttribute(outputAttributes.ORIENTATIONPITCH, QString::number(sensorParameter.position.pitch));
-    fStream->writeAttribute(outputAttributes.ORIENTATIONYAW, QString::number(sensorParameter.position.yaw));
-    fStream->writeAttribute(outputAttributes.ORIENTATIONROLL, QString::number(sensorParameter.position.roll));
+    xmlFileStream->writeAttribute(outputAttributes.ID, QString::fromStdString(sensorId));
+    xmlFileStream->writeAttribute(outputAttributes.TYPE, QString::fromStdString(std::get<std::string>(dataStore.GetStatic(sensorKeyPrefix + "Type").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.MOUNTINGPOSITIONLONGITUDINAL, QString::number(std::get<double>(dataStore.GetStatic(mountingKeyPrefix + "Position/Longitudinal").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.MOUNTINGPOSITIONLATERAL, QString::number(std::get<double>(dataStore.GetStatic(mountingKeyPrefix + "Position/Lateral").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.MOUNTINGPOSITIONHEIGHT, QString::number(std::get<double>(dataStore.GetStatic(mountingKeyPrefix + "Position/Height").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.ORIENTATIONYAW, QString::number(std::get<double>(dataStore.GetStatic(mountingKeyPrefix + "Orientation/Yaw").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.ORIENTATIONPITCH, QString::number(std::get<double>(dataStore.GetStatic(mountingKeyPrefix + "Orientation/Pitch").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.ORIENTATIONROLL, QString::number(std::get<double>(dataStore.GetStatic(mountingKeyPrefix + "Orientation/Roll").at(0))));
 
-    const auto& parameters = sensorParameter.profile.parameter;
+    xmlFileStream->writeAttribute(outputAttributes.LATENCY, QString::number(std::get<double>(dataStore.GetStatic(sensorKeyPrefix + "Parameters/Latency").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.OPENINGANGLEH, QString::number(std::get<double>(dataStore.GetStatic(sensorKeyPrefix + "Parameters/OpeningAngleH").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.DETECTIONRANGE, QString::number(std::get<double>(dataStore.GetStatic(sensorKeyPrefix + "Parameters/Range").at(0))));
 
-    if (auto latency = openpass::parameter::Get<double>(parameters, "Latency"))
+    try
     {
-       fStream->writeAttribute(outputAttributes.LATENCY, QString::number(latency.value()));
+        xmlFileStream->writeAttribute(outputAttributes.OPENINGANGLEV, QString::number(std::get<double>(dataStore.GetStatic(sensorKeyPrefix + "Parameters/OpeningAngleV").at(0))));
+    }
+    catch (const std::out_of_range&)
+    {
     }
 
-    if (auto openingAngleH = openpass::parameter::Get<double>(parameters, "OpeningAngleH"))
-    {
-        fStream->writeAttribute(outputAttributes.OPENINGANGLEH, QString::number(openingAngleH.value()));
-    }
-
-    if (auto openingAngleV = openpass::parameter::Get<double>(parameters, "OpeningAngleV"))
-    {
-        fStream->writeAttribute(outputAttributes.OPENINGANGLEV, QString::number(openingAngleV.value()));
-    }
-
-    if (auto detectionRange = openpass::parameter::Get<double>(parameters, "DetectionRange"))
-    {
-        fStream->writeAttribute(outputAttributes.DETECTIONRANGE, QString::number(detectionRange.value()));
-    }
-
-    fStream->writeEndElement(); // Close Sensor Tag for this sensor
+    xmlFileStream->writeEndElement();
 }
 
-void ObservationFileHandler::AddHeader(std::shared_ptr<QXmlStreamWriter> fStream, ObservationCyclics& cyclics)
+void ObservationFileHandler::AddHeader(ObservationCyclics& cyclics)
 {
-    fStream->writeStartElement(outputTags.HEADER);
-
-    fStream->writeCharacters(QString::fromStdString(cyclics.GetHeader()));
-
-    fStream->writeEndElement();
+    xmlFileStream->writeStartElement(outputTags.HEADER);
+    xmlFileStream->writeCharacters(QString::fromStdString(cyclics.GetHeader()));
+    xmlFileStream->writeEndElement();
 }
 
-void ObservationFileHandler::AddSamples(std::shared_ptr<QXmlStreamWriter> fStream, ObservationCyclics& cyclics)
+void ObservationFileHandler::AddSamples(ObservationCyclics& cyclics)
 {
     // write SamplesTag
-    fStream->writeStartElement(outputTags.SAMPLES);
-    auto timeSteps = cyclics.GetTimeSteps();
-    for (unsigned int timeStepNumber = 0; timeStepNumber < timeSteps->size(); ++timeStepNumber)
+    xmlFileStream->writeStartElement(outputTags.SAMPLES);
+    const auto& timeSteps = cyclics.GetTimeSteps();
+
+    for (unsigned int timeStepNumber = 0; timeStepNumber < timeSteps.size(); ++timeStepNumber)
     {
-        fStream->writeStartElement(outputTags.SAMPLE);
-        fStream->writeAttribute(outputAttributes.TIME, QString::number(timeSteps->at(timeStepNumber)));
-        fStream->writeCharacters(QString::fromStdString(cyclics.GetSamplesLine(timeStepNumber)));
+        xmlFileStream->writeStartElement(outputTags.SAMPLE);
+        xmlFileStream->writeAttribute(outputAttributes.TIME, QString::number(timeSteps.at(timeStepNumber)));
+        xmlFileStream->writeCharacters(QString::fromStdString(cyclics.GetSamplesLine(timeStepNumber)));
 
         // close SampleTag
-        fStream->writeEndElement();
+        xmlFileStream->writeEndElement();
     }
 
     // close SamplesTag
-    fStream->writeEndElement();
+    xmlFileStream->writeEndElement();
 }
 
-void ObservationFileHandler::AddReference(std::shared_ptr<QXmlStreamWriter> fStream, QString filename)
+void ObservationFileHandler::AddReference(QString filename)
 {
     // write CyclicsFileTag
-    fStream->writeStartElement(outputTags.CYCLICSFILE);
+    xmlFileStream->writeStartElement(outputTags.CYCLICSFILE);
 
-    fStream->writeCharacters(filename);
+    xmlFileStream->writeCharacters(filename);
 
     // close CyclicsFileTag
-    fStream->writeEndElement();
+    xmlFileStream->writeEndElement();
 }
 
 void ObservationFileHandler::RemoveCsvCyclics(QString directory)
@@ -399,7 +344,7 @@ void ObservationFileHandler::WriteCsvCyclics(QString filename, ObservationCyclic
 {
     QString path = folder + QDir::separator() + filename;
 
-    csvFile = std::make_shared<QFile>(path);
+    csvFile = std::make_unique<QFile>(path);
     if (!csvFile->open(QIODevice::WriteOnly | QIODevice::Text))
     {
         std::stringstream ss;
@@ -408,17 +353,64 @@ void ObservationFileHandler::WriteCsvCyclics(QString filename, ObservationCyclic
         throw std::runtime_error(ss.str());
     }
 
-    QTextStream stream( csvFile.get() );
+    QTextStream stream(csvFile.get());
 
     stream << "Timestep, " << QString::fromStdString(cyclics.GetHeader()) << '\n';
 
-    auto timeSteps = cyclics.GetTimeSteps();
-    for (unsigned int timeStepNumber = 0; timeStepNumber < timeSteps->size(); ++timeStepNumber)
+    const auto& timeSteps = cyclics.GetTimeSteps();
+    for (unsigned int timeStepNumber = 0; timeStepNumber < timeSteps.size(); ++timeStepNumber)
     {
-        stream << QString::number(timeSteps->at(timeStepNumber)) << ", " << QString::fromStdString(cyclics.GetSamplesLine(timeStepNumber)) << '\n';
+        stream << QString::number(timeSteps.at(timeStepNumber)) << ", " << QString::fromStdString(cyclics.GetSamplesLine(timeStepNumber)) << '\n';
     }
 
     csvFile->flush();
 
     csvFile->close();
+}
+
+void ObservationFileHandler::WriteEntities(const QString tag, const openpass::type::EntityIds &entities, bool mandatory)
+{
+    if (!entities.empty())
+    {
+        xmlFileStream->writeStartElement(tag);
+        for (const auto &entity : entities)
+        {
+            xmlFileStream->writeStartElement(output::tag::ENTITY);
+            xmlFileStream->writeAttribute(output::attribute::ID, QString::number(entity));
+            xmlFileStream->writeEndElement();
+        }
+        xmlFileStream->writeEndElement();
+    }
+    else if (mandatory)
+    {
+        xmlFileStream->writeEmptyElement(tag);
+    }
+}
+
+void ObservationFileHandler::WriteParameter(const openpass::type::FlatParameter &parameters, bool mandatory)
+{
+    constexpr auto tag = output::tag::PARAMETERS;
+    if (!parameters.empty())
+    {
+        xmlFileStream->writeStartElement(tag);
+
+        // No structured binding on purpose:
+        // see https://stackoverflow.com/questions/46114214/lambda-implicit-capture-fails-with-variable-declared-from-structured-binding
+        for (const auto &p : parameters)
+        {
+            auto parameterWriter = [&](const std::string &value) {
+                xmlFileStream->writeStartElement(output::tag::PARAMETER);
+                xmlFileStream->writeAttribute(output::attribute::KEY, QString::fromStdString(p.first));
+                xmlFileStream->writeAttribute(output::attribute::VALUE, QString::fromStdString(value));
+                xmlFileStream->writeEndElement();
+            };
+
+            std::visit(openpass::utils::FlatParameter::to_string(parameterWriter), p.second);
+        }
+        xmlFileStream->writeEndElement();
+    }
+    else if (mandatory)
+    {
+        xmlFileStream->writeEmptyElement(tag);
+    }
 }

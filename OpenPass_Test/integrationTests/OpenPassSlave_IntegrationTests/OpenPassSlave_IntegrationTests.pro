@@ -91,6 +91,7 @@ INC_SLAVECONFIG = $$OPENPASS_SLAVE/importer/slaveConfig.h \
 
 SRC_SLAVECONFIG = $$OPENPASS_SLAVE/importer/slaveConfig.cpp \
                   $$OPENPASS_SLAVE/importer/slaveConfigImporter.cpp \
+                  $$OPENPASS_SLAVE/importer/parameterImporter.cpp \
                   $$OPENPASS_SLAVE/framework/directories.cpp
 
 SRC_CORESHARE = $$CORE_SHARE/xmlParser.cpp \

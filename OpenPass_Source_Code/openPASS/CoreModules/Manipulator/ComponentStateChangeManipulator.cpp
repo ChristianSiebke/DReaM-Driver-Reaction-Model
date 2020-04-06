@@ -17,8 +17,6 @@
 #include "Common/componentStateChangeEvent.h"
 #include "Common/commonTools.h"
 
-#include <QtGlobal>
-#include <array>
 
 ComponentStateChangeManipulator::ComponentStateChangeManipulator(WorldInterface *world,
                                 std::shared_ptr<openScenario::UserDefinedCommandAction> action,
@@ -52,13 +50,11 @@ ComponentStateChangeManipulator::ComponentStateChangeManipulator(WorldInterface 
     cycleTime = 100;
 }
 
-void ComponentStateChangeManipulator::Trigger(int time)
+void ComponentStateChangeManipulator::Trigger([[maybe_unused]] int time)
 {
-    Q_UNUSED(time)
-
-    for (std::shared_ptr<EventInterface> eventInterface : GetEvents())
+    for (const auto& eventInterface : GetEvents())
     {
-        std::shared_ptr<ConditionalEvent> triggeringEvent = std::dynamic_pointer_cast<ConditionalEvent>(eventInterface);
+        const auto& triggeringEvent = std::dynamic_pointer_cast<ConditionalEvent>(eventInterface);
 
         std::shared_ptr<ComponentChangeEvent> event =
                 std::make_shared<ComponentChangeEvent>(time,
@@ -79,7 +75,7 @@ EventContainer ComponentStateChangeManipulator::GetEvents()
 {
     EventContainer manipulatorSpecificEvents{};
 
-    const auto &conditionalEvents = eventNetwork->GetActiveEventCategory(EventDefinitions::EventCategory::Conditional);
+    const auto &conditionalEvents = eventNetwork->GetActiveEventCategory(EventDefinitions::EventCategory::OpenSCENARIO);
 
     for(const auto &event: conditionalEvents)
     {

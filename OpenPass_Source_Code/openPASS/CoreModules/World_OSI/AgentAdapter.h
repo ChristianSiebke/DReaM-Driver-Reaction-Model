@@ -46,7 +46,7 @@ public:
     const std::string MODULENAME = "AGENTADAPTER";
 
     AgentAdapter(WorldInterface* world, const CallbackInterface* callbacks, OWL::Interfaces::WorldData* worldData, const World::Localization::Localizer& localizer);
-    ~AgentAdapter() override = default;
+    ~AgentAdapter() override;
 
     ObjectTypeOSI GetType() const override
     {
@@ -62,6 +62,7 @@ public:
     {
         return id;
     }
+
     EgoAgentInterface& GetEgoAgent() override
     {
         return egoAgent;
@@ -224,14 +225,6 @@ public:
         });
     }
 
-    void SetDistanceTraveled(double value) override
-    {
-        world->QueueAgentUpdate([this, value]()
-        {
-            distanceTraveled = value;
-        });
-    }
-
     void SetVehicleModelParameter(const VehicleModelParameters& parameter) override
     {
         world->QueueAgentUpdate([this, parameter]()
@@ -384,11 +377,6 @@ public:
     bool OnLane(const OWL::Interfaces::Lane& lane) const;
 
     double GetVelocity(VelocityScope velocityScope = VelocityScope::Absolute) const override;
-
-    double  GetDistanceTraveled() const override
-    {
-        return distanceTraveled;
-    }
 
     void Unregister() const override;
 

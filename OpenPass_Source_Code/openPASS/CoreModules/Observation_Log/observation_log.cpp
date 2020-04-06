@@ -1,6 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
-*               2016, 2017, 2018 ITK Engineering GmbH
+* Copyright (c) 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -10,13 +9,15 @@
 *******************************************************************************/
 
 //-----------------------------------------------------------------------------
-/** \file  ObservationLog.cpp */
+/** \file  observation_Log.cpp */
 //-----------------------------------------------------------------------------
 
 #include "observation_log.h"
 #include "observation_logImplementation.h"
 
-const std::string Version = "1.0.0";    //!< The version of the current module - has to be incremented manually
+class DataStoreReadInterface;
+
+const std::string Version = "0.2.0";    //!< The version of the current module - has to be incremented manually
 static const CallbackInterface* Callbacks = nullptr;
 
 //-----------------------------------------------------------------------------
@@ -43,17 +44,19 @@ extern "C" OBSERVATION_LOG_SHARED_EXPORT ObservationInterface* OpenPASS_CreateIn
     WorldInterface* world,
     SimulationSlave::EventNetworkInterface* eventNetwork,
     const ParameterInterface* parameters,
-    const CallbackInterface* callbacks)
+    const CallbackInterface* callbacks,
+    DataStoreReadInterface* dataStore)
 {
     Callbacks = callbacks;
 
     try
     {
         return (ObservationInterface*)(new (std::nothrow) ObservationLogImplementation(eventNetwork,
-                                       stochastics,
-                                       world,
-                                       parameters,
-                                       callbacks));
+                                                                                         stochastics,
+                                                                                         world,
+                                                                                         parameters,
+                                                                                         callbacks,
+                                                                                         dataStore));
     }
     catch (const std::runtime_error& ex)
     {

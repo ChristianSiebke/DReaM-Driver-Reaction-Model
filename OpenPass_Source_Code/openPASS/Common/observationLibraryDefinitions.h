@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 #include "parameter.h"
+#include "Interfaces/dataStoreInterface.h"
 
 /**
  * @brief Wrapper for building an ObservationInstance

@@ -9,26 +9,24 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
-//-----------------------------------------------------------------------------
-//! @file  Scheduler.h
-//! @brief This file contains the generic schedule managing component
-//-----------------------------------------------------------------------------
-
 #pragma once
 
 #include <functional>
 #include <memory>
+
 #include "Interfaces/worldInterface.h"
-#include "taskBuilder.h"
 #include "schedulerTasks.h"
+#include "taskBuilder.h"
+#include "timeKeeper.h"
 
-namespace SimulationSlave
-{
-
+namespace SimulationSlave {
 class RunResult;
 class EventNetworkInterface;
 class SchedulePolicy;
 class SpawnPointNetworkInterface;
+} // namespace SimulationSlave
+
+namespace openpass::scheduling {
 
 //-----------------------------------------------------------------------------
 /** \brief execute all tasks for an simulation run
@@ -42,15 +40,15 @@ class SpawnPointNetworkInterface;
 class Scheduler
 {
 public:
-    static constexpr bool FAILURE { false };
-    static constexpr bool SUCCESS { true };
-    static constexpr int FRAMEWORK_UPDATE_RATE { 100 };
+    static constexpr bool FAILURE{false};
+    static constexpr bool SUCCESS{true};
+    static constexpr int FRAMEWORK_UPDATE_RATE{100};
 
     Scheduler(WorldInterface &world,
-              SpawnPointNetworkInterface &spawnPointNetwork,
-              EventDetectorNetworkInterface &eventDetectorNetwork,
-              ManipulatorNetworkInterface &manipulatorNetwork,
-              ObservationNetworkInterface &observationNetwork);
+              SimulationSlave::SpawnPointNetworkInterface &spawnPointNetwork,
+              SimulationSlave::EventDetectorNetworkInterface &eventDetectorNetwork,
+              SimulationSlave::ManipulatorNetworkInterface &manipulatorNetwork,
+              SimulationSlave::ObservationNetworkInterface &observationNetwork);
 
     /*!
     * \brief Run
@@ -65,7 +63,7 @@ public:
     */
     bool Run(int startTime,
              int endTime,
-             RunResult &runResult,
+             SimulationSlave::RunResult &runResult,
              SimulationSlave::EventNetworkInterface &eventNetwork);
 
     /*!
@@ -77,16 +75,16 @@ public:
     * @param[in]     taskList current task list
     * @param[in]     Agent    new agent
     */
-    void ScheduleAgentTasks(SchedulerTasks& taskList, const Agent& agent);
+    void ScheduleAgentTasks(SchedulerTasks &taskList, const SimulationSlave::Agent &agent);
 
-private:    
+private:
     WorldInterface &world;
-    SpawnPointNetworkInterface &spawnPointNetwork;
-    EventDetectorNetworkInterface &eventDetectorNetwork;
-    ManipulatorNetworkInterface &manipulatorNetwork;
-    ObservationNetworkInterface &observationNetwork;
+    SimulationSlave::SpawnPointNetworkInterface &spawnPointNetwork;
+    SimulationSlave::EventDetectorNetworkInterface &eventDetectorNetwork;
+    SimulationSlave::ManipulatorNetworkInterface &manipulatorNetwork;
+    SimulationSlave::ObservationNetworkInterface &observationNetwork;
 
-    int currentTime {0};
+    int &currentTime{openpass::scheduling::TimeKeeper::time};
 
     /*!
     * \brief UpdateAgents
@@ -107,10 +105,8 @@ private:
     * @param[in]     tasks     execute function of given tasks
     * @return                  false, if a task reports error
     */
-    template<typename T>
+    template <typename T>
     bool ExecuteTasks(T tasks);
 };
 
-} // namespace SimulationSlave
-
-
+} // namespace openpass::scheduling

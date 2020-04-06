@@ -12,55 +12,54 @@
 /** \file  dynamics_trajectoryFollower.cpp */
 //-----------------------------------------------------------------------------
 
+#include "dynamics_trajectoryFollower.h"
+
 #include <QCoreApplication>
 
 #include "Interfaces/parameterInterface.h"
-#include "dynamics_trajectoryFollower.h"
 #include "trajectoryFollowerImplementation.h"
 
-const std::string Version = "0.1.0";
-static const CallbackInterface* Callbacks = nullptr;
+const static std::string VERSION = "0.2.0";
+static const CallbackInterface *Callbacks = nullptr;
 
-extern "C" DYNAMICS_TRAJECTORY_FOLLOWER_SHARED_EXPORT const std::string& OpenPASS_GetVersion()
+extern "C" DYNAMICS_TRAJECTORY_FOLLOWER_SHARED_EXPORT const std::string &OpenPASS_GetVersion()
 {
-    return Version;
+    return VERSION;
 }
 
-extern "C" DYNAMICS_TRAJECTORY_FOLLOWER_SHARED_EXPORT ModelInterface* OpenPASS_CreateInstance(
+extern "C" DYNAMICS_TRAJECTORY_FOLLOWER_SHARED_EXPORT ModelInterface *OpenPASS_CreateInstance(
     std::string componentName,
     bool isInit,
     int priority,
     int offsetTime,
     int responseTime,
     int cycleTime,
-    StochasticsInterface* stochastics,
-    WorldInterface* world,
-    const ParameterInterface* parameters,
-    const std::map<int, ObservationInterface*>* observations,
-    AgentInterface* agent,
-    const CallbackInterface* callbacks,
-    SimulationSlave::EventNetworkInterface * const eventNetwork)
+    StochasticsInterface *stochastics,
+    WorldInterface *world,
+    const ParameterInterface *parameters,
+    PublisherInterface * const publisher,
+    AgentInterface *agent,
+    const CallbackInterface *callbacks)
 {
     Callbacks = callbacks;
 
     try
     {
-                return (ModelInterface*)(new (std::nothrow) TrajectoryFollowerImplementation(
-                                             componentName,
-                                             isInit,
-                                             priority,
-                                             offsetTime,
-                                             responseTime,
-                                             cycleTime,
-                                             stochastics,
-                                             world,
-                                             parameters,
-                                             observations,
-                                             callbacks,
-                                             agent,
-                                             eventNetwork));
+        return (ModelInterface *)(new (std::nothrow) TrajectoryFollowerImplementation(
+            componentName,
+            isInit,
+            priority,
+            offsetTime,
+            responseTime,
+            cycleTime,
+            stochastics,
+            world,
+            parameters,
+            publisher,
+            callbacks,
+            agent));
     }
-    catch (const std::runtime_error& ex)
+    catch (const std::runtime_error &ex)
     {
         if (Callbacks != nullptr)
         {
@@ -80,22 +79,22 @@ extern "C" DYNAMICS_TRAJECTORY_FOLLOWER_SHARED_EXPORT ModelInterface* OpenPASS_C
     }
 }
 
-extern "C" DYNAMICS_TRAJECTORY_FOLLOWER_SHARED_EXPORT void OpenPASS_DestroyInstance(ModelInterface* implementation)
+extern "C" DYNAMICS_TRAJECTORY_FOLLOWER_SHARED_EXPORT void OpenPASS_DestroyInstance(ModelInterface *implementation)
 {
     delete implementation;
 }
 
 extern "C" DYNAMICS_TRAJECTORY_FOLLOWER_SHARED_EXPORT bool OpenPASS_UpdateInput(
-    ModelInterface* implementation,
+    ModelInterface *implementation,
     int localLinkId,
-    const std::shared_ptr<SignalInterface const>& data,
+    const std::shared_ptr<SignalInterface const> &data,
     int time)
 {
     try
     {
         implementation->UpdateInput(localLinkId, data, time);
     }
-    catch (const std::runtime_error& ex)
+    catch (const std::runtime_error &ex)
     {
         if (Callbacks != nullptr)
         {
@@ -118,16 +117,16 @@ extern "C" DYNAMICS_TRAJECTORY_FOLLOWER_SHARED_EXPORT bool OpenPASS_UpdateInput(
 }
 
 extern "C" DYNAMICS_TRAJECTORY_FOLLOWER_SHARED_EXPORT bool OpenPASS_UpdateOutput(
-    ModelInterface* implementation,
+    ModelInterface *implementation,
     int localLinkId,
-    std::shared_ptr<SignalInterface const>& data,
+    std::shared_ptr<SignalInterface const> &data,
     int time)
 {
     try
     {
         implementation->UpdateOutput(localLinkId, data, time);
     }
-    catch (const std::runtime_error& ex)
+    catch (const std::runtime_error &ex)
     {
         if (Callbacks != nullptr)
         {
@@ -150,14 +149,14 @@ extern "C" DYNAMICS_TRAJECTORY_FOLLOWER_SHARED_EXPORT bool OpenPASS_UpdateOutput
 }
 
 extern "C" DYNAMICS_TRAJECTORY_FOLLOWER_SHARED_EXPORT bool OpenPASS_Trigger(
-    ModelInterface* implementation,
+    ModelInterface *implementation,
     int time)
 {
     try
     {
         implementation->Trigger(time);
     }
-    catch (const std::runtime_error& ex)
+    catch (const std::runtime_error &ex)
     {
         if (Callbacks != nullptr)
         {

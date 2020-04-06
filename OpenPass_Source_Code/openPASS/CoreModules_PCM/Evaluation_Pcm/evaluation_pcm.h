@@ -17,6 +17,5 @@
 #define EVALUATION_PCM_H
 
 #include "evaluation_pcm_global.h"
-#include "observationInterface.h"
 
 #endif // EVALUATION_PCM_H

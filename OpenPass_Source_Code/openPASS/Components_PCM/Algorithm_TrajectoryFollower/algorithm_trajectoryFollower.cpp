@@ -56,7 +56,7 @@ ModelInterface *OpenPASS_CreateInstance(int componentId,
                                         StochasticsInterface *stochastics,
                                         WorldInterface *world,
                                         const ParameterInterface *parameters,
-                                        const std::map<int, ObservationInterface *> *observations,
+                                        PublisherInterface * const publisher,
                                         AgentInterface *agent,
                                         const CallbackInterface *callbacks)
 {
@@ -77,7 +77,7 @@ ModelInterface *OpenPASS_CreateInstance(int componentId,
                                       cycleTime,
                                       stochastics,
                                       parameters,
-                                      observations,
+                                      publisher,
                                       callbacks,
                                       agent->GetAgentId()));
     }

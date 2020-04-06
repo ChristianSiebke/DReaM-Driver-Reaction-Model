@@ -68,4 +68,8 @@ void ActionLongitudinalDriverImplementation::Trigger(int time)
     GetAgent()->SetEffBrakePedal(in_brakePedalPos);
     //! Set gear
     GetAgent()->SetGear(in_gear);
+
+    GetPublisher()->Publish("AccelerationPedalPosition", in_accPedalPos);
+    GetPublisher()->Publish("BrakePedalPosition", in_brakePedalPos);
+    GetPublisher()->Publish("Gear", in_gear);
 }

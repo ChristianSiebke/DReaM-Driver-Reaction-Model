@@ -42,7 +42,8 @@ bool ObservationNetwork::Instantiate(const ObservationInstanceCollection& observ
                                      StochasticsInterface* stochastics,
                                      WorldInterface* world,
                                      EventNetworkInterface* eventNetwork,
-                                     const std::string& sceneryPath)
+                                     const std::string& sceneryPath,
+                                     DataStoreReadInterface* dataStore)
 {
     for (auto& observationInstance : observationInstances)
     {
@@ -57,13 +58,13 @@ bool ObservationNetwork::Instantiate(const ObservationInstanceCollection& observ
             auto& binding = bindingIter->second;
 
             openpass::parameter::ParameterSetLevel1 parameters{observationInstance.parameters};
-            parameters.push_back({"SceneryFile", sceneryPath}); //Hotfix until sceneryPath is observable
 
             auto module = binding.Instantiate(observationInstance.libraryName,
                                               parameters,
                                               stochastics,
                                               world,
-                                              eventNetwork);
+                                              eventNetwork,
+                                              dataStore);
 
             modules.insert({observationInstance.id, module});
         }

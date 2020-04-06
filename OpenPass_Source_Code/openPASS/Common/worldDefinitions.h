@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include <limits>
+
 #include "globalDefinitions.h"
 #include <set>
 #include "boost/graph/adjacency_list.hpp"

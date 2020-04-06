@@ -24,7 +24,6 @@
 
 class AgentInterface;
 class StochasticsInterface;
-class ObservationInterface;
 class ParameterInterface;
 class WorldInterface;
 
@@ -55,7 +54,7 @@ public:
     //! \param [in] stochastics   Stochastics instance
     //! \param [in] world         World interface
     //! \param [in] parameters    Paramaters
-    //! \param [in] observations  Observation instance
+    //! \param [in] pubslisher    Publisher instance
     //! \param [in] callbacks     Callbacks
     //! \param [in] agent         Agent
     AlgorithmAgentFollowingDriverModelImplementation(
@@ -68,7 +67,7 @@ public:
             StochasticsInterface *stochastics,
             WorldInterface *world,
             const ParameterInterface *parameters,
-            const std::map<int, ObservationInterface*> *observations,
+            PublisherInterface * const publisher,
             const CallbackInterface *callbacks,
             AgentInterface *agent);
 

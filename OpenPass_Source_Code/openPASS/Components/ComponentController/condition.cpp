@@ -7,50 +7,29 @@
 *
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
-#include <QtGlobal>
-
 #include "condition.h"
 
 using namespace ComponentControl;
 
-FixedComponentStateExpression::FixedComponentStateExpression(ComponentState value) : value(value)
+ComponentState FixedComponentStateExpression::Get(const StateMapping &) const
 {
-
-}
-
-ComponentState FixedComponentStateExpression::Get(const std::map<std::string, std::pair<ComponentType, ComponentState>> &componentNameToComponentTypeAndStateMap) const
-{
-    Q_UNUSED(componentNameToComponentTypeAndStateMap);
     return value;
 }
 
-VehicleComponentStateExpression::VehicleComponentStateExpression(const std::string& component) : component(component)
-{
-
-}
-
-ComponentState VehicleComponentStateExpression::Get(const std::map<std::string, std::pair<ComponentType, ComponentState>> &componentNameToComponentTypeAndStateMap) const
+ComponentState VehicleComponentStateExpression::Get(const StateMapping &componentNameToComponentTypeAndStateMap) const
 {
     try
     {
         auto componentInformation = componentNameToComponentTypeAndStateMap.at(component);
         return componentInformation.second;
     }
-    catch (const std::out_of_range& e)
+    catch ([[maybe_unused]] const std::out_of_range & e)
     {
-        Q_UNUSED(e);
         return ComponentState::Undefined;
     }
 }
 
-
-ComponentStateEquality::ComponentStateEquality(std::unique_ptr<ComponentStateExpression> expression1, std::unique_ptr<ComponentStateExpression> expression2)
-{
-    this->expression1 = std::move(expression1);
-    this->expression2 = std::move(expression2);
-}
-
-bool ComponentStateEquality::IsFullfilled(const std::map<std::string, std::pair<ComponentType, ComponentState>> &componentNameToComponentTypeAndStateMap) const
+bool ComponentStateEquality::IsFullfilled(const StateMapping &componentNameToComponentTypeAndStateMap) const
 {
     return expression1->Get(componentNameToComponentTypeAndStateMap) == expression2->Get(componentNameToComponentTypeAndStateMap);
 }

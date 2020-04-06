@@ -27,7 +27,7 @@ SignalPrioritizerImplementation::SignalPrioritizerImplementation(
         int cycleTime,
         StochasticsInterface *stochastics,
         const ParameterInterface *parameters,
-        const std::map<int, ObservationInterface *> *observations,
+        PublisherInterface * const publisher,
         const CallbackInterface *callbacks,
         AgentInterface *agent) :
     AlgorithmInterface (
@@ -39,7 +39,7 @@ SignalPrioritizerImplementation::SignalPrioritizerImplementation(
         cycleTime,
         stochastics,
         parameters,
-        observations,
+        publisher,
         callbacks,
         agent)
 {

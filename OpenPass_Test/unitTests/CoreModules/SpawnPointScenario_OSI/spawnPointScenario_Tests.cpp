@@ -8,48 +8,40 @@
 * SPDX-License-Identifier: EPL-2.0
 **********************************************************************/
 
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
-#include "dontCare.h"
-
 #include "SpawnPointScenario.h"
 #include "agentBlueprint.h"
-
-#include "fakeWorld.h"
-#include "fakeScenario.h"
+#include "dontCare.h"
+#include "fakeAgent.h"
 #include "fakeAgentBlueprintProvider.h"
 #include "fakeAgentFactory.h"
 #include "fakeStochastics.h"
-#include "fakeAgent.h"
+#include "fakeScenario.h"
+#include "fakeWorld.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
-using ::testing::ReturnRef;
-using ::testing::Return;
 using ::testing::_;
 using ::testing::DontCare;
 using ::testing::Matcher;
 using ::testing::NiceMock;
+using ::testing::Return;
+using ::testing::ReturnRef;
 
 MATCHER_P(MatchesAgentBlueprint, referenceAgentBlueprint, "matches blueprint")
 {
-    if (!(arg->GetAgentProfileName() == referenceAgentBlueprint.GetAgentProfileName()
-       && arg->GetAgentCategory() == referenceAgentBlueprint.GetAgentCategory())
-       && arg->GetObjectName() == referenceAgentBlueprint.GetObjectName())
+    if (!(arg->GetAgentProfileName() == referenceAgentBlueprint.GetAgentProfileName() && arg->GetAgentCategory() == referenceAgentBlueprint.GetAgentCategory()) && arg->GetObjectName() == referenceAgentBlueprint.GetObjectName())
     {
         return false;
     }
     const auto actualSpawnParameters = arg->GetSpawnParameter();
     const auto expectedSpawnParameters = referenceAgentBlueprint.GetSpawnParameter();
-    if (!(actualSpawnParameters.velocity == expectedSpawnParameters.velocity
-       && actualSpawnParameters.positionX == expectedSpawnParameters.positionX
-       && actualSpawnParameters.yawAngle == expectedSpawnParameters.yawAngle))
+    if (!(actualSpawnParameters.velocity == expectedSpawnParameters.velocity && actualSpawnParameters.positionX == expectedSpawnParameters.positionX && actualSpawnParameters.yawAngle == expectedSpawnParameters.yawAngle))
     {
         return false;
     }
     const auto actualVehicleModelParameters = arg->GetVehicleModelParameters();
     const auto expectedVehicleModelParameters = referenceAgentBlueprint.GetVehicleModelParameters();
-    if (!(actualVehicleModelParameters.length == expectedVehicleModelParameters.length
-       && actualVehicleModelParameters.width == expectedVehicleModelParameters.width
-       && actualVehicleModelParameters.distanceReferencePointToLeadingEdge == expectedVehicleModelParameters.distanceReferencePointToLeadingEdge))
+    if (!(actualVehicleModelParameters.length == expectedVehicleModelParameters.length && actualVehicleModelParameters.width == expectedVehicleModelParameters.width && actualVehicleModelParameters.distanceReferencePointToLeadingEdge == expectedVehicleModelParameters.distanceReferencePointToLeadingEdge))
     {
         return false;
     }
@@ -108,17 +100,17 @@ TEST(SpawnPointScenario, Trigger_SpawnsEgoAgentAccordingToScenarioWorldPosition)
     expectedAgentBlueprint.SetSpawnParameter(expectedSpawnParameter);
 
     ON_CALL(fakeScenario, GetEntities())
-            .WillByDefault(ReturnRef(entities));
+        .WillByDefault(ReturnRef(entities));
 
     ON_CALL(fakeAgentBlueprintProvider, SampleAgent(entity.catalogReference.entryName, _))
-            .WillByDefault(Return(actualAgentBlueprint));
+        .WillByDefault(Return(actualAgentBlueprint));
     ON_CALL(fakeWorld, IntersectsWithAgent(_, _, _, _, _, _))
-            .WillByDefault(Return(false));
+        .WillByDefault(Return(false));
 
     SimulationSlave::Agent agent(0, &fakeWorld);
     // if this is called and the blueprints match, we're creating our Agent correctly
     EXPECT_CALL(fakeAgentFactory, AddAgent(MatchesAgentBlueprint(expectedAgentBlueprint)))
-            .WillOnce(Return(&agent));
+        .WillOnce(Return(&agent));
 
     SpawnPointScenario spawnPointScenario{&dependencies, nullptr};
     spawnPointScenario.Trigger(0);
@@ -184,25 +176,25 @@ TEST(SpawnPointScenario, Trigger_SpawnsEgoAgentAccordingToScenarioLanePosition)
 
     Position position{expectedX, expectedY, expectedYaw, 0};
 
-    ON_CALL(fakeScenario, GetEntities()) .WillByDefault(ReturnRef(entities));
+    ON_CALL(fakeScenario, GetEntities()).WillByDefault(ReturnRef(entities));
 
     ON_CALL(fakeAgentBlueprintProvider, SampleAgent(entity.catalogReference.entryName, _))
-            .WillByDefault(Return(actualAgentBlueprint));
+        .WillByDefault(Return(actualAgentBlueprint));
     ON_CALL(fakeWorld, IsSValidOnLane(roadId, laneId, s))
-            .WillByDefault(Return(true));
+        .WillByDefault(Return(true));
     ON_CALL(fakeWorld, IsSValidOnLane(roadId, laneId, s))
-            .WillByDefault(Return(true));
+        .WillByDefault(Return(true));
     ON_CALL(fakeWorld, GetLaneWidth(roadId, laneId, s))
-            .WillByDefault(Return(0.75));
+        .WillByDefault(Return(0.75));
     ON_CALL(fakeWorld, LaneCoord2WorldCoord(s, offset, roadId, laneId))
-            .WillByDefault(Return(position));
+        .WillByDefault(Return(position));
     ON_CALL(fakeWorld, IntersectsWithAgent(_, _, _, _, _, _))
-            .WillByDefault(Return(false));
+        .WillByDefault(Return(false));
 
     SimulationSlave::Agent agent(0, &fakeWorld);
     // if this is called and the blueprints match, we're creating our Agent correctly
     EXPECT_CALL(fakeAgentFactory, AddAgent(MatchesAgentBlueprint(expectedAgentBlueprint)))
-            .WillOnce(Return(&agent));
+        .WillOnce(Return(&agent));
 
     SpawnPointScenario spawnPointScenario{&dependencies, nullptr};
     spawnPointScenario.Trigger(0);
@@ -259,17 +251,17 @@ TEST(SpawnPointScenario, Trigger_SpawnsScenarioAgentAccordingToScenarioWorldPosi
     expectedAgentBlueprint.SetSpawnParameter(expectedSpawnParameter);
 
     ON_CALL(fakeScenario, GetEntities())
-            .WillByDefault(ReturnRef(entities));
+        .WillByDefault(ReturnRef(entities));
 
     ON_CALL(fakeAgentBlueprintProvider, SampleAgent(entity.catalogReference.entryName, _))
-            .WillByDefault(Return(actualAgentBlueprint));
+        .WillByDefault(Return(actualAgentBlueprint));
     ON_CALL(fakeWorld, IntersectsWithAgent(_, _, _, _, _, _))
-            .WillByDefault(Return(false));
+        .WillByDefault(Return(false));
 
     SimulationSlave::Agent agent(0, &fakeWorld);
     // if this is called and the blueprints match, we're creating our Agent correctly
     EXPECT_CALL(fakeAgentFactory, AddAgent(MatchesAgentBlueprint(expectedAgentBlueprint)))
-            .WillOnce(Return(&agent));
+        .WillOnce(Return(&agent));
 
     SpawnPointScenario spawnPointScenario{&dependencies, nullptr};
     spawnPointScenario.Trigger(0);
@@ -336,25 +328,25 @@ TEST(SpawnPointScenario, Trigger_SpawnsScenarioAgentAccordingToScenarioLanePosit
     Position position{expectedX, expectedY, expectedYaw, 0};
 
     ON_CALL(fakeScenario, GetEntities())
-            .WillByDefault(ReturnRef(entities));
+        .WillByDefault(ReturnRef(entities));
 
     ON_CALL(fakeAgentBlueprintProvider, SampleAgent(entity.catalogReference.entryName, _))
-            .WillByDefault(Return(actualAgentBlueprint));
+        .WillByDefault(Return(actualAgentBlueprint));
     ON_CALL(fakeWorld, IsSValidOnLane(roadId, laneId, s))
-            .WillByDefault(Return(true));
+        .WillByDefault(Return(true));
     ON_CALL(fakeWorld, IsSValidOnLane(roadId, laneId, s))
-            .WillByDefault(Return(true));
+        .WillByDefault(Return(true));
     ON_CALL(fakeWorld, GetLaneWidth(roadId, laneId, s))
-            .WillByDefault(Return(0.75));
+        .WillByDefault(Return(0.75));
     ON_CALL(fakeWorld, LaneCoord2WorldCoord(s, offset, roadId, laneId))
-            .WillByDefault(Return(position));
+        .WillByDefault(Return(position));
     ON_CALL(fakeWorld, IntersectsWithAgent(_, _, _, _, _, _))
-            .WillByDefault(Return(false));
+        .WillByDefault(Return(false));
 
     SimulationSlave::Agent agent(0, &fakeWorld);
     // if this is called and the blueprints match, we're creating our Agent correctly
     EXPECT_CALL(fakeAgentFactory, AddAgent(MatchesAgentBlueprint(expectedAgentBlueprint)))
-            .WillOnce(Return(&agent));
+        .WillOnce(Return(&agent));
 
     SpawnPointScenario spawnPointScenario{&dependencies, nullptr};
     spawnPointScenario.Trigger(0);

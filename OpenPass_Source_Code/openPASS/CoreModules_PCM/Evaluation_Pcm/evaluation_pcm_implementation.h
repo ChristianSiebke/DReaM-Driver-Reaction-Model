@@ -21,7 +21,6 @@
 #include <fstream>
 
 #include <string>
-#include "observationInterface.h"
 #include "agent.h"
 #include "runResult.h"
 #include "componentPorts.h"

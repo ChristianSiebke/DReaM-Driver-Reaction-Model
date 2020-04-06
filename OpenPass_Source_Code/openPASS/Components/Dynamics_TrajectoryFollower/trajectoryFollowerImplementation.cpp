@@ -12,30 +12,30 @@
 /** \file  trajectoryFollowerImplementation.cpp */
 //-----------------------------------------------------------------------------
 
-#include <memory>
-#include <qglobal.h>
-
 #include "trajectoryFollowerImplementation.h"
 
-#include "Interfaces/parameterInterface.h"
-#include "Interfaces/observationInterface.h"
+#include <memory>
+
+#include <qglobal.h>
+
 #include "Common/componentStateChangeEvent.h"
 #include "Common/trajectorySignal.h"
+#include "Interfaces/parameterInterface.h"
+#include "Interfaces/publisherInterface.h"
 
 TrajectoryFollowerImplementation::TrajectoryFollowerImplementation(std::string componentName,
-        bool isInit,
-        int priority,
-        int offsetTime,
-        int responseTime,
-        int cycleTime,
-        StochasticsInterface* stochastics,
-        WorldInterface* world,
-        const ParameterInterface* parameters,
-        const std::map<int, ObservationInterface*>* observations,
-        const CallbackInterface* callbacks,
-        AgentInterface* agent,
-        SimulationSlave::EventNetworkInterface * const eventNetwork) :
-    UnrestrictedEventModelInterface(
+                                                                   bool isInit,
+                                                                   int priority,
+                                                                   int offsetTime,
+                                                                   int responseTime,
+                                                                   int cycleTime,
+                                                                   StochasticsInterface *stochastics,
+                                                                   WorldInterface *world,
+                                                                   const ParameterInterface *parameters,
+                                                                   PublisherInterface * const publisher,
+                                                                   const CallbackInterface *callbacks,
+                                                                   AgentInterface *agent) :
+    UnrestrictedModelInterface(
         componentName,
         isInit,
         priority,
@@ -45,10 +45,9 @@ TrajectoryFollowerImplementation::TrajectoryFollowerImplementation(std::string c
         stochastics,
         world,
         parameters,
-        observations,
+        publisher,
         callbacks,
-        agent,
-        eventNetwork),
+        agent),
     cycleTimeInSeconds{static_cast<double>(cycleTime) / 1000.0}
 {
     dynamicsOutputSignal.positionX = 0;
@@ -58,7 +57,7 @@ TrajectoryFollowerImplementation::TrajectoryFollowerImplementation(std::string c
     ParseParameters(parameters);
 }
 
-void TrajectoryFollowerImplementation::ParseParameters(const ParameterInterface* parameters)
+void TrajectoryFollowerImplementation::ParseParameters(const ParameterInterface *parameters)
 {
     try
     {
@@ -66,15 +65,15 @@ void TrajectoryFollowerImplementation::ParseParameters(const ParameterInterface*
         enforceTrajectory = boolParameters.at("EnforceTrajectory");
         automaticDeactivation = boolParameters.at("AutomaticDeactivation");
     }
-    catch (const std::out_of_range& error)
+    catch (const std::out_of_range &error)
     {
         LOG(CbkLogLevel::Error, error.what());
         throw std::runtime_error(error.what());
     }
 }
 
-void TrajectoryFollowerImplementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const>& data,
-        int time)
+void TrajectoryFollowerImplementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data,
+                                                   int time)
 {
     Q_UNUSED(time);
 
@@ -105,7 +104,7 @@ void TrajectoryFollowerImplementation::UpdateInput(int localLinkId, const std::s
         if (!enforceTrajectory)
         {
             const std::shared_ptr<ComponentStateSignalInterface const> stateSignal =
-                    std::dynamic_pointer_cast<ComponentStateSignalInterface const>(data);
+                std::dynamic_pointer_cast<ComponentStateSignalInterface const>(data);
             if (stateSignal != nullptr && stateSignal->componentState == ComponentState::Acting)
             {
                 const std::shared_ptr<AccelerationSignal const> signal = std::dynamic_pointer_cast<AccelerationSignal const>(data);
@@ -136,13 +135,13 @@ void TrajectoryFollowerImplementation::UpdateInput(int localLinkId, const std::s
     }
     else
     {
-        const std::string msg = COMPONENTNAME + " invalid signaltype";
+        const std::string msg = std::string(COMPONENTNAME) + " invalid signaltype";
         LOG(CbkLogLevel::Error, msg);
         throw std::runtime_error(msg);
     }
 }
 
-void TrajectoryFollowerImplementation::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterface const>& data, int time)
+void TrajectoryFollowerImplementation::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterface const> &data, int time)
 {
     Q_UNUSED(time);
 
@@ -153,14 +152,14 @@ void TrajectoryFollowerImplementation::UpdateOutput(int localLinkId, std::shared
             dynamicsOutputSignal.componentState = componentState;
             data = std::make_shared<DynamicsSignal const>(dynamicsOutputSignal);
         }
-        catch (const std::bad_alloc&)
+        catch (const std::bad_alloc &)
         {
             ThrowCouldNotInstantiateSignalError();
         }
     }
     else
     {
-        const std::string msg = COMPONENTNAME + " invalid link";
+        const std::string msg = std::string(COMPONENTNAME) + " invalid link";
         LOG(CbkLogLevel::Debug, msg);
         throw std::runtime_error(msg);
     }
@@ -176,6 +175,12 @@ ComponentState TrajectoryFollowerImplementation::GetState() const
     return componentState;
 }
 
+void TrajectoryFollowerImplementation::SetComponentState(const ComponentState newState)
+{
+    componentState = newState;
+    GetPublisher()->Publish(COMPONENTNAME, ComponentEvent({{"ComponentState", openpass::utils::to_string(componentState)}}));
+}
+
 void TrajectoryFollowerImplementation::UpdateState(const ComponentState newState)
 {
     // only update state if the newstate differs from the current state
@@ -185,25 +190,13 @@ void TrajectoryFollowerImplementation::UpdateState(const ComponentState newState
         {
             if (canBeActivated)
             {
-                componentState = newState;
-                std::shared_ptr<VehicleComponentEvent> event = std::make_shared<VehicleComponentEvent>(currentTime,
-                                                                                                       "TrajectoryFollowerActivated",
-                                                                                                       GetComponentName(),
-                                                                                                       GetAgent()->GetId());
-
-                GetObservations()->at(0)->InsertEvent(event);
+                SetComponentState(newState);
             }
         }
         else if (newState == ComponentState::Disabled)
         {
             canBeActivated = false;
-            componentState = newState;
-            std::shared_ptr<VehicleComponentEvent> event = std::make_shared<VehicleComponentEvent>(currentTime,
-                                                                                                   "TrajectoryFollowerDeactivated",
-                                                                                                   GetComponentName(),
-                                                                                                   GetAgent()->GetId());
-
-            GetObservations()->at(0)->InsertEvent(event);
+            SetComponentState(newState);
         }
         else
         {
@@ -212,16 +205,16 @@ void TrajectoryFollowerImplementation::UpdateState(const ComponentState newState
     }
 }
 
-[[ noreturn ]] void TrajectoryFollowerImplementation::ThrowCouldNotInstantiateSignalError()
+[[noreturn]] void TrajectoryFollowerImplementation::ThrowCouldNotInstantiateSignalError()
 {
-    const std::string msg = COMPONENTNAME + " could not instantiate signal";
+    const std::string msg = std::string(COMPONENTNAME) + " could not instantiate signal";
     LOG(CbkLogLevel::Debug, msg);
     throw std::runtime_error(msg);
 }
 
-[[ noreturn ]] void TrajectoryFollowerImplementation::ThrowInvalidSignalTypeError()
+[[noreturn]] void TrajectoryFollowerImplementation::ThrowInvalidSignalTypeError()
 {
-    const std::string msg = COMPONENTNAME + " invalid signaltype";
+    const std::string msg = std::string(COMPONENTNAME) + " invalid signaltype";
     LOG(CbkLogLevel::Debug, msg);
     throw std::runtime_error(msg);
 }
@@ -233,7 +226,7 @@ void TrajectoryFollowerImplementation::HandleEndOfTrajectory()
     dynamicsOutputSignal.travelDistance = 0;
     dynamicsOutputSignal.yawRate = 0;
 
-    if(automaticDeactivation)
+    if (automaticDeactivation)
     {
         UpdateState(ComponentState::Disabled);
     }
@@ -266,7 +259,7 @@ void TrajectoryFollowerImplementation::TriggerWithActiveAccelerationInput()
 
             previousPosition = *previousTrajectoryIterator;
 
-            if(nextTrajectoryIterator != trajectory.points.end())
+            if (nextTrajectoryIterator != trajectory.points.end())
             {
                 nextPosition = *nextTrajectoryIterator;
             }
@@ -296,7 +289,7 @@ void TrajectoryFollowerImplementation::TriggerWithInactiveAccelerationInput()
 
     double remainingTime = cycleTimeInSeconds;
     double timeBetweenCoordinates = nextCoordinate.time - previousTimestamp;
-    double deltaS {0};
+    double deltaS{0};
 
     while (timeBetweenCoordinates <= remainingTime &&
            nextTrajectoryIterator != trajectory.points.end())
@@ -322,8 +315,8 @@ void TrajectoryFollowerImplementation::TriggerWithInactiveAccelerationInput()
         }
     }
 
-    const auto& previousPosition = previousCoordinate;
-    const auto& nextPosition = nextCoordinate;
+    const auto &previousPosition = previousCoordinate;
+    const auto &nextPosition = nextCoordinate;
 
     percentageTraveledBetweenCoordinates = remainingTime / timeBetweenCoordinates;
     Common::Vector2d direction = CalculateScaledVector(previousPosition, nextPosition, percentageTraveledBetweenCoordinates);
@@ -352,11 +345,11 @@ void TrajectoryFollowerImplementation::CalculateNextTimestep(int time)
     lastVelocity = dynamicsOutputSignal.velocity;
 
     if (previousTrajectoryIterator != trajectory.points.end() &&
-            nextTrajectoryIterator != trajectory.points.end())
+        nextTrajectoryIterator != trajectory.points.end())
     {
         if (initialization)
         {
-            UpdateDynamics(*previousTrajectoryIterator, {0,0}, 0, 0, 0);
+            UpdateDynamics(*previousTrajectoryIterator, {0, 0}, 0, 0, 0);
             lastCoordinateTimestamp = previousTrajectoryIterator->time;
             initialization = false;
             return;
@@ -379,7 +372,7 @@ void TrajectoryFollowerImplementation::CalculateNextTimestep(int time)
 
 Common::Vector2d TrajectoryFollowerImplementation::CalculateScaledVector(const TrajectoryPoint &previousPosition, const TrajectoryPoint &nextPosition, const double &factor)
 {
-    Common::Vector2d result (nextPosition.x - previousPosition.x, nextPosition.y - previousPosition.y);
+    Common::Vector2d result(nextPosition.x - previousPosition.x, nextPosition.y - previousPosition.y);
     result.Scale(factor);
 
     return result;
@@ -387,9 +380,9 @@ Common::Vector2d TrajectoryFollowerImplementation::CalculateScaledVector(const T
 
 double TrajectoryFollowerImplementation::CalculateScaledDeltaYawAngle(const TrajectoryPoint &previousPosition, const TrajectoryPoint &nextPosition, const double &factor)
 {
-    return (nextPosition.yaw - previousPosition.yaw) * factor;;
+    return (nextPosition.yaw - previousPosition.yaw) * factor;
+    ;
 }
-
 
 TrajectoryPoint TrajectoryFollowerImplementation::CalculateStartPosition(const TrajectoryPoint &previousPosition, const TrajectoryPoint &nextPosition)
 {

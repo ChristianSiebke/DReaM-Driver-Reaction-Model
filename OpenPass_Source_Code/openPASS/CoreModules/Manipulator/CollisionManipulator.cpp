@@ -16,9 +16,9 @@
 
 #include <QtGlobal>
 
-CollisionManipulator::CollisionManipulator(WorldInterface* world,
-        SimulationSlave::EventNetworkInterface* eventNetwork,
-        const CallbackInterface* callbacks):
+CollisionManipulator::CollisionManipulator(WorldInterface *world,
+                                           SimulationSlave::EventNetworkInterface *eventNetwork,
+                                           const CallbackInterface *callbacks) :
     ManipulatorCommonBase(world,
                           eventNetwork,
                           callbacks)
@@ -33,20 +33,20 @@ void CollisionManipulator::Trigger(int time)
     for (std::shared_ptr<EventInterface> eventInterface : GetEvents())
     {
         std::shared_ptr<CollisionEvent> event = std::dynamic_pointer_cast<CollisionEvent>(eventInterface);
-        AgentInterface* collisionAgent = world->GetAgent(event->collisionAgentId);
+        AgentInterface *collisionAgent = world->GetAgent(event->collisionAgentId);
 
         eventNetwork->AddCollision(event->collisionAgentId);
 
         if (event->collisionWithAgent)
         {
-            AgentInterface* collisionOpponent = world->GetAgent(event->collisionOpponentId);
+            AgentInterface *collisionOpponent = world->GetAgent(event->collisionOpponentId);
             try
             {
                 UpdateCollision(collisionAgent, collisionOpponent);
             }
-            catch (const std::bad_alloc&)
+            catch (const std::bad_alloc &)
             {
-                std::cout << "BAD ALLOC";
+                std::cout << "BAD ALLOC"; // TODO: log if something like this happens
             }
             eventNetwork->AddCollision(event->collisionOpponentId);
         }
@@ -57,7 +57,7 @@ void CollisionManipulator::Trigger(int time)
             {
                 if (partner.first == ObjectTypeOSI::Vehicle)
                 {
-                    AgentInterface* partnerAgent = world->GetAgent(partner.second);
+                    AgentInterface *partnerAgent = world->GetAgent(partner.second);
                     partnerAgent->UpdateCollision(pair);
                 }
             }
@@ -67,37 +67,32 @@ void CollisionManipulator::Trigger(int time)
     }
 }
 
-void CollisionManipulator::UpdateCollision(AgentInterface* agent, AgentInterface* opponent)
+void CollisionManipulator::UpdateCollision(AgentInterface *agent, AgentInterface *opponent)
 {
-    //Stop conditions for the recursion
-    if (agent == nullptr || opponent == nullptr)
-    {
-        return ;
-    }
-
-    if (agent->GetId() == opponent->GetId())
+    if (!agent || !opponent || agent->GetId() == opponent->GetId())
     {
         return;
     }
 
-    for (const auto& partner : agent->GetCollisionPartners())
+    // check if object is already in stored collision partners
+    for (const auto &[objectType, id] : agent->GetCollisionPartners())
     {
-        if (partner.second == opponent->GetId() && partner.first == ObjectTypeOSI::Vehicle)
+        if (id == opponent->GetId() && objectType == ObjectTypeOSI::Vehicle)
         {
             return;
         }
     }
 
     //Update the collision partners
-    agent->UpdateCollision(std::make_pair(opponent->GetType(), opponent->GetId()));
-    opponent->UpdateCollision(std::make_pair(agent->GetType(), agent->GetId()));
+    agent->UpdateCollision({opponent->GetType(), opponent->GetId()});
+    opponent->UpdateCollision({agent->GetType(), agent->GetId()});
 
     //Recursion for agent
-    for (const auto& partner : agent->GetCollisionPartners())
+    for (const auto &partner : agent->GetCollisionPartners())
     {
         if (partner.first == ObjectTypeOSI::Object)
         {
-            opponent->UpdateCollision(std::make_pair(ObjectTypeOSI::Object, partner.second));
+            opponent->UpdateCollision({ObjectTypeOSI::Object, partner.second});
         }
         else
         {
@@ -106,11 +101,11 @@ void CollisionManipulator::UpdateCollision(AgentInterface* agent, AgentInterface
     }
 
     //Recursion for opponent
-    for (const auto& partner : opponent->GetCollisionPartners())
+    for (const auto &partner : opponent->GetCollisionPartners())
     {
         if (partner.first == ObjectTypeOSI::Object)
         {
-            agent->UpdateCollision(std::make_pair(ObjectTypeOSI::Object, partner.second));
+            agent->UpdateCollision({ObjectTypeOSI::Object, partner.second});
         }
         else
         {
@@ -119,8 +114,7 @@ void CollisionManipulator::UpdateCollision(AgentInterface* agent, AgentInterface
     }
 }
 
-
 EventContainer CollisionManipulator::GetEvents()
 {
-    return eventNetwork->GetActiveEventCategory(EventDefinitions::EventCategory::Collision);
+    return eventNetwork->GetActiveEventCategory(EventDefinitions::EventCategory::OpenPASS);
 }

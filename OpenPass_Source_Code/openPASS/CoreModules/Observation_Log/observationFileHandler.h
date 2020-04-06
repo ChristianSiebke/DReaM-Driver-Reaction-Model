@@ -12,16 +12,18 @@
 #pragma once
 
 #include <string>
+
+#include <QDirIterator>
 #include <QFile>
 #include <QFileInfo>
+#include <QTemporaryFile>
 #include <QTextStream>
 #include <QXmlStreamWriter>
-#include <QDirIterator>
 
-#include "Interfaces/observationInterface.h"
 #include "Interfaces/eventNetworkInterface.h"
-#include "observationLogConstants.h"
+#include "Interfaces/observationInterface.h"
 #include "observationCyclics.h"
+#include "observationLogConstants.h"
 #include "runStatistic.h"
 
 //-----------------------------------------------------------------------------
@@ -39,11 +41,11 @@ class ObservationFileHandler
 public:
     const std::string COMPONENTNAME = "ObservationFileHandler";
 
-    ObservationFileHandler() = default;
-    ObservationFileHandler(const ObservationFileHandler&) = delete;
-    ObservationFileHandler(ObservationFileHandler&&) = delete;
-    ObservationFileHandler& operator=(const ObservationFileHandler&) = delete;
-    ObservationFileHandler& operator=(ObservationFileHandler&&) = delete;
+    ObservationFileHandler(const DataStoreReadInterface& dataStore);
+    ObservationFileHandler(const ObservationFileHandler &) = delete;
+    ObservationFileHandler(ObservationFileHandler &&) = delete;
+    ObservationFileHandler &operator=(const ObservationFileHandler &) = delete;
+    ObservationFileHandler &operator=(ObservationFileHandler &&) = delete;
     ~ObservationFileHandler() = default;
 
     /*!
@@ -51,17 +53,19 @@ public:
      *
      * \param outputDir path of output directory
      */
-    void SetOutputDir(std::string outputDir)
+    void SetOutputLocation(const std::string& outputDir, const std::string& outputFile)
     {
         folder = QString::fromStdString(outputDir);
+        finalFilename = QString::fromStdString(outputFile);
+        finalPath = folder + QDir::separator() + finalFilename;
     }
 
-    void SetSceneryFile (std::string fileName)
+    void SetSceneryFile(const std::string& fileName)
     {
         sceneryFile = fileName;
     }
 
-    void SetCsvOutput (bool writeCsv)
+    void SetCsvOutput(bool writeCsv)
     {
         writeCyclicsToCsv = writeCsv;
     }
@@ -69,7 +73,7 @@ public:
     /*!
      * \brief Creates the output file as simulationOutput.tmp and writes the basic header information
      */
-    void WriteStartOfFile(const std::string& frameworkVersion);
+    void WriteStartOfFile(const std::string &frameworkVersion);
 
     /*!
      * \brief This function gets called after each run and writes all information about this run into the output file
@@ -77,11 +81,9 @@ public:
      * \param runResult
      * \param runStatistik
      * \param cyclics
-     * \param world
-     * \param eventNetwork
+     * \param dataStore
      */
-    void WriteRun(const RunResultInterface& runResult, RunStatistic runStatistik, ObservationCyclics& cyclics,
-                  WorldInterface* world, SimulationSlave::EventNetworkInterface* eventNetwork);
+    void WriteRun(const RunResultInterface& runResult, RunStatistic runStatistik, ObservationCyclics& cyclics);
 
     /*!
      * \brief Closes the xml tags flushes the output file, closes it and renames it to simulationOutput.xlm
@@ -89,23 +91,24 @@ public:
     void WriteEndOfFile();
 
 private:
-    std::shared_ptr<QXmlStreamWriter> xmlFileStream;
+    std::unique_ptr<QXmlStreamWriter> xmlFileStream;
+    const DataStoreReadInterface& dataStore;
 
-    int runNumber;                                               //!< run number
+    int runNumber; //!< run number
     std::string sceneryFile;
 
-    bool writeCyclicsToCsv {false};
+    bool writeCyclicsToCsv{false};
 
-    const OutputAttributes outputAttributes;
-    const OutputTags outputTags;
+    OutputAttributes outputAttributes;
+    OutputTags outputTags;
 
     QString folder;
     QString tmpFilename;
     QString finalFilename;
     QString tmpPath;
     QString finalPath;
-    std::shared_ptr<QFile> xmlFile;
-    std::shared_ptr<QFile> csvFile;
+    std::unique_ptr<QTemporaryFile> xmlFile;
+    std::unique_ptr<QFile> csvFile;
 
     //add infos to the file stream
     /*!
@@ -113,7 +116,7 @@ private:
     *
     * @return       true if agent has sensors, otherwise false.
     */
-    inline bool ContainsSensor(const openpass::sensors::Parameters& sensorParameters) const;
+    inline bool ContainsSensor(const openpass::sensors::Parameters &sensorParameters) const;
 
     /*!
     * \brief Writes the sensor information into the simulation output.
@@ -121,7 +124,7 @@ private:
     * @param[in]    fStream             Shared pointer of the stream writer.
     * @param[in]    sensorParameter    Parameters of the sensor.
     */
-    void AddSensor(std::shared_ptr<QXmlStreamWriter> fStream, const openpass::sensors::Parameter& sensorParameter);
+    void AddSensor(const std::string& agentId, const std::string& sensorId);
 
     /*!
     * \brief Writes the sensor information into the simulation output.
@@ -129,7 +132,7 @@ private:
     * @param[in]    fStream             Shared pointer of the stream writer.
     * @param[in]    vehicleModelParameters      Parameters of the vehicle.
     */
-    void AddVehicleAttributes(std::shared_ptr<QXmlStreamWriter> fStream, const VehicleModelParameters &vehicleModelParameters);
+    void AddVehicleAttributes(const std::string& agentId);
 
     /*!
     * \brief Writes all sensor information of an agent into the simulation output.
@@ -137,7 +140,7 @@ private:
     * @param[in]     fStream    Shared pointer of the stream writer.
     * @param[in]     agent      Pointer to the agent.
     */
-    void AddSensors(std::shared_ptr<QXmlStreamWriter> fStream, const AgentInterface* agent);
+    void AddSensors(const std::string& agentId);
 
     /*!
     * \brief Writes the content of an agent into the simulation output.
@@ -145,52 +148,35 @@ private:
     * @param[in]     fStream    Shared pointer of the stream writer.
     * @param[in]     agent      Pointer to the agent.
     */
-    void AddAgent(std::shared_ptr<QXmlStreamWriter> fStream, const AgentInterface* agent);
+    void AddAgent(const std::string& agentId);
 
     /*!
     * \brief Writes the content of all agent into the simulation output.
     *
     * @param[in]     fStream    Shared pointer of the stream writer.
     */
-    void AddAgents(std::shared_ptr<QXmlStreamWriter> fStream, WorldInterface* world);
-
-    /*!
-    * \brief Writes all parameters of an event into the simulation output.
-    *
-    * @param[in]     fStream            Shared pointer of the stream writer.
-    * @param[in]     eventParameters    Parameters of an event in string representation.
-    */
-    void AddEventParameters(std::shared_ptr<QXmlStreamWriter> fStream,
-                            EventParameters eventParameters);
-
-    /*!
-    * \brief Writes an event into the simulation output.
-    *
-    * @param[in]     fStream            Shared pointer of the stream writer.
-    * @param[in]     event              Shared pointer of the event.
-    */
-    void AddEvent(std::shared_ptr<QXmlStreamWriter> fStream, std::shared_ptr<EventInterface> event);
+    void AddAgents();
 
     /*!
     * \brief Writes all events into the simulation output.
     *
     * @param[in]     fStream            Shared pointer of the stream writer.
     */
-    void AddEvents(std::shared_ptr<QXmlStreamWriter> fStream, SimulationSlave::EventNetworkInterface* eventNetwork);
+    void AddEvents();
 
     /*!
     * \brief Writes the header into the simulation output during full logging.
     *
     * @param[in]     fStream            Shared pointer of the stream writer.
     */
-    void AddHeader(std::shared_ptr<QXmlStreamWriter> fStream, ObservationCyclics& cyclics);
+    void AddHeader(ObservationCyclics& cyclics);
 
     /*!
     * \brief Writes the samples into the simulation output during full logging.
     *
     * @param[in]     fStream            Shared pointer of the stream writer.
     */
-    void AddSamples(std::shared_ptr<QXmlStreamWriter> fStream, ObservationCyclics& cyclics);
+    void AddSamples(ObservationCyclics& cyclics);
 
     /*!
     * \brief Writes the filename for the cyclics file into the simulation output during full logging.
@@ -198,7 +184,7 @@ private:
     * @param[in]     fStream            Shared pointer of the stream writer.
     * @param[in]     filename           Name of the file, where cyclics are written to.
     */
-    void AddReference(std::shared_ptr<QXmlStreamWriter> fStream, QString filename);
+    void AddReference(QString filename);
 
     /*!
     * \brief Removes old cyclic files from directory.
@@ -213,10 +199,27 @@ private:
     * @param[in]    runId               Id of the current run
     * @param[in]    cyclics             Cyclics of the current run
     */
-    void WriteCsvCyclics(QString runId, ObservationCyclics& cyclics);
+    void WriteCsvCyclics(QString runId, ObservationCyclics &cyclics);
+
+    /*!
+    * \brief Write entities to XML
+    *
+    * \param tag       tag name
+    * \param entities  list of entities
+    * \param mandatory if set, an emtpy tag is added if entities is empty (default false)
+    */
+    void WriteEntities(const QString tag, const openpass::type::EntityIds &entities, bool mandatory = false);
+
+    /*!
+    * \brief Write (event) parameter to XML
+    *
+    * \remark Might be used for generic parameters in the future - right now, only event parameters
+    *
+    * \param[in]    parameters  list of parameters
+    * \param[in]    mandatory   if set, an emtpy tag is added if parameters are empty (default false)
+    */
+    void WriteParameter(const openpass::type::FlatParameter &parameters, bool mandatory = false);
 
 private:
     const QString outputFileVersion = "0.2.1";
 };
-
-

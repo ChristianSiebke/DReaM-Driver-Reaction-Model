@@ -19,11 +19,10 @@
 //-----------------------------------------------------------------------------
 
 #include <exception>
-#include <set>
 #include <functional>
+#include <set>
 
-namespace SimulationSlave {
-namespace Scheduling {
+namespace openpass::scheduling {
 
 enum TaskType
 {
@@ -61,12 +60,14 @@ public:
         delay(delay),
         taskType(taskType),
         func(func)
-    {}
+    {
+    }
     virtual ~TaskItem() = default;
 
     static constexpr int VALID_FOR_ALL_AGENTS = -1;
     static constexpr int NO_DELAY = 0;
 
+    static constexpr int PRIORITY_PRESPAWNING = 6;
     static constexpr int PRIORITY_SPAWNING = 5;
     static constexpr int PRIORITY_EVENTDETECTOR = 4;
     static constexpr int PRIORITY_MANIPULATOR = 3;
@@ -74,8 +75,8 @@ public:
     static constexpr int PRIORITY_UPDATEGLOBALDRIVINGVIEW = 1;
     static constexpr int PRIORITY_OBSERVATION = 0;
 
-    bool operator<(const TaskItem& rhs) const;
-    bool operator==(const TaskItem& rhs) const;
+    bool operator<(const TaskItem &rhs) const;
+    bool operator==(const TaskItem &rhs) const;
 };
 
 /*!
@@ -101,7 +102,9 @@ class TriggerTaskItem : public TaskItem
 {
 public:
     TriggerTaskItem(int agentId, int priority, int cycleTime, int delay, std::function<bool()> func) :
-        TaskItem(agentId, priority, cycleTime, delay, TaskType::Trigger, func) {}
+        TaskItem(agentId, priority, cycleTime, delay, TaskType::Trigger, func)
+    {
+    }
 };
 
 //-----------------------------------------------------------------------------
@@ -127,7 +130,9 @@ public:
     SpawningTaskItem(int cycleTime, std::function<bool()> func) :
         TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_SPAWNING, cycleTime, NO_DELAY,
                  TaskType::Spawning,
-                 func) { }
+                 func)
+    {
+    }
 };
 
 //-----------------------------------------------------------------------------
@@ -140,7 +145,9 @@ public:
     EventDetectorTaskItem(int cycleTime, std::function<void()> func) :
         TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_EVENTDETECTOR, cycleTime, NO_DELAY,
                  TaskType::EventDetector,
-                 std::bind(&voidFunctionWrapper, func)) { }
+                 std::bind(&voidFunctionWrapper, func))
+    {
+    }
 };
 
 //-----------------------------------------------------------------------------
@@ -153,7 +160,9 @@ public:
     ManipulatorTaskItem(int cycleTime, std::function<void()> func) :
         TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_MANIPULATOR, cycleTime, NO_DELAY,
                  TaskType::Manipulator,
-                 std::bind(&voidFunctionWrapper, func)) { }
+                 std::bind(&voidFunctionWrapper, func))
+    {
+    }
 };
 
 //-----------------------------------------------------------------------------
@@ -180,7 +189,9 @@ public:
     SyncWorldTaskItem(int cycleTime, std::function<void()> func) :
         TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_SYNCGLOBALDATA, cycleTime, NO_DELAY,
                  TaskType::SyncGlobalData,
-                 std::bind(&voidFunctionWrapper, func)) { }
+                 std::bind(&voidFunctionWrapper, func))
+    {
+    }
 };
 
 //-----------------------------------------------------------------------------
@@ -206,7 +217,6 @@ public:
 
 class Tasks
 {
-
 public:
     /*!
     * \brief AddTask
@@ -216,7 +226,7 @@ public:
     *
     * @param[in]     TaskItem    subclass of taskItem
     */
-    void AddTask(const TaskItem& newTask);
+    void AddTask(const TaskItem &newTask);
 
     /*!
     * \brief DeleteTasks
@@ -231,6 +241,4 @@ public:
     std::multiset<TaskItem> tasks;
 };
 
-
-} // namespace Scheduling
-} // namespace SimulationSlave
+} // namespace openpass::scheduling

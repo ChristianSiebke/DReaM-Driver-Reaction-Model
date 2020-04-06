@@ -73,6 +73,7 @@ VEHICLEMODELIMPORTER_TESTS = \
 EVENTDETECTOR_TESTS = \
     $$UNIT_UNDER_TEST/importer/eventDetectorImporter.cpp \
     $$UNIT_UNDER_TEST/framework/eventNetwork.cpp \
+    $$UNIT_UNDER_TEST/framework/eventNetworkDataPublisher.cpp \
     \
     eventNetwork_Tests.cpp
 
@@ -118,6 +119,11 @@ DIRECTORIES_TESTS = \
     \
     directories_Tests.cpp \
 
+PUBLISHER_TESTS = \
+    $$UNIT_UNDER_TEST/framework/agentDataPublisher.cpp \
+    \
+    agentDataPublisher_Tests.cpp
+
 SOURCES += \
     $$DEPENDENCIES \
     $$SLAVECONFIGIMPORTER_TESTS \
@@ -132,4 +138,5 @@ SOURCES += \
     $$VEHICLEMODELIMPORTER_TESTS \
     $$DIRECTORIES_TESTS \
     $$COMMANDLINERPARSER_TESTS \
-    $$AGENTSAMPLER_TESTS
+    $$AGENTSAMPLER_TESTS \
+    $$PUBLISHER_TESTS

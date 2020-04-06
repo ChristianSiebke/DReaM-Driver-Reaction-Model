@@ -20,7 +20,6 @@
 #include <list>
 #include <map>
 #include "worldInterface.h"
-#include "observationInterface.h"
 
 //-----------------------------------------------------------------------------
 //! Class that has all informations on the run result

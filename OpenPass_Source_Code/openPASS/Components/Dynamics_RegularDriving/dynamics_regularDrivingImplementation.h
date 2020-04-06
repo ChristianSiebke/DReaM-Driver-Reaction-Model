@@ -116,7 +116,7 @@ public:
         StochasticsInterface *stochastics,
         WorldInterface *world,
         const ParameterInterface *parameters,
-        const std::map<int, ObservationInterface*> *observations,
+        PublisherInterface * const publisher,
         const CallbackInterface *callbacks,
         AgentInterface *agent) :
         DynamicsInterface(
@@ -129,20 +129,16 @@ public:
             stochastics,
             world,
             parameters,
-            observations,
+            publisher,
             callbacks,
             agent),
         dynamicsSignal {ComponentState::Acting}
     {
-        try
+        if (GetPublisher() == nullptr)
         {
-            this->observation = observations->at(0);
-        }
-        catch (const std::out_of_range&)
-        {
-            std::string msg = "DynamicsRegularDriving requires an Observer";
+            std::string msg = "DynamicsRegularDriving requires a publisher";
             LOG(CbkLogLevel::Error, msg);
-            throw std::out_of_range(msg);
+            throw std::runtime_error(msg);
         }
     }
     DynamicsRegularDrivingImplementation(const DynamicsRegularDrivingImplementation&) = delete;
@@ -270,9 +266,6 @@ private:
         /** @name Internal Parameters
          * @{
          */
-
-    //! pointer to observation at observations map element 0
-    ObservationInterface* observation;
 
     //! The minimal velocity of the agent [m/s].
     const double VLowerLimit = 0;

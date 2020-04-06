@@ -17,8 +17,8 @@
 
 #pragma once
 
-#include "Interfaces/observationInterface.h"
 #include "Interfaces/eventNetworkInterface.h"
+#include "Interfaces/stochasticsInterface.h"
 #include "Common/observationLibraryDefinitions.h"
 
 namespace SimulationSlave {
@@ -59,7 +59,8 @@ public:
                              StochasticsInterface* stochastics,
                              WorldInterface* world,
                              EventNetworkInterface* eventNetwork,
-                             const std::string& sceneryPath) = 0;
+                             const std::string& sceneryPath,
+                             DataStoreReadInterface* dataStore) = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the observation module mapping.

@@ -20,7 +20,7 @@ Algorithm_Selector_Implementation::Algorithm_Selector_Implementation(int compone
                                                                      int responseTime,
                                                                      int cycleTime,
                                                                      StochasticsInterface *stochastics,
-                                                                     const ParameterInterface *parameters, const std::map<int, ObservationInterface *> *observations,
+                                                                     const ParameterInterface *parameters, PublisherInterface * const publisher,
                                                                      const CallbackInterface *callbacks,
                                                                      int agentId) :
     AlgorithmInterface(componentId,
@@ -31,7 +31,7 @@ Algorithm_Selector_Implementation::Algorithm_Selector_Implementation(int compone
                        cycleTime,
                        stochastics,
                        parameters,
-                       observations,
+                       publisher,
                        callbacks,
                        agentId)
 {

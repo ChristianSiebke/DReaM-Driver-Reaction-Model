@@ -27,6 +27,5 @@ private:
     FakeStochastics* fakeStochasticsInterface{nullptr};
     FakeParameter* fakeParameters{nullptr};
     FakeAgent* fakeAgent;
-    FakeObservation* stubObservation{nullptr};
-    const std::map<int, ObservationInterface*>* stubObservations{nullptr};
+    FakePublisher* fakePublisher{nullptr};
 };

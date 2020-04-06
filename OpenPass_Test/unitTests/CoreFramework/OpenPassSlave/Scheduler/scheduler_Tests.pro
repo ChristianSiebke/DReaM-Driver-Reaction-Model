@@ -60,4 +60,6 @@ SOURCES += \
     taskBuilder_Tests.cpp \
     schedulerTasks_Tests.cpp \
     agentParser_Tests.cpp \
-    scheduler_Tests.cpp
+    scheduler_Tests.cpp \
+    \ # unknown dependency (@reinhard)!
+    $$OPEN_PASS_SLAVE/framework/agentDataPublisher.cpp

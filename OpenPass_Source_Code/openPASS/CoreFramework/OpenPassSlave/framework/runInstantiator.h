@@ -16,15 +16,19 @@
 
 #pragma once
 
-#include <string>
-#include <map>
 #include <QMutex>
+
+#include <map>
+#include <string>
+
 #include "frameworkModules.h"
+
 #include "Interfaces/agentFactoryInterface.h"
 #include "Interfaces/configurationContainerInterface.h"
-#include "Interfaces/parameterInterface.h"
+#include "Interfaces/dataStoreInterface.h"
 #include "Interfaces/frameworkModuleContainerInterface.h"
 #include "Interfaces/observationNetworkInterface.h"
+#include "Interfaces/parameterInterface.h"
 #include "Interfaces/stochasticsInterface.h"
 
 namespace SimulationSlave {
@@ -45,6 +49,7 @@ public:
         stochastics(*frameworkModuleContainer.GetStochastics()),
         eventDetectorNetwork(*frameworkModuleContainer.GetEventDetectorNetwork()),
         manipulatorNetwork(*frameworkModuleContainer.GetManipulatorNetwork()),
+        dataStore(*frameworkModuleContainer.GetDataStore()),
         frameworkModules{frameworkModules}
     {}
 
@@ -100,11 +105,10 @@ private:
     StochasticsInterface& stochastics;
     EventDetectorNetworkInterface& eventDetectorNetwork;
     ManipulatorNetworkInterface& manipulatorNetwork;
+    DataStoreInterface& dataStore;
     FrameworkModules& frameworkModules;
 
-    std::unique_ptr<ParameterInterface> worldParameter {nullptr};
+    std::unique_ptr<ParameterInterface> worldParameter;
 };
 
 } // namespace SimulationSlave
-
-

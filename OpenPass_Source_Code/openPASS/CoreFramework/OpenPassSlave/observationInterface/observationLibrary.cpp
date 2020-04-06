@@ -187,7 +187,8 @@ ObservationModule* ObservationLibrary::CreateObservationModule(
         const openpass::parameter::ParameterSetLevel1& parameters,
         StochasticsInterface* stochastics,
         WorldInterface* world,
-        EventNetworkInterface* eventNetwork)
+        EventNetworkInterface* eventNetwork,
+        DataStoreReadInterface* const dataStore)
 {
     if (!library)
     {
@@ -211,7 +212,8 @@ ObservationModule* ObservationLibrary::CreateObservationModule(
                                world,
                                eventNetwork,
                                module_parameters.get(),
-                               callbacks);
+                               callbacks,
+                               dataStore);
     }
     catch (std::runtime_error const& ex)
     {

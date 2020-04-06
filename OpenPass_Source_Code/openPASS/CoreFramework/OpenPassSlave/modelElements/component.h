@@ -21,6 +21,7 @@
 #include "Interfaces/componentInterface.h"
 #include "Interfaces/modelInterface.h"
 #include "Interfaces/observationInterface.h"
+#include "Interfaces/publisherInterface.h"
 
 namespace SimulationSlave {
 
@@ -48,7 +49,7 @@ public:
     //-----------------------------------------------------------------------------
     //! Destructor, deletes all saved output channel buffers.
     //-----------------------------------------------------------------------------
-    virtual ~Component();
+    virtual ~Component() override;
 
 
     //-----------------------------------------------------------------------------
@@ -56,8 +57,7 @@ public:
     //!
     //! @param[in]     implementation       Model interface implementation to set
     //-----------------------------------------------------------------------------
-    void SetImplementation(ModelInterface* implementation);
-
+    void SetImplementation(ModelInterface* implementation) override;
 
     void SetParameter(std::unique_ptr<ParameterInterface> parameter) override
     {
@@ -69,7 +69,7 @@ public:
     //!
     //! @return                             Stored agent
     //-----------------------------------------------------------------------------
-    Agent* GetAgent() const;
+    Agent* GetAgent() const override;
 
     //-----------------------------------------------------------------------------
     //! Adds the provided channel with the provided ID to the stored list of input
@@ -79,7 +79,7 @@ public:
     //! @param[in]     linkId               ID of the channel to add
     //! @return                             Flag if adding the channel was successful
     //-----------------------------------------------------------------------------
-    bool AddInputLink(Channel* input, int linkId);
+    bool AddInputLink(Channel* input, int linkId) override;
 
     //-----------------------------------------------------------------------------
     //! Adds the provided channel with the provided ID to the stored list of output
@@ -89,7 +89,7 @@ public:
     //! @param[in]     linkId               ID of the channel to add
     //! @return                             Flag if adding the channel was successful
     //-----------------------------------------------------------------------------
-    bool AddOutputLink(Channel* output, int linkId);
+    bool AddOutputLink(Channel* output, int linkId) override;
 
     //-----------------------------------------------------------------------------
     //! Sets the observation modules map of the component
@@ -103,21 +103,21 @@ public:
     //!
     //! @return                             Map of IDs to stored input channels
     //-----------------------------------------------------------------------------
-    std::map<int, Channel*>& GetInputLinks();
+    std::map<int, Channel*>& GetInputLinks() override;
 
     //-----------------------------------------------------------------------------
     //! Returns the map of IDs to stored output channels.
     //!
     //! @return                             Map of IDs to stored output channels
     //-----------------------------------------------------------------------------
-    std::map<int, Channel*>& GetOutputLinks();
+    std::map<int, Channel*>& GetOutputLinks() override;
 
     //-----------------------------------------------------------------------------
     //! Returns the map of IDs to stored observation modules.
     //!
     //! @return                             Map of IDs to stored observation modules
     //-----------------------------------------------------------------------------
-    const std::map<int, ObservationInterface*>& GetObservations() const;
+    const std::map<int, ObservationInterface*>& GetObservations() const override;
 
     //-----------------------------------------------------------------------------
     //! Calls the Trigger method on the stored model library with the stored model
@@ -126,7 +126,7 @@ public:
     //! @param[in]     time                 Observation module (as interface)to add
     //! @return                             False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    bool TriggerCycle(int time);
+    bool TriggerCycle(int time) override;
 
     //-----------------------------------------------------------------------------
     //! Gets the data on the channel with the provided ID by updating the output
@@ -138,7 +138,7 @@ public:
     //! @param[in]     time                 Time stamp for the output
     //! @return                             False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    bool AcquireOutputData(int linkId, int time);
+    bool AcquireOutputData(int linkId, int time) override;
 
     //-----------------------------------------------------------------------------
     //! Releases the data on the channel with the provided ID.
@@ -146,7 +146,7 @@ public:
     //! @param[in]     linkId               ID of the output channel
     //! @return                             False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    bool ReleaseOutputData(int linkId);
+    bool ReleaseOutputData(int linkId) override;
 
     //-----------------------------------------------------------------------------
     //! Updates the input data on the input channelwith the provided ID by updating
@@ -157,7 +157,7 @@ public:
     //! @param[in]     time                 Time stamp for the output
     //! @return                             False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    bool UpdateInputData(int linkId, int time);
+    bool UpdateInputData(int linkId, int time) override;
 
     //-----------------------------------------------------------------------------
     //! Creates a new channel buffer with the provided ID, store it in the stored
@@ -166,7 +166,7 @@ public:
     //! @param[in]     linkId               ID of the channel output buffer to create
     //! @return                             Created output channel buffer
     //-----------------------------------------------------------------------------
-    ChannelBuffer* CreateOutputBuffer(int linkId);
+    ChannelBuffer* CreateOutputBuffer(int linkId) override;
 
     //-----------------------------------------------------------------------------
     //! Insert the provided channel buffer with the provided ID in the list of stored
@@ -176,7 +176,7 @@ public:
     //! @param[in]     buffer               Channel input bufer to set
     //! @return                             False if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
-    bool SetInputBuffer(int linkId, ChannelBuffer* buffer);
+    bool SetInputBuffer(int linkId, ChannelBuffer* buffer) override;
 
     //-----------------------------------------------------------------------------
     //! Returns if the stored model interface implementation is defined as init module.
@@ -185,7 +185,7 @@ public:
     //!                                     the flag if stored model interface
     //!                                     implementation is defined as init module
     //-----------------------------------------------------------------------------
-    bool GetInit() const;
+    bool GetInit() const override;
 
     //-----------------------------------------------------------------------------
     //! Returns the priority of the stored model interface implementation.
@@ -194,7 +194,7 @@ public:
     //!                                     if error occured, otherwise the priority
     //!                                     of the stored model interface implementation
     //-----------------------------------------------------------------------------
-    int GetPriority() const;
+    int GetPriority() const override;
 
     //-----------------------------------------------------------------------------
     //! Returns the offset time of the stored model interface implementation, i.e.
@@ -204,7 +204,7 @@ public:
     //!                                     the offset time of the stored model
     //!                                     interface implementation
     //-----------------------------------------------------------------------------
-    int GetOffsetTime() const;
+    int GetOffsetTime() const override;
 
     //-----------------------------------------------------------------------------
     //! Returns the response time of the stored model interface implementation.
@@ -213,7 +213,7 @@ public:
     //!                                     the respone time of the stored model
     //!                                     interface implementation
     //-----------------------------------------------------------------------------
-    int GetResponseTime() const;
+    int GetResponseTime() const override;
 
     //-----------------------------------------------------------------------------
     //! Returns the cycle time of the stored model interface implementation, i.e.
@@ -223,7 +223,7 @@ public:
     //!                                     the cycle time of the stored model
     //!                                     interface implementation
     //-----------------------------------------------------------------------------
-    int GetCycleTime() const;
+    int GetCycleTime() const override;
 
     //-----------------------------------------------------------------------------
     //! Set the provided model library as library to store.
@@ -232,28 +232,28 @@ public:
     //! @return                             False if library is already set, true
     //!                                     otherwise
     //-----------------------------------------------------------------------------
-    bool SetModelLibrary(ModelLibrary* modelLibrary);
+    bool SetModelLibrary(ModelLibrary* modelLibrary) override;
 
     //-----------------------------------------------------------------------------
     //! Releases this component from the stored library.
     //!
     //! @return                             Result of releasing this component
     //-----------------------------------------------------------------------------
-    bool ReleaseFromLibrary();
+    bool ReleaseFromLibrary() override;
 
     //-----------------------------------------------------------------------------
     //! Returns the stored model interface instance.
     //!
     //! @return                             Stored model interface instance
     //-----------------------------------------------------------------------------
-    ModelInterface* GetImplementation() const;
+    ModelInterface* GetImplementation() const override;
 
     //-----------------------------------------------------------------------------
     //! Returns the stored ID.
     //!
     //! @return                             Stored ID
     //-----------------------------------------------------------------------------
-    std::string GetName() const;
+    std::string GetName() const override;
 
 private:
     Agent* agent;
@@ -264,6 +264,7 @@ private:
     ModelLibrary* modelLibrary;
     ModelInterface* implementation;
     std::unique_ptr<ParameterInterface> parameter;
+    std::unique_ptr<PublisherInterface> publisher;
     std::map<int, ChannelBuffer*> inputChannelBuffers;
     std::map<int, ChannelBuffer*> outputChannelBuffers;
 };

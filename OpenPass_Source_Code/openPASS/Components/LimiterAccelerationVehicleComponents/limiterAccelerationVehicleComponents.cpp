@@ -33,7 +33,7 @@ extern "C" LIMITER_ACCELERATION_VEHICLE_COMPONENTS_SHARED_EXPORT ModelInterface 
         StochasticsInterface *stochastics,
         WorldInterface *world,
         const ParameterInterface *parameters,
-        const std::map<int, ObservationInterface*> *observations,
+        PublisherInterface * const publisher,
         AgentInterface *agent,
         const CallbackInterface *callbacks)
 {
@@ -51,7 +51,7 @@ extern "C" LIMITER_ACCELERATION_VEHICLE_COMPONENTS_SHARED_EXPORT ModelInterface 
                                      stochastics,
                                      world,
                                      parameters,
-                                     observations,
+                                     publisher,
                                      callbacks,
                                      agent));
     }
