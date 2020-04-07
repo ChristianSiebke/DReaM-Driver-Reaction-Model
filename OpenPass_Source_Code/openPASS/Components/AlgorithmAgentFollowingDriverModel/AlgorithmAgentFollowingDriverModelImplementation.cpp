@@ -167,7 +167,6 @@ void AlgorithmAgentFollowingDriverModelImplementation::Trigger(int time)
 {
     Q_UNUSED(time);
 
-    out_longitudinal_speed = ownVehicleInformation.velocity;
     out_curvature = geometryInformation.laneEgo.curvature;
     out_laneWidth = geometryInformation.laneEgo.width;
     out_lateral_speed = 0;
@@ -182,12 +181,12 @@ void AlgorithmAgentFollowingDriverModelImplementation::Trigger(int time)
 
     if (frontAgent.exist)
     {
-        auto vDelta = std::abs(ownVehicleInformation.velocity - frontAgent.velocity);
-        auto effectiveMinimumGap = minDistance + ownVehicleInformation.velocity*tGapWish + (ownVehicleInformation.velocity*vDelta)/2 * std::sqrt(maxAcceleration * decelerationWish);
+        auto vDelta = std::abs(ownVehicleInformation.absoluteVelocity - frontAgent.absoluteVelocity);
+        auto effectiveMinimumGap = minDistance + ownVehicleInformation.absoluteVelocity*tGapWish + (ownVehicleInformation.absoluteVelocity*vDelta)/2 * std::sqrt(maxAcceleration * decelerationWish);
         decelerationCoeff = std::pow(effectiveMinimumGap/frontAgent.relativeLongitudinalDistance, 2);
     }
 
-    auto freeRoadCoeff = 1.0 - std::pow(ownVehicleInformation.velocity/vWish, delta);
+    auto freeRoadCoeff = 1.0 - std::pow(ownVehicleInformation.absoluteVelocity/vWish, delta);
     auto intelligentDriverModelAcceleration = maxAcceleration * (freeRoadCoeff - decelerationCoeff);
 
     if(intelligentDriverModelAcceleration >= 0)

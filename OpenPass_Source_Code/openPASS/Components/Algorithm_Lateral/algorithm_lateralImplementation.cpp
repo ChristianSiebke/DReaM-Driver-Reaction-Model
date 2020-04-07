@@ -80,7 +80,7 @@ void AlgorithmLateralImplementation::UpdateInput(int localLinkId, const std::sha
             throw std::runtime_error(msg);
         }
 
-         velocity = signal->GetOwnVehicleInformation().velocity;
+         velocity = signal->GetOwnVehicleInformation().absoluteVelocity;
          steeringWheelAngle = signal->GetOwnVehicleInformation().steeringWheelAngle;
     }
     else

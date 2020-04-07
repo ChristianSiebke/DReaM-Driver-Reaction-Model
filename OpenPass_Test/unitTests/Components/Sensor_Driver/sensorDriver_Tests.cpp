@@ -106,7 +106,7 @@ TEST(SensorDriver_UnitTests, CorrectInformationInSignal)
     std::shared_ptr<const SensorDriverSignal> sensorDriverSignal = std::dynamic_pointer_cast<const SensorDriverSignal>(data);
 
     auto ownVehicleInformation = sensorDriverSignal->GetOwnVehicleInformation();
-    EXPECT_THAT(ownVehicleInformation.velocity, Eq(2.0));
+    EXPECT_THAT(ownVehicleInformation.absoluteVelocity, Eq(2.0));
     EXPECT_THAT(ownVehicleInformation.acceleration, Eq(3.0));
     EXPECT_THAT(ownVehicleInformation.lateralPosition, Eq(4.0));
     EXPECT_THAT(ownVehicleInformation.heading, Eq(5.0));
@@ -139,7 +139,7 @@ TEST(SensorDriver_UnitTests, CorrectInformationInSignal)
     EXPECT_THAT(surroundingObjects.objectFront.exist, Eq(true));
     EXPECT_THAT(surroundingObjects.objectFront.isStatic, Eq(false));
     EXPECT_THAT(surroundingObjects.objectFront.id, Eq(2));
-    EXPECT_THAT(surroundingObjects.objectFront.velocity, Eq(10.0));
+    EXPECT_THAT(surroundingObjects.objectFront.absoluteVelocity, Eq(10.0));
     EXPECT_THAT(surroundingObjects.objectFront.acceleration, Eq(11.0));
     EXPECT_THAT(surroundingObjects.objectFront.heading, Eq(0.1));
     EXPECT_THAT(surroundingObjects.objectFront.length, Eq(1.0));

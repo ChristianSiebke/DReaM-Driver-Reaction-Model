@@ -180,7 +180,7 @@ TEST_P(LateralDriverUpdateInput, LateralDriver_CheckUpdateInputFunction)
     GeometryInformation geometryInfo;
     TrafficRuleInformation trafficRuleInfo;
     SurroundingObjects surroundingObjects;
-    ownVehicle.velocity = data.input_AbsoluteVelocity;
+    ownVehicle.absoluteVelocity = data.input_AbsoluteVelocity;
     const std::shared_ptr<SignalInterface const> signal2 = std::make_shared<SensorDriverSignal const>(ownVehicle, trafficRuleInfo, geometryInfo, surroundingObjects);
     int localLinkId2{101};
 

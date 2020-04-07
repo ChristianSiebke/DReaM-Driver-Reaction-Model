@@ -77,7 +77,7 @@ void AlgorithmLongitudinalImplementation::UpdateInput(int localLinkId, const std
             throw std::runtime_error(msg);
         }
 
-        currentVelocity = signal->GetOwnVehicleInformation().velocity;
+        currentVelocity = signal->GetOwnVehicleInformation().absoluteVelocity;
         initializedSensorDriverData = true;
     }
     else

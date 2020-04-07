@@ -146,8 +146,6 @@ private:
     //! desired deceleration
     double decelerationWish = 2.0;
 
-    //! The longitudinal velocity of the current vehicle [m/s].
-    double out_longitudinal_speed = 0;
     //! The lateral velocity of the current vehicle [m/s].
     double out_lateral_speed = 0;
     //! The relative lateral position of the vehicle [m].

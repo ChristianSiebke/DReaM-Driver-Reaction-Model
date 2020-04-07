@@ -98,7 +98,7 @@ void SensorDriverImplementation::Trigger(int time)
 
 void SensorDriverImplementation::GetOwnVehicleInformation()
 {
-    ownVehicleInformation.velocity                      = GetAgent()->GetVelocity(VelocityScope::Absolute);
+    ownVehicleInformation.absoluteVelocity              = GetAgent()->GetVelocity(VelocityScope::Absolute);
     ownVehicleInformation.acceleration                  = GetAgent()->GetAcceleration();
     ownVehicleInformation.lateralPosition               = GetAgent()->GetPositionLateral();
     ownVehicleInformation.heading                       = GetAgent()->GetRelativeYaw();
@@ -269,7 +269,7 @@ ObjectInformation SensorDriverImplementation::GetOtherObjectInformation(const Wo
         {
             objectInformation.isStatic = false;
             objectInformation.heading = surroundingVehicle->GetRelativeYaw();
-            objectInformation.velocity = surroundingVehicle->GetVelocity();
+            objectInformation.absoluteVelocity = surroundingVehicle->GetVelocity();
             objectInformation.acceleration = surroundingVehicle->GetAcceleration();
             objectInformation.relativeLateralDistance = sensorDriverCalculations.GetLateralDistanceToObject(surroundingVehicle);
         }

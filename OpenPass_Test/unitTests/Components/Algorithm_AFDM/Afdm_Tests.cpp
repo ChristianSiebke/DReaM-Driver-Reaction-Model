@@ -45,7 +45,7 @@ TEST(AgentFollowingDriverModel, TriggerWithNoFrontAgentAndVelocityHigherWish_Acc
     SurroundingObjects surroundingObjects;
 
     surroundingObjects.objectFront.exist = false;
-    vehicleInfo.velocity = 200.0/3.6;
+    vehicleInfo.absoluteVelocity = 200.0/3.6;
     const auto sensorDriverSignal0 = std::make_shared<SensorDriverSignal const>(vehicleInfo,
                                                                                 trafficRuleInfo,
                                                                                 geometricInfo,
@@ -62,7 +62,7 @@ TEST(AgentFollowingDriverModel, TriggerWithNoFrontAgentAndVelocityHigherWish_Acc
     ASSERT_THAT(acceleration, Ge(-maxDeceleration));
     ASSERT_THAT(acceleration, Le(maxAcceleration));
 
-    vehicleInfo.velocity = 20.0/3.6;
+    vehicleInfo.absoluteVelocity = 20.0/3.6;
     const auto sensorDriverSignal1 = std::make_shared<SensorDriverSignal const>(vehicleInfo,
                                                                                 trafficRuleInfo,
                                                                                 geometricInfo,
@@ -105,7 +105,7 @@ TEST(AgentFollowingDriverModel, TriggerWithNoFrontAgentAndVelocityIsWish_HoldVWi
     SurroundingObjects surroundingObjects;
 
     surroundingObjects.objectFront.exist = false;
-    vehicleInfo.velocity = 120.0/3.6;
+    vehicleInfo.absoluteVelocity = 120.0/3.6;
     const auto sensorDriverSignal = std::make_shared<SensorDriverSignal const>(vehicleInfo,
                                                                                trafficRuleInfo,
                                                                                geometricInfo,
@@ -147,7 +147,7 @@ TEST(AgentFollowingDriverModel, TriggerWithNoFrontAgentAndVelocityHigherWish_Acc
     SurroundingObjects surroundingObjects;
 
     surroundingObjects.objectFront.exist = false;
-    vehicleInfo.velocity = 150.0/3.6;
+    vehicleInfo.absoluteVelocity = 150.0/3.6;
     const auto sensorDriverSignal0 = std::make_shared<SensorDriverSignal const>(vehicleInfo,
                                                                                 trafficRuleInfo,
                                                                                 geometricInfo,
@@ -162,7 +162,7 @@ TEST(AgentFollowingDriverModel, TriggerWithNoFrontAgentAndVelocityHigherWish_Acc
     double acceleration = brakingSignal->acceleration;
     ASSERT_THAT(acceleration, Lt(0.0));
 
-    vehicleInfo.velocity = 120.0/3.6;
+    vehicleInfo.absoluteVelocity = 120.0/3.6;
     const auto sensorDriverSignal1 = std::make_shared<SensorDriverSignal const>(vehicleInfo,
                                                                                 trafficRuleInfo,
                                                                                 geometricInfo,
