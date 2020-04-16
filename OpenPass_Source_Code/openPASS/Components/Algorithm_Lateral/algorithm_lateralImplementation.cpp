@@ -42,11 +42,15 @@ void AlgorithmLateralImplementation::UpdateInput(int localLinkId, const std::sha
                 LOG(CbkLogLevel::Debug, msg);
                 throw std::runtime_error(msg);
             }
+
             in_lateralDeviation = signal->lateralDeviation;
             in_gainLateralDeviation = signal->gainLateralDeviation;
             in_headingError = signal->headingError;
             in_gainHeadingError = signal->gainHeadingError;
-            in_kappaSet = signal->kappaSet;
+            in_kappaManoeuvre = signal->kappaManoeuvre;
+            in_kappaRoad = signal->kappaRoad;
+            in_curvatureOfSegmentsToNearPoint = signal->curvatureOfSegmentsToNearPoint;
+            in_curvatureOfSegmentsToFarPoint = signal->curvatureOfSegmentsToFarPoint;
         }
         else
         {
@@ -127,43 +131,91 @@ void AlgorithmLateralImplementation::Trigger(int time)
 {
     // Time step length
     double dt{(time - timeLast) * 0.001};
-
+    tAverage = .05;
+    double velocityForCalculations = std::fmax(20. / 3.6, velocity);
     // Scale gains to current velocity. Linear interpolation between 0 and default values at 200km/h.
-    double velocityFactor = 3.6 / 200. * velocity;
+    double velocityFactor = std::clamp(3.6 / 150. * velocityForCalculations, .15, 1.);
     in_gainLateralDeviation *= velocityFactor;
     in_gainHeadingError *= velocityFactor;
+    tAverage = tAverage / velocityFactor;
 
     // Controller for lateral deviation
     double deltaHLateralDeviation = in_gainLateralDeviation
-            * in_steeringRatio * in_wheelBase / (velocity * velocity)
+            * in_steeringRatio * in_wheelBase / (velocityForCalculations * velocityForCalculations)
             * in_lateralDeviation * RadiantToDegree;
 
     // Controller for heading angle error
     double deltaHHeadingError = in_gainHeadingError
-            * in_steeringRatio * in_wheelBase / velocity
+            * in_steeringRatio * in_wheelBase / velocityForCalculations
             * in_headingError * RadiantToDegree;
 
-    // Controller for curvature
-    double deltaHkappa = std::atan(in_kappaSet * in_wheelBase)
+    // Controller for road curvature
+    double meanCurvatureToNearPoint = 0.;
+    double meanCurvatureToFarPoint = 0.;
+    if (!in_curvatureOfSegmentsToNearPoint.empty())
+    {
+        for (unsigned int i = 0; i < in_curvatureOfSegmentsToNearPoint.size(); ++i)
+        {
+            meanCurvatureToNearPoint += in_curvatureOfSegmentsToNearPoint.at(i);
+        }
+
+        meanCurvatureToNearPoint = meanCurvatureToNearPoint / in_curvatureOfSegmentsToNearPoint.size();
+    }
+
+    if (!in_curvatureOfSegmentsToFarPoint.empty())
+    {
+        for (unsigned int i = 0; i < in_curvatureOfSegmentsToFarPoint.size(); ++i)
+        {
+            meanCurvatureToFarPoint += in_curvatureOfSegmentsToFarPoint.at(i);
+        }
+
+        meanCurvatureToFarPoint = meanCurvatureToFarPoint / in_curvatureOfSegmentsToFarPoint.size();
+    }
+
+    // Smooth curvatures with a running average filter
+    double meanCurvatureToNearPointSmooth = (dt * meanCurvatureToNearPoint + (tAverage - dt) *
+                                             meanCurvatureToNearPointSmoothLast) / tAverage;
+    double meanCurvatureToFarPointSmooth = (dt * meanCurvatureToFarPoint + (tAverage - dt) *
+                                            meanCurvatureToFarPointSmoothLast) / tAverage;
+    double curvatureRoadSmooth = (dt * in_kappaRoad + (tAverage - dt) * curvatureRoadSmoothLast) / tAverage;
+
+    // Weighting of different curvature Information RoadSmooth, road, nearPointSmooth, farPointSmooth, nearPointMax
+    std::vector <double> weighingCurvaturePortions = {.75, 0.25, .15, -.10};
+    if (!in_curvatureOfSegmentsToNearPoint.empty())
+    {
+        weighingCurvaturePortions.at(2) = 0.;
+    }
+
+    if (!in_curvatureOfSegmentsToFarPoint.empty())
+    {
+        weighingCurvaturePortions.at(3) = 0.;
+    }
+
+    double calc_kappaRoadAnticipated = (weighingCurvaturePortions.at(0) * curvatureRoadSmooth +
+                                        weighingCurvaturePortions.at(1) * in_kappaRoad +
+                                        weighingCurvaturePortions.at(2) * meanCurvatureToNearPointSmooth +
+                                        weighingCurvaturePortions.at(3) * meanCurvatureToFarPointSmooth) /
+            (weighingCurvaturePortions.at(0) + weighingCurvaturePortions.at(1) +
+             weighingCurvaturePortions.at(2) + weighingCurvaturePortions.at(3));
+
+    // Controller for road curvaturedelta due to manoeuvre
+    double deltaHkappa = std::atan((in_kappaManoeuvre + calc_kappaRoadAnticipated) * in_wheelBase)
             * in_steeringRatio * RadiantToDegree;
+
 
     // Total steering wheel angle
     double deltaH = deltaHLateralDeviation + deltaHHeadingError + deltaHkappa;
 
-    // Limit steering wheel velocity. Human limit set to 160°/s.
-    if (std::fabs(deltaH - steeringWheelAngle) > 160. * dt)
+    // Limit steering wheel velocity. Human limit set to 320°/s.
+    if (std::fabs(deltaH - steeringWheelAngle) > (320. / velocityFactor) * dt)
     {
-        deltaH = deltaH / std::fabs(deltaH) * 160. * dt + steeringWheelAngle;
+        deltaH = deltaH / std::fabs(deltaH) * (320. / velocityFactor) * dt + steeringWheelAngle;
     }
 
-    // Calculate lateral position of next time step
-    double lateralDeviationNext = std::sin(deltaH / in_steeringRatio / RadiantToDegree) * velocity * dt + in_lateralDeviation;
-    if (in_lateralDeviation * lateralDeviationNext < 0.)  // negative --> sign changed
-    {
-        deltaH = std::asin(in_lateralDeviation / (velocity * dt)) * in_steeringRatio * RadiantToDegree;
-    }
-
-    out_desiredSteeringWheelAngle = TrafficHelperFunctions::ValueInBounds(-in_steeringMax, deltaH, in_steeringMax);
-
+    out_desiredSteeringWheelAngle = TrafficHelperFunctions::ValueInBounds(-in_steeringMax, deltaH , in_steeringMax);
+    deltaHLast = out_desiredSteeringWheelAngle;
     timeLast = time;
+    meanCurvatureToNearPointSmoothLast = meanCurvatureToNearPointSmooth;
+    meanCurvatureToFarPointSmoothLast = meanCurvatureToFarPointSmooth;
+    curvatureRoadSmoothLast = curvatureRoadSmooth;
 }
