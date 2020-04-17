@@ -401,13 +401,29 @@ double AgentAdapter::GetDistanceToEndOfLane(double sightDistance, int relativeLa
 std::vector<const WorldObjectInterface*> AgentAdapter::GetObjectsInRange(int relativeLane, double backwardRange,
         double forwardRange, MeasurementPoint mp) const
 {
-    return world->GetObjectsInRange(route, GetRoadId(), GetLaneIdFromRelative(relativeLane), GetMainLocateS(), backwardRange, forwardRange);
+    auto objectsInRange = world->GetObjectsInRange(route, GetRoadId(), GetLaneIdFromRelative(relativeLane), GetMainLocateS(), backwardRange, forwardRange);
+
+    auto self = std::find(objectsInRange.cbegin(), objectsInRange.cend(), this);
+    if (self != objectsInRange.cend())
+    {
+        objectsInRange.erase(self);
+    }
+
+    return objectsInRange;
 }
 
 std::vector<const AgentInterface*> AgentAdapter::GetAgentsInRange(int relativeLane, double backwardRange,
         double forwardRange, MeasurementPoint mp) const
 {
-    return world->GetAgentsInRange(route, GetRoadId(), GetLaneIdFromRelative(relativeLane), GetMainLocateS(), backwardRange, forwardRange);
+    auto agentsInRange = world->GetAgentsInRange(route, GetRoadId(), GetLaneIdFromRelative(relativeLane), GetMainLocateS(), backwardRange, forwardRange);
+
+    auto self = std::find(agentsInRange.cbegin(), agentsInRange.cend(), this);
+    if (self != agentsInRange.cend())
+    {
+        agentsInRange.erase(self);
+    }
+
+    return agentsInRange;
 }
 
 double AgentAdapter::GetDistanceToConnectorEntrance(std::string intersectingConnectorId, int intersectingLaneId, std::string ownConnectorId) const
