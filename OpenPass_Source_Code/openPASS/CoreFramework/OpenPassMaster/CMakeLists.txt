@@ -1,26 +1,32 @@
-#/*******************************************************************************
-#* Copyright (c) 2020 HLRS, University of Stuttgart
-#*
-#* This program and the accompanying materials are made
-#* available under the terms of the Eclipse Public License 2.0
-#* which is available at https://www.eclipse.org/legal/epl-2.0/
-#*
-#* SPDX-License-Identifier: EPL-2.0
-#*******************************************************************************/
+set(COMPONENT_NAME OpenPassMaster)
 
-set(SOURCES  framework/main.cpp
-			  framework/processManager.cpp
-			  importer/masterConfigImporter.cpp)
-			  
-set(HEADERS framework/processManager.h
-			 framework/masterConfig.h
-			 framework/slaveConfig.h
-			 openPassMaster.h
-			 importer/masterConfigImporter.h)
-			 
-openpass_add_executable(OpenPassMaster )
-set_target_properties(OpenPassMaster PROPERTIES FOLDER "CoreFramework")
+set(CMAKE_AUTOMOC ON)
 
-target_link_libraries(OpenPassMaster CoreShare)
+add_openpass_target(
+  NAME ${COMPONENT_NAME} TYPE executable COMPONENT bin
 
-qt5_use_modules(OpenPassMaster Widgets Xml Concurrent)
+  HEADERS
+    framework/processManager.h
+    framework/masterConfig.h
+    framework/slaveConfig.h
+    importer/masterConfigImporter.h
+    openPassMaster.h
+
+  SOURCES
+    framework/main.cpp
+    framework/processManager.cpp
+    importer/masterConfigImporter.cpp
+
+  INCDIRS
+    framework
+    importer
+
+  LIBRARIES
+    Qt5::Concurrent
+    Qt5::Core
+    Qt5::Widgets
+    Qt5::Xml
+    CoreShare
+)
+
+set_target_properties(${COMPONENT_NAME} PROPERTIES FOLDER "CoreFramework")

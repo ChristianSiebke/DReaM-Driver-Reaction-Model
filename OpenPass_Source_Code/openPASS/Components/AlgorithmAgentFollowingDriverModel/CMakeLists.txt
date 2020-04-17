@@ -1,21 +1,22 @@
-#/*******************************************************************************
-#* Copyright (c) 2020 HLRS, University of Stuttgart
-#*
-#* This program and the accompanying materials are made
-#* available under the terms of the Eclipse Public License 2.0
-#* which is available at https://www.eclipse.org/legal/epl-2.0/
-#*
-#* SPDX-License-Identifier: EPL-2.0
-#*******************************************************************************/
+set(COMPONENT_NAME AlgorithmAgentFollowingDriverModel)
 
-set(SOURCES AlgorithmAgentFollowingDriverModel.cpp
-			 AlgorithmAgentFollowingDriverModelImplementation.cpp)
-set(HEADERS AlgorithmAgentFollowingDriverModel.h
-			 AlgorithmAgentFollowingDriverModelGlobal.h
-			 AlgorithmAgentFollowingDriverModelImplementation.h)
-			 
-include_directories(${OSI_INCLUDE_DIR} ${PROTOBUF_INCLUDE_DIRS})
 add_compile_definitions(ALGORITHM_AGENTFOLLOWINGDRIVERMODEL_LIBRARY)
 
-OPENPASS_add_component(AlgorithmAgentFollowingDriverModel "")
-target_link_libraries(AlgorithmAgentFollowingDriverModel Common  ${OSI_LIBRARIES} ${PROTOBUF_LIBRARIES})
+add_openpass_target(
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
+
+  HEADERS
+    AlgorithmAgentFollowingDriverModel.h
+    AlgorithmAgentFollowingDriverModelGlobal.h
+    AlgorithmAgentFollowingDriverModelImplementation.h
+
+  SOURCES
+    AlgorithmAgentFollowingDriverModel.cpp
+    AlgorithmAgentFollowingDriverModelImplementation.cpp
+
+  LIBRARIES
+    Qt5::Core
+    Common
+
+  LINKOSI
+)

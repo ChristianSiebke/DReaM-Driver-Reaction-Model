@@ -1,23 +1,23 @@
-#/*******************************************************************************
-#* Copyright (c) 2020 HLRS, University of Stuttgart
-#*
-#* This program and the accompanying materials are made
-#* available under the terms of the Eclipse Public License 2.0
-#* which is available at https://www.eclipse.org/legal/epl-2.0/
-#*
-#* SPDX-License-Identifier: EPL-2.0
-#*******************************************************************************/
-
-set(SOURCES sensor_driver.cpp
-			 sensor_driverCalculations.cpp
-			 sensor_driverImplementation.cpp)
-set(HEADERS sensor_driver.h
-			 sensor_driverCalculations.h
-			 sensor_driverImplementation.h
-			 sensor_driverGlobal.h
-			 Signals/sensorDriverSignal.h
-			 Signals/sensor_driverDefinitions.h)
+set(COMPONENT_NAME Sensor_Driver)
 
 add_compile_definitions(SENSOR_DRIVER_LIBRARY)
 
-OPENPASS_add_component(Sensor_Driver "")
+add_openpass_target(
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
+
+  HEADERS
+    sensor_driver.h
+    sensor_driverCalculations.h
+    sensor_driverImplementation.h
+    sensor_driverGlobal.h
+    Signals/sensorDriverSignal.h
+    Signals/sensor_driverDefinitions.h
+
+  SOURCES
+    sensor_driver.cpp
+    sensor_driverCalculations.cpp
+    sensor_driverImplementation.cpp
+
+  LIBRARIES
+    Qt5::Core
+)

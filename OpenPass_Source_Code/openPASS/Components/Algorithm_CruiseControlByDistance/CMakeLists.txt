@@ -1,20 +1,19 @@
-#/*******************************************************************************
-#* Copyright (c) 2020 HLRS, University of Stuttgart
-#*
-#* This program and the accompanying materials are made
-#* available under the terms of the Eclipse Public License 2.0
-#* which is available at https://www.eclipse.org/legal/epl-2.0/
-#*
-#* SPDX-License-Identifier: EPL-2.0
-#*******************************************************************************/
+set(COMPONENT_NAME Algorithm_CruiseControlByDistance)
 
-set(SOURCES algorithm_cruisecontrolbydistance.cpp
-			 algorithm_cruisecontrolbydistance_implementation.cpp)
-set(HEADERS algorithm_cruisecontrolbydistance.h
-			 algorithm_cruisecontrolbydistance_global.h
-			 algorithm_cruisecontrolbydistance_implementation.h)
+add_compile_definitions(ALGORITHM_CRUISECONTROLBYDISTANCE_LIBRARY)
 
+add_openpass_target(
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
 
-add_definitions(-DALGORITHM_CRUISECONTROLBYDISTANCE_LIBRARY)
+  HEADERS
+    algorithm_cruisecontrolbydistance.h
+    algorithm_cruisecontrolbydistance_global.h
+    algorithm_cruisecontrolbydistance_implementation.h
 
-OPENPASS_add_component(Algorithm_CruiseControlByDistance "")
+  SOURCES
+    algorithm_cruisecontrolbydistance.cpp
+    algorithm_cruisecontrolbydistance_implementation.cpp
+
+  LIBRARIES
+    Qt5::Core
+)

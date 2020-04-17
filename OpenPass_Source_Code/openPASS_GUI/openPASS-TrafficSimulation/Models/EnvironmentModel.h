@@ -18,7 +18,7 @@
 #ifndef ENVIRONMENTMODEL_H
 #define ENVIRONMENTMODEL_H
 
-#include "openPASS-TrafficSimulation/EnvironmentInterface.h"
+#include "interfaces/openPASS-TrafficSimulation/EnvironmentInterface.h"
 
 #include "Models/EnvironmentItemModel.h"
 

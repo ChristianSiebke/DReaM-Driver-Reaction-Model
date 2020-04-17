@@ -1,20 +1,19 @@
-#/*******************************************************************************
-#* Copyright (c) 2020 HLRS, University of Stuttgart
-#*
-#* This program and the accompanying materials are made
-#* available under the terms of the Eclipse Public License 2.0
-#* which is available at https://www.eclipse.org/legal/epl-2.0/
-#*
-#* SPDX-License-Identifier: EPL-2.0
-#*******************************************************************************/
+set(COMPONENT_NAME Action_BrakeLight_Basic)
 
-set(SOURCES action_brakelight_basic.cpp
-			 action_brakelight_basic_implementation.cpp)
-set(HEADERS action_brakelight_basic.h
-			 action_brakelight_basic_implementation.h
-			 action_brakelight_basic_global.h)
+add_compile_definitions(ACTION_BRAKELIGHT_BASIC_LIBRARY)
 
+add_openpass_target(
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
 
-add_definitions(-DACTION_BRAKELIGHT_BASIC_LIBRARY)
+  HEADERS
+    action_brakelight_basic.h
+    action_brakelight_basic_implementation.h
+    action_brakelight_basic_global.h
 
-OPENPASS_add_component(Action_BrakeLight_Basic "")
+  SOURCES
+    action_brakelight_basic.cpp
+    action_brakelight_basic_implementation.cpp
+
+  LIBRARIES
+    Qt5::Core
+)

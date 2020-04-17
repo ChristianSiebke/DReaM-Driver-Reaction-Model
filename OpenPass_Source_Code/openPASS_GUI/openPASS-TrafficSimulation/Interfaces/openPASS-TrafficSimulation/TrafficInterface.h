@@ -24,7 +24,7 @@
 #ifndef TRAFFICINTERFACE_H
 #define TRAFFICINTERFACE_H
 
-#include "openPASS-TrafficSimulation/TrafficItemMapInterface.h"
+#include "interfaces/openPASS-TrafficSimulation/TrafficItemMapInterface.h"
 
 #include <QObject>
 

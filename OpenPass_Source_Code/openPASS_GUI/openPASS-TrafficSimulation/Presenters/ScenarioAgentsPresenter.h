@@ -28,7 +28,7 @@
 #ifndef SCENARIOAGENTSPRESENTER_H
 #define SCENARIOAGENTSPRESENTER_H
 
-#include "openPASS-TrafficSimulation/ScenarioInterface.h"
+#include "interfaces/openPASS-TrafficSimulation/ScenarioInterface.h"
 
 #include <QAbstractTableModel>
 

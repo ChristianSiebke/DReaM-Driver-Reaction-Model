@@ -8,6 +8,7 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
+set(FOLDER "CoreModules")
 #ADD_SUBDIRECTORY(CollisionDetection)
 ADD_SUBDIRECTORY(EventDetector)
 ADD_SUBDIRECTORY(Manipulator)

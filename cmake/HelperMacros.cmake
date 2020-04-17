@@ -1,55 +1,97 @@
-#/*******************************************************************************
-#* Copyright (c) 2020 HLRS, University of Stuttgart
-#*
-#* This program and the accompanying materials are made
-#* available under the terms of the Eclipse Public License 2.0
-#* which is available at https://www.eclipse.org/legal/epl-2.0/
-#*
-#* SPDX-License-Identifier: EPL-2.0
-#*******************************************************************************/
+# @file HelperMacros.cmake
+#
+# @author Blasius Czink
+# @author Reinhard Biegel, in-tech GmbH
 #
 # Provides helper macros for build control:
 #
-#  add_openpass_library(targetname [STATIC | SHARED | MODULE] [EXCLUDE_FROM_ALL]
+#  ADD_OPENPASS_LIBRARY(targetname [STATIC | SHARED | MODULE] [EXCLUDE_FROM_ALL]
 #              source1 source2 ... sourceN)
 #    - OPENPASS specific wrapper macro of add_library. Please use this macro for OPENPASS libraries.
 #
-#  add_openpass_executable(targetname [WIN32] [MACOSX_BUNDLE] [EXCLUDE_FROM_ALL]
+#  ADD_OPENPASS_EXECUTABLE(targetname [WIN32] [MACOSX_BUNDLE] [EXCLUDE_FROM_ALL]
 #              source1 source2 ... sourceN)
 #    - OPENPASS specific wrapper macro of add_executable. Please use this macro for OPENPASS executables.
 #      Note: The variables SOURCES and HEADERS are added automatically.
 #
-#  add_openpass_module(targetname [WIN32] [MACOSX_BUNDLE] [EXCLUDE_FROM_ALL]
+#  ADD_OPENPASS_MODULE(targetname [WIN32] [MACOSX_BUNDLE] [EXCLUDE_FROM_ALL]
 #              source1 source2 ... sourceN)
 #    - OPENPASS specific wrapper macro of add_library. Please use this macro for OPENPASS modules.
 #      Note: The variables SOURCES and HEADERS are added automatically.
 #
-#  openpass_install_target(targetname)
-#    - OPENPASS specific wrapper macro of install(TARGETS ...) Please use this macro for installing OPENPASS targets.
-#      You should use the cmake install() command for anything else but OPENPASS-targets.
+#  OPENPASS_INSTALL_TARGET(targetname)
+#    - OPENPASS specific wrapper macro of INSTALL(TARGETS ...) Please use this macro for installing OPENPASS targets.
+#      You should use the cmake INSTALL() command for anything else but OPENPASS-targets.
 #
-#  add_openpass_compile_flags(targetname flags)
+#  ADD_OPENPASS_COMPILE_FLAGS(targetname flags)
 #    - add additional compile_flags to the given target
-#      Example: add_openpass_compile_flags(coJS "-fPIC;-fno-strict-aliasing")
+#      Example: ADD_OPENPASS_COMPILE_FLAGS(coJS "-fPIC;-fno-strict-aliasing")
 #
-#  remove_openpass_compile_flags(targetname flags)
+#  REMOVE_OPENPASS_COMPILE_FLAGS(targetname flags)
 #    - remove compile flags from target
-#      Example: remove_openpass_compile_flags(coJS "-fPIC")
+#      Example: REMOVE_OPENPASS_COMPILE_FLAGS(coJS "-fPIC")
 #
-#  add_openpass_link_flags(targetname flags)
+#  ADD_OPENPASS_LINK_FLAGS(targetname flags)
 #    - add additional link flags to the given target
 #
-#  remove_openpass_link_flags(targetname flags)
+#  REMOVE_OPENPASS_LINK_FLAGS(targetname flags)
 #    - remove link flags from target
 #
 #  --------------------------------------------------------------------------------------
 #
+#  OPENPASS_RESET (varname)
+#    - sets a variable to "not found"
+#
+#  OPENPASS_TEST_FEATURE (feature_dest_var feature_test_name my_output)
+#    - Compiles a small program given in "feature_test_name" and sets the variable "feature_dest_var"
+#      if the compile/link process was successful
+#      The full output from the compile/link process is returned in "my_output"
+#      This macro expects the "feature-test"-files in CM_FEATURE_TESTS_DIR which is preset to
+#      ${OPENPASSDIR}/cmake/FeatureTests
+#
+#      Example: OPENPASS_TEST_FEATURE(MPI_THREADED ft_mpi_threaded.c MY_OUTPUT)
+#
+#  OPENPASS_COPY_TARGET_PDB(target_name pdb_inst_prefix)
+#    - gets the targets .pdb file and deploys it to the given location ${pdb_inst_prefix}/lib or
+#      ${pdb_inst_prefix}/bin during install
+#    - only the pdb files for debug versions of a library are installed
+#      (this macro is windows specific)
+#
+#  OPENPASS_DUMP_LIB_SETUP (basename)
+#    - dumps the different library-variable contents to a file
+#
+#  USING(DEP1 DEP2 [optional])
+#    - add dependencies DEP1 and DEP2,
+#      all of them are optional, if 'optional' is present within the arguments
+#
 # @author Uwe Woessner
 #
 
-macro(OPENPASS_TEST_FEATURE feature_dest_var feature_test_name my_output)
-  message(STATUS "Checking for ${feature_test_name}")
-  try_compile(${feature_dest_var}
+include(MSVC)
+
+# helper to dump the lib-values to a simple text-file
+MACRO(OPENPASS_DUMP_LIB_SETUP basename)
+  SET (dump_file "${CMAKE_BINARY_DIR}/${basename}_lib_setup.txt")
+  FILE(WRITE  ${dump_file} "${basename}_INCLUDE_DIR    = ${${basename}_INCLUDE_DIR}\n")
+  FILE(APPEND ${dump_file} "${basename}_LIBRARY        = ${${basename}_LIBRARY}\n")
+  FILE(APPEND ${dump_file} "${basename}_LIBRARY_RELESE = ${${basename}_LIBRARY_RELEASE}\n")
+  FILE(APPEND ${dump_file} "${basename}_LIBRARY_DEBUG  = ${${basename}_LIBRARY_DEBUG}\n")
+  FILE(APPEND ${dump_file} "${basename}_LIBRARIES      = ${${basename}_LIBRARIES}\n")
+ENDMACRO(OPENPASS_DUMP_LIB_SETUP)
+
+# helper to print the lib-values to a simple text-file
+MACRO(OPENPASS_PRINT_LIB_SETUP basename)
+  MESSAGE("${basename}_INCLUDE_DIR    = ${${basename}_INCLUDE_DIR}")
+  MESSAGE("${basename}_LIBRARY        = ${${basename}_LIBRARY}")
+  MESSAGE("${basename}_LIBRARY_RELESE = ${${basename}_LIBRARY_RELEASE}")
+  MESSAGE("${basename}_LIBRARY_DEBUG  = ${${basename}_LIBRARY_DEBUG}")
+  MESSAGE("${basename}_LIBRARIES      = ${${basename}_LIBRARIES}")
+ENDMACRO(OPENPASS_PRINT_LIB_SETUP)
+
+
+MACRO(OPENPASS_TEST_FEATURE feature_dest_var feature_test_name my_output)
+  MESSAGE (STATUS "Checking for ${feature_test_name}")
+  TRY_COMPILE (${feature_dest_var}
                ${CMAKE_BINARY_DIR}/CMakeTemp
                ${CM_FEATURE_TESTS_DIR}/${feature_test_name}
                CMAKE_FLAGS
@@ -58,281 +100,377 @@ macro(OPENPASS_TEST_FEATURE feature_dest_var feature_test_name my_output)
                OUTPUT_VARIABLE ${my_output}
   )
   # Feature test failed
-  if(${feature_dest_var})
-     message(STATUS "Checking for ${feature_test_name} - succeeded")
-  else(${feature_dest_var})
-     message(STATUS "Checking for ${feature_test_name} - feature not available")
-  endif(${feature_dest_var})
-endmacro(OPENPASS_TEST_FEATURE)
-
-
-function(OPENPASS_COPY_TARGET_PDB target_name pdb_inst_prefix)
-  if(MSVC)
-    get_target_property(TARGET_LOC ${target_name} DEBUG_LOCATION)
-    if(TARGET_LOC)
-      get_filename_component(TARGET_HEAD "${TARGET_LOC}" NAME_WE)
-      # get_filename_component(FNABSOLUTE  "${TARGET_LOC}" ABSOLUTE)
-      get_filename_component(TARGET_PATH "${TARGET_LOC}" PATH)
-      set(TARGET_PDB "${TARGET_PATH}/${TARGET_HEAD}.pdb")
-      # message(STATUS "PDB-File of ${target_name} is ${TARGET_PDB}")
-      get_target_property(TARGET_TYPE ${target_name} TYPE)
-      if(TARGET_TYPE)
-        set(pdb_dest )
-        if(TARGET_TYPE STREQUAL "STATIC_LIBRARY")
-          set(pdb_dest lib)
-        else(TARGET_TYPE STREQUAL "STATIC_LIBRARY")
-          set(pdb_dest bin)
-        endif(TARGET_TYPE STREQUAL "STATIC_LIBRARY")
-        # maybe an optional category path given?
-        if(NOT "${ARGN}" STREQUAL "")
-          set(category_path "${ARGV2}")
-        endif(NOT "${ARGN}" STREQUAL "")
-        install(FILES ${TARGET_PDB} DESTINATION "${pdb_inst_prefix}/${pdb_dest}${category_path}" CONFIGURATIONS "Debug") 
-      endif(TARGET_TYPE)
-    endif(TARGET_LOC)
-  endif(MSVC)
-endfunction(OPENPASS_COPY_TARGET_PDB)
-
-macro(OPENPASS_MSVC_RUNTIME_OPTION)
-  if(MSVC)
-    option(MSVC_USE_STATIC_RUNTIME "Use static MS-Runtime (/MT, /MTd)" OFF)
-    if(MSVC_USE_STATIC_RUNTIME)
-      foreach(FLAG_VAR CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO
-                        CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO)
-      if(${FLAG_VAR} MATCHES "/MD")
-        string(REGEX REPLACE "/MD" "/MT" BCMSVC_${FLAG_VAR} "${${FLAG_VAR}}")
-        set(${FLAG_VAR} ${BCMSVC_${FLAG_VAR}} CACHE STRING "" FORCE)
-      endif(${FLAG_VAR} MATCHES "/MD")
-      endforeach(FLAG_VAR)
-    else(MSVC_USE_STATIC_RUNTIME)
-      foreach(FLAG_VAR CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO
-                        CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO)
-      if(${FLAG_VAR} MATCHES "/MT")
-        string(REGEX REPLACE "/MT" "/MD" BCMSVC_${FLAG_VAR} "${${FLAG_VAR}}")
-        set(${FLAG_VAR} ${BCMSVC_${FLAG_VAR}} CACHE STRING "" FORCE)
-      endif(${FLAG_VAR} MATCHES "/MT")
-      endforeach(FLAG_VAR)
-    endif(MSVC_USE_STATIC_RUNTIME)
-  endif(MSVC)
-endmacro(OPENPASS_MSVC_RUNTIME_OPTION)
+  IF (${feature_dest_var})
+     MESSAGE (STATUS "Checking for ${feature_test_name} - succeeded")
+  ELSE (${feature_dest_var})
+     MESSAGE (STATUS "Checking for ${feature_test_name} - feature not available")
+  ENDIF (${feature_dest_var})
+ENDMACRO(OPENPASS_TEST_FEATURE)
 
 
 # Macro to adjust the output directories of a target
 function(openpass_adjust_output_dir targetname)
-    #message("openpass_adjust_output_dir(${targetname}) : TARGET_TYPE = ${TARGET_TYPE}, ARGV2=${ARGV2}")
+    #MESSAGE("openpass_adjust_output_dir(${targetname}) : OPENPASS_DESTDIR = ${OPENPASS_DESTDIR}, ARGV1=${ARGV1}")
 
-    set(MYPATH_POSTFIX )
+    SET(MYPATH_POSTFIX )
     # optional path-postfix specified?
-    if(NOT "${ARGV1}" STREQUAL "")
-      if("${ARGV1}" MATCHES "^/.*")
-        set(MYPATH_POSTFIX "${ARGV1}")
-      else()
-        set(MYPATH_POSTFIX "/${ARGV1}")
-      endif()
-    endif()
-    
+    IF(NOT "${ARGV1}" STREQUAL "")
+      IF("${ARGV1}" MATCHES "^/.*")
+        SET(MYPATH_POSTFIX "${ARGV1}")
+      ELSE()
+        SET(MYPATH_POSTFIX "/${ARGV1}")
+      ENDIF()
+    ENDIF()
+
     # adjust
-    if(CMAKE_CONFIGURATION_TYPES)
+    IF(CMAKE_CONFIGURATION_TYPES)
       # generator supports configuration types
-      foreach(conf_type ${CMAKE_CONFIGURATION_TYPES})
-        string(TOUPPER "${conf_type}" upper_conf_type_str)
-            set_target_properties(${ARGV0} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY_${upper_conf_type_str} "${OPENPASS_DESTDIR}${MYPATH_POSTFIX}")
-            set_target_properties(${ARGV0} PROPERTIES LIBRARY_OUTPUT_DIRECTORY_${upper_conf_type_str} "${OPENPASS_DESTDIR}${MYPATH_POSTFIX}")
-            set_target_properties(${ARGV0} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_${upper_conf_type_str} "${OPENPASS_DESTDIR}${MYPATH_POSTFIX}")
-      endforeach(conf_type)
-    else(CMAKE_CONFIGURATION_TYPES)
+      FOREACH(conf_type ${CMAKE_CONFIGURATION_TYPES})
+        STRING(TOUPPER "${conf_type}" upper_conf_type_str)
+            SET_TARGET_PROPERTIES(${ARGV0} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY_${upper_conf_type_str} "${OPENPASS_DESTDIR}${MYPATH_POSTFIX}")
+            SET_TARGET_PROPERTIES(${ARGV0} PROPERTIES LIBRARY_OUTPUT_DIRECTORY_${upper_conf_type_str} "${OPENPASS_DESTDIR}${MYPATH_POSTFIX}")
+            SET_TARGET_PROPERTIES(${ARGV0} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_${upper_conf_type_str} "${OPENPASS_DESTDIR}${MYPATH_POSTFIX}")
+      ENDFOREACH(conf_type)
+    ELSE(CMAKE_CONFIGURATION_TYPES)
       # no configuration types - probably makefile generator
-      string(TOUPPER "${CMAKE_BUILD_TYPE}" upper_build_type_str)
-      set_target_properties(${ARGV0} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY_${upper_build_type_str} "${OPENPASS_DESTDIR}${MYPATH_POSTFIX}")
-      set_target_properties(${ARGV0} PROPERTIES LIBRARY_OUTPUT_DIRECTORY_${upper_build_type_str} "${OPENPASS_DESTDIR}${MYPATH_POSTFIX}")
-      set_target_properties(${ARGV0} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_${upper_build_type_str} "${OPENPASS_DESTDIR}${MYPATH_POSTFIX}")
-    endif(CMAKE_CONFIGURATION_TYPES)
+      STRING(TOUPPER "${CMAKE_BUILD_TYPE}" upper_build_type_str)
+      SET_TARGET_PROPERTIES(${ARGV0} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY_${upper_build_type_str} "${OPENPASS_DESTDIR}${MYPATH_POSTFIX}")
+      SET_TARGET_PROPERTIES(${ARGV0} PROPERTIES LIBRARY_OUTPUT_DIRECTORY_${upper_build_type_str} "${OPENPASS_DESTDIR}${MYPATH_POSTFIX}")
+      SET_TARGET_PROPERTIES(${ARGV0} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_${upper_build_type_str} "${OPENPASS_DESTDIR}${MYPATH_POSTFIX}")
+    ENDIF(CMAKE_CONFIGURATION_TYPES)
 endfunction(openpass_adjust_output_dir)
 
-# Macro to add OPENPASS libraries
-macro(openpass_add_library targetname)
-  add_library(${ARGV} ${SOURCES} ${HEADERS} ${UIS})
-  target_link_libraries(${targetname} ${EXTRA_LIBS})
-  # set_target_properties(${targetname} PROPERTIES PROJECT_LABEL "${targetname}")
-  set_target_properties(${targetname} PROPERTIES OUTPUT_NAME "${targetname}")
+##
+# Macro to add openPASS libraries, executables and tests
+#
+# Usages:
+#   For building executables:
+#     add_openpass_target(NAME <target> TYPE executable
+#                         SOURCES <sourcefiles>
+#                         [HEADERS <headerfiles>]
+#                         [INCDIRS <include-directories>]
+#                         [LIBRARIES <libraries>]
+#                         [UIS <qt_uis>]
+#                         [LINKOSI])
+#                         [LINKGUI]
+#                         [FOLDER <category>]
+#                         [COMPONENT <gui|sim|core|bin|module>])
+#
+#   For building libraries:
+#     add_openpass_target(NAME <target> TYPE libraries LINKAGE <static|shared>
+#                         SOURCES <sourcefiles>
+#                         [HEADERS <headerfiles>]
+#                         [INCDIRS <include-directories>]
+#                         [LIBRARIES <libraries>]
+#                         [UIS <qt_uis>]
+#                         [LINKOSI]
+#                         [LINKGUI]
+#                         [FOLDER <category>]
+#                         [COMPONENT <gui|sim|core|bin|module>])
+#
+#   For building tests:
+#     add_openpass_target(NAME <target> TYPE test
+#                         SOURCES <sourcefiles>
+#                         [HEADERS <headerfiles>]
+#                         [INCDIRS <include-directories>]
+#                         [LIBRARIES <libraries>]
+#                         [UIS <qt_uis>]
+#                         [LINKOSI]
+#                         [LINKGUI]
+#                         [DEFAULT_MAIN]
+#                         [SIMCORE_DEPS <dependencies>]
+#                         [RESOURCES <directories>]
+#                         [FOLDER <category>]
+#                         [COMPONENT <gui|sim|core|bin|module>])
+#
+# NAME           Specifies the target name, has to be unique
+# TYPE           Type of the target to build (executable, library or test)
+# LINKAGE        Specifies static or shared linkage for library targets
+# SOURCES        Source files
+# HEADERS        Header files
+# UIS            Qt UI files
+# INCDIRS        Additional include directories
+# LIBRARIES      Additional libraries to link
+# LINKOSI        Shortcut for adding OSI include directories and libraries (incl. protobuf)
+# LINKGUI        Shortcut for adding GUI Libraries
+# DEFAULT_MAIN   Links a simple main() implementation for running GTest
+# SIMCORE_DEPS   Adds dependencies on simulation core targets to a test
+# RESOURCES      List of directories to be copied to the test executable's location before test execution
+# FOLDER       The target will be sorted into that folder in your development environment
+#				 tests will be sorted into tests/<category>
+#
+# In addtion to the parameters above:
+#   - For 'test' targets:
+#    - A test for building the test is added and the test will depend on that build target
+#    - gmock/gtest headers and include directories are added
+#    - gtest/gmock/pthread libraries are linked
+#    - Tests are excluded form the 'all' target
+#    - If DEFAULT_MAIN argument is provided, adds '--default-xml' to test executable command line arguments
+#  - General:
+#    - Target properties PROJECT_LABEL and OUTPUT_NAME are set to the target's name
+#    - Target property DEBUG_POSTFIX is set to CMAKE_DEBUG_POSTFIX
+##
+function(add_openpass_target)
+  cmake_parse_arguments(PARSED_ARG "LINKGUI;LINKOSI;DEFAULT_MAIN" "NAME;TYPE;LINKAGE" "HEADERS;SOURCES;INCDIRS;LIBRARIES;UIS;SIMCORE_DEPS;RESOURCES;FOLDER;COMPONENT" ${ARGN})
 
-  openpass_adjust_output_dir(${targetname} bin)
-  
-  # set additional OPENPASS_COMPILE_FLAGS
-  set_target_properties(${targetname} PROPERTIES COMPILE_FLAGS "${OPENPASS_COMPILE_FLAGS}")
-  # set additional OPENPASS_LINK_FLAGS
-  set_target_properties(${targetname} PROPERTIES LINK_FLAGS "${OPENPASS_LINK_FLAGS}")
-  
-  
-  unset(SOURCES)
-  unset(HEADERS)
-  unset(UIS)
+  if(TARGET ${PARSED_ARG_NAME})
+    message(STATUS "Target '${PARSED_ARG_NAME}' already defined. Skipping.")
+  else()
 
-endmacro(openpass_add_library)
+# TODO: different categories of libraries can be placed in different directories
+#       GUI Components are installed in their own gui directory as an example
+	if("${PARSED_ARG_COMPONENT}" STREQUAL "gui")
+	  set (DESTDIR ${SUBDIR_LIB_GUI})
+	elseif("${PARSED_ARG_COMPONENT}" STREQUAL "core")
+	  set (DESTDIR ${SUBDIR_LIB_COMPONENTS})
+	elseif("${PARSED_ARG_COMPONENT}" STREQUAL "bin")
+	  set (DESTDIR ${INSTALL_BIN_DIR})
+	elseif("${PARSED_ARG_COMPONENT}" STREQUAL "sim")
+	  set (DESTDIR ${SUBDIR_LIB_SIM})
+	elseif("${PARSED_ARG_COMPONENT}" STREQUAL "module")
+	  set (DESTDIR ${SUBDIR_LIB_SIM})
+	else()
+      message(STATUS "Unknown COMPONENT '${PARSED_ARG_COMPONENT}' please use any one of GUI, CORE, BIN or SIM.")
+	endif()
+	
+	
+    if("${PARSED_ARG_TYPE}" STREQUAL "library")
 
-# Macro to add OPENPASS executables
-macro(openpass_add_executable targetname)
-  add_executable(${targetname} ${ARGN} ${SOURCES} ${HEADERS} ${UIS})
-  target_link_libraries(${targetname} ${EXTRA_LIBS})
-  set_target_properties(${targetname} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
-  # set_target_properties(${targetname} PROPERTIES PROJECT_LABEL "${targetname}")
-  set_target_properties(${targetname} PROPERTIES OUTPUT_NAME "${targetname}")
+      set(VALID_LINKAGES shared static)
+
+      if(NOT "${PARSED_ARG_LINKAGE}" IN_LIST VALID_LINKAGES)
+        message(FATAL_ERROR "Target type 'library' requires either 'shared' or 'static' LINKAGE")
+      else()
+        string(TOUPPER "${PARSED_ARG_LINKAGE}" PARSED_ARG_LINKAGE)
+      endif()
+
+      add_library(${PARSED_ARG_NAME} ${PARSED_ARG_LINKAGE} ${PARSED_ARG_HEADERS} ${PARSED_ARG_SOURCES} ${PARSED_ARG_UIS})
+      install(FILES $<TARGET_FILE:${PARSED_ARG_NAME}> DESTINATION "${DESTDIR}")
+      install(TARGETS ${PARSED_ARG_NAME} RUNTIME DESTINATION "${DESTDIR}")
 	  
-  openpass_adjust_output_dir(${targetname} "")
-  
-  # set additional OPENPASS_COMPILE_FLAGS
-  set_target_properties(${targetname} PROPERTIES COMPILE_FLAGS "${OPENPASS_COMPILE_FLAGS}")
-  # set additional OPENPASS_LINK_FLAGS
-  set_target_properties(${targetname} PROPERTIES LINK_FLAGS "${OPENPASS_LINK_FLAGS}")
-  
-  # set_target_properties(${targetname} PROPERTIES DEBUG_OUTPUT_NAME "${targetname}${CMAKE_DEBUG_POSTFIX}")
-  unset(SOURCES)
-  unset(HEADERS)
-  unset(UIS)
-endmacro(openpass_add_executable)
+	  if(OPENPASS_ADJUST_OUTPUT)
+	    openpass_adjust_output_dir(${PARSED_ARG_NAME} ${DESTDIR})
+	  endif()
+
+      if(WIN32)
+        set_target_properties(${PARSED_ARG_NAME} PROPERTIES PREFIX "")
+      endif()
+
+    elseif("${PARSED_ARG_TYPE}" STREQUAL "executable")
+
+      if(DEFINED PARSED_ARG_LINKAGE)
+        message(WARNING "LINKAGE parameter isn't used by target type 'executable'")
+      endif()
+
+      add_executable(${PARSED_ARG_NAME} ${PARSED_ARG_HEADERS} ${PARSED_ARG_SOURCES} ${PARSED_ARG_UIS})
+      install(TARGETS ${PARSED_ARG_NAME} RUNTIME DESTINATION "${DESTDIR}")
+	  
+	  if(OPENPASS_ADJUST_OUTPUT)
+	    openpass_adjust_output_dir(${PARSED_ARG_NAME} ${DESTDIR})
+	  endif()
+
+    elseif("${PARSED_ARG_TYPE}" STREQUAL "test")
+
+      if(DEFINED PARSED_ARG_LINKAGE)
+        message(WARNING "LINKAGE parameter isn't used by target type 'executable'")
+      endif()
+
+      set(ADDITIONAL_TEST_ARGS "")
+
+      if(${PARSED_ARG_DEFAULT_MAIN})
+        set(ADDITIONAL_TEST_ARGS "${ADDITIONAL_TEST_ARGS} --default-xml")
+
+        list(APPEND PARSED_ARG_HEADERS
+          ${TEST_PATH}/common/gtest/mainHelper.h
+        )
+
+        list(APPEND PARSED_ARG_SOURCES
+          ${TEST_PATH}/common/gtest/mainHelper.cpp
+          ${TEST_PATH}/common/gtest/unitTestMain.cpp
+        )
+      endif()
+
+      add_executable(${PARSED_ARG_NAME} EXCLUDE_FROM_ALL ${PARSED_ARG_HEADERS} ${PARSED_ARG_SOURCES} ${PARSED_ARG_UIS})
+
+      target_include_directories(${PARSED_ARG_NAME}
+        SYSTEM PRIVATE
+        ${GTEST_INCLUDE_DIR}
+      )
 
 
+      target_link_libraries(${PARSED_ARG_NAME}
+        ${GTEST_LIBRARY}
+        ${GMOCK_LIBRARIES}
+        pthread
+      )
+
+      add_test(NAME ${PARSED_ARG_NAME}_build COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target ${PARSED_ARG_NAME})
+      add_test(NAME ${PARSED_ARG_NAME} COMMAND ${PARSED_ARG_NAME} ${ADDITIONAL_TEST_ARGS})
+      set_tests_properties(${PARSED_ARG_NAME} PROPERTIES DEPENDS ${PARSED_ARG_NAME}_build)
+
+    else()
+
+      message(FATAL_ERROR "Target type '${PARSED_TARGET_TYPE}' is not supported.")
+
+    endif()
+	
+
+    set_target_properties(${PARSED_ARG_NAME} PROPERTIES DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}")
+    set_target_properties(${PARSED_ARG_NAME} PROPERTIES PROJECT_LABEL "${PARSED_ARG_NAME}")
+    set_target_properties(${PARSED_ARG_NAME} PROPERTIES OUTPUT_NAME "${PARSED_ARG_NAME}")
+	if("${PARSED_ARG_FOLDER}" STREQUAL "")
+	   set(PARSED_ARG_FOLDER ${FOLDER})
+	endif()
+    if("${PARSED_ARG_TYPE}" STREQUAL "test")
+	   set_target_properties(${PARSED_ARG_NAME} PROPERTIES FOLDER "tests/${PARSED_ARG_FOLDER}")
+	else()
+	   set_target_properties(${PARSED_ARG_NAME} PROPERTIES FOLDER "${PARSED_ARG_FOLDER}")
+	endif()
+
+    target_include_directories(${PARSED_ARG_NAME} PRIVATE
+      ${PARSED_ARG_INCDIRS}
+    )
+
+    target_link_libraries(${PARSED_ARG_NAME}
+      ${PARSED_ARG_LIBRARIES}
+      Qt5::Core
+      Boost::headers
+    )
+
+    if(${PARSED_ARG_LINKOSI})
+      target_include_directories(${PARSED_ARG_NAME} PRIVATE
+        ${OSI_INCLUDE_DIR}
+        protobuf::libprotobuf
+      )
+
+      target_link_libraries(${PARSED_ARG_NAME}
+        ${OSI_LIBRARIES}
+        protobuf::libprotobuf
+      )
+    endif()
+	
+	target_compile_options(${PARSED_ARG_NAME} PRIVATE
+     $<$<CXX_COMPILER_ID:MSVC>:
+          -wd4251 -wd4335 -wd4250>)
+
+    if(${PARSED_ARG_LINKGUI})
+      qt5_use_modules(${PARSED_ARG_NAME} Core Gui Xml Widgets)
+    endif()
+
+    if(DEFINED PARSED_ARG_SIMCORE_DEPS)
+      if("${PARSED_ARG_TYPE}" STREQUAL "test")
+        foreach(DEP IN LISTS PARSED_ARG_SIMCORE_DEPS)
+          # build dependency
+          add_dependencies(${PARSED_ARG_NAME} ${DEP})
+
+          # test run dependency
+          get_property(DEP_PATH TARGET ${DEP} PROPERTY BINARY_DIR)
+          set_tests_properties(${PARSED_ARG_NAME} PROPERTIES ENVIRONMENT "LD_LIBRARY_PATH=${DEP_PATH}")
+        endforeach()
+      else()
+        message(WARNING "SIMCORE_DEPS argument is only used for 'test' openpass targets")
+      endif()
+    endif()
+
+    if(DEFINED PARSED_ARG_RESOURCES)
+      if("${PARSED_ARG_TYPE}" STREQUAL "test")
+        foreach(RES IN LISTS PARSED_ARG_RESOURCES)
+          add_custom_command(TARGET ${PARSED_ARG_NAME}
+                             POST_BUILD
+                             COMMAND ${CMAKE_COMMAND} -E copy_directory
+                               ${CMAKE_CURRENT_SOURCE_DIR}/${RES}
+                               ${CMAKE_CURRENT_BINARY_DIR}/${RES}
+          )
+        endforeach()
+      else()
+        message(WARNING "RESOURCES only used for 'test' openpass targets")
+      endif()
+    endif()
+  endif()
+endfunction()
 
 
 # Macro to add OPENPASS modules (executables with a module-category)
-macro(openpass_add_plugin targetname component)
-  add_library(${targetname} SHARED ${ARGN} ${SOURCES} ${HEADERS} ${UIS})
-  target_link_libraries(${targetname} ${EXTRA_LIBS})
-  
-  # set_target_properties(${targetname} PROPERTIES PROJECT_LABEL "${targetname}")
-  set_target_properties(${targetname} PROPERTIES OUTPUT_NAME "${targetname}")
-	  
-  openpass_adjust_output_dir(${targetname} ${component}) 
-  
-  # set additional OPENPASS_COMPILE_FLAGS
-  set_target_properties(${targetname} PROPERTIES COMPILE_FLAGS "${OPENPASS_COMPILE_FLAGS}")
-  # set additional OPENPASS_LINK_FLAGS
-  set_target_properties(${targetname} PROPERTIES LINK_FLAGS "${OPENPASS_LINK_FLAGS}")
-  
-  # set_target_properties(${targetname} PROPERTIES DEBUG_OUTPUT_NAME "${targetname}${CMAKE_DEBUG_POSTFIX}")
-  unset(SOURCES)
-  unset(HEADERS)
-  unset(UIS)
-endmacro(openpass_add_plugin)
+#MACRO(ADD_OPENPASS_PLUGIN targetname component)
+#  ADD_LIBRARY(${targetname} SHARED ${ARGN} ${SOURCES} ${HEADERS} ${UIS})
+#  TARGET_LINK_LIBRARIES(${targetname} ${EXTRA_LIBS})
+#
+#  # SET_TARGET_PROPERTIES(${targetname} PROPERTIES PROJECT_LABEL "${targetname}")
+#  SET_TARGET_PROPERTIES(${targetname} PROPERTIES OUTPUT_NAME "${targetname}")
+#
+#  #openpass_adjust_output_dir(${targetname} ${component})
+#
+#  # set additional OPENPASS_COMPILE_FLAGS
+#  #SET_TARGET_PROPERTIES(${targetname} PROPERTIES COMPILE_FLAGS "${OPENPASS_COMPILE_FLAGS}")
+#  # set additional OPENPASS_LINK_FLAGS
+#  #SET_TARGET_PROPERTIES(${targetname} PROPERTIES LINK_FLAGS "${OPENPASS_LINK_FLAGS}")
+#
+#  # SET_TARGET_PROPERTIES(${targetname} PROPERTIES DEBUG_OUTPUT_NAME "${targetname}${CMAKE_DEBUG_POSTFIX}")
+#
+#  OPENPASS_INSTALL_TARGET(${targetname})
+#
+#  #UNSET(SOURCES)
+#  #UNSET(HEADERS)
+#  #UNSET(UIS)
+#ENDMACRO(ADD_OPENPASS_PLUGIN)
 
-macro(openpass_gui_add_plugin targetname category)  
-   openpass_add_plugin(${targetname} "bin/gui" ${ARGN})
-   if("${category}" STREQUAL "")
-       set_target_properties(${targetname} PROPERTIES FOLDER "GUI")
-   else("${category}" STREQUAL "")
-       set_target_properties(${targetname} PROPERTIES FOLDER "${category}/GUI")
-   endif("${category}" STREQUAL "")
-   target_link_libraries(${targetname} Common)
-   qt5_use_modules(${targetname} Core Gui Xml Widgets)
-  
-endmacro(openpass_gui_add_plugin)
+#MACRO(OPENPASS_GUI_add_plugin targetname category)  
+#   ADD_OPENPASS_PLUGIN(${targetname} "lib/gui" ${ARGN})
+#   IF("${category}" STREQUAL "")
+#       set_target_properties(${targetname} PROPERTIES FOLDER "GUI")
+#   ELSE("${category}" STREQUAL "")
+#       set_target_properties(${targetname} PROPERTIES FOLDER "${category}/GUI")
+#   ENDIF("${category}" STREQUAL "")
+#   target_link_libraries(${targetname} Common)
+#   qt5_use_modules(${targetname} Core Gui Xml Widgets)
+#
+#ENDMACRO(OPENPASS_GUI_add_plugin)
 
-macro(openpass_add_module targetname category)
-   openpass_add_plugin(${targetname} lib ${ARGN})
-   if("${category}" STREQUAL "")
-       set_target_properties(${targetname} PROPERTIES FOLDER "CoreModules")
-   else("${category}" STREQUAL "")
-       set_target_properties(${targetname} PROPERTIES FOLDER "${category}/CoreModules")
-   endif("${category}" STREQUAL "")
-   target_link_libraries(${targetname} Common)
-   qt5_use_modules(${targetname} Xml)
-  
-endmacro(openpass_add_module)
+#MACRO(OPENPASS_add_module targetname category)
+#   ADD_OPENPASS_PLUGIN(${targetname} lib ${ARGN})
+#   IF("${category}" STREQUAL "")
+#       set_target_properties(${targetname} PROPERTIES FOLDER "CoreModules")
+#   ELSE("${category}" STREQUAL "")
+#       set_target_properties(${targetname} PROPERTIES FOLDER "${category}/CoreModules")
+#   ENDIF("${category}" STREQUAL "")
+#   target_link_libraries(${targetname} Common)
+#   qt5_use_modules(${targetname} Xml)
+#
+#ENDMACRO(OPENPASS_add_module)
 
-macro(openpass_add_component targetname category)
-   openpass_add_plugin(${targetname} "lib" ${ARGN})
-   if("${category}" STREQUAL "")
-       set_target_properties(${targetname} PROPERTIES FOLDER "Component")
-   else("${category}" STREQUAL "")
-       set_target_properties(${targetname} PROPERTIES FOLDER "${category}/Component")
-   endif("${category}" STREQUAL "")
-   target_link_libraries(${targetname} Common)
-   qt5_use_modules(${targetname} Xml)
-  
-endmacro(openpass_add_component)
+#MACRO(add_openpass_component targetname category)
+#   ADD_OPENPASS_PLUGIN(${targetname} "lib" ${ARGN})
+#   IF("${category}" STREQUAL "")
+#       set_target_properties(${targetname} PROPERTIES FOLDER "Component")
+#   ELSE("${category}" STREQUAL "")
+#       set_target_properties(${targetname} PROPERTIES FOLDER "${category}/Component")
+#   ENDIF("${category}" STREQUAL "")
+#   target_link_libraries(${targetname} Common)
+#   qt5_use_modules(${targetname} Xml)
+#
+#ENDMACRO(OPENPASS_add_component)
 
 # Macro to install and export
-macro(openpass_install_target targetname)
-  
-install(TARGETS ${targetname}
-        RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
-        ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
-        LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
-		
-install(FILES ${HEADERS} DESTINATION "${INSTALL_INC_DIR}")
-  
-endmacro(openpass_install_target)
+macro(add_openpass_install_target targetname)
+  install(TARGETS ${targetname}
+          RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
+          ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
+          LIBRARY DESTINATION "${INSTALL_LIB_DIR}")
+
+  install(FILES ${HEADERS} DESTINATION "${INSTALL_INC_DIR}")
+endmacro()
 
 # Macro to install an OpenOPENPASS_GUI plugin
-macro(openpass_gui_install_plugin targetname)
-  install(TARGETS ${ARGV} EXPORT OPENPASS-targets
-          RUNTIME DESTINATION ${INSTALL_BIN_DIR}/bin/gui
-          LIBRARY DESTINATION ${INSTALL_LIB_DIR}
-          ARCHIVE DESTINATION ${INSTALL_LIB_DIR}
-          COMPONENT guiplugins
-  )
-endmacro(openpass_gui_install_plugin)
+#MACRO(OPENPASS_GUI_INSTALL_PLUGIN targetname)
+#  INSTALL(TARGETS ${ARGV} EXPORT OPENPASS-targets
+#          RUNTIME DESTINATION ${INSTALL_BIN_DIR}/bin/gui
+#          LIBRARY DESTINATION ${INSTALL_LIB_DIR}
+#          ARCHIVE DESTINATION ${INSTALL_LIB_DIR}
+#          COMPONENT guiplugins
+#  )
+#ENDMACRO(OPENPASS_GUI_INSTALL_PLUGIN)
 
 # Macro to install headers
-macro(openpass_install_headers dirname)
-  install(FILES ${ARGN} DESTINATION include/OPENPASS/${dirname})
-endmacro(openpass_install_headers)
-
-
-#
-# Per target flag handling
-#
-
-function(add_openpass_compile_flags targetname flags)
-  get_target_property(MY_CFLAGS ${targetname} COMPILE_FLAGS)
-  if(NOT MY_CFLAGS)
-    set(MY_CFLAGS "")
-  endif()
-  foreach(cflag ${flags})
-    #string(REGEX MATCH "${cflag}" flag_matched "${MY_CFLAGS}")
-    #if(NOT flag_matched)
-      set(MY_CFLAGS "${MY_CFLAGS} ${cflag}")
-    #endif(NOT flag_matched)
-  endforeach(cflag)
-  set_target_properties(${targetname} PROPERTIES COMPILE_FLAGS "${MY_CFLAGS}")
-  # message("added compile flags ${MY_CFLAGS} to target ${targetname}")
-endfunction(add_openpass_compile_flags)
-
-function(remove_openpass_compile_flags targetname flags)
-  get_target_property(MY_CFLAGS ${targetname} COMPILE_FLAGS)
-  if(NOT MY_CFLAGS)
-    set(MY_CFLAGS "")
-  endif()
-  foreach(cflag ${flags})
-    string(REGEX REPLACE "${cflag}[ ]+|${cflag}$" "" MY_CFLAGS "${MY_CFLAGS}")
-  endforeach(cflag)
-  set_target_properties(${targetname} PROPERTIES COMPILE_FLAGS "${MY_CFLAGS}")
-endfunction(remove_openpass_compile_flags)
-
-function(add_openpass_link_flags targetname flags)
-  get_target_property(MY_LFLAGS ${targetname} LINK_FLAGS)
-  if(NOT MY_LFLAGS)
-    set(MY_LFLAGS "")
-  endif()
-  foreach(lflag ${flags})
-    #string(REGEX MATCH "${lflag}" flag_matched "${MY_LFLAGS}")
-    #if(NOT flag_matched)
-      set(MY_LFLAGS "${MY_LFLAGS} ${lflag}")
-    #endif(NOT flag_matched)
-  endforeach(lflag)
-  set_target_properties(${targetname} PROPERTIES LINK_FLAGS "${MY_LFLAGS}")
-  #message("added link flags ${MY_LFLAGS} to target ${targetname}")
-endfunction(add_openpass_link_flags)
-
-function(remove_openpass_link_flags targetname flags)
-  get_target_property(MY_LFLAGS ${targetname} LINK_FLAGS)
-  if(NOT MY_LFLAGS)
-    set(MY_LFLAGS "")
-  endif()
-  foreach(lflag ${flags})
-    string(REGEX REPLACE "${lflag}[ ]+|${lflag}$" "" MY_LFLAGS "${MY_LFLAGS}")
-  endforeach(lflag)
-  set_target_properties(${targetname} PROPERTIES LINK_FLAGS "${MY_LFLAGS}")
-endfunction(remove_openpass_link_flags)
-
-
+#MACRO(OPENPASS_INSTALL_HEADERS dirname)
+#  INSTALL(FILES ${ARGN} DESTINATION include/OPENPASS/${dirname})
+#ENDMACRO(OPENPASS_INSTALL_HEADERS)

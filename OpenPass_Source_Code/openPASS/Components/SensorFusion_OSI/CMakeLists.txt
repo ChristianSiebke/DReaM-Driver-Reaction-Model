@@ -1,25 +1,23 @@
-#/*******************************************************************************
-#* Copyright (c) 2020 HLRS, University of Stuttgart
-#*
-#* This program and the accompanying materials are made
-#* available under the terms of the Eclipse Public License 2.0
-#* which is available at https://www.eclipse.org/legal/epl-2.0/
-#*
-#* SPDX-License-Identifier: EPL-2.0
-#*******************************************************************************/
-
-set(SOURCES sensorFusion.cpp
-			 sensorFusionImplementation.cpp)
-set(HEADERS sensorFusion.h
-			 sensorFusionGlobal.h
-			 sensorFusionImplementation.h
-			 sensorFusionQuery.h)
+set(COMPONENT_NAME SensorFusion_OSI)
 
 add_compile_definitions(SENSOR_FUSION_LIBRARY)
 
-include_directories(${OSI_INCLUDE_DIR} ${PROTOBUF_INCLUDE_DIRS})
+add_openpass_target(
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
 
+  HEADERS
+    sensorFusion.h
+    sensorFusionGlobal.h
+    sensorFusionImplementation.h
+    sensorFusionQuery.h
 
-OPENPASS_add_component(SensorFusion_OSI OSI)
+  SOURCES
+    sensorFusion.cpp
+    sensorFusionImplementation.cpp
 
-target_link_libraries(SensorFusion_OSI Common  ${OSI_LIBRARIES} ${PROTOBUF_LIBRARIES})
+  LIBRARIES
+    Qt5::Core
+    Common
+
+  LINKOSI
+)

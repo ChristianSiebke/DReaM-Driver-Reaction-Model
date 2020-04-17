@@ -17,7 +17,7 @@
 #ifndef SCENARIOPRESENTER_H
 #define SCENARIOPRESENTER_H
 
-#include "openPASS-TrafficSimulation/ScenarioInterface.h"
+#include "interfaces/openPASS-TrafficSimulation/ScenarioInterface.h"
 #include "openPASS-Project/ProjectInterface.h"
 
 #include "Presenters/ScenarioAgentsPresenter.h"

@@ -26,7 +26,7 @@
 #include <QShortcut>
 
 #include "openPASS-Project/ProjectInterface.h"
-#include "openPASS-TrafficSimulation/TrafficSimulationInterface.h"
+#include "interfaces/openPASS-TrafficSimulation/TrafficSimulationInterface.h"
 
 #include "Views/TrafficSimulationView.h"
 

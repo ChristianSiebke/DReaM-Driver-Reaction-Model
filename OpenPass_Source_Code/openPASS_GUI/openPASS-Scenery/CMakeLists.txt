@@ -7,27 +7,31 @@
 #*
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
+set(COMPONENT_NAME Scenery)
 
-set(SOURCES SceneryPlugin.cpp
-Models/SceneryModel.cpp
-Views/SceneryView.cpp
-Presenters/SceneryPresenter.cpp
-)
-set(HEADERS SceneryPlugin.h 
-Models/SceneryModel.h
-Views/SceneryView.h
-Presenters/SceneryPresenter.h
-)
-
-set(UIS 
-Views/SceneryView.ui
-)
-
+add_compile_definitions(Scenery_LIBRARY)
 
 include_directories(.)
 
-add_definitions(-DScenery_LIBRARY)
+add_openpass_target(
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared LINKGUI COMPONENT gui
 
-openpass_gui_add_plugin(Scenery "")
+  HEADERS
+    SceneryPlugin.h 
+	Models/SceneryModel.h
+	Views/SceneryView.h
+	Presenters/SceneryPresenter.h
 
-target_link_libraries(Scenery Project openPASSInterfaces)
+  SOURCES
+    SceneryPlugin.cpp
+	Models/SceneryModel.cpp
+	Views/SceneryView.cpp
+	Presenters/SceneryPresenter.cpp
+	
+  UIS 
+	Views/SceneryView.ui
+	
+  LIBRARIES
+      openPASSInterfaces
+	  Project
+)

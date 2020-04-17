@@ -27,7 +27,7 @@
 #ifndef LIBRARIESPRESENTER_H
 #define LIBRARIESPRESENTER_H
 
-#include "openPASS-TrafficSimulation/ExperimentInterface.h"
+#include "interfaces/openPASS-TrafficSimulation/ExperimentInterface.h"
 #include "openPASS-Project/ProjectInterface.h"
 
 #include <QAbstractTableModel>

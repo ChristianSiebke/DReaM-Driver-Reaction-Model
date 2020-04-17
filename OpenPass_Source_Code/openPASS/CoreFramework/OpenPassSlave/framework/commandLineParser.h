@@ -14,7 +14,7 @@
 #include <QStringList>
 #include <QCoreApplication>
 #include "QCommandLineParser"
-#include <opExport.h>
+#include <Common/opExport.h>
 
 struct CORESLAVEEXPORT CommandLineArguments
 {

@@ -1,19 +1,19 @@
-#/*******************************************************************************
-#* Copyright (c) 2020 HLRS, University of Stuttgart
-#*
-#* This program and the accompanying materials are made
-#* available under the terms of the Eclipse Public License 2.0
-#* which is available at https://www.eclipse.org/legal/epl-2.0/
-#*
-#* SPDX-License-Identifier: EPL-2.0
-#*******************************************************************************/
-
-set(SOURCES dynamics_collision.cpp
-			 dynamics_collisionImplementation.cpp)
-set(HEADERS dynamics_collision.h
-			 dynamics_collisionImplementation.h
-			 dynamics_collisionGlobal.h)
+set(COMPONENT_NAME Dynamics_Collision)
 
 add_compile_definitions(DYNAMICS_COLLISION_LIBRARY)
 
-OPENPASS_add_component(Dynamics_Collision "")
+add_openpass_target(
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
+
+  HEADERS
+    dynamics_collision.h
+    dynamics_collisionImplementation.h
+    dynamics_collisionGlobal.h
+
+  SOURCES
+    dynamics_collision.cpp
+    dynamics_collisionImplementation.cpp
+
+  LIBRARIES
+    Qt5::Core
+)

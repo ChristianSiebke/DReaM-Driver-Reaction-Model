@@ -8,22 +8,24 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-set(SOURCES SpawnPoint.cpp
-			SpawnPointExport.cpp
-			SpawnPointSceneryParser.cpp)
-set(HEADERS SpawnPoint.h
-			SpawnPointExport.h
-			SpawnPointGlobal.h
-			SpawnPointSceneryParser.h)
-
+set(COMPONENT_NAME SpawnPoint_OSI)
 
 add_compile_definitions(SPAWNPOINT_LIBRARY)
-include_directories(. ${OSI_INCLUDE_DIR} ${PROTOBUF_INCLUDE_DIRS})
 
-OPENPASS_ADD_MODULE(SpawnPoint_OSI OSI)
-qt5_use_modules(SpawnPoint_OSI Xml)
+add_openpass_target(
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT module
 
+  HEADERS SpawnPoint.h
+          SpawnPointExport.h
+          SpawnPointGlobal.h
+          SpawnPointSceneryParser.h
 
-target_link_libraries(SpawnPoint_OSI Common  ${OSI_LIBRARIES} ${PROTOBUF_LIBRARIES})
+  SOURCES
+           SpawnPoint.cpp
+           SpawnPointExport.cpp
+           SpawnPointSceneryParser.cpp
 
+  LIBRARIES
+    Qt5::Core
+)
 

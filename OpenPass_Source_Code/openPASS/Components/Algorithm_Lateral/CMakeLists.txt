@@ -1,22 +1,23 @@
-#/*******************************************************************************
-#* Copyright (c) 2020 HLRS, University of Stuttgart
-#*
-#* This program and the accompanying materials are made
-#* available under the terms of the Eclipse Public License 2.0
-#* which is available at https://www.eclipse.org/legal/epl-2.0/
-#*
-#* SPDX-License-Identifier: EPL-2.0
-#*******************************************************************************/
+set(COMPONENT_NAME Algorithm_Lateral)
 
-set(SOURCES algorithm_lateral.cpp
-			 algorithm_lateralImplementation.cpp)
-set(HEADERS algorithm_lateral.h
-			 algorithm_lateralGlobal.h
-			 algorithm_lateralImplementation.h)
-			 
-include_directories(${OSI_INCLUDE_DIR} ${PROTOBUF_INCLUDE_DIRS})
 add_compile_definitions(ALGORITHM_LATERAL_LIBRARY)
 
-OPENPASS_add_component(Algorithm_Lateral "")
+add_openpass_target(
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
 
-target_link_libraries(Algorithm_Lateral Common  ${OSI_LIBRARIES} ${PROTOBUF_LIBRARIES})
+  HEADERS
+    algorithm_lateral.h
+    algorithm_lateralGlobal.h
+    algorithm_lateralImplementation.h
+
+  SOURCES
+    algorithm_lateral.cpp
+    algorithm_lateralImplementation.cpp
+
+  LIBRARIES
+    Qt5::Core
+    Common
+	
+  LINKOSI
+)
+

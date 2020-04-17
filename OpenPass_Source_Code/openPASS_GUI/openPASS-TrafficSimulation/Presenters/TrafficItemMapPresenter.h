@@ -27,7 +27,7 @@
 #ifndef TRAFFICITEMMAPPRESENTER_H
 #define TRAFFICITEMMAPPRESENTER_H
 
-#include "openPASS-TrafficSimulation/TrafficItemMapInterface.h"
+#include "interfaces/openPASS-TrafficSimulation/TrafficItemMapInterface.h"
 
 #include <QAbstractTableModel>
 #include <QUndoCommand>

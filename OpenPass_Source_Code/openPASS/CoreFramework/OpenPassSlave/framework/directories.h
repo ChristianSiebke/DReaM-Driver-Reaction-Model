@@ -12,7 +12,7 @@
 #pragma once
 
 #include <string>
-#include <opExport.h>
+#include <Common/opExport.h>
 
 /// Directories takes care of a consistent handling of paths and directories
 /// without making the underlying implementation public or a dependency

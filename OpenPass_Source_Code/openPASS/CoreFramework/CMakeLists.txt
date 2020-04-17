@@ -9,6 +9,7 @@
 #*******************************************************************************/
 
 include_directories("./" "CoreShare")
+set(FOLDER "CoreFramework")
 ADD_SUBDIRECTORY(CoreShare)
 ADD_SUBDIRECTORY(OpenPassMaster)
 ADD_SUBDIRECTORY(OpenPassSlave)

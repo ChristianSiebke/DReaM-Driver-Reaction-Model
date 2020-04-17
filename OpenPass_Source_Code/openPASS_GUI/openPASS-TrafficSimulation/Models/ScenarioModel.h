@@ -18,7 +18,7 @@
 #ifndef SCENARIOMODEL_H
 #define SCENARIOMODEL_H
 
-#include "openPASS-TrafficSimulation/ScenarioInterface.h"
+#include "interfaces/openPASS-TrafficSimulation/ScenarioInterface.h"
 
 //-----------------------------------------------------------------------------
 //! @brief The Scenario Model class implements the functionality of the

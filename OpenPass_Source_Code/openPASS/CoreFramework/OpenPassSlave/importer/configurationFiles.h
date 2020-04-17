@@ -13,7 +13,7 @@
 
 #include <string>
 #include "directories.h"
-#include <opExport.h>
+#include <Common/opExport.h>
 
 /// Container for configuration file related paths
 /// \see Directories

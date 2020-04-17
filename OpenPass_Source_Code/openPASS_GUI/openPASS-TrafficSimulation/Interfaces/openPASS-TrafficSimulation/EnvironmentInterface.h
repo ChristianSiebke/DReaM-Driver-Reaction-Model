@@ -25,7 +25,7 @@
 #ifndef ENVIRONMENTINTERFACE_H
 #define ENVIRONMENTINTERFACE_H
 
-#include "openPASS-TrafficSimulation/EnvironmentItemInterface.h"
+#include "interfaces/openPASS-TrafficSimulation/EnvironmentItemInterface.h"
 
 #include <QObject>
 #include <QString>

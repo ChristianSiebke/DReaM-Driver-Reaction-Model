@@ -7,30 +7,33 @@
 #*
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
-
-set(SOURCES WindowPlugin.cpp
-Models/WindowModel.cpp
-Views/WindowView.cpp
-Views/LogoDelegate.cpp
-Presenters/WindowPresenter.cpp
-)
-set(HEADERS WindowPlugin.h 
-Models/WindowModel.h
-Views/WindowView.h
-Views/LogoDelegate.h
-Presenters/WindowPresenter.h
-Interfaces/openPASS-Window/WindowInterface.h
-)
-
-set(UIS 
-Views/WindowView.ui
-)
-
-include_directories(.)
-
+set(COMPONENT_NAME Window)
 
 add_compile_definitions(Window_LIBRARY)
 
-openpass_gui_add_plugin(Window "")
+include_directories(.)
 
-target_link_libraries(Window openPASSInterfaces)
+add_openpass_target(
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared LINKGUI COMPONENT gui
+
+  HEADERS
+    WindowPlugin.h 
+	Models/WindowModel.h
+	Views/WindowView.h
+	Views/LogoDelegate.h
+	Presenters/WindowPresenter.h
+	Interfaces/openPASS-Window/WindowInterface.h
+
+  SOURCES
+    WindowPlugin.cpp
+	Models/WindowModel.cpp
+	Views/WindowView.cpp
+	Views/LogoDelegate.cpp
+	Presenters/WindowPresenter.cpp
+	
+  UIS 
+	Views/WindowView.ui
+	
+  LIBRARIES
+      openPASSInterfaces
+)

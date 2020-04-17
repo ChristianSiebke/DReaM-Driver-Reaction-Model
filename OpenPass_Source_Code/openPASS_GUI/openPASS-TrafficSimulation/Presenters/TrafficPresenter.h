@@ -18,7 +18,7 @@
 #ifndef TRAFFICPRESENTER_H
 #define TRAFFICPRESENTER_H
 
-#include "openPASS-TrafficSimulation/TrafficInterface.h"
+#include "interfaces/openPASS-TrafficSimulation/TrafficInterface.h"
 #include "Presenters/TrafficItemMapPresenter.h"
 #include "Views/TrafficView.h"
 

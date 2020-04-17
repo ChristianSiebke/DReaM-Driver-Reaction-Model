@@ -8,6 +8,7 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
+set(FOLDER "CoreComponents")
 #ADD_SUBDIRECTORY(Action_BrakeLight_Basic)
 ADD_SUBDIRECTORY(Action_LongitudinalDriver)
 ADD_SUBDIRECTORY(Action_SecondaryDriverTasks)

@@ -27,7 +27,7 @@
 #ifndef LOGGINGGROUPSPRESENTER_H
 #define LOGGINGGROUPSPRESENTER_H
 
-#include "openPASS-TrafficSimulation/ExperimentInterface.h"
+#include "interfaces/openPASS-TrafficSimulation/ExperimentInterface.h"
 
 #include <QAbstractListModel>
 
