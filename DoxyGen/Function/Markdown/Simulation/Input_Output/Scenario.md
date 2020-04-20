@@ -538,6 +538,22 @@ Example
 </Action>
 ```
 
+**Gaze Follower**
+
+The GazeFollower influences the gaze behaviour of an agent. The command consists of three parts:
+1. "SetGazeFollower": The first command instantiates the GazeFollower and is set by default. This command does not need to be changed.
+2. "Activity State": The second command describes the activity state in which the GazeFollower should be put. The activity state is supposed to be "Active" or "Inactive".
+3. "GazeFollowerFileName": The last command needs to be replaced by the file that contains the gaze information. Here, the file name relative to the config directory with its corresponding file type [.txt, .csv, etc.] need to be provided. 
+
+Example
+```xml
+<Action name="GazeFollower">
+	<UserDefined>
+		<Command>SetGazeFollower Active GazeFollowerFileName.csv</Command>
+	</UserDefined>
+</Action>
+```
+
 \subsection scenario_storyboard_endconditions EndConditions
 
 Here the end conditions for the simulation are defined.

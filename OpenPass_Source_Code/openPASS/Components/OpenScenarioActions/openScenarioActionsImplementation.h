@@ -1,5 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2020 in-tech GmbH
+*               2020 BMW AG
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -19,6 +20,7 @@
 #include "Interfaces/modelInterface.h"
 #include "Common/trajectoryEvent.h"
 #include "Common/laneChangeEvent.h"
+#include "Common/gazeFollowerEvent.h"
 
 /**
 * \brief
@@ -90,4 +92,5 @@ public:
 private:
     std::shared_ptr<TrajectoryEvent> trajectoryEvent;
     std::shared_ptr<LaneChangeEvent> laneChangeEvent;
+    std::shared_ptr<GazeFollowerEvent> gazeFollowerEvent;
 };

@@ -14,23 +14,10 @@
 
 #include "ComponentStateChangeManipulator.h"
 #include "Common/componentStateChangeEvent.h"
+#include "Common/commonTools.h"
+
 #include <QtGlobal>
 #include <array>
-
-std::vector<std::string> TokenizeString(const std::string& str, const char delimiter)
-{
-    std::stringstream stream(str);
-
-    std::string intermediateString;
-    std::vector<std::string> tokens;
-    while (getline(stream, intermediateString, delimiter))
-    {
-        boost::algorithm::trim(intermediateString);
-        tokens.push_back(intermediateString);
-    }
-
-    return tokens;
-}
 
 ComponentStateChangeManipulator::ComponentStateChangeManipulator(WorldInterface *world,
                                 std::shared_ptr<openScenario::UserDefinedCommandAction> action,
@@ -41,26 +28,25 @@ ComponentStateChangeManipulator::ComponentStateChangeManipulator(WorldInterface 
                           eventNetwork,
                           callbacks)
 {
-    auto commandTokens = TokenizeString(action->GetCommand(), ' ');
-    if (commandTokens[0] != "SetComponentState")
+    auto commandTokens = CommonHelper::TokenizeString(action->GetCommand(), ' ');
+    auto commandTokensSize = commandTokens.size();
+
+    if(commandTokensSize < 3)
+    {
+        const std::string msg = COMPONENTNAME + ": ComponentStateChangeManipulator provided invalid number of commands";
+        LOG(CbkLogLevel::Error, msg);
+        throw std::runtime_error(msg);
+    }
+
+    if(commandTokens.at(0) != "SetComponentState")
     {
         const std::string msg = COMPONENTNAME + ": ComponentStateChangeManipulator provided invalid command for initialization";
         LOG(CbkLogLevel::Error, msg);
         throw std::runtime_error(msg);
     }
 
-    try
-    {
-        componentName = commandTokens[1];
-        componentStateName = commandTokens[2];
-    }
-    catch (const std::out_of_range& error)
-    {
-        Q_UNUSED(error);
-        const std::string msg = COMPONENTNAME + ": ComponentStateChangeManipulator provided insufficient command information";
-        LOG(CbkLogLevel::Error, msg);
-        throw std::runtime_error(msg);
-    }
+    componentName = commandTokens.at(1);
+    componentStateName = commandTokens.at(2);
 
     cycleTime = 100;
 }

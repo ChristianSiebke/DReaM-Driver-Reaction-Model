@@ -208,6 +208,7 @@ With corresponding defined indices :
 | SecondaryDriverTasks          | Algorithm             | 19      |
 | Trajectory                    | OpenScenarioActions   | 71      |
 | LaneChange                    | OpenScenarioActions   | 72      |
+| GazeFollower                  | OpenScenarioActions   | 73      |
 | SensorDriver                  | Sensor                | 81      |
 | ParametersVehicle             | Parameters            | 92      |
 

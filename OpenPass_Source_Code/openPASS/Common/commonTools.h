@@ -2,6 +2,7 @@
 * Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2018 AMFD GmbH
 *               2016, 2017, 2018, 2019 ITK Engineering GmbH
+*               2020 BMW AG
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -142,8 +143,8 @@ public:
 
     //! Calculate the absolute angle between two pcm points.
     //!
-    //! @param[in]    firstPoint     firstPoint
-    //! @param[in]    secondPoint    secondPoint
+    //! @param [in]    firstPoint     firstPoint
+    //! @param [in]    secondPoint    secondPoint
     //! @return       distance between two pcm points
     //-----------------------------------------------------------------------------
     static double CalcAngleBetweenPoints(const Common::Vector2d& firstPoint, const Common::Vector2d& secondPoint)
@@ -161,7 +162,7 @@ public:
     //! Transform a pcm point to a vector in the coordination system of a
     //! source point in a direction.
     //!
-    //! @param[in]    point     point
+    //! @param [in]    point     point
     //! @return                 vector
     static Common::Vector2d TransformPointToSourcePointCoord(const Common::Vector2d *point,
                                                              const Common::Vector2d *sourcePoint,
@@ -209,9 +210,9 @@ public:
     //-----------------------------------------------------------------------------
     //! @brief Calculate linear interpolated points with constant spacing.
     //!
-    //! @param[in] start            Start of interval
-    //! @param[in] end              End of interval
-    //! @param[in] totalPoints      Total number of points returned (includes start
+    //! @param [in] start            Start of interval
+    //! @param [in] end              End of interval
+    //! @param [in] totalPoints      Total number of points returned (includes start
     //!                             and end point)
     //!
     //! @return                     Vector of interpolated points.
@@ -240,6 +241,29 @@ public:
     {
         static_assert(std::is_floating_point_v<T>, "kmH must be a floating point data type");
         return kmH/static_cast<T>(3.6);
+    }
+
+    //-----------------------------------------------------------------------------
+    //! @brief Tokenizes string by delimiter.
+    //!
+    //! @param [in] str              String to be tokenized
+    //! @param [in] delimiter        Delimiter by which string gets tokenized
+    //!
+    //! @return                     Vector of tokens
+    //-----------------------------------------------------------------------------
+    static std::vector<std::string> TokenizeString(const std::string& str, const char delimiter)
+    {
+        std::stringstream stream(str);
+
+        std::string intermediateString;
+        std::vector<std::string> tokens;
+        while (getline(stream, intermediateString, delimiter))
+        {
+            boost::algorithm::trim(intermediateString);
+            tokens.push_back(intermediateString);
+        }
+
+        return tokens;
     }
 };
 

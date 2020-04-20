@@ -56,6 +56,6 @@ public:
 private:
     EventContainer GetEvents() override;
 
-    std::string componentName = "";
-    std::string componentStateName = "";
+    std::string componentName {""};
+    std::string componentStateName {""};
 };

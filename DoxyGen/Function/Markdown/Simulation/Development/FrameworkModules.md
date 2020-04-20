@@ -119,6 +119,7 @@ List of Modules which use the EventNetwork:
 [//]: <> "Please refer to each section!"
 * [CollisionManipulator](\ref dev_framework_modules_manipulators_collision)
 * [ComponentStateChangeManipulator](\ref dev_framework_modules_manipulators_componentstatechange)
+* [GazeFollowerManipulator](\ref dev_framework_modules_manipulators_gazefollower)
 
 The class structure of the Manipulators is showed in the following diagram:
 
@@ -132,7 +133,7 @@ The class structure of the Manipulators is showed in the following diagram:
 
 * **Trigger:** This manipulator is always triggered by CollisionDetector.
 
-* ** Event: ** -
+* **Event:** -
 
 * **Configuration:**
 
@@ -148,10 +149,9 @@ The class structure of the Manipulators is showed in the following diagram:
 
 * **Trigger:** This manipulator can be triggered by any detector. This has to be parameterized in scenario configuration (see [Input/Output documentation](\ref io_input_scenario)).
 
-* ** Event: ** Creates and event of type ComponentChangeEvent for the specified component name.
+* **Event:** Creates an event of type ComponentChangeEvent for the specified component name.
 
 * **Configuration:**
-
 ```xml
 <Action name="ExampleComponentStateChangeManipulator">
 	<UserDefined>
@@ -163,6 +163,28 @@ The class structure of the Manipulators is showed in the following diagram:
 |ElementName|Attribute|Type  |Description                                                   |
 |-----------|---------|------|--------------------------------------------------------------|
 |Command    |-        |string|This string must be formatted as "SetComponentState <TargetComponent> <DesiredState>", where <TargetComponent> is the target component name and <DesiredState> is one of "Acting", "Armed", or "Disabled".|
+
+---
+
+\subsection dev_framework_modules_manipulators_gazefollower GazeFollowerManipulator
+* **Description:**
+    This manipulator influences the gaze behaviour of an agent.
+
+* **Trigger:** This manipulator can be triggered by any detector. This has to be parameterized in scenario configuration (see [Input/Output documentation](\ref io_input_scenario)).
+
+* **Event:** Creates an event of type GazeFollowerEvent.
+
+* **Configuration:**
+```xml
+<Action name="ExampleGazeFollowerManipulator">
+	<UserDefined>
+		<Command>SetGazeFollower ActivityState GazeFollowerFileName</Command>
+	</UserDefined>
+</Action>
+```
+|ElementName|Attribute|Type  |Description                                                   |
+|-----------|---------|------|--------------------------------------------------------------|
+|Command    |-        |string|This string must be formatted as "SetGazeFollower" <ActivityState> <GazeFollowerFileName>, where <ActivityState> is either "Active" or "Inactive". <GazeFollowerFileName> is the file name relative to the config directory with its corresponding file type [.txt, .csv, etc.] that contains the gaze information.|
 
 ---
 

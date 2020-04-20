@@ -1,5 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+*               2020 BMW AG
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -23,6 +24,7 @@
 #include "RemoveAgentsManipulator.h"
 #include "NoOperationManipulator.h"
 #include "TrajectoryManipulator.h"
+#include "GazeFollowerManipulator.h"
 
 
 const std::string version = "0.0.1";
@@ -73,6 +75,16 @@ extern "C" MANIPULATOR_SHARED_EXPORT ManipulatorInterface* OpenPASS_CreateInstan
                 {
                     return static_cast<ManipulatorInterface*>(new (std::nothrow) NoOperationManipulator(
                                                                   world,
+                                                                  eventNetwork,
+                                                                  callbacks
+                                                                  ));
+                }
+
+                if (commandType == "SetGazeFollower")
+                {
+                    return static_cast<ManipulatorInterface*>(new (std::nothrow) GazeFollowerManipulator(
+                                                                  world,
+                                                                  userDefinedCommandAction,
                                                                   eventNetwork,
                                                                   callbacks
                                                                   ));
