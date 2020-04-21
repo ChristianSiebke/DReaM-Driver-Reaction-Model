@@ -27,9 +27,11 @@ INCLUDEPATH += $$SUBDIRS \
 
 SOURCES += \
         openScenarioActions.cpp \
-        openScenarioActionsImplementation.cpp
+        openScenarioActionsImplementation.cpp \
+        oscActionsCalculation.cpp
 
 HEADERS += \
         openScenarioActions.h \
         openScenarioActionsGlobal.h \
-        openScenarioActionsImplementation.h
+        openScenarioActionsImplementation.h \
+        oscActionsCalculation.h

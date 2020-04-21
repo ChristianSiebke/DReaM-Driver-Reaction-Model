@@ -435,20 +435,39 @@ Depending on the type of the action a different Manipulator is created, that bec
 
 **Lane Change**
 
-The LaneChangeManipulator writes an event to the EventNetwork which tells the Driver that he should change one or more lanes to the left or right as specified by the <Target> tag.
+The LaneChangeManipulator writes an event to the EventNetwork that is read by the OpenScenarioActions module and converted into a trajectory that performs a lange change.
+The target lane be given either absolute or relative to a specific entity. The trajectory can either have a fixed length (in s) or a fixed time.
+Currently, "sinusoidal" is the only type supported.
 
-Example
+Example with absolute target and fixed length
 ```xml
 <Action name="LaneChange">
-	<Private>
-		<Lateral>
-			<LaneChange>
-				<Target>
-					<Absolute value="-1"/>
-				</Target>
-			</LaneChange>
-		</Lateral>
-	</Private>
+    <Private>
+        <Lateral>
+            <LaneChange>
+                <Dynamics distance="100.0" shape="sinusoidal"/>
+                <Target>
+                    <Absolute value="-1"/>
+                </Target>
+            </LaneChange>
+        </Lateral>
+    </Private>
+</Action>
+```
+
+Example with relative target and fixed time
+```xml
+<Action name="LaneChange">
+    <Private>
+        <Lateral>
+            <LaneChange>
+                <Dynamics time="2.0" shape="sinusoidal"/>
+                <Target>
+                    <Relative object="Ego" value="0"/>
+                </Target>
+            </LaneChange>
+        </Lateral>
+    </Private>
 </Action>
 ```
 

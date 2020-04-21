@@ -9,18 +9,13 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
-/** \addtogroup OpenScenarioActions
-* @{
-* \brief This module
-*
-* @} */
-
 #pragma once
 
 #include "Interfaces/modelInterface.h"
 #include "Common/trajectoryEvent.h"
 #include "Common/laneChangeEvent.h"
 #include "Common/gazeFollowerEvent.h"
+#include "oscActionsCalculation.h"
 
 /**
 * \brief
@@ -90,7 +85,7 @@ public:
     virtual void Trigger(int time);
 
 private:
+    OscActionsCalculation calculation;
     std::shared_ptr<TrajectoryEvent> trajectoryEvent;
-    std::shared_ptr<LaneChangeEvent> laneChangeEvent;
     std::shared_ptr<GazeFollowerEvent> gazeFollowerEvent;
 };

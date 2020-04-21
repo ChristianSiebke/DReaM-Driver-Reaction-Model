@@ -137,14 +137,14 @@ TEST(ManipulatorImporter, SuccessfullyImportsGlobalEntityAddAction)
 
 TEST(ManipulatorImporter, SuccessfullyImportsPrivateLateralLaneChangeAbsoluteAction)
 {
-    const double expectedLaneOffset = -1;
+    const int expectedLaneOffset = -1;
     QDomElement fakeEventElement = documentRootFromString(
                 "<Event name=\"LaneChangeEvent\" priority=\"overwrite\">"
                 "	<Action name=\"LaneChangeAction\">"
                 "		<Private>"
                 "			<Lateral>"
                 "				<LaneChange>"
-                "					<Dynamics shape=\"linear\" />"
+                "					<Dynamics time=\"2.0\" shape=\"sinusoidal\" />"
                 "					<Target>"
                 "						<Absolute value=\"" + std::to_string(expectedLaneOffset) + "\" />"
                 "					</Target>"
@@ -162,22 +162,24 @@ TEST(ManipulatorImporter, SuccessfullyImportsPrivateLateralLaneChangeAbsoluteAct
     std::shared_ptr<openScenario::PrivateLateralLaneChangeAction> castedAction = std::dynamic_pointer_cast<openScenario::PrivateLateralLaneChangeAction>(action);
 
     ASSERT_NE(castedAction, nullptr);
-    EXPECT_EQ(castedAction->GetType(), openScenario::PrivateLateralLaneChangeActionType::Absolute);
-    EXPECT_EQ(castedAction->GetValue(), static_cast<int>(std::rint(expectedLaneOffset)));
-    EXPECT_EQ(castedAction->GetObject(), "");
+    EXPECT_EQ(castedAction->GetLaneChangeParameter().type, openScenario::LaneChangeParameter::Type::Absolute);
+    EXPECT_EQ(castedAction->GetLaneChangeParameter().value, expectedLaneOffset);
+    EXPECT_EQ(castedAction->GetLaneChangeParameter().object, "");
+    EXPECT_EQ(castedAction->GetLaneChangeParameter().dynamicsType, openScenario::LaneChangeParameter::DynamicsType::Time);
+    EXPECT_EQ(castedAction->GetLaneChangeParameter().dynamicsTarget, 2.0);
 }
 
 TEST(ManipulatorImporter, SuccessfullyImportsPrivateLateralLaneChangeRelativeAction)
 {
     const std::string expectedObject{"TestObject"};
-    const double expectedLaneOffset = -1;
+    const int expectedLaneOffset = -1;
     QDomElement fakeEventElement = documentRootFromString(
                 "<Event name=\"LaneChangeEvent\" priority=\"overwrite\">"
                 "	<Action name=\"LaneChangeAction\">"
                 "		<Private>"
                 "			<Lateral>"
                 "				<LaneChange>"
-                "					<Dynamics shape=\"linear\" />"
+                "					<Dynamics distance=\"100.0\" shape=\"sinusoidal\" />"
                 "					<Target>"
                 "						<Relative object=\"" + expectedObject + "\" value=\"" + std::to_string(expectedLaneOffset) + "\" />"
                 "					</Target>"
@@ -195,9 +197,11 @@ TEST(ManipulatorImporter, SuccessfullyImportsPrivateLateralLaneChangeRelativeAct
     std::shared_ptr<openScenario::PrivateLateralLaneChangeAction> castedAction = std::dynamic_pointer_cast<openScenario::PrivateLateralLaneChangeAction>(action);
 
     ASSERT_NE(castedAction, nullptr);
-    EXPECT_EQ(castedAction->GetType(), openScenario::PrivateLateralLaneChangeActionType::Relative);
-    EXPECT_EQ(castedAction->GetValue(), static_cast<int>(std::rint(expectedLaneOffset)));
-    EXPECT_EQ(castedAction->GetObject(), expectedObject);
+    EXPECT_EQ(castedAction->GetLaneChangeParameter().type, openScenario::LaneChangeParameter::Type::Relative);
+    EXPECT_EQ(castedAction->GetLaneChangeParameter().value, expectedLaneOffset);
+    EXPECT_EQ(castedAction->GetLaneChangeParameter().object, expectedObject);
+    EXPECT_EQ(castedAction->GetLaneChangeParameter().dynamicsType, openScenario::LaneChangeParameter::DynamicsType::Distance);
+    EXPECT_EQ(castedAction->GetLaneChangeParameter().dynamicsTarget, 100.0);
 }
 
 TEST(ManipulatorImporter, SuccessfullyImportsPrivateFollowTrajectoryAction)

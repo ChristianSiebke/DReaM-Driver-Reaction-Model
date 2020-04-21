@@ -76,6 +76,22 @@ std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorF
         QDomElement lateralChildElement;
         if (SimulationCommon::GetFirstChildElement(privateChildElement, TAG::laneChange, lateralChildElement))
         {
+            QDomElement dynamicsElement;
+            ThrowIfFalse(SimulationCommon::GetFirstChildElement(lateralChildElement, TAG::dynamics, dynamicsElement),
+                        lateralChildElement, "Tag " + std::string(TAG::dynamics) + " is missing.");
+
+            double dynamicsTarget;
+            bool timeDefined = SimulationCommon::ParseAttributeDouble(dynamicsElement, ATTRIBUTE::time, dynamicsTarget);
+            bool distanceDefined = SimulationCommon::ParseAttributeDouble(dynamicsElement, ATTRIBUTE::distance, dynamicsTarget);
+            ThrowIfFalse(timeDefined || distanceDefined, dynamicsElement, "Either attribute time or distance is required for LaneChange action.");
+            ThrowIfFalse(!timeDefined || !distanceDefined, dynamicsElement, "Only one of attribute time or distance may be defined for LaneChange action.");
+            openScenario::LaneChangeParameter::DynamicsType dynamicsType{timeDefined ? openScenario::LaneChangeParameter::DynamicsType::Time : openScenario::LaneChangeParameter::DynamicsType::Distance};
+
+            std::string shape;
+            ThrowIfFalse(SimulationCommon::ParseAttributeString(dynamicsElement, ATTRIBUTE::shape, shape),
+                        dynamicsElement, "Tag " + std::string(ATTRIBUTE::shape) + " is missing.");
+            ThrowIfFalse(shape == "sinusoidal", dynamicsElement, "Currently only shape sinusoidal supported for LaneChangeAction");
+
             QDomElement targetElement;
             ThrowIfFalse(SimulationCommon::GetFirstChildElement(lateralChildElement, TAG::target, targetElement),
                         lateralChildElement, "Tag " + std::string(TAG::target) + " is missing.");
@@ -84,30 +100,35 @@ std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorF
             if (SimulationCommon::GetFirstChildElement(targetElement, TAG::relative, typeElement))
             {
                 std::string object;
-                double value{};
+                int value{};
 
                 ThrowIfFalse(SimulationCommon::ParseAttributeString(typeElement, ATTRIBUTE::object, object),
                              typeElement, "Attribute " + std::string(ATTRIBUTE::object) + " is missing.");
-                ThrowIfFalse(SimulationCommon::ParseAttributeDouble(typeElement, ATTRIBUTE::value, value),
+                ThrowIfFalse(SimulationCommon::ParseAttributeInt(typeElement, ATTRIBUTE::value, value),
                              typeElement, "Atrribute " + std::string(ATTRIBUTE::value) + " is missing.");
 
                 return std::shared_ptr<ScenarioActionInterface>(std::make_shared<openScenario::PrivateLateralLaneChangeAction>(eventName,
-                                                                                                                               openScenario::PrivateLateralLaneChangeActionType::Relative,
-                                                                                                                               static_cast<int>(std::rint(value)),
-                                                                                                                               object));
+                                                                                                                               openScenario::LaneChangeParameter{openScenario::LaneChangeParameter::Type::Relative,
+                                                                                                                                                                 value,
+                                                                                                                                                                 object,
+                                                                                                                                                                 dynamicsTarget,
+                                                                                                                                                                 dynamicsType}));
             }
             else
             {
                 ThrowIfFalse(SimulationCommon::GetFirstChildElement(targetElement, TAG::absolute, typeElement),
                              targetElement, "Tag " + std::string(TAG::absolute) + " is missing.");
 
-                double value;
-                ThrowIfFalse(SimulationCommon::ParseAttributeDouble(typeElement, ATTRIBUTE::value, value),
+                int value;
+                ThrowIfFalse(SimulationCommon::ParseAttributeInt(typeElement, ATTRIBUTE::value, value),
                              typeElement, "Attribute " + std::string(ATTRIBUTE::value) + " is missing.");
 
                 return std::shared_ptr<ScenarioActionInterface>(std::make_shared<openScenario::PrivateLateralLaneChangeAction>(eventName,
-                                                                                                                               openScenario::PrivateLateralLaneChangeActionType::Absolute,
-                                                                                                                               static_cast<int>(std::rint(value))));
+                                                                                                                               openScenario::LaneChangeParameter{openScenario::LaneChangeParameter::Type::Absolute,
+                                                                                                                                                                 value,
+                                                                                                                                                                 "",
+                                                                                                                                                                 dynamicsTarget,
+                                                                                                                                                                 dynamicsType}));
             }
         }
 

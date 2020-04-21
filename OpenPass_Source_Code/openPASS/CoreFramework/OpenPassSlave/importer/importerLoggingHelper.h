@@ -57,6 +57,7 @@ namespace openpass::importer::xml::manipulatorImporter::tag
     constexpr char catalogReference[] {"CatalogReference"};
     constexpr char command[] {"Command"};
     constexpr char Delete[] {"Delete"};
+    constexpr char dynamics[] {"Dynamics"};
     constexpr char entity[] {"Entity"};
     constexpr char followTrajectory[] {"FollowTrajectory"};
     constexpr char global[] {"Global"};
@@ -76,11 +77,14 @@ namespace openpass::importer::xml::manipulatorImporter::tag
 namespace openpass::importer::xml::manipulatorImporter::attribute
 {
     constexpr char catalogName[] {"catalogName"};
+    constexpr char distance[] {"distance"};
     constexpr char entryName[] {"entryName"};
     constexpr char h[] {"h"};
     constexpr char name[] {"name"};
     constexpr char object[] {"object"};
     constexpr char reference[] {"reference"};
+    constexpr char shape[] {"shape"};
+    constexpr char time[] {"time"};
     constexpr char value[] {"value"};
     constexpr char x[] {"x"};
     constexpr char y[] {"y"};

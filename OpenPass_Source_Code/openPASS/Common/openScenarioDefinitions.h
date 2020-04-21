@@ -187,36 +187,39 @@ public:
     PrivateAction(const std::string& eventName):
         Action(eventName)
     {}
-    PrivateAction() = delete;
-    PrivateAction(const PrivateAction&) = delete;
-    PrivateAction(PrivateAction&&) = delete;
-    PrivateAction& operator=(const PrivateAction&) = delete;
-    PrivateAction& operator=(PrivateAction&&) = delete;
 };
 
-enum PrivateLateralLaneChangeActionType
+
+//! Content of a LaneChange action
+struct LaneChangeParameter
 {
-    Absolute,
-    Relative
+    enum class Type
+    {
+        Absolute,
+        Relative
+    };
+
+    enum class DynamicsType
+    {
+        Time,
+        Distance
+    };
+    const Type type; //! Whether the target is absolute or relative
+    const int value;    //! Value of the target element
+    const std::string object; //! Name of the reference object if relative
+    const double dynamicsTarget; //! Time or distance defined by Dynamics element
+    const DynamicsType dynamicsType; //! Whether time or distance was defined by Dynamics element
 };
 
 class PrivateLateralLaneChangeAction : public PrivateAction
 {
 public:
+
     PrivateLateralLaneChangeAction(const std::string& eventName,
-                                   PrivateLateralLaneChangeActionType type,
-                                   int value,
-                                   const std::string& object = ""):
+                                   LaneChangeParameter laneChangeParameter):
         PrivateAction(eventName),
-        type{type},
-        value{value},
-        object{object}
+        laneChangeParameter{laneChangeParameter}
     {}
-    PrivateLateralLaneChangeAction() = delete;
-    PrivateLateralLaneChangeAction(const PrivateLateralLaneChangeAction&) = delete;
-    PrivateLateralLaneChangeAction(PrivateLateralLaneChangeAction&&) = delete;
-    PrivateLateralLaneChangeAction& operator=(const PrivateLateralLaneChangeAction&) = delete;
-    PrivateLateralLaneChangeAction& operator=(PrivateLateralLaneChangeAction&&) = delete;
 
     /*!
      * ------------------------------------------------------------------------
@@ -227,44 +230,13 @@ public:
      *          PrivateLateralLaneChangeActionType::Relative.
      * ------------------------------------------------------------------------
      */
-    PrivateLateralLaneChangeActionType GetType() const
+    LaneChangeParameter GetLaneChangeParameter() const
     {
-        return type;
-    }
-
-    /*!
-     * ------------------------------------------------------------------------
-     * \brief GetValue returns the lane offset value specified as a target by
-     *        this Action.
-     *
-     * \returns the lane offset value specified as a target by this Action.
-     * ------------------------------------------------------------------------
-     */
-    int GetValue() const
-    {
-        return value;
-    }
-
-    /*!
-     * ------------------------------------------------------------------------
-     * \brief GetObject returns the name of the entity from which relative
-     *        offsets are specified.
-     *
-     * \returns the name of the entity from which relative offsets are
-     *          specified. Returns "" if no such entity was specified.
-     * ------------------------------------------------------------------------
-     */
-    const std::string& GetObject() const
-    {
-        return object;
+        return laneChangeParameter;
     }
 
 private:
-    const PrivateLateralLaneChangeActionType type;
-    const int value;
-    const std::string object; // optional
-    // we'll ignore the LaneChange element's "Dynamics" tag for now
-    // we'll ignore the LaneChange element's "targetLaneOffset" attribute for now
+    LaneChangeParameter laneChangeParameter;
 };
 
 struct TrajectoryPoint

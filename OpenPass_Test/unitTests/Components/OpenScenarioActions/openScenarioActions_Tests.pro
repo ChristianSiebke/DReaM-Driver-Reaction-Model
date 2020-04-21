@@ -21,11 +21,12 @@ INCLUDEPATH += \
 
 HEADERS += \
     $$OPEN_SRC/Common/laneChangeEvent.h \
-    $$OPEN_SRC/Common/laneChangeSignal.h \
     $$OPEN_SRC/Common/trajectoryEvent.h \
     $$OPEN_SRC/Common/trajectorySignal.h \
-    $$UNIT_UNDER_TEST/openScenarioActionsImplementation.h
+    $$UNIT_UNDER_TEST/openScenarioActionsImplementation.h \
+    $$UNIT_UNDER_TEST/oscActionsCalculation.h
 
 SOURCES += \
     $$UNIT_UNDER_TEST/openScenarioActionsImplementation.cpp \
+    $$UNIT_UNDER_TEST/oscActionsCalculation.cpp \
     openScenarioActions_Tests.cpp
