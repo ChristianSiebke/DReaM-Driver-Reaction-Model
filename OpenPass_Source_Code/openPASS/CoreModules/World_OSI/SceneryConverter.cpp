@@ -658,11 +658,15 @@ bool SceneryConverter::ConnectRoads()
     {
         RoadInterface* road = item.second;
 
-        ConnectRoadExternalWithElementTypeRoad(road);
+        if (!ConnectRoadExternalWithElementTypeRoad(road))
+        {
+            LOG(CbkLogLevel::Error, "could not connect external road " + item.second->GetId());
+            return false;
+        }
 
         if (!ConnectRoadInternal(road))
         {
-            LOG(CbkLogLevel::Error, "could not connect road " + item.second->GetId());
+            LOG(CbkLogLevel::Error, "could not connect internal road " + item.second->GetId());
             return false;
         }
     }
