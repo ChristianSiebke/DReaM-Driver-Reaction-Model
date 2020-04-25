@@ -23,10 +23,12 @@
 #define EXTERNLIBS GetEnv("EXTERNLIBS")
 
 #define DIST OP_SOURCE+"\DIST"
-#define BIN  OP_HOME+"\bin"
+#define BIN  OP_HOME+"\bin"  
 #define LIB  OP_HOME+"\lib"
-#define DBIN "{app}\bin"
+#define GUI  OP_HOME+"\gui"
+#define DBIN "{app}\bin" 
 #define DLIB "{app}\lib"
+#define DGUI "{app}\gui"
 #define DDOC "{app}\Documentation"
 #define ICONFILE GetEnv("OPENPASS_HOME")+"\..\..\OpenPass_Source_Code\openPASS_GUI\openPASS\openPASS.ico" 
 #define DICONFILE "{app}\bin\openPASS.ico"
@@ -77,11 +79,12 @@ Source: {#OP_HOME}\configs\*; DestDir: {app}\configs; Flags: recursesubdirs; Com
 Source: {#OP_HOME}\components\*; DestDir: {app}\components; Flags: recursesubdirs; Components: core 
 ;Source: {#OP_HOME}\results; DestDir: {app}\results; Flags: recursesubdirs; Components: core 
 
-Source: {#OP_HOME}\*.exe; DestDir: {app}; Components: core
+Source: {#BIN}\*.exe; DestDir: {#DBIN}; Flags: recursesubdirs; Components: core
 Source: {#BIN}\*.lib; DestDir: {#DBIN}; Flags: recursesubdirs; Components: core
 Source: {#BIN}\*.dll; DestDir: {#DBIN}; Flags: recursesubdirs; Components: core
-Source: {#LIB}\*.dll; DestDir: {#DLIB}; Flags: recursesubdirs; Components: core
+Source: {#LIB}\*.dll; DestDir: {#DLIB}; Flags: recursesubdirs; Components: core    
 Source: {#LIB}\*.lib; DestDir: {#DLIB}; Flags: recursesubdirs; Components: core
+Source: {#GUI}\*.dll; DestDir: {#DGUI}; Flags: recursesubdirs; Components: core
 
 Source: {#EXTERNLIBS}\runtime\bin\VC_redist.x64.exe; DestDir: {#DBIN}; Flags: recursesubdirs; Components: core
 
