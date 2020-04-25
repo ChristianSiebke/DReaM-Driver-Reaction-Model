@@ -27,6 +27,12 @@ int main(int argc, char *argv[])
     application.setApplicationName(QStringLiteral(APPLICATION_NAME));
     application.setApplicationVersion(QStringLiteral(APPLICATION_VERSION));
     application.addLibraryPath(application.applicationDirPath() + "/../" + SUBDIR_LIB_GUI);
+    // make sure dependencies of plugins are found, otherwise plugins such as the AgentConfiguration which depend on the Project plugin are not found
+#ifdef WIN32
+    qputenv("PATH",(qgetenv("PATH") + ";" + application.applicationDirPath() + "/../" + SUBDIR_LIB_GUI).toLatin1());
+#else
+    qputenv("LD_LIBRARY_PATH", (qgetenv("LD_LIBRARY_PATH") + ";" + application.applicationDirPath() + "/../" + SUBDIR_LIB_GUI).toLatin1());
+#endif
 
     // Initialize models
     ServiceManagerModel services;
