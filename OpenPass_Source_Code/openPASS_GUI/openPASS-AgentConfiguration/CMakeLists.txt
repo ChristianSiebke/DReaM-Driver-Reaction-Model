@@ -161,7 +161,6 @@ add_openpass_target(
     Views/WidgetView.cpp
     ../Global/DelegateComboBoxView.cpp
     ../Global/DelegateDoubleView.cpp
-    ../Global/DelegateTimeView.cpp
   LIBRARIES
       openPASSInterfaces
 	  Project

@@ -33,8 +33,14 @@ include_directories(openPASS/Interfaces
 					Global
 					../OpenPASS/Common
 					./)
+					
 
-add_definitions(-DAPPLICATION_NAME=\"openPASS\" -DAPPLICATION_VERSION=\"0.9\" )
+add_compile_definitions(APPLICATION_NAME="${CPACK_PACKAGE_NAME}")
+if("${CPACK_PACKAGE_VERSION_PATCH}" STREQUAL "0")
+add_compile_definitions(APPLICATION_VERSION="${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}" )
+else()
+add_compile_definitions(APPLICATION_VERSION="${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}" )
+endif()
 ADD_SUBDIRECTORY(openPASS)
 ADD_SUBDIRECTORY(openPASS-AgentConfiguration)
 ADD_SUBDIRECTORY(openPASS-Component)
