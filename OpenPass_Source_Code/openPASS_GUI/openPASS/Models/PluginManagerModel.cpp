@@ -15,6 +15,7 @@
 #include <QLibrary>
 #include <QPluginLoader>
 #include <limits>
+#include <iostream>
 
 PluginManagerModel::PluginManagerModel(ServiceManagerInterface * const services,
                                        QObject * const parent)
@@ -69,6 +70,7 @@ bool PluginManagerModel::loadDirectory(QDir const & directory)
             }
             else
             {
+                std::cerr << "Failed to load plugin \"" << filepath.toLatin1().toStdString() << "\" error:" << loader->errorString().toLatin1().toStdString() << std::endl;
                 // Destroy plugin
                 delete loader;
             }
