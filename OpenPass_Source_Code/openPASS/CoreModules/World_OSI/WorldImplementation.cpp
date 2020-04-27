@@ -15,6 +15,8 @@
 #include "osi3/osi_sensorview.pb.h"
 #include "osi3/osi_sensorviewconfiguration.pb.h"
 
+#include "CoreFramework/CoreShare/log.h"
+
 namespace {
     template <typename T>
     static std::vector<const T*> get_transformed(const std::vector<const OWL::Interfaces::WorldObject*>& worldObjects)
@@ -151,15 +153,13 @@ bool WorldImplementation::CreateScenery(SceneryInterface* scenery)
                                worldData,
                                localizer,
                                callbacks);
-    if (converter.ConvertRoads())
-    {
-        localizer.Init();
-        converter.ConvertObjects();
-        InitTrafficObjects();
-        return true;
-    }
 
-    return false;
+    ThrowIfFalse(converter.ConvertRoads(), "Unable to finish convertion process.");
+    localizer.Init();
+    converter.ConvertObjects();
+    InitTrafficObjects();
+
+    return true;
 }
 
 AgentInterface* WorldImplementation::CreateAgentAdapterForAgent()

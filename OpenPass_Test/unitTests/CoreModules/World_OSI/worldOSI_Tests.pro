@@ -18,9 +18,14 @@ win32:QMAKE_CXXFLAGS += -Wa,-mbig-obj
 UNIT_UNDER_TEST = $$OPEN_SRC/CoreModules/World_OSI
 
 # commons
-SRC_COMMONS = $$OPEN_SRC/Common/Vector2D.cpp
-INC_COMMONS = $$OPEN_SRC/Common/Vector2D.h
-INC_COMMONS = $$OPEN_SRC/Interfaces/worldinterface.h
+SRC_COMMONS = \
+            $$OPEN_SRC/Common/Vector2D.cpp \
+            $$OPEN_SRC/CoreFramework/CoreShare/log.cpp
+
+INC_COMMONS = \
+            $$OPEN_SRC/Common/Vector2D.h \
+            $$OPEN_SRC/Interfaces/worldinterface.h \
+            $$OPEN_SRC/CoreFramework/CoreShare/log.h
 
 # owl
 SRC_OWL =   \
@@ -97,7 +102,9 @@ INCLUDEPATH += \
             $$UNIT_UNDER_TEST/OWL \
             $$UNIT_UNDER_TEST/OWL/fakes \
             $$UNIT_UNDER_TEST/Localization \
+            $$OPEN_SRC \
             $$OPEN_SRC/Interfaces
+
 
 SOURCES += \
             $$SRC_COMMONS \
