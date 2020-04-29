@@ -21,7 +21,7 @@
 using Importer::ManipulatorImporter;
 using ::testing::ElementsAre;
 
-TEST(ManipulatorImporter, SuccessfullyImportsUserDefinedCommandAction)
+TEST(ManipulatorImporter, SuccessfullyImportsUserDefinedCommandAction_ComponentStateChange)
 {
     const std::string expectedCommand = "SetComponentState DynamicsTrajectoryFollower Acting";
     QDomElement fakeEventElement = documentRootFromString(
@@ -38,6 +38,34 @@ TEST(ManipulatorImporter, SuccessfullyImportsUserDefinedCommandAction)
 
     const std::vector<std::string> eventDetectorNames{"TestEventDetectorA, TestEventDetectorB"};
     const std::string eventName{"ActivateTFEvent"};
+
+    std::shared_ptr<ScenarioActionInterface> action = ManipulatorImporter::ImportManipulator(fakeEventElement,
+                                                                                             eventName,
+                                                                                             testing::DontCare<std::string>());
+
+    std::shared_ptr<openScenario::UserDefinedCommandAction> castedAction = std::dynamic_pointer_cast<openScenario::UserDefinedCommandAction>(action);
+
+    ASSERT_NE(castedAction, nullptr);
+    EXPECT_EQ(castedAction->GetCommand(), expectedCommand);
+    EXPECT_EQ(castedAction->GetEventName(), eventName);
+}
+
+TEST(ManipulatorImporter, SuccessfullyImportsUserDefinedCommandAction_GazeFollower)
+{
+    const std::string expectedCommand = "SetGazeFollower Active GazeFollowerFileName.csv";
+    QDomElement fakeEventElement = documentRootFromString(
+                "<Event name=\"ActiveGFEvent\" priority=\"overwrite\">"
+                "	<Action name=\"GazeFollower\">"
+                "		<UserDefined>"
+                "			<Command>"
+                "				" + expectedCommand + ""
+                "			</Command>"
+                "		</UserDefined>"
+                "	</Action>"
+                "</Event>"
+    );
+
+    const std::string eventName{"ActiveGFEvent"};
 
     std::shared_ptr<ScenarioActionInterface> action = ManipulatorImporter::ImportManipulator(fakeEventElement,
                                                                                              eventName,
