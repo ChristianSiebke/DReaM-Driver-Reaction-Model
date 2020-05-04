@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -80,13 +80,17 @@ bool ParseType(const std::string& element, RoadObjectType& objectType);
  *  Depending on the datatype of the result parameter, different parsing techniques are applied.
  *
  *  \param[in]  element         XML element holding the attribute
- *  \param[in]  attributeName   Name of the atttribute to parse the value from
+ *  \param[in]  attributeName   Name of the attribute to parse the value from
  *  \param[out] result          Container holding the result
  *
  *  \return     True on successful parsing, false otherwise.
  */
 template <typename T>
 bool ParseAttribute(QDomElement element, const std::string &attributeName, T& result);
+
+
+//! Returns true if the given element has an attribute of the given name
+bool HasAttribute(QDomElement element, const std::string &attributeName);
 
 template <typename T>
 bool ParseAttributeType(QDomElement element, const std::string &attributeName, T &result)

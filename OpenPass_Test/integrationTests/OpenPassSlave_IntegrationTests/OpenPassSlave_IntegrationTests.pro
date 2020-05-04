@@ -35,12 +35,14 @@ INCLUDEPATH += . \
 SRC_SCENARIO =  $$OPENPASS_SLAVE/importer/eventDetectorImporter.cpp \
                 $$OPENPASS_SLAVE/importer/manipulatorImporter.cpp \
                 $$OPENPASS_SLAVE/importer/scenario.cpp \
-                $$OPENPASS_SLAVE/importer/scenarioImporter.cpp
+                $$OPENPASS_SLAVE/importer/scenarioImporter.cpp \
+                $$OPENPASS_SLAVE/importer/oscImporterCommon.cpp
 
 INC_SCENARIO =  $$OPENPASS_SLAVE/importer/scenario.h \
                 $$OPENPASS_SLAVE/importer/scenarioImporter.h \
                 $$OPENPASS_SLAVE/importer/manipulatorImporter.h \
-                $$OPEN_SRC/Common/openScenarioDefinitions.h
+                $$OPEN_SRC/Common/openScenarioDefinitions.h \
+                $$OPENPASS_SLAVE/importer/oscImporterCommon.h
 
 SRC_SCENERY =   $$OPENPASS_SLAVE/importer/scenery.cpp \
                 $$OPENPASS_SLAVE/importer/sceneryImporter.cpp \

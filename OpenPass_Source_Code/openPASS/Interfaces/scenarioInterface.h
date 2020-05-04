@@ -23,7 +23,6 @@
 #include "Common/worldDefinitions.h"
 #include "Common/eventDetectorDefinitions.h"
 #include "Interfaces/scenarioActionInterface.h"
-#include "CoreFramework/CoreShare/parameters.h"
 
 struct SpawnInfo
 {
@@ -63,9 +62,10 @@ struct CatalogReference
  */
 struct ScenarioEntity
 {
-    std::string name;                   //!< Name of the scenario object
-    CatalogReference catalogReference;  //!< Catalog reference information
-    SpawnInfo spawnInfo;                //!< Initial spawn parameter information
+    std::string name;                               //! Name of the scenario object
+    CatalogReference catalogReference;              //! Catalog reference information
+    SpawnInfo spawnInfo;                            //! Initial spawn parameter information
+    openScenario::Parameters assignedParameters;    //! Parameters assigned in the Catalog reference
 };
 
 //-----------------------------------------------------------------------------

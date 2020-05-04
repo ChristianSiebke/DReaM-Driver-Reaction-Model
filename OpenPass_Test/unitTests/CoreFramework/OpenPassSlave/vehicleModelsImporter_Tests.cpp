@@ -8,6 +8,7 @@
 
 using ::testing::DoubleEq;
 using ::testing::ElementsAre;
+using ::testing::SizeIs;
 using ::testing::Eq;
 
 using namespace Importer;
@@ -45,6 +46,43 @@ const std::string validVehicleString{
     "</Vehicle>"
 };
 
+const std::string parametrizedVehicleString{
+    "<Vehicle name=\"validCar\" category=\"car\">"
+        "<ParameterDeclaration>"
+            "<Parameter name=\"AirDragCoefficient\" type=\"double\" value=\"1.0\"/>"
+            "<Parameter name=\"AxleRatio\" type=\"double\" value=\"2.0\"/>"
+            "<Parameter name=\"DecelerationFromPowertrainDrag\" type=\"double\" value=\"3.0\"/>"
+            "<Parameter name=\"FrictionCoefficient\" type=\"double\" value=\"4.0\"/>"
+            "<Parameter name=\"FrontSurface\" type=\"double\" value=\"5.0\"/>"
+            "<Parameter name=\"GearRatio1\" type=\"double\" value=\"6.0\"/>"
+            "<Parameter name=\"GearRatio2\" type=\"double\" value=\"6.1\"/>"
+            "<Parameter name=\"GearRatio3\" type=\"double\" value=\"6.2\"/>"
+            "<Parameter name=\"MinimumEngineTorque\" type=\"double\" value=\"7.0\"/>"
+            "<Parameter name=\"MaximumEngineTorque\" type=\"double\" value=\"8.0\"/>"
+            "<Parameter name=\"MinimumEngineSpeed\" type=\"double\" value=\"9.0\"/>"
+            "<Parameter name=\"MaximumEngineSpeed\" type=\"double\" value=\"10.0\"/>"
+            "<Parameter name=\"MomentInertiaRoll\" type=\"double\" value=\"11.0\"/>"
+            "<Parameter name=\"MomentInertiaPitch\" type=\"double\" value=\"12.0\"/>"
+            "<Parameter name=\"MomentInertiaYaw\" type=\"double\" value=\"13.0\"/>"
+            "<Parameter name=\"NumberOfGears\" type=\"integer\" value=\"3\"/>"
+            "<Parameter name=\"SteeringRatio\" type=\"double\" value=\"15.0\"/>"
+            "<Parameter name=\"CustomX\" type=\"double\" value=\"1.5\"/>"
+            "<Parameter name=\"CustomLength\" type=\"double\" value=\"3.0\"/>"
+            "<Parameter name=\"CustomSpeed\" type=\"double\" value=\"30.0\"/>"
+            "<Parameter name=\"CustomFrontTrackWidth\" type=\"double\" value=\"1.9\"/>"
+        "</ParameterDeclaration>"
+        "<BoundingBox>"
+            "<Center x=\"$CustomX\" y=\"1.7\" z=\"1.8\"/>"
+            "<Dimension width=\"1.9\" length=\"$CustomLength\" height=\"2.1\"/>"
+        "</BoundingBox>"
+        "<Performance maxSpeed=\"$CustomSpeed\" maxDeceleration=\"23.0\" mass=\"24.0\"/>"
+        "<Axles>"
+            "<Front maxSteering=\"1.1\" wheelDiameter=\"26.0\" trackWidth=\"$CustomFrontTrackWidth\" positionX=\"28.0\" positionZ=\"29.0\"/>"
+            "<Rear maxSteering=\"0.0\" wheelDiameter=\"31.0\" trackWidth=\"32.0\" positionX=\"0.0\" positionZ=\"34.0\"/>"
+        "</Axles>"
+    "</Vehicle>"
+};
+
 const std::string validPedestrianString{
     "<Pedestrian name=\"pedestrian_name\" model=\"pedestrian_model\" category=\"pedestrian\" mass=\"7.0\">"
         "<ParameterDeclaration/>"
@@ -67,6 +105,8 @@ const std::string unknownVehicleTypeString{
     "</NotAWellKnownType>"
 };
 
+const openScenario::Parameters EMPTY_PARAMETERS{};
+
 TEST(VehicleModelsImporter, GivenValidVehicle_ImportsCorrectGeometry)
 {
     QDomElement fakeVehicleRoot = documentRootFromString(validVehicleString);
@@ -75,7 +115,7 @@ TEST(VehicleModelsImporter, GivenValidVehicle_ImportsCorrectGeometry)
     VehicleModelParameters vehicleModelParameters;
 
     ASSERT_NO_THROW(VehicleModelsImporter::ImportVehicleModel(fakeVehicleRoot, vehicleModelMap));
-    ASSERT_NO_THROW(vehicleModelParameters = vehicleModelMap.at("validCar"));
+    ASSERT_NO_THROW(vehicleModelParameters = vehicleModelMap.at("validCar").Get(EMPTY_PARAMETERS));
 
     EXPECT_THAT(vehicleModelParameters.length, DoubleEq(2.0));
     EXPECT_THAT(vehicleModelParameters.width, DoubleEq(1.9));
@@ -96,7 +136,7 @@ TEST(VehicleModelsImporter, GivenValidVehicle_ImportsCorrectEngineParameters)
     VehicleModelParameters vehicleModelParameters;
 
     ASSERT_NO_THROW(VehicleModelsImporter::ImportVehicleModel(fakeVehicleRoot, vehicleModelMap));
-    ASSERT_NO_THROW(vehicleModelParameters = vehicleModelMap.at("validCar"));
+    ASSERT_NO_THROW(vehicleModelParameters = vehicleModelMap.at("validCar").Get(EMPTY_PARAMETERS));
 
     EXPECT_THAT(vehicleModelParameters.decelerationFromPowertrainDrag, DoubleEq(3.0));
     EXPECT_THAT(vehicleModelParameters.minimumEngineTorque, DoubleEq(7.0));
@@ -113,7 +153,7 @@ TEST(VehicleModelsImporter, GivenValidGeometry_ImportsCorrectDynamics)
     VehicleModelParameters vehicleModelParameters;
 
     ASSERT_NO_THROW(VehicleModelsImporter::ImportVehicleModel(fakeVehicleRoot, vehicleModelMap));
-    ASSERT_NO_THROW(vehicleModelParameters = vehicleModelMap.at("validCar"));
+    ASSERT_NO_THROW(vehicleModelParameters = vehicleModelMap.at("validCar").Get(EMPTY_PARAMETERS));
 
     EXPECT_THAT(vehicleModelParameters.steeringRatio, DoubleEq(15.0));
     EXPECT_THAT(vehicleModelParameters.axleRatio, DoubleEq(2.0));
@@ -137,10 +177,28 @@ TEST(VehicleModelsImporter, GivenValidVehicle_ImportsCorrectGearing)
     VehicleModelParameters vehicleModelParameters;
 
     ASSERT_NO_THROW(VehicleModelsImporter::ImportVehicleModel(fakeVehicleRoot, vehicleModelMap));
-    ASSERT_NO_THROW(vehicleModelParameters = vehicleModelMap.at("validCar"));
+    ASSERT_NO_THROW(vehicleModelParameters = vehicleModelMap.at("validCar").Get(EMPTY_PARAMETERS));
 
     EXPECT_THAT(vehicleModelParameters.numberOfGears, Eq(3));
     EXPECT_THAT(vehicleModelParameters.gearRatios, ElementsAre(0.0, 6.0, 6.1, 6.2));
+}
+
+TEST(VehicleModelsImporter, GivenParametrizedVehicle_ImportsCorrectParameters)
+{
+    QDomElement fakeVehicleRoot = documentRootFromString(parametrizedVehicleString);
+
+    VehicleModelMap vehicleModelMap;
+    ParametrizedVehicleModelParameters vehicleModelParameters;
+
+    ASSERT_NO_THROW(VehicleModelsImporter::ImportVehicleModel(fakeVehicleRoot, vehicleModelMap));
+    ASSERT_NO_THROW(vehicleModelParameters = vehicleModelMap.at("validCar"));
+
+    EXPECT_THAT(vehicleModelParameters.length.name, Eq("CustomLength"));
+    EXPECT_THAT(vehicleModelParameters.length.defaultValue, DoubleEq(3.0));
+    EXPECT_THAT(vehicleModelParameters.maxVelocity.name, Eq("CustomSpeed"));
+    EXPECT_THAT(vehicleModelParameters.maxVelocity.defaultValue, DoubleEq(30.0));
+    EXPECT_THAT(vehicleModelParameters.frontAxle.trackWidth.name, Eq("CustomFrontTrackWidth"));
+    EXPECT_THAT(vehicleModelParameters.frontAxle.trackWidth.defaultValue, DoubleEq(1.9));
 }
 
 TEST(VehicleModelsImporter, GivenValidVehicle_SetsCorrectType)
@@ -148,7 +206,7 @@ TEST(VehicleModelsImporter, GivenValidVehicle_SetsCorrectType)
     QDomElement fakeVehicleRoot = documentRootFromString(validVehicleString);
 
     VehicleModelMap vehicleModelMap;
-    VehicleModelParameters vehicleModelParameters;
+    ParametrizedVehicleModelParameters vehicleModelParameters;
 
     ASSERT_NO_THROW(VehicleModelsImporter::ImportVehicleModel(fakeVehicleRoot, vehicleModelMap));
     ASSERT_NO_THROW(vehicleModelParameters = vehicleModelMap.at("validCar"));
@@ -161,7 +219,6 @@ TEST(VehicleModelsImporter, GivenUnknwonVehicleType_DoesNotImport)
     QDomElement fakeVehicleRoot = documentRootFromString(unknownVehicleTypeString);
 
     VehicleModelMap vehicleModelMap;
-    VehicleModelParameters vehicleModelParameters;
 
     ASSERT_THROW(VehicleModelsImporter::ImportVehicleModel(fakeVehicleRoot, vehicleModelMap), std::out_of_range);
 }
@@ -174,7 +231,7 @@ TEST(VehicleModelsImporter, GivenValidPedestrian_ImportsCorrectValues)
     VehicleModelParameters vehicleModelParameters;
 
     ASSERT_NO_THROW(VehicleModelsImporter::ImportPedestrianModel(fakePedestrianRoot, vehicleModelMap));
-    ASSERT_NO_THROW(vehicleModelParameters = vehicleModelMap.at("pedestrian_name"));
+    ASSERT_NO_THROW(vehicleModelParameters = vehicleModelMap.at("pedestrian_name").Get(EMPTY_PARAMETERS));
 
     // workaround for ground truth not being able to handle pedestrians
     //EXPECT_THAT(vehicleModelParameters.vehicleType, Eq(AgentVehicleType::Pedestrian));

@@ -23,7 +23,7 @@ public:
     ~VehicleModels();
 
     VehicleModelMap& GetVehicleModelMap();
-    VehicleModelParameters GetVehicleModel(std::string vehicleModelType);
+    VehicleModelParameters GetVehicleModel(std::string vehicleModelType, const openScenario::Parameters& parameters = {});
 
 private:
     VehicleModelMap vehicleModelMap;

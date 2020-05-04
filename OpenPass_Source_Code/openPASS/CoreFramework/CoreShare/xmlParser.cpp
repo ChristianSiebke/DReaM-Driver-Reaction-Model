@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -580,6 +580,11 @@ bool ParseType(const std::string &element, RoadObjectType &objectType)
             assignIfMatching(element, objectType, "patch", RoadObjectType::patch) ||
             assignIfMatching(element, objectType, "GuardRail", RoadObjectType::guardRail) ||
             assignIfMatching(element, objectType, "RoadSideMarkerPost", RoadObjectType::roadSideMarkerPost);
+}
+
+bool HasAttribute(QDomElement element, const std::string& attributeName)
+{
+    return element.hasAttribute(QString::fromStdString(attributeName));
 }
 
 } // namespace SimulationCommon

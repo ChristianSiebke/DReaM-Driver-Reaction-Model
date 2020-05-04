@@ -110,7 +110,7 @@ TEST(SpawnPointScenario, Trigger_SpawnsEgoAgentAccordingToScenarioWorldPosition)
     ON_CALL(fakeScenario, GetEntities())
             .WillByDefault(ReturnRef(entities));
 
-    ON_CALL(fakeAgentBlueprintProvider, SampleAgent(entity.catalogReference.entryName))
+    ON_CALL(fakeAgentBlueprintProvider, SampleAgent(entity.catalogReference.entryName, _))
             .WillByDefault(Return(actualAgentBlueprint));
     ON_CALL(fakeWorld, IntersectsWithAgent(_, _, _, _, _, _))
             .WillByDefault(Return(false));
@@ -186,7 +186,7 @@ TEST(SpawnPointScenario, Trigger_SpawnsEgoAgentAccordingToScenarioLanePosition)
 
     ON_CALL(fakeScenario, GetEntities()) .WillByDefault(ReturnRef(entities));
 
-    ON_CALL(fakeAgentBlueprintProvider, SampleAgent(entity.catalogReference.entryName))
+    ON_CALL(fakeAgentBlueprintProvider, SampleAgent(entity.catalogReference.entryName, _))
             .WillByDefault(Return(actualAgentBlueprint));
     ON_CALL(fakeWorld, IsSValidOnLane(roadId, laneId, s))
             .WillByDefault(Return(true));
@@ -261,7 +261,7 @@ TEST(SpawnPointScenario, Trigger_SpawnsScenarioAgentAccordingToScenarioWorldPosi
     ON_CALL(fakeScenario, GetEntities())
             .WillByDefault(ReturnRef(entities));
 
-    ON_CALL(fakeAgentBlueprintProvider, SampleAgent(entity.catalogReference.entryName))
+    ON_CALL(fakeAgentBlueprintProvider, SampleAgent(entity.catalogReference.entryName, _))
             .WillByDefault(Return(actualAgentBlueprint));
     ON_CALL(fakeWorld, IntersectsWithAgent(_, _, _, _, _, _))
             .WillByDefault(Return(false));
@@ -338,7 +338,7 @@ TEST(SpawnPointScenario, Trigger_SpawnsScenarioAgentAccordingToScenarioLanePosit
     ON_CALL(fakeScenario, GetEntities())
             .WillByDefault(ReturnRef(entities));
 
-    ON_CALL(fakeAgentBlueprintProvider, SampleAgent(entity.catalogReference.entryName))
+    ON_CALL(fakeAgentBlueprintProvider, SampleAgent(entity.catalogReference.entryName, _))
             .WillByDefault(Return(actualAgentBlueprint));
     ON_CALL(fakeWorld, IsSValidOnLane(roadId, laneId, s))
             .WillByDefault(Return(true));

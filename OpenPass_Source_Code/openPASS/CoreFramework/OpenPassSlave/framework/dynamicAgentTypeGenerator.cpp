@@ -159,11 +159,11 @@ DynamicAgentTypeGenerator& DynamicAgentTypeGenerator::GatherSensors()
     return *this;
 }
 
-DynamicAgentTypeGenerator& DynamicAgentTypeGenerator::SetVehicleModelParameters()
+DynamicAgentTypeGenerator& DynamicAgentTypeGenerator::SetVehicleModelParameters(const openScenario::Parameters& assignedParameters)
 {
     VehicleProfile vehicleProfile = profiles->GetVehicleProfiles().at(sampledProfiles.vehicleProfileName);
     agentBuildInformation.vehicleModelName = vehicleProfile.vehicleModel;
-    agentBuildInformation.vehicleModelParameters = vehicleModels->GetVehicleModel(vehicleProfile.vehicleModel);
+    agentBuildInformation.vehicleModelParameters = vehicleModels->GetVehicleModel(vehicleProfile.vehicleModel, assignedParameters);
 
     return *this;
 }

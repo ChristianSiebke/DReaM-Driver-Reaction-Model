@@ -352,11 +352,12 @@ TEST(DynamicAgentTypeGenerator, SetVehicleModelParameters)
     VehicleModelParameters vehicleModelParameters;
     vehicleModelParameters.length = 5.0;
     vehicleModelParameters.width = 2.0;
-    ON_CALL(vehicleModels, GetVehicleModel("SomeVehicleModel")).WillByDefault(Return(vehicleModelParameters));
+    ON_CALL(vehicleModels, GetVehicleModel("SomeVehicleModel", _)).WillByDefault(Return(vehicleModelParameters));
+    openScenario::Parameters assignedParameters;
 
     AgentBuildInformation agentBuildInformation =
             AgentBuildInformation::make(sampledProfiles, dynamicParameters, systemConfigBlueprint, &profiles, &vehicleModels)
-            .SetVehicleModelParameters();
+            .SetVehicleModelParameters(assignedParameters);
 
     ASSERT_THAT(agentBuildInformation.vehicleModelName, Eq("SomeVehicleModel"));
     ASSERT_THAT(agentBuildInformation.vehicleModelParameters.length, Eq(5.0));

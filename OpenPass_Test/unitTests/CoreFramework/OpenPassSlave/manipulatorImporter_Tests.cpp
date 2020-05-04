@@ -22,6 +22,8 @@
 using Importer::ManipulatorImporter;
 using ::testing::ElementsAre;
 
+openScenario::Parameters EMPTY_PARAMETERS{};
+
 TEST(ManipulatorImporter, SuccessfullyImportsUserDefinedCommandAction_ComponentStateChange)
 {
     const std::string expectedCommand = "SetComponentState DynamicsTrajectoryFollower Acting";
@@ -39,10 +41,12 @@ TEST(ManipulatorImporter, SuccessfullyImportsUserDefinedCommandAction_ComponentS
 
     const std::vector<std::string> eventDetectorNames{"TestEventDetectorA, TestEventDetectorB"};
     const std::string eventName{"ActivateTFEvent"};
+    openScenario::Parameters parameters;
 
     std::shared_ptr<ScenarioActionInterface> action = ManipulatorImporter::ImportManipulator(fakeEventElement,
                                                                                              eventName,
-                                                                                             testing::DontCare<std::string>());
+                                                                                             testing::DontCare<std::string>(),
+                                                                                             parameters);
 
     std::shared_ptr<openScenario::UserDefinedCommandAction> castedAction = std::dynamic_pointer_cast<openScenario::UserDefinedCommandAction>(action);
 
@@ -70,7 +74,8 @@ TEST(ManipulatorImporter, SuccessfullyImportsUserDefinedCommandAction_GazeFollow
 
     std::shared_ptr<ScenarioActionInterface> action = ManipulatorImporter::ImportManipulator(fakeEventElement,
                                                                                              eventName,
-                                                                                             testing::DontCare<std::string>());
+                                                                                             testing::DontCare<std::string>(),
+                                                                                             EMPTY_PARAMETERS);
 
     std::shared_ptr<openScenario::UserDefinedCommandAction> castedAction = std::dynamic_pointer_cast<openScenario::UserDefinedCommandAction>(action);
 
@@ -94,9 +99,12 @@ TEST(ManipulatorImporter, SuccessfullyImportsGlobalEntityDeleteAction)
                 "</Event>"
     );
 
+    openScenario::Parameters parameters;
+
     std::shared_ptr<ScenarioActionInterface> action = ManipulatorImporter::ImportManipulator(fakeEventElement,
                                                                                              testing::DontCare<std::string>(),
-                                                                                             testing::DontCare<std::string>());
+                                                                                             testing::DontCare<std::string>(),
+                                                                                             parameters);
 
     std::shared_ptr<openScenario::GlobalEntityAction> castedAction = std::dynamic_pointer_cast<openScenario::GlobalEntityAction>(action);
 
@@ -124,9 +132,12 @@ TEST(ManipulatorImporter, SuccessfullyImportsGlobalEntityAddAction)
                 "</Event>"
     );
 
+    openScenario::Parameters parameters;
+
     std::shared_ptr<ScenarioActionInterface> action = ManipulatorImporter::ImportManipulator(fakeEventElement,
                                                                                              testing::DontCare<std::string>(),
-                                                                                             testing::DontCare<std::string>());
+                                                                                             testing::DontCare<std::string>(),
+                                                                                             parameters);
 
     std::shared_ptr<openScenario::GlobalEntityAction> castedAction = std::dynamic_pointer_cast<openScenario::GlobalEntityAction>(action);
 
@@ -155,9 +166,12 @@ TEST(ManipulatorImporter, SuccessfullyImportsPrivateLateralLaneChangeAbsoluteAct
                 "</Event>"
     );
 
+    openScenario::Parameters parameters;
+
     std::shared_ptr<ScenarioActionInterface> action = ManipulatorImporter::ImportManipulator(fakeEventElement,
                                                                                              testing::DontCare<std::string>(),
-                                                                                             testing::DontCare<std::string>());
+                                                                                             testing::DontCare<std::string>(),
+                                                                                             parameters);
 
     std::shared_ptr<openScenario::PrivateLateralLaneChangeAction> castedAction = std::dynamic_pointer_cast<openScenario::PrivateLateralLaneChangeAction>(action);
 
@@ -190,9 +204,12 @@ TEST(ManipulatorImporter, SuccessfullyImportsPrivateLateralLaneChangeRelativeAct
                 "</Event>"
     );
 
+    openScenario::Parameters parameters;
+
     std::shared_ptr<ScenarioActionInterface> action = ManipulatorImporter::ImportManipulator(fakeEventElement,
                                                                                              testing::DontCare<std::string>(),
-                                                                                             testing::DontCare<std::string>());
+                                                                                             testing::DontCare<std::string>(),
+                                                                                             parameters);
 
     std::shared_ptr<openScenario::PrivateLateralLaneChangeAction> castedAction = std::dynamic_pointer_cast<openScenario::PrivateLateralLaneChangeAction>(action);
 
@@ -241,9 +258,12 @@ TEST(ManipulatorImporter, SuccessfullyImportsPrivateFollowTrajectoryAction)
                 "</Event>"
     );
 
+    openScenario::Parameters parameters;
+
     std::shared_ptr<ScenarioActionInterface> action = ManipulatorImporter::ImportManipulator(fakeEventElement,
                                                                                              testing::DontCare<std::string>(),
-                                                                                             testing::DontCare<std::string>());
+                                                                                             testing::DontCare<std::string>(),
+                                                                                             parameters);
 
     std::shared_ptr<openScenario::PrivateFollowTrajectoryAction> castedAction = std::dynamic_pointer_cast<openScenario::PrivateFollowTrajectoryAction>(action);
 

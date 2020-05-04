@@ -1,5 +1,5 @@
 ﻿/*******************************************************************************
-* Copyright (c) 2017, 2019 in-tech GmbH
+* Copyright (c) 2017, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,7 @@
 #include "Interfaces/scenarioInterface.h"
 #include "Common/eventDetectorDefinitions.h"
 #include "importerLoggingHelper.h"
+#include "oscImporterCommon.h"
 
 namespace Importer
 {
@@ -59,7 +60,8 @@ public:
                                                                                  const std::string &eventName,
                                                                                  const int numberOfExecutions,
                                                                                  const openScenario::ActorInformation& actorInformation,
-                                                                                 const std::vector<ScenarioEntity>& entities);
+                                                                                 const std::vector<ScenarioEntity>& entities,
+                                                                                 openScenario::Parameters& parameters);
 private:
     /*!
      * \brief Imports a condition element of a OpenSCENARIO storyboard DOM
@@ -70,7 +72,8 @@ private:
      * \param[in]   seqName            Name of the containing sequence
      */
     static openScenario::Condition ImportConditionElement(QDomElement& conditionElement,
-                                                                          const std::vector<ScenarioEntity>& entities);
+                                                          const std::vector<ScenarioEntity>& entities,
+                                                          openScenario::Parameters& parameters);
 
     /*!
      * \brief Imports a ByEntity condition element of a OpenSCENARIO storyboard DOM
@@ -80,7 +83,8 @@ private:
      * \param[out]  eventDetectorParameters   Triggering entity names are stored here
      */
     static openScenario::Condition ImportByEntityElement(QDomElement byEntityElement,
-                                                         const std::vector<ScenarioEntity>& entities);
+                                                         const std::vector<ScenarioEntity>& entities,
+                                                         openScenario::Parameters& parameters);
 
     /*!
      * ------------------------------------------------------------------------
@@ -93,7 +97,7 @@ private:
      *             element's condition details are imported into this object.
      * ------------------------------------------------------------------------
      */
-    static openScenario::Condition ImportConditionByValueElement(QDomElement& byValueElement);
+    static openScenario::Condition ImportConditionByValueElement(QDomElement& byValueElement, openScenario::Parameters& parameters);
 
     /*!
      * \brief Tests, if a entity with a given name is included in the provided vector of scenario entities

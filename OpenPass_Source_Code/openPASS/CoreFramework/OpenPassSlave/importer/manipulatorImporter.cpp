@@ -18,12 +18,21 @@
 
 namespace TAG = openpass::importer::xml::manipulatorImporter::tag;
 namespace ATTRIBUTE = openpass::importer::xml::manipulatorImporter::attribute;
+namespace TAG_SCENARIO = openpass::importer::xml::scenarioImporter::tag;
+namespace ATTRIBUTE_SCENARIO = openpass::importer::xml::scenarioImporter::attribute;
+
+template <typename T>
+T ParseAttributeHelper(const QDomElement& element, const char attributeName[], openScenario::Parameters& parameters, T&)
+{
+    return Importer::ParseAttribute<T>(element, attributeName, parameters);
+}
 
 namespace Importer
 {
 std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulator(QDomElement& eventElement,
                                                                                 const std::string& eventName,
-                                                                                const std::string& trajectoryCatalogPath)
+                                                                                const std::string& trajectoryCatalogPath,
+                                                                                openScenario::Parameters& parameters)
 {
     QDomElement actionElement;
     ThrowIfFalse(SimulationCommon::GetFirstChildElement(eventElement, TAG::action, actionElement),
@@ -40,13 +49,15 @@ std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulator(
     {
         return ImportManipulatorFromPrivateElement(actionTypeElement,
                                                    eventName,
-                                                   trajectoryCatalogPath);
+                                                   trajectoryCatalogPath,
+                                                   parameters);
     }
 
     if (SimulationCommon::GetFirstChildElement(actionElement, TAG::global, actionTypeElement))
     {
         return ImportManipulatorFromGlobalElement(actionTypeElement,
-                                                  eventName);
+                                                  eventName,
+                                                  parameters);
     }
 
     LogErrorAndThrow("Invalid Action Type in OpenSCENARIO file");
@@ -68,7 +79,8 @@ std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorF
 
 std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorFromPrivateElement(QDomElement& privateElement,
                                                                                                   const std::string& eventName,
-                                                                                                  const std::string& trajectoryCatalogPath)
+                                                                                                  const std::string& trajectoryCatalogPath,
+                                                                                                  openScenario::Parameters& parameters)
 {
     QDomElement privateChildElement;
     if(SimulationCommon::GetFirstChildElement(privateElement, TAG::lateral, privateChildElement))
@@ -80,16 +92,26 @@ std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorF
             ThrowIfFalse(SimulationCommon::GetFirstChildElement(lateralChildElement, TAG::dynamics, dynamicsElement),
                         lateralChildElement, "Tag " + std::string(TAG::dynamics) + " is missing.");
 
-            double dynamicsTarget;
-            bool timeDefined = SimulationCommon::ParseAttributeDouble(dynamicsElement, ATTRIBUTE::time, dynamicsTarget);
-            bool distanceDefined = SimulationCommon::ParseAttributeDouble(dynamicsElement, ATTRIBUTE::distance, dynamicsTarget);
+            bool timeDefined = SimulationCommon::HasAttribute(dynamicsElement, ATTRIBUTE::time);
+            bool distanceDefined = SimulationCommon::HasAttribute(dynamicsElement, ATTRIBUTE::distance);
             ThrowIfFalse(timeDefined || distanceDefined, dynamicsElement, "Either attribute time or distance is required for LaneChange action.");
             ThrowIfFalse(!timeDefined || !distanceDefined, dynamicsElement, "Only one of attribute time or distance may be defined for LaneChange action.");
-            openScenario::LaneChangeParameter::DynamicsType dynamicsType{timeDefined ? openScenario::LaneChangeParameter::DynamicsType::Time : openScenario::LaneChangeParameter::DynamicsType::Distance};
 
-            std::string shape;
-            ThrowIfFalse(SimulationCommon::ParseAttributeString(dynamicsElement, ATTRIBUTE::shape, shape),
-                        dynamicsElement, "Tag " + std::string(ATTRIBUTE::shape) + " is missing.");
+            openScenario::LaneChangeParameter::DynamicsType dynamicsType;
+            double dynamicsTarget;
+
+            if (timeDefined)
+            {
+                dynamicsType = openScenario::LaneChangeParameter::DynamicsType::Time;
+                dynamicsTarget = ParseAttribute<double>(dynamicsElement, ATTRIBUTE::time, parameters);
+            }
+            else
+            {
+                dynamicsType = openScenario::LaneChangeParameter::DynamicsType::Distance;
+                dynamicsTarget = ParseAttribute<double>(dynamicsElement, ATTRIBUTE::distance, parameters);
+            }
+
+            std::string shape = ParseAttribute<std::string>(dynamicsElement, ATTRIBUTE::shape, parameters);
             ThrowIfFalse(shape == "sinusoidal", dynamicsElement, "Currently only shape sinusoidal supported for LaneChangeAction");
 
             QDomElement targetElement;
@@ -99,13 +121,8 @@ std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorF
             QDomElement typeElement;
             if (SimulationCommon::GetFirstChildElement(targetElement, TAG::relative, typeElement))
             {
-                std::string object;
-                int value{};
-
-                ThrowIfFalse(SimulationCommon::ParseAttributeString(typeElement, ATTRIBUTE::object, object),
-                             typeElement, "Attribute " + std::string(ATTRIBUTE::object) + " is missing.");
-                ThrowIfFalse(SimulationCommon::ParseAttributeInt(typeElement, ATTRIBUTE::value, value),
-                             typeElement, "Atrribute " + std::string(ATTRIBUTE::value) + " is missing.");
+                std::string object = ParseAttribute<std::string>(typeElement, ATTRIBUTE::object, parameters);
+                int value = ParseAttribute<int>(typeElement, ATTRIBUTE::value, parameters);
 
                 return std::shared_ptr<ScenarioActionInterface>(std::make_shared<openScenario::PrivateLateralLaneChangeAction>(eventName,
                                                                                                                                openScenario::LaneChangeParameter{openScenario::LaneChangeParameter::Type::Relative,
@@ -119,9 +136,7 @@ std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorF
                 ThrowIfFalse(SimulationCommon::GetFirstChildElement(targetElement, TAG::absolute, typeElement),
                              targetElement, "Tag " + std::string(TAG::absolute) + " is missing.");
 
-                int value;
-                ThrowIfFalse(SimulationCommon::ParseAttributeInt(typeElement, ATTRIBUTE::value, value),
-                             typeElement, "Attribute " + std::string(ATTRIBUTE::value) + " is missing.");
+                int value = ParseAttribute<int>(typeElement, ATTRIBUTE::value, parameters);
 
                 return std::shared_ptr<ScenarioActionInterface>(std::make_shared<openScenario::PrivateLateralLaneChangeAction>(eventName,
                                                                                                                                openScenario::LaneChangeParameter{openScenario::LaneChangeParameter::Type::Absolute,
@@ -141,22 +156,44 @@ std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorF
         {
             openScenario::Trajectory trajectory;
             QDomElement trajectoryElement;
+            openScenario::Parameters defaultParameters;
+            openScenario::Parameters assignedParameters;
             if(!SimulationCommon::GetFirstChildElement(routingChildElement, TAG::trajectory, trajectoryElement))
             {
                 QDomElement catalogReferenceElement;
                 ThrowIfFalse(SimulationCommon::GetFirstChildElement(routingChildElement, TAG::catalogReference, catalogReferenceElement),
                              routingChildElement, "Tag " + std::string(TAG::trajectory) + " or " + std::string(TAG::catalogReference) + " is missing.");
-                std::string catalogName;
-                ThrowIfFalse(SimulationCommon::ParseAttribute(catalogReferenceElement, ATTRIBUTE::catalogName, catalogName),
-                             catalogReferenceElement, "Attribute " + std::string(ATTRIBUTE::catalogName) + " is missing.");
-                std::string entryName;
-                ThrowIfFalse(SimulationCommon::ParseAttribute(catalogReferenceElement, ATTRIBUTE::entryName, entryName),
-                             catalogReferenceElement, "Attribute " + std::string(ATTRIBUTE::entryName) + " is missing.");
-                trajectoryElement = GetTrajectoryElementFromCatalog(catalogName, trajectoryCatalogPath, entryName);
+                std::string catalogName = ParseAttribute<std::string>(catalogReferenceElement, ATTRIBUTE::catalogName, parameters);
+                std::string entryName = ParseAttribute<std::string>(catalogReferenceElement, ATTRIBUTE::entryName, parameters);
+                trajectoryElement = GetTrajectoryElementFromCatalog(catalogName, trajectoryCatalogPath, entryName, parameters);
+                QDomElement parameterDeclarationElement;
+                SimulationCommon::GetFirstChildElement(trajectoryElement, TAG_SCENARIO::parameterDeclaration, parameterDeclarationElement);
+                if (!parameterDeclarationElement.isNull())
+                {
+                    ImportParameterDeclarationElement(parameterDeclarationElement, defaultParameters);
+                }
+                QDomElement parameterAssignmentsElement;
+                SimulationCommon::GetFirstChildElement(catalogReferenceElement, TAG_SCENARIO::parameterAssignments, parameterAssignmentsElement);
+                QDomElement parameterAssignmentElement;
+                SimulationCommon::GetFirstChildElement(parameterAssignmentsElement, TAG_SCENARIO::parameterAssignment, parameterAssignmentElement);
+                while (!parameterAssignmentElement.isNull())
+                {
+                    auto parameterName = ParseAttribute<std::string>(parameterAssignmentElement, ATTRIBUTE_SCENARIO::parameterRef, parameters);
+                    auto foundParameter = defaultParameters.find(parameterName);
+                    ThrowIfFalse(foundParameter != defaultParameters.cend(), parameterAssignmentElement, "Can not assign parameter \"" + parameterName + "\". No parameter with this name declared.");
+                    std::visit([&](auto& value){
+                        assignedParameters.insert({parameterName, ParseAttributeHelper(parameterAssignmentElement, ATTRIBUTE_SCENARIO::value, parameters, value)});
+                        },
+                        foundParameter->second);
+                    parameterAssignmentElement = parameterAssignmentElement.nextSiblingElement(TAG_SCENARIO::parameterAssignment);
+                }
 
             }
-            ThrowIfFalse(SimulationCommon::ParseAttribute(trajectoryElement, ATTRIBUTE::name, trajectory.name),
-                         trajectoryElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
+            else
+            {
+                defaultParameters = parameters;
+            }
+            trajectory.name = ParseAttribute<std::string>(trajectoryElement, ATTRIBUTE::name, defaultParameters, assignedParameters);
             QDomElement vertexElement;
             ThrowIfFalse(SimulationCommon::GetFirstChildElement(trajectoryElement, TAG::vertex, vertexElement),
                          trajectoryElement, "Tag " + std::string(TAG::vertex) + " is missing.");
@@ -170,14 +207,10 @@ std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorF
                              positionElement, "Tag " + std::string(TAG::world) + " is missing.");
 
                 openScenario::TrajectoryPoint trajectoryPoint;
-                ThrowIfFalse(SimulationCommon::ParseAttribute(vertexElement, ATTRIBUTE::reference, trajectoryPoint.time),
-                             vertexElement, "Attribute " + std::string(ATTRIBUTE::reference) + " is missing.");
-                ThrowIfFalse(SimulationCommon::ParseAttribute(worldElement, ATTRIBUTE::x, trajectoryPoint.x),
-                             worldElement, "Attribute " + std::string(ATTRIBUTE::x) + " is missing.");
-                ThrowIfFalse(SimulationCommon::ParseAttribute(worldElement, ATTRIBUTE::y, trajectoryPoint.y),
-                             worldElement, "Attribute " + std::string(ATTRIBUTE::y) + " is missing.");
-                ThrowIfFalse(SimulationCommon::ParseAttribute(worldElement, ATTRIBUTE::h, trajectoryPoint.yaw),
-                             worldElement, "Attribute " + std::string(ATTRIBUTE::h) + " is missing.");
+                trajectoryPoint.time = ParseAttribute<double>(vertexElement, ATTRIBUTE::reference, defaultParameters, assignedParameters);
+                trajectoryPoint.x = ParseAttribute<double>(worldElement, ATTRIBUTE::x, defaultParameters, assignedParameters);
+                trajectoryPoint.y = ParseAttribute<double>(worldElement, ATTRIBUTE::y, defaultParameters, assignedParameters);
+                trajectoryPoint.yaw = ParseAttribute<double>(worldElement, ATTRIBUTE::h, defaultParameters, assignedParameters);
                 trajectory.points.push_back(trajectoryPoint);
 
                 vertexElement = vertexElement.nextSiblingElement(TAG::vertex);
@@ -193,14 +226,13 @@ std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorF
 }
 
 std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorFromGlobalElement(QDomElement &globalElement,
-                                                                                         const std::string& eventName)
+                                                                                                 const std::string& eventName,
+                                                                                                 openScenario::Parameters& parameters)
 {
     QDomElement globalActionTypeElement;
     if (SimulationCommon::GetFirstChildElement(globalElement, TAG::entity, globalActionTypeElement))
     {
-        std::string name;
-        ThrowIfFalse(SimulationCommon::ParseAttributeString(globalActionTypeElement, ATTRIBUTE::name, name),
-                     globalActionTypeElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
+        std::string name = ParseAttribute<std::string>(globalActionTypeElement, ATTRIBUTE::name, parameters);
 
         QDomElement entityTypeElement;
         if (SimulationCommon::GetFirstChildElement(globalActionTypeElement, TAG::add, entityTypeElement))
@@ -223,7 +255,7 @@ std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorF
     LogErrorAndThrow("Invalid GlobalAction Type in openScenario file.");
 }
 
-QDomElement ManipulatorImporter::GetTrajectoryElementFromCatalog(const std::string& catalogName, const std::string& catalogPath, const std::string& entryName)
+QDomElement ManipulatorImporter::GetTrajectoryElementFromCatalog(const std::string& catalogName, const std::string& catalogPath, const std::string& entryName, openScenario::Parameters& parameters)
 {
     std::locale::global(std::locale("C"));
 
@@ -248,9 +280,7 @@ QDomElement ManipulatorImporter::GetTrajectoryElementFromCatalog(const std::stri
                  catalogElement, "Tag " + std::string(TAG::trajectory) + " is missing.");
     while (!trajectoryElement.isNull())
     {
-        std::string name;
-        ThrowIfFalse(SimulationCommon::ParseAttributeString(trajectoryElement, ATTRIBUTE::name, name),
-                     trajectoryElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
+        std::string name = ParseAttribute<std::string>(trajectoryElement, ATTRIBUTE::name, parameters);
         if (name == entryName)
         {
             return trajectoryElement;

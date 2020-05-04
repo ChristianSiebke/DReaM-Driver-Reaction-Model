@@ -31,11 +31,12 @@ public:
     * \details First samples the agent profile and then depending on wether it is a static or dynamic profile samples the dynamic
     * profiles and builds an AgentType from this or loads the AgentType from the specified SystemConfig
     *
-    * @param[in]        agentProfileName    name of agent profile to sample
+    * \param    agentProfileName    name of agent profile to sample
+    * \param    assignedParameters  parameters assigned by a catalog reference if appropriate
     *
-    * @return           sampled AgentBlueprint if successful
+    * \return   sampled AgentBlueprint if successful
     */
-    virtual AgentBlueprint SampleAgent(const std::string& agentProfileName) const override;
+    virtual AgentBlueprint SampleAgent(const std::string& agentProfileName, const openScenario::Parameters& assignedParameters) const override;
 
     /*!
      * \brief Store sampled information in AgentBlueprint for dynamic AgentProfile

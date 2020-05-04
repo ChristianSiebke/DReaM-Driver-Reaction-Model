@@ -56,7 +56,7 @@ SpawnDetails SpawnPointRuntimeCommon::GenerateSpawnDetailsForLane(const SpawnPos
     const auto agentProfile = SampleAgentProfile(sceneryInformation.laneIndex == 0);
     try
     {
-        auto agentBlueprint = dependencies.agentBlueprintProvider->SampleAgent(agentProfile.name);
+        auto agentBlueprint = dependencies.agentBlueprintProvider->SampleAgent(agentProfile.name, {});
         agentBlueprint.SetAgentProfileName(agentProfile.name);
         agentBlueprint.SetAgentCategory(AgentCategory::Common);
 

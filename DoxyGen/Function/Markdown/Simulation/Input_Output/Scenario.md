@@ -8,7 +8,26 @@ The scenario configuration file describes all dynamic configuration of a simulat
 It adheres to the OpenSCENARIO standard, although we support only a subset of the features of the standard.
 The different parts of the scenario configuration are described in the following chapters:
 
-\section scenario_catalogs Catalog References
+\section scenario_parameterDeclaration ParameterDeclaration
+
+In the ParameterDeclaration section parameters of different type may be declared, that are later referenced by their name prefixed with "$".
+The type can be "string", "integer" or "double". In case of "string" the value may be empty.
+The parameter "OP_OSC_SchemaVersion" is mandatory. It is used to check if the schema of the scenario is supported by this version of OpenPASS.
+
+Example
+```xml
+  <ParameterDeclaration>
+    <Parameter name="OP_OSC_SchemaVersion" type="string" value="0.3.0"/>
+    <Parameter name="EgoSCoordinate" type="double" value="50.0"/>
+  </ParameterDeclaration>
+```
+
+Example use of a parameter
+```xml
+    <Lane roadId="1" s="$EgoSCoordinate" laneId="-2" offset="0.0">
+```
+
+\section scenario_catalogs Catalogs
 
 The <Catalogs> tag defines references to various other files that describe sub features of OpenSCENARIO.
 We currently support only three of these references: the [VehicleCatalog](\ref io_input_vehiclemodels), which defines the vehicle models, and the [PedestrianCatalog](\ref io_input_pedestrianmodels), which defines the pedestrian models.
@@ -89,6 +108,23 @@ Example
         </Selection>
     </Entities>
 ```
+
+Parameters defined in the VehicleCatalog can be assigned inside the CatalogReference element.
+In this case the assigned parameter will overwrite the definition in the VehicleCatalog.
+Otherwise the value defined in the VehicleCatalog is used.
+The type of the parameter must match those in the VehicleCatalog.
+
+Example
+```xml
+    <CatalogReference catalogName="ProfilesCatalog.xml" entryName="MiddleClassCarAgent">
+        <ParameterAssignments>
+            <ParameterAssignment parameterRef="Length" value="4.0" />
+        </ParameterAssignments>
+    </CatalogReference>
+```
+
+Note: In OpenPASS we reference an AgentProfile instead of a VehicleModel. An AgentProfile may have a stochastic distribution of different VehicleModel with different parameters.
+In this case some assigned parameters may only be used if a certain VehicleModel is drawn in the random selection.
 
 \section scenario_storyboard Storyboard
 

@@ -35,7 +35,7 @@ SpawnPointInterface::Agents SpawnPointScenario::Trigger([[maybe_unused]]int time
     {
         try
         {
-            auto agentBlueprint = dependencies.agentBlueprintProvider->SampleAgent(entity.catalogReference.entryName);
+            auto agentBlueprint = dependencies.agentBlueprintProvider->SampleAgent(entity.catalogReference.entryName, entity.assignedParameters);
             agentBlueprint.SetAgentProfileName(entity.catalogReference.entryName);
             agentBlueprint.SetAgentCategory(entity.name == "Ego"
                                                 ? AgentCategory::Ego

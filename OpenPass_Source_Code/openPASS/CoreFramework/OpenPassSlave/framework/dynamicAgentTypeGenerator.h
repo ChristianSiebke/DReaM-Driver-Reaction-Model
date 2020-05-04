@@ -149,7 +149,7 @@ public:
      * \brief Sets the VehicleModelParameters in the AgentBuildInformation depending on the vehicle model name.
      * \return  reference to itself
      */
-    DynamicAgentTypeGenerator& SetVehicleModelParameters();
+    DynamicAgentTypeGenerator& SetVehicleModelParameters(const openScenario::Parameters& assignedParameters);
 
     /*!
     * \brief Gathers a component and adds it to the AgentType

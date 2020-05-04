@@ -23,6 +23,31 @@ using ::testing::Eq;
 using ::testing::StrEq;
 using ::testing::DontCare;
 using ::testing::ElementsAre;
+using ::testing::SizeIs;
+
+TEST(ScenarioImporter_UnitTests, ImportEntity)
+{
+    QDomElement entityElement = documentRootFromString(
+        "<Object name=\"Ego\">"
+          "<CatalogReference catalogName=\"ProfilesCatalog.xml\" entryName=\"EgoAgent\">"
+              "<ParameterAssignments>"
+                  "<ParameterAssignment parameterRef=\"TestParameter\" value=\"6\" />"
+              "</ParameterAssignments>"
+          "</CatalogReference>"
+        "</Object>"
+    );
+
+    ScenarioEntity scenarioEntity;
+    openScenario::Parameters parameters;
+
+    EXPECT_NO_THROW(ScenarioImporter::ImportEntity(entityElement, scenarioEntity, parameters));
+
+    ASSERT_THAT(scenarioEntity.name, Eq("Ego"));
+    ASSERT_THAT(scenarioEntity.catalogReference.catalogName, Eq("ProfilesCatalog.xml"));
+    ASSERT_THAT(scenarioEntity.catalogReference.entryName, Eq("EgoAgent"));
+    ASSERT_THAT(scenarioEntity.assignedParameters, SizeIs(1));
+    ASSERT_THAT(std::get<std::string>(scenarioEntity.assignedParameters.at("TestParameter")), Eq("6"));
+}
 
 TEST(ScenarioImporter_UnitTests, ImportPositionElementLaneWithStochastics)
 {
@@ -36,8 +61,9 @@ TEST(ScenarioImporter_UnitTests, ImportPositionElementLaneWithStochastics)
               );
 
     ScenarioEntity scenarioEntity;
+    openScenario::Parameters parameters;
 
-    EXPECT_NO_THROW(ScenarioImporter::ImportPositionElement(scenarioEntity,positionElement));
+    EXPECT_NO_THROW(ScenarioImporter::ImportPositionElement(scenarioEntity, positionElement, parameters));
 
     const auto& spawnInfo = scenarioEntity.spawnInfo;
     openScenario::LanePosition lanePosition;
@@ -75,8 +101,9 @@ TEST(ScenarioImporter_UnitTests, ImportPositionElementLaneWithOrientation)
               );
 
     ScenarioEntity scenarioEntity;
+    openScenario::Parameters parameters;
 
-    EXPECT_NO_THROW(ScenarioImporter::ImportPositionElement(scenarioEntity,positionElement));
+    EXPECT_NO_THROW(ScenarioImporter::ImportPositionElement(scenarioEntity,positionElement, parameters));
     const auto& spawnInfo = scenarioEntity.spawnInfo;
     openScenario::LanePosition lanePosition;
     ASSERT_NO_THROW(lanePosition = std::get<openScenario::LanePosition>(spawnInfo.position));
@@ -98,8 +125,9 @@ TEST(ScenarioImporter_UnitTests, ImportPositionElementWorld)
               );
 
     ScenarioEntity scenarioEntity;
+    openScenario::Parameters parameters;
 
-    EXPECT_NO_THROW(ScenarioImporter::ImportPositionElement(scenarioEntity,positionElement));
+    EXPECT_NO_THROW(ScenarioImporter::ImportPositionElement(scenarioEntity,positionElement, parameters));
 
     const auto& spawnInfo = scenarioEntity.spawnInfo;
     openScenario::WorldPosition worldPosition;
@@ -125,8 +153,9 @@ TEST(ScenarioImporter_UnitTests, ImportLongitudinal)
     );
 
     ScenarioEntity scenarioEntity;
+    openScenario::Parameters parameters;
 
-    EXPECT_NO_THROW(ScenarioImporter::ImportLongitudinalElement(scenarioEntity, positionElement));
+    EXPECT_NO_THROW(ScenarioImporter::ImportLongitudinalElement(scenarioEntity, positionElement, parameters));
 
     ASSERT_THAT(scenarioEntity.spawnInfo.stochasticVelocity.has_value(), Eq(false));
     ASSERT_THAT(scenarioEntity.spawnInfo.velocity, Eq(27.7));
@@ -152,8 +181,9 @@ TEST(ScenarioImporter_UnitTests, ImportLongitudinalWithStochastics)
     );
 
     ScenarioEntity scenarioEntity;
+    openScenario::Parameters parameters;
 
-    EXPECT_NO_THROW(ScenarioImporter::ImportLongitudinalElement(scenarioEntity, positionElement));
+    EXPECT_NO_THROW(ScenarioImporter::ImportLongitudinalElement(scenarioEntity, positionElement, parameters));
 
     ASSERT_THAT(scenarioEntity.spawnInfo.stochasticVelocity.has_value(), Eq(true));
     const auto& velocityAttribute = scenarioEntity.spawnInfo.stochasticVelocity.value();
@@ -168,6 +198,32 @@ TEST(ScenarioImporter_UnitTests, ImportLongitudinalWithStochastics)
     ASSERT_DOUBLE_EQ(accelerationAttribtue.stdDeviation, 4.0);
     ASSERT_DOUBLE_EQ(accelerationAttribtue.lowerBoundary, 0.0);
     ASSERT_DOUBLE_EQ(accelerationAttribtue.upperBoundary, 4.0);
+}
+
+TEST(ScenarioImporter_UnitTests, ImportLongitudinalWithParameterDeclaration)
+{
+    QDomElement positionElement = documentRootFromString(
+        "<Longitudinal>"
+            "<Speed>"
+                "<Dynamics rate=\"$Rate\" />"
+                "<Target>"
+                    "<Absolute value=\"$Velocity\" />"
+                "</Target>"
+            "</Speed>"
+        "</Longitudinal>"
+    );
+
+    ScenarioEntity scenarioEntity;
+    openScenario::Parameters parameters{{"Rate", 10.0}, {"Velocity", 27.7}};
+
+    EXPECT_NO_THROW(ScenarioImporter::ImportLongitudinalElement(scenarioEntity, positionElement, parameters));
+
+    ASSERT_THAT(scenarioEntity.spawnInfo.stochasticVelocity.has_value(), Eq(false));
+    ASSERT_THAT(scenarioEntity.spawnInfo.velocity, Eq(27.7));
+
+    ASSERT_THAT(scenarioEntity.spawnInfo.stochasticAcceleration.has_value(), Eq(false));
+    ASSERT_THAT(scenarioEntity.spawnInfo.acceleration.has_value(), Eq(true));
+    ASSERT_THAT(scenarioEntity.spawnInfo.acceleration.value(), Eq(10.0));
 }
 
 std::ostream& operator<<(std::ostream& os, const RouteElement& obj)
@@ -204,8 +260,9 @@ TEST(ScenarioImporter_UnitTests, ImportRoutingElement)
               );
 
     ScenarioEntity scenarioEntity;
+    openScenario::Parameters parameters;
 
-    ScenarioImporter::ImportRoutingElement(scenarioEntity, routingElement);
+    ScenarioImporter::ImportRoutingElement(scenarioEntity, routingElement, parameters);
 
     auto route = scenarioEntity.spawnInfo.route;
     ASSERT_THAT(route.has_value(), Eq(true));
@@ -227,7 +284,9 @@ TEST(ScenarioImporter_UnitTests, ImportVehicleCatalog_ReturnsSuccess)
               "</Catalogs>"
               );
 
-    ASSERT_NO_THROW(catalogPath = ScenarioImporter::ImportCatalog("VehicleCatalog", catalogsElement));
+    openScenario::Parameters parameters;
+
+    ASSERT_NO_THROW(catalogPath = ScenarioImporter::ImportCatalog("VehicleCatalog", catalogsElement, parameters));
     EXPECT_THAT(catalogPath, StrEq("vpath"));
 }
 
@@ -246,7 +305,9 @@ TEST(ScenarioImporter_UnitTests, ImportPedestrianCatalog_ReturnsSuccess)
               "</Catalogs>"
               );
 
-    ASSERT_NO_THROW(catalogPath = ScenarioImporter::ImportCatalog("PedestrianCatalog", catalogsElement));
+    openScenario::Parameters parameters;
+
+    ASSERT_NO_THROW(catalogPath = ScenarioImporter::ImportCatalog("PedestrianCatalog", catalogsElement, parameters));
     EXPECT_THAT(catalogPath, StrEq("ppath"));
 }
 
@@ -264,8 +325,9 @@ TEST(ScenarioImporter_UnitTests, ImportStoryboardWithoutEndCondition_Throws)
     );
     std::vector<ScenarioEntity> entities;
     FakeScenario mockScenario;
+    openScenario::Parameters parameters;
 
-    EXPECT_THROW(ScenarioImporter::ImportStoryboard(storyboardRootElement, entities, &mockScenario), std::runtime_error);
+    EXPECT_THROW(ScenarioImporter::ImportStoryboard(storyboardRootElement, entities, &mockScenario, parameters), std::runtime_error);
 }
 
 TEST(ScenarioImporter_UnitTests, ImportStoryboardWithEndCondition_SetsScenarioEndTime)
@@ -279,7 +341,7 @@ TEST(ScenarioImporter_UnitTests, ImportStoryboardWithEndCondition_SetsScenarioEn
                 "		</Init>"
                 "		<EndConditions>"
                 "			<ConditionGroup>"
-                "				<Condition name=\"\" delay=\"0.0\" edge=\"rising\">"
+                "				<Condition name=\"TestCondition\" delay=\"0.0\" edge=\"rising\">"
                 "					<ByValue>"
                 "						<SimulationTime value=\"3.000\" rule=\"greater_than\" />"
                 "					</ByValue>"
@@ -292,8 +354,9 @@ TEST(ScenarioImporter_UnitTests, ImportStoryboardWithEndCondition_SetsScenarioEn
     std::vector<ScenarioEntity> entities;
     FakeScenario mockScenario;
     EXPECT_CALL(mockScenario, SetEndTime(3.000)).Times(1);
+    openScenario::Parameters parameters;
 
-    EXPECT_NO_THROW(ScenarioImporter::ImportStoryboard(storyboardRootElement, entities, &mockScenario));
+    EXPECT_NO_THROW(ScenarioImporter::ImportStoryboard(storyboardRootElement, entities, &mockScenario, parameters));
 }
 
 TEST(ScenarioImporter_UnitTests, ImportStoryboardWithInvalidEndCondition_Throws)
@@ -380,9 +443,110 @@ TEST(ScenarioImporter_UnitTests, ImportStoryboardWithInvalidEndCondition_Throws)
 
     std::vector<ScenarioEntity> entities;
     FakeScenario mockScenario;
+    openScenario::Parameters parameters;
 
-    EXPECT_THROW(ScenarioImporter::ImportStoryboard(storyboardRootElementConditionMissingName, entities, &mockScenario), std::runtime_error);
-    EXPECT_THROW(ScenarioImporter::ImportStoryboard(storyboardRootElementConditionMissingDelay, entities, &mockScenario), std::runtime_error);
-    EXPECT_THROW(ScenarioImporter::ImportStoryboard(storyboardRootElementConditionMissingEdge, entities, &mockScenario), std::runtime_error);
-    EXPECT_THROW(ScenarioImporter::ImportStoryboard(storyboardRootElementConditionDelayNegative, entities, &mockScenario), std::runtime_error);
+    EXPECT_THROW(ScenarioImporter::ImportStoryboard(storyboardRootElementConditionMissingName, entities, &mockScenario, parameters), std::runtime_error);
+    EXPECT_THROW(ScenarioImporter::ImportStoryboard(storyboardRootElementConditionMissingDelay, entities, &mockScenario, parameters), std::runtime_error);
+    EXPECT_THROW(ScenarioImporter::ImportStoryboard(storyboardRootElementConditionMissingEdge, entities, &mockScenario, parameters), std::runtime_error);
+    EXPECT_THROW(ScenarioImporter::ImportStoryboard(storyboardRootElementConditionDelayNegative, entities, &mockScenario, parameters), std::runtime_error);
+}
+
+TEST(ScenarioImporter_UnitTests, ImportParameterDeclarationElement)
+{
+    QDomElement parameterDeclarationElement = documentRootFromString(
+              "<ParameterDeclaration>"
+                "<Parameter name=\"Parameter1\" type=\"string\" value=\"TestString\" />"
+                "<Parameter name=\"Parameter2\" type=\"double\" value=\"10.0\" />"
+                "<Parameter name=\"Parameter3\" type=\"integer\" value=\"2\" />"
+              "</ParameterDeclaration>"
+              );
+
+    openScenario::Parameters parameters;
+
+    ASSERT_NO_THROW(Importer::ImportParameterDeclarationElement(parameterDeclarationElement, parameters));
+    EXPECT_THAT(parameters, SizeIs(3));
+    EXPECT_THAT(std::get<std::string>(parameters.at("Parameter1")), Eq("TestString"));
+    EXPECT_THAT(std::get<double>(parameters.at("Parameter2")), Eq(10.0));
+    EXPECT_THAT(std::get<int>(parameters.at("Parameter3")), Eq(2));
+}
+
+TEST(ScenarioImporter_UnitTests, ParseAttributeWithPlainValue)
+{
+    QDomElement element = documentRootFromString(
+                "<Element valueString=\"TestString\" valueDouble=\"10.0\" valueInt=\"5\" />"
+              );
+
+    openScenario::Parameters parameters;
+
+    std::string valueString;
+    double valueDouble;
+    int valueInt;
+
+    ASSERT_NO_THROW(valueString = ParseAttribute<std::string>(element, "valueString", parameters));
+    ASSERT_THAT(valueString, Eq("TestString"));
+    ASSERT_NO_THROW(valueDouble = ParseAttribute<double>(element, "valueDouble", parameters));
+    ASSERT_THAT(valueDouble, Eq(10.0));
+    ASSERT_NO_THROW(valueInt = ParseAttribute<int>(element, "valueInt", parameters));
+    ASSERT_THAT(valueInt, Eq(5));
+}
+
+TEST(ScenarioImporter_UnitTests, ParseAttributeWithParameter)
+{
+    QDomElement element = documentRootFromString(
+                 "<Element valueString=\"$ParameterString\" valueDouble=\"$ParameterDouble\" valueInt=\"$ParameterInt\" />"
+              );
+
+    std::string parameterString{"TestString"};
+    double parameterDouble{10.0};
+    int parameterInt{5};
+
+    openScenario::Parameters parameters{{"ParameterString", parameterString}, {"ParameterDouble", parameterDouble}, {"ParameterInt", parameterInt}};
+
+    std::string valueString;
+    double valueDouble;
+    int valueInt;
+
+    ASSERT_NO_THROW(valueString = ParseAttribute<std::string>(element, "valueString", parameters));
+    ASSERT_THAT(valueString, Eq(parameterString));
+    ASSERT_NO_THROW(valueDouble = ParseAttribute<double>(element, "valueDouble", parameters));
+    ASSERT_THAT(valueDouble, Eq(parameterDouble));
+    ASSERT_NO_THROW(valueInt = ParseAttribute<int>(element, "valueInt", parameters));
+    ASSERT_THAT(valueInt, Eq(parameterInt));
+}
+
+TEST(ScenarioImporter_UnitTests, ParseAttributeWithUndefinedAttribute_Throws)
+{
+    QDomElement element = documentRootFromString(
+                 "<Element valueString=\"$ParameterString\" valueDouble=\"$ParameterDouble\" valueInt=\"$ParameterInt\" />"
+              );
+
+    openScenario::Parameters parameters{};
+
+    ASSERT_THROW(ParseAttribute<double>(element, "valueUndefined", parameters), std::runtime_error);
+}
+
+TEST(ScenarioImporter_UnitTests, ParseAttributeWithUndefinedParameter_Throws)
+{
+    QDomElement element = documentRootFromString(
+                 "<Element valueString=\"$ParameterString\" valueDouble=\"$ParameterDouble\" valueInt=\"$ParameterInt\" />"
+              );
+
+    openScenario::Parameters parameters{};
+
+    ASSERT_THROW(ParseAttribute<double>(element, "valueString", parameters), std::runtime_error);
+}
+
+TEST(ScenarioImporter_UnitTests, ParseAttributeWithParameterWrongType_Throws)
+{
+    QDomElement element = documentRootFromString(
+                 "<Element valueString=\"$ParameterString\" valueDouble=\"$ParameterDouble\" valueInt=\"$ParameterInt\" />"
+              );
+
+    std::string parameterString{"TestString"};
+    double parameterDouble{10.0};
+    int parameterInt{5};
+
+    openScenario::Parameters parameters{{"ParameterString", parameterString}, {"ParameterDouble", parameterDouble}, {"ParameterInt", parameterInt}};
+
+    ASSERT_THROW(ParseAttribute<double>(element, "valueString", parameters), std::runtime_error);
 }

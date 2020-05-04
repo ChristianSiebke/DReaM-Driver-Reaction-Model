@@ -20,7 +20,8 @@ namespace Importer
                                                                                                  const std::string& eventName,
                                                                                                  const int numberOfExecutions,
                                                                                                  const openScenario::ActorInformation& actorInformation,
-                                                                                                 const std::vector<ScenarioEntity>& entities)
+                                                                                                 const std::vector<ScenarioEntity>& entities,
+                                                                                                 openScenario::Parameters& parameters)
     {
         QDomElement startConditionsElement;
         ThrowIfFalse(SimulationCommon::GetFirstChildElement(eventElement, TAG::startConditions, startConditionsElement),
@@ -38,7 +39,7 @@ namespace Importer
 
         while (!conditionElement.isNull())
         {
-            conditions.emplace_back(ImportConditionElement(conditionElement, entities));
+            conditions.emplace_back(ImportConditionElement(conditionElement, entities, parameters));
             conditionElement = conditionElement.nextSiblingElement(TAG::condition);
         }
 
@@ -49,27 +50,29 @@ namespace Importer
     }
 
     openScenario::Condition EventDetectorImporter::ImportConditionElement(QDomElement& conditionElement,
-                                                                          const std::vector<ScenarioEntity>& entities)
+                                                                          const std::vector<ScenarioEntity>& entities,
+                                                                          openScenario::Parameters& parameters)
     {
         QDomElement byEntityElement;
 
         //Parse specific entity
         if (SimulationCommon::GetFirstChildElement(conditionElement, TAG::byEntity, byEntityElement))
         {
-            return ImportByEntityElement(byEntityElement, entities);
+            return ImportByEntityElement(byEntityElement, entities, parameters);
         }
 
         QDomElement byValueElement;
         if (SimulationCommon::GetFirstChildElement(conditionElement, TAG::byValue, byValueElement))
         {
-            return ImportConditionByValueElement(byValueElement);
+            return ImportConditionByValueElement(byValueElement, parameters);
         }
 
         LogErrorAndThrow("No valid Condition found.");
     }
 
     openScenario::Condition EventDetectorImporter::ImportByEntityElement(QDomElement byEntityElement,
-                                                                         const std::vector<ScenarioEntity>& entities)
+                                                                         const std::vector<ScenarioEntity>& entities,
+                                                                         openScenario::Parameters& parameters)
     {
         std::vector<std::string> triggeringEntities;
 
@@ -82,9 +85,7 @@ namespace Importer
 
         while (!entityElement.isNull())
         {
-            std::string entityName;
-            ThrowIfFalse(SimulationCommon::ParseAttributeString(entityElement, ATTRIBUTE::name, entityName),
-                         entityElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
+            std::string entityName = ParseAttribute<std::string>(entityElement, ATTRIBUTE::name, parameters);
 
             ThrowIfFalse(ContainsEntity(entities, entityName),
                          entityElement, "TriggeringEntity '" + entityName + "' not declared in 'Entities'");
@@ -100,9 +101,7 @@ namespace Importer
         QDomElement reachPositionElement;
         if (SimulationCommon::GetFirstChildElement(entityConditionElement, "ReachPosition", reachPositionElement))
         {
-            double tolerance;
-            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(reachPositionElement, ATTRIBUTE::tolerance, tolerance),
-                         reachPositionElement, "Attribute " + std::string(ATTRIBUTE::tolerance) + " is missing.");
+            double tolerance = ParseAttribute<double>(reachPositionElement, ATTRIBUTE::tolerance, parameters);
 
             QDomElement positionElement;
             ThrowIfFalse(SimulationCommon::GetFirstChildElement(reachPositionElement, TAG::position, positionElement),
@@ -111,13 +110,9 @@ namespace Importer
             QDomElement roadElement;
             if(SimulationCommon::GetFirstChildElement(positionElement, TAG::road, roadElement))
             {
-                double sCoordinate;
-                ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadElement, ATTRIBUTE::s, sCoordinate),
-                             roadElement, "Attribute " + std::string(ATTRIBUTE::s) + " is missing.");
+                double sCoordinate = ParseAttribute<double>(roadElement, ATTRIBUTE::s, parameters);
 
-                std::string roadId;
-                ThrowIfFalse(SimulationCommon::ParseAttributeString(roadElement, ATTRIBUTE::roadId, roadId),
-                             roadElement, "Attribute " + std::string(ATTRIBUTE::roadId) + " is missing.");
+                std::string roadId = ParseAttribute<std::string>(roadElement, ATTRIBUTE::roadId, parameters);
 
                 // this return must occur across two lines to appropriately construct the std::variant
                 auto condition = openScenario::ReachPositionRoadCondition(triggeringEntities,
@@ -131,17 +126,11 @@ namespace Importer
             QDomElement relativeLaneElement;
             if(SimulationCommon::GetFirstChildElement(positionElement, TAG::relativeLane, relativeLaneElement))
             {
-                std::string referenceEntityName;
-                ThrowIfFalse(SimulationCommon::ParseAttributeString(relativeLaneElement, ATTRIBUTE::object, referenceEntityName),
-                             relativeLaneElement, "Attribute " + std::string(ATTRIBUTE::object) + " is missing.");
+                std::string referenceEntityName = ParseAttribute<std::string>(relativeLaneElement, ATTRIBUTE::object, parameters);
 
-                int deltaLane;
-                ThrowIfFalse(SimulationCommon::ParseAttributeInt(relativeLaneElement, ATTRIBUTE::dLane, deltaLane),
-                             relativeLaneElement, "Attribute " + std::string(ATTRIBUTE::dLane) + " is missing.");
+                int deltaLane = ParseAttribute<int>(relativeLaneElement, ATTRIBUTE::dLane, parameters);
 
-                double deltaS;
-                ThrowIfFalse(SimulationCommon::ParseAttributeDouble(relativeLaneElement, ATTRIBUTE::ds, deltaS),
-                             relativeLaneElement, "Attribute " + std::string(ATTRIBUTE::ds) + " is missing.");
+                double deltaS = ParseAttribute<double>(relativeLaneElement, ATTRIBUTE::ds, parameters);
 
                 auto condition = openScenario::RelativeLaneCondition(triggeringEntities,
                                                                      referenceEntityName,
@@ -156,17 +145,11 @@ namespace Importer
         QDomElement relativeSpeedElement;
         if (SimulationCommon::GetFirstChildElement(entityConditionElement, TAG::relativeSpeed, relativeSpeedElement))
         {
-            std::string referenceEntityName;
-            ThrowIfFalse(SimulationCommon::ParseAttributeString(relativeSpeedElement, ATTRIBUTE::entity, referenceEntityName),
-                         relativeSpeedElement, "Attribute " + std::string(ATTRIBUTE::entity) + " is missing.");
+            std::string referenceEntityName = ParseAttribute<std::string>(relativeSpeedElement, ATTRIBUTE::entity, parameters);
 
-            double value;
-            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(relativeSpeedElement, ATTRIBUTE::value, value),
-                         relativeSpeedElement, "Attribute " + std::string(ATTRIBUTE::value) + " is missing.");
+            double value = ParseAttribute<double>(relativeSpeedElement, ATTRIBUTE::value, parameters);
 
-            std::string ruleString;
-            ThrowIfFalse(SimulationCommon::ParseAttributeString(relativeSpeedElement, ATTRIBUTE::rule, ruleString),
-                         relativeSpeedElement, "Attribute " + std::string(ATTRIBUTE::rule) + " is missing.");
+            std::string ruleString = ParseAttribute<std::string>(relativeSpeedElement, ATTRIBUTE::rule, parameters);
 
             auto condition = openScenario::RelativeSpeedCondition(triggeringEntities,
                                                                   referenceEntityName,
@@ -178,13 +161,9 @@ namespace Importer
         QDomElement timeToCollisionElement;
         if (SimulationCommon::GetFirstChildElement(entityConditionElement, TAG::timeToCollision, timeToCollisionElement))
         {
-            double targetTTC;
-            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(timeToCollisionElement, ATTRIBUTE::value, targetTTC),
-                         timeToCollisionElement, "Attribute " + std::string(ATTRIBUTE::value) + " is missing.");
+            double targetTTC = ParseAttribute<double>(timeToCollisionElement, ATTRIBUTE::value, parameters);
 
-            std::string ruleString;
-            ThrowIfFalse(SimulationCommon::ParseAttributeString(timeToCollisionElement, ATTRIBUTE::rule, ruleString),
-                         timeToCollisionElement, "Attribute " + std::string(ATTRIBUTE::rule) + " is missing.");
+            std::string ruleString = ParseAttribute<std::string>(timeToCollisionElement, ATTRIBUTE::rule, parameters);
 
             QDomElement targetElement;
             ThrowIfFalse(SimulationCommon::GetFirstChildElement(timeToCollisionElement, TAG::target, targetElement),
@@ -194,9 +173,7 @@ namespace Importer
             ThrowIfFalse(SimulationCommon::GetFirstChildElement(targetElement, TAG::entity, entityElement),
                          targetElement, "Tag " + std::string(TAG::entity) + " is missing.");
 
-            std::string targetEntityName;
-            ThrowIfFalse(SimulationCommon::ParseAttributeString(entityElement, ATTRIBUTE::name, targetEntityName),
-                         entityElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
+            std::string targetEntityName = ParseAttribute<std::string>(entityElement, ATTRIBUTE::name, parameters);
 
             auto condition = openScenario::TimeToCollisionCondition(triggeringEntities,
                                                                     targetEntityName,
@@ -209,26 +186,16 @@ namespace Importer
         QDomElement timeHeadwayElement;
         if (SimulationCommon::GetFirstChildElement(entityConditionElement, TAG::timeHeadway, timeHeadwayElement))
         {
-            std::string targetEntityName;
-            ThrowIfFalse(SimulationCommon::ParseAttributeString(timeHeadwayElement, ATTRIBUTE::entity, targetEntityName),
-                         timeHeadwayElement, "Attribute " + std::string(ATTRIBUTE::entity) + " is missing.");
+            std::string targetEntityName = ParseAttribute<std::string>(timeHeadwayElement, ATTRIBUTE::entity, parameters);
 
-            double targetTHW;
-            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(timeHeadwayElement, ATTRIBUTE::value, targetTHW),
-                         timeHeadwayElement, "Attribute " + std::string(ATTRIBUTE::value) + " is missing.");
+            double targetTHW = ParseAttribute<double>(timeHeadwayElement, ATTRIBUTE::value, parameters);
 
-            bool freeSpace;
-            ThrowIfFalse(SimulationCommon::ParseAttributeBool(timeHeadwayElement, ATTRIBUTE::freespace, freeSpace),
-                         timeHeadwayElement, "Attribute " + std::string(ATTRIBUTE::freespace) + " is missing.");
+            bool freeSpace = ParseAttribute<bool>(timeHeadwayElement, ATTRIBUTE::freespace, parameters);
 
-            std::string ruleString;
-            ThrowIfFalse(SimulationCommon::ParseAttributeString(timeHeadwayElement, ATTRIBUTE::rule, ruleString),
-                         timeHeadwayElement, "Attribute " + std::string(ATTRIBUTE::rule) + " is missing.");
+            std::string ruleString = ParseAttribute<std::string>(timeHeadwayElement, ATTRIBUTE::rule, parameters);
 
-            bool alongRoute;
-            SimulationCommon::ParseAttributeBool(timeHeadwayElement, ATTRIBUTE::alongRoute, alongRoute);
+            bool alongRoute = ParseAttribute<bool>(timeHeadwayElement, ATTRIBUTE::alongRoute, parameters);
             ThrowIfFalse(alongRoute, timeHeadwayElement, "Attribute alongRoute=\"false\" in TimeHeadway condition is currently not supported.");
-
 
             auto condition = openScenario::TimeHeadwayCondition(triggeringEntities,
                                                                 targetEntityName,
@@ -243,19 +210,15 @@ namespace Importer
         LogErrorAndThrow("No valid ByEntity Condition found.");
     }
 
-    openScenario::Condition EventDetectorImporter::ImportConditionByValueElement(QDomElement& byValueElement)
+    openScenario::Condition EventDetectorImporter::ImportConditionByValueElement(QDomElement& byValueElement, openScenario::Parameters& parameters)
     {
         QDomElement simulationTimeElement;
         ThrowIfFalse(SimulationCommon::GetFirstChildElement(byValueElement, TAG::simulationTime, simulationTimeElement),
                      byValueElement, "Tag " + std::string(TAG::simulationTime) + " is missing.");
 
-        double value;
-        ThrowIfFalse(SimulationCommon::ParseAttributeDouble(simulationTimeElement, ATTRIBUTE::value, value),
-                     simulationTimeElement, "Attribute " + std::string(ATTRIBUTE::value) + " is missing.");
+        double value = ParseAttribute<double>(simulationTimeElement, ATTRIBUTE::value, parameters);
 
-        std::string ruleString;
-        ThrowIfFalse(SimulationCommon::ParseAttributeString(simulationTimeElement, ATTRIBUTE::rule, ruleString),
-                     simulationTimeElement, "Attribute " + std::string(ATTRIBUTE::rule) + " is missing.");
+        std::string ruleString = ParseAttribute<std::string>(simulationTimeElement, ATTRIBUTE::rule, parameters);
 
         openScenario::Rule rule = ruleConversionMap.at(ruleString);
 

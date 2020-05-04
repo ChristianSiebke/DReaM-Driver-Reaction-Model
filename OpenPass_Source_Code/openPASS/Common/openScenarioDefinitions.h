@@ -9,14 +9,40 @@
 *******************************************************************************/
 #pragma once
 
+#include <map>
 #include <optional>
 #include <ostream>
 #include <string>
+#include <variant>
 #include <vector>
 
 #include "Interfaces/scenarioActionInterface.h"
 
 namespace openScenario {
+
+//! Value of a ParameterDeclaration or ParameterAssignment element
+using ParameterValue = std::variant<bool, int, double, std::string>;
+
+//! Content of a ParameterDeclarations or ParameterAssignments element
+using Parameters = std::map<std::string, ParameterValue>;
+
+//! Attribute in a catalog that is not yet resolved
+template <typename T>
+struct ParametrizedAttribute
+{
+    std::string name; //!Name of the parameter in OpenSCENARIO
+    T defaultValue; //!Value defined in the catalog (may later be overwriten in the CatalogReference)
+
+    ParametrizedAttribute() = default;
+
+    ParametrizedAttribute(const T& value) :
+        name{""},
+        defaultValue{value} {}
+
+    ParametrizedAttribute(const std::string& name, const T& defaultValue) :
+        name{name},
+        defaultValue{defaultValue} {}
+};
 
 // This is a custom solution and not according to the openScenario standard
 struct StochasticAttribute

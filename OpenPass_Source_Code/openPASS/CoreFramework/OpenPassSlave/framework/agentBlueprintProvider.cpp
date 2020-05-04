@@ -24,7 +24,7 @@ AgentBlueprintProvider::AgentBlueprintProvider(ConfigurationContainerInterface *
 {
 }
 
-AgentBlueprint AgentBlueprintProvider::SampleAgent(const std::string& agentProfileName) const
+AgentBlueprint AgentBlueprintProvider::SampleAgent(const std::string& agentProfileName, const openScenario::Parameters& assignedParameters) const
 {
     AgentBlueprint agentBlueprint;
 
@@ -45,7 +45,7 @@ AgentBlueprint AgentBlueprintProvider::SampleAgent(const std::string& agentProfi
             DynamicParameters dynamicParameters = DynamicParameters::make(stochastics, sampledProfiles.vehicleProfileName, profiles)
                     .SampleSensorLatencies();
             AgentBuildInformation agentBuildInformation = AgentBuildInformation::make(sampledProfiles, dynamicParameters, systemConfigBlueprint, profiles, vehicleModels)
-                    .SetVehicleModelParameters()
+                    .SetVehicleModelParameters(assignedParameters)
                     .GatherBasicComponents()
                     .GatherDriverComponents()
                     .GatherVehicleComponents()

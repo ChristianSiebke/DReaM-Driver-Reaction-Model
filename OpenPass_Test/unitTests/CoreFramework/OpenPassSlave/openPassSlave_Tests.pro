@@ -18,7 +18,7 @@ win32:QMAKE_CXXFLAGS += -Wa,-mbig-obj
 
 UNIT_UNDER_TEST = $$OPEN_SRC/CoreFramework/OpenPassSlave
 
-INCLUDEPATH += \            
+INCLUDEPATH += \
             $$OPEN_SRC/CoreFramework/CoreShare \
             $$OPEN_SRC/CoreFramework/CoreShare/cephes \
             $$OPEN_SRC/Common \
@@ -99,6 +99,7 @@ SCENERYIMPORTER_TESTS = \
 SCENARIOIMPORTER_TESTS = \
     $$UNIT_UNDER_TEST/importer/scenario.cpp \
     $$UNIT_UNDER_TEST/importer/scenarioImporter.cpp \
+    $$UNIT_UNDER_TEST/importer/oscImporterCommon.cpp \
     \
     scenarioImporter_Tests.cpp
 

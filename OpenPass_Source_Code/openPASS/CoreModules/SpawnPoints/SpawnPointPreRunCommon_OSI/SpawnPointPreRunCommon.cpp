@@ -82,7 +82,7 @@ SpawnPointInterface::Agents SpawnPointPreRunCommon::GenerateAgentsForRange(const
 
         try
         {
-            auto agentBlueprint = dependencies.agentBlueprintProvider->SampleAgent(agentProfile.name);
+            auto agentBlueprint = dependencies.agentBlueprintProvider->SampleAgent(agentProfile.name, {});
             agentBlueprint.SetAgentProfileName(agentProfile.name);
             agentBlueprint.SetAgentCategory(AgentCategory::Common);
 

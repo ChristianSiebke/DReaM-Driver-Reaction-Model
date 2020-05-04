@@ -195,6 +195,8 @@ namespace openpass::importer::xml::scenarioImporter::tag
     constexpr char object[] {"Object"};
     constexpr char orientation[] {"Orientation"};
     constexpr char parameter[] {"Parameter"};
+    constexpr char parameterAssignment[] {"ParameterAssignment"};
+    constexpr char parameterAssignments[] {"ParameterAssignments"};
     constexpr char parameterDeclaration[] {"ParameterDeclaration"};
     constexpr char position[] {"Position"};
     constexpr char Private[] {"Private"};
@@ -228,6 +230,7 @@ namespace openpass::importer::xml::scenarioImporter::attribute
     constexpr char numberOfExecutions[] {"numberOfExecutions"};
     constexpr char object[] {"object"};
     constexpr char offset[] {"offset"};
+    constexpr char parameterRef[] {"parameterRef"};
     constexpr char path[] {"path"};
     constexpr char rate[] {"rate"};
     constexpr char roadId[] {"roadId"};

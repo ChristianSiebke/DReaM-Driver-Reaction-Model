@@ -17,8 +17,8 @@ class FakeVehicleModels : public VehicleModelsInterface {
  public:
   MOCK_METHOD0(GetVehicleModelMap,
       VehicleModelMap&());
-  MOCK_METHOD1(GetVehicleModel,
-      VehicleModelParameters(std::string));
+  MOCK_METHOD2(GetVehicleModel,
+      VehicleModelParameters(std::string, const openScenario::Parameters&));
 };
 
 
