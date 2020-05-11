@@ -17,29 +17,16 @@
 
 #include <list>
 #include <unordered_map>
+#include <vector>
 
 #include "Interfaces/parameterInterface.h"
 #include "Common/globalDefinitions.h"
 #include "Common/spawnPointLibraryDefinitions.h"
 
-using IntProbabilities = std::unordered_map<int, double>;
-using DoubleProbabilities = std::unordered_map<double, double>;
-using StringProbabilities = std::unordered_map<std::string, double>;
-
-struct hash_fn
-{
-    std::size_t operator()(const openpass::parameter::NormalDistribution& normalDistribution) const
-    {
-        std::size_t mean = std::hash<double>()(normalDistribution.mean);
-        std::size_t standardDeviation = std::hash<double>()(normalDistribution.standardDeviation);
-        std::size_t min = std::hash<double>()(normalDistribution.min);
-        std::size_t max = std::hash<double>()(normalDistribution.max);
-
-        return mean ^ standardDeviation ^ min ^ max;
-    }
-};
-
-using NormalDistributionProbabilities = std::unordered_map<openpass::parameter::NormalDistribution, double, hash_fn>;
+using IntProbabilities = std::vector<std::pair<int, double>>;
+using DoubleProbabilities = std::vector<std::pair<double, double>>;
+using StringProbabilities = std::vector<std::pair<std::string, double>>;
+using StochasticDistributionProbabilities = std::vector<std::pair<openpass::parameter::StochasticDistribution, double>>;
 
 struct ExperimentConfig
 {

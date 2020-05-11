@@ -24,7 +24,6 @@
 #include "Common/spawnPointLibraryDefinitions.h"
 #include "Interfaces/spawnPointInterface.h"
 #include "Interfaces/worldInterface.h"
-#include "Interfaces/samplerInterface.h"
 #include "Interfaces/scenarioInterface.h"
 #include "Interfaces/agentBlueprintProviderInterface.h"
 #include "SpawnPointPreRunCommonDefinitions.h"
@@ -57,7 +56,7 @@ public:
      * \brief Trigger creates the agents for the spawn points
      * \return the created agents
      */
-    Agents Trigger() override;
+    Agents Trigger(int time) override;
 
 private:
     /**
@@ -68,12 +67,9 @@ private:
      * @return
      */
     Agents GenerateAgentsForRange(const LaneId laneId,
-                                  const Range& range);
-    /**
-     * @brief Calculates gap between agents.
-     * @return Gap in seconds.
-     */
-    double RollGapBetweenCars() const;
+                                  const RoadId roadId,
+                                  const Range& range,
+                                  size_t laneIndex);
 
     /**
      * @brief Get SpawnInfo for the next agent that should be spawned.
@@ -85,7 +81,8 @@ private:
      * @param[in]   agentRearLength
      * @return      SpawnInfo for new agent.
      */
-    std::optional<SpawnInfo> GetNextSpawnCarInfo(const LaneId laneId,
+    std::optional<SpawnInfo> GetNextSpawnCarInfo(const RoadId roadId,
+                                                 const LaneId laneId,
                                                  const Range& range,
                                                  const double gapInSeconds,
                                                  const double velocity,
@@ -150,8 +147,11 @@ private:
      */
     [[noreturn]] void LogError(const std::string& message);
 
+    SpawningAgentProfile SampleAgentProfile(bool rightLane);
+
+
     const SpawnPointDependencies dependencies;
-    const SpawnPointParameters parameters;
+    const PreRunSpawnerParameters parameters;
     const WorldAnalyzer worldAnalyzer;
 
     static constexpr double NON_PLATOON_GAP_EXTENSION = 10.0;

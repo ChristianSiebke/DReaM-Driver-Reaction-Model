@@ -30,242 +30,103 @@
 
 #include "Common/boostGeometryCommon.h"
 
-//-----------------------------------------------------------------------------
-//! @brief defines common helper functions like conversion from and to enums.
-//-----------------------------------------------------------------------------
-class CommonHelper
+namespace CommonHelper
 {
-public:
-    static constexpr double EPSILON = 0.001; //!Treat values smaller than epsilon as zero for geometric calculations
 
-    static double ConvertagentViewDirectionToRadian(AgentViewDirection agentViewDirection)
+static bool CheckPointValid(const Common::Vector2d *point)
+{
+    return ((point != nullptr) && (point->x != INFINITY) && (point->y != INFINITY));
+}
+
+//! Calculate the absolute angle between two pcm points.
+//!
+//! @param[in]    firstPoint     firstPoint
+//! @param[in]    secondPoint    secondPoint
+//! @return       distance between two pcm points
+//-----------------------------------------------------------------------------
+static double CalcAngleBetweenPoints(const Common::Vector2d& firstPoint, const Common::Vector2d& secondPoint)
+{
+    if ((!CheckPointValid(&firstPoint)) || (!CheckPointValid(&secondPoint)))
     {
-        double viewDirection = INFINITY;
-
-        switch (agentViewDirection)
-        {
-        case AgentViewDirection::front:
-            viewDirection = 0;
-            break;
-        case AgentViewDirection::left:
-            viewDirection = M_PI_2;
-            break;
-        case AgentViewDirection::back:
-            viewDirection = M_PI;
-            break;
-        case AgentViewDirection::right:
-            viewDirection = -M_PI_2;
-            break;
-        default:
-            break;
-        }
-        return viewDirection;
+        return INFINITY;
     }
 
-    static AgentViewDirection ConvertRadianToAgentViewDirection(double radiant)
+    double angle = (secondPoint - firstPoint).Angle();
+
+    return angle;
+}
+
+//! Transform a pcm point to a vector in the coordination system of a
+//! source point in a direction.
+//!
+//! @param[in]    point     point
+//! @return                 vector
+static Common::Vector2d TransformPointToSourcePointCoord(const Common::Vector2d *point,
+                                                         const Common::Vector2d *sourcePoint,
+                                                         double direction)
+{
+    Common::Vector2d newPoint = *point; //(point->x, point->y);
+    newPoint.Translate((*sourcePoint) * (-1));
+    newPoint.Rotate(direction * (-1));
+
+    return newPoint;
+}
+
+//-----------------------------------------------------------------------------
+//! @brief Round doubles.
+//!
+//! Rounds doubles to a given amount of decimals.
+//!
+//! @param[in] value            Value which is rounded
+//! @param[in] decimals         Amount of decimals.
+//!
+//! @return                     Rounded value.
+//-----------------------------------------------------------------------------
+static double roundDoubleWithDecimals(double value, int decimals)
+{
+    return std::floor((value * (std::pow(10, decimals))) + 0.5)/(std::pow(10.0, decimals));
+}
+
+static std::optional<Common::Vector2d> CalculateIntersection(const Common::Vector2d& firstStartPoint, const Common::Vector2d& firstAxis,
+                                                      const Common::Vector2d& secondStartPoint, const Common::Vector2d& secondAxis)
+{
+    //Solve linear equation firstStartPoint + lambda * firstAxis = secondStart + kappa * secondAxis
+    double determinant = - firstAxis.x * secondAxis.y + firstAxis.y * secondAxis.x; //Determinant of matrix (firstAxis -secondAxis)
+    if (std::abs(determinant) < EPSILON)
     {
-        if ((radiant <= M_PI_4) && (radiant >= -M_PI_4))
-        {
-            return AgentViewDirection::front;
-        }
-        else if ((radiant > M_PI_4) && (radiant <= 3 * M_PI_4))
-        {
-            return AgentViewDirection::left;
-        }
-        else if ((radiant < -M_PI_4) && (radiant >= -3 * M_PI))
-        {
-            return AgentViewDirection::right;
-        }
-        else if (((radiant < -3 * M_PI_4) && (radiant >= -M_PI))
-                 || ((radiant > 3 * M_PI_4) && (radiant <= M_PI)))
-        {
-            return AgentViewDirection::back;
-        }
-        else
-        {
-            return AgentViewDirection::none;
-        }
+        return std::nullopt;
+    }
+    double lambda = (- (secondStartPoint.x - firstStartPoint.x) * secondAxis.y
+                     + (secondStartPoint.y - firstStartPoint.y) * secondAxis.x)
+                    / determinant;
+    double intersectionPointX = firstStartPoint.x + lambda * firstAxis.x;
+    double intersectionPointY = firstStartPoint.y + lambda * firstAxis.y;
+    return std::make_optional<Common::Vector2d>(intersectionPointX, intersectionPointY);
+}
+
+//-----------------------------------------------------------------------------
+//! @brief Tokenizes string by delimiter.
+//!
+//! @param [in] str              String to be tokenized
+//! @param [in] delimiter        Delimiter by which string gets tokenized
+//!
+//! @return                     Vector of tokens
+//-----------------------------------------------------------------------------
+static std::vector<std::string> TokenizeString(const std::string& str, const char delimiter)
+{
+    std::stringstream stream(str);
+
+    std::string intermediateString;
+    std::vector<std::string> tokens;
+    while (getline(stream, intermediateString, delimiter))
+    {
+        boost::algorithm::trim(intermediateString);
+        tokens.push_back(intermediateString);
     }
 
-    static double ConvertRadiantToDegree(double radian)
-    {
-        double degree = radian * 180 / M_PI;
-        return degree;
-    }
-
-    static double ConvertDegreeToRadian(double degree)
-    {
-        double radian = degree / 180 * M_PI;
-        return radian;
-    }
-
-    static double ConvertAngleToPi(double angle)
-    {
-        double out_angle = angle;
-        if (fabs(out_angle) > M_PI)
-        {
-            if (out_angle > 0)
-            {
-                out_angle -= 2 * M_PI;
-            }
-            else
-            {
-                out_angle += 2 * M_PI;
-            }
-        }
-
-        return out_angle;
-    }
-
-    // check if an angle is in the range of [angleRight, angleLeft]. All 3 inputs should be in the range of [-PI, PI]
-    static bool Angle_In_Range(double angel, double angleRight, double angleLeft)
-    {
-      if (angleRight <= angleLeft)
-      {
-          return ((angel >= angleRight) && (angel <= angleLeft));
-      }
-      else // angleRight > angleLeft, meaning that the range passes through the line of PI/-PI
-      {
-          return ((angel >= angleRight) || (angel <= angleLeft));
-      }
-    }
-
-    //! Returns the same angle but within the range [-PI, PI]
-    static double SetAngleToValidRange(double angel)
-    {
-        return std::fmod(angel + 3 * M_PI, 2 * M_PI) - M_PI;
-    }
-
-    static bool CheckPointValid(const Common::Vector2d *point)
-    {
-        return ((point != nullptr) && (point->x != INFINITY) && (point->y != INFINITY));
-    }
-
-    //! Calculate the absolute angle between two pcm points.
-    //!
-    //! @param [in]    firstPoint     firstPoint
-    //! @param [in]    secondPoint    secondPoint
-    //! @return       distance between two pcm points
-    //-----------------------------------------------------------------------------
-    static double CalcAngleBetweenPoints(const Common::Vector2d& firstPoint, const Common::Vector2d& secondPoint)
-    {
-        if ((!CheckPointValid(&firstPoint)) || (!CheckPointValid(&secondPoint)))
-        {
-            return INFINITY;
-        }
-
-        double angle = (secondPoint - firstPoint).Angle();
-
-        return angle;
-    }
-
-    //! Transform a pcm point to a vector in the coordination system of a
-    //! source point in a direction.
-    //!
-    //! @param [in]    point     point
-    //! @return                 vector
-    static Common::Vector2d TransformPointToSourcePointCoord(const Common::Vector2d *point,
-                                                             const Common::Vector2d *sourcePoint,
-                                                             double direction)
-    {
-        Common::Vector2d newPoint = *point; //(point->x, point->y);
-        newPoint.Translate((*sourcePoint) * (-1));
-        newPoint.Rotate(direction * (-1));
-
-        return newPoint;
-    }
-
-    //-----------------------------------------------------------------------------
-    //! @brief Round doubles.
-    //!
-    //! Rounds doubles to a given amount of decimals.
-    //!
-    //! @param[in] value            Value which is rounded
-    //! @param[in] decimals         Amount of decimals.
-    //!
-    //! @return                     Rounded value.
-    //-----------------------------------------------------------------------------
-    static double roundDoubleWithDecimals(double value, int decimals)
-    {
-        return std::floor((value * (std::pow(10, decimals))) + 0.5)/(std::pow(10.0, decimals));
-    }
-
-    static std::optional<Common::Vector2d> CalculateIntersection(const Common::Vector2d& firstStartPoint, const Common::Vector2d& firstAxis,
-                                                          const Common::Vector2d& secondStartPoint, const Common::Vector2d& secondAxis)
-    {
-        //Solve linear equation firstStartPoint + lambda * firstAxis = secondStart + kappa * secondAxis
-        double determinant = - firstAxis.x * secondAxis.y + firstAxis.y * secondAxis.x; //Determinant of matrix (firstAxis -secondAxis)
-        if (std::abs(determinant) < EPSILON)
-        {
-            return std::nullopt;
-        }
-        double lambda = (- (secondStartPoint.x - firstStartPoint.x) * secondAxis.y
-                         + (secondStartPoint.y - firstStartPoint.y) * secondAxis.x)
-                        / determinant;
-        double intersectionPointX = firstStartPoint.x + lambda * firstAxis.x;
-        double intersectionPointY = firstStartPoint.y + lambda * firstAxis.y;
-        return std::make_optional<Common::Vector2d>(intersectionPointX, intersectionPointY);
-    }
-
-    //-----------------------------------------------------------------------------
-    //! @brief Calculate linear interpolated points with constant spacing.
-    //!
-    //! @param [in] start            Start of interval
-    //! @param [in] end              End of interval
-    //! @param [in] totalPoints      Total number of points returned (includes start
-    //!                             and end point)
-    //!
-    //! @return                     Vector of interpolated points.
-    //-----------------------------------------------------------------------------
-    static std::vector<double> InterpolateLinear(const double start, const double end, const int totalPoints)
-    {
-        std::vector<double> elements;
-
-        for(int i = 0; i < totalPoints; ++i)
-        {
-            elements.push_back(start + (i * ((end-start) / (totalPoints-1))));
-            //elements.push_back(start + (i * ((end-start+1) / (totalPoints))));  //not correct implemented yet
-        }
-        return elements;
-    }
-
-    template <typename T>
-    static inline constexpr T PerHourToPerSecond(T value) noexcept
-    {
-        static_assert(std::is_floating_point_v<T>, "the value must be a floating point data type");
-        return value/static_cast<T>(3600.0);
-    }
-
-    template <typename T>
-    static inline constexpr T KilometerPerHourToMeterPerSecond(T kmH) noexcept
-    {
-        static_assert(std::is_floating_point_v<T>, "kmH must be a floating point data type");
-        return kmH/static_cast<T>(3.6);
-    }
-
-    //-----------------------------------------------------------------------------
-    //! @brief Tokenizes string by delimiter.
-    //!
-    //! @param [in] str              String to be tokenized
-    //! @param [in] delimiter        Delimiter by which string gets tokenized
-    //!
-    //! @return                     Vector of tokens
-    //-----------------------------------------------------------------------------
-    static std::vector<std::string> TokenizeString(const std::string& str, const char delimiter)
-    {
-        std::stringstream stream(str);
-
-        std::string intermediateString;
-        std::vector<std::string> tokens;
-        while (getline(stream, intermediateString, delimiter))
-        {
-            boost::algorithm::trim(intermediateString);
-            tokens.push_back(intermediateString);
-        }
-
-        return tokens;
-    }
-};
+    return tokens;
+}
+}; // namespace CommonHelper
 
 //-----------------------------------------------------------------------------
 //! @brief Containing general static functions to evaluate traffic situations

@@ -9,40 +9,54 @@
 *******************************************************************************/
 
 #include "dynamicParametersSampler.h"
+#include "sampler.h"
 #include <algorithm>
 
-DynamicParameterSampler::DynamicParameterSampler(const SamplerInterface& sampler,
+DynamicParameterSampler::DynamicParameterSampler(StochasticsInterface& stochastics,
                                                  std::string &vehicleProfileName,
-                                                 std::unordered_map<std::string, VehicleProfile> &vehicleProfiles,
-                                                 openpass::sensors::Profiles &sensorProfiles) :
-    sampler(sampler),
+                                                 ProfilesInterface* profiles) :
+    stochastics(stochastics),
     vehicleProfileName(vehicleProfileName),
-    vehicleProfiles(vehicleProfiles),
-    sensorProfiles(sensorProfiles)
+    profiles(profiles)
 {
 }
 
 DynamicParameterSampler &DynamicParameterSampler::SampleSensorLatencies()
 {
-    for (const auto& sensor : vehicleProfiles.at(vehicleProfileName).sensors)
-    {
-        const auto& profile = std::find_if(sensorProfiles.cbegin(), sensorProfiles.cend(),
-                                                 [sensor](const auto& profile){return profile.name == sensor.profile.name && profile.type == sensor.profile.type;});
+    const auto& vehicleProfiles = profiles->GetVehicleProfiles();
 
-        const auto& latencyParameters = openpass::parameter::Get<openpass::parameter::NormalDistribution>(profile->parameter, "Latency"); // checked in importer
-        double latency = sampler.RollForStochasticAttribute(latencyParameters->mean, latencyParameters->standardDeviation, latencyParameters->min, latencyParameters->max);
-        dynamicParameter.sensorLatencies.insert({sensor.id, latency});
+    if (vehicleProfiles.find(vehicleProfileName) != vehicleProfiles.end())
+    {
+        for (const auto& sensor : vehicleProfiles.at(vehicleProfileName).sensors)
+        {
+            try
+            {
+                const auto& profile = profiles->GetProfile(sensor.profile.type, sensor.profile.name);
+                const auto& optionalLatencyParameters = openpass::parameter::Get<openpass::parameter::StochasticDistribution>(profile, "Latency");
+
+                if (!optionalLatencyParameters.has_value())
+                {
+                    throw std::runtime_error("'Latency' parameter not defined");
+                }
+
+                double latency = Sampler::RollForStochasticAttribute(optionalLatencyParameters.value(), &stochastics);
+                dynamicParameter.sensorLatencies.insert({sensor.id, latency});
+            }
+            catch (const std::runtime_error& error)
+            {
+                throw std::runtime_error("Could not sample sensor latencies for vehicle profile '" + vehicleProfileName + "': " + error.what());
+            }
+        }
     }
 
     return *this;
 }
 
-DynamicParameterSampler DynamicParameters::make(const SamplerInterface &sampler,
+DynamicParameterSampler DynamicParameters::make(StochasticsInterface& stochastics,
                                                 std::string& vehicleProfileName,
-                                                std::unordered_map<std::string, VehicleProfile> &vehicleProfiles,
-                                                openpass::sensors::Profiles &sensorProfiles)
+                                                ProfilesInterface* profiles)
 {
-    return DynamicParameterSampler(sampler, vehicleProfileName, vehicleProfiles, sensorProfiles);
+    return DynamicParameterSampler(stochastics, vehicleProfileName, profiles);
 }
 
 DynamicParameters DynamicParameters::empty()

@@ -14,6 +14,7 @@
 #include "Interfaces/worldInterface.h"
 #include "CoreFramework/OpenPassSlave/modelElements/agentBlueprint.h"
 #include "CoreFramework/OpenPassSlave/framework/agentFactory.h"
+#include "CoreFramework/OpenPassSlave/framework/sampler.h"
 
 SpawnPointScenario::SpawnPointScenario(const SpawnPointDependencies* dependencies,
                        const CallbackInterface* callbacks):
@@ -26,7 +27,7 @@ SpawnPointScenario::SpawnPointScenario(const SpawnPointDependencies* dependencie
     }
 }
 
-SpawnPointInterface::Agents SpawnPointScenario::Trigger()
+SpawnPointInterface::Agents SpawnPointScenario::Trigger([[maybe_unused]]int time)
 {
     Agents agents;
 
@@ -245,10 +246,9 @@ SpawnParameter SpawnPointScenario::CalculateSpawnParameter(const SpawnInfo& spaw
 
 double SpawnPointScenario::CalculateAttributeValue(const openScenario::StochasticAttribute &attribute)
 {
-        return dependencies.sampler->RollForStochasticAttribute(attribute.mean,
-                                                                attribute.stdDeviation,
-                                                                attribute.lowerBoundary,
-                                                                attribute.upperBoundary);
+    openpass::parameter::NormalDistribution distribution{attribute.mean, attribute.stdDeviation, attribute.lowerBoundary, attribute.upperBoundary};
+    return Sampler::RollForStochasticAttribute(distribution,
+                                               dependencies.stochastics);
 }
 
 [[noreturn]] void SpawnPointScenario::LogError(const std::string& message)

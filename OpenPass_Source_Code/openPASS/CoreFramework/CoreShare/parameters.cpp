@@ -66,10 +66,9 @@ bool Parameters::AddParameterStringVector(std::string name, const std::vector<st
     return CheckedInsert(parametersStringVector, name, value);
 }
 
-bool Parameters::AddParameterNormalDistribution(std::string name,
-        const openpass::parameter::NormalDistribution value)
+bool Parameters::AddParameterStochastic(std::string name, const openpass::parameter::StochasticDistribution value)
 {
-    return CheckedInsert(parametersNormalDistribution, name, value);
+    return CheckedInsert(parametersStochastic, name, value);
 }
 
 ParameterInterface& Parameters::InitializeListItem(std::string key)

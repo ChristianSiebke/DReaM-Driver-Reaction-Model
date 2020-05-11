@@ -23,7 +23,7 @@
 class AgentBlueprintProvider : public AgentBlueprintProviderInterface
 {
 public:
-    AgentBlueprintProvider(ConfigurationContainerInterface* configurationContainer, const SamplerInterface& sampler);
+    AgentBlueprintProvider(ConfigurationContainerInterface* configurationContainer, StochasticsInterface& stochastics);
 
     /*!
     * \brief Samples an entire agent
@@ -61,7 +61,7 @@ public:
                                       std::string vehicleModelName) const;
 
 private:
-    const SamplerInterface& sampler;
+    StochasticsInterface& stochastics;
     ProfilesInterface* profiles;
     std::unordered_map<std::string, AgentProfile>& agentProfiles;
     VehicleModelsInterface* vehicleModels {nullptr};

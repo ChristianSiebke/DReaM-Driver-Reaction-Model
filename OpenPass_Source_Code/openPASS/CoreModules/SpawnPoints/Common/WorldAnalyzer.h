@@ -17,6 +17,12 @@
 
 using namespace SpawnPointDefinitions;
 
+enum class Direction
+{
+    FORWARD = 0,
+    BACKWARD
+};
+
 class WorldAnalyzer
 {
 public:

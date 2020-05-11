@@ -184,7 +184,7 @@ bool ObservationLibrary::ReleaseObservationModule(ObservationModule* observation
 
 ObservationModule* ObservationLibrary::CreateObservationModule(
         const openpass::common::RuntimeInformation& runtimeInformation,
-        const openpass::parameter::Container& parameters,
+        const openpass::parameter::ParameterSetLevel1& parameters,
         StochasticsInterface* stochastics,
         WorldInterface* world,
         EventNetworkInterface* eventNetwork)

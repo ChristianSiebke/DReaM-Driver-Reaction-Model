@@ -30,6 +30,7 @@ SUBDIRS = \
     sensorOSI_Tests \
     signalPrioritizer_Tests \
     spawnPointScenario_Tests \
+    spawnPointRuntimeCommon_Tests \
     spawnPointWorldAnalyzer_Tests \
     worldOSI_Tests \
     common_Tests
@@ -90,6 +91,9 @@ signalPrioritizer_Tests.file = \
 
 spawnPointScenario_Tests.file = \
     $$PWD/CoreModules/SpawnPointScenario_OSI/spawnPointScenario_Tests.pro
+
+spawnPointRuntimeCommon_Tests.file = \
+    $$PWD/CoreModules/SpawnPointRuntimeCommon_OSI/spawnPointRuntimeCommon_Tests.pro
 
 spawnPointWorldAnalyzer_Tests.file = \
     $$PWD/CoreModules/SpawnPointWorldAnalyzer/spawnPointWorldAnalyzer_Tests.pro

@@ -49,7 +49,7 @@ extern "C" SPAWNPOINT_SHARED_EXPORT std::unique_ptr<SpawnPointInterface> OpenPAS
     }
 }
 
-extern "C" SPAWNPOINT_SHARED_EXPORT SpawnPointInterface::Agents OpenPASS_Trigger(SpawnPointInterface *implementation)
+extern "C" SPAWNPOINT_SHARED_EXPORT SpawnPointInterface::Agents OpenPASS_Trigger(SpawnPointInterface *implementation, int time)
 {
-    return implementation->Trigger();
+    return implementation->Trigger(time);
 }

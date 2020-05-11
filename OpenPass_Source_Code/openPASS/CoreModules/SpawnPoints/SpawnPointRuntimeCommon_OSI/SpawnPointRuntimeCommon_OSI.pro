@@ -25,7 +25,7 @@ INCLUDEPATH += \
     $$SUBDIRS \
         ../../.. \
         ../../../CoreFramework/OpenPassSlave/modelElements \
-        ../../../CoreFramework/OpenPassSlave/Framework \
+        ../../../CoreFramework/OpenPassSlave/framework \
         ../../../CoreFramework/OpenPassSlave/importer \
         ../../../CoreFramework/CoreShare \
         ..
@@ -34,12 +34,14 @@ DEPENDENCIES_HEADERS = \
                        ../Common/SpawnPointDefinitions.h \
                        ../Common/WorldAnalyzer.h \
                        ../../../CoreFramework/CoreShare/log.h \
-                       ../../../CoreFramework/OpenPassSlave/modelElements/agentBlueprint.h
+                       ../../../CoreFramework/OpenPassSlave/modelElements/agentBlueprint.h \
+                       ../../../CoreFramework/OpenPassSlave/framework/sampler.h
 
 DEPENDENCIES_SOURCES = \
                        ../Common/WorldAnalyzer.cpp \
                        ../../../CoreFramework/CoreShare/log.cpp \
-                       ../../../CoreFramework/OpenPassSlave/modelElements/agentBlueprint.cpp
+                       ../../../CoreFramework/OpenPassSlave/modelElements/agentBlueprint.cpp \
+                       ../../../CoreFramework/OpenPassSlave/framework/sampler.cpp
 
 SOURCES += \
     $$DEPENDENCIES_SOURCES \

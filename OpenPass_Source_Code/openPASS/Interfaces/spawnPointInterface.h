@@ -45,7 +45,7 @@ public:
     virtual ~SpawnPointInterface() = default;
 
     using Agents = std::vector<SimulationSlave::Agent*>;
-    virtual Agents Trigger() = 0;
+    virtual Agents Trigger(int time) = 0;
 
 protected:
     //-----------------------------------------------------------------------------

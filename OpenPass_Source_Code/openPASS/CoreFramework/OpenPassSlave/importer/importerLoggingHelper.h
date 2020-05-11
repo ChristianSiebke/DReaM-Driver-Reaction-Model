@@ -94,23 +94,33 @@ namespace openpass::importer::xml::parameterImporter::tag
 {
     constexpr char Bool[] {"Bool"};
     constexpr char Double[] {"Double"};
-    constexpr char doubleVector[] {"DoubleVector"};
+    constexpr char DoubleVector[] {"DoubleVector"};
     constexpr char Int[] {"Int"};
-    constexpr char intVector[] {"IntVector"};
-    constexpr char list[] {"List"};
-    constexpr char listItem[] {"ListItem"};
-    constexpr char normalDistribution[] {"NormalDistribution"};
-    constexpr char string[] {"String"};
+    constexpr char IntVector[] {"IntVector"};
+    constexpr char String[] {"String"};
+
+    constexpr char NormalDistribution[] {"NormalDistribution"};
+    constexpr char LogNormalDistribution[] {"LogNormalDistribution"};
+    constexpr char UniformDistribution[] {"UniformDistribution"};
+    constexpr char ExponentialDistribution[] {"ExponentialDistribution"};
+
+    constexpr char List[] {"List"};
+    constexpr char ListItem[] {"ListItem"};
+    constexpr char Reference[] {"Reference"};
 }
 
 namespace openpass::importer::xml::parameterImporter::attribute
 {
     constexpr char key[] {"Key"};
+    constexpr char lambda[] {"Lambda"};
     constexpr char max[] {"Max"};
     constexpr char mean[] {"Mean"};
     constexpr char min[] {"Min"};
+    constexpr char mu[] {"Mu"};
     constexpr char name[] {"Name"};
     constexpr char sd[] {"SD"};
+    constexpr char sigma[] {"Sigma"};
+    constexpr char type[] {"Type"};
     constexpr char value[] {"Value"};
 }
 
@@ -126,17 +136,12 @@ namespace openpass::importer::xml::profilesImporter::tag
     constexpr char position[] {"Position"};
     constexpr char profile[] {"Profile"};
     constexpr char profiles[] {"Profiles"};
+    constexpr char profileGroup[] {"ProfileGroup"};
     constexpr char sensor[] {"Sensor"};
     constexpr char sensors[] {"Sensors"};
     constexpr char sensorLink[] {"SensorLink"};
     constexpr char sensorLinks[] {"SensorLinks"};
-    constexpr char sensorProfile[] {"SensorProfile"};
-    constexpr char sensorProfiles[] {"SensorProfiles"};
-    constexpr char spawnPointProfile[] {"SpawnPointProfile"};
-    constexpr char spawnPointProfiles[] {"SpawnPointProfiles"};
     constexpr char system[] {"System"};
-    constexpr char vehicleComponentProfile[] {"VehicleComponentProfile"};
-    constexpr char vehicleComponentProfiles[] {"VehicleComponentProfiles"};
     constexpr char vehicleProfile[] {"VehicleProfile"};
     constexpr char vehicleProfiles[] {"VehicleProfiles"};
 }

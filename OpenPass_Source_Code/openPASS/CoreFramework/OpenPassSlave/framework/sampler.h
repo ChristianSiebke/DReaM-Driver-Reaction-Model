@@ -17,9 +17,11 @@
 
 #pragma once
 
-#include "Interfaces/samplerInterface.h"
 #include "Interfaces/stochasticsInterface.h"
+#include "Interfaces/slaveConfigInterface.h"
 #include "Common/runtimeInformation.h"
+#include <numeric>
+#include <algorithm>
 
 //-----------------------------------------------------------------------------
 /** \brief Sampler samples probabilities and SpawnPoint and World parameters.
@@ -28,33 +30,29 @@
 *
 */
 //-----------------------------------------------------------------------------
-class Sampler : public SamplerInterface
+namespace Sampler
 {
-public:
-    /// \brief Sampler
-    /// \param stochastics          Base for all random rolls (\see StochasticsInterface)
-    /// \param runtimeInformation   Consumed by spawnpoint and worldparameters
-    Sampler(StochasticsInterface &stochastics, const openpass::common::RuntimeInformation& runtimeInformation);
-    virtual ~Sampler() override = default;
+    bool RollFor(double chance, StochasticsInterface* stochastics);
+    double RollForStochasticAttribute(const openpass::parameter::StochasticDistribution& distribution, StochasticsInterface* stochastics);
 
-    virtual bool RollFor(double chance) const override;
-    virtual double RollGapBetweenCars(double carRatePerSecond) const override;
-    virtual double RollGapExtension(double extension) const override;
-    virtual double RollForVelocity(double meanVelocity, double stdDeviationVelocity) const override;
-    virtual double RollForStochasticAttribute(double mean, double stdDev, double lowerBound, double upperBound) const override;
-    virtual size_t RollUniformDistributedVectorIndex(size_t vectorSize) const override;
-    virtual std::string SampleStringProbability(StringProbabilities probabilities) const override;
-    virtual int SampleIntProbability(IntProbabilities probabilities) const override;
-    virtual double SampleDoubleProbability(DoubleProbabilities probabilities) const override;
-    virtual openpass::parameter::NormalDistribution SampleNormalDistributionProbability(NormalDistributionProbabilities probabilities) const override;
-    virtual std::unique_ptr<ParameterInterface> SampleWorldParameters(const EnvironmentConfig &environmentConfig) const override;
+    template <typename T>
+    T Sample(std::vector<std::pair<T, double>> weightedValues, StochasticsInterface* stochastics)
+    {
+        double sumOfWeights{0.0};
+        for (const auto& [value, weight] : weightedValues)
+        {
+            sumOfWeights += weight;
+        }
+        auto roll = stochastics->GetUniformDistributed(0, sumOfWeights);
+        for (const auto& [value, weight] : weightedValues)
+        {
+            roll -= weight;
+            if (roll <= 0)
+            {
+                return value;
+            }
+        }
+        throw std::runtime_error("Invalid roll in Sampler");
+    }
 
-private:
-    const std::string COMPONENTNAME = "Sampler";
-
-    StochasticsInterface& stochastics;
-    const openpass::common::RuntimeInformation &runtimeInformation;
-
-    static constexpr double RATE_ALWAYS_TRUE {1.0};
-    static constexpr double RATE_ALWAYS_FALSE {0.0};
 };

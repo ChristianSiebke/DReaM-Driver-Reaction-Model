@@ -83,12 +83,12 @@ public:
         return modelLibrary;
     }
 
-    const openpass::parameter::Container& GetModelParameters()
+    const openpass::parameter::ParameterSetLevel1& GetModelParameters()
     {
         return this->parameters;
     }
 
-    void SetModelParameter(const openpass::parameter::Container parameters)
+    void SetModelParameter(const openpass::parameter::ParameterSetLevel1 parameters)
     {
         this->parameters = parameters;
     }
@@ -105,7 +105,7 @@ private:
     std::string modelLibrary = "";
     std::map<int, int> inputs;
     std::map<int, int> outputs;
-    openpass::parameter::Container parameters{};
+    openpass::parameter::ParameterSetLevel1 parameters{};
 };
 
 } // namespace SimulationSlave

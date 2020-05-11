@@ -82,11 +82,11 @@ public:
     //-----------------------------------------------------------------------------
     //! Draw from log-normal distribution.
     //!
-    //! @param[in]     mean         mean value
-    //! @param[in]     stdDeviation standard deviation from mean value
+    //! @param[in]     mu         mu value
+    //! @param[in]     sigma     sigma value
     //! @return                     value drawn
     //-----------------------------------------------------------------------------
-    virtual double GetLogNormalDistributed(double mean, double stdDeviation) = 0;
+    virtual double GetLogNormalDistributed(double mu, double sigma) = 0;
 
     //-----------------------------------------------------------------------------
     //! Used for a user specific distribution.

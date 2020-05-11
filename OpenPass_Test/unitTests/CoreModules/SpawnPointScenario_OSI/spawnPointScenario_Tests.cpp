@@ -19,7 +19,7 @@
 #include "fakeScenario.h"
 #include "fakeAgentBlueprintProvider.h"
 #include "fakeAgentFactory.h"
-#include "fakeSampler.h"
+#include "fakeStochastics.h"
 #include "fakeAgent.h"
 
 using ::testing::ReturnRef;
@@ -63,9 +63,9 @@ TEST(SpawnPointScenario, Trigger_SpawnsEgoAgentAccordingToScenarioWorldPosition)
     NiceMock<FakeScenario> fakeScenario;
     NiceMock<FakeAgentBlueprintProvider> fakeAgentBlueprintProvider;
     NiceMock<FakeAgentFactory> fakeAgentFactory;
-    NiceMock<FakeSampler> fakeSampler;
+    NiceMock<FakeStochastics> fakeStochastics;
 
-    SpawnPointDependencies dependencies(&fakeAgentFactory, &fakeWorld, &fakeAgentBlueprintProvider, &fakeSampler);
+    SpawnPointDependencies dependencies(&fakeAgentFactory, &fakeWorld, &fakeAgentBlueprintProvider, &fakeStochastics);
     dependencies.scenario = &fakeScenario;
 
     const std::string entityName = "Ego";
@@ -121,7 +121,7 @@ TEST(SpawnPointScenario, Trigger_SpawnsEgoAgentAccordingToScenarioWorldPosition)
             .WillOnce(Return(&agent));
 
     SpawnPointScenario spawnPointScenario{&dependencies, nullptr};
-    spawnPointScenario.Trigger();
+    spawnPointScenario.Trigger(0);
 }
 
 TEST(SpawnPointScenario, Trigger_SpawnsEgoAgentAccordingToScenarioLanePosition)
@@ -130,9 +130,9 @@ TEST(SpawnPointScenario, Trigger_SpawnsEgoAgentAccordingToScenarioLanePosition)
     NiceMock<FakeScenario> fakeScenario;
     NiceMock<FakeAgentBlueprintProvider> fakeAgentBlueprintProvider;
     NiceMock<FakeAgentFactory> fakeAgentFactory;
-    NiceMock<FakeSampler> fakeSampler;
+    NiceMock<FakeStochastics> fakeStochastics;
 
-    SpawnPointDependencies dependencies(&fakeAgentFactory, &fakeWorld, &fakeAgentBlueprintProvider, &fakeSampler);
+    SpawnPointDependencies dependencies(&fakeAgentFactory, &fakeWorld, &fakeAgentBlueprintProvider, &fakeStochastics);
     dependencies.scenario = &fakeScenario;
 
     const std::string entityName = "Ego";
@@ -205,7 +205,7 @@ TEST(SpawnPointScenario, Trigger_SpawnsEgoAgentAccordingToScenarioLanePosition)
             .WillOnce(Return(&agent));
 
     SpawnPointScenario spawnPointScenario{&dependencies, nullptr};
-    spawnPointScenario.Trigger();
+    spawnPointScenario.Trigger(0);
 }
 
 TEST(SpawnPointScenario, Trigger_SpawnsScenarioAgentAccordingToScenarioWorldPosition)
@@ -214,9 +214,9 @@ TEST(SpawnPointScenario, Trigger_SpawnsScenarioAgentAccordingToScenarioWorldPosi
     NiceMock<FakeScenario> fakeScenario;
     NiceMock<FakeAgentBlueprintProvider> fakeAgentBlueprintProvider;
     NiceMock<FakeAgentFactory> fakeAgentFactory;
-    NiceMock<FakeSampler> fakeSampler;
+    NiceMock<FakeStochastics> fakeStochastics;
 
-    SpawnPointDependencies dependencies(&fakeAgentFactory, &fakeWorld, &fakeAgentBlueprintProvider, &fakeSampler);
+    SpawnPointDependencies dependencies(&fakeAgentFactory, &fakeWorld, &fakeAgentBlueprintProvider, &fakeStochastics);
     dependencies.scenario = &fakeScenario;
 
     const std::string entityName = "ENTITY";
@@ -272,7 +272,7 @@ TEST(SpawnPointScenario, Trigger_SpawnsScenarioAgentAccordingToScenarioWorldPosi
             .WillOnce(Return(&agent));
 
     SpawnPointScenario spawnPointScenario{&dependencies, nullptr};
-    spawnPointScenario.Trigger();
+    spawnPointScenario.Trigger(0);
 }
 
 TEST(SpawnPointScenario, Trigger_SpawnsScenarioAgentAccordingToScenarioLanePosition)
@@ -281,9 +281,9 @@ TEST(SpawnPointScenario, Trigger_SpawnsScenarioAgentAccordingToScenarioLanePosit
     NiceMock<FakeScenario> fakeScenario;
     NiceMock<FakeAgentBlueprintProvider> fakeAgentBlueprintProvider;
     NiceMock<FakeAgentFactory> fakeAgentFactory;
-    NiceMock<FakeSampler> fakeSampler;
+    NiceMock<FakeStochastics> fakeStochastics;
 
-    SpawnPointDependencies dependencies(&fakeAgentFactory, &fakeWorld, &fakeAgentBlueprintProvider, &fakeSampler);
+    SpawnPointDependencies dependencies(&fakeAgentFactory, &fakeWorld, &fakeAgentBlueprintProvider, &fakeStochastics);
     dependencies.scenario = &fakeScenario;
 
     const std::string entityName = "ENTITY";
@@ -357,5 +357,5 @@ TEST(SpawnPointScenario, Trigger_SpawnsScenarioAgentAccordingToScenarioLanePosit
             .WillOnce(Return(&agent));
 
     SpawnPointScenario spawnPointScenario{&dependencies, nullptr};
-    spawnPointScenario.Trigger();
+    spawnPointScenario.Trigger(0);
 }

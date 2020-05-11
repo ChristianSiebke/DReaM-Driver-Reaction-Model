@@ -54,7 +54,7 @@ public:
     //!                                     observation instance
     //-----------------------------------------------------------------------------
     ObservationModule* Instantiate(const std::string &libraryPath,
-                                   const openpass::parameter::Container& parameter,
+                                   const openpass::parameter::ParameterSetLevel1& parameter,
                                    StochasticsInterface* stochastics,
                                    WorldInterface* world,
                                    SimulationSlave::EventNetworkInterface* eventNetwork);

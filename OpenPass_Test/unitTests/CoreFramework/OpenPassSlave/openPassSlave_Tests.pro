@@ -33,6 +33,7 @@ INCLUDEPATH += \
 
 DEPENDENCIES = \
     $$OPEN_SRC/Common/eventDetectorDefinitions.cpp \
+    $$OPEN_SRC/Common/stochasticDefinitions.h \
     $$OPEN_SRC/Common/vector2d.cpp \
     $$OPEN_SRC/CoreFramework/CoreShare/cephes/fresnl.c \
     $$OPEN_SRC/CoreFramework/CoreShare/cephes/polevl.c \

@@ -273,7 +273,7 @@ bool WorldAnalyzer::AreSpawningCoordinatesValid(const RoadId& roadId,
         return false;
     }
 
-    if (world->GetDistanceToEndOfLane(Route{roadId}, roadId, laneId, sPosition, INFINITY, {LaneType::Driving}) < MIN_DISTANCE_TO_END_OF_LANE)
+    if (world->GetDistanceToEndOfLane(Route{roadId, laneId < 0}, roadId, laneId, sPosition, INFINITY, {LaneType::Driving}) < MIN_DISTANCE_TO_END_OF_LANE)
     {
         loggingCallback("End of lane: " + std::to_string(laneId) + " is too close.");
         return false;

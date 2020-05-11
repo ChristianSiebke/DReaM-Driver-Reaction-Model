@@ -133,7 +133,7 @@ template <typename T>
 bool ImportProbabilityMap(QDomElement parentElement,
                           const std::string key,
                           const QString tag,
-                          std::unordered_map<T, double> &probabilities,
+                          std::vector<std::pair<T, double>> &probabilities,
                           bool mustAddUpToOne = true)
 {
     double probabilitySum = 0.0;
@@ -162,12 +162,7 @@ bool ImportProbabilityMap(QDomElement parentElement,
             return false;
         }
 
-        auto insertReturn = probabilities.insert({keyValue, probability});
-        if(!insertReturn.second)
-        {
-            LOG_INTERN(LogLevel::Error) << "Key must be unique.";
-            return false;
-        }
+        probabilities.push_back({keyValue, probability});
 
         probabilitySum += probability;
 

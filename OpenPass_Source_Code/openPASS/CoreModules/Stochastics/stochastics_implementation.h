@@ -134,7 +134,7 @@ public:
     *
     * @return        Logarithmic normal distributed number.
     */
-    double GetLogNormalDistributed(double mean, double stdDeviation);
+    double GetLogNormalDistributed(double mu, double sigma);
 
     /*!
     * \brief Generates a special distributed number.

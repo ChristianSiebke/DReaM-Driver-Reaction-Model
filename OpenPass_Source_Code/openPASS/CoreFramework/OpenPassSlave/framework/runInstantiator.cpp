@@ -26,6 +26,10 @@
 #include "spawnPointNetwork.h"
 #include "stochastics.h"
 #include "parameters.h"
+#include "parameterbuilder.h"
+#include "sampler.h"
+
+constexpr char SPAWNER[] = {"Spawner"};
 
 namespace SimulationSlave {
 
@@ -112,7 +116,7 @@ void RunInstantiator::InitializeFrameworkModules(ExperimentConfig& experimentCon
     ThrowIfFalse(manipulatorNetwork.Instantiate(frameworkModules.manipulatorLibrary, &scenario, &eventNetwork),
                  "Failed to instantiate ManipulatorNetwork");
 
-    openpass::parameter::Container observationParameters
+    openpass::parameter::ParameterSetLevel1 observationParameters
     {
         { "LoggingCyclicsToCsv", experimentConfig.logCyclicsToCsv},
         { "LoggingGroups", experimentConfig.loggingGroups },
@@ -130,14 +134,27 @@ void RunInstantiator::InitializeFrameworkModules(ExperimentConfig& experimentCon
 
 void RunInstantiator::InitializeSpawnPointNetwork()
 {
+    const auto &profileGroups = configurationContainer.GetProfiles()->GetProfileGroups();
+    bool existingSpawnProfiles = profileGroups.find(SPAWNER) != profileGroups.end();
+
     ThrowIfFalse(spawnPointNetwork.Instantiate(frameworkModules.spawnPointLibraries,
                  &agentFactory,
                  &agentBlueprintProvider,
-                 &sampler,
+                 &stochastics,
                  configurationContainer.GetScenario(),
-                 configurationContainer.GetProfiles()->GetSpawnPointProfiles()), "Failed to instantiate SpawnPointNetwork");
+                 existingSpawnProfiles ? std::make_optional(profileGroups.at(SPAWNER)) : std::nullopt), "Failed to instantiate SpawnPointNetwork");
 }
 
+std::unique_ptr<ParameterInterface> RunInstantiator::SampleWorldParameters(const EnvironmentConfig& environmentConfig, StochasticsInterface* stochastics, const openpass::common::RuntimeInformation& runtimeInformation)
+{
+    return openpass::parameter::make<SimulationCommon::Parameters>(
+        runtimeInformation, openpass::parameter::ParameterSetLevel1 {
+            { "TimeOfDay", Sampler::Sample(environmentConfig.timeOfDays, stochastics) },
+            { "VisibilityDistance", Sampler::Sample(environmentConfig.visibilityDistances, stochastics) },
+            { "Friction", Sampler::Sample(environmentConfig.frictions, stochastics) },
+            { "Weather", Sampler::Sample(environmentConfig.weathers, stochastics) }}
+    );
+}
 
 bool RunInstantiator::InitRun(std::uint32_t seed, const EnvironmentConfig& environmentConfig, RunResult& runResult)
 {
@@ -145,7 +162,7 @@ bool RunInstantiator::InitRun(std::uint32_t seed, const EnvironmentConfig& envir
     {
         stochastics.InitGenerator(seed);
 
-        worldParameter = sampler.SampleWorldParameters(environmentConfig);
+        worldParameter = SampleWorldParameters(environmentConfig, &stochastics, configurationContainer.GetRuntimeInformation());
         world.ExtractParameter(worldParameter.get());
 
         observationNetwork.InitRun();

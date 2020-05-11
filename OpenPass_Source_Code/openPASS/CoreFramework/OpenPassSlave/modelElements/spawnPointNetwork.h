@@ -23,8 +23,7 @@
 
 #include "Interfaces/worldInterface.h"
 #include "Interfaces/agentBlueprintProviderInterface.h"
-#include "Interfaces/samplerInterface.h"
-#include "Interfaces/scenarioInterface.h"
+#include "Interfaces/stochasticsInterface.h"
 #include "Interfaces/spawnPointNetworkInterface.h"
 #include "Common/runtimeInformation.h"
 #include "spawnPointLibraryDefinitions.h"
@@ -48,9 +47,9 @@ public:
     bool Instantiate(const SpawnPointLibraryInfoCollection& libraryInfos,
                      AgentFactoryInterface* agentFactory,
                      AgentBlueprintProviderInterface* agentBlueprintProvider,
-                     const SamplerInterface * const sampler,
+                     StochasticsInterface * stochastics,
                      ScenarioInterface* scenario,
-                     const SpawnPointProfiles& spawnPointProfiles) override;
+                     const std::optional<ProfileGroup>& spawnPointProfiles) override;
 
     bool TriggerPreRunSpawnPoints() override;
 

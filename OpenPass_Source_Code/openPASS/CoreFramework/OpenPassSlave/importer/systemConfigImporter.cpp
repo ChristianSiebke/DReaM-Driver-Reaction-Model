@@ -18,9 +18,9 @@ namespace TAG = openpass::importer::xml::systemConfigImporter::tag;
 
 namespace Importer {
 
-openpass::parameter::Container SystemConfigImporter::ImportSystemParameters(QDomElement& parametersElement)
+openpass::parameter::ParameterSetLevel1 SystemConfigImporter::ImportSystemParameters(QDomElement& parametersElement)
 {
-    openpass::parameter::Container param;
+    openpass::parameter::ParameterSetLevel1 param;
     QDomElement parameterElement = parametersElement.firstChildElement("parameter");
     while (!parameterElement.isNull())
     {
@@ -125,8 +125,8 @@ bool SystemConfigImporter::ImportSystemConfigContent(const std::string& filename
                  "an error occurred during agent type import: " + filename);
 
     QByteArray xmlData(xmlFile.readAll());
-    QString errorMsg;
-    int errorLine;
+    QString errorMsg {};
+    int errorLine {};
     ThrowIfFalse(document.setContent(xmlData, &errorMsg, &errorLine),
                  "invalid xml file format of file " + filename + " in line " + std::to_string(errorLine) + " : " + errorMsg.toStdString());
 

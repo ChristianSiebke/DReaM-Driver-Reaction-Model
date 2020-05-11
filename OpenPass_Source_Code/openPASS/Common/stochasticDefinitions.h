@@ -11,12 +11,14 @@
 #pragma once
 
 #include <limits>
+#include <variant>
+
+#include "commonHelper.h"
 
 namespace openpass::parameter {
 
 struct NormalDistribution
 {
-    // neccessary evil, since we defined our own constructor
     NormalDistribution() = default;
     NormalDistribution(const NormalDistribution&) = default;
     NormalDistribution(NormalDistribution&&) = default;
@@ -34,10 +36,10 @@ struct NormalDistribution
     bool operator==(const NormalDistribution& rhs) const
     {
         return this == &rhs || (
-               mean == rhs.mean &&
-               standardDeviation == rhs.standardDeviation &&
-               min == rhs.min &&
-               max == rhs.max);
+               CommonHelper::DoubleEquality(mean,rhs.mean) &&
+               CommonHelper::DoubleEquality(standardDeviation, rhs.standardDeviation) &&
+               CommonHelper::DoubleEquality(min, rhs.min) &&
+               CommonHelper::DoubleEquality(max, rhs.max));
     }
 
     bool operator!=(const NormalDistribution& rhs) const
@@ -45,5 +47,84 @@ struct NormalDistribution
         return !operator==(rhs);
     }
 };
+
+struct LogNormalDistribution
+{
+    LogNormalDistribution() = default;
+    LogNormalDistribution(const LogNormalDistribution&) = default;
+    LogNormalDistribution(LogNormalDistribution&&) = default;
+    LogNormalDistribution& operator=(const LogNormalDistribution&) = default;
+    LogNormalDistribution& operator=(LogNormalDistribution&&) = default;
+
+    LogNormalDistribution(double mu, double sigma, double min, double max):
+        mu{mu}, sigma{sigma}, min{min}, max{max} {}
+
+    double mu{0.0};
+    double sigma{0.0};
+    double min{std::numeric_limits<double>::lowest()};
+    double max{std::numeric_limits<double>::max()};
+
+    bool operator==(const LogNormalDistribution& rhs) const
+    {
+        return this == &rhs || (
+               CommonHelper::DoubleEquality(mu, rhs.mu) &&
+               CommonHelper::DoubleEquality(sigma, rhs.sigma) &&
+               CommonHelper::DoubleEquality(min, rhs.min) &&
+               CommonHelper::DoubleEquality(max, rhs.max));
+    }
+
+    bool operator!=(const LogNormalDistribution& rhs) const
+    {
+        return !operator==(rhs);
+    }
+};
+
+struct UniformDistribution
+{
+    UniformDistribution() = default;
+    UniformDistribution(const UniformDistribution&) = default;
+    UniformDistribution(UniformDistribution&&) = default;
+    UniformDistribution& operator=(const UniformDistribution&) = default;
+    UniformDistribution& operator=(UniformDistribution&&) = default;
+
+    UniformDistribution(double min, double max):
+        min{min}, max{max} {}
+
+    double min{std::numeric_limits<double>::lowest()};
+    double max{std::numeric_limits<double>::max()};
+
+    bool operator==(const UniformDistribution& rhs) const
+    {
+        return this == &rhs || (
+               CommonHelper::DoubleEquality(min, rhs.min) &&
+               CommonHelper::DoubleEquality(max, rhs.max));
+    }
+};
+
+struct ExponentialDistribution
+{
+    ExponentialDistribution() = default;
+    ExponentialDistribution(const ExponentialDistribution&) = default;
+    ExponentialDistribution(ExponentialDistribution&&) = default;
+    ExponentialDistribution& operator=(const ExponentialDistribution&) = default;
+    ExponentialDistribution& operator=(ExponentialDistribution&&) = default;
+
+    ExponentialDistribution(double lambda, double min, double max):
+        lambda{lambda}, min{min}, max{max} {}
+
+    double lambda{1.0};
+    double min{std::numeric_limits<double>::lowest()};
+    double max{std::numeric_limits<double>::max()};
+
+    bool operator==(const ExponentialDistribution& rhs) const
+    {
+        return this == &rhs || (
+               CommonHelper::DoubleEquality(lambda, rhs.lambda) &&
+               CommonHelper::DoubleEquality(min, rhs.min) &&
+               CommonHelper::DoubleEquality(max, rhs.max));
+    }
+};
+
+using StochasticDistribution = std::variant<NormalDistribution, LogNormalDistribution, UniformDistribution, ExponentialDistribution>;
 
 } // openpass::parameter

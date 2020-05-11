@@ -43,11 +43,12 @@ namespace Configuration {
 class ConfigurationContainer : public ConfigurationContainerInterface
 {
 public:
-    ConfigurationContainer(const ConfigurationFiles& configurationFiles) :
-        configurationFiles{configurationFiles}
+    ConfigurationContainer(const ConfigurationFiles& configurationFiles, const openpass::common::RuntimeInformation& runtimeInformation) :
+        configurationFiles{configurationFiles},
+        runtimeInformation(runtimeInformation)
     {}
 
-    virtual ~ConfigurationContainer() = default;
+    virtual ~ConfigurationContainer() override = default;
 
     /*!
     * \brief This functions imports all confiugrations
@@ -107,6 +108,13 @@ public:
     */
     VehicleModelsInterface* GetVehicleModels() override;
 
+    /*!
+    * \brief Returns the RunTimeInformation
+    *
+    * @return        RunTimeInformation
+    */
+    const openpass::common::RuntimeInformation& GetRuntimeInformation() const override;
+
 private:
     const ConfigurationFiles& configurationFiles;
 
@@ -117,6 +125,7 @@ private:
     std::map<std::string, std::shared_ptr<SystemConfigInterface>> systemConfigs;
     VehicleModels vehicleModels;
     Profiles profiles;
+    openpass::common::RuntimeInformation runtimeInformation;
 };
 
 } //namespace Configuration

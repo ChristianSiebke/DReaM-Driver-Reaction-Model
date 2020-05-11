@@ -31,7 +31,6 @@
 #include "modelBinding.h"
 #include "observationInterface/observationBinding.h"
 #include "observationNetwork.h"
-#include "sampler.h"
 #include "spawnPointInterface/spawnPointBinding.h"
 #include "spawnPointNetwork.h"
 #include "stochasticsInterface/stochastics.h"
@@ -67,8 +66,6 @@ public:
 
     ObservationNetworkInterface* GetObservationNetwork() override;
 
-    const SamplerInterface& GetSampler() const override;
-
     SpawnPointNetworkInterface* GetSpawnPointNetwork() override;
 
     StochasticsInterface* GetStochastics() override;
@@ -96,8 +93,6 @@ private:
     ModelBinding modelBinding;
 
     AgentFactory agentFactory;
-
-    const Sampler sampler;
 
     AgentBlueprintProvider agentBlueprintProvider;
 

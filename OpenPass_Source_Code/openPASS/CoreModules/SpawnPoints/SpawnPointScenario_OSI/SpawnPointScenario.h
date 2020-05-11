@@ -11,9 +11,9 @@
 #pragma once
 
 #include "../Common/SpawnPointDefinitions.h"
+#include "Common/spawnPointLibraryDefinitions.h"
 #include "Interfaces/spawnPointInterface.h"
 #include "Interfaces/worldInterface.h"
-#include "Interfaces/samplerInterface.h"
 #include "Interfaces/scenarioInterface.h"
 #include "Interfaces/agentBlueprintProviderInterface.h"
 
@@ -50,7 +50,7 @@ public:
      * \brief Trigger creates the agents for the spawn points
      * \return the created agents
      */
-    Agents Trigger() override;
+    Agents Trigger(int time) override;
 
 private:
     /*!

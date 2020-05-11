@@ -91,8 +91,8 @@ void VehicleModelsImporter::ImportCatalog(const std::string& catalogPath, QDomEl
 
     QByteArray xmlData(xmlFile.readAll());
     QDomDocument document;
-    QString errorMsg;
-    int errorLine;
+    QString errorMsg {};
+    int errorLine {};
     ThrowIfFalse(document.setContent(xmlData, &errorMsg, &errorLine),
                  "Invalid xml file format of file " + catalogPath + " in line " + std::to_string(errorLine) + " : " + errorMsg.toStdString());
 

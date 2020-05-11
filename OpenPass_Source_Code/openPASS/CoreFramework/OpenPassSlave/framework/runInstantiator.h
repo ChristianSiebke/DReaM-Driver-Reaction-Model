@@ -41,7 +41,6 @@ public:
         agentBlueprintProvider(*frameworkModuleContainer.GetAgentBlueprintProvider()),
         eventNetwork(*frameworkModuleContainer.GetEventNetwork()),
         world(*frameworkModuleContainer.GetWorld()),
-        sampler(frameworkModuleContainer.GetSampler()),
         spawnPointNetwork(*frameworkModuleContainer.GetSpawnPointNetwork()),
         stochastics(*frameworkModuleContainer.GetStochastics()),
         eventDetectorNetwork(*frameworkModuleContainer.GetEventDetectorNetwork()),
@@ -84,6 +83,7 @@ private:
     bool InitRun(std::uint32_t seed, const EnvironmentConfig& environmentConfig, RunResult& runResult);
     void InitializeFrameworkModules(ExperimentConfig &experimentConfig, ScenarioInterface &scenario);
     void InitializeSpawnPointNetwork();
+    std::unique_ptr<ParameterInterface> SampleWorldParameters(const EnvironmentConfig& environmentConfig, StochasticsInterface* stochastics, const openpass::common::RuntimeInformation& runtimeInformation);
 
     void ClearRun();
 
@@ -96,7 +96,6 @@ private:
     AgentBlueprintProviderInterface& agentBlueprintProvider;
     EventNetworkInterface& eventNetwork;
     WorldInterface& world;
-    const SamplerInterface& sampler;
     SpawnPointNetworkInterface& spawnPointNetwork;
     StochasticsInterface& stochastics;
     EventDetectorNetworkInterface& eventDetectorNetwork;

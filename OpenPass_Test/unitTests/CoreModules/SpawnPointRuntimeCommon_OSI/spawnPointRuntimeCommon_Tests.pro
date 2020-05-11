@@ -15,7 +15,7 @@ include(../../../testing.pri)
 
 SPAWNPOINTS = $$OPEN_SRC/CoreModules/SpawnPoints
 
-UNIT_UNDER_TEST = $$SPAWNPOINTS/SpawnPointScenario_OSI
+UNIT_UNDER_TEST = $$SPAWNPOINTS/SpawnPointRuntimeCommon_OSI
 
 OPENPASS_SLAVE = $$OPEN_SRC/CoreFramework/OpenPassSlave
 
@@ -42,7 +42,9 @@ INCLUDEPATH += \
     $$OPEN_SRC/Common
 
 HEADERS += \
-    $$UNIT_UNDER_TEST/SpawnPointScenario.h \
+    $$UNIT_UNDER_TEST/SpawnPointRuntimeCommon.h \
+    $$UNIT_UNDER_TEST/SpawnPointRuntimeCommonDefinitions.h \
+    $$UNIT_UNDER_TEST/SpawnPointRuntimeCommonParameterExtractor.h \
     $$FRAMEWORK/agentBlueprintProvider.h \
     $$FRAMEWORK/dynamicProfileSampler.h \
     $$FRAMEWORK/dynamicParametersSampler.h \
@@ -56,10 +58,11 @@ HEADERS += \
     $$MODEL_ELEMENTS/channel.h \
     $$CORE_SHARE/log.h \
     $$CORE_SHARE/parameters.h \
-    $$OPENPASS_SLAVE/modelInterface/modelLibrary.h
+    $$OPENPASS_SLAVE/modelInterface/modelLibrary.h \
+    $$SPAWNPOINTS/Common/WorldAnalyzer.h
 
 SOURCES += \
-    $$UNIT_UNDER_TEST/SpawnPointScenario.cpp \
+    $$UNIT_UNDER_TEST/SpawnPointRuntimeCommon.cpp \
     $$FRAMEWORK/agentBlueprintProvider.cpp \
     $$FRAMEWORK/dynamicProfileSampler.cpp \
     $$FRAMEWORK/dynamicParametersSampler.cpp \
@@ -75,5 +78,6 @@ SOURCES += \
     $$CORE_SHARE/log.cpp \
     $$CORE_SHARE/parameters.cpp \
     $$OPENPASS_SLAVE/modelInterface/modelLibrary.cpp \
-    spawnPointScenario_Tests.cpp
+    $$SPAWNPOINTS/Common/WorldAnalyzer.cpp \
+    spawnPointRuntimeCommon_Tests.cpp
 

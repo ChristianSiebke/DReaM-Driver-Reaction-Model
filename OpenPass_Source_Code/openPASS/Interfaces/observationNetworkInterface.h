@@ -32,7 +32,7 @@ class RunResult;
 struct ObservationInstance
 {
     const std::string libraryPath;
-    const openpass::parameter::Container parameters;
+    const openpass::parameter::ParameterSetLevel1 parameters;
 };
 
 //-----------------------------------------------------------------------------

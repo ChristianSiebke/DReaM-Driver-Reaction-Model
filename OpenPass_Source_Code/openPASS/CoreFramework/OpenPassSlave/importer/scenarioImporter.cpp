@@ -42,8 +42,8 @@ bool ScenarioImporter::Import(const std::string& filename, ScenarioInterface* sc
 
         QByteArray xmlData(xmlFile.readAll());
         QDomDocument document;
-        QString errorMsg;
-        int errorLine;
+        QString errorMsg{};
+        int errorLine{};
         ThrowIfFalse(document.setContent(xmlData, &errorMsg, &errorLine), "Invalid xml format (" + filename + ") in line " + std::to_string(errorLine) + ": " + errorMsg.toStdString());
 
         QDomElement documentRoot = document.documentElement();
@@ -76,7 +76,7 @@ bool ScenarioImporter::Import(const std::string& filename, ScenarioInterface* sc
 
 void ScenarioImporter::ImportAndValidateVersion(QDomElement& documentRoot)
 {
-    openpass::parameter::Container scenarioParameters;
+    openpass::parameter::ParameterSetLevel1 scenarioParameters;
 
     QDomElement parameterDeclarationElement;
 
@@ -615,7 +615,7 @@ void ScenarioImporter::ParseSimulationTime(const QDomElement& byValueElement, do
     }
 }
 
-void ScenarioImporter::ImportParameterElement(QDomElement& parameterElement, openpass::parameter::Container& parameters)
+void ScenarioImporter::ImportParameterElement(QDomElement& parameterElement, openpass::parameter::ParameterSetLevel1& parameters)
 {
     std::string parameterName;
     ThrowIfFalse(SimulationCommon::ParseAttributeString(parameterElement, ATTRIBUTE::name, parameterName),
@@ -658,7 +658,7 @@ void ScenarioImporter::ImportParameterElement(QDomElement& parameterElement, ope
 }
 
 void ScenarioImporter::ImportParameterDeclarationElement(QDomElement& parameterDeclarationElement,
-        openpass::parameter::Container& parameters)
+        openpass::parameter::ParameterSetLevel1& parameters)
 {
     QDomElement parameterElement;
     if (SimulationCommon::GetFirstChildElement(parameterDeclarationElement, TAG::parameter, parameterElement))

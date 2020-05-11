@@ -15,7 +15,6 @@
 
 #include "fakeAgent.h"
 #include "fakeWorld.h"
-#include "fakeSampler.h"
 #include "dontCare.h"
 
 using ::testing::Return;

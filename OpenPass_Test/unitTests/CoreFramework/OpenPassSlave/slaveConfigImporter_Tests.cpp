@@ -15,8 +15,10 @@
 #include "slaveConfigImporter.h"
 
 using ::testing::SizeIs;
+using ::testing::Pair;
 using ::testing::UnorderedElementsAre;
 using ::testing::EndsWith;
+using ::testing::ElementsAre;
 
 using namespace Importer;
 
@@ -38,7 +40,7 @@ TEST(SlaveConfigImporter_UnitTests, ImportSpawnPointsConfigSuccessfully)
                                        "</root>"
                                     );
 
-    SpawnPointLibraryInfoCollection spawnPointsConfig;
+    SpawnPointLibraryInfoCollection spawnPointsConfig {};
 
     EXPECT_NO_THROW(SlaveConfigImporter::ImportSpawnPointsConfig(fakeDocumentRoot, spawnPointsConfig));
     EXPECT_THAT(spawnPointsConfig, SizeIs(2));
@@ -312,14 +314,14 @@ TEST(SlaveConfigImporter_UnitTests, ImportEnvironmentConfigSuccessfully)
 
     EXPECT_NO_THROW(SlaveConfigImporter::ImportEnvironmentConfig(fakeDocumentRoot, environmentConfig));
 
-    ASSERT_EQ(environmentConfig.timeOfDays.at("12"), 0.5);
-    ASSERT_EQ(environmentConfig.timeOfDays.at("18"), 0.5);
-    ASSERT_EQ(environmentConfig.visibilityDistances.at(100), 0.5);
-    ASSERT_EQ(environmentConfig.visibilityDistances.at(200), 0.5);
-    ASSERT_EQ(environmentConfig.frictions.at(0.3), 0.5);
-    ASSERT_EQ(environmentConfig.frictions.at(0.7), 0.5);
-    ASSERT_EQ(environmentConfig.weathers.at("Rainy"), 0.5);
-    ASSERT_EQ(environmentConfig.weathers.at("Snowy"), 0.5);
+    ASSERT_THAT(environmentConfig.timeOfDays, ElementsAre(Pair("12", 0.5),
+                                                          Pair("18", 0.5)));
+    ASSERT_THAT(environmentConfig.visibilityDistances, ElementsAre(Pair(100, 0.5),
+                                                                   Pair(200, 0.5)));
+    ASSERT_THAT(environmentConfig.frictions, ElementsAre(Pair(0.3, 0.5),
+                                                          Pair(0.7, 0.5)));
+    ASSERT_THAT(environmentConfig.weathers, ElementsAre(Pair("Rainy", 0.5),
+                                                          Pair("Snowy", 0.5)));
 }
 
 TEST(SlaveConfigImporter_UnitTests, ImportEnvironmentConfigUnsuccessfully)

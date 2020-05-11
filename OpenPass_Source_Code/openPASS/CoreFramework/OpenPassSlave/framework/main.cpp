@@ -96,10 +96,10 @@ int main(int argc, char* argv[])
     }
 
     ConfigurationFiles configurationFiles {directories.configurationDir, "systemConfigBlueprint.xml", "slaveConfig.xml"};
-    Configuration::ConfigurationContainer configurationContainer(configurationFiles);
     openpass::common::RuntimeInformation runtimeInformation
     { {openpass::common::framework}, { directories.configurationDir, directories.outputDir, directories.libraryDir }};
 
+    Configuration::ConfigurationContainer configurationContainer(configurationFiles, runtimeInformation);
     if (!configurationContainer.ImportAllConfigurations())
     {
         LOG_INTERN(LogLevel::Error) << "Failed to import all configurations";

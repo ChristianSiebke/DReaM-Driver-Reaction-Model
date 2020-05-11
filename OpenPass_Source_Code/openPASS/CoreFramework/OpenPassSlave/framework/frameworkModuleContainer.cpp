@@ -30,8 +30,7 @@ FrameworkModuleContainer::FrameworkModuleContainer(
         manipulatorNetwork(&manipulatorBinding, &world),
         modelBinding(frameworkModules.libraryDir, runtimeInformation, callbacks),
         agentFactory(&modelBinding, &world, &stochastics, &observationNetwork, &eventNetwork),
-        sampler(stochastics, runtimeInformation),
-        agentBlueprintProvider(configurationContainer, sampler),
+        agentBlueprintProvider(configurationContainer, stochastics),
         eventNetwork(),
         spawnPointNetwork(&spawnPointBindings, &world, runtimeInformation)
 {
@@ -69,11 +68,6 @@ ManipulatorNetworkInterface* FrameworkModuleContainer::GetManipulatorNetwork()
 ObservationNetworkInterface* FrameworkModuleContainer::GetObservationNetwork()
 {
     return &observationNetwork;
-}
-
-const SamplerInterface& FrameworkModuleContainer::GetSampler() const
-{
-    return sampler;
 }
 
 SpawnPointNetworkInterface* FrameworkModuleContainer::GetSpawnPointNetwork()

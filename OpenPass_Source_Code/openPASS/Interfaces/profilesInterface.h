@@ -16,10 +16,9 @@
 
 #include "Common/sensorDefinitions.h"
 
-using StringProbabilities = std::unordered_map<std::string, double>;
-using DriverProfiles = std::unordered_map<std::string, openpass::parameter::Container>;
-using VehicleComponentProfiles = std::unordered_map<std::string, openpass::parameter::Container>;
-using SpawnPointProfiles = std::unordered_map<std::string, openpass::parameter::Container>;
+using StringProbabilities = std::vector<std::pair<std::string, double>>;
+using ProfileGroup = std::unordered_map<std::string, openpass::parameter::ParameterSetLevel1>;
+using ProfileGroups = std::unordered_map<std::string, ProfileGroup>;
 
 enum class AgentProfileType
 {
@@ -76,28 +75,19 @@ public:
     */
     virtual std::unordered_map<std::string, AgentProfile>& GetAgentProfiles() = 0;
 
-    virtual SpawnPointProfiles& GetSpawnPointProfiles() = 0;
-
-    /*!
-    * \brief Returns a pointer to the driverProfiles
-    *
-    * @return        driverProfiles
-    */
-    virtual DriverProfiles& GetDriverProfiles() = 0;
-
-    /*!
-    * \brief Returns a pointer to the map of vehicle component profiles
-    *
-    * @return        vehicleComponentProfiles
-    */
-    virtual std::unordered_map<std::string, VehicleComponentProfiles>& GetVehicleComponentProfiles() = 0;
-
     /*!
     * \brief Returns a pointer to the map of vehicle profiles
     *
     * @return        vehicleProfiles
     */
     virtual std::unordered_map<std::string, VehicleProfile>& GetVehicleProfiles() = 0;
+
+    /*!
+    * \brief Returns a pointer to the map of profile groups
+    *
+    * @return        ProfileGroups
+    */
+    virtual ProfileGroups& GetProfileGroups() = 0;
 
     /*!
     * \brief Returns the driver profile probabilities of an agentProfile
@@ -115,10 +105,10 @@ public:
     */
     virtual StringProbabilities& GetVehicleProfileProbabilities(std::string agentProfileName) = 0;
 
-    /*!
-    * \brief Returns a pointer to the sensorProfiles
-    *
-    * @return        sensorProfiles
-    */
-    virtual openpass::sensors::Profiles& GetSensorProfiles() = 0;
+    //! \brief Returns the profile with the specified name in the specified profile gropus
+    //!
+    //! \param type     type of the profile group
+    //! \param name     name of the profile
+    //! \return     specified profile
+    virtual openpass::parameter::ParameterSetLevel1 GetProfile(std::string type, std::string name) = 0;
 };

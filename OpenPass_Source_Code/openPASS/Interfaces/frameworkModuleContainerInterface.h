@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include "Interfaces/samplerInterface.h"
 #include "Interfaces/stochasticsInterface.h"
 
 class AgentBlueprintProviderInterface;
@@ -64,13 +63,6 @@ public:
     * @return        ObservationNetwork pointer
     */
     virtual ObservationNetworkInterface* GetObservationNetwork() = 0;
-
-    /*!
-    * \brief Returns the instance of the used sampler
-    *
-    * @return        Sampler
-    */
-    virtual const SamplerInterface& GetSampler() const = 0;
 
     /*!
     * \brief Returns a pointer to the SpawnPointNetwork

@@ -368,66 +368,17 @@ Every invocation has sunny weather.
 
 ---
 
-\subsubsection io_input_slaveconfig_trafficconfig TrafficConfig
-
-This section contains parameters regarding the traffic and distribution of agent profiles for all common vehicles. The traffic parameters are rerolled once for every invocation. The RegularLane and RightMostLane parameters are rolled for each common agent. All probabilities must add up to 1.0.
-
-|Tag|Description|Dependence|
-|---|-----------|----------|
-|TrafficVolume|This value determines how many cars per hour and per lane are expected|At least one entry is required|
-|PlatoonRate|Platoon rate is rolled for every common agent. If the agent is platooning they are spawned closer together|At least one entry is required|
-|Velocity|Average velocity of the right most lane in m/s|At least one entry is required|
-|Homogenity|Determines how much the average velocity drops per lane in km/h|At least one entry is required|
-|RegularLane|Determines the agent profiles used for common agents in regular lanes|At least one entry is required|
-|RightMostLane|Determines the agent profiles used for common agents in the right most lane|At least one entry is required|
-
-Example:
-In this experiment every invocation spawns one agent per second for each initial lane.
-50% of the agents are platooning initially.
-In 30% of all invocations the right lane has an average velocity of 30 m/s and in the other 70% the velocity is 40 m/s.
-For all invocations the average lane velocity drops by 20% from left to right.
-60% of the common agents on regular lanes have the "LuxuryClassCarAgent" AgentProfile. The other 40% have the "MiddleClassCarAgent" AgentProfile.
-All common agents on the right most lane have the "TruckAgent" AgentProfile.
-
-```xml
-<TrafficConfig Name="Default">
-    <TrafficParameter>
-        <TrafficVolumes>
-            <TrafficVolume Value="3600" Probability="1.0"/>
-        </TrafficVolumes>
-        <PlatoonRates>
-            <PlatoonRate Value="0.5" Probability="1.0"/>
-        </PlatoonRates>
-        <Velocities>
-            <Velocity Value="30.0" Probability="0.3"/>
-            <Velocity Value="40.0" Probability="0.7"/>
-        </Velocities>
-        <Homogenities>
-            <Homogenity Value="0.8" Probability="1.0"/>
-        </Homogenities>
-    </TrafficParameter>
-    <RegularLane>
-        <AgentProfile Name = "LuxuryClassCarAgent" Probability = "0.6"/>
-        <AgentProfile Name = "MiddleClassCarAgent" Probability = "0.4"/>
-    </RegularLane>
-    <RightMostLane>
-        <AgentProfile Name = "TruckAgent" Probability = "1.0"/>
-    </RightMostLane>
-</TrafficConfig>
-```
-
----
-
 \subsection io_input_profilescatalog ProfilesCatalog.xml
 
-The ProfilesCatalog contains all AgentProfiles referenced by the the Scenario entities and its sub profiles, i.e. DriverProfiles, VehicleProfiles, VehicleProfiles and SensorProfiles. Several parameters depend on probabilities. Each invocation then rolls for said probabilities. All probabilities except ComponentProfiles of an VehicleProfile need to add up to 1.0. For more info see the corresponding section.
+The ProfilesCatalog contains all AgentProfiles, VehicleProfiles and generic ProfileGroups and Profiles. Depending on the configuration the simulator could require  a "Driver"-ProfileGroup, a "Spawner"- and "TrafficGroup"-ProfileGroup , or sensor and vehiclecomponent specific ProfileGroups.
 
 * [AgentProfiles](\ref io_input_profilescatalog_agentprofiles)
-* [DriverProfiles](\ref io_input_profilescatalog_driverprofiles)
 * [VehicleProfiles](\ref io_input_profilescatalog_vehicleprofiles)
-* [VehicleComponentProfiles](\ref io_input_profilescatalog_vehiclecomponentprofiles)
-* [SensorProfiles](\ref io_input_profilescatalog_sensorprofiles)
-  
+* [Driver-ProfileGroup](\ref io_input_profilescatalog_driverprofiles)
+* [VehicleComponent-ProfileGroups](\ref io_input_profilescatalog_vehiclecomponentprofiles)
+* [Sensor-ProfileGroups](\ref io_input_profilescatalog_sensorprofiles)
+* [TrafficGroup-ProfileGroup](\ref io_input_profilescatalog_trafficgroupprofiles)
+* [Spawner-ProfileGroup](\ref io_input_profilescatalog_spawnerprofiles)
 
 ---
 
@@ -471,23 +422,6 @@ Regarding the vehicle profile 50% have a MINI Cooper and the other 50% drive a B
 ```
 
 ---
-
-\subsubsection io_input_profilescatalog_driverprofiles DriverProfiles
-
-This section contains all driver profiles used by the simulation. At least one driver profile is required.
-
-[//]: <> (Please refer to each section!)
-* [AlgorithmAgentFollowingDriverModel](\ref io_input_profilescatalog_profilescatalog_agentfollowingdrivermodel)
-
-\paragraph io_input_slaveconfig_profilescatalog_agentfollowingdrivermodel AlgorithmAgentFollowingDriverModel
-
-This driver type adapts its velocity to an agent in front and holds a desired velocity if there's no front agent available (like adaptive cruise control). The lateral guidance always keeps the agent in the middle of the lane.
-
-```xml
-<DriverProfile Name = "AgentFollowingDriver">
-    <String Key="Type" Value="AlgorithmAgentFollowingDriverModel"/>
-</DriverProfile>
-```
 
 \subsubsection io_input_profilescatalog_vehicleprofiles VehicleProfiles
 
@@ -579,6 +513,27 @@ For details about the system go to [AEB - Module](\ref dev_modules_adas_aeb).
 
 ---
 
+\subsubsection io_input_profilescatalog_driverprofiles DriverProfiles
+
+This section is required if a driver component is being used.
+
+[//]: <> (Please refer to each section!)
+* [AlgorithmAgentFollowingDriverModel](\ref io_input_profilescatalog_profilescatalog_agentfollowingdrivermodel)
+
+\paragraph io_input_slaveconfig_profilescatalog_agentfollowingdrivermodel AlgorithmAgentFollowingDriverModel
+
+This driver type adapts its velocity to an agent in front and holds a desired velocity if there's no front agent available (like adaptive cruise control). The lateral guidance always keeps the agent in the middle of the lane.
+
+```xml
+<ProfileGroup Type="Driver">
+    <Profile Name = "AgentFollowingDriver">
+        <String Key="Type" Value="AlgorithmAgentFollowingDriverModel"/>
+    </Profile>
+</ProfileGroup>
+```
+
+---
+
 \paragraph io_input_profilescatalog_adasprofiles_trajectoryfollower DynamicsTrajectoryFollower
 
 This vehicle component aligns the vehicle to a certain trajectory. Every vehicle component profile of this type needs a [Trajectory](\ref io_input_trajectory) file.
@@ -592,13 +547,13 @@ All attributes are required. The profile name may be chosen freely.
 |EnforceTrajectory|If true, the trajectory follower overrides external input related to the vehicle's travel.|
 
 ```xml
-<VehicleComponentProfiles>
-    <VehicleComponentProfile Type="DynamicsTrajectoryFollower" Name="BasicTrajectoryFollower">
-            <String Key="TrajectoryFile" Value="Trajectory.xml"/>
-            <Bool Key="AutomaticDeactivation" Value="true"/>
-            <Bool Key="EnforceTrajectory" Value="true"/>
-        </VehicleComponentProfile>
-</VehicleComponentProfiles>
+<ProfileGroup Type="DynamicsTrajectoryFollower">
+    <Profile Name="BasicTrajectoryFollower">
+        <String Key="TrajectoryFile" Value="Trajectory.xml"/>
+        <Bool Key="AutomaticDeactivation" Value="true"/>
+        <Bool Key="EnforceTrajectory" Value="true"/>
+    </Profile>
+</ProfileGroup>
 ```
 
 ---
@@ -608,8 +563,8 @@ All attributes are required. The profile name may be chosen freely.
 This section describes the possible sensor profiles of all vehicle profiles.
 
 ```xml
-<SensorProfiles>
-    <SensorProfile Name="Standard" Type="Geometric2D">
+<ProfileGroup Type="Geometric2D">
+    <Profile Name="Standard">
         <Double Key="OpeningAngleH" Value="0.35"/>
         <Double Key="DetectionRange" Value="300"/>
         <Double Key="LatencyMean" Value="0"/>
@@ -619,9 +574,8 @@ This section describes the possible sensor profiles of all vehicle profiles.
         <Double Key="FailureProbability" Value="0"/>
         <Bool Key="EnableVisualObstruction" Value="false"/>
         <Double Key="RequiredPercentageOfVisibleArea" Value="0.001" />
-    </SensorProfile>
-    ...
-</SensorProfiles>
+    </Profile>
+</ProfileGroup>
 ```
 
 |Attribute|Description|
