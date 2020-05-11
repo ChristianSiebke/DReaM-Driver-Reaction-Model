@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020 in-tech GmbH
 *               2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -91,6 +91,11 @@ public:
     static void ImportSpawnPointsConfig(const QDomElement& spawnPointsConfigElement,
                                         SpawnPointLibraryInfoCollection& spawnPointsInfo);
 
+    static void ImportObservationConfig(const QDomElement& librariesElement,
+                                        std::vector<std::string>& loggingGroups,
+                                        bool logCyclicsToCsv,
+                                        ObservationInstanceCollection& observationConfig);
+
     //Overall import function
     /*!
     * \brief Imports the entire slave configuration
@@ -116,7 +121,6 @@ private:
         {"EventDetectorLibrary", "EventDetector"},
         {"ManipulatorLibrary", "Manipulator"},
         {"WorldLibrary", "World"},
-        {"ObservationLibrary", "Observation"},
         {"StochasticsLibrary", "Stochastics"}
     };
 };

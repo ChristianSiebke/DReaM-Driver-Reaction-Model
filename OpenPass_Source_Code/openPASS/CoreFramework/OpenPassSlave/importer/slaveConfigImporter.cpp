@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020 in-tech GmbH
 *               2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -190,6 +190,18 @@ void SlaveConfigImporter::ImportSpawnPointsConfig(const QDomElement &spawnPoints
     }
 }
 
+void SlaveConfigImporter::ImportObservationConfig(const QDomElement& librariesElement, std::vector<std::string>& loggingGroups, bool logCyclicsToCsv, ObservationInstanceCollection& observationConfig)
+{
+    auto observationLibrary = SlaveConfigImporter::GetLibrary(librariesElement, "ObservationLibrary", "Observation");
+    openpass::parameter::ParameterSetLevel1 observationParameters
+    {
+        { "LoggingCyclicsToCsv", logCyclicsToCsv},
+        { "LoggingGroups", loggingGroups }
+    };
+    ObservationInstance observationInstance{0, observationLibrary, observationParameters};
+    observationConfig.push_back(observationInstance);
+}
+
 bool SlaveConfigImporter::Import(const std::string& configurationDir,
                                  const std::string& slaveConfigFile,
                                  Configuration::SlaveConfig& slaveConfig)
@@ -223,11 +235,12 @@ bool SlaveConfigImporter::Import(const std::string& configurationDir,
 
 
         //Import experiment config
+        auto& experimentConfig = slaveConfig.GetExperimentConfig();
         QDomElement experimentConfigElement;
         ThrowIfFalse(GetFirstChildElement(documentRoot, TAG::experimentConfig, experimentConfigElement),
                      "Could not import ExperimentConfig.");
 
-        ImportExperimentConfig(experimentConfigElement, slaveConfig.GetExperimentConfig());
+        ImportExperimentConfig(experimentConfigElement, experimentConfig);
 
         //Import scenario config
         QDomElement scenarioConfigElement;
@@ -242,6 +255,10 @@ bool SlaveConfigImporter::Import(const std::string& configurationDir,
                      "Could not import EnvironmentConfig.");
 
         ImportEnvironmentConfig(environmentConfigElement, slaveConfig.GetEnvironmentConfig());
+
+        QDomElement librariesElement;
+        ThrowIfFalse(SimulationCommon::GetFirstChildElement(experimentConfigElement, TAG::libraries, librariesElement), experimentConfigElement, "Missing libraries");
+        ImportObservationConfig(librariesElement, experimentConfig.loggingGroups, experimentConfig.logCyclicsToCsv, slaveConfig.GetObservationConfig());
 
         //Import spawnpoints config
         QDomElement spawnPointsConfigElement;

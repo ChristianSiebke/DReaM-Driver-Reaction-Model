@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -22,8 +22,7 @@ FrameworkModuleContainer::FrameworkModuleContainer(
         stochastics(&stochasticsBinding),
         worldBinding(frameworkModules.worldLibrary, callbacks, &stochastics),
         world(&worldBinding),
-        observationBinding(runtimeInformation, callbacks),
-        observationNetwork(&observationBinding),
+        observationNetwork(&observationBindings),
         eventDetectorBinding(callbacks),
         eventDetectorNetwork(&eventDetectorBinding, &world),
         manipulatorBinding(callbacks),
@@ -37,6 +36,10 @@ FrameworkModuleContainer::FrameworkModuleContainer(
     for(const auto& libraryInfo : frameworkModules.spawnPointLibraries)
     {
         spawnPointBindings.emplace(libraryInfo.libraryName, SpawnPointBinding(callbacks));
+    }
+    for(const auto& libraryInfo : frameworkModules.observationLibraries)
+    {
+        observationBindings.emplace(libraryInfo.libraryName, ObservationBinding(runtimeInformation, callbacks));
     }
 }
 

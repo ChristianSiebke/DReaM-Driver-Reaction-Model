@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -19,21 +19,13 @@
 
 #include "Interfaces/observationInterface.h"
 #include "Interfaces/eventNetworkInterface.h"
+#include "Common/observationLibraryDefinitions.h"
 
 namespace SimulationSlave {
 
 class ObservationBinding;
 class ObservationModule;
 class RunResult;
-
-/**
- * @brief Wrapper for building an ObservationInstance
- */
-struct ObservationInstance
-{
-    const std::string libraryPath;
-    const openpass::parameter::ParameterSetLevel1 parameters;
-};
 
 //-----------------------------------------------------------------------------
 /** \brief This class provides the interface for the ObservationNetwork
@@ -56,15 +48,18 @@ public:
     //! with these objects and the ids of their observation instances priovided in
     //! the given map.
     //!
-    //! @param[in]  observationInstances    Contains library path and parameters
-    //! @param[in]  stochastics             The stochastics object
-    //! @param[in]  world                   The world object
+    //! \param observationInstances     Contains library path and parameters
+    //! \param  stochastics             The stochastics object
+    //! \param  world                   The world object
+    //! \param eventNetwork             EventNetwork instance
+    //! \param sceneryPath              path of the scenery file
     //! @return                             Flag if the instantiation was successful
     //-----------------------------------------------------------------------------
-    virtual bool Instantiate(const std::map<int, ObservationInstance>& observationInstances,
+    virtual bool Instantiate(const ObservationInstanceCollection& observationInstances,
                              StochasticsInterface* stochastics,
                              WorldInterface* world,
-                             EventNetworkInterface* eventNetwork) = 0;
+                             EventNetworkInterface* eventNetwork,
+                             const std::string& sceneryPath) = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the observation module mapping.

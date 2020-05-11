@@ -195,7 +195,6 @@ TEST(SlaveConfigImporter_UnitTests, ImportMissingLibraries_LoadsDefaults)
     EXPECT_THAT(libraries["ManipulatorLibrary"], "Manipulator");
     EXPECT_THAT(libraries["WorldLibrary"], "World");
     EXPECT_THAT(libraries["StochasticsLibrary"], "Stochastics");
-    EXPECT_THAT(libraries["ObservationLibrary"], "Observation");
 }
 
 TEST(SlaveConfigImporter_UnitTests, ImportCompleteLibraryList_ParsesSpecifiedValues)
@@ -207,7 +206,6 @@ TEST(SlaveConfigImporter_UnitTests, ImportCompleteLibraryList_ParsesSpecifiedVal
                                        "    <ManipulatorLibrary>TestManipulator</ManipulatorLibrary>"
                                        "    <WorldLibrary>TestWorld</WorldLibrary>"
                                        "    <StochasticsLibrary>TestStochastics</StochasticsLibrary>"
-                                       "    <ObservationLibrary>TestObservation</ObservationLibrary>"
                                        "  </Libraries>"
                                        "</root>"
                                    );
@@ -218,7 +216,6 @@ TEST(SlaveConfigImporter_UnitTests, ImportCompleteLibraryList_ParsesSpecifiedVal
     EXPECT_THAT(libraries["ManipulatorLibrary"], "TestManipulator");
     EXPECT_THAT(libraries["WorldLibrary"], "TestWorld");
     EXPECT_THAT(libraries["StochasticsLibrary"], "TestStochastics");
-    EXPECT_THAT(libraries["ObservationLibrary"], "TestObservation");
 }
 
 TEST(SlaveConfigImporter_UnitTests, ImportPartialLibraryList_ParsesSpecifiedValues)
@@ -227,7 +224,7 @@ TEST(SlaveConfigImporter_UnitTests, ImportPartialLibraryList_ParsesSpecifiedValu
                                        "<root>"
                                        "  <Libraries>"
                                        "    <WorldLibrary>TestWorld</WorldLibrary>"
-                                       "    <ObservationLibrary>TestObservation</ObservationLibrary>"
+                                       "    <EventDetectorLibrary>TestEventDetector</EventDetectorLibrary>"
                                        "  </Libraries>"
                                        "</root>"
                                    );
@@ -235,8 +232,7 @@ TEST(SlaveConfigImporter_UnitTests, ImportPartialLibraryList_ParsesSpecifiedValu
     auto libraries = SlaveConfigImporter::ImportLibraries(fakeDocumentRoot);
 
     EXPECT_THAT(libraries["WorldLibrary"], "TestWorld");
-    EXPECT_THAT(libraries["ObservationLibrary"], "TestObservation");
-    EXPECT_THAT(libraries["EventDetectorLibrary"], "EventDetector");
+    EXPECT_THAT(libraries["EventDetectorLibrary"], "TestEventDetector");
     EXPECT_THAT(libraries["ManipulatorLibrary"], "Manipulator");
     EXPECT_THAT(libraries["StochasticsLibrary"], "Stochastics");
 }
@@ -252,7 +248,6 @@ TEST(SlaveConfigImporter_UnitTests, ImportEmptyLibraryList_ParsesSpecifiedValues
 
     EXPECT_THAT(libraries["EventDetectorLibrary"], "EventDetector");
     EXPECT_THAT(libraries["ManipulatorLibrary"], "Manipulator");
-    EXPECT_THAT(libraries["ObservationLibrary"], "Observation");
     EXPECT_THAT(libraries["StochasticsLibrary"], "Stochastics");
     EXPECT_THAT(libraries["WorldLibrary"], "World");
 }

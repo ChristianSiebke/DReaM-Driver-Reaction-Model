@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
         directories.libraryDir,
         libraries.at("EventDetectorLibrary"),
         libraries.at("ManipulatorLibrary"),
-        libraries.at("ObservationLibrary"),
+        configurationContainer.GetSlaveConfig()->GetObservationConfig(),
         libraries.at("StochasticsLibrary"),
         libraries.at("WorldLibrary"),
         configurationContainer.GetSlaveConfig()->GetSpawnPointsConfig()

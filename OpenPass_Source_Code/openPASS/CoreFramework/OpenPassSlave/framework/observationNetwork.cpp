@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -32,38 +32,46 @@ void ObservationNetwork::Clear()
 
     modules.clear();
 
-    if (binding != nullptr)
+    for (auto& [library, binding] : *bindings)
     {
-        binding->Unload();
+        binding.Unload();
     }
 }
 
-bool ObservationNetwork::Instantiate(const std::map<int, ObservationInstance>& observationInstances,
+bool ObservationNetwork::Instantiate(const ObservationInstanceCollection& observationInstances,
                                      StochasticsInterface* stochastics,
                                      WorldInterface* world,
-                                     EventNetworkInterface* eventNetwork)
+                                     EventNetworkInterface* eventNetwork,
+                                     const std::string& sceneryPath)
 {
-    int id;
-    try
+    for (auto& observationInstance : observationInstances)
     {
-        for (const auto& item : observationInstances)
+        try
         {
-            id = item.first;
-            auto observationInstance = item.second;
+            const auto bindingIter = bindings->find(observationInstance.libraryName);
+            if (bindingIter == bindings->end())
+            {
+                return false;
+            }
 
-            auto module = binding->Instantiate(observationInstance.libraryPath,
-                                               observationInstance.parameters,
-                                               stochastics,
-                                               world,
-                                               eventNetwork);
+            auto& binding = bindingIter->second;
 
-            modules.insert({id, module});
+            openpass::parameter::ParameterSetLevel1 parameters{observationInstance.parameters};
+            parameters.push_back({"SceneryFile", sceneryPath}); //Hotfix until sceneryPath is observable
+
+            auto module = binding.Instantiate(observationInstance.libraryName,
+                                              parameters,
+                                              stochastics,
+                                              world,
+                                              eventNetwork);
+
+            modules.insert({observationInstance.id, module});
         }
-    }
-    catch (const std::exception& ex)
-    {
-        LOG_INTERN(LogLevel::Error) << "observation " << id << ", could not be initialized: " << ex.what();
-        return false;
+        catch (const std::exception& ex)
+        {
+            LOG_INTERN(LogLevel::Error) << "observation " << observationInstance.libraryName << ", could not be initialized: " << ex.what();
+            return false;
+        }
     }
 
     return true;

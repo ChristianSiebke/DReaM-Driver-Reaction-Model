@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -47,7 +47,7 @@ bool RunInstantiator::ExecuteRun()
     auto& experimentConfig = slaveConfig.GetExperimentConfig();
     auto& environmentConfig = slaveConfig.GetEnvironmentConfig();
 
-    if (!InitPreRun(experimentConfig, scenario, scenery))
+    if (!InitPreRun(scenario, scenery))
     {
         LOG_INTERN(LogLevel::DebugCore) << std::endl << "### initialization failed ###";
         return false;
@@ -87,11 +87,11 @@ bool RunInstantiator::ExecuteRun()
     return (scheduler_state && observations_state);
 }
 
-bool RunInstantiator::InitPreRun(ExperimentConfig& experimentConfig, ScenarioInterface& scenario, SceneryInterface& scenery)
+bool RunInstantiator::InitPreRun(ScenarioInterface& scenario, SceneryInterface& scenery)
 {
     try
     {
-        InitializeFrameworkModules(experimentConfig, scenario);
+        InitializeFrameworkModules(scenario);
         world.CreateScenery(&scenery);
         return true;
     }
@@ -105,7 +105,7 @@ bool RunInstantiator::InitPreRun(ExperimentConfig& experimentConfig, ScenarioInt
     return false;
 }
 
-void RunInstantiator::InitializeFrameworkModules(ExperimentConfig& experimentConfig, ScenarioInterface& scenario)
+void RunInstantiator::InitializeFrameworkModules(ScenarioInterface& scenario)
 {
     ThrowIfFalse(stochastics.Instantiate(frameworkModules.stochasticsLibrary),
                  "Failed to instantiate Stochastics");
@@ -115,18 +115,7 @@ void RunInstantiator::InitializeFrameworkModules(ExperimentConfig& experimentCon
                  "Failed to instantiate EventDetectorNetwork");
     ThrowIfFalse(manipulatorNetwork.Instantiate(frameworkModules.manipulatorLibrary, &scenario, &eventNetwork),
                  "Failed to instantiate ManipulatorNetwork");
-
-    openpass::parameter::ParameterSetLevel1 observationParameters
-    {
-        { "LoggingCyclicsToCsv", experimentConfig.logCyclicsToCsv},
-        { "LoggingGroups", experimentConfig.loggingGroups },
-        { "SceneryFile", scenario.GetSceneryPath() }
-    };
-
-    // TODO: This is a workaround, as the OSI use case only imports a single observation library -> implement new observation concept
-    std::map<int, ObservationInstance> observationInstances {{ 0, {frameworkModules.observationLibrary, observationParameters} }};
-
-    ThrowIfFalse(observationNetwork.Instantiate(observationInstances, &stochastics, &world, &eventNetwork),
+    ThrowIfFalse(observationNetwork.Instantiate(frameworkModules.observationLibraries, &stochastics, &world, &eventNetwork, scenario.GetSceneryPath()),
                  "Failed to instantiate ObservationNetwork");
     ThrowIfFalse(observationNetwork.InitAll(),
                  "Failed to initialize ObservationNetwork");

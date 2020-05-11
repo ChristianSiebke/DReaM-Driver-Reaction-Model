@@ -35,7 +35,7 @@ class ObservationBinding
 public:
     ObservationBinding(const openpass::common::RuntimeInformation& runtimeInformation, CallbackInterface* callbacks);
     ObservationBinding(const ObservationBinding&) = delete;
-    ObservationBinding(ObservationBinding&&) = delete;
+    ObservationBinding(ObservationBinding&&) = default;
     ObservationBinding& operator=(const ObservationBinding&) = delete;
     ObservationBinding& operator=(ObservationBinding&&) = delete;
     virtual ~ObservationBinding();

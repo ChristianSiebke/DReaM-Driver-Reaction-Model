@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -22,6 +22,7 @@
 #include "Interfaces/parameterInterface.h"
 #include "Common/globalDefinitions.h"
 #include "Common/spawnPointLibraryDefinitions.h"
+#include "Common/observationLibraryDefinitions.h"
 
 using IntProbabilities = std::vector<std::pair<int, double>>;
 using DoubleProbabilities = std::vector<std::pair<double, double>>;
@@ -67,23 +68,35 @@ public:
     virtual ~SlaveConfigInterface() = default;
 
     /*!
-    * \brief Returns a pointer to the experimentConfig
+    * \brief Returns a reference to the experimentConfig
     *
     * @return        experimentConfig
     */
     virtual ExperimentConfig& GetExperimentConfig() = 0;
 
     /*!
-    * \brief Returns a pointer to the scenarioConfig
+    * \brief Returns a reference to the scenarioConfig
     *
     * @return        scenarioConfig
     */
     virtual ScenarioConfig& GetScenarioConfig() = 0;
 
+    /*!
+    * \brief Returns a reference to the spawnPointsConfig
+    *
+    * @return        spawnPointsConfig
+    */
     virtual SpawnPointLibraryInfoCollection& GetSpawnPointsConfig() = 0;
 
     /*!
-    * \brief Returns a pointer to the environmentConfig
+    * \brief Returns a reference to the observationConfig
+    *
+    * @return        observationConfig
+    */
+    virtual ObservationInstanceCollection& GetObservationConfig() = 0;
+
+    /*!
+    * \brief Returns a reference to the environmentConfig
     *
     * @return        environmentConfig
     */

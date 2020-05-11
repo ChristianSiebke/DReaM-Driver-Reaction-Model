@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -79,9 +79,9 @@ public:
     //void StopRun();
 
 private:
-    bool InitPreRun(ExperimentConfig& experimentConfig, ScenarioInterface& scenario, SceneryInterface& scenery);
+    bool InitPreRun(ScenarioInterface& scenario, SceneryInterface& scenery);
     bool InitRun(std::uint32_t seed, const EnvironmentConfig& environmentConfig, RunResult& runResult);
-    void InitializeFrameworkModules(ExperimentConfig &experimentConfig, ScenarioInterface &scenario);
+    void InitializeFrameworkModules(ScenarioInterface &scenario);
     void InitializeSpawnPointNetwork();
     std::unique_ptr<ParameterInterface> SampleWorldParameters(const EnvironmentConfig& environmentConfig, StochasticsInterface* stochastics, const openpass::common::RuntimeInformation& runtimeInformation);
 

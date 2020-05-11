@@ -15,8 +15,8 @@
 class FakeObservationNetwork : public SimulationSlave::ObservationNetworkInterface
 {
 public:
-    MOCK_METHOD4(Instantiate,
-        bool(const std::map<int, ObservationInstance>&, StochasticsInterface*, WorldInterface*, EventNetworkInterface*));
+    MOCK_METHOD5(Instantiate,
+        bool(const ObservationInstanceCollection&, StochasticsInterface*, WorldInterface*, EventNetworkInterface*, const std::string&));
     MOCK_METHOD0(GetObservationModules,
         const std::map<int, ObservationModule*>&());
     MOCK_METHOD0(InitAll,
