@@ -11,8 +11,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
-#ifndef COMMONTOOLS
-#define COMMONTOOLS
+#pragma once
 
 #ifndef _USE_MATH_DEFINES
 #define _USE_MATH_DEFINES
@@ -33,7 +32,7 @@
 namespace CommonHelper
 {
 
-static bool CheckPointValid(const Common::Vector2d *point)
+[[maybe_unused]] static inline constexpr bool CheckPointValid(const Common::Vector2d *point)
 {
     return ((point != nullptr) && (point->x != INFINITY) && (point->y != INFINITY));
 }
@@ -44,7 +43,7 @@ static bool CheckPointValid(const Common::Vector2d *point)
 //! @param[in]    secondPoint    secondPoint
 //! @return       distance between two pcm points
 //-----------------------------------------------------------------------------
-static double CalcAngleBetweenPoints(const Common::Vector2d& firstPoint, const Common::Vector2d& secondPoint)
+[[maybe_unused]] static double CalcAngleBetweenPoints(const Common::Vector2d& firstPoint, const Common::Vector2d& secondPoint)
 {
     if ((!CheckPointValid(&firstPoint)) || (!CheckPointValid(&secondPoint)))
     {
@@ -61,7 +60,7 @@ static double CalcAngleBetweenPoints(const Common::Vector2d& firstPoint, const C
 //!
 //! @param[in]    point     point
 //! @return                 vector
-static Common::Vector2d TransformPointToSourcePointCoord(const Common::Vector2d *point,
+[[maybe_unused]] static Common::Vector2d TransformPointToSourcePointCoord(const Common::Vector2d *point,
                                                          const Common::Vector2d *sourcePoint,
                                                          double direction)
 {
@@ -87,7 +86,7 @@ static double roundDoubleWithDecimals(double value, int decimals)
     return std::floor((value * (std::pow(10, decimals))) + 0.5)/(std::pow(10.0, decimals));
 }
 
-static std::optional<Common::Vector2d> CalculateIntersection(const Common::Vector2d& firstStartPoint, const Common::Vector2d& firstAxis,
+[[maybe_unused]] static std::optional<Common::Vector2d> CalculateIntersection(const Common::Vector2d& firstStartPoint, const Common::Vector2d& firstAxis,
                                                       const Common::Vector2d& secondStartPoint, const Common::Vector2d& secondAxis)
 {
     //Solve linear equation firstStartPoint + lambda * firstAxis = secondStart + kappa * secondAxis
@@ -112,7 +111,7 @@ static std::optional<Common::Vector2d> CalculateIntersection(const Common::Vecto
 //!
 //! @return                     Vector of tokens
 //-----------------------------------------------------------------------------
-static std::vector<std::string> TokenizeString(const std::string& str, const char delimiter)
+[[maybe_unused]] static std::vector<std::string> TokenizeString(const std::string& str, const char delimiter)
 {
     std::stringstream stream(str);
 
@@ -504,4 +503,3 @@ private:
         parameters.yawRate += parameters.yawAcceleration * timestep;
     }
 };
-#endif // COMMONTOOLS

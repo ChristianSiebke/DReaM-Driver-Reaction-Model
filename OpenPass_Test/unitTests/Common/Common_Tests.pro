@@ -28,4 +28,5 @@ HEADERS += \
     $$UNIT_UNDER_TEST/commonTools.h \
 
 SOURCES += \
+    $$UNIT_UNDER_TEST/vector2d.cpp \
     ttcCalculation_Tests.cpp

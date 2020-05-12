@@ -31,7 +31,8 @@ DEPENDENCY_HEADERS = \
                      ../../../CoreFramework/OpenPassSlave/framework/sampler.h \
                      ../../../CoreFramework/OpenPassSlave/modelElements/agentBlueprint.h
 
-DEPENDENCY_SOURCES = ../../../CoreFramework/CoreShare/log.cpp \
+DEPENDENCY_SOURCES = ../../../Common/vector2d.cpp \
+                     ../../../CoreFramework/CoreShare/log.cpp \
                      ../../../CoreFramework/OpenPassSlave/framework/sampler.cpp \
                      ../../../CoreFramework/OpenPassSlave/modelElements/agentBlueprint.cpp
 
