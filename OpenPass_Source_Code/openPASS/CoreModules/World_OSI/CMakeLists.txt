@@ -1,4 +1,4 @@
-set(COMPONENT_NAME World_OSI)
+set(COMPONENT_NAME World)
 
 add_compile_definitions(WORLD_OSI_LIBRARY WORLD_LIBRARY)
 

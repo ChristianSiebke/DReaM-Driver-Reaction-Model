@@ -21,12 +21,12 @@
 #include <QStandardPaths>
 #include <QString>
 
-ProjectInterface::Library const ProjectModel::DefaultLibrary = QCoreApplication::applicationDirPath().append( QStringLiteral("/lib"));      
-ProjectInterface::Config const ProjectModel::DefaultConfig = QCoreApplication::applicationDirPath().append(QStringLiteral("/configs"));
-ProjectInterface::Result const ProjectModel::DefaultResult = QCoreApplication::applicationDirPath();
-ProjectInterface::LogMaster const ProjectModel::DefaultLogMaster = QCoreApplication::applicationDirPath().append( QStringLiteral("/OpenPassMaster.log"));
-ProjectInterface::LogSlave const ProjectModel::DefaultLogSlave = QCoreApplication::applicationDirPath().append( QStringLiteral("/OpenPassSlave.log"));
-ProjectInterface::Slave const ProjectModel::DefaultSlave = QCoreApplication::applicationDirPath().append( QStringLiteral("/bin/OpenPassSlave.exe"));
+ProjectInterface::Library const ProjectModel::DefaultLibrary = QCoreApplication::applicationDirPath().append( QStringLiteral("/../lib"));      
+ProjectInterface::Config const ProjectModel::DefaultConfig = QCoreApplication::applicationDirPath().append(QStringLiteral("/../configs"));
+ProjectInterface::Result const ProjectModel::DefaultResult = QCoreApplication::applicationDirPath().append(QStringLiteral("/.."));
+ProjectInterface::LogMaster const ProjectModel::DefaultLogMaster = QCoreApplication::applicationDirPath().append( QStringLiteral("/../OpenPassMaster.log"));
+ProjectInterface::LogSlave const ProjectModel::DefaultLogSlave = QCoreApplication::applicationDirPath().append( QStringLiteral("/../OpenPassSlave.log"));
+ProjectInterface::Slave const ProjectModel::DefaultSlave = QCoreApplication::applicationDirPath().append( QStringLiteral("/OpenPassSlave.exe"));
 
 ProjectModel::ProjectModel(QObject *parent)
     : ProjectInterface(parent)
