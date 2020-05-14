@@ -10,6 +10,10 @@
 #ifndef OPEXPORT_H
 #define OPEXPORT_H
 
+#ifdef QMAKE_BUILD
+#define OPIMPORT
+#define OPEXPORT
+#else
 #if defined(_WIN32) && !defined(NODLL)
 #define OPIMPORT __declspec(dllimport)
 #define OPEXPORT __declspec(dllexport)
@@ -21,6 +25,7 @@
 #else
 #define OPIMPORT
 #define OPEXPORT
+#endif
 #endif
 
 

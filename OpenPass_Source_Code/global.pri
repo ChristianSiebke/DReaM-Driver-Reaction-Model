@@ -19,6 +19,11 @@ include(ccache.pri)
 
 INCLUDEPATH += $$PWD/openPASS
 CONFIG += c++17
+## debug postfix not working in qmake build
+DEFINES+=DEBUG_POSTFIX=\\\"\\\"
+
+## common and CoreShare are not built as libraries in the qmake build
+DEFINES+=QMAKE_BUILD
 
 ## activate log time output
 DEFINES += LOG_TIME_ENABLED
