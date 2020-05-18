@@ -24,6 +24,7 @@ enum struct EventCategory
     Collision,
     ComponentStateChange,
     LaneChange,
+    CustomLaneChange,
     SetTrajectory,
     SetGazeFollower,
     VehicleComponent

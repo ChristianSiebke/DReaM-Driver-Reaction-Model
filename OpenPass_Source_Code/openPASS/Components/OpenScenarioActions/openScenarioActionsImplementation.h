@@ -14,6 +14,7 @@
 #include "Interfaces/modelInterface.h"
 #include "Common/trajectoryEvent.h"
 #include "Common/laneChangeEvent.h"
+#include "Common/customLaneChangeEvent.h"
 #include "Common/gazeFollowerEvent.h"
 #include "oscActionsCalculation.h"
 
@@ -87,5 +88,6 @@ public:
 private:
     OscActionsCalculation calculation;
     std::shared_ptr<TrajectoryEvent> trajectoryEvent;
+    std::shared_ptr<CustomLaneChangeEvent> customLaneChangeEvent;
     std::shared_ptr<GazeFollowerEvent> gazeFollowerEvent;
 };

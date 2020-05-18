@@ -506,6 +506,26 @@ Example with relative target and fixed time
     </Private>
 </Action>
 ```
+**Custom Lane Change**
+
+The Custom Lane Change triggers a custom lane change for an agent. The execution of the lane change is performed by an arbitrary agent component. 
+
+Note: The regular lane change action is performed according to the defined shape (see above). 
+The custom lane change is only forwarded to agent components, as defined in the signal architecture of the *systemConfigBlueprint.xml*. 
+The way of execution is left to the agent component in the later case.
+
+The command consists of two parts:
+1. "SetCustomLaneChange": The first command instantiates the CustomLaneChange and is set by default. This command does not need to be changed.
+2. "DeltaLaneId": The second command indicates the number of lanes over which the lane change should take place.
+
+Example
+```xml
+<Action name="CustomLaneChange">
+	<UserDefined>
+		<Command>SetCustomLaneChange -1</Command>
+	</UserDefined>
+</Action>
+```
 
 **Follow Trajectory**
 

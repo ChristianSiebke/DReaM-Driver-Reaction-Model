@@ -55,6 +55,34 @@ TEST(ManipulatorImporter, SuccessfullyImportsUserDefinedCommandAction_ComponentS
     EXPECT_EQ(castedAction->GetEventName(), eventName);
 }
 
+TEST(ManipulatorImporter, SuccessfullyImportsUserDefinedCommandAction_CustomLaneChange)
+{
+    const std::string expectedCommand = "SetCustomLaneChange -1";
+    QDomElement fakeEventElement = documentRootFromString(
+                "<Event name=\"ActiveCLCEvent\" priority=\"overwrite\">"
+                "	<Action name=\"CustomLaneChange\">"
+                "		<UserDefined>"
+                "			<Command>"
+                "				" + expectedCommand + ""
+                "			</Command>"
+                "		</UserDefined>"
+                "	</Action>"
+                "</Event>"
+    );
+
+    const std::string eventName{"ActiveCLCEvent"};
+
+    std::shared_ptr<ScenarioActionInterface> action = ManipulatorImporter::ImportManipulator(fakeEventElement,
+                                                                                             eventName,
+                                                                                             testing::DontCare<std::string>());
+
+    std::shared_ptr<openScenario::UserDefinedCommandAction> castedAction = std::dynamic_pointer_cast<openScenario::UserDefinedCommandAction>(action);
+
+    ASSERT_NE(castedAction, nullptr);
+    EXPECT_EQ(castedAction->GetCommand(), expectedCommand);
+    EXPECT_EQ(castedAction->GetEventName(), eventName);
+}
+
 TEST(ManipulatorImporter, SuccessfullyImportsUserDefinedCommandAction_GazeFollower)
 {
     const std::string expectedCommand = "SetGazeFollower Active GazeFollowerFileName.csv";

@@ -21,6 +21,8 @@
 #include "Common/trajectorySignal.h"
 #include "Common/gazeFollowerEvent.h"
 #include "Common/gazeFollowerSignal.h"
+#include "Common/customLaneChangeEvent.h"
+#include "Common/customLaneChangeSignal.h"
 
 using ::testing::Return;
 using ::testing::_;
@@ -163,6 +165,77 @@ TEST(OpenScenarioActions_Test, LaneChangeEventForOtherAgent_IsIgnored)
     const auto laneChangeSignal = std::dynamic_pointer_cast<const TrajectorySignal>(signal);
     ASSERT_TRUE(laneChangeSignal);
     ASSERT_THAT(laneChangeSignal->componentState, Eq(ComponentState::Disabled));
+}
+
+TEST(OpenScenarioActions_Test, CustomLaneChangeEventForOwnAgent_IsForwardedAsSignal)
+{
+    constexpr int agentId = 10;
+    int fakeDeltaLaneId = -1;
+    FakeAgent fakeAgent;
+    ON_CALL(fakeAgent, GetId()).WillByDefault(Return(agentId));
+    FakeEventNetwork fakeEventNetwork;
+    EventContainer events{std::make_shared<CustomLaneChangeEvent>(0, "", "", agentId, fakeDeltaLaneId)};
+    ON_CALL(fakeEventNetwork, GetActiveEventCategory(EventDefinitions::EventCategory::CustomLaneChange)).WillByDefault(Return(events));
+
+    auto openScenarioActions = OpenScenarioActionsImplementation("",
+                                                                 0,
+                                                                 0,
+                                                                 0,
+                                                                 0,
+                                                                 0,
+                                                                 nullptr,
+                                                                 nullptr,
+                                                                 nullptr,
+                                                                 nullptr,
+                                                                 nullptr,
+                                                                 &fakeAgent,
+                                                                 &fakeEventNetwork);
+
+    openScenarioActions.Trigger(0);
+
+    std::shared_ptr<SignalInterface const> signal;
+    openScenarioActions.UpdateOutput(1, signal, 0);
+
+    const auto customLaneChangeSignal = std::dynamic_pointer_cast<const CustomLaneChangeSignal>(signal);
+    ASSERT_TRUE(customLaneChangeSignal);
+    ASSERT_THAT(customLaneChangeSignal->componentState, Eq(ComponentState::Acting));
+    ASSERT_THAT(customLaneChangeSignal->deltaLaneId, fakeDeltaLaneId);
+}
+
+TEST(OpenScenarioActions_Test, CustomLaneChangeEventForOtherAgent_IsIgnored)
+{
+    constexpr int ownAgentId = 10;
+    constexpr int otherAgentId = 11;
+    int fakeDeltaLaneId = -1;
+    FakeAgent fakeAgent;
+    ON_CALL(fakeAgent, GetId()).WillByDefault(Return(ownAgentId));
+    FakeEventNetwork fakeEventNetwork;
+    EventContainer events{std::make_shared<CustomLaneChangeEvent>(0, "", "", otherAgentId, fakeDeltaLaneId)};
+    ON_CALL(fakeEventNetwork, GetActiveEventCategory(EventDefinitions::EventCategory::CustomLaneChange)).WillByDefault(Return(events));
+
+    auto openScenarioActions = OpenScenarioActionsImplementation("",
+                                                                 0,
+                                                                 0,
+                                                                 0,
+                                                                 0,
+                                                                 0,
+                                                                 nullptr,
+                                                                 nullptr,
+                                                                 nullptr,
+                                                                 nullptr,
+                                                                 nullptr,
+                                                                 &fakeAgent,
+                                                                 &fakeEventNetwork);
+
+    openScenarioActions.Trigger(0);
+
+    std::shared_ptr<SignalInterface const> signal;
+    openScenarioActions.UpdateOutput(1, signal, 0);
+
+    const auto customLaneChangeSignal = std::dynamic_pointer_cast<const CustomLaneChangeSignal>(signal);
+    ASSERT_TRUE(customLaneChangeSignal);
+    ASSERT_THAT(customLaneChangeSignal->componentState, Eq(ComponentState::Disabled));
+    ASSERT_THAT(customLaneChangeSignal->deltaLaneId, 0);
 }
 
 TEST(OpenScenarioActions_Test, GazeFollowerEventForOwnAgent_IsForwardedAsSignal)

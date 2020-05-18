@@ -24,6 +24,7 @@
 #include "RemoveAgentsManipulator.h"
 #include "NoOperationManipulator.h"
 #include "TrajectoryManipulator.h"
+#include "CustomLaneChangeManipulator.h"
 #include "GazeFollowerManipulator.h"
 
 
@@ -75,6 +76,16 @@ extern "C" MANIPULATOR_SHARED_EXPORT ManipulatorInterface* OpenPASS_CreateInstan
                 {
                     return static_cast<ManipulatorInterface*>(new (std::nothrow) NoOperationManipulator(
                                                                   world,
+                                                                  eventNetwork,
+                                                                  callbacks
+                                                                  ));
+                }
+
+                if (commandType == "SetCustomLaneChange")
+                {
+                    return static_cast<ManipulatorInterface*>(new (std::nothrow) CustomLaneChangeManipulator(
+                                                                  world,
+                                                                  userDefinedCommandAction,
                                                                   eventNetwork,
                                                                   callbacks
                                                                   ));

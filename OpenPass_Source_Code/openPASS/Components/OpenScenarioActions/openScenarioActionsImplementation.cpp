@@ -16,6 +16,7 @@
 
 #include "openScenarioActionsImplementation.h"
 #include "Common/trajectorySignal.h"
+#include "Common/customLaneChangeSignal.h"
 #include "Common/gazeFollowerSignal.h"
 #include "Interfaces/eventNetworkInterface.h"
 #include "Common/eventTypes.h"
@@ -68,6 +69,17 @@ void OpenScenarioActionsImplementation::UpdateOutput(int localLinkId, std::share
             data = std::make_shared<TrajectorySignal>();
         }
     }
+    else if (localLinkId == 1)
+    {
+        if (customLaneChangeEvent)
+        {
+            data = std::make_shared<CustomLaneChangeSignal>(ComponentState::Acting, customLaneChangeEvent->deltaLaneId);
+        }
+        else
+        {
+            data = std::make_shared<CustomLaneChangeSignal>();
+        }
+    }
     else if (localLinkId == 2)
     {
         if (gazeFollowerEvent)
@@ -86,6 +98,7 @@ void OpenScenarioActionsImplementation::Trigger([[maybe_unused]]int time)
     const auto& agentId = GetAgent()->GetId();
 
     trajectoryEvent = nullptr;
+    customLaneChangeEvent = nullptr;
     gazeFollowerEvent = nullptr;
 
     const auto laneChangeEventList = GetEventNetwork()->GetActiveEventCategory(EventDefinitions::EventCategory::LaneChange);
@@ -168,6 +181,17 @@ void OpenScenarioActionsImplementation::Trigger([[maybe_unused]]int time)
         }
     }
 
+    const auto customLaneChangeEventList = GetEventNetwork()->GetActiveEventCategory(EventDefinitions::EventCategory::CustomLaneChange);
+
+    for (const auto &event : customLaneChangeEventList)
+    {
+        const auto& castedCustomLaneChangeEvent = std::dynamic_pointer_cast<CustomLaneChangeEvent>(event);
+        if (castedCustomLaneChangeEvent && castedCustomLaneChangeEvent->agentId == agentId)
+        {
+            this->customLaneChangeEvent = castedCustomLaneChangeEvent;
+        }
+    }
+    
     const auto gazeFollowerEventList = GetEventNetwork()->GetActiveEventCategory(EventDefinitions::EventCategory::SetGazeFollower);
 
     for (const auto &event : gazeFollowerEventList)

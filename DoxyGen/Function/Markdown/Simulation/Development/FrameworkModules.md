@@ -120,6 +120,7 @@ List of Modules which use the EventNetwork:
 * [CollisionManipulator](\ref dev_framework_modules_manipulators_collision)
 * [ComponentStateChangeManipulator](\ref dev_framework_modules_manipulators_componentstatechange)
 * [GazeFollowerManipulator](\ref dev_framework_modules_manipulators_gazefollower)
+* * [CustomLaneChangeManipulator](\ref dev_framework_modules_manipulators_customlanechange)
 
 The class structure of the Manipulators is showed in the following diagram:
 
@@ -163,6 +164,28 @@ The class structure of the Manipulators is showed in the following diagram:
 |ElementName|Attribute|Type  |Description                                                   |
 |-----------|---------|------|--------------------------------------------------------------|
 |Command    |-        |string|This string must be formatted as "SetComponentState <TargetComponent> <DesiredState>", where <TargetComponent> is the target component name and <DesiredState> is one of "Acting", "Armed", or "Disabled".|
+
+---
+
+\subsection dev_framework_modules_manipulators_customlanechange CustomLaneChangeManipulator
+* **Description:**
+    This manipulator sets a custom lane change for an agent.
+
+* **Trigger:** This manipulator can be triggered by any detector. This has to be parameterized in scenario configuration (see [Input/Output documentation](\ref io_input_scenario)).
+
+* **Event:** Creates an event of type CustomLaneChangeEvent.
+
+* **Configuration:**
+```xml
+<Action name="ExampleCustomLaneChangeManipulator">
+	<UserDefined>
+		<Command>SetCustomLaneChange DeltaLaneId</Command>
+	</UserDefined>
+</Action>
+```
+|ElementName|Attribute|Type  |Description                                                   |
+|-----------|---------|------|--------------------------------------------------------------|
+|Command    |-        |string|This string must be formatted as "SetCustomLaneChange" <DeltaLaneId>, where <DeltaLaneId> indicates the number of lanes over which the lane change should take place.|
 
 ---
 
