@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -62,14 +62,19 @@ ParameterSetLevel3 ImportParameter<NormalDistribution>(QDomElement& domElement, 
 
             ThrowIfFalse(ParseAttributeString(parameterElement, ATTRIBUTE::key, parameterName),
                          parameterElement, "Attribute " + std::string(ATTRIBUTE::key) + " is missing.");
-            ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::mean, parameterValue.mean),
-                         parameterElement, "Attribute " + std::string(ATTRIBUTE::mean) + " is missing or of wrong type");
-            ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::sd, parameterValue.standardDeviation),
-                         parameterElement, "Attribute " + std::string(ATTRIBUTE::sd) + " is missing or of wrong type");
             ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::min, parameterValue.min),
                          parameterElement, "Attribute " + std::string(ATTRIBUTE::min) + " is missing or of wrong type");
             ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::max, parameterValue.max),
                          parameterElement, "Attribute " + std::string(ATTRIBUTE::max) + " is missing or of wrong type");
+
+            if (!ParseAttribute(parameterElement, ATTRIBUTE::mean, parameterValue.mean)
+                || !ParseAttribute(parameterElement, ATTRIBUTE::sd, parameterValue.standardDeviation))
+            {
+                ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::mu, parameterValue.mean)
+                             && ParseAttribute(parameterElement, ATTRIBUTE::sigma, parameterValue.standardDeviation),
+                             parameterElement, std::string("Either attribute ") + ATTRIBUTE::mu + " and " + ATTRIBUTE::sigma + " or "
+                             + ATTRIBUTE::mean + " and " + ATTRIBUTE::sd + " required for NormalDistribution");
+            }
 
             param.emplace_back(parameterName, parameterValue);
             parameterElement = parameterElement.nextSiblingElement(QString::fromStdString(elementName));

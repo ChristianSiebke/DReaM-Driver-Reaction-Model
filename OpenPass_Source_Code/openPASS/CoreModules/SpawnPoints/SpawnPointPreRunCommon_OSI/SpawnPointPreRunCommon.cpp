@@ -208,7 +208,6 @@ bool SpawnPointPreRunCommon::CalculateSpawnParameter(AgentBlueprintInterface* ag
 {
     const auto& lanePosition = std::get<openScenario::LanePosition>(spawnInfo.position);
 
-    SpawnParameter& spawnParameter = agentBlueprint->GetSpawnParameter();
 
     Position pos = GetWorld()->LaneCoord2WorldCoord(lanePosition.s,
                                                     lanePosition.offset.value_or(0.0),
@@ -216,11 +215,6 @@ bool SpawnPointPreRunCommon::CalculateSpawnParameter(AgentBlueprintInterface* ag
                                                     lanePosition.laneId);
 
     double spawnV = spawnInfo.velocity;
-
-    if(agentBlueprint->GetVehicleModelParameters().vehicleType == AgentVehicleType::Truck)
-    {
-        spawnV = std::min(90 / 3.6, spawnV);
-    }
 
     //considers adjusted velocity in curvatures
     double kappa = pos.curvature;
@@ -235,6 +229,7 @@ bool SpawnPointPreRunCommon::CalculateSpawnParameter(AgentBlueprintInterface* ag
         spawnV = std::min(spawnV, curvatureVelocity);
     }
 
+    SpawnParameter& spawnParameter = agentBlueprint->GetSpawnParameter();
     spawnParameter.positionX = pos.xPos;
     spawnParameter.positionY = pos.yPos;
     spawnParameter.yawAngle  = pos.yawAngle;

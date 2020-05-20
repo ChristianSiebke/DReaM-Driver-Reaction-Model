@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2019 in-tech
+* Copyright (c) 2019, 2020 in-tech
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -271,124 +271,8 @@ INSTANTIATE_TEST_CASE_P(WorldAnalyzer_AltersValidSpawnRangeCorrectly, GetValidLa
         GetValidLaneSpawningRanges_TwoAgents_Data{"ROADID",      -1,      100,   200, AgentCategory::Scenario,                   {0, 5}, AgentCategory::Scenario,           {55, 60},                   true, {{100, 200}}}
     ));
 
-struct GetNextSpawnPositionTests_Data
-{
-    const std::pair<double, double> bounds;
-    const bool agentExistsInRange;
-    const double firstAgentInLanePosition;
-    const double firstAgentRearLength;
-    const double intendedVelocity;
-    const double gapInSeconds;
-    const bool expectingValidSpawnPosition;
-    const double expectedSpawnPosition;
-};
-
-class GetNextSpawnPositionTests : public::testing::TestWithParam<GetNextSpawnPositionTests_Data>
-{
-public:
-    GetNextSpawnPositionTests()
-    {}
-
-    FakeWorld fakeWorld;
-    FakeAgent fakeAgent;
-};
-
-TEST_P(GetNextSpawnPositionTests, GetNextSpawnPosition)
-{
-    const auto data = GetParam();
-
-    const RoadId roadId{"ROADID"};
-    const Route routeForRoadId{roadId};
-    const LaneId laneId{-1};
-    const double agentFrontLength{0.5};
-    const double agentRearLength{0.5};
-    const auto maxSearchPosition = data.bounds.second + data.intendedVelocity * data.gapInSeconds;
-
-    if (!data.agentExistsInRange)
-    {
-        EXPECT_CALL(fakeWorld, GetAgentsInRange(routeForRoadId,
-                                                  roadId,
-                                                  laneId,
-                                                  data.bounds.first,
-                                                  SEARCH_FORWARDS ? 0 : maxSearchPosition,
-                                                  SEARCH_FORWARDS ? maxSearchPosition : 0))
-                .WillOnce(Return(NO_AGENTS_IN_RANGE));
-
-        EXPECT_CALL(fakeWorld, GetDistanceToEndOfLane(routeForRoadId,
-                                                      roadId,
-                                                      laneId,
-                                                      0,
-                                                      MAX_SEARCH_DISTANCE,
-                                                      _))
-                .WillOnce(Return(MAX_SEARCH_DISTANCE));
-
-        EXPECT_CALL(fakeWorld, GetDistanceToEndOfLane(routeForRoadId,
-                                                      roadId,
-                                                      laneId,
-                                                      data.bounds.second,
-                                                      data.bounds.second,
-                                                      _))
-                .WillOnce(Return(MAX_SEARCH_DISTANCE));
-
-    }
-
-    else
-    {
-        const std::vector<const AgentInterface *> agentsInRange{&fakeAgent};
-        EXPECT_CALL(fakeWorld, GetAgentsInRange(routeForRoadId,
-                                                  roadId,
-                                                  laneId,
-                                                  data.bounds.first,
-                                                  SEARCH_FORWARDS ? 0 : maxSearchPosition,
-                                                  SEARCH_FORWARDS ? maxSearchPosition : 0))
-                .WillOnce(Return(agentsInRange));
-
-        EXPECT_CALL(fakeAgent, GetDistanceToStartOfRoad())
-                .WillRepeatedly(Return(data.firstAgentInLanePosition));
-
-        // create an arbitrary agent length such that the first agent rear and front length are equal.
-        const auto agentLength = data.firstAgentRearLength * 2;
-        EXPECT_CALL(fakeAgent, GetLength())
-                .WillOnce(Return(agentLength));
-        EXPECT_CALL(fakeAgent, GetDistanceReferencePointToLeadingEdge())
-                .WillOnce(Return(data.firstAgentRearLength));
-    }
-
-    WorldAnalyzer worldAnalyzer(&fakeWorld,
-                                [](const auto&) {});
-    const auto nextSpawnPosition = worldAnalyzer.GetNextSpawnPosition(routeForRoadId,
-                                                                      roadId,
-                                                                      laneId,
-                                                                      data.bounds,
-                                                                      agentFrontLength,
-                                                                      agentRearLength,
-                                                                      data.intendedVelocity,
-                                                                      data.gapInSeconds,
-                                                                      Direction::FORWARD);
-
-    EXPECT_THAT(nextSpawnPosition.has_value(), data.expectingValidSpawnPosition);
-    if (data.expectingValidSpawnPosition)
-    {
-        EXPECT_THAT(nextSpawnPosition.value(), data.expectedSpawnPosition);
-    }
-}
-INSTANTIATE_TEST_CASE_P(WorldAnalyzer_GetNextSpawnPosition, GetNextSpawnPositionTests,
-    ::testing::Values(
-                                   //  bounds  | agentExistsInRange | firstAgentInLanePosition | firstAgentRearLength | intendedVelocity | gapInSeconds |expectingValidSpawnPosition | expectedSpawnPosition
-        // no agents yet spawned in range -- spawn first at end of range (minus front length)
-        GetNextSpawnPositionTests_Data{{0, 100},               false,        DontCare<double>(),    DontCare<double>(),                30,             1,                        true, 99.5}, // no agent in lane - last possible position in range minus agentFrontLength
-        // agent spawned in lane -- spawn behind with calculated minimum gap
-        GetNextSpawnPositionTests_Data{{0, 500},                true,                       100,                   0.5,                30,             1,                        true, 67},  // agent at end of lane (position 100) - separation is minimum of gapInSeconds * velocity + rearLength of front agent + frontLength of spawnedAgent
-                                                                                                                                                                                             // OR MINIMUM_SEPARATION_BUFFER (2.0) + rearLength of front agent + frontLength of spawned agent + MINIMUM_GAP_IN_SECONDS (1.0) * velocity
-        // agent spawned in lane -- spawn behind with calculated minimum gap
-        GetNextSpawnPositionTests_Data{{0, 500},                true,                       100,                   0.5,                30,             2,                        true, 39},
-        // agent spawned in lane with no room left for new agent -- no valid spawn position
-        GetNextSpawnPositionTests_Data{{0, 100},                true,                         1,                   0.5,                30,             1,                       false, DontCare<double>()}
-));
-
 struct CalculateSpawnVelocityToPreventCrashing_Data
 {
-    const bool objectExistsInLane;
     const double opponentRearDistanceFromStartOfRoad;
     const double opponentVelocity;
 
@@ -415,46 +299,24 @@ TEST_P(CalculateSpawnVelocityToPreventCrashingTests, AdjustsVelocityToPreventCra
     const RoadId roadId = "ROADID";
     const Route routeForRoadId{roadId};
     const LaneId laneId = -1;
-    const double intendedVehicleFrontPosition = data.intendedSpawnPosition + data.agentFrontLength;
 
     FakeAgent fakeAgent;
     FakeWorld fakeWorld;
 
-    if (data.objectExistsInLane)
-    {
-        const std::vector<const AgentInterface*> agentsInRange{&fakeAgent};
-        EXPECT_CALL(fakeWorld, GetAgentsInRange(routeForRoadId,
-                                                roadId,
-                                                laneId,
-                                                _,
-                                                0,
-                                                std::numeric_limits<double>::infinity()))
-                .WillOnce(Return(agentsInRange));
+    const std::vector<const AgentInterface*> agentsInRange{&fakeAgent};
+    EXPECT_CALL(fakeWorld, GetAgentsInRange(routeForRoadId,
+                                            roadId,
+                                            laneId,
+                                            _,
+                                            0,
+                                            _))
+            .WillOnce(Return(agentsInRange));
 
-        EXPECT_CALL(fakeAgent, GetDistanceToStartOfRoad(MeasurementPoint::Rear))
-                .WillOnce(Return(data.opponentRearDistanceFromStartOfRoad));
-        EXPECT_CALL(fakeAgent, GetVelocity())
-                .WillOnce(Return(data.opponentVelocity));
-        EXPECT_CALL(fakeAgent, GetDistanceToStartOfRoad(MeasurementPoint::Front))
-                .WillOnce(Return(MAX_SEARCH_DISTANCE));
-    }
-    else
-    {
-        EXPECT_CALL(fakeWorld, GetAgentsInRange(routeForRoadId,
-                                                roadId,
-                                                laneId,
-                                                _,
-                                                0,
-                                                std::numeric_limits<double>::infinity()))
-                .WillOnce(Return(NO_AGENTS_IN_RANGE));
-        EXPECT_CALL(fakeWorld, GetDistanceToEndOfLane(routeForRoadId,
-                                                      roadId,
-                                                      laneId,
-                                                      intendedVehicleFrontPosition,
-                                                      _,
-                                                      _))
-                .WillOnce(Return(MAX_SEARCH_DISTANCE));
-    }
+    EXPECT_CALL(fakeAgent, GetDistanceToStartOfRoad(MeasurementPoint::Rear))
+            .WillOnce(Return(data.opponentRearDistanceFromStartOfRoad));
+    EXPECT_CALL(fakeAgent, GetVelocity())
+            .WillOnce(Return(data.opponentVelocity))
+            .WillOnce(Return(data.opponentVelocity));
 
     const auto emptyLoggingCallback = [](const std::string&) {};
     WorldAnalyzer worldAnalyzer(&fakeWorld,
@@ -472,9 +334,8 @@ TEST_P(CalculateSpawnVelocityToPreventCrashingTests, AdjustsVelocityToPreventCra
 
 INSTANTIATE_TEST_CASE_P(WorldAnalyzer_CalculateSpawnVelocityToPreventCrashing, CalculateSpawnVelocityToPreventCrashingTests,
     ::testing::Values(
-                                                  // objectExistsInLane | opponentRearDistanceFromStartOfRoad |  opponentVelocity | intendedSpawnPosition | agentFrontLength | agentRearLength | intendedVelocity | expectedAdjustedVelocity |
-        CalculateSpawnVelocityToPreventCrashing_Data{              false,                   DontCare<double>(), DontCare<double>(),                     50,               0.5,              0.5,                30,                        30},
-        CalculateSpawnVelocityToPreventCrashing_Data{               true,                                   60,                 20,                     50,               0.5,              0.5,                30,                        30 - (60 / 3.6)}
+                                                  // opponentRearDistanceFromStartOfRoad |  opponentVelocity | intendedSpawnPosition | agentFrontLength | agentRearLength | intendedVelocity | expectedAdjustedVelocity |
+        CalculateSpawnVelocityToPreventCrashing_Data{                                  60,                 20,                   49.5,               0.5,              0.5,                30,                      25.0}
 ));
 
 struct SpawnWillCauseCrash_Data
