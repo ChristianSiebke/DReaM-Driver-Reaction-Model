@@ -735,6 +735,59 @@ TEST(GetTrafficSignsInRange, ReturnsCorrectTrafficSigns)
     ASSERT_THAT(result3.at(1).relativeDistance, Eq(specificationSign3a.relativeDistance));
 }
 
+TEST(GetTrafficSignsInRange, NegativeRange_ReturnsSignsBehind)
+{
+    FakeLaneMultiStream laneMultiStream;
+    auto [node1, lane1] = laneMultiStream.AddRoot(100, true);
+    Fakes::TrafficSign fakeSign1a;
+    ON_CALL(fakeSign1a, GetS()).WillByDefault(Return(10.0));
+    Fakes::TrafficSign fakeSign1b;
+    CommonTrafficSign::Entity specificationSign1b{CommonTrafficSign::Type::Stop, CommonTrafficSign::Unit::None, 60.0, -90.0, 0.0, "", {}};
+    ON_CALL(fakeSign1b, GetS()).WillByDefault(Return(60.0));
+    ON_CALL(fakeSign1b, GetSpecification(DoubleEq(-90.0))).WillByDefault(Return(specificationSign1b));
+    OWL::Interfaces::TrafficSigns signsLane1{ {&fakeSign1a, &fakeSign1b} };
+    ON_CALL(*lane1, GetTrafficSigns()).WillByDefault(ReturnRef(signsLane1));
+
+    auto [node2, lane2] = laneMultiStream.AddLane(200, false, *node1);
+    Fakes::TrafficSign fakeSign2a;
+    ON_CALL(fakeSign2a, GetS()).WillByDefault(Return(110.0));
+    Fakes::TrafficSign fakeSign2b;
+    CommonTrafficSign::Entity specificationSign2b{CommonTrafficSign::Type::MaximumSpeedLimit, CommonTrafficSign::Unit::MeterPerSecond, 160.0, -10.0, 10.0, "", {}};
+    ON_CALL(fakeSign2b, GetS()).WillByDefault(Return(160.0));
+    ON_CALL(fakeSign2b, GetSpecification(DoubleEq(-10.0))).WillByDefault(Return(specificationSign2b));
+    OWL::Interfaces::TrafficSigns signsLane2{ {&fakeSign2a, &fakeSign2b} };
+    ON_CALL(*lane2, GetTrafficSigns()).WillByDefault(ReturnRef(signsLane2));
+
+    auto [node3, lane3] = laneMultiStream.AddLane(300, true, *node1);
+    Fakes::TrafficSign fakeSign3a;
+    ON_CALL(fakeSign3a, GetS()).WillByDefault(Return(10.0));
+    Fakes::TrafficSign fakeSign3b;
+    ON_CALL(fakeSign3b, GetS()).WillByDefault(Return(60.0));
+    OWL::Interfaces::TrafficSigns signsLane3{ {&fakeSign3a, &fakeSign3b} };
+    ON_CALL(*lane3, GetTrafficSigns()).WillByDefault(ReturnRef(signsLane3));
+
+    Fakes::WorldData worldData;
+    WorldDataQuery wdQuery(worldData);
+
+    auto result = wdQuery.GetTrafficSignsInRange(laneMultiStream.Get(), 150.0, -100.0);
+
+    ASSERT_THAT(result, SizeIs(3));
+    auto& result1 = result[node1->roadGraphVertex];
+    ASSERT_THAT(result1, SizeIs(1));
+    ASSERT_THAT(result1.at(0).type, Eq(specificationSign1b.type));
+    ASSERT_THAT(result1.at(0).distanceToStartOfRoad, Eq(specificationSign1b.distanceToStartOfRoad));
+    ASSERT_THAT(result1.at(0).relativeDistance, Eq(specificationSign1b.relativeDistance));
+
+    auto& result2 = result[node2->roadGraphVertex];
+    ASSERT_THAT(result2, SizeIs(2));
+    ASSERT_THAT(result2.at(0).type, Eq(specificationSign1b.type));
+    ASSERT_THAT(result2.at(0).distanceToStartOfRoad, Eq(specificationSign1b.distanceToStartOfRoad));
+    ASSERT_THAT(result2.at(0).relativeDistance, Eq(specificationSign1b.relativeDistance));
+    ASSERT_THAT(result2.at(1).type, Eq(specificationSign2b.type));
+    ASSERT_THAT(result2.at(1).distanceToStartOfRoad, Eq(specificationSign2b.distanceToStartOfRoad));
+    ASSERT_THAT(result2.at(1).relativeDistance, Eq(specificationSign2b.relativeDistance));
+}
+
 TEST(GetRoadMarkingInRange, ReturnsCorrectRoadMarkings)
 {
     FakeLaneMultiStream laneMultiStream;

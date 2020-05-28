@@ -218,15 +218,18 @@ bool WorldDataQuery::IsSValidOnLane(std::string roadId, OWL::OdId laneId, double
 
 RouteQueryResult<std::vector<CommonTrafficSign::Entity>> WorldDataQuery::GetTrafficSignsInRange(LaneMultiStream laneStream, double startDistance, double searchRange) const
 {
+    const bool backwardsSearch = searchRange < 0;
+    const double startPosition = backwardsSearch ? startDistance + searchRange : startDistance;
+    const double endPosition = backwardsSearch ? startDistance : startDistance + searchRange;
     return laneStream.Traverse(LaneMultiStream::TraversedFunction<std::vector<CommonTrafficSign::Entity>>{[&](const auto& lane, const auto& previousTrafficSigns)
     {
         std::vector<CommonTrafficSign::Entity> foundTrafficSigns{previousTrafficSigns};
 
-        if (lane.EndS() < startDistance)
+        if (lane.EndS() < startPosition)
         {
             return foundTrafficSigns;
         }
-        if (lane.StartS() > startDistance + searchRange)
+        if (lane.StartS() > endPosition)
         {
             return foundTrafficSigns;
         }
@@ -236,7 +239,7 @@ RouteQueryResult<std::vector<CommonTrafficSign::Entity>> WorldDataQuery::GetTraf
         for (const auto& trafficSign : sortedTrafficSigns)
         {
             double trafficSignPosition = lane.GetStreamPosition(trafficSign->GetS() - lane().GetDistance(OWL::MeasurementPoint::RoadStart));
-            if (startDistance <= trafficSignPosition && trafficSignPosition <= startDistance + searchRange)
+            if (startPosition <= trafficSignPosition && trafficSignPosition <= endPosition)
             {
                 foundTrafficSigns.push_back(trafficSign->GetSpecification(trafficSignPosition - startDistance));
             }
