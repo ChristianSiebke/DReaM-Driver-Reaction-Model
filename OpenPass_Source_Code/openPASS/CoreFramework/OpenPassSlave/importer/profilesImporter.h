@@ -114,7 +114,7 @@ public:
 
 private:
     static constexpr auto profilesCatalogFile = "ProfilesCatalog.xml";
-    static constexpr auto supportedConfigVersion = "0.4.0";
+    static constexpr auto supportedConfigVersion = "0.4.1";
 
 };
 } //namespace Importer

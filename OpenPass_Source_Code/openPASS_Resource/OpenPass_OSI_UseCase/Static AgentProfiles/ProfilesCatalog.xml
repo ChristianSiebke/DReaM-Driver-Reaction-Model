@@ -1,4 +1,4 @@
-<Profiles SchemaVersion="0.4.0">
+<Profiles SchemaVersion="0.4.1">
   <AgentProfiles>
     <AgentProfile Name="EgoAgent" Type="Static">
       <System>
