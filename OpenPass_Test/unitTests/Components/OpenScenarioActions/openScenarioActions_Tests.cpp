@@ -104,7 +104,7 @@ TEST(OpenScenarioActions_Test, TrajectoryEventForOtherAgent_IsIgnored)
     FakeAgent fakeAgent;
     ON_CALL(fakeAgent, GetId()).WillByDefault(Return(agentId));
     FakeEventNetwork fakeEventNetwork;
-    LaneChangeParameter laneChange{};
+    openScenario::LaneChangeParameter laneChange{};
     EventContainer events{std::make_shared<LaneChangeEvent>(0, "", "", agentId, laneChange)};
     ON_CALL(fakeEventNetwork, GetActiveEventCategory(EventDefinitions::EventCategory::LaneChange)).WillByDefault(Return(events));
 
@@ -139,7 +139,7 @@ TEST(OpenScenarioActions_Test, LaneChangeEventForOtherAgent_IsIgnored)
     FakeAgent fakeAgent;
     ON_CALL(fakeAgent, GetId()).WillByDefault(Return(ownAgentId));
     FakeEventNetwork fakeEventNetwork;
-    LaneChangeParameter laneChange{};
+    openScenario::LaneChangeParameter laneChange{};
     EventContainer events{std::make_shared<LaneChangeEvent>(0, "", "", otherAgentId, laneChange)};
     ON_CALL(fakeEventNetwork, GetActiveEventCategory(EventDefinitions::EventCategory::LaneChange)).WillByDefault(Return(events));
 
@@ -364,7 +364,7 @@ TEST_P(OscActionCalculation_LaneChangeTest, ShapeIsSineCurve)
 
     auto trajectoryResult = calculation.CalculateSinusiodalLaneChange(data.deltaS, data.deltaT, data.deltaTime, 0.1, startPosition, 1.5);
 
-    for (const auto point : trajectoryResult.points)
+    for (const auto& point : trajectoryResult.points)
     {
         const auto s = point.x - 11.0;
         const auto t = point.y - 13.0;

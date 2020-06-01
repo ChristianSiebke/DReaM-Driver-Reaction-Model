@@ -18,7 +18,6 @@
 #include "Common/globalDefinitions.h"
 #include "Common/eventDetectorDefinitions.h"
 #include "Interfaces/scenarioInterface.h"
-#include "Interfaces/scenarioActionInterface.h"
 
 namespace Configuration {
 
@@ -96,13 +95,13 @@ public:
     const std::map<std::string, std::vector<ScenarioEntity*>> &GetScenarioGroups() override;
 
     void AddConditionalEventDetector(const openScenario::ConditionalEventDetectorInformation &eventDetectorInformation) override;
-    void AddAction(std::shared_ptr<ScenarioActionInterface> action) override;
+    void AddAction(const openScenario::Action action, const std::string eventName) override;
 
     std::string GetEventDetectorLibraryName();
     const std::vector<openScenario::ConditionalEventDetectorInformation>& GetEventDetectorInformations() override;
 
     std::string GetManipulatorLibraryName();
-    std::vector<std::shared_ptr<ScenarioActionInterface> > GetActions() const override;
+    std::vector<openScenario::ManipulatorInformation> GetActions() const override;
 
     int GetEndTime() const override;
     void SetEndTime(const double endTime) override;
@@ -113,7 +112,7 @@ private:
     std::map<std::string, std::vector<ScenarioEntity*>> scenarioGroups;
 
     std::vector<openScenario::ConditionalEventDetectorInformation> eventDetectorInformations;
-    std::vector<std::shared_ptr<ScenarioActionInterface>> actions;
+    std::vector<openScenario::ManipulatorInformation> actions;
 
     std::string vehicleCatalogPath;     //!< The path of the vehicle catalog (relative to Scenario.xosc)
     std::string pedestrianCatalogPath;  //!< The path of the pedestrian catalog (relative to Scenario.xosc)

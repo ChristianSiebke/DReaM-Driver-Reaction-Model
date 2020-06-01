@@ -21,8 +21,8 @@ void Importer::ImportParameterElement(QDomElement& parameterElement, openScenari
                  parameterElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
 
     std::string parameterType;
-    ThrowIfFalse(SimulationCommon::ParseAttribute(parameterElement, ATTRIBUTE::type, parameterType),
-                 parameterElement, "Attribute " + std::string(ATTRIBUTE::type) + " is missing.");
+    ThrowIfFalse(SimulationCommon::ParseAttribute(parameterElement, ATTRIBUTE::parameterType, parameterType),
+                 parameterElement, "Attribute " + std::string(ATTRIBUTE::parameterType) + " is missing.");
 
     if (parameterType == "bool")
     {
@@ -61,12 +61,12 @@ void Importer::ImportParameterElement(QDomElement& parameterElement, openScenari
 void Importer::ImportParameterDeclarationElement(QDomElement& parameterDeclarationElement, openScenario::Parameters& parameters)
 {
     QDomElement parameterElement;
-    if (SimulationCommon::GetFirstChildElement(parameterDeclarationElement, TAG::parameter, parameterElement))
+    if (SimulationCommon::GetFirstChildElement(parameterDeclarationElement, TAG::parameterDeclaration, parameterElement))
     {
         while (!parameterElement.isNull())
         {
             ImportParameterElement(parameterElement, parameters);
-            parameterElement = parameterElement.nextSiblingElement(TAG::parameter);
+            parameterElement = parameterElement.nextSiblingElement(TAG::parameterDeclaration);
         }
     }
 }

@@ -128,19 +128,40 @@ private:
     const Rule rule;
 };
 
-class ReachPositionCondition :  public ByEntityCondition
+class ReachPositionCondition : public ByEntityCondition
 {
 public:
     ReachPositionCondition(const std::vector<std::string>& triggeringEntityNames,
-                           const double tolerance):
+                           const double tolerance,
+                           const openScenario::Position position):
         ByEntityCondition(triggeringEntityNames),
-        tolerance(tolerance)
-    {}
+        tolerance(tolerance),
+        position(position)
+    {
+        if (tolerance < 0)
+        {
+            throw std::runtime_error("Reach Position Tolerance must be greater than or equal to 0");
+        }
+
+        if (std::holds_alternative<openScenario::RoadPosition>(position))
+        {
+            const auto roadPosition = std::get<openScenario::RoadPosition>(position);
+
+            if (roadPosition.s < 0)
+            {
+                throw std::runtime_error("Reach Position Target S Coordinate must be greater than or equal to 0");
+            }
+
+        }
+    }
     ReachPositionCondition(const ReachPositionCondition&) = default;
     virtual ~ReachPositionCondition();
 
-protected:
+    std::vector<const AgentInterface*> IsMet(WorldInterface * const world) const;
+
+private:
     const double tolerance{};
+    const openScenario::Position position{};
 };
 
 class RelativeSpeedCondition : public ByEntityCondition
@@ -164,67 +185,6 @@ private:
     const std::string referenceEntityName{};
     const double value{};
     const Rule rule{};
-};
-
-class ReachPositionRoadCondition : public ReachPositionCondition
-{
-public:
-    ReachPositionRoadCondition(const std::vector<std::string> &triggeringEntityNames,
-                               const double tolerance,
-                               const double targetSCoordinate,
-                               const std::string& targetRoadId):
-        ReachPositionCondition(triggeringEntityNames,
-                               tolerance),
-        targetSCoordinate(targetSCoordinate),
-        targetRoadId(targetRoadId)
-    {
-        if (targetSCoordinate < 0)
-        {
-            throw std::runtime_error("Reach Position Target S Coordinate must be greater than or equal to 0");
-        }
-        else if (tolerance < 0)
-        {
-            throw std::runtime_error("Reach Position Tolerance must be greater than or equal to 0");
-        }
-    }
-    ReachPositionRoadCondition(const ReachPositionRoadCondition&) = default;
-    virtual ~ReachPositionRoadCondition();
-
-    std::vector<const AgentInterface*> IsMet(WorldInterface * const world) const;
-
-private:
-    const double targetSCoordinate;
-    const std::string targetRoadId;
-};
-
-class RelativeLaneCondition: public ReachPositionCondition
-{
-public:
-    RelativeLaneCondition(const std::vector<std::string> &triggeringEntities,
-                          const std::string &referenceEntityName,
-                          const int deltaLane,
-                          const double deltaS,
-                          const double tolerance):
-        ReachPositionCondition(triggeringEntities,
-                               tolerance),
-        referenceEntityName(referenceEntityName),
-        deltaLane(deltaLane),
-        deltaS(deltaS)
-    {
-        if (tolerance < 0)
-        {
-            throw std::runtime_error("RelativeLaneCondition tolerance must be greater than or equal to 0");
-        }
-    }
-    RelativeLaneCondition(const RelativeLaneCondition&) = default;
-    virtual ~RelativeLaneCondition();
-
-    std::vector<const AgentInterface*> IsMet(WorldInterface * const world) const;
-
-private:
-    const std::string referenceEntityName;
-    const int deltaLane;
-    const double deltaS;
 };
 
 // OpenScenario ByValue Conditions
@@ -258,13 +218,12 @@ private:
     const int targetValue;
 };
 
-using Condition = std::variant<ReachPositionRoadCondition,
-                               RelativeLaneCondition,
+using Condition = std::variant<ReachPositionCondition,
                                RelativeSpeedCondition,
                                SimulationTimeCondition,
                                TimeToCollisionCondition,
                                TimeHeadwayCondition>;
-using ConditionCollection = std::vector<Condition>;
+using ConditionGroup = std::vector<Condition>;
 
 ///
 /// \brief Event specific information collected from an openSCENARIO story
@@ -274,7 +233,7 @@ struct ConditionalEventDetectorInformation
     ActorInformation actorInformation{};
     int numberOfExecutions{};             ///< Specifies number of executions. Use -1 for "unrestricted"
     std::string eventName{};
-    ConditionCollection conditions{};
+    ConditionGroup conditions{};
 };
 
 } // openScenario

@@ -122,8 +122,7 @@ private:
         return [cmi](auto&& condition)
         {
             return std::visit(overload{
-                                  [&](const openScenario::ReachPositionRoadCondition &reachPositionCondition) { return ConditionVisitorVariant{reachPositionCondition.IsMet(cmi.world)}; },
-                                  [&](const openScenario::RelativeLaneCondition &relativeLaneCondition) { return ConditionVisitorVariant{relativeLaneCondition.IsMet(cmi.world)}; },
+                                  [&](const openScenario::ReachPositionCondition &reachPositionCondition) { return ConditionVisitorVariant{reachPositionCondition.IsMet(cmi.world)}; },
                                   [&](const openScenario::RelativeSpeedCondition &relativeSpeedCondition) { return ConditionVisitorVariant{relativeSpeedCondition.IsMet(cmi.world)}; },
                                   [&](const openScenario::TimeToCollisionCondition &timeToCollisionCondition) { return ConditionVisitorVariant{timeToCollisionCondition.IsMet(cmi.world)}; },
                                   [&](const openScenario::TimeHeadwayCondition& timeHeadwayCondition) { return ConditionVisitorVariant{timeHeadwayCondition.IsMet(cmi.world)}; },

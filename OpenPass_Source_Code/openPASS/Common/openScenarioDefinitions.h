@@ -9,6 +9,7 @@
 *******************************************************************************/
 #pragma once
 
+#include "commonHelper.h"
 #include <map>
 #include <optional>
 #include <ostream>
@@ -28,18 +29,18 @@ using Parameters = std::map<std::string, ParameterValue>;
 
 //! Attribute in a catalog that is not yet resolved
 template <typename T>
-struct ParametrizedAttribute
+struct ParameterizedAttribute
 {
     std::string name; //!Name of the parameter in OpenSCENARIO
     T defaultValue; //!Value defined in the catalog (may later be overwriten in the CatalogReference)
 
-    ParametrizedAttribute() = default;
+    ParameterizedAttribute() = default;
 
-    ParametrizedAttribute(const T& value) :
+    ParameterizedAttribute(const T& value) :
         name{""},
         defaultValue{value} {}
 
-    ParametrizedAttribute(const std::string& name, const T& defaultValue) :
+    ParameterizedAttribute(const std::string& name, const T& defaultValue) :
         name{name},
         defaultValue{defaultValue} {}
 };
@@ -78,14 +79,6 @@ struct Orientation
 };
 
 // OSCPosition
-struct RoadPosition
-{
-    std::optional<Orientation> orientation{};
-    std::string roadId{};
-    double s{};
-    double t{};
-};
-
 struct LanePosition
 {
     std::optional<Orientation> orientation{};
@@ -98,186 +91,68 @@ struct LanePosition
     std::optional<StochasticAttribute> stochasticS;
 };
 
+struct RelativeLanePosition
+{
+    std::string entityRef{};
+    int dLane{};
+    double ds{};
+    std::optional<double> offset{};
+    std::optional<Orientation> orientation{};
+};
+
+struct RoadPosition
+{
+    std::optional<Orientation> orientation{};
+    std::string roadId{};
+    double s{};
+    double t{};
+};
+
 struct WorldPosition
 {
     double x{};
     double y{};
-    std::optional<double> heading;
+    std::optional<double> z;
+    std::optional<double> h;
+    std::optional<double> p;
+    std::optional<double> r;
 };
 
-// All action classes
-class Action : public ScenarioActionInterface
-{
-public:
-    /*!
-     * -----------------------------------------------------------------------------
-     * \brief Each action is part of an event. The event name specifies to which event the action belongs.
-     * -----------------------------------------------------------------------------
-     */
-    Action(const std::string& eventName):
-        eventName{eventName}
-    {}
-    Action() = delete;
-    Action(const Action&) = delete;
-    Action(Action&&) = delete;
-    Action& operator=(const Action&) = delete;
-    Action& operator=(Action&&) = delete;
+using Position = std::variant<LanePosition,
+                              RelativeLanePosition,
+                              RoadPosition,
+                              WorldPosition>;
 
-    /*!
-     * ------------------------------------------------------------------------
-     * \brief GetEventName returns the name of the event of which this
-     *        action is a part.
-     *
-     * \returns a reference to the name of the event of which this action is
-     *          a part.
-     * ------------------------------------------------------------------------
-     */
-    const std::string& GetEventName() const
-    {
-        return eventName;
-    }
-
-private:
-    const std::string eventName;
-};
-
-class GlobalAction : public Action
-{
-public:
-    GlobalAction(const std::string& eventName):
-        Action(eventName)
-    {
-    }
-    GlobalAction() = delete;
-    GlobalAction(const GlobalAction&) = delete;
-    GlobalAction(GlobalAction&&) = delete;
-    GlobalAction& operator=(const GlobalAction&) = delete;
-    GlobalAction& operator=(GlobalAction&&) = delete;
-};
-
-enum GlobalEntityActionType
+// Action
+// GlobalAction
+enum EntityActionType
 {
     Delete = 0,
     Add
 };
 
-class GlobalEntityAction : public GlobalAction
+struct EntityAction
 {
-public:
-    GlobalEntityAction(const std::string& eventName,
-                                      GlobalEntityActionType type,
-                                      const std::string& name):
-        GlobalAction(eventName),
-        type{type},
-        name{name}
-    {}
-    GlobalEntityAction() = delete;
-    GlobalEntityAction(const GlobalEntityAction&) = delete;
-    GlobalEntityAction(GlobalEntityAction&&) = delete;
-    GlobalEntityAction& operator=(const GlobalEntityAction&) = delete;
-    GlobalEntityAction& operator=(GlobalEntityAction&&) = delete;
-
-    /*!
-     * ------------------------------------------------------------------------
-     * \brief GetType returns the type of Global Entity Action this Action is.
-     *
-     * \returns GlobalEntityActionType::Delete or GlobalEntityActionType::Add.
-     * ------------------------------------------------------------------------
-     */
-    GlobalEntityActionType GetType() const
-    {
-        return type;
-    }
-
-    /*!
-     * ------------------------------------------------------------------------
-     * \brief GetName returns the name of the entity specified by this action.
-     *
-     * \returns the name of the entity specified by this action.
-     * ------------------------------------------------------------------------
-     */
-    const std::string& GetName() const
-    {
-        return name;
-    }
-
-private:
-    const GlobalEntityActionType type;
-    const std::string name;
-    // we'll ignore the "Add" element's "Position" child, even though required by standard
+    std::string entityRef{};
+    EntityActionType type{};
 };
 
-class PrivateAction : public Action
-{
-public:
-    PrivateAction(const std::string& eventName):
-        Action(eventName)
-    {}
-};
+using GlobalAction = std::variant<EntityAction>;
 
-
-//! Content of a LaneChange action
-struct LaneChangeParameter
-{
-    enum class Type
-    {
-        Absolute,
-        Relative
-    };
-
-    enum class DynamicsType
-    {
-        Time,
-        Distance
-    };
-    const Type type; //! Whether the target is absolute or relative
-    const int value;    //! Value of the target element
-    const std::string object; //! Name of the reference object if relative
-    const double dynamicsTarget; //! Time or distance defined by Dynamics element
-    const DynamicsType dynamicsType; //! Whether time or distance was defined by Dynamics element
-};
-
-class PrivateLateralLaneChangeAction : public PrivateAction
-{
-public:
-
-    PrivateLateralLaneChangeAction(const std::string& eventName,
-                                   LaneChangeParameter laneChangeParameter):
-        PrivateAction(eventName),
-        laneChangeParameter{laneChangeParameter}
-    {}
-
-    /*!
-     * ------------------------------------------------------------------------
-     * \brief GetType returns the type of Private Lateral LaneChange Action
-     *        this Action is.
-     *
-     * \returns PrivateLateralLaneChangeActionType::Absolute or
-     *          PrivateLateralLaneChangeActionType::Relative.
-     * ------------------------------------------------------------------------
-     */
-    LaneChangeParameter GetLaneChangeParameter() const
-    {
-        return laneChangeParameter;
-    }
-
-private:
-    LaneChangeParameter laneChangeParameter;
-};
-
+// PrivateAction
 struct TrajectoryPoint
 {
-    double time;
-    double x;
-    double y;
-    double yaw;
+    double time{};
+    double x{};
+    double y{};
+    double yaw{};
 
     bool operator== (const TrajectoryPoint& other) const
     {
-        return other.time == time
-                && other.x == x
-                && other.y == y
-                && other.yaw == yaw;
+        return CommonHelper::DoubleEquality(other.time, time)
+                && CommonHelper::DoubleEquality(other.x, x)
+                && CommonHelper::DoubleEquality(other.y, y)
+                && CommonHelper::DoubleEquality(other.yaw, yaw);
     }
 
     friend std::ostream& operator<<(std::ostream& os, const TrajectoryPoint& point)
@@ -308,77 +183,90 @@ struct Trajectory
     }
 };
 
-class PrivateFollowTrajectoryAction : public PrivateAction
-{
-public:
-    PrivateFollowTrajectoryAction(const std::string& eventName,
-                                  const Trajectory& trajectory):
-        PrivateAction(eventName),
-        trajectory(trajectory)
-    {}
-    PrivateFollowTrajectoryAction() = delete;
-    PrivateFollowTrajectoryAction(const PrivateAction&) = delete;
-    PrivateFollowTrajectoryAction(PrivateAction&&) = delete;
-    PrivateFollowTrajectoryAction& operator=(const PrivateAction&) = delete;
-    PrivateFollowTrajectoryAction& operator=(PrivateAction&&) = delete;
+using AssignRouteAction = std::vector<RoadPosition>;
 
-    /*!
-     * ------------------------------------------------------------------------
-     * \brief GetTrajectory returns the trajectory of this Action.
-     *
-     * \returns trajectory of this Action
-     * ------------------------------------------------------------------------
-     */
-    const openScenario::Trajectory& GetTrajectory() const
+struct FollowTrajectoryAction
+{
+    Trajectory trajectory{};
+};
+
+using RoutingAction = std::variant<AssignRouteAction, FollowTrajectoryAction>;
+
+struct LaneChangeParameter
+{
+    enum class Type
     {
-        return trajectory;
-    }
+        Absolute,
+        Relative
+    };
 
-private:
-    const Trajectory trajectory;
-};
-
-class UserDefinedAction : public Action
-{
-public:
-    UserDefinedAction(const std::string& eventName):
-        Action(eventName)
-    {}
-    UserDefinedAction() = delete;
-    UserDefinedAction(const UserDefinedAction&) = delete;
-    UserDefinedAction(UserDefinedAction&&) = delete;
-    UserDefinedAction& operator=(const UserDefinedAction&) = delete;
-    UserDefinedAction& operator=(UserDefinedAction&&) = delete;
-};
-
-class UserDefinedCommandAction : public UserDefinedAction
-{
-public:
-    UserDefinedCommandAction(const std::string& eventName,
-                             const std::string& command):
-        UserDefinedAction(eventName),
-        command{command}
-    {}
-    UserDefinedCommandAction() = delete;
-    UserDefinedCommandAction(const UserDefinedCommandAction&) = delete;
-    UserDefinedCommandAction(UserDefinedCommandAction&&) = delete;
-    UserDefinedCommandAction& operator=(const UserDefinedCommandAction&) = delete;
-    UserDefinedCommandAction& operator=(UserDefinedCommandAction&&) = delete;
-
-    /*!
-     * ------------------------------------------------------------------------
-     * \brief GetCommand returns the command string specified for this Action
-     *
-     * \returns the command string specified for this Action
-     * ------------------------------------------------------------------------
-     */
-    const std::string& GetCommand() const
+    enum class DynamicsType
     {
-        return command;
-    }
+        Time,
+        Distance
+    };
 
-private:
-    const std::string command;
+    Type type{}; //! Whether the target is absolute or relative
+    int value{};    //! Value of the target element
+    std::string object{}; //! Name of the reference object if relative
+    double dynamicsTarget{}; //! Time or distance defined by Dynamics element
+    DynamicsType dynamicsType{}; //! Whether time or distance was defined by Dynamics element
 };
 
+struct LaneChangeAction
+{
+    LaneChangeParameter laneChangeParameter{};
+};
+
+using LateralAction = std::variant<LaneChangeAction>;
+
+struct TransitionDynamics
+{
+    std::string shape{};
+    double value{};
+    std::string dimension{};
+};
+
+struct AbsoluteTargetSpeed
+{
+    double value{};
+};
+
+using SpeedActionTarget = std::variant<AbsoluteTargetSpeed>;
+
+struct SpeedAction
+{
+    TransitionDynamics transitionDynamics {};
+    SpeedActionTarget target {};
+
+    std::optional<StochasticAttribute> stochasticValue {};
+    std::optional<StochasticAttribute> stochasticDynamics {};
+};
+
+using LongitudinalAction = std::variant<SpeedAction>;
+
+using TeleportAction = Position;
+
+using PrivateAction = std::variant<LateralAction, LongitudinalAction, RoutingAction, TeleportAction>;
+
+// UserDefinedAction
+struct CustomCommandAction
+{
+    std::string command;
+};
+
+using UserDefinedAction = std::variant<CustomCommandAction>;
+
+using Action = std::variant<GlobalAction, PrivateAction, UserDefinedAction>;
+
+struct ManipulatorInformation
+{
+    ManipulatorInformation(const Action action, const std::string eventName):
+        action(action),
+        eventName(eventName)
+    {}
+
+    const Action action;
+    const std::string eventName;
+};
 } // namespace openScenario

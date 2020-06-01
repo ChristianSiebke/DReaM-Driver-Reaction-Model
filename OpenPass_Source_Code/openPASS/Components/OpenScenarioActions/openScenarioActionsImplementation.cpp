@@ -113,7 +113,7 @@ void OpenScenarioActionsImplementation::Trigger([[maybe_unused]]int time)
 
             double deltaS;
             double deltaTime;
-            if (laneChange.dynamicsType == LaneChangeParameter::DynamicsType::Distance)
+            if (laneChange.dynamicsType == openScenario::LaneChangeParameter::DynamicsType::Distance)
             {
                 deltaS = laneChange.dynamicsTarget;
                 deltaTime = deltaS / GetAgent()->GetVelocity();
@@ -132,7 +132,7 @@ void OpenScenarioActionsImplementation::Trigger([[maybe_unused]]int time)
             const auto currentLaneId = GetAgent()->GetObjectPosition().referencePoint.at(roadId).laneId;
             const auto currentS = GetAgent()->GetObjectPosition().referencePoint.at(roadId).roadPosition.s;
             int targetLaneId;
-            if (laneChange.type == LaneChangeParameter::Type::Absolute)
+            if (laneChange.type == openScenario::LaneChangeParameter::Type::Absolute)
             {
                 targetLaneId = laneChange.value;
             }

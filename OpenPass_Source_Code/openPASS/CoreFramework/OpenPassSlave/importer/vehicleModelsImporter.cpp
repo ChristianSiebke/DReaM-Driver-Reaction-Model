@@ -126,12 +126,12 @@ void VehicleModelsImporter::ImportVehicleModelAxles(QDomElement& vehicleElement,
                  vehicleElement, "Tag " + std::string(TAG::axles) + " is missing.");
 
     QDomElement frontAxleElement;
-    ThrowIfFalse(SimulationCommon::GetFirstChildElement(axlesElement, TAG::front, frontAxleElement),
-                 axlesElement, "Tag " + std::string(TAG::front) + " is missing.");
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(axlesElement, TAG::frontAxle, frontAxleElement),
+                 axlesElement, "Tag " + std::string(TAG::frontAxle) + " is missing.");
 
     QDomElement rearAxleElement;
-    ThrowIfFalse(SimulationCommon::GetFirstChildElement(axlesElement, TAG::rear, rearAxleElement),
-                 axlesElement, "Tag " + std::string(TAG::rear) + " is missing.");
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(axlesElement, TAG::rearAxle, rearAxleElement),
+                 axlesElement, "Tag " + std::string(TAG::rearAxle) + " is missing.");
 
     ImportVehicleModelAxle(frontAxleElement, modelParameters.frontAxle, parameters);
     ImportVehicleModelAxle(rearAxleElement, modelParameters.rearAxle, parameters);
@@ -180,8 +180,8 @@ void VehicleModelsImporter::ImportModelBoundingBox(QDomElement& modelElement, Pa
                  boundingBoxElement, "Tag " + std::string(TAG::center) + " is missing.");
 
     QDomElement boundingBoxDimensionElement;
-    ThrowIfFalse(SimulationCommon::GetFirstChildElement(boundingBoxElement, TAG::dimension, boundingBoxDimensionElement),
-                 boundingBoxElement, "Tag " + std::string(TAG::dimension) + " is missing.");
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(boundingBoxElement, TAG::dimensions, boundingBoxDimensionElement),
+                 boundingBoxElement, "Tag " + std::string(TAG::dimensions) + " is missing.");
 
     auto bbCenterX = ParseParametrizedAttribute<double>(boundingBoxCenterElement, ATTRIBUTE::x, parameters);
     auto bbCenterY = ParseParametrizedAttribute<double>(boundingBoxCenterElement, ATTRIBUTE::y, parameters);
@@ -212,22 +212,20 @@ void VehicleModelsImporter::ImportVehicleModelPerformance(QDomElement& vehicleEl
                  vehicleElement, "Tag " + std::string(TAG::performance) + " is missing.");
 
     modelParameters.maxVelocity = ParseParametrizedAttribute<double>(performanceElement, ATTRIBUTE::maxSpeed, parameters);
-
-    modelParameters.weight = ParseParametrizedAttribute<double>(performanceElement, ATTRIBUTE::mass, parameters);
 }
 
 void VehicleModelsImporter::ImportVehicleModelGears(ParametrizedVehicleModelParameters& modelParameters,
-                                                    openScenario::Parameters& parameters)
+                                                    const Properties& properties)
 {
-    openScenario::ParametrizedAttribute<double> gearRatio;
+    openScenario::ParameterizedAttribute<double> gearRatio;
 
     modelParameters.gearRatios.push_back(0.0);
 
-    AssignModelParameter("NumberOfGears", modelParameters.numberOfGears, parameters);
+    AssignProperty("NumberOfGears", modelParameters.numberOfGears, properties);
 
     for (int currentGear = 1; currentGear <= modelParameters.numberOfGears.defaultValue; ++currentGear)
     {
-        AssignModelParameter("GearRatio" + std::to_string(currentGear), gearRatio, parameters);
+        AssignProperty("GearRatio" + std::to_string(currentGear), gearRatio, properties);
         modelParameters.gearRatios.push_back(gearRatio);
     }
 }
@@ -238,14 +236,13 @@ void VehicleModelsImporter::ImportVehicleModel(QDomElement& vehicleElement, Vehi
     openScenario::Parameters parameters;
 
     QDomElement parametersElement;
-    if (!SimulationCommon::GetFirstChildElement(vehicleElement, TAG::parameterDeclaration, parametersElement))
+    if (SimulationCommon::GetFirstChildElement(vehicleElement, TAG::parameterDeclarations, parametersElement))
     {
-        return;
+        Importer::ImportParameterDeclarationElement(parametersElement, parameters);
     }
 
-    Importer::ImportParameterDeclarationElement(parametersElement, parameters);
 
-    auto vehicleModelCategory = ParseParametrizedAttribute<std::string>(vehicleElement, ATTRIBUTE::category, parameters);
+    auto vehicleModelCategory = ParseParametrizedAttribute<std::string>(vehicleElement, ATTRIBUTE::vehicleCategory, parameters);
 
     modelParameters.vehicleType = vehicleTypeConversionMap.at(vehicleModelCategory.defaultValue);
 
@@ -260,27 +257,30 @@ void VehicleModelsImporter::ImportVehicleModel(QDomElement& vehicleElement, Vehi
                   modelParameters.vehicleType == AgentVehicleType::Bicycle),
                   vehicleElement, "VehicleModelCatagory '" + vehicleModelCategory.defaultValue + "' currently not supported");
 
-    AssignModelParameter("SteeringRatio", modelParameters.steeringRatio, parameters, 1.0);
+    const auto &properties = ImportProperties(vehicleElement);
 
-    AssignModelParameter("MomentInertiaRoll", modelParameters.momentInertiaRoll, parameters, 0.0);
-    AssignModelParameter("MomentInertiaPitch", modelParameters.momentInertiaPitch, parameters, 0.0);
-    AssignModelParameter("MomentInertiaYaw", modelParameters.momentInertiaYaw, parameters, 0.0);
+    AssignProperty("SteeringRatio", modelParameters.steeringRatio, properties, 1.0);
 
-    AssignModelParameter("MinimumEngineSpeed", modelParameters.minimumEngineSpeed, parameters, 0.0);
-    AssignModelParameter("MaximumEngineSpeed", modelParameters.maximumEngineSpeed, parameters, 0.0);
-    AssignModelParameter("MaximumEngineTorque", modelParameters.maximumEngineTorque, parameters, 0.0);
-    AssignModelParameter("MinimumEngineTorque", modelParameters.minimumEngineTorque, parameters, 0.0);
+    AssignProperty("MomentInertiaRoll", modelParameters.momentInertiaRoll, properties, 0.0);
+    AssignProperty("MomentInertiaPitch", modelParameters.momentInertiaPitch, properties, 0.0);
+    AssignProperty("MomentInertiaYaw", modelParameters.momentInertiaYaw, properties, 0.0);
 
-    AssignModelParameter("AirDragCoefficient", modelParameters.airDragCoefficient, parameters, 0.0);
-    AssignModelParameter("AxleRatio", modelParameters.axleRatio, parameters, 1.0);
-    AssignModelParameter("DecelerationFromPowertrainDrag", modelParameters.decelerationFromPowertrainDrag, parameters, 0.0);
-    AssignModelParameter("FrictionCoefficient", modelParameters.frictionCoeff, parameters, 1.0);
-    AssignModelParameter("FrontSurface", modelParameters.frontSurface, parameters, 0.0);
+    AssignProperty("MinimumEngineSpeed", modelParameters.minimumEngineSpeed, properties, 0.0);
+    AssignProperty("MaximumEngineSpeed", modelParameters.maximumEngineSpeed, properties, 0.0);
+    AssignProperty("MaximumEngineTorque", modelParameters.maximumEngineTorque, properties, 0.0);
+    AssignProperty("MinimumEngineTorque", modelParameters.minimumEngineTorque, properties, 0.0);
+
+    AssignProperty("AirDragCoefficient", modelParameters.airDragCoefficient, properties, 0.0);
+    AssignProperty("AxleRatio", modelParameters.axleRatio, properties, 1.0);
+    AssignProperty("DecelerationFromPowertrainDrag", modelParameters.decelerationFromPowertrainDrag, properties, 0.0);
+    AssignProperty("FrictionCoefficient", modelParameters.frictionCoeff, properties, 1.0);
+    AssignProperty("FrontSurface", modelParameters.frontSurface, properties, 0.0);
+    AssignProperty("Mass", modelParameters.weight, properties, 1000.0);
 
     ImportModelBoundingBox(vehicleElement, modelParameters, parameters);
     ImportVehicleModelAxles(vehicleElement, modelParameters, parameters);
     ImportVehicleModelPerformance(vehicleElement, modelParameters, parameters);
-    ImportVehicleModelGears(modelParameters, parameters);
+    ImportVehicleModelGears(modelParameters, properties);
 
     modelParameters.heightCOG = 0.0;    // currently not supported
 
@@ -292,17 +292,10 @@ void VehicleModelsImporter::ImportVehicleModel(QDomElement& vehicleElement, Vehi
 void VehicleModelsImporter::ImportPedestrianModel(QDomElement& pedestrianElement, VehicleModelMap& vehicleModelsMap)
 {
     ParametrizedVehicleModelParameters modelParameters;
-    openScenario::Parameters parameters;
 
-    QDomElement parametersElement;
-    if (!SimulationCommon::GetFirstChildElement(pedestrianElement, TAG::parameterDeclaration, parametersElement))
-    {
-        return;
-    }
+    openScenario::Parameters parameters{};
 
-    Importer::ImportParameterDeclarationElement(parametersElement, parameters);
-
-    auto pedestrianCategory = ParseParametrizedAttribute<std::string>(pedestrianElement, ATTRIBUTE::category, parameters);
+    auto pedestrianCategory = ParseParametrizedAttribute<std::string>(pedestrianElement, ATTRIBUTE::pedestrianCategory, parameters);
     ThrowIfFalse(pedestrianCategory.defaultValue == "pedestrian", pedestrianElement, "Unsupported pedestrian catagory");
 
     auto pedestrianModelName = ParseParametrizedAttribute<std::string>(pedestrianElement, ATTRIBUTE::name, parameters);
@@ -310,7 +303,6 @@ void VehicleModelsImporter::ImportPedestrianModel(QDomElement& pedestrianElement
     ThrowIfFalse(vehicleModelsMap.find(pedestrianModelName.defaultValue) == vehicleModelsMap.end(),
                  pedestrianElement, "pedestrian model '" + pedestrianModelName.defaultValue + "' already exists");
 
-    modelParameters.weight = ParseParametrizedAttribute<double>(pedestrianElement, ATTRIBUTE::mass, parameters);
 
     ImportModelBoundingBox(pedestrianElement, modelParameters, parameters);
 
@@ -323,8 +315,38 @@ void VehicleModelsImporter::ImportPedestrianModel(QDomElement& pedestrianElement
     modelParameters.maximumEngineTorque = 100;
     modelParameters.maximumEngineSpeed = 1e5;
     modelParameters.minimumEngineSpeed = 1;
+    modelParameters.weight = ParseParametrizedAttribute<double>(pedestrianElement, ATTRIBUTE::mass, parameters);
 
     vehicleModelsMap[pedestrianModelName.defaultValue] = modelParameters;
+}
+
+Properties VehicleModelsImporter::ImportProperties(QDomElement& root)
+{
+    Properties properties{};
+
+    QDomElement propertiesElement;
+    if (SimulationCommon::GetFirstChildElement(root, TAG::properties, propertiesElement))
+    {
+        QDomElement propertyElement;
+        SimulationCommon::GetFirstChildElement(propertiesElement, TAG::property, propertyElement);
+
+        while (!propertyElement.isNull())
+        {
+            std::string name;
+            ThrowIfFalse(SimulationCommon::ParseAttribute(propertyElement, ATTRIBUTE::name, name),
+                         propertyElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
+
+            std::string value;
+            ThrowIfFalse(SimulationCommon::ParseAttribute(propertyElement, ATTRIBUTE::value, value),
+                         propertyElement, "Attribute " + std::string(ATTRIBUTE::value) + " is missing.");
+
+            properties[name] = value;
+
+            propertyElement = propertyElement.nextSiblingElement(TAG::property);
+        }
+    }
+
+    return properties;
 }
 
 } //namespace Importer

@@ -121,10 +121,13 @@ TEST_P(ReachPositionConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
     bool errorOccurred = false;
     try
     {
-        auto testCondition = openScenario::ReachPositionRoadCondition(testTriggeringEntitites,
+        openScenario::RoadPosition roadPosition;
+        roadPosition.s = GetParam().sCoordinateOfTargetPosition;
+        roadPosition.roadId = GetParam().roadId;
+
+        auto testCondition = openScenario::ReachPositionCondition(testTriggeringEntitites,
                                                                       GetParam().tolerance,
-                                                                      GetParam().sCoordinateOfTargetPosition,
-                                                                      GetParam().roadId);
+                                                                      roadPosition);
         testConditionalEventDetectorInformation.conditions.emplace_back(testCondition);
 
         NiceMock<FakeAgent> mockAgent1;
@@ -309,11 +312,14 @@ TEST_P(RelativeLaneConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
     testConditionalEventDetectorInformation.actorInformation.actors.emplace(actors);
 
     const std::vector<std::string> testTriggeringEntitites{"triggeringAgent"};
-    auto testCondition = openScenario::RelativeLaneCondition(testTriggeringEntitites,
-                                                             GetParam().entityName,
-                                                             GetParam().deltaLane,
-                                                             GetParam().deltaS,
-                                                             GetParam().tolerance);
+
+    openScenario::RelativeLanePosition relativePosition;
+    relativePosition.entityRef = GetParam().entityName;
+    relativePosition.dLane = GetParam().deltaLane;
+    relativePosition.ds = GetParam().deltaS;
+    auto testCondition = openScenario::ReachPositionCondition(testTriggeringEntitites,
+                                                             GetParam().tolerance,
+                                                              relativePosition);
     testConditionalEventDetectorInformation.conditions.emplace_back(testCondition);
 
     const std::string roadId = "SomeRoad";

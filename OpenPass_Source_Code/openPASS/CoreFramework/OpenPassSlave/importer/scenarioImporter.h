@@ -48,12 +48,6 @@ public:
      */
     static void ImportEntity(QDomElement& entityElement, ScenarioEntity& entity, openScenario::Parameters& parameters);
 
-    static void ImportLongitudinalElement(ScenarioEntity& scenarioEntity, QDomElement firstChildOfActionElement, openScenario::Parameters& parameters);
-
-    static void ImportPositionElement(ScenarioEntity& scenarioEntity, QDomElement firstChildOfActionElement, openScenario::Parameters& parameters);
-
-    static void ImportRoutingElement(ScenarioEntity& scenarioEntity, QDomElement firstChildOfActionElement, openScenario::Parameters& parameters);
-
     /*!
      * \brief Imports the storyboard from OpenSCENARIO DOM
      *
@@ -245,15 +239,6 @@ private:
                                       openScenario::Parameters& parameters);
 
     /*!
-     * \brief Imports a stochastic element of in OpenSCENARIO (Note: This is a custom extension of the standard)
-     *
-     * \param[in]   stochasticsElement   The DOM root of the stochastic element
-     * \param[in]   parameters      declared parameters
-     * \return     type of the value and stochastic attributes
-     */
-    static std::pair<std::string, openScenario::StochasticAttribute> ImportStochastics(QDomElement& stochasticsElement, openScenario::Parameters& parameters);
-
-    /*!
      * \brief Imports a orientation element of a OpenSCENARIO entity
      *
      * \param[in]   orientationElement  The DOM root of the orientation element
@@ -313,6 +298,7 @@ private:
      *
      * \param[in]   positionElement    XML-Element containing position
      * \param[in]   parameters      declared parameters
+     * \return      lanePosition
      */
     static openScenario::LanePosition ImportLanePosition(QDomElement positionElement, openScenario::Parameters& parameters);
 
@@ -321,11 +307,22 @@ private:
      *
      * \param[in]   positionElement    XML-Element containing position
      * \param[in]   parameters      declared parameters
+     * \return  worldPosition
      */
     static openScenario::WorldPosition ImportWorldPosition(QDomElement positionElement, openScenario::Parameters& parameters);
 
+    /*!
+     * \brief Imports an openScenario Action element
+     *
+     * \param[in]   eventElement        XML-Element containing Event
+     * \param[in]   parameters          declared parameters
+     * \param[in]   catalogPath         catalog path
+     * \return  action
+     */
+    static openScenario::Action ImportAction(QDomElement eventElement, openScenario::Parameters& parameters, const std::string catalogPath);
 
     //! Currently supported "internal" OpenSCENARIO version
-    static constexpr auto supportedScenarioVersion = "0.3.0";};
+    static constexpr auto supportedScenarioVersion = "0.4.0";
+};
 
 } // namespace Importer

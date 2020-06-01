@@ -16,7 +16,6 @@
 #include "ManipulatorExport.h"
 #include "Interfaces/callbackInterface.h"
 #include "Interfaces/eventNetworkInterface.h"
-#include "Interfaces/scenarioActionInterface.h"
 #include "Common/openScenarioDefinitions.h"
 #include "CollisionManipulator.h"
 #include "ComponentStateChangeManipulator.h"
@@ -38,7 +37,165 @@ extern "C" MANIPULATOR_SHARED_EXPORT const std::string& OpenPASS_GetVersion()
 
 extern "C" MANIPULATOR_SHARED_EXPORT ManipulatorInterface* OpenPASS_CreateInstance(
     WorldInterface* world,
-    std::shared_ptr<ScenarioActionInterface> action,
+    openScenario::ManipulatorInformation manipulatorInformation,
+    SimulationSlave::EventNetworkInterface* eventNetwork,
+    const CallbackInterface* callbacks)
+{
+    Callbacks = callbacks;
+
+    try
+    {
+        const auto &action = manipulatorInformation.action;
+
+        if (std::holds_alternative<openScenario::UserDefinedAction>(action))
+        {
+            const auto userDefinedAction = std::get<openScenario::UserDefinedAction>(action);
+
+            if (std::holds_alternative<openScenario::CustomCommandAction>(userDefinedAction))
+            {
+                const auto customCommandAction = std::get<openScenario::CustomCommandAction>(userDefinedAction);
+                const auto command = customCommandAction.command;
+                const auto firstSplitInCommand = command.find(' ');
+                const auto commandType = command.substr(0, firstSplitInCommand);
+
+                if (commandType == "SetComponentState")
+                {
+                    return static_cast<ManipulatorInterface*>(new (std::nothrow) ComponentStateChangeManipulator(
+                                                                  world,
+                                                                  eventNetwork,
+                                                                  callbacks,
+                                                                  customCommandAction,
+                                                                  manipulatorInformation.eventName));
+                }
+                else if (commandType == "NoOperation")
+                {
+                    return static_cast<ManipulatorInterface*>(new (std::nothrow) NoOperationManipulator(
+                                                                  world,
+                                                                  eventNetwork,
+                                                                  callbacks));
+                }
+                else if (commandType == "SetCustomLaneChange")
+                {
+                    return static_cast<ManipulatorInterface*>(new (std::nothrow) CustomLaneChangeManipulator(
+                                                                  world,
+                                                                  eventNetwork,
+                                                                  callbacks,
+                                                                  customCommandAction,
+                                                                  manipulatorInformation.eventName));
+                }
+                else if (commandType == "SetGazeFollower")
+                {
+                    return static_cast<ManipulatorInterface*>(new (std::nothrow) GazeFollowerManipulator(
+                                                                  world,
+                                                                  eventNetwork,
+                                                                  callbacks,
+                                                                  customCommandAction,
+                                                                  manipulatorInformation.eventName));
+                }
+                else
+                {
+                    Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, "Invalid CustomCommandAction as manipulator.");
+                    return nullptr;
+                }
+            }
+            else
+            {
+                Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, "Invalid UserDefinedAction as manipulator.");
+                return nullptr;
+            }
+        }
+        else if (std::holds_alternative<openScenario::GlobalAction>(action))
+        {
+            const auto &globalAction = std::get<openScenario::GlobalAction>(action);
+
+            if (std::holds_alternative<openScenario::EntityAction>(globalAction))
+            {
+               const auto entityAction = std::get<openScenario::EntityAction>(globalAction);
+               const auto actionType = entityAction.type;
+               if (actionType == openScenario::EntityActionType::Delete)
+               {
+                   return static_cast<ManipulatorInterface*>(new (std::nothrow) RemoveAgentsManipulator(
+                                                                 world,
+                                                                 eventNetwork,
+                                                                 callbacks,
+                                                                 entityAction,
+                                                                 manipulatorInformation.eventName));
+               }
+               else
+               {
+                   Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, "Invalid EntityAction as manipulator.");
+                   return nullptr;
+               }
+            }
+            else
+            {
+                Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, "Invalid GlobalAction as manipulator.");
+                return nullptr;
+            }
+        }
+        else if (std::holds_alternative<openScenario::PrivateAction>(action))
+        {
+            const auto &privateAction = std::get<openScenario::PrivateAction>(action);
+            if (std::holds_alternative<openScenario::LateralAction>(privateAction))
+            {
+                const auto &lateralAction = std::get<openScenario::LateralAction>(privateAction);
+                if (std::holds_alternative<openScenario::LaneChangeAction>(lateralAction))
+                {
+                    const auto &laneChangeAction = std::get<openScenario::LaneChangeAction>(lateralAction);
+                    return static_cast<ManipulatorInterface*>(new (std::nothrow) LaneChangeManipulator(
+                                                                  world,
+                                                                  eventNetwork,
+                                                                  callbacks,
+                                                                  laneChangeAction,
+                                                                  manipulatorInformation.eventName));
+                }
+                else
+                {
+                    Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, "Invalid LateralAction as manipulator.");
+                    return nullptr;
+                }
+            }
+            else if (std::holds_alternative<openScenario::RoutingAction>(privateAction))
+            {
+                const auto &routingAction = std::get<openScenario::RoutingAction>(privateAction);
+                if (std::holds_alternative<openScenario::FollowTrajectoryAction>(routingAction))
+                {
+                    const auto &followTrajectoryAction = std::get<openScenario::FollowTrajectoryAction>(routingAction);
+                    return static_cast<ManipulatorInterface*>(new (std::nothrow) TrajectoryManipulator(
+                                                                  world,
+                                                                  eventNetwork,
+                                                                  callbacks,
+                                                                  followTrajectoryAction,
+                                                                  manipulatorInformation.eventName));
+                }
+                else
+                {
+                    Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, "Invalid RoutingAction as manipulator.");
+                    return nullptr;
+                }
+            }
+            else
+            {
+                Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, "Invalid PrivateAction as manipulator.");
+                return nullptr;
+            }
+        }
+    }
+    catch (...)
+    {
+        if (Callbacks != nullptr)
+        {
+            Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, "unexpected exception");
+        }
+
+        return nullptr;
+    }
+
+    throw std::runtime_error("Unable to instantiate unknown manipulator");
+}
+
+extern "C" MANIPULATOR_SHARED_EXPORT ManipulatorInterface* OpenPASS_CreateDefaultInstance(
+    WorldInterface* world,
     std::string manipulatorType,
     SimulationSlave::EventNetworkInterface* eventNetwork,
     const CallbackInterface* callbacks)
@@ -53,85 +210,6 @@ extern "C" MANIPULATOR_SHARED_EXPORT ManipulatorInterface* OpenPASS_CreateInstan
                                                           world,
                                                           eventNetwork,
                                                           callbacks));
-        }
-        else
-        {
-            if (auto userDefinedCommandAction = std::dynamic_pointer_cast<openScenario::UserDefinedCommandAction>(action))
-            {
-                const auto command = userDefinedCommandAction->GetCommand();
-                const auto firstSplitInCommand = command.find(' ');
-                const auto commandType = command.substr(0, firstSplitInCommand);
-
-                if (commandType == "SetComponentState")
-                {
-                    return static_cast<ManipulatorInterface*>(new (std::nothrow) ComponentStateChangeManipulator(
-                                                                  world,
-                                                                  userDefinedCommandAction,
-                                                                  eventNetwork,
-                                                                  callbacks
-                                                                  ));
-                }
-
-                if (commandType == "NoOperation")
-                {
-                    return static_cast<ManipulatorInterface*>(new (std::nothrow) NoOperationManipulator(
-                                                                  world,
-                                                                  eventNetwork,
-                                                                  callbacks
-                                                                  ));
-                }
-
-                if (commandType == "SetCustomLaneChange")
-                {
-                    return static_cast<ManipulatorInterface*>(new (std::nothrow) CustomLaneChangeManipulator(
-                                                                  world,
-                                                                  userDefinedCommandAction,
-                                                                  eventNetwork,
-                                                                  callbacks
-                                                                  ));
-                }
-
-                if (commandType == "SetGazeFollower")
-                {
-                    return static_cast<ManipulatorInterface*>(new (std::nothrow) GazeFollowerManipulator(
-                                                                  world,
-                                                                  userDefinedCommandAction,
-                                                                  eventNetwork,
-                                                                  callbacks
-                                                                  ));
-                }
-            }
-            else if (auto globalAction = std::dynamic_pointer_cast<openScenario::GlobalEntityAction>(action))
-            {
-                const auto actionType = globalAction->GetType();
-                if (actionType == openScenario::GlobalEntityActionType::Delete)
-                {
-                    return static_cast<ManipulatorInterface*>(new (std::nothrow) RemoveAgentsManipulator(
-                                                                  world,
-                                                                  globalAction,
-                                                                  eventNetwork,
-                                                                  callbacks
-                                                                  ));
-                }
-            }
-            else if (auto laneChangeAction = std::dynamic_pointer_cast<openScenario::PrivateLateralLaneChangeAction>(action))
-            {
-                return static_cast<ManipulatorInterface*>(new (std::nothrow) LaneChangeManipulator(
-                                                              world,
-                                                              laneChangeAction,
-                                                              eventNetwork,
-                                                              callbacks
-                                                              ));
-            }
-            else if (auto trajectoryAction = std::dynamic_pointer_cast<openScenario::PrivateFollowTrajectoryAction>(action))
-            {
-                return static_cast<ManipulatorInterface*>(new (std::nothrow) TrajectoryManipulator(
-                                                              world,
-                                                              trajectoryAction,
-                                                              eventNetwork,
-                                                              callbacks
-                                                              ));
-            }
         }
     }
     catch (...)

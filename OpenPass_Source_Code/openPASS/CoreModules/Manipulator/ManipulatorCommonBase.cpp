@@ -15,17 +15,15 @@
 #include "ManipulatorCommonBase.h"
 
 ManipulatorCommonBase::ManipulatorCommonBase(WorldInterface *world,
-                                             std::shared_ptr<ScenarioActionInterface> action,
                                              SimulationSlave::EventNetworkInterface *eventNetwork,
-                                             const CallbackInterface *callbacks) :
+                                             const CallbackInterface *callbacks,
+                                             const std::string &eventName) :
     world(world),
     parameters(nullptr),
     eventNetwork(eventNetwork),
-    callbacks(callbacks)
-{
-    eventName = action->GetEventName();
-
-}
+    callbacks(callbacks),
+    eventName(eventName)
+{}
 
 int ManipulatorCommonBase::GetCycleTime()
 {

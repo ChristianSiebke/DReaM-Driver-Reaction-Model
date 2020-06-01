@@ -18,13 +18,14 @@
 #include <QtGlobal>
 
 TrajectoryManipulator::TrajectoryManipulator(WorldInterface *world,
-                                             std::shared_ptr<openScenario::PrivateFollowTrajectoryAction> action,
                                              SimulationSlave::EventNetworkInterface *eventNetwork,
-                                             const CallbackInterface *callbacks):
+                                             const CallbackInterface *callbacks,
+                                             const openScenario::FollowTrajectoryAction action,
+                                             const std::string &eventName) :
     ManipulatorCommonBase(world,
-                          action,
                           eventNetwork,
-                          callbacks),
+                          callbacks,
+                          eventName),
     action(action)
 {
     cycleTime = 100;
@@ -42,7 +43,7 @@ void TrajectoryManipulator::Trigger(int time)
                                                                      eventName,
                                                                      COMPONENTNAME,
                                                                      actorId,
-                                                                     action->GetTrajectory());
+                                                                     action.trajectory);
 
             eventNetwork->InsertEvent(laneChangeEvent);
         }

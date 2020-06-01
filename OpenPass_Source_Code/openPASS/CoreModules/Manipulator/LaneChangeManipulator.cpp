@@ -18,13 +18,14 @@
 #include <QtGlobal>
 
 LaneChangeManipulator::LaneChangeManipulator(WorldInterface *world,
-                                             std::shared_ptr<openScenario::PrivateLateralLaneChangeAction> action,
                                              SimulationSlave::EventNetworkInterface *eventNetwork,
-                                             const CallbackInterface *callbacks):
+                                             const CallbackInterface *callbacks,
+                                             const openScenario::LaneChangeAction action,
+                                             const std::string &eventName) :
     ManipulatorCommonBase(world,
-                          action,
                           eventNetwork,
-                          callbacks),
+                          callbacks,
+                          eventName),
     action(action)
 {
     cycleTime = 100;
@@ -42,7 +43,7 @@ void LaneChangeManipulator::Trigger(int time)
                                                                      eventName,
                                                                      COMPONENTNAME,
                                                                      actorId,
-                                                                     action->GetLaneChangeParameter());
+                                                                     action.laneChangeParameter);
 
             eventNetwork->InsertEvent(laneChangeEvent);
         }

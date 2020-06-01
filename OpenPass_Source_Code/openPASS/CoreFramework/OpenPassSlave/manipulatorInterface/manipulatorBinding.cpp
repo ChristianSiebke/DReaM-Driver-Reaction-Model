@@ -50,8 +50,7 @@ std::vector<const Manipulator*> ManipulatorBinding::Instantiate(const std::strin
     //Instantiates all default eventDetectors
     for(auto manipulatorType : defaultManipulatorTypes)
     {
-        const auto manipulator = library->CreateManipulator(nullptr,
-                                                            manipulatorType,
+        const auto manipulator = library->CreateManipulator(manipulatorType,
                                                             eventNetwork,
                                                             world);
 
@@ -62,7 +61,6 @@ std::vector<const Manipulator*> ManipulatorBinding::Instantiate(const std::strin
     for(const auto& action : scenario->GetActions())
     {
         const auto manipulator = library->CreateManipulator(action,
-                                                            "",
                                                             eventNetwork,
                                                             world);
         manipulators.push_back(manipulator);

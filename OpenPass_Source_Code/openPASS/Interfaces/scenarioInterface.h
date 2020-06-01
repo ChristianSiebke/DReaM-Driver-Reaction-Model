@@ -22,22 +22,21 @@
 
 #include "Common/worldDefinitions.h"
 #include "Common/eventDetectorDefinitions.h"
-#include "Interfaces/scenarioActionInterface.h"
 
 struct SpawnInfo
 {
 public:
     SpawnInfo() {}
-    SpawnInfo(std::variant<openScenario::LanePosition, openScenario::WorldPosition> position,
-                        double v,
-                        double acceleration):
+    SpawnInfo(openScenario::Position position,
+              double v,
+              double acceleration):
         position(position)
     {
         this->velocity = v;
         this->acceleration = acceleration;
     }
 
-    std::variant<openScenario::LanePosition, openScenario::WorldPosition> position;
+    openScenario::Position position;
 
     std::optional<std::vector<RouteElement>> route {std::nullopt};
 
@@ -180,7 +179,7 @@ public:
     //!
     //! \param[in] action a shared_ptr to an action
     //-------------------------------------------------------------------------
-    virtual void AddAction(std::shared_ptr<ScenarioActionInterface> action) = 0;
+    virtual void AddAction(const openScenario::Action action, const std::string eventName) = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the event detector.
@@ -194,7 +193,7 @@ public:
     //!
     //! \returns list of actions
     //-------------------------------------------------------------------------
-    virtual std::vector<std::shared_ptr<ScenarioActionInterface>> GetActions() const = 0;
+    virtual std::vector<openScenario::ManipulatorInformation> GetActions() const = 0;
 
     //-------------------------------------------------------------------------
     //! \brief Returns the desired end time of the simulation.

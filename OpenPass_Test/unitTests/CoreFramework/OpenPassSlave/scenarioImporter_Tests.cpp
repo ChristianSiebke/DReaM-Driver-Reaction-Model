@@ -14,12 +14,14 @@
 #include "common/helper/importerHelper.h"
 #include "scenario.h"
 #include "scenarioImporter.h"
+#include "scenarioImporterHelper.h"
 #include "fakeScenario.h"
 
 using namespace Configuration;
 using namespace Importer;
 
 using ::testing::Eq;
+using ::testing::DoubleEq;
 using ::testing::StrEq;
 using ::testing::DontCare;
 using ::testing::ElementsAre;
@@ -51,23 +53,21 @@ TEST(ScenarioImporter_UnitTests, ImportEntity)
 
 TEST(ScenarioImporter_UnitTests, ImportPositionElementLaneWithStochastics)
 {
-    QDomElement positionElement = documentRootFromString(
-              "<Position>"
-                     "<Lane roadId=\"RoadId1\" s=\"1470.0\" laneId=\"-4\" offset=\"0.5\" > "
-                    "<Stochastics value=\"s\"  stdDeviation =\"5\" lowerBound = \"95\" upperBound=\"105\"/>"
-                    "<Stochastics value=\"offset\" stdDeviation =\"4\" lowerBound = \"44\" upperBound=\"54\"/>"
-                     "</Lane>"
-                    "</Position>"
+    QDomElement rootElement = documentRootFromString(
+                                      "<root>"
+                                          "<Position>"
+                                                "<LanePosition roadId=\"RoadId1\" s=\"1470.0\" laneId=\"-4\" offset=\"0.5\" > "
+                                                    "<Stochastics value=\"s\"  stdDeviation =\"5\" lowerBound = \"95\" upperBound=\"105\"/>"
+                                                    "<Stochastics value=\"offset\" stdDeviation =\"4\" lowerBound = \"44\" upperBound=\"54\"/>"
+                                                "</LanePosition>"
+                                           "</Position>"
+                                      "</root>"
               );
 
-    ScenarioEntity scenarioEntity;
     openScenario::Parameters parameters;
 
-    EXPECT_NO_THROW(ScenarioImporter::ImportPositionElement(scenarioEntity, positionElement, parameters));
-
-    const auto& spawnInfo = scenarioEntity.spawnInfo;
     openScenario::LanePosition lanePosition;
-    ASSERT_NO_THROW(lanePosition = std::get<openScenario::LanePosition>(spawnInfo.position));
+    EXPECT_NO_THROW(lanePosition = std::get<openScenario::LanePosition>(openScenario::ScenarioImporterHelper::ImportPosition(rootElement, parameters)));
 
     ASSERT_EQ(lanePosition.laneId,-4);
 
@@ -92,21 +92,20 @@ TEST(ScenarioImporter_UnitTests, ImportPositionElementLaneWithStochastics)
 
 TEST(ScenarioImporter_UnitTests, ImportPositionElementLaneWithOrientation)
 {
-    QDomElement positionElement = documentRootFromString(
-              "<Position>"
-                     "<Lane roadId=\"RoadId1\" s=\"1470.0\" laneId=\"-4\" offset=\"0.5\" > "
-                     "<Orientation type=\"relative\" h=\"1.57\"/>"
-                     "</Lane>"
-                    "</Position>"
+    QDomElement rootElement = documentRootFromString(
+                                      "<root>"
+                                          "<Position>"
+                                             "<LanePosition roadId=\"RoadId1\" s=\"1470.0\" laneId=\"-4\" offset=\"0.5\" > "
+                                                "<Orientation type=\"relative\" h=\"1.57\"/>"
+                                             "</LanePosition>"
+                                          "</Position>"
+                                      "</root>"
               );
 
-    ScenarioEntity scenarioEntity;
     openScenario::Parameters parameters;
 
-    EXPECT_NO_THROW(ScenarioImporter::ImportPositionElement(scenarioEntity,positionElement, parameters));
-    const auto& spawnInfo = scenarioEntity.spawnInfo;
     openScenario::LanePosition lanePosition;
-    ASSERT_NO_THROW(lanePosition = std::get<openScenario::LanePosition>(spawnInfo.position));
+    EXPECT_NO_THROW(lanePosition = std::get<openScenario::LanePosition>(openScenario::ScenarioImporterHelper::ImportPosition(rootElement, parameters)));
 
     ASSERT_DOUBLE_EQ(lanePosition.s, 1470.0);
     ASSERT_EQ(lanePosition.laneId, -4);
@@ -118,155 +117,178 @@ TEST(ScenarioImporter_UnitTests, ImportPositionElementLaneWithOrientation)
 
 TEST(ScenarioImporter_UnitTests, ImportPositionElementWorld)
 {
+    QDomElement rootElement = documentRootFromString(
+                                      "<root>"
+                                          "<Position>"
+                                                "<WorldPosition x=\"10.0\" y=\"-4.0\" h=\"0.5\" /> "
+                                          "</Position>"
+                                      "</root>"
+              );
     QDomElement positionElement = documentRootFromString(
               "<Position>"
                     "<World x=\"10.0\" y=\"-4.0\" h=\"0.5\" /> "
                "</Position>"
               );
 
-    ScenarioEntity scenarioEntity;
     openScenario::Parameters parameters;
 
-    EXPECT_NO_THROW(ScenarioImporter::ImportPositionElement(scenarioEntity,positionElement, parameters));
-
-    const auto& spawnInfo = scenarioEntity.spawnInfo;
     openScenario::WorldPosition worldPosition;
-    ASSERT_NO_THROW(worldPosition = std::get<openScenario::WorldPosition>(spawnInfo.position));
+    EXPECT_NO_THROW(worldPosition = std::get<openScenario::WorldPosition>(openScenario::ScenarioImporterHelper::ImportPosition(rootElement, parameters)));
 
     ASSERT_THAT(worldPosition.x, Eq(10.0));
     ASSERT_THAT(worldPosition.y, Eq(-4));
-    ASSERT_THAT(worldPosition.heading.has_value(), Eq(true));
-    ASSERT_THAT(worldPosition.heading.value(), Eq(0.5));
+    ASSERT_THAT(worldPosition.h.has_value(), Eq(true));
+    ASSERT_THAT(worldPosition.h.value(), Eq(0.5));
 }
 
-TEST(ScenarioImporter_UnitTests, ImportLongitudinal)
+TEST(ScenarioImporter_UnitTests, ImportSpeedAction)
 {
-    QDomElement positionElement = documentRootFromString(
-        "<Longitudinal>"
-            "<Speed>"
-                "<Dynamics rate=\"10.0\" />"
-                "<Target>"
-                    "<Absolute value=\"27.7\" />"
-                "</Target>"
-            "</Speed>"
-        "</Longitudinal>"
+    QDomElement rootElement = documentRootFromString(
+                                "<root>"
+                                        "<LongitudinalAction>"
+                                            "<SpeedAction>"
+                                                "<SpeedActionDynamics value=\"10.0\" dynamicsDimension=\"rate\" dynamicsShape=\"linear\" />"
+                                                "<SpeedActionTarget>"
+                                                    "<AbsoluteTargetSpeed value=\"27.7\" />"
+                                                "</SpeedActionTarget>"
+                                            "</SpeedAction>"
+                                        "</Longitudinal>"
+                                "</root>"
     );
 
-    ScenarioEntity scenarioEntity;
     openScenario::Parameters parameters;
 
-    EXPECT_NO_THROW(ScenarioImporter::ImportLongitudinalElement(scenarioEntity, positionElement, parameters));
+    openScenario::Action action;
+    EXPECT_NO_THROW(action = openScenario::ScenarioImporterHelper::ImportPrivateAction(rootElement, parameters));
+    openScenario::SpeedAction speedAction;
+    EXPECT_NO_THROW(speedAction = std::get<openScenario::SpeedAction>(std::get<openScenario::LongitudinalAction>(std::get<openScenario::PrivateAction>(action))));
 
-    ASSERT_THAT(scenarioEntity.spawnInfo.stochasticVelocity.has_value(), Eq(false));
-    ASSERT_THAT(scenarioEntity.spawnInfo.velocity, Eq(27.7));
+    ASSERT_THAT(speedAction.stochasticValue.has_value(), Eq(false));
+    ASSERT_THAT(std::get<openScenario::AbsoluteTargetSpeed>(speedAction.target).value, DoubleEq(27.7));
 
-    ASSERT_THAT(scenarioEntity.spawnInfo.stochasticAcceleration.has_value(), Eq(false));
-    ASSERT_THAT(scenarioEntity.spawnInfo.acceleration.has_value(), Eq(true));
-    ASSERT_THAT(scenarioEntity.spawnInfo.acceleration.value(), Eq(10.0));
+    ASSERT_THAT(speedAction.stochasticDynamics.has_value(), Eq(false));
+    ASSERT_THAT(speedAction.transitionDynamics.value, DoubleEq(10.0));
+    ASSERT_THAT(speedAction.transitionDynamics.shape, Eq("linear"));
+    ASSERT_THAT(speedAction.transitionDynamics.dimension, Eq("rate"));
 }
 
-TEST(ScenarioImporter_UnitTests, ImportLongitudinalWithStochastics)
+TEST(ScenarioImporter_UnitTests, ImportLongitudinalActionWithStochastics)
 {
-    QDomElement positionElement = documentRootFromString(
-        "<Longitudinal>"
-            "<Speed>"
-                "<Dynamics rate=\"0\" />"
-                "<Target>"
-                    "<Absolute value=\"27.7\" />"
-                "</Target>"
-                "<Stochastics value=\"velocity\"  stdDeviation =\"3\" lowerBound = \"12\" upperBound=\"40.0\"/>"
-                "<Stochastics value=\"rate\" stdDeviation =\"4\" lowerBound = \"0\" upperBound=\"4\"/>"
-            "</Speed>"
-        "</Longitudinal>"
+    QDomElement rootElement = documentRootFromString(
+                                "<root>"
+                                        "<LongitudinalAction>"
+                                            "<SpeedAction>"
+                                                "<SpeedActionDynamics value=\"10.0\" dynamicsDimension=\"rate\" dynamicsShape=\"linear\" />"
+                                                "<SpeedActionTarget>"
+                                                    "<AbsoluteTargetSpeed value=\"27.7\" />"
+                                                "</SpeedActionTarget>"
+                                                "<Stochastics value=\"velocity\"  stdDeviation =\"3\" lowerBound = \"12\" upperBound=\"40.0\"/>"
+                                                "<Stochastics value=\"rate\" stdDeviation =\"4\" lowerBound = \"0\" upperBound=\"4\"/>"
+                                            "</SpeedAction>"
+                                        "</Longitudinal>"
+                                "</root>"
     );
 
-    ScenarioEntity scenarioEntity;
     openScenario::Parameters parameters;
 
-    EXPECT_NO_THROW(ScenarioImporter::ImportLongitudinalElement(scenarioEntity, positionElement, parameters));
+    openScenario::Action action;
+    EXPECT_NO_THROW(action = openScenario::ScenarioImporterHelper::ImportPrivateAction(rootElement, parameters));
+    openScenario::SpeedAction speedAction;
+    EXPECT_NO_THROW(speedAction = std::get<openScenario::SpeedAction>(std::get<openScenario::LongitudinalAction>(std::get<openScenario::PrivateAction>(action))));
 
-    ASSERT_THAT(scenarioEntity.spawnInfo.stochasticVelocity.has_value(), Eq(true));
-    const auto& velocityAttribute = scenarioEntity.spawnInfo.stochasticVelocity.value();
+    ASSERT_THAT(speedAction.stochasticValue.has_value(), Eq(true));
+    const auto& velocityAttribute = speedAction.stochasticValue.value();
     ASSERT_DOUBLE_EQ(velocityAttribute.mean, 27.7);
     ASSERT_DOUBLE_EQ(velocityAttribute.stdDeviation, 3.0);
     ASSERT_DOUBLE_EQ(velocityAttribute.lowerBoundary, 12.0);
     ASSERT_DOUBLE_EQ(velocityAttribute.upperBoundary, 40.0);
 
-    ASSERT_THAT(scenarioEntity.spawnInfo.stochasticAcceleration.has_value(), Eq(true));
-    const auto& accelerationAttribtue = scenarioEntity.spawnInfo.stochasticAcceleration.value();
-    ASSERT_DOUBLE_EQ(accelerationAttribtue.mean, 0.0);
-    ASSERT_DOUBLE_EQ(accelerationAttribtue.stdDeviation, 4.0);
-    ASSERT_DOUBLE_EQ(accelerationAttribtue.lowerBoundary, 0.0);
-    ASSERT_DOUBLE_EQ(accelerationAttribtue.upperBoundary, 4.0);
+    ASSERT_THAT(speedAction.stochasticDynamics.has_value(), Eq(true));
+    const auto& rateAttribute = speedAction.stochasticDynamics.value();
+    ASSERT_DOUBLE_EQ(rateAttribute.mean, 10.0);
+    ASSERT_DOUBLE_EQ(rateAttribute.stdDeviation, 4.0);
+    ASSERT_DOUBLE_EQ(rateAttribute.lowerBoundary, 0.0);
+    ASSERT_DOUBLE_EQ(rateAttribute.upperBoundary, 4.0);
+
 }
 
 TEST(ScenarioImporter_UnitTests, ImportLongitudinalWithParameterDeclaration)
 {
-    QDomElement positionElement = documentRootFromString(
-        "<Longitudinal>"
-            "<Speed>"
-                "<Dynamics rate=\"$Rate\" />"
-                "<Target>"
-                    "<Absolute value=\"$Velocity\" />"
-                "</Target>"
-            "</Speed>"
-        "</Longitudinal>"
+    QDomElement rootElement = documentRootFromString(
+                                "<root>"
+                                        "<LongitudinalAction>"
+                                            "<SpeedAction>"
+                                                "<SpeedActionDynamics value=\"$Rate\" dynamicsDimension=\"rate\" dynamicsShape=\"linear\" />"
+                                                "<SpeedActionTarget>"
+                                                    "<AbsoluteTargetSpeed value=\"$Velocity\" />"
+                                                "</SpeedActionTarget>"
+                                            "</SpeedAction>"
+                                        "</Longitudinal>"
+                                "</root>"
     );
 
-    ScenarioEntity scenarioEntity;
     openScenario::Parameters parameters{{"Rate", 10.0}, {"Velocity", 27.7}};
 
-    EXPECT_NO_THROW(ScenarioImporter::ImportLongitudinalElement(scenarioEntity, positionElement, parameters));
+    EXPECT_NO_THROW(openScenario::ScenarioImporterHelper::ImportPrivateAction(rootElement, parameters));
 
-    ASSERT_THAT(scenarioEntity.spawnInfo.stochasticVelocity.has_value(), Eq(false));
-    ASSERT_THAT(scenarioEntity.spawnInfo.velocity, Eq(27.7));
+    openScenario::Action action;
+    EXPECT_NO_THROW(action = openScenario::ScenarioImporterHelper::ImportPrivateAction(rootElement, parameters));
+    openScenario::SpeedAction speedAction;
+    EXPECT_NO_THROW(speedAction = std::get<openScenario::SpeedAction>(std::get<openScenario::LongitudinalAction>(std::get<openScenario::PrivateAction>(action))));
 
-    ASSERT_THAT(scenarioEntity.spawnInfo.stochasticAcceleration.has_value(), Eq(false));
-    ASSERT_THAT(scenarioEntity.spawnInfo.acceleration.has_value(), Eq(true));
-    ASSERT_THAT(scenarioEntity.spawnInfo.acceleration.value(), Eq(10.0));
+    ASSERT_THAT(speedAction.stochasticValue.has_value(), Eq(false));
+    ASSERT_THAT(std::get<openScenario::AbsoluteTargetSpeed>(speedAction.target).value, DoubleEq(27.7));
+
+    ASSERT_THAT(speedAction.stochasticDynamics.has_value(), Eq(false));
+    ASSERT_THAT(speedAction.transitionDynamics.value, DoubleEq(10.0));
+    ASSERT_THAT(speedAction.transitionDynamics.shape, Eq("linear"));
+    ASSERT_THAT(speedAction.transitionDynamics.dimension, Eq("rate"));
 }
 
-std::ostream& operator<<(std::ostream& os, const RouteElement& obj)
+TEST(ScenarioImporter_UnitTests, ImportAssignRoutingAction)
 {
-    return os
-            << "road " << obj.roadId << " "
-            << (obj.inOdDirection ? "in" : "against") << " OpenDrive direction";
-}
-
-TEST(ScenarioImporter_UnitTests, ImportRoutingElement)
-{
-    QDomElement routingElement = documentRootFromString(
-              "<Routing>"
-                    "<FollowRoute>"
-                        "<Route>"
-                            "<Waypoint>"
-                                "<Position>"
-                                    "<Road roadId=\"RoadId1\" t=\"-1.0\" />"
-                                "</Position>"
-                            "</Waypoint>"
-                            "<Waypoint>"
-                                "<Position>"
-                                    "<Road roadId=\"RoadId2\" t=\"1.0\" />"
-                                "</Position>"
-                            "</Waypoint>"
-                            "<Waypoint>"
-                                "<Position>"
-                                    "<Road roadId=\"RoadId3\" t=\"-1.0\" />"
-                                "</Position>"
-                            "</Waypoint>"
-                        "</Route>"
-                    "</FollowRoute>"
-               "</Routing>"
+    QDomElement rootElement = documentRootFromString(
+                                     "<root>"
+                                          "<RoutingAction>"
+                                                "<AssignRouteAction>"
+                                                    "<Route>"
+                                                        "<Waypoint>"
+                                                            "<Position>"
+                                                                "<RoadPosition roadId=\"RoadId1\" s=\"0\" t=\"-1.0\" />"
+                                                            "</Position>"
+                                                        "</Waypoint>"
+                                                        "<Waypoint>"
+                                                            "<Position>"
+                                                                "<RoadPosition roadId=\"RoadId2\" s=\"0\" t=\"1.0\" />"
+                                                            "</Position>"
+                                                        "</Waypoint>"
+                                                        "<Waypoint>"
+                                                            "<Position>"
+                                                                "<RoadPosition roadId=\"RoadId3\" s=\"0\" t=\"-1.0\" />"
+                                                            "</Position>"
+                                                        "</Waypoint>"
+                                                   "</Route>"
+                                                "</AssignRouteAction>"
+                                           "</RoutingAction>"
+                                     "</root>"
               );
 
-    ScenarioEntity scenarioEntity;
     openScenario::Parameters parameters;
 
-    ScenarioImporter::ImportRoutingElement(scenarioEntity, routingElement, parameters);
+    EXPECT_NO_THROW(openScenario::ScenarioImporterHelper::ImportPrivateAction(rootElement, parameters));
 
-    auto route = scenarioEntity.spawnInfo.route;
-    ASSERT_THAT(route.has_value(), Eq(true));
-    ASSERT_THAT(route.value(), ElementsAre(RouteElement{"RoadId1", true}, RouteElement{"RoadId2", false}, RouteElement{"RoadId3", true}));
+    openScenario::Action action;
+    EXPECT_NO_THROW(action = openScenario::ScenarioImporterHelper::ImportPrivateAction(rootElement, parameters));
+    openScenario::AssignRouteAction assignRouteAction;
+    EXPECT_NO_THROW(assignRouteAction = std::get<openScenario::AssignRouteAction>(std::get<openScenario::RoutingAction>(std::get<openScenario::PrivateAction>(action))));
+
+    ASSERT_THAT(assignRouteAction, SizeIs(3));
+    ASSERT_THAT(assignRouteAction[0].roadId, Eq("RoadId1"));
+    ASSERT_THAT(assignRouteAction[0].t, DoubleEq(-1));
+    ASSERT_THAT(assignRouteAction[1].roadId, Eq("RoadId2"));
+    ASSERT_THAT(assignRouteAction[1].t, DoubleEq(1));
+    ASSERT_THAT(assignRouteAction[2].roadId, Eq("RoadId3"));
+    ASSERT_THAT(assignRouteAction[2].t, DoubleEq(-1));
 }
 
 TEST(ScenarioImporter_UnitTests, ImportVehicleCatalog_ReturnsSuccess)
@@ -339,15 +361,15 @@ TEST(ScenarioImporter_UnitTests, ImportStoryboardWithEndCondition_SetsScenarioEn
                 "			<Actions>"
                 "			</Actions>"
                 "		</Init>"
-                "		<EndConditions>"
+                "		<StopTrigger>"
                 "			<ConditionGroup>"
-                "				<Condition name=\"TestCondition\" delay=\"0.0\" edge=\"rising\">"
-                "					<ByValue>"
-                "						<SimulationTime value=\"3.000\" rule=\"greater_than\" />"
-                "					</ByValue>"
+                "				<Condition name=\"TestCondition\" delay=\"0.0\" conditionEdge=\"rising\">"
+                "					<ByValueCondition>"
+                "						<SimulationTimeCondition value=\"3.000\" rule=\"greaterThan\" />"
+                "					</ByValueCondition>"
                 "				</Condition>"
                 "			</ConditionGroup>"
-                "		</EndConditions>"
+                "		</StopTrigger>"
                 "	</Storyboard>"
                 "</root>"
     );
@@ -368,15 +390,15 @@ TEST(ScenarioImporter_UnitTests, ImportStoryboardWithInvalidEndCondition_Throws)
                 "			<Actions>"
                 "			</Actions>"
                 "		</Init>"
-                "		<EndConditions>"
+                "		<StopTrigger>"
                 "			<ConditionGroup>"
-                "				<Condition delay=\"0.0\" edge=\"rising\">"
-                "					<ByValue>"
-                "						<SimulationTime value=\"3.000\" rule=\"greater_than\" />"
-                "					</ByValue>"
+                "				<Condition delay=\"0.0\" edge=\"conditionEdge\">"
+                "					<ByValueCondition>"
+                "						<SimulationTimeCondition value=\"3.000\" rule=\"greaterThan\" />"
+                "					</ByValueCondition>"
                 "				</Condition>"
                 "			</ConditionGroup>"
-                "		</EndConditions>"
+                "		</StopTrigger>"
                 "	</Storyboard>"
                 "</root>"
     );
@@ -388,15 +410,15 @@ TEST(ScenarioImporter_UnitTests, ImportStoryboardWithInvalidEndCondition_Throws)
                 "			<Actions>"
                 "			</Actions>"
                 "		</Init>"
-                "		<EndConditions>"
+                "		<StopTrigger>"
                 "			<ConditionGroup>"
                 "				<Condition name=\"\" edge=\"rising\">"
-                "					<ByValue>"
-                "						<SimulationTime value=\"3.000\" rule=\"greater_than\" />"
-                "					</ByValue>"
+                "					<ByValueCondition>"
+                "						<SimulationTimeCondition value=\"3.000\" rule=\"greaterThan\" />"
+                "					</ByValueCondition>"
                 "				</Condition>"
                 "			</ConditionGroup>"
-                "		</EndConditions>"
+                "		</StopTrigger>"
                 "	</Storyboard>"
                 "</root>"
     );
@@ -408,15 +430,15 @@ TEST(ScenarioImporter_UnitTests, ImportStoryboardWithInvalidEndCondition_Throws)
                 "			<Actions>"
                 "			</Actions>"
                 "		</Init>"
-                "		<EndConditions>"
+                "		<StopTrigger>"
                 "			<ConditionGroup>"
                 "				<Condition name=\"\" delay=\"0.0\">"
-                "					<ByValue>"
-                "						<SimulationTime value=\"3.000\" rule=\"greater_than\" />"
-                "					</ByValue>"
+                "					<ByValueCondition>"
+                "						<SimulationTimeCondition value=\"3.000\" rule=\"greaterThan\" />"
+                "					</ByValueCondition>"
                 "				</Condition>"
                 "			</ConditionGroup>"
-                "		</EndConditions>"
+                "		</StopTrigger>"
                 "	</Storyboard>"
                 "</root>"
     );
@@ -428,15 +450,15 @@ TEST(ScenarioImporter_UnitTests, ImportStoryboardWithInvalidEndCondition_Throws)
                 "			<Actions>"
                 "			</Actions>"
                 "		</Init>"
-                "		<EndConditions>"
+                "		<StopTrigger>"
                 "			<ConditionGroup>"
                 "				<Condition name=\"\" delay=\"-1.0\" edge=\"rising\">"
-                "					<ByValue>"
-                "						<SimulationTime value=\"3.000\" rule=\"greater_than\" />"
-                "					</ByValue>"
+                "					<ByValueCondition>"
+                "						<SimulationTimeCondition value=\"3.000\" rule=\"greaterThan\" />"
+                "					</ByValueCondition>"
                 "				</Condition>"
                 "			</ConditionGroup>"
-                "		</EndConditions>"
+                "		</StopTrigger>"
                 "	</Storyboard>"
                 "</root>"
     );
@@ -454,11 +476,11 @@ TEST(ScenarioImporter_UnitTests, ImportStoryboardWithInvalidEndCondition_Throws)
 TEST(ScenarioImporter_UnitTests, ImportParameterDeclarationElement)
 {
     QDomElement parameterDeclarationElement = documentRootFromString(
-              "<ParameterDeclaration>"
-                "<Parameter name=\"Parameter1\" type=\"string\" value=\"TestString\" />"
-                "<Parameter name=\"Parameter2\" type=\"double\" value=\"10.0\" />"
-                "<Parameter name=\"Parameter3\" type=\"integer\" value=\"2\" />"
-              "</ParameterDeclaration>"
+              "<ParameterDeclarations>"
+                "<ParameterDeclaration name=\"Parameter1\" parameterType=\"string\" value=\"TestString\" />"
+                "<ParameterDeclaration name=\"Parameter2\" parameterType=\"double\" value=\"10.0\" />"
+                "<ParameterDeclaration name=\"Parameter3\" parameterType=\"integer\" value=\"2\" />"
+              "</ParameterDeclarations>"
               );
 
     openScenario::Parameters parameters;

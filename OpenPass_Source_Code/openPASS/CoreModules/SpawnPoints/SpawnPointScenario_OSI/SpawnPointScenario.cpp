@@ -191,7 +191,7 @@ SpawnParameter SpawnPointScenario::CalculateSpawnParameter(const SpawnInfo& spaw
 
     // Define position and orientation
     // Lane Spawning
-    if(spawnInfo.position.index() == 0)
+    if(std::holds_alternative<openScenario::LanePosition>(spawnInfo.position))
     {
         const auto &lanePosition = std::get<openScenario::LanePosition>(spawnInfo.position);
 
@@ -211,12 +211,15 @@ SpawnParameter SpawnPointScenario::CalculateSpawnParameter(const SpawnInfo& spaw
         }
     }
     // World Spawning
-    else
+    else if (std::holds_alternative<openScenario::WorldPosition>(spawnInfo.position))
     {
         const auto &worldPosition = std::get<openScenario::WorldPosition>(spawnInfo.position);
         spawnParameter.positionX = worldPosition.x;
         spawnParameter.positionY = worldPosition.y;
-        spawnParameter.yawAngle = worldPosition.heading.value_or(0.0);
+        spawnParameter.yawAngle = worldPosition.h.value_or(0.0);
+    }
+    else {
+        LogErrorAndThrow("This Spawner only supports Lane- & WorldPositions.");
     }
 
     // Define velocity

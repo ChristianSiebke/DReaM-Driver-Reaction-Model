@@ -17,9 +17,8 @@
 #include "dontCare.h"
 #include "fakeParameter.h"
 
-#include "manipulatorImporter.h"
+#include "scenarioImporterHelper.h"
 
-using Importer::ManipulatorImporter;
 using ::testing::ElementsAre;
 
 openScenario::Parameters EMPTY_PARAMETERS{};
@@ -27,188 +26,107 @@ openScenario::Parameters EMPTY_PARAMETERS{};
 TEST(ManipulatorImporter, SuccessfullyImportsUserDefinedCommandAction_ComponentStateChange)
 {
     const std::string expectedCommand = "SetComponentState DynamicsTrajectoryFollower Acting";
-    QDomElement fakeEventElement = documentRootFromString(
-                "<Event name=\"ActivateTFEvent\" priority=\"overwrite\">"
-                "	<Action name=\"ActivateTFAction\">"
-                "		<UserDefined>"
-                "			<Command>"
-                "				" + expectedCommand + ""
-                "			</Command>"
-                "		</UserDefined>"
-                "	</Action>"
-                "</Event>"
+    QDomElement fakeRoot = documentRootFromString(
+                               "<root>"
+                                    "<CustomCommandAction>"
+                                    + expectedCommand + ""
+                                    "</CustomCommandAction>"
+                               "</root>"
     );
 
     const std::vector<std::string> eventDetectorNames{"TestEventDetectorA, TestEventDetectorB"};
     const std::string eventName{"ActivateTFEvent"};
     openScenario::Parameters parameters;
 
-    std::shared_ptr<ScenarioActionInterface> action = ManipulatorImporter::ImportManipulator(fakeEventElement,
-                                                                                             eventName,
-                                                                                             testing::DontCare<std::string>(),
-                                                                                             parameters);
+    const auto action = openScenario::ScenarioImporterHelper::ImportUserDefinedAction(fakeRoot);
 
-    std::shared_ptr<openScenario::UserDefinedCommandAction> castedAction = std::dynamic_pointer_cast<openScenario::UserDefinedCommandAction>(action);
+    ASSERT_TRUE(std::holds_alternative<openScenario::CustomCommandAction>(action));
 
-    ASSERT_NE(castedAction, nullptr);
-    EXPECT_EQ(castedAction->GetCommand(), expectedCommand);
-    EXPECT_EQ(castedAction->GetEventName(), eventName);
-}
-
-TEST(ManipulatorImporter, SuccessfullyImportsUserDefinedCommandAction_CustomLaneChange)
-{
-    const std::string expectedCommand = "SetCustomLaneChange -1";
-    QDomElement fakeEventElement = documentRootFromString(
-                "<Event name=\"ActiveCLCEvent\" priority=\"overwrite\">"
-                "	<Action name=\"CustomLaneChange\">"
-                "		<UserDefined>"
-                "			<Command>"
-                "				" + expectedCommand + ""
-                "			</Command>"
-                "		</UserDefined>"
-                "	</Action>"
-                "</Event>"
-    );
-
-    const std::string eventName{"ActiveCLCEvent"};
-
-    std::shared_ptr<ScenarioActionInterface> action = ManipulatorImporter::ImportManipulator(fakeEventElement,
-                                                                                             eventName,
-                                                                                             testing::DontCare<std::string>());
-
-    std::shared_ptr<openScenario::UserDefinedCommandAction> castedAction = std::dynamic_pointer_cast<openScenario::UserDefinedCommandAction>(action);
-
-    ASSERT_NE(castedAction, nullptr);
-    EXPECT_EQ(castedAction->GetCommand(), expectedCommand);
-    EXPECT_EQ(castedAction->GetEventName(), eventName);
-}
-
-TEST(ManipulatorImporter, SuccessfullyImportsUserDefinedCommandAction_GazeFollower)
-{
-    const std::string expectedCommand = "SetGazeFollower Active GazeFollowerFileName.csv";
-    QDomElement fakeEventElement = documentRootFromString(
-                "<Event name=\"ActiveGFEvent\" priority=\"overwrite\">"
-                "	<Action name=\"GazeFollower\">"
-                "		<UserDefined>"
-                "			<Command>"
-                "				" + expectedCommand + ""
-                "			</Command>"
-                "		</UserDefined>"
-                "	</Action>"
-                "</Event>"
-    );
-
-    const std::string eventName{"ActiveGFEvent"};
-
-    std::shared_ptr<ScenarioActionInterface> action = ManipulatorImporter::ImportManipulator(fakeEventElement,
-                                                                                             eventName,
-                                                                                             testing::DontCare<std::string>(),
-                                                                                             EMPTY_PARAMETERS);
-
-    std::shared_ptr<openScenario::UserDefinedCommandAction> castedAction = std::dynamic_pointer_cast<openScenario::UserDefinedCommandAction>(action);
-
-    ASSERT_NE(castedAction, nullptr);
-    EXPECT_EQ(castedAction->GetCommand(), expectedCommand);
-    EXPECT_EQ(castedAction->GetEventName(), eventName);
+    EXPECT_EQ(std::get<openScenario::CustomCommandAction>(action).command, expectedCommand);
 }
 
 TEST(ManipulatorImporter, SuccessfullyImportsGlobalEntityDeleteAction)
 {
     const std::string expectedEntityName = "TestEntity";
-    QDomElement fakeEventElement = documentRootFromString(
-                "<Event name=\"RemoveAgentsEvent\" priority=\"overwrite\">"
-                "	<Action name=\"RemoveAgentsAction\">"
-                "		<Global>"
-                "			<Entity name=\"" + expectedEntityName + "\">"
-                "				<Delete />"
-                "			</Entity>"
-                "		</Global>"
-                "	</Action>"
-                "</Event>"
+    QDomElement fakeRoot = documentRootFromString(
+                               "<root>"
+                                    "<EntityAction entityRef=\"" + expectedEntityName + "\">"
+                                        "<DeleteEntityAction />"
+                                    "</EntityAction>"
+                               "</root>"
     );
 
     openScenario::Parameters parameters;
 
-    std::shared_ptr<ScenarioActionInterface> action = ManipulatorImporter::ImportManipulator(fakeEventElement,
-                                                                                             testing::DontCare<std::string>(),
-                                                                                             testing::DontCare<std::string>(),
+    const auto action = openScenario::ScenarioImporterHelper::ImportGlobalAction(fakeRoot,
                                                                                              parameters);
 
-    std::shared_ptr<openScenario::GlobalEntityAction> castedAction = std::dynamic_pointer_cast<openScenario::GlobalEntityAction>(action);
+    ASSERT_TRUE(std::holds_alternative<openScenario::EntityAction>(action));
 
-    ASSERT_NE(castedAction, nullptr);
-    EXPECT_EQ(castedAction->GetName(), expectedEntityName);
-    EXPECT_EQ(castedAction->GetType(), openScenario::GlobalEntityActionType::Delete);
+    const auto entityAction = std::get<openScenario::EntityAction>(action);
+    EXPECT_EQ(entityAction.entityRef, expectedEntityName);
+    EXPECT_EQ(entityAction.type, openScenario::EntityActionType::Delete);
 }
 
 TEST(ManipulatorImporter, SuccessfullyImportsGlobalEntityAddAction)
 {
     const std::string expectedEntityName = "TestEntity";
-    QDomElement fakeEventElement = documentRootFromString(
-                "<Event name=\"RemoveAgentsEvent\" priority=\"overwrite\">"
-                "	<Action name=\"RemoveAgentsAction\">"
-                "		<Global>"
-                "			<Entity name=\"" + expectedEntityName + "\">"
-                "				<Add>"
-                "					<Position>"
-                "						<World x=\"0\" y=\"0\" />"
-                "					</Position>"
-                "				</Add>"
-                "			</Entity>"
-                "		</Global>"
-                "	</Action>"
-                "</Event>"
+    QDomElement fakeRoot = documentRootFromString(
+                               "<root>"
+                                    "<EntityAction entityRef=\"" + expectedEntityName + "\">"
+                                        "<AddEntityAction>"
+                                            "<Position>"
+                                                "<World x=\"0\" y=\"0\" />"
+                                            "</Position>"
+                                        "</AddEntityAction>"
+                                    "</EntityAction>"
+                                "</root>"
     );
 
     openScenario::Parameters parameters;
 
-    std::shared_ptr<ScenarioActionInterface> action = ManipulatorImporter::ImportManipulator(fakeEventElement,
-                                                                                             testing::DontCare<std::string>(),
-                                                                                             testing::DontCare<std::string>(),
+    const auto action = openScenario::ScenarioImporterHelper::ImportGlobalAction(fakeRoot,
                                                                                              parameters);
 
-    std::shared_ptr<openScenario::GlobalEntityAction> castedAction = std::dynamic_pointer_cast<openScenario::GlobalEntityAction>(action);
+    ASSERT_TRUE(std::holds_alternative<openScenario::EntityAction>(action));
 
-    ASSERT_NE(castedAction, nullptr);
-    EXPECT_EQ(castedAction->GetName(), expectedEntityName);
-    EXPECT_EQ(castedAction->GetType(), openScenario::GlobalEntityActionType::Add);
+    const auto entityAction = std::get<openScenario::EntityAction>(action);
+    EXPECT_EQ(entityAction.entityRef, expectedEntityName);
+    EXPECT_EQ(entityAction.type, openScenario::EntityActionType::Add);
 }
 
 TEST(ManipulatorImporter, SuccessfullyImportsPrivateLateralLaneChangeAbsoluteAction)
 {
     const int expectedLaneOffset = -1;
     QDomElement fakeEventElement = documentRootFromString(
-                "<Event name=\"LaneChangeEvent\" priority=\"overwrite\">"
-                "	<Action name=\"LaneChangeAction\">"
-                "		<Private>"
-                "			<Lateral>"
-                "				<LaneChange>"
-                "					<Dynamics time=\"2.0\" shape=\"sinusoidal\" />"
-                "					<Target>"
-                "						<Absolute value=\"" + std::to_string(expectedLaneOffset) + "\" />"
-                "					</Target>"
-                "				</LaneChange>"
-                "			</Lateral>"
-                "		</Private>"
-                "	</Action>"
-                "</Event>"
+                                       "<root>"
+                                            "<LateralAction>"
+                                                "<LaneChangeAction>"
+                                                    "<LaneChangeActionDynamics value=\"2.0\" dynamicsShape=\"sinusoidal\" dynamicsDimension=\"time\"/>"
+                                                    "<LaneChangeTarget>"
+                                                        "<AbsoluteTargetLane value=\"" + std::to_string(expectedLaneOffset) + "\" />"
+                                                    "</LaneChangeTarget>"
+                                                "</LaneChangeAction>"
+                                            "</LateralAction>"
+                                       "</root>"
     );
 
     openScenario::Parameters parameters;
 
-    std::shared_ptr<ScenarioActionInterface> action = ManipulatorImporter::ImportManipulator(fakeEventElement,
-                                                                                             testing::DontCare<std::string>(),
-                                                                                             testing::DontCare<std::string>(),
+    const auto action = openScenario::ScenarioImporterHelper::ImportPrivateAction(fakeEventElement,
                                                                                              parameters);
 
-    std::shared_ptr<openScenario::PrivateLateralLaneChangeAction> castedAction = std::dynamic_pointer_cast<openScenario::PrivateLateralLaneChangeAction>(action);
+    ASSERT_TRUE(std::holds_alternative<openScenario::LateralAction>(action));
+    const auto lateralAction = std::get<openScenario::LateralAction>(action);
 
-    ASSERT_NE(castedAction, nullptr);
-    EXPECT_EQ(castedAction->GetLaneChangeParameter().type, openScenario::LaneChangeParameter::Type::Absolute);
-    EXPECT_EQ(castedAction->GetLaneChangeParameter().value, expectedLaneOffset);
-    EXPECT_EQ(castedAction->GetLaneChangeParameter().object, "");
-    EXPECT_EQ(castedAction->GetLaneChangeParameter().dynamicsType, openScenario::LaneChangeParameter::DynamicsType::Time);
-    EXPECT_EQ(castedAction->GetLaneChangeParameter().dynamicsTarget, 2.0);
+    ASSERT_TRUE(std::holds_alternative<openScenario::LaneChangeAction>(lateralAction));
+    const auto laneChangeAction = std::get<openScenario::LaneChangeAction>(lateralAction);
+
+    EXPECT_EQ(laneChangeAction.laneChangeParameter.type, openScenario::LaneChangeParameter::Type::Absolute);
+    EXPECT_EQ(laneChangeAction.laneChangeParameter.value, expectedLaneOffset);
+    EXPECT_EQ(laneChangeAction.laneChangeParameter.object, "");
+    EXPECT_EQ(laneChangeAction.laneChangeParameter.dynamicsType, openScenario::LaneChangeParameter::DynamicsType::Time);
+    EXPECT_EQ(laneChangeAction.laneChangeParameter.dynamicsTarget, 2.0);
 }
 
 TEST(ManipulatorImporter, SuccessfullyImportsPrivateLateralLaneChangeRelativeAction)
@@ -216,88 +134,75 @@ TEST(ManipulatorImporter, SuccessfullyImportsPrivateLateralLaneChangeRelativeAct
     const std::string expectedObject{"TestObject"};
     const int expectedLaneOffset = -1;
     QDomElement fakeEventElement = documentRootFromString(
-                "<Event name=\"LaneChangeEvent\" priority=\"overwrite\">"
-                "	<Action name=\"LaneChangeAction\">"
-                "		<Private>"
-                "			<Lateral>"
-                "				<LaneChange>"
-                "					<Dynamics distance=\"100.0\" shape=\"sinusoidal\" />"
-                "					<Target>"
-                "						<Relative object=\"" + expectedObject + "\" value=\"" + std::to_string(expectedLaneOffset) + "\" />"
-                "					</Target>"
-                "				</LaneChange>"
-                "			</Lateral>"
-                "		</Private>"
-                "	</Action>"
-                "</Event>"
+                                       "<root>"
+                                            "<LateralAction>"
+                                                "<LaneChangeAction>"
+                                                    "<LaneChangeActionDynamics value=\"100.0\" dynamicsShape=\"sinusoidal\" dynamicsDimension=\"time\" />"
+                                                    "<LaneChangeTarget>"
+                                                        "<RelativeTargetLane entityRef=\"" + expectedObject + "\" value=\"" + std::to_string(expectedLaneOffset) + "\" />"
+                                                    "</LaneChangeTarget>"
+                                                "</LaneChangeAction>"
+                                            "</LateralAction>"
+                                      "</root>"
     );
 
     openScenario::Parameters parameters;
 
-    std::shared_ptr<ScenarioActionInterface> action = ManipulatorImporter::ImportManipulator(fakeEventElement,
-                                                                                             testing::DontCare<std::string>(),
-                                                                                             testing::DontCare<std::string>(),
+    const auto action = openScenario::ScenarioImporterHelper::ImportPrivateAction(fakeEventElement,
                                                                                              parameters);
 
-    std::shared_ptr<openScenario::PrivateLateralLaneChangeAction> castedAction = std::dynamic_pointer_cast<openScenario::PrivateLateralLaneChangeAction>(action);
+    ASSERT_TRUE(std::holds_alternative<openScenario::LateralAction>(action));
+    const auto lateralAction = std::get<openScenario::LateralAction>(action);
 
-    ASSERT_NE(castedAction, nullptr);
-    EXPECT_EQ(castedAction->GetLaneChangeParameter().type, openScenario::LaneChangeParameter::Type::Relative);
-    EXPECT_EQ(castedAction->GetLaneChangeParameter().value, expectedLaneOffset);
-    EXPECT_EQ(castedAction->GetLaneChangeParameter().object, expectedObject);
-    EXPECT_EQ(castedAction->GetLaneChangeParameter().dynamicsType, openScenario::LaneChangeParameter::DynamicsType::Distance);
-    EXPECT_EQ(castedAction->GetLaneChangeParameter().dynamicsTarget, 100.0);
+    ASSERT_TRUE(std::holds_alternative<openScenario::LaneChangeAction>(lateralAction));
+    const auto laneChangeAction = std::get<openScenario::LaneChangeAction>(lateralAction);
+
+    EXPECT_EQ(laneChangeAction.laneChangeParameter.type, openScenario::LaneChangeParameter::Type::Relative);
+    EXPECT_EQ(laneChangeAction.laneChangeParameter.value, expectedLaneOffset);
+    EXPECT_EQ(laneChangeAction.laneChangeParameter.object, expectedObject);
+    EXPECT_EQ(laneChangeAction.laneChangeParameter.dynamicsType, openScenario::LaneChangeParameter::DynamicsType::Time);
+    EXPECT_EQ(laneChangeAction.laneChangeParameter.dynamicsTarget, 100.0);
 }
 
 TEST(ManipulatorImporter, SuccessfullyImportsPrivateFollowTrajectoryAction)
 {
-    QDomElement fakeEventElement = documentRootFromString(
-                "<Event name=\"TrajectoryEvent\" priority=\"overwrite\">"
-                "	<Action name=\"TrajectoryAction\">"
-                "		<Private>"
-                "			<Routing>"
-                "				<FollowTrajectory>"
-                "					<Trajectory name=\"MyTrajectory\" closed=\"false\" domain=\"time\">"
-                "                       <Vertex reference=\"1.0\">"
-                "                           <Position>"
-                "                               <World x=\"-0.1\" y=\"0.2\" z=\"0\" h=\"0.3\" p=\"0\" r=\"0\" />"
-                "                           </Position>"
-                "                           <Shape>"
-                "                               <Polyline />"
-                "                           </Shape>"
-                "                       </Vertex>"
-                "                       <Vertex reference=\"10.0\">"
-                "                           <Position>"
-                "                               <World x=\"0.4\" y=\"-0.5\" z=\"0\" h=\"-0.6\" p=\"0\" r=\"0\" />"
-                "                           </Position>"
-                "                           <Shape>"
-                "                               <Polyline />"
-                "                           </Shape>"
-                "                       </Vertex>"
-                "					</Trajectory/>"
-                "					<Longitudinal>"
-                "						<None/>"
-                "					</Longitudinal>"
-                "					<Lateral/>"
-                "				</FollowTrajectory>"
-                "			</Routing>"
-                "		</Private>"
-                "	</Action>"
-                "</Event>"
+    QDomElement fakeRoot = documentRootFromString(
+                               "<root>"
+                                "	<RoutingAction>"
+                                "		<FollowTrajectoryAction>"
+                                "			<Trajectory name=\"MyTrajectory\" closed=\"false\" domain=\"time\">"
+                                "                       <Shape>"
+                                "                           <Polyline>"
+                                "                               <Vertex time=\"1.0\">"
+                                "                                   <Position>"
+                                "                                       <WorldPosition x=\"-0.1\" y=\"0.2\" z=\"0\" h=\"0.3\" p=\"0\" r=\"0\" />"
+                                "                                   </Position>"
+                                "                               </Vertex>"
+                                "                               <Vertex time=\"10.0\">"
+                                "                                   <Position>"
+                                "                                       <WorldPosition x=\"0.4\" y=\"-0.5\" z=\"0\" h=\"-0.6\" p=\"0\" r=\"0\" />"
+                                "                                   </Position>"
+                                "                               </Vertex>"
+                                "                           </Polyline>"
+                                "                       </Shape>"
+                                "			</Trajectory/>"
+                                "		</FollowTrajectoryAction>"
+                                "	</RoutingAction>"
+                               "</root>"
     );
 
     openScenario::Parameters parameters;
 
-    std::shared_ptr<ScenarioActionInterface> action = ManipulatorImporter::ImportManipulator(fakeEventElement,
-                                                                                             testing::DontCare<std::string>(),
-                                                                                             testing::DontCare<std::string>(),
+    const auto action = openScenario::ScenarioImporterHelper::ImportPrivateAction(fakeRoot,
                                                                                              parameters);
 
-    std::shared_ptr<openScenario::PrivateFollowTrajectoryAction> castedAction = std::dynamic_pointer_cast<openScenario::PrivateFollowTrajectoryAction>(action);
+    ASSERT_TRUE(std::holds_alternative<openScenario::RoutingAction>(action));
+    const auto routingAction = std::get<openScenario::RoutingAction>(action);
 
-    ASSERT_NE(castedAction, nullptr);
-    const auto& trajectory = castedAction->GetTrajectory();
-    ASSERT_EQ(trajectory.name, "MyTrajectory");
-    ASSERT_THAT(trajectory.points, ElementsAre(openScenario::TrajectoryPoint{1.0, -0.1, 0.2, 0.3},
+    ASSERT_TRUE(std::holds_alternative<openScenario::FollowTrajectoryAction>(routingAction));
+    const auto followTrajectoryAction = std::get<openScenario::FollowTrajectoryAction>(routingAction);
+
+    ASSERT_EQ(followTrajectoryAction.trajectory.name, "MyTrajectory");
+    ASSERT_THAT(followTrajectoryAction.trajectory.points, ElementsAre(openScenario::TrajectoryPoint{1.0, -0.1, 0.2, 0.3},
                                                openScenario::TrajectoryPoint{10.0, 0.4, -0.5, -0.6}));
 }

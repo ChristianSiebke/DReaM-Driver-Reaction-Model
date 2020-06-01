@@ -10,16 +10,16 @@ The different parts of the scenario configuration are described in the following
 
 \section scenario_parameterDeclaration ParameterDeclaration
 
-In the ParameterDeclaration section parameters of different type may be declared, that are later referenced by their name prefixed with "$".
+In the ParameterDeclarations section parameters of different type may be declared, that are later referenced by their name prefixed with "$".
 The type can be "string", "integer" or "double". In case of "string" the value may be empty.
 The parameter "OP_OSC_SchemaVersion" is mandatory. It is used to check if the schema of the scenario is supported by this version of OpenPASS.
 
 Example
 ```xml
-  <ParameterDeclaration>
-    <Parameter name="OP_OSC_SchemaVersion" type="string" value="0.3.0"/>
-    <Parameter name="EgoSCoordinate" type="double" value="50.0"/>
-  </ParameterDeclaration>
+  <ParameterDeclarations>
+    <ParameterDeclaration name="OP_OSC_SchemaVersion" type="string" value="0.4.0"/>
+    <ParameterDeclaration name="EgoSCoordinate" type="double" value="50.0"/>
+  </ParameterDeclarations>
 ```
 
 Example use of a parameter
@@ -35,7 +35,7 @@ For the FollowTrajectory action one can also use a TrajectoryCatalog.
 
 Example
 ```xml
-    <Catalogs>
+    <CatalogsLocations>
         <VehicleCatalog>
             <Directory path="VehicleModelsCatalog.xosc"/>
         </VehicleCatalog>
@@ -63,7 +63,7 @@ Example
         <RouteCatalog>
             <Directory path=""/>
         </RouteCatalog>
-    </Catalogs>
+    </CatalogLocations>
 ```
 
 \section scenario_roadnetwork RoadNetwork
@@ -73,8 +73,8 @@ The <RoadNetwork> tag contains the reference to the OpenDrive [SceneryConfigurat
 Example
 ```xml
     <RoadNetwork>
-        <Logics filepath="SceneryConfiguration.xodr"/>
-        <SceneGraph filepath=""/>
+        <LogicFile filepath="SceneryConfiguration.xodr"/>
+        <SceneGraphFile filepath=""/>
     </RoadNetwork>
 ```
 
@@ -91,21 +91,21 @@ The Ego Agent need not be included in the "ScenarioAgents" selection; it will al
 Example
 ```xml
     <Entities>
-        <Object name="Ego">
+        <ScenarioObject name="Ego">
             <CatalogReference catalogName="ProfilesCatalog.xml" entryName="MiddleClassCarAgent"/>
-        </Object>
-        <Object name="ScenarioAgent1">
+        </ScenarioObject>
+        <ScenarioObject name="ScenarioAgent1">
             <CatalogReference catalogName="ProfilesCatalog.xml" entryName="MiddleClassCarAgent"/>
-        </Object>
-        <Object name="ScenarioAgent2">
+        </ScenarioObject>
+        <ScenarioObject name="ScenarioAgent2">
             <CatalogReference catalogName="ProfilesCatalog.xml" entryName="MiddleClassCarAgent"/>
-        </Object>
-        <Selection name="ScenarioAgents">
+        </ScenarioObject>
+        <EntitySelection name="ScenarioAgents">
             <Members>
-                <ByEntity name="ScenarioAgent1" />
-                <ByEntity name="ScenarioAgent2" />
+                <EntityRef entityRef="ScenarioAgent1" />
+                <EntityRef entityRef="ScenarioAgent2" />
             </Members>
-        </Selection>
+        </EntitySelection>
     </Entities>
 ```
 
@@ -136,111 +136,115 @@ The content of the <Init> tag is forwarded to the SpawnPoint to define where it 
 The position can either be defined as global coordinates (x and y) with the World tag or as lane coordinates (s and t) with the Lane tag.
 The schema is as follows:
 
-|tag		|parent			|attributes					|multiplicity|
-|-----------|---------------|---------------------------|------------|
-|Actions	|Init			|-							|1		     |
-|Private	|Actions		|object						|1 per entity|
-|Position	|Private		|-							|1		     |
-|Lane		|Position		|roadId, laneId, s, offset	|0 or 1		 |
-|World		|Position		|x, y, h	                |0 or 1		 |
-|Orientation|Lane			|type, h					|0 or 1		 |
-|Longitudinal|Action		|-							|1		     |
-|Speed		|Longitudinal	|-							|1			 |
-|Dynamics	|Speed			|rate, shape				|1			 |
-|Target		|Speed			|-							|1			 |
-|Absolute	|Target			|value						|1			 |
-|Routing    |Action         |-                          |0 or 1      |
-|FollowRoute|Routing        |-                          |1           |
-|Route      |FollowRoute    |-                          |1           |
-|Waypoint   |Route          |-                          |at least 1  |
-|Position   |Waypoint       |-                          |1           |
-|Road       |Position       |roadId, t                  |1           |
+|tag				|parent			|attributes					|multiplicity|
+|-------------------|---------------|---------------------------|------------|
+|Actions			|Init			|-							|1		     |
+|Private			|Actions		|object						|1 per entity|
+|Position			|Private		|-							|1		     |
+|LanePosition		|Position		|roadId, laneId, s, offset	|0 or 1		 |
+|WorldPosition		|Position		|x, y, h	                |0 or 1		 |
+|Orientation		|Lane			|type, h					|0 or 1		 |
+|LongitudinalAction |PrivateAction		|-						|1		     |
+|SpeedAction		|LongitudinalAction	|-						|1			 |
+|SpeedActionDynamics|SpeedAction	|rate, shape				|1			 |
+|SpeedActionTarget	|SpeedAction	|-							|1			 |
+|AbsoluteTargetSpeed|SpeedActionTarget |value					|1			 |
+|RoutingAction    	|PrivateAction  |-                          |0 or 1      |
+|AssignRouteAction	|RoutingAction  |-                          |1           |
+|Route      		|AssignRouteAction    |-                    |1           |
+|Waypoint   		|Route          |-                          |at least 1  |
+|Position   		|Waypoint       |-                          |1           |
+|RoadPosition       |Position       |roadId, t                  |1           |
 
 All listed attributes are required.
 The attributes have the following meaning:
 
 |tag		|attribute	|meaning																						|
 |-----------|-----------|-----------------------------------------------------------------------------------------------|
-|Private	|object		|name of the entity for which the initial values are described in the subtags					|
-|Lane		|roadId		|Id of the road in the Scenery																	|
-|Lane		|laneId		|Id of the lane in the Scenery																	|
-|Lane		|s			|start position on the lane (i.e. distance from the start of the road) of the reference point	|
-|Lane		|offset		|lateral distance of the reference point to the middle of the road (i.e. t coordinate)			|
-|World		|x		    |x coordinate of the reference point			                                                |
-|World		|y		    |y coordinate of the reference point			                                                |
-|World		|h		    |heading			                                                                            |
+|Private	|entityRef		|name of the entity for which the initial values are described in the subtags					|
+|LanePosition|roadId		|Id of the road in the Scenery																	|
+|LanePosition|laneId		|Id of the lane in the Scenery																	|
+|LanePosition|s			|start position on the lane (i.e. distance from the start of the road) of the reference point	|
+|LanePosition|offset		|lateral distance of the reference point to the middle of the road (i.e. t coordinate)			|
+|WorldPosition|x		    |x coordinate of the reference point			                                                |
+|WorldPosition|y		    |y coordinate of the reference point			                                                |
+|WorldPosition|h		    |heading			                                                                            |
 |Orientation|type		|has to be "relative"																			|
 |Orientation|h			|heading angle in radiant relative to the lane													|
-|Dynamics	|rate		|acceleration																					|
-|Dynamics	|shape		|unsupported (but required by OpenSCENARIO)														|
-|Absolute	|Value		|velocity																						|
-|Road       |roadId     |Id of the road in the Scenery																	|
-|Road       |t          |negative for driving in roadDirection (i.e on lanes with negative Id) else positive            |
+|SpeedActionDynamics|rate		|acceleration																					|
+|SpeedActionDynamics|shape		|unsupported (but required by OpenSCENARIO)														|
+|AbsoluteTargetSpeed|Value		|velocity																						|
+|RoadPosition|roadId     |Id of the road in the Scenery																	|
+|RoadPosition|t          |negative for driving in roadDirection (i.e on lanes with negative Id) else positive            |
 
-Although OpenSCENARIO also states other ways for defining a position, we currently only support position via the <Lane> tag.
+Although OpenSCENARIO also states other ways for defining a position, we currently only support position via the <LanePosition> tag.
 Unlike OpenSCENARIO we also allow some of these values to be stochastic.
 This is marked by adding a subtag  <Stochastics value="valuetype" stdDeviation="value" lowerBound="value" upperBound="value"/> to the <Lane> tag.
 The valuetype can be one of s, offset, velocity or rate.
-The value defined as attribute of the Lane/Dynamics/Absolute tag is then taken as mean value.
+The value defined as attribute of the LanePosition/SpeedActionDynamics/AbsoluteTargetSpeed tag is then taken as mean value.
 
 Example
 ```xml
 	<Init>
 		<Actions>
 			<Private object="Ego">
-				<Action>
-					<Position>
-						<Lane roadId="1" s="20.0" laneId="-2" offset="0.0">
-							<Orientation type="relative" h="0.2"/>
-							<Stochastics value="s" stdDeviation="5.0" lowerBound="10.0" upperBound="30.0"/>
-						</Lane>
-					</Position>
-				</Action>
-				<Action>
-					<Longitudinal>
-						<Speed>
-							<Dynamics rate="0.0" shape="linear" />
-							<Target>
-								<Absolute value="10.0" />
-							</Target>
-						</Speed>
-					</Longitudinal>
-				</Action>
-                <Action>
+				<PrivateAction>
+					<TeleportAction>
+						<Position>
+							<LanePosition roadId="1" s="20.0" laneId="-2" offset="0.0">
+								<Orientation type="relative" h="0.2"/>
+								<Stochastics value="s" stdDeviation="5.0" lowerBound="10.0" upperBound="30.0"/>
+							</LanePosition>
+						</Position>
+					</TeleportAction>
+				</PrivateAction>
+				<PrivateAction>
+					<LongitudinalAction>
+						<SpeedAction>
+							<SpeedActionDynamics rate="0.0" shape="linear" />
+							<SpeedActionTarget>
+								<AbsoluteTargetSpeed value="10.0" />
+							</SpeedActionTarget>
+						</SpeedAction>
+					</LongitudinalAction>
+				</PrivateAction>
+                <PrivateAction>
                     <Routing>
-                        <FollowRoute>
+                        <AssignRouteAction>
                             <Route>
                                 <Waypoint>
                                     <Position>
-                                        <Road roadId="1" t="-1.0" />
+                                        <RoadPosition roadId="1" t="-1.0" />
                                     </Position>
                                 </Waypoint>
                                 <Waypoint>
                                     <Position>
-                                        <Road roadId="2" t="-1.0" />
+                                        <RoadPosition roadId="2" t="-1.0" />
                                     </Position>
                                 </Waypoint>
                             </Route>
-                        </FollowRoute>
+                        </AssignRouteAction>
                     </Routing>
-                </Action>
+                </PrivateAction>
 			</Private>
 			<Private object="ScenarioAgent">
-				<Action>
-					<Position>
-						<Lane roadId="1" s="50.0" laneId="-3" offset="0.0"/>
-					</Position>
-				</Action>
-				<Action>
-					<Longitudinal>
-						<Speed>
-							<Dynamics rate="0.0" shape="linear" />
-							<Target>
-								<Absolute value="10.0" />
-							</Target>
-						</Speed>
-					</Longitudinal>
-				</Action>
+				<PrivateAction>
+					<TeleportAction>
+						<Position>
+							<LanePosition roadId="1" s="50.0" laneId="-3" offset="0.0"/>
+						</Position>
+					</TeleportAction>
+				</PrivateAction>
+				<PrivateAction>
+					<LongitudinalAction>
+						<SpeedAction>
+							<SpeedActionDynamics rate="0.0" shape="linear" />
+							<SpeedActionTarget>
+								<AbsoluteTargetSpeed value="10.0" />
+							</SpeedActionTarget>
+						</SpeedAction>
+					</LongitudinalAction>
+				</PrivateAction>
 			</Private>
 		</Actions>
 	</Init>
@@ -252,26 +256,25 @@ Inside the (optional) <Story> tag all conditional interventions into the simulat
 When importing this tag its content is translated into EventDetectors and Manipulators.
 An EventDetector checks in every timestep if its condition is fullfilled.
 In this case it writes an event into the EventNetwork, which then triggers the associated Manipulator.
-The story consists of multiple acts, which itself can consist of multiple sequences.
-The grouping of sequences into acts currently has no effect in the simulator.
-A sequence must consist of exactly one <Actors> tag and one <Maneuver> tag.
+The story consists of multiple acts, which itself can consist of multiple maneuvergroups.
+The grouping of maneuvergroups into acts currently has no effect in the simulator.
+A maneuvergroups must consist of exactly one <Actors> tag and one <Maneuver> tag.
 The numberOfExecutions attribute states the maximum number of times that each maneuver will by triggered.
 If the numberOfExecutions is -1 then the maneuver can triggered an unlimited number of times.
 Multiple stories can be added.
-Currently the eventnames of maneuvers across multiple stories must be unique.
 
 Example
 ```xml
 	<Story name="MyStory">
 		<Act name="Act1">
-			<Sequence name="MySequence" numberOfExecutions="-1">
+			<ManeuverGroup name="MySequence" numberOfExecutions="-1">
 				<Actors>
 					...
 				</Actors>
 				<Maneuver name="MyManeuver">
 					...
 				</Maneuver>
-			</Sequence>
+			</ManeuverGroup>
 		</Act>
 	</Story>
 ```
@@ -279,8 +282,7 @@ Example
 \subsubsection scenario_storyboard_story_actors Actors
 
 The <Actors> tag defines the agents that are mainly affected by this sequence.
-These agents can either be defined directly by stating their name via <Entity name="entityName"/> or by a condition via <ByCondition actor="triggeringEntity"/>.
-Currently "triggeringEntity" is the only supported condition.
+These agents can either be defined directly by stating their name via <EntityRef entityRef="entityName"/>.
 
 \subsubsection scenario_storyboard_story_maneuver Maneuver
 
@@ -296,13 +298,13 @@ Example
 			<Action name="MyManipulator">
 				...
 			</Action>
-			<StartConditions>
+			<StartTrigger>
 				<ConditionGroup>
 					<Condition name="Conditional">
 						...
 					</Condition>
 				</ConditionGroup>
-			</StartConditions>
+			</StartTrigger>
 		</Event>
 	</Maneuver>
 ```
@@ -314,14 +316,14 @@ If all conditions are met the EventDetector writes an event into the EventNetwor
 OpenPASS supports five different kinds of condition.
 Conditions are either ByEntityConditions or ByValueConditions.
 
-\paragraph scenario_storyboard_story_maneuver_conditions_byEntity ByEntity Conditions
+\paragraph scenario_storyboard_story_maneuver_conditions_byEntity ByEntityConditions
 
-All ByEntity Conditions require triggering agents.
+All ByEntityConditions require triggering agents.
 Ego and Scenario agents can be specified as triggering agents in the TriggeringEntities section of the ByEntity-Condition.
 If no agents are specified in the TriggeringEntities section, all agents will be used as triggering agents.
 OpenScenario specifies that a rule be applied to the TriggeringEntities element; currently, only "any" is supported (indicating that any of the listed entities may satisfy the condition independent of the others).
 
-**RelativeLane** 
+**RelativeLanePosition** 
 
 This Condition evaluates specifically if an entity is within a relative lane position with regard to the specified object
 
@@ -338,11 +340,11 @@ Example
             <Entity name="Agent"/>
         </TriggeringEntities>
         <EntityCondition>
-            <ReachPosition tolerance="3.0">
+            <ReachPositionCondition tolerance="3.0">
                 <Position>
-                    <RelativeLane object="referenceEntity" dLane="-1" ds="-50.0"/>
+                    <RelativeLanePosition object="referenceEntity" dLane="-1" ds="-50.0"/>
                 </Position>
-            </ReachPosition>
+            </ReachPositionCondition>
         </EntityCondition>
     </ByEntity>
 </Condition>
@@ -366,11 +368,11 @@ Example
             <Entity name="Agent"/>
         </TriggeringEntities>
         <EntityCondition>
-            <ReachPosition tolerance="3.0">
+            <ReachPositionCondition tolerance="3.0">
                 <Position>
-                    <Road roadId="road1" s="50.0" t="0.0"/>
+                    <RoadPosition roadId="road1" s="50.0" t="0.0"/>
                 </Position>
-            </ReachPosition>
+            </ReachPositionCondition>
         </EntityCondition>
     </ByEntity>
 </Condition>
@@ -392,7 +394,7 @@ Example
             <Entity name="Agent"/>
         </TriggeringEntities>
         <EntityCondition>
-            <RelativeSpeed entity="referenceEntity" value="10.0" rule="greater_than"/>
+            <RelativeSpeedCondition entityRef="referenceEntity" value="10.0" rule="greater_than"/>
         </EntityCondition>
     </ByEntity>
 </Condition>
@@ -400,7 +402,7 @@ Example
 
 **TimeToCollision**
 
-The TimeToCollision Condition evaluates the Time To Collision (TTC) between the specified Triggering Entities and the specified reference Entity.
+The TimeToCollisionCondition evaluates the Time To Collision (TTC) between the specified Triggering Entities and the specified reference Entity.
 When the comparison of the calculated TTC to the specified TTC value using the provided rule is true, this Condition is satisfied.
 
 The TTC is determined by projecting the movement of the agents in timesteps of 0.1s and taking the first timestep, at which the bounding boxes intersect.
@@ -413,11 +415,11 @@ Example
 			<Entity name="Agent"/>
 		</TriggeringEntities>
 		<EntityCondition>
-			<TimeToCollision value="2.0" rule="less_than">
-				  <Target>
-					  <Entity name="referenceAgent"/>
-				  </Target>
-			  </TimeToCollision>
+			<TimeToCollisionCondition value="2.0" rule="less_than">
+				<TimeToCollisionConditionTarget>
+					<EntityRef entityRef="referenceAgent"/>
+				</TimeToCollisionConditionTarget>
+			 </TimeToCollisionCondition>
 		</EntityCondition>
 	  </ByEntity>
 </Condition>
@@ -425,7 +427,7 @@ Example
 
 **TimeHeadway**
 
-The TimeToCollision Condition evaluates the TimeHeadway (THW) between the specified Triggering Entities and the specified reference Entity.
+The TimeHeadwayCondition evaluates the TimeHeadway (THW) between the specified Triggering Entities and the specified reference Entity.
 When the comparison of the calculated THW to the specified THW value using the provided rule is true, this Condition is satisfied.
 
 The TTC is calculated by dividing the s distance of the agents by the velocity of the triggering agent.
@@ -439,15 +441,15 @@ Example
 			<Entity name="Agent"/>
 		</TriggeringEntities>
 		<EntityCondition>
-			<TimeHeadway value="2.0" rule="less_than" entity="referenceAgent" freespace="true"/>
+			<TimeHeadwayCondition value="2.0" rule="less_than" entityRef="referenceAgent" freespace="true"/>
 		</EntityCondition>
     </ByEntity>
 </Condition>
 ```
 
-\paragraph scenario_storyboard_story_maneuver_conditions_byValue ByValue Conditions
+\paragraph scenario_storyboard_story_maneuver_conditions_byValue ByValueConditions
 
-All ByValue Conditions trigger based on a specified value and are unrelated to any specific agent. 
+All ByValueConditions trigger based on a specified value and are unrelated to any specific agent. 
 
 **SimulationTime**
 Triggers at a specified time value, configured by the detector parameters in the [Scenario File](\ref io_input_scenario).
@@ -457,9 +459,9 @@ The rule is required and only "greater_than" is accepted as valid.
 Example
 ```xml
 <Condition name="Conditional">
-	<ByValue>
-		<SimulationTime value="5.0" rule="greater_than" />
-	</ByValue>
+	<ByValueCondition>
+		<SimulationTimeCondition value="5.0" rule="greater_than" />
+	</ByValueCondition>
 </Condition>
 ```
 
@@ -469,7 +471,7 @@ The actions define what happens if all conditions of the maneuver are fullfilled
 These act on the actors defined for this maneuver.
 Depending on the type of the action a different Manipulator is created, that becomes active if it the EventNetwork contains an event of the associated EventDetector.
 
-**Lane Change**
+**LaneChange**
 
 The LaneChangeManipulator writes an event to the EventNetwork that is read by the OpenScenarioActions module and converted into a trajectory that performs a lange change.
 The target lane be given either absolute or relative to a specific entity. The trajectory can either have a fixed length (in s) or a fixed time.
@@ -478,32 +480,32 @@ Currently, "sinusoidal" is the only type supported.
 Example with absolute target and fixed length
 ```xml
 <Action name="LaneChange">
-    <Private>
-        <Lateral>
-            <LaneChange>
-                <Dynamics distance="100.0" shape="sinusoidal"/>
-                <Target>
-                    <Absolute value="-1"/>
+    <PrivateAction>
+        <LateralAction>
+            <LaneChangeAction>
+                <LaneChangeActionDynamics distance="100.0" shape="sinusoidal"/>
+                <LaneChangeTarget>
+                    <AbsoluteTargetLane value="-1"/>
                 </Target>
-            </LaneChange>
-        </Lateral>
-    </Private>
+            </LaneChangeAction>
+        </LateralAction>
+    </PrivateAction>
 </Action>
 ```
 
 Example with relative target and fixed time
 ```xml
 <Action name="LaneChange">
-    <Private>
-        <Lateral>
-            <LaneChange>
-                <Dynamics time="2.0" shape="sinusoidal"/>
-                <Target>
-                    <Relative object="Ego" value="0"/>
-                </Target>
-            </LaneChange>
-        </Lateral>
-    </Private>
+    <PrivateAction>
+        <LateralAction>
+            <LaneChangeAction>
+                <LaneChangeActionDynamics time="2.0" shape="sinusoidal"/>
+                <LaneChangeTarget>
+                    <RelativeTargetLane entityRef="Ego" value="0"/>
+                </LaneChangeTarget>
+            </LaneChangeAction>
+        </LateralAction>
+    </PrivateAction>
 </Action>
 ```
 **Custom Lane Change**
@@ -521,9 +523,9 @@ The command consists of two parts:
 Example
 ```xml
 <Action name="CustomLaneChange">
-	<UserDefined>
-		<Command>SetCustomLaneChange -1</Command>
-	</UserDefined>
+	<UserDefinedAction>
+		<CustomCommandAction>SetCustomLaneChange -1</CustomCommandAction>
+	</UserDefinedAction>
 </Action>
 ```
 
@@ -531,15 +533,14 @@ Example
 
 The TrajectoryManipulator also an event to the EventNetwork which tells the Driver that he should a given trajectory.
 The trajectory can be defined either directly in the story or in a separate TrajectoryCatalog.
-The Longitudinal and Lateral tag are currently ignored.
 For the points (vertices) of the trajectory we support only World position (and ignore z, pitch and roll).
 
 Example
 ```xml
 <Action name="FollowTrajectory">
-    <Private>
-        <Routing>
-            <FollowTrajectory>
+    <PrivateAction>
+        <RoutingAction>
+            <FollowTrajectoryAction>
                 <Trajectory name="TrajectoryA" closed="false" domain="time">
                     <Vertex reference="0.0">
                         <Position>
@@ -558,13 +559,9 @@ Example
                         </Shape>
                     </Vertex>
                 </Trajectory>
-                <Longitudinal>
-                    <None/>
-                </Longitudinal>
-                <Lateral purpose="position"/>
-            </FollowTrajectory>
-        </Routing>
-    </Private>
+            </FollowTrajectoryAction>
+        </RoutingAction>
+    </PrivateAction>
 </Action>
 ```
 
@@ -592,11 +589,11 @@ The RemoveAgentsManipulator simply removes the specifed agent from the simulatio
 Example
 ```xml
 <Action name="RemoveAgent">
-	<Global>
-		<Entity name="">
-			<Delete/>
-		</Entity>
-	</Global>
+	<GlobalAction>
+		<EntityAction entityRef="">
+			<DeleteEntityAction/>
+		</EntityAction>
+	</GlobalAction>
 </Action>
 ```
 
@@ -607,9 +604,9 @@ The ComponentStateChangeManipulator influences the maximum reachable state of an
 Example
 ```xml
 <Action name="ComponentStateChange">
-	<UserDefined>
-		<Command>SetComponentState Dynamics_TrajectoryFollower Acting</Command>
-	</UserDefined>
+	<UserDefinedAction>
+		<CustomCommandAction>SetComponentState Dynamics_TrajectoryFollower Acting</CustomCommandAction>
+	</UserDefinedAction>
 </Action>
 ```
 
@@ -623,9 +620,9 @@ The GazeFollower influences the gaze behaviour of an agent. The command consists
 Example
 ```xml
 <Action name="GazeFollower">
-	<UserDefined>
-		<Command>SetGazeFollower Active GazeFollowerFileName.csv</Command>
-	</UserDefined>
+	<UserDefinedAction>
+		<CustomCommandAction>SetGazeFollower Active GazeFollowerFileName.csv</CustomCommandAction>
+	</UserDefinedAction>
 </Action>
 ```
 
@@ -638,13 +635,13 @@ Any other or additional conditions are not supported.
 Example:
 
 ```xml
-<EndConditions>
+<StopTrigger>
     <ConditionGroup>
         <Condition name="EndTime" rule="greater_than" edge="rising">
-            <ByValue>
-                <SimulationTime value="30.0" rule="greater_than" />
-            </ByValue>
+            <ByValueCondition>
+                <SimulationTimeCondition value="30.0" rule="greater_than" />
+            </ByValueCondition>
         </Condition>
     </ConditionGroup>
-</EndConditions>
+</StopTrigger>
 ```

@@ -19,15 +19,16 @@
 
 
 ComponentStateChangeManipulator::ComponentStateChangeManipulator(WorldInterface *world,
-                                std::shared_ptr<openScenario::UserDefinedCommandAction> action,
-                                SimulationSlave::EventNetworkInterface *eventNetwork,
-                                const CallbackInterface *callbacks):
+                                                                 SimulationSlave::EventNetworkInterface *eventNetwork,
+                                                                 const CallbackInterface *callbacks,
+                                                                 const openScenario::CustomCommandAction action,
+                                                                 const std::string &eventName) :
     ManipulatorCommonBase(world,
-                          action,
-                          eventNetwork,
-                          callbacks)
+                                              eventNetwork,
+                                              callbacks,
+                                              eventName)
 {
-    auto commandTokens = CommonHelper::TokenizeString(action->GetCommand(), ' ');
+    auto commandTokens = CommonHelper::TokenizeString(action.command, ' ');
     auto commandTokensSize = commandTokens.size();
 
     if(commandTokensSize < 3)

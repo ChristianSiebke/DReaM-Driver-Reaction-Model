@@ -1,5 +1,5 @@
 # /*********************************************************************
-# * Copyright (c) 2017, 2018, 2019 in-tech GmbH
+# * Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -99,13 +99,12 @@ SCENERYIMPORTER_TESTS = \
 SCENARIOIMPORTER_TESTS = \
     $$UNIT_UNDER_TEST/importer/scenario.cpp \
     $$UNIT_UNDER_TEST/importer/scenarioImporter.cpp \
+    $$UNIT_UNDER_TEST/importer/scenarioImporterHelper.cpp \
     $$UNIT_UNDER_TEST/importer/oscImporterCommon.cpp \
     \
     scenarioImporter_Tests.cpp
 
 MANIPULATORIMPORTER_TESTS = \
-    $$UNIT_UNDER_TEST/importer/manipulatorImporter.cpp \
-    \
     manipulatorImporter_Tests.cpp
 
 COMMANDLINERPARSER_TESTS = \

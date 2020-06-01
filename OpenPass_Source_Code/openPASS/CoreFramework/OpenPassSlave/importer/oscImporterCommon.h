@@ -11,6 +11,8 @@
 #pragma once
 
 #include <QDomDocument>
+#include <optional>
+
 #include "xmlParser.h"
 #include "CoreFramework/CoreShare/log.h"
 #include "Common/openScenarioDefinitions.h"
@@ -59,6 +61,23 @@ T ParseAttribute(const QDomElement& element, const char attributeName[], openSce
     }
 }
 
+//! Parse an optional XML attribute from a .xosc file, which is either given by value or by referencing a parameter declared before
+//!
+//! \param element              xml element
+//! \param attributeName        name of the attribute to parse
+//! \param parameters           parameters declared by the ParameterDeclarations element
+//! \param assignedParameters   if the element is from a referenced catalog, these are the parameters declared by the ParameterAssignments element
+template<typename T>
+std::optional<T> ParseOptionalAttribute(const QDomElement& element, const char attributeName[], openScenario::Parameters& parameters, const openScenario::Parameters& assignedParameters = {})
+{
+    if(SimulationCommon::HasAttribute(element, attributeName))
+    {
+        return ParseAttribute<T>(element, attributeName, parameters);
+    }
+
+    return std::nullopt;
+}
+
 //! Parse an XML attribute from a .xosc file, which is either given by value or by reference a parameter declared before.
 //! This variant is for attributes in catalog that may later be overruled by parameter assignments
 //!
@@ -66,7 +85,7 @@ T ParseAttribute(const QDomElement& element, const char attributeName[], openSce
 //! \param attributeName        name of the attribute to parse
 //! \param parameters           parameters declared by the ParameterDeclarations element
 template<typename T>
-openScenario::ParametrizedAttribute<T> ParseParametrizedAttribute(const QDomElement& element, const char attributeName[], const openScenario::Parameters& defaultParameters)
+openScenario::ParameterizedAttribute<T> ParseParametrizedAttribute(const QDomElement& element, const char attributeName[], const openScenario::Parameters& defaultParameters)
 {
     std::string valueString;
     ThrowIfFalse(SimulationCommon::ParseAttribute(element, attributeName, valueString), element,

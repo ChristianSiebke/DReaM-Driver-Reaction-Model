@@ -16,12 +16,14 @@
 #include "importerLoggingHelper.h"
 #include "oscImporterCommon.h"
 
+namespace RULE = openpass::importer::xml::openScenario::rule;
+
 namespace Importer
 {
 
-const std::map<std::string, openScenario::Rule> ruleConversionMap = {{"greater_than", openScenario::Rule::GreaterThan},
-                                                                     {"less_than", openScenario::Rule::LessThan},
-                                                                     {"equal_to", openScenario::Rule::EqualTo}};
+const std::map<std::string, openScenario::Rule> ruleConversionMap = {{RULE::greaterThan, openScenario::Rule::GreaterThan},
+                                                                     {RULE::lessThan, openScenario::Rule::LessThan},
+                                                                     {RULE::equalTo, openScenario::Rule::EqualTo}};
 
 class EventDetectorImporter
 {
@@ -68,8 +70,7 @@ private:
      *
      * \param[in]   conditionElement   The DOM root of the condition element
      * \param[in]   entities           Objects from 'Entities' tag
-     * \param[out]  scenario           The relevant event detector data is imported into this scenario
-     * \param[in]   seqName            Name of the containing sequence
+     * \param[in]   parameters         Declared parameters
      */
     static openScenario::Condition ImportConditionElement(QDomElement& conditionElement,
                                                           const std::vector<ScenarioEntity>& entities,
@@ -80,11 +81,22 @@ private:
      *
      * \param[in]   byEntityElement   The DOM root of the by-entity element
      * \param[in]   entities          Objects from 'Entities' tag
-     * \param[out]  eventDetectorParameters   Triggering entity names are stored here
+     * \param[in]   parameters         Declared parameters
      */
     static openScenario::Condition ImportByEntityElement(QDomElement byEntityElement,
                                                          const std::vector<ScenarioEntity>& entities,
                                                          openScenario::Parameters& parameters);
+
+    /*!
+     * \brief Imports a EntityCondition element of a OpenSCENARIO storyboard DOM
+     *
+     * \param[in]   byEntityCondition   The DOM root of the byEntityCondition element
+     * \param[in]   triggeringEntities  Objects from 'Entities' tag
+     *
+     * return Condition
+     */
+    static openScenario::Condition ImportEntityCondition(QDomElement byEntityCondition,
+                                                         std::vector<std::string> triggeringEntities);
 
     /*!
      * ------------------------------------------------------------------------
@@ -93,8 +105,8 @@ private:
      *
      * \param[in] byValueElement the ByValue element to parse for condition
      *            details.
-     * \param[out] conditionParameters If successfully parsed, the ByValue
-     *             element's condition details are imported into this object.
+     * \param[in] parameters   Declared parameters
+     * \return      openScenario Condition
      * ------------------------------------------------------------------------
      */
     static openScenario::Condition ImportConditionByValueElement(QDomElement& byValueElement, openScenario::Parameters& parameters);

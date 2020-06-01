@@ -28,7 +28,7 @@
 //! \param attribute                attribute is defined in the catalog
 //! \param parameterAssignments     parameter assignments in the catalog reference
 template <typename T>
-T GetAttribute(openScenario::ParametrizedAttribute<T> attribute, const openScenario::Parameters& parameterAssignments)
+T GetAttribute(openScenario::ParameterizedAttribute<T> attribute, const openScenario::Parameters& parameterAssignments)
 {
     const auto& assignedParameter = parameterAssignments.find(attribute.name);
     if (assignedParameter != parameterAssignments.cend())
@@ -69,11 +69,11 @@ T GetAttribute(openScenario::ParametrizedAttribute<T> attribute, const openScena
  */
 struct VehicleAxle
 {
-    openScenario::ParametrizedAttribute<double> maxSteering;     //!< Maximum steering angle
-    openScenario::ParametrizedAttribute<double> wheelDiameter;   //!< Diameter of the wheels
-    openScenario::ParametrizedAttribute<double> trackWidth;      //!< Trackwidth of the axle
-    openScenario::ParametrizedAttribute<double> positionX;       //!< Longitudinal position offset (measured from reference point)
-    openScenario::ParametrizedAttribute<double> positionZ;       //!< Vertical position offset (measured from reference point)
+    openScenario::ParameterizedAttribute<double> maxSteering;     //!< Maximum steering angle
+    openScenario::ParameterizedAttribute<double> wheelDiameter;   //!< Diameter of the wheels
+    openScenario::ParameterizedAttribute<double> trackWidth;      //!< Trackwidth of the axle
+    openScenario::ParameterizedAttribute<double> positionX;       //!< Longitudinal position offset (measured from reference point)
+    openScenario::ParameterizedAttribute<double> positionZ;       //!< Vertical position offset (measured from reference point)
 };
 
 //! Contains the VehicleModelParameters as defined in the VehicleModelCatalog.
@@ -81,30 +81,30 @@ struct VehicleAxle
 struct ParametrizedVehicleModelParameters
 {
     AgentVehicleType vehicleType = AgentVehicleType::Undefined;
-    openScenario::ParametrizedAttribute<double> width = -999.0;
-    openScenario::ParametrizedAttribute<double> length = -999.0;
-    openScenario::ParametrizedAttribute<double> height = -999.0;
+    openScenario::ParameterizedAttribute<double> width = -999.0;
+    openScenario::ParameterizedAttribute<double> length = -999.0;
+    openScenario::ParameterizedAttribute<double> height = -999.0;
     VehicleAxle frontAxle;
     VehicleAxle rearAxle;
-    openScenario::ParametrizedAttribute<double> distanceReferencePointToLeadingEdge = -999.0;
-    openScenario::ParametrizedAttribute<double> maxVelocity = -999.0;
-    openScenario::ParametrizedAttribute<double> weight = -999.0;
-    openScenario::ParametrizedAttribute<double> heightCOG = -999.0;
-    openScenario::ParametrizedAttribute<double> momentInertiaRoll = -999.0;
-    openScenario::ParametrizedAttribute<double> momentInertiaPitch = -999.0;
-    openScenario::ParametrizedAttribute<double> momentInertiaYaw = -999.0;
-    openScenario::ParametrizedAttribute<double> frontSurface = -999.0;
-    openScenario::ParametrizedAttribute<double> airDragCoefficient = -999.0;
-    openScenario::ParametrizedAttribute<double> minimumEngineSpeed = -999.0;
-    openScenario::ParametrizedAttribute<double> maximumEngineSpeed = -999.0;
-    openScenario::ParametrizedAttribute<double> minimumEngineTorque = -999.0;
-    openScenario::ParametrizedAttribute<double> maximumEngineTorque = -999.0;
-    openScenario::ParametrizedAttribute<int> numberOfGears = -999;
-    std::vector<openScenario::ParametrizedAttribute<double>> gearRatios;
-    openScenario::ParametrizedAttribute<double> axleRatio = -999.0;
-    openScenario::ParametrizedAttribute<double> decelerationFromPowertrainDrag = -999.0;
-    openScenario::ParametrizedAttribute<double> steeringRatio = -999.0;
-    openScenario::ParametrizedAttribute<double> frictionCoeff = -999.0;
+    openScenario::ParameterizedAttribute<double> distanceReferencePointToLeadingEdge = -999.0;
+    openScenario::ParameterizedAttribute<double> maxVelocity = -999.0;
+    openScenario::ParameterizedAttribute<double> weight = -999.0;
+    openScenario::ParameterizedAttribute<double> heightCOG = -999.0;
+    openScenario::ParameterizedAttribute<double> momentInertiaRoll = -999.0;
+    openScenario::ParameterizedAttribute<double> momentInertiaPitch = -999.0;
+    openScenario::ParameterizedAttribute<double> momentInertiaYaw = -999.0;
+    openScenario::ParameterizedAttribute<double> frontSurface = -999.0;
+    openScenario::ParameterizedAttribute<double> airDragCoefficient = -999.0;
+    openScenario::ParameterizedAttribute<double> minimumEngineSpeed = -999.0;
+    openScenario::ParameterizedAttribute<double> maximumEngineSpeed = -999.0;
+    openScenario::ParameterizedAttribute<double> minimumEngineTorque = -999.0;
+    openScenario::ParameterizedAttribute<double> maximumEngineTorque = -999.0;
+    openScenario::ParameterizedAttribute<int> numberOfGears = -999;
+    std::vector<openScenario::ParameterizedAttribute<double>> gearRatios;
+    openScenario::ParameterizedAttribute<double> axleRatio = -999.0;
+    openScenario::ParameterizedAttribute<double> decelerationFromPowertrainDrag = -999.0;
+    openScenario::ParameterizedAttribute<double> steeringRatio = -999.0;
+    openScenario::ParameterizedAttribute<double> frictionCoeff = -999.0;
 
     VehicleModelParameters Get(const openScenario::Parameters& assignedParameters) const
     {

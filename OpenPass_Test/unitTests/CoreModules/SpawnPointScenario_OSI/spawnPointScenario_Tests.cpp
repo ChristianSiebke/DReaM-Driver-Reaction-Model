@@ -67,7 +67,7 @@ TEST(SpawnPointScenario, Trigger_SpawnsEgoAgentAccordingToScenarioWorldPosition)
     constexpr double velocity = 25;
     constexpr double acceleration = 25;
 
-    openScenario::WorldPosition worldPosition{x, y, heading};
+    openScenario::WorldPosition worldPosition{x, y, std::nullopt, heading, std::nullopt, std::nullopt};
 
     ScenarioEntity entity;
     entity.name = entityName;
@@ -218,7 +218,7 @@ TEST(SpawnPointScenario, Trigger_SpawnsScenarioAgentAccordingToScenarioWorldPosi
     constexpr double velocity = 25;
     constexpr double acceleration = 25;
 
-    openScenario::WorldPosition worldPosition{x, y, heading};
+    openScenario::WorldPosition worldPosition{x, y, std::nullopt, heading, std::nullopt, std::nullopt};
 
     ScenarioEntity entity;
     entity.name = entityName;

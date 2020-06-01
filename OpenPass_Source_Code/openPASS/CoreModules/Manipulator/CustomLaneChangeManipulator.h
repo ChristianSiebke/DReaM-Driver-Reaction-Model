@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2020 BMW AG
 *
 * This program and the accompanying materials are made
@@ -37,9 +37,10 @@ class CustomLaneChangeManipulator : public ManipulatorCommonBase
 {
 public:
     CustomLaneChangeManipulator(WorldInterface *world,
-                          std::shared_ptr<openScenario::UserDefinedCommandAction> action,
-                          SimulationSlave::EventNetworkInterface *eventNetwork,
-                          const CallbackInterface *callbacks);
+                                SimulationSlave::EventNetworkInterface *eventNetwork,
+                                const CallbackInterface *callbacks,
+                                const openScenario::CustomCommandAction action,
+                                const std::string &eventName);
 
     /*!
     * \brief Triggers the functionality of this class

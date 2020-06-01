@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <OpenSCENARIO>
-  <FileHeader revMajor="1" revMinor="0" date="2020-06-22T15:00:00" description="openPASS default scenario" author="in-tech GmbH"/>
+  <FileHeader revMajor="1" revMinor="0" date="2020-06-22T15:05:00" description="Integration test failing scenario with undeclared actor entity" author="in-tech GmbH"/>
   <ParameterDeclarations>
     <ParameterDeclaration name="OP_OSC_SchemaVersion" parameterType="string" value="0.4.0"/>
   </ParameterDeclarations>
@@ -35,36 +35,20 @@
     <SceneGraphFile filepath=""/>
   </RoadNetwork>
   <Entities>
-    <ScenarioObject name="Ego">
-      <CatalogReference catalogName="ProfilesCatalog.xml" entryName="MiddleClassCarAgent"/>
+    <ScenarioObject name="DefinedEntity">
+      <CatalogReference catalogName="TheCatalog" entryName="TheEntry"/>
     </ScenarioObject>
-    <EntitySelection name="ScenarioAgents">
-      <Members/>
-    </EntitySelection>
   </Entities>
   <Storyboard>
-    <Init>
-      <Actions>
-        <Private entityRef="Ego">
-          <PrivateAction>
-            <TeleportAction>
-              <Position>
-                <LanePosition roadId="1" laneId="-1" offset="0.0" s="0.0"/>
-              </Position>
-            </TeleportAction>
-          </PrivateAction>
-        </Private>
-      </Actions>
-    </Init>
-    <Story/>
-    <StopTrigger>
-      <ConditionGroup>
-        <Condition name="EndTime" delay="0" conditionEdge="rising">
-          <ByValueCondition>
-            <SimulationTimeCondition value="30.0" rule="greaterThan"/>
-          </ByValueCondition>
-        </Condition>
-      </ConditionGroup>
-    </StopTrigger>
+    <Init/>
+    <Story name="TheStory">
+      <Act name="TheAct">
+        <ManeuverGroup maximumExecutionCount="1" name="TheSequence">
+          <Actors selectTriggeringEntities="false">
+            <EntityRef entityRef="UndefinedEntity"/>
+          </Actors>
+        </ManeuverGroup>
+      </Act>
+    </Story>
   </Storyboard>
 </OpenSCENARIO>

@@ -113,60 +113,6 @@
         </Private>
       </Actions>
     </Init>
-    <Story name="Story1">
-      <Act name="Act1">
-        <ManeuverGroup maximumExecutionCount="1" name="StateChangeSequence1">
-          <Actors selectTriggeringEntities="false">
-            <EntityRef entityRef="Ego"/>
-          </Actors>
-          <Maneuver name="StateChangeManeuver1">
-            <Event name="StateChangeEvent1" priority="overwrite">
-              <Action name="ComponentStateChangeManipulator1">
-                <UserDefinedAction>
-                  <CustomCommandAction>SetComponentState DynamicsInterruptor Acting</CustomCommandAction>
-                </UserDefinedAction>
-              </Action>
-              <StartTrigger>
-                <ConditionGroup>
-                  <Condition name="Conditional">
-                    <ByValueCondition>
-                      <SimulationTimeCondition value="0.9" rule="greaterThan"/>
-                    </ByValueCondition>
-                  </Condition>
-                </ConditionGroup>
-              </StartTrigger>
-            </Event>
-          </Maneuver>
-        </ManeuverGroup>
-      </Act>
-    </Story>
-    <Story name="Story2">
-      <Act name="Act2">
-        <ManeuverGroup maximumExecutionCount="1" name="StateChangeSequence2">
-          <Actors selectTriggeringEntities="false">
-            <EntityRef entityRef="Scenery1"/>
-          </Actors>
-          <Maneuver name="StateChangeManeuver2">
-            <Event name="StateChangeEvent2" priority="overwrite">
-              <Action name="ComponentStateChangeManipulator2">
-                <UserDefinedAction>
-                  <CustomCommandAction>SetComponentState DynamicsInterruptor Acting</CustomCommandAction>
-                </UserDefinedAction>
-              </Action>
-              <StartTrigger>
-                <ConditionGroup>
-                  <Condition name="Conditional">
-                    <ByValueCondition>
-                      <SimulationTimeCondition value="2.0" rule="greaterThan"/>
-                    </ByValueCondition>
-                  </Condition>
-                </ConditionGroup>
-              </StartTrigger>
-            </Event>
-          </Maneuver>
-        </ManeuverGroup>
-      </Act>
-    </Story>
     <StopTrigger>
       <ConditionGroup>
         <Condition name="EndTime" delay="0" conditionEdge="rising">

@@ -20,7 +20,6 @@
 #pragma once
 
 #include "ManipulatorCommonBase.h"
-#include "Interfaces/scenarioActionInterface.h"
 #include "Common/openScenarioDefinitions.h"
 
 //-----------------------------------------------------------------------------
@@ -36,9 +35,10 @@ class GazeFollowerManipulator : public ManipulatorCommonBase
 {
 public:
     GazeFollowerManipulator(WorldInterface *world,
-                            std::shared_ptr<openScenario::UserDefinedCommandAction> action,
                             SimulationSlave::EventNetworkInterface *eventNetwork,
-                            const CallbackInterface *callbacks);
+                            const CallbackInterface *callbacks,
+                            const openScenario::CustomCommandAction action,
+                            const std::string &eventName);
 
     /*!
     * \brief Triggers the functionality of this class

@@ -109,56 +109,62 @@ std::vector<const AgentInterface*> RelativeSpeedCondition::IsMet(WorldInterface 
     return conditionMetAgents;
 }
 
-std::vector<const AgentInterface*> ReachPositionRoadCondition::IsMet(WorldInterface * const world) const
+std::vector<const AgentInterface*> ReachPositionCondition::IsMet(WorldInterface * const world) const
 {
     std::vector<const AgentInterface*> conditionMetAgents{};
-    for (const auto agent : GetTriggeringAgents(world))
-    {
-        const auto& roadIds = agent->GetRoads(MeasurementPoint::Reference);
 
-        if (std::find(roadIds.cbegin(), roadIds.cend(), targetRoadId) != roadIds.end())
+    if (std::holds_alternative<openScenario::RoadPosition>(position))
+    {
+        const auto roadPosition = std::get<openScenario::RoadPosition>(position);
+
+        for (const auto agent : GetTriggeringAgents(world))
         {
-            const auto sCoordinate = agent->GetObjectPosition().referencePoint.at(targetRoadId).roadPosition.s;
-
-            if (std::abs(targetSCoordinate - sCoordinate) <= tolerance)
+            const auto& roadIds = agent->GetRoads(MeasurementPoint::Reference);
+            if (std::find(roadIds.cbegin(), roadIds.cend(), roadPosition.roadId) != roadIds.end())
             {
-                conditionMetAgents.emplace_back(agent);
-            }
-        }
-    }
+                const auto sCoordinate = agent->GetObjectPosition().referencePoint.at(roadPosition.roadId).roadPosition.s;
 
-    return conditionMetAgents;
-}
-
-std::vector<const AgentInterface*> RelativeLaneCondition::IsMet(WorldInterface * const world) const
-{
-    const auto referenceAgent = world->GetAgentByName(referenceEntityName);
-    if (!referenceAgent)
-    {
-        throw std::runtime_error("Reference Entity '" + referenceEntityName + "' does not exist for RelativeLane Condition");
-    }
-
-    std::vector<const AgentInterface*> conditionMetAgents{};
-    for (const auto agent : GetTriggeringAgents(world))
-    {
-        for (const auto& roadId : agent->GetRoads(MeasurementPoint::Reference))
-        {
-            const auto& referenceAgentRoads = referenceAgent->GetRoads(MeasurementPoint::Reference);
-            if (std::find(referenceAgentRoads.cbegin(), referenceAgentRoads.cend(), roadId) != referenceAgentRoads.cend()
-                && agent->GetObjectPosition().referencePoint.at(roadId).laneId == referenceAgent->GetObjectPosition().referencePoint.at(roadId).laneId + deltaLane)
-            {
-                const auto agentS = agent->GetObjectPosition().referencePoint.at(roadId).roadPosition.s;
-                const auto referenceS = referenceAgent->GetObjectPosition().referencePoint.at(roadId).roadPosition.s + deltaS;
-
-                if (std::abs(referenceS - agentS) <= tolerance)
+                if (std::abs(roadPosition.s - sCoordinate) <= tolerance)
                 {
-                    conditionMetAgents.emplace_back(agent);
+                   conditionMetAgents.emplace_back(agent);
                 }
             }
         }
     }
+    else if (std::holds_alternative<openScenario::RelativeLanePosition>(position))
+    {
+        const auto relativeLanePosition = std::get<openScenario::RelativeLanePosition>(position);
+        const auto referenceAgent = world->GetAgentByName(relativeLanePosition.entityRef);
+        if (!referenceAgent)
+        {
+            throw std::runtime_error("Reference Entity '" + relativeLanePosition.entityRef + "' does not exist for RelativeLane Condition");
+        }
+
+        for (const auto agent : GetTriggeringAgents(world))
+        {
+            for (const auto& roadId : agent->GetRoads(MeasurementPoint::Reference))
+            {
+                const auto& referenceAgentRoads = referenceAgent->GetRoads(MeasurementPoint::Reference);
+                if (std::find(referenceAgentRoads.cbegin(), referenceAgentRoads.cend(), roadId) != referenceAgentRoads.cend()
+                        && agent->GetObjectPosition().referencePoint.at(roadId).laneId == referenceAgent->GetObjectPosition().referencePoint.at(roadId).laneId + relativeLanePosition.dLane)
+                {
+                    const auto agentS = agent->GetObjectPosition().referencePoint.at(roadId).roadPosition.s;
+                    const auto referenceS = referenceAgent->GetObjectPosition().referencePoint.at(roadId).roadPosition.s + relativeLanePosition.ds;
+                    if (std::abs(referenceS - agentS) <= tolerance)
+                    {
+                    conditionMetAgents.emplace_back(agent);
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        throw std::runtime_error("Position type not supported by ReachPositionCondition.");
+    }
 
     return conditionMetAgents;
+
 }
 
 // OpenScenario ByValue Conditions
@@ -178,8 +184,6 @@ TimeToCollisionCondition::~TimeToCollisionCondition(){}
 TimeHeadwayCondition::~TimeHeadwayCondition(){}
 ReachPositionCondition::~ReachPositionCondition(){}
 RelativeSpeedCondition::~RelativeSpeedCondition(){}
-ReachPositionRoadCondition::~ReachPositionRoadCondition(){}
-RelativeLaneCondition::~RelativeLaneCondition(){}
 ByValueCondition::~ByValueCondition(){}
 SimulationTimeCondition::~SimulationTimeCondition(){}
 

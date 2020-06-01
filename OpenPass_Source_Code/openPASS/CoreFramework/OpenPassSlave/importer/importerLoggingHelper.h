@@ -12,78 +12,75 @@
 
 #include "log.h"
 
+namespace openpass::importer::xml::openScenario::rule
+{
+    constexpr char greaterThan[] {"greaterThan"};
+    constexpr char lessThan[] {"lessThan"};
+    constexpr char equalTo[] {"equalTo"};
+}
+
+namespace openpass::importer::xml::openScenario::dynamicsShape
+{
+    constexpr char linear[] {"linear"};
+}
+
+namespace openpass::importer::xml::openScenario::dynamicsDimension
+{
+    constexpr char rate[] {"rate"};
+}
+
 namespace openpass::importer::xml::eventDetectorImporter::tag
 {
-    constexpr char byEntity[] {"ByEntity"};
-    constexpr char byValue[] {"ByValue"};
+    constexpr char byEntityCondition[] {"ByEntityCondition"};
+    constexpr char byValueCondition[] {"ByValueCondition"};
     constexpr char condition[] {"Condition"};
     constexpr char conditionGroup[] {"ConditionGroup"};
-    constexpr char entity[] {"Entity"};
+    constexpr char entityRef[] {"EntityRef"};
     constexpr char entityCondition[] {"EntityCondition"};
     constexpr char position[] {"Position"};
-    constexpr char relativeLane[] {"RelativeLane"};
-    constexpr char relativeSpeed[] {"RelativeSpeed"};
-    constexpr char road[] {"Road"};
-    constexpr char simulationTime[] {"SimulationTime"};
-    constexpr char startConditions[] {"StartConditions"};
-    constexpr char target[] {"Target"};
-    constexpr char timeHeadway[] {"TimeHeadway"};
-    constexpr char timeToCollision[] {"TimeToCollision"};
+    constexpr char reachPositionCondition[] {"ReachPositionCondition"};
+    constexpr char relativeLanePosition[] {"RelativeLanePosition"};
+    constexpr char relativeSpeedCondition[] {"RelativeSpeedCondition"};
+    constexpr char roadPosition[] {"RoadPosition"};
+    constexpr char simulationTimeCondition[] {"SimulationTimeCondition"};
+    constexpr char startTrigger[] {"StartTrigger"};
+    constexpr char timeToCollisionConditionTarget[] {"TimeToCollisionConditionTarget"};
+    constexpr char timeHeadwayCondition[] {"TimeHeadwayCondition"};
+    constexpr char timeToCollisionCondition[] {"TimeToCollisionCondition"};
     constexpr char triggeringEntities[] {"TriggeringEntities"};
 }
 
 namespace openpass::importer::xml::eventDetectorImporter::attribute
 {
     constexpr char alongRoute[] {"alongRoute"};
-    constexpr char dLane[] {"dLane"};
-    constexpr char ds[] {"ds"};
-    constexpr char entity[] {"entity"};
+    constexpr char entityRef[] {"entityRef"};
     constexpr char freespace[] {"freespace"};
     constexpr char name[] {"name"};
-    constexpr char object[] {"object"};
-    constexpr char roadId[] {"roadId"};
     constexpr char rule[] {"rule"};
-    constexpr char s[] {"s"};
     constexpr char tolerance[] {"tolerance"};
     constexpr char value[] {"value"};
 }
 
 namespace openpass::importer::xml::manipulatorImporter::tag
 {
-    constexpr char absolute[] {"Absolute"};
-    constexpr char action[] {"Action"};
-    constexpr char add[] {"Add"};
-    constexpr char catalog[] {"Catalog"};
+    constexpr char addEntityAction[] {"AddEntityAction"};
     constexpr char catalogReference[] {"CatalogReference"};
-    constexpr char command[] {"Command"};
-    constexpr char Delete[] {"Delete"};
-    constexpr char dynamics[] {"Dynamics"};
-    constexpr char entity[] {"Entity"};
-    constexpr char followTrajectory[] {"FollowTrajectory"};
-    constexpr char global[] {"Global"};
-    constexpr char userDefined[] {"UserDefined"};
-    constexpr char laneChange[] {"LaneChange"};
-    constexpr char lateral[] {"Lateral"};
     constexpr char position[] {"Position"};
-    constexpr char Private[] {"Private"};
-    constexpr char relative[] {"Relative"};
-    constexpr char routing[] {"Routing"};
-    constexpr char target[] {"Target"};
-    constexpr char trajectory[] {"Trajectory"};
-    constexpr char vertex[] {"Vertex"};
-    constexpr char world[] {"World"};
+    constexpr char routingAction[] {"RoutingAction"};
+    constexpr char worldPosition[] {"WorldPosition"};
 }
 
 namespace openpass::importer::xml::manipulatorImporter::attribute
 {
     constexpr char catalogName[] {"catalogName"};
     constexpr char distance[] {"distance"};
+    constexpr char dynamicsDimension[] {"dynamicsDimension"};
+    constexpr char entityRef[] {"entityRef"};
     constexpr char entryName[] {"entryName"};
     constexpr char h[] {"h"};
     constexpr char name[] {"name"};
     constexpr char object[] {"object"};
-    constexpr char reference[] {"reference"};
-    constexpr char shape[] {"shape"};
+    constexpr char dynamicsShape[] {"dynamicsShape"};
     constexpr char time[] {"time"};
     constexpr char value[] {"value"};
     constexpr char x[] {"x"};
@@ -168,82 +165,114 @@ namespace openpass::importer::xml::profilesImporter::attribute
 
 namespace openpass::importer::xml::scenarioImporter::tag
 {
-    constexpr char absolute[] {"Absolute"};
+    constexpr char absoluteTargetLane[] {"AbsoluteTargetLane"};
+    constexpr char absoluteTargetSpeed[] {"AbsoluteTargetSpeed"};
     constexpr char act[] {"Act"};
     constexpr char action[] {"Action"};
+    constexpr char addEntityAction[] {"AddEntityAction"};
+    constexpr char privateAction[] {"PrivateAction"};
     constexpr char actions[] {"Actions"};
     constexpr char actors[] {"Actors"};
-    constexpr char byCondition[] {"ByCondition"};
-    constexpr char byEntity[] {"ByEntity"};
-    constexpr char byValue[] {"ByValue"};
-    constexpr char catalogs[] {"Catalogs"};
+    constexpr char byValueCondition[] {"ByValueCondition"};
+    constexpr char catalog[] {"Catalog"};
+    constexpr char catalogLocations[] {"CatalogLocations"};
     constexpr char catalogReference[] {"CatalogReference"};
     constexpr char condition[] {"Condition"};
     constexpr char conditionGroup[] {"ConditionGroup"};
+    constexpr char customCommandAction[] {"CustomCommandAction"};
+    constexpr char deleteEntityAction[] {"DeleteEntityAction"};
     constexpr char directory[] {"Directory"};
-    constexpr char dynamics[] {"Dynamics"};
-    constexpr char endConditions[] {"EndConditions"};
+    constexpr char followTrajectoryAction[] {"FollowTrajectoryAction"};
+    constexpr char speedActionDynamics[] {"SpeedActionDynamics"};
     constexpr char entities[] {"Entities"};
-    constexpr char entity[] {"Entity"};
+    constexpr char entityAction[] {"EntityAction"};
+    constexpr char entityRef[] {"EntityRef"};
     constexpr char event[] {"Event"};
-    constexpr char followRoute[] {"FollowRoute"};
+    constexpr char assignRouteAction[] {"AssignRouteAction"};
+    constexpr char globalAction [] {"GlobalAction"};
     constexpr char init[] {"Init"};
-    constexpr char lane[] {"Lane"};
-    constexpr char logics[] {"Logics"};
-    constexpr char longitudinal[] {"Longitudinal"};
+    constexpr char laneChangeAction[] {"LaneChangeAction"};
+    constexpr char laneChangeActionDynamics[] {"LaneChangeActionDynamics"};
+    constexpr char laneChangeTarget[] {"LaneChangeTarget"};
+    constexpr char lanePosition[] {"LanePosition"};
+    constexpr char lateralAction[] {"LateralAction"};
+    constexpr char logicFile[] {"LogicFile"};
+    constexpr char longitudinalAction[] {"LongitudinalAction"};
     constexpr char maneuver[] {"Maneuver"};
+    constexpr char maneuverGroup[] {"ManeuverGroup"};
     constexpr char members[] {"Members"};
-    constexpr char object[] {"Object"};
+    constexpr char scenarioObject[] {"ScenarioObject"};
     constexpr char orientation[] {"Orientation"};
-    constexpr char parameter[] {"Parameter"};
     constexpr char parameterAssignment[] {"ParameterAssignment"};
     constexpr char parameterAssignments[] {"ParameterAssignments"};
     constexpr char parameterDeclaration[] {"ParameterDeclaration"};
+    constexpr char parameterDeclarations[] {"ParameterDeclarations"};
+    constexpr char pedestrianCatalog[] {"PedestrianCatalog"};
+    constexpr char polyline[] {"Polyline"};
     constexpr char position[] {"Position"};
     constexpr char Private[] {"Private"};
-    constexpr char road[] {"Road"};
+    constexpr char relativeLanePosition[] {"RelativeLanePosition"};
+    constexpr char relativeTargetLane[] {"RelativeTargetLane"};
+    constexpr char roadPosition[] {"RoadPosition"};
     constexpr char roadNetwork[] {"RoadNetwork"};
     constexpr char route[] {"Route"};
-    constexpr char routing[] {"Routing"};
-    constexpr char selection[] {"Selection"};
-    constexpr char sequence[] {"Sequence"};
-    constexpr char speed[] {"Speed"};
+    constexpr char routingAction[] {"RoutingAction"};
+    constexpr char entitySelection[] {"EntitySelection"};
+    constexpr char shape[] {"Shape"};
+    constexpr char speedAction[] {"SpeedAction"};
     constexpr char stochastics[] {"Stochastics"};
+    constexpr char stopTrigger[] {"StopTrigger"};
     constexpr char story[] {"Story"};
     constexpr char storyboard[] {"Storyboard"};
-    constexpr char target[] {"Target"};
+    constexpr char speedActionTarget[] {"SpeedActionTarget"};
+    constexpr char trajectory[] {"Trajectory"};
+    constexpr char trajectoryCatalog[] {"TrajectoryCatalog"};
+    constexpr char teleportAction[] {"TeleportAction"};
+    constexpr char userDefinedAction[] {"UserDefinedAction"};
+    constexpr char vehicleCatalog[] {"VehicleCatalog"};
+    constexpr char vertex[] {"Vertex"};
     constexpr char waypoint[] {"Waypoint"};
-    constexpr char world[] {"World"};
+    constexpr char worldPosition[] {"WorldPosition"};
 }
 
 namespace openpass::importer::xml::scenarioImporter::attribute
 {
-    constexpr char actor[] {"actor"};
     constexpr char catalogName[] {"catalogName"};
     constexpr char delay[] {"delay"};
-    constexpr char edge[] {"edge"};
+    constexpr char dLane[] {"dLane"};
+    constexpr char ds[] {"ds"};
+    constexpr char conditionEdge[] {"conditionEdge"};
+    constexpr char dynamicsDimension[] {"dynamicsDimension"};
+    constexpr char dynamicsShape[] {"dynamicsShape"};
+    constexpr char entityRef[] {"entityRef"};
     constexpr char entryName[] {"entryName"};
-    constexpr char filePath[] {"filepath"};
+    constexpr char filepath[] {"filepath"};
     constexpr char h[] {"h"};
     constexpr char laneId[] {"laneId"};
     constexpr char lowerBound[] {"lowerBound"};
+    constexpr char maximumExecutionCount[] {"maximumExecutionCount"};
     constexpr char name[] {"name"};
-    constexpr char numberOfExecutions[] {"numberOfExecutions"};
-    constexpr char object[] {"object"};
     constexpr char offset[] {"offset"};
+    constexpr char p[] {"p"};
     constexpr char parameterRef[] {"parameterRef"};
+    constexpr char parameterType[] {"parameterType"};
     constexpr char path[] {"path"};
+    constexpr char r[] {"r"};
     constexpr char rate[] {"rate"};
+    constexpr char reference[] {"reference"};
     constexpr char roadId[] {"roadId"};
     constexpr char rule[] {"rule"};
     constexpr char s[] {"s"};
+    constexpr char selectTriggeringEntities[] {"selectTriggeringEntities"};
     constexpr char stdDeviation[] {"stdDeviation"};
     constexpr char t[] {"t"};
+    constexpr char time[] {"time"};
     constexpr char type[] {"type"};
     constexpr char upperBound[] {"upperBound"};
     constexpr char value[] {"value"};
     constexpr char x[] {"x"};
     constexpr char y[] {"y"};
+    constexpr char z[] {"z"};
 }
 
 namespace openpass::importer::xml::sceneryImporter::tag
@@ -422,26 +451,30 @@ namespace openpass::importer::xml::vehicleModelsImporter::tag
     constexpr char boundingBox[] {"BoundingBox"};
     constexpr char catalog[] {"Catalog"};
     constexpr char center[] {"Center"};
-    constexpr char dimension[] {"Dimension"};
-    constexpr char front[] {"Front"};
-    constexpr char parameterDeclaration[] {"ParameterDeclaration"};
+    constexpr char dimensions[] {"Dimensions"};
+    constexpr char frontAxle[] {"FrontAxle"};
+    constexpr char parameterDeclarations[] {"ParameterDeclarations"};
     constexpr char pedestrian[] {"Pedestrian"};
     constexpr char performance[] {"Performance"};
-    constexpr char rear[] {"Rear"};
+    constexpr char properties[] {"Properties"};
+    constexpr char property[] {"Property"};
+    constexpr char rearAxle[] {"RearAxle"};
     constexpr char vehicle[] {"Vehicle"};
 }
 
 namespace openpass::importer::xml::vehicleModelsImporter::attribute
 {
-    constexpr char category[] {"category"};
+    constexpr char vehicleCategory[] {"vehicleCategory"};
     constexpr char height[] {"height"};
     constexpr char length[] {"length"};
     constexpr char mass[] {"mass"};
     constexpr char maxSpeed[] {"maxSpeed"};
     constexpr char maxSteering[] {"maxSteering"};
     constexpr char name[] {"name"};
+    constexpr char pedestrianCategory[] {"pedestrianCategory"};
     constexpr char positionX[] {"positionX"};
     constexpr char trackWidth[] {"trackWidth"};
+    constexpr char value[] {"value"};
     constexpr char wheelDiameter[] {"wheelDiameter"};
     constexpr char width[] {"width"};
     constexpr char x[] {"x"};

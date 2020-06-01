@@ -33,14 +33,14 @@ INCLUDEPATH += . \
     $$WORLD_OSI/Localization
 
 SRC_SCENARIO =  $$OPENPASS_SLAVE/importer/eventDetectorImporter.cpp \
-                $$OPENPASS_SLAVE/importer/manipulatorImporter.cpp \
                 $$OPENPASS_SLAVE/importer/scenario.cpp \
                 $$OPENPASS_SLAVE/importer/scenarioImporter.cpp \
+                $$OPENPASS_SLAVE/importer/scenarioImporterHelper.cpp \
                 $$OPENPASS_SLAVE/importer/oscImporterCommon.cpp
 
 INC_SCENARIO =  $$OPENPASS_SLAVE/importer/scenario.h \
                 $$OPENPASS_SLAVE/importer/scenarioImporter.h \
-                $$OPENPASS_SLAVE/importer/manipulatorImporter.h \
+                $$OPENPASS_SLAVE/importer/scenarioImporterHelper.h \
                 $$OPEN_SRC/Common/openScenarioDefinitions.h \
                 $$OPENPASS_SLAVE/importer/oscImporterCommon.h
 

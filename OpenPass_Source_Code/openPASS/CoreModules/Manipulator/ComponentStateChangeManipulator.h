@@ -21,7 +21,6 @@
 #pragma once
 
 #include "ManipulatorCommonBase.h"
-#include "Interfaces/scenarioActionInterface.h"
 #include "Common/openScenarioDefinitions.h"
 
 //-----------------------------------------------------------------------------
@@ -37,9 +36,10 @@ class ComponentStateChangeManipulator : public ManipulatorCommonBase
 {
 public:
     ComponentStateChangeManipulator(WorldInterface *world,
-                                    std::shared_ptr<openScenario::UserDefinedCommandAction> action,
                                     SimulationSlave::EventNetworkInterface *eventNetwork,
-                                    const CallbackInterface *callbacks);
+                                    const CallbackInterface *callbacks,
+                                    const openScenario::CustomCommandAction action,
+                                    const std::string &eventName);
 
     virtual ~ComponentStateChangeManipulator() = default;
 

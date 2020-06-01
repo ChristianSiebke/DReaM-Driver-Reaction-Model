@@ -1,9 +1,7 @@
 <?xml version="1.0"?>
 <OpenSCENARIO>
-  <FileHeader revMajor="1" revMinor="0" date="2020-06-22T15:00:00" description="openPASS default scenario" author="in-tech GmbH"/>
-  <ParameterDeclarations>
-    <ParameterDeclaration name="OP_OSC_SchemaVersion" parameterType="string" value="0.4.0"/>
-  </ParameterDeclarations>
+  <FileHeader revMajor="0" revMinor="1" date="2019-03-27T7:55:00" description="Integration test scenario without version" author="in-tech GmbH"/>
+  <ParameterDeclarations/>
   <CatalogLocations>
     <VehicleCatalog>
       <Directory path="VehicleModelsCatalog.xosc"/>
@@ -31,40 +29,34 @@
     </RouteCatalog>
   </CatalogLocations>
   <RoadNetwork>
-    <LogicFile filepath="SceneryConfiguration.xodr"/>
+    <LogicFile filepath="testSceneryConfiguration.xodr"/>
     <SceneGraphFile filepath=""/>
   </RoadNetwork>
   <Entities>
     <ScenarioObject name="Ego">
       <CatalogReference catalogName="ProfilesCatalog.xml" entryName="MiddleClassCarAgent"/>
     </ScenarioObject>
-    <EntitySelection name="ScenarioAgents">
-      <Members/>
-    </EntitySelection>
   </Entities>
   <Storyboard>
     <Init>
       <Actions>
         <Private entityRef="Ego">
           <PrivateAction>
+            <LongitudinalAction>
+              <SpeedAction>
+                <SpeedActionDynamics dynamicsShape="linear" value="0.5" dynamicsDimension="distance"/>
+              </SpeedAction>
+            </LongitudinalAction>
+          </PrivateAction>
+          <PrivateAction>
             <TeleportAction>
               <Position>
-                <LanePosition roadId="1" laneId="-1" offset="0.0" s="0.0"/>
+                <LanePosition roadId="1" laneId="-3" offset="0.5" s="1000.0"/>
               </Position>
             </TeleportAction>
           </PrivateAction>
         </Private>
       </Actions>
     </Init>
-    <Story/>
-    <StopTrigger>
-      <ConditionGroup>
-        <Condition name="EndTime" delay="0" conditionEdge="rising">
-          <ByValueCondition>
-            <SimulationTimeCondition value="30.0" rule="greaterThan"/>
-          </ByValueCondition>
-        </Condition>
-      </ConditionGroup>
-    </StopTrigger>
   </Storyboard>
 </OpenSCENARIO>

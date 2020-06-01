@@ -13,8 +13,6 @@
 #include "Common/openScenarioDefinitions.h"
 #include "Interfaces/worldInterface.h"
 
-using namespace openScenario;
-
 //! This class makes calculations for the OpenScenarioActions module
 class OscActionsCalculation
 {
@@ -31,7 +29,7 @@ public:
     //! \param startPosition    start point of the trajectory
     //! \param startTime        time of the first trajectory point
     //! \return     sinusiodal lane change trajectory in world coordinates
-    Trajectory CalculateSinusiodalLaneChange (double deltaS, double deltaT, double deltaTime, double timeStep, GlobalRoadPosition startPosition, double startTime) const;
+    openScenario::Trajectory CalculateSinusiodalLaneChange (double deltaS, double deltaT, double deltaTime, double timeStep, GlobalRoadPosition startPosition, double startTime) const;
 
 private:
     const WorldInterface* world;

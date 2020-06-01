@@ -31,6 +31,8 @@ const std::unordered_map<std::string, AgentVehicleType> vehicleTypeConversionMap
                                                                                     {"motorbike", AgentVehicleType::Motorbike},
                                                                                     {"bicycle", AgentVehicleType::Bicycle}};
 
+using Properties = std::map<std::string, std::string>;
+
 /*!
  * \brief Provides methods for importing vehicle models from OpenSCENARIO catalog files
  */
@@ -211,11 +213,10 @@ private:
      * `gearRatios` will always be 0.0. For every gear, a `Parameter` tag `GearRatioN` has to exist, where N represents the
      * number of a gear. Ratios are imported in ascending order of the gear number.
      *
-     * \param[in]   vehicleElement      The DOM element of the vehicle model
      * \param[out]  modelParameters     Storage for the imported values
-     * \param[in]   parameters          declared parameters
+     * \param[in]   properties          openScenario properties
      */
-    static void ImportVehicleModelGears(ParametrizedVehicleModelParameters& modelParameters, openScenario::Parameters& parameters);
+    static void ImportVehicleModelGears(ParametrizedVehicleModelParameters& modelParameters, const Properties& properties);
 
     /*!
      * \brief Helper for template type deduction with std::optional parameters
@@ -229,32 +230,55 @@ private:
     struct TypeHelper { typedef T type; };
 
     /*!
-     * \brief Imports the value from an model parameter tag
+     * \brief Assigns the value of a property to a attribute
      *
-     * \param[in]   parameterName       Name of the parameter to import
-     * \param[out]  parameterValue      Value of the parsed parameter
-     * \param[in]   parameters          declared parameters
+     * \param[in]   propertyName       Name of the parameter to import
+     * \param[out]  attribtue               Reference to the attribute
+     * \param[in]   properties              Properties
      * \param[in]   defaultValue        An optional default value to use if it cannot be imported
      *
      * \throw   std::runtime_error  On missing model `Parameter` tag or invalid `name` or `value` attribute.
      */
     template<typename T>
-    static void AssignModelParameter(const std::string& parameterName, openScenario::ParametrizedAttribute<T>& parameterValue, openScenario::Parameters& parameters, std::optional<typename TypeHelper<T>::type> defaultValue = std::nullopt)
+    static void AssignProperty(const std::string& propertyName,
+                               openScenario::ParameterizedAttribute<T>& attribute,
+                               const Properties& properties,
+                               std::optional<typename TypeHelper<T>::type> defaultValue = std::nullopt)
     {
-        auto foundParameter = parameters.find(parameterName);
-        if (foundParameter != parameters.cend())
+        auto propertyIt = properties.find(propertyName);
+        if (propertyIt != properties.cend())
         {
-            parameterValue = {parameterName, std::get<T>(foundParameter->second)};
+            if(std::is_same<T, double>::value)
+            {
+                attribute = {propertyName, std::stod(properties.at(propertyName))};
+            }
+            else if (std::is_same<T, int>::value)
+            {
+                attribute = {propertyName, std::stoi(properties.at(propertyName))};
+            }
+            else
+            {
+                throw std::runtime_error("Property data type not supported.");
+            }
         }
         else if (defaultValue)
         {
-            parameterValue = {parameterName, defaultValue.value()};
+            attribute = {propertyName, defaultValue.value()};
         }
         else
         {
-            LogErrorAndThrow("Missing parameter " + parameterName);
+            LogErrorAndThrow("Missing parameter " + propertyName);
         }
     }
+
+    /*!
+     * \brief Imports the properties of an element
+     *
+     * \param[in]   root       XML document root
+     *
+     * \return   Properties
+     */
+    static Properties ImportProperties(QDomElement& root);
 };
 
 } //namespace Importer

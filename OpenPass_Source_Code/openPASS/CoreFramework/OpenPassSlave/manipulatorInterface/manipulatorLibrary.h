@@ -20,7 +20,6 @@
 #include "manipulatorBinding.h"
 #include "Interfaces/manipulatorInterface.h"
 #include "Interfaces/callbackInterface.h"
-#include "Interfaces/scenarioActionInterface.h"
 
 namespace SimulationSlave
 {
@@ -30,7 +29,10 @@ class ManipulatorLibrary
 public:
     typedef const std::string &(*ManipulatorInterface_GetVersion)();
     typedef ManipulatorInterface *(*ManipulatorInterface_CreateInstanceType)(WorldInterface *world,
-                                                                             std::shared_ptr<ScenarioActionInterface> action,
+                                                                             openScenario::ManipulatorInformation manipulatorInformation,
+                                                                             EventNetworkInterface* eventNetwork,
+                                                                             const CallbackInterface *callbacks);
+    typedef ManipulatorInterface *(*ManipulatorInterface_CreateDefaultInstanceType)(WorldInterface *world,
                                                                              std::string manipulatorType,
                                                                              EventNetworkInterface* eventNetwork,
                                                                              const CallbackInterface *callbacks);
@@ -86,14 +88,18 @@ public:
     //! @param[in]  world               World instance
     //! @return                         Manipulator created
     //-----------------------------------------------------------------------------
-    Manipulator *CreateManipulator(std::shared_ptr<ScenarioActionInterface> action,
-                                   const std::string& manipulatorType,
+    Manipulator *CreateManipulator(const openScenario::ManipulatorInformation manipulatorInformation,
+                                   EventNetworkInterface* eventNetwork,
+                                   WorldInterface* world);
+
+    Manipulator *CreateManipulator(const std::string& manipulatorType,
                                    EventNetworkInterface* eventNetwork,
                                    WorldInterface* world);
 
 private:
     const std::string DllGetVersionId = "OpenPASS_GetVersion";
     const std::string DllCreateInstanceId = "OpenPASS_CreateInstance";
+    const std::string DllCreateDefaultInstanceId = "OpenPASS_CreateDefaultInstance";
     const std::string DllDestroyInstanceId = "OpenPASS_DestroyInstance";
 
     std::string libraryPath;
@@ -102,6 +108,7 @@ private:
     CallbackInterface *callbacks;
     ManipulatorInterface_GetVersion getVersionFunc;
     ManipulatorInterface_CreateInstanceType createInstanceFunc;
+    ManipulatorInterface_CreateDefaultInstanceType createDefaultInstanceFunc;
     ManipulatorInterface_DestroyInstanceType destroyInstanceFunc;
 };
 

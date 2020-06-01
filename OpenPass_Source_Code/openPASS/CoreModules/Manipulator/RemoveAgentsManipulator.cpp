@@ -15,13 +15,14 @@
 #include "RemoveAgentsManipulator.h"
 
 RemoveAgentsManipulator::RemoveAgentsManipulator(WorldInterface *world,
-                                                 std::shared_ptr<openScenario::GlobalEntityAction> action,
                                                  SimulationSlave::EventNetworkInterface *eventNetwork,
-                                                 const CallbackInterface *callbacks):
+                                                 const CallbackInterface *callbacks,
+                                                 const openScenario::EntityAction action,
+                                                 const std::string &eventName) :
     ManipulatorCommonBase(world,
-                          action,
                           eventNetwork,
-                          callbacks)
+                          callbacks,
+                          eventName)
 {
     cycleTime = 100;
 }

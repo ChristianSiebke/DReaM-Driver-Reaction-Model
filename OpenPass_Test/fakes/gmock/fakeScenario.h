@@ -40,14 +40,14 @@ public:
                  void(const std::map<std::string, std::list<std::string>>&));
     MOCK_METHOD1(AddConditionalEventDetector,
                  void(const openScenario::ConditionalEventDetectorInformation&));
-    MOCK_METHOD1(AddAction,
-                 void(std::shared_ptr<ScenarioActionInterface>));
+    MOCK_METHOD2(AddAction,
+                 void(const openScenario::Action, const std::string));
     MOCK_METHOD0(GetEventDetectorInformations,
                  std::vector<openScenario::ConditionalEventDetectorInformation>&());
     MOCK_METHOD0(GetScenarioGroups,
                  const std::map<std::string, std::vector<ScenarioEntity*>>&());
     MOCK_CONST_METHOD0(GetActions,
-                       std::vector<std::shared_ptr<ScenarioActionInterface>>());
+                       std::vector<openScenario::ManipulatorInformation>());
     MOCK_CONST_METHOD0(GetEndTime,
                        int());
     MOCK_METHOD1(SetEndTime,
