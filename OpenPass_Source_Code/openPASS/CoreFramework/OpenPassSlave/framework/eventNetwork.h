@@ -25,11 +25,13 @@
 #include <map>
 #include <vector>
 
-#include "Common/agentBasedManipulatorEvent.h"
+#include "Common/conditionalEvent.h"
+#include "Common/componentStateChangeEvent.h"
+#include "Common/componentWarningEvent.h"
 #include "Common/collisionEvent.h"
+#include "Common/laneChangeEvent.h"
 #include "Common/vehicleComponentEvent.h"
 #include "Interfaces/eventNetworkInterface.h"
-#include "Interfaces/observationInterface.h"
 #include "Interfaces/runResultInterface.h"
 #include "Interfaces/worldInterface.h"
 
@@ -45,8 +47,8 @@ using namespace EventDefinitions;
 class EventNetwork : public EventNetworkInterface
 {
 public:
-    EventNetwork();
-    ~EventNetwork();
+    EventNetwork() = default;
+    virtual ~EventNetwork() override = default;
 
     /*!
     * \brief Returns the activeEvents.
@@ -119,26 +121,12 @@ public:
     *
     *
     * @param[in]     runResult    Pointer to the runResult.
-    * @param[in]     observer     Pointer to the observer.
     */
-    void Initialize(RunResultInterface *runResult,
-                    ObservationInterface *observer);
+    void Initialize(RunResultInterface *runResult);
 
 private:
-    /*!
-    * \brief Determines the event category of an EventType
-    *
-    * \details Determines the event category of an EventType.
-    *
-    *
-    * @param[in]     eventType    EventType.
-    * @return	     Event category.
-    */
-    EventCategory DefineEventCategory(EventType eventType);
-
     Events activeEvents;
     Events archivedEvents;
-    ObservationInterface *observer {nullptr};
     RunResultInterface *runResult {nullptr};
 
     int eventId {0};

@@ -37,7 +37,7 @@ public:
     MOCK_METHOD1(SetValidForLane,
                  void(OWL::Id));
     MOCK_METHOD1(SetSpecification,
-                 void(RoadSignalInterface*));
+                 bool(RoadSignalInterface*));
     MOCK_METHOD1(AddSupplementarySign,
                  void (RoadSignalInterface* odSignal));
     MOCK_CONST_METHOD1(CopyToGroundTruth,

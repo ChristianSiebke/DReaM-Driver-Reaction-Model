@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -33,11 +33,7 @@
 
 namespace Internal
 {
-
-using PathInJunctionConnector = std::function<void(JunctionInterface*, RoadInterface *, RoadInterface *, RoadInterface *, ContactPointType,
-                                                   ContactPointType, std::map<int, int>)>;
-
-ConversionStatus ConnectJunction(SceneryInterface *scenery, JunctionInterface *junction,
+ConversionStatus ConnectJunction(const SceneryInterface *scenery, const JunctionInterface *junction,
                                  PathInJunctionConnector connectPathInJunction)
 {
     for (auto &entry : junction->GetConnections())
@@ -445,7 +441,7 @@ bool SceneryConverter::ConnectRoadExternalWithElementTypeRoad(RoadInterface* roa
             continue;
         }
 
-        RoadInterface* otherRoad = scenery->GetRoad(roadLink->GetElementId());
+        auto otherRoad = scenery->GetRoad(roadLink->GetElementId());
         RoadLaneSectionInterface* otherSection;
 
         if (roadLink->GetContactPoint() == ContactPointType::Start)
@@ -476,7 +472,7 @@ bool SceneryConverter::ConnectRoadExternalWithElementTypeRoad(RoadInterface* roa
     return true;
 }
 
-bool SceneryConverter::ConnectExternalRoadSuccessor(RoadInterface* currentRoad, RoadInterface* otherRoad,
+bool SceneryConverter::ConnectExternalRoadSuccessor(const RoadInterface* currentRoad, const RoadInterface* otherRoad,
         RoadLaneSectionInterface* otherSection)
 {
     worldData.SetRoadSuccessor(*currentRoad, *otherRoad);
@@ -503,7 +499,7 @@ bool SceneryConverter::ConnectExternalRoadSuccessor(RoadInterface* currentRoad, 
     return true;
 }
 
-bool SceneryConverter::ConnectExternalRoadPredecessor(RoadInterface* currentRoad, RoadInterface* otherRoad,
+bool SceneryConverter::ConnectExternalRoadPredecessor(const RoadInterface* currentRoad, const RoadInterface* otherRoad,
         RoadLaneSectionInterface* otherSection)
 {
     worldData.SetRoadPredecessor(*currentRoad, *otherRoad);
@@ -562,12 +558,12 @@ bool SceneryConverter::ConnectRoadInternal(RoadInterface* road)
 
 
 
-bool SceneryConverter::ConnectJunction(JunctionInterface* junction)
+bool SceneryConverter::ConnectJunction(const JunctionInterface* junction)
 {
     worldData.AddJunction(junction);
     // this indirection to an internal function is a first step towards better testability. please do not remove.
     if(auto [status, error_message] = Internal::ConnectJunction(scenery, junction,
-                         [&](JunctionInterface* junction, RoadInterface *incomingRoad, RoadInterface *connectingRoad, RoadInterface *outgoingRoad,
+                         [&](const JunctionInterface* junction, const RoadInterface *incomingRoad, const RoadInterface *connectingRoad, const RoadInterface *outgoingRoad,
                              ContactPointType incomingContactPoint, ContactPointType outgoingContactPoint,
                              std::map<int, int> laneIdMapping) {
                              ConnectPathInJunction(junction, incomingRoad, connectingRoad, outgoingRoad, incomingContactPoint,
@@ -589,8 +585,8 @@ bool SceneryConverter::ConnectJunction(JunctionInterface* junction)
     }
 }
 
-void SceneryConverter::ConnectPathInJunction(JunctionInterface* junction, RoadInterface* incomingRoad, RoadInterface* connectingRoad,
-        RoadInterface* outgoingRoad, ContactPointType incomingContactPoint, ContactPointType outgoingContactPoint,
+void SceneryConverter::ConnectPathInJunction(const JunctionInterface* junction, const RoadInterface* incomingRoad, const RoadInterface* connectingRoad,
+        const RoadInterface* outgoingRoad, ContactPointType incomingContactPoint, ContactPointType outgoingContactPoint,
         std::map<int, int> laneIdMapping)
 {
     if (incomingContactPoint == ContactPointType::Start)
@@ -677,7 +673,7 @@ bool SceneryConverter::ConnectRoads()
     return true;
 }
 
-bool SceneryConverter::Convert()
+bool SceneryConverter::ConvertRoads()
 {
     // define a unique directions of roads/lanes within each road cluster
     if (!MarkDirections())
@@ -693,22 +689,14 @@ bool SceneryConverter::Convert()
         return false;
     }
 
-    // create geometries
-    GeometryConverter converter(scenery,
-                                //                                sectionMapping,
-                                //                                xfLaneMapping,
-                                //                                laneMapping,
-                                worldData,
-                                callbacks);
-    if (!converter.Convert())
-    {
-        return false;
-    }
+    GeometryConverter::Convert(*scenery, worldData);
+    return true;
+}
 
+void SceneryConverter::ConvertObjects()
+{
     CreateObjects();
     CreateTrafficSigns();
-
-    return true;
 }
 
 void SceneryConverter::CreateObjects()
@@ -747,7 +735,7 @@ void SceneryConverter::CreateObjects()
 std::vector<OWL::Id> SceneryConverter::CreateLaneBoundaries(RoadLaneInterface &odLane, RoadLaneSectionInterface& odSection)
 {
     std::vector<OWL::Id> laneBoundaries;
-    for (const auto& roadMarkEntry : odLane.getRoadMarks())
+    for (const auto& roadMarkEntry : odLane.GetRoadMarks())
     {
         switch (roadMarkEntry->GetType())
         {
@@ -775,6 +763,12 @@ void SceneryConverter::CreateTrafficSigns()
 
         for (RoadSignalInterface* signal : road->GetRoadSignals())
         {
+            if (signal->GetIsDynamic())
+            {
+                LOG(CbkLogLevel::Warning, std::string("Ignoring dynamic signal: ") + signal->GetId());
+                continue;
+            }
+
             // Gather all dependent signals
             if(!signal->GetDependencies().empty())
             {
@@ -793,7 +787,13 @@ void SceneryConverter::CreateTrafficSigns()
             OWL::Interfaces::TrafficSign& trafficSign = worldData.AddTrafficSign(signal->GetId());
 
             trafficSign.SetS(signal->GetS());
-            trafficSign.SetSpecification(signal);
+
+            if (!trafficSign.SetSpecification(signal))
+            {
+                const std::string message = "Unsupported traffic sign type: " + signal->GetType() + (" (id: " + signal->GetId() + ")");
+                LOG(CbkLogLevel::Warning, message);
+                continue;
+            }
 
             for (auto lane : section->GetLanes())
             {

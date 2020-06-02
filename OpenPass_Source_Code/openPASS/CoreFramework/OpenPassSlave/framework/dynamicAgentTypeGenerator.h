@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -30,6 +30,7 @@ struct DefaultComponents
         "ComponentController",
         "Dynamics_Collision",
         "Dynamics_RegularDriving",
+        "OpenScenarioActions",
         "Parameters_Vehicle",
         "PrioritizerDynamics",
         "PrioritizerLongitudinal",
@@ -71,7 +72,7 @@ struct AgentBuildInformation
     std::shared_ptr<SimulationSlave::AgentType> agentType = std::make_shared<SimulationSlave::AgentType>();
     std::string vehicleModelName;
     VehicleModelParameters vehicleModelParameters;
-    std::vector<SensorParameter> sensorParameters;
+    openpass::sensors::Parameters sensorParameters;
 
     /*!
      * \brief Creates a new DynamicAgentTypeGenerator which can be used to build an instance of this struct.
@@ -172,7 +173,7 @@ public:
     * @param[out]   agentType                   AgentType where the results get stored
     * @param[in]    parameters                  Pointer to a specific parameters set.
     */
-    void GatherComponentWithParameters(std::string componentName, std::shared_ptr<SimulationSlave::AgentType> agentType, ParameterInterface *parameters);
+    void GatherComponentWithParameters(std::string componentName, std::shared_ptr<SimulationSlave::AgentType> agentType, const openpass::parameter::Container &parameters);
 
     /*!
     * \brief Gathers a component and adds it to the AgentType
@@ -186,7 +187,7 @@ public:
     * @param[in]    componentNameInSystemConfigBlueprint    Name of the component in the app config, different if different from componentName (currently used for sensors)
     * @param[in]    channelIncrease             Increase in the ids of the output channels (currently used for sensors)
     */
-    void GatherComponentWithParameters(std::string componentName, std::shared_ptr<SimulationSlave::AgentType> agentType, ParameterInterface *parameters,
+    void GatherComponentWithParameters(std::string componentName, std::shared_ptr<SimulationSlave::AgentType> agentType, const openpass::parameter::Container &parameters,
                                                                                   std::string componentNameInSystemConfigBlueprint, int channelOffset);
 
     /*!

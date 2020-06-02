@@ -30,8 +30,6 @@ CollisionDetector::CollisionDetector(WorldInterface *world,
         stochastics)
 {
     cycleTime = 100;
-    eventType = EventDefinitions::EventType::Collision;
-
     trafficObjects = &(world->GetTrafficObjects());
     agents = &(world->GetAgents());
 }
@@ -767,26 +765,22 @@ bool CollisionDetector::DetectIntersectionOfTwoWorldObjects(const WorldObjectInt
 
 void CollisionDetector::DetectedCollisionWithObject(int time, AgentInterface *agent, const WorldObjectInterface *other)
 {
-    std::shared_ptr<CollisionEvent> event = std::make_shared<CollisionEvent>(time,
-                                                                                                                              COMPONENTNAME,
-                                                                                                                              "Collision",
-                                                                                                                              eventType,
-                                                                                                                              false,
-                                                                                                                              agent->GetId(),
-                                                                                                                              other->GetId());
+    auto event = std::make_shared<CollisionEvent>(time,
+                                                  COMPONENTNAME,
+                                                  false,
+                                                  agent->GetId(),
+                                                  other->GetId());
 
     eventNetwork->InsertEvent(event);
 }
 
 void CollisionDetector::DetectedCollisionWithAgent(int time, AgentInterface *agent, AgentInterface *other)
 {
-    std::shared_ptr<CollisionEvent> event = std::make_shared<CollisionEvent>(time,
-                                                                                                                               COMPONENTNAME,
-                                                                                                                               "Collision",
-                                                                                                                               eventType,
-                                                                                                                               true,
-                                                                                                                               agent->GetId(),
-                                                                                                                               other->GetId());
+    auto event = std::make_shared<CollisionEvent>(time,
+                                                  COMPONENTNAME,
+                                                  true,
+                                                  agent->GetId(),
+                                                  other->GetId());
 
     eventNetwork->InsertEvent(event);
 }

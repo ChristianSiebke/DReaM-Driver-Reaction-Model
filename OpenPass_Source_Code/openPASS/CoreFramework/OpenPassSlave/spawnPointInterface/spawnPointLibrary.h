@@ -21,12 +21,12 @@
 #include <string>
 #include <QLibrary>
 #include "Interfaces/agentFactoryInterface.h"
-#include "spawnPointBinding.h"
 #include "Interfaces/spawnPointInterface.h"
 #include "Interfaces/callbackInterface.h"
 #include "Interfaces/agentBlueprintInterface.h"
 #include "Interfaces/agentBlueprintProviderInterface.h"
 #include "Interfaces/scenarioInterface.h"
+#include "Common/spawnPointLibraryDefinitions.h"
 
 namespace SimulationSlave
 {
@@ -35,15 +35,8 @@ class SpawnPointLibrary
 {
 public:    
     typedef const std::string &(*SpawnPointInterface_GetVersion)();
-    typedef SpawnPointInterface *(*SpawnPointInterface_CreateInstanceType)(WorldInterface *world,
-                                                                           const ParameterInterface *parameters,
-                                                                           const CallbackInterface *callbacks,
-                                                                           AgentBlueprintProviderInterface* agentBlueprintProvider,
-                                                                           SamplerInterface *sampler,
-                                                                           ScenarioInterface *scenario);
-    typedef void (*SpawnPointInterface_DestroyInstanceType)(SpawnPointInterface *implementation);
-    typedef bool (*SpawnPointInterface_GenerateAgentType)(SpawnPointInterface *implementation,
-                                                          AgentBlueprintInterface* agentBlueprint);
+    typedef std::unique_ptr<SpawnPointInterface> (*SpawnPointInterface_CreateInstanceType)(const SpawnPointDependencies* dependencies,
+                                                                                           const CallbackInterface* callbacks);
 
     SpawnPointLibrary(const std::string &libraryPath,
                       CallbackInterface *callbacks) :
@@ -67,18 +60,8 @@ public:
     //! and setting the spawn item (see typedefs for corresponding signatures).
     //!
     //! @return                 Null pointer
-    //-----------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------l
     bool Init();
-
-    //-----------------------------------------------------------------------------
-    //! Find spawn point in the sored list of spawn points, then call the "destroy
-    //! instance" function pointer with its implementation and remove it from the list
-    //! of stored spawn points.
-    //!
-    //! @param[in]  spawnPoint          Spawn point to release
-    //! @return                         Flag if the release was successful
-    //-----------------------------------------------------------------------------
-    bool ReleaseSpawnPoint(SpawnPoint *spawnPoint);
 
     //-----------------------------------------------------------------------------
     //! Make sure that the library exists and is loaded, then call the "create instance"
@@ -94,40 +77,17 @@ public:
     //! @param[in]  scenario                Scenario from configs
     //! @return                         Spawn point created
     //-----------------------------------------------------------------------------
-    SpawnPoint *CreateSpawnPoint(ParameterInterface *parameters,
-                                 AgentFactoryInterface *agentFactory,
-                                 WorldInterface *world,
-                                 AgentBlueprintProviderInterface *agentBlueprintProvider,
-                                 SamplerInterface *sampler,
-                                 ScenarioInterface *scenario);
-
-    //-----------------------------------------------------------------------------
-    //! Calls the "generateAgent" function pointer with the provided parameters and
-    //! returns the result of this call.
-    //!
-    //! @param[in]  spawnPointInstance  Spawn point instance that is instantiated
-    //! @param[out]  spawnItem          AgentBlueprint which is used to create an agent.
-    //! @return                         Flag if generate agent was successful
-    //-----------------------------------------------------------------------------
-    bool GenerateAgent(SpawnPointInterface *implementation, AgentBlueprintInterface* agentBlueprint)
-    {
-        return generateAgentFunc(implementation, agentBlueprint);
-    }
+    std::unique_ptr<SpawnPoint> CreateSpawnPoint(const SpawnPointDependencies& dependencies);
 
 private:    
     const std::string DllGetVersionId = "OpenPASS_GetVersion";
     const std::string DllCreateInstanceId = "OpenPASS_CreateInstance";
-    const std::string DllDestroyInstanceId = "OpenPASS_DestroyInstance";
-    const std::string DllGenerateAgentId = "OpenPASS_GenerateAgent";
 
     std::string libraryPath;
-    std::list<SpawnPoint*> spawnPoints;
     QLibrary *library = nullptr;
     CallbackInterface *callbacks;
     SpawnPointInterface_GetVersion getVersionFunc{nullptr};
     SpawnPointInterface_CreateInstanceType createInstanceFunc{nullptr};
-    SpawnPointInterface_DestroyInstanceType destroyInstanceFunc{nullptr};
-    SpawnPointInterface_GenerateAgentType generateAgentFunc{nullptr};
 };
 
 } // namespace SimulationSlave

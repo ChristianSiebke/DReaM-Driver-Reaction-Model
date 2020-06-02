@@ -1,14 +1,14 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
-*               2018 AMFD GmbH
-*               2016, 2017, 2018 ITK Engineering GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+ * Copyright (c) 2017, 2018, 2019 in-tech GmbH
+ *               2018 AMFD GmbH
+ *               2016, 2017, 2018 ITK Engineering GmbH
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  ParameterInterface.h
@@ -17,32 +17,13 @@
 
 #pragma once
 
+#include <map>
+#include <memory>
 #include <string>
 #include <vector>
-#include <map>
-#include <cmath>
-#include <memory>
 
-namespace StochasticDefintions {
-struct NormalDistributionParameter
-{
-    NormalDistributionParameter() {}
-    NormalDistributionParameter(double mean,
-                                double standardDeviation,
-                                double min,
-                                double max):
-        mean(mean),
-        standardDeviation(standardDeviation),
-        min(min),
-        max(max)
-    {}
-
-    double mean = 0;
-    double standardDeviation = 0;
-    double min = -INFINITY;
-    double max = INFINITY;
-};
-}
+#include "Common/runtimeInformation.h"
+#include "Common/stochasticDefinitions.h"
 
 //-----------------------------------------------------------------------------
 //! Interface provides access to the configuration parameters
@@ -53,6 +34,13 @@ public:
     using ParameterLists = std::vector<std::shared_ptr<ParameterInterface>>;
 
     virtual ~ParameterInterface() = default;
+
+    //-----------------------------------------------------------------------------
+    //! Initializes a new parameter list item
+    //!
+    //! @return                Pointer to the list item
+    //-----------------------------------------------------------------------------
+    virtual ParameterInterface &InitializeListItem(std::string key) = 0;
 
     //-----------------------------------------------------------------------------
     //! Adds a double to the parameters
@@ -116,14 +104,14 @@ public:
     //! @return                true, if value was not already in the map
     //-----------------------------------------------------------------------------
     virtual bool AddParameterNormalDistribution(std::string name,
-            const StochasticDefintions::NormalDistributionParameter value) = 0;
+                                                const openpass::parameter::NormalDistribution value) = 0;
 
     //-----------------------------------------------------------------------------
-    //! Initializes a new parameter list item
+    //! Retrieves the runtime information from the interface
     //!
-    //! @return                Pointer to the list item
+    //! @return                RuntimeInformation
     //-----------------------------------------------------------------------------
-    virtual ParameterInterface& InitializeListItem(std::string key) = 0;
+    virtual const openpass::common::RuntimeInformation& GetRuntimeInformation() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Retrieves the parameters of type "Double"
@@ -186,8 +174,7 @@ public:
     //!
     //! @return                Mapping of "id" to "value"
     //-----------------------------------------------------------------------------
-    virtual const std::map<std::string, const StochasticDefintions::NormalDistributionParameter>&
-    GetParametersNormalDistribution() const = 0;
+    virtual const std::map<std::string, const openpass::parameter::NormalDistribution>& GetParametersNormalDistribution() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Retrieves the parameter lists.

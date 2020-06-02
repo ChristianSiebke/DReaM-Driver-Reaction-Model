@@ -18,6 +18,8 @@ public:
 
     virtual std::unordered_map<std::string, AgentProfile>& GetAgentProfiles() override;
 
+    virtual SpawnPointProfiles& GetSpawnPointProfiles() override;
+
     virtual DriverProfiles& GetDriverProfiles() override;
 
     virtual std::unordered_map<std::string, VehicleComponentProfiles>& GetVehicleComponentProfiles() override;
@@ -28,12 +30,13 @@ public:
 
     virtual StringProbabilities& GetVehicleProfileProbabilities(std::string agentProfileName) override;
 
-    virtual std::list<SensorProfile>& GetSensorProfiles() override;
+    virtual openpass::sensors::Profiles& GetSensorProfiles() override;
 
 private:
     std::unordered_map<std::string, AgentProfile> agentProfiles {};
     std::unordered_map<std::string, VehicleProfile> vehicleProfiles {};
+    SpawnPointProfiles spawnPointProfiles {};
     DriverProfiles driverProfiles {};
     std::unordered_map<std::string, VehicleComponentProfiles> vehicleComponentProfiles {};
-    std::list<SensorProfile> sensorProfiles {};
+    openpass::sensors::Profiles sensorProfiles {};
 };

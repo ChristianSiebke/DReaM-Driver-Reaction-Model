@@ -20,13 +20,8 @@ namespace Configuration
 class SystemConfig : public SystemConfigInterface
 {
 public:
-
     virtual std::map<int, std::shared_ptr<SimulationSlave::AgentTypeInterface>>& GetSystems() override;
-
     virtual void SetSystems(std::map<int, std::shared_ptr<SimulationSlave::AgentTypeInterface>> systems) override;
-
-    virtual SimulationCommon::ModelParameters *AddModelParameters() override;
-
     virtual void AddModelParameters(std::shared_ptr<ParameterInterface> modelParameters) override;
 
 private:

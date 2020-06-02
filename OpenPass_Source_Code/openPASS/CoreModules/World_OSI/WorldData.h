@@ -83,6 +83,8 @@ public:
      */
     virtual osi3::SensorView GetSensorView(osi3::SensorViewConfiguration& conf, int agentId) = 0;
 
+    virtual const osi3::GroundTruth& GetOsiGroundTruth() const = 0;
+
     //!Returns a map of all Roads with their OSI Id
     virtual const std::unordered_map<Id, Road*>& GetRoads() const = 0;
 
@@ -274,6 +276,8 @@ public:
     void Clear() override;
 
     osi3::SensorView GetSensorView(osi3::SensorViewConfiguration& conf, int agentId) override;
+
+    const osi3::GroundTruth& GetOsiGroundTruth() const override;
 
     /*!
      * \brief Retrieves a filtered OSI GroundTruth

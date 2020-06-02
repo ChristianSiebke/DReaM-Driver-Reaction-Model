@@ -20,11 +20,11 @@
 #define GLOBALDEFINITIONS
 
 #include <Common/opMath.h>
+#include <list>
+#include <map>
 #include <string>
 #include <tuple>
 #include <vector>
-#include <list>
-#include <map>
 
 // the following is a temporary workaround until the contribution is merged into osi
 #if defined(_WIN32) && !defined(NODLL)

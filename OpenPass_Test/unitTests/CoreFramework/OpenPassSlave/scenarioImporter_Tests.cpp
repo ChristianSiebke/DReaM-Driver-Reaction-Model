@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -22,11 +22,10 @@ using namespace Importer;
 using ::testing::Eq;
 using ::testing::StrEq;
 using ::testing::DontCare;
+using ::testing::ElementsAre;
 
-TEST(ScenarioImporter_UnitTests, ImportPositionElementLaneWithStocastics)
+TEST(ScenarioImporter_UnitTests, ImportPositionElementLaneWithStochastics)
 {
-    bool testOutcome = true;
-
     QDomElement positionElement = documentRootFromString(
               "<Position>"
                      "<Lane roadId=\"RoadId1\" s=\"1470.0\" laneId=\"-4\" offset=\"0.5\" > "
@@ -37,39 +36,36 @@ TEST(ScenarioImporter_UnitTests, ImportPositionElementLaneWithStocastics)
               );
 
     ScenarioEntity scenarioEntity;
-    try
-    {
-        ScenarioImporter::ImportPositionElement(scenarioEntity,positionElement);
-    }
-    catch (...)
-    {
-        testOutcome = false;
-    }
 
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.ILane,-4);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.TStart,0);
+    EXPECT_NO_THROW(ScenarioImporter::ImportPositionElement(scenarioEntity,positionElement));
 
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.s.value,1470.0);
-    ASSERT_TRUE(scenarioEntity.spawnInfo.s.isStochastic);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.s.mean,1470.0);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.s.lowerBoundary,95);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.s.upperBoundary,105);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.s.stdDeviation,5);
+    const auto& spawnInfo = scenarioEntity.spawnInfo;
+    openScenario::LanePosition lanePosition;
+    ASSERT_NO_THROW(lanePosition = std::get<openScenario::LanePosition>(spawnInfo.position));
 
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.offset.value,0.5);
-    ASSERT_TRUE(scenarioEntity.spawnInfo.offset.isStochastic);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.offset.mean,0.5);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.offset.lowerBoundary,44);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.offset.upperBoundary,54);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.offset.stdDeviation,4);
+    ASSERT_EQ(lanePosition.laneId,-4);
 
-    ASSERT_TRUE(testOutcome);
+    ASSERT_DOUBLE_EQ(lanePosition.s,1470.0);
+    ASSERT_TRUE(lanePosition.stochasticS.has_value());
+
+    const auto &stochasticS = lanePosition.stochasticS.value();
+    ASSERT_DOUBLE_EQ(stochasticS.mean,1470.0);
+    ASSERT_DOUBLE_EQ(stochasticS.lowerBoundary,95);
+    ASSERT_DOUBLE_EQ(stochasticS.upperBoundary,105);
+    ASSERT_DOUBLE_EQ(stochasticS.stdDeviation,5);
+
+    ASSERT_DOUBLE_EQ(lanePosition.offset.value(),0.5);
+    ASSERT_TRUE(lanePosition.stochasticOffset.has_value());
+
+    const auto &stochasticOffset = lanePosition.stochasticOffset.value();
+    ASSERT_DOUBLE_EQ(stochasticOffset.mean,0.5);
+    ASSERT_DOUBLE_EQ(stochasticOffset.lowerBoundary,44);
+    ASSERT_DOUBLE_EQ(stochasticOffset.upperBoundary,54);
+    ASSERT_DOUBLE_EQ(stochasticOffset.stdDeviation,4);
 }
 
 TEST(ScenarioImporter_UnitTests, ImportPositionElementLaneWithOrientation)
 {
-    bool testOutcome = true;
-
     QDomElement positionElement = documentRootFromString(
               "<Position>"
                      "<Lane roadId=\"RoadId1\" s=\"1470.0\" laneId=\"-4\" offset=\"0.5\" > "
@@ -79,58 +75,69 @@ TEST(ScenarioImporter_UnitTests, ImportPositionElementLaneWithOrientation)
               );
 
     ScenarioEntity scenarioEntity;
-    try
-    {
-        ScenarioImporter::ImportPositionElement(scenarioEntity,positionElement);
-    }
-    catch (...)
-    {
-        testOutcome = false;
-    }
 
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.s.value, 1470.0);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.ILane, -4);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.TStart, 0);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.offset.value,0.5);
+    EXPECT_NO_THROW(ScenarioImporter::ImportPositionElement(scenarioEntity,positionElement));
+    const auto& spawnInfo = scenarioEntity.spawnInfo;
+    openScenario::LanePosition lanePosition;
+    ASSERT_NO_THROW(lanePosition = std::get<openScenario::LanePosition>(spawnInfo.position));
 
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.heading,1.57);
-    ASSERT_TRUE(testOutcome);
+    ASSERT_DOUBLE_EQ(lanePosition.s, 1470.0);
+    ASSERT_EQ(lanePosition.laneId, -4);
+    ASSERT_DOUBLE_EQ(lanePosition.offset.value(),0.5);
+
+    ASSERT_DOUBLE_EQ(lanePosition.orientation.value().h.value(), 1.57);
 }
 
 
-TEST(ScenarioImporter_UnitTests, ImportPositionElementLane)
+TEST(ScenarioImporter_UnitTests, ImportPositionElementWorld)
 {
-    bool testOutcome = true;
-
     QDomElement positionElement = documentRootFromString(
               "<Position>"
-                    "<Lane roadId=\"RoadId1\" s=\"1470.0\" laneId=\"-4\" offset=\"0.5\" /> "
+                    "<World x=\"10.0\" y=\"-4.0\" h=\"0.5\" /> "
                "</Position>"
               );
 
     ScenarioEntity scenarioEntity;
 
-    try
-    {
-        ScenarioImporter::ImportPositionElement(scenarioEntity,positionElement);
-    }
-    catch (...)
-    {
-        testOutcome = false;
-    }
+    EXPECT_NO_THROW(ScenarioImporter::ImportPositionElement(scenarioEntity,positionElement));
 
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.s.value, 1470.0);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.ILane, -4);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.TStart, 0);
-    ASSERT_DOUBLE_EQ(scenarioEntity.spawnInfo.offset.value, 0.5);
+    const auto& spawnInfo = scenarioEntity.spawnInfo;
+    openScenario::WorldPosition worldPosition;
+    ASSERT_NO_THROW(worldPosition = std::get<openScenario::WorldPosition>(spawnInfo.position));
 
-    ASSERT_TRUE(testOutcome);
+    ASSERT_THAT(worldPosition.x, Eq(10.0));
+    ASSERT_THAT(worldPosition.y, Eq(-4));
+    ASSERT_THAT(worldPosition.heading.has_value(), Eq(true));
+    ASSERT_THAT(worldPosition.heading.value(), Eq(0.5));
+}
+
+TEST(ScenarioImporter_UnitTests, ImportLongitudinal)
+{
+    QDomElement positionElement = documentRootFromString(
+        "<Longitudinal>"
+            "<Speed>"
+                "<Dynamics rate=\"10.0\" />"
+                "<Target>"
+                    "<Absolute value=\"27.7\" />"
+                "</Target>"
+            "</Speed>"
+        "</Longitudinal>"
+    );
+
+    ScenarioEntity scenarioEntity;
+
+    EXPECT_NO_THROW(ScenarioImporter::ImportLongitudinalElement(scenarioEntity, positionElement));
+
+    ASSERT_THAT(scenarioEntity.spawnInfo.stochasticVelocity.has_value(), Eq(false));
+    ASSERT_THAT(scenarioEntity.spawnInfo.velocity, Eq(27.7));
+
+    ASSERT_THAT(scenarioEntity.spawnInfo.stochasticAcceleration.has_value(), Eq(false));
+    ASSERT_THAT(scenarioEntity.spawnInfo.acceleration.has_value(), Eq(true));
+    ASSERT_THAT(scenarioEntity.spawnInfo.acceleration.value(), Eq(10.0));
 }
 
 TEST(ScenarioImporter_UnitTests, ImportLongitudinalWithStochastics)
 {
-    bool testOutcome = true;
-
     QDomElement positionElement = documentRootFromString(
         "<Longitudinal>"
             "<Speed>"
@@ -145,37 +152,68 @@ TEST(ScenarioImporter_UnitTests, ImportLongitudinalWithStochastics)
     );
 
     ScenarioEntity scenarioEntity;
-    try
-    {
-        ScenarioImporter::ImportLongitudinalElement(scenarioEntity, positionElement);
-    }
-    catch (...)
-    {
-        testOutcome = false;
-    }
 
-    SpawnAttribute velocity = scenarioEntity.spawnInfo.velocity;
-    ASSERT_DOUBLE_EQ(velocity.value, 27.7);
-    ASSERT_DOUBLE_EQ(velocity.mean, 27.7);
-    ASSERT_DOUBLE_EQ(velocity.stdDeviation, 3.0);
-    ASSERT_DOUBLE_EQ(velocity.lowerBoundary, 12.0);
-    ASSERT_DOUBLE_EQ(velocity.upperBoundary, 40.0);
-    ASSERT_TRUE(velocity.isStochastic);
+    EXPECT_NO_THROW(ScenarioImporter::ImportLongitudinalElement(scenarioEntity, positionElement));
 
-    SpawnAttribute acceleration = scenarioEntity.spawnInfo.acceleration;
-    ASSERT_DOUBLE_EQ(acceleration.value, 0.0);
-    ASSERT_DOUBLE_EQ(acceleration.mean, 0.0);
-    ASSERT_DOUBLE_EQ(acceleration.stdDeviation, 4.0);
-    ASSERT_DOUBLE_EQ(acceleration.lowerBoundary, 0.0);
-    ASSERT_DOUBLE_EQ(acceleration.upperBoundary, 4.0);
-    ASSERT_TRUE(acceleration.isStochastic);
+    ASSERT_THAT(scenarioEntity.spawnInfo.stochasticVelocity.has_value(), Eq(true));
+    const auto& velocityAttribute = scenarioEntity.spawnInfo.stochasticVelocity.value();
+    ASSERT_DOUBLE_EQ(velocityAttribute.mean, 27.7);
+    ASSERT_DOUBLE_EQ(velocityAttribute.stdDeviation, 3.0);
+    ASSERT_DOUBLE_EQ(velocityAttribute.lowerBoundary, 12.0);
+    ASSERT_DOUBLE_EQ(velocityAttribute.upperBoundary, 40.0);
 
-    ASSERT_TRUE(testOutcome);
+    ASSERT_THAT(scenarioEntity.spawnInfo.stochasticAcceleration.has_value(), Eq(true));
+    const auto& accelerationAttribtue = scenarioEntity.spawnInfo.stochasticAcceleration.value();
+    ASSERT_DOUBLE_EQ(accelerationAttribtue.mean, 0.0);
+    ASSERT_DOUBLE_EQ(accelerationAttribtue.stdDeviation, 4.0);
+    ASSERT_DOUBLE_EQ(accelerationAttribtue.lowerBoundary, 0.0);
+    ASSERT_DOUBLE_EQ(accelerationAttribtue.upperBoundary, 4.0);
+}
+
+std::ostream& operator<<(std::ostream& os, const RouteElement& obj)
+{
+    return os
+            << "road " << obj.roadId << " "
+            << (obj.inRoadDirection ? "in" : "against") << " OpenDrive direction";
+}
+
+TEST(ScenarioImporter_UnitTests, ImportRoutingElement)
+{
+    QDomElement routingElement = documentRootFromString(
+              "<Routing>"
+                    "<FollowRoute>"
+                        "<Route>"
+                            "<Waypoint>"
+                                "<Position>"
+                                    "<Road roadId=\"RoadId1\" t=\"-1.0\" />"
+                                "</Position>"
+                            "</Waypoint>"
+                            "<Waypoint>"
+                                "<Position>"
+                                    "<Road roadId=\"RoadId2\" t=\"1.0\" />"
+                                "</Position>"
+                            "</Waypoint>"
+                            "<Waypoint>"
+                                "<Position>"
+                                    "<Road roadId=\"RoadId3\" t=\"-1.0\" />"
+                                "</Position>"
+                            "</Waypoint>"
+                        "</Route>"
+                    "</FollowRoute>"
+               "</Routing>"
+              );
+
+    ScenarioEntity scenarioEntity;
+
+    ScenarioImporter::ImportRoutingElement(scenarioEntity, routingElement);
+
+    auto route = scenarioEntity.spawnInfo.route;
+    ASSERT_THAT(route.has_value(), Eq(true));
+    ASSERT_THAT(route->roads, ElementsAre(RouteElement{"RoadId1", true}, RouteElement{"RoadId2", false}, RouteElement{"RoadId3", true}));
 }
 
 TEST(ScenarioImporter_UnitTests, ImportVehicleCatalog_ReturnsSuccess)
 {
-    bool testOutcome = true;
     std::string catalogPath{};
 
     QDomElement catalogsElement = documentRootFromString(
@@ -189,22 +227,12 @@ TEST(ScenarioImporter_UnitTests, ImportVehicleCatalog_ReturnsSuccess)
               "</Catalogs>"
               );
 
-    try
-    {
-        ScenarioImporter::ImportCatalog(catalogPath, "VehicleCatalog", catalogsElement);
-    }
-    catch (...)
-    {
-        testOutcome = false;
-    }
-
-    ASSERT_THAT(testOutcome, Eq(true));
+    ASSERT_NO_THROW(catalogPath = ScenarioImporter::ImportCatalog("VehicleCatalog", catalogsElement));
     EXPECT_THAT(catalogPath, StrEq("vpath"));
 }
 
 TEST(ScenarioImporter_UnitTests, ImportPedestrianCatalog_ReturnsSuccess)
 {
-    bool testOutcome = true;
     std::string catalogPath{};
 
     QDomElement catalogsElement = documentRootFromString(
@@ -218,70 +246,8 @@ TEST(ScenarioImporter_UnitTests, ImportPedestrianCatalog_ReturnsSuccess)
               "</Catalogs>"
               );
 
-    try
-    {
-        testOutcome = testOutcome && ScenarioImporter::ImportCatalog(catalogPath, "PedestrianCatalog", catalogsElement);
-    }
-    catch (...)
-    {
-        testOutcome = false;
-    }
-
-    ASSERT_THAT(testOutcome, Eq(true));
+    ASSERT_NO_THROW(catalogPath = ScenarioImporter::ImportCatalog("PedestrianCatalog", catalogsElement));
     EXPECT_THAT(catalogPath, StrEq("ppath"));
-}
-
-TEST(ScenarioImporter_UnitTests, ImportCatalogDirectory_ReturnsSuccess)
-{
-    bool testOutcome = true;
-    std::string catalogPath{};
-
-    QDomElement catalogElement = documentRootFromString(
-                "<AnyCatalog name=\"anycat\">"
-                    "<Directory path=\"anypath\"/>"
-                "</AnyCatalog>"
-              );
-
-    try
-    {
-        testOutcome = testOutcome && ScenarioImporter::ImportCatalogDirectory(catalogPath, catalogElement);
-    }
-    catch (...)
-    {
-        testOutcome = false;
-    }
-
-    ASSERT_THAT(testOutcome, Eq(true));
-    EXPECT_THAT(catalogPath, StrEq("anypath"));
-}
-
-TEST(ScenarioImporter_UnitTests, ImportInvalidCatalogDirectory_ReturnsError)
-{
-    bool testOutcome = false;
-    std::string catalogPath{};
-
-    QDomElement catalogElement1 = documentRootFromString(
-                "<AnyCatalog name=\"anycat\">"
-                    "<Directory/>"
-                "</AnyCatalog>"
-              );
-
-    QDomElement catalogElement2 = documentRootFromString(
-                "<AnyCatalog name=\"anycat\">"
-                "</AnyCatalog>"
-              );
-
-    try
-    {
-        testOutcome = testOutcome || ScenarioImporter::ImportCatalogDirectory(catalogPath, catalogElement1);
-        testOutcome = testOutcome || ScenarioImporter::ImportCatalogDirectory(catalogPath, catalogElement2);
-    }
-    catch (...)
-    {
-        testOutcome = false;
-    }
-
-    ASSERT_THAT(testOutcome, Eq(false));
 }
 
 TEST(ScenarioImporter_UnitTests, ImportStoryboardWithoutEndCondition_Throws)

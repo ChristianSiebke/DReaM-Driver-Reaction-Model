@@ -22,6 +22,7 @@
 #include "Interfaces/componentInterface.h"
 #include "CoreFramework/CoreShare/callbacks.h"
 #include "CoreFramework/CoreShare/log.h"
+#include "Common/runtimeInformation.h"
 
 namespace SimulationSlave
 {
@@ -35,6 +36,7 @@ class ModelBinding
 {
 public:
     ModelBinding(const std::string libraryPath,
+                 const openpass::common::RuntimeInformation& runtimeInformation,
                  CallbackInterface *callbacks);
     ModelBinding(const ModelBinding&) = delete;
     ModelBinding(ModelBinding&&) = delete;
@@ -74,8 +76,10 @@ public:
 
 private:
     const std::string libraryPath;
-    std::map<std::string, ModelLibrary*> modelLibraries;
+    const openpass::common::RuntimeInformation &runtimeInformation;
     CallbackInterface *callbacks {nullptr};
+
+    std::map<std::string, ModelLibrary*> modelLibraries;
 };
 
 } // namespace SimulationSlave

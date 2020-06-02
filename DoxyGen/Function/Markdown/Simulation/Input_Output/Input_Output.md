@@ -78,6 +78,7 @@ Highest number indicates highest priority.
 | Scope                      | Range     |
 |----------------------------|-----------|
 | Parameters                 | 500       |
+| OpenScenarioActions        | 400       |
 | Sensor                     | 350...399 |
 | Event                      | 330       |
 | DriverModels               | 310       |
@@ -95,6 +96,7 @@ The table below can be used as orientation when a new module is introduced.
 |Name|Library|Priority|Scope|Note|
 |---|-----------|-----------|-----------|-----------|
 | ParametersAgentModules| ParametersAgent| 500 | Parameters | Sets all init-data and is updated cyclically |
+| OpenScenarioActions | OpenScenarioActions | 400 | ADAS | Reads events from OpenScenario Actions and forwards them to other components |
 | AlgorithmAgentFollowingDriverModel | AlgorithmAgentFollowingDriverModel | 310 | DriverModels | - |
 | AEB | AlgorithmAutonomousEmergencyBraking | 250 | ADAS | - |
 | ComponentController | ComponentController | 200 | ADAS | Manages vehicle component states with regard to other vehicle component states and conditions and in response to events. |
@@ -175,7 +177,8 @@ With corresponding defined indices :
 | PrioritizerTurningIndicator               | DriverTasks       | 33 | 
 | AlgorithmAgentFollowingDriver             | Driver            | 41 |
 | AEB                                       | VehicleComponent  | 52 | 
-| VehicleControlUnit                        | Special           | 83 |
+| ComponentController                       | Special           | 83 |
+| OpenScenarioActions                       | Special           | 84 |
 | Parameter_Vehicle                         | Sensor            | 92 | 
 | Sensor_Driver                             | Sensor            | 95 | 
 
@@ -183,26 +186,29 @@ With corresponding defined indices :
 
 Index range for signal groups:
 
-| Group         | Id      |
-|---------------|---------|
-| Dynamics      | 1...10  |
-| Algorithm     | 11...30 |
-| Special       | 71...80 |
-| Sensor        | 81...90 |
-| Parameters    | 91...99 |
+| Group                 | Id      |
+|-----------------------|---------|
+| Dynamics              | 1...10  |
+| Algorithm             | 11...30 |
+| OpenScenarioActions   | 61...70 |
+| Special               | 71...80 |
+| Sensor                | 81...90 |
+| Parameters            | 91...99 |
 
 With corresponding defined indices :
 
-| Signal                        | Group      | Id      |
-|-------------------------------|------------|---------|
-| Dynamics                      | Dynamics   | 01      | 
-| Longitudinal                  | Algorithm  | 11      | 
-| Steering                      | Algorithm  | 12      | 
-| Acceleration                  | Algorithm  | 13      | 
-| Lateral                       | Algorithm  | 14      |
-| SecondaryDriverTasks          | Algorithm  | 19      |
-| SensorDriver                  | Sensor     | 81      |
-| ParametersVehicle             | Parameters | 92      |
+| Signal                        | Group                 | Id      |
+|-------------------------------|-----------------------|---------|
+| Dynamics                      | Dynamics              | 01      | 
+| Longitudinal                  | Algorithm             | 11      | 
+| Steering                      | Algorithm             | 12      | 
+| Acceleration                  | Algorithm             | 13      | 
+| Lateral                       | Algorithm             | 14      |
+| SecondaryDriverTasks          | Algorithm             | 19      |
+| Trajectory                    | OpenScenarioActions   | 71      |
+| LaneChange                    | OpenScenarioActions   | 72      |
+| SensorDriver                  | Sensor                | 81      |
+| ParametersVehicle             | Parameters            | 92      |
 
 ---
 
@@ -280,21 +286,19 @@ Groups are defined:
     - Lane
     - S coordinate
     - T coordinate
+	- Agent in front
+
+- **RoadPositionExtended**
     - Secondary lanes
 
 - **Vehicle**
     - Steering angle
-    - Steering angle rate
-    - Steering torque
-    - Side slip angle
     - Yaw rate
     - Lateral acceleration
     - Accelerator pedal position
     - Decelerator pedal position
     - Motor torque
     - RPM
-    - Gear
-    - Status ADAS
 
 - **Sensor**
     - Number of detected agents
@@ -832,6 +836,15 @@ This section contains some information on how each agent is configured.
 ```xml
 <Agent Id="0" AgentTypeGroupName="Ego" AgentTypeName="MiddleClassCarAgent" VehicleModelType="car_bmw_7" DriverProfileName="Regular">
 ```
+
+The VehicleAttributes tag lists basic information of the vehicle parameters.
+
+|Attribute|Description|
+|---------|-----------|
+|Width|Width of the vehicles bounding box|
+|Length|Length of the vehicles bounding box|
+|Height|Height of the vehicles bounding box|
+|LongitudinalPivotOffset|Distance between the center of the bounding box and the reference point of the agent. Positive distances are closer to the front and Negative distances are closer to the rear of the vehicle.|
 
 The Sensors tag lists all sensors of the agent and their parameters.
 

@@ -21,15 +21,32 @@ cmake_policy(SET CMP0020 NEW)   # Automatically link Qt executables to qtmain ta
 cmake_policy(SET CMP0043 NEW)   # Ignore COMPILE_DEFINITIONS_<Config> properties. OLD behavior may be removed in a future version.
 cmake_policy(SET CMP0054 NEW)   # Only interpret if() arguments as variables or keywords when unquoted. OLD behavior may be removed in a future version.
 
-set(CMAKE_C_STANDARD 90)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+if(NOT CMAKE_C_STANDARD)
+  set(CMAKE_C_STANDARD 99)
+  set(CMAKE_C_STANDARD_REQUIRED ON)
+  set(CMAKE_C_EXTENSIONS ON)
+endif()
+
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  set(CMAKE_CXX_EXTENSIONS OFF)
+endif()
 
 if(USE_CCACHE)
   set(CMAKE_C_COMPILER_LAUNCHER ccache)
   set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
+endif()
+
+if(MINGW)
+  if(CMAKE_BUILD_TYPE STREQUAL Debug)
+    # this avoids string table overflow errors during compilation
+    add_compile_options(-O1)
+  endif()
+
+  # required by some openpass link targets
+  # and (almost) all test executables
+  add_compile_options(-Wa,-mbig-obj)
 endif()
 
 set(CMAKE_AUTOMOC ON)
@@ -77,12 +94,12 @@ if(WIN32)
   add_compile_definitions(BOOST_ALL_DYN_LINK)
   add_compile_definitions(_USE_MATH_DEFINES)
   set(CMAKE_DEBUG_POSTFIX "d")
-  option(OPENPASS_ADJUST_OUTPUT "Adjust output durectory" ON)
+  option(OPENPASS_ADJUST_OUTPUT "Adjust output directory" ON)
 else()
   set(CMAKE_INSTALL_PREFIX "/OpenPASS" CACHE PATH "Destination directory")
   add_compile_definitions(unix)
   add_link_options(LINKER:-z,defs)
-  option(OPENPASS_ADJUST_OUTPUT "Adjust output durectory" OFF)
+  option(OPENPASS_ADJUST_OUTPUT "Adjust output directory" OFF)
 endif()
 
 add_compile_definitions($<IF:$<CONFIG:Debug>,DEBUG_POSTFIX="${CMAKE_DEBUG_POSTFIX}",DEBUG_POSTFIX=\"\">)

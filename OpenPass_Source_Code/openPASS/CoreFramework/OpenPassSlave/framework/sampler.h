@@ -19,6 +19,7 @@
 
 #include "Interfaces/samplerInterface.h"
 #include "Interfaces/stochasticsInterface.h"
+#include "Common/runtimeInformation.h"
 
 //-----------------------------------------------------------------------------
 /** \brief Sampler samples probabilities and SpawnPoint and World parameters.
@@ -30,7 +31,10 @@
 class Sampler : public SamplerInterface
 {
 public:
-    Sampler(StochasticsInterface& stochastics);
+    /// \brief Sampler
+    /// \param stochastics          Base for all random rolls (\see StochasticsInterface)
+    /// \param runtimeInformation   Consumed by spawnpoint and worldparameters
+    Sampler(StochasticsInterface &stochastics, const openpass::common::RuntimeInformation& runtimeInformation);
     virtual ~Sampler() override = default;
 
     virtual bool RollFor(double chance) const override;
@@ -42,13 +46,14 @@ public:
     virtual std::string SampleStringProbability(StringProbabilities probabilities) const override;
     virtual int SampleIntProbability(IntProbabilities probabilities) const override;
     virtual double SampleDoubleProbability(DoubleProbabilities probabilities) const override;
-    virtual void SampleSpawnPointParameters(TrafficConfig& trafficConfig, ParameterInterface* parameters) const override;
-    virtual void SampleWorldParameters(EnvironmentConfig& environmentConfig, ParameterInterface* parameters) const override;
+    virtual openpass::parameter::NormalDistribution SampleNormalDistributionProbability(NormalDistributionProbabilities probabilities) const override;
+    virtual std::unique_ptr<ParameterInterface> SampleWorldParameters(const EnvironmentConfig &environmentConfig) const override;
 
 private:
     const std::string COMPONENTNAME = "Sampler";
 
     StochasticsInterface& stochastics;
+    const openpass::common::RuntimeInformation &runtimeInformation;
 
     static constexpr double RATE_ALWAYS_TRUE {1.0};
     static constexpr double RATE_ALWAYS_FALSE {0.0};

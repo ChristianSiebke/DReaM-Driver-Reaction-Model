@@ -10,14 +10,16 @@
 
 #pragma once
 
-#include "parameterInterface.h"
+#include <list>
 #include <memory>
 #include <unordered_map>
-#include <list>
+
+#include "Common/sensorDefinitions.h"
 
 using StringProbabilities = std::unordered_map<std::string, double>;
-using DriverProfiles = std::unordered_map<std::string, std::shared_ptr<ParameterInterface>>;
-using VehicleComponentProfiles = std::unordered_map<std::string, std::shared_ptr<ParameterInterface>>;
+using DriverProfiles = std::unordered_map<std::string, openpass::parameter::Container>;
+using VehicleComponentProfiles = std::unordered_map<std::string, openpass::parameter::Container>;
+using SpawnPointProfiles = std::unordered_map<std::string, openpass::parameter::Container>;
 
 enum class AgentProfileType
 {
@@ -39,31 +41,6 @@ struct AgentProfile
     AgentProfileType type;
 };
 
-struct SensorPosition
-{
-    std::string name {};
-    double longitudinal {};
-    double lateral {};
-    double height {};
-    double pitch {};
-    double yaw {};
-    double roll {};
-};
-
-struct SensorProfile
-{
-    std::string name;
-    std::string type;
-    std::shared_ptr<ParameterInterface> parameters;
-};
-
-struct SensorParameter
-{
-    int id;
-    SensorPosition sensorPosition;
-    SensorProfile sensorProfile;
-};
-
 struct SensorLink
 {
     int sensorId {};
@@ -77,14 +54,12 @@ struct VehicleComponent
     std::list<SensorLink> sensorLinks {};
 };
 
-
 struct VehicleProfile
 {
     std::string vehicleModel {};
     std::list<VehicleComponent> vehicleComponents {};
-    std::list<SensorParameter> sensors {};
+    openpass::sensors::Parameters sensors {};
 };
-
 
 //-----------------------------------------------------------------------------
 //! Interface provides access to the profiles catalog
@@ -100,6 +75,8 @@ public:
     * @return        agentProfiles
     */
     virtual std::unordered_map<std::string, AgentProfile>& GetAgentProfiles() = 0;
+
+    virtual SpawnPointProfiles& GetSpawnPointProfiles() = 0;
 
     /*!
     * \brief Returns a pointer to the driverProfiles
@@ -143,5 +120,5 @@ public:
     *
     * @return        sensorProfiles
     */
-    virtual std::list<SensorProfile>& GetSensorProfiles() = 0;
+    virtual openpass::sensors::Profiles& GetSensorProfiles() = 0;
 };

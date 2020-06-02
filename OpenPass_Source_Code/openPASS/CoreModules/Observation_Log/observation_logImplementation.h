@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -26,6 +26,7 @@
 #include "runStatistic.h"
 #include "observationCyclics.h"
 #include "observationFileHandler.h"
+#include "Common/runtimeInformation.h"
 
 //-----------------------------------------------------------------------------
 /** \brief This class adds the RunStatistic information to the simulation output.
@@ -54,7 +55,7 @@ public:
 
     virtual void Insert(int time, int agentId, LoggingGroup group, const std::string& key, const std::string& value) override;
     virtual void InsertEvent(std::shared_ptr<EventInterface> event) override;
-    virtual void SlavePreHook(const std::string& path) override;
+    virtual void SlavePreHook() override;
     virtual void SlavePreRunHook() override;
     virtual void SlavePostRunHook(const RunResultInterface& runResult) override;
     virtual void SlaveUpdateHook(int, RunResultInterface&) override {}
@@ -62,19 +63,6 @@ public:
     virtual void MasterPostHook(const std::string&) override {}
     virtual void SlavePostHook() override;
 
-    //-----------------------------------------------------------------------------
-    /*!
-    * \brief Calculates the ego followers at simulation start
-    */
-    //-----------------------------------------------------------------------------
-    virtual void GatherFollowers() override;
-
-    //-----------------------------------------------------------------------------
-    /*!
-    * \brief Insert the id of the agent into the list of followers of it is behind the ego
-    */
-    //-----------------------------------------------------------------------------
-    virtual void InformObserverOnSpawn(AgentInterface* agent) override;
 
     virtual const std::string SlaveResultFile() override
     {
@@ -82,6 +70,7 @@ public:
     }
 
 private:
+    const openpass::common::RuntimeInformation& runtimeInformation;
     RunStatistic runStatistic = RunStatistic(-1);
     std::vector<LoggingGroup> loggingGroups{LoggingGroup::Trace};
     ObservationCyclics cyclics;

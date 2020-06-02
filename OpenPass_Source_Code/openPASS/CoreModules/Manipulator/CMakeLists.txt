@@ -10,9 +10,11 @@ add_openpass_target(
     ComponentStateChangeManipulator.h
     LaneChangeManipulator.h
     ManipulatorCommonBase.h
-    ManipulatorExport.h
     ManipulatorGlobal.h
+    ManipulatorExport.h
+    NoOperationManipulator.h
     RemoveAgentsManipulator.h
+    TrajectoryManipulator.h
 
   SOURCES
     CollisionManipulator.cpp
@@ -20,7 +22,9 @@ add_openpass_target(
     LaneChangeManipulator.cpp
     ManipulatorCommonBase.cpp
     ManipulatorExport.cpp
+    NoOperationManipulator.cpp
     RemoveAgentsManipulator.cpp
+    TrajectoryManipulator.cpp
 
   LIBRARIES
     Qt5::Core

@@ -23,10 +23,13 @@
 #include "CoreFramework/CoreShare/callbacks.h"
 #include "commandLineParser.h"
 #include "configurationContainer.h"
-#include "directories.h"
 #include "frameworkModuleContainer.h"
 #include "CoreFramework/CoreShare/log.h"
 #include "runInstantiator.h"
+
+#include "directories.h"
+#include "Common/runtimeInformation.h"
+#include "Common/version.h"
 
 using namespace SimulationSlave;
 
@@ -60,7 +63,7 @@ static bool CheckWritableDir(const std::string& directory, const std::string& pr
 //! \param   directories
 //! \return  true, if everything is allright
 //-----------------------------------------------------------------------------
-static bool CheckDirectories(const Directories& directories);
+static bool CheckDirectories(const openpass::core::Directories& directories);
 
 //-----------------------------------------------------------------------------
 //! Entry point of program.
@@ -87,10 +90,10 @@ int main(int argc, char* argv[])
                  parsedArguments.logFile,
                  CommandLineParser::GetParsingLog());
 
-    Directories directories(QCoreApplication::applicationDirPath().toStdString(),
-                            parsedArguments.libPath,
-                            parsedArguments.configsPath,
-                            parsedArguments.resultsPath);
+    openpass::core::Directories directories(QCoreApplication::applicationDirPath().toStdString(),
+                                              parsedArguments.libPath,
+                                              parsedArguments.configsPath,
+                                              parsedArguments.resultsPath);
     if (!CheckDirectories(directories))
     {
         exit(EXIT_FAILURE);
@@ -98,6 +101,8 @@ int main(int argc, char* argv[])
 
     ConfigurationFiles configurationFiles {directories.configurationDir, "systemConfigBlueprint.xml", "slaveConfig.xml"};
     Configuration::ConfigurationContainer configurationContainer(configurationFiles);
+    openpass::common::RuntimeInformation runtimeInformation
+    { {openpass::common::framework}, { directories.configurationDir, directories.outputDir, directories.libraryDir }};
 
     if (!configurationContainer.ImportAllConfigurations())
     {
@@ -113,16 +118,18 @@ int main(int argc, char* argv[])
         libraries.at("EventDetectorLibrary"),
         libraries.at("ManipulatorLibrary"),
         libraries.at("ObservationLibrary"),
-        libraries.at("SpawnPointLibrary"),
         libraries.at("StochasticsLibrary"),
-        libraries.at("WorldLibrary")
+        libraries.at("WorldLibrary"),
+        configurationContainer.GetSlaveConfig()->GetSpawnPointsConfig()
     };
 
     SimulationCommon::Callbacks callbacks;
-    FrameworkModuleContainer frameworkModuleContainer(frameworkModules, &configurationContainer, &callbacks);
+    FrameworkModuleContainer frameworkModuleContainer(frameworkModules,
+                                                      &configurationContainer,
+                                                      runtimeInformation,
+                                                      &callbacks);
 
-    RunInstantiator runInstantiator(directories.outputDir,
-                                    configurationContainer,
+    RunInstantiator runInstantiator(configurationContainer,
                                     frameworkModuleContainer,
                                     frameworkModules);
 
@@ -157,7 +164,7 @@ void SetupLogging(LogLevel logLevel, const std::string& logFile, const std::list
     [](const std::string & m) { LOG_INTERN(LogLevel::Warning) << m; });
 }
 
-bool CheckDirectories(const Directories& directories)
+bool CheckDirectories(const openpass::core::Directories& directories)
 {
     LOG_INTERN(LogLevel::DebugCore) << "base path: " << directories.baseDir;
     LOG_INTERN(LogLevel::DebugCore) << "library path: " << directories.libraryDir;

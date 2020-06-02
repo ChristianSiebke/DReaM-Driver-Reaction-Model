@@ -22,6 +22,8 @@
 #include "Interfaces/eventNetworkInterface.h"
 #include "Interfaces/stochasticsInterface.h"
 #include "Interfaces/worldInterface.h"
+#include "Common/runtimeInformation.h"
+#include "Common/parameter.h"
 #include "callbacks.h"
 
 namespace SimulationSlave {
@@ -31,7 +33,7 @@ class ObservationModule;
 class ObservationBinding
 {
 public:
-    ObservationBinding(CallbackInterface* callbacks);
+    ObservationBinding(const openpass::common::RuntimeInformation& runtimeInformation, CallbackInterface* callbacks);
     ObservationBinding(const ObservationBinding&) = delete;
     ObservationBinding(ObservationBinding&&) = delete;
     ObservationBinding& operator=(const ObservationBinding&) = delete;
@@ -51,8 +53,8 @@ public:
     //! @return                             Observation module created from the
     //!                                     observation instance
     //-----------------------------------------------------------------------------
-    ObservationModule* Instantiate(const std::string libraryPath,
-                                   ParameterInterface* parameters,
+    ObservationModule* Instantiate(const std::string &libraryPath,
+                                   const openpass::parameter::Container& parameter,
                                    StochasticsInterface* stochastics,
                                    WorldInterface* world,
                                    SimulationSlave::EventNetworkInterface* eventNetwork);
@@ -63,6 +65,7 @@ public:
 
 private:
     ObservationLibrary* library {nullptr};
+    const openpass::common::RuntimeInformation &runtimeInformation;
     CallbackInterface* callbacks {nullptr};
 };
 

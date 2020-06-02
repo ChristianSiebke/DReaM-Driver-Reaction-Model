@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019. 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -20,7 +20,21 @@ using ::testing::Return;
 using ::testing::ReturnPointee;
 using ::testing::NiceMock;
 
-TEST(DynamicsCollision_UnitTests, CollisionOfTwoAgentsOnlyInXDirection)
+class DynamicsCollision_Test : public ::testing::Test
+{
+public:
+    DynamicsCollision_Test()
+    {
+        heavyVehicle.weight = 2000.0;
+        lightVehicle.weight = 1000.0;
+    }
+
+protected:
+    VehicleModelParameters heavyVehicle;
+    VehicleModelParameters lightVehicle;
+};
+
+TEST_F(DynamicsCollision_Test, CollisionOfTwoAgentsOnlyInXDirection)
 {
     NiceMock<FakeAgent> agent;
     NiceMock<FakeAgent> opponent;
@@ -29,13 +43,13 @@ TEST(DynamicsCollision_UnitTests, CollisionOfTwoAgentsOnlyInXDirection)
 
     ON_CALL(agent, GetVelocity()).WillByDefault(Return(40.0));
     ON_CALL(agent, GetYaw()).WillByDefault(Return(0.0));
-    ON_CALL(agent, GetWeight()).WillByDefault(Return(2000.0));
+    ON_CALL(agent, GetVehicleModelParameters()).WillByDefault(Return(heavyVehicle));
     std::vector<std::pair<ObjectTypeOSI,int>> collisionPartnersAgent {pair1};
     ON_CALL(agent, GetCollisionPartners()).WillByDefault(Return(collisionPartnersAgent));
 
     ON_CALL(opponent, GetVelocity()).WillByDefault(Return(10.0));
     ON_CALL(opponent, GetYaw()).WillByDefault(Return(0.0));
-    ON_CALL(opponent, GetWeight()).WillByDefault(Return(1000.0));
+    ON_CALL(opponent, GetVehicleModelParameters()).WillByDefault(Return(lightVehicle));
     std::vector<std::pair<ObjectTypeOSI,int>> collisionPartnersOpponent {pair0};
     ON_CALL(opponent, GetCollisionPartners()).WillByDefault(Return(collisionPartnersOpponent));
 
@@ -63,7 +77,7 @@ TEST(DynamicsCollision_UnitTests, CollisionOfTwoAgentsOnlyInXDirection)
     ASSERT_DOUBLE_EQ(dynamicsCollision.GetMovingDirection(), 0.0);
 }
 
-TEST(DynamicsCollision_UnitTests, CollisionOfTwoAgentsOrthogonal)
+TEST_F(DynamicsCollision_Test, CollisionOfTwoAgentsOrthogonal)
 {
     NiceMock<FakeAgent> agent;
     NiceMock<FakeAgent> opponent;
@@ -72,13 +86,13 @@ TEST(DynamicsCollision_UnitTests, CollisionOfTwoAgentsOrthogonal)
 
     ON_CALL(agent, GetVelocity()).WillByDefault(Return(40.0));
     ON_CALL(agent, GetYaw()).WillByDefault(Return(0.0));
-    ON_CALL(agent, GetWeight()).WillByDefault(Return(1000.0));
+    ON_CALL(agent, GetVehicleModelParameters()).WillByDefault(Return(lightVehicle));
     std::vector<std::pair<ObjectTypeOSI,int>> collisionPartnersAgent {pair1};
     ON_CALL(agent, GetCollisionPartners()).WillByDefault(Return(collisionPartnersAgent));
 
     ON_CALL(opponent, GetVelocity()).WillByDefault(Return(40.0));
     ON_CALL(opponent, GetYaw()).WillByDefault(Return(0.5 * M_PI));
-    ON_CALL(opponent, GetWeight()).WillByDefault(Return(1000.0));
+    ON_CALL(opponent, GetVehicleModelParameters()).WillByDefault(Return(lightVehicle));
     std::vector<std::pair<ObjectTypeOSI,int>> collisionPartnersOpponent {pair0};
     ON_CALL(opponent, GetCollisionPartners()).WillByDefault(Return(collisionPartnersOpponent));
 
@@ -107,7 +121,7 @@ TEST(DynamicsCollision_UnitTests, CollisionOfTwoAgentsOrthogonal)
     ASSERT_DOUBLE_EQ(dynamicsCollision.GetMovingDirection(), 0.25 * M_PI);
 }
 
-TEST(DynamicsCollision_UnitTests, CollisionOfTwoAgentsOpposingDirections)
+TEST_F(DynamicsCollision_Test, CollisionOfTwoAgentsOpposingDirections)
 {
     NiceMock<FakeAgent> agent;
     NiceMock<FakeAgent> opponent;
@@ -116,13 +130,13 @@ TEST(DynamicsCollision_UnitTests, CollisionOfTwoAgentsOpposingDirections)
 
     ON_CALL(agent, GetVelocity()).WillByDefault(Return(20.0));
     ON_CALL(agent, GetYaw()).WillByDefault(Return(1.25 * M_PI));
-    ON_CALL(agent, GetWeight()).WillByDefault(Return(2000.0));
+    ON_CALL(agent, GetVehicleModelParameters()).WillByDefault(Return(heavyVehicle));
     std::vector<std::pair<ObjectTypeOSI,int>> collisionPartnersAgent {pair1};
     ON_CALL(agent, GetCollisionPartners()).WillByDefault(Return(collisionPartnersAgent));
 
     ON_CALL(opponent, GetVelocity()).WillByDefault(Return(40.0));
     ON_CALL(opponent, GetYaw()).WillByDefault(Return(0.25 * M_PI));
-    ON_CALL(opponent, GetWeight()).WillByDefault(Return(1000.0));
+    ON_CALL(opponent, GetVehicleModelParameters()).WillByDefault(Return(lightVehicle));
     std::vector<std::pair<ObjectTypeOSI,int>> collisionPartnersOpponent {pair0};
     ON_CALL(opponent, GetCollisionPartners()).WillByDefault(Return(collisionPartnersOpponent));
 
@@ -149,7 +163,7 @@ TEST(DynamicsCollision_UnitTests, CollisionOfTwoAgentsOpposingDirections)
     ASSERT_NEAR(dynamicsCollision.GetVelocity(), 0.0, 1e-9);
 }
 
-TEST(DynamicsCollision_UnitTests, CollisionOfThreeAgentsOnlyInXDirection)
+TEST_F(DynamicsCollision_Test, CollisionOfThreeAgentsOnlyInXDirection)
 {
     NiceMock<FakeAgent> agent;
     NiceMock<FakeAgent> opponent1;
@@ -160,19 +174,19 @@ TEST(DynamicsCollision_UnitTests, CollisionOfThreeAgentsOnlyInXDirection)
 
     ON_CALL(agent, GetVelocity()).WillByDefault(Return(40.0));
     ON_CALL(agent, GetYaw()).WillByDefault(Return(0.0));
-    ON_CALL(agent, GetWeight()).WillByDefault(Return(2000.0));
+    ON_CALL(agent, GetVehicleModelParameters()).WillByDefault(Return(heavyVehicle));
     std::vector<std::pair<ObjectTypeOSI,int>> collisionPartnersAgent {pair1, pair2};
     ON_CALL(agent, GetCollisionPartners()).WillByDefault(Return(collisionPartnersAgent));
 
     ON_CALL(opponent1, GetVelocity()).WillByDefault(Return(20.0));
     ON_CALL(opponent1, GetYaw()).WillByDefault(Return(0.0));
-    ON_CALL(opponent1, GetWeight()).WillByDefault(Return(1000.0));
+    ON_CALL(opponent1, GetVehicleModelParameters()).WillByDefault(Return(lightVehicle));
     std::vector<std::pair<ObjectTypeOSI,int>> collisionPartnersOpponent1 {pair0, pair2};
     ON_CALL(opponent1, GetCollisionPartners()).WillByDefault(Return(collisionPartnersOpponent1));
 
     ON_CALL(opponent2, GetVelocity()).WillByDefault(Return(0.0));
     ON_CALL(opponent2, GetYaw()).WillByDefault(Return(0.0));
-    ON_CALL(opponent2, GetWeight()).WillByDefault(Return(1000.0));
+    ON_CALL(opponent2, GetVehicleModelParameters()).WillByDefault(Return(lightVehicle));
     std::vector<std::pair<ObjectTypeOSI,int>> collisionPartnersOpponent2 {pair1, pair0};
     ON_CALL(opponent2, GetCollisionPartners()).WillByDefault(Return(collisionPartnersOpponent2));
 
@@ -201,7 +215,7 @@ TEST(DynamicsCollision_UnitTests, CollisionOfThreeAgentsOnlyInXDirection)
     ASSERT_DOUBLE_EQ(dynamicsCollision.GetMovingDirection(), 0.0);
 }
 
-TEST(DynamicsCollision_UnitTests, CollisionOfThreeAgentsInDifferentDirections)
+TEST_F(DynamicsCollision_Test, CollisionOfThreeAgentsInDifferentDirections)
 {
     NiceMock<FakeAgent> agent;
     NiceMock<FakeAgent> opponent1;
@@ -212,19 +226,19 @@ TEST(DynamicsCollision_UnitTests, CollisionOfThreeAgentsInDifferentDirections)
 
     ON_CALL(agent, GetVelocity()).WillByDefault(Return(30.0));
     ON_CALL(agent, GetYaw()).WillByDefault(Return(-0.5 * M_PI));
-    ON_CALL(agent, GetWeight()).WillByDefault(Return(1000.0));
+    ON_CALL(agent, GetVehicleModelParameters()).WillByDefault(Return(lightVehicle));
     std::vector<std::pair<ObjectTypeOSI,int>> collisionPartnersAgent {pair1, pair2};
     ON_CALL(agent, GetCollisionPartners()).WillByDefault(Return(collisionPartnersAgent));
 
     ON_CALL(opponent1, GetVelocity()).WillByDefault(Return(30.0 * std::sqrt(2)));
     ON_CALL(opponent1, GetYaw()).WillByDefault(Return(-0.25 * M_PI));
-    ON_CALL(opponent1, GetWeight()).WillByDefault(Return(1000.0));
+    ON_CALL(opponent1, GetVehicleModelParameters()).WillByDefault(Return(lightVehicle));
     std::vector<std::pair<ObjectTypeOSI,int>> collisionPartnersOpponent1 {pair0, pair2};
     ON_CALL(opponent1, GetCollisionPartners()).WillByDefault(Return(collisionPartnersOpponent1));
 
     ON_CALL(opponent2, GetVelocity()).WillByDefault(Return(30.0));
     ON_CALL(opponent2, GetYaw()).WillByDefault(Return(0.0));
-    ON_CALL(opponent2, GetWeight()).WillByDefault(Return(1000.0));
+    ON_CALL(opponent2, GetVehicleModelParameters()).WillByDefault(Return(lightVehicle));
     std::vector<std::pair<ObjectTypeOSI,int>> collisionPartnersOpponent2 {pair1, pair0};
     ON_CALL(opponent2, GetCollisionPartners()).WillByDefault(Return(collisionPartnersOpponent2));
 
@@ -254,14 +268,14 @@ TEST(DynamicsCollision_UnitTests, CollisionOfThreeAgentsInDifferentDirections)
     ASSERT_DOUBLE_EQ(dynamicsCollision.GetMovingDirection(), -0.25 * M_PI);
 }
 
-TEST(DynamicsCollision_UnitTests, CollisionOfAgentWithFixedObject)
+TEST_F(DynamicsCollision_Test, CollisionOfAgentWithFixedObject)
 {
     NiceMock<FakeAgent> agent;
     std::pair<ObjectTypeOSI,int> pair = std::make_pair(ObjectTypeOSI::Object, 0);
 
     ON_CALL(agent, GetVelocity()).WillByDefault(Return(40.0));
     ON_CALL(agent, GetYaw()).WillByDefault(Return(0.0));
-    ON_CALL(agent, GetWeight()).WillByDefault(Return(2000.0));
+    ON_CALL(agent, GetVehicleModelParameters()).WillByDefault(Return(heavyVehicle));
     std::vector<std::pair<ObjectTypeOSI,int>> collisionPartnersAgent {pair};
     ON_CALL(agent, GetCollisionPartners()).WillByDefault(Return(collisionPartnersAgent));
 

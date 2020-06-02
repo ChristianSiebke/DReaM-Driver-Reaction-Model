@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2019 in-tech GmbH
+* Copyright (c) 2017, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -14,15 +14,6 @@
 #include <QDomDocument>
 #include "CoreFramework/CoreShare/parameters.h"
 #include "Interfaces/scenarioActionInterface.h"
-
-#define CHECKFALSE(element) \
-    do { \
-        if (!(element)) \
-        { \
-            throw std::runtime_error("Checkfalse in manipulator importer failed"); \
-        } \
-    } \
-    while (0);
 
 namespace Importer
 {
@@ -43,17 +34,16 @@ public:
      *
      * \param[in] eventElement The OpenSCENARIO-adherent Event element from
      *            which to import the manipulator
-     * \param[in] eventDetectorNames The names of the event detectors in the
-     *            scenario
-     * \param[in] actors The names of the actors in the sequence
-     * \param[in] sequenceName The name of the sequence
+     * \param[in] eventName The name of the event
+     * \param[in] trajectoryCatalogPath Full path to the trajectory catalog file
      *
      * \returns a std::shared_ptr to a scenario action interface containing
      *          pertinent information from within the eventElement
      * ------------------------------------------------------------------------
      */
     static std::shared_ptr<ScenarioActionInterface> ImportManipulator(QDomElement& eventElement,
-                                                              const std::string& sequenceName);
+                                                                      const std::string& eventName,
+                                                                      const std::string& trajectoryCatalogPath);
 
 private:
     /*!
@@ -62,12 +52,15 @@ private:
      *        an ActionInterface from which a manipulator may be created
      *
      * \param[in] privateElement the Private element to parse
+     * \param[in] eventName The name of the event
+     * \param[in] trajectoryCatalogPath Full path to the trajectory catalog file
      *
      * \returns a shared_ptr to the ActionInterface containing the parsed data
      * ------------------------------------------------------------------------
      */
     static std::shared_ptr<ScenarioActionInterface> ImportManipulatorFromPrivateElement(QDomElement& privateElement,
-                                                                                const std::string& sequenceName);
+                                                                                        const std::string& eventName,
+                                                                                        const std::string& trajectoryCatalogPath);
 
     /*!
      * ------------------------------------------------------------------------
@@ -75,12 +68,13 @@ private:
      *        an ActionInterface from which a manipulator may be created
      *
      * \param[in] globalElement the Global element to parse
+     * \param[in] eventName The name of the event
      *
      * \returns a shared_ptr to the ActionInterface containing the parsed data
      * ------------------------------------------------------------------------
      */
     static std::shared_ptr<ScenarioActionInterface> ImportManipulatorFromGlobalElement(QDomElement& globalElement,
-                                                                               const std::string& sequenceName);
+                                                                               const std::string& eventName);
 
     /*!
      * ------------------------------------------------------------------------
@@ -88,13 +82,14 @@ private:
      *        an ActionInterface from which a manipulator may be created
      *
      * \param[in] userDefinedElement the UserDefined element to parse
+     * \param[in] eventName     Name of the event.
      *
      * \returns a shared_ptr to the ActionInterface containing the parsed data
      * ------------------------------------------------------------------------
      */
     static std::shared_ptr<ScenarioActionInterface> ImportManipulatorFromUserDefinedElement(QDomElement& userDefinedElement,
-                                                                                    const std::string& sequenceName);
+                                                                                    const std::string& eventName);
 
-    [[ noreturn ]] static void LogAndThrowError(const std::string &message);
+    static QDomElement GetTrajectoryElementFromCatalog(const std::string& catalogName, const std::string& catalogPath, const std::string& entryName);
 };
 } // Importer

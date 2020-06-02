@@ -46,6 +46,13 @@ public:
     virtual void SetImplementation(ModelInterface* implementation) = 0;
 
     //-----------------------------------------------------------------------------
+    //! Sets the parameter for the component.
+    //!
+    //! @param[in]     parameter             Parameters transmitted to the model
+    //-----------------------------------------------------------------------------
+    virtual void SetParameter(std::unique_ptr<ParameterInterface> parameter) = 0;
+
+    //-----------------------------------------------------------------------------
     //! Returns the stored agent.
     //!
     //! @return                             Stored agent

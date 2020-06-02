@@ -20,6 +20,7 @@
 #include <list>
 #include <string>
 #include <QLibrary>
+#include "Common/runtimeInformation.h"
 #include "Interfaces/modelInterface.h"
 #include "Interfaces/componentInterface.h"
 #include "Interfaces/observationNetworkInterface.h"
@@ -111,14 +112,17 @@ public:
     //!
     //! @param[in]     componentType        Agent as defined in the agent config file
     //! @param[in]     componentName        Name of the component
+    //! @param[in]     runtimeInformation   Static information from the slave for the components
     //! @param[in]     stochastics          The stochastics interface
     //! @param[in]     world                The world interface
     //! @param[in]     observationNetwork   Network of the observation modules
     //! @param[in]     agent                Agent instance
+    //! @param[in]     eventNetwork         Instance of the internal event logic
     //! @return
     //-----------------------------------------------------------------------------
     ComponentInterface *CreateComponent(std::shared_ptr<ComponentType> componentType,
                                std::string componentName,
+                               const openpass::common::RuntimeInformation& runtimeInformation,
                                StochasticsInterface *stochastics,
                                WorldInterface *world,
                                ObservationNetworkInterface *observationNetwork,

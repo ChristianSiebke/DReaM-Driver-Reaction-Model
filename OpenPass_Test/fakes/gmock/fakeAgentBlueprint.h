@@ -33,38 +33,36 @@ class FakeAgentBlueprint : public AgentBlueprintInterface {
       void(SpawnParameter spawnParameter));
   MOCK_METHOD1(SetSpeedGoalMin,
       void(double));
-  MOCK_METHOD0(GetAgentCategory,
+  MOCK_CONST_METHOD0(GetAgentCategory,
       AgentCategory());
-  MOCK_METHOD0(GetAgentProfileName,
+  MOCK_CONST_METHOD0(GetAgentProfileName,
       std::string());
-  MOCK_METHOD0(GetVehicleProfileName,
+  MOCK_CONST_METHOD0(GetVehicleProfileName,
       std::string());
-  MOCK_METHOD0(GetVehicleModelName,
+  MOCK_CONST_METHOD0(GetVehicleModelName,
       std::string());
-  MOCK_METHOD0(GetVehicleModelParameters,
+  MOCK_CONST_METHOD0(GetVehicleModelParameters,
       VehicleModelParameters());
-  MOCK_METHOD0(GetVehicleComponentProfileNames,
+  MOCK_CONST_METHOD0(GetVehicleComponentProfileNames,
       VehicleComponentProfileNames());
-  MOCK_METHOD0(GetDriverProfileName,
+  MOCK_CONST_METHOD0(GetDriverProfileName,
       std::string());
-  MOCK_METHOD0(GetObjectName,
+  MOCK_CONST_METHOD0(GetObjectName,
       std::string());
-  MOCK_METHOD0(GetAgentType,
+  MOCK_CONST_METHOD0(GetAgentType,
       SimulationSlave::AgentTypeInterface&());
   MOCK_METHOD0(GetSpawnParameter,
       SpawnParameter&());
-  MOCK_METHOD0(GetSpeedGoalMin,
+  MOCK_CONST_METHOD0(GetSpawnParameter,
+      const SpawnParameter&());
+  MOCK_CONST_METHOD0(GetSpeedGoalMin,
       double());
   MOCK_METHOD1(SetObjectName,
       void(std::string));
-  MOCK_METHOD0(Reset,
-      void());
   MOCK_METHOD1(AddSensor,
-      void(SensorParameter));
-  MOCK_METHOD0(GetSensorParameters,
-      std::list<SensorParameter>());
+      void(openpass::sensors::Parameter));
+  MOCK_CONST_METHOD0(GetSensorParameters,
+      openpass::sensors::Parameters());
   MOCK_METHOD1(SetAgentType,
       void (std::shared_ptr<SimulationSlave::AgentTypeInterface> agentType));
 };
-
-

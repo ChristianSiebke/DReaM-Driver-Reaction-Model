@@ -232,7 +232,7 @@ protected:
    osi3::SensorData sensorData;
 
    ObservationInterface* _observer = nullptr;
-   SensorPosition position;
+   openpass::sensors::Position position;
    int id;
    double failureProbability;
    double latency {0.0};

@@ -74,14 +74,14 @@ const std::map<int, ObservationModule*>& ObservationNetwork::GetObservationModul
     return modules;
 }
 
-bool ObservationNetwork::InitAll(const std::string& path)
+bool ObservationNetwork::InitAll()
 {
     for (auto& item : modules)
     {
         auto module = item.second;
         try
         {
-            if (!module->GetLibrary()->SlavePreHook(module->GetImplementation(), path))
+            if (!module->GetLibrary()->SlavePreHook(module->GetImplementation()))
             {
                 LOG_INTERN(LogLevel::Error) << "observation " << module->GetId() << ", slave pre hook failed";
                 return false;

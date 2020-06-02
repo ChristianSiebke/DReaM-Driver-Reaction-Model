@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -20,10 +20,34 @@
 #include <string>
 #include <vector>
 
+#include "Common/worldDefinitions.h"
 #include "Common/eventDetectorDefinitions.h"
-#include "Common/spawnPointDefinitions.h"
 #include "Interfaces/scenarioActionInterface.h"
 #include "CoreFramework/CoreShare/parameters.h"
+
+struct SpawnInfo
+{
+public:
+    SpawnInfo() {}
+    SpawnInfo(std::variant<openScenario::LanePosition, openScenario::WorldPosition> position,
+                        double v,
+                        double acceleration):
+        position(position)
+    {
+        this->velocity = v;
+        this->acceleration = acceleration;
+    }
+
+    std::variant<openScenario::LanePosition, openScenario::WorldPosition> position;
+
+    std::optional<Route> route {std::nullopt};
+
+    double velocity;
+    std::optional<openScenario::StochasticAttribute> stochasticVelocity;
+
+    std::optional<double> acceleration;
+    std::optional<openScenario::StochasticAttribute> stochasticAcceleration;
+};
 
 /*!
  * \brief References an element inside a catalog
@@ -87,6 +111,24 @@ public:
     virtual void SetPedestrianCatalogPath(const std::string& catalogPath) = 0;
 
     //-----------------------------------------------------------------------------
+    //! \brief Retreives the path to the trajectory catalog file
+    //!
+    //! The path can either be absolute or relative to the simulator executable
+    //!
+    //! \return     Path to the trajectory catalog file
+    //-----------------------------------------------------------------------------
+    virtual const std::string& GetTrajectoryCatalogPath() = 0;
+
+    //-----------------------------------------------------------------------------
+    //! Sets the path to the trajectory catalog file
+    //!
+    //! The path can either be absolute or relative to the simulator executable
+    //!
+    //! \param[in]      catalogPath     Path to the trajectory catalog file
+    //-----------------------------------------------------------------------------
+    virtual void SetTrajectoryCatalogPath(const std::string& catalogPath) = 0;
+
+    //-----------------------------------------------------------------------------
     //! Retreives the path to the scenery file (OpenDRIVE)
     //!
     //! \return     Relative path to the scenery file
@@ -101,11 +143,6 @@ public:
     virtual void SetSceneryPath(const std::string& sceneryPath) = 0;
 
     //-----------------------------------------------------------------------------
-    //! Sets the ego entity of the scenario.
-    //-----------------------------------------------------------------------------
-    virtual void SetEgoEntity(const ScenarioEntity& egoEntity) = 0;
-
-    //-----------------------------------------------------------------------------
     //! Adds one scenario entity to the scenery entities of the scenario.
     //-----------------------------------------------------------------------------
     virtual void AddScenarioEntity(const ScenarioEntity& entity) = 0;
@@ -116,12 +153,7 @@ public:
     //-----------------------------------------------------------------------------
     virtual void AddScenarioGroupsByEntityNames(const std::map<std::string, std::list<std::string>> &groupDefinitions) = 0;
 
-    //-----------------------------------------------------------------------------
-    //! Returns the ego entity of the scenario.
-    //!
-    //! @return                         ScenarioEntity of ego vehicle
-    //-----------------------------------------------------------------------------
-    virtual const ScenarioEntity& GetEgoEntity() = 0;
+    virtual const std::vector<ScenarioEntity>& GetEntities() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the ego entity of the scenario.

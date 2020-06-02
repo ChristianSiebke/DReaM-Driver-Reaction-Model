@@ -11,10 +11,15 @@
 
 #pragma once
 
+#include <list>
+#include <string>
+
+#include <QString>
 #include <QStringList>
 #include <QCoreApplication>
-#include "QCommandLineParser"
-#include <Common/opExport.h>
+#include <QCommandLineParser>
+
+#include "Common/opExport.h"
 
 struct CORESLAVEEXPORT CommandLineArguments
 {

@@ -42,7 +42,6 @@ DEPENDENCIES = \
     $$OPEN_SRC/CoreFramework/CoreShare/parameters.cpp
 
 AGENTSAMPLER_TESTS = \
-    $$UNIT_UNDER_TEST/framework/agentProfileSampler.cpp \
     $$UNIT_UNDER_TEST/framework/dynamicProfileSampler.h \
     $$UNIT_UNDER_TEST/framework/dynamicProfileSampler.cpp \
     $$UNIT_UNDER_TEST/framework/dynamicParametersSampler.cpp \
@@ -107,11 +106,6 @@ MANIPULATORIMPORTER_TESTS = \
     \
     manipulatorImporter_Tests.cpp
 
-INVOCATIONCONTROL_TESTS = \
-    $$UNIT_UNDER_TEST/framework/invocationControl.cpp \
-    \
-    invocationControl_Tests.cpp
-
 COMMANDLINERPARSER_TESTS = \
     $$UNIT_UNDER_TEST/framework/commandLineParser.cpp \
     \
@@ -130,6 +124,7 @@ SOURCES += \
     $$PARAMETERIMPORTER_TESTS \
     $$SAMPLER_TESTS \
     $$SCENARIOIMPORTER_TESTS \
+    $$SCENERYIMPORTER_TESTS \
     $$MANIPULATORIMPORTER_TESTS \
     $$INVOCATIONCONTROL_TESTS \
     $$VEHICLEMODELIMPORTER_TESTS \

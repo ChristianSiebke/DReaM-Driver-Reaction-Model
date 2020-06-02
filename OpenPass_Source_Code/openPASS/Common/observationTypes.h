@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -12,7 +12,6 @@
 #pragma once
 
 #define OBSERVATION_LOG_VALUE_UNDEFINED ""
-#define NFOLLOWERS 10
 
 #include <string>
 
@@ -21,6 +20,7 @@ enum class LoggingGroup
     Trace,
     Visualization,
     RoadPosition,
+    RoadPositionExtended,
     Vehicle,
     Sensor,
     SensorExtended,

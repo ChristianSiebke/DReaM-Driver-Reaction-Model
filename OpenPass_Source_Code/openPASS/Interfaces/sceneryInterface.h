@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -58,14 +58,12 @@ public:
     //-----------------------------------------------------------------------------
     virtual JunctionInterface *AddJunction(const std::string &id) = 0;
 
-
     //-----------------------------------------------------------------------------
     //! Returns the stored list of roads.
     //!
     //! @return                         list of roads
     //-----------------------------------------------------------------------------
-    virtual std::map<std::string, RoadInterface*> &GetRoads() = 0;
-
+    virtual const std::map<std::string, RoadInterface*> &GetRoads() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the road with the provided ID from the scenery.
@@ -73,15 +71,14 @@ public:
     //! @param[in]  id                  ID of the road
     //! @return                         road with the provided ID
     //-----------------------------------------------------------------------------
-    virtual RoadInterface *GetRoad(const std::string& id) = 0;
-
+    virtual const RoadInterface *GetRoad(const std::string& id) const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the stored list of junctions.
     //!
     //! @return                         list of roads
     //-----------------------------------------------------------------------------
-    virtual std::map<std::string, JunctionInterface*> &GetJunctions() = 0;
+    virtual const std::map<std::string, JunctionInterface*> &GetJunctions() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the junction with the provided ID from the scenery.
@@ -89,7 +86,7 @@ public:
     //! @param[in]  id                  ID of the junction
     //! @return                         junction with the provided ID
     //-----------------------------------------------------------------------------
-    virtual JunctionInterface *GetJunction(const std::string& id) = 0;
+    virtual const JunctionInterface *GetJunction(const std::string& id) const = 0;
 };
 
 #endif // SCENERYINTERFACE

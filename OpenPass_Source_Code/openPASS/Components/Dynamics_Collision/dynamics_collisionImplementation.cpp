@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -93,9 +93,10 @@ void DynamicsCollisionImplementation::Trigger(int time)
         bool collisionWithFixedObject = false;
 
         //Calculate new velocity by inelastic collision
-        double sumOfWeights = GetAgent()->GetWeight();
-        double sumOfImpulsesX = GetAgent()->GetVelocity() * GetAgent()->GetWeight() * std::cos(GetAgent()->GetYaw());
-        double sumOfImpulsesY = GetAgent()->GetVelocity() * GetAgent()->GetWeight() * std::sin(GetAgent()->GetYaw());
+        const double &agentWeight = GetAgent()->GetVehicleModelParameters().weight;
+        double sumOfWeights = agentWeight;
+        double sumOfImpulsesX = GetAgent()->GetVelocity() * agentWeight * std::cos(GetAgent()->GetYaw());
+        double sumOfImpulsesY = GetAgent()->GetVelocity() * agentWeight * std::sin(GetAgent()->GetYaw());
 
         auto collisionPartners = GetAgent()->GetCollisionPartners();
         for (const auto &partner : collisionPartners)
@@ -108,9 +109,11 @@ void DynamicsCollisionImplementation::Trigger(int time)
             const AgentInterface* partnerAgent = GetWorld()->GetAgent(partner.second);
             if (partnerAgent != nullptr)
             {
-                sumOfWeights += partnerAgent->GetWeight();
-                sumOfImpulsesX += partnerAgent->GetVelocity() * partnerAgent->GetWeight() * std::cos(partnerAgent->GetYaw());
-                sumOfImpulsesY += partnerAgent->GetVelocity() * partnerAgent->GetWeight() * std::sin(partnerAgent->GetYaw());
+                const double &partnerAgentWeight = partnerAgent->GetVehicleModelParameters().weight;
+
+                sumOfWeights += partnerAgentWeight;
+                sumOfImpulsesX += partnerAgent->GetVelocity() * partnerAgentWeight * std::cos(partnerAgent->GetYaw());
+                sumOfImpulsesY += partnerAgent->GetVelocity() * partnerAgentWeight * std::sin(partnerAgent->GetYaw());
             }
         }
 

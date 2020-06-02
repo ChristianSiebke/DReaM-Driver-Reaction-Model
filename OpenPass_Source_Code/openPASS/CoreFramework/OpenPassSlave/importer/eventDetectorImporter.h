@@ -13,6 +13,7 @@
 #include <QDomDocument>
 #include "Interfaces/scenarioInterface.h"
 #include "Common/eventDetectorDefinitions.h"
+#include "importerLoggingHelper.h"
 
 namespace Importer
 {
@@ -39,7 +40,7 @@ public:
      * \param[in] eventElement the element from which to parse
      *                         ConditionalEventDetector instantiation
      *                         information
-     * \param[in] sequenceName the name of the sequence to which the
+     * \param[in] eventName the name of the event to which the
      *                         ConditionalEventDetector will belong
      * \param[in] numberOfExecutions the maximum number of times the
      *                               ConditionalEventDetector is to emit an
@@ -55,7 +56,7 @@ public:
      * ------------------------------------------------------------------------
      */
     static openScenario::ConditionalEventDetectorInformation ImportEventDetector(QDomElement& eventElement,
-                                                                                 const std::string &sequenceName,
+                                                                                 const std::string &eventName,
                                                                                  const int numberOfExecutions,
                                                                                  const openScenario::ActorInformation& actorInformation,
                                                                                  const std::vector<ScenarioEntity>& entities);

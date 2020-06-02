@@ -25,66 +25,9 @@
 #include "scheduler.h"
 #include "spawnPointNetwork.h"
 #include "stochastics.h"
-#include "invocationControl.h"
 #include "parameters.h"
 
-
-#define CHECKFALSE(element) \
-    do { \
-    if(!(element)) \
-    { \
-    LOG_INTERN(LogLevel::Warning) << "an error occurred during run generation"; \
-    if(world->isInstantiated()) \
-    { \
-        world->Reset(); \
-    }\
-    return false;\
-    } \
-    } \
-    while(0);
-
 namespace SimulationSlave {
-
-void RunInstantiator::ClearRun()
-{
-    world->Reset();
-    agentFactory->Clear();
-    spawnPointNetwork->Clear();
-    eventNetwork->Clear();
-}
-
-bool RunInstantiator::InitializeFrameworkModules(ExperimentConfig& experimentConfig, ScenarioInterface* scenario)
-{
-    CHECKFALSE(stochastics->Instantiate(frameworkModules.stochasticsLibrary));
-    CHECKFALSE(world->Instantiate());
-
-    CHECKFALSE(eventDetectorNetwork->Instantiate(frameworkModules.eventDetectorLibrary,
-               scenario,
-               eventNetwork,
-               stochastics));
-    CHECKFALSE(manipulatorNetwork->Instantiate(frameworkModules.manipulatorLibrary,
-               scenario,
-               eventNetwork));
-
-    SimulationCommon::ObservationParameters observationParameters;
-    observationParameters.AddParameterBool("LoggingCyclicsToCsv", experimentConfig.logCyclicsToCsv);
-    observationParameters.AddParameterStringVector("LoggingGroups", experimentConfig.loggingGroups);
-    observationParameters.AddParameterString("SceneryFile", scenario->GetSceneryPath());
-
-    // TODO: This is a workaround, as the OSI use case only imports a single observation library -> implement new observation concept
-    std::map<int, ObservationInstance> observationInstances
-    {
-        { 0, { frameworkModules.observationLibrary, &observationParameters } }
-    };
-
-    CHECKFALSE(observationNetwork->Instantiate(observationInstances,
-               stochastics,
-               world,
-               eventNetwork));
-    CHECKFALSE(observationNetwork->InitAll(outputDir));
-
-    return true;
-}
 
 bool RunInstantiator::ExecuteRun()
 {
@@ -94,99 +37,140 @@ bool RunInstantiator::ExecuteRun()
     stopped = false;
     stopMutex.unlock();
 
-    SlaveConfigInterface* slaveConfig = configurationContainer.GetSlaveConfig();
-    ExperimentConfig experimentConfig = slaveConfig->GetExperimentConfig();
-    ScenarioInterface* scenario = configurationContainer.GetScenario();
-    SceneryInterface* scenery = configurationContainer.GetScenery();
+    auto& scenario = *configurationContainer.GetScenario();
+    auto& scenery = *configurationContainer.GetScenery();
+    auto& slaveConfig = *configurationContainer.GetSlaveConfig();
+    auto& experimentConfig = slaveConfig.GetExperimentConfig();
+    auto& environmentConfig = slaveConfig.GetEnvironmentConfig();
 
-    if (!InitializeFrameworkModules(experimentConfig, scenario))
+    if (!InitPreRun(experimentConfig, scenario, scenery))
     {
+        LOG_INTERN(LogLevel::DebugCore) << std::endl << "### initialization failed ###";
         return false;
     }
-    world->CreateScenery(scenery);
 
-    InvocationControl invocationControl(experimentConfig.numberOfInvocations);
-    while (invocationControl.Progress())
+    Scheduler scheduler(world, spawnPointNetwork, eventDetectorNetwork, manipulatorNetwork, observationNetwork);
+    bool scheduler_state { false };
+
+    for (auto invocation = 0; invocation < experimentConfig.numberOfInvocations; invocation++)
     {
-        stochastics->InitGenerator(experimentConfig.randomSeed + invocationControl.CurrentInvocation());
-        LOG_INTERN(LogLevel::DebugCore) << std::endl << "### run number: " << invocationControl.CurrentInvocation() << " ###";
-
-        agentFactory->ResetIds();
-
-        ClearRun();
-
-        SimulationCommon::WorldParameters worldParameters;
-        sampler.SampleWorldParameters(slaveConfig->GetEnvironmentConfig(), &worldParameters);
-
-        world->ExtractParameter(&worldParameters);
-
-        observationNetwork->InitRun();
-
-        SimulationCommon::SpawnPointParameters spawnPointParameters;
-        sampler.SampleSpawnPointParameters(slaveConfig->GetTrafficConfig(), &spawnPointParameters);
-
-        CHECKFALSE(spawnPointNetwork->Instantiate(frameworkModules.spawnPointLibrary,
-                   agentFactory,
-                   agentBlueprintProvider,
-                   &spawnPointParameters,
-                   sampler,
-                   scenario));
-
-        LOG_INTERN(LogLevel::DebugCore) << std::endl << "### start scheduling ###";
-
-        // instantiate Scheduler last step since destructors are called in the inverse order of instantiation
-        // otherwise dangling references might exists in Schedule
-        Scheduler scheduler(world, spawnPointNetwork, eventDetectorNetwork, manipulatorNetwork, observationNetwork);
-
-        // prepare result storage
         RunResult runResult;
 
-        // TODO: This is a workaround, as the OSI use case only imports a single observation library -> implement new observation concept
-        auto& observationModule = *(observationNetwork->GetObservationModules().begin()->second);
-
-        eventNetwork->Initialize(&runResult,
-                                 observationModule.GetImplementation());
-
-        auto schedulerReturnState = scheduler.Run(
-                                        0,
-                                        scenario->GetEndTime(),
-                                        runResult,
-                                        eventNetwork);
-
-        if (schedulerReturnState == SchedulerReturnState::NoError)
+        LOG_INTERN(LogLevel::DebugCore) << std::endl << "### run number: " << invocation << " ###";
+        auto seed = static_cast<std::uint32_t>(experimentConfig.randomSeed + invocation);
+        if (!InitRun(seed, environmentConfig, runResult))
         {
-            observationNetwork->FinalizeRun(runResult);
+            LOG_INTERN(LogLevel::DebugCore) << std::endl << "### run initialization failed ###";
+            break;
         }
 
-        if (schedulerReturnState == SchedulerReturnState::AbortInvocation)
+        LOG_INTERN(LogLevel::DebugCore) << std::endl << "### run started ###";
+        scheduler_state = scheduler.Run(0, scenario.GetEndTime(), runResult, eventNetwork);
+        if (scheduler_state == Scheduler::FAILURE)
         {
-            invocationControl.Retry();
+            LOG_INTERN(LogLevel::DebugCore) << std::endl << "### run aborted ###";
+            break;
         }
+        LOG_INTERN(LogLevel::DebugCore) << std::endl << "### run successful ###";
 
-        if (schedulerReturnState == SchedulerReturnState::AbortSimulation)
-        {
-            invocationControl.Abort();
-        }
-
-        stochastics->ReInit();
-
-        // Reset EventDetectors
-        eventDetectorNetwork->ResetAll();
+        observationNetwork.FinalizeRun(runResult);
+        ClearRun();
     }
 
-    LOG_INTERN(LogLevel::DebugCore) << std::endl << "### end scheduling ###";
+    LOG_INTERN(LogLevel::DebugCore) << std::endl << "### end of all runs ###";
+    bool observations_state = observationNetwork.FinalizeAll();
 
-    bool successfullyFinalized = observationNetwork->FinalizeAll();
+    return (scheduler_state && observations_state);
+}
 
-    ClearRun();
-    world->Clear();
-
-    if (!successfullyFinalized || invocationControl.GetAbortFlag())
+bool RunInstantiator::InitPreRun(ExperimentConfig& experimentConfig, ScenarioInterface& scenario, SceneryInterface& scenery)
+{
+    try
     {
+        InitializeFrameworkModules(experimentConfig, scenario);
+        world.CreateScenery(&scenery);
+        return true;
+    }
+    catch(const std::exception& error)
+    {
+        LOG_INTERN(LogLevel::Error) << std::endl << "### could not init: "  << error.what() << "###";
         return false;
     }
 
-    return true;
+    LOG_INTERN(LogLevel::Error) << std::endl << "### exception caught, which is not of type std::exception! ###";
+    return false;
+}
+
+void RunInstantiator::InitializeFrameworkModules(ExperimentConfig& experimentConfig, ScenarioInterface& scenario)
+{
+    ThrowIfFalse(stochastics.Instantiate(frameworkModules.stochasticsLibrary),
+                 "Failed to instantiate Stochastics");
+    ThrowIfFalse(world.Instantiate(),
+                 "Failed to instantiate World");
+    ThrowIfFalse(eventDetectorNetwork.Instantiate(frameworkModules.eventDetectorLibrary, &scenario, &eventNetwork, &stochastics),
+                 "Failed to instantiate EventDetectorNetwork");
+    ThrowIfFalse(manipulatorNetwork.Instantiate(frameworkModules.manipulatorLibrary, &scenario, &eventNetwork),
+                 "Failed to instantiate ManipulatorNetwork");
+
+    openpass::parameter::Container observationParameters
+    {
+        { "LoggingCyclicsToCsv", experimentConfig.logCyclicsToCsv},
+        { "LoggingGroups", experimentConfig.loggingGroups },
+        { "SceneryFile", scenario.GetSceneryPath() }
+    };
+
+    // TODO: This is a workaround, as the OSI use case only imports a single observation library -> implement new observation concept
+    std::map<int, ObservationInstance> observationInstances {{ 0, {frameworkModules.observationLibrary, observationParameters} }};
+
+    ThrowIfFalse(observationNetwork.Instantiate(observationInstances, &stochastics, &world, &eventNetwork),
+                 "Failed to instantiate ObservationNetwork");
+    ThrowIfFalse(observationNetwork.InitAll(),
+                 "Failed to initialize ObservationNetwork");
+}
+
+void RunInstantiator::InitializeSpawnPointNetwork()
+{
+    ThrowIfFalse(spawnPointNetwork.Instantiate(frameworkModules.spawnPointLibraries,
+                 &agentFactory,
+                 &agentBlueprintProvider,
+                 &sampler,
+                 configurationContainer.GetScenario(),
+                 configurationContainer.GetProfiles()->GetSpawnPointProfiles()), "Failed to instantiate SpawnPointNetwork");
+}
+
+
+bool RunInstantiator::InitRun(std::uint32_t seed, const EnvironmentConfig& environmentConfig, RunResult& runResult)
+{
+    try
+    {
+        stochastics.InitGenerator(seed);
+
+        worldParameter = sampler.SampleWorldParameters(environmentConfig);
+        world.ExtractParameter(worldParameter.get());
+
+        observationNetwork.InitRun();
+        InitializeSpawnPointNetwork();
+
+        eventNetwork.Initialize(&runResult);
+        return true;
+    }
+    catch(const std::exception& error)
+    {
+        LOG_INTERN(LogLevel::Error) << std::endl << "### could not init run: "  << error.what() << "###";
+        return false;
+    }
+
+    LOG_INTERN(LogLevel::Error) << std::endl << "### exception caught, which is not of type std::exception! ###";
+    return false;
+}
+
+void RunInstantiator::ClearRun()
+{
+    world.Reset();
+    agentFactory.Clear();
+    spawnPointNetwork.Clear();
+    eventNetwork.Clear();
+    eventDetectorNetwork.ResetAll();
 }
 
 } // namespace SimulationSlave

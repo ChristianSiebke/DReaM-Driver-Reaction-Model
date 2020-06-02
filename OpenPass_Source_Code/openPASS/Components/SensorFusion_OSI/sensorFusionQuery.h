@@ -16,9 +16,11 @@
 //-----------------------------------------------------------------------------
 
 #pragma once
-#include "osi3/osi_sensordata.pb.h"
+
 #include <map>
 #include <vector>
+
+#include "osi3/osi_sensordata.pb.h"
 
 class SensorFusionHelperFunctions
 {

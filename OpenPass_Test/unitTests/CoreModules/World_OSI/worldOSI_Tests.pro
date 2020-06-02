@@ -1,5 +1,5 @@
 # /*********************************************************************
-# * Copyright (c) 2019 in-tech GmbH
+# * Copyright (c) 2019, 2020 in-tech GmbH
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -47,6 +47,7 @@ SRC_WORLD = \
             $$UNIT_UNDER_TEST/AgentAdapter.cpp \
             $$UNIT_UNDER_TEST/AgentNetwork.cpp \
             $$UNIT_UNDER_TEST/GeometryConverter.cpp \
+            $$UNIT_UNDER_TEST/JointsBuilder.cpp \
             $$UNIT_UNDER_TEST/TrafficObjectAdapter.cpp \
             $$UNIT_UNDER_TEST/SceneryConverter.cpp \
             $$UNIT_UNDER_TEST/RoutePlanning/StochasticNavigation.cpp \
@@ -60,6 +61,7 @@ INC_WORLD = \
             $$UNIT_UNDER_TEST/AgentAdapter.h \
             $$UNIT_UNDER_TEST/AgentNetwork.h \
             $$UNIT_UNDER_TEST/GeometryConverter.h \
+            $$UNIT_UNDER_TEST/JointsBuilder.h \
             $$UNIT_UNDER_TEST/TrafficObjectAdapter.h \
             $$UNIT_UNDER_TEST/SceneryConverter.h \
             $$UNIT_UNDER_TEST/RoutePlanning/StochasticNavigation.h \
@@ -105,6 +107,7 @@ SOURCES += \
             \ # GENERATOR-TESTS
             Generators/laneGeometryElementGenerator_Tests.cpp \
             \ # UNIT-TESTS
+            geometryConverter_Tests.cpp \
             locator_Tests.cpp \
             pointQuery_Tests.cpp \
             sceneryConverter_Tests.cpp \
@@ -129,5 +132,4 @@ HEADERS += \
 
 LIBS += \
     -lopen_simulation_interface \
-    -lzmq \
     -lprotobuf

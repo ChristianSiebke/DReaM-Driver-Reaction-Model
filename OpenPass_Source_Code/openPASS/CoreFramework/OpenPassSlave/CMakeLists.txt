@@ -7,7 +7,6 @@ add_openpass_target(
     OpenPassSlave.h
     framework/agentBlueprintProvider.h
     framework/agentFactory.h
-    framework/agentProfileSampler.h
     framework/commandLineParser.h
     framework/configurationContainer.h
     framework/directories.h
@@ -16,11 +15,11 @@ add_openpass_target(
     framework/dynamicProfileSampler.h
     framework/eventNetwork.h
     framework/frameworkModuleContainer.h
-    framework/invocationControl.h
     framework/observationModule.h
     framework/observationNetwork.h
+    framework/parameterbuilder.h
     framework/runInstantiator.h
-    framework/sampler.h 
+    framework/sampler.h
     importer/configurationFiles.h
     importer/connection.h
     importer/csvParser.h
@@ -40,8 +39,6 @@ add_openpass_target(
     importer/slaveConfigImporter.h
     importer/systemConfig.h
     importer/systemConfigImporter.h
-    importer/trajectory.h
-    importer/trajectoryImporter.h
     importer/vehicleModels.h
     importer/vehicleModelsImporter.h
     importer/road/roadObject.h
@@ -74,7 +71,6 @@ add_openpass_target(
     scheduler/runResult.h
     scheduler/scheduler.h
     scheduler/schedulerTasks.h
-    scheduler/spawnControl.h
     scheduler/taskBuilder.h
     scheduler/tasks.h
     observationInterface/observationBinding.h
@@ -90,7 +86,6 @@ add_openpass_target(
   SOURCES
     framework/agentBlueprintProvider.cpp
     framework/agentFactory.cpp
-    framework/agentProfileSampler.cpp
     framework/commandLineParser.cpp
     framework/configurationContainer.cpp
     framework/directories.cpp
@@ -99,11 +94,10 @@ add_openpass_target(
     framework/dynamicProfileSampler.cpp
     framework/eventNetwork.cpp
     framework/frameworkModuleContainer.cpp
-    framework/invocationControl.cpp
     framework/observationModule.cpp
     framework/observationNetwork.cpp
     framework/runInstantiator.cpp
-    framework/sampler.cpp 
+    framework/sampler.cpp
     importer/connection.cpp
     importer/csvParser.cpp
     importer/eventDetectorImporter.cpp
@@ -121,8 +115,6 @@ add_openpass_target(
     importer/slaveConfigImporter.cpp
     importer/systemConfig.cpp
     importer/systemConfigImporter.cpp
-    importer/trajectory.cpp
-    importer/trajectoryImporter.cpp
     importer/vehicleModels.cpp
     importer/vehicleModelsImporter.cpp
     importer/road/roadObject.cpp
@@ -152,7 +144,6 @@ add_openpass_target(
     scheduler/runResult.cpp
     scheduler/scheduler.cpp
     scheduler/schedulerTasks.cpp
-    scheduler/spawnControl.cpp
     scheduler/taskBuilder.cpp
     scheduler/tasks.cpp
     #collisionDetectionInterface/collisionDetection.cpp

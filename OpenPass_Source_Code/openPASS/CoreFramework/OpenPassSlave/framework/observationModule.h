@@ -22,6 +22,7 @@
 #include <map>
 
 #include "Interfaces/observationInterface.h"
+#include "Interfaces/parameterInterface.h"
 #include "observationInterface/observationLibrary.h"
 #include "CoreFramework/CoreShare/log.h"
 
@@ -32,6 +33,7 @@ class ObservationModule
 {
 public:
     ObservationModule(ObservationInterface *implementation,
+                      std::unique_ptr<ParameterInterface> parameter,
                       ObservationLibrary *library);
     ObservationModule(const ObservationModule&) = delete;
     ObservationModule(ObservationModule&&) = delete;
@@ -56,6 +58,7 @@ public:
 
 private:
     ObservationInterface *implementation;
+    std::unique_ptr<ParameterInterface> parameter;
     ObservationLibrary *library;
     int id = 0;
 };

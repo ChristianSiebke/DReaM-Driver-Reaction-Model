@@ -12,35 +12,52 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include "directories.h"
 #include <Common/opExport.h>
+#include "spawnPointLibraryDefinitions.h"
+
+namespace
+{
+    SpawnPointLibraryInfoCollection ConcatenateSpawnPointLibraries(const std::string& libraryDir, const SpawnPointLibraryInfoCollection& spawnPointLibraries)
+    {
+        SpawnPointLibraryInfoCollection libraries = spawnPointLibraries;
+        for (auto& libraryInfo : libraries)
+        {
+            libraryInfo.libraryName = openpass::core::Directories::Concat(libraryDir, libraryInfo.libraryName);
+        }
+
+        return libraries;
+    }
+}
 
 struct CORESLAVEEXPORT FrameworkModules
 {
 public:
-    FrameworkModules(int logLevel,
-                     std::string libraryDir,
-                     std::string eventDetectorLibrary,
-                     std::string manipulatorLibrary,
-                     std::string observationLibrary,
-                     std::string spawnPointLibrary,
-                     std::string stochasticsLibrary,
-                     std::string worldLibrary) :
+    FrameworkModules(const int logLevel,
+                     const std::string& libraryDir,
+                     const std::string& eventDetectorLibrary,
+                     const std::string& manipulatorLibrary,
+                     const std::string& observationLibrary,
+                     const std::string& stochasticsLibrary,
+                     const std::string& worldLibrary,
+                     const SpawnPointLibraryInfoCollection& spawnPointLibraries) :
         logLevel{logLevel},
         libraryDir{libraryDir},
-        eventDetectorLibrary{Directories::Concat(libraryDir, eventDetectorLibrary)},
-        manipulatorLibrary{Directories::Concat(libraryDir, manipulatorLibrary)},
-        observationLibrary{Directories::Concat(libraryDir, observationLibrary)},
-        spawnPointLibrary{Directories::Concat(libraryDir, spawnPointLibrary)},
-        stochasticsLibrary{Directories::Concat(libraryDir, stochasticsLibrary)},
-        worldLibrary{Directories::Concat(libraryDir, worldLibrary)}
+        eventDetectorLibrary{openpass::core::Directories::Concat(libraryDir, eventDetectorLibrary)},
+        manipulatorLibrary{openpass::core::Directories::Concat(libraryDir, manipulatorLibrary)},
+        observationLibrary{openpass::core::Directories::Concat(libraryDir, observationLibrary)},
+        stochasticsLibrary{openpass::core::Directories::Concat(libraryDir, stochasticsLibrary)},
+        worldLibrary{openpass::core::Directories::Concat(libraryDir, worldLibrary)},
+        spawnPointLibraries{ConcatenateSpawnPointLibraries(libraryDir, spawnPointLibraries)}
     {}
+
     const int logLevel;
     const std::string libraryDir;
     const std::string eventDetectorLibrary;
     const std::string manipulatorLibrary;
     const std::string observationLibrary;
-    const std::string spawnPointLibrary;
     const std::string stochasticsLibrary;
     const std::string worldLibrary;
+    SpawnPointLibraryInfoCollection spawnPointLibraries;
 };

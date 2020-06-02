@@ -7,11 +7,11 @@
 #include <functional>
 
 #include "fakeWorld.h"
-#include "fakeSpawnControl.h"
 #include "fakeSpawnPointNetwork.h"
 #include "fakeEventDetectorNetwork.h"
 #include "fakeManipulatorNetwork.h"
 #include "fakeEventNetwork.h"
+#include "fakeObservationNetwork.h"
 
 #include "eventDetector.h"
 #include "eventDetectorLibrary.h"
@@ -62,12 +62,12 @@ TEST(DISABLED_Scheduler, RunWorks)
     NiceMock<FakeWorld> fakeWorld;
 
     NiceMock<FakeSpawnPointNetwork> fakeSpawnPointNetwork;
-    SpawnPoint *spawnPoint{nullptr};
-    ON_CALL(fakeSpawnPointNetwork, GetSpawnPoint()).WillByDefault(Return(spawnPoint));
-
     NiceMock<FakeEventDetector> fakeEventDetector;
     NiceMock<FakeManipulatorNetwork> fakeManipulatorNetwork;
+    NiceMock<FakeObservationNetwork> fakeObservationNetwork;
+    NiceMock<FakeEventDetectorNetwork> fakeEventDetectorNetwork;
 
+    NiceMock<FakeEventNetwork> fakeEventNetwork;
     SimulationSlave::EventDetectorLibrary edl("", nullptr);
     SimulationSlave::EventDetector e1(&fakeEventDetector, &edl);
     SimulationSlave::EventDetector e2(&fakeEventDetector, &edl);
@@ -76,19 +76,10 @@ TEST(DISABLED_Scheduler, RunWorks)
     fakeEventDetectors.push_back(&e1);
     fakeEventDetectors.push_back(&e2);
 
-    NiceMock<FakeEventDetectorNetwork> fakeEventDetectorNetwork;
     ON_CALL(fakeEventDetectorNetwork, GetEventDetectors()).WillByDefault(Return(fakeEventDetectors));
 
-    Scheduler scheduler(&fakeWorld,
-                       &fakeSpawnPointNetwork,
-                       &fakeEventDetectorNetwork,
-                       &fakeManipulatorNetwork,
-                       nullptr);
+    Scheduler scheduler(fakeWorld, fakeSpawnPointNetwork, fakeEventDetectorNetwork, fakeManipulatorNetwork, fakeObservationNetwork);
 
-    NiceMock<FakeEventNetwork> fakeEventNetwork;
     RunResult runResult{};
-    scheduler.Run(0,
-                  300,
-                  runResult,
-                  &fakeEventNetwork);
+    scheduler.Run(0, 300, runResult, fakeEventNetwork);
 }

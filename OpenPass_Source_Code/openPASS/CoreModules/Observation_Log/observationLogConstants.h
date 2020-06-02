@@ -14,6 +14,7 @@
 
 struct OutputAttributes
 {
+    const QString FRAMEWORKVERSION = "FrameworkVersion";
     const QString SCHEMAVERSION = "SchemaVersion";
     const QString RUNID = "RunId";
     const QString FAILUREPROBABITLITY= "FailureProbability";
@@ -33,11 +34,16 @@ struct OutputAttributes
     const QString AGENTTYPENAME = "AgentTypeName";
     const QString TIME = "Time";
     const QString TYPE = "Type";
+    const QString NAME = "Name";
     const QString TRIGGERINGEVENTID = "TriggeringEventId";
     const QString KEY = "Key";
     const QString VALUE = "Value";
     const QString ID = "Id";
     const QString SOURCE = "Source";
+    const QString WIDTH = "Width";
+    const QString LENGTH = "Length";
+    const QString HEIGHT = "Height";
+    const QString LONGITUDINALPIVOTOFFSET = "LongitudinalPivotOffset";
 };
 
 struct OutputTags
@@ -59,4 +65,5 @@ struct OutputTags
     const QString SAMPLES = "Samples";
     const QString SAMPLE = "Sample";
     const QString SCENERYFILE = "SceneryFile";
+    const QString VEHICLEATTRIBUTES = "VehicleAttributes";
 };

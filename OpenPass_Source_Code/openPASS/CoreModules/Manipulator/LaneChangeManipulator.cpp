@@ -28,23 +28,21 @@ LaneChangeManipulator::LaneChangeManipulator(WorldInterface *world,
     action(action)
 {
     cycleTime = 100;
-    eventType = EventDefinitions::EventType::LaneChange;
 }
 
 void LaneChangeManipulator::Trigger(int time)
 {
     for (const auto &eventInterface : GetEvents())
     {
-        std::shared_ptr<AgentBasedManipulationEvent> triggeringEvent = std::dynamic_pointer_cast<AgentBasedManipulationEvent>(eventInterface);
+        auto triggeringEvent = std::dynamic_pointer_cast<ConditionalEvent>(eventInterface);
 
         for(const auto actorId : triggeringEvent->actingAgents)
         {
-            std::shared_ptr<LaneChangeEvent> laneChangeEvent = std::make_shared<LaneChangeEvent>(time,
-                                                                                                 COMPONENTNAME,
-                                                                                                 sequenceName,
-                                                                                                 eventType,
-                                                                                                 actorId,
-                                                                                                 action->GetValue());
+            auto laneChangeEvent = std::make_shared<LaneChangeEvent>(time,
+                                                                     eventName,
+                                                                     COMPONENTNAME,
+                                                                     actorId,
+                                                                     action->GetValue());
 
             eventNetwork->InsertEvent(laneChangeEvent);
         }
@@ -55,13 +53,13 @@ EventContainer LaneChangeManipulator::GetEvents()
 {
     EventContainer manipulatorSpecificEvents{};
 
-    const auto &conditionalEvents = eventNetwork->GetActiveEventCategory(EventDefinitions::EventCategory::AgentBasedManipulation);
+    const auto &conditionalEvents = eventNetwork->GetActiveEventCategory(EventDefinitions::EventCategory::Conditional);
 
     for(const auto &event: conditionalEvents)
     {
-        const auto conditionalEvent = std::static_pointer_cast<AgentBasedManipulationEvent>(event);
+        const auto conditionalEvent = std::static_pointer_cast<ConditionalEvent>(event);
 
-        if(conditionalEvent && conditionalEvent.get()->GetSequenceName() == sequenceName)
+        if(conditionalEvent && conditionalEvent.get()->GetName() == eventName)
         {
             manipulatorSpecificEvents.emplace_back(event);
         }

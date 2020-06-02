@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -23,118 +23,94 @@
 #include "scenarioImporter.h"
 #include "xmlParser.h"
 #include "CoreFramework/CoreShare/log.h"
-#include "CoreFramework/CoreShare/parameters.h"
+#include "CoreFramework/OpenPassSlave/framework/directories.h"
 
-// local helper macros
-#define SCENARIOCHECKFALSE(element) \
-    do { \
-        if (!(element)) \
-        { \
-            throw std::runtime_error("Checkfalse in scenario importer failed"); \
-        } \
-    } \
-    while (0);
+namespace TAG = openpass::importer::xml::scenarioImporter::tag;
+namespace ATTRIBUTE = openpass::importer::xml::scenarioImporter::attribute;
+using Directories = openpass::core::Directories;
 
 namespace Importer {
 
 bool ScenarioImporter::Import(const std::string& filename, ScenarioInterface* scenario)
 {
-    std::locale::global(std::locale("C"));
-
-    QFile xmlFile(filename.c_str()); // automatic object will be closed on destruction
-    if (!xmlFile.open(QIODevice::ReadOnly))
+    try
     {
-        LOG_INTERN(LogLevel::Warning) << "an error occurred during scenario import";
-        throw std::runtime_error("Could not open scenario (" + filename + ")");
+        std::locale::global(std::locale("C"));
+
+        QFile xmlFile(filename.c_str()); // automatic object will be closed on destruction
+        ThrowIfFalse(xmlFile.open(QIODevice::ReadOnly), "Could not open scenario (" + filename + ")");
+
+        QByteArray xmlData(xmlFile.readAll());
+        QDomDocument document;
+        QString errorMsg;
+        int errorLine;
+        ThrowIfFalse(document.setContent(xmlData, &errorMsg, &errorLine), "Invalid xml format (" + filename + ") in line " + std::to_string(errorLine) + ": " + errorMsg.toStdString());
+
+        QDomElement documentRoot = document.documentElement();
+        ThrowIfFalse(!documentRoot.isNull(), "Scenario xml has no document root");
+
+        ImportAndValidateVersion(documentRoot);
+
+        std::string sceneryPath;
+        ImportRoadNetwork(documentRoot, sceneryPath);
+        scenario->SetSceneryPath(sceneryPath);
+
+        auto path = Directories::StripFile(filename);
+        ImportCatalogs(documentRoot, scenario, path);
+
+        std::vector<ScenarioEntity> entities;
+        std::map<std::string, std::list<std::string>> groups;
+        ImportEntities(documentRoot, entities, groups);
+
+        ImportStoryboard(documentRoot, entities, scenario);
+        CategorizeEntities(entities, groups, scenario);
+
+        return true;
     }
-
-    QByteArray xmlData(xmlFile.readAll());
-    QDomDocument document;
-    QString errorMsg;
-    int errorLine;
-    if (!document.setContent(xmlData, &errorMsg, &errorLine))
+    catch(std::runtime_error& e)
     {
-        LOG_INTERN(LogLevel::Warning) << "invalid xml format: " << filename;
-        LOG_INTERN(LogLevel::Warning) << "in line " << errorLine << ": " << errorMsg.toStdString();
-        throw std::runtime_error("Invalid xml format (" + filename + ")");
-    }
-
-    QDomElement documentRoot = document.documentElement();
-    if (documentRoot.isNull())
-    {
-        throw std::runtime_error("Scenario xml has no document root");
-    }
-
-    if (!ImportAndValidateVersion(documentRoot))
-    {
+        LOG_INTERN(LogLevel::Error) << "Scenario import failed: " + std::string(e.what());
         return false;
     }
-
-    std::string sceneryPath;
-    ImportRoadNetwork(documentRoot, sceneryPath);
-    scenario->SetSceneryPath(sceneryPath);
-
-    ImportCatalogs(documentRoot, scenario);
-
-    std::vector<ScenarioEntity> entities;
-    std::map<std::string, std::list<std::string>> groups;
-    if (!ImportEntities(documentRoot, entities, groups))
-    {
-        LOG_INTERN(LogLevel::Error) << "Unable to import entities from scenario file";
-        return false;
-    }
-
-    ImportStoryboard(documentRoot, entities, scenario);
-    CategorizeEntities(entities, groups, scenario);
-
-    return true;
 }
 
-bool ScenarioImporter::ImportAndValidateVersion(QDomElement& documentRoot)
+void ScenarioImporter::ImportAndValidateVersion(QDomElement& documentRoot)
 {
-    SimulationCommon::Parameters scenarioParameters;
+    openpass::parameter::Container scenarioParameters;
 
     QDomElement parameterDeclarationElement;
 
-    if (SimulationCommon::GetFirstChildElement(documentRoot, "ParameterDeclaration", parameterDeclarationElement))
+    if (SimulationCommon::GetFirstChildElement(documentRoot, TAG::parameterDeclaration, parameterDeclarationElement))
     {
-        ImportParameterDeclarationElement(parameterDeclarationElement, &scenarioParameters);
+        ImportParameterDeclarationElement(parameterDeclarationElement, scenarioParameters);
     }
 
-    const auto version = scenarioParameters.GetParametersString().find("OP_OSC_SchemaVersion");
-
-    if (version == scenarioParameters.GetParametersString().cend())
-    {
-        LOG_INTERN(LogLevel::Error) << "Cannot determine scenario version";
-        return false;
-    }
-    else
-        if (version->second.compare(supportedScenarioVersion) != 0)
-        {
-            LOG_INTERN(LogLevel::Error) << "Scenario version not supported (" << version->second << "). Supported version is " <<
-                                        supportedScenarioVersion;
-            return false;
-        }
-
-    return true;
+    const auto version = openpass::parameter::Get<std::string>(scenarioParameters, "OP_OSC_SchemaVersion");
+    ThrowIfFalse(version.has_value(), "Cannot determine scenario version");
+    ThrowIfFalse(version.value() == supportedScenarioVersion,
+                 "Scenario version not supported (" + version.value() + "). Supported version is " + supportedScenarioVersion);
 }
 
-void ScenarioImporter::ImportCatalogs(QDomElement& documentRoot, ScenarioInterface* scenario)
+void ScenarioImporter::ImportCatalogs(QDomElement& documentRoot, ScenarioInterface* scenario, const std::string& path)
 {
-    std::string catalogPath;
-
     QDomElement catalogsElement;
-    SCENARIOCHECKFALSE(SimulationCommon::GetFirstChildElement(documentRoot, "Catalogs", catalogsElement));
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(documentRoot, TAG::catalogs, catalogsElement),
+                 documentRoot, "Tag " + std::string(TAG::catalogs) + " is missing.");
 
-    if (ImportCatalog(catalogPath, "VehicleCatalog", catalogsElement))
+    const auto vehicleCatalogPath = ImportCatalog("VehicleCatalog", catalogsElement);
+    scenario->SetVehicleCatalogPath(vehicleCatalogPath);
+
+    const auto pedestrianCatalogPath = ImportCatalog("PedestrianCatalog", catalogsElement);
+    scenario->SetPedestrianCatalogPath(pedestrianCatalogPath);
+
+    auto trajectoryCatalogPath = ImportCatalog("TrajectoryCatalog", catalogsElement);
+
+    if (Directories::IsRelative(trajectoryCatalogPath))
     {
-        scenario->SetVehicleCatalogPath(catalogPath);
+        trajectoryCatalogPath = Directories::Concat(path, trajectoryCatalogPath);
     }
 
-    if (ImportCatalog(catalogPath, "PedestrianCatalog", catalogsElement))
-    {
-        scenario->SetPedestrianCatalogPath(catalogPath);
-    }
+    scenario->SetTrajectoryCatalogPath(trajectoryCatalogPath);
 }
 
 void ScenarioImporter::ImportRoadNetwork(QDomElement& documentRoot, std::string& sceneryPath)
@@ -142,28 +118,37 @@ void ScenarioImporter::ImportRoadNetwork(QDomElement& documentRoot, std::string&
     QDomElement roadNetworkElement;
     QDomElement logicsElement;
 
-    SCENARIOCHECKFALSE(SimulationCommon::GetFirstChildElement(documentRoot, "RoadNetwork", roadNetworkElement))
-    SCENARIOCHECKFALSE(SimulationCommon::GetFirstChildElement(roadNetworkElement, "Logics", logicsElement))
-    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeString(logicsElement, "filepath", sceneryPath));
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(documentRoot, TAG::roadNetwork, roadNetworkElement),
+                 documentRoot, "Tag " + std::string(TAG::roadNetwork) + " is missing.");
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(roadNetworkElement, TAG::logics, logicsElement),
+                 roadNetworkElement, "Tag " + std::string(TAG::logics) + " is missing.");
+    ThrowIfFalse(SimulationCommon::ParseAttributeString(logicsElement, ATTRIBUTE::filePath, sceneryPath),
+                 logicsElement, "Attribute " + std::string(ATTRIBUTE::filePath) + " is missing.");
 }
 
 void ScenarioImporter::ImportStoryboard(QDomElement& documentRoot, std::vector<ScenarioEntity>& entities,
                                         ScenarioInterface* scenario)
 {
     QDomElement storyboardElement;
-    SCENARIOCHECKFALSE(SimulationCommon::GetFirstChildElement(documentRoot, "Storyboard", storyboardElement))
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(documentRoot, TAG::storyboard, storyboardElement),
+                 documentRoot, "Tag " + std::string(TAG::storyboard) + " is missing.");
 
     //Import Init
     QDomElement initElement;
     // for initial entitiy parameters we just use first child "Init" --> others will be ignore
-    SCENARIOCHECKFALSE(SimulationCommon::GetFirstChildElement(storyboardElement, "Init", initElement))
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(storyboardElement, TAG::init, initElement),
+                 storyboardElement, "Tag " + std::string(TAG::init) + " is missing.");
     ImportInitElement(initElement, entities);
 
     // Import Story
     QDomElement storyElement;
-    if (SimulationCommon::GetFirstChildElement(storyboardElement, "Story", storyElement))
+
+    SimulationCommon::GetFirstChildElement(storyboardElement, TAG::story, storyElement);
+
+    while (!storyElement.isNull())
     {
         ImportStoryElement(storyElement, entities, scenario);
+        storyElement = storyElement.nextSiblingElement(TAG::story);
     }
 
     // Import EndCondition
@@ -176,38 +161,36 @@ void ScenarioImporter::ImportStoryElement(QDomElement& storyElement,
 {
     // none of these tags are urgently required
     QDomElement actElement;
-    if (SimulationCommon::GetFirstChildElement(storyElement, "Act", actElement))
+    if (SimulationCommon::GetFirstChildElement(storyElement, TAG::act, actElement))
     {
         while (!actElement.isNull())
         {
             QDomElement seqElement;
-            if (SimulationCommon::GetFirstChildElement(actElement, "Sequence", seqElement))
+            if (SimulationCommon::GetFirstChildElement(actElement, TAG::sequence, seqElement))
             {
                 while (!seqElement.isNull())
                 {
-                    std::string sequenceName;
-                    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeString(seqElement, "name", sequenceName));
-
                     int numberOfExecutions;
-                    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeInt(seqElement, "numberOfExecutions", numberOfExecutions));
+                    ThrowIfFalse(SimulationCommon::ParseAttributeInt(seqElement, ATTRIBUTE::numberOfExecutions, numberOfExecutions),
+                                 seqElement, "Attribute " + std::string(ATTRIBUTE::numberOfExecutions) + " is missing.");
 
                     QDomElement actorsElement;
                     openScenario::ActorInformation actorInformation;
-                    if (SimulationCommon::GetFirstChildElement(seqElement, "Actors", actorsElement)) // just one actors per sequence
+                    if (SimulationCommon::GetFirstChildElement(seqElement, TAG::actors, actorsElement)) // just one actors per sequence
                     {
                         actorInformation = ImportActors(actorsElement, entities);
                     }
 
                     QDomElement maneuverElement;
-                    if (SimulationCommon::GetFirstChildElement(seqElement, "Maneuver", maneuverElement)) // just one maneuver per sequence
+                    if (SimulationCommon::GetFirstChildElement(seqElement, TAG::maneuver, maneuverElement)) // just one maneuver per sequence
                     {
-                        ImportManeuverElement(maneuverElement, entities, scenario, sequenceName, actorInformation, numberOfExecutions);
+                        ImportManeuverElement(maneuverElement, entities, scenario, actorInformation, numberOfExecutions);
                     }
 
-                    seqElement = seqElement.nextSiblingElement("Sequence");
+                    seqElement = seqElement.nextSiblingElement(TAG::sequence);
                 }
             }
-            actElement = actElement.nextSiblingElement("Act");
+            actElement = actElement.nextSiblingElement(TAG::act);
         }
     }
 }
@@ -218,17 +201,15 @@ openScenario::ActorInformation ScenarioImporter::ImportActors(QDomElement& actor
     openScenario::ActorInformation actorInformation;
 
     QDomElement entityElement;
-    SimulationCommon::GetFirstChildElement(actorsElement, "Entity", entityElement);
+    SimulationCommon::GetFirstChildElement(actorsElement, TAG::entity, entityElement);
 
     while (!entityElement.isNull())
     {
         std::string entityName;
-        SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeString(entityElement, "name", entityName))
-        if (!ContainsEntity(entities, entityName))
-        {
-            throw std::runtime_error(std::string("Actor element references entity '") + entityName +
-                                     "' which isn't declared in 'Entities'");
-        }
+        ThrowIfFalse(SimulationCommon::ParseAttributeString(entityElement, ATTRIBUTE::name, entityName),
+                     entityElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
+        ThrowIfFalse(ContainsEntity(entities, entityName),
+                     entityElement, "Element references entity '" + entityName + "' which isn't declared in 'Entities'");
 
         if (actorInformation.actors.has_value())
         {
@@ -239,16 +220,17 @@ openScenario::ActorInformation ScenarioImporter::ImportActors(QDomElement& actor
             actorInformation.actors.emplace({entityName});
         }
 
-        entityElement = entityElement.nextSiblingElement("Entity");
+        entityElement = entityElement.nextSiblingElement(TAG::entity);
     }
 
     QDomElement byConditionElement;
-    SimulationCommon::GetFirstChildElement(actorsElement, "ByCondition", byConditionElement);
+    SimulationCommon::GetFirstChildElement(actorsElement, TAG::byCondition, byConditionElement);
 
     if(!byConditionElement.isNull())
     {
         std::string actor;
-        SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeString(byConditionElement, "actor", actor))
+        ThrowIfFalse(SimulationCommon::ParseAttributeString(byConditionElement, ATTRIBUTE::actor, actor),
+                     byConditionElement, "Attribute " + std::string(ATTRIBUTE::actor) + " is missing.");
         if(actor == "triggeringEntity")
         {
             actorInformation.triggeringAgentsAsActors.emplace(true);
@@ -261,21 +243,25 @@ openScenario::ActorInformation ScenarioImporter::ImportActors(QDomElement& actor
 void ScenarioImporter::ImportManeuverElement(QDomElement& maneuverElement,
                                              const std::vector<ScenarioEntity>& entities,
                                              ScenarioInterface* scenario,
-                                             const std::string& sequenceName,
                                              const openScenario::ActorInformation &actorInformation,
                                              const int numberOfExecutions)
 {
     // handle parameterdeclaration element(s) for event(s)
     QDomElement parameterDeclarationElement;
-    SimulationCommon::GetFirstChildElement(maneuverElement, "ParameterDeclaration", parameterDeclarationElement);
+    SimulationCommon::GetFirstChildElement(maneuverElement, TAG::parameterDeclaration, parameterDeclarationElement);
 
     // handle event element
     QDomElement eventElement;
-    SimulationCommon::GetFirstChildElement(maneuverElement, "Event", eventElement);
+    SimulationCommon::GetFirstChildElement(maneuverElement, TAG::event, eventElement);
+
     while (!eventElement.isNull())
     {
+        std::string eventName;
+        ThrowIfFalse(SimulationCommon::ParseAttributeString(eventElement, ATTRIBUTE::name, eventName),
+                     eventElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
+
         openScenario::ConditionalEventDetectorInformation conditionalEventDetectorInformation = EventDetectorImporter::ImportEventDetector(eventElement,
-                                                                                                                                           sequenceName,
+                                                                                                                                           eventName,
                                                                                                                                            numberOfExecutions,
                                                                                                                                            actorInformation,
                                                                                                                                            entities);
@@ -283,215 +269,265 @@ void ScenarioImporter::ImportManeuverElement(QDomElement& maneuverElement,
         scenario->AddConditionalEventDetector(conditionalEventDetectorInformation);
 
         std::shared_ptr<ScenarioActionInterface> action = ManipulatorImporter::ImportManipulator(eventElement,
-                                                                                                 sequenceName);
+                                                                                                 eventName,
+                                                                                                 scenario->GetTrajectoryCatalogPath());
         scenario->AddAction(action);
 
-        eventElement = eventElement.nextSiblingElement("Event");
+        eventElement = eventElement.nextSiblingElement(TAG::event);
     }
 }
 
 void ScenarioImporter::ImportLongitudinalElement(ScenarioEntity& scenarioEntity, QDomElement firstChildOfActionElement)
 {
+    SpawnInfo &spawnInfo = scenarioEntity.spawnInfo;
+
     QDomElement speedElement;
-    if (SimulationCommon::GetFirstChildElement(firstChildOfActionElement, "Speed", speedElement))
+    if (SimulationCommon::GetFirstChildElement(firstChildOfActionElement, TAG::speed, speedElement))
     {
         QDomElement dynamicsElement;
-        if (SimulationCommon::GetFirstChildElement(speedElement, "Dynamics", dynamicsElement))
+        if (SimulationCommon::GetFirstChildElement(speedElement, TAG::dynamics, dynamicsElement))
         {
             double rate;
-            if (SimulationCommon::ParseAttributeDouble(dynamicsElement, "rate", rate))
+            if (SimulationCommon::ParseAttributeDouble(dynamicsElement, ATTRIBUTE::rate, rate))
             {
-                scenarioEntity.spawnInfo.acceleration.value = rate;
+                spawnInfo.acceleration = rate;
             }
         }
 
         // Handle <Target> attributes
         QDomElement targetElement;
-        if (SimulationCommon::GetFirstChildElement(speedElement, "Target", targetElement))
+        if (SimulationCommon::GetFirstChildElement(speedElement, TAG::target, targetElement))
         {
             // Handle <Target> internal tags - currently ignoring <Relative> tags
             QDomElement absoluteElement;
-            if (SimulationCommon::GetFirstChildElement(targetElement, "Absolute", absoluteElement))
+            if (SimulationCommon::GetFirstChildElement(targetElement, TAG::absolute, absoluteElement))
             {
                 double velocity;
-                if (SimulationCommon::ParseAttributeDouble(absoluteElement, "value", velocity))
+                if (SimulationCommon::ParseAttributeDouble(absoluteElement, ATTRIBUTE::value, velocity))
                 {
-                    scenarioEntity.spawnInfo.velocity.value = velocity;
+                    spawnInfo.velocity = velocity;
                 }
             }
         }
 
         // Parse stochastics if available
         QDomElement stochasticElement;
-        SimulationCommon::GetFirstChildElement(speedElement, "Stochastics", stochasticElement);
+        SimulationCommon::GetFirstChildElement(speedElement, TAG::stochastics, stochasticElement);
         while (!stochasticElement.isNull())
         {
-           SetStochasticsData(scenarioEntity, stochasticElement);
-           stochasticElement = stochasticElement.nextSiblingElement("Stochastics");
+            const auto& [attributeName, stochasticInformation] = ImportStochastics(stochasticElement);
+            if (attributeName == "velocity")
+            {
+                spawnInfo.stochasticVelocity = stochasticInformation;
+                spawnInfo.stochasticVelocity.value().mean = spawnInfo.velocity;
+            }
+            else if (attributeName == "rate")
+            {
+                ThrowIfFalse(spawnInfo.acceleration.has_value(), stochasticElement, "Rate attribute is requried in order to use stochastic rates.");
+                spawnInfo.stochasticAcceleration = stochasticInformation;
+                spawnInfo.stochasticAcceleration.value().mean = spawnInfo.acceleration.value();
+            }
 
+           stochasticElement = stochasticElement.nextSiblingElement(TAG::stochastics);
         }
     }
+}
+
+openScenario::LanePosition ScenarioImporter::ImportLanePosition(QDomElement positionElement)
+{
+    openScenario::LanePosition lanePosition;
+    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(positionElement, ATTRIBUTE::s, lanePosition.s),
+                 positionElement, "Attribute " + std::string(ATTRIBUTE::s) + " is missing");
+    ThrowIfFalse(SimulationCommon::ParseAttributeInt(positionElement, ATTRIBUTE::laneId, lanePosition.laneId),
+                 positionElement, "Attribute " + std::string(ATTRIBUTE::laneId) + " is missing.");
+    ThrowIfFalse(SimulationCommon::ParseAttributeString(positionElement, ATTRIBUTE::roadId, lanePosition.roadId),
+                 positionElement, "Attribute " + std::string(ATTRIBUTE::roadId) + " is missing.");
+
+    double offset{};
+    if(SimulationCommon::ParseAttributeDouble(positionElement, ATTRIBUTE::offset, offset))
+    {
+        lanePosition.offset = offset;
+    }
+
+    //Parse optional stochastics
+    QDomElement stochasticElement;
+    SimulationCommon::GetFirstChildElement(positionElement, TAG::stochastics, stochasticElement);
+    while (!stochasticElement.isNull())
+    {
+        const auto& stochasticInformation = ImportStochastics(stochasticElement);
+
+        if (stochasticInformation.first == "offset")
+        {
+            ThrowIfFalse(lanePosition.offset.has_value(), stochasticElement, "The offset attribute is required in order to use stochastic offsets.");
+
+            lanePosition.stochasticOffset = stochasticInformation.second;
+            lanePosition.stochasticOffset->mean = lanePosition.offset.value();
+        }
+        else if (stochasticInformation.first == "s")
+        {
+            lanePosition.stochasticS = stochasticInformation.second;
+            lanePosition.stochasticS->mean = lanePosition.s;
+        }
+        stochasticElement = stochasticElement.nextSiblingElement(TAG::stochastics);
+    }
+
+    QDomElement orientationElement;
+    if(SimulationCommon::GetFirstChildElement(positionElement, TAG::orientation, orientationElement))
+    {
+        lanePosition.orientation = ImportOrientation(orientationElement);
+    }
+
+    return lanePosition;
+}
+
+openScenario::WorldPosition ScenarioImporter::ImportWorldPosition(QDomElement positionElement)
+{
+    openScenario::WorldPosition worldPosition;
+    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(positionElement, ATTRIBUTE::x, worldPosition.x),
+                 positionElement, "Attribute " + std::string(ATTRIBUTE::x) + " is missing");
+    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(positionElement, ATTRIBUTE::y, worldPosition.y),
+                 positionElement, "Attribute " + std::string(ATTRIBUTE::y) + " is missing.");
+
+    double heading{};
+    if(SimulationCommon::ParseAttributeDouble(positionElement, ATTRIBUTE::h, heading))
+    {
+        worldPosition.heading = heading;
+    }
+
+    return worldPosition;
 }
 
 void ScenarioImporter::ImportPositionElement(ScenarioEntity& scenarioEntity, QDomElement firstChildOfActionElement)
 {
-    std::string roadId = "";
-    int laneId;
-    double s;
-    double offset;
-
-    QDomElement laneElement;
-    SCENARIOCHECKFALSE(SimulationCommon::GetFirstChildElement(firstChildOfActionElement, "Lane", laneElement))
-    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeDouble(laneElement, "s", s));
-    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeInt(laneElement, "laneId", laneId));
-    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeString(laneElement, "roadId", roadId));
-
-    SpawnInfo& spawnInfo = scenarioEntity.spawnInfo;
-    spawnInfo.s.value = s;
-    spawnInfo.TStart = 0; // always presimulation spawning
-    spawnInfo.ILane = laneId;
-    spawnInfo.roadId = roadId;
-
-    bool offsetAvailable = SimulationCommon::ParseAttributeDouble(laneElement, "offset", offset);
-    if (offsetAvailable)
+    QDomElement positionElement;
+    if(SimulationCommon::GetFirstChildElement(firstChildOfActionElement, TAG::lane, positionElement))
     {
-        spawnInfo.offset.value = offset;
-    }
-
-    QDomElement stochasticElement;
-    SimulationCommon::GetFirstChildElement(laneElement, "Stochastics", stochasticElement);
-    while (!stochasticElement.isNull())
-    {
-        SetStochasticsData(scenarioEntity, stochasticElement);
-        stochasticElement = stochasticElement.nextSiblingElement("Stochastics");
-    }
-
-    QDomElement orientationElement;
-    if (SimulationCommon::GetFirstChildElement(laneElement, "Orientation", orientationElement))
-    {
-        SetOrientationData(scenarioEntity, orientationElement);
-    }
-}
-
-void ScenarioImporter::SetStochasticsDataHelper(SpawnAttribute& attribute, QDomElement& stochasticsElement)
-{
-    double stdDeviation;
-    double lowerBound;
-    double upperBound;
-
-    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeDouble(stochasticsElement, "stdDeviation", stdDeviation));
-    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeDouble(stochasticsElement, "lowerBound", lowerBound));
-    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeDouble(stochasticsElement, "upperBound", upperBound));
-
-    attribute.mean = attribute.value;
-    attribute.isStochastic = true;
-    attribute.stdDeviation = stdDeviation;
-    attribute.lowerBoundary = lowerBound;
-    attribute.upperBoundary = upperBound;
-}
-
-void ScenarioImporter::SetStochasticsData(ScenarioEntity& scenarioEntity, QDomElement& stochasticsElement)
-{
-    SpawnInfo& spawnInfo = scenarioEntity.spawnInfo;
-
-    std::string type;
-    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeString(stochasticsElement, "value", type));
-
-    if (type == "offset")
-    {
-        SetStochasticsDataHelper(spawnInfo.offset, stochasticsElement);
+        scenarioEntity.spawnInfo.position = ImportLanePosition(positionElement);
     }
     else
-        if (type == "s")
-        {
-            SetStochasticsDataHelper(spawnInfo.s, stochasticsElement);
-        }
-        else
-            if (type == "velocity")
-            {
-                SetStochasticsDataHelper(spawnInfo.velocity, stochasticsElement);
-            }
-            else
-                if (type == "rate")
-                {
-                    SetStochasticsDataHelper(spawnInfo.acceleration, stochasticsElement);
-                }
+    {
+        ThrowIfFalse(SimulationCommon::GetFirstChildElement(firstChildOfActionElement, TAG::world, positionElement),
+                  firstChildOfActionElement, "OSCPosition type not supported. Currently only World and Lane are supported!");
+        scenarioEntity.spawnInfo.position = ImportWorldPosition(positionElement);
+    }
 }
 
-void ScenarioImporter::SetOrientationData(ScenarioEntity& scenarioEntity, QDomElement& orientationElement)
+void ScenarioImporter::ImportRoutingElement(ScenarioEntity& scenarioEntity, QDomElement firstChildOfActionElement)
 {
-    std::string type;
-    double heading;
+    std::vector<RouteElement> roads;
+    size_t hash{0};
 
-    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeString(orientationElement, "type", type));
-    if (type != "relative")
+    QDomElement followRouteElement;
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(firstChildOfActionElement, TAG::followRoute, followRouteElement),
+                 firstChildOfActionElement, "Tag " + std::string(TAG::followRoute) + " is missing.");
+    QDomElement routeElement;
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(followRouteElement, TAG::route, routeElement),
+                 followRouteElement, "Tag " + std::string(TAG::route) + " is missing.");
+    QDomElement waypointElement;
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(routeElement, TAG::waypoint, waypointElement),
+                 routeElement, "Tag " + std::string(TAG::waypoint) + " is missing.");
+    while (!waypointElement.isNull())
     {
-        LOG_INTERN(LogLevel::Warning) << "Scenario Importer: only relative orientation is allowed.";
-        throw std::runtime_error("Scenario Importer: only relative orientation is allowed.");
+        QDomElement positionElement;
+        ThrowIfFalse(SimulationCommon::GetFirstChildElement(waypointElement, TAG::position, positionElement),
+                     waypointElement, "Tag " + std::string(TAG::position) + " is missing.");
+        QDomElement roadElement;
+        ThrowIfFalse(SimulationCommon::GetFirstChildElement(positionElement, TAG::road, roadElement),
+                     positionElement, "Tag " + std::string(TAG::road) + " is missing.");
+        std::string roadId;
+        ThrowIfFalse(SimulationCommon::ParseAttributeString(roadElement, ATTRIBUTE::roadId, roadId),
+                     roadElement, "Attribute " + std::string(ATTRIBUTE::roadId) + " is missing.");
+        double t;
+        ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadElement, ATTRIBUTE::t, t),
+                     roadElement, "Attribute " + std::string(ATTRIBUTE::t) + " is missing.");
+        bool inRoadDirection = (t <= 0);
+        roads.push_back({roadId, inRoadDirection});
+        hash = hash ^ (std::hash<std::string>{}(roadId) << 1);
+
+        waypointElement = waypointElement.nextSiblingElement(TAG::waypoint);
     }
+    scenarioEntity.spawnInfo.route = Route{roads, {}, hash};
+}
 
-    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeDouble(orientationElement, "h", heading));
+std::pair<std::string, openScenario::StochasticAttribute> ScenarioImporter::ImportStochastics(QDomElement& stochasticsElement)
+{
+    std::string attributeName;
+    ThrowIfFalse(SimulationCommon::ParseAttributeString(stochasticsElement, ATTRIBUTE::value, attributeName),
+                 stochasticsElement, "Attribute " + std::string(ATTRIBUTE::value) + " is missing.");
 
-    scenarioEntity.spawnInfo.heading = heading;
+    openScenario::StochasticAttribute stochasticAttribute;
+    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(stochasticsElement, ATTRIBUTE::stdDeviation, stochasticAttribute.stdDeviation),
+                 stochasticsElement, "Attribute " + std::string(ATTRIBUTE::stdDeviation) + " is missing.");
+    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(stochasticsElement, ATTRIBUTE::lowerBound, stochasticAttribute.lowerBoundary),
+                 stochasticsElement, "Attribute " + std::string(ATTRIBUTE::lowerBound) + " is missing.");
+    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(stochasticsElement, ATTRIBUTE::upperBound, stochasticAttribute.upperBoundary),
+                 stochasticsElement, "Attribute " + std::string(ATTRIBUTE::upperBound) + " is missing.");
+
+    return {attributeName, stochasticAttribute};
+}
+
+openScenario::Orientation ScenarioImporter::ImportOrientation(QDomElement& orientationElement)
+{
+    openScenario::Orientation orientation;
+
+    std::string type;
+    ThrowIfFalse(SimulationCommon::ParseAttributeString(orientationElement, ATTRIBUTE::type, type),
+                 orientationElement, "Attribute " + std::string(ATTRIBUTE::type) + " is missing.");
+    ThrowIfFalse(type == "relative", orientationElement, "Scenario Importer: only relative orientation is allowed.");
+    orientation.type = openScenario::OrientationType::Relative;
+
+    double heading;
+    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(orientationElement, ATTRIBUTE::h, heading),
+                 orientationElement, "Attribute " + std::string(ATTRIBUTE::h) + " is missing.");
+    orientation.h = heading;
+
+    return orientation;
 }
 
 void ScenarioImporter::ImportPrivateElement(QDomElement& privateElement,
         std::vector<ScenarioEntity>& entities)
 {
     std::string object;
-    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeString(privateElement, "object", object));
+    ThrowIfFalse(SimulationCommon::ParseAttributeString(privateElement, ATTRIBUTE::object, object),
+                 privateElement, "Attribute " + std::string(ATTRIBUTE::object) + " is missing.");
 
     ScenarioEntity* scenarioEntity = GetEntityByName(entities, object);
 
-    if (scenarioEntity == nullptr)
-    {
-        throw std::runtime_error(std::string("Action object '") + object + "' not declared in 'Entities'");
-    }
+    ThrowIfFalse(scenarioEntity, privateElement,
+                 (std::string("Action object '") + object + "' not declared in 'Entities'"));
 
     QDomElement actionElement;
-    SimulationCommon::GetFirstChildElement(privateElement, "Action", actionElement);
+    SimulationCommon::GetFirstChildElement(privateElement, TAG::action, actionElement);
 
     while (!actionElement.isNull())
     {
         QDomElement firstChildOfActionElement;
-        if (SimulationCommon::GetFirstChildElement(actionElement, "Longitudinal", firstChildOfActionElement))
+        if (SimulationCommon::GetFirstChildElement(actionElement, TAG::longitudinal, firstChildOfActionElement))
         {
             ImportLongitudinalElement(*scenarioEntity, firstChildOfActionElement);
         }
-        else
-            if (SimulationCommon::GetFirstChildElement(actionElement, "Position", firstChildOfActionElement))
-            {
-                ImportPositionElement(*scenarioEntity, firstChildOfActionElement);
-            }
+        else if (SimulationCommon::GetFirstChildElement(actionElement, TAG::position, firstChildOfActionElement))
+        {
+            ImportPositionElement(*scenarioEntity, firstChildOfActionElement);
+        }
+        else if (SimulationCommon::GetFirstChildElement(actionElement, TAG::routing, firstChildOfActionElement))
+        {
+            ImportRoutingElement(*scenarioEntity, firstChildOfActionElement);
+        }
 
-        actionElement = actionElement.nextSiblingElement("Action");
-    }
-
-    try
-    {
-        ValidityCheckForSpawnParameters(*scenarioEntity);
-    }
-    catch (const std::runtime_error& error)
-    {
-        LOG_INTERN(LogLevel::Warning) << "error in importInitElement: " << error.what();
-        throw std::runtime_error("Import scenario xml failed.");
-    }
-    catch (...)
-    {
-        LOG_INTERN(LogLevel::Warning) << "An unexpected error occured.";
-        throw std::runtime_error("Import scenario xml failed.");
+        actionElement = actionElement.nextSiblingElement(TAG::action);
     }
 }
 
 void ScenarioImporter::ImportPrivateElements(QDomElement& actionsElement, std::vector<ScenarioEntity>& entities)
 {
     QDomElement privateElement;
-    SimulationCommon::GetFirstChildElement(actionsElement, "Private", privateElement);
+    SimulationCommon::GetFirstChildElement(actionsElement, TAG::Private, privateElement);
 
     while (!privateElement.isNull())
     {
         ImportPrivateElement(privateElement, entities);
-        privateElement = privateElement.nextSiblingElement("Private");
+        privateElement = privateElement.nextSiblingElement(TAG::Private);
     }
 }
 
@@ -499,7 +535,7 @@ void ScenarioImporter::ImportInitElement(QDomElement& initElement, std::vector<S
 {
     // for initial entitiy parameters we just use first child "Actions" --> others will be ignore
     QDomElement actionsElement;
-    SimulationCommon::GetFirstChildElement(initElement, "Actions", actionsElement);
+    SimulationCommon::GetFirstChildElement(initElement, TAG::actions, actionsElement);
 
     ImportPrivateElements(actionsElement, entities);
 }
@@ -509,13 +545,13 @@ void ScenarioImporter::ImportEndConditionsFromStoryboard(const QDomElement& stor
     bool endConditionProvided = false;
 
     QDomElement endConditionsElement;
-    if (SimulationCommon::GetFirstChildElement(storyboardElement, "EndConditions", endConditionsElement))
+    if (SimulationCommon::GetFirstChildElement(storyboardElement, TAG::endConditions, endConditionsElement))
     {
         QDomElement conditionGroupElement;
-        if (SimulationCommon::GetFirstChildElement(endConditionsElement, "ConditionGroup", conditionGroupElement))
+        if (SimulationCommon::GetFirstChildElement(endConditionsElement, TAG::conditionGroup, conditionGroupElement))
         {
             QDomElement conditionElement;
-            if (SimulationCommon::GetFirstChildElement(conditionGroupElement, "Condition", conditionElement))
+            if (SimulationCommon::GetFirstChildElement(conditionGroupElement, TAG::condition, conditionElement))
             {
                 // these attributes are required by OpenSCENARIO standard, but have no impact on behaviour
                 std::string conditionName;
@@ -523,30 +559,22 @@ void ScenarioImporter::ImportEndConditionsFromStoryboard(const QDomElement& stor
                 std::string conditionEdge;
 
                 ParseConditionAttributes(conditionElement, conditionName, conditionDelay, conditionEdge);
-                if (conditionDelay > 0.0)
-                {
-                    LOG_INTERN(LogLevel::Warning) << "Condition delay attribute not equal to zero not currently supported";
-                    throw std::runtime_error("End Condition specifies unsupported delay value");
-                }
+                ThrowIfFalse(conditionDelay == 0.0, conditionElement,
+                             "End Condition specifies unsupported delay value. Condition delay attribute not equal to zero not currently supported.");
 
-                if (conditionEdge != "rising")
-                {
-                    LOG_INTERN(LogLevel::Warning) << "Condition edge attribute not equal to 'rising' not currently supported";
-                    throw std::runtime_error("End Condition specifies unsupported edge value");
-                }
+                ThrowIfFalse(conditionEdge == "rising", conditionElement,
+                             "End Condition specifies unsupported edge value. Condition edge attribute not equal to 'rising' not currently supported.");
 
                 QDomElement byValueElement;
-                if (SimulationCommon::GetFirstChildElement(conditionElement, "ByValue", byValueElement))
+                if (SimulationCommon::GetFirstChildElement(conditionElement, TAG::byValue, byValueElement))
                 {
                     double endTime;
                     std::string rule;
 
                     ParseSimulationTime(byValueElement, endTime, rule);
-                    if (rule == "less_than" || rule == "equal_to")
-                    {
-                        LOG_INTERN(LogLevel::Warning) << "SimulationTime rule attribute value '" << rule << "' not supported; defaulting to 'greater_than'";
-                        throw std::runtime_error("End Condition specifies unsupported rule");
-                    }
+                    ThrowIfFalse(rule == "greater_than", byValueElement,
+                                 "End Condition specifies unsupported rule. SimulationTime rule attribute value '" + rule + "' not supported; defaulting to 'greater_than'.");
+
                     scenario->SetEndTime(endTime);
                     endConditionProvided = true;
                 }
@@ -554,37 +582,19 @@ void ScenarioImporter::ImportEndConditionsFromStoryboard(const QDomElement& stor
         }
     }
 
-    if (!endConditionProvided)
-    {
-        // error message
-        throw std::runtime_error("Scenario provides no EndConditions for the simulation");
-    }
+    ThrowIfFalse(endConditionProvided, "Scenario provides no EndConditions for the simulation");
 }
 
 void ScenarioImporter::ParseConditionAttributes(const QDomElement& conditionElement, std::string& name, double& delay, std::string& edge)
 {
-    if (!SimulationCommon::ParseAttributeString(conditionElement, "name", name))
-    {
-        LOG_INTERN(LogLevel::Error) << "Condition name required";
-        throw std::runtime_error("No name specified for condition");
-    }
-
-    if (!SimulationCommon::ParseAttributeDouble(conditionElement, "delay", delay))
-    {
-        LOG_INTERN(LogLevel::Error) << "Condition delay required";
-        throw std::runtime_error("No delay attribute specified for condition " + name);
-    }
-    else if (delay < 0.0)
-    {
-        LOG_INTERN(LogLevel::Error) << "Negative condition delay not valid";
-        throw std::runtime_error("Invalid delay value specified for condition " + name);
-    }
-
-    if (!SimulationCommon::ParseAttributeString(conditionElement, "edge", edge))
-    {
-        LOG_INTERN(LogLevel::Error) << "Condition edge required";
-        throw std::runtime_error("No edge specified for condition " + name);
-    }
+    ThrowIfFalse(SimulationCommon::ParseAttributeString(conditionElement, ATTRIBUTE::name, name),
+                 conditionElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
+    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(conditionElement, ATTRIBUTE::delay, delay),
+                 conditionElement, "Attribute " + std::string(ATTRIBUTE::delay) + " is missing.");
+    ThrowIfFalse(delay >= 0.0,
+                 conditionElement, "Invalid delay value specified for condition");
+    ThrowIfFalse(SimulationCommon::ParseAttributeString(conditionElement, ATTRIBUTE::edge, edge),
+                 conditionElement, "Attribute " + std::string(ATTRIBUTE::edge) + " is missing.");
 }
 
 void ScenarioImporter::ParseSimulationTime(const QDomElement& byValueElement, double& value, std::string& rule)
@@ -592,178 +602,136 @@ void ScenarioImporter::ParseSimulationTime(const QDomElement& byValueElement, do
     QDomElement simulationTimeElement;
     if(SimulationCommon::GetFirstChildElement(byValueElement, "SimulationTime", simulationTimeElement))
     {
-        if(SimulationCommon::ParseAttributeDouble(simulationTimeElement, "value", value))
+        ThrowIfFalse(SimulationCommon::ParseAttributeDouble(simulationTimeElement, ATTRIBUTE::value, value),
+                     simulationTimeElement, "Attribute " + std::string(ATTRIBUTE::value) + " is missing.");
+
+        if(SimulationCommon::ParseAttributeString(simulationTimeElement, ATTRIBUTE::rule, rule))
         {
-            if(SimulationCommon::ParseAttributeString(simulationTimeElement, "rule", rule))
-            {
-                if(!(rule == "greater_than" || rule == "less_than" || rule == "equal_to"))
-                {
-                    LOG_INTERN(LogLevel::Error) << "SimulationTime rule attribute value '" << rule << "' not valid";
-                    throw std::runtime_error("Invalid rule specified for SimulationTime element");
-                }
-            }
-        }
-        else
-        {
-            LOG_INTERN(LogLevel::Error) << "SimulationTime value attribute not valid";
-            throw std::runtime_error("Invalid SimulationTime element");
+            ThrowIfFalse((rule == "greater_than"
+                            || rule == "less_than"
+                            || rule == "equal_to"),
+                         simulationTimeElement, "Simulation rule attribute value '" + rule + "' not valid");
         }
     }
 }
 
-void ScenarioImporter::ValidityCheckForSpawnParameters(const ScenarioEntity& scenarioEntity)
-{
-    if (scenarioEntity.spawnInfo.s.value == -999 || scenarioEntity.spawnInfo.TStart == -999)
-    {
-        throw std::runtime_error("no position information available");
-    }
-}
-
-void ScenarioImporter::ImportParameterElement(QDomElement& parameterElement, ParameterInterface *parameters)
+void ScenarioImporter::ImportParameterElement(QDomElement& parameterElement, openpass::parameter::Container& parameters)
 {
     std::string parameterName;
-    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeString(parameterElement, "name", parameterName));
+    ThrowIfFalse(SimulationCommon::ParseAttributeString(parameterElement, ATTRIBUTE::name, parameterName),
+                 parameterElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
 
     std::string parameterType;
-    SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeString(parameterElement, "type", parameterType));
+    ThrowIfFalse(SimulationCommon::ParseAttributeString(parameterElement, ATTRIBUTE::type, parameterType),
+                 parameterElement, "Attribute " + std::string(ATTRIBUTE::type) + " is missing.");
 
     switch (parameterTypes.at(parameterType))
     {
         case 0:
             bool parameterValueBool;
-            SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeBool(parameterElement, "value", parameterValueBool));
-            parameters->AddParameterBool(parameterName, parameterValueBool);
+            ThrowIfFalse(SimulationCommon::ParseAttributeBool(parameterElement, ATTRIBUTE::value, parameterValueBool),
+                         parameterElement, "Attribute " + std::string(ATTRIBUTE::value) + " is missing.");
+            parameters.emplace_back(parameterName, parameterValueBool);
             break;
 
         case 1:
             int parameterValueInt;
-            SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeInt(parameterElement, "value", parameterValueInt));
-            parameters->AddParameterInt(parameterName, parameterValueInt);
+            ThrowIfFalse(SimulationCommon::ParseAttributeInt(parameterElement, ATTRIBUTE::value, parameterValueInt),
+                         parameterElement, "Attribute " + std::string(ATTRIBUTE::value) + " is missing.");
+            parameters.emplace_back(parameterName, parameterValueInt);
             break;
 
         case 2:
             double parameterValueDouble;
-            SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeDouble(parameterElement, "value", parameterValueDouble));
-            parameters->AddParameterDouble(parameterName, parameterValueDouble);
+            ThrowIfFalse(SimulationCommon::ParseAttributeDouble(parameterElement, ATTRIBUTE::value, parameterValueDouble),
+                         parameterElement, "Attribute " + std::string(ATTRIBUTE::value) + " is missing.");
+            parameters.emplace_back(parameterName, parameterValueDouble);
             break;
 
         case 3:
             std::string parameterValueString;
-            SCENARIOCHECKFALSE(SimulationCommon::ParseAttributeString(parameterElement, "value", parameterValueString));
-            parameters->AddParameterString(parameterName, parameterValueString);
+            ThrowIfFalse(SimulationCommon::ParseAttributeString(parameterElement, ATTRIBUTE::value, parameterValueString),
+                         parameterElement, "Attribute " + std::string(ATTRIBUTE::value) + " is missing.");
+            parameters.emplace_back(parameterName, parameterValueString);
             break;
     }
 }
 
 void ScenarioImporter::ImportParameterDeclarationElement(QDomElement& parameterDeclarationElement,
-        ParameterInterface* parameters)
+        openpass::parameter::Container& parameters)
 {
     QDomElement parameterElement;
-    if (SimulationCommon::GetFirstChildElement(parameterDeclarationElement, "Parameter", parameterElement))
+    if (SimulationCommon::GetFirstChildElement(parameterDeclarationElement, TAG::parameter, parameterElement))
     {
         while (!parameterElement.isNull())
         {
             ImportParameterElement(parameterElement, parameters);
-
-            parameterElement = parameterElement.nextSiblingElement("Parameter");
+            parameterElement = parameterElement.nextSiblingElement(TAG::parameter);
         }
     }
 }
 
-bool ScenarioImporter::ImportCatalogDirectory(std::string& catalogPath, QDomElement& catalogElement)
-{
-    QDomElement directoryElement;
-    SimulationCommon::GetFirstChildElement(catalogElement, "Directory", directoryElement);
-
-    if (directoryElement.isNull())
-    {
-        LOG_INTERN(LogLevel::Warning) << "Catalog element directory tag missing or invalid";
-        return false;
-    }
-
-    return SimulationCommon::ParseAttributeString(directoryElement, "path", catalogPath);
-}
-
-bool ScenarioImporter::ImportCatalog(std::string& catalogPath, const std::string& catalogName,
-                                     QDomElement& catalogsElement)
+std::string ScenarioImporter::ImportCatalog(const std::string& catalogName,
+                                            QDomElement& catalogsElement)
 {
     QDomElement catalogElement;
-    SimulationCommon::GetFirstChildElement(catalogsElement, catalogName, catalogElement);
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(catalogsElement, catalogName, catalogElement),
+                catalogsElement, "Tag " + catalogName + " is missing.");
 
-    if (catalogElement.isNull())
-    {
-        LOG_INTERN(LogLevel::Warning) << "No " << catalogName << " found in scenario file";
-        return false;
-    }
+    QDomElement directoryElement;
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(catalogElement, TAG::directory, directoryElement),
+                 catalogElement, "Tag " + std::string(TAG::directory) + " is missing.");
 
-    return ImportCatalogDirectory(catalogPath, catalogElement);
+    std::string catalogPath;
+    ThrowIfFalse(SimulationCommon::ParseAttributeString(directoryElement, ATTRIBUTE::path, catalogPath),
+                 directoryElement, "Attribute " + std::string(ATTRIBUTE::path) + " is missing.");
+
+    return catalogPath;
 }
 
-bool ScenarioImporter::ImportEntities(QDomElement& documentRoot, std::vector<ScenarioEntity>& entities, std::map<std::string, std::list<std::string>> &groups)
+void ScenarioImporter::ImportEntities(QDomElement& documentRoot, std::vector<ScenarioEntity>& entities, std::map<std::string, std::list<std::string>> &groups)
 {
     QDomElement entitiesElement;
-    SCENARIOCHECKFALSE(SimulationCommon::GetFirstChildElement(documentRoot, "Entities", entitiesElement));
-
-    if (entitiesElement.isNull())
-    {
-        LOG_INTERN(LogLevel::Error) << "'Entities' tag not found in scenario file";
-        return false;
-    }
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(documentRoot, TAG::entities, entitiesElement),
+                 documentRoot, "Tag " + std::string(TAG::entities) + " is missing.");
 
     QDomElement entityElement;
-    SCENARIOCHECKFALSE(SimulationCommon::GetFirstChildElement(entitiesElement, "Object", entityElement));
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(entitiesElement, TAG::object, entityElement),
+                 entitiesElement, "Tag " + std::string(TAG::object) + " is missing.");
 
     while (!entityElement.isNull())
     {
         ScenarioEntity entity;
 
-        if (!ImportEntity(entityElement, entity))
-        {
-            LOG_INTERN(LogLevel::Error) << "Unable to import entity object";
-            return false;
-        }
+        ImportEntity(entityElement, entity);
 
         entities.push_back(entity);
-        entityElement = entityElement.nextSiblingElement("Object");
+        entityElement = entityElement.nextSiblingElement(TAG::object);
     }
 
     // Parse selection elements (there can be as few as zero and as many as one wants)
-    if (!ImportSelectionElements(entitiesElement, groups))
-    {
-        LOG_INTERN(LogLevel::Error) << "Unable to import selection element";
-        return false;
-    }
-
-    return true;
+    ImportSelectionElements(entitiesElement, groups);
 }
 
-bool ScenarioImporter::ImportSelectionElements(QDomElement &entitiesElement, std::map<std::string, std::list<std::string>> &groups)
+void ScenarioImporter::ImportSelectionElements(QDomElement &entitiesElement, std::map<std::string, std::list<std::string>> &groups)
 {
     QDomElement selectionElement;
-    if(SimulationCommon::GetFirstChildElement(entitiesElement, "Selection", selectionElement))
+    if(SimulationCommon::GetFirstChildElement(entitiesElement, TAG::selection, selectionElement))
     {
         std::string selectionName;
         QDomElement membersElement;
         std::list<std::string> members;
         while (!selectionElement.isNull())
         {
-            if (!SimulationCommon::ParseAttributeString(selectionElement, "name", selectionName))
-            {
-                LOG_INTERN(LogLevel::Error) << "No name provided for selection";
-                return false;
-            }
-            // parse members element (just one)
-            if(!SimulationCommon::GetFirstChildElement(selectionElement, "Members", membersElement))
-            {
-                LOG_INTERN(LogLevel::Error) << "No members provided for selection: " << selectionName;
-                return false;
-            }
+            ThrowIfFalse(SimulationCommon::ParseAttributeString(selectionElement, ATTRIBUTE::name, selectionName),
+                         selectionElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
+            ThrowIfFalse(SimulationCommon::GetFirstChildElement(selectionElement, TAG::members, membersElement),
+                         selectionElement, "Tag " + std::string(TAG::members) + " is missing.");
 
             ImportMembers(membersElement, members);
-
             groups.insert({selectionName, members});
 
-            selectionElement = selectionElement.nextSiblingElement("Selection");
+            selectionElement = selectionElement.nextSiblingElement(TAG::selection);
         }
     }
 
@@ -772,86 +740,47 @@ bool ScenarioImporter::ImportSelectionElements(QDomElement &entitiesElement, std
         LOG_INTERN(LogLevel::Info) << "ScenarioAgents selection is not defined. Adding empty one.";
         groups.insert({"ScenarioAgents", {}});
     }
-    return true;
 }
 
-bool ScenarioImporter::ImportEntity(QDomElement& entityElement, ScenarioEntity& entity)
+void ScenarioImporter::ImportEntity(QDomElement& entityElement, ScenarioEntity& entity)
 {
-    if (!SimulationCommon::ParseAttributeString(entityElement, "name", entity.name))
-    {
-        LOG_INTERN(LogLevel::Error) << "Unable to parse 'name' tag of entity object";
-        return false;
-    }
-
-    if (entity.name.size() == 0)
-    {
-        LOG_INTERN(LogLevel::Error) << "Length of entity object name has to be greater than 0";
-        return false;
-    }
+    ThrowIfFalse(SimulationCommon::ParseAttributeString(entityElement, ATTRIBUTE::name, entity.name),
+                 entityElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
+    ThrowIfFalse(entity.name.size() > 0,
+                 entityElement, "Length of entity object name has to be greater than 0");
 
     QDomElement catalogReferenceElement;
-
-    if (!SimulationCommon::GetFirstChildElement(entityElement, "CatalogReference", catalogReferenceElement))
-    {
-        LOG_INTERN(LogLevel::Error) << "Unable to import entity catalog reference tag";
-        return false;
-    }
-
-    if (!ImportEntityCatalogReference(catalogReferenceElement, entity))
-    {
-        LOG_INTERN(LogLevel::Error) << "Invalid catalog reference for entity '" << entity.name << "'";
-        return false;
-    }
-
-    return true;
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(entityElement, TAG::catalogReference, catalogReferenceElement),
+                 entityElement, "Tag " + std::string(TAG::catalogReference) + " is missing.");
+    ImportEntityCatalogReference(catalogReferenceElement, entity);
 }
 
-bool ScenarioImporter::ImportMembers(const QDomElement &membersElement, std::list<std::string> &members)
+void ScenarioImporter::ImportMembers(const QDomElement &membersElement, std::list<std::string> &members)
 {
     QDomElement byEntityElement;
-    if(SimulationCommon::GetFirstChildElement(membersElement, "ByEntity", byEntityElement))
+    if(SimulationCommon::GetFirstChildElement(membersElement, TAG::byEntity, byEntityElement))
     {
         std::string memberName;
         while(!byEntityElement.isNull())
         {
-            SimulationCommon::ParseAttributeString(byEntityElement, "name", memberName);
+            SimulationCommon::ParseAttributeString(byEntityElement, ATTRIBUTE::name, memberName);
             members.push_back(memberName);
 
-            byEntityElement = byEntityElement.nextSiblingElement("ByEntity");
+            byEntityElement = byEntityElement.nextSiblingElement(TAG::byEntity);
         }
     }
-
-    return true;
 }
 
-bool ScenarioImporter::ImportEntityCatalogReference(QDomElement& catalogReferenceElement, ScenarioEntity& entity)
+void ScenarioImporter::ImportEntityCatalogReference(QDomElement& catalogReferenceElement, ScenarioEntity& entity)
 {
-    if (!SimulationCommon::ParseAttributeString(catalogReferenceElement, "catalogName",
-            entity.catalogReference.catalogName))
-    {
-        LOG_INTERN(LogLevel::Error) << "Unable to parse 'catalogName' attribute of catalog reference";
-        return false;
-    }
-
-    if (entity.catalogReference.catalogName.size() == 0)
-    {
-        LOG_INTERN(LogLevel::Error) << "Length of 'catalogName' has to be greater than 0";
-        return false;
-    }
-
-    if (!SimulationCommon::ParseAttributeString(catalogReferenceElement, "entryName", entity.catalogReference.entryName))
-    {
-        LOG_INTERN(LogLevel::Error) << "Unable to parse 'entryName' attribute of catalog reference";
-        return false;
-    }
-
-    if (entity.catalogReference.entryName.size() == 0)
-    {
-        LOG_INTERN(LogLevel::Error) << "Length of 'entryName' has to be greater than 0";
-        return false;
-    }
-
-    return true;
+    ThrowIfFalse(SimulationCommon::ParseAttributeString(catalogReferenceElement, ATTRIBUTE::catalogName, entity.catalogReference.catalogName),
+                 catalogReferenceElement, "Attribute " + std::string(ATTRIBUTE::catalogName) + " is missing.");
+    ThrowIfFalse(entity.catalogReference.catalogName.size() > 0,
+                 catalogReferenceElement, "Length of 'catalogName' has to be greater than 0");
+    ThrowIfFalse(SimulationCommon::ParseAttributeString(catalogReferenceElement, ATTRIBUTE::entryName, entity.catalogReference.entryName),
+                 catalogReferenceElement, "Attribute " + std::string(ATTRIBUTE::entryName) + " is missing.");
+    ThrowIfFalse(entity.catalogReference.entryName.size() > 0,
+                 catalogReferenceElement, "Length of 'entryName' has to be greater than 0");
 }
 
 ScenarioEntity* ScenarioImporter::GetEntityByName(std::vector<ScenarioEntity>& entities, const std::string& entityName)
@@ -875,10 +804,6 @@ void ScenarioImporter::CategorizeEntities(const std::vector<ScenarioEntity>& ent
 {
     for (const auto& entity : entities)
     {
-        if (entity.name == "Ego")
-        {
-            scenario->SetEgoEntity(entity);
-        }
         scenario->AddScenarioEntity(entity);
     }
 

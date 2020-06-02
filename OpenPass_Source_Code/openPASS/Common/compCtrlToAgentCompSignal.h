@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -23,7 +23,7 @@
 #include "Interfaces/signalInterface.h"
 #include "Common/globalDefinitions.h"
 
-using Warnings = std::map<std::string, ComponentWarningInformation>;
+using Warnings = std::map<std::string, std::vector<ComponentWarningInformation>>;
 
 /*!
  * --------------------------------------------------------------------------------
@@ -103,7 +103,7 @@ public:
     //-----------------------------------------------------------------------------
     CompCtrlToDriverCompSignal(const ComponentState &maxReachableState,
                                const std::map<std::string, std::pair<ComponentType, ComponentState>> &vehicleComponentStates,
-                               const std::optional<std::map<std::string, ComponentWarningInformation>>& warnings = std::nullopt):
+                               const Warnings& warnings):
         CompCtrlToAgentCompSignal(maxReachableState,
                                   vehicleComponentStates),
         warnings(warnings)
@@ -121,10 +121,10 @@ public:
      *
      * \return all warnings for the driver known by the ComponentController (if any exist), by component name
      */
-    const std::optional<Warnings>& GetWarnings() const
+    const Warnings& GetWarnings() const
     {
         return warnings;
     }
 private:
-    const std::optional<Warnings> warnings; //!< Contains all warnings for the driver known by the ComponentController (if any exist) by component name
+    const Warnings warnings; //!< Contains all warnings for the driver known by the ComponentController (if any exist) by component name
 };

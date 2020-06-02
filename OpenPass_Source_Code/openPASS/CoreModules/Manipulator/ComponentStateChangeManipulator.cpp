@@ -63,7 +63,6 @@ ComponentStateChangeManipulator::ComponentStateChangeManipulator(WorldInterface 
     }
 
     cycleTime = 100;
-    eventType = EventDefinitions::EventType::ComponentStateChange;
 }
 
 void ComponentStateChangeManipulator::Trigger(int time)
@@ -72,17 +71,16 @@ void ComponentStateChangeManipulator::Trigger(int time)
 
     for (std::shared_ptr<EventInterface> eventInterface : GetEvents())
     {
-        std::shared_ptr<AgentBasedManipulationEvent> triggeringEvent = std::dynamic_pointer_cast<AgentBasedManipulationEvent>(eventInterface);
+        std::shared_ptr<ConditionalEvent> triggeringEvent = std::dynamic_pointer_cast<ConditionalEvent>(eventInterface);
 
         std::shared_ptr<ComponentChangeEvent> event =
                 std::make_shared<ComponentChangeEvent>(time,
-                                                            COMPONENTNAME,
-                                                            sequenceName,
-                                                            eventType,
-                                                            triggeringEvent->triggeringAgents,
-                                                            triggeringEvent->actingAgents,
-                                                            componentName,
-                                                            componentStateName);
+                                                       eventName,
+                                                       COMPONENTNAME,
+                                                       triggeringEvent->triggeringAgents,
+                                                       triggeringEvent->actingAgents,
+                                                       componentName,
+                                                       componentStateName);
 
          event->SetTriggeringEventId(triggeringEvent->GetId());
 
@@ -94,13 +92,13 @@ EventContainer ComponentStateChangeManipulator::GetEvents()
 {
     EventContainer manipulatorSpecificEvents{};
 
-    const auto &conditionalEvents = eventNetwork->GetActiveEventCategory(EventDefinitions::EventCategory::AgentBasedManipulation);
+    const auto &conditionalEvents = eventNetwork->GetActiveEventCategory(EventDefinitions::EventCategory::Conditional);
 
     for(const auto &event: conditionalEvents)
     {
-        const auto conditionalEvent = std::static_pointer_cast<AgentBasedManipulationEvent>(event);
+        const auto conditionalEvent = std::static_pointer_cast<ConditionalEvent>(event);
 
-        if(conditionalEvent && conditionalEvent.get()->GetSequenceName() == sequenceName)
+        if(conditionalEvent && conditionalEvent.get()->GetName() == eventName)
         {
             manipulatorSpecificEvents.emplace_back(event);
         }

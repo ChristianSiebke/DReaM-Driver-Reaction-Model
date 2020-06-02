@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -60,6 +60,20 @@ public:
      */
     void SetPedestrianCatalogPath(const std::string& catalogPath) override;
 
+    //-----------------------------------------------------------------------------
+    //! \brief Retreives the path to the trajectory catalog file
+    //!
+    //! \return     Relative path to the trajectory catalog
+    //-----------------------------------------------------------------------------
+    const std::string& GetTrajectoryCatalogPath() override;
+
+    //-----------------------------------------------------------------------------
+    //! Sets the path to the trajectory catalog file
+    //!
+    //! \param[in]      catalogPath     Relative path to the trajectory catalog file
+    //-----------------------------------------------------------------------------
+    void SetTrajectoryCatalogPath(const std::string& catalogPath) override;
+
     /*!
      * \brief Getter for scenery path
      *
@@ -74,11 +88,10 @@ public:
      */
     void SetSceneryPath(const std::string& sceneryPath) override;
 
-    void SetEgoEntity(const ScenarioEntity& egoEntity) override;
     void AddScenarioEntity(const ScenarioEntity& entity) override;
     void AddScenarioGroupsByEntityNames(const std::map<std::string, std::list<std::string>> &groupDefinitions) override;
 
-    const ScenarioEntity &GetEgoEntity() override;
+    const std::vector<ScenarioEntity> &GetEntities() const override;
     const std::vector<ScenarioEntity*> &GetScenarioEntities() override;
     const std::map<std::string, std::vector<ScenarioEntity*>> &GetScenarioGroups() override;
 
@@ -104,6 +117,7 @@ private:
 
     std::string vehicleCatalogPath;     //!< The path of the vehicle catalog (relative to Scenario.xosc)
     std::string pedestrianCatalogPath;  //!< The path of the pedestrian catalog (relative to Scenario.xosc)
+    std::string trajectoryCatalogPath;  //!< The path of the trajectory catalog (relative to Scenario.xosc)
     std::string sceneryPath;            //!< The path of the scenery file (relative to Scenario.xosc)
 
     double endTimeInSeconds; //!< The simulationTime at which the simulation should end

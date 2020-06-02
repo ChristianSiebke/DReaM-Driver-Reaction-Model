@@ -20,13 +20,6 @@ void Configuration::SystemConfig::SetSystems(std::map<int, std::shared_ptr<Simul
     this->systems = systems;
 }
 
-SimulationCommon::ModelParameters* Configuration::SystemConfig::AddModelParameters()
-{
-    auto parameter = std::make_shared<SimulationCommon::ModelParameters>();
-    parameters.push_back(parameter);
-    return parameter.get();
-}
-
 void Configuration::SystemConfig::AddModelParameters(std::shared_ptr<ParameterInterface> modelParameters)
 {
     parameters.push_back(modelParameters);

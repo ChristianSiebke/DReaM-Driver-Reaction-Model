@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -34,30 +34,20 @@ void RunStatisticCalculation::CalculateTotalDistanceTraveled(RunStatistic& runSt
     }
 }
 
-void RunStatisticCalculation::CalculateNumberOfCollisions(RunStatistic& runStatistic, const RunResultInterface& runResult, WorldInterface* world)
+void RunStatisticCalculation::DetermineEgoCollision(RunStatistic& runStatistic, const RunResultInterface& runResult, WorldInterface* world)
 {
-    for (const auto agentId : *(runResult.GetCollisionIds()))
+    auto egoAgent = world->GetEgoAgent();
+
+    if (!egoAgent)
     {
-        AgentInterface* egoAgent = world->GetEgoAgent();
+        return;
+    }
 
-        if (egoAgent == nullptr)
-        {
-            runStatistic.NCollisionsArbitrary++;
+    const int egoId = egoAgent->GetId();
+    auto collisionsIds = runResult.GetCollisionIds();
 
-            return;
-        }
-
-        if (agentId == egoAgent->GetId())
-        {
-            runStatistic.EgoCollision = true;
-        }
-        else if (std::find(runStatistic.GetFollowerIds()->begin(), runStatistic.GetFollowerIds()->end(), agentId) == runStatistic.GetFollowerIds()->end())
-        {
-            runStatistic.NCollisionsArbitrary++;
-        }
-        else
-        {
-            runStatistic.NCollisionsFollowers++;
-        }
+    if (std::find(collisionsIds->cbegin(), collisionsIds->cend(), egoId) != collisionsIds->cend())
+    {
+        runStatistic.EgoCollision = true;
     }
 }

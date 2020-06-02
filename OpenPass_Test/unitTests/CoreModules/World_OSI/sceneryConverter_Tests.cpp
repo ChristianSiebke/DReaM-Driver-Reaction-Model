@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2018, 2019 in-tech
+* Copyright (c) 2018, 2019, 2020 in-tech
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -19,6 +19,7 @@
 #include "fakeMovingObject.h"
 #include "fakeOdRoad.h"
 #include "fakeRoadObject.h"
+#include "fakeRoadLaneSection.h"
 #include "fakeSection.h"
 #include "fakeWorld.h"
 #include "fakeWorldData.h"
@@ -114,10 +115,10 @@ public:
     MOCK_METHOD0(Clear, void());
     MOCK_METHOD1(AddRoad, RoadInterface *(const std::string &id));
     MOCK_METHOD1(AddJunction, JunctionInterface *(const std::string &id));
-    MOCK_METHOD0(GetRoads, std::map<std::string, RoadInterface *> &());
-    MOCK_METHOD1(GetRoad, RoadInterface *(const std::string &id));
-    MOCK_METHOD0(GetJunctions, std::map<std::string, JunctionInterface *> &());
-    MOCK_METHOD1(GetJunction, JunctionInterface *(const std::string &id));
+    MOCK_CONST_METHOD0(GetRoads, std::map<std::string, RoadInterface *> &());
+    MOCK_CONST_METHOD1(GetRoad, RoadInterface *(const std::string &id));
+    MOCK_CONST_METHOD0(GetJunctions, std::map<std::string, JunctionInterface *> &());
+    MOCK_CONST_METHOD1(GetJunction, JunctionInterface *(const std::string &id));
 };
 
 class FakeRoadLink : public RoadLinkInterface
@@ -131,23 +132,8 @@ public:
     MOCK_CONST_METHOD0(GetSide, RoadLinkSideType());
 };
 
-class FakeRoadLaneSection : public RoadLaneSectionInterface
-{
-  public:
-    MOCK_METHOD2(AddRoadLane, RoadLaneInterface *(int id, RoadLaneType type));
-    MOCK_METHOD0(GetLanes, std::map<int, RoadLaneInterface *> &());
-    MOCK_CONST_METHOD0(GetStart, double());
-    MOCK_METHOD1(SetInDirection, void(bool inDirection));
-    MOCK_METHOD1(SetLaneIndexOffset, void(int laneIndexOffset));
-    MOCK_METHOD1(SetId, void(int Id));
-    MOCK_CONST_METHOD0(GetInDirection, bool());
-    MOCK_CONST_METHOD0(GetLaneIndexOffset, int());
-    MOCK_CONST_METHOD0(GetId, int());
-    MOCK_METHOD0(GetRoad, RoadInterface *());
-};
-
-void Connect(RoadInterface* incomingRoad, RoadInterface* connectingRoad,
-             RoadInterface* outgoingRoad, ContactPointType incomingContactPoint, ContactPointType outgoingContactPoint,
+void Connect(const RoadInterface* incomingRoad, const RoadInterface* connectingRoad,
+             const RoadInterface* outgoingRoad, ContactPointType incomingContactPoint, ContactPointType outgoingContactPoint,
              std::map<int, int> laneIdMapping)
 {
 
@@ -191,7 +177,7 @@ TEST(SceneryConverter, RefactoringSafeguard_DoNotDelete)
             &stubScenery,
             &stubJunction,
 
-            [&](JunctionInterface*, RoadInterface *incomingRoad, RoadInterface *connectingRoad, RoadInterface *outgoingRoad,
+            [&](const JunctionInterface*, const RoadInterface *incomingRoad, const RoadInterface *connectingRoad, const RoadInterface *outgoingRoad,
                 ContactPointType incomingContactPoint, ContactPointType outgoingContactPoint,
                 std::map<int, int> laneIdMapping) {
                 Connect(incomingRoad, connectingRoad, outgoingRoad, incomingContactPoint,

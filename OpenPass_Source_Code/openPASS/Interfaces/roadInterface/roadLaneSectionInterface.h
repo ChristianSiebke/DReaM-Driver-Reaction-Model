@@ -15,8 +15,7 @@
 //!        can contain several road lanes.
 //-----------------------------------------------------------------------------
 
-#ifndef ROADLANESECTIONINTERFACE
-#define ROADLANESECTIONINTERFACE
+#pragma once
 
 #include "roadInterface.h"
 
@@ -54,7 +53,7 @@ public:
     //! @return                         Stored road lanes as a mapping from their
     //!                                 respective IDs
     //-----------------------------------------------------------------------------
-    virtual std::map<int, RoadLaneInterface*> &GetLanes() = 0;
+    virtual const std::map<int, RoadLaneInterface*> &GetLanes() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the starting offset of the road lane section.
@@ -112,8 +111,5 @@ public:
     //!
     //! @return                         Road from which this section is a part of
     //-----------------------------------------------------------------------------
-    virtual RoadInterface *GetRoad() = 0;
+    virtual RoadInterface *GetRoad() const = 0;
 };
-
-#endif // ROADLANESECTIONINTERFACE
-

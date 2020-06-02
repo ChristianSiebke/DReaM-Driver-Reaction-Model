@@ -32,7 +32,7 @@ class RunResult;
 struct ObservationInstance
 {
     const std::string libraryPath;
-    ParameterInterface* parameters;
+    const openpass::parameter::Container parameters;
 };
 
 //-----------------------------------------------------------------------------
@@ -78,10 +78,9 @@ public:
     //! of the observation library with each observation module implementation as
     //! parameter.
     //!
-    //! @param[in]  path                    Path for storing observations
     //! @return                             Flag if the init was successful
     //-----------------------------------------------------------------------------
-    virtual bool InitAll(const std::string& path) = 0;
+    virtual bool InitAll() = 0;
 
     //-----------------------------------------------------------------------------
     //! Inits the network run by calling the slavePreRunHook function

@@ -1,12 +1,12 @@
-/*********************************************************************
-* Copyright (c) 2019 in-tech GmbH on behalf of BMW
+/*******************************************************************************
+* Copyright (c) 2019 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
 * which is available at https://www.eclipse.org/legal/epl-2.0/
 *
 * SPDX-License-Identifier: EPL-2.0
-**********************************************************************/
+*******************************************************************************/
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -21,9 +21,9 @@ using ::testing::UnorderedElementsAre;
 
 using namespace Importer;
 
-TEST(ProfilesImporter_UnitTests, ImportAllVehicleComponentsOfVehicleProfileSuccessful)
+TEST(ProfilesImporter_ImportAllVehicleComponentsOfVehicleProfile, GivenValidXml_ImportsValues)
 {
-    QDomElement fakeDocumentRoot = documentRootFromString(
+    QDomElement validXml = documentRootFromString(
                 "<root>"
                     "<Components>"
                         "<Component Type=\"ComponentA\">"
@@ -41,21 +41,21 @@ TEST(ProfilesImporter_UnitTests, ImportAllVehicleComponentsOfVehicleProfileSucce
                 "</root>"
                 );
 
-    VehicleProfile resultProfiles;
+    VehicleProfile profiles;
 
-    ASSERT_TRUE(ProfilesImporter::ImportAllVehicleComponentsOfVehicleProfile(fakeDocumentRoot, resultProfiles));
+    EXPECT_NO_THROW(ProfilesImporter::ImportAllVehicleComponentsOfVehicleProfile(validXml, profiles));
 
-    ASSERT_EQ(resultProfiles.vehicleComponents.size(), (size_t )1);
+    ASSERT_EQ(profiles.vehicleComponents.size(), (size_t )1);
 
-    VehicleComponent resultVehicleComponent = resultProfiles.vehicleComponents.front();
+    VehicleComponent resultVehicleComponent = profiles.vehicleComponents.front();
 
     ASSERT_EQ (resultVehicleComponent.componentProfiles.size(), (size_t) 2);
     ASSERT_EQ (resultVehicleComponent.sensorLinks.size(), (size_t) 3);
 }
 
-TEST(ProfilesImporter_UnitTests, ImportAllVehicleComponentsOfVehicleProfileUnsuccessful)
+TEST(ProfilesImporter_ImportAllVehicleComponentsOfVehicleProfile, WithMissingComponentsTag_Throws)
 {
-    QDomElement fakeDocumentRootMissingComponentsTag = documentRootFromString(
+    QDomElement missingComponentsTag = documentRootFromString(
                 "<root>"
                         "<Component Type=\"ComponentA\">"
                             "<Profiles>"
@@ -71,7 +71,13 @@ TEST(ProfilesImporter_UnitTests, ImportAllVehicleComponentsOfVehicleProfileUnsuc
                 "</root>"
                 );
 
-    QDomElement fakeDocumentRootProbabilitySumAboveOne = documentRootFromString(
+    VehicleProfile profiles;
+    EXPECT_THROW(ProfilesImporter::ImportAllVehicleComponentsOfVehicleProfile(missingComponentsTag, profiles), std::runtime_error);
+}
+
+TEST(ProfilesImporter_ImportAllVehicleComponentsOfVehicleProfile, SumOfProbabilityGreatherOne_Throws)
+{
+    QDomElement sumOfProbabilityGreatherOne = documentRootFromString(
                 "<root>"
                     "<Components>"
                         "<Component Type=\"ComponentA\">"
@@ -89,15 +95,13 @@ TEST(ProfilesImporter_UnitTests, ImportAllVehicleComponentsOfVehicleProfileUnsuc
                 "</root>"
                 );
 
-    VehicleProfile resultProfiles;
-
-    ASSERT_FALSE(ProfilesImporter::ImportAllVehicleComponentsOfVehicleProfile(fakeDocumentRootMissingComponentsTag, resultProfiles));
-    ASSERT_FALSE(ProfilesImporter::ImportAllVehicleComponentsOfVehicleProfile(fakeDocumentRootProbabilitySumAboveOne, resultProfiles));
+    VehicleProfile profiles;
+    EXPECT_THROW(ProfilesImporter::ImportAllVehicleComponentsOfVehicleProfile(sumOfProbabilityGreatherOne, profiles), std::runtime_error);
 }
 
-TEST(ProfilesImporter_UnitTests, ImportAllSensorsOfVehicleProfileSuccessful)
+TEST(ProfilesImporter_ImportAllSensorsOfVehicleProfile, GivenValidXml_ImportsValues)
 {
-    QDomElement fakeDocumentRoot = documentRootFromString(
+    QDomElement validXml = documentRootFromString(
                 "<root>"
                     "<Sensors>"
                         "<Sensor Id=\"0\">"
@@ -112,17 +116,16 @@ TEST(ProfilesImporter_UnitTests, ImportAllSensorsOfVehicleProfileSuccessful)
                 "</root>"
                 );
 
-    VehicleProfile resultProfiles;
+    VehicleProfile profiles;
+    EXPECT_NO_THROW(ProfilesImporter::ImportAllSensorsOfVehicleProfile(validXml, profiles));
 
-    ASSERT_TRUE(ProfilesImporter::ImportAllSensorsOfVehicleProfile(fakeDocumentRoot, resultProfiles));
-
-    std::list<SensorParameter> resultSensors = resultProfiles.sensors;
+    openpass::sensors::Parameters resultSensors = profiles.sensors;
 
     ASSERT_EQ(resultSensors.size(), (size_t ) 2);
 
-    SensorParameter resultSensorParameter = resultSensors.front();
-    SensorPosition resultSensorPosition = resultSensorParameter.sensorPosition;
-    SensorProfile resultSensorProfile = resultSensorParameter.sensorProfile;
+    openpass::sensors::Parameter resultSensorParameter = resultSensors.front();
+    openpass::sensors::Position resultSensorPosition = resultSensorParameter.position;
+    openpass::sensors::Profile resultSensorProfile = resultSensorParameter.profile;
 
     ASSERT_EQ (resultSensorPosition.name, "Somewhere");
     ASSERT_EQ (resultSensorPosition.longitudinal, 1.0);
@@ -136,9 +139,9 @@ TEST(ProfilesImporter_UnitTests, ImportAllSensorsOfVehicleProfileSuccessful)
     ASSERT_EQ (resultSensorProfile.name, "Camera");
 }
 
-TEST(ProfilesImporter_UnitTests, ImportAllSensorsOfVehicleProfileUnsuccessful)
+TEST(ProfilesImporter_ImportAllSensorsOfVehicleProfile, SensorsTagMissing_Throws)
 {
-    QDomElement fakeDocumentRootSensorsTagMissing = documentRootFromString(
+    QDomElement sensorsTagMissing = documentRootFromString(
                 "<root>"
                         "<Sensor Id=\"0\">"
                             "<Position Name=\"Somewhere\" Longitudinal=\"1.0\" Lateral=\"2.0\" Height=\"3.0\" Pitch=\"4.0\" Yaw=\"5.0\" Roll=\"6.0\"/>"
@@ -150,8 +153,13 @@ TEST(ProfilesImporter_UnitTests, ImportAllSensorsOfVehicleProfileUnsuccessful)
                         "</Sensor>"
                 "</root>"
                 );
+    VehicleProfile profiles;
+    EXPECT_THROW(ProfilesImporter::ImportAllSensorsOfVehicleProfile(sensorsTagMissing, profiles), std::runtime_error);
+}
 
-    QDomElement fakeDocumentRootPositionTagMissing = documentRootFromString(
+TEST(ProfilesImporter_ImportAllSensorsOfVehicleProfile, PositionTagMissing_Throws)
+{
+    QDomElement positionTagMissing = documentRootFromString(
                 "<root>"
                     "<Sensors>"
                         "<Sensor Id=\"0\">"
@@ -160,8 +168,13 @@ TEST(ProfilesImporter_UnitTests, ImportAllSensorsOfVehicleProfileUnsuccessful)
                     "</Sensors>"
                 "</root>"
                 );
+    VehicleProfile profiles;
+    EXPECT_THROW(ProfilesImporter::ImportAllSensorsOfVehicleProfile(positionTagMissing, profiles), std::runtime_error);
+}
 
-    QDomElement fakeDocumentRootProfileTagMissing = documentRootFromString(
+TEST(ProfilesImporter_ImportAllSensorsOfVehicleProfile, ProfileTagMissing_Throws)
+{
+    QDomElement profileTagMissing = documentRootFromString(
                 "<root>"
                     "<Sensors>"
                         "<Sensor Id=\"0\">"
@@ -170,71 +183,83 @@ TEST(ProfilesImporter_UnitTests, ImportAllSensorsOfVehicleProfileUnsuccessful)
                     "</Sensors>"
                 "</root>"
                 );
-
-    VehicleProfile resultProfiles;
-
-    ASSERT_FALSE(ProfilesImporter::ImportAllSensorsOfVehicleProfile(fakeDocumentRootSensorsTagMissing, resultProfiles));
-    ASSERT_FALSE(ProfilesImporter::ImportAllSensorsOfVehicleProfile(fakeDocumentRootPositionTagMissing, resultProfiles));
-    ASSERT_FALSE(ProfilesImporter::ImportAllSensorsOfVehicleProfile(fakeDocumentRootProfileTagMissing, resultProfiles));
+    VehicleProfile profiles;
+    EXPECT_THROW(ProfilesImporter::ImportAllSensorsOfVehicleProfile(profileTagMissing, profiles), std::runtime_error);
 }
 
-TEST(ProfilesImporter_UnitTests, ImportAllSensorProfilesOfSensorProfilesSuccessful)
+TEST(ProfilesImporter_ImportSensorProfiles, GivenValidXml_ImportsValues)
 {
-    QDomElement fakeDocumentRoot = documentRootFromString(
+    QDomElement validXml = documentRootFromString(
                 "<root>"
                       "<SensorProfile Name=\"Narrow\" Type=\"Geometric\">"
                             "<Int Key=\"Number1\" Value=\"1\"/>"
                             "<String Key=\"WordA\" Value=\"A\"/>"
+                            "<NormalDistribution Key=\"Latency\" Mean=\"0\" SD=\"0\" Min=\"0\" Max=\"0\"/>"
                         "</SensorProfile>"
                         "<SensorProfile Name=\"Wide\" Type=\"Lane\">"
                             "<Int Key=\"Number1\" Value=\"2\"/>"
                             "<String Key=\"WordA\" Value=\"B\"/>"
+                            "<NormalDistribution Key=\"Latency\" Mean=\"0\" SD=\"0\" Min=\"0\" Max=\"0\"/>"
                         "</SensorProfile>"
                 "</root>"
                 );
 
-    std::list<SensorProfile> resultSensorProfiles;
+    openpass::sensors::Profiles profiles;
+    EXPECT_NO_THROW(ProfilesImporter::ImportSensorProfiles(validXml, profiles));
+    ASSERT_THAT(profiles, SizeIs(2));
 
-    ASSERT_TRUE(ProfilesImporter::ImportSensorProfiles(fakeDocumentRoot, resultSensorProfiles));
-    ASSERT_EQ(resultSensorProfiles.size(), (size_t ) 2);
-
-
-    SensorProfile& firstProfile = resultSensorProfiles.front();
+    openpass::sensors::Profile& firstProfile = profiles.front();
     ASSERT_EQ(firstProfile.name, "Narrow");
     ASSERT_EQ(firstProfile.type, "Geometric");
-    ASSERT_EQ(firstProfile.parameters->GetParametersInt().at("Number1"), 1);
-    ASSERT_EQ(firstProfile.parameters->GetParametersString().at("WordA"), "A");
+    ASSERT_EQ(openpass::parameter::Get<int>(firstProfile.parameter, "Number1").has_value(), true);
+    ASSERT_EQ(openpass::parameter::Get<std::string>(firstProfile.parameter, "WordA").has_value(), true);
 }
 
 
-TEST(ProfilesImporter_UnitTests, ImportAllSensorProfilesOfSensorProfilesUnsuccessful)
+TEST(ProfilesImporter_ImportSensorProfiles, MissingNameTagMissing_Throws)
 {
-    QDomElement fakeDocumentRootNameTagMissing = documentRootFromString(
+    QDomElement nameTagMissing = documentRootFromString(
                 "<root>"
                       "<SensorProfile Type=\"Geometric\">"
                             "<Int Key=\"Number1\" Value=\"1\"/>"
+                            "<NormalDistribution Key=\"Latency\" Mean=\"0\" SD=\"0\" Min=\"0\" Max=\"0\"/>"
+                      "</SensorProfile>"
+                "</root>"
+                );
+    openpass::sensors::Profiles profiles;
+    EXPECT_THROW(ProfilesImporter::ImportSensorProfiles(nameTagMissing, profiles), std::runtime_error);
+}
+
+TEST(ProfilesImporter_ImportSensorProfiles, MissingTypeTagMissing_Throws)
+{
+    QDomElement typeTagMissing = documentRootFromString(
+                "<root>"
+                       "<SensorProfile Name=\"Narrow\">"
+                            "<Int Key=\"Number1\" Value=\"1\"/>"
+                            "<NormalDistribution Key=\"Latency\" Mean=\"0\" SD=\"0\" Min=\"0\" Max=\"0\"/>"
                         "</SensorProfile>"
                 "</root>"
                 );
+    openpass::sensors::Profiles profiles;
+    EXPECT_THROW(ProfilesImporter::ImportSensorProfiles(typeTagMissing, profiles), std::runtime_error);
+}
 
-    QDomElement fakeDocumentRootTypeTagMissing = documentRootFromString(
+TEST(ProfilesImporter_ImportSensorProfiles, MissingLatencyMissing_Throws)
+{
+    QDomElement latencyMissing = documentRootFromString(
                 "<root>"
-                       "<SensorProfile Name=\"Narrow\">"
+                       "<SensorProfile Type=\"Geometric\" Name=\"Narrow\">"
                             "<Int Key=\"Number1\" Value=\"1\"/>"
                         "</SensorProfile>"
                 "</root>"
                 );
-
-    std::list<SensorProfile> resultSensorProfiles;
-
-    ASSERT_FALSE(ProfilesImporter::ImportSensorProfiles(fakeDocumentRootNameTagMissing, resultSensorProfiles));
-    ASSERT_FALSE(ProfilesImporter::ImportSensorProfiles(fakeDocumentRootTypeTagMissing, resultSensorProfiles));
+    openpass::sensors::Profiles profiles;
+    EXPECT_THROW(ProfilesImporter::ImportSensorProfiles(latencyMissing, profiles), std::runtime_error);
 }
 
-
-TEST(ProfilesImporter_UnitTests, ImportAgentProfilesUnsuccessfully)
+TEST(ProfilesImporter_ImportAgentProfiles, MissingAtLeastOneElement_Throws)
 {
-    QDomElement fakeDocumentRootMissingAtLeastOneElement = documentRootFromString(
+    QDomElement missingAtLeastOneElement = documentRootFromString(
                 "<root>"
                     "<AgentProfile Name = \"Superhero\">"
                         "<DriverProfiles>"
@@ -249,8 +274,13 @@ TEST(ProfilesImporter_UnitTests, ImportAgentProfilesUnsuccessfully)
                     "</AgentProfile>"
                 "</root>"
                 );
+    std::unordered_map<std::string, AgentProfile> profiles {};
+    EXPECT_THROW(ProfilesImporter::ImportAgentProfiles(missingAtLeastOneElement, profiles), std::runtime_error);
+}
 
-    QDomElement fakeDocumentRootWrongProbabilities = documentRootFromString(
+TEST(ProfilesImporter_ImportAgentProfiles, WrongProbabilities_Throws)
+{
+    QDomElement wrongProbabilities = documentRootFromString(
                 "<root>"
                     "<AgentProfile Name = \"Superhero\">"
                         "<DriverProfiles>"
@@ -267,8 +297,13 @@ TEST(ProfilesImporter_UnitTests, ImportAgentProfilesUnsuccessfully)
                     "</AgentProfile>"
                 "</root>"
                 );
+    std::unordered_map<std::string, AgentProfile> profiles {};
+    EXPECT_THROW(ProfilesImporter::ImportAgentProfiles(wrongProbabilities, profiles), std::runtime_error);
+}
 
-    QDomElement fakeDocumentRootMissingTag = documentRootFromString(
+TEST(ProfilesImporter_ImportAgentProfiles, MissingTag_Throws)
+{
+    QDomElement missingTag = documentRootFromString(
                 "<root>"
                     "<AgentProfile Name = \"Superhero\">"
                         "<ADASProfiles>"
@@ -281,17 +316,13 @@ TEST(ProfilesImporter_UnitTests, ImportAgentProfilesUnsuccessfully)
                     "</AgentProfile>"
                 "</root>"
                 );
-
-    std::unordered_map<std::string, AgentProfile> agentProfiles {};
-
-    ASSERT_FALSE(ProfilesImporter::ImportAgentProfiles(fakeDocumentRootMissingAtLeastOneElement, agentProfiles));
-    ASSERT_FALSE(ProfilesImporter::ImportAgentProfiles(fakeDocumentRootWrongProbabilities, agentProfiles));
-    ASSERT_FALSE(ProfilesImporter::ImportAgentProfiles(fakeDocumentRootMissingTag, agentProfiles));
+    std::unordered_map<std::string, AgentProfile> profiles {};
+    EXPECT_THROW(ProfilesImporter::ImportAgentProfiles(missingTag, profiles), std::runtime_error);
 }
 
-TEST(ProfilesImporter_UnitTests, ImportDriverProfilesSuccessfully)
+TEST(ProfilesImporter_ImportDriverProfiles, GivenValidXml_ImportsValues)
 {
-    QDomElement fakeDocumentRoot = documentRootFromString(
+    QDomElement validXml = documentRootFromString(
                 "<root>"
                     "<DriverProfile Name = \"Regular\">"
                         "<String Key=\"Type\" Value=\"MyDriverModule\"/>"
@@ -303,22 +334,21 @@ TEST(ProfilesImporter_UnitTests, ImportDriverProfilesSuccessfully)
                 "</root>"
                 );
 
-    DriverProfiles driverProfiles;
+    DriverProfiles profiles;
 
-    ASSERT_TRUE(ProfilesImporter::ImportDriverProfiles(fakeDocumentRoot, driverProfiles));
+    EXPECT_NO_THROW(ProfilesImporter::ImportDriverProfiles(validXml, profiles));
+    ASSERT_THAT(profiles, SizeIs(2));
 
-    ASSERT_EQ(driverProfiles.size(), (size_t) 2);
+    auto resultParameter1 = profiles.at("Regular");
+    auto resultParameter2 = profiles.at("TrajectoryFollower");
 
-    auto resultParameter1 = driverProfiles.at("Regular");
-    auto resultParameter2 = driverProfiles.at("TrajectoryFollower");
-
-    ASSERT_EQ(resultParameter1->GetParametersString().size(), (size_t) 1);
-    ASSERT_EQ(resultParameter2->GetParametersString().size(), (size_t) 2);
+    EXPECT_THAT(resultParameter1, SizeIs(1));
+    EXPECT_THAT(resultParameter2, SizeIs(2));
 }
 
-TEST(ProfilesImporter_UnitTests, ImportDriverProfilesUnsuccessfully)
+TEST(ProfilesImporter_ImportDriverProfiles, MissingType_Throws)
 {
-    QDomElement fakeDocumentRootWithoutType = documentRootFromString(
+    QDomElement missingType = documentRootFromString(
                 "<root>"
                     "<DriverProfile Name = \"Regular\">"
                         "<String Key=\"Type\" Value=\"MyDriverModule\"/>"
@@ -328,8 +358,13 @@ TEST(ProfilesImporter_UnitTests, ImportDriverProfilesUnsuccessfully)
                     "</DriverProfile>"
                 "</root>"
                 );
+    DriverProfiles profiles;
+    EXPECT_THROW(ProfilesImporter::ImportDriverProfiles(missingType, profiles), std::runtime_error);
+}
 
-    QDomElement fakeDocumentRootWithDuplicateNames = documentRootFromString(
+TEST(ProfilesImporter_ImportDriverProfiles, WithDuplicateNames_Throws)
+{
+    QDomElement withDuplicateNames = documentRootFromString(
                 "<root>"
                     "<DriverProfile Name = \"Regular\">"
                         "<String Key=\"Type\" Value=\"MyDriverModule\"/>"
@@ -341,16 +376,13 @@ TEST(ProfilesImporter_UnitTests, ImportDriverProfilesUnsuccessfully)
                 "</root>"
                 );
 
-    DriverProfiles driverProfiles;
-
-    ASSERT_FALSE(ProfilesImporter::ImportDriverProfiles(fakeDocumentRootWithoutType, driverProfiles));
-    ASSERT_FALSE(ProfilesImporter::ImportDriverProfiles(fakeDocumentRootWithDuplicateNames, driverProfiles));
-
+    DriverProfiles profiles;
+    EXPECT_THROW(ProfilesImporter::ImportDriverProfiles(withDuplicateNames, profiles), std::runtime_error);
 }
 
-TEST(ProfilesImporter_UnitTests, ImportAllVehicleComponentProfilesSuccessfully)
+TEST(ProfilesImporter_ImportAllVehicleComponentProfiles, GivenValidXml_ImportsValues)
 {
-    QDomElement fakeDocumentRoot = documentRootFromString(
+    QDomElement validXml = documentRootFromString(
                 "<root>"
                     "<VehicleComponentProfile Type=\"ComponentA\" Name = \"ComponentAProfileOne\">"
                         "<Double Key=\"FakeDoubleOne\" Value=\"0.0\"/>"
@@ -372,9 +404,64 @@ TEST(ProfilesImporter_UnitTests, ImportAllVehicleComponentProfilesSuccessfully)
 
     std::unordered_map<std::string, VehicleComponentProfiles> fakeVehicleComponentProfiles;
 
-    ASSERT_TRUE(ProfilesImporter::ImportAllVehicleComponentProfiles(fakeDocumentRoot, fakeVehicleComponentProfiles));
+    EXPECT_NO_THROW(ProfilesImporter::ImportAllVehicleComponentProfiles(validXml, fakeVehicleComponentProfiles));
 
-    ASSERT_EQ(fakeVehicleComponentProfiles.at("ComponentA").size(), static_cast<size_t>(2));
-    ASSERT_EQ(fakeVehicleComponentProfiles.at("ComponentB").size(), static_cast<size_t>(2));
-    ASSERT_EQ(fakeVehicleComponentProfiles.at("ComponentC").size(), static_cast<size_t>(1));
+    EXPECT_THAT(fakeVehicleComponentProfiles.at("ComponentA"), SizeIs(2));
+    EXPECT_THAT(fakeVehicleComponentProfiles.at("ComponentB"), SizeIs(2));
+    EXPECT_THAT(fakeVehicleComponentProfiles.at("ComponentC"), SizeIs(1));
+}
+
+TEST(ProfilesImporter_UnitTests, ImportSpawnPointProfilesSuccessfully)
+{
+    QDomElement fakeDocumentRoot = documentRootFromString(
+                "<root>"
+                    "<SpawnPointProfile Name=\"ExampleProfile\">"
+                        "<String Key=\"Road\" Value=\"R0\"/>"
+                        "<IntVector Key=\"Lanes\" Value=\"-1,-2\"/>"
+                    "</SpawnPointProfile>"
+                    "<SpawnPointProfile Name=\"AnotherExampleProfile\">"
+                        "<String Key=\"Road\" Value=\"R0\"/>"
+                        "<IntVector Key=\"Lanes\" Value=\"-1,-2\"/>"
+                    "</SpawnPointProfile>"
+                "</root>"
+                );
+    SpawnPointProfiles spawnPointProfiles;
+
+    EXPECT_NO_THROW(ProfilesImporter::ImportSpawnPointProfiles(fakeDocumentRoot, spawnPointProfiles));
+
+    ASSERT_THAT(spawnPointProfiles, SizeIs(2));
+
+    auto resultParameter = spawnPointProfiles.at("ExampleProfile");
+    ASSERT_THAT(resultParameter, SizeIs(2));
+}
+
+TEST(ProfilesImporter_UnitTests, ImportSpawnPointProfilesUnsuccessfully)
+{
+
+    QDomElement fakeDocumentRootMissingName = documentRootFromString(
+                "<root>"
+                  "<SpawnPointProfile>"
+                      "<String Key=\"Road\" Value=\"R0\"/>"
+                      "<IntVector Key=\"Lanes\" Value=\"-1,-2\"/>"
+                  "</SpawnPointProfile>"
+                "</root>"
+                );
+
+    QDomElement fakeDocumentRootDuplicateNames = documentRootFromString(
+                "<root>"
+                 "<SpawnPointProfile Name=\"ExampleProfile\">"
+                     "<String Key=\"Road\" Value=\"R0\"/>"
+                     "<IntVector Key=\"Lanes\" Value=\"-1,-2\"/>"
+                 "</SpawnPointProfile>"
+                 "<SpawnPointProfile Name=\"ExampleProfile\">"
+                     "<String Key=\"Road\" Value=\"R0\"/>"
+                     "<IntVector Key=\"Lanes\" Value=\"-1,-2\"/>"
+                 "</SpawnPointProfile>"
+                "</root>"
+                );
+
+    SpawnPointProfiles spawnPointProfiles;
+
+    EXPECT_THROW(ProfilesImporter::ImportSpawnPointProfiles(fakeDocumentRootMissingName, spawnPointProfiles), std::runtime_error);
+    EXPECT_THROW(ProfilesImporter::ImportSpawnPointProfiles(fakeDocumentRootDuplicateNames, spawnPointProfiles), std::runtime_error);
 }

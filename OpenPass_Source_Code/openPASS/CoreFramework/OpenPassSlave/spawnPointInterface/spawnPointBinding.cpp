@@ -9,57 +9,27 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
+#include <memory>
 #include "spawnPointBinding.h"
-#include "spawnPointLibrary.h"
+#include "log.h"
 
 namespace SimulationSlave {
 
 SpawnPointBinding::SpawnPointBinding(CallbackInterface* callbacks) :
-    callbacks(callbacks)
+    callbacks{callbacks}
 {}
 
-SpawnPointBinding::~SpawnPointBinding()
+std::unique_ptr<SpawnPoint> SpawnPointBinding::Instantiate(const std::string& libraryPath,
+                                                           const SpawnPointDependencies& dependencies)
 {
-    Unload();
-}
-
-SpawnPoint* SpawnPointBinding::Instantiate(
-    std::string libraryPath,
-    AgentFactoryInterface* agentFactory,
-    WorldInterface* world,
-    AgentBlueprintProviderInterface* agentBlueprintProvider,
-    ParameterInterface* parameters,
-    const SamplerInterface& sampler,
-    ScenarioInterface* scenario)
-{
+    spawnPointDependencies = dependencies; // take ownership by copy
     if (!library)
     {
-        library = new (std::nothrow) SpawnPointLibrary(libraryPath,
-                callbacks);
-        if (!library)
-        {
-            return nullptr;
-        }
-
-        if (!library->Init())
-        {
-            delete library;
-            return nullptr;
-        }
+        library = std::make_unique<SpawnPointLibrary>(libraryPath, callbacks);
+        ThrowIfFalse(library && library->Init(), "Unable to create SpawnPointLibrary: " + libraryPath);
     }
 
-    return library->CreateSpawnPoint(parameters,
-                                     agentFactory,
-                                     world,
-                                     agentBlueprintProvider,
-                                     // Library boundary: hard to keep const reference
-                                     const_cast<SamplerInterface*>(&sampler),
-                                     scenario);
-}
-
-void SpawnPointBinding::Unload()
-{
-    delete library;
+    return library->CreateSpawnPoint(spawnPointDependencies);
 }
 
 } // namespace SimulationSlave

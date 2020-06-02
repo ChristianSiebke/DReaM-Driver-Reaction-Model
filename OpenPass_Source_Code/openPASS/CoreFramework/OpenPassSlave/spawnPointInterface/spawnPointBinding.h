@@ -19,26 +19,23 @@
 #include <map>
 #include <string>
 #include "Interfaces/spawnPointInterface.h"
-#include "Interfaces/agentBlueprintProviderInterface.h"
-#include "Interfaces/agentFactoryInterface.h"
 #include "CoreFramework/CoreShare/callbacks.h"
-#include "Interfaces/samplerInterface.h"
-#include "Interfaces/scenarioInterface.h"
+#include "spawnPointLibraryDefinitions.h"
+#include "spawnPointLibrary.h"
+#include "spawnPoint.h"
 
 namespace SimulationSlave {
-
-class SpawnPointLibrary;
-class SpawnPoint;
 
 class SpawnPointBinding
 {
 public:
     SpawnPointBinding(CallbackInterface* callbacks);
+    SpawnPointBinding(SpawnPointBinding&&) noexcept = default;
+    virtual ~SpawnPointBinding() = default;
+
     SpawnPointBinding(const SpawnPointBinding&) = delete;
-    SpawnPointBinding(SpawnPointBinding&&) = delete;
     SpawnPointBinding& operator=(const SpawnPointBinding&) = delete;
     SpawnPointBinding& operator=(SpawnPointBinding&&) = delete;
-    virtual ~SpawnPointBinding();
 
     //-----------------------------------------------------------------------------
     //! Gets the spawn point instance library either from the already stored libraries
@@ -46,21 +43,20 @@ public:
     //! point using the provided parameters.
     //!
     //! @param[in]  libraryPath             Path of the spawnpoint library
-    //! @param[in]  agentFactory            Factory for the agents
-    //! @param[in]  world                   World instance
-    //! @param[in]  agentBlueprintProvider  AgentBlueprintProvider
-    //! @param[in]  parameters              SpawnPoint parameters
-    //! @param[in]  sampler                 Sampler
-    //! @param[in]  scenario                Scenario
+    //! @param[in]  deps                    Spawn point dependencies
     //! @return                          Spawn point created from the library
     //-----------------------------------------------------------------------------
-    SpawnPoint* Instantiate(std::string libraryPath,
-                            AgentFactoryInterface* agentFactory,
-                            WorldInterface* world,
-                            AgentBlueprintProviderInterface* agentBlueprintProvider,
-                            ParameterInterface* parameters,
-                            const SamplerInterface& sampler,
-                            ScenarioInterface* scenario);
+    std::unique_ptr<SpawnPoint> Instantiate(const std::string& libraryPath,
+                                            const SpawnPointDependencies& dependencies);
+
+    //-----------------------------------------------------------------------------
+    /// Transfers ownership of parameters to this specific binding
+    /// \param parameter Parameters
+    //-----------------------------------------------------------------------------
+    void SetParameter(std::unique_ptr<ParameterInterface> parameter)
+    {
+        this->parameter = std::move(parameter);
+    }
 
     //-----------------------------------------------------------------------------
     //! Unloads the spawn point binding by deleting all stored spawn point libraries.
@@ -68,8 +64,10 @@ public:
     void Unload();
 
 private:
-    SpawnPointLibrary* library {nullptr};
+    std::unique_ptr<ParameterInterface> parameter {nullptr};
+    std::unique_ptr<SpawnPointLibrary> library {nullptr};
     CallbackInterface* callbacks;
+    SpawnPointDependencies spawnPointDependencies;
 };
 
 } // namespace SimulationSlave

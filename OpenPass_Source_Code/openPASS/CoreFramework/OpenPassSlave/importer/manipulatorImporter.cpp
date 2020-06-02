@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2019 in-tech GmbH
+* Copyright (c) 2017, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -11,134 +11,232 @@
 #include "manipulatorImporter.h"
 #include "xmlParser.h"
 #include "Common/openScenarioDefinitions.h"
-
+#include "importerLoggingHelper.h"
+#include "framework/directories.h"
+#include <cmath>
 #include <boost/algorithm/string/trim.hpp>
+
+namespace TAG = openpass::importer::xml::manipulatorImporter::tag;
+namespace ATTRIBUTE = openpass::importer::xml::manipulatorImporter::attribute;
 
 namespace Importer
 {
 std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulator(QDomElement& eventElement,
-                                                                                const std::string& sequenceName)
+                                                                                const std::string& eventName,
+                                                                                const std::string& trajectoryCatalogPath)
 {
     QDomElement actionElement;
-    CHECKFALSE(SimulationCommon::GetFirstChildElement(eventElement, "Action", actionElement));
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(eventElement, TAG::action, actionElement),
+                  eventElement, "Tag " + std::string(TAG::action) + " is missing.");
 
     QDomElement actionTypeElement;
-    if (SimulationCommon::GetFirstChildElement(actionElement, "UserDefined", actionTypeElement))
+    if (SimulationCommon::GetFirstChildElement(actionElement, TAG::userDefined, actionTypeElement))
     {
         return ImportManipulatorFromUserDefinedElement(actionTypeElement,
-                                                       sequenceName);
+                                                       eventName);
     }
-    else if (SimulationCommon::GetFirstChildElement(actionElement, "Private", actionTypeElement))
+
+    if (SimulationCommon::GetFirstChildElement(actionElement, TAG::Private, actionTypeElement))
     {
         return ImportManipulatorFromPrivateElement(actionTypeElement,
-                                                   sequenceName);
+                                                   eventName,
+                                                   trajectoryCatalogPath);
     }
-    else if (SimulationCommon::GetFirstChildElement(actionElement, "Global", actionTypeElement))
+
+    if (SimulationCommon::GetFirstChildElement(actionElement, TAG::global, actionTypeElement))
     {
         return ImportManipulatorFromGlobalElement(actionTypeElement,
-                                                  sequenceName);
+                                                  eventName);
     }
-    else {
-        LogAndThrowError("Invalid Action Type in openScenario file");
-    }
+
+    LogErrorAndThrow("Invalid Action Type in OpenSCENARIO file");
 }
 
 std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorFromUserDefinedElement(QDomElement& userDefinedElement,
-                                                                                                      const std::string& sequenceName)
+                                                                                                      const std::string& eventName)
 {
     QDomElement userDefinedChildElement;
-    CHECKFALSE(SimulationCommon::GetFirstChildElement(userDefinedElement, "Command", userDefinedChildElement))
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(userDefinedElement, TAG::command, userDefinedChildElement),
+                 userDefinedElement, "Tag " + std::string(TAG::command) + " is missing.");
 
     std::string command = userDefinedChildElement.text().toStdString();
     boost::algorithm::trim(command);
 
-    return std::shared_ptr<ScenarioActionInterface>(std::make_shared<openScenario::UserDefinedCommandAction>(sequenceName,
+    return std::shared_ptr<ScenarioActionInterface>(std::make_shared<openScenario::UserDefinedCommandAction>(eventName,
                                                                                                              command));
 }
 
 std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorFromPrivateElement(QDomElement& privateElement,
-                                                                                                  const std::string& sequenceName)
+                                                                                                  const std::string& eventName,
+                                                                                                  const std::string& trajectoryCatalogPath)
 {
     QDomElement privateChildElement;
-    if(SimulationCommon::GetFirstChildElement(privateElement, "Lateral", privateChildElement))
+    if(SimulationCommon::GetFirstChildElement(privateElement, TAG::lateral, privateChildElement))
     {
         QDomElement lateralChildElement;
-        if (SimulationCommon::GetFirstChildElement(privateChildElement, "LaneChange", lateralChildElement))
+        if (SimulationCommon::GetFirstChildElement(privateChildElement, TAG::laneChange, lateralChildElement))
         {
             QDomElement targetElement;
-            CHECKFALSE(SimulationCommon::GetFirstChildElement(lateralChildElement, "Target", targetElement));
+            ThrowIfFalse(SimulationCommon::GetFirstChildElement(lateralChildElement, TAG::target, targetElement),
+                        lateralChildElement, "Tag " + std::string(TAG::target) + " is missing.");
 
             QDomElement typeElement;
-            if (SimulationCommon::GetFirstChildElement(targetElement, "Relative", typeElement))
+            if (SimulationCommon::GetFirstChildElement(targetElement, TAG::relative, typeElement))
             {
                 std::string object;
                 double value{};
 
-                CHECKFALSE(SimulationCommon::ParseAttributeString(typeElement, "object", object));
-                CHECKFALSE(SimulationCommon::ParseAttributeDouble(typeElement, "value", value));
+                ThrowIfFalse(SimulationCommon::ParseAttributeString(typeElement, ATTRIBUTE::object, object),
+                             typeElement, "Attribute " + std::string(ATTRIBUTE::object) + " is missing.");
+                ThrowIfFalse(SimulationCommon::ParseAttributeDouble(typeElement, ATTRIBUTE::value, value),
+                             typeElement, "Atrribute " + std::string(ATTRIBUTE::value) + " is missing.");
 
-                return std::shared_ptr<ScenarioActionInterface>(std::make_shared<openScenario::PrivateLateralLaneChangeAction>(sequenceName,
+                return std::shared_ptr<ScenarioActionInterface>(std::make_shared<openScenario::PrivateLateralLaneChangeAction>(eventName,
                                                                                                                                openScenario::PrivateLateralLaneChangeActionType::Relative,
                                                                                                                                static_cast<int>(std::rint(value)),
                                                                                                                                object));
             }
             else
             {
-                CHECKFALSE(SimulationCommon::GetFirstChildElement(targetElement, "Absolute", typeElement));
+                ThrowIfFalse(SimulationCommon::GetFirstChildElement(targetElement, TAG::absolute, typeElement),
+                             targetElement, "Tag " + std::string(TAG::absolute) + " is missing.");
 
                 double value;
-                CHECKFALSE(SimulationCommon::ParseAttributeDouble(typeElement, "value", value));
+                ThrowIfFalse(SimulationCommon::ParseAttributeDouble(typeElement, ATTRIBUTE::value, value),
+                             typeElement, "Attribute " + std::string(ATTRIBUTE::value) + " is missing.");
 
-                return std::shared_ptr<ScenarioActionInterface>(std::make_shared<openScenario::PrivateLateralLaneChangeAction>(sequenceName,
+                return std::shared_ptr<ScenarioActionInterface>(std::make_shared<openScenario::PrivateLateralLaneChangeAction>(eventName,
                                                                                                                                openScenario::PrivateLateralLaneChangeActionType::Absolute,
                                                                                                                                static_cast<int>(std::rint(value))));
             }
         }
-        else
-        {
-            LogAndThrowError("Invalid PrivateAction-Lateral Type in openScenario file");
-        }
+
+        LogErrorAndThrow("Invalid PrivateAction-Lateral Type in openScenario file");
     }
-    else
+    else if(SimulationCommon::GetFirstChildElement(privateElement, TAG::routing, privateChildElement))
     {
-        LogAndThrowError("Invalid PrivateAction Type in openScenario file");
+        QDomElement routingChildElement;
+        if(SimulationCommon::GetFirstChildElement(privateChildElement, TAG::followTrajectory, routingChildElement))
+        {
+            openScenario::Trajectory trajectory;
+            QDomElement trajectoryElement;
+            if(!SimulationCommon::GetFirstChildElement(routingChildElement, TAG::trajectory, trajectoryElement))
+            {
+                QDomElement catalogReferenceElement;
+                ThrowIfFalse(SimulationCommon::GetFirstChildElement(routingChildElement, TAG::catalogReference, catalogReferenceElement),
+                             routingChildElement, "Tag " + std::string(TAG::trajectory) + " or " + std::string(TAG::catalogReference) + " is missing.");
+                std::string catalogName;
+                ThrowIfFalse(SimulationCommon::ParseAttribute(catalogReferenceElement, ATTRIBUTE::catalogName, catalogName),
+                             catalogReferenceElement, "Attribute " + std::string(ATTRIBUTE::catalogName) + " is missing.");
+                std::string entryName;
+                ThrowIfFalse(SimulationCommon::ParseAttribute(catalogReferenceElement, ATTRIBUTE::entryName, entryName),
+                             catalogReferenceElement, "Attribute " + std::string(ATTRIBUTE::entryName) + " is missing.");
+                trajectoryElement = GetTrajectoryElementFromCatalog(catalogName, trajectoryCatalogPath, entryName);
+
+            }
+            ThrowIfFalse(SimulationCommon::ParseAttribute(trajectoryElement, ATTRIBUTE::name, trajectory.name),
+                         trajectoryElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
+            QDomElement vertexElement;
+            ThrowIfFalse(SimulationCommon::GetFirstChildElement(trajectoryElement, TAG::vertex, vertexElement),
+                         trajectoryElement, "Tag " + std::string(TAG::vertex) + " is missing.");
+            while (!vertexElement.isNull())
+            {
+                QDomElement positionElement;
+                ThrowIfFalse(SimulationCommon::GetFirstChildElement(vertexElement, TAG::position, positionElement),
+                             vertexElement, "Tag " + std::string(TAG::position) + " is missing.");
+                QDomElement worldElement;
+                ThrowIfFalse(SimulationCommon::GetFirstChildElement(positionElement, TAG::world, worldElement),
+                             positionElement, "Tag " + std::string(TAG::world) + " is missing.");
+
+                openScenario::TrajectoryPoint trajectoryPoint;
+                ThrowIfFalse(SimulationCommon::ParseAttribute(vertexElement, ATTRIBUTE::reference, trajectoryPoint.time),
+                             vertexElement, "Attribute " + std::string(ATTRIBUTE::reference) + " is missing.");
+                ThrowIfFalse(SimulationCommon::ParseAttribute(worldElement, ATTRIBUTE::x, trajectoryPoint.x),
+                             worldElement, "Attribute " + std::string(ATTRIBUTE::x) + " is missing.");
+                ThrowIfFalse(SimulationCommon::ParseAttribute(worldElement, ATTRIBUTE::y, trajectoryPoint.y),
+                             worldElement, "Attribute " + std::string(ATTRIBUTE::y) + " is missing.");
+                ThrowIfFalse(SimulationCommon::ParseAttribute(worldElement, ATTRIBUTE::h, trajectoryPoint.yaw),
+                             worldElement, "Attribute " + std::string(ATTRIBUTE::h) + " is missing.");
+                trajectory.points.push_back(trajectoryPoint);
+
+                vertexElement = vertexElement.nextSiblingElement(TAG::vertex);
+            }
+
+            return std::shared_ptr<ScenarioActionInterface>(std::make_shared<openScenario::PrivateFollowTrajectoryAction>(eventName, trajectory));
+        }
+
+        LogErrorAndThrow("Invalid PrivateAction-Routing Type in openScenario file");
     }
+
+    LogErrorAndThrow("Invalid PrivateAction Type in openScenario file");
 }
 
 std::shared_ptr<ScenarioActionInterface> ManipulatorImporter::ImportManipulatorFromGlobalElement(QDomElement &globalElement,
-                                                                                         const std::string& sequenceName)
+                                                                                         const std::string& eventName)
 {
     QDomElement globalActionTypeElement;
-    if (SimulationCommon::GetFirstChildElement(globalElement, "Entity", globalActionTypeElement))
+    if (SimulationCommon::GetFirstChildElement(globalElement, TAG::entity, globalActionTypeElement))
     {
         std::string name;
-        CHECKFALSE(SimulationCommon::ParseAttributeString(globalActionTypeElement, "name", name));
+        ThrowIfFalse(SimulationCommon::ParseAttributeString(globalActionTypeElement, ATTRIBUTE::name, name),
+                     globalActionTypeElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
 
         QDomElement entityTypeElement;
-        if (SimulationCommon::GetFirstChildElement(globalActionTypeElement, "Add",entityTypeElement))
+        if (SimulationCommon::GetFirstChildElement(globalActionTypeElement, TAG::add, entityTypeElement))
         {
-                return std::shared_ptr<ScenarioActionInterface>(std::make_shared<openScenario::GlobalEntityAction>(sequenceName,
+                return std::shared_ptr<ScenarioActionInterface>(std::make_shared<openScenario::GlobalEntityAction>(eventName,
                                                                                                                    openScenario::GlobalEntityActionType::Add,
                                                                                                                    name));
         }
         else
         {
-           CHECKFALSE(SimulationCommon::GetFirstChildElement(globalActionTypeElement, "Delete",entityTypeElement));
+           ThrowIfFalse(SimulationCommon::GetFirstChildElement(globalActionTypeElement, TAG::Delete, entityTypeElement),
+                        globalActionTypeElement, "Tag " + std::string(TAG::Delete) + " is missing.");
 
-           return std::shared_ptr<ScenarioActionInterface>(std::make_shared<openScenario::GlobalEntityAction>(sequenceName,
+           return std::shared_ptr<ScenarioActionInterface>(std::make_shared<openScenario::GlobalEntityAction>(eventName,
                                                                                                               openScenario::GlobalEntityActionType::Delete,
                                                                                                               name));
         }
     }
-    else
-    {
-        LogAndThrowError("Invalid GlobalAction Type in openScenario file");
-    }
+
+    LogErrorAndThrow("Invalid GlobalAction Type in openScenario file.");
 }
 
-[[ noreturn ]] void ManipulatorImporter::LogAndThrowError(const std::string &message)
+QDomElement ManipulatorImporter::GetTrajectoryElementFromCatalog(const std::string& catalogName, const std::string& catalogPath, const std::string& entryName)
 {
-    LOG_INTERN(LogLevel::Error) << message;
-    throw std::runtime_error(message);
+    std::locale::global(std::locale("C"));
+
+    QFile xmlFile(QString::fromStdString(catalogPath)); // automatic object will be closed on destruction
+    ThrowIfFalse(xmlFile.open(QIODevice::ReadOnly), "Could not open TrajectoryCatalog (" + catalogName + ")");
+
+    QByteArray xmlData(xmlFile.readAll());
+    QDomDocument document;
+    QString errorMsg;
+    int errorLine;
+    ThrowIfFalse(document.setContent(xmlData, &errorMsg, &errorLine), "Invalid xml format (" + catalogName + ") in line " + std::to_string(errorLine) + ": " + errorMsg.toStdString());
+
+    QDomElement documentRoot = document.documentElement();
+    ThrowIfFalse(!documentRoot.isNull(), "TrajectoryCatalog has no document root");
+
+    QDomElement catalogElement;
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(documentRoot, TAG::catalog, catalogElement),
+                 documentRoot, "Tag " + std::string(TAG::catalog) + " is missing.");
+
+    QDomElement trajectoryElement;
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(catalogElement, TAG::trajectory, trajectoryElement),
+                 catalogElement, "Tag " + std::string(TAG::trajectory) + " is missing.");
+    while (!trajectoryElement.isNull())
+    {
+        std::string name;
+        ThrowIfFalse(SimulationCommon::ParseAttributeString(trajectoryElement, ATTRIBUTE::name, name),
+                     trajectoryElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
+        if (name == entryName)
+        {
+            return trajectoryElement;
+        }
+        trajectoryElement = trajectoryElement.nextSiblingElement(TAG::trajectory);
+    }
+
+    LogErrorAndThrow("Entry " + entryName + " not found in TrajectoryCatalog " + catalogName);
 }
 }

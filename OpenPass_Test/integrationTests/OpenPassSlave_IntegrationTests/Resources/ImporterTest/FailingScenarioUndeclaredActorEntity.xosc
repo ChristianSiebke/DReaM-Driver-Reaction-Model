@@ -1,0 +1,64 @@
+<?xml version="1.0" ?>
+<OpenSCENARIO>
+    <FileHeader revMajor="0" revMinor="1" date="2019-04-26T16:05:00" description="Integration test failing scenario with undeclared actor entity" author="in-tech GmbH"/>
+
+    <ParameterDeclaration>
+        <Parameter name="OP_OSC_SchemaVersion" type="string" value="0.3.0"/>
+    </ParameterDeclaration>
+
+    <Catalogs>
+        <VehicleCatalog>
+            <Directory path="VehicleModelsCatalog.xosc"/>
+        </VehicleCatalog>
+        <PedestrianCatalog>
+            <Directory path="PedestrianModelsCatalog.xosc"/>
+        </PedestrianCatalog>
+        <PedestrianControllerCatalog>
+            <Directory path=""/>
+        </PedestrianControllerCatalog>
+        <DriverCatalog>
+            <Directory path=""/>
+        </DriverCatalog>
+        <ManeuverCatalog>
+            <Directory path=""/>
+        </ManeuverCatalog>
+        <MiscObjectCatalog>
+            <Directory path=""/>
+        </MiscObjectCatalog>
+        <EnvironmentCatalog>
+            <Directory path=""/>
+        </EnvironmentCatalog>
+        <TrajectoryCatalog>
+            <Directory path=""/>
+        </TrajectoryCatalog>
+        <RouteCatalog>
+            <Directory path=""/>
+        </RouteCatalog>
+    </Catalogs>
+
+    <RoadNetwork>
+        <Logics filepath="SceneryConfiguration.xodr"/>
+        <SceneGraph filepath=""/>
+    </RoadNetwork>
+
+    <Entities>
+        <Object name="DefinedEntity">
+            <CatalogReference catalogName="TheCatalog" entryName="TheEntry"/>
+        </Object>
+    </Entities>
+
+    <Storyboard>
+        <Init/> <!-- initial position and velocity of agents  -->
+
+        <!-- EventDetectors (=StartCondition) and Manipulators(=Action)-->
+        <Story name="TheStory">
+            <Act name="TheAct">
+                <Sequence name="TheSequence" numberOfExecutions="1">
+                    <Actors>
+                        <Entity name="UndefinedEntity" />
+                    </Actors>
+                </Sequence>
+            </Act>
+        </Story>
+    </Storyboard>
+</OpenSCENARIO>

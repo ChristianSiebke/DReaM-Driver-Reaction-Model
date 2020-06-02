@@ -23,16 +23,16 @@ struct CORESLAVEEXPORT ConfigurationFiles
                        std::string systemConfigBlueprintFile,
                        std::string slaveConfigFile) :
         configurationDir{configurationDir},
-        systemConfigBlueprintFile{Directories::Concat(configurationDir, systemConfigBlueprintFile)},
-        slaveConfigFile{Directories::Concat(configurationDir, slaveConfigFile)}
+        systemConfigBlueprintFile{openpass::core::Directories::Concat(configurationDir, systemConfigBlueprintFile)},
+        slaveConfigFile{openpass::core::Directories::Concat(configurationDir, slaveConfigFile)}
     {}
 
     // This class should not be moved or assigned,
     // as there should be only one instance throughout the system
     ConfigurationFiles() = delete;
-    ConfigurationFiles(const Directories&) = delete;
-    ConfigurationFiles(Directories&&) = delete;
-    ConfigurationFiles& operator=(Directories&&) = delete;
+    ConfigurationFiles(const openpass::core::Directories&) = delete;
+    ConfigurationFiles(openpass::core::Directories&&) = delete;
+    ConfigurationFiles& operator=(openpass::core::Directories&&) = delete;
 
     const std::string configurationDir;            //!< directory of the configuration files
     const std::string systemConfigBlueprintFile;   //!< absolute path of the systemConfigBlueprintFile

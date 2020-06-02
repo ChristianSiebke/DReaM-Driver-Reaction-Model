@@ -1,4 +1,4 @@
-set(COMPONENT_NAME World)
+set(COMPONENT_NAME World_OSI)
 
 add_compile_definitions(WORLD_OSI_LIBRARY WORLD_LIBRARY)
 
@@ -9,6 +9,7 @@ add_openpass_target(
     AgentAdapter.h
     AgentNetwork.h
     GeometryConverter.h
+    JointsBuilder.h
     Localization.h
     LocalizationElement.h
     PointQuery.h
@@ -34,6 +35,7 @@ add_openpass_target(
     AgentAdapter.cpp
     AgentNetwork.cpp
     GeometryConverter.cpp
+    JointsBuilder.cpp
     Localization.cpp
     PointQuery.cpp
     SceneryConverter.cpp

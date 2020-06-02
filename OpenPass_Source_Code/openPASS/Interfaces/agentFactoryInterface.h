@@ -38,12 +38,7 @@ public:
     virtual ~AgentFactoryInterface() = default;
 
     //-----------------------------------------------------------------------------
-    //! Sets the ID of the last added agent to 0.
-    //-----------------------------------------------------------------------------
-    virtual void ResetIds() = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Unloads the model bindings.
+    //! Clear factory for next simulation cycle
     //-----------------------------------------------------------------------------
     virtual void Clear() = 0;
 
@@ -56,8 +51,7 @@ public:
     //!
     //! @return                         The added agent
     //-----------------------------------------------------------------------------
-    virtual Agent *AddAgent(AgentBlueprintInterface* agentBlueprint,
-                            int spawnTime) = 0;
+    virtual Agent *AddAgent(AgentBlueprintInterface* agentBlueprint) = 0;
 };
 
 } //namespace SimulationSlave

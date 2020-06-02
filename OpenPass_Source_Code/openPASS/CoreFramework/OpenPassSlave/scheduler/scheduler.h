@@ -19,10 +19,8 @@
 #include <functional>
 #include <memory>
 #include "Interfaces/worldInterface.h"
-#include "Interfaces/spawnControlInterface.h"
 #include "taskBuilder.h"
 #include "schedulerTasks.h"
-#include "spawnControl.h"
 
 namespace SimulationSlave
 {
@@ -31,20 +29,6 @@ class RunResult;
 class EventNetworkInterface;
 class SchedulePolicy;
 class SpawnPointNetworkInterface;
-
-enum class SchedulerReturnState
-{
-    NoError,
-    AbortInvocation,
-    AbortSimulation
-};
-
-enum class ExecuteReturnState
-{
-    NoError,
-    Potential,
-    FatalError
-};
 
 //-----------------------------------------------------------------------------
 /** \brief execute all tasks for an simulation run
@@ -58,32 +42,31 @@ enum class ExecuteReturnState
 class Scheduler
 {
 public:
-    Scheduler(WorldInterface *world,
-              SpawnPointNetworkInterface *spawnPointNetwork,
-              EventDetectorNetworkInterface *eventDetectorNetwork,
-              ManipulatorNetworkInterface *manipulatorNetwork,
-              ObservationNetworkInterface *observationNetwork);
-    Scheduler(const Scheduler&) = delete;
-    Scheduler(Scheduler&&) = delete;
-    Scheduler& operator=(const Scheduler&) = delete;
-    Scheduler& operator=(Scheduler&&) = delete;
+    static constexpr bool FAILURE { false };
+    static constexpr bool SUCCESS { true };
+    static constexpr int FRAMEWORK_UPDATE_RATE { 100 };
+
+    Scheduler(WorldInterface &world,
+              SpawnPointNetworkInterface &spawnPointNetwork,
+              EventDetectorNetworkInterface &eventDetectorNetwork,
+              ManipulatorNetworkInterface &manipulatorNetwork,
+              ObservationNetworkInterface &observationNetwork);
 
     /*!
     * \brief Run
     *
     * \details execute all tasks for one simulation run
     *
-    *
     * @param[in]     startTime              simulation start
     * @param[in]     endTime                simulation end
-    * @param[in]     EventNetworkInterface  EventNetwork
     * @param[out]    runResult              RunResult
-    * @returns SchedulerReturnState for invocation control
+    * @param[in,out] EventNetwork           EventNetwork
+    * @returns true if simulation ends withuot error
     */
-    SchedulerReturnState Run(int startTime,
+    bool Run(int startTime,
              int endTime,
              RunResult &runResult,
-             EventNetworkInterface *eventNetwork);
+             SimulationSlave::EventNetworkInterface &eventNetwork);
 
     /*!
     * \brief ScheduleAgentTasks
@@ -91,34 +74,29 @@ public:
     * \details schedule all tasks of an new agent
     *           e.g. for respawning
     *
+    * @param[in]     taskList current task list
     * @param[in]     Agent    new agent
     */
-    void ScheduleAgentTasks(const Agent &agent);
+    void ScheduleAgentTasks(SchedulerTasks& taskList, const Agent& agent);
 
 private:    
-    WorldInterface *world;
-    SpawnPointNetworkInterface *spawnPointNetwork = nullptr;
-    EventDetectorNetworkInterface *eventDetectorNetwork = nullptr;
-    ManipulatorNetworkInterface *manipulatorNetwork = nullptr;
-    ObservationNetworkInterface *observationNetwork = nullptr;
+    WorldInterface &world;
+    SpawnPointNetworkInterface &spawnPointNetwork;
+    EventDetectorNetworkInterface &eventDetectorNetwork;
+    ManipulatorNetworkInterface &manipulatorNetwork;
+    ObservationNetworkInterface &observationNetwork;
 
-    const TaskItem* failedTaskItem;
-
-    int currentTime;
-
-    constexpr static int frameworkUpdateRate = 100;
+    int currentTime {0};
 
     /*!
     * \brief UpdateAgents
     *
     * \details schedule new agents and remove deleted ones
     *
-    *
-    * @param[in]     SchedulerTasks         logic for scheduling tasks
-    * @param[out]    SpawnControl           controlling of spawning
+    * @param[in]     taskList               current task list
     * @param[out]    WorldInterface         world
     */
-    void UpdateAgents(SpawnControlInterface &spawnControl, WorldInterface *world);
+    void UpdateAgents(SchedulerTasks &taskList, WorldInterface &world);
 
     /*!
     * \brief ExecuteTasks
@@ -131,12 +109,6 @@ private:
     */
     template<typename T>
     bool ExecuteTasks(T tasks);
-
-    SchedulerReturnState ParseAbortReason(const SpawnControl& spawnControl, int currentTime);
-
-    std::unique_ptr<SchedulerTasks> taskList;
-
-    friend class Scheduler_UpdateAgents_ScheduleNewTasks_Test;
 };
 
 } // namespace SimulationSlave

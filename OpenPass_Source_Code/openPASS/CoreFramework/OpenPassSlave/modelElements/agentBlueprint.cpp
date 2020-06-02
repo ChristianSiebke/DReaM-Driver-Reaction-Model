@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -13,10 +13,6 @@
 #include <assert.h>
 
 AgentBlueprint::AgentBlueprint()
-{
-}
-
-AgentBlueprint::~AgentBlueprint()
 {
 }
 
@@ -70,52 +66,52 @@ void AgentBlueprint::SetObjectName(std::string objectName)
     this->objectName = objectName;
 }
 
-void AgentBlueprint::AddSensor(SensorParameter parameters)
+void AgentBlueprint::AddSensor(openpass::sensors::Parameter parameters)
 {
     sensorParameters.push_back(parameters);
 }
 
-AgentCategory AgentBlueprint::GetAgentCategory()
+AgentCategory AgentBlueprint::GetAgentCategory() const
 {
     return agentCategory;
 }
 
-std::string AgentBlueprint::GetAgentProfileName()
+std::string AgentBlueprint::GetAgentProfileName() const
 {
     return agentProfileName;
 }
 
-std::string AgentBlueprint::GetVehicleProfileName()
+std::string AgentBlueprint::GetVehicleProfileName() const
 {
     return vehicleProfileName;
 }
 
-std::string AgentBlueprint::GetVehicleModelName()
+std::string AgentBlueprint::GetVehicleModelName() const
 {
     return vehicleModelName;
 }
 
-std::string AgentBlueprint::GetObjectName()
+std::string AgentBlueprint::GetObjectName() const
 {
     return objectName;
 }
 
-std::string AgentBlueprint::GetDriverProfileName()
+std::string AgentBlueprint::GetDriverProfileName() const
 {
     return driverProfileName;
 }
 
-VehicleModelParameters AgentBlueprint::GetVehicleModelParameters()
+VehicleModelParameters AgentBlueprint::GetVehicleModelParameters() const
 {
     return vehicleModelParameters;
 }
 
-std::list<SensorParameter> AgentBlueprint::GetSensorParameters()
+openpass::sensors::Parameters AgentBlueprint::GetSensorParameters() const
 {
     return sensorParameters;
 }
 
-VehicleComponentProfileNames AgentBlueprint::GetVehicleComponentProfileNames()
+VehicleComponentProfileNames AgentBlueprint::GetVehicleComponentProfileNames() const
 {
     return vehicleComponentProfileNames;
 }
@@ -126,7 +122,7 @@ void AgentBlueprint::SetAgentType(std::shared_ptr<SimulationSlave::AgentTypeInte
 }
 
 
-SimulationSlave::AgentTypeInterface& AgentBlueprint::GetAgentType()
+SimulationSlave::AgentTypeInterface& AgentBlueprint::GetAgentType() const
 {
     assert(agentType.get());
     return *agentType.get();
@@ -137,32 +133,12 @@ SpawnParameter& AgentBlueprint::GetSpawnParameter()
     return spawnParameter;
 }
 
-/*
-SimulationSlave::SpawnItemParameter& AgentBlueprint::GetSpawnItemParameter()
+const SpawnParameter& AgentBlueprint::GetSpawnParameter() const
 {
-    return spawnItemParameter;
+    return spawnParameter;
 }
-*/
 
-double AgentBlueprint::GetSpeedGoalMin()
+double AgentBlueprint::GetSpeedGoalMin() const
 {
     return speedGoalMin;
 }
-
-void AgentBlueprint::Reset()
-{
-    agentCategory = AgentCategory::Common;
-    agentProfileName = "";
-    vehicleProfileName = "";
-    driverProfileName = "";
-
-    spawnParameter = SpawnParameter{};
-    vehicleModelParameters = VehicleModelParameters{};
-    agentType.reset();
-
-    sensorParameters.clear();
-
-    speedGoalMin = 30.0 / 3.6;
-}
-
-

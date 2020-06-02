@@ -9,10 +9,12 @@
 *******************************************************************************/
 
 #include "commandLineParser.h"
-#include "QCommandLineParser"
-#include "QCoreApplication"
+
 #include <algorithm>
 #include <iostream>
+
+#include <QCommandLineParser>
+#include <QCoreApplication>
 
 CommandLineArguments CommandLineParser::Parse(const QStringList& arguments)
 {

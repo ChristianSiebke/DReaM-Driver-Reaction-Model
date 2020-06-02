@@ -1,0 +1,127 @@
+<?xml version="1.0" ?>
+<OpenSCENARIO>
+    <FileHeader revMajor="0" revMinor="1" date="2018-12-06T14:00:00" description="Integration test failing scenario" author="in-tech GmbH"/>
+
+    <ParameterDeclaration>
+        <Parameter name="OP_OSC_SchemaVersion" type="string" value="0.3.0"/>
+    </ParameterDeclaration>
+
+    <Catalogs>
+        <VehicleCatalog>
+            <Directory path="VehicleModelsCatalog.xosc"/>
+        </VehicleCatalog>
+        <PedestrianCatalog>
+            <Directory path="PedestrianModelsCatalog.xosc"/>
+        </PedestrianCatalog>
+        <PedestrianControllerCatalog>
+            <Directory path=""/>
+        </PedestrianControllerCatalog>
+        <DriverCatalog>
+            <Directory path=""/>
+        </DriverCatalog>
+        <ManeuverCatalog>
+            <Directory path=""/>
+        </ManeuverCatalog>
+        <MiscObjectCatalog>
+            <Directory path=""/>
+        </MiscObjectCatalog>
+        <EnvironmentCatalog>
+            <Directory path=""/>
+        </EnvironmentCatalog>
+        <TrajectoryCatalog>
+            <Directory path=""/>
+        </TrajectoryCatalog>
+        <RouteCatalog>
+            <Directory path=""/>
+        </RouteCatalog>
+    </Catalogs>
+
+    <RoadNetwork>
+        <Logics filepath="SceneryConfiguration.xodr"/>
+        <SceneGraph filepath=""/>
+    </RoadNetwork>
+
+    <Entities>
+        <Object name="Ego">
+            <CatalogReference catalogName="ProfilesCatalog.xml" entryName="MiddleClassCarAgent"/>
+        </Object>
+        <Object name="Scenery1">
+            <CatalogReference catalogName="ProfilesCatalog.xml" entryName="MiddleClassCarAgent"/>
+        </Object>
+        <Object name="Scenery2">
+            <CatalogReference catalogName="ProfilesCatalog.xml" entryName="MiddleClassCarAgent"/>
+        </Object>
+    </Entities>
+
+    <Storyboard>
+        <Init> <!-- initial position and velocity of agents  -->
+            <Actions>
+                <Private object="Ego">
+                    <Action>
+                        <Longitudinal>
+                            <Speed> 
+                                <Dynamics time="100" distance="0.5" rate="0.5" shape="linear"/> <!-- velocity, acceleration: rate -->
+                            </Speed>
+                        </Longitudinal>
+                    </Action>
+                </Private>
+                <Private object="Scenery1">
+                    <Action>
+                        <Longitudinal>
+                            <Speed>
+                                <Dynamics time="100" distance="0.5" rate="0.5" shape="linear"/>
+                            </Speed>
+                        </Longitudinal>
+                    </Action>
+                    <Action>
+                        <Position>
+                            <Lane roadId="1" s="1000.0" laneId="-3" offset="0.5"/> <!-- position  -->
+                        </Position>
+                    </Action>
+                </Private>
+                <Private object="Scenery2">
+                    <Action>
+                        <Longitudinal>
+                            <Speed>
+                                <Dynamics time="100" distance="0.5" rate="0.5" shape="linear"/>
+                            </Speed>
+                        </Longitudinal>
+                    </Action>
+                    <Action>
+                        <Position>
+                            <Lane roadId="1" s="1000.0" laneId="-3" offset="0.5"/> <!-- position  -->
+                        </Position>
+                    </Action>
+                </Private>
+            </Actions>
+        </Init>
+
+        <!-- EventDetectors (=StartCondition) and Manipulators(=Action)-->
+        <Story name="CutInStory">
+            <Act name="Act1">
+                <Sequence name="CutInSequence" numberOfExecutions="1">
+                    <Maneuver name="LaneChangeManeuver">
+                        <!-- ParameterDeclarationen -->
+                        <ParameterDeclaration>
+                            <Parameter name="TriggerZoneLength" type="double" value="20"/>
+                            <Parameter name="ForceManipulator" type="integer" value= "0"/>
+                        </ParameterDeclaration>
+                        <Event name="MyLaneChangeRightEvent" priority="overwrite">
+                            <Action name="DummyManipulator"> <!-- maxOccurs="unbounded" --> <!-- adapt Manipulator id as string -->
+                                <!-- Global, UserDefined or Private Action -->
+                                    <!-- Add entity, delete entity, set or modify parameter, modify signal .... -->
+                            </Action>
+                            <StartConditions>
+                                <ConditionGroup>
+                                    <Condition name="CutInEventDetector"> <!-- EventDetector id as string -->
+                                        <!-- ByEntity (TTC, Offroad, Distance, Speed, ...) ByState, ByValue -->
+                                    </Condition>
+                                </ConditionGroup>
+                            </StartConditions>
+                        </Event>
+                    </Maneuver>
+                </Sequence>
+            </Act>
+        </Story>
+    </Storyboard>
+</OpenSCENARIO>

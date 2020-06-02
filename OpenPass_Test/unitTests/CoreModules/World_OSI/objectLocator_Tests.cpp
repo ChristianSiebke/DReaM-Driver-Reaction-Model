@@ -12,5 +12,5 @@
 #include "OWL/DataTypes.h"
 
 #include "fakeLane.h"
-#include "Generators/LaneGenerator.h"
-#include "Generators/LaneGeometryElementGenerator.h"
+#include "Generators/laneGenerator.h"
+#include "Generators/laneGeometryElementGenerator.h"

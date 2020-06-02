@@ -36,7 +36,7 @@
 #include "Interfaces/worldInterface.h"
 #include "Interfaces/eventDetectorInterface.h"
 
-#include "Common/agentBasedManipulatorEvent.h"
+#include "Common/conditionalEvent.h"
 #include "Common/collisionEvent.h"
 #include "Common/vehicleComponentEvent.h"
 #include "Common/openScenarioDefinitions.h"
@@ -109,8 +109,6 @@ protected:
              const char *file,
              int line,
              const std::string &message);
-
-    EventDefinitions::EventType eventType;
 
     WorldInterface *world {nullptr};
     SimulationSlave::EventNetworkInterface* eventNetwork {nullptr};

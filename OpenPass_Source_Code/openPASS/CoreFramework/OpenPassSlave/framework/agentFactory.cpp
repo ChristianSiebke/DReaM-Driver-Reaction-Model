@@ -42,30 +42,16 @@ AgentFactory::AgentFactory(ModelBinding *modelBinding,
 {
 }
 
-AgentFactory::~AgentFactory()
-{
-}
-
-void AgentFactory::ResetIds()
-{
-    lastAgentId = 0;
-}
-
 void AgentFactory::Clear()
 {
-    for(auto &item : agentList)
-    {
-        delete item;
-    }
     agentList.clear();
+    lastAgentId = INITIAL_AGENT_ID;
 }
 
-Agent* AgentFactory::AddAgent(AgentBlueprintInterface* agentBlueprint,
-                              int spawnTime)
+Agent* AgentFactory::AddAgent(AgentBlueprintInterface* agentBlueprint)
 {
     Agent *agent = CreateAgent(lastAgentId,
-                               agentBlueprint,
-                               spawnTime);
+                               agentBlueprint);
     if(!agent)
     {
         LOG_INTERN(LogLevel::Error) << "could not create agent";
@@ -80,21 +66,16 @@ Agent* AgentFactory::AddAgent(AgentBlueprintInterface* agentBlueprint,
     }
 
     lastAgentId++;
-
-    agentList.push_back(agent);
-
+    agentList.push_back(std::unique_ptr<Agent>(agent));
     return agent;
 }
 
 Agent *AgentFactory::CreateAgent(int id,
-                                 AgentBlueprintInterface* agentBlueprint,
-                                 int spawnTime)
+                                 AgentBlueprintInterface* agentBlueprint)
 {
     LOG_INTERN(LogLevel::DebugCore) << "instantiate agent (id " << id << ")";
 
     Agent *agent = new (std::nothrow) Agent(id,
-                                            agentBlueprint,
-                                            spawnTime,
                                             world);
     if(!agent)
     {

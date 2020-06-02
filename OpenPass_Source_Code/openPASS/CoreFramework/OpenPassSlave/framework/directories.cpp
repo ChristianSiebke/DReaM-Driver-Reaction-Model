@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -9,7 +9,15 @@
 *******************************************************************************/
 
 #include "directories.h"
+
+#include <algorithm>
+#include <string>
+
 #include <QDir>
+#include <QFileInfo>
+#include <QString>
+
+namespace openpass::core {
 
 Directories::Directories(const std::string& applicationDir,
                          const std::string& libraryDir,
@@ -36,3 +44,32 @@ const std::string Directories::Concat(const std::string& path, const std::string
                 QDir::separator() +
                 QString::fromStdString(file)).absolutePath().toStdString();
 }
+
+const std::vector<std::string> Directories::Concat(const std::string& path, const std::vector<std::string>& filenames)
+{
+    std::vector<std::string> result {};
+
+    std::transform(filenames.cbegin(),
+                   filenames.cend(),
+                   std::back_inserter(result),
+                   [&path] (const auto &extension) -> std::string
+    {
+        return Directories::Concat(path, extension);
+    });
+
+    return result;
+}
+
+const std::string Directories::StripFile(const std::string& path)
+{
+    QFileInfo fileInfo(QString::fromStdString(path));
+    return fileInfo.path().toStdString();
+}
+
+bool Directories::IsRelative(const std::string& path)
+{
+    QFileInfo fileInfo(QString::fromStdString(path));
+    return fileInfo.isRelative();
+}
+
+} // namespace openpass::core

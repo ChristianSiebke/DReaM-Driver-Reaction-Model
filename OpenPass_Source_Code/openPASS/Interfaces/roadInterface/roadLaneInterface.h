@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -144,14 +144,14 @@ public:
     //!
     //! @return                         RoadLaneSection to which the road lane belongs
     //-----------------------------------------------------------------------------
-    virtual RoadLaneSectionInterface *GetLaneSection() = 0;
+    virtual RoadLaneSectionInterface *GetLaneSection() const = 0;
 
     //! Returns the roadmarktype of the road lane.
     //!
     //! @return                         RoadLaneRoadMarkType
     //-----------------------------------------------------------------------------
 
-    virtual const std::list<RoadLaneRoadMark*> &getRoadMarks() const = 0;
+    virtual const std::list<RoadLaneRoadMark*> &GetRoadMarks() const = 0;
 
 };
 

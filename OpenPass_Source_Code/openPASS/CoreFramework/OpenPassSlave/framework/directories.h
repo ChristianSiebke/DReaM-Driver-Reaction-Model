@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020 in-tech GmbH
 * Copyright (c) 2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -12,7 +12,11 @@
 #pragma once
 
 #include <string>
-#include <Common/opExport.h>
+#include <vector>
+
+#include "Common/opExport.h"
+
+namespace openpass::core {
 
 /// Directories takes care of a consistent handling of paths and directories
 /// without making the underlying implementation public or a dependency
@@ -45,11 +49,28 @@ public:
     /// \brief  Concats a path and a file with the seperator used by the current system
     /// \param  path     e.g. /the_path
     /// \param  file     e.g. the_file
-    /// \return Concaternated string, e.g. /the_path/the_file
+    /// \return Concatenated string, e.g. /the_path/the_file
     ///
     static const std::string Concat(const std::string& path, const std::string& file);
-private:
 
+    /// \brief  Concats a path and multiple filenames with the seperator used by the current system
+    /// \param  path            e.g. /the_path
+    /// \param  filenames     e.g. the_filenames
+    /// \return Vector of concatenated strings, e.g. /the_path/the_filename
+    ///
+    static const std::vector<std::string> Concat(const std::string& path, const std::vector<std::string>& filenames);
+
+    /// \brief  Removes the file from a path
+    /// \param  path with file
+    /// \return Resolved string  e.g. /baseDir/path or /path, respectively
+    static const std::string StripFile(const std::string& path);
+
+    /// \brief  Checkes whether a given path is absolute or relative
+    /// \param  path
+    /// \return true if relative path
+    static bool IsRelative(const std::string& path);
+
+private:
     /// \brief  Internally used to get a cononical path w.r.t to the application path
     /// \param  applicationPath  absolute path of the executed file, e.g. /baseDir
     /// \param  path             relative or absolute path, e.g. path or /path
@@ -58,3 +79,4 @@ private:
     static const std::string Resolve(const std::string& applicationPath, const std::string& path);
 };
 
+} // openpass::core

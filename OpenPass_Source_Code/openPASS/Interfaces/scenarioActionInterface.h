@@ -10,8 +10,8 @@
 
 #pragma once
 
-#include <vector>
 #include <string>
+#include <vector>
 
 class ScenarioActionInterface
 {
@@ -23,6 +23,6 @@ public:
     ScenarioActionInterface& operator=(ScenarioActionInterface&&) = delete;
     virtual ~ScenarioActionInterface() = default;
 
-    virtual const std::string& GetSequenceName() const = 0;
+    virtual const std::string& GetEventName() const = 0;
 private:
 };

@@ -1,5 +1,5 @@
 /*********************************************************************
- * Copyright (c) 2018, 2019 in-tech
+ * Copyright (c) 2018, 2019, 2020 in-tech
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -32,18 +32,17 @@ class FakeOdRoad : public RoadInterface
     MOCK_METHOD1(AddRoadSignal, void(const RoadSignalSpecification &signal));
     MOCK_METHOD1(AddRoadObject, void(const RoadObjectSpecification &object));
     MOCK_CONST_METHOD0(GetId, const std::string());
-    MOCK_METHOD0(GetElevations, std::list<RoadElevation *> &());
-    MOCK_METHOD0(GetLaneOffsets, std::list<RoadLaneOffset *> &());
+    MOCK_CONST_METHOD0(GetElevations, std::list<RoadElevation *> &());
     MOCK_CONST_METHOD0(GetLaneOffsets, const std::list<RoadLaneOffset *> &());
-    MOCK_METHOD0(GetGeometries, std::list<RoadGeometryInterface *> &());
-    MOCK_METHOD0(GetRoadLinks, std::list<RoadLinkInterface *> &());
-    MOCK_METHOD0(GetLaneSections, std::vector<RoadLaneSectionInterface *> &());
-    MOCK_METHOD0(GetRoadSignals, std::vector<RoadSignalInterface *> &());
-    MOCK_METHOD0(GetRoadObjects, std::vector<RoadObjectInterface *> &());
+    MOCK_CONST_METHOD0(GetGeometries, std::list<RoadGeometryInterface *> &());
+    MOCK_CONST_METHOD0(GetRoadLinks, std::list<RoadLinkInterface *> &());
+    MOCK_CONST_METHOD0(GetLaneSections, std::vector<RoadLaneSectionInterface *> &());
+    MOCK_CONST_METHOD0(GetRoadSignals, std::vector<RoadSignalInterface *> &());
+    MOCK_CONST_METHOD0(GetRoadObjects, std::vector<RoadObjectInterface *> &());
     MOCK_METHOD1(SetInDirection, void(bool inDirection));
     MOCK_CONST_METHOD0(GetInDirection, bool());
     MOCK_METHOD1(AddRoadType, void(const RoadTypeSpecification &));
     MOCK_CONST_METHOD1(GetRoadType, RoadTypeInformation(double start));
-    MOCK_METHOD0(GetJunctionId, std::string());
+    MOCK_CONST_METHOD0(GetJunctionId, const std::string());
     MOCK_METHOD1(SetJunctionId, void(const std::string &id));
 };

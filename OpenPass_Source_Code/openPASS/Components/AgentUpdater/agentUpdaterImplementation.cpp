@@ -39,6 +39,7 @@ void AgentUpdaterImplementation::UpdateInput(int localLinkId, const std::shared_
             yaw = signal->yaw;
             yawRate = signal->yawRate;
             steeringWheelAngle = signal->steeringWheelAngle;
+            centripetalAcceleration = signal->centripetalAcceleration;
             travelDistance = signal->travelDistance;
         }
         else
@@ -68,5 +69,6 @@ void AgentUpdaterImplementation::Trigger(int time)
     agent->SetYaw(yaw);
     agent->SetYawRate(yawRate);
     agent->SetSteeringWheelAngle(steeringWheelAngle);
+    agent->SetCentripetalAcceleration(centripetalAcceleration);
     agent->SetDistanceTraveled(travelDistance + agent->GetDistanceTraveled());
 }

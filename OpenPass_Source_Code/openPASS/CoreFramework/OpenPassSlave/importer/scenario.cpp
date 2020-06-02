@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -33,6 +33,16 @@ void Scenario::SetPedestrianCatalogPath(const std::string& catalogPath)
     this->pedestrianCatalogPath = catalogPath;
 }
 
+const std::string& Scenario::GetTrajectoryCatalogPath()
+{
+    return trajectoryCatalogPath;
+}
+
+void Scenario::SetTrajectoryCatalogPath(const std::string& catalogPath)
+{
+    trajectoryCatalogPath = catalogPath;
+}
+
 const std::string& Scenario::GetSceneryPath()
 {
     return sceneryPath;
@@ -41,11 +51,6 @@ const std::string& Scenario::GetSceneryPath()
 void Scenario::SetSceneryPath(const std::string& sceneryPath)
 {
     this->sceneryPath = sceneryPath;
-}
-
-void Scenario::SetEgoEntity(const ScenarioEntity& egoEntity)
-{
-    this->egoEntity = egoEntity;
 }
 
 void Scenario::AddScenarioEntity(const ScenarioEntity& entity)
@@ -73,9 +78,9 @@ void Scenario::AddScenarioGroupsByEntityNames(const std::map<std::string, std::l
     }
 }
 
-const ScenarioEntity &Scenario::GetEgoEntity()
+const std::vector<ScenarioEntity> &Scenario::GetEntities() const
 {
-    return egoEntity;
+    return entities;
 }
 
 const std::vector<ScenarioEntity*> &Scenario::GetScenarioEntities()

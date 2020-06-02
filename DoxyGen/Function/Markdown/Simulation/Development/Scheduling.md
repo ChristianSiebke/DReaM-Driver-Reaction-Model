@@ -28,7 +28,7 @@ Right after execution of all agent-based tasks, the FinalizeRecurring phase sync
 
 The scheduler handles 8 different task types:
 
-* **Spawning** - triggers agent spawning while spawntime and parse agent tasks
+* **Spawning** - triggers agent spawning
 * **EventDetector** - execute event detector
 * **Manipulator** - execute manipulator
 * **Observation** - update observation modules
@@ -41,8 +41,8 @@ The following table gives an overview to all phases.
 
 | **Phase**  | **Changeable**| **Task types**| **Notes**|
 | ------------- |-------------|-------------|-------------|
-| Bootstrap  | no | Observation | |
-| Common  | no | Spawning, EventDetector, Manipulator, Observation| |
+| Bootstrap  | no | Spawning, Observation | PreRun Spawning occurs here |
+| Common  | no | Spawning, EventDetector, Manipulator, Observation| Runtime Spawning occurs here |
 | Non recurring | yes | Trigger, Update | |
 | Recurring  | yes | Trigger, Update | |
 | Finalize recurring | no | SyncGlobalData | Update the state of the agents and the virtual world (e.g. due to agent movements).|

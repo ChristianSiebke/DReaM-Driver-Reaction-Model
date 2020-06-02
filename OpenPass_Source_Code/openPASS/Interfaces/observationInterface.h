@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -25,6 +25,7 @@
 #include <vector>
 #include <memory>
 #include <tuple>
+#include "Interfaces/callbackInterface.h"
 #include "Interfaces/eventInterface.h"
 #include "Interfaces/runResultInterface.h"
 #include "Common/observationTypes.h"
@@ -69,9 +70,8 @@ public:
     //-----------------------------------------------------------------------------
     //! Called by framework in slave before all simulation runs start
     //!
-    //! @param[in]     path          Directory where simulation results will be stored
     //-----------------------------------------------------------------------------
-    virtual void SlavePreHook(const std::string& path) = 0;
+    virtual void SlavePreHook() = 0;
 
     //-----------------------------------------------------------------------------
     //! Called by framework in slave before each simulation run starts be stored
@@ -125,10 +125,6 @@ public:
     */
     //-----------------------------------------------------------------------------
     virtual void InsertEvent(std::shared_ptr<EventInterface> event) = 0;
-
-    virtual void GatherFollowers() = 0;
-
-    virtual void InformObserverOnSpawn(AgentInterface* agent) = 0;
 
 protected:
     //-----------------------------------------------------------------------------

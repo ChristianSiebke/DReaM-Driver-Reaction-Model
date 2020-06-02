@@ -1,0 +1,51 @@
+<Combination SchemaVersion="0.7.0" id="544">
+    <ProfilesCatalog>ProfilesCatalog.xml</ProfilesCatalog>
+    <ExperimentConfig>
+        <ExperimentID>123</ExperimentID>
+        <NumberOfInvocations>1</NumberOfInvocations>
+        <RandomSeed>532725206</RandomSeed>
+        <Libraries>
+            <WorldLibrary>World_OSI</WorldLibrary>
+            <ObservationLibrary>Observation_Log</ObservationLibrary>
+            <SpawnPointLibrary>SpawnPoint_OSI</SpawnPointLibrary>
+        </Libraries>
+        <LoggingGroups>
+            <LoggingGroup>Trace</LoggingGroup>
+            <LoggingGroup>Visualization</LoggingGroup>
+            <LoggingGroup>RoadPosition</LoggingGroup>
+            <LoggingGroup>Sensor</LoggingGroup>
+            <LoggingGroup>Driver</LoggingGroup>
+        </LoggingGroups>
+		<LoggingCyclicsToCsv>false</LoggingCyclicsToCsv>
+    </ExperimentConfig>
+    
+    <SpawnPointsConfig>
+        <SpawnPoint>
+            <Library>SpawnPointScenerio_OSI</Library>
+            <Type>PreRun</Type>
+            <Priority>1</Priority>
+        </SpawnPoint>
+    </SpawnPointsConfig>
+
+    <ScenarioConfig Name="Default Scenario">
+        <OpenScenarioFile>Scenario.xosc</OpenScenarioFile>
+    </ScenarioConfig>
+    
+    <EnvironmentConfig Name="Default Environment">
+        <TimeOfDays>
+            <TimeOfDay Probability="0.4" Value="15" />
+            <TimeOfDay Probability="0.6" Value="18" />
+        </TimeOfDays>
+        <VisibilityDistances>
+            <VisibilityDistance Probability="0.7" Value="300" />
+            <VisibilityDistance Probability="0.3" Value="400" />
+        </VisibilityDistances>
+        <Frictions>
+            <Friction Probability="1.0" Value="1.0" />
+        </Frictions>
+        <Weathers>
+            <Weather Probability="0.5" Value="Rainy" />
+            <Weather Probability="0.5" Value="Snowy" />
+        </Weathers>
+    </EnvironmentConfig>
+</Combination>

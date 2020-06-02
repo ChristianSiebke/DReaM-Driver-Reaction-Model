@@ -54,19 +54,6 @@ bool SpawnPointLibrary::Init()
         return false;
     }
 
-    destroyInstanceFunc = (SpawnPointInterface_DestroyInstanceType)library->resolve(DllDestroyInstanceId.c_str());
-    if(!destroyInstanceFunc)
-    {
-        LOG_INTERN(LogLevel::Warning) << "spawn point could not be released";
-        return false;
-    }
-
-    generateAgentFunc = (SpawnPointInterface_GenerateAgentType)library->resolve(DllGenerateAgentId.c_str());
-    if(!generateAgentFunc)
-    {
-        return false;
-    }
-
     try
     {
         LOG_INTERN(LogLevel::DebugCore) << "loaded spawn point library " << library->fileName().toStdString()
@@ -88,11 +75,6 @@ bool SpawnPointLibrary::Init()
 
 SpawnPointLibrary::~SpawnPointLibrary()
 {
-    if(!(spawnPoints.empty()))
-    {
-        LOG_INTERN(LogLevel::Warning) << "unloading library which is still in use";
-    }
-
     if(library)
     {
         if(library->isLoaded())
@@ -106,46 +88,7 @@ SpawnPointLibrary::~SpawnPointLibrary()
     }
 }
 
-bool SpawnPointLibrary::ReleaseSpawnPoint(SpawnPoint *spawnPoint)
-{
-    if(!library)
-    {
-        return false;
-    }
-
-    std::list<SpawnPoint*>::iterator findIter = std::find(spawnPoints.begin(), spawnPoints.end(), spawnPoint);
-    if(spawnPoints.end() == findIter)
-    {
-        LOG_INTERN(LogLevel::Warning) << "spawn point doesn't belong to library";
-        return false;
-    }
-
-    try
-    {
-        destroyInstanceFunc(spawnPoint->GetImplementation());
-    }
-    catch(std::runtime_error const &ex)
-    {
-        LOG_INTERN(LogLevel::Error) << "spawn point could not be released: " << ex.what();
-        return false;
-    }
-    catch(...)
-    {
-        LOG_INTERN(LogLevel::Error) << "spawn point could not be released";
-        return false;
-    }
-
-    spawnPoints.remove(spawnPoint);
-
-    return true;
-}
-
-SpawnPoint *SpawnPointLibrary::CreateSpawnPoint(ParameterInterface *parameters,
-                                                AgentFactoryInterface *agentFactory,
-                                                WorldInterface *world,
-                                                AgentBlueprintProviderInterface* agentBlueprintProvider,
-                                                SamplerInterface *sampler,
-                                                ScenarioInterface *scenario)
+std::unique_ptr<SpawnPoint> SpawnPointLibrary::CreateSpawnPoint(const SpawnPointDependencies& dependencies)
 {
     if(!library)
     {
@@ -160,15 +103,10 @@ SpawnPoint *SpawnPointLibrary::CreateSpawnPoint(ParameterInterface *parameters,
         }
     }
 
-    SpawnPointInterface *spawnPointInterface = nullptr;
+    std::unique_ptr<SpawnPointInterface> spawnPoint = nullptr;
     try
     {
-        spawnPointInterface = createInstanceFunc(world,
-                                                 parameters,
-                                                 callbacks,
-                                                 agentBlueprintProvider,
-                                                 sampler,
-                                                 scenario);
+        spawnPoint = createInstanceFunc(&dependencies, callbacks);
     }
     catch(std::runtime_error const &ex)
     {
@@ -181,21 +119,11 @@ SpawnPoint *SpawnPointLibrary::CreateSpawnPoint(ParameterInterface *parameters,
         return nullptr;
     }
 
-    if(!spawnPointInterface)
-    {
-        return nullptr;
-    }
-
-    SpawnPoint *spawnPoint = new (std::nothrow) SpawnPoint(agentFactory,
-                                                           spawnPointInterface,
-                                                           this);
     if(!spawnPoint)
     {
         return nullptr;
     }
 
-    spawnPoints.push_back(spawnPoint);
-    return spawnPoint;
+    return std::make_unique<SpawnPoint>(dependencies.agentFactory, std::move(spawnPoint), this);
 }
-
 } // namespace SimulationSlave

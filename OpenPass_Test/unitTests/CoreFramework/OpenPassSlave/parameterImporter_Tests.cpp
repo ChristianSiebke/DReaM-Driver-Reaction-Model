@@ -6,9 +6,12 @@
 #include "parameterImporter.h"
 #include "parameters.h"
 
-using namespace SimulationCommon;
+using ::testing::Eq;
+using ::testing::SizeIs;
 
-TEST(ParameterImporter_UnitTests, ImportParametersSuccessfully)
+namespace op = openpass::parameter;
+
+TEST(ParameterImporter, ImportParametersSuccessfully)
 {
     QDomElement fakeDocumentRoot = documentRootFromString(
                 "<ComponentParameterSet Name = \"Regular\">"
@@ -25,33 +28,27 @@ TEST(ParameterImporter_UnitTests, ImportParametersSuccessfully)
                 "</ComponentParameterSet>"
                 );
 
-    SimulationCommon::ModelParameters resultModelParameters;
-    ASSERT_TRUE(ParameterImporter::ImportParameters(fakeDocumentRoot, resultModelParameters));
+    namespace op = openpass::parameter;
 
-    auto resultBools = resultModelParameters.GetParametersBool();
-    auto resultInts = resultModelParameters.GetParametersInt();
-    auto resultIntVectors = resultModelParameters.GetParametersIntVector();
-    auto resultDoubles = resultModelParameters.GetParametersDouble();
-    auto resultDoubleVectors = resultModelParameters.GetParametersDoubleVector();
-    auto resultStrings = resultModelParameters.GetParametersString();
-
-    ASSERT_EQ(resultBools.at("FakeBoolOne"), true);
-    ASSERT_EQ(resultBools.at("FakeBoolTwo"), false);
-    ASSERT_EQ(resultInts.at("FakeIntOne"), 1);
-    ASSERT_EQ(resultInts.at("FakeIntTwo"), 2);
-    ASSERT_EQ(resultIntVectors.at("FakeIntVector").at(0), 5);
-    ASSERT_EQ(resultIntVectors.at("FakeIntVector").at(1), 6);
-    ASSERT_EQ(resultIntVectors.at("FakeIntVector").at(2), 7);
-    ASSERT_EQ(resultDoubles.at("FakeDoubleOne"), 1.0);
-    ASSERT_EQ(resultDoubles.at("FakeDoubleTwo"), 2.5);
-    ASSERT_EQ(resultDoubleVectors.at("FakeDoubleVector").at(0), 1.5);
-    ASSERT_EQ(resultDoubleVectors.at("FakeDoubleVector").at(1), 2.6);
-    ASSERT_EQ(resultDoubleVectors.at("FakeDoubleVector").at(2), 3.7);
-    ASSERT_EQ(resultStrings.at("FakeStringOne"), "FakeOne");
-    ASSERT_EQ(resultStrings.at("FakeStringTwo"), "FakeTwo");
+    op::Container parameter;
+    EXPECT_NO_THROW(parameter = op::Import(fakeDocumentRoot));
+    EXPECT_THAT(op::Get<bool>(parameter, "FakeBoolOne").value(), Eq(true));
+    EXPECT_THAT(op::Get<bool>(parameter, "FakeBoolTwo").value(), Eq(false));
+    EXPECT_THAT(op::Get<int>(parameter, "FakeIntOne").value(), Eq(1));
+    EXPECT_THAT(op::Get<int>(parameter, "FakeIntTwo").value(), Eq(2));
+    EXPECT_THAT(op::Get<std::vector<int>>(parameter, "FakeIntVector").value().at(0), Eq(5));
+    EXPECT_THAT(op::Get<std::vector<int>>(parameter, "FakeIntVector").value().at(1), Eq(6));
+    EXPECT_THAT(op::Get<std::vector<int>>(parameter, "FakeIntVector").value().at(2), Eq(7));
+    EXPECT_THAT(op::Get<double>(parameter, "FakeDoubleOne").value(), Eq(1.0));
+    EXPECT_THAT(op::Get<double>(parameter, "FakeDoubleTwo").value(), Eq(2.5));
+    EXPECT_THAT(op::Get<std::vector<double>>(parameter, "FakeDoubleVector").value().at(0), Eq(1.5));
+    EXPECT_THAT(op::Get<std::vector<double>>(parameter, "FakeDoubleVector").value().at(1), Eq(2.6));
+    EXPECT_THAT(op::Get<std::vector<double>>(parameter, "FakeDoubleVector").value().at(2), Eq(3.7));
+    EXPECT_THAT(op::Get<std::string>(parameter, "FakeStringOne").value(), Eq("FakeOne"));
+    EXPECT_THAT(op::Get<std::string>(parameter, "FakeStringTwo").value(), Eq("FakeTwo"));
 }
 
-TEST(ParameterImporter_UnitTests, ImportParametersWithOneSimpleParameterListSuccessfully)
+TEST(ParameterImporter, ImportParametersWithOneSimpleParameterListSuccessfully)
 {
     QDomElement fakeDocumentRoot = documentRootFromString(
                 "<ComponentParameterSet Name = \"Regular\">"
@@ -70,32 +67,23 @@ TEST(ParameterImporter_UnitTests, ImportParametersWithOneSimpleParameterListSucc
                 "</ComponentParameterSet>"
                 );
 
-    SimulationCommon::ModelParameters resultModelParameters;
+    op::Container parameter;
+    EXPECT_NO_THROW(parameter = op::Import(fakeDocumentRoot));
 
-    ASSERT_TRUE(ParameterImporter::ImportParameters(fakeDocumentRoot, resultModelParameters));
+    EXPECT_THAT(op::Get<bool>(parameter, "FakeBoolOne").value(), true);
+    EXPECT_THAT(op::Get<std::string>(parameter, "FakeStringOne").value(), Eq("FakeOne"));
 
-    auto resultBools = resultModelParameters.GetParametersBool();
-    auto resultStrings = resultModelParameters.GetParametersString();
-    auto resultParameterLists = resultModelParameters.GetParameterLists();
+    auto testList = op::Get<op::internal::ParameterList>(parameter, "TestList");
+    ASSERT_THAT(testList.value(), SizeIs(2));
 
-    auto resultList = resultParameterLists.at("TestList");
-    auto resultBoolsOfFirstListEntry = resultList.at(0)->GetParametersBool();
-    auto resultIntsOfFirstListEntry = resultList.at(0)->GetParametersInt();
+    EXPECT_THAT(op::Get<bool>(testList->at(0), "FakeBoolTwo").value(), true);
+    EXPECT_THAT(op::Get<int>(testList->at(0), "FakeIntOne").value(), 1);
 
-    auto resultIntsOfSecondListEntry = resultList.at(1)->GetParametersInt();
-    auto resultDoublesOfSecondListEntry = resultList.at(1)->GetParametersDouble();
-
-    ASSERT_EQ(resultBools.at("FakeBoolOne"), true);
-    ASSERT_EQ(resultStrings.at("FakeStringOne"), "FakeOne");
-
-    ASSERT_EQ(resultBoolsOfFirstListEntry.at("FakeBoolTwo"), true);
-    ASSERT_EQ(resultIntsOfFirstListEntry.at("FakeIntOne"), 1);
-
-    ASSERT_EQ(resultIntsOfSecondListEntry.at("FakeIntTwo"), 2);
-    ASSERT_EQ(resultDoublesOfSecondListEntry.at("FakeDoubleOne"), 1.0);
+    EXPECT_THAT(op::Get<int>(testList->at(1), "FakeIntTwo").value(), 2);
+    EXPECT_THAT(op::Get<double>(testList->at(1), "FakeDoubleOne").value(), 1.0);
 }
 
-TEST(ParameterImporter_UnitTests, ImportParametersWithTwoSimpleParameterListsSuccessfully)
+TEST(ParameterImporter, ImportParametersWithTwoSimpleParameterListsSuccessfully)
 {
     QDomElement fakeDocumentRoot = documentRootFromString(
                 "<ComponentParameterSet Name = \"Regular\">"
@@ -114,60 +102,20 @@ TEST(ParameterImporter_UnitTests, ImportParametersWithTwoSimpleParameterListsSuc
                 "</ComponentParameterSet>"
                 );
 
-    SimulationCommon::ModelParameters resultModelParameters;
-    ASSERT_TRUE(ParameterImporter::ImportParameters(fakeDocumentRoot, resultModelParameters));
+    op::Container parameter;
+    EXPECT_NO_THROW(parameter = op::Import(fakeDocumentRoot));
 
-    auto resultParameterLists = resultModelParameters.GetParameterLists();
+    auto testListOne = op::Get<op::internal::ParameterList>(parameter, "TestListOne");
+    auto testListTwo = op::Get<op::internal::ParameterList>(parameter, "TestListTwo");
 
-    auto resultListOne = resultParameterLists.at("TestListOne");
-    auto resultBoolsOfFirstList = resultListOne.at(0)->GetParametersBool();
-    auto resultIntsOfFirstList = resultListOne.at(0)->GetParametersInt();
+    ASSERT_THAT(testListOne->at(0), SizeIs(2));
+    ASSERT_THAT(testListTwo->at(0), SizeIs(2));
 
-    auto resultListTwo = resultParameterLists.at("TestListTwo");
-    auto resultBoolsOfSecondList = resultListTwo.at(0)->GetParametersBool();
-    auto resultIntsOfSecondList = resultListTwo.at(0)->GetParametersInt();
-
-    ASSERT_EQ(resultBoolsOfFirstList.at("FakeBoolOne"), true);
-    ASSERT_EQ(resultIntsOfFirstList.at("FakeIntOne"), 1);
-
-    ASSERT_EQ(resultBoolsOfSecondList.at("FakeBoolTwo"), false);
-    ASSERT_EQ(resultIntsOfSecondList.at("FakeIntTwo"), 2);
+    EXPECT_THAT(op::Get<bool>(testListOne->at(0), "FakeBoolOne").value(), true);
+    EXPECT_THAT(op::Get<int>(testListTwo->at(0), "FakeIntTwo").value(), 2);
 }
 
-TEST(ParameterImporter_UnitTests, ImportParametersWithRecursiveParameterListsSuccessfully)
-{
-    QDomElement fakeDocumentRoot = documentRootFromString(
-                "<ComponentParameterSet Name = \"Regular\">"
-                    "<List Name=\"MainList\">"
-                        "<ListItem>"
-                            "<List Name=\"SubList\">"
-                                "<ListItem>"
-                                    "<Bool Key=\"FakeBoolOne\" Value=\"true\"/>"
-                                    "<Int Key=\"FakeIntOne\" Value=\"1\"/>"
-                                "</ListItem>"
-                            "</List>"
-                        "</ListItem>"
-                    "</List>"
-                "</ComponentParameterSet>"
-                );
-
-    SimulationCommon::ModelParameters resultModelParameters;
-
-    ASSERT_TRUE(ParameterImporter::ImportParameters(fakeDocumentRoot, resultModelParameters));
-    auto resultParameterLists = resultModelParameters.GetParameterLists();
-
-    auto resultMainList = resultParameterLists.at("MainList");
-    auto subParameterLists = resultMainList.at(0)->GetParameterLists();
-
-    auto resultSubList = subParameterLists.at("SubList");
-    auto resultBoolsOfSubList = resultSubList.at(0)->GetParametersBool();
-    auto resultIntsOfSubList = resultSubList.at(0)->GetParametersInt();
-
-    ASSERT_EQ(resultBoolsOfSubList.at("FakeBoolOne"), true);
-    ASSERT_EQ(resultIntsOfSubList.at("FakeIntOne"), 1);
-}
-
-TEST(ParameterImporter_UnitTests, ImportStochasticDsitributionSuccessfully)
+TEST(ParameterImporter, ImportStochasticDsitributionSuccessfully)
 {
     QDomElement fakeDocumentRoot = documentRootFromString(
                 "<ComponentParameterSet Name = \"Regular\">"
@@ -176,22 +124,22 @@ TEST(ParameterImporter_UnitTests, ImportStochasticDsitributionSuccessfully)
                 "</ComponentParameterSet>"
                 );
 
-    SimulationCommon::ModelParameters resultModelParameters;
+    op::Container parameter;
+    EXPECT_NO_THROW(parameter = op::Import(fakeDocumentRoot));
 
-    ASSERT_TRUE(ParameterImporter::ImportParameters(fakeDocumentRoot, resultModelParameters));
+    auto normalDistOne = op::Get<op::NormalDistribution>(parameter, "FakeOne");
+    auto normalDistTwo = op::Get<op::NormalDistribution>(parameter, "FakeTwo");
 
-    const auto &resultNormalDitributions = resultModelParameters.GetParametersNormalDistribution();
+    ASSERT_THAT(normalDistOne.has_value(), true);
+    ASSERT_THAT(normalDistTwo.has_value(), true);
 
-    const auto resultFakeOne = resultNormalDitributions.at("FakeOne");
-    const auto resultFakeTwo = resultNormalDitributions.at("FakeTwo");
+    EXPECT_DOUBLE_EQ(normalDistOne->mean, 2.5);
+    EXPECT_DOUBLE_EQ(normalDistOne->standardDeviation, 0.3);
+    EXPECT_DOUBLE_EQ(normalDistOne->min, 1.91);
+    EXPECT_DOUBLE_EQ(normalDistOne->max, 3.09);
 
-    ASSERT_DOUBLE_EQ(resultFakeOne.mean, 2.5);
-    ASSERT_DOUBLE_EQ(resultFakeOne.standardDeviation, 0.3);
-    ASSERT_DOUBLE_EQ(resultFakeOne.min, 1.91);
-    ASSERT_DOUBLE_EQ(resultFakeOne.max, 3.09);
-
-    ASSERT_DOUBLE_EQ(resultFakeTwo.mean, 0.5);
-    ASSERT_DOUBLE_EQ(resultFakeTwo.standardDeviation, 1);
-    ASSERT_DOUBLE_EQ(resultFakeTwo.min, 1);
-    ASSERT_DOUBLE_EQ(resultFakeTwo.max, 2.0);
+    EXPECT_DOUBLE_EQ(normalDistTwo->mean, 0.5);
+    EXPECT_DOUBLE_EQ(normalDistTwo->standardDeviation, 1);
+    EXPECT_DOUBLE_EQ(normalDistTwo->min, 1);
+    EXPECT_DOUBLE_EQ(normalDistTwo->max, 2.0);
 }

@@ -39,13 +39,13 @@ public:
     //-----------------------------------------------------------------------------
     LateralSignal(LateralSignal &other) :
         LateralSignal(
-                other.laneWidth,
-                other.lateralDeviation,
-                other.gainLateralDeviation,
-                other.headingError,
-                other.gainHeadingError,
-                other.kappaSet,
-                other.componentState)
+            other.componentState,
+            other.laneWidth,
+            other.lateralDeviation,
+            other.gainLateralDeviation,
+            other.headingError,
+            other.gainHeadingError,
+            other.kappaSet)
     {
     }
 
@@ -53,13 +53,13 @@ public:
     //! Constructor
     //-----------------------------------------------------------------------------
     LateralSignal(
+            ComponentState componentState,
             double laneWidth,
             double lateralDeviation,
             double gainLateralDeviation,
             double headingError,
             double gainHeadingError,
-            double kappaSet,
-            ComponentState componentStateP
+            double kappaSet
             ):
         laneWidth(laneWidth),
         lateralDeviation(lateralDeviation),
@@ -68,7 +68,7 @@ public:
         gainHeadingError(gainHeadingError),
         kappaSet(kappaSet)
     {
-        componentState = componentStateP;
+        this->componentState = componentState;
     }
 
     virtual ~LateralSignal()

@@ -103,6 +103,15 @@ struct Lane
     LaneType type;
     std::optional<int> predecessor;
     std::optional<int> successor;
+
+    bool operator==(const Lane& other) const
+    {
+        return relativeId == other.relativeId
+                && inDrivingDirection == other.inDrivingDirection
+                && type == other.type
+                && predecessor == other.predecessor
+                && successor == other.successor;
+    }
 };
 
 struct LanesInterval
@@ -259,6 +268,7 @@ namespace CommonTrafficSign {
 enum Type
 {
     Undefined = 0,
+    GiveWay = 205,
     Stop = 206,
     DoNotEnter = 267,
     EnvironmentalZoneBegin = 2701, // 270.1

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019. 2020 in-tech GmbH
 *               2016, 2017 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -32,11 +32,6 @@ void RunStatistic::AddStopReason(int time, StopReason reason)
     StopTime = time;
 }
 
-std::list<int> *RunStatistic::GetFollowerIds()
-{
-    return &_followerIds;
-}
-
 // ----------------------------- writing out --------------------- //
 void RunStatistic::WriteStatistics(std::shared_ptr<QXmlStreamWriter> fileStream)
 {
@@ -58,14 +53,6 @@ void RunStatistic::WriteStatistics(std::shared_ptr<QXmlStreamWriter> fileStream)
 
     fileStream->writeStartElement("EgoAccident");
     fileStream->writeCharacters(BoolToString(EgoCollision ));
-    fileStream->writeEndElement();
-
-    fileStream->writeStartElement("NumberOfAccidentsInFollowers");
-    fileStream->writeCharacters(QString::number(NCollisionsFollowers));
-    fileStream->writeEndElement();
-
-    fileStream->writeStartElement("NumberOfArbitraryAccidents");
-    fileStream->writeCharacters(QString::number(NCollisionsArbitrary));
     fileStream->writeEndElement();
 
     fileStream->writeStartElement("TotalDistanceTraveled");

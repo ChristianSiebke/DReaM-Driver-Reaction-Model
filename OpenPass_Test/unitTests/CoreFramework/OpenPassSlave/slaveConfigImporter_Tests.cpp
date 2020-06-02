@@ -1,12 +1,12 @@
-/*********************************************************************
-* Copyright (c) 2018 - 2019 in-tech GmbH on behalf of BMW
+/*******************************************************************************
+* Copyright (c) 2018, 2019 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
 * which is available at https://www.eclipse.org/legal/epl-2.0/
 *
 * SPDX-License-Identifier: EPL-2.0
-**********************************************************************/
+*******************************************************************************/
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -19,6 +19,74 @@ using ::testing::UnorderedElementsAre;
 using ::testing::EndsWith;
 
 using namespace Importer;
+
+TEST(SlaveConfigImporter_UnitTests, ImportSpawnPointsConfigSuccessfully)
+{
+    QDomElement fakeDocumentRoot = documentRootFromString(
+                                       "<root>"
+                                           "<SpawnPoint>"
+                                               "<Library>Test_Library</Library>"
+                                               "<Type>PreRun</Type>"
+                                               "<Priority>1</Priority>"
+                                           "</SpawnPoint>"
+                                           "<SpawnPoint>"
+                                               "<Library>Test_Library</Library>"
+                                               "<Type>Runtime</Type>"
+                                               "<Priority>0</Priority>"
+                                               "<Profile>ExampleProfile</Profile>"
+                                           "</SpawnPoint>"
+                                       "</root>"
+                                    );
+
+    SpawnPointLibraryInfoCollection spawnPointsConfig;
+
+    EXPECT_NO_THROW(SlaveConfigImporter::ImportSpawnPointsConfig(fakeDocumentRoot, spawnPointsConfig));
+    EXPECT_THAT(spawnPointsConfig, SizeIs(2));
+    const auto resultSpawnPointLibraryInfo1 = spawnPointsConfig.at(0);
+    const auto resultSpawnPointLibraryInfo2 = spawnPointsConfig.at(1);
+
+    EXPECT_THAT(resultSpawnPointLibraryInfo1.libraryName, "Test_Library");
+    EXPECT_THAT(resultSpawnPointLibraryInfo1.type, SpawnPointType::PreRun);
+    EXPECT_THAT(resultSpawnPointLibraryInfo1.priority, 1);
+    EXPECT_THAT(resultSpawnPointLibraryInfo1.profileName, std::nullopt);
+    EXPECT_THAT(resultSpawnPointLibraryInfo2.libraryName, "Test_Library");
+    EXPECT_THAT(resultSpawnPointLibraryInfo2.type, SpawnPointType::Runtime);
+    EXPECT_THAT(resultSpawnPointLibraryInfo2.priority, 0);
+    EXPECT_THAT(resultSpawnPointLibraryInfo2.profileName, "ExampleProfile");
+}
+
+TEST(SlaveConfigImporter_UnitTests, ImportSpawnPointConfigUnsuccessfully)
+{
+    QDomElement fakeDocumentRootMissingLibrary = documentRootFromString(
+                                       "<root>"
+                                           "<SpawnPoint>"
+                                               "<Type>PreRun</Type>"
+                                               "<Priority>1</Priority>"
+                                           "</SpawnPoint>"
+                                       "</root>"
+                                    );
+    QDomElement fakeDocumentRootMissingType = documentRootFromString(
+                                       "<root>"
+                                           "<SpawnPoint>"
+                                               "<Library>Test_Library</Library>"
+                                               "<Priority>1</Priority>"
+                                           "</SpawnPoint>"
+                                       "</root>"
+                                    );
+    QDomElement fakeDocumentRootMissingPriority = documentRootFromString(
+                                       "<root>"
+                                           "<SpawnPoint>"
+                                               "<Library>Test_Library</Library>"
+                                               "<Type>PreRun</Type>"
+                                           "</SpawnPoint>"
+                                       "</root>"
+                                    );
+    SpawnPointLibraryInfoCollection spawnPointsConfig;
+
+    ASSERT_THROW(SlaveConfigImporter::ImportSpawnPointsConfig(fakeDocumentRootMissingLibrary, spawnPointsConfig), std::runtime_error);
+    ASSERT_THROW(SlaveConfigImporter::ImportSpawnPointsConfig(fakeDocumentRootMissingType, spawnPointsConfig), std::runtime_error);
+    ASSERT_THROW(SlaveConfigImporter::ImportSpawnPointsConfig(fakeDocumentRootMissingPriority, spawnPointsConfig), std::runtime_error);
+}
 
 TEST(SlaveConfigImporter_UnitTests, ImportExperimentConfigSuccessfully)
 {
@@ -37,9 +105,8 @@ TEST(SlaveConfigImporter_UnitTests, ImportExperimentConfigSuccessfully)
 
     ExperimentConfig experimentConfig;
 
-    bool importResult = SlaveConfigImporter::ImportExperimentConfig(fakeDocumentRoot, experimentConfig);
+    EXPECT_NO_THROW(SlaveConfigImporter::ImportExperimentConfig(fakeDocumentRoot, experimentConfig));
 
-    ASSERT_THAT(importResult,                         true);
     EXPECT_THAT(experimentConfig.experimentId,        1337);
     EXPECT_THAT(experimentConfig.numberOfInvocations, 5);
     EXPECT_THAT(experimentConfig.randomSeed,          12345);
@@ -76,9 +143,9 @@ TEST(SlaveConfigImporter_UnitTests, ImportExperimentConfigUnsuccessfully)
 
     ExperimentConfig experimentConfig;
 
-    ASSERT_FALSE(SlaveConfigImporter::ImportExperimentConfig(fakeDocumentRootMissingLoggingTag, experimentConfig));
-    ASSERT_FALSE(SlaveConfigImporter::ImportExperimentConfig(fakeDocumentRootWrongDataType, experimentConfig));
-    ASSERT_FALSE(SlaveConfigImporter::ImportExperimentConfig(fakeDocumentRootWrongTagName, experimentConfig));
+    ASSERT_THROW(SlaveConfigImporter::ImportExperimentConfig(fakeDocumentRootMissingLoggingTag, experimentConfig), std::runtime_error);
+    ASSERT_THROW(SlaveConfigImporter::ImportExperimentConfig(fakeDocumentRootWrongDataType, experimentConfig), std::runtime_error);
+    ASSERT_THROW(SlaveConfigImporter::ImportExperimentConfig(fakeDocumentRootWrongTagName, experimentConfig), std::runtime_error);
 }
 
 TEST(SlaveConfigImporter_UnitTests, ImportValidLoggingGroups_Succeeds)
@@ -96,9 +163,8 @@ TEST(SlaveConfigImporter_UnitTests, ImportValidLoggingGroups_Succeeds)
 
     std::vector<std::string> loggingGroups;
 
-    bool importResult = SlaveConfigImporter::ImportLoggingGroups(fakeDocumentRoot, loggingGroups);
+    EXPECT_NO_THROW(SlaveConfigImporter::ImportLoggingGroups(fakeDocumentRoot, loggingGroups));
 
-    ASSERT_THAT(importResult, true);
     EXPECT_THAT(loggingGroups, UnorderedElementsAre("Group01", "Group02", "AnotherGroup"));
 }
 
@@ -113,11 +179,7 @@ TEST(SlaveConfigImporter_UnitTests, ImportEmptyLoggingGroupString_Fails)
             );
 
     std::vector<std::string> loggingGroups;
-
-    bool importResult = SlaveConfigImporter::ImportLoggingGroups(fakeDocumentRootEmptyString, loggingGroups);
-
-    ASSERT_THAT(importResult, false);
-    EXPECT_THAT(loggingGroups, SizeIs(0));
+    ASSERT_THROW(SlaveConfigImporter::ImportLoggingGroups(fakeDocumentRootEmptyString, loggingGroups), std::runtime_error);
 }
 
 
@@ -131,7 +193,6 @@ TEST(SlaveConfigImporter_UnitTests, ImportMissingLibraries_LoadsDefaults)
     EXPECT_THAT(libraries["ManipulatorLibrary"], "Manipulator");
     EXPECT_THAT(libraries["WorldLibrary"], "World");
     EXPECT_THAT(libraries["StochasticsLibrary"], "Stochastics");
-    EXPECT_THAT(libraries["SpawnPointLibrary"], "SpawnPoint_OSI");
     EXPECT_THAT(libraries["ObservationLibrary"], "Observation");
 }
 
@@ -144,7 +205,6 @@ TEST(SlaveConfigImporter_UnitTests, ImportCompleteLibraryList_ParsesSpecifiedVal
                                        "    <ManipulatorLibrary>TestManipulator</ManipulatorLibrary>"
                                        "    <WorldLibrary>TestWorld</WorldLibrary>"
                                        "    <StochasticsLibrary>TestStochastics</StochasticsLibrary>"
-                                       "    <SpawnPointLibrary>TestSpawnPoint</SpawnPointLibrary>"
                                        "    <ObservationLibrary>TestObservation</ObservationLibrary>"
                                        "  </Libraries>"
                                        "</root>"
@@ -156,7 +216,6 @@ TEST(SlaveConfigImporter_UnitTests, ImportCompleteLibraryList_ParsesSpecifiedVal
     EXPECT_THAT(libraries["ManipulatorLibrary"], "TestManipulator");
     EXPECT_THAT(libraries["WorldLibrary"], "TestWorld");
     EXPECT_THAT(libraries["StochasticsLibrary"], "TestStochastics");
-    EXPECT_THAT(libraries["SpawnPointLibrary"], "TestSpawnPoint");
     EXPECT_THAT(libraries["ObservationLibrary"], "TestObservation");
 }
 
@@ -178,7 +237,6 @@ TEST(SlaveConfigImporter_UnitTests, ImportPartialLibraryList_ParsesSpecifiedValu
     EXPECT_THAT(libraries["EventDetectorLibrary"], "EventDetector");
     EXPECT_THAT(libraries["ManipulatorLibrary"], "Manipulator");
     EXPECT_THAT(libraries["StochasticsLibrary"], "Stochastics");
-    EXPECT_THAT(libraries["SpawnPointLibrary"], "SpawnPoint_OSI");
 }
 
 TEST(SlaveConfigImporter_UnitTests, ImportEmptyLibraryList_ParsesSpecifiedValues)
@@ -193,7 +251,6 @@ TEST(SlaveConfigImporter_UnitTests, ImportEmptyLibraryList_ParsesSpecifiedValues
     EXPECT_THAT(libraries["EventDetectorLibrary"], "EventDetector");
     EXPECT_THAT(libraries["ManipulatorLibrary"], "Manipulator");
     EXPECT_THAT(libraries["ObservationLibrary"], "Observation");
-    EXPECT_THAT(libraries["SpawnPointLibrary"], "SpawnPoint_OSI");
     EXPECT_THAT(libraries["StochasticsLibrary"], "Stochastics");
     EXPECT_THAT(libraries["WorldLibrary"], "World");
 }
@@ -209,7 +266,7 @@ TEST(SlaveConfigImporter_UnitTests, ImportScenarioConfigSuccessfully)
 
     ScenarioConfig scenarioConfig;
 
-    ASSERT_THAT(SlaveConfigImporter::ImportScenarioConfig(fakeDocumentRoot, "configs", scenarioConfig), true);
+    EXPECT_NO_THROW(SlaveConfigImporter::ImportScenarioConfig(fakeDocumentRoot, "configs", scenarioConfig));
     ASSERT_THAT(scenarioConfig.scenarioPath, EndsWith("configs/scenarioFile.xml"));
 }
 
@@ -224,7 +281,7 @@ TEST(SlaveConfigImporter_UnitTests, ImportScenarioConfigUnsuccessfullyMissingTag
 
     ScenarioConfig scenarioConfig;
 
-    ASSERT_THAT(SlaveConfigImporter::ImportScenarioConfig(fakeDocumentRoot, "configs", scenarioConfig), false);
+    ASSERT_THROW(SlaveConfigImporter::ImportScenarioConfig(fakeDocumentRoot, "configs", scenarioConfig), std::runtime_error);
 }
 
 TEST(SlaveConfigImporter_UnitTests, ImportEnvironmentConfigSuccessfully)
@@ -253,7 +310,7 @@ TEST(SlaveConfigImporter_UnitTests, ImportEnvironmentConfigSuccessfully)
 
     EnvironmentConfig environmentConfig;
 
-    ASSERT_TRUE(SlaveConfigImporter::ImportEnvironmentConfig(fakeDocumentRoot, environmentConfig));
+    EXPECT_NO_THROW(SlaveConfigImporter::ImportEnvironmentConfig(fakeDocumentRoot, environmentConfig));
 
     ASSERT_EQ(environmentConfig.timeOfDays.at("12"), 0.5);
     ASSERT_EQ(environmentConfig.timeOfDays.at("18"), 0.5);
@@ -326,137 +383,10 @@ TEST(SlaveConfigImporter_UnitTests, ImportEnvironmentConfigUnsuccessfully)
 
     EnvironmentConfig environmentConfig;
 
-    ASSERT_FALSE(SlaveConfigImporter::ImportEnvironmentConfig(fakeDocumentRootWrongProbabilities,
-                 environmentConfig));
-    ASSERT_FALSE(SlaveConfigImporter::ImportEnvironmentConfig(fakeDocumentRootMissingAtLeastOneElement,
-                 environmentConfig));
-    ASSERT_FALSE(SlaveConfigImporter::ImportEnvironmentConfig(fakeDocumentRootMissingTag, environmentConfig));
-}
-
-TEST(SlaveConfigImporter_UnitTests, ImportTrafficParameterSuccessfully)
-{
-    QDomElement fakeDocumentRoot = documentRootFromString(
-                                       "<root>"
-                                       "<TrafficVolumes>"
-                                       "<TrafficVolume Value = \"900\" Probability = \"0.5\"/>"
-                                       "<TrafficVolume Value = \"1500\" Probability = \"0.5\"/>"
-                                       "</TrafficVolumes>"
-                                       "<PlatoonRates>"
-                                       "<PlatoonRate Value = \"0.3\" Probability = \"1.0\"/>"
-                                       "</PlatoonRates>"
-                                       "<Velocities>"
-                                       "<Velocity Value = \"85.0\" Probability = \"0.2\"/>"
-                                       "<Velocity Value = \"3.0\" Probability = \"0.8\"/>"
-                                       "</Velocities>"
-                                       "<Homogenities>"
-                                       "<Homogenity Value = \"0.2\" Probability = \"1.0\"/>"
-                                       "<Homogenity Value = \"0.4\" Probability = \"0.0\"/>"
-                                       "</Homogenities>"
-                                       "</root>"
-                                   );
-
-    TrafficConfig trafficConfig;
-
-    ASSERT_TRUE(SlaveConfigImporter::ImportTrafficParameter(fakeDocumentRoot, trafficConfig));
-
-    ASSERT_EQ(trafficConfig.trafficVolumes.at(900.0), 0.5);
-    ASSERT_EQ(trafficConfig.trafficVolumes.at(1500.0), 0.5);
-    ASSERT_EQ(trafficConfig.platoonRates.at(0.3), 1.0);
-    ASSERT_EQ(trafficConfig.velocities.at(85.0), 0.2);
-    ASSERT_EQ(trafficConfig.velocities.at(3.0), 0.8);
-    ASSERT_EQ(trafficConfig.homogenities.at(0.2), 1.0);
-    ASSERT_EQ(trafficConfig.homogenities.at(0.4), 0.0);
-}
-
-TEST(SlaveConfigImporter_UnitTests, ImportTrafficParameterUnsuccessfully)
-{
-    QDomElement fakeDocumentRootMissingTag = documentRootFromString(
-                "<root>"
-                "<TrafficVolumes>"
-                "<TrafficVolume Value = \"900\" Probability = \"0.5\"/>"
-                "<TrafficVolume Value = \"1500\" Probability = \"0.5\"/>"
-                "</TrafficVolumes>"
-                "<Velocities>"
-                "<Velocity Value = \"85.0\" Probability = \"0.0\"/>"
-                "<Velocity Value = \"3.0\" Probability = \"0.8\"/>"
-                "</Velocities>"
-                "<Homogenities>"
-                "<Homogenity Value = \"0.2\" Probability = \"1.0\"/>"
-                "<Homogenity Value = \"0.4\" Probability = \"0.0\"/>"
-                "</Homogenities>"
-                "</root>"
-            );
-
-    QDomElement fakeDocumentRootAtLeastOneEntryMissing = documentRootFromString(
-                "<root>"
-                "<TrafficVolumes>"
-                "<TrafficVolume Value = \"900\" Probability = \"0.5\"/>"
-                "<TrafficVolume Value = \"1500\" Probability = \"0.5\"/>"
-                "</TrafficVolumes>"
-                "<PlatoonRates>"
-                "<PlatoonRate Value = \"0.3\" Probability = \"1.0\"/>"
-                "</PlatoonRates>"
-                "<Velocities>"
-                "</Velocities>"
-                "<Homogenities>"
-                "<Homogenity Value = \"0.2\" Probability = \"1.0\"/>"
-                "<Homogenity Value = \"0.4\" Probability = \"0.0\"/>"
-                "</Homogenities>"
-                "</root>"
-            );
-
-    TrafficConfig trafficConfig;
-
-    ASSERT_FALSE(SlaveConfigImporter::ImportTrafficParameter(fakeDocumentRootMissingTag, trafficConfig));
-    ASSERT_FALSE(SlaveConfigImporter::ImportTrafficParameter(fakeDocumentRootAtLeastOneEntryMissing, trafficConfig));
-}
-
-TEST(SlaveConfigImporter_UnitTests, ImportLaneParameterSuccessfully)
-{
-    QDomElement fakeDocumentRoot = documentRootFromString(
-                                       "<root>"
-                                       "<RegularLane>"
-                                       "<AgentProfile Name = \"Grandpa\" Probability = \"0.5\"/>"
-                                       "<AgentProfile Name = \"Grandma\" Probability = \"0.5\"/>"
-                                       "</RegularLane>"
-                                       "<RightMostLane>"
-                                       "<AgentProfile Name = \"Truck\" Probability = \"1.0\"/>"
-                                       "</RightMostLane>"
-                                       "</root>"
-                                   );
-
-    TrafficConfig trafficConfig;
-
-    ASSERT_TRUE(SlaveConfigImporter::ImportLaneParameter(fakeDocumentRoot, trafficConfig));
-
-    ASSERT_EQ(trafficConfig.regularLaneAgents.at("Grandpa"), 0.5);
-    ASSERT_EQ(trafficConfig.regularLaneAgents.at("Grandma"), 0.5);
-    ASSERT_EQ(trafficConfig.rightMostLaneAgents.at("Truck"), 1.0);
-}
-
-TEST(SlaveConfigImporter_UnitTests, ImportLaneParameterUnsuccessfully)
-{
-    QDomElement fakeDocumentRootMissingTag = documentRootFromString(
-                "<root>"
-                "<RightMostLane>"
-                "<AgentProfile Name = \"Truck\" Probability = \"1.0\"/>"
-                "</RightMostLane>"
-                "</root>"
-            );
-
-    QDomElement fakeDocumentRootAtLeastOneEntryMissing = documentRootFromString(
-                "<root>"
-                "<RegularLane>"
-                "<AgentProfile Name = \"Grandpa\" Probability = \"0.5\"/>"
-                "<AgentProfile Name = \"Grandma\" Probability = \"0.5\"/>"
-                "</RegularLane>"
-                "<RightMostLane>"
-                "</RightMostLane>"
-                "</root>"
-            );
-
-    TrafficConfig trafficConfig;
-
-    ASSERT_FALSE(SlaveConfigImporter::ImportLaneParameter(fakeDocumentRootMissingTag, trafficConfig));
-    ASSERT_FALSE(SlaveConfigImporter::ImportLaneParameter(fakeDocumentRootAtLeastOneEntryMissing, trafficConfig));
+    ASSERT_THROW(SlaveConfigImporter::ImportEnvironmentConfig(fakeDocumentRootWrongProbabilities, environmentConfig),
+                 std::runtime_error);
+    ASSERT_THROW(SlaveConfigImporter::ImportEnvironmentConfig(fakeDocumentRootMissingAtLeastOneElement, environmentConfig),
+                 std::runtime_error);
+    ASSERT_THROW(SlaveConfigImporter::ImportEnvironmentConfig(fakeDocumentRootMissingTag, environmentConfig),
+                 std::runtime_error);
 }

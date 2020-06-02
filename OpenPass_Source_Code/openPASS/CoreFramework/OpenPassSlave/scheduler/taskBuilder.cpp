@@ -26,7 +26,7 @@ TaskBuilder::TaskBuilder(const int& currentTime,
                          RunResult& runResult,
                          const int frameworkUpdateRate,
                          WorldInterface* const world,
-                         SpawnControlInterface* const spawnControl,
+                         SpawnPointNetworkInterface* const spawnPointNetwork,
                          ObservationNetworkInterface* const observationNetwork,
                          EventDetectorNetworkInterface* const eventDetectorNetwork,
                          ManipulatorNetworkInterface* const manipulatorNetwork) :
@@ -34,7 +34,7 @@ TaskBuilder::TaskBuilder(const int& currentTime,
     runResult{runResult},
     frameworkUpdateRate{frameworkUpdateRate},
     world{world},
-    spawnControl{spawnControl},
+    spawnPointNetwork{spawnPointNetwork},
     observationNetwork{observationNetwork},
     eventDetectorNetwork{eventDetectorNetwork},
     manipulatorNetwork{manipulatorNetwork}
@@ -45,19 +45,26 @@ TaskBuilder::TaskBuilder(const int& currentTime,
 
 std::list<TaskItem> TaskBuilder::CreateBootstrapTasks()
 {
-    return std::list<TaskItem>
-    {
-        ObservationTaskItem(frameworkUpdateRate,
+    std::list<TaskItem> items;
+
+    items.emplace_back(ObservationTaskItem(frameworkUpdateRate,
                             std::bind(&ObservationNetworkInterface::UpdateTimeStep,
-                                      observationNetwork, std::ref(currentTime), std::ref(runResult)))
-    };
+                                      observationNetwork, std::ref(currentTime), std::ref(runResult))));
+
+    items.emplace_back(SpawningTaskItem(frameworkUpdateRate,
+                                        std::bind(&SpawnPointNetworkInterface::TriggerPreRunSpawnPoints,
+                                                  spawnPointNetwork)));
+
+    return items;
 }
 
 std::list<TaskItem> TaskBuilder::CreateCommonTasks()
 {
     std::list<TaskItem> items {};
-    items.emplace_back(SpawningTaskItem(frameworkUpdateRate, std::bind(&SpawnControlInterface::Execute, spawnControl,
-                                        std::ref(currentTime))));
+    items.emplace_back(SpawningTaskItem(frameworkUpdateRate,
+                                        std::bind(&SpawnPointNetworkInterface::TriggerRuntimeSpawnPoints,
+                                                  spawnPointNetwork,
+                                                  std::ref(currentTime))));
 
     std::copy(std::begin(eventDetectorTasks), std::end(eventDetectorTasks), std::back_inserter(items));
     std::copy(std::begin(manipulatorTasks), std::end(manipulatorTasks), std::back_inserter(items));

@@ -12,15 +12,22 @@
 /** @file  AlgorithmAEBmplementation.cpp */
 //-----------------------------------------------------------------------------
 
-#include <memory>
-#include <qglobal.h>
-#include <QCoreApplication>
 #include <limits>
+#include <memory>
+
+#include <QtGlobal>
+#include <QCoreApplication>
+
+#include "Interfaces/parameterInterface.h"
+
+#include "Common/commonTools.h"
+#include "Common/eventTypes.h"
+
+#include "Components/SensorFusion_OSI/sensorFusionQuery.h"
 
 #include "algorithm_autonomousEmergencyBrakingImplementation.h"
 #include "boundingBoxCalculation.h"
-#include "Common/eventTypes.h"
-#include "Components/SensorFusion_OSI/sensorFusionQuery.h"
+
 
 AlgorithmAutonomousEmergencyBrakingImplementation::AlgorithmAutonomousEmergencyBrakingImplementation(
     std::string componentName,
@@ -175,46 +182,66 @@ bool AlgorithmAutonomousEmergencyBrakingImplementation::ShouldBeDeactivated(cons
 
 double AlgorithmAutonomousEmergencyBrakingImplementation::CalculateObjectTTC(const osi3::BaseMoving& baseMoving)
 {
-    BoundingBoxCalculation bbcalculation(GetAgent(), collisionDetectionLongitudinalBoundary,
-                                         collisionDetectionLateralBoundary);
-    double ttc = 0.0;
-
-    while (ttc <= (ttcBrake * 1.5))
-    {
-        polygon_t objectBoundingBox = bbcalculation.CalculateBoundingBox(ttc, baseMoving);
-        polygon_t ownBoundingBox = bbcalculation.CalculateOwnBoundingBox(ttc);
-
-        if (bg::intersects(ownBoundingBox, objectBoundingBox))
-        {
-            return ttc;
-        }
-
-        ttc += GetCycleTime() / 1000.0;
-    }
-
-    return std::numeric_limits<double>::max();
+    TtcCalculations::TtcParameters own;
+    own.length = GetAgent()->GetLength() + collisionDetectionLongitudinalBoundary;
+    own.width = GetAgent()->GetWidth() + collisionDetectionLateralBoundary;
+    own.frontLength = GetAgent()->GetDistanceReferencePointToLeadingEdge() + 0.5 * collisionDetectionLongitudinalBoundary;
+    own.backLength = own.length - own.frontLength;
+    own.position = {0.0, 0.0};
+    own.velocityX = 0.0;
+    own.velocityY = 0.0;
+    own.accelerationX = 0.0;
+    own.accelerationY = 0.0;
+    own.yaw = 0.0;
+    own.yawRate = GetAgent()->GetYawRate();
+    own.yawAcceleration = 0.0;   // GetAgent()->GetYawAcceleration() not implemented yet
+    TtcCalculations::TtcParameters opponent;
+    opponent.length = baseMoving.dimension().length() + collisionDetectionLongitudinalBoundary;
+    opponent.width = baseMoving.dimension().width() + collisionDetectionLateralBoundary;
+    opponent.frontLength = 0.5 * opponent.length;
+    opponent.backLength = 0.5 * opponent.length;
+    opponent.position = {baseMoving.position().x(), baseMoving.position().y()};
+    opponent.velocityX = baseMoving.velocity().x();
+    opponent.velocityY = baseMoving.velocity().y();
+    opponent.accelerationX = baseMoving.acceleration().x();
+    opponent.accelerationY = baseMoving.acceleration().y();
+    opponent.yaw = baseMoving.orientation().yaw();
+    opponent.yawRate = baseMoving.orientation_rate().yaw();
+    opponent.yawAcceleration = baseMoving.orientation_acceleration().yaw();
+    return TtcCalculations::CalculateObjectTTC(own, opponent, ttcBrake * 1.5, GetCycleTime());
 }
 
 double AlgorithmAutonomousEmergencyBrakingImplementation::CalculateObjectTTC(const osi3::BaseStationary& baseStationary)
 {
-    BoundingBoxCalculation bbcalculation(GetAgent(), collisionDetectionLongitudinalBoundary,
-                                         collisionDetectionLateralBoundary);
-    double ttc = GetCycleTime() / 1000.0;
+    TtcCalculations::TtcParameters own;
+    own.length = GetAgent()->GetLength() + collisionDetectionLongitudinalBoundary;
+    own.width = GetAgent()->GetWidth() + collisionDetectionLateralBoundary;
+    own.frontLength = GetAgent()->GetDistanceReferencePointToLeadingEdge() + 0.5 * collisionDetectionLongitudinalBoundary;
+    own.backLength = own.length - own.frontLength;
+    own.position = {0.0, 0.0};
+    own.velocityX = 0.0;
+    own.velocityY = 0.0;
+    own.accelerationX = 0.0;
+    own.accelerationY = 0.0;
+    own.yaw = 0.0;
+    own.yawRate = GetAgent()->GetYawRate();
+    own.yawAcceleration = 0.0;   // GetAgent()->GetYawAcceleration() not implemented yet
 
-    polygon_t objectBoundingBox = bbcalculation.CalculateBoundingBox(baseStationary);
-    while (!ShouldBeActivated(ttc))
-    {
-        polygon_t ownBoundingBox = bbcalculation.CalculateOwnBoundingBox(ttc);
+    TtcCalculations::TtcParameters opponent;
+    opponent.length = baseStationary.dimension().length() + collisionDetectionLongitudinalBoundary;
+    opponent.width = baseStationary.dimension().width() + collisionDetectionLateralBoundary;
+    opponent.frontLength =  0.5 * opponent.length;
+    opponent.backLength =  0.5 * opponent.length;
+    opponent.position = {baseStationary.position().x(), baseStationary.position().y()};
+    opponent.velocityX = - GetAgent()->GetVelocity();
+    opponent.velocityY = 0.0;
+    opponent.accelerationX = - GetAgent()->GetAcceleration();
+    opponent.accelerationY = 0.0;
+    opponent.yaw = baseStationary.orientation().yaw();
+    opponent.yawRate = 0.0;
+    opponent.yawAcceleration = 0.0;
 
-        if (bg::intersects(ownBoundingBox, objectBoundingBox))
-        {
-            return ttc;
-        }
-
-        ttc += GetCycleTime() / 1000.0;
-    }
-
-    return std::numeric_limits<double>::max();
+    return TtcCalculations::CalculateObjectTTC(own, opponent, ttcBrake * 1.5, GetCycleTime());
 }
 
 double AlgorithmAutonomousEmergencyBrakingImplementation::CalculateTTC()
@@ -248,19 +275,17 @@ void AlgorithmAutonomousEmergencyBrakingImplementation::UpdateAcceleration(const
     {
         activeAcceleration = brakingAcceleration;
         event = std::make_shared<VehicleComponentEvent>(time,
-                                           COMPONENTNAME,
-                                           "",
-                                           EventDefinitions::EventType::AEBActive,
-                                           GetAgent()->GetId());
+                                                        "AEBActive",
+                                                        COMPONENTNAME,
+                                                        GetAgent()->GetId());
     }
     else if (componentState == ComponentState::Disabled && activeAcceleration != 0.0)
     {
         activeAcceleration = 0.0;
         event = std::make_shared<VehicleComponentEvent>(time,
-                                           COMPONENTNAME,
-                                           "",
-                                           EventDefinitions::EventType::AEBInactive,
-                                           GetAgent()->GetId());
+                                                        "AEBInactive",
+                                                        COMPONENTNAME,
+                                                        GetAgent()->GetId());
     }
 
     if(event.get())

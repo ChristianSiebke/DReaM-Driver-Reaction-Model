@@ -1,5 +1,6 @@
 #/*******************************************************************************
 #* Copyright (c) 2020 HLRS, University of Stuttgart
+#* Copyright (c) 2020 in-tech GmbH
 #*
 #* This program and the accompanying materials are made
 #* available under the terms of the Eclipse Public License 2.0
@@ -9,25 +10,28 @@
 #*******************************************************************************/
 
 set(FOLDER "CoreComponents")
-#ADD_SUBDIRECTORY(Action_BrakeLight_Basic)
-ADD_SUBDIRECTORY(Action_LongitudinalDriver)
-ADD_SUBDIRECTORY(Action_SecondaryDriverTasks)
-ADD_SUBDIRECTORY(AgentUpdater)
-ADD_SUBDIRECTORY(AlgorithmAgentFollowingDriverModel)
-ADD_SUBDIRECTORY(Algorithm_AEB)
-#ADD_SUBDIRECTORY(Algorithm_CruiseControlByDistance)
-ADD_SUBDIRECTORY(Algorithm_Lateral)
-ADD_SUBDIRECTORY(Algorithm_Longitudinal)
-ADD_SUBDIRECTORY(ComponentController)
-ADD_SUBDIRECTORY(Dynamics_Collision)
-ADD_SUBDIRECTORY(Dynamics_Longitudinal_Basic)
-ADD_SUBDIRECTORY(Dynamics_RegularDriving)
-ADD_SUBDIRECTORY(Dynamics_TrajectoryFollower)
-ADD_SUBDIRECTORY(LimiterAccelerationVehicleComponents)
-ADD_SUBDIRECTORY(Parameters_Vehicle)
-ADD_SUBDIRECTORY(SensorFusion_OSI)
-#ADD_SUBDIRECTORY(Sensor_Distance)
-ADD_SUBDIRECTORY(Sensor_Driver)
-ADD_SUBDIRECTORY(Sensor_OSI)
-ADD_SUBDIRECTORY(Sensor_RecordState)
-ADD_SUBDIRECTORY(SignalPrioritizer)
+
+#add_subdirectory(Action_BrakeLight_Basic)
+add_subdirectory(Action_LongitudinalDriver)
+add_subdirectory(Action_SecondaryDriverTasks)
+add_subdirectory(AgentUpdater)
+add_subdirectory(AlgorithmAgentFollowingDriverModel)
+add_subdirectory(Algorithm_AEB)
+#add_subdirectory(Algorithm_CruiseControlByDistance)
+add_subdirectory(Algorithm_FmuWrapper)
+add_subdirectory(Algorithm_Lateral)
+add_subdirectory(Algorithm_Longitudinal)
+add_subdirectory(ComponentController)
+add_subdirectory(Dynamics_Collision)
+add_subdirectory(Dynamics_Longitudinal_Basic)
+add_subdirectory(Dynamics_RegularDriving)
+add_subdirectory(Dynamics_TrajectoryFollower)
+add_subdirectory(LimiterAccelerationVehicleComponents)
+add_subdirectory(OpenScenarioActions)
+add_subdirectory(Parameters_Vehicle)
+add_subdirectory(SensorFusion_OSI)
+#add_subdirectory(Sensor_Distance)
+add_subdirectory(Sensor_Driver)
+add_subdirectory(Sensor_OSI)
+add_subdirectory(Sensor_RecordState)
+add_subdirectory(SignalPrioritizer)

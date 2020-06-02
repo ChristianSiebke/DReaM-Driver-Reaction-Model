@@ -22,9 +22,7 @@ SUBDIRS +=  . \
 			
 INCLUDEPATH += $$SUBDIRS \
             ../../CoreFrameWork/CoreShare \
-            ../../Interfaces \
-            ../../Common \
-            ..
+            ../..
 
 SOURCES += \
     $$getFiles(SUBDIRS, cpp) \

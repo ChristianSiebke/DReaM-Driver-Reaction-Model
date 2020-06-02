@@ -16,25 +16,29 @@ namespace SimulationSlave {
 FrameworkModuleContainer::FrameworkModuleContainer(
     FrameworkModules frameworkModules,
     ConfigurationContainerInterface* configurationContainer,
+    const openpass::common::RuntimeInformation& runtimeInformation,
     CallbackInterface* callbacks) :
-    stochasticsBinding(callbacks),
-    stochastics(&stochasticsBinding),
-    worldBinding(frameworkModules.worldLibrary, callbacks, &stochastics),
-    world(&worldBinding),
-    spawnPointBinding(callbacks),
-    spawnPointNetwork(&spawnPointBinding, &world),
-    observationBinding(callbacks),
-    observationNetwork(&observationBinding),
-    eventDetectorBinding(callbacks),
-    eventDetectorNetwork(&eventDetectorBinding, &world),
-    manipulatorBinding(callbacks),
-    manipulatorNetwork(&manipulatorBinding, &world),
-    modelBinding(frameworkModules.libraryDir, callbacks),
-    agentFactory(&modelBinding, &world, &stochastics, &observationNetwork, &eventNetwork),
-    sampler(stochastics),
-    agentBlueprintProvider(configurationContainer, sampler),
-    eventNetwork()
+        stochasticsBinding(callbacks),
+        stochastics(&stochasticsBinding),
+        worldBinding(frameworkModules.worldLibrary, callbacks, &stochastics),
+        world(&worldBinding),
+        observationBinding(runtimeInformation, callbacks),
+        observationNetwork(&observationBinding),
+        eventDetectorBinding(callbacks),
+        eventDetectorNetwork(&eventDetectorBinding, &world),
+        manipulatorBinding(callbacks),
+        manipulatorNetwork(&manipulatorBinding, &world),
+        modelBinding(frameworkModules.libraryDir, runtimeInformation, callbacks),
+        agentFactory(&modelBinding, &world, &stochastics, &observationNetwork, &eventNetwork),
+        sampler(stochastics, runtimeInformation),
+        agentBlueprintProvider(configurationContainer, sampler),
+        eventNetwork(),
+        spawnPointNetwork(&spawnPointBindings, &world, runtimeInformation)
 {
+    for(const auto& libraryInfo : frameworkModules.spawnPointLibraries)
+    {
+        spawnPointBindings.emplace(libraryInfo.libraryName, SpawnPointBinding(callbacks));
+    }
 }
 
 AgentFactoryInterface* FrameworkModuleContainer::GetAgentFactory()

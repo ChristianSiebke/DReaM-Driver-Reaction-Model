@@ -16,6 +16,7 @@
 #include <qglobal.h>
 #include <cassert>
 
+#include "Interfaces/parameterInterface.h"
 #include "Interfaces/stochasticsInterface.h"
 
 #include "objectDetectorBase.h"

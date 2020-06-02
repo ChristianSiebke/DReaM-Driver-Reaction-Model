@@ -20,8 +20,6 @@ public:
                  std::map<int, std::shared_ptr< SimulationSlave::AgentTypeInterface>>& ());
     MOCK_METHOD1(SetSystems,
                  void (std::map<int, std::shared_ptr< SimulationSlave::AgentTypeInterface>> systems));
-    MOCK_METHOD0(AddModelParameters,
-                 ParameterInterface* ());
     MOCK_METHOD1(AddModelParameters,
                  void (std::shared_ptr<ParameterInterface> modelParameters));
 };

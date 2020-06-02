@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 * Copyright (c) 2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -17,16 +17,16 @@
 class CSVParser
 {
 public:
-    CSVParser();
-    ~CSVParser();
+    CSVParser() = default;
+    ~CSVParser() = default;
 
-    void ParseFile(std::string file);
+    void ParseFile(const std::string& file);
 
-    size_t GetNumberOfLines();
+    size_t GetNumberOfLines() const;
 
-    std::string GetEntryAt(int row,int column);
+    std::string GetEntryAt(size_t row, size_t column) const;
 
 private:
-    std::vector<std::string> ParseLine(std::string line);
-    std::vector< std::vector<std::string> > table;
+    std::vector<std::string> ParseLine(const std::string& line);
+    std::vector<std::vector<std::string>> table;
 };

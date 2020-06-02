@@ -14,7 +14,7 @@
 DynamicParameterSampler::DynamicParameterSampler(const SamplerInterface& sampler,
                                                  std::string &vehicleProfileName,
                                                  std::unordered_map<std::string, VehicleProfile> &vehicleProfiles,
-                                                 std::list<SensorProfile> &sensorProfiles) :
+                                                 openpass::sensors::Profiles &sensorProfiles) :
     sampler(sampler),
     vehicleProfileName(vehicleProfileName),
     vehicleProfiles(vehicleProfiles),
@@ -26,17 +26,21 @@ DynamicParameterSampler &DynamicParameterSampler::SampleSensorLatencies()
 {
     for (const auto& sensor : vehicleProfiles.at(vehicleProfileName).sensors)
     {
-        const auto& sensorProfile = std::find_if(sensorProfiles.cbegin(), sensorProfiles.cend(),
-                                                 [sensor](const auto& sensorProfile){return sensorProfile.name == sensor.sensorProfile.name && sensorProfile.type == sensor.sensorProfile.type;});
-        const auto& latencyParameters = sensorProfile->parameters->GetParametersNormalDistribution().at("Latency");
-        double latency = sampler.RollForStochasticAttribute(latencyParameters.mean, latencyParameters.standardDeviation, latencyParameters.min, latencyParameters.max);
+        const auto& profile = std::find_if(sensorProfiles.cbegin(), sensorProfiles.cend(),
+                                                 [sensor](const auto& profile){return profile.name == sensor.profile.name && profile.type == sensor.profile.type;});
+
+        const auto& latencyParameters = openpass::parameter::Get<openpass::parameter::NormalDistribution>(profile->parameter, "Latency"); // checked in importer
+        double latency = sampler.RollForStochasticAttribute(latencyParameters->mean, latencyParameters->standardDeviation, latencyParameters->min, latencyParameters->max);
         dynamicParameter.sensorLatencies.insert({sensor.id, latency});
     }
 
     return *this;
 }
 
-DynamicParameterSampler DynamicParameters::make(const SamplerInterface &sampler, std::string& vehicleProfileName, std::unordered_map<std::string, VehicleProfile> &vehicleProfiles, std::list<SensorProfile> &sensorProfiles)
+DynamicParameterSampler DynamicParameters::make(const SamplerInterface &sampler,
+                                                std::string& vehicleProfileName,
+                                                std::unordered_map<std::string, VehicleProfile> &vehicleProfiles,
+                                                openpass::sensors::Profiles &sensorProfiles)
 {
     return DynamicParameterSampler(sampler, vehicleProfileName, vehicleProfiles, sensorProfiles);
 }

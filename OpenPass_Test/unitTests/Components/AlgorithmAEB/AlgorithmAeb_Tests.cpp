@@ -1,27 +1,52 @@
-/**********************************************
-* Copyright (c) 2019 in-tech GmbH             *
-* on behalf of BMW AG                         *
-***********************************************/
+/*******************************************************************************
+* Copyright (c) 2019 in-tech GmbH
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+*******************************************************************************/
 
 #include <cmath>
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "algorithm_autonomousEmergencyBrakingImplementation.h"
-#include "AlgorithmAebOSIUnitTests.h"
-
 #include "fakeAgent.h"
 #include "fakeObservation.h"
 #include "fakeWorldObject.h"
 #include "fakeParameter.h"
+
+#include "AlgorithmAebOSIUnitTests.h"
+#include "algorithm_autonomousEmergencyBrakingImplementation.h"
+
 
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::NiceMock;
 
-TEST_F(AlgorithmAutonomousEmergencyBraking_UnitTest, ActualTTCLessThanBrakeTTC_ShouldActivateAEB)
+TEST_F(AlgorithmAutonomousEmergencyBraking_UnitTest, ActualTTCLessThanBrakeTTCWithStationaryObject_ShouldActivateAEB)
+{
+    SetEgoValues(20.0, 0.0, 0.0);
+
+    osi3::SensorData sensorData;
+    auto stationaryObject = sensorData.add_stationary_object();
+    stationaryObject->mutable_header()->add_sensor_id()->set_value(0);
+    stationaryObject->mutable_base()->mutable_position()->set_x(8.0);
+    stationaryObject->mutable_base()->mutable_position()->set_y(0.0);
+    stationaryObject->mutable_base()->mutable_orientation()->set_yaw(0.0);
+    stationaryObject->mutable_base()->mutable_dimension()->set_length(2.0);
+    stationaryObject->mutable_base()->mutable_dimension()->set_width(1.0);
+
+    implementation->UpdateInput(0, std::make_shared<SensorDataSignal>(sensorData), 0);
+
+    implementation->Trigger(0);
+    EXPECT_LT(implementation->GetAcceleration(), 0.0);
+}
+
+TEST_F(AlgorithmAutonomousEmergencyBraking_UnitTest, ActualTTCLessThanBrakeTTCWithMovingObject_ShouldActivateAEB)
 {
     SetEgoValues(20.0, 0.0, 0.0);
 

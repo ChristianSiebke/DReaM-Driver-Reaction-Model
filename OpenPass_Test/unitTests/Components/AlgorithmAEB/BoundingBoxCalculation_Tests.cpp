@@ -1,13 +1,22 @@
-/**********************************************
-* Copyright (c) 2019 in-tech GmbH             *
-* on behalf of BMW AG                         *
-***********************************************/
+/*******************************************************************************
+* Copyright (c) 2019 in-tech GmbH
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+*******************************************************************************/
+
+#include "osi3/osi_detectedobject.pb.h"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-#include "boundingBoxCalculation.h"
+
 #include "fakeAgent.h"
-#include "osi/osi_detectedobject.pb.h"
+
+#include "boundingBoxCalculation.h"
+
 
 using ::testing::Return;
 using ::testing::Lt;

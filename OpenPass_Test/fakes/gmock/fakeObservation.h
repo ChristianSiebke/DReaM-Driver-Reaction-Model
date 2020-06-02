@@ -1,5 +1,5 @@
 /*********************************************************************
- * Copyright (c) 2018, 2019 in-tech
+ * Copyright (c) 2018, 2019, 2020 in-tech
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,8 +20,8 @@ public:
                  void());
     MOCK_METHOD1(MasterPostHook,
                  void(const std::string& filename));
-    MOCK_METHOD1(SlavePreHook,
-                 void(const std::string& path));
+    MOCK_METHOD0(SlavePreHook,
+                 void());
     MOCK_METHOD0(SlavePreRunHook,
                  void());
     MOCK_METHOD2(SlaveUpdateHook,
@@ -36,10 +36,6 @@ public:
                  void(int, int, LoggingGroup, const std::string&, const std::string&));
     MOCK_METHOD1(InsertEvent,
                  void(std::shared_ptr<EventInterface>));
-    MOCK_METHOD0(GatherFollowers,
-                 void());
-    MOCK_METHOD1(InformObserverOnSpawn,
-                 void(AgentInterface*));
 };
 
 

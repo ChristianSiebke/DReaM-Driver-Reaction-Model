@@ -20,9 +20,11 @@ namespace SimulationSlave
 {
 
 ModelBinding::ModelBinding(const std::string libraryPath,
+                           const openpass::common::RuntimeInformation &runtimeInformation,
                            CallbackInterface *callbacks):
-    libraryPath(libraryPath),
-    callbacks(callbacks)
+    libraryPath{libraryPath},
+    runtimeInformation{runtimeInformation},
+    callbacks{callbacks}
 {}
 
 ModelBinding::~ModelBinding()
@@ -75,6 +77,7 @@ ComponentInterface *ModelBinding::Instantiate(std::shared_ptr<ComponentType>comp
 
     return modelLibrary->CreateComponent(componentType,
                                          componentName,
+                                         runtimeInformation,
                                          stochastics,
                                          world,
                                          observationNetwork,

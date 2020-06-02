@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2018 AMFD GmbH
 *               2016 ITK Engineering GmbH
 *
@@ -45,11 +45,7 @@ public:
     const std::string MODULENAME = "AGENTADAPTER";
 
     AgentAdapter(WorldInterface* world, const CallbackInterface* callbacks, OWL::Interfaces::WorldData* worldData, const World::Localization::Localizer& localizer);
-    AgentAdapter(const AgentAdapter&) = delete;
-    AgentAdapter(AgentAdapter&&) = delete;
-    AgentAdapter& operator=(const AgentAdapter&) = delete;
-    AgentAdapter& operator=(AgentAdapter&&) = delete;
-    ~AgentAdapter();
+    ~AgentAdapter() override = default;
 
     ObjectTypeOSI GetType() const override
     {
@@ -57,7 +53,6 @@ public:
     }
 
     bool InitAgentParameter(int id,
-                            int spawnTime,
                             AgentBlueprintInterface* agentBlueprint) override;
 
     //////////////////////////////////////////////////////////
@@ -96,54 +91,9 @@ public:
         return speedGoalMin;
     }
 
-    int GetSpawnTime() const
-    {
-        return spawnTime;
-    }
-
-    double GetDistanceReferencePointToFrontAxle() const override
-    {
-        return distanceReferencePointToFrontAxle;
-    }
-
     double GetEngineSpeed() const override
     {
         return engineSpeed;
-    }
-
-    double GetHeightCOG() const override
-    {
-        return heightCOG;
-    }
-
-    double GetWheelbase() const override
-    {
-        return wheelbase;
-    }
-
-    double GetMomentInertiaRoll() const override
-    {
-        return momentInertiaRoll;
-    }
-
-    double GetMomentInertiaPitch() const override
-    {
-        return momentInertiaPitch;
-    }
-
-    double GetMomentInertiaYaw() const override
-    {
-        return momentInertiaYaw;
-    }
-
-    double GetFrictionCoeff() const override
-    {
-        return frictionCoeff;
-    }
-
-    double GetTrackWidth() const override
-    {
-        return trackWidth;
     }
 
     double GetDistanceReferencePointToLeadingEdge() const override
@@ -202,16 +152,13 @@ public:
         return GetBaseTrafficObject().GetLocatedPosition().referencePoint.roadPosition;
     }
 
+    double GetMainLocateS() const;
+
     void UpdateCollision(std::pair<ObjectTypeOSI, int> collisionPartner) override;
 
     std::vector<std::pair<ObjectTypeOSI, int>> GetCollisionPartners() const override
     {
         return collisionPartners;
-    }
-
-    AgentVehicleType GetVehicleType() const override
-    {
-        return vehicleType;
     }
 
     VehicleModelParameters GetVehicleModelParameters() const override
@@ -221,170 +168,166 @@ public:
 
     void SetPositionX(double value) override
     {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdatePositionX, this, value));
+        world->QueueAgentUpdate([this, value]()
+        {
+            GetBaseTrafficObject().SetX(value);
+        });
     }
 
     void SetPositionY(double value) override
     {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdatePositionY, this, value));
+        world->QueueAgentUpdate([this, value]()
+        {
+            GetBaseTrafficObject().SetY(value);
+        });
     }
 
 
     void SetVelocity(double value) override
     {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateVelocity, this, value));
+        world->QueueAgentUpdate([this, value]()
+        {
+            GetBaseTrafficObject().SetAbsVelocity(value);
+        });
     }
 
     void SetAcceleration(double value) override
     {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateAcceleration, this, value));
+        world->QueueAgentUpdate([this, value]()
+        {
+            GetBaseTrafficObject().SetAbsAcceleration(value);
+        });
     }
 
     void SetYaw(double value) override
     {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateYaw, this, value));
+        world->QueueAgentUpdate([this, value]()
+        {
+            UpdateYaw(value);
+        });
     }
 
     void SetYawRate(double value) override
     {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateYawRate, this, value));
+        world->QueueAgentUpdate([this, value]()
+        {
+            OWL::Primitive::AbsOrientationRate orientationRate = GetBaseTrafficObject().GetAbsOrientationRate();
+            orientationRate.yawRate = value;
+            GetBaseTrafficObject().SetAbsOrientationRate(orientationRate);
+        });
     }
 
-    void SetDistanceTraveled(double distanceTraveled) override
+    void SetCentripetalAcceleration(double value) override
     {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateDistanceTraveled, this, distanceTraveled));
+        world->QueueAgentUpdate([this, value]()
+        {
+            centripetalAcceleration = value;
+
+        });
     }
 
-    void SetWidth(double width) override
+    void SetDistanceTraveled(double value) override
     {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateWidth, this, width));
+        world->QueueAgentUpdate([this, value]()
+        {
+            distanceTraveled = value;
+        });
     }
 
-    void SetLength(double length) override
+    void SetVehicleModelParameter(const VehicleModelParameters& parameter) override
     {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateLength, this, length));
+        world->QueueAgentUpdate([this, parameter]()
+        {
+            UpdateVehicleModelParameter(parameter);
+        });
     }
 
-    void SetHeight(double height) override
+    void SetMaxAcceleration(double value) override
     {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateHeight, this, height));
+        world->QueueAgentUpdate([this, value]()
+        {
+            maxAcceleration = value;
+        });
     }
 
-    void SetDistanceReferencePointToFrontAxle(double distanceReferencePointToFrontAxle) override
+    void SetEngineSpeed(double value) override
     {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateDistanceReferencePointToFrontAxle, this,
-                                          distanceReferencePointToFrontAxle));
-    }
-
-    double GetWeight() const override
-    {
-        return weight;
-    }
-
-    void SetWeight(double weight) override
-    {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateWeight, this, weight));
-    }
-
-    void SetHeightCOG(double heightCOG) override
-    {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateHeightCOG, this, heightCOG));
-    }
-
-    void SetWheelbase(double wheelbase) override
-    {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateWheelbase, this, wheelbase));
-    }
-
-    void SetMomentInertiaRoll(double momentInertiaRoll) override
-    {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateMomentInertiaRoll, this, momentInertiaRoll));
-    }
-
-    void SetMomentInertiaPitch(double momentInertiaPitch) override
-    {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateMomentInertiaPitch, this, momentInertiaPitch));
-    }
-
-    void SetMomentInertiaYaw(double momentInertiaYaw) override
-    {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateMomentInertiaYaw, this, momentInertiaYaw));
-    }
-
-    void SetSteeringRatio(double steeringRatio) override
-    {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateSteeringRatio, this, steeringRatio));
-    }
-
-    void SetMaxAcceleration(double maxAcceleration) override
-    {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateMaxAcceleration, this, maxAcceleration));
-    }
-
-    void SetEngineSpeed(double engineSpeed) override
-    {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateEngineSpeed, this, engineSpeed));
+        world->QueueAgentUpdate([this, value]()
+        {
+            engineSpeed = value;
+        });
     }
 
     void SetMaxDeceleration(double maxDeceleration) override
     {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateMaxDeceleration, this, maxDeceleration));
-    }
-
-    void SetFrictionCoeff(double frictionCoeff) override
-    {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateFrictionCoeff, this, frictionCoeff));
-    }
-
-    void SetTrackWidth(double trackWidth) override
-    {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateTrackWidth, this, trackWidth));
-    }
-
-    void SetDistanceReferencePointToLeadingEdge(double distanceReferencePointToLeadingEdge) override
-    {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateDistanceReferencePointToLeadingEdge, this,
-                                          distanceReferencePointToLeadingEdge));
+        world->QueueAgentUpdate([this, maxDeceleration]()
+        {
+            this->maxDeceleration = maxDeceleration;
+        });
     }
 
     void SetGear(int gear) override
     {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateGear, this, gear));
+        world->QueueAgentUpdate([this, gear]()
+        {
+            currentGear = gear;
+        });
     }
 
     void SetEffAccelPedal(double percent) override
     {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateAccelPedal, this, percent));
+        world->QueueAgentUpdate([this, percent]()
+        {
+            accelPedal = percent;
+        });
     }
 
     void SetEffBrakePedal(double percent) override
     {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateBrakePedal, this, percent));
+        world->QueueAgentUpdate([this, percent]()
+        {
+            brakePedal = percent;
+        });
     }
 
     void SetSteeringWheelAngle(double steeringWheelAngle) override
     {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateSteeringWheelAngle, this, steeringWheelAngle));
+        world->QueueAgentUpdate([this, steeringWheelAngle]()
+        {
+            this->steeringWheelAngle = steeringWheelAngle;
+        });
     }
 
     void SetHeadLight(bool headLight) override
     {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateHeadLight, this, headLight));
+        world->QueueAgentUpdate([this, headLight]()
+        {
+            GetBaseTrafficObject().SetHeadLight(headLight);
+        });
     }
 
     void SetHighBeamLight(bool highBeam) override
     {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateHighBeamLight, this, highBeam));
+        world->QueueAgentUpdate([this, highBeam]()
+        {
+            GetBaseTrafficObject().SetHighBeamLight(highBeam);
+        });
     }
 
     void SetHorn(bool horn) override
     {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateHorn, this, horn));
+        world->QueueAgentUpdate([this, horn]()
+        {
+            hornSwitch = horn;
+        });
     }
 
     void SetFlasher(bool flasher) override
     {
-        world->QueueAgentUpdate(std::bind(&AgentAdapter::UpdateFlasher, this, flasher));
+        world->QueueAgentUpdate([this, flasher]()
+        {
+            flasherSwitch = flasher;
+        });
     }
 
     double GetYawRate() const override
@@ -392,252 +335,9 @@ public:
         return GetBaseTrafficObject().GetAbsOrientationRate().yawRate;
     }
 
-    void UpdateWidth(double width)
+    double GetCentripetalAcceleration() const override
     {
-        OWL::Primitive::Dimension dimension = baseTrafficObject.GetDimension();
-        dimension.width = width;
-        GetBaseTrafficObject().SetDimension(dimension);
-    }
-
-    void UpdateLength(double length)
-    {
-        OWL::Primitive::Dimension dimension = baseTrafficObject.GetDimension();
-        dimension.length = length;
-        GetBaseTrafficObject().SetDimension(dimension);
-    }
-
-    void UpdateHeight(double height)
-    {
-        OWL::Primitive::Dimension dimension = baseTrafficObject.GetDimension();
-        dimension.height = height;
-        GetBaseTrafficObject().SetDimension(dimension);
-    }
-
-    void UpdateVelocity(double velocity)
-    {
-        if (std::abs(velocity) < zeroBaseline)
-        {
-            velocity = 0.0;
-        }
-        GetBaseTrafficObject().SetAbsVelocity(velocity);
-    }
-
-    void UpdateAcceleration(double acceleration)
-    {
-        if (std::abs(acceleration) < zeroBaseline)
-        {
-            acceleration = 0.0;
-        }
-        GetBaseTrafficObject().SetAbsAcceleration(acceleration);
-    }
-
-    void UpdatePositionX(double positionX)
-    {
-        GetBaseTrafficObject().SetX(positionX);
-    }
-
-    void UpdatePositionY(double positionY)
-    {
-        GetBaseTrafficObject().SetY(positionY);
-    }
-
-    void UpdateDistanceTraveled(double distanceTraveled)
-    {
-        this->distanceTraveled = distanceTraveled;
-    }
-
-    void UpdateGear(double gear)
-    {
-        this->currentGear = static_cast<int>(gear);
-    }
-
-    void UpdateAccelPedal(double percent)
-    {
-        if (std::abs(percent) < zeroBaseline)
-        {
-            percent = 0.0;
-        }
-        this->accelPedal = percent;
-    }
-
-    void UpdateBrakePedal(double percent)
-    {
-        if (std::abs(percent) < zeroBaseline)
-        {
-            percent = 0.0;
-        }
-        this->brakePedal = percent;
-    }
-
-    void UpdateSteeringWheelAngle(double steeringWheelAngle)
-    {
-        if (std::abs(steeringWheelAngle) < zeroBaseline)
-        {
-            steeringWheelAngle = 0.0;
-        }
-        this->steeringWheelAngle = steeringWheelAngle;
-    }
-
-    void UpdateHeadLight(bool headLight)
-    {
-        GetBaseTrafficObject().SetHeadLight(headLight);
-    }
-
-    void UpdateHighBeamLight(bool highBeam)
-    {
-        GetBaseTrafficObject().SetHighBeamLight(highBeam);
-    }
-
-    void UpdateHorn(bool horn)
-    {
-        this->hornSwitch = horn;
-    }
-
-    void UpdateFlasher(bool flasher)
-    {
-        this->flasherSwitch = flasher;
-    }
-
-    void UpdateYaw(double yawAngle)
-    {
-        if (std::abs(yawAngle) < zeroBaseline)
-        {
-            yawAngle = 0.0;
-        }
-        OWL::Primitive::AbsOrientation orientation = baseTrafficObject.GetAbsOrientation();
-        orientation.yaw = yawAngle;
-        GetBaseTrafficObject().SetAbsOrientation(orientation);
-    }
-
-    void UpdateYawRate(double yawRate)
-    {
-        if (std::abs(yawRate) < zeroBaseline)
-        {
-            yawRate = 0.0;
-        }
-        OWL::Primitive::AbsOrientationRate orientationRate = GetBaseTrafficObject().GetAbsOrientationRate();
-        orientationRate.yawRate = yawRate;
-        GetBaseTrafficObject().SetAbsOrientationRate(orientationRate);
-    }
-
-    void UpdateDistanceReferencePointToFrontAxle(double distanceReferencePointToFrontAxle)
-    {
-        this->distanceReferencePointToFrontAxle = distanceReferencePointToFrontAxle;
-    }
-
-    void UpdateWeight(double weight)
-    {
-        this->weight = weight;
-    }
-
-    void UpdateHeightCOG(double heightCOG)
-    {
-        this->heightCOG = heightCOG;
-    }
-
-    void UpdateWheelbase(double wheelbase)
-    {
-        this->wheelbase = wheelbase;
-    }
-
-    void UpdateMomentInertiaRoll(double momentInertiaRoll)
-    {
-        if (std::abs(momentInertiaRoll) < zeroBaseline)
-        {
-            momentInertiaRoll = 0.0;
-        }
-        this->momentInertiaRoll = momentInertiaRoll;
-    }
-
-    void UpdateMomentInertiaPitch(double momentInertiaPitch)
-    {
-        if (std::abs(momentInertiaPitch) < zeroBaseline)
-        {
-            momentInertiaPitch = 0.0;
-        }
-        this->momentInertiaPitch = momentInertiaPitch;
-    }
-
-    void UpdateMomentInertiaYaw(double momentInertiaYaw)
-    {
-        if (std::abs(momentInertiaYaw) < zeroBaseline)
-        {
-            momentInertiaYaw = 0.0;
-        }
-        this->momentInertiaYaw = momentInertiaYaw;
-    }
-
-    void UpdateSteeringRatio(double steeringRatio)
-    {
-        if (std::abs(steeringRatio) < zeroBaseline)
-        {
-            steeringRatio = 0.0;
-        }
-        this->steeringRatio = steeringRatio;
-    }
-
-    void UpdateMaxVelocity(double maxVelocity)
-    {
-        if (std::abs(maxVelocity) < zeroBaseline)
-        {
-            maxVelocity = 0.0;
-        }
-        this->maxVelocity = maxVelocity;
-    }
-
-    void UpdateMaxCurvature(double maxCurvature)
-    {
-        if (std::abs(maxCurvature) < zeroBaseline)
-        {
-            maxCurvature = 0.0;
-        }
-        this->maxCurvature = maxCurvature;
-    }
-
-    void UpdateMaxAcceleration(double maxAcceleration)
-    {
-        if (std::abs(maxAcceleration) < zeroBaseline)
-        {
-            maxAcceleration = 0.0;
-        }
-        this->maxAcceleration = maxAcceleration;
-    }
-
-    void UpdateEngineSpeed(double engineSpeed)
-    {
-        if (std::abs(engineSpeed) < zeroBaseline)
-        {
-            engineSpeed = 0.0;
-        }
-        this->engineSpeed = engineSpeed;
-    }
-
-    void UpdateMaxDeceleration(double maxDeceleration)
-    {
-        if (std::abs(maxDeceleration) < zeroBaseline)
-        {
-            maxDeceleration = 0.0;
-        }
-        this->maxDeceleration = maxDeceleration;
-    }
-
-    void UpdateFrictionCoeff(double frictionCoeff)
-    {
-        if (std::abs(frictionCoeff) < zeroBaseline)
-        {
-            frictionCoeff = 0.0;
-        }
-        this->frictionCoeff = frictionCoeff;
-    }
-
-    void UpdateTrackWidth(double trackWidth)
-    {
-        this->trackWidth = trackWidth;
-    }
-
-    void UpdateDistanceReferencePointToLeadingEdge(double distanceReferencePointToLeadingEdge)
-    {
-        GetBaseTrafficObject().SetDistanceReferencPointToLeadingEdge(distanceReferencePointToLeadingEdge);
+        return centripetalAcceleration;
     }
 
     void UpdateRoute(Route route)
@@ -689,8 +389,6 @@ public:
 
     bool IsCrossingLanes() const override;
 
-    int GetNumberOfLanes() override;
-
     bool IsAgentInWorld() const override;
 
     void SetPosition(Position pos) override;
@@ -706,54 +404,20 @@ public:
 
     double GetLaneWidth(int relativeLane = 0, double distance = 0.0) const override;
 
-    double GetLaneWidthRightDrivingAndStopLane() const override;
-
     double GetLaneCurvature(int relativeLane = 0, double distance = 0.0) const override;
 
     double GetLaneDirection(int relativeLane = 0, double distance = 0.0) const override;
 
     bool IsEgoAgent() const override;
 
-    double GetDistanceToFrontTrafficObject() const;
-
-    std::vector<AgentInterface*> GetAllAgentsInFront() const override;
-
-    std::vector<const TrafficObjectInterface*> GetAllTrafficObjectsInFront() const;
-
-    std::vector<const WorldObjectInterface*> GetAllWorldObjectsInFront() const override;
-
     bool OnRoad(const OWL::Interfaces::Road& road) const;
     bool OnLane(const OWL::Interfaces::Lane& lane) const;
 
-    AgentInterface* GetAgentInFront(int laneId) const override;
-
-    TrafficObjectInterface* GetTrafficObjectInFront(int laneId) const;
-
-    WorldObjectInterface* GetObjectInFront(double previewDistance, int relativeLaneId = 0) const override;
-
-    WorldObjectInterface* GetObjectBehind(double previewDistance, int relativeLaneId = 0) const override;
-
-    const AgentInterface* GetAgentBehind(int laneId) const override;
-
     double GetDistanceToObject(const WorldObjectInterface* otherObject) const override;
-
-    bool ExistsLaneLeft() const override;
-
-    bool ExistsLaneRight() const override;
-
-    bool IsLaneStopLane(int laneId, double distance = 0.0) const override;
-
-    bool IsLaneDrivingLane(int laneId, double distance = 0.0) const override;
-
-    bool IsLaneExitLane(int laneId, double distance = 0.0) const override;
-
-    bool IsLaneRamp(int laneId, double distance = 0.0) const override;
 
     double GetDistanceToEndOfLane(double sightDistance, int relativeLane = 0) const override;
 
-    double GetDistanceToEndOfExit(int laneID, double sightDistance) const override;
-
-    double GetDistanceToEndOfRamp(int laneId, double sightDistance) const override;
+    double GetDistanceToEndOfLane(double sightDistance, int relativeLane, const LaneTypes& laneTypes) const override;
 
     double GetVelocity(VelocityScope velocityScope = VelocityScope::Absolute) const override;
 
@@ -775,13 +439,13 @@ public:
 
     double GetLaneRemainder(Side side) const override;
 
-    virtual const std::list<SensorParameter>& GetSensorParameters() const override
+    virtual const openpass::sensors::Parameters& GetSensorParameters() const override
 
     {
         return sensorParameters;
     }
 
-    virtual void SetSensorParameters(std::list<SensorParameter> sensorParameters) override
+    virtual void SetSensorParameters(openpass::sensors::Parameters sensorParameters) override
     {
         this->sensorParameters = sensorParameters;
     }
@@ -791,9 +455,6 @@ public:
 
     virtual std::vector<const AgentInterface*> GetAgentsInRange(int relativeLane, double backwardRange,
             double forwardRange, MeasurementPoint mp) const override;
-
-    virtual std::vector<const AgentInterface*> GetAgentsInRangeAbsolute(int laneId, double minDistance,
-            double maxDistance) const override;
 
     virtual double GetDistanceToConnectorEntrance(std::string intersectingConnectorId, int intersectingLaneId, std::string ownConnectorId) const override;
 
@@ -844,14 +505,6 @@ public:
     {
         throw std::runtime_error("not implemented");
     }
-    virtual double GetDistanceCOGtoLeadingEdge() const override
-    {
-        throw std::runtime_error("not implemented");
-    }
-    virtual double GetDistanceCOGtoFrontAxle() const override
-    {
-        throw std::runtime_error("not implemented");
-    }
     virtual double GetAccelerationX() const override
     {
         throw std::runtime_error("not implemented");
@@ -880,18 +533,6 @@ public:
 
         throw std::runtime_error("not implemented");
     }
-    virtual void SetDistanceCOGtoFrontAxle(double distanceCOGtoFrontAxle) override
-    {
-        Q_UNUSED(distanceCOGtoFrontAxle);
-
-        throw std::runtime_error("not implemented");
-    }
-    virtual void SetDistanceCOGtoLeadingEdge(double distanceCOGtoLeadingEdge) override
-    {
-        Q_UNUSED(distanceCOGtoLeadingEdge);
-
-        throw std::runtime_error("not implemented");
-    }
     virtual void SetAccelerationX(double accelerationX) override
     {
         Q_UNUSED(accelerationX);
@@ -906,13 +547,11 @@ public:
     }
     virtual bool InitAgentParameter(int id,
                                     int agentTypeId,
-                                    int spawnTime,
                                     const AgentSpawnItem *agentSpawnItem,
                                     const SpawnItemParameterInterface &spawnItemParameter) override
     {
         Q_UNUSED(id);
         Q_UNUSED(agentTypeId);
-        Q_UNUSED(spawnTime);
         Q_UNUSED(agentSpawnItem);
         Q_UNUSED(spawnItemParameter);
 
@@ -1324,6 +963,25 @@ private:
         return *(static_cast<OWL::Interfaces::MovingObject*>(&baseTrafficObject));
     }
 
+    void UpdateVehicleModelParameter(const VehicleModelParameters& parameter)
+    {
+        OWL::Primitive::Dimension dimension = baseTrafficObject.GetDimension();
+        dimension.width = parameter.width;
+        dimension.length = parameter.length;
+        dimension.height = parameter.height;
+
+        GetBaseTrafficObject().SetDimension(dimension);
+        GetBaseTrafficObject().SetDistanceReferencPointToLeadingEdge(parameter.distanceReferencePointToLeadingEdge);
+
+        vehicleModelParameters = parameter;
+    }
+
+    void UpdateYaw(double yawAngle)
+    {
+        OWL::Primitive::AbsOrientation orientation = baseTrafficObject.GetAbsOrientation();
+        orientation.yaw = yawAngle;
+        GetBaseTrafficObject().SetAbsOrientation(orientation);
+    }
 
     //-----------------------------------------------------------------------------
     //! Initialize the ego vehicle object inside the drivingView.
@@ -1351,27 +1009,16 @@ private:
 
     const WorldObjectInterface* GetNearestObjectInVector(std::vector<const WorldObjectInterface*> agents);
 
-    double distanceReferencePointToFrontAxle = 0.0;
-    double weight = 0.0;
-    double heightCOG = 0.0;
-    double wheelbase = 0.0;
-    double momentInertiaRoll = 0.0;
-    double momentInertiaPitch = 0.0;
-    double momentInertiaYaw = 0.0;
-    double steeringRatio = 0.0; //no getter
+    bool hornSwitch = false;
+    bool flasherSwitch = false;
+    int currentGear = 0;
     double maxAcceleration = 0.0;
     double maxDeceleration = 0.0;
-    double maxVelocity = 0.0; //no getter
-    double maxCurvature = 0.0; //no getter
-    double frictionCoeff = 0.0;
-    double trackWidth = 0.0;
-    int currentGear = 0;
     double accelPedal = 0.;
     double brakePedal = 0.;
     double steeringWheelAngle = 0.0;
+    double centripetalAcceleration = 0.0;
     double engineSpeed = 0.;
-    bool hornSwitch = false;
-    bool flasherSwitch = false;
     double distanceTraveled = 0.0;
 
     World::Localization::Result locateResult;
@@ -1383,17 +1030,15 @@ private:
 
     int id{0};
     AgentCategory agentCategory;
-    std::string agentTypeName = "";
-    std::string vehicleModelType = "";
-    std::string driverProfileName = "";
-    std::string objectName = "";
-    AgentVehicleType vehicleType = AgentVehicleType::Undefined;
+    std::string agentTypeName;
+    std::string vehicleModelType;
+    std::string driverProfileName;
+    std::string objectName;
     VehicleModelParameters vehicleModelParameters;
 
     double speedGoalMin;
-    int spawnTime;
 
     bool completlyInWorld = false;
 
-    std::list<SensorParameter> sensorParameters;
+    openpass::sensors::Parameters sensorParameters;
 };

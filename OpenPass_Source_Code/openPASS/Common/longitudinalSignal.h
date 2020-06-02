@@ -24,31 +24,33 @@
 class LongitudinalSignal: public ComponentStateSignalInterface
 {
 public:
-    const std::string COMPONENTNAME = "LongitudinalSignal";
+    static constexpr char COMPONENTNAME[] = "LongitudinalSignal";
 
-    //-----------------------------------------------------------------------------
-    //! Constructor
-    //-----------------------------------------------------------------------------
+    LongitudinalSignal() : ComponentStateSignalInterface{ComponentState::Disabled}
+    {}
+
     LongitudinalSignal(
             ComponentState componentState,
             double accPedalPos,
             double brakePedalPos,
             int gear
-            ):
-        accPedalPos(accPedalPos),
-        brakePedalPos(brakePedalPos),
-        gear(gear)
-    {
-        this->componentState = componentState;
-    }
-
-    LongitudinalSignal(const LongitudinalSignal&) = delete;
-    LongitudinalSignal(LongitudinalSignal&&) = delete;
-    LongitudinalSignal& operator=(const LongitudinalSignal&) = delete;
-    LongitudinalSignal& operator=(LongitudinalSignal&&) = delete;
-
-    virtual ~LongitudinalSignal()
+            ) :
+        ComponentStateSignalInterface{componentState},
+        accPedalPos{accPedalPos},
+        brakePedalPos{brakePedalPos},
+        gear{gear}
     {}
+
+    LongitudinalSignal(const LongitudinalSignal&) = default;
+    LongitudinalSignal(LongitudinalSignal&&) = default;
+    LongitudinalSignal& operator=(const LongitudinalSignal&) = default;
+    LongitudinalSignal& operator=(LongitudinalSignal&&) = default;
+
+    virtual ~LongitudinalSignal() = default;
+
+    double accPedalPos {};
+    double brakePedalPos {};
+    int gear {};
 
     //-----------------------------------------------------------------------------
     //! Returns the content/payload of the signal as an std::string
@@ -58,13 +60,12 @@ public:
     virtual operator std::string() const
     {
         std::ostringstream stream;
-        stream << COMPONENTNAME;
+        stream << COMPONENTNAME << '\n';
+        stream << "accPedalPos:   " << accPedalPos << '\n';
+        stream << "brakePedalPos: " << brakePedalPos << '\n';
+        stream << "gear:          " << gear << '\n';
         return stream.str();
     }
-
-    double accPedalPos;
-    double brakePedalPos;
-    int gear;
 };
 
 

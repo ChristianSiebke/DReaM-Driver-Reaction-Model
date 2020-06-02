@@ -15,7 +15,7 @@
 
 #include "sensorFusionImplementation.h"
 #include "Common/sensorDataSignal.h"
-#include "osi/osi_sensordata.pb.h"
+#include "osi3/osi_sensordata.pb.h"
 
 using ::testing::Eq;
 using ::testing::NiceMock;

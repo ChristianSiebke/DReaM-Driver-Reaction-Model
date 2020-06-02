@@ -69,7 +69,7 @@ public:
     /*!
      * \brief Creates the output file as simulationOutput.tmp and writes the basic header information
      */
-    void WriteStartOfFile();
+    void WriteStartOfFile(const std::string& frameworkVersion);
 
     /*!
      * \brief This function gets called after each run and writes all information about this run into the output file
@@ -113,16 +113,23 @@ private:
     *
     * @return       true if agent has sensors, otherwise false.
     */
-    inline bool ContainsSensor(const std::list<SensorParameter>& sensorParameters) const;
+    inline bool ContainsSensor(const openpass::sensors::Parameters& sensorParameters) const;
 
     /*!
     * \brief Writes the sensor information into the simulation output.
     *
     * @param[in]    fStream             Shared pointer of the stream writer.
-    * @param[in]    sensorName          Name of the sensor.
-    * @param[in]    sensorParameters    Parameters of the sensor.
+    * @param[in]    sensorParameter    Parameters of the sensor.
     */
-    void AddSensor(std::shared_ptr<QXmlStreamWriter> fStream, const SensorParameter& sensorParameter);
+    void AddSensor(std::shared_ptr<QXmlStreamWriter> fStream, const openpass::sensors::Parameter& sensorParameter);
+
+    /*!
+    * \brief Writes the sensor information into the simulation output.
+    *
+    * @param[in]    fStream             Shared pointer of the stream writer.
+    * @param[in]    vehicleModelParameters      Parameters of the vehicle.
+    */
+    void AddVehicleAttributes(std::shared_ptr<QXmlStreamWriter> fStream, const VehicleModelParameters &vehicleModelParameters);
 
     /*!
     * \brief Writes all sensor information of an agent into the simulation output.
@@ -154,7 +161,7 @@ private:
     * @param[in]     eventParameters    Parameters of an event in string representation.
     */
     void AddEventParameters(std::shared_ptr<QXmlStreamWriter> fStream,
-                            std::list<std::pair<std::string, std::string>> eventParameters);
+                            EventParameters eventParameters);
 
     /*!
     * \brief Writes an event into the simulation output.
@@ -194,16 +201,6 @@ private:
     void AddReference(std::shared_ptr<QXmlStreamWriter> fStream, QString filename);
 
     /*!
-    * \brief Returns the event type as string.
-    *
-    * @param[in]     eventType      Event type.
-    *
-    * @return        Event type as string.
-    */
-
-    std::string GetEventString(EventDefinitions::EventType eventType);
-
-    /*!
     * \brief Removes old cyclic files from directory.
     *
     * @param[in]    directory           directory to delete teh cyclic files
@@ -219,7 +216,7 @@ private:
     void WriteCsvCyclics(QString runId, ObservationCyclics& cyclics);
 
 private:
-    const QString outputFileVersion = "0.2.0";
+    const QString outputFileVersion = "0.2.1";
 };
 
 

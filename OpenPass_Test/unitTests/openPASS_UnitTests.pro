@@ -1,5 +1,5 @@
 #/*******************************************************************************
-#* Copyright (c) 2019 in-tech GmbH
+#* Copyright (c) 2019, 2020 in-tech GmbH
 #*
 #* This program and the accompanying materials are made
 #* available under the terms of the Eclipse Public License 2.0
@@ -13,27 +13,35 @@ TEMPLATE = subdirs
 SUBDIRS = \
     algorithmAEB_Tests \
     algorithmAgentFollowingDriverModel_Tests \
+    algorithmFmuWrapper_Tests \
     algorithmLateral_Tests \
     algorithmLongitudinal_Tests \
     componentController_Tests \
     dynamicsCollision_Tests \
+    dynamicsTrajectoryFollower_Tests \
     eventDetector_Tests \
     limiterAccelerationVehicleComponents_Tests \
     observationLog_Tests \
     openPassSlave_Tests \
+    openScenarioActions_Tests \
     scheduler_Tests \
     sensorDriver_Tests \
     sensorFusionOSI_Tests \
     sensorOSI_Tests \
     signalPrioritizer_Tests \
-    spawnPoint_Tests \
-    worldOSI_Tests
+    spawnPointScenario_Tests \
+    spawnPointWorldAnalyzer_Tests \
+    worldOSI_Tests \
+    common_Tests
 
 algorithmAEB_Tests.file = \
     $$PWD/Components/AlgorithmAEB/algorithmAEB_Tests.pro
 
 algorithmAgentFollowingDriverModel_Tests.file = \
     $$PWD/Components/Algorithm_AFDM/Afdm_Tests.pro
+
+algorithmFmuWrapper_Tests.file = \
+    $$PWD/Components/Algorithm_FmuWrapper/FmuWrapper_Tests.pro
 
 algorithmLateral_Tests.file = \
     $$PWD/Components/Algorithm_Lateral/algorithmLateral_Tests.pro
@@ -47,6 +55,9 @@ componentController_Tests.file = \
 dynamicsCollision_Tests.file = \
     $$PWD/Components/Dynamics_Collision/dynamicsCollision_Tests.pro
 
+dynamicsTrajectoryFollower_Tests.file = \
+    $$PWD/Components/Dynamics_TrajectoryFollower/dynamicsTrajectoryFollower_Tests.pro
+
 eventDetector_Tests.file = \
     $$PWD/CoreModules/EventDetector/eventDetector_Tests.pro
 
@@ -58,6 +69,9 @@ observationLog_Tests.file = \
 
 openPassSlave_Tests.file = \
     $$PWD/CoreFramework/OpenPassSlave/openPassSlave_Tests.pro
+
+openScenarioActions_Tests.file = \
+    $$PWD/Components/OpenScenarioActions/openScenarioActions_Tests.pro
 
 scheduler_Tests.file = \
     $$PWD/CoreFramework/OpenPassSlave/Scheduler/scheduler_Tests.pro
@@ -74,8 +88,14 @@ sensorOSI_Tests.file = \
 signalPrioritizer_Tests.file = \
     $$PWD/Components/SignalPrioritizer/signalPrioritizer_Tests.pro
 
-spawnPoint_Tests.file = \
-    $$PWD/CoreModules/SpawnPoint_OSI/spawnPoint_Tests.pro
+spawnPointScenario_Tests.file = \
+    $$PWD/CoreModules/SpawnPointScenario_OSI/spawnPointScenario_Tests.pro
+
+spawnPointWorldAnalyzer_Tests.file = \
+    $$PWD/CoreModules/SpawnPointWorldAnalyzer/spawnPointWorldAnalyzer_Tests.pro
 
 worldOSI_Tests.file = \
     $$PWD/CoreModules/World_OSI/worldOSI_Tests.pro
+
+common_Tests.file = \
+    $$PWD/Common/Common_Tests.pro

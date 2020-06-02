@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -213,306 +213,6 @@ TEST(GetDistanceToEndOfLane, OneLaneHasWrongType)
 
     ASSERT_THAT(result, Eq(49.9));
 }
-
-///////////////////////////////////////////////////////////////////////////////
-
-TEST(GetNextObjectInLane, NoObjects_ReturnsDefault)
-{
-    FakeLaneStream laneStream;
-    auto lane = laneStream.AddLane(100.0, true);
-    OWL::Interfaces::WorldObjects emptyObjectsList{};
-    ON_CALL(*lane, GetWorldObjects()).WillByDefault(ReturnRef(emptyObjectsList));
-
-    Fakes::WorldData worldData;
-    const auto& roadIdMapping = laneStream.GetRoadIdMapping();
-    ON_CALL(worldData, GetRoadIdMapping()).WillByDefault(ReturnRef(roadIdMapping));
-    WorldDataQuery wdQuery(worldData);
-
-    auto result = wdQuery.GetNextObjectInLane<OWL::Interfaces::MovingObject>(laneStream.Get(), 0, 1000);
-    ASSERT_THAT(result, IsNull());
-}
-
-TEST(GetNextObjectInLane, TwoObjectsOnFirstLane_ReturnsCloserObject)
-{
-    FakeLaneStream laneStream;
-    auto lane1 = laneStream.AddLane(200.0, true);
-    auto lane2 = laneStream.AddLane(200.0, true);
-
-    Fakes::MovingObject closeObject;
-    Fakes::MovingObject distantObject;
-    ON_CALL(closeObject, GetDistance(_,_)).WillByDefault(Return(10));
-    ON_CALL(distantObject, GetDistance(_,_)).WillByDefault(Return(100));
-    OWL::Interfaces::WorldObjects objectsLane1{ {&closeObject, &distantObject} };
-    ON_CALL(*lane1, GetWorldObjects()).WillByDefault(ReturnRef(objectsLane1));
-    OWL::Interfaces::WorldObjects emptyObjectsList{};
-    ON_CALL(*lane2, GetWorldObjects()).WillByDefault(ReturnRef(emptyObjectsList));
-
-    Fakes::WorldData worldData;
-    const auto& roadIdMapping = laneStream.GetRoadIdMapping();
-    ON_CALL(worldData, GetRoadIdMapping()).WillByDefault(ReturnRef(roadIdMapping));
-    WorldDataQuery wdQuery(worldData);
-    auto result = wdQuery.GetNextObjectInLane<OWL::Interfaces::MovingObject>(laneStream.Get(), 0, 1000);
-    ASSERT_THAT(result, Eq(&closeObject));
-}
-
-TEST(GetNextObjectInLane, TwoObjectsOnLaneStream_ReturnsCloserObject)
-{
-    FakeLaneStream laneStream;
-    auto lane1 = laneStream.AddLane(200.0, true);
-    auto lane2 = laneStream.AddLane(200.0, true);
-
-    Fakes::MovingObject closeObject;
-    Fakes::MovingObject distantObject;
-    ON_CALL(closeObject, GetDistance(_,_)).WillByDefault(Return(10));
-    ON_CALL(distantObject, GetDistance(_,_)).WillByDefault(Return(100));
-    OWL::Interfaces::WorldObjects objectsLane1{ {&closeObject} };
-    ON_CALL(*lane1, GetWorldObjects()).WillByDefault(ReturnRef(objectsLane1));
-    OWL::Interfaces::WorldObjects objectsLane2{ {&distantObject} };
-    ON_CALL(*lane2, GetWorldObjects()).WillByDefault(ReturnRef(objectsLane2));
-
-    Fakes::WorldData worldData;
-    const auto& roadIdMapping = laneStream.GetRoadIdMapping();
-    ON_CALL(worldData, GetRoadIdMapping()).WillByDefault(ReturnRef(roadIdMapping));
-    WorldDataQuery wdQuery(worldData);
-    auto result = wdQuery.GetNextObjectInLane<OWL::Interfaces::MovingObject>(laneStream.Get(), 0, 1000);
-    ASSERT_THAT(result, Eq(&closeObject));
-}
-
-TEST(GetNextObjectInLane, TwoObjectsOnSecondLane_ReturnsCloserObject)
-{
-    FakeLaneStream laneStream;
-    auto lane1 = laneStream.AddLane(200.0, true);
-    auto lane2 = laneStream.AddLane(200.0, true);
-
-    Fakes::MovingObject closeObject;
-    Fakes::MovingObject distantObject;
-    ON_CALL(closeObject, GetDistance(_,_)).WillByDefault(Return(10));
-    ON_CALL(distantObject, GetDistance(_,_)).WillByDefault(Return(100));
-    OWL::Interfaces::WorldObjects emptyObjectsList{};
-    ON_CALL(*lane1, GetWorldObjects()).WillByDefault(ReturnRef(emptyObjectsList));
-    OWL::Interfaces::WorldObjects objectsLane2{ {&closeObject, &distantObject} };
-    ON_CALL(*lane2, GetWorldObjects()).WillByDefault(ReturnRef(objectsLane2));
-
-    Fakes::WorldData worldData;
-    const auto& roadIdMapping = laneStream.GetRoadIdMapping();
-    ON_CALL(worldData, GetRoadIdMapping()).WillByDefault(ReturnRef(roadIdMapping));
-    WorldDataQuery wdQuery(worldData);
-    auto result = wdQuery.GetNextObjectInLane<OWL::Interfaces::MovingObject>(laneStream.Get(), 0, 1000);
-    ASSERT_THAT(result, Eq(&closeObject));
-}
-
-TEST(GetNextObjectInLane, ObjectsOutOfSearchDistance_ReturnsDefault)
-{
-    FakeLaneStream laneStream;
-    auto lane = laneStream.AddLane(100.0, true);
-    Fakes::MovingObject objectTooFarAway;
-    ON_CALL(objectTooFarAway, GetDistance(_,_)).WillByDefault(Return(150));
-    Fakes::MovingObject objectTooNear;
-    ON_CALL(objectTooNear, GetDistance(_,_)).WillByDefault(Return(10));
-    OWL::Interfaces::WorldObjects objects{ {&objectTooNear, &objectTooFarAway} };
-    ON_CALL(*lane, GetWorldObjects()).WillByDefault(ReturnRef(objects));
-
-    Fakes::WorldData worldData;
-    const auto& roadIdMapping = laneStream.GetRoadIdMapping();
-    ON_CALL(worldData, GetRoadIdMapping()).WillByDefault(ReturnRef(roadIdMapping));
-    WorldDataQuery wdQuery(worldData);
-
-    auto result = wdQuery.GetNextObjectInLane<OWL::Interfaces::MovingObject>(laneStream.Get(),20, 100);
-    ASSERT_THAT(result, IsNull());
-}
-
-TEST(GetNextObjectInLane, ObjectsOnRangeBorder_ReturnsDefault)
-{
-    FakeLaneStream laneStream;
-    auto lane = laneStream.AddLane(100.0, true);
-    Fakes::MovingObject objectTooFarAway;
-    ON_CALL(objectTooFarAway, GetDistance(_,_)).WillByDefault(Return(120));
-    Fakes::MovingObject objectTooNear;
-    ON_CALL(objectTooNear, GetDistance(_,_)).WillByDefault(Return(20));
-    OWL::Interfaces::WorldObjects objects{ {&objectTooNear, &objectTooFarAway} };
-    ON_CALL(*lane, GetWorldObjects()).WillByDefault(ReturnRef(objects));
-
-    Fakes::WorldData worldData;
-    const auto& roadIdMapping = laneStream.GetRoadIdMapping();
-    ON_CALL(worldData, GetRoadIdMapping()).WillByDefault(ReturnRef(roadIdMapping));
-    WorldDataQuery wdQuery(worldData);
-
-    auto result = wdQuery.GetNextObjectInLane<OWL::Interfaces::MovingObject>(laneStream.Get(),20, 100);
-    ASSERT_THAT(result, IsNull());
-}
-
-TEST(GetNextObjectInLane, TwoObjectsOnLaneInReverseDirection_ReturnsCloserObject)
-{
-    FakeLaneStream laneStream;
-    auto lane1 = laneStream.AddLane(200.0, true);
-    auto lane2 = laneStream.AddLane(200.0, false);
-
-    Fakes::MovingObject closeObject;
-    Fakes::MovingObject distantObject;
-    ON_CALL(closeObject, GetDistance(_,_)).WillByDefault(Return(100));
-    ON_CALL(distantObject, GetDistance(_,_)).WillByDefault(Return(10));
-    OWL::Interfaces::WorldObjects emptyObjectsList{};
-    ON_CALL(*lane1, GetWorldObjects()).WillByDefault(ReturnRef(emptyObjectsList));
-    OWL::Interfaces::WorldObjects objectsLane2{ {&closeObject, &distantObject} };
-    ON_CALL(*lane2, GetWorldObjects()).WillByDefault(ReturnRef(objectsLane2));
-
-    Fakes::WorldData worldData;
-    const auto& roadIdMapping = laneStream.GetRoadIdMapping();
-    ON_CALL(worldData, GetRoadIdMapping()).WillByDefault(ReturnRef(roadIdMapping));
-    WorldDataQuery wdQuery(worldData);
-    auto result = wdQuery.GetNextObjectInLane<OWL::Interfaces::MovingObject>(laneStream.Get(), 0, 1000);
-    ASSERT_THAT(result, Eq(&closeObject));
-}
-///////////////////////////////////////////////////////////////////////////////
-
-TEST(GetLastObjectInLane, NoObjects_ReturnsDefault)
-{
-    FakeLaneStream laneStream;
-    auto lane = laneStream.AddLane(100.0, true);
-    OWL::Interfaces::WorldObjects emptyObjectsList{};
-    ON_CALL(*lane, GetWorldObjects()).WillByDefault(ReturnRef(emptyObjectsList));
-
-    Fakes::WorldData worldData;
-    const auto& roadIdMapping = laneStream.GetRoadIdMapping();
-    ON_CALL(worldData, GetRoadIdMapping()).WillByDefault(ReturnRef(roadIdMapping));
-    WorldDataQuery wdQuery(worldData);
-
-    auto result = wdQuery.GetLastObjectInLane<OWL::Interfaces::MovingObject>(laneStream.Get(), 0, 1000);
-    ASSERT_THAT(result, IsNull());
-}
-
-TEST(GetLastObjectInLane, TwoObjectsOnFirstLane_ReturnsDistantObject)
-{
-    FakeLaneStream laneStream;
-    auto lane1 = laneStream.AddLane(200.0, true);
-    auto lane2 = laneStream.AddLane(200.0, true);
-
-    Fakes::MovingObject closeObject;
-    Fakes::MovingObject distantObject;
-    ON_CALL(closeObject, GetDistance(_,_)).WillByDefault(Return(10));
-    ON_CALL(distantObject, GetDistance(_,_)).WillByDefault(Return(100));
-    OWL::Interfaces::WorldObjects objectsLane1{ {&closeObject, &distantObject} };
-    ON_CALL(*lane1, GetWorldObjects()).WillByDefault(ReturnRef(objectsLane1));
-    OWL::Interfaces::WorldObjects emptyObjectsList{};
-    ON_CALL(*lane2, GetWorldObjects()).WillByDefault(ReturnRef(emptyObjectsList));
-
-    Fakes::WorldData worldData;
-    const auto& roadIdMapping = laneStream.GetRoadIdMapping();
-    ON_CALL(worldData, GetRoadIdMapping()).WillByDefault(ReturnRef(roadIdMapping));
-    WorldDataQuery wdQuery(worldData);
-    auto result = wdQuery.GetLastObjectInLane<OWL::Interfaces::MovingObject>(laneStream.Get(), 0, 1000);
-    ASSERT_THAT(result, Eq(&distantObject));
-}
-
-TEST(GetLastObjectInLane, TwoObjectsOnLaneStream_ReturnsDistantObject)
-{
-    FakeLaneStream laneStream;
-    auto lane1 = laneStream.AddLane(200.0, true);
-    auto lane2 = laneStream.AddLane(200.0, true);
-
-    Fakes::MovingObject closeObject;
-    Fakes::MovingObject distantObject;
-    ON_CALL(closeObject, GetDistance(_,_)).WillByDefault(Return(10));
-    ON_CALL(distantObject, GetDistance(_,_)).WillByDefault(Return(100));
-    OWL::Interfaces::WorldObjects objectsLane1{ {&closeObject} };
-    ON_CALL(*lane1, GetWorldObjects()).WillByDefault(ReturnRef(objectsLane1));
-    OWL::Interfaces::WorldObjects objectsLane2{ {&distantObject} };
-    ON_CALL(*lane2, GetWorldObjects()).WillByDefault(ReturnRef(objectsLane2));
-
-    Fakes::WorldData worldData;
-    const auto& roadIdMapping = laneStream.GetRoadIdMapping();
-    ON_CALL(worldData, GetRoadIdMapping()).WillByDefault(ReturnRef(roadIdMapping));
-    WorldDataQuery wdQuery(worldData);
-    auto result = wdQuery.GetLastObjectInLane<OWL::Interfaces::MovingObject>(laneStream.Get(), 0, 1000);
-    ASSERT_THAT(result, Eq(&distantObject));
-}
-
-TEST(GetLastObjectInLane, TwoObjectsOnSecondLane_ReturnsDistantObject)
-{
-    FakeLaneStream laneStream;
-    auto lane1 = laneStream.AddLane(200.0, true);
-    auto lane2 = laneStream.AddLane(200.0, true);
-
-    Fakes::MovingObject closeObject;
-    Fakes::MovingObject distantObject;
-    ON_CALL(closeObject, GetDistance(_,_)).WillByDefault(Return(10));
-    ON_CALL(distantObject, GetDistance(_,_)).WillByDefault(Return(100));
-    OWL::Interfaces::WorldObjects emptyObjectsList{};
-    ON_CALL(*lane1, GetWorldObjects()).WillByDefault(ReturnRef(emptyObjectsList));
-    OWL::Interfaces::WorldObjects objectsLane2{ {&closeObject, &distantObject} };
-    ON_CALL(*lane2, GetWorldObjects()).WillByDefault(ReturnRef(objectsLane2));
-
-    Fakes::WorldData worldData;
-    const auto& roadIdMapping = laneStream.GetRoadIdMapping();
-    ON_CALL(worldData, GetRoadIdMapping()).WillByDefault(ReturnRef(roadIdMapping));
-    WorldDataQuery wdQuery(worldData);
-    auto result = wdQuery.GetLastObjectInLane<OWL::Interfaces::MovingObject>(laneStream.Get(), 0, 1000);
-    ASSERT_THAT(result, Eq(&distantObject));
-}
-
-TEST(GetLastObjectInLane, ObjectsOutOfSearchDistance_ReturnsDefault)
-{
-    FakeLaneStream laneStream;
-    auto lane = laneStream.AddLane(100.0, true);
-    Fakes::MovingObject objectTooFarAway;
-    ON_CALL(objectTooFarAway, GetDistance(_,_)).WillByDefault(Return(150));
-    Fakes::MovingObject objectTooNear;
-    ON_CALL(objectTooNear, GetDistance(_,_)).WillByDefault(Return(10));
-    OWL::Interfaces::WorldObjects objects{ {&objectTooNear, &objectTooFarAway} };
-    ON_CALL(*lane, GetWorldObjects()).WillByDefault(ReturnRef(objects));
-
-    Fakes::WorldData worldData;
-    const auto& roadIdMapping = laneStream.GetRoadIdMapping();
-    ON_CALL(worldData, GetRoadIdMapping()).WillByDefault(ReturnRef(roadIdMapping));
-    WorldDataQuery wdQuery(worldData);
-
-    auto result = wdQuery.GetLastObjectInLane<OWL::Interfaces::MovingObject>(laneStream.Get(),20, 100);
-    ASSERT_THAT(result, IsNull());
-}
-
-TEST(GetLastObjectInLane, ObjectsOnRangeBorder_ReturnsDefault)
-{
-    FakeLaneStream laneStream;
-    auto lane = laneStream.AddLane(100.0, true);
-    Fakes::MovingObject objectTooFarAway;
-    ON_CALL(objectTooFarAway, GetDistance(_,_)).WillByDefault(Return(120));
-    Fakes::MovingObject objectTooNear;
-    ON_CALL(objectTooNear, GetDistance(_,_)).WillByDefault(Return(20));
-    OWL::Interfaces::WorldObjects objects{ {&objectTooNear, &objectTooFarAway} };
-    ON_CALL(*lane, GetWorldObjects()).WillByDefault(ReturnRef(objects));
-
-    Fakes::WorldData worldData;
-    const auto& roadIdMapping = laneStream.GetRoadIdMapping();
-    ON_CALL(worldData, GetRoadIdMapping()).WillByDefault(ReturnRef(roadIdMapping));
-    WorldDataQuery wdQuery(worldData);
-
-    auto result = wdQuery.GetLastObjectInLane<OWL::Interfaces::MovingObject>(laneStream.Get(),20, 100);
-    ASSERT_THAT(result, IsNull());
-}
-
-TEST(GetLastObjectInLane, TwoObjectsOnLaneInReverseDirection_ReturnsDistantObject)
-{
-    FakeLaneStream laneStream;
-    auto lane1 = laneStream.AddLane(200.0, true);
-    auto lane2 = laneStream.AddLane(200.0, false);
-
-    Fakes::MovingObject closeObject;
-    Fakes::MovingObject distantObject;
-    ON_CALL(closeObject, GetDistance(_,_)).WillByDefault(Return(100));
-    ON_CALL(distantObject, GetDistance(_,_)).WillByDefault(Return(10));
-    OWL::Interfaces::WorldObjects emptyObjectsList{};
-    ON_CALL(*lane1, GetWorldObjects()).WillByDefault(ReturnRef(emptyObjectsList));
-    OWL::Interfaces::WorldObjects objectsLane2{ {&closeObject, &distantObject} };
-    ON_CALL(*lane2, GetWorldObjects()).WillByDefault(ReturnRef(objectsLane2));
-
-    Fakes::WorldData worldData;
-    const auto& roadIdMapping = laneStream.GetRoadIdMapping();
-    ON_CALL(worldData, GetRoadIdMapping()).WillByDefault(ReturnRef(roadIdMapping));
-    WorldDataQuery wdQuery(worldData);
-    auto result = wdQuery.GetLastObjectInLane<OWL::Interfaces::MovingObject>(laneStream.Get(), 0, 1000);
-    ASSERT_THAT(result, Eq(&distantObject));
-}
-
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -838,155 +538,6 @@ TEST(GetValidSOnLane, CheckIfSIsValid_ReturnsFalse)
     ASSERT_FALSE(result);
 }
 
-TEST(GetValidSOnLane, GetNextValidSOnLaneInDownstream_ReturnsNextValidSInDownstream)
-{
-    FakeLaneManager laneManager(3, 1, 3.0, {100, 100, 100}, "TestRoadId");
-
-    Fakes::WorldData worldData;
-    ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(laneManager.GetRoads()));
-    ON_CALL(worldData, GetRoadIdMapping()).WillByDefault(ReturnRef(laneManager.GetRoadIdMapping()));
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneManager.GetLaneIdMapping()));
-
-    WorldDataQuery wdQuery(worldData);
-    double result = wdQuery.GetNextValidSOnLaneInDownstream("TestRoadId", -1, 5.0, 50.0);
-    ASSERT_EQ(result, 55.0);
-
-    result = wdQuery.GetNextValidSOnLaneInDownstream("TestRoadId", -1, 150, 100.0);
-    ASSERT_EQ(result, 250.0);
-
-    result = wdQuery.GetNextValidSOnLaneInDownstream("TestRoadId", -1, 0.0, 250.0);
-    ASSERT_EQ(result, 250.0);
-
-    result = wdQuery.GetNextValidSOnLaneInDownstream("TestRoadId", -1, 0.0, 5.0);
-    ASSERT_EQ(result, 5.0);
-
-    result = wdQuery.GetNextValidSOnLaneInDownstream("TestRoadId", -1, 295.0, 5.0);
-    ASSERT_EQ(result, 300.0);
-
-    result = wdQuery.GetNextValidSOnLaneInDownstream("TestRoadId", -1, 295.0, 10.0);
-    ASSERT_EQ(result, INFINITY);
-}
-
-TEST(GetValidSOnLane, GetLastValidSInUpstream_ReturnsLastValidSInUpstream)
-{
-    FakeLaneManager laneManager(3, 1, 3.0, {100, 100, 100}, "TestRoadId");
-
-    Fakes::WorldData worldData;
-    ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(laneManager.GetRoads()));
-    ON_CALL(worldData, GetRoadIdMapping()).WillByDefault(ReturnRef(laneManager.GetRoadIdMapping()));
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneManager.GetLaneIdMapping()));
-
-    WorldDataQuery wdQuery(worldData);
-    double result = wdQuery.GetLastValidSInUpstream("TestRoadId", -1, 200.0, 50.0);
-    ASSERT_EQ(result, 150.0);
-
-    result = wdQuery.GetLastValidSInUpstream("TestRoadId", -1, 300.0, 250.0);
-    ASSERT_EQ(result, 50.0);
-
-    result = wdQuery.GetLastValidSInUpstream("TestRoadId", -1, 50.0, 5.0);
-    ASSERT_EQ(result, 45.0);
-
-    result = wdQuery.GetLastValidSInUpstream("TestRoadId", -1, 5.0, 5.0);
-    ASSERT_EQ(result, 0.0);
-
-    result = wdQuery.GetLastValidSInUpstream("TestRoadId", -1, 0.0, 5.0);
-    ASSERT_EQ(result, -INFINITY);
-}
-
-
-/////////////////////////////////////////////////////////////////////////////
-
-TEST(SideLanesExist, LeftLanesExist_ReturnsTrue)
-{
-    FakeLaneManager laneManager(1, 3, 3.0, {100}, "TestRoadId");
-
-    ON_CALL(*laneManager.lanes[0][0], GetLaneType()).WillByDefault(Return(LaneType::Driving));
-    ON_CALL(*laneManager.lanes[0][1], GetLaneType()).WillByDefault(Return(LaneType::Driving));
-    ON_CALL(*laneManager.lanes[0][2], GetLaneType()).WillByDefault(Return(LaneType::Driving));
-
-    Fakes::WorldData worldData;
-    ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(laneManager.GetRoads()));
-    ON_CALL(worldData, GetRoadIdMapping()).WillByDefault(ReturnRef(laneManager.GetRoadIdMapping()));
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneManager.GetLaneIdMapping()));
-
-
-    WorldDataQuery wdQuery(worldData);
-    bool result = wdQuery.ExistsDrivingLaneOnSide("TestRoadId", -3, 50, Side::Left);
-    ASSERT_TRUE(result);
-
-    result = wdQuery.ExistsDrivingLaneOnSide("TestRoadId", -2, 50.0, Side::Left);
-    ASSERT_TRUE(result);
-
-    result = wdQuery.ExistsDrivingLaneOnSide("TestRoadId", -1, 50.0, Side::Left);
-    ASSERT_FALSE(result);
-
-}
-
-TEST(SideLanesExist, RightLanesExist_ReturnsTrue)
-{
-    FakeLaneManager laneManager(1, 3, 3.0, {100}, "TestRoadId");
-
-    ON_CALL(*laneManager.lanes[0][0], GetLaneType()).WillByDefault(Return(LaneType::Driving));
-    ON_CALL(*laneManager.lanes[0][1], GetLaneType()).WillByDefault(Return(LaneType::Driving));
-    ON_CALL(*laneManager.lanes[0][2], GetLaneType()).WillByDefault(Return(LaneType::Driving));
-
-    Fakes::WorldData worldData;
-    ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(laneManager.GetRoads()));
-    ON_CALL(worldData, GetRoadIdMapping()).WillByDefault(ReturnRef(laneManager.GetRoadIdMapping()));
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneManager.GetLaneIdMapping()));
-
-    WorldDataQuery wdQuery(worldData);
-    bool result = wdQuery.ExistsDrivingLaneOnSide("TestRoadId", -1, 50, Side::Right);
-    ASSERT_TRUE(result);
-
-    result = wdQuery.ExistsDrivingLaneOnSide("TestRoadId", -2, 50, Side::Right);
-    ASSERT_TRUE(result);
-
-    result = wdQuery.ExistsDrivingLaneOnSide("TestRoadId", -3, 50, Side::Right);
-    ASSERT_FALSE(result);
-}
-
-TEST(SideLanesExist, RightLanesExistButInvalidLaneType_ReturnsFalse)
-{
-    FakeLaneManager laneManager(1, 3, 3.0, {100}, "TestRoadId");
-
-    ON_CALL(*laneManager.lanes[0][1], GetLaneType()).WillByDefault(Return(LaneType::Undefined));
-    ON_CALL(*laneManager.lanes[0][2], GetLaneType()).WillByDefault(Return(LaneType::Biking));
-
-    Fakes::WorldData worldData;
-    ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(laneManager.GetRoads()));
-    ON_CALL(worldData, GetRoadIdMapping()).WillByDefault(ReturnRef(laneManager.GetRoadIdMapping()));
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneManager.GetLaneIdMapping()));
-
-    WorldDataQuery wdQuery(worldData);
-    bool result = wdQuery.ExistsDrivingLaneOnSide("TestRoadId", -1, 50, Side::Right);
-    ASSERT_FALSE(result);
-
-    result = wdQuery.ExistsDrivingLaneOnSide("TestRoadId", -2, 50, Side::Right);
-    ASSERT_FALSE(result);
-}
-
-TEST(SideLanesExist, LeftLanesExistButInvalidLaneType_ReturnsFalse)
-{
-    FakeLaneManager laneManager(1, 3, 3.0, {100}, "TestRoadId");
-
-    ON_CALL(*laneManager.lanes[0][0], GetLaneType()).WillByDefault(Return(LaneType::Exit));
-    ON_CALL(*laneManager.lanes[0][1], GetLaneType()).WillByDefault(Return(LaneType::Biking));
-
-    Fakes::WorldData worldData;
-    ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(laneManager.GetRoads()));
-    ON_CALL(worldData, GetRoadIdMapping()).WillByDefault(ReturnRef(laneManager.GetRoadIdMapping()));
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneManager.GetLaneIdMapping()));
-
-
-    WorldDataQuery wdQuery(worldData);
-    bool result = wdQuery.ExistsDrivingLaneOnSide("TestRoadId", -3, 50, Side::Left);
-    ASSERT_FALSE(result);
-
-    result = wdQuery.ExistsDrivingLaneOnSide("TestRoadId", -2, 50.0, Side::Left);
-    ASSERT_FALSE(result);
-}
-
 //////////////////////////////////////////////////////////////////
 
 TEST(GetTrafficSignsInRange, ReturnsCorrectTrafficSigns)
@@ -1044,91 +595,6 @@ TEST(GetTrafficSignsInRange, ReturnsCorrectTrafficSigns)
 
     result = wdQuery.GetTrafficSignsInRange(laneStream.Get(), 1000.0, 1000.0);
     EXPECT_EQ(result.size(), 0);
-}
-
-TEST(DISABLED_QueryLanes, ThreeLanesInTwoSections)
-{
-    std::list<const OWL::Interfaces::Section*> sections;
-    std::unordered_map<OWL::Id, OWL::OdId> laneIdMapping = {{1, -1}, {2, -2}, {3, -2}};
-    std::unordered_map<OWL::Id, std::string> roadIdMapping = { {1, "TestRoadId"} };
-
-    Fakes::Road fakeRoad;
-    std::unordered_map<OWL::Id, OWL::Interfaces::Road*> roads = { {1, &fakeRoad} };
-    ON_CALL(fakeRoad, GetSections()).WillByDefault(ReturnRef(sections));
-    ON_CALL(fakeRoad, GetId()).WillByDefault(Return(1));
-
-    Fakes::WorldData worldData;
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneIdMapping));
-    ON_CALL(worldData, GetRoadIdMapping()).WillByDefault(ReturnRef(roadIdMapping));
-    ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(roads));
-
-    WorldDataQuery wdQuery(worldData);
-    Fakes::Section section1;
-    Fakes::Section section2;
-
-    Fakes::Lane lane1_minus1; //Id 1
-    Fakes::Lane lane1_minus2; //Id 2
-    Fakes::Lane lane2_minus2; //Id 3
-
-    ON_CALL(lane1_minus1, GetId()).WillByDefault(Return(1));
-    ON_CALL(lane1_minus2, GetId()).WillByDefault(Return(2));
-    ON_CALL(lane2_minus2, GetId()).WillByDefault(Return(3));
-
-    ON_CALL(lane1_minus1, Exists()).WillByDefault(Return(true));
-    ON_CALL(lane1_minus2, Exists()).WillByDefault(Return(true));
-    ON_CALL(lane2_minus2, Exists()).WillByDefault(Return(true));
-
-    std::vector<OWL::Id> previous{2};
-    ON_CALL(lane2_minus2, GetPrevious()).WillByDefault(Return(previous));
-
-    std::vector<OWL::Id> next{3};
-    ON_CALL(lane1_minus2, GetNext()).WillByDefault(Return(next));
-
-
-    ON_CALL(lane1_minus1, GetRightLaneCount()).WillByDefault(Return(1));
-
-    ON_CALL(lane1_minus1, GetLaneType()).WillByDefault(Return(LaneType::Stop));
-    ON_CALL(lane1_minus2, GetLaneType()).WillByDefault(Return(LaneType::Driving));
-    ON_CALL(lane2_minus2, GetLaneType()).WillByDefault(Return(LaneType::Driving));
-
-    ON_CALL(lane1_minus1, GetDistance(OWL::MeasurementPoint::RoadStart)).WillByDefault(Return(50));
-    ON_CALL(lane1_minus1, GetDistance(OWL::MeasurementPoint::RoadEnd)).WillByDefault(Return(100));
-    ON_CALL(lane1_minus2, GetDistance(OWL::MeasurementPoint::RoadStart)).WillByDefault(Return(50));
-    ON_CALL(lane1_minus2, GetDistance(OWL::MeasurementPoint::RoadEnd)).WillByDefault(Return(100));
-    ON_CALL(lane2_minus2, GetDistance(OWL::MeasurementPoint::RoadStart)).WillByDefault(Return(100));
-    ON_CALL(lane2_minus2, GetDistance(OWL::MeasurementPoint::RoadEnd)).WillByDefault(Return(150));
-
-    const std::list<const OWL::Interfaces::Lane*> lanesSection1 = {{&lane1_minus1, &lane1_minus2}} ;
-    ON_CALL(section1, GetLanes()).WillByDefault(ReturnRef(lanesSection1));
-    ON_CALL(section1, Covers(_)).WillByDefault(Return(false));
-    ON_CALL(section1, CoversInterval(0.0, 100.0)).WillByDefault(Return(true));
-
-    const std::list<const OWL::Interfaces::Lane*> lanesSection2 = {{&lane2_minus2}} ;
-    ON_CALL(section2, GetLanes()).WillByDefault(ReturnRef(lanesSection2));
-    ON_CALL(section2, Covers(_)).WillByDefault(Return(false));
-    ON_CALL(section2, CoversInterval(0.0, 100.0)).WillByDefault(Return(true));
-
-    sections = {{&section1, &section2}};
-
-    auto queryResult = wdQuery.QueryLanes("TestRoadId", 0.0, 100.0);
-
-    ASSERT_EQ(queryResult.size(), 2);
-    queryResult.sort([](LaneQueryResult result1, LaneQueryResult result2){return result1.streamId < result2.streamId;});
-    LaneQueryResult result = queryResult.front();
-    ASSERT_TRUE(result.valid);
-    ASSERT_EQ(result.streamId, 1);
-    ASSERT_EQ(result.laneCategory, LaneCategory::RegularLane);
-    ASSERT_FALSE(result.isDrivingLane);
-    ASSERT_EQ(result.startDistance, 50);
-    ASSERT_EQ(result.endDistance, 100);
-    queryResult.pop_front();
-    result = queryResult.front();
-    ASSERT_TRUE(result.valid);
-    ASSERT_EQ(result.streamId, 2);
-    ASSERT_EQ(result.laneCategory, LaneCategory::RightMostLane);
-    ASSERT_TRUE(result.isDrivingLane);
-    ASSERT_EQ(result.startDistance, 50);
-    ASSERT_EQ(result.endDistance, 150);
 }
 
 TEST(GetLaneMarkings, OneLaneWithOnlyOneBoundaryPerSide)
@@ -1715,7 +1181,33 @@ TEST(CreateLaneStream, ExcessRoudsInRoute)
     ASSERT_THAT(lanesInStream.at(3).inStreamDirection, Eq(true));
 }
 
-TEST(GetIntersectingConnections, NoIntersections_ReturnsEmptyVector)
+TEST(GetIntersectingConnections, NoIntersectionsOneEntireJunction_ReturnsEmptyVector)
+{
+    Fakes::WorldData worldData;
+    Fakes::Junction fakeJunction;
+    Fakes::Road connectionA;
+    OWL::Interfaces::Roads connections{&connectionA};
+    ON_CALL(fakeJunction, GetConnectingRoads()).WillByDefault(ReturnRef(connections));
+    Id idJunction{1}, idConnectionA{2};
+    ON_CALL(connectionA, GetId()).WillByDefault(Return(idConnectionA));
+    std::map<std::string, std::vector<IntersectionInfo>> intersections{};
+    ON_CALL(fakeJunction, GetIntersections()).WillByDefault(ReturnRef(intersections));
+    std::unordered_map<Id, Junction*> junctions{ {idJunction, &fakeJunction} };
+    ON_CALL(worldData, GetJunctions()).WillByDefault(ReturnRef(junctions));
+    std::unordered_map<Id, std::string> junctionIdMapping{ {idJunction, "Junction"}};
+    ON_CALL(worldData, GetJunctionIdMapping()).WillByDefault(ReturnRef(junctionIdMapping));
+    std::unordered_map<Id, Road*> roads{ {idConnectionA, &connectionA}};
+    ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(roads));
+    std::unordered_map<Id, std::string> roadIdMapping{ {idConnectionA, "ConnectionA"}};
+    ON_CALL(worldData, GetRoadIdMapping()).WillByDefault(ReturnRef(roadIdMapping));
+
+    WorldDataQuery wdQuery(worldData);
+
+    auto result = wdQuery.GetIntersectingConnections("ConnectionA");
+    ASSERT_THAT(result, IsEmpty());
+}
+
+TEST(GetIntersectingConnections, NoIntersectionsForRoad_ReturnsEmptyVector)
 {
     Fakes::WorldData worldData;
     Fakes::Junction fakeJunction;

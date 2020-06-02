@@ -51,7 +51,7 @@ bool ConfigurationContainer::ImportAllConfigurations()
     }
 
     //Import Scenery
-    if (!SceneryImporter::Import(Directories::Concat(configurationFiles.configurationDir, scenario.GetSceneryPath()),
+    if (!SceneryImporter::Import(openpass::core::Directories::Concat(configurationFiles.configurationDir, scenario.GetSceneryPath()),
                                  &scenery))
     {
         LOG_INTERN(LogLevel::Error) << "could not import scenery";
@@ -60,8 +60,8 @@ bool ConfigurationContainer::ImportAllConfigurations()
 
     //Import VehicleModels
     if (!VehicleModelsImporter::Import(
-                Directories::Concat(configurationFiles.configurationDir, scenario.GetVehicleCatalogPath()),
-                Directories::Concat(configurationFiles.configurationDir, scenario.GetPedestrianCatalogPath()),
+                openpass::core::Directories::Concat(configurationFiles.configurationDir, scenario.GetVehicleCatalogPath()),
+                openpass::core::Directories::Concat(configurationFiles.configurationDir, scenario.GetPedestrianCatalogPath()),
                 vehicleModels))
     {
         LOG_INTERN(LogLevel::Error) << "could not import vehicle models";
@@ -81,7 +81,7 @@ bool ConfigurationContainer::ImportAllConfigurations()
         }
         auto systemConfig = std::make_shared<SystemConfig>();
 
-        if(!SystemConfigImporter::Import(Directories::Concat(configurationFiles.configurationDir, systemConfigFile), systemConfig))
+        if(!SystemConfigImporter::Import(openpass::core::Directories::Concat(configurationFiles.configurationDir, systemConfigFile), systemConfig))
         {
             LOG_INTERN(LogLevel::Error) << "could not import vehicle models";
             return false;

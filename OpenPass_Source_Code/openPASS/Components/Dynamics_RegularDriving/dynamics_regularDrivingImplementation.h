@@ -19,6 +19,7 @@
 #include "Common/primitiveSignals.h"
 #include "Common/dynamicsSignal.h"
 #include "Common/globalDefinitions.h"
+#include "Interfaces/observationInterface.h"
 
 
 /** \addtogroup Dynamics_RegularDriving
@@ -203,6 +204,16 @@ private:
     //! @return current acceleration
     double GetAccVehicle(double accPedalPos, double brakePedalPos, int gear, int time);
 
+    //! Get the acceleration (negative) caused by the air resistance of the vehicle.
+    //! @param [in] velocity        absolute vehicle speed [m/s]
+    //! @return acceleration due to rolling resistance [m/s^2]
+    //-----------------------------------------------------------------------------
+    double GetAccelerationFromAirResistance(double velocity);
+
+    //! Get the acceleration (negative) caused by the rolling resistance of the wheels.
+    //! @return acceleration due to rolling resistance [m/s^2]
+    //-----------------------------------------------------------------------------
+    double GetAccelerationFromRollingResistance();
 
     //! Get the moment of the engine from pedal position and gear.
     //! @param [in] gasPedalPos         current Gas pedal position. [%]

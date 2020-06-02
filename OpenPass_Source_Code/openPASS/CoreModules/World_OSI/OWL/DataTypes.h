@@ -623,7 +623,7 @@ public:
 
     virtual void SetS(double sPos) = 0;
     virtual void SetValidForLane(OWL::Id laneId) = 0;
-    virtual void SetSpecification(RoadSignalInterface* signal) = 0;
+    virtual bool SetSpecification(RoadSignalInterface* signal) = 0;
     virtual void AddSupplementarySign(RoadSignalInterface* odSignal) = 0;
 
     /*!
@@ -1110,7 +1110,7 @@ public:
         osiSign->mutable_main_sign()->mutable_classification()->add_assigned_lane_id()->set_value(laneId);
     }
 
-    virtual void SetSpecification(RoadSignalInterface* signal) override;
+    virtual bool SetSpecification(RoadSignalInterface* signal) override;
 
     virtual void AddSupplementarySign(RoadSignalInterface* odSignal) override;
 

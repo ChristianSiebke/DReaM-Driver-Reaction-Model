@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2018 AMFD GmbH
 * Copyright (c) 2020 HLRS, University of Stuttgart.
 *
@@ -16,9 +16,13 @@
 
 #include "sampler.h"
 #include <stdexcept>
+#include "parameterbuilder.h"
+#include "parameters.h"
+#include <cmath>
 
-Sampler::Sampler(StochasticsInterface &stochastics):
-    stochastics(stochastics)
+Sampler::Sampler(StochasticsInterface &stochastics, const openpass::common::RuntimeInformation &runtimeInformation):
+    stochastics {stochastics},
+    runtimeInformation { runtimeInformation }
 {
 }
 
@@ -68,7 +72,7 @@ double Sampler::RollForStochasticAttribute(double mean, double stdDev, double lo
 
 size_t Sampler::RollUniformDistributedVectorIndex(size_t vectorSize) const
 {
-    size_t index = static_cast<size_t>(floor(stochastics.GetUniformDistributed(0, 1) * vectorSize));
+    size_t index = static_cast<size_t>(std::floor(stochastics.GetUniformDistributed(0, 1) * vectorSize));
 
     if (vectorSize == index)
     {
@@ -147,41 +151,37 @@ double Sampler::SampleDoubleProbability(DoubleProbabilities probabilities) const
     throw std::logic_error("Could not find matching probability within range.");
 }
 
-void Sampler::SampleSpawnPointParameters(TrafficConfig& trafficConfig, ParameterInterface* parameters) const
+openpass::parameter::NormalDistribution Sampler::SampleNormalDistributionProbability(NormalDistributionProbabilities probabilities) const
 {
-    //Sample traffic volume
-    double trafficVolume = SampleDoubleProbability(trafficConfig.trafficVolumes);
-    parameters->AddParameterDouble("TrafficVolume", trafficVolume);
+    double roll = stochastics.GetUniformDistributed(0, 1);
+    double probability = 0.0;
 
-    //Sample platoon rate
-    double platoonRate = SampleDoubleProbability(trafficConfig.platoonRates);
-    parameters->AddParameterDouble("PlatoonRate", platoonRate);
+    for (auto entry : probabilities)
+    {
+        probability += entry.second;
 
-    //Sample velocity
-    double velocity = SampleDoubleProbability(trafficConfig.velocities);
-    parameters->AddParameterDouble("Velocity", velocity);
+        if (probability == 0.0)
+        {
+            continue;
+        }
 
-    //Sample homogenity
-    double homogenity = SampleDoubleProbability(trafficConfig.homogenities);
-    parameters->AddParameterDouble("Homogenity", homogenity);
+        if (roll <= probability)
+        {
+            return entry.first;
+        }
+    }
+
+    throw std::logic_error("Could not find matching probability within range.");
 }
 
-void Sampler::SampleWorldParameters(EnvironmentConfig& environmentConfig, ParameterInterface* parameters) const
+std::unique_ptr<ParameterInterface> Sampler::SampleWorldParameters(const EnvironmentConfig& environmentConfig) const
 {
-    //Sample time of day
-    std::string timeOfDay = SampleStringProbability(environmentConfig.timeOfDays);
-    parameters->AddParameterString("TimeOfDay", timeOfDay);
-
-    //Sample visibility distance
-    int visibilityDistance = SampleIntProbability(environmentConfig.visibilityDistances);
-    parameters->AddParameterInt("VisibilityDistance", visibilityDistance);
-
-    //Sample friction
-    double friction = SampleDoubleProbability(environmentConfig.frictions);
-    parameters->AddParameterDouble("Friction", friction);
-
-    //Sample weather
-    std::string weather = SampleStringProbability(environmentConfig.weathers);
-    parameters->AddParameterString("Weather", weather);
+    return openpass::parameter::make<SimulationCommon::Parameters>(
+        runtimeInformation, openpass::parameter::Container {
+            { "TimeOfDay", SampleStringProbability(environmentConfig.timeOfDays) },
+            { "VisibilityDistance", SampleIntProbability(environmentConfig.visibilityDistances) },
+            { "Friction", SampleDoubleProbability(environmentConfig.frictions) },
+            { "Weather", SampleStringProbability(environmentConfig.weathers) }}
+    );
 }
 

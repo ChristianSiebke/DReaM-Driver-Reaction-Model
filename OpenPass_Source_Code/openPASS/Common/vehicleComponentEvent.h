@@ -30,21 +30,29 @@ class VehicleComponentEvent : public BasicEvent
 {
 public:
     VehicleComponentEvent(int time,
-                    std::string source,
-                    std::string sequenceName,
-                    EventDefinitions::EventType eventType,
-                    int agentId):
+                          const std::string &eventName,
+                          std::string source,
+                          int agentId):
         BasicEvent(time,
-                   source,
-                   sequenceName,
-                   eventType),
+                   eventName,
+                   source),
         agentId(agentId)
     {}
     VehicleComponentEvent(const VehicleComponentEvent&) = delete;
     VehicleComponentEvent(VehicleComponentEvent&&) = delete;
     VehicleComponentEvent& operator=(const VehicleComponentEvent&) = delete;
     VehicleComponentEvent& operator=(VehicleComponentEvent&&) = delete;
-    virtual ~VehicleComponentEvent() = default;
+    virtual ~VehicleComponentEvent() override = default;
+
+    /*!
+    * \brief Returns the category of the event.
+    *
+    * @return	     EventCategory.
+    */
+    virtual EventDefinitions::EventCategory GetCategory() const override
+    {
+        return EventDefinitions::EventCategory::VehicleComponent;
+    }
 
     /*!
     * \brief Returns all parameters of the event as string list.
@@ -52,13 +60,9 @@ public:
     *
     * @return	     List of string pairs of the event parameters.
     */
-    virtual std::list<std::pair<std::string, std::string>> GetEventParametersAsString()
+    virtual EventParameters GetParametersAsString() override
     {
-        std::list<std::pair<std::string, std::string>> eventParameters;
-
-        eventParameters.push_back(std::pair<std::string, std::string>("AgentId", std::to_string(agentId)));
-
-        return eventParameters;
+        return {{"AgentId", std::to_string(agentId)}};
     }
 
     int agentId;

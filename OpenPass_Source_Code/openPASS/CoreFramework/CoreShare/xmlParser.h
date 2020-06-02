@@ -51,9 +51,9 @@ extern bool ParseULong(QDomElement rootElement, const std::string &tag, unsigned
 
 extern bool ParseBool(QDomElement rootElement, const std::string &tag, bool &result);
 
-extern bool ParseAttributeString(QDomElement element, const std::string &attributeName, std::string &result);
+extern bool ParseAttributeString(QDomElement element, const std::string &attributeName, std::string &result, std::optional<std::string> defaultValue = std::nullopt);
 
-extern bool ParseAttributeDouble(QDomElement element, const std::string &attributeName, double &result);
+extern bool ParseAttributeDouble(QDomElement element, const std::string &attributeName, double &result, std::optional<double> defaultValue = std::nullopt);
 
 extern bool ParseAttributeInt(QDomElement element, const std::string &attributeName, int &result);
 
@@ -191,7 +191,15 @@ bool ImportProbabilityMap(QDomElement parentElement,
 }
 
 
-
 } // namespace SimulationCommon
 
-
+[[maybe_unused]] static void ThrowIfFalse(bool success, const QDomElement element, const std::string &message)
+{
+    if (!success)
+    {
+        LogErrorAndThrow("Could not import element " + element.tagName().toStdString()
+                         + " (line " + std::to_string(element.lineNumber())
+                         + ", column " + std::to_string(element.columnNumber())
+                         + "): " + message);
+    }
+}

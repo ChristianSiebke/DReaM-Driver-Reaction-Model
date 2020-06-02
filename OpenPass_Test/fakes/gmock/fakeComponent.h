@@ -9,6 +9,8 @@ class FakeComponent : public ComponentInterface {
  public:
   MOCK_METHOD1(SetImplementation,
       void(ModelInterface *implementation));
+  MOCK_METHOD1(SetParameter,
+      void(std::unique_ptr<ParameterInterface>));
   MOCK_CONST_METHOD0(GetAgent,
       Agent*());
   MOCK_METHOD2(AddInputLink,
@@ -51,6 +53,8 @@ class FakeComponent : public ComponentInterface {
       bool());
   MOCK_CONST_METHOD0(GetImplementation,
       ModelInterface*());
+  MOCK_CONST_METHOD0(GetParameter,
+                     const ParameterInterface&());
   MOCK_CONST_METHOD0(GetName,
       std::string());
 };

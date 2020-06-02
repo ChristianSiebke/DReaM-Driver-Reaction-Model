@@ -35,7 +35,7 @@
 #include "Interfaces/worldInterface.h"
 
 //Event Categories
-#include "Common/agentBasedManipulatorEvent.h"
+#include "Common/conditionalEvent.h"
 #include "Common/collisionEvent.h"
 
 #define EVENT_DETECTOR "EventDetector"
@@ -107,17 +107,13 @@ protected:
     */
     virtual EventContainer GetEvents() = 0;
 
-    std::list<EventDefinitions::EventType> eventTypes;
-
     WorldInterface *world = nullptr;
     ParameterInterface *parameters = nullptr;
     SimulationSlave::EventNetworkInterface* eventNetwork = nullptr;
     const CallbackInterface *callbacks = nullptr;
 
     int cycleTime {};
-    std::string sequenceName {""};
-
-    EventDefinitions::EventType eventType = EventDefinitions::EventType::Undefined;
+    std::string eventName {""};
 
     const std::string COMPONENTNAME {"Manipulator"};
 };

@@ -29,15 +29,12 @@ class CollisionEvent : public BasicEvent
 public:
     CollisionEvent(int time,
                    std::string source,
-                   std::string sequenceName,
-                   EventDefinitions::EventType eventType,
                    bool collisionWithAgent,
                    int collisionAgentId,
                    int collisionOpponentId):
         BasicEvent(time,
-                   source,
-                   sequenceName,
-                   eventType),
+                   "Collision",
+                   source),
         collisionWithAgent(collisionWithAgent),
         collisionAgentId(collisionAgentId),
         collisionOpponentId(collisionOpponentId)
@@ -46,7 +43,17 @@ public:
     CollisionEvent(CollisionEvent&&) = delete;
     CollisionEvent& operator=(const CollisionEvent&) = delete;
     CollisionEvent& operator=(CollisionEvent&&) = delete;
-    virtual ~CollisionEvent() = default;
+    virtual ~CollisionEvent() override = default;
+
+    /*!
+    * \brief Returns the category of the event.
+    *
+    * @return	     EventCategory.
+    */
+    virtual EventDefinitions::EventCategory GetCategory() const override
+    {
+        return EventDefinitions::EventCategory::Collision;
+    }
 
     /*!
     * \brief Returns all parameters of the event as string list.
@@ -54,13 +61,13 @@ public:
     *
     * @return	     List of string pairs of the event parameters.
     */
-    virtual std::list<std::pair<std::string, std::string>> GetEventParametersAsString()
+    virtual EventParameters GetParametersAsString() override
     {
-        std::list<std::pair<std::string, std::string>> eventParameters;
+        EventParameters eventParameters;
 
-        eventParameters.push_back(std::pair<std::string, std::string>("CollisionWithAgent", collisionWithAgent ? "true" : "false"));
-        eventParameters.push_back(std::pair<std::string, std::string>("CollisionAgentId", std::to_string(collisionAgentId)));
-        eventParameters.push_back(std::pair<std::string, std::string>("CollisionOpponentId", std::to_string(collisionOpponentId)));
+        eventParameters.push_back({"CollisionWithAgent", collisionWithAgent ? "true" : "false"});
+        eventParameters.push_back({"CollisionAgentId", std::to_string(collisionAgentId)});
+        eventParameters.push_back({"CollisionOpponentId", std::to_string(collisionOpponentId)});
 
         return eventParameters;
     }

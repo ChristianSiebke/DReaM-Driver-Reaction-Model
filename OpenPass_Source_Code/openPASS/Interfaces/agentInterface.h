@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2018 AMFD GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
@@ -18,16 +18,19 @@
 
 #pragma once
 
-#include <map>
 #include <list>
+#include <map>
 #include <vector>
 
 #include "Common/globalDefinitions.h"
+#include "Common/sensorDefinitions.h"
 #include "Common/worldDefinitions.h"
-#include "Interfaces/worldObjectInterface.h"
-#include "Interfaces/spawnPointInterface.h"
-#include "Interfaces/signalInterface.h"
 #include "Interfaces/profilesInterface.h"
+#include "Interfaces/signalInterface.h"
+#include "Interfaces/spawnItemParameterInterface.h"
+#include "Interfaces/worldObjectInterface.h"
+
+using LaneTypes = std::vector<LaneType>;
 
 /**
 * \brief Agent Interface within the openPASS framework.
@@ -49,19 +52,6 @@ public:
     // @return                Id of agent
     //-----------------------------------------------------------------------------
     virtual int GetAgentId() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Retrieves time of spawn event of this agent
-    //!
-    //! @return                Spawn time
-    //-----------------------------------------------------------------------------
-    virtual int GetSpawnTime() const = 0;
-
-    //! Retrieves type of vehicle of agent
-    //!
-    // @return                Type of vehicle
-    //-----------------------------------------------------------------------------
-    virtual AgentVehicleType GetVehicleType() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Retrieves the type key of an agent
@@ -127,81 +117,11 @@ public:
     virtual double GetVelocityY() const = 0;
 
     //-----------------------------------------------------------------------------
-    //! Retrieves distance from COG to front axle of agent
-    //!
-    // @return                Distance from COG to front axle
-    //-----------------------------------------------------------------------------
-    virtual double GetDistanceCOGtoFrontAxle() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Retrieves weight of agent
-    //!
-    // @return                Weight of agent
-    //-----------------------------------------------------------------------------
-    virtual double GetWeight() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Retrieves distance from ground to COG of agent
-    //!
-    // @return                Distance from ground to COG
-    //-----------------------------------------------------------------------------
-    virtual double GetHeightCOG() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Retrieves distance between the centers of the front and rear wheels
-    //!
-    // @return                Distance between front and rear wheels
-    //-----------------------------------------------------------------------------
-    virtual double GetWheelbase() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Retrieves moment of inertia (roll axis)
-    //!
-    // @return                Moment of inertia for roll axis
-    //-----------------------------------------------------------------------------
-    virtual double GetMomentInertiaRoll() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Retrieves moment of inertia (pitch axis)
-    //!
-    // @return                Moment of inertia for pitch axis
-    //-----------------------------------------------------------------------------
-    virtual double GetMomentInertiaPitch() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Retrieves moment of inertia (yaw axis)
-    //!
-    // @return                Moment of inertia for yaw axis
-    //-----------------------------------------------------------------------------
-    virtual double GetMomentInertiaYaw() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Retrieves friction coefficient
-    //!
-    // @return                Friction coefficient
-    //-----------------------------------------------------------------------------
-    virtual double GetFrictionCoeff() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Retrieves distance between wheels on the same axle
-    //!
-    // @return                Distance between both front wheels (or both rear wheels)
-    //-----------------------------------------------------------------------------
-    virtual double GetTrackWidth() const = 0;
-
-    //-----------------------------------------------------------------------------
     //! Retrieves the current gear number
     //!
     // @return                Gear no.
     //-----------------------------------------------------------------------------
     virtual int GetGear() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Retrieves distance from COG to leading edge
-    //!
-    // @return                Distance from COG to leading edge
-    //-----------------------------------------------------------------------------
-    virtual double GetDistanceCOGtoLeadingEdge() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Retrieves forward acceleration of agent
@@ -254,25 +174,11 @@ public:
     virtual void SetPositionY(double positionY) = 0;
 
     //-----------------------------------------------------------------------------
-    //! Sets width of agents boundary box
+    //! Sets the agents vehicle model parameter
     //!
-    //! @param[in]     width    Width of agent
+    //! @param[in]     parameter    New vehicle model paramter
     //-----------------------------------------------------------------------------
-    virtual void SetWidth(double width) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Sets length of agents boundary box
-    //!
-    //! @param[in]     length    Length of agent
-    //-----------------------------------------------------------------------------
-    virtual void SetLength(double length) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Sets height of agents boundary box
-    //!
-    //! @param[in]     height    Height of agent
-    //-----------------------------------------------------------------------------
-    virtual void SetHeight(double height) = 0;
+    virtual void SetVehicleModelParameter (const VehicleModelParameters &parameter) = 0;
 
     //-----------------------------------------------------------------------------
     //! Sets forward velocity of agent
@@ -324,13 +230,6 @@ public:
     virtual double GetDistanceTraveled() const = 0;
 
     //-----------------------------------------------------------------------------
-    //! Sets distance from COG to front axle of agent
-    //!
-    //! @param[in]     distanceCOGtoFrontAxle    distance from COG to front axle
-    //-----------------------------------------------------------------------------
-    virtual void SetDistanceCOGtoFrontAxle(double distanceCOGtoFrontAxle) = 0;
-
-    //-----------------------------------------------------------------------------
     //! Sets gear of vehicle
     //!
     //! @param[in]     gear    current gear
@@ -366,70 +265,6 @@ public:
     virtual void SetSteeringWheelAngle(double steeringWheelAngle) = 0;
 
     //-----------------------------------------------------------------------------
-    //! Sets weight of agent
-    //!
-    //! @param[in]     weight    agents weight
-    //-----------------------------------------------------------------------------
-    virtual void SetWeight(double weight) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Sets distance from ground to COG of agent
-    //!
-    //! @param[in]     heightCOG    distance from ground to COG
-    //-----------------------------------------------------------------------------
-    virtual void SetHeightCOG(double heightCOG) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Sets distance from reference point to front axle of agent
-    //!
-    //! @param[in]     distanceReferencePointToFrontAxle    distance from reference
-    //!                                                     point to front axle
-    //-----------------------------------------------------------------------------
-    virtual void SetDistanceReferencePointToFrontAxle(double distanceReferencePointToFrontAxle) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Sets distance from reference point to leading edge
-    //!
-    //! @param[in]     distanceReferencePointToLeadingEdge    distance from reference point to leading edge
-    //-----------------------------------------------------------------------------
-    virtual void SetDistanceReferencePointToLeadingEdge(double distanceReferencePointToLeadingEdge) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Sets distance between centers of front and rear wheels
-    //!
-    //! @param[in]     wheelbase    Distance between front and rear wheels.
-    //-----------------------------------------------------------------------------
-    virtual void SetWheelbase(double wheelbase) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Sets steering ratio
-    //!
-    //! @param[in]     steeringRatio    ratio between steering wheel angle and front wheel angle
-    //-----------------------------------------------------------------------------
-    virtual void SetSteeringRatio(double steeringRatio) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Sets moment of inertia for roll axis
-    //!
-    //! @param[in]     momentInertiaRoll    moment of inertia for roll axis
-    //-----------------------------------------------------------------------------
-    virtual void SetMomentInertiaRoll(double momentInertiaRoll) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Sets moment of inertia for pitch axis
-    //!
-    //! @param[in]     momentInertiaPitch    moment of inertia for pitch axis
-    //-----------------------------------------------------------------------------
-    virtual void SetMomentInertiaPitch(double momentInertiaPitch) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Sets moment of inertia for yaw axis
-    //!
-    //! @param[in]     momentInertiaYaw    moment of inertia for yaw axis
-    //-----------------------------------------------------------------------------
-    virtual void SetMomentInertiaYaw(double momentInertiaYaw) = 0;
-
-    //-----------------------------------------------------------------------------
     //! Sets maximum acceleration of the vehicle
     //!
     //! @param[in]     maxAcceleration   maximum acceleration
@@ -442,29 +277,6 @@ public:
     //! @param[in]     maxDeceleration   maximum deceleration
     //-----------------------------------------------------------------------------
     virtual void SetMaxDeceleration(double maxDeceleration) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Sets friction coefficient
-    //!
-    //! @param[in]     frictionCoeff    friction coefficient
-    //-----------------------------------------------------------------------------
-    virtual void SetFrictionCoeff(double frictionCoeff) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Sets distance between wheels on same axle
-    //!
-    //! @param[in]     trackWidth    distance between both front wheels (or both
-    //!                              rear wheels)
-    //-----------------------------------------------------------------------------
-    virtual void SetTrackWidth(double trackWidth) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Sets distance from COG to leading edge
-    //!
-    //! @param[in]     distanceCOGtoLeadingEdge    distance from COG to leading
-    //!                                            edge
-    //-----------------------------------------------------------------------------
-    virtual void SetDistanceCOGtoLeadingEdge(double distanceCOGtoLeadingEdge) = 0;
 
     //-----------------------------------------------------------------------------
     //! Sets forward acceleration of agent
@@ -605,7 +417,6 @@ public:
     //-----------------------------------------------------------------------------
     virtual bool InitAgentParameter(int id,
                                     int agentTypeId,
-                                    int spawnTime,
                                     const AgentSpawnItem *agentSpawnItem,
                                     const SpawnItemParameterInterface &spawnItemParameter) = 0;
 
@@ -615,7 +426,6 @@ public:
     //! @return    true for success
     //-----------------------------------------------------------------------------
     virtual bool InitAgentParameter(int id,
-                                    int spawnTime,
                                     AgentBlueprintInterface* agentBlueprint) = 0;
 
     //-----------------------------------------------------------------------------
@@ -685,13 +495,6 @@ public:
     virtual double GetLaneWidth(int relativeLane = 0, double distance = 0.0) const = 0;
 
     //-----------------------------------------------------------------------------
-    //! Returns the width of a lane right of the agent.
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual double GetLaneWidthRightDrivingAndStopLane() const = 0;
-
-    //-----------------------------------------------------------------------------
     //! Returns the curvature of the lane at the postion given by the relative distance to the agent
     //!
     //! \param relativeLane relative difference of lane relative to agent (positive for left lanes, negative for right lanes, 0 for own lane)
@@ -724,20 +527,6 @@ public:
     virtual double GetDistanceToRearAgent(int laneId) = 0;
 
     //-----------------------------------------------------------------------------
-    //! Returns the AgentInterface of the next agent in front in a specific lane.
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual const AgentInterface *GetAgentInFront(int laneId) const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns the AgentInterface of the next agent behind in a specific lane.
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual const AgentInterface *GetAgentBehind(int laneId) const = 0;
-
-    //-----------------------------------------------------------------------------
     //! Returns the longitudinal distance to another agent. (negative if other agent is behind)
     //!
     //! @return the distance to the other object
@@ -757,44 +546,6 @@ public:
     //! @return
     //-----------------------------------------------------------------------------
     virtual void SetSpecialAgentMarker() = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns true if a left lane exists.
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual bool ExistsLaneLeft() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns true if a right lane exists.
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual bool ExistsLaneRight() const = 0;
-
-    //! Returns true if the given lane at given relative distance and is a driving lane.
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual bool IsLaneDrivingLane(int laneId, double distance = 0.0) const = 0;
-
-    //! Returns true if the given lane at given relative distance is a stop lane.
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual bool IsLaneStopLane(int laneId, double distance = 0.0) const = 0;
-
-    //! Returns true if the given lane at given relative distance is a exit lane.
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual bool IsLaneExitLane(int laneId, double distance = 0.0) const = 0;
-
-    //! Returns true if the given lane at given relative distance is a ramp.
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual bool IsLaneRamp(int laneId, double distance = 0.0) const = 0;
 
     //-----------------------------------------------------------------------------
     //! Sets the flag to mark the agent as obstacle.
@@ -826,22 +577,12 @@ public:
     virtual double GetDistanceToEndOfLane(double sightDistance, int relativeLane = 0) const  = 0;
 
     //-----------------------------------------------------------------------------
-    //! Returns the distance to the end of the current exit lane or infinity, if end of
-    //! lane is farther away then the sightDistance.
-    //!
-    //! @return                distance to the end of the exit lane (in meters)
-    //-----------------------------------------------------------------------------
-    virtual double GetDistanceToEndOfExit(int laneID, double sightDistance) const = 0;
-
-
-    //-----------------------------------------------------------------------------
-    //! Returns the distance to the end of the current ramp or infinity, if end of
-    //! lane is farther away then the sightDistance.
+    //! Returns the distance to the end of the current lane considering until lane of specified type
+    //! or infinity, if end of lane is farther away then the sightDistance.
     //!
     //! @return
     //-----------------------------------------------------------------------------
-    virtual double GetDistanceToEndOfRamp(int laneID, double sightDistance) const = 0;
-
+    virtual double GetDistanceToEndOfLane(double sightDistance, int relativeLane, const LaneTypes& laneTypes) const  = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the lateral position.
@@ -855,13 +596,6 @@ public:
 
     //! Returns true if the agent touches more than one lane
     virtual bool IsCrossingLanes() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns size of lanes in total
-    //!
-    //! @return               number of lanes
-    //-----------------------------------------------------------------------------
-    virtual int GetNumberOfLanes() = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the distance of the front agent to ego.
@@ -923,26 +657,6 @@ public:
     virtual bool IsFirstCarInLane() const = 0;
 
     //-----------------------------------------------------------------------------
-    //! Returns the next object in front for a specific lane.
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual WorldObjectInterface* GetObjectInFront(double previewDistance, int relativeLaneId = 0) const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns the nearest object behind for a specific lane.
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual WorldObjectInterface* GetObjectBehind(double previewDistance, int relativeLaneId = 0) const = 0;
-
-    //! Returns a vector with all AgentInterfaces of the next agents in front in all assigned lanes.
-    virtual std::vector<AgentInterface*> GetAllAgentsInFront() const = 0;
-
-    //! Returns a vector with all WorldObjectInterfaces of the next objects in front in all assigned lanes.
-    virtual std::vector<const WorldObjectInterface*> GetAllWorldObjectsInFront() const = 0;
-
-    //-----------------------------------------------------------------------------
     //! Returns all objects around the agent on given lane inside the given range
     //! Objects partially in range are also considered
     //!
@@ -963,19 +677,6 @@ public:
     //! @param[in]      mp              measurement point for range
     //-----------------------------------------------------------------------------
     virtual std::vector<const AgentInterface *> GetAgentsInRange(int relativeLane, double backwardRange, double forwardRange, MeasurementPoint mp) const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns all agents in specified range (also agents partially in search interval).
-    //! Returns empty list otherwise.
-    //!
-    //! @param[in] laneId OpendDriveId of lane to search in
-    //! @param[in] minDistance  lower bound of search interval (s coordinate)
-    //! @param[in] maxDistance  upper bound of search interval (s coordinate)
-    //!
-    //! @return All agents in specified range
-    //-----------------------------------------------------------------------------
-    virtual std::vector<const AgentInterface*> GetAgentsInRangeAbsolute(int laneId, double minDistance,
-            double maxDistance) const = 0;
 
     //! Returns the s coordinate distance from the front of the agent to the first point where his lane intersects another.
     //! As the agent may not yet be on the junction, it has to be specified which connecting road he will take in the junction
@@ -1281,6 +982,20 @@ public:
     virtual void SetYawAcceleration(double yawAcceleration) = 0;
 
     //-----------------------------------------------------------------------------
+    //! Retrieve the centripetal acceleration of the agent.
+    //!
+    //! @return   Centripetal acceleration [m/s^2]
+    //-----------------------------------------------------------------------------
+    virtual double GetCentripetalAcceleration() const = 0;
+
+    //-----------------------------------------------------------------------------
+    //! Set the centripetal acceleration of the agent.
+    //!
+    //! @param[in]   centripetalAcceleration   The acceleration to set [m/s^2]
+    //-----------------------------------------------------------------------------
+    virtual void SetCentripetalAcceleration(double centripetalAcceleration) = 0;
+
+    //-----------------------------------------------------------------------------
     //! Retrieve the trajectory of time of the agent.
     //!
     //! @return
@@ -1466,16 +1181,9 @@ public:
     //-----------------------------------------------------------------------------
     virtual double GetSpeedGoalMin() const = 0;
 
-    //-----------------------------------------------------------------------------
-    //! Retrieves distance from reference point to front axle of agent
-    //!
-    //! @return               Distance from reference point to front axle
-    //-----------------------------------------------------------------------------
-    virtual double GetDistanceReferencePointToFrontAxle() const = 0;
+    virtual const openpass::sensors::Parameters& GetSensorParameters() const = 0;
 
-    virtual const std::list<SensorParameter>& GetSensorParameters() const = 0;
-
-    virtual void SetSensorParameters(std::list<SensorParameter> sensorParameters) = 0;
+    virtual void SetSensorParameters(openpass::sensors::Parameters sensorParameters) = 0;
 
     //-----------------------------------------------------------------------------
     //! \brief GetDistanceToNextJunction gets the distance to the next junction on

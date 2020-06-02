@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020 in-tech GmbH
 *               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -17,6 +17,7 @@
 #include <exception>
 #include <list>
 #include <memory>
+#include <string>
 #include <tuple>
 #include <qglobal.h>
 
@@ -223,31 +224,14 @@ double Lane::GetWidth(double distance) const
 
 double Lane::GetDirection(double distance) const
 {
-    const Primitive::LaneGeometryJoint* prevJoint;
-    const Primitive::LaneGeometryJoint* nextJoint;
-    std::tie(prevJoint, nextJoint) = GetNeighbouringJoints(distance);
+    auto [prevJoint, nextJoint] = GetNeighbouringJoints(distance);
 
-    if (!prevJoint && !nextJoint)
+    if (!prevJoint)
     {
         return 0.0;
     }
-    else
-        if (prevJoint && !nextJoint)
-        {
-            return prevJoint->sHdg;
-        }
-        else
-            if (nextJoint && !prevJoint)
-            {
-                return 0.0;
-            }
 
-    double interpolationFactor = (distance - prevJoint->sOffset) / (nextJoint->sOffset -
-                                                                    prevJoint->sOffset);
-    double interpolatedDirection = (1.0 - interpolationFactor) * prevJoint->sHdg + interpolationFactor *
-            nextJoint->sHdg;
-
-    return interpolatedDirection;
+    return prevJoint->sHdg;
 }
 
 const Interfaces::Lane& Lane::GetLeftLane() const
@@ -1328,8 +1312,10 @@ TrafficSign::TrafficSign(osi3::TrafficSign* osiObject) : osiSign{osiObject}
 {
 }
 
-void TrafficSign::SetSpecification(RoadSignalInterface* signal)
+bool TrafficSign::SetSpecification(RoadSignalInterface* signal)
 {
+    bool mapping_succeeded = true;
+
     const auto mutableOsiClassification = osiSign->mutable_main_sign()->mutable_classification();
     const std::string odType = signal->GetType();
 
@@ -1372,10 +1358,13 @@ void TrafficSign::SetSpecification(RoadSignalInterface* signal)
         mutableOsiClassification->mutable_value()->set_value(value);
         mutableOsiClassification->mutable_value()->set_value_unit(valueAndUnit.second);
     }
-    else {
-        const std::string message = "Invalid traffic sign type: " + odType;
-        throw std::invalid_argument(message);
+    else
+    {
+        mutableOsiClassification->set_type(osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_OTHER);
+        mapping_succeeded = false;
     }
+
+    return mapping_succeeded;
 }
 
 void TrafficSign::AddSupplementarySign(RoadSignalInterface* odSignal)
@@ -1445,33 +1434,33 @@ CommonTrafficSign::Entity TrafficSign::GetSpecification(const double relativeDis
         specification.type = typeConversionMap.at(osiType);
     }
 
-    const auto osiMainSign = osiSign->main_sign().classification().value();
+    const auto& osiMainSign = osiSign->main_sign().classification().value();
     const auto valueAndUnit = GetValueAndUnitInSI(osiMainSign.value(), osiMainSign.value_unit());
 
     specification.value = valueAndUnit.first;
     specification.unit = valueAndUnit.second;
     specification.text = osiSign->main_sign().classification().value().text();
 
-    for (int i = 0; i < osiSign->supplementary_sign().size(); i++)
-    {
+    std::transform(osiSign->supplementary_sign().cbegin(),
+                   osiSign->supplementary_sign().cend(),
+                   std::back_inserter(specification.supplementarySigns),
+                   [this, relativeDistance](const auto& osiSupplementarySign) {
         CommonTrafficSign::Entity supplementarySignSpecification;
         supplementarySignSpecification.distanceToStartOfRoad = s;
         supplementarySignSpecification.relativeDistance = s - relativeDistance;
 
-        auto osiSupplementarySign = osiSign->supplementary_sign().Get(i);
-
-        if(osiSupplementarySign.classification().type() == osi3::TrafficSign_SupplementarySign_Classification_Type::TrafficSign_SupplementarySign_Classification_Type_TYPE_SPACE)
+        if (osiSupplementarySign.classification().type() == osi3::TrafficSign_SupplementarySign_Classification_Type::TrafficSign_SupplementarySign_Classification_Type_TYPE_SPACE)
         {
-            supplementarySignSpecification.type = CommonTrafficSign::Type::DistanceIndication;
-
-            auto osiSupplementarySignValueStruct = osiSupplementarySign.classification().value().Get(i);
+            const auto& osiSupplementarySignValueStruct = osiSupplementarySign.classification().value().Get(0);
             const auto supplementarySignValueAndUnit = GetValueAndUnitInSI(osiSupplementarySignValueStruct.value(), osiSupplementarySignValueStruct.value_unit());
+            supplementarySignSpecification.type = CommonTrafficSign::Type::DistanceIndication;
             supplementarySignSpecification.value = supplementarySignValueAndUnit.first;
             supplementarySignSpecification.unit = supplementarySignValueAndUnit.second;
             supplementarySignSpecification.text = osiSupplementarySignValueStruct.text();
         }
-        specification.supplementarySigns.push_back(supplementarySignSpecification);
-    }
+
+        return supplementarySignSpecification;
+    });
 
     return specification;
 }

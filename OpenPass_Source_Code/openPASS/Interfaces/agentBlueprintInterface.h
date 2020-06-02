@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -17,9 +17,12 @@
 
 #include <string>
 #include <unordered_map>
+
+#include "Common/globalDefinitions.h"
+#include "Common/worldDefinitions.h"
+
 #include "agentTypeInterface.h"
 #include "profilesInterface.h"
-#include "Common/globalDefinitions.h"
 
 #pragma once
 
@@ -27,17 +30,13 @@ using VehicleComponentProfileNames = std::unordered_map<std::string, std::string
 
 struct SpawnParameter
 {
-    std::string SpawningRoadId = "";
-    int SpawningLaneId = -999;
-    int nextTimeOffset = -999;
-    double distance = -999;
     double positionX = -999;
     double positionY = -999;
     double velocity = -999;
     double acceleration = -999;
     double gear = -999;
     double yawAngle = -999;
-    double heading = 0;
+    std::optional<Route> route{};
 };
 
 class AgentBlueprintInterface
@@ -58,24 +57,24 @@ public:
     virtual void SetSpeedGoalMin(double speedGoalMin) = 0;
     virtual void SetAgentType(std::shared_ptr<SimulationSlave::AgentTypeInterface> agentType) = 0;
 
-    virtual void AddSensor(SensorParameter parameters) = 0;
+    virtual void AddSensor(openpass::sensors::Parameter parameters) = 0;
 
-    virtual AgentCategory                       GetAgentCategory() = 0;
-    virtual std::string                         GetAgentProfileName() = 0;
-    virtual std::string                         GetVehicleProfileName() = 0;
-    virtual std::string                         GetVehicleModelName() = 0;
-    virtual std::string                         GetDriverProfileName() = 0;
-    virtual std::string                         GetObjectName() = 0;
+    virtual AgentCategory                           GetAgentCategory() const = 0;
+    virtual std::string                             GetAgentProfileName() const = 0;
+    virtual std::string                             GetVehicleProfileName() const = 0;
+    virtual std::string                             GetVehicleModelName() const = 0;
+    virtual std::string                             GetDriverProfileName() const = 0;
+    virtual std::string                             GetObjectName() const = 0;
 
-    virtual VehicleModelParameters              GetVehicleModelParameters() = 0;
-    virtual std::list<SensorParameter>          GetSensorParameters()  = 0;
-    virtual VehicleComponentProfileNames        GetVehicleComponentProfileNames() = 0;
-    virtual SimulationSlave::AgentTypeInterface& GetAgentType() = 0;
-    virtual SpawnParameter&                      GetSpawnParameter() = 0;
-    virtual double                              GetSpeedGoalMin() = 0;
+    virtual VehicleModelParameters                  GetVehicleModelParameters() const = 0;
+    virtual openpass::sensors::Parameters           GetSensorParameters() const = 0;
+    virtual VehicleComponentProfileNames            GetVehicleComponentProfileNames() const = 0;
+    virtual SimulationSlave::AgentTypeInterface&    GetAgentType() const = 0;
+    virtual SpawnParameter&                         GetSpawnParameter() = 0;
+    virtual const SpawnParameter&                   GetSpawnParameter() const = 0;
+    virtual double                                  GetSpeedGoalMin() const = 0;
 
-    virtual void                        SetObjectName(std::string objectName) = 0;
-    virtual void Reset() = 0;
+    virtual void                                    SetObjectName(std::string objectName) = 0;
 };
 
 

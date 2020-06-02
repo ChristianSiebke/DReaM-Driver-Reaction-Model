@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -16,8 +16,7 @@
 //!        plane.
 //-----------------------------------------------------------------------------
 
-#ifndef ROADGEOMETRYINTERFACE
-#define ROADGEOMETRYINTERFACE
+#pragma once
 
 #include "Common/vector2d.h"
 #include "Interfaces/roadInterface/roadInterface.h"
@@ -39,52 +38,19 @@ public:
     //-----------------------------------------------------------------------------
     //! Calculates the x/y coordinates as vector.
     //!
-    //! @param[in]  side                side of road (1: left, -1: right)
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes
-    //! @param[in]  laneOffset          lane offset
-    //! @param[in]  laneWidth           width of lane
-    //! @param[in]  corner              position in lane (1: left, 0: middle, -1: right)
-    //! @return                         vector with the x/y coordinates
+    //! @param[in]  sOffset    s offset within geometry section
+    //! @param[in]  tOffset    offset to the left
+    //! @return                coordinates with the x/y coordinates
     //-----------------------------------------------------------------------------
-    virtual Common::Vector2d GetCoord(double side,
-                                      double geometryOffset,
-                                      double previousWidth,
-                                      double laneOffset,
-                                      double laneWidth,
-                                      int corner) = 0;
+    virtual Common::Vector2d GetCoord(double geometryOffset, double laneOffset) const = 0;
 
     //-----------------------------------------------------------------------------
-    //! Calculates the curvature.
+    //! Calculates the heading.
     //!
-    //! @param[in]  side                side of road (1: left, -1, right)
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes
-    //! @param[in]  laneOffset          lane offset
-    //! @param[in]  laneWidth           width of lane
-    //! @return                         curvature
+    //! @param[in]  sOffset    s offset within geometry section
+    //! @return                heading
     //-----------------------------------------------------------------------------
-    virtual double GetCurvature(double side,
-                                double geometryOffset,
-                                double previousWidth,
-                                double laneOffset,
-                                double laneWidth) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Calculates the direction.
-    //!
-    //! @param[in]  side                side of road (1: left, -1, right)
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes
-    //! @param[in]  laneOffset          lane offset
-    //! @param[in]  laneWidth           width of lane
-    //! @return                         direction
-    //-----------------------------------------------------------------------------
-    virtual double GetDir(double side,
-                          double geometryOffset,
-                          double previousWidth,
-                          double laneOffset,
-                          double laneWidth) = 0;
+    virtual double GetDir(double geometryOffset) const = 0;
 
     //-----------------------------------------------------------------------------
     //! Retrieves the offset within the OpenDrive road.
@@ -106,104 +72,4 @@ public:
     //! @return                         length of geometry section
     //-----------------------------------------------------------------------------
     virtual double GetLength() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Gets a vector representing a linear road in a x/y coordinate system.
-    //!
-    //! @param[in]  side                side of road (1: left, -1: right)
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes
-    //! @param[in]  laneOffset          lane offset
-    //! @param[in]  laneWidth           width of lane
-    //! @param[in]  corner              position in lane (1: left, 0: middle, -1: right)
-    //! @return                         vector with the x/y coordinates
-    //-----------------------------------------------------------------------------
-    Common::Vector2d GetCoordLine(double side,
-                                  double geometryOffset,
-                                  double previousWidth,
-                                  double laneOffset,
-                                  double laneWidth,
-                                  int corner);
-
-    //-----------------------------------------------------------------------------
-    //! Returns the curvature of a line, i.e. 0.0.
-    //!
-    //! @param[in]  side                side of road (1: left, -1: right); unused
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes; unused
-    //! @param[in]  laneOffset          lane offset; unused
-    //! @param[in]  laneWidth           width of lane; unused
-    //! @return                         0.0
-    //-----------------------------------------------------------------------------
-    double GetCurvatureLine(double side,
-                            double geometryOffset,
-                            double previousWidth,
-                            double laneOffset,
-                            double laneWidth);
-
-    //-----------------------------------------------------------------------------
-    //! Returns the direction of the line, i.e. the start orientation.
-    //!
-    //! @param[in]  geometryOffset      offset within geometry section; unused
-    //! @return                         direction
-    //-----------------------------------------------------------------------------
-    double GetDirLine(double geometryOffset);
-
-    //-----------------------------------------------------------------------------
-    //! Gets a vector representing an arc in a polar coordinate system.
-    //!
-    //! @param[in]  side                side of road (1: left, -1: right)
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  previousWidth       sum of widths of inner lanes
-    //! @param[in]  laneOffset          lane offset
-    //! @param[in]  laneWidth           width of lane
-    //! @param[in]  curvature           curvature of the arc
-    //! @param[in]  corner              position in lane (1: left, 0: middle, -1: right)
-    //! @return                         vector with the x/y coordinates
-    //-----------------------------------------------------------------------------
-    Common::Vector2d GetCoordArc(double side,
-                                 double geometryOffset,
-                                 double previousWidth,
-                                 double laneOffset,
-                                 double laneWidth,
-                                 double curvature,
-                                 int corner);
-
-    //-----------------------------------------------------------------------------
-    //! Returns the curvature of an arc.
-    //!
-    //! @param[in]  side                side of road (1: left, -1: right); unused
-    //! @param[in]  geometryOffset      offset within geometry section; unused
-    //! @param[in]  previousWidth       sum of widths of inner lanes; unused
-    //! @param[in]  laneOffset          lane offset; unused
-    //! @param[in]  laneWidth           width of lane; unused
-    //! @param[in]  curvature           curvature of the arc
-    //! @return                         curvature
-    //-----------------------------------------------------------------------------
-    double GetCurvatureArc(double side,
-                           double geometryOffset,
-                           double previousWidth,
-                           double laneOffset,
-                           double laneWidth,
-                           double curvature);
-
-    //-----------------------------------------------------------------------------
-    //! Returns the direction of an arc, i.e. the initial heading plus the fraction
-    //! of the radius due to the curvature.
-    //!
-    //! @param[in]  geometryOffset      offset within geometry section
-    //! @param[in]  curvature           curvature of the arc
-    //! @return                         direction of the arc
-    //-----------------------------------------------------------------------------
-    double GetDirArc(double geometryOffset,
-                     double curvature);
-
-    double s;
-    double x;
-    double y;
-    double hdg;
-    double length;
 };
-
-#endif // ROADGEOMETRYINTERFACE
-

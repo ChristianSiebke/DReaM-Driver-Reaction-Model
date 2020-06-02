@@ -108,13 +108,13 @@ void AlgorithmAgentFollowingDriverModelImplementation::UpdateOutput(int localLin
         try
         {
             data = std::make_shared<LateralSignal const>(
+                        componentState,
                         out_laneWidth,
                         out_lateral_displacement, // lateral deviation
                         out_lateral_gain_displacement,
                         out_lateral_heading_error,
                         out_lateral_gain_heading_error,
-                        out_curvature,
-                        componentState);
+                        out_curvature);
         }
         catch(const std::bad_alloc&)
         {

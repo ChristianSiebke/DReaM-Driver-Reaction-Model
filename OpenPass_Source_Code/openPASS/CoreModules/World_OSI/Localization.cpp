@@ -261,11 +261,15 @@ Result Localizer::BuildResult(const LocatedObject& locatedObject, const Route& r
     GlobalRoadPosition referencePoint;
     const auto& referenceRoad = std::find_if(route.roads.cbegin(), route.roads.cend(),
                                         [&](const auto& routeElement){return locatedObject.referencePoint.count(routeElement.roadId) > 0;});
+
     if (referenceRoad == route.roads.cend())
     {
-        isOnRoute = false;
         //If the referencePoint is not on the route, but on some other road, we take an arbitrary road instead
-        if (locatedObject.referencePoint.size() > 0)
+        if (locatedObject.referencePoint.empty())
+        {
+            isOnRoute = false;
+        }
+        else
         {
             referencePoint = locatedObject.referencePoint.cbegin()->second;
         }

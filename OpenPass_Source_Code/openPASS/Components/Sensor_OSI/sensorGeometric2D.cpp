@@ -17,6 +17,7 @@
 #include <numeric>
 #include "Common/boostGeometryCommon.h"
 #include "CoreModules/World_OSI/WorldData.h"
+#include "Interfaces/parameterInterface.h"
 
 SensorGeometric2D::SensorGeometric2D(
         std::string componentName,
@@ -83,6 +84,7 @@ void SensorGeometric2D::UpdateInput(int, const std::shared_ptr<SignalInterface c
 void SensorGeometric2D::Observe(const int time, const SensorDetectionResults& results)
 {
     std::vector<OWL::Id> visibleIds;
+
     std::transform(results.visibleMovingObjects.begin(),
                    results.visibleMovingObjects.end(),
                    std::back_inserter(visibleIds),
@@ -90,9 +92,27 @@ void SensorGeometric2D::Observe(const int time, const SensorDetectionResults& re
     {
         return object.id().value();
     });
+
+    std::transform(results.visibleStationaryObjects.begin(),
+                   results.visibleStationaryObjects.end(),
+                   std::back_inserter(visibleIds),
+                   [](const auto object) -> OWL::Id
+    {
+        return object.id().value();
+    });
+
     std::vector<OWL::Id> detectedIds;
+
     std::transform(results.detectedMovingObjects.begin(),
                    results.detectedMovingObjects.end(),
+                   std::back_inserter(detectedIds),
+                   [](const auto object) -> OWL::Id
+    {
+        return object.id().value();
+    });
+
+    std::transform(results.detectedStationaryObjects.begin(),
+                   results.detectedStationaryObjects.end(),
                    std::back_inserter(detectedIds),
                    [](const auto object) -> OWL::Id
     {
@@ -121,7 +141,15 @@ std::string SensorGeometric2D::CreateAgentIdListString(const std::vector<OWL::Id
                    std::back_inserter(agentIds),
                    [worldData](const auto owlId) -> std::string
     {
-        return std::to_string(worldData->GetAgentId(owlId));
+        try
+        {
+            return std::to_string(worldData->GetAgentId(owlId));
+        }
+        catch (const std::out_of_range&)
+        {
+            // agent id could not be resolved, maybe stationary object
+            return "x";
+        }
     });
 
     return std::accumulate(agentIds.begin(),

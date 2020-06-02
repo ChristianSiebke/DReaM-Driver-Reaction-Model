@@ -1,5 +1,5 @@
 # /*********************************************************************
-# * Copyright (c) 2017, 2018, 2019 in-tech GmbH
+# * Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -15,13 +15,16 @@ SUBDIRS = \
         CoreModules/EventDetector \
         CoreModules/Manipulator \
         CoreModules/Observation_Log \
-        CoreModules/SpawnPoint_OSI \
+        CoreModules/SpawnPoints/SpawnPointScenario_OSI \
+        CoreModules/SpawnPoints/SpawnPointPreRunCommon_OSI \
+        CoreModules/SpawnPoints/SpawnPointRuntimeCommon_OSI \
         CoreModules/Stochastics \
         CoreModules/World_OSI \
         Components/Action_LongitudinalDriver \
         Components/Action_SecondaryDriverTasks \
         Components/AgentUpdater \
         Components/Algorithm_AEB \
+        Components/Algorithm_FmuWrapper \
         Components/Algorithm_Lateral \
         Components/Algorithm_Longitudinal \
         Components/AlgorithmAgentFollowingDriverModel \
@@ -30,6 +33,7 @@ SUBDIRS = \
         Components/Dynamics_RegularDriving \
         Components/Dynamics_TrajectoryFollower \
         Components/LimiterAccelerationVehicleComponents \
+        Components/OpenScenarioActions \
         Components/Parameters_Vehicle \
         Components/Sensor_Driver \
         Components/Sensor_OSI \

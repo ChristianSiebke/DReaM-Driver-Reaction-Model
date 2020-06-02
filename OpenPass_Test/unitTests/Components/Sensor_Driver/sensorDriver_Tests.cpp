@@ -54,13 +54,17 @@ TEST(SensorDriver_UnitTests, CorrectInformationInSignal)
     ON_CALL(egoAgent, GetTrafficSignsInRange(_,0)).WillByDefault(Return(trafficSigns));
     ON_CALL(egoAgent, GetTrafficSignsInRange(_,1)).WillByDefault(Return(trafficSigns));
     ON_CALL(egoAgent, GetTrafficSignsInRange(_,-1)).WillByDefault(Return(trafficSigns));
-    ON_CALL(egoAgent, ExistsLaneLeft()).WillByDefault(Return(true));
-    ON_CALL(egoAgent, ExistsLaneRight()).WillByDefault(Return(true));
+    RelativeWorldView::Lanes relativeLanes {{0.0, 0.0,
+            {{-1, true, LaneType::Driving, std::nullopt, std::nullopt},
+            {0, true, LaneType::Driving, std::nullopt, std::nullopt},
+            {1, true, LaneType::Driving, std::nullopt, std::nullopt}}}};
+    ON_CALL(egoAgent, GetRelativeLanes(_)).WillByDefault(Return(relativeLanes));
 
     ON_CALL(fakeWorld, GetVisibilityDistance()).WillByDefault(Return(123.4));
 
     NiceMock<FakeAgent> otherAgent;
-    ON_CALL(egoAgent, GetObjectInFront(_,0)).WillByDefault(Return(&otherAgent));
+    std::vector<const WorldObjectInterface *> objectsInFront{{&otherAgent}};
+    ON_CALL(egoAgent, GetObjectsInRange(0,0.0,_,_)).WillByDefault(Return(objectsInFront));
     ON_CALL(otherAgent, GetId()).WillByDefault(Return(2));
     ON_CALL(egoAgent, GetDistanceToObject(&otherAgent)).WillByDefault(Return(50.0));
     ON_CALL(otherAgent, GetRelativeYaw()).WillByDefault(Return(0.1));
@@ -73,7 +77,8 @@ TEST(SensorDriver_UnitTests, CorrectInformationInSignal)
     ON_CALL(otherAgent, GetPositionLateral()).WillByDefault(Return(2.0));
 
     NiceMock<FakeWorldObject> trafficObject;
-    ON_CALL(egoAgent, GetObjectBehind(_,1)).WillByDefault(Return(&trafficObject));
+    std::vector<const WorldObjectInterface *> objectsBehind{{&trafficObject}};
+    ON_CALL(egoAgent, GetObjectsInRange(1,_,0.0,_)).WillByDefault(Return(objectsBehind));
     ON_CALL(trafficObject, GetId()).WillByDefault(Return(3));
     ON_CALL(egoAgent, GetDistanceToObject(&trafficObject)).WillByDefault(Return(60.0));
     ON_CALL(trafficObject, GetYaw()).WillByDefault(Return(0.2));

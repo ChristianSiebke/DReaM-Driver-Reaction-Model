@@ -27,26 +27,23 @@
 class SteeringSignal : public ComponentStateSignalInterface
 {
 public:
-    const std::string COMPONENTNAME = "SteeringSignal";
+    static constexpr char COMPONENTNAME[] = "SteeringSignal";
 
     //-----------------------------------------------------------------------------
     //! Constructor
     //-----------------------------------------------------------------------------
     SteeringSignal(ComponentState componentState,
                   double steeringWheelAngle) :
+        ComponentStateSignalInterface (componentState),
         steeringWheelAngle(steeringWheelAngle)
-    {
-        this->componentState = componentState;
-    }
-
-    SteeringSignal(const SteeringSignal&) = delete;
-    SteeringSignal(SteeringSignal&&) = delete;
-    SteeringSignal& operator=(const SteeringSignal&) = delete;
-    SteeringSignal& operator=(SteeringSignal&&) = delete;
-
-    virtual ~SteeringSignal()
-
     {}
+
+    SteeringSignal(const SteeringSignal&) = default;
+    SteeringSignal(SteeringSignal&&) = default;
+    SteeringSignal& operator=(const SteeringSignal&) = default;
+    SteeringSignal& operator=(SteeringSignal&&) = default;
+
+    virtual ~SteeringSignal() = default;
 
     //-----------------------------------------------------------------------------
     //! Returns the content/payload of the signal as an std::string

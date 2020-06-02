@@ -24,6 +24,7 @@
 #include "Interfaces/eventNetworkInterface.h"
 #include "Interfaces/observationInterface.h"
 #include "Interfaces/callbackInterface.h"
+#include "Common/runtimeInformation.h"
 
 namespace SimulationSlave {
 
@@ -42,8 +43,7 @@ public:
     typedef bool (*ObservationInterface_MasterPreHook)(ObservationInterface* implementation);
     typedef bool (*ObservationInterface_MasterPostHook)(ObservationInterface* implementation,
             const std::string& filename);
-    typedef bool (*ObservationInterface_SlavePreHook)(ObservationInterface* implementation,
-            const std::string& path);
+    typedef bool (*ObservationInterface_SlavePreHook)(ObservationInterface* implementation);
     typedef bool (*ObservationInterface_SlavePreRunHook)(ObservationInterface* implementation);
     typedef bool (*ObservationInterface_SlaveUpdateHook)(ObservationInterface* implementation,
             int time,
@@ -91,15 +91,16 @@ public:
     //! @return                             Observation module created from the
     //!                                     observation instance
     //-----------------------------------------------------------------------------
-    ObservationModule* CreateObservationModule(ParameterInterface* parameters,
+    ObservationModule* CreateObservationModule(
+            const openpass::common::RuntimeInformation& runtimeInformation,
+            const openpass::parameter::Container &parameters,
             StochasticsInterface* stochastics,
             WorldInterface* world,
             EventNetworkInterface* eventNetwork);
 
-    bool SlavePreHook(ObservationInterface* implementation,
-                      const std::string& path)
+    bool SlavePreHook(ObservationInterface* implementation)
     {
-        return slavePreHookFunc(implementation, path);
+        return slavePreHookFunc(implementation);
     }
 
 

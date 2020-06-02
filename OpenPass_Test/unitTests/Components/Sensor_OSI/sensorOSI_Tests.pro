@@ -44,4 +44,4 @@ SOURCES += \
     $$WORLD_OSI/WorldDataException.cpp \
     sensorOSI_Tests.cpp
 
-LIBS += -lopen_simulation_interface -lzmq -lprotobuf
+LIBS += -lopen_simulation_interface -lprotobuf

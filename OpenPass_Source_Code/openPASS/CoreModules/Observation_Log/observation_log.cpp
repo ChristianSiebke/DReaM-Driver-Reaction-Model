@@ -142,12 +142,11 @@ extern "C" OBSERVATION_LOG_SHARED_EXPORT bool OpenPASS_MasterPostHook(Observatio
     return true;
 }
 
-extern "C" OBSERVATION_LOG_SHARED_EXPORT bool OpenPASS_SlavePreHook(ObservationInterface* implementation,
-        const std::string& path)
+extern "C" OBSERVATION_LOG_SHARED_EXPORT bool OpenPASS_SlavePreHook(ObservationInterface* implementation)
 {
     try
     {
-        implementation->SlavePreHook(path);
+        implementation->SlavePreHook();
     }
     catch (const std::runtime_error& ex)
     {

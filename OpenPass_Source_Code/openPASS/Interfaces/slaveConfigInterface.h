@@ -20,10 +20,26 @@
 
 #include "Interfaces/parameterInterface.h"
 #include "Common/globalDefinitions.h"
+#include "Common/spawnPointLibraryDefinitions.h"
 
 using IntProbabilities = std::unordered_map<int, double>;
 using DoubleProbabilities = std::unordered_map<double, double>;
 using StringProbabilities = std::unordered_map<std::string, double>;
+
+struct hash_fn
+{
+    std::size_t operator()(const openpass::parameter::NormalDistribution& normalDistribution) const
+    {
+        std::size_t mean = std::hash<double>()(normalDistribution.mean);
+        std::size_t standardDeviation = std::hash<double>()(normalDistribution.standardDeviation);
+        std::size_t min = std::hash<double>()(normalDistribution.min);
+        std::size_t max = std::hash<double>()(normalDistribution.max);
+
+        return mean ^ standardDeviation ^ min ^ max;
+    }
+};
+
+using NormalDistributionProbabilities = std::unordered_map<openpass::parameter::NormalDistribution, double, hash_fn>;
 
 struct ExperimentConfig
 {
@@ -49,17 +65,6 @@ struct EnvironmentConfig
     DoubleProbabilities frictions {};
     StringProbabilities weathers {};
 };
-
-struct TrafficConfig
-{
-    DoubleProbabilities trafficVolumes{};
-    DoubleProbabilities platoonRates{};
-    DoubleProbabilities velocities {};
-    DoubleProbabilities homogenities {};
-    StringProbabilities regularLaneAgents {};
-    StringProbabilities rightMostLaneAgents {};
-};
-
 
 //-----------------------------------------------------------------------------
 //! Interface provides access to the slave configuration parameters
@@ -88,19 +93,14 @@ public:
     */
     virtual ScenarioConfig& GetScenarioConfig() = 0;
 
+    virtual SpawnPointLibraryInfoCollection& GetSpawnPointsConfig() = 0;
+
     /*!
     * \brief Returns a pointer to the environmentConfig
     *
     * @return        environmentConfig
     */
     virtual EnvironmentConfig& GetEnvironmentConfig() = 0;
-
-    /*!
-    * \brief Returns a pointer to the trafficConfig
-    *
-    * @return        trafficConfig
-    */
-    virtual TrafficConfig& GetTrafficConfig() = 0;
 
     /*!
      * \brief Returns the name of the profiles catalog

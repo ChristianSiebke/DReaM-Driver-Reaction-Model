@@ -12,9 +12,9 @@
 #include "systemConfigImporter.h"
 #include "dynamicProfileSampler.h"
 #include "dynamicParametersSampler.h"
+#include "agentBlueprint.h"
 
 AgentBlueprintProvider::AgentBlueprintProvider(ConfigurationContainerInterface *configurationContainer, const SamplerInterface& sampler) :
-    agentProfileSampler(configurationContainer, sampler),
     sampler(sampler),
     profiles(configurationContainer->GetProfiles()),
     agentProfiles(configurationContainer->GetProfiles()->GetAgentProfiles()),
@@ -24,33 +24,48 @@ AgentBlueprintProvider::AgentBlueprintProvider(ConfigurationContainerInterface *
 {
 }
 
-bool AgentBlueprintProvider::SampleAgent(AgentBlueprintInterface &agentBlueprint, LaneCategory laneCategory, unsigned int scenarioAgentIterator)
+AgentBlueprint AgentBlueprintProvider::SampleAgent(const std::string& agentProfileName) const
 {
-    agentProfileSampler.SampleAgentProfileName(agentBlueprint, laneCategory, scenarioAgentIterator);
-    auto agentProfile = agentProfiles.at(agentBlueprint.GetAgentProfileName());
-    if (agentProfile.type == AgentProfileType::Dynamic)
+    AgentBlueprint agentBlueprint;
+
+    try
     {
-        SampledProfiles sampledProfiles = SampledProfiles::make(agentBlueprint.GetAgentProfileName(), sampler, profiles)
-                .SampleDriverProfile()
-                .SampleVehicleProfile()
-                .SampleVehicleComponentProfiles();
-        DynamicParameters dynamicParameters = DynamicParameters::make(sampler, sampledProfiles.vehicleProfileName, profiles->GetVehicleProfiles(), profiles->GetSensorProfiles())
-                .SampleSensorLatencies();
-        AgentBuildInformation agentBuildInformation = AgentBuildInformation::make(sampledProfiles, dynamicParameters, systemConfigBlueprint, profiles, vehicleModels)
-                .SetVehicleModelParameters()
-                .GatherBasicComponents()
-                .GatherDriverComponents()
-                .GatherVehicleComponents()
-                .GatherSensors();
-        return GenerateDynamicAgentBlueprint(agentBlueprint, agentBuildInformation, sampledProfiles.driverProfileName);
+        auto agentProfile = agentProfiles.at(agentProfileName);
+        if (agentProfile.type == AgentProfileType::Dynamic)
+        {
+            SampledProfiles sampledProfiles = SampledProfiles::make(agentProfileName, sampler, profiles)
+                    .SampleDriverProfile()
+                    .SampleVehicleProfile()
+                    .SampleVehicleComponentProfiles();
+            DynamicParameters dynamicParameters = DynamicParameters::make(sampler, sampledProfiles.vehicleProfileName, profiles->GetVehicleProfiles(), profiles->GetSensorProfiles())
+                    .SampleSensorLatencies();
+            AgentBuildInformation agentBuildInformation = AgentBuildInformation::make(sampledProfiles, dynamicParameters, systemConfigBlueprint, profiles, vehicleModels)
+                    .SetVehicleModelParameters()
+                    .GatherBasicComponents()
+                    .GatherDriverComponents()
+                    .GatherVehicleComponents()
+                    .GatherSensors();
+            GenerateDynamicAgentBlueprint(agentBlueprint, agentBuildInformation, sampledProfiles.driverProfileName);
+
+            return agentBlueprint;
+        }
+        else
+        {
+            GenerateStaticAgentBlueprint(agentBlueprint, agentProfile.systemConfigFile, agentProfile.systemId, agentProfile.vehicleModel);
+
+            return agentBlueprint;
+        }
     }
-    else
+    catch (const std::out_of_range& e)
     {
-        return GenerateStaticAgentBlueprint(agentBlueprint, agentProfile.systemConfigFile, agentProfile.systemId, agentProfile.vehicleModel);
+        std::string message{e.what()};
+        message += ": Tried to sample undefined AgentProfile '" + agentProfileName + "'";
+        LOG_INTERN(LogLevel::Error) << message;
+        throw std::runtime_error(message);
     }
 }
 
-bool AgentBlueprintProvider::GenerateDynamicAgentBlueprint(AgentBlueprintInterface &agentBlueprint, AgentBuildInformation agentBuildInformation, std::string &driverProfileName)
+void AgentBlueprintProvider::GenerateDynamicAgentBlueprint(AgentBlueprintInterface &agentBlueprint, AgentBuildInformation agentBuildInformation, std::string &driverProfileName) const
 {
     agentBlueprint.SetVehicleModelName(agentBuildInformation.vehicleModelName);
     agentBlueprint.SetVehicleModelParameters(agentBuildInformation.vehicleModelParameters);
@@ -61,10 +76,9 @@ bool AgentBlueprintProvider::GenerateDynamicAgentBlueprint(AgentBlueprintInterfa
     {
         agentBlueprint.AddSensor(sensor);
     }
-    return true;
 }
 
-bool AgentBlueprintProvider::GenerateStaticAgentBlueprint(AgentBlueprintInterface &agentBlueprint, std::string systemConfigName, int systemId, std::string vehicleModelName)
+void AgentBlueprintProvider::GenerateStaticAgentBlueprint(AgentBlueprintInterface &agentBlueprint, std::string systemConfigName, int systemId, std::string vehicleModelName) const
 {
     try
     {
@@ -73,13 +87,12 @@ bool AgentBlueprintProvider::GenerateStaticAgentBlueprint(AgentBlueprintInterfac
     }
     catch (const std::out_of_range& e)
     {
-        LOG_INTERN(LogLevel::Error) << "No system for specified id found in imported systemConfig: " << e.what();
-        return false;
+        const std::string message{"No system for specified id found in imported systemConfig: " + std::string(e.what())};
+        LOG_INTERN(LogLevel::Error) << message;
+        throw std::runtime_error(message);
     }
 
     agentBlueprint.SetVehicleModelName(vehicleModelName);
     auto vehicleModelParameters = vehicleModels->GetVehicleModel(vehicleModelName);
     agentBlueprint.SetVehicleModelParameters(vehicleModelParameters);
-
-    return true;
 }

@@ -14,7 +14,6 @@
 #include "Interfaces/modelInterface.h"
 #include "Interfaces/observationInterface.h"
 #include "Common/primitiveSignals.h"
-#include "Common/sensorDataSignal.h"
 
 /** \addtogroup Algorithm_Lateral
 * @{

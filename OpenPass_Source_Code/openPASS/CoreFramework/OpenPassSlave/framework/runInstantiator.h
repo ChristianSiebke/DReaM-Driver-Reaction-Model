@@ -21,9 +21,10 @@
 #include <map>
 #include <QMutex>
 #include "opExport.h"
+#include "frameworkModules.h"
 #include "Interfaces/agentFactoryInterface.h"
 #include "Interfaces/configurationContainerInterface.h"
-#include "frameworkModules.h"
+#include "Interfaces/parameterInterface.h"
 #include "Interfaces/frameworkModuleContainerInterface.h"
 #include "Interfaces/observationNetworkInterface.h"
 #include "Interfaces/stochasticsInterface.h"
@@ -33,30 +34,22 @@ namespace SimulationSlave {
 class CORESLAVEEXPORT RunInstantiator
 {
 public:
-    RunInstantiator(std::string outputDir,
-                    ConfigurationContainerInterface& configurationContainer,
+    RunInstantiator(ConfigurationContainerInterface& configurationContainer,
                     FrameworkModuleContainerInterface& frameworkModuleContainer,
                     FrameworkModules& frameworkModules) :
-        outputDir(outputDir),
         configurationContainer(configurationContainer),
-        observationNetwork(frameworkModuleContainer.GetObservationNetwork()),
-        agentFactory(frameworkModuleContainer.GetAgentFactory()),
-        agentBlueprintProvider(frameworkModuleContainer.GetAgentBlueprintProvider()),
-        eventNetwork(frameworkModuleContainer.GetEventNetwork()),
-        world(frameworkModuleContainer.GetWorld()),
+        observationNetwork(*frameworkModuleContainer.GetObservationNetwork()),
+        agentFactory(*frameworkModuleContainer.GetAgentFactory()),
+        agentBlueprintProvider(*frameworkModuleContainer.GetAgentBlueprintProvider()),
+        eventNetwork(*frameworkModuleContainer.GetEventNetwork()),
+        world(*frameworkModuleContainer.GetWorld()),
         sampler(frameworkModuleContainer.GetSampler()),
-        spawnPointNetwork(frameworkModuleContainer.GetSpawnPointNetwork()),
-        stochastics(frameworkModuleContainer.GetStochastics()),
-        eventDetectorNetwork(frameworkModuleContainer.GetEventDetectorNetwork()),
-        manipulatorNetwork(frameworkModuleContainer.GetManipulatorNetwork()),
+        spawnPointNetwork(*frameworkModuleContainer.GetSpawnPointNetwork()),
+        stochastics(*frameworkModuleContainer.GetStochastics()),
+        eventDetectorNetwork(*frameworkModuleContainer.GetEventDetectorNetwork()),
+        manipulatorNetwork(*frameworkModuleContainer.GetManipulatorNetwork()),
         frameworkModules{frameworkModules}
     {}
-
-    RunInstantiator(const RunInstantiator&) = delete;
-    RunInstantiator(RunInstantiator&&) = delete;
-    RunInstantiator& operator=(const RunInstantiator&) = delete;
-    RunInstantiator& operator=(RunInstantiator&&) = delete;
-    ~RunInstantiator() = default;
 
     //-----------------------------------------------------------------------------
     //! @brief Executes the run by preparing the stochastics, world and observation
@@ -89,28 +82,30 @@ public:
     //void StopRun();
 
 private:
-    bool InitializeFrameworkModules(ExperimentConfig& experimentConfig,
-                                    ScenarioInterface* scenario);
+    bool InitPreRun(ExperimentConfig& experimentConfig, ScenarioInterface& scenario, SceneryInterface& scenery);
+    bool InitRun(std::uint32_t seed, const EnvironmentConfig& environmentConfig, RunResult& runResult);
+    void InitializeFrameworkModules(ExperimentConfig &experimentConfig, ScenarioInterface &scenario);
+    void InitializeSpawnPointNetwork();
 
     void ClearRun();
 
     QMutex stopMutex;
     bool stopped = true;
 
-    const std::string outputDir;
-
     ConfigurationContainerInterface& configurationContainer;
-    ObservationNetworkInterface* observationNetwork {nullptr};
-    AgentFactoryInterface* agentFactory {nullptr};
-    AgentBlueprintProviderInterface* agentBlueprintProvider {nullptr};
-    EventNetworkInterface* eventNetwork {nullptr};
-    WorldInterface* world {nullptr};
+    ObservationNetworkInterface& observationNetwork;
+    AgentFactoryInterface& agentFactory;
+    AgentBlueprintProviderInterface& agentBlueprintProvider;
+    EventNetworkInterface& eventNetwork;
+    WorldInterface& world;
     const SamplerInterface& sampler;
-    SpawnPointNetworkInterface* spawnPointNetwork {nullptr};
-    StochasticsInterface* stochastics {nullptr};
-    EventDetectorNetworkInterface* eventDetectorNetwork {nullptr};
-    ManipulatorNetworkInterface* manipulatorNetwork {nullptr};
+    SpawnPointNetworkInterface& spawnPointNetwork;
+    StochasticsInterface& stochastics;
+    EventDetectorNetworkInterface& eventDetectorNetwork;
+    ManipulatorNetworkInterface& manipulatorNetwork;
     FrameworkModules& frameworkModules;
+
+    std::unique_ptr<ParameterInterface> worldParameter {nullptr};
 };
 
 } // namespace SimulationSlave

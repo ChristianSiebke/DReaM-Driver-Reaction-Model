@@ -1,12 +1,12 @@
-/*********************************************************************
-* Copyright (c) 2017 - 2019 in-tech GmbH on behalf of BMW
+/*******************************************************************************
+* Copyright (c) 2017, 2018, 2019 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
 * which is available at https://www.eclipse.org/legal/epl-2.0/
 *
 * SPDX-License-Identifier: EPL-2.0
-**********************************************************************/
+*******************************************************************************/
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -21,6 +21,7 @@
 using ::testing::_;
 using ::testing::Invoke;
 using ::testing::Return;
+using ::testing::SizeIs;
 using ::testing::NiceMock;
 
 using namespace Importer;
@@ -37,7 +38,7 @@ TEST(SceneryImporter_UnitTests, ParseRoadTypes)
 
 
     EXPECT_CALL(mockRoad, AddRoadType(_)).Times(2);
-    ASSERT_TRUE(SceneryImporter::ParseRoadTypes(documentRoot, &mockRoad));
+    ASSERT_NO_THROW(SceneryImporter::ParseRoadTypes(documentRoot, &mockRoad));
 }
 
 
@@ -62,7 +63,7 @@ TEST(SceneryImporter_UnitTests, ParseJunctionConnections)
     EXPECT_CALL(mockConnection, AddLink(-8,-3)).Times(1);
 
 
-    ASSERT_TRUE(SceneryImporter::ParseJunctionConnections(documentRoot,&mockJunction));
+    ASSERT_NO_THROW(SceneryImporter::ParseJunctionConnections(documentRoot,&mockJunction));
 }
 
 
@@ -80,7 +81,7 @@ TEST(SceneryImporter_UnitTests, ParseSignalsWithThreeValidSignals_DetectsThreeSi
     NiceMock<FakeOdRoad> mockRoad;
 
     //EXPECT_CALL(mockRoad, AddRoadSignal(_)).Times(3);
-    ASSERT_TRUE(SceneryImporter::ParseSignals(documentRoot, &mockRoad));
+    ASSERT_NO_THROW(SceneryImporter::ParseSignals(documentRoot, &mockRoad));
 }
 
 
@@ -113,7 +114,7 @@ TEST(SceneryImporter_UnitTests, ParseSignalsWithValidSignal_ReturnsCorrectValues
 
     ON_CALL(mockRoad, AddRoadSignal(_)).WillByDefault(Invoke(SignalInterceptor::intercept));
 
-    ASSERT_TRUE(SceneryImporter::ParseSignals(documentRoot, &mockRoad));
+    ASSERT_NO_THROW(SceneryImporter::ParseSignals(documentRoot, &mockRoad));
 
     EXPECT_DOUBLE_EQ(SignalInterceptor::signal.s, 100.1);
     EXPECT_DOUBLE_EQ(SignalInterceptor::signal.t, 1.1);
@@ -122,7 +123,7 @@ TEST(SceneryImporter_UnitTests, ParseSignalsWithValidSignal_ReturnsCorrectValues
     EXPECT_EQ(SignalInterceptor::signal.orientation, "-");
     EXPECT_DOUBLE_EQ(SignalInterceptor::signal.zOffset, 0.1);
     EXPECT_EQ(SignalInterceptor::signal.country, "c1");
-    EXPECT_EQ(SignalInterceptor::signal.type, RoadSignalType::Undefined);
+    EXPECT_EQ(SignalInterceptor::signal.type, "none");
     EXPECT_EQ(SignalInterceptor::signal.subtype, "none");
     EXPECT_DOUBLE_EQ(SignalInterceptor::signal.value, 0.123);
     EXPECT_EQ(SignalInterceptor::signal.unit, RoadSignalUnit::Undefined);
@@ -144,10 +145,9 @@ TEST(SceneryImporter_UnitTests, ParseSignalsWithMissingField_Fails)
     "  </signals>"
     "</root>");
 
-    using namespace SimulationSlave;
     NiceMock<FakeOdRoad> mockRoad;
 
-    ASSERT_FALSE(SceneryImporter::ParseSignals(documentRoot, &mockRoad));
+    ASSERT_THROW(SceneryImporter::ParseSignals(documentRoot, &mockRoad), std::runtime_error);
 }
 
 TEST(SceneryImporter_UnitTests, ParseSignalsWithInvalidField_Fails)
@@ -159,10 +159,9 @@ TEST(SceneryImporter_UnitTests, ParseSignalsWithInvalidField_Fails)
     "  </signals>"
     "</root>");
 
-    using namespace SimulationSlave;
     NiceMock<FakeOdRoad> mockRoad;
 
-    ASSERT_FALSE(SceneryImporter::ParseSignals(documentRoot, &mockRoad));
+    ASSERT_THROW(SceneryImporter::ParseSignals(documentRoot, &mockRoad), std::runtime_error);
 }
 
 
@@ -173,11 +172,10 @@ TEST(SceneryImporter_UnitTests, ValidityWithThreeIncreasingLaneNumbers_DeliversT
     "  <validity fromLane=\"0\" toLane=\"2\" />"
     "</root>");
 
-    using namespace SimulationSlave;
     RoadElementValidity validitiy;
 
-    ASSERT_TRUE(SceneryImporter::ParseElementValidity(documentRoot, validitiy));
-    ASSERT_EQ(validitiy.lanes.size(), (size_t) 3);
+    ASSERT_NO_THROW(SceneryImporter::ParseElementValidity(documentRoot, validitiy));
+    ASSERT_THAT(validitiy.lanes, SizeIs(3));
     EXPECT_FALSE(validitiy.all);
     EXPECT_EQ(validitiy.lanes[0], 0);
     EXPECT_EQ(validitiy.lanes[1], 1);
@@ -191,11 +189,10 @@ TEST(SceneryImporter_UnitTests, ValidityWithThreeDecreasingLaneNumbers_DeliversT
     "  <validity fromLane=\"0\" toLane=\"-2\" />"
     "</root>");
 
-    using namespace SimulationSlave;
     RoadElementValidity validitiy;
 
-    ASSERT_TRUE(SceneryImporter::ParseElementValidity(documentRoot, validitiy));
-    ASSERT_EQ(validitiy.lanes.size(), (size_t) 3);
+    ASSERT_NO_THROW(SceneryImporter::ParseElementValidity(documentRoot, validitiy));
+    ASSERT_THAT(validitiy.lanes, SizeIs(3));
     EXPECT_FALSE(validitiy.all);
     EXPECT_EQ(validitiy.lanes[0], -2);
     EXPECT_EQ(validitiy.lanes[1], -1);
@@ -209,10 +206,9 @@ TEST(SceneryImporter_UnitTests, ValidityWithMissingFromLane_Fails)
     "  <validity toLane=\"0\" />"
     "</root>");
 
-    using namespace SimulationSlave;
     RoadElementValidity validitiy;
 
-    ASSERT_FALSE(SceneryImporter::ParseElementValidity(documentRoot, validitiy));
+    ASSERT_THROW(SceneryImporter::ParseElementValidity(documentRoot, validitiy), std::runtime_error);
 }
 
 TEST(SceneryImporter_UnitTests, ValidityWithMissingToLane_Fails)
@@ -222,10 +218,9 @@ TEST(SceneryImporter_UnitTests, ValidityWithMissingToLane_Fails)
     "  <validity fromLane=\"0\" />"
     "</root>");
 
-    using namespace SimulationSlave;
     RoadElementValidity validitiy;
 
-    ASSERT_FALSE(SceneryImporter::ParseElementValidity(documentRoot, validitiy));
+    ASSERT_THROW(SceneryImporter::ParseElementValidity(documentRoot, validitiy), std::runtime_error);
 }
 
 TEST(SceneryImporter_UnitTests, NoValidity_SetsAllValidityFlag)
@@ -234,34 +229,11 @@ TEST(SceneryImporter_UnitTests, NoValidity_SetsAllValidityFlag)
     "<root>"
     "</root>");
 
-    using namespace SimulationSlave;
     RoadElementValidity validitiy;
 
-    ASSERT_TRUE(SceneryImporter::ParseElementValidity(documentRoot, validitiy));
+    ASSERT_NO_THROW(SceneryImporter::ParseElementValidity(documentRoot, validitiy));
     EXPECT_TRUE(validitiy.all);
-    EXPECT_EQ(validitiy.lanes.size(), (size_t) 0);
-}
-
-
-//TODO: make parameterized and test all available units (see doc of getValue)
-TEST(RoadSignal_UnitTest, ValuesWithAndWithoutUnits_AlwaysGetValueInSIUnit)
-{
-    RoadSignalSpecification signal;
-    signal.value = 10.0;
-
-    signal.unit = RoadSignalUnit::Undefined;
-    RoadSignal r1(nullptr, signal);
-    EXPECT_DOUBLE_EQ(r1.GetValue(), 10.0);
-
-    signal.unit = RoadSignalUnit::KilometersPerHour;
-    RoadSignal r2(nullptr, signal);
-    EXPECT_NEAR(r2.GetValue(), 2.7778, 0.0001);
-
-    signal.unit = RoadSignalUnit::MilesPerHour;
-    RoadSignal r3(nullptr, signal);
-    EXPECT_NEAR(r3.GetValue(), 4.4704, 0.0001);
-
-    // don't go on here => this will end up in copy paste errors!
+    EXPECT_THAT(validitiy.lanes, SizeIs(0));
 }
 
 TEST(SceneryImporter_UnitTests, ParseObject_ThreeBarriersAreDetected)
@@ -275,11 +247,10 @@ TEST(SceneryImporter_UnitTests, ParseObject_ThreeBarriersAreDetected)
     "  </objects>"
     "</root>");
 
-    using namespace SimulationSlave;
     NiceMock<FakeOdRoad> mockRoad;
 
     //EXPECT_CALL(mockRoad, AddRoadObject(_)).Times(3);
-    ASSERT_TRUE(SceneryImporter::ParseObjects(documentRoot, &mockRoad));
+    ASSERT_NO_THROW(SceneryImporter::ParseObjects(documentRoot, &mockRoad));
 }
 
 struct ObjectInterceptor
@@ -305,11 +276,10 @@ TEST(SceneryImporter_UnitTests, ParseObjectsWithValidObject_ReturnsCorrectValues
     "  </objects>"
     "</root>");
 
-    using namespace SimulationSlave;
     NiceMock<FakeOdRoad> mockRoad;
 
     ON_CALL(mockRoad, AddRoadObject(_)).WillByDefault(Invoke(ObjectInterceptor::intercept));
-    ASSERT_TRUE(SceneryImporter::ParseObjects(documentRoot, &mockRoad));
+    ASSERT_NO_THROW(SceneryImporter::ParseObjects(documentRoot, &mockRoad));
 
     EXPECT_EQ(ObjectInterceptor::object.type, RoadObjectType::barrier);
     EXPECT_EQ(ObjectInterceptor::object.name, "obstacle");
@@ -337,10 +307,9 @@ TEST(SceneryImporter_UnitTests, ParseObjectsWithMissingField_Fails)
     "  </objects>"
     "</root>");         // validLength is missing
 
-    using namespace SimulationSlave;
     NiceMock<FakeOdRoad> mockRoad;
 
-    ASSERT_FALSE(SceneryImporter::ParseObjects(documentRoot, &mockRoad));
+    ASSERT_THROW(SceneryImporter::ParseObjects(documentRoot, &mockRoad), std::runtime_error);
 }
 
 TEST(SceneryImporter_UnitTests, ParseObjectssWithInvalidS_Fails)
@@ -352,7 +321,6 @@ TEST(SceneryImporter_UnitTests, ParseObjectssWithInvalidS_Fails)
     "  </objects>"
     "</root>");   // s is negative
 
-    using namespace SimulationSlave;
     NiceMock<FakeOdRoad> mockRoad;
 
     ASSERT_THROW(SceneryImporter::ParseObjects(documentRoot, &mockRoad), std::runtime_error);
@@ -367,29 +335,38 @@ TEST(SceneryImporter_UnitTests, ParseObjectssWithInvalidDimensions_Fails)
     "  </objects>"
     "</root>");   // length, width = 0
 
-    using namespace SimulationSlave;
     NiceMock<FakeOdRoad> mockRoad;
 
     ASSERT_THROW(SceneryImporter::ParseObjects(documentRoot, &mockRoad), std::runtime_error);
 }
 
-TEST(SceneryImporter_UnitTests, ParseObjectssWithDimensionsOfZero_Ignored)
+TEST(SceneryImporter_UnitTests, ParseObjectsWithZeroLength_ThrowsException)
 {
     QDomElement documentRoot = documentRootFromString(
     "<root>"
     "  <objects>"
-    "    <object type=\"barrier\" name=\"obstacle\" id=\"b01\" s=\"100\" t=\"10\" zOffset=\"0\" validLength=\"0\" orientation=\"none\" length=\"1.0\" width=\"0.0\" height=\"2\" hdg=\"0\" pitch=\"0\" roll=\"0\" />"
     "    <object type=\"barrier\" name=\"obstacle\" id=\"b01\" s=\"100\" t=\"10\" zOffset=\"0\" validLength=\"0\" orientation=\"none\" length=\"0.0\" width=\"2.0\" height=\"2\" hdg=\"0\" pitch=\"0\" roll=\"0\" />"
     "  </objects>"
-    "</root>");   // length, width = 0
+    "</root>");
 
-    using namespace SimulationSlave;
     NiceMock<FakeOdRoad> mockRoad;
-    //EXPECT_CALL(mockRoad, AddRoadObject(_)).Times(0);
 
-    ASSERT_TRUE(SceneryImporter::ParseObjects(documentRoot, &mockRoad));
+    ASSERT_THROW(SceneryImporter::ParseObjects(documentRoot, &mockRoad), std::runtime_error);
 }
 
+TEST(SceneryImporter_UnitTests, ParseObjectsWithZeroWidth_ThrowsException)
+{
+    QDomElement documentRoot = documentRootFromString(
+    "<root>"
+    "  <objects>"
+    "    <object type=\"barrier\" name=\"obstacle\" id=\"b01\" s=\"100\" t=\"10\" zOffset=\"0\" validLength=\"0\" orientation=\"none\" length=\"2.0\" width=\"0.0\" height=\"2\" hdg=\"0\" pitch=\"0\" roll=\"0\" />"
+    "  </objects>"
+    "</root>");
+
+    NiceMock<FakeOdRoad> mockRoad;
+
+    ASSERT_THROW(SceneryImporter::ParseObjects(documentRoot, &mockRoad), std::runtime_error);
+}
 
 TEST(SceneryImporter_UnitTests, ParseRepeatWithNoOverridingOfOptionalParameters)
 {
@@ -407,8 +384,8 @@ TEST(SceneryImporter_UnitTests, ParseRepeatWithNoOverridingOfOptionalParameters)
     object.zOffset = 0;
     object.validLength = 0;
     object.orientation = RoadElementOrientation::negative;
-    object.length = 0;
-    object.width = 0;
+    object.length = 2.0;
+    object.width = 1.0;
     object.height = 0;
     object.hdg = 0;
     object.pitch = 0;
@@ -416,13 +393,13 @@ TEST(SceneryImporter_UnitTests, ParseRepeatWithNoOverridingOfOptionalParameters)
     object.radius = 0;
     std::list<RoadObjectSpecification> objectRepitions;
 
-    using namespace SimulationSlave;
     objectRepitions = SceneryImporter::ParseObjectRepeat(documentRoot, object);
 
     for(auto object : objectRepitions)
     {
       ASSERT_EQ(object.t, 1);
-      ASSERT_EQ(object.width, 0);
+      ASSERT_EQ(object.length, 2.0);
+      ASSERT_EQ(object.width, 1.0);
       ASSERT_EQ(object.height, 0);
       ASSERT_EQ(object.zOffset, 0);
     }
@@ -438,9 +415,10 @@ TEST(SceneryImporter_UnitTests, ParseRepeatTestOverridingOfObjectRepeat)
     RoadObjectSpecification object;
     object.s = 0;
     object.radius = 0;
+    object.length = 2.0;
+    object.width = 1.0;
     std::list<RoadObjectSpecification> objectRepitions;
 
-    using namespace SimulationSlave;
     objectRepitions = SceneryImporter::ParseObjectRepeat(documentRoot, object);
 
     int distance = 50;
@@ -477,7 +455,6 @@ TEST(SceneryImporter_UnitTests, ParseRepeatOverridesAllOptionalParameters)
     object.radius = 0;
     std::list<RoadObjectSpecification> objectRepitions;
 
-    using namespace SimulationSlave;
     objectRepitions = SceneryImporter::ParseObjectRepeat(documentRoot, object);
 
     RoadObjectSpecification firstObject = objectRepitions.front();

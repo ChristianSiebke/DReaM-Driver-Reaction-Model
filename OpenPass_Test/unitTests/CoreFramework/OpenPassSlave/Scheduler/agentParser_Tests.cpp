@@ -1,7 +1,12 @@
-/**********************************************
+/*******************************************************************************
 * Copyright (c) 2017 in-tech GmbH
-* on behalf of BMW AG
-***********************************************/
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+*******************************************************************************/
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -44,7 +49,7 @@ TEST(AgentParser, RecurringComponent_IsParsed)
 {
     NiceMock<FakeWorld> fakeWorld;
     NiceMock<FakeAgentBlueprint> fakeAgentBlueprint;
-    Agent testAgent(0, &fakeAgentBlueprint, 0, &fakeWorld);
+    Agent testAgent(0, &fakeWorld);
 
     Channel testChannel(1);
     Component testTargetComponent("", &testAgent);
@@ -81,7 +86,7 @@ TEST(AgentParser, ThreeRecurringComponents_AreParsed)
 {
     NiceMock<FakeWorld> fakeWorld;
     NiceMock<FakeAgentBlueprint> fakeAgentBlueprint;
-    Agent testAgent(0, &fakeAgentBlueprint, 0, &fakeWorld);
+    Agent testAgent(0, &fakeWorld);
 
     Channel testChannel(1);
     Component testTargetComponent("", &testAgent);
@@ -136,7 +141,7 @@ TEST(AgentParser, NonRecurringComponent_IsParsed)
 {
     NiceMock<FakeWorld> fakeWorld;
     NiceMock<FakeAgentBlueprint> fakeAgentBlueprint;
-    Agent testAgent(0, &fakeAgentBlueprint, 0, &fakeWorld);
+    Agent testAgent(0, &fakeWorld);
 
     Channel testChannel(1);
     Component testTargetComponent("", &testAgent);
@@ -172,7 +177,7 @@ TEST(AgentParser, MixedComponents_AreParsedWithRightTaskType)
 {
     NiceMock<FakeWorld> fakeWorld;
     NiceMock<FakeAgentBlueprint> fakeAgentBlueprint;
-    Agent testAgent(0, &fakeAgentBlueprint, 0, &fakeWorld);
+    Agent testAgent(0, &fakeWorld);
 
     Channel testChannel(1);
     Component testTargetComponent("", &testAgent);

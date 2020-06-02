@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *               2016, 2017 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -105,21 +105,4 @@ public:
     virtual void UpdateOutput(int localLinkId, std::shared_ptr<SignalInterface const>& data, int time);
 
     virtual void Trigger(int time);
-
-protected:
-
-    /*!
-    * \brief Starts the initialization sequence of the class instance - mostly parsing inputs
-    */
-    virtual void Initialize();
-
-    //! data struct for vehicle parameters
-    VehicleModelParameters out_vehicleParameters;
-
-private:
-
-    //! Flag that indicates the need to initialize - e.g parsing input informations
-    bool initialisation = false;
-
-    const CallbackInterface* callbacks;
 };

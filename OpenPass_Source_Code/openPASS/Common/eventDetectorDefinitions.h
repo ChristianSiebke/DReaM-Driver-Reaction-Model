@@ -277,7 +277,7 @@ struct ConditionalEventDetectorInformation
 {
     ActorInformation actorInformation{};
     int numberOfExecutions{};
-    std::string sequenceName{};
+    std::string eventName{};
     ConditionCollection conditions{};
 };
 

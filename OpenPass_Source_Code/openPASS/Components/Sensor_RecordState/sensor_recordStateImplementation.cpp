@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2018 AMFD GmbH
 *               2016, 2017 ITK Engineering GmbH
 *
@@ -161,7 +161,7 @@ void SensorRecordStateImplementation::ObserveEgo()
 
     observerInstance->Insert(timeMSec,
                              agentId,
-                             LoggingGroup::RoadPosition,
+                             LoggingGroup::RoadPositionExtended,
                              "SecondaryLanes",
                              SecondaryLanesToString());
 
@@ -190,19 +190,17 @@ void SensorRecordStateImplementation::ObserveEgo()
                              std::to_string(GetAgent()->GetGear()));
 
     int frontAgentId = -1;
-    const auto roadId = GetAgent()->GetRoadId();
-    const auto searchStartDistance = GetAgent()->GetDistanceToStartOfRoad(MeasurementPoint::Front);
-    const auto* frontAgent = GetWorld()->GetNextAgentInLane(Route{roadId}, roadId, indexLaneEgo, searchStartDistance, true);
+    const auto frontAgents = GetAgent()->GetAgentsInRange(0, 0, std::numeric_limits<double>::max(), MeasurementPoint::Front);
 
-    if (frontAgent)
+    if (!frontAgents.empty())
     {
-        frontAgentId = frontAgent->GetId();
+        frontAgentId = frontAgents.front()->GetId();
     }
 
     observerInstance->Insert(timeMSec,
                              agentId,
                              LoggingGroup::RoadPosition,
-                             "VehicleInFront",
+                             "AgentInFront",
                              std::to_string(frontAgentId));
 }
 

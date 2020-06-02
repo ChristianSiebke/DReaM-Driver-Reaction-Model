@@ -58,6 +58,12 @@ public:
     //-----------------------------------------------------------------------------
     void SetImplementation(ModelInterface* implementation);
 
+
+    void SetParameter(std::unique_ptr<ParameterInterface> parameter) override
+    {
+        this->parameter = std::move(parameter);
+    }
+
     //-----------------------------------------------------------------------------
     //! Returns the stored agent.
     //!
@@ -257,6 +263,7 @@ private:
     std::map<int, ObservationInterface*> observations {};
     ModelLibrary* modelLibrary;
     ModelInterface* implementation;
+    std::unique_ptr<ParameterInterface> parameter;
     std::map<int, ChannelBuffer*> inputChannelBuffers;
     std::map<int, ChannelBuffer*> outputChannelBuffers;
 };

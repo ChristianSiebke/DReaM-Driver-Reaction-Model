@@ -11,50 +11,11 @@
 #pragma once
 
 #include <QDomDocument>
+#include "Common/parameter.h"
 
-#include "Interfaces/parameterInterface.h"
-#include "xmlParser.h"
-
-namespace SimulationCommon {
-
-class ParameterImporter
+namespace openpass::parameter
 {
-public:
-    static bool ImportBoolParameters(
-        QDomElement componentParameterSetElement,
-        ParameterInterface& componentParameterSet);
 
-    static bool ImportIntParameters(
-        QDomElement componentParameterSetElement,
-        ParameterInterface& componentParameterSet);
+Container Import(QDomElement parameterElement);
 
-    static bool ImportIntVectorParameters(
-        QDomElement componentParameterSetElement,
-        ParameterInterface& componentParameterSet);
-
-    static bool ImportDoubleParameters(
-        QDomElement componentParameterSetElement,
-        ParameterInterface& componentParameterSet);
-
-    static bool ImportDoubleVectorParameters(
-        QDomElement componentParameterSetElement,
-        ParameterInterface& componentParameterSet);
-
-    static bool ImportStringParameters(
-        QDomElement componentParameterSetElement,
-        ParameterInterface& componentParameterSet);
-
-    static bool ImportNormalDistributionParameters(
-        QDomElement componentParameterSetElement,
-        ParameterInterface& componentParameterSet);
-
-    static bool ImportParameterLists(
-        QDomElement componentParameterSetElement,
-        ParameterInterface& componentParameterSet);
-
-    static bool ImportParameters(
-        QDomElement componentParameterSetElement,
-        ParameterInterface& componentParameterSet);
-};
-
-} //namespace SimulationCommon
+} //namespace openpass::parameter

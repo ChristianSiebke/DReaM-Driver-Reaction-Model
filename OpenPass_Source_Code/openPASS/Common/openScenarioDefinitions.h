@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -9,13 +9,24 @@
 *******************************************************************************/
 #pragma once
 
-#include "Interfaces/scenarioActionInterface.h"
-
 #include <optional>
+#include <ostream>
 #include <string>
 #include <vector>
 
+#include "Interfaces/scenarioActionInterface.h"
+
 namespace openScenario {
+
+// This is a custom solution and not according to the openScenario standard
+struct StochasticAttribute
+{
+    double value = -999;
+    double mean = -999;
+    double stdDeviation = -999;
+    double lowerBoundary = -999;
+    double upperBoundary = -999;
+};
 
 struct ActorInformation
 {
@@ -56,15 +67,29 @@ struct LanePosition
     int laneId{};
     std::optional<double> offset{};
     double s{};
+
+    std::optional<StochasticAttribute> stochasticOffset;
+    std::optional<StochasticAttribute> stochasticS;
+};
+
+struct WorldPosition
+{
+    double x{};
+    double y{};
+    std::optional<double> heading;
 };
 
 // All action classes
 class Action : public ScenarioActionInterface
 {
 public:
-    Action(const std::string& sequenceName):
-        ScenarioActionInterface(),
-        sequenceName{sequenceName}
+    /*!
+     * -----------------------------------------------------------------------------
+     * \brief Each action is part of an event. The event name specifies to which event the action belongs.
+     * -----------------------------------------------------------------------------
+     */
+    Action(const std::string& eventName):
+        eventName{eventName}
     {}
     Action() = delete;
     Action(const Action&) = delete;
@@ -74,27 +99,27 @@ public:
 
     /*!
      * ------------------------------------------------------------------------
-     * \brief GetSequenceName returns the name of the sequence of which this
+     * \brief GetEventName returns the name of the event of which this
      *        action is a part.
      *
-     * \returns a reference to the name of the sequence of which this action is
+     * \returns a reference to the name of the event of which this action is
      *          a part.
      * ------------------------------------------------------------------------
      */
-    const std::string& GetSequenceName() const
+    const std::string& GetEventName() const
     {
-        return sequenceName;
+        return eventName;
     }
 
 private:
-    const std::string sequenceName;
+    const std::string eventName;
 };
 
 class GlobalAction : public Action
 {
 public:
-    GlobalAction(const std::string& sequenceName):
-        Action(sequenceName)
+    GlobalAction(const std::string& eventName):
+        Action(eventName)
     {
     }
     GlobalAction() = delete;
@@ -113,10 +138,10 @@ enum GlobalEntityActionType
 class GlobalEntityAction : public GlobalAction
 {
 public:
-    GlobalEntityAction(const std::string& sequenceName,
+    GlobalEntityAction(const std::string& eventName,
                                       GlobalEntityActionType type,
                                       const std::string& name):
-        GlobalAction(sequenceName),
+        GlobalAction(eventName),
         type{type},
         name{name}
     {}
@@ -159,8 +184,8 @@ private:
 class PrivateAction : public Action
 {
 public:
-    PrivateAction(const std::string& sequenceName):
-        Action(sequenceName)
+    PrivateAction(const std::string& eventName):
+        Action(eventName)
     {}
     PrivateAction() = delete;
     PrivateAction(const PrivateAction&) = delete;
@@ -178,11 +203,11 @@ enum PrivateLateralLaneChangeActionType
 class PrivateLateralLaneChangeAction : public PrivateAction
 {
 public:
-    PrivateLateralLaneChangeAction(const std::string& sequenceName,
-                                                                PrivateLateralLaneChangeActionType type,
-                                                                int value,
-                                                                const std::string& object = ""):
-        PrivateAction(sequenceName),
+    PrivateLateralLaneChangeAction(const std::string& eventName,
+                                   PrivateLateralLaneChangeActionType type,
+                                   int value,
+                                   const std::string& object = ""):
+        PrivateAction(eventName),
         type{type},
         value{value},
         object{object}
@@ -242,11 +267,84 @@ private:
     // we'll ignore the LaneChange element's "targetLaneOffset" attribute for now
 };
 
+struct TrajectoryPoint
+{
+    double time;
+    double x;
+    double y;
+    double yaw;
+
+    bool operator== (const TrajectoryPoint& other) const
+    {
+        return other.time == time
+                && other.x == x
+                && other.y == y
+                && other.yaw == yaw;
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const TrajectoryPoint& point)
+    {
+        os << "t = " << point.time
+           << " : (" << point.x
+           << ", " << point.y
+           << ") yaw = " << point.yaw;
+
+        return os;
+    }
+};
+
+struct Trajectory
+{
+    std::vector<TrajectoryPoint> points;
+    std::string name;
+
+    friend std::ostream& operator<<(std::ostream& os, const Trajectory& trajectory)
+    {
+        os << "Trajectory \"" << trajectory.name << "\"\n";
+        for (const auto& point : trajectory.points)
+        {
+            os << point << "\n";
+        }
+
+        return os;
+    }
+};
+
+class PrivateFollowTrajectoryAction : public PrivateAction
+{
+public:
+    PrivateFollowTrajectoryAction(const std::string& eventName,
+                                  const Trajectory& trajectory):
+        PrivateAction(eventName),
+        trajectory(trajectory)
+    {}
+    PrivateFollowTrajectoryAction() = delete;
+    PrivateFollowTrajectoryAction(const PrivateAction&) = delete;
+    PrivateFollowTrajectoryAction(PrivateAction&&) = delete;
+    PrivateFollowTrajectoryAction& operator=(const PrivateAction&) = delete;
+    PrivateFollowTrajectoryAction& operator=(PrivateAction&&) = delete;
+
+    /*!
+     * ------------------------------------------------------------------------
+     * \brief GetTrajectory returns the trajectory of this Action.
+     *
+     * \returns trajectory of this Action
+     * ------------------------------------------------------------------------
+     */
+    const openScenario::Trajectory& GetTrajectory() const
+    {
+        return trajectory;
+    }
+
+private:
+    const Trajectory trajectory;
+};
+
 class UserDefinedAction : public Action
 {
 public:
-    UserDefinedAction(const std::string& sequenceName):
-        Action(sequenceName)
+    UserDefinedAction(const std::string& eventName):
+        Action(eventName)
     {}
     UserDefinedAction() = delete;
     UserDefinedAction(const UserDefinedAction&) = delete;
@@ -258,9 +356,9 @@ public:
 class UserDefinedCommandAction : public UserDefinedAction
 {
 public:
-    UserDefinedCommandAction(const std::string& sequenceName,
+    UserDefinedCommandAction(const std::string& eventName,
                              const std::string& command):
-        UserDefinedAction(sequenceName),
+        UserDefinedAction(eventName),
         command{command}
     {}
     UserDefinedCommandAction() = delete;

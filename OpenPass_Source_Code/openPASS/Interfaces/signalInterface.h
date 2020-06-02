@@ -72,10 +72,10 @@ class SignalInterface
 {
 public:
     SignalInterface() = default;
-    SignalInterface(const SignalInterface &) = delete;
-    SignalInterface(SignalInterface &&) = delete;
-    SignalInterface &operator=(const SignalInterface &) = delete;
-    SignalInterface &operator=(SignalInterface &&) = delete;
+    SignalInterface(const SignalInterface &) = default;
+    SignalInterface(SignalInterface &&) = default;
+    SignalInterface &operator=(const SignalInterface &) = default;
+    SignalInterface &operator=(SignalInterface &&) = default;
     virtual ~SignalInterface() = default;
 
     //-----------------------------------------------------------------------------
@@ -95,10 +95,11 @@ class ComponentStateSignalInterface : public SignalInterface
 {
 public:
     ComponentStateSignalInterface() = default;
-    ComponentStateSignalInterface(const ComponentStateSignalInterface&) = delete;
-    ComponentStateSignalInterface(ComponentStateSignalInterface&&) = delete;
-    ComponentStateSignalInterface& operator=(const ComponentStateSignalInterface&) = delete;
-    ComponentStateSignalInterface& operator=(ComponentStateSignalInterface&&) = delete;
+    ComponentStateSignalInterface(ComponentState componentState):componentState{componentState}{}
+    ComponentStateSignalInterface(const ComponentStateSignalInterface&) = default;
+    ComponentStateSignalInterface(ComponentStateSignalInterface&&) = default;
+    ComponentStateSignalInterface& operator=(const ComponentStateSignalInterface&) = default;
+    ComponentStateSignalInterface& operator=(ComponentStateSignalInterface&&) = default;
     virtual ~ComponentStateSignalInterface() = default;
 
     ComponentState componentState;

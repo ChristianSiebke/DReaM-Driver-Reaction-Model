@@ -27,45 +27,11 @@
 class DynamicsSignal : public ComponentStateSignalInterface
 {
 public:
-    const std::string COMPONENTNAME = "DynamicsSignal";
+    static constexpr char COMPONENTNAME[] = "DynamicsSignal";
 
+    DynamicsSignal() : ComponentStateSignalInterface{ComponentState::Disabled} {}
+    DynamicsSignal(ComponentState componentState) : ComponentStateSignalInterface{componentState}{}
 
-    //-----------------------------------------------------------------------------
-    //! Constructor
-    //-----------------------------------------------------------------------------
-    DynamicsSignal()
-    {
-        componentState = ComponentState::Disabled;
-    }
-
-    //-----------------------------------------------------------------------------
-    //! Constructor
-    //-----------------------------------------------------------------------------
-    DynamicsSignal(ComponentState componentState)
-    {
-        this->componentState = componentState;
-    }
-
-    //-----------------------------------------------------------------------------
-    //! Constructor
-    //-----------------------------------------------------------------------------
-    DynamicsSignal(DynamicsSignal &other) :
-        DynamicsSignal(other.componentState,
-                       other.acceleration,
-                       other.velocity,
-                       other.positionX,
-                       other.positionY,
-                       other.yaw,
-                       other.yawRate,
-                       other.steeringWheelAngle,
-                       other.travelDistance)
-
-    {
-    }
-
-    //-----------------------------------------------------------------------------
-    //! Constructor
-    //-----------------------------------------------------------------------------
     DynamicsSignal(ComponentState componentState,
                   double acceleration,
                   double velocity,
@@ -74,7 +40,9 @@ public:
                   double yaw,
                   double yawRate,
                   double steeringWheelAngle,
+                  double centripetalAcceleration,
                   double travelDistance) :
+        ComponentStateSignalInterface{componentState},
         acceleration(acceleration),
         velocity(velocity),
         positionX(positionX),
@@ -82,19 +50,16 @@ public:
         yaw(yaw),
         yawRate(yawRate),
         steeringWheelAngle(steeringWheelAngle),
+        centripetalAcceleration(centripetalAcceleration),
         travelDistance(travelDistance)
-    {
-        this->componentState = componentState;
-    }
-
-    DynamicsSignal(const DynamicsSignal&) = delete;
-    DynamicsSignal(DynamicsSignal&&) = delete;
-    DynamicsSignal& operator=(const DynamicsSignal&) = delete;
-    DynamicsSignal& operator=(DynamicsSignal&&) = delete;
-
-    virtual ~DynamicsSignal()
-
     {}
+
+    DynamicsSignal(DynamicsSignal &other) = default;
+    DynamicsSignal(const DynamicsSignal&) = default;
+    DynamicsSignal(DynamicsSignal&&) = default;
+    DynamicsSignal& operator=(const DynamicsSignal&) = default;
+    DynamicsSignal& operator=(DynamicsSignal&&) = default;
+    virtual ~DynamicsSignal() = default;
 
     //-----------------------------------------------------------------------------
     //! Returns the content/payload of the signal as an std::string
@@ -104,7 +69,16 @@ public:
     virtual operator std::string() const
     {
         std::ostringstream stream;
-        stream << COMPONENTNAME;
+        stream << COMPONENTNAME << std::endl;
+        stream << "acceleration: " << acceleration << std::endl;
+        stream << "velocity: " << velocity << std::endl;
+        stream << "positionX: " << positionX << std::endl;
+        stream << "positionY: " << positionY << std::endl;
+        stream << "yaw: " << yaw << std::endl;
+        stream << "yawRate: " << yawRate << std::endl;
+        stream << "steeringWheelAngle: " << steeringWheelAngle << std::endl;
+        stream << "centripetalAcceleration: " << centripetalAcceleration << std::endl;
+        stream << "travelDistance: " << travelDistance << std::endl;
         return stream.str();
     }
 
@@ -115,6 +89,7 @@ public:
     double yaw = 0.0;
     double yawRate = 0.0;
     double steeringWheelAngle = 0.0;
+    double centripetalAcceleration = 0.0;
     double travelDistance = 0.0;
 };
 

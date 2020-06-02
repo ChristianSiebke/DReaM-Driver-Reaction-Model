@@ -196,8 +196,8 @@ endfunction(openpass_adjust_output_dir)
 # DEFAULT_MAIN   Links a simple main() implementation for running GTest
 # SIMCORE_DEPS   Adds dependencies on simulation core targets to a test
 # RESOURCES      List of directories to be copied to the test executable's location before test execution
-# FOLDER       The target will be sorted into that folder in your development environment
-#				 tests will be sorted into tests/<category>
+# FOLDER         The target will be sorted into that folder in your development environment
+#                tests will be sorted into tests/<category>
 #
 # In addtion to the parameters above:
 #   - For 'test' targets:
@@ -219,21 +219,20 @@ function(add_openpass_target)
 
 # TODO: different categories of libraries can be placed in different directories
 #       GUI Components are installed in their own gui directory as an example
-	if("${PARSED_ARG_COMPONENT}" STREQUAL "gui")
-	  set (DESTDIR ${SUBDIR_LIB_GUI})
-	elseif("${PARSED_ARG_COMPONENT}" STREQUAL "core")
-	  set (DESTDIR ${SUBDIR_LIB_COMPONENTS})
-	elseif("${PARSED_ARG_COMPONENT}" STREQUAL "bin")
-	  set (DESTDIR ${INSTALL_BIN_DIR})
-	elseif("${PARSED_ARG_COMPONENT}" STREQUAL "sim")
-	  set (DESTDIR ${SUBDIR_LIB_SIM})
-	elseif("${PARSED_ARG_COMPONENT}" STREQUAL "module")
-	  set (DESTDIR ${SUBDIR_LIB_SIM})
-	else()
-      message(STATUS "Unknown COMPONENT '${PARSED_ARG_COMPONENT}' please use any one of GUI, CORE, BIN or SIM.")
-	endif()
-	
-	
+    if("${PARSED_ARG_COMPONENT}" STREQUAL "gui")
+      set (DESTDIR ${SUBDIR_LIB_GUI})
+    elseif("${PARSED_ARG_COMPONENT}" STREQUAL "core")
+      set (DESTDIR ${SUBDIR_LIB_COMPONENTS})
+    elseif("${PARSED_ARG_COMPONENT}" STREQUAL "bin")
+      set (DESTDIR ${INSTALL_BIN_DIR})
+    elseif("${PARSED_ARG_COMPONENT}" STREQUAL "sim")
+      set (DESTDIR ${SUBDIR_LIB_SIM})
+    elseif("${PARSED_ARG_COMPONENT}" STREQUAL "module")
+      set (DESTDIR ${SUBDIR_LIB_SIM})
+    else()
+      message(FATAL_ERROR "Unknown COMPONENT '${PARSED_ARG_COMPONENT}' please use any one of 'gui', 'core', 'bin', 'sim', or 'module'.")
+    endif()
+
     if("${PARSED_ARG_TYPE}" STREQUAL "library")
 
       set(VALID_LINKAGES shared static)
@@ -247,10 +246,10 @@ function(add_openpass_target)
       add_library(${PARSED_ARG_NAME} ${PARSED_ARG_LINKAGE} ${PARSED_ARG_HEADERS} ${PARSED_ARG_SOURCES} ${PARSED_ARG_UIS})
       install(FILES $<TARGET_FILE:${PARSED_ARG_NAME}> DESTINATION "${DESTDIR}")
       install(TARGETS ${PARSED_ARG_NAME} RUNTIME DESTINATION "${DESTDIR}")
-	  
-	  if(OPENPASS_ADJUST_OUTPUT)
-	    openpass_adjust_output_dir(${PARSED_ARG_NAME} ${DESTDIR})
-	  endif()
+
+      if(OPENPASS_ADJUST_OUTPUT)
+        openpass_adjust_output_dir(${PARSED_ARG_NAME} ${DESTDIR})
+      endif()
 
       if(WIN32)
         set_target_properties(${PARSED_ARG_NAME} PROPERTIES PREFIX "")
@@ -264,10 +263,10 @@ function(add_openpass_target)
 
       add_executable(${PARSED_ARG_NAME} ${PARSED_ARG_HEADERS} ${PARSED_ARG_SOURCES} ${PARSED_ARG_UIS})
       install(TARGETS ${PARSED_ARG_NAME} RUNTIME DESTINATION "${DESTDIR}")
-	  
-	  if(OPENPASS_ADJUST_OUTPUT)
-	    openpass_adjust_output_dir(${PARSED_ARG_NAME} ${DESTDIR})
-	  endif()
+
+      if(OPENPASS_ADJUST_OUTPUT)
+        openpass_adjust_output_dir(${PARSED_ARG_NAME} ${DESTDIR})
+      endif()
 
     elseif("${PARSED_ARG_TYPE}" STREQUAL "test")
 
@@ -297,10 +296,13 @@ function(add_openpass_target)
         ${GTEST_INCLUDE_DIR}
       )
 
+      # currently not provided by FindGTest
+      get_filename_component(GMOCK_LIBRARY_PATH ${GTEST_LIBRARY} DIRECTORY)
+      set(GMOCK_LIBRARY ${GMOCK_LIBRARY_PATH}/libgmock.a)
 
       target_link_libraries(${PARSED_ARG_NAME}
         ${GTEST_LIBRARY}
-        ${GMOCK_LIBRARIES}
+        ${GMOCK_LIBRARY}
         pthread
       )
 
@@ -313,19 +315,20 @@ function(add_openpass_target)
       message(FATAL_ERROR "Target type '${PARSED_TARGET_TYPE}' is not supported.")
 
     endif()
-	
 
     set_target_properties(${PARSED_ARG_NAME} PROPERTIES DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}")
     set_target_properties(${PARSED_ARG_NAME} PROPERTIES PROJECT_LABEL "${PARSED_ARG_NAME}")
     set_target_properties(${PARSED_ARG_NAME} PROPERTIES OUTPUT_NAME "${PARSED_ARG_NAME}")
-	if("${PARSED_ARG_FOLDER}" STREQUAL "")
-	   set(PARSED_ARG_FOLDER ${FOLDER})
-	endif()
+
+    if("${PARSED_ARG_FOLDER}" STREQUAL "")
+      set(PARSED_ARG_FOLDER ${FOLDER})
+    endif()
+
     if("${PARSED_ARG_TYPE}" STREQUAL "test")
-	   set_target_properties(${PARSED_ARG_NAME} PROPERTIES FOLDER "tests/${PARSED_ARG_FOLDER}")
-	else()
-	   set_target_properties(${PARSED_ARG_NAME} PROPERTIES FOLDER "${PARSED_ARG_FOLDER}")
-	endif()
+      set_target_properties(${PARSED_ARG_NAME} PROPERTIES FOLDER "tests/${PARSED_ARG_FOLDER}")
+    else()
+      set_target_properties(${PARSED_ARG_NAME} PROPERTIES FOLDER "${PARSED_ARG_FOLDER}")
+    endif()
 
     target_include_directories(${PARSED_ARG_NAME} PRIVATE
       ${PARSED_ARG_INCDIRS}
@@ -348,27 +351,115 @@ function(add_openpass_target)
         protobuf::libprotobuf
       )
     endif()
-	
-	target_compile_options(${PARSED_ARG_NAME} PRIVATE
-     $<$<CXX_COMPILER_ID:MSVC>:
+
+    target_compile_options(${PARSED_ARG_NAME} PRIVATE
+      $<$<CXX_COMPILER_ID:MSVC>:
           -wd4251 -wd4335 -wd4250>)
 
     if(${PARSED_ARG_LINKGUI})
       qt5_use_modules(${PARSED_ARG_NAME} Core Gui Xml Widgets)
     endif()
 
-    if(DEFINED PARSED_ARG_SIMCORE_DEPS)
-      if("${PARSED_ARG_TYPE}" STREQUAL "test")
-        foreach(DEP IN LISTS PARSED_ARG_SIMCORE_DEPS)
-          # build dependency
+    # locate shared library dependencies for test execution and add
+    # their location to PATH or LD_LIBRARY_PATH environment variable
+    if("${PARSED_ARG_TYPE}" STREQUAL "test")
+      set(DEPS)
+      set(DEP_PATHS)
+      if(DEFINED PARSED_ARG_SIMCORE_DEPS)
+        list(APPEND DEPS ${PARSED_ARG_SIMCORE_DEPS})
+      endif()
+      if(DEFINED PARSED_ARG_LIBRARIES)
+        list(APPEND DEPS ${PARSED_ARG_LIBRARIES})
+      endif()
+      if(${PARSED_ARG_LINKOSI})
+        list(APPEND DEPS "${OSI_LIBRARIES}" protobuf::libprotobuf)
+      endif()
+
+      message(DEBUG "Locating shared library test dependencies...")
+      foreach(DEP IN LISTS DEPS)
+        if(TARGET ${DEP})
+          set(DEP_PATH "")
+          message(DEBUG "Target dependency: ${DEP}")
+          # build dependencies
           add_dependencies(${PARSED_ARG_NAME} ${DEP})
 
-          # test run dependency
-          get_property(DEP_PATH TARGET ${DEP} PROPERTY BINARY_DIR)
-          set_tests_properties(${PARSED_ARG_NAME} PROPERTIES ENVIRONMENT "LD_LIBRARY_PATH=${DEP_PATH}")
-        endforeach()
+          # test run dependencies
+          get_property(DEP_TARGET_TYPE TARGET ${DEP} PROPERTY TYPE)
+          if("${DEP_TARGET_TYPE}" STREQUAL "INTERFACE_LIBRARY")
+            message(DEBUG "Dependency is interface libarary. Ignoring.")
+            continue()
+          endif()
+
+          get_property(DEP_PATH TARGET ${DEP} PROPERTY IMPORTED_LOCATION)
+          if("${DEP_PATH}" STREQUAL "")
+            string(TOUPPER "${CMAKE_BUILD_TYPE}" TYPE)
+            get_property(DEP_PATH TARGET ${DEP} PROPERTY "IMPORTED_LOCATION_${TYPE}")
+          endif()
+          if("${DEP_PATH}" STREQUAL "")
+            get_property(DEP_PATH TARGET ${DEP} PROPERTY IMPORTED_LOCATION_RELEASE)
+          endif()
+          if("${DEP_PATH}" STREQUAL "")
+            get_property(DEP_PATH TARGET ${DEP} PROPERTY IMPORTED_LOCATION_DEBUG)
+          endif()
+
+          if("${DEP_PATH}" STREQUAL "")
+            get_property(DEP_PATH TARGET ${DEP} PROPERTY BINARY_DIR)
+            message(DEBUG "no IMPORTED_LOCATION defined, got BINARY_DIR: ${DEP_PATH}")
+          else()
+            message(DEBUG "IMPORTED_LOCATION: ${DEP_PATH}")
+            if(WIN32)
+              get_filename_component(DEP_EXT ${DEP_PATH} EXT)
+              if("${DEP_EXT}" STREQUAL ".dll.a")
+                string(REGEX REPLACE "\.a$" "" DEP_PATH_NO_A "${DEP_PATH}")
+                if(NOT EXISTS ${DEP_PATH_NO_A})
+                  string(REGEX REPLACE "\/lib\/" "/bin/" DEP_PATH "${DEP_PATH_NO_A}")
+                endif()
+              endif()
+              if(EXISTS "${DEP_PATH}")
+                message(DEBUG "located shared library: ${DEP_PATH}")
+                get_filename_component(DEP_PATH ${DEP_PATH} DIRECTORY)
+              else()
+                message(DEBUG "unable to locate shared library")
+                continue()
+              endif()
+            endif()
+          endif()
+        else()
+          message(DEBUG "No target dependency: ${DEP}")
+          set(DEP_PATH "${DEP}")
+          if(WIN32)
+            get_filename_component(DEP_EXT "${DEP_PATH}" EXT)
+            if("${DEP_EXT}" STREQUAL ".dll.a")
+              string(REGEX REPLACE "\\.a$" "" DEP_PATH_NO_A "${DEP_PATH}")
+              if(EXISTS ${DEP_PATH_NO_A})
+                set(DEP_PATH "${DEP_PATH_NO_A}")
+              else()
+                string(REGEX REPLACE "/lib/" "/bin/" DEP_PATH "${DEP_PATH_NO_A}")
+              endif()
+            endif()
+          endif()
+          if(EXISTS "${DEP_PATH}")
+            message(DEBUG "located shared library: ${DEP_PATH}")
+            get_filename_component(DEP_PATH ${DEP_PATH} DIRECTORY)
+          else()
+            message(DEBUG "unable to locate shared library")
+            continue()
+          endif()
+        endif()
+        if(WIN32)
+          string(REGEX REPLACE "/" "\\\\" DEP_PATH "${DEP_PATH}")
+        endif()
+        list(APPEND DEP_PATHS "${DEP_PATH}")
+      endforeach()
+
+      if(WIN32)
+        list(JOIN DEP_PATHS "\\;" ADDITIONAL_PATHS)
+        set(CURRENT_PATH "$ENV{PATH}")
+        string(REGEX REPLACE "\;" "\\\;" CURRENT_PATH "${CURRENT_PATH}")
+        set_tests_properties(${PARSED_ARG_NAME} PROPERTIES ENVIRONMENT "PATH=${ADDITIONAL_PATHS}\;${CURRENT_PATH}")
       else()
-        message(WARNING "SIMCORE_DEPS argument is only used for 'test' openpass targets")
+        list(JOIN DEP_PATHS ":" ADDITIONAL_PATHS)
+        set_tests_properties(${PARSED_ARG_NAME} PROPERTIES ENVIRONMENT "LD_LIBRARY_PATH=${ADDITIONAL_PATHS}:$ENV{LD_LIBRARY_PATH}")
       endif()
     endif()
 

@@ -23,12 +23,9 @@
 class ConfigurationContainerInterface
 {
 public:
-    ConfigurationContainerInterface() = default;
     virtual ~ConfigurationContainerInterface() = default;
 
     virtual bool ImportAllConfigurations() = 0;
-
-    //Getters
     virtual std::shared_ptr<SystemConfigInterface> GetSystemConfigBlueprint() = 0;
     virtual SlaveConfigInterface* GetSlaveConfig() = 0;
     virtual ProfilesInterface* GetProfiles() = 0;

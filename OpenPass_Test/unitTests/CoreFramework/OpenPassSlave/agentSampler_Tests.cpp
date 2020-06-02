@@ -1,12 +1,12 @@
-/*********************************************************************
-* Copyright (c) 2018 - 2019 in-tech GmbH on behalf of BMW
+/*******************************************************************************
+* Copyright (c) 2018, 2019 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
 * which is available at https://www.eclipse.org/legal/epl-2.0/
 *
 * SPDX-License-Identifier: EPL-2.0
-**********************************************************************/
+*******************************************************************************/
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -22,7 +22,6 @@
 #include "fakeAgentType.h"
 #include "fakeSystemConfig.h"
 
-#include "agentProfileSampler.h"
 #include "dynamicProfileSampler.h"
 #include "dynamicAgentTypeGenerator.h"
 #include "dynamicParametersSampler.h"
@@ -34,208 +33,11 @@ using ::testing::Eq;
 using ::testing::DoubleEq;
 using ::testing::NiceMock;
 
-TEST(AgentProfileSampler_UnitTests, SampleAgentProfileNameEgo)
-{
-    std::string fakeName = "fake";
+using namespace std::string_literals;
 
-    ScenarioEntity fakeEgoEntity;
-    fakeEgoEntity.catalogReference.entryName = fakeName;
+namespace op = openpass::parameter;
 
-    NiceMock<FakeScenario> fakeScenario;
-    ON_CALL(fakeScenario, GetEgoEntity()).WillByDefault(ReturnRef(fakeEgoEntity));
-    std::vector<ScenarioEntity*> emptyScenarioEntities;
-    ON_CALL(fakeScenario, GetScenarioEntities()).WillByDefault(ReturnRef(emptyScenarioEntities));
-    TrafficConfig fakeTrafficConfig;
 
-    NiceMock<FakeSlaveConfig> fakeSlaveConfig;
-    ON_CALL(fakeSlaveConfig, GetTrafficConfig()).WillByDefault(ReturnRef(fakeTrafficConfig));
-    NiceMock<FakeConfigurationContainer> fakeConfigurationContainer;
-    ON_CALL(fakeConfigurationContainer, GetSlaveConfig()).WillByDefault(Return(&fakeSlaveConfig));
-    ON_CALL(fakeConfigurationContainer, GetScenario()).WillByDefault(Return(&fakeScenario));
-
-    NiceMock<FakeSampler> fakeSampler;
-    AgentProfileSampler agentProfileSampler(&fakeConfigurationContainer, fakeSampler);
-
-    NiceMock<FakeAgentBlueprint> fakeAgentBlueprint;
-    ON_CALL(fakeAgentBlueprint, GetAgentCategory()).WillByDefault(Return(AgentCategory::Ego));
-    EXPECT_CALL(fakeAgentBlueprint, SetAgentProfileName(fakeName)).Times(1);
-
-    agentProfileSampler.SampleAgentProfileName(fakeAgentBlueprint, LaneCategory::Undefined, 0);
-}
-
-TEST(AgentProfileSampler_UnitTests, SampleAgentProfileNameScenario)
-{
-    std::string fakeName = "fake";
-
-    ScenarioEntity fakeEgoEntity;
-    ScenarioEntity fakeScenarioEntity;
-    fakeScenarioEntity.catalogReference.entryName = fakeName;
-
-    std::vector<ScenarioEntity*> fakeScenarioEntities{&fakeScenarioEntity};
-
-    NiceMock<FakeScenario> fakeScenario;
-    ON_CALL(fakeScenario, GetEgoEntity()).WillByDefault(ReturnRef(fakeEgoEntity));
-    ON_CALL(fakeScenario, GetScenarioEntities()).WillByDefault(ReturnRef(fakeScenarioEntities));
-    TrafficConfig fakeTrafficConfig;
-
-    NiceMock<FakeSlaveConfig> fakeSlaveConfig;
-    ON_CALL(fakeSlaveConfig, GetTrafficConfig()).WillByDefault(ReturnRef(fakeTrafficConfig));
-    NiceMock<FakeConfigurationContainer> fakeConfigurationContainer;
-    ON_CALL(fakeConfigurationContainer, GetSlaveConfig()).WillByDefault(Return(&fakeSlaveConfig));
-    ON_CALL(fakeConfigurationContainer, GetScenario()).WillByDefault(Return(&fakeScenario));
-
-    NiceMock<FakeSampler> fakeSampler;
-    AgentProfileSampler agentProfileSampler(&fakeConfigurationContainer, fakeSampler);
-
-    NiceMock<FakeAgentBlueprint> fakeAgentBlueprint;
-    ON_CALL(fakeAgentBlueprint, GetAgentCategory()).WillByDefault(Return(AgentCategory::Scenario));
-    EXPECT_CALL(fakeAgentBlueprint, SetAgentProfileName(fakeName)).Times(1);
-
-    agentProfileSampler.SampleAgentProfileName(fakeAgentBlueprint, LaneCategory::Undefined, 0);
-}
-
-TEST(AgentProfileSampler_UnitTests, SampleAgentProfileNameScenarioWithoutEnoughAgentProfiles)
-{
-    NiceMock<FakeScenario> fakeScenario;
-    TrafficConfig fakeTrafficConfig;
-    ScenarioEntity fakeEgoEntity;
-
-    ON_CALL(fakeScenario, GetEgoEntity()).WillByDefault(ReturnRef(fakeEgoEntity));
-    std::vector<ScenarioEntity*> emptyScenarioEntities;
-    ON_CALL(fakeScenario, GetScenarioEntities()).WillByDefault(ReturnRef(emptyScenarioEntities));
-
-    NiceMock<FakeSlaveConfig> fakeSlaveConfig;
-    ON_CALL(fakeSlaveConfig, GetTrafficConfig()).WillByDefault(ReturnRef(fakeTrafficConfig));
-    NiceMock<FakeConfigurationContainer> fakeConfigurationContainer;
-    ON_CALL(fakeConfigurationContainer, GetSlaveConfig()).WillByDefault(Return(&fakeSlaveConfig));
-    ON_CALL(fakeConfigurationContainer, GetScenario()).WillByDefault(Return(&fakeScenario));
-
-    NiceMock<FakeSampler> fakeSampler;
-    AgentProfileSampler agentProfileSampler(&fakeConfigurationContainer, fakeSampler);
-
-    NiceMock<FakeAgentBlueprint> fakeAgentBlueprint;
-    ON_CALL(fakeAgentBlueprint, GetAgentCategory()).WillByDefault(Return(AgentCategory::Scenario));
-
-    bool failed = false;
-
-    try
-    {
-        agentProfileSampler.SampleAgentProfileName(fakeAgentBlueprint, LaneCategory::Undefined, 0);
-    }
-    catch(...)
-    {
-        failed = true;
-    }
-
-    ASSERT_TRUE(failed);
-}
-
-TEST(AgentProfileSampler_UnitTests, SampleAgentProfileNameCommonRegularLane)
-{
-    StringProbabilities fakeRegularLaneAgents;
-    fakeRegularLaneAgents.insert({"fakeName", 0.5});
-    ScenarioEntity fakeEgoEntity;
-
-    NiceMock<FakeScenario> fakeScenario;
-    ON_CALL(fakeScenario, GetEgoEntity()).WillByDefault(ReturnRef(fakeEgoEntity));
-    std::vector<ScenarioEntity*> emptyScenarioEntities;
-    ON_CALL(fakeScenario, GetScenarioEntities()).WillByDefault(ReturnRef(emptyScenarioEntities));
-
-    TrafficConfig fakeTrafficConfig;
-    fakeTrafficConfig.regularLaneAgents = fakeRegularLaneAgents;
-
-    NiceMock<FakeSlaveConfig> fakeSlaveConfig;
-    ON_CALL(fakeSlaveConfig, GetTrafficConfig()).WillByDefault(ReturnRef(fakeTrafficConfig));
-
-    NiceMock<FakeConfigurationContainer> fakeConfigurationContainer;
-    ON_CALL(fakeConfigurationContainer, GetSlaveConfig()).WillByDefault(Return(&fakeSlaveConfig));
-    ON_CALL(fakeConfigurationContainer, GetScenario()).WillByDefault(Return(&fakeScenario));
-
-    NiceMock<FakeSampler> fakeSampler;
-    EXPECT_CALL(fakeSampler, SampleStringProbability(fakeRegularLaneAgents)).Times(1)
-            .WillOnce(Return("fakeName"));
-
-    AgentProfileSampler agentProfileSampler(&fakeConfigurationContainer, fakeSampler);
-
-    NiceMock<FakeAgentBlueprint> fakeAgentBlueprint;
-    ON_CALL(fakeAgentBlueprint, GetAgentCategory()).WillByDefault(Return(AgentCategory::Common));
-    EXPECT_CALL(fakeAgentBlueprint, SetAgentProfileName("fakeName")).Times(1);
-
-    agentProfileSampler.SampleAgentProfileName(fakeAgentBlueprint, LaneCategory::RegularLane, 0);
-}
-
-TEST(AgentProfileSampler_UnitTests, SampleAgentProfileNameCommonRightMostLane)
-{
-    StringProbabilities fakeRegularLaneAgents;
-    fakeRegularLaneAgents.insert({"fakeName", 0.5});
-    ScenarioEntity fakeEgoEntity;
-
-    NiceMock<FakeScenario> fakeScenario;
-    ON_CALL(fakeScenario, GetEgoEntity()).WillByDefault(ReturnRef(fakeEgoEntity));
-    std::vector<ScenarioEntity*> emptyScenarioEntities;
-    ON_CALL(fakeScenario, GetScenarioEntities()).WillByDefault(ReturnRef(emptyScenarioEntities));
-    TrafficConfig fakeTrafficConfig;
-    fakeTrafficConfig.rightMostLaneAgents = fakeRegularLaneAgents;
-
-    NiceMock<FakeSlaveConfig> fakeSlaveConfig;
-    ON_CALL(fakeSlaveConfig, GetTrafficConfig()).WillByDefault(ReturnRef(fakeTrafficConfig));
-
-    NiceMock<FakeConfigurationContainer> fakeConfigurationContainer;
-    ON_CALL(fakeConfigurationContainer, GetSlaveConfig()).WillByDefault(Return(&fakeSlaveConfig));
-    ON_CALL(fakeConfigurationContainer, GetScenario()).WillByDefault(Return(&fakeScenario));
-
-    NiceMock<FakeSampler> fakeSampler;
-    EXPECT_CALL(fakeSampler, SampleStringProbability(fakeRegularLaneAgents)).Times(1)
-            .WillOnce(Return("fakeName"));
-
-    AgentProfileSampler agentProfileSampler(&fakeConfigurationContainer, fakeSampler);
-
-    NiceMock<FakeAgentBlueprint> fakeAgentBlueprint;
-    ON_CALL(fakeAgentBlueprint, GetAgentCategory()).WillByDefault(Return(AgentCategory::Common));
-    EXPECT_CALL(fakeAgentBlueprint, SetAgentProfileName("fakeName")).Times(1);
-
-    agentProfileSampler.SampleAgentProfileName(fakeAgentBlueprint, LaneCategory::RightMostLane, 0);
-}
-
-TEST(AgentProfileSampler_UnitTests, SampleAgentProfileNameCommonInvalidLaneCategory)
-{
-    StringProbabilities fakeRegularLaneAgents;
-    fakeRegularLaneAgents.insert({"fakeName", 0.5});
-
-    ScenarioEntity fakeEgoEntity;
-
-    NiceMock<FakeScenario> fakeScenario;
-    ON_CALL(fakeScenario, GetEgoEntity()).WillByDefault(ReturnRef(fakeEgoEntity));
-    std::vector<ScenarioEntity*> emptyScenarioEntities;
-    ON_CALL(fakeScenario, GetScenarioEntities()).WillByDefault(ReturnRef(emptyScenarioEntities));
-
-    TrafficConfig fakeTrafficConfig;
-    NiceMock<FakeSlaveConfig> fakeSlaveConfig;
-    ON_CALL(fakeSlaveConfig, GetTrafficConfig()).WillByDefault(ReturnRef(fakeTrafficConfig));
-
-    NiceMock<FakeConfigurationContainer> fakeConfigurationContainer;
-    ON_CALL(fakeConfigurationContainer, GetSlaveConfig()).WillByDefault(Return(&fakeSlaveConfig));
-    ON_CALL(fakeConfigurationContainer, GetScenario()).WillByDefault(Return(&fakeScenario));
-
-    NiceMock<FakeSampler> fakeSampler;
-    AgentProfileSampler agentProfileSampler(&fakeConfigurationContainer, fakeSampler);
-
-    NiceMock<FakeAgentBlueprint> fakeAgentBlueprint;
-    ON_CALL(fakeAgentBlueprint, GetAgentCategory()).WillByDefault(Return(AgentCategory::Common));
-
-    bool failed = false;
-
-    try
-    {
-        agentProfileSampler.SampleAgentProfileName(fakeAgentBlueprint, LaneCategory::Undefined, 0);
-    }
-    catch(...)
-    {
-        failed = true;
-    }
-
-    ASSERT_TRUE(failed);
-}
 
 TEST(DynamicProfileSampler, SampleDriverProfile)
 {
@@ -337,15 +139,15 @@ TEST(DynamicAgentTypeGenerator, GatherDriverComponents)
 
     sampledProfiles.driverProfileName = "SomeDriverProfile";
 
-    auto driverProfile = std::make_shared<NiceMock<FakeParameter>>();
-    std::map<std::string, const std::string> stringParameter {{"Type", "SomeDriverModule"},
-                                                              {"ParametersModule", "SomeParameters"},
-                                                              {"SensorDriverModule", "SomeSensorDriver"},
-                                                              {"AlgorithmLateralModule", "SomeAlgorithmLateral"},
-                                                              {"AlgorithmLongitudinalModule", "SomeAlgorithmLongitudinal"}};
-    ON_CALL(*driverProfile, GetParametersString()).WillByDefault(ReturnRef(stringParameter));
+    op::Container driverProfile{
+        {"Type"s, "SomeDriverModule"s},
+        {"ParametersModule"s, "SomeParameters"s},
+        {"SensorDriverModule"s, "SomeSensorDriver"s},
+        {"AlgorithmLateralModule"s, "SomeAlgorithmLateral"s},
+        {"AlgorithmLongitudinalModule"s, "SomeAlgorithmLongitudinal"s}
+    };
 
-    std::unordered_map<std::string, std::shared_ptr<ParameterInterface>> driverProfiles{{"SomeDriverProfile", driverProfile}};
+    DriverProfiles driverProfiles{{"SomeDriverProfile", driverProfile}};
     ON_CALL(profiles, GetDriverProfiles()).WillByDefault(ReturnRef(driverProfiles));
 
     auto fakeAgentType = std::make_shared<NiceMock<SimulationSlave::FakeAgentType>>();
@@ -394,10 +196,10 @@ TEST(DynamicAgentTypeGenerator, GatherVehicleComponents)
     sampledProfiles.vehicleProfileName = "SomeVehicle";
     sampledProfiles.vehicleComponentProfileNames = {{"VehicleComponentA", "ProfileA"}, {"VehicleComponentB", "ProfileB"}};
 
-    auto parametersAA = std::make_shared<NiceMock<FakeParameter>>();
-    auto parametersAB = std::make_shared<NiceMock<FakeParameter>>();
-    auto parametersBA = std::make_shared<NiceMock<FakeParameter>>();
-    auto parametersBB = std::make_shared<NiceMock<FakeParameter>>();
+    op::Container parametersAA {{"aa", 0}};
+    op::Container parametersAB {{"ab", 0}};
+    op::Container parametersBA {{"ba", 0}};
+    op::Container parametersBB {{"bb", 0}};
 
     VehicleComponentProfiles profilesComponentA {
         {"ProfileA", parametersAA},
@@ -450,11 +252,12 @@ TEST(DynamicAgentTypeGenerator, GatherVehicleComponents)
         ASSERT_THAT(agentBuildInformation.agentType->GetComponents().count(component), Eq(1));
     }
     ASSERT_THAT(agentBuildInformation.agentType->GetComponents().count("VehicleComponentA"), Eq(1));
-    ASSERT_THAT(agentBuildInformation.agentType->GetComponents().at("VehicleComponentA")->GetModelParameters(),
-                Eq(parametersAA.get()));
+    auto parameterA = agentBuildInformation.agentType->GetComponents().at("VehicleComponentA")->GetModelParameters();
+    EXPECT_THAT(op::Get<int>(parameterA, "aa").has_value(), true);
+
     ASSERT_THAT(agentBuildInformation.agentType->GetComponents().count("VehicleComponentB"), Eq(1));
-    ASSERT_THAT(agentBuildInformation.agentType->GetComponents().at("VehicleComponentB")->GetModelParameters(),
-                Eq(parametersBB.get()));
+    auto parameterB = agentBuildInformation.agentType->GetComponents().at("VehicleComponentB")->GetModelParameters();
+    EXPECT_THAT(op::Get<int>(parameterB, "bb").has_value(), true);
 }
 
 TEST(DynamicAgentTypeGenerator, GatherSensors)
@@ -470,38 +273,34 @@ TEST(DynamicAgentTypeGenerator, GatherSensors)
 
     sampledProfiles.vehicleProfileName = "SomeVehicle";
 
-    auto sensorParametersA = std::make_shared<SimulationCommon::Parameters>();
-    SensorProfile sensorProfileA;
+    openpass::sensors::Profile sensorProfileA;
     sensorProfileA.name = "ProfileA";
     sensorProfileA.type = "SensorTypeA";
-    sensorProfileA.parameters = sensorParametersA;
 
-    auto sensorParametersB = std::make_shared<SimulationCommon::Parameters>();
-    SensorProfile sensorProfileB;
+    openpass::sensors::Profile sensorProfileB;
     sensorProfileB.name = "ProfileB";
     sensorProfileB.type = "SensorTypeB";
-    sensorProfileB.parameters = sensorParametersB;
 
-    std::list<SensorProfile> sensorProfiles {{sensorProfileA, sensorProfileB}};
+    openpass::sensors::Profiles sensorProfiles {{sensorProfileA, sensorProfileB}};
     ON_CALL(profiles, GetSensorProfiles()).WillByDefault(ReturnRef(sensorProfiles));
 
     VehicleProfile vehicleProfile;
 
-    SensorParameter sensorA;
+    openpass::sensors::Parameter sensorA;
     sensorA.id = 5;
-    sensorA.sensorProfile = sensorProfileA;
+    sensorA.profile = sensorProfileA;
 
-    SensorPosition positionA;
+    openpass::sensors::Position positionA;
     positionA.longitudinal = 2.0;
-    sensorA.sensorPosition = positionA;
+    sensorA.position = positionA;
 
-    SensorParameter sensorB;
+    openpass::sensors::Parameter sensorB;
     sensorB.id = 7;
-    sensorB.sensorProfile = sensorProfileB;
+    sensorB.profile = sensorProfileB;
 
-    SensorPosition positionB;
+    openpass::sensors::Position positionB;
     positionB.longitudinal = 3.0;
-    sensorB.sensorPosition = positionB;
+    sensorB.position = positionB;
     vehicleProfile.sensors = {sensorA, sensorB};
 
     std::unordered_map<std::string, VehicleProfile> vehicleProfiles {{"SomeVehicle", vehicleProfile}};
@@ -539,15 +338,9 @@ TEST(DynamicAgentTypeGenerator, GatherSensors)
 
     ASSERT_THAT(gatheredComponents.at("Sensor_5")->GetModelLibrary(), Eq("SensorObjectDetector"));
     ASSERT_THAT(gatheredComponents.at("Sensor_5")->GetOutputLinks().at(3), Eq(100));
-//  ASSERT_THAT(gatheredComponents.at("Sensor_5")->GetModelParameters()->GetParametersString().at("Type"), Eq("SensorTypeA"));
-//  ASSERT_THAT(gatheredComponents.at("Sensor_5")->GetModelParameters()->GetParametersDouble().at("Longitudinal"), Eq(2.0));
-//  ASSERT_THAT(gatheredComponents.at("Sensor_5")->GetModelParameters()->GetParametersDouble().at("Latency"), Eq(1.0));
 
     ASSERT_THAT(gatheredComponents.at("Sensor_7")->GetModelLibrary(), Eq("SensorObjectDetector"));
     ASSERT_THAT(gatheredComponents.at("Sensor_7")->GetOutputLinks().at(3), Eq(101));
-//  ASSERT_THAT(gatheredComponents.at("Sensor_7")->GetModelParameters()->GetParametersString().at("Type"), Eq("SensorTypeB"));
-//  ASSERT_THAT(gatheredComponents.at("Sensor_7")->GetModelParameters()->GetParametersDouble().at("Longitudinal"), Eq(3.0));l
-//  ASSERT_THAT(gatheredComponents.at("Sensor_7")->GetModelParameters()->GetParametersDouble().at("Latency"), Eq(2.0));
 }
 
 TEST(DynamicAgentTypeGenerator, SetVehicleModelParameters)
@@ -586,23 +379,19 @@ TEST(DynamicParametersSampler, SampleSensorLatencies)
     ON_CALL(sampler, RollForStochasticAttribute(DoubleEq(10.0),_,_,_)).WillByDefault(Return(10.0));
 
     std::string vehicleProfileName ="SomeVehicle";
-    SensorParameter sensorParameter;
+    openpass::sensors::Parameter sensorParameter;
     sensorParameter.id = 5;
-    sensorParameter.sensorProfile.name = "SomeProfile";
-    sensorParameter.sensorProfile.type = "SomeSensorType";
+    sensorParameter.profile.name = "SomeProfile";
+    sensorParameter.profile.type = "SomeSensorType";
     VehicleProfile vehicleProfile;
     vehicleProfile.sensors = {{sensorParameter}};
     std::unordered_map<std::string, VehicleProfile> vehicleProfiles{{vehicleProfileName, vehicleProfile}};
 
-    std::map<std::string, const StochasticDefintions::NormalDistributionParameter> normalDistributionParameters {{"Latency", {10.0, 0.0, 0.0, 0.0}}};
-    auto sensorParameters = std::make_shared<NiceMock<FakeParameter>>();
-    ON_CALL(*sensorParameters, GetParametersNormalDistribution()).WillByDefault(ReturnRef(normalDistributionParameters));
-
-    SensorProfile sensorProfile;
+    openpass::sensors::Profile sensorProfile;
     sensorProfile.name = "SomeProfile";
     sensorProfile.type = "SomeSensorType";
-    sensorProfile.parameters = sensorParameters;
-    std::list<SensorProfile> sensorProfiles{sensorProfile};
+    sensorProfile.parameter = op::Container{ {"Latency", op::NormalDistribution{10.0, 0.0, 0.0, 0.0}} };
+    openpass::sensors::Profiles sensorProfiles{sensorProfile};
 
     DynamicParameters dynamicParameters = DynamicParameters::make(sampler, vehicleProfileName, vehicleProfiles, sensorProfiles)
             .SampleSensorLatencies();
