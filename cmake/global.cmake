@@ -66,7 +66,8 @@ option(WITH_TESTS "Build unit tests" ON)
 
 if(WITH_TESTS)
   find_package(GTest)
-  find_package(GMock)
+  # as GMock currently doesn't provvide a find_package config, gmock file location is derived from gtest in HelperMacros.cmake
+  #find_package(GMock)
 endif()
 
 if(WIN32)

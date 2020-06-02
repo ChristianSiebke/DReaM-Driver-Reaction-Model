@@ -31,7 +31,8 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/OpenPass_Source_Code)
 
 if(WITH_TESTS)
   enable_testing()
-  add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/OpenPass_Test)
+  # will be provided in the near future
+  #add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/OpenPass_Test)
 endif()
 
 include(CPack)

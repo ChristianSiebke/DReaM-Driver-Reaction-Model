@@ -31,7 +31,7 @@ include_directories(openPASS/Interfaces
 					openPASS-Component/Interfaces
 					openPASS
 					Global
-					../OpenPASS/Common
+					../openPASS/Common
 					./)
 					
 
