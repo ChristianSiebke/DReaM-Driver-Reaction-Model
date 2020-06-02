@@ -1,6 +1,7 @@
 /*******************************************************************************
 * Copyright (c) 2017, 2018, 2019 in-tech GmbH
 *               2016, 2017 ITK Engineering GmbH
+*               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -12,8 +13,8 @@
 #include "WorldData.h"
 #include "WorldImplementation.h"
 
-#include "osi/osi_sensorview.pb.h"
-#include "osi/osi_sensorviewconfiguration.pb.h"
+#include "osi3/osi_sensorview.pb.h"
+#include "osi3/osi_sensorviewconfiguration.pb.h"
 
 namespace {
     template <typename T>

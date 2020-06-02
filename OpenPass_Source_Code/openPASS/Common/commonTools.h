@@ -2,6 +2,7 @@
 * Copyright (c) 2017, 2018, 2019 in-tech GmbH
 *               2018 AMFD GmbH
 *               2016, 2017, 2018, 2019 ITK Engineering GmbH
+*               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -14,8 +15,9 @@
 #define COMMONTOOLS
 
 #include "globalDefinitions.h"
-#include "math.h"
 #include "vector2d.h"
+#include <optional>
+#include <algorithm>
 
 //-----------------------------------------------------------------------------
 //! @brief defines common helper functions like conversion from and to enums.

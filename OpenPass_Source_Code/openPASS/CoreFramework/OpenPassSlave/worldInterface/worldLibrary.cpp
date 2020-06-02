@@ -1,6 +1,7 @@
 /*******************************************************************************
 * Copyright (c) 2017, 2018, 2019 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
+*               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -17,7 +18,8 @@ namespace SimulationSlave
 
 bool WorldLibrary::Init()
 {
-    library = new (std::nothrow) QLibrary(QString::fromStdString(worldLibraryPath));
+    std::string suffix = DEBUG_POSTFIX;
+    library = new (std::nothrow) QLibrary(QString::fromStdString(worldLibraryPath+suffix));
     if(!library)
     {
         return false;

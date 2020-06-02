@@ -1,5 +1,6 @@
 /******************************************************************************
 * Copyright (c) 2017, 2019 Volkswagen Group of America.
+* Copyright (c) 2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -25,7 +26,13 @@ int main(int argc, char *argv[])
     QApplication application(argc, argv);
     application.setApplicationName(QStringLiteral(APPLICATION_NAME));
     application.setApplicationVersion(QStringLiteral(APPLICATION_VERSION));
-    application.addLibraryPath(application.applicationDirPath()  + SUBDIR_LIB_GUI);
+    application.addLibraryPath(application.applicationDirPath() + "/../" + SUBDIR_LIB_GUI);
+    // make sure dependencies of plugins are found, otherwise plugins such as the AgentConfiguration which depend on the Project plugin are not found
+#ifdef WIN32
+    qputenv("PATH",(qgetenv("PATH") + ";" + application.applicationDirPath() + "/../" + SUBDIR_LIB_GUI).toLatin1());
+#else
+    qputenv("LD_LIBRARY_PATH", (qgetenv("LD_LIBRARY_PATH") + ";" + application.applicationDirPath() + "/../" + SUBDIR_LIB_GUI).toLatin1());
+#endif
 
     // Initialize models
     ServiceManagerModel services;
@@ -34,7 +41,7 @@ int main(int argc, char *argv[])
     // Schedule application
     QTimer::singleShot(0, [&plugins](){
         // Load plugins
-        plugins.loadDirectory(QDir(QApplication::applicationDirPath() + SUBDIR_LIB_GUI));
+        plugins.loadDirectory(QDir(QApplication::applicationDirPath() +"/../" + SUBDIR_LIB_GUI));
 
         // Emit signal 'started'
         Q_EMIT plugins.started();

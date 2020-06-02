@@ -27,7 +27,7 @@
 #ifndef ENVIRONMENTMAPPRESENTER_H
 #define ENVIRONMENTMAPPRESENTER_H
 
-#include "openPASS-TrafficSimulation/EnvironmentInterface.h"
+#include "interfaces/openPASS-TrafficSimulation/EnvironmentInterface.h"
 
 #include <QMap>
 #include <QAbstractTableModel>

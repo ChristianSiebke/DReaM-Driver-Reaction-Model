@@ -17,7 +17,7 @@
 #ifndef EXPERIMENTPRESENTER_H
 #define EXPERIMENTPRESENTER_H
 
-#include "openPASS-TrafficSimulation/ExperimentInterface.h"
+#include "interfaces/openPASS-TrafficSimulation/ExperimentInterface.h"
 #include "openPASS-Project/ProjectInterface.h"
 
 #include "Presenters/LoggingGroupsPresenter.h"

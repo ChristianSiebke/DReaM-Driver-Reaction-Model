@@ -17,7 +17,7 @@
 #ifndef TRAFFICITEMMODEL_H
 #define TRAFFICITEMMODEL_H
 
-#include "openPASS-TrafficSimulation/TrafficItemInterface.h"
+#include "interfaces/openPASS-TrafficSimulation/TrafficItemInterface.h"
 
 //-----------------------------------------------------------------------------
 //! @brief The TrafficItemModel class implements functionality of the

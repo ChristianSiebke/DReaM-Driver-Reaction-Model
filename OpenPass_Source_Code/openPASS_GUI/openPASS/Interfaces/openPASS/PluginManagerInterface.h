@@ -1,5 +1,6 @@
 /****************************************************************************** 
 * Copyright (c) 2017 Volkswagen Group of America. 
+* Copyright (c) 2020 HLRS, University of Stuttgart.
 * 
 * This program and the accompanying materials are made 
 * available under the terms of the Eclipse Public License 2.0 
@@ -21,11 +22,12 @@
 #include <QDir>
 #include <QObject>
 #include <QString>
+#include <opExport.h>
 
 static ServiceManagerInterface::ID const PluginManagerInterfaceID =
         ServiceManagerInterfaceID("openPASS.PluginManagerInterface");
 
-class PluginManagerInterface : public QObject,
+class OPENPASSINTERFACESEXPORT PluginManagerInterface : public QObject,
         public ServiceInterface<PluginManagerInterface, PluginManagerInterfaceID>
 {
     Q_OBJECT

@@ -1,5 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2018, 2019 in-tech GmbH
+*               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -19,8 +20,8 @@
 
 #include "Interfaces/roadInterface/roadElementTypes.h"
 
-#include "osi/osi_road.pb.h"
-#include "osi/osi_lane.pb.h"
+#include "osi3/osi_road.pb.h"
+#include "osi3/osi_lane.pb.h"
 #include "OWL/DataTypes.h"
 
 osi3::world::Road_Type OpenDriveTypeMapper::OdToOsiRoadType(const RoadTypeInformation odRoadType)

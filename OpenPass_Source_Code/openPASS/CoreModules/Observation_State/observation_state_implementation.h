@@ -1,5 +1,6 @@
 /*********************************************************************
 * Copyright (c) 2017 ITK Engineering GmbH
+*               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -133,6 +134,10 @@ public:
     {
         return "";   //dummy
     }
+    virtual void Insert(int time, int agentId, LoggingGroup group, const std::string& key, const std::string& value) {};
+    virtual void InsertEvent(std::shared_ptr<EventInterface> event) {};
+    virtual void GatherFollowers() {};
+    virtual void InformObserverOnSpawn(AgentInterface* agent) {};
 
 private:
     void RecordAllAgents(int time);

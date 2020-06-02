@@ -1,5 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2017, 2018, 2019 in-tech GmbH
+*               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -8,8 +9,8 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
+#include <Common/opMath.h>
 #include <exception>
-#include <cmath>
 #include <qglobal.h>
 
 #include "TrafficObjectAdapter.h"
@@ -19,7 +20,7 @@
 TrafficObjectAdapter::TrafficObjectAdapter(OWL::Interfaces::WorldData& worldData, const World::Localization::Localizer& localizer,
         OWL::Primitive::AbsPosition position,
         OWL::Primitive::Dimension dimension, OWL::Primitive::AbsOrientation orientation) :
-    WorldObjectAdapter{worldData.AddStationaryObject(static_cast<void*>(this))},
+    WorldObjectAdapter{worldData.AddStationaryObject(static_cast<void*>(static_cast<WorldObjectInterface*>(this)))}, // objects passed as void * need to be casted to WorldObjectInterface*, because they are retrieved by casting to that class
     localizer{localizer}
 {
     baseTrafficObject.SetReferencePointPosition(position);

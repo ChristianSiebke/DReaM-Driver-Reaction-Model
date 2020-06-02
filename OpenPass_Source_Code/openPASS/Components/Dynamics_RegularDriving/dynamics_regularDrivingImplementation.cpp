@@ -1,6 +1,7 @@
 /*******************************************************************************
 * Copyright (c) 2018, 2019 in-tech GmbH
 *               2018, 2019 AMFD GmbH
+* Copyright (c) 2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -13,10 +14,10 @@
 //! @brief This file contains the implementation header file
 //-----------------------------------------------------------------------------
 
+#include <Common/opMath.h>
 #include <memory>
 #include <qglobal.h>
 #include <cassert>
-#include <cmath>
 #include "dynamics_regularDrivingImplementation.h"
 #include "Common/longitudinalSignal.h"
 #include "Common/commonTools.h"

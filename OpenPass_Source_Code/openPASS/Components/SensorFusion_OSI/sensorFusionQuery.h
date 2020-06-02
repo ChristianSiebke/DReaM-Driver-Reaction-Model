@@ -1,5 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2018, 2019 in-tech GmbH
+* Copyright (c) 2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -15,7 +16,7 @@
 //-----------------------------------------------------------------------------
 
 #pragma once
-#include "osi/osi_sensordata.pb.h"
+#include "osi3/osi_sensordata.pb.h"
 #include <map>
 #include <vector>
 

@@ -1,5 +1,6 @@
 /*********************************************************************
 * Copyright (c) 2016 ITK Engineering GmbH
+* Copyright (c) 2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -26,7 +27,7 @@ extern "C" DYNAMICS_LONGITUDINAL_BASICSHARED_EXPORT const std::string &OpenPASS_
 }
 
 extern "C" DYNAMICS_LONGITUDINAL_BASICSHARED_EXPORT ModelInterface *OpenPASS_CreateInstance(
-        int componentId,
+        std::string componentName,
         bool isInit,
         int priority,
         int offsetTime,
@@ -44,7 +45,7 @@ extern "C" DYNAMICS_LONGITUDINAL_BASICSHARED_EXPORT ModelInterface *OpenPASS_Cre
     try
     {
         return (ModelInterface*)(new (std::nothrow) Dynamics_Longitudinal_Basic_Implementation(
-                                     componentId,
+                                     componentName,
                                      isInit,
                                      priority,
                                      offsetTime,

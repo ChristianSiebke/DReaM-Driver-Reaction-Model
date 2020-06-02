@@ -1,6 +1,7 @@
 /*******************************************************************************
 * Copyright (c) 2017, 2018, 2019 in-tech GmbH
 *               2016, 2017 ITK Engineering GmbH
+*               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -45,7 +46,7 @@ struct WorldParameterOSI
     std::string weather {""};
 };
 
-#include "osi/osi_groundtruth.pb.h"
+#include "osi3/osi_groundtruth.pb.h"
 
 /** \addtogroup World
 * @{

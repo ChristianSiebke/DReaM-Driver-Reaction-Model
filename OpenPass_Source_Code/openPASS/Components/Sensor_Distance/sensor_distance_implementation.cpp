@@ -1,5 +1,6 @@
 /*********************************************************************
 * Copyright (c) 2016 ITK Engineering GmbH
+* Copyright (c) 2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +15,7 @@
 #include "Common/primitiveSignals.h"
 #include "sensor_distance_implementation.h"
 
-Sensor_Distance_Implementation::Sensor_Distance_Implementation(int componentId,
+Sensor_Distance_Implementation::Sensor_Distance_Implementation(std::string componentName,
                                                                bool isInit,
                                                                int priority,
                                                                int offsetTime,
@@ -25,7 +26,7 @@ Sensor_Distance_Implementation::Sensor_Distance_Implementation(int componentId,
                                                                const ParameterInterface *parameters, const std::map<int, ObservationInterface *> *observations,
                                                                const CallbackInterface *callbacks,
                                                                AgentInterface *agent) :
-    SensorInterface(componentId,
+    SensorInterface(componentName,
                     isInit,
                     priority,
                     offsetTime,
@@ -55,7 +56,7 @@ void Sensor_Distance_Implementation::UpdateOutput(int localLinkId, std::shared_p
     Q_UNUSED(time);
 
     std::stringstream log;
-    log << COMPONENTNAME << " (component " << GetComponentId() << ", agent " << GetAgent()->GetAgentId() << ", agentTypeId " << GetAgent()->GetAgentTypeId() << " output data for local link " << localLinkId << ": ";
+    log << COMPONENTNAME << " (component " << GetComponentName() << ", agent " << GetAgent()->GetAgentId() << ", agentTypeId " << GetAgent()->GetAgentTypeId() << " output data for local link " << localLinkId << ": ";
     LOG(CbkLogLevel::Debug, log.str());
 
     double value;

@@ -18,7 +18,7 @@
 #ifndef ENVIRONMENTITEMMODEL_H
 #define ENVIRONMENTITEMMODEL_H
 
-#include "openPASS-TrafficSimulation/EnvironmentItemInterface.h"
+#include "interfaces/openPASS-TrafficSimulation/EnvironmentItemInterface.h"
 
 //-----------------------------------------------------------------------------
 //! @brief The EnvironmentItemModel class implements the functionality of the

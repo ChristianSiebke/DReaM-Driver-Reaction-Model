@@ -1,5 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -13,6 +14,7 @@
 //! @brief This file contains the implementation of the header file
 //-----------------------------------------------------------------------------
 
+#include <Common/opMath.h>
 #include <qglobal.h>
 
 #include "Interfaces/worldInterface.h"

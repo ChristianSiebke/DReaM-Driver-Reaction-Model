@@ -18,7 +18,7 @@
 #ifndef TRAFFICITEMMAPMODEL_H
 #define TRAFFICITEMMAPMODEL_H
 
-#include "openPASS-TrafficSimulation/TrafficItemMapInterface.h"
+#include "interfaces/openPASS-TrafficSimulation/TrafficItemMapInterface.h"
 #include "TrafficItemModel.h"
 
 //-----------------------------------------------------------------------------

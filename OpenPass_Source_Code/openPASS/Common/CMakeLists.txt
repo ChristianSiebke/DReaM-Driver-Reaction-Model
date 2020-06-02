@@ -1,0 +1,41 @@
+add_openpass_target(
+  NAME Common TYPE library LINKAGE shared COMPONENT bin
+  
+  HEADERS
+    accelerationSignal.h
+	 agentBasedManipulatorEvent.h
+	 agentCompToCompCtrlSignal.h
+	 basicEvent.h
+	 boostGeometryCommon.h
+	 collisionEvent.h
+	 commonTools.h
+	 compCtrlToAgentCompSignal.h
+	 componentStateChangeEvent.h
+	 componentWarningEvent.h
+	 dynamicsSignal.h
+	 eventDetectorDefinitions.h
+	 eventTypes.h
+	 globalDefinitions.h
+	 laneChangeEvent.h
+	 lateralSignal.h
+	 longitudinalSignal.h
+	 observationTypes.h
+	 openScenarioDefinitions.h
+	 parametersVehicleSignal.h
+	 primitiveSignals.h
+	 secondaryDriverTasksSignal.h
+	 sensorDataSignal.h
+	 spawnPointDefinitions.h
+	 steeringSignal.h
+	 vector2d.h
+	 vector3d.h
+	 vectorSignals.h
+	 vehicleComponentEvent.h
+	 worldDefinitions.h
+	 opExport.h
+
+  SOURCES
+    vector2d.cpp
+    vector3d.cpp
+    eventDetectorDefinitions.cpp
+)

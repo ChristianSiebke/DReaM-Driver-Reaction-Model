@@ -18,8 +18,8 @@
 
 #include <algorithm>
 
-#include "frameworkModules.h"
-#include "configurationFiles.h"
+#include "../importer/frameworkModules.h"
+#include "../importer/configurationFiles.h"
 #include "CoreFramework/CoreShare/callbacks.h"
 #include "commandLineParser.h"
 #include "configurationContainer.h"
@@ -78,6 +78,10 @@ int main(int argc, char* argv[])
     timer.start();
 
     QCoreApplication application(argc, argv);
+
+    application.addLibraryPath(application.applicationDirPath() + "/../" + SUBDIR_LIB_COMPONENTS);
+    application.addLibraryPath(application.applicationDirPath() + "/../" + SUBDIR_LIB_SIM);
+
     CommandLineArguments parsedArguments = CommandLineParser::Parse(application.arguments());
     SetupLogging(static_cast<LogLevel>(parsedArguments.logLevel),
                  parsedArguments.logFile,

@@ -1,5 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2018, 2019 in-tech GmbH
+*               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -28,8 +29,8 @@
 #include "OWL/LaneGeometryJoint.h"
 #include "OWL/Primitives.h"
 
-#include "osi/osi_groundtruth.pb.h"
-#include "osi/osi_worldinterface.pb.h"
+#include "osi3/osi_groundtruth.pb.h"
+#include "osi3/osi_worldinterface.pb.h"
 #include "WorldObjectAdapter.h"
 
 namespace OWL {

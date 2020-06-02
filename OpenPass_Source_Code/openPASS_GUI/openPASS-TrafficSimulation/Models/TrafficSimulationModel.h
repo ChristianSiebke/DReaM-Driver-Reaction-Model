@@ -17,7 +17,7 @@
 #ifndef TRAFFICSIMULATIONMODEL_H
 #define TRAFFICSIMULATIONMODEL_H
 
-#include "openPASS-TrafficSimulation/TrafficSimulationInterface.h"
+#include "interfaces/openPASS-TrafficSimulation/TrafficSimulationInterface.h"
 
 #include "Models/EnvironmentModel.h"
 #include "Models/ExperimentModel.h"

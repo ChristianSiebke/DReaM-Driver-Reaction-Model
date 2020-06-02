@@ -1,5 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -12,7 +13,7 @@
 #include <boost/geometry/geometries/adapted/c_array.hpp>
 #include "Common/boostGeometryCommon.h"
 #include "Interfaces/agentInterface.h"
-#include "osi/osi_sensordata.pb.h"
+#include "osi3/osi_sensordata.pb.h"
 
 /** \addtogroup Algorithm_AEB
  * @{

@@ -1,5 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2019 in-tech GmbH
+*               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -16,6 +17,7 @@
 #include "Common/openScenarioDefinitions.h"
 #include "Interfaces/agentInterface.h"
 #include "Interfaces/worldInterface.h"
+#include "opExport.h"
 
 namespace openScenario
 {
@@ -29,7 +31,7 @@ enum class Rule
 
 
 // OpenScenario ByEntity Conditions
-class ByEntityCondition
+class OPENPASSCOMMONEXPORT ByEntityCondition
 {
 public:
     ByEntityCondition(const std::vector<std::string> &triggeringEntityNames):
@@ -78,7 +80,7 @@ private:
     const std::vector<std::string> triggeringEntityNames;
 };
 
-class TimeToCollisionCondition : public ByEntityCondition
+class OPENPASSCOMMONEXPORT TimeToCollisionCondition : public ByEntityCondition
 {
 public:
     TimeToCollisionCondition(const std::vector<std::string>& triggeringEntityNames,
@@ -106,7 +108,7 @@ private:
     const Rule rule;
 };
 
-class ReachPositionCondition :  public ByEntityCondition
+class OPENPASSCOMMONEXPORT ReachPositionCondition :  public ByEntityCondition
 {
 public:
     ReachPositionCondition(const std::vector<std::string>& triggeringEntityNames,
@@ -125,7 +127,7 @@ protected:
     const double tolerance{};
 };
 
-class RelativeSpeedCondition : public ByEntityCondition
+class OPENPASSCOMMONEXPORT RelativeSpeedCondition : public ByEntityCondition
 {
 public:
     RelativeSpeedCondition(const std::vector<std::string> &triggeringEntityNames,
@@ -153,7 +155,7 @@ private:
     const Rule rule{};
 };
 
-class ReachPositionRoadCondition : public ReachPositionCondition
+class OPENPASSCOMMONEXPORT ReachPositionRoadCondition : public ReachPositionCondition
 {
 public:
     ReachPositionRoadCondition(const std::vector<std::string> &triggeringEntityNames,
@@ -189,7 +191,7 @@ private:
     const std::string targetRoadId;
 };
 
-class RelativeLaneCondition: public ReachPositionCondition
+class OPENPASSCOMMONEXPORT RelativeLaneCondition: public ReachPositionCondition
 {
 public:
     RelativeLaneCondition(const std::vector<std::string> &triggeringEntities,
@@ -225,7 +227,7 @@ private:
 };
 
 // OpenScenario ByValue Conditions
-class ByValueCondition
+class OPENPASSCOMMONEXPORT ByValueCondition
 {
 public:
     ByValueCondition(const Rule rule):
@@ -241,7 +243,7 @@ protected:
     const Rule rule;
 };
 
-class SimulationTimeCondition : public ByValueCondition
+class OPENPASSCOMMONEXPORT SimulationTimeCondition : public ByValueCondition
 {
 public:
     SimulationTimeCondition(const Rule rule,

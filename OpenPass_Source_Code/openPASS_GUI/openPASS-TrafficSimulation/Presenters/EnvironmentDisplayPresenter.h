@@ -18,7 +18,7 @@
 #ifndef ENVIRONMENTDISPLAYPRESENTER_H
 #define ENVIRONMENTDISPLAYPRESENTER_H
 
-#include "openPASS-TrafficSimulation/EnvironmentInterface.h"
+#include "interfaces/openPASS-TrafficSimulation/EnvironmentInterface.h"
 //#include "Presenters/EnvironmentPresenter.h"
 #include "Views/EnvironmentDisplayView.h"
 

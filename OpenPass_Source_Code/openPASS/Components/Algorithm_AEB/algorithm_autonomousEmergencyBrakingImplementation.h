@@ -1,6 +1,7 @@
 /*******************************************************************************
 * Copyright (c) 2017, 2018, 2019 in-tech GmbH
 *               2018 AMFD GmbH
+*               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -40,7 +41,7 @@
 #include "Common/vehicleComponentEvent.h"
 #include "Common/primitiveSignals.h"
 #include "Common/sensorDataSignal.h"
-#include "osi/osi_sensordata.pb.h"
+#include "osi3/osi_sensordata.pb.h"
 
 class AlgorithmAutonomousEmergencyBrakingImplementation : public AlgorithmInterface
 {

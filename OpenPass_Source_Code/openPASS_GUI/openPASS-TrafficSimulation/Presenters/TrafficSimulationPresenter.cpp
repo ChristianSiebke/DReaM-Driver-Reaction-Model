@@ -1,5 +1,6 @@
 /******************************************************************************
 * Copyright (c) 2019 Volkswagen Group of America.
+* Copyright (c) 2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -33,6 +34,7 @@
 #include <QFileDialog>
 #include <QProcess>
 #include <QFileSystemWatcher>
+#include <EditDataCommand.h>
 
 TrafficSimulationPresenter::TrafficSimulationPresenter(TrafficSimulationInterface *trafficSimulation,
                                                        TrafficSimulationView *trafficSimulationView,

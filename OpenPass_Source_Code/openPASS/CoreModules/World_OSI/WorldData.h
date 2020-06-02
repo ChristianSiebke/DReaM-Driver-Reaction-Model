@@ -1,5 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2018, 2019 in-tech GmbH
+*               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -23,10 +24,10 @@
 #include "Interfaces/roadInterface/junctionInterface.h"
 #include "Interfaces/worldInterface.h"
 
-#include "osi/osi_groundtruth.pb.h"
-#include "osi/osi_sensorview.pb.h"
-#include "osi/osi_sensorviewconfiguration.pb.h"
-#include "osi/osi_worldinterface.pb.h"
+#include "osi3/osi_groundtruth.pb.h"
+#include "osi3/osi_sensorview.pb.h"
+#include "osi3/osi_sensorviewconfiguration.pb.h"
+#include "osi3/osi_worldinterface.pb.h"
 
 namespace OWL {
 

@@ -1,5 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2018, 2019 in-tech GmbH
+*               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -29,9 +30,10 @@
 #include "WorldDataException.h"
 #include "WorldDataQuery.h"
 
-#include "osi/osi_groundtruth.pb.h"
-#include "osi/osi_sensorviewconfiguration.pb.h"
-#include "osi/osi_worldinterface.pb.h"
+#include "osi3/osi_groundtruth.pb.h"
+#include "osi3/osi_sensorviewconfiguration.pb.h"
+#include "osi3/osi_worldinterface.pb.h"
+#include "osi3/osi_road.pb.h"
 
 namespace OWL {
 
@@ -354,7 +356,7 @@ void WorldData::AddSection(const RoadInterface& odRoad, const RoadLaneSectionInt
     {
         osiRoad = osiRoads.at(&odRoad);
     }
-    catch (std::out_of_range& e)
+    catch (std::out_of_range&)
     {
         throw new OWL::NonExistentOsiRef("Road", odRoad.GetId());
     }
@@ -417,7 +419,7 @@ void WorldData::AddJunctionConnection(const JunctionInterface *odJunction, const
     {
         osiRoad = osiRoads.at(&odRoad);
     }
-    catch (std::out_of_range& e)
+    catch (std::out_of_range&)
     {
         throw new OWL::NonExistentOsiRef("Road", odRoad.GetId());
     }

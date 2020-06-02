@@ -48,7 +48,12 @@ extern "C" DYNAMICS_TRAJECTORY_FOLLOWER_SHARED_EXPORT ModelInterface* OpenPASS_C
 
     try
     {
-        std::string trajectoryPath = QCoreApplication::applicationDirPath().toStdString()
+        char* opHome = getenv("OPENPASS_HOME");
+        if (opHome == nullptr)
+        {
+            opHome = "c:/src/simopenpass/build/OpenPASS";
+        }
+        std::string trajectoryPath = std::string(opHome) // hard coded path is not OK, is sopposed to be fixed, do not commit
                                      + "/configs/"
                                      + parameters->GetParametersString().at("TrajectoryFile");
 

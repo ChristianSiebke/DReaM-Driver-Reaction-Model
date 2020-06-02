@@ -1,5 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -13,8 +14,9 @@
 #include <QStringList>
 #include <QCoreApplication>
 #include "QCommandLineParser"
+#include <Common/opExport.h>
 
-struct CommandLineArguments
+struct CORESLAVEEXPORT CommandLineArguments
 {
     int logLevel;
     std::string libPath;
@@ -23,7 +25,7 @@ struct CommandLineArguments
     std::string resultsPath;
 };
 
-struct CommandLineOption
+struct CORESLAVEEXPORT CommandLineOption
 {
     QString name;
     QString description;
@@ -31,7 +33,7 @@ struct CommandLineOption
     QString defaultValue;
 };
 
-class CommandLineParser
+class CORESLAVEEXPORT CommandLineParser
 {
 public:
     static CommandLineArguments Parse(const QStringList& arguments);

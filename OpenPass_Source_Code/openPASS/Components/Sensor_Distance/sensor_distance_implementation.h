@@ -1,5 +1,6 @@
 /*********************************************************************
 * Copyright (c) 2016 ITK Engineering GmbH
+* Copyright (c) 2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -70,7 +71,7 @@ class Sensor_Distance_Implementation : public SensorInterface
 public:
     const std::string COMPONENTNAME = "Sensor_Distance";
 
-    Sensor_Distance_Implementation(int componentId,
+    Sensor_Distance_Implementation(std::string componentName,
                                    bool isInit,
                                    int priority,
                                    int offsetTime,

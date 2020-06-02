@@ -1,6 +1,7 @@
 /*******************************************************************************
 * Copyright (c) 2019 in-tech GmbH
 *               2017, 2018, 2019 ITK Engineering GmbH
+* Copyright (c) 2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -20,10 +21,10 @@
 #include <QString>
 #include <optional>
 
-#include "masterConfig.h"
+#include "../framework/masterConfig.h"
 #include "masterConfigImporter.h"
 #include "xmlParser.h"
-#include "slaveConfig.h"
+#include "../framework/slaveConfig.h"
 
 namespace SimulationMaster {
 namespace Configuration {

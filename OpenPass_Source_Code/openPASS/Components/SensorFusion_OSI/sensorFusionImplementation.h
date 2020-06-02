@@ -1,5 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -44,7 +45,7 @@
 
 #include "Interfaces/modelInterface.h"
 #include "Common/sensorDataSignal.h"
-#include "osi/osi_sensordata.pb.h"
+#include "osi3/osi_sensordata.pb.h"
 
 //-----------------------------------------------------------------------------
 /** \brief This class is the SensorFusion module.

@@ -2,6 +2,7 @@
 * Copyright (c) 2017, 2018, 2019 in-tech GmbH
 *               2018, 2019 AMFD GmbH
 *               2016, 2017, 2018, 2019 ITK Engineering GmbH
+*               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -18,11 +19,32 @@
 #ifndef GLOBALDEFINITIONS
 #define GLOBALDEFINITIONS
 
+#include <Common/opMath.h>
 #include <string>
 #include <tuple>
 #include <vector>
 #include <list>
 #include <map>
+
+// the following is a temporary workaround until the contribution is merged into osi
+#if defined(_WIN32) && !defined(NODLL)
+#define OSIIMPORT __declspec(dllimport)
+#define OSIEXPORT __declspec(dllexport)
+
+#elif (defined(__GNUC__) && __GNUC__ >= 4 || defined(__clang__))
+#define OSIEXPORT __attribute__((visibility("default")))
+#define OSIIMPORT OSIEXPORT
+
+#else
+#define OSIIMPORT
+#define OSIEXPORT
+#endif
+
+#if defined(open_simulation_interface_EXPORTS)
+#define OSI_EXPORT OSIEXPORT
+#else
+#define OSI_EXPORT OSIIMPORT
+#endif
 
 //-----------------------------------------------------------------------------
 //! @brief Containing the three possible states regarding lane change

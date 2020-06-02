@@ -1,5 +1,6 @@
 /*********************************************************************
 * Copyright (c) 2016 ITK Engineering GmbH
+*               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -17,6 +18,7 @@
 #include "spawnpoint_start.h"
 #include "spawnpoint_start_implementation.h"
 #include "spawnPointInterface.h"
+#include <stdexcept>
 
 const std::string Version = "0.0.1";
 static const CallbackInterface *Callbacks = nullptr;

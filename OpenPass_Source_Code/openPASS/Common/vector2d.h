@@ -1,6 +1,7 @@
 /******************************************************************************
 * Copyright (c) 2017 ITK Engineering GmbH.
-* Copyright (c) 2018 in-tech GmbH.
+*               2018 in-tech GmbH.
+*               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License 2.0 which is available at
@@ -15,13 +16,14 @@
 #define VECTOR2D_H
 
 #include <ostream>
+#include "opExport.h"
 
 namespace Common {
 
 /*!
  * class for 2d vectors in cartesian coordinate system
  */
-class Vector2d
+class OPENPASSCOMMONEXPORT Vector2d
 {
 public:
     /*!

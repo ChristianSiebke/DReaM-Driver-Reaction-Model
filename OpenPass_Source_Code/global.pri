@@ -19,6 +19,11 @@ include(ccache.pri)
 
 INCLUDEPATH += $$PWD/openPASS
 CONFIG += c++17
+## debug postfix not working in qmake build
+DEFINES+=DEBUG_POSTFIX=\\\"\\\"
+
+## common and CoreShare are not built as libraries in the qmake build
+DEFINES+=QMAKE_BUILD
 
 ## activate log time output
 DEFINES += LOG_TIME_ENABLED
@@ -29,10 +34,10 @@ DEFINES += SUBDIR_LIB_SIM=\\\"/lib\\\"
 
 ## gui libraries destination sub-directory ##
 SUBDIR_LIB_GUIS = "/bin/gui"
-SUBDIR_COMPONENTS = "\components"
+SUBDIR_LIB_COMPONENTS = "\components"
 
 DEFINES += SUBDIR_LIB_GUI=\\\"/bin/gui\\\"
-DEFINES += SUBDIR_COMPONENTS=\\\"/components\\\"
+DEFINES += SUBDIR_LIB_COMPONENTS=\\\"/components\\\"
 
 ## Qt plugins sub-directory ##
 DEFINES += SUBDIR_LIB_PLUGIN=\\\"/plugin\\\"

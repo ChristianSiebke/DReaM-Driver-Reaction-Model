@@ -28,7 +28,7 @@
 #ifndef TRAFFICSIMULATIONXMLLOADMODEL_H
 #define TRAFFICSIMULATIONXMLLOADMODEL_H
 
-#include "openPASS-TrafficSimulation/TrafficSimulationInterface.h"
+#include "interfaces/openPASS-TrafficSimulation/TrafficSimulationInterface.h"
 #include "Models/TrafficSimulationXMLBaseModel.h"
 
 #include <QFile>

@@ -18,7 +18,7 @@
 #ifndef TRAFFICMODEL_H
 #define TRAFFICMODEL_H
 
-#include "openPASS-TrafficSimulation/TrafficInterface.h"
+#include "interfaces/openPASS-TrafficSimulation/TrafficInterface.h"
 
 //-----------------------------------------------------------------------------
 //! @brief The TrafficModel class implements the functionality of the

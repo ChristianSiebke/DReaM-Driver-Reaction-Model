@@ -1,5 +1,6 @@
 /*********************************************************************
 * Copyright (c) 2016 ITK Engineering GmbH
+*               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -16,6 +17,7 @@
 #include <array>
 #include "collisionDetectionInterface.h"
 #include "callbackInterface.h"
+#include "vector2d.h"
 
 /**
 * \addtogroup CoreModules_Basic openPASS CoreModules basic

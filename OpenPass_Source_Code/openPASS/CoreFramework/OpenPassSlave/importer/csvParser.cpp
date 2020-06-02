@@ -1,5 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -59,7 +60,7 @@ std::vector<std::string> CSVParser::ParseLine(std::string line)
    return lineData;
 }
 
-int CSVParser::GetNumberOfLines()
+size_t CSVParser::GetNumberOfLines()
 {
     return table.size();
 }

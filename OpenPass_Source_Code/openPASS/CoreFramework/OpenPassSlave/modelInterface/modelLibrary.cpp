@@ -1,6 +1,7 @@
 /*******************************************************************************
 * Copyright (c) 2017, 2018, 2019 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
+*               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -31,23 +32,28 @@ bool ModelLibrary::Init()
     #if defined(unix)
     QString path = QString(modelLibraryPath.c_str()) + QString("/lib") + QString(modelLibraryName.c_str());
     #elif defined (WIN32)
-    QString path = QString(modelLibraryPath.c_str()) + QString("/") + QString(modelLibraryName.c_str());
+    std::string suffix = DEBUG_POSTFIX;
+    QString path = QString(modelLibraryPath.c_str()) + QString("/") + QString((modelLibraryName+suffix).c_str());
     #else
 #error undefined target platform
     #endif
-
     library = new (std::nothrow) QLibrary(path);
     if (!library)
     {
         return false;
     }
-
-    if (!library->load())
+    try {
+        if (!library->load())
+        {
+            LOG_INTERN(LogLevel::Error) << library->errorString().toStdString();
+            delete library;
+            library = nullptr;
+            return false;
+        }
+    }
+    catch (std::exception e)
     {
-        LOG_INTERN(LogLevel::Error) << library->errorString().toStdString();
-        delete library;
-        library = nullptr;
-        return false;
+        // ignore exceptions during dublicate initialization of libprotobuf
     }
 
     getVersionFunc = (ModelInterface_GetVersion)library->resolve(DllGetVersionId.c_str());

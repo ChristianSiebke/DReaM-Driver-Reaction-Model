@@ -2,6 +2,7 @@
 * Copyright (c) 2017, 2018, 2019 in-tech GmbH
 *               2018 AMFD GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
+*               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -14,9 +15,9 @@
 /** @file  StochasticsImplementation.cpp */
 //-----------------------------------------------------------------------------
 
+#include <Common/opMath.h>
 #include <qglobal.h>
 #include <stdexcept>
-#include <cmath>
 #include "stochastics_implementation.h"
 
 StochasticsImplementation::StochasticsImplementation(const CallbackInterface *callbacks) :

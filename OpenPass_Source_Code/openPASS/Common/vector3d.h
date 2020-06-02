@@ -1,5 +1,6 @@
 /******************************************************************************
 * Copyright (c) 2016 ITK Engineering AG.
+*               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License 2.0 which is available at
@@ -11,6 +12,7 @@
 //! \brief This file implements a generic 3D vector.
 
 #pragma once
+#include "opExport.h"
 
 namespace Common
 {
@@ -18,7 +20,7 @@ namespace Common
 /*!
  * class for 3d vectors in cartesian coordinate system
  */
-class Vector3d
+class OPENPASSCOMMONEXPORT Vector3d
 {
 public:
     /*!

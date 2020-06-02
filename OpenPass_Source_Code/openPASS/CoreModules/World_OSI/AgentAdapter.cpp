@@ -2,6 +2,7 @@
 * Copyright (c) 2017, 2018, 2019 in-tech GmbH
 *               2018 AMFD GmbH
 *               2016 ITK Engineering GmbH
+*               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -22,7 +23,7 @@ AgentAdapter::AgentAdapter(WorldInterface* world,
                            const CallbackInterface* callbacks,
                            OWL::Interfaces::WorldData* worldData,
                            const World::Localization::Localizer& localizer) :
-    WorldObjectAdapter{worldData->AddMovingObject(static_cast<void*>(this))},
+    WorldObjectAdapter{worldData->AddMovingObject(static_cast<void*>(static_cast<WorldObjectInterface*>(this)))},
     world{world},
     callbacks{callbacks},
     worldData{worldData},
@@ -441,7 +442,7 @@ bool AgentAdapter::IsCrossingLanes() const
 
 std::vector<CommonTrafficSign::Entity> AgentAdapter::GetTrafficSignsInRange(double searchDistance, int relativeLane) const
 {
-    assert(relativeLane != (int)INFINITY);
+    //  (int)INFINITY dows not really make sense and equals to 0 on windows, could be < MAXINT instead assert(relativeLane != (int)INFINITY);
     return world->GetTrafficSignsInRange(route, GetRoadId(), GetLaneIdFromRelative(relativeLane), GetDistanceToStartOfRoad(), searchDistance);
 }
 

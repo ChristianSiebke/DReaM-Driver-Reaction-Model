@@ -18,7 +18,7 @@
 #ifndef EXPERIMENTMODEL_H
 #define EXPERIMENTMODEL_H
 
-#include "openPASS-TrafficSimulation/ExperimentInterface.h"
+#include "interfaces/openPASS-TrafficSimulation/ExperimentInterface.h"
 
 #include <QObject>
 

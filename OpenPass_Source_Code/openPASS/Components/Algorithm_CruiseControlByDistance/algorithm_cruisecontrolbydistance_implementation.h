@@ -1,5 +1,6 @@
 /*********************************************************************
 * Copyright (c) 2016 ITK Engineering GmbH
+*               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -98,7 +99,7 @@ public:
     const std::string COMPONENTNAME = "Algorithm_CruiseControlByDistance";
 
     Algorithm_CruiseControlByDistance_Implementation(
-        int componentId,
+        std::string componentName,
         bool isInit,
         int priority,
         int offsetTime,
@@ -108,9 +109,9 @@ public:
         const ParameterInterface *parameters,
         const std::map<int, ObservationInterface *> *observations,
         const CallbackInterface *callbacks,
-        int agentId) :
+        AgentInterface* agent) :
         AlgorithmInterface(
-            componentId,
+            componentName,
             isInit,
             priority,
             offsetTime,
@@ -120,7 +121,7 @@ public:
             parameters,
             observations,
             callbacks,
-            agentId)
+            agent)
     {
         double meanVelocity = GetParameters()->GetParametersDouble().at(0);
         Par_desiredVelocity = std::fmax(5.0, GetStochastics()->GetNormalDistributed(meanVelocity, 10.0));

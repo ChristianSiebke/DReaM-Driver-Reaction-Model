@@ -17,7 +17,7 @@
 #ifndef SCENARIODISPLAYPRESENTER_H
 #define SCENARIODISPLAYPRESENTER_H
 
-#include "openPASS-TrafficSimulation/ScenarioInterface.h"
+#include "interfaces/openPASS-TrafficSimulation/ScenarioInterface.h"
 #include "openPASS-Project/ProjectInterface.h"
 #include "Views/ScenarioDisplayView.h"
 

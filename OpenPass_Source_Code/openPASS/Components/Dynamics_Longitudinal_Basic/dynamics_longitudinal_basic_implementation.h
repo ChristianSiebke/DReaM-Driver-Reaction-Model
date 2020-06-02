@@ -1,5 +1,6 @@
 /*********************************************************************
 * Copyright (c) 2016 ITK Engineering GmbH
+* Copyright (c) 2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -74,7 +75,7 @@ public:
     const std::string COMPONENTNAME = "Dynamics_Longitudinal_Basic";
 
     Dynamics_Longitudinal_Basic_Implementation(
-        int componentId,
+        std::string componentName,
         bool isInit,
         int priority,
         int offsetTime,
@@ -87,7 +88,7 @@ public:
         const CallbackInterface *callbacks,
         AgentInterface *agent) :
         DynamicsInterface(
-            componentId,
+            componentName,
             isInit,
             priority,
             offsetTime,

@@ -2,6 +2,7 @@
 * Copyright (c) 2017, 2018, 2019 in-tech GmbH
 *               2018, 2019 AMFD GmbH
 *               2016, 2017 ITK Engineering GmbH
+* Copyright (c) 2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -11,11 +12,13 @@
 *******************************************************************************/
 #pragma once
 
+
+#include <Common/opMath.h>
 #include "Interfaces/modelInterface.h"
 #include "Interfaces/observationInterface.h"
 #include "Common/primitiveSignals.h"
 #include "Common/dynamicsSignal.h"
-#include "globalDefinitions.h"
+#include "Common/globalDefinitions.h"
 
 
 /** \addtogroup Dynamics_RegularDriving

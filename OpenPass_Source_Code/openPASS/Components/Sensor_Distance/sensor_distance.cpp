@@ -1,5 +1,6 @@
 /*********************************************************************
 * Copyright (c) 2016 ITK Engineering GmbH
+* Copyright (c) 2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -25,7 +26,7 @@ extern "C" SENSOR_DISTANCE_SHARED_EXPORT const std::string &OpenPASS_GetVersion(
     return Version;
 }
 
-extern "C" SENSOR_DISTANCE_SHARED_EXPORT ModelInterface *OpenPASS_CreateInstance(int componentId,
+extern "C" SENSOR_DISTANCE_SHARED_EXPORT ModelInterface *OpenPASS_CreateInstance(std::string componentName,
                                                                            bool isInit,
                                                                            int priority,
                                                                            int offsetTime,
@@ -42,7 +43,7 @@ extern "C" SENSOR_DISTANCE_SHARED_EXPORT ModelInterface *OpenPASS_CreateInstance
 
     try
     {
-        return (ModelInterface*)(new (std::nothrow) Sensor_Distance_Implementation(componentId,
+        return (ModelInterface*)(new (std::nothrow) Sensor_Distance_Implementation(componentName,
                                                                               isInit,
                                                                               priority,
                                                                               offsetTime,

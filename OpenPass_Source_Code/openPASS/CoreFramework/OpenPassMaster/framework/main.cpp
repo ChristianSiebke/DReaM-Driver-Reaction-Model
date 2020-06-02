@@ -1,6 +1,7 @@
 /*******************************************************************************
 * Copyright (c) 2017, 2019 in-tech GmbH
 *               2016, 2017, 2018, 2019 ITK Engineering GmbH
+* Copyright (c) 2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -40,7 +41,7 @@
 
 #include "log.h"
 #include "masterConfig.h"
-#include "masterConfigImporter.h"
+#include "../importer/masterConfigImporter.h"
 #include "processManager.h"
 
 using namespace SimulationMaster;
@@ -238,7 +239,7 @@ std::string GetExecutable(std::string slave)
     #if WIN32
     if (QString::fromStdString(slave).split(".").last() != "exe")
     {
-        slave += ".exe";
+        slave += DEBUG_POSTFIX".exe";
     }
     #endif
 

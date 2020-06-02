@@ -1,6 +1,7 @@
 /*******************************************************************************
 * Copyright (c) 2017, 2018, 2019 in-tech GmbH
 *               2016, 2017 ITK Engineering GmbH
+*               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +10,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
+#include <Common/opMath.h>
 #include <algorithm>
 #include <utility>
 #include <limits>
@@ -16,7 +18,6 @@
 #include <iostream>
 #include <string>
 #include <memory>
-#include <cmath>
 #include <QFile>
 
 #include "GeometryConverter.h"
