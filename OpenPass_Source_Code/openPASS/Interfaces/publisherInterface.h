@@ -58,10 +58,15 @@ public:
      *
      * \param value[in]   The acyclic event
      */
-    virtual void Publish(const openpass::narrator::EventBase &event)
+    virtual void Publish(const openpass::datastore::Key &key, const openpass::narrator::EventBase &event)
     {
     }
 
+    /*!
+     * \brief Writes acyclic information into a data store backend
+     *
+     * \param value[in]   The acyclic event
+     */
     virtual void Publish(const openpass::datastore::Key &key, const openpass::datastore::ComponentEvent &event)
     {
     }

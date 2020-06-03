@@ -24,7 +24,7 @@ public:
     {
     }
 
-    void Publish(const openpass::narrator::EventBase &event) override;
+    void Publish(const openpass::datastore::Key &key, const openpass::narrator::EventBase &event) override;
 };
 
 } // namespace openpass::publisher

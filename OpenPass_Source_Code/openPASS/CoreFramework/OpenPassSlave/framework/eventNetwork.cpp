@@ -55,7 +55,7 @@ void EventNetwork::RemoveOldEvents(int time)
 // This glue logic is only an intermediate state, as we intend to remove EventInterface in the future
 void EventNetwork::Log(const std::shared_ptr<EventInterface> &event)
 {
-    openpass::narrator::Event narratorEvent(EventDefinitions::helper::GetAsString(event->GetCategory())); // USE THAT IN THE FUTURE INSTEAD OF EVENTINTERFACE
+    openpass::narrator::Event narratorEvent(event->GetName());
 
     // TODO: Named type issue (assigment missing)
     for (auto agent : event->GetTriggeringAgents())
@@ -71,7 +71,7 @@ void EventNetwork::Log(const std::shared_ptr<EventInterface> &event)
 
     narratorEvent.parameter = event->GetParameter();
 
-    publisher.Publish(narratorEvent);
+    publisher.Publish(EventDefinitions::helper::GetAsString(event->GetCategory()), narratorEvent);
 }
 
 void EventNetwork::InsertEvent(std::shared_ptr<EventInterface> event)

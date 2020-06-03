@@ -23,7 +23,7 @@ class EventBase
 {
 public:
     EventBase() = default;
-    EventBase(std::string name) :
+    explicit EventBase(std::string name) :
         name{std::move(name)}
     {
     }

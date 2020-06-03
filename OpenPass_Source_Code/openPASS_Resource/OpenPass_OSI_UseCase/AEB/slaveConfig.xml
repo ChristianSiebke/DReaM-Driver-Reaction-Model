@@ -34,7 +34,7 @@
       <Parameters>
         <String Key="OutputFilename" Value="simulationOutput.xml"/>
         <Bool Key="LoggingCyclicsToCsv" Value="false"/>
-        <StringVector Key="LoggingGroups" Value="Trace,Visualization,RoadPosition,Sensor,Driver"/>
+        <StringVector Key="LoggingGroups" Value="Trace,Visualization,RoadPosition,Sensor"/>
       </Parameters>
     </Observation>
   </Observations>
