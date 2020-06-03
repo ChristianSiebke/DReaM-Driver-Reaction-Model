@@ -134,7 +134,7 @@ public:
     *
     * @param[in]     time           Current scheduling time
     */
-    void CalculateNextTimestep(int time);
+    void CalculateNextTimestep();
 
 private:
         const double cycleTimeInSeconds{0.0};
@@ -144,7 +144,7 @@ private:
     bool automaticDeactivation{false};
     bool inputAccelerationActive{false};
 
-    int currentTime{0};
+    double currentTime{0};
 
     double inputAcceleration{0.0};
 
@@ -162,8 +162,10 @@ private:
     ComponentState componentState{ComponentState::Disabled};
     bool canBeActivated{true};
 
-    [[noreturn]] void ThrowCouldNotInstantiateSignalError();
-    [[noreturn]] void ThrowInvalidSignalTypeError();
+    void Init();
+
+    [[ noreturn ]] void ThrowCouldNotInstantiateSignalError();
+    [[ noreturn ]] void ThrowInvalidSignalTypeError();
 
     ComponentState GetState() const;
     void UpdateState(const ComponentState newState);
@@ -175,8 +177,6 @@ private:
     Common::Vector2d CalculateScaledVector(const TrajectoryPoint &previousPosition, const TrajectoryPoint &nextPosition, const double &factor);
     double CalculateScaledDeltaYawAngle(const TrajectoryPoint &previousPosition, const TrajectoryPoint &nextPosition, const double &factor);
 
-    TrajectoryPoint CalculateStartPosition(const TrajectoryPoint &previousPosition, const TrajectoryPoint &nextPosition);
-    std::pair<int, TrajectoryPoint> CalculateStartCoordinate(const std::pair<int, TrajectoryPoint> &previousPosition, const std::pair<int, TrajectoryPoint> &nextPosition);
     double CalculateDistanceBetweenWorldCoordinates(TrajectoryPoint previousPosition, TrajectoryPoint nextPosition);
 
     void TriggerWithActiveAccelerationInput();

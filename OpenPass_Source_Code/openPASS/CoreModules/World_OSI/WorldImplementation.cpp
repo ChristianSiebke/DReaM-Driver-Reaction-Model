@@ -523,6 +523,11 @@ Position WorldImplementation::RoadCoord2WorldCoord(RoadPosition roadCoord, std::
     return worldCoord;
 }
 
+double WorldImplementation::GetRoadLength(const std::string& roadId) const
+{
+    return worldDataQuery.GetRoadByOdId(roadId)->GetLength();
+}
+
 void WorldImplementation::InitTrafficObjects()
 {
     assert(trafficObjects.size() == 0);
@@ -535,9 +540,9 @@ void WorldImplementation::InitTrafficObjects()
     }
 }
 
-RouteQueryResult<std::optional<LongitudinalDistance> > WorldImplementation::GetDistanceBetweenObjects(const RoadGraph& roadGraph, RoadGraphVertex startNode,
-                                                      const ObjectPosition& objectPos, const ObjectPosition& targetObjectPos) const
+RouteQueryResult<LongitudinalDistance> WorldImplementation::GetDistanceBetweenObjects(const RoadGraph& roadGraph, RoadGraphVertex startNode,
+                                                      const ObjectPosition& objectPos, const std::optional<double> objectReferenceS, const ObjectPosition& targetObjectPos) const
 {
     const auto roadStream = worldDataQuery.CreateRoadMultiStream(roadGraph, startNode);
-    return worldDataQuery.GetDistanceBetweenObjects(*roadStream, objectPos, targetObjectPos);
+    return worldDataQuery.GetDistanceBetweenObjects(*roadStream, objectPos, objectReferenceS, targetObjectPos);
 }

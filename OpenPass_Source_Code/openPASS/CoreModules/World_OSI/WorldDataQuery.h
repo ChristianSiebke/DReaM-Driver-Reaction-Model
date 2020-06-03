@@ -509,12 +509,13 @@ public:
 
     //! \brief GetDistanceBetweenObjects gets the distance between two ObjectPositions on a RoadStream
     //!
-    //! \param roadStream the RoadStream in which to get the distance between two ObjectPositions
-    //! \param object the first object from whom the distance is calculated
-    //! \param targetObject the target object from whom the distance is calculated (if this object is behind, the distance is negative)
+    //! \param[in]    roadStream         RoadStream in which to get the distance between two ObjectPositions
+    //! \param[in]    objectPos          Object from whom the distance is calculated
+    //! \param[in]    objectReferenceS   Reference point offset of the target object
+    //! \param[in]    targetObject       Target object from whom the distance is calculated (if this object is behind, the distance is negative)
     //!
-    //! \return the distance between object and targetObject on roadStream
-    RouteQueryResult<std::optional<LongitudinalDistance>> GetDistanceBetweenObjects(const RoadMultiStream& roadStream, const ObjectPosition& objectPos, const ObjectPosition& targetObjectPos) const;
+    //! \return The distance between object and targetObject on roadStream
+    RouteQueryResult<LongitudinalDistance> GetDistanceBetweenObjects(const RoadMultiStream& roadStream, const ObjectPosition& objectPos, const std::optional<double> objectReferenceS, const ObjectPosition& targetObjectPos) const;
 
     //! Calculates the obstruction with an object i.e. how far to left or the right the object is from my position
     //! For more information see the [markdown documentation](\ref dev_framework_modules_world_getobstruction)

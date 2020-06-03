@@ -31,7 +31,7 @@ class FakeEgoAgent : public EgoAgentInterface
     MOCK_CONST_METHOD2(GetTrafficSignsInRange, std::vector<CommonTrafficSign::Entity> (double range, int relativeLane));
     MOCK_CONST_METHOD2(GetRoadMarkingsInRange, std::vector<CommonTrafficSign::Entity> (double range, int relativeLane));
     MOCK_CONST_METHOD3(GetLaneMarkingsInRange, std::vector<LaneMarking::Entity> (double range, Side side, int relativeLane));
-    MOCK_CONST_METHOD1(GetDistanceToObject, std::optional<LongitudinalDistance> (const WorldObjectInterface* otherObject));
+    MOCK_CONST_METHOD1(GetDistanceToObject, LongitudinalDistance (const WorldObjectInterface* otherObject));
     MOCK_CONST_METHOD1(GetObstruction, Obstruction (const WorldObjectInterface* otherObject));
     MOCK_CONST_METHOD0(GetRelativeYaw, double ());
     MOCK_CONST_METHOD0(GetPositionLateral, double ());
@@ -43,7 +43,9 @@ class FakeEgoAgent : public EgoAgentInterface
     MOCK_CONST_METHOD1(GetLaneDirection, double (int relativeLane));
     MOCK_CONST_METHOD2(GetLaneDirection, std::optional<double> (double distance, int relativeLane));
     MOCK_CONST_METHOD0(GetMainLocatePosition, GlobalRoadPosition ());
+    MOCK_CONST_METHOD0(GetReferencePointPosition, std::optional<GlobalRoadPosition> ());
     MOCK_CONST_METHOD1(GetLaneIdFromRelative, int (int relativeLaneId));
+    MOCK_CONST_METHOD3(GetWorldPosition, Position (double sDistance, double tDistance, double yaw));
     MOCK_CONST_METHOD1(executeQueryDistanceToEndOfLane, ExecuteReturn<DistanceToEndOfLane> (DistanceToEndOfLaneParameter parameter));
     MOCK_CONST_METHOD1(executeQueryObjectsInRange, ExecuteReturn<ObjectsInRange> (ObjectsInRangeParameter parameter));
 };

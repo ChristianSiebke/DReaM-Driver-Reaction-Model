@@ -47,8 +47,9 @@ TEST(TrajectoryFollowerImplementation_WithoutExternalAcceleration_Unittests, Dea
 {
     TrajectoryPoint fakePosition1{0, 0, 0, 0};
     TrajectoryPoint fakePosition2{0.1, 0, 2, 0.1};
+    TrajectoryPoint fakePosition3{0.2, 0, 4, 0.1};
 
-    Trajectory fakeCoordinates = {{fakePosition1, fakePosition2}, ""};
+    Trajectory fakeCoordinates = {{fakePosition1, fakePosition2, fakePosition3}, ""};
 
     TrajectoryTester trajectoryTester(DontCare<bool>(),
                                       true);
@@ -90,16 +91,10 @@ TEST(TrajectoryFollowerImplementation_WithoutExternalAcceleration_Unittests, Lin
     trajectoryFollower->UpdateOutput(0, resultSignalInterface, 0);
 
     result = std::dynamic_pointer_cast<DynamicsSignal const>(resultSignalInterface);
-    AssertDynamicsSignalEquality(result, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+    AssertDynamicsSignalEquality(result, 3.0, 4.0, 0.1, 0.5, 25.0, 125.0, 5.0);
 
     trajectoryFollower->Trigger(200);
     trajectoryFollower->UpdateOutput(0, resultSignalInterface, 200);
-
-    result = std::dynamic_pointer_cast<DynamicsSignal const>(resultSignalInterface);
-    AssertDynamicsSignalEquality(result, 3.0, 4.0, 0.1, 0.5, 25.0, 125.0, 5.0);
-
-    trajectoryFollower->Trigger(400);
-    trajectoryFollower->UpdateOutput(0, resultSignalInterface, 400);
 
     result = std::dynamic_pointer_cast<DynamicsSignal const>(resultSignalInterface);
     AssertDynamicsSignalEquality(result, 9.0, 12.0, 0.4, 1.5, 50.0, 125.0, 10.0);
@@ -113,8 +108,15 @@ TEST(TrajectoryFollowerImplementation_WithoutExternalAcceleration_Unittests, Lin
     TrajectoryPoint fakePosition4{0.8, 16, 13, 1};
     Trajectory fakeCoordinates = {{fakePosition1, fakePosition2, fakePosition3, fakePosition4}, ""};
 
+    FakeAgent fakeAgent;
+    ON_CALL(fakeAgent, GetPositionX()).WillByDefault(Return(10.0));
+    ON_CALL(fakeAgent, GetPositionY()).WillByDefault(Return(10.0));
+    ON_CALL(fakeAgent, GetYaw()).WillByDefault(Return(-1.0));
+
     TrajectoryTester trajectoryTester(DontCare<bool>(),
                                       DontCare<bool>(),
+                                      nullptr,
+                                      &fakeAgent,
                                       200);
     std::shared_ptr<TrajectoryFollowerImplementation> trajectoryFollower = trajectoryTester.trajectoryFollower;
 
@@ -133,12 +135,6 @@ TEST(TrajectoryFollowerImplementation_WithoutExternalAcceleration_Unittests, Lin
     trajectoryFollower->UpdateOutput(0, resultSignalInterface, 0);
 
     result = std::dynamic_pointer_cast<DynamicsSignal const>(resultSignalInterface);
-    AssertDynamicsSignalEquality(result, 10, 10, -1, -5, velocity, acceleration, 0);
-
-    trajectoryFollower->Trigger(200);
-    trajectoryFollower->UpdateOutput(0, resultSignalInterface, 100);
-
-    result = std::dynamic_pointer_cast<DynamicsSignal const>(resultSignalInterface);
     distance =  (5 + std::sqrt(2));
     velocity = distance / cycleTimeInSeconds;
     acceleration = velocity / cycleTimeInSeconds;
@@ -151,11 +147,10 @@ TEST(TrajectoryFollowerImplementation_WithoutExternalAcceleration_Unittests, Lin
                               acceleration,
                               distance);
 
-    trajectoryFollower->Trigger(400);
-    trajectoryFollower->UpdateOutput(0, resultSignalInterface, 400);
+    trajectoryFollower->Trigger(200);
+    trajectoryFollower->UpdateOutput(0, resultSignalInterface, 100);
 
     result = std::dynamic_pointer_cast<DynamicsSignal const>(resultSignalInterface);
-
     double previousVelocity = velocity;
     distance = std::sqrt(8);
     velocity = distance / cycleTimeInSeconds;
@@ -170,15 +165,16 @@ TEST(TrajectoryFollowerImplementation_WithoutExternalAcceleration_Unittests, Lin
                               acceleration,
                               distance);
 
-    trajectoryFollower->Trigger(600);
-    trajectoryFollower->UpdateOutput(0, resultSignalInterface, 600);
+    trajectoryFollower->Trigger(400);
+    trajectoryFollower->UpdateOutput(0, resultSignalInterface, 400);
+
+    result = std::dynamic_pointer_cast<DynamicsSignal const>(resultSignalInterface);
 
     previousVelocity = velocity;
     distance = 2.0;
     velocity = distance / cycleTimeInSeconds;
     acceleration = (velocity - previousVelocity) / cycleTimeInSeconds;
 
-    result = std::dynamic_pointer_cast<DynamicsSignal const>(resultSignalInterface);
     AssertDynamicsSignalEquality(result,
                               16.0,
                               11.0,
@@ -199,8 +195,15 @@ TEST(TrajectoryFollowerImplementation_WithExternalAcceleration_Unittests, Linear
     TrajectoryPoint fakePosition5{0.8, 17.0, 16.0, 0.8};
     Trajectory fakeCoordinates = {{fakePosition1, fakePosition2, fakePosition3, fakePosition4, fakePosition5}, ""};
 
+    FakeAgent fakeAgent;
+    ON_CALL(fakeAgent, GetPositionX()).WillByDefault(Return(10.0));
+    ON_CALL(fakeAgent, GetPositionY()).WillByDefault(Return(10.0));
+    ON_CALL(fakeAgent, GetYaw()).WillByDefault(Return(0.0));
+
     TrajectoryTester trajectoryTester(DontCare<bool>(),
                                       DontCare<bool>(),
+                                      nullptr,
+                                      &fakeAgent,
                                       200);
     std::shared_ptr<TrajectoryFollowerImplementation> trajectoryFollower = trajectoryTester.trajectoryFollower;
 
@@ -214,32 +217,26 @@ TEST(TrajectoryFollowerImplementation_WithExternalAcceleration_Unittests, Linear
     trajectoryFollower->UpdateOutput(0, resultSignalInterface, 0);
 
     result = std::dynamic_pointer_cast<DynamicsSignal const>(resultSignalInterface);
-    AssertDynamicsSignalEquality(result, 10.0, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+    AssertDynamicsSignalEquality(result, 13.0, 14.0, 0.2, 1.0, 25.0, 125.0, 5.0);
 
+    trajectoryFollower->UpdateInput(1, inputSignal, 0);
     trajectoryFollower->Trigger(200);
     trajectoryFollower->UpdateOutput(0, resultSignalInterface, 200);
 
     result = std::dynamic_pointer_cast<DynamicsSignal const>(resultSignalInterface);
-    AssertDynamicsSignalEquality(result, 13.0, 14.0, 0.2, 1.0, 25.0, 125.0, 5.0);
+    AssertDynamicsSignalEquality(result, 15.0, 15.0, 0.5, 1.5, 15.0, -50.0, 3.0);
 
     trajectoryFollower->UpdateInput(1, inputSignal, 0);
     trajectoryFollower->Trigger(400);
     trajectoryFollower->UpdateOutput(0, resultSignalInterface, 400);
 
     result = std::dynamic_pointer_cast<DynamicsSignal const>(resultSignalInterface);
-    AssertDynamicsSignalEquality(result, 15.0, 15.0, 0.5, 1.5, 15.0, -50.0, 3.0);
-
-    trajectoryFollower->UpdateInput(1, inputSignal, 0);
-    trajectoryFollower->Trigger(600);
-    trajectoryFollower->UpdateOutput(0, resultSignalInterface, 600);
-
-    result = std::dynamic_pointer_cast<DynamicsSignal const>(resultSignalInterface);
     AssertDynamicsSignalEquality(result, 15.0, 16.0, 0.6, 0.5, 5.0, -50.0, 1.0);
 
     inputSignal = std::make_shared<AccelerationSignal>(ComponentState::Acting, 0.0);
     trajectoryFollower->UpdateInput(1, inputSignal, 0);
-    trajectoryFollower->Trigger(800);
-    trajectoryFollower->UpdateOutput(0, resultSignalInterface, 800);
+    trajectoryFollower->Trigger(600);
+    trajectoryFollower->UpdateOutput(0, resultSignalInterface, 600);
 
     result = std::dynamic_pointer_cast<DynamicsSignal const>(resultSignalInterface);
     AssertDynamicsSignalEquality(result, 16.0, 16.0, 0.7, 0.5, 5.0, 0.0, 1.0);
@@ -254,8 +251,15 @@ TEST(TrajectoryFollowerImplementation_WithExternalAcceleration_Unittests, Deacti
     TrajectoryPoint fakePosition5{0.8, 17.0, 16.0, 0.8};
     Trajectory fakeCoordinates = {{fakePosition1, fakePosition2, fakePosition3, fakePosition4, fakePosition5}, ""};
 
+    FakeAgent fakeAgent;
+    ON_CALL(fakeAgent, GetPositionX()).WillByDefault(Return(10.0));
+    ON_CALL(fakeAgent, GetPositionY()).WillByDefault(Return(10.0));
+    ON_CALL(fakeAgent, GetYaw()).WillByDefault(Return(0.0));
+
     TrajectoryTester trajectoryTester(DontCare<bool>(),
                                       true,
+                                      nullptr,
+                                      &fakeAgent,
                                       200);
     std::shared_ptr<TrajectoryFollowerImplementation> trajectoryFollower = trajectoryTester.trajectoryFollower;
 
@@ -266,6 +270,8 @@ TEST(TrajectoryFollowerImplementation_WithExternalAcceleration_Unittests, Deacti
     const auto trajectorySignal = std::make_shared<TrajectorySignal>(ComponentState::Acting, fakeCoordinates);
     trajectoryFollower->UpdateInput(2, trajectorySignal, 0);
     trajectoryFollower->Trigger(0);
+
+    trajectoryFollower->UpdateInput(1, inputSignal, 0);
     trajectoryFollower->Trigger(200);
 
     trajectoryFollower->UpdateInput(1, inputSignal, 0);
@@ -274,10 +280,7 @@ TEST(TrajectoryFollowerImplementation_WithExternalAcceleration_Unittests, Deacti
     trajectoryFollower->UpdateInput(1, inputSignal, 0);
     trajectoryFollower->Trigger(600);
 
-    trajectoryFollower->UpdateInput(1, inputSignal, 0);
-    trajectoryFollower->Trigger(800);
-
-    trajectoryFollower->UpdateOutput(0, resultSignalInterface, 800);
+    trajectoryFollower->UpdateOutput(0, resultSignalInterface, 600);
 
     result = std::dynamic_pointer_cast<DynamicsSignal const>(resultSignalInterface);
 
@@ -304,31 +307,25 @@ TEST(TrajectoryFollowerImplementation_WithExternalAcceleration_Unittests, Multip
     trajectoryFollower->UpdateOutput(0, resultSignalInterface, 0);
 
     result = std::dynamic_pointer_cast<DynamicsSignal const>(resultSignalInterface);
-    AssertDynamicsSignalEquality(result, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+    AssertDynamicsSignalEquality(result, 3.0, 0.0, 0.0, 0.0, 30.0, 300.0, 3.0);
 
     trajectoryFollower->Trigger(100);
     trajectoryFollower->UpdateOutput(0, resultSignalInterface, 100);
 
     result = std::dynamic_pointer_cast<DynamicsSignal const>(resultSignalInterface);
-    AssertDynamicsSignalEquality(result, 3.0, 0.0, 0.0, 0.0, 30.0, 300.0, 3.0);
-
-    trajectoryFollower->Trigger(200);
-    trajectoryFollower->UpdateOutput(0, resultSignalInterface, 200);
-
-    result = std::dynamic_pointer_cast<DynamicsSignal const>(resultSignalInterface);
     AssertDynamicsSignalEquality(result, 6.0, 0.0, 0, 0, 30.0, 0.0, 3.0);
 
-    trajectoryFollower->UpdateInput(1, inputSignal, 300);
-    trajectoryFollower->Trigger(300);
-    trajectoryFollower->UpdateOutput(0, resultSignalInterface, 300);
+    trajectoryFollower->UpdateInput(1, inputSignal, 200);
+    trajectoryFollower->Trigger(200);
+    trajectoryFollower->UpdateOutput(0, resultSignalInterface, 200);
 
     result = std::dynamic_pointer_cast<DynamicsSignal const>(resultSignalInterface);
     AssertDynamicsSignalEquality(result, 7.5, 0.0, 0.0, 0, 15.0, -150.0, 1.5);
 
     inputSignal = std::make_shared<AccelerationSignal>(ComponentState::Disabled, 0.0);
-    trajectoryFollower->UpdateInput(1, inputSignal, 400);
-    trajectoryFollower->Trigger(400);
-    trajectoryFollower->UpdateOutput(0, resultSignalInterface, 400);
+    trajectoryFollower->UpdateInput(1, inputSignal, 300);
+    trajectoryFollower->Trigger(300);
+    trajectoryFollower->UpdateOutput(0, resultSignalInterface, 300);
 
     result = std::dynamic_pointer_cast<DynamicsSignal const>(resultSignalInterface);
     AssertDynamicsSignalEquality(result, 9.0, 0.0, 0, 0, 15.0, 0.0, 1.5);

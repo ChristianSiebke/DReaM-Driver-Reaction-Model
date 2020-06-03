@@ -173,16 +173,19 @@ std::vector<LaneMarking::Entity> EgoAgent::GetLaneMarkingsInRange(double range, 
                                   side).at(0);
 }
 
-std::optional<LongitudinalDistance> EgoAgent::GetDistanceToObject(const WorldObjectInterface* otherObject) const
+LongitudinalDistance EgoAgent::GetDistanceToObject(const WorldObjectInterface* otherObject) const
 {
     if (!otherObject)
     {
-        return std::nullopt;
+        return {};
     }
 
     const auto objectPos = agent->GetObjectPosition();
+    const auto referencePoint = GetReferencePointPosition();
     const auto otherObjectPos = otherObject->GetObjectPosition();
-    const auto distance = world->GetDistanceBetweenObjects(wayToTarget, rootOfWayToTargetGraph, objectPos, otherObjectPos).at(0);
+    const auto distance = world->GetDistanceBetweenObjects(wayToTarget, rootOfWayToTargetGraph,
+                                                           objectPos, referencePoint ? std::optional<double>{referencePoint->roadPosition.s} : std::nullopt,
+                                                           otherObjectPos).at(0);
 
     return distance;
 }
@@ -265,6 +268,41 @@ GlobalRoadPosition EgoAgent::GetMainLocatePosition() const
     return agent->GetObjectPosition().mainLocatePoint.at(GetRoadId());
 }
 
+std::optional<GlobalRoadPosition> EgoAgent::GetReferencePointPosition() const
+{
+    auto referencePoint = agent->GetObjectPosition().referencePoint;
+    auto referencePointPosition = referencePoint.find(GetRoadId());
+    if (referencePointPosition != referencePoint.end())
+    {
+        return referencePointPosition->second;
+    }
+    size_t steps = 1;
+    while(auto routeElement = GetPreviousRoad(steps))
+    {
+        referencePointPosition = referencePoint.find(routeElement.value().roadId);
+        if (referencePointPosition != referencePoint.end())
+        {
+            return referencePointPosition->second;
+        }
+        steps++;
+    }
+    return std::nullopt;
+}
+
+std::optional<RoadGraphVertex> EgoAgent::GetReferencePointVertex() const
+{
+    auto referencePoint = agent->GetObjectPosition().referencePoint;
+    for (size_t steps = 0; rootOfWayToTargetGraph + steps < num_vertices(wayToTarget); ++steps)
+    {
+        auto routeElement = get(RouteElement(), wayToTarget, rootOfWayToTargetGraph + steps);
+        auto referencePointPosition = referencePoint.find(routeElement.roadId);
+        if (referencePointPosition != referencePoint.end())
+        {
+            return rootOfWayToTargetGraph + steps;
+        }
+    }
+    return std::nullopt;
+}
 int EgoAgent::GetLaneIdFromRelative(int relativeLaneId) const
 {
     const auto& routeElement = get(RouteElement(), roadGraph, current);
@@ -277,6 +315,88 @@ int EgoAgent::GetLaneIdFromRelative(int relativeLaneId) const
     {
         return  mainLaneId - relativeLaneId + (relativeLaneId <= -mainLaneId ? -1 : 0);
     }
+}
+
+std::optional<RouteElement> EgoAgent::GetPreviousRoad(size_t steps) const
+{
+    if (rootOfWayToTargetGraph + steps >= num_vertices(wayToTarget))
+    {
+        return std::nullopt;
+    }
+    return get(RouteElement(), wayToTarget, rootOfWayToTargetGraph + steps);
+}
+
+Position EgoAgent::GetWorldPosition(double sDistance, double tDistance, double yaw) const
+{
+    auto currentPosition = GetReferencePointPosition().value();
+    auto targetVertex = GetReferencePointVertex().value();
+    auto roadId = currentPosition.roadId;
+    auto laneId = currentPosition.laneId;
+    auto inOdDirection = get(RouteElement(), wayToTarget, rootOfWayToTargetGraph).inOdDirection;
+    auto targetS = currentPosition.roadPosition.s + (inOdDirection ? sDistance : -sDistance);
+    auto targetT = currentPosition.roadPosition.t + (inOdDirection ? tDistance : -tDistance);
+    if (laneId < 0)
+    {
+        targetT -= 0.5 * world->GetLaneWidth(roadId, laneId, currentPosition.roadPosition.s);
+        for (int intermediaryLane = -1; intermediaryLane > laneId; --intermediaryLane)
+        {
+            targetT -= world->GetLaneWidth(roadId, intermediaryLane, currentPosition.roadPosition.s);
+        }
+    }
+    else
+    {
+        targetT += 0.5 * world->GetLaneWidth(roadId, laneId, currentPosition.roadPosition.s);
+        for (int intermediaryLane = 1; intermediaryLane < laneId; ++intermediaryLane)
+        {
+            targetT += world->GetLaneWidth(roadId, intermediaryLane, currentPosition.roadPosition.s);
+        }
+    }
+    bool finished = false;
+    while (!finished)
+    {
+        if (targetS < 0)
+        {
+            targetVertex--;
+            auto routeElement = get(RouteElement(), wayToTarget, targetVertex);
+            if (routeElement.inOdDirection)
+            {
+                targetS = -targetS;
+            }
+            else
+            {
+                targetS += world->GetRoadLength(routeElement.roadId);
+            }
+            roadId = routeElement.roadId;
+        }
+        else if (targetS > world->GetRoadLength(roadId))
+        {
+            targetVertex--;
+            auto routeElement = get(RouteElement(), wayToTarget, targetVertex);
+            if (routeElement.inOdDirection)
+            {
+                targetS -= world->GetRoadLength(roadId);
+            }
+            else
+            {
+                targetS = world->GetRoadLength(roadId) + world->GetRoadLength(routeElement.roadId) - targetS;
+            }
+            roadId = routeElement.roadId;
+        }
+        else
+        {
+            finished = true;
+        }
+    }
+    if (inOdDirection != get(RouteElement(), wayToTarget, targetVertex).inOdDirection)
+    {
+        targetT = -targetT;
+    }
+    if (!get(RouteElement(), wayToTarget, targetVertex).inOdDirection)
+    {
+        yaw = CommonHelper::SetAngleToValidRange(yaw + M_PI);
+    }
+    RoadPosition newPosition{targetS, targetT, yaw};
+    return world->RoadCoord2WorldCoord(newPosition, roadId);
 }
 
 void EgoAgent::SetWayToTarget(RoadGraphVertex targetVertex)

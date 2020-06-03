@@ -241,6 +241,11 @@ public:
         return implementation->RoadCoord2WorldCoord(roadCoord, roadID);
     }
 
+    double GetRoadLength (const std::string& roadId) const override
+    {
+        return implementation->GetRoadLength(roadId);
+    }
+
     //-----------------------------------------------------------------------------
     //! Instantiate the world by creating a WorldInterface out of a world library
     //! with given world parameters
@@ -398,9 +403,10 @@ public:
     {
         return implementation->CreateWorldScenario(scenarioFilename);
     }
-    virtual RouteQueryResult<std::optional<LongitudinalDistance>> GetDistanceBetweenObjects(const RoadGraph& roadGraph, RoadGraphVertex startNode, const ObjectPosition& objectPos, const ObjectPosition& targetObjectPos) const override
+    virtual RouteQueryResult<LongitudinalDistance> GetDistanceBetweenObjects(const RoadGraph& roadGraph, RoadGraphVertex startNode,
+                                                                             const ObjectPosition& objectPos, const std::optional<double> objectReferenceS, const ObjectPosition& targetObjectPos) const override
     {
-        return implementation->GetDistanceBetweenObjects(roadGraph, startNode, objectPos, targetObjectPos);
+        return implementation->GetDistanceBetweenObjects(roadGraph, startNode, objectPos, objectReferenceS, targetObjectPos);
     }
 
 private:

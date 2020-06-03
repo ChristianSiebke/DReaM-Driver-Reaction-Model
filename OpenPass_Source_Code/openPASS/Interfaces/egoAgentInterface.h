@@ -170,7 +170,7 @@ public:
     //!
     //! \param otherObject  object to calculate distance to
     //! \return distance to other object or nullopt if the other object is not on the route of this agent
-    virtual std::optional<LongitudinalDistance> GetDistanceToObject(const WorldObjectInterface* otherObject) const = 0;
+    virtual LongitudinalDistance GetDistanceToObject(const WorldObjectInterface* otherObject) const = 0;
 
     //! Returns the (lateral) obstruction with another object along the route
     //!
@@ -232,9 +232,20 @@ public:
     //! Returns the position of the MainLaneLocator (w.r.t. the OpenDrive direction of the road)
     virtual GlobalRoadPosition GetMainLocatePosition() const = 0;
 
+    //! Returns the position of the ReferencePoint if it is on the route
+    virtual std::optional<GlobalRoadPosition> GetReferencePointPosition() const = 0;
+
     //! Return the OpenDrive lane id that is the specified amount to the left (in driving direction) of the own lane
     //! (i.e. negative values are to the right, and 0 returns the own lane)
     virtual int GetLaneIdFromRelative(int relativeLaneId) const = 0;
+
+    //!Returns the world position that corresponds to the given distance along the route
+    //!
+    //! \param sDistance    distance along s (in driving direction)
+    //! \param tDistance    distance along t (left of driving direction)
+    //! \param yaw          yaw relative to road at given distance
+    //! \return world position at given distance
+    virtual Position GetWorldPosition (double sDistance, double tDistance, double yaw = 0) const = 0;
 
     //! Returns all alternatives (i.e. leaves of the graph) that fulfill the filter function.
     //! First the appropriate WordInterface queries are called for the whole tree and then

@@ -2353,8 +2353,10 @@ TEST(GetDistanceUntilMovingObjectLeavesConnector, DISABLED_ObjectOnIncomingRoad_
 
 bool operator== (const LongitudinalDistance& lhs, const LongitudinalDistance& rhs)
 {
-    return std::abs(lhs.netDistance - rhs.netDistance) < CommonHelper::EPSILON
-            && std::abs(lhs.referencePoint - rhs.referencePoint) < CommonHelper::EPSILON;
+    return ((!lhs.netDistance.has_value() && !rhs.netDistance.has_value())
+            || std::abs(lhs.netDistance.value() - rhs.netDistance.value()) < CommonHelper::EPSILON)
+            && ((!lhs.referencePoint.has_value() && !rhs.referencePoint.has_value())
+                || std::abs(lhs.referencePoint.value() - rhs.referencePoint.value()) < CommonHelper::EPSILON);
 }
 
 TEST(GetDistanceBetweenObjects, LinearStreamObjectOnSameRoad_ReturnsDistanceOnAllNode)
@@ -2375,18 +2377,18 @@ TEST(GetDistanceBetweenObjects, LinearStreamObjectOnSameRoad_ReturnsDistanceOnAl
     ON_CALL(worldData, GetRoadIdMapping).WillByDefault(ReturnRef(roadIdMapping));
 
     RoadInterval road1ObjectInterval{{}, 10, 15};
-    ObjectPosition objectPos{{{"Road1", GlobalRoadPosition{"Road1", -1, 11.0, 0, 0}}},{},{{"Road1", road1ObjectInterval}}};
+    ObjectPosition objectPos{{},{},{{"Road1", road1ObjectInterval}}};
 
     RoadInterval road1TargetObjectInterval{{}, 20, 30};
     ObjectPosition targetObjectPos{{{"Road1", GlobalRoadPosition{"Road1", -1, 22.0, 0, 0}}},{},{{"Road1", road1TargetObjectInterval}}};
 
     WorldDataQuery wdQuery(worldData);
 
-    const auto distance = wdQuery.GetDistanceBetweenObjects(roadStream.Get(), objectPos, targetObjectPos);
+    const auto distance = wdQuery.GetDistanceBetweenObjects(roadStream.Get(), objectPos, 11.0, targetObjectPos);
 
-    ASSERT_THAT(distance, ElementsAre(std::make_pair(node1->roadGraphVertex, std::optional(LongitudinalDistance{5, 11})),
-                                      std::make_pair(node2->roadGraphVertex, std::optional(LongitudinalDistance{5, 11})),
-                                      std::make_pair(node3->roadGraphVertex, std::optional(LongitudinalDistance{5, 11}))));
+    ASSERT_THAT(distance, ElementsAre(std::make_pair(node1->roadGraphVertex, LongitudinalDistance{5, 11}),
+                                      std::make_pair(node2->roadGraphVertex, LongitudinalDistance{5, 11}),
+                                      std::make_pair(node3->roadGraphVertex,LongitudinalDistance{5, 11})));
 };
 
 TEST(GetDistanceBetweenObjects, LinearStreamObjectOnNextRoad_ReturnsDistanceOnThisAndFollowingNodes)
@@ -2407,18 +2409,18 @@ TEST(GetDistanceBetweenObjects, LinearStreamObjectOnNextRoad_ReturnsDistanceOnTh
     ON_CALL(worldData, GetRoadIdMapping).WillByDefault(ReturnRef(roadIdMapping));
 
     RoadInterval road1ObjectInterval{{}, 10, 15};
-    ObjectPosition objectPos{{{"Road1", GlobalRoadPosition{"Road1", -1, 11.0, 0, 0}}},{},{{"Road1", road1ObjectInterval}}};
+    ObjectPosition objectPos{{},{},{{"Road1", road1ObjectInterval}}};
 
     RoadInterval road2TargetObjectInterval{{}, 20, 30};
     ObjectPosition targetObjectPos{{{"Road2", GlobalRoadPosition{"Road2", -1, 22.0, 0, 0}}},{},{{"Road2", road2TargetObjectInterval}}};
 
     WorldDataQuery wdQuery(worldData);
 
-    const auto distance = wdQuery.GetDistanceBetweenObjects(roadStream.Get(), objectPos, targetObjectPos);
+    const auto distance = wdQuery.GetDistanceBetweenObjects(roadStream.Get(), objectPos, 11.0, targetObjectPos);
 
-    ASSERT_THAT(distance, ElementsAre(std::make_pair(node1->roadGraphVertex, std::nullopt),
-                                      std::make_pair(node2->roadGraphVertex, std::optional(LongitudinalDistance{255, 267})),
-                                      std::make_pair(node3->roadGraphVertex, std::optional(LongitudinalDistance{255, 267}))));
+    ASSERT_THAT(distance, ElementsAre(std::make_pair(node1->roadGraphVertex, LongitudinalDistance{}),
+                                      std::make_pair(node2->roadGraphVertex, LongitudinalDistance{255, 267}),
+                                      std::make_pair(node3->roadGraphVertex, LongitudinalDistance{255, 267})));
 };
 
 TEST(GetDistanceBetweenObjects, LinearStreamObjectBehind_ReturnsNegativeDistance)
@@ -2439,18 +2441,18 @@ TEST(GetDistanceBetweenObjects, LinearStreamObjectBehind_ReturnsNegativeDistance
     ON_CALL(worldData, GetRoadIdMapping).WillByDefault(ReturnRef(roadIdMapping));
 
     RoadInterval road1ObjectInterval{{}, 50, 55};
-    ObjectPosition objectPos{{{"Road1", GlobalRoadPosition{"Road1", -1, 51.0, 0, 0}}},{},{{"Road1", road1ObjectInterval}}};
+    ObjectPosition objectPos{{},{},{{"Road1", road1ObjectInterval}}};
 
     RoadInterval road1TargetObjectInterval{{}, 20, 30};
     ObjectPosition targetObjectPos{{{"Road1", GlobalRoadPosition{"Road1", -1, 22.0, 0, 0}}},{},{{"Road1", road1TargetObjectInterval}}};
 
     WorldDataQuery wdQuery(worldData);
 
-    const auto distance = wdQuery.GetDistanceBetweenObjects(roadStream.Get(), objectPos, targetObjectPos);
+    const auto distance = wdQuery.GetDistanceBetweenObjects(roadStream.Get(), objectPos, 51.0, targetObjectPos);
 
-    ASSERT_THAT(distance, ElementsAre(std::make_pair(node1->roadGraphVertex, std::optional(LongitudinalDistance{-20, -29})),
-                                      std::make_pair(node2->roadGraphVertex, std::optional(LongitudinalDistance{-20, -29})),
-                                      std::make_pair(node3->roadGraphVertex, std::optional(LongitudinalDistance{-20, -29}))));
+    ASSERT_THAT(distance, ElementsAre(std::make_pair(node1->roadGraphVertex, LongitudinalDistance{-20, -29}),
+                                      std::make_pair(node2->roadGraphVertex, LongitudinalDistance{-20, -29}),
+                                      std::make_pair(node3->roadGraphVertex, LongitudinalDistance{-20, -29})));
 };
 
 TEST(GetDistanceBetweenObjects, LinearStreamObjectOverlaps_ReturnsZero)
@@ -2471,18 +2473,18 @@ TEST(GetDistanceBetweenObjects, LinearStreamObjectOverlaps_ReturnsZero)
     ON_CALL(worldData, GetRoadIdMapping).WillByDefault(ReturnRef(roadIdMapping));
 
     RoadInterval road1ObjectInterval{{}, 25, 35};
-    ObjectPosition objectPos{{{"Road1", GlobalRoadPosition{"Road1", -1, 26.0, 0, 0}}},{},{{"Road1", road1ObjectInterval}}};
+    ObjectPosition objectPos{{},{},{{"Road1", road1ObjectInterval}}};
 
     RoadInterval road1TargetObjectInterval{{}, 20, 30};
     ObjectPosition targetObjectPos{{{"Road1", GlobalRoadPosition{"Road1", -1, 22.0, 0, 0}}},{},{{"Road1", road1TargetObjectInterval}}};
 
     WorldDataQuery wdQuery(worldData);
 
-    const auto distance = wdQuery.GetDistanceBetweenObjects(roadStream.Get(), objectPos, targetObjectPos);
+    const auto distance = wdQuery.GetDistanceBetweenObjects(roadStream.Get(), objectPos, 26.0, targetObjectPos);
 
-    ASSERT_THAT(distance, ElementsAre(std::make_pair(node1->roadGraphVertex, std::optional(LongitudinalDistance{0, -4})),
-                                      std::make_pair(node2->roadGraphVertex, std::optional(LongitudinalDistance{0, -4})),
-                                      std::make_pair(node3->roadGraphVertex, std::optional(LongitudinalDistance{0, -4}))));
+    ASSERT_THAT(distance, ElementsAre(std::make_pair(node1->roadGraphVertex, LongitudinalDistance{0, -4}),
+                                      std::make_pair(node2->roadGraphVertex, LongitudinalDistance{0, -4}),
+                                      std::make_pair(node3->roadGraphVertex, LongitudinalDistance{0, -4})));
 };
 
 TEST(GetDistanceBetweenObjects, LinearStreamObjectOnTwoRoads_IgnoresSecondRoad)
@@ -2503,7 +2505,7 @@ TEST(GetDistanceBetweenObjects, LinearStreamObjectOnTwoRoads_IgnoresSecondRoad)
     ON_CALL(worldData, GetRoadIdMapping).WillByDefault(ReturnRef(roadIdMapping));
 
     RoadInterval road1ObjectInterval{{}, 10, 15};
-    ObjectPosition objectPos{{{"Road1", GlobalRoadPosition{"Road1", -1, 11.0, 0, 0}}},{},{{"Road1", road1ObjectInterval}}};
+    ObjectPosition objectPos{{},{},{{"Road1", road1ObjectInterval}}};
 
     RoadInterval road2TargetObjectInterval{{}, 0, 30};
     RoadInterval road3TargetObjectInterval{{}, 0, 10};
@@ -2512,11 +2514,11 @@ TEST(GetDistanceBetweenObjects, LinearStreamObjectOnTwoRoads_IgnoresSecondRoad)
 
     WorldDataQuery wdQuery(worldData);
 
-    const auto distance = wdQuery.GetDistanceBetweenObjects(roadStream.Get(), objectPos, targetObjectPos);
+    const auto distance = wdQuery.GetDistanceBetweenObjects(roadStream.Get(), objectPos, 11.0, targetObjectPos);
 
-    ASSERT_THAT(distance, ElementsAre(std::make_pair(node1->roadGraphVertex, std::nullopt),
-                                      std::make_pair(node2->roadGraphVertex, std::optional(LongitudinalDistance{255, 267})),
-                                      std::make_pair(node3->roadGraphVertex, std::optional(LongitudinalDistance{255, 267}))));
+    ASSERT_THAT(distance, ElementsAre(std::make_pair(node1->roadGraphVertex, LongitudinalDistance{}),
+                                      std::make_pair(node2->roadGraphVertex, LongitudinalDistance{255, 267}),
+                                      std::make_pair(node3->roadGraphVertex, LongitudinalDistance{255, 267})));
 };
 
 TEST(GetDistanceBetweenObjects, BranchingStreamObjectOneLeaf_ReturnsDistanceOnThisNode)
@@ -2537,18 +2539,18 @@ TEST(GetDistanceBetweenObjects, BranchingStreamObjectOneLeaf_ReturnsDistanceOnTh
     ON_CALL(worldData, GetRoadIdMapping).WillByDefault(ReturnRef(roadIdMapping));
 
     RoadInterval road1ObjectInterval{{}, 10, 15};
-    ObjectPosition objectPos{{{"Road1", GlobalRoadPosition{"Road1", -1, 11.0, 0, 0}}},{},{{"Road1", road1ObjectInterval}}};
+    ObjectPosition objectPos{{},{},{{"Road1", road1ObjectInterval}}};
 
     RoadInterval road2TargetObjectInterval{{}, 20, 30};
     ObjectPosition targetObjectPos{{{"Road2", GlobalRoadPosition{"Road2", -1, 22.0, 0, 0}}},{},{{"Road2", road2TargetObjectInterval}}};
 
     WorldDataQuery wdQuery(worldData);
 
-    const auto distance = wdQuery.GetDistanceBetweenObjects(roadStream.Get(), objectPos, targetObjectPos);
+    const auto distance = wdQuery.GetDistanceBetweenObjects(roadStream.Get(), objectPos, 11.0, targetObjectPos);
 
-    ASSERT_THAT(distance, ElementsAre(std::make_pair(node1->roadGraphVertex, std::nullopt),
-                                      std::make_pair(node2->roadGraphVertex, std::optional(LongitudinalDistance{255, 267})),
-                                      std::make_pair(node3->roadGraphVertex, std::nullopt)));
+    ASSERT_THAT(distance, ElementsAre(std::make_pair(node1->roadGraphVertex, LongitudinalDistance{}),
+                                      std::make_pair(node2->roadGraphVertex, LongitudinalDistance{255, 267}),
+                                      std::make_pair(node3->roadGraphVertex, LongitudinalDistance{})));
 };
 
 TEST(GetDistanceBetweenObjects, BranchingStreamObjectTwoLeaf_ReturnsDistanceForBoth)
@@ -2569,7 +2571,7 @@ TEST(GetDistanceBetweenObjects, BranchingStreamObjectTwoLeaf_ReturnsDistanceForB
     ON_CALL(worldData, GetRoadIdMapping).WillByDefault(ReturnRef(roadIdMapping));
 
     RoadInterval road1ObjectInterval{{}, 10, 15};
-    ObjectPosition objectPos{{{"Road1", GlobalRoadPosition{"Road1", -1, 11.0, 0, 0}}},{},{{"Road1", road1ObjectInterval}}};
+    ObjectPosition objectPos{{},{},{{"Road1", road1ObjectInterval}}};
 
     RoadInterval road2TargetObjectInterval{{}, 20, 30};
     RoadInterval road3TargetObjectInterval{{}, 40, 50};
@@ -2578,11 +2580,43 @@ TEST(GetDistanceBetweenObjects, BranchingStreamObjectTwoLeaf_ReturnsDistanceForB
 
     WorldDataQuery wdQuery(worldData);
 
-    const auto distance = wdQuery.GetDistanceBetweenObjects(roadStream.Get(), objectPos, targetObjectPos);
+    const auto distance = wdQuery.GetDistanceBetweenObjects(roadStream.Get(), objectPos, 11.0, targetObjectPos);
 
-    ASSERT_THAT(distance, ElementsAre(std::make_pair(node1->roadGraphVertex, std::nullopt),
-                                      std::make_pair(node2->roadGraphVertex, std::optional(LongitudinalDistance{255, 267})),
-                                      std::make_pair(node3->roadGraphVertex, std::optional(LongitudinalDistance{125, 130}))));
+    ASSERT_THAT(distance, ElementsAre(std::make_pair(node1->roadGraphVertex, LongitudinalDistance{}),
+                                      std::make_pair(node2->roadGraphVertex, LongitudinalDistance{255, 267}),
+                                      std::make_pair(node3->roadGraphVertex, LongitudinalDistance{125, 130})));
+};
+
+TEST(GetDistanceBetweenObjects, LinearStreamNoReferencePoint_ReturnsNetDistanceOnly)
+{
+    FakeRoadMultiStream roadStream;
+    auto [node1, road1] = roadStream.AddRoot(100, true);
+    auto [node2, road2] = roadStream.AddRoad(200, false, *node1);
+    auto [node3, road3] = roadStream.AddRoad(300, true, *node2);
+    Fakes::WorldData worldData;
+
+    OWL::Id idRoad1 = 1;
+    ON_CALL(*road1, GetId()).WillByDefault(Return(idRoad1));
+    OWL::Id idRoad2 = 2;
+    ON_CALL(*road2, GetId()).WillByDefault(Return(idRoad2));
+    OWL::Id idRoad3 = 3;
+    ON_CALL(*road3, GetId()).WillByDefault(Return(idRoad3));
+    std::unordered_map<OWL::Id, std::string> roadIdMapping {{idRoad1, "Road1"}, {idRoad2, "Road2"}, {idRoad3, "Road3"}};
+    ON_CALL(worldData, GetRoadIdMapping).WillByDefault(ReturnRef(roadIdMapping));
+
+    RoadInterval road1ObjectInterval{{}, 10, 15};
+    ObjectPosition objectPos{{},{},{{"Road1", road1ObjectInterval}}};
+
+    RoadInterval road1TargetObjectInterval{{}, 20, 30};
+    ObjectPosition targetObjectPos{{{"Road1", GlobalRoadPosition{"Road1", -1, 22.0, 0, 0}}},{},{{"Road1", road1TargetObjectInterval}}};
+
+    WorldDataQuery wdQuery(worldData);
+
+    const auto distance = wdQuery.GetDistanceBetweenObjects(roadStream.Get(), objectPos, std::nullopt, targetObjectPos);
+
+    ASSERT_THAT(distance, ElementsAre(std::make_pair(node1->roadGraphVertex, LongitudinalDistance{5, std::nullopt}),
+                                      std::make_pair(node2->roadGraphVertex, LongitudinalDistance{5, std::nullopt}),
+                                      std::make_pair(node3->roadGraphVertex,LongitudinalDistance{5, std::nullopt})));
 };
 
 TEST(GetObstruction, ObjectOnSameLane)

@@ -470,9 +470,10 @@ public:
     //! \param targetObjectPos the ObjectPosition of the reference object
     //! \return the distance between the ObjectPositions on the Route
     //-----------------------------------------------------------------------------
-    virtual RouteQueryResult<std::optional<LongitudinalDistance>> GetDistanceBetweenObjects(const RoadGraph& roadGraph,
+    virtual RouteQueryResult<LongitudinalDistance> GetDistanceBetweenObjects(const RoadGraph& roadGraph,
                                                                                             RoadGraphVertex startNode,
                                                                                             const ObjectPosition& objectPos,
+                                                                                            const std::optional<double> objectReferenceS,
                                                                                             const ObjectPosition& targetObjectPos) const = 0;
     //-----------------------------------------------------------------------------
     //! Retrieve whether a new agent intersects with an existing agent
@@ -482,6 +483,15 @@ public:
     virtual bool IntersectsWithAgent(double x, double y, double rotation, double length, double width, double center) = 0;
 
     virtual Position RoadCoord2WorldCoord(RoadPosition roadCoord, std::string roadID = "") const = 0;
+
+    /*!
+     * \brief Retrieve the length of a road
+     *
+     * \param[in]    roadId   Road ID for which to retrieve the length
+     *
+     * \return Length of the specified road in [m]
+     */
+    virtual double GetRoadLength(const std::string& roadId) const = 0;
 
     //! Calculates the obstruction of an agent with another object i.e. how far to left or the right the object is from my position
     //! For more information see the [markdown documentation](\ref dev_framework_modules_world_getobstruction)

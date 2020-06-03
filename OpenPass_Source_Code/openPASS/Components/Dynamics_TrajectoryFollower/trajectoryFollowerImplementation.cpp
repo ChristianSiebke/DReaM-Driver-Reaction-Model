@@ -50,11 +50,8 @@ TrajectoryFollowerImplementation::TrajectoryFollowerImplementation(std::string c
         agent),
     cycleTimeInSeconds{static_cast<double>(cycleTime) / 1000.0}
 {
-    dynamicsOutputSignal.positionX = 0;
-    dynamicsOutputSignal.positionY = 0;
-    dynamicsOutputSignal.yaw = 0;
-
     ParseParameters(parameters);
+    Init();
 }
 
 void TrajectoryFollowerImplementation::ParseParameters(const ParameterInterface *parameters)
@@ -70,6 +67,15 @@ void TrajectoryFollowerImplementation::ParseParameters(const ParameterInterface 
         LOG(CbkLogLevel::Error, error.what());
         throw std::runtime_error(error.what());
     }
+}
+
+void TrajectoryFollowerImplementation::Init()
+{
+    lastWorldPosition = {0, GetAgent()->GetPositionX(), GetAgent()->GetPositionY(), GetAgent()->GetYaw()};
+    lastVelocity = GetAgent()->GetVelocity();
+
+    nextTrajectoryIterator = trajectory.points.begin();
+    currentTime = 0;
 }
 
 void TrajectoryFollowerImplementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data,
@@ -165,9 +171,9 @@ void TrajectoryFollowerImplementation::UpdateOutput(int localLinkId, std::shared
     }
 }
 
-void TrajectoryFollowerImplementation::Trigger(int time)
+void TrajectoryFollowerImplementation::Trigger([[maybe_unused]]int time)
 {
-    CalculateNextTimestep(time);
+    CalculateNextTimestep();
 }
 
 ComponentState TrajectoryFollowerImplementation::GetState() const
@@ -191,6 +197,7 @@ void TrajectoryFollowerImplementation::UpdateState(const ComponentState newState
             if (canBeActivated)
             {
                 SetComponentState(newState);
+                Init();
             }
         }
         else if (newState == ComponentState::Disabled)
@@ -287,7 +294,7 @@ void TrajectoryFollowerImplementation::TriggerWithInactiveAccelerationInput()
     TrajectoryPoint previousCoordinate = lastWorldPosition;
     TrajectoryPoint nextCoordinate = *nextTrajectoryIterator;
 
-    double remainingTime = cycleTimeInSeconds;
+    double remainingTime = GetCycleTime() / 1000.0;
     double timeBetweenCoordinates = nextCoordinate.time - previousTimestamp;
     double deltaS{0};
 
@@ -296,7 +303,7 @@ void TrajectoryFollowerImplementation::TriggerWithInactiveAccelerationInput()
     {
         deltaS += CalculateDistanceBetweenWorldCoordinates(previousCoordinate, nextCoordinate);
 
-        previousTrajectoryIterator++;
+        previousTrajectoryIterator = nextTrajectoryIterator;
         previousTimestamp = previousTrajectoryIterator->time;
         previousCoordinate = *previousTrajectoryIterator;
         lastCoordinateTimestamp = previousTimestamp;
@@ -328,34 +335,22 @@ void TrajectoryFollowerImplementation::TriggerWithInactiveAccelerationInput()
     const double velocity = deltaS / cycleTimeInSeconds;
     const double acceleration = (velocity - lastVelocity) / cycleTimeInSeconds;
 
-    lastCoordinateTimestamp = currentTime * 0.001;
     UpdateDynamics(previousPosition, direction, deltaYawAngle, velocity, acceleration);
 }
 
-void TrajectoryFollowerImplementation::CalculateNextTimestep(int time)
+void TrajectoryFollowerImplementation::CalculateNextTimestep()
 {
-    currentTime = time;
+    lastCoordinateTimestamp = currentTime;
+    currentTime += GetCycleTime() / 1000.0;
 
     if (GetState() == ComponentState::Disabled)
     {
         return;
     }
 
-    lastWorldPosition = {lastCoordinateTimestamp * 0.001, dynamicsOutputSignal.positionX, dynamicsOutputSignal.positionY, dynamicsOutputSignal.yaw};
-    lastVelocity = dynamicsOutputSignal.velocity;
-
-    if (previousTrajectoryIterator != trajectory.points.end() &&
-        nextTrajectoryIterator != trajectory.points.end())
+    if (nextTrajectoryIterator != trajectory.points.end())
     {
-        if (initialization)
-        {
-            UpdateDynamics(*previousTrajectoryIterator, {0, 0}, 0, 0, 0);
-            lastCoordinateTimestamp = previousTrajectoryIterator->time;
-            initialization = false;
-            return;
-        }
-
-        if (inputAccelerationActive)
+        if(inputAccelerationActive)
         {
             TriggerWithActiveAccelerationInput();
         }
@@ -384,29 +379,6 @@ double TrajectoryFollowerImplementation::CalculateScaledDeltaYawAngle(const Traj
     ;
 }
 
-TrajectoryPoint TrajectoryFollowerImplementation::CalculateStartPosition(const TrajectoryPoint &previousPosition, const TrajectoryPoint &nextPosition)
-{
-    const auto startDirection = CalculateScaledVector(previousPosition, nextPosition, percentageTraveledBetweenCoordinates);
-    const double startDeltaYawAngle = CalculateScaledDeltaYawAngle(previousPosition, nextPosition, percentageTraveledBetweenCoordinates);
-
-    TrajectoryPoint startPosition = previousPosition;
-    startPosition.x += startDirection.x;
-    startPosition.y += startDirection.y;
-    startPosition.yaw += startDeltaYawAngle;
-
-    return startPosition;
-}
-
-std::pair<int, TrajectoryPoint> TrajectoryFollowerImplementation::CalculateStartCoordinate(const std::pair<int, TrajectoryPoint> &previousPosition, const std::pair<int, TrajectoryPoint> &nextPosition)
-{
-    const auto startPosition = CalculateStartPosition(previousPosition.second, nextPosition.second);
-
-    const double timeDifference = nextPosition.first - previousPosition.first;
-    const double startTime = previousPosition.first + timeDifference * percentageTraveledBetweenCoordinates;
-
-    return {startTime, startPosition};
-}
-
 double TrajectoryFollowerImplementation::CalculateDistanceBetweenWorldCoordinates(TrajectoryPoint previousPosition, TrajectoryPoint nextPosition)
 {
     return std::hypot(nextPosition.x - previousPosition.x, nextPosition.y - previousPosition.y);
@@ -427,4 +399,10 @@ void TrajectoryFollowerImplementation::UpdateDynamics(const TrajectoryPoint &pre
     dynamicsOutputSignal.velocity = velocity;
     dynamicsOutputSignal.acceleration = acceleration;
     dynamicsOutputSignal.centripetalAcceleration = dynamicsOutputSignal.yawRate * dynamicsOutputSignal.velocity;
+
+    lastWorldPosition = {currentTime,
+                         dynamicsOutputSignal.positionX,
+                         dynamicsOutputSignal.positionY,
+                         dynamicsOutputSignal.yaw};
+    lastVelocity = dynamicsOutputSignal.velocity;
 }

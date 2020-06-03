@@ -16,6 +16,7 @@
 #include <set>
 #include "boost/graph/adjacency_list.hpp"
 
+constexpr double EQUALITY_BOUND = 1e-3;
 
 enum class RoadNetworkElementType
 {
@@ -154,7 +155,9 @@ struct RoadPosition
 
     bool operator==(const RoadPosition& other) const
     {
-        return s == other.s && t == other.t && hdg == other.hdg;
+        return std::abs(s - other.s) < EQUALITY_BOUND
+                && std::abs(t - other.t) < EQUALITY_BOUND
+                && std::abs(hdg - other.hdg) < EQUALITY_BOUND;
     }
 };
 
@@ -281,8 +284,8 @@ public:
 //! Longitudinal distance (i.e. along s) between two objects on the same road
 struct LongitudinalDistance
 {
-    double netDistance;     //! distance between boundaries
-    double referencePoint;  //! distance between reference points
+    std::optional<double> netDistance;     //! distance between boundaries
+    std::optional<double> referencePoint;  //! distance between reference points
 };
 
 

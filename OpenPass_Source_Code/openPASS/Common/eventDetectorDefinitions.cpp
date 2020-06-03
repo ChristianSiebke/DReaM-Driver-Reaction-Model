@@ -70,21 +70,12 @@ std::vector<const AgentInterface *> TimeHeadwayCondition::IsMet(WorldInterface* 
 
     for (auto triggeringAgent : GetTriggeringAgents(world))
     {
-        double deltaS{std::numeric_limits<double>::infinity()};
         auto longPos = triggeringAgent->GetEgoAgent().GetDistanceToObject(referenceAgent);
+        auto deltaS = freeSpace ? longPos.netDistance : longPos.referencePoint;
 
-        if (longPos.has_value())
+        if (deltaS.has_value())
         {
-            if (freeSpace)
-            {
-                deltaS = longPos.value().netDistance;
-            }
-            else
-            {
-                deltaS = longPos.value().referencePoint;
-            }
-
-            double timeHeadway = deltaS / triggeringAgent->GetVelocity(VelocityScope::Longitudinal);
+            double timeHeadway = deltaS.value() / triggeringAgent->GetVelocity(VelocityScope::Longitudinal);
 
             if (CheckEquation(timeHeadway, targetTHW, rule))
             {

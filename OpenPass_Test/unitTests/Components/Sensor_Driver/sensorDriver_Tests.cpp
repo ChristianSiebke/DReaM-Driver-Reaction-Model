@@ -95,7 +95,7 @@ TEST(SensorDriver_UnitTests, CorrectInformationInSignal)
     std::vector<const WorldObjectInterface *> objectsInFront{{&otherAgent}};
     EXPECT_CALL(fakeEgoAgent, GetObjectsInRange(0.0,_,0)).WillRepeatedly(Return(objectsInFront));
     ON_CALL(otherAgent, GetId()).WillByDefault(Return(2));
-    ON_CALL(fakeEgoAgent, GetDistanceToObject(&otherAgent)).WillByDefault(Return(std::optional(LongitudinalDistance{50.0, 52.0})));
+    ON_CALL(fakeEgoAgent, GetDistanceToObject(&otherAgent)).WillByDefault(Return(LongitudinalDistance{50.0, 52.0}));
     ON_CALL(otherAgent, GetYaw()).WillByDefault(Return(0.1));
     ON_CALL(otherAgent, GetLength()).WillByDefault(Return(1.0));
     ON_CALL(otherAgent, GetWidth()).WillByDefault(Return(1.1));
@@ -109,7 +109,7 @@ TEST(SensorDriver_UnitTests, CorrectInformationInSignal)
     std::vector<const WorldObjectInterface *> objectsBehind{{&trafficObject}};
     EXPECT_CALL(fakeEgoAgent, GetObjectsInRange(_,0.0,1)).WillRepeatedly(Return(objectsBehind));
     ON_CALL(trafficObject, GetId()).WillByDefault(Return(3));
-    ON_CALL(fakeEgoAgent, GetDistanceToObject(&trafficObject)).WillByDefault(Return(std::optional(LongitudinalDistance{60.0, 62.0})));
+    ON_CALL(fakeEgoAgent, GetDistanceToObject(&trafficObject)).WillByDefault(Return(LongitudinalDistance{60.0, 62.0}));
     ON_CALL(trafficObject, GetYaw()).WillByDefault(Return(0.2));
     ON_CALL(trafficObject, GetLength()).WillByDefault(Return(2.0));
     ON_CALL(trafficObject, GetWidth()).WillByDefault(Return(2.1));

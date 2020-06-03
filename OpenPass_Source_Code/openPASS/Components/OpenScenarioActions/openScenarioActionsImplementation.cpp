@@ -129,8 +129,8 @@ void OpenScenarioActionsImplementation::Trigger([[maybe_unused]]int time)
             {
                 throw std::runtime_error("Could not calculate LaneChange trajectory. Reference point is not on route.");
             }
-            const auto& currentLaneId = GetAgent()->GetObjectPosition().referencePoint.at(roadId).laneId;
-            const auto& currentS = GetAgent()->GetObjectPosition().referencePoint.at(roadId).roadPosition.s;
+            const auto currentLaneId = GetAgent()->GetObjectPosition().referencePoint.at(roadId).laneId;
+            const auto currentS = GetAgent()->GetObjectPosition().referencePoint.at(roadId).roadPosition.s;
             int targetLaneId;
             if (laneChange.type == LaneChangeParameter::Type::Absolute)
             {
@@ -174,7 +174,7 @@ void OpenScenarioActionsImplementation::Trigger([[maybe_unused]]int time)
                                              currentS,
                                              GetAgent()->GetObjectPosition().referencePoint.at(roadId).roadPosition.t,
                                              GetAgent()->GetObjectPosition().referencePoint.at(roadId).roadPosition.hdg};
-            auto trajectory = calculation.CalculateSinusiodalLaneChange(deltaS, deltaT, deltaTime, GetCycleTime() / 1000.0, startPosition, time / 1000.0);
+            auto trajectory = calculation.CalculateSinusiodalLaneChange(deltaS, deltaT, deltaTime, GetCycleTime() / 1000.0, startPosition, 0.0);
             this->trajectoryEvent = std::make_shared<TrajectoryEvent>(time, "OscAction", castedLaneChangeEvent->GetName(), GetAgent()->GetId(), trajectory);
         }
     }

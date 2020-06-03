@@ -52,7 +52,7 @@ public:
 
     std::vector<LaneMarking::Entity> GetLaneMarkingsInRange(double range, Side side, int relativeLane = 0) const override;
 
-    std::optional<LongitudinalDistance> GetDistanceToObject(const WorldObjectInterface* otherObject) const override;
+    LongitudinalDistance GetDistanceToObject(const WorldObjectInterface* otherObject) const override;
 
     Obstruction GetObstruction(const WorldObjectInterface* otherObject) const override;
 
@@ -76,9 +76,17 @@ public:
 
     GlobalRoadPosition GetMainLocatePosition () const override;
 
+    std::optional<GlobalRoadPosition> GetReferencePointPosition() const override;
+
     int GetLaneIdFromRelative (int relativeLaneId) const override;
 
+    Position GetWorldPosition (double sDistance, double tDistance, double yaw = 0) const override;
+
 private:
+
+    std::optional<RouteElement> GetPreviousRoad(size_t steps = 1) const;
+
+    std::optional<RoadGraphVertex> GetReferencePointVertex() const;
 
     ExecuteReturn<DistanceToEndOfLane> executeQueryDistanceToEndOfLane(DistanceToEndOfLaneParameter parameter) const override;
 

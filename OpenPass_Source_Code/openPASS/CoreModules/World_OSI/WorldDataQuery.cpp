@@ -755,9 +755,10 @@ OWL::CLane* WorldDataQuery::GetOriginatingRouteLane(std::vector<RouteElement> ro
     return currentLane;
 }
 
-RouteQueryResult<std::optional<LongitudinalDistance>> WorldDataQuery::GetDistanceBetweenObjects(const RoadMultiStream& roadStream,
-                                                                                  const ObjectPosition& objectPos,
-                                                                                  const ObjectPosition& targetObjectPos) const
+RouteQueryResult<LongitudinalDistance> WorldDataQuery::GetDistanceBetweenObjects(const RoadMultiStream& roadStream,
+                                                                                 const ObjectPosition& objectPos,
+                                                                                 const std::optional<double> objectReferenceS,
+                                                                                 const ObjectPosition& targetObjectPos) const
 {
     const auto& rootElement = roadStream.GetRoot().element.value();
     const auto& rootRoadId = worldData.GetRoadIdMapping().at(rootElement.element->GetId());
@@ -765,11 +766,15 @@ RouteQueryResult<std::optional<LongitudinalDistance>> WorldDataQuery::GetDistanc
     double objectPositionEnd = rootElement.GetStreamPosition(objectPos.touchedRoads.at(rootRoadId).sEnd);
     double objectPositionMin = std::min(objectPositionStart, objectPositionEnd);
     double objectPositionMax = std::max(objectPositionStart, objectPositionEnd);
-    double objectPositionReferencPoint = rootElement.GetStreamPosition(objectPos.referencePoint.at(rootRoadId).roadPosition.s);
-    return roadStream.Traverse<std::optional<LongitudinalDistance>>(RoadMultiStream::TraversedFunction<std::optional<LongitudinalDistance>>{[&](const auto& road, const auto& previousResult)
+    double objectPositionReferencPoint{0};
+    if (objectReferenceS)
+    {
+        objectPositionReferencPoint  = rootElement.GetStreamPosition(objectReferenceS.value());
+    }
+    return roadStream.Traverse<LongitudinalDistance>(RoadMultiStream::TraversedFunction<LongitudinalDistance>{[&](const auto& road, const auto& previousResult)
     {
         const auto& roadId = worldData.GetRoadIdMapping().at(road.element->GetId());
-        if ((previousResult.has_value() && previousResult->referencePoint < std::numeric_limits<double>::infinity())
+        if ((previousResult.netDistance.has_value() && previousResult.referencePoint.has_value())
             || targetObjectPos.touchedRoads.count(roadId) == 0)
         {
             return previousResult;
@@ -778,29 +783,29 @@ RouteQueryResult<std::optional<LongitudinalDistance>> WorldDataQuery::GetDistanc
         double targetObjectPositionEnd = road.GetStreamPosition(targetObjectPos.touchedRoads.at(roadId).sEnd);
         double targetObjectPositionMin = std::min(targetObjectPositionStart, targetObjectPositionEnd);
         double targetObjectPositionMax = std::max(targetObjectPositionStart, targetObjectPositionEnd);
-        double referenceDistance = std::numeric_limits<double>::infinity();
-        if (targetObjectPos.referencePoint.find(roadId) != targetObjectPos.referencePoint.end())
+        std::optional<double> referenceDistance = std::nullopt;
+        if (objectReferenceS && targetObjectPos.referencePoint.find(roadId) != targetObjectPos.referencePoint.end())
         {
             referenceDistance = road.GetStreamPosition(targetObjectPos.referencePoint.at(roadId).roadPosition.s) - objectPositionReferencPoint;
         }
-        else if (previousResult)
+        else if (previousResult.referencePoint.has_value())
         {
-            referenceDistance = previousResult->referencePoint;
+            referenceDistance = previousResult.referencePoint;
         }
         if (objectPositionMin > targetObjectPositionMax)
         {
-            return std::optional<LongitudinalDistance>{LongitudinalDistance{targetObjectPositionMax - objectPositionMin, referenceDistance}};
+            return LongitudinalDistance{targetObjectPositionMax - objectPositionMin, referenceDistance};
         }
         else if (targetObjectPositionMin > objectPositionMax)
         {
-            return std::optional<LongitudinalDistance>{LongitudinalDistance{targetObjectPositionMin - objectPositionMax, referenceDistance}};
+            return LongitudinalDistance{targetObjectPositionMin - objectPositionMax, referenceDistance};
         }
         else
         {
-            return std::optional<LongitudinalDistance>{LongitudinalDistance{0, referenceDistance}};
+            return LongitudinalDistance{0, referenceDistance};
         }
     }},
-    std::nullopt,
+    {},
     worldData);
 }
 

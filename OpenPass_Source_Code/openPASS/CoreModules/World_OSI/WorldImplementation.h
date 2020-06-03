@@ -166,11 +166,13 @@ public:
     RouteQueryResult<double> GetDistanceToEndOfLane(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double initialSearchDistance,
                                   double maximumSearchLength, const LaneTypes& laneTypes) const override;
 
-    RouteQueryResult<std::optional<LongitudinalDistance>> GetDistanceBetweenObjects(const RoadGraph& roadGraph, RoadGraphVertex startNode, const ObjectPosition& objectPos, const ObjectPosition& targetObjectPos) const override;
+    RouteQueryResult<LongitudinalDistance> GetDistanceBetweenObjects(const RoadGraph& roadGraph, RoadGraphVertex startNode, const ObjectPosition& objectPos, const std::optional<double> objectReferenceS, const ObjectPosition& targetObjectPos) const override;
 
     bool IntersectsWithAgent(double x, double y, double rotation, double length, double width, double center) override;
 
     Position RoadCoord2WorldCoord(RoadPosition roadCoord, std::string roadID) const override;
+
+    double GetRoadLength(const std::string& roadId) const override;
 
     double GetVisibilityDistance() const override;
 

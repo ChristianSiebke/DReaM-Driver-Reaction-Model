@@ -283,7 +283,7 @@ ObjectInformation SensorDriverImplementation::GetOtherObjectInformation(const Wo
     {
         objectInformation.exist = true;
         objectInformation.id = surroundingObject->GetId();
-        objectInformation.relativeLongitudinalDistance = egoAgent.GetDistanceToObject(surroundingObject).value().netDistance;
+        objectInformation.relativeLongitudinalDistance = egoAgent.GetDistanceToObject(surroundingObject).netDistance.value();
         objectInformation.heading = surroundingObject->GetYaw();
         objectInformation.length = surroundingObject->GetLength();
         objectInformation.width = surroundingObject->GetWidth();
