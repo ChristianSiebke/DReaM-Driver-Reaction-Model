@@ -310,6 +310,7 @@ void Lane::SetLeftLane(const Interfaces::Lane& lane)
 
     leftLane = &lane;
     osiLane->mutable_left_adjacent_lane_id()->set_value(lane.GetId());
+    osiLane->mutable_base_lane()->mutable_classification()->add_left_adjacent_lane_id()->set_value(lane.GetId());
     for (const auto& laneBoundary : lane.GetRightLaneBoundaries())
     {
         osiLane->mutable_base_lane()->mutable_classification()->add_left_lane_boundary_id()->set_value(laneBoundary);
@@ -326,6 +327,7 @@ void Lane::SetRightLane(const Interfaces::Lane& lane)
 
     rightLane = &lane;
     osiLane->mutable_right_adjacent_lane_id()->set_value(lane.GetId());
+    osiLane->mutable_base_lane()->mutable_classification()->add_right_adjacent_lane_id()->set_value(lane.GetId());
 }
 
 void Lane::SetLeftLaneBoundaries(const std::vector<Id> laneBoundaries)
@@ -418,11 +420,17 @@ void Lane::AddLanePairing(const Interfaces::Lane& prevLane, const Interfaces::La
 void Lane::AddNext(const Interfaces::Lane* lane)
 {
     next.push_back(lane->GetId());
+    auto lanePairing = osiLane->mutable_base_lane()->mutable_classification()->add_lane_pairing();
+    lanePairing->mutable_antecessor_lane_id()->set_value(GetId());
+    lanePairing->mutable_successor_lane_id()->set_value(lane->GetId());
 }
 
 void Lane::AddPrevious(const Interfaces::Lane* lane)
 {
     previous.push_back(lane->GetId());
+    auto lanePairing = osiLane->mutable_base_lane()->mutable_classification()->add_lane_pairing();
+    lanePairing->mutable_antecessor_lane_id()->set_value(lane->GetId());
+    lanePairing->mutable_successor_lane_id()->set_value(GetId());
 }
 
 const Interfaces::LaneGeometryElements& Lane::GetLaneGeometryElements() const
@@ -462,6 +470,9 @@ void Lane::AddLaneGeometryJoint(const Common::Vector2d& pointLeft,
     Primitive::LaneGeometryElement* newElement = new Primitive::LaneGeometryElement(previousJoint, newJoint, this);
     laneGeometryElements.push_back(newElement);
     laneGeometryJoints.push_back(newJoint);
+    auto osiCenterpoint = osiLane->mutable_base_lane()->mutable_classification()->add_centerline();
+    osiCenterpoint->set_x(pointCenter.x);
+    osiCenterpoint->set_y(pointCenter.y);
 }
 
 Section::Section(osi3::world::RoadSection* osiSection) : osiSection(osiSection)

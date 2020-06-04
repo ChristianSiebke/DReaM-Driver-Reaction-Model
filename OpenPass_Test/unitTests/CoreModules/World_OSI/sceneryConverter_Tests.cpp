@@ -40,7 +40,8 @@ using ::testing::_;
 
 std::tuple<const OWL::Primitive::LaneGeometryJoint*, const OWL::Primitive::LaneGeometryJoint*> CreateSectionPartJointsRect(double length)
 {
-    OWL::Implementation::Lane lane(nullptr, nullptr);
+    osi3::world::RoadLane osiLane;
+    OWL::Implementation::Lane lane(&osiLane, nullptr);
 
     auto laneGeometryElement =
         OWL::Testing::LaneGeometryElementGenerator::RectangularLaneGeometryElement(
