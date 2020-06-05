@@ -45,6 +45,8 @@ class FakeAgent : public FakeWorldObject, public AgentInterface
     MOCK_METHOD1(SetVelocity, void(double value));
     MOCK_METHOD1(SetAcceleration, void(double value));
     MOCK_METHOD1(SetYaw, void(double value));
+    MOCK_METHOD1(SetDistanceTraveled, void(double distanceTraveled));
+    MOCK_CONST_METHOD0(GetDistanceTraveled, double());
     MOCK_METHOD1(SetGear, void(int gear));
     MOCK_METHOD1(SetEngineSpeed, void(double engineSpeed));
     MOCK_METHOD1(SetEffAccelPedal, void(double percent));
@@ -161,7 +163,7 @@ class FakeAgent : public FakeWorldObject, public AgentInterface
     MOCK_METHOD1(SetCollisionState, void(bool collisionState));
     MOCK_CONST_METHOD0(GetCollisionState, bool());
     MOCK_CONST_METHOD0(GetAccelerationAbsolute, double());
-    MOCK_CONST_METHOD0(GetObjectPosition, ObjectPosition ());
+    MOCK_CONST_METHOD0(GetObjectPosition, const ObjectPosition& ());
     MOCK_CONST_METHOD1(GetRoads, std::vector<std::string>(MeasurementPoint mp));
     MOCK_CONST_METHOD2(GetDistanceToStartOfRoad, double(MeasurementPoint mp, std::string roadId));
     MOCK_CONST_METHOD0(GetDistanceReferencePointToLeadingEdge, double());

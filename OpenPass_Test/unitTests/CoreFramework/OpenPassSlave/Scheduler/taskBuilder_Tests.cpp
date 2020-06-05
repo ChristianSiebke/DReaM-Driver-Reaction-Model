@@ -24,7 +24,29 @@ using ::testing::SizeIs;
 using namespace SimulationSlave;
 using namespace openpass::scheduling;
 
-TEST(TaskBuilder, CommonTaskCreation_Works)
+TEST(TaskBuilder, SpawningTaskCreation_Works)
+{
+    NiceMock<FakeManipulatorNetwork> fakeManipulatorNetwork;
+    NiceMock<FakeEventDetectorNetwork> fakeEventDetectorNetwork;
+    int currentTime = 0;
+
+    NiceMock<FakeWorld> fakeWorld;
+    RunResult runResult{};
+    TaskBuilder taskBuilder(currentTime,
+                            runResult,
+                            100,
+                            &fakeWorld,
+                            nullptr,
+                            nullptr,
+                            &fakeEventDetectorNetwork,
+                            &fakeManipulatorNetwork);
+
+    auto commonTasks = taskBuilder.CreateSpawningTasks();
+    ASSERT_THAT(commonTasks, SizeIs(Gt(size_t(0))));
+    ASSERT_THAT(commonTasks, Contains(Field(&TaskItem::taskType, Eq(TaskType::Spawning))));
+}
+
+TEST(TaskBuilder, PreAgentTaskCreation_Works)
 {
     NiceMock<FakeEventDetector> fakeEventDetector;
     NiceMock<FakeManipulatorNetwork> fakeManipulatorNetwork;
@@ -52,14 +74,14 @@ TEST(TaskBuilder, CommonTaskCreation_Works)
                             &fakeEventDetectorNetwork,
                             &fakeManipulatorNetwork);
 
-    auto commonTasks = taskBuilder.CreateCommonTasks();
+    auto commonTasks = taskBuilder.CreatePreAgentTasks();
     ASSERT_THAT(commonTasks, SizeIs(Gt(size_t(0))));
-    ASSERT_THAT(commonTasks, Contains(Field(&TaskItem::taskType, Eq(TaskType::Spawning))));
+    ASSERT_THAT(commonTasks, Contains(Field(&TaskItem::taskType, Eq(TaskType::SyncGlobalData))));
     ASSERT_THAT(commonTasks, Contains(Field(&TaskItem::taskType, Eq(TaskType::EventDetector))));
     ASSERT_THAT(commonTasks, Not(Contains(Field(&TaskItem::taskType, Eq(TaskType::Manipulator)))));
 }
 
-TEST(TaskBuilder, FinalizeRecurringTaskCreation_Works)
+TEST(TaskBuilder, SynchronizeTaskCreation_Works)
 {
     NiceMock<FakeEventDetectorNetwork> fakeEventDetectorNetwork;
     NiceMock<FakeManipulatorNetwork> fakeManipulatorNetwork;
@@ -77,6 +99,6 @@ TEST(TaskBuilder, FinalizeRecurringTaskCreation_Works)
                             &fakeEventDetectorNetwork,
                             &fakeManipulatorNetwork);
 
-    auto finalizeTasks = taskBuilder.CreateFinalizeRecurringTasks();
+    auto finalizeTasks = taskBuilder.CreateSynchronizeTasks();
     ASSERT_THAT(finalizeTasks, SizeIs(Gt(size_t(0))));
 }

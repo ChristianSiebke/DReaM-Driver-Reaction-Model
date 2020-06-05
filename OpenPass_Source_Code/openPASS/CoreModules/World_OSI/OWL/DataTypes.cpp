@@ -51,6 +51,14 @@ Lane::~Lane()
     {
         delete laneGeometryElement;
     }
+    if (leftLaneIsDummy)
+    {
+        delete leftLane;
+    }
+    if (rightLaneIsDummy)
+    {
+        delete rightLane;
+    }
 }
 
 void Lane::CopyToGroundTruth(osi3::GroundTruth& target) const
@@ -715,7 +723,7 @@ double StationaryObject::GetAbsAccelerationDouble() const
     return 0.0;
 }
 
-ObjectPosition StationaryObject::GetLocatedPosition() const
+const ObjectPosition& StationaryObject::GetLocatedPosition() const
 {
     return position;
 }
@@ -928,7 +936,7 @@ void MovingObject::SetZ(const double newZ)
     osiPosition->set_z(newZ);
 }
 
-ObjectPosition MovingObject::GetLocatedPosition() const
+const ObjectPosition& MovingObject::GetLocatedPosition() const
 {
     return position;
 }

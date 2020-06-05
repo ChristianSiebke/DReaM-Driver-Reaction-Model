@@ -33,7 +33,7 @@ TrafficObjectAdapter::TrafficObjectAdapter(OWL::Interfaces::WorldData& worldData
     Locate();
 }
 
-ObjectPosition TrafficObjectAdapter::GetObjectPosition() const
+const ObjectPosition& TrafficObjectAdapter::GetObjectPosition() const
 {
     return GetBaseTrafficObject().GetLocatedPosition();
 }

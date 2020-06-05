@@ -121,7 +121,7 @@ TEST(SchedulerTasks_Test, ScheduleComponentTasks_UpdateScheduledTimestamps)
     TriggerTaskItem thirdTaskItem{0, 0, 25, 0, triggerFunc};
     std::list<TaskItem> testTasks{firstTaskItem, secondTaskItem, thirdTaskItem};
 
-    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
+    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
     testSchedulerTasks.ScheduleNewRecurringTasks(testTasks);
 
     std::set<int> scheduledTimestamps = testSchedulerTasks.scheduledTimestamps;
@@ -140,7 +140,7 @@ TEST(SchedulerTasks_Test, ScheduleComponentTasksWithLargerValueThanUpperBound_Up
     TriggerTaskItem fourthTaskItem{0, 10, 250, 0, triggerFunc};
     std::list<TaskItem> testTasks{firstTaskItem, secondTaskItem, thirdTaskItem, fourthTaskItem};
 
-    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
+    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
     testSchedulerTasks.ScheduleNewRecurringTasks(testTasks);
 
     std::set<int> scheduledTimestamps = testSchedulerTasks.scheduledTimestamps;
@@ -158,7 +158,7 @@ TEST(SchedulerTasks_Test, ScheduleComponentTasksWithLargerDelayThanBound_UpdateS
     TriggerTaskItem thirdTaskItem{0, 0, 50, 300, triggerFunc};
     std::list<TaskItem> testTasks{firstTaskItem, secondTaskItem, thirdTaskItem};
 
-    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
+    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
     testSchedulerTasks.ScheduleNewRecurringTasks(testTasks);
 
     std::set<int> scheduledTimestamps = testSchedulerTasks.scheduledTimestamps;
@@ -179,7 +179,7 @@ TEST(SchedulerTasks_Test, ScheduleComponentTasksWithMultipleLargerHorizons_Updat
     TriggerTaskItem sixthTaskItem{0, 10, 400, 0, triggerFunc};
     std::list<TaskItem> testTasks{firstTaskItem, secondTaskItem, thirdTaskItem, fourthTaskItem, fifthTaskItem, sixthTaskItem};
 
-    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
+    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
     testSchedulerTasks.ScheduleNewRecurringTasks(testTasks);
 
     std::set<int> scheduledTimestamps = testSchedulerTasks.scheduledTimestamps;
@@ -196,10 +196,10 @@ TEST(SchedulerTasks_Test, ScheduleComponentTasks_FillNonRecurringTasksCorrect)
     TriggerTaskItem secondTaskItem{0, 10, 0, 0, triggerFunc};
     std::list<TaskItem> testTasks{firstTaskItem, secondTaskItem};
 
-    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
+    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
     testSchedulerTasks.ScheduleNewNonRecurringTasks(testTasks);
 
-    std::multiset<TaskItem> nonRecurringTasks = testSchedulerTasks.nonRecurringTasks.tasks;
+    std::multiset<TaskItem> nonRecurringTasks = testSchedulerTasks.nonRecurringAgentTasks.tasks;
 
     ASSERT_THAT(nonRecurringTasks, SizeIs(2));
     ASSERT_THAT(nonRecurringTasks, ElementsAre(secondTaskItem, firstTaskItem));
@@ -228,33 +228,33 @@ TEST(SchedulerTasks_Test, DeleteAgentTasks_FilterAllAffectedTasks)
     ObservationTaskItem fourthCommonTaskItem{100, triggerFunc};
     std::list<TaskItem> testCommonTasks{firstCommonTaskItem, secondCommonTaskItem, thirdCommonTaskItem, fourthCommonTaskItem};
 
-    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, testCommonTasks, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
+    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, testCommonTasks, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
     testSchedulerTasks.ScheduleNewRecurringTasks(testTasksRecurring);
     testSchedulerTasks.ScheduleNewNonRecurringTasks(testTasksNonRecurring);
 
     std::list<int> removeAgents = {removeAgent};
     testSchedulerTasks.DeleteAgentTasks(removeAgents);
 
-    std::multiset<TaskItem> recurringTasks = testSchedulerTasks.recurringTasks.tasks;
+    std::multiset<TaskItem> recurringTasks = testSchedulerTasks.recurringAgentTasks.tasks;
     auto recurringIt = std::find_if(recurringTasks.begin(), recurringTasks.end(),
                                     [removeAgent](const TaskItem &TaskItem) {
                                         return removeAgent == TaskItem.agentId;
                                     });
     ASSERT_TRUE(recurringIt == recurringTasks.end());
 
-    std::multiset<TaskItem> nonRecurringTasks = testSchedulerTasks.nonRecurringTasks.tasks;
+    std::multiset<TaskItem> nonRecurringTasks = testSchedulerTasks.nonRecurringAgentTasks.tasks;
     auto nonRecurringIt = std::find_if(nonRecurringTasks.begin(), nonRecurringTasks.end(),
                                        [removeAgent](const TaskItem &TaskItem) {
                                            return removeAgent == TaskItem.agentId;
                                        });
     ASSERT_TRUE(nonRecurringIt == nonRecurringTasks.end());
 
-    std::multiset<TaskItem> commonTasks = testSchedulerTasks.commonTasks.tasks;
-    auto commonIt = std::find_if(commonTasks.begin(), commonTasks.end(),
+    std::multiset<TaskItem> spawningTasks = testSchedulerTasks.spawningTasks.tasks;
+    auto commonIt = std::find_if(spawningTasks.begin(), spawningTasks.end(),
                                  [removeAgent](const TaskItem &TaskItem) {
                                      return removeAgent == TaskItem.agentId;
                                  });
-    ASSERT_TRUE(commonIt == commonTasks.end());
+    ASSERT_TRUE(commonIt == spawningTasks.end());
 }
 
 TEST(SchedulerTasks_Test, DeleteAgentTasks_CreateNewScheduledTimestamps)
@@ -271,7 +271,7 @@ TEST(SchedulerTasks_Test, DeleteAgentTasks_CreateNewScheduledTimestamps)
     TriggerTaskItem sixthTaskItem{removeAgent, 10, 10, 0, triggerFunc};
     std::list<TaskItem> testTasks{firstTaskItem, secondTaskItem, thirdTaskItem, fourthTaskItem, fifthtTaskItem, sixthTaskItem};
 
-    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
+    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
     testSchedulerTasks.ScheduleNewRecurringTasks(testTasks);
     std::list<int> removeAgents = {removeAgent};
     testSchedulerTasks.DeleteAgentTasks(removeAgents);
@@ -293,10 +293,10 @@ TEST(SchedulerTasks_Test, ScheduleComponentTasks_FillRecurringTasksCorrect)
     UpdateTaskItem fourthTaskItem{0, 0, 100, 10, updateFunc};
     std::list<TaskItem> testTasks{firstTaskItem, secondTaskItem, thirdTaskItem, fourthTaskItem};
 
-    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
+    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
     testSchedulerTasks.ScheduleNewRecurringTasks(testTasks);
 
-    std::multiset<TaskItem> recurringTasks = testSchedulerTasks.recurringTasks.tasks;
+    std::multiset<TaskItem> recurringTasks = testSchedulerTasks.recurringAgentTasks.tasks;
 
     ASSERT_THAT(recurringTasks, SizeIs(4));
     ASSERT_EQ((*recurringTasks.begin()), firstTaskItem);
@@ -307,7 +307,7 @@ TEST(SchedulerTasks_Test, ScheduleComponentTasks_FillRecurringTasksCorrect)
 
 TEST(SchedulerTasks_Test, GetNextTimestamp_MakesCorrectStep)
 {
-    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
+    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
     testSchedulerTasks.scheduledTimestamps = {0, 10, 20, 50, 100, 110, 120, 150, 200};
 
     ASSERT_EQ(testSchedulerTasks.GetNextTimestamp(0), 10);
@@ -326,7 +326,7 @@ TEST(SchedulerTasks_Test, GetNextTimestamp_CreateNewScheduledTimestamps)
     TriggerTaskItem fourthTaskItem{0, 10, 50, 0, triggerFunc};
     std::list<TaskItem> testTasks{firstTaskItem, secondTaskItem, thirdTaskItem, fourthTaskItem};
 
-    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
+    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
     testSchedulerTasks.ScheduleNewRecurringTasks(testTasks);
 
     // first scheduledTimestamps has to be {0, 10, 50, 100, 110, 150, 200};
@@ -350,7 +350,7 @@ TEST(SchedulerTasks_Test, GetNextTimestampWithUnscheduledTimestamp_MakesCorrectS
     TriggerTaskItem fourthTaskItem{0, 10, 50, 0, triggerFunc};
     std::list<TaskItem> testTasks{firstTaskItem, secondTaskItem, thirdTaskItem, fourthTaskItem};
 
-    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
+    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
     testSchedulerTasks.ScheduleNewRecurringTasks(testTasks);
 
     // first scheduledTimestamps has to be {0, 10, 50, 100, 110, 150, 200};
@@ -376,7 +376,7 @@ TEST(SchedulerTasks_Test, GetAllCurrentTasks_DeliversFilteredTasks)
     UpdateTaskItem sixthTaskItem{0, 0, 100, 10, updateFunc};
     std::list<TaskItem> testTasksRecurring{thirdTaskItem, fourthTaskItem, fifthTaskItem, sixthTaskItem};
 
-    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
+    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
     testSchedulerTasks.ScheduleNewRecurringTasks(testTasksRecurring);
     testSchedulerTasks.ScheduleNewNonRecurringTasks(testTasksNonRecurring);
 
@@ -398,7 +398,7 @@ TEST(SchedulerTasks_Test, GetAllCurrentTasks_DeliversFilteredTasksOnSecondTimest
     UpdateTaskItem sixthTaskItem{0, 0, 100, 10, updateFunc};
     std::list<TaskItem> testTasks{firstTaskItem, secondTaskItem, thirdTaskItem, fourthTaskItem, fifthTaskItem, sixthTaskItem};
 
-    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
+    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
     testSchedulerTasks.ScheduleNewRecurringTasks(testTasks);
 
     std::list<TaskItem> currentTasks = testSchedulerTasks.GetTasks(10);
@@ -423,7 +423,7 @@ TEST(SchedulerTasks_Test, GetAllCurrentTasksWithUnscheduledTimestamp_DeliversEmp
     UpdateTaskItem sixthTaskItem{0, 0, 100, 10, updateFunc};
     std::list<TaskItem> testTasksRecurring{thirdTaskItem, fourthTaskItem, fifthTaskItem, sixthTaskItem};
 
-    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
+    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
     testSchedulerTasks.ScheduleNewRecurringTasks(testTasksRecurring);
     testSchedulerTasks.ScheduleNewNonRecurringTasks(testTasksNonRecurring);
 
@@ -446,7 +446,7 @@ TEST(SchedulerTasks_Test, GetAllCurrentTasksWithinFirstBoundaries_DeliversFilter
     UpdateTaskItem sixthTaskItem{0, 0, 100, 10, updateFunc};
     std::list<TaskItem> testTasksRecurring{thirdTaskItem, fourthTaskItem, fifthTaskItem, sixthTaskItem};
 
-    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
+    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
     testSchedulerTasks.ScheduleNewRecurringTasks(testTasksRecurring);
     testSchedulerTasks.ScheduleNewNonRecurringTasks(testTasksNonRecurring);
 
@@ -478,7 +478,7 @@ TEST(SchedulerTasks_Test, GetAllCurrentTasksWithTimestampHigherBound_DeliversFil
     UpdateTaskItem sixthTaskItem{0, 0, 100, 10, updateFunc};
     std::list<TaskItem> testTasksRecurring{thirdTaskItem, fourthTaskItem, fifthTaskItem, sixthTaskItem};
 
-    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
+    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
     testSchedulerTasks.ScheduleNewRecurringTasks(testTasksRecurring);
     testSchedulerTasks.ScheduleNewNonRecurringTasks(testTasksNonRecurring);
 
@@ -500,7 +500,7 @@ TEST(SchedulerTasks_Test, UpdateTasks_ListedInCorrectOrder)
     taskItems.push_back(outputTaskItem);
     taskItems.push_back(inputTaskItem); // like in AgentParser
 
-    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
+    SchedulerTasks testSchedulerTasks(std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, std::list<TaskItem>{}, 200);
     testSchedulerTasks.ScheduleNewRecurringTasks(taskItems);
 
     taskItems = testSchedulerTasks.GetTasks(0);

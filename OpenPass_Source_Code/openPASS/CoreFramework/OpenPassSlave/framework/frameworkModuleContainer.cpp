@@ -23,7 +23,7 @@ FrameworkModuleContainer::FrameworkModuleContainer(
     dataStore(&dataStoreBinding),
     stochasticsBinding(callbacks),
     stochastics(&stochasticsBinding),
-    worldBinding(frameworkModules.worldLibrary, callbacks, &stochastics),
+    worldBinding(frameworkModules.worldLibrary, callbacks, &stochastics, &dataStore),
     world(&worldBinding),
     observationNetwork(&observationBindings),
     eventDetectorBinding(callbacks),

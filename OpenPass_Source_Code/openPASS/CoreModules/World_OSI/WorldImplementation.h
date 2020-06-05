@@ -18,6 +18,7 @@
 #include "SceneryConverter.h"
 #include "Interfaces/parameterInterface.h"
 #include "Localization.h"
+#include "Interfaces/dataStoreInterface.h"
 
 #include "WorldData.h"
 #include "WorldDataQuery.h"
@@ -90,7 +91,7 @@ class WorldImplementation : public WorldInterface
 public:
     const std::string MODULENAME = "WORLD";
 
-    WorldImplementation(const CallbackInterface* callbacks, StochasticsInterface* stochastics);
+    WorldImplementation(const CallbackInterface* callbacks, StochasticsInterface* stochastics, DataStoreWriteInterface* dataStore);
     WorldImplementation(const WorldImplementation&) = delete;
     WorldImplementation(WorldImplementation&&) = delete;
     WorldImplementation& operator=(const WorldImplementation&) = delete;
@@ -120,6 +121,8 @@ public:
 
     void QueueAgentUpdate(std::function<void()> func) override;
     void QueueAgentRemove(const AgentInterface* agent) override;
+
+    void PublishGlobalData(int timestamp) override;
     void SyncGlobalData() override;
 
     bool CreateScenery(SceneryInterface* scenery) override;
@@ -315,4 +318,6 @@ private:
 
     std::unordered_map<const OWL::Interfaces::MovingObject*, AgentInterface*> movingObjectMapping{{nullptr, nullptr}};
     std::unordered_map<const OWL::Interfaces::MovingObject*, TrafficObjectInterface*> stationaryObjectMapping{{nullptr, nullptr}};
+
+    DataStoreWriteInterface* dataStore;
 };

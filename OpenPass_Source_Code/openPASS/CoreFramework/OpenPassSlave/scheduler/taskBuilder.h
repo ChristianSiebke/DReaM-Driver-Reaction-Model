@@ -40,9 +40,10 @@ class TaskBuilderInterface
 {
 public:
     virtual std::list<TaskItem> CreateBootstrapTasks() = 0;
-    virtual std::list<TaskItem> CreateCommonTasks() = 0;
-    virtual std::list<TaskItem> CreateFinalizeRecurringTasks() = 0;
+    virtual std::list<TaskItem> CreateSpawningTasks() = 0;
+    virtual std::list<TaskItem> CreateSynchronizeTasks() = 0;
     virtual std::list<TaskItem> CreateFinalizeTasks() = 0;
+    virtual std::list<TaskItem> CreatePreAgentTasks() = 0;
 };
 
 //-----------------------------------------------------------------------------
@@ -115,7 +116,9 @@ public:
     *
     * @return	tasks   final tasks of common phase
     */
-    std::list<TaskItem> CreateCommonTasks() override;
+    std::list<TaskItem> CreateSpawningTasks() override;
+
+    std::list<TaskItem> CreatePreAgentTasks() override;
 
     /*!
     * \brief CreateFinalizeRecurringTasks
@@ -125,7 +128,7 @@ public:
     *
     * @return	tasks   final tasks of finalizeRecurring phase
     */
-    std::list<TaskItem> CreateFinalizeRecurringTasks() override;
+    std::list<TaskItem> CreateSynchronizeTasks() override;
 
     /*!
     * \brief CreateFinalizeTasks

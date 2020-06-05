@@ -30,9 +30,10 @@ namespace {
     }
 }
 
-WorldImplementation::WorldImplementation(const CallbackInterface* callbacks, StochasticsInterface* stochastics):
+WorldImplementation::WorldImplementation(const CallbackInterface* callbacks, StochasticsInterface* stochastics, DataStoreWriteInterface* dataStore):
     agentNetwork(this, callbacks),
-    callbacks(callbacks)
+    callbacks(callbacks),
+    dataStore(dataStore)
 {}
 
 WorldImplementation::~WorldImplementation()
@@ -134,6 +135,15 @@ void WorldImplementation::QueueAgentRemove(const AgentInterface* agent)
     {
         worldObjects.erase(it);
     }
+}
+
+void WorldImplementation::PublishGlobalData(int timestamp)
+{
+    agentNetwork.PublishGlobalData(
+        [&](openpass::type::EntityId id, openpass::type::FlatParameterKey key, openpass::type::FlatParameterValue value)
+        {
+            dataStore->PutCyclic(timestamp, id, key, value);
+        });
 }
 
 void WorldImplementation::SyncGlobalData()

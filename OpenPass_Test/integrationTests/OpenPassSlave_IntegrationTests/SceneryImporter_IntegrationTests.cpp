@@ -50,7 +50,7 @@ struct TESTSCENERY_FACTORY
     Scenery scenery;
 
     TESTSCENERY_FACTORY() :
-        worldBinding(libraryName, &callbacks, &stochastics),
+        worldBinding(libraryName, &callbacks, &stochastics, nullptr),
         world(&worldBinding)
     {
     }

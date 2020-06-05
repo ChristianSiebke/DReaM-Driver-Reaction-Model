@@ -41,7 +41,7 @@ public:
 
     MOCK_METHOD1(SetAbsOrientation, void(const OWL::Primitive::AbsOrientation& newOrientation));
     MOCK_METHOD1(SetDimension, void(const OWL::Primitive::Dimension& newDimension));
-    MOCK_CONST_METHOD0(GetLocatedPosition, ObjectPosition());
+    MOCK_CONST_METHOD0(GetLocatedPosition, const ObjectPosition&());
     MOCK_METHOD1(SetLocatedPosition, void(const ObjectPosition& position));
     MOCK_METHOD1(SetReferencePointPosition, void(const OWL::Primitive::AbsPosition& newPosition));
 
@@ -65,7 +65,7 @@ public:
     MOCK_CONST_METHOD0(GetRoad, const OWL::Interfaces::Road & ());
 
     MOCK_CONST_METHOD0(GetReferencePointPosition, OWL::Primitive::AbsPosition());
-    MOCK_CONST_METHOD0(GetLocatedPosition, ObjectPosition());
+    MOCK_CONST_METHOD0(GetLocatedPosition, const ObjectPosition&());
 
     MOCK_CONST_METHOD0(GetAbsOrientation, OWL::Primitive::AbsOrientation());
     MOCK_CONST_METHOD0(GetLaneOrientation, OWL::Primitive::LaneOrientation());

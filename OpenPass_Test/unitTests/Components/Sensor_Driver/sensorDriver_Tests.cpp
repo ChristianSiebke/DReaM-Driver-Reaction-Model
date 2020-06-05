@@ -23,6 +23,7 @@
 
 using ::testing::_;
 using ::testing::Return;
+using ::testing::ReturnRef;
 using ::testing::Eq;
 using ::testing::DoubleEq;
 using ::testing::NiceMock;
@@ -48,7 +49,7 @@ TEST(SensorDriver_UnitTests, CorrectInformationInSignal)
     RoadGraphEdge edge = add_edge(start, target, roadGraph).first;
 
     ObjectPosition egoAgentPosition{{}, {{roadId, GlobalRoadPosition{roadId, -2, 50, 4.0, 5.0}}},{{roadId, RoadInterval{{-1}, 0, 0, {6.0, 7.0}}}}};
-    ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(Return(egoAgentPosition));
+    ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(ReturnRef(egoAgentPosition));
     ON_CALL(fakeAgent, GetVelocity(VelocityScope::Absolute)).WillByDefault(Return(2.0));
     ON_CALL(fakeAgent, GetAcceleration()).WillByDefault(Return(3.0));
     ON_CALL(fakeAgent, IsCrossingLanes()).WillByDefault(Return(true));
@@ -102,7 +103,7 @@ TEST(SensorDriver_UnitTests, CorrectInformationInSignal)
     ON_CALL(otherAgent, GetVelocity()).WillByDefault(Return(10.0));
     ON_CALL(otherAgent, GetAcceleration()).WillByDefault(Return(11.0));
     ObjectPosition otherAgentPosition{{}, {{roadId, GlobalRoadPosition{roadId, -2, 50, 2.0, 0}}},{}};
-    ON_CALL(otherAgent, GetObjectPosition()).WillByDefault(Return(otherAgentPosition));
+    ON_CALL(otherAgent, GetObjectPosition()).WillByDefault(ReturnRef(otherAgentPosition));
 
     NiceMock<FakeWorldObject> trafficObject;
     std::vector<const WorldObjectInterface *> objectsBehind{{&trafficObject}};
@@ -199,7 +200,7 @@ TEST(SensorDriverCalculations_UnitTests, GetLateralDistanceToObjectSameLane)
 
     NiceMock<FakeAgent> otherAgent;
     ObjectPosition otherAgentPosition{{{"MyRoad", GlobalRoadPosition{"MyRoad", -3, 50, -1.0, 0}}}, {},{}};
-    ON_CALL(otherAgent, GetObjectPosition()).WillByDefault(Return(otherAgentPosition));
+    ON_CALL(otherAgent, GetObjectPosition()).WillByDefault(ReturnRef(otherAgentPosition));
 
     SensorDriverCalculations sensorDriverCalculations(egoAgent);
     double lateralDistance = sensorDriverCalculations.GetLateralDistanceToObject("MyRoad", &otherAgent);
@@ -213,14 +214,15 @@ TEST(SensorDriverCalculations_UnitTests, GetLateralDistanceToObjectLeftLane)
     ON_CALL(egoAgent, GetLaneIdFromRelative(-1)).WillByDefault(Return(-4));
     ON_CALL(egoAgent, GetLaneIdFromRelative(0)).WillByDefault(Return(-3));
     ON_CALL(egoAgent, GetLaneIdFromRelative(1)).WillByDefault(Return(-2));
-    ON_CALL(agent, GetObjectPosition()).WillByDefault(Return(ObjectPosition{{},{{"MyRoad",GlobalRoadPosition{"",-3,0,0.5,0}},{}}}));
+    ObjectPosition position{{},{{"MyRoad",GlobalRoadPosition{"",-3,0,0.5,0}},{}}};
+    ON_CALL(agent, GetObjectPosition()).WillByDefault(ReturnRef(position));
     ON_CALL(egoAgent, GetPositionLateral()).WillByDefault(Return(0.5));
     ON_CALL(egoAgent, GetLaneWidth(0)).WillByDefault(Return(4.0));
     ON_CALL(egoAgent, GetLaneWidth(1)).WillByDefault(Return(5.0));
 
     NiceMock<FakeAgent> otherAgent;
     ObjectPosition otherAgentPosition{{{"MyRoad", GlobalRoadPosition{"MyRoad", -2, 50, -1.0, 0}}}, {},{}};
-    ON_CALL(otherAgent, GetObjectPosition()).WillByDefault(Return(otherAgentPosition));
+    ON_CALL(otherAgent, GetObjectPosition()).WillByDefault(ReturnRef(otherAgentPosition));
 
     SensorDriverCalculations sensorDriverCalculations(egoAgent);
     double lateralDistance = sensorDriverCalculations.GetLateralDistanceToObject("MyRoad", &otherAgent);
@@ -234,14 +236,15 @@ TEST(SensorDriverCalculations_UnitTests, GetLateralDistanceToObjectRightLane)
     ON_CALL(egoAgent, GetLaneIdFromRelative(-1)).WillByDefault(Return(-4));
     ON_CALL(egoAgent, GetLaneIdFromRelative(0)).WillByDefault(Return(-3));
     ON_CALL(egoAgent, GetLaneIdFromRelative(1)).WillByDefault(Return(-2));
-    ON_CALL(agent, GetObjectPosition()).WillByDefault(Return(ObjectPosition{{},{{"MyRoad",GlobalRoadPosition{"",-3,0,0.5,0}},{}}}));
+    ObjectPosition position{{},{{"MyRoad",GlobalRoadPosition{"",-3,0,0.5,0}},{}}};
+    ON_CALL(agent, GetObjectPosition()).WillByDefault(ReturnRef(position));
     ON_CALL(egoAgent, GetPositionLateral()).WillByDefault(Return(0.5));
     ON_CALL(egoAgent, GetLaneWidth(0)).WillByDefault(Return(4.0));
     ON_CALL(egoAgent, GetLaneWidth(-1)).WillByDefault(Return(5.0));
 
     NiceMock<FakeAgent> otherAgent;
     ObjectPosition otherAgentPosition{{{"MyRoad", GlobalRoadPosition{"MyRoad", -4, 50, -1.0, 0}}}, {},{}};
-    ON_CALL(otherAgent, GetObjectPosition()).WillByDefault(Return(otherAgentPosition));
+    ON_CALL(otherAgent, GetObjectPosition()).WillByDefault(ReturnRef(otherAgentPosition));
 
     SensorDriverCalculations sensorDriverCalculations(egoAgent);
     double lateralDistance = sensorDriverCalculations.GetLateralDistanceToObject("MyRoad", &otherAgent);

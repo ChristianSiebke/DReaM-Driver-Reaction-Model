@@ -18,6 +18,7 @@
 using ::testing::NiceMock;
 using ::testing::_;
 using ::testing::Return;
+using ::testing::ReturnRef;
 using ::testing::Eq;
 using ::testing::ElementsAre;
 using ::testing::SizeIs;
@@ -28,7 +29,7 @@ TEST(EgoAgent_Test, GetDistanceToEndOfLane)
     NiceMock<FakeWorld> fakeWorld;
 
     ObjectPosition agentPosition{{},{{"Road1", GlobalRoadPosition{"Road1", -2, 12, 0, 0}}},{}};
-    ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(Return(agentPosition));
+    ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(ReturnRef(agentPosition));
 
     RoadGraph roadGraph;
     RoadGraphVertex root = add_vertex(RouteElement{"Road1", true}, roadGraph);
@@ -51,7 +52,7 @@ TEST(EgoAgent_Test, GetObjectsInRange)
     NiceMock<FakeWorld> fakeWorld;
 
     ObjectPosition agentPosition{{},{{"Road1", GlobalRoadPosition{"Road1", -2, 12, 0, 0}}},{}};
-    ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(Return(agentPosition));
+    ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(ReturnRef(agentPosition));
 
     RoadGraph roadGraph;
     RoadGraphVertex root = add_vertex(RouteElement{"Road1", true}, roadGraph);
@@ -75,7 +76,7 @@ TEST(EgoAgent_Test, GetAgentsInRange)
     NiceMock<FakeWorld> fakeWorld;
 
     ObjectPosition agentPosition{{},{{"Road1", GlobalRoadPosition{"Road1", -2, 12, 0, 0}}},{}};
-    ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(Return(agentPosition));
+    ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(ReturnRef(agentPosition));
 
     RoadGraph roadGraph;
     RoadGraphVertex root = add_vertex(RouteElement{"Road1", true}, roadGraph);
@@ -99,7 +100,7 @@ TEST(EgoAgent_Test, GetTrafficSignsInRange)
     NiceMock<FakeWorld> fakeWorld;
 
     ObjectPosition agentPosition{{},{{"Road1", GlobalRoadPosition{"Road1", -2, 12, 0, 0}}},{}};
-    ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(Return(agentPosition));
+    ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(ReturnRef(agentPosition));
 
     RoadGraph roadGraph;
     RoadGraphVertex root = add_vertex(RouteElement{"Road1", true}, roadGraph);
@@ -127,7 +128,7 @@ public:
         add_edge(node2, node21, roadGraph);
         add_edge(node2, node22, roadGraph);
         add_edge(root, node3, roadGraph);
-        ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(Return(agentPosition));
+        ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(ReturnRef(agentPosition));
         RouteQueryResult<double> distances {{node1, 100},
                                             {node21, 150},
                                             {node22, 200},

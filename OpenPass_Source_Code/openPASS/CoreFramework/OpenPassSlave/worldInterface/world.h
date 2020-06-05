@@ -122,6 +122,11 @@ public:
         return implementation->QueueAgentRemove(agent);
     }
 
+    void PublishGlobalData(int timestamp) override
+    {
+        return implementation->PublishGlobalData(timestamp);
+    }
+
     void SyncGlobalData() override
     {
         return implementation->SyncGlobalData();

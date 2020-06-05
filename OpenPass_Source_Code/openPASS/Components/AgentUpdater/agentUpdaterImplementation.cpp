@@ -66,16 +66,5 @@ void AgentUpdaterImplementation::Trigger([[maybe_unused]] int time)
     agent->SetYawRate(yawRate);
     agent->SetSteeringWheelAngle(steeringWheelAngle);
     agent->SetCentripetalAcceleration(centripetalAcceleration);
-
-    GetPublisher()->Publish("XPosition", positionX);
-    GetPublisher()->Publish("YPosition", positionY);
-    GetPublisher()->Publish("VelocityEgo", velocity);
-    GetPublisher()->Publish("AccelerationEgo", acceleration);
-    GetPublisher()->Publish("YawAngle", yaw);
-    GetPublisher()->Publish("YawRate", yawRate);
-    GetPublisher()->Publish("SteeringAngle", steeringWheelAngle);
-
-    totalTravelDistance += travelDistance;
-
-    GetPublisher()->Publish("TotalDistanceTraveled", totalTravelDistance);
+    agent->SetDistanceTraveled(agent->GetDistanceTraveled() + travelDistance);
 }

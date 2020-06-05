@@ -472,7 +472,7 @@ public:
     virtual double GetAbsAccelerationDouble() const = 0;
 
     //!Returns the road coordinates of the object
-    virtual ObjectPosition GetLocatedPosition() const = 0;
+    virtual const ObjectPosition& GetLocatedPosition() const = 0;
 
     //!Assigns a lane to this object
     virtual void AddLaneAssignment(const Interfaces::Lane& lane) = 0;
@@ -553,7 +553,7 @@ class StationaryObject : public Interfaces::WorldObject
 public:
     virtual ~StationaryObject() = default;
 
-    virtual ObjectPosition GetLocatedPosition() const = 0;
+    virtual const ObjectPosition& GetLocatedPosition() const = 0;
 
     virtual void SetReferencePointPosition(const Primitive::AbsPosition& newPosition) = 0;
     virtual void SetDimension(const Primitive::Dimension& newDimension) = 0;
@@ -567,7 +567,7 @@ class MovingObject : public Interfaces::WorldObject
 public:
     virtual ~MovingObject() = default;
 
-    virtual ObjectPosition GetLocatedPosition() const = 0;
+    virtual const ObjectPosition& GetLocatedPosition() const = 0;
     virtual Primitive::LaneOrientation GetLaneOrientation() const = 0;
 
     virtual Primitive::AbsVelocity GetAbsVelocity() const = 0;
@@ -1051,7 +1051,7 @@ public:
     virtual Primitive::AbsPosition GetReferencePointPosition() const override;
     virtual double GetAbsVelocityDouble() const override;
     virtual double GetAbsAccelerationDouble() const override;
-    virtual ObjectPosition GetLocatedPosition() const override;
+    virtual const ObjectPosition& GetLocatedPosition() const override;
 
     void SetReferencePointPosition(const Primitive::AbsPosition& newPosition) override;
     void SetDimension(const Primitive::Dimension& newDimension) override;
@@ -1081,7 +1081,7 @@ public:
 
     virtual Primitive::Dimension GetDimension() const override;
     virtual Primitive::AbsPosition GetReferencePointPosition() const override;
-    virtual ObjectPosition GetLocatedPosition() const override;
+    virtual const ObjectPosition& GetLocatedPosition() const override;
     virtual double GetDistanceReferencePointToLeadingEdge() const override;
 
     virtual Primitive::AbsOrientation GetAbsOrientation() const override;

@@ -67,22 +67,4 @@ void SensorRecordStateImplementation::UpdateOutput(int ,std::shared_ptr<SignalIn
 
 void SensorRecordStateImplementation::Trigger([[maybe_unused]] int time)
 {
-    const auto& egoAgent = GetAgent()->GetEgoAgent();
-    GetPublisher()->Publish("PositionRoute", egoAgent.GetMainLocatePosition().roadPosition.s);
-    GetPublisher()->Publish("TCoordinate", egoAgent.GetPositionLateral());
-    GetPublisher()->Publish("Lane", egoAgent.GetLaneIdFromRelative(0));
-    GetPublisher()->Publish("Road", egoAgent.GetRoadId());
-
-    const auto& secondaryLanes = GetAgent()->GetObjectPosition().touchedRoads.at(egoAgent.GetRoadId()).lanes;
-    GetPublisher()->Publish("SecondaryLanes", secondaryLanes);
-
-    int frontAgentId = -1;
-    const auto frontAgents = egoAgent.GetAgentsInRange(0, std::numeric_limits<double>::max(), 0);
-
-    if (!frontAgents.empty())
-    {
-        frontAgentId = frontAgents.front()->GetId();
-    }
-
-    GetPublisher()->Publish("AgentInFront", frontAgentId);
 }

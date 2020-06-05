@@ -146,7 +146,7 @@ public:
 
     LightState GetLightState() const override;
 
-    ObjectPosition GetObjectPosition() const override
+    const ObjectPosition& GetObjectPosition() const override
     {
         return GetBaseTrafficObject().GetLocatedPosition();
     }
@@ -222,6 +222,14 @@ public:
         {
             centripetalAcceleration = value;
 
+        });
+    }
+
+    void SetDistanceTraveled(double value) override
+    {
+        world->QueueAgentUpdate([this, value]()
+        {
+            distanceTraveled = value;
         });
     }
 
@@ -370,6 +378,11 @@ public:
     double GetDistanceToStartOfRoad(MeasurementPoint mp, std::string roadId) const override;
 
     double GetMainLocateS(const std::string& roadId) const;
+
+    double  GetDistanceTraveled() const override
+    {
+        return distanceTraveled;
+    }
 
     bool IsEgoAgent() const override;
 

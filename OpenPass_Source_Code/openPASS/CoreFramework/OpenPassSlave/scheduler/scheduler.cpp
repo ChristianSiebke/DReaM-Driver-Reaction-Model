@@ -58,14 +58,16 @@ bool Scheduler::Run(
                             &manipulatorNetwork);
 
     auto bootstrapTasks = taskBuilder.CreateBootstrapTasks();
-    auto commonTasks = taskBuilder.CreateCommonTasks();
-    auto finalizeRecurringTasks = taskBuilder.CreateFinalizeRecurringTasks();
+    auto spawningTasks = taskBuilder.CreateSpawningTasks();
+    auto preAgentTasks = taskBuilder.CreatePreAgentTasks();
+    auto synchronizeTasks = taskBuilder.CreateSynchronizeTasks();
     auto finalizeTasks = taskBuilder.CreateFinalizeTasks();
 
     auto taskList = SchedulerTasks(
         bootstrapTasks,
-        commonTasks,
-        finalizeRecurringTasks,
+        spawningTasks,
+        preAgentTasks,
+        synchronizeTasks,
         finalizeTasks,
         FRAMEWORK_UPDATE_RATE);
 
@@ -76,19 +78,17 @@ bool Scheduler::Run(
 
     while (currentTime <= endTime)
     {
-        if (!ExecuteTasks(taskList.GetCommonTasks(currentTime)))
+        if (!ExecuteTasks(taskList.GetSpawningTasks(currentTime)))
         {
             return Scheduler::FAILURE;
         }
 
         UpdateAgents(taskList, world);
 
-        if (!ExecuteTasks(taskList.ConsumeNonRecurringTasks(currentTime)))
-        {
-            return Scheduler::FAILURE;
-        }
-
-        if (!ExecuteTasks(taskList.GetRecurringTasks(currentTime)))
+        if (ExecuteTasks(taskList.GetPreAgentTasks(currentTime)) &&
+            ExecuteTasks(taskList.ConsumeNonRecurringAgentTasks(currentTime)) &&
+            ExecuteTasks(taskList.GetRecurringAgentTasks(currentTime)) &&
+            ExecuteTasks(taskList.GetSynchronizeTasks(currentTime)) == false)
         {
             return Scheduler::FAILURE;
         }

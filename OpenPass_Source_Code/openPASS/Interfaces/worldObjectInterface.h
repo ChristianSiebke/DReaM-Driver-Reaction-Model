@@ -53,7 +53,7 @@ public:
 
     virtual const polygon_t& GetBoundingBox2D() const = 0;
 
-    virtual ObjectPosition GetObjectPosition() const = 0;
+    virtual const ObjectPosition& GetObjectPosition() const = 0;
 
     /// \brief  Get distance (s coordinate) w.r.t. the specified measurement point on the specified road
     /// \param mp       point where s coordinate is measured

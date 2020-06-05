@@ -36,8 +36,9 @@ class SchedulerTasks
 {
 public:
     SchedulerTasks(std::list<TaskItem> bootstrapTasks,
-                   std::list<TaskItem> commonTasks,
-                   std::list<TaskItem> finalizeRecurringTasks,
+                   std::list<TaskItem> spawningTasks,
+                   std::list<TaskItem> preAgentTasks,
+                   std::list<TaskItem> synchronizeTasks,
                    std::list<TaskItem> finalizeTasks,
                    int scheduledTimestampsInterval);
 
@@ -101,7 +102,9 @@ public:
     * @param[in]     int                timestamp
     * @return    list of TaskItems  all common tasks for given timestamp
     */
-    std::list<TaskItem> GetCommonTasks(int timestamp);
+    std::list<TaskItem> GetSpawningTasks(int timestamp);
+
+    std::list<TaskItem> GetPreAgentTasks(int timestamp);
 
     /*!
     * \brief ConsumeNonRecurringTasks
@@ -111,7 +114,7 @@ public:
     * @param[in]     int                timestamp
     * @return    list of TaskItems  all init tasks for given timestamp
     */
-    std::list<TaskItem> ConsumeNonRecurringTasks(int timestamp);
+    std::list<TaskItem> ConsumeNonRecurringAgentTasks(int timestamp);
 
     /*!
     * \brief PullNonRecurringTasks
@@ -129,7 +132,9 @@ public:
     * @param[in]    int                timestamp
     * @return       list of TaskItems  all recurring tasks for given timestamp
     */
-    std::list<TaskItem> GetRecurringTasks(int timestamp);
+    std::list<TaskItem> GetRecurringAgentTasks(int timestamp);
+
+    std::list<TaskItem> GetSynchronizeTasks(int timestamp);
 
     /*!
     * \brief GetBootstrapTasks
@@ -150,10 +155,11 @@ public:
     std::set<int> scheduledTimestamps;
 
     Tasks bootstrapTasks;
-    Tasks commonTasks;
-    Tasks nonRecurringTasks;
-    Tasks recurringTasks;
-    Tasks finalizeRecurringTasks;
+    Tasks spawningTasks;
+    Tasks preAgentTasks;
+    Tasks nonRecurringAgentTasks;
+    Tasks recurringAgentTasks;
+    Tasks synchronizeTasks;
     Tasks finalizeTasks;
 
 private:

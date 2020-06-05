@@ -207,6 +207,13 @@ public:
     virtual void QueueAgentRemove(const AgentInterface *agent) = 0;
 
     //-----------------------------------------------------------------------------
+    //! Wirte all global date into the datesstore
+    //!
+    //! @return timestamp under which the data should be published
+    //-----------------------------------------------------------------------------
+    virtual void PublishGlobalData(int timestamp) = 0;
+
+    //-----------------------------------------------------------------------------
     //! Update all agents / Remove agents and sync data of all agents within world
     //!
     //! @return

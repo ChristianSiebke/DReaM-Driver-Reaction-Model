@@ -8,6 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 #include "condition.h"
+#include <stdexcept>
 
 using namespace ComponentControl;
 

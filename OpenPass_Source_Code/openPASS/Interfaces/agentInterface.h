@@ -213,6 +213,20 @@ public:
     virtual void SetYaw(double value) = 0;
 
     //-----------------------------------------------------------------------------
+    //! Sets the total traveled distance of agent
+    //!
+    //! @param[in]     distanceTraveled    total traveled distance
+    //-----------------------------------------------------------------------------
+    virtual void SetDistanceTraveled(double distanceTraveled) = 0;
+
+    //-----------------------------------------------------------------------------
+    //! Returns the total traveled distance of agent
+    //!
+    //! @return   total traveled distance
+    //-----------------------------------------------------------------------------
+    virtual double GetDistanceTraveled() const = 0;
+
+    //-----------------------------------------------------------------------------
     //! Sets gear of vehicle
     //!
     //! @param[in]     gear    current gear
@@ -972,7 +986,7 @@ public:
     //-----------------------------------------------------------------------------
     virtual double GetAccelerationAbsolute() const = 0;
 
-    virtual ObjectPosition GetObjectPosition() const = 0;
+    virtual const ObjectPosition& GetObjectPosition() const = 0;
 
     virtual std::vector<std::string> GetRoads(MeasurementPoint mp) const = 0;
 

@@ -79,21 +79,6 @@ public:
     bool operator==(const TaskItem &rhs) const;
 };
 
-/*!
-* \brief voidFunctionWrapper
-*
-* \details function of taskItem usually returns bool, so for void this function wraps this
-*
-*
-* @param[in]     function   void function
-* @return        bool       true if func was executed
-*/
-inline bool voidFunctionWrapper(std::function<void()> func)
-{
-    func();
-    return true;
-}
-
 //-----------------------------------------------------------------------------
 /** \brief taskItem for triggering task */
 //-----------------------------------------------------------------------------
@@ -101,8 +86,8 @@ inline bool voidFunctionWrapper(std::function<void()> func)
 class TriggerTaskItem : public TaskItem
 {
 public:
-    TriggerTaskItem(int agentId, int priority, int cycleTime, int delay, std::function<bool()> func) :
-        TaskItem(agentId, priority, cycleTime, delay, TaskType::Trigger, func)
+    TriggerTaskItem(int agentId, int priority, int cycleTime, int delay, std::function<bool()> task) :
+        TaskItem(agentId, priority, cycleTime, delay, TaskType::Trigger, task)
     {
     }
 };
@@ -114,8 +99,8 @@ public:
 class UpdateTaskItem : public TaskItem
 {
 public:
-    UpdateTaskItem(int agentId, int priority, int cycleTime, int delay, std::function<bool()> func) :
-        TaskItem(agentId, priority, cycleTime, delay, TaskType::Update, func)
+    UpdateTaskItem(int agentId, int priority, int cycleTime, int delay, std::function<bool()> task) :
+        TaskItem(agentId, priority, cycleTime, delay, TaskType::Update, task)
     {
     }
 };
@@ -127,10 +112,8 @@ public:
 class SpawningTaskItem : public TaskItem
 {
 public:
-    SpawningTaskItem(int cycleTime, std::function<bool()> func) :
-        TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_SPAWNING, cycleTime, NO_DELAY,
-                 TaskType::Spawning,
-                 func)
+    SpawningTaskItem(int cycleTime, std::function<bool()> task) :
+        TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_SPAWNING, cycleTime, NO_DELAY, TaskType::Spawning, task)
     {
     }
 };
@@ -142,10 +125,8 @@ public:
 class EventDetectorTaskItem : public TaskItem
 {
 public:
-    EventDetectorTaskItem(int cycleTime, std::function<void()> func) :
-        TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_EVENTDETECTOR, cycleTime, NO_DELAY,
-                 TaskType::EventDetector,
-                 std::bind(&voidFunctionWrapper, func))
+    EventDetectorTaskItem(int cycleTime, std::function<void()> task) :
+        TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_EVENTDETECTOR, cycleTime, NO_DELAY, TaskType::EventDetector, [task] { task(); return true; })
     {
     }
 };
@@ -157,10 +138,8 @@ public:
 class ManipulatorTaskItem : public TaskItem
 {
 public:
-    ManipulatorTaskItem(int cycleTime, std::function<void()> func) :
-        TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_MANIPULATOR, cycleTime, NO_DELAY,
-                 TaskType::Manipulator,
-                 std::bind(&voidFunctionWrapper, func))
+    ManipulatorTaskItem(int cycleTime, std::function<void()> task) :
+        TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_MANIPULATOR, cycleTime, NO_DELAY, TaskType::Manipulator, [task] { task(); return true; })
     {
     }
 };
@@ -173,8 +152,7 @@ class ObservationTaskItem : public TaskItem
 {
 public:
     ObservationTaskItem(int cycleTime, std::function<bool()> task) :
-        TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_OBSERVATION, cycleTime, NO_DELAY,
-                 TaskType::Observation, task)
+        TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_OBSERVATION, cycleTime, NO_DELAY, TaskType::Observation, task)
     {
     }
 };
@@ -186,10 +164,8 @@ public:
 class SyncWorldTaskItem : public TaskItem
 {
 public:
-    SyncWorldTaskItem(int cycleTime, std::function<void()> func) :
-        TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_SYNCGLOBALDATA, cycleTime, NO_DELAY,
-                 TaskType::SyncGlobalData,
-                 std::bind(&voidFunctionWrapper, func))
+    SyncWorldTaskItem(int cycleTime, std::function<void()> task) :
+        TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_SYNCGLOBALDATA, cycleTime, NO_DELAY, TaskType::SyncGlobalData, [task] { task(); return true; })
     {
     }
 };
@@ -201,9 +177,8 @@ public:
 class UpdateGlobalDrivingViewTaskItem : public TaskItem
 {
 public:
-    UpdateGlobalDrivingViewTaskItem(int cycleTime, std::function<bool()> func) :
-        TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_UPDATEGLOBALDRIVINGVIEW, cycleTime, NO_DELAY,
-                 TaskType::UpdateGlobalDrivingView, func)
+    UpdateGlobalDrivingViewTaskItem(int cycleTime, std::function<bool()> task) :
+        TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_UPDATEGLOBALDRIVINGVIEW, cycleTime, NO_DELAY, TaskType::UpdateGlobalDrivingView, task)
     {
     }
 };

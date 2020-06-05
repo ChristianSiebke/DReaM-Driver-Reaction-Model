@@ -36,7 +36,7 @@ public:
                          const OpenDriveId odId);
 
 
-    ObjectPosition GetObjectPosition() const;
+    const ObjectPosition& GetObjectPosition() const override;
     ObjectTypeOSI GetType() const override;
     double GetDistanceToStartOfRoad(MeasurementPoint mp, std::string roadId) const override;
     double GetVelocity(VelocityScope velocityScope = VelocityScope::Absolute) const override;

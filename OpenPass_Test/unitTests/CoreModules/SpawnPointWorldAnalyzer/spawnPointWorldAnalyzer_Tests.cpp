@@ -18,6 +18,7 @@
 #include "dontCare.h"
 
 using ::testing::Return;
+using ::testing::ReturnRef;
 using ::testing::Ne;
 using ::testing::Ge;
 using ::testing::Gt;
@@ -118,7 +119,7 @@ TEST_P(GetValidLaneSpawningRanges_OneAgent, GetValidLaneSpawningRanges)
 
     ObjectPosition fakeAgentRoadPosition{{{data.roadId, GlobalRoadPosition{data.roadId, data.laneId, data.scenarioAgentBounds.first, 0, 0}}},{},{}};
     EXPECT_CALL(fakeAgent, GetObjectPosition())
-            .WillRepeatedly(Return(fakeAgentRoadPosition));
+            .WillRepeatedly(ReturnRef(fakeAgentRoadPosition));
 
     VehicleModelParameters fakeAgentVehicleModelParameters;
     fakeAgentVehicleModelParameters.length = data.scenarioAgentBounds.second - data.scenarioAgentBounds.first;
@@ -195,7 +196,7 @@ TEST_P(GetValidLaneSpawningRanges_TwoAgents, GetValidLaneSpawningRanges)
 
     ObjectPosition fakeAgentRoadPosition{{{data.roadId, GlobalRoadPosition{data.roadId, data.laneId, data.firstScenarioAgentBounds.first, 0, 0}}},{},{}};
     EXPECT_CALL(firstFakeAgent, GetObjectPosition())
-            .WillRepeatedly(Return(fakeAgentRoadPosition));
+            .WillRepeatedly(ReturnRef(fakeAgentRoadPosition));
 
     VehicleModelParameters fakeAgentVehicleModelParameters;
     fakeAgentVehicleModelParameters.length = data.firstScenarioAgentBounds.second - data.firstScenarioAgentBounds.first;
@@ -211,7 +212,7 @@ TEST_P(GetValidLaneSpawningRanges_TwoAgents, GetValidLaneSpawningRanges)
 
     ObjectPosition secondFakeAgentRoadPosition{{{data.roadId, GlobalRoadPosition{data.roadId, data.laneId, data.secondScenarioAgentBounds.first, 0, 0}}},{},{}};
     EXPECT_CALL(secondFakeAgent, GetObjectPosition())
-            .WillRepeatedly(Return(secondFakeAgentRoadPosition));
+            .WillRepeatedly(ReturnRef(secondFakeAgentRoadPosition));
 
     VehicleModelParameters secondFakeAgentVehicleModelParameters;
     secondFakeAgentVehicleModelParameters.length = data.secondScenarioAgentBounds.second - data.secondScenarioAgentBounds.first;

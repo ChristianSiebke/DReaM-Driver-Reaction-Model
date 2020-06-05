@@ -130,12 +130,12 @@ TEST_P(ReachPositionConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
         NiceMock<FakeAgent> mockAgent1;
         ObjectPosition positionAgent1{{{"fakeRoad", GlobalRoadPosition{"fakeRoad", DontCare<int>(),95.0, DontCare<double>(), DontCare<double>()}}},{},{}};
         ON_CALL(mockAgent1, GetRoads(_)).WillByDefault(Return(std::vector<std::string>{"fakeRoad"}));
-        ON_CALL(mockAgent1, GetObjectPosition()).WillByDefault(Return(positionAgent1));
+        ON_CALL(mockAgent1, GetObjectPosition()).WillByDefault(ReturnRef(positionAgent1));
 
         NiceMock<FakeAgent> mockAgent2;
         ObjectPosition positionAgent2{{{"fakeRoad", GlobalRoadPosition{"fakeRoad", DontCare<int>(),115.0, DontCare<double>(), DontCare<double>()}}},{},{}};
         ON_CALL(mockAgent2, GetRoads(_)).WillByDefault(Return(std::vector<std::string>{"fakeRoad"}));
-        ON_CALL(mockAgent2, GetObjectPosition()).WillByDefault(Return(positionAgent2));
+        ON_CALL(mockAgent2, GetObjectPosition()).WillByDefault(ReturnRef(positionAgent2));
 
         NiceMock<FakeWorld> mockWorld;
         ON_CALL(mockWorld, GetAgentByName("mockAgent1")).WillByDefault(Return(&mockAgent1));
@@ -319,12 +319,12 @@ TEST_P(RelativeLaneConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
     const std::string roadId = "SomeRoad";
     NiceMock<FakeAgent> triggeringAgent;
     ObjectPosition triggeringAgentPosition{{{"SomeRoad", GlobalRoadPosition{"SomeRoad", GetParam().triggeringAgentLane, GetParam().triggeringAgentSCoordinate, DontCare<double>(), DontCare<double>()}}},{},{}};
-    ON_CALL(triggeringAgent, GetObjectPosition()).WillByDefault(Return(triggeringAgentPosition));
+    ON_CALL(triggeringAgent, GetObjectPosition()).WillByDefault(ReturnRef(triggeringAgentPosition));
     ON_CALL(triggeringAgent, GetRoads(_)).WillByDefault(Return(std::vector<std::string>{roadId}));
 
     NiceMock<FakeAgent> referenceAgentOnSameRoad;
     ObjectPosition referenceAgentPosition{{{"SomeRoad", GlobalRoadPosition{"SomeRoad", GetParam().referenceAgentLane, GetParam().referenceAgentSCoordinate, DontCare<double>(), DontCare<double>()}}},{},{}};
-    ON_CALL(referenceAgentOnSameRoad, GetObjectPosition()).WillByDefault(Return(referenceAgentPosition));
+    ON_CALL(referenceAgentOnSameRoad, GetObjectPosition()).WillByDefault(ReturnRef(referenceAgentPosition));
     ON_CALL(referenceAgentOnSameRoad, GetRoads(_)).WillByDefault(Return(std::vector<std::string>{roadId}));
 
     NiceMock<FakeWorld> mockWorld;

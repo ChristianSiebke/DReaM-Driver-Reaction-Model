@@ -126,5 +126,4 @@ private:
     double steeringWheelAngle {0.0};
     double centripetalAcceleration {0.0};
     double travelDistance {0.0};
-    double totalTravelDistance {0.0};
 };

@@ -23,10 +23,12 @@
 #include <algorithm>
 #include <utility>
 #include <map>
+#include "Common/openPassTypes.h"
 #include "Interfaces/agentInterface.h"
-#include "AgentAdapter.h"
 #include "Interfaces/worldInterface.h"
+#include "AgentAdapter.h"
 
+using Publisher = std::function<void(openpass::type::EntityId id, openpass::type::FlatParameterKey key, openpass::type::FlatParameterValue value)>;
 
 /*!
 * \brief network of agents
@@ -34,16 +36,11 @@
 * This class stores all agents in a network. It is used to synchronize the update of all
 * values of all agents.
 */
-class AgentNetwork
+class AgentNetwork final
 {
 public:    
     AgentNetwork(WorldInterface *world, const CallbackInterface *callbacks);
-    AgentNetwork(const AgentNetwork&) = delete;
-    AgentNetwork(AgentNetwork&&) = delete;
-    AgentNetwork& operator=(const AgentNetwork&) = delete;
-    AgentNetwork& operator=(AgentNetwork&&) = delete;
-    virtual ~AgentNetwork();
-
+    ~AgentNetwork();
     /*!
      * \brief AddAgent
      * Add agent to agent network:
@@ -77,6 +74,13 @@ public:
      * \param agent agent which shall be removed
      */
     void QueueAgentRemove(const AgentInterface *agent);
+
+    /*!
+         * \brief Publishes the general observations about current agents
+         *
+         * \param Publish call
+         */
+    void PublishGlobalData(Publisher publish);
 
     /*!
      * \brief SyncGlobalData

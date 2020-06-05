@@ -76,6 +76,7 @@ class FakeWorld : public WorldInterface
     MOCK_METHOD1(SetTimeOfDay, void(int timeOfDay));
     MOCK_METHOD1(SetWeekday, void(Weekday weekday));
     MOCK_METHOD0(SyncGlobalData, void());
+    MOCK_METHOD1(PublishGlobalData, void (int timestamp));
     MOCK_METHOD0(GetOsiGroundTruth, void*());
     MOCK_METHOD0(GetWorldData, void*());
     MOCK_CONST_METHOD0(GetWeekday, Weekday());

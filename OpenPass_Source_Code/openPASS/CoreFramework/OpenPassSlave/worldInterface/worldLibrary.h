@@ -20,6 +20,7 @@
 #include <QLibrary>
 #include "worldBinding.h"
 #include "Interfaces/callbackInterface.h"
+#include "Interfaces/dataStoreInterface.h"
 
 namespace SimulationSlave
 {
@@ -29,16 +30,18 @@ class WorldLibrary
 public:
     typedef const std::string &(*WorldInterface_GetVersion)();
     typedef WorldInterface *(*WorldInterface_CreateInstanceType)(
-            const CallbackInterface *callbacks, StochasticsInterface* stochastics);
+            const CallbackInterface *callbacks, StochasticsInterface* stochastics, DataStoreWriteInterface* dataStore);
     typedef void (*WorldInterface_DestroyInstanceType)(WorldInterface *implementation);
 
 
     WorldLibrary(const std::string &worldLibraryPath,
                  CallbackInterface *callbacks,
-                 StochasticsInterface* stochastics) :
+                 StochasticsInterface* stochastics,
+                 DataStoreWriteInterface* dataStore) :
            worldLibraryPath(worldLibraryPath),
            callbacks(callbacks),
-           stochastics(stochastics)
+           stochastics(stochastics),
+           dataStore(dataStore)
     {}
 
     WorldLibrary(const WorldLibrary&) = delete;
@@ -88,6 +91,7 @@ private:
     QLibrary *library = nullptr;
     CallbackInterface *callbacks;
     StochasticsInterface* stochastics;
+    DataStoreWriteInterface* dataStore;
     WorldInterface_GetVersion getVersionFunc{nullptr};
     WorldInterface_CreateInstanceType createInstanceFunc{nullptr};
     WorldInterface_DestroyInstanceType destroyInstanceFunc{nullptr};

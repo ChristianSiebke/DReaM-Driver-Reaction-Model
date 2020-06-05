@@ -30,7 +30,7 @@ void AgentNetwork::Clear()
     updateQueue.clear();
     removeQueue.clear();
 
-    for (const std::pair<const int, const AgentInterface*>& item : agents)
+    for (const std::pair<const int, AgentInterface*>& item : agents)
     {
         delete item.second;
     }
@@ -84,6 +84,38 @@ void AgentNetwork::QueueAgentUpdate(std::function<void()> func)
 void AgentNetwork::QueueAgentRemove(const AgentInterface* agent)
 {
     removeQueue.push_back(agent);
+}
+
+void AgentNetwork::PublishGlobalData(Publisher publish)
+{
+    for (const auto& [_, agent] : agents)
+    {
+        if (agent->IsValid())
+        {
+            const openpass::type::EntityId agentId = agent->GetId();
+
+            publish(agentId, "XPosition", agent->GetPositionX());
+            publish(agentId, "YPosition", agent->GetPositionY());
+            publish(agentId, "VelocityEgo", agent->GetVelocity());
+            publish(agentId, "AccelerationEgo", agent->GetAcceleration());
+            publish(agentId, "YawAngle", agent->GetYaw());
+            publish(agentId, "YawRate", agent->GetYawRate());
+            publish(agentId, "SteeringAngle", agent->GetSteeringWheelAngle());
+            publish(agentId, "TotalDistanceTraveled", agent->GetDistanceTraveled());
+
+            const auto& egoAgent = agent->GetEgoAgent();
+            publish(agentId, "PositionRoute", egoAgent.GetMainLocatePosition().roadPosition.s);
+            publish(agentId, "TCoordinate", egoAgent.GetPositionLateral());
+            publish(agentId, "Lane", egoAgent.GetMainLocatePosition().laneId);
+            publish(agentId, "Road", egoAgent.GetRoadId());
+
+            const auto secondaryLanes = agent->GetObjectPosition().touchedRoads.at(egoAgent.GetRoadId()).lanes;
+            publish(agentId, "SecondaryLanes", secondaryLanes);
+
+            const auto frontAgents = egoAgent.GetAgentsInRange(0, std::numeric_limits<double>::max(), 0);
+            publish(agentId, "AgentInFront", frontAgents.empty() ? -1 : frontAgents.front()->GetId());
+        }
+    }
 }
 
 // udpate global data at occurrence of time step

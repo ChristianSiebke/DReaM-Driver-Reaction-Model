@@ -18,7 +18,7 @@ public:
     MOCK_CONST_METHOD0(GetType, ObjectTypeOSI());
     MOCK_CONST_METHOD0(GetPositionX, double());
     MOCK_CONST_METHOD0(GetPositionY, double());
-    MOCK_CONST_METHOD0(GetObjectPosition, ObjectPosition ());
+    MOCK_CONST_METHOD0(GetObjectPosition, const ObjectPosition& ());
     MOCK_CONST_METHOD0(GetWidth, double());
     MOCK_CONST_METHOD0(GetLength, double());
     MOCK_CONST_METHOD0(GetHeight, double());

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,6 @@
 #include "taskBuilder.h"
 
 #include <algorithm>
-#include <functional>
 
 #include "eventDetector.h"
 #include "manipulator.h"
@@ -46,42 +45,33 @@ TaskBuilder::TaskBuilder(const int &currentTime,
 
 std::list<TaskItem> TaskBuilder::CreateBootstrapTasks()
 {
-    std::list<TaskItem> items;
-
-    items.emplace_back(ObservationTaskItem(frameworkUpdateRate,
-                                           std::bind(&ObservationNetworkInterface::UpdateTimeStep,
-                                                     observationNetwork, std::ref(currentTime), std::ref(runResult))));
-
-    items.emplace_back(SpawningTaskItem(frameworkUpdateRate,
-                                        std::bind(&SpawnPointNetworkInterface::TriggerPreRunSpawnPoints,
-                                                  spawnPointNetwork)));
-
-    return items;
+    return {
+        ObservationTaskItem(frameworkUpdateRate, [&] { return observationNetwork->UpdateTimeStep(currentTime, runResult); }),
+        SpawningTaskItem(frameworkUpdateRate, [&] { return spawnPointNetwork->TriggerPreRunSpawnPoints(); }),
+    };
 }
 
-std::list<TaskItem> TaskBuilder::CreateCommonTasks()
+std::list<TaskItem> TaskBuilder::CreateSpawningTasks()
 {
-    std::list<TaskItem> items{};
-    items.emplace_back(SpawningTaskItem(frameworkUpdateRate,
-                                        std::bind(&SpawnPointNetworkInterface::TriggerRuntimeSpawnPoints,
-                                                  spawnPointNetwork,
-                                                  std::ref(currentTime))));
+    return {
+        SpawningTaskItem(frameworkUpdateRate, [&] { return spawnPointNetwork->TriggerRuntimeSpawnPoints(currentTime); }),
+        ObservationTaskItem(frameworkUpdateRate, [&] { return observationNetwork->UpdateTimeStep(currentTime, runResult); })};
+}
+
+std::list<TaskItem> TaskBuilder::CreatePreAgentTasks()
+{
+    std::list<TaskItem> items{
+        SyncWorldTaskItem(ScheduleAtEachCycle, [&] { world->PublishGlobalData(currentTime); })};
 
     std::copy(std::begin(eventDetectorTasks), std::end(eventDetectorTasks), std::back_inserter(items));
     std::copy(std::begin(manipulatorTasks), std::end(manipulatorTasks), std::back_inserter(items));
 
-    items.emplace_back(ObservationTaskItem(frameworkUpdateRate, std::bind(
-                                                                    &ObservationNetworkInterface::UpdateTimeStep,
-                                                                    observationNetwork,
-                                                                    std::ref(currentTime), std::ref(runResult))));
-
     return items;
 }
 
-std::list<TaskItem> TaskBuilder::CreateFinalizeRecurringTasks()
+std::list<TaskItem> TaskBuilder::CreateSynchronizeTasks()
 {
-    return std::list<TaskItem>{
-        SyncWorldTaskItem(ScheduleAtEachCycle, std::bind(&WorldInterface::SyncGlobalData, world))};
+    return {SyncWorldTaskItem(ScheduleAtEachCycle, [&] { world->SyncGlobalData(); })};
 }
 
 std::list<TaskItem> TaskBuilder::CreateFinalizeTasks()
@@ -91,38 +81,27 @@ std::list<TaskItem> TaskBuilder::CreateFinalizeTasks()
     std::copy(std::begin(eventDetectorTasks), std::end(eventDetectorTasks), std::back_inserter(items));
     std::copy(std::begin(manipulatorTasks), std::end(manipulatorTasks), std::back_inserter(items));
 
-    items.emplace_back(ObservationTaskItem(frameworkUpdateRate, std::bind(
-                                                                    &ObservationNetworkInterface::UpdateTimeStep,
-                                                                    observationNetwork,
-                                                                    std::ref(currentTime),
-                                                                    std::ref(runResult))));
+    items.emplace_back(ObservationTaskItem(frameworkUpdateRate, [&] { return observationNetwork->UpdateTimeStep(currentTime, runResult); }));
 
     return items;
 }
 
 void TaskBuilder::BuildEventDetectorTasks()
 {
-    const auto &eventDetectors = eventDetectorNetwork->GetEventDetectors();
-    std::transform(std::begin(eventDetectors), std::end(eventDetectors),
-                   std::back_inserter(eventDetectorTasks),
-                   [&](auto eventDetector) {
-                       return EventDetectorTaskItem(frameworkUpdateRate, std::bind(
-                                                                             &EventDetectorInterface::Trigger,
-                                                                             eventDetector->GetImplementation(),
-                                                                             std::ref(currentTime)));
-                   });
+    for (const auto &eventDetector : eventDetectorNetwork->GetEventDetectors())
+    {
+        auto impl = eventDetector->GetImplementation();
+        eventDetectorTasks.emplace_back(EventDetectorTaskItem(frameworkUpdateRate, [this, impl] { impl->Trigger(this->currentTime); }));
+    }
 }
 
 void TaskBuilder::BuildManipulatorTasks()
 {
-    const auto &manipulators = manipulatorNetwork->GetManipulators();
-    std::transform(std::begin(manipulators), std::end(manipulators),
-                   std::back_inserter(manipulatorTasks),
-                   [&](auto manipulator) {
-                       return EventDetectorTaskItem(frameworkUpdateRate, std::bind(
-                                                                             &ManipulatorInterface::Trigger,
-                                                                             manipulator->GetImplementation(),
-                                                                             std::ref(currentTime)));
-                   });
+    for (const auto &manipulator : manipulatorNetwork->GetManipulators())
+    {
+        auto impl = manipulator->GetImplementation();
+        manipulatorTasks.emplace_back(ManipulatorTaskItem(frameworkUpdateRate, [this, impl] { impl->Trigger(this->currentTime); }));
+    }
 }
+
 } // namespace openpass::scheduling
