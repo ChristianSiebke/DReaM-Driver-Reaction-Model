@@ -68,12 +68,12 @@ double Sampler::RollForStochasticAttribute(const StochasticDistribution& distrib
         }
 
         int run = 0;
-        double result = stochastics->GetLogNormalDistributed(logNormalDistribution.mu, logNormalDistribution.sigma);
+        double result = stochastics->GetMuSigmaLogNormalDistributed(logNormalDistribution.mu, logNormalDistribution.sigma);
 
         while (result > logNormalDistribution.max || result < logNormalDistribution.min)
         {
             run++;
-            result = stochastics->GetLogNormalDistributed(logNormalDistribution.mu, logNormalDistribution.sigma);
+            result = stochastics->GetMuSigmaLogNormalDistributed(logNormalDistribution.mu, logNormalDistribution.sigma);
             if (run == MAX_RETRIES)
             {
                 return 0.5 * (logNormalDistribution.min + logNormalDistribution.max);

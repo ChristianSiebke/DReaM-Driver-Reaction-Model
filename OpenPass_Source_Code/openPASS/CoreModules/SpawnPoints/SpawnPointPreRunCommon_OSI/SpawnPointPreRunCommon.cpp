@@ -97,7 +97,7 @@ SpawnPointInterface::Agents SpawnPointPreRunCommon::GenerateAgentsForRange(const
             const auto tGap = Sampler::RollForStochasticAttribute(agentProfile.tGap, dependencies.stochastics);
 
             const auto spawnInfo = GetNextSpawnCarInfo(roadId, laneId, range, tGap, velocity, agentFrontLength, agentRearLength);
-            if (!spawnInfo)
+            if (!spawnInfo.has_value())
             {
                 generating = false;
                 break;
@@ -154,8 +154,6 @@ std::optional<SpawnInfo> SpawnPointPreRunCommon::GetNextSpawnCarInfo(const RoadI
                                                          const double agentFrontLength,
                                                          const double agentRearLength) const
 {
-    std::optional<SpawnInfo> optionalSpawnInfo;
-
     const auto spawnDistance = worldAnalyzer.GetNextSpawnPosition(roadId,
                                                                   laneId,
                                                                   range,
@@ -165,9 +163,9 @@ std::optional<SpawnInfo> SpawnPointPreRunCommon::GetNextSpawnCarInfo(const RoadI
                                                                   gapInSeconds,
                                                                   Direction::FORWARD);
 
-    if (!spawnDistance)
+    if (!spawnDistance.has_value())
     {
-        return optionalSpawnInfo;
+        return {};
     }
 
     const auto adjustedVelocity = worldAnalyzer.CalculateSpawnVelocityToPreventCrashing(roadId,
@@ -188,9 +186,7 @@ std::optional<SpawnInfo> SpawnPointPreRunCommon::GetNextSpawnCarInfo(const RoadI
     spawnInfo.velocity = adjustedVelocity;
     spawnInfo.acceleration = 0.0;
 
-    optionalSpawnInfo = spawnInfo;
-
-    return optionalSpawnInfo;
+    return spawnInfo;
 }
 
 

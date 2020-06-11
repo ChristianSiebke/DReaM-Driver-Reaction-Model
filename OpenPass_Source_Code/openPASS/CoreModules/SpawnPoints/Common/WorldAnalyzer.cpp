@@ -145,7 +145,7 @@ std::optional<double> WorldAnalyzer::GetNextSpawnPosition(const RoadId& roadId,
 
     if (spawnDistance - agentRearLength < bounds.first)
     {
-        return std::nullopt;
+        return {};
     }
 
     return spawnDistance;
@@ -198,7 +198,9 @@ bool WorldAnalyzer::ValidMinimumSpawningDistanceToObjectInFront(const RoadId& ro
     const double rearLength = vehicleModelParameters.length - vehicleModelParameters.distanceReferencePointToFrontAxle;
 
     const auto [roadGraph, vertex] = GetSingleVertexRoadGraph(RouteElement{roadId, laneId < 0});
-    if(!world->GetAgentsInRange(roadGraph, vertex, laneId, sPosition, sPosition - rearLength, sPosition + vehicleModelParameters.distanceReferencePointToFrontAxle + MINIMUM_SEPARATION_BUFFER).at(vertex).empty())
+    const auto agentsInRangeResult = world->GetAgentsInRange(roadGraph, vertex, laneId, sPosition, rearLength, vehicleModelParameters.distanceReferencePointToFrontAxle + MINIMUM_SEPARATION_BUFFER);
+
+    if(!agentsInRangeResult.at(vertex).empty())
     {
         loggingCallback("Minimum distance required to previous agent not valid on lane: " + std::to_string(laneId) + ".");
         return false;

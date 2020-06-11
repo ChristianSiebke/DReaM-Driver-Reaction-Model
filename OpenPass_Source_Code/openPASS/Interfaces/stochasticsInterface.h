@@ -82,11 +82,25 @@ public:
     //-----------------------------------------------------------------------------
     //! Draw from log-normal distribution.
     //!
-    //! @param[in]     mu         mu value
-    //! @param[in]     sigma     sigma value
+    //! @param[in]     mean         mean value
+    //! @param[in]     stdDeviation standard deviation from mean value
     //! @return                     value drawn
     //-----------------------------------------------------------------------------
-    virtual double GetLogNormalDistributed(double mu, double sigma) = 0;
+    virtual double GetLogNormalDistributed(double mean, double stdDeviation) = 0;
+
+    //-----------------------------------------------------------------------------
+    //! \brief Generates a logarithmic normal distributed number.
+    //!
+    //! Generates a logrithmic normal distributed number according to mu and sigma
+    //! (which represent mean and standard deviation of the natural logarithm of
+    //! the random variable).
+    //!
+    //! @param[in]     mu          Average value of the random variable natural logarithm.
+    //! @param[in]     sigma       Standard deviation of the random variable natural logarithm.
+    //!
+    //! @return        Logarithmic normal distributed number
+    //-----------------------------------------------------------------------------
+    virtual double GetMuSigmaLogNormalDistributed(double mu, double sigma) = 0;
 
     //-----------------------------------------------------------------------------
     //! Used for a user specific distribution.

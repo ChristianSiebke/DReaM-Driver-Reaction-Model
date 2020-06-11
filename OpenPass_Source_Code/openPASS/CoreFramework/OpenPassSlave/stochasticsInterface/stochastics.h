@@ -66,6 +66,10 @@ public:
         return implementation->GetLogNormalDistributed(mean, stdDeviation);
     }
 
+    double GetMuSigmaLogNormalDistributed(double mu, double sigma){
+        return implementation->GetMuSigmaLogNormalDistributed(mu, sigma);
+    }
+
     double GetSpecialDistributed(std::string distributionName, std::vector<double> args){
         return implementation->GetSpecialDistributed(distributionName, args);
     }

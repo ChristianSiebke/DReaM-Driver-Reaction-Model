@@ -89,12 +89,24 @@ double StochasticsImplementation::GetGammaDistributed(double mean, double stdDev
     return draw;
 }
 
-double StochasticsImplementation::GetLogNormalDistributed(double mu, double sigma)
+double StochasticsImplementation::GetLogNormalDistributed(double mean, double stdDeviation)
+{
+    double s2 = log(pow(stdDeviation/mean, 2)+1);
+
+    std::lognormal_distribution<double> lognormalDistribution(log(mean)-s2/2, sqrt(s2));
+
+    double draw = lognormalDistribution(baseGenerator);
+    LOG(CbkLogLevel::Debug, "GetLogNormalDistributed " + std::to_string(draw));
+
+    return draw;
+}
+
+double StochasticsImplementation::GetMuSigmaLogNormalDistributed(double mu, double sigma)
 {
     std::lognormal_distribution<double> lognormalDistribution(mu, sigma);
 
     double draw = lognormalDistribution(baseGenerator);
-    LOG(CbkLogLevel::Debug, "GetLogNormalDistributed " + std::to_string(draw));
+    LOG(CbkLogLevel::Debug, "GetMuSigmaLogNormalDistributed " + std::to_string(draw));
 
     return draw;
 }
