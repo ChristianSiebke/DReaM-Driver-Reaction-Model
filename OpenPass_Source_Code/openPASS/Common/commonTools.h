@@ -23,7 +23,7 @@
 #include <boost/algorithm/string/trim.hpp>
 
 #include "globalDefinitions.h"
-#include "vector2d.h"
+#include "Common/vector2d.h"
 
 #include "Interfaces/agentInterface.h"
 #include "Interfaces/worldObjectInterface.h"
@@ -107,8 +107,8 @@ static double roundDoubleWithDecimals(double value, int decimals)
 //-----------------------------------------------------------------------------
 //! @brief Tokenizes string by delimiter.
 //!
-//! @param [in] str              String to be tokenized
-//! @param [in] delimiter        Delimiter by which string gets tokenized
+//! @param [in] str             String to be tokenized
+//! @param [in] delimiter       Delimiter by which string gets tokenized
 //!
 //! @return                     Vector of tokens
 //-----------------------------------------------------------------------------

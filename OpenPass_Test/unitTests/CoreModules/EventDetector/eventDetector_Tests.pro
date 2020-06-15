@@ -13,13 +13,14 @@ CONFIG += OPENPASS_GTEST \
 
 include(../../../testing.pri)
 
+win32:QMAKE_CXXFLAGS += -Wa,-mbig-obj
+
 UNIT_UNDER_TEST = $$OPEN_SRC/CoreModules/EventDetector
 CONDITIONS = $$OPEN_SRC/CoreModules/EventDetector/Conditions
 
 # commons
 HDR_COMMONS = $$OPEN_SRC/Common/Vector2D.h \
               $$OPEN_SRC/Common/openScenarioDefinitions.h
-SRC_COMMONS = $$OPEN_SRC/Common/Vector2D.cpp
 
 INCLUDEPATH += \
     . \
@@ -37,7 +38,6 @@ HEADERS += \
     $$OPEN_SRC/Common/eventDetectorDefinitions.h
 
 SOURCES += \
-    $$SRC_COMMONS \
     $$OPEN_SRC/CoreFramework/CoreShare/log.cpp \
     $$OPEN_SRC/CoreFramework/CoreShare/parameters.cpp \
     $$UNIT_UNDER_TEST/CollisionDetector.cpp \

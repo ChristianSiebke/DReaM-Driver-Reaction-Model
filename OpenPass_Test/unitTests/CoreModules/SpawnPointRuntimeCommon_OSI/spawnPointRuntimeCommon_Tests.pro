@@ -62,7 +62,6 @@ HEADERS += \
     $$SPAWNPOINTS/Common/WorldAnalyzer.h
 
 SOURCES += \
-    $$relative_path($$OPEN_SRC)/Common/vector2d.cpp \
     $$UNIT_UNDER_TEST/SpawnPointRuntimeCommon.cpp \
     $$FRAMEWORK/agentBlueprintProvider.cpp \
     $$FRAMEWORK/agentDataPublisher.cpp \

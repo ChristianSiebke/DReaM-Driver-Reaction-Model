@@ -12,7 +12,7 @@
 #define POLYGON_H
 
 #include <vector>
-#include "vector2d.h"
+#include "Common/vector2d.h"
 
 /*!
  * \brief polygon in 2d

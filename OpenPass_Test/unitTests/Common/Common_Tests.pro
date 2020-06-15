@@ -30,6 +30,5 @@ HEADERS += \
 
 
 SOURCES += \
-    $$UNIT_UNDER_TEST/vector2d.cpp \
     vectorToString_Tests.cpp \
     ttcCalculation_Tests.cpp

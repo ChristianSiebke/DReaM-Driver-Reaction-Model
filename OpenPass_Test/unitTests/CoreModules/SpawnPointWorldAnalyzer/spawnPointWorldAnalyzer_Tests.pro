@@ -18,7 +18,6 @@ win32:QMAKE_CXXFLAGS += -Wa,-mbig-obj
 SPAWNPOINTS = $$OPEN_SRC/CoreModules/SpawnPoints
 
 DEPENDENCIES_SOURCES = \
-                       $$relative_path($$OPEN_SRC)/Common/vector2d.cpp \
                        $$OPEN_SRC/CoreFramework/CoreShare/log.cpp
 
 INCLUDEPATH += \

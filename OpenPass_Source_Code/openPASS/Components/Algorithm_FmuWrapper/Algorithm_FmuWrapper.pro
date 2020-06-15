@@ -31,8 +31,7 @@ SOURCES += \
     FmiImporter/src/FMI2/fmi2_me_sim.c \
     AlgorithmFmuWrapper.cpp \
     AlgorithmFmuWrapperImplementation.cpp \
-    OsmpFmuHandler.cpp \
-    ../../Common/vector2d.cpp
+    OsmpFmuHandler.cpp
 
 HEADERS += \
     FmiImporter/include/fmuChecker.h \

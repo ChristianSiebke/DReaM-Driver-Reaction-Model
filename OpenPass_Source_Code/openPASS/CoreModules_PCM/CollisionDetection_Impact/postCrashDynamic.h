@@ -11,7 +11,7 @@
 #ifndef POSTCRASHDYNAMIC_H
 #define POSTCRASHDYNAMIC_H
 
-#include "vector2d.h"
+#include "Common/vector2d.h"
 
 #define POSTCRASHDYNAMICID 0
 

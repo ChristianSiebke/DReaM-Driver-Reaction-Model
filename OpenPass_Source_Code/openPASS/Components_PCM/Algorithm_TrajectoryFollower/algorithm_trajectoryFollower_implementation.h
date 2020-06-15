@@ -20,7 +20,7 @@
 #include "pcm_trajectory.h"
 #include "trajectorySignal.h"
 #include "componentPorts.h"
-#include "vector2d.h"
+#include "Common/vector2d.h"
 
 #include "trajectoryfollowing.h"
 

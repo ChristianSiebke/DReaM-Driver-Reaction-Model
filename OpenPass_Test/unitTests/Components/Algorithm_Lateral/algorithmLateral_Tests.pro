@@ -25,7 +25,6 @@ HEADERS += \
     testResourceManager.h
 
 SOURCES += \
-    $$relative_path($$OPEN_SRC)/Common/vector2d.cpp \
     $$UNIT_UNDER_TEST/algorithm_lateralImplementation.cpp \
     testResourceManager.cpp \
     algorithmLateral_Tests.cpp

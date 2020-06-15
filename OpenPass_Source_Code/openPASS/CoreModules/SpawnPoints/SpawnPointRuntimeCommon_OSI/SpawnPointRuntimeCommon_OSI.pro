@@ -39,7 +39,6 @@ DEPENDENCIES_HEADERS = \
 
 DEPENDENCIES_SOURCES = \
                        ../Common/WorldAnalyzer.cpp \
-                       ../../../Common/vector2d.cpp \
                        ../../../CoreFramework/CoreShare/log.cpp \
                        ../../../CoreFramework/OpenPassSlave/modelElements/agentBlueprint.cpp \
                        ../../../CoreFramework/OpenPassSlave/framework/sampler.cpp

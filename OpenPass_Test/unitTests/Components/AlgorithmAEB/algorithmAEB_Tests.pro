@@ -28,7 +28,6 @@ HEADERS += \
 SOURCES += \
     AlgorithmAeb_Tests.cpp \
     BoundingBoxCalculation_Tests.cpp \
-    $$relative_path($$OPEN_SRC)/Common/vector2d.cpp \
     $$relative_path($$OPEN_SRC)/Components/Algorithm_AEB/algorithm_autonomousEmergencyBrakingImplementation.cpp \
     $$relative_path($$OPEN_SRC)/Components/Algorithm_AEB/boundingBoxCalculation.cpp
 

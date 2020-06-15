@@ -54,7 +54,6 @@ SOURCES += \
     $$OPEN_PASS_SLAVE/modelInterface/modelBinding.cpp \
     $$OPEN_PASS_SLAVE/modelInterface/modelLibrary.cpp \
     $$OPEN_SRC/Common/eventDetectorDefinitions.cpp \
-    $$OPEN_SRC/Common/vector2d.cpp \
     $$OPEN_SRC/CoreFramework/CoreShare/log.cpp \
     $$OPEN_SRC/CoreFramework/CoreShare/parameters.cpp \
     taskBuilder_Tests.cpp \

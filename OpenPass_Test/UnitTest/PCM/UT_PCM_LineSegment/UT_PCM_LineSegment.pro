@@ -28,7 +28,6 @@ HEADERS += $$MAIN_SRC_DIR/openPASS/Common_PCM/PCM_Data/pcm_lineSegment.h \
 
 SOURCES += $$MAIN_SRC_DIR/openPASS/Common_PCM/PCM_Data/pcm_lineSegment.cpp\
         $$MAIN_SRC_DIR/openPASS/Common_PCM/PCM_Data/pcm_point.cpp \
-        $$MAIN_SRC_DIR/openPASS/Common/Vector2d.cpp \
         tst_ut_pcm_linesegmenttest.cpp \
         main.cpp \
 

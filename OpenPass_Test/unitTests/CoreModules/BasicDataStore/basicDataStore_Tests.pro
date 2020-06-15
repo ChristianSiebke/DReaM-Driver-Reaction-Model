@@ -25,6 +25,5 @@ HEADERS += \
     $$UNIT_UNDER_TEST/basicDataStoreImplementation.h
 
 SOURCES += \
-    $$OPEN_SRC/Common/vector2d.cpp \
     $$UNIT_UNDER_TEST/basicDataStoreImplementation.cpp \
     basicDataStore_Tests.cpp

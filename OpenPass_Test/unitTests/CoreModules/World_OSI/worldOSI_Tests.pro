@@ -18,7 +18,7 @@ win32:QMAKE_CXXFLAGS += -Wa,-mbig-obj
 UNIT_UNDER_TEST = $$OPEN_SRC/CoreModules/World_OSI
 
 # commons
-SRC_COMMONS = $$OPEN_SRC/Common/vector2d.cpp \
+SRC_COMMONS = \
               $$OPEN_SRC/CoreFramework/CoreShare/log.cpp
 INC_COMMONS = $$OPEN_SRC/Common/vector2d.h \
               $$OPEN_SRC/Common/worldDefinitions.h \

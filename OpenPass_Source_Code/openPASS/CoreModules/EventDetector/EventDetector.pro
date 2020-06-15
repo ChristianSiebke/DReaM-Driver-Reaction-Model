@@ -31,7 +31,6 @@ SOURCES += \
     $$getFiles(SUBDIRS, cc) \
     $$getFiles(SUBDIRS, c) \
     ../../CoreFramework/CoreShare/log.cpp \
-    ../../Common/vector2d.cpp \
     ../../Common/eventDetectorDefinitions.cpp
 
 HEADERS += \

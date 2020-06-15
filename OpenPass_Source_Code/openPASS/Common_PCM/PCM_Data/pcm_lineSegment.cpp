@@ -16,7 +16,7 @@
 //-----------------------------------------------------------------------------
 
 #include "pcm_lineSegment.h"
-#include "vector2d.h"
+#include "Common/vector2d.h"
 #include "commonTools.h"
 
 PCM_LineSegment::PCM_LineSegment(const PCM_Point &firstPoint, const PCM_Point &secondPoint):

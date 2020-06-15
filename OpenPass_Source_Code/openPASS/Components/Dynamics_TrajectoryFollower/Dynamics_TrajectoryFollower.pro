@@ -32,7 +32,6 @@ INCLUDEPATH += $$SUBDIRS \
 
 SOURCES += $$getFiles(SUBDIRS, cpp) \
            $$getFiles(SUBDIRS, c) \
-            ../../Common/vector2d.cpp \
             ../../CoreFramework/CoreShare/log.cpp \
 
 HEADERS += $$getFiles(SUBDIRS, h) \

@@ -26,7 +26,6 @@ SOURCES += \
     ../../CoreModules/World_OSI/OWL/OpenDriveTypeMapper.cpp \
     ../../CoreModules/World_OSI/WorldData.cpp \
     ../../CoreModules/World_OSI/WorldDataException.cpp \
-    ../../Common/vector2d.cpp \
     objectDetectorBase.cpp \
     sensorGeometric2D.cpp \
     sensorObjectDetectorFactory.cpp

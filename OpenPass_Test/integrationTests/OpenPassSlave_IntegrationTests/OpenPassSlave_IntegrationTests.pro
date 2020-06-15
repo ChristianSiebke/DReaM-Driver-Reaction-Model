@@ -54,8 +54,7 @@ SRC_SCENERY =   $$OPENPASS_SLAVE/importer/scenery.cpp \
                 $$OPENPASS_SLAVE/worldInterface/world.cpp \
                 $$OPENPASS_SLAVE/worldInterface/worldBinding.cpp \
                 $$OPENPASS_SLAVE/worldInterface/worldLibrary.cpp \
-                $$OPEN_SRC/CoreModules/Stochastics/stochastics_implementation.cpp \
-                $$OPEN_SRC/Common/vector2d.cpp
+                $$OPEN_SRC/CoreModules/Stochastics/stochastics_implementation.cpp                
 
 INC_SCENERY =   $$OPENPASS_SLAVE/importer/scenery.h \
                 $$OPENPASS_SLAVE/importer/sceneryImporter.h \

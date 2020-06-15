@@ -28,7 +28,6 @@ INCLUDEPATH += $$SUBDIRS \
             ..
 
 SOURCES += \
-    ../../Common/vector2d.cpp \
     $$getFiles(SUBDIRS, cpp) \
     $$getFiles(SUBDIRS, cc) \
     $$getFiles(SUBDIRS, c)

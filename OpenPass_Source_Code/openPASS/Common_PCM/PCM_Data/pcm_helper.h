@@ -12,7 +12,7 @@
 #define PCM_HELPER_H
 
 #include "globalDefinitions.h"
-#include "vector2d.h"
+#include "Common/vector2d.h"
 #include "pcm_point.h"
 
 /*!

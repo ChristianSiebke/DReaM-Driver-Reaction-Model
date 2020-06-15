@@ -15,7 +15,7 @@
 #include "modelInterface.h"
 #include "primitiveSignals.h"
 #include "vectorSignals.h"
-#include "vector2d.h"
+#include "Common/vector2d.h"
 #include "componentPorts.h"
 #include "dynamics_twotrack_vehicle.h"
 
