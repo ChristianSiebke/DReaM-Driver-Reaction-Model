@@ -69,11 +69,6 @@ public:
                      EventNetworkInterface *eventNetwork,
                      DataStoreWriteInterface* dataStore);
 
-    bool IsValid() const
-    {
-        return agentInterface->IsValid();
-    }
-
     AgentInterface* GetAgentAdapter() const;
 
     void SetAgentAdapter(AgentInterface *agentAdapt);

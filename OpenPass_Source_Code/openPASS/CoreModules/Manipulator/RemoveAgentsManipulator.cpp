@@ -34,7 +34,7 @@ void RemoveAgentsManipulator::Trigger(int time)
 
         for(const auto actorId : triggeringEvent->actingAgents)
         {
-            world->GetAgent(actorId)->RemoveAgent();
+            world->RemoveAgent(world->GetAgent(actorId));
         }
 
         auto removeAgentsEvent = std::make_shared<ConditionalEvent>(time,

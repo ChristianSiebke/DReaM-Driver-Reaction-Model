@@ -88,7 +88,11 @@ public:
     //! Updates the roadGraph in the case the agent changes from road to the next
     //!
     //! \return true of the agent is still on the route to his assigned target, false otherwise
-    virtual bool UpdatePositionInGraph() = 0;
+    virtual void UpdatePositionInGraph() = 0;
+
+
+    //! Returns true if a route has been set and the agent is still on this route
+    virtual bool HasValidRoute() const = 0;
 
     //! Chooses one of the possible alternatives and sets it as new target destination
     //!

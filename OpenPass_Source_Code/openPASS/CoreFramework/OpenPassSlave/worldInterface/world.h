@@ -71,6 +71,11 @@ public:
         return implementation->GetRemovedAgents();
     }
 
+    const std::list<const AgentInterface*> GetRemovedAgentsInPreviousTimestep() override
+    {
+        return implementation->GetRemovedAgentsInPreviousTimestep();
+    }
+
     // framework internal methods to access members without restrictions
     void ExtractParameter(ParameterInterface* parameters) override
     {
@@ -117,9 +122,9 @@ public:
         return implementation->QueueAgentUpdate(func);
     }
 
-    void QueueAgentRemove(const AgentInterface* agent) override
+    void RemoveAgent(const AgentInterface* agent) override
     {
-        return implementation->QueueAgentRemove(agent);
+        return implementation->RemoveAgent(agent);
     }
 
     void PublishGlobalData(int timestamp) override

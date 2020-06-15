@@ -56,7 +56,6 @@ class FakeAgent : public FakeWorldObject, public AgentInterface
     MOCK_METHOD1(SetMaxDeceleration, void(double maxDeceleration));
     MOCK_METHOD1(SetAccelerationX, void(double accelerationX));
     MOCK_METHOD1(SetAccelerationY, void(double accelerationY));
-    MOCK_METHOD0(RemoveAgent, void());
     MOCK_METHOD1(UpdateCollision, void(CollisionPartner collisionPartner));
     MOCK_METHOD0(Unlocate, void());
     MOCK_METHOD0(Locate, bool());

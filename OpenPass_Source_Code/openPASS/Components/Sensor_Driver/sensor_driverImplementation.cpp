@@ -116,7 +116,7 @@ void SensorDriverImplementation::GetNewRoute()
 
 void SensorDriverImplementation::UpdateGraphPosition()
 {
-    if(!egoAgent.UpdatePositionInGraph())
+    if(!egoAgent.HasValidRoute())
     {
         GetNewRoute();
     }

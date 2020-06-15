@@ -71,6 +71,11 @@ const std::list<const AgentInterface*>& WorldImplementation::GetRemovedAgents() 
     return agentNetwork.GetRemovedAgents();
 }
 
+const std::list<const AgentInterface*> WorldImplementation::GetRemovedAgentsInPreviousTimestep()
+{
+    return agentNetwork.GetRemovedAgentsInPreviousTimestep();
+}
+
 const std::vector<const TrafficObjectInterface*>& WorldImplementation::GetTrafficObjects() const
 {
     return trafficObjects;
@@ -126,9 +131,9 @@ void WorldImplementation::QueueAgentUpdate(std::function<void()> func)
     agentNetwork.QueueAgentUpdate(func);
 }
 
-void WorldImplementation::QueueAgentRemove(const AgentInterface* agent)
+void WorldImplementation::RemoveAgent(const AgentInterface* agent)
 {
-    agentNetwork.QueueAgentRemove(agent);
+    agentNetwork.RemoveAgent(agent);
 
     auto it = std::find(worldObjects.begin(), worldObjects.end(), agent);
     if (it != worldObjects.end())

@@ -204,7 +204,7 @@ public:
     //!
     //! @return
     //-----------------------------------------------------------------------------
-    virtual void QueueAgentRemove(const AgentInterface *agent) = 0;
+    virtual void RemoveAgent(const AgentInterface *agent) = 0;
 
     //-----------------------------------------------------------------------------
     //! Wirte all global date into the datesstore
@@ -605,6 +605,13 @@ public:
     //! @return                List of agent references
     //-----------------------------------------------------------------------------
     virtual const std::list<const AgentInterface*>& GetRemovedAgents() const = 0;
+
+    //-----------------------------------------------------------------------------
+    //! Retrieves agents that were removed from the world during the previous timestep and clears the list
+    //!
+    //! @return                List of agent references
+    //-----------------------------------------------------------------------------
+    virtual const std::list<const AgentInterface*> GetRemovedAgentsInPreviousTimestep() = 0;
 
     //-----------------------------------------------------------------------------
     //! Retrieves all traffic objects

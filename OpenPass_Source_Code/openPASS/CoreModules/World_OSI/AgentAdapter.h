@@ -345,18 +345,6 @@ public:
 
     bool Update() override;
 
-    // callback from model
-    void RemoveAgent() override
-    {
-        // disable in schedule
-        isValid = false;
-    }
-
-    bool IsValid() const override
-    {
-        return isValid;
-    }
-
     void SetBrakeLight(bool brakeLightStatus) override;
 
     bool GetBrakeLight() const override;

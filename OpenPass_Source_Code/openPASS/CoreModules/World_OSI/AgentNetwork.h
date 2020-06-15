@@ -73,7 +73,7 @@ public:
      * This function queues agents in a list that will be removed after a time step.
      * \param agent agent which shall be removed
      */
-    void QueueAgentRemove(const AgentInterface *agent);
+    void RemoveAgent(const AgentInterface *agent);
 
     /*!
          * \brief Publishes the general observations about current agents
@@ -114,6 +114,14 @@ public:
      */
     virtual const std::list<const AgentInterface*> &GetRemovedAgents() const;
 
+    /*!
+     * \brief GetRemovedAgents
+     * Retrieves agents that were removed during the previous timestep and clears the list
+     *
+     * \return              List of agent references
+     */
+    virtual const std::list<const AgentInterface*> GetRemovedAgentsInPreviousTimestep();
+
 protected:
     //-----------------------------------------------------------------------------
     //! Provides callback to LOG() macro
@@ -142,7 +150,7 @@ private:
     std::map<int, AgentInterface*> agents;
     std::list<const AgentInterface*> removedAgents;
     std::list<std::function<void()>> updateQueue;
-    std::list<const AgentInterface*> removeQueue;
+    std::list<const AgentInterface*> removedAgentsPrevious;
 
     const CallbackInterface *callbacks;
 };

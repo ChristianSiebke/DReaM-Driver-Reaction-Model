@@ -104,6 +104,7 @@ public:
     const std::vector<const WorldObjectInterface*>& GetWorldObjects() const override;
     const std::map<int, AgentInterface *> &GetAgents() const override;
     const std::list<const AgentInterface*>& GetRemovedAgents() const override;
+    const std::list<const AgentInterface*> GetRemovedAgentsInPreviousTimestep() override;
 
     const std::vector<const TrafficObjectInterface*>& GetTrafficObjects() const override;
 
@@ -120,7 +121,7 @@ public:
     void* GetOsiGroundTruth() override;
 
     void QueueAgentUpdate(std::function<void()> func) override;
-    void QueueAgentRemove(const AgentInterface* agent) override;
+    void RemoveAgent(const AgentInterface* agent) override;
 
     void PublishGlobalData(int timestamp) override;
     void SyncGlobalData() override;

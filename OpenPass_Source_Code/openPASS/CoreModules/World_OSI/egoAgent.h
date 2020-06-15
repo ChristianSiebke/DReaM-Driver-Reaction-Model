@@ -26,7 +26,9 @@ public:
 
     void SetRoadGraph(const RoadGraph&& roadGraph, RoadGraphVertex current, RoadGraphVertex target) override;
 
-    bool UpdatePositionInGraph() override;
+    void UpdatePositionInGraph() override;
+
+    bool HasValidRoute() const override;
 
     void SetNewTarget (size_t alternativeIndex) override;
 
@@ -86,7 +88,7 @@ private:
 
     const AgentInterface* agent;
     const WorldInterface* world;
-    bool graphInitialized{false};
+    bool graphValid{false};
     RoadGraph roadGraph{};
     RoadGraphVertex current{0};
     RoadGraph wayToTarget{};

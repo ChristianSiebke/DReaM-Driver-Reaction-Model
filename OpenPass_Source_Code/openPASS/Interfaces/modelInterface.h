@@ -364,15 +364,6 @@ protected:
         return agent;
     }
 
-    //-----------------------------------------------------------------------------
-    //! Requests removal of the agent containing this component during the
-    //! simulation
-    //-----------------------------------------------------------------------------
-    void RemoveAgent()
-    {
-        agent->RemoveAgent();
-    }
-
 private:
     AgentInterface *agent;                //!< Reference to agent containing this component
 public: //RP: BAD HACK! just for testing FMI

@@ -135,14 +135,9 @@ void Scheduler::UpdateAgents(SchedulerTasks &taskList, WorldInterface &world)
     }
 
     std::list<int> removedAgents;
-    for (const auto &agentMap : world.GetAgents())
+    for (const auto &agent: world.GetRemovedAgentsInPreviousTimestep())
     {
-        AgentInterface *agent = agentMap.second;
-        if (!agent->IsValid())
-        {
-            removedAgents.push_back(agent->GetId());
-            world.QueueAgentRemove(agent);
-        }
+        removedAgents.push_back(agent->GetId());
     }
     taskList.DeleteAgentTasks(removedAgents);
 }

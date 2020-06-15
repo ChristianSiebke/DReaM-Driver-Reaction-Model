@@ -94,7 +94,12 @@ bool AgentAdapter::Update()
     // and objects with an incomplete set of dynamic parameters (i. e. changing x/y with velocity = 0)
     //boundingBoxNeedsUpdate = std::abs(GetVelocity()) >= zeroBaseline;
     boundingBoxNeedsUpdate = true;
-    return Locate();
+    if(!Locate())
+    {
+        return false;
+    }
+    egoAgent.UpdatePositionInGraph();
+    return true;
 }
 
 void AgentAdapter::SetBrakeLight(bool brakeLightStatus)

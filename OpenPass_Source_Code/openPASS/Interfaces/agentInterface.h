@@ -290,11 +290,6 @@ public:
     virtual void SetAccelerationY(double accelerationY) = 0;
 
     //-----------------------------------------------------------------------------
-    //! Requests removal of agents at next time step.
-    //-----------------------------------------------------------------------------
-    virtual void RemoveAgent() = 0;
-
-    //-----------------------------------------------------------------------------
     //! update list with collision partners
     //!
     //! @return
@@ -424,13 +419,6 @@ public:
     //-----------------------------------------------------------------------------
     virtual bool InitAgentParameter(int id,
                                     AgentBlueprintInterface* agentBlueprint) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Checks if an agent is still valid or if its marked for remove.
-    //!
-    // @return     true if still valid, false if marked for remove
-    //-----------------------------------------------------------------------------
-    virtual bool IsValid() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Retrieves type of agent

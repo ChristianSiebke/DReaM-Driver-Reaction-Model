@@ -17,7 +17,7 @@ const AgentInterface* EgoAgent::GetAgent() const
 
 void EgoAgent::SetRoadGraph(const RoadGraph&& roadGraph, RoadGraphVertex current, RoadGraphVertex target)
 {
-    graphInitialized = true;
+    graphValid = true;
     this->roadGraph = roadGraph;
     this->current = current;
     alternatives.clear();
@@ -31,11 +31,11 @@ void EgoAgent::SetRoadGraph(const RoadGraph&& roadGraph, RoadGraphVertex current
     SetWayToTarget(target);
 }
 
-bool EgoAgent::UpdatePositionInGraph()
+void EgoAgent::UpdatePositionInGraph()
 {
-    if (!graphInitialized)
+    if (!graphValid)
     {
-        return false;
+        return;
     }
     auto roadIds = GetAgent()->GetRoads(MeasurementPoint::Front);
     if (std::find(roadIds.cbegin(), roadIds.cend(), GetRoadId()) == roadIds.end())
@@ -46,20 +46,28 @@ bool EgoAgent::UpdatePositionInGraph()
             auto routeElement = get(RouteElement(), wayToTarget, rootOfWayToTargetGraph);
             if (std::find(roadIds.cbegin(), roadIds.cend(), routeElement.roadId) == roadIds.end())
             {
-                return false;
+                graphValid = false;
+                return;
             }
             auto [successorBegin, successorsEnd] = adjacent_vertices(current, roadGraph);
                     auto successor = std::find_if(successorBegin, successorsEnd, [&](const auto& vertex){return get(RouteElement(), roadGraph, vertex) == routeElement;});
             if (successor == successorsEnd)
             {
-                return false;
+                graphValid = false;
+                return;
             }
             current = *successor;
-            return true;
         }
-        return false;
+        else
+        {
+            graphValid = false;
+        }
     }
-    return true;
+}
+
+bool EgoAgent::HasValidRoute() const
+{
+    return graphValid;
 }
 
 void EgoAgent::SetNewTarget(size_t alternativeIndex)
