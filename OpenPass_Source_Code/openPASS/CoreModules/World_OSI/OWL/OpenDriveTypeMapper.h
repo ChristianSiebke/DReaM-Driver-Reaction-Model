@@ -174,7 +174,8 @@ namespace OpenDriveTypeMapper
     const std::map<std::string, osi3::TrafficSign_MainSign_Classification_Type> trafficSignsWithText =
     {
         {"310", osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_TOWN_BEGIN},
-        {"311", osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_TOWN_END}
+        {"311", osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_TOWN_END},
+        {"448", osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_HIGHWAY_ANNOUNCEMENT}
     };
 
     //! Conversion map from OpenDrive traffic sign to OSI for road markings
@@ -223,6 +224,7 @@ namespace OpenDriveTypeMapper
         {osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_RIGHT_OF_WAY_END, CommonTrafficSign::Type::RightOfWayEnd},
         {osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_TOWN_BEGIN, CommonTrafficSign::Type::TownBegin},
         {osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_TOWN_END, CommonTrafficSign::Type::TownEnd},
+        {osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_HIGHWAY_ANNOUNCEMENT, CommonTrafficSign::Type::AnnounceHighwayExit},
         {osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_LIVING_STREET_BEGIN, CommonTrafficSign::Type::TrafficCalmedDistrictBegin},
         {osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_LIVING_STREET_END, CommonTrafficSign::Type::TrafficCalmedDistrictEnd},
         {osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_HIGHWAY_BEGIN, CommonTrafficSign::Type::HighWayBegin},

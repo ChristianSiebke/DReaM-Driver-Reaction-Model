@@ -327,6 +327,7 @@ enum Type
     HighWayEnd = 3302, // 330.2
     HighWayExit = 333,
     HighwayExitPole = 450, // 450-(50/51/52),
+    AnnounceHighwayExit = 448,
     AnnounceRightLaneEnd = 5311, // 531-(10/11/12/13)
     AnnounceLeftLaneEnd = 5312, // 531-(20/21/22/23)
     DistanceIndication = 1004 // 1004-(30/31/32/33)
