@@ -314,6 +314,13 @@ public:
     //! \param heading  heading of the lane
     //!
     virtual void AddBoundaryPoint(const Common::Vector2d& point, double heading) = 0;
+
+    /*!
+     * \brief Copies the underlying OSI object to the given GroundTruth
+     *
+     * \param[in]   target   The target OSI GroundTruth
+     */
+    virtual void CopyToGroundTruth(osi3::GroundTruth& target) const = 0;
 };
 
 //!This class represents one section of a road.
@@ -847,6 +854,7 @@ public:
     virtual LaneMarking::Color GetColor() const override;
     virtual LaneMarkingSide GetSide() const override;
     virtual void AddBoundaryPoint(const Common::Vector2d& point, double heading) override;
+    virtual void CopyToGroundTruth(osi3::GroundTruth& target) const override;
 
 private:
     osi3::LaneBoundary* osiLaneBoundary;    //! underlying OSI object

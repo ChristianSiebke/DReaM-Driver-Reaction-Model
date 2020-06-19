@@ -1699,6 +1699,12 @@ void LaneBoundary::AddBoundaryPoint(const Common::Vector2d &point, double headin
     boundaryPoint->set_width(width);
 }
 
+void LaneBoundary::CopyToGroundTruth(osi3::GroundTruth& target) const
+{
+    auto newLaneBoundary = target.add_lane_boundary();
+    newLaneBoundary->CopyFrom(*osiLaneBoundary);
+}
+
 // namespace Implementation
 
 }

@@ -148,6 +148,7 @@ osi3::GroundTruth WorldData::GetFilteredGroundTruth(const osi3::SensorViewConfig
     const auto& filteredTrafficSigns = GetTrafficSignsInSector(absoluteSensorPos, range, yawMin, yawMax);
     const auto& filteredRoadMarkings = GetRoadMarkingsInSector(absoluteSensorPos, range, yawMin, yawMax);
     const auto& filteredLanes = GetLanes();
+    const auto& filteredLaneBoundaries = GetLaneBoundaries();
 
     for (const auto& object : filteredMovingObjects)
     {
@@ -182,6 +183,11 @@ osi3::GroundTruth WorldData::GetFilteredGroundTruth(const osi3::SensorViewConfig
     for (const auto& lane : filteredLanes)
     {
         lane.second->CopyToGroundTruth(filteredGroundTruth);
+    }
+
+    for (const auto& laneboundaries : filteredLaneBoundaries)
+    {
+        laneboundaries.second->CopyToGroundTruth(filteredGroundTruth);
     }
 
     return filteredGroundTruth;
