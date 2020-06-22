@@ -192,6 +192,13 @@ struct FollowTrajectoryAction
 
 using RoutingAction = std::variant<AssignRouteAction, FollowTrajectoryAction>;
 
+struct VisibilityAction
+{
+    bool graphics {false};
+    bool traffic {false};
+    bool sensors {false};
+};
+
 struct LaneChangeParameter
 {
     enum class Type
@@ -247,7 +254,7 @@ using LongitudinalAction = std::variant<SpeedAction>;
 
 using TeleportAction = Position;
 
-using PrivateAction = std::variant<LateralAction, LongitudinalAction, RoutingAction, TeleportAction>;
+using PrivateAction = std::variant<LateralAction, LongitudinalAction, RoutingAction, TeleportAction, VisibilityAction>;
 
 // UserDefinedAction
 struct CustomCommandAction

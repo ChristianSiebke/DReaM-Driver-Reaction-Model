@@ -23,6 +23,9 @@
 #include "Common/worldDefinitions.h"
 #include "Common/eventDetectorDefinitions.h"
 
+/*!
+ * \brief Information required for spawning a scenario agent
+ */
 struct SpawnInfo
 {
 public:
@@ -36,15 +39,16 @@ public:
         this->acceleration = acceleration;
     }
 
-    openScenario::Position position;
+    bool spawning {true}; //!< Spawning flag, spawning agent if true
 
-    std::optional<std::vector<RouteElement>> route {std::nullopt};
+    openScenario::Position position; //!< Initial position
+    std::optional<std::vector<RouteElement>> route {std::nullopt}; //!< Optional predfined route
 
-    double velocity;
-    std::optional<openScenario::StochasticAttribute> stochasticVelocity;
+    double velocity; //!< Initial velocity
+    std::optional<openScenario::StochasticAttribute> stochasticVelocity; //!< optional stochastic initial velocity
 
-    std::optional<double> acceleration;
-    std::optional<openScenario::StochasticAttribute> stochasticAcceleration;
+    std::optional<double> acceleration; //!< Optional initial acceleration
+    std::optional<openScenario::StochasticAttribute> stochasticAcceleration; //!< optional stochastic initial acceleration
 };
 
 /*!

@@ -33,33 +33,36 @@ SpawnPointInterface::Agents SpawnPointScenario::Trigger([[maybe_unused]]int time
 
     for (const auto& entity : dependencies.scenario.value()->GetEntities())
     {
-        try
+        if (entity.spawnInfo.spawning)
         {
-            auto agentBlueprint = dependencies.agentBlueprintProvider->SampleAgent(entity.catalogReference.entryName, entity.assignedParameters);
-            agentBlueprint.SetAgentProfileName(entity.catalogReference.entryName);
-            agentBlueprint.SetAgentCategory(entity.name == "Ego"
-                                                ? AgentCategory::Ego
-                                                : AgentCategory::Scenario);
-            agentBlueprint.SetObjectName(entity.name);
-            agentBlueprint.SetSpawnParameter(CalculateSpawnParameter(entity.spawnInfo,
-                                                                     agentBlueprint.GetVehicleModelParameters()));
-
-            SimulationSlave::Agent* newAgent = dependencies.agentFactory->AddAgent(&agentBlueprint);
-
-            if(newAgent != nullptr)
+            try
             {
-                agents.emplace_back(newAgent);
-            }
-            else
-            {
-                LogError(" failed to add agent successfully for entity "
-                       + entity.name);
-            }
+                auto agentBlueprint = dependencies.agentBlueprintProvider->SampleAgent(entity.catalogReference.entryName, entity.assignedParameters);
+                agentBlueprint.SetAgentProfileName(entity.catalogReference.entryName);
+                agentBlueprint.SetAgentCategory(entity.name == "Ego"
+                                                    ? AgentCategory::Ego
+                                                    : AgentCategory::Scenario);
+                agentBlueprint.SetObjectName(entity.name);
+                agentBlueprint.SetSpawnParameter(CalculateSpawnParameter(entity.spawnInfo,
+                                                                         agentBlueprint.GetVehicleModelParameters()));
 
-        }
-        catch(const std::runtime_error& error)
-        {
-            LogError("SpawnPointScenario encountered an Error: " + std::string(error.what()));
+                SimulationSlave::Agent* newAgent = dependencies.agentFactory->AddAgent(&agentBlueprint);
+
+                if(newAgent != nullptr)
+                {
+                    agents.emplace_back(newAgent);
+                }
+                else
+                {
+                    LogError(" failed to add agent successfully for entity "
+                           + entity.name);
+                }
+
+            }
+            catch(const std::runtime_error& error)
+            {
+                LogError("SpawnPointScenario encountered an Error: " + std::string(error.what()));
+            }
         }
     }
 

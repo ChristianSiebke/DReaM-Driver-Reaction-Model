@@ -132,7 +132,7 @@ The <Storyboard> tag contains the initial setup of the scenario as well as manip
 
 \subsection scenario_storyboard_init Init
 
-The content of the <Init> tag is forwarded to the SpawnPoint to define where it should place the ego and scenario agents.
+The content of the <Init> tag is forwarded to the SpawnPoint to define if and where it should place the ego and scenario agents.
 The position can either be defined as global coordinates (x and y) with the World tag or as lane coordinates (s and t) with the Lane tag.
 The schema is as follows:
 
@@ -155,33 +155,38 @@ The schema is as follows:
 |Waypoint   		|Route          |-                          |at least 1  |
 |Position   		|Waypoint       |-                          |1           |
 |RoadPosition       |Position       |roadId, t                  |1           |
+|VisibilityAction   |PrivateAction  |traffic					|1           |
+
 
 All listed attributes are required.
 The attributes have the following meaning:
 
 |tag		|attribute	|meaning																						|
 |-----------|-----------|-----------------------------------------------------------------------------------------------|
-|Private	|entityRef		|name of the entity for which the initial values are described in the subtags					|
-|LanePosition|roadId		|Id of the road in the Scenery																	|
-|LanePosition|laneId		|Id of the lane in the Scenery																	|
+|Private	|entityRef		|name of the entity for which the initial values are described in the subtags				|
+|LanePosition|roadId		|Id of the road in the Scenery																|
+|LanePosition|laneId		|Id of the lane in the Scenery																|
 |LanePosition|s			|start position on the lane (i.e. distance from the start of the road) of the reference point	|
-|LanePosition|offset		|lateral distance of the reference point to the middle of the road (i.e. t coordinate)			|
-|WorldPosition|x		    |x coordinate of the reference point			                                                |
-|WorldPosition|y		    |y coordinate of the reference point			                                                |
-|WorldPosition|h		    |heading			                                                                            |
+|LanePosition|offset		|lateral distance of the reference point to the middle of the road (i.e. t coordinate)		|
+|WorldPosition|x		    |x coordinate of the reference point			                                            |
+|WorldPosition|y		    |y coordinate of the reference point			                                            |
+|WorldPosition|h		    |heading			                                                                        |
 |Orientation|type		|has to be "relative"																			|
 |Orientation|h			|heading angle in radiant relative to the lane													|
-|SpeedActionDynamics|rate		|acceleration																					|
-|SpeedActionDynamics|shape		|unsupported (but required by OpenSCENARIO)														|
-|AbsoluteTargetSpeed|Value		|velocity																						|
+|SpeedActionDynamics|rate		|acceleration																			|
+|SpeedActionDynamics|shape		|unsupported (but required by OpenSCENARIO)												|
+|AbsoluteTargetSpeed|Value		|velocity																				|
 |RoadPosition|roadId     |Id of the road in the Scenery																	|
-|RoadPosition|t          |negative for driving in roadDirection (i.e on lanes with negative Id) else positive            |
+|RoadPosition|t          |negative for driving in roadDirection (i.e on lanes with negative Id) else positive           |
+|VisibilityAction|traffic   |Flag deciding if the scenario agent will be spawned (true = spawned, false = not spawned)  |
 
 Although OpenSCENARIO also states other ways for defining a position, we currently only support position via the <LanePosition> tag.
 Unlike OpenSCENARIO we also allow some of these values to be stochastic.
 This is marked by adding a subtag  <Stochastics value="valuetype" stdDeviation="value" lowerBound="value" upperBound="value"/> to the <Lane> tag.
 The valuetype can be one of s, offset, velocity or rate.
 The value defined as attribute of the LanePosition/SpeedActionDynamics/AbsoluteTargetSpeed tag is then taken as mean value.
+The VisibilityAction is optional.
+If VisibilityAction is not defined the agent will be spawned.
 
 Example
 ```xml

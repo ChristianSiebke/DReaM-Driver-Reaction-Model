@@ -91,6 +91,10 @@ PrivateAction ScenarioImporterHelper::ImportPrivateAction(QDomElement privateAct
     {
         return ImportRoutingAction(childOfPrivateActionElement, parameters, catalogPath);
     }
+    else if (SimulationCommon::GetFirstChildElement(privateActionElement, TAG::visibilityAction, childOfPrivateActionElement))
+    {
+        return ImportVisibilityAction(childOfPrivateActionElement, parameters);
+    }
     else
     {
         LogErrorAndThrow(std::string("PrivateAction type invalid."));
@@ -517,6 +521,16 @@ RoutingAction ScenarioImporterHelper::ImportRoutingAction(QDomElement routingAct
     {
         LogErrorAndThrow("Invalid RoutingAction type.");
     }
+}
+
+VisibilityAction ScenarioImporterHelper::ImportVisibilityAction(QDomElement visibilityActionElement, Parameters& parameters)
+{
+    VisibilityAction visibilityAction;
+    visibilityAction.graphics = ParseAttribute<bool>(visibilityActionElement, ATTRIBUTE::graphics, parameters);
+    visibilityAction.traffic = ParseAttribute<bool>(visibilityActionElement, ATTRIBUTE::traffic, parameters);
+    visibilityAction.sensors = ParseAttribute<bool>(visibilityActionElement, ATTRIBUTE::sensors, parameters);
+
+    return visibilityAction;
 }
 
 QDomElement ScenarioImporterHelper::GetTrajectoryElementFromCatalog(const std::string& catalogName, const std::string& catalogPath, const std::string& entryName, openScenario::Parameters& parameters)

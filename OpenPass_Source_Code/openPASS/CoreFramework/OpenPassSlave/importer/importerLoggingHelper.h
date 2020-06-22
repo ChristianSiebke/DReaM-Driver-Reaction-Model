@@ -230,6 +230,7 @@ namespace openpass::importer::xml::scenarioImporter::tag
     constexpr char teleportAction[] {"TeleportAction"};
     constexpr char userDefinedAction[] {"UserDefinedAction"};
     constexpr char vehicleCatalog[] {"VehicleCatalog"};
+    constexpr char visibilityAction[] {"VisibilityAction"};
     constexpr char vertex[] {"Vertex"};
     constexpr char waypoint[] {"Waypoint"};
     constexpr char worldPosition[] {"WorldPosition"};
@@ -247,6 +248,7 @@ namespace openpass::importer::xml::scenarioImporter::attribute
     constexpr char entityRef[] {"entityRef"};
     constexpr char entryName[] {"entryName"};
     constexpr char filepath[] {"filepath"};
+    constexpr char graphics[] {"graphics"};
     constexpr char h[] {"h"};
     constexpr char laneId[] {"laneId"};
     constexpr char lowerBound[] {"lowerBound"};
@@ -264,9 +266,11 @@ namespace openpass::importer::xml::scenarioImporter::attribute
     constexpr char rule[] {"rule"};
     constexpr char s[] {"s"};
     constexpr char selectTriggeringEntities[] {"selectTriggeringEntities"};
+    constexpr char sensors[] {"sensors"};
     constexpr char stdDeviation[] {"stdDeviation"};
     constexpr char t[] {"t"};
     constexpr char time[] {"time"};
+    constexpr char traffic[] {"traffic"};
     constexpr char type[] {"type"};
     constexpr char upperBound[] {"upperBound"};
     constexpr char value[] {"value"};

@@ -398,6 +398,11 @@ void ScenarioImporter::ImportInitElement(QDomElement& initElement, std::vector<S
                     LogErrorAndThrow("Simulator only supports AssignRouteAction for Init RoutingAction.");
                 }
             }
+            else if (std::holds_alternative<VisibilityAction>(action))
+            {
+                const auto &visibilityAction = std::get<VisibilityAction>(action);
+                scenarioEntity->spawnInfo.spawning = visibilityAction.traffic;
+            }
             else
             {
                 LOG_INTERN(LogLevel::Error) << "Unsupported PrivateAction in openScenario Init.";

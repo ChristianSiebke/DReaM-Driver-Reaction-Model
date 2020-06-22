@@ -73,7 +73,7 @@ private:
     /*!
     * \brief Import an openscenario Orientation Element
     *
-    * @param[in]     root                   Root of the xml Element
+    * @param[in]     orientationElement                   Orientation xml Element
     * @param[in]     parameters       Parametersset for openScenario parameter references
     *
     * return    Orientation
@@ -83,7 +83,7 @@ private:
     /*!
     * \brief Import an openscenario LanePosition Element
     *
-    * @param[in]     root                   Root of the xml Element
+    * @param[in]     positionElement                   Position xml Element
     * @param[in]     parameters       Parametersset for openScenario parameter references
     *
     * return    LanePosition
@@ -93,7 +93,7 @@ private:
     /*!
     * \brief Import an openscenario RelativeLanePosition Element
     *
-    * @param[in]     root                   Root of the xml Element
+    * @param[in]     positionElement                   Position xml Element
     * @param[in]     parameters       Parametersset for openScenario parameter references
     *
     * return    RelativeLanePosition
@@ -103,7 +103,7 @@ private:
     /*!
     * \brief Import an openscenario RoadPosition Element
     *
-    * @param[in]     root                   Root of the xml Element
+    * @param[in]     positionElement                   Position xml Element
     * @param[in]     parameters       Parametersset for openScenario parameter references
     *
     * return    RoadPosition
@@ -113,7 +113,7 @@ private:
     /*!
     * \brief Import an openscenario WorldPosition Element
     *
-    * @param[in]     root                   Root of the xml Element
+    * @param[in]     positionElement                   Position xml Element
     * @param[in]     parameters       Parametersset for openScenario parameter references
     *
     * return    WorldPosition
@@ -123,7 +123,7 @@ private:
     /*!
     * \brief Import an openPASS custom Stochastic Element
     *
-    * @param[in]     root                   Root of the xml Element
+    * @param[in]     stochasticsElement                   Stochastics xml Element
     * @param[in]     parameters       Parametersset for openScenario parameter references
     *
     * return    attributeName, Stochastic
@@ -133,7 +133,7 @@ private:
     /*!
     * \brief Import an openscenario EntityAction Element
     *
-    * @param[in]     root                   Root of the xml Element
+    * @param[in]     entityActionElement               EntityAction xml Element
     * @param[in]     parameters       Parametersset for openScenario parameter references
     *
     * return    EntityAction
@@ -143,7 +143,7 @@ private:
     /*!
     * \brief Import an openscenario LateralAction Element
     *
-    * @param[in]     root                   Root of the xml Element
+    * @param[in]     lateralActionElement         LateralAction xml Element
     * @param[in]     parameters       Parametersset for openScenario parameter references
     *
     * return    LateralAction
@@ -153,7 +153,7 @@ private:
     /*!
     * \brief Import an openscenario LongitudinalAction Element
     *
-    * @param[in]     root                   Root of the xml Element
+    * @param[in]     longitudinalActionElement     LongitudinalAction xml Element
     * @param[in]     parameters       Parametersset for openScenario parameter references
     *
     * return    LongitudinalAction
@@ -163,8 +163,8 @@ private:
     /*!
     * \brief Import an openscenario TeleportAction Element
     *
-    * @param[in]     root                   Root of the xml Element
-    * @param[in]     parameters       Parametersset for openScenario parameter references
+    * @param[in]     teleportActionElement      TeleportAction xml Element
+    * @param[in]     parameters                 Parametersset for openScenario parameter references
     *
     * return    TeleportAction
     */
@@ -173,13 +173,23 @@ private:
     /*!
     * \brief Import an openscenario RoutingAction Element
     *
-    * @param[in]     root                   Root of the xml Element
+    * @param[in]     routingActionElement     RoutingAction xml Element
     * @param[in]     parameters       Parametersset for openScenario parameter references
     * @param[in]     catalogPath        CatalogPath
     *
     * return    RoutingAction
     */
     static RoutingAction ImportRoutingAction(QDomElement routingActionElement, Parameters& parameters, const std::string catalogPath);
+
+    /*!
+    * \brief Import an openscenario VisibilityAction Element
+    *
+    * @param[in]     visbilityActionElement     VisibilityAction xml Element
+    * @param[in]     parameters                 Parametersset for openScenario parameter references
+    *
+    * return    VisibilityAction
+    */
+    static VisibilityAction ImportVisibilityAction(QDomElement visibilityActionElement, Parameters& parameters);
 
     /*!
     * \brief Gets the Trajectory xml Element from a specified catalog
