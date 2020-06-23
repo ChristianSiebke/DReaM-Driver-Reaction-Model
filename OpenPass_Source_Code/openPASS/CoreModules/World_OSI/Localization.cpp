@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -282,7 +282,10 @@ Result Localizer::Locate(const polygon_t& boundingBox, OWL::Interfaces::WorldObj
                                                          orientation.yaw);
 
     auto result = BuildResult(locatedObject);
-    CreateLaneAssignments(object, locatedObject.laneIntersections);
+    if (result.isOnRoute)
+    {
+        CreateLaneAssignments(object, locatedObject.laneIntersections);
+    }
 
     return result;
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -34,7 +34,7 @@ void RemoveAgentsManipulator::Trigger(int time)
 
         for(const auto actorId : triggeringEvent->actingAgents)
         {
-            world->RemoveAgent(world->GetAgent(actorId));
+            world->QueueAgentRemove(world->GetAgent(actorId));
         }
 
         auto removeAgentsEvent = std::make_shared<ConditionalEvent>(time,

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -25,8 +25,9 @@
 #include <map>
 #include "Common/openPassTypes.h"
 #include "Interfaces/agentInterface.h"
-#include "Interfaces/worldInterface.h"
 #include "AgentAdapter.h"
+
+class WorldImplementation;
 
 using Publisher = std::function<void(openpass::type::EntityId id, openpass::type::FlatParameterKey key, openpass::type::FlatParameterValue value)>;
 
@@ -39,7 +40,7 @@ using Publisher = std::function<void(openpass::type::EntityId id, openpass::type
 class AgentNetwork final
 {
 public:    
-    AgentNetwork(WorldInterface *world, const CallbackInterface *callbacks);
+    AgentNetwork(WorldImplementation *world, const CallbackInterface *callbacks);
     ~AgentNetwork();
     /*!
      * \brief AddAgent
@@ -70,7 +71,13 @@ public:
     /*!
      * \brief QueueAgentRemove
      *
-     * This function queues agents in a list that will be removed after a time step.
+     * This function queues agents in a list that will be removed during the next syncronization.
+     * \param agent agent which shall be removed
+     */
+    void QueueAgentRemove(const AgentInterface *agent);
+
+    /*! Removes an agent from the network
+     *
      * \param agent agent which shall be removed
      */
     void RemoveAgent(const AgentInterface *agent);
@@ -146,10 +153,11 @@ protected:
     }
 
 private:    
-    WorldInterface *world;
+    WorldImplementation *world;
     std::map<int, AgentInterface*> agents;
     std::list<const AgentInterface*> removedAgents;
     std::list<std::function<void()>> updateQueue;
+    std::list<const AgentInterface*> removeQueue;
     std::list<const AgentInterface*> removedAgentsPrevious;
 
     const CallbackInterface *callbacks;

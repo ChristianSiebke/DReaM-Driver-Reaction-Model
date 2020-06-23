@@ -70,6 +70,7 @@ class FakeWorld : public WorldInterface
     MOCK_METHOD0(Clear, void());
     MOCK_METHOD1(ExtractParameter, void(ParameterInterface *parameters));
     MOCK_METHOD1(RemoveAgent, void(const AgentInterface*agent));
+    MOCK_METHOD1(QueueAgentRemove, void(const AgentInterface*agent));
     MOCK_METHOD1(QueueAgentUpdate, void(std::function<void()> func));
     MOCK_METHOD2(QueueAgentUpdate, void(std::function<void(double)> func, double val));
     MOCK_METHOD0(Reset, void());

@@ -122,9 +122,9 @@ public:
         return implementation->QueueAgentUpdate(func);
     }
 
-    void RemoveAgent(const AgentInterface* agent) override
+    void QueueAgentRemove(const AgentInterface* agent) override
     {
-        return implementation->RemoveAgent(agent);
+        return implementation->QueueAgentRemove(agent);
     }
 
     void PublishGlobalData(int timestamp) override

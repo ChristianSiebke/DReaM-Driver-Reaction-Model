@@ -131,6 +131,11 @@ void WorldImplementation::QueueAgentUpdate(std::function<void()> func)
     agentNetwork.QueueAgentUpdate(func);
 }
 
+void WorldImplementation::QueueAgentRemove(const AgentInterface* agent)
+{
+    agentNetwork.QueueAgentRemove(agent);
+}
+
 void WorldImplementation::RemoveAgent(const AgentInterface* agent)
 {
     agentNetwork.RemoveAgent(agent);

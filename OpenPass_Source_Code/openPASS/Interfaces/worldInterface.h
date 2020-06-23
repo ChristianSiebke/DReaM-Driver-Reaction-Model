@@ -204,7 +204,7 @@ public:
     //!
     //! @return
     //-----------------------------------------------------------------------------
-    virtual void RemoveAgent(const AgentInterface *agent) = 0;
+    virtual void QueueAgentRemove(const AgentInterface *agent) = 0;
 
     //-----------------------------------------------------------------------------
     //! Wirte all global date into the datesstore

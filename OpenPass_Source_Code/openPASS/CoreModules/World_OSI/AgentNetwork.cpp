@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -14,8 +14,9 @@
 #include <QFile>
 #include "AgentAdapter.h"
 #include "AgentNetwork.h"
+#include "WorldImplementation.h"
 
-AgentNetwork::AgentNetwork(WorldInterface* world, const CallbackInterface* callbacks) :
+AgentNetwork::AgentNetwork(WorldImplementation* world, const CallbackInterface* callbacks) :
     world(world),
     callbacks(callbacks)
 {}
@@ -28,6 +29,7 @@ AgentNetwork::~AgentNetwork()
 void AgentNetwork::Clear()
 {
     updateQueue.clear();
+    removeQueue.clear();
 
     for (const std::pair<const int, AgentInterface*>& item : agents)
     {
@@ -86,6 +88,11 @@ const std::list<const AgentInterface*> AgentNetwork::GetRemovedAgentsInPreviousT
 void AgentNetwork::QueueAgentUpdate(std::function<void()> func)
 {
     updateQueue.push_back(func);
+}
+
+void AgentNetwork::QueueAgentRemove(const AgentInterface* agent)
+{
+    removeQueue.push_back(agent);
 }
 
 void AgentNetwork::RemoveAgent(const AgentInterface* agent)
@@ -149,6 +156,12 @@ void AgentNetwork::SyncGlobalData()
         func();
         updateQueue.pop_front();
     }
+
+    for (auto& agent : removeQueue)
+    {
+        world->RemoveAgent(agent);
+    }
+    removeQueue.clear();
 
     auto currentAgents = agents; //make a copy, because agents is manipulated inside the loop
     for (auto& item : currentAgents)

@@ -121,7 +121,8 @@ public:
     void* GetOsiGroundTruth() override;
 
     void QueueAgentUpdate(std::function<void()> func) override;
-    void RemoveAgent(const AgentInterface* agent) override;
+    void QueueAgentRemove(const AgentInterface* agent) override;
+    void RemoveAgent(const AgentInterface* agent);
 
     void PublishGlobalData(int timestamp) override;
     void SyncGlobalData() override;
