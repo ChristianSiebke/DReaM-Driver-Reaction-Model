@@ -19,6 +19,7 @@ namespace RULE = openpass::importer::xml::openScenario::rule;
 
 namespace DYNAMICSSHAPE = openpass::importer::xml::openScenario::dynamicsShape;
 namespace DYNAMICSDIMENSION = openpass::importer::xml::openScenario::dynamicsDimension;
+namespace SPEEDTARGETVALUETYPE = openpass::importer::xml::openScenario::speedTargetValueType;
 
 using namespace Importer;
 
@@ -30,6 +31,12 @@ T ParseAttributeHelper(const QDomElement& element, const char attributeName[], o
 
 namespace openScenario
 {
+
+const std::map<std::string, Shape> shapeConversionMap = {{DYNAMICSSHAPE::linear, Shape::Linear},
+                                                         {DYNAMICSSHAPE::step, Shape::Step}};
+
+const std::map<std::string, SpeedTargetValueType> speedTargetValueTypeConversionMap = {{SPEEDTARGETVALUETYPE::delta, SpeedTargetValueType::Delta},
+                                                                                       {SPEEDTARGETVALUETYPE::factor, SpeedTargetValueType::Factor}};
 
 Position ScenarioImporterHelper::ImportPosition(QDomElement root, Parameters& parameters)
 {
@@ -332,13 +339,25 @@ LongitudinalAction ScenarioImporterHelper::ImportLongitudinalAction(QDomElement 
                      childOfLongitudinalActionElement, std::string("Error while importing ") + TAG::speedAction + ". Tag" + TAG::speedActionDynamics + " is missing.");
 
         speedAction.transitionDynamics.value = ParseAttribute<double>(dynamicsElement, ATTRIBUTE::value, parameters);
-        speedAction.transitionDynamics.shape = ParseAttribute<std::string>(dynamicsElement, ATTRIBUTE::dynamicsShape, parameters);
+        ThrowIfFalse(speedAction.transitionDynamics.value >= 0.0,
+                     dynamicsElement, "TransitionDynamics value must greater or equal to 0.");
+
+        // DynamicsShape
+        const auto shape = ParseAttribute<std::string>(dynamicsElement, ATTRIBUTE::dynamicsShape, parameters);
+
+        if (shapeConversionMap.find(shape) == shapeConversionMap.cend())
+        {
+            LogErrorAndThrow(std::string("Error while importing ") + TAG::speedActionDynamics + ". " + ATTRIBUTE::dynamicsShape + ": " + shape + " not supported.");
+        }
+
+        speedAction.transitionDynamics.shape = shapeConversionMap.at(shape);
+
+        // DynamicsDimensions
         speedAction.transitionDynamics.dimension = ParseAttribute<std::string>(dynamicsElement, ATTRIBUTE::dynamicsDimension, parameters);
 
-        if(speedAction.transitionDynamics.shape != DYNAMICSSHAPE::linear
-           || speedAction.transitionDynamics.dimension != DYNAMICSDIMENSION::rate)
+        if(speedAction.transitionDynamics.dimension != DYNAMICSDIMENSION::rate)
         {
-            LogErrorAndThrow(std::string("Error while importing ") + TAG::speedActionDynamics + ". " + ATTRIBUTE::dynamicsShape + " or " + ATTRIBUTE::dynamicsDimension + " not supported.");
+            LogErrorAndThrow(std::string("Error while importing ") + TAG::speedActionDynamics + ". " + ATTRIBUTE::dynamicsDimension + ": " + speedAction.transitionDynamics.dimension + " not supported.");
         }
 
         // Handle <Target> attributes
@@ -347,18 +366,35 @@ LongitudinalAction ScenarioImporterHelper::ImportLongitudinalAction(QDomElement 
                      childOfLongitudinalActionElement, std::string("Error while importing ") + TAG::speedAction + ". Tag" + TAG::speedActionTarget + " is missing.");
 
         // Handle <Target> internal tags - currently ignoring <Relative> tags
-        QDomElement absoluteElement;
-        if (SimulationCommon::GetFirstChildElement(targetElement, TAG::absoluteTargetSpeed, absoluteElement))
+        QDomElement targetSpeedElement;
+        if (SimulationCommon::GetFirstChildElement(targetElement, TAG::absoluteTargetSpeed, targetSpeedElement))
         {
-            if (SimulationCommon::HasAttribute(absoluteElement, ATTRIBUTE::value))
+            if (SimulationCommon::HasAttribute(targetSpeedElement, ATTRIBUTE::value))
             {
-                AbsoluteTargetSpeed absoluteTargetSpeed {ParseAttribute<double>(absoluteElement, ATTRIBUTE::value, parameters)};
+                AbsoluteTargetSpeed absoluteTargetSpeed {ParseAttribute<double>(targetSpeedElement, ATTRIBUTE::value, parameters)};
                 speedAction.target = absoluteTargetSpeed;
             }
         }
+        else if (SimulationCommon::GetFirstChildElement(targetElement, TAG::relativeTargetSpeed, targetSpeedElement))
+        {
+            RelativeTargetSpeed relativeTargetSpeed;
+            relativeTargetSpeed.entityRef = ParseAttribute<std::string>(targetSpeedElement, ATTRIBUTE::entityRef, parameters);
+            relativeTargetSpeed.value = ParseAttribute<double>(targetSpeedElement, ATTRIBUTE::value, parameters);
+
+            const auto speedTargetValueType = ParseAttribute<std::string>(targetSpeedElement, ATTRIBUTE::speedTargetValueType, parameters);
+
+            ThrowIfFalse(speedTargetValueTypeConversionMap.find(speedTargetValueType) != speedTargetValueTypeConversionMap.cend(),
+                         targetSpeedElement, std::string("Error while importing ") + ATTRIBUTE::speedTargetValueType + ". Invalid choice.");
+
+            relativeTargetSpeed.speedTargetValueType = speedTargetValueTypeConversionMap.at(speedTargetValueType);
+
+            relativeTargetSpeed.continuous = ParseAttribute<bool>(targetSpeedElement, ATTRIBUTE::continuous, parameters);
+
+            speedAction.target = relativeTargetSpeed;
+        }
         else
         {
-            LogErrorAndThrow(std::string("Error while importing ") + TAG::speedActionTarget + ". Only" + TAG::absoluteTargetSpeed + " is supported.");
+            LogErrorAndThrow(std::string("Error while importing ") + TAG::speedActionTarget + ". Invalid choice.");
         }
 
         // Parse stochastics if available

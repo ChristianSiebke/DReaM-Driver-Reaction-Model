@@ -66,6 +66,7 @@ enum struct EventCategory
     CustomLaneChange,     // deprecated ?
     SetTrajectory,        // deprecated ?
     SetGazeFollower,      // deprecated ?
+    SpeedAction,
     VehicleComponent,     // deprecated
     OpenPASS,
     OpenSCENARIO
@@ -73,7 +74,7 @@ enum struct EventCategory
 
 namespace helper {
 
-static constexpr std::array<const char *, 11> EventCategoryMapping{
+static constexpr std::array<const char *, 12> EventCategoryMapping{
     "Basic",
     "Conditional",
     "Collision",
@@ -82,6 +83,7 @@ static constexpr std::array<const char *, 11> EventCategoryMapping{
     "CustomLaneChange",
     "SetTrajectory",
     "SetGazeFollower",
+    "SpeedAction",
     "VehicleComponent",
     "OpenPASS",
     "OpenSCENARIO"};

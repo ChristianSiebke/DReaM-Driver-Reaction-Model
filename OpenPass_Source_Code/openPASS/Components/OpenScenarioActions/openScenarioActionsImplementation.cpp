@@ -18,6 +18,7 @@
 #include "Common/trajectorySignal.h"
 #include "Common/customLaneChangeSignal.h"
 #include "Common/gazeFollowerSignal.h"
+#include "Common/speedActionSignal.h"
 #include "Interfaces/eventNetworkInterface.h"
 #include "Interfaces/egoAgentInterface.h"
 #include "Common/eventTypes.h"
@@ -92,6 +93,17 @@ void OpenScenarioActionsImplementation::UpdateOutput(int localLinkId, std::share
             data = std::make_shared<GazeFollowerSignal>();
         }
     }
+    else if (localLinkId == 3)
+    {
+        if (speedActionEvent)
+        {
+            data = std::make_shared<SpeedActionSignal>(ComponentState::Acting, speedActionTargetSpeed, speedActionAcceleration);
+        }
+        else
+        {
+            data = std::make_shared<SpeedActionSignal>();
+        }
+    }
 }
 
 void OpenScenarioActionsImplementation::Trigger([[maybe_unused]]int time)
@@ -101,6 +113,7 @@ void OpenScenarioActionsImplementation::Trigger([[maybe_unused]]int time)
     trajectoryEvent = nullptr;
     customLaneChangeEvent = nullptr;
     gazeFollowerEvent = nullptr;
+    speedActionEvent = nullptr;
 
     const auto laneChangeEventList = GetEventNetwork()->GetActiveEventCategory(EventDefinitions::EventCategory::LaneChange);
 
@@ -209,6 +222,61 @@ void OpenScenarioActionsImplementation::Trigger([[maybe_unused]]int time)
         if (castedGazeFollowerEvent && castedGazeFollowerEvent->agentId == agentId)
         {
             this->gazeFollowerEvent = castedGazeFollowerEvent;
+        }
+    }
+
+    const auto speedActionEventList = GetEventNetwork()->GetActiveEventCategory(EventDefinitions::EventCategory::SpeedAction);
+
+    for (const auto &event : speedActionEventList)
+    {
+        const auto& speedActionEvent = std::dynamic_pointer_cast<SpeedActionEvent>(event);
+        if (speedActionEvent && speedActionEvent->agentId == agentId)
+        {
+            const auto &speedAction = speedActionEvent->speedAction;
+
+            // Determine target speed
+            if (std::holds_alternative<openScenario::RelativeTargetSpeed>(speedAction.target))
+            {
+                const auto &relativeTargetSpeed = std::get<openScenario::RelativeTargetSpeed>(speedAction.target);
+                auto referenceAgent = GetWorld()->GetAgentByName(relativeTargetSpeed.entityRef);
+
+                if (!referenceAgent)
+                {
+                    throw std::runtime_error("Can't find entityref: " + relativeTargetSpeed.entityRef + " of SpeedAction.");
+                }
+
+                if (relativeTargetSpeed.speedTargetValueType == openScenario::SpeedTargetValueType::Delta)
+                {
+                    speedActionTargetSpeed = referenceAgent->GetVelocity() + relativeTargetSpeed.value;
+                }
+                else if (relativeTargetSpeed.speedTargetValueType == openScenario::SpeedTargetValueType::Factor)
+                {
+                    speedActionTargetSpeed = referenceAgent->GetVelocity() * relativeTargetSpeed.value;
+                }
+            }
+            else if (std::holds_alternative<openScenario::AbsoluteTargetSpeed>(speedAction.target))
+            {
+                const auto &absoluteTargetSpeed = std::get<openScenario::AbsoluteTargetSpeed>(speedAction.target);
+                speedActionTargetSpeed = absoluteTargetSpeed.value;
+            }
+
+            // Determine acceleration
+            if (speedAction.transitionDynamics.shape == openScenario::Shape::Step)
+            {
+                double deltaVelocity = speedActionTargetSpeed - GetAgent()->GetVelocity();
+
+                speedActionAcceleration = std::abs(deltaVelocity / (GetCycleTime() / 1000.0));
+            }
+            else if (speedAction.transitionDynamics.shape == openScenario::Shape::Linear)
+            {
+                speedActionAcceleration = speedAction.transitionDynamics.value;
+            }
+            else
+            {
+                throw std::runtime_error("Invalid TransitionsDyanimcs shape in SpeedAction.");
+            }
+
+            this->speedActionEvent = speedActionEvent;
         }
     }
 }

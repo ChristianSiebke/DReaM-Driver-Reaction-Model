@@ -45,6 +45,18 @@ struct ParameterizedAttribute
         defaultValue{defaultValue} {}
 };
 
+enum class Shape
+{
+    Linear = 0,
+    Step
+};
+
+enum class SpeedTargetValueType
+{
+    Delta = 0,
+    Factor
+};
+
 // This is a custom solution and not according to the openScenario standard
 struct StochasticAttribute
 {
@@ -229,7 +241,7 @@ using LateralAction = std::variant<LaneChangeAction>;
 
 struct TransitionDynamics
 {
-    std::string shape{};
+    Shape shape{};
     double value{};
     std::string dimension{};
 };
@@ -239,7 +251,15 @@ struct AbsoluteTargetSpeed
     double value{};
 };
 
-using SpeedActionTarget = std::variant<AbsoluteTargetSpeed>;
+struct RelativeTargetSpeed
+{
+    std::string entityRef{};
+    double value{};
+    SpeedTargetValueType speedTargetValueType{};
+    bool continuous{};
+};
+
+using SpeedActionTarget = std::variant<AbsoluteTargetSpeed, RelativeTargetSpeed>;
 
 struct SpeedAction
 {

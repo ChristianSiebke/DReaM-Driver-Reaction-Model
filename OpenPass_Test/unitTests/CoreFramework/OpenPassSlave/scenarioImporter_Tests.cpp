@@ -168,7 +168,7 @@ TEST(ScenarioImporter_UnitTests, ImportSpeedAction)
 
     ASSERT_THAT(speedAction.stochasticDynamics.has_value(), Eq(false));
     ASSERT_THAT(speedAction.transitionDynamics.value, DoubleEq(10.0));
-    ASSERT_THAT(speedAction.transitionDynamics.shape, Eq("linear"));
+    ASSERT_THAT(speedAction.transitionDynamics.shape, Eq(openScenario::Shape::Linear));
     ASSERT_THAT(speedAction.transitionDynamics.dimension, Eq("rate"));
 }
 
@@ -241,7 +241,7 @@ TEST(ScenarioImporter_UnitTests, ImportLongitudinalWithParameterDeclaration)
 
     ASSERT_THAT(speedAction.stochasticDynamics.has_value(), Eq(false));
     ASSERT_THAT(speedAction.transitionDynamics.value, DoubleEq(10.0));
-    ASSERT_THAT(speedAction.transitionDynamics.shape, Eq("linear"));
+    ASSERT_THAT(speedAction.transitionDynamics.shape, Eq(openScenario::Shape::Linear));
     ASSERT_THAT(speedAction.transitionDynamics.dimension, Eq("rate"));
 }
 

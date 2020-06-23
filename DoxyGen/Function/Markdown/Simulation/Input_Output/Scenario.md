@@ -631,6 +631,46 @@ Example
 </Action>
 ```
 
+**SpeedAction**
+
+The SpeedAction adjusts the velocity of an agent based on parameters of the SpeedAction.
+Both variants RelativeTargetSpeed and AbsoluteTargetSpeed are supported.
+The SpeedActionDynamics attribute "dynamicsShape" currently only supports "linear" & "step".
+The SpeedActionDynamics attribute "dynamicsDimension" currently only supports "rate".
+The RelativeTargetSpeed attribute "continuous" is ignored.
+
+Note: Values defined in the SpeedAction might not reflect actual values used by the simulator due to physical boundaries of the simulator.
+
+Example AbsoulteTargetSpeed
+```xml
+<Action name="Adjust speed">
+    <PrivateAction>
+        <LongitudinalAction>
+            <SpeedAction>
+                <SpeedActionDynamics dynamicsShape="" value="" dynamicsDimension=""/>
+                <AbsoluteTargetSpeed value="10.0"/>
+            </SpeedAction>
+        </LongitudinalAction>
+    </PrivateAction>
+</Action>
+```
+
+Example RelativeTargetSpeed
+```xml
+<Action name="Adjust speed">
+    <PrivateAction>
+        <LongitudinalAction>
+            <SpeedAction>
+                <SpeedActionDynamics dynamicsShape="" value="" dynamicsDimension=""/>
+                <SpeedActionTarget>
+                    <RelativeTargetSpeed entityRef="refAgent" value="10.0" speedTargetValueType="delta" continuous="false" />
+                </SpeedActionTarget>
+            </SpeedAction>
+        </LongitudinalAction>
+    </PrivateAction>
+</Action>
+```
+
 \subsection scenario_storyboard_endconditions EndConditions
 
 Here the end conditions for the simulation are defined.

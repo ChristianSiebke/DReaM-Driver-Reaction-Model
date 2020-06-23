@@ -22,6 +22,7 @@
 #include "LaneChangeManipulator.h"
 #include "RemoveAgentsManipulator.h"
 #include "NoOperationManipulator.h"
+#include "SpeedActionManipulator.h"
 #include "TrajectoryManipulator.h"
 #include "CustomLaneChangeManipulator.h"
 #include "GazeFollowerManipulator.h"
@@ -153,6 +154,20 @@ extern "C" MANIPULATOR_SHARED_EXPORT ManipulatorInterface* OpenPASS_CreateInstan
                 {
                     Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, "Invalid LateralAction as manipulator.");
                     return nullptr;
+                }
+            }
+            else if (std::holds_alternative<openScenario::LongitudinalAction>(privateAction))
+            {
+                const auto &longitudinalAction = std::get<openScenario::LongitudinalAction>(privateAction);
+                if (std::holds_alternative<openScenario::SpeedAction>(longitudinalAction))
+                {
+                        const auto &speedAction = std::get<openScenario::SpeedAction>(longitudinalAction);
+                        return static_cast<ManipulatorInterface*>(new (std::nothrow) SpeedActionManipulator(
+                                                                      world,
+                                                                      eventNetwork,
+                                                                      callbacks,
+                                                                      speedAction,
+                                                                      manipulatorInformation.eventName));
                 }
             }
             else if (std::holds_alternative<openScenario::RoutingAction>(privateAction))

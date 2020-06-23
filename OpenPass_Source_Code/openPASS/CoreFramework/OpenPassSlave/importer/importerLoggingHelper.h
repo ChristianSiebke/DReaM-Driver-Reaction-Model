@@ -22,6 +22,13 @@ namespace openpass::importer::xml::openScenario::rule
 namespace openpass::importer::xml::openScenario::dynamicsShape
 {
     constexpr char linear[] {"linear"};
+    constexpr char step[] {"step"};
+}
+
+namespace openpass::importer::xml::openScenario::speedTargetValueType
+{
+    constexpr char delta[] {"delta"};
+    constexpr char factor[] {"factor"};
 }
 
 namespace openpass::importer::xml::openScenario::dynamicsDimension
@@ -213,6 +220,7 @@ namespace openpass::importer::xml::scenarioImporter::tag
     constexpr char Private[] {"Private"};
     constexpr char relativeLanePosition[] {"RelativeLanePosition"};
     constexpr char relativeTargetLane[] {"RelativeTargetLane"};
+    constexpr char relativeTargetSpeed[] {"RelativeTargetSpeed"};
     constexpr char roadPosition[] {"RoadPosition"};
     constexpr char roadNetwork[] {"RoadNetwork"};
     constexpr char route[] {"Route"};
@@ -243,6 +251,7 @@ namespace openpass::importer::xml::scenarioImporter::attribute
     constexpr char dLane[] {"dLane"};
     constexpr char ds[] {"ds"};
     constexpr char conditionEdge[] {"conditionEdge"};
+    constexpr char continuous[] {"continuous"};
     constexpr char dynamicsDimension[] {"dynamicsDimension"};
     constexpr char dynamicsShape[] {"dynamicsShape"};
     constexpr char entityRef[] {"entityRef"};
@@ -267,6 +276,7 @@ namespace openpass::importer::xml::scenarioImporter::attribute
     constexpr char s[] {"s"};
     constexpr char selectTriggeringEntities[] {"selectTriggeringEntities"};
     constexpr char sensors[] {"sensors"};
+    constexpr char speedTargetValueType[] {"speedTargetValueType"};
     constexpr char stdDeviation[] {"stdDeviation"};
     constexpr char t[] {"t"};
     constexpr char time[] {"time"};

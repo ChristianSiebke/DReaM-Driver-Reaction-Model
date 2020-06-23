@@ -16,6 +16,7 @@
 #include "Common/laneChangeEvent.h"
 #include "Common/customLaneChangeEvent.h"
 #include "Common/gazeFollowerEvent.h"
+#include "Common/speedActionEvent.h"
 #include "oscActionsCalculation.h"
 
 /**
@@ -90,4 +91,8 @@ private:
     std::shared_ptr<TrajectoryEvent> trajectoryEvent;
     std::shared_ptr<CustomLaneChangeEvent> customLaneChangeEvent;
     std::shared_ptr<GazeFollowerEvent> gazeFollowerEvent;
+    std::shared_ptr<SpeedActionEvent> speedActionEvent;
+
+    double speedActionTargetSpeed {};
+    double speedActionAcceleration {};
 };
