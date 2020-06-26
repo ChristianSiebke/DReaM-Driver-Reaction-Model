@@ -25,14 +25,12 @@ namespace SpawnPointRuntimeCommonDefinitions
         const RoadId roadId;
         const LaneId laneId;
         const SPosition sPosition;
-        const size_t laneIndex;
 
         bool operator== (const SpawnPosition& other) const
         {
             return this->roadId == other.roadId
                     && this->laneId == other.laneId
-                    && this->sPosition == other.sPosition
-                    && this->laneIndex == other.laneIndex;
+                    && this->sPosition == other.sPosition;
         }
     };
 

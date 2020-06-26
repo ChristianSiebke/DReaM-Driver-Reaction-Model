@@ -23,8 +23,7 @@ std::ostream& operator<<(std::ostream& os, const SpawnPosition& position)
 {
     os << "road: " << position.roadId
        << " lane: " << position.laneId
-       << " s: " << position.sPosition
-       << " laneIndex: " << position.laneIndex;
+       << " s: " << position.sPosition;
 
     return os;
 }
@@ -106,11 +105,11 @@ TEST(SpawnPointRuntimeCommonParameterExtractor, ExtractSpawnPointParameters)
     const auto result = SpawnPointRuntimeCommonParameterExtractor::ExtractSpawnPointParameters(parameter);
 
     const auto spawnPositions = result.spawnPositions;
-    ASSERT_THAT(result.spawnPositions, UnorderedElementsAre(SpawnPosition{"RoadA", 1, 10., 2},
-                                                            SpawnPosition{"RoadA", 2, 10., 1},
-                                                            SpawnPosition{"RoadA", 3, 10., 0},
-                                                            SpawnPosition{"RoadB", -1, 11., 1},
-                                                            SpawnPosition{"RoadB", -2, 11., 0}));
+    ASSERT_THAT(result.spawnPositions, UnorderedElementsAre(SpawnPosition{"RoadA", 1, 10.},
+                                                            SpawnPosition{"RoadA", 2, 10.},
+                                                            SpawnPosition{"RoadA", 3, 10.},
+                                                            SpawnPosition{"RoadB", -1, 11.},
+                                                            SpawnPosition{"RoadB", -2, 11.}));
 
     SpawningAgentProfile spawningAgentProfile1 = {"Profile1", openpass::parameter::NormalDistribution{1.,2.,3.,4.}, {0.1,0.2}, openpass::parameter::NormalDistribution{2.,3.,4.,5.}};
     SpawningAgentProfile spawningAgentProfile2 = {"Profile2", openpass::parameter::NormalDistribution{1.,2.,3.,4.}, {0.1,0.2}, openpass::parameter::NormalDistribution{2.,3.,4.,5.}};

@@ -12,9 +12,11 @@ TEMPLATE = subdirs
 
 SUBDIRS = \
     World_OSI \
-    OpenPassSlave_IntegrationTests
+    OpenPassSlave_IntegrationTests \
+    Spawner_IntegrationTests
 
 World_OSI.subdir                        = ../../OpenPass_Source_Code/openPASS/CoreModules/World_OSI
 
 OpenPassSlave_IntegrationTests.subdir   = OpenPassSlave_IntegrationTests
 OpenPassSlave_IntegrationTests.depends  = World_OSI
+Spawner_IntegrationTests.subdir   = Spawner_IntegrationTests

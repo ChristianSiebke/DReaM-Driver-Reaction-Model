@@ -16,8 +16,6 @@
 
 #include "sampler.h"
 #include <stdexcept>
-#include "parameterbuilder.h"
-#include "parameters.h"
 #include <cmath>
 
 bool Sampler::RollFor(double chance, StochasticsInterface* stochastics)

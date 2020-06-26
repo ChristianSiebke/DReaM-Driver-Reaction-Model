@@ -417,3 +417,19 @@ bool WorldAnalyzer::SpawnWillCauseCrash(const RoadId& roadId,
                                              accelerationOfFrontObject,
                                              ASSUMED_TTB);
 }
+
+size_t WorldAnalyzer::GetRightLaneCount(const RoadId& roadId, const LaneId& laneId, const double sPosition) const
+{
+    size_t rightLaneCount{0};
+    RoadGraph roadGraph;
+    const auto start = add_vertex(RouteElement{roadId, laneId < 0}, roadGraph);
+    const auto relativeLanes = world->GetRelativeLanes(roadGraph, start, laneId, sPosition, 0).at(start);
+    for (const auto& lane : relativeLanes.front().lanes)
+    {
+        if (lane.relativeId < 0 && lane.type == LaneType::Driving)
+        {
+            ++rightLaneCount;
+        }
+    }
+    return rightLaneCount;
+}

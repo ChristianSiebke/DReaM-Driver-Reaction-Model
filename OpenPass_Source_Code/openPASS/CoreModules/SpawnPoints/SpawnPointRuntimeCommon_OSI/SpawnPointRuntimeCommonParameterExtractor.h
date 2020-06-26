@@ -54,10 +54,9 @@ namespace SpawnPointRuntimeCommonParameterExtractor
                 std::sort(sortedLaneIds.begin(), sortedLaneIds.end(), std::greater<int>{});
             }
 
-
-            for (size_t laneIndex = 0; laneIndex < sortedLaneIds.size(); ++laneIndex)
+            for (const auto& laneId : sortedLaneIds)
             {
-                spawnpoints.emplace_back(SpawnPosition{roadIdElement.value(), sortedLaneIds.at(laneIndex), sCoordinateElement.value(), laneIndex});
+                spawnpoints.emplace_back(SpawnPosition{roadIdElement.value(), laneId, sCoordinateElement.value()});
             }
         }
 

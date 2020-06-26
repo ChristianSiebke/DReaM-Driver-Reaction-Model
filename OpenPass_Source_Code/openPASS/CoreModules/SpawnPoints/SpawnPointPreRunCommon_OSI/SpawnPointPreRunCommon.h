@@ -63,16 +63,17 @@ private:
      * @brief Generates agents in specified lane based on specified range.
      *
      * @param[in]   laneId      Id of the lane to spawn agents in.
+     * @param[in]   roadId      Id of the road to spawn agents in.
      * @param[in]   range       Range in which to spawn agents.
      * @return
      */
-    Agents GenerateAgentsForRange(const LaneId laneId,
-                                  const RoadId roadId,
-                                  const Range& range,
-                                  size_t laneIndex);
+    Agents GenerateAgentsForRange(const LaneId& laneId,
+                                  const RoadId& roadId,
+                                  const Range& range);
 
     /**
      * @brief Get SpawnInfo for the next agent that should be spawned.
+     * @param[in]   roadId              Id of the road to spawn agents in.
      * @param[in]   laneId              Id of the lane in which new agent should be spawned.
      * @param[in]   range               Range of the lane in which new agent should be spawned.
      * @param[in]   gapInSeconds        Gap between new agent and other agents in the lane.
@@ -81,8 +82,8 @@ private:
      * @param[in]   agentRearLength
      * @return      SpawnInfo for new agent.
      */
-    std::optional<SpawnInfo> GetNextSpawnCarInfo(const RoadId roadId,
-                                                 const LaneId laneId,
+    std::optional<SpawnInfo> GetNextSpawnCarInfo(const RoadId& roadId,
+                                                 const LaneId& laneId,
                                                  const Range& range,
                                                  const double gapInSeconds,
                                                  const double velocity,

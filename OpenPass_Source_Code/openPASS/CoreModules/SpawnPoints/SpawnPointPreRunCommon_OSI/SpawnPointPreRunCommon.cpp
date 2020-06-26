@@ -30,7 +30,6 @@ SpawnPointInterface::Agents SpawnPointPreRunCommon::Trigger([[maybe_unused]]int 
 
     for (const auto &spawnArea : parameters.spawnAreas)
     {
-        size_t laneIndex = 0;
         for (const auto laneId : spawnArea.laneIds)
         {
 
@@ -44,15 +43,12 @@ SpawnPointInterface::Agents SpawnPointPreRunCommon::Trigger([[maybe_unused]]int 
                 {
                     const auto generatedAgents = GenerateAgentsForRange(laneId,
                                                                         spawnArea.roadId,
-                                                                        spawningRange,
-                                                                        laneIndex);
+                                                                        spawningRange);
                     newAgents.insert(std::cend(newAgents),
                                      std::cbegin(generatedAgents),
                                      std::cend(generatedAgents));
                 }
             }
-
-            laneIndex++;
         }
     }
 
@@ -64,17 +60,17 @@ SpawningAgentProfile SpawnPointPreRunCommon::SampleAgentProfile(bool rightLane)
     return Sampler::Sample(rightLane ? parameters.agentProfileLaneMaps.rightLanes : parameters.agentProfileLaneMaps.leftLanes, dependencies.stochastics);
 }
 
-SpawnPointInterface::Agents SpawnPointPreRunCommon::GenerateAgentsForRange(const LaneId laneId,
-                                                                           const RoadId roadId,
-                                                                           const Range& range,
-                                                                           size_t laneIndex)
+SpawnPointInterface::Agents SpawnPointPreRunCommon::GenerateAgentsForRange(const LaneId& laneId,
+                                                                           const RoadId& roadId,
+                                                                           const Range& range)
 {
     SpawnPointInterface::Agents agents;
     bool generating = true;
+    size_t rightLaneCount = worldAnalyzer.GetRightLaneCount(roadId, laneId, range.second);
 
     while (generating)
     {
-        const auto agentProfile = SampleAgentProfile(laneIndex == 0);
+        const auto agentProfile = SampleAgentProfile(rightLaneCount == 0);
 
         try
         {
@@ -88,10 +84,10 @@ SpawnPointInterface::Agents SpawnPointPreRunCommon::GenerateAgentsForRange(const
 
             auto velocity = Sampler::RollForStochasticAttribute(agentProfile.velocity, dependencies.stochastics);
 
-            for (size_t iterator = 0; iterator < laneIndex; ++iterator)
+            for (size_t iterator = 0; iterator < rightLaneCount; ++iterator)
             {
-                double homogeneity = agentProfile.homogeneities.size() > iterator ? agentProfile.homogeneities[iterator] : agentProfile.homogeneities.back();
-                velocity *= 2 - homogeneity;
+                double homogeneity = agentProfile.homogeneities.size() > iterator ? agentProfile.homogeneities[iterator] : 1.0;
+                velocity *= 2.0 - homogeneity;
             }
 
             const auto tGap = Sampler::RollForStochasticAttribute(agentProfile.tGap, dependencies.stochastics);
@@ -137,6 +133,7 @@ SpawnPointInterface::Agents SpawnPointPreRunCommon::GenerateAgentsForRange(const
                 generating = false;
                 break;
             }
+            rightLaneCount = worldAnalyzer.GetRightLaneCount(roadId, laneId, sPosition);
         }
         catch (const std::runtime_error& error)
         {
@@ -146,8 +143,8 @@ SpawnPointInterface::Agents SpawnPointPreRunCommon::GenerateAgentsForRange(const
     return agents;
 }
 
-std::optional<SpawnInfo> SpawnPointPreRunCommon::GetNextSpawnCarInfo(const RoadId roadId,
-                                                                     const LaneId laneId,
+std::optional<SpawnInfo> SpawnPointPreRunCommon::GetNextSpawnCarInfo(const RoadId& roadId,
+                                                                     const LaneId& laneId,
                                                          const Range& range,
                                                          const double gapInSeconds,
                                                          const double velocity,

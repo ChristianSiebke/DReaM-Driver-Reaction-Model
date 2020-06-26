@@ -53,7 +53,8 @@ SpawnPointInterface::Agents SpawnPointRuntimeCommon::Trigger(int time)
 
 SpawnDetails SpawnPointRuntimeCommon::GenerateSpawnDetailsForLane(const SpawnPosition sceneryInformation, int time)
 {
-    const auto agentProfile = SampleAgentProfile(sceneryInformation.laneIndex == 0);
+    auto rightLaneCount = worldAnalyzer.GetRightLaneCount(sceneryInformation.roadId, sceneryInformation.laneId, sceneryInformation.sPosition);
+    const auto agentProfile = SampleAgentProfile(rightLaneCount == 0);
     try
     {
         auto agentBlueprint = dependencies.agentBlueprintProvider->SampleAgent(agentProfile.name, {});
@@ -64,10 +65,10 @@ SpawnDetails SpawnPointRuntimeCommon::GenerateSpawnDetailsForLane(const SpawnPos
 
         auto velocity = Sampler::RollForStochasticAttribute(agentProfile.velocity, dependencies.stochastics);
 
-        for (size_t laneIndex = 0; laneIndex < sceneryInformation.laneIndex; ++laneIndex)
+        for (size_t i = 0; i < rightLaneCount; ++i)
         {
-            double homogeneity = agentProfile.homogeneities.size() > laneIndex ? agentProfile.homogeneities[laneIndex] : agentProfile.homogeneities.back();
-            velocity *= 2 - homogeneity;
+            double homogeneity = agentProfile.homogeneities.size() > i ? agentProfile.homogeneities[i] : 1.0;
+            velocity *= 2.0 - homogeneity;
         }
 
         CalculateSpawnParameter(&agentBlueprint,
