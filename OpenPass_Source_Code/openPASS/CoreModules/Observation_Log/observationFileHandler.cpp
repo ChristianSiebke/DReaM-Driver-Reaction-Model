@@ -273,16 +273,10 @@ void ObservationFileHandler::AddSensor(const std::string& agentId, const::std::s
     xmlFileStream->writeAttribute(outputAttributes.ORIENTATIONPITCH, QString::number(std::get<double>(dataStore.GetStatic(mountingKeyPrefix + "Orientation/Pitch").at(0))));
     xmlFileStream->writeAttribute(outputAttributes.ORIENTATIONROLL, QString::number(std::get<double>(dataStore.GetStatic(mountingKeyPrefix + "Orientation/Roll").at(0))));
 
-    xmlFileStream->writeAttribute(outputAttributes.LATENCY, QString::number(std::get<double>(dataStore.GetStatic(sensorKeyPrefix + "Parameters/Latency").at(0))));
-    xmlFileStream->writeAttribute(outputAttributes.OPENINGANGLEH, QString::number(std::get<double>(dataStore.GetStatic(sensorKeyPrefix + "Parameters/OpeningAngleH").at(0))));
-    xmlFileStream->writeAttribute(outputAttributes.DETECTIONRANGE, QString::number(std::get<double>(dataStore.GetStatic(sensorKeyPrefix + "Parameters/Range").at(0))));
-
-    try
+    const auto parameters = dataStore.GetKeys("Statics/" + sensorKeyPrefix + "Parameters");
+    for (const auto& parameter : parameters)
     {
-        xmlFileStream->writeAttribute(outputAttributes.OPENINGANGLEV, QString::number(std::get<double>(dataStore.GetStatic(sensorKeyPrefix + "Parameters/OpeningAngleV").at(0))));
-    }
-    catch (const std::out_of_range&)
-    {
+        xmlFileStream->writeAttribute(QString::fromStdString(parameter), QString::number(std::get<double>(dataStore.GetStatic(sensorKeyPrefix + "Parameters/" + parameter).at(0))));
     }
 
     xmlFileStream->writeEndElement();
