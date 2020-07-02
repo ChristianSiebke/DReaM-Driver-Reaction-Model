@@ -259,7 +259,7 @@ void AlgorithmFmuWrapperImplementation::Trigger(int time)
 
     cdata_global_ptr = &cdata;      // reassign global pointer, required for FMI 1.0 logging
 
-    fmuHandler->PreStep();
+    fmuHandler->PreStep(time);
 
     jm_status_enu_t fmiStatus;
 
@@ -279,7 +279,7 @@ void AlgorithmFmuWrapperImplementation::Trigger(int time)
 
     ReadOutputValues();
 
-    fmuHandler->PostStep();
+    fmuHandler->PostStep(time);
 
     LOGDEBUG("End of Trigger");
 }
@@ -318,7 +318,8 @@ void AlgorithmFmuWrapperImplementation::InitFmu()
                                         GetAgent(),
                                         callbacks,
                                         std::get<FMI2>(fmuVariables),
-                                        &fmuVariableValues);
+                                        &fmuVariableValues,
+                                        GetParameters());
     }
     else
     {

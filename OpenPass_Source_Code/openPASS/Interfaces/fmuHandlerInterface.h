@@ -81,14 +81,16 @@ public:
     /*!
      * \brief Has to be called from Trigger in AlgorithmFmuWrapper
      *
+     * \param[in]   time            Timestep forwarded from FmuWrapper
      */
-    virtual void PreStep() = 0;
+    virtual void PreStep(int time) = 0;
 
     /*!
      * \brief Has to be called from Trigger in AlgorithmFmuWrapper
      *
+     * \param[in]   time            Timestep forwarded from FmuWrapper
      */
-    virtual void PostStep() = 0;
+    virtual void PostStep(int time) = 0;
 
     //-----------------------------------------------------------------------------
     //! Provides callback to LOG() macro.

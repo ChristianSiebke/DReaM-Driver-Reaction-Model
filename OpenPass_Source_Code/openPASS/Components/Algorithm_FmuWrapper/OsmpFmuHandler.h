@@ -14,11 +14,14 @@
 #include "Interfaces/fmuHandlerInterface.h"
 #include "Interfaces/worldInterface.h"
 #include "Interfaces/agentInterface.h"
+#include "Interfaces/parameterInterface.h"
 #include "osi3/osi_groundtruth.pb.h"
-#include "osi3/osi_trafficupdate.pb.h"
-#include "osi3/osi_trafficcommand.pb.h"
+#include "osi3/osi_sensordata.pb.h"
 #include "osi3/osi_sensorview.pb.h"
+#include "osi3/osi_trafficcommand.pb.h"
+#include "osi3/osi_trafficupdate.pb.h"
 #include "Common/openScenarioDefinitions.h"
+#include <QString>
 
 class CallbackInterface;
 
@@ -30,32 +33,36 @@ public:
                    AgentInterface* agent,
                    const CallbackInterface* callbacks,
                    const Fmu2Variables& fmuVariables,
-                   std::map<ValueReferenceAndType, FmuValue>* fmuVariableValues) :
-        FmuHandlerInterface(cdata, agent, callbacks),
-        world(world),
-        fmuVariableValues(fmuVariableValues),
-        fmuVariables(fmuVariables),
-        previousPosition(agent->GetPositionX(), agent->GetPositionY())
-    {
-    }
+                   std::map<ValueReferenceAndType, FmuValue>* fmuVariableValues,
+                   const ParameterInterface *parameters);
 
     void UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const>& data, int time) override;
 
     void UpdateOutput(int localLinkId, std::shared_ptr<SignalInterface const>& data, int time) override;
 
-    void PreStep() override;
+    void PreStep(int time) override;
 
-    void PostStep() override;
+    void PostStep(int time) override;
 
-    void SetSensorViewInput(const osi3::SensorView& data);
-
-    void SetTrafficCommandInput(const osi3::TrafficCommand& data);
-
-    void GetTrafficUpdate();
-
+    //! Converts a trajectory from OpenSCENARIO to a OSI TrafficCommand
     static osi3::TrafficCommand GetTrafficCommandFromOpenScenarioTrajectory(openScenario::Trajectory trajectory);
 
 private:
+    //! Sets the SensorView as input for the FMU
+    void SetSensorViewInput(const osi3::SensorView& data);
+
+    //! Sets the TrafficCommand as input for the FMU
+    void SetTrafficCommandInput(const osi3::TrafficCommand& data);
+
+    //! Reads the TrafficUpdate from the FMU
+    void GetTrafficUpdate();
+
+    //! Reads the SensorData from the FMU
+    void GetSensorData();
+
+    //! Writes an OSI message into a JSON file
+    void WriteJson(const google::protobuf::Message& message, const QString& fileName);
+
     FmuHandlerInterface::FmuValue& GetValue(fmi2_value_reference_t valueReference, VariableType variableType);
 
     osi3::SensorViewConfiguration GenerateSensorViewConfiguration();
@@ -68,6 +75,18 @@ private:
     std::string serializedTrafficCommand;
     osi3::TrafficUpdate trafficUpdate;
     osi3::TrafficCommand trafficCommand;
+    osi3::SensorData sensorData;
+
+    std::optional<std::string> sensorViewVariable;
+    std::optional<std::string> sensorDataVariable;
+    std::optional<std::string> trafficCommandVariable;
+    std::optional<std::string> trafficUpdateVariable;
+
+    bool writeSensorView{false};
+    bool writeSensorData{false};
+    bool writeTrafficCommand{false};
+    bool writeTrafficUpdate{false};
+    QString outputDir{};
 
     Common::Vector2d previousPosition{0.0,0.0};
 };

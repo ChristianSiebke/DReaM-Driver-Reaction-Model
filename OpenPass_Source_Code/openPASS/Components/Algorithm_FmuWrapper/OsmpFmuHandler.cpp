@@ -13,6 +13,9 @@
 #include "Common/dynamicsSignal.h"
 #include "Common/trajectorySignal.h"
 #include "CoreModules/World_OSI/WorldData.h"
+#include <QFile>
+#include <QDir>
+#include "google/protobuf/util/json_util.h"
 
 extern "C" {
 #include "fmilib.h"
@@ -61,6 +64,67 @@ void encode_pointer_to_integer(const void* ptr,fmi2_integer_t& hi,fmi2_integer_t
 }
 
 
+OsmpFmuHandler::OsmpFmuHandler(fmu_check_data_t *cdata, WorldInterface *world, AgentInterface *agent, const CallbackInterface *callbacks, const Fmu2Variables &fmuVariables, std::map<ValueReferenceAndType, FmuHandlerInterface::FmuValue> *fmuVariableValues, const ParameterInterface *parameters) :
+    FmuHandlerInterface(cdata, agent, callbacks),
+    world(world),
+    fmuVariableValues(fmuVariableValues),
+    fmuVariables(fmuVariables),
+    previousPosition(agent->GetPositionX(), agent->GetPositionY())
+{
+    auto sensorViewParameter = parameters->GetParametersString().find("Input_SensorView");
+    if (sensorViewParameter != parameters->GetParametersString().end())
+    {
+        sensorViewVariable = sensorViewParameter->second;
+    }
+    auto trafficCommandParameter = parameters->GetParametersString().find("Input_TrafficCommand");
+    if (trafficCommandParameter != parameters->GetParametersString().end())
+    {
+        trafficCommandVariable = trafficCommandParameter->second;
+    }
+    auto sensorDataParameter = parameters->GetParametersString().find("Output_SensorData");
+    if (sensorDataParameter != parameters->GetParametersString().end())
+    {
+        sensorDataVariable = sensorDataParameter->second;
+    }
+    auto trafficUpdateParameter = parameters->GetParametersString().find("Output_TrafficUpdate");
+    if (trafficUpdateParameter != parameters->GetParametersString().end())
+    {
+        trafficUpdateVariable = trafficUpdateParameter->second;
+    }
+    auto writeSensorDataFlag = parameters->GetParametersBool().find("WriteSensorDataOutput");
+    if (writeSensorDataFlag != parameters->GetParametersBool().end())
+    {
+        writeSensorData = writeSensorDataFlag->second;
+    }
+    auto writeSensorViewFlag = parameters->GetParametersBool().find("WriteSensorViewOutput");
+    if (writeSensorViewFlag != parameters->GetParametersBool().end())
+    {
+        writeSensorView = writeSensorViewFlag->second;
+    }
+    auto writeTrafficCommandFlag = parameters->GetParametersBool().find("WriteTrafficCommandOutput");
+    if (writeTrafficCommandFlag != parameters->GetParametersBool().end())
+    {
+        writeTrafficCommand = writeTrafficCommandFlag->second;
+    }
+    auto writeTrafficUpdateFlag = parameters->GetParametersBool().find("WriteTrafficUpdateOutput");
+    if (writeTrafficUpdateFlag != parameters->GetParametersBool().end())
+    {
+        writeTrafficUpdate = writeTrafficUpdateFlag->second;
+    }
+
+    bool writeJsonOutput = writeSensorData || writeSensorView || writeTrafficCommand || writeTrafficUpdate;
+    if (writeJsonOutput)
+    {
+        outputDir = QString::fromStdString(parameters->GetRuntimeInformation().directories.output) +
+                    QDir::separator() + cdata->modelName + QDir::separator() +
+                    "Agent" + QString::number(agent->GetId());
+        QDir directory{outputDir};
+        if (!directory.exists())
+        {
+            directory.mkpath(outputDir);
+        }
+    }
+}
 
 
 void OsmpFmuHandler::UpdateInput(int localLinkId, const std::shared_ptr<const SignalInterface>& data, [[maybe_unused]] int time)
@@ -113,27 +177,56 @@ void OsmpFmuHandler::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterfa
     }
 }
 
-void OsmpFmuHandler::PreStep()
+void OsmpFmuHandler::PreStep(int time)
 {
     osi3::SensorViewConfiguration sensorViewConfig = GenerateSensorViewConfiguration();
     auto* worldData = static_cast<OWL::Interfaces::WorldData*>(world->GetWorldData());
     osi3::SensorView sensorView = worldData->GetSensorView(sensorViewConfig, agent->GetId());
 
-    SetSensorViewInput(sensorView);
-    SetTrafficCommandInput(trafficCommand);
+    if (sensorViewVariable)
+    {
+        SetSensorViewInput(sensorView);
+        if (writeSensorView)
+        {
+            WriteJson(sensorView, "SensorView-" + QString::number(time) + ".json");
+        }
+    }
+    if (trafficCommandVariable)
+    {
+        SetTrafficCommandInput(trafficCommand);
+        if (writeTrafficCommand)
+        {
+            WriteJson(trafficCommand, "TrafficCommand-" + QString::number(time) + ".json");
+        }
+    }
 }
 
-void OsmpFmuHandler::PostStep()
+void OsmpFmuHandler::PostStep(int time)
 {
-    GetTrafficUpdate();
+    if (sensorDataVariable)
+    {
+        GetSensorData();
+        if (writeSensorData)
+        {
+            WriteJson(sensorData, "SensorData-" + QString::number(time) + ".json");
+        }
+    }
+    if (trafficUpdateVariable)
+    {
+        GetTrafficUpdate();
+        if (writeTrafficUpdate)
+        {
+            WriteJson(trafficUpdate, "TrafficUpdate-" + QString::number(time) + ".json");
+        }
+    }
 }
 
 void OsmpFmuHandler::SetSensorViewInput(const osi3::SensorView& data)
 {
     fmi2_integer_t fmuInputValues[3];
-    fmi2_value_reference_t valueReferences[3] = {fmuVariables.at("OSMPSensorViewIn.base.lo").first,
-                                                 fmuVariables.at("OSMPSensorViewIn.base.hi").first,
-                                                 fmuVariables.at("OSMPSensorViewIn.size").first};
+    fmi2_value_reference_t valueReferences[3] = {fmuVariables.at(sensorViewVariable.value()+".base.lo").first,
+                                                 fmuVariables.at(sensorViewVariable.value()+".base.hi").first,
+                                                 fmuVariables.at(sensorViewVariable.value()+".size").first};
 
     data.SerializeToString(&serializedSensorView);
     encode_pointer_to_integer(serializedSensorView.data(),
@@ -150,9 +243,9 @@ void OsmpFmuHandler::SetSensorViewInput(const osi3::SensorView& data)
 void OsmpFmuHandler::SetTrafficCommandInput(const osi3::TrafficCommand& data)
 {
     fmi2_integer_t fmuInputValues[3];
-    fmi2_value_reference_t valueReferences[3] = {fmuVariables.at("OSMPTrafficCommandIn.base.lo").first,
-                                                 fmuVariables.at("OSMPTrafficCommandIn.base.hi").first,
-                                                 fmuVariables.at("OSMPTrafficCommandIn.size").first};
+    fmi2_value_reference_t valueReferences[3] = {fmuVariables.at(trafficCommandVariable.value()+".base.lo").first,
+                                                 fmuVariables.at(trafficCommandVariable.value()+".base.hi").first,
+                                                 fmuVariables.at(trafficCommandVariable.value()+".size").first};
 
     data.SerializeToString(&serializedTrafficCommand);
     encode_pointer_to_integer(serializedTrafficCommand.data(),
@@ -202,9 +295,28 @@ osi3::TrafficCommand OsmpFmuHandler::GetTrafficCommandFromOpenScenarioTrajectory
 
 void OsmpFmuHandler::GetTrafficUpdate()
 {
-    void* buffer = decode_integer_to_pointer(GetValue(fmuVariables.at("OSMPTrafficUpdateOut.base.hi").first, VariableType::Int).intValue,
-                                             GetValue(fmuVariables.at("OSMPTrafficUpdateOut.base.lo").first, VariableType::Int).intValue);
-    trafficUpdate.ParseFromArray(buffer, GetValue(fmuVariables.at("OSMPTrafficUpdateOut.size").first, VariableType::Int).intValue);
+    void* buffer = decode_integer_to_pointer(GetValue(fmuVariables.at(trafficUpdateVariable.value()+".base.hi").first, VariableType::Int).intValue,
+                                             GetValue(fmuVariables.at(trafficUpdateVariable.value()+".base.lo").first, VariableType::Int).intValue);
+    trafficUpdate.ParseFromArray(buffer, GetValue(fmuVariables.at(trafficUpdateVariable.value()+".size").first, VariableType::Int).intValue);
+}
+
+void OsmpFmuHandler::GetSensorData()
+{
+    void* buffer = decode_integer_to_pointer(GetValue(fmuVariables.at(sensorDataVariable.value()+".base.hi").first, VariableType::Int).intValue,
+                                             GetValue(fmuVariables.at(sensorDataVariable.value()+".base.lo").first, VariableType::Int).intValue);
+    sensorData.ParseFromArray(buffer, GetValue(fmuVariables.at(sensorDataVariable.value()+".size").first, VariableType::Int).intValue);
+}
+
+void OsmpFmuHandler::WriteJson(const google::protobuf::Message& message, const QString& fileName)
+{
+    QFile file{outputDir + "/" + fileName};
+    file.open(QIODevice::WriteOnly);
+    std::string outputString;
+    google::protobuf::util::JsonPrintOptions options;
+    options.add_whitespace = true;
+    google::protobuf::util::MessageToJsonString(message, &outputString, options);
+    file.write(outputString.data());
+    file.close();
 }
 
 osi3::SensorViewConfiguration OsmpFmuHandler::GenerateSensorViewConfiguration()
