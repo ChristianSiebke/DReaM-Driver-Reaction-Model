@@ -14,6 +14,7 @@
 
 #include "CollisionManipulator.h"
 
+#include <iostream>
 #include <QtGlobal>
 
 CollisionManipulator::CollisionManipulator(WorldInterface *world,
