@@ -8,9 +8,11 @@ add_openpass_target(
   SOURCES
     openScenarioActions_Tests.cpp
     ${COMPONENT_SOURCE_DIR}/openScenarioActionsImplementation.cpp
+    ${COMPONENT_SOURCE_DIR}/oscActionsCalculation.cpp
 
   HEADERS
     ${COMPONENT_SOURCE_DIR}/openScenarioActionsImplementation.h
+    ${COMPONENT_SOURCE_DIR}/oscActionsCalculation.h
 
   INCDIRS
     ${COMPONENT_SOURCE_DIR}

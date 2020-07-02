@@ -19,16 +19,12 @@ class FakeProfiles : public ProfilesInterface {
       std::unordered_map<std::string, AgentProfile> &());
   MOCK_METHOD0(GetVehicleProfiles,
       std::unordered_map<std::string, VehicleProfile> &());
-  MOCK_METHOD0(GetDriverProfiles,
-      DriverProfiles &());
-  MOCK_METHOD0(GetVehicleComponentProfiles,
-      std::unordered_map<std::string, VehicleComponentProfiles>&());
-  MOCK_METHOD0(GetSensorProfiles,
-      openpass::sensors::Profiles&());
-  MOCK_METHOD0(GetSpawnPointProfiles,
-      SpawnPointProfiles &());
+  MOCK_METHOD0(GetProfileGroups,
+     ProfileGroups &());
   MOCK_METHOD1(GetDriverProbabilities,
       StringProbabilities &(std::string));
   MOCK_METHOD1(GetVehicleProfileProbabilities,
       StringProbabilities &(std::string));
+  MOCK_METHOD2(GetProfile,
+      openpass::parameter::ParameterSetLevel1 (std::string, std::string));
 };

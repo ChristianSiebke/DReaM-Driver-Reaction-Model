@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -30,6 +30,11 @@ ScenarioConfig &SlaveConfig::GetScenarioConfig()
 SpawnPointLibraryInfoCollection& SlaveConfig::GetSpawnPointsConfig()
 {
     return spawnPointsConfig;
+}
+
+ObservationInstanceCollection& SlaveConfig::GetObservationConfig()
+{
+    return observationConfig;
 }
 
 EnvironmentConfig &SlaveConfig::GetEnvironmentConfig()

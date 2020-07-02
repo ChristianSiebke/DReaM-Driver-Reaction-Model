@@ -35,6 +35,7 @@
 #include "Interfaces/parameterInterface.h"
 #include "Interfaces/worldInterface.h"
 #include "Interfaces/eventDetectorInterface.h"
+#include "Interfaces/stochasticsInterface.h"
 
 #include "Common/conditionalEvent.h"
 #include "Common/collisionEvent.h"

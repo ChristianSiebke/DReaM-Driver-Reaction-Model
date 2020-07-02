@@ -1,6 +1,7 @@
 /*******************************************************************************
 * Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2020 HLRS, University of Stuttgart.
+*               2020 BMW AG
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -9,7 +10,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
-#include <Common/opMath.h>
+#include "Common/opMath.h"
 #include <algorithm>
 #include <utility>
 #include <limits>
@@ -33,6 +34,10 @@
 
 namespace Internal
 {
+
+using PathInJunctionConnector = std::function<void(const JunctionInterface*, const RoadInterface *, const RoadInterface *, const RoadInterface *, ContactPointType,
+                                                   ContactPointType, std::map<int, int>)>;
+
 ConversionStatus ConnectJunction(const SceneryInterface *scenery, const JunctionInterface *junction,
                                  PathInJunctionConnector connectPathInJunction)
 {
@@ -654,11 +659,15 @@ bool SceneryConverter::ConnectRoads()
     {
         RoadInterface* road = item.second;
 
-        ConnectRoadExternalWithElementTypeRoad(road);
+        if (!ConnectRoadExternalWithElementTypeRoad(road))
+        {
+            LOG(CbkLogLevel::Error, "could not connect external road " + item.second->GetId());
+            return false;
+        }
 
         if (!ConnectRoadInternal(road))
         {
-            LOG(CbkLogLevel::Error, "could not connect road " + item.second->GetId());
+            LOG(CbkLogLevel::Error, "could not connect internal road " + item.second->GetId());
             return false;
         }
     }
@@ -696,7 +705,7 @@ bool SceneryConverter::ConvertRoads()
 void SceneryConverter::ConvertObjects()
 {
     CreateObjects();
-    CreateTrafficSigns();
+    CreateRoadSignals();
 }
 
 void SceneryConverter::CreateObjects()
@@ -726,7 +735,12 @@ void SceneryConverter::CreateObjects()
                 OWL::Primitive::AbsPosition pos{x, y, 0};
                 OWL::Primitive::Dimension dim{object->GetLength(), object->GetWidth(), object->GetHeight()};
                 OWL::Primitive::AbsOrientation orientation{object->GetHdg(), object->GetPitch(), object->GetRoll()};
-                new TrafficObjectAdapter(worldData, localizer, pos, dim, orientation);
+                new TrafficObjectAdapter(worldData,
+                                         localizer,
+                                         pos,
+                                         dim,
+                                         orientation,
+                                         object->GetId());
             }
         }
     }
@@ -753,7 +767,23 @@ std::vector<OWL::Id> SceneryConverter::CreateLaneBoundaries(RoadLaneInterface &o
     return laneBoundaries;
 }
 
-void SceneryConverter::CreateTrafficSigns()
+Position GetPositionForRoadCoordinates(RoadInterface* road, double s, double t)
+{
+
+    auto& geometries = road->GetGeometries();
+    auto geometry = std::find_if(geometries.cbegin(), geometries.cend(),
+                                 [&](const RoadGeometryInterface* geometry)
+    {return (geometry->GetS() <= s) && (geometry->GetS() + geometry->GetLength() >= s);});
+    if (geometry == geometries.end())
+    {
+        throw std::runtime_error("No valid geometry found");
+    }
+    auto coordinates = (*geometry)->GetCoord(s - (*geometry)->GetS(), t);
+    auto yaw = (*geometry)->GetDir(s - (*geometry)->GetS());
+    return {coordinates.x, coordinates.y, yaw, 0};
+}
+
+void SceneryConverter::CreateRoadSignals()
 {
     for (auto& item : scenery->GetRoads())
     {
@@ -784,35 +814,74 @@ void SceneryConverter::CreateTrafficSigns()
                 continue;
             }
 
-            OWL::Interfaces::TrafficSign& trafficSign = worldData.AddTrafficSign(signal->GetId());
-
-            trafficSign.SetS(signal->GetS());
-
-            if (!trafficSign.SetSpecification(signal))
+            auto position = GetPositionForRoadCoordinates(road, signal->GetS(), signal->GetT());
+            if (OpenDriveTypeMapper::roadMarkings.find(signal->GetType()) != OpenDriveTypeMapper::roadMarkings.end())
             {
-                const std::string message = "Unsupported traffic sign type: " + signal->GetType() + (" (id: " + signal->GetId() + ")");
-                LOG(CbkLogLevel::Warning, message);
-                continue;
+                CreateRoadMarking(signal, position, section->GetLanes());
             }
 
-            for (auto lane : section->GetLanes())
+            else
             {
-                OWL::OdId odId = worldData.GetLaneIdMapping().at(lane->GetId());
-                if (signal->IsValidForLane(odId))
-                {
-                    worldData.AssignTrafficSignToLane(lane->GetId(), trafficSign);
-                }
+                CreateTrafficSign(signal, position, section->GetLanes());
             }
         }
 
         // First instantiate all signals and then add dependencies accordingly afterwards
-        for (const auto [supplementarySign, parentIds] : dependentSignals)
+        for (const auto& [supplementarySign, parentIds] : dependentSignals)
         {
-            for (const auto parentId : parentIds)
+            for (const auto& parentId : parentIds)
             {
                 auto parentSign = worldData.GetTrafficSigns().at(worldData.GetTrafficSignIdMapping().at(parentId));
-                parentSign->AddSupplementarySign(supplementarySign);
+
+                auto position = GetPositionForRoadCoordinates(road, supplementarySign->GetS(), supplementarySign->GetT());
+                parentSign->AddSupplementarySign(supplementarySign, position);
             }
+        }
+    }
+}
+
+void SceneryConverter::CreateTrafficSign(RoadSignalInterface* signal, Position position, const OWL::Interfaces::Lanes& lanes)
+{
+    OWL::Interfaces::TrafficSign& trafficSign = worldData.AddTrafficSign(signal->GetId());
+
+    trafficSign.SetS(signal->GetS());
+
+    if (!trafficSign.SetSpecification(signal, position))
+    {
+        const std::string message = "Unsupported traffic sign type: " + signal->GetType() + (" (id: " + signal->GetId() + ")");
+        LOG(CbkLogLevel::Warning, message);
+        return;
+    }
+
+    for (auto lane : lanes)
+    {
+        OWL::OdId odId = worldData.GetLaneIdMapping().at(lane->GetId());
+        if (signal->IsValidForLane(odId))
+        {
+            worldData.AssignTrafficSignToLane(lane->GetId(), trafficSign);
+        }
+    }
+}
+
+void SceneryConverter::CreateRoadMarking(RoadSignalInterface* signal, Position position, const OWL::Interfaces::Lanes& lanes)
+{
+    OWL::Interfaces::RoadMarking& roadMarking = worldData.AddRoadMarking();
+
+    roadMarking.SetS(signal->GetS());
+
+    if (!roadMarking.SetSpecification(signal, position))
+    {
+        const std::string message = "Unsupported traffic sign type: " + signal->GetType() + (" (id: " + signal->GetId() + ")");
+        LOG(CbkLogLevel::Warning, message);
+        return;
+    }
+
+    for (auto lane : lanes)
+    {
+        OWL::OdId odId = worldData.GetLaneIdMapping().at(lane->GetId());
+        if (signal->IsValidForLane(odId))
+        {
+            worldData.AssignRoadMarkingToLane(lane->GetId(), roadMarking);
         }
     }
 }
@@ -895,4 +964,92 @@ void SceneryConverter::CreateRoads()
             }
         }
     }
+}
+
+std::pair<RoadGraph, RoadGraphVertexMapping> RoadNetworkBuilder::Build()
+{
+    RoadGraph roadGraph;
+    RoadGraphVertexMapping vertices;
+
+    for (auto& [roadId, road] : scenery.GetRoads())
+    {
+        bool hasLeftLanes = road->GetLaneSections().front()->GetLanes().crbegin()->first > 0;
+        bool hasRightLanes = road->GetLaneSections().front()->GetLanes().cbegin()->first < 0;
+        if (hasLeftLanes)
+        {
+            RouteElement routeElement{roadId, false};
+            vertices[routeElement] = add_vertex(routeElement, roadGraph);
+        }
+        if (hasRightLanes)
+        {
+            RouteElement routeElement{roadId, true};
+            vertices[routeElement] = add_vertex(routeElement, roadGraph);
+        }
+    }
+
+    for (auto& [roadId, road] : scenery.GetRoads())
+    {
+        bool hasLeftLanes = road->GetLaneSections().front()->GetLanes().crbegin()->first > 0;
+        bool hasRightLanes = road->GetLaneSections().front()->GetLanes().cbegin()->first < 0;
+        for (auto& link : road->GetRoadLinks())
+        {
+            if (link->GetElementType() == RoadLinkElementType::Road)
+            {
+                if (link->GetType() == RoadLinkType::Successor)
+                {
+                    auto& successorId = link->GetElementId();
+                    if (link->GetContactPoint() == ContactPointType::Start)
+                    {
+                        if (hasRightLanes)
+                        {
+                            add_edge(vertices[{roadId, true}], vertices[{successorId, true}], roadGraph);
+                        }
+                        if (hasLeftLanes)
+                        {
+                            add_edge(vertices[{successorId, false}], vertices[{roadId, false}], roadGraph);
+                        }
+                    }
+                    else
+                    {
+                        if (hasRightLanes)
+                        {
+                            add_edge(vertices[{roadId, true}], vertices[{successorId, false}], roadGraph);
+                        }
+                        if (hasLeftLanes)
+                        {
+                            add_edge(vertices[{successorId, false}], vertices[{roadId, true}], roadGraph);
+                        }
+                    }
+                }
+                if (link->GetType() == RoadLinkType::Predecessor)
+                {
+                    auto& predecessorId = link->GetElementId();
+                    if (link->GetContactPoint() == ContactPointType::Start)
+                    {
+                        if (hasRightLanes)
+                        {
+                            add_edge(vertices[{predecessorId, true}], vertices[{roadId, false}], roadGraph);
+                        }
+                        if (hasLeftLanes)
+                        {
+                            add_edge(vertices[{roadId, false}], vertices[{predecessorId, true}], roadGraph);
+                        }
+                    }
+                    else
+                    {
+                        if (hasRightLanes)
+                        {
+                            add_edge(vertices[{predecessorId, true}], vertices[{roadId, true}], roadGraph);
+                        }
+                        if (hasLeftLanes)
+                        {
+                            add_edge(vertices[{roadId, false}], vertices[{predecessorId, false}], roadGraph);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return {roadGraph, vertices};
 }

@@ -25,7 +25,6 @@ HEADERS += \
 SOURCES += \
     $$MAIN_SRC_DIR/openPASS/Components_PCM/Dynamics_TwoTrack/dynamics_twotrack_tire.cpp \
     $$MAIN_SRC_DIR/openPASS/Components_PCM/Dynamics_TwoTrack/dynamics_twotrack_local.cpp \
-    $$MAIN_SRC_DIR/openPASS/Common/vector2d.cpp \
     tst_ut_dynamics2tmtest.cpp \
     main.cpp \
 

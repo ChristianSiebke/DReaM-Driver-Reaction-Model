@@ -27,15 +27,15 @@ ObservationBinding::~ObservationBinding()
 }
 
 ObservationModule* ObservationBinding::Instantiate(const std::string& libraryPath,
-        const openpass::parameter::Container &parameter,
+        const openpass::parameter::ParameterSetLevel1 &parameter,
         StochasticsInterface* stochastics,
         WorldInterface* world,
-        EventNetworkInterface* eventNetwork)
+        EventNetworkInterface* eventNetwork,
+        DataStoreReadInterface* const dataStore)
 {
     if (!library)
     {
-        library = new (std::nothrow) ObservationLibrary(libraryPath,
-                callbacks);
+        library = new (std::nothrow) ObservationLibrary(libraryPath, callbacks);
         if (!library)
         {
             return nullptr;
@@ -52,7 +52,8 @@ ObservationModule* ObservationBinding::Instantiate(const std::string& libraryPat
                                             parameter,
                                             stochastics,
                                             world,
-                                            eventNetwork);
+                                            eventNetwork,
+                                            dataStore);
 }
 
 void ObservationBinding::Unload()

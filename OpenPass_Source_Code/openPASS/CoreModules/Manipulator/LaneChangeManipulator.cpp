@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -18,13 +18,14 @@
 #include <QtGlobal>
 
 LaneChangeManipulator::LaneChangeManipulator(WorldInterface *world,
-                                             std::shared_ptr<openScenario::PrivateLateralLaneChangeAction> action,
                                              SimulationSlave::EventNetworkInterface *eventNetwork,
-                                             const CallbackInterface *callbacks):
+                                             const CallbackInterface *callbacks,
+                                             const openScenario::LaneChangeAction action,
+                                             const std::string &eventName) :
     ManipulatorCommonBase(world,
-                          action,
                           eventNetwork,
-                          callbacks),
+                          callbacks,
+                          eventName),
     action(action)
 {
     cycleTime = 100;
@@ -42,7 +43,7 @@ void LaneChangeManipulator::Trigger(int time)
                                                                      eventName,
                                                                      COMPONENTNAME,
                                                                      actorId,
-                                                                     action->GetValue());
+                                                                     action.laneChangeParameter);
 
             eventNetwork->InsertEvent(laneChangeEvent);
         }
@@ -53,7 +54,7 @@ EventContainer LaneChangeManipulator::GetEvents()
 {
     EventContainer manipulatorSpecificEvents{};
 
-    const auto &conditionalEvents = eventNetwork->GetActiveEventCategory(EventDefinitions::EventCategory::Conditional);
+    const auto &conditionalEvents = eventNetwork->GetActiveEventCategory(EventDefinitions::EventCategory::OpenSCENARIO);
 
     for(const auto &event: conditionalEvents)
     {

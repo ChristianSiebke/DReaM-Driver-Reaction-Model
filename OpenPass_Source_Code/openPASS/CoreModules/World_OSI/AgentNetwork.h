@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -23,10 +23,13 @@
 #include <algorithm>
 #include <utility>
 #include <map>
+#include "Common/openPassTypes.h"
 #include "Interfaces/agentInterface.h"
 #include "AgentAdapter.h"
-#include "Interfaces/worldInterface.h"
 
+class WorldImplementation;
+
+using Publisher = std::function<void(openpass::type::EntityId id, openpass::type::FlatParameterKey key, openpass::type::FlatParameterValue value)>;
 
 /*!
 * \brief network of agents
@@ -34,16 +37,11 @@
 * This class stores all agents in a network. It is used to synchronize the update of all
 * values of all agents.
 */
-class AgentNetwork
+class AgentNetwork final
 {
 public:    
-    AgentNetwork(WorldInterface *world, const CallbackInterface *callbacks);
-    AgentNetwork(const AgentNetwork&) = delete;
-    AgentNetwork(AgentNetwork&&) = delete;
-    AgentNetwork& operator=(const AgentNetwork&) = delete;
-    AgentNetwork& operator=(AgentNetwork&&) = delete;
-    virtual ~AgentNetwork();
-
+    AgentNetwork(WorldImplementation *world, const CallbackInterface *callbacks);
+    ~AgentNetwork();
     /*!
      * \brief AddAgent
      * Add agent to agent network:
@@ -73,10 +71,23 @@ public:
     /*!
      * \brief QueueAgentRemove
      *
-     * This function queues agents in a list that will be removed after a time step.
+     * This function queues agents in a list that will be removed during the next syncronization.
      * \param agent agent which shall be removed
      */
     void QueueAgentRemove(const AgentInterface *agent);
+
+    /*! Removes an agent from the network
+     *
+     * \param agent agent which shall be removed
+     */
+    void RemoveAgent(const AgentInterface *agent);
+
+    /*!
+         * \brief Publishes the general observations about current agents
+         *
+         * \param Publish call
+         */
+    void PublishGlobalData(Publisher publish);
 
     /*!
      * \brief SyncGlobalData
@@ -110,6 +121,14 @@ public:
      */
     virtual const std::list<const AgentInterface*> &GetRemovedAgents() const;
 
+    /*!
+     * \brief GetRemovedAgents
+     * Retrieves agents that were removed during the previous timestep and clears the list
+     *
+     * \return              List of agent references
+     */
+    virtual const std::list<const AgentInterface*> GetRemovedAgentsInPreviousTimestep();
+
 protected:
     //-----------------------------------------------------------------------------
     //! Provides callback to LOG() macro
@@ -134,11 +153,12 @@ protected:
     }
 
 private:    
-    WorldInterface *world;
+    WorldImplementation *world;
     std::map<int, AgentInterface*> agents;
     std::list<const AgentInterface*> removedAgents;
     std::list<std::function<void()>> updateQueue;
     std::list<const AgentInterface*> removeQueue;
+    std::list<const AgentInterface*> removedAgentsPrevious;
 
     const CallbackInterface *callbacks;
 };

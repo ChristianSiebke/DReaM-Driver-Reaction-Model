@@ -14,11 +14,13 @@
 #include "gmock/gmock.h"
 #include "fakeWorldObject.h"
 #include "Interfaces/agentInterface.h"
+#include "Interfaces/egoAgentInterface.h"
 
 class FakeAgent : public FakeWorldObject, public AgentInterface
 {
   public:
     MOCK_CONST_METHOD0(GetAgentId, int());
+    MOCK_METHOD0(GetEgoAgent, EgoAgentInterface&());
     MOCK_CONST_METHOD0(GetVehicleModelType, std::string());
     MOCK_CONST_METHOD0(GetVehicleModelParameters, VehicleModelParameters());
     MOCK_CONST_METHOD0(GetDriverProfileName, std::string());
@@ -33,7 +35,6 @@ class FakeAgent : public FakeWorldObject, public AgentInterface
     MOCK_CONST_METHOD0(GetDistanceCOGtoLeadingEdge, double());
     MOCK_CONST_METHOD0(GetAccelerationX, double());
     MOCK_CONST_METHOD0(GetAccelerationY, double());
-    MOCK_CONST_METHOD0(GetRelativeYaw, double());
     MOCK_CONST_METHOD2(GetCollisionData, std::vector<void *>(int collisionPartnerId, int collisionDataId));
     MOCK_CONST_METHOD0(GetCollisionPartners, std::vector<CollisionPartner>());
     MOCK_METHOD1(SetPositionX, void(double positionX));
@@ -55,7 +56,6 @@ class FakeAgent : public FakeWorldObject, public AgentInterface
     MOCK_METHOD1(SetMaxDeceleration, void(double maxDeceleration));
     MOCK_METHOD1(SetAccelerationX, void(double accelerationX));
     MOCK_METHOD1(SetAccelerationY, void(double accelerationY));
-    MOCK_METHOD0(RemoveAgent, void());
     MOCK_METHOD1(UpdateCollision, void(CollisionPartner collisionPartner));
     MOCK_METHOD0(Unlocate, void());
     MOCK_METHOD0(Locate, bool());
@@ -78,29 +78,16 @@ class FakeAgent : public FakeWorldObject, public AgentInterface
     MOCK_METHOD2(InitAgentParameter, bool(int id, AgentBlueprintInterface *agentBlueprint));
     MOCK_CONST_METHOD0(IsValid, bool());
     MOCK_CONST_METHOD0(GetAgentTypeId, int());
-    MOCK_CONST_METHOD1(GetRoadId, std::string(MeasurementPoint mp));
-    MOCK_CONST_METHOD1(GetMainLaneId, int(MeasurementPoint mp));
-    MOCK_METHOD0(GetSecondaryCoveredLanes, std::set<int>());
-    MOCK_CONST_METHOD0(GetLaneIdLeft, int());
-    MOCK_CONST_METHOD0(GetLaneIdRight, int());
     MOCK_CONST_METHOD0(IsAgentInWorld, bool());
     MOCK_METHOD0(IsAgentAtEndOfRoad, bool());
     MOCK_METHOD1(SetPosition, void(Position pos));
-    MOCK_CONST_METHOD0(GetDistanceToStartOfRoad, double());
-    MOCK_CONST_METHOD2(GetLaneWidth, double(int relativeLane, double distance));
-    MOCK_CONST_METHOD2(GetLaneCurvature, double(int relativeLane, double distance));
-    MOCK_CONST_METHOD2(GetLaneDirection, double(int relativeLane, double distance));
     MOCK_METHOD1(GetDistanceToFrontAgent, double(int laneId));
     MOCK_METHOD1(GetDistanceToRearAgent, double(int laneId));
-    MOCK_CONST_METHOD1(GetDistanceToObject, double(const WorldObjectInterface *otherObject));
     MOCK_METHOD0(RemoveSpecialAgentMarker, void());
     MOCK_METHOD0(SetSpecialAgentMarker, void());
     MOCK_METHOD0(SetObstacleFlag, void());
     MOCK_METHOD0(GetDistanceToSpecialAgent, double());
     MOCK_METHOD0(IsObstacle, bool());
-    MOCK_CONST_METHOD2(GetDistanceToEndOfLane, double(double sightDistance, int relativeLane));
-    MOCK_CONST_METHOD3(GetDistanceToEndOfLane, double(double sightDistance, int relativeLane, const LaneTypes& laneTypes));
-    MOCK_CONST_METHOD0(GetPositionLateral, double());
     MOCK_CONST_METHOD0(IsLeavingWorld, bool());
     MOCK_CONST_METHOD0(IsCrossingLanes, bool());
     MOCK_METHOD0(GetDistanceFrontAgentToEgo, double());
@@ -112,11 +99,6 @@ class FakeAgent : public FakeWorldObject, public AgentInterface
     MOCK_CONST_METHOD0(IsBicycle, bool());
     MOCK_CONST_METHOD0(Unregister, void());
     MOCK_CONST_METHOD0(IsFirstCarInLane, bool());
-    MOCK_CONST_METHOD4(GetObjectsInRange,
-                       std::vector<const WorldObjectInterface *>(int relativeLane, double backwardsRange,
-                                                                 double forwardRange, MeasurementPoint mp));
-    MOCK_CONST_METHOD4(GetAgentsInRange, std::vector<const AgentInterface *>(int relativeLane, double backwardsRange,
-                                                                             double forwardRange, MeasurementPoint mp));
     MOCK_CONST_METHOD0(GetTypeOfNearestMark, MarkType());
     MOCK_CONST_METHOD0(GetTypeOfNearestMarkString, std::string());
     MOCK_CONST_METHOD1(GetDistanceToNearestMark, double(MarkType markType));
@@ -180,10 +162,9 @@ class FakeAgent : public FakeWorldObject, public AgentInterface
     MOCK_METHOD1(SetCollisionState, void(bool collisionState));
     MOCK_CONST_METHOD0(GetCollisionState, bool());
     MOCK_CONST_METHOD0(GetAccelerationAbsolute, double());
-    MOCK_CONST_METHOD0(GetRoadPosition, RoadPosition());
-    MOCK_CONST_METHOD1(GetDistanceToStartOfRoad, double(MeasurementPoint mp));
+    MOCK_CONST_METHOD0(GetObjectPosition, const ObjectPosition& ());
+    MOCK_CONST_METHOD1(GetRoads, std::vector<std::string>(MeasurementPoint mp));
     MOCK_CONST_METHOD2(GetDistanceToStartOfRoad, double(MeasurementPoint mp, std::string roadId));
-    MOCK_CONST_METHOD1(GetObstruction, const Obstruction(const WorldObjectInterface &worldObject));
     MOCK_CONST_METHOD0(GetDistanceReferencePointToLeadingEdge, double());
     MOCK_CONST_METHOD0(GetEngineSpeed, double());
     MOCK_CONST_METHOD0(GetEffAccelPedal, double());
@@ -191,17 +172,11 @@ class FakeAgent : public FakeWorldObject, public AgentInterface
     MOCK_CONST_METHOD0(GetSteeringWheelAngle, double());
     MOCK_CONST_METHOD0(GetMaxAcceleration, double());
     MOCK_CONST_METHOD0(GetMaxDeceleration, double());
-    MOCK_CONST_METHOD1(GetLaneRemainder, double(Side));
-    MOCK_CONST_METHOD2(GetTrafficSignsInRange,
-                       std::vector<CommonTrafficSign::Entity>(double searchDistance, int relativeLane));
-    MOCK_CONST_METHOD3(GetLaneMarkingsInRange, std::vector<LaneMarking::Entity> (double searchDistance, int relativeLane, Side side));
+    MOCK_CONST_METHOD2(GetLaneRemainder, double(const std::string& roadId, Side));
     MOCK_CONST_METHOD0(GetSpeedGoalMin, double());
     MOCK_CONST_METHOD0(GetSensorParameters, const openpass::sensors::Parameters&());
     MOCK_METHOD1(SetSensorParameters, void(openpass::sensors::Parameters sensorParameters));
     MOCK_CONST_METHOD3(GetDistanceToConnectorEntrance, double (std::string intersectingConnectorId, int intersectingLaneId, std::string ownConnectorId));
     MOCK_CONST_METHOD3(GetDistanceToConnectorDeparture, double (std::string intersectingConnectorId, int intersectingLaneId, std::string ownConnectorId));
     MOCK_CONST_METHOD0(GetDistanceToNextJunction, double ());
-    MOCK_CONST_METHOD0(GetRoute, const Route&());
-    MOCK_CONST_METHOD1(GetRelativeJunctions, RelativeWorldView::Junctions (double range));
-    MOCK_CONST_METHOD1(GetRelativeLanes, RelativeWorldView::Lanes (double range));
 };

@@ -10,7 +10,7 @@
 
 #pragma once
 #include "Interfaces/profilesInterface.h"
-#include "Interfaces/samplerInterface.h"
+#include "Interfaces/stochasticsInterface.h"
 
 class DynamicProfileSampler;
 
@@ -31,11 +31,11 @@ struct SampledProfiles
     /*!
      * \brief Creates a new DynamicProfileSampler which can be used to build an instance of this struct.
      * \param agentProfileName  name of the AgentProfile samplied by the AgentProfileSampler
-     * \param sampler           sampler
+     * \param stochastics       Reference to the stochasticInterface
      * \param profiles          imported profiles from the ProfilesCatalog
      * \return new instance of DynamicProfileSampler
      */
-    static DynamicProfileSampler make(std::string agentProfileName, const SamplerInterface& sampler, ProfilesInterface* profiles);
+    static DynamicProfileSampler make(std::string agentProfileName, StochasticsInterface& stochastics, ProfilesInterface* profiles);
 
 private:
     SampledProfiles() = default;
@@ -47,9 +47,9 @@ private:
 class DynamicProfileSampler
 {
 public:
-    DynamicProfileSampler(std::string agentProfileName, const SamplerInterface& sampler, ProfilesInterface* profiles) :
+    DynamicProfileSampler(std::string agentProfileName, StochasticsInterface& stochastics, ProfilesInterface* profiles) :
         agentProfileName(agentProfileName),
-        sampler(sampler),
+        stochastics(stochastics),
         profiles(profiles)
     {
     }
@@ -85,7 +85,7 @@ public:
 private:
     SampledProfiles sampledProfiles;
     std::string agentProfileName;
-    const SamplerInterface& sampler;
+    StochasticsInterface& stochastics;
     ProfilesInterface* profiles;
 };
 

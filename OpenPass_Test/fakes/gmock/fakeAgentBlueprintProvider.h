@@ -16,7 +16,7 @@
 
 class FakeAgentBlueprintProvider : public AgentBlueprintProviderInterface {
 public:
-    MOCK_CONST_METHOD1(SampleAgent, AgentBlueprint(const std::string& agentProfileName));
+    MOCK_CONST_METHOD2(SampleAgent, AgentBlueprint(const std::string& agentProfileName, const openScenario::Parameters& assignedParameters));
 };
 
 

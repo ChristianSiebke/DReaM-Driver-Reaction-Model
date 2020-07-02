@@ -9,7 +9,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
-#include <Common/opMath.h>
+#include "Common/opMath.h"
 #include <exception>
 #include <qglobal.h>
 
@@ -17,11 +17,15 @@
 
 //TODO: replace GlobalObject with injected shared_pointer to locator
 
-TrafficObjectAdapter::TrafficObjectAdapter(OWL::Interfaces::WorldData& worldData, const World::Localization::Localizer& localizer,
-        OWL::Primitive::AbsPosition position,
-        OWL::Primitive::Dimension dimension, OWL::Primitive::AbsOrientation orientation) :
+TrafficObjectAdapter::TrafficObjectAdapter(OWL::Interfaces::WorldData& worldData,
+                                           const World::Localization::Localizer& localizer,
+                                           OWL::Primitive::AbsPosition position,
+                                           OWL::Primitive::Dimension dimension,
+                                           OWL::Primitive::AbsOrientation orientation,
+                                           const OpenDriveId odId) :
     WorldObjectAdapter{worldData.AddStationaryObject(static_cast<void*>(static_cast<WorldObjectInterface*>(this)))}, // objects passed as void * need to be casted to WorldObjectInterface*, because they are retrieved by casting to that class
-    localizer{localizer}
+    localizer{localizer},
+    openDriveId{odId}
 {
     baseTrafficObject.SetReferencePointPosition(position);
     baseTrafficObject.SetDimension(dimension);
@@ -30,24 +34,19 @@ TrafficObjectAdapter::TrafficObjectAdapter(OWL::Interfaces::WorldData& worldData
     Locate();
 }
 
+const ObjectPosition& TrafficObjectAdapter::GetObjectPosition() const
+{
+    return GetBaseTrafficObject().GetLocatedPosition();
+}
+
 ObjectTypeOSI TrafficObjectAdapter::GetType() const
 {
     return ObjectTypeOSI::Object;
 }
 
-double TrafficObjectAdapter::GetDistanceToStartOfRoad() const
-{
-    return WorldObjectInterface::GetDistanceToStartOfRoad();
-}
-
 void TrafficObjectAdapter::InitLaneDirection(double hdg)
 {
     laneDirection = GetYaw() - hdg;
-}
-
-double TrafficObjectAdapter::GetDistanceToStartOfRoad(MeasurementPoint mp) const
-{
-    return GetDistanceToStartOfRoad(mp, GetBaseTrafficObject().GetLocatedPosition().referencePoint.roadId);
 }
 
 double TrafficObjectAdapter::GetDistanceToStartOfRoad(MeasurementPoint mp, std::string roadId) const
@@ -59,7 +58,7 @@ double TrafficObjectAdapter::GetDistanceToStartOfRoad(MeasurementPoint mp, std::
         case MeasurementPoint::Rear:
             return GetBaseTrafficObject().GetDistance(OWL::MeasurementPoint::RoadStart, roadId);
         case MeasurementPoint::Reference:
-            return GetBaseTrafficObject().GetLocatedPosition().referencePoint.roadPosition.s;
+            return GetBaseTrafficObject().GetLocatedPosition().referencePoint.at(roadId).roadPosition.s;
         default:
             throw std::invalid_argument("Invalid measurement point");
     }
@@ -78,9 +77,9 @@ double TrafficObjectAdapter::GetLaneDirection() const
     return laneDirection;
 }
 
-double TrafficObjectAdapter::GetLaneRemainder(Side side) const
+double TrafficObjectAdapter::GetLaneRemainder(const std::string& roadId, Side side) const
 {
-    return side == Side::Left ? locateResult.remainder.left : locateResult.remainder.right;
+    return side == Side::Left ? locateResult.position.touchedRoads.at(roadId).remainder.left : locateResult.position.touchedRoads.at(roadId).remainder.right;
 }
 
 bool TrafficObjectAdapter::Locate()
@@ -88,7 +87,7 @@ bool TrafficObjectAdapter::Locate()
     // reset on-demand values
     boundaryPoints.clear();
 
-    locateResult = localizer.Locate(GetBoundingBox2D(), baseTrafficObject, Route{});
+    locateResult = localizer.Locate(GetBoundingBox2D(), baseTrafficObject);
 
     baseTrafficObject.SetLocatedPosition(locateResult.position);
     return true;
@@ -97,6 +96,11 @@ bool TrafficObjectAdapter::Locate()
 void TrafficObjectAdapter::Unlocate()
 {
     localizer.Unlocate(baseTrafficObject);
+}
+
+OpenDriveId TrafficObjectAdapter::GetOpenDriveId() const
+{
+    return openDriveId;
 }
 
 TrafficObjectAdapter::~TrafficObjectAdapter()

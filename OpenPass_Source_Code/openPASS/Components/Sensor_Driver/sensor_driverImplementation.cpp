@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *               2018, 2019 AMFD GmbH
 *
 * This program and the accompanying materials are made
@@ -17,7 +17,7 @@
 #include <qglobal.h>
 
 #include "Interfaces/worldInterface.h"
-
+#include "RouteCalculation.h"
 #include "sensor_driverImplementation.h"
 #include "Signals/sensorDriverSignal.h"
 
@@ -31,7 +31,7 @@ SensorDriverImplementation::SensorDriverImplementation(
         StochasticsInterface *stochastics,
         WorldInterface *world,
         const ParameterInterface *parameters,
-        const std::map<int, ObservationInterface*> *observations,
+        PublisherInterface * const publisher,
         const CallbackInterface *callbacks,
         AgentInterface *agent) :
     SensorInterface(
@@ -44,11 +44,14 @@ SensorDriverImplementation::SensorDriverImplementation(
         stochastics,
         world,
         parameters,
-        observations,
+        publisher,
         callbacks,
         agent),
-    sensorDriverCalculations(agent)
-{}
+    egoAgent(agent->GetEgoAgent()),
+    sensorDriverCalculations(egoAgent)
+{
+    UpdateGraphPosition();
+}
 
 void SensorDriverImplementation::UpdateInput(int localLinkId,
                                              const std::shared_ptr<const SignalInterface> &data,
@@ -90,22 +93,44 @@ void SensorDriverImplementation::UpdateOutput(int localLinkId,
 void SensorDriverImplementation::Trigger(int time)
 {
     Q_UNUSED(time);
+    UpdateGraphPosition();
     GetOwnVehicleInformation();
-    GetTrafficRuleInformation();
     GetGeometryInformation();
+    GetTrafficRuleInformation();
     GetSurroundingObjectsInformation();
+}
+
+void SensorDriverImplementation::GetNewRoute()
+{
+    constexpr int maxDepth = 10;
+    const auto& roadIds = GetAgent()->GetRoads(MeasurementPoint::Front);
+    if (roadIds.empty())
+    {
+        return;
+    }
+    auto [roadGraph, root] = GetWorld()->GetRoadGraph({roadIds.front(), GetAgent()->GetObjectPosition().mainLocatePoint.at(roadIds.front()).laneId < 0}, maxDepth);
+    std::map<RoadGraph::edge_descriptor, double> weights = GetWorld()->GetEdgeWeights(roadGraph);
+    auto [route, target] = RouteCalculation::SampleRoute(roadGraph, root, weights, *GetStochastics());
+    egoAgent.SetRoadGraph(std::move(roadGraph), root, target);
+}
+
+void SensorDriverImplementation::UpdateGraphPosition()
+{
+    if(!egoAgent.HasValidRoute())
+    {
+        GetNewRoute();
+    }
 }
 
 void SensorDriverImplementation::GetOwnVehicleInformation()
 {
-    ownVehicleInformation.velocity                      = GetAgent()->GetVelocity(VelocityScope::Absolute);
+    ownVehicleInformation.absoluteVelocity              = GetAgent()->GetVelocity(VelocityScope::Absolute);
     ownVehicleInformation.acceleration                  = GetAgent()->GetAcceleration();
-    ownVehicleInformation.lateralPosition               = GetAgent()->GetPositionLateral();
-    ownVehicleInformation.heading                       = GetAgent()->GetRelativeYaw();
+    ownVehicleInformation.lateralPosition               = egoAgent.GetPositionLateral();
+    ownVehicleInformation.heading                       = egoAgent.GetRelativeYaw();
     ownVehicleInformation.steeringWheelAngle            = GetAgent()->GetSteeringWheelAngle();
-    ownVehicleInformation.isCrossingLanes               = GetAgent()->IsCrossingLanes();
-    ownVehicleInformation.distanceToLaneBoundaryLeft    = GetAgent()->GetLaneRemainder(Side::Left);
-    ownVehicleInformation.distanceToLaneBoundaryRight   = GetAgent()->GetLaneRemainder(Side::Right);
+    ownVehicleInformation.distanceToLaneBoundaryLeft    = egoAgent.GetLaneRemainder(Side::Left);
+    ownVehicleInformation.distanceToLaneBoundaryRight   = egoAgent.GetLaneRemainder(Side::Right);
     ownVehicleInformation.collision                     = GetAgent()->GetCollisionPartners().size() > 0;
 }
 
@@ -115,10 +140,10 @@ void SensorDriverImplementation::GetTrafficRuleInformation()
     trafficRuleInformation.laneEgo    = GetTrafficRuleLaneInformationEgo();
     trafficRuleInformation.laneLeft   = GetTrafficRuleLaneInformationLeft();
     trafficRuleInformation.laneRight  = GetTrafficRuleLaneInformationRight();
-    trafficRuleInformation.laneMarkingsLeft = GetAgent()->GetLaneMarkingsInRange(visibilityDistance, 0, Side::Left);
-    trafficRuleInformation.laneMarkingsRight = GetAgent()->GetLaneMarkingsInRange(visibilityDistance, 0, Side::Right);
+    trafficRuleInformation.laneMarkingsLeft = egoAgent.GetLaneMarkingsInRange(visibilityDistance, Side::Left);
+    trafficRuleInformation.laneMarkingsRight = egoAgent.GetLaneMarkingsInRange(visibilityDistance, Side::Right);
 
-    const auto laneIntervals = GetAgent()->GetRelativeLanes(0.0);
+    const auto laneIntervals = egoAgent.GetRelativeLanes(0.0);
 
     if (laneIntervals.size() > 0)
     {
@@ -128,11 +153,11 @@ void SensorDriverImplementation::GetTrafficRuleInformation()
         {
             if(relativeLane.relativeId == 1)
             {
-                trafficRuleInformation.laneMarkingsLeftOfLeftLane = GetAgent()->GetLaneMarkingsInRange(visibilityDistance, 1, Side::Left);
+                trafficRuleInformation.laneMarkingsLeftOfLeftLane = egoAgent.GetLaneMarkingsInRange(visibilityDistance, Side::Left, 1);
             }
             if(relativeLane.relativeId == -1)
             {
-                trafficRuleInformation.laneMarkingsRightOfRightLane = GetAgent()->GetLaneMarkingsInRange(visibilityDistance, -1, Side::Right);
+                trafficRuleInformation.laneMarkingsRightOfRightLane = egoAgent.GetLaneMarkingsInRange(visibilityDistance,Side::Right, -1);
             }
         }
     }
@@ -143,7 +168,7 @@ LaneInformationTrafficRules SensorDriverImplementation::GetTrafficRuleLaneInform
     LaneInformationTrafficRules laneInformation;
     const double visibilityDistance = GetWorld()->GetVisibilityDistance();
 
-    laneInformation.trafficSigns            = GetAgent()->GetTrafficSignsInRange(visibilityDistance);
+    laneInformation.trafficSigns            = egoAgent.GetTrafficSignsInRange(visibilityDistance);
 
     return laneInformation;
 }
@@ -154,7 +179,7 @@ LaneInformationTrafficRules SensorDriverImplementation::GetTrafficRuleLaneInform
     const int relativeLaneId = 1;
     const double visibilityDistance = GetWorld()->GetVisibilityDistance();
 
-    laneInformation.trafficSigns            = GetAgent()->GetTrafficSignsInRange(visibilityDistance, relativeLaneId);
+    laneInformation.trafficSigns            = egoAgent.GetTrafficSignsInRange(visibilityDistance, relativeLaneId);
 
     return laneInformation;
 }
@@ -165,7 +190,7 @@ LaneInformationTrafficRules SensorDriverImplementation::GetTrafficRuleLaneInform
     const int relativeLaneId = -1;
     const double visibilityDistance = GetWorld()->GetVisibilityDistance();
 
-    laneInformation.trafficSigns            = GetAgent()->GetTrafficSignsInRange(visibilityDistance, relativeLaneId);
+    laneInformation.trafficSigns            = egoAgent.GetTrafficSignsInRange(visibilityDistance, relativeLaneId);
 
     return laneInformation;
 }
@@ -184,9 +209,9 @@ LaneInformationGeometry SensorDriverImplementation::GetGeometryLaneInformationEg
     const double visibilityDistance = GetWorld()->GetVisibilityDistance();
 
     laneInformation.exists                  = true;     // Ego lane must exist by definition, or else vehicle would have despawned by now. Information not necessary atm!
-    laneInformation.curvature               = GetAgent()->GetLaneCurvature();
-    laneInformation.width                   = GetAgent()->GetLaneWidth();
-    laneInformation.distanceToEndOfLane     = GetAgent()->GetDistanceToEndOfLane(visibilityDistance);
+    laneInformation.curvature               = egoAgent.GetLaneCurvature();
+    laneInformation.width                   = egoAgent.GetLaneWidth();
+    laneInformation.distanceToEndOfLane     = egoAgent.GetDistanceToEndOfLane(visibilityDistance);
 
     return laneInformation;
 }
@@ -198,7 +223,7 @@ LaneInformationGeometry SensorDriverImplementation::GetGeometryLaneInformation(i
 
     laneInformation.exists = false;
 
-    const auto laneIntervals = GetAgent()->GetRelativeLanes(0.0);
+    const auto laneIntervals = egoAgent.GetRelativeLanes(0.0);
 
     if (!laneIntervals.empty())
     {
@@ -211,9 +236,9 @@ LaneInformationGeometry SensorDriverImplementation::GetGeometryLaneInformation(i
                          }) != relativeLanes.cend())
         {
             laneInformation.exists = true;
-            laneInformation.curvature               = GetAgent()->GetLaneCurvature(relativeLaneId);
-            laneInformation.width                   = GetAgent()->GetLaneWidth(relativeLaneId);
-            laneInformation.distanceToEndOfLane     = GetAgent()->GetDistanceToEndOfLane(visibilityDistance, relativeLaneId);
+            laneInformation.curvature               = egoAgent.GetLaneCurvature(relativeLaneId);
+            laneInformation.width                   = egoAgent.GetLaneWidth(relativeLaneId);
+            laneInformation.distanceToEndOfLane     = egoAgent.GetDistanceToEndOfLane(visibilityDistance, relativeLaneId);
         }
     }
 
@@ -234,7 +259,9 @@ void SensorDriverImplementation::GetSurroundingObjectsInformation()
 
 const WorldObjectInterface* SensorDriverImplementation::GetObject(double visibilityDistance, int relativeLane, bool forwardSearch)
 {
-    const auto objectsInRange = GetAgent()->GetObjectsInRange(relativeLane, forwardSearch ? 0 : visibilityDistance, forwardSearch ? visibilityDistance : 0, forwardSearch ? MeasurementPoint::Front : MeasurementPoint::Rear);
+    const auto objectsInRange = egoAgent.GetObjectsInRange(forwardSearch ? 0 : visibilityDistance,
+                                                           forwardSearch ? visibilityDistance : 0,
+                                                           relativeLane);
     if (objectsInRange.empty())
     {
         return nullptr;
@@ -256,7 +283,7 @@ ObjectInformation SensorDriverImplementation::GetOtherObjectInformation(const Wo
     {
         objectInformation.exist = true;
         objectInformation.id = surroundingObject->GetId();
-        objectInformation.relativeLongitudinalDistance = GetAgent()->GetDistanceToObject(surroundingObject);
+        objectInformation.relativeLongitudinalDistance = egoAgent.GetDistanceToObject(surroundingObject).netDistance.value();
         objectInformation.heading = surroundingObject->GetYaw();
         objectInformation.length = surroundingObject->GetLength();
         objectInformation.width = surroundingObject->GetWidth();
@@ -268,10 +295,10 @@ ObjectInformation SensorDriverImplementation::GetOtherObjectInformation(const Wo
         else
         {
             objectInformation.isStatic = false;
-            objectInformation.heading = surroundingVehicle->GetRelativeYaw();
-            objectInformation.velocity = surroundingVehicle->GetVelocity();
+//            objectInformation.heading = surroundingVehicle->GetRelativeYaw(get(RouteElement(), route, currentPositionInGraph).roadId);
+            objectInformation.absoluteVelocity = surroundingVehicle->GetVelocity();
             objectInformation.acceleration = surroundingVehicle->GetAcceleration();
-            objectInformation.relativeLateralDistance = sensorDriverCalculations.GetLateralDistanceToObject(surroundingVehicle);
+//            objectInformation.relativeLateralDistance = sensorDriverCalculations.GetLateralDistanceToObject(get(RouteElement(), route, currentPositionInGraph).roadId, surroundingVehicle);
         }
     }
 

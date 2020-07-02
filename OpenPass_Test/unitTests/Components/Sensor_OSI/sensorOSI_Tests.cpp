@@ -14,7 +14,7 @@
 #include "gmock/gmock.h"
 
 #include "fakeAgent.h"
-#include "fakeObservation.h"
+#include "fakePublisher.h"
 #include "fakeParameter.h"
 #include "fakeStochastics.h"
 #include "fakeWorld.h"
@@ -200,8 +200,6 @@ public:
         fakeBools = {};
         ON_CALL(fakeParameters, GetParametersBool()).WillByDefault(ReturnRef(fakeBools));
 
-        observations = {{0, &fakeObservation}};
-
         ON_CALL(fakeWorldInterface, GetWorldData()).WillByDefault(Return(&fakeWorldData));
 
     }
@@ -209,14 +207,13 @@ public:
     osi3::SensorView sensorView;
     NiceMock<FakeStochastics> fakeStochastics;
     NiceMock<FakeParameter> fakeParameters;
-    NiceMock<FakeObservation> fakeObservation;
+    NiceMock<FakePublisher> fakePublisher;
     NiceMock<FakeWorld> fakeWorldInterface;
     NiceMock<OWL::Fakes::WorldData> fakeWorldData;
     NiceMock<FakeAgent> fakeAgent;
     std::map<std::string, double> fakeDoubles;
     std::map<std::string, int> fakeInts;
     std::map<std::string, bool> fakeBools;
-    std::map<int, ObservationInterface*> observations;
 };
 
 void AddMovingObjectToSensorView (osi3::SensorView &sensorView, MovingObjectParameter &objectParameter)
@@ -277,7 +274,7 @@ TEST_P(DetectObjects, StoresSensorDataWithDetectedObjects)
                 &fakeStochastics,
                 &fakeWorldInterface,
                 &fakeParameters,
-                &observations,
+                &fakePublisher,
                 nullptr,
                 &fakeAgent);
 

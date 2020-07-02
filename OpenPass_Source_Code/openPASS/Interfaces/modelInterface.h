@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -32,15 +32,16 @@
 #include "Interfaces/agentInterface.h"
 #include "Interfaces/callbackInterface.h"
 #include "Interfaces/signalInterface.h"
+#include "Interfaces/publisherInterface.h"
+#include "Interfaces/observationInterface.h"
 
-class ObservationInterface;
 class ParameterInterface;
 class StochasticsInterface;
 class WorldInterface;
 
 namespace SimulationSlave {
 class EventNetworkInterface;
-};
+}
 
 //-----------------------------------------------------------------------------
 //! Provides functionality to print information of signals
@@ -201,14 +202,14 @@ public:
                              int cycleTime,
                              StochasticsInterface *stochastics,
                              const ParameterInterface *parameters,
-                             const std::map<int, ObservationInterface*> *observations,
+                             PublisherInterface * const publisher,
                              const CallbackInterface *callbacks) :
         ModelInterface(isInit, priority, offsetTime, responseTime, cycleTime),
         callbacks(callbacks),
         componentName(componentName),
         stochastics(stochastics),
         parameters(parameters),
-        observations(observations)
+        publisher(publisher)
     {}
     RestrictedModelInterface(const RestrictedModelInterface&) = delete;
     RestrictedModelInterface(RestrictedModelInterface&&) = delete;
@@ -248,14 +249,13 @@ protected:
     }
 
     //-----------------------------------------------------------------------------
-    //! Retrieves the references to the observation modules used to track and
-    //! observe information
+    //! Retrieves the reference to the publishing module for data recording
     //!
-    //! @return                       Mapping of observation modules.
+    //! @return                       Publisher
     //-----------------------------------------------------------------------------
-    const std::map<int, ObservationInterface*> *GetObservations() const
+    PublisherInterface* GetPublisher()
     {
-        return observations;
+        return publisher;
     }
 
     //-----------------------------------------------------------------------------
@@ -287,7 +287,7 @@ private:
     std::string componentName;                      //!< Name of this component
     StochasticsInterface *stochastics;    //!< Reference to the stochastics functionality of the framework
     const ParameterInterface *parameters; //!< Reference to the configuration parameters
-    const std::map<int, ObservationInterface*> *observations; //!< Mapping of observation modules
+    PublisherInterface * const publisher; //!< Reference to the publisher module
 };
 
 //-----------------------------------------------------------------------------
@@ -321,7 +321,7 @@ public:
                                StochasticsInterface *stochastics,
                                WorldInterface *world,
                                const ParameterInterface *parameters,
-                               const std::map<int, ObservationInterface*> *observations,
+                               PublisherInterface * const publisher,
                                const CallbackInterface *callbacks,
                                AgentInterface *agent) :
         RestrictedModelInterface(componentName,
@@ -332,7 +332,7 @@ public:
                                  cycleTime,
                                  stochastics,
                                  parameters,
-                                 observations,
+                                 publisher,
                                  callbacks),
         agent(agent),
         world(world)
@@ -362,15 +362,6 @@ protected:
     AgentInterface *GetAgent() const
     {
         return agent;
-    }
-
-    //-----------------------------------------------------------------------------
-    //! Requests removal of the agent containing this component during the
-    //! simulation
-    //-----------------------------------------------------------------------------
-    void RemoveAgent()
-    {
-        agent->RemoveAgent();
     }
 
 private:
@@ -405,7 +396,7 @@ public:
                        int cycleTime,
                        StochasticsInterface *stochastics,
                        const ParameterInterface *parameters,
-                       const std::map<int, ObservationInterface*> *observations,
+                       PublisherInterface * const publisher,
                        const CallbackInterface *callbacks,
                        AgentInterface *agent) :
         RestrictedModelInterface(componentName,
@@ -416,7 +407,7 @@ public:
                                  cycleTime,
                                  stochastics,
                                  parameters,
-                                 observations,
+                                 publisher,
                                  callbacks),
         agent(agent)
     {}
@@ -583,7 +574,7 @@ public:
                                     StochasticsInterface *stochastics,
                                     WorldInterface *world,
                                     const ParameterInterface *parameters,
-                                    const std::map<int, ObservationInterface*> *observations,
+                                    PublisherInterface * const publisher,
                                     const CallbackInterface *callbacks,
                                     AgentInterface *agent,
                                     SimulationSlave::EventNetworkInterface * const eventNetwork):
@@ -596,7 +587,7 @@ public:
                                    stochastics,
                                    world,
                                    parameters,
-                                   observations,
+                                   publisher,
                                    callbacks,
                                    agent),
         eventNetwork(eventNetwork)

@@ -1,5 +1,5 @@
-﻿/*******************************************************************************
-* Copyright (c) 2017, 2019 in-tech GmbH
+/*******************************************************************************
+* Copyright (c) 2017, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -14,13 +14,16 @@
 #include "Interfaces/scenarioInterface.h"
 #include "Common/eventDetectorDefinitions.h"
 #include "importerLoggingHelper.h"
+#include "oscImporterCommon.h"
+
+namespace RULE = openpass::importer::xml::openScenario::rule;
 
 namespace Importer
 {
 
-const std::map<std::string, openScenario::Rule> ruleConversionMap = {{"greater_than", openScenario::Rule::GreaterThan},
-                                                                     {"less_than", openScenario::Rule::LessThan},
-                                                                     {"equal_to", openScenario::Rule::EqualTo}};
+const std::map<std::string, openScenario::Rule> ruleConversionMap = {{RULE::greaterThan, openScenario::Rule::GreaterThan},
+                                                                     {RULE::lessThan, openScenario::Rule::LessThan},
+                                                                     {RULE::equalTo, openScenario::Rule::EqualTo}};
 
 class EventDetectorImporter
 {
@@ -37,50 +40,63 @@ public:
      * \brief ImportEventDetector parses information from an EventElement for
      *        instantiation of a ConditionalEventDetector.
      *
-     * \param[in] eventElement the element from which to parse
-     *                         ConditionalEventDetector instantiation
-     *                         information
-     * \param[in] eventName the name of the event to which the
-     *                         ConditionalEventDetector will belong
+     * \param[in] eventElement       the element from which to parse
+     *                               ConditionalEventDetector instantiation
+     *                               information
+     * \param[in] eventName          Name of the event used for identification
+     *                               e.g. "MyStory/MyAct/MySequence/MyManeuver/MyEvent"
      * \param[in] numberOfExecutions the maximum number of times the
      *                               ConditionalEventDetector is to emit an
      *                               event
-     * \param[in] actorInformation information detailing what entities are the
-     *                             actors to be targeted by the
-     *                             ConditionalEventDetector's emitted events
-     * \param[in] entities the entities explicitly defined in the openScenario
-     *                     file's Entities element
+     * \param[in] actorInformation   information detailing what entities are the
+     *                               actors to be targeted by the
+     *                               ConditionalEventDetector's emitted events
+     * \param[in] entities           entities defined in openScenario Entities
      *
      * \return a struct containing all information relevant for the
      *         instantiation of a ConditionalEventDetector
      * ------------------------------------------------------------------------
      */
-    static openScenario::ConditionalEventDetectorInformation ImportEventDetector(QDomElement& eventElement,
+    static openScenario::ConditionalEventDetectorInformation ImportEventDetector(QDomElement &eventElement,
                                                                                  const std::string &eventName,
                                                                                  const int numberOfExecutions,
-                                                                                 const openScenario::ActorInformation& actorInformation,
-                                                                                 const std::vector<ScenarioEntity>& entities);
+                                                                                 const openScenario::ActorInformation &actorInformation,
+                                                                                 const std::vector<ScenarioEntity>& entities,
+                                                                                 openScenario::Parameters& parameters);
+
 private:
     /*!
      * \brief Imports a condition element of a OpenSCENARIO storyboard DOM
      *
      * \param[in]   conditionElement   The DOM root of the condition element
      * \param[in]   entities           Objects from 'Entities' tag
-     * \param[out]  scenario           The relevant event detector data is imported into this scenario
-     * \param[in]   seqName            Name of the containing sequence
+     * \param[in]   parameters         Declared parameters
      */
     static openScenario::Condition ImportConditionElement(QDomElement& conditionElement,
-                                                                          const std::vector<ScenarioEntity>& entities);
+                                                          const std::vector<ScenarioEntity>& entities,
+                                                          openScenario::Parameters& parameters);
 
     /*!
      * \brief Imports a ByEntity condition element of a OpenSCENARIO storyboard DOM
      *
      * \param[in]   byEntityElement   The DOM root of the by-entity element
      * \param[in]   entities          Objects from 'Entities' tag
-     * \param[out]  eventDetectorParameters   Triggering entity names are stored here
+     * \param[in]   parameters         Declared parameters
      */
     static openScenario::Condition ImportByEntityElement(QDomElement byEntityElement,
-                                                         const std::vector<ScenarioEntity>& entities);
+                                                         const std::vector<ScenarioEntity>& entities,
+                                                         openScenario::Parameters& parameters);
+
+    /*!
+     * \brief Imports a EntityCondition element of a OpenSCENARIO storyboard DOM
+     *
+     * \param[in]   byEntityCondition   The DOM root of the byEntityCondition element
+     * \param[in]   triggeringEntities  Objects from 'Entities' tag
+     *
+     * return Condition
+     */
+    static openScenario::Condition ImportEntityCondition(QDomElement byEntityCondition,
+                                                         std::vector<std::string> triggeringEntities);
 
     /*!
      * ------------------------------------------------------------------------
@@ -89,11 +105,11 @@ private:
      *
      * \param[in] byValueElement the ByValue element to parse for condition
      *            details.
-     * \param[out] conditionParameters If successfully parsed, the ByValue
-     *             element's condition details are imported into this object.
+     * \param[in] parameters   Declared parameters
+     * \return      openScenario Condition
      * ------------------------------------------------------------------------
      */
-    static openScenario::Condition ImportConditionByValueElement(QDomElement& byValueElement);
+    static openScenario::Condition ImportConditionByValueElement(QDomElement& byValueElement, openScenario::Parameters& parameters);
 
     /*!
      * \brief Tests, if a entity with a given name is included in the provided vector of scenario entities

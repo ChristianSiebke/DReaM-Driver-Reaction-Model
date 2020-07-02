@@ -61,9 +61,11 @@ HEADERS += \
 SOURCES += \
     $$UNIT_UNDER_TEST/SpawnPointScenario.cpp \
     $$FRAMEWORK/agentBlueprintProvider.cpp \
+    $$FRAMEWORK/agentDataPublisher.cpp \
     $$FRAMEWORK/dynamicProfileSampler.cpp \
     $$FRAMEWORK/dynamicParametersSampler.cpp \
     $$FRAMEWORK/dynamicAgentTypeGenerator.cpp \
+    $$FRAMEWORK/sampler.cpp \
     $$MODEL_INTERFACE/modelBinding.cpp \
     $$MODEL_ELEMENTS/agentBlueprint.cpp \
     $$MODEL_ELEMENTS/componentType.cpp \

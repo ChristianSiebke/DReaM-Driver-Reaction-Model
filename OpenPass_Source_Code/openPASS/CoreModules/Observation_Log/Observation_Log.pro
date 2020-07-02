@@ -1,5 +1,5 @@
 # /*********************************************************************
-# * Copyright (c) 2017, 2018, 2019 in-tech GmbH
+# * Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 # *               2016, 2017 ITK Engineering GmbH
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -18,21 +18,25 @@ DEFINES += OBSERVATION_LOG_LIBRARY
 CONFIG += OPENPASS_LIBRARY
 include(../../../global.pri)
 
-SUBDIRS +=  . \
-			
-INCLUDEPATH += $$SUBDIRS \
-            ../../CoreFrameWork/CoreShare \
-            ../..
+INCLUDEPATH += \
+    . \
+    ../.. \
+    ../Observation_Log \
+    ../../CoreFrameWork/CoreShare
 
 SOURCES += \
-    $$getFiles(SUBDIRS, cpp) \
-    $$getFiles(SUBDIRS, cc) \
-    $$getFiles(SUBDIRS, c) \
-    ../../CoreFramework/CoreShare/log.cpp \
-    ../../CoreFramework/CoreShare/parameters.cpp
+    observationFileHandler.cpp \
+    observation_log.cpp \
+    observation_logImplementation.cpp \
+    observationCyclics.cpp \
+    runStatistic.cpp \
+    runStatisticCalculation.cpp
 
 HEADERS += \
-    $$getFiles(SUBDIRS, hpp) \
-    $$getFiles(SUBDIRS, h) \
-    ../../CoreFramework/CoreShare/log.h \
-    ../../CoreFramework/CoreShare/parameters.h
+    observationFileHandler.h \
+    observationLogConstants.h \
+    observation_log.h \
+    observation_logImplementation.h \
+    observationCyclics.h \
+    runStatistic.h \
+    runStatisticCalculation.h

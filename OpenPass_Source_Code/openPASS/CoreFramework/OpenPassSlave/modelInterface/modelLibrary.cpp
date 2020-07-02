@@ -17,6 +17,7 @@
 #include <QLibrary>
 
 #include "agent.h"
+#include "agentDataPublisher.h"
 #include "component.h"
 #include "componentType.h"
 #include "CoreFramework/CoreShare/log.h"
@@ -58,49 +59,42 @@ bool ModelLibrary::Init()
         // ignore exceptions during dublicate initialization of libprotobuf
     }
 
-    getVersionFunc = (ModelInterface_GetVersion)library->resolve(DllGetVersionId.c_str());
+    getVersionFunc = reinterpret_cast<ModelInterface_GetVersion>(library->resolve(DllGetVersionId.c_str()));
     if (!getVersionFunc)
     {
         LOG_INTERN(LogLevel::Error) << "could not resolve " << DllGetVersionId.c_str() << " from DLL";
         return false;
     }
 
-    createInstanceFunc = (ModelInterface_CreateInstanceType)library->resolve(DllCreateInstanceId.c_str());
+    createInstanceFunc = reinterpret_cast<ModelInterface_CreateInstanceType>(library->resolve(DllCreateInstanceId.c_str()));
     if (!createInstanceFunc)
     {
         LOG_INTERN(LogLevel::Error) << "could not resolve " << DllCreateInstanceId.c_str() << " from DLL";
         return false;
     }
 
-    createEventInstanceFunc = (UnrestrictedEventModelInterface_CreateInstanceType)library->resolve(DllCreateInstanceId.c_str());
-    if(!createEventInstanceFunc)
-    {
-        LOG_INTERN(LogLevel::Error) << "could not resolve " << DllCreateInstanceId.c_str() << " from DLL";
-        return false;
-    }
-
-    destroyInstanceFunc = (ModelInterface_DestroyInstanceType)library->resolve(DllDestroyInstanceId.c_str());
+    destroyInstanceFunc = reinterpret_cast<ModelInterface_DestroyInstanceType>(library->resolve(DllDestroyInstanceId.c_str()));
     if (!destroyInstanceFunc)
     {
         LOG_INTERN(LogLevel::Error) << "could not resolve " << DllDestroyInstanceId.c_str() << " from DLL";
         return false;
     }
 
-    updateInputFunc = (ModelInterface_UpdateInputType)library->resolve(DllUpdateInputId.c_str());
+    updateInputFunc = reinterpret_cast<ModelInterface_UpdateInputType>(library->resolve(DllUpdateInputId.c_str()));
     if (!updateInputFunc)
     {
         LOG_INTERN(LogLevel::Error) << "could not resolve " << DllUpdateInputId.c_str() << " from DLL";
         return false;
     }
 
-    updateOutputFunc = (ModelInterface_UpdateOutputType)library->resolve(DllUpdateOutputId.c_str());
+    updateOutputFunc = reinterpret_cast<ModelInterface_UpdateOutputType>(library->resolve(DllUpdateOutputId.c_str()));
     if (!updateOutputFunc)
     {
         LOG_INTERN(LogLevel::Error) << "could not resolve " << DllUpdateOutputId.c_str() << " from DLL";
         return false;
     }
 
-    triggerFunc = (ModelInterface_TriggerType)library->resolve(DllTriggerId.c_str());
+    triggerFunc = reinterpret_cast<ModelInterface_TriggerType>(library->resolve(DllTriggerId.c_str()));
     if (!triggerFunc)
     {
         LOG_INTERN(LogLevel::Error) << "could not resolve " << DllTriggerId.c_str() << " from DLL";
@@ -189,7 +183,8 @@ ComponentInterface* ModelLibrary::CreateComponent(std::shared_ptr<ComponentType>
         WorldInterface* world,
         ObservationNetworkInterface* observationNetwork,
         Agent* agent,
-        EventNetworkInterface* eventNetwork)
+        EventNetworkInterface* eventNetwork,
+        PublisherInterface* publisher)
 {
     if (!library)
     {
@@ -222,36 +217,73 @@ ComponentInterface* ModelLibrary::CreateComponent(std::shared_ptr<ComponentType>
     {
         const auto &version = getVersionFunc();
 
-        if (version == "0.1.0")
+        /*if (version == "0.3.0")
         {
-            implementation = createEventInstanceFunc(componentName,
-                                                     componentType->GetInit(),
-                                                     componentType->GetPriority(),
-                                                     componentType->GetOffsetTime(),
-                                                     componentType->GetResponseTime(),
-                                                     componentType->GetCycleTime(),
-                                                     stochastics,
-                                                     world,
-                                                     parameter.get(),
-                                                     &component->GetObservations(),
-                                                     agent->GetAgentAdapter(),
-                                                     callbacks,
-                                                     eventNetwork);
+            implementation = reinterpret_cast<UnrestrictedEventPublishModelInterface_CreateInstanceType>(createInstanceFunc)(
+                componentName,
+                componentType->GetInit(),
+                componentType->GetPriority(),
+                componentType->GetOffsetTime(),
+                componentType->GetResponseTime(),
+                componentType->GetCycleTime(),
+                stochastics,
+                world,
+                parameter.get(),
+                &component->GetObservations(),
+                agent->GetAgentAdapter(),
+                callbacks,
+                eventNetwork,
+                publisher);
+        }
+        if (version == "0.2.0")
+        {
+            implementation = reinterpret_cast<UnrestrictedPublishModelInterface_CreateInstanceType>(createInstanceFunc)(
+                                 componentName,
+                                 componentType->GetInit(),
+                                 componentType->GetPriority(),
+                                 componentType->GetOffsetTime(),
+                                 componentType->GetResponseTime(),
+                                 componentType->GetCycleTime(),
+                                 stochastics,
+                                 world,
+                                 parameter.get(),
+                                 &component->GetObservations(),
+                                 agent->GetAgentAdapter(),
+                                 callbacks,
+                                 publisher);
+        }
+        else*/ if (version == "0.1.0")
+        {
+            implementation = reinterpret_cast<UnrestrictedEventModelInterface_CreateInstanceType>(createInstanceFunc)(
+                                 componentName,
+                                 componentType->GetInit(),
+                                 componentType->GetPriority(),
+                                 componentType->GetOffsetTime(),
+                                 componentType->GetResponseTime(),
+                                 componentType->GetCycleTime(),
+                                 stochastics,
+                                 world,
+                                 parameter.get(),
+                                 publisher,
+                                 agent->GetAgentAdapter(),
+                                 callbacks,
+                                 eventNetwork);
         }
         else
         {
-            implementation = createInstanceFunc(componentName,
-                                                componentType->GetInit(),
-                                                componentType->GetPriority(),
-                                                componentType->GetOffsetTime(),
-                                                componentType->GetResponseTime(),
-                                                componentType->GetCycleTime(),
-                                                stochastics,
-                                                world,
-                                                parameter.get(),
-                                                &component->GetObservations(),
-                                                agent->GetAgentAdapter(),
-                                                callbacks);
+            implementation = createInstanceFunc(
+                                 componentName,
+                                 componentType->GetInit(),
+                                 componentType->GetPriority(),
+                                 componentType->GetOffsetTime(),
+                                 componentType->GetResponseTime(),
+                                 componentType->GetCycleTime(),
+                                 stochastics,
+                                 world,
+                                 parameter.get(),
+                                 publisher,
+                                 agent->GetAgentAdapter(),
+                                 callbacks);
         }
     }
     catch (std::runtime_error const& ex)

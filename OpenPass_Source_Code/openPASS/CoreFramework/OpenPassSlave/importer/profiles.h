@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -9,34 +9,29 @@
 *******************************************************************************/
 
 #pragma once
+
+#include "Common/opExport.h"
 #include "Interfaces/profilesInterface.h"
 
-class Profiles : public ProfilesInterface
+class CORESLAVEEXPORT Profiles : public ProfilesInterface
 {
 public:
     virtual ~Profiles() override = default;
 
     virtual std::unordered_map<std::string, AgentProfile>& GetAgentProfiles() override;
 
-    virtual SpawnPointProfiles& GetSpawnPointProfiles() override;
-
-    virtual DriverProfiles& GetDriverProfiles() override;
-
-    virtual std::unordered_map<std::string, VehicleComponentProfiles>& GetVehicleComponentProfiles() override;
-
     virtual std::unordered_map<std::string, VehicleProfile>& GetVehicleProfiles() override;
+
+    virtual ProfileGroups& GetProfileGroups() override;
 
     virtual StringProbabilities& GetDriverProbabilities(std::string agentProfileName) override;
 
     virtual StringProbabilities& GetVehicleProfileProbabilities(std::string agentProfileName) override;
 
-    virtual openpass::sensors::Profiles& GetSensorProfiles() override;
+    virtual openpass::parameter::ParameterSetLevel1 GetProfile(std::string type, std::string name) override;
 
 private:
     std::unordered_map<std::string, AgentProfile> agentProfiles {};
     std::unordered_map<std::string, VehicleProfile> vehicleProfiles {};
-    SpawnPointProfiles spawnPointProfiles {};
-    DriverProfiles driverProfiles {};
-    std::unordered_map<std::string, VehicleComponentProfiles> vehicleComponentProfiles {};
-    openpass::sensors::Profiles sensorProfiles {};
+    ProfileGroups profileGroups;
 };

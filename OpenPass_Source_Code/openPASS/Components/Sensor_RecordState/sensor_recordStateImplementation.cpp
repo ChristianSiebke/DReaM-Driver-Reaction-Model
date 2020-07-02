@@ -18,6 +18,7 @@
 #include <qglobal.h>
 
 #include "Interfaces/worldInterface.h"
+#include "Interfaces/egoAgentInterface.h"
 
 #include "sensor_recordStateImplementation.h"
 
@@ -31,7 +32,7 @@ SensorRecordStateImplementation::SensorRecordStateImplementation(
         StochasticsInterface *stochastics,
         WorldInterface *world,
         const ParameterInterface *parameters,
-        const std::map<int, ObservationInterface*> *observations,
+        PublisherInterface * const publisher,
         const CallbackInterface *callbacks,
         AgentInterface *agent) :
     SensorInterface(
@@ -44,27 +45,16 @@ SensorRecordStateImplementation::SensorRecordStateImplementation(
         stochastics,
         world,
         parameters,
-        observations,
+        publisher,
         callbacks,
         agent)
 {
-    agentId = GetAgent()->GetId();
-
-    try
+    if (GetPublisher() == nullptr)
     {
-        observerInstance = GetObservations()->at(0);
-        if(observerInstance == nullptr)
-        {
-            throw std::runtime_error("");
-        }
-    }
-    catch(...)
-    {
-        const std::string msg = COMPONENTNAME + " invalid observation module setup";
+        const std::string msg = COMPONENTNAME + " invalid publisher module setup";
         LOG(CbkLogLevel::Error, msg);
         throw std::runtime_error(msg);
     }
-
 }
 
 void SensorRecordStateImplementation::UpdateInput(int, const std::shared_ptr<SignalInterface const> &, int)
@@ -75,147 +65,6 @@ void SensorRecordStateImplementation::UpdateOutput(int ,std::shared_ptr<SignalIn
 {
 }
 
-void SensorRecordStateImplementation::Trigger(int time)
+void SensorRecordStateImplementation::Trigger([[maybe_unused]] int time)
 {
-    timeMSec = time;
-
-    auto collisionPartners = GetAgent()->GetCollisionPartners();
-    indexLaneEgo = GetAgent()->GetMainLaneId();
-
-    ObserveEgo();
-}
-
-void SensorRecordStateImplementation::ObserveEgo()
-{
-    observerInstance->Insert(timeMSec,
-                             agentId,
-                             LoggingGroup::Trace,
-                             "XPosition",
-                             std::to_string(GetAgent()->GetPositionX()));
-
-    observerInstance->Insert(timeMSec,
-                             agentId,
-                             LoggingGroup::Trace,
-                             "YPosition",
-                             std::to_string(GetAgent()->GetPositionY()));
-
-    observerInstance->Insert(timeMSec,
-                             agentId,
-                             LoggingGroup::Trace,
-                             "YawAngle",
-                             std::to_string(GetAgent()->GetYaw()));
-
-    observerInstance->Insert(timeMSec,
-                             agentId,
-                             LoggingGroup::Visualization,
-                             "VelocityEgo",
-                             std::to_string(GetAgent()->GetVelocity()));
-
-    observerInstance->Insert(timeMSec,
-                             agentId,
-                             LoggingGroup::Visualization,
-                             "AccelerationEgo",
-                             std::to_string(GetAgent()->GetAcceleration()));
-
-    observerInstance->Insert(timeMSec,
-                             agentId,
-                             LoggingGroup::Visualization,
-                             "BrakeLight",
-                             GetAgent()->GetBrakeLight() ? "1" : "0");
-
-    observerInstance->Insert(timeMSec,
-                             agentId,
-                             LoggingGroup::Visualization,
-                             "IndicatorState",
-                             std::to_string(static_cast<int>(GetAgent()->GetIndicatorState())));
-
-    observerInstance->Insert(timeMSec,
-                             agentId,
-                             LoggingGroup::Visualization,
-                             "LightStatus",
-                             std::to_string(static_cast<int>(GetAgent()->GetLightState())));
-
-    observerInstance->Insert(timeMSec,
-                             agentId,
-                             LoggingGroup::RoadPosition,
-                             "PositionRoute",
-                             std::to_string(GetAgent()->GetDistanceToStartOfRoad()));
-
-    observerInstance->Insert(timeMSec,
-                             agentId,
-                             LoggingGroup::RoadPosition,
-                             "TCoordinate",
-                             std::to_string(GetAgent()->GetPositionLateral()));
-
-    observerInstance->Insert(timeMSec,
-                             agentId,
-                             LoggingGroup::RoadPosition,
-                             "Lane",
-                             std::to_string(indexLaneEgo));
-
-    observerInstance->Insert(timeMSec,
-                             agentId,
-                             LoggingGroup::RoadPosition,
-                             "Road",
-                             GetAgent()->GetRoadId());
-
-    observerInstance->Insert(timeMSec,
-                             agentId,
-                             LoggingGroup::RoadPositionExtended,
-                             "SecondaryLanes",
-                             SecondaryLanesToString());
-
-    observerInstance->Insert(timeMSec,
-                             agentId,
-                             LoggingGroup::Vehicle,
-                             "YawRate",
-                             std::to_string(GetAgent()->GetYawRate()));
-
-    observerInstance->Insert(timeMSec,
-                             agentId,
-                             LoggingGroup::Vehicle,
-                             "AccelerationPedalPosition",
-                             std::to_string(GetAgent()->GetEffAccelPedal()));
-
-    observerInstance->Insert(timeMSec,
-                             agentId,
-                             LoggingGroup::Vehicle,
-                             "BrakePedalPosition",
-                             std::to_string(GetAgent()->GetEffBrakePedal()));
-
-    observerInstance->Insert(timeMSec,
-                             agentId,
-                             LoggingGroup::Vehicle,
-                             "Gear",
-                             std::to_string(GetAgent()->GetGear()));
-
-    int frontAgentId = -1;
-    const auto frontAgents = GetAgent()->GetAgentsInRange(0, 0, std::numeric_limits<double>::max(), MeasurementPoint::Front);
-
-    if (!frontAgents.empty())
-    {
-        frontAgentId = frontAgents.front()->GetId();
-    }
-
-    observerInstance->Insert(timeMSec,
-                             agentId,
-                             LoggingGroup::RoadPosition,
-                             "AgentInFront",
-                             std::to_string(frontAgentId));
-}
-
-std::string SensorRecordStateImplementation::SecondaryLanesToString()
-{
-    const auto secondaryList = GetAgent()->GetSecondaryCoveredLanes();
-    std::string listOfSecondaryLanes{""};
-    for (auto objectIt = secondaryList.cbegin(); objectIt != secondaryList.cend(); objectIt++)
-    {
-        listOfSecondaryLanes += std::to_string(*objectIt);
-
-        if (std::next(objectIt) != secondaryList.cend())
-        {
-            listOfSecondaryLanes += ";";
-        }
-    }
-    return listOfSecondaryLanes;
 }

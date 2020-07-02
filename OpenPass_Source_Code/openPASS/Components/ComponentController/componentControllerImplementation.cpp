@@ -19,7 +19,6 @@
 #include "Interfaces/eventNetworkInterface.h"
 #include "Common/eventTypes.h"
 #include "Common/componentStateChangeEvent.h"
-#include "Common/componentWarningEvent.h"
 
 ComponentControllerImplementation::ComponentControllerImplementation(std::string componentName,
                                                                      bool isInit,
@@ -30,7 +29,7 @@ ComponentControllerImplementation::ComponentControllerImplementation(std::string
                                                                      StochasticsInterface *stochastics,
                                                                      WorldInterface *world,
                                                                      const ParameterInterface *parameters,
-                                                                     const std::map<int, ObservationInterface *> *observations,
+                                                                     PublisherInterface * const publisher,
                                                                      const CallbackInterface *callbacks,
                                                                      AgentInterface *agent,
                                                                      SimulationSlave::EventNetworkInterface* const eventNetwork) :
@@ -44,7 +43,7 @@ ComponentControllerImplementation::ComponentControllerImplementation(std::string
         stochastics,
         world,
         parameters,
-        observations,
+        publisher,
         callbacks,
         agent,
         eventNetwork),
@@ -52,11 +51,9 @@ ComponentControllerImplementation::ComponentControllerImplementation(std::string
 {
 }
 
-void ComponentControllerImplementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const>& data, int time)
+void ComponentControllerImplementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const>& data, [[maybe_unused]] int time)
 {
-    Q_UNUSED(time);
-
-    const auto signal = SignalCast<AgentCompToCompCtrlSignal const>(data, localLinkId);
+    const auto signal = SignalCast<AgentCompToCompCtrlSignal>(data, localLinkId);
 
     if (stateManager.LocalLinkIdIsRegistered(localLinkId))
     {
@@ -69,7 +66,7 @@ void ComponentControllerImplementation::UpdateInput(int localLinkId, const std::
         ComponentType componentType = signal->GetComponentType();
         if(componentType == ComponentType::VehicleComponent)
         {
-            const auto castedSignal = SignalCast<VehicleCompToCompCtrlSignal const>(signal, localLinkId);
+            const auto castedSignal = SignalCast<VehicleCompToCompCtrlSignal>(signal, localLinkId);
             componentStateInformation = std::make_shared<AdasComponentStateInformation>(castedSignal->GetComponentType(),
                                                                                         castedSignal->GetAgentComponentName(),
                                                                                         castedSignal->GetCurrentState(),
@@ -94,10 +91,8 @@ void ComponentControllerImplementation::UpdateInput(int localLinkId, const std::
     }
 }
 
-void ComponentControllerImplementation::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterface const>& data, int time)
+void ComponentControllerImplementation::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterface const>& data, [[maybe_unused]] int time)
 {
-    Q_UNUSED(time);
-
     ComponentState maxReachableState = ComponentState::Undefined;
 
     if (stateManager.LocalLinkIdIsRegistered(localLinkId))
@@ -128,10 +123,8 @@ void ComponentControllerImplementation::UpdateOutput(int localLinkId, std::share
  * Each trigger, pull ComponentChangeEvents for this agent and pass the list of them
  * to the stateManager for proper handling of changes of component max reachable state
  */
-void ComponentControllerImplementation::Trigger(int time)
+void ComponentControllerImplementation::Trigger([[maybe_unused]] int time)
 {
-    Q_UNUSED(time);
-
     // get the event list and filter by ComponentChangeEvents and this agent's id
     const auto stateChangeEventList = GetEventNetwork()->GetActiveEventCategory(EventDefinitions::EventCategory::ComponentStateChange);
     const auto agentId = GetAgent()->GetId();

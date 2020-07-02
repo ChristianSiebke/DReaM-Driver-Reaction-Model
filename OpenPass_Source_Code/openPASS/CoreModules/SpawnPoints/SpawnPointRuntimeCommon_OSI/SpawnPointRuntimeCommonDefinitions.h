@@ -4,8 +4,8 @@
 #include <unordered_map>
 #include <vector>
 #include "Interfaces/parameterInterface.h"
-
-class AgentBlueprint;
+#include "agentBlueprint.h"
+#include "Common/SpawnPointDefinitions.h"
 
 namespace SpawnPointRuntimeCommonDefinitions
 {
@@ -13,40 +13,32 @@ namespace SpawnPointRuntimeCommonDefinitions
     using LaneId = int;
     using LaneIds = std::vector<LaneId>;
     using SPosition = double;
-    using Range = std::pair<SPosition, SPosition>;
-    using ValidLaneSpawningRanges = std::vector<Range>;
-    using VehicleRearAndFrontCoordinates = std::pair<SPosition, SPosition>;
-    using CarsPerSecond = double;
-    using PlatoonRate = double;
-    using TrafficVelocityDistribution = openpass::parameter::NormalDistribution;
-    using StringProbabilities = std::unordered_map<std::string, double>;
-    using GapInSeconds = double;
-    using SpawnDetails = std::pair<GapInSeconds, AgentBlueprint>;
+
+    struct SpawnDetails
+    {
+        int spawnTime;
+        AgentBlueprint agentBlueprint;
+    };
+
+    struct SpawnPosition
+    {
+        const RoadId roadId;
+        const LaneId laneId;
+        const SPosition sPosition;
+        const size_t laneIndex;
+
+        bool operator== (const SpawnPosition& other) const
+        {
+            return this->roadId == other.roadId
+                    && this->laneId == other.laneId
+                    && this->sPosition == other.sPosition
+                    && this->laneIndex == other.laneIndex;
+        }
+    };
 
     struct SpawnPointRuntimeCommonParameters
     {
-        SpawnPointRuntimeCommonParameters(const RoadId& roadId,
-                                          const LaneIds& laneIds,
-                                          const SPosition spawnLocation,
-                                          const CarsPerSecond carsPerSecond,
-                                          const PlatoonRate platoonRate,
-                                          const TrafficVelocityDistribution& trafficVelocityDistribution,
-                                          const StringProbabilities& agentProfiles):
-            roadId{roadId},
-            laneIds{laneIds},
-            spawnLocation{spawnLocation},
-            carsPerSecond{carsPerSecond},
-            platoonRate{platoonRate},
-            trafficVelocityDistribution{trafficVelocityDistribution},
-            agentProfiles{agentProfiles}
-        {}
-
-        const RoadId roadId;
-        const LaneIds laneIds;
-        const SPosition spawnLocation;
-        const CarsPerSecond carsPerSecond;
-        const PlatoonRate platoonRate;
-        const TrafficVelocityDistribution trafficVelocityDistribution;
-        const StringProbabilities agentProfiles;
+        const std::vector<SpawnPosition> spawnPositions;
+        const SpawnPointDefinitions::AgentProfileLaneMaps agentProfileLaneMaps;
     };
 }

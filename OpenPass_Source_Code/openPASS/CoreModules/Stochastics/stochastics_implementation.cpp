@@ -102,6 +102,16 @@ double StochasticsImplementation::GetLogNormalDistributed(double mean, double st
     return draw;
 }
 
+double StochasticsImplementation::GetMuSigmaLogNormalDistributed(double mu, double sigma)
+{
+    std::lognormal_distribution<double> lognormalDistribution(mu, sigma);
+
+    double draw = lognormalDistribution(baseGenerator);
+    LOG(CbkLogLevel::Debug, "GetMuSigmaLogNormalDistributed " + std::to_string(draw));
+
+    return draw;
+}
+
 double StochasticsImplementation::GetSpecialDistributed(std::string distributionName, std::vector<double> args)
 {
     Q_UNUSED(distributionName);

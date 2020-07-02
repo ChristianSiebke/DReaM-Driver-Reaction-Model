@@ -25,22 +25,24 @@ TEST(TrafficSigns, SetSpecificationWithUnsupportedMainType_ReturnsFalse)
 {
     FakeRoadSignal roadSignal;
     ON_CALL(roadSignal, GetType()).WillByDefault(Return("unsupported_type_string"));
+    Position position{};
 
     osi3::TrafficSign osiSign;
     OWL::Implementation::TrafficSign trafficSign(&osiSign);
 
-    ASSERT_THAT(trafficSign.SetSpecification(&roadSignal), Eq(false));
+    ASSERT_THAT(trafficSign.SetSpecification(&roadSignal, position), Eq(false));
 }
 
 TEST(TrafficSigns, SetSpecificationTypeOnly)
 {
     FakeRoadSignal roadSignal;
     ON_CALL(roadSignal, GetType()).WillByDefault(Return("333"));
+    Position position{};
 
     osi3::TrafficSign osiSign;
     OWL::Implementation::TrafficSign trafficSign(&osiSign);
 
-    ASSERT_THAT(trafficSign.SetSpecification(&roadSignal), Eq(true));
+    ASSERT_THAT(trafficSign.SetSpecification(&roadSignal, position), Eq(true));
 
     const auto specification = trafficSign.GetSpecification(5);
 
@@ -53,11 +55,12 @@ TEST(TrafficSigns, SetSpecificationSubtypeDefinesValue)
     FakeRoadSignal roadSignal;
     ON_CALL(roadSignal, GetType()).WillByDefault(Return("450"));
     ON_CALL(roadSignal, GetSubType()).WillByDefault(Return("51"));
+    Position position{};
 
     osi3::TrafficSign osiSign;
     OWL::Implementation::TrafficSign trafficSign(&osiSign);
 
-    ASSERT_THAT(trafficSign.SetSpecification(&roadSignal), Eq(true));
+    ASSERT_THAT(trafficSign.SetSpecification(&roadSignal, position), Eq(true));
 
     const auto specification = trafficSign.GetSpecification(5);
 
@@ -72,11 +75,12 @@ TEST(TrafficSigns, SetSpecificationSubtypeIsValue)
     FakeRoadSignal roadSignal;
     ON_CALL(roadSignal, GetType()).WillByDefault(Return("278"));
     ON_CALL(roadSignal, GetSubType()).WillByDefault(Return("80"));
+    Position position{};
 
     osi3::TrafficSign osiSign;
     OWL::Implementation::TrafficSign trafficSign(&osiSign);
 
-    ASSERT_THAT(trafficSign.SetSpecification(&roadSignal), Eq(true));
+    ASSERT_THAT(trafficSign.SetSpecification(&roadSignal, position), Eq(true));
 
     const auto specification = trafficSign.GetSpecification(5);
 
@@ -91,11 +95,12 @@ TEST(TrafficSigns, SetSpecificationWithText)
     FakeRoadSignal roadSignal;
     ON_CALL(roadSignal, GetType()).WillByDefault(Return("310"));
     ON_CALL(roadSignal, GetText()).WillByDefault(Return("SomeText"));
+    Position position{};
 
     osi3::TrafficSign osiSign;
     OWL::Implementation::TrafficSign trafficSign(&osiSign);
 
-    ASSERT_THAT(trafficSign.SetSpecification(&roadSignal), Eq(true));
+    ASSERT_THAT(trafficSign.SetSpecification(&roadSignal, position), Eq(true));
 
     const auto specification = trafficSign.GetSpecification(5);
 
@@ -112,13 +117,14 @@ TEST(TrafficSigns, SetSpecificationWithSupplementarySign)
     ON_CALL(supplementarySignal, GetType()).WillByDefault(Return("1004"));
     ON_CALL(supplementarySignal, GetSubType()).WillByDefault(Return("30"));
     ON_CALL(supplementarySignal, GetValue()).WillByDefault(Return(100));
+    Position position{};
 
     osi3::TrafficSign osiSign;
     OWL::Implementation::TrafficSign trafficSign(&osiSign);
 
-    ASSERT_THAT(trafficSign.SetSpecification(&mainSignal), Eq(true));
+    ASSERT_THAT(trafficSign.SetSpecification(&mainSignal, position), Eq(true));
 
-    trafficSign.AddSupplementarySign(&supplementarySignal);
+    trafficSign.AddSupplementarySign(&supplementarySignal, position);
     const auto specification = trafficSign.GetSpecification(5);
 
     ASSERT_THAT(specification.type, Eq(CommonTrafficSign::Type::OvertakingBanBegin));
@@ -129,6 +135,52 @@ TEST(TrafficSigns, SetSpecificationWithSupplementarySign)
     ASSERT_THAT(osiSign.main_sign().classification().type(), Eq(osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_OVERTAKING_BAN_BEGIN));
     ASSERT_THAT(osiSign.supplementary_sign().Get(0).classification().type(), Eq(osi3::TrafficSign_SupplementarySign_Classification_Type::TrafficSign_SupplementarySign_Classification_Type_TYPE_SPACE));
 };
+
+TEST(TrafficSigns, SetSpecification_SetsCorrectBaseStationaryForPositiveOrientation)
+{
+    FakeRoadSignal roadSignal;
+    ON_CALL(roadSignal, GetType()).WillByDefault(Return("333"));
+    ON_CALL(roadSignal, GetWidth()).WillByDefault(Return(4.0));
+    ON_CALL(roadSignal, GetHeight()).WillByDefault(Return(5.0));
+    ON_CALL(roadSignal, GetZOffset()).WillByDefault(Return(3.0));
+    ON_CALL(roadSignal, GetHOffset()).WillByDefault(Return(2.0));
+    ON_CALL(roadSignal, GetOrientation()).WillByDefault(Return(true));
+    Position position{10, 11, -1.5, 0};
+
+    osi3::TrafficSign osiSign;
+    OWL::Implementation::TrafficSign trafficSign(&osiSign);
+
+    ASSERT_THAT(trafficSign.SetSpecification(&roadSignal, position), Eq(true));
+    ASSERT_THAT(osiSign.main_sign().base().position().x(), Eq(10));
+    ASSERT_THAT(osiSign.main_sign().base().position().y(), Eq(11));
+    ASSERT_THAT(osiSign.main_sign().base().position().z(), Eq(5.5));
+    ASSERT_THAT(osiSign.main_sign().base().dimension().width(), Eq(4));
+    ASSERT_THAT(osiSign.main_sign().base().dimension().height(), Eq(5));
+    ASSERT_THAT(osiSign.main_sign().base().orientation().yaw(), DoubleEq(0.5));
+}
+
+TEST(TrafficSigns, SetSpecification_SetsCorrectBaseStationaryForNegativeOrientation)
+{
+    FakeRoadSignal roadSignal;
+    ON_CALL(roadSignal, GetType()).WillByDefault(Return("333"));
+    ON_CALL(roadSignal, GetWidth()).WillByDefault(Return(4.0));
+    ON_CALL(roadSignal, GetHeight()).WillByDefault(Return(5.0));
+    ON_CALL(roadSignal, GetZOffset()).WillByDefault(Return(3.0));
+    ON_CALL(roadSignal, GetHOffset()).WillByDefault(Return(1.0));
+    ON_CALL(roadSignal, GetOrientation()).WillByDefault(Return(false));
+    Position position{10, 11, 1.5, 0};
+
+    osi3::TrafficSign osiSign;
+    OWL::Implementation::TrafficSign trafficSign(&osiSign);
+
+    ASSERT_THAT(trafficSign.SetSpecification(&roadSignal, position), Eq(true));
+    ASSERT_THAT(osiSign.main_sign().base().position().x(), Eq(10));
+    ASSERT_THAT(osiSign.main_sign().base().position().y(), Eq(11));
+    ASSERT_THAT(osiSign.main_sign().base().position().z(), Eq(5.5));
+    ASSERT_THAT(osiSign.main_sign().base().dimension().width(), Eq(4));
+    ASSERT_THAT(osiSign.main_sign().base().dimension().height(), Eq(5));
+    ASSERT_THAT(osiSign.main_sign().base().orientation().yaw(), DoubleEq(2.5 - M_PI));
+}
 
 TEST(TrafficSigns_GetSpecification, GivenSignWithoutSupplementarySigns_ReturnsCorrectEntity)
 {
@@ -196,4 +248,74 @@ TEST(TrafficSigns_GetSpecification, GivenSignWithTwoSupplementarySigns_ReturnsCo
     EXPECT_THAT(supplementary1->value, Eq(9.0));
     EXPECT_THAT(supplementary2->type, Eq(CommonTrafficSign::Type::DistanceIndication));
     EXPECT_THAT(supplementary2->value, Eq(10.0));
+}
+
+TEST(RoadMarking, SetSpecificationWithUnsupportedMainType_ReturnsFalse)
+{
+    FakeRoadSignal roadSignal;
+    ON_CALL(roadSignal, GetType()).WillByDefault(Return("unsupported_type_string"));
+    Position position{};
+
+    osi3::RoadMarking osiMarking;
+    OWL::Implementation::RoadMarking roadMarking(&osiMarking);
+
+    ASSERT_THAT(roadMarking.SetSpecification(&roadSignal, position), Eq(false));
+}
+
+TEST(RoadMarking, SetSpecificationTypeOnly)
+{
+    FakeRoadSignal roadSignal;
+    ON_CALL(roadSignal, GetType()).WillByDefault(Return("294"));
+    Position position{};
+
+    osi3::RoadMarking osiMarking;
+    OWL::Implementation::RoadMarking roadMarking(&osiMarking);
+
+    ASSERT_THAT(roadMarking.SetSpecification(&roadSignal, position), Eq(true));
+
+    const auto specification = roadMarking.GetSpecification(5);
+
+    ASSERT_THAT(specification.type, Eq(CommonTrafficSign::Type::Stop));
+    ASSERT_THAT(osiMarking.classification().type(), Eq(osi3::RoadMarking_Classification_Type::RoadMarking_Classification_Type_TYPE_SYMBOLIC_TRAFFIC_SIGN));
+    ASSERT_THAT(osiMarking.classification().traffic_main_sign_type(), Eq(osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_STOP));
+}
+
+TEST(RoadMarking, SetSpecification_SetsCorrectBaseStationaryForPositiveOrientation)
+{
+    FakeRoadSignal roadSignal;
+    ON_CALL(roadSignal, GetType()).WillByDefault(Return("294"));
+    ON_CALL(roadSignal, GetWidth()).WillByDefault(Return(4.0));
+    ON_CALL(roadSignal, GetHOffset()).WillByDefault(Return(2.0));
+    ON_CALL(roadSignal, GetOrientation()).WillByDefault(Return(true));
+    Position position{10, 11, -1.5, 0};
+
+    osi3::RoadMarking osiMarking;
+    OWL::Implementation::RoadMarking roadMarking(&osiMarking);
+
+    ASSERT_THAT(roadMarking.SetSpecification(&roadSignal, position), Eq(true));
+    ASSERT_THAT(osiMarking.base().position().x(), Eq(10));
+    ASSERT_THAT(osiMarking.base().position().y(), Eq(11));
+    ASSERT_THAT(osiMarking.base().position().z(), Eq(0));
+    ASSERT_THAT(osiMarking.base().dimension().width(), Eq(4));
+    ASSERT_THAT(osiMarking.base().orientation().yaw(), DoubleEq(0.5));
+}
+
+TEST(RoadMarking, SetSpecification_SetsCorrectBaseStationaryForNegativeOrientation)
+{
+    FakeRoadSignal roadSignal;
+    ON_CALL(roadSignal, GetType()).WillByDefault(Return("294"));
+    ON_CALL(roadSignal, GetWidth()).WillByDefault(Return(4.0));
+    ON_CALL(roadSignal, GetHOffset()).WillByDefault(Return(1.0));
+    ON_CALL(roadSignal, GetOrientation()).WillByDefault(Return(false));
+    Position position{10, 11, 1.5, 0};
+
+    osi3::RoadMarking osiMarking;
+    OWL::Implementation::RoadMarking roadMarking(&osiMarking);
+
+    ASSERT_THAT(roadMarking.SetSpecification(&roadSignal, position), Eq(true));
+    ASSERT_THAT(osiMarking.base().position().x(), Eq(10));
+    ASSERT_THAT(osiMarking.base().position().y(), Eq(11));
+    ASSERT_THAT(osiMarking.base().position().z(), Eq(0));
+    ASSERT_THAT(osiMarking.base().dimension().width(), Eq(4));
+    ASSERT_THAT(osiMarking.base().orientation().yaw(), DoubleEq(2.5 - M_PI));
 }

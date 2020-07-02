@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 * Copyright (c) 2020 HLRS, University of Stuttgart.
 *
@@ -30,6 +30,8 @@
 #include "Interfaces/worldInterface.h"
 #include "Common/opExport.h"
 
+class DataStoreWriteInterface;
+
 namespace SimulationSlave
 {
 class Agent;
@@ -39,7 +41,7 @@ class Stochastics;
 class SpawnItemParameter;
 class ObservationNetworkInterface;
 
-class AgentFactory : public AgentFactoryInterface
+class CORESLAVEEXPORT AgentFactory : public AgentFactoryInterface
 {
 public:
     static constexpr int INITIAL_AGENT_ID {0};
@@ -48,8 +50,9 @@ public:
                  WorldInterface *world,
                  Stochastics *stochastics,
                  ObservationNetworkInterface *observationNetwork,
-                 SimulationSlave::EventNetworkInterface *eventNetwork);
-    virtual ~AgentFactory() = default;
+                 SimulationSlave::EventNetworkInterface *eventNetwork,
+                 DataStoreWriteInterface* dataStore);
+    virtual ~AgentFactory() override = default;
 
     virtual void Clear() override;
     virtual Agent *AddAgent(AgentBlueprintInterface* agentBlueprint) override;
@@ -85,17 +88,20 @@ private:
     //!
     //! @return                         The created agent
     //-----------------------------------------------------------------------------
-    Agent* CreateAgent(int id,
-                       AgentBlueprintInterface* agentBlueprint);
+    std::unique_ptr<Agent> CreateAgent(int id, AgentBlueprintInterface* agentBlueprint);
 
-    int lastAgentId {INITIAL_AGENT_ID};
+    void PublishProperties(const Agent& agent);
+    
     ModelBinding *modelBinding;
     WorldInterface *world;
     Stochastics *stochastics;
     ObservationNetworkInterface *observationNetwork;
     EventNetworkInterface *eventNetwork;
+    DataStoreWriteInterface *dataStore;
 
     std::vector<std::unique_ptr<Agent>> agentList;
+
+    int lastAgentId {INITIAL_AGENT_ID};
 };
 
 } // namespace SimulationSlave

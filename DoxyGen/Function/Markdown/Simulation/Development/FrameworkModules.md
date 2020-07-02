@@ -35,6 +35,21 @@ Then the AgentType with the components and channels is build by the DynamicAgent
 
 ![AgentBlueprintProviderSequenceDiagram](AgentBlueprintProviderSequence.svg)
 
+\section dev_framework_modules_datastore DataStore
+
+The DataStore accepts arbitrary values from different components (from framework as well as agents).
+The stored values if cyclic and acyclic type are associated with an timestamp, entity id and a key (topic).
+Static values are only associated with a key.
+
+Typically, Observers are using the DataStore to retrieve information about the simulation.
+This can happen during the simulation run and/or at the end of a run.
+For the keys, a generic datatype is used (strings).
+For the values, a set of predefined datatypes is used (bool, char, int, size_t, float, double, string).
+A value can also hold a vector of one of the mentioned datatypes.
+
+For information about the usage, please refer to the implementation's inline documentation.
+
+
 \section dev_framework_modules_eventdetectors EventDetectors
 
 [//]: <> "Please refer to each section!"
@@ -119,6 +134,8 @@ List of Modules which use the EventNetwork:
 [//]: <> "Please refer to each section!"
 * [CollisionManipulator](\ref dev_framework_modules_manipulators_collision)
 * [ComponentStateChangeManipulator](\ref dev_framework_modules_manipulators_componentstatechange)
+* [GazeFollowerManipulator](\ref dev_framework_modules_manipulators_gazefollower)
+* * [CustomLaneChangeManipulator](\ref dev_framework_modules_manipulators_customlanechange)
 
 The class structure of the Manipulators is showed in the following diagram:
 
@@ -132,7 +149,7 @@ The class structure of the Manipulators is showed in the following diagram:
 
 * **Trigger:** This manipulator is always triggered by CollisionDetector.
 
-* ** Event: ** -
+* **Event:** -
 
 * **Configuration:**
 
@@ -148,10 +165,9 @@ The class structure of the Manipulators is showed in the following diagram:
 
 * **Trigger:** This manipulator can be triggered by any detector. This has to be parameterized in scenario configuration (see [Input/Output documentation](\ref io_input_scenario)).
 
-* ** Event: ** Creates and event of type ComponentChangeEvent for the specified component name.
+* **Event:** Creates an event of type ComponentChangeEvent for the specified component name.
 
 * **Configuration:**
-
 ```xml
 <Action name="ExampleComponentStateChangeManipulator">
 	<UserDefined>
@@ -163,6 +179,50 @@ The class structure of the Manipulators is showed in the following diagram:
 |ElementName|Attribute|Type  |Description                                                   |
 |-----------|---------|------|--------------------------------------------------------------|
 |Command    |-        |string|This string must be formatted as "SetComponentState <TargetComponent> <DesiredState>", where <TargetComponent> is the target component name and <DesiredState> is one of "Acting", "Armed", or "Disabled".|
+
+---
+
+\subsection dev_framework_modules_manipulators_customlanechange CustomLaneChangeManipulator
+* **Description:**
+    This manipulator sets a custom lane change for an agent.
+
+* **Trigger:** This manipulator can be triggered by any detector. This has to be parameterized in scenario configuration (see [Input/Output documentation](\ref io_input_scenario)).
+
+* **Event:** Creates an event of type CustomLaneChangeEvent.
+
+* **Configuration:**
+```xml
+<Action name="ExampleCustomLaneChangeManipulator">
+	<UserDefined>
+		<Command>SetCustomLaneChange DeltaLaneId</Command>
+	</UserDefined>
+</Action>
+```
+|ElementName|Attribute|Type  |Description                                                   |
+|-----------|---------|------|--------------------------------------------------------------|
+|Command    |-        |string|This string must be formatted as "SetCustomLaneChange" <DeltaLaneId>, where <DeltaLaneId> indicates the number of lanes over which the lane change should take place.|
+
+---
+
+\subsection dev_framework_modules_manipulators_gazefollower GazeFollowerManipulator
+* **Description:**
+    This manipulator influences the gaze behaviour of an agent.
+
+* **Trigger:** This manipulator can be triggered by any detector. This has to be parameterized in scenario configuration (see [Input/Output documentation](\ref io_input_scenario)).
+
+* **Event:** Creates an event of type GazeFollowerEvent.
+
+* **Configuration:**
+```xml
+<Action name="ExampleGazeFollowerManipulator">
+	<UserDefined>
+		<Command>SetGazeFollower ActivityState GazeFollowerFileName</Command>
+	</UserDefined>
+</Action>
+```
+|ElementName|Attribute|Type  |Description                                                   |
+|-----------|---------|------|--------------------------------------------------------------|
+|Command    |-        |string|This string must be formatted as "SetGazeFollower" <ActivityState> <GazeFollowerFileName>, where <ActivityState> is either "Active" or "Inactive". <GazeFollowerFileName> is the file name relative to the config directory with its corresponding file type [.txt, .csv, etc.] that contains the gaze information.|
 
 ---
 
@@ -248,9 +308,11 @@ Generally, the position of an agent is stored with respect to [world coordinates
 As queries on the world operates in [road coordinates (s,t)](\ref dev_concepts_coordinatesystems_road), the position of the agent needs to be transformed.
 The transformation is performed by the [localization algorithm](\ref localization).
 
-\subsection dev_framework_modules_world_trafficsigns Traffic Signs
+\subsection dev_framework_modules_world_trafficsigns Traffic Signs and Road Markings
 
-The world currently supports a variety of traffic signs. At the moment it can only interpret traffic signs according to the German regulations "StVo".
+The world currently supports a variety of traffic signs and road markings.
+Both are defined in OpenDRIVE as "RoadSignal".
+At the moment it can only interpret traffic signs according to the German regulations "StVo".
 Traffic signs can contain optional supplementary traffic signs. Supplementary signs are dependent on a main traffic sign and contain additional information.
 The following traffic signs are supported:
 
@@ -286,6 +348,12 @@ The following traffic signs are supported:
 | AnnounceRightLaneEnd                          | 531       | 10/11/12/13 | The subtype describes the number of continuing lanes after the right lane ends. 10 = 1 lane, 11 = 2 lanes, 12 = 3 lanes, 13 = 4 lanes |
 | AnnounceLeftLaneEnd                           | 531       | 20/21/22/23 | The subtype describes the number of continuing lanes after the left lane ends. 10 = 1 lane, 11 = 2 lanes, 12 = 3 lanes, 13 = 4 lanes |
 | DistanceIndication                            | 1004      | 30/31/32	  | For subtype 30 the value describes the distance in m. For subtype 31 the value describes the distance in km. Subtype 32 has a STOP in 100m |
+
+The following road markings are supported:
+
+| RoadMarking                                   | StVo Type | Subtype     | Value and Units   |
+|-----------------------------------------------|-----------|-------------|-------------------|
+| Stop line                                     | 294       | -           | -                 |
 
 \subsection dev_framework_modules_world_lanemarking Lane Markings
 

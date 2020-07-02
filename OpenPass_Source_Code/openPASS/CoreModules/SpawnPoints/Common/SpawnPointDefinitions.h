@@ -10,14 +10,17 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
 #include "Interfaces/parameterInterface.h"
-#include "Interfaces/samplerInterface.h"
-#include "Interfaces/slaveConfigInterface.h"
+#include "Common/commonTools.h"
 #include "CoreFramework/CoreShare/log.h"
-#include "Common/spawnPointLibraryDefinitions.h"
 
 namespace SpawnPointDefinitions
 {
+constexpr char SPAWNPOINTS[] = {"SpawnPoints"};
+constexpr char ROAD[] = {"Road"};
+constexpr char LANES[] = {"Lanes"};
 
 using RoadId = std::string;
 using LaneId = int;
@@ -25,137 +28,72 @@ using LaneIds = std::vector<LaneId>;
 using SPosition = double;
 using Range = std::pair<SPosition, SPosition>;
 using ValidLaneSpawningRanges = std::vector<Range>;
-using StringProbabilities = std::unordered_map<std::string, double>;
 using VehicleRearAndFrontCoordinates = std::pair<SPosition, SPosition>;
 
-enum class Direction
+struct SpawningAgentProfile
 {
-    FORWARD = 0,
-    BACKWARD
+    const std::string name;
+    const openpass::parameter::StochasticDistribution velocity;
+    const std::vector<double> homogeneities;
+    const openpass::parameter::StochasticDistribution tGap;
+
+    bool operator== (const SpawningAgentProfile& other) const
+    {
+        return this->name == other.name
+                && this->velocity == other.velocity
+                && this->homogeneities == other.homogeneities
+                && this->tGap == other.tGap;
+    }
 };
 
-struct TrafficConfig
+using AgentProfiles = std::vector<std::pair<SpawningAgentProfile, double>>;
+
+struct AgentProfileLaneMaps
 {
-    DoubleProbabilities trafficVolumes{};
-    DoubleProbabilities platoonRates{};
-    NormalDistributionProbabilities velocities{};
-    StringProbabilities agentProfiles {};
+    AgentProfiles leftLanes;
+    AgentProfiles rightLanes;
 };
 
-static TrafficConfig ConvertParametersIntoTrafficConfig(const ParameterInterface& parameter)
+static AgentProfileLaneMaps ExtractAgentProfileLaneMaps(const ParameterInterface &parameter)
 {
-    TrafficConfig trafficConfig;
+    using namespace helper;
 
-    try
+    AgentProfileLaneMaps agentProfileLaneMaps;
+
+    const auto& trafficGroupsList = map::query(parameter.GetParameterLists(),"TrafficGroups");
+    ThrowIfFalse(trafficGroupsList.has_value(), "No TrafficGroups provided for SpawnPointRuntimeCommon");
+
+    for (const auto& trafficGroupParameter : trafficGroupsList.value())
     {
-        const auto& trafficVolumesParameterListItems = parameter.GetParameterLists().at("TrafficVolumes");
-        std::transform(std::begin(trafficVolumesParameterListItems),
-                       std::end(trafficVolumesParameterListItems),
-                       std::inserter(trafficConfig.trafficVolumes, std::end(trafficConfig.trafficVolumes)),
-                       [](const auto& parameterListItem) -> std::pair<double, double>
+        const auto weightOfGroup = map::query(trafficGroupParameter->GetParametersDouble(), "Weight");
+        const auto velocity = map::query(trafficGroupParameter->GetParametersStochastic(), "Velocity");
+        const auto homogeneity = map::query(trafficGroupParameter->GetParametersDoubleVector(), "Homogeneity");
+        const auto tGap = map::query(trafficGroupParameter->GetParametersStochastic(), "TGap");
+        const auto rightLaneOnly = map::query(trafficGroupParameter->GetParametersBool(), "RightLaneOnly");
+
+        const auto& agentProfilesList = map::query(trafficGroupParameter->GetParameterLists(),"AgentProfiles");
+
+        ThrowIfFalse(velocity.has_value(), "No velocity provided in TrafficGroup for SpawnPointRuntimeCommon");
+        ThrowIfFalse(tGap.has_value(), "No t gap provided in TrafficGroup for SpawnPointRuntimeCommon");
+        ThrowIfFalse(agentProfilesList.has_value(), "No AgentProfile provided in TrafficGroup for SpawnPointRuntimeCommon");
+        for (const auto& agentProfileParameter : agentProfilesList.value())
         {
-            const auto& parametersDouble = parameterListItem->GetParametersDouble();
-            const auto& trafficVolume = parametersDouble.at("TrafficVolume");
-            const auto& probability = parametersDouble.at("Probability");
-
-            return std::make_pair(trafficVolume, probability);
-        });
-    }
-    catch (const std::out_of_range& error)
-    {
-        const std::string errorMessage = error.what();
-        const std::string fullError = errorMessage + "SpawnPoint needs at least one traffic volume.";
-        LOG_INTERN(LogLevel::Error) << fullError;
-    }
-
-    try
-    {
-        const auto& platoonRatesParameterListItems = parameter.GetParameterLists().at("PlatoonRates");
-        std::transform(std::begin(platoonRatesParameterListItems),
-                       std::end(platoonRatesParameterListItems),
-                       std::inserter(trafficConfig.platoonRates, std::end(trafficConfig.platoonRates)),
-                       [](const auto& parameterListItem) -> std::pair<double, double>
-        {
-           const auto& parametersDouble = parameterListItem->GetParametersDouble();
-           const auto& platoonRate = parametersDouble.at("PlatoonRate");
-           const auto& probability = parametersDouble.at("Probability");
-
-           return std::make_pair(platoonRate, probability);
-        });
-    }
-    catch (const std::out_of_range& error)
-    {
-        const std::string errorMessage = error.what();
-        const std::string fullError = errorMessage + "SpawnPoint needs at least one platoon rate.";
-        LOG_INTERN(LogLevel::Error) << fullError;
+            const auto weightOfProfile = map::query(agentProfileParameter->GetParametersDouble(), "Weight");
+            const auto name = map::query(agentProfileParameter->GetParametersString(), "Name");
+            ThrowIfFalse(name.has_value(), "No AgentProfile name provided in TrafficGroup for SpawnPointRuntimeCommon");
+            agentProfileLaneMaps.rightLanes.push_back(std::make_pair(SpawningAgentProfile{name.value(), velocity.value(),
+                                                                                 homogeneity.value_or(std::vector<double>{1.0}), tGap.value()},
+                                                            weightOfGroup.value_or(1.0) * weightOfProfile.value_or(1.0)));
+            if (!rightLaneOnly.value_or(false))
+            {
+                agentProfileLaneMaps.leftLanes.push_back(std::make_pair(SpawningAgentProfile{name.value(), velocity.value(),
+                                                                                     homogeneity.value_or(std::vector<double>{1.0}), tGap.value()},
+                                                                weightOfGroup.value_or(1.0) * weightOfProfile.value_or(1.0)));
+            }
+        }
     }
 
-    try
-    {
-        const auto& velocitiesParameterListItems = parameter.GetParameterLists().at("Velocities");
-        std::transform(std::begin(velocitiesParameterListItems),
-                       std::end(velocitiesParameterListItems),
-                       std::inserter(trafficConfig.velocities, std::end(trafficConfig.velocities)),
-                       [](const auto& parameterListItem) -> std::pair<openpass::parameter::NormalDistribution, double>
-        {
-           const auto& velocity = parameterListItem->GetParametersNormalDistribution().at("Velocity");
-           const auto& probability = parameterListItem->GetParametersDouble().at("Probability");
-
-           return std::make_pair(velocity, probability);
-        });
-    }
-    catch (const std::out_of_range& error)
-    {
-        const std::string errorMessage = error.what();
-        const std::string fullError = errorMessage + "SpawnPoint needs at least one velocity.";
-        LOG_INTERN(LogLevel::Error) << fullError;
-    }
-
-    try
-    {
-        const auto& agentProfilesListItems = parameter.GetParameterLists().at("AgentProfiles");
-        std::transform(std::begin(agentProfilesListItems),
-                       std::end(agentProfilesListItems),
-                       std::inserter(trafficConfig.agentProfiles, std::end(trafficConfig.agentProfiles)),
-                       [](const auto& parameterListItem) -> std::pair<std::string, double>
-        {
-            const auto& agentProfile = parameterListItem->GetParametersString().at("AgentProfile");
-            const auto& probability = parameterListItem->GetParametersDouble().at("Probability");
-
-            return std::make_pair(agentProfile, probability);
-        });
-    }
-    catch (const std::out_of_range& error)
-    {
-        const std::string errorMessage = error.what();
-        const std::string fullError = errorMessage + "SpawnPoint needs at least one agent profile.";
-        LOG_INTERN(LogLevel::Error) << fullError;
-    }
-
-    return trafficConfig;
+    return agentProfileLaneMaps;
 }
 
-struct SampledTrafficConfig
-{
-    double trafficVolume{};
-    double platoonRate{};
-    openpass::parameter::NormalDistribution trafficVelocityDistribution {};
-};
-
-static SampledTrafficConfig SampleTrafficConfig(const SamplerInterface * const sampler,
-                                                const SpawnPointDefinitions::TrafficConfig& trafficConfig)
-{
-    SampledTrafficConfig trafficConfigParameters;
-
-    const auto trafficVolumes = sampler->SampleDoubleProbability(trafficConfig.trafficVolumes);
-    trafficConfigParameters.trafficVolume = trafficVolumes;
-
-    const auto platoonRates = sampler->SampleDoubleProbability(trafficConfig.platoonRates);
-    trafficConfigParameters.platoonRate = platoonRates;
-
-    const auto velocities = sampler->SampleNormalDistributionProbability(trafficConfig.velocities);
-    trafficConfigParameters.trafficVelocityDistribution = velocities;
-
-    return trafficConfigParameters;
-}
 } // namespace SpawnPointDefinitions

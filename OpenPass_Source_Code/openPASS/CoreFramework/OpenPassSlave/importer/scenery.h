@@ -19,10 +19,12 @@
 
 #include <cassert>
 #include <map>
-#include "Interfaces/worldInterface.h"
-#include "Interfaces/sceneryInterface.h"
-#include "road.h"
+
+#include "Common/opExport.h"
 #include "Interfaces/roadInterface/junctionInterface.h"
+#include "Interfaces/sceneryInterface.h"
+#include "Interfaces/worldInterface.h"
+#include "road.h"
 #include "junction.h"
 
 namespace Configuration
@@ -31,7 +33,7 @@ namespace Configuration
 //-----------------------------------------------------------------------------
 //! Class representing a scenery as a list of roads.
 //-----------------------------------------------------------------------------
-class Scenery :public SceneryInterface
+class CORESLAVEEXPORT Scenery : public SceneryInterface
 {
 public:
     Scenery() = default;

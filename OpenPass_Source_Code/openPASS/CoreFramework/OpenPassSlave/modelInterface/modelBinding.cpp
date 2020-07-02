@@ -32,13 +32,14 @@ ModelBinding::~ModelBinding()
     Unload();
 }
 
-ComponentInterface *ModelBinding::Instantiate(std::shared_ptr<ComponentType>componentType,
-                                     std::string componentName,
-                                     StochasticsInterface *stochastics,
-                                     WorldInterface *world,
-                                     ObservationNetworkInterface *observationNetwork,
-                                     Agent *agent,
-                                     EventNetworkInterface *eventNetwork)
+ComponentInterface *ModelBinding::Instantiate(std::shared_ptr<ComponentType> componentType,
+                                              std::string componentName,
+                                              StochasticsInterface *stochastics,
+                                              WorldInterface *world,
+                                              ObservationNetworkInterface *observationNetwork,
+                                              Agent *agent,
+                                              EventNetworkInterface *eventNetwork,
+                                              PublisherInterface *publisher)
 {
     const std::string name = componentType->GetModelLibrary();
 
@@ -82,7 +83,8 @@ ComponentInterface *ModelBinding::Instantiate(std::shared_ptr<ComponentType>comp
                                          world,
                                          observationNetwork,
                                          agent,
-                                         eventNetwork);
+                                         eventNetwork,
+                                         publisher);
 }
 
 void ModelBinding::Unload()

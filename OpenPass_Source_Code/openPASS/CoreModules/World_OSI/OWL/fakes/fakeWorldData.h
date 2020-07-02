@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -90,6 +90,16 @@ public:
 
     MOCK_CONST_METHOD0(GetTrafficSignIdMapping, const std::unordered_map<std::string, OWL::Id>& ());
 
+    MOCK_METHOD0(AddRoadMarking, OWL::Interfaces::RoadMarking&());
+    
+    MOCK_CONST_METHOD0(GetRoadMarkings, const std::unordered_map<OWL::Id, OWL::Interfaces::RoadMarking*>& ());
+
+    MOCK_CONST_METHOD0(GetRoadGraph, const RoadGraph& ());
+    
+    MOCK_METHOD2(SetRoadGraph, void  (const RoadGraph&& roadGraph, const RoadGraphVertexMapping&& vertexMapping));
+
+    MOCK_CONST_METHOD0(GetRoadGraphVertexMapping, const RoadGraphVertexMapping& ());
+
     MOCK_METHOD2(GetSensorView, osi3::SensorView(osi3::SensorViewConfiguration&, int));
 
     MOCK_CONST_METHOD0(GetLaneBoundaries, const std::unordered_map<OWL::Id, OWL::Interfaces::LaneBoundary*>& ());
@@ -105,6 +115,8 @@ public:
     MOCK_CONST_METHOD0(GetJunctions, const std::unordered_map<OWL::Id, OWL::Junction*>& ());
 
     MOCK_METHOD2(AssignTrafficSignToLane, void (OWL::Id laneId, OWL::Interfaces::TrafficSign& trafficSign));
+
+    MOCK_METHOD2(AssignRoadMarkingToLane, void (OWL::Id laneId, OWL::Interfaces::RoadMarking& roadMarking));
 
     MOCK_METHOD3(AddJunctionPriority, void (const JunctionInterface* odJunction, const std::string& high, const std::string& low));
 

@@ -28,6 +28,7 @@
 #include "Interfaces/trafficObjectInterface.h"
 #include "Interfaces/worldInterface.h"
 #include "Interfaces/stochasticsInterface.h"
+#include "egoAgent.h"
 #include "Localization.h"
 #include "WorldData.h"
 #include "WorldDataQuery.h"
@@ -45,7 +46,7 @@ public:
     const std::string MODULENAME = "AGENTADAPTER";
 
     AgentAdapter(WorldInterface* world, const CallbackInterface* callbacks, OWL::Interfaces::WorldData* worldData, const World::Localization::Localizer& localizer);
-    ~AgentAdapter() override = default;
+    ~AgentAdapter() override;
 
     ObjectTypeOSI GetType() const override
     {
@@ -62,6 +63,11 @@ public:
         return id;
     }
 
+    EgoAgentInterface& GetEgoAgent() override
+    {
+        return egoAgent;
+    }
+
     std::string GetVehicleModelType() const override
     {
         return vehicleModelType;
@@ -76,15 +82,6 @@ public:
     {
         return driverProfileName;
     }
-
-
-    std::vector<CommonTrafficSign::Entity> GetTrafficSignsInRange(double searchDistance, int relativeLane = 0) const override;
-
-    std::vector<LaneMarking::Entity> GetLaneMarkingsInRange(double searchDistance, int relativeLane, Side side) const override;
-
-    RelativeWorldView::Junctions GetRelativeJunctions (double range) const override;
-
-    RelativeWorldView::Lanes GetRelativeLanes (double range) const override;
 
     double GetSpeedGoalMin() const override
     {
@@ -145,11 +142,13 @@ public:
         return flasherSwitch;
     }
 
+    std::vector<std::string> GetRoads(MeasurementPoint mp) const override;
+
     LightState GetLightState() const override;
 
-    RoadPosition GetRoadPosition() const override
+    const ObjectPosition& GetObjectPosition() const override
     {
-        return GetBaseTrafficObject().GetLocatedPosition().referencePoint.roadPosition;
+        return GetBaseTrafficObject().GetLocatedPosition();
     }
 
     double GetMainLocateS() const;
@@ -340,28 +339,11 @@ public:
         return centripetalAcceleration;
     }
 
-    void UpdateRoute(Route route)
-    {
-        this->route = route;
-    }
-
     bool Locate() override;
 
     void Unlocate() override;
 
     bool Update() override;
-
-    // callback from model
-    void RemoveAgent() override
-    {
-        // disable in schedule
-        isValid = false;
-    }
-
-    bool IsValid() const override
-    {
-        return isValid;
-    }
 
     void SetBrakeLight(bool brakeLightStatus) override;
 
@@ -375,69 +357,31 @@ public:
 
     IndicatorState GetIndicatorState() const override;
 
-    std::string GetRoadId(MeasurementPoint mp = MeasurementPoint::Front) const override;
-
-    int GetMainLaneId(MeasurementPoint mp = MeasurementPoint::Front) const override;
-
-    virtual int GetLaneIdLeft() const override;
-
-    virtual int GetLaneIdRight() const override;
-
-    int GetLaneIdFromRelative(int relativeLaneId) const;
-
     bool IsLeavingWorld() const override;
-
-    bool IsCrossingLanes() const override;
 
     bool IsAgentInWorld() const override;
 
     void SetPosition(Position pos) override;
 
-    double GetDistanceToStartOfRoad() const override
-    {
-        return WorldObjectInterface::GetDistanceToStartOfRoad();
-    }
-
-    double GetDistanceToStartOfRoad(MeasurementPoint mp) const override;
-
     double GetDistanceToStartOfRoad(MeasurementPoint mp, std::string roadId) const override;
 
-    double GetLaneWidth(int relativeLane = 0, double distance = 0.0) const override;
-
-    double GetLaneCurvature(int relativeLane = 0, double distance = 0.0) const override;
-
-    double GetLaneDirection(int relativeLane = 0, double distance = 0.0) const override;
-
-    bool IsEgoAgent() const override;
-
-    bool OnRoad(const OWL::Interfaces::Road& road) const;
-    bool OnLane(const OWL::Interfaces::Lane& lane) const;
-
-    double GetDistanceToObject(const WorldObjectInterface* otherObject) const override;
-
-    double GetDistanceToEndOfLane(double sightDistance, int relativeLane = 0) const override;
-
-    double GetDistanceToEndOfLane(double sightDistance, int relativeLane, const LaneTypes& laneTypes) const override;
-
-    double GetVelocity(VelocityScope velocityScope = VelocityScope::Absolute) const override;
-
-    double  GetRelativeYaw() const override
-    {
-        return GetRoadPosition().hdg;
-    }
+    double GetMainLocateS(const std::string& roadId) const;
 
     double  GetDistanceTraveled() const override
     {
         return distanceTraveled;
     }
 
-    const Obstruction GetObstruction(const WorldObjectInterface& worldObject) const override;
+    bool IsEgoAgent() const override;
 
-    double GetPositionLateral() const override;
+    bool OnRoad(const OWL::Interfaces::Road& road) const;
+    bool OnLane(const OWL::Interfaces::Lane& lane) const;
+
+    double GetVelocity(VelocityScope velocityScope = VelocityScope::Absolute) const override;
 
     void Unregister() const override;
 
-    double GetLaneRemainder(Side side) const override;
+    double GetLaneRemainder(const std::string& roadId, Side side) const override;
 
     virtual const openpass::sensors::Parameters& GetSensorParameters() const override
 
@@ -450,24 +394,9 @@ public:
         this->sensorParameters = sensorParameters;
     }
 
-    virtual std::vector<const WorldObjectInterface*> GetObjectsInRange(int relativeLane, double backwardRange,
-            double forwardRange, MeasurementPoint mp) const override;
-
-    virtual std::vector<const AgentInterface*> GetAgentsInRange(int relativeLane, double backwardRange,
-            double forwardRange, MeasurementPoint mp) const override;
-
     virtual double GetDistanceToConnectorEntrance(std::string intersectingConnectorId, int intersectingLaneId, std::string ownConnectorId) const override;
 
     virtual double GetDistanceToConnectorDeparture(std::string intersectingConnectorId, int intersectingLaneId, std::string ownConnectorId) const override;
-
-    std::set<int> GetSecondaryCoveredLanes() override;
-
-    virtual const Route& GetRoute() const override
-    {
-        return route;
-    }
-
-    double GetDistanceToNextJunction() const override;
 
 protected:
     //-----------------------------------------------------------------------------
@@ -940,18 +869,12 @@ public:
         throw std::runtime_error("not implemented");
     }
 
-#ifdef TESTING
-    void SetRoute(Route route)
-    {
-        this->route = route;
-    }
-#endif
-
 private:
     WorldInterface* world;
     const CallbackInterface* callbacks;
     OWL::Interfaces::WorldData* worldData;
     const World::Localization::Localizer& localizer;
+    EgoAgent egoAgent;
 
     OWL::Interfaces::MovingObject& GetBaseTrafficObject()
     {
@@ -993,9 +916,6 @@ private:
     //-----------------------------------------------------------------------------
     void UpdateEgoVehicle();
 
-
-    std::map<int, World::Localization::Remainder> remainder;
-
     struct LaneObjParameters
     {
         double distance;
@@ -1006,8 +926,6 @@ private:
         Common::Vector2d lowerLeftCoord;
         Common::Vector2d lowerRightCoord;
     };
-
-    const WorldObjectInterface* GetNearestObjectInVector(std::vector<const WorldObjectInterface*> agents);
 
     bool hornSwitch = false;
     bool flasherSwitch = false;
@@ -1023,7 +941,6 @@ private:
 
     World::Localization::Result locateResult;
     mutable std::vector<GlobalRoadPosition> boundaryPoints;
-    Route route;
 
     std::vector<std::pair<ObjectTypeOSI, int>> collisionPartners;
     bool isValid = true;

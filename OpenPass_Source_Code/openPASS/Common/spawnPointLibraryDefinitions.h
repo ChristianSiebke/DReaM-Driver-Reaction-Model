@@ -17,7 +17,7 @@
 class ParameterInterface;
 class ScenarioInterface;
 class WorldInterface;
-class SamplerInterface;
+class StochasticsInterface;
 class AgentBlueprintProviderInterface;
 namespace SimulationSlave
 {
@@ -55,11 +55,11 @@ struct SpawnPointDependencies
     SpawnPointDependencies(SimulationSlave::AgentFactoryInterface* agentFactory,
                            WorldInterface* world,
                            const AgentBlueprintProviderInterface* agentBlueprintProvider,
-                           const SamplerInterface* sampler) :
+                           StochasticsInterface* stochastics) :
         agentFactory{agentFactory},
         world{world},
         agentBlueprintProvider{agentBlueprintProvider},
-        sampler{sampler}
+        stochastics{stochastics}
     {}
 
     SpawnPointDependencies& operator=(const SpawnPointDependencies&) = default;
@@ -68,7 +68,7 @@ struct SpawnPointDependencies
     SimulationSlave::AgentFactoryInterface* agentFactory {nullptr};
     WorldInterface* world {nullptr};
     const AgentBlueprintProviderInterface* agentBlueprintProvider {nullptr};
-    const SamplerInterface* sampler {nullptr};
+    StochasticsInterface* stochastics {nullptr};
     std::optional<ScenarioInterface*> scenario{std::nullopt};
     std::optional<ParameterInterface*> parameters{std::nullopt};
 };

@@ -29,7 +29,7 @@ static void TransformParameterValue(ParameterInterface* param, const std::string
     else if (std::holds_alternative<std::vector<int>>(value)) { param->AddParameterIntVector(key, std::get<std::vector<int>>(value)); }
     else if (std::holds_alternative<std::vector<double>>(value)) { param->AddParameterDoubleVector(key, std::get<std::vector<double>>(value)); }
     else if (std::holds_alternative<std::vector<std::string>>(value)) { param->AddParameterStringVector(key, std::get<std::vector<std::string>>(value)); }
-    else if (std::holds_alternative<NormalDistribution>(value)) { param->AddParameterNormalDistribution(key, std::get<NormalDistribution>(value)); }
+    else if (std::holds_alternative<StochasticDistribution>(value)) { param->AddParameterStochastic(key, std::get<StochasticDistribution>(value)); }
     else throw std::runtime_error("unable to transform parameter type");
 
 }
@@ -50,7 +50,7 @@ struct VisitParameterElement
     }
 
     /// execute if visited variant holds a ParameterList
-    void operator()(const ParameterList& list)
+    void operator()(const ParameterListLevel2& list)
     {
         for (const auto& parameterSet : list)
         {
@@ -58,6 +58,18 @@ struct VisitParameterElement
             for (const auto& [sub_key, sub_value] : parameterSet)
             {
                 TransformParameterValue(&sub_param, sub_key, sub_value);
+            }
+        }
+    }
+    void operator()(const ParameterListLevel1& list)
+    {
+        for (const auto& parameterSet : list)
+        {
+            auto& sub_param = param->InitializeListItem(key);
+            for (const auto& [sub_key, sub_value] : parameterSet)
+            {
+                VisitParameterElement visitor(sub_key, &sub_param);
+                std::visit(visitor, sub_value);
             }
         }
     }
@@ -72,7 +84,7 @@ namespace openpass::parameter {
 //! @param container             The parameter set
 //! @returns Unique pointer to a new parameter interface
 template <typename T>
-std::unique_ptr<T> make(const openpass::common::RuntimeInformation& runtimeInformation, const Container& container)
+std::unique_ptr<T> make(const openpass::common::RuntimeInformation& runtimeInformation, const ParameterSetLevel1& container)
 {
     auto parameter = std::make_unique<T>(runtimeInformation);
 

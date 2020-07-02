@@ -15,6 +15,8 @@ include(../../../testing.pri)
 
 UNIT_UNDER_TEST = $$OPEN_SRC/Components/ComponentController
 
+win32:QMAKE_CXXFLAGS += -Wa,-mbig-obj
+
 INCLUDEPATH += \
     . \
     $$UNIT_UNDER_TEST

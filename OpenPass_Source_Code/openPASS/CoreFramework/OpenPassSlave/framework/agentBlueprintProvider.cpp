@@ -14,8 +14,8 @@
 #include "dynamicParametersSampler.h"
 #include "agentBlueprint.h"
 
-AgentBlueprintProvider::AgentBlueprintProvider(ConfigurationContainerInterface *configurationContainer, const SamplerInterface& sampler) :
-    sampler(sampler),
+AgentBlueprintProvider::AgentBlueprintProvider(ConfigurationContainerInterface *configurationContainer, StochasticsInterface& stochastics) :
+    stochastics(stochastics),
     profiles(configurationContainer->GetProfiles()),
     agentProfiles(configurationContainer->GetProfiles()->GetAgentProfiles()),
     vehicleModels(configurationContainer->GetVehicleModels()),
@@ -24,7 +24,7 @@ AgentBlueprintProvider::AgentBlueprintProvider(ConfigurationContainerInterface *
 {
 }
 
-AgentBlueprint AgentBlueprintProvider::SampleAgent(const std::string& agentProfileName) const
+AgentBlueprint AgentBlueprintProvider::SampleAgent(const std::string& agentProfileName, const openScenario::Parameters& assignedParameters) const
 {
     AgentBlueprint agentBlueprint;
 
@@ -33,14 +33,19 @@ AgentBlueprint AgentBlueprintProvider::SampleAgent(const std::string& agentProfi
         auto agentProfile = agentProfiles.at(agentProfileName);
         if (agentProfile.type == AgentProfileType::Dynamic)
         {
-            SampledProfiles sampledProfiles = SampledProfiles::make(agentProfileName, sampler, profiles)
+            if(systemConfigBlueprint == nullptr)
+            {
+                LogErrorAndThrow("Couldn't instantiate AgentProfile:" + agentProfileName + ". SystemConfigBlueprint is either missing or invalid.");
+            }
+
+            SampledProfiles sampledProfiles = SampledProfiles::make(agentProfileName, stochastics, profiles)
                     .SampleDriverProfile()
                     .SampleVehicleProfile()
                     .SampleVehicleComponentProfiles();
-            DynamicParameters dynamicParameters = DynamicParameters::make(sampler, sampledProfiles.vehicleProfileName, profiles->GetVehicleProfiles(), profiles->GetSensorProfiles())
+            DynamicParameters dynamicParameters = DynamicParameters::make(stochastics, sampledProfiles.vehicleProfileName, profiles)
                     .SampleSensorLatencies();
             AgentBuildInformation agentBuildInformation = AgentBuildInformation::make(sampledProfiles, dynamicParameters, systemConfigBlueprint, profiles, vehicleModels)
-                    .SetVehicleModelParameters()
+                    .SetVehicleModelParameters(assignedParameters)
                     .GatherBasicComponents()
                     .GatherDriverComponents()
                     .GatherVehicleComponents()

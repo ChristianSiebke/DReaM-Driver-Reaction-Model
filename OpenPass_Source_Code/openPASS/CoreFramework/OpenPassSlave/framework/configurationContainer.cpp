@@ -23,8 +23,8 @@ bool ConfigurationContainer::ImportAllConfigurations()
     systemConfigBlueprint = std::make_shared<SystemConfig>();
     if (!SystemConfigImporter::Import(configurationFiles.systemConfigBlueprintFile, systemConfigBlueprint))
     {
-        LOG_INTERN(LogLevel::Error) << "could not import app configuration";
-        return false;
+        LOG_INTERN(LogLevel::Info) << "could not import systemConfigBlueprint.";
+        systemConfigBlueprint = nullptr;
     }
 
     //Import SlaveConfig
@@ -83,7 +83,7 @@ bool ConfigurationContainer::ImportAllConfigurations()
 
         if(!SystemConfigImporter::Import(openpass::core::Directories::Concat(configurationFiles.configurationDir, systemConfigFile), systemConfig))
         {
-            LOG_INTERN(LogLevel::Error) << "could not import vehicle models";
+            LOG_INTERN(LogLevel::Error) << "could not import system configs";
             return false;
         }
         systemConfigs.insert(std::make_pair(systemConfigFile, systemConfig));
@@ -125,4 +125,9 @@ std::map<std::string, std::shared_ptr<SystemConfigInterface>>& ConfigurationCont
 VehicleModelsInterface* ConfigurationContainer::GetVehicleModels()
 {
     return &vehicleModels;
+}
+
+const openpass::common::RuntimeInformation& ConfigurationContainer::GetRuntimeInformation() const
+{
+    return runtimeInformation;
 }

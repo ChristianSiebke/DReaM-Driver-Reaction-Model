@@ -14,14 +14,13 @@
 //!        interact with the framework.
 //-----------------------------------------------------------------------------
 
-#ifndef CALLBACKINTERFACE_H
-#define CALLBACKINTERFACE_H
+#pragma once
 
 #include <string>
 
 //-----------------------------------------------------------------------------
 //! The following macro should only be called within classes providing a Log() member function
-//! (e.g. classes derived from ModelInterface, ObservationInterface SpawnPointInterface).
+//! (e.g. classes derived from ModelInterface  SpawnPointInterface).
 //-----------------------------------------------------------------------------
 #define LOG(level, message) Log(level, __FILE__, __LINE__, message)
 #define LOGERROR(message) Log(CbkLogLevel::Error, __FILE__, __LINE__, message)
@@ -65,5 +64,3 @@ public:
                      int line,
                      const std::string &message) const = 0;
 };
-
-#endif // CALLBACKINTERFACE_H

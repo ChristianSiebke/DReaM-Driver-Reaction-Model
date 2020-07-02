@@ -14,7 +14,6 @@
 #include "gmock/gmock.h"
 
 #include "fakeAgent.h"
-#include "fakeObservation.h"
 #include "fakeParameter.h"
 #include "fakeWorld.h"
 #include "fakeWorldObject.h"
@@ -93,7 +92,7 @@ TEST_P(TtcCalcualtionTest, CalculateObjectTTC_ReturnsCorrectTtc)
     ASSERT_THAT(result, DoubleNear(data.expectedTtc, 0.001));
 }
 
-INSTANTIATE_TEST_CASE_P(TtcCalculationTestCase, TtcCalcualtionTest, Values(
+INSTANTIATE_TEST_CASE_P(TtcCalculationTestCase, TtcCalcualtionTest, ::testing::Values(
 //                       Ego                                           opponent
 //                           x,     y,  v_x, v_y,   a, yaw, yawRate, yawAcc,     x,     y,  v_x,  v_y,   a,     yaw, yawRate, yawAcc, long, lat,     ttc
 TtcCalculationTest_Data{ -20.0,   0.0, 10.0, 0.0, 0.0, 0.0,     0.0,    0.0,   0.0,   0.0, 12.0,  0.0, 0.0,     0.0,     0.0,    0.0,  0.0, 0.0, DBL_MAX},

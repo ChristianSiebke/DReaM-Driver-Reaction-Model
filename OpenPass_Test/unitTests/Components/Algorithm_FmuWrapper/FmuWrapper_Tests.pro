@@ -40,8 +40,7 @@ SOURCES += \
     $$OPEN_SRC/Components/Algorithm_FmuWrapper/FmiImporter/src/FMI1/fmi1_me_sim.c \
     $$OPEN_SRC/Components/Algorithm_FmuWrapper/FmiImporter/src/FMI2/fmi2_check.c \
     $$OPEN_SRC/Components/Algorithm_FmuWrapper/FmiImporter/src/FMI2/fmi2_cs_sim.c \
-    $$OPEN_SRC/Components/Algorithm_FmuWrapper/FmiImporter/src/FMI2/fmi2_me_sim.c \
-    $$OPEN_SRC/Common/vector2d.cpp
+    $$OPEN_SRC/Components/Algorithm_FmuWrapper/FmiImporter/src/FMI2/fmi2_me_sim.c
 
 win32 {
     LIBS += \

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -18,6 +18,7 @@
 
 #include "Interfaces/slaveConfigInterface.h"
 #include "profiles.h"
+#include "Common/opExport.h"
 #include "Common/spawnPointLibraryDefinitions.h"
 
 namespace Configuration {
@@ -28,7 +29,7 @@ namespace Configuration {
 *            and provides access to this information
 */
 //-----------------------------------------------------------------------------
-class SlaveConfig : public SlaveConfigInterface
+class CORESLAVEEXPORT SlaveConfig : public SlaveConfigInterface
 {
 public:
     virtual ExperimentConfig &GetExperimentConfig() override;
@@ -36,6 +37,8 @@ public:
     virtual ScenarioConfig &GetScenarioConfig() override;
 
     virtual SpawnPointLibraryInfoCollection& GetSpawnPointsConfig() override;
+
+    virtual ObservationInstanceCollection& GetObservationConfig() override;
 
     virtual EnvironmentConfig &GetEnvironmentConfig() override;
 
@@ -47,6 +50,7 @@ private:
     ExperimentConfig experimentConfig {};
     ScenarioConfig scenarioConfig {};
     SpawnPointLibraryInfoCollection spawnPointsConfig {};
+    ObservationInstanceCollection observationConfig {};
     EnvironmentConfig environmentConfig {};
     std::string profilesCatalog {};
 };

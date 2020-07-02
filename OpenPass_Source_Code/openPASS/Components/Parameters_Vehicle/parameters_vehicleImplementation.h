@@ -12,7 +12,6 @@
 #pragma once
 
 #include "Interfaces/modelInterface.h"
-#include "Interfaces/observationInterface.h"
 #include "Common/primitiveSignals.h"
 
 /** \addtogroup Parameters_Vehicle
@@ -90,7 +89,7 @@ public:
         StochasticsInterface* stochastics,
         WorldInterface* world,
         const ParameterInterface* parameters,
-        const std::map<int, ObservationInterface*>* observations,
+        PublisherInterface * const publisher,
         const CallbackInterface* callbacks,
         AgentInterface* agent);
     ParametersVehicleImplementation(const ParametersVehicleImplementation&) = delete;

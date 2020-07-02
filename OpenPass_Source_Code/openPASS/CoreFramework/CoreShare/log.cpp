@@ -10,4 +10,4 @@
 
 #include "log.h"
 
-QMap<int, std::ofstream *> LogOutputPolicy::logStreamMap;
+std::map<int, std::unique_ptr<std::ofstream>> LogOutputPolicy::logStreamMap;

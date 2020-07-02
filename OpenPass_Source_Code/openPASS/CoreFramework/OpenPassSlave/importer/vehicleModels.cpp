@@ -26,9 +26,9 @@ VehicleModelMap &VehicleModels::GetVehicleModelMap()
     return vehicleModelMap;
 }
 
-VehicleModelParameters VehicleModels::GetVehicleModel(std::string vehicleModelType)
+VehicleModelParameters VehicleModels::GetVehicleModel(std::string vehicleModelType, const openScenario::Parameters& parameters)
 {
-    return vehicleModelMap.at(vehicleModelType);
+    return vehicleModelMap.at(vehicleModelType).Get(parameters);
 }
 
 } //namespace Configuration

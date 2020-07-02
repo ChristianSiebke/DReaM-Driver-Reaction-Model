@@ -23,8 +23,7 @@ class FakeComponent : public ComponentInterface {
       std::map<int, Channel*>&());
   MOCK_METHOD0(GetOutputLinks,
       std::map<int, Channel*>&());
-  MOCK_CONST_METHOD0(GetObservations,
-      const std::map<int, ObservationInterface*>&());
+  MOCK_CONST_METHOD0(GetObservations, const std::map<int, ObservationInterface*>& ());
   MOCK_METHOD1(TriggerCycle,
       bool(int time));
   MOCK_METHOD2(AcquireOutputData,

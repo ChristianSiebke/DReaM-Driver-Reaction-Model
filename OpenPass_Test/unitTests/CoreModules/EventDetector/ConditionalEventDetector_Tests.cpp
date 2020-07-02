@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -13,12 +13,13 @@
 //#include "../deps/thirdParty/include/google/protobuf/stubs/callback.h"
 
 #include "dontCare.h"
-#include "fakeWorld.h"
-#include "fakeParameter.h"
-#include "fakeEventNetwork.h"
-#include "fakeCallback.h"
-#include "fakeStochastics.h"
 #include "fakeAgent.h"
+#include "fakeCallback.h"
+#include "fakeEgoAgent.h"
+#include "fakeEventNetwork.h"
+#include "fakeParameter.h"
+#include "fakeStochastics.h"
+#include "fakeWorld.h"
 
 #include "CoreFramework/CoreShare/parameters.h"
 #include "ConditionalEventDetector.h"
@@ -70,7 +71,7 @@ TEST_P(ConditionalTimeTriggerTest, TriggerEventInsertion_AddsEventIfNecessary)
 
 INSTANTIATE_TEST_CASE_P(ConditionalTimeTrigger_AppropriatelyInsertsEventsIntoNetwork,
                         ConditionalTimeTriggerTest,
-                        Values(
+                        ::testing::Values(
                             ConditionalTimeTriggerTest_Data{800, 0},
                             ConditionalTimeTriggerTest_Data{1000, 0},
                             ConditionalTimeTriggerTest_Data{1200, 1}
@@ -111,7 +112,7 @@ TEST_P(ReachPositionConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
 {
     openScenario::ConditionalEventDetectorInformation testConditionalEventDetectorInformation;
     testConditionalEventDetectorInformation.numberOfExecutions = -1;
-    testConditionalEventDetectorInformation.actorInformation.triggeringAgentsAsActors.emplace(true);
+    testConditionalEventDetectorInformation.actorInformation.actorIsTriggeringEntity = true;
 
     const std::vector<std::string> actors {"mockAgent1", "mockAgent2"};
     testConditionalEventDetectorInformation.actorInformation.actors.emplace(actors);
@@ -120,22 +121,24 @@ TEST_P(ReachPositionConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
     bool errorOccurred = false;
     try
     {
-        auto testCondition = openScenario::ReachPositionRoadCondition(testTriggeringEntitites,
+        openScenario::RoadPosition roadPosition;
+        roadPosition.s = GetParam().sCoordinateOfTargetPosition;
+        roadPosition.roadId = GetParam().roadId;
+
+        auto testCondition = openScenario::ReachPositionCondition(testTriggeringEntitites,
                                                                       GetParam().tolerance,
-                                                                      GetParam().sCoordinateOfTargetPosition,
-                                                                      GetParam().roadId);
+                                                                      roadPosition);
         testConditionalEventDetectorInformation.conditions.emplace_back(testCondition);
 
-        RoadPosition fakeRoadPosition1 {95.0, DontCare<double>(), DontCare<double>()};
-        RoadPosition fakeRoadPosition2 {115.0, DontCare<double>(), DontCare<double>()};
-
         NiceMock<FakeAgent> mockAgent1;
-        ON_CALL(mockAgent1, GetRoadId(_)).WillByDefault(Return("fakeRoad"));
-        ON_CALL(mockAgent1, GetRoadPosition()).WillByDefault(Return(fakeRoadPosition1));
+        ObjectPosition positionAgent1{{{"fakeRoad", GlobalRoadPosition{"fakeRoad", DontCare<int>(),95.0, DontCare<double>(), DontCare<double>()}}},{},{}};
+        ON_CALL(mockAgent1, GetRoads(_)).WillByDefault(Return(std::vector<std::string>{"fakeRoad"}));
+        ON_CALL(mockAgent1, GetObjectPosition()).WillByDefault(ReturnRef(positionAgent1));
 
         NiceMock<FakeAgent> mockAgent2;
-        ON_CALL(mockAgent2, GetRoadId(_)).WillByDefault(Return("fakeRoad"));
-        ON_CALL(mockAgent2, GetRoadPosition()).WillByDefault(Return(fakeRoadPosition2));
+        ObjectPosition positionAgent2{{{"fakeRoad", GlobalRoadPosition{"fakeRoad", DontCare<int>(),115.0, DontCare<double>(), DontCare<double>()}}},{},{}};
+        ON_CALL(mockAgent2, GetRoads(_)).WillByDefault(Return(std::vector<std::string>{"fakeRoad"}));
+        ON_CALL(mockAgent2, GetObjectPosition()).WillByDefault(ReturnRef(positionAgent2));
 
         NiceMock<FakeWorld> mockWorld;
         ON_CALL(mockWorld, GetAgentByName("mockAgent1")).WillByDefault(Return(&mockAgent1));
@@ -178,7 +181,7 @@ TEST_P(ReachPositionConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
 
 INSTANTIATE_TEST_CASE_P(ReachPositionCondition_AppropriatelyInsertsEventsIntoNetwork,
                         ReachPositionConditionTest,
-                        Values(
+                        ::testing::Values(
                             ReachPositionCondition_Data{20.0 , -1.0 , "fakeRoad" , true,  0, 0},
                             ReachPositionCondition_Data{-20.0, 10.0 , "fakeRoad" , true,  0, 0},
                             ReachPositionCondition_Data{20.0 , 100.0, "fakeRoad" , false, 2, 2},
@@ -212,7 +215,7 @@ TEST_P(RelativeSpeedConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
 {
     openScenario::ConditionalEventDetectorInformation testConditionalEventDetectorInformation;
     testConditionalEventDetectorInformation.numberOfExecutions = -1;
-    testConditionalEventDetectorInformation.actorInformation.triggeringAgentsAsActors.emplace(true);
+    testConditionalEventDetectorInformation.actorInformation.actorIsTriggeringEntity = true;
 
     const std::vector<std::string> actors {};
     testConditionalEventDetectorInformation.actorInformation.actors.emplace(actors);
@@ -266,7 +269,7 @@ TEST_P(RelativeSpeedConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
 
 INSTANTIATE_TEST_CASE_P(RelativeSpeedCondition_AppropriatelyInsertsEventsIntoNetwork,
                         RelativeSpeedConditionTest,
-                        Values(
+                        ::testing::Values(
                             RelativeSpeedCondition_Data{"notExisting"      , DontCare<double>(), DontCare<openScenario::Rule>()   , 20.0, 20.0, DontCare<double>(), true  , 0},
                             RelativeSpeedCondition_Data{"referenceAgent"   , -10.0             , DontCare<openScenario::Rule>()   , 0.0,  0.0,  20.0              , false , 1},
                             RelativeSpeedCondition_Data{"referenceAgent"   , 10.0              , openScenario::Rule::LessThan     , 10.0, 10.0, 19.9              , false , 1},
@@ -303,28 +306,32 @@ TEST_P(RelativeLaneConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
 {
     openScenario::ConditionalEventDetectorInformation testConditionalEventDetectorInformation;
     testConditionalEventDetectorInformation.numberOfExecutions = -1;
-    testConditionalEventDetectorInformation.actorInformation.triggeringAgentsAsActors.emplace(true);
+    testConditionalEventDetectorInformation.actorInformation.actorIsTriggeringEntity = true;
 
     const std::vector<std::string> actors {};
     testConditionalEventDetectorInformation.actorInformation.actors.emplace(actors);
 
     const std::vector<std::string> testTriggeringEntitites{"triggeringAgent"};
-    auto testCondition = openScenario::RelativeLaneCondition(testTriggeringEntitites,
-                                                             GetParam().entityName,
-                                                             GetParam().deltaLane,
-                                                             GetParam().deltaS,
-                                                             GetParam().tolerance);
+
+    openScenario::RelativeLanePosition relativePosition;
+    relativePosition.entityRef = GetParam().entityName;
+    relativePosition.dLane = GetParam().deltaLane;
+    relativePosition.ds = GetParam().deltaS;
+    auto testCondition = openScenario::ReachPositionCondition(testTriggeringEntitites,
+                                                             GetParam().tolerance,
+                                                              relativePosition);
     testConditionalEventDetectorInformation.conditions.emplace_back(testCondition);
 
+    const std::string roadId = "SomeRoad";
     NiceMock<FakeAgent> triggeringAgent;
-    RoadPosition triggeringAgentPosition{GetParam().triggeringAgentSCoordinate, DontCare<double>(), DontCare<double>()};
-    ON_CALL(triggeringAgent, GetRoadPosition()).WillByDefault(Return(triggeringAgentPosition));
-    ON_CALL(triggeringAgent, GetMainLaneId(MeasurementPoint::Reference)).WillByDefault(Return(GetParam().triggeringAgentLane));
+    ObjectPosition triggeringAgentPosition{{{"SomeRoad", GlobalRoadPosition{"SomeRoad", GetParam().triggeringAgentLane, GetParam().triggeringAgentSCoordinate, DontCare<double>(), DontCare<double>()}}},{},{}};
+    ON_CALL(triggeringAgent, GetObjectPosition()).WillByDefault(ReturnRef(triggeringAgentPosition));
+    ON_CALL(triggeringAgent, GetRoads(_)).WillByDefault(Return(std::vector<std::string>{roadId}));
 
     NiceMock<FakeAgent> referenceAgentOnSameRoad;
-    RoadPosition referenceAgentPosition{GetParam().referenceAgentSCoordinate, DontCare<double>(), DontCare<double>()};
-    ON_CALL(referenceAgentOnSameRoad, GetRoadPosition()).WillByDefault(Return(referenceAgentPosition));
-    ON_CALL(referenceAgentOnSameRoad, GetMainLaneId(MeasurementPoint::Reference)).WillByDefault(Return(GetParam().referenceAgentLane));
+    ObjectPosition referenceAgentPosition{{{"SomeRoad", GlobalRoadPosition{"SomeRoad", GetParam().referenceAgentLane, GetParam().referenceAgentSCoordinate, DontCare<double>(), DontCare<double>()}}},{},{}};
+    ON_CALL(referenceAgentOnSameRoad, GetObjectPosition()).WillByDefault(ReturnRef(referenceAgentPosition));
+    ON_CALL(referenceAgentOnSameRoad, GetRoads(_)).WillByDefault(Return(std::vector<std::string>{roadId}));
 
     NiceMock<FakeWorld> mockWorld;
     ON_CALL(mockWorld, GetAgentByName("notExisting")).WillByDefault(Return(nullptr));
@@ -356,7 +363,7 @@ TEST_P(RelativeLaneConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
 
 INSTANTIATE_TEST_CASE_P(RelativeLaneCondition_AppropriatelyInsertsEventsIntoNetwork,
                         RelativeLaneConditionTest,
-                        Values(
+                        ::testing::Values(
                             // -----------------------| entityName               | deltaLane      | deltaS            | tolerance         | triggeringAgentLane | triggeringAgentSCoordinate | referenceAgentLane | referenceAgentSCoordinate | expectError | expectNumberOfEvents
                             RelativeLaneCondition_Data{"notExisting"             , DontCare<int>(), DontCare<double>(), DontCare<double>(), DontCare<int>()     , DontCare<double>()         , DontCare<int>()    , DontCare<double>()        , true        , 0                    },
                             RelativeLaneCondition_Data{"referenceAgentOnSameRoad", -1             , 30.0              , 10.0              , 0                   , 25.0                       , -1                 , 0.0                       , false       , 0                    },
@@ -387,7 +394,7 @@ TEST_P(TimeToCollisionConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
 {
     openScenario::ConditionalEventDetectorInformation testConditionalEventDetectorInformation;
     testConditionalEventDetectorInformation.numberOfExecutions = -1;
-    testConditionalEventDetectorInformation.actorInformation.triggeringAgentsAsActors.emplace(true);
+    testConditionalEventDetectorInformation.actorInformation.actorIsTriggeringEntity = true;
 
     const std::vector<std::string> actors {};
     testConditionalEventDetectorInformation.actorInformation.actors.emplace(actors);
@@ -456,16 +463,158 @@ TEST_P(TimeToCollisionConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
 
 INSTANTIATE_TEST_CASE_P(TimeToCollisionCondition_AppropriatelyInsertsEventsIntoNetwork,
                         TimeToCollisionConditionTest,
-                        Values(
+                        ::testing::Values(
                             // ------------------------- | entityName      | targetTTC | rule                              | expectError | expectNumberOfEvents |
                             TimeToCollisionCondition_Data{"notExisting"    , 1.0       , openScenario::Rule::LessThan      , true        , 0                    },
                             TimeToCollisionCondition_Data{"referenceAgent" , 1.0       , openScenario::Rule::GreaterThan   , false       , 1                    },
                             TimeToCollisionCondition_Data{"referenceAgent" , 1.0       , openScenario::Rule::LessThan      , false       , 0                    },
                             TimeToCollisionCondition_Data{"referenceAgent" , 1.0       , openScenario::Rule::EqualTo       , false       , 0                    },
-                            TimeToCollisionCondition_Data{"referenceAgent" , 2.0       , openScenario::Rule::GreaterThan   , false       , 0                    },
-                            TimeToCollisionCondition_Data{"referenceAgent" , 2.0       , openScenario::Rule::LessThan      , false       , 0                    },
                             TimeToCollisionCondition_Data{"referenceAgent" , 2.0       , openScenario::Rule::EqualTo       , false       , 1                    },
                             TimeToCollisionCondition_Data{"referenceAgent" , 3.0       , openScenario::Rule::GreaterThan   , false       , 0                    },
                             TimeToCollisionCondition_Data{"referenceAgent" , 3.0       , openScenario::Rule::LessThan      , false       , 1                    },
                             TimeToCollisionCondition_Data{"referenceAgent" , 3.0       , openScenario::Rule::EqualTo       , false       , 0                    }
+                        ));
+
+// Condition - ByEntity - TimeHeadway
+
+struct TimeHeadwayCondition_Data
+{
+    std::string entityName{};
+    double targetTHW{};
+    openScenario::Rule rule{};
+
+    bool expectError{};
+    int expectNumberOfEvents{};
+};
+
+class TimeHeadwayConditionTest: public ::TestWithParam<TimeHeadwayCondition_Data>
+{
+};
+
+TEST_P(TimeHeadwayConditionTest, TriggerEventInsertionFreeSpaceTrue_AddsEventIfNecessary)
+{
+    openScenario::ConditionalEventDetectorInformation testConditionalEventDetectorInformation;
+    testConditionalEventDetectorInformation.numberOfExecutions = -1;
+    testConditionalEventDetectorInformation.actorInformation.actorIsTriggeringEntity = true;
+
+    const std::vector<std::string> actors {};
+    testConditionalEventDetectorInformation.actorInformation.actors.emplace(actors);
+
+    const std::vector<std::string> testTriggeringEntitites{"triggeringAgent"};
+    auto testCondition = openScenario::TimeHeadwayCondition(testTriggeringEntitites,
+                                                            GetParam().entityName,
+                                                            GetParam().targetTHW,
+                                                            true,
+                                                            GetParam().rule);
+    testConditionalEventDetectorInformation.conditions.emplace_back(testCondition);
+
+    NiceMock<FakeAgent> triggeringAgent;
+    NiceMock<FakeEgoAgent> triggeringEgoAgent;
+    NiceMock<FakeAgent> referenceAgent;
+
+    LongitudinalDistance fakeNetDistance;
+    fakeNetDistance.netDistance = 20.0;
+    fakeNetDistance.referencePoint = std::numeric_limits<double>::infinity();
+
+    ON_CALL(triggeringAgent, GetEgoAgent()).WillByDefault(ReturnRef(triggeringEgoAgent));
+    ON_CALL(triggeringAgent, GetVelocity(VelocityScope::Longitudinal)).WillByDefault(Return(10.0));
+    ON_CALL(triggeringEgoAgent, GetDistanceToObject(&referenceAgent)).WillByDefault(Return(fakeNetDistance));
+
+    NiceMock<FakeWorld> mockWorld;
+    ON_CALL(mockWorld, GetAgentByName("notExisting")).WillByDefault(Return(nullptr));
+    ON_CALL(mockWorld, GetAgentByName("triggeringAgent")).WillByDefault(Return(&triggeringAgent));
+    ON_CALL(mockWorld, GetAgentByName("referenceAgent")).WillByDefault(Return(&referenceAgent));
+
+    FakeEventNetwork mockEventNetwork;
+    EXPECT_CALL(mockEventNetwork, InsertEvent(_)).Times(GetParam().expectNumberOfEvents);
+
+    bool errorOccurred = false;
+
+    try
+    {
+        ConditionalEventDetector eventDetector(&mockWorld,
+                                               testConditionalEventDetectorInformation,
+                                               &mockEventNetwork,
+                                               nullptr,
+                                               nullptr);
+
+        eventDetector.Trigger(0);
+    }
+    catch (...)
+    {
+        errorOccurred = true;
+    }
+
+    ASSERT_EQ(errorOccurred, GetParam().expectError);
+}
+
+TEST_P(TimeHeadwayConditionTest, TriggerEventInsertionFreeSpaceFalse_AddsEventIfNecessary)
+{
+    openScenario::ConditionalEventDetectorInformation testConditionalEventDetectorInformation;
+    testConditionalEventDetectorInformation.numberOfExecutions = -1;
+    testConditionalEventDetectorInformation.actorInformation.actorIsTriggeringEntity = true;
+
+    const std::vector<std::string> actors {};
+    testConditionalEventDetectorInformation.actorInformation.actors.emplace(actors);
+
+    const std::vector<std::string> testTriggeringEntitites{"triggeringAgent"};
+    auto testCondition = openScenario::TimeHeadwayCondition(testTriggeringEntitites,
+                                                            GetParam().entityName,
+                                                            GetParam().targetTHW,
+                                                            false,
+                                                            GetParam().rule);
+    testConditionalEventDetectorInformation.conditions.emplace_back(testCondition);
+
+    NiceMock<FakeAgent> triggeringAgent;
+    NiceMock<FakeEgoAgent> triggeringEgoAgent;
+    NiceMock<FakeAgent> referenceAgent;
+
+    LongitudinalDistance fakeNetDistance;
+    fakeNetDistance.netDistance = std::numeric_limits<double>::infinity();
+    fakeNetDistance.referencePoint = 20.0;
+
+    ON_CALL(triggeringAgent, GetEgoAgent()).WillByDefault(ReturnRef(triggeringEgoAgent));
+    ON_CALL(triggeringAgent, GetVelocity(VelocityScope::Longitudinal)).WillByDefault(Return(10.0));
+    ON_CALL(triggeringEgoAgent, GetDistanceToObject(&referenceAgent)).WillByDefault(Return(fakeNetDistance));
+
+    NiceMock<FakeWorld> mockWorld;
+    ON_CALL(mockWorld, GetAgentByName("notExisting")).WillByDefault(Return(nullptr));
+    ON_CALL(mockWorld, GetAgentByName("triggeringAgent")).WillByDefault(Return(&triggeringAgent));
+    ON_CALL(mockWorld, GetAgentByName("referenceAgent")).WillByDefault(Return(&referenceAgent));
+
+    FakeEventNetwork mockEventNetwork;
+    EXPECT_CALL(mockEventNetwork, InsertEvent(_)).Times(GetParam().expectNumberOfEvents);
+
+    bool errorOccurred = false;
+
+    try
+    {
+        ConditionalEventDetector eventDetector(&mockWorld,
+                                               testConditionalEventDetectorInformation,
+                                               &mockEventNetwork,
+                                               nullptr,
+                                               nullptr);
+
+        eventDetector.Trigger(0);
+    }
+    catch (...)
+    {
+        errorOccurred = true;
+    }
+
+    ASSERT_EQ(errorOccurred, GetParam().expectError);
+}
+
+INSTANTIATE_TEST_CASE_P(TimeHeadwayCondition_AppropriatelyInsertsEventsIntoNetwork,
+                        TimeHeadwayConditionTest,
+                        ::testing::Values(
+                            // --------------------- | entityName      | targetTHW | rule                              | expectError | expectNumberOfEvents |
+                            TimeHeadwayCondition_Data{"notExisting"    , 1.0       , openScenario::Rule::LessThan      , true        , 0                    },
+                            TimeHeadwayCondition_Data{"referenceAgent" , 1.0       , openScenario::Rule::GreaterThan   , false       , 1                    },
+                            TimeHeadwayCondition_Data{"referenceAgent" , 1.0       , openScenario::Rule::LessThan      , false       , 0                    },
+                            TimeHeadwayCondition_Data{"referenceAgent" , 1.0       , openScenario::Rule::EqualTo       , false       , 0                    },
+                            TimeHeadwayCondition_Data{"referenceAgent" , 2.0       , openScenario::Rule::EqualTo       , false       , 1                    },
+                            TimeHeadwayCondition_Data{"referenceAgent" , 3.0       , openScenario::Rule::GreaterThan   , false       , 0                    },
+                            TimeHeadwayCondition_Data{"referenceAgent" , 3.0       , openScenario::Rule::LessThan      , false       , 1                    },
+                            TimeHeadwayCondition_Data{"referenceAgent" , 3.0       , openScenario::Rule::EqualTo       , false       , 0                    }
                         ));

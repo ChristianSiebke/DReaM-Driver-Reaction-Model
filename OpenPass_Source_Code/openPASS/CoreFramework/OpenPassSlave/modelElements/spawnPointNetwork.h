@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -23,9 +23,9 @@
 
 #include "Interfaces/worldInterface.h"
 #include "Interfaces/agentBlueprintProviderInterface.h"
-#include "Interfaces/samplerInterface.h"
-#include "Interfaces/scenarioInterface.h"
+#include "Interfaces/stochasticsInterface.h"
 #include "Interfaces/spawnPointNetworkInterface.h"
+#include "Common/opExport.h"
 #include "Common/runtimeInformation.h"
 #include "spawnPointLibraryDefinitions.h"
 #include "spawnPoint.h"
@@ -33,7 +33,7 @@
 namespace SimulationSlave {
 class SpawnPointBinding;
 
-class SpawnPointNetwork : public SpawnPointNetworkInterface
+class CORESLAVEEXPORT SpawnPointNetwork : public SpawnPointNetworkInterface
 {
 public:
     SpawnPointNetwork(std::map<std::string, SpawnPointBinding> *spawnPointBindings,
@@ -48,9 +48,9 @@ public:
     bool Instantiate(const SpawnPointLibraryInfoCollection& libraryInfos,
                      AgentFactoryInterface* agentFactory,
                      AgentBlueprintProviderInterface* agentBlueprintProvider,
-                     const SamplerInterface * const sampler,
+                     StochasticsInterface * stochastics,
                      ScenarioInterface* scenario,
-                     const SpawnPointProfiles& spawnPointProfiles) override;
+                     const std::optional<ProfileGroup>& spawnPointProfiles) override;
 
     bool TriggerPreRunSpawnPoints() override;
 

@@ -34,7 +34,7 @@ extern "C" SENSOR_RECORD_STATE_SHARED_EXPORT ModelInterface *OpenPASS_CreateInst
     StochasticsInterface *stochastics,
     WorldInterface *world,
     const ParameterInterface *parameters,
-    const std::map<int, ObservationInterface*> *observations,
+    PublisherInterface * const publisher,
     AgentInterface *agent,
     const CallbackInterface *callbacks)
 {
@@ -52,7 +52,7 @@ Callbacks = callbacks;
             stochastics,
             world,
             parameters,
-            observations,
+            publisher,
             callbacks,
             agent));
     }

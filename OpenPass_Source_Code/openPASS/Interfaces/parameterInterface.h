@@ -103,8 +103,8 @@ public:
     //!
     //! @return                true, if value was not already in the map
     //-----------------------------------------------------------------------------
-    virtual bool AddParameterNormalDistribution(std::string name,
-                                                const openpass::parameter::NormalDistribution value) = 0;
+    virtual bool AddParameterStochastic(std::string name,
+                                        const openpass::parameter::StochasticDistribution value) = 0;
 
     //-----------------------------------------------------------------------------
     //! Retrieves the runtime information from the interface
@@ -174,7 +174,7 @@ public:
     //!
     //! @return                Mapping of "id" to "value"
     //-----------------------------------------------------------------------------
-    virtual const std::map<std::string, const openpass::parameter::NormalDistribution>& GetParametersNormalDistribution() const = 0;
+    virtual const std::map<std::string, const openpass::parameter::StochasticDistribution>& GetParametersStochastic() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Retrieves the parameter lists.

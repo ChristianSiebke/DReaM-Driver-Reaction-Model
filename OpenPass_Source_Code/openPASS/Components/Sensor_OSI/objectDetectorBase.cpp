@@ -31,7 +31,7 @@ ObjectDetectorBase::ObjectDetectorBase(
     StochasticsInterface* stochastics,
     WorldInterface* world,
     const ParameterInterface* parameters,
-    const std::map<int, ObservationInterface*>* observations,
+    PublisherInterface * const publisher,
     const CallbackInterface* callbacks,
     AgentInterface* agent) :
     SensorInterface(
@@ -44,7 +44,7 @@ ObjectDetectorBase::ObjectDetectorBase(
         stochastics,
         world,
         parameters,
-        observations,
+        publisher,
         callbacks,
         agent)
 {
@@ -62,12 +62,11 @@ ObjectDetectorBase::ObjectDetectorBase(
 
     try
     {
-        _observer = GetObservations()->at(0);
-        if (_observer == nullptr) { throw std::runtime_error(""); }
+        if (GetPublisher() == nullptr) { throw std::runtime_error(""); }
     }
     catch (...)
     {
-        const std::string msg = COMPONENTNAME + " invalid observation module setup";
+        const std::string msg = COMPONENTNAME + " invalid publisher module setup";
         LOG(CbkLogLevel::Error, msg);
         throw std::runtime_error(msg);
     }

@@ -16,6 +16,7 @@ add_openpass_target(
   NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT module
 
   HEADERS
+    ../../../CoreFramework/OpenPassSlave/framework/sampler.h
     ../../../CoreFramework/OpenPassSlave/modelElements/agentBlueprint.h
     ../Common/SpawnPointDefinitions.h
     ../Common/WorldAnalyzer.h
@@ -25,14 +26,15 @@ add_openpass_target(
     SpawnPointPreRunCommonParameterExtractor.h
 
   SOURCES
+    ../../../CoreFramework/OpenPassSlave/framework/sampler.cpp
     ../../../CoreFramework/OpenPassSlave/modelElements/agentBlueprint.cpp
     ../Common/WorldAnalyzer.cpp
     SpawnPointPreRunCommon.cpp
     SpawnPointPreRunCommonExport.cpp
-    SpawnPointPreRunCommonParameterExtractor.cpp
 
   INCDIRS
     ..
+    ../../../CoreFramework/CoreShare
     ../../../CoreFramework/OpenPassSlave/modelElements
 
   LIBRARIES

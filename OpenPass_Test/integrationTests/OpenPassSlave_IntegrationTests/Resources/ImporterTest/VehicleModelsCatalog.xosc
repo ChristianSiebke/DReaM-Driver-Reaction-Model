@@ -1,63 +1,65 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0"?>
 <OpenSCENARIO>
-    <FileHeader revMajor="0" revMinor="1" date="2018-12-04T10:00:00" description="openPASS vehicle models" author="in-tech GmbH"/>
-    <Catalog name="VehicleCatalog">
-        <Vehicle name="car_one" category="car">
-            <ParameterDeclaration>
-                <Parameter name="AirDragCoefficient" type="double" value="1.1"/>
-                <Parameter name="AxleRatio" type="double" value="2.2"/>
-                <Parameter name="DecelerationFromPowertrainDrag" type="double" value="3.3"/>
-                <Parameter name="FrictionCoefficient" type="double" value="4.4"/>
-                <Parameter name="FrontSurface" type="double" value="5.5"/>
-                <Parameter name="GearRatio1" type="double" value="6.6"/>
-                <Parameter name="MaximumEngineSpeed" type="double" value="6000.0"/>
-                <Parameter name="MaximumEngineTorque" type="double" value="250.0"/>
-                <Parameter name="MinimumEngineSpeed" type="double" value="900.0"/>
-                <Parameter name="MinimumEngineTorque" type="double" value="-54.0"/>
-                <Parameter name="MomentInertiaPitch" type="double" value="0.0"/>
-                <Parameter name="MomentInertiaRoll" type="double" value="0.0"/>
-                <Parameter name="MomentInertiaYaw" type="double" value="0.0"/>
-                <Parameter name="NumberOfGears" type="integer" value="1"/>
-                <Parameter name="SteeringRatio" type="double" value="7.7"/>
-            </ParameterDeclaration>
-            <BoundingBox>
-                <Center x="1.0" y="0.0" z="1.1"/>
-                <Dimension width="1.0" length="4.0" height="2.2"/>
-            </BoundingBox>
-            <Performance maxSpeed="10.0" maxDeceleration="9.80665" mass="1000.0"/>
-            <Axles>
-                <Front maxSteering="0.707" wheelDiameter="0.5" trackWidth="1.0" positionX="2.0" positionZ="0.25"/>
-                <Rear maxSteering="0.0" wheelDiameter="0.5" trackWidth="1.0" positionX="0.0" positionZ="0.25"/>
-            </Axles>
-        </Vehicle>
-        <Vehicle name="car_two" category="car">
-            <ParameterDeclaration>
-                <Parameter name="AirDragCoefficient" type="double" value="2.2"/>
-                <Parameter name="AxleRatio" type="double" value="3.3"/>
-                <Parameter name="DecelerationFromPowertrainDrag" type="double" value="4.4"/>
-                <Parameter name="FrictionCoefficient" type="double" value="5.5"/>
-                <Parameter name="FrontSurface" type="double" value="6.6"/>
-                <Parameter name="GearRatio1" type="double" value="7.7"/>
-                <Parameter name="GearRatio2" type="double" value="8.8"/>
-                <Parameter name="MaximumEngineSpeed" type="double" value="6000.0"/>
-                <Parameter name="MaximumEngineTorque" type="double" value="250.0"/>
-                <Parameter name="MinimumEngineSpeed" type="double" value="900.0"/>
-                <Parameter name="MinimumEngineTorque" type="double" value="-54.0"/>
-                <Parameter name="MomentInertiaPitch" type="double" value="0.0"/>
-                <Parameter name="MomentInertiaRoll" type="double" value="0.0"/>
-                <Parameter name="MomentInertiaYaw" type="double" value="0.0"/>
-                <Parameter name="NumberOfGears" type="integer" value="2"/>
-                <Parameter name="SteeringRatio" type="double" value="9.9"/>
-            </ParameterDeclaration>
-            <BoundingBox>
-                <Center x="2.0" y="0.0" z="2.2"/>
-                <Dimension width="1.5" length="3.0" height="4.4"/>
-            </BoundingBox>
-            <Performance maxSpeed="11.0" maxDeceleration="4.5" mass="999.9"/>
-            <Axles>
-                <Front maxSteering="0.5" wheelDiameter="0.4" trackWidth="1.1" positionX="2.5" positionZ="0.2"/>
-                <Rear maxSteering="0.0" wheelDiameter="0.4" trackWidth="1.1" positionX="0.0" positionZ="0.2"/>
-            </Axles>
-        </Vehicle>
-    </Catalog>
+  <FileHeader revMajor="0" revMinor="1" date="2018-12-04T10:00:00" description="openPASS vehicle models" author="in-tech GmbH"/>
+  <Catalog name="VehicleCatalog">
+    <Vehicle name="car_one" vehicleCategory="car">
+      <Properties>
+        <Property name="AirDragCoefficient" parameterType="double" value="1.1"/>
+        <Property name="AxleRatio" parameterType="double" value="2.2"/>
+        <Property name="DecelerationFromPowertrainDrag" parameterType="double" value="3.3"/>
+        <Property name="FrictionCoefficient" parameterType="double" value="4.4"/>
+        <Property name="FrontSurface" parameterType="double" value="5.5"/>
+        <Property name="GearRatio1" parameterType="double" value="6.6"/>
+        <Property name="MaximumEngineSpeed" parameterType="double" value="6000.0"/>
+        <Property name="MaximumEngineTorque" parameterType="double" value="250.0"/>
+        <Property name="MinimumEngineSpeed" parameterType="double" value="900.0"/>
+        <Property name="MinimumEngineTorque" parameterType="double" value="-54.0"/>
+        <Property name="MomentInertiaPitch" parameterType="double" value="0.0"/>
+        <Property name="MomentInertiaRoll" parameterType="double" value="0.0"/>
+        <Property name="MomentInertiaYaw" parameterType="double" value="0.0"/>
+        <Property name="NumberOfGears" parameterType="integer" value="1"/>
+        <Property name="SteeringRatio" parameterType="double" value="7.7"/>
+        <Property name="Mass" parameterType="double" value="1000.0"/>
+      </Properties>
+      <BoundingBox>
+        <Center x="1.0" y="0.0" z="1.1"/>
+        <Dimensions width="1.0" length="4.0" height="2.2"/>
+      </BoundingBox>
+      <Performance maxSpeed="10.0" maxDeceleration="9.80665"/>
+      <Axles>
+        <FrontAxle maxSteering="0.707" wheelDiameter="0.5" trackWidth="1.0" positionX="2.0" positionZ="0.25"/>
+        <RearAxle maxSteering="0.0" wheelDiameter="0.5" trackWidth="1.0" positionX="0.0" positionZ="0.25"/>
+      </Axles>
+    </Vehicle>
+    <Vehicle name="car_two" vehicleCategory="car">
+      <Properties>
+        <Property name="AirDragCoefficient" parameterType="double" value="2.2"/>
+        <Property name="AxleRatio" parameterType="double" value="3.3"/>
+        <Property name="DecelerationFromPowertrainDrag" parameterType="double" value="4.4"/>
+        <Property name="FrictionCoefficient" parameterType="double" value="5.5"/>
+        <Property name="FrontSurface" parameterType="double" value="6.6"/>
+        <Property name="GearRatio1" parameterType="double" value="7.7"/>
+        <Property name="GearRatio2" parameterType="double" value="8.8"/>
+        <Property name="MaximumEngineSpeed" parameterType="double" value="6000.0"/>
+        <Property name="MaximumEngineTorque" parameterType="double" value="250.0"/>
+        <Property name="MinimumEngineSpeed" parameterType="double" value="900.0"/>
+        <Property name="MinimumEngineTorque" parameterType="double" value="-54.0"/>
+        <Property name="MomentInertiaPitch" parameterType="double" value="0.0"/>
+        <Property name="MomentInertiaRoll" parameterType="double" value="0.0"/>
+        <Property name="MomentInertiaYaw" parameterType="double" value="0.0"/>
+        <Property name="NumberOfGears" parameterType="integer" value="2"/>
+        <Property name="SteeringRatio" parameterType="double" value="9.9"/>
+        <Property name="Mass" parameterType="double" value="999.9"/>
+      </Properties>
+      <BoundingBox>
+        <Center x="2.0" y="0.0" z="2.2"/>
+        <Dimensions width="1.5" length="3.0" height="4.4"/>
+      </BoundingBox>
+      <Performance maxSpeed="11.0" maxDeceleration="4.5"/>
+      <Axles>
+        <FrontAxle maxSteering="0.5" wheelDiameter="0.4" trackWidth="1.1" positionX="2.5" positionZ="0.2"/>
+        <RearAxle maxSteering="0.0" wheelDiameter="0.4" trackWidth="1.1" positionX="0.0" positionZ="0.2"/>
+      </Axles>
+    </Vehicle>
+  </Catalog>
 </OpenSCENARIO>

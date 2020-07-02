@@ -19,11 +19,10 @@
 //-----------------------------------------------------------------------------
 
 #include <exception>
-#include <set>
 #include <functional>
+#include <set>
 
-namespace SimulationSlave {
-namespace Scheduling {
+namespace openpass::scheduling {
 
 enum TaskType
 {
@@ -61,12 +60,14 @@ public:
         delay(delay),
         taskType(taskType),
         func(func)
-    {}
+    {
+    }
     virtual ~TaskItem() = default;
 
     static constexpr int VALID_FOR_ALL_AGENTS = -1;
     static constexpr int NO_DELAY = 0;
 
+    static constexpr int PRIORITY_PRESPAWNING = 6;
     static constexpr int PRIORITY_SPAWNING = 5;
     static constexpr int PRIORITY_EVENTDETECTOR = 4;
     static constexpr int PRIORITY_MANIPULATOR = 3;
@@ -74,24 +75,9 @@ public:
     static constexpr int PRIORITY_UPDATEGLOBALDRIVINGVIEW = 1;
     static constexpr int PRIORITY_OBSERVATION = 0;
 
-    bool operator<(const TaskItem& rhs) const;
-    bool operator==(const TaskItem& rhs) const;
+    bool operator<(const TaskItem &rhs) const;
+    bool operator==(const TaskItem &rhs) const;
 };
-
-/*!
-* \brief voidFunctionWrapper
-*
-* \details function of taskItem usually returns bool, so for void this function wraps this
-*
-*
-* @param[in]     function   void function
-* @return        bool       true if func was executed
-*/
-inline bool voidFunctionWrapper(std::function<void()> func)
-{
-    func();
-    return true;
-}
 
 //-----------------------------------------------------------------------------
 /** \brief taskItem for triggering task */
@@ -100,8 +86,10 @@ inline bool voidFunctionWrapper(std::function<void()> func)
 class TriggerTaskItem : public TaskItem
 {
 public:
-    TriggerTaskItem(int agentId, int priority, int cycleTime, int delay, std::function<bool()> func) :
-        TaskItem(agentId, priority, cycleTime, delay, TaskType::Trigger, func) {}
+    TriggerTaskItem(int agentId, int priority, int cycleTime, int delay, std::function<bool()> task) :
+        TaskItem(agentId, priority, cycleTime, delay, TaskType::Trigger, task)
+    {
+    }
 };
 
 //-----------------------------------------------------------------------------
@@ -111,8 +99,8 @@ public:
 class UpdateTaskItem : public TaskItem
 {
 public:
-    UpdateTaskItem(int agentId, int priority, int cycleTime, int delay, std::function<bool()> func) :
-        TaskItem(agentId, priority, cycleTime, delay, TaskType::Update, func)
+    UpdateTaskItem(int agentId, int priority, int cycleTime, int delay, std::function<bool()> task) :
+        TaskItem(agentId, priority, cycleTime, delay, TaskType::Update, task)
     {
     }
 };
@@ -124,10 +112,10 @@ public:
 class SpawningTaskItem : public TaskItem
 {
 public:
-    SpawningTaskItem(int cycleTime, std::function<bool()> func) :
-        TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_SPAWNING, cycleTime, NO_DELAY,
-                 TaskType::Spawning,
-                 func) { }
+    SpawningTaskItem(int cycleTime, std::function<bool()> task) :
+        TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_SPAWNING, cycleTime, NO_DELAY, TaskType::Spawning, task)
+    {
+    }
 };
 
 //-----------------------------------------------------------------------------
@@ -137,10 +125,10 @@ public:
 class EventDetectorTaskItem : public TaskItem
 {
 public:
-    EventDetectorTaskItem(int cycleTime, std::function<void()> func) :
-        TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_EVENTDETECTOR, cycleTime, NO_DELAY,
-                 TaskType::EventDetector,
-                 std::bind(&voidFunctionWrapper, func)) { }
+    EventDetectorTaskItem(int cycleTime, std::function<void()> task) :
+        TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_EVENTDETECTOR, cycleTime, NO_DELAY, TaskType::EventDetector, [task] { task(); return true; })
+    {
+    }
 };
 
 //-----------------------------------------------------------------------------
@@ -150,10 +138,10 @@ public:
 class ManipulatorTaskItem : public TaskItem
 {
 public:
-    ManipulatorTaskItem(int cycleTime, std::function<void()> func) :
-        TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_MANIPULATOR, cycleTime, NO_DELAY,
-                 TaskType::Manipulator,
-                 std::bind(&voidFunctionWrapper, func)) { }
+    ManipulatorTaskItem(int cycleTime, std::function<void()> task) :
+        TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_MANIPULATOR, cycleTime, NO_DELAY, TaskType::Manipulator, [task] { task(); return true; })
+    {
+    }
 };
 
 //-----------------------------------------------------------------------------
@@ -164,8 +152,7 @@ class ObservationTaskItem : public TaskItem
 {
 public:
     ObservationTaskItem(int cycleTime, std::function<bool()> task) :
-        TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_OBSERVATION, cycleTime, NO_DELAY,
-                 TaskType::Observation, task)
+        TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_OBSERVATION, cycleTime, NO_DELAY, TaskType::Observation, task)
     {
     }
 };
@@ -177,10 +164,10 @@ public:
 class SyncWorldTaskItem : public TaskItem
 {
 public:
-    SyncWorldTaskItem(int cycleTime, std::function<void()> func) :
-        TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_SYNCGLOBALDATA, cycleTime, NO_DELAY,
-                 TaskType::SyncGlobalData,
-                 std::bind(&voidFunctionWrapper, func)) { }
+    SyncWorldTaskItem(int cycleTime, std::function<void()> task) :
+        TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_SYNCGLOBALDATA, cycleTime, NO_DELAY, TaskType::SyncGlobalData, [task] { task(); return true; })
+    {
+    }
 };
 
 //-----------------------------------------------------------------------------
@@ -190,9 +177,8 @@ public:
 class UpdateGlobalDrivingViewTaskItem : public TaskItem
 {
 public:
-    UpdateGlobalDrivingViewTaskItem(int cycleTime, std::function<bool()> func) :
-        TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_UPDATEGLOBALDRIVINGVIEW, cycleTime, NO_DELAY,
-                 TaskType::UpdateGlobalDrivingView, func)
+    UpdateGlobalDrivingViewTaskItem(int cycleTime, std::function<bool()> task) :
+        TaskItem(VALID_FOR_ALL_AGENTS, PRIORITY_UPDATEGLOBALDRIVINGVIEW, cycleTime, NO_DELAY, TaskType::UpdateGlobalDrivingView, task)
     {
     }
 };
@@ -206,7 +192,6 @@ public:
 
 class Tasks
 {
-
 public:
     /*!
     * \brief AddTask
@@ -216,7 +201,7 @@ public:
     *
     * @param[in]     TaskItem    subclass of taskItem
     */
-    void AddTask(const TaskItem& newTask);
+    void AddTask(const TaskItem &newTask);
 
     /*!
     * \brief DeleteTasks
@@ -231,6 +216,4 @@ public:
     std::multiset<TaskItem> tasks;
 };
 
-
-} // namespace Scheduling
-} // namespace SimulationSlave
+} // namespace openpass::scheduling

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include "Common/opExport.h"
 #include "Interfaces/eventDetectorNetworkInterface.h"
 #include "Interfaces/worldInterface.h"
 
@@ -21,7 +22,7 @@ class EventDetector;
 class EventDetectorBinding;
 class EventNetworkInterface;
 
-class EventDetectorNetwork : public EventDetectorNetworkInterface
+class CORESLAVEEXPORT EventDetectorNetwork : public EventDetectorNetworkInterface
 {
 public:
     EventDetectorNetwork(EventDetectorBinding *eventDetectorBinding,

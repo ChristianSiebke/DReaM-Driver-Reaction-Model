@@ -2,7 +2,7 @@ set(COMPONENT_TEST_NAME OpenPassSlave_Tests)
 set(COMPONENT_SOURCE_DIR ${OPENPASS_SIMCORE_DIR}/CoreFramework/OpenPassSlave)
 
 add_openpass_target(
-    NAME ${COMPONENT_TEST_NAME} TYPE test COMPONENT core
+  NAME ${COMPONENT_TEST_NAME} TYPE test COMPONENT core
   DEFAULT_MAIN
 
   SOURCES
@@ -26,11 +26,11 @@ add_openpass_target(
     # EventNetwork
     eventNetwork_Tests.cpp
     ${COMPONENT_SOURCE_DIR}/framework/eventNetwork.cpp
+    ${COMPONENT_SOURCE_DIR}/framework/eventNetworkDataPublisher.cpp
     ${COMPONENT_SOURCE_DIR}/importer/eventDetectorImporter.cpp
 
     # ManipulatorImporter
     manipulatorImporter_Tests.cpp
-    ${COMPONENT_SOURCE_DIR}/importer/manipulatorImporter.cpp
 
     # ParameterImporter
     parameterImporter_Tests.cpp
@@ -47,8 +47,10 @@ add_openpass_target(
 
     # ScenarioImporter
     scenarioImporter_Tests.cpp
+    ${COMPONENT_SOURCE_DIR}/importer/oscImporterCommon.cpp
     ${COMPONENT_SOURCE_DIR}/importer/scenario.cpp
     ${COMPONENT_SOURCE_DIR}/importer/scenarioImporter.cpp
+    ${COMPONENT_SOURCE_DIR}/importer/scenarioImporterHelper.cpp
 
     # SceneryImporter
     sceneryImporter_Tests.cpp
@@ -85,10 +87,10 @@ add_openpass_target(
 
     # EventNetwork
     ${COMPONENT_SOURCE_DIR}/framework/eventNetwork.h
+    ${COMPONENT_SOURCE_DIR}/framework/eventNetworkDataPublisher.h
     ${COMPONENT_SOURCE_DIR}/importer/eventDetectorImporter.h
 
     # ManipulatorImporter
-    ${COMPONENT_SOURCE_DIR}/importer/manipulatorImporter.h
 
     # ParameterImporter
     ${COMPONENT_SOURCE_DIR}/importer/parameterImporter.h
@@ -101,8 +103,10 @@ add_openpass_target(
     ${COMPONENT_SOURCE_DIR}/framework/sampler.h
 
     # ScenarioImporter
+    ${COMPONENT_SOURCE_DIR}/importer/oscImporterCommon.h
     ${COMPONENT_SOURCE_DIR}/importer/scenario.h
     ${COMPONENT_SOURCE_DIR}/importer/scenarioImporter.h
+    ${COMPONENT_SOURCE_DIR}/importer/scenarioImporterHelper.h
 
     # SceneryImporter
     ${COMPONENT_SOURCE_DIR}/importer/connection.h

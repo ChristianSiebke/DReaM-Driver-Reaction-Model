@@ -9,9 +9,11 @@ add_openpass_target(
     spawnPointScenario_Tests.cpp
     ${COMPONENT_SOURCE_DIR}/SpawnPointScenario.cpp
     ${OPENPASS_SIMCORE_DIR}/CoreFramework/OpenPassSlave/framework/agentBlueprintProvider.cpp
+    ${OPENPASS_SIMCORE_DIR}/CoreFramework/OpenPassSlave/framework/agentDataPublisher.cpp
     ${OPENPASS_SIMCORE_DIR}/CoreFramework/OpenPassSlave/framework/dynamicProfileSampler.cpp
     ${OPENPASS_SIMCORE_DIR}/CoreFramework/OpenPassSlave/framework/dynamicParametersSampler.cpp
     ${OPENPASS_SIMCORE_DIR}/CoreFramework/OpenPassSlave/framework/dynamicAgentTypeGenerator.cpp
+    ${OPENPASS_SIMCORE_DIR}/CoreFramework/OpenPassSlave/framework/sampler.cpp
     ${OPENPASS_SIMCORE_DIR}/CoreFramework/OpenPassSlave/modelElements/agent.cpp
     ${OPENPASS_SIMCORE_DIR}/CoreFramework/OpenPassSlave/modelElements/agentBlueprint.cpp
     ${OPENPASS_SIMCORE_DIR}/CoreFramework/OpenPassSlave/modelElements/agentType.cpp
@@ -24,9 +26,11 @@ add_openpass_target(
   HEADERS
     ${COMPONENT_SOURCE_DIR}/SpawnPointScenario.h
     ${OPENPASS_SIMCORE_DIR}/CoreFramework/OpenPassSlave/framework/agentBlueprintProvider.h
+    ${OPENPASS_SIMCORE_DIR}/CoreFramework/OpenPassSlave/framework/agentDataPublisher.h
     ${OPENPASS_SIMCORE_DIR}/CoreFramework/OpenPassSlave/framework/dynamicProfileSampler.h
     ${OPENPASS_SIMCORE_DIR}/CoreFramework/OpenPassSlave/framework/dynamicParametersSampler.h
     ${OPENPASS_SIMCORE_DIR}/CoreFramework/OpenPassSlave/framework/dynamicAgentTypeGenerator.h
+    ${OPENPASS_SIMCORE_DIR}/CoreFramework/OpenPassSlave/framework/sampler.h
     ${OPENPASS_SIMCORE_DIR}/CoreFramework/OpenPassSlave/modelElements/agent.h
     ${OPENPASS_SIMCORE_DIR}/CoreFramework/OpenPassSlave/modelElements/agentBlueprint.h
     ${OPENPASS_SIMCORE_DIR}/CoreFramework/OpenPassSlave/modelElements/agentType.h

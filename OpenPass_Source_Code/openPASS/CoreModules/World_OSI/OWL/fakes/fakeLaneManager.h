@@ -51,6 +51,8 @@ struct FakeLaneManager
     std::vector<std::vector<OWL::Interfaces::WorldObjects*>> objectAssignments;
     std::unordered_map<OWL::Id, OWL::OdId> laneIdMapping;
     std::unordered_map<OWL::Id, std::string> roadIdMapping;
+    std::vector<std::vector<OWL::Id>> lanePredecessors;
+    std::vector<std::vector<OWL::Id>> laneSuccessors;
 
     void SetLength(size_t col, size_t row, double length, double startDistance = 0)
     {
@@ -154,19 +156,31 @@ struct FakeLaneManager
 
     void ConnectLaneColumns()
     {
+        lanePredecessors.reserve(cols * rows);
+        laneSuccessors.reserve(cols * rows);
         for (size_t col = 0; col < cols; col++)
         {
             for (size_t row = 0; row < rows; row++)
             {
                 if (col < cols - 1)
                 {
-                    ON_CALL(*lanes[col][row], GetNext()).WillByDefault(Return(std::vector<OWL::Id>{lanes[col + 1][row]->GetId()}));
+                    laneSuccessors.emplace_back(1, lanes[col + 1][row]->GetId());
                 }
+                else
+                {
+                    laneSuccessors.emplace_back();
+                }
+                ON_CALL(*lanes[col][row], GetNext()).WillByDefault(ReturnRef(laneSuccessors.back()));
 
                 if (col > 0)
                 {
-                    ON_CALL(*lanes[col][row], GetPrevious()).WillByDefault(Return(std::vector<OWL::Id>{lanes[col - 1][row]->GetId()}));
+                    lanePredecessors.emplace_back(1, lanes[col - 1][row]->GetId());
                 }
+                else
+                {
+                    lanePredecessors.emplace_back();
+                }
+                ON_CALL(*lanes[col][row], GetPrevious()).WillByDefault(ReturnRef(lanePredecessors.back()));
             }
         }
     }

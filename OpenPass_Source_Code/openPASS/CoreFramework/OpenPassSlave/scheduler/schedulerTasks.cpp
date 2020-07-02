@@ -9,29 +9,30 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
+#include "schedulerTasks.h"
+
 #include <algorithm>
+#include <stdexcept>
 #include <utility>
 #include <stdexcept>
-
-#include "schedulerTasks.h"
 
 //-----------------------------------------------------------------------------
 /** \file  SchedulerTasks.cpp */
 //-----------------------------------------------------------------------------
 
-namespace SimulationSlave {
-namespace Scheduling {
+namespace openpass::scheduling {
 
 SchedulerTasks::SchedulerTasks(std::list<TaskItem> bootstrapTasks,
-                               std::list<TaskItem> commonTasks,
-                               std::list<TaskItem> finalizeRecurringTasks,
+                               std::list<TaskItem> spawningTasks,
+                               std::list<TaskItem> preAgentTasks,
+                               std::list<TaskItem> synchronizeTasks,
                                std::list<TaskItem> finalizeTasks,
                                int scheduledTimestampsInterval)
 {
     this->bootstrapTasks.tasks = std::multiset<TaskItem>(bootstrapTasks.begin(), bootstrapTasks.end());
-    this->commonTasks.tasks = std::multiset<TaskItem>(commonTasks.begin(), commonTasks.end());
-    this->finalizeRecurringTasks.tasks = std::multiset<TaskItem>(finalizeRecurringTasks.begin(),
-                                         finalizeRecurringTasks.end());
+    this->spawningTasks.tasks = std::multiset<TaskItem>(spawningTasks.begin(), spawningTasks.end());
+    this->preAgentTasks.tasks = std::multiset<TaskItem>(preAgentTasks.begin(), preAgentTasks.end());
+    this->synchronizeTasks.tasks = std::multiset<TaskItem>(synchronizeTasks.begin(), synchronizeTasks.end());
     this->finalizeTasks.tasks = std::multiset<TaskItem>(finalizeTasks.begin(), finalizeTasks.end());
 
     this->scheduledTimestampsInterval = scheduledTimestampsInterval;
@@ -42,17 +43,17 @@ SchedulerTasks::SchedulerTasks(std::list<TaskItem> bootstrapTasks,
 
 void SchedulerTasks::ScheduleNewRecurringTasks(std::list<TaskItem> newTasks)
 {
-    ScheduleNewTasks(recurringTasks, std::move(newTasks));
+    ScheduleNewTasks(recurringAgentTasks, std::move(newTasks));
 }
 
 void SchedulerTasks::ScheduleNewNonRecurringTasks(std::list<TaskItem> newTasks)
 {
-    ScheduleNewTasks(nonRecurringTasks, newTasks);
+    ScheduleNewTasks(nonRecurringAgentTasks, newTasks);
 }
 
-void SchedulerTasks::ScheduleNewTasks(Tasks& tasks, std::list<TaskItem> newTasks)
+void SchedulerTasks::ScheduleNewTasks(Tasks &tasks, std::list<TaskItem> newTasks)
 {
-    for (const auto& newTask : newTasks)
+    for (const auto &newTask : newTasks)
     {
         tasks.AddTask(newTask);
         UpdateScheduledTimestamps(newTask.cycletime, newTask.delay);
@@ -74,8 +75,8 @@ void SchedulerTasks::UpdateScheduledTimestamps(int cycleTime, int delay)
 
     int currentScheduleTime = cycleTime + delay;
     int numberOfSkippedTimestamps = std::max(0,
-                                    (lowerBoundOfScheduledTimestamps - currentScheduleTime + cycleTime - 1) /
-                                    cycleTime); //We add cycletime -1 because we want to round up
+                                             (lowerBoundOfScheduledTimestamps - currentScheduleTime + cycleTime - 1) /
+                                                 cycleTime); //We add cycletime -1 because we want to round up
     currentScheduleTime += cycleTime * numberOfSkippedTimestamps;
 
     if (currentScheduleTime <= upperBoundOfScheduledTimestamps)
@@ -89,9 +90,9 @@ void SchedulerTasks::UpdateScheduledTimestamps(int cycleTime, int delay)
     // scheduledTimesteps higher than horizon will be considered on next timestamp
 }
 
-void SchedulerTasks::UpdateScheduledTimestamps(std::multiset<TaskItem>& tasks)
+void SchedulerTasks::UpdateScheduledTimestamps(std::multiset<TaskItem> &tasks)
 {
-    for (const auto& task : tasks)
+    for (const auto &task : tasks)
     {
         UpdateScheduledTimestamps(task.cycletime, task.delay);
     }
@@ -103,16 +104,16 @@ void SchedulerTasks::CreateNewScheduledTimestamps()
     scheduledTimestamps.insert(lowerBoundOfScheduledTimestamps);
     scheduledTimestamps.insert(upperBoundOfScheduledTimestamps);
 
-    UpdateScheduledTimestamps(commonTasks.tasks);
-    UpdateScheduledTimestamps(recurringTasks.tasks);
-    UpdateScheduledTimestamps(nonRecurringTasks.tasks);
+    UpdateScheduledTimestamps(spawningTasks.tasks);
+    UpdateScheduledTimestamps(recurringAgentTasks.tasks);
+    UpdateScheduledTimestamps(nonRecurringAgentTasks.tasks);
 }
 
 int SchedulerTasks::GetNextTimestamp(int timestamp)
 {
     ExpandUpperBoundary(timestamp);
 
-    for (const auto& scheduledTimestamp : scheduledTimestamps)
+    for (const auto &scheduledTimestamp : scheduledTimestamps)
     {
         if (scheduledTimestamp > timestamp)
         {
@@ -134,9 +135,9 @@ void SchedulerTasks::ExpandUpperBoundary(int timestamp)
     // we are not time travelling.. backwards is illogical
 }
 
-void SchedulerTasks::GetTasks(int timestamp, std::multiset<TaskItem>& tasks, std::list<TaskItem>& currentTasks)
+void SchedulerTasks::GetTasks(int timestamp, std::multiset<TaskItem> &tasks, std::list<TaskItem> &currentTasks)
 {
-    for (const auto& task : tasks)
+    for (const auto &task : tasks)
     {
         if (task.cycletime == 0)
         {
@@ -161,39 +162,52 @@ std::list<TaskItem> SchedulerTasks::GetTasks(int timestamp)
         return currentTasks;
     }
 
-    GetTasks(timestamp, commonTasks.tasks, currentTasks);
+    GetTasks(timestamp, spawningTasks.tasks, currentTasks);
     PullNonRecurringTasks(timestamp, currentTasks);
-    GetTasks(timestamp, recurringTasks.tasks, currentTasks);
-    GetTasks(timestamp, finalizeRecurringTasks.tasks, currentTasks);
+    GetTasks(timestamp, recurringAgentTasks.tasks, currentTasks);
+    GetTasks(timestamp, synchronizeTasks.tasks, currentTasks);
 
     return currentTasks;
 }
 
-std::list<TaskItem> SchedulerTasks::GetCommonTasks(int timestamp)
+std::list<TaskItem> SchedulerTasks::GetSpawningTasks(int timestamp)
 {
     std::list<TaskItem> currentTasks;
-    GetTasks(timestamp, commonTasks.tasks, currentTasks);
+    GetTasks(timestamp, spawningTasks.tasks, currentTasks);
     return currentTasks;
 }
 
-std::list<TaskItem> SchedulerTasks::ConsumeNonRecurringTasks(int timestamp)
+std::list<TaskItem> SchedulerTasks::GetPreAgentTasks(int timestamp)
+{
+    std::list<TaskItem> currentTasks;
+    GetTasks(timestamp, preAgentTasks.tasks, currentTasks);
+    return currentTasks;
+}
+
+std::list<TaskItem> SchedulerTasks::ConsumeNonRecurringAgentTasks(int timestamp)
 {
     std::list<TaskItem> currentTasks;
     PullNonRecurringTasks(timestamp, currentTasks);
     return currentTasks;
 }
 
-std::list<TaskItem> SchedulerTasks::GetRecurringTasks(int timestamp)
+std::list<TaskItem> SchedulerTasks::GetRecurringAgentTasks(int timestamp)
 {
     std::list<TaskItem> currentTasks;
-    GetTasks(timestamp, recurringTasks.tasks, currentTasks);
-    GetTasks(timestamp, finalizeRecurringTasks.tasks, currentTasks);
+    GetTasks(timestamp, recurringAgentTasks.tasks, currentTasks);
     return currentTasks;
 }
 
-void SchedulerTasks::PullNonRecurringTasks(int timestamp, std::list<TaskItem>& currentTasks)
+std::list<TaskItem> SchedulerTasks::GetSynchronizeTasks(int timestamp)
 {
-    GetTasks(timestamp, nonRecurringTasks.tasks, currentTasks);
+    std::list<TaskItem> currentTasks;
+    GetTasks(timestamp, synchronizeTasks.tasks, currentTasks);
+    return currentTasks;
+}
+
+void SchedulerTasks::PullNonRecurringTasks(int timestamp, std::list<TaskItem> &currentTasks)
+{
+    GetTasks(timestamp, nonRecurringAgentTasks.tasks, currentTasks);
     ClearNonrecurringTasks();
 }
 
@@ -209,7 +223,7 @@ std::multiset<TaskItem> SchedulerTasks::GetFinalizeTasks()
 
 void SchedulerTasks::ClearNonrecurringTasks()
 {
-    nonRecurringTasks.tasks.clear();
+    nonRecurringAgentTasks.tasks.clear();
 }
 
 void SchedulerTasks::DeleteAgentTasks(int agentId)
@@ -218,12 +232,12 @@ void SchedulerTasks::DeleteAgentTasks(int agentId)
     DeleteAgentTasks(agentIds);
 }
 
-void SchedulerTasks::DeleteAgentTasks(std::list<int>& agentIds)
+void SchedulerTasks::DeleteAgentTasks(std::list<int> &agentIds)
 {
-    for (const auto& agentId : agentIds)
+    for (const auto &agentId : agentIds)
     {
-        recurringTasks.DeleteTasks(agentId);
-        nonRecurringTasks.DeleteTasks(agentId); //if agent immediately will be removed after spawning
+        recurringAgentTasks.DeleteTasks(agentId);
+        nonRecurringAgentTasks.DeleteTasks(agentId); //if agent immediately will be removed after spawning
     }
 
     if (!agentIds.empty())
@@ -232,5 +246,4 @@ void SchedulerTasks::DeleteAgentTasks(std::list<int>& agentIds)
     }
 }
 
-} // namespace Scheduling
-} // namespace SimulationSlave
+} // namespace openpass::scheduling

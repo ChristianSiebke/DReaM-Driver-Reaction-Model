@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 * Copyright (c) 2020 HLRS, University of Stuttgart.
 *
@@ -17,16 +17,20 @@
 
 #pragma once
 
-#include <string>
-#include <map>
 #include <QMutex>
-#include "opExport.h"
+
+#include "Common/opExport.h"
+#include <map>
+#include <string>
+
 #include "frameworkModules.h"
+
 #include "Interfaces/agentFactoryInterface.h"
 #include "Interfaces/configurationContainerInterface.h"
-#include "Interfaces/parameterInterface.h"
+#include "Interfaces/dataStoreInterface.h"
 #include "Interfaces/frameworkModuleContainerInterface.h"
 #include "Interfaces/observationNetworkInterface.h"
+#include "Interfaces/parameterInterface.h"
 #include "Interfaces/stochasticsInterface.h"
 
 namespace SimulationSlave {
@@ -43,11 +47,11 @@ public:
         agentBlueprintProvider(*frameworkModuleContainer.GetAgentBlueprintProvider()),
         eventNetwork(*frameworkModuleContainer.GetEventNetwork()),
         world(*frameworkModuleContainer.GetWorld()),
-        sampler(frameworkModuleContainer.GetSampler()),
         spawnPointNetwork(*frameworkModuleContainer.GetSpawnPointNetwork()),
         stochastics(*frameworkModuleContainer.GetStochastics()),
         eventDetectorNetwork(*frameworkModuleContainer.GetEventDetectorNetwork()),
         manipulatorNetwork(*frameworkModuleContainer.GetManipulatorNetwork()),
+        dataStore(*frameworkModuleContainer.GetDataStore()),
         frameworkModules{frameworkModules}
     {}
 
@@ -82,10 +86,11 @@ public:
     //void StopRun();
 
 private:
-    bool InitPreRun(ExperimentConfig& experimentConfig, ScenarioInterface& scenario, SceneryInterface& scenery);
+    bool InitPreRun(ScenarioInterface& scenario, SceneryInterface& scenery);
     bool InitRun(std::uint32_t seed, const EnvironmentConfig& environmentConfig, RunResult& runResult);
-    void InitializeFrameworkModules(ExperimentConfig &experimentConfig, ScenarioInterface &scenario);
+    void InitializeFrameworkModules(ScenarioInterface &scenario);
     void InitializeSpawnPointNetwork();
+    std::unique_ptr<ParameterInterface> SampleWorldParameters(const EnvironmentConfig& environmentConfig, StochasticsInterface* stochastics, const openpass::common::RuntimeInformation& runtimeInformation);
 
     void ClearRun();
 
@@ -98,16 +103,14 @@ private:
     AgentBlueprintProviderInterface& agentBlueprintProvider;
     EventNetworkInterface& eventNetwork;
     WorldInterface& world;
-    const SamplerInterface& sampler;
     SpawnPointNetworkInterface& spawnPointNetwork;
     StochasticsInterface& stochastics;
     EventDetectorNetworkInterface& eventDetectorNetwork;
     ManipulatorNetworkInterface& manipulatorNetwork;
+    DataStoreInterface& dataStore;
     FrameworkModules& frameworkModules;
 
-    std::unique_ptr<ParameterInterface> worldParameter {nullptr};
+    std::unique_ptr<ParameterInterface> worldParameter;
 };
 
 } // namespace SimulationSlave
-
-

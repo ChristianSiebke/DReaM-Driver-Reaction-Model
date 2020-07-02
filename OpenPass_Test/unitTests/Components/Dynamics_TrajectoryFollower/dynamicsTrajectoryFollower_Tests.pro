@@ -26,9 +26,6 @@ TRAJECTORYFOLLOWER_SRC = \
 TRAJECTORYFOLLOWER_HDR = \
     $$relative_path($$OPEN_SRC)/Components/Dynamics_TrajectoryFollower/trajectoryFollowerImplementation.h
 
-COMMON_SRC = \
-    $$relative_path($$OPEN_SRC)/Common/vector2d.cpp
-
 COMMON_HDR = \
     $$relative_path($$OPEN_SRC)/Common/vector2d.h
 
@@ -41,5 +38,4 @@ HEADERS += \
 
 SOURCES += \
     $$TEST_SRC \
-    $$TRAJECTORYFOLLOWER_SRC \
-    $$COMMON_SRC
+    $$TRAJECTORYFOLLOWER_SRC

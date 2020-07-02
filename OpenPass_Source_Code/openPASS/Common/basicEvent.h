@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include "Interfaces/eventInterface.h"
 
 //-----------------------------------------------------------------------------
@@ -30,115 +32,125 @@
 class BasicEvent : public EventInterface
 {
 public:
-    BasicEvent(int time,
-               std::string eventName,
-               std::string source):
+    BasicEvent(int time, std::string eventName, std::string source,
+               const std::vector<int> triggeringAgents, const std::vector<int> actingAgents) :
         time(time),
         name(eventName),
-        source(source)
-    {}
-    BasicEvent(const BasicEvent&) = delete;
-    BasicEvent(BasicEvent&&) = delete;
-    BasicEvent& operator=(const BasicEvent&) = delete;
-    BasicEvent& operator=(BasicEvent&&) = delete;
+        source(source),
+        triggeringAgents(triggeringAgents),
+        actingAgents(actingAgents)
+    {
+    }
+
+    BasicEvent(int time, std::string eventName, std::string source) :
+        time(time),
+        name(eventName),
+        source(source),
+        triggeringAgents{},
+        actingAgents{}
+    {
+    }
+
     virtual ~BasicEvent() override = default;
 
-    /*!
-    * \brief Sets the Id of the event.
-    *
-    * @param[in]	Id of the event.
-    */
     virtual void SetId(const int eventId) override
     {
         this->eventId = eventId;
     }
 
-    /*!
-    * \brief Returns the Id of the event.
-    *
-    * @return	     Id.
-    */
     virtual int GetId() const override
     {
         return eventId;
     }
 
-    /*!
-    * \brief Returns the time of the event.
-    *
-    * @return	     Time in milliseconds.
-    */
     virtual int GetEventTime() const override
     {
         return time;
     }
 
-    /*!
-    * \brief Returns the category of the event.
-    *
-    * @return	     EventCategory.
-    */
     virtual EventDefinitions::EventCategory GetCategory() const override
     {
         return EventDefinitions::EventCategory::Basic;
     }
 
-    /*!
-    * \brief Sets the Id of the event which triggered this event.
-    *
-    * @param[in]	     Event Id.
-    */
     virtual void SetTriggeringEventId(const int triggeringEventId) override
     {
         this->triggeringEventId = triggeringEventId;
     }
 
-    /*!
-    * \brief Returns the Id of the event which triggered this event.
-    *
-    * @return	     Event Id.
-    */
     virtual int GetTriggeringEventId() const override
     {
         return triggeringEventId;
     }
 
-    /*!
-    * \brief Returns the name of the event.
-    *
-    * @return	     Name of the event as string.
-    */
     virtual std::string GetName() const override
     {
         return name;
     }
 
-    /*!
-    * \brief Returns the name of the source component.
-    *
-    * @return	     Name of source component as string.
-    */
     virtual std::string GetSource() const override
     {
         return source;
     }
 
-    /*!
-    * \brief Returns all parameters of the event as string list.
-    * \details Returns all parameters of the event as a generic string list.
-    *          The parameter name and the value are returned as string.
-    *
-    * @return	     List of string pairs of the event parameters.
-    */
+    virtual const std::vector<int> GetTriggeringAgents() const override
+    {
+        return triggeringAgents;
+    }
+
+    virtual const std::vector<int> GetActingAgents() const override
+    {
+        return actingAgents;
+    }
+
     virtual EventParameters GetParametersAsString() override
     {
-        return {};
+        EventParameters eventParameters;
+
+        std::string triggeringAgentsAsString{};
+        for (auto &triggeringAgentId : triggeringAgents)
+        {
+            triggeringAgentsAsString += std::to_string(triggeringAgentId) + ",";
+        }
+
+        std::string actingAgentsAsString;
+        for (auto &actingAgentId : actingAgents)
+        {
+            actingAgentsAsString += std::to_string(actingAgentId) + ",";
+        }
+
+        if (!triggeringAgentsAsString.empty())
+        {
+            triggeringAgentsAsString.pop_back();
+            eventParameters.push_back({"TriggeringAgentIds", triggeringAgentsAsString});
+        }
+
+        if (!actingAgentsAsString.empty())
+        {
+            actingAgentsAsString.pop_back();
+            eventParameters.push_back({"ActingAgentIds", actingAgentsAsString});
+        }
+
+        return eventParameters;
+    }
+
+    const openpass::type::FlatParameter &GetParameter() const noexcept override
+    {
+        return parameter;
     }
 
 private:
-    int eventId;
     const int time;
-    int triggeringEventId {-1};
     const std::string name;
     const std::string source;
+
+    int eventId{};
+    int triggeringEventId{-1};
+
+public:
+    const std::vector<int> triggeringAgents;
+    const std::vector<int> actingAgents;
+
+protected:
+    openpass::type::FlatParameter parameter{};
 };

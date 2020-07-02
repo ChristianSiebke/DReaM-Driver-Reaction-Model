@@ -35,12 +35,13 @@
 
 #include <vector>
 
-#include "Interfaces/modelInterface.h"
-#include "Interfaces/observationInterface.h"
 #include "Common/accelerationSignal.h"
-#include "Common/vehicleComponentEvent.h"
 #include "Common/primitiveSignals.h"
 #include "Common/sensorDataSignal.h"
+#include "Common/vehicleComponentEvent.h"
+#include "Interfaces/modelInterface.h"
+#include "Interfaces/parameterInterface.h"
+#include "Interfaces/publisherInterface.h"
 #include "osi3/osi_sensordata.pb.h"
 
 class AlgorithmAutonomousEmergencyBrakingImplementation : public AlgorithmInterface
@@ -55,16 +56,16 @@ public:
         int offsetTime,
         int responseTime,
         int cycleTime,
-        StochasticsInterface* stochastics,
-        const ParameterInterface* parameters,
-        const std::map<int, ObservationInterface*>* observations,
-        const CallbackInterface* callbacks,
-        AgentInterface* agent);
-    AlgorithmAutonomousEmergencyBrakingImplementation(const AlgorithmAutonomousEmergencyBrakingImplementation&) = delete;
-    AlgorithmAutonomousEmergencyBrakingImplementation(AlgorithmAutonomousEmergencyBrakingImplementation&&) = delete;
-    AlgorithmAutonomousEmergencyBrakingImplementation& operator=(const AlgorithmAutonomousEmergencyBrakingImplementation&) =
+        StochasticsInterface *stochastics,
+        const ParameterInterface *parameters,
+        PublisherInterface * const publisher,
+        const CallbackInterface *callbacks,
+        AgentInterface *agent);
+    AlgorithmAutonomousEmergencyBrakingImplementation(const AlgorithmAutonomousEmergencyBrakingImplementation &) = delete;
+    AlgorithmAutonomousEmergencyBrakingImplementation(AlgorithmAutonomousEmergencyBrakingImplementation &&) = delete;
+    AlgorithmAutonomousEmergencyBrakingImplementation &operator=(const AlgorithmAutonomousEmergencyBrakingImplementation &) =
         delete;
-    AlgorithmAutonomousEmergencyBrakingImplementation& operator=(AlgorithmAutonomousEmergencyBrakingImplementation&&) =
+    AlgorithmAutonomousEmergencyBrakingImplementation &operator=(AlgorithmAutonomousEmergencyBrakingImplementation &&) =
         delete;
     virtual ~AlgorithmAutonomousEmergencyBrakingImplementation() = default;
 
@@ -80,7 +81,7 @@ public:
      * \param[in]     data           Referenced signal (copied by sending component)
      * \param[in]     time           Current scheduling time
      */
-    virtual void UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const>& data, int time);
+    virtual void UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time);
 
     /*!
      * \brief Update outputs.
@@ -94,7 +95,7 @@ public:
      * \param[out]    data           Referenced signal (copied by this component)
      * \param[in]     time           Current scheduling time
      */
-    virtual void UpdateOutput(int localLinkId, std::shared_ptr<SignalInterface const>& data, int time);
+    virtual void UpdateOutput(int localLinkId, std::shared_ptr<SignalInterface const> &data, int time);
 
     /*!
      * \brief Process data within component.
@@ -123,7 +124,7 @@ private:
      * \param parameters ParameterInterface containing braking information
      * ------------------------------------------------------------------------
      */
-    void ParseParameters(const ParameterInterface* parameters);
+    void ParseParameters(const ParameterInterface *parameters);
 
     /*!
      * \brief Calculates the minimim ttc (time to collision) of all objects the linked sensors
@@ -138,14 +139,14 @@ private:
      * \param baseMoving osi BaseMoving of other object
      * \return ttc
      */
-    double CalculateObjectTTC(const osi3::BaseMoving& baseMoving);
+    double CalculateObjectTTC(const osi3::BaseMoving &baseMoving);
 
     /*!
      * \brief Calculates the ttc between a stationary object and the own agent
      * \param baseStationary osi BaseStationary of other object
      * \return ttc
      */
-    double CalculateObjectTTC(const osi3::BaseStationary& baseStationary);
+    double CalculateObjectTTC(const osi3::BaseStationary &baseStationary);
 
     /*!
      * \brief ShouldBeActivated Determines if the Autonomous Emergency Braking system
@@ -167,28 +168,28 @@ private:
     bool ShouldBeDeactivated(double ttc) const;
 
     /*!
-     * \brief Sets the current acceleration of the system
+     * \brief Checks if current acceleration of the system needs to be updated
      *
-     * The acceleration is determined by the currently active stage. After a
-     * stage gets activated the acceralation moves to the defined acceleration of
-     * this stage by a parametrized gradient.
-     *
-     * \param time  current timeStep
+     * The acceleration is determined by the currently active stage.
      */
-    void UpdateAcceleration(const int time);
+    void UpdateAcceleration();
+
+    /*!
+     * \brief Sets the current acceleration of the system
+     */
+    void SetAcceleration(double setValue);
 
     std::vector<int> sensors; ///!< Collection of sensor input ids
 
-    double collisionDetectionLongitudinalBoundary {0.0}; ///!< Additional length added to the vehicle boundary when checking for collision detection
-    double collisionDetectionLateralBoundary {0.0}; ///!< Additional width added to the vehicle boundary when checking for collision detection
+    double collisionDetectionLongitudinalBoundary{0.0}; ///!< Additional length added to the vehicle boundary when checking for collision detection
+    double collisionDetectionLateralBoundary{0.0};      ///!< Additional width added to the vehicle boundary when checking for collision detection
 
-    ObservationInterface* observer = nullptr; ///!< Observer containing the eventnetwork into which (de-)activation events are inserted
-    std::vector<osi3::DetectedMovingObject> detectedMovingObjects; ///!< Collection of moving objects detected by connected sensors
+    std::vector<osi3::DetectedMovingObject> detectedMovingObjects;         ///!< Collection of moving objects detected by connected sensors
     std::vector<osi3::DetectedStationaryObject> detectedStationaryObjects; ///!< Collection of stationary objects detected by connected sensors
 
     ComponentState componentState = ComponentState::Disabled; ///!< Current state of the AEB component
 
-    double ttcBrake{0.0}; ///!< The minimum Time-To-Collision before the AEB component activates
+    double ttcBrake{0.0};            ///!< The minimum Time-To-Collision before the AEB component activates
     double brakingAcceleration{0.0}; ///!< The acceleration provided by the AEB component when activated (should be negative)
-    double activeAcceleration {0.0}; ///!< The current acceleration actively provided by the AEB component (should be 0.0 when off)
+    double activeAcceleration{0.0};  ///!< The current acceleration actively provided by the AEB component (should be 0.0 when off)
 };

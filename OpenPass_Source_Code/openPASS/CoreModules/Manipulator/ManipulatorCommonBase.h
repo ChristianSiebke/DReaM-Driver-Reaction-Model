@@ -31,7 +31,6 @@
 
 #include "Interfaces/eventNetworkInterface.h"
 #include "Interfaces/manipulatorInterface.h"
-#include "Interfaces/scenarioActionInterface.h"
 #include "Interfaces/worldInterface.h"
 
 //Event Categories
@@ -57,9 +56,9 @@ public:
     {}
 
     ManipulatorCommonBase(WorldInterface *world,
-                          std::shared_ptr<ScenarioActionInterface> action,
                           SimulationSlave::EventNetworkInterface *eventNetwork,
-                          const CallbackInterface *callbacks);
+                          const CallbackInterface *callbacks,
+                          const std::string &eventName);
 
     ManipulatorCommonBase(const ManipulatorCommonBase&) = delete;
     ManipulatorCommonBase(ManipulatorCommonBase&&) = delete;

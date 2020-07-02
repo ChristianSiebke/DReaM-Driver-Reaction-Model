@@ -35,7 +35,7 @@ extern "C" DYNAMICS_REGULAR_DRIVING_SHARED_EXPORT ModelInterface *OpenPASS_Creat
         StochasticsInterface *stochastics,
         WorldInterface *world,
         const ParameterInterface *parameters,
-        const std::map<int, ObservationInterface*> *observations,
+        PublisherInterface * const publisher,
         AgentInterface *agent,
         const CallbackInterface *callbacks)
 {
@@ -53,7 +53,7 @@ extern "C" DYNAMICS_REGULAR_DRIVING_SHARED_EXPORT ModelInterface *OpenPASS_Creat
                                      stochastics,
                                      world,
                                      parameters,
-                                     observations,
+                                     publisher,
                                      callbacks,
                                      agent));
     }

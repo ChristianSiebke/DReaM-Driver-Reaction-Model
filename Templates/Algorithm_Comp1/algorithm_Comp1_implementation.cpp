@@ -31,7 +31,7 @@ Algorithm_Comp1_Implementation::Algorithm_Comp1_Implementation(int componentId,
                                                            int cycleTime,
                                                            StochasticsInterface *stochastics,
                                                            const ParameterInterface *parameters, 
-                                                           const std::map<int, ObservationInterface *> *observations,
+                                                           PublisherInterface * const publisher,
                                                            const CallbackInterface *callbacks,
                                                            int agentId) :
     AlgorithmInterface(componentId,
@@ -42,7 +42,7 @@ Algorithm_Comp1_Implementation::Algorithm_Comp1_Implementation(int componentId,
                        cycleTime,
                        stochastics,
                        parameters,
-                       observations,
+                       publisher,
                        callbacks,
                        agentId)
 {

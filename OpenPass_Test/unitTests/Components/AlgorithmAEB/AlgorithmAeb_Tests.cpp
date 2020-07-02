@@ -10,22 +10,18 @@
 
 #include <cmath>
 
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
-
-#include "fakeAgent.h"
-#include "fakeObservation.h"
-#include "fakeWorldObject.h"
-#include "fakeParameter.h"
-
 #include "AlgorithmAebOSIUnitTests.h"
 #include "algorithm_autonomousEmergencyBrakingImplementation.h"
-
+#include "fakeAgent.h"
+#include "fakeParameter.h"
+#include "fakeWorldObject.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 using ::testing::_;
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::NiceMock;
 
 TEST_F(AlgorithmAutonomousEmergencyBraking_UnitTest, ActualTTCLessThanBrakeTTCWithStationaryObject_ShouldActivateAEB)
 {
@@ -92,26 +88,23 @@ TEST_F(AlgorithmAutonomousEmergencyBraking_UnitTest, ActualTTCMoreThanBrakeTTC_S
 
 AlgorithmAutonomousEmergencyBraking_UnitTest::AlgorithmAutonomousEmergencyBraking_UnitTest()
 {
-    std::map<std::string, int> intParametersSensorLink = { { "SensorId", 0 } } ;
-    std::map<std::string, const std::string> stringParametersSensorLink = { { "InputId", "Camera" } } ;
+    std::map<std::string, int> intParametersSensorLink = {{"SensorId", 0}};
+    std::map<std::string, const std::string> stringParametersSensorLink = {{"InputId", "Camera"}};
     auto sensorLink = std::make_shared<NiceMock<FakeParameter>>();
     ON_CALL(*sensorLink, GetParametersString()).WillByDefault(ReturnRef(stringParametersSensorLink));
     ON_CALL(*sensorLink, GetParametersInt()).WillByDefault(ReturnRef(intParametersSensorLink));
     std::map<std::string, ParameterInterface::ParameterLists> parameterLists =
-    {
-        {"SensorLinks", {sensorLink} }
-    };
+        {
+            {"SensorLinks", {sensorLink}}};
 
-    std::map<std::string, double> doubleParameters = { { "TTC", 4.0 },
-                                                       { "Acceleration", -4 },
-                                                       { "CollisionDetectionLateralBoundary", 0.0 },
-                                                       { "CollisionDetectionLongitudinalBoundary", 0.0 } };
+    std::map<std::string, double> doubleParameters = {{"TTC", 4.0},
+                                                      {"Acceleration", -4},
+                                                      {"CollisionDetectionLateralBoundary", 0.0},
+                                                      {"CollisionDetectionLongitudinalBoundary", 0.0}};
 
     auto aebParameters = std::make_shared<NiceMock<FakeParameter>>();
     ON_CALL(*aebParameters, GetParameterLists()).WillByDefault(ReturnRef(parameterLists));
     ON_CALL(*aebParameters, GetParametersDouble()).WillByDefault(ReturnRef(doubleParameters));
-
-    const std::map<int, ObservationInterface*> fakeObservationMap = {{0, &fakeObservation}};
 
     ON_CALL(fakeEgoAgent, GetLength()).WillByDefault(Return(2.0));
     ON_CALL(fakeEgoAgent, GetWidth()).WillByDefault(Return(1.0));
@@ -127,7 +120,7 @@ AlgorithmAutonomousEmergencyBraking_UnitTest::AlgorithmAutonomousEmergencyBrakin
                                                                            fakeCycleTime,
                                                                            nullptr,
                                                                            aebParameters.get(),
-                                                                           &fakeObservationMap,
+                                                                           &fakePublisher,
                                                                            nullptr,
                                                                            &fakeEgoAgent);
 }

@@ -1,127 +1,126 @@
-<?xml version="1.0" ?>
+<?xml version="1.0"?>
 <OpenSCENARIO>
-    <FileHeader revMajor="0" revMinor="1" date="2018-12-06T14:00:00" description="Integration test scenario" author="in-tech GmbH"/>
-
-    <ParameterDeclaration>
-        <Parameter name="OP_OSC_SchemaVersion" type="string" value="0.3.0"/>
-    </ParameterDeclaration>
-
-    <Catalogs>
-        <VehicleCatalog>
-            <Directory path="VehicleModelsCatalog.xosc"/>
-        </VehicleCatalog>
-        <PedestrianCatalog>
-            <Directory path="PedestrianModelsCatalog.xosc"/>
-        </PedestrianCatalog>
-        <PedestrianControllerCatalog>
-            <Directory path=""/>
-        </PedestrianControllerCatalog>
-        <DriverCatalog>
-            <Directory path=""/>
-        </DriverCatalog>
-        <ManeuverCatalog>
-            <Directory path=""/>
-        </ManeuverCatalog>
-        <MiscObjectCatalog>
-            <Directory path=""/>
-        </MiscObjectCatalog>
-        <EnvironmentCatalog>
-            <Directory path=""/>
-        </EnvironmentCatalog>
-        <TrajectoryCatalog>
-            <Directory path=""/>
-        </TrajectoryCatalog>
-        <RouteCatalog>
-            <Directory path=""/>
-        </RouteCatalog>
-    </Catalogs>
-
-    <RoadNetwork>
-        <Logics filepath="testSceneryConfiguration.xodr"/>
-        <SceneGraph filepath=""/>
-    </RoadNetwork>
-
-    <Entities>
-        <Object name="Ego">
-            <CatalogReference catalogName="ProfilesCatalog.xml" entryName="MiddleClassCarAgent"/>
-        </Object>
-        <Object name="Scenery1">
-            <CatalogReference catalogName="ProfilesCatalog.xml" entryName="MiddleClassCarAgent"/>
-        </Object>
-        <Object name="Scenery2">
-            <CatalogReference catalogName="ProfilesCatalog.xml" entryName="MiddleClassCarAgent"/>
-        </Object>
-        <Selection name="ScenarioAgents">
-            <Members>
-                <ByEntity name="Scenery1"/>
-                <ByEntity name="Scenery2"/>
-            </Members>
-        </Selection>
-    </Entities>
-
-    <Storyboard>
-        <Init> <!-- initial position and velocity of agents  -->
-            <Actions>
-                <Private object="Ego">
-                    <Action>
-                        <Longitudinal>
-                            <Speed> 
-                                <Dynamics rate="0.5" shape="linear"/>
-                                <Target>
-                                    <Absolute value="5.0" />
-                                </Target>
-                            </Speed>
-                        </Longitudinal>
-                    </Action>
-                    <Action>
-                        <Position>
-                            <Lane roadId="1" s="1000.0" laneId="-3" offset="0.5"/> <!-- position  -->
-                        </Position>
-                    </Action>
-                </Private>
-                <Private object="Scenery1">
-                    <Action>
-                        <Longitudinal>
-                            <Speed>
-                                <Dynamics time="100" distance="0.5" rate="0.5" shape="linear"/>
-                            </Speed>
-                        </Longitudinal>
-                    </Action>
-                    <Action>
-                        <Position>
-                            <Lane roadId="1" s="1000.0" laneId="-3" offset="0.5"/> <!-- position  -->
-                        </Position>
-                    </Action>
-                </Private>
-                <Private object="Scenery2">
-                    <Action>
-                        <Longitudinal>
-                            <Speed>
-                                <Dynamics rate="0.5" shape="linear"/>
-                                <Target>
-                                    <Absolute value="5.0" />
-                                </Target>
-                            </Speed>
-                        </Longitudinal>
-                    </Action>
-                    <Action>
-                        <Position>
-                            <Lane roadId="1" s="1000.0" laneId="-3" offset="0.5"/> <!-- position  -->
-                        </Position>
-                    </Action>
-                </Private>
-            </Actions>
-        </Init>
-
-        <!-- EventDetectors (=StartCondition) and Manipulators(=Action)-->
-        <EndConditions>
-            <ConditionGroup>
-                <Condition name="EndTime" delay="0" edge="rising">
-                    <ByValue>
-                        <SimulationTime value="30.0" rule="greater_than" />
-                    </ByValue>
-                </Condition>
-            </ConditionGroup>
-        </EndConditions>
-    </Storyboard>
+  <FileHeader revMajor="1" revMinor="0" date="2020-06-22T15:00:00" description="Integration test scenario" author="in-tech GmbH"/>
+  <ParameterDeclarations>
+    <ParameterDeclaration name="OP_OSC_SchemaVersion" parameterType="string" value="0.4.0"/>
+  </ParameterDeclarations>
+  <CatalogLocations>
+    <VehicleCatalog>
+      <Directory path="VehicleModelsCatalog.xosc"/>
+    </VehicleCatalog>
+    <PedestrianCatalog>
+      <Directory path="PedestrianModelsCatalog.xosc"/>
+    </PedestrianCatalog>
+    <ControllerCatalog>
+      <Directory path=""/>
+    </ControllerCatalog>
+    <ManeuverCatalog>
+      <Directory path=""/>
+    </ManeuverCatalog>
+    <MiscObjectCatalog>
+      <Directory path=""/>
+    </MiscObjectCatalog>
+    <EnvironmentCatalog>
+      <Directory path=""/>
+    </EnvironmentCatalog>
+    <TrajectoryCatalog>
+      <Directory path=""/>
+    </TrajectoryCatalog>
+    <RouteCatalog>
+      <Directory path=""/>
+    </RouteCatalog>
+  </CatalogLocations>
+  <RoadNetwork>
+    <LogicFile filepath="testSceneryConfiguration.xodr"/>
+    <SceneGraphFile filepath=""/>
+  </RoadNetwork>
+  <Entities>
+    <ScenarioObject name="Ego">
+      <CatalogReference catalogName="ProfilesCatalog.xml" entryName="MiddleClassCarAgent"/>
+    </ScenarioObject>
+    <ScenarioObject name="Scenery1">
+      <CatalogReference catalogName="ProfilesCatalog.xml" entryName="MiddleClassCarAgent"/>
+    </ScenarioObject>
+    <ScenarioObject name="Scenery2">
+      <CatalogReference catalogName="ProfilesCatalog.xml" entryName="MiddleClassCarAgent"/>
+    </ScenarioObject>
+    <EntitySelection name="ScenarioAgents">
+      <Members>
+        <EntityRef entityRef="Scenery1"/>
+        <EntityRef entityRef="Scenery2"/>
+      </Members>
+    </EntitySelection>
+  </Entities>
+  <Storyboard>
+    <Init>
+      <Actions>
+        <Private entityRef="Ego">
+          <PrivateAction>
+            <LongitudinalAction>
+              <SpeedAction>
+                <SpeedActionDynamics dynamicsShape="linear" value="0.5" dynamicsDimension="rate"/>
+                <SpeedActionTarget>
+                  <AbsoluteTargetSpeed value="5.0"/>
+                </SpeedActionTarget>
+              </SpeedAction>
+            </LongitudinalAction>
+          </PrivateAction>
+          <PrivateAction>
+            <TeleportAction>
+              <Position>
+                <LanePosition roadId="1" laneId="-3" offset="0.5" s="1000.0"/>
+              </Position>
+            </TeleportAction>
+          </PrivateAction>
+        </Private>
+        <Private entityRef="Scenery1">
+          <PrivateAction>
+            <LongitudinalAction>
+              <SpeedAction>
+                <SpeedActionDynamics dynamicsShape="linear" value="0.5" dynamicsDimension="rate"/>
+                <SpeedActionTarget>
+                  <AbsoluteTargetSpeed value="5.0"/>
+                </SpeedActionTarget>
+              </SpeedAction>
+            </LongitudinalAction>
+          </PrivateAction>
+          <PrivateAction>
+            <TeleportAction>
+              <Position>
+                <LanePosition roadId="1" laneId="-3" offset="0.5" s="1000.0"/>
+              </Position>
+            </TeleportAction>
+          </PrivateAction>
+        </Private>
+        <Private entityRef="Scenery2">
+          <PrivateAction>
+            <LongitudinalAction>
+              <SpeedAction>
+                <SpeedActionDynamics dynamicsShape="linear" value="0.5" dynamicsDimension="rate"/>
+                <SpeedActionTarget>
+                  <AbsoluteTargetSpeed value="5.0"/>
+                </SpeedActionTarget>
+              </SpeedAction>
+            </LongitudinalAction>
+          </PrivateAction>
+          <PrivateAction>
+            <TeleportAction>
+              <Position>
+                <LanePosition roadId="1" laneId="-3" offset="0.5" s="1000.0"/>
+              </Position>
+            </TeleportAction>
+          </PrivateAction>
+        </Private>
+      </Actions>
+    </Init>
+    <StopTrigger>
+      <ConditionGroup>
+        <Condition name="EndTime" delay="0" conditionEdge="rising">
+          <ByValueCondition>
+            <SimulationTimeCondition value="30.0" rule="greaterThan"/>
+          </ByValueCondition>
+        </Condition>
+      </ConditionGroup>
+    </StopTrigger>
+  </Storyboard>
 </OpenSCENARIO>

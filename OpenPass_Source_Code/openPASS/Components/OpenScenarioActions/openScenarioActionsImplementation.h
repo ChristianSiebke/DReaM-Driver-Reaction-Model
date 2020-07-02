@@ -1,5 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2020 in-tech GmbH
+*               2020 BMW AG
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -8,17 +9,15 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
-/** \addtogroup OpenScenarioActions
-* @{
-* \brief This module
-*
-* @} */
-
 #pragma once
 
 #include "Interfaces/modelInterface.h"
 #include "Common/trajectoryEvent.h"
 #include "Common/laneChangeEvent.h"
+#include "Common/customLaneChangeEvent.h"
+#include "Common/gazeFollowerEvent.h"
+#include "Common/speedActionEvent.h"
+#include "oscActionsCalculation.h"
 
 /**
 * \brief
@@ -39,7 +38,7 @@ public:
         StochasticsInterface *stochastics,
         WorldInterface *world,
         const ParameterInterface *parameters,
-        const std::map<int, ObservationInterface*> *observations,
+        PublisherInterface * const publisher,
         const CallbackInterface *callbacks,
         AgentInterface *agent,
         SimulationSlave::EventNetworkInterface * const eventNetwork);
@@ -88,6 +87,12 @@ public:
     virtual void Trigger(int time);
 
 private:
+    OscActionsCalculation calculation;
     std::shared_ptr<TrajectoryEvent> trajectoryEvent;
-    std::shared_ptr<LaneChangeEvent> laneChangeEvent;
+    std::shared_ptr<CustomLaneChangeEvent> customLaneChangeEvent;
+    std::shared_ptr<GazeFollowerEvent> gazeFollowerEvent;
+    std::shared_ptr<SpeedActionEvent> speedActionEvent;
+
+    double speedActionTargetSpeed {};
+    double speedActionAcceleration {};
 };

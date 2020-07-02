@@ -35,9 +35,9 @@ void SpawnPointNetwork::Clear()
 bool SpawnPointNetwork::Instantiate(const SpawnPointLibraryInfoCollection& libraryInfos,
                                     AgentFactoryInterface *agentFactory,
                                     AgentBlueprintProviderInterface *agentBlueprintProvider,
-                                    const SamplerInterface * const sampler,
+                                    StochasticsInterface* stochastics,
                                     ScenarioInterface* scenario,
-                                    const SpawnPointProfiles& spawnPointProfiles)
+                                    const std::optional<ProfileGroup>& spawnPointProfiles)
 {
     for (const auto& libraryInfo : libraryInfos)
     {
@@ -48,7 +48,7 @@ bool SpawnPointNetwork::Instantiate(const SpawnPointLibraryInfoCollection& libra
         }
 
         auto binding = &bindingIter->second;
-        SpawnPointDependencies dependencies(agentFactory, world, agentBlueprintProvider, sampler);
+        SpawnPointDependencies dependencies(agentFactory, world, agentBlueprintProvider, stochastics);
 
         if (libraryInfo.profileName.has_value())
         {
@@ -56,7 +56,7 @@ bool SpawnPointNetwork::Instantiate(const SpawnPointLibraryInfoCollection& libra
             {
                 auto parameter = openpass::parameter::make<SimulationCommon::Parameters>(
                             runtimeInformation,
-                            spawnPointProfiles.at(libraryInfo.profileName.value()));
+                            spawnPointProfiles.value().at(libraryInfo.profileName.value()));
 
                 dependencies.parameters = parameter.get(); // get spawnpoint access to the parameters
                 binding->SetParameter(std::move(parameter)); // the transfer ownership away from network
@@ -99,7 +99,7 @@ bool SpawnPointNetwork::TriggerPreRunSpawnPoints()
         std::for_each(preRunSpawnPoints.crbegin(), preRunSpawnPoints.crend(),
         [&](auto const& element)
         {
-            const auto spawnedAgents = element.second->GetImplementation()->Trigger();
+            const auto spawnedAgents = element.second->GetImplementation()->Trigger(0);
             newAgents.insert(newAgents.cend(), spawnedAgents.cbegin(), spawnedAgents.cend());
         });
     }
@@ -118,7 +118,7 @@ bool SpawnPointNetwork::TriggerRuntimeSpawnPoints([[maybe_unused]]const int time
         std::for_each(runtimeSpawnPoints.crbegin(), runtimeSpawnPoints.crend(),
         [&](auto const& element)
         {
-            const auto spawnedAgents = element.second->GetImplementation()->Trigger();
+            const auto spawnedAgents = element.second->GetImplementation()->Trigger(timestamp);
             newAgents.insert(newAgents.cend(), spawnedAgents.cbegin(), spawnedAgents.cend());
         });
     }

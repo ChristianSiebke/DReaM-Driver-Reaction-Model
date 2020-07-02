@@ -28,7 +28,7 @@ struct ObjectInformation
     //! true if stationary object, false if agent
     bool isStatic {false};
     //! Absolute velocity of the agent (default if object is not an agent)
-    double velocity {-999.0};
+    double absoluteVelocity {-999.0};
     //! Acceleration of the agent (default if object is not an agent)
     double acceleration {-999.0};
     //! Heading relative to the street (default if not existing)
@@ -68,8 +68,8 @@ struct LaneInformationGeometry
 //! Data about the lane to left (in driving direction) of the mainLane
 struct OwnVehicleInformation
 {
-    //! Velocity of agent
-    double velocity {-999.0};
+    //! Absolute velocity of agent
+    double absoluteVelocity {-999.0};
     //! Acceleration of agent
     double acceleration {-999.0};
     //! t-coordinate
@@ -78,8 +78,6 @@ struct OwnVehicleInformation
     double heading {-999.0};
     //! Angle of the steering wheel
     double steeringWheelAngle {-999.0};
-    //! Wether the agent touches multiple neighbouring lanes
-    bool isCrossingLanes {false};
     //! Distance between the left front point and the left boundary of the lane it is in.
     double distanceToLaneBoundaryLeft {-999.0};
     //! Distance between the right front point and the right boundary of the lane it is in.

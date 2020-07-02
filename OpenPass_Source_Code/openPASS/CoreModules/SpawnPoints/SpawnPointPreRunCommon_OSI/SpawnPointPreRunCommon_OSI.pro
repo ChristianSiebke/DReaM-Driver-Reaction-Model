@@ -21,17 +21,20 @@ include(../../../../global.pri)
 INCLUDEPATH += \
         . \
         .. \
-        ../../../CoreFramework/OpenPassSlave/modelElements
+        ../../../CoreFramework/OpenPassSlave/modelElements \
+        ../../../CoreFramework/CoreShare \
 
 DEPENDENCY_HEADERS = \
                      ../Common/WorldAnalyzer.h \
                      ../../../CoreFramework/CoreShare/log.h \
-                     ../../../CoreFramework/OpenPassSlave/modelElements/agentBlueprint.h
+                     ../../../CoreFramework/OpenPassSlave/modelElements/agentBlueprint.h \
+                     ../../../CoreFramework/OpenPassSlave/framework/sampler.h
 
 DEPENDENCY_SOURCES = \
                      ../Common/WorldAnalyzer.cpp \
                      ../../../CoreFramework/CoreShare/log.cpp \
-                     ../../../CoreFramework/OpenPassSlave/modelElements/agentBlueprint.cpp
+                     ../../../CoreFramework/OpenPassSlave/modelElements/agentBlueprint.cpp \
+                     ../../../CoreFramework/OpenPassSlave/framework/sampler.cpp
 
 SPAWNPOINT_HEADERS = \
                      SpawnPointPreRunCommonDefinitions.h \
@@ -41,7 +44,6 @@ SPAWNPOINT_HEADERS = \
                      SpawnPointPreRunCommonGlobal.h
 
 SPAWNPOINT_SOURCES = \
-                     SpawnPointPreRunCommonParameterExtractor.cpp \
                      SpawnPointPreRunCommon.cpp \
                      SpawnPointPreRunCommonExport.cpp
 

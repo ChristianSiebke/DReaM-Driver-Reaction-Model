@@ -1,6 +1,6 @@
 /******************************************************************************
 * Copyright (c) 2017 ITK Engineering GmbH.
-*               2018 in-tech GmbH.
+*               2018, 2020 in-tech GmbH.
 *               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made available under the
@@ -12,10 +12,10 @@
 
 //! \brief This file implements a generic 2D vector.
 
-#ifndef VECTOR2D_H
-#define VECTOR2D_H
+#pragma once
 
 #include <ostream>
+#include <cmath>
 #include "opExport.h"
 
 namespace Common {
@@ -23,21 +23,26 @@ namespace Common {
 /*!
  * class for 2d vectors in cartesian coordinate system
  */
-class OPENPASSCOMMONEXPORT Vector2d
+class OPENPASSCOMMONEXPORT Vector2d final
 {
 public:
+    static double constexpr EPSILON = 1e-9;
+
+    double x;
+    double y;
+
+    Vector2d(const Vector2d &) = default;
+    Vector2d(Vector2d &&) = default;
+    Vector2d &operator=(const Vector2d &) = default;
+    Vector2d &operator=(Vector2d &&) = default;
+
     /*!
      * create 2d vector from pair (x,y)
      *
      * \param[in] x     x-value
      * \param[in] y     y-value
      */
-    Vector2d(double x = 0, double y = 0);
-    Vector2d(const Vector2d &) = default;
-    Vector2d(Vector2d &&) = default;
-    Vector2d &operator=(const Vector2d &) = default;
-    Vector2d &operator=(Vector2d &&) = default;
-    virtual ~Vector2d() = default;
+    constexpr Vector2d(double x = 0, double y = 0) noexcept : x(x), y(y) {}
 
     /*!
      * translation of vector
@@ -45,42 +50,68 @@ public:
      * \param[in] x    x-value of displacement vector
      * \param[in] y    y-value of displacement vector
      */
-    void Translate(double x, double y);
+    constexpr void Translate(double x, double y) noexcept
+    {
+        this->x += x;
+        this->y += y;
+    }
 
     /*!
      * \brief Translate
      * translation of vector via another vector
      * \param[in] translationVector vector of translation
      */
-    void Translate(Vector2d translationVector);
+    constexpr void Translate(Vector2d translationVector) noexcept
+    {
+        this->x += translationVector.x;
+        this->y += translationVector.y;
+    }
 
     /*!
      * rotates vector by angle
      *
      * \param[in] angle     angle, in radians
      */
-    void Rotate(double angle);
+    void Rotate(double angle) noexcept
+    {
+        double cosAngle = std::cos(angle);
+        double sinAngle = std::sin(angle);
+        *this = Vector2d(x * cosAngle - y * sinAngle,
+                         x * sinAngle + y * cosAngle);
+    }
 
     /*!
      * scales vector by a factor
      *
      * \param[in] scale     scaling factor
      */
-    void Scale(double scale);
+    constexpr void Scale(double scale) noexcept
+    {
+        x *= scale;
+        y *= scale;
+    }
 
     /*!
      * adds a vector
      *
      * \param[in] in     added 2d vector
      */
-    void Add(const Vector2d &in);
+    constexpr void Add(const Vector2d &in) noexcept
+    {
+        x += in.x;
+        y += in.y;
+    }
 
     /*!
      * subtracts a vector
      *
      * \param[in] in     subtracted 2d vector
      */
-    void Sub(const Vector2d &in);
+    constexpr void Sub(const Vector2d &in) noexcept
+    {
+        x -= in.x;
+        y -= in.y;
+    }
 
     /*!
      * scalar product / dot product
@@ -88,7 +119,10 @@ public:
      * \param[in] in      2d vector
      * \return returns dot product of the 2 vectors
      */
-    double Dot(const Vector2d &in) const;
+    constexpr double Dot(const Vector2d &in) const noexcept
+    {
+        return x * in.x + y * in.y;
+    }
 
     /*!
      * cross product with Z=0
@@ -96,7 +130,10 @@ public:
      * \param[in] in      2d vector
      * \return returns z-component of the cross product
      */
-    double Cross(const Vector2d &in) const;
+    constexpr double Cross(const Vector2d &in) const noexcept
+    {
+        return x * in.y - y * in.x;
+    }
 
     /*!
      * Normalizes the 2d vector
@@ -107,31 +144,55 @@ public:
      *
      * \return returns true if vector could be normalized, false otherwise
      */
-    bool Norm();
+    bool Norm()
+    {
+        double length = Length();
+
+        if (std::abs(length) < EPSILON)
+        {
+            return false;
+        }
+
+        x /= length;
+        y /= length;
+
+        return true;
+    }
 
     /*!
      * returns length of the vector
      *
      * \return length of the vector
      */
-    double Length() const;
+    double Length() const noexcept
+    {
+        return std::hypot(x, y);
+    }
 
     /*!
      * \brief Angle
      * returns the angle of the vector [-pi,+pi]
      * \return angle of vector
      */
-    double Angle() const;
-
-    /// \brief Overload << operator for Vector2d
-    friend std::ostream& operator<<(std::ostream& os, const Vector2d& vector)
+    double Angle() const noexcept
     {
-        return os << "(" << vector.x << ", " << vector.y << ")";
+        return atan2(y, x);
     }
 
-    Vector2d operator-(const Vector2d &in) const;
-    Vector2d operator+(const Vector2d &in) const;
-    Vector2d operator*(double in) const;
+    constexpr Vector2d operator-(const Vector2d &in) const noexcept
+    {
+        return Vector2d(x - in.x, y - in.y);
+    }
+
+    constexpr Vector2d operator+(const Vector2d &in) const noexcept
+    {
+        return Vector2d(x + in.x, y + in.y);
+    }
+
+    constexpr Vector2d operator*(double in) const noexcept
+    {
+        return Vector2d(x * in, y * in);
+    }
 
     /*!
      * \brief Comparison operator taking EPSILON of 1e-9 into account
@@ -140,7 +201,11 @@ public:
      *
      * \return   true if vectors are considered equal, false otherwise
      */
-    bool operator==(const Vector2d &in) const;
+    constexpr bool operator==(const Vector2d &in) const noexcept
+    {
+        return (std::abs(x - in.x) < EPSILON) &&
+               (std::abs(y - in.y) < EPSILON);
+    }
 
     /*!
      * \brief Inequality operator taking EPSILON of 1e-9 into account
@@ -149,15 +214,22 @@ public:
      *
      * \return   false if vectors are considered equal, true otherwise
      */
-    bool operator!=(const Vector2d &in) const;
+    constexpr bool operator!=(const Vector2d &in) const noexcept
+    {
+        return !operator==(in);
+    }
 
-    double x;
-    double y;
+    /// \brief Overload << operator for Vector2d
+    friend std::ostream& operator<<(std::ostream& os, const Vector2d& vector)
+    {
+        return os << "(" << vector.x << ", " << vector.y << ")";
+    }
+
 };
 
 struct Line
 {
-   explicit Line(const Common::Vector2d& startPoint,  const Common::Vector2d& endPoint) :
+    explicit constexpr Line(const Common::Vector2d& startPoint,  const Common::Vector2d& endPoint) noexcept :
         startPoint{startPoint},
         directionalVector{endPoint - startPoint}{}
 
@@ -166,5 +238,3 @@ struct Line
 };
 
 } // namespace Common
-
-#endif // VECTOR2D_H

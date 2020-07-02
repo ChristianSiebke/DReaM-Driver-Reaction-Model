@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -17,20 +17,23 @@
 #pragma once
 
 #include "callbacks.h"
+#include "Common/opExport.h"
 #include "Interfaces/worldInterface.h"
 #include "Interfaces/stochasticsInterface.h"
+#include "Interfaces/dataStoreInterface.h"
 
 namespace SimulationSlave {
 
 class WorldLibrary;
 class FrameworkConfig;
 
-class WorldBinding
+class CORESLAVEEXPORT WorldBinding
 {
 public:
     WorldBinding(std::string libraryPath,
                  CallbackInterface *callbacks,
-                 StochasticsInterface* stochastics);
+                 StochasticsInterface* stochastics,
+                 DataStoreWriteInterface* dataStore);
     WorldBinding(const WorldBinding&) = delete;
     WorldBinding(WorldBinding&&) = delete;
     WorldBinding& operator=(const WorldBinding&) = delete;
@@ -55,6 +58,7 @@ private:
     WorldLibrary *library = nullptr;
     CallbackInterface *callbacks;
     StochasticsInterface* stochastics;
+    DataStoreWriteInterface* dataStore;
 };
 
 } // namespace SimulationSlave

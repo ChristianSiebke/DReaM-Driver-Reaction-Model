@@ -1,32 +1,52 @@
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
 #include <vector>
 
 #include "Interfaces/scenarioInterface.h"
-
+#include "eventDetector.h"
 #include "fakeEventDetectorNetwork.h"
 #include "fakeManipulatorNetwork.h"
 #include "fakeSpawnPointNetwork.h"
 #include "fakeWorld.h"
-#include "eventDetector.h"
-
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "taskBuilder.h"
 
 using ::testing::_;
-using ::testing::Invoke;
-using ::testing::Gt;
-using ::testing::SizeIs;
 using ::testing::Contains;
-using ::testing::Not;
-using ::testing::Field;
 using ::testing::Eq;
+using ::testing::Field;
+using ::testing::Gt;
+using ::testing::Invoke;
 using ::testing::NiceMock;
+using ::testing::Not;
 using ::testing::Return;
+using ::testing::SizeIs;
 
 using namespace SimulationSlave;
-using namespace SimulationSlave::Scheduling;
+using namespace openpass::scheduling;
 
-TEST(TaskBuilder, CommonTaskCreation_Works)
+TEST(TaskBuilder, SpawningTaskCreation_Works)
+{
+    NiceMock<FakeManipulatorNetwork> fakeManipulatorNetwork;
+    NiceMock<FakeEventDetectorNetwork> fakeEventDetectorNetwork;
+    int currentTime = 0;
+
+    NiceMock<FakeWorld> fakeWorld;
+    RunResult runResult{};
+    TaskBuilder taskBuilder(currentTime,
+                            runResult,
+                            100,
+                            &fakeWorld,
+                            nullptr,
+                            nullptr,
+                            &fakeEventDetectorNetwork,
+                            &fakeManipulatorNetwork);
+
+    auto commonTasks = taskBuilder.CreateSpawningTasks();
+    ASSERT_THAT(commonTasks, SizeIs(Gt(size_t(0))));
+    ASSERT_THAT(commonTasks, Contains(Field(&TaskItem::taskType, Eq(TaskType::Spawning))));
+}
+
+TEST(TaskBuilder, PreAgentTaskCreation_Works)
 {
     NiceMock<FakeEventDetector> fakeEventDetector;
     NiceMock<FakeManipulatorNetwork> fakeManipulatorNetwork;
@@ -35,7 +55,7 @@ TEST(TaskBuilder, CommonTaskCreation_Works)
     SimulationSlave::EventDetector e1(&fakeEventDetector, &edl);
     SimulationSlave::EventDetector e2(&fakeEventDetector, &edl);
 
-    std::vector<const SimulationSlave::EventDetector*> fakeEventDetectors;
+    std::vector<const SimulationSlave::EventDetector *> fakeEventDetectors;
     fakeEventDetectors.push_back(&e1);
     fakeEventDetectors.push_back(&e2);
 
@@ -54,14 +74,14 @@ TEST(TaskBuilder, CommonTaskCreation_Works)
                             &fakeEventDetectorNetwork,
                             &fakeManipulatorNetwork);
 
-    auto commonTasks = taskBuilder.CreateCommonTasks();
+    auto commonTasks = taskBuilder.CreatePreAgentTasks();
     ASSERT_THAT(commonTasks, SizeIs(Gt(size_t(0))));
-    ASSERT_THAT(commonTasks, Contains(Field(&TaskItem::taskType, Eq(TaskType::Spawning))));
+    ASSERT_THAT(commonTasks, Contains(Field(&TaskItem::taskType, Eq(TaskType::SyncGlobalData))));
     ASSERT_THAT(commonTasks, Contains(Field(&TaskItem::taskType, Eq(TaskType::EventDetector))));
     ASSERT_THAT(commonTasks, Not(Contains(Field(&TaskItem::taskType, Eq(TaskType::Manipulator)))));
 }
 
-TEST(TaskBuilder, FinalizeRecurringTaskCreation_Works)
+TEST(TaskBuilder, SynchronizeTaskCreation_Works)
 {
     NiceMock<FakeEventDetectorNetwork> fakeEventDetectorNetwork;
     NiceMock<FakeManipulatorNetwork> fakeManipulatorNetwork;
@@ -79,6 +99,6 @@ TEST(TaskBuilder, FinalizeRecurringTaskCreation_Works)
                             &fakeEventDetectorNetwork,
                             &fakeManipulatorNetwork);
 
-    auto finalizeTasks = taskBuilder.CreateFinalizeRecurringTasks();
+    auto finalizeTasks = taskBuilder.CreateSynchronizeTasks();
     ASSERT_THAT(finalizeTasks, SizeIs(Gt(size_t(0))));
 }

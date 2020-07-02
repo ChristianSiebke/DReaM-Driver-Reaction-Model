@@ -22,7 +22,7 @@
 CollisionDetector::CollisionDetector(WorldInterface *world,
                                      SimulationSlave::EventNetworkInterface *eventNetwork,
                                      const CallbackInterface *callbacks,
-                                     StochasticsInterface *stochastics):
+                                     StochasticsInterface *stochastics) :
     EventDetectorCommonBase(
         world,
         eventNetwork,
@@ -62,14 +62,14 @@ void CollisionDetector::CalculateWorldObjectGeometry(const WorldObjectInterface 
     resultCorners[LowerLeft].y = -agentWidthHalf;
 
     // transform corners
-    for(int i = 0; i < NumberCorners; ++i)
+    for (size_t i = 0; i < NumberCorners; ++i)
     {
         resultCorners[i].Rotate(agentAngle);
         resultCorners[i].Translate(position.x, position.y);
     }
 
     resultNormals[Right] = resultCorners[LowerRight] - resultCorners[LowerLeft]; // pointing right if angle == 0
-    resultNormals[Up] = resultCorners[UpperLeft] - resultCorners[LowerLeft]; // pointing up if angle == 0
+    resultNormals[Up] = resultCorners[UpperLeft] - resultCorners[LowerLeft];     // pointing up if angle == 0
 }
 
 void CollisionDetector::GetWorldObjectGeometry(const WorldObjectInterface *worldObject,
@@ -87,14 +87,14 @@ void CollisionDetector::GetMinMax4(std::array<double, 4> &input,
     maxValue = input[0];
     minValue = input[0];
 
-    for(size_t index = 1; index < 4; ++index)
+    for (size_t index = 1; index < 4; ++index)
     {
-        if(input[index] > maxValue)
+        if (input[index] > maxValue)
         {
             maxValue = input[index];
         }
 
-        if(input[index] < minValue)
+        if (input[index] < minValue)
         {
             minValue = input[index];
         }
@@ -109,14 +109,14 @@ void CollisionDetector::GetMinMax2(std::array<double, 2> &input,
     minValue = std::min(input[0], input[1]);
 }
 
-bool CollisionDetector::CalculateDistOnBorder(const WorldObjectInterface* worldObject,
+bool CollisionDetector::CalculateDistOnBorder(const WorldObjectInterface *worldObject,
                                               int corner,
                                               double cornerDistance,
                                               double &result)
 {
     double distance = 0;
 
-    if(UpperLeft < corner)
+    if (UpperLeft < corner)
     {
         distance += worldObject->GetLength();
     }
@@ -127,7 +127,7 @@ bool CollisionDetector::CalculateDistOnBorder(const WorldObjectInterface* worldO
         return true;
     }
 
-    if(UpperRight < corner)
+    if (UpperRight < corner)
     {
         distance += worldObject->GetWidth();
     }
@@ -138,7 +138,7 @@ bool CollisionDetector::CalculateDistOnBorder(const WorldObjectInterface* worldO
         return true;
     }
 
-    if(LowerRight < corner)
+    if (LowerRight < corner)
     {
         distance += worldObject->GetLength();
     }
@@ -158,7 +158,7 @@ bool CollisionDetector::CalculateDistOnBorder(const WorldObjectInterface* worldO
 
 // intersectionPoints tuple elements: intersection occurred on edge, scaled distance from previous corner, edge direction, distance from initial position to intersection
 bool CollisionDetector::CalculateIntersectionPoints(const WorldObjectInterface *agent,
-                                                    const WorldObjectInterface* other,
+                                                    const WorldObjectInterface *other,
                                                     bool &intersected,
                                                     Common::Vector2d &intersectionPoint,
                                                     double &otherDistanceFromCorner,
@@ -166,7 +166,7 @@ bool CollisionDetector::CalculateIntersectionPoints(const WorldObjectInterface *
                                                     double &agentDistanceFromInitial,
                                                     Common::Vector2d &agentReferencePoint,
                                                     Common::Vector2d &otherReferencePoint,
-                                                    int &agentPenetratingCorner)
+                                                    size_t &agentPenetratingCorner)
 {
     // reduce problem of two moving agents into problem of one moving agent:
     // add translation of other agent relative to translation of first agent
@@ -186,18 +186,19 @@ bool CollisionDetector::CalculateIntersectionPoints(const WorldObjectInterface *
     Common::Vector2d agentVelocity = agentVelocityLongitudinal + agentVelocityLateral;
     Common::Vector2d agentRelativeVelocity = agentVelocity;
 
-    if(0 == otherVelocity.x && 0 == otherVelocity.y && 0 == agentRelativeVelocity.x && 0 == agentRelativeVelocity.y)
+    if (0 == otherVelocity.x && 0 == otherVelocity.y && 0 == agentRelativeVelocity.x && 0 == agentRelativeVelocity.y)
     {
-        LOG(CbkLogLevel::Warning, + "calculation of point of contact not possible since velocities of both agents are 0"
-                                    " (this could happen for example if agents are spawned with overlaps)");
+        LOG(CbkLogLevel::Warning, +"calculation of point of contact not possible since velocities of both agents are 0"
+                                   " (this could happen for example if agents are spawned with overlaps)");
         return false;
     }
 
     agentRelativeVelocity.Sub(otherVelocity);
 
-    if(agentRelativeVelocity.Length() == 0){
-        LOG(CbkLogLevel::Warning, + "calculation of point of contact not possible since velocities of both agents are the same"
-                                    " (this could happen for example if agents are spawned with overlaps)");
+    if (agentRelativeVelocity.Length() == 0)
+    {
+        LOG(CbkLogLevel::Warning, +"calculation of point of contact not possible since velocities of both agents are the same"
+                                   " (this could happen for example if agents are spawned with overlaps)");
         return false;
     }
 
@@ -253,21 +254,23 @@ bool CollisionDetector::CalculateIntersectionPoints(const WorldObjectInterface *
     intersected = false;
     agentDistanceFromInitial = std::numeric_limits<double>::max();
 
-    for(int corner = 0; corner < NumberCorners; ++corner) // for each corner in agentInitialCorners[]
+    for (size_t corner = 0; corner < NumberCorners; ++corner) // for each corner in agentInitialCorners[]
     {
         // intersection point with upper edge
         otherEdgeDirection = otherInitialCorners[UpperRight] - otherInitialCorners[UpperLeft];
         det = otherEdgeDirection.x * agentDirection.y - otherEdgeDirection.y * agentDirection.x;
-        if(0 != det)
+        if (0 != det)
         {
             double s = ((otherInitialCorners[UpperLeft].y - agentInitialCorners[corner].y) * otherEdgeDirection.x -
-                        (otherInitialCorners[UpperLeft].x - agentInitialCorners[corner].x) * otherEdgeDirection.y) / det;
+                        (otherInitialCorners[UpperLeft].x - agentInitialCorners[corner].x) * otherEdgeDirection.y) /
+                       det;
             double t = ((otherInitialCorners[UpperLeft].y - agentInitialCorners[corner].y) * agentDirection.x -
-                        (otherInitialCorners[UpperLeft].x - agentInitialCorners[corner].x) * agentDirection.y) / det;
-            if(0.0 <= s && 1.0 >= s && 0.0 <= t && 1.0 >= t) // within bounds of edge
+                        (otherInitialCorners[UpperLeft].x - agentInitialCorners[corner].x) * agentDirection.y) /
+                       det;
+            if (0.0 <= s && 1.0 >= s && 0.0 <= t && 1.0 >= t) // within bounds of edge
             {
                 double tmpDistance = (agentDirection * s).Length();
-                if(agentDistanceFromInitial > tmpDistance)
+                if (agentDistanceFromInitial > tmpDistance)
                 {
                     intersected = true;
                     agentDistanceFromInitial = tmpDistance;
@@ -292,16 +295,18 @@ bool CollisionDetector::CalculateIntersectionPoints(const WorldObjectInterface *
         // intersection point with right edge
         otherEdgeDirection = otherInitialCorners[LowerRight] - otherInitialCorners[UpperRight];
         det = otherEdgeDirection.x * agentDirection.y - otherEdgeDirection.y * agentDirection.x;
-        if(0 != det)
+        if (0 != det)
         {
             double s = ((otherInitialCorners[UpperRight].y - agentInitialCorners[corner].y) * otherEdgeDirection.x -
-                        (otherInitialCorners[UpperRight].x - agentInitialCorners[corner].x) * otherEdgeDirection.y) / det;
+                        (otherInitialCorners[UpperRight].x - agentInitialCorners[corner].x) * otherEdgeDirection.y) /
+                       det;
             double t = ((otherInitialCorners[UpperRight].y - agentInitialCorners[corner].y) * agentDirection.x -
-                        (otherInitialCorners[UpperRight].x - agentInitialCorners[corner].x) * agentDirection.y) / det;
-            if(0.0 <= s && 1.0 >= s && 0.0 <= t && 1.0 >= t) // within bounds of edge
+                        (otherInitialCorners[UpperRight].x - agentInitialCorners[corner].x) * agentDirection.y) /
+                       det;
+            if (0.0 <= s && 1.0 >= s && 0.0 <= t && 1.0 >= t) // within bounds of edge
             {
                 double tmpDistance = (agentDirection * s).Length();
-                if(agentDistanceFromInitial > tmpDistance)
+                if (agentDistanceFromInitial > tmpDistance)
                 {
                     intersected = true;
                     agentDistanceFromInitial = tmpDistance;
@@ -326,16 +331,18 @@ bool CollisionDetector::CalculateIntersectionPoints(const WorldObjectInterface *
         // intersection point with lower edge
         otherEdgeDirection = otherInitialCorners[LowerLeft] - otherInitialCorners[LowerRight];
         det = otherEdgeDirection.x * agentDirection.y - otherEdgeDirection.y * agentDirection.x;
-        if(0 != det)
+        if (0 != det)
         {
             double s = ((otherInitialCorners[LowerRight].y - agentInitialCorners[corner].y) * otherEdgeDirection.x -
-                        (otherInitialCorners[LowerRight].x - agentInitialCorners[corner].x) * otherEdgeDirection.y) / det;
+                        (otherInitialCorners[LowerRight].x - agentInitialCorners[corner].x) * otherEdgeDirection.y) /
+                       det;
             double t = ((otherInitialCorners[LowerRight].y - agentInitialCorners[corner].y) * agentDirection.x -
-                        (otherInitialCorners[LowerRight].x - agentInitialCorners[corner].x) * agentDirection.y) / det;
-            if(0.0 <= s && 1.0 >= s && 0.0 <= t && 1.0 >= t) // within bounds of edge
+                        (otherInitialCorners[LowerRight].x - agentInitialCorners[corner].x) * agentDirection.y) /
+                       det;
+            if (0.0 <= s && 1.0 >= s && 0.0 <= t && 1.0 >= t) // within bounds of edge
             {
                 double tmpDistance = (agentDirection * s).Length();
-                if(agentDistanceFromInitial > tmpDistance)
+                if (agentDistanceFromInitial > tmpDistance)
                 {
                     intersected = true;
                     agentDistanceFromInitial = tmpDistance;
@@ -360,16 +367,18 @@ bool CollisionDetector::CalculateIntersectionPoints(const WorldObjectInterface *
         // intersection point with left edge
         otherEdgeDirection = otherInitialCorners[UpperLeft] - otherInitialCorners[LowerLeft];
         det = otherEdgeDirection.x * agentDirection.y - otherEdgeDirection.y * agentDirection.x;
-        if(0 != det)
+        if (0 != det)
         {
             double s = ((otherInitialCorners[LowerLeft].y - agentInitialCorners[corner].y) * otherEdgeDirection.x -
-                        (otherInitialCorners[LowerLeft].x - agentInitialCorners[corner].x) * otherEdgeDirection.y) / det;
+                        (otherInitialCorners[LowerLeft].x - agentInitialCorners[corner].x) * otherEdgeDirection.y) /
+                       det;
             double t = ((otherInitialCorners[LowerLeft].y - agentInitialCorners[corner].y) * agentDirection.x -
-                        (otherInitialCorners[LowerLeft].x - agentInitialCorners[corner].x) * agentDirection.y) / det;
-            if(0.0 <= s && 1.0 >= s && 0.0 <= t && 1.0 >= t) // within bounds of edge
+                        (otherInitialCorners[LowerLeft].x - agentInitialCorners[corner].x) * agentDirection.y) /
+                       det;
+            if (0.0 <= s && 1.0 >= s && 0.0 <= t && 1.0 >= t) // within bounds of edge
             {
                 double tmpDistance = (agentDirection * s).Length();
-                if(agentDistanceFromInitial > tmpDistance)
+                if (agentDistanceFromInitial > tmpDistance)
                 {
                     intersected = true;
                     agentDistanceFromInitial = tmpDistance;
@@ -396,31 +405,31 @@ bool CollisionDetector::CalculateIntersectionPoints(const WorldObjectInterface *
 }
 
 bool CollisionDetector::CalculatePointOfContact(AgentInterface *agent,
-                                                const WorldObjectInterface* other,
+                                                const WorldObjectInterface *other,
                                                 double &resultAgentDistOnBorder,
                                                 double &resultOtherDistOnBorder,
                                                 Common::Vector2d &resultAgentReferencePoint,
                                                 Common::Vector2d &resultOtherReferencePoint)
 {
-    bool agentIntersected; // is agent intersected at all
-    Common::Vector2d agentIntersectionPoint; // coordinates of intersection point
-    double agentDistanceFromCorner; // distance from previous corner of intersected edge
-    int agentFromCorner; // starting corner for measuring distance on edge
-    double otherDistanceFromInitial; // distance of other moving agent from it's non-colliding start position
-    int otherPenetratingCorner; // corner of other agent which penetrated first
-    Common::Vector2d movingOtherReferencePoint; // ReferencePoint of agent at point of collision
+    bool agentIntersected;                          // is agent intersected at all
+    Common::Vector2d agentIntersectionPoint;        // coordinates of intersection point
+    double agentDistanceFromCorner;                 // distance from previous corner of intersected edge
+    int agentFromCorner;                            // starting corner for measuring distance on edge
+    double otherDistanceFromInitial;                // distance of other moving agent from it's non-colliding start position
+    size_t otherPenetratingCorner;                  // corner of other agent which penetrated first
+    Common::Vector2d movingOtherReferencePoint;     // ReferencePoint of agent at point of collision
     Common::Vector2d penetratedAgentReferencePoint; // ReferencePoint of other at point of collision
 
-    if(!CalculateIntersectionPoints(other,
-                                    agent,
-                                    agentIntersected,
-                                    agentIntersectionPoint,
-                                    agentDistanceFromCorner,
-                                    agentFromCorner,
-                                    otherDistanceFromInitial,
-                                    movingOtherReferencePoint,
-                                    penetratedAgentReferencePoint,
-                                    otherPenetratingCorner))
+    if (!CalculateIntersectionPoints(other,
+                                     agent,
+                                     agentIntersected,
+                                     agentIntersectionPoint,
+                                     agentDistanceFromCorner,
+                                     agentFromCorner,
+                                     otherDistanceFromInitial,
+                                     movingOtherReferencePoint,
+                                     penetratedAgentReferencePoint,
+                                     otherPenetratingCorner))
     {
         return false;
     }
@@ -430,36 +439,37 @@ bool CollisionDetector::CalculatePointOfContact(AgentInterface *agent,
     double otherDistanceFromCorner;
     int otherFromCorner;
     double agentDistanceFromInitial;
-    int agentPenetratingCorner;
+    size_t agentPenetratingCorner;
     Common::Vector2d movingAgentReferencePoint;
     Common::Vector2d penetratedOtherReferencePoint;
 
-    if(!CalculateIntersectionPoints(agent,
-                                    other,
-                                    otherIntersected,
-                                    otherIntersectionPoint,
-                                    otherDistanceFromCorner,
-                                    otherFromCorner,
-                                    agentDistanceFromInitial,
-                                    movingAgentReferencePoint,
-                                    penetratedOtherReferencePoint,
-                                    agentPenetratingCorner))
+    if (!CalculateIntersectionPoints(agent,
+                                     other,
+                                     otherIntersected,
+                                     otherIntersectionPoint,
+                                     otherDistanceFromCorner,
+                                     otherFromCorner,
+                                     agentDistanceFromInitial,
+                                     movingAgentReferencePoint,
+                                     penetratedOtherReferencePoint,
+                                     agentPenetratingCorner))
     {
         return false;
     }
 
-    if(agentIntersected==0 && otherIntersected==0){
+    if (agentIntersected == 0 && otherIntersected == 0)
+    {
         assert(agentIntersected || otherIntersected);
     }
 
-    if(agentIntersected && !otherIntersected)
+    if (agentIntersected && !otherIntersected)
     {
-        if(!CalculateDistOnBorder(agent, agentFromCorner, agentDistanceFromCorner, resultAgentDistOnBorder))
+        if (!CalculateDistOnBorder(agent, agentFromCorner, agentDistanceFromCorner, resultAgentDistOnBorder))
         {
             return false;
         }
 
-        if(!CalculateDistOnBorder(other, otherPenetratingCorner, 0, resultOtherDistOnBorder))
+        if (!CalculateDistOnBorder(other, otherPenetratingCorner, 0, resultOtherDistOnBorder))
         {
             return false;
         }
@@ -467,14 +477,14 @@ bool CollisionDetector::CalculatePointOfContact(AgentInterface *agent,
         resultAgentReferencePoint = penetratedAgentReferencePoint;
         resultOtherReferencePoint = movingOtherReferencePoint;
     }
-    else if(!agentIntersected && otherIntersected)
+    else if (!agentIntersected && otherIntersected)
     {
-        if(!CalculateDistOnBorder(agent, agentPenetratingCorner, 0, resultAgentDistOnBorder))
+        if (!CalculateDistOnBorder(agent, agentPenetratingCorner, 0, resultAgentDistOnBorder))
         {
             return false;
         }
 
-        if(!CalculateDistOnBorder(other, otherFromCorner, otherDistanceFromCorner, resultOtherDistOnBorder))
+        if (!CalculateDistOnBorder(other, otherFromCorner, otherDistanceFromCorner, resultOtherDistOnBorder))
         {
             return false;
         }
@@ -485,15 +495,15 @@ bool CollisionDetector::CalculatePointOfContact(AgentInterface *agent,
     else
     {
         // decide which agent entered first into body of other agent
-        if(agentDistanceFromInitial < otherDistanceFromInitial)
+        if (agentDistanceFromInitial < otherDistanceFromInitial)
         {
             // agent corner penetrated first into body of other
-            if(!CalculateDistOnBorder(agent, agentPenetratingCorner, 0, resultAgentDistOnBorder))
+            if (!CalculateDistOnBorder(agent, agentPenetratingCorner, 0, resultAgentDistOnBorder))
             {
                 return false;
             }
 
-            if(!CalculateDistOnBorder(other, otherFromCorner, otherDistanceFromCorner, resultOtherDistOnBorder))
+            if (!CalculateDistOnBorder(other, otherFromCorner, otherDistanceFromCorner, resultOtherDistOnBorder))
             {
                 return false;
             }
@@ -504,12 +514,12 @@ bool CollisionDetector::CalculatePointOfContact(AgentInterface *agent,
         else
         {
             // other corner penetrated first into body of agent
-            if(!CalculateDistOnBorder(agent, agentFromCorner, agentDistanceFromCorner, resultAgentDistOnBorder))
+            if (!CalculateDistOnBorder(agent, agentFromCorner, agentDistanceFromCorner, resultAgentDistOnBorder))
             {
                 return false;
             }
 
-            if(!CalculateDistOnBorder(other, otherPenetratingCorner, 0, resultOtherDistOnBorder))
+            if (!CalculateDistOnBorder(other, otherPenetratingCorner, 0, resultOtherDistOnBorder))
             {
                 return false;
             }
@@ -525,7 +535,7 @@ bool CollisionDetector::CalculatePointOfContact(AgentInterface *agent,
 void CollisionDetector::Trigger(int time)
 {
     // accumulate collisions
-    for(auto it = agents->cbegin(); it != agents->cend(); ++it)
+    for (auto it = agents->cbegin(); it != agents->cend(); ++it)
     {
         AgentInterface *agent = it->second;
         assert(agent != nullptr);
@@ -535,10 +545,10 @@ void CollisionDetector::Trigger(int time)
         std::array<Common::Vector2d, NumberNormals> agentNormals;
         GetWorldObjectGeometry(agent, agentCorners, agentNormals);
 
-        for(auto otherIt = std::next(it); otherIt != agents->cend(); ++otherIt)
+        for (auto otherIt = std::next(it); otherIt != agents->cend(); ++otherIt)
         {
             AgentInterface *other = otherIt->second;
-            if(!DetectCollision(other, agent, agentCorners, agentNormals))
+            if (!DetectCollision(other, agent, agentCorners, agentNormals))
             {
                 continue;
             }
@@ -550,15 +560,15 @@ void CollisionDetector::Trigger(int time)
         }
 
         // second loop to avoid comparing traffic objects with traffic objects
-        for(auto trafficObjectIt = trafficObjects->begin(); trafficObjectIt != trafficObjects->end(); ++trafficObjectIt)
+        for (auto trafficObjectIt = trafficObjects->begin(); trafficObjectIt != trafficObjects->end(); ++trafficObjectIt)
         {
-            const TrafficObjectInterface* otherObject = *trafficObjectIt;
-            if(!otherObject)
+            const TrafficObjectInterface *otherObject = *trafficObjectIt;
+            if (!otherObject)
             {
                 LOG(CbkLogLevel::Warning, "collision detection aborted");
                 throw std::runtime_error("Invalid other worldObject. Collision detection cancled.");
             }
-            if(!DetectCollision(otherObject, agent, agentCorners, agentNormals))
+            if (!DetectCollision(otherObject, agent, agentCorners, agentNormals))
             {
                 continue;
             }
@@ -571,19 +581,21 @@ void CollisionDetector::Trigger(int time)
 }
 
 template <typename T>
-bool IsInVector(const std::vector<T>& v, T element)
+bool IsInVector(const std::vector<T> &v, T element)
 {
     return std::find(v.begin(), v.end(), element) != v.end();
 }
 
 bool CollisionDetector::DetectCollision(const WorldObjectInterface *other,
-                                           AgentInterface *agent,
-                                           std::array<Common::Vector2d,
-                                           NumberCorners> agentCorners,
-                                           std::array<Common::Vector2d,
-                                           NumberNormals> agentNormals)
+                                        AgentInterface *agent,
+                                        std::array<Common::Vector2d,
+                                                   NumberCorners>
+                                            agentCorners,
+                                        std::array<Common::Vector2d,
+                                                   NumberNormals>
+                                            agentNormals)
 {
-    if( IsInVector(agent->GetCollisionPartners(), std::make_pair(other->GetType(), other->GetId())) )
+    if (IsInVector(agent->GetCollisionPartners(), std::make_pair(other->GetType(), other->GetId())))
     {
         return false;
     }
@@ -595,8 +607,8 @@ bool CollisionDetector::DetectCollision(const WorldObjectInterface *other,
 
     // quick check
     double quickDistance = agent->GetLength() + agent->GetWidth() + other->GetLength() + other->GetWidth();
-    if(fabs(agentCorners[UpperLeft].x - otherCorners[UpperLeft].x) > quickDistance ||
-            fabs(agentCorners[UpperLeft].y - otherCorners[UpperLeft].y) > quickDistance)
+    if (fabs(agentCorners[UpperLeft].x - otherCorners[UpperLeft].x) > quickDistance ||
+        fabs(agentCorners[UpperLeft].y - otherCorners[UpperLeft].y) > quickDistance)
     {
         return false;
     }
@@ -611,11 +623,11 @@ bool CollisionDetector::DetectIntersectionOfTwoWorldObjects(const WorldObjectInt
                                                             std::array<Common::Vector2d, NumberNormals> otherNormals,
                                                             std::array<Common::Vector2d, NumberCorners> otherCorners)
 {
-    double agentNormal1_agentCornerProjectedMinValue;
-    double agentNormal1_agentCornerProjectedMaxValue;
+    double agentNormal1_agentCornerProjectedMinValue{};
+    double agentNormal1_agentCornerProjectedMaxValue{};
 
-    double agentNormal0_agentCornerProjectedMinValue;
-    double agentNormal0_agentCornerProjectedMaxValue;
+    double agentNormal0_agentCornerProjectedMinValue{};
+    double agentNormal0_agentCornerProjectedMaxValue{};
 
     // only two points need to be projected on own normals since they are aligned
     std::array<double, NumberProjectedOwnAxis> agentNormal0_agentCornerProjected;
@@ -625,7 +637,7 @@ bool CollisionDetector::DetectIntersectionOfTwoWorldObjects(const WorldObjectInt
     bool calculatedNormal1 = false;
 
     // project agent corners on agent normal0 (take origin as reference, unnormalized since only comparision result is significant)
-    if(!calculatedNormal0)
+    if (!calculatedNormal0)
     {
         agentNormal0_agentCornerProjected[ProjectedFirst] = agentCorners[LowerLeft].Dot(agentNormals[Right]);
         agentNormal0_agentCornerProjected[ProjectedSecond] = agentCorners[LowerRight].Dot(agentNormals[Right]); // right normal
@@ -637,7 +649,7 @@ bool CollisionDetector::DetectIntersectionOfTwoWorldObjects(const WorldObjectInt
 
     // project other corners on agent normal0 (take origin as reference, unnormalized since only comparision result is significant)
     std::array<double, NumberProjectedOpponentAxis> agentNormal0_otherCornerProjected;
-    for(int i = 0; i < NumberProjectedOpponentAxis; ++i)
+    for (size_t i = 0; i < NumberProjectedOpponentAxis; ++i)
     {
         agentNormal0_otherCornerProjected[i] = otherCorners[i].Dot(agentNormals[Right]);
     }
@@ -649,15 +661,15 @@ bool CollisionDetector::DetectIntersectionOfTwoWorldObjects(const WorldObjectInt
                agentNormal0_otherCornerProjectedMinValue);
 
     // check for collision on agent normal 0
-    if(agentNormal0_agentCornerProjectedMaxValue < agentNormal0_otherCornerProjectedMinValue ||
-            agentNormal0_otherCornerProjectedMaxValue < agentNormal0_agentCornerProjectedMinValue)
+    if (agentNormal0_agentCornerProjectedMaxValue < agentNormal0_otherCornerProjectedMinValue ||
+        agentNormal0_otherCornerProjectedMaxValue < agentNormal0_agentCornerProjectedMinValue)
     {
         // agents separated on agent normal 0 axis
         return false;
     }
 
     // project agent corners on agent normal1 (take origin as reference, unnormalized since only comparision result is significant)
-    if(!calculatedNormal1)
+    if (!calculatedNormal1)
     {
         agentNormal1_agentCornerProjected[ProjectedFirst] = agentCorners[LowerLeft].Dot(agentNormals[Up]);
         agentNormal1_agentCornerProjected[ProjectedSecond] = agentCorners[UpperLeft].Dot(agentNormals[Up]); // up normal
@@ -669,7 +681,7 @@ bool CollisionDetector::DetectIntersectionOfTwoWorldObjects(const WorldObjectInt
 
     // project other corners  on agent normal1 (take origin as reference, unnormalized since only comparision result is significant)
     std::array<double, NumberProjectedOpponentAxis> agentNormal1_otherCornerProjected;
-    for(int i = 0; i < NumberProjectedOpponentAxis; ++i)
+    for (size_t i = 0; i < NumberProjectedOpponentAxis; ++i)
     {
         agentNormal1_otherCornerProjected[i] = otherCorners[i].Dot(agentNormals[Up]);
     }
@@ -681,107 +693,92 @@ bool CollisionDetector::DetectIntersectionOfTwoWorldObjects(const WorldObjectInt
                agentNormal1_otherCornerProjectedMinValue);
 
     // check for collision on agent normal 1
-    if(agentNormal1_agentCornerProjectedMaxValue < agentNormal1_otherCornerProjectedMinValue ||
-            agentNormal1_otherCornerProjectedMaxValue < agentNormal1_agentCornerProjectedMinValue)
+    if (agentNormal1_agentCornerProjectedMaxValue < agentNormal1_otherCornerProjectedMinValue ||
+        agentNormal1_otherCornerProjectedMaxValue < agentNormal1_agentCornerProjectedMinValue)
     {
         // agents separated on agent normal 1 axis
         return false;
     }
 
     // skip check for other normals if agents are approximately aligned to same axes
-    if(fabs(fmod(fabs(agent->GetYaw()), 90.0) - fmod(fabs(other->GetYaw()), 90.0)) > ROTATION_EPS)
-    {
-        // project agent corners on other normal0 (take origin as reference, unnormalized since only comparision result is significant)
-        std::array<double, NumberProjectedOpponentAxis> otherNormal0_agentCornerProjected;
-        for(int i = 0; i < NumberProjectedOpponentAxis; ++i)
-        {
-            otherNormal0_agentCornerProjected[i] = agentCorners[i].Dot(otherNormals[Right]);
-        }
-
-        double otherNormal0_agentCornerProjectedMaxValue;
-        double otherNormal0_agentCornerProjectedMinValue;
-        GetMinMax4(otherNormal0_agentCornerProjected,
-                   otherNormal0_agentCornerProjectedMaxValue,
-                   otherNormal0_agentCornerProjectedMinValue);
-
-        // project other corners on other normal0 (take origin as reference, unnormalized since only comparision result is significant)
-        std::array<double, NumberProjectedOwnAxis> otherNormal0_otherCornerProjected; // only two points need to be projected on own normals since they are aligned
-        otherNormal0_otherCornerProjected[ProjectedFirst] = otherCorners[LowerLeft].Dot(otherNormals[Right]); // right normal
-        otherNormal0_otherCornerProjected[ProjectedSecond] = otherCorners[LowerRight].Dot(otherNormals[Right]);
-
-        double otherNormal0_otherCornerProjectedMaxValue;
-        double otherNormal0_otherCornerProjectedMinValue;
-        GetMinMax2(otherNormal0_otherCornerProjected,
-                   otherNormal0_otherCornerProjectedMaxValue,
-                   otherNormal0_otherCornerProjectedMinValue);
-
-        // check for collision on other normal 0
-        if(otherNormal0_agentCornerProjectedMaxValue < otherNormal0_otherCornerProjectedMinValue ||
-                otherNormal0_otherCornerProjectedMaxValue < otherNormal0_agentCornerProjectedMinValue)
-        {
-            // agents separated on other normal 0 axis
-            return false;
-        }
-
-        // project agent corners on other normal1 (take origin as reference, unnormalized since only comparision result is significant)
-        std::array<double, NumberProjectedOpponentAxis> otherNormal1_agentCornerProjected;
-        for(int i = 0; i < NumberProjectedOpponentAxis; ++i)
-        {
-            otherNormal1_agentCornerProjected[i] = agentCorners[i].Dot(otherNormals[Up]);
-        }
-
-        double otherNormal1_agentCornerProjectedMaxValue;
-        double otherNormal1_agentCornerProjectedMinValue;
-        GetMinMax4(otherNormal1_agentCornerProjected,
-                   otherNormal1_agentCornerProjectedMaxValue,
-                   otherNormal1_agentCornerProjectedMinValue);
-
-        // project other corners on other normal1 (take origin as reference, unnormalized since only comparision result is significant)
-        std::array<double, NumberProjectedOwnAxis> otherNormal1_otherCornerProjected; // only two points need to be projected on own normals since they are aligned
-        otherNormal1_otherCornerProjected[ProjectedFirst] = otherCorners[LowerLeft].Dot(otherNormals[Up]); // up normal
-        otherNormal1_otherCornerProjected[ProjectedSecond] = otherCorners[UpperLeft].Dot(otherNormals[Up]);
-
-        double otherNormal1_otherCornerProjectedMaxValue;
-        double otherNormal1_otherCornerProjectedMinValue;
-        GetMinMax2(otherNormal1_otherCornerProjected,
-                   otherNormal1_otherCornerProjectedMaxValue,
-                   otherNormal1_otherCornerProjectedMinValue);
-
-        // check for collision on other normal 1
-        if(otherNormal1_agentCornerProjectedMaxValue < otherNormal1_otherCornerProjectedMinValue ||
-                otherNormal1_otherCornerProjectedMaxValue < otherNormal1_agentCornerProjectedMinValue)
-        {
-            // agents separated on other normal 1 axis
-            return false;
-        }
-
-        return true;
-    }
-    else
+    if (fabs(fmod(fabs(agent->GetYaw()), 90.0) - fmod(fabs(other->GetYaw()), 90.0)) <= ROTATION_EPS)
     {
         return true;
     }
+
+    // project agent corners on other normal0 (take origin as reference, unnormalized since only comparision result is significant)
+    std::array<double, NumberProjectedOpponentAxis> otherNormal0_agentCornerProjected;
+    for (size_t i = 0; i < NumberProjectedOpponentAxis; ++i)
+    {
+        otherNormal0_agentCornerProjected[i] = agentCorners[i].Dot(otherNormals[Right]);
+    }
+
+    double otherNormal0_agentCornerProjectedMaxValue;
+    double otherNormal0_agentCornerProjectedMinValue;
+    GetMinMax4(otherNormal0_agentCornerProjected,
+               otherNormal0_agentCornerProjectedMaxValue,
+               otherNormal0_agentCornerProjectedMinValue);
+
+    // project other corners on other normal0 (take origin as reference, unnormalized since only comparision result is significant)
+    std::array<double, NumberProjectedOwnAxis> otherNormal0_otherCornerProjected;                         // only two points need to be projected on own normals since they are aligned
+    otherNormal0_otherCornerProjected[ProjectedFirst] = otherCorners[LowerLeft].Dot(otherNormals[Right]); // right normal
+    otherNormal0_otherCornerProjected[ProjectedSecond] = otherCorners[LowerRight].Dot(otherNormals[Right]);
+
+    double otherNormal0_otherCornerProjectedMaxValue;
+    double otherNormal0_otherCornerProjectedMinValue;
+    GetMinMax2(otherNormal0_otherCornerProjected,
+               otherNormal0_otherCornerProjectedMaxValue,
+               otherNormal0_otherCornerProjectedMinValue);
+
+    // check for collision on other normal 0
+    if (otherNormal0_agentCornerProjectedMaxValue < otherNormal0_otherCornerProjectedMinValue ||
+        otherNormal0_otherCornerProjectedMaxValue < otherNormal0_agentCornerProjectedMinValue)
+    {
+        // agents separated on other normal 0 axis
+        return false;
+    }
+
+    // project agent corners on other normal1 (take origin as reference, unnormalized since only comparision result is significant)
+    std::array<double, NumberProjectedOpponentAxis> otherNormal1_agentCornerProjected;
+    for (size_t i = 0; i < NumberProjectedOpponentAxis; ++i)
+    {
+        otherNormal1_agentCornerProjected[i] = agentCorners[i].Dot(otherNormals[Up]);
+    }
+
+    double otherNormal1_agentCornerProjectedMaxValue;
+    double otherNormal1_agentCornerProjectedMinValue;
+    GetMinMax4(otherNormal1_agentCornerProjected,
+               otherNormal1_agentCornerProjectedMaxValue,
+               otherNormal1_agentCornerProjectedMinValue);
+
+    // project other corners on other normal1 (take origin as reference, unnormalized since only comparision result is significant)
+    std::array<double, NumberProjectedOwnAxis> otherNormal1_otherCornerProjected;                      // only two points need to be projected on own normals since they are aligned
+    otherNormal1_otherCornerProjected[ProjectedFirst] = otherCorners[LowerLeft].Dot(otherNormals[Up]); // up normal
+    otherNormal1_otherCornerProjected[ProjectedSecond] = otherCorners[UpperLeft].Dot(otherNormals[Up]);
+
+    double otherNormal1_otherCornerProjectedMaxValue;
+    double otherNormal1_otherCornerProjectedMinValue;
+    GetMinMax2(otherNormal1_otherCornerProjected,
+               otherNormal1_otherCornerProjectedMaxValue,
+               otherNormal1_otherCornerProjectedMinValue);
+
+    // check for collision on other normal 1
+    if (otherNormal1_agentCornerProjectedMaxValue < otherNormal1_otherCornerProjectedMinValue ||
+        otherNormal1_otherCornerProjectedMaxValue < otherNormal1_agentCornerProjectedMinValue)
+    {
+        // agents separated on other normal 1 axis
+        return false;
+    }
+
+    return true;
 }
 
 void CollisionDetector::DetectedCollisionWithObject(int time, AgentInterface *agent, const WorldObjectInterface *other)
 {
-    auto event = std::make_shared<CollisionEvent>(time,
-                                                  COMPONENTNAME,
-                                                  false,
-                                                  agent->GetId(),
-                                                  other->GetId());
-
-    eventNetwork->InsertEvent(event);
+    eventNetwork->InsertEvent(std::make_shared<CollisionEvent>(time, COMPONENTNAME, false, agent->GetId(), other->GetId()));
 }
 
 void CollisionDetector::DetectedCollisionWithAgent(int time, AgentInterface *agent, AgentInterface *other)
 {
-    auto event = std::make_shared<CollisionEvent>(time,
-                                                  COMPONENTNAME,
-                                                  true,
-                                                  agent->GetId(),
-                                                  other->GetId());
-
-    eventNetwork->InsertEvent(event);
+    eventNetwork->InsertEvent(std::make_shared<CollisionEvent>(time, COMPONENTNAME, true, agent->GetId(), other->GetId()));
 }
-

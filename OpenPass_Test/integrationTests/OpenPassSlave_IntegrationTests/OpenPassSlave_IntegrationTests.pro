@@ -25,7 +25,10 @@ WORLD_OSI = $$OPEN_SRC/CoreModules/World_OSI
 INCLUDEPATH += . \
     $$OPENPASS_SLAVE \
     $$OPENPASS_SLAVE/framework \
+    $$OPENPASS_SLAVE/importer \
     $$OPENPASS_SLAVE/importer/road \
+    $$OPENPASS_SLAVE/modelElements \
+    $$OPENPASS_SLAVE/worldInterface \
     $$CORE_SHARE \
     $$CORE_SHARE/cephes \
     $$WORLD_OSI \
@@ -33,14 +36,16 @@ INCLUDEPATH += . \
     $$WORLD_OSI/Localization
 
 SRC_SCENARIO =  $$OPENPASS_SLAVE/importer/eventDetectorImporter.cpp \
-                $$OPENPASS_SLAVE/importer/manipulatorImporter.cpp \
                 $$OPENPASS_SLAVE/importer/scenario.cpp \
-                $$OPENPASS_SLAVE/importer/scenarioImporter.cpp
+                $$OPENPASS_SLAVE/importer/scenarioImporter.cpp \
+                $$OPENPASS_SLAVE/importer/scenarioImporterHelper.cpp \
+                $$OPENPASS_SLAVE/importer/oscImporterCommon.cpp
 
 INC_SCENARIO =  $$OPENPASS_SLAVE/importer/scenario.h \
                 $$OPENPASS_SLAVE/importer/scenarioImporter.h \
-                $$OPENPASS_SLAVE/importer/manipulatorImporter.h \
-                $$OPEN_SRC/Common/openScenarioDefinitions.h
+                $$OPENPASS_SLAVE/importer/scenarioImporterHelper.h \
+                $$OPEN_SRC/Common/openScenarioDefinitions.h \
+                $$OPENPASS_SLAVE/importer/oscImporterCommon.h
 
 SRC_SCENERY =   $$OPENPASS_SLAVE/importer/scenery.cpp \
                 $$OPENPASS_SLAVE/importer/sceneryImporter.cpp \
@@ -52,8 +57,7 @@ SRC_SCENERY =   $$OPENPASS_SLAVE/importer/scenery.cpp \
                 $$OPENPASS_SLAVE/worldInterface/world.cpp \
                 $$OPENPASS_SLAVE/worldInterface/worldBinding.cpp \
                 $$OPENPASS_SLAVE/worldInterface/worldLibrary.cpp \
-                $$OPEN_SRC/CoreModules/Stochastics/stochastics_implementation.cpp \
-                $$OPEN_SRC/Common/vector2d.cpp
+                $$OPEN_SRC/CoreModules/Stochastics/stochastics_implementation.cpp                
 
 INC_SCENERY =   $$OPENPASS_SLAVE/importer/scenery.h \
                 $$OPENPASS_SLAVE/importer/sceneryImporter.h \
@@ -89,6 +93,7 @@ INC_SLAVECONFIG = $$OPENPASS_SLAVE/importer/slaveConfig.h \
 
 SRC_SLAVECONFIG = $$OPENPASS_SLAVE/importer/slaveConfig.cpp \
                   $$OPENPASS_SLAVE/importer/slaveConfigImporter.cpp \
+                  $$OPENPASS_SLAVE/importer/parameterImporter.cpp \
                   $$OPENPASS_SLAVE/framework/directories.cpp
 
 SRC_CORESHARE = $$CORE_SHARE/xmlParser.cpp \
@@ -113,7 +118,8 @@ SRC_WORLD = $$WORLD_OSI/WorldData.cpp \
             $$WORLD_OSI/OWL/OpenDriveTypeMapper.cpp \
             $$WORLD_OSI/Localization.cpp \
             $$WORLD_OSI/WorldToRoadCoordinateConverter.cpp \
-            $$WORLD_OSI/PointQuery.cpp
+            $$WORLD_OSI/PointQuery.cpp \
+            $$WORLD_OSI/egoAgent.cpp
 
 INC_WORLD = $$WORLD_OSI/WorldData.h \
             $$WORLD_OSI/WorldDataQuery.h \
@@ -124,7 +130,8 @@ INC_WORLD = $$WORLD_OSI/WorldData.h \
             $$WORLD_OSI/OWL/OpenDriveTypeMapper.h \
             $$WORLD_OSI/Localization.h \
             $$WORLD_OSI/WorldToRoadCoordinateConverter.h \
-            $$WORLD_OSI/PointQuery.h
+            $$WORLD_OSI/PointQuery.h \
+            $$WORLD_OSI/egoAgent.h
 
 SOURCES += \
     $$OPEN_SRC/Common/eventDetectorDefinitions.cpp \

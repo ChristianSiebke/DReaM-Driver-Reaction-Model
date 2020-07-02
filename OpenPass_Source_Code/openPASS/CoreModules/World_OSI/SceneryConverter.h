@@ -24,6 +24,7 @@
 #include "WorldData.h"
 #include "WorldDataQuery.h"
 #include "Localization.h"
+#include "Common/worldDefinitions.h"
 
 namespace Internal
 {
@@ -279,13 +280,25 @@ private:
     //OSI Methods and Variables
     void CreateRoads();
 
-    void CreateTrafficSigns();
+    void CreateRoadSignals();
+
+    //! Creates a traffic sign in OWL from an OpenDrive RoadSignal
+    //!
+    //! \param signal       OpenDrive specification of the sign
+    //! \param position     position of the sign in the world
+    //! \param lanes        lanes for which this sign is valid
+    void CreateTrafficSign(RoadSignalInterface* signal, Position position, const OWL::Interfaces::Lanes& lanes);
+
+    //! Creates a road marking in OWL from an OpenDrive RoadSignal
+    //!
+    //! \param signal       OpenDrive specification of the road marking
+    //! \param position     position of the road marking in the world
+    //! \param lanes        lanes for which this road marking is valid
+    void CreateRoadMarking(RoadSignalInterface* signal, Position position, const OWL::Interfaces::Lanes& lanes);
 
     void CreateTrafficLight(RoadSignalInterface* signal, RoadInterface* road);
 
     std::list<RoadLaneInterface*> GetRoadLanesAtDistance(RoadInterface *road, double s);
-
-    Common::Vector3d GetPositionForSCoordinate(RoadInterface* road, double s, double t);
 
     void CreateObjects();
 
@@ -324,4 +337,19 @@ inline bool HasSucceedingElement(std::vector<T, A> const& vector, size_t current
     return vector.size() > currentIndex + 1;
 }
 
+class RoadNetworkBuilder
+{
+public:
+    RoadNetworkBuilder(SceneryInterface& scenery) :
+        scenery(scenery)
+    {}
 
+    //! Converts the road netwerk of OpenDrive into a graph representation
+    //!
+    //! \return graph of the road network and mapping from roads (with direction) to the vertices
+    //!
+    std::pair<RoadGraph, RoadGraphVertexMapping> Build();
+
+private:
+    SceneryInterface& scenery;
+};

@@ -10,7 +10,7 @@
 
 #pragma once
 #include <unordered_map>
-#include "Interfaces/samplerInterface.h"
+#include "Interfaces/stochasticsInterface.h"
 #include "Interfaces/profilesInterface.h"
 #include "Common/sensorDefinitions.h"
 
@@ -21,10 +21,9 @@ struct DynamicParameters
     friend DynamicParameterSampler;
     std::unordered_map<int, double> sensorLatencies;
 
-    static DynamicParameterSampler make(const SamplerInterface& sampler,
+    static DynamicParameterSampler make(StochasticsInterface& stochastics,
                                         std::string &vehicleProfileName,
-                                        std::unordered_map<std::string, VehicleProfile>& vehicleProfiles,
-                                        openpass::sensors::Profiles& sensorProfiles);
+                                        ProfilesInterface* profiles);
 
     //For testing;
     static DynamicParameters empty();
@@ -35,10 +34,9 @@ private:
 class DynamicParameterSampler
 {
 public:
-    DynamicParameterSampler(const SamplerInterface& sampler,
+    DynamicParameterSampler(StochasticsInterface& stochastics,
                             std::string &vehicleProfileName,
-                            std::unordered_map<std::string, VehicleProfile>& vehicleProfiles,
-                            openpass::sensors::Profiles &sensorProfiles);
+                            ProfilesInterface* profiles);
 
     operator DynamicParameters&&()
     {
@@ -49,8 +47,7 @@ public:
 
 private:
     DynamicParameters dynamicParameter;
-    const SamplerInterface& sampler;
+    StochasticsInterface& stochastics;
     std::string& vehicleProfileName;
-    std::unordered_map<std::string, VehicleProfile>& vehicleProfiles;
-    openpass::sensors::Profiles& sensorProfiles;
+    ProfilesInterface *profiles;
 };

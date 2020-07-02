@@ -45,7 +45,7 @@ public:
         parametersIntVector{other.GetParametersIntVector()},
         parametersBoolVector{other.GetParametersBoolVector()},
         parametersStringVector{other.GetParametersStringVector()},
-        parametersNormalDistribution{other.GetParametersNormalDistribution()},
+        parametersStochastic{other.GetParametersStochastic()},
         parameterLists{other.GetParameterLists()} {}
 
     bool AddParameterDouble(std::string name, double value) override;
@@ -56,8 +56,7 @@ public:
     bool AddParameterIntVector(std::string name, const std::vector<int> value) override;
     bool AddParameterBoolVector(std::string name, const std::vector<bool> value) override;
     bool AddParameterStringVector(std::string name, const std::vector<std::string> value) override;
-    bool AddParameterNormalDistribution(std::string name,
-                                        const openpass::parameter::NormalDistribution value) override;
+    bool AddParameterStochastic(std::string name, const openpass::parameter::StochasticDistribution value) override;
 
     ParameterInterface& InitializeListItem(std::string key) override;
 
@@ -108,10 +107,9 @@ public:
         return parametersStringVector;
     }
 
-    virtual const std::map<std::string, const openpass::parameter::NormalDistribution>&
-    GetParametersNormalDistribution() const override
+    virtual const std::map<std::string, const openpass::parameter::StochasticDistribution>& GetParametersStochastic() const override
     {
-        return parametersNormalDistribution;
+        return parametersStochastic;
     }
 
     virtual const std::map<std::string, ParameterLists>& GetParameterLists() const override
@@ -129,7 +127,7 @@ protected:
     std::map<std::string, const std::vector<int>> parametersIntVector;
     std::map<std::string, const std::vector<bool>> parametersBoolVector;
     std::map<std::string, const std::vector<std::string>> parametersStringVector;
-    std::map<std::string, const openpass::parameter::NormalDistribution> parametersNormalDistribution;
+    std::map<std::string, const openpass::parameter::StochasticDistribution> parametersStochastic;
     std::map<std::string, ParameterLists> parameterLists;
 };
 

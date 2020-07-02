@@ -50,7 +50,7 @@ struct TESTSCENERY_FACTORY
     Scenery scenery;
 
     TESTSCENERY_FACTORY() :
-        worldBinding(libraryName, &callbacks, &stochastics),
+        worldBinding(libraryName, &callbacks, &stochastics, nullptr),
         world(&worldBinding)
     {
     }
@@ -158,8 +158,9 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectLanes)
 
     auto& world = tsf.world;
 
-    Route route{"1"};
-    const auto relativeLanes = world.GetRelativeLanes(route, "1", -1, 0.0, 150.0);
+    RoadGraph roadGraph;
+    RoadGraphVertex root = add_vertex(RouteElement{"1", true}, roadGraph);
+    const auto relativeLanes = world.GetRelativeLanes(roadGraph, root, -1, 0.0, 150.0).at(root);
     ASSERT_EQ(relativeLanes.size(), 5);
 
     const auto firstSection = relativeLanes.at(0);
@@ -194,13 +195,13 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectLanes)
                                                          RelativeWorldView::Lane{-2, true, LaneType::Stop, -2, std::nullopt}));
 
     double maxSearchDistance = 1000.0;
-    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(route, "1", -1, 0.0, maxSearchDistance, {LaneType::Driving, LaneType::Stop}), 100.0);
-    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(route, "1", -2, 15.0, maxSearchDistance, {LaneType::Driving, LaneType::Stop}), 135.0);
-    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(route, "1", -3, 35.0, maxSearchDistance, {LaneType::Driving, LaneType::Stop}), 115.0);
+    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(roadGraph, root, -1, 0.0, maxSearchDistance, {LaneType::Driving, LaneType::Stop}).at(root), 100.0);
+    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(roadGraph, root, -2, 15.0, maxSearchDistance, {LaneType::Driving, LaneType::Stop}).at(root), 135.0);
+    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(roadGraph, root, -3, 35.0, maxSearchDistance, {LaneType::Driving, LaneType::Stop}).at(root), 115.0);
 
-    ASSERT_DOUBLE_EQ(world.GetLaneWidth(route, "1", -1, 60.0), 3.0);
-    ASSERT_DOUBLE_EQ(world.GetLaneWidth(route, "1", -2, 60.0), 4.0);
-    ASSERT_DOUBLE_EQ(world.GetLaneWidth(route, "1", -3, 60.0), 5.0);
+    ASSERT_DOUBLE_EQ(world.GetLaneWidth("1", -1, 60.0), 3.0);
+    ASSERT_DOUBLE_EQ(world.GetLaneWidth("1", -2, 60.0), 4.0);
+    ASSERT_DOUBLE_EQ(world.GetLaneWidth("1", -3, 60.0), 5.0);
 
 }
 
@@ -211,9 +212,14 @@ TEST(SceneryImporter_IntegrationTests, MultipleRoads_ImportWithCorrectLanes)
 
     auto& world = tsf.world;
 
-    Route route{{{"1", true}, {"2", false}, {"3", true}}, {}, 0};
+    RoadGraph roadGraph;
+    RoadGraphVertex node1 = add_vertex(RouteElement{"1", true}, roadGraph);
+    RoadGraphVertex node2 = add_vertex(RouteElement{"2", false}, roadGraph);
+    RoadGraphVertex node3 = add_vertex(RouteElement{"3", true}, roadGraph);
+    add_edge(node1, node2, roadGraph);
+    add_edge(node2, node3, roadGraph);
 
-    const auto relativeLanes = world.GetRelativeLanes(route, "1", -1, 0.0, 6000.0);
+    const auto relativeLanes = world.GetRelativeLanes(roadGraph, node1, -1, 0.0, 6000.0).at(node3);
     ASSERT_EQ(relativeLanes.size(), 6);
 
     const auto firstSection = relativeLanes.at(0);
@@ -260,18 +266,18 @@ TEST(SceneryImporter_IntegrationTests, MultipleRoads_ImportWithCorrectLanes)
 
     double maxSearchLength = 10000.0;
     //--------------------------------------------------------RoId, laneId, s, maxsearch
-    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(route, "1", -1, 0.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}), 6000.0);
-    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(route, "1", -2, 650.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}), 5350.0);
-    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(route, "2", 2, 0.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}), 3000.0);
-    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(route, "2", 2, 1500.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}), 4500.0);
-    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(route, "3", -3, 0.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}), 3000.0);
-    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(route, "3", -3, 1500.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}), 1500.0);
+    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(roadGraph, node1, -1, 0.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}).at(node3), 6000.0);
+    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(roadGraph, node1, -2, 650.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}).at(node3), 5350.0);
+    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(roadGraph, node2, 2, 0.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}).at(node3), 3000.0);
+    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(roadGraph, node2, 2, 1500.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}).at(node3), 4500.0);
+    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(roadGraph, node3, -3, 0.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}).at(node3), 3000.0);
+    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(roadGraph, node3, -3, 1500.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}).at(node3), 1500.0);
 
     //-----------------------------RoId, laneId, s
-    ASSERT_DOUBLE_EQ(world.GetLaneWidth(route, "1", -1, 60.0), 3.0);
-    ASSERT_DOUBLE_EQ(world.GetLaneWidth(route, "1", -3, 999.9), 5.0);
-    ASSERT_DOUBLE_EQ(world.GetLaneWidth(route, "2", 1, 0.0), 3.0);
-    ASSERT_DOUBLE_EQ(world.GetLaneWidth(route, "3", -2, 1500.0), 4.0);
+    ASSERT_DOUBLE_EQ(world.GetLaneWidth("1", -1, 60.0), 3.0);
+    ASSERT_DOUBLE_EQ(world.GetLaneWidth("1", -3, 999.9), 5.0);
+    ASSERT_DOUBLE_EQ(world.GetLaneWidth("2", 1, 0.0), 3.0);
+    ASSERT_DOUBLE_EQ(world.GetLaneWidth("3", -2, 1500.0), 4.0);
 
 }
 
@@ -282,10 +288,19 @@ TEST(SceneryImporter_IntegrationTests, MultipleRoadsWithJunctions_ImportWithCorr
 
     auto& world = tsf.world;
 
-    Route routeUp{{{"1", true}, {"4", true}, {"2", true}}, {}, 1};
-    Route routeDown{{{"1", true}, {"5", true}, {"3", true}}, {}, 2};
+    RoadGraph roadGraph;
+    RoadGraphVertex node1 = add_vertex(RouteElement{"1", true}, roadGraph);
+    RoadGraphVertex node2 = add_vertex(RouteElement{"2", true}, roadGraph);
+    RoadGraphVertex node3 = add_vertex(RouteElement{"3", true}, roadGraph);
+    RoadGraphVertex node4 = add_vertex(RouteElement{"4", true}, roadGraph);
+    RoadGraphVertex node5 = add_vertex(RouteElement{"5", true}, roadGraph);
+    add_edge(node1, node4, roadGraph);
+    add_edge(node4, node2, roadGraph);
+    add_edge(node1, node5, roadGraph);
+    add_edge(node5, node3, roadGraph);
 
-    const auto relativeLanesUp = world.GetRelativeLanes(routeUp, "1", -1, 0.0, 320.0);
+    const auto relativeLanes = world.GetRelativeLanes(roadGraph, node1, -1, 0.0, 320.0);
+    const auto relativeLanesUp = relativeLanes.at(node2);
     ASSERT_EQ(relativeLanesUp.size(), 3);
 
     const auto firstSectionUp = relativeLanesUp.at(0);
@@ -308,7 +323,7 @@ TEST(SceneryImporter_IntegrationTests, MultipleRoadsWithJunctions_ImportWithCorr
     ASSERT_THAT(thirdSectionUp.lanes, UnorderedElementsAre(RelativeWorldView::Lane{0, true, LaneType::Driving, 0, std::nullopt},
                                                            RelativeWorldView::Lane{-1, true, LaneType::Driving, -1, std::nullopt}));
 
-    const auto relativeLanesDown = world.GetRelativeLanes(routeDown, "1", -1, 0.0, 320.0);
+    const auto relativeLanesDown = relativeLanes.at(node3);
     ASSERT_EQ(relativeLanesDown.size(), 3);
 
     const auto firstSectionDown = relativeLanesDown.at(0);
@@ -333,29 +348,29 @@ TEST(SceneryImporter_IntegrationTests, MultipleRoadsWithJunctions_ImportWithCorr
 
     double maxSearchLength = 1000.0;
     //--------------------------------------------------------RoId, laneId, s, maxsearch
-    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(routeUp, "1", -1, 0.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}), 320.0);
-    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(routeUp, "1", -2, 90.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}), 230.0);
-    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(routeDown, "1", -3, 10.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}), 410.0);
-    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(routeDown, "1", -4, 0.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}), 420.0);
-    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(routeUp, "2", -1, 0.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}), 200.0);
-    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(routeUp, "2", -2, 150.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}), 50.0);
-    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(routeDown, "3", -1, 0.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}), 300.0);
-    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(routeUp, "4", -1, 0.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}), 220.0);
-    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(routeDown, "5", -2, 18.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}), 302.0);
+    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(roadGraph, node1, -1, 0.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}).at(node2), 320.0);
+    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(roadGraph, node1, -2, 90.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}).at(node2), 230.0);
+    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(roadGraph, node1, -3, 10.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}).at(node3), 410.0);
+    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(roadGraph, node1, -4, 0.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}).at(node3), 420.0);
+    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(roadGraph, node2, -1, 0.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}).at(node2), 200.0);
+    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(roadGraph, node2, -2, 150.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}).at(node2), 50.0);
+    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(roadGraph, node3, -1, 0.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}).at(node3), 300.0);
+    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(roadGraph, node4, -1, 0.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}).at(node2), 220.0);
+    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(roadGraph, node5, -2, 18.0, maxSearchLength, {LaneType::Driving, LaneType::Stop}).at(node3), 302.0);
 
     //-----------------------------RoId, laneId, s
-    ASSERT_DOUBLE_EQ(world.GetLaneWidth(routeUp, "1", -1, 60.0), 3.0);
-    ASSERT_DOUBLE_EQ(world.GetLaneWidth(routeUp, "1", -2, 95.0), 4.0);
-    ASSERT_DOUBLE_EQ(world.GetLaneWidth(routeDown, "1", -3, 99.0), 5.0);
-    ASSERT_DOUBLE_EQ(world.GetLaneWidth(routeDown, "1", -4, 0.0), 6.0);
-    ASSERT_DOUBLE_EQ(world.GetLaneWidth(routeUp, "2", -1, 1.0), 3.0);
-    ASSERT_DOUBLE_EQ(world.GetLaneWidth(routeUp, "2", -2, 20.0), 4.0);
-    ASSERT_DOUBLE_EQ(world.GetLaneWidth(routeDown, "3", -1, 123.0), 5.0);
-    ASSERT_DOUBLE_EQ(world.GetLaneWidth(routeDown, "3", -2, 200.0), 6.0);
-    ASSERT_DOUBLE_EQ(world.GetLaneWidth(routeUp, "4", -1, 15.0), 3.0);
-    ASSERT_DOUBLE_EQ(world.GetLaneWidth(routeUp, "4", -2, 15.0), 4.0);
-    ASSERT_DOUBLE_EQ(world.GetLaneWidth(routeDown, "5", -1, 0.0), 5.0);
-    ASSERT_DOUBLE_EQ(world.GetLaneWidth(routeDown, "5", -2, 15.0), 6.0);
+    ASSERT_DOUBLE_EQ(world.GetLaneWidth("1", -1, 60.0), 3.0);
+    ASSERT_DOUBLE_EQ(world.GetLaneWidth("1", -2, 95.0), 4.0);
+    ASSERT_DOUBLE_EQ(world.GetLaneWidth("1", -3, 99.0), 5.0);
+    ASSERT_DOUBLE_EQ(world.GetLaneWidth("1", -4, 0.0), 6.0);
+    ASSERT_DOUBLE_EQ(world.GetLaneWidth("2", -1, 1.0), 3.0);
+    ASSERT_DOUBLE_EQ(world.GetLaneWidth("2", -2, 20.0), 4.0);
+    ASSERT_DOUBLE_EQ(world.GetLaneWidth("3", -1, 123.0), 5.0);
+    ASSERT_DOUBLE_EQ(world.GetLaneWidth("3", -2, 200.0), 6.0);
+    ASSERT_DOUBLE_EQ(world.GetLaneWidth("4", -1, 15.0), 3.0);
+    ASSERT_DOUBLE_EQ(world.GetLaneWidth("4", -2, 15.0), 4.0);
+    ASSERT_DOUBLE_EQ(world.GetLaneWidth("5", -1, 0.0), 5.0);
+    ASSERT_DOUBLE_EQ(world.GetLaneWidth("5", -2, 15.0), 6.0);
 }
 
 
@@ -610,8 +625,9 @@ TEST(GetObjectsInRange_IntegrationTests, OneObjectOnQueriedLane)
     AddAgentToWorld(world, 2, 10.0, 9.0);
     world.SyncGlobalData();
 
-    Route route{"1"};
-    const auto objectsInRange = world.GetObjectsInRange(route, "1", -3, 0, 0, 500);
+    RoadGraph roadGraph;
+    RoadGraphVertex root = add_vertex(RouteElement{"1", true}, roadGraph);
+    const auto objectsInRange = world.GetObjectsInRange(roadGraph, root, -3, 0, 0, 500).at(root);
     const auto agent1 = world.GetAgent(1);
     ASSERT_THAT(objectsInRange.size(), Eq(1));
     ASSERT_THAT(objectsInRange.at(0), Eq(agent1));
@@ -627,8 +643,9 @@ TEST(GetObjectsInRange_IntegrationTests, NoObjectOnQueriedLane)
     AddAgentToWorld(world, 1, 10.0, 9.0);
     world.SyncGlobalData();
 
-    Route route{"1"};
-    const auto objectsInRange = world.GetObjectsInRange(route, "1", -3, 0, 0, 500);
+    RoadGraph roadGraph;
+    RoadGraphVertex root = add_vertex(RouteElement{"1", true}, roadGraph);
+    const auto objectsInRange = world.GetObjectsInRange(roadGraph, root, -3, 0, 0, 500).at(root);
     ASSERT_THAT(objectsInRange.size(), Eq(0));
 }
 
@@ -644,8 +661,9 @@ TEST(GetObjectsInRange_IntegrationTests, TwoObjectsInDifferentSections)
     AddAgentToWorld(world, 3, 10.0, 9.0);
     world.SyncGlobalData();
 
-    Route route{"1"};
-    const auto objectsInRange = world.GetObjectsInRange(route, "1", -3, 0, 0, 500);
+    RoadGraph roadGraph;
+    RoadGraphVertex root = add_vertex(RouteElement{"1", true}, roadGraph);
+    const auto objectsInRange = world.GetObjectsInRange(roadGraph, root, -3, 0, 0, 500).at(root);
     const auto agent1 = world.GetAgent(1);
     const auto agent2 = world.GetAgent(2);
     ASSERT_THAT(objectsInRange.size(), Eq(2));
@@ -664,8 +682,9 @@ TEST(GetObjectsInRange_IntegrationTests, OneObjectOnSectionBorder)
     AddAgentToWorld(world, 2, 300.0, 9.0);
     world.SyncGlobalData();
 
-    Route route{"1"};
-    const auto objectsInRange = world.GetObjectsInRange(route, "1", -3, 0, 0, 500);
+    RoadGraph roadGraph;
+    RoadGraphVertex root = add_vertex(RouteElement{"1", true}, roadGraph);
+    const auto objectsInRange = world.GetObjectsInRange(roadGraph, root, -3, 0, 0, 500).at(root);
     const auto agent1 = world.GetAgent(1);
     ASSERT_THAT(objectsInRange.size(), Eq(1));
     ASSERT_THAT(objectsInRange.at(0), Eq(agent1));
@@ -683,8 +702,13 @@ TEST(GetObjectsInRange_IntegrationTests, MultipleRoads)
     AddAgentToWorld(world, 3, 510.0, -1.0);
     world.SyncGlobalData();
 
-    Route route{{{"1", true}, {"2", false}, {"3", true}}, {}, 1};
-    const auto objectsInRange = world.GetObjectsInRange(route, "1", -2, 500, 0, 1500);
+    RoadGraph roadGraph;
+    RoadGraphVertex node1 = add_vertex(RouteElement{"1", true}, roadGraph);
+    RoadGraphVertex node2 = add_vertex(RouteElement{"2", false}, roadGraph);
+    RoadGraphVertex node3 = add_vertex(RouteElement{"3", true}, roadGraph);
+    add_edge(node1, node2, roadGraph);
+    add_edge(node2, node3, roadGraph);
+    const auto objectsInRange = world.GetObjectsInRange(roadGraph, node1, -2, 500, 0, 1500).at(node3);
     const auto agent1 = world.GetAgent(1);
     const auto agent2 = world.GetAgent(2);
     ASSERT_THAT(objectsInRange.size(), Eq(2));
@@ -699,25 +723,21 @@ TEST(Locator_IntegrationTests, AgentOnStraightRoad_CalculatesCorrectLocateResult
 
     auto& world = tsf.world;
     const auto agent1 = AddAgentToWorld(world, 1, 399.0, 1.0, 2.0, 5.0);
-    agent1->UpdateRoute(Route{ {{"1", true}, {"2", false}, {"3", true}}, {}, 1});
     const auto agent2 = AddAgentToWorld(world, 2, 2500.0, 2.0, 2.0, 5.0);
-    agent2->UpdateRoute(Route{ {{"1", true}, {"2", false}, {"3", true}}, {}, 2});
     world.SyncGlobalData();
 
-    ASSERT_THAT(agent1->GetRoadId(MeasurementPoint::Front), Eq("1"));
-    ASSERT_THAT(agent1->GetMainLaneId(MeasurementPoint::Front), Eq(-2));
+    ASSERT_THAT(agent1->GetRoads(MeasurementPoint::Front), ElementsAre("1"));
+    ASSERT_THAT(agent1->GetObjectPosition().mainLocatePoint.at("1").laneId, Eq(-2));
     ASSERT_THAT(agent1->GetDistanceToStartOfRoad(MeasurementPoint::Front, "1"), DoubleNear(401.5, 0.01));
     ASSERT_THAT(agent1->GetDistanceToStartOfRoad(MeasurementPoint::Rear, "1"), DoubleNear(396.5, 0.01));
-    ASSERT_THAT(agent1->IsCrossingLanes(), Eq(true));
-    ASSERT_THAT(agent1->GetLaneRemainder(Side::Left), DoubleNear(2.5, 0.01));
-    ASSERT_THAT(agent1->GetLaneRemainder(Side::Right), DoubleNear(4.5, 0.01));
-    ASSERT_THAT(agent2->GetRoadId(MeasurementPoint::Front), Eq("2"));
-    ASSERT_THAT(agent2->GetMainLaneId(MeasurementPoint::Front), Eq(2));
+    ASSERT_THAT(agent1->GetLaneRemainder("1", Side::Left), DoubleNear(2.5, 0.01));
+    ASSERT_THAT(agent1->GetLaneRemainder("1", Side::Right), DoubleNear(4.5, 0.01));
+    ASSERT_THAT(agent2->GetRoads(MeasurementPoint::Front), ElementsAre("2"));
+    ASSERT_THAT(agent2->GetObjectPosition().mainLocatePoint.at("2").laneId, Eq(2));
     ASSERT_THAT(agent2->GetDistanceToStartOfRoad(MeasurementPoint::Front, "2"), DoubleNear(502.5, 0.01));
     ASSERT_THAT(agent2->GetDistanceToStartOfRoad(MeasurementPoint::Rear, "2"), DoubleNear(497.5, 0.01));
-    ASSERT_THAT(agent2->IsCrossingLanes(), Eq(false));
-    ASSERT_THAT(agent2->GetLaneRemainder(Side::Left), DoubleNear(0.5, 0.01));
-    ASSERT_THAT(agent2->GetLaneRemainder(Side::Right), DoubleNear(1.5, 0.01));
+    ASSERT_THAT(agent2->GetLaneRemainder("2", Side::Left), DoubleNear(0.5, 0.01));
+    ASSERT_THAT(agent2->GetLaneRemainder("2", Side::Right), DoubleNear(1.5, 0.01));
 }
 
 TEST(Locator_IntegrationTests, AgentOnJunction_CalculatesCorrectLocateResult)
@@ -747,8 +767,9 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectLaneMarkings)
 
     auto& world = tsf.world;
 
-    Route route{"1"};
-    auto laneMarkings = world.GetLaneMarkings(route, "1", -1, 0.0, 99.0, Side::Left);
+    RoadGraph roadGraph;
+    RoadGraphVertex root = add_vertex(RouteElement{"1", true}, roadGraph);
+    auto laneMarkings = world.GetLaneMarkings(roadGraph, root, -1, 0.0, 99.0, Side::Left).at(root);
     ASSERT_THAT(laneMarkings.size(), Eq(5));
     ASSERT_THAT(laneMarkings.at(0).relativeStartDistance, DoubleEq(0.0));
     ASSERT_THAT(laneMarkings.at(0).type, Eq(LaneMarking::Type::Solid));
@@ -764,7 +785,7 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectLaneMarkings)
     ASSERT_THAT(laneMarkings.at(2).color, Eq(LaneMarking::Color::White));
     ASSERT_THAT(laneMarkings.at(3).relativeStartDistance, DoubleEq(30.0));
 
-    laneMarkings = world.GetLaneMarkings(route, "1", -1, 0.0, 99.0, Side::Right);
+    laneMarkings = world.GetLaneMarkings(roadGraph, root, -1, 0.0, 99.0, Side::Right).at(root);
     ASSERT_THAT(laneMarkings.size(), Eq(5));
     ASSERT_THAT(laneMarkings.at(0).relativeStartDistance, DoubleEq(0.0));
     ASSERT_THAT(laneMarkings.at(0).type, Eq(LaneMarking::Type::Broken));
@@ -780,7 +801,7 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectLaneMarkings)
     ASSERT_THAT(laneMarkings.at(2).color, Eq(LaneMarking::Color::Blue));
     ASSERT_THAT(laneMarkings.at(3).relativeStartDistance, DoubleEq(30.0));
 
-    laneMarkings = world.GetLaneMarkings(route, "1", -2, 11.0, 88.0, Side::Left);
+    laneMarkings = world.GetLaneMarkings(roadGraph, root, -2, 11.0, 88.0, Side::Left).at(root);
     ASSERT_THAT(laneMarkings.size(), Eq(4));
     ASSERT_THAT(laneMarkings.at(0).relativeStartDistance, DoubleEq(-1.0));
     ASSERT_THAT(laneMarkings.at(0).type, Eq(LaneMarking::Type::Broken_Solid));
@@ -792,7 +813,7 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectLaneMarkings)
     ASSERT_THAT(laneMarkings.at(1).color, Eq(LaneMarking::Color::Blue));
     ASSERT_THAT(laneMarkings.at(2).relativeStartDistance, DoubleEq(19.0));
 
-    laneMarkings = world.GetLaneMarkings(route, "1", -2, 11.0, 88.0, Side::Right);
+    laneMarkings = world.GetLaneMarkings(roadGraph, root, -2, 11.0, 88.0, Side::Right).at(root);
     ASSERT_THAT(laneMarkings.size(), Eq(4));
     ASSERT_THAT(laneMarkings.at(0).relativeStartDistance, DoubleEq(-1.0));
     ASSERT_THAT(laneMarkings.at(0).type, Eq(LaneMarking::Type::Broken_Broken));
@@ -812,8 +833,9 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectTrafficSigns)
 
     auto& world = tsf.world;
 
-    Route route{"1"};
-    auto trafficSigns = world.GetTrafficSignsInRange(route, "1", -1, 5, 90);
+    RoadGraph roadGraph;
+    RoadGraphVertex root = add_vertex(RouteElement{"1", true}, roadGraph);
+    auto trafficSigns = world.GetTrafficSignsInRange(roadGraph, root, -1, 5, 90).at(root);
     std::sort(trafficSigns.begin(), trafficSigns.end(),
               [](CommonTrafficSign::Entity first, CommonTrafficSign::Entity second){return first.relativeDistance < second.relativeDistance;});
     ASSERT_THAT(trafficSigns.size(), Eq(3));
@@ -832,7 +854,7 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectTrafficSigns)
     ASSERT_THAT(trafficSigns.at(2).value, Eq(2));
     ASSERT_THAT(trafficSigns.at(2).supplementarySigns.size(), Eq(0));
 
-    trafficSigns = world.GetTrafficSignsInRange(route, "1", -2, 11, 90);
+    trafficSigns = world.GetTrafficSignsInRange(roadGraph, root, -2, 11, 90).at(root);
     std::sort(trafficSigns.begin(), trafficSigns.end(),
               [](CommonTrafficSign::Entity first, CommonTrafficSign::Entity second){return first.relativeDistance < second.relativeDistance;});
     ASSERT_THAT(trafficSigns.size(), Eq(5));
@@ -860,6 +882,77 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectTrafficSigns)
     ASSERT_THAT(trafficSigns.at(4).supplementarySigns.front().type, Eq(CommonTrafficSign::Type::DistanceIndication));
     ASSERT_THAT(trafficSigns.at(4).supplementarySigns.front().value, DoubleEq(200.0));
     ASSERT_THAT(trafficSigns.at(4).supplementarySigns.front().unit, Eq(CommonTrafficSign::Unit::Meter));
+
+    auto roadMarkings = world.GetRoadMarkingsInRange(roadGraph, root, -2, 11, 90).at(root);
+    ASSERT_THAT(roadMarkings.size(), Eq(1));
+    ASSERT_THAT(roadMarkings.at(0).relativeDistance, DoubleEq(30.0));
+    ASSERT_THAT(roadMarkings.at(0).type, Eq(CommonTrafficSign::Type::Stop));
+}
+
+TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectTrafficSignGeometriess)
+{
+    TESTSCENERY_FACTORY tsf;
+    ASSERT_THAT(tsf.instantiate("IntegrationTestScenery.xodr"), IsTrue());
+
+    auto& world = tsf.world;
+
+    OWL::Interfaces::WorldData* worldData = static_cast<OWL::Interfaces::WorldData*>(world.GetWorldData());
+    auto& groundtruth = worldData->GetOsiGroundTruth();
+
+    ASSERT_THAT(groundtruth.traffic_sign_size(), Eq(5));
+    auto& trafficSign0 = groundtruth.traffic_sign(0);
+    ASSERT_THAT(trafficSign0.main_sign().base().position().x(), DoubleEq(15));
+    ASSERT_THAT(trafficSign0.main_sign().base().position().y(), DoubleEq(-0.5));
+    ASSERT_THAT(trafficSign0.main_sign().base().position().z(), DoubleEq(1.7));
+    ASSERT_THAT(trafficSign0.main_sign().base().dimension().width(), DoubleEq(0.4));
+    ASSERT_THAT(trafficSign0.main_sign().base().dimension().height(), DoubleEq(0.4));
+    ASSERT_THAT(trafficSign0.main_sign().base().orientation().yaw(), DoubleEq(0.0));
+
+    auto& trafficSign1 = groundtruth.traffic_sign(1);
+    ASSERT_THAT(trafficSign1.main_sign().base().position().x(), DoubleEq(25));
+    ASSERT_THAT(trafficSign1.main_sign().base().position().y(), DoubleEq(-0.5));
+    ASSERT_THAT(trafficSign1.main_sign().base().position().z(), DoubleEq(1.7));
+    ASSERT_THAT(trafficSign1.main_sign().base().dimension().width(), DoubleEq(0.4));
+    ASSERT_THAT(trafficSign1.main_sign().base().dimension().height(), DoubleEq(0.4));
+    ASSERT_THAT(trafficSign1.main_sign().base().orientation().yaw(), DoubleNear(0.1, 1e-3));
+
+    auto& trafficSign2 = groundtruth.traffic_sign(2);
+    ASSERT_THAT(trafficSign2.main_sign().base().position().x(), DoubleEq(35));
+    ASSERT_THAT(trafficSign2.main_sign().base().position().y(), DoubleEq(-0.5));
+    ASSERT_THAT(trafficSign2.main_sign().base().position().z(), DoubleEq(1.7));
+    ASSERT_THAT(trafficSign2.main_sign().base().dimension().width(), DoubleEq(0.4));
+    ASSERT_THAT(trafficSign2.main_sign().base().dimension().height(), DoubleEq(0.4));
+    ASSERT_THAT(trafficSign2.main_sign().base().orientation().yaw(), DoubleEq(-M_PI + 0.1));
+
+    auto& trafficSign3 = groundtruth.traffic_sign(3);
+    ASSERT_THAT(trafficSign3.main_sign().base().position().x(), DoubleEq(36));
+    ASSERT_THAT(trafficSign3.main_sign().base().position().y(), DoubleEq(-0.5));
+    ASSERT_THAT(trafficSign3.main_sign().base().position().z(), DoubleEq(2.0));
+    ASSERT_THAT(trafficSign3.main_sign().base().dimension().width(), DoubleEq(0.5));
+    ASSERT_THAT(trafficSign3.main_sign().base().dimension().height(), DoubleEq(1.0));
+    ASSERT_THAT(trafficSign3.main_sign().base().orientation().yaw(), DoubleEq(0.0));
+
+    auto& trafficSign4 = groundtruth.traffic_sign(4);
+    ASSERT_THAT(trafficSign4.main_sign().base().position().x(), DoubleEq(40));
+    ASSERT_THAT(trafficSign4.main_sign().base().position().y(), DoubleEq(-0.5));
+    ASSERT_THAT(trafficSign4.main_sign().base().position().z(), DoubleEq(1.7));
+    ASSERT_THAT(trafficSign4.main_sign().base().dimension().width(), DoubleEq(0.4));
+    ASSERT_THAT(trafficSign4.main_sign().base().dimension().height(), DoubleEq(0.4));
+    ASSERT_THAT(trafficSign4.main_sign().base().orientation().yaw(), DoubleEq(0.0));
+    ASSERT_THAT(trafficSign4.supplementary_sign(0).base().position().x(), DoubleEq(40));
+    ASSERT_THAT(trafficSign4.supplementary_sign(0).base().position().y(), DoubleEq(-0.5));
+    ASSERT_THAT(trafficSign4.supplementary_sign(0).base().position().z(), DoubleEq(1.3));
+    ASSERT_THAT(trafficSign4.supplementary_sign(0).base().dimension().width(), DoubleEq(0.4));
+    ASSERT_THAT(trafficSign4.supplementary_sign(0).base().dimension().height(), DoubleEq(0.2));
+    ASSERT_THAT(trafficSign4.supplementary_sign(0).base().orientation().yaw(), DoubleEq(0.0));
+
+    auto& roadMarking = groundtruth.road_marking(0);
+    ASSERT_THAT(roadMarking.base().position().x(), DoubleEq(41));
+    ASSERT_THAT(roadMarking.base().position().y(), DoubleEq(0.5));
+    ASSERT_THAT(roadMarking.base().position().z(), DoubleEq(0.0));
+    ASSERT_THAT(roadMarking.base().dimension().width(), DoubleEq(4.0));
+    ASSERT_THAT(roadMarking.base().dimension().height(), DoubleEq(0.0));
+    ASSERT_THAT(roadMarking.base().orientation().yaw(), DoubleEq(0.0));
 }
 
 TEST(SceneryImporter_IntegrationTests, TJunction_ImportWithCorrectConnectionsAndPriorities)
@@ -924,9 +1017,11 @@ TEST(GetObstruction_IntegrationTests, AgentsOnStraightRoad)
     auto agent1 = AddAgentToWorld(world, 1, 100.0, 2.5, 2.0);
     world.SyncGlobalData();
 
-    Route route{"1"};
-    agent0->SetRoute(route);
-    const auto obstruction = agent0->GetObstruction(*agent1);
+    auto& egoAgent = agent0->GetEgoAgent();
+    RoadGraph roadGraph;
+    auto root = add_vertex(RouteElement{"1", true}, roadGraph);
+    egoAgent.SetRoadGraph(std::move(roadGraph), root, root);
+    const auto obstruction = egoAgent.GetObstruction(agent1);
     EXPECT_THAT(obstruction.left, DoubleEq(1.5));
     EXPECT_THAT(obstruction.right, DoubleEq(-0.5));
 }
@@ -941,9 +1036,15 @@ TEST(GetObstruction_IntegrationTests, AgentBehindJunction)
     auto agent1 = AddAgentToWorld(world, 1, 203.5, -10.0, 1.0, 3.0);
     world.SyncGlobalData();
 
-    Route route{{{"R1", true}, {"R1-2", true}, {"R2", false}}, {}, 0};
-    agent0->SetRoute(route);
-    const auto obstruction = agent0->GetObstruction(*agent1);
+    auto& egoAgent = agent0->GetEgoAgent();
+    RoadGraph roadGraph;
+    auto node1 = add_vertex(RouteElement{"R1", true}, roadGraph);
+    auto node2 = add_vertex(RouteElement{"R1-2", true}, roadGraph);
+    auto node3 = add_vertex(RouteElement{"R2", false}, roadGraph);
+    add_edge(node1, node2, roadGraph);
+    add_edge(node2, node3, roadGraph);
+    egoAgent.SetRoadGraph(std::move(roadGraph), node1, node3);
+    const auto obstruction = egoAgent.GetObstruction(agent1);
     EXPECT_THAT(obstruction.left, DoubleNear(2.0, 1e-3));
     EXPECT_THAT(obstruction.right, DoubleNear(-1.0, 1e-3));
 }

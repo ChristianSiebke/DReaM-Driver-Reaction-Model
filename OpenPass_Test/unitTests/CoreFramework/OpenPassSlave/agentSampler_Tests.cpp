@@ -15,13 +15,14 @@
 #include "fakeSlaveConfig.h"
 #include "fakeProfiles.h"
 #include "fakeConfigurationContainer.h"
-#include "fakeSampler.h"
+#include "fakeStochastics.h"
 #include "fakeVehicleModels.h"
 #include "fakeParameter.h"
 #include "fakeScenario.h"
 #include "fakeAgentType.h"
 #include "fakeSystemConfig.h"
 
+#include "profiles.h"
 #include "dynamicProfileSampler.h"
 #include "dynamicAgentTypeGenerator.h"
 #include "dynamicParametersSampler.h"
@@ -41,13 +42,13 @@ namespace op = openpass::parameter;
 
 TEST(DynamicProfileSampler, SampleDriverProfile)
 {
-    NiceMock<FakeSampler> fakeSampler;
+    NiceMock<FakeStochastics> fakeStochastics;
     NiceMock<FakeProfiles> fakeProfiles;
-    std::unordered_map<std::string, double> driverProbabilities {{"SomeDriver", 1.0}};
+    StringProbabilities driverProbabilities {{"SomeDriver", 1.0}};
     ON_CALL(fakeProfiles, GetDriverProbabilities("SomeAgentProfile")).WillByDefault(ReturnRef(driverProbabilities));
-    ON_CALL(fakeSampler, SampleStringProbability(driverProbabilities)).WillByDefault(Return("SomeDriver"));
+    ON_CALL(fakeStochastics, GetUniformDistributed(_,_)).WillByDefault(Return(0));
 
-    SampledProfiles sampledProfiles = SampledProfiles::make("SomeAgentProfile", fakeSampler, &fakeProfiles)
+    SampledProfiles sampledProfiles = SampledProfiles::make("SomeAgentProfile", fakeStochastics, &fakeProfiles)
             .SampleDriverProfile();
 
     ASSERT_THAT(sampledProfiles.driverProfileName, "SomeDriver");
@@ -55,13 +56,13 @@ TEST(DynamicProfileSampler, SampleDriverProfile)
 
 TEST(DynamicProfileSampler, SampleVehicleProfile)
 {
-    NiceMock<FakeSampler> fakeSampler;
+    NiceMock<FakeStochastics> fakeStochastics;
     NiceMock<FakeProfiles> fakeProfiles;
-    std::unordered_map<std::string, double> vehicleProbabilities {{"SomeVehicle", 1.0}};
+    StringProbabilities vehicleProbabilities {{"SomeVehicle", 1.0}};
     ON_CALL(fakeProfiles, GetVehicleProfileProbabilities("SomeAgentProfile")).WillByDefault(ReturnRef(vehicleProbabilities));
-    ON_CALL(fakeSampler, SampleStringProbability(vehicleProbabilities)).WillByDefault(Return("SomeVehicle"));
+    ON_CALL(fakeStochastics, GetUniformDistributed(_,_)).WillByDefault(Return(0));
 
-    SampledProfiles sampledProfiles = SampledProfiles::make("SomeAgentProfile", fakeSampler, &fakeProfiles)
+    SampledProfiles sampledProfiles = SampledProfiles::make("SomeAgentProfile", fakeStochastics, &fakeProfiles)
             .SampleVehicleProfile();
 
     ASSERT_THAT(sampledProfiles.vehicleProfileName, "SomeVehicle");
@@ -69,11 +70,11 @@ TEST(DynamicProfileSampler, SampleVehicleProfile)
 
 TEST(DynamicProfileSampler, SampleVehicleComponentProfiles)
 {
-    NiceMock<FakeSampler> fakeSampler;
+    NiceMock<FakeStochastics> fakeStochastics;
     NiceMock<FakeProfiles> fakeProfiles;
 
     VehicleComponent someComponent;
-    std::unordered_map<std::string, double> probabilities = {{"SomeProfile", 1.0}};
+    StringProbabilities probabilities = {{"SomeProfile", 1.0}};
     someComponent.type = "SomeComponent";
     someComponent.componentProfiles = probabilities;
 
@@ -81,13 +82,12 @@ TEST(DynamicProfileSampler, SampleVehicleComponentProfiles)
     someVehicleProfile.vehicleComponents = {{someComponent}};
     std::unordered_map<std::string, VehicleProfile> vehicleProfiles {{"SomeVehicle", someVehicleProfile}};
     ON_CALL(fakeProfiles, GetVehicleProfiles()).WillByDefault(ReturnRef(vehicleProfiles));
-    ON_CALL(fakeSampler, SampleStringProbability(probabilities)).WillByDefault(Return("SomeProfile"));
+    ON_CALL(fakeStochastics, GetUniformDistributed(_,_)).WillByDefault(Return(0));
 
-    std::unordered_map<std::string, double> vehicleProbabilities {{"SomeVehicle", 1.0}};
+    StringProbabilities vehicleProbabilities {{"SomeVehicle", 1.0}};
     ON_CALL(fakeProfiles, GetVehicleProfileProbabilities("SomeAgentProfile")).WillByDefault(ReturnRef(vehicleProbabilities));
-    ON_CALL(fakeSampler, SampleStringProbability(vehicleProbabilities)).WillByDefault(Return("SomeVehicle"));
 
-    SampledProfiles sampledProfiles = SampledProfiles::make("SomeAgentProfile", fakeSampler, &fakeProfiles)
+    SampledProfiles sampledProfiles = SampledProfiles::make("SomeAgentProfile", fakeStochastics, &fakeProfiles)
             .SampleVehicleProfile()
             .SampleVehicleComponentProfiles();
 
@@ -96,8 +96,8 @@ TEST(DynamicProfileSampler, SampleVehicleComponentProfiles)
 
 TEST(DynamicAgentTypeGenerator, GatherBasicComponents)
 {
-    NiceMock<FakeSampler> fakeSampler;
-    SampledProfiles sampledProfiles = SampledProfiles::make("", fakeSampler, nullptr);
+    NiceMock<FakeStochastics> fakeStochastics;
+    SampledProfiles sampledProfiles = SampledProfiles::make("", fakeStochastics, nullptr);
     auto systemConfigBlueprint = std::make_shared<NiceMock<FakeSystemConfig>>();
     NiceMock<FakeProfiles> profiles;
     NiceMock<FakeVehicleModels> vehicleModels;
@@ -129,8 +129,8 @@ TEST(DynamicAgentTypeGenerator, GatherBasicComponents)
 
 TEST(DynamicAgentTypeGenerator, GatherDriverComponents)
 {
-    NiceMock<FakeSampler> fakeSampler;
-    SampledProfiles sampledProfiles = SampledProfiles::make("", fakeSampler, nullptr);
+    NiceMock<FakeStochastics> fakeStochastics;
+    SampledProfiles sampledProfiles = SampledProfiles::make("", fakeStochastics, nullptr);
     auto systemConfigBlueprint = std::make_shared<NiceMock<FakeSystemConfig>>();
     NiceMock<FakeProfiles> profiles;
     NiceMock<FakeVehicleModels> vehicleModels;
@@ -139,7 +139,7 @@ TEST(DynamicAgentTypeGenerator, GatherDriverComponents)
 
     sampledProfiles.driverProfileName = "SomeDriverProfile";
 
-    op::Container driverProfile{
+    op::ParameterSetLevel1 driverProfile{
         {"Type"s, "SomeDriverModule"s},
         {"ParametersModule"s, "SomeParameters"s},
         {"SensorDriverModule"s, "SomeSensorDriver"s},
@@ -147,8 +147,7 @@ TEST(DynamicAgentTypeGenerator, GatherDriverComponents)
         {"AlgorithmLongitudinalModule"s, "SomeAlgorithmLongitudinal"s}
     };
 
-    DriverProfiles driverProfiles{{"SomeDriverProfile", driverProfile}};
-    ON_CALL(profiles, GetDriverProfiles()).WillByDefault(ReturnRef(driverProfiles));
+    ON_CALL(profiles, GetProfile("Driver", "SomeDriverProfile")).WillByDefault(Return(driverProfile));
 
     auto fakeAgentType = std::make_shared<NiceMock<SimulationSlave::FakeAgentType>>();
     std::map<int, std::shared_ptr< SimulationSlave::AgentTypeInterface>> systems = {{0, fakeAgentType}};
@@ -185,8 +184,8 @@ TEST(DynamicAgentTypeGenerator, GatherDriverComponents)
 
 TEST(DynamicAgentTypeGenerator, GatherVehicleComponents)
 {
-    NiceMock<FakeSampler> fakeSampler;
-    SampledProfiles sampledProfiles = SampledProfiles::make("", fakeSampler, nullptr);
+    NiceMock<FakeStochastics> fakeStochastics;
+    SampledProfiles sampledProfiles = SampledProfiles::make("", fakeStochastics, nullptr);
     auto systemConfigBlueprint = std::make_shared<NiceMock<FakeSystemConfig>>();
     NiceMock<FakeProfiles> profiles;
     NiceMock<FakeVehicleModels> vehicleModels;
@@ -196,26 +195,15 @@ TEST(DynamicAgentTypeGenerator, GatherVehicleComponents)
     sampledProfiles.vehicleProfileName = "SomeVehicle";
     sampledProfiles.vehicleComponentProfileNames = {{"VehicleComponentA", "ProfileA"}, {"VehicleComponentB", "ProfileB"}};
 
-    op::Container parametersAA {{"aa", 0}};
-    op::Container parametersAB {{"ab", 0}};
-    op::Container parametersBA {{"ba", 0}};
-    op::Container parametersBB {{"bb", 0}};
+    op::ParameterSetLevel1 parametersAA {{"aa", 0}};
+    op::ParameterSetLevel1 parametersAB {{"ab", 0}};
+    op::ParameterSetLevel1 parametersBA {{"ba", 0}};
+    op::ParameterSetLevel1 parametersBB {{"bb", 0}};
 
-    VehicleComponentProfiles profilesComponentA {
-        {"ProfileA", parametersAA},
-        {"ProfileB", parametersAB}
-    };
-    VehicleComponentProfiles profilesComponentB {
-        {"ProfileA", parametersBA},
-        {"ProfileB", parametersBB}
-    };
-
-    std::unordered_map<std::string, VehicleComponentProfiles> vehicleComponentProfiles {
-        {"VehicleComponentA", profilesComponentA},
-        {"VehicleComponentB", profilesComponentB}
-    };
-
-    ON_CALL(profiles, GetVehicleComponentProfiles()).WillByDefault(ReturnRef(vehicleComponentProfiles));
+    ON_CALL(profiles, GetProfile("VehicleComponentA", "ProfileA")).WillByDefault(Return(parametersAA));
+    ON_CALL(profiles, GetProfile("VehicleComponentA", "ProfileB")).WillByDefault(Return(parametersAB));
+    ON_CALL(profiles, GetProfile("VehicleComponentB", "ProfileA")).WillByDefault(Return(parametersBA));
+    ON_CALL(profiles, GetProfile("VehicleComponentB", "ProfileB")).WillByDefault(Return(parametersBB));
 
     VehicleComponent vehicleComponentA;
     vehicleComponentA.type = "VehicleComponentA";
@@ -262,8 +250,8 @@ TEST(DynamicAgentTypeGenerator, GatherVehicleComponents)
 
 TEST(DynamicAgentTypeGenerator, GatherSensors)
 {
-    NiceMock<FakeSampler> fakeSampler;
-    SampledProfiles sampledProfiles = SampledProfiles::make("", fakeSampler, nullptr);
+    NiceMock<FakeStochastics> fakeStochastics;
+    SampledProfiles sampledProfiles = SampledProfiles::make("", fakeStochastics, nullptr);
     auto systemConfigBlueprint = std::make_shared<NiceMock<FakeSystemConfig>>();
     NiceMock<FakeProfiles> profiles;
     NiceMock<FakeVehicleModels> vehicleModels;
@@ -281,8 +269,10 @@ TEST(DynamicAgentTypeGenerator, GatherSensors)
     sensorProfileB.name = "ProfileB";
     sensorProfileB.type = "SensorTypeB";
 
-    openpass::sensors::Profiles sensorProfiles {{sensorProfileA, sensorProfileB}};
-    ON_CALL(profiles, GetSensorProfiles()).WillByDefault(ReturnRef(sensorProfiles));
+    openpass::parameter::ParameterSetLevel1 parameter;
+
+    ON_CALL(profiles, GetProfile("SensorTypeA", "ProfileA")).WillByDefault(Return(parameter));
+    ON_CALL(profiles, GetProfile("SensorTypeB", "ProfileB")).WillByDefault(Return(parameter));
 
     VehicleProfile vehicleProfile;
 
@@ -345,8 +335,8 @@ TEST(DynamicAgentTypeGenerator, GatherSensors)
 
 TEST(DynamicAgentTypeGenerator, SetVehicleModelParameters)
 {
-    NiceMock<FakeSampler> fakeSampler;
-    SampledProfiles sampledProfiles = SampledProfiles::make("", fakeSampler, nullptr);
+    NiceMock<FakeStochastics> fakeStochastics;
+    SampledProfiles sampledProfiles = SampledProfiles::make("", fakeStochastics, nullptr);
     auto systemConfigBlueprint = std::make_shared<NiceMock<FakeSystemConfig>>();
     NiceMock<FakeProfiles> profiles;
     NiceMock<FakeVehicleModels> vehicleModels;
@@ -362,11 +352,12 @@ TEST(DynamicAgentTypeGenerator, SetVehicleModelParameters)
     VehicleModelParameters vehicleModelParameters;
     vehicleModelParameters.length = 5.0;
     vehicleModelParameters.width = 2.0;
-    ON_CALL(vehicleModels, GetVehicleModel("SomeVehicleModel")).WillByDefault(Return(vehicleModelParameters));
+    ON_CALL(vehicleModels, GetVehicleModel("SomeVehicleModel", _)).WillByDefault(Return(vehicleModelParameters));
+    openScenario::Parameters assignedParameters;
 
     AgentBuildInformation agentBuildInformation =
             AgentBuildInformation::make(sampledProfiles, dynamicParameters, systemConfigBlueprint, &profiles, &vehicleModels)
-            .SetVehicleModelParameters();
+            .SetVehicleModelParameters(assignedParameters);
 
     ASSERT_THAT(agentBuildInformation.vehicleModelName, Eq("SomeVehicleModel"));
     ASSERT_THAT(agentBuildInformation.vehicleModelParameters.length, Eq(5.0));
@@ -375,26 +366,28 @@ TEST(DynamicAgentTypeGenerator, SetVehicleModelParameters)
 
 TEST(DynamicParametersSampler, SampleSensorLatencies)
 {
-    NiceMock<FakeSampler> sampler;
-    ON_CALL(sampler, RollForStochasticAttribute(DoubleEq(10.0),_,_,_)).WillByDefault(Return(10.0));
+    NiceMock<FakeStochastics> fakeStochastics;
+    ON_CALL(fakeStochastics, GetNormalDistributed(_,_)).WillByDefault(Return(10));
 
     std::string vehicleProfileName ="SomeVehicle";
     openpass::sensors::Parameter sensorParameter;
     sensorParameter.id = 5;
     sensorParameter.profile.name = "SomeProfile";
     sensorParameter.profile.type = "SomeSensorType";
+
     VehicleProfile vehicleProfile;
     vehicleProfile.sensors = {{sensorParameter}};
-    std::unordered_map<std::string, VehicleProfile> vehicleProfiles{{vehicleProfileName, vehicleProfile}};
 
-    openpass::sensors::Profile sensorProfile;
-    sensorProfile.name = "SomeProfile";
-    sensorProfile.type = "SomeSensorType";
-    sensorProfile.parameter = op::Container{ {"Latency", op::NormalDistribution{10.0, 0.0, 0.0, 0.0}} };
-    openpass::sensors::Profiles sensorProfiles{sensorProfile};
+    Profiles profiles;
+    profiles.GetVehicleProfiles() = {{vehicleProfileName, vehicleProfile}};
 
-    DynamicParameters dynamicParameters = DynamicParameters::make(sampler, vehicleProfileName, vehicleProfiles, sensorProfiles)
-            .SampleSensorLatencies();
+    openpass::parameter::ParameterSetLevel1 parameter{{"Latency", op::NormalDistribution{10.0, 0.0, 5.0, 15.0}}};
+    ProfileGroup profileGroup{{"SomeProfile", parameter}};
+    ProfileGroups profileGroups{{"SomeSensorType", profileGroup}};
+
+    profiles.GetProfileGroups() = profileGroups;
+
+    DynamicParameters dynamicParameters = DynamicParameters::make(fakeStochastics, vehicleProfileName, &profiles).SampleSensorLatencies();
 
     ASSERT_THAT(dynamicParameters.sensorLatencies.at(5), DoubleEq(10.0));
 }

@@ -24,7 +24,7 @@ public:
                                    StochasticsInterface *stochastics,
                                    WorldInterface *world,
                                    const ParameterInterface *parameters,
-                                   const std::map<int, ObservationInterface*> *observations,
+                                   PublisherInterface * const publisher,
                                    AgentInterface *agent,
                                    const CallbackInterface *callbacks);
 

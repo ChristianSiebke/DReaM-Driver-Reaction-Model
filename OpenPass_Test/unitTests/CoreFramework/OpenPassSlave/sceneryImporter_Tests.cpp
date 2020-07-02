@@ -89,10 +89,9 @@ struct SignalInterceptor
 {
     static RoadSignalSpecification signal;
 
-    static RoadSignalInterface* intercept(const RoadSignalSpecification& signal)
+    static void intercept(const RoadSignalSpecification& signal)
     {
         SignalInterceptor::signal = signal;
-        return nullptr;
     }
 };
 
@@ -257,10 +256,9 @@ struct ObjectInterceptor
 {
     static RoadObjectSpecification object;
 
-    static RoadObjectInterface* intercept(const RoadObjectSpecification& object)
+    static void intercept(const RoadObjectSpecification& object)
     {
         ObjectInterceptor::object = object;
-        return nullptr;
     }
 };
 

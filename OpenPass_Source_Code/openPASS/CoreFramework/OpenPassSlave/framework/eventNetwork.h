@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -25,18 +25,18 @@
 #include <map>
 #include <vector>
 
-#include "Common/conditionalEvent.h"
-#include "Common/componentStateChangeEvent.h"
-#include "Common/componentWarningEvent.h"
 #include "Common/collisionEvent.h"
+#include "Common/componentStateChangeEvent.h"
+#include "Common/conditionalEvent.h"
 #include "Common/laneChangeEvent.h"
+#include "Common/opExport.h"
 #include "Common/vehicleComponentEvent.h"
 #include "Interfaces/eventNetworkInterface.h"
 #include "Interfaces/runResultInterface.h"
 #include "Interfaces/worldInterface.h"
+#include "eventNetworkDataPublisher.h"
 
-namespace SimulationSlave
-{
+namespace SimulationSlave {
 using namespace EventDefinitions;
 
 //-----------------------------------------------------------------------------
@@ -44,32 +44,34 @@ using namespace EventDefinitions;
 *
 * 	\ingroup EventNetwork */
 //-----------------------------------------------------------------------------
-class EventNetwork : public EventNetworkInterface
+class CORESLAVEEXPORT EventNetwork final : public EventNetworkInterface
 {
 public:
-    EventNetwork() = default;
-    virtual ~EventNetwork() override = default;
+    EventNetwork(DataStoreWriteInterface *const dataStore) :
+        publisher{dataStore}
+    {
+    }
 
     /*!
     * \brief Returns the activeEvents.
     *
     * @return	     Map of activ events.
     */
-    virtual Events *GetActiveEvents();
+    virtual Events *GetActiveEvents() override;
 
     /*!
     * \brief Returns the archivedEvents.
     *
     * @return	     Map of archived events.
     */
-    virtual Events *GetArchivedEvents();
+    virtual Events *GetArchivedEvents() override;
 
     /*!
     * \brief Returns the active events of a specific category.
     *
     * @return	     List of active events.
     */
-    virtual EventContainer GetActiveEventCategory(const EventCategory eventCategory);
+    virtual EventContainer GetActiveEventCategory(const EventCategory eventCategory) override;
 
     /*!
     * \brief Removes archived events which are older than a certain time stamp.
@@ -79,7 +81,7 @@ public:
     *
     * @param[in]     time       Time stamp.
     */
-    virtual void RemoveOldEvents(int time);
+    virtual void RemoveOldEvents(int time) override;
 
     /*!
     * \brief Inserts an event into the activeEvents.
@@ -89,7 +91,7 @@ public:
     *
     * @param[in]     event    Shared pointer of the event.
     */
-    virtual void InsertEvent(std::shared_ptr<EventInterface> event);
+    virtual void InsertEvent(std::shared_ptr<EventInterface> event) override;
 
     /*!
     * \brief Empties the active events map and stores them as archived events.
@@ -97,12 +99,12 @@ public:
     * \details Empties the current active events and inserts them into the archived events.
     *          This method gets called once per cycle time.
     */
-    virtual void ClearActiveEvents();
+    virtual void ClearActiveEvents() override;
 
     /*!
     * \brief Clears the event maps and resets pointers.
     */
-    virtual void Clear();
+    virtual void Clear() override;
 
     /*!
     * \brief Adds a collision id to the RunResult
@@ -112,7 +114,7 @@ public:
     *
     * @param[in]     agentId     Id of the collision agent
     */
-    virtual void AddCollision(const int agentId);
+    virtual void AddCollision(const int agentId) override;
 
     /*!
     * \brief Initalizes the EventNetwork
@@ -122,15 +124,22 @@ public:
     *
     * @param[in]     runResult    Pointer to the runResult.
     */
-    void Initialize(RunResultInterface *runResult);
+    virtual void Initialize(RunResultInterface *runResult) override;
+
+    /*!
+     * \brief Publishes the event for logging
+     * \param[in] event
+     */
+    void Log(const std::shared_ptr<EventInterface> &event);
 
 private:
+    openpass::publisher::EventNetworkDataPublisher publisher;
+
     Events activeEvents;
     Events archivedEvents;
-    RunResultInterface *runResult {nullptr};
+    RunResultInterface *runResult{nullptr};
 
-    int eventId {0};
+    int eventId{0};
 };
 
 } //namespace SimulationSlave
-

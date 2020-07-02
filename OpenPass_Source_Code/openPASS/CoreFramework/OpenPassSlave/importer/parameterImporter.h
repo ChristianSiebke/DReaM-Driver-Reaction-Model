@@ -16,6 +16,6 @@
 namespace openpass::parameter
 {
 
-Container Import(QDomElement parameterElement);
+ParameterSetLevel1 Import(const QDomElement& parameterElement, const QDomElement& profilesElement);
 
 } //namespace openpass::parameter

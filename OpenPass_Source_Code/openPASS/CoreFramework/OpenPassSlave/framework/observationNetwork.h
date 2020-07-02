@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -18,6 +18,7 @@
 
 #include <map>
 
+#include "Common/opExport.h"
 #include "CoreFramework/CoreShare/log.h"
 #include "Interfaces/worldInterface.h"
 #include "Interfaces/observationNetworkInterface.h"
@@ -29,11 +30,11 @@ class ObservationModule;
 class Stochastics;
 class RunResult;
 
-class ObservationNetwork : public ObservationNetworkInterface
+class CORESLAVEEXPORT ObservationNetwork : public ObservationNetworkInterface
 {
 public:
-    ObservationNetwork(ObservationBinding* binding) :
-        binding(binding)
+    ObservationNetwork(std::map<std::string, ObservationBinding>* bindings) :
+        bindings(bindings)
     {}
     ObservationNetwork(const ObservationNetwork&) = delete;
     ObservationNetwork(ObservationNetwork&&) = delete;
@@ -42,10 +43,12 @@ public:
 
     virtual ~ObservationNetwork() override;
 
-    virtual bool Instantiate(const std::map<int, ObservationInstance>& observationInstances,
+    virtual bool Instantiate(const ObservationInstanceCollection& observationInstances,
                              StochasticsInterface* stochastics,
                              WorldInterface* world,
-                             EventNetworkInterface* eventNetwork) override;
+                             EventNetworkInterface* eventNetwork,
+                             const std::string& sceneryPath,
+                             DataStoreReadInterface* dataStore) override;
     virtual const std::map<int, ObservationModule*>& GetObservationModules() override;
 
     virtual bool InitAll() override;
@@ -56,7 +59,7 @@ public:
     virtual void Clear() override;
 
 private:
-    ObservationBinding* binding;
+    std::map<std::string, ObservationBinding>* bindings;
     std::map<int, ObservationModule*> modules {};
 };
 

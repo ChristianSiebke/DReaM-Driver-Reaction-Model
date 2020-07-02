@@ -31,9 +31,10 @@ class LaneChangeManipulator : public ManipulatorCommonBase
 {
 public:
     LaneChangeManipulator(WorldInterface *world,
-                          std::shared_ptr<openScenario::PrivateLateralLaneChangeAction> action,
                           SimulationSlave::EventNetworkInterface *eventNetwork,
-                          const CallbackInterface *callbacks);
+                          const CallbackInterface *callbacks,
+                          const openScenario::LaneChangeAction action,
+                          const std::string &eventName);
 
     /*!
     * \brief Triggers the functionality of this class
@@ -46,7 +47,7 @@ public:
     virtual void Trigger(int time) override;
 
 private:
-    std::shared_ptr<openScenario::PrivateLateralLaneChangeAction> action;
+    const openScenario::LaneChangeAction action;
 
     EventContainer GetEvents() override;
 };

@@ -22,9 +22,29 @@ enum class ComponentState
     Acting
 };
 
-const std::map<std::string, ComponentState> ComponentStateMapping = { { "Acting",   ComponentState::Acting   },
-                                                                      { "Armed",    ComponentState::Armed    },
-                                                                      { "Disabled", ComponentState::Disabled } };
+namespace openpass::utils {
+
+static constexpr std::array<const char *, 4> ComponentStateMapping{
+    "Undefined",
+    "Disabled",
+    "Armed",
+    "Acting"};
+
+constexpr const char *to_cstr(ComponentState state)
+{
+    return ComponentStateMapping[static_cast<size_t>(state)];
+}
+
+inline std::string to_string(ComponentState state) noexcept
+{
+    return std::string(to_cstr(state));
+}
+
+} // namespace openpass::utils
+
+const std::map<std::string, ComponentState> ComponentStateMapping = {{"Acting", ComponentState::Acting},
+                                                                     {"Armed", ComponentState::Armed},
+                                                                     {"Disabled", ComponentState::Disabled}};
 
 enum class ComponentWarningLevel
 {
@@ -32,8 +52,8 @@ enum class ComponentWarningLevel
     WARNING
 };
 
-const std::map<ComponentWarningLevel, std::string> ComponentWarningLevelMapping = { { ComponentWarningLevel::INFO   , "Info"    },
-                                                                                    { ComponentWarningLevel::WARNING, "Warning" } };
+const std::map<ComponentWarningLevel, std::string> ComponentWarningLevelMapping = {{ComponentWarningLevel::INFO, "Info"},
+                                                                                   {ComponentWarningLevel::WARNING, "Warning"}};
 
 enum class ComponentWarningType
 {
@@ -42,9 +62,9 @@ enum class ComponentWarningType
     HAPTIC
 };
 
-const std::map<ComponentWarningType, std::string> ComponentWarningTypeMapping = { { ComponentWarningType::OPTIC   , "Optic"    },
-                                                                                  { ComponentWarningType::ACOUSTIC, "Acoustic" },
-                                                                                  { ComponentWarningType::HAPTIC  , "Haptic"   } };
+const std::map<ComponentWarningType, std::string> ComponentWarningTypeMapping = {{ComponentWarningType::OPTIC, "Optic"},
+                                                                                 {ComponentWarningType::ACOUSTIC, "Acoustic"},
+                                                                                 {ComponentWarningType::HAPTIC, "Haptic"}};
 
 enum class ComponentWarningIntensity
 {
@@ -53,9 +73,9 @@ enum class ComponentWarningIntensity
     HIGH
 };
 
-const std::map<ComponentWarningIntensity, std::string> ComponentWarningIntensityMapping = { { ComponentWarningIntensity::LOW   , "Low"    },
-                                                                                            { ComponentWarningIntensity::MEDIUM, "Medium" },
-                                                                                            { ComponentWarningIntensity::HIGH  , "High"   } };
+const std::map<ComponentWarningIntensity, std::string> ComponentWarningIntensityMapping = {{ComponentWarningIntensity::LOW, "Low"},
+                                                                                           {ComponentWarningIntensity::MEDIUM, "Medium"},
+                                                                                           {ComponentWarningIntensity::HIGH, "High"}};
 
 struct ComponentWarningInformation
 {
@@ -95,11 +115,14 @@ class ComponentStateSignalInterface : public SignalInterface
 {
 public:
     ComponentStateSignalInterface() = default;
-    ComponentStateSignalInterface(ComponentState componentState):componentState{componentState}{}
-    ComponentStateSignalInterface(const ComponentStateSignalInterface&) = default;
-    ComponentStateSignalInterface(ComponentStateSignalInterface&&) = default;
-    ComponentStateSignalInterface& operator=(const ComponentStateSignalInterface&) = default;
-    ComponentStateSignalInterface& operator=(ComponentStateSignalInterface&&) = default;
+    ComponentStateSignalInterface(ComponentState componentState) :
+        componentState{componentState}
+    {
+    }
+    ComponentStateSignalInterface(const ComponentStateSignalInterface &) = default;
+    ComponentStateSignalInterface(ComponentStateSignalInterface &&) = default;
+    ComponentStateSignalInterface &operator=(const ComponentStateSignalInterface &) = default;
+    ComponentStateSignalInterface &operator=(ComponentStateSignalInterface &&) = default;
     virtual ~ComponentStateSignalInterface() = default;
 
     ComponentState componentState;

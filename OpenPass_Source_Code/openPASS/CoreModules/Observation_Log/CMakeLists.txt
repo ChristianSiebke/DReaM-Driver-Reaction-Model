@@ -9,7 +9,7 @@ add_openpass_target(
     observationCyclics.h
     observationFileHandler.h
     observationLogConstants.h
-    observationLogGlobal.h
+    observation_LogGlobal.h
     observation_log.h
     observation_logImplementation.h
     runStatistic.h

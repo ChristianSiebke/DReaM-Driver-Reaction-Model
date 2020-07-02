@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -14,16 +14,15 @@
 
 #include "RemoveAgentsManipulator.h"
 
-#include <QtGlobal>
-
 RemoveAgentsManipulator::RemoveAgentsManipulator(WorldInterface *world,
-                                                 std::shared_ptr<openScenario::GlobalEntityAction> action,
                                                  SimulationSlave::EventNetworkInterface *eventNetwork,
-                                                 const CallbackInterface *callbacks):
+                                                 const CallbackInterface *callbacks,
+                                                 const openScenario::EntityAction action,
+                                                 const std::string &eventName) :
     ManipulatorCommonBase(world,
-                          action,
                           eventNetwork,
-                          callbacks)
+                          callbacks,
+                          eventName)
 {
     cycleTime = 100;
 }
@@ -36,7 +35,7 @@ void RemoveAgentsManipulator::Trigger(int time)
 
         for(const auto actorId : triggeringEvent->actingAgents)
         {
-            world->GetAgent(actorId)->RemoveAgent();
+            world->QueueAgentRemove(world->GetAgent(actorId));
         }
 
         auto removeAgentsEvent = std::make_shared<ConditionalEvent>(time,
@@ -54,9 +53,7 @@ EventContainer RemoveAgentsManipulator::GetEvents()
 {
     EventContainer manipulatorSpecificEvents{};
 
-    const auto &conditionalEvents = eventNetwork->GetActiveEventCategory(EventDefinitions::EventCategory::Conditional);
-
-    for(const auto &event: conditionalEvents)
+    for (const auto &event : eventNetwork->GetActiveEventCategory(EventDefinitions::EventCategory::OpenSCENARIO))
     {
         const auto conditionalEvent = std::static_pointer_cast<ConditionalEvent>(event);
 

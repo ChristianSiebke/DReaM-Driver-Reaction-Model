@@ -9,11 +9,13 @@ add_openpass_target(
     openScenarioActions.h
     openScenarioActionsGlobal.h
     openScenarioActionsImplementation.h
+    oscActionsCalculation.h
 
   SOURCES
     openScenarioActions.cpp
     openScenarioActionsImplementation.cpp
-
+    oscActionsCalculation.cpp
+    
   LIBRARIES
     Qt5::Core
 )

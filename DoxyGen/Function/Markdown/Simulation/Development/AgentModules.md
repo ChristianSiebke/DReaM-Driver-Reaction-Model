@@ -292,9 +292,19 @@ F<SUB>air</SUB> = rho<SUB>air</SUB> / 2 * A<SUB>front</SUB> * c<SUB>w</SUB> * v<
 
 \section dev_agent_modules_oscActions OpenScenarioActions
 
-Relaying module for LaneChange- or Trajectory-actions as defined by openSCENARIO.
-If a LaneChangeManipulator or TrajectoryManipulator raises such an event for the specified agent, the module forwards it as signal to all interested module of the corresponding agent.
-The modules can than react on the signals content without time delay.
+As defined by openSCENARIO, OpenScenarioActions is the relaying module for: 
+- Trajectory-actions
+- LaneChange-actions 
+- CustomLaneChange-actions 
+- UserDefined-actions.
+  
+If a 
+- TrajectoryManipulator
+- LaneChangeManipulator
+- CustomLaneChangeManipulator or a
+- GazeFollowerManipulator 
+  
+raises such an event for the specified agent, the module forwards it as signal to all interested module of the corresponding agent. The modules can than react on the signals content without time delay.
 
 ---
 

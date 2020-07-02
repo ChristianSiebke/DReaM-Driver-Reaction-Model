@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -18,6 +18,7 @@
 
 #include <memory>
 
+#include "Common/opExport.h"
 #include "CoreFramework/CoreShare/callbacks.h"
 #include "Interfaces/stochasticsInterface.h"
 
@@ -29,7 +30,7 @@ namespace SimulationSlave
 class StochasticsLibrary;
 class FrameworkConfig;
 
-class StochasticsBinding
+class CORESLAVEEXPORT StochasticsBinding
 {
 public:
     StochasticsBinding(CallbackInterface *callbacks);

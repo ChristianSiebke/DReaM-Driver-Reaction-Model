@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -14,8 +14,9 @@
 #include <QFile>
 #include "AgentAdapter.h"
 #include "AgentNetwork.h"
+#include "WorldImplementation.h"
 
-AgentNetwork::AgentNetwork(WorldInterface* world, const CallbackInterface* callbacks) :
+AgentNetwork::AgentNetwork(WorldImplementation* world, const CallbackInterface* callbacks) :
     world(world),
     callbacks(callbacks)
 {}
@@ -30,7 +31,7 @@ void AgentNetwork::Clear()
     updateQueue.clear();
     removeQueue.clear();
 
-    for (const std::pair<const int, const AgentInterface*>& item : agents)
+    for (const std::pair<const int, AgentInterface*>& item : agents)
     {
         delete item.second;
     }
@@ -43,6 +44,7 @@ void AgentNetwork::Clear()
     }
 
     removedAgents.clear();
+    removedAgentsPrevious.clear();
 }
 
 bool AgentNetwork::AddAgent(int id, AgentInterface* agent)
@@ -76,6 +78,13 @@ const std::list<const AgentInterface*>& AgentNetwork::GetRemovedAgents() const
     return removedAgents;
 }
 
+const std::list<const AgentInterface*> AgentNetwork::GetRemovedAgentsInPreviousTimestep()
+{
+    auto agents = std::move(removedAgentsPrevious);
+    removedAgentsPrevious.clear();
+    return agents;
+}
+
 void AgentNetwork::QueueAgentUpdate(std::function<void()> func)
 {
     updateQueue.push_back(func);
@@ -84,6 +93,58 @@ void AgentNetwork::QueueAgentUpdate(std::function<void()> func)
 void AgentNetwork::QueueAgentRemove(const AgentInterface* agent)
 {
     removeQueue.push_back(agent);
+}
+
+void AgentNetwork::RemoveAgent(const AgentInterface* agent)
+{
+
+    if (1 != agents.erase(agent->GetId()))
+    {
+        LOG(CbkLogLevel::Warning, "trying to remove non-existent agent");
+    }
+
+    removedAgents.push_back(agent);
+    removedAgentsPrevious.push_back(agent);
+    agent->Unregister();
+}
+
+void AgentNetwork::PublishGlobalData(Publisher publish)
+{
+    for (const auto& [_, agent] : agents)
+    {
+        const openpass::type::EntityId agentId = agent->GetId();
+
+        publish(agentId, "XPosition", agent->GetPositionX());
+        publish(agentId, "YPosition", agent->GetPositionY());
+        publish(agentId, "VelocityEgo", agent->GetVelocity());
+        publish(agentId, "AccelerationEgo", agent->GetAcceleration());
+        publish(agentId, "YawAngle", agent->GetYaw());
+        publish(agentId, "YawRate", agent->GetYawRate());
+        publish(agentId, "SteeringAngle", agent->GetSteeringWheelAngle());
+        publish(agentId, "TotalDistanceTraveled", agent->GetDistanceTraveled());
+
+        const auto& egoAgent = agent->GetEgoAgent();
+        if (egoAgent.HasValidRoute())
+        {
+            const auto frontAgents = egoAgent.GetAgentsInRange(0, std::numeric_limits<double>::max(), 0);
+
+            publish(agentId, "PositionRoute", egoAgent.GetMainLocatePosition().roadPosition.s);
+            publish(agentId, "TCoordinate", egoAgent.GetPositionLateral());
+            publish(agentId, "Lane", egoAgent.GetMainLocatePosition().laneId);
+            publish(agentId, "Road", egoAgent.GetRoadId());
+            publish(agentId, "SecondaryLanes", agent->GetObjectPosition().touchedRoads.at(egoAgent.GetRoadId()).lanes);
+            publish(agentId, "AgentInFront", frontAgents.empty() ? -1 : frontAgents.front()->GetId());
+        }
+        else
+        {
+            publish(agentId, "PositionRoute", NAN );
+            publish(agentId, "TCoordinate", NAN );
+            publish(agentId, "Lane", NAN );
+            publish(agentId, "Road", NAN);
+            publish(agentId, "SecondaryLanes", std::vector<int>{});
+            publish(agentId, "AgentInFront", NAN);
+        }
+    }
 }
 
 // udpate global data at occurrence of time step
@@ -96,24 +157,14 @@ void AgentNetwork::SyncGlobalData()
         updateQueue.pop_front();
     }
 
-    // remove agents
-    while (!removeQueue.empty())
+    for (auto& agent : removeQueue)
     {
-        // remove from framework
-        const AgentInterface* agent = removeQueue.front();
-        removeQueue.pop_front();
-
-        if (1 != agents.erase(agent->GetId()))
-        {
-            LOG(CbkLogLevel::Warning, "trying to remove non-existent agent");
-        }
-
-        removedAgents.push_back(agent);
-
-        agent->Unregister();
+        world->RemoveAgent(agent);
     }
+    removeQueue.clear();
 
-    for (auto& item : agents)
+    auto currentAgents = agents; //make a copy, because agents is manipulated inside the loop
+    for (auto& item : currentAgents)
     {
         AgentInterface* agent = item.second;
 
@@ -126,7 +177,7 @@ void AgentNetwork::SyncGlobalData()
 
         if (!agent->IsAgentInWorld())
         {
-            agent->RemoveAgent();
+            world->RemoveAgent(agent);
             continue;
         }
     }

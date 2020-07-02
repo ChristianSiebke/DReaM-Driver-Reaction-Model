@@ -11,9 +11,9 @@
 #pragma once
 
 #include "../Common/SpawnPointDefinitions.h"
+#include "Common/spawnPointLibraryDefinitions.h"
 #include "Interfaces/spawnPointInterface.h"
 #include "Interfaces/worldInterface.h"
-#include "Interfaces/samplerInterface.h"
 #include "Interfaces/scenarioInterface.h"
 #include "Interfaces/agentBlueprintProviderInterface.h"
 
@@ -50,7 +50,7 @@ public:
      * \brief Trigger creates the agents for the spawn points
      * \return the created agents
      */
-    Agents Trigger() override;
+    Agents Trigger(int time) override;
 
 private:
     /*!
@@ -108,6 +108,15 @@ private:
      * \return value
      */
     double CalculateAttributeValue(const openScenario::StochasticAttribute &attribute);
+
+    /*!
+     * \brief Converts the imported route from OpenScenario into a graph
+     *
+     * \param[in]   roads   route from OpenScenario
+     *
+     * \return  graph of road network from agent's perspective with target node as given by OpenScenario, nullopt if no road in OpenScenario defined
+     */
+    std::optional<Route> GetRoute(const std::vector<RouteElement>& roads);
 
     /*!
     * \brief Logs a error message.

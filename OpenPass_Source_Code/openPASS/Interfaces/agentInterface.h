@@ -31,6 +31,7 @@
 #include "Interfaces/worldObjectInterface.h"
 
 using LaneTypes = std::vector<LaneType>;
+class EgoAgentInterface;
 
 /**
 * \brief Agent Interface within the openPASS framework.
@@ -52,6 +53,9 @@ public:
     // @return                Id of agent
     //-----------------------------------------------------------------------------
     virtual int GetAgentId() const = 0;
+
+    //! Returns the EgoAgent corresponding to this agent
+    virtual EgoAgentInterface& GetEgoAgent() = 0;
 
     //-----------------------------------------------------------------------------
     //! Retrieves the type key of an agent
@@ -136,13 +140,6 @@ public:
     // @return                Sideward acceleration
     //-----------------------------------------------------------------------------
     virtual double GetAccelerationY() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns the relative yaw angle between agent and lane (i.e heading)
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual double  GetRelativeYaw() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Retrieves list of collisions partners of agent.
@@ -293,11 +290,6 @@ public:
     virtual void SetAccelerationY(double accelerationY) = 0;
 
     //-----------------------------------------------------------------------------
-    //! Requests removal of agents at next time step.
-    //-----------------------------------------------------------------------------
-    virtual void RemoveAgent() = 0;
-
-    //-----------------------------------------------------------------------------
     //! update list with collision partners
     //!
     //! @return
@@ -429,33 +421,11 @@ public:
                                     AgentBlueprintInterface* agentBlueprint) = 0;
 
     //-----------------------------------------------------------------------------
-    //! Checks if an agent is still valid or if its marked for remove.
-    //!
-    // @return     true if still valid, false if marked for remove
-    //-----------------------------------------------------------------------------
-    virtual bool IsValid() const = 0;
-
-    //-----------------------------------------------------------------------------
     //! Retrieves type of agent
     //!
     //! @return                Id of agent type
     //-----------------------------------------------------------------------------
     virtual int GetAgentTypeId() const = 0;
-
-    //! Retrieve the ID of the road the agent is on.
-    virtual std::string GetRoadId(MeasurementPoint mp = MeasurementPoint::Front) const = 0;
-
-    //! Retrieve the ID of the lane the agent is on.
-    virtual int GetMainLaneId(MeasurementPoint mp = MeasurementPoint::Front) const = 0;
-
-    //! Retrieve the ID of all assigned lanes.
-    virtual std::set<int> GetSecondaryCoveredLanes() = 0 ;
-
-    //! Returns the ID of the lane to the left of the main lane
-    virtual int GetLaneIdLeft() const = 0;
-
-    //! Returns the ID of the lane to the right of the main lane
-    virtual int GetLaneIdRight() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns true if agent is still in World located.
@@ -479,40 +449,6 @@ public:
     virtual void SetPosition(Position pos) = 0;
 
     //-----------------------------------------------------------------------------
-    //! Retrieve the distance to the start of the road.
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual double GetDistanceToStartOfRoad() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns the width of the lane at the postion given by the relative distance to the agent
-    //!
-    //! \param relativeLane relative difference of lane relative to agent (positive for left lanes, negative for right lanes, 0 for own lane)
-    //! \param distance     relative difference of the s coordinate from the agent
-    //! \return width of queried lane
-    //-----------------------------------------------------------------------------
-    virtual double GetLaneWidth(int relativeLane = 0, double distance = 0.0) const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns the curvature of the lane at the postion given by the relative distance to the agent
-    //!
-    //! \param relativeLane relative difference of lane relative to agent (positive for left lanes, negative for right lanes, 0 for own lane)
-    //! \param distance     relative difference of the s coordinate from the agent
-    //! \return curvature of queried lane
-    //-----------------------------------------------------------------------------
-    virtual double GetLaneCurvature(int relativeLane = 0, double distance = 0.0) const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns the direction (yaw) of the lane at the postion given by the relative distance to the agent
-    //!
-    //! \param relativeLane relative difference of lane relative to agent (positive for left lanes, negative for right lanes, 0 for own lane)
-    //! \param distance     relative difference of the s coordinate from the agent
-    //! \return direction of queried lane
-    //-----------------------------------------------------------------------------
-    virtual double GetLaneDirection(int relativeLane = 0, double distance = 0.0) const = 0;
-
-    //-----------------------------------------------------------------------------
     //! Returns the distance to the next agent in front in a specific lane.
     //!
     //! @return
@@ -525,13 +461,6 @@ public:
     //! @return
     //-----------------------------------------------------------------------------
     virtual double GetDistanceToRearAgent(int laneId) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns the longitudinal distance to another agent. (negative if other agent is behind)
-    //!
-    //! @return the distance to the other object
-    //-----------------------------------------------------------------------------
-    virtual double GetDistanceToObject(const WorldObjectInterface* otherObject) const = 0;
 
     //-----------------------------------------------------------------------------
     //! Removes the marker of the agent which marks it special.
@@ -568,34 +497,8 @@ public:
     //-----------------------------------------------------------------------------
     virtual bool IsObstacle() = 0;
 
-    //-----------------------------------------------------------------------------
-    //! Returns the distance to the end of the current lane or infinity, if end of
-    //! lane is farther away then the sightDistance.
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual double GetDistanceToEndOfLane(double sightDistance, int relativeLane = 0) const  = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns the distance to the end of the current lane considering until lane of specified type
-    //! or infinity, if end of lane is farther away then the sightDistance.
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual double GetDistanceToEndOfLane(double sightDistance, int relativeLane, const LaneTypes& laneTypes) const  = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns the lateral position.
-    //!
-    //! @return
-    //-----------------------------------------------------------------------------
-    virtual double GetPositionLateral() const = 0 ;
-
     //! Returns if agent is partially not on the road
     virtual bool IsLeavingWorld() const = 0;
-
-    //! Returns true if the agent touches more than one lane
-    virtual bool IsCrossingLanes() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the distance of the front agent to ego.
@@ -655,28 +558,6 @@ public:
     //! @return
     //-----------------------------------------------------------------------------
     virtual bool IsFirstCarInLane() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns all objects around the agent on given lane inside the given range
-    //! Objects partially in range are also considered
-    //!
-    //! @param[in]      relativeLane    lane relative to agent main lane, e.g. -1 for right lane
-    //! @param[in]      backwardRange   range in backward direction (>= 0)
-    //! @param[in]      forwardRange    range in forward direction (>= 0)
-    //! @param[in]      mp              measurement point for range
-    //-----------------------------------------------------------------------------
-    virtual std::vector<const WorldObjectInterface *> GetObjectsInRange(int relativeLane, double backwardRange, double forwardRange, MeasurementPoint mp) const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns all agents around the agent on given lane inside the given range
-    //! Agents partially in range are also considered
-    //!
-    //! @param[in]      relativeLane    lane relative to agent main lane, e.g. -1 for right lane
-    //! @param[in]      backwardRange   range in backwards direction (>= 0)
-    //! @param[in]      forwardRange    range in forward direction (>= 0)
-    //! @param[in]      mp              measurement point for range
-    //-----------------------------------------------------------------------------
-    virtual std::vector<const AgentInterface *> GetAgentsInRange(int relativeLane, double backwardRange, double forwardRange, MeasurementPoint mp) const = 0;
 
     //! Returns the s coordinate distance from the front of the agent to the first point where his lane intersects another.
     //! As the agent may not yet be on the junction, it has to be specified which connecting road he will take in the junction
@@ -1093,25 +974,15 @@ public:
     //-----------------------------------------------------------------------------
     virtual double GetAccelerationAbsolute() const = 0;
 
-    virtual RoadPosition GetRoadPosition() const = 0;
+    virtual const ObjectPosition& GetObjectPosition() const = 0;
 
-    /// \brief  Get distance (s coordinate) w.r.t. the specified measurement point on the route
-    /// \param mp   point where s coordinate is measured
-    /// \return distance
-    virtual double GetDistanceToStartOfRoad(MeasurementPoint mp) const = 0;
+    virtual std::vector<std::string> GetRoads(MeasurementPoint mp) const = 0;
 
     /// \brief  Get distance (s coordinate) w.r.t. the specified measurement point on the specified road
     /// \param mp       point where s coordinate is measured
     /// \param roadId   OpenDrive id of the road
     /// \return distance
     virtual double GetDistanceToStartOfRoad(MeasurementPoint mp, std::string roadId) const = 0;
-
-    //----------------------------------------------------------------------------
-   //! Calculates the degree of obstructing within the covered lanes of the quering agent
-   //! @param worldObject  Object of interest
-   //! @return             Information about the obstruction
-   //-----------------------------------------------------------------------------
-   virtual const Obstruction GetObstruction(const WorldObjectInterface& worldObject) const = 0;
 
     virtual double GetDistanceReferencePointToLeadingEdge() const = 0;
 
@@ -1141,39 +1012,6 @@ public:
     virtual double GetMaxAcceleration() const = 0;
     virtual double GetMaxDeceleration() const = 0;
 
-    virtual double GetLaneRemainder(Side) const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns all the TrafficSigns valid for the given lane from the agent postion within the given search distance
-    //!
-    //! @return vector of traffic signs, or emtpy list if no signs are available
-    //-----------------------------------------------------------------------------
-    virtual std::vector<CommonTrafficSign::Entity> GetTrafficSignsInRange(double searchDistance, int relativeLane = 0) const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns all the LaneMarkings on the given side within the given search distance from the agent postion
-    //!
-    //! \param searchDistance   range of the search
-    //! \param relativeLane     lane to look in relative to agent main lane
-    //! \param side             side of the lane
-    //-----------------------------------------------------------------------------
-    virtual std::vector<LaneMarking::Entity> GetLaneMarkingsInRange(double searchDistance, int relativeLane, Side side) const = 0;
-
-    //! Returns the relative distances (start and end) and the connecting road id of all junctions on the route in range
-    //!
-    //! \param range            range of search
-    //! \return information about all junctions in range
-    virtual RelativeWorldView::Junctions GetRelativeJunctions (double range) const = 0;
-
-    //! Returns information about all lanes on the route in range. These info are the relative distances (start and end),
-    //! the laneId relative to the ego lane, the successors and predecessors if existing and the information wether the intended
-    //! driving direction of the lane is the same as the direction of the route. If the ego lane prematurely ends, then
-    //! the further lane ids are relative to the middle of the road.
-    //!
-    //! \param range            range of search
-    //! \return information about all lanes in range
-    virtual RelativeWorldView::Lanes GetRelativeLanes (double range) const = 0;
-
     //-----------------------------------------------------------------------------
     //! Retrieves the minimum speed goal of agent
     //!
@@ -1184,15 +1022,4 @@ public:
     virtual const openpass::sensors::Parameters& GetSensorParameters() const = 0;
 
     virtual void SetSensorParameters(openpass::sensors::Parameters sensorParameters) = 0;
-
-    //-----------------------------------------------------------------------------
-    //! \brief GetDistanceToNextJunction gets the distance to the next junction on
-    //!        Agent's route
-    //!
-    //! \returns distance to next junction on Agent's route; if no junction is on
-    //!          route, returns std::numeric_limits<double>::max()
-    //-----------------------------------------------------------------------------
-    virtual double GetDistanceToNextJunction() const = 0;
-
-    virtual const Route& GetRoute() const = 0;
 };

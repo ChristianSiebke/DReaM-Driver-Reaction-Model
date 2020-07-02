@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -18,11 +18,16 @@
 
 #include <map>
 #include <string>
+
 #include "Interfaces/modelInterface.h"
 #include "Interfaces/componentInterface.h"
+
+#include "Common/opExport.h"
+#include "Common/runtimeInformation.h"
 #include "CoreFramework/CoreShare/callbacks.h"
 #include "CoreFramework/CoreShare/log.h"
-#include "Common/runtimeInformation.h"
+
+class PublisherInterface;
 
 namespace SimulationSlave
 {
@@ -32,7 +37,7 @@ class Agent;
 class ComponentType;
 class ObservationNetworkInterface;
 
-class ModelBinding
+class CORESLAVEEXPORT ModelBinding
 {
 public:
     ModelBinding(const std::string libraryPath,
@@ -53,21 +58,24 @@ public:
     //! parameters using this library.
     //!
     //! @param[in]  componentType       Type of the component to instantiate
-    //! @param[in]  componentId         ID of the component to instantiate
+    //! @param[in]  componentName       Name of the component to instantiate
     //! @param[in]  stochastics         Stochastics interface
     //! @param[in]  world               World representation
     //! @param[in]  observationNetwork  Network of the observation modules
     //! @param[in]  agent               Agent that the component type is a part of
+    //! @param[in]  eventNetwork        Instance of the internal event logic
+    //! @param[in]  publisher           Publisher instance
     //!
     //! @return                         The instantiated component
     //-----------------------------------------------------------------------------
     ComponentInterface *Instantiate(std::shared_ptr<ComponentType> componentType,
-                           std::string componentName,
-                           StochasticsInterface *stochastics,
-                           WorldInterface *world,
-                           ObservationNetworkInterface *observationNetwork,
-                           Agent *agent,
-                           EventNetworkInterface *eventNetwork);
+                                    std::string componentName,
+                                    StochasticsInterface *stochastics,
+                                    WorldInterface *world,
+                                    ObservationNetworkInterface *observationNetwork,
+                                    Agent *agent,
+                                    EventNetworkInterface *eventNetwork,
+                                    PublisherInterface *publisher);
 
     //-----------------------------------------------------------------------------
     //! Unloads the model library by deleting the stored libraries

@@ -11,6 +11,8 @@
 
 #include "Interfaces/worldObjectInterface.h"
 
+using OpenDriveId = std::string;
+
 class TrafficObjectInterface : public virtual WorldObjectInterface
 {
 public:
@@ -20,4 +22,6 @@ public:
     TrafficObjectInterface& operator=(const TrafficObjectInterface&) = delete;
     TrafficObjectInterface& operator=(TrafficObjectInterface&&) = delete;
     virtual ~TrafficObjectInterface() = default;
+
+    virtual OpenDriveId GetOpenDriveId() const = 0;
 };

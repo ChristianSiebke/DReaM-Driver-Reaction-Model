@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -13,30 +13,35 @@
 #include "EventDetectorCommonBase.h"
 
 // template for overload pattern used in CheckCondition()
-template<class... Ts> struct overload : Ts... { using Ts::operator()...; };
-template<class... Ts> overload(Ts...) -> overload<Ts...>;
+template <class... Ts>
+struct overload : Ts...
+{
+    using Ts::operator()...;
+};
+template <class... Ts>
+overload(Ts...)->overload<Ts...>;
 
 struct ConditionMetaInformation
 {
-    WorldInterface * const world {};
-    int currentTime {};
+    WorldInterface *const world{};
+    int currentTime{};
 };
-using ConditionVisitorVariant = std::variant<std::vector<const AgentInterface*>, bool>;
+using ConditionVisitorVariant = std::variant<std::vector<const AgentInterface *>, bool>;
 
 class ConditionalEventDetector : public EventDetectorCommonBase
 {
 public:
     ConditionalEventDetector(WorldInterface *world,
-                             const openScenario::ConditionalEventDetectorInformation& eventDetectorInformation,
+                             const openScenario::ConditionalEventDetectorInformation &eventDetectorInformation,
                              SimulationSlave::EventNetworkInterface *eventNetwork,
                              const CallbackInterface *callbacks,
                              StochasticsInterface *stochastics);
 
     ConditionalEventDetector() = delete;
-    ConditionalEventDetector(const ConditionalEventDetector&) = delete;
-    ConditionalEventDetector(ConditionalEventDetector&&) = delete;
-    ConditionalEventDetector& operator=(const ConditionalEventDetector&) = delete;
-    ConditionalEventDetector& operator=(ConditionalEventDetector&&) = delete;
+    ConditionalEventDetector(const ConditionalEventDetector &) = delete;
+    ConditionalEventDetector(ConditionalEventDetector &&) = delete;
+    ConditionalEventDetector &operator=(const ConditionalEventDetector &) = delete;
+    ConditionalEventDetector &operator=(ConditionalEventDetector &&) = delete;
 
     virtual void Trigger(int time) override;
 
@@ -56,7 +61,7 @@ private:
      *            EventNetwork.
      * ------------------------------------------------------------------------
      */
-    void TriggerEventInsertion(int time, const std::vector<const AgentInterface*> triggeringAgents);
+    void TriggerEventInsertion(int time, const std::vector<const AgentInterface *> triggeringAgents);
 
     /*!
      * ------------------------------------------------------------------------
@@ -84,24 +89,21 @@ private:
      *         by the Events emitted by the EventDetector
      * ------------------------------------------------------------------------
      */
-    std::vector<const AgentInterface*> GetActors(const std::vector<const AgentInterface*> triggeringAgents = {});
+    std::vector<const AgentInterface *> GetActors(const std::vector<const AgentInterface *> triggeringAgents = {});
 
     /*!
      * ------------------------------------------------------------------------
      * \brief EvaluateConditionsAtTime evaluates all conditions for the
-     *        specified time. TriggeringAgents who meet all conditions are
-     *        placed into the triggeringAgents collection.
+     *        specified time and returns triggering agents who meet all conditions.
      *
      * \param[in] time the time at which the conditions are being evaluated
      *
-     * \param[out] triggeringAgents the collection into which the
-     *             TriggeringAgents who meet all conditions are placed
-     *
-     * \return true if all conditions are met; false otherwise
+     * \return <0> true if all conditions are met; false otherwise
+     *         <1> triggeringAgents who meet all conditions
      * ------------------------------------------------------------------------
      */
-    bool EvaluateConditionsAtTime(const int time,
-                                  std::vector<const AgentInterface*>& triggeringAgents);
+
+    std::pair<bool, std::vector<const AgentInterface *>> EvaluateConditions(const int time);
 
     /*!
      * ------------------------------------------------------------------------
@@ -115,17 +117,17 @@ private:
      * \return lambda function for evaluating a Condition variant
      * ------------------------------------------------------------------------
      */
-    auto CheckCondition(const ConditionMetaInformation& cmi)
+    auto CheckCondition(const ConditionMetaInformation &cmi)
     {
         return [cmi](auto&& condition)
         {
             return std::visit(overload{
-                                  [&](const openScenario::ReachPositionRoadCondition& reachPositionCondition) { return ConditionVisitorVariant{reachPositionCondition.IsMet(cmi.world)}; },
-                                  [&](const openScenario::RelativeLaneCondition& relativeLaneCondition) { return ConditionVisitorVariant{relativeLaneCondition.IsMet(cmi.world)}; },
-                                  [&](const openScenario::RelativeSpeedCondition& relativeSpeedCondition) { return ConditionVisitorVariant{relativeSpeedCondition.IsMet(cmi.world)}; },
-                                  [&](const openScenario::TimeToCollisionCondition& timeToCollisionCondition) { return ConditionVisitorVariant{timeToCollisionCondition.IsMet(cmi.world)}; },
-                                  [&](const openScenario::SimulationTimeCondition& simulationTimeCondition) { return ConditionVisitorVariant{simulationTimeCondition.IsMet(cmi.currentTime)}; }
-                              }, condition);
+                                  [&](const openScenario::ReachPositionCondition &reachPositionCondition) { return ConditionVisitorVariant{reachPositionCondition.IsMet(cmi.world)}; },
+                                  [&](const openScenario::RelativeSpeedCondition &relativeSpeedCondition) { return ConditionVisitorVariant{relativeSpeedCondition.IsMet(cmi.world)}; },
+                                  [&](const openScenario::TimeToCollisionCondition &timeToCollisionCondition) { return ConditionVisitorVariant{timeToCollisionCondition.IsMet(cmi.world)}; },
+                                  [&](const openScenario::TimeHeadwayCondition& timeHeadwayCondition) { return ConditionVisitorVariant{timeHeadwayCondition.IsMet(cmi.world)}; },
+                                  [&](const openScenario::SimulationTimeCondition &simulationTimeCondition) { return ConditionVisitorVariant{simulationTimeCondition.IsMet(cmi.currentTime)}; }},
+                              condition);
         };
     }
 };

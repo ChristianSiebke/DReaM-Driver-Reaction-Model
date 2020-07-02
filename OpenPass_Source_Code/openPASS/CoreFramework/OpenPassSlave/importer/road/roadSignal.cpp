@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -94,5 +94,20 @@ bool RoadSignal::GetIsDynamic() const
 std::list<std::string> RoadSignal::GetDependencies() const
 {
     return signal.dependencyIds;
+}
+
+double RoadSignal::GetZOffset() const
+{
+    return signal.zOffset;
+}
+
+bool RoadSignal::GetOrientation() const
+{
+    return signal.orientation == "+";
+}
+
+double RoadSignal::GetHOffset() const
+{
+    return signal.hOffset;
 }
 

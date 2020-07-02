@@ -17,6 +17,7 @@
 #pragma once
 
 #include <optional>
+#include "Common/openScenarioDefinitions.h"
 
 class AgentBlueprint;
 class AgentBlueprintProviderInterface
@@ -30,10 +31,11 @@ public:
     * \details Samples an entired agent from a given SystemConfig or from a dynamically built agent
     *
     *
-    * @param[in]        agentProfileName    Name of AgentProfile to sample
+    * @param agentProfileName    Name of AgentProfile to sample
+    * \param assignedParameters  parameters assigned by a catalog reference if appropriate
     *
     * @return           Sampled AgentBlueprint if successful
     */
-    virtual AgentBlueprint SampleAgent(const std::string& agentProfileName) const = 0;
+    virtual AgentBlueprint SampleAgent(const std::string& agentProfileName, const openScenario::Parameters& assignedParameters) const = 0;
 };
 

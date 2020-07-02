@@ -28,7 +28,7 @@ extern "C" ALGORITHM_FMUWRAPPER_SHARED_EXPORT ModelInterface *OpenPASS_CreateIns
                                                                                      StochasticsInterface *stochastics,
                                                                                      WorldInterface *world,
                                                                                      const ParameterInterface *parameters,
-                                                                                     const std::map<int, ObservationInterface*> *observations,
+                                                                                     PublisherInterface * const publisher,
                                                                                      AgentInterface *agent,
                                                                                      const CallbackInterface *callbacks)
 {
@@ -43,7 +43,7 @@ extern "C" ALGORITHM_FMUWRAPPER_SHARED_EXPORT ModelInterface *OpenPASS_CreateIns
                                                                                         world,
                                                                                         stochastics,
                                                                                         parameters,
-                                                                                        observations,
+                                                                                        publisher,
                                                                                         callbacks,
                                                                                         agent));
     }

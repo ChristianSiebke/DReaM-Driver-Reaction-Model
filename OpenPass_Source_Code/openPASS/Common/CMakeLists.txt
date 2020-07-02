@@ -11,13 +11,11 @@ add_openpass_target(
     compCtrlToAgentCompSignal.h
     compatibility.h
     componentStateChangeEvent.h
-    componentWarningEvent.h
     dynamicsSignal.h
     eventDetectorDefinitions.h
     eventTypes.h
     globalDefinitions.h
     laneChangeEvent.h
-    laneChangeSignal.h
     lateralSignal.h
     longitudinalSignal.h
     observationTypes.h
@@ -43,7 +41,6 @@ add_openpass_target(
     worldDefinitions.h
 
   SOURCES
-    vector2d.cpp
     vector3d.cpp
     eventDetectorDefinitions.cpp
 )

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -12,22 +12,15 @@
 /** @file  AlgorithmAEBmplementation.cpp */
 //-----------------------------------------------------------------------------
 
+#include "algorithm_autonomousEmergencyBrakingImplementation.h"
+
 #include <limits>
 #include <memory>
 
-#include <QtGlobal>
-#include <QCoreApplication>
-
-#include "Interfaces/parameterInterface.h"
-
 #include "Common/commonTools.h"
 #include "Common/eventTypes.h"
-
 #include "Components/SensorFusion_OSI/sensorFusionQuery.h"
-
-#include "algorithm_autonomousEmergencyBrakingImplementation.h"
 #include "boundingBoxCalculation.h"
-
 
 AlgorithmAutonomousEmergencyBrakingImplementation::AlgorithmAutonomousEmergencyBrakingImplementation(
     std::string componentName,
@@ -36,11 +29,11 @@ AlgorithmAutonomousEmergencyBrakingImplementation::AlgorithmAutonomousEmergencyB
     int offsetTime,
     int responseTime,
     int cycleTime,
-    StochasticsInterface* stochastics,
-    const ParameterInterface* parameters,
-    const std::map<int, ObservationInterface*>* observations,
-    const CallbackInterface* callbacks,
-    AgentInterface* agent) :
+    StochasticsInterface *stochastics,
+    const ParameterInterface *parameters,
+    PublisherInterface * const publisher,
+    const CallbackInterface *callbacks,
+    AgentInterface *agent) :
     AlgorithmInterface(
         componentName,
         isInit,
@@ -50,7 +43,7 @@ AlgorithmAutonomousEmergencyBrakingImplementation::AlgorithmAutonomousEmergencyB
         cycleTime,
         stochastics,
         parameters,
-        observations,
+        publisher,
         callbacks,
         agent)
 {
@@ -67,26 +60,28 @@ AlgorithmAutonomousEmergencyBrakingImplementation::AlgorithmAutonomousEmergencyB
 
     try
     {
-        observer = GetObservations()->at(0);
-        if (observer == nullptr) { throw std::runtime_error(""); }
+        if (GetPublisher() == nullptr)
+        {
+            throw std::runtime_error("");
+        }
     }
     catch (...)
     {
-        const std::string msg = COMPONENTNAME + " invalid observation module setup";
+        const std::string msg = COMPONENTNAME + " invalid publisher module setup";
         LOG(CbkLogLevel::Error, msg);
         throw std::runtime_error(msg);
     }
 }
 
-void AlgorithmAutonomousEmergencyBrakingImplementation::ParseParameters(const ParameterInterface* parameters)
+void AlgorithmAutonomousEmergencyBrakingImplementation::ParseParameters(const ParameterInterface *parameters)
 {
     ttcBrake = parameters->GetParametersDouble().at("TTC");
     brakingAcceleration = parameters->GetParametersDouble().at("Acceleration");
     collisionDetectionLongitudinalBoundary = parameters->GetParametersDouble().at("CollisionDetectionLongitudinalBoundary");
     collisionDetectionLateralBoundary = parameters->GetParametersDouble().at("CollisionDetectionLateralBoundary");
 
-    const auto& sensorList = parameters->GetParameterLists().at("SensorLinks");
-    for (const auto& sensorLink : sensorList)
+    const auto &sensorList = parameters->GetParameterLists().at("SensorLinks");
+    for (const auto &sensorLink : sensorList)
     {
         if (sensorLink->GetParametersString().at("InputId") == "Camera")
         {
@@ -96,13 +91,11 @@ void AlgorithmAutonomousEmergencyBrakingImplementation::ParseParameters(const Pa
 }
 
 void AlgorithmAutonomousEmergencyBrakingImplementation::UpdateInput(int localLinkId,
-        const std::shared_ptr<SignalInterface const>& data, int time)
+                                                                    const std::shared_ptr<SignalInterface const> &data,
+                                                                    [[maybe_unused]] int time)
 {
-    Q_UNUSED(time);
-
     std::stringstream log;
-    log << COMPONENTNAME << " (component " << GetComponentName() << ", agent " << GetAgent()->GetId() <<
-        ", input data for local link " << localLinkId << ": ";
+    log << COMPONENTNAME << " (component " << GetComponentName() << ", agent " << GetAgent()->GetId() << ", input data for local link " << localLinkId << ": ";
     LOG(CbkLogLevel::Debug, log.str());
 
     //from SensorFusion
@@ -129,17 +122,16 @@ void AlgorithmAutonomousEmergencyBrakingImplementation::UpdateInput(int localLin
 }
 
 void AlgorithmAutonomousEmergencyBrakingImplementation::UpdateOutput(int localLinkId,
-        std::shared_ptr<SignalInterface const>& data, int time)
+                                                                     std::shared_ptr<SignalInterface const> &data,
+                                                                     [[maybe_unused]] int time)
 {
-    Q_UNUSED(time);
-
     if (localLinkId == 0)
     {
         try
         {
             data = std::make_shared<AccelerationSignal const>(componentState, activeAcceleration);
         }
-        catch (const std::bad_alloc&)
+        catch (const std::bad_alloc &)
         {
             const std::string msg = COMPONENTNAME + " could not instantiate signal";
             LOG(CbkLogLevel::Debug, msg);
@@ -155,18 +147,19 @@ void AlgorithmAutonomousEmergencyBrakingImplementation::UpdateOutput(int localLi
     }
 }
 
-void AlgorithmAutonomousEmergencyBrakingImplementation::Trigger(int time)
+void AlgorithmAutonomousEmergencyBrakingImplementation::Trigger([[maybe_unused]] int time)
 {
     const auto ttc = CalculateTTC();
+
     if (componentState == ComponentState::Disabled && ShouldBeActivated(ttc))
     {
         componentState = ComponentState::Acting;
-        UpdateAcceleration(time);
+        UpdateAcceleration();
     }
-    else if(componentState == ComponentState::Acting && ShouldBeDeactivated(ttc))
+    else if (componentState == ComponentState::Acting && ShouldBeDeactivated(ttc))
     {
         componentState = ComponentState::Disabled;
-        UpdateAcceleration(time);
+        UpdateAcceleration();
     }
 }
 
@@ -180,7 +173,7 @@ bool AlgorithmAutonomousEmergencyBrakingImplementation::ShouldBeDeactivated(cons
     return ttc > (ttcBrake * 1.5);
 }
 
-double AlgorithmAutonomousEmergencyBrakingImplementation::CalculateObjectTTC(const osi3::BaseMoving& baseMoving)
+double AlgorithmAutonomousEmergencyBrakingImplementation::CalculateObjectTTC(const osi3::BaseMoving &baseMoving)
 {
     TtcCalculations::TtcParameters own;
     own.length = GetAgent()->GetLength() + collisionDetectionLongitudinalBoundary;
@@ -194,7 +187,7 @@ double AlgorithmAutonomousEmergencyBrakingImplementation::CalculateObjectTTC(con
     own.accelerationY = 0.0;
     own.yaw = 0.0;
     own.yawRate = GetAgent()->GetYawRate();
-    own.yawAcceleration = 0.0;   // GetAgent()->GetYawAcceleration() not implemented yet
+    own.yawAcceleration = 0.0; // GetAgent()->GetYawAcceleration() not implemented yet
     TtcCalculations::TtcParameters opponent;
     opponent.length = baseMoving.dimension().length() + collisionDetectionLongitudinalBoundary;
     opponent.width = baseMoving.dimension().width() + collisionDetectionLateralBoundary;
@@ -211,7 +204,7 @@ double AlgorithmAutonomousEmergencyBrakingImplementation::CalculateObjectTTC(con
     return TtcCalculations::CalculateObjectTTC(own, opponent, ttcBrake * 1.5, GetCycleTime());
 }
 
-double AlgorithmAutonomousEmergencyBrakingImplementation::CalculateObjectTTC(const osi3::BaseStationary& baseStationary)
+double AlgorithmAutonomousEmergencyBrakingImplementation::CalculateObjectTTC(const osi3::BaseStationary &baseStationary)
 {
     TtcCalculations::TtcParameters own;
     own.length = GetAgent()->GetLength() + collisionDetectionLongitudinalBoundary;
@@ -225,17 +218,17 @@ double AlgorithmAutonomousEmergencyBrakingImplementation::CalculateObjectTTC(con
     own.accelerationY = 0.0;
     own.yaw = 0.0;
     own.yawRate = GetAgent()->GetYawRate();
-    own.yawAcceleration = 0.0;   // GetAgent()->GetYawAcceleration() not implemented yet
+    own.yawAcceleration = 0.0; // GetAgent()->GetYawAcceleration() not implemented yet
 
     TtcCalculations::TtcParameters opponent;
     opponent.length = baseStationary.dimension().length() + collisionDetectionLongitudinalBoundary;
     opponent.width = baseStationary.dimension().width() + collisionDetectionLateralBoundary;
-    opponent.frontLength =  0.5 * opponent.length;
-    opponent.backLength =  0.5 * opponent.length;
+    opponent.frontLength = 0.5 * opponent.length;
+    opponent.backLength = 0.5 * opponent.length;
     opponent.position = {baseStationary.position().x(), baseStationary.position().y()};
-    opponent.velocityX = - GetAgent()->GetVelocity();
+    opponent.velocityX = -GetAgent()->GetVelocity();
     opponent.velocityY = 0.0;
-    opponent.accelerationX = - GetAgent()->GetAcceleration();
+    opponent.accelerationX = -GetAgent()->GetAcceleration();
     opponent.accelerationY = 0.0;
     opponent.yaw = baseStationary.orientation().yaw();
     opponent.yawRate = 0.0;
@@ -247,7 +240,7 @@ double AlgorithmAutonomousEmergencyBrakingImplementation::CalculateObjectTTC(con
 double AlgorithmAutonomousEmergencyBrakingImplementation::CalculateTTC()
 {
     double ttc = std::numeric_limits<double>::max();
-    for (const auto& detectedObject : detectedMovingObjects)
+    for (const auto &detectedObject : detectedMovingObjects)
     {
         double objectTtc = CalculateObjectTTC(detectedObject.base());
         if (objectTtc < ttc)
@@ -255,7 +248,7 @@ double AlgorithmAutonomousEmergencyBrakingImplementation::CalculateTTC()
             ttc = objectTtc;
         }
     }
-    for (const auto& detectedObject : detectedStationaryObjects)
+    for (const auto &detectedObject : detectedStationaryObjects)
     {
         double objectTtc = CalculateObjectTTC(detectedObject.base());
         if (objectTtc < ttc)
@@ -267,29 +260,22 @@ double AlgorithmAutonomousEmergencyBrakingImplementation::CalculateTTC()
     return ttc;
 }
 
-void AlgorithmAutonomousEmergencyBrakingImplementation::UpdateAcceleration(const int time)
+void AlgorithmAutonomousEmergencyBrakingImplementation::SetAcceleration(double setValue)
 {
-    std::shared_ptr<VehicleComponentEvent> event;
+    activeAcceleration = setValue;
+    GetPublisher()->Publish(COMPONENTNAME, ComponentEvent({{"ComponentState", openpass::utils::to_string(componentState)}}));
+}
 
-    if(componentState == ComponentState::Acting && activeAcceleration != brakingAcceleration)
+void AlgorithmAutonomousEmergencyBrakingImplementation::UpdateAcceleration()
+{
+    if (componentState == ComponentState::Acting &&
+        (activeAcceleration - brakingAcceleration) != 0.0)
     {
-        activeAcceleration = brakingAcceleration;
-        event = std::make_shared<VehicleComponentEvent>(time,
-                                                        "AEBActive",
-                                                        COMPONENTNAME,
-                                                        GetAgent()->GetId());
+        SetAcceleration(brakingAcceleration);
     }
-    else if (componentState == ComponentState::Disabled && activeAcceleration != 0.0)
+    else if (componentState == ComponentState::Disabled &&
+             activeAcceleration != 0.0)
     {
-        activeAcceleration = 0.0;
-        event = std::make_shared<VehicleComponentEvent>(time,
-                                                        "AEBInactive",
-                                                        COMPONENTNAME,
-                                                        GetAgent()->GetId());
-    }
-
-    if(event.get())
-    {
-        observer->InsertEvent(event);
+        SetAcceleration(0.0);
     }
 }

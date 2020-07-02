@@ -18,6 +18,9 @@ add_openpass_target(
     sensor_driverCalculations.cpp
     sensor_driverImplementation.cpp
 
+  INCDIRS
+    ../../CoreModules/World_OSI/RoutePlanning
+    
   LIBRARIES
     Qt5::Core
 )

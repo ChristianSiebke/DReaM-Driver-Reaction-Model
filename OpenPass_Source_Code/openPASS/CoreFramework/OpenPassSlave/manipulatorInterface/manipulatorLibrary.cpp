@@ -53,6 +53,13 @@ bool ManipulatorLibrary::Init()
         return false;
     }
 
+    createDefaultInstanceFunc = (ManipulatorInterface_CreateDefaultInstanceType)library->resolve(DllCreateDefaultInstanceId.c_str());
+    if(!createDefaultInstanceFunc)
+    {
+        LOG_INTERN(LogLevel::Error) << "could not instantiate class from DLL";
+        return false;
+    }
+
     destroyInstanceFunc = (ManipulatorInterface_DestroyInstanceType)library->resolve(DllDestroyInstanceId.c_str());
     if(!destroyInstanceFunc)
     {
@@ -133,8 +140,7 @@ bool ManipulatorLibrary::ReleaseManipulator(Manipulator *manipulator)
     return true;
 }
 
-Manipulator *ManipulatorLibrary::CreateManipulator(std::shared_ptr<ScenarioActionInterface> action,
-                                                   const std::string& manipulatorType,
+Manipulator *ManipulatorLibrary::CreateManipulator(const openScenario::ManipulatorInformation manipulatorInformation,
                                                    EventNetworkInterface* eventNetwork,
                                                    WorldInterface* world)
 {
@@ -152,7 +158,34 @@ Manipulator *ManipulatorLibrary::CreateManipulator(std::shared_ptr<ScenarioActio
     }
 
     auto manipulatorInterface = createInstanceFunc(world,
-                                                   action,
+                                                   manipulatorInformation,
+                                                   eventNetwork,
+                                                   callbacks);
+
+    Manipulator *manipulator = new Manipulator(manipulatorInterface,
+                                               this);
+    manipulators.push_back(manipulator);
+    return manipulator;
+}
+
+Manipulator *ManipulatorLibrary::CreateManipulator(const std::string& manipulatorType,
+                                                   EventNetworkInterface* eventNetwork,
+                                                   WorldInterface* world)
+{
+    if(!library)
+    {
+        return nullptr;
+    }
+
+    if(!library->isLoaded())
+    {
+        if(!library->load())
+        {
+            return nullptr;
+        }
+    }
+
+    auto manipulatorInterface = createDefaultInstanceFunc(world,
                                                    manipulatorType,
                                                    eventNetwork,
                                                    callbacks);

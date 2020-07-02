@@ -18,11 +18,13 @@ UNIT_UNDER_TEST = $$OPEN_SRC/Components/Sensor_Driver
 
 INCLUDEPATH += \
     . \
-    $$UNIT_UNDER_TEST
+    $$UNIT_UNDER_TEST \
+    $$OPEN_SRC/CoreModules/World_OSI/RoutePlanning
 
 HEADERS += \
     $$UNIT_UNDER_TEST/sensor_driverCalculations.h \
-    $$UNIT_UNDER_TEST/sensor_driverImplementation.h
+    $$UNIT_UNDER_TEST/sensor_driverImplementation.h \
+    $$OPEN_SRC/CoreModules/World_OSI/RoutePlanning/RouteCalculation.h
 
 SOURCES += \
     $$UNIT_UNDER_TEST/sensor_driverCalculations.cpp \

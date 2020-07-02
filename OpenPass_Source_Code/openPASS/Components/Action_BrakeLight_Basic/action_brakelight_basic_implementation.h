@@ -13,7 +13,6 @@
 #define ACTION_BRAKELIGHT_BASIC_IMPLEMENTATION_H
 
 #include "modelInterface.h"
-#include "observationInterface.h"
 #include "primitiveSignals.h"
 
 /*!

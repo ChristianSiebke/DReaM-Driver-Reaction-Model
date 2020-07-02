@@ -20,168 +20,93 @@
 #include "parameters.h"
 #include <cmath>
 
-Sampler::Sampler(StochasticsInterface &stochastics, const openpass::common::RuntimeInformation &runtimeInformation):
-    stochastics {stochastics},
-    runtimeInformation { runtimeInformation }
+bool Sampler::RollFor(double chance, StochasticsInterface* stochastics)
 {
-}
-
-bool Sampler::RollFor(double chance) const
-{
-    if (chance == RATE_ALWAYS_FALSE)
+    if (chance == 0.0)
     {
         return false;
     }
 
-    double roll = stochastics.GetUniformDistributed(0, 1);
+    double roll = stochastics->GetUniformDistributed(0, 1);
     return (roll <= chance);
 }
 
-double Sampler::RollGapBetweenCars(double carRatePerSecond) const
-{
-    return stochastics.GetExponentialDistributed(carRatePerSecond);
-}
+using namespace openpass::parameter;
 
-double Sampler::RollGapExtension(double extension) const
-{
-    return stochastics.GetUniformDistributed(0, extension);
-}
+constexpr int MAX_RETRIES{10};
 
-double Sampler::RollForVelocity(double meanVelocity, double stdDeviationVelocity) const
+double Sampler::RollForStochasticAttribute(const StochasticDistribution& distribution, StochasticsInterface* stochastics)
 {
-    return stochastics.GetNormalDistributed(meanVelocity, stdDeviationVelocity);
-}
-
-double Sampler::RollForStochasticAttribute(double mean, double stdDev, double lowerBound, double upperBound) const
-{
-    int run = 0;
-    double result = stochastics.GetNormalDistributed(mean, stdDev);
-
-    while (result > upperBound || result < lowerBound)
+    if (std::holds_alternative<NormalDistribution>(distribution))
     {
-        run++;
-        result = stochastics.GetNormalDistributed(mean, stdDev);
-        if (run == 10)
+        auto normalDistribution = std::get<NormalDistribution>(distribution);
+
+        if(CommonHelper::DoubleEquality(normalDistribution.min, normalDistribution.max))
         {
-            return mean;
+            return normalDistribution.min;
         }
+
+        int run = 0;
+        double result = stochastics->GetNormalDistributed(normalDistribution.mean, normalDistribution.standardDeviation);
+
+        while (result > normalDistribution.max || result < normalDistribution.min)
+        {
+            run++;
+            result = stochastics->GetNormalDistributed(normalDistribution.mean, normalDistribution.standardDeviation);
+            if (run == MAX_RETRIES)
+            {
+                return normalDistribution.mean;
+            }
+        }
+        return result;
     }
-
-    return result;
-}
-
-size_t Sampler::RollUniformDistributedVectorIndex(size_t vectorSize) const
-{
-    size_t index = static_cast<size_t>(std::floor(stochastics.GetUniformDistributed(0, 1) * vectorSize));
-
-    if (vectorSize == index)
+    else if (std::holds_alternative<LogNormalDistribution>(distribution))
     {
-        index--;
+        auto logNormalDistribution = std::get<LogNormalDistribution>(distribution);
+
+        if(CommonHelper::DoubleEquality(logNormalDistribution.min, logNormalDistribution.max))
+        {
+            return logNormalDistribution.min;
+        }
+
+        int run = 0;
+        double result = stochastics->GetMuSigmaLogNormalDistributed(logNormalDistribution.mu, logNormalDistribution.sigma);
+
+        while (result > logNormalDistribution.max || result < logNormalDistribution.min)
+        {
+            run++;
+            result = stochastics->GetMuSigmaLogNormalDistributed(logNormalDistribution.mu, logNormalDistribution.sigma);
+            if (run == MAX_RETRIES)
+            {
+                return 0.5 * (logNormalDistribution.min + logNormalDistribution.max);
+            }
+        }
+        return result;
     }
-
-    return index;
-}
-
-std::string Sampler::SampleStringProbability(StringProbabilities probabilities) const
-{
-    double roll = stochastics.GetUniformDistributed(0, 1);
-    double probability = 0.0;
-
-    for (auto entry : probabilities)
+    else if (std::holds_alternative<UniformDistribution>(distribution))
     {
-        probability += entry.second;
-
-        if (probability == 0.0)
-        {
-            continue;
-        }
-
-        if (roll <= probability)
-        {
-            return entry.first;
-        }
+        auto uniformDistribution = std::get<UniformDistribution>(distribution);
+        return stochastics->GetUniformDistributed(uniformDistribution.min, uniformDistribution.max);
     }
-
-    return "";
-}
-
-int Sampler::SampleIntProbability(IntProbabilities probabilities) const
-{
-    double roll = stochastics.GetUniformDistributed(0, 1);
-    double probability = 0.0;
-
-    for (auto entry : probabilities)
+    else if (std::holds_alternative<ExponentialDistribution>(distribution))
     {
-        probability += entry.second;
+        int run = 0;
+        auto exponentialDistribution = std::get<ExponentialDistribution>(distribution);
+        double result = stochastics->GetExponentialDistributed(exponentialDistribution.lambda);
 
-        if (probability == 0.0)
+        while (result > exponentialDistribution.max || result < exponentialDistribution.min)
         {
-            continue;
+            run++;
+            result = stochastics->GetExponentialDistributed(exponentialDistribution.lambda);
+            if (run == MAX_RETRIES)
+            {
+                return 1 / exponentialDistribution.lambda;
+            }
         }
-
-        if (roll <= probability)
-        {
-            return entry.first;
-        }
+        return result;
     }
-
-    throw std::logic_error("Could not find matching probability within range.");
-}
-
-double Sampler::SampleDoubleProbability(DoubleProbabilities probabilities) const
-{
-    double roll = stochastics.GetUniformDistributed(0, 1);
-    double probability = 0.0;
-
-    for (auto entry : probabilities)
+    else
     {
-        probability += entry.second;
-
-        if (probability == 0.0)
-        {
-            continue;
-        }
-
-        if (roll <= probability)
-        {
-            return entry.first;
-        }
+        throw std::runtime_error("Unsupported distribution type. Variant index: " + std::to_string(distribution.index()));
     }
-
-    throw std::logic_error("Could not find matching probability within range.");
 }
-
-openpass::parameter::NormalDistribution Sampler::SampleNormalDistributionProbability(NormalDistributionProbabilities probabilities) const
-{
-    double roll = stochastics.GetUniformDistributed(0, 1);
-    double probability = 0.0;
-
-    for (auto entry : probabilities)
-    {
-        probability += entry.second;
-
-        if (probability == 0.0)
-        {
-            continue;
-        }
-
-        if (roll <= probability)
-        {
-            return entry.first;
-        }
-    }
-
-    throw std::logic_error("Could not find matching probability within range.");
-}
-
-std::unique_ptr<ParameterInterface> Sampler::SampleWorldParameters(const EnvironmentConfig& environmentConfig) const
-{
-    return openpass::parameter::make<SimulationCommon::Parameters>(
-        runtimeInformation, openpass::parameter::Container {
-            { "TimeOfDay", SampleStringProbability(environmentConfig.timeOfDays) },
-            { "VisibilityDistance", SampleIntProbability(environmentConfig.visibilityDistances) },
-            { "Friction", SampleDoubleProbability(environmentConfig.frictions) },
-            { "Weather", SampleStringProbability(environmentConfig.weathers) }}
-    );
-}
-

@@ -9,10 +9,11 @@ add_openpass_target(
   SOURCES
     # Scenario
     ScenarioImporter_IntegrationTests.cpp
+    ${COMPONENT_SOURCE_DIR}/importer/oscImporterCommon.cpp
     ${COMPONENT_SOURCE_DIR}/importer/eventDetectorImporter.cpp
-    ${COMPONENT_SOURCE_DIR}/importer/manipulatorImporter.cpp
     ${COMPONENT_SOURCE_DIR}/importer/scenario.cpp
     ${COMPONENT_SOURCE_DIR}/importer/scenarioImporter.cpp
+    ${COMPONENT_SOURCE_DIR}/importer/scenarioImporterHelper.cpp
 
     # Scenery
     SceneryImporter_IntegrationTests.cpp
@@ -28,6 +29,7 @@ add_openpass_target(
     # SlaveConfig
     SlaveConfigImporter_IntegrationTests.cpp
     ${COMPONENT_SOURCE_DIR}/framework/directories.cpp
+    ${COMPONENT_SOURCE_DIR}/importer/parameterImporter.cpp
     ${COMPONENT_SOURCE_DIR}/importer/slaveConfig.cpp
     ${COMPONENT_SOURCE_DIR}/importer/slaveConfigImporter.cpp
 
@@ -58,13 +60,15 @@ add_openpass_target(
     ${OPENPASS_SIMCORE_DIR}/CoreModules/World_OSI/WorldDataException.cpp
     ${OPENPASS_SIMCORE_DIR}/CoreModules/World_OSI/WorldObjectAdapter.cpp
     ${OPENPASS_SIMCORE_DIR}/CoreModules/World_OSI/WorldToRoadCoordinateConverter.cpp
+    ${OPENPASS_SIMCORE_DIR}/CoreModules/World_OSI/egoAgent.cpp
 
   HEADERS
     # Scenario
     ${COMPONENT_SOURCE_DIR}/importer/eventDetectorImporter.h
-    ${COMPONENT_SOURCE_DIR}/importer/manipulatorImporter.h
+    ${COMPONENT_SOURCE_DIR}/importer/oscImporterCommon.h
     ${COMPONENT_SOURCE_DIR}/importer/scenario.h
     ${COMPONENT_SOURCE_DIR}/importer/scenarioImporter.h
+    ${COMPONENT_SOURCE_DIR}/importer/scenarioImporterHelper.h
 
     # Scenery
     ${COMPONENT_SOURCE_DIR}/importer/connection.h
@@ -78,6 +82,7 @@ add_openpass_target(
 
     # SlaveConfig
     ${COMPONENT_SOURCE_DIR}/framework/directories.h
+    ${COMPONENT_SOURCE_DIR}/importer/parameterImporter.h
     ${COMPONENT_SOURCE_DIR}/importer/slaveConfig.h
     ${COMPONENT_SOURCE_DIR}/importer/slaveConfigImporter.h
 
@@ -105,6 +110,7 @@ add_openpass_target(
     ${OPENPASS_SIMCORE_DIR}/CoreModules/World_OSI/WorldDataException.h
     ${OPENPASS_SIMCORE_DIR}/CoreModules/World_OSI/WorldObjectAdapter.h
     ${OPENPASS_SIMCORE_DIR}/CoreModules/World_OSI/WorldToRoadCoordinateConverter.h
+    ${OPENPASS_SIMCORE_DIR}/CoreModules/World_OSI/egoAgent.h
 
   INCDIRS
     ${COMPONENT_SOURCE_DIR}

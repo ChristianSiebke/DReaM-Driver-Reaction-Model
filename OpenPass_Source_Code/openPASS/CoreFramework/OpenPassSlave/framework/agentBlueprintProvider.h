@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -17,13 +17,14 @@
 #pragma once
 
 #include "dynamicAgentTypeGenerator.h"
+#include "Common/opExport.h"
 #include "Interfaces/agentBlueprintProviderInterface.h"
 #include "Interfaces/configurationContainerInterface.h"
 
-class AgentBlueprintProvider : public AgentBlueprintProviderInterface
+class CORESLAVEEXPORT AgentBlueprintProvider : public AgentBlueprintProviderInterface
 {
 public:
-    AgentBlueprintProvider(ConfigurationContainerInterface* configurationContainer, const SamplerInterface& sampler);
+    AgentBlueprintProvider(ConfigurationContainerInterface* configurationContainer, StochasticsInterface& stochastics);
 
     /*!
     * \brief Samples an entire agent
@@ -31,11 +32,12 @@ public:
     * \details First samples the agent profile and then depending on wether it is a static or dynamic profile samples the dynamic
     * profiles and builds an AgentType from this or loads the AgentType from the specified SystemConfig
     *
-    * @param[in]        agentProfileName    name of agent profile to sample
+    * \param    agentProfileName    name of agent profile to sample
+    * \param    assignedParameters  parameters assigned by a catalog reference if appropriate
     *
-    * @return           sampled AgentBlueprint if successful
+    * \return   sampled AgentBlueprint if successful
     */
-    virtual AgentBlueprint SampleAgent(const std::string& agentProfileName) const override;
+    virtual AgentBlueprint SampleAgent(const std::string& agentProfileName, const openScenario::Parameters& assignedParameters) const override;
 
     /*!
      * \brief Store sampled information in AgentBlueprint for dynamic AgentProfile
@@ -61,7 +63,7 @@ public:
                                       std::string vehicleModelName) const;
 
 private:
-    const SamplerInterface& sampler;
+    StochasticsInterface& stochastics;
     ProfilesInterface* profiles;
     std::unordered_map<std::string, AgentProfile>& agentProfiles;
     VehicleModelsInterface* vehicleModels {nullptr};

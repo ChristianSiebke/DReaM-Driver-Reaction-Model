@@ -20,6 +20,7 @@
 #include "log.h"
 #include "vehicleModels.h"
 #include "xmlParser.h"
+#include "oscImporterCommon.h"
 
 namespace Importer {
 
@@ -30,17 +31,7 @@ const std::unordered_map<std::string, AgentVehicleType> vehicleTypeConversionMap
                                                                                     {"motorbike", AgentVehicleType::Motorbike},
                                                                                     {"bicycle", AgentVehicleType::Bicycle}};
 
-/*!
- * \brief Container for axle parameters in OpenSCENARIO vehicle model
- */
-struct VehicleAxle
-{
-    double maxSteering;     //!< Maximum steering angle
-    double wheelDiameter;   //!< Diameter of the wheels
-    double trackWidth;      //!< Trackwidth of the axle
-    double positionX;       //!< Longitudinal position offset (measured from reference point)
-    double positionZ;       //!< Vertical position offset (measured from reference point)
-};
+using Properties = std::map<std::string, std::string>;
 
 /*!
  * \brief Provides methods for importing vehicle models from OpenSCENARIO catalog files
@@ -111,7 +102,7 @@ private:
      *
      * \param[in]   model   The model parameters to check
      */
-    static void CheckModelParameters(const VehicleModelParameters& model);
+    static void CheckModelParameters(const ParametrizedVehicleModelParameters& model);
 
     /*!
      * \brief Imports a catalog from OpenSCENARIO DOM
@@ -145,13 +136,14 @@ private:
      *
      * \param[in]   modelElement        The DOM element of the model
      * \param[out]  modelParameters     Storage for the imported values
+     * \param[in]   parameters          declared parameters
      *
      * A warning is issued, if the bounding box center is not 0.0 in y-direction and half the model's height in z-direction,
      * as offsets in these directions are not supported by the simulator.
      *
      * \throw   std::runtime_error  On missing `BoundingBox`, `Center` or `Dimension` tag
      */
-    static void ImportModelBoundingBox(QDomElement& modelElement, VehicleModelParameters& modelParameters);
+    static void ImportModelBoundingBox(QDomElement& modelElement, ParametrizedVehicleModelParameters& modelParameters, openScenario::Parameters& parameters);
 
     /*!
      * \brief Imports the models' axles parameters
@@ -169,11 +161,12 @@ private:
      *
      * \param[in]   vehicleElement      The DOM element of the vehicle model
      * \param[out]  modelParameters     Storage for the imported values
+     * \param[in]   parameters          declared parameters
      *
      * \throw   std::runtime_error  On missing `Axles`, `Front` or `Rear` tag, reference point not being on rear axle or
      *                              steering defined for rear axle
      */
-    static void ImportVehicleModelAxles(QDomElement& vehicleElement, VehicleModelParameters& modelParameters);
+    static void ImportVehicleModelAxles(QDomElement& vehicleElement, ParametrizedVehicleModelParameters& modelParameters, openScenario::Parameters& parameters);
 
 
     /*!
@@ -181,21 +174,12 @@ private:
      *
      * \param[in]   axleElement         The DOM element ot the axle
      * \param[out]  axleParameters      Storage for the imported values
+     * \param[in]   parameters          declared parameters
      *
      * \throw   std::runtime_error  On missing `Axles`, `Front` or `Rear` tag, reference point not being on rear axle or
      *                              steering defined for rear axle
      */
-    static void ImportVehicleModelAxle(QDomElement& axleElement, VehicleAxle& axleParameters);
-
-    /*!
-     * \brief Assigns the axle-specific model parameters
-     *
-     * \param[in]   frontAxle           Parameters of the front axle
-     * \param[in]   rearAxle            Parameters of the rear axle
-     * \param[out]  modelParameters     Storage for the model parameters
-     */
-    static void AssignModelParameters(const VehicleAxle& frontAxle, const VehicleAxle& rearAxle,
-                                      VehicleModelParameters& modelParameters);
+    static void ImportVehicleModelAxle(QDomElement& axleElement, VehicleAxle& axleParameters, openScenario::Parameters& parameters);
 
     /*!
      * \brief Validates the axle parameters
@@ -216,22 +200,23 @@ private:
      *
      * \param[in]   vehicleElement      The DOM element of the vehicle model
      * \param[out]  modelParameters     Storage for the imported values
+     * \param[in]   parameters          declared parameters
      *
      * \throw   std::runtime_error  On missing `Performance` tag or missing or invalid `maxSpeed` or `mass` attribute
      */
-    static void ImportVehicleModelPerformance(QDomElement& vehicleElement, VehicleModelParameters& modelParameters);
+    static void ImportVehicleModelPerformance(QDomElement& vehicleElement, ParametrizedVehicleModelParameters& modelParameters, openScenario::Parameters& parameters);
 
     /*!
      * \brief Imports the models' gears from its `ParameterDeclaration` in OpenSCENARIO DOM
      *
-     * The paramters `NumberOfGears` has to specifiy the number of gears in a model. The first entry in VehicleModelParameters
+     * The paramters `NumberOfGears` has to specifiy the number of gears in a model. The first entry in ParametrizedVehicleModelParameters
      * `gearRatios` will always be 0.0. For every gear, a `Parameter` tag `GearRatioN` has to exist, where N represents the
      * number of a gear. Ratios are imported in ascending order of the gear number.
      *
-     * \param[in]   vehicleElement      The DOM element of the vehicle model
      * \param[out]  modelParameters     Storage for the imported values
+     * \param[in]   properties          openScenario properties
      */
-    static void ImportVehicleModelGears(QDomElement& parametersElement, VehicleModelParameters& modelParameters);
+    static void ImportVehicleModelGears(ParametrizedVehicleModelParameters& modelParameters, const Properties& properties);
 
     /*!
      * \brief Helper for template type deduction with std::optional parameters
@@ -245,57 +230,55 @@ private:
     struct TypeHelper { typedef T type; };
 
     /*!
-     * \brief Imports the value from an model parameter tag
+     * \brief Assigns the value of a property to a attribute
      *
-     * \param[in]   parametersElement   Parameters DOM element
-     * \param[in]   parameterName       Name of the parameter to import
-     * \param[out]  parameterValue      Value of the parsed parameter
+     * \param[in]   propertyName       Name of the parameter to import
+     * \param[out]  attribtue               Reference to the attribute
+     * \param[in]   properties              Properties
      * \param[in]   defaultValue        An optional default value to use if it cannot be imported
      *
      * \throw   std::runtime_error  On missing model `Parameter` tag or invalid `name` or `value` attribute.
      */
     template<typename T>
-    static void ImportModelParameter(QDomElement& parametersElement, const std::string& parameterName, T& parameterValue, std::optional<typename TypeHelper<T>::type> defaultValue = std::nullopt)
+    static void AssignProperty(const std::string& propertyName,
+                               openScenario::ParameterizedAttribute<T>& attribute,
+                               const Properties& properties,
+                               std::optional<typename TypeHelper<T>::type> defaultValue = std::nullopt)
     {
-        QDomElement parameterElement;
-        if (!SimulationCommon::GetFirstChildElement(parametersElement, "Parameter", parameterElement) && !defaultValue.has_value())
+        auto propertyIt = properties.find(propertyName);
+        if (propertyIt != properties.cend())
         {
-            throw std::runtime_error("Cannot import model parameter '" + parameterName + "'. No parameters defined.");
-        }
-
-        while (!parameterElement.isNull())
-        {
-            if (parameterElement.attribute("name").toStdString() == parameterName)
+            if(std::is_same<T, double>::value)
             {
-                std::string parameterType;
-
-                if (!SimulationCommon::ParseAttribute(parameterElement, "type", parameterType))
-                {
-                    throw std::runtime_error("Error parsing type of '" + parameterName + "'");
-                }
-
-                if (!SimulationCommon::ParseAttribute(parameterElement, "value", parameterValue))
-                {
-                    throw std::runtime_error("Error parsing '" + parameterName + "'");
-                }
-
-                return;
+                attribute = {propertyName, std::stod(properties.at(propertyName))};
             }
-
-            parameterElement = parameterElement.nextSiblingElement("Parameter");
+            else if (std::is_same<T, int>::value)
+            {
+                attribute = {propertyName, std::stoi(properties.at(propertyName))};
+            }
+            else
+            {
+                throw std::runtime_error("Property data type not supported.");
+            }
         }
-
-        if (defaultValue.has_value())
+        else if (defaultValue)
         {
-            const auto value = defaultValue.value();
-            LOG_INTERN(LogLevel::Warning) << "Using default value " << value << " for model parameter '" << parameterName << "'";
-            parameterValue = defaultValue.value();
+            attribute = {propertyName, defaultValue.value()};
         }
         else
         {
-            throw std::runtime_error("Model parameter '" + parameterName + "' is missing");
+            LogErrorAndThrow("Missing parameter " + propertyName);
         }
     }
+
+    /*!
+     * \brief Imports the properties of an element
+     *
+     * \param[in]   root       XML document root
+     *
+     * \return   Properties
+     */
+    static Properties ImportProperties(QDomElement& root);
 };
 
 } //namespace Importer

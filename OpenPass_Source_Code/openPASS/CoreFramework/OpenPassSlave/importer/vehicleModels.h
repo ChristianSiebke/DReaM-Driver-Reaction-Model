@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -10,20 +10,21 @@
 
 #pragma once
 
+#include "Common/opExport.h"
 #include "CoreFramework/CoreShare/log.h"
 #include "Interfaces/vehicleModelsInterface.h"
 
 namespace Configuration
 {
 
-class VehicleModels : public VehicleModelsInterface
+class CORESLAVEEXPORT VehicleModels : public VehicleModelsInterface
 {
 public:
     VehicleModels();
     ~VehicleModels();
 
     VehicleModelMap& GetVehicleModelMap();
-    VehicleModelParameters GetVehicleModel(std::string vehicleModelType);
+    VehicleModelParameters GetVehicleModel(std::string vehicleModelType, const openScenario::Parameters& parameters = {});
 
 private:
     VehicleModelMap vehicleModelMap;

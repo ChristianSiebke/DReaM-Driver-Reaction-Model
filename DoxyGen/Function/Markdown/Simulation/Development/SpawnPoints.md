@@ -76,70 +76,69 @@ The PreRun Spawnpoint (included in library "SpawnPointPreRunCommon_OSI") is resp
 This SpawnPoint only acts once before the simulator starts and not during the simulation run.
 A traffic config is required for each PreRun SpawnPoint.
 
-The PreRunCommon SpawnPoint requires a SpawnPointProfile to be defined in the ProfilesCatalog.
-Here the Road, Lanes, S-range, as well as the Traffic Configuration should be specified for the SpawnPoint.
+The PreRunCommon SpawnPoint requires a Spawner-Profile in the ProfilesCatalog. The SpawnerProfile contains information specifying the SpawnAreas and TrafficGroups
 
 ```xml
-<SpawnPointProfiles>
-    <SpawnPointProfile Name="ExamplePreRunCommonProfile">
-        <String Key="Road" Value="1"/>
-        <IntVector Key="Lanes" Value="-1,-2"/>
-        <Double Key="S-Start" Value="1500"/>
-        <Double Key="S-End" Value="3000"/>
-        <List Name="TrafficVolumes">
-            <ListItem>
-                <Double Key="TrafficVolume" Value="3000"/>
-                <Double Key="Probability" Value="0.5"/>
-            </ListItem>
-            <ListItem>
-                <Double Key="TrafficVolume" Value="1500"/>
-                <Double Key="Probability" Value="0.5"/>
-            </ListItem>
-        </List>
-        <List Name="PlatoonRates">
-            <ListItem>
-                <Double Key="PlatoonRate" Value="0.5"/>
-                <Double Key="Probability" Value="0.4"/>
-            </ListItem>
-            <ListItem>
-                <Double Key="PlatoonRate" Value="0.75"/>
-                <Double Key="Probability" Value="0.6"/>
-            </ListItem>
-        </List>
-        <List Name="Velocities">
-            <ListItem>
-                <NormalDistribution Key="Velocity" Max="40.0" Mean="30.0" Min="20.0" SD="5.0"/>
-                <Double Key="Probability" Value="0.6"/>
-            </ListItem>
-            <ListItem>
-                <NormalDistribution Key="Velocity" Max="50.0" Mean="30.0" Min="10.0" SD="10.0"/>
-                <Double Key="Probability" Value="0.4"/>
-            </ListItem>
-        </List>
-        <List Name="AgentProfiles">
-            <ListItem>
-                <String Key="AgentProfile" Value="LuxuryClassCarAgent"/>
-                <Double Key="Probability" Value="0.4"/>
-            </ListItem>
-            <ListItem>
-                <String Key="AgentProfile" Value="MiddleClassCarAgent"/>
-                <Double Key="Probability" Value="0.6"/>
-            </ListItem>
-        </List>
-    </SpawnPointProfile>
-</SpawnPointProfiles>
+<ProfileGroup Type="TrafficGroup">
+    <Profile Name="ExampleTrafficGroup">
+      <List Name="AgentProfiles">
+        <ListItem>
+          <String Key="Name" Value="LuxuryClassCarAgent"/>
+          <Double Key="Weight" Value="0.4"/>
+        </ListItem>
+        <ListItem>
+          <String Key="Name" Value="MiddleClassCarAgent"/>
+          <Double Key="Weight" Value="0.6"/>
+        </ListItem>
+        <ListItem>
+          <String Key="Name" Value="TruckAgent"/>
+          <Double Key="Weight" Value="0.0"/>
+        </ListItem>
+      </List>
+      <NormalDistribution Key="Velocity" Max="68.5" Mean="43.5" Min="18.5" SD="5.0"/>
+      <LogNormalDistribution Key="TGap" Max="0.5" Min="0.5" Mu="0.5" Sigma="0.5"/>
+      <DoubleVector Key="Homogeneity" Value="0.8, 0.7"/>
+      <Bool Key="RightLaneOnly" Value="true"/>
+    </Profile>
+</ProfileGroup>
+<ProfileGroup Type="Spawner">
+    <Profile Name="ExamplePreRunSpawner">
+      <List Name="SpawnPoints">
+        <ListItem>
+          <String Key="Road" Value="1"/>
+          <IntVector Key="Lanes" Value="-1,-2,-3,-4,-5"/>
+          <Double Key="SStart" Value="0.0"/>
+          <Double Key="SEnd" Value="1000.0"/>
+        </ListItem>
+      </List>
+      <List Name="TrafficGroups">
+        <ListItem>
+          <Double Key="Weight" Value="1"/>
+          <Reference Type="TrafficGroup" Name="ExampleTrafficGroup"/>
+        </ListItem>
+      </List>
+    </Profile>
+</ProfileGroup>
 ```
+
+The SpawnAreas are defined by the following parameter:
 
 | Name            | Description |
 |-----------------|-------------|
 | Road            | The RoadID of the Road on which to spawn Agents |
 | Lanes           | The LaneIDs of the Lanes of the Road on which to spawn Agents |
-| S-Start         | The S position specifying the minimum S for the range within which to spawn Agents |
-| S-End           | The S position specifying the maximum S for the range within which to spawn Agents |
-| TrafficVolumes  | A set of <ListItem>s which define potential TrafficVolume values for the Agents spawned by the spawn point and the probability at which the TrafficVolume will be selected |
-| PlatoonRates    | A set of <ListItem>s which define potential PlatoonRate values for the Agents spawned by the spawn point and the probability at which the PlatoonRate will be selected     |
-| Velocities      | A set of <ListItem>s which define potential Velocity Normal Distributions for the Agents spawned by the spawn point and the Probability at which the Velocity Normal Distribution will be selected |
-| AgentProfiles   | A set of <ListItem>s which define potential AgentProfile values for the Agents spawned by the spawn point and the Probability at which the AgentProfile will be selected |
+| SStart         | The S position specifying the minimum S for the range within which to spawn Agents |
+| SEnd           | The S position specifying the maximum S for the range within which to spawn Agents |
+
+The TrafficGroups are defined by the following parameter:
+
+| Name            | Description |
+|-----------------|-------------|
+| AgentProfiles   | A set of <ListItem>s which define potential AgentProfile values for the Agents spawned in the SpawnArea and the probability at which the TrafficVolume will be selected |
+| Velocity    	  | A stochastic distribution describing the velocity in m/s of the spawned Agents |
+| TGap      	  | A stochastic distribution describing the gap in seconds between spawned Agents |
+| Homogeneity     | OPTIONAL: A vector describing the velocity increments for left lanes |
+| RightLaneOnly   | OPTIONAL: A flag determining whether this TrafficGroup can only be applied to the right most lane |
 
 The PreRunCommon SpawnPoint will spawn common agents on the specified Lanes of the specified Road from the s position S-Start to the s position S-End with Traffic Parameters sampled from the specified TrafficVolumes, PlatoonRates, Velocities, and AgentProfiles lists with the following restrictions:
 
@@ -170,67 +169,67 @@ As such, there are 7 different potential scenarios that may arise in terms of ho
 The Runtime SpawnPoint (included in library "SpawnPointRuntimeCommon_OSI") is responsible for maintaining a populated scenery throughout the simulation runtime.
 This SpawnPoint acts at each timestep throughout the simulation run and attempts to spawn Common Agents at the specified location(s).
 
-The PreRunCommon SpawnPoint requires a SpawnPointProfile to be defined in the ProfilesCatalog. Here, the Road, Lanes, S-Position, as well as the TrafficConfig should be specified for the SpawnPoint:
+The PreRunCommon SpawnPoint requires a Spawner-Profile to be defined in the ProfilesCatalog. The Spawner-Profile contains all SpawnPoints and all possible TrafficGroups:
 
 ```xml
-<SpawnPointProfiles>
-    <SpawnPointProfile Name="ExampleRuntimeCommonProfile">
-        <String Key="Road" Value="1"/>
-        <IntVector Key="Lanes" Value="-1,-2"/>
-        <Double Key="S-Position" Value="0"/>
-        <List Name="TrafficVolumes">
-            <ListItem>
-                <Double Key="TrafficVolume" Value="3000"/>
-                <Double Key="Probability" Value="0.5"/>
-            </ListItem>
-            <ListItem>
-                <Double Key="TrafficVolume" Value="1500"/>
-                <Double Key="Probability" Value="0.5"/>
-            </ListItem>
-        </List>
-        <List Name="PlatoonRates">
-            <ListItem>
-                <Double Key="PlatoonRate" Value="0.5"/>
-                <Double Key="Probability" Value="0.4"/>
-            </ListItem>
-            <ListItem>
-                <Double Key="PlatoonRate" Value="0.75"/>
-                <Double Key="Probability" Value="0.6"/>
-            </ListItem>
-        </List>
-        <List Name="Velocities">
-            <ListItem>
-                <NormalDistribution Key="Velocity" Max="40.0" Mean="30.0" Min="20.0" SD="5.0"/>
-                <Double Key="Probability" Value="0.6"/>
-            </ListItem>
-            <ListItem>
-                <NormalDistribution Key="Velocity" Max="50.0" Mean="30.0" Min="10.0" SD="10.0"/>
-                <Double Key="Probability" Value="0.4"/>
-            </ListItem>
-        </List>
-        <List Name="AgentProfiles">
-            <ListItem>
-                <String Key="AgentProfile" Value="LuxuryClassCarAgent"/>
-                <Double Key="Probability" Value="0.4"/>
-            </ListItem>
-            <ListItem>
-                <String Key="AgentProfile" Value="MiddleClassCarAgent"/>
-                <Double Key="Probability" Value="0.6"/>
-            </ListItem>
-        </List>
-    </SpawnPointProfile>
-</SpawnPointProfiles>
+<ProfileGroup Type="TrafficGroup">
+    <Profile Name="ExampleTrafficGroup">
+      <List Name="AgentProfiles">
+        <ListItem>
+          <String Key="Name" Value="LuxuryClassCarAgent"/>
+          <Double Key="Weight" Value="0.4"/>
+        </ListItem>
+        <ListItem>
+          <String Key="Name" Value="MiddleClassCarAgent"/>
+          <Double Key="Weight" Value="0.6"/>
+        </ListItem>
+        <ListItem>
+          <String Key="Name" Value="TruckAgent"/>
+          <Double Key="Weight" Value="0.0"/>
+        </ListItem>
+      </List>
+      <NormalDistribution Key="Velocity" Max="68.5" Mean="43.5" Min="18.5" SD="5.0"/>
+      <LogNormalDistribution Key="TGap" Max="0.5" Min="0.5" Mu="0.5" Sigma="0.5"/>
+      <DoubleVector Key="Homogeneity" Value="0.8, 0.7"/>
+      <Bool Key="RightLaneOnly" Value="true"/>
+    </Profile>
+</ProfileGroup>
+<ProfileGroup Type="Spawner">
+    <Profile Name="ExamplePreRunSpawner">
+      <List Name="SpawnPoints">
+        <ListItem>
+          <String Key="Road" Value="1"/>
+          <IntVector Key="Lanes" Value="-1,-2,-3,-4,-5"/>
+          <Double Key="SCoordinate" Value="0.0"/>
+        </ListItem>
+      </List>
+      <List Name="TrafficGroups">
+        <ListItem>
+          <Double Key="Weight" Value="1"/>
+          <Reference Type="TrafficGroup" Name="ExampleTrafficGroup"/>
+        </ListItem>
+      </List>
+    </Profile>
+</ProfileGroup>
 ```
+
+The SpawnPoints are defined by the following parameter:
 
 | Name            | Description |
 |-----------------|-------------|
 | Road            | The RoadID of the Road on which to spawn Agents |
 | Lanes           | The LaneIDs of the Lanes of the Road on which to spawn Agents |
 | S-Position      | The S position specifying at which point to spawn Agents |
-| TrafficVolumes  | A set of <ListItem>s which define potential TrafficVolume values for the Agents spawned by the spawn point and the probability at which the TrafficVolume will be selected |
-| PlatoonRates    | A set of <ListItem>s which define potential PlatoonRate values for the Agents spawned by the spawn point and the probability at which the PlatoonRate will be selected     |
-| Velocities      | A set of <ListItem>s which define potential Velocity Normal Distributions for the Agents spawned by the spawn point and the Probability at which the Velocity Normal Distribution will be selected |
-| AgentProfiles   | A set of <ListItem>s which define potential AgentProfile values for the Agents spawned by the spawn point and the Probability at which the AgentProfile will be selected |
+
+The TrafficGroups are defined by the following parameter:
+
+| Name            | Description |
+|-----------------|-------------|
+| AgentProfiles   | A set of <ListItem>s which define potential AgentProfile values for the Agents spawned in the SpawnArea and the probability at which the TrafficVolume will be selected |
+| Velocity    	  | A stochastic distribution describing the velocity in m/s of the spawned Agents |
+| TGap      	  | A stochastic distribution describing the gap in seconds between spawned Agents |
+| Homogeneity     | OPTIONAL: A vector describing the velocity increments for left lanes |
+| RightLaneOnly   | OPTIONAL: A flag determining whether this TrafficGroup can only be applied to the right most lane |
 
 The RuntimeCommon SpawnPoint will spawn a generated Agent under the following conditions:
 

@@ -21,17 +21,6 @@ class RunStatisticCalculation
 {
 public:
     /*!
-     * \brief Calculates the total distance traveled of all agents in the simulation
-     *
-     * The members `EgoDistanceTraveled` and `TotalDistanceTraveled` of the first parameter
-     * are used to store the result
-     *
-     * \param[out] runStatistic      Result is stored here
-     * \param[in]  world             Pointer to the world
-     */
-    static void CalculateTotalDistanceTraveled(RunStatistic& runStatistic, WorldInterface* world);
-
-    /*!
      * \brief Determines whether the ego had a collision and sets the related flag in the RunStatistic
      *
      * \param[out] runStatistic      Result is stored here

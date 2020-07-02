@@ -5,7 +5,11 @@ add_openpass_target(
 
   HEADERS
     OpenPassSlave.h
+    dataStoreInterface/dataStore.h
+    dataStoreInterface/dataStoreBinding.h
+    dataStoreInterface/dataStoreLibrary.h
     framework/agentBlueprintProvider.h
+    framework/agentDataPublisher.h
     framework/agentFactory.h
     framework/commandLineParser.h
     framework/configurationContainer.h
@@ -14,6 +18,7 @@ add_openpass_target(
     framework/dynamicParametersSampler.h
     framework/dynamicProfileSampler.h
     framework/eventNetwork.h
+    framework/eventNetworkDataPublisher.h
     framework/frameworkModuleContainer.h
     framework/observationModule.h
     framework/observationNetwork.h
@@ -26,13 +31,14 @@ add_openpass_target(
     importer/eventDetectorImporter.h
     importer/frameworkModules.h
     importer/junction.h
-    importer/manipulatorImporter.h
+    importer/oscImporterCommon.h
     importer/parameterImporter.h
     importer/profiles.h
     importer/profilesImporter.h
     importer/road.h
     importer/scenario.h
     importer/scenarioImporter.h
+    importer/scenarioImporterHelper.h
     importer/scenery.h
     importer/sceneryImporter.h
     importer/slaveConfig.h
@@ -73,6 +79,7 @@ add_openpass_target(
     scheduler/schedulerTasks.h
     scheduler/taskBuilder.h
     scheduler/tasks.h
+    scheduler/timeKeeper.h
     observationInterface/observationBinding.h
     observationInterface/observationLibrary.h
     manipulatorInterface/manipulatorBinding.h
@@ -84,7 +91,11 @@ add_openpass_target(
     #collisionDetectionInterface/collisionDetectionLibrary.h
 
   SOURCES
+    dataStoreInterface/dataStore.cpp
+    dataStoreInterface/dataStoreBinding.cpp
+    dataStoreInterface/dataStoreLibrary.cpp
     framework/agentBlueprintProvider.cpp
+    framework/agentDataPublisher.cpp
     framework/agentFactory.cpp
     framework/commandLineParser.cpp
     framework/configurationContainer.cpp
@@ -93,6 +104,7 @@ add_openpass_target(
     framework/dynamicParametersSampler.cpp
     framework/dynamicProfileSampler.cpp
     framework/eventNetwork.cpp
+    framework/eventNetworkDataPublisher.cpp
     framework/frameworkModuleContainer.cpp
     framework/observationModule.cpp
     framework/observationNetwork.cpp
@@ -102,13 +114,14 @@ add_openpass_target(
     importer/csvParser.cpp
     importer/eventDetectorImporter.cpp
     importer/junction.cpp
-    importer/manipulatorImporter.cpp
+    importer/oscImporterCommon.cpp
     importer/parameterImporter.cpp
     importer/profiles.cpp
     importer/profilesImporter.cpp
     importer/road.cpp
     importer/scenario.cpp
     importer/scenarioImporter.cpp
+    importer/scenarioImporterHelper.cpp
     importer/scenery.cpp
     importer/sceneryImporter.cpp
     importer/slaveConfig.cpp
@@ -159,6 +172,7 @@ add_openpass_target(
     ../../Common
     collisionDetectionInterface
     eventDetectorInterface
+    dataStoreInterface
     framework
     importer
     manipulatorInterface
@@ -195,6 +209,7 @@ add_openpass_target(
     .
     ../../Common
     collisionDetectionInterface
+    dataStoreInterface
     eventDetectorInterface
     framework
     importer

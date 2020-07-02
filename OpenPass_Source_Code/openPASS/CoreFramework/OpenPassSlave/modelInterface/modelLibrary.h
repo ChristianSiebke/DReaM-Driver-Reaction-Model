@@ -25,6 +25,8 @@
 #include "Interfaces/componentInterface.h"
 #include "Interfaces/observationNetworkInterface.h"
 
+class PublisherInterface;
+
 namespace SimulationSlave
 {
 
@@ -44,22 +46,22 @@ public:
                                                                  StochasticsInterface *stochastics,
                                                                  WorldInterface *world,
                                                                  const ParameterInterface *parameters,
-                                                                 const std::map<int, ObservationInterface*> *observationLinks,
+                                                                 PublisherInterface * const publisher,
                                                                  AgentInterface *agent,
                                                                  const CallbackInterface *callbacks);
     typedef ModelInterface *(*UnrestrictedEventModelInterface_CreateInstanceType)(std::string componentName,
-                                                                             bool isInit,
-                                                                             int priority,
-                                                                             int offsetTime,
-                                                                             int responseTime,
-                                                                             int cycleTime,
-                                                                             StochasticsInterface *stochastics,
-                                                                             WorldInterface *world,
-                                                                             const ParameterInterface *parameters,
-                                                                             const std::map<int, ObservationInterface*> *observationLinks,
-                                                                             AgentInterface *agent,
-                                                                             const CallbackInterface *callbacks,
-                                                                             const SimulationSlave::EventNetworkInterface *eventNetwork);
+                                                                                  bool isInit,
+                                                                                  int priority,
+                                                                                  int offsetTime,
+                                                                                  int responseTime,
+                                                                                  int cycleTime,
+                                                                                  StochasticsInterface *stochastics,
+                                                                                  WorldInterface *world,
+                                                                                  const ParameterInterface *parameters,
+                                                                                  PublisherInterface * const publisher,
+                                                                                  AgentInterface *agent,
+                                                                                  const CallbackInterface *callbacks,
+                                                                                  const SimulationSlave::EventNetworkInterface *eventNetwork);
     typedef void (*ModelInterface_DestroyInstanceType)(ModelInterface *implementation);
     typedef bool (*ModelInterface_UpdateInputType)(ModelInterface *implementation,
                                                    int localLinkId,
@@ -118,16 +120,18 @@ public:
     //! @param[in]     observationNetwork   Network of the observation modules
     //! @param[in]     agent                Agent instance
     //! @param[in]     eventNetwork         Instance of the internal event logic
+    //! @param[in]     publisher            Publisher instance
     //! @return
     //-----------------------------------------------------------------------------
     ComponentInterface *CreateComponent(std::shared_ptr<ComponentType> componentType,
-                               std::string componentName,
-                               const openpass::common::RuntimeInformation& runtimeInformation,
-                               StochasticsInterface *stochastics,
-                               WorldInterface *world,
-                               ObservationNetworkInterface *observationNetwork,
-                               Agent *agent,
-                               EventNetworkInterface *eventNetwork);
+                                        std::string componentName,
+                                        const openpass::common::RuntimeInformation& runtimeInformation,
+                                        StochasticsInterface *stochastics,
+                                        WorldInterface *world,
+                                        ObservationNetworkInterface *observationNetwork,
+                                        Agent *agent,
+                                        EventNetworkInterface *eventNetwork,
+                                        PublisherInterface *publisher);
 
     //-----------------------------------------------------------------------------
     //! Calls the "update input" function pointer with the provided parameters and
@@ -195,7 +199,6 @@ private:
     QLibrary *library = nullptr;
     ModelInterface_GetVersion getVersionFunc{nullptr};
     ModelInterface_CreateInstanceType createInstanceFunc{nullptr};
-    UnrestrictedEventModelInterface_CreateInstanceType createEventInstanceFunc{nullptr};
     ModelInterface_DestroyInstanceType destroyInstanceFunc{nullptr};
     ModelInterface_UpdateInputType updateInputFunc{nullptr};
     ModelInterface_UpdateOutputType updateOutputFunc{nullptr};

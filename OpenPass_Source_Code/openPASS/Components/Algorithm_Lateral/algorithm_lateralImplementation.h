@@ -12,7 +12,6 @@
 #pragma once
 
 #include "Interfaces/modelInterface.h"
-#include "Interfaces/observationInterface.h"
 #include "Common/primitiveSignals.h"
 
 /** \addtogroup Algorithm_Lateral
@@ -102,7 +101,7 @@ public:
         int cycleTime,
         StochasticsInterface *stochastics,
         const ParameterInterface *parameters,
-        const std::map<int, ObservationInterface*> *observations,
+        PublisherInterface * const publisher,
         const CallbackInterface *callbacks,
         AgentInterface *agent) :
         AlgorithmInterface(
@@ -114,7 +113,7 @@ public:
             cycleTime,
             stochastics,
             parameters,
-            observations,
+            publisher,
             callbacks,
             agent)
     {}
@@ -167,16 +166,24 @@ protected:
 
     // --- module internal variables
     //  --- Inputs
+    //! Time to Average regulation over
+    double tAverage {0.};
     //! Current lateral deviation regarding trajectory [m].
     double in_lateralDeviation = 0;
-    //! Gain for lateral deviation controller [-].
+    //! Gain for P controller lateral deviation error [-].
     double in_gainLateralDeviation = 20.0;
     //! Current heading error regarding trajectory [rad].
     double in_headingError = 0;
-    //! Gain for heading error controller [-].
+    //! Gain for P controller heading error [-].
     double in_gainHeadingError = 7.5;
-    //! Set value for trajectory curvature [1/m].
-    double in_kappaSet = 0;
+    //! Set value for trajectory curvature due to manouevre[1/m].
+    double in_kappaManoeuvre = 0;
+    //! Set value for curvature of road at reference point[1/m].
+    double in_kappaRoad = 0;
+    //! curvature at the middle of each segment between reference point and near point
+    std::vector <double> in_curvatureOfSegmentsToNearPoint {0.};
+    //! curvature at the middle of each segment between near point and far point
+    std::vector <double> in_curvatureOfSegmentsToFarPoint {0.};
     //! current velocity
     double velocity = 0.0;
     //! current angle of the steering wheel
@@ -202,5 +209,13 @@ protected:
     bool isActive{false};
 
     //! Previous scheduling time (for calculation of cycle time lenght).
-    int timeLast{-100};
+    int timeLast {-100};
+     //! moving average of total steering angle
+    double deltaHLast {0.};
+    //! running average of  mean curvature up to NearPoint
+    double meanCurvatureToNearPointSmoothLast {0.};
+    //! running average of  mean curvature from NearPoint up to FarPoint
+    double meanCurvatureToFarPointSmoothLast {0.};
+    //! running average of kappaRoad at referencepoint
+    double curvatureRoadSmoothLast {0.};
 };

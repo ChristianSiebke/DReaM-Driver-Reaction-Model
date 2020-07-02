@@ -15,7 +15,6 @@
 
 #include <math.h>
 #include "modelInterface.h"
-#include "observationInterface.h"
 
 /*!
  * \addtogroup Components_Basic openPASS components basic
@@ -80,7 +79,7 @@ public:
                                    StochasticsInterface *stochastics,
                                    WorldInterface *world,
                                    const ParameterInterface *parameters,
-                                   const std::map<int, ObservationInterface *> *observations,
+                                   PublisherInterface * const publisher,
                                    const CallbackInterface *callbacks,
                                    AgentInterface *agent);
     virtual ~Sensor_Distance_Implementation() = default;

@@ -32,12 +32,18 @@ public:
     VehicleComponentEvent(int time,
                           const std::string &eventName,
                           std::string source,
-                          int agentId):
+                          int agentId) :
         BasicEvent(time,
                    eventName,
-                   source),
+                   source,
+                   {agentId},
+                   {}),
         agentId(agentId)
-    {}
+    {
+        parameter.emplace("Source", source);
+        parameter.emplace("State", eventName);
+    }
+
     VehicleComponentEvent(const VehicleComponentEvent&) = delete;
     VehicleComponentEvent(VehicleComponentEvent&&) = delete;
     VehicleComponentEvent& operator=(const VehicleComponentEvent&) = delete;

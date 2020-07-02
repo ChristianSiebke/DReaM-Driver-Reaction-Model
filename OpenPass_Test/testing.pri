@@ -36,6 +36,15 @@ include($$PWD/../OpenPass_Source_Code/ccache.pri)
 
 CONFIG+=c++17
 
+## debug postfix not working in qmake build
+DEFINES+=DEBUG_POSTFIX=\\\"\\\"
+
+debug {
+    # Helps preventing x86_64-w64-mingw32 related error "Fatal error: can't close debug\SOMEFILE.o: File too big"
+    win32:QMAKE_CXXFLAGS += -O1
+}
+
+
 ## executable destination directories ##
 win32 {
     DIR_DEBUG = "C:/OpenPASS/BinDebug"

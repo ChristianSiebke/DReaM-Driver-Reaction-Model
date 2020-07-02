@@ -54,16 +54,16 @@
 
 #pragma once
 
-#include "Interfaces/modelInterface.h"
-#include "Interfaces/eventNetworkInterface.h"
-#include "Common/openScenarioDefinitions.h"
-
-#include "Common/vector2d.h"
 #include "Common/accelerationSignal.h"
-#include "Common/vehicleComponentEvent.h"
 #include "Common/dynamicsSignal.h"
 #include "Common/globalDefinitions.h"
 #include "Common/lateralSignal.h"
+#include "Common/openScenarioDefinitions.h"
+#include "Common/vector2d.h"
+#include "Common/vehicleComponentEvent.h"
+#include "Interfaces/eventNetworkInterface.h"
+#include "Interfaces/modelInterface.h"
+#include "Interfaces/publisherInterface.h"
 
 using openScenario::Trajectory;
 using openScenario::TrajectoryPoint;
@@ -73,10 +73,10 @@ using openScenario::TrajectoryPoint;
  *
  * \ingroup Dynamics_TrajectoryFollower
  */
-class TrajectoryFollowerImplementation : public UnrestrictedEventModelInterface
+class TrajectoryFollowerImplementation : public UnrestrictedModelInterface
 {
 public:
-    const std::string COMPONENTNAME = "Dynamics_TrajectoryFollower";
+    static constexpr char COMPONENTNAME[] = "Dynamics_TrajectoryFollower";
 
     TrajectoryFollowerImplementation(std::string componentName,
                                      bool isInit,
@@ -87,16 +87,9 @@ public:
                                      StochasticsInterface *stochastics,
                                      WorldInterface *world,
                                      const ParameterInterface *parameters,
-                                     const std::map<int, ObservationInterface*> *observations,
+                                     PublisherInterface * const publisher,
                                      const CallbackInterface *callbacks,
-                                     AgentInterface *agent,
-                                     SimulationSlave::EventNetworkInterface * const eventNetwork);
-
-    TrajectoryFollowerImplementation(const TrajectoryFollowerImplementation&) = delete;
-    TrajectoryFollowerImplementation(TrajectoryFollowerImplementation&&) = delete;
-    TrajectoryFollowerImplementation& operator=(const TrajectoryFollowerImplementation&) = delete;
-    TrajectoryFollowerImplementation& operator=(TrajectoryFollowerImplementation&&) = delete;
-    virtual ~TrajectoryFollowerImplementation() = default;
+                                     AgentInterface *agent);
 
     /*!
     * \brief Update Inputs
@@ -141,32 +134,35 @@ public:
     *
     * @param[in]     time           Current scheduling time
     */
-    void CalculateNextTimestep(int time);
+    void CalculateNextTimestep();
 
 private:
-    bool initialization {true};
+        const double cycleTimeInSeconds{0.0};
+
+    bool initialization{true};
     bool enforceTrajectory{false};
     bool automaticDeactivation{false};
-    bool inputAccelerationActive {false};
+    bool inputAccelerationActive{false};
 
-    int currentTime{0};
+    double currentTime{0};
 
-    double inputAcceleration {0.0};
-    const double cycleTimeInSeconds {0.0};
+    double inputAcceleration{0.0};
 
     DynamicsSignal dynamicsOutputSignal{};
 
     Trajectory trajectory{};
-    std::vector<TrajectoryPoint>::iterator previousTrajectoryIterator {};
-    std::vector<TrajectoryPoint>::iterator nextTrajectoryIterator {};
+    std::vector<TrajectoryPoint>::iterator previousTrajectoryIterator{};
+    std::vector<TrajectoryPoint>::iterator nextTrajectoryIterator{};
 
-    double lastCoordinateTimestamp {0};
-    double lastVelocity {0.0};
+    double lastCoordinateTimestamp{0};
+    double lastVelocity{0.0};
     TrajectoryPoint lastWorldPosition;
-    double percentageTraveledBetweenCoordinates {0};
+    double percentageTraveledBetweenCoordinates{0};
 
-    ComponentState componentState {ComponentState::Disabled};
+    ComponentState componentState{ComponentState::Disabled};
     bool canBeActivated{true};
+
+    void Init();
 
     [[ noreturn ]] void ThrowCouldNotInstantiateSignalError();
     [[ noreturn ]] void ThrowInvalidSignalTypeError();
@@ -181,12 +177,12 @@ private:
     Common::Vector2d CalculateScaledVector(const TrajectoryPoint &previousPosition, const TrajectoryPoint &nextPosition, const double &factor);
     double CalculateScaledDeltaYawAngle(const TrajectoryPoint &previousPosition, const TrajectoryPoint &nextPosition, const double &factor);
 
-    TrajectoryPoint CalculateStartPosition(const TrajectoryPoint &previousPosition, const TrajectoryPoint &nextPosition);
-    std::pair<int, TrajectoryPoint> CalculateStartCoordinate(const std::pair<int, TrajectoryPoint> &previousPosition, const std::pair<int, TrajectoryPoint> &nextPosition);
     double CalculateDistanceBetweenWorldCoordinates(TrajectoryPoint previousPosition, TrajectoryPoint nextPosition);
 
     void TriggerWithActiveAccelerationInput();
     void TriggerWithInactiveAccelerationInput();
+
+    void SetComponentState(const ComponentState newState);
 
     void UpdateDynamics(const TrajectoryPoint &previousPosition,
                         const Common::Vector2d &direction,

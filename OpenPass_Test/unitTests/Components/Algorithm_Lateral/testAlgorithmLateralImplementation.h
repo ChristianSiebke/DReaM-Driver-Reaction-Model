@@ -18,8 +18,8 @@
 #include "fakeStochastics.h"
 #include "fakeParameter.h"
 #include "fakeAgent.h"
-#include "fakeObservation.h"
 #include "algorithm_lateralImplementation.h"
+#include "fakePublisher.h"
 
 /**********************************************************/
 // Define fake classes necessary for testing
@@ -37,7 +37,7 @@ public:
             int cycleTime,
             StochasticsInterface* stochastics,
             const ParameterInterface* parameters,
-            const std::map<int, ObservationInterface*> *observations,
+            PublisherInterface * const publisher,
             const CallbackInterface* callbacks,
             AgentInterface* agent) :
             AlgorithmLateralImplementation(
@@ -49,7 +49,7 @@ public:
                 cycleTime,
                 stochastics,
                 parameters,
-                observations,
+                publisher,
                 callbacks,
                 agent){}
 
@@ -62,7 +62,10 @@ public:
     void SetLateralDeviation(double lateralDeviation) {in_lateralDeviation = lateralDeviation;}
     void SetGainHeadingError(double gainHeadingError) {in_gainHeadingError = gainHeadingError;}
     void SetHeadingError(double headingError) {in_headingError = headingError;}
-    void SetCurvature(double curvature) {in_kappaSet = curvature;}
+    void SetCurvatureRoad(double curvature) {in_kappaRoad = curvature;}
+    void SetCurvatureManeuver(double curvature) {in_kappaManoeuvre = curvature;}
+    void SetCurvatureNear(std::vector <double> curvature) {in_curvatureOfSegmentsToNearPoint = curvature;}
+    void SetCurvatureFar(std::vector <double> curvature) {in_curvatureOfSegmentsToFarPoint = curvature;}
     void SetSteeringMax(double steeringMax) {in_steeringMax =  steeringMax;}
     void SetActualSteeringWheelAngle(double angle) {this->steeringWheelAngle = angle;}
     void SetDesiredSteeringWheelAngle(double Angle) {out_desiredSteeringWheelAngle = Angle;}
@@ -73,7 +76,10 @@ public:
     double GetGainHeadingError() {return in_gainHeadingError;}
     double GetGainLateralDeviation() {return in_gainLateralDeviation;}
     double GetHeadingError() {return in_headingError;}
-    double GetKappaSet() {return in_kappaSet;}
+    double GetKappaRoad() {return in_kappaRoad;}
+    double GetKappaManeuver() {return in_kappaManoeuvre;}
+    std::vector <double> GetKappaNear() {return in_curvatureOfSegmentsToNearPoint;}
+    std::vector <double> GetKappaFar() {return in_curvatureOfSegmentsToFarPoint;}
     double GetLateralDeviation() {return in_lateralDeviation;}
     double GetLongitudinalVelocity() {return velocity;}
     double GetSteeringRatio() {return in_steeringRatio;}

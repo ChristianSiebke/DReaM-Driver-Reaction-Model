@@ -9,6 +9,7 @@ add_openpass_target(
   SOURCES
     agentAdapter_Tests.cpp
     datatypes_Tests.cpp
+    egoAgent_Tests.cpp
     fakeLaneManager_Tests.cpp
     geometryConverter_Tests.cpp
     lane_Tests.cpp
@@ -18,19 +19,18 @@ add_openpass_target(
 #    roadNetworkMapper_Tests.cpp
     sceneryConverter_Tests.cpp
     sensorView_Tests.cpp
-    stochasticNavigation_Tests.cpp
     worldQuery_Tests.cpp
     worldToRoadCoordinateConverter_Tests.cpp
     Generators/laneGeometryElementGenerator_Tests.cpp
     ${COMPONENT_SOURCE_DIR}/AgentAdapter.cpp
     ${COMPONENT_SOURCE_DIR}/AgentNetwork.cpp
+    ${COMPONENT_SOURCE_DIR}/egoAgent.cpp
     ${COMPONENT_SOURCE_DIR}/GeometryConverter.cpp
     ${COMPONENT_SOURCE_DIR}/JointsBuilder.cpp
     ${COMPONENT_SOURCE_DIR}/Localization.cpp
     ${COMPONENT_SOURCE_DIR}/OWL/DataTypes.cpp
     ${COMPONENT_SOURCE_DIR}/OWL/OpenDriveTypeMapper.cpp
     ${COMPONENT_SOURCE_DIR}/PointQuery.cpp
-    ${COMPONENT_SOURCE_DIR}/RoutePlanning/StochasticNavigation.cpp
     ${COMPONENT_SOURCE_DIR}/SceneryConverter.cpp
     ${COMPONENT_SOURCE_DIR}/TrafficObjectAdapter.cpp
     ${COMPONENT_SOURCE_DIR}/WorldData.cpp
@@ -43,13 +43,14 @@ add_openpass_target(
   HEADERS
     ${COMPONENT_SOURCE_DIR}/AgentAdapter.h
     ${COMPONENT_SOURCE_DIR}/AgentNetwork.h
+    ${COMPONENT_SOURCE_DIR}/egoAgent.h
     ${COMPONENT_SOURCE_DIR}/GeometryConverter.h
     ${COMPONENT_SOURCE_DIR}/JointsBuilder.h
     ${COMPONENT_SOURCE_DIR}/Localization.h
     ${COMPONENT_SOURCE_DIR}/OWL/DataTypes.h
     ${COMPONENT_SOURCE_DIR}/OWL/OpenDriveTypeMapper.h
     ${COMPONENT_SOURCE_DIR}/PointQuery.h
-    ${COMPONENT_SOURCE_DIR}/RoutePlanning/StochasticNavigation.h
+    ${COMPONENT_SOURCE_DIR}/RoutePlanning/RouteCalculation.h
     ${COMPONENT_SOURCE_DIR}/SceneryConverter.h
     ${COMPONENT_SOURCE_DIR}/TrafficObjectAdapter.h
     ${COMPONENT_SOURCE_DIR}/WorldData.h

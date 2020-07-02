@@ -1,5 +1,5 @@
 # /*********************************************************************
-# * Copyright (c) 2017, 2018, 2019 in-tech GmbH
+# * Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 # *               2018 AMFD GmbH
 # *
 # * This program and the accompanying materials are made
@@ -20,6 +20,8 @@ CONFIG += OPENPASS_LIBRARY
 
 include(../../../global.pri)
 
+INCLUDEPATH += ../../CoreModules/World_OSI/RoutePlanning
+
 SOURCES += \
     sensor_driver.cpp \
     sensor_driverCalculations.cpp \
@@ -31,4 +33,5 @@ HEADERS += \
     sensor_driverGlobal.h \
     sensor_driverImplementation.h \
     Signals/sensorDriverSignal.h \
-    Signals/sensor_driverDefinitions.h
+    Signals/sensor_driverDefinitions.h \
+    ../../CoreModules/World_OSI/RoutePlanning/RouteCalculation.h

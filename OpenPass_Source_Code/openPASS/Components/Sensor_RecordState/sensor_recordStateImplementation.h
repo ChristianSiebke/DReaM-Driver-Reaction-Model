@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2018 AMFD GmbH
 *               2016, 2017 ITK Engineering GmbH
 *
@@ -13,7 +13,6 @@
 #pragma once
 
 #include "Interfaces/modelInterface.h"
-#include "Interfaces/observationInterface.h"
 
 /*!
  * \brief records the state of the agent.
@@ -23,7 +22,6 @@
  * \ingroup SensorRecordState
  */
 
-//ToDo This module needs a major refactoring, when the new observation/logging concept is implemented. Until then it uses the first ObservationInterface of the ObservationNetwork.
 class SensorRecordStateImplementation : public SensorInterface
 {
 public:
@@ -39,7 +37,7 @@ public:
             StochasticsInterface *stochastics,
             WorldInterface *world,
             const ParameterInterface *parameters,
-            const std::map<int, ObservationInterface*> *observations,
+            PublisherInterface * const publisher,
             const CallbackInterface *callbacks,
             AgentInterface *agent);
 
@@ -88,30 +86,6 @@ public:
      * \param[in]     time           Current scheduling time
      */
     void Trigger(int time);
-
-private:
-
-    int agentId = 0;
-    int timeMSec = 0;
-    int indexLaneEgo{0};
-    ObservationInterface* observerInstance {nullptr};
-
-    /*!
-     * \brief Translates secondaray covered lanes into a string.
-     *
-     * This function uses AgentInterface::GetSecondaryCoveredLanes and translates it into a string.
-     *
-     * @return      secondary lanes as string.
-     */
-    std::string SecondaryLanesToString();
-
-    /*!
-     * \brief Sends all output relevant agent variables to the observer.
-     *
-     * Sends all output relevant agent variables to the observer.
-     * Which are later on logged.
-     */
-    void ObserveEgo();
 };
 
 

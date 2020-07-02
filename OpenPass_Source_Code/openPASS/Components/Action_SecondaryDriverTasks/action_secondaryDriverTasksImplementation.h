@@ -17,7 +17,6 @@
 #define ACTION_SECONDARY_DRIVER_TASKS_IMPLEMENTATION_H
 
 #include "Interfaces/modelInterface.h"
-#include "Interfaces/observationInterface.h"
 #include "Common/primitiveSignals.h"
 
 /*! \addtogroup Action_SecondaryDriverTasks

@@ -22,31 +22,33 @@
 
 #include "Common/worldDefinitions.h"
 #include "Common/eventDetectorDefinitions.h"
-#include "Interfaces/scenarioActionInterface.h"
-#include "CoreFramework/CoreShare/parameters.h"
 
+/*!
+ * \brief Information required for spawning a scenario agent
+ */
 struct SpawnInfo
 {
 public:
     SpawnInfo() {}
-    SpawnInfo(std::variant<openScenario::LanePosition, openScenario::WorldPosition> position,
-                        double v,
-                        double acceleration):
+    SpawnInfo(openScenario::Position position,
+              double v,
+              double acceleration):
         position(position)
     {
         this->velocity = v;
         this->acceleration = acceleration;
     }
 
-    std::variant<openScenario::LanePosition, openScenario::WorldPosition> position;
+    bool spawning {true}; //!< Spawning flag, spawning agent if true
 
-    std::optional<Route> route {std::nullopt};
+    openScenario::Position position; //!< Initial position
+    std::optional<std::vector<RouteElement>> route {std::nullopt}; //!< Optional predfined route
 
-    double velocity;
-    std::optional<openScenario::StochasticAttribute> stochasticVelocity;
+    double velocity; //!< Initial velocity
+    std::optional<openScenario::StochasticAttribute> stochasticVelocity; //!< optional stochastic initial velocity
 
-    std::optional<double> acceleration;
-    std::optional<openScenario::StochasticAttribute> stochasticAcceleration;
+    std::optional<double> acceleration; //!< Optional initial acceleration
+    std::optional<openScenario::StochasticAttribute> stochasticAcceleration; //!< optional stochastic initial acceleration
 };
 
 /*!
@@ -63,9 +65,10 @@ struct CatalogReference
  */
 struct ScenarioEntity
 {
-    std::string name;                   //!< Name of the scenario object
-    CatalogReference catalogReference;  //!< Catalog reference information
-    SpawnInfo spawnInfo;                //!< Initial spawn parameter information
+    std::string name;                               //! Name of the scenario object
+    CatalogReference catalogReference;              //! Catalog reference information
+    SpawnInfo spawnInfo;                            //! Initial spawn parameter information
+    openScenario::Parameters assignedParameters;    //! Parameters assigned in the Catalog reference
 };
 
 //-----------------------------------------------------------------------------
@@ -180,7 +183,7 @@ public:
     //!
     //! \param[in] action a shared_ptr to an action
     //-------------------------------------------------------------------------
-    virtual void AddAction(std::shared_ptr<ScenarioActionInterface> action) = 0;
+    virtual void AddAction(const openScenario::Action action, const std::string eventName) = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the event detector.
@@ -194,7 +197,7 @@ public:
     //!
     //! \returns list of actions
     //-------------------------------------------------------------------------
-    virtual std::vector<std::shared_ptr<ScenarioActionInterface>> GetActions() const = 0;
+    virtual std::vector<openScenario::ManipulatorInformation> GetActions() const = 0;
 
     //-------------------------------------------------------------------------
     //! \brief Returns the desired end time of the simulation.

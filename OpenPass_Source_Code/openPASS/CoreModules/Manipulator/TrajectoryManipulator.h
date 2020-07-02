@@ -31,9 +31,10 @@ class TrajectoryManipulator : public ManipulatorCommonBase
 {
 public:
     TrajectoryManipulator(WorldInterface *world,
-                          std::shared_ptr<openScenario::PrivateFollowTrajectoryAction> action,
                           SimulationSlave::EventNetworkInterface *eventNetwork,
-                          const CallbackInterface *callbacks);
+                          const CallbackInterface *callbacks,
+                          const openScenario::FollowTrajectoryAction action,
+                          const std::string &eventName);
 
     /*!
     * \brief Triggers the functionality of this class
@@ -46,7 +47,7 @@ public:
     virtual void Trigger(int time) override;
 
 private:
-    std::shared_ptr<openScenario::PrivateFollowTrajectoryAction> action;
+    openScenario::FollowTrajectoryAction action;
 
     EventContainer GetEvents() override;
 };

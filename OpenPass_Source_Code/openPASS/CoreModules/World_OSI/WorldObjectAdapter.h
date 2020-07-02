@@ -28,7 +28,7 @@ public:
     double GetAcceleration() const;
     const OWL::Interfaces::WorldObject& GetBaseTrafficObject() const;
 
-    virtual double GetLaneRemainder(Side) const = 0;
+    virtual double GetLaneRemainder(const std::string& roadId, Side) const = 0;
 
 
 protected:

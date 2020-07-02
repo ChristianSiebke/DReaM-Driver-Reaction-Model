@@ -33,4 +33,5 @@ public:
     virtual ScenarioInterface* GetScenario() = 0;
     virtual std::map<std::string, std::shared_ptr<SystemConfigInterface>>& GetSystemConfigs() = 0;
     virtual VehicleModelsInterface* GetVehicleModels() = 0;
+    virtual const openpass::common::RuntimeInformation& GetRuntimeInformation() const = 0;
 };

@@ -40,7 +40,6 @@
 #pragma once
 
 #include "Interfaces/modelInterface.h"
-#include "Interfaces/observationInterface.h"
 #include "Interfaces/profilesInterface.h"
 #include "Common/primitiveSignals.h"
 #include "Common/vector3d.h"
@@ -73,7 +72,7 @@ public:
         StochasticsInterface* stochastics,
         WorldInterface* world,
         const ParameterInterface* parameters,
-        const std::map<int, ObservationInterface*>* observations,
+        PublisherInterface * const publisher,
         const CallbackInterface* callbacks,
         AgentInterface* agent);
 
@@ -231,7 +230,6 @@ protected:
 
    osi3::SensorData sensorData;
 
-   ObservationInterface* _observer = nullptr;
    openpass::sensors::Position position;
    int id;
    double failureProbability;

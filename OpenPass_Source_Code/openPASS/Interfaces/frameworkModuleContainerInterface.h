@@ -10,10 +10,11 @@
 
 #pragma once
 
-#include "Interfaces/samplerInterface.h"
+// TODO rb: replace by forward declarations
 #include "Interfaces/stochasticsInterface.h"
 
 class AgentBlueprintProviderInterface;
+class DataStoreInterface;
 class WorldInterface;
 
 namespace SimulationSlave {
@@ -31,11 +32,25 @@ public:
     virtual ~FrameworkModuleContainerInterface() = default;
 
     /*!
+    * \brief Returns a pointer to the agentBlueprintProvider
+    *
+    * @return        agentBlueprintProvider pointer
+    */
+    virtual AgentBlueprintProviderInterface* GetAgentBlueprintProvider() = 0;
+
+    /*!
     * \brief Returns a pointer to the AgentFactory
     *
     * @return        AgentFactory pointer
     */
     virtual AgentFactoryInterface* GetAgentFactory() = 0;
+
+    /*!
+    * \brief Returns a pointer to the data store
+    *
+    * @return   data store pointer
+    */
+    virtual DataStoreInterface* GetDataStore() = 0;
 
     /*!
     * \brief Returns a pointer to the EventDetectorNetwork
@@ -66,13 +81,6 @@ public:
     virtual ObservationNetworkInterface* GetObservationNetwork() = 0;
 
     /*!
-    * \brief Returns the instance of the used sampler
-    *
-    * @return        Sampler
-    */
-    virtual const SamplerInterface& GetSampler() const = 0;
-
-    /*!
     * \brief Returns a pointer to the SpawnPointNetwork
     *
     * @return        SpawnPointNetwork pointer
@@ -92,14 +100,6 @@ public:
     * @return        World pointer
     */
     virtual WorldInterface* GetWorld() = 0;
-
-
-    /*!
-    * \brief Returns a pointer to the agentBlueprintProvider
-    *
-    * @return        agentBlueprintProvider pointer
-    */
-    virtual AgentBlueprintProviderInterface* GetAgentBlueprintProvider() = 0;
 };
 
 } //namespace SimulationSlave

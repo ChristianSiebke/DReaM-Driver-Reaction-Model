@@ -17,6 +17,7 @@ add_subdirectory(Components/SignalPrioritizer)
 
 add_subdirectory(CoreFramework/OpenPassSlave)
 
+add_subdirectory(CoreModules/BasicDataStore)
 add_subdirectory(CoreModules/EventDetector)
 add_subdirectory(CoreModules/Observation_Log)
 add_subdirectory(CoreModules/SpawnPointScenario_OSI)

@@ -35,7 +35,7 @@ AlgorithmFmuWrapperImplementation::AlgorithmFmuWrapperImplementation(std::string
                                                                      WorldInterface* world,
                                                                      StochasticsInterface *stochastics,
                                                                      const ParameterInterface *parameters,
-                                                                     const std::map<int, ObservationInterface*> *observations,
+                                                                     PublisherInterface * const publisher,
                                                                      const CallbackInterface *callbacks,
                                                                      AgentInterface* agent) :
     UnrestrictedModelInterface(componentName,
@@ -47,7 +47,7 @@ AlgorithmFmuWrapperImplementation::AlgorithmFmuWrapperImplementation(std::string
                                stochastics,
                                world,
                                parameters,
-                               observations,
+                               publisher,
                                callbacks,
                                agent),
     startTime { 0 },

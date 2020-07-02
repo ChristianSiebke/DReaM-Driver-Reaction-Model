@@ -14,60 +14,55 @@
 
 #include "Common/commonTools.h"
 #include "Interfaces/parameterInterface.h"
-#include "Interfaces/samplerInterface.h"
 #include "Common/SpawnPointDefinitions.h"
+#include "CoreFramework/CoreShare/log.h"
 
-namespace
-{
-    using namespace SpawnPointRuntimeCommonDefinitions;
-    static constexpr std::string_view ROAD_TAG{"Road"};
-    static constexpr std::string_view LANES_TAG{"Lanes"};
-    static constexpr std::string_view S_POSITION_TAG{"S-Position"};
-
-    /*!
-     * \brief AssertSpawnPointRuntimeCommonParametersProvided ensures all
-     *        required parameters are provided; throws if not provided
-     * \param roadId the roadId read from the parameters
-     * \param laneIds the laneIds read from the parameters
-     * \param sPosition the sPosition read from the parameters
-     */
-    static inline void AssertSpawnPointRuntimeCommonParametersProvided(const std::optional<RoadId>& roadId,
-                                                                       const std::optional<LaneIds>& laneIds,
-                                                                       const std::optional<SPosition>& sPosition)
-    {
-        if (!roadId
-         || !laneIds
-         || !sPosition)
-        {
-            std::string missingParameters;
-            if (!roadId)
-            {
-                missingParameters += ROAD_TAG;
-                missingParameters += ",";
-            }
-            if (!laneIds)
-            {
-                missingParameters += LANES_TAG;
-                missingParameters += ",";
-            }
-            if (!sPosition)
-            {
-                missingParameters += S_POSITION_TAG;
-            }
-            if (missingParameters.back() == ',')
-            {
-                missingParameters.erase(std::cend(missingParameters) - 1,
-                                        std::cend(missingParameters));
-            }
-
-            throw(std::runtime_error("Insufficient parameters supplied to SpawnPointRuntimeCommon: " + missingParameters));
-        }
-    }
-}
+using namespace SpawnPointDefinitions;
 
 namespace SpawnPointRuntimeCommonParameterExtractor
 {
     using namespace SpawnPointRuntimeCommonDefinitions;
+
+    constexpr char SCOORDINATE[] = {"SCoordinate"};
+
+    static std::vector<SpawnPosition> ExtractSpawnPoints(const ParameterInterface &parameter)
+    {
+        using namespace helper;
+
+        std::vector<SpawnPosition> spawnpoints;
+
+        const auto& spawnPointList = map::query(parameter.GetParameterLists(),SPAWNPOINTS);
+        ThrowIfFalse(spawnPointList.has_value(), "No SpawnPoint provided for SpawnPointRuntimeCommon");
+
+        for (const auto& spawnPointParameter : spawnPointList.value())
+        {
+            const auto roadIdElement = map::query(spawnPointParameter->GetParametersString(), ROAD);
+            const auto laneIdsElement = map::query(spawnPointParameter->GetParametersIntVector(), LANES);
+            const auto sCoordinateElement = map::query(spawnPointParameter->GetParametersDouble(), SCOORDINATE);
+
+            ThrowIfFalse(roadIdElement.has_value(), "No road id provided in SceneryInformation for SpawnPointRuntimeCommon");
+            ThrowIfFalse(laneIdsElement.has_value(), "No lane id provided in SceneryInformation for SpawnPointRuntimeCommon");
+            ThrowIfFalse(sCoordinateElement.has_value(), "No s coordinate provided in SceneryInformation for SpawnPointRuntimeCommon");
+
+            std::vector<int> sortedLaneIds(laneIdsElement.value());
+            if (sortedLaneIds.front() < 0)
+            {
+                std::sort(sortedLaneIds.begin(), sortedLaneIds.end());
+            }
+            else
+            {
+                std::sort(sortedLaneIds.begin(), sortedLaneIds.end(), std::greater<int>{});
+            }
+
+
+            for (size_t laneIndex = 0; laneIndex < sortedLaneIds.size(); ++laneIndex)
+            {
+                spawnpoints.emplace_back(SpawnPosition{roadIdElement.value(), sortedLaneIds.at(laneIndex), sCoordinateElement.value(), laneIndex});
+            }
+        }
+
+        return spawnpoints;
+    }
 
     /*!
      * \brief ExtractSpawnPointParameters extracts the parameters for the
@@ -76,33 +71,8 @@ namespace SpawnPointRuntimeCommonParameterExtractor
      * \param sampler the sampler with which to sample random values
      * \return the parameters for the spawn point
      */
-    static SpawnPointRuntimeCommonParameters ExtractSpawnPointParameters(const ParameterInterface& parameter,
-                                                                         const SamplerInterface * const sampler)
+    static SpawnPointRuntimeCommonParameters ExtractSpawnPointParameters(const ParameterInterface& parameter)
     {
-        using namespace helper;
-
-        const auto& stringParameters = parameter.GetParametersString();
-        const auto& intVectorParameters = parameter.GetParametersIntVector();
-        const auto& doubleParameters = parameter.GetParametersDouble();
-
-        const auto roadIdElement = map::query(stringParameters, "Road");
-        const auto laneIdsElement = map::query(intVectorParameters, "Lanes");
-        const auto sPositionElement = map::query(doubleParameters, "S-Position");
-
-        AssertSpawnPointRuntimeCommonParametersProvided(roadIdElement,
-                                                        laneIdsElement,
-                                                        sPositionElement);
-
-        const auto trafficConfig = SpawnPointDefinitions::ConvertParametersIntoTrafficConfig(parameter);
-        const auto sampledTrafficConfig = SpawnPointDefinitions::SampleTrafficConfig(sampler,
-                                                                                     trafficConfig);
-
-        return SpawnPointRuntimeCommonParameters(roadIdElement.value(),
-                                                 laneIdsElement.value(),
-                                                 sPositionElement.value(),
-                                                 CommonHelper::PerHourToPerSecond(sampledTrafficConfig.trafficVolume),
-                                                 sampledTrafficConfig.platoonRate,
-                                                 sampledTrafficConfig.trafficVelocityDistribution,
-                                                 trafficConfig.agentProfiles);
+        return {ExtractSpawnPoints(parameter), SpawnPointDefinitions::ExtractAgentProfileLaneMaps(parameter)};
     }
 };

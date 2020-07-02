@@ -14,6 +14,7 @@
 #include "Interfaces/worldInterface.h"
 #include "CoreFramework/OpenPassSlave/modelElements/agentBlueprint.h"
 #include "CoreFramework/OpenPassSlave/framework/agentFactory.h"
+#include "CoreFramework/OpenPassSlave/framework/sampler.h"
 
 SpawnPointScenario::SpawnPointScenario(const SpawnPointDependencies* dependencies,
                        const CallbackInterface* callbacks):
@@ -26,39 +27,42 @@ SpawnPointScenario::SpawnPointScenario(const SpawnPointDependencies* dependencie
     }
 }
 
-SpawnPointInterface::Agents SpawnPointScenario::Trigger()
+SpawnPointInterface::Agents SpawnPointScenario::Trigger([[maybe_unused]]int time)
 {
     Agents agents;
 
     for (const auto& entity : dependencies.scenario.value()->GetEntities())
     {
-        try
+        if (entity.spawnInfo.spawning)
         {
-            auto agentBlueprint = dependencies.agentBlueprintProvider->SampleAgent(entity.catalogReference.entryName);
-            agentBlueprint.SetAgentProfileName(entity.catalogReference.entryName);
-            agentBlueprint.SetAgentCategory(entity.name == "Ego"
-                                                ? AgentCategory::Ego
-                                                : AgentCategory::Scenario);
-            agentBlueprint.SetObjectName(entity.name);
-            agentBlueprint.SetSpawnParameter(CalculateSpawnParameter(entity.spawnInfo,
-                                                                     agentBlueprint.GetVehicleModelParameters()));
-
-            SimulationSlave::Agent* newAgent = dependencies.agentFactory->AddAgent(&agentBlueprint);
-
-            if(newAgent != nullptr)
+            try
             {
-                agents.emplace_back(newAgent);
-            }
-            else
-            {
-                LogError(" failed to add agent successfully for entity "
-                       + entity.name);
-            }
+                auto agentBlueprint = dependencies.agentBlueprintProvider->SampleAgent(entity.catalogReference.entryName, entity.assignedParameters);
+                agentBlueprint.SetAgentProfileName(entity.catalogReference.entryName);
+                agentBlueprint.SetAgentCategory(entity.name == "Ego"
+                                                    ? AgentCategory::Ego
+                                                    : AgentCategory::Scenario);
+                agentBlueprint.SetObjectName(entity.name);
+                agentBlueprint.SetSpawnParameter(CalculateSpawnParameter(entity.spawnInfo,
+                                                                         agentBlueprint.GetVehicleModelParameters()));
 
-        }
-        catch(const std::runtime_error& error)
-        {
-            LogError("SpawnPointScenario encountered an Error: " + std::string(error.what()));
+                SimulationSlave::Agent* newAgent = dependencies.agentFactory->AddAgent(&agentBlueprint);
+
+                if(newAgent != nullptr)
+                {
+                    agents.emplace_back(newAgent);
+                }
+                else
+                {
+                    LogError(" failed to add agent successfully for entity "
+                           + entity.name);
+                }
+
+            }
+            catch(const std::runtime_error& error)
+            {
+                LogError("SpawnPointScenario encountered an Error: " + std::string(error.what()));
+            }
         }
     }
 
@@ -99,10 +103,9 @@ bool SpawnPointScenario::ValidateSTCoordinatesOnLane(const STCoordinates &stCoor
     }
 
     //Check if lane width > vehicle width
-    double laneWidth = GetWorld()->GetLaneWidth(Route{lanePosition.roadId},
-                                                lanePosition.roadId,
+    double laneWidth = GetWorld()->GetLaneWidth(lanePosition.roadId,
                                                 lanePosition.laneId,
-                                                stCoordinate.s, 0);
+                                                stCoordinate.s);
     if (vehicleWidth > laneWidth + std::abs(stCoordinate.t))
     {
         return false;
@@ -191,7 +194,7 @@ SpawnParameter SpawnPointScenario::CalculateSpawnParameter(const SpawnInfo& spaw
 
     // Define position and orientation
     // Lane Spawning
-    if(spawnInfo.position.index() == 0)
+    if(std::holds_alternative<openScenario::LanePosition>(spawnInfo.position))
     {
         const auto &lanePosition = std::get<openScenario::LanePosition>(spawnInfo.position);
 
@@ -204,7 +207,6 @@ SpawnParameter SpawnPointScenario::CalculateSpawnParameter(const SpawnInfo& spaw
         spawnParameter.positionX = pos.xPos;
         spawnParameter.positionY = pos.yPos;
         spawnParameter.yawAngle = pos.yawAngle;
-        spawnParameter.route = spawnInfo.route;
 
         if(lanePosition.orientation.has_value())
         {
@@ -212,12 +214,15 @@ SpawnParameter SpawnPointScenario::CalculateSpawnParameter(const SpawnInfo& spaw
         }
     }
     // World Spawning
-    else
+    else if (std::holds_alternative<openScenario::WorldPosition>(spawnInfo.position))
     {
         const auto &worldPosition = std::get<openScenario::WorldPosition>(spawnInfo.position);
         spawnParameter.positionX = worldPosition.x;
         spawnParameter.positionY = worldPosition.y;
-        spawnParameter.yawAngle = worldPosition.heading.value_or(0.0);
+        spawnParameter.yawAngle = worldPosition.h.value_or(0.0);
+    }
+    else {
+        LogErrorAndThrow("This Spawner only supports Lane- & WorldPositions.");
     }
 
     // Define velocity
@@ -240,16 +245,50 @@ SpawnParameter SpawnPointScenario::CalculateSpawnParameter(const SpawnInfo& spaw
         spawnParameter.acceleration = spawnInfo.acceleration.value_or(0.0);
     }
 
+    spawnParameter.route = GetRoute(spawnInfo.route.value_or(std::vector<RouteElement>{}));
+
     return spawnParameter;
 }
 
 double SpawnPointScenario::CalculateAttributeValue(const openScenario::StochasticAttribute &attribute)
 {
-        return dependencies.sampler->RollForStochasticAttribute(attribute.mean,
-                                                                attribute.stdDeviation,
-                                                                attribute.lowerBoundary,
-                                                                attribute.upperBoundary);
+    openpass::parameter::NormalDistribution distribution{attribute.mean, attribute.stdDeviation, attribute.lowerBoundary, attribute.upperBoundary};
+    return Sampler::RollForStochasticAttribute(distribution,
+                                               dependencies.stochastics);
 }
+
+std::optional<Route> SpawnPointScenario::GetRoute(const std::vector<RouteElement>& roads)
+{
+    if (roads.empty())
+    {
+        return std::nullopt;
+    }
+
+    constexpr size_t MAX_DEPTH = 10; //! Limits search depths in case of cyclic network
+    auto [roadGraph , root] = GetWorld()->GetRoadGraph(roads.front(), std::max(MAX_DEPTH, roads.size()));
+
+    RoadGraphVertex target = root;
+    for (auto road = roads.begin() + 1; road != roads.end(); ++road)
+    {
+        bool foundSuccessor = false;
+        for (auto [successor, successorsEnd] = adjacent_vertices(target, roadGraph); successor != successorsEnd; ++successor)
+        {
+            if (get(RouteElement(), roadGraph, *successor) == *road)
+            {
+                foundSuccessor = true;
+                target = *successor;
+                break;
+            }
+        }
+        if (!foundSuccessor)
+        {
+            LogError("Invalid route defined in Scenario. Node " + road->roadId + " not reachable");
+        }
+    }
+
+    return Route{roadGraph, root, target};
+}
+
 
 [[noreturn]] void SpawnPointScenario::LogError(const std::string& message)
 {

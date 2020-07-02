@@ -29,7 +29,7 @@ struct Profile
 {
     std::string name {};
     std::string type {};
-    openpass::parameter::Container parameter {};
+    openpass::parameter::ParameterSetLevel1 parameter {};
 };
 
 struct Parameter

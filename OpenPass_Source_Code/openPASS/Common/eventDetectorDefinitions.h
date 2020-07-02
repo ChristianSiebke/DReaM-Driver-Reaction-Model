@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -22,6 +22,12 @@
 namespace openScenario
 {
 
+namespace ConditionEquality
+{
+//! Maximum difference between two values to be consired equal for OpenSCENARIO rule equal_to
+static constexpr double EPSILON = 1e-12;
+}
+
 enum class Rule
 {
     LessThan = 0,
@@ -40,14 +46,9 @@ public:
     ByEntityCondition(const ByEntityCondition&) = default;
     virtual ~ByEntityCondition();
 
-    ByEntityCondition() = delete;
-    ByEntityCondition(ByEntityCondition&&) = delete;
-    ByEntityCondition& operator=(const ByEntityCondition&) = delete;
-    ByEntityCondition& operator=(ByEntityCondition&&) = delete;
-
-    std::vector<const AgentInterface *> GetTriggeringAgents(WorldInterface* const world) const
+    std::vector<AgentInterface *> GetTriggeringAgents(WorldInterface* const world) const
     {
-        std::vector<const AgentInterface *> triggeringAgents {};
+        std::vector<AgentInterface *> triggeringAgents {};
 
         if(triggeringEntityNames.empty())
         {
@@ -55,7 +56,7 @@ public:
             std::transform(agentMap.cbegin(),
                            agentMap.cend(),
                            std::back_inserter(triggeringAgents),
-                           [] (const auto &agentPair) -> const AgentInterface*
+                           [] (const auto &agentPair) -> AgentInterface*
                            {
                                return agentPair.second;
                            });
@@ -93,14 +94,9 @@ public:
         rule(rule)
     {}
     TimeToCollisionCondition(const TimeToCollisionCondition&) = default;
-    ~TimeToCollisionCondition();
+    virtual ~TimeToCollisionCondition();
 
     std::vector<const AgentInterface*> IsMet(WorldInterface * const world) const;
-
-    TimeToCollisionCondition() = delete;
-    TimeToCollisionCondition(TimeToCollisionCondition&&) = delete;
-    TimeToCollisionCondition& operator=(const TimeToCollisionCondition&) = delete;
-    TimeToCollisionCondition& operator=(TimeToCollisionCondition&&) = delete;
 
 private:
     const std::string referenceEntityName;
@@ -108,23 +104,66 @@ private:
     const Rule rule;
 };
 
-class OPENPASSCOMMONEXPORT ReachPositionCondition :  public ByEntityCondition
+class OPENPASSCOMMONEXPORT TimeHeadwayCondition : public ByEntityCondition
+{
+public:
+    TimeHeadwayCondition(const std::vector<std::string>& triggeringEntityNames,
+                         const std::string& referenceEntityName,
+                         const double targetTHW,
+                         const bool freeSpace,
+                         const Rule rule):
+        ByEntityCondition(triggeringEntityNames),
+        referenceEntityName(referenceEntityName),
+        targetTHW(targetTHW),
+        freeSpace(freeSpace),
+        rule(rule)
+    {}
+    TimeHeadwayCondition(const TimeHeadwayCondition&) = default;
+    virtual ~TimeHeadwayCondition();
+
+    std::vector<const AgentInterface*> IsMet(WorldInterface * const world) const;
+
+private:
+    const std::string referenceEntityName;
+    const double targetTHW;
+    const bool freeSpace;
+    const Rule rule;
+};
+
+class OPENPASSCOMMONEXPORT ReachPositionCondition : public ByEntityCondition
 {
 public:
     ReachPositionCondition(const std::vector<std::string>& triggeringEntityNames,
-                           const double tolerance):
+                           const double tolerance,
+                           const openScenario::Position position):
         ByEntityCondition(triggeringEntityNames),
-        tolerance(tolerance)
-    {}
-    ReachPositionCondition(const ReachPositionCondition&) = default;
-    ~ReachPositionCondition();
+        tolerance(tolerance),
+        position(position)
+    {
+        if (tolerance < 0)
+        {
+            throw std::runtime_error("Reach Position Tolerance must be greater than or equal to 0");
+        }
 
-    ReachPositionCondition() = delete;
-    ReachPositionCondition(ReachPositionCondition&&) = delete;
-    ReachPositionCondition& operator=(const ReachPositionCondition&) = delete;
-    ReachPositionCondition& operator=(ReachPositionCondition&&) = delete;
-protected:
+        if (std::holds_alternative<openScenario::RoadPosition>(position))
+        {
+            const auto roadPosition = std::get<openScenario::RoadPosition>(position);
+
+            if (roadPosition.s < 0)
+            {
+                throw std::runtime_error("Reach Position Target S Coordinate must be greater than or equal to 0");
+            }
+
+        }
+    }
+    ReachPositionCondition(const ReachPositionCondition&) = default;
+    virtual ~ReachPositionCondition();
+
+    std::vector<const AgentInterface*> IsMet(WorldInterface * const world) const;
+
+private:
     const double tolerance{};
+    const openScenario::Position position{};
 };
 
 class OPENPASSCOMMONEXPORT RelativeSpeedCondition : public ByEntityCondition
@@ -132,98 +171,22 @@ class OPENPASSCOMMONEXPORT RelativeSpeedCondition : public ByEntityCondition
 public:
     RelativeSpeedCondition(const std::vector<std::string> &triggeringEntityNames,
                            const std::string &referenceEntityName,
-                           const double tolerance,
+                           const double value,
                            const Rule rule):
         ByEntityCondition(triggeringEntityNames),
         referenceEntityName(referenceEntityName),
-        tolerance(tolerance),
+        value(value),
         rule(rule)
     {}
     RelativeSpeedCondition(const RelativeSpeedCondition&) = default;
-    ~RelativeSpeedCondition();
+    virtual ~RelativeSpeedCondition();
 
     std::vector<const AgentInterface*> IsMet(WorldInterface * const world) const;
-
-    RelativeSpeedCondition() = delete;
-    RelativeSpeedCondition(RelativeSpeedCondition&&) = delete;
-    RelativeSpeedCondition& operator=(const RelativeSpeedCondition&) = delete;
-    RelativeSpeedCondition& operator=(RelativeSpeedCondition&&) = delete;
 
 private:
     const std::string referenceEntityName{};
-    const double tolerance{};
+    const double value{};
     const Rule rule{};
-};
-
-class OPENPASSCOMMONEXPORT ReachPositionRoadCondition : public ReachPositionCondition
-{
-public:
-    ReachPositionRoadCondition(const std::vector<std::string> &triggeringEntityNames,
-                               const double tolerance,
-                               const double targetSCoordinate,
-                               const std::string& targetRoadId):
-        ReachPositionCondition(triggeringEntityNames,
-                               tolerance),
-        targetSCoordinate(targetSCoordinate),
-        targetRoadId(targetRoadId)
-    {
-        if (targetSCoordinate < 0)
-        {
-            throw std::runtime_error("Reach Position Target S Coordinate must be greater than or equal to 0");
-        }
-        else if (tolerance < 0)
-        {
-            throw std::runtime_error("Reach Position Tolerance must be greater than or equal to 0");
-        }
-    }
-    ReachPositionRoadCondition(const ReachPositionRoadCondition&) = default;
-    ~ReachPositionRoadCondition();
-
-    std::vector<const AgentInterface*> IsMet(WorldInterface * const world) const;
-
-    ReachPositionRoadCondition() = delete;
-    ReachPositionRoadCondition(ReachPositionRoadCondition&&) = delete;
-    ReachPositionRoadCondition& operator=(const ReachPositionRoadCondition&) = delete;
-    ReachPositionRoadCondition& operator=(ReachPositionRoadCondition&&) = delete;
-
-private:
-    const double targetSCoordinate;
-    const std::string targetRoadId;
-};
-
-class OPENPASSCOMMONEXPORT RelativeLaneCondition: public ReachPositionCondition
-{
-public:
-    RelativeLaneCondition(const std::vector<std::string> &triggeringEntities,
-                          const std::string &referenceEntityName,
-                          const int deltaLane,
-                          const double deltaS,
-                          const double tolerance):
-        ReachPositionCondition(triggeringEntities,
-                               tolerance),
-        referenceEntityName(referenceEntityName),
-        deltaLane(deltaLane),
-        deltaS(deltaS)
-    {
-        if (tolerance < 0)
-        {
-            throw std::runtime_error("RelativeLaneCondition tolerance must be greater than or equal to 0");
-        }
-    }
-    RelativeLaneCondition(const RelativeLaneCondition&) = default;
-    ~RelativeLaneCondition();
-
-    std::vector<const AgentInterface*> IsMet(WorldInterface * const world) const;
-
-    RelativeLaneCondition() = delete;
-    RelativeLaneCondition(RelativeLaneCondition&&) = delete;
-    RelativeLaneCondition& operator=(const RelativeLaneCondition&) = delete;
-    RelativeLaneCondition& operator=(RelativeLaneCondition&&) = delete;
-
-private:
-    const std::string referenceEntityName;
-    const int deltaLane;
-    const double deltaS;
 };
 
 // OpenScenario ByValue Conditions
@@ -235,10 +198,6 @@ public:
     {}
     ByValueCondition(const ByValueCondition&) = default;
     virtual ~ByValueCondition();
-
-    ByValueCondition(ByValueCondition&&) = delete;
-    ByValueCondition& operator=(const ByValueCondition&) = delete;
-    ByValueCondition& operator=(ByValueCondition&&) = delete;
 protected:
     const Rule rule;
 };
@@ -252,33 +211,31 @@ public:
         targetValue(static_cast<int>(targetValueInSeconds * 1000.0))
     {}
     SimulationTimeCondition(const SimulationTimeCondition&) = default;
-    ~SimulationTimeCondition();
+    virtual ~SimulationTimeCondition();
 
     bool IsMet(const int value) const;
     int GetTargetValue() const;
-
-    SimulationTimeCondition() = delete;
-    SimulationTimeCondition(SimulationTimeCondition&&) = delete;
-    SimulationTimeCondition& operator=(const SimulationTimeCondition&) = delete;
-    SimulationTimeCondition& operator=(SimulationTimeCondition&&) = delete;
 
 private:
     const int targetValue;
 };
 
-using Condition = std::variant<ReachPositionRoadCondition,
-                               RelativeLaneCondition,
+using Condition = std::variant<ReachPositionCondition,
                                RelativeSpeedCondition,
                                SimulationTimeCondition,
-                               TimeToCollisionCondition>;
-using ConditionCollection = std::vector<Condition>;
+                               TimeToCollisionCondition,
+                               TimeHeadwayCondition>;
+using ConditionGroup = std::vector<Condition>;
 
-struct ConditionalEventDetectorInformation
+///
+/// \brief Event specific information collected from an openSCENARIO story
+///
+struct OPENPASSCOMMONEXPORT ConditionalEventDetectorInformation
 {
     ActorInformation actorInformation{};
-    int numberOfExecutions{};
+    int numberOfExecutions{};             ///< Specifies number of executions. Use -1 for "unrestricted"
     std::string eventName{};
-    ConditionCollection conditions{};
+    ConditionGroup conditions{};
 };
 
 } // openScenario

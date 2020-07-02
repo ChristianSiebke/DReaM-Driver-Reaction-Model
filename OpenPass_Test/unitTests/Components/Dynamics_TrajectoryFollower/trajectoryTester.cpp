@@ -18,44 +18,18 @@ TrajectoryTester::TrajectoryTester(const int cycleTime)
     ON_CALL(fakeAgent, GetId()).WillByDefault(Return(1));
 
     trajectoryFollower = std::make_shared<TrajectoryFollowerImplementation>(
-                             "trajectoryFollower",
-                             false,
-                             DontCare<int>(),
-                             DontCare<int>(),
-                             DontCare<int>(),
-                             cycleTime,
-                             nullptr,
-                             nullptr,
-                             &fakeParameters,
-                             &fakeObservations,
-                             nullptr,
-                             &fakeAgent,
-                             &fakeEventNetwork);
-}
-
-TrajectoryTester::TrajectoryTester(const int cycleTime,
-                                   SimulationSlave::EventNetworkInterface * eventNetwork)
-{
-    fakeBools.insert({"EnforceTrajectory", DontCare<bool>});
-    fakeBools.insert({"AutomaticDeactivation", DontCare<bool>});
-    ON_CALL(fakeParameters, GetParametersBool()).WillByDefault(ReturnRef(fakeBools));
-
-    ON_CALL(fakeAgent, GetId()).WillByDefault(Return(1));
-
-    trajectoryFollower = std::make_shared<TrajectoryFollowerImplementation>(
-                             "trajectoryFollower",
-                             false,
-                             DontCare<int>(),
-                             DontCare<int>(),
-                             DontCare<int>(),
-                             cycleTime,
-                             nullptr,
-                             nullptr,
-                             &fakeParameters,
-                             &fakeObservations,
-                             nullptr,
-                             &fakeAgent,
-                             eventNetwork);
+        "trajectoryFollower",
+        false,
+        DontCare<int>(),
+        DontCare<int>(),
+        DontCare<int>(),
+        cycleTime,
+        nullptr,
+        nullptr,
+        &fakeParameters,
+        &fakePublisher,
+        nullptr,
+        &fakeAgent);
 }
 
 TrajectoryTester::TrajectoryTester(const bool enforceTrajectory, const bool automaticDeactivation, const int cycleTime)
@@ -67,19 +41,18 @@ TrajectoryTester::TrajectoryTester(const bool enforceTrajectory, const bool auto
     ON_CALL(fakeAgent, GetId()).WillByDefault(Return(1));
 
     trajectoryFollower = std::make_shared<TrajectoryFollowerImplementation>(
-                             "trajectoryFollower",
-                             false,
-                             DontCare<int>(),
-                             DontCare<int>(),
-                             DontCare<int>(),
-                             cycleTime,
-                             nullptr,
-                             nullptr,
-                             &fakeParameters,
-                             &fakeObservations,
-                             nullptr,
-                             &fakeAgent,
-                             &fakeEventNetwork);
+        "trajectoryFollower",
+        false,
+        DontCare<int>(),
+        DontCare<int>(),
+        DontCare<int>(),
+        cycleTime,
+        nullptr,
+        nullptr,
+        &fakeParameters,
+        &fakePublisher,
+        nullptr,
+        &fakeAgent);
 }
 
 TrajectoryTester::TrajectoryTester(const bool enforceTrajectory,
@@ -94,19 +67,18 @@ TrajectoryTester::TrajectoryTester(const bool enforceTrajectory,
     ON_CALL(fakeAgent, GetId()).WillByDefault(Return(1));
 
     trajectoryFollower = std::make_shared<TrajectoryFollowerImplementation>(
-                             "trajectoryFollower",
-                             false,
-                             DontCare<int>(),
-                             DontCare<int>(),
-                             DontCare<int>(),
-                             cycleTime,
-                             nullptr,
-                             fakeWorld,
-                             &fakeParameters,
-                             &fakeObservations,
-                             nullptr,
-                             &fakeAgent,
-                             &fakeEventNetwork);
+        "trajectoryFollower",
+        false,
+        DontCare<int>(),
+        DontCare<int>(),
+        DontCare<int>(),
+        cycleTime,
+        nullptr,
+        fakeWorld,
+        &fakeParameters,
+        &fakePublisher,
+        nullptr,
+        &fakeAgent);
 }
 
 TrajectoryTester::TrajectoryTester(const bool enforceTrajectory,
@@ -122,17 +94,16 @@ TrajectoryTester::TrajectoryTester(const bool enforceTrajectory,
     ON_CALL(*fakeAgent, GetId()).WillByDefault(Return(1));
 
     trajectoryFollower = std::make_shared<TrajectoryFollowerImplementation>(
-                             "trajectoryFollower",
-                             false,
-                             DontCare<int>(),
-                             DontCare<int>(),
-                             DontCare<int>(),
-                             cycleTime,
-                             nullptr,
-                             fakeWorld,
-                             &fakeParameters,
-                             &fakeObservations,
-                             nullptr,
-                             fakeAgent,
-                             &fakeEventNetwork);
+        "trajectoryFollower",
+        false,
+        DontCare<int>(),
+        DontCare<int>(),
+        DontCare<int>(),
+        cycleTime,
+        nullptr,
+        fakeWorld,
+        &fakeParameters,
+        &fakePublisher,
+        nullptr,
+        fakeAgent);
 }

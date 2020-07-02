@@ -28,8 +28,8 @@ add_openpass_target(
     OWL/LaneGeometryJoint.h
     OWL/OpenDriveTypeMapper.h
     OWL/Primitives.h
-    RoutePlanning/NavigationInterface.h
-    RoutePlanning/StochasticNavigation.h
+    RoutePlanning/RouteCalculation.h
+    egoAgent.h
 
   SOURCES
     AgentAdapter.cpp
@@ -49,7 +49,7 @@ add_openpass_target(
     WorldToRoadCoordinateConverter.cpp
     OWL/DataTypes.cpp
     OWL/OpenDriveTypeMapper.cpp
-    RoutePlanning/StochasticNavigation.cpp
+    egoAgent.cpp
 
   INCDIRS
     ${CMAKE_CURRENT_LIST_DIR}
@@ -58,6 +58,7 @@ add_openpass_target(
     Qt5::Core
     Boost::headers
     Common
+    CoreShare
 
   LINKOSI
 )

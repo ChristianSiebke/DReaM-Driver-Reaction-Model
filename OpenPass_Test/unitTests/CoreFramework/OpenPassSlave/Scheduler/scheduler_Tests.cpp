@@ -1,33 +1,31 @@
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
-
-#include <list>
-#include <iostream>
-#include <set>
 #include <functional>
-
-#include "fakeWorld.h"
-#include "fakeSpawnPointNetwork.h"
-#include "fakeEventDetectorNetwork.h"
-#include "fakeManipulatorNetwork.h"
-#include "fakeEventNetwork.h"
-#include "fakeObservationNetwork.h"
+#include <iostream>
+#include <list>
+#include <set>
 
 #include "eventDetector.h"
 #include "eventDetectorLibrary.h"
+#include "fakeEventDetectorNetwork.h"
+#include "fakeEventNetwork.h"
+#include "fakeManipulatorNetwork.h"
+#include "fakeObservationNetwork.h"
+#include "fakeSpawnPointNetwork.h"
+#include "fakeWorld.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "scheduler.h"
 #include "schedulerTasks.h"
 
-using namespace SimulationSlave::Scheduling;
+using namespace openpass::scheduling;
 
 using testing::NiceMock;
-using testing::ReturnRef;
 using testing::Return;
+using testing::ReturnRef;
 
-template<typename T>
+template <typename T>
 void ExecuteTasks(T tasks)
 {
-    for(auto& task : tasks)
+    for (auto &task : tasks)
     {
         task.func();
     }
@@ -72,7 +70,7 @@ TEST(DISABLED_Scheduler, RunWorks)
     SimulationSlave::EventDetector e1(&fakeEventDetector, &edl);
     SimulationSlave::EventDetector e2(&fakeEventDetector, &edl);
 
-    std::vector<const SimulationSlave::EventDetector*> fakeEventDetectors;
+    std::vector<const SimulationSlave::EventDetector *> fakeEventDetectors;
     fakeEventDetectors.push_back(&e1);
     fakeEventDetectors.push_back(&e2);
 

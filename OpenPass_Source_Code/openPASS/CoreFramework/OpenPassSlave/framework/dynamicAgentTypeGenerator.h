@@ -149,7 +149,7 @@ public:
      * \brief Sets the VehicleModelParameters in the AgentBuildInformation depending on the vehicle model name.
      * \return  reference to itself
      */
-    DynamicAgentTypeGenerator& SetVehicleModelParameters();
+    DynamicAgentTypeGenerator& SetVehicleModelParameters(const openScenario::Parameters& assignedParameters);
 
     /*!
     * \brief Gathers a component and adds it to the AgentType
@@ -171,9 +171,9 @@ public:
     *
     * @param[in]    componentName               Name of the component
     * @param[out]   agentType                   AgentType where the results get stored
-    * @param[in]    parameters                  Pointer to a specific parameters set.
+    * @param[in]    parameters                  Parameters set.
     */
-    void GatherComponentWithParameters(std::string componentName, std::shared_ptr<SimulationSlave::AgentType> agentType, const openpass::parameter::Container &parameters);
+    void GatherComponentWithParameters(std::string componentName, std::shared_ptr<SimulationSlave::AgentType> agentType, const openpass::parameter::ParameterSetLevel1 &parameters);
 
     /*!
     * \brief Gathers a component and adds it to the AgentType
@@ -183,11 +183,11 @@ public:
     *
     * @param[in]    componentName               Name of the component
     * @param[out]   agentType                   AgentType where the results get stored
-    * @param[in]    parameters                  Pointer to a specific parameters set.
+    * @param[in]    parameters                  Parameters set.
     * @param[in]    componentNameInSystemConfigBlueprint    Name of the component in the app config, different if different from componentName (currently used for sensors)
     * @param[in]    channelIncrease             Increase in the ids of the output channels (currently used for sensors)
     */
-    void GatherComponentWithParameters(std::string componentName, std::shared_ptr<SimulationSlave::AgentType> agentType, const openpass::parameter::Container &parameters,
+    void GatherComponentWithParameters(std::string componentName, std::shared_ptr<SimulationSlave::AgentType> agentType, const openpass::parameter::ParameterSetLevel1 &parameters,
                                                                                   std::string componentNameInSystemConfigBlueprint, int channelOffset);
 
     /*!

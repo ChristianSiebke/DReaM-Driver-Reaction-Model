@@ -13,7 +13,6 @@
 #include <map>
 #include "Interfaces/agentFactoryInterface.h"
 #include "Interfaces/agentBlueprintProviderInterface.h"
-#include "Interfaces/samplerInterface.h"
 #include "Interfaces/scenarioInterface.h"
 #include "Common/spawnPointLibraryDefinitions.h"
 
@@ -45,9 +44,9 @@ public:
     virtual bool Instantiate(const SpawnPointLibraryInfoCollection& libraryInfos,
                              AgentFactoryInterface* agentFactory,
                              AgentBlueprintProviderInterface* agentBlueprintProvider,
-                             const SamplerInterface * const sampler,
+                             StochasticsInterface* stochastics,
                              ScenarioInterface* scenario,
-                             const SpawnPointProfiles& spawnPointProfiles) = 0;
+                             const std::optional<ProfileGroup>& spawnPointProfiles) = 0;
 
     virtual bool TriggerPreRunSpawnPoints() = 0;
 

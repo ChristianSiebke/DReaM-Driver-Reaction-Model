@@ -52,6 +52,14 @@ Lane::~Lane()
     {
         delete laneGeometryElement;
     }
+    if (leftLaneIsDummy)
+    {
+        delete leftLane;
+    }
+    if (rightLaneIsDummy)
+    {
+        delete rightLane;
+    }
 }
 
 void Lane::CopyToGroundTruth(osi3::GroundTruth& target) const
@@ -311,6 +319,7 @@ void Lane::SetLeftLane(const Interfaces::Lane& lane)
 
     leftLane = &lane;
     osiLane->mutable_left_adjacent_lane_id()->set_value(lane.GetId());
+    osiLane->mutable_base_lane()->mutable_classification()->add_left_adjacent_lane_id()->set_value(lane.GetId());
     for (const auto& laneBoundary : lane.GetRightLaneBoundaries())
     {
         osiLane->mutable_base_lane()->mutable_classification()->add_left_lane_boundary_id()->set_value(laneBoundary);
@@ -327,6 +336,7 @@ void Lane::SetRightLane(const Interfaces::Lane& lane)
 
     rightLane = &lane;
     osiLane->mutable_right_adjacent_lane_id()->set_value(lane.GetId());
+    osiLane->mutable_base_lane()->mutable_classification()->add_right_adjacent_lane_id()->set_value(lane.GetId());
 }
 
 void Lane::SetLeftLaneBoundaries(const std::vector<Id> laneBoundaries)
@@ -350,6 +360,11 @@ const Interfaces::WorldObjects& Lane::GetWorldObjects() const
 const Interfaces::TrafficSigns &Lane::GetTrafficSigns() const
 {
     return trafficSigns;
+}
+
+const Interfaces::RoadMarkings& Lane::GetRoadMarkings() const
+{
+    return roadMarkings;
 }
 
 //const Interfaces::MovingObjects& Lane::GetMovingObjects() const
@@ -392,6 +407,11 @@ void Lane::AddTrafficSign(Interfaces::TrafficSign& trafficSign)
     trafficSigns.push_back(&trafficSign);
 }
 
+void Lane::AddRoadMarking(Interfaces::RoadMarking& roadMarking)
+{
+    roadMarkings.push_back(&roadMarking);
+}
+
 void Lane::ClearMovingObjects()
 {
     worldObjects.clear();
@@ -409,11 +429,17 @@ void Lane::AddLanePairing(const Interfaces::Lane& prevLane, const Interfaces::La
 void Lane::AddNext(const Interfaces::Lane* lane)
 {
     next.push_back(lane->GetId());
+    auto lanePairing = osiLane->mutable_base_lane()->mutable_classification()->add_lane_pairing();
+    lanePairing->mutable_antecessor_lane_id()->set_value(GetId());
+    lanePairing->mutable_successor_lane_id()->set_value(lane->GetId());
 }
 
 void Lane::AddPrevious(const Interfaces::Lane* lane)
 {
     previous.push_back(lane->GetId());
+    auto lanePairing = osiLane->mutable_base_lane()->mutable_classification()->add_lane_pairing();
+    lanePairing->mutable_antecessor_lane_id()->set_value(lane->GetId());
+    lanePairing->mutable_successor_lane_id()->set_value(GetId());
 }
 
 const Interfaces::LaneGeometryElements& Lane::GetLaneGeometryElements() const
@@ -453,6 +479,9 @@ void Lane::AddLaneGeometryJoint(const Common::Vector2d& pointLeft,
     Primitive::LaneGeometryElement* newElement = new Primitive::LaneGeometryElement(previousJoint, newJoint, this);
     laneGeometryElements.push_back(newElement);
     laneGeometryJoints.push_back(newJoint);
+    auto osiCenterpoint = osiLane->mutable_base_lane()->mutable_classification()->add_centerline();
+    osiCenterpoint->set_x(pointCenter.x);
+    osiCenterpoint->set_y(pointCenter.y);
 }
 
 Section::Section(osi3::world::RoadSection* osiSection) : osiSection(osiSection)
@@ -695,7 +724,7 @@ double StationaryObject::GetAbsAccelerationDouble() const
     return 0.0;
 }
 
-ObjectPosition StationaryObject::GetLocatedPosition() const
+const ObjectPosition& StationaryObject::GetLocatedPosition() const
 {
     return position;
 }
@@ -908,7 +937,7 @@ void MovingObject::SetZ(const double newZ)
     osiPosition->set_z(newZ);
 }
 
-ObjectPosition MovingObject::GetLocatedPosition() const
+const ObjectPosition& MovingObject::GetLocatedPosition() const
 {
     return position;
 }
@@ -1312,25 +1341,36 @@ TrafficSign::TrafficSign(osi3::TrafficSign* osiObject) : osiSign{osiObject}
 {
 }
 
-bool TrafficSign::SetSpecification(RoadSignalInterface* signal)
+bool TrafficSign::SetSpecification(RoadSignalInterface* signal, Position position)
 {
     bool mapping_succeeded = true;
+
+    const auto baseStationary = osiSign->mutable_main_sign()->mutable_base();
+
+    baseStationary->mutable_position()->set_x(position.xPos);
+    baseStationary->mutable_position()->set_y(position.yPos);
+    baseStationary->mutable_position()->set_z(signal->GetZOffset() + 0.5 * signal->GetHeight());
+    baseStationary->mutable_dimension()->set_width(signal->GetWidth());
+    baseStationary->mutable_dimension()->set_height(signal->GetHeight());
+    double yaw = position.yawAngle + signal->GetHOffset() + (signal->GetOrientation() ? 0 : M_PI);
+    yaw = CommonHelper::SetAngleToValidRange(yaw);
+    baseStationary->mutable_orientation()->set_yaw(yaw);
 
     const auto mutableOsiClassification = osiSign->mutable_main_sign()->mutable_classification();
     const std::string odType = signal->GetType();
 
-    if(trafficSignsTypeOnly.find(odType) != trafficSignsTypeOnly.end())
+    if(OpenDriveTypeMapper::trafficSignsTypeOnly.find(odType) != OpenDriveTypeMapper::trafficSignsTypeOnly.end())
     {
-        mutableOsiClassification->set_type(trafficSignsTypeOnly.at(odType));
+        mutableOsiClassification->set_type(OpenDriveTypeMapper::trafficSignsTypeOnly.at(odType));
     }
-    else if(trafficSignsWithText.find(odType) != trafficSignsWithText.end())
+    else if(OpenDriveTypeMapper::trafficSignsWithText.find(odType) != OpenDriveTypeMapper::trafficSignsWithText.end())
     {
-        mutableOsiClassification->set_type(trafficSignsWithText.at(odType));
+        mutableOsiClassification->set_type(OpenDriveTypeMapper::trafficSignsWithText.at(odType));
         mutableOsiClassification->mutable_value()->set_text(signal->GetText());
     }
-    else if(trafficSignsPredefinedValueAndUnit.find(odType) != trafficSignsPredefinedValueAndUnit.end())
+    else if(OpenDriveTypeMapper::trafficSignsPredefinedValueAndUnit.find(odType) != OpenDriveTypeMapper::trafficSignsPredefinedValueAndUnit.end())
     {
-        const auto &specification = trafficSignsPredefinedValueAndUnit.at(odType);
+        const auto &specification = OpenDriveTypeMapper::trafficSignsPredefinedValueAndUnit.at(odType);
 
         mutableOsiClassification->mutable_value()->set_value_unit(specification.first);
 
@@ -1348,9 +1388,9 @@ bool TrafficSign::SetSpecification(RoadSignalInterface* signal)
             throw std::invalid_argument(message);
         }
     }
-    else if(trafficSignsSubTypeDefinesValue.find(odType) != trafficSignsSubTypeDefinesValue.end())
+    else if(OpenDriveTypeMapper::trafficSignsSubTypeDefinesValue.find(odType) != OpenDriveTypeMapper::trafficSignsSubTypeDefinesValue.end())
     {
-        const auto &valueAndUnit = trafficSignsSubTypeDefinesValue.at(odType);
+        const auto &valueAndUnit = OpenDriveTypeMapper::trafficSignsSubTypeDefinesValue.at(odType);
 
         mutableOsiClassification->set_type(valueAndUnit.first);
 
@@ -1367,9 +1407,20 @@ bool TrafficSign::SetSpecification(RoadSignalInterface* signal)
     return mapping_succeeded;
 }
 
-void TrafficSign::AddSupplementarySign(RoadSignalInterface* odSignal)
+void TrafficSign::AddSupplementarySign(RoadSignalInterface* odSignal, Position position)
 {
     auto *supplementarySign = osiSign->add_supplementary_sign();
+
+    const auto baseStationary = supplementarySign->mutable_base();
+
+    baseStationary->mutable_position()->set_x(position.xPos);
+    baseStationary->mutable_position()->set_y(position.yPos);
+    baseStationary->mutable_position()->set_z(odSignal->GetZOffset() + 0.5 * odSignal->GetHeight());
+    baseStationary->mutable_dimension()->set_width(odSignal->GetWidth());
+    baseStationary->mutable_dimension()->set_height(odSignal->GetHeight());
+    double yaw = position.yawAngle + odSignal->GetHOffset() + (odSignal->GetOrientation() ? 0 : M_PI);
+    yaw = CommonHelper::SetAngleToValidRange(yaw);
+    baseStationary->mutable_orientation()->set_yaw(yaw);
 
     if (odSignal->GetType() == "1004")
     {
@@ -1407,9 +1458,9 @@ void TrafficSign::AddSupplementarySign(RoadSignalInterface* odSignal)
 
 std::pair<double, CommonTrafficSign::Unit> TrafficSign::GetValueAndUnitInSI(const double osiValue, const osi3::TrafficSignValue_Unit osiUnit) const
 {
-    if (unitConversionMap.find(osiUnit) != unitConversionMap.end())
+    if (OpenDriveTypeMapper::unitConversionMap.find(osiUnit) != OpenDriveTypeMapper::unitConversionMap.end())
     {
-        const auto& conversionParameters = unitConversionMap.at(osiUnit);
+        const auto& conversionParameters = OpenDriveTypeMapper::unitConversionMap.at(osiUnit);
 
         return {osiValue * conversionParameters.first, conversionParameters.second};
     }
@@ -1429,9 +1480,9 @@ CommonTrafficSign::Entity TrafficSign::GetSpecification(const double relativeDis
 
     const auto osiType = osiSign->main_sign().classification().type();
 
-    if (typeConversionMap.find(osiType) != typeConversionMap.end())
+    if (OpenDriveTypeMapper::typeConversionMap.find(osiType) != OpenDriveTypeMapper::typeConversionMap.end())
     {
-        specification.type = typeConversionMap.at(osiType);
+        specification.type = OpenDriveTypeMapper::typeConversionMap.at(osiType);
     }
 
     const auto& osiMainSign = osiSign->main_sign().classification().value();
@@ -1465,6 +1516,18 @@ CommonTrafficSign::Entity TrafficSign::GetSpecification(const double relativeDis
     return specification;
 }
 
+Primitive::AbsPosition TrafficSign::GetReferencePointPosition() const
+{
+    const osi3::Vector3d osiPosition = osiSign->main_sign().base().position();
+    Primitive::AbsPosition position;
+
+    position.x = osiPosition.x();
+    position.y = osiPosition.y();
+    position.z = osiPosition.z();
+
+    return position;
+}
+
 bool TrafficSign::IsValidForLane(OWL::Id laneId) const
 {
     auto assignedLanes = osiSign->main_sign().classification().assigned_lane_id();
@@ -1479,6 +1542,93 @@ bool TrafficSign::IsValidForLane(OWL::Id laneId) const
 }
 
 void TrafficSign::CopyToGroundTruth(osi3::GroundTruth& target) const
+{
+    auto newTrafficSign = target.add_traffic_sign();
+    newTrafficSign->CopyFrom(*osiSign);
+}
+
+RoadMarking::RoadMarking(osi3::RoadMarking* osiObject) : osiSign{osiObject}
+{
+}
+
+bool RoadMarking::SetSpecification(RoadSignalInterface* signal, Position position)
+{
+    bool mapping_succeeded = true;
+
+    const auto baseStationary = osiSign->mutable_base();
+
+    baseStationary->mutable_position()->set_x(position.xPos);
+    baseStationary->mutable_position()->set_y(position.yPos);
+    baseStationary->mutable_position()->set_z(0.0);
+    baseStationary->mutable_dimension()->set_width(signal->GetWidth());
+    baseStationary->mutable_dimension()->set_length(0.5);
+    double yaw = position.yawAngle + signal->GetHOffset() + (signal->GetOrientation() ? 0 : M_PI);
+    yaw = CommonHelper::SetAngleToValidRange(yaw);
+    baseStationary->mutable_orientation()->set_yaw(yaw);
+
+    const auto mutableOsiClassification = osiSign->mutable_classification();
+    const std::string odType = signal->GetType();
+
+    mutableOsiClassification->set_type(osi3::RoadMarking_Classification_Type::RoadMarking_Classification_Type_TYPE_SYMBOLIC_TRAFFIC_SIGN);
+    mutableOsiClassification->set_monochrome_color(osi3::RoadMarking_Classification_Color::RoadMarking_Classification_Color_COLOR_WHITE);
+    if(OpenDriveTypeMapper::roadMarkings.find(odType) != OpenDriveTypeMapper::roadMarkings.end())
+    {
+        mutableOsiClassification->set_traffic_main_sign_type(OpenDriveTypeMapper::roadMarkings.at(odType));
+    }
+    else
+    {
+        mutableOsiClassification->set_traffic_main_sign_type(osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_OTHER);
+        mapping_succeeded = false;
+    }
+
+    return mapping_succeeded;
+}
+
+CommonTrafficSign::Entity RoadMarking::GetSpecification(const double relativeDistance) const
+{
+    CommonTrafficSign::Entity specification;
+
+    specification.distanceToStartOfRoad = s;
+    specification.relativeDistance = relativeDistance;
+
+    const auto osiType = osiSign->classification().traffic_main_sign_type();
+
+    if (OpenDriveTypeMapper::typeConversionMap.find(osiType) != OpenDriveTypeMapper::typeConversionMap.end())
+    {
+        specification.type = OpenDriveTypeMapper::typeConversionMap.at(osiType);
+    }
+
+    specification.text = osiSign->classification().value().text();
+
+    return specification;
+}
+
+Primitive::AbsPosition RoadMarking::GetReferencePointPosition() const
+{
+    const osi3::Vector3d osiPosition = osiSign->base().position();
+    Primitive::AbsPosition position;
+
+    position.x = osiPosition.x();
+    position.y = osiPosition.y();
+    position.z = osiPosition.z();
+
+    return position;
+}
+
+bool RoadMarking::IsValidForLane(OWL::Id laneId) const
+{
+    auto assignedLanes = osiSign->classification().assigned_lane_id();
+    for (auto lane : assignedLanes)
+    {
+        if (lane.value() == laneId)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+void RoadMarking::CopyToGroundTruth(osi3::GroundTruth& target) const
 {
     auto newTrafficSign = target.add_traffic_sign();
     newTrafficSign->CopyFrom(*osiSign);
@@ -1548,6 +1698,12 @@ void LaneBoundary::AddBoundaryPoint(const Common::Vector2d &point, double headin
         break;
     }
     boundaryPoint->set_width(width);
+}
+
+void LaneBoundary::CopyToGroundTruth(osi3::GroundTruth& target) const
+{
+    auto newLaneBoundary = target.add_lane_boundary();
+    newLaneBoundary->CopyFrom(*osiLaneBoundary);
 }
 
 // namespace Implementation

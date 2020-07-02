@@ -25,7 +25,7 @@
 #include <iostream>
 #include <QMutex>
 #include <QThread>
-#include <QMap>
+#include <map>
 
 #if defined(LOG_TIME_ENABLED)
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
@@ -197,6 +197,14 @@ std::string Log<T>::ToString(LogLevel level)
 class LogOutputPolicy
 {
 public:
+    ~LogOutputPolicy ()
+    {
+        for (const auto &[id, stream] : logStreamMap)
+        {
+            stream->close();
+        }
+    }
+
     //-----------------------------------------------------------------------------
     //! Initializes output file.
     //!
@@ -219,21 +227,21 @@ public:
     static void Output(const std::string &message);
 
 private:
-    static QMap<int, std::ofstream *> logStreamMap; //!< output file stream
+    static std::map<int, std::unique_ptr<std::ofstream>> logStreamMap;
 };
 
 inline void LogOutputPolicy::SetFile(const std::string &fileName)
 {
     long long threadId = (long long)QThread::currentThreadId();
-    std::ofstream *logStream = new std::ofstream();
+    std::unique_ptr<std::ofstream> logStream = std::make_unique<std::ofstream>();
     logStream->open(fileName);
-    logStreamMap.insert(threadId, logStream);
+    logStreamMap.emplace(threadId, std::move(logStream));
 }
 
 inline bool LogOutputPolicy::IsOpen()
 {
     long long threadId = (long long)QThread::currentThreadId();
-    if (logStreamMap.contains(threadId))
+    if (logStreamMap.find(threadId) != logStreamMap.end())
     {
         return logStreamMap[threadId]->is_open();
     }
@@ -250,7 +258,7 @@ inline void LogOutputPolicy::Output(const std::string &message)
 
     // print to file
     long long threadId = (long long)QThread::currentThreadId();
-    if (logStreamMap.contains(threadId))
+    if (logStreamMap.find(threadId) != logStreamMap.end())
     {
         *logStreamMap[threadId] << message;
         logStreamMap[threadId]->flush();

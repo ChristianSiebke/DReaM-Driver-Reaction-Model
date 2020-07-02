@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -22,9 +22,9 @@ public:
                  bool(const SpawnPointLibraryInfoCollection&,
                       AgentFactoryInterface*,
                       AgentBlueprintProviderInterface*,
-                      const SamplerInterface * const,
+                      StochasticsInterface*,
                       ScenarioInterface*,
-                      const SpawnPointProfiles&));
+                      const std::optional<ProfileGroup>&));
     MOCK_METHOD0(TriggerPreRunSpawnPoints,
                  bool());
     MOCK_METHOD1(TriggerRuntimeSpawnPoints,

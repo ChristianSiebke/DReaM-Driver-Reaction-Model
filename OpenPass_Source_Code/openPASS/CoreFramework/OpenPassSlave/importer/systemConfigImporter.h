@@ -59,7 +59,7 @@ public:
 
 
 private:
-    static openpass::parameter::Container ImportSystemParameters(QDomElement &parametersElement);
+    static openpass::parameter::ParameterSetLevel1 ImportSystemParameters(QDomElement &parametersElement);
     static bool ImportSystemConfigContent(const std::string &filename, QDomDocument& document);
 
 };

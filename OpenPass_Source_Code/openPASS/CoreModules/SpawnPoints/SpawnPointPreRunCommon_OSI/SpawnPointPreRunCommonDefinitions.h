@@ -15,37 +15,31 @@
 #include <vector>
 #include "Interfaces/parameterInterface.h"
 #include "Common/SpawnPointDefinitions.h"
+#include "Common/commonTools.h"
 
 namespace SpawnPointPreRunCommonDefinitions
 {
     using namespace SpawnPointDefinitions;
-    struct SpawnPointParameters
-    {
-        SpawnPointParameters(const RoadId& roadId,
-                             const LaneIds& laneIds,
-                             const SPosition sStart,
-                             const SPosition sEnd,
-                             const double carsPerSecond,
-                             const double platoonRate,
-                             const openpass::parameter::NormalDistribution& trafficVelocityDistribution,
-                             const StringProbabilities& agentProfiles):
-            roadId{roadId},
-            laneIds{laneIds},
-            sStart{sStart},
-            sEnd{sEnd},
-            carsPerSecond{carsPerSecond},
-            platoonRate{platoonRate},
-            trafficVelocityDistribution{trafficVelocityDistribution},
-            agentProfiles{agentProfiles}
-        {}
 
+    struct SpawnArea
+    {
         const RoadId roadId;
         const LaneIds laneIds;
         const SPosition sStart;
         const SPosition sEnd;
-        const double carsPerSecond;
-        const double platoonRate;
-        const openpass::parameter::NormalDistribution trafficVelocityDistribution;
-        const StringProbabilities agentProfiles;
+
+        bool operator== (const SpawnArea& other) const
+        {
+            return this->roadId == other.roadId
+                    && this->laneIds == other.laneIds
+                    && CommonHelper::DoubleEquality(this->sStart, other.sStart)
+                    && CommonHelper::DoubleEquality(this->sEnd, other.sEnd);
+        }
+    };
+
+    struct PreRunSpawnerParameters
+    {
+        const std::vector<SpawnArea> spawnAreas;
+        const AgentProfileLaneMaps agentProfileLaneMaps;
     };
 } // SpawnPointPreRunDefinitions

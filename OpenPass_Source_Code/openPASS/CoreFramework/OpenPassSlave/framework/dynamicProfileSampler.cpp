@@ -9,18 +9,19 @@
 *******************************************************************************/
 
 #include "dynamicProfileSampler.h"
+#include "sampler.h"
 
 DynamicProfileSampler& DynamicProfileSampler::SampleDriverProfile()
 {
     auto probabilities = profiles->GetDriverProbabilities(agentProfileName);
-    sampledProfiles.driverProfileName = sampler.SampleStringProbability(probabilities);
+    sampledProfiles.driverProfileName = Sampler::Sample(probabilities, &stochastics);
     return *this;
 }
 
 DynamicProfileSampler& DynamicProfileSampler::SampleVehicleProfile()
 {
     auto probabilities = profiles->GetVehicleProfileProbabilities(agentProfileName);
-    sampledProfiles.vehicleProfileName = sampler.SampleStringProbability(probabilities);
+    sampledProfiles.vehicleProfileName = Sampler::Sample(probabilities, &stochastics);
     return *this;
 }
 
@@ -29,7 +30,7 @@ DynamicProfileSampler& DynamicProfileSampler::SampleVehicleComponentProfiles()
     VehicleProfile vehicleProfile = profiles->GetVehicleProfiles().at(sampledProfiles.vehicleProfileName);
     for (VehicleComponent vehicleComponentInProfile : vehicleProfile.vehicleComponents)
     {
-        std::string vehicleComponentName = sampler.SampleStringProbability(vehicleComponentInProfile.componentProfiles);
+        std::string vehicleComponentName = Sampler::Sample(vehicleComponentInProfile.componentProfiles, &stochastics);
         if (vehicleComponentName != "")
         {
             sampledProfiles.vehicleComponentProfileNames.insert(std::make_pair<std::string&, std::string&>
@@ -40,10 +41,9 @@ DynamicProfileSampler& DynamicProfileSampler::SampleVehicleComponentProfiles()
     return *this;
 }
 
-DynamicProfileSampler SampledProfiles::make(
-    std::string agentProfileName,
-    const SamplerInterface& sampler,
+DynamicProfileSampler SampledProfiles::make(std::string agentProfileName,
+    StochasticsInterface& stochastics,
     ProfilesInterface* profiles)
 {
-    return DynamicProfileSampler(agentProfileName, sampler, profiles);
+    return DynamicProfileSampler(agentProfileName, stochastics, profiles);
 }

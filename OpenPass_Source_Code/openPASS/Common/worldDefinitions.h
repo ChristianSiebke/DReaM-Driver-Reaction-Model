@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -11,8 +11,14 @@
 
 #pragma once
 
+#include <limits>
+
 #include "globalDefinitions.h"
 #include <optional>
+#include <set>
+#include "boost/graph/adjacency_list.hpp"
+
+constexpr double EQUALITY_BOUND = 1e-3;
 
 enum class RoadNetworkElementType
 {
@@ -151,7 +157,9 @@ struct RoadPosition
 
     bool operator==(const RoadPosition& other) const
     {
-        return s == other.s && t == other.t && hdg == other.hdg;
+        return std::abs(s - other.s) < EQUALITY_BOUND
+                && std::abs(t - other.t) < EQUALITY_BOUND
+                && std::abs(hdg - other.hdg) < EQUALITY_BOUND;
     }
 };
 
@@ -170,57 +178,75 @@ struct GlobalRoadPosition
     RoadPosition roadPosition {};
 };
 
+//! This struct describes how much space an agent has to next lane boundary on both sides
+struct Remainder
+{
+    Remainder() = default;
+    Remainder(double left, double right) : left{left}, right{right}
+    {}
+
+    double left {0.0};
+    double right {0.0};
+};
+
 //! Interval on a specific road
 struct RoadInterval
 {
     std::vector<int> lanes;
     double sStart {std::numeric_limits<double>::max()};
     double sEnd {0.0};
+    Remainder remainder;
 };
 
 //! Position of an object in the road network
 struct ObjectPosition
 {
-    GlobalRoadPosition referencePoint{};    //! position of the reference point
-    GlobalRoadPosition mainLocatePoint{};   //! position of the mainLocatePoint (middle of agent front)
+    std::map<const std::string, GlobalRoadPosition> referencePoint{};    //! position of the reference point mapped by roadId
+    std::map<const std::string, GlobalRoadPosition> mainLocatePoint{};   //! position of the mainLocatePoint (middle of agent front) mapped by roadId
     std::map<std::string, RoadInterval> touchedRoads{}; //! all roads the object is on (fully or partially), key is the roadId
 };
 
+//! This represents one node on the road network graph of the world or in the routing graph of an agent.
 struct RouteElement
 {
     std::string roadId;
-    bool inRoadDirection;
+    bool inOdDirection{false};
+
+    RouteElement() = default;
+
+    RouteElement (std::string roadId, bool inOdDirection) :
+        roadId(roadId),
+        inOdDirection(inOdDirection)
+    {}
 
     bool operator==(const RouteElement& other) const
     {
-        return inRoadDirection == other.inRoadDirection && roadId == other.roadId;
+        return roadId == other.roadId
+                && inOdDirection == other.inOdDirection;
     }
-};
 
-//! Route of an agent through the world
-struct Route
-{
-    Route () = default;
-    explicit Route (std::vector<RouteElement> roads, std::vector<std::string> junctions, size_t hash) :
-        roads(roads),
-        junctions(junctions),
-        hash(hash)
-    {}
-    explicit Route (std::string road, bool inRoadDirection = true) :
-        roads{{road, inRoadDirection}},
-        hash{std::hash<std::string>{}(road) ^ std::hash<bool>{}(inRoadDirection)}
-    {}
-
-    bool operator==(const Route& other) const
+    bool operator<(const RouteElement& other) const
     {
-        return hash == other.hash && roads == other.roads && junctions == other.junctions;
+        return inOdDirection < other.inOdDirection
+                || (inOdDirection == other.inOdDirection && roadId < other.roadId);
     }
 
-    std::vector<RouteElement> roads;
-    std::vector<std::string> junctions;
-    //! The hash is part of an internal query optimization. This is likly to change in future versions, so use with care in custom implementations
-    size_t hash;
+    typedef boost::vertex_property_tag kind;
 };
+
+using RouteElementProperty = boost::property<RouteElement, RouteElement>;
+
+//! Directed graph representing the road network.
+//! For each road there is one vertex for each possible driving direction.
+//! An edges between two vertices means, that an agent driving on the first road in this direction can after the road ends
+//! continue its way on the second road in the given direction.
+using RoadGraph = boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, RouteElementProperty>;
+using RoadGraphVertex = boost::graph_traits<RoadGraph>::vertex_descriptor;
+using RoadGraphEdge = boost::graph_traits<RoadGraph>::edge_descriptor;
+using RoadGraphVertexMapping = std::map<RouteElement, RoadGraphVertex>;
+
+template <typename T>
+using RouteQueryResult = std::map<RoadGraphVertex, T>;
 
 //! @brief Describes the obstruction of an opposing object within the driving lanes
 ///
@@ -230,15 +256,19 @@ public:
     bool valid {false};   ///!< @brief True, if obstruction could be calculated
     double left {0.0};    ///!< @brief How far do I need to drive to the left to pass the object
     double right {0.0};   ///!< @brief How far do I need to drive to the right to pass the object
+    double mainLaneLocator {0.0}; ///!< @brief Lateral distance of the mainLaneLocator
     bool isOverlapping {false}; ///!< @brief True, if object obstructs
 
-    Obstruction(double left, double right) :
+    Obstruction(double left, double right, double mainLaneLocator) :
         valid{true},
         left{left},
         right{right},
+        mainLaneLocator{mainLaneLocator},
         isOverlapping{ left > 0.0 && right < 0.0 }
     {
     }
+
+    Obstruction() = default;
 
     /// \return Invalid obstruction object
     static Obstruction Invalid()
@@ -249,11 +279,15 @@ public:
     /// \return Default for no opponent
     static Obstruction NoOpponent()
     {
-        return Obstruction(0.0, 0.0);
+        return Obstruction(0.0, 0.0, 0.0);
     }
+};
 
-private:
-    Obstruction() = default;
+//! Longitudinal distance (i.e. along s) between two objects on the same road
+struct LongitudinalDistance
+{
+    std::optional<double> netDistance;     //! distance between boundaries
+    std::optional<double> referencePoint;  //! distance between reference points
 };
 
 
@@ -295,6 +329,7 @@ enum Type
     HighWayEnd = 3302, // 330.2
     HighWayExit = 333,
     HighwayExitPole = 450, // 450-(50/51/52),
+    AnnounceHighwayExit = 448,
     AnnounceRightLaneEnd = 5311, // 531-(10/11/12/13)
     AnnounceLeftLaneEnd = 5312, // 531-(20/21/22/23)
     DistanceIndication = 1004 // 1004-(30/31/32/33)

@@ -17,16 +17,21 @@ add_openpass_target(
   NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT module
 
   HEADERS
+    ../../../CoreFramework/OpenPassSlave/framework/sampler.h
     ../../../CoreFramework/OpenPassSlave/modelElements/agentBlueprint.h
     SpawnPointScenario.h
     SpawnPointScenarioExport.h
     SpawnPointScenarioGlobal.h
 
   SOURCES
+    ../../../CoreFramework/OpenPassSlave/framework/sampler.cpp
     ../../../CoreFramework/OpenPassSlave/modelElements/agentBlueprint.cpp
     SpawnPointScenario.cpp
     SpawnPointScenarioExport.cpp
 
+  INCDIRS
+    ../../../CoreFramework/CoreShare
+    
   LIBRARIES
     Qt5::Core
     CoreShare

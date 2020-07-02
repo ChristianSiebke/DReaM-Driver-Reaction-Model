@@ -239,7 +239,7 @@ double DynamicsRegularDrivingImplementation::GetAccVehicle(double accPedalPos, d
     else  // Gas
     {
         double engineMoment = GetEngineMoment(accPedalPos, gear);
-        observation->Insert(time, GetAgent()->GetId(), LoggingGroup::Vehicle, "EngineMoment", std::to_string(engineMoment));
+        GetPublisher()->Publish("EngineMoment", engineMoment);
         resultAcc = GetAccFromEngineMoment(xVel, engineMoment, gear, GetCycleTime());
     }
 
@@ -292,7 +292,7 @@ void DynamicsRegularDrivingImplementation::Trigger(int time)
     // convert steering wheel angle to steering angle of front wheels [degree]
     double steering_angle_degrees = TrafficHelperFunctions::ValueInBounds(-vehicleModelParameters.maximumSteeringWheelAngleAmplitude, in_steeringWheelAngle, vehicleModelParameters.maximumSteeringWheelAngleAmplitude) / vehicleModelParameters.steeringRatio;
     dynamicsSignal.steeringWheelAngle = TrafficHelperFunctions::ValueInBounds(-vehicleModelParameters.maximumSteeringWheelAngleAmplitude, in_steeringWheelAngle, vehicleModelParameters.maximumSteeringWheelAngleAmplitude);
-    observation->Insert(time, GetAgent()->GetId(), LoggingGroup::Vehicle, "SteeringAngle", std::to_string(steering_angle_degrees));
+    GetPublisher()->Publish("SteeringAngle", steering_angle_degrees);
     // calculate curvature (Ackermann model; reference point of yawing = rear axle!) [radiant]
     double steeringCurvature = std::tan(DegreeToRadiant * steering_angle_degrees) / vehicleModelParameters.wheelbase;
     // change of yaw angle due to ds and curvature [radiant]

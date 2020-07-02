@@ -34,7 +34,6 @@ HEADERS += \
     $$WORLD_OSI/WorldDataException.h
 
 SOURCES += \
-    $$OPEN_SRC/Common/vector2d.cpp \
     $$UNIT_UNDER_TEST/sensorGeometric2D.cpp \
     $$UNIT_UNDER_TEST/objectDetectorBase.cpp \
     $$WORLD_OSI/OWL/DataTypes.cpp \

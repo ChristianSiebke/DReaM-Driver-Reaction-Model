@@ -26,10 +26,13 @@ INCLUDEPATH += \
 
 DEPENDENCY_HEADERS = \
                      ../Common/SpawnPointDefinitions.h \
+                     ../Common/stochasticDefinitions.h \
                      ../../../CoreFramework/CoreShare/log.h \
+                     ../../../CoreFramework/OpenPassSlave/framework/sampler.h \
                      ../../../CoreFramework/OpenPassSlave/modelElements/agentBlueprint.h
 
 DEPENDENCY_SOURCES = ../../../CoreFramework/CoreShare/log.cpp \
+                     ../../../CoreFramework/OpenPassSlave/framework/sampler.cpp \
                      ../../../CoreFramework/OpenPassSlave/modelElements/agentBlueprint.cpp
 
 SPAWNPOINT_HEADERS = SpawnPointScenario.h \

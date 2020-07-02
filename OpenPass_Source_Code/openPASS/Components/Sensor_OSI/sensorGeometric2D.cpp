@@ -29,7 +29,7 @@ SensorGeometric2D::SensorGeometric2D(
         StochasticsInterface *stochastics,
         WorldInterface *world,
         const ParameterInterface *parameters,
-        const std::map<int, ObservationInterface*> *observations,
+        PublisherInterface * const publisher,
         const CallbackInterface *callbacks,
         AgentInterface *agent) :
     ObjectDetectorBase(
@@ -42,7 +42,7 @@ SensorGeometric2D::SensorGeometric2D(
         stochastics,
         world,
         parameters,
-        observations,
+        publisher,
         callbacks,
         agent)
 {
@@ -119,16 +119,8 @@ void SensorGeometric2D::Observe(const int time, const SensorDetectionResults& re
         return object.id().value();
     });
 
-    _observer->Insert(time,
-                      GetAgent()->GetId(),
-                      LoggingGroup::SensorExtended,
-                      "Sensor" + std::to_string(id) + "_VisibleAgents",
-                      CreateAgentIdListString(visibleIds));
-    _observer->Insert(time,
-                      GetAgent()->GetId(),
-                      LoggingGroup::SensorExtended,
-                      "Sensor" + std::to_string(id) + "_DetectedAgents",
-                      CreateAgentIdListString(detectedIds));
+    GetPublisher()->Publish("Sensor" + std::to_string(id) + "_VisibleAgents", CreateAgentIdListString(visibleIds));
+    GetPublisher()->Publish("Sensor" + std::to_string(id) + "_DetectedAgents", CreateAgentIdListString(detectedIds));
 }
 
 std::string SensorGeometric2D::CreateAgentIdListString(const std::vector<OWL::Id>& owlIds) const

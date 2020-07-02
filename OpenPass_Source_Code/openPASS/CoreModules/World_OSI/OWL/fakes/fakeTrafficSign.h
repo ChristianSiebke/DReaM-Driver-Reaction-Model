@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -30,16 +30,18 @@ public:
                        std::pair<double, CommonTrafficSign::Unit> (const double osiValue, const osi3::TrafficSignValue_Unit osiUnit));
     MOCK_CONST_METHOD1(GetSpecification,
                        CommonTrafficSign::Entity(double));
+    MOCK_CONST_METHOD0(GetReferencePointPosition,
+                       Primitive::AbsPosition ());
     MOCK_CONST_METHOD1(IsValidForLane,
                        bool(OWL::Id laneId));
     MOCK_METHOD1(SetS,
                  void(double));
     MOCK_METHOD1(SetValidForLane,
                  void(OWL::Id));
-    MOCK_METHOD1(SetSpecification,
-                 bool(RoadSignalInterface*));
-    MOCK_METHOD1(AddSupplementarySign,
-                 void (RoadSignalInterface* odSignal));
+    MOCK_METHOD2(SetSpecification,
+                 bool(RoadSignalInterface*, Position position));
+    MOCK_METHOD2(AddSupplementarySign,
+                 void (RoadSignalInterface* odSignal, Position position));
     MOCK_CONST_METHOD1(CopyToGroundTruth,
                        void(osi3::GroundTruth&));
 };

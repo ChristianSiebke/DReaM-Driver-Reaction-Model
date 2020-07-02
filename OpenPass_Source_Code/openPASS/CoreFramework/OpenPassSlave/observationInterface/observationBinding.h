@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -22,6 +22,7 @@
 #include "Interfaces/eventNetworkInterface.h"
 #include "Interfaces/stochasticsInterface.h"
 #include "Interfaces/worldInterface.h"
+#include "Common/opExport.h"
 #include "Common/runtimeInformation.h"
 #include "Common/parameter.h"
 #include "callbacks.h"
@@ -30,12 +31,12 @@ namespace SimulationSlave {
 class ObservationLibrary;
 class ObservationModule;
 
-class ObservationBinding
+class CORESLAVEEXPORT ObservationBinding
 {
 public:
     ObservationBinding(const openpass::common::RuntimeInformation& runtimeInformation, CallbackInterface* callbacks);
     ObservationBinding(const ObservationBinding&) = delete;
-    ObservationBinding(ObservationBinding&&) = delete;
+    ObservationBinding(ObservationBinding&&) = default;
     ObservationBinding& operator=(const ObservationBinding&) = delete;
     ObservationBinding& operator=(ObservationBinding&&) = delete;
     virtual ~ObservationBinding();
@@ -54,10 +55,11 @@ public:
     //!                                     observation instance
     //-----------------------------------------------------------------------------
     ObservationModule* Instantiate(const std::string &libraryPath,
-                                   const openpass::parameter::Container& parameter,
+                                   const openpass::parameter::ParameterSetLevel1& parameter,
                                    StochasticsInterface* stochastics,
                                    WorldInterface* world,
-                                   SimulationSlave::EventNetworkInterface* eventNetwork);
+                                   SimulationSlave::EventNetworkInterface* eventNetwork,
+                                   DataStoreReadInterface* dataStore);
     //-----------------------------------------------------------------------------
     //! Deletes the library mapping and all referenced observation library objects
     //-----------------------------------------------------------------------------

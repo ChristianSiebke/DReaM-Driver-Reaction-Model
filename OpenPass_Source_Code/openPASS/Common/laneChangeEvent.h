@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -8,21 +8,15 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
-//-----------------------------------------------------------------------------
-/** @file  LaneChangeEvent.h
-* @brief This file contains all functions for agent based events.
-*
-* This class contains all functionality of the module. */
-//-----------------------------------------------------------------------------
-
 #pragma once
 
 #include <vector>
 
 #include "vehicleComponentEvent.h"
+#include "openScenarioDefinitions.h"
 
 //-----------------------------------------------------------------------------
-/** This class implements all functionality of the AgentBasedEvent.
+/** This class implements all functionality of the LaneChangeEvent.
  *
  * \ingroup Event */
 //-----------------------------------------------------------------------------
@@ -33,17 +27,13 @@ public:
                     const std::string eventName,
                     std::string source,
                     int agentId,
-                    const int deltaLaneId):
+                    const openScenario::LaneChangeParameter laneChange):
         VehicleComponentEvent(time,
                               eventName,
                               source,
                               agentId),
-        deltaLaneId(deltaLaneId)
+        laneChange(laneChange)
     {}
-    LaneChangeEvent(const LaneChangeEvent&) = delete;
-    LaneChangeEvent(LaneChangeEvent&&) = delete;
-    LaneChangeEvent& operator=(const LaneChangeEvent&) = delete;
-    LaneChangeEvent& operator=(LaneChangeEvent&&) = delete;
     virtual ~LaneChangeEvent() = default;
 
     /*!
@@ -66,11 +56,9 @@ public:
     {
         auto eventParameters = VehicleComponentEvent::GetParametersAsString();
 
-        eventParameters.push_back({"DeltaLaneId", std::to_string(deltaLaneId)});
-
         return eventParameters;
     }
 
-    const int deltaLaneId;
+    const openScenario::LaneChangeParameter laneChange;
 };
 

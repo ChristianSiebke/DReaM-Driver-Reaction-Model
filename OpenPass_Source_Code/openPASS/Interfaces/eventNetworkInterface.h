@@ -18,14 +18,12 @@
 
 #include "Interfaces/agentInterface.h"
 #include "Interfaces/eventInterface.h"
-#include "Interfaces/observationInterface.h"
 #include "Interfaces/runResultInterface.h"
 
 using Events = std::map<EventDefinitions::EventCategory, std::list<std::shared_ptr<EventInterface>>>;
 using EventContainer = std::list<std::shared_ptr<EventInterface>>;
 
-namespace SimulationSlave
-{
+namespace SimulationSlave {
 
 //-----------------------------------------------------------------------------
 /** \brief This class provides the interface for the EventNetwork

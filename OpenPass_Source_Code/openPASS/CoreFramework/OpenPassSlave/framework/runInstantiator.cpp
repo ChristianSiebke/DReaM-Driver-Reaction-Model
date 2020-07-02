@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -9,100 +9,121 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
+#include "runInstantiator.h"
+
 #include <functional>
 #include <sstream>
 
-#include "agentFactory.h"
+#include "CoreFramework/CoreShare/log.h"
 #include "Interfaces/agentBlueprintProviderInterface.h"
+#include "Interfaces/observationNetworkInterface.h"
+#include "agentFactory.h"
 #include "agentType.h"
 #include "channel.h"
 #include "component.h"
-#include "CoreFramework/CoreShare/log.h"
-#include "Interfaces/observationNetworkInterface.h"
+#include "dataStore.h"
 #include "observationModule.h"
-#include "runInstantiator.h"
+#include "parameters.h"
 #include "runResult.h"
 #include "scheduler.h"
 #include "spawnPointNetwork.h"
 #include "stochastics.h"
-#include "parameters.h"
+#include "parameterbuilder.h"
+#include "sampler.h"
+
+constexpr char SPAWNER[] = {"Spawner"};
 
 namespace SimulationSlave {
 
 bool RunInstantiator::ExecuteRun()
 {
-    LOG_INTERN(LogLevel::DebugCore) << std::endl << "### execute run ###";
+    LOG_INTERN(LogLevel::DebugCore) << std::endl
+                                    << "### execute run ###";
 
     stopMutex.lock();
     stopped = false;
     stopMutex.unlock();
 
-    auto& scenario = *configurationContainer.GetScenario();
-    auto& scenery = *configurationContainer.GetScenery();
-    auto& slaveConfig = *configurationContainer.GetSlaveConfig();
-    auto& experimentConfig = slaveConfig.GetExperimentConfig();
-    auto& environmentConfig = slaveConfig.GetEnvironmentConfig();
+    auto &scenario = *configurationContainer.GetScenario();
+    auto &scenery = *configurationContainer.GetScenery();
+    auto &slaveConfig = *configurationContainer.GetSlaveConfig();
+    auto &experimentConfig = slaveConfig.GetExperimentConfig();
+    auto &environmentConfig = slaveConfig.GetEnvironmentConfig();
 
-    if (!InitPreRun(experimentConfig, scenario, scenery))
+    if (!InitPreRun(scenario, scenery))
     {
-        LOG_INTERN(LogLevel::DebugCore) << std::endl << "### initialization failed ###";
+        LOG_INTERN(LogLevel::DebugCore) << std::endl
+                                        << "### initialization failed ###";
         return false;
     }
 
-    Scheduler scheduler(world, spawnPointNetwork, eventDetectorNetwork, manipulatorNetwork, observationNetwork);
-    bool scheduler_state { false };
+    dataStore.PutStatic("SceneryFile", scenario.GetSceneryPath(), true);
+    ThrowIfFalse(observationNetwork.InitAll(), "Failed to initialize ObservationNetwork");
+
+    openpass::scheduling::Scheduler scheduler(world, spawnPointNetwork, eventDetectorNetwork, manipulatorNetwork, observationNetwork);
+    bool scheduler_state{false};
 
     for (auto invocation = 0; invocation < experimentConfig.numberOfInvocations; invocation++)
     {
         RunResult runResult;
 
-        LOG_INTERN(LogLevel::DebugCore) << std::endl << "### run number: " << invocation << " ###";
+        LOG_INTERN(LogLevel::DebugCore) << std::endl
+                                        << "### run number: " << invocation << " ###";
         auto seed = static_cast<std::uint32_t>(experimentConfig.randomSeed + invocation);
         if (!InitRun(seed, environmentConfig, runResult))
         {
-            LOG_INTERN(LogLevel::DebugCore) << std::endl << "### run initialization failed ###";
+            LOG_INTERN(LogLevel::DebugCore) << std::endl
+                                            << "### run initialization failed ###";
             break;
         }
 
-        LOG_INTERN(LogLevel::DebugCore) << std::endl << "### run started ###";
+        LOG_INTERN(LogLevel::DebugCore) << std::endl
+                                        << "### run started ###";
         scheduler_state = scheduler.Run(0, scenario.GetEndTime(), runResult, eventNetwork);
-        if (scheduler_state == Scheduler::FAILURE)
+        if (scheduler_state == openpass::scheduling::Scheduler::FAILURE)
         {
-            LOG_INTERN(LogLevel::DebugCore) << std::endl << "### run aborted ###";
+            LOG_INTERN(LogLevel::DebugCore) << std::endl
+                                            << "### run aborted ###";
             break;
         }
-        LOG_INTERN(LogLevel::DebugCore) << std::endl << "### run successful ###";
+        LOG_INTERN(LogLevel::DebugCore) << std::endl
+                                        << "### run successful ###";
 
         observationNetwork.FinalizeRun(runResult);
         ClearRun();
     }
 
-    LOG_INTERN(LogLevel::DebugCore) << std::endl << "### end of all runs ###";
+    LOG_INTERN(LogLevel::DebugCore) << std::endl
+                                    << "### end of all runs ###";
     bool observations_state = observationNetwork.FinalizeAll();
 
     return (scheduler_state && observations_state);
 }
 
-bool RunInstantiator::InitPreRun(ExperimentConfig& experimentConfig, ScenarioInterface& scenario, SceneryInterface& scenery)
+bool RunInstantiator::InitPreRun(ScenarioInterface& scenario, SceneryInterface& scenery)
 {
     try
     {
-        InitializeFrameworkModules(experimentConfig, scenario);
+        InitializeFrameworkModules(scenario);
         world.CreateScenery(&scenery);
         return true;
     }
-    catch(const std::exception& error)
+    catch (const std::exception &error)
     {
-        LOG_INTERN(LogLevel::Error) << std::endl << "### could not init: "  << error.what() << "###";
+        LOG_INTERN(LogLevel::Error) << std::endl
+                                    << "### could not init: " << error.what() << "###";
         return false;
     }
 
-    LOG_INTERN(LogLevel::Error) << std::endl << "### exception caught, which is not of type std::exception! ###";
+    LOG_INTERN(LogLevel::Error) << std::endl
+                                << "### exception caught, which is not of type std::exception! ###";
     return false;
 }
 
-void RunInstantiator::InitializeFrameworkModules(ExperimentConfig& experimentConfig, ScenarioInterface& scenario)
+void RunInstantiator::InitializeFrameworkModules(ScenarioInterface& scenario)
 {
+    ThrowIfFalse(dataStore.Instantiate(),
+                 "Failed to instantiate DataStore");
     ThrowIfFalse(stochastics.Instantiate(frameworkModules.stochasticsLibrary),
                  "Failed to instantiate Stochastics");
     ThrowIfFalse(world.Instantiate(),
@@ -111,41 +132,41 @@ void RunInstantiator::InitializeFrameworkModules(ExperimentConfig& experimentCon
                  "Failed to instantiate EventDetectorNetwork");
     ThrowIfFalse(manipulatorNetwork.Instantiate(frameworkModules.manipulatorLibrary, &scenario, &eventNetwork),
                  "Failed to instantiate ManipulatorNetwork");
-
-    openpass::parameter::Container observationParameters
-    {
-        { "LoggingCyclicsToCsv", experimentConfig.logCyclicsToCsv},
-        { "LoggingGroups", experimentConfig.loggingGroups },
-        { "SceneryFile", scenario.GetSceneryPath() }
-    };
-
-    // TODO: This is a workaround, as the OSI use case only imports a single observation library -> implement new observation concept
-    std::map<int, ObservationInstance> observationInstances {{ 0, {frameworkModules.observationLibrary, observationParameters} }};
-
-    ThrowIfFalse(observationNetwork.Instantiate(observationInstances, &stochastics, &world, &eventNetwork),
+    ThrowIfFalse(observationNetwork.Instantiate(frameworkModules.observationLibraries, &stochastics, &world, &eventNetwork, scenario.GetSceneryPath(), &dataStore),
                  "Failed to instantiate ObservationNetwork");
-    ThrowIfFalse(observationNetwork.InitAll(),
-                 "Failed to initialize ObservationNetwork");
 }
 
 void RunInstantiator::InitializeSpawnPointNetwork()
 {
+    const auto &profileGroups = configurationContainer.GetProfiles()->GetProfileGroups();
+    bool existingSpawnProfiles = profileGroups.find(SPAWNER) != profileGroups.end();
+
     ThrowIfFalse(spawnPointNetwork.Instantiate(frameworkModules.spawnPointLibraries,
-                 &agentFactory,
-                 &agentBlueprintProvider,
-                 &sampler,
-                 configurationContainer.GetScenario(),
-                 configurationContainer.GetProfiles()->GetSpawnPointProfiles()), "Failed to instantiate SpawnPointNetwork");
+                                               &agentFactory,
+                                               &agentBlueprintProvider,
+                                               &stochastics,
+                                               configurationContainer.GetScenario(),
+                                               existingSpawnProfiles ? std::make_optional(profileGroups.at(SPAWNER)) : std::nullopt),
+                 "Failed to instantiate SpawnPointNetwork");
 }
 
-
-bool RunInstantiator::InitRun(std::uint32_t seed, const EnvironmentConfig& environmentConfig, RunResult& runResult)
+std::unique_ptr<ParameterInterface> RunInstantiator::SampleWorldParameters(const EnvironmentConfig& environmentConfig, StochasticsInterface* stochastics, const openpass::common::RuntimeInformation& runtimeInformation)
+{
+    return openpass::parameter::make<SimulationCommon::Parameters>(
+        runtimeInformation, openpass::parameter::ParameterSetLevel1 {
+            { "TimeOfDay", Sampler::Sample(environmentConfig.timeOfDays, stochastics) },
+            { "VisibilityDistance", Sampler::Sample(environmentConfig.visibilityDistances, stochastics) },
+            { "Friction", Sampler::Sample(environmentConfig.frictions, stochastics) },
+            { "Weather", Sampler::Sample(environmentConfig.weathers, stochastics) }}
+    );
+}
+bool RunInstantiator::InitRun(std::uint32_t seed, const EnvironmentConfig &environmentConfig, RunResult &runResult)
 {
     try
     {
         stochastics.InitGenerator(seed);
 
-        worldParameter = sampler.SampleWorldParameters(environmentConfig);
+        worldParameter = SampleWorldParameters(environmentConfig, &stochastics, configurationContainer.GetRuntimeInformation());
         world.ExtractParameter(worldParameter.get());
 
         observationNetwork.InitRun();
@@ -154,13 +175,15 @@ bool RunInstantiator::InitRun(std::uint32_t seed, const EnvironmentConfig& envir
         eventNetwork.Initialize(&runResult);
         return true;
     }
-    catch(const std::exception& error)
+    catch (const std::exception &error)
     {
-        LOG_INTERN(LogLevel::Error) << std::endl << "### could not init run: "  << error.what() << "###";
+        LOG_INTERN(LogLevel::Error) << std::endl
+                                    << "### could not init run: " << error.what() << "###";
         return false;
     }
 
-    LOG_INTERN(LogLevel::Error) << std::endl << "### exception caught, which is not of type std::exception! ###";
+    LOG_INTERN(LogLevel::Error) << std::endl
+                                << "### exception caught, which is not of type std::exception! ###";
     return false;
 }
 
@@ -171,6 +194,7 @@ void RunInstantiator::ClearRun()
     spawnPointNetwork.Clear();
     eventNetwork.Clear();
     eventDetectorNetwork.ResetAll();
+    dataStore.Clear();
 }
 
 } // namespace SimulationSlave

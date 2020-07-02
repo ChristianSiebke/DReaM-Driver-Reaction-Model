@@ -32,8 +32,8 @@ public:
                  bool(std::string, const std::vector<bool>));
     MOCK_METHOD2(AddParameterStringVector,
                  bool(std::string, const std::vector<std::string>));
-    MOCK_METHOD2(AddParameterNormalDistribution,
-                 bool(std::string, const openpass::parameter::NormalDistribution));
+    MOCK_METHOD2(AddParameterStochastic,
+                 bool(std::string, const openpass::parameter::StochasticDistribution));
     MOCK_CONST_METHOD0(GetRuntimeInformation,
                        const openpass::common::RuntimeInformation& ());
     MOCK_CONST_METHOD0(GetParametersDouble,
@@ -52,8 +52,8 @@ public:
                        const std::map<std::string, const std::vector<bool>>&());
     MOCK_CONST_METHOD0(GetParametersStringVector,
                        const std::map<std::string, const std::vector<std::string>>&());
-    MOCK_CONST_METHOD0(GetParametersNormalDistribution,
-                       const std::map<std::string, const openpass::parameter::NormalDistribution>&());
+    MOCK_CONST_METHOD0(GetParametersStochastic,
+                       const std::map<std::string, const openpass::parameter::StochasticDistribution>&());
     MOCK_CONST_METHOD0(GetParameterLists,
                        const std::map<std::string, ParameterLists>&());
 

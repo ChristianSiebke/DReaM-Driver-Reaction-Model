@@ -17,20 +17,18 @@
 //-----------------------------------------------------------------------------
 
 #include <functional>
-#include <vector>
 #include <list>
+#include <vector>
 
-#include "tasks.h"
 #include "Interfaces/spawnPointNetworkInterface.h"
 #include "Interfaces/worldInterface.h"
-#include "runResult.h"
-#include "observationNetwork.h"
 #include "eventDetectorNetwork.h"
 #include "manipulatorNetwork.h"
+#include "observationNetwork.h"
+#include "runResult.h"
+#include "tasks.h"
 
-using namespace SimulationSlave;
-using namespace Scheduling;
-
+namespace openpass::scheduling {
 //-----------------------------------------------------------------------------
 /** \brief interface of taskBuilder
 *
@@ -41,10 +39,11 @@ using namespace Scheduling;
 class TaskBuilderInterface
 {
 public:
-    virtual std::list<TaskItem> CreateBootstrapTasks()=  0;
-    virtual std::list<TaskItem> CreateCommonTasks() = 0;
-    virtual std::list<TaskItem> CreateFinalizeRecurringTasks() = 0;
-    virtual std::list<TaskItem> CreateFinalizeTasks() = 0;    
+    virtual std::list<TaskItem> CreateBootstrapTasks() = 0;
+    virtual std::list<TaskItem> CreateSpawningTasks() = 0;
+    virtual std::list<TaskItem> CreateSynchronizeTasks() = 0;
+    virtual std::list<TaskItem> CreateFinalizeTasks() = 0;
+    virtual std::list<TaskItem> CreatePreAgentTasks() = 0;
 };
 
 //-----------------------------------------------------------------------------
@@ -58,16 +57,15 @@ class TaskBuilder : public TaskBuilderInterface
 {
 private:
     const int &currentTime;
-    RunResult &runResult;
+    SimulationSlave::RunResult &runResult;
     const int frameworkUpdateRate;
     const int ScheduleAtEachCycle = 0;
 
-
-    WorldInterface* const world;
-    SpawnPointNetworkInterface* const spawnPointNetwork;
-    ObservationNetworkInterface* const observationNetwork;
-    EventDetectorNetworkInterface* const eventDetectorNetwork;
-    ManipulatorNetworkInterface* const manipulatorNetwork;
+    WorldInterface *const world;
+    SimulationSlave::SpawnPointNetworkInterface *const spawnPointNetwork;
+    SimulationSlave::ObservationNetworkInterface *const observationNetwork;
+    SimulationSlave::EventDetectorNetworkInterface *const eventDetectorNetwork;
+    SimulationSlave::ManipulatorNetworkInterface *const manipulatorNetwork;
 
     std::list<TaskItem> eventDetectorTasks;
     std::list<TaskItem> manipulatorTasks;
@@ -91,13 +89,13 @@ private:
 
 public:
     TaskBuilder(const int &currentTime,
-                          RunResult &runResult,
-                          const int frameworkUpdateRate,
-                          WorldInterface* const world,
-                          SpawnPointNetworkInterface* const spawnPointNetwork,
-                          ObservationNetworkInterface * const observationNetwork,
-                          EventDetectorNetworkInterface* const eventDetectorNetwork,
-                          ManipulatorNetworkInterface* const manipulatorNetwork);
+                SimulationSlave::RunResult &runResult,
+                const int frameworkUpdateRate,
+                WorldInterface *const world,
+                SimulationSlave::SpawnPointNetworkInterface *const spawnPointNetwork,
+                SimulationSlave::ObservationNetworkInterface *const observationNetwork,
+                SimulationSlave::EventDetectorNetworkInterface *const eventDetectorNetwork,
+                SimulationSlave::ManipulatorNetworkInterface *const manipulatorNetwork);
 
     virtual ~TaskBuilder() = default;
     /*!
@@ -118,7 +116,9 @@ public:
     *
     * @return	tasks   final tasks of common phase
     */
-    std::list<TaskItem> CreateCommonTasks() override;
+    std::list<TaskItem> CreateSpawningTasks() override;
+
+    std::list<TaskItem> CreatePreAgentTasks() override;
 
     /*!
     * \brief CreateFinalizeRecurringTasks
@@ -128,7 +128,7 @@ public:
     *
     * @return	tasks   final tasks of finalizeRecurring phase
     */
-    std::list<TaskItem> CreateFinalizeRecurringTasks() override;
+    std::list<TaskItem> CreateSynchronizeTasks() override;
 
     /*!
     * \brief CreateFinalizeTasks
@@ -139,5 +139,6 @@ public:
     * @return	tasks   final tasks of finalize phase
     */
     std::list<TaskItem> CreateFinalizeTasks() override;
-
 };
+
+} // namespace openpass::scheduling

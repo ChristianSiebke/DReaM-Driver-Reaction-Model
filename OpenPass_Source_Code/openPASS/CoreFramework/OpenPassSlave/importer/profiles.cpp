@@ -9,6 +9,8 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
+#include <stdexcept>
+
 #include "profiles.h"
 #include <stdexcept>
 
@@ -17,24 +19,14 @@ std::unordered_map<std::string, AgentProfile>& Profiles::GetAgentProfiles()
     return agentProfiles;
 }
 
-SpawnPointProfiles& Profiles::GetSpawnPointProfiles()
-{
-    return spawnPointProfiles;
-}
-
-DriverProfiles& Profiles::GetDriverProfiles()
-{
-    return driverProfiles;
-}
-
-std::unordered_map<std::string, VehicleComponentProfiles>& Profiles::GetVehicleComponentProfiles()
-{
-    return vehicleComponentProfiles;
-}
-
 std::unordered_map<std::string, VehicleProfile>& Profiles::GetVehicleProfiles()
 {
     return vehicleProfiles;
+}
+
+ProfileGroups& Profiles::GetProfileGroups()
+{
+    return profileGroups;
 }
 
 StringProbabilities& Profiles::GetDriverProbabilities(std::string agentProfileName)
@@ -61,7 +53,13 @@ StringProbabilities& Profiles::GetVehicleProfileProbabilities(std::string agentP
     }
 }
 
-openpass::sensors::Profiles& Profiles::GetSensorProfiles()
+openpass::parameter::ParameterSetLevel1 Profiles::GetProfile(std::string type, std::string name)
 {
-    return sensorProfiles;
+    if(profileGroups.find(type) != profileGroups.end()
+       && profileGroups.at(type).find(name) != profileGroups.at(type).end())
+    {
+        return profileGroups[type][name];
+    }
+
+    throw std::runtime_error("Could not find Profile: " + name + " in ProfileGroup: " + type);
 }

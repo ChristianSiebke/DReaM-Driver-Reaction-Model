@@ -13,88 +13,70 @@
 
 #include "CoreFramework/OpenPassSlave/framework/agentBlueprintProvider.h"
 #include "CoreFramework/OpenPassSlave/framework/agentFactory.h"
+#include "CoreFramework/OpenPassSlave/framework/sampler.h"
 
 SpawnPointRuntimeCommon::SpawnPointRuntimeCommon(const SpawnPointDependencies* dependencies,
                                                  const CallbackInterface * const callbacks):
     SpawnPointInterface(dependencies->world, callbacks),
     dependencies(*dependencies),
-    parameters(SpawnPointRuntimeCommonParameterExtractor::ExtractSpawnPointParameters(*(dependencies->parameters.value()),
-                                                                                      dependencies->sampler)),
+    parameters(SpawnPointRuntimeCommonParameterExtractor::ExtractSpawnPointParameters(*(dependencies->parameters.value()))),
     worldAnalyzer(dependencies->world)
-{}
-
-SpawnPointInterface::Agents SpawnPointRuntimeCommon::Trigger()
 {
-    if(parameters.carsPerSecond <= 0.0)
+    for (const auto& spawnPosition : parameters.spawnPositions)
     {
-        std::stringstream log;
-        log.str(std::string());
-        log << COMPONENTNAME << ": Unable to spawn agents (carsPerSecond 0 or negative: " << parameters.carsPerSecond << ")";
-        LOG(CbkLogLevel::Warning, log.str());
-        return {};
+        queuedSpawnDetails.push_back(GenerateSpawnDetailsForLane(spawnPosition, 0));
     }
+}
 
+SpawnPointInterface::Agents SpawnPointRuntimeCommon::Trigger(int time)
+{
     SpawnPointInterface::Agents agents;
 
-    std::for_each(std::cbegin(parameters.laneIds),
-                  std::cend(parameters.laneIds),
-                  [&](const auto laneId) -> void
+    for (size_t i = 0; i < parameters.spawnPositions.size(); ++i)
     {
-        if (auto spawnDetail = GetSpawnDetailsForLane(laneId))
+        if (time >= queuedSpawnDetails[i].spawnTime && AreSpawningCoordinatesValid(queuedSpawnDetails[i], parameters.spawnPositions[i]))
         {
-            if (ShouldSpawnAgent(*spawnDetail,
-                                 laneId))
-            {
-                SimulationSlave::Agent* newAgent = dependencies.agentFactory->AddAgent(&(spawnDetail->second));
+            AdjustVelocityForCrash(queuedSpawnDetails[i], parameters.spawnPositions[i]);
+            SimulationSlave::Agent* newAgent = dependencies.agentFactory->AddAgent(&(queuedSpawnDetails[i].agentBlueprint));
 
-                if (newAgent != nullptr)
-                {
-                    agents.emplace_back(newAgent);
-                }
-
-                queuedSpawnDetails.erase(laneId);
-            }
-            else
+            if (newAgent != nullptr)
             {
-                queuedSpawnDetails[laneId] = *spawnDetail;
+                agents.emplace_back(newAgent);
             }
+
+            queuedSpawnDetails[i] = GenerateSpawnDetailsForLane(parameters.spawnPositions[i], time);
         }
-    });
+    }
 
     return agents;
 }
 
-std::optional<SpawnDetails> SpawnPointRuntimeCommon::GetSpawnDetailsForLane(const LaneId laneId)
+SpawnDetails SpawnPointRuntimeCommon::GenerateSpawnDetailsForLane(const SpawnPosition sceneryInformation, int time)
 {
-    using namespace helper;
-    auto spawnDetail = map::query(queuedSpawnDetails,
-                                  laneId);
-    return spawnDetail.has_value()
-         ? spawnDetail
-         : GenerateSpawnDetailsForLane(laneId);
-}
-
-SpawnDetails SpawnPointRuntimeCommon::GenerateSpawnDetailsForLane(const LaneId laneId)
-{
-    const auto agentProfileName = dependencies.sampler->SampleStringProbability(parameters.agentProfiles);
+    const auto agentProfile = SampleAgentProfile(sceneryInformation.laneIndex == 0);
     try
     {
-        auto agentBlueprint = dependencies.agentBlueprintProvider->SampleAgent(agentProfileName);
-        agentBlueprint.SetAgentProfileName(agentProfileName);
+        auto agentBlueprint = dependencies.agentBlueprintProvider->SampleAgent(agentProfile.name, {});
+        agentBlueprint.SetAgentProfileName(agentProfile.name);
         agentBlueprint.SetAgentCategory(AgentCategory::Common);
 
-        const auto velocity = dependencies.sampler->RollForStochasticAttribute(parameters.trafficVelocityDistribution.mean,
-                                                                               parameters.trafficVelocityDistribution.standardDeviation,
-                                                                               parameters.trafficVelocityDistribution.min,
-                                                                               parameters.trafficVelocityDistribution.max);
+        const auto tGap = Sampler::RollForStochasticAttribute(agentProfile.tGap, dependencies.stochastics);
+
+        auto velocity = Sampler::RollForStochasticAttribute(agentProfile.velocity, dependencies.stochastics);
+
+        for (size_t laneIndex = 0; laneIndex < sceneryInformation.laneIndex; ++laneIndex)
+        {
+            double homogeneity = agentProfile.homogeneities.size() > laneIndex ? agentProfile.homogeneities[laneIndex] : agentProfile.homogeneities.back();
+            velocity *= 2 - homogeneity;
+        }
 
         CalculateSpawnParameter(&agentBlueprint,
-                                parameters.roadId,
-                                laneId,
-                                parameters.spawnLocation,
+                                sceneryInformation.roadId,
+                                sceneryInformation.laneId,
+                                sceneryInformation.sPosition,
                                 velocity);
 
-        return SpawnDetails(RollGapBetweenCars(), agentBlueprint);
+        return SpawnDetails{static_cast<int>(tGap * 1000) + time, agentBlueprint};
     }
     catch (const std::runtime_error& error)
     {
@@ -102,68 +84,31 @@ SpawnDetails SpawnPointRuntimeCommon::GenerateSpawnDetailsForLane(const LaneId l
     }
 }
 
-double SpawnPointRuntimeCommon::RollGapBetweenCars() const
+void SpawnPointRuntimeCommon::AdjustVelocityForCrash(SpawnDetails& spawnDetails,
+                                                     const SpawnPosition& sceneryInformation) const
 {
-    double gapInSeconds = dependencies.sampler->RollGapBetweenCars(parameters.carsPerSecond);
+    const auto agentFrontLength = spawnDetails.agentBlueprint.GetVehicleModelParameters().distanceReferencePointToLeadingEdge;
+    const auto agentRearLength = spawnDetails.agentBlueprint.GetVehicleModelParameters().length - spawnDetails.agentBlueprint.GetVehicleModelParameters().distanceReferencePointToLeadingEdge;
+    const auto intendedVelocity = spawnDetails.agentBlueprint.GetSpawnParameter().velocity;
+    spawnDetails.agentBlueprint.GetSpawnParameter().velocity = worldAnalyzer.CalculateSpawnVelocityToPreventCrashing(sceneryInformation.roadId,
 
-    if (!dependencies.sampler->RollFor(parameters.platoonRate))
-    {
-        gapInSeconds += dependencies.sampler->RollGapExtension(NON_PLATOON_GAP_EXTENSION);
-    }
-
-    return gapInSeconds;
+                                                                                                                     sceneryInformation.laneId,
+                                                                                                                     sceneryInformation.sPosition,
+                                                                                                                     agentFrontLength,
+                                                                                                                     agentRearLength,
+                                                                                                                     intendedVelocity);
 }
 
-bool SpawnPointRuntimeCommon::ShouldSpawnAgent(const SpawnDetails& spawnDetails,
-                                               const LaneId laneId) const
+bool SpawnPointRuntimeCommon::AreSpawningCoordinatesValid(const SpawnDetails& spawnDetails,
+                                                   const SpawnPosition& sceneryInformation) const
 {
-    const auto [gapInSeconds, agentBlueprint] = spawnDetails;
-    const auto vehicleModelParameters = agentBlueprint.GetVehicleModelParameters();
+    const auto vehicleModelParameters = spawnDetails.agentBlueprint.GetVehicleModelParameters();
 
-    if (worldAnalyzer.AreSpawningCoordinatesValid(parameters.roadId,
-                                                  laneId,
-                                                  parameters.spawnLocation,
-                                                  0 /* offset */,
-                                                  vehicleModelParameters))
-    {
-        const auto agentLength = vehicleModelParameters.length;
-        const auto agentFrontLength = vehicleModelParameters.distanceReferencePointToLeadingEdge;
-        const auto agentRearLength = agentLength - agentFrontLength;
-        const auto intendedVelocity = agentBlueprint.GetSpawnParameter().velocity;
-        const Route routeForRoadId{parameters.roadId};
-        const Range spawnRangeForLane{parameters.spawnLocation, std::numeric_limits<double>::max()};
-
-        // if nextSpawnPosition evaluates to true, our spawn position is valid
-        if (const auto nextSpawnPosition = worldAnalyzer.GetNextSpawnPosition(routeForRoadId,
-                                                                              parameters.roadId,
-                                                                              laneId,
-                                                                              spawnRangeForLane,
-                                                                              agentFrontLength,
-                                                                              agentRearLength,
-                                                                              intendedVelocity,
-                                                                              gapInSeconds,
-                                                                              Direction::FORWARD))
-        {
-            return !(worldAnalyzer.SpawnWillCauseCrash(routeForRoadId,
-                                                       parameters.roadId,
-                                                       laneId,
-                                                       parameters.spawnLocation,
-                                                       agentFrontLength,
-                                                       agentRearLength,
-                                                       intendedVelocity,
-                                                       Direction::FORWARD)
-                  || worldAnalyzer.SpawnWillCauseCrash(routeForRoadId,
-                                                       parameters.roadId,
-                                                       laneId,
-                                                       parameters.spawnLocation,
-                                                       agentFrontLength,
-                                                       agentRearLength,
-                                                       intendedVelocity,
-                                                       Direction::BACKWARD));
-        }
-    }
-
-    return false;
+    return worldAnalyzer.AreSpawningCoordinatesValid(sceneryInformation.roadId,
+                                                     sceneryInformation.laneId,
+                                                     sceneryInformation.sPosition,
+                                                     0 /* offset */,
+                                                     vehicleModelParameters);
 }
 
 void SpawnPointRuntimeCommon::CalculateSpawnParameter(AgentBlueprintInterface* agentBlueprint,
@@ -172,17 +117,9 @@ void SpawnPointRuntimeCommon::CalculateSpawnParameter(AgentBlueprintInterface* a
                                                       const SPosition sPosition,
                                                       const double velocity) const
 {
-    SpawnParameter& spawnParameter = agentBlueprint->GetSpawnParameter();
-
-    double distance = sPosition;
-    Position pos = GetWorld()->LaneCoord2WorldCoord(distance, 0 /* offset */, roadId, laneId);
+    Position pos = GetWorld()->LaneCoord2WorldCoord(sPosition, 0 /* offset */, roadId, laneId);
 
     double spawnV = velocity;
-
-    if(agentBlueprint->GetVehicleModelParameters().vehicleType == AgentVehicleType::Truck)
-    {
-        spawnV = std::min(90 / 3.6, spawnV);
-    }
 
     //considers adjusted velocity in curvatures
     double kappa = pos.curvature;
@@ -197,11 +134,17 @@ void SpawnPointRuntimeCommon::CalculateSpawnParameter(AgentBlueprintInterface* a
         spawnV = std::min(spawnV, curvatureVelocity);
     }
 
+    SpawnParameter& spawnParameter = agentBlueprint->GetSpawnParameter();
     spawnParameter.positionX = pos.xPos;
     spawnParameter.positionY = pos.yPos;
     spawnParameter.yawAngle  = pos.yawAngle;
     spawnParameter.velocity = spawnV;
     spawnParameter.acceleration = 0;
+}
+
+SpawningAgentProfile SpawnPointRuntimeCommon::SampleAgentProfile(bool rightLane)
+{
+    return Sampler::Sample(rightLane ? parameters.agentProfileLaneMaps.rightLanes : parameters.agentProfileLaneMaps.leftLanes, dependencies.stochastics);
 }
 
 void SpawnPointRuntimeCommon::LogError(const std::string& message)

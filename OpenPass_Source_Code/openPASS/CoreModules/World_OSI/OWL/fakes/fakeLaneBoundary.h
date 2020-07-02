@@ -24,5 +24,6 @@ public:
     MOCK_CONST_METHOD0(GetColor, LaneMarking::Color ());
     MOCK_CONST_METHOD0(GetSide, OWL::LaneMarkingSide ());
     MOCK_METHOD2(AddBoundaryPoint, void (const Common::Vector2d& point, double heading));
+    MOCK_CONST_METHOD1(CopyToGroundTruth, void (osi3::GroundTruth& target));
 };
 }

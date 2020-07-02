@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020 in-tech GmbH
 *               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -119,6 +119,12 @@ int WorldData::GetAgentId(const OWL::Id owlId) const
     }
 }
 
+void WorldData::SetRoadGraph(const RoadGraph&& roadGraph, const RoadGraphVertexMapping&& vertexMapping)
+{
+    this->roadGraph = roadGraph;
+    this->vertexMapping = vertexMapping;
+}
+
 osi3::GroundTruth WorldData::GetFilteredGroundTruth(const osi3::SensorViewConfiguration& conf, const OWL::Interfaces::MovingObject& reference)
 {
     bool referenceObjectAdded = false;
@@ -141,8 +147,10 @@ osi3::GroundTruth WorldData::GetFilteredGroundTruth(const osi3::SensorViewConfig
 
     const auto& filteredMovingObjects = GetMovingObjectsInSector(absoluteSensorPos, range, yawMin, yawMax);
     const auto& filteredStationaryObjects = GetStationaryObjectsInSector(absoluteSensorPos, range, yawMin, yawMax);
-    const auto& filteredTrafficSigns = GetTrafficSigns();
+    const auto& filteredTrafficSigns = GetTrafficSignsInSector(absoluteSensorPos, range, yawMin, yawMax);
+    const auto& filteredRoadMarkings = GetRoadMarkingsInSector(absoluteSensorPos, range, yawMin, yawMax);
     const auto& filteredLanes = GetLanes();
+    const auto& filteredLaneBoundaries = GetLaneBoundaries();
 
     for (const auto& object : filteredMovingObjects)
     {
@@ -164,14 +172,24 @@ osi3::GroundTruth WorldData::GetFilteredGroundTruth(const osi3::SensorViewConfig
         object->CopyToGroundTruth(filteredGroundTruth);
     }
 
-    for (const auto& object : filteredTrafficSigns)
+    for (const auto& trafficSign : filteredTrafficSigns)
     {
-        object.second->CopyToGroundTruth(filteredGroundTruth);
+        trafficSign->CopyToGroundTruth(filteredGroundTruth);
+    }
+
+    for (const auto& roadMarking : filteredRoadMarkings)
+    {
+        roadMarking->CopyToGroundTruth(filteredGroundTruth);
     }
 
     for (const auto& lane : filteredLanes)
     {
         lane.second->CopyToGroundTruth(filteredGroundTruth);
+    }
+
+    for (const auto& laneboundaries : filteredLaneBoundaries)
+    {
+        laneboundaries.second->CopyToGroundTruth(filteredGroundTruth);
     }
 
     return filteredGroundTruth;
@@ -207,8 +225,6 @@ std::vector<const Interfaces::MovingObject*> WorldData::GetMovingObjectsInSector
     return ApplySectorFilter(objects, origin, radius, absYawMax, absYawMin);
 }
 
-/*
-TrafficSigns haven't assigned an absiolute position at the moment
 std::vector<const Interfaces::TrafficSign*> WorldData::GetTrafficSignsInSector(const Primitive::AbsPosition& origin,
                                                                                double radius,
                                                                                double absYawMin,
@@ -223,7 +239,19 @@ std::vector<const Interfaces::TrafficSign*> WorldData::GetTrafficSignsInSector(c
 
     return ApplySectorFilter(objects, origin, radius, absYawMax, absYawMin);
 }
-*/
+
+std::vector<const Interfaces::RoadMarking*> WorldData::GetRoadMarkingsInSector(const Primitive::AbsPosition& origin, double radius, double absYawMin, double absYawMax)
+{
+    std::vector<Interfaces::RoadMarking*> objects;
+
+    for (const auto& mapItem : roadMarkings)
+    {
+        objects.push_back(mapItem.second);
+    }
+
+    return ApplySectorFilter(objects, origin, radius, absYawMax, absYawMin);
+}
+
 
 double WorldData::NormalizeAngle(double angle)
 {
@@ -263,6 +291,7 @@ void WorldData::AddLane(RoadLaneSectionInterface& odSection, const RoadLaneInter
     osiLane->mutable_id()->set_value(osiLaneId);
     osiLane->mutable_base_lane()->mutable_id()->set_value(osiLaneId);
     osiLane->set_reverse_direction(!odLane.GetInDirection());
+    osiLane->mutable_base_lane()->mutable_classification()->set_centerline_is_driving_direction(odLane.GetInDirection());
 
     for (const auto& laneBoundary : laneBoundaries)
     {
@@ -567,10 +596,28 @@ Interfaces::TrafficSign& WorldData::AddTrafficSign(const std::string odId)
     return *trafficSignal;
 }
 
+Interfaces::RoadMarking& WorldData::AddRoadMarking()
+{
+    osi3::RoadMarking* osiRoadMarking = osiGroundTruth.mutable_groundtruth()->add_road_marking();
+    auto roadMarking = new Implementation::RoadMarking(osiRoadMarking);
+    Id id = CreateUid();
+
+    osiRoadMarking->mutable_id()->set_value(id);
+    roadMarkings[id] = roadMarking;
+
+    return *roadMarking;
+}
+
 void WorldData::AssignTrafficSignToLane(Id laneId, Interfaces::TrafficSign& trafficSign)
 {
     lanes.at(laneId)->AddTrafficSign(trafficSign);
     trafficSign.SetValidForLane(laneId);
+}
+
+void WorldData::AssignRoadMarkingToLane(Id laneId, Interfaces::RoadMarking& roadMarking)
+{
+    lanes.at(laneId)->AddRoadMarking(roadMarking);
+    roadMarking.SetValidForLane(laneId);
 }
 
 void WorldData::SetSectionSuccessor(const RoadLaneSectionInterface &section, const RoadLaneSectionInterface &successorSection)
@@ -790,9 +837,24 @@ const std::unordered_map<Id, Interfaces::TrafficSign *> &WorldData::GetTrafficSi
     return trafficSigns;
 }
 
+const std::unordered_map<Id, Interfaces::RoadMarking*>& WorldData::GetRoadMarkings() const
+{
+    return roadMarkings;
+}
+
 CMovingObject& WorldData::GetMovingObjectById(Id id) const
 {
     return *(movingObjects.at(id));
+}
+
+const RoadGraph& WorldData::GetRoadGraph() const
+{
+    return roadGraph;
+}
+
+const RoadGraphVertexMapping& WorldData::GetRoadGraphVertexMapping() const
+{
+    return vertexMapping;
 }
 
 void WorldData::Reset()

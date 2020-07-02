@@ -31,6 +31,7 @@
 #include "Common/observationTypes.h"
 
 class CallbackInterface;
+class DataStoreReadInterface;
 class ParameterInterface;
 class StochasticsInterface;
 class WorldInterface;
@@ -43,7 +44,8 @@ public:
     ObservationInterface(StochasticsInterface* stochastics,
                          WorldInterface* world,
                          const ParameterInterface* parameters,
-                         const CallbackInterface* callbacks) :
+                         const CallbackInterface* callbacks,
+                         [[maybe_unused]] DataStoreReadInterface* dataStore) :
         stochastics(stochastics),
         world(world),
         parameters(parameters),
@@ -107,24 +109,6 @@ public:
     //! @return                      File to be transferred
     //-----------------------------------------------------------------------------
     virtual const std::string SlaveResultFile() = 0;
-
-    //-----------------------------------------------------------------------------
-    //! \brief Inserts directly pushed information into the observation
-    //!
-    //! \param time       insert time stamp
-    //! \param agentId    corresponding agent
-    //! \param group      logging group
-    //! \param key        topic
-    //! \param value      value
-    //-----------------------------------------------------------------------------
-    virtual void Insert(int time, int agentId, LoggingGroup group, const std::string& key, const std::string& value) = 0;
-
-    //-----------------------------------------------------------------------------
-    /*!
-    * \brief Insert the event into the EventNetwork
-    */
-    //-----------------------------------------------------------------------------
-    virtual void InsertEvent(std::shared_ptr<EventInterface> event) = 0;
 
 protected:
     //-----------------------------------------------------------------------------

@@ -30,42 +30,11 @@ public:
                                     std::unordered_map<std::string, AgentProfile> &agentProfiles);
 
     /*!
-     * \brief ImportSpawnPointProfiles Imports the SpawnPointProfiles section of the profiles catalog
-     * \param spawnPointProfilesElement Element containing the information
-     * \param spawnPointProfiles Map into which the values get saved
+     * \brief Imports all ProfileGroups defined in the profiles catalog
+     * \param profileGroups Element containing the information
+     * \param profilesElement Map into which the values get saved
      */
-    static void ImportSpawnPointProfiles(const QDomElement& spawnPointProfilesElement, SpawnPointProfiles& spawnPointProfiles);
-
-    /*!
-    * \brief Imports the DriverProfiles section of the profiles catalog
-    *
-    * @param[in]     driverProfilesElement    Element containing the information
-    * @param[out]    driverProfiles           Map into which the values get saved
-    * @return	     true, if successful
-    */
-    static void ImportDriverProfiles(QDomElement driverProfilesElement,
-                                                           DriverProfiles &driverProfiles);
-
-
-    /*!
-    * \brief Imports the VehicleComponentProfiles section of the profiles catalog
-    *
-    * @param[in]     vehicleComponentProfilesElement    Element containing the information
-    * @param[out]    vehicleComponentProfilesMap        Map into which the values get saved
-    * @return	     true, if successful
-    */
-    static void ImportAllVehicleComponentProfiles(QDomElement vehicleComponentProfilesElement,
-                                                  std::unordered_map<std::string, VehicleComponentProfiles> &vehicleComponentProfilesMap);
-
-    /*!
-    * \brief Imports the SensorProfiles section of the profiles catalog
-    *
-    * @param[in]     sensorProfilesElement    Element containing the information
-    * @param[out]    sensorProfiles           Map into which the values get saved
-    * @return	     true, if successful
-    */
-    static void ImportSensorProfiles(QDomElement sensorProfilesElement,
-                                     openpass::sensors::Profiles &sensorProfiles);
+    static void ImportProfileGroups(ProfileGroups& profileGroups, QDomElement& profilesElement);
 
     /*!
     * \brief Imports the AgentProfiles section of the profiles catalog
@@ -131,6 +100,7 @@ public:
     static void ImportSensorParameters(QDomElement sensorElement,
                                        openpass::sensors::Parameter &sensorParameter);
 
+
     //Overall import function
     /*!
     * \brief Imports the entire profiles catalog
@@ -144,7 +114,7 @@ public:
 
 private:
     static constexpr auto profilesCatalogFile = "ProfilesCatalog.xml";
-    static constexpr auto supportedConfigVersion = "0.3.0";
+    static constexpr auto supportedConfigVersion = "0.4.1";
 
 };
 } //namespace Importer

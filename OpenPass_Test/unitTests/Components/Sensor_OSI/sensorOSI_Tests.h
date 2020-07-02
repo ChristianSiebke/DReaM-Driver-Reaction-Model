@@ -11,10 +11,8 @@
 #include "gtest/gtest.h"
 
 #include "fakeAgent.h"
-#include "fakeObservation.h"
 #include "fakeWorld.h"
 #include "fakeWorldObject.h"
-#include "Interfaces/observationInterface.h"
 #include "fakeParameter.h"
 #include "fakeStochastics.h"
 
@@ -34,7 +32,6 @@ public:
     const polygon_t& GetBBByAgentId(size_t id);
 
     SensorGeometric2D* sensor = nullptr;
-    FakeObservation fakeObservation;
 
 private:
     ::testing::NiceMock<FakeWorld> fakeWorldInterface;
@@ -52,8 +49,6 @@ private:
                                                            };
 
     std::map<std::string, bool> fakeBools;
-
-    std::map<int, ObservationInterface*> observations = { { 0, &fakeObservation } };
 
     ::testing::NiceMock<FakeAgent> fakeEgoAgent;
     std::vector<const WorldObjectInterface*> fakeObjects;

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -17,15 +17,15 @@
 #pragma once
 
 #include <string>
-#include <QFile>
-#include <QDomDocument>
 #include <unordered_map>
-#include "log.h"
+
+#include <QDomDocument>
+#include <QFile>
 
 #include "Interfaces/roadInterface/roadElementTypes.h"
+#include "log.h"
 
-namespace SimulationCommon
-{
+namespace SimulationCommon {
 
 extern bool GetFirstChildElement(QDomElement rootElement, const std::string &tag, QDomElement &result);
 
@@ -37,7 +37,7 @@ extern bool ParseCurrentInt(QDomElement currentElement, int &result);
 
 /// Tempalted wrapper for Parse* functions
 template <typename T>
-bool Parse(QDomElement rootElement, const std::string &tag, T & result);
+bool Parse(QDomElement rootElement, const std::string &tag, T &result);
 
 extern bool ParseString(QDomElement rootElement, const std::string &tag, std::string &result);
 
@@ -59,20 +59,16 @@ extern bool ParseAttributeInt(QDomElement element, const std::string &attributeN
 
 extern bool ParseAttributeBool(QDomElement element, const std::string &attributeName, bool &result);
 
-extern bool ParseAttributeDoubleVector(QDomElement element, const std::string &attributeName, std::vector<double>* result);
+extern bool ParseAttributeStringVector(QDomElement element, const std::string &attributeName, std::vector<std::string> *result);
 
-extern bool ParseAttributeIntVector(QDomElement element, const std::string &attributeName, std::vector<int>* result);
+extern bool ParseAttributeDoubleVector(QDomElement element, const std::string &attributeName, std::vector<double> *result);
 
-extern bool ParseAttributeBoolVector(QDomElement element, const std::string &attributeName, std::vector<bool>* result);
+extern bool ParseAttributeIntVector(QDomElement element, const std::string &attributeName, std::vector<int> *result);
 
-//template <typename T>
-//bool ParseAttributeType(QDomElement element, const std::string &attributeName, T &result);
+extern bool ParseAttributeBoolVector(QDomElement element, const std::string &attributeName, std::vector<bool> *result);
 
-bool ParseType(const std::string& element, RoadElementOrientation& orientation);
-bool ParseType(const std::string& element, RoadObjectType& objectType);
-
-//template <typename T>
-//bool assignIfMatching(std::string element, T& enumeration, std::string match, T value);
+bool ParseType(const std::string &element, RoadElementOrientation &orientation);
+bool ParseType(const std::string &element, RoadObjectType &objectType);
 
 /*!
  *  \brief Parses the value of an XML attribute into the provided container.
@@ -80,24 +76,28 @@ bool ParseType(const std::string& element, RoadObjectType& objectType);
  *  Depending on the datatype of the result parameter, different parsing techniques are applied.
  *
  *  \param[in]  element         XML element holding the attribute
- *  \param[in]  attributeName   Name of the atttribute to parse the value from
+ *  \param[in]  attributeName   Name of the attribute to parse the value from
  *  \param[out] result          Container holding the result
  *
  *  \return     True on successful parsing, false otherwise.
  */
 template <typename T>
-bool ParseAttribute(QDomElement element, const std::string &attributeName, T& result);
+bool ParseAttribute(QDomElement element, const std::string &attributeName, T &result);
+
+
+//! Returns true if the given element has an attribute of the given name
+bool HasAttribute(QDomElement element, const std::string &attributeName);
 
 template <typename T>
 bool ParseAttributeType(QDomElement element, const std::string &attributeName, T &result)
 {
-    if(!element.hasAttribute(QString::fromStdString(attributeName)))
+    if (!element.hasAttribute(QString::fromStdString(attributeName)))
     {
         return false;
     }
 
     QDomAttr attribute = element.attributeNode(QString::fromStdString(attributeName));
-    if(attribute.isNull())
+    if (attribute.isNull())
     {
         return false;
     }
@@ -106,9 +106,10 @@ bool ParseAttributeType(QDomElement element, const std::string &attributeName, T
 }
 
 template <typename T>
-bool assignIfMatching(const std::string& element, T& enumeration, const std::string& match, const T& value)
+bool assignIfMatching(const std::string &element, T &enumeration, const std::string &match, const T &value)
 {
-    if(element == match){
+    if (element == match)
+    {
         enumeration = value;
         return true;
     }
@@ -133,41 +134,36 @@ template <typename T>
 bool ImportProbabilityMap(QDomElement parentElement,
                           const std::string key,
                           const QString tag,
-                          std::unordered_map<T, double> &probabilities,
+                          std::vector<std::pair<T, double>> &probabilities,
                           bool mustAddUpToOne = true)
 {
     double probabilitySum = 0.0;
 
     QDomElement childElement;
-    if(!GetFirstChildElement(parentElement, tag.toStdString(), childElement))
+    if (!GetFirstChildElement(parentElement, tag.toStdString(), childElement))
     {
         LOG_INTERN(LogLevel::Error) << "At least one element is required.";
         return false;
     }
 
-    while(!childElement.isNull())
+    while (!childElement.isNull())
     {
         T keyValue;
         double probability;
 
-        if(!ParseAttribute<T>(childElement, key, keyValue))
+        if (!ParseAttribute<T>(childElement, key, keyValue))
         {
             LOG_INTERN(LogLevel::Error) << "Key is invalid.";
             return false;
         }
 
-        if(!ParseAttributeDouble(childElement, "Probability", probability))
+        if (!ParseAttributeDouble(childElement, "Probability", probability))
         {
             LOG_INTERN(LogLevel::Error) << "Probability is invalid.";
             return false;
         }
 
-        auto insertReturn = probabilities.insert({keyValue, probability});
-        if(!insertReturn.second)
-        {
-            LOG_INTERN(LogLevel::Error) << "Key must be unique.";
-            return false;
-        }
+        probabilities.push_back({keyValue, probability});
 
         probabilitySum += probability;
 
@@ -175,13 +171,13 @@ bool ImportProbabilityMap(QDomElement parentElement,
     }
 
     //Checks probabilities
-    if(mustAddUpToOne && std::abs(probabilitySum - 1.0) > 1e-6)
+    if (mustAddUpToOne && std::abs(probabilitySum - 1.0) > 1e-6)
     {
         LOG_INTERN(LogLevel::Error) << "Probabilities do not add up to 1.0.";
         return false;
     }
 
-    if(probabilitySum > 1.0 + 1e-6)
+    if (probabilitySum > 1.0 + 1e-6)
     {
         LOG_INTERN(LogLevel::Error) << "Probabilities add up to more than 1.0.";
         return false;
@@ -190,16 +186,15 @@ bool ImportProbabilityMap(QDomElement parentElement,
     return true;
 }
 
-
 } // namespace SimulationCommon
 
 [[maybe_unused]] static void ThrowIfFalse(bool success, const QDomElement element, const std::string &message)
 {
     if (!success)
     {
-        LogErrorAndThrow("Could not import element " + element.tagName().toStdString()
-                         + " (line " + std::to_string(element.lineNumber())
-                         + ", column " + std::to_string(element.columnNumber())
-                         + "): " + message);
+        LogErrorAndThrow("Could not import element " + element.tagName().toStdString() +
+                         " (line " + std::to_string(element.lineNumber()) +
+                         ", column " + std::to_string(element.columnNumber()) + "): " +
+                         message);
     }
 }

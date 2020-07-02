@@ -137,6 +137,19 @@ public:
     double GetLogNormalDistributed(double mean, double stdDeviation);
 
     /*!
+    * \brief Generates a logarithmic normal distributed number.
+    *
+    * \details Generates a logrithmic normal distributed number according to mu and sigma (which
+    * represent mean and standard deviation of the natural logarithm of the random variable).
+    *
+    * @param[in]     mu          Average value of the random variable natural logarithm.
+    * @param[in]     sigma       Standard deviation of the random variable natural logarithm.
+    *
+    * @return        Logarithmic normal distributed number.
+    */
+    double GetMuSigmaLogNormalDistributed(double mu, double sigma);
+
+    /*!
     * \brief Generates a special distributed number.
     *
     * \details Not implemented.

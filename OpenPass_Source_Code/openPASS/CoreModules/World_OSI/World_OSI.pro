@@ -31,15 +31,18 @@ INCLUDEPATH += \
     $$SUBDIRS \
     ../../Interfaces \
     ../../Interfaces/RoadInterface \
+    ../../CoreFramework/CoreShare \
     ..
 
 SOURCES += \
     $$getFiles(SUBDIRS, cpp) \
     $$getFiles(SUBDIRS, cc) \
-    $$getFiles(SUBDIRS, c)
+    $$getFiles(SUBDIRS, c) \
+    ../../CoreFramework/CoreShare/log.cpp
 
 HEADERS += \
     $$getFiles(SUBDIRS, hpp) \
-    $$getFiles(SUBDIRS, h)
+    $$getFiles(SUBDIRS, h) \
+    ../../CoreFramework/CoreShare/log.h
 
 LIBS += -lopen_simulation_interface -lprotobuf

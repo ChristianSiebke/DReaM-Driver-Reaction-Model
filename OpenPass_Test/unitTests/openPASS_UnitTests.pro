@@ -16,12 +16,14 @@ SUBDIRS = \
     algorithmFmuWrapper_Tests \
     algorithmLateral_Tests \
     algorithmLongitudinal_Tests \
+    basicDataStore_Tests \
     componentController_Tests \
     dynamicsCollision_Tests \
     dynamicsTrajectoryFollower_Tests \
     eventDetector_Tests \
     limiterAccelerationVehicleComponents_Tests \
     observationLog_Tests \
+    \ #observationLogNG_Tests \
     openPassSlave_Tests \
     openScenarioActions_Tests \
     scheduler_Tests \
@@ -30,6 +32,7 @@ SUBDIRS = \
     sensorOSI_Tests \
     signalPrioritizer_Tests \
     spawnPointScenario_Tests \
+    spawnPointRuntimeCommon_Tests \
     spawnPointWorldAnalyzer_Tests \
     worldOSI_Tests \
     common_Tests
@@ -48,6 +51,9 @@ algorithmLateral_Tests.file = \
 
 algorithmLongitudinal_Tests.file = \
     $$PWD/Components/Algorithm_Longitudinal/algorithmLongitudinal_Tests.pro
+
+basicDataStore_Tests.file = \
+    $$PWD/CoreModules/BasicDataStore/basicDataStore_Tests.pro
 
 componentController_Tests.file = \
     $$PWD/Components/ComponentController/componentController_Tests.pro
@@ -90,6 +96,9 @@ signalPrioritizer_Tests.file = \
 
 spawnPointScenario_Tests.file = \
     $$PWD/CoreModules/SpawnPointScenario_OSI/spawnPointScenario_Tests.pro
+
+spawnPointRuntimeCommon_Tests.file = \
+    $$PWD/CoreModules/SpawnPointRuntimeCommon_OSI/spawnPointRuntimeCommon_Tests.pro
 
 spawnPointWorldAnalyzer_Tests.file = \
     $$PWD/CoreModules/SpawnPointWorldAnalyzer/spawnPointWorldAnalyzer_Tests.pro

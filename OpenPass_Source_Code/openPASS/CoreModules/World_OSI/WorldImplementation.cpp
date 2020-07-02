@@ -2,6 +2,7 @@
 * Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017 ITK Engineering GmbH
 *               2020 HLRS, University of Stuttgart.
+*               2020 BMW AG
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -12,9 +13,12 @@
 
 #include "WorldData.h"
 #include "WorldImplementation.h"
+#include "RoutePlanning/RouteCalculation.h"
 
 #include "osi3/osi_sensorview.pb.h"
 #include "osi3/osi_sensorviewconfiguration.pb.h"
+
+#include "CoreFramework/CoreShare/log.h"
 
 namespace {
     template <typename T>
@@ -27,10 +31,10 @@ namespace {
     }
 }
 
-WorldImplementation::WorldImplementation(const CallbackInterface* callbacks, StochasticsInterface* stochastics):
+WorldImplementation::WorldImplementation(const CallbackInterface* callbacks, StochasticsInterface* stochastics, DataStoreWriteInterface* dataStore):
     agentNetwork(this, callbacks),
     callbacks(callbacks),
-    navigation(*stochastics, worldData)
+    dataStore(dataStore)
 {}
 
 WorldImplementation::~WorldImplementation()
@@ -66,6 +70,11 @@ const std::map<int, AgentInterface *> &WorldImplementation::GetAgents() const
 const std::list<const AgentInterface*>& WorldImplementation::GetRemovedAgents() const
 {
     return agentNetwork.GetRemovedAgents();
+}
+
+const std::list<const AgentInterface*> WorldImplementation::GetRemovedAgentsInPreviousTimestep()
+{
+    return agentNetwork.GetRemovedAgentsInPreviousTimestep();
 }
 
 const std::vector<const TrafficObjectInterface*>& WorldImplementation::GetTrafficObjects() const
@@ -126,12 +135,26 @@ void WorldImplementation::QueueAgentUpdate(std::function<void()> func)
 void WorldImplementation::QueueAgentRemove(const AgentInterface* agent)
 {
     agentNetwork.QueueAgentRemove(agent);
+}
+
+void WorldImplementation::RemoveAgent(const AgentInterface* agent)
+{
+    agentNetwork.RemoveAgent(agent);
 
     auto it = std::find(worldObjects.begin(), worldObjects.end(), agent);
     if (it != worldObjects.end())
     {
         worldObjects.erase(it);
     }
+}
+
+void WorldImplementation::PublishGlobalData(int timestamp)
+{
+    agentNetwork.PublishGlobalData(
+        [&](openpass::type::EntityId id, openpass::type::FlatParameterKey key, openpass::type::FlatParameterValue value)
+        {
+            dataStore->PutCyclic(timestamp, id, key, value);
+        });
 }
 
 void WorldImplementation::SyncGlobalData()
@@ -152,15 +175,17 @@ bool WorldImplementation::CreateScenery(SceneryInterface* scenery)
                                worldData,
                                localizer,
                                callbacks);
-    if (converter.ConvertRoads())
-    {
-        localizer.Init();
-        converter.ConvertObjects();
-        InitTrafficObjects();
-        return true;
-    }
 
-    return false;
+    ThrowIfFalse(converter.ConvertRoads(), "Unable to finish convertion process.");
+    localizer.Init();
+    converter.ConvertObjects();
+    InitTrafficObjects();
+
+    RoadNetworkBuilder networkBuilder(*scenery);
+    auto [roadGraph, vertexMapping] = networkBuilder.Build();
+    worldData.SetRoadGraph(std::move(roadGraph), std::move(vertexMapping));
+
+    return true;
 }
 
 AgentInterface* WorldImplementation::CreateAgentAdapterForAgent()
@@ -185,61 +210,32 @@ double WorldImplementation::GetFriction() const
     return worldParameter.friction;
 }
 
-std::vector<CommonTrafficSign::Entity> WorldImplementation::GetTrafficSignsInRange(const Route& route, std::string roadId, int laneId,
-        double startDistance, double searchRange) const
+RouteQueryResult<std::vector<CommonTrafficSign::Entity>> WorldImplementation::GetTrafficSignsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance, double searchRange) const
 {
-    std::vector<CommonTrafficSign::Entity> foundSigns {};
-    auto& lane = worldDataQuery.GetLaneByOdId(roadId, laneId, startDistance);
-    if (!lane.Exists())
-    {
-        return {};
-    }
-    auto laneStream = navigation.GetLaneStream(route, roadId, laneId, startDistance);
-    if (searchRange < 0.0)
-    {
-        laneStream = laneStream.Reverse();
-        searchRange = -searchRange;
-    }
-    startDistance = laneStream.GetPositionByElementAndS(lane, startDistance);
-
-    const auto& signs = worldDataQuery.GetTrafficSignsInRange(laneStream,
-                                                       startDistance,
-                                                       searchRange);
-    for (auto& sign : signs)
-    {
-        foundSigns.push_back(sign.second->GetSpecification(sign.first));
-    }
-
-    return foundSigns;
+    const auto laneMultiStream = worldDataQuery.CreateLaneMultiStream(roadGraph, startNode, laneId, startDistance);
+    double startDistanceOnStream = laneMultiStream->GetPositionByVertexAndS(startNode, startDistance);
+    return worldDataQuery.GetTrafficSignsInRange(*laneMultiStream, startDistanceOnStream, searchRange);
 }
 
-std::vector<LaneMarking::Entity> WorldImplementation::GetLaneMarkings(const Route& route, std::string roadId, int laneId, double startDistance, double range, Side side) const
+RouteQueryResult<std::vector<CommonTrafficSign::Entity> > WorldImplementation::GetRoadMarkingsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance, double searchRange) const
 {
-     auto& lane = worldDataQuery.GetLaneByOdId(roadId, laneId, startDistance);
-     if (!lane.Exists())
-     {
-         return {};
-     }
-     auto laneStream = navigation.GetLaneStream(route, roadId, laneId, startDistance);
-     if (range < 0.0)
-     {
-         laneStream = laneStream.Reverse();
-         range = -range;
-     }
-     startDistance = laneStream.GetPositionByElementAndS(lane, startDistance);
-
-     return worldDataQuery.GetLaneMarkings(laneStream,
-                                           startDistance,
-                                           range,
-                                           side);
+    const auto laneMultiStream = worldDataQuery.CreateLaneMultiStream(roadGraph, startNode, laneId, startDistance);
+    double startDistanceOnStream = laneMultiStream->GetPositionByVertexAndS(startNode, startDistance);
+    return worldDataQuery.GetRoadMarkingsInRange(*laneMultiStream, startDistanceOnStream, searchRange);
 }
 
-RelativeWorldView::Junctions WorldImplementation::GetRelativeJunctions(const Route& route, std::string roadId, double startDistance, double range) const
+RouteQueryResult<std::vector<LaneMarking::Entity> > WorldImplementation::GetLaneMarkings(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance, double range, Side side) const
 {
-    const auto road = worldDataQuery.GetRoadByOdId(roadId);
-    const auto& roadStream = navigation.GetRoadStream(route);
-    const auto& positionOnStream = roadStream.GetPositionByElementAndS(*road, startDistance);
-    return worldDataQuery.GetRelativeJunctions(roadStream, positionOnStream, range);
+    const auto laneMultiStream = worldDataQuery.CreateLaneMultiStream(roadGraph, startNode, laneId, startDistance);
+    double startDistanceOnStream = laneMultiStream->GetPositionByVertexAndS(startNode, startDistance);
+    return worldDataQuery.GetLaneMarkings(*laneMultiStream, startDistanceOnStream, range, side);
+}
+
+RouteQueryResult<RelativeWorldView::Junctions> WorldImplementation::GetRelativeJunctions(const RoadGraph& roadGraph, RoadGraphVertex startNode, double startDistance, double range) const
+{
+    const auto roadMultiStream = worldDataQuery.CreateRoadMultiStream(roadGraph, startNode);
+    double startDistanceOnStream = roadMultiStream->GetPositionByVertexAndS(startNode, startDistance);
+    return worldDataQuery.GetRelativeJunctions(*roadMultiStream, startDistanceOnStream, range);
 }
 
 std::vector<JunctionConnection> WorldImplementation::GetConnectionsOnJunction(std::string junctionId, std::string incomingRoadId) const
@@ -267,16 +263,27 @@ RoadNetworkElement WorldImplementation::GetRoadPredecessor(std::string roadId) c
     return worldDataQuery.GetRoadPredecessor(roadId);
 }
 
-Route WorldImplementation::GetRoute(GlobalRoadPosition start) const
+std::pair<RoadGraph, RoadGraphVertex> WorldImplementation::GetRoadGraph(const RouteElement& start, int maxDepth) const
 {
-    return navigation.GetRoute(start);
+    auto startVertex = worldData.GetRoadGraphVertexMapping().at(start);
+    return RouteCalculation::FilterRoadGraphByStartPosition(worldData.GetRoadGraph(), startVertex, maxDepth);
+}
+
+std::map<RoadGraphEdge, double> WorldImplementation::GetEdgeWeights(const RoadGraph& roadGraph) const
+{
+    std::map<RoadGraphEdge, double> weights;
+    for (auto [edge, edgesEnd] = edges(roadGraph); edge != edgesEnd; ++edge)
+    {
+        weights[*edge] = 1;
+    }
+    return weights;
 }
 
 AgentInterface* WorldImplementation::GetEgoAgent()
 {
     const std::map<int, AgentInterface*> agents = agentNetwork.GetAgents();
 
-    for (auto iterator = agents.begin(); iterator != agents.end(); iterator++)
+    for (auto iterator = agents.begin(); iterator != agents.end(); ++iterator)
     {
         AgentInterface* agent = iterator->second;
         if (agent->IsEgoAgent())
@@ -304,58 +311,45 @@ AgentInterface* WorldImplementation::GetAgentByName(const std::string& scenarioN
     return nullptr;
 }
 
-Obstruction WorldImplementation::GetObstruction(const Route& route, const GlobalRoadPosition& ownPosition, const ObjectPosition& otherPosition, const std::vector<Common::Vector2d>& objectCorners) const
+RouteQueryResult<Obstruction> WorldImplementation::GetObstruction(const RoadGraph& roadGraph, RoadGraphVertex startNode, const GlobalRoadPosition& ownPosition,
+                                                                  const ObjectPosition& otherPosition, const std::vector<Common::Vector2d>& objectCorners, const Common::Vector2d& mainLaneLocator) const
 {
-    auto& lane = worldDataQuery.GetLaneByOdId(ownPosition.roadId, ownPosition.laneId, ownPosition.roadPosition.s);
-    if (!lane.Exists())
-    {
-        return Obstruction::Invalid();
-    }
-    auto laneStream = navigation.GetLaneStream(route, ownPosition);
-    return worldDataQuery.GetObstruction(laneStream, ownPosition.roadPosition.t, otherPosition, objectCorners);
+    const auto laneMultiStream = worldDataQuery.CreateLaneMultiStream(roadGraph, startNode, ownPosition.laneId, ownPosition.roadPosition.s);
+    return worldDataQuery.GetObstruction(*laneMultiStream, ownPosition.roadPosition.t, otherPosition, objectCorners, mainLaneLocator);
 }
 
-RelativeWorldView::Lanes WorldImplementation::GetRelativeLanes(const Route& route, std::string roadId, int laneId, double distance, double range) const
+RouteQueryResult<RelativeWorldView::Lanes> WorldImplementation::GetRelativeLanes(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, double range) const
 {
-    auto road = worldDataQuery.GetRoadByOdId(roadId);
-    if (!road)
-    {
-        return {};
-    }
-    auto roadStream = navigation.GetRoadStream(route);
-    double startDistanceOnStream = roadStream.GetPositionByElementAndS(*road, distance);
+    const auto roadMultiStream = worldDataQuery.CreateRoadMultiStream(roadGraph, startNode);
+    double startDistanceOnStream = roadMultiStream->GetPositionByVertexAndS(startNode, distance);
 
-    return worldDataQuery.GetRelativeLanes(roadStream, startDistanceOnStream, laneId, range);
+    return worldDataQuery.GetRelativeLanes(*roadMultiStream, startDistanceOnStream, laneId, range);
 }
 
-std::vector<const AgentInterface*> WorldImplementation::GetAgentsInRange(Route route, std::string roadId, int laneId, double startDistance,
-                                                                         double backwardRange, double forwardRange) const
+RouteQueryResult<std::vector<const AgentInterface*> > WorldImplementation::GetAgentsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance, double backwardRange, double forwardRange) const
 {
-    auto& lane = worldDataQuery.GetLaneByOdId(roadId, laneId, startDistance);
-    if (!lane.Exists())
+    const auto laneMultiStream = worldDataQuery.CreateLaneMultiStream(roadGraph, startNode, laneId, startDistance);
+    double startDistanceOnStream = laneMultiStream->GetPositionByVertexAndS(startNode, startDistance);
+    const auto queryResult = worldDataQuery.GetObjectsOfTypeInRange<OWL::Interfaces::MovingObject>(*laneMultiStream, startDistanceOnStream - backwardRange, startDistanceOnStream + forwardRange);
+    RouteQueryResult<std::vector<const AgentInterface*>> result;
+    for (const auto& [node, objects]: queryResult)
     {
-        return {};
+        result[node] = get_transformed<AgentInterface>(objects);
     }
-    auto laneStream = navigation.GetLaneStream(route, roadId, laneId, startDistance);
-    double startDistanceOnStream = laneStream.GetPositionByElementAndS(lane, startDistance);
-
-    auto movingObjects = worldDataQuery.GetObjectsOfTypeInRange<OWL::Interfaces::MovingObject>(laneStream, startDistanceOnStream - backwardRange, startDistanceOnStream + forwardRange);
-    return get_transformed<AgentInterface>(movingObjects);
+    return result;
 }
 
-std::vector<const WorldObjectInterface*> WorldImplementation::GetObjectsInRange(Route route, std::string roadId, int laneId, double startDistance,
-                                                                                double backwardRange, double forwardRange) const
+RouteQueryResult<std::vector<const WorldObjectInterface*>> WorldImplementation::GetObjectsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance, double backwardRange, double forwardRange) const
 {
-    auto& lane = worldDataQuery.GetLaneByOdId(roadId, laneId, startDistance);
-    if (!lane.Exists())
+    const auto laneMultiStream = worldDataQuery.CreateLaneMultiStream(roadGraph, startNode, laneId, startDistance);
+    double startDistanceOnStream = laneMultiStream->GetPositionByVertexAndS(startNode, startDistance);
+    const auto queryResult = worldDataQuery.GetObjectsOfTypeInRange<OWL::Interfaces::WorldObject>(*laneMultiStream, startDistanceOnStream - backwardRange, startDistanceOnStream + forwardRange);
+    RouteQueryResult<std::vector<const WorldObjectInterface*>> result;
+    for (const auto& [node, objects]: queryResult)
     {
-        return {};
+        result[node] = get_transformed<WorldObjectInterface>(objects);
     }
-    auto laneStream = navigation.GetLaneStream(route, roadId, laneId, startDistance);
-    double startDistanceOnStream = laneStream.GetPositionByElementAndS(lane, startDistance);
-
-    auto objects = worldDataQuery.GetObjectsOfTypeInRange<OWL::Interfaces::WorldObject>(laneStream, startDistanceOnStream - backwardRange, startDistanceOnStream + forwardRange);
-    return get_transformed<WorldObjectInterface>(objects);
+    return result;
 }
 
 std::vector<const AgentInterface *> WorldImplementation::GetAgentsInRangeOfJunctionConnection(std::string connectingRoadId, double range) const
@@ -387,75 +381,68 @@ bool WorldImplementation::IsSValidOnLane(std::string roadId, int laneId,
     return worldDataQuery.IsSValidOnLane(roadId, laneId, distance);
 }
 
-double WorldImplementation::GetLaneCurvature(Route route, std::string roadId, int laneId, double position, double distance) const
+double WorldImplementation::GetLaneCurvature(std::string roadId, int laneId, double position) const
 {
     auto& lane =  worldDataQuery.GetLaneByOdId(roadId, laneId, position);
     if (!lane.Exists())
     {
         return 0.0;
     }
-    auto laneStream = navigation.GetLaneStream(route, roadId, laneId, position);
-    double positionOnLaneStream = laneStream.GetPositionByElementAndS(lane, position);
-    auto [relativePositionOnLane, laneInGivenDistance] = laneStream.GetElementAndSByPosition(positionOnLaneStream + distance);
-    if (!laneInGivenDistance)
-    {
-        return 0.0;
-    }
-    return laneInGivenDistance->GetCurvature(laneInGivenDistance->GetDistance(OWL::MeasurementPoint::RoadStart) + relativePositionOnLane);
+    return lane.GetCurvature(position);
 }
 
-double WorldImplementation::GetLaneWidth(Route route, std::string roadId, int laneId, double position, double distance) const
+RouteQueryResult<std::optional<double> > WorldImplementation::GetLaneCurvature(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double position, double distance) const
+{
+    const auto laneMultiStream = worldDataQuery.CreateLaneMultiStream(roadGraph, startNode, laneId, position);
+    double positionOnStream = laneMultiStream->GetPositionByVertexAndS(startNode, position);
+    return worldDataQuery.GetLaneCurvature(*laneMultiStream, positionOnStream + distance);
+}
+
+double WorldImplementation::GetLaneWidth(std::string roadId, int laneId, double position) const
 {
     auto& lane =  worldDataQuery.GetLaneByOdId(roadId, laneId, position);
     if (!lane.Exists())
     {
         return 0.0;
     }
-    auto laneStream = navigation.GetLaneStream(route, roadId, laneId, position);
-    double positionOnLaneStream = laneStream.GetPositionByElementAndS(lane, position);
-    auto [relativePositionOnLane, laneInGivenDistance] = laneStream.GetElementAndSByPosition( positionOnLaneStream + distance);
-    if (!laneInGivenDistance)
-    {
-        return 0.0;
-    }
-    return laneInGivenDistance->GetWidth(laneInGivenDistance->GetDistance(OWL::MeasurementPoint::RoadStart) + relativePositionOnLane);
+    return lane.GetWidth(position);
 }
 
-double WorldImplementation::GetLaneDirection(Route route, std::string roadId, int laneId, double position, double distance) const
+RouteQueryResult<std::optional<double>> WorldImplementation::GetLaneWidth(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double position, double distance) const
+{
+    const auto laneMultiStream = worldDataQuery.CreateLaneMultiStream(roadGraph, startNode, laneId, position);
+    double positionOnStream = laneMultiStream->GetPositionByVertexAndS(startNode, position);
+    return worldDataQuery.GetLaneWidth(*laneMultiStream, positionOnStream + distance);
+}
+
+double WorldImplementation::GetLaneDirection(std::string roadId, int laneId, double position) const
 {
     auto& lane =  worldDataQuery.GetLaneByOdId(roadId, laneId, position);
     if (!lane.Exists())
     {
         return 0.0;
     }
-    auto laneStream = navigation.GetLaneStream(route, roadId, laneId, position);
-    double positionOnLaneStream = laneStream.GetPositionByElementAndS(lane, position);
-    auto [relativePositionOnLane, laneInGivenDistance] = laneStream.GetElementAndSByPosition( positionOnLaneStream + distance);
-    if (!laneInGivenDistance)
-    {
-        return 0.0;
-    }
-    return laneInGivenDistance->GetDirection(laneInGivenDistance->GetDistance(OWL::MeasurementPoint::RoadStart) + relativePositionOnLane);
+    return lane.GetDirection(position);
 }
 
-double WorldImplementation::GetDistanceToEndOfLane(Route route, std::string roadId, int laneId, double initialSearchDistance,
-        double maximumSearchLength)
+RouteQueryResult<std::optional<double> > WorldImplementation::GetLaneDirection(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double position, double distance) const
 {
-    return GetDistanceToEndOfLane(route, roadId, laneId, initialSearchDistance, maximumSearchLength,
-    {LaneType::Driving, LaneType::Exit, LaneType::OnRamp, LaneType::OffRamp, LaneType::Stop});
+    const auto laneMultiStream = worldDataQuery.CreateLaneMultiStream(roadGraph, startNode, laneId, position);
+    double positionOnStream = laneMultiStream->GetPositionByVertexAndS(startNode, position);
+    return worldDataQuery.GetLaneDirection(*laneMultiStream, positionOnStream + distance);
 }
 
-double WorldImplementation::GetDistanceToEndOfLane(Route route, std::string roadId, int laneId, double initialSearchDistance, double maximumSearchLength, const LaneTypes& laneTypes)
+RouteQueryResult<double> WorldImplementation::GetDistanceToEndOfLane(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double initialSearchDistance, double maximumSearchLength) const
 {
-    auto& lane =  worldDataQuery.GetLaneByOdId(roadId, laneId, initialSearchDistance);
-    if (!lane.Exists())
-    {
-        return 0.0;
-    }
-    auto laneStream = navigation.GetLaneStream(route, roadId, laneId, initialSearchDistance);
-    double positionOnLaneStream = laneStream.GetPositionByElementAndS(lane, initialSearchDistance);
-    return worldDataQuery.GetDistanceToEndOfLane(laneStream, positionOnLaneStream,
-                                                 maximumSearchLength, laneTypes);
+    return GetDistanceToEndOfLane(roadGraph, startNode, laneId, initialSearchDistance, maximumSearchLength,
+                                  {LaneType::Driving, LaneType::Exit, LaneType::OnRamp, LaneType::OffRamp, LaneType::Stop});
+}
+
+RouteQueryResult<double> WorldImplementation::GetDistanceToEndOfLane(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double initialSearchDistance, double maximumSearchLength, const LaneTypes& laneTypes) const
+{
+    auto laneMultiStream = worldDataQuery.CreateLaneMultiStream(roadGraph, startNode, laneId, initialSearchDistance);
+    auto initialPositionOnStream = laneMultiStream->GetPositionByVertexAndS(startNode, initialSearchDistance);
+    return worldDataQuery.GetDistanceToEndOfLane(*laneMultiStream, initialPositionOnStream, maximumSearchLength, laneTypes);
 }
 
 bool WorldImplementation::IntersectsWithAgent(double x, double y, double rotation, double length, double width,
@@ -537,6 +524,11 @@ Position WorldImplementation::RoadCoord2WorldCoord(RoadPosition roadCoord, std::
     return worldCoord;
 }
 
+double WorldImplementation::GetRoadLength(const std::string& roadId) const
+{
+    return worldDataQuery.GetRoadByOdId(roadId)->GetLength();
+}
+
 void WorldImplementation::InitTrafficObjects()
 {
     assert(trafficObjects.size() == 0);
@@ -549,18 +541,9 @@ void WorldImplementation::InitTrafficObjects()
     }
 }
 
-double WorldImplementation::GetDistanceBetweenObjects(const Route& route, const ObjectPosition& objectPos, const ObjectPosition& targetObjectPos) const
+RouteQueryResult<LongitudinalDistance> WorldImplementation::GetDistanceBetweenObjects(const RoadGraph& roadGraph, RoadGraphVertex startNode,
+                                                      const ObjectPosition& objectPos, const std::optional<double> objectReferenceS, const ObjectPosition& targetObjectPos) const
 {
-    const auto roadStream = navigation.GetRoadStream(route);
-    return worldDataQuery.GetDistanceBetweenObjects(roadStream, objectPos, targetObjectPos);
-}
-
-std::string WorldImplementation::GetNextJunctionIdOnRoute(const Route& route, const ObjectPosition& objectPos) const
-{
-    return worldDataQuery.GetNextJunctionIdOnRoute(route, objectPos);
-}
-
-double WorldImplementation::GetDistanceToJunction(const Route& route, const ObjectPosition& objectPos, const std::string& junctionId) const
-{
-    return worldDataQuery.GetDistanceToJunction(route, objectPos, junctionId);
+    const auto roadStream = worldDataQuery.CreateRoadMultiStream(roadGraph, startNode);
+    return worldDataQuery.GetDistanceBetweenObjects(*roadStream, objectPos, objectReferenceS, targetObjectPos);
 }

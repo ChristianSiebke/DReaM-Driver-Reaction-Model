@@ -106,9 +106,9 @@ void Scenario::AddConditionalEventDetector(const openScenario::ConditionalEventD
     eventDetectorInformations.emplace_back(eventDetectorInformation);
 }
 
-void Scenario::AddAction(std::shared_ptr<ScenarioActionInterface> action)
+void Scenario::AddAction(const openScenario::Action action, const std::string eventName)
 {
-    actions.push_back(action);
+    actions.emplace_back(action, eventName);
 }
 
 const std::vector<openScenario::ConditionalEventDetectorInformation>& Scenario::GetEventDetectorInformations()
@@ -116,7 +116,7 @@ const std::vector<openScenario::ConditionalEventDetectorInformation>& Scenario::
     return eventDetectorInformations;
 }
 
-std::vector<std::shared_ptr<ScenarioActionInterface>> Scenario::GetActions() const
+std::vector<openScenario::ManipulatorInformation> Scenario::GetActions() const
 {
     return actions;
 }

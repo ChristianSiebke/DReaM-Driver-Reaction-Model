@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,7 @@
 #pragma once
 
 #include "callbacks.h"
+#include "Common/opExport.h"
 #include "Interfaces/worldInterface.h"
 #include "Interfaces/scenarioInterface.h"
 #include "Interfaces/stochasticsInterface.h"
@@ -28,7 +29,7 @@ class EventDetector;
 class EventNetworkInterface;
 class FrameworkConfig;
 
-class EventDetectorBinding
+class CORESLAVEEXPORT EventDetectorBinding
 {
 public:
     EventDetectorBinding(CallbackInterface *callbacks);

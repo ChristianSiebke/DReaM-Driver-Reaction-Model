@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -11,6 +11,8 @@
 
 #include <optional>
 #include <sstream>
+
+#include "Common/commonTools.h"
 
 #include "xmlParser.h"
 
@@ -309,6 +311,12 @@ bool ParseAttribute<>(QDomElement element, const std::string &attributeName, std
 }
 
 template<>
+bool ParseAttribute<>(QDomElement element, const std::string &attributeName, std::vector<std::string>& result)
+{
+   return ParseAttributeStringVector(element, attributeName, &result);
+}
+
+template<>
 bool ParseAttribute<int>(QDomElement element, const std::string &attributeName, int& result)
 {
    return ParseAttributeInt(element, attributeName, result);
@@ -428,6 +436,31 @@ bool ParseAttributeBool(QDomElement element, const std::string &attributeName, b
                        ::tolower);
         std::istringstream is(value);
         is >> std::boolalpha >> result;
+    }
+    catch(...)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool ParseAttributeStringVector(QDomElement element, const std::string &attributeName, std::vector<std::string> *result)
+{
+    if (!element.hasAttribute(QString::fromStdString(attributeName)))
+    {
+        return false;
+    }
+
+    QDomAttr attribute = element.attributeNode(QString::fromStdString(attributeName));
+    if (attribute.isNull())
+    {
+        return false;
+    }
+
+    try
+    {
+        *result = CommonHelper::TokenizeString(attribute.value().toStdString(), ',');
     }
     catch(...)
     {
@@ -580,6 +613,11 @@ bool ParseType(const std::string &element, RoadObjectType &objectType)
             assignIfMatching(element, objectType, "patch", RoadObjectType::patch) ||
             assignIfMatching(element, objectType, "GuardRail", RoadObjectType::guardRail) ||
             assignIfMatching(element, objectType, "RoadSideMarkerPost", RoadObjectType::roadSideMarkerPost);
+}
+
+bool HasAttribute(QDomElement element, const std::string& attributeName)
+{
+    return element.hasAttribute(QString::fromStdString(attributeName));
 }
 
 } // namespace SimulationCommon

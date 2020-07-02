@@ -31,9 +31,10 @@ class RemoveAgentsManipulator : public ManipulatorCommonBase
 {
 public:
     RemoveAgentsManipulator(WorldInterface *world,
-                            std::shared_ptr<openScenario::GlobalEntityAction> action,
                             SimulationSlave::EventNetworkInterface *eventNetwork,
-                            const CallbackInterface *callbacks);
+                            const CallbackInterface *callbacks,
+                            const openScenario::EntityAction action,
+                            const std::string &eventName);
 
     /*!
     * \brief Triggers the functionality of this class

@@ -1,5 +1,5 @@
 # /*********************************************************************
-# * Copyright (c) 2017, 2018, 2019 in-tech GmbH
+# * Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -18,7 +18,7 @@ win32:QMAKE_CXXFLAGS += -Wa,-mbig-obj
 
 UNIT_UNDER_TEST = $$OPEN_SRC/CoreFramework/OpenPassSlave
 
-INCLUDEPATH += \            
+INCLUDEPATH += \
             $$OPEN_SRC/CoreFramework/CoreShare \
             $$OPEN_SRC/CoreFramework/CoreShare/cephes \
             $$OPEN_SRC/Common \
@@ -33,7 +33,7 @@ INCLUDEPATH += \
 
 DEPENDENCIES = \
     $$OPEN_SRC/Common/eventDetectorDefinitions.cpp \
-    $$OPEN_SRC/Common/vector2d.cpp \
+    $$OPEN_SRC/Common/stochasticDefinitions.h \
     $$OPEN_SRC/CoreFramework/CoreShare/cephes/fresnl.c \
     $$OPEN_SRC/CoreFramework/CoreShare/cephes/polevl.c \
     $$OPEN_SRC/CoreFramework/CoreShare/cephes/const.c \
@@ -72,6 +72,7 @@ VEHICLEMODELIMPORTER_TESTS = \
 EVENTDETECTOR_TESTS = \
     $$UNIT_UNDER_TEST/importer/eventDetectorImporter.cpp \
     $$UNIT_UNDER_TEST/framework/eventNetwork.cpp \
+    $$UNIT_UNDER_TEST/framework/eventNetworkDataPublisher.cpp \
     \
     eventNetwork_Tests.cpp
 
@@ -98,12 +99,12 @@ SCENERYIMPORTER_TESTS = \
 SCENARIOIMPORTER_TESTS = \
     $$UNIT_UNDER_TEST/importer/scenario.cpp \
     $$UNIT_UNDER_TEST/importer/scenarioImporter.cpp \
+    $$UNIT_UNDER_TEST/importer/scenarioImporterHelper.cpp \
+    $$UNIT_UNDER_TEST/importer/oscImporterCommon.cpp \
     \
     scenarioImporter_Tests.cpp
 
 MANIPULATORIMPORTER_TESTS = \
-    $$UNIT_UNDER_TEST/importer/manipulatorImporter.cpp \
-    \
     manipulatorImporter_Tests.cpp
 
 COMMANDLINERPARSER_TESTS = \
@@ -115,6 +116,11 @@ DIRECTORIES_TESTS = \
     $$UNIT_UNDER_TEST/framework/directories.cpp \
     \
     directories_Tests.cpp \
+
+PUBLISHER_TESTS = \
+    $$UNIT_UNDER_TEST/framework/agentDataPublisher.cpp \
+    \
+    agentDataPublisher_Tests.cpp
 
 SOURCES += \
     $$DEPENDENCIES \
@@ -130,4 +136,5 @@ SOURCES += \
     $$VEHICLEMODELIMPORTER_TESTS \
     $$DIRECTORIES_TESTS \
     $$COMMANDLINERPARSER_TESTS \
-    $$AGENTSAMPLER_TESTS
+    $$AGENTSAMPLER_TESTS \
+    $$PUBLISHER_TESTS
