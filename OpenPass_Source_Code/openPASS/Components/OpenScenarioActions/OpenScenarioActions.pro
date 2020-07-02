@@ -28,10 +28,17 @@ INCLUDEPATH += $$SUBDIRS \
 SOURCES += \
         openScenarioActions.cpp \
         openScenarioActionsImplementation.cpp \
-        oscActionsCalculation.cpp
+        oscActionsCalculation.cpp \
+        transformLaneChange.cpp \
+        transformSpeedAction.cpp
 
 HEADERS += \
         openScenarioActions.h \
         openScenarioActionsGlobal.h \
         openScenarioActionsImplementation.h \
-        oscActionsCalculation.h
+        oscActionsCalculation.h \
+        actionTransformRepository.h \
+        transformerBase.h \
+        transformTrajectory.h \
+        transformLaneChange.h \
+        transformSpeedAction.h

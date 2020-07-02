@@ -16,12 +16,11 @@
 
 #pragma once
 
-#include "Interfaces/agentInterface.h"
 #include "Interfaces/eventInterface.h"
 #include "Interfaces/runResultInterface.h"
 
-using Events = std::map<EventDefinitions::EventCategory, std::list<std::shared_ptr<EventInterface>>>;
-using EventContainer = std::list<std::shared_ptr<EventInterface>>;
+using SharedEvent = std::shared_ptr<EventInterface>;
+using EventContainer = std::vector<SharedEvent>;
 
 namespace SimulationSlave {
 
@@ -35,15 +34,13 @@ class EventNetworkInterface
 public:
     virtual ~EventNetworkInterface() = default;
 
-    virtual Events *GetActiveEvents() = 0;
-    virtual Events *GetArchivedEvents() = 0;
-    virtual EventContainer GetActiveEventCategory(const EventDefinitions::EventCategory eventCategory) = 0;
-    virtual void RemoveOldEvents(int time) = 0;
-    virtual void InsertEvent(std::shared_ptr<EventInterface> event) = 0;
-    virtual void ClearActiveEvents() = 0;
+    virtual EventContainer GetEvents(const EventDefinitions::EventCategory eventCategory) = 0;
+    virtual void InsertEvent(SharedEvent event) = 0;
     virtual void Clear() = 0;
     virtual void AddCollision(const int agentId) = 0;
     virtual void Initialize(RunResultInterface *runResult) = 0;
+    virtual void InsertTrigger(const std::string &identifier, std::unique_ptr<EventInterface> event) = 0;
+    virtual std::vector<EventInterface const *> GetTrigger(const std::string &identifier) const = 0;
 };
 
 } //namespace SimulationSlave

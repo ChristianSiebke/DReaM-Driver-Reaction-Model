@@ -33,12 +33,6 @@
 #include "Interfaces/manipulatorInterface.h"
 #include "Interfaces/worldInterface.h"
 
-//Event Categories
-#include "Common/conditionalEvent.h"
-#include "Common/collisionEvent.h"
-
-#define EVENT_DETECTOR "EventDetector"
-
 //-----------------------------------------------------------------------------
 /** \brief This is the parent class for all Manipulators providing the basic functionality.
 *

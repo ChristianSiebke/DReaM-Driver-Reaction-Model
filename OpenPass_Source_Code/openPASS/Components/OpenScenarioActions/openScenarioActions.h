@@ -17,7 +17,5 @@
 
 #pragma once
 
-#include "openScenarioActionsGlobal.h"
 #include "Interfaces/modelInterface.h"
-
-
+#include "openScenarioActionsGlobal.h"

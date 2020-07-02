@@ -17,8 +17,7 @@
 #include "Common/agentCompToCompCtrlSignal.h"
 #include "Common/primitiveSignals.h"
 #include "Interfaces/eventNetworkInterface.h"
-#include "Common/eventTypes.h"
-#include "Common/componentStateChangeEvent.h"
+#include "Common/Events/componentStateChangeEvent.h"
 
 ComponentControllerImplementation::ComponentControllerImplementation(std::string componentName,
                                                                      bool isInit,
@@ -119,26 +118,30 @@ void ComponentControllerImplementation::UpdateOutput(int localLinkId, std::share
     }
 }
 
+bool ComponentControllerImplementation::IsAgentAffectedByEvent(EventInterface const * event)
+{
+    return std::find(event->GetActingAgents().entities.begin(),event->GetActingAgents().entities.end(),
+                     GetAgent()->GetId()) != event->GetActingAgents().entities.end();
+}
+
 /*
- * Each trigger, pull ComponentChangeEvents for this agent and pass the list of them
+ * Each trigger, pull ComponentStateChangeEvents for this agent and pass the list of them
  * to the stateManager for proper handling of changes of component max reachable state
  */
 void ComponentControllerImplementation::Trigger([[maybe_unused]] int time)
 {
-    // get the event list and filter by ComponentChangeEvents and this agent's id
-    const auto stateChangeEventList = GetEventNetwork()->GetActiveEventCategory(EventDefinitions::EventCategory::ComponentStateChange);
-    const auto agentId = GetAgent()->GetId();
-    std::list<std::shared_ptr<ComponentChangeEvent const>> castedStateChangeEventListForAgentId;
+    // get the event list and filter by ComponentStateChangeEvents and this agent's id
+    const auto stateChangeEventList = GetEventNetwork()->GetTrigger(openpass::events::ComponentStateChangeEvent::TOPIC);
+
+    std::vector<openpass::events::ComponentStateChangeEvent const *> componentStateChanges;
 
     // filter state change event list by this agentid
     for (const auto &stateChangeEvent : stateChangeEventList)
     {
-        const auto &componentChangeEvent = std::dynamic_pointer_cast<ComponentChangeEvent>(stateChangeEvent);
-        const auto &actingAgentIds = componentChangeEvent->actingAgents;
-
-        if (componentChangeEvent && std::find(actingAgentIds.begin(), actingAgentIds.end(), agentId) != actingAgentIds.end())
+        const auto componentStateChangeEvent = dynamic_cast<openpass::events::ComponentStateChangeEvent const *>(stateChangeEvent);
+        if (componentStateChangeEvent && IsAgentAffectedByEvent(componentStateChangeEvent))
         {
-           castedStateChangeEventListForAgentId.push_back(componentChangeEvent);
+           componentStateChanges.push_back(componentStateChangeEvent);
         }
     }
 
@@ -146,5 +149,5 @@ void ComponentControllerImplementation::Trigger([[maybe_unused]] int time)
     // - this prioritizes the provided event list for event-triggered max reachable states
     // - this also uses registered conditions to determine each component's max reachable
     //   state dependent on each other component's current state
-    stateManager.UpdateMaxReachableStatesForRegisteredComponents(castedStateChangeEventListForAgentId);
+    stateManager.UpdateMaxReachableStatesForRegisteredComponents(componentStateChanges);
 }

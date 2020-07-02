@@ -14,11 +14,11 @@
 
 #include "NoOperationManipulator.h"
 
-#include <QtGlobal>
-
-NoOperationManipulator::NoOperationManipulator(WorldInterface* world,
-        SimulationSlave::EventNetworkInterface* eventNetwork,
-        const CallbackInterface* callbacks):
+NoOperationManipulator::NoOperationManipulator(WorldInterface *world,
+                                               SimulationSlave::EventNetworkInterface *eventNetwork,
+                                               const CallbackInterface *callbacks,
+                                               [[maybe_unused]] const openScenario::CustomCommandAction action,
+                                               [[maybe_unused]] const std::string &eventName) :
     ManipulatorCommonBase(world,
                           eventNetwork,
                           callbacks)
@@ -26,9 +26,8 @@ NoOperationManipulator::NoOperationManipulator(WorldInterface* world,
     cycleTime = 100;
 }
 
-void NoOperationManipulator::Trigger(int time)
+void NoOperationManipulator::Trigger([[maybe_unused]] int time)
 {
-    Q_UNUSED(time);
 }
 
 EventContainer NoOperationManipulator::GetEvents()

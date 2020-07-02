@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017 - 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -14,107 +14,56 @@
 
 #include "eventNetwork.h"
 
+#include <algorithm>
+
 using namespace EventDefinitions;
 
 namespace SimulationSlave {
 
-Events *EventNetwork::GetActiveEvents()
+EventContainer EventNetwork::GetEvents(const EventCategory eventCategory)
 {
-    return &activeEvents;
+    if (auto iter = events.find(eventCategory); iter != events.end())
+    {
+        return iter->second;
+    }
+    return {};
 }
 
-Events *EventNetwork::GetArchivedEvents()
+std::vector<EventInterface const *> EventNetwork::GetTrigger(const std::string &topic) const
 {
-    return &archivedEvents;
+    std::vector<EventInterface const *> matching_trigger;
+
+    if (auto iter = trigger.find(topic); iter != trigger.end())
+    {
+        const auto &found_trigger = iter->second;
+        matching_trigger.reserve(found_trigger.size());
+        std::transform(found_trigger.begin(), found_trigger.end(),
+                       std::back_inserter(matching_trigger), [](const auto &t) { return t.get(); });
+    }
+    return matching_trigger;
 }
 
-EventContainer EventNetwork::GetActiveEventCategory(const EventCategory eventCategory)
+void EventNetwork::InsertTrigger(const std::string &identifier, std::unique_ptr<EventInterface> event)
 {
-    auto iterator = activeEvents.find(eventCategory);
-    if (iterator == activeEvents.end())
-    {
-        return {};
-    }
-    else
-    {
-        return iterator->second;
-    }
-}
-
-void EventNetwork::RemoveOldEvents(int time)
-{
-    for (Events::iterator iterator = archivedEvents.begin(); iterator != archivedEvents.end(); iterator++)
-    {
-        while ((*iterator).second.front()->GetEventTime() < time)
-        {
-            (*iterator).second.pop_front();
-        }
-    }
-}
-
-// This glue logic is only an intermediate state, as we intend to remove EventInterface in the future
-void EventNetwork::Log(const std::shared_ptr<EventInterface> &event)
-{
-    openpass::narrator::Event narratorEvent(event->GetName());
-
-    // TODO: Named type issue (assigment missing)
-    for (auto agent : event->GetTriggeringAgents())
-    {
-        narratorEvent.triggeringEntities.entities.push_back(agent);
-    }
-
-    // TODO: Named type issue (assigment missing)
-    for (auto agent : event->GetActingAgents())
-    {
-        narratorEvent.affectedEntities.entities.push_back(agent);
-    }
-
-    narratorEvent.parameter = event->GetParameter();
-
-    publisher.Publish(EventDefinitions::helper::GetAsString(event->GetCategory()), narratorEvent);
+    trigger[identifier].push_back(std::move(event));
 }
 
 void EventNetwork::InsertEvent(std::shared_ptr<EventInterface> event)
 {
-    event->SetId(eventId);
-    eventId++;
+    events[event->GetCategory()].push_back(event);
 
-    activeEvents[event->GetCategory()].push_back(event);
+    openpass::narrator::Event narratorEvent(event->GetName());
+    narratorEvent.triggeringEntities = event->triggeringAgents;
+    narratorEvent.affectedEntities = event->actingAgents;
+    narratorEvent.parameter = event->GetParameter();
 
-    // This filter is currently necessary, as manipulators fire events too (which shall not be logged anymore)
-    if (event->GetCategory() == EventDefinitions::EventCategory::OpenSCENARIO ||
-        event->GetCategory() == EventDefinitions::EventCategory::OpenPASS)
-    {
-        Log(event);
-    }
-}
-
-void EventNetwork::ClearActiveEvents()
-{
-    for (std::pair<EventCategory, std::list<std::shared_ptr<EventInterface>>> eventMapEntry : activeEvents)
-    {
-        if (archivedEvents.find(eventMapEntry.first) != archivedEvents.end())
-        {
-            std::list<std::shared_ptr<EventInterface>> *eventList = &(archivedEvents.at(eventMapEntry.first));
-            eventList->insert(eventList->end(), eventMapEntry.second.begin(), eventMapEntry.second.end());
-        }
-        else
-        {
-            archivedEvents.insert(eventMapEntry);
-        }
-    }
-
-    activeEvents.clear();
+    publisher.Publish(EventDefinitions::utils::GetAsString(event->GetCategory()), narratorEvent);
 }
 
 void EventNetwork::Clear()
 {
-    eventId = 0;
-
-    activeEvents.clear();
-    archivedEvents.clear();
-
-    runResult = nullptr;
+    trigger.clear();
+    events.clear();
 }
 
 void EventNetwork::AddCollision(const int agentId)

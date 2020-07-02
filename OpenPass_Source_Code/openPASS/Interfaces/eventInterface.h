@@ -38,23 +38,15 @@ class EventInterface
 {
 public:
     EventInterface() = default;
-    EventInterface(const EventInterface &) = delete;
-    EventInterface(EventInterface &&) = delete;
-    EventInterface &operator=(const EventInterface &) = delete;
-    EventInterface &operator=(EventInterface &&) = delete;
+    EventInterface(const TriggeringEntities triggeringAgents, const AffectedEntities actingAgents) :
+        triggeringAgents{std::move(triggeringAgents)},
+        actingAgents{std::move(actingAgents)}{}
+
+    EventInterface(const EventInterface &) = default;
+    EventInterface(EventInterface &&) = default;
+    EventInterface &operator=(const EventInterface & rhs) = default;
+    EventInterface &operator=(EventInterface &&) = default;
     virtual ~EventInterface() = default;
-
-    /*!
-    * \brief Sets the Id of the event.
-    * \param[in]	Id of the event.
-    */
-    virtual void SetId(const int eventId) = 0;
-
-    /*!
-    * \brief Returns the Id of the event.
-    * \return	     Id.
-    */
-    virtual int GetId() const = 0;
 
     /*!
     * \brief Returns the time of the event.
@@ -67,18 +59,6 @@ public:
     * \return	     EventCategory.
     */
     virtual EventDefinitions::EventCategory GetCategory() const = 0;
-
-    /*!
-    * \brief Sets the Id of the event which triggered this event.
-    * \param[in]	     Event Id.
-    */
-    virtual void SetTriggeringEventId(const int triggeringEventId) = 0;
-
-    /*!
-    * \brief Returns the Id of the event which triggered this event.
-    * \return	     Event Id.
-    */
-    virtual int GetTriggeringEventId() const = 0;
 
     /*!
     * \brief Returns the name of the event.
@@ -96,25 +76,25 @@ public:
      * \brief GetTriggeringAgents
      * \return  List of triggering agents (might me empty)
      */
-    virtual const std::vector<int> GetTriggeringAgents() const = 0;
+    virtual const TriggeringEntities GetTriggeringAgents() const = 0;
 
     /*!
      * \brief GetActingAgents
      * \return  List of acting agents (might me empty)
      */
-    virtual const std::vector<int> GetActingAgents() const = 0;
-
-    /*!
-    * \brief Returns all parameters of the event as string list.
-    * \details Returns the agentId as string list.
-    * \return	     List of string pairs of the event parameters.
-    */
-    [[deprecated("Will be replaced by functionality of openpass::events::Parameter")]] virtual EventParameters GetParametersAsString() = 0;
+    virtual const AffectedEntities GetActingAgents() const = 0;
 
     /*!
      * \brief Returns all parameter in their raw form
      * \see openpass::events::Parameter
      * \return Parameter
      */
-    [[deprecated("will be replaced by specializations of the type")]] virtual const openpass::type::FlatParameter &GetParameter() const = 0;
+    virtual const openpass::type::FlatParameter &GetParameter() const = 0;
+
+public:
+    //! All agents which triggered the event
+    TriggeringEntities triggeringAgents {};
+
+    //! All agents which are affected by the event
+    AffectedEntities actingAgents {};
 };

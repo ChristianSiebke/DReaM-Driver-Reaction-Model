@@ -16,16 +16,11 @@
 class FakeEvent : public EventInterface
 {
 public:
-    MOCK_METHOD1(SetId, void(int));
-    MOCK_CONST_METHOD0(GetId, int());
     MOCK_CONST_METHOD0(GetEventTime, int());
     MOCK_CONST_METHOD0(GetCategory, EventDefinitions::EventCategory());
-    MOCK_METHOD1(SetTriggeringEventId, void(int));
-    MOCK_CONST_METHOD0(GetTriggeringEventId, int());
     MOCK_CONST_METHOD0(GetSource, std::string());
     MOCK_CONST_METHOD0(GetName, std::string());
-    MOCK_CONST_METHOD0(GetTriggeringAgents, const std::vector<int>());
-    MOCK_CONST_METHOD0(GetActingAgents, const std::vector<int>());
-    MOCK_METHOD0(GetParametersAsString, EventParameters());
+    MOCK_CONST_METHOD0(GetTriggeringAgents, const TriggeringEntities());
+    MOCK_CONST_METHOD0(GetActingAgents, const AffectedEntities());
     MOCK_CONST_METHOD0(GetParameter, const openpass::type::FlatParameter&());
 };

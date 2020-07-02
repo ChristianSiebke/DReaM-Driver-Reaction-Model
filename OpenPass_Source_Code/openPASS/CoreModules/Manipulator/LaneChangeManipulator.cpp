@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017 - 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -13,9 +13,8 @@
 //-----------------------------------------------------------------------------
 
 #include "LaneChangeManipulator.h"
-#include "Common/laneChangeEvent.h"
 
-#include <QtGlobal>
+#include "Common/Events/laneChangeEvent.h"
 
 LaneChangeManipulator::LaneChangeManipulator(WorldInterface *world,
                                              SimulationSlave::EventNetworkInterface *eventNetwork,
@@ -35,17 +34,12 @@ void LaneChangeManipulator::Trigger(int time)
 {
     for (const auto &eventInterface : GetEvents())
     {
-        auto triggeringEvent = std::dynamic_pointer_cast<ConditionalEvent>(eventInterface);
+        auto triggeringEvent = std::dynamic_pointer_cast<openpass::events::OpenScenarioEvent>(eventInterface);
 
-        for(const auto actorId : triggeringEvent->actingAgents)
+        for (const auto actorId : triggeringEvent->actingAgents.entities)
         {
-            auto laneChangeEvent = std::make_shared<LaneChangeEvent>(time,
-                                                                     eventName,
-                                                                     COMPONENTNAME,
-                                                                     actorId,
-                                                                     action.laneChangeParameter);
-
-            eventNetwork->InsertEvent(laneChangeEvent);
+            auto trigger = std::make_unique<openpass::events::LaneChangeEvent>(time, eventName, COMPONENTNAME, actorId, action.laneChangeParameter);
+            eventNetwork->InsertTrigger(openpass::events::LaneChangeEvent::TOPIC, std::move(trigger));
         }
     }
 }
@@ -54,13 +48,13 @@ EventContainer LaneChangeManipulator::GetEvents()
 {
     EventContainer manipulatorSpecificEvents{};
 
-    const auto &conditionalEvents = eventNetwork->GetActiveEventCategory(EventDefinitions::EventCategory::OpenSCENARIO);
+    const auto &conditionalEvents = eventNetwork->GetEvents(EventDefinitions::EventCategory::OpenSCENARIO);
 
-    for(const auto &event: conditionalEvents)
+    for (const auto &event : conditionalEvents)
     {
-        const auto conditionalEvent = std::static_pointer_cast<ConditionalEvent>(event);
+        const auto oscEvent = std::static_pointer_cast<openpass::events::OpenScenarioEvent>(event);
 
-        if(conditionalEvent && conditionalEvent.get()->GetName() == eventName)
+        if (oscEvent && oscEvent.get()->GetName() == eventName)
         {
             manipulatorSpecificEvents.emplace_back(event);
         }

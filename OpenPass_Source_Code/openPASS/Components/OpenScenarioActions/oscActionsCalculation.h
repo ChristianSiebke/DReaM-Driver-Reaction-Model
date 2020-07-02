@@ -17,7 +17,7 @@
 class OscActionsCalculation
 {
 public:
-    OscActionsCalculation(const WorldInterface* world);
+    OscActionsCalculation(const WorldInterface *world);
 
     //! Calculates a trajectory for a lane change with shape "sinusiodal"
     //! The result has constant speed in s
@@ -29,8 +29,8 @@ public:
     //! \param startPosition    start point of the trajectory
     //! \param startTime        time of the first trajectory point
     //! \return     sinusiodal lane change trajectory in world coordinates
-    openScenario::Trajectory CalculateSinusiodalLaneChange (double deltaS, double deltaT, double deltaTime, double timeStep, GlobalRoadPosition startPosition, double startTime) const;
+    openScenario::Trajectory CalculateSinusiodalLaneChange(double deltaS, double deltaT, double deltaTime, double timeStep, GlobalRoadPosition startPosition, double startTime) const;
 
 private:
-    const WorldInterface* world;
+    const WorldInterface *world;
 };

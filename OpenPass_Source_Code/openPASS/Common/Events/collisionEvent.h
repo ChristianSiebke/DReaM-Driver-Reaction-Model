@@ -16,18 +16,20 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-#include "basicEvent.h"
+#include "Events/basicEvent.h"
+
+namespace openpass::events {
 
 //-----------------------------------------------------------------------------
 /** This class implements all functionality of the CollisionEvent.
  *
  * \ingroup Events */
 //-----------------------------------------------------------------------------
-class CollisionEvent : public BasicEvent
+class CollisionEvent : public OpenPassEvent
 {
 public:
     CollisionEvent(int time, std::string source, bool collisionWithAgent, int collisionAgentId, int collisionOpponentId) :
-        BasicEvent{time, "Collision", source, {collisionAgentId, collisionOpponentId}, {}},
+        BasicEvent{time, "Collision", std::move(source), {{std::move(collisionAgentId), std::move(collisionOpponentId)}}, {}},
         collisionWithAgent{collisionWithAgent},
         collisionAgentId{collisionAgentId},
         collisionOpponentId{collisionOpponentId}
@@ -35,23 +37,9 @@ public:
         parameter.emplace("CollisionWithAgent", collisionWithAgent);
     }
 
-    ~CollisionEvent() override = default;
-
-    EventDefinitions::EventCategory GetCategory() const override
-    {
-        return EventDefinitions::EventCategory::OpenPASS;
-    }
-
-    EventParameters GetParametersAsString() override
-    {
-        EventParameters eventParameters = BasicEvent::GetParametersAsString();
-        eventParameters.push_back({"CollisionWithAgent", collisionWithAgent ? "true" : "false"});
-        eventParameters.push_back({"CollisionAgentId", std::to_string(collisionAgentId)});
-        eventParameters.push_back({"CollisionOpponentId", std::to_string(collisionOpponentId)});
-        return eventParameters;
-    }
-
-    [[deprecated("Will be replaced by BasicEvent::parameter")]] bool collisionWithAgent;
-    [[deprecated("Will be replaced by BasicEvent::parameter")]] int collisionAgentId;
-    [[deprecated("Will be replaced by BasicEvent::parameter")]] int collisionOpponentId;
+    bool collisionWithAgent;
+    int collisionAgentId;
+    int collisionOpponentId;
 };
+
+} // namespace openpass::events

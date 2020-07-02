@@ -14,9 +14,9 @@
 //-----------------------------------------------------------------------------
 
 #include "ComponentStateChangeManipulator.h"
-#include "Common/componentStateChangeEvent.h"
-#include "Common/commonTools.h"
 
+#include "Common/Events/componentStateChangeEvent.h"
+#include "Common/commonTools.h"
 
 ComponentStateChangeManipulator::ComponentStateChangeManipulator(WorldInterface *world,
                                                                  SimulationSlave::EventNetworkInterface *eventNetwork,
@@ -24,21 +24,21 @@ ComponentStateChangeManipulator::ComponentStateChangeManipulator(WorldInterface 
                                                                  const openScenario::CustomCommandAction action,
                                                                  const std::string &eventName) :
     ManipulatorCommonBase(world,
-                                              eventNetwork,
-                                              callbacks,
-                                              eventName)
+                          eventNetwork,
+                          callbacks,
+                          eventName)
 {
     auto commandTokens = CommonHelper::TokenizeString(action.command, ' ');
     auto commandTokensSize = commandTokens.size();
 
-    if(commandTokensSize < 3)
+    if (commandTokensSize < 3)
     {
         const std::string msg = COMPONENTNAME + ": ComponentStateChangeManipulator provided invalid number of commands";
         LOG(CbkLogLevel::Error, msg);
         throw std::runtime_error(msg);
     }
 
-    if(commandTokens.at(0) != "SetComponentState")
+    if (commandTokens.at(0) != "SetComponentState")
     {
         const std::string msg = COMPONENTNAME + ": ComponentStateChangeManipulator provided invalid command for initialization";
         LOG(CbkLogLevel::Error, msg);
@@ -48,27 +48,41 @@ ComponentStateChangeManipulator::ComponentStateChangeManipulator(WorldInterface 
     componentName = commandTokens.at(1);
     componentStateName = commandTokens.at(2);
 
+    if (!AssignComponentState(componentStateName))
+    {
+        const std::string msg = COMPONENTNAME + ": Invalid ComponentStateName " + componentStateName;
+        LOG(CbkLogLevel::Error, msg);
+        throw std::runtime_error(msg);
+    }
+
     cycleTime = 100;
 }
 
-void ComponentStateChangeManipulator::Trigger([[maybe_unused]] int time)
+bool ComponentStateChangeManipulator::AssignComponentState(const std::string &componentStateName)
 {
-    for (const auto& eventInterface : GetEvents())
+    for (const auto &[stateName, state] : ComponentStateMapping)
     {
-        const auto& triggeringEvent = std::dynamic_pointer_cast<ConditionalEvent>(eventInterface);
+        if (componentStateName == stateName)
+        {
+            componentState = state;
+            return true;
+        }
+    }
+    return false;
+}
 
-        std::shared_ptr<ComponentChangeEvent> event =
-                std::make_shared<ComponentChangeEvent>(time,
-                                                       eventName,
-                                                       COMPONENTNAME,
-                                                       triggeringEvent->triggeringAgents,
-                                                       triggeringEvent->actingAgents,
-                                                       componentName,
-                                                       componentStateName);
+void ComponentStateChangeManipulator::Trigger(int time)
+{
+    for (const auto &eventInterface : GetEvents())
+    {
+        const auto &triggeringEvent = std::dynamic_pointer_cast<openpass::events::OpenScenarioEvent>(eventInterface);
 
-         event->SetTriggeringEventId(triggeringEvent->GetId());
+        auto trigger = std::make_unique<openpass::events::ComponentStateChangeEvent>(time, eventName, COMPONENTNAME,
+                                                                   triggeringEvent->triggeringAgents,
+                                                                   triggeringEvent->actingAgents,
+                                                                   componentName, componentState);
 
-         eventNetwork->InsertEvent(event);
+        eventNetwork->InsertTrigger(openpass::events::ComponentStateChangeEvent::TOPIC, std::move(trigger));
     }
 }
 
@@ -76,13 +90,13 @@ EventContainer ComponentStateChangeManipulator::GetEvents()
 {
     EventContainer manipulatorSpecificEvents{};
 
-    const auto &conditionalEvents = eventNetwork->GetActiveEventCategory(EventDefinitions::EventCategory::OpenSCENARIO);
+    const auto &conditionalEvents = eventNetwork->GetEvents(EventDefinitions::EventCategory::OpenSCENARIO);
 
-    for(const auto &event: conditionalEvents)
+    for (const auto &event : conditionalEvents)
     {
-        const auto conditionalEvent = std::static_pointer_cast<ConditionalEvent>(event);
+        const auto oscEvent = std::static_pointer_cast<openpass::events::OpenScenarioEvent>(event);
 
-        if(conditionalEvent && conditionalEvent.get()->GetName() == eventName)
+        if (oscEvent && oscEvent.get()->GetName() == eventName)
         {
             manipulatorSpecificEvents.emplace_back(event);
         }

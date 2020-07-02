@@ -15,7 +15,7 @@
 #include "Interfaces/callbackInterface.h"
 #include "componentControllerCommon.h"
 #include "componentStateInformation.h"
-#include "Common/componentStateChangeEvent.h"
+#include "Common/Events/componentStateChangeEvent.h"
 
 namespace ComponentControl {
 
@@ -102,12 +102,12 @@ public:
 
     /*!
      * \brief UpdateMaxReachableStatesForRegisteredComponents Calculates and updates the max reachable states for the registered components using the provided
-     *        event list (filtered to include only ComponentChangeEvents and only for the agentId of the ComponentController owning the statemanager) and registered
+     *        event list (filtered to include only ComponentStateChangeEvents and only for the agentId of the ComponentController owning the statemanager) and registered
      *        Condition-state pairs
-     * \param componentStateChangeEventListFilteredByAgent the event list from the event network, filtered to include only those events related to the agentId
-     *        of the controlling ComponentController and only including ComponentChangeEvents
+     * \param componentStateChanges     the event list from the event network, filtered to include only those events related to the agentId
+     *        of the controlling ComponentController and only including ComponentStateChangeEvents
      */
-    void UpdateMaxReachableStatesForRegisteredComponents(const std::list<std::shared_ptr<ComponentChangeEvent const>> &componentStateChangeEventListFilteredByAgent);
+    void UpdateMaxReachableStatesForRegisteredComponents(std::vector<openpass::events::ComponentStateChangeEvent const *>& componentStateChanges);
 private:
     //-----------------------------------------------------------------------------
     //! Provides callback to LOG() macro

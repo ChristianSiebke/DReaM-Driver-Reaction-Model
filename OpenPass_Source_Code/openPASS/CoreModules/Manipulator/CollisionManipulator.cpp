@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,7 @@
 #include "CollisionManipulator.h"
 
 #include <iostream>
-#include <QtGlobal>
+#include "Common/Events/collisionEvent.h"
 
 CollisionManipulator::CollisionManipulator(WorldInterface *world,
                                            SimulationSlave::EventNetworkInterface *eventNetwork,
@@ -27,43 +27,36 @@ CollisionManipulator::CollisionManipulator(WorldInterface *world,
     cycleTime = 100;
 }
 
-void CollisionManipulator::Trigger(int time)
+void CollisionManipulator::Trigger([[maybe_unused]] int time)
 {
-    Q_UNUSED(time);
-
     for (std::shared_ptr<EventInterface> eventInterface : GetEvents())
     {
-        std::shared_ptr<CollisionEvent> event = std::dynamic_pointer_cast<CollisionEvent>(eventInterface);
-        AgentInterface *collisionAgent = world->GetAgent(event->collisionAgentId);
-
-        eventNetwork->AddCollision(event->collisionAgentId);
-
-        if (event->collisionWithAgent)
+        if (auto event = std::dynamic_pointer_cast<openpass::events::CollisionEvent>(eventInterface))
         {
-            AgentInterface *collisionOpponent = world->GetAgent(event->collisionOpponentId);
-            try
+            AgentInterface *collisionAgent = world->GetAgent(event->collisionAgentId);
+
+            eventNetwork->AddCollision(event->collisionAgentId);
+
+            if (event->collisionWithAgent)
             {
+                AgentInterface *collisionOpponent = world->GetAgent(event->collisionOpponentId);
                 UpdateCollision(collisionAgent, collisionOpponent);
+                eventNetwork->AddCollision(event->collisionOpponentId);
             }
-            catch (const std::bad_alloc &)
+            else
             {
-                std::cout << "BAD ALLOC"; // TODO: log if something like this happens
-            }
-            eventNetwork->AddCollision(event->collisionOpponentId);
-        }
-        else
-        {
-            const auto pair = std::make_pair(ObjectTypeOSI::Object, event->collisionOpponentId);
-            for (auto partner : collisionAgent->GetCollisionPartners())
-            {
-                if (partner.first == ObjectTypeOSI::Vehicle)
+                const auto pair = std::make_pair(ObjectTypeOSI::Object, event->collisionOpponentId);
+                for (auto partner : collisionAgent->GetCollisionPartners())
                 {
-                    AgentInterface *partnerAgent = world->GetAgent(partner.second);
-                    partnerAgent->UpdateCollision(pair);
+                    if (partner.first == ObjectTypeOSI::Vehicle)
+                    {
+                        AgentInterface *partnerAgent = world->GetAgent(partner.second);
+                        partnerAgent->UpdateCollision(pair);
+                    }
                 }
-            }
 
-            collisionAgent->UpdateCollision(pair);
+                collisionAgent->UpdateCollision(pair);
+            }
         }
     }
 }
@@ -117,5 +110,5 @@ void CollisionManipulator::UpdateCollision(AgentInterface *agent, AgentInterface
 
 EventContainer CollisionManipulator::GetEvents()
 {
-    return eventNetwork->GetActiveEventCategory(EventDefinitions::EventCategory::OpenPASS);
+    return eventNetwork->GetEvents(EventDefinitions::EventCategory::OpenPASS);
 }

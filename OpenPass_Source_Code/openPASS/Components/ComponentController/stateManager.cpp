@@ -101,15 +101,14 @@ void StateManager::FlagComponentMaxReachableStateSetByEvent(const int localLinkI
     }
 }
 
-void StateManager::UpdateMaxReachableStatesForRegisteredComponents(const
-        std::list<std::shared_ptr<ComponentChangeEvent const>>& componentStateChangeEventListFilteredByAgent)
+void StateManager::UpdateMaxReachableStatesForRegisteredComponents(std::vector<const openpass::events::ComponentStateChangeEvent *> &componentStateChanges)
 {
-    for (const auto& stateChangeEvent : componentStateChangeEventListFilteredByAgent)
+    for (const auto& stateChangeEvent : componentStateChanges)
     {
         try
         {
-            const auto localLinkId = GetComponentLocalLinkIdByName(stateChangeEvent->GetComponentName());
-            UpdateComponentMaxReachableState(localLinkId, stateChangeEvent->GetGoalState());
+            const auto localLinkId = GetComponentLocalLinkIdByName(stateChangeEvent->componentName);
+            UpdateComponentMaxReachableState(localLinkId, stateChangeEvent->componentState);
             FlagComponentMaxReachableStateSetByEvent(localLinkId);
         }
         catch (const std::out_of_range& error)

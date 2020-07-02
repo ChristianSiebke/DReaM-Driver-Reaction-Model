@@ -60,7 +60,6 @@
 #include "Common/lateralSignal.h"
 #include "Common/openScenarioDefinitions.h"
 #include "Common/vector2d.h"
-#include "Common/vehicleComponentEvent.h"
 #include "Interfaces/eventNetworkInterface.h"
 #include "Interfaces/modelInterface.h"
 #include "Interfaces/publisherInterface.h"

@@ -12,6 +12,7 @@
 
 #include "Interfaces/eventNetworkInterface.h"
 #include "Interfaces/scenarioInterface.h"
+#include "Interfaces/stochasticsInterface.h"
 
 namespace SimulationSlave
 {

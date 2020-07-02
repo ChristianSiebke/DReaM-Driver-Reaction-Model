@@ -14,10 +14,12 @@
 
 #include "RemoveAgentsManipulator.h"
 
+#include "Common/Events/basicEvent.h"
+
 RemoveAgentsManipulator::RemoveAgentsManipulator(WorldInterface *world,
                                                  SimulationSlave::EventNetworkInterface *eventNetwork,
                                                  const CallbackInterface *callbacks,
-                                                 const openScenario::EntityAction action,
+                                                 [[maybe_unused]] const openScenario::EntityAction action,
                                                  const std::string &eventName) :
     ManipulatorCommonBase(world,
                           eventNetwork,
@@ -27,25 +29,16 @@ RemoveAgentsManipulator::RemoveAgentsManipulator(WorldInterface *world,
     cycleTime = 100;
 }
 
-void RemoveAgentsManipulator::Trigger(int time)
+void RemoveAgentsManipulator::Trigger([[maybe_unused]] int time)
 {
     for (const auto &eventInterface : GetEvents())
     {
-        auto triggeringEvent = std::dynamic_pointer_cast<ConditionalEvent>(eventInterface);
+        auto triggeringEvent = std::dynamic_pointer_cast<openpass::events::OpenScenarioEvent>(eventInterface);
 
-        for(const auto actorId : triggeringEvent->actingAgents)
+        for (const auto actorId : triggeringEvent->actingAgents.entities)
         {
             world->QueueAgentRemove(world->GetAgent(actorId));
         }
-
-        auto removeAgentsEvent = std::make_shared<ConditionalEvent>(time,
-                                                                    eventName,
-                                                                    COMPONENTNAME,
-                                                                    triggeringEvent->triggeringAgents,
-                                                                    triggeringEvent->actingAgents);
-
-        removeAgentsEvent->SetTriggeringEventId(triggeringEvent->GetId());
-        eventNetwork->InsertEvent(removeAgentsEvent);
     }
 }
 
@@ -53,11 +46,11 @@ EventContainer RemoveAgentsManipulator::GetEvents()
 {
     EventContainer manipulatorSpecificEvents{};
 
-    for (const auto &event : eventNetwork->GetActiveEventCategory(EventDefinitions::EventCategory::OpenSCENARIO))
+    for (const auto &event : eventNetwork->GetEvents(EventDefinitions::EventCategory::OpenSCENARIO))
     {
-        const auto conditionalEvent = std::static_pointer_cast<ConditionalEvent>(event);
+        const auto oscEvent = std::static_pointer_cast<openpass::events::OpenScenarioEvent>(event);
 
-        if(conditionalEvent && conditionalEvent.get()->GetName() == eventName)
+        if (oscEvent && oscEvent.get()->GetName() == eventName)
         {
             manipulatorSpecificEvents.emplace_back(event);
         }

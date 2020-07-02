@@ -38,7 +38,6 @@
 #include "Common/accelerationSignal.h"
 #include "Common/primitiveSignals.h"
 #include "Common/sensorDataSignal.h"
-#include "Common/vehicleComponentEvent.h"
 #include "Interfaces/modelInterface.h"
 #include "Interfaces/parameterInterface.h"
 #include "Interfaces/publisherInterface.h"

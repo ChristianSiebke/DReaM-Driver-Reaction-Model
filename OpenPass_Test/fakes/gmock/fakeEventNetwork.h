@@ -15,14 +15,11 @@
 class FakeEventNetwork : public SimulationSlave::EventNetworkInterface
 {
 public:
-    MOCK_METHOD0(GetActiveEvents, Events *());
-    MOCK_METHOD0(GetArchivedEvents, Events *());
-    MOCK_METHOD1(GetActiveEventCategory, EventContainer(const EventDefinitions::EventCategory));
-    MOCK_METHOD1(RemoveOldEvents, void(int));
-    MOCK_METHOD1(InsertEvent, void(std::shared_ptr<EventInterface>));
-    MOCK_METHOD0(ClearActiveEvents, void());
+    MOCK_METHOD1(GetEvents, EventContainer(const EventDefinitions::EventCategory));
+    MOCK_METHOD1(InsertEvent, void(SharedEvent));
     MOCK_METHOD0(Clear, void());
-    MOCK_METHOD1(Respawn, void(int));
     MOCK_METHOD1(AddCollision, void(const int));
     MOCK_METHOD1(Initialize, void(RunResultInterface *));
+    MOCK_METHOD2(InsertTrigger, void (const std::string &, std::unique_ptr<EventInterface>));
+    MOCK_CONST_METHOD1(GetTrigger, std::vector<EventInterface const *>(const std::string &identifier));
 };

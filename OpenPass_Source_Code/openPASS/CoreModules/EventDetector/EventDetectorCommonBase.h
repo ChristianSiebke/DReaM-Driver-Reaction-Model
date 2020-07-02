@@ -30,20 +30,14 @@
 
 #pragma once
 
-#include <unordered_map>
-
 #include "Interfaces/parameterInterface.h"
 #include "Interfaces/worldInterface.h"
 #include "Interfaces/eventDetectorInterface.h"
 #include "Interfaces/stochasticsInterface.h"
 
-#include "Common/conditionalEvent.h"
-#include "Common/collisionEvent.h"
-#include "Common/vehicleComponentEvent.h"
+#include "Common/Events/basicEvent.h"
 #include "Common/openScenarioDefinitions.h"
 #include "Common/eventDetectorDefinitions.h"
-
-#define SCENARIO_AGENT "ScenarioAgent"
 
 const std::unordered_map<std::string, AgentCategory> agentCategoryMap = {{"Ego", AgentCategory::Ego},
                                                                          {"Scenario", AgentCategory::Scenario},
@@ -67,11 +61,6 @@ public:
     callbacks(callbacks),
     stochastics(stochastics)
     {}
-    EventDetectorCommonBase(const EventDetectorCommonBase&) = delete;
-    EventDetectorCommonBase(EventDetectorCommonBase&&) = delete;
-    EventDetectorCommonBase& operator=(const EventDetectorCommonBase&) = delete;
-    EventDetectorCommonBase& operator=(EventDetectorCommonBase&&) = delete;
-    ~EventDetectorCommonBase() = default;
 
     /*!
     * \brief Triggers the functionality of this class
@@ -81,20 +70,20 @@ public:
     *
     * @param[in]     time    Current time.
     */
-    virtual void Trigger(int time) = 0;
+    void Trigger(int time) override = 0;
 
     /*!
     * \brief Returns the cycle time.
     *
     * @return     cycle time.
     */
-    virtual int GetCycleTime();
+    virtual int GetCycleTime() override;
 
     /*!
     * \brief Resets the initial state of the EventDetector.
     *
     */
-    virtual void Reset();
+    virtual void Reset() override;
 
 protected:
     /*!

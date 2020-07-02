@@ -165,7 +165,7 @@ The class structure of the Manipulators is showed in the following diagram:
 
 * **Trigger:** This manipulator can be triggered by any detector. This has to be parameterized in scenario configuration (see [Input/Output documentation](\ref io_input_scenario)).
 
-* **Event:** Creates an event of type ComponentChangeEvent for the specified component name.
+* **Event:** Creates an event of type ComponentStateChangeEvent for the specified component name.
 
 * **Configuration:**
 ```xml

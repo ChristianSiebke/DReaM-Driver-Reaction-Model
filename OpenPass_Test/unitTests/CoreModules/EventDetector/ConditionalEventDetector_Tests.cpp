@@ -97,10 +97,10 @@ public:
 
     void StoreEvent (std::shared_ptr<EventInterface> inputEvent)
     {
-        event = std::dynamic_pointer_cast<ConditionalEvent>(inputEvent);
+        event = std::dynamic_pointer_cast<openpass::events::OpenScenarioEvent>(inputEvent);
     }
 
-    std::shared_ptr<ConditionalEvent> event{};
+    std::shared_ptr<openpass::events::OpenScenarioEvent> event{};
 };
 
 
@@ -144,8 +144,7 @@ TEST_P(ReachPositionConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
         ON_CALL(mockWorld, GetAgentByName("mockAgent1")).WillByDefault(Return(&mockAgent1));
         ON_CALL(mockWorld, GetAgentByName("mockAgent2")).WillByDefault(Return(&mockAgent2));
 
-        std::vector<int> expectedAgentIds {1, 2};
-        auto referenceEvent = std::make_shared<ConditionalEvent>(0, "", "", std::vector<int>(), expectedAgentIds);
+        TriggeringEntities triggering {};
 
         Invocationcontainer container{};
 
@@ -163,8 +162,8 @@ TEST_P(ReachPositionConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
 
         if(GetParam().numberOfActingAgents > 0)
         {
-            ASSERT_EQ(container.event->triggeringAgents.size(), GetParam().numberOfTriggeringAgents);
-            ASSERT_EQ(container.event->actingAgents.size(), GetParam().numberOfActingAgents);
+            ASSERT_EQ(container.event->GetTriggeringAgents().entities.size(), GetParam().numberOfTriggeringAgents);
+            ASSERT_EQ(container.event->GetActingAgents().entities.size(), GetParam().numberOfActingAgents);
         }
         else
         {

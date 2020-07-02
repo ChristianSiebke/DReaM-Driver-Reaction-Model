@@ -41,21 +41,21 @@ void ConditionalEventDetector::Trigger(int time)
 
 void ConditionalEventDetector::TriggerEventInsertion(int time, const std::vector<const AgentInterface *> triggeringAgents)
 {
-    std::vector<int> triggeringAgentIds{};
+    TriggeringEntities triggering{};
     for (const auto triggeringAgent : triggeringAgents)
     {
-        triggeringAgentIds.push_back(triggeringAgent->GetId());
+        triggering.entities.push_back(triggeringAgent->GetId());
     }
 
     const auto actors = GetActors(triggeringAgents);
-    std::vector<int> actingAgentIds{};
+
+    AffectedEntities acting{};
     for (const auto actingAgent : actors)
     {
-        actingAgentIds.push_back(actingAgent->GetId());
+        acting.entities.push_back(actingAgent->GetId());
     }
 
-    eventNetwork->InsertEvent(std::make_shared<ConditionalEvent>(time, eventDetectorInformation.eventName, COMPONENTNAME, triggeringAgentIds, actingAgentIds));
-
+    eventNetwork->InsertEvent(std::make_shared<openpass::events::OpenScenarioEvent>(time, eventDetectorInformation.eventName, COMPONENTNAME, triggering, acting));
     executionCounter++;
 }
 

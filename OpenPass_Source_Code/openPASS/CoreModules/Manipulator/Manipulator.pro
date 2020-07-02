@@ -1,5 +1,5 @@
 # /*********************************************************************
-# * Copyright (c) 2017, 2018, 2019 in-tech GmbH
+# * Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -22,15 +22,39 @@ SUBDIRS +=  . \
 
 INCLUDEPATH += $$SUBDIRS \
             ../../Common \
+            ../../Common/Events \
             ../../CoreFrameWork/CoreShare \
             ../../Interfaces \
             ..
 
 SOURCES += \
-    $$getFiles(SUBDIRS, cpp) \
-    $$getFiles(SUBDIRS, cc) \
-    $$getFiles(SUBDIRS, c)
+    CollisionManipulator.cpp \
+    ComponentStateChangeManipulator.cpp \
+    LaneChangeManipulator.cpp \
+    ManipulatorCommonBase.cpp \
+    ManipulatorExport.cpp \
+    NoOperationManipulator.cpp \
+    RemoveAgentsManipulator.cpp \
+    SpeedActionManipulator.cpp \
+    TrajectoryManipulator.cpp
+
+EVENT_HEADERS += \
+    ../../Common/Events/componentStateChangeEvent.h \
+    ../../Common/Events/collisionEvent.h \
+    ../../Common/Events/laneChangeEvent.h \
+    ../../Common/Events/speedActionEvent.h \
+    ../../Common/Events/trajectoryEvent.h \
 
 HEADERS += \
-    $$getFiles(SUBDIRS, hpp) \
-    $$getFiles(SUBDIRS, h)
+    $$EVENT_HEADERS \
+    CollisionManipulator.h \
+    ComponentStateChangeManipulator.h \
+    CustomCommandFactory.h \
+    LaneChangeManipulator.h \
+    ManipulatorCommonBase.h \
+    ManipulatorExport.h \
+    ManipulatorGlobal.h \
+    NoOperationManipulator.h \
+    RemoveAgentsManipulator.h \
+    SpeedActionManipulator.h \
+    TrajectoryManipulator.h

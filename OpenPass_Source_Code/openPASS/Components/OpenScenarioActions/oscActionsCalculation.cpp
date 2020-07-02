@@ -10,7 +10,7 @@
 
 #include "oscActionsCalculation.h"
 
-OscActionsCalculation::OscActionsCalculation(const WorldInterface* world) :
+OscActionsCalculation::OscActionsCalculation(const WorldInterface *world) :
     world(world)
 {
 }
@@ -36,11 +36,11 @@ openScenario::Trajectory OscActionsCalculation::CalculateSinusiodalLaneChange(do
     for (double timeSinceStart = 0; timeSinceStart <= deltaTime + 0.5 * timeStep; timeSinceStart += timeStep)
     {
         timeSinceStart = std::min(timeSinceStart, deltaTime); //For reducing rounding errors we also consider an additional point if difference of last time to deltaTime was at most half a timeStep
-        double alpha = timeSinceStart / deltaTime; // Position on the sinus curve (0 = start, 1 = end)
+        double alpha = timeSinceStart / deltaTime;            // Position on the sinus curve (0 = start, 1 = end)
         double s = startPosition.roadPosition.s + alpha * deltaS;
         double t = startT + deltaT * 0.5 * (1 - std::cos(alpha * M_PI));
         double yaw = deltaT / deltaS * M_PI * 0.5 * std::sin(alpha * M_PI);
-        auto worldPosition = world->RoadCoord2WorldCoord({s,t,yaw}, startPosition.roadId);
+        auto worldPosition = world->RoadCoord2WorldCoord({s, t, yaw}, startPosition.roadId);
         openScenario::TrajectoryPoint nextPoint{startTime + timeSinceStart, worldPosition.xPos, worldPosition.yPos, worldPosition.yawAngle};
         trajectory.points.push_back(nextPoint);
     }

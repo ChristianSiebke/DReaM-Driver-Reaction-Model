@@ -18,15 +18,11 @@
 #include "Interfaces/eventNetworkInterface.h"
 #include "Common/openScenarioDefinitions.h"
 #include "CollisionManipulator.h"
-#include "ComponentStateChangeManipulator.h"
-#include "LaneChangeManipulator.h"
 #include "RemoveAgentsManipulator.h"
-#include "NoOperationManipulator.h"
 #include "SpeedActionManipulator.h"
 #include "TrajectoryManipulator.h"
-#include "CustomLaneChangeManipulator.h"
-#include "GazeFollowerManipulator.h"
-
+#include "LaneChangeManipulator.h"
+#include "CustomCommandFactory.h"
 
 const std::string version = "0.0.1";
 static const CallbackInterface* Callbacks = nullptr;
@@ -59,45 +55,18 @@ extern "C" MANIPULATOR_SHARED_EXPORT ManipulatorInterface* OpenPASS_CreateInstan
                 const auto firstSplitInCommand = command.find(' ');
                 const auto commandType = command.substr(0, firstSplitInCommand);
 
-                if (commandType == "SetComponentState")
+                if (auto instance = CustomCommandFactory::Create(commandType,
+                                                                 world,
+                                                                 eventNetwork,
+                                                                 callbacks,
+                                                                 customCommandAction,
+                                                                 manipulatorInformation.eventName))
                 {
-                    return static_cast<ManipulatorInterface*>(new (std::nothrow) ComponentStateChangeManipulator(
-                                                                  world,
-                                                                  eventNetwork,
-                                                                  callbacks,
-                                                                  customCommandAction,
-                                                                  manipulatorInformation.eventName));
+                    return instance;
                 }
-                else if (commandType == "NoOperation")
-                {
-                    return static_cast<ManipulatorInterface*>(new (std::nothrow) NoOperationManipulator(
-                                                                  world,
-                                                                  eventNetwork,
-                                                                  callbacks));
-                }
-                else if (commandType == "SetCustomLaneChange")
-                {
-                    return static_cast<ManipulatorInterface*>(new (std::nothrow) CustomLaneChangeManipulator(
-                                                                  world,
-                                                                  eventNetwork,
-                                                                  callbacks,
-                                                                  customCommandAction,
-                                                                  manipulatorInformation.eventName));
-                }
-                else if (commandType == "SetGazeFollower")
-                {
-                    return static_cast<ManipulatorInterface*>(new (std::nothrow) GazeFollowerManipulator(
-                                                                  world,
-                                                                  eventNetwork,
-                                                                  callbacks,
-                                                                  customCommandAction,
-                                                                  manipulatorInformation.eventName));
-                }
-                else
-                {
-                    Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, "Invalid CustomCommandAction as manipulator.");
-                    return nullptr;
-                }
+
+                Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, "Invalid CustomCommandAction as manipulator.");
+                return nullptr;
             }
             else
             {

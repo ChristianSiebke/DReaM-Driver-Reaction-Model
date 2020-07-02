@@ -101,7 +101,7 @@ bool Scheduler::Run(
             return Scheduler::SUCCESS;
         }
 
-        eventNetwork.ClearActiveEvents();
+        eventNetwork.Clear();
     }
 
     if (!ExecuteTasks(taskList.GetFinalizeTasks()))

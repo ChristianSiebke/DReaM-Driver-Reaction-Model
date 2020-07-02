@@ -19,6 +19,8 @@
 #include "Interfaces/trafficObjectInterface.h"
 #include "Interfaces/worldObjectInterface.h"
 
+#include "Common/Events/collisionEvent.h"
+
 CollisionDetector::CollisionDetector(WorldInterface *world,
                                      SimulationSlave::EventNetworkInterface *eventNetwork,
                                      const CallbackInterface *callbacks,
@@ -775,10 +777,10 @@ bool CollisionDetector::DetectIntersectionOfTwoWorldObjects(const WorldObjectInt
 
 void CollisionDetector::DetectedCollisionWithObject(int time, AgentInterface *agent, const WorldObjectInterface *other)
 {
-    eventNetwork->InsertEvent(std::make_shared<CollisionEvent>(time, COMPONENTNAME, false, agent->GetId(), other->GetId()));
+    eventNetwork->InsertEvent(std::make_shared<openpass::events::CollisionEvent>(time, COMPONENTNAME, false, agent->GetId(), other->GetId()));
 }
 
 void CollisionDetector::DetectedCollisionWithAgent(int time, AgentInterface *agent, AgentInterface *other)
 {
-    eventNetwork->InsertEvent(std::make_shared<CollisionEvent>(time, COMPONENTNAME, true, agent->GetId(), other->GetId()));
+    eventNetwork->InsertEvent(std::make_shared<openpass::events::CollisionEvent>(time, COMPONENTNAME, true, agent->GetId(), other->GetId()));
 }

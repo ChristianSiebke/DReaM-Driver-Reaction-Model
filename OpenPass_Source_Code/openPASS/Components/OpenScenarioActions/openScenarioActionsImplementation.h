@@ -11,88 +11,71 @@
 
 #pragma once
 
-#include "Interfaces/modelInterface.h"
-#include "Common/trajectoryEvent.h"
-#include "Common/laneChangeEvent.h"
-#include "Common/customLaneChangeEvent.h"
-#include "Common/gazeFollowerEvent.h"
-#include "Common/speedActionEvent.h"
-#include "oscActionsCalculation.h"
+#include <map>
 
+#include "Interfaces/modelInterface.h"
+#include "actionTransformRepository.h"
+#include "transformLaneChange.h"
+#include "transformSpeedAction.h"
+#include "transformTrajectory.h"
 /**
-* \brief
+* \brief Relays triggered OpenScenario actions as signals to other components
+*
+* When used in conjunction with autoregistering transformers (\sa actionTransformRepository),
+* the linkIdMapping has to be provided via the parameter interface.
+*
+* That means that when a transformer for e.g. event X is autoregistered,
+* a parameter for mapping X::Topic to a linkId needs to be defined.
+*
+* Syntax:
+* <parameter>
+*     <id>THE_TOPIC</id>
+*     <type>int</type>
+*     <unit/>
+*     <value>THE_LINK_ID</value>
+* </parameter>
 *
 * \ingroup OpenScenarioActions
 */
 class OpenScenarioActionsImplementation : public UnrestrictedEventModelInterface
 {
 public:
-    const std::string COMPONENTNAME = "OpenScenarioActions";
+    static constexpr char COMPONENTNAME[] {"OpenScenarioActions"};
 
     OpenScenarioActionsImplementation(std::string componentName,
-        bool isInit,
-        int priority,
-        int offsetTime,
-        int responseTime,
-        int cycleTime,
-        StochasticsInterface *stochastics,
-        WorldInterface *world,
-        const ParameterInterface *parameters,
-        PublisherInterface * const publisher,
-        const CallbackInterface *callbacks,
-        AgentInterface *agent,
-        SimulationSlave::EventNetworkInterface * const eventNetwork);
-    OpenScenarioActionsImplementation(const OpenScenarioActionsImplementation&) = delete;
-    OpenScenarioActionsImplementation(OpenScenarioActionsImplementation&&) = delete;
-    OpenScenarioActionsImplementation& operator=(const OpenScenarioActionsImplementation&) = delete;
-    OpenScenarioActionsImplementation& operator=(OpenScenarioActionsImplementation&&) = delete;
-    virtual ~OpenScenarioActionsImplementation() = default;
+                                      bool isInit,
+                                      int priority,
+                                      int offsetTime,
+                                      int responseTime,
+                                      int cycleTime,
+                                      StochasticsInterface *stochastics,
+                                      WorldInterface *world,
+                                      const ParameterInterface *parameters,
+                                      PublisherInterface *const publisher,
+                                      const CallbackInterface *callbacks,
+                                      AgentInterface *agent,
+                                      SimulationSlave::EventNetworkInterface *const eventNetwork);
 
-    /*!
-    * \brief Update Inputs
-    *
-    * Function is called by framework when another component delivers a signal over
-    * a channel to this component (scheduler calls update taks of other component).
-    *
-    * Refer to module description for input channels and input ids.
-    *
-    * @param[in]     localLinkId    Corresponds to "id" of "ComponentInput"
-    * @param[in]     data           Referenced signal (copied by sending component)
-    * @param[in]     time           Current scheduling time
-    */
-    virtual void UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time);
-
-    /*!
-    * \brief Update outputs.
-    *
-    * Function is called by framework when this component has to deliver a signal over
-    * a channel to another component (scheduler calls update task of this component).
-    *
-    * Refer to module description for output channels and output ids.
-    *
-    * @param[in]     localLinkId    Corresponds to "id" of "ComponentOutput"
-    * @param[out]    data           Referenced signal (copied by this component)
-    * @param[in]     time           Current scheduling time
-    */
-    virtual void UpdateOutput(int localLinkId, std::shared_ptr<SignalInterface const> &data, int time);
-
-    /*!
-    * \brief Process data within component.
-    *
-    * Function is called by framework when the scheduler calls the trigger task
-    * of this component
-    *
-    * @param[in]     time           Current scheduling time
-    */
-    virtual void Trigger(int time);
+    void UpdateInput(int, const std::shared_ptr<SignalInterface const> &, int) override;
+    void UpdateOutput(int localLinkId, std::shared_ptr<SignalInterface const> &data, int time) override;
+    void Trigger(int time) override;
 
 private:
-    OscActionsCalculation calculation;
-    std::shared_ptr<TrajectoryEvent> trajectoryEvent;
-    std::shared_ptr<CustomLaneChangeEvent> customLaneChangeEvent;
-    std::shared_ptr<GazeFollowerEvent> gazeFollowerEvent;
-    std::shared_ptr<SpeedActionEvent> speedActionEvent;
+    [[noreturn]] void ThrowUnregisteredIdentifier(const std::string identifier);
+    [[noreturn]] void ThrowOnTooManySignals(LinkId localLinkId);
+    [[noreturn]] void ThrowOnInvalidLinkId(LinkId localLinkId);
 
-    double speedActionTargetSpeed {};
-    double speedActionAcceleration {};
+    TransformResults pendingSignals;
+
+    inline static std::vector<bool> registeredActions{
+           ActionTransformRepository::Register(openScenario::transformation::Trajectory::Transform),
+           ActionTransformRepository::Register(openScenario::transformation::LaneChange::Transform),
+           ActionTransformRepository::Register(openScenario::transformation::SpeedAction::Transform),
+       };
+
+    std::map<const std::string, LinkId> linkIdMapping{
+        {openpass::events::TrajectoryEvent::TOPIC, 0},
+        {openpass::events::LaneChangeEvent::TOPIC, 0},
+        {openpass::events::SpeedActionEvent::TOPIC, 3},
+    };
 };

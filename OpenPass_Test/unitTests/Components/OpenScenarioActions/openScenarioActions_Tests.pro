@@ -23,14 +23,12 @@ HEADERS += \
     $$OPEN_SRC/Common/laneChangeEvent.h \
     $$OPEN_SRC/Common/trajectoryEvent.h \
     $$OPEN_SRC/Common/trajectorySignal.h \
-    $$OPEN_SRC/Common/gazeFollowerEvent.h \
-    $$OPEN_SRC/Common/gazeFollowerSignal.h \
-    $$OPEN_SRC/Common/customLaneChangeEvent.h \
-    $$OPEN_SRC/Common/customLaneChangeSignal.h \
     $$UNIT_UNDER_TEST/openScenarioActionsImplementation.h \
     $$UNIT_UNDER_TEST/oscActionsCalculation.h
 
 SOURCES += \
+    $$UNIT_UNDER_TEST/transformLaneChange.cpp \
+    $$UNIT_UNDER_TEST/transformSpeedAction.cpp \
     $$UNIT_UNDER_TEST/openScenarioActionsImplementation.cpp \
     $$UNIT_UNDER_TEST/oscActionsCalculation.cpp \
     openScenarioActions_Tests.cpp

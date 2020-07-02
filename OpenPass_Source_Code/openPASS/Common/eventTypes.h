@@ -15,7 +15,7 @@
 #include <string>
 
 #include "Common/openPassTypes.h"
-#include "Interfaces/dataStoreInterface.h" // TODO: RP: make datastore types (Acyclic, TriggeringEntites,...) explicitly available
+#include "Interfaces/dataStoreInterface.h"
 
 namespace openpass::narrator {
 
@@ -58,33 +58,13 @@ namespace EventDefinitions {
 
 enum struct EventCategory
 {
-    Basic,                // deprecated
-    Conditional,          // deprecated
-    Collision,            // deprecated
-    ComponentStateChange, // deprecated
-    LaneChange,           // deprecated
-    CustomLaneChange,     // deprecated ?
-    SetTrajectory,        // deprecated ?
-    SetGazeFollower,      // deprecated ?
-    SpeedAction,
-    VehicleComponent,     // deprecated
     OpenPASS,
     OpenSCENARIO
 };
 
-namespace helper {
+namespace utils {
 
-static constexpr std::array<const char *, 12> EventCategoryMapping{
-    "Basic",
-    "Conditional",
-    "Collision",
-    "ComponentStateChange",
-    "LaneChange",
-    "CustomLaneChange",
-    "SetTrajectory",
-    "SetGazeFollower",
-    "SpeedAction",
-    "VehicleComponent",
+static constexpr std::array<const char *, 2> EventCategoryMapping{
     "OpenPASS",
     "OpenSCENARIO"};
 
@@ -93,6 +73,6 @@ constexpr auto GetAsString(EventCategory category)
     return EventCategoryMapping[static_cast<size_t>(category)];
 }
 
-} // namespace helper
+} // namespace utils
 
 } //namespace EventDefinitions

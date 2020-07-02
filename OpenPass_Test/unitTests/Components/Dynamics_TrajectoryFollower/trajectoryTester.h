@@ -31,12 +31,7 @@ public:
     static const int CC_LOCAL_LINK_ID = 83;
 
     std::vector<int> fakeActingAgents {1};
-    std::shared_ptr<VehicleComponentEvent> fakeEvent = std::make_shared<VehicleComponentEvent>(0,
-                                                                                               "TrajectoryFollowerActivated",
-                                                                                               DontCare<std::string>(),
-                                                                                               1);
 
-    EventContainer fakeActivatingEventContainer = {fakeEvent};
     EventContainer fakeEmptyEventContainer = {};
 
     NiceMock<FakePublisher> fakePublisher;

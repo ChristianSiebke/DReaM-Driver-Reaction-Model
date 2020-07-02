@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017 - 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -20,8 +20,10 @@
 
 #pragma once
 
-#include "ManipulatorCommonBase.h"
 #include "Common/openScenarioDefinitions.h"
+
+#include "CustomCommandFactory.h"
+#include "ManipulatorCommonBase.h"
 
 //-----------------------------------------------------------------------------
 /** \brief This class toggles an assistance system.
@@ -51,11 +53,15 @@ public:
     *
     * @param[in]     time    Current time.
     */
-    virtual void Trigger(int time);
+    virtual void Trigger(int time) override;
 
 private:
+    bool AssignComponentState(const std::string& componentState);
     EventContainer GetEvents() override;
 
     std::string componentName {""};
     std::string componentStateName {""};
+    ComponentState componentState;
+
+    static inline bool registered  = CustomCommandFactory::Register<ComponentStateChangeManipulator>("SetComponentState");
 };

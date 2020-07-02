@@ -22,22 +22,16 @@
 
 #pragma once
 
-#include <map>
+#include <unordered_map>
 #include <vector>
 
-#include "Common/collisionEvent.h"
-#include "Common/componentStateChangeEvent.h"
-#include "Common/conditionalEvent.h"
-#include "Common/laneChangeEvent.h"
 #include "Common/opExport.h"
-#include "Common/vehicleComponentEvent.h"
 #include "Interfaces/eventNetworkInterface.h"
 #include "Interfaces/runResultInterface.h"
 #include "Interfaces/worldInterface.h"
 #include "eventNetworkDataPublisher.h"
 
 namespace SimulationSlave {
-using namespace EventDefinitions;
 
 //-----------------------------------------------------------------------------
 /** \brief Implements the functionality of the interface.
@@ -53,53 +47,18 @@ public:
     }
 
     /*!
-    * \brief Returns the activeEvents.
-    *
-    * @return	     Map of activ events.
-    */
-    virtual Events *GetActiveEvents() override;
-
-    /*!
-    * \brief Returns the archivedEvents.
-    *
-    * @return	     Map of archived events.
-    */
-    virtual Events *GetArchivedEvents() override;
-
-    /*!
     * \brief Returns the active events of a specific category.
     *
     * @return	     List of active events.
     */
-    virtual EventContainer GetActiveEventCategory(const EventCategory eventCategory) override;
+    virtual EventContainer GetEvents(const EventDefinitions::EventCategory eventCategory) override;
 
     /*!
-    * \brief Removes archived events which are older than a certain time stamp.
-    *
-    * \details Removes all archived events which are older than a certain time stamp.
-    *
-    *
-    * @param[in]     time       Time stamp.
-    */
-    virtual void RemoveOldEvents(int time) override;
-
-    /*!
-    * \brief Inserts an event into the activeEvents.
-    *
-    * \details Inserts an event into the activeEvents if the event has a valid category.
-    *
+    * \brief Inserts an event for the manipulators
     *
     * @param[in]     event    Shared pointer of the event.
     */
-    virtual void InsertEvent(std::shared_ptr<EventInterface> event) override;
-
-    /*!
-    * \brief Empties the active events map and stores them as archived events.
-    *
-    * \details Empties the current active events and inserts them into the archived events.
-    *          This method gets called once per cycle time.
-    */
-    virtual void ClearActiveEvents() override;
+    virtual void InsertEvent(SharedEvent event) override;
 
     /*!
     * \brief Clears the event maps and resets pointers.
@@ -126,20 +85,21 @@ public:
     */
     virtual void Initialize(RunResultInterface *runResult) override;
 
-    /*!
-     * \brief Publishes the event for logging
-     * \param[in] event
-     */
-    void Log(const std::shared_ptr<EventInterface> &event);
+    /// \brief Add a trigger, which is being relayed to the components
+    /// \param topic for identification of the specific trigger
+    /// \param event The according event, which is being sent
+    void InsertTrigger(const std::string &topic, std::unique_ptr<EventInterface> event) override;
+
+    /// \brief Returns a collection of active trigger
+    /// \param topic for identification of the specific triggers
+    /// \return Collection of active trigger
+    std::vector<EventInterface const *> GetTrigger(const std::string &topic) const override;
 
 private:
     openpass::publisher::EventNetworkDataPublisher publisher;
-
-    Events activeEvents;
-    Events archivedEvents;
+    std::unordered_map<std::string, std::vector<std::unique_ptr<EventInterface>>> trigger;
+    std::unordered_map<EventDefinitions::EventCategory, EventContainer> events;
     RunResultInterface *runResult{nullptr};
-
-    int eventId{0};
 };
 
 } //namespace SimulationSlave

@@ -27,10 +27,7 @@ public:
         return Acyclic(name, triggeringEntities, affectedEntities, parameter);
     }
 
-    // Events shall have it's own specialized members (e.g. TrajectoryFile for TrajectoryEvents)
-    // Once we need it as acyclic, we convert it properly
-    // Right now, this is not possible, as we internally use the "old" EventInterface
-    [[deprecated("will be replaced by specializations of the type")]] openpass::datastore::Parameter parameter;
+    openpass::datastore::Parameter parameter;
 };
 
 } // namespace openpass::narrator

@@ -18,7 +18,6 @@
 
 #include <qglobal.h>
 
-#include "Common/componentStateChangeEvent.h"
 #include "Common/trajectorySignal.h"
 #include "Interfaces/parameterInterface.h"
 #include "Interfaces/publisherInterface.h"

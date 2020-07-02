@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017 - 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -8,9 +8,9 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
-
 #pragma once
 
+#include "CustomCommandFactory.h"
 #include "ManipulatorCommonBase.h"
 
 //-----------------------------------------------------------------------------
@@ -24,23 +24,16 @@ class NoOperationManipulator : public ManipulatorCommonBase
 {
 public:
     NoOperationManipulator(WorldInterface *world,
-                         SimulationSlave::EventNetworkInterface *eventNetwork,
-                         const CallbackInterface *callbacks);
+                           SimulationSlave::EventNetworkInterface *eventNetwork,
+                           const CallbackInterface *callbacks,
+                           const openScenario::CustomCommandAction action,
+                           const std::string &eventName);
 
     virtual ~NoOperationManipulator() = default;
-
-    /*!
-    * \brief Triggers no functionality
-    *
-    * \details Trigger gets called each cycle timestep.
-    * This function is repsonsible for creating events
-    *
-    * @param[in]     time    Current time.
-    */
-    virtual void Trigger(int time);
+    virtual void Trigger(int time) override;
 
 private:
     EventContainer GetEvents() override;
+
+    static inline bool registered  = CustomCommandFactory::Register<NoOperationManipulator>("NoOperation");
 };
-
-

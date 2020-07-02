@@ -18,24 +18,21 @@ DEFINES += EVENT_DETECTOR_LIBRARY
 CONFIG += OPENPASS_LIBRARY
 include(../../../global.pri)
 
-SUBDIRS +=  .
-
-INCLUDEPATH += $$SUBDIRS \
+INCLUDEPATH += . \
             ../../Interfaces \
             ../../CoreFramework/CoreShare \
             ../../Common \
             ..
 
 SOURCES += \
-    $$getFiles(SUBDIRS, cpp) \
-    $$getFiles(SUBDIRS, cc) \
-    $$getFiles(SUBDIRS, c) \
+    CollisionDetector.cpp \
+    ConditionalEventDetector.cpp \
+    EventDetectorCommonBase.cpp \
+    EventDetectorExport.cpp \
     ../../CoreFramework/CoreShare/log.cpp \
     ../../Common/eventDetectorDefinitions.cpp
 
 HEADERS += \
-    $$getFiles(SUBDIRS, hpp) \
-    $$getFiles(SUBDIRS, h) \
-    ../../CoreFramework/CoreShare/log.h \
     ../../Common/vector2d.h \
-    ../../Common/eventDetectorDefinitions.h
+    ../../Common/eventDetectorDefinitions.h \
+    ../../CoreFramework/CoreShare/log.h

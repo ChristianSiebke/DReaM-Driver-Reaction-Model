@@ -22,6 +22,7 @@
 #include "componentControllerImplementation.h"
 #include "Common/agentCompToCompCtrlSignal.h"
 #include "Common/compCtrlToAgentCompSignal.h"
+#include "Common/Events/componentStateChangeEvent.h"
 
 using ::testing::_;
 using ::testing::DontCare;
@@ -154,7 +155,7 @@ TEST(StateManager_GetMaxReachableStateOfComponentAtLocalLinkId, ComponentStateEq
     componentStateInformation->AddStateCondition(std::move(componentStateEquality), ComponentState::Acting);
     stateManager.AddComponent(localLinkId, componentStateInformation);
 
-    std::list<std::shared_ptr<ComponentChangeEvent const>> placeholderEventList;
+    std::vector<const openpass::events::ComponentStateChangeEvent *> placeholderEventList {};
     stateManager.UpdateMaxReachableStatesForRegisteredComponents(placeholderEventList);
 
     ASSERT_EQ(stateManager.GetMaxReachableStateOfComponentAtLocalLinkId(localLinkId), ComponentState::Acting);
@@ -175,7 +176,7 @@ TEST(StateManager_GetMaxReachableStateOfComponentAtLocalLinkId, ComponentStateEq
     componentStateInformation->AddStateCondition(std::move(componentStateEquality), ComponentState::Acting);
     stateManager.AddComponent(localLinkId, componentStateInformation);
 
-    std::list<std::shared_ptr<ComponentChangeEvent const>> placeholderEventList;
+    std::vector<const openpass::events::ComponentStateChangeEvent *> placeholderEventList {};
     stateManager.UpdateMaxReachableStatesForRegisteredComponents(placeholderEventList);
 
     ASSERT_EQ(stateManager.GetMaxReachableStateOfComponentAtLocalLinkId(localLinkId), ComponentState::Undefined);
@@ -208,7 +209,7 @@ TEST(StateManager_GetMaxReachableStateOfComponentAtLocalLinkId, TwoConditionsFul
     stateManager.AddComponent(localLinkIdA, testComponentAStateInformation);
     stateManager.AddComponent(localLinkIdB, testComponentBStateInformation);
 
-    std::list<std::shared_ptr<ComponentChangeEvent const>> placeholderEventList;
+    std::vector<const openpass::events::ComponentStateChangeEvent *> placeholderEventList {};
     stateManager.UpdateMaxReachableStatesForRegisteredComponents(placeholderEventList);
 
     ASSERT_EQ(stateManager.GetMaxReachableStateOfComponentAtLocalLinkId(localLinkIdA), ComponentState::Armed);
@@ -231,16 +232,21 @@ TEST(StateManager_GetMaxReachableStateOfComponentAtLocalLinkId, ComponentMaxStat
     componentStateInformation->AddStateCondition(std::move(componentStateEquality), ComponentState::Acting);
     stateManager.AddComponent(localLinkId, componentStateInformation);
 
-    const std::vector<int> actingAgentIds = {0};
+    TriggeringEntities triggering {};
 
-    std::list<std::shared_ptr<ComponentChangeEvent const>> placeholderEventList;
-    placeholderEventList.push_back(std::make_shared<ComponentChangeEvent const>(0,
-                                                                                "",
-                                                                                "",
-                                                                                testing::DontCare<std::vector<int>>(),
-                                                                                actingAgentIds,
-                                                                                componentName,
-                                                                                "Disabled"));
+    openpass::type::AgentId agentId {0};
+    AffectedEntities affected {};
+    affected.entities.push_back(agentId);
+
+    auto event = std::make_unique<openpass::events::ComponentStateChangeEvent const>(0,
+                                                                   "",
+                                                                   "",
+                                                                triggering,
+                                                                   affected,
+                                                                   componentName,
+                                                                   ComponentState::Disabled);
+    std::vector<const openpass::events::ComponentStateChangeEvent *> placeholderEventList {};
+    placeholderEventList.push_back(event.get());
     stateManager.UpdateMaxReachableStatesForRegisteredComponents(placeholderEventList);
 
     ASSERT_EQ(stateManager.GetMaxReachableStateOfComponentAtLocalLinkId(localLinkId), ComponentState::Disabled);

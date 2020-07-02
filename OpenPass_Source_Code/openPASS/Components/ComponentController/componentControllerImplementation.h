@@ -91,6 +91,11 @@ public:
     virtual void Trigger(int time);
 
 private:
+    /// \brief Check if the associated agent is within the affected agents of the given id
+    /// \param event
+    /// \return True if affected
+    bool IsAgentAffectedByEvent(EventInterface const * event);
+
     template <typename T, typename Signal>
     const std::shared_ptr<T const> SignalCast(Signal&& signal, int linkId)
     {
