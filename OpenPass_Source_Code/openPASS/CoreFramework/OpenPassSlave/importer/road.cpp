@@ -30,6 +30,11 @@ RoadLane::~RoadLane()
         delete item;
     }
 
+    for (RoadLaneWidth *item : borders)
+    {
+        delete item;
+    }
+
     for (auto roadMark : roadMarks)
     {
         delete roadMark;
@@ -45,6 +50,19 @@ bool RoadLane::AddWidth(double sOffset, double a, double b, double c, double d)
     }
 
     widths.push_back(laneWidth);
+
+    return true;
+}
+
+bool RoadLane::AddBorder(double sOffset, double a, double b, double c, double d)
+{
+    RoadLaneWidth *laneWidth = new (std::nothrow) RoadLaneWidth(sOffset, a, b, c, d);
+    if (!laneWidth)
+    {
+        return false;
+    }
+
+    borders.push_back(laneWidth);
 
     return true;
 }

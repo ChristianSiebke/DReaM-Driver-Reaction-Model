@@ -147,6 +147,19 @@ class RoadLane : public RoadLaneInterface
     bool AddWidth(double sOffset, double a, double b, double c, double d) override;
 
     //-----------------------------------------------------------------------------
+    //! Adds a new polynomial calculating the border of a lane to a road lane.
+    //!
+    //! @param[in]  sOffset             Offset relative to the preceding lane section
+    //! @param[in]  a                   Constant factor from the polynomial
+    //! @param[in]  b                   Linear factor from the polynomial
+    //! @param[in]  c                   Quadratic factor from the polynomial
+    //! @param[in]  d                   Cubic factor from the polynomial
+    //!
+    //! @return                         False if an error occurred, true otherwise
+    //-----------------------------------------------------------------------------
+    bool AddBorder(double sOffset, double a, double b, double c, double d) override;
+
+    //-----------------------------------------------------------------------------
     //! Adds the ID of a successor lane to a road lane.
     //!
     //! @param[in]  id                  ID of a successor lane
@@ -192,6 +205,16 @@ class RoadLane : public RoadLaneInterface
     const std::list<RoadLaneWidth *> &GetWidths() const override
     {
         return widths;
+    }
+
+    //-----------------------------------------------------------------------------
+    //! Returns the borders of the road lane.
+    //!
+    //! @return                         RoadLaneTypeType of the road lane
+    //-----------------------------------------------------------------------------
+    const std::list<RoadLaneWidth *> &GetBorders() const override
+    {
+        return borders;
     }
 
     //-----------------------------------------------------------------------------
@@ -278,6 +301,7 @@ class RoadLane : public RoadLaneInterface
     RoadLaneType type;
     // using lists to indicate empty predecessor/successor
     std::list<RoadLaneWidth *> widths;
+    std::list<RoadLaneWidth *> borders;
     std::list<int> predecessor;
     std::list<int> successor;
     bool inDirection = true;

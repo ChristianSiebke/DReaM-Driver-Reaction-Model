@@ -17,6 +17,7 @@ class FakeRoadLane : public RoadLaneInterface
 {
   public:
     MOCK_METHOD5(AddWidth, bool (double sOffset, double a, double b, double c, double d));
+    MOCK_METHOD5(AddBorder, bool (double sOffset, double a, double b, double c, double d));
     MOCK_METHOD6(AddRoadMark, bool (double sOffset,
                                     RoadLaneRoadDescriptionType descType,
                                     RoadLaneRoadMarkType roadMark,
@@ -28,6 +29,7 @@ class FakeRoadLane : public RoadLaneInterface
     MOCK_CONST_METHOD0(GetId, int ());
     MOCK_CONST_METHOD0(GetType, RoadLaneType ());
     MOCK_CONST_METHOD0(GetWidths, const std::list<RoadLaneWidth*> &());
+    MOCK_CONST_METHOD0(GetBorders, const std::list<RoadLaneWidth*> &());
     MOCK_CONST_METHOD0(GetSuccessor, const std::list<int> &());
     MOCK_CONST_METHOD0(GetPredecessor, const std::list<int> &());
     MOCK_METHOD1(SetInDirection, void (bool inDirection));

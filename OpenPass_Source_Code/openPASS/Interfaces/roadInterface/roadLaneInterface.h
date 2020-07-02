@@ -53,6 +53,23 @@ public:
                   double d) = 0;
 
     //-----------------------------------------------------------------------------
+    //! Adds a new polynomial calculating the border of a lane to a road lane.
+    //!
+    //! @param[in]  sOffset             Offset relative to the preceding lane section
+    //! @param[in]  a                   Constant factor from the polynomial
+    //! @param[in]  b                   Linear factor from the polynomial
+    //! @param[in]  c                   Quadratic factor from the polynomial
+    //! @param[in]  d                   Cubic factor from the polynomial
+    //!
+    //! @return                         False if an error occurred, true otherwise
+    //-----------------------------------------------------------------------------
+    virtual bool AddBorder(double sOffset,
+                  double a,
+                  double b,
+                  double c,
+                  double d) = 0;
+
+    //-----------------------------------------------------------------------------
     //! Adds a new roadmark to a road lane.
     //!
     //! @param[in]  sOffset             Offset relative to the preceding lane section
@@ -108,6 +125,13 @@ public:
     //! @return                         RoadLaneTypeType of the road lane
     //-----------------------------------------------------------------------------
     virtual const std::list<RoadLaneWidth*> &GetWidths() const = 0;
+
+    //-----------------------------------------------------------------------------
+    //! Returns the widths of the road lane.
+    //!
+    //! @return                         RoadLaneTypeType of the road lane
+    //-----------------------------------------------------------------------------
+    virtual const std::list<RoadLaneWidth*> &GetBorders() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the successors of a road lane, can have at most one element.

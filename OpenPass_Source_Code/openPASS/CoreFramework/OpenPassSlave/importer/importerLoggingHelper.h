@@ -292,6 +292,7 @@ namespace openpass::importer::xml::scenarioImporter::attribute
 namespace openpass::importer::xml::sceneryImporter::tag
 {
     constexpr char arc[] {"arc"};
+    constexpr char border[] {"border"};
     constexpr char center[] {"center"};
     constexpr char connection[] {"connection"};
     constexpr char dependency[] {"dependency"};

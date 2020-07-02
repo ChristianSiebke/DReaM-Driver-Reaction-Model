@@ -70,31 +70,57 @@ void SceneryImporter::ParseLanes(QDomElement& rootElement,
 
         if (0 != roadLaneId) // skip center lanes
         {
-            QDomElement roadLaneWidthElement;
+            QDomElement widthOrBorderElement;
             // at least one width element necessary
-            ThrowIfFalse(SimulationCommon::GetFirstChildElement(roadLaneElement, TAG::width, roadLaneWidthElement),
-                          roadLaneElement,"Tag " + std::string(TAG::width) + " is missing.");
-            while (!roadLaneWidthElement.isNull())
+            if(SimulationCommon::GetFirstChildElement(roadLaneElement, TAG::width, widthOrBorderElement))
             {
-                double roadLaneSOffset, roadLaneA, roadLaneB, roadLaneC, roadLaneD;
-                ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadLaneWidthElement, ATTRIBUTE::sOffset, roadLaneSOffset),
-                             roadLaneWidthElement, "Attribute " + std::string(ATTRIBUTE::sOffset) + " is missing.");
-                ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadLaneWidthElement, ATTRIBUTE::a, roadLaneA),
-                             roadLaneWidthElement, "Attribute " + std::string(ATTRIBUTE::a) + " is missing.");
-                ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadLaneWidthElement, ATTRIBUTE::b, roadLaneB),
-                             roadLaneWidthElement, "Attribute " + std::string(ATTRIBUTE::b) + " is missing.");
-                ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadLaneWidthElement, ATTRIBUTE::c, roadLaneC),
-                             roadLaneWidthElement, "Attribute " + std::string(ATTRIBUTE::c) + " is missing.");
-                ThrowIfFalse(SimulationCommon::ParseAttributeDouble(roadLaneWidthElement, ATTRIBUTE::d, roadLaneD),
-                             roadLaneWidthElement, "Attribute " + std::string(ATTRIBUTE::d) + " is missing.");
+                while (!widthOrBorderElement.isNull())
+                {
+                    double sOffset, a, b, c, d;
+                    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(widthOrBorderElement, ATTRIBUTE::sOffset, sOffset),
+                                 widthOrBorderElement, "Attribute " + std::string(ATTRIBUTE::sOffset) + " is missing.");
+                    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(widthOrBorderElement, ATTRIBUTE::a, a),
+                                 widthOrBorderElement, "Attribute " + std::string(ATTRIBUTE::a) + " is missing.");
+                    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(widthOrBorderElement, ATTRIBUTE::b, b),
+                                 widthOrBorderElement, "Attribute " + std::string(ATTRIBUTE::b) + " is missing.");
+                    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(widthOrBorderElement, ATTRIBUTE::c, c),
+                                 widthOrBorderElement, "Attribute " + std::string(ATTRIBUTE::c) + " is missing.");
+                    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(widthOrBorderElement, ATTRIBUTE::d, d),
+                                 widthOrBorderElement, "Attribute " + std::string(ATTRIBUTE::d) + " is missing.");
 
-                roadLane->AddWidth(roadLaneSOffset,
-                                   roadLaneA,
-                                   roadLaneB,
-                                   roadLaneC,
-                                   roadLaneD);
+                    roadLane->AddWidth(sOffset,
+                                       a,
+                                       b,
+                                       c,
+                                       d);
 
-                roadLaneWidthElement = roadLaneWidthElement.nextSiblingElement(TAG::width);
+                    widthOrBorderElement = widthOrBorderElement.nextSiblingElement(TAG::width);
+                }
+            }
+            else if (SimulationCommon::GetFirstChildElement(roadLaneElement, TAG::border, widthOrBorderElement))
+            {
+                while (!widthOrBorderElement.isNull())
+                {
+                    double sOffset, a, b, c, d;
+                    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(widthOrBorderElement, ATTRIBUTE::sOffset, sOffset),
+                                 widthOrBorderElement, "Attribute " + std::string(ATTRIBUTE::sOffset) + " is missing.");
+                    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(widthOrBorderElement, ATTRIBUTE::a, a),
+                                 widthOrBorderElement, "Attribute " + std::string(ATTRIBUTE::a) + " is missing.");
+                    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(widthOrBorderElement, ATTRIBUTE::b, b),
+                                 widthOrBorderElement, "Attribute " + std::string(ATTRIBUTE::b) + " is missing.");
+                    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(widthOrBorderElement, ATTRIBUTE::c, c),
+                                 widthOrBorderElement, "Attribute " + std::string(ATTRIBUTE::c) + " is missing.");
+                    ThrowIfFalse(SimulationCommon::ParseAttributeDouble(widthOrBorderElement, ATTRIBUTE::d, d),
+                                 widthOrBorderElement, "Attribute " + std::string(ATTRIBUTE::d) + " is missing.");
+
+                    roadLane->AddBorder(sOffset,
+                                       a,
+                                       b,
+                                       c,
+                                       d);
+
+                    widthOrBorderElement = widthOrBorderElement.nextSiblingElement(TAG::border);
+                }
             }
         }
 

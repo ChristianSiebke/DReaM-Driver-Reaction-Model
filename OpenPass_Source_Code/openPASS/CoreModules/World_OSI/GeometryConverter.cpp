@@ -269,7 +269,7 @@ BorderPoints GeometryConverter::CalculateBorderPoints(const RoadLaneSectionInter
 
     // start with positive lanes
     // 1, 2, 3... -> order necessary to accumulate right starting from center
-    double accumulatedWidth = 0.0;
+    double borderOffset = 0.0;
     for (int laneId = 1; laneId <= maxLaneId; laneId++)
     {
         const auto laneIter = roadLanes.find(laneId);
@@ -277,16 +277,29 @@ BorderPoints GeometryConverter::CalculateBorderPoints(const RoadLaneSectionInter
         {
             throw std::runtime_error("Missing lane with id "+ std::to_string(laneId));
         }
-        const double laneWidth = CalculateLaneWidth(laneIter->second, sectionOffset);
-        accumulatedWidth += laneWidth;
-        const double x = centerPoint.x - accumulatedWidth * sin_hdg;
-        const double y = centerPoint.y + accumulatedWidth * cos_hdg;
+
+        auto lane = laneIter->second;
+        if (!lane->GetWidths().empty())
+        {
+            borderOffset += CalculateLaneWidth(lane, sectionOffset);
+        }
+        else if (!lane->GetBorders().empty())
+        {
+            borderOffset = CalculateLaneBorder(lane, sectionOffset);
+        }
+        else
+        {
+            throw std::runtime_error("RoadLane requires either Width or Border definition.");
+        }
+
+        const double x = centerPoint.x - borderOffset * sin_hdg;
+        const double y = centerPoint.y + borderOffset * cos_hdg;
         points.emplace_front(Common::Vector2d{x,y}, roadLanes.at(laneId));
     }
 
     points.emplace_back(centerPoint, roadLanes.at(0));
 
-    accumulatedWidth = 0.0;
+    borderOffset = 0.0;
     for (int laneId = -1; laneId >= minLaneId; laneId--)
     {
         const auto laneIter = roadLanes.find(laneId);
@@ -294,10 +307,23 @@ BorderPoints GeometryConverter::CalculateBorderPoints(const RoadLaneSectionInter
         {
             throw std::runtime_error("Missing lane with id "+ std::to_string(laneId));
         }
-        const double laneWidth = CalculateLaneWidth(laneIter->second, sectionOffset);
-        accumulatedWidth += laneWidth;
-        const double x = centerPoint.x + accumulatedWidth * sin_hdg;
-        const double y = centerPoint.y - accumulatedWidth * cos_hdg;
+
+        auto lane = laneIter->second;
+        if (!lane->GetWidths().empty())
+        {
+            borderOffset += CalculateLaneWidth(lane, sectionOffset);
+        }
+        else if (!lane->GetBorders().empty())
+        {
+            borderOffset = CalculateLaneBorder(lane, sectionOffset);
+        }
+        else
+        {
+            throw std::runtime_error("RoadLane requires either Width or Border definition.");
+        }
+
+        const double x = centerPoint.x + borderOffset * sin_hdg;
+        const double y = centerPoint.y - borderOffset * cos_hdg;
         points.emplace_back(Common::Vector2d{x,y}, roadLanes.at(laneId));
     }
 
@@ -381,15 +407,15 @@ const RoadElevation* GeometryConverter::GetRelevantRoadElevation(double roadOffs
     }
 }
 
-const RoadLaneWidth* GeometryConverter::GetRelevantRoadLaneWidth(double sectionOffset, const RoadLaneInterface *roadLane)
+const RoadLaneWidth* GeometryConverter::GetRelevantRoadLaneWidth(double sectionOffset, const std::list<RoadLaneWidth*> widthsOrBorders)
 {
-    auto roadLaneIt = roadLane->GetWidths().begin();
-    while(roadLane->GetWidths().end() != roadLaneIt)
+    auto roadLaneIt = widthsOrBorders.begin();
+    while(widthsOrBorders.end() != roadLaneIt)
     {
         if((*roadLaneIt)->GetSOffset() <= sectionOffset)
         {
             auto roadLaneNextIt = std::next(roadLaneIt);
-            if(roadLane->GetWidths().end() == roadLaneNextIt ||
+            if(widthsOrBorders.end() == roadLaneNextIt ||
                     (*roadLaneNextIt)->GetSOffset() > sectionOffset)
             {
                 break;
@@ -399,7 +425,7 @@ const RoadLaneWidth* GeometryConverter::GetRelevantRoadLaneWidth(double sectionO
         ++roadLaneIt;
     }
 
-    if(roadLaneIt == roadLane->GetWidths().end())
+    if(roadLaneIt == widthsOrBorders.end())
     {
         return nullptr;
     }
@@ -481,7 +507,7 @@ const RoadLaneRoadMark* GeometryConverter::GetRelevantRoadLaneRoadMark(double se
 
 double GeometryConverter::CalculateLaneWidth(const RoadLaneInterface *roadLane, double sectionOffset)
 {
-    const RoadLaneWidth* roadLaneWidth = GetRelevantRoadLaneWidth(sectionOffset, roadLane);
+    const RoadLaneWidth* roadLaneWidth = GetRelevantRoadLaneWidth(sectionOffset, roadLane->GetWidths());
 
     if(!roadLaneWidth)
     {
@@ -489,6 +515,18 @@ double GeometryConverter::CalculateLaneWidth(const RoadLaneInterface *roadLane, 
     }
 
     return CalculateWidthAtSectionPosition(roadLaneWidth, sectionOffset);
+}
+
+double GeometryConverter::CalculateLaneBorder(const RoadLaneInterface *roadLane, double sectionOffset)
+{
+    const RoadLaneWidth* roadLaneBorder = GetRelevantRoadLaneWidth(sectionOffset, roadLane->GetBorders());
+
+    if(!roadLaneBorder)
+    {
+        throw std::runtime_error("No lane border given");
+    }
+
+    return CalculateWidthAtSectionPosition(roadLaneBorder, sectionOffset);
 }
 
 double GeometryConverter::CalculateLaneOffset(const RoadInterface* road, double roadPosition)

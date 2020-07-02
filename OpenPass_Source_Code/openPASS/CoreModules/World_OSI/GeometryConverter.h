@@ -186,6 +186,15 @@ double CalculateSlope(RoadInterface *road, double offset);
 //-----------------------------------------------------------------------------
 double CalculateLaneWidth(const RoadLaneInterface* roadLane, double sectionOffset);
 
+//-----------------------------------------------------------------------------
+//! Calculates the border of the provided lane.
+//!
+//! @param[in]  roadLane            OpenDrive road lane (for width information)
+//! @param[in]  sectionOffset       Offset within the OpenDrive section
+//! @return                         Lane border, 0.0 if no width was specified
+//-----------------------------------------------------------------------------
+double CalculateLaneBorder(const RoadLaneInterface* roadLane, double sectionOffset);
+
 double CalculateLaneOffset(const RoadInterface* road, double roadPosition);
 
 //-----------------------------------------------------------------------------
@@ -221,10 +230,10 @@ const RoadElevation* GetRelevantRoadElevation(double sectionOffset, RoadInterfac
 //! Get the RoadLaneWidth which is relevant for the given position
 //!
 //! @param[in] sectionOffset    position w.r.t. start of section
-//! @param[in] roadLane         the RoadLaneInterface input data
+//! @param[in] widthsOrBorders        container with all potential RoadLaneWidth pointers
 //! @return                     relevant RoadLaneWidth
 //-----------------------------------------------------------------------------
-const RoadLaneWidth* GetRelevantRoadLaneWidth(double sectionOffset, const RoadLaneInterface* roadLane);
+const RoadLaneWidth* GetRelevantRoadLaneWidth(double sectionOffset, const std::list<RoadLaneWidth*> widthsOrBorders);
 
 const RoadLaneOffset* GetRelevantRoadLaneOffset(double roadOffset, const RoadInterface* road);
 

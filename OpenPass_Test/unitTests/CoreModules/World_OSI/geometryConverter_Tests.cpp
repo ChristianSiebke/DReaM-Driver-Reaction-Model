@@ -65,6 +65,49 @@ TEST(GeometryConverter_UnitTests, CalculateJointOnlyRightLanes)
     ASSERT_THAT(result.points.at(2).lane, Eq(&laneMinus2));
 }
 
+TEST(GeometryConverter_UnitTests, CalculateJointOnlyRightLanesWithBorders)
+{
+    constexpr double geometryOffset = 123.4;
+    constexpr double roadOffset = 12.3;
+    constexpr double roadSectionStart = 1.2;
+
+    FakeRoadLaneSection section;
+    FakeOdRoad road;
+    std::list<RoadLaneOffset *> laneOffsets;
+    ON_CALL(road, GetLaneOffsets()).WillByDefault(ReturnRef(laneOffsets));
+
+    FakeRoadLane lane0;
+    FakeRoadLane laneMinus1;
+    FakeRoadLane laneMinus2;
+
+    std::list<RoadLaneWidth*> emptyWidths {};
+    RoadLaneWidth widthMinus1{0, 3.0, 0.0, 0.0, 0.0};
+    std::list<RoadLaneWidth*> widthsMinus1{&widthMinus1};
+    ON_CALL(laneMinus1, GetWidths()).WillByDefault(ReturnRef(emptyWidths));
+    ON_CALL(laneMinus1, GetBorders()).WillByDefault(ReturnRef(widthsMinus1));
+    RoadLaneWidth widthMinus2{0, 7.0, 0.0, 0.0, 0.0};
+
+    std::list<RoadLaneWidth*> widthsMinus2{&widthMinus2};
+    ON_CALL(laneMinus2, GetWidths()).WillByDefault(ReturnRef(emptyWidths));
+    ON_CALL(laneMinus2, GetBorders()).WillByDefault(ReturnRef(widthsMinus2));
+    std::map<int, RoadLaneInterface*> lanes{{0, &lane0}, {-1, &laneMinus1}, {-2, &laneMinus2}};
+    ON_CALL(section, GetLanes()).WillByDefault(ReturnRef(lanes));
+
+    FakeRoadGeometry geometry;
+    ON_CALL(geometry, GetCoord(geometryOffset,_)).WillByDefault(Return(Common::Vector2d{101.0, 102.0}));
+
+    auto result = GeometryConverter::CalculateBorderPoints(&section, &road, &geometry, geometryOffset, roadOffset, roadSectionStart);
+
+    ASSERT_THAT(result.s, Eq(roadOffset));
+    ASSERT_THAT(result.points, SizeIs(3));
+    ASSERT_THAT(result.points.at(0).point, Eq(Common::Vector2d{101.0, 102.0}));
+    ASSERT_THAT(result.points.at(0).lane, Eq(&lane0));
+    ASSERT_THAT(result.points.at(1).point, Eq(Common::Vector2d{101.0, 99.0}));
+    ASSERT_THAT(result.points.at(1).lane, Eq(&laneMinus1));
+    ASSERT_THAT(result.points.at(2).point, Eq(Common::Vector2d{101.0, 95.0}));
+    ASSERT_THAT(result.points.at(2).lane, Eq(&laneMinus2));
+}
+
 TEST(GeometryConverter_UnitTests, CalculateJointOnlyLeftLanes)
 {
     constexpr double geometryOffset = 123.4;
