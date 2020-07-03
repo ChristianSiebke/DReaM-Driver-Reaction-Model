@@ -632,8 +632,3 @@ TEST(BasicDataStore_Constants, Wildcard_IsSize1)
 {
     ASSERT_THAT(WILDCARD, SizeIs(1));
 }
-
-TEST(BasicDataStore_Constants, Separator_IsSize1)
-{
-    ASSERT_THAT(SEPARATOR, SizeIs(1));
-}

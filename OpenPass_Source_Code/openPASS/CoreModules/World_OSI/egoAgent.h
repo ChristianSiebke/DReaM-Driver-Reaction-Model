@@ -74,7 +74,7 @@ public:
 
     std::optional<double> GetLaneDirection(double distance, int relativeLane = 0) const override;
 
-    GlobalRoadPosition GetMainLocatePosition () const override;
+    const GlobalRoadPosition& GetMainLocatePosition() const override;
 
     std::optional<GlobalRoadPosition> GetReferencePointPosition() const override;
 

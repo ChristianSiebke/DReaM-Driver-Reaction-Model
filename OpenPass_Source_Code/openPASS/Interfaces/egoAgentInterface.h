@@ -230,7 +230,7 @@ public:
     virtual std::optional<double> GetLaneDirection(double distance, int relativeLane = 0) const = 0;
 
     //! Returns the position of the MainLaneLocator (w.r.t. the OpenDrive direction of the road)
-    virtual GlobalRoadPosition GetMainLocatePosition() const = 0;
+    virtual const GlobalRoadPosition& GetMainLocatePosition() const = 0;
 
     //! Returns the position of the ReferencePoint if it is on the route
     virtual std::optional<GlobalRoadPosition> GetReferencePointPosition() const = 0;

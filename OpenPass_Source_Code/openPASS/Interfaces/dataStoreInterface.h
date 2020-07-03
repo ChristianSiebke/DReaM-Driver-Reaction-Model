@@ -22,15 +22,17 @@
 #include "Common/openPassTypes.h"
 #include "Common/runtimeInformation.h"
 #include "Interfaces/callbackInterface.h"
+#include "Common/commonTools.h"
 
 namespace openpass::datastore {
 
 using Key = openpass::type::FlatParameterKey;
 using Value = openpass::type::FlatParameterValue;
 using Parameter = openpass::type::FlatParameter;
+using Tokens = std::vector<Key>;
 
 static const std::string WILDCARD = "*";    //!< Wildcard to match any token inside a DataStore key string. Length of 1 is mandatory.
-static const std::string SEPARATOR = "/";   //!< Separator for hierarchical DataStore key strings. Length of 1 is mandatory.
+static constexpr char SEPARATOR = '/';   //!< Separator for hierarchical DataStore key strings. Length of 1 is mandatory.
 
 /*!
  * \brief Contains the triggering entities of an acyclic
@@ -139,6 +141,7 @@ struct CyclicRow
         timestamp{ts},
         entityId{id},
         key{k},
+        tokens{CommonHelper::TokenizeString(key, SEPARATOR)},
         value{v}
     {
     }
@@ -154,6 +157,7 @@ struct CyclicRow
     openpass::type::Timestamp timestamp;     //!< Simulation time timestamp [ms]
     openpass::type::EntityId entityId;       //!< Id of the entity (agent or object)
     Key key;                                 //!< Key (topic) associated with the data
+    Tokens tokens;                           //!< Tokenized representation of key
     Value value;                             //!< Data value
 };
 

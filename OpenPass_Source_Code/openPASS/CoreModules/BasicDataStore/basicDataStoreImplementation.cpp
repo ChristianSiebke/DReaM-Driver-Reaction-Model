@@ -123,7 +123,7 @@ std::unique_ptr<CyclicResultInterface> BasicDataStoreImplementation::GetIndexed<
     {
         const auto& storeValue = cyclicStore.at(it->second);
 
-        if (TokensMatch(tokens, Tokens{storeValue.key}))
+        if (TokensMatch(tokens, storeValue.tokens))
         {
             rowRefs.emplace_back(storeValue);
         }
@@ -143,7 +143,7 @@ std::unique_ptr<CyclicResultInterface> BasicDataStoreImplementation::GetIndexed<
     {
         const auto& storeValue = cyclicStore.at(it->second);
 
-        if (TokensMatch(tokens, CommonHelper::TokenizeString(storeValue.key, SEPARATOR[0])))
+        if (TokensMatch(tokens, storeValue.tokens))
         {
             rowRefs.emplace_back(storeValue);
         }
@@ -164,7 +164,7 @@ std::unique_ptr<CyclicResultInterface> BasicDataStoreImplementation::GetIndexed<
     {
         const auto& storeValue = cyclicStore.at(it->second);
 
-        if (TokensMatch(tokens, CommonHelper::TokenizeString(storeValue.key, SEPARATOR[0])))
+        if (TokensMatch(tokens, storeValue.tokens))
         {
             rowRefs.emplace_back(storeValue);
         }
@@ -175,12 +175,12 @@ std::unique_ptr<CyclicResultInterface> BasicDataStoreImplementation::GetIndexed<
 
 std::unique_ptr<CyclicResultInterface> BasicDataStoreImplementation::GetCyclic(const Key& key) const
 {
-    const Tokens tokens = CommonHelper::TokenizeString(key, SEPARATOR[0]);
+    const Tokens tokens = CommonHelper::TokenizeString(key, SEPARATOR);
     CyclicRowRefs rowRefs;
 
     for (const auto& storeValue : cyclicStore)
     {
-        if (TokensMatch(tokens, CommonHelper::TokenizeString(storeValue.key, SEPARATOR[0])))
+        if (TokensMatch(tokens, storeValue.tokens))
         {
             rowRefs.emplace_back(storeValue);
         }
@@ -191,7 +191,7 @@ std::unique_ptr<CyclicResultInterface> BasicDataStoreImplementation::GetCyclic(c
 
 std::unique_ptr<CyclicResultInterface> BasicDataStoreImplementation::GetCyclic(const std::optional<Timestamp> time, const std::optional<EntityId> entityId, const Key &key) const
 {
-    const Tokens tokens = CommonHelper::TokenizeString(key, SEPARATOR[0]);
+    const Tokens tokens = CommonHelper::TokenizeString(key, SEPARATOR);
 
     if (!time.has_value() && entityId.has_value())
     {
@@ -260,13 +260,13 @@ void BasicDataStoreImplementation::Clear()
 
 std::unique_ptr<AcyclicResultInterface> BasicDataStoreImplementation::GetAcyclic(const Key& key) const
 {
-    const Tokens tokens = CommonHelper::TokenizeString(key, SEPARATOR[0]);
+    const Tokens tokens = CommonHelper::TokenizeString(key, SEPARATOR);
 
     AcyclicRowRefs rowRefs;
 
     for (const auto& storeValue : acyclicStore)
     {
-        if (TokensMatch(tokens, CommonHelper::TokenizeString(storeValue.key, SEPARATOR[0])))
+        if (TokensMatch(tokens, CommonHelper::TokenizeString(storeValue.key, SEPARATOR)))
         {
             rowRefs.emplace_back(storeValue);
         }
@@ -309,7 +309,7 @@ Values BasicDataStoreImplementation::GetStatic(const Key &key) const
 
 Keys BasicDataStoreImplementation::GetKeys(const Key &key) const
 {
-    const Tokens tokens = CommonHelper::TokenizeString(key, SEPARATOR[0]);
+    const Tokens tokens = CommonHelper::TokenizeString(key, SEPARATOR);
 
     if (tokens.at(0) == "Cyclics")
     {
@@ -339,14 +339,13 @@ Keys BasicDataStoreImplementation::GetKeys(const Key &key) const
             for (const auto& entry : *entries)
             {
                 const auto& row = entry.get();
-                const Tokens storedKeyTokens = CommonHelper::TokenizeString(row.key, SEPARATOR[0]);
 
                 size_t tokenCount = searchKeyTokens.size();
 
-                if (searchKeyTokens == Tokens{storedKeyTokens.cbegin(), std::next(storedKeyTokens.cbegin(), static_cast<ssize_t>(tokenCount))})   // match given tokens against currently processed store entry
+                if (searchKeyTokens == Tokens{row.tokens.cbegin(), std::next(row.tokens.cbegin(), static_cast<ssize_t>(tokenCount))})   // match given tokens against currently processed store entry
                 {
                     // retrieve the token following the last matched one
-                    result.insert(storedKeyTokens.at(searchKeyTokens.size()));
+                    result.insert(row.tokens.at(searchKeyTokens.size()));
                 }
             }
 
@@ -369,7 +368,7 @@ Keys BasicDataStoreImplementation::GetStaticKeys(const Tokens &tokens) const
 
     for (const auto& [storedKey, storedValue] : staticStore)
     {
-        const auto storedKeyTokens = CommonHelper::TokenizeString(storedKey, SEPARATOR[0]);
+        const auto storedKeyTokens = CommonHelper::TokenizeString(storedKey, SEPARATOR);
         size_t tokenCount = searchKeyTokens.size();
 
         if (tokenCount == 0)   // all keys at top level are requested

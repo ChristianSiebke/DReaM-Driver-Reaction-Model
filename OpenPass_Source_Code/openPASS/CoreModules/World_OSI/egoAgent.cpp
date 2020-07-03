@@ -180,9 +180,9 @@ LongitudinalDistance EgoAgent::GetDistanceToObject(const WorldObjectInterface* o
         return {};
     }
 
-    const auto objectPos = agent->GetObjectPosition();
+    const auto& objectPos = agent->GetObjectPosition();
     const auto referencePoint = GetReferencePointPosition();
-    const auto otherObjectPos = otherObject->GetObjectPosition();
+    const auto& otherObjectPos = otherObject->GetObjectPosition();
     const auto distance = world->GetDistanceBetweenObjects(wayToTarget, rootOfWayToTargetGraph,
                                                            objectPos, referencePoint ? std::optional<double>{referencePoint->roadPosition.s} : std::nullopt,
                                                            otherObjectPos).at(0);
@@ -263,7 +263,7 @@ std::optional<double> EgoAgent::GetLaneDirection(double distance, int relativeLa
     return world->GetLaneWidth(wayToTarget, rootOfWayToTargetGraph, GetLaneIdFromRelative(relativeLane), GetMainLocatePosition().roadPosition.s, distance).at(0);
 }
 
-GlobalRoadPosition EgoAgent::GetMainLocatePosition() const
+const GlobalRoadPosition& EgoAgent::GetMainLocatePosition() const
 {
     return agent->GetObjectPosition().mainLocatePoint.at(GetRoadId());
 }

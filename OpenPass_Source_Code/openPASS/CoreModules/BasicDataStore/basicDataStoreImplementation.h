@@ -35,8 +35,6 @@ using AcyclicStore = std::vector<AcyclicRow>;
 template <typename... Ts>
 using StoreIndex = std::multimap<std::tuple<Ts...>, size_t>;
 
-using Tokens = std::vector<std::string>;
-
 class CyclicResult : public CyclicResultInterface
 {
 public:

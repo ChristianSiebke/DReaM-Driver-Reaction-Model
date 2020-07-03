@@ -42,7 +42,7 @@ class FakeEgoAgent : public EgoAgentInterface
     MOCK_CONST_METHOD2(GetLaneCurvature, std::optional<double> (double distance, int relativeLane));
     MOCK_CONST_METHOD1(GetLaneDirection, double (int relativeLane));
     MOCK_CONST_METHOD2(GetLaneDirection, std::optional<double> (double distance, int relativeLane));
-    MOCK_CONST_METHOD0(GetMainLocatePosition, GlobalRoadPosition ());
+    MOCK_CONST_METHOD0(GetMainLocatePosition, const GlobalRoadPosition&());
     MOCK_CONST_METHOD0(GetReferencePointPosition, std::optional<GlobalRoadPosition> ());
     MOCK_CONST_METHOD1(GetLaneIdFromRelative, int (int relativeLaneId));
     MOCK_CONST_METHOD3(GetWorldPosition, Position (double sDistance, double tDistance, double yaw));

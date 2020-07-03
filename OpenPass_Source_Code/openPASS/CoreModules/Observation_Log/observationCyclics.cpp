@@ -17,7 +17,7 @@
 std::string ObservationCyclics::GetHeader()
 {
     std::string header;
-    for(std::map<std::string, std::vector<std::string>>::iterator it = samples.begin(); it != samples.end(); ++it)
+    for (auto it = samples.begin(); it != samples.end(); ++it)
     {
         if(it != samples.begin())
         {
@@ -32,7 +32,7 @@ std::string ObservationCyclics::GetHeader()
 std::string ObservationCyclics::GetSamplesLine(std::uint32_t timeStepNumber)
 {
     std::string sampleLine;
-    for (std::map<std::string, std::vector<std::string>>::iterator it = samples.begin(); it != samples.end(); ++it)
+    for (auto it = samples.begin(); it != samples.end(); ++it)
     {
         const std::vector<std::string>& values = it->second;
 
@@ -61,39 +61,21 @@ void ObservationCyclics::Clear()
 //! Called by Observation Log Implementation
 //! to log all Sample values in output.xml
 //-----------------------------------------------------------------------------
-void ObservationCyclics::Insert(
-        int time,
-        const std::string &key,
-        const std::string &value)
+void ObservationCyclics::Insert(int time, const std::string &key, const std::string &value)
 {
-    if(timeSteps.size() == 0 || timeSteps.back() != time)
+    timeSteps.insert(timeSteps.end(), time);
+
+    auto it = samples.find(key);
+
+    if (it == samples.end())
     {
-        timeSteps.push_back(time);
+        auto [newIt, newElement] = samples.emplace(key, timeSteps.size() - 1);
+        newIt->second.push_back(value);
     }
-
-    if(samples.find(key) == samples.end())
+    else
     {
-        // key doesn't exist yet
-        std::vector<std::string> &values = samples[key];
-
-        // fill up skipped time steps
-        for(unsigned int i = 0; i < timeSteps.size() - 1; ++i)
-        {
-            values.push_back("");
-        }
-
-        values.push_back(value);
-
-        return;
+        // fill up skipped time steps (e.g. another agent has been instantiated in between -> inserted new time step in scheduling)
+        it->second.resize(timeSteps.size() - 1);
+        it->second.push_back(value);
     }
-
-    std::vector<std::string> &channel = samples.at(key);
-
-    // fill up skipped time steps (e.g. another agent has been instantiated in between -> inserted new time step in scheduling)
-    for(unsigned int i = channel.size(); i < timeSteps.size() - 1; ++i)
-    {
-        channel.push_back("");
-    }
-
-    channel.push_back(value);
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019-2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -44,10 +44,7 @@ public:
     * @param[in]     key        Name of parameter as string.
     * @param[in]     value      Value of parameter as string.
     */
-    void Insert(
-            int time,
-            const std::string &key,
-            const std::string &value);
+    void Insert(int time, const std::string &key, const std::string &value);
 
     /*!
      * \brief Returns the string header that is written into the simulationOuput.xml
@@ -62,7 +59,7 @@ public:
     /*!
      * \brief Returns all timesteps for which samples exist
      */
-    std::vector<int>& GetTimeSteps()
+    std::set<int>& GetTimeSteps()
     {
         return timeSteps;
     }
@@ -73,7 +70,7 @@ public:
     void Clear();
 
 private:
-    std::vector<int> timeSteps;
+    std::set<int> timeSteps;
     std::map<std::string, std::vector<std::string>> samples;
 };
 

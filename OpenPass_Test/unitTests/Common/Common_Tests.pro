@@ -20,15 +20,14 @@ win32:QMAKE_CXXFLAGS += -Wa,-mbig-obj
 UNIT_UNDER_TEST = $$OPEN_SRC/Common
 
 INCLUDEPATH += \
-            $$UNIT_UNDER_TEST \
-            $$OPEN_SRC/Interfaces \
-            $$OPEN_SRC/CoreFramework/OpenPassSlave/modelElements
+    $$UNIT_UNDER_TEST \
+    $$OPEN_SRC/Interfaces \
+    $$OPEN_SRC/CoreFramework/OpenPassSlave/modelElements
 
 HEADERS += \
     $$UNIT_UNDER_TEST/commonTools.h
 
-
-
 SOURCES += \
-    vectorToString_Tests.cpp \
-    ttcCalculation_Tests.cpp
+    tokenizeString_Tests.cpp \
+    ttcCalculation_Tests.cpp \
+    vectorToString_Tests.cpp

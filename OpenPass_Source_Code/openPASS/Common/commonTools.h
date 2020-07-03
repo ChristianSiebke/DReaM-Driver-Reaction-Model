@@ -21,8 +21,6 @@
 #include <map>
 #include <unordered_map>
 
-#include <boost/algorithm/string/trim.hpp>
-
 #include "globalDefinitions.h"
 #include "Common/vector2d.h"
 #include <optional>
@@ -113,19 +111,43 @@ static double roundDoubleWithDecimals(double value, int decimals)
 //! @param [in] str             String to be tokenized
 //! @param [in] delimiter       Delimiter by which string gets tokenized
 //!
-//! @return                     Vector of tokens
+//! @return                     Vector of trimmed tokens
 //-----------------------------------------------------------------------------
-[[maybe_unused]] static std::vector<std::string> TokenizeString(const std::string& str, const char delimiter)
+[[maybe_unused]] static std::vector<std::string> TokenizeString(const std::string& str, const char delimiter = ',')
 {
-    std::stringstream stream(str);
-
-    std::string intermediateString;
+    constexpr char WHITESPACE[] = " \t\n\v\f\r";
     std::vector<std::string> tokens;
-    while (getline(stream, intermediateString, delimiter))
+
+    if (str.empty())
     {
-        boost::algorithm::trim(intermediateString);
-        tokens.push_back(intermediateString);
+        return tokens;
     }
+
+    std::string_view remaining_input_view{str};
+    auto tokenlength = static_cast<std::string_view::size_type>(-1);
+
+    do
+    {
+        remaining_input_view.remove_prefix(tokenlength + 1);   // remove previous token from view
+        tokenlength = remaining_input_view.find(delimiter);
+
+        // if no delimiter is left, use whole string
+        tokenlength = tokenlength != std::string::npos ? tokenlength : remaining_input_view.length();
+
+        // untrimmed view on token
+        std::string_view token{remaining_input_view.data(), tokenlength};
+        auto trim_start = token.find_first_not_of(WHITESPACE);
+
+        if (trim_start ==  std::string::npos)
+        {
+            // only whitespace charactes in current token
+            tokens.push_back("");
+            continue;
+        }
+
+        auto trim_end = token.find_last_not_of(WHITESPACE);
+        tokens.emplace_back(token.substr(trim_start, trim_end - trim_start + 1));
+    } while(tokenlength < remaining_input_view.length());
 
     return tokens;
 }

@@ -301,14 +301,17 @@ void ObservationFileHandler::AddSamples(ObservationCyclics& cyclics)
     xmlFileStream->writeStartElement(outputTags.SAMPLES);
     const auto& timeSteps = cyclics.GetTimeSteps();
 
-    for (unsigned int timeStepNumber = 0; timeStepNumber < timeSteps.size(); ++timeStepNumber)
+    unsigned int timeStepNumber = 0;
+    for (const auto timeStep : timeSteps)
     {
         xmlFileStream->writeStartElement(outputTags.SAMPLE);
-        xmlFileStream->writeAttribute(outputAttributes.TIME, QString::number(timeSteps.at(timeStepNumber)));
+        xmlFileStream->writeAttribute(outputAttributes.TIME, QString::number(timeStep));
         xmlFileStream->writeCharacters(QString::fromStdString(cyclics.GetSamplesLine(timeStepNumber)));
 
         // close SampleTag
         xmlFileStream->writeEndElement();
+
+        ++timeStepNumber;
     }
 
     // close SamplesTag
@@ -358,9 +361,11 @@ void ObservationFileHandler::WriteCsvCyclics(QString filename, ObservationCyclic
     stream << "Timestep, " << QString::fromStdString(cyclics.GetHeader()) << '\n';
 
     const auto& timeSteps = cyclics.GetTimeSteps();
-    for (unsigned int timeStepNumber = 0; timeStepNumber < timeSteps.size(); ++timeStepNumber)
+    unsigned int timeStepNumber = 0;
+    for (const auto timeStep : timeSteps)
     {
-        stream << QString::number(timeSteps.at(timeStepNumber)) << ", " << QString::fromStdString(cyclics.GetSamplesLine(timeStepNumber)) << '\n';
+        stream << QString::number(timeStep) << ", " << QString::fromStdString(cyclics.GetSamplesLine(timeStepNumber)) << '\n';
+        ++timeStepNumber;
     }
 
     csvFile->flush();

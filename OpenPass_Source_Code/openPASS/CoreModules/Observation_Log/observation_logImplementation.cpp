@@ -119,14 +119,11 @@ void ObservationLogImplementation::SlavePostRunHook(const RunResultInterface& ru
 
     for (const CyclicRow& dsCyclic : *dsCyclics)
     {
-        std::stringstream entityStr;
-        entityStr << std::setw(2) << std::setfill('0') << dsCyclic.entityId;
-
-        std::visit(openpass::utils::FlatParameter::to_string([this, &dsCyclic, &entityStr](const std::string& valueStr)
+        std::visit(openpass::utils::FlatParameter::to_string([this, &dsCyclic](const std::string& valueStr)
         {
             if (selectedColumns.find(dsCyclic.key) != selectedColumns.end())
             {
-                cyclics.Insert(dsCyclic.timestamp, entityStr.str() + ":" + dsCyclic.key, valueStr);
+                cyclics.Insert(dsCyclic.timestamp, (dsCyclic.entityId < 10 ? "0" : "") + std::to_string(dsCyclic.entityId) + ":" + dsCyclic.key, valueStr);
             }
         }), dsCyclic.value);
     }
