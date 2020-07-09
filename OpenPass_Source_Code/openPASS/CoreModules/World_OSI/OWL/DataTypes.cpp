@@ -466,6 +466,9 @@ void Lane::AddLaneGeometryJoint(const Common::Vector2d& pointLeft,
     if (laneGeometryJoints.empty())
     {
         laneGeometryJoints.push_back(newJoint);
+        auto osiCenterpoint = osiLane->mutable_base_lane()->mutable_classification()->add_centerline();
+        osiCenterpoint->set_x(pointCenter.x);
+        osiCenterpoint->set_y(pointCenter.y);
         return;
     }
 

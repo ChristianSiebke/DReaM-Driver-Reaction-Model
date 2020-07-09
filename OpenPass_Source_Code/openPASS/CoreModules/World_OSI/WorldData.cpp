@@ -291,7 +291,7 @@ void WorldData::AddLane(RoadLaneSectionInterface& odSection, const RoadLaneInter
     osiLane->mutable_id()->set_value(osiLaneId);
     osiLane->mutable_base_lane()->mutable_id()->set_value(osiLaneId);
     osiLane->set_reverse_direction(!odLane.GetInDirection());
-    osiLane->mutable_base_lane()->mutable_classification()->set_centerline_is_driving_direction(odLane.GetInDirection());
+    osiLane->mutable_base_lane()->mutable_classification()->set_centerline_is_driving_direction(odLaneId < 0);
 
     for (const auto& laneBoundary : laneBoundaries)
     {
