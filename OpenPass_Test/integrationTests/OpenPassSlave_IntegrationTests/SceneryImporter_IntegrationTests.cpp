@@ -91,22 +91,15 @@ enum LaneConnectionType
 //! Helper function to sort all sections for a given road by their length
 //! This is used to make checking the correct import of the sceneries easier
 //! Note: in all sceneries section lengths in each road are increasing.
-std::vector<OWL::Interfaces::Section*> GetDistanceSortedSectionsForRoad(OWL::Interfaces::WorldData* worldData, std::string roadId)
+std::vector<const OWL::Interfaces::Section*> GetDistanceSortedSectionsForRoad(OWL::Interfaces::WorldData* worldData, std::string roadId)
 {
     //Extract sections for given roadID
-    std::vector<OWL::Interfaces::Section*> queriedSections{};
-    for(auto& section : worldData->GetSections())
-    {
-        auto osiRoadId = section.second->GetRoad().GetId();
-        if(worldData->GetRoadIdMapping().at(osiRoadId) == roadId)
-        {
-            queriedSections.push_back(section.second);
-        }
-    }
+    auto sections = worldData->GetRoads().at(roadId)->GetSections();
+    std::vector<const OWL::Interfaces::Section*> queriedSections{sections.cbegin(),sections.cend()};
 
     //Sort by distance
     std::sort(queriedSections.begin(), queriedSections.end(),
-              [](OWL::Interfaces::Section* s1, OWL::Interfaces::Section* s2)
+              [](auto s1, auto s2)
     {
         return s1->GetDistance(OWL::MeasurementPoint::RoadStart) < s2->GetDistance(OWL::MeasurementPoint::RoadStart);
     });
@@ -385,9 +378,9 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_CheckForCorrectLaneConnections
 
     OWL::Interfaces::WorldData* worldData = static_cast<OWL::Interfaces::WorldData*>(world.GetWorldData());
 
-    ASSERT_EQ(worldData->GetSections().size(), 5);
+    ASSERT_EQ(worldData->GetRoads().at("1")->GetSections().size(), 5);
 
-    std::vector<OWL::Interfaces::Section*> sections = GetDistanceSortedSectionsForRoad(worldData, "1");
+    auto sections = GetDistanceSortedSectionsForRoad(worldData, "1");
 
     const std::vector<int> numberOfLanesPerSection = {1, 2, 3, 3, 2};
     const std::vector<std::vector<int>> laneConnections = {{ -1}, {-1,-2}, {-1, -2, -3}, {0, -1, -2}};
@@ -421,15 +414,17 @@ TEST(SceneryImporter_IntegrationTests, MultipleRoads_CheckForCorrectLaneConnecti
 
     OWL::Interfaces::WorldData* worldData = static_cast<OWL::Interfaces::WorldData*>(world.GetWorldData());
 
-    ASSERT_EQ(worldData->GetSections().size(), 6);
+    ASSERT_EQ(worldData->GetRoads().at("1")->GetSections().size(), 2);
+    ASSERT_EQ(worldData->GetRoads().at("2")->GetSections().size(), 2);
+    ASSERT_EQ(worldData->GetRoads().at("3")->GetSections().size(), 2);
 
-    std::vector<OWL::Interfaces::Section*> sectionsRoad1 = GetDistanceSortedSectionsForRoad(worldData, "1");
+    auto sectionsRoad1 = GetDistanceSortedSectionsForRoad(worldData, "1");
     const auto& lanesRoad1Section1 = sectionsRoad1.front()->GetLanes();
     const auto& lanesRoad1Section2 = sectionsRoad1.back()->GetLanes();
-    std::vector<OWL::Interfaces::Section*> sectionsRoad2 = GetDistanceSortedSectionsForRoad(worldData, "2");
+    auto sectionsRoad2 = GetDistanceSortedSectionsForRoad(worldData, "2");
     const auto& lanesRoad2Section1 = sectionsRoad2.front()->GetLanes();
     const auto& lanesRoad2Section2 = sectionsRoad2.back()->GetLanes();
-    std::vector<OWL::Interfaces::Section*> sectionsRoad3 = GetDistanceSortedSectionsForRoad(worldData, "3");
+    auto sectionsRoad3 = GetDistanceSortedSectionsForRoad(worldData, "3");
     const auto& lanesRoad3Section1 = sectionsRoad3.front()->GetLanes();
     const auto& lanesRoad3Section2 = sectionsRoad3.back()->GetLanes();
 
@@ -465,7 +460,11 @@ TEST(SceneryImporter_IntegrationTests, MultipleRoadsWithJunctions_CheckForCorrec
 
     OWL::Interfaces::WorldData* worldData = static_cast<OWL::Interfaces::WorldData*>(world.GetWorldData());
 
-    ASSERT_EQ(worldData->GetSections().size(), 5);
+    ASSERT_EQ(worldData->GetRoads().at("1")->GetSections().size(), 1);
+    ASSERT_EQ(worldData->GetRoads().at("2")->GetSections().size(), 1);
+    ASSERT_EQ(worldData->GetRoads().at("3")->GetSections().size(), 1);
+    ASSERT_EQ(worldData->GetRoads().at("4")->GetSections().size(), 1);
+    ASSERT_EQ(worldData->GetRoads().at("5")->GetSections().size(), 1);
 
     const auto& lanesIncomingRoad = GetDistanceSortedSectionsForRoad(worldData, "1").back()->GetLanes();
     const auto& lanesUpperOutgoingRoad = GetDistanceSortedSectionsForRoad(worldData, "2").back()->GetLanes();

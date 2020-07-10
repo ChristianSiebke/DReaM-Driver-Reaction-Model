@@ -38,7 +38,6 @@
 #include "osi3/osi_common.pb.h"
 #include "osi3/osi_groundtruth.pb.h"
 #include "osi3/osi_trafficsign.pb.h"
-#include "osi3/osi_worldinterface.pb.h"
 
 namespace OWL {
 
@@ -49,7 +48,7 @@ using OdId = int64_t;
 
 using Angle = float;
 
-using Priorities = std::vector<std::pair<Id, Id>>;
+using Priorities = std::vector<std::pair<std::string, std::string>>;
 
 constexpr double EVENTHORIZON = 2000;
 
@@ -68,7 +67,7 @@ enum class LaneMarkingSide
 
 struct IntersectionInfo
 {
-    Id intersectingRoad;
+    std::string intersectingRoad;
     IntersectingConnectionRank relativeRank;
 
     //! For each pair of lanes on the own road (first id) and the intersecting road (second id)
@@ -330,9 +329,6 @@ class Section
 public:
     virtual ~Section() = default;
 
-    //!Returns the OSI Id of the section
-    virtual Id GetId() const = 0;
-
     //!Sets the sucessor of the section. Throws an error if the section already has a sucessor
     virtual void AddNext(const Interfaces::Section& section) = 0;
 
@@ -382,8 +378,8 @@ class Road
 public:
     virtual ~Road() = default;
 
-    //!Returns the OSI Id of the road
-    virtual Id GetId() const = 0;
+    //!Returns the Id of the road
+    virtual const std::string& GetId() const = 0;
 
     //!Adds a section to this road
     virtual void AddSection(Interfaces::Section& section) = 0;
@@ -395,18 +391,18 @@ public:
     virtual double GetLength() const = 0;
 
     //!Returns the id of the successor of the road (i.e. next road or junction)
-    virtual Id GetSuccessor() const = 0;
+    virtual const std::string& GetSuccessor() const = 0;
 
     //!Returns the id of the predecessor of the road (i.e. previous road or junction)
-    virtual Id GetPredecessor() const = 0;
+    virtual const std::string& GetPredecessor() const = 0;
 
     //! Sets the successor of the road
     //! \param successor    id of successor (road or junction)
-    virtual void SetSuccessor(Id successor) = 0;
+    virtual void SetSuccessor(const std::string& successor) = 0;
 
     //! Sets the predecessor of the road
     //! \param predecessor  id of predecessor (road or junction)
-    virtual void SetPredecessor(Id predecessor) = 0;
+    virtual void SetPredecessor(const std::string& predecessor) = 0;
 
     //!Returns true if the direction of the road is the same as the direction of the road stream,
     //! false otherwise
@@ -424,7 +420,7 @@ public:
     virtual ~Junction() = default;
 
     //!Returns the Id of the Junction
-    virtual Id GetId() const = 0;
+    virtual const std::string& GetId() const = 0;
 
     //!Adds a connecting road to this road
     virtual void AddConnectingRoad(const Interfaces::Road* connectingRoad) = 0;
@@ -433,7 +429,7 @@ public:
     virtual const Roads& GetConnectingRoads() const = 0;
 
     //!Adds a priority entry for this junction
-    virtual void AddPriority(Id high, Id low) = 0;
+    virtual void AddPriority(const std::string& high, const std::string& low) = 0;
 
     //!Returns all priorities of connectors in this junction
     virtual const Priorities& GetPriorities() const = 0;
@@ -731,7 +727,7 @@ public:
     //! @param[in] osiLane  representation of the road in OpenDrive
     //! @param[in] section  section that this lane is part of
     //! @param[in] isInStreamDirection  flag whether this lane is in the same direction as the LaneStream it belongs to
-    Lane(osi3::world::RoadLane* osiLane, const Interfaces::Section* section);
+    Lane(osi3::Lane* osiLane, const Interfaces::Section* section);
     ~Lane() override;
 
     void CopyToGroundTruth(osi3::GroundTruth& target) const override;
@@ -764,7 +760,6 @@ public:
     LaneType GetLaneType() const override;
     bool Covers(double distance) const override;
 
-    void AddLanePairing(const Interfaces::Lane& prevLane, const Interfaces::Lane& nextLane);
     void AddNext(const Interfaces::Lane* lane) override;
     void AddPrevious(const Interfaces::Lane* lane) override;
     const Interfaces::LaneGeometryElements& GetLaneGeometryElements() const override;
@@ -799,7 +794,7 @@ public:
     const Primitive::LaneGeometryJoint::Points GetInterpolatedPointsAtDistance(double distance) const override;
 
 protected:
-    osi3::world::RoadLane* osiLane{nullptr};
+    osi3::Lane* osiLane{nullptr};
 
 private:
     LaneType laneType;
@@ -815,6 +810,7 @@ private:
     std::vector<Id> previous;
     const Interfaces::Lane* leftLane;
     const Interfaces::Lane* rightLane;
+    double length;
     bool leftLaneIsDummy{section == nullptr};
     bool rightLaneIsDummy{section == nullptr};
 };
@@ -822,7 +818,7 @@ private:
 class InvalidLane : public Lane
 {
 public:
-    InvalidLane() : Lane(new osi3::world::RoadLane(), nullptr)
+    InvalidLane() : Lane(new osi3::Lane(), nullptr)
     {
         // set 'invalid' id
         osiLane->mutable_id()->set_value(InvalidId);
@@ -868,8 +864,7 @@ private:
 class Section : public Interfaces::Section
 {
 public:
-    Section(osi3::world::RoadSection* osiSection);
-    Id GetId() const override;
+    Section(double sOffset);
 
     void AddNext(const Interfaces::Section& section) override;
     void AddPrevious(const Interfaces::Section& section) override;
@@ -890,15 +885,13 @@ public:
     virtual void SetCenterLaneBoundary(std::vector<Id> laneBoundaryIds) override;
     virtual std::vector<Id> GetCenterLaneBoundary() const override;
 
-protected:
-    osi3::world::RoadSection* osiSection;
-
 private:
     Interfaces::Lanes lanes;
     const Interfaces::Road* road;
     Interfaces::Sections nextSections;
     Interfaces::Sections previousSections;
     std::vector<Id> centerLaneBoundary;
+    double sOffset;
 
 public:
     Section(const Section&) = delete;
@@ -912,13 +905,9 @@ public:
 class InvalidSection : public Section
 {
 public:
-    InvalidSection() : Section(new osi3::world::RoadSection())
-    {
-        // set 'invalid' id
-        osiSection->mutable_id()->set_value(InvalidId);
-    }
+    InvalidSection() : Section(0)
+    {}
 
-    virtual ~InvalidSection();
     InvalidSection(const InvalidSection&) = delete;
     InvalidSection& operator=(const InvalidSection&) = delete;
     InvalidSection(InvalidSection&&) = delete;
@@ -928,7 +917,7 @@ public:
 class Road : public Interfaces::Road
 {
 public:
-    Road(osi3::world::Road* osiRoad, bool isInStreamDirection);
+    Road(bool isInStreamDirection, const std::string& id);
 
     Road(const Road&) = delete;
     Road& operator=(const Road&) = delete;
@@ -937,37 +926,31 @@ public:
 
     virtual ~Road() override = default;
 
-    Id GetId() const override;
+    const std::string& GetId() const override;
     const Interfaces::Sections& GetSections() const override;
     void AddSection(Interfaces::Section& section) override;
     double GetLength() const override;
-    Id GetSuccessor() const override;
-    Id GetPredecessor() const override;
-    void SetSuccessor(Id successor) override;
-    void SetPredecessor(Id predecessor) override;
+    const std::string& GetSuccessor() const override;
+    const std::string& GetPredecessor() const override;
+    void SetSuccessor(const std::string& successor) override;
+    void SetPredecessor(const std::string& predecessor) override;
     bool IsInStreamDirection() const override;
     double GetDistance(MeasurementPoint mp) const override;
 
-protected:
-    osi3::world::Road* osiRoad;
-
 private:
     Interfaces::Sections sections;
-    Id successor{InvalidId};
-    Id predecessor{InvalidId};
+    std::string successor{};
+    std::string predecessor{};
     bool isInStreamDirection;
+    std::string id;
 };
 
 class InvalidRoad : public Road
 {
 public:
-    InvalidRoad() : Road(new osi3::world::Road(), true)
-    {
-        // set 'invalid' id
-        osiRoad->mutable_id()->set_value(InvalidId);
-    }
+    InvalidRoad() : Road(true, "")
+    {}
 
-    virtual ~InvalidRoad();
     InvalidRoad(const InvalidRoad&) = delete;
     InvalidRoad& operator=(const InvalidRoad&) = delete;
     InvalidRoad(InvalidRoad&&) = delete;
@@ -977,13 +960,13 @@ public:
 class Junction : public Interfaces::Junction
 {
 public:
-    Junction(Id id) :
+    Junction(const std::string& id) :
         id(id)
     {}
 
     virtual ~Junction() override = default;
 
-    virtual Id GetId() const override
+    virtual const std::string& GetId() const override
     {
         return id;
     }
@@ -998,7 +981,7 @@ public:
         return connectingRoads;
     }
 
-    virtual void AddPriority(Id high, Id low) override
+    virtual void AddPriority(const std::string& high, const std::string& low) override
     {
         priorities.emplace_back(std::pair{high, low});
     }
@@ -1042,7 +1025,7 @@ public:
     Junction& operator=(Junction&&) = delete;
 
 private:
-    Id id;
+    std::string id;
     std::list<const Interfaces::Road*> connectingRoads;
     Priorities priorities;
     std::map<std::string, std::vector<IntersectionInfo>> intersections;

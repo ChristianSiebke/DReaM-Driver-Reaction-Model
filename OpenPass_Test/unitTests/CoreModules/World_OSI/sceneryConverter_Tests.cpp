@@ -40,7 +40,7 @@ using ::testing::_;
 
 std::tuple<const OWL::Primitive::LaneGeometryJoint*, const OWL::Primitive::LaneGeometryJoint*> CreateSectionPartJointsRect(double length)
 {
-    osi3::world::RoadLane osiLane;
+    osi3::Lane osiLane;
     OWL::Implementation::Lane lane(&osiLane, nullptr);
 
     auto laneGeometryElement =
@@ -89,8 +89,6 @@ TEST(CalculateAbsolutCoordinates, Test2)
 
     NiceMock<Fakes::WorldData> worldData;
     ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(laneManager.GetRoads()));
-    ON_CALL(worldData, GetRoadIdMapping()).WillByDefault(ReturnRef(laneManager.GetRoadIdMapping()));
-    ON_CALL(worldData, GetSections()).WillByDefault(ReturnRef(laneManager.GetSections()));
     ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneManager.GetLaneIdMapping()));
 
     NiceMock<FakeRoadObject> testRoadObject;

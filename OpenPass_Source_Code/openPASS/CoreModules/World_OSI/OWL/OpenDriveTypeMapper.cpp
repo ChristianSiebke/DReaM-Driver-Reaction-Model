@@ -20,47 +20,8 @@
 
 #include "Interfaces/roadInterface/roadElementTypes.h"
 
-#include "osi3/osi_road.pb.h"
 #include "osi3/osi_lane.pb.h"
 #include "OWL/DataTypes.h"
-
-osi3::world::Road_Type OpenDriveTypeMapper::OdToOsiRoadType(const RoadTypeInformation odRoadType)
-{
-    osi3::world::Road_Type osiType;
-
-    switch (odRoadType)
-    {
-        case RoadTypeInformation::Bicycle:
-            osiType = osi3::world::Road_Type_TYPE_BIKEWAY;
-            break;
-
-        case RoadTypeInformation::LowSpeed:
-            osiType = osi3::world::Road_Type_TYPE_LOWSPEED;
-            break;
-
-        case RoadTypeInformation::Motorway:
-            osiType = osi3::world::Road_Type_TYPE_HIGHWAY;
-            break;
-
-        case RoadTypeInformation::Pedestrian:
-            osiType = osi3::world::Road_Type_TYPE_PEDESTRIAN;
-            break;
-
-        case RoadTypeInformation::Rural:
-            osiType = osi3::world::Road_Type_TYPE_RURAL;
-            break;
-
-        case RoadTypeInformation::Town:
-            osiType = osi3::world::Road_Type_TYPE_TOWN;
-            break;
-
-        default:
-            osiType = osi3::world::Road_Type_TYPE_HIGHWAY;
-            break;
-    }
-
-    return osiType;
-}
 
 osi3::Lane_Classification_Type OpenDriveTypeMapper::OdToOsiLaneType(const RoadLaneType odLaneType)
 {

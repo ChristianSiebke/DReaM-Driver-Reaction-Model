@@ -43,19 +43,17 @@ public:
     {
         ON_CALL(lane, GetId()).WillByDefault(Return(idLane));
         ON_CALL(lane, GetWidth(_)).WillByDefault(Return(4));
-        ON_CALL(road, GetId()).WillByDefault(Return(idRoad));
+        ON_CALL(road, GetId()).WillByDefault(ReturnRef(idRoad));
         ON_CALL(lane, GetRoad()).WillByDefault(ReturnRef(road));
         ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneIdMapping));
-        ON_CALL(worldData, GetRoadIdMapping()).WillByDefault(ReturnRef(roadIdMapping));
     }
 
     OWL::Fakes::WorldData worldData;
     OWL::Fakes::Lane lane;
     OWL::Id idLane{1};
+    std::string idRoad{"Road"};
     OWL::Fakes::Road road;
-    OWL::Id idRoad{2};
     const std::unordered_map<OWL::Id, OWL::OdId> laneIdMapping {{idLane, -1}};
-    const std::unordered_map<OWL::Id, std::string> roadIdMapping {{idRoad, "Road"}};
     OWL::Primitive::LaneGeometryElement laneGeometryElement{OWL::Testing::LaneGeometryElementGenerator::RectangularLaneGeometryElement({0.0,0.0}, 4.0, 4.0, 0.0, &lane)};
     World::Localization::LocalizationElement localizationElement{laneGeometryElement};
     double yaw{0.0};

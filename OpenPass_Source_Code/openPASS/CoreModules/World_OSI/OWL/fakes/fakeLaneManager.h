@@ -42,7 +42,7 @@ struct FakeLaneManager
     const size_t rows;
     const std::vector<double> sectionLengths;
 
-    std::unordered_map<OWL::Id, OWL::Interfaces::Road*> roads;
+    std::unordered_map<std::string, OWL::Interfaces::Road*> roads;
     std::vector<std::vector<OWL::Fakes::Lane*>> lanes;
     std::map<OWL::Id, OWL::Interfaces::Section*> sections;
     std::list<const OWL::Interfaces::Section*> sectionsList;
@@ -50,9 +50,9 @@ struct FakeLaneManager
     OWL::Implementation::InvalidLane invalidLane;
     std::vector<std::vector<OWL::Interfaces::WorldObjects*>> objectAssignments;
     std::unordered_map<OWL::Id, OWL::OdId> laneIdMapping;
-    std::unordered_map<OWL::Id, std::string> roadIdMapping;
     std::vector<std::vector<OWL::Id>> lanePredecessors;
     std::vector<std::vector<OWL::Id>> laneSuccessors;
+    std::string roadId;
 
     void SetLength(size_t col, size_t row, double length, double startDistance = 0)
     {
@@ -101,8 +101,6 @@ struct FakeLaneManager
 
     void GenerateRoad(double width, std::string roadId = "TestRoadId")
     {
-        OWL::Id id = GetNewId();
-        roadIdMapping.insert({id, roadId});
         OWL::Fakes::Road* road = new OWL::Fakes::Road();
         GenerateLaneMatrix(road);
         ConnectLaneRows();
@@ -112,8 +110,9 @@ struct FakeLaneManager
         SetDefaultMovingObjects();
         GenerateSections();
         ON_CALL(*road, GetSections()).WillByDefault(ReturnRef(sectionsList));
-        ON_CALL(*road, GetId()).WillByDefault(Return(id));
-        roads.insert({id, road});
+        this->roadId = roadId;
+        ON_CALL(*road, GetId()).WillByDefault(ReturnRef(this->roadId));
+        roads.insert({roadId, road});
     }
 
     void GenerateSections()
@@ -257,7 +256,7 @@ struct FakeLaneManager
         return sections;
     }
 
-    const std::unordered_map<OWL::Id, OWL::Interfaces::Road* >& GetRoads() const
+    const std::unordered_map<std::string, OWL::Interfaces::Road* >& GetRoads() const
     {
         return roads;
     }
@@ -265,11 +264,6 @@ struct FakeLaneManager
     std::unordered_map<OWL::Id, OWL::OdId>& GetLaneIdMapping()
     {
         return laneIdMapping;
-    }
-
-    std::unordered_map<OWL::Id, std::string>& GetRoadIdMapping()
-    {
-        return roadIdMapping;
     }
 
     FakeLaneManager(size_t cols, size_t rows, double width, const std::vector<double>& sectionLengths, const std::string& roadId) : cols{cols}, rows{rows},

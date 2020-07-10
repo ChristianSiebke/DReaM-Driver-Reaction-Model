@@ -25,23 +25,17 @@ public:
     MOCK_METHOD0(Reset, void());
     MOCK_CONST_METHOD0(GetOsiGroundTruth, const osi3::GroundTruth& ());
     MOCK_CONST_METHOD0(GetRoads,
-                       const std::unordered_map<OWL::Id, OWL::Interfaces::Road*>& ());
+                       const std::unordered_map<std::string, OWL::Interfaces::Road*>& ());
     MOCK_METHOD1(AddMovingObject,
                  OWL::Interfaces::MovingObject & (void* linkedObject));
     MOCK_METHOD1(AddStationaryObject,
                  OWL::Interfaces::StationaryObject & (void* linkedObject));
     MOCK_METHOD1(RemoveMovingObjectById,
                  void(OWL::Id id));
-    MOCK_CONST_METHOD0(GetRoadIdMapping,
-                       const std::unordered_map<OWL::Id, std::string>& ());
     MOCK_CONST_METHOD0(GetLaneIdMapping,
                        const std::unordered_map<OWL::Id, OWL::OdId>& ());
-    MOCK_CONST_METHOD0(GetJunctionIdMapping,
-                       const std::unordered_map<OWL::Id, std::string>& ());
     MOCK_CONST_METHOD0(GetLanes,
                        const std::unordered_map<OWL::Id, OWL::Interfaces::Lane*>& ());
-    MOCK_CONST_METHOD0(GetSections,
-                       const std::map<OWL::Id, OWL::Interfaces::Section*>& ());
     MOCK_METHOD3(AddLane, void(RoadLaneSectionInterface& odSection, const RoadLaneInterface& odLane, const std::vector<OWL::Id> laneBoundaries));
     MOCK_METHOD2(AddSection, void(const RoadInterface&, const RoadLaneSectionInterface&));
     MOCK_METHOD1(AddRoad, void(const RoadInterface&));
@@ -112,7 +106,7 @@ public:
                                            const Common::Vector2d& pointCenter,
                                            const double sOffset));
 
-    MOCK_CONST_METHOD0(GetJunctions, const std::unordered_map<OWL::Id, OWL::Junction*>& ());
+    MOCK_CONST_METHOD0(GetJunctions, const std::map<std::string, OWL::Junction*>& ());
 
     MOCK_METHOD2(AssignTrafficSignToLane, void (OWL::Id laneId, OWL::Interfaces::TrafficSign& trafficSign));
 

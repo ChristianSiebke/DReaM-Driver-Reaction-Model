@@ -27,7 +27,6 @@
 #include "osi3/osi_groundtruth.pb.h"
 #include "osi3/osi_sensorview.pb.h"
 #include "osi3/osi_sensorviewconfiguration.pb.h"
-#include "osi3/osi_worldinterface.pb.h"
 
 namespace OWL {
 
@@ -86,7 +85,7 @@ public:
     virtual const osi3::GroundTruth& GetOsiGroundTruth() const = 0;
 
     //!Returns a map of all Roads with their OSI Id
-    virtual const std::unordered_map<Id, Road*>& GetRoads() const = 0;
+    virtual const std::unordered_map<std::string, Road*>& GetRoads() const = 0;
 
     //!Creates a new MovingObject linked to an AgentAdapter and returns it
     //!
@@ -122,12 +121,6 @@ public:
     //!Returns the mapping of OSI Ids to OpenDrive Ids for lanes
     virtual const std::unordered_map<Id, OdId>& GetLaneIdMapping() const = 0;
 
-    //!Returns the mapping of OSI Ids to OpenDrive Ids for roads
-    virtual const std::unordered_map<Id, std::string>& GetRoadIdMapping() const = 0;
-
-    //!Returns the mapping of OSI Ids to OpenDrive Ids for junctions
-    virtual const std::unordered_map<Id, std::string>& GetJunctionIdMapping() const = 0;
-
     //!Returns the mapping of OpenDrive Ids to OSI Ids for trafficSigns
     virtual const std::unordered_map<std::string, Id>& GetTrafficSignIdMapping() const = 0;
 
@@ -140,11 +133,8 @@ public:
     //!Returns a map of all lane boundaries with their OSI Id
     virtual const std::unordered_map<Id, LaneBoundary*>& GetLaneBoundaries() const = 0;
 
-    //!Returns a map of all sections with their OSI Id
-    virtual const std::map<Id, Section*>& GetSections() const = 0;
-
     //!Returns a map of all junctions with their OSI Id
-    virtual const std::unordered_map<Id, Junction*>& GetJunctions() const = 0;
+    virtual const std::map<std::string, Junction*>& GetJunctions() const = 0;
 
     //!Returns a map of all traffic signs with their OSI Id
     virtual const std::unordered_map<Id, TrafficSign*>& GetTrafficSigns() const = 0;
@@ -386,9 +376,6 @@ public:
     void AddJunctionConnection(const JunctionInterface* odJunction, const RoadInterface& odRoad) override;
     void AddJunctionPriority(const JunctionInterface* odJunction,  const std::string& high, const std::string& low) override;
 
-    void AddLanePairing(/* const */ RoadLaneInterface& odLane,
-                                    /* const */ RoadLaneInterface& predecessorOdLane,
-                                    /* const */ RoadLaneInterface& successorOdLane);
     void AddLaneSuccessor(/* const */ RoadLaneInterface& odLane,
                                       /* const */ RoadLaneInterface& successorOdLane) override;
     void AddLanePredecessor(/* const */ RoadLaneInterface& odLane,
@@ -432,8 +419,6 @@ public:
     const std::unordered_map<Id, MovingObject*>& GetMovingObjects() const;
     const std::unordered_map<Id, StationaryObject*>& GetStationaryObjects() const;
 
-    CSection& GetSectionById(Id id) const;
-    CRoad& GetRoadById(Id id) const;
     CStationaryObject& GetStationaryObjectById(Id id) const;
     CMovingObject& GetMovingObjectById(Id id) const;
 
@@ -441,9 +426,8 @@ public:
     const RoadGraphVertexMapping& GetRoadGraphVertexMapping() const override;
     const std::unordered_map<Id, Lane*>& GetLanes() const override;
     const std::unordered_map<Id, LaneBoundary*>& GetLaneBoundaries() const override;
-    const std::map<Id, Section*>& GetSections() const override;
-    const std::unordered_map<Id, Road*>& GetRoads() const override;
-    const std::unordered_map<Id, Junction *>& GetJunctions() const override;
+    const std::unordered_map<std::string, Road*>& GetRoads() const override;
+    const std::map<std::string, Junction*>& GetJunctions() const override;
     const std::unordered_map<Id, Interfaces::TrafficSign*>& GetTrafficSigns() const override;
     const std::unordered_map<Id, Interfaces::RoadMarking*>& GetRoadMarkings() const override;
     const Implementation::InvalidLane& GetInvalidLane() const override {return invalidLane;}
@@ -451,14 +435,6 @@ public:
     const std::unordered_map<Id, OdId>& GetLaneIdMapping() const override
     {
         return laneIdMapping;
-    }
-    const std::unordered_map<Id, std::string>& GetRoadIdMapping() const override
-    {
-        return roadIdMapping;
-    }
-    const std::unordered_map<Id, std::string>& GetJunctionIdMapping() const override
-    {
-        return junctionIdMapping;
     }
 
     const std::unordered_map<std::string, Id>& GetTrafficSignIdMapping() const override
@@ -548,28 +524,28 @@ private:
     uint64_t next_free_uid{0};
 
     std::unordered_map<Id, OdId>              laneIdMapping;
-    std::unordered_map<Id, std::string>       roadIdMapping;
-    std::unordered_map<Id, std::string>       junctionIdMapping;
     std::unordered_map<std::string, Id>         trafficSignIdMapping;
 
     std::unordered_map<Id, Lane*>               lanes;
     std::unordered_map<Id, LaneBoundary*>       laneBoundaries;
-    std::map<Id, Section*>                      sections;
-    std::unordered_map<Id, Road*>               roads;
-    std::unordered_map<Id, Junction*>           junctions;
     std::unordered_map<Id, StationaryObject*>   stationaryObjects;
     std::unordered_map<Id, MovingObject*>       movingObjects;
     std::unordered_map<Id, Interfaces::TrafficSign*>  trafficSigns;
     std::unordered_map<Id, Interfaces::RoadMarking*>  roadMarkings;
 
-    std::unordered_map<const RoadInterface*, osi3::world::Road*>                   osiRoads;
-    std::unordered_map<const RoadLaneSectionInterface*, osi3::world::RoadSection*> osiSections;
-    std::unordered_map<const RoadLaneInterface*, osi3::world::RoadLane*>           osiLanes;
+    std::unordered_map<std::string, Road*> roadsById;
+    std::map<std::string, Junction*> junctionsById;
+
+    std::unordered_map<const RoadInterface*, Road*>                 roads;
+    std::unordered_map<const RoadLaneSectionInterface*, Section*>   sections;
+    std::unordered_map<const JunctionInterface*, Junction*>         junctions;
+
+    std::unordered_map<const RoadLaneInterface*, osi3::Lane*> osiLanes;
 
     RoadGraph roadGraph;
     RoadGraphVertexMapping vertexMapping;
 
-    osi3::world::WorldInterface osiGroundTruth;
+    osi3::GroundTruth osiGroundTruth;
 
     const Implementation::InvalidLane invalidLane;
 

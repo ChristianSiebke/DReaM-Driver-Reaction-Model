@@ -31,14 +31,13 @@
 #include "OWL/Primitives.h"
 
 #include "osi3/osi_groundtruth.pb.h"
-#include "osi3/osi_worldinterface.pb.h"
 #include "WorldObjectAdapter.h"
 
 namespace OWL {
 
 namespace Implementation {
 
-Lane::Lane(osi3::world::RoadLane* osiLane, const Interfaces::Section* section) :
+Lane::Lane(osi3::Lane* osiLane, const Interfaces::Section* section) :
     osiLane(osiLane),
     section(section),
     leftLane(section ? new InvalidLane() : nullptr),
@@ -65,7 +64,7 @@ Lane::~Lane()
 void Lane::CopyToGroundTruth(osi3::GroundTruth& target) const
 {
     auto newLane = target.add_lane();
-    newLane->CopyFrom(osiLane->base_lane());
+    newLane->CopyFrom(*osiLane);
 }
 
 Id Lane::GetId() const
@@ -104,7 +103,7 @@ int Lane::GetRightLaneCount() const
 
 double Lane::GetLength() const
 {
-    return osiLane->length();
+    return length;
 }
 
 
@@ -255,7 +254,7 @@ const Interfaces::Lane& Lane::GetRightLane() const
 const std::vector<Id> Lane::GetLeftLaneBoundaries() const
 {
     std::vector<Id> laneBoundaries;
-    for(const auto& laneBoundary : osiLane->base_lane().classification().left_lane_boundary_id())
+    for(const auto& laneBoundary : osiLane->classification().left_lane_boundary_id())
     {
         laneBoundaries.push_back(laneBoundary.value());
     }
@@ -265,7 +264,7 @@ const std::vector<Id> Lane::GetLeftLaneBoundaries() const
 const std::vector<Id> Lane::GetRightLaneBoundaries() const
 {
     std::vector<Id> laneBoundaries;
-    for(const auto& laneBoundary : osiLane->base_lane().classification().right_lane_boundary_id())
+    for(const auto& laneBoundary : osiLane->classification().right_lane_boundary_id())
     {
         laneBoundaries.push_back(laneBoundary.value());
     }
@@ -318,11 +317,10 @@ void Lane::SetLeftLane(const Interfaces::Lane& lane)
     }
 
     leftLane = &lane;
-    osiLane->mutable_left_adjacent_lane_id()->set_value(lane.GetId());
-    osiLane->mutable_base_lane()->mutable_classification()->add_left_adjacent_lane_id()->set_value(lane.GetId());
+    osiLane->mutable_classification()->add_left_adjacent_lane_id()->set_value(lane.GetId());
     for (const auto& laneBoundary : lane.GetRightLaneBoundaries())
     {
-        osiLane->mutable_base_lane()->mutable_classification()->add_left_lane_boundary_id()->set_value(laneBoundary);
+        osiLane->mutable_classification()->add_left_lane_boundary_id()->set_value(laneBoundary);
     }
 }
 
@@ -335,15 +333,14 @@ void Lane::SetRightLane(const Interfaces::Lane& lane)
     }
 
     rightLane = &lane;
-    osiLane->mutable_right_adjacent_lane_id()->set_value(lane.GetId());
-    osiLane->mutable_base_lane()->mutable_classification()->add_right_adjacent_lane_id()->set_value(lane.GetId());
+    osiLane->mutable_classification()->add_right_adjacent_lane_id()->set_value(lane.GetId());
 }
 
 void Lane::SetLeftLaneBoundaries(const std::vector<Id> laneBoundaries)
 {
     for(const auto& laneBoundary : laneBoundaries)
     {
-        osiLane->mutable_base_lane()->mutable_classification()->add_left_lane_boundary_id()->set_value(laneBoundary);
+        osiLane->mutable_classification()->add_left_lane_boundary_id()->set_value(laneBoundary);
     }
 }
 
@@ -419,17 +416,10 @@ void Lane::ClearMovingObjects()
     movingObjects.clear();
 }
 
-void Lane::AddLanePairing(const Interfaces::Lane& prevLane, const Interfaces::Lane& nextLane)
-{
-    osi3::world::RoadLanePairing* pairing = osiLane->add_lane_pairing();
-    pairing->mutable_antecessor_lane_id()->set_value(prevLane.GetId());
-    pairing->mutable_successor_lane_id()->set_value(nextLane.GetId());
-}
-
 void Lane::AddNext(const Interfaces::Lane* lane)
 {
     next.push_back(lane->GetId());
-    auto lanePairing = osiLane->mutable_base_lane()->mutable_classification()->add_lane_pairing();
+    auto lanePairing = osiLane->mutable_classification()->add_lane_pairing();
     lanePairing->mutable_antecessor_lane_id()->set_value(GetId());
     lanePairing->mutable_successor_lane_id()->set_value(lane->GetId());
 }
@@ -437,7 +427,7 @@ void Lane::AddNext(const Interfaces::Lane* lane)
 void Lane::AddPrevious(const Interfaces::Lane* lane)
 {
     previous.push_back(lane->GetId());
-    auto lanePairing = osiLane->mutable_base_lane()->mutable_classification()->add_lane_pairing();
+    auto lanePairing = osiLane->mutable_classification()->add_lane_pairing();
     lanePairing->mutable_antecessor_lane_id()->set_value(lane->GetId());
     lanePairing->mutable_successor_lane_id()->set_value(GetId());
 }
@@ -466,7 +456,7 @@ void Lane::AddLaneGeometryJoint(const Common::Vector2d& pointLeft,
     if (laneGeometryJoints.empty())
     {
         laneGeometryJoints.push_back(newJoint);
-        auto osiCenterpoint = osiLane->mutable_base_lane()->mutable_classification()->add_centerline();
+        auto osiCenterpoint = osiLane->mutable_classification()->add_centerline();
         osiCenterpoint->set_x(pointCenter.x);
         osiCenterpoint->set_y(pointCenter.y);
         return;
@@ -479,21 +469,18 @@ void Lane::AddLaneGeometryJoint(const Common::Vector2d& pointLeft,
         return; //Do not add the same point twice
     }
 
+    length = sOffset - laneGeometryJoints.front().sOffset;
     Primitive::LaneGeometryElement* newElement = new Primitive::LaneGeometryElement(previousJoint, newJoint, this);
     laneGeometryElements.push_back(newElement);
     laneGeometryJoints.push_back(newJoint);
-    auto osiCenterpoint = osiLane->mutable_base_lane()->mutable_classification()->add_centerline();
+    auto osiCenterpoint = osiLane->mutable_classification()->add_centerline();
     osiCenterpoint->set_x(pointCenter.x);
     osiCenterpoint->set_y(pointCenter.y);
 }
 
-Section::Section(osi3::world::RoadSection* osiSection) : osiSection(osiSection)
+Section::Section(double sOffset) :
+    sOffset(sOffset)
 {}
-
-Id Section::GetId() const
-{
-    return osiSection->id().value();
-}
 
 void Section::AddNext(const Interfaces::Section &section)
 {
@@ -596,19 +583,19 @@ std::vector<Id> Section::GetCenterLaneBoundary() const
 
 double Section::GetSOffset() const
 {
-    return osiSection->s_offset();
+    return sOffset;
 }
 
 
-Road::Road(osi3::world::Road* osiRoad, bool isInStreamDirection) :
-    osiRoad(osiRoad),
-    isInStreamDirection(isInStreamDirection)
+Road::Road(bool isInStreamDirection, const std::string& id) :
+    isInStreamDirection(isInStreamDirection),
+    id(id)
 {
 }
 
-Id Road::GetId() const
+const std::string& Road::GetId() const
 {
-    return osiRoad->id().value();
+    return id;
 }
 
 const Interfaces::Sections& Road::GetSections() const
@@ -632,22 +619,22 @@ double Road::GetLength() const
     return length;
 }
 
-Id Road::GetSuccessor() const
+const std::string& Road::GetSuccessor() const
 {
     return successor;
 }
 
-Id Road::GetPredecessor() const
+const std::string& Road::GetPredecessor() const
 {
     return predecessor;
 }
 
-void Road::SetSuccessor(Id successor)
+void Road::SetSuccessor(const std::string& successor)
 {
     this->successor = successor;
 }
 
-void Road::SetPredecessor(Id predecessor)
+void Road::SetPredecessor(const std::string& predecessor)
 {
     this->predecessor = predecessor;
 }
@@ -1320,22 +1307,6 @@ InvalidLane::~InvalidLane()
     if (osiLane)
     {
         delete osiLane;
-    }
-}
-
-InvalidSection::~InvalidSection()
-{
-    if (osiSection)
-    {
-        delete osiSection;
-    }
-}
-
-InvalidRoad::~InvalidRoad()
-{
-    if (osiRoad)
-    {
-        delete osiRoad;
     }
 }
 

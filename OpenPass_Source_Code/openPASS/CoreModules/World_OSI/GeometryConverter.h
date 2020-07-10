@@ -26,13 +26,13 @@
 
 struct LaneGeometryPolygon
 {
-    OWL::Id roadId;
+    std::string roadId;
     OWL::Id laneId;
     const OWL::Primitive::LaneGeometryElement * const laneGeometryElement;
     polygon_t polygon;
 };
-using RoadPolygons = std::pair<OWL::Id, std::vector<LaneGeometryPolygon>>;
-using JunctionPolygons = std::map<OWL::Id, std::vector<LaneGeometryPolygon>>;
+using RoadPolygons = std::pair<std::string, std::vector<LaneGeometryPolygon>>;
+using JunctionPolygons = std::map<std::string, std::vector<LaneGeometryPolygon>>;
 
 //-----------------------------------------------------------------------------
 //! Functions for the convertion of the road geometries in a section. First, the roads,
@@ -275,7 +275,7 @@ RoadPolygons BuildRoadPolygons(const OWL::Road* const road);
 //! \return a function that creates LaneGeometryPolygons from
 //!         LaneGeometryElements for the lane at laneId on the road at roadId
 //-----------------------------------------------------------------------------
-std::function<LaneGeometryPolygon (const OWL::Primitive::LaneGeometryElement* const)> CreateBuildPolygonFromLaneGeometryFunction(const OWL::Id roadId,
+std::function<LaneGeometryPolygon (const OWL::Primitive::LaneGeometryElement* const)> CreateBuildPolygonFromLaneGeometryFunction(const std::string& roadId,
                                                                                                                                  const OWL::Id laneId);
 
 //-----------------------------------------------------------------------------
@@ -288,8 +288,7 @@ std::function<LaneGeometryPolygon (const OWL::Primitive::LaneGeometryElement* co
 //! \param[out] junction the junction to which intersection information should
 //!             be added, given that any interesections are found
 //-----------------------------------------------------------------------------
-void CalculateJunctionIntersectionsFromRoadPolygons(OWL::Interfaces::WorldData& worldData,
-                                                    const JunctionPolygons& junctionPolygons,
+void CalculateJunctionIntersectionsFromRoadPolygons(const JunctionPolygons& junctionPolygons,
                                                     OWL::Junction* const junction);
 
 //-----------------------------------------------------------------------------
@@ -317,7 +316,7 @@ std::optional<OWL::IntersectionInfo> CalculateIntersectionInfoForRoadPolygons(co
 //! \param[in] junction the junction in which the roads intersect
 //! \return the relative rank of the intersecting road
 //-----------------------------------------------------------------------------
-IntersectingConnectionRank GetRelativeRank(const OWL::Id roadId, const OWL::Id intersectingRoadId, const OWL::Junction * const junction);
+IntersectingConnectionRank GetRelativeRank(const std::string& roadId, const std::string& intersectingRoadId, const OWL::Junction * const junction);
 
 constexpr static const double SAMPLING_RATE = 0.1; // 1m sampling rate of reference line
 constexpr static const double EPS = 1e-3;   // epsilon value for geometric comparisons

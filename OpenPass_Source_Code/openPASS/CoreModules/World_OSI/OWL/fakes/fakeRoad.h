@@ -17,14 +17,14 @@ namespace OWL::Fakes{
 class Road: public OWL::Interfaces::Road
 {
 public:
-    MOCK_CONST_METHOD0(GetId, OWL::Id());
+    MOCK_CONST_METHOD0(GetId, const std::string&());
     MOCK_CONST_METHOD0(GetSections, std::list<const OWL::Interfaces::Section*>&());
     MOCK_METHOD1(AddSection, void(OWL::Interfaces::Section& ));
     MOCK_CONST_METHOD0(GetLength, double());
-    MOCK_CONST_METHOD0(GetSuccessor, OWL::Id ());
-    MOCK_CONST_METHOD0(GetPredecessor, OWL::Id ());
-    MOCK_METHOD1(SetSuccessor, void (OWL::Id));
-    MOCK_METHOD1(SetPredecessor, void (OWL::Id));
+    MOCK_CONST_METHOD0(GetSuccessor, const std::string& ());
+    MOCK_CONST_METHOD0(GetPredecessor, const std::string& ());
+    MOCK_METHOD1(SetSuccessor, void (const std::string&));
+    MOCK_METHOD1(SetPredecessor, void (const std::string&));
     MOCK_CONST_METHOD0(IsInStreamDirection, bool ());
     MOCK_CONST_METHOD1(GetDistance, double (OWL::MeasurementPoint));
 };

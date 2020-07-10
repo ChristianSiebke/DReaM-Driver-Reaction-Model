@@ -595,14 +595,14 @@ void GeometryConverter::CalculateIntersections(OWL::Interfaces::WorldData& world
                        std::inserter(junctionPolygons, junctionPolygons.begin()),
                        BuildRoadPolygons);
 
-        CalculateJunctionIntersectionsFromRoadPolygons(worldData, junctionPolygons, junction);
+        CalculateJunctionIntersectionsFromRoadPolygons(junctionPolygons, junction);
     }
 }
 
-std::pair<OWL::Id, std::vector<LaneGeometryPolygon>> GeometryConverter::BuildRoadPolygons(const OWL::Road* const road)
+RoadPolygons GeometryConverter::BuildRoadPolygons(const OWL::Road* const road)
 {
     std::vector<LaneGeometryPolygon> polygons;
-    OWL::Id roadId = road->GetId();
+    auto& roadId = road->GetId();
 
     for (const auto section : road->GetSections())
     {
@@ -621,7 +621,7 @@ std::pair<OWL::Id, std::vector<LaneGeometryPolygon>> GeometryConverter::BuildRoa
     return std::make_pair(roadId, polygons);
 }
 
-std::function<LaneGeometryPolygon (const OWL::Primitive::LaneGeometryElement* const)> GeometryConverter::CreateBuildPolygonFromLaneGeometryFunction(const OWL::Id roadId,
+std::function<LaneGeometryPolygon (const OWL::Primitive::LaneGeometryElement* const)> GeometryConverter::CreateBuildPolygonFromLaneGeometryFunction(const std::string& roadId,
                                                                                                                                                     const OWL::Id laneId)
 {
     return [roadId, laneId](const auto elem) -> LaneGeometryPolygon
@@ -646,8 +646,7 @@ std::function<LaneGeometryPolygon (const OWL::Primitive::LaneGeometryElement* co
     };
 }
 
-void GeometryConverter::CalculateJunctionIntersectionsFromRoadPolygons(OWL::Interfaces::WorldData& worldData,
-                                                                       const JunctionPolygons& junctionPolygons,
+void GeometryConverter::CalculateJunctionIntersectionsFromRoadPolygons(const JunctionPolygons& junctionPolygons,
                                                                        OWL::Junction* const junction)
 {
     auto roadPolygonsIter = junctionPolygons.begin();
@@ -663,8 +662,8 @@ void GeometryConverter::CalculateJunctionIntersectionsFromRoadPolygons(OWL::Inte
             {
                 const auto crossIntersectionInfo = CalculateIntersectionInfoForRoadPolygons(*roadPolygonsToCompareIter, *roadPolygonsIter, junction);
 
-                junction->AddIntersectionInfo(worldData.GetRoadIdMapping().at(roadPolygonsIter->first), intersectionInfo.value());
-                junction->AddIntersectionInfo(worldData.GetRoadIdMapping().at(roadPolygonsToCompareIter->first), crossIntersectionInfo.value());
+                junction->AddIntersectionInfo(roadPolygonsIter->first, intersectionInfo.value());
+                junction->AddIntersectionInfo(roadPolygonsToCompareIter->first, crossIntersectionInfo.value());
             }
 
             roadPolygonsToCompareIter++;
@@ -729,17 +728,17 @@ std::optional<OWL::IntersectionInfo> GeometryConverter::CalculateIntersectionInf
             : std::nullopt;
 }
 
-IntersectingConnectionRank GeometryConverter::GetRelativeRank(const OWL::Id roadId, const OWL::Id intersectingRoadId, const OWL::Junction * const junction)
+IntersectingConnectionRank GeometryConverter::GetRelativeRank(const std::string& roadId, const std::string& intersectingRoadId, const OWL::Junction * const junction)
 {
-    if (std::find(junction->GetPriorities().begin(),
-                  junction->GetPriorities().end(),
-                  std::make_pair(roadId, intersectingRoadId)) != junction->GetPriorities().end())
+    if (std::find_if(junction->GetPriorities().begin(),
+                     junction->GetPriorities().end(),
+                     [&](const auto& priority){return priority.first == roadId && priority.second == intersectingRoadId;}) != junction->GetPriorities().end())
     {
         return IntersectingConnectionRank::Lower;
     }
-    else if (std::find(junction->GetPriorities().begin(),
-             junction->GetPriorities().end(),
-             std::make_pair(intersectingRoadId, roadId)) != junction->GetPriorities().end())
+    else if (std::find_if(junction->GetPriorities().begin(),
+                          junction->GetPriorities().end(),
+                          [&](const auto& priority){return priority.first == intersectingRoadId && priority.second == roadId;}) != junction->GetPriorities().end())
     {
         return IntersectingConnectionRank::Higher;
     }

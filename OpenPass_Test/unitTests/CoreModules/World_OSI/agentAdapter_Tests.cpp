@@ -11,19 +11,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "fakeWorld.h"
-#include "fakeSection.h"
-#include "fakeLane.h"
-#include "fakeWorldData.h"
-#include "fakeLaneManager.h"
-#include "fakeMovingObject.h"
-#include "fakeAgent.h"
-
-#include "agentManager_Testhelper.h"
-#include "Generators/laneGeometryElementGenerator.h"
-
 #include "AgentAdapter.h"
-#include "WorldDataQuery.h"
 
 using ::testing::Return;
 using ::testing::ReturnRef;

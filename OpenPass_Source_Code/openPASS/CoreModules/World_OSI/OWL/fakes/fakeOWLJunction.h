@@ -17,10 +17,10 @@ namespace OWL::Fakes {
 class Junction : public OWL::Interfaces::Junction
 {
 public:
-    MOCK_CONST_METHOD0(GetId, OWL::Id ());
+    MOCK_CONST_METHOD0(GetId, const std::string& ());
     MOCK_METHOD1(AddConnectingRoad, void (const OWL::Interfaces::Road* connectingRoad));
     MOCK_CONST_METHOD0(GetConnectingRoads, const OWL::Interfaces::Roads& ());
-    MOCK_METHOD2(AddPriority, void (Id high, Id low));
+    MOCK_METHOD2(AddPriority, void (const std::string& high, const std::string& low));
     MOCK_CONST_METHOD0(GetPriorities, const Priorities& ());
     MOCK_METHOD2(AddIntersectionInfo, void (const std::string&, const IntersectionInfo&));
     MOCK_CONST_METHOD0(GetIntersections, const std::map<std::string, std::vector<IntersectionInfo>>& ());

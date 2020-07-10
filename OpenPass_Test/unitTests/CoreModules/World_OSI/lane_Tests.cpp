@@ -35,7 +35,7 @@ TEST(GetNeighbouringJoints, DistanceBetweenTwoJoints_ReturnsJoints)
 {
     const double length = 10.0;
 
-    osi3::world::RoadLane osiLane;
+    osi3::Lane osiLane;
     OWL::Implementation::Lane lane(&osiLane, nullptr);
 
     auto laneGeometryElement =
@@ -74,7 +74,7 @@ TEST(GetNeighbouringJoints, DistanceAtPrevJoint_ReturnsJoints)
 {
     const double length = 10.0;
 
-    osi3::world::RoadLane osiLane;
+    osi3::Lane osiLane;
     OWL::Implementation::Lane lane(&osiLane, nullptr);
 
     auto laneGeometryElement =
@@ -113,7 +113,7 @@ TEST(GetNeighbouringJoints, DistanceAtNextJoint_ReturnsPrevJointOnly)
 {
     const double length = 10.0;
 
-    osi3::world::RoadLane osiLane;
+    osi3::Lane osiLane;
     OWL::Implementation::Lane lane(&osiLane, nullptr);
 
     auto laneGeometryElement =
@@ -151,7 +151,7 @@ TEST(GetNeighbouringJoints, DistanceAtMiddleJoint_ReturnsJoints)
 {
     const double length = 10.0;
 
-    osi3::world::RoadLane osiLane;
+    osi3::Lane osiLane;
     OWL::Implementation::Lane lane(&osiLane, nullptr);
 
     auto laneGeometryElement1 =
@@ -206,7 +206,7 @@ TEST(GetInterpolatedPointsAtDistance, DistanceAtPrevJoint_ReturnsPrevJoint)
     const double length = 10.0;
     const double width = 3.75;
 
-    osi3::world::RoadLane osiLane;
+    osi3::Lane osiLane;
     OWL::Implementation::Lane lane(&osiLane, nullptr);
 
     auto laneGeometryElement =
@@ -243,7 +243,7 @@ TEST(GetInterpolatedPointsAtDistance, DistanceAtNextJoint_ReturnsNextJoint)
     const double length = 10.0;
     const double width = 3.75;
 
-    osi3::world::RoadLane osiLane;
+    osi3::Lane osiLane;
     OWL::Implementation::Lane lane(&osiLane, nullptr);
 
     auto laneGeometryElement =
@@ -281,7 +281,7 @@ TEST(GetInterpolatedPointsAtDistance, DistanceBetweenJoints_ReturnsInterpolatedP
     const double width = 4.0;
     const double distance = 5.0;
 
-    osi3::world::RoadLane osiLane;
+    osi3::Lane osiLane;
     OWL::Implementation::Lane lane(&osiLane, nullptr);
 
     auto laneGeometryElement =
@@ -325,7 +325,7 @@ TEST(GetInterpolatedPointsAtDistance, DistanceBetweenJointsWithHeading_ReturnsIn
     const double width = 4.0;
     const double distance = 5.0;
 
-    osi3::world::RoadLane osiLane;
+    osi3::Lane osiLane;
     OWL::Implementation::Lane lane(&osiLane, nullptr);
 
     auto laneGeometryElement =
@@ -371,7 +371,7 @@ TEST(GetLaneWidth, LaneWidthQueryOnTriangularLane_ReturnsZeroWidthAtStartAndFull
     const double length = 10;
     const double heading = 0.0;
 
-    osi3::world::RoadLane osiLane;
+    osi3::Lane osiLane;
     OWL::Implementation::Lane lane(&osiLane, nullptr);
 
     auto elementUnderTest =
@@ -405,7 +405,7 @@ TEST(GetLaneWidth, LaneWidthQueryOnTriangularLane_ReturnsCorrectlyInterpolatedWi
     const double heading = 0.0;
     const double queryPosition = 3.0;
 
-    osi3::world::RoadLane osiLane;
+    osi3::Lane osiLane;
     OWL::Implementation::Lane lane(&osiLane, nullptr);
 
     auto elementUnderTest =
@@ -438,7 +438,7 @@ TEST(GetLaneWidth, LaneWidthQueryOnRotatedTriangularLane_ReturnsCorrectlyInterpo
     const double heading = M_PI / 6.0;
     const double queryPosition = 3.0;
 
-    osi3::world::RoadLane osiLane;
+    osi3::Lane osiLane;
     OWL::Implementation::Lane lane(&osiLane, nullptr);
 
     auto elementUnderTest =
@@ -470,7 +470,7 @@ TEST(DISABLED_GetLaneWidth, LaneWidthQueryOnRectangularLane_ReturnsFullWidthAtSt
     const double length = 10;
     const double heading = 0.0;
 
-    osi3::world::RoadLane osiLane;
+    osi3::Lane osiLane;
     OWL::Implementation::Lane lane(&osiLane, nullptr);
 
     auto elementUnderTest =
@@ -507,7 +507,7 @@ TEST(GetLaneCurvature, LaneCurvatureQueryOnCurvedLane_ReturnsZeroCurvatureAtStar
     const double curvatureStart = 0.2;
     const double curvatureEnd = 0.5;
 
-    osi3::world::RoadLane osiLane;
+    osi3::Lane osiLane;
     OWL::Implementation::Lane lane(&osiLane, nullptr);
 
     auto elementUnderTest =
@@ -548,7 +548,7 @@ TEST(GetLaneCurvature, LaneCurvatureQueryOnCurvedLane_ReturnsCorrectlyInterpolat
     const double curvatureStart = 0.2;
     const double curvatureEnd = 0.5;
 
-    osi3::world::RoadLane osiLane;
+    osi3::Lane osiLane;
     OWL::Implementation::Lane lane(&osiLane, nullptr);
 
     auto elementUnderTest =
@@ -589,7 +589,7 @@ TEST(GetLaneCurvature, LaneCurvatureQueryOnRotatedCurvedLane_ReturnsCorrectlyInt
     const double curvatureStart = 0.2;
     const double curvatureEnd = 0.5;
 
-    osi3::world::RoadLane osiLane;
+    osi3::Lane osiLane;
     OWL::Implementation::Lane lane(&osiLane, nullptr);
 
     auto elementUnderTest =
@@ -626,7 +626,7 @@ TEST(GetLaneCurvature, LaneCurvatureQueryOnStraightLane_ReturnsZeroCurvature)
     const double length = 10;
     const double heading = 0.0;
 
-    osi3::world::RoadLane osiLane;
+    osi3::Lane osiLane;
     OWL::Implementation::Lane lane(&osiLane, nullptr);
 
     auto elementUnderTest =
@@ -664,7 +664,7 @@ TEST(GetLaneDirection, LaneWidthQueryOnRotatedStraightLane_ReturnsCorrectDirecti
     const double length = 10;
     const double heading = M_PI / 6.0;
 
-    osi3::world::RoadLane osiLane;
+    osi3::Lane osiLane;
     OWL::Implementation::Lane lane(&osiLane, nullptr);
 
     auto elementUnderTest =
@@ -700,7 +700,7 @@ TEST(GetLaneDirection, LaneWidthQueryOnRotatedConstantlyCurvedLane_ReturnsCorrec
     const double curvatureStart = 0.2;
     const double curvatureEnd = 0.2;
 
-    osi3::world::RoadLane osiLane;
+    osi3::Lane osiLane;
     OWL::Implementation::Lane lane(&osiLane, nullptr);
 
     auto elementUnderTest =
@@ -742,7 +742,7 @@ TEST(GetLaneDirection, LaneWidthQueryOnRotatedCurvedLane_ReturnsCorrectDirection
     const double curvatureStart = 0.2;
     const double curvatureEnd = 0.8;
 
-    osi3::world::RoadLane osiLane;
+    osi3::Lane osiLane;
     OWL::Implementation::Lane lane(&osiLane, nullptr);
 
     auto elementUnderTest =

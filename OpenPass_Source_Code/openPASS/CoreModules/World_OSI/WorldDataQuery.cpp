@@ -109,19 +109,17 @@ OWL::CSection* WorldDataQuery::GetSectionByDistance(std::string odRoadId, double
 {
     distance = std::max(0.0, distance);
 
-    for (const auto& road : worldData.GetRoads())
+    auto road = GetRoadByOdId(odRoadId);
+    if (!road)
     {
-        if (worldData.GetRoadIdMapping().at(road.first) == odRoadId)
+        return nullptr;
+    }
+    for (auto tmpSection : road->GetSections())
+    {
+        if (tmpSection->Covers(distance))
         {
-            for (auto tmpSection : road.second->GetSections())
-            {
-                if (tmpSection->Covers(distance))
-                {
-                    return tmpSection;
-                }
-            }
+            return tmpSection;
         }
-        continue;
     }
 
     return nullptr;
@@ -129,26 +127,14 @@ OWL::CSection* WorldDataQuery::GetSectionByDistance(std::string odRoadId, double
 
 OWL::CRoad* WorldDataQuery::GetRoadByOdId(std::string odRoadId) const
 {
-    for (const auto& [osiId, odId] : worldData.GetRoadIdMapping())
-    {
-        if (odRoadId == odId)
-        {
-            return worldData.GetRoads().at(osiId);
-        }
-    }
-    return  nullptr;
+    auto road = worldData.GetRoads().find(odRoadId);
+    return  road != worldData.GetRoads().cend() ? road->second : nullptr;
 }
 
 const OWL::Interfaces::Junction *WorldDataQuery::GetJunctionByOdId(const std::string &odJunctionId) const
 {
-    for (const auto& [osiId, odId] : worldData.GetJunctionIdMapping())
-    {
-        if (odJunctionId == odId)
-        {
-            return worldData.GetJunctions().at(osiId);
-        }
-    }
-    return  nullptr;
+    auto junction = worldData.GetJunctions().find(odJunctionId);
+    return  junction != worldData.GetJunctions().cend() ? junction->second : nullptr;
 }
 
 const OWL::Interfaces::Junction *WorldDataQuery::GetJunctionOfConnector(const std::string &connectingRoadId) const
@@ -379,8 +365,8 @@ std::vector<JunctionConnection> WorldDataQuery::GetConnectionsOnJunction(std::st
         if (connectingRoad->GetPredecessor() == incomingRoad->GetId())
         {
             JunctionConnection connection;
-            connection.connectingRoadId = worldData.GetRoadIdMapping().at(connectingRoad->GetId());
-            connection.outgoingRoadId = worldData.GetRoadIdMapping().at(connectingRoad->GetSuccessor());
+            connection.connectingRoadId = connectingRoad->GetId();
+            connection.outgoingRoadId = connectingRoad->GetSuccessor();
             const auto& outgoingRoad = worldData.GetRoads().at(connectingRoad->GetSuccessor());
             connection.outgoingStreamDirection =
                     junction->GetId() == (outgoingRoad->IsInStreamDirection() ? outgoingRoad->GetPredecessor() : outgoingRoad->GetSuccessor());
@@ -398,7 +384,7 @@ std::vector<IntersectingConnection> WorldDataQuery::GetIntersectingConnections(s
     if (connectionInfos != junction->GetIntersections().end())
     {
         std::transform(connectionInfos->second.cbegin(), connectionInfos->second.cend(), std::back_inserter(intersections),
-                       [&](const OWL::IntersectionInfo& connectionInfo){return IntersectingConnection{worldData.GetRoadIdMapping().at(connectionInfo.intersectingRoad), connectionInfo.relativeRank};});
+                       [&](const OWL::IntersectionInfo& connectionInfo){return IntersectingConnection{connectionInfo.intersectingRoad, connectionInfo.relativeRank};});
     }
     return intersections;
 }
@@ -409,7 +395,7 @@ std::vector<JunctionConnectorPriority> WorldDataQuery::GetPrioritiesOnJunction(s
     const auto junction = GetJunctionByOdId(junctionId);
     for (const auto& [high, low] : junction->GetPriorities())
     {
-        priorities.push_back({worldData.GetRoadIdMapping().at(high), worldData.GetRoadIdMapping().at(low)});
+        priorities.push_back({high, low});
     }
     return priorities;
 }
@@ -418,14 +404,14 @@ RoadNetworkElement WorldDataQuery::GetRoadSuccessor(std::string roadId) const
 {
     auto currentRoad = GetRoadByOdId(roadId);
     assert(currentRoad);
-    OWL::Id nextElementId = currentRoad->GetSuccessor();
+    const auto& nextElementId = currentRoad->GetSuccessor();
     if (worldData.GetRoads().count(nextElementId) > 0)
     {
-        return {RoadNetworkElementType::Road, worldData.GetRoadIdMapping().at(nextElementId)};
+        return {RoadNetworkElementType::Road, nextElementId};
     }
     if (worldData.GetJunctions().count(nextElementId) > 0)
     {
-        return {RoadNetworkElementType::Junction, worldData.GetJunctionIdMapping().at(nextElementId)};
+        return {RoadNetworkElementType::Junction, nextElementId};
     }
     return {RoadNetworkElementType::None, ""};
 }
@@ -434,14 +420,14 @@ RoadNetworkElement WorldDataQuery::GetRoadPredecessor(std::string roadId) const
 {
     auto currentRoad = GetRoadByOdId(roadId);
     assert(currentRoad);
-    OWL::Id nextElementId = currentRoad->GetPredecessor();
+    const auto& nextElementId = currentRoad->GetPredecessor();
     if (worldData.GetRoads().count(nextElementId) > 0)
     {
-        return {RoadNetworkElementType::Road, worldData.GetRoadIdMapping().at(nextElementId)};
+        return {RoadNetworkElementType::Road, nextElementId};
     }
     if (worldData.GetJunctions().count(nextElementId) > 0)
     {
-        return {RoadNetworkElementType::Junction, worldData.GetJunctionIdMapping().at(nextElementId)};
+        return {RoadNetworkElementType::Junction, nextElementId};
     }
     return {RoadNetworkElementType::None, ""};
 }
@@ -474,7 +460,7 @@ std::vector<const OWL::Interfaces::WorldObject*> WorldDataQuery::GetMovingObject
 std::vector<RouteElement> WorldDataQuery::GetRouteLeadingToConnector (std::string connectingRoadId) const
 {
      auto incomingRoadId = GetRoadPredecessor(connectingRoadId).id;
-     bool incomingRoadLeadsToJunction = GetRoadSuccessor(incomingRoadId).id == worldData.GetJunctionIdMapping().at(GetJunctionOfConnector(connectingRoadId)->GetId());
+     bool incomingRoadLeadsToJunction = GetRoadSuccessor(incomingRoadId).id == GetJunctionOfConnector(connectingRoadId)->GetId();
      std::vector<RouteElement> route{{incomingRoadId, incomingRoadLeadsToJunction}};
      bool reachedEndOfRoadStream = false;
      auto emplace_element_if = [&](const RoadNetworkElement& element)
@@ -571,11 +557,10 @@ std::shared_ptr<const LaneStream> WorldDataQuery::CreateLaneStream(const std::ve
 {
     std::vector<LaneStreamInfo> lanes;
     OWL::CLane* currentLane = GetOriginatingRouteLane(route, startRoadId, startLaneId, startDistance);
-    auto currentRoadOdId = worldData.GetRoadIdMapping().at(currentLane->GetRoad().GetId());
+    auto currentRoadId = currentLane->GetRoad().GetId();
     auto routeIterator = std::find_if(route.cbegin(), route.cend(),
-                                      [&](const auto& routeElement){return routeElement.roadId == currentRoadOdId;});
+                                      [&](const auto& routeElement){return routeElement.roadId == currentRoadId;});
     double currentS = 0.0;
-    auto currentRoadId = GetRoadByOdId(routeIterator->roadId)->GetId();
     auto currentRoad = worldData.GetRoads().at(currentRoadId);
     while (currentLane)
     {
@@ -595,7 +580,7 @@ std::shared_ptr<const LaneStream> WorldDataQuery::CreateLaneStream(const std::ve
             {
                 break;
             }
-            currentRoadId = GetRoadByOdId(routeIterator->roadId)->GetId();
+            currentRoadId = routeIterator->roadId;
             currentRoad = worldData.GetRoads().at(currentRoadId);
             currentLane = GetLaneOnRoad(currentRoad, successorLanes);
         }
@@ -666,7 +651,7 @@ LaneMultiStream::Node WorldDataQuery::CreateLaneMultiStreamRecursive(const RoadG
     if (laneSuccessors.size() == 1)
     {
         const auto& laneSuccessor = worldData.GetLanes().at(laneSuccessors.front());
-        const auto& successorRoadId = worldData.GetRoadIdMapping().at(laneSuccessor->GetRoad().GetId());
+        const auto& successorRoadId = laneSuccessor->GetRoad().GetId();
         if (successorRoadId == routeElement.roadId)
         {
             next.push_back(CreateLaneMultiStreamRecursive(roadGraph, current, sOffset + laneLength, laneSuccessor));
@@ -681,7 +666,7 @@ LaneMultiStream::Node WorldDataQuery::CreateLaneMultiStreamRecursive(const RoadG
             auto laneSuccessorId = std::find_if(laneSuccessors.begin(), laneSuccessors.end(), [&](const auto& laneSuccessorId)
             {
                 const auto& laneSuccessor = worldData.GetLanes().at(laneSuccessorId);
-                const auto& laneSuccessorRoadId = worldData.GetRoadIdMapping().at(laneSuccessor->GetRoad().GetId());
+                const auto& laneSuccessorRoadId = laneSuccessor->GetRoad().GetId();
                 return laneSuccessorRoadId == successorRoadId;
             });
             if (laneSuccessorId != laneSuccessors.end())
@@ -724,7 +709,7 @@ OWL::CLane* WorldDataQuery::GetOriginatingRouteLane(std::vector<RouteElement> ro
         {
             const auto upStreamLane = worldData.GetLanes().at(laneId);
             const auto upStreamRoadId = upStreamLane->GetRoad().GetId();
-            return worldData.GetRoadIdMapping().at(upStreamRoadId) == routeIterator->roadId;
+            return upStreamRoadId == routeIterator->roadId;
         });
         if (upstreamLane == upstreamLanes.cend()) //no predecessor in current road -> go to previous road
         {
@@ -740,7 +725,7 @@ OWL::CLane* WorldDataQuery::GetOriginatingRouteLane(std::vector<RouteElement> ro
             {
                 const auto upStreamLane = worldData.GetLanes().at(laneId);
                 const auto upStreamRoadId = upStreamLane->GetRoad().GetId();
-                return worldData.GetRoadIdMapping().at(upStreamRoadId) == routeIterator->roadId;
+                return upStreamRoadId == routeIterator->roadId;
             });
         }
         if (upstreamLane == upstreamLanes.cend()) //none of the predecessors is on the route
@@ -761,7 +746,7 @@ RouteQueryResult<LongitudinalDistance> WorldDataQuery::GetDistanceBetweenObjects
                                                                                  const ObjectPosition& targetObjectPos) const
 {
     const auto& rootElement = roadStream.GetRoot().element.value();
-    const auto& rootRoadId = worldData.GetRoadIdMapping().at(rootElement.element->GetId());
+    const auto& rootRoadId = rootElement.element->GetId();
     double objectPositionStart = rootElement.GetStreamPosition(objectPos.touchedRoads.at(rootRoadId).sStart);
     double objectPositionEnd = rootElement.GetStreamPosition(objectPos.touchedRoads.at(rootRoadId).sEnd);
     double objectPositionMin = std::min(objectPositionStart, objectPositionEnd);
@@ -773,7 +758,7 @@ RouteQueryResult<LongitudinalDistance> WorldDataQuery::GetDistanceBetweenObjects
     }
     return roadStream.Traverse<LongitudinalDistance>(RoadMultiStream::TraversedFunction<LongitudinalDistance>{[&](const auto& road, const auto& previousResult)
     {
-        const auto& roadId = worldData.GetRoadIdMapping().at(road.element->GetId());
+        const auto& roadId = road.element->GetId();
         if ((previousResult.netDistance.has_value() && previousResult.referencePoint.has_value())
             || targetObjectPos.touchedRoads.count(roadId) == 0)
         {
@@ -836,7 +821,7 @@ RouteQueryResult<RelativeWorldView::Junctions> WorldDataQuery::GetRelativeJuncti
             return previousResult;
         }
         RelativeWorldView::Junctions junctions{previousResult};
-        std::string roadId = worldData.GetRoadIdMapping().at(road().GetId());
+        std::string roadId = road().GetId();
         auto junction = GetJunctionOfConnector(roadId);
         if (junction)
         {
@@ -1038,7 +1023,7 @@ RouteQueryResult<Obstruction> WorldDataQuery::GetObstruction(const LaneMultiStre
      {
          std::optional<Position> firstPoint{previousPoints.first};
          std::optional<Position> secondPoint{previousPoints.second};
-         const auto it = otherPosition.touchedRoads.find(worldData.GetRoadIdMapping().at(lane().GetRoad().GetId()));
+         const auto it = otherPosition.touchedRoads.find(lane().GetRoad().GetId());
          if (it == otherPosition.touchedRoads.end())
          {
              return std::make_tuple(previousResult, std::make_pair(firstPoint, secondPoint));

@@ -19,7 +19,6 @@
 
 #include "Common/globalDefinitions.h"
 
-#include "osi3/osi_road.pb.h"
 #include "osi3/osi_lane.pb.h"
 #include "osi3/osi_trafficsign.pb.h"
 
@@ -35,14 +34,6 @@ enum class LaneMarkingSide;
 
 namespace OpenDriveTypeMapper
 {
-    //-----------------------------------------------------------------------------
-    //! Convert OpenDRIVE road type to OSI road type
-    //!
-    //! @param[in] odRoadType             OpenDRIVE road type
-    //! @return                           OSI road type
-    //-----------------------------------------------------------------------------
-    osi3::world::Road_Type OdToOsiRoadType(const RoadTypeInformation odRoadType);
-
     //-----------------------------------------------------------------------------
     //! Convert OpenDRIVE lane type to OSI lane type
     //!

@@ -13,7 +13,6 @@
 #include "gmock/gmock.h"
 
 #include "AgentAdapter.h"
-#include "WorldDataQuery.h"
 
 #include "fakeWorld.h"
 #include "fakeSection.h"

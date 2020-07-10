@@ -110,19 +110,18 @@ std::function<void (const RTreeElement&)>  LocateOnGeometryElement(const OWL::In
         const OWL::Interfaces::Lane* lane = localizationElement.lane;
         const auto laneOsiId = lane->GetId();
         const auto laneOdId = worldData.GetLaneIdMapping().at(laneOsiId);
-        const auto roadOsiId = lane->GetRoad().GetId();
-        const auto roadOdId = worldData.GetRoadIdMapping().at(roadOsiId);
+        const auto roadId = lane->GetRoad().GetId();
 
         if (converter.IsConvertible(referencePoint))
         {
             auto [s, t, yaw] = converter.GetRoadCoordinate(referencePoint, hdg);
-            locatedObject.referencePoint[roadOdId] = GlobalRoadPosition(roadOdId, laneOdId, s, t, yaw);
+            locatedObject.referencePoint[roadId] = GlobalRoadPosition(roadId, laneOdId, s, t, yaw);
         }
 
         if (converter.IsConvertible(mainLaneLocator))
         {
             auto [s, t, yaw] = converter.GetRoadCoordinate(mainLaneLocator, hdg);
-            locatedObject.mainLaneLocator[roadOdId] = GlobalRoadPosition(roadOdId, laneOdId, s, t, yaw);
+            locatedObject.mainLaneLocator[roadId] = GlobalRoadPosition(roadId, laneOdId, s, t, yaw);
         }
 
         for (const auto& point : intersection)
@@ -213,7 +212,7 @@ Result Localizer::BuildResult(const LocatedObject& locatedObject) const
 
     for (const auto& [lane, laneIntersection] : locatedObject.laneIntersections)
     {
-        std::string roadId = worldData.GetRoadIdMapping().at(lane->GetRoad().GetId());
+        std::string roadId = lane->GetRoad().GetId();
         touchedRoads[roadId].lanes.push_back(worldData.GetLaneIdMapping().at(lane->GetId()));
         touchedRoads[roadId].sStart = std::min(touchedRoads[roadId].sStart, laneIntersection.s_min);
         touchedRoads[roadId].sEnd = std::max(touchedRoads[roadId].sEnd, laneIntersection.s_max);

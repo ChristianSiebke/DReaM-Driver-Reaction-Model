@@ -228,7 +228,7 @@ public:
     template<typename T>
     bool ObjectIsOfTypeAndWithinRange(const OWL::Interfaces::WorldObject * const worldObject, const double minS, const double maxS, const LaneStreamInfo& lane) const
     {
-        const auto& roadId = worldData.GetRoadIdMapping().at(lane.element->GetRoad().GetId());
+        const auto& roadId = lane.element->GetRoad().GetId();
         return (worldObject->Is<T>() &&
                 lane.GetStreamPosition(worldObject->GetDistance(OWL::MeasurementPoint::RoadEnd, roadId) - lane.element->GetDistance(OWL::MeasurementPoint::RoadStart)) > minS &&
                 lane.GetStreamPosition(worldObject->GetDistance(OWL::MeasurementPoint::RoadStart, roadId) - lane.element->GetDistance(OWL::MeasurementPoint::RoadStart)) < maxS);
@@ -255,7 +255,7 @@ public:
             {
                 break;
             }
-            const auto& roadId = worldData.GetRoadIdMapping().at(lane.element->GetRoad().GetId());
+            const auto& roadId = lane.element->GetRoad().GetId();
             auto sortedObjects = lane.element->GetWorldObjects();
             if (lane.inStreamDirection)
             {
@@ -315,7 +315,7 @@ public:
                         return foundObjects;
                     }
 
-                    const auto& roadId = worldData.GetRoadIdMapping().at(lane.element->GetRoad().GetId());
+                    const auto& roadId = lane.element->GetRoad().GetId();
                     auto sortedObjects = lane.element->GetWorldObjects();
 
                     if (lane.inStreamDirection)
