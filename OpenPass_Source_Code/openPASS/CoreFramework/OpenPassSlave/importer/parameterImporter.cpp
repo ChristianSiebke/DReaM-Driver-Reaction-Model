@@ -58,25 +58,25 @@ ParameterSetLevel3 ImportParameter<NormalDistribution>(const QDomElement& domEle
         while (!parameterElement.isNull())
         {
             std::string parameterName;
-            NormalDistribution parameterValue;
+            double min, max, mean, sd;
 
             ThrowIfFalse(ParseAttributeString(parameterElement, ATTRIBUTE::key, parameterName),
                          parameterElement, "Attribute " + std::string(ATTRIBUTE::key) + " is missing.");
-            ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::min, parameterValue.min),
+            ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::min, min),
                          parameterElement, "Attribute " + std::string(ATTRIBUTE::min) + " is missing or of wrong type");
-            ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::max, parameterValue.max),
+            ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::max, max),
                          parameterElement, "Attribute " + std::string(ATTRIBUTE::max) + " is missing or of wrong type");
 
-            if (!ParseAttribute(parameterElement, ATTRIBUTE::mean, parameterValue.mean)
-                || !ParseAttribute(parameterElement, ATTRIBUTE::sd, parameterValue.standardDeviation))
+            if (!ParseAttribute(parameterElement, ATTRIBUTE::mean, mean)
+                || !ParseAttribute(parameterElement, ATTRIBUTE::sd, sd))
             {
-                ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::mu, parameterValue.mean)
-                             && ParseAttribute(parameterElement, ATTRIBUTE::sigma, parameterValue.standardDeviation),
+                ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::mu, mean)
+                             && ParseAttribute(parameterElement, ATTRIBUTE::sigma,sd),
                              parameterElement, std::string("Either attribute ") + ATTRIBUTE::mu + " and " + ATTRIBUTE::sigma + " or "
                              + ATTRIBUTE::mean + " and " + ATTRIBUTE::sd + " required for NormalDistribution");
             }
 
-            param.emplace_back(parameterName, parameterValue);
+            param.emplace_back(parameterName, NormalDistribution{mean, sd, min, max});
             parameterElement = parameterElement.nextSiblingElement(QString::fromStdString(elementName));
         }
     }
@@ -95,31 +95,29 @@ ParameterSetLevel3 ImportParameter<LogNormalDistribution>(const QDomElement& dom
         while (!parameterElement.isNull())
         {
             std::string parameterName;
-            LogNormalDistribution parameterValue;
+            double min, max, mean, sd{}, mu, sigma{};
 
             ThrowIfFalse(ParseAttributeString(parameterElement, ATTRIBUTE::key, parameterName),
                          parameterElement, "Attribute " + std::string(ATTRIBUTE::key) + " is missing.");
-            if (!ParseAttribute(parameterElement, ATTRIBUTE::mu, parameterValue.mu)
-                || !ParseAttribute(parameterElement, ATTRIBUTE::sigma, parameterValue.sigma))
+            ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::min, min),
+                         parameterElement, "Attribute " + std::string(ATTRIBUTE::min) + " is missing or of wrong type");
+            ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::max, max),
+                         parameterElement, "Attribute " + std::string(ATTRIBUTE::max) + " is missing or of wrong type");
+            if (ParseAttribute(parameterElement, ATTRIBUTE::mu, mu)
+                && ParseAttribute(parameterElement, ATTRIBUTE::sigma, sigma))
             {
-                double mean{0};
-                double stdDeviation{0};
+                param.emplace_back(parameterName, LogNormalDistribution{mu, sigma, min, max});
+            }
+           else {
                 ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::mean, mean)
-                             && ParseAttribute(parameterElement, ATTRIBUTE::sd, stdDeviation),
+                             && ParseAttribute(parameterElement, ATTRIBUTE::sd, sd),
                              parameterElement, "Either attribute " + std::string(ATTRIBUTE::mu) + " and " + std::string(ATTRIBUTE::sigma) + " or "
                              + std::string(ATTRIBUTE::mean) + " and " + std::string(ATTRIBUTE::sd) + " required for LogNormalDistribution");
 
-                double s2 = std::log(std::pow(stdDeviation/mean, 2)+1);
-                parameterValue.mu = std::log(mean)-s2/2;
-                parameterValue.sigma = std::sqrt(s2);
+                param.emplace_back(parameterName, LogNormalDistribution::CreateWithMeanSd(mean, sd, min, max));
 
             }
-            ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::min, parameterValue.min),
-                         parameterElement, "Attribute " + std::string(ATTRIBUTE::min) + " is missing or of wrong type");
-            ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::max, parameterValue.max),
-                         parameterElement, "Attribute " + std::string(ATTRIBUTE::max) + " is missing or of wrong type");
 
-            param.emplace_back(parameterName, parameterValue);
             parameterElement = parameterElement.nextSiblingElement(QString::fromStdString(elementName));
         }
     }
@@ -138,16 +136,16 @@ ParameterSetLevel3 ImportParameter<UniformDistribution>(const QDomElement& domEl
         while (!parameterElement.isNull())
         {
             std::string parameterName;
-            UniformDistribution parameterValue;
+            double min, max;
 
             ThrowIfFalse(ParseAttributeString(parameterElement, ATTRIBUTE::key, parameterName),
                          parameterElement, "Attribute " + std::string(ATTRIBUTE::key) + " is missing.");
-            ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::min, parameterValue.min),
+            ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::min, min),
                          parameterElement, "Attribute " + std::string(ATTRIBUTE::min) + " is missing or of wrong type");
-            ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::max, parameterValue.max),
+            ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::max, max),
                          parameterElement, "Attribute " + std::string(ATTRIBUTE::max) + " is missing or of wrong type");
 
-            param.emplace_back(parameterName, parameterValue);
+            param.emplace_back(parameterName, UniformDistribution{min, max});
             parameterElement = parameterElement.nextSiblingElement(QString::fromStdString(elementName));
         }
     }
@@ -166,18 +164,68 @@ ParameterSetLevel3 ImportParameter<ExponentialDistribution>(const QDomElement& d
         while (!parameterElement.isNull())
         {
             std::string parameterName;
-            ExponentialDistribution parameterValue;
+            double min, max, lambda, mean{};
 
             ThrowIfFalse(ParseAttributeString(parameterElement, ATTRIBUTE::key, parameterName),
                          parameterElement, "Attribute " + std::string(ATTRIBUTE::key) + " is missing.");
-            ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::lambda, parameterValue.lambda),
-                         parameterElement, "Attribute " + std::string(ATTRIBUTE::lambda) + " is missing or of wrong type");
-            ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::min, parameterValue.min),
+            ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::min, min),
                          parameterElement, "Attribute " + std::string(ATTRIBUTE::min) + " is missing or of wrong type");
-            ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::max, parameterValue.max),
+            ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::max, max),
                          parameterElement, "Attribute " + std::string(ATTRIBUTE::max) + " is missing or of wrong type");
 
-            param.emplace_back(parameterName, parameterValue);
+            if (ParseAttribute(parameterElement, ATTRIBUTE::lambda, lambda))
+            {
+                param.emplace_back(parameterName, ExponentialDistribution{lambda, min, max});
+            }
+            else
+            {
+                ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::mean, mean),
+                             parameterElement, "Either attribute " + std::string(ATTRIBUTE::lambda) + " or "
+                             + std::string(ATTRIBUTE::mean) + " required for ExponentialDistribution");
+                param.emplace_back(parameterName, ExponentialDistribution{1 / mean, min, max});
+            }
+
+            parameterElement = parameterElement.nextSiblingElement(QString::fromStdString(elementName));
+        }
+    }
+
+    return param;
+}
+
+template <>
+ParameterSetLevel3 ImportParameter<GammaDistribution>(const QDomElement& domElement, const std::string& elementName)
+{
+    ParameterSetLevel3 param;
+
+    QDomElement parameterElement;
+    if (SimulationCommon::GetFirstChildElement(domElement, elementName, parameterElement))
+    {
+        while (!parameterElement.isNull())
+        {
+            std::string parameterName;
+            double min, max, mean, sd{}, shape, scale{};
+
+            ThrowIfFalse(ParseAttributeString(parameterElement, ATTRIBUTE::key, parameterName),
+                         parameterElement, "Attribute " + std::string(ATTRIBUTE::key) + " is missing.");
+            ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::min, min),
+                         parameterElement, "Attribute " + std::string(ATTRIBUTE::min) + " is missing or of wrong type");
+            ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::max, max),
+                         parameterElement, "Attribute " + std::string(ATTRIBUTE::max) + " is missing or of wrong type");
+            if (ParseAttribute(parameterElement, ATTRIBUTE::shape, shape)
+                && ParseAttribute(parameterElement, ATTRIBUTE::scale, scale))
+            {
+                param.emplace_back(parameterName, GammaDistribution{shape, scale, min, max});
+            }
+           else {
+                ThrowIfFalse(ParseAttribute(parameterElement, ATTRIBUTE::mean, mean)
+                             && ParseAttribute(parameterElement, ATTRIBUTE::sd, sd),
+                             parameterElement, "Either attribute " + std::string(ATTRIBUTE::mu) + " and " + std::string(ATTRIBUTE::sigma) + " or "
+                             + std::string(ATTRIBUTE::mean) + " and " + std::string(ATTRIBUTE::sd) + " required for LogNormalDistribution");
+
+                param.emplace_back(parameterName, GammaDistribution::CreateWithMeanSd(mean, sd, min, max));
+
+            }
+
             parameterElement = parameterElement.nextSiblingElement(QString::fromStdString(elementName));
         }
     }
@@ -257,6 +305,7 @@ static ParameterSetLevel3 ImportParameterLevel3WithoutReferences(const QDomEleme
     auto lognormalDistributionParams = ImportParameter<openpass::parameter::LogNormalDistribution>(element, TAG::LogNormalDistribution);
     auto uniformDistributionParams = ImportParameter<openpass::parameter::UniformDistribution>(element, TAG::UniformDistribution);
     auto exponentialDistributionParams = ImportParameter<openpass::parameter::ExponentialDistribution>(element, TAG::ExponentialDistribution);
+    auto gammaDistributionParams = ImportParameter<openpass::parameter::GammaDistribution>(element, TAG::GammaDistribution);
 
     param.insert(param.end(), boolParams.begin(), boolParams.end());
     param.insert(param.end(), intParams.begin(), intParams.end());
@@ -269,6 +318,7 @@ static ParameterSetLevel3 ImportParameterLevel3WithoutReferences(const QDomEleme
     param.insert(param.end(), lognormalDistributionParams.begin(), lognormalDistributionParams.end());
     param.insert(param.end(), uniformDistributionParams.begin(), uniformDistributionParams.end());
     param.insert(param.end(), exponentialDistributionParams.begin(), exponentialDistributionParams.end());
+    param.insert(param.end(), gammaDistributionParams.begin(), gammaDistributionParams.end());
 
     return param;
 }

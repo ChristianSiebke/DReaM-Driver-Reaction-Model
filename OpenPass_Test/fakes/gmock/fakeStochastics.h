@@ -21,8 +21,9 @@ public:
     MOCK_METHOD2(GetNormalDistributed, double(double mean, double stdDeviation));
     MOCK_METHOD1(GetExponentialDistributed, double(double lambda));
     MOCK_METHOD2(GetGammaDistributed, double(double mean, double stdDeviation));
+    MOCK_METHOD2(GetGammaDistributedShapeScale, double(double shape, double scale));
     MOCK_METHOD2(GetLogNormalDistributed, double(double mean, double stdDeviation));
-    MOCK_METHOD2(GetMuSigmaLogNormalDistributed, double(double mu, double sigma));
+    MOCK_METHOD2(GetLogNormalDistributedMuSigma, double(double mu, double sigma));
     MOCK_METHOD2(GetSpecialDistributed, double(std::string distributionName, std::vector<double> args));
     MOCK_METHOD2(GetRandomCdfLogNormalDistributed, double(double, double));
     MOCK_METHOD3(GetPercentileLogNormalDistributed, double(double, double, double));

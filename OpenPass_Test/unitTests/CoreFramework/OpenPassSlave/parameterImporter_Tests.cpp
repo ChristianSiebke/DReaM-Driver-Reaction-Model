@@ -259,6 +259,9 @@ TEST(ParameterImporter, ImportStochasticDistributionSuccessfully)
                         "<LogNormalDistribution Key=\"FakeThree\" Mu=\"0.5\" Sigma=\"1\" Min=\"1.0\" Max=\"2.0\"/>"
                         "<UniformDistribution Key=\"FakeFour\" Min=\"1.\" Max=\"10.\"/>"
                         "<ExponentialDistribution Key=\"FakeFive\" Lambda=\"2.0\" Min=\"1.0\" Max=\"3.0\"/>"
+                        "<ExponentialDistribution Key=\"FakeSix\" Mean=\"3.0\" Min=\"1.0\" Max=\"3.0\"/>"
+                        "<GammaDistribution Key=\"FakeSeven\" Mean=\"2.0\" SD=\"0.5\" Min=\"1.0\" Max=\"3.0\"/>"
+                        "<GammaDistribution Key=\"FakeEight\" Shape=\"2.2\" Scale=\"0.7\" Min=\"1.0\" Max=\"3.0\"/>"
                     "</Profile>"
                  "</ProfileGroup>"
               "</Profiles>"
@@ -271,6 +274,9 @@ TEST(ParameterImporter, ImportStochasticDistributionSuccessfully)
                         "<LogNormalDistribution Key=\"FakeThree\" Mu=\"0.5\" Sigma=\"1\" Min=\"1.0\" Max=\"2.0\"/>"
                         "<UniformDistribution Key=\"FakeFour\" Min=\"1.\" Max=\"10.\"/>"
                         "<ExponentialDistribution Key=\"FakeFive\" Lambda=\"2.0\" Min=\"1.0\" Max=\"3.0\"/>"
+                        "<ExponentialDistribution Key=\"FakeSix\" Mean=\"3.0\" Min=\"1.0\" Max=\"3.0\"/>"
+                        "<GammaDistribution Key=\"FakeSeven\" Mean=\"2.0\" SD=\"0.5\" Min=\"1.0\" Max=\"3.0\"/>"
+                        "<GammaDistribution Key=\"FakeEight\" Shape=\"2.2\" Scale=\"0.7\" Min=\"1.0\" Max=\"3.0\"/>"
                     "</Profile>"
                 );
 
@@ -282,40 +288,63 @@ TEST(ParameterImporter, ImportStochasticDistributionSuccessfully)
     auto opt3 = op::Get<op::StochasticDistribution>(parameter, "FakeThree");
     auto opt4 = op::Get<op::StochasticDistribution>(parameter, "FakeFour");
     auto opt5 = op::Get<op::StochasticDistribution>(parameter, "FakeFive");
+    auto opt6 = op::Get<op::StochasticDistribution>(parameter, "FakeSix");
+    auto opt7 = op::Get<op::StochasticDistribution>(parameter, "FakeSeven");
+    auto opt8 = op::Get<op::StochasticDistribution>(parameter, "FakeEight");
 
     ASSERT_TRUE(opt1.has_value() && std::holds_alternative<op::NormalDistribution>(opt1.value()));
     ASSERT_TRUE(opt2.has_value() && std::holds_alternative<op::LogNormalDistribution>(opt2.value()));
     ASSERT_TRUE(opt3.has_value() && std::holds_alternative<op::LogNormalDistribution>(opt3.value()));
     ASSERT_TRUE(opt4.has_value() && std::holds_alternative<op::UniformDistribution>(opt4.value()));
     ASSERT_TRUE(opt5.has_value() && std::holds_alternative<op::ExponentialDistribution>(opt5.value()));
+    ASSERT_TRUE(opt6.has_value() && std::holds_alternative<op::ExponentialDistribution>(opt6.value()));
+    ASSERT_TRUE(opt7.has_value() && std::holds_alternative<op::GammaDistribution>(opt7.value()));
+    ASSERT_TRUE(opt8.has_value() && std::holds_alternative<op::GammaDistribution>(opt8.value()));
 
     auto normalDist = std::get<op::NormalDistribution>(opt1.value());
     auto logNormalDistTwo = std::get<op::LogNormalDistribution>(opt2.value());
     auto logNormalDistThree = std::get<op::LogNormalDistribution>(opt3.value());
     auto uniformDist = std::get<op::UniformDistribution>(opt4.value());
-    auto expDist = std::get<op::ExponentialDistribution>(opt5.value());
+    auto expDistOne = std::get<op::ExponentialDistribution>(opt5.value());
+    auto expDistTwo = std::get<op::ExponentialDistribution>(opt6.value());
+    auto gammaDistOne = std::get<op::GammaDistribution>(opt7.value());
+    auto gammaDistTwo = std::get<op::GammaDistribution>(opt8.value());
 
-    EXPECT_DOUBLE_EQ(normalDist.mean, 2.5);
-    EXPECT_DOUBLE_EQ(normalDist.standardDeviation, 0.3);
-    EXPECT_DOUBLE_EQ(normalDist.min, 1.91);
-    EXPECT_DOUBLE_EQ(normalDist.max, 3.09);
+    EXPECT_DOUBLE_EQ(normalDist.GetMean(), 2.5);
+    EXPECT_DOUBLE_EQ(normalDist.GetStandardDeviation(), 0.3);
+    EXPECT_DOUBLE_EQ(normalDist.GetMin(), 1.91);
+    EXPECT_DOUBLE_EQ(normalDist.GetMax(), 3.09);
 
-    EXPECT_DOUBLE_EQ(logNormalDistTwo.mu, 0.6820218760925354);
-    EXPECT_DOUBLE_EQ(logNormalDistTwo.sigma, 0.14916638004195087);
-    EXPECT_DOUBLE_EQ(logNormalDistTwo.min, 1);
-    EXPECT_DOUBLE_EQ(logNormalDistTwo.max, 3.0);
+    EXPECT_DOUBLE_EQ(logNormalDistTwo.GetMean(), 2.0);
+    EXPECT_DOUBLE_EQ(logNormalDistTwo.GetStandardDeviation(), 0.3);
+    EXPECT_DOUBLE_EQ(logNormalDistTwo.GetMin(), 1);
+    EXPECT_DOUBLE_EQ(logNormalDistTwo.GetMax(), 3.0);
 
-    EXPECT_DOUBLE_EQ(logNormalDistThree.mu, 0.5);
-    EXPECT_DOUBLE_EQ(logNormalDistThree.sigma, 1);
-    EXPECT_DOUBLE_EQ(logNormalDistThree.min, 1);
-    EXPECT_DOUBLE_EQ(logNormalDistThree.max, 2.0);
+    EXPECT_DOUBLE_EQ(logNormalDistThree.GetMu(), 0.5);
+    EXPECT_DOUBLE_EQ(logNormalDistThree.GetSigma(), 1);
+    EXPECT_DOUBLE_EQ(logNormalDistThree.GetMin(), 1);
+    EXPECT_DOUBLE_EQ(logNormalDistThree.GetMax(), 2.0);
 
-    EXPECT_DOUBLE_EQ(uniformDist.min, 1);
-    EXPECT_DOUBLE_EQ(uniformDist.max, 10);
+    EXPECT_DOUBLE_EQ(uniformDist.GetMin(), 1);
+    EXPECT_DOUBLE_EQ(uniformDist.GetMax(), 10);
 
-    EXPECT_DOUBLE_EQ(expDist.lambda, 2);
-    EXPECT_DOUBLE_EQ(expDist.min, 1);
-    EXPECT_DOUBLE_EQ(expDist.max, 3);
+    EXPECT_DOUBLE_EQ(expDistOne.GetLambda(), 2);
+    EXPECT_DOUBLE_EQ(expDistOne.GetMin(), 1);
+    EXPECT_DOUBLE_EQ(expDistOne.GetMax(), 3);
+
+    EXPECT_DOUBLE_EQ(expDistTwo.GetMean(), 3);
+    EXPECT_DOUBLE_EQ(expDistTwo.GetMin(), 1);
+    EXPECT_DOUBLE_EQ(expDistTwo.GetMax(), 3);
+
+    EXPECT_DOUBLE_EQ(gammaDistOne.GetMean(), 2);
+    EXPECT_DOUBLE_EQ(gammaDistOne.GetStandardDeviation(), 0.5);
+    EXPECT_DOUBLE_EQ(gammaDistOne.GetMin(), 1);
+    EXPECT_DOUBLE_EQ(gammaDistOne.GetMax(), 3);
+
+    EXPECT_DOUBLE_EQ(gammaDistTwo.GetShape(), 2.2);
+    EXPECT_DOUBLE_EQ(gammaDistTwo.GetScale(), 0.7);
+    EXPECT_DOUBLE_EQ(gammaDistTwo.GetMin(), 1);
+    EXPECT_DOUBLE_EQ(gammaDistTwo.GetMax(), 3);
 }
 
 TEST(ParameterImporter, AbortReferenceLoops)
@@ -385,13 +414,141 @@ TEST(ParameterImporter, ImportSingleReferenceSuccessfully)
     auto normalDistOne = std::get<op::NormalDistribution>(opt1.value());
     auto normalDistTwo = std::get<op::NormalDistribution>(opt2.value());
 
-    EXPECT_DOUBLE_EQ(normalDistOne.mean, 1);
-    EXPECT_DOUBLE_EQ(normalDistOne.standardDeviation, 1);
-    EXPECT_DOUBLE_EQ(normalDistOne.min, 1);
-    EXPECT_DOUBLE_EQ(normalDistOne.max, 1);
+    EXPECT_DOUBLE_EQ(normalDistOne.GetMean(), 1);
+    EXPECT_DOUBLE_EQ(normalDistOne.GetStandardDeviation(), 1);
+    EXPECT_DOUBLE_EQ(normalDistOne.GetMin(), 1);
+    EXPECT_DOUBLE_EQ(normalDistOne.GetMax(), 1);
 
-    EXPECT_DOUBLE_EQ(normalDistTwo.mean, 2);
-    EXPECT_DOUBLE_EQ(normalDistTwo.standardDeviation, 2);
-    EXPECT_DOUBLE_EQ(normalDistTwo.min, 2);
-    EXPECT_DOUBLE_EQ(normalDistTwo.max, 2.0);
+    EXPECT_DOUBLE_EQ(normalDistTwo.GetMean(), 2);
+    EXPECT_DOUBLE_EQ(normalDistTwo.GetStandardDeviation(), 2);
+    EXPECT_DOUBLE_EQ(normalDistTwo.GetMin(), 2);
+    EXPECT_DOUBLE_EQ(normalDistTwo.GetMax(), 2.0);
+}
+
+TEST(Parameter_LogNormalDistribution, GetAndSetMu_MeanAndSdUnchanged)
+{
+    constexpr double mu{12.3};
+    constexpr double sigma{1.2};
+    openpass::parameter::LogNormalDistribution distribution{mu, sigma, 0, 100};
+
+    const double mean = distribution.GetMean();
+    const double sd = distribution.GetStandardDeviation();
+
+    distribution.SetMu(distribution.GetMu());
+
+    EXPECT_DOUBLE_EQ(mean, distribution.GetMean());
+    EXPECT_DOUBLE_EQ(sd, distribution.GetStandardDeviation());
+}
+
+TEST(Parameter_LogNormalDistribution, GetAndSetSigma_MeanAndSdUnchanged)
+{
+    constexpr double mu{12.3};
+    constexpr double sigma{1.2};
+    openpass::parameter::LogNormalDistribution distribution{mu, sigma, 0, 100};
+
+    const double mean = distribution.GetMean();
+    const double sd = distribution.GetStandardDeviation();
+
+    distribution.SetSigma(distribution.GetSigma());
+
+    EXPECT_DOUBLE_EQ(mean, distribution.GetMean());
+    EXPECT_DOUBLE_EQ(sd, distribution.GetStandardDeviation());
+}
+
+TEST(Parameter_LogNormalDistribution, GetAndSetMean_MuAndSigmaUnchanged)
+{
+    constexpr double mu{12.3};
+    constexpr double sigma{1.2};
+    openpass::parameter::LogNormalDistribution distribution{mu, sigma, 0, 100};
+
+    distribution.SetMean(distribution.GetMean());
+
+    EXPECT_DOUBLE_EQ(mu, distribution.GetMu());
+    EXPECT_DOUBLE_EQ(sigma, distribution.GetSigma());
+}
+
+TEST(Parameter_LogNormalDistribution, GetAndSetSd_MuAndSigmaUnchanged)
+{
+    constexpr double mu{12.3};
+    constexpr double sigma{1.2};
+    openpass::parameter::LogNormalDistribution distribution{mu, sigma, 0, 100};
+
+    distribution.SetStandardDeviation(distribution.GetStandardDeviation());
+
+    EXPECT_DOUBLE_EQ(mu, distribution.GetMu());
+    EXPECT_DOUBLE_EQ(sigma, distribution.GetSigma());
+}
+
+TEST(Parameter_LogNormalDistribution, CreateWithMeanSd_MeanAndSdAsSet)
+{
+    constexpr double mean{12.3};
+    constexpr double sd{1.2};
+    auto distribution = openpass::parameter::LogNormalDistribution::CreateWithMeanSd(mean, sd, 0, 100);
+
+    EXPECT_DOUBLE_EQ(mean, distribution.GetMean());
+    EXPECT_DOUBLE_EQ(sd, distribution.GetStandardDeviation());
+}
+
+TEST(Parameter_GammaDistribution, GetAndSetShape_MeanAndSdUnchanged)
+{
+    constexpr double shape{12.3};
+    constexpr double scale{1.2};
+    openpass::parameter::GammaDistribution distribution{shape, scale, 0, 100};
+
+    const double mean = distribution.GetMean();
+    const double sd = distribution.GetStandardDeviation();
+
+    distribution.SetShape(distribution.GetShape());
+
+    EXPECT_DOUBLE_EQ(mean, distribution.GetMean());
+    EXPECT_DOUBLE_EQ(sd, distribution.GetStandardDeviation());
+}
+
+TEST(Parameter_GammaDistribution, GetAndSetScale_MeanAndSdUnchanged)
+{
+    constexpr double shape{12.3};
+    constexpr double scale{1.2};
+    openpass::parameter::GammaDistribution distribution{shape, scale, 0, 100};
+
+    const double mean = distribution.GetMean();
+    const double sd = distribution.GetStandardDeviation();
+
+    distribution.SetScale(distribution.GetScale());
+
+    EXPECT_DOUBLE_EQ(mean, distribution.GetMean());
+    EXPECT_DOUBLE_EQ(sd, distribution.GetStandardDeviation());
+}
+
+TEST(Parameter_GammaDistribution, GetAndSetMean_ShapeAndScaleUnchanged)
+{
+    constexpr double shape{12.3};
+    constexpr double scale{1.2};
+    openpass::parameter::GammaDistribution distribution{shape, scale, 0, 100};
+
+    distribution.SetMean(distribution.GetMean());
+
+    EXPECT_DOUBLE_EQ(shape, distribution.GetShape());
+    EXPECT_DOUBLE_EQ(scale, distribution.GetScale());
+}
+
+TEST(Parameter_GammaDistribution, GetAndSetSd_ShapeAndScaleUnchanged)
+{
+    constexpr double shape{12.3};
+    constexpr double scale{1.2};
+    openpass::parameter::GammaDistribution distribution{shape, scale, 0, 100};
+
+    distribution.SetStandardDeviation(distribution.GetStandardDeviation());
+
+    EXPECT_DOUBLE_EQ(shape, distribution.GetShape());
+    EXPECT_DOUBLE_EQ(scale, distribution.GetScale());
+}
+
+TEST(Parameter_GammaDistribution, CreateWithMeanSd_MeanAndSdAsSet)
+{
+    constexpr double mean{12.3};
+    constexpr double sd{1.2};
+    auto distribution = openpass::parameter::GammaDistribution::CreateWithMeanSd(mean, sd, 0, 100);
+
+    EXPECT_DOUBLE_EQ(mean, distribution.GetMean());
+    EXPECT_DOUBLE_EQ(sd, distribution.GetStandardDeviation());
 }

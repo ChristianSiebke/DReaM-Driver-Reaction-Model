@@ -170,7 +170,7 @@ public:
     virtual const std::map<std::string, const std::vector<std::string>>& GetParametersStringVector() const = 0;
 
     //-----------------------------------------------------------------------------
-    //! Retrieves the parameters of type "NormalDistribution"
+    //! Retrieves the parameters of stochastic type
     //!
     //! @return                Mapping of "id" to "value"
     //-----------------------------------------------------------------------------

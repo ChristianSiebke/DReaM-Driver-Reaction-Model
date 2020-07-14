@@ -90,6 +90,16 @@ double StochasticsImplementation::GetGammaDistributed(double mean, double stdDev
     return draw;
 }
 
+double StochasticsImplementation::GetGammaDistributedShapeScale(double shape, double scale)
+{
+    std::gamma_distribution<double> gammaDistribution(shape, scale);
+    auto gammaGenerator = std::bind(gammaDistribution, baseGenerator);
+
+    double draw = gammaGenerator();
+    LOG(CbkLogLevel::Debug, "GetGammaDistributed " + std::to_string(draw));
+    return draw;
+}
+
 double StochasticsImplementation::GetLogNormalDistributed(double mean, double stdDeviation)
 {
     double s2 = log(pow(stdDeviation/mean, 2)+1);
@@ -102,7 +112,7 @@ double StochasticsImplementation::GetLogNormalDistributed(double mean, double st
     return draw;
 }
 
-double StochasticsImplementation::GetMuSigmaLogNormalDistributed(double mu, double sigma)
+double StochasticsImplementation::GetLogNormalDistributedMuSigma(double mu, double sigma)
 {
     std::lognormal_distribution<double> lognormalDistribution(mu, sigma);
 

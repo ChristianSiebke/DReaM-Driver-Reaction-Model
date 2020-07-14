@@ -39,21 +39,21 @@ double Sampler::RollForStochasticAttribute(const StochasticDistribution& distrib
     {
         auto normalDistribution = std::get<NormalDistribution>(distribution);
 
-        if(CommonHelper::DoubleEquality(normalDistribution.min, normalDistribution.max))
+        if(CommonHelper::DoubleEquality(normalDistribution.GetMin(), normalDistribution.GetMax()))
         {
-            return normalDistribution.min;
+            return normalDistribution.GetMin();
         }
 
         int run = 0;
-        double result = stochastics->GetNormalDistributed(normalDistribution.mean, normalDistribution.standardDeviation);
+        double result = stochastics->GetNormalDistributed(normalDistribution.GetMean(), normalDistribution.GetStandardDeviation());
 
-        while (result > normalDistribution.max || result < normalDistribution.min)
+        while (result > normalDistribution.GetMax() || result < normalDistribution.GetMin())
         {
             run++;
-            result = stochastics->GetNormalDistributed(normalDistribution.mean, normalDistribution.standardDeviation);
+            result = stochastics->GetNormalDistributed(normalDistribution.GetMean(), normalDistribution.GetStandardDeviation());
             if (run == MAX_RETRIES)
             {
-                return normalDistribution.mean;
+                return normalDistribution.GetMean();
             }
         }
         return result;
@@ -62,21 +62,21 @@ double Sampler::RollForStochasticAttribute(const StochasticDistribution& distrib
     {
         auto logNormalDistribution = std::get<LogNormalDistribution>(distribution);
 
-        if(CommonHelper::DoubleEquality(logNormalDistribution.min, logNormalDistribution.max))
+        if(CommonHelper::DoubleEquality(logNormalDistribution.GetMin(), logNormalDistribution.GetMax()))
         {
-            return logNormalDistribution.min;
+            return logNormalDistribution.GetMin();
         }
 
         int run = 0;
-        double result = stochastics->GetMuSigmaLogNormalDistributed(logNormalDistribution.mu, logNormalDistribution.sigma);
+        double result = stochastics->GetLogNormalDistributedMuSigma(logNormalDistribution.GetMu(), logNormalDistribution.GetSigma());
 
-        while (result > logNormalDistribution.max || result < logNormalDistribution.min)
+        while (result > logNormalDistribution.GetMax() || result < logNormalDistribution.GetMin())
         {
             run++;
-            result = stochastics->GetMuSigmaLogNormalDistributed(logNormalDistribution.mu, logNormalDistribution.sigma);
+            result = stochastics->GetLogNormalDistributedMuSigma(logNormalDistribution.GetMu(), logNormalDistribution.GetSigma());
             if (run == MAX_RETRIES)
             {
-                return 0.5 * (logNormalDistribution.min + logNormalDistribution.max);
+                return 0.5 * (logNormalDistribution.GetMin() + logNormalDistribution.GetMax());
             }
         }
         return result;
@@ -84,22 +84,41 @@ double Sampler::RollForStochasticAttribute(const StochasticDistribution& distrib
     else if (std::holds_alternative<UniformDistribution>(distribution))
     {
         auto uniformDistribution = std::get<UniformDistribution>(distribution);
-        return stochastics->GetUniformDistributed(uniformDistribution.min, uniformDistribution.max);
+        return stochastics->GetUniformDistributed(uniformDistribution.GetMin(), uniformDistribution.GetMax());
     }
     else if (std::holds_alternative<ExponentialDistribution>(distribution))
     {
         int run = 0;
         auto exponentialDistribution = std::get<ExponentialDistribution>(distribution);
-        double result = stochastics->GetExponentialDistributed(exponentialDistribution.lambda);
+        double result = stochastics->GetExponentialDistributed(exponentialDistribution.GetLambda());
 
-        while (result > exponentialDistribution.max || result < exponentialDistribution.min)
+        while (result > exponentialDistribution.GetMax() || result < exponentialDistribution.GetMin())
         {
             run++;
-            result = stochastics->GetExponentialDistributed(exponentialDistribution.lambda);
+            result = stochastics->GetExponentialDistributed(exponentialDistribution.GetLambda());
             if (run == MAX_RETRIES)
             {
-                return 1 / exponentialDistribution.lambda;
+                return 1 / exponentialDistribution.GetLambda();
             }
+        }
+        return result;
+    }
+    else if (std::holds_alternative<GammaDistribution>(distribution))
+    {
+        int run = 0;
+        auto gammaDistribution = std::get<GammaDistribution>(distribution);
+        double result = stochastics->GetGammaDistributedShapeScale(gammaDistribution.GetShape(), gammaDistribution.GetScale());
+
+        while (result > gammaDistribution.GetMax() || result < gammaDistribution.GetMin())
+        {
+            run++;
+
+            if (run == MAX_RETRIES)
+            {
+                return gammaDistribution.GetMean();
+            }
+
+            result = stochastics->GetGammaDistributedShapeScale(gammaDistribution.GetShape(), gammaDistribution.GetScale());
         }
         return result;
     }

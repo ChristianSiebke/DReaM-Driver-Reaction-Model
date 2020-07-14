@@ -68,153 +68,35 @@ public:
     StochasticsImplementation(StochasticsImplementation&&) = delete;
     StochasticsImplementation& operator=(const StochasticsImplementation&) = delete;
     StochasticsImplementation& operator=(StochasticsImplementation&&) = delete;
-    virtual ~StochasticsImplementation() = default;
+    virtual ~StochasticsImplementation() override = default;
 
-    /*!
-    * \brief Generates an uniform distributed number.
-    *
-    * \details Generates an uniform distributed number between two input values.
-    *
-    *
-    * @param[in]     a         First boundary.
-    * @param[in]     b         Second boundary.
-    *
-    * @return        Uniform distributed number.
-    */
-    double GetUniformDistributed(double a, double b);
+    double GetUniformDistributed(double a, double b) override;
 
-    /*!
-    * \brief Generates a normal distributed number.
-    *
-    * \details Generates a normal distributed number according to a mean value and a standard deviation.
-    *
-    *
-    * @param[in]     mean               Average value.
-    * @param[in]     stdDeviation       Standard deviation.
-    *
-    * @return        Normal distributed number.
-    */
-    double GetNormalDistributed(double mean, double stdDeviation);
+    double GetNormalDistributed(double mean, double stdDeviation) override;
 
-    int GetBinomialDistributed(int upperRangeNum, double probSuccess);
+    int GetBinomialDistributed(int upperRangeNum, double probSuccess) override;
 
-    /*!
-    * \brief Generates a exponential distributed number.
-    *
-    * \details Generates a exponential distributed number with a certain rate.
-    *
-    *
-    * @param[in]     lambda             Rate.
-    *
-    * @return        Exponential distributed number.
-    */
-    double GetExponentialDistributed(double lambda);
+    double GetExponentialDistributed(double lambda) override;
 
-    /*!
-    * \brief Generates a gamma distributed number.
-    *
-    * \details Generates a gamma distributed number according to a mean value and a standard deviation.
-    *
-    *
-    * @param[in]     mean               Average value.
-    * @param[in]     stdDeviation       Standard deviation.
-    *
-    * @return        Gamma distributed number.
-    */
-    double GetGammaDistributed(double mean, double stdDeviation);
+    double GetGammaDistributed(double mean, double stdDeviation) override;
 
-    /*!
-    * \brief Generates a logarithmic normal distributed number.
-    *
-    * \details Generates a logrithmic normal distributed number according to a mean value and a standard deviation.
-    *
-    *
-    * @param[in]     mean               Average value.
-    * @param[in]     stdDeviation       Standard deviation.
-    *
-    * @return        Logarithmic normal distributed number.
-    */
-    double GetLogNormalDistributed(double mean, double stdDeviation);
+    double GetGammaDistributedShapeScale(double shape, double scale) override;
 
-    /*!
-    * \brief Generates a logarithmic normal distributed number.
-    *
-    * \details Generates a logrithmic normal distributed number according to mu and sigma (which
-    * represent mean and standard deviation of the natural logarithm of the random variable).
-    *
-    * @param[in]     mu          Average value of the random variable natural logarithm.
-    * @param[in]     sigma       Standard deviation of the random variable natural logarithm.
-    *
-    * @return        Logarithmic normal distributed number.
-    */
-    double GetMuSigmaLogNormalDistributed(double mu, double sigma);
+    double GetLogNormalDistributed(double mean, double stdDeviation) override;
 
-    /*!
-    * \brief Generates a special distributed number.
-    *
-    * \details Not implemented.
-    *
-    *
-    * @param[in]     distributionName           Name of the Distribution.
-    * @param[in]     args                       Arguments of the distribution.
-    *
-    * @return        0.
-    */
-    double GetSpecialDistributed(std::string distributionName, std::vector<double> args);
+    double GetLogNormalDistributedMuSigma(double mu, double sigma) override;
 
-    /*!
-    * \brief tbd.
-    *
-    * \details tbd.
-    *
-    *
-    * @param[in]     mean               Average value.
-    * @param[in]     stdDeviation       Standard deviation.
-    *
-    * @return        tbd.
-    */
-    double GetRandomCdfLogNormalDistributed(double mean, double stdDeviation);
+    double GetSpecialDistributed(std::string distributionName, std::vector<double> args) override;
 
-    /*!
-    * \brief tbd.
-    *
-    * \details tbd.
-    *
-    *
-    * @param[in]     mean               Average value.
-    * @param[in]     stdDeviation       Standard deviation.
-    * @param[in]     probability        Probability.
-    *
-    * @return        tbd.
-    */
-    double GetPercentileLogNormalDistributed(double mean, double stdDeviation, double probability);
+    double GetRandomCdfLogNormalDistributed(double mean, double stdDeviation) override;
 
-    /*!
-    * \brief Returns the random seed.
-    *
-    * \details Returns the random seed.
-    *
-    * @return        Random seed.
-    */
-    std::uint32_t GetRandomSeed() const;
+    double GetPercentileLogNormalDistributed(double mean, double stdDeviation, double probability) override;
 
-    /*!
-    * \brief Reinitalizes the stochastics module.
-    *
-    * \details Uses the current random seed to generate a new random seed.
-    * Then reinitalizes the generators with the new random seed.
-    */
-    void ReInit();
+    std::uint32_t GetRandomSeed() const override;
 
-    /*!
-    * \brief Initializes the generators with a random seed.
-    *
-    * \details Sets the seed for the base generator.
-    * Then initalizes all other generators.
-    *
-    * @param[in]    seed        Random seed.
-    */
-    void InitGenerator(std::uint32_t seed);
+    void ReInit() override;
+
+    void InitGenerator(std::uint32_t seed) override;
 
 protected:
     /*! Provides callback to LOG() macro

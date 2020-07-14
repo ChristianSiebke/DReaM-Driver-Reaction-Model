@@ -108,6 +108,7 @@ namespace openpass::importer::xml::parameterImporter::tag
     constexpr char LogNormalDistribution[] {"LogNormalDistribution"};
     constexpr char UniformDistribution[] {"UniformDistribution"};
     constexpr char ExponentialDistribution[] {"ExponentialDistribution"};
+    constexpr char GammaDistribution[] {"GammaDistribution"};
 
     constexpr char List[] {"List"};
     constexpr char ListItem[] {"ListItem"};
@@ -123,7 +124,9 @@ namespace openpass::importer::xml::parameterImporter::attribute
     constexpr char min[] {"Min"};
     constexpr char mu[] {"Mu"};
     constexpr char name[] {"Name"};
+    constexpr char scale[] {"Scale"};
     constexpr char sd[] {"SD"};
+    constexpr char shape[] {"Shape"};
     constexpr char sigma[] {"Sigma"};
     constexpr char type[] {"Type"};
     constexpr char value[] {"Value"};

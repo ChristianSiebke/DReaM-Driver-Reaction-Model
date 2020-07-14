@@ -80,6 +80,15 @@ public:
     virtual double GetGammaDistributed(double mean, double stdDeviation) = 0;
 
     //-----------------------------------------------------------------------------
+    //! Draw from gamma distribution.
+    //!
+    //! @param[in]     shape        shape parameter of gamma distribution
+    //! @param[in]     scale        scale parameter of gamma distribution
+    //! @return                     value drawn
+    //-----------------------------------------------------------------------------
+    virtual double GetGammaDistributedShapeScale(double shape, double scale) = 0;
+
+    //-----------------------------------------------------------------------------
     //! Draw from log-normal distribution.
     //!
     //! @param[in]     mean         mean value
@@ -100,7 +109,7 @@ public:
     //!
     //! @return        Logarithmic normal distributed number
     //-----------------------------------------------------------------------------
-    virtual double GetMuSigmaLogNormalDistributed(double mu, double sigma) = 0;
+    virtual double GetLogNormalDistributedMuSigma(double mu, double sigma) = 0;
 
     //-----------------------------------------------------------------------------
     //! Used for a user specific distribution.

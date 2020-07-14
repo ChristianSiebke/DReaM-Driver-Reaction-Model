@@ -63,12 +63,16 @@ public:
         return implementation->GetGammaDistributed(mean, stdDeviation);
     }
 
+    double GetGammaDistributedShapeScale(double shape, double scale){
+        return implementation->GetGammaDistributedShapeScale(shape, scale);
+    }
+
     double GetLogNormalDistributed(double mean, double stdDeviation){
         return implementation->GetLogNormalDistributed(mean, stdDeviation);
     }
 
-    double GetMuSigmaLogNormalDistributed(double mu, double sigma){
-        return implementation->GetMuSigmaLogNormalDistributed(mu, sigma);
+    double GetLogNormalDistributedMuSigma(double mu, double sigma){
+        return implementation->GetLogNormalDistributedMuSigma(mu, sigma);
     }
 
     double GetSpecialDistributed(std::string distributionName, std::vector<double> args){
