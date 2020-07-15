@@ -104,6 +104,7 @@ TEST_P(MaximumLimit,
     fakeVehicleParameters.gearRatios = testInput.gearRatios;
     fakeVehicleParameters.axleRatio = testInput.axleRatio;
     fakeVehicleParameters.staticWheelRadius = testInput.staticWheelRadius;
+    fakeVehicleParameters.frictionCoeff = 1.0;
 
     const auto vehicleParameterInputSignal = std::make_shared<ParametersVehicleSignal const>(fakeVehicleParameters);
 

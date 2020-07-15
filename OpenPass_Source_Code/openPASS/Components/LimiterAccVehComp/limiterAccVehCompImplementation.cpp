@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 * Copyright (c) 2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -200,7 +200,7 @@ double LimiterAccelerationVehicleComponentsImplementation::CalculateAcceleration
     const double &engineTorqueBasedOnVelocity = *(std::max_element(engineTorquesBasedOnGearRatios.begin(), engineTorquesBasedOnGearRatios.end()));
 
     const double forceAtWheel = engineTorqueBasedOnVelocity * vehicleModelParameters.axleRatio / vehicleModelParameters.staticWheelRadius;
-    const double forceRoll = vehicleModelParameters.weight * oneG * frictionCoefficient;
+    const double forceRoll = vehicleModelParameters.weight * oneG * rollFrictionCoefficient;
     const double forceAir = (airResistance / 2) * vehicleModelParameters.frontSurface * vehicleModelParameters.airDragCoefficient * std::pow(currentVelocity, 2);
 
     const double accelerationLimit = (forceAtWheel - forceRoll - forceAir) / vehicleModelParameters.weight;
@@ -210,7 +210,7 @@ double LimiterAccelerationVehicleComponentsImplementation::CalculateAcceleration
 
 double LimiterAccelerationVehicleComponentsImplementation::CalculateDecelerationLimit()
 {
-    const double decelerationLimit = world->GetFriction() * (-oneG);
+    const double decelerationLimit = GetWorld()->GetFriction() * vehicleModelParameters.frictionCoeff * (-oneG);
 
     return decelerationLimit;
 }

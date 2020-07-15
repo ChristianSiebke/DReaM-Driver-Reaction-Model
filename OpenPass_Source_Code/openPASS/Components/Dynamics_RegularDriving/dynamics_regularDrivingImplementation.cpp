@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020 in-tech GmbH
 *               2018, 2019 AMFD GmbH
 * Copyright (c) 2020 HLRS, University of Stuttgart.
 *
@@ -25,6 +25,8 @@
 #include "Common/steeringSignal.h"
 #include "Common/parametersVehicleSignal.h"
 #include "Common/globalDefinitions.h"
+
+#include "Interfaces/worldInterface.h"
 
 void DynamicsRegularDrivingImplementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time)
 {
@@ -179,7 +181,7 @@ double DynamicsRegularDrivingImplementation::GetEngineMomentMin(double engineSpe
 
 double DynamicsRegularDrivingImplementation::GetFrictionCoefficient()
 {
-    return 1;
+    return GetWorld()->GetFriction() * vehicleModelParameters.frictionCoeff;
 }
 
 double DynamicsRegularDrivingImplementation::GetEngineMoment(double gasPedalPos, int gear)
@@ -253,7 +255,7 @@ void DynamicsRegularDrivingImplementation::Trigger(int time)
 {
     Q_UNUSED(time);
 
-    AgentInterface *agent = GetAgent();
+    const auto agent = GetAgent();
 
     //Lateral behavior
     double maxDecel = _oneG * GetFrictionCoefficient() * -1;

@@ -7,7 +7,7 @@
         <Property name="AirDragCoefficient" value="0.3"/>
         <Property name="AxleRatio" value="1.0"/>
         <Property name="DecelerationFromPowertrainDrag" value="0.5"/>
-        <Property name="FrictionCoefficient" value="0.0"/>
+        <Property name="FrictionCoefficient" value="1.0"/>
         <Property name="FrontSurface" value="2.38"/>
         <Property name="GearRatio1" value="9.665"/>
         <Property name="Mass" value="1320.0"/>
@@ -36,7 +36,7 @@
         <Property name="AirDragCoefficient" value="0.3"/>
         <Property name="AxleRatio" value="2.813"/>
         <Property name="DecelerationFromPowertrainDrag" value="0.5"/>
-        <Property name="FrictionCoefficient" value="0.0"/>
+        <Property name="FrictionCoefficient" value="1.0"/>
         <Property name="FrontSurface" value="2.2"/>
         <Property name="GearRatio1" value="5.0"/>
         <Property name="GearRatio2" value="3.2"/>
@@ -72,7 +72,7 @@
         <Property name="AirDragCoefficient" value="0.3"/>
         <Property name="AxleRatio" value="3.077"/>
         <Property name="DecelerationFromPowertrainDrag" value="0.5"/>
-        <Property name="FrictionCoefficient" value="0.0"/>
+        <Property name="FrictionCoefficient" value="1.0"/>
         <Property name="FrontSurface" value="2.42"/>
         <Property name="GearRatio1" value="5.0"/>
         <Property name="GearRatio2" value="3.2"/>
@@ -108,7 +108,7 @@
         <Property name="AirDragCoefficient" value="0.3"/>
         <Property name="AxleRatio" value="3.077"/>
         <Property name="DecelerationFromPowertrainDrag" value="0.5"/>
-        <Property name="FrictionCoefficient" value="0.0"/>
+        <Property name="FrictionCoefficient" value="1.0"/>
         <Property name="FrontSurface" value="2.42"/>
         <Property name="GearRatio1" value="4.714"/>
         <Property name="GearRatio2" value="3.143"/>
@@ -144,7 +144,7 @@
         <Property name="AirDragCoefficient" value="0.3"/>
         <Property name="AxleRatio" value="3.789"/>
         <Property name="DecelerationFromPowertrainDrag" value="0.5"/>
-        <Property name="FrictionCoefficient" value="0.0"/>
+        <Property name="FrictionCoefficient" value="1.0"/>
         <Property name="FrontSurface" value="2.07"/>
         <Property name="GearRatio1" value="4.154"/>
         <Property name="GearRatio2" value="2.45"/>
@@ -179,7 +179,7 @@
         <Property name="AirDragCoefficient" value="0.8"/>
         <Property name="AxleRatio" value="4.0"/>
         <Property name="DecelerationFromPowertrainDrag" value="1.0"/>
-        <Property name="FrictionCoefficient" value="0.0"/>
+        <Property name="FrictionCoefficient" value="1.0"/>
         <Property name="FrontSurface" value="9.0"/>
         <Property name="GearRatio1" value="6.316"/>
         <Property name="GearRatio2" value="4.554"/>
@@ -215,7 +215,7 @@
         <Property name="AirDragCoefficient" value="0.8"/>
         <Property name="AxleRatio" value="4.0"/>
         <Property name="DecelerationFromPowertrainDrag" value="1.0"/>
-        <Property name="FrictionCoefficient" value="0.0"/>
+        <Property name="FrictionCoefficient" value="1.0"/>
         <Property name="FrontSurface" value="9.0"/>
         <Property name="GearRatio1" value="6.316"/>
         <Property name="GearRatio2" value="4.554"/>
@@ -251,7 +251,7 @@
         <Property name="AirDragCoefficient" value="0.3"/>
         <Property name="AxleRatio" value="3.0"/>
         <Property name="DecelerationFromPowertrainDrag" value="0.5"/>
-        <Property name="FrictionCoefficient" value="0.0"/>
+        <Property name="FrictionCoefficient" value="1.0"/>
         <Property name="FrontSurface" value="1.9"/>
         <Property name="GearRatio1" value="4.350"/>
         <Property name="GearRatio2" value="2.496"/>

@@ -337,7 +337,7 @@ All probabilities need to add up to 1.0.
 |---|-----------|----------|
 |TimeOfDay|Number representing the time of day in hours ranging from 1-24. Currently not used.|At least one entry is required|
 |VisibilityDistance|Range agents can see in m|At least one entry is required|
-|Friction|Friction on the road. Currently not used|At least one entry is required|
+|Friction|Friction on the road. Used by the LimiterAccelerationVehicleComponents & DynamicsRegularDriving|At least one entry is required|
 |Weather|Weather as string. Currently not used|At least one entry is required|
 
 Example:

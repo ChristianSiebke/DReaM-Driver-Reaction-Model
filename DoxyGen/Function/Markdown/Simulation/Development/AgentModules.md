@@ -145,6 +145,7 @@ After the collision the agents slow down with a fixed deceleration until fully s
 \section dev_agent_modules_dynamicsRegularDriving Dynamics_RegularDriving
 
 The module takes care that the motion of the agent fit to the physical limitations, such as friction or maximum possible acceleration based on the current gear.
+This module uses both the world friction and the vehiclemodelparameter friction.
 Thereby it calculates the dynamics of the agents in every time step.
 The currently covered  dynamics are _Acceleration_, _Velocity_, and consequently _Position_, _Yaw angle_ and _Yaw rate_.
 The input for this module is the steeringwheel angle and the new acceleration of the vehicle.

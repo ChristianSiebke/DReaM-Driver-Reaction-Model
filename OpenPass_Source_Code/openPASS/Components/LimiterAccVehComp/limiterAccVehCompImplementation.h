@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 * Copyright (c) 2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -18,7 +18,7 @@
 #pragma once
 
 #include <Common/opMath.h>
-#include "Common/accelerationSignal.h"
+
 
 #include "Interfaces/modelInterface.h"
 
@@ -119,7 +119,7 @@ private:
 
     const double twoPI {2.0 * M_PI};
     const double oneG {9.81}; //mps^2
-    const double frictionCoefficient {0.015};
+    const double rollFrictionCoefficient {0.015};
     const double airResistance {1.2};
 
     VehicleModelParameters vehicleModelParameters;
