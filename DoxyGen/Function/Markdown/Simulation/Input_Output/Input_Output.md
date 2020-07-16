@@ -766,13 +766,14 @@ Event can either be triggered by an EventDetector, Manipulator or by certain veh
 They are used to track special behavior in the simulation.
 The visualization uses those tags to generate markers on the timeline.
 
-|Attribute|Description|
-|---------|-----------|
-|Id|Identification number|
-|Time|Time in ms when the event occured.|
-|Source|Name of the component which created the event.|
-|Type|Type of the event.|
-|Parameters|Depending on the eventtype different parameters describing the event can exist.|
+| Attribute          | Description                                                                                                                                                                                |
+|--------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Time               | Time in ms when the event occured.                                                                                                                                                         |
+| Source             | Name of the component which created the event. `OpenSCENARIO`, if triggered by an OpenSCENARIO condition.                                                                                  |
+| Name               | In case of an OpenSCENARIO event, a path expression trough Story, Act, Sequence, Maneuver and Event (as described in OpenSCENARIO file). Otherwise determined by the triggering component. |
+| TriggeringEntities | List of entity IDs triggering this event.                                                                                                                                                  |
+| AffectedEntities   | List of entity IDs affected by this event.                                                                                                                                                 |
+| Parameters         | List of generic key/value string pairs.                                                                                                                                                    |
 
 \subsubsection io_output_simout_agents Agents
 

@@ -221,5 +221,5 @@ private:
     void WriteParameter(const openpass::type::FlatParameter &parameters, bool mandatory = false);
 
 private:
-    const QString outputFileVersion = "0.2.1";
+    const QString outputFileVersion = "0.3.0";
 };
