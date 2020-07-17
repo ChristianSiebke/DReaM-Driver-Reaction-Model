@@ -30,6 +30,12 @@
 #include "Interfaces/observationNetworkInterface.h"
 #include "Interfaces/worldInterface.h"
 
+const std::string AgentCategoryStrings[] =
+{
+    "Ego",
+    "Scenario",
+    "Common"
+};
 
 class DataStoreInterface;
 

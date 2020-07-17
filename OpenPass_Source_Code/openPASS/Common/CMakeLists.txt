@@ -21,7 +21,6 @@ add_openpass_target(
     lateralSignal.h
     longitudinalSignal.h
     observationLibraryDefinitions.h
-    observationTypes.h
     opExport.h
     openPassTypes.h
     openPassUtils.h

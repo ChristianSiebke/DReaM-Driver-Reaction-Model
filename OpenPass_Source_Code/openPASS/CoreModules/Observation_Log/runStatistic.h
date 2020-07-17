@@ -15,7 +15,6 @@
 #include <list>
 #include <QXmlStreamWriter>
 
-#include "Common/observationTypes.h"
 #include "Interfaces/observationInterface.h"
 
 class RunStatistic

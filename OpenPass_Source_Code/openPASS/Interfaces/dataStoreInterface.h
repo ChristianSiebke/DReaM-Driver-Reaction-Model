@@ -18,7 +18,6 @@
 #include <vector>
 
 #include "Common/globalDefinitions.h"
-#include "Common/observationTypes.h"
 #include "Common/openPassTypes.h"
 #include "Common/runtimeInformation.h"
 #include "Interfaces/callbackInterface.h"

@@ -14,7 +14,6 @@
 
 #include "EventDetectorExport.h"
 
-#include "Common/observationTypes.h"
 #include "CoreFramework/CoreShare/parameters.h"
 
 //Different detectors

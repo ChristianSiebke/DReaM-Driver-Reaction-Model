@@ -22,6 +22,7 @@
 #include <set>
 #include <string>
 #include <tuple>
+#include <regex>
 
 #include <QFile>
 #include <QTextStream>
@@ -86,7 +87,8 @@ private:
     ObservationFileHandler fileHandler;
     ObservationCyclics cyclics;
     RunStatistic runStatistic = RunStatistic(-1);
-    std::set<std::string> selectedColumns;
+    std::vector<std::string> selectedColumns;
+    std::vector<std::pair<std::string,std::string>> selectedRegexColumns;
 };
 
 

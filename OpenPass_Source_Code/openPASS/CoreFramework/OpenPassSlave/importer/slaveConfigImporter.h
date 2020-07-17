@@ -102,7 +102,7 @@ public:
 
 private:
     static std::string GetLibrary(const QDomElement& root, const std::string& key, const std::string& tag);
-    static constexpr auto supportedConfigVersion = "0.8.0";
+    static constexpr auto supportedConfigVersion = "0.8.1";
 
     //! \brief Identifier with correspondiong default values for mandatory libraries
     //! \note: The identifier is identical to the XML tag

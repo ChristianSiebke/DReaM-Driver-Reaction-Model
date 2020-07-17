@@ -17,7 +17,6 @@
 #include <vector>
 
 #include "Common/commonTools.h"
-#include "Common/observationTypes.h"
 #include "Common/openPassUtils.h"
 
 #include "Interfaces/dataStoreInterface.h"
@@ -74,18 +73,38 @@ void ObservationLogImplementation::SlavePreHook()
         throw std::runtime_error(msg);
     }
 
+    std::unordered_map<std::string, std::vector<std::string>> loggingGroups;
+    for (const auto& [key, value]: GetParameters()->GetParametersStringVector())
+    {
+        if (key.substr(0, 13) == "LoggingGroup_")
+        {
+            const auto groupName = key.substr(13);
+            loggingGroups[groupName] = value;
+        }
+    }
     try
     {
         for (const auto& loggingGroup : GetParameters()->GetParametersStringVector().at("LoggingGroups"))
         {
             try
             {
-                const auto& groupColumns = LOGGINGGROUP_DEFINITIONS.at(loggingGroup);
-                selectedColumns.insert(groupColumns.begin(), groupColumns.end());
+                const auto& groupColumns = loggingGroups.at(loggingGroup);
+                for (const std::string& column : groupColumns)
+                {
+                    auto pos = column.find('*');
+                    if (pos == std::string::npos)
+                    {
+                        selectedColumns.push_back(column);
+                    }
+                    else
+                    {
+                        selectedRegexColumns.push_back({column.substr(0,pos),column.substr(pos+1)});
+                    }
+                }
             }
             catch (const std::out_of_range&)
             {
-                std::string msg = "Unsupported LoggingGroup '" + loggingGroup + "'";
+                std::string msg = "Undefined LoggingGroup '" + loggingGroup + "'";
                 LOG(CbkLogLevel::Error, msg);
                 throw std::runtime_error(msg);
             }
@@ -93,10 +112,7 @@ void ObservationLogImplementation::SlavePreHook()
     }
     catch (const std::out_of_range&)
     {
-        const auto& traceColumns = LOGGINGGROUP_DEFINITIONS.at("Trace");
-        selectedColumns.insert(traceColumns.begin(), traceColumns.end());
-
-        LOG(CbkLogLevel::Warning, "No LoggingGroups configured. Defaulting to 'Trace'");
+        LOG(CbkLogLevel::Error, "No LoggingGroups configured");
     }
 
     fileHandler.SetOutputLocation(runtimeInformation.directories.output, filename);
@@ -121,7 +137,17 @@ void ObservationLogImplementation::SlavePostRunHook(const RunResultInterface& ru
     {
         std::visit(openpass::utils::FlatParameter::to_string([this, &dsCyclic](const std::string& valueStr)
         {
-            if (selectedColumns.find(dsCyclic.key) != selectedColumns.end())
+            if (std::any_of(selectedColumns.cbegin(), selectedColumns.cend(),
+                            [&dsCyclic](const std::string& column)
+                            {
+                                return dsCyclic.key == column;
+                            }) ||
+                std::any_of(selectedRegexColumns.cbegin(), selectedRegexColumns.cend(),
+                            [&dsCyclic](const auto& column)
+                            {
+                                return dsCyclic.key.find(column.first) == 0 &&
+                                       dsCyclic.key.find(column.second, dsCyclic.key.size() - column.second.size()) == dsCyclic.key.size() - column.second.size();
+                            }))
             {
                 cyclics.Insert(dsCyclic.timestamp, (dsCyclic.entityId < 10 ? "0" : "") + std::to_string(dsCyclic.entityId) + ":" + dsCyclic.key, valueStr);
             }

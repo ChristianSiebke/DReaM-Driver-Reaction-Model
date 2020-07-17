@@ -28,7 +28,6 @@
 #include "Interfaces/callbackInterface.h"
 #include "Interfaces/eventInterface.h"
 #include "Interfaces/runResultInterface.h"
-#include "Common/observationTypes.h"
 
 class CallbackInterface;
 class DataStoreReadInterface;

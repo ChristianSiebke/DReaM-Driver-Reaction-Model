@@ -247,8 +247,6 @@ During this experiment the simulation runs 10 invocations and the first invocati
     <RandomSeed>5327</RandomSeed>
     <Libraries>
         <WorldLibrary>World_OSI</WorldLibrary>
-        <ObservationLibrary>Observation_Log</ObservationLibrary>
-        <SpawnPointLibrary>SpawnPoint_OSI</SpawnPointLibrary>
     </Libraries>
 </ExperimentConfig>
 ```
@@ -314,6 +312,10 @@ Every invocation has sunny weather.
 \subsubsection io_input_slaveconfig_observations Observations
 
 In this section all observation libraries are defined with their parameters.
+A specific library is loaded by adding an entry to the `Observations` tag in the slaveConfig.xml (see example below).
+The `Library` tag contains the name of the library.
+The `Parameters` tag provides an optional list of keys/values.
+These parameters are specific to each type of observation libraries.
 
 ```xml
 <Observations>
@@ -322,7 +324,9 @@ In this section all observation libraries are defined with their parameters.
     <Parameters>
       <String Key="OutputFilename" Value="simulationOutput.xml"/>
       <Bool Key="LoggingCyclicsToCsv" Value="false"/>
-      <StringVector Key="LoggingGroups" Value="Trace,Visualization,RoadPosition,Sensor"/>
+      <StringVector Key="LoggingGroup_Trace" Value="XPosition,YPosition,YawAngle"/>
+      <StringVector Key="LoggingGroup_Sensor" Value="Sensor*_DetectedAgents,Sensor*_VisibleAgents"/>
+      <StringVector Key="LoggingGroups" Value="Trace,Sensor"/>
     </Parameters>
   </Observation>
 </Observations>
@@ -332,11 +336,19 @@ In this section all observation libraries are defined with their parameters.
 
 This is the standard observation module, that writes the [simulationOutput.xml](\ref io_output_simout). It has the following parameters:
 
-|Parameter|Description|
-|---------|-----------|
-|OutputFilename|name of the output file|
-|LoggingCyclicsToCsv|If true, the cyclics are written into a separate CSV file for every run|
-|LoggingGroups|defines which columns are logged|
+| Parameter           | Description                                                             |
+|---------------------|-------------------------------------------------------------------------|
+| OutputFilename      | Name of the output file                                                 |
+| LoggingCyclicsToCsv | If true, the cyclics are written into a separate CSV file for every run |
+| LoggingGroup_<NAME> | Defines which columns belong to the logging group named NAME            |
+| LoggingGroups       | Defines which logging groups are active                                 |
+
+**LoggingGroup definitions using wildcards**
+
+In addition to specifying logging column names by stating their full names, it is allowed to use the wildcard character `*` in a `LoggingGroup_NAME` entry.
+The wildcard can be used at most one time in each column reference.
+
+For an example, please see the slaveConfig.xml snippet above.
 
 ---
 
