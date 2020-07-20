@@ -59,14 +59,13 @@ This module converts the acceleration input of the driver module into pedal posi
 
 \section dev_agent_modules_dynamicsTrajectoryFollower Dynamics_TrajectoryFollower
 
-This module forces agents to drive according to a specific trajectory. The trajectory is defined in a separate file. This module is disabled by default and must be activated using a ComponentStateChange Event.
-Currently there are 4 types of trajectories which can be used by this module. It is always important that the trajectories match the current scenery file, otherwise the Agent could be placed outside of valid lanes. If the agent gets placed on a invalid position, it will be deleted.
+This module forces agents to drive according to a specific trajectory. The trajectory is defined in the scenario. This module is disabled by default and is activated if a trajectory from openSCENARIO is triggered.
+It is always important that the trajectories matches the current scenery file, otherwise the Agent could be placed outside of valid lanes. If the agent gets placed on a invalid position, it will be deleted.
 
-The following attributes must be defined for these modules:
+The following attributes must be defined for these module:
 
 |Attribute|Type|Description|
 |---------|----|-----------|
-|TrajectoryFile|String|The file defining the Trajectory to follow|
 |AutomaticDeactivation|Bool|If true, the trajectory follower relinquishes control of the vehicle after the final instruction in the TrajectoryFile.|
 |EnforceTrajectory|Bool|If true, the trajectory follower overrides external input related to the vehicle's travel.|
 
@@ -75,33 +74,51 @@ Examples:
 An example VehicleComponentProfile for the TrajectoryFollower defining these attributes would look as follows:
 
 ```xml
-<VehicleComponentProfiles>
-    <VehicleComponentProfile Type="DynamicsTrajectoryFollower" Name="BasicTrajectoryFollower">
-            <String Key="TrajectoryFile" Value="Trajectory.xml"/>
-            <Bool Key="AutomaticDeactivation" Value="true"/>
-            <Bool Key="EnforceTrajectory" Value="true"/>
-        </VehicleComponentProfile>
-</VehicleComponentProfiles>
+<ProfileGroup Type="Dynamics_TrajectoryFollower">
+    <Profile Type="DynamicsTrajectoryFollower" Name="BasicTrajectoryFollower">
+        <Bool Key="AutomaticDeactivation" Value="true"/>
+        <Bool Key="EnforceTrajectory" Value="true"/>
+    </Profile>
+</ProfileGroup>
 ```
 
 An example of a Scenario Sequence to activate the TrajectoryFollower would look as shown below.
-To disable the TrajectoryFollower through an event, change the value of the  Parameter named
-"ComponentState" to "Disabled". 
-
-NOTE: Once the TrajectoryFollower has been disabled (either by automatic deactivation, or by an
-event), it cannot be set to acting again. Any such attempt will be ignored.
 
 ```xml
-<Sequence name="StateChangeSequence" numberOfExecutions="1">
-    <Actors>
-        <Entity name="Ego"/>
+<ManeuverGroup name="TrajectorySequence" maximumExecutionCount="1">
+    <Actors selectTriggeringEntities="false">
+        <EntityRef entityRef="TF"/>
     </Actors>
     <Maneuver name="StateChangeManeuver">
         <Event name="StateChangeEvent" priority="overwrite">
             <Action name="ComponentStateChangeManipulator">
-                <UserDefined>
-                    <Command>SetComponentState DynamicsTrajectoryFollower Acting</Command>
-                </UserDefined>
+                <PrivateAction>
+                    <RoutingAction>
+                        <FollowTrajectoryAction>
+                            <Trajectory name="LaneChange" closed="false">
+                                <Shape>
+                                    <Polyline>
+                                        <Vertex time="0">
+                                            <Position>
+                                                <WorldPosition x="76.17" y="5.625" z="0" h="0.0" p="0" r="0"/>
+                                            </Position>
+                                        </Vertex>
+                                        <Vertex time="0.1">
+                                            <Position>
+                                                <WorldPosition x="79.17" y="5.62485" z="0" h="-0.00005" p="0" r="0"/>
+                                            </Position>
+                                        </Vertex>
+                                        <Vertex time="0.2">
+                                            <Position>
+                                                <WorldPosition x="82.17" y="5.6247" z="0" h="-0.00005" p="0" r="0"/>
+                                            </Position>
+                                        </Vertex>
+                                    </Polyline>
+                                </Shape>
+                            </Trajectory>
+                        </FollowTrajectoryAction>
+                    </RoutingAction>
+                </PrivateAction>
             </Action>
             <StartConditions>
                 <ConditionGroup>
@@ -116,21 +133,6 @@ event), it cannot be set to acting again. Any such attempt will be ignored.
     </Maneuver>
 </Sequence>
 ```
-
-\subsection dev_agent_modules_dynamicsTrajectoryFollower_awc Absolute World Coordinates
-
-Absolute world coordinates specify x- and y-coordinates and the yaw angle in the world. 
-The velocity and acceleration of the agent are calculated based on the new position.
-
-\subsection dev_agent_modules_dynamicsTrajectoryFollower_arc Absolute Road Coordinates
-
-Absolute road coordinates specify s- and t- coordinates and the heading within the road.
-The velocity and acceleration of the agent are calculated based on the new position.
-
-\subsection dev_agent_modules_dynamicsTrajectoryFollower_rrc Relative Road Coordinates
-
-Relative road coordinates specify the agents displacement in s- and t-coordinates and heading angle. The initial starting point for the trajectory is the agents position at time of activation.
-The velocity and acceleration of the agent are calculated based on the new position.
 
 ---
 
@@ -152,7 +154,7 @@ The input for this module is the steeringwheel angle and the new acceleration of
 
 ---
 
-\section dev_bmw_agent_modules_fmuwrapper FMU wrapper
+\section dev_agent_modules_fmuwrapper FMU wrapper
 
 The FMU Wrapper provides a connection to arbitrary FMUs (Functional Mock-up Unit).
 A FMU has to be compatible with the FMI 1.0 or FMI 2.0 specification (Functional Mock-up Interface) and has to be ABI (Application Binary Interface) compatible with the OpenPassSlave binary.
@@ -160,7 +162,7 @@ A FMU has to be compatible with the FMI 1.0 or FMI 2.0 specification (Functional
 Additional reading about FMI is provided by the FMI standard website at https://fmi-standard.org/.
 For interfacing the FMUs in openPASS, the Modelon FMI Library is used, which is recommended on the FMI standard website. See https://jmodelica.org/.
 
-\subsection dev_bmw_agent_modules_fmuwrapper_fmupackage FMU package format
+\subsection dev_agent_modules_fmuwrapper_fmupackage FMU package format
 
 FMI defines a packaging format for FMUs. The used container format is ZIP.
 It basically contains - among other parts -  the compiled FMU code (as *.dll or *.so, depending on the platform) and the `modelDescription.xml`.
@@ -171,45 +173,26 @@ Latter provides meta-data about the FMU, i. e.
 - Name and datatype of model variables (inputs and outputs)
 
 
-\subsection dev_bmw_agent_modules_fmuwrapper_arch Architectural overview
+\subsection dev_agent_modules_fmuwrapper_arch Architectural overview
 
 The wrapper is instantiated as a component of an agent.
-It reads the input variables for the FMU from the simulation and provides it the FMU and reads the output of the FMU and forwards it via signals to other agent components.
+It instantiates an implementation of the FmuHandlerInterface, which is a specialization depending on the type of the FMU.
+Currently the only such FmuHandler is the OsmpFmuHandler
 
-![FMU wrapper architectural overview](FmuWrapperOverview.svg)
+\subsection dev_agent_modules_fmuwrapper_config Configuration
 
-\subsubsection dev_bmw_agent_modules_fmuwrapper_io_channels Framework channels
-
-The wrapper can use input and output signals via `Channels` as every other agent component does.
-Framework channels (signals) can provide data and can also be written to by the wrapper.
-In addition, the wrapper is able to access the \c AgentInterface and \c WorldInterface methods.
-
-\subsubsection dev_bmw_agent_modules_fmuwrapper_io_fmi FMI variables
-
-Communication with the FMU happens via FMI variables (inputs and outputs).
-The wrapper will read in available variables from `modelDescription.xml` in the FMU package.
-These variables need to be mapped to variables and signals of OpenPASS in the VehicleComponentProfile.
-
-FMI 1.0 supports these standard datatypes:
-- bool
-- integer
-- real
-- string
-
-\subsection dev_bmw_agent_modules_fmuwrapper_config Configuration
-
-Configuration of a particular FMU takes place in the [ProfilesCatalog.xml](\ref io_input_profilescatalog).
-
-For selecting the path of a FMU, common wrapper settings and specifing the type of the FMI, a VehicleComponentProfile is created, i. e.
+Some Parameter are always required for the FmuWrapper. Depending on the FmuHandler additional parameters may be needed.
 
 ```xml
-<VehicleComponentProfile Type="FMU1" Name="OSMP">
-    <String Key="FmuPath" Value="resources/OSMP.fmu"/>
-    <Bool Key="Logging" Value="true"/>
-    <Bool Key="CsvOutput" Value="true"/>
-    <Bool Key="UnzipOncePerInstance" Value="false"/>
-    <String Key="FmuType" Value="OSMP"/>
-</VehicleComponentProfile>
+<ProfileGroup Type="FMU1">
+    <Profile Name="OSMP">
+        <String Key="FmuPath" Value="resources/OSMP.fmu"/>
+        <Bool Key="Logging" Value="true"/>
+        <Bool Key="CsvOutput" Value="true"/>
+        <Bool Key="UnzipOncePerInstance" Value="false"/>
+        <String Key="FmuType" Value="OSMP"/>
+    </Profile>
+</ProfileGroup>
 ```
 
 | **Key**              | **Type** | **Description**                                                                                                                  |
@@ -231,11 +214,34 @@ Same goes for `Logging` with the folder "Log".
 
 If `UnzipOncePerInstance` is set to `true`, an integer number will be appended to these subdirectories names.
 
-\subsection dev_bmw_agent_modules_fmuwrapper_osmp OSMP FMU
+\subsection dev_agent_modules_fmuwrapper_osmp OSMP FMU
 
 OSMP is currently the only supported type of FMU.
 It allows the pass input to the FMU as OSI messages as well as recieve output as OSI message.
 For more information on OSMP see https://github.com/OpenSimulationInterface/osi-sensor-model-packaging.
+
+The OsmpFmuHandler has the following additional (optional) parameters:
+
+| **Key**                   | **Type** | **Description**                                                             |
+|---------------------------|----------|-----------------------------------------------------------------------------|
+| Input_SensorView          | string   | Name of the FMU variable to which the SensorView is send                    |
+| Input_TrafficCommand      | string   | Name of the FMU variable to which the TrafficCommand is send                |
+| Output_SensorData         | string   | Name of the FMU variable from where a SensorData should be recieved         |
+| Output_TrafficUpdate      | string   | Name of the FMU variable from where a TrafficUpdate should be recieved      |
+| WriteSensorViewOutput     | bool     | If true the SensorView is written into a JSON file                          |
+| WriteTrafficCommandOutput | bool     | If true the TrafficCommand is written into a JSON file                      |
+| WriteSensorDataOutput     | bool     | If true the SensorData is written into a JSON file                          |
+| WriteTrafficUpdateOutput  | bool     | If true the TrafficUpdate is written into a JSON file                       |
+
+The type of OSI messages the OsmpFmuHandler sends an recieves is defined by its parameters. Only messages for which a FMU variable is given in the configuration are sent/recieved.
+An additional parameter defines wether the message should be logged as JSON file for every agent and every timestep.
+
+Currently these messages are supported:
+
+* SensorView: SensorView generated from the Groundtruth with this agent is host vehicle
+* TrafficCommand: Trajectory from openSCENARIO, that will be converted into a TrafficCommand
+* SensorData: Output of a sensor, that can be send to other modules as SensorDataSignal
+* TrafficUpdate: Will be converted to a DynamicsSignal
 
 ---
 
@@ -318,80 +324,6 @@ The ParametersVehicle module forwards the VehicleModelParamters to all other mod
 \section dev_agent_modules_sensorDriver Sensor_Driver
 
 The SensorDriver performs queries on the AgentInterface to gather information about the own agent and its surroundings. These are forwarded to the driver modules and the Algorithm modules, which use them for their calculations.
-
----
-
-\subsection dev_agent_modules_geometric2d Sensor_Geometric2D 
-
-The main functionality of this sensor is detection of agents in a 2D area (x/y). Via a sensor range and an opening-angle the user can define the field of view, or rather a circular sector in which he wants to detect an object.
-
-To test whether an object is inside our sector we check
-1. if it is inside the circle around the sensor with radius the detection range and
-2. if it intersects a suitable polygon
-
-Depending on the opening-angle the polygon in 2) has either four (angle < 180°) or five corners (angle >= 180°).
-
-![four-corner kite polygon for angle lower than 180°](Sensor2D_kite_polygon.png)
-
-| Object | intersects circle | intersects polygon | detected |
-|--------|-------------------|--------------------|----------|
-| A      | true              | false              | false    |
-| B      | true              | true               | true     |
-| C      | false             | true               | false    |
-| D      | false             | false              | false    |
-| E      | true              | true               | true     |
-
-![five-corner polygon for angle greater or equal 180° and greater 360°](Sensor2D_five_corner_polygon.png)
-
-| Object | intersects circle | intersects polygon | detected |
-|--------|-------------------|--------------------|--------- |
-| A      | false             | true               | false    |
-| B      | true              | true               | true     |
-| C      | true              | true               | true     |
-| D      | true              | false              | false    |
-| E      | false             | false              | false    |
-
-For convex BBoxes the above will give correct detection results.
-
-Both polygons are constructed from corner-points consisting out of the intersection between the opening-angle boundaries at maximum detection range and their corresponding tangents.
-
-\subsubsection dev_agent_modules_geometric2d_function Function
-
-1. Construct the polygon based on the opening-angle
-2. Check if detection-field (polygon) intersects with any BBox (object-detection)
-3. Calculate the distance between sensor and object
-4. if (dist <= range && isIntersecting) -> object is in circular sector (object validation)
-
-\subsubsection dev_agent_modules_geometric2d_cases Cases
-
-- For angles < 1.0 * pi a four-corner (kite) polygon can be constructed out of two radiuses and two tangents.
-- For angles > = 1.0 * pi and < 2.0 * pi a five-corner polygon can be constructed of two radiusas an three tangents.
-- For opening-angle of exactly 2.0 * pi the distance information suffices. No polygon is needed.
-
-\subsubsection dev_agent_modules_geometric2d_obstruction Visual Obstruction
-
-Objects in front of others block the sensors line of sight. If an object is large enough it might visually obstruct others.
-
-To check if one or multiple objects in combination "shadow" other objects the EnableVisualObstruction - flag can be set.
-
-Also the minimum required percentage of the visible area of an object to be detected can be specified.
-
-The implemented algorithm uses the concept of shadow-casting.
-
-The sensor can be pictured as a light source. Every object in the detection field of the sensor will therefore cast a shadow and reduce the overall detection area behind it.
-
-If an object is shadowed too much (e.g. the visible area is below a specified threshold) it is removed from the list of DetectedObject's and considered undetected.
-
-![Example of shadow-casting](ShadowCasting.svg)
-
-
-As depicted in the figure above, inside the initial bright area (approximated as ciruclar sector) the following steps are taken:
-1. calculate the shadow polygon of each object inside the detection field and remove the casted shadow from the bright area
-2. check for each object the remaining area inside the bright area polygon. If (covered object area / total object area) < threshold  - remove object from the list of detected objects.
-
-After all shadows are removed the "real" detection field polygon (yellow area) remains.
-Objects in green and blue are detected. 
-The red object is completly covered by shadows and therefore not detected.
 
 ---
 
@@ -486,26 +418,6 @@ The red object is completly covered by shadows and therefore not detected.
 The SensorFusionOSI module allows unsorted aggregation of any data provided by sensors. All sampled detected objects can then be broadcasted to connected ADAS.
 
 It collects all SensorDataSignals and merges them into a single SensorDataSignal.
-
----
-
-\section dev_agent_modules_sensorRecordState SensorRecordState
-
-This module forwards the agent parameters to the Observer in each time step. The observer writes those values into the simulation output.
-There are the following values:
-
-* Distance to start of road
-* Lane index
-* Brakelight flag
-* Position X
-* Position Y
-* Yaw
-* Velocity
-* Acceleration
-* Lane change state
-* Indicator state
-
-![SensorRecordState](SensorRecordStateClassdiagram.svg)
 
 ---
 

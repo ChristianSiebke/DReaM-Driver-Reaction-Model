@@ -146,7 +146,6 @@
   </ProfileGroup>
   <ProfileGroup Type="Dynamics_TrajectoryFollower">
     <Profile Name="BasicTrajectoryFollower">
-      <String Key="TrajectoryFile" Value="Trajectory.xml"/>
       <Bool Key="AutomaticDeactivation" Value="true"/>
       <Bool Key="EnforceTrajectory" Value="true"/>
     </Profile>

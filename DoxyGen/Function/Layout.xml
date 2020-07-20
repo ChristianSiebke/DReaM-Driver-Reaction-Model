@@ -7,7 +7,7 @@
       <tab type="usergroup" url="@ref dev" title="Development">
         <tab type="user" url="@ref execution" title="Execution" />
         <tab type="usergroup" url="@ref dev_framework_modules" title="Framework Modules">
-          <tab type="user" url="@ref dev_framework_modules_spawnpoints" title="SpawnPoints"/>
+          <tab type="user" url="@ref dev_framework_modules_spawners" title="Spawners"/>
           <tab type="user" url="@ref dev_conditionaleventdetector" title="Conditional EventDetectors"/>
         </tab>
         <tab type="user" url="@ref dev_agent_modules" title="Agent Modules" />

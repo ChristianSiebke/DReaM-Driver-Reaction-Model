@@ -23,7 +23,6 @@ For demonstration purposes all files of an AEB scenario have been added as an ex
 * [SceneryConfiguration.xodr](\ref io_input_scenery)
 * [VehicleModelsCatalog.xosc](\ref io_input_vehiclemodels)
 * [PedestrianModelsCatalog.xosc](\ref io_input_pedestrianmodels)
-* [Trajectory](\ref io_input_trajectory)
 * [System Configuration](\ref io_input_systemconfig)
 
 \subsection io_input_systemconfigblueprint systemConfigBlueprint.xml
@@ -61,7 +60,7 @@ This example describes the Sensor_Driver module.
 </component>
 ```
 
-\subsubsection io_input_modulepriorities Priorities
+\subsubsection io_input_systemconfigblueprint_modulepriorities Priorities
 
 Please refer to the [Components and channel communication diagram]]\ref dev_concepts_modulecomposition) for assignment of a proper priority.
 Based on the signal flow, input relevant components like sensors need to be executed first. They provide data for consuming components (algorithms) like ADAS and drivers.
@@ -123,10 +122,10 @@ The table below can be used as orientation when a new module is introduced.
 | AgentUpdater | AgentUpdater | 1 | Updater | - |
 
 
-\subsubsection io_input_channelids Channel-Ids 
+\subsubsection io_input_systemconfigblueprint_channelids Channel-Ids
 
 
-Channels allow components to communicate with each other. 
+Channels allow components to communicate with each other.
 The signalflow is set explicitly via a channel-Id of 4 digits (see also [Components and channels communication diagram](/ref dev_concepts_modulecomposition)).
 
 The first two numbers define the sending module (XX 00).
@@ -220,12 +219,13 @@ Several parameters depend on probabilities. Each invocation then rolls for said 
 The slaveConfig.xml consists of the following parts:
 
 [//]: <> (Please refer to each section!)
-* [ExperimentConfig](\ref io_input_slaveconfig_experimentconfig)
-* [ScenarioConfig](\ref io_input_slaveconfig_scenarioconfig)
-* [EnvironmentConfig](\ref io_input_slaveconfig_environmentconfig)
-* [TrafficConfig](\ref io_input_slaveconfig_trafficconfig)
+* [Experiment](\ref io_input_slaveconfig_experiment)
+* [Scenario](\ref io_input_slaveconfig_scenario)
+* [Environment](\ref io_input_slaveconfig_environment)
+* [Observations](\ref io_input_slaveconfig_observations)
+* [Spawners](\ref io_input_slaveconfig_spawners)
 
-\subsubsection io_input_slaveconfig_experimentconfig ExperimentConfig
+\subsubsection io_input_slaveconfig_experiment Experiment
 
 This section contains information about the general experiment setup. These values are not specific to a single invocation.
 
@@ -235,13 +235,10 @@ This section contains information about the general experiment setup. These valu
 | NumberOfInvocations | Number of invocation in the experiment. For each invocation probabilities are rerolled           | Obligatory                      |
 | RandomSeed          | Random seed for the entire experiment. The seed must be within the bounds of unsigned integers   | Obligatory                      |
 | Libraries           | Name of the core module Libraries to use. If a name is not specified the default name is assumed | Obligatory                      |
-| LoggingGroups       | List of logging groups to be activated                                                           | Obligatory (empty list allowed) |
-| LoggingCyclicsToCsv | Determine if cyclics are written to a separate csv-file instead of the xml output                | Optional (default: false)       |
 
 Example:
 This experiment has the id 0.
 During this experiment the simulation runs 10 invocations and the first invocation starts with the random seed 5327.
-It produces output with all possible agent attributes logged for the visualization. The cyclics are written to csv-files. For each run a new csv-file is created.
 
 ```xml
 <ExperimentConfig>
@@ -253,64 +250,12 @@ It produces output with all possible agent attributes logged for the visualizati
         <ObservationLibrary>Observation_Log</ObservationLibrary>
         <SpawnPointLibrary>SpawnPoint_OSI</SpawnPointLibrary>
     </Libraries>
-    <LoggingGroups>
-        <LoggingGroup>Trace</LoggingGroup>
-        <LoggingGroup>Visualization</LoggingGroup>
-        <LoggingGroup>RoadPosition</LoggingGroup>
-        <LoggingGroup>Sensor</LoggingGroup>
-        <LoggingGroup>Driver</LoggingGroup>
-    </LoggingGroups>
-	<LoggingCyclicsToCsv>true</LoggingCyclicsToCsv>
 </ExperimentConfig>
 ```
 
-\paragraph io_input_slaveconfig_experimentconfig_logginggroups LoggingGroups
-
-The LoggingGroups configuration allows to enable or disable predefined sets of values to be logged to the ```simulationOutput.xml ```.
-Currently, the following
-Groups are defined:
-
-- **Trace**
-    - X coordinate
-    - Y coordinate
-    - Yaw angle
-
-- **Visualization**
-    - Brake light
-    - Velocity ego
-    - Indicator state
-    - Acceleration ego
-    - Light status
-
-- **RoadPosition**
-    - Lane
-    - S coordinate
-    - T coordinate
-	- Agent in front
-
-- **RoadPositionExtended**
-    - Secondary lanes
-
-- **Vehicle**
-    - Steering angle
-    - Yaw rate
-    - Lateral acceleration
-    - Accelerator pedal position
-    - Decelerator pedal position
-    - Motor torque
-    - RPM
-
-- **Sensor**
-    - Number of detected agents
-    - List of detected agents
-
-- **Driver**
-    Depends on driver module
-
-
 ---
 
-\subsubsection io_input_slaveconfig_scenarioconfig ScenarioConfig
+\subsubsection io_input_slaveconfig_scenario Scenario
 
 This section contains information about the scenario setup for the experiment. This information does not change between invocations.
 
@@ -328,7 +273,7 @@ This experiment uses the "HighwayScenario.xosc" scenario file.
 
 ---
 
-\subsubsection io_input_slaveconfig_environmentconfig EnvironmentConfig
+\subsubsection io_input_slaveconfig_environment Environment
 
 This section contains information about the world and the general environment inside the simulation. Every invocation re-rolls the environment probabilities.
 All probabilities need to add up to 1.0.
@@ -366,15 +311,74 @@ Every invocation has sunny weather.
 
 ---
 
+\subsubsection io_input_slaveconfig_observations Observations
+
+In this section all observation libraries are defined with their parameters.
+
+```xml
+<Observations>
+  <Observation>
+    <Library>Observation_Log</Library>
+    <Parameters>
+      <String Key="OutputFilename" Value="simulationOutput.xml"/>
+      <Bool Key="LoggingCyclicsToCsv" Value="false"/>
+      <StringVector Key="LoggingGroups" Value="Trace,Visualization,RoadPosition,Sensor"/>
+    </Parameters>
+  </Observation>
+</Observations>
+```
+
+\paragraph io_input_slaveconfig_observations_observationlog Observation_Log
+
+This is the standard observation module, that writes the [simulationOutput.xml](\ref io_output_simout). It has the following parameters:
+
+|Parameter|Description|
+|---------|-----------|
+|OutputFilename|name of the output file|
+|LoggingCyclicsToCsv|If true, the cyclics are written into a separate CSV file for every run|
+|LoggingGroups|defines which columns are logged|
+
+---
+
+\subsubsection io_input_slaveconfig_spawners Spawners
+
+In this section the spawners are defined with their Profile (defined in the ProfilesCatalog). The same library can be loaded multiple times with different profiles.
+A spawner is either of type "PreRun", meaning it is triggered only once at the start of the simulation, or "Runtime", meaning it is triggered in every timestep.
+If different spawners are to be triggered at the same time the spawner with the highest priority is triggered first.
+
+```xml
+<Spawners>
+  <Spawner>
+    <Library>SpawnPointScenario_OSI</Library>
+    <Type>PreRun</Type>
+    <Priority>1</Priority>
+  </Spawner>
+  <Spawner>
+    <Library>SpawnPointPreRunCommon_OSI</Library>
+    <Type>PreRun</Type>
+    <Priority>0</Priority>
+    <Profile>DefaultPreRunCommon</Profile>
+  </Spawner>
+  <Spawner>
+    <Library>SpawnPointRuntimeCommon_OSI</Library>
+    <Type>Runtime</Type>
+    <Priority>0</Priority>
+    <Profile>DefaultRuntimeCommon</Profile>
+  </Spawner>
+</Spawners>
+```
+
+---
+
 \subsection io_input_profilescatalog ProfilesCatalog.xml
 
 The ProfilesCatalog contains all AgentProfiles, VehicleProfiles and generic ProfileGroups and Profiles. Depending on the configuration the simulator could require  a "Driver"-ProfileGroup, a "Spawner"- and "TrafficGroup"-ProfileGroup , or sensor and vehiclecomponent specific ProfileGroups.
 
 * [AgentProfiles](\ref io_input_profilescatalog_agentprofiles)
 * [VehicleProfiles](\ref io_input_profilescatalog_vehicleprofiles)
+* [ProfileGroups](\ref io_input_profilescatalog_profileGroups)
 * [Driver-ProfileGroup](\ref io_input_profilescatalog_driverprofiles)
 * [VehicleComponent-ProfileGroups](\ref io_input_profilescatalog_vehiclecomponentprofiles)
-* [Sensor-ProfileGroups](\ref io_input_profilescatalog_sensorprofiles)
 * [TrafficGroup-ProfileGroup](\ref io_input_profilescatalog_trafficgroupprofiles)
 * [Spawner-ProfileGroup](\ref io_input_profilescatalog_spawnerprofiles)
 
@@ -476,17 +480,125 @@ If the probabilities of the profiles do not add up to 1, it means that the vehic
 
 ---
 
+\subsubsection io_input_profilescatalog_profileGroups ProfileGroups
+
+A ProfileGroup defines all the possible profiles of a component.
+A single profile is a set of parameters that are passed to the component in the same way as the parameters in the SystemConfig.
+Note: For components that have their parameters defined in the ProfilesCatalog the parameters in the SystemConfigBlueprint are ignored.
+Parameters can either be simple or stochastic.
+Simple parameters only have one value, while stochastic parameters have a minimum and maximum value as well as distribution specific parameters.
+Which parameters are needed/supported depends on the component.
+
+```xml
+<ProfileGroup Type="ComponentName">
+    <Profile Name="ExampleProfile">
+        <String Key="StringParameter" Value="Lorem ipsum"/>
+        <DoubleVector Key="DoubleParameter" Value="12.3,4.56,78.9"/>
+        <NormalDistribution Key="RandomParameter" Mean="4.5" SD="0.5" Min="3.5" Max="10.0"/>
+    </Profile>
+    <Profile Name="AnotherProfile">
+        ...
+    </Profile>
+</ProfileGroup>
+```
+
+There are the following types of simple parameters:
+* Bool
+* Int
+* Double
+* String
+* IntVector
+* DoubleVector
+* StringVector
+
+If a parameter is stochastic it can be defined as any to be drawn from any of the following distributions:
+
+| Distribution            |Additional attributes                             |
+|-------------------------|--------------------------------------------------|
+| NormalDistribution      | (Mean and SD) or (Mu and Sigma) (equivalent)     |
+| LogNormalDistributio    | (Mean and SD) or (Mu and Sigma) (not equivalent) |
+| UniformDistribution     | -                                                |
+| ExponentialDistribution | Lambda or Mean (Mean = 1 / Lambda)               |
+| GammaDistribution       | (Mean and SD) or (Shape and Scale)               |
+
+Additionally there is the list type.
+The list contains any number of list items which itself contain a list of parameters.
+Lists can be nested at most two times.
+
+```xml
+<List Name="AgentProfiles">
+    <ListItem>
+        <String Key="Name" Value="LuxuryClassCarAgent"/>
+        <Double Key="Weight" Value="0.4"/>
+    </ListItem>
+    <ListItem>
+        <String Key="Name" Value="MiddleClassCarAgent"/>
+        <Double Key="Weight" Value="0.6"/>
+    </ListItem>
+</List>
+```
+
+A Profile can also reference another Profile in another ProfileGroup.
+In these case the importer handles the reference as if it was substituted by all subelements of the referenced Profile.
+References may not be nested.
+
+```xml
+<Reference Type="GroupType" Name="ProfileName"/>
+```
+
+---
+
+\subsubsection io_input_profilescatalog_driverprofiles DriverProfiles
+
+This section contains all driver profiles used by the simulation. At least one driver profile is required.
+
+[//]: <> (Please refer to each section!)
+* [AlgorithmAgentFollowingDriverModel](\ref io_input_profilescatalog_profilescatalog_agentfollowingdrivermodel)
+
+\paragraph io_input_slaveconfig_profilescatalog_agentfollowingdrivermodel AlgorithmAgentFollowingDriverModel
+
+This driver type adapts its velocity to an agent in front and holds a desired velocity if there's no front agent available (like adaptive cruise control). The lateral guidance always keeps the agent in the middle of the lane.
+
+```xml
+<ProfileGroup Type="Driver">
+    <Profile Name="AgentFollowingDriver">
+        <String Key="Type" Value="AlgorithmAgentFollowingDriverModel"/>
+        <String Key="AlgorithmLateralModule" Value="AlgorithmLateralAfdm"/>
+        <String Key="AlgorithmLongitudinalModule" Value="AlgorithmLongitudinalAfdm"/>
+        <Double Key="VelocityWish" Value="35.0"/>
+        <Double Key="Delta" Value="4.0"/>
+        <Double Key="TGapWish" Value="1.5"/>
+        <Double Key="MinDistance" Value="2.0"/>
+        <Double Key="MaxAcceleration" Value="1.4"/>
+        <Double Key="MaxDeceleration" Value="2.0"/>
+    </Profile>
+</ProfileGroup>
+```
+|Parameter|Description|Dependence|
+|---------|-----------|----------|
+|AlgorithmLateralModule|Sets the driver behaviour model that generates the steering wheel angle of the driver|Obligatory|
+|AlgorithmLongitudinalModule|Sets the driver behaviour model that generates the accelerator and brake pedal position and the current gear of the driver|Obligatory|
+|VelocityWish|Desired speed|Optional (default: 120 [km/h]/ 33.33 [m/s])|
+|Delta|Free acceleration exponent characterizing how the acceleration decreases with velocity (1: linear, infinity: constant)|Optional (default: 4.0)|
+|TGapWish|Desired time gap between ego and front agent|Optional (default: 1.5)|
+|MinDistance|Minimum distance between ego and front (used at slow speeds); Also called jam distance|Optional (default: 2.0)|
+|MaxAcceleration|Maximum acceleration in satisfactory way, not vehicle possible acceleration|Optional (default: 1.4)|
+|MaxDeceleration|Desired deceleration|Optional (default: 2.0)|
+
+---
+
 \subsubsection io_input_profilescatalog_vehiclecomponentprofiles VehicleComponentProfiles
 
 This sections contains all driver assistance systems and other vehicle components and their parameter sets. 
 Every VehicleComponentProfile used by [AgentProfiles](\ref io_input_profilescatalog_agentprofiles) must be listed here.
-Currently there are three driver assistance systems:
+Currently there are three VehicleComponents:
 
 [//]: <> (Please refer to each section!)
-* [AEB](\ref io_input_profilescatalog_adasprofiles_aeb)
-* [DynamicsTrajectoryFollower](\ref io_input_profilescatalog_adasprofiles_trajectoryfollower)
+* [AEB](\ref io_input_profilescatalog_vehiclecomponentprofiles_aeb)
+* [DynamicsTrajectoryFollower](\ref io_input_profilescatalog_vehiclecomponentprofiles_trajectoryfollower)
+* [SensorGeometric2D](\ref io_input_profilescatalog_vehiclecomponentprofiles_geometric2d)
 
-\paragraph io_input_profilescatalog_adasprofiles_aeb AEB
+\paragraph io_input_profilescatalog_vehiclecomponentprofiles_aeb AEB
 
 For details about the system go to [AEB - Module](\ref dev_modules_adas_aeb).
 
@@ -498,41 +610,20 @@ For details about the system go to [AEB - Module](\ref dev_modules_adas_aeb).
 |Acceleration                          |Braking acceleration when activated                                                    |
 
 ```xml
-<VehicleComponentProfiles>
-        <VehicleComponentProfile Type="AEB" Name="AEB1">
-            <Double Key="CollisionDetectionLongitudinalBoundary" Value="4.0"/>
-            <Double Key="CollisionDetectionLateralBoundary" Value="1.5"/>
-            <Double Key="TTC" Value="2.0"/>
-            <Double Key="Acceleration" Value="-2"/>
-         </VehicleComponentProfile>
-    ...
-</VehicleComponentProfiles>
-```
-
----
-
-\subsubsection io_input_profilescatalog_driverprofiles DriverProfiles
-
-This section is required if a driver component is being used.
-
-[//]: <> (Please refer to each section!)
-* [AlgorithmAgentFollowingDriverModel](\ref io_input_profilescatalog_profilescatalog_agentfollowingdrivermodel)
-
-\paragraph io_input_slaveconfig_profilescatalog_agentfollowingdrivermodel AlgorithmAgentFollowingDriverModel
-
-This driver type adapts its velocity to an agent in front and holds a desired velocity if there's no front agent available (like adaptive cruise control). The lateral guidance always keeps the agent in the middle of the lane.
-
-```xml
-<ProfileGroup Type="Driver">
-    <Profile Name = "AgentFollowingDriver">
-        <String Key="Type" Value="AlgorithmAgentFollowingDriverModel"/>
+<ProfileGroup Type="AEB">
+    <Profile Type="AEB" Name="AEB1">
+        <Double Key="CollisionDetectionLongitudinalBoundary" Value="4.0"/>
+        <Double Key="CollisionDetectionLateralBoundary" Value="1.5"/>
+        <Double Key="TTC" Value="2.0"/>
+        <Double Key="Acceleration" Value="-2"/>
     </Profile>
+    ...
 </ProfileGroup>
 ```
 
 ---
 
-\paragraph io_input_profilescatalog_adasprofiles_trajectoryfollower DynamicsTrajectoryFollower
+\paragraph io_input_profilescatalog_vehiclecomponentprofiles_trajectoryfollower DynamicsTrajectoryFollower
 
 This vehicle component aligns the vehicle to a certain trajectory. Every vehicle component profile of this type needs a [Trajectory](\ref io_input_trajectory) file.
 
@@ -556,9 +647,19 @@ All attributes are required. The profile name may be chosen freely.
 
 ---
 
-\subsubsection io_input_profilescatalog_sensorprofiles SensorProfiles
+\subsubsection io_input_profilescatalog_vehiclecomponentprofiles_geometric2d SensorGeometric2D
 
-This section describes the possible sensor profiles of all vehicle profiles.
+|Parameter|Description|
+|---------|-----------|
+|LatencyMean|Mean value of the latency|
+|LatencySD|Standard deviation of the latency|
+|LatencyMin|Minimum value of the latency|
+|LatencyMax|Maximum value of the latency|
+|FailureProbability|How likely the sensor fails to detected an object|
+|DetectionRange|Range in which the sensor can detect objects|
+|OpeningAngleH|Angle of the circular sector|
+|EnableVisualObstruction|Wether this sensor uses [visual obstruction](\ref dev_agent_modules_geometric2d_obstruction)|
+|RequiredPercentageOfVisibleArea|Fraction of the area of an object that has to be in the sensor detection field in order for being detected|Geometric2D|
 
 ```xml
 <ProfileGroup Type="Geometric2D">
@@ -575,27 +676,6 @@ This section describes the possible sensor profiles of all vehicle profiles.
     </Profile>
 </ProfileGroup>
 ```
-
-|Attribute|Description|
-|---------|-----------|
-|Name|Name of the profile|
-|Type|Type of the sensor. Currently there is only the Geometric2D|
-
-Sensor profile for different sensor types can have the same name, but the names of profile of the same sensor type must be unique.
-
-The parameters depending on the sensor type. The SensorGeometric2D needs the following:
-
-|Parameter|Description|
-|---------|-----------|
-|LatencyMean|Mean value of the latency|
-|LatencySD|Standard deviation of the latency|
-|LatencyMin|Minimum value of the latency|
-|LatencyMax|Maximum value of the latency|
-|FailureProbability|How likely the sensor fails to detected an object|
-|DetectionRange|Range in which the sensor can detect objects|
-|OpeningAngleH|Angle of the circular sector|
-|EnableVisualObstruction|Wether this sensor uses [visual obstruction](\ref dev_agent_modules_geometric2d_obstruction)|
-|RequiredPercentageOfVisibleArea|Fraction of the area of an object that has to be in the sensor detection field in order for being detected|Geometric2D|
 
 ---
 
@@ -635,82 +715,10 @@ The name of this file needs has to be specified in the scenario configuration fi
 
 ---
 
-\subsection io_input_trajectory Trajectory
-
-Trajectory files are optional, but each trajectory file specified under the [AgentProfiles](\ref io_input_slaveconfig_agentprofiles) of the slaveConfig.xml is required. There are 3 types of trajectories:
-
-[//]: <> (Please refer to each section!)
-* Absolute world coordinates
-* Absolute road coordinates
-* Relative road coordinates
-
----
-
-**Absolute world coordinates**
-This trajectory type stores the x- and y-coordinates and the yaw angle.
-
-Example:
-
-```xml
-<Trajectory>
-        <TrajectoryCoordinate Time="0" X="112" Y="10" Yaw="0.0"/>
-        <TrajectoryCoordinate Time="100" X="112" Y="11" Yaw="0.0"/>
-        <TrajectoryCoordinate Time="200" X="113" Y="12" Yaw="0.0"/>
-        <TrajectoryCoordinate Time="300" X="113" Y="13" Yaw="0.0"/>
-        <TrajectoryCoordinate Time="400" X="114" Y="14" Yaw="0.0"/>
-        <TrajectoryCoordinate Time="500" X="115" Y="15" Yaw="0.0"/>
-        <TrajectoryCoordinate Time="600" X="116" Y="16" Yaw="0.05"/>
-</Trajectory>
-```
-
----
-
-**Absolute road coordinates**
-This trajectory type stores the s- and t-coordinates and the heading.
-s-coordinates represent the longitudinal distance on the road from the road start point.
-t-coordinates represent the lateral displacement on the road related to the middle of the lane.
-A absolute road trajectory has to starts with an s-coordinate other than 0.
-
-Example:
-
-```xml
-<Trajectory>
-        <TrajectoryCoordinate Time="0" S="1008" T="-6" Hdg="0.0"/>
-        <TrajectoryCoordinate Time="100" S="1009" T="-6" Hdg="0.0"/>
-        <TrajectoryCoordinate Time="200" S="1010" T="-6" Hdg="0.0"/>
-        <TrajectoryCoordinate Time="300" S="1011" T="-6" Hdg="0.0"/>
-        <TrajectoryCoordinate Time="400" S="1012" T="-6" Hdg="0.0"/>
-        <TrajectoryCoordinate Time="500" S="1013" T="-6" Hdg="0.0"/>
-        <TrajectoryCoordinate Time="600" S="1014" T="-5" Hdg="0.05"/>
-</Trajectory>
-```
-
-**Relative road coordinates**
-This trajectory type stores the s- and t-coordinates and the heading.
-s-coordinates represent the longitudinal distance on the road from the road start point.
-t-coordinates represent the lateral displacement on the road related to the middle of the lane.
-A relative road trajectory has to start with an s-coordinate of 0.
-
-Example:
-
-```xml
-<Trajectory>
-        <TrajectoryCoordinate Time="0" S="0" T="-6" Hdg="0.0"/>
-        <TrajectoryCoordinate Time="100" S="1" T="-6" Hdg="0.0"/>
-        <TrajectoryCoordinate Time="200" S="2" T="-6" Hdg="0.0"/>
-        <TrajectoryCoordinate Time="300" S="3" T="-6" Hdg="0.0"/>
-        <TrajectoryCoordinate Time="400" S="4" T="-6" Hdg="0.0"/>
-        <TrajectoryCoordinate Time="500" S="5" T="-6" Hdg="0.0"/>
-        <TrajectoryCoordinate Time="600" S="6" T="-5" Hdg="0.05"/>
-</Trajectory>
-```
-
----
-
 \subsection io_input_systemconfig systemConfig.xml
 SystemConfig files are optional.
 They discribe static configurations of agents and are therefore an alternative to the dynamic sampling of an agent during runtime.
-
+The schema is the same as for the [SystemConfigBlueprint](\ref io_input_systemconfigblueprint).
 
 \section io_output Output
 
@@ -751,11 +759,10 @@ This section contains the RandomSeed and general statistics of the invocation.
 |Tag|Description|
 |---|-----------|
 |RandomSeed|Random seed used for this invocation|
+|VisibilityDistance|Visibility distance of the world|
 |StopReason|Displays the reason why the simulation stopped. Currently only due to time out|
 |StopTime|Currently not used and set to -1|
 |EgoAccident|Flag which shows whether the ego agent was involved in an accident|
-|NumberOfAccidentsInFollowers|Tracks how many of the follower cars related to the ego had an accident|
-|NumberOfArbitraryAccidents|Number of accidents unrelated to the ego vehicle|
 |TotalDistanceTraveled|Total traveled distance of all agents|
 |EgoDistanceTraveled|Total traveled distance of ego vehicle only|
 
@@ -764,7 +771,6 @@ This section contains the RandomSeed and general statistics of the invocation.
 This section contains all events that occurred during the invocation.
 Event can either be triggered by an EventDetector, Manipulator or by certain vehicle components.
 They are used to track special behavior in the simulation.
-The visualization uses those tags to generate markers on the timeline.
 
 | Attribute          | Description                                                                                                                                                                                |
 |--------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|

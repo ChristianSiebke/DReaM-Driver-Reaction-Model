@@ -1,4 +1,4 @@
-\page dev_framework_modules_spawnpoints SpawnPoints
+\page dev_framework_modules_spawners Spawners
 
 \tableofcontents
 
@@ -6,59 +6,53 @@
 
 \section dev_framework_modules_spawnpoints_framework Framework
 
-The current SpawnPoint setup allows users to generically add or remove SpawnPoints.
-The SpawnPointNetwork can hold multiple SpawnPointLibraries. 
-These SpawnPointLibraries can generate multiple SpawnPoint instances.
-All SpawnPoint instances are instantiated before each invocation.
+The current Spawner setup allows users to generically add or remove Spawners.
+The SpawnPointNetwork can hold multiple SpawnerLibraries. 
+These SpawnerLibraries can generate multiple Spawner instances.
+All Spawner instances are instantiated before each invocation.
 
-![SpawnPoint Classes ](SpawnPointClasses.svg)
+![Spawner Classes ](SpawnPointClasses.svg)
 
-The SpawnPoints are responsible for interacting directly with the SpawnPoint dependencies (e.g. World, AgentFactory) in order to instantiate new Agents.
-The SpawnPoints are configured through the SpawnPointsConfig in the SlaveConfig file. 
-If the Profile tag is existing, the related SpawnPoint profile with the specified name from the ProfilesCatalog is passed to the SpawnPoint as a ParameterInterface.
+The Spawners are responsible for interacting directly with the Spawner dependencies (e.g. World, AgentFactory) in order to instantiate new Agents.
+The Spawners are configured through the corresponding section of the SlaveConfig file. 
+If the Profile tag is existing, the related Spawner profile with the specified name from the ProfilesCatalog is passed to the Spawner as a ParameterInterface.
 If the Profile tag does not exist, the Scenario file is passed to the SpawnPoint instead.
 
-![SpawnPoint Dependencies ](SpawnPointDependencies.svg)
+![Spawner Dependencies ](SpawnPointDependencies.svg)
 
-**Example SpawnPointsConfig (within slaveConfig.xml):**
+**Example Spawner Config (within slaveConfig.xml):**
 
 ```xml
-<SpawnPointsConfig>
-	<SpawnPoint>
+<Spawners>
+	<Spawner>
 		<Library>SpawnPointScenario_OSI</Library>
 		<Type>PreRun</Type>
 		<Priority>1</Priority>
-	</SpawnPoint>
-</SpawnPointsConfig>
-
-<SpawnPointsConfig>
-	<SpawnPoint>
+	</Spawner>
+	<Spawner>
 		<Library>SpawnPointPreRunCommon_OSI</Library>
 		<Type>PreRun</Type>
 		<Priority>0</Priority>
 		<Profile>ExamplePreRunProfile</Profile>
-	</SpawnPoint>
-</SpawnPointsConfig>
-
-<SpawnPointsConfig>
-	<SpawnPoint>
+	</Spawner>
+	<Spawner>
 		<Library>SpawnPointRuntimeCommon_OSI</Library>
 		<Type>Runtime</Type>
 		<Priority>0</Priority>
 		<Profile>ExampleRuntimeProfile</Profile>
-	</SpawnPoint>
-</SpawnPointsConfig>
+	</Spawner>
+</Spawners>
 ```
 
 
 | Name     | Description |
 |----------|-------------|
-| Library  | Library name of the SpawnPoint |
+| Library  | Library name of the Spawner |
 | Type     | Either "PreRun" or "RunTime". PreRun triggers only once before the invocation starts. RunTime continuously triggers during the run. |
-| Priority | Determines the order in which SpawnPoints are triggered. SpawnPoints with higher priority are triggered first. Greater values equal higher priority. |
-| Profile  | Required only for the [PreRunCommon](\ref dev_framework_modules_spawnpoints_preruncommonspawnpoint) and [RuntimeCommon](\ref dev_framework_modules_spawnpoints_runtimecommonspawnpoint) SpawnPoints. Do not define for the [Scenario](\ref dev_framework_modules_spawnpoints_scenariospawnpoint) SpawnPoint.|
+| Priority | Determines the order in which Spawners are triggered. Spawners with higher priority are triggered first. Greater values equal higher priority. |
+| Profile  | Required only for the [PreRunCommon](\ref dev_framework_modules_spawnpoints_preruncommonspawnpoint) and [RuntimeCommon](\ref dev_framework_modules_spawnpoints_runtimecommonspawnpoint) Spawners. Do not define for the [Scenario](\ref dev_framework_modules_spawnpoints_scenariospawnpoint) SpawnPoint.|
 
-There are 3 types of SpawnPoints:
+There are 3 types of Spawners:
 1. [Scenario](\ref dev_framework_modules_spawnpoints_scenariospawnpoint)
 2. [PreRunCommon](\ref dev_framework_modules_spawnpoints_preruncommonspawnpoint)
 3. [RuntimeCommon](\ref dev_framework_modules_spawnpoints_runtimecommonspawnpoint)
@@ -140,7 +134,8 @@ The TrafficGroups are defined by the following parameter:
 | Homogeneity     | OPTIONAL: A vector describing the velocity increments for left lanes |
 | RightLaneOnly   | OPTIONAL: A flag determining whether this TrafficGroup can only be applied to the right most lane |
 
-The PreRunCommon SpawnPoint will spawn common agents on the specified Lanes of the specified Road from the s position S-Start to the s position S-End with Traffic Parameters sampled from the specified TrafficVolumes, PlatoonRates, Velocities, and AgentProfiles lists with the following restrictions:
+The PreRunCommon SpawnPoint will spawn common agents on the specified Lanes of the specified Road from the s position S-Start to the s position S-End based on the parameters of the TrafficGroups.
+The following restrictions apply:
 
 - If the Scenario Spawn Point spawned Scenario Agents (including the Ego agent) before this Spawn Point is triggered (in the intended order of these Spawn Points), ranges between the Scenario Agents are invalid for spawning by this Spawn Point.
 The spawn ranges will only be augmented by Scenario Agents on the same Road and Lane.
@@ -165,11 +160,20 @@ As such, there are 7 different potential scenarios that may arise in terms of ho
 - If the specified S-Start and S-End positions are either beyond or before the S positions at which the specified Road and Lane combination exists, no spawning will occur
 - In the situation where a section of a Road adds a new lane to the left of the currently existing lanes, one should be aware that the laneId "-1" will shift to the newest left lane and should adjust SpawnPoint profiles with this in mind
 
+Once the spawning ranges are determined the PreRun SpawnPoint will spawn for each spawning area based on the following logic:
+
+- First the agentprofile needs to be determined. If the current spawn position evaluate to a right lane, the pool from which the agentprofile is drafted is extended by all traffic groups which contain the RightLaneOnly flag set to true.
+- Then the time gap between the new agent and the closest existing agent is sampled.
+- Afterwards the velocity of the new agent is being sampled under consideration of the homogeneity.
+- The gap and velocity are used to calculate the distance between the new agent and the next agent in this spawnarea. Here a minimum distance of 5m between agents is required.
+- Based on the distance and the velocity the TTC (2s) conditions are evaluated.If the TTC is critical the spawn velocity is reduced to fullfill the TTC requriements. 
+- As a final step the spawnpoint evaluates the spawncoordinates. If they are valid the agent is created, else the spawnpoint moves on to the next spawning range. 
+
 \section dev_framework_modules_spawnpoints_runtimecommonspawnpoint RuntimeSpawnPoint
 The Runtime SpawnPoint (included in library "SpawnPointRuntimeCommon_OSI") is responsible for maintaining a populated scenery throughout the simulation runtime.
 This SpawnPoint acts at each timestep throughout the simulation run and attempts to spawn Common Agents at the specified location(s).
 
-The PreRunCommon SpawnPoint requires a Spawner-Profile to be defined in the ProfilesCatalog. The Spawner-Profile contains all SpawnPoints and all possible TrafficGroups:
+The RunTimeCommon SpawnPoint requires a Spawner-Profile to be defined in the ProfilesCatalog. The Spawner-Profile contains all SpawnPoints and all possible TrafficGroups:
 
 ```xml
 <ProfileGroup Type="TrafficGroup">
@@ -231,9 +235,12 @@ The TrafficGroups are defined by the following parameter:
 | Homogeneity     | OPTIONAL: A vector describing the velocity increments for left lanes |
 | RightLaneOnly   | OPTIONAL: A flag determining whether this TrafficGroup can only be applied to the right most lane |
 
-The RuntimeCommon SpawnPoint will spawn a generated Agent under the following conditions:
+The RuntimeCommon SpawnPoint will spawn based on the following logic:
 
-- the distance between the spawn position and the next agent in the lane satisfies the "gap in seconds" such that the specified traffic volume is met
-- the spawning of the agent would not cause a crash: either of the spawned agent to a car further down the lane, or of a car before the spawned agent into the spawned agent
+- First the agentprofile needs to be determined. If the current spawn position evaluates to a right lane, the pool from which the agentprofile is drafted is extended by all traffic groups which contain the RightLaneOnly flag set to true.
+- Then the time gap between the new agent and the closest existing agent is sampled.
+- Afterwards the velocity of the new agent is being sampled under consideration of the homogeneity.
+- Once the timely gap expires, the spawnpoint evaluate if the TTC (2s) conditions and a minimum required distance between agents (5m) are met. If the TTC is critical the spawn velocity is reduced to fullfill the TTC requriements. If the minimum distance is not fullfilled, the agent will be held back.
+- If all requirements were fullfilled the agent is spawned.
 
-If the above conditions are not met, the agent is queued to be spawned the next time both of the conditions *are* met.
+![SpawnLogic](SpawningFlowChart.png)

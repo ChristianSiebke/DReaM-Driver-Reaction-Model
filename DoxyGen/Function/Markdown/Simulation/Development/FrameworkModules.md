@@ -253,7 +253,7 @@ The Sampler uses the Stochastics module to generate random values.
 
 \section dev_framework_modules_spawnpoint SpawnPoint
 
-For information on the current SpawnPoints, please refer the SpawnPoint [documentation](\ref dev_framework_modules_spawnpoints).
+For information on the current SpawnPoints, please refer the SpawnPoint [documentation](\ref dev_framework_modules_spawners).
 
 ---
 
@@ -295,7 +295,7 @@ The road is scanned at a constant interval along 's', which leads to four-sided 
 The scanning is carried out at a scanning rate of 10 centimeters with the aim of achieving a total scanning error of less than 5 centimeters, as required by the representation used internally (c.f. [open simulation interface](https://github.com/OpenSimulationInterface)).
 Note that this error is only guaranteed if geometries do not exhibit extreme curvatures, i.e. a deviation of more than 5 cm within two sampling points (10 cm along s).
 The scanned points define so-called joints, which contain all scanned points at an 's' coordinate across all lane boundaries of the given road.
-The number of these joints is reduced by a [Douglas-Peucker algorithm](https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm), which ensures that the maximum lateral error of each individual point within a joint is less than 5 cm compared to the originally scanned points.
+The number of these joints is reduced by a [Ramer-Douglas-Peucker algorithm](https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm), which ensures that the maximum lateral error of each individual point within a joint is less than 5 cm compared to the originally scanned points.
 Note that (a) the boundary points of geometries are always retained and (b) additional points for lane marking transitions are also retained to ensure the maximum accuracy of these edge cases.
 The lane elements are generated with two successive connections, which are ultimately used in the localization at runtime (see [below](\ref dev_framework_modules_world_localization)).
 
@@ -344,6 +344,7 @@ The following traffic signs are supported:
 | HighWayBegin                                  | 330.1     | -           | -                 |
 | HighWayEnd                                    | 330.2     | -           | -                 |
 | HighWayExit                                   | 333       | -           | -                 |
+| AnnounceHighwayExit                           | 448       | -           | -                 |
 | HighwayExitPole                               | 450       | 50/51/52    | The subtype describes the distance to the highway exit in m. 50 = 100m, 51 = 200m, 52 = 300m |
 | AnnounceRightLaneEnd                          | 531       | 10/11/12/13 | The subtype describes the number of continuing lanes after the right lane ends. 10 = 1 lane, 11 = 2 lanes, 12 = 3 lanes, 13 = 4 lanes |
 | AnnounceLeftLaneEnd                           | 531       | 20/21/22/23 | The subtype describes the number of continuing lanes after the left lane ends. 10 = 1 lane, 11 = 2 lanes, 12 = 3 lanes, 13 = 4 lanes |
