@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *               2017 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -102,6 +102,126 @@ openpass::parameter::ParameterSetLevel1 SystemConfigImporter::ImportSystemParame
                 }
             }
             param.emplace_back(id, vector);
+        }
+        else if (type == "normalDistribution")
+        {
+            QDomElement valueElement;
+            ThrowIfFalse(SimulationCommon::GetFirstChildElement(parameterElement, "value", valueElement), parameterElement,
+                         "Missing value");
+
+            double min, max, mean, sd;
+            ThrowIfFalse(SimulationCommon::Parse(valueElement, "min", min), valueElement,
+                         "Missing min");
+            ThrowIfFalse(SimulationCommon::Parse(valueElement, "max", max), valueElement,
+                         "Missing max");
+
+            if (!SimulationCommon::Parse(valueElement, "mean", mean))
+            {
+                ThrowIfFalse(SimulationCommon::Parse(valueElement, "mu", min), valueElement,
+                             "Missing mean or mu");
+            }
+
+            if (!SimulationCommon::Parse(valueElement, "sd", sd))
+            {
+                ThrowIfFalse(SimulationCommon::Parse(valueElement, "sigma", sd), valueElement,
+                             "Missing sd or sigma");
+            }
+
+            openpass::parameter::NormalDistribution distribution{mean, sd, min, max};
+            param.emplace_back(id, distribution);
+        }
+        else if (type == "logNormalDistribution")
+        {
+            QDomElement valueElement;
+            ThrowIfFalse(SimulationCommon::GetFirstChildElement(parameterElement, "value", valueElement), parameterElement,
+                         "Missing value");
+
+            double min, max, mean, sd{0}, mu{0}, sigma{0};
+            ThrowIfFalse(SimulationCommon::Parse(valueElement, "min", min), valueElement,
+                         "Missing min");
+            ThrowIfFalse(SimulationCommon::Parse(valueElement, "max", max), valueElement,
+                         "Missing max");
+
+            if (SimulationCommon::Parse(valueElement, "mean", mean) &&
+                SimulationCommon::Parse(valueElement, "sd", sd))
+            {
+                auto distribution =  openpass::parameter::LogNormalDistribution::CreateWithMeanSd(mean, sd, min, max);
+                param.emplace_back(id, distribution);
+            }
+            else
+            {
+                ThrowIfFalse(SimulationCommon::Parse(valueElement, "mu", mu)
+                             && SimulationCommon::Parse(valueElement, "sigma", sigma), valueElement,
+                             "Missing mean and sd or mu and sigma");
+
+                openpass::parameter::LogNormalDistribution distribution{mu, sigma, min, max};
+                param.emplace_back(id, distribution);
+            }
+        }
+        else if (type == "exponentialDistribution")
+        {
+            QDomElement valueElement;
+            ThrowIfFalse(SimulationCommon::GetFirstChildElement(parameterElement, "value", valueElement), parameterElement,
+                         "Missing value");
+
+            double min, max, lambda, mean{0};
+            ThrowIfFalse(SimulationCommon::Parse(valueElement, "min", min), valueElement,
+                         "Missing min");
+            ThrowIfFalse(SimulationCommon::Parse(valueElement, "max", max), valueElement,
+                         "Missing max");
+
+            if (!SimulationCommon::Parse(valueElement, "lambda", lambda))
+            {
+                ThrowIfFalse(SimulationCommon::Parse(valueElement, "mean", mean), valueElement,
+                             "Missing mean or mu");
+                lambda = 1 / mean;
+            }
+
+            openpass::parameter::ExponentialDistribution distribution{lambda, min, max};
+            param.emplace_back(id, distribution);
+        }
+        else if (type == "uniformDistribution")
+        {
+            QDomElement valueElement;
+            ThrowIfFalse(SimulationCommon::GetFirstChildElement(parameterElement, "value", valueElement), parameterElement,
+                         "Missing value");
+
+            double min, max;
+            ThrowIfFalse(SimulationCommon::Parse(valueElement, "min", min), valueElement,
+                         "Missing min");
+            ThrowIfFalse(SimulationCommon::Parse(valueElement, "max", max), valueElement,
+                         "Missing max");
+
+            openpass::parameter::UniformDistribution distribution{min, max};
+            param.emplace_back(id, distribution);
+        }
+        else if (type == "gammaDistribution")
+        {
+            QDomElement valueElement;
+            ThrowIfFalse(SimulationCommon::GetFirstChildElement(parameterElement, "value", valueElement), parameterElement,
+                         "Missing value");
+
+            double min, max, mean, sd{0}, shape{0}, scale{0};
+            ThrowIfFalse(SimulationCommon::Parse(valueElement, "min", min), valueElement,
+                         "Missing min");
+            ThrowIfFalse(SimulationCommon::Parse(valueElement, "max", max), valueElement,
+                         "Missing max");
+
+            if (SimulationCommon::Parse(valueElement, "mean", mean) &&
+                SimulationCommon::Parse(valueElement, "sd", sd))
+            {
+                auto distribution =  openpass::parameter::GammaDistribution::CreateWithMeanSd(mean, sd, min, max);
+                param.emplace_back(id, distribution);
+            }
+            else
+            {
+                ThrowIfFalse(SimulationCommon::Parse(valueElement, "shape", shape)
+                             && SimulationCommon::Parse(valueElement, "scale", scale), valueElement,
+                             "Missing mean and sd or mu and sigma");
+
+                openpass::parameter::GammaDistribution distribution{shape, scale, min, max};
+                param.emplace_back(id, distribution);
+            }
         }
     
         parameterElement = parameterElement.nextSiblingElement(TAG::parameter);

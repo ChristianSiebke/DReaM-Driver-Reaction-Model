@@ -208,6 +208,35 @@ With corresponding defined indices :
 | SensorDriver                  | Sensor                | 81      |
 | ParametersVehicle             | Parameters            | 92      |
 
+\subsubsection io_input_systemconfigblueprint_paramters Parameters
+
+For more information on the type of parameters (escpecially stochastic distributions), please refer to the [ProfilesGroup section](\ref io_input_profilescatalog_profileGroups).
+
+**Important Note:** The syntax for defining parameters in the SystemConfigBlueprint file differs from the ProfilesCatalog syntax.
+See the following example:
+
+```xml
+<parameters>
+    <parameter>
+        <id>StringParameter</id>
+        <type>string</type>
+        <unit/>
+        <value>Lorem ipsum</value>
+    </parameter>
+    <parameter>
+        <id>RandomParameter</id>
+        <type>normalDistribution</type>
+        <unit/>
+        <value>
+            <mean>15.0</mean>
+            <sd>2.5</sd>
+            <min>10.0</min>
+            <max>20.0</max>
+        </value>
+    </parameter>
+</parameters>
+```
+
 ---
 
 \subsection io_input_slaveconfig slaveConfig.xml

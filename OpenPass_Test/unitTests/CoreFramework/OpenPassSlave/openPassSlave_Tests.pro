@@ -52,6 +52,11 @@ AGENTSAMPLER_TESTS = \
     \
     agentSampler_Tests.cpp
 
+SYSTEMCONFIGIMPORTER_TESTS = \
+    $$UNIT_UNDER_TEST/importer/systemConfigImporter.cpp \
+    \
+    systemConfigImporter_Tests.cpp
+
 SLAVECONFIGIMPORTER_TESTS = \
     $$UNIT_UNDER_TEST/importer/slaveConfig.cpp \
     $$UNIT_UNDER_TEST/importer/slaveConfigImporter.cpp \
@@ -125,6 +130,7 @@ PUBLISHER_TESTS = \
 SOURCES += \
     $$DEPENDENCIES \
     $$SLAVECONFIGIMPORTER_TESTS \
+    $$SYSTEMCONFIGIMPORTER_TESTS \
     $$PROFILESIMPORTER_TESTS \
     $$EVENTDETECTOR_TESTS \
     $$PARAMETERIMPORTER_TESTS \

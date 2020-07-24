@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *               2017 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -57,9 +57,10 @@ public:
     //-----------------------------------------------------------------------------
     static bool Import(const std::string &filename, std::shared_ptr<SystemConfig> systemConfig);
 
+    //! Public for testing
+    static openpass::parameter::ParameterSetLevel1 ImportSystemParameters(QDomElement &parametersElement);
 
 private:
-    static openpass::parameter::ParameterSetLevel1 ImportSystemParameters(QDomElement &parametersElement);
     static bool ImportSystemConfigContent(const std::string &filename, QDomDocument& document);
 
 };
