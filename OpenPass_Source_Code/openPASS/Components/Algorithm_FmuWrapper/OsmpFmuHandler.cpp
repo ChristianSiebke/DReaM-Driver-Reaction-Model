@@ -124,6 +124,13 @@ OsmpFmuHandler::OsmpFmuHandler(fmu_check_data_t *cdata, WorldInterface *world, A
             directory.mkpath(outputDir);
         }
     }
+
+    auto enforceDoubleBufferingFlag = parameters->GetParametersBool().find("EnforceDoubleBuffering");
+    if (enforceDoubleBufferingFlag != parameters->GetParametersBool().end())
+    {
+        enforceDoubleBuffering = enforceDoubleBufferingFlag->second;
+    }
+
 }
 
 
@@ -223,6 +230,7 @@ void OsmpFmuHandler::PostStep(int time)
 
 void OsmpFmuHandler::SetSensorViewInput(const osi3::SensorView& data)
 {
+    std::swap(serializedSensorView, previousSerializedSensorView);
     fmi2_integer_t fmuInputValues[3];
     fmi2_value_reference_t valueReferences[3] = {fmuVariables.at(sensorViewVariable.value()+".base.lo").first,
                                                  fmuVariables.at(sensorViewVariable.value()+".base.hi").first,
@@ -242,6 +250,7 @@ void OsmpFmuHandler::SetSensorViewInput(const osi3::SensorView& data)
 
 void OsmpFmuHandler::SetTrafficCommandInput(const osi3::TrafficCommand& data)
 {
+    std::swap(serializedTrafficCommand, previousSerializedTrafficCommand);
     fmi2_integer_t fmuInputValues[3];
     fmi2_value_reference_t valueReferences[3] = {fmuVariables.at(trafficCommandVariable.value()+".base.lo").first,
                                                  fmuVariables.at(trafficCommandVariable.value()+".base.hi").first,
@@ -297,6 +306,15 @@ void OsmpFmuHandler::GetTrafficUpdate()
 {
     void* buffer = decode_integer_to_pointer(GetValue(fmuVariables.at(trafficUpdateVariable.value()+".base.hi").first, VariableType::Int).intValue,
                                              GetValue(fmuVariables.at(trafficUpdateVariable.value()+".base.lo").first, VariableType::Int).intValue);
+
+    if (enforceDoubleBuffering && buffer != nullptr && buffer == previousTrafficUpdate)
+    {
+        const std::string msg = "FMU has no double buffering";
+        LOGERROR(msg);
+        throw std::runtime_error(msg);
+    }
+
+    previousTrafficUpdate = buffer;
     trafficUpdate.ParseFromArray(buffer, GetValue(fmuVariables.at(trafficUpdateVariable.value()+".size").first, VariableType::Int).intValue);
 }
 
@@ -304,6 +322,15 @@ void OsmpFmuHandler::GetSensorData()
 {
     void* buffer = decode_integer_to_pointer(GetValue(fmuVariables.at(sensorDataVariable.value()+".base.hi").first, VariableType::Int).intValue,
                                              GetValue(fmuVariables.at(sensorDataVariable.value()+".base.lo").first, VariableType::Int).intValue);
+
+    if (enforceDoubleBuffering && buffer != nullptr && buffer == previousSensorData)
+    {
+        const std::string msg = "FMU has no double buffering";
+        LOGERROR(msg);
+        throw std::runtime_error(msg);
+    }
+
+    previousSensorData = buffer;
     sensorData.ParseFromArray(buffer, GetValue(fmuVariables.at(sensorDataVariable.value()+".size").first, VariableType::Int).intValue);
 }
 

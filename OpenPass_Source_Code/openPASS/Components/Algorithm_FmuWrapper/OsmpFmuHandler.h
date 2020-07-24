@@ -72,9 +72,13 @@ private:
     const Fmu2Variables& fmuVariables;
 
     std::string serializedSensorView;
+    std::string previousSerializedSensorView;
     std::string serializedTrafficCommand;
+    std::string previousSerializedTrafficCommand;
     osi3::TrafficUpdate trafficUpdate;
+    void* previousTrafficUpdate{nullptr};
     osi3::TrafficCommand trafficCommand;
+    void* previousSensorData{nullptr};
     osi3::SensorData sensorData;
 
     std::optional<std::string> sensorViewVariable;
@@ -86,6 +90,10 @@ private:
     bool writeSensorData{false};
     bool writeTrafficCommand{false};
     bool writeTrafficUpdate{false};
+
+    //! check for double buffering of OSI messages allocated by FMU
+    bool enforceDoubleBuffering{false};
+
     QString outputDir{};
 
     Common::Vector2d previousPosition{0.0,0.0};
