@@ -90,6 +90,17 @@ static double roundDoubleWithDecimals(double value, int decimals)
     return std::floor((value * (std::pow(10, decimals))) + 0.5)/(std::pow(10.0, decimals));
 }
 
+//! Estimate the inertial momentum for rotation around the vehicle's z-axis, assuming
+//! a cuboid of homogeneous mass density. ( see .e.g. https://en.wikipedia.org/wiki/List_of_moments_of_inertia )
+//!
+//! @param[in]    double    mass
+//! @param[in]    double    length
+//! @param[in]    double    width
+//! @return       double    momentInertiaYaw
+static double CalculateMomentInertiaYaw(double mass, double length, double width) {
+    return mass * (length*length + width*width) / 12;
+}
+
 [[maybe_unused]] static std::optional<Common::Vector2d> CalculateIntersection(const Common::Vector2d& firstStartPoint, const Common::Vector2d& firstAxis,
                                                       const Common::Vector2d& secondStartPoint, const Common::Vector2d& secondAxis)
 {

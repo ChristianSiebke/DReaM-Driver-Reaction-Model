@@ -82,8 +82,9 @@ void EventNetwork::InsertEvent(std::shared_ptr<EventInterface> event)
     activeEvents[event->GetCategory()].push_back(event);
 
     // This filter is currently necessary, as manipulators fire events too (which shall not be logged anymore)
-    if (event->GetCategory() == EventDefinitions::EventCategory::OpenSCENARIO ||
-        event->GetCategory() == EventDefinitions::EventCategory::OpenPASS)
+    if ((event->GetCategory() == EventDefinitions::EventCategory::OpenSCENARIO ||
+        event->GetCategory() == EventDefinitions::EventCategory::OpenPASS) &&
+        event->GetName() != "Collision")
     {
         Log(event);
     }

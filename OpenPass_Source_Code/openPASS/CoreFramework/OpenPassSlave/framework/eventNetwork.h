@@ -130,7 +130,7 @@ public:
      * \brief Publishes the event for logging
      * \param[in] event
      */
-    void Log(const std::shared_ptr<EventInterface> &event);
+    virtual void Log(const std::shared_ptr<EventInterface> &event) override;
 
 private:
     openpass::publisher::EventNetworkDataPublisher publisher;

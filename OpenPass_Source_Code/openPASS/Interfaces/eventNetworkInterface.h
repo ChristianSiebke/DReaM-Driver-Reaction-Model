@@ -44,6 +44,7 @@ public:
     virtual void Clear() = 0;
     virtual void AddCollision(const int agentId) = 0;
     virtual void Initialize(RunResultInterface *runResult) = 0;
+    virtual void Log(const std::shared_ptr<EventInterface> &event) = 0;
 };
 
 } //namespace SimulationSlave

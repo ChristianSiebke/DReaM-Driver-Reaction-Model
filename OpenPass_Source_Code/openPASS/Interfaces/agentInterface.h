@@ -156,6 +156,21 @@ public:
     virtual std::vector<void *> GetCollisionData(int collisionPartnerId,
                                                  int collisionDataId) const = 0;
 
+
+    //-----------------------------------------------------------------------------
+    //! Retrieves velocity of agent after crash.
+    //!
+    // @return                a value >0 if collided
+    //-----------------------------------------------------------------------------
+    virtual PostCrashVelocity GetPostCrashVelocity() const = 0;
+
+    //-----------------------------------------------------------------------------
+    //! Retrieves velocity of agent after crash.
+    //!
+    // @return                a value >0 if collided
+    //-----------------------------------------------------------------------------
+    virtual void SetPostCrashVelocity(PostCrashVelocity postCrashVelocity) = 0;
+
     //-----------------------------------------------------------------------------
     //! Sets x-coordinate of agent
     //!

@@ -18,6 +18,9 @@ add_openpass_target(
     RemoveAgentsManipulator.h
     SpeedActionManipulator.h
     TrajectoryManipulator.h
+    ../../Common/vector2d.h
+    srcCollisionPostCrash/polygon.h
+    srcCollisionPostCrash/collisionDetection_Impact_implementation.h
 
   SOURCES
     CollisionManipulator.cpp
@@ -31,7 +34,13 @@ add_openpass_target(
     RemoveAgentsManipulator.cpp
     SpeedActionManipulator.cpp
     TrajectoryManipulator.cpp
+    srcCollisionPostCrash/polygon.cpp
+    srcCollisionPostCrash/collisionDetection_Impact_implementation.cpp
 
   LIBRARIES
     Qt5::Core
+    
+  INCDIRS
+    ../../Common
+    srcCollisionPostCrash
 )

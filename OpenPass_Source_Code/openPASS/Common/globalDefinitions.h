@@ -562,3 +562,22 @@ private:
     double accelerationY;
     double yawAngle;
 };
+
+struct PostCrashVelocity
+{
+    bool isActive = false;//! activity flag
+    double velocityAbsolute = 0.0;//! post crash velocity, absolute [m/s]
+    double velocityDirection = 0.0;//! post crash velocity direction [rad]
+    double yawVelocity = 0.0;//! post crash yaw velocity [rad/s]
+};
+
+/*!
+ * For definitions see http://indexsmart.mirasmart.com/26esv/PDFfiles/26ESV-000177.pdf
+ */
+struct CollisionAngles{
+    double OYA = 0.0; //!< opponent yaw angle
+    double HCPAo = 0.0; //!< original host collision point angle
+    double OCPAo = 0.0; //!< original opponent collision point angle
+    double HCPA = 0.0; //!< transformed host collision point angle
+    double OCPA = 0.0; //!< transformed opponent collision point angle
+};
