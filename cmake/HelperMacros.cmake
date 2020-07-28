@@ -244,6 +244,7 @@ function(add_openpass_target)
       endif()
 
       add_library(${PARSED_ARG_NAME} ${PARSED_ARG_LINKAGE} ${PARSED_ARG_HEADERS} ${PARSED_ARG_SOURCES} ${PARSED_ARG_UIS})
+      set_target_properties(${PARSED_ARG_NAME} PROPERTIES INSTALL_RPATH "\$ORIGIN;\$ORIGIN/..")
       install(FILES $<TARGET_FILE:${PARSED_ARG_NAME}> DESTINATION "${DESTDIR}")
       install(TARGETS ${PARSED_ARG_NAME} RUNTIME DESTINATION "${DESTDIR}")
 
@@ -262,6 +263,7 @@ function(add_openpass_target)
       endif()
 
       add_executable(${PARSED_ARG_NAME} ${PARSED_ARG_HEADERS} ${PARSED_ARG_SOURCES} ${PARSED_ARG_UIS})
+      set_target_properties(${PARSED_ARG_NAME} PROPERTIES INSTALL_RPATH "\$ORIGIN;\$ORIGIN/lib")
       install(TARGETS ${PARSED_ARG_NAME} RUNTIME DESTINATION "${DESTDIR}")
 
       if(OPENPASS_ADJUST_OUTPUT)
@@ -274,10 +276,10 @@ function(add_openpass_target)
         message(WARNING "LINKAGE parameter isn't used by target type 'executable'")
       endif()
 
-      set(ADDITIONAL_TEST_ARGS "")
+      set(ADDITIONAL_TEST_ARGS)
 
       if(${PARSED_ARG_DEFAULT_MAIN})
-        set(ADDITIONAL_TEST_ARGS "${ADDITIONAL_TEST_ARGS} --default-xml")
+        list(APPEND ADDITIONAL_TEST_ARGS "--default-xml")
 
         list(APPEND PARSED_ARG_HEADERS
           ${TEST_PATH}/common/gtest/mainHelper.h

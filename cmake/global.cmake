@@ -103,7 +103,6 @@ endif()
 add_compile_definitions($<IF:$<CONFIG:Debug>,DEBUG_POSTFIX="${CMAKE_DEBUG_POSTFIX}",DEBUG_POSTFIX=\"\">)
 
 set(CMAKE_BUILD_RPATH \$ORIGIN)
-set(CMAKE_INSTALL_RPATH \$ORIGIN \$ORIGIN/lib)
 
 include(HelperMacros)
 
