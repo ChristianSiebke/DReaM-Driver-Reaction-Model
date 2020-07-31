@@ -79,6 +79,12 @@ public:
     virtual void UpdateOutput(int localLinkId, std::shared_ptr<SignalInterface const>& data, int time) = 0;
 
     /*!
+     * \brief This function is called during the initialization if the FMU
+     *  and allows to set values that are fixed after the initialization
+     */
+    virtual void Init() = 0;
+
+    /*!
      * \brief Has to be called from Trigger in AlgorithmFmuWrapper
      *
      * \param[in]   time            Timestep forwarded from FmuWrapper

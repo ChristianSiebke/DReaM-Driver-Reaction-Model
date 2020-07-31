@@ -255,7 +255,6 @@ jm_status_enu_t fmi2_check(fmu_check_data_t* cdata) {
 					jm_log_error(cb,fmu_checker_module,"Platform type returned from CS FMU '%s' does not match the checker '%s'",platform, fmi2_get_types_platform() );
 			}
 
-            status = fmi2_cs_prep_simulate(cdata);
 		}
 		if(status == jm_status_success) status = savedStatus;
 		else if((status == jm_status_warning) && (savedStatus == jm_status_error)) status = jm_status_error;

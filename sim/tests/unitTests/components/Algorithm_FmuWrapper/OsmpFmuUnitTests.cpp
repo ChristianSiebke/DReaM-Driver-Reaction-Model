@@ -23,27 +23,27 @@ TEST(OsmpFmuUnitTests, GetTrafficCommandFromOpenScenarioTrajectory)
     trajectory.points.emplace_back(openScenario::TrajectoryPoint{15.2, 2.1, -2.2, -2.3});
 
     const auto trafficCommand = OsmpFmuHandler::GetTrafficCommandFromOpenScenarioTrajectory(trajectory);
-    const auto& trajectoryAction = trafficCommand.action(0).trajectory_action();
+    const auto& trajectoryAction = trafficCommand.action(0).follow_trajectory_action();
     ASSERT_THAT(trajectoryAction.trajectory_point_size(), Eq(3));
 
     const auto& firstPoint = trajectoryAction.trajectory_point(0);
-    ASSERT_THAT(firstPoint.time_stamp().seconds(), Eq(0));
-    ASSERT_THAT(firstPoint.time_stamp().nanos(), Eq(0));
-    ASSERT_THAT(firstPoint.state().position().x(), Eq(0.1));
-    ASSERT_THAT(firstPoint.state().position().y(), Eq(-0.2));
-    ASSERT_THAT(firstPoint.state().orientation().yaw(), Eq(0.3));
+    ASSERT_THAT(firstPoint.timestamp().seconds(), Eq(0));
+    ASSERT_THAT(firstPoint.timestamp().nanos(), Eq(0));
+    ASSERT_THAT(firstPoint.position().x(), Eq(0.1));
+    ASSERT_THAT(firstPoint.position().y(), Eq(-0.2));
+    ASSERT_THAT(firstPoint.orientation().yaw(), Eq(0.3));
 
     const auto& secondPoint = trajectoryAction.trajectory_point(1);
-    ASSERT_THAT(secondPoint.time_stamp().seconds(), Eq(5));
-    ASSERT_THAT(secondPoint.time_stamp().nanos(), Eq(100000000));
-    ASSERT_THAT(secondPoint.state().position().x(), Eq(-1.1));
-    ASSERT_THAT(secondPoint.state().position().y(), Eq(1.2));
-    ASSERT_THAT(secondPoint.state().orientation().yaw(), Eq(1.3));
+    ASSERT_THAT(secondPoint.timestamp().seconds(), Eq(5));
+    ASSERT_THAT(secondPoint.timestamp().nanos(), Eq(100000000));
+    ASSERT_THAT(secondPoint.position().x(), Eq(-1.1));
+    ASSERT_THAT(secondPoint.position().y(), Eq(1.2));
+    ASSERT_THAT(secondPoint.orientation().yaw(), Eq(1.3));
 
     const auto& thirdPoint = trajectoryAction.trajectory_point(2);
-    ASSERT_THAT(thirdPoint.time_stamp().seconds(), Eq(15));
-    ASSERT_THAT(thirdPoint.time_stamp().nanos(), Eq(200000000));
-    ASSERT_THAT(thirdPoint.state().position().x(), Eq(2.1));
-    ASSERT_THAT(thirdPoint.state().position().y(), Eq(-2.2));
-    ASSERT_THAT(thirdPoint.state().orientation().yaw(), Eq(-2.3));
+    ASSERT_THAT(thirdPoint.timestamp().seconds(), Eq(15));
+    ASSERT_THAT(thirdPoint.timestamp().nanos(), Eq(200000000));
+    ASSERT_THAT(thirdPoint.position().x(), Eq(2.1));
+    ASSERT_THAT(thirdPoint.position().y(), Eq(-2.2));
+    ASSERT_THAT(thirdPoint.orientation().yaw(), Eq(-2.3));
 }

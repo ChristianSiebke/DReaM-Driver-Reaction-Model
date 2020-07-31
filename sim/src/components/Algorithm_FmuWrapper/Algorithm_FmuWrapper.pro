@@ -6,7 +6,8 @@
 # Copyright (c) 2017, 2019 in-tech GmbH
 # on behalf of BMW AG
 #-----------------------------------------------------------------------------/
-DEFINES += ALGORITHM_FMUWRAPPER_LIBRARY
+DEFINES += ALGORITHM_FMUWRAPPER_LIBRARY \
+           USE_EXTENDED_OSI
 CONFIG += OPENPASS_LIBRARY
 include(../../../global.pri)
 

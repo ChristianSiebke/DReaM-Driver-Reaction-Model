@@ -11,9 +11,8 @@
 #include <fmuChecker.h>
 #include <fmilib.h>
 
-jm_status_enu_t fmi1_cs_prep_simulate(fmu_check_data_t* cdata)
+jm_status_enu_t fmi1_cs_prep_init(fmu_check_data_t* cdata)
 {	
-	fmi1_status_t fmistatus;
 	jm_status_enu_t jmstatus = jm_status_success;
 	jm_callbacks* cb = &cdata->callbacks;
 
@@ -24,10 +23,8 @@ jm_status_enu_t fmi1_cs_prep_simulate(fmu_check_data_t* cdata)
 	fmi1_boolean_t visible = fmi1_false;
 	fmi1_boolean_t interactive = fmi1_false;
 
-	fmi1_real_t tstart = fmi1_import_get_default_experiment_start(fmu);
 	fmi1_real_t hstep;
-	fmi1_real_t tend = fmi1_import_get_default_experiment_stop(fmu);
-	fmi1_boolean_t StopTimeDefined = fmi1_true;
+    fmi1_real_t tend = fmi1_import_get_default_experiment_stop(fmu);
 
 	mimeType = fmi1_import_get_mime_type(fmu);
 	if(	(cdata->fmu1_kind == fmi1_fmu_kind_enu_cs_standalone) 
@@ -55,6 +52,18 @@ jm_status_enu_t fmi1_cs_prep_simulate(fmu_check_data_t* cdata)
 		return jm_status_error;
 	}
 
+    return jmstatus;
+}
+
+jm_status_enu_t fmi1_cs_prep_simulate(fmu_check_data_t* cdata)
+{
+    fmi1_status_t fmistatus;
+    fmi1_import_t* fmu = cdata->fmu1;
+    jm_callbacks* cb = &cdata->callbacks;
+    jm_status_enu_t jmstatus = jm_status_success;
+    fmi1_boolean_t StopTimeDefined = fmi1_true;
+    fmi1_real_t tstart = fmi1_import_get_default_experiment_start(fmu);
+    fmi1_real_t tend = fmi1_import_get_default_experiment_stop(fmu);
     if (fmi1_status_ok_or_warning(fmistatus = check_fmi1_set_with_zero_len_array(fmu, cb)) &&
         fmi1_status_ok_or_warning(fmistatus = fmi1_import_initialize_slave(fmu, tstart, StopTimeDefined, tend)))
     {

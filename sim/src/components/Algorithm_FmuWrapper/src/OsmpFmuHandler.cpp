@@ -76,21 +76,28 @@ OsmpFmuHandler::OsmpFmuHandler(fmu_check_data_t *cdata, WorldInterface *world, A
     {
         sensorViewVariable = sensorViewParameter->second;
     }
-    auto trafficCommandParameter = parameters->GetParametersString().find("Input_TrafficCommand");
-    if (trafficCommandParameter != parameters->GetParametersString().end())
-    {
-        trafficCommandVariable = trafficCommandParameter->second;
-    }
     auto sensorDataParameter = parameters->GetParametersString().find("Output_SensorData");
     if (sensorDataParameter != parameters->GetParametersString().end())
     {
         sensorDataVariable = sensorDataParameter->second;
+    }
+    auto groundtruthParameter = parameters->GetParametersString().find("Init_Groundtruth");
+    if (groundtruthParameter != parameters->GetParametersString().end())
+    {
+        groundtruthVariable = groundtruthParameter->second;
+    }
+#ifdef USE_EXTENDED_OSI
+    auto trafficCommandParameter = parameters->GetParametersString().find("Input_TrafficCommand");
+    if (trafficCommandParameter != parameters->GetParametersString().end())
+    {
+        trafficCommandVariable = trafficCommandParameter->second;
     }
     auto trafficUpdateParameter = parameters->GetParametersString().find("Output_TrafficUpdate");
     if (trafficUpdateParameter != parameters->GetParametersString().end())
     {
         trafficUpdateVariable = trafficUpdateParameter->second;
     }
+#endif
     auto writeSensorDataFlag = parameters->GetParametersBool().find("WriteSensorDataOutput");
     if (writeSensorDataFlag != parameters->GetParametersBool().end())
     {
@@ -101,6 +108,12 @@ OsmpFmuHandler::OsmpFmuHandler(fmu_check_data_t *cdata, WorldInterface *world, A
     {
         writeSensorView = writeSensorViewFlag->second;
     }
+    auto writeGroundtruthFlag = parameters->GetParametersBool().find("WriteGroundtruthOutput");
+    if (writeGroundtruthFlag != parameters->GetParametersBool().end())
+    {
+        writeGroundtruth = writeGroundtruthFlag->second;
+    }
+#ifdef USE_EXTENDED_OSI
     auto writeTrafficCommandFlag = parameters->GetParametersBool().find("WriteTrafficCommandOutput");
     if (writeTrafficCommandFlag != parameters->GetParametersBool().end())
     {
@@ -111,8 +124,11 @@ OsmpFmuHandler::OsmpFmuHandler(fmu_check_data_t *cdata, WorldInterface *world, A
     {
         writeTrafficUpdate = writeTrafficUpdateFlag->second;
     }
+    bool writeJsonOutput = writeSensorData || writeSensorView || writeTrafficCommand || writeTrafficUpdate || writeGroundtruth;
+#else
+    bool writeJsonOutput = writeSensorData || writeSensorView || writeGroundtruth;
+#endif
 
-    bool writeJsonOutput = writeSensorData || writeSensorView || writeTrafficCommand || writeTrafficUpdate;
     if (writeJsonOutput)
     {
         outputDir = QString::fromStdString(parameters->GetRuntimeInformation().directories.output) +
@@ -136,6 +152,7 @@ OsmpFmuHandler::OsmpFmuHandler(fmu_check_data_t *cdata, WorldInterface *world, A
 
 void OsmpFmuHandler::UpdateInput(int localLinkId, const std::shared_ptr<const SignalInterface>& data, [[maybe_unused]] int time)
 {
+#ifdef USE_EXTENDED_OSI
     if (localLinkId == 10)
     {
         const std::shared_ptr<TrajectorySignal const> signal = std::dynamic_pointer_cast<TrajectorySignal const>(data);
@@ -144,12 +161,14 @@ void OsmpFmuHandler::UpdateInput(int localLinkId, const std::shared_ptr<const Si
             trafficCommand = GetTrafficCommandFromOpenScenarioTrajectory(signal->trajectory);
         }
     }
+#endif
 }
 
 constexpr double EPSILON = 0.001;
 
 void OsmpFmuHandler::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterface const>& data, int time)
 {
+#ifdef USE_EXTENDED_OSI
     if (localLinkId == 0)
     {
         const auto& baseMoving = trafficUpdate.mutable_update()->mutable_base();
@@ -182,6 +201,36 @@ void OsmpFmuHandler::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterfa
                                                       centripetalAcceleration,
                                                       travelDistance);
     }
+#endif
+}
+
+void OsmpFmuHandler::Init()
+{
+    if (groundtruthVariable.has_value())
+    {
+        auto* worldData = static_cast<OWL::Interfaces::WorldData*>(world->GetWorldData());
+        auto& groundtruth = worldData->GetOsiGroundTruth();
+
+        fmi2_integer_t fmuInputValues[3];
+        fmi2_value_reference_t valueReferences[3] = {fmuVariables.at(groundtruthVariable.value()+".base.lo").first,
+                                                     fmuVariables.at(groundtruthVariable.value()+".base.hi").first,
+                                                     fmuVariables.at(groundtruthVariable.value()+".size").first};
+
+        groundtruth.SerializeToString(&serializedGroundtruth);
+        encode_pointer_to_integer(serializedGroundtruth.data(),
+                                  fmuInputValues[1],
+                                  fmuInputValues[0]);
+        fmuInputValues[2] = serializedGroundtruth.length();
+
+        fmi2_import_set_integer(cdata->fmu2,
+                                valueReferences,     // array of value reference
+                                3,                   // number of elements
+                                fmuInputValues);     // array of values
+        if (writeGroundtruth)
+        {
+            WriteJson(groundtruth, "Groundtruth.json");
+        }
+    }
 }
 
 void OsmpFmuHandler::PreStep(int time)
@@ -198,6 +247,7 @@ void OsmpFmuHandler::PreStep(int time)
             WriteJson(sensorView, "SensorView-" + QString::number(time) + ".json");
         }
     }
+#ifdef USE_EXTENDED_OSI
     if (trafficCommandVariable)
     {
         SetTrafficCommandInput(trafficCommand);
@@ -206,6 +256,7 @@ void OsmpFmuHandler::PreStep(int time)
             WriteJson(trafficCommand, "TrafficCommand-" + QString::number(time) + ".json");
         }
     }
+#endif
 }
 
 void OsmpFmuHandler::PostStep(int time)
@@ -218,6 +269,7 @@ void OsmpFmuHandler::PostStep(int time)
             WriteJson(sensorData, "SensorData-" + QString::number(time) + ".json");
         }
     }
+#ifdef USE_EXTENDED_OSI
     if (trafficUpdateVariable)
     {
         GetTrafficUpdate();
@@ -226,6 +278,14 @@ void OsmpFmuHandler::PostStep(int time)
             WriteJson(trafficUpdate, "TrafficUpdate-" + QString::number(time) + ".json");
         }
     }
+#endif
+}
+
+FmuHandlerInterface::FmuValue& OsmpFmuHandler::GetValue(fmi2_value_reference_t valueReference, VariableType variableType)
+{
+    ValueReferenceAndType valueReferenceAndType;
+    valueReferenceAndType.emplace<FMI2>(valueReference, variableType);
+    return fmuVariableValues->at(valueReferenceAndType);
 }
 
 void OsmpFmuHandler::SetSensorViewInput(const osi3::SensorView& data)
@@ -248,6 +308,23 @@ void OsmpFmuHandler::SetSensorViewInput(const osi3::SensorView& data)
                             fmuInputValues);     // array of values
 }
 
+void OsmpFmuHandler::GetSensorData()
+{
+    void* buffer = decode_integer_to_pointer(GetValue(fmuVariables.at(sensorDataVariable.value()+".base.hi").first, VariableType::Int).intValue,
+                                             GetValue(fmuVariables.at(sensorDataVariable.value()+".base.lo").first, VariableType::Int).intValue);
+
+    if (enforceDoubleBuffering && buffer != nullptr && buffer == previousSensorData)
+    {
+        const std::string msg = "FMU has no double buffering";
+        LOGERROR(msg);
+        throw std::runtime_error(msg);
+    }
+
+    previousSensorData = buffer;
+    sensorData.ParseFromArray(buffer, GetValue(fmuVariables.at(sensorDataVariable.value()+".size").first, VariableType::Int).intValue);
+}
+
+#ifdef USE_EXTENDED_OSI
 void OsmpFmuHandler::SetTrafficCommandInput(const osi3::TrafficCommand& data)
 {
     std::swap(serializedTrafficCommand, previousSerializedTrafficCommand);
@@ -278,26 +355,19 @@ void OsmpFmuHandler::SetTrafficCommandInput(const osi3::TrafficCommand& data)
                                              fmuInputValues);     // array of values
 }
 
-FmuHandlerInterface::FmuValue& OsmpFmuHandler::GetValue(fmi2_value_reference_t valueReference, VariableType variableType)
-{
-    ValueReferenceAndType valueReferenceAndType;
-    valueReferenceAndType.emplace<FMI2>(valueReference, variableType);
-    return fmuVariableValues->at(valueReferenceAndType);
-}
-
 osi3::TrafficCommand OsmpFmuHandler::GetTrafficCommandFromOpenScenarioTrajectory(openScenario::Trajectory trajectory)
 {
     osi3::TrafficCommand trafficCommand;
     auto trafficAction = trafficCommand.add_action();
-    auto trajectoryAction = trafficAction->mutable_trajectory_action();
+    auto trajectoryAction = trafficAction->mutable_follow_trajectory_action();
     for (const auto& trajectoryPoint : trajectory.points)
     {
         auto statePoint = trajectoryAction->add_trajectory_point();
-        statePoint->mutable_time_stamp()->set_seconds(static_cast<google::protobuf::int64>(trajectoryPoint.time));
-        statePoint->mutable_time_stamp()->set_nanos(static_cast<google::protobuf::uint32>(std::fmod(trajectoryPoint.time * 1e9, 1e9)));
-        statePoint->mutable_state()->mutable_position()->set_x(trajectoryPoint.x);
-        statePoint->mutable_state()->mutable_position()->set_y(trajectoryPoint.y);
-        statePoint->mutable_state()->mutable_orientation()->set_yaw(trajectoryPoint.yaw);
+        statePoint->mutable_timestamp()->set_seconds(static_cast<google::protobuf::int64>(trajectoryPoint.time));
+        statePoint->mutable_timestamp()->set_nanos(static_cast<google::protobuf::uint32>(std::fmod(trajectoryPoint.time * 1e9, 1e9)));
+        statePoint->mutable_position()->set_x(trajectoryPoint.x);
+        statePoint->mutable_position()->set_y(trajectoryPoint.y);
+        statePoint->mutable_orientation()->set_yaw(trajectoryPoint.yaw);
     }
     return trafficCommand;
 }
@@ -317,22 +387,7 @@ void OsmpFmuHandler::GetTrafficUpdate()
     previousTrafficUpdate = buffer;
     trafficUpdate.ParseFromArray(buffer, GetValue(fmuVariables.at(trafficUpdateVariable.value()+".size").first, VariableType::Int).intValue);
 }
-
-void OsmpFmuHandler::GetSensorData()
-{
-    void* buffer = decode_integer_to_pointer(GetValue(fmuVariables.at(sensorDataVariable.value()+".base.hi").first, VariableType::Int).intValue,
-                                             GetValue(fmuVariables.at(sensorDataVariable.value()+".base.lo").first, VariableType::Int).intValue);
-
-    if (enforceDoubleBuffering && buffer != nullptr && buffer == previousSensorData)
-    {
-        const std::string msg = "FMU has no double buffering";
-        LOGERROR(msg);
-        throw std::runtime_error(msg);
-    }
-
-    previousSensorData = buffer;
-    sensorData.ParseFromArray(buffer, GetValue(fmuVariables.at(sensorDataVariable.value()+".size").first, VariableType::Int).intValue);
-}
+#endif
 
 void OsmpFmuHandler::WriteJson(const google::protobuf::Message& message, const QString& fileName)
 {

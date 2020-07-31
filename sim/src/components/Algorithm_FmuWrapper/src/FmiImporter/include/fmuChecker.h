@@ -207,6 +207,8 @@ jm_status_enu_t check_fprintf_var_name(fmu_check_data_t* cdata, const char* vn);
 jm_status_enu_t fmi1_me_simulate(fmu_check_data_t* cdata);
 
 /** Simulate an FMI 1.0 CS FMU */
+jm_status_enu_t fmi1_cs_prep_init(fmu_check_data_t* cdata);
+
 jm_status_enu_t fmi1_cs_prep_simulate(fmu_check_data_t* cdata);
 
 jm_status_enu_t fmi1_cs_simulate_step(fmu_check_data_t* cdata, fmi1_real_t tcur);
@@ -224,6 +226,8 @@ jm_status_enu_t fmi2_check(fmu_check_data_t* cdata);
 jm_status_enu_t fmi2_me_simulate(fmu_check_data_t* cdata);
 
 /** Simulate an FMI 2.0 CS FMU */
+jm_status_enu_t fmi2_cs_prep_init(fmu_check_data_t* cdata);
+
 jm_status_enu_t fmi2_cs_prep_simulate(fmu_check_data_t* cdata);
 
 jm_status_enu_t fmi2_cs_simulate_step(fmu_check_data_t* cdata, fmi2_real_t tcur);

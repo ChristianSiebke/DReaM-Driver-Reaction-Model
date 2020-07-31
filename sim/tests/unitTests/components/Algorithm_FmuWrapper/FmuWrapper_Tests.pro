@@ -9,6 +9,8 @@
 # **********************************************************************/
 
 CONFIG += OPENPASS_GTEST OPENPASS_GTEST_DEFAULT_MAIN
+DEFINES += USE_EXTENDED_OSI
+
 include(../../../testing.pri)
 
 QMAKE_CXXFLAGS += -fpermissive

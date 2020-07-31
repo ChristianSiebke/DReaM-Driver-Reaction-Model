@@ -295,9 +295,13 @@ void AlgorithmFmuWrapperImplementation::InitFmu()
     switch (cdata.version)
     {
         case fmi_version_1_enu:
-            fmiStatus = fmi1_cs_prep_simulate(&cdata); //! initialize simulation
+            fmiStatus = fmi1_cs_prep_init(&cdata);
+            fmuHandler->Init();
+            fmiStatus = fmi1_cs_prep_simulate(&cdata);
             break;
         case fmi_version_2_0_enu:
+            fmiStatus = fmi2_cs_prep_init(&cdata);
+            fmuHandler->Init();
             fmiStatus = fmi2_cs_prep_simulate(&cdata);
             break;
         default:

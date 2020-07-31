@@ -224,12 +224,14 @@ The OsmpFmuHandler has the following additional (optional) parameters:
 
 | **Key**                   | **Type** | **Description**                                                                                 |
 |---------------------------|----------|-------------------------------------------------------------------------------------------------|
-| Input_SensorView          | string   | Name of the FMU variable to which the SensorView is send                                        |
-| Input_TrafficCommand      | string   | Name of the FMU variable to which the TrafficCommand is send                                    |
+| Input_SensorView          | string   | Name of the FMU variable to which the SensorView is sent                                        |
+| Input_TrafficCommand      | string   | Name of the FMU variable to which the TrafficCommand is sent                                    |
+| Init_Groundtruth          | string   | Name of the FMU variable to which the Groundtruth is sent during the initialization             |
 | Output_SensorData         | string   | Name of the FMU variable from where a SensorData should be recieved                             |
 | Output_TrafficUpdate      | string   | Name of the FMU variable from where a TrafficUpdate should be recieved                          |
 | WriteSensorViewOutput     | bool     | If true the SensorView is written into a JSON file                                              |
 | WriteTrafficCommandOutput | bool     | If true the TrafficCommand is written into a JSON file                                          |
+| WriteGroundtruthOutput    | bool     | If true the Groundtruth is written into a JSON file                                             |
 | WriteSensorDataOutput     | bool     | If true the SensorData is written into a JSON file                                              |
 | WriteTrafficUpdateOutput  | bool     | If true the TrafficUpdate is written into a JSON file                                           |
 | EnforceDoubleBuffering    | bool     | If true the wrapper will throw an error if FMU doesn't use double buffering. Defaults to false. |

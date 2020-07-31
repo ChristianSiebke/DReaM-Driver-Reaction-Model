@@ -11,11 +11,11 @@
 #include <fmuChecker.h>
 #include <fmilib.h>
 
-jm_status_enu_t fmi2_cs_prep_simulate(fmu_check_data_t* cdata)
+jm_status_enu_t fmi2_cs_prep_init(fmu_check_data_t* cdata)
 {	
 	fmi2_status_t fmistatus;
-	jm_status_enu_t jmstatus = jm_status_success;
-	jm_callbacks* cb = &cdata->callbacks;
+    jm_status_enu_t jmstatus = jm_status_success;
+    jm_callbacks* cb = &cdata->callbacks;
 
 	fmi2_import_t* fmu = cdata->fmu2;
 	fmi2_string_t fmuGUID = fmi2_import_get_GUID(fmu);
@@ -25,10 +25,8 @@ jm_status_enu_t fmi2_cs_prep_simulate(fmu_check_data_t* cdata)
 	fmi2_real_t relativeTolerance = fmi2_import_get_default_experiment_tolerance(fmu);
 
 	fmi2_real_t tstart = fmi2_import_get_default_experiment_start(fmu);
-	fmi2_real_t tcur = tstart;
 	fmi2_real_t hstep;
 	fmi2_real_t tend = fmi2_import_get_default_experiment_stop(fmu);
-	fmi2_boolean_t StopTimeDefined = fmi2_true;
 	fmi2_boolean_t canHandleVarStepSize = fmi2_import_get_capability(fmu,fmi2_cs_canHandleVariableCommunicationStepSize);
 		
 
@@ -46,8 +44,20 @@ jm_status_enu_t fmi2_cs_prep_simulate(fmu_check_data_t* cdata)
 	}
 	
 	//fmistatus = fmi2_import_initialize(fmu, 0 /* relTolerance */, tstart, StopTimeDefined, tend);
-    if( fmi2_status_ok_or_warning(fmistatus =  fmi2_import_setup_experiment(fmu, toleranceControlled,relativeTolerance, tstart, fmi2_false, 0.0)) &&
-		fmi2_status_ok_or_warning(fmistatus = fmi2_import_enter_initialization_mode(fmu)) &&
+    if( fmi2_status_ok_or_warning(fmistatus =  fmi2_import_setup_experiment(fmu, toleranceControlled,relativeTolerance, tstart, fmi2_false, 0.0)))
+    {
+    }
+    return jmstatus;
+}
+
+jm_status_enu_t fmi2_cs_prep_simulate(fmu_check_data_t* cdata)
+{
+    fmi2_status_t fmistatus;
+    fmi2_import_t* fmu = cdata->fmu2;
+    jm_callbacks* cb = &cdata->callbacks;
+    jm_status_enu_t jmstatus = jm_status_success;
+    fmi2_real_t tstart = fmi2_import_get_default_experiment_start(fmu);
+    if(fmi2_status_ok_or_warning(fmistatus = fmi2_import_enter_initialization_mode(fmu)) &&
 		fmi2_status_ok_or_warning(fmi2_import_exit_initialization_mode(fmu))){
         cdata->slave_initialized = 1;
 			jm_log_info(cb, fmu_checker_module, "Initialized FMU for simulation starting at time %g", tstart);
