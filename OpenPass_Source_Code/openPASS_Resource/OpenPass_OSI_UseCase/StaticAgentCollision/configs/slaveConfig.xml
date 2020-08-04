@@ -1,0 +1,60 @@
+<slaveConfig SchemaVersion="0.8.0">
+  <ProfilesCatalog>ProfilesCatalog.xml</ProfilesCatalog>
+  <Experiment>
+    <ExperimentID>0</ExperimentID>
+    <NumberOfInvocations>1</NumberOfInvocations>
+    <RandomSeed>532725206</RandomSeed>
+    <Libraries>
+      <WorldLibrary>World_OSI</WorldLibrary>
+    </Libraries>
+  </Experiment>
+  <Scenario>
+    <OpenScenarioFile>Scenario.xosc</OpenScenarioFile>
+  </Scenario>
+  <Environment>
+    <TimeOfDays>
+      <TimeOfDay Probability="0.4" Value="15"/>
+      <TimeOfDay Probability="0.6" Value="18"/>
+    </TimeOfDays>
+    <VisibilityDistances>
+      <VisibilityDistance Probability="0.7" Value="300"/>
+      <VisibilityDistance Probability="0.3" Value="400"/>
+    </VisibilityDistances>
+    <Frictions>
+      <Friction Probability="1.0" Value="1.0"/>
+    </Frictions>
+    <Weathers>
+      <Weather Probability="0.5" Value="Rainy"/>
+      <Weather Probability="0.5" Value="Snowy"/>
+    </Weathers>
+  </Environment>
+  <Observations>
+    <Observation>
+      <Library>Observation_LogAgent</Library>
+      <Parameters>
+        <String Key="OutputFilename" Value="simulationOutput.xml"/>
+        <Bool Key="LoggingCyclicsToCsv" Value="true"/>
+        <StringVector Key="LoggingGroups" Value="Trace,Visualization,RoadPosition,Sensor"/>
+      </Parameters>
+    </Observation>
+  </Observations>
+  <Spawners>
+    <Spawner>
+      <Library>SpawnPointScenario_OSI</Library>
+      <Type>PreRun</Type>
+      <Priority>1</Priority>
+    </Spawner>
+    <Spawner>
+      <Library>SpawnPointPreRunCommon_OSI</Library>
+      <Type>PreRun</Type>
+      <Priority>0</Priority>
+      <Profile>DefaultPreRunCommon</Profile>
+    </Spawner>
+    <Spawner>
+      <Library>SpawnPointRuntimeCommon_OSI</Library>
+      <Type>Runtime</Type>
+      <Priority>0</Priority>
+      <Profile>DefaultRuntimeCommon</Profile>
+    </Spawner>
+  </Spawners>
+</slaveConfig>
