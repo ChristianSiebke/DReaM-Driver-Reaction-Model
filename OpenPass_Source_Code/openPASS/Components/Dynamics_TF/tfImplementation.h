@@ -28,7 +28,7 @@
 * Input channel IDs:
 * | Input ID   | signal class              | contained variables               |
 * |------------|---------------------------|-----------------------------------|
-* | 0          | LateralSignal             | componentState                    |
+* | 0          | SteeringSignal            | componentState                    |
 * | 1          | AccelerationSignal        | inputAcceleration, componentState |
 * | 2          | TrajectorySignal          | trajectory                        |
 *
@@ -57,7 +57,7 @@
 #include "Common/accelerationSignal.h"
 #include "Common/dynamicsSignal.h"
 #include "Common/globalDefinitions.h"
-#include "Common/lateralSignal.h"
+#include "Common/steeringSignal.h"
 #include "Common/openScenarioDefinitions.h"
 #include "Common/vector2d.h"
 #include "Interfaces/eventNetworkInterface.h"

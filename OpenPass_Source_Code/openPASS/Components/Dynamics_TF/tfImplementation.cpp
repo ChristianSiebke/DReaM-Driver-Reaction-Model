@@ -90,14 +90,13 @@ void TrajectoryFollowerImplementation::UpdateInput(int localLinkId, const std::s
                 std::dynamic_pointer_cast<ComponentStateSignalInterface const>(data);
             if (stateSignal != nullptr && stateSignal->componentState == ComponentState::Acting)
             {
-                const std::shared_ptr<LateralSignal const> signal = std::dynamic_pointer_cast<LateralSignal const>(data);
+                const std::shared_ptr<SteeringSignal const> signal = std::dynamic_pointer_cast<SteeringSignal const>(data);
                 if (!signal)
                 {
                     ThrowInvalidSignalTypeError();
                 }
 
-                const bool isLateralSignalActing = signal->componentState == ComponentState::Acting;
-                if (isLateralSignalActing)
+                if (signal->componentState == ComponentState::Acting)
                 {
                     UpdateState(ComponentState::Disabled);
                 }

@@ -49,10 +49,9 @@ struct DefaultComponents
     //Components that are needed, if at least one vehicle component is present
     const std::vector<std::string> vehicleComponentNames
     {
-        "Algorithm_LateralVehicleComponents",
         "Algorithm_LongitudinalVehicleComponents",
         "PrioritizerAccelerationVehicleComponents",
-        "PrioritizerLateralVehicleComponents",
+        "PrioritizerSteeringVehicleComponents",
         "LimiterAccelerationVehicleComponents"
     };
 };

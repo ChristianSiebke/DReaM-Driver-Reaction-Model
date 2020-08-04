@@ -99,7 +99,7 @@
                 </parameters>
             </component>
             <component>
-                <id>PrioritizerLateralVehicleComponents</id>
+                <id>PrioritizerSteeringVehicleComponents</id>
                 <schedule>
                     <priority>150</priority>
                     <offset>0</offset>
@@ -141,17 +141,6 @@
                     <response>0</response>
                 </schedule>
                 <library>Algorithm_Longitudinal</library>
-                <parameters/>
-            </component>
-            <component>
-                <id>Algorithm_LateralVehicleComponents</id>
-                <schedule>
-                    <priority>100</priority>
-                    <offset>0</offset>
-                    <cycle>100</cycle>
-                    <response>0</response>
-                </schedule>
-                <library>Algorithm_Lateral</library>
                 <parameters/>
             </component>
             <component>
@@ -418,17 +407,6 @@
                 </target>
             </connection>
             <connection>
-                <id>1412</id>
-                <source>
-                    <component>Algorithm_LateralVehicleComponents</component>
-                    <output>0</output>
-                </source>
-                <target>
-                    <component>PrioritizerSteering</component>
-                    <input>0</input>
-                </target>
-            </connection>
-            <connection>
                 <id>1512</id>
                 <source>
                     <component>Algorithm_LateralAfdm</component>
@@ -494,11 +472,11 @@
             <connection>
                 <id>2414</id>
                 <source>
-                    <component>PrioritizerLateralVehicleComponents</component>
+                    <component>PrioritizerSteeringVehicleComponents</component>
                     <output>0</output>
                 </source>
                 <target>
-                    <component>Algorithm_LateralVehicleComponents</component>
+                    <component>PrioritizerSteering</component>
                     <input>0</input>
                 </target>
                 <target>
@@ -595,10 +573,6 @@
                     <input>100</input>
                 </target>
                 <target>
-                    <component>Algorithm_LateralVehicleComponents</component>
-                    <input>100</input>
-                </target>
-                <target>
                     <component>Dynamics_RegularDriving</component>
                     <input>100</input>
                 </target>
@@ -623,10 +597,6 @@
                 </target>
                 <target>
                     <component>Algorithm_LateralAfdm</component>
-                    <input>101</input>
-                </target>
-                <target>
-                    <component>Algorithm_LateralVehicleComponents</component>
                     <input>101</input>
                 </target>
             </connection>

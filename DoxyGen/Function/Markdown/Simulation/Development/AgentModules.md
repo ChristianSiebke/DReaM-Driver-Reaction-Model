@@ -515,8 +515,7 @@ on the configuration of the CC.
 
 The CC communicates with the controlled components via framework signals. An overview of the connections and signal flow is shown below.
 
-![Vehicle components signal flow](ComponentController_Signals.svg)
-
+![Vehicle components signal flow](DynamicsModules.png)
 
 Inputs to the ComponentController:
 

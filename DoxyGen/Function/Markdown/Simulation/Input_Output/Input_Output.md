@@ -103,10 +103,9 @@ The table below can be used as orientation when a new module is introduced.
 | PrioritizerLaterDriver | SignalPrioritizer | 150 | Prioritizer | - |
 | PrioritizerAccelerationDriver | SignalPrioritizer | 150 | Prioritizer | - |
 | PrioritizerTurningIndicator | SignalPrioritizer | 150 | Prioritizer | - |
-| PrioritizerLateralVehicleComponents | SignalPrioritizer | 150 | Prioritizer | - |
+| PrioritizerSteeringVehicleComponents | SignalPrioritizer | 150 | Prioritizer | - |
 | PrioritizerAccelerationVehicleComponents | SignalPrioritizer | 150 | Prioritizer | - |
 | LimiterAccelerationVehicleComponents | LimiterAccelerationVehicleComponents | 120 | VehicleDynamicsControllers | - |
-| AlgorithmLateralVehicleComponents | AlgorithmLateralVehicleComponents | 100 | VehicleDynamicsControllers | - |
 | AlgorithmLateralDriver | AlgorithmLateralDriver | 100 | VehicleDynamicsControllers | - |
 | AlgorithmLongitudinalVehicleComponents | AlgorithmLongitudinalVehicleComponents | 100 | VehicleDynamicsControllers | - |
 | AlgorithmLongitudinalDriver | AlgorithmLongitudinalDriver | 100 | VehicleDynamicsControllers | - |
@@ -171,7 +170,7 @@ With corresponding defined indices :
 | PrioritizerLongitudinal                   | Algorithm         | 21 | 
 | PrioritizerSteering                       | Algorithm         | 22 | 
 | PrioritizerAccelerationVehicleComponents  | Algorithm         | 23 | 
-| PrioritizerLateralVehicleComponents       | Algorithm         | 24 | 
+| PrioritizerSteeringVehicleComponents      | Algorithm         | 24 | 
 | Action_LongitudinalDriver                 | DriverTasks       | 31 | 
 | Action_SecondaryDriverTasks               | DriverTasks       | 32 | 
 | PrioritizerTurningIndicator               | DriverTasks       | 33 | 
