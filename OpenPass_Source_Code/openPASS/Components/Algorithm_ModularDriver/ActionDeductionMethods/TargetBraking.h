@@ -29,7 +29,7 @@ class TargetBraking
 public:
     TargetBraking(int cycleTime, StochasticsInterface *stochastics);
 
-    double ReactOnStopSign(StopSign *StopSign, double v_long, double distRefToLed, double v_wish, double acomfort);
+    double ReactOnStopSign(stopSign *StopSign, double v_long, double distRefToLed, double v_wish, double acomfort);
 
     double NextRealBrakeVelocity(double a, double b, double c, double t_brk);
 

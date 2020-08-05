@@ -400,8 +400,8 @@ void ObservationFileHandler::WriteCsvCyclics(QString filename, ObservationCyclic
 
     QTextStream stream( csvFile.get() );
 
-    stream << "Timestep, "
-           << "AgentId, "
+    stream << "frame,"
+           << "id,"
            << QString::fromStdString(cyclics.GetAgentHeader())
            << '\n';
 
@@ -413,9 +413,9 @@ void ObservationFileHandler::WriteCsvCyclics(QString filename, ObservationCyclic
         for (size_t agentId = 0; agentId < agentSamplesLines.size(); ++agentId)
         {
             stream << QString::number(timeSteps->at(timeStepNumber))
-                   << ", "
+                   << ","
                    << QString::fromStdString(std::to_string(agentId))
-                   << ", "
+                   << ","
                    << QString::fromStdString(agentSamplesLines.at(agentId))
                    << '\n';
         }

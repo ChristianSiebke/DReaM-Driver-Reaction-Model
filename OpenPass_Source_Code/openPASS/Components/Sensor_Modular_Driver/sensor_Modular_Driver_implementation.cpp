@@ -71,7 +71,7 @@ void Sensor_Modular_Driver_Implementation::UpdateOutput(int localLinkId, std::sh
             data = std::make_shared<structSignal<StaticEnvironmentData> const>(StaticEnvironment);
             break;
         case 1:
-            data = std::make_shared<structSignal<EgoData> const>(Ego);
+            data = std::make_shared<structSignal<egoData> const>(Ego);
             break;
         case 2:
             data = std::make_shared<structSignal<std::list<SurroundingMovingObjectsData>> const>(SurroundingMovingObjects);
@@ -104,6 +104,11 @@ void Sensor_Modular_Driver_Implementation::Trigger(int time)
     SetMentalModelGeometryLaneInformation();
     GetTrafficRuleInformation();
     GetRoadGeometry();
+
+    // if(Ego.GetState()->id == 26 || Ego.GetState()->id == 27){
+    // std::cout << "Agents_size: " << Agents.size() << std::endl;
+    // std::cout << "Sensor_ID: " << Ego.GetState()->id << "Sensor_Out: " << SurroundingMovingObjects.size() << std::endl;
+    // std::cout << time << std::endl;}
 }
 
 void Sensor_Modular_Driver_Implementation::SetMentalModelGeometryLaneInformation()
@@ -173,7 +178,7 @@ void Sensor_Modular_Driver_Implementation::SetEgoData(AgentInterface *agent)
 {
     AgentVehicleType VehicleType = agent->GetVehicleType();
 
-    State State;
+    state State;
     State.id                          = agent->GetId();
     State.pos.xPos                    = agent->GetPositionX();
     State.pos.yPos                    = agent->GetPositionY();
@@ -195,7 +200,7 @@ void Sensor_Modular_Driver_Implementation::SetEgoData(AgentInterface *agent)
     State.yaw_velocity                = agent->GetYawRate();
     State.yaw_acceleration            = 0; //not implemented: agent->GetYawAcceleration();
 
-    State_Ego State_Ego;
+    state_Ego State_Ego;
     State_Ego.velocity_long           = agent->GetVelocity(VelocityScope::Longitudinal);
     State_Ego.velocity_lat            = agent->GetVelocity(VelocityScope::Lateral);
     State_Ego.acceleration_long       = agent->GetAcceleration(); //not implemented: agent->GetAccelerationX();
@@ -228,8 +233,13 @@ void Sensor_Modular_Driver_Implementation::SetMovingObjects(AgentInterface *agen
     std::list<std::pair<int,int>>::iterator it1, it2;
     it1 = AgentAndDist.begin();
     it2 = AgentAndDist.end();
-    advance(it1, 10);
-    AgentAndDist.erase(it1,it2);
+    int disttoend = AgentAndDist.size();
+    int maxsize = disttoend - 10;
+    if (maxsize > 0 )
+    {
+        advance(it1, 10);
+        AgentAndDist.erase(it1,it2);
+    }
 
     for (std::list<std::pair<int,int>>::const_iterator i=AgentAndDist.begin(); i!=AgentAndDist.end(); i++)
     {
@@ -263,7 +273,7 @@ void Sensor_Modular_Driver_Implementation::SetMovingObjects(AgentInterface *agen
             State.laneid                  = it->GetMainLaneId();
             State.secondarycoveredlanes   = it->GetSecondaryCoveredLanes();
 
-            Properties Properties;
+            properties Properties;
             Properties.lx                       = it->GetLength();
             Properties.ly                       = it->GetWidth();
             Properties.lz                       = it->GetHeight();

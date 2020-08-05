@@ -232,12 +232,18 @@ public:
     virtual std::vector<std::pair<ObjectTypeOSI, int>> GetCollisionPartners() const = 0;
 
     //-----------------------------------------------------------------------------
-    //! Retrieves vector of all collisionData with a collisionPartner.
+    //! Retrieves velocity of agent after crash.
     //!
     // @return                a value >0 if collided
     //-----------------------------------------------------------------------------
-    virtual std::vector<void *> GetCollisionData(int collisionPartnerId,
-                                                 int collisionDataId) const = 0;
+    virtual PostCrashVelocity GetPostCrashVelocity() const = 0;
+
+    //-----------------------------------------------------------------------------
+    //! Retrieves velocity of agent after crash.
+    //!
+    // @return                a value >0 if collided
+    //-----------------------------------------------------------------------------
+    virtual void SetPostCrashVelocity(PostCrashVelocity postCrashVelocity) = 0;
 
     //-----------------------------------------------------------------------------
     //! Sets x-coordinate of agent

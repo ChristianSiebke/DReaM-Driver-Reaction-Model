@@ -74,18 +74,18 @@ SituationAssessment_Output_TD *SituationAssessment::GetSituationAssessment_Outpu
 void SituationAssessment::AssessEgoSituationAndWish(SituationAssessment_Output_BU *SA_Output_BU)
 {
     SA_Output_BU->Ego = SA_Input->MM_O->Ego;
-    SpeedLimit speedLimit = situationCalculation.CheckSignsForRelevantSpeedLimit();
-    double currSpeedLimit = speedLimit.GetCurrentSpeedLimit();
-    double distance = speedLimit.GetCurrentDistanceToSign();
+    speedLimit SpeedLimit = situationCalculation.CheckSignsForRelevantSpeedLimit();
+    double currSpeedLimit = SpeedLimit.GetCurrentSpeedLimit();
+    double distance = SpeedLimit.GetCurrentDistanceToSign();
 
-    StopSign stopSign = situationCalculation.CheckSignsForRelevantStopSign();
+    stopSign StopSign = situationCalculation.CheckSignsForRelevantStopSign();
 
-    SA_Output_BU->AssessedEnvironment.SpeedLimit = speedLimit;
-    SA_Output_BU->AssessedEnvironment.StopSign = stopSign;
+    SA_Output_BU->AssessedEnvironment.SpeedLimit = SpeedLimit;
+    SA_Output_BU->AssessedEnvironment.StopSign = StopSign;
 
     v_Wish_out = AdaptionOnSpeedLimit(currSpeedLimit, distance);
 
-    DriverInformation DriverInformation;
+    driverInformation DriverInformation;
     DriverInformation.v_Wish = &v_Wish_out;
     DriverInformation.thw_Wish = &thw_Wish_out;
     DriverInformation.v_y_Max = &v_y_Max;
@@ -103,8 +103,8 @@ void SituationAssessment::Pigeonhole_SurroundingMovingObjectsToEgo(SituationAsse
     double mindistneighfrontright   = {std::numeric_limits<double>::max()};
     double mindistneighfollowright  = {std::numeric_limits<double>::max()};
 
-    EgoData *Ego = SA_Input->MM_O->Ego;
-    State *EgoState = Ego->GetState();
+    egoData *Ego = SA_Input->MM_O->Ego;
+    state *EgoState = Ego->GetState();
     bool lanerightexists = SA_Output_BU->AssessedEnvironment.StaticEnvironment->roadGeometry.laneRight.exists;
     bool laneleftexists = SA_Output_BU->AssessedEnvironment.StaticEnvironment->roadGeometry.laneLeft.exists;
 
@@ -119,8 +119,8 @@ void SituationAssessment::Pigeonhole_SurroundingMovingObjectsToEgo(SituationAsse
     for (auto&& it = SA_Input->MM_O->SurroundingMovingObjects->begin() ; it != SA_Input->MM_O->SurroundingMovingObjects->end(); it++)
     {
         SurroundingMovingObjectsData ItInternal = it->get()->Get_internal_Data();
-        State *ItState = it->get()->Get_internal_Data().GetState();
-        Properties *ItProperties = it->get()->Get_internal_Data().GetProperties();
+        state *ItState = it->get()->Get_internal_Data().GetState();
+        properties *ItProperties = it->get()->Get_internal_Data().GetProperties();
 
         int itlaneId = ItState->laneid;
         double front_s_it = ItState->roadPos.s + ItProperties->distanceReftoLeadingEdge;
@@ -252,7 +252,7 @@ void SituationAssessment::CheckForInternalLogging(int time)
 
 void SituationAssessment::SetNearVehicle(RelationType RelationType,
                                          const SurroundingMovingObjectsData *it,
-                                         State *ItState,
+                                         state *ItState,
                                          double *mindistance,
                                          double currdist,
                                          SituationAssessment_Output_BU *SA_Output_BU)

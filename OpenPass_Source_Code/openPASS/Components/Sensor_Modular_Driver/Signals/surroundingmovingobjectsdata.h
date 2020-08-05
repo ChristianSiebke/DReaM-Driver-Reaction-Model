@@ -26,7 +26,7 @@
 #include "globalDefinitions.h"
 #include "egodata.h"
 
-struct Properties //dimension of the object related to the sensor coordinate system
+struct properties //dimension of the object related to the sensor coordinate system
 {
     double lx {-999};
     double ly {-999};
@@ -54,7 +54,7 @@ enum RelationType
     FollowerLeft = 6
 };
 
-struct State_Moving : State
+struct State_Moving : state
 {
     double velocity_long {-999};
     double velocity_lat {-999};
@@ -67,7 +67,7 @@ class SurroundingMovingObjectsData
 public:
     SurroundingMovingObjectsData(AgentVehicleType VehicleType,
                                  State_Moving State,
-                                 Properties Properties):
+                                 properties Properties):
         VehicleType(VehicleType),
         State(State),
         Properties(Properties)
@@ -86,7 +86,7 @@ public:
     {
         return &State;
     }
-    Properties *GetProperties()
+    properties *GetProperties()
     {
         return &Properties;
     }
@@ -98,7 +98,7 @@ public:
     {
         this->State = State;
     }
-    void SetProperties(Properties Properties)
+    void SetProperties(properties Properties)
     {
         this->Properties = Properties;
     }
@@ -114,7 +114,7 @@ private:
 
     AgentVehicleType VehicleType;
     State_Moving State;
-    Properties Properties;
+    properties Properties;
 
     double DistanceToEgo;
 };

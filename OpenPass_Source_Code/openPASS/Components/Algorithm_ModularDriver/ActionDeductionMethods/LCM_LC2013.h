@@ -73,7 +73,7 @@ public:
      * */
     int wantsChange(int lane, int laneOffset,
                     bool lexists, bool nlexists, bool nfexists,
-                    EgoData* agent,
+                    egoData* agent,
                     int blocked,
                     SurroundingMovingObjectsData* leader,
                     SurroundingMovingObjectsData* neighLead,
@@ -115,11 +115,11 @@ public:
     void setParameter(const std::string& key, const std::string& value);
 
     /// @brief decides the next lateral speed (for continuous lane changing)
-    double computeSpeedLat(double latDist, double& maneuverDist, EgoData* agent);
+    double computeSpeedLat(double latDist, double& maneuverDist, egoData* agent);
 
    /// @brief Returns a deceleration value which is used for the estimation of the duration of a lane change.
    /// @note  Effective only for continuous lane-changing when using attributes myMaxSpeedLatFactor and myMaxSpeedLatStanding. See #3771
-   double getAssumedDecelForLaneChangeDuration(EgoData* agent) const;
+   double getAssumedDecelForLaneChangeDuration(egoData* agent) const;
 
    //virtual int getWaitingSeconds(double velocity_x);
 
@@ -129,7 +129,7 @@ protected:
     int _wantsChange(
             int lane, int laneOffset,
             bool lexists, bool nlexists, bool nfexists,
-            EgoData* agent,
+            egoData* agent,
             int blocked,
             SurroundingMovingObjectsData* leader,
             SurroundingMovingObjectsData* neighLead,
@@ -145,7 +145,7 @@ protected:
      * If we decide to follow, myVSafes will be extended
      * returns the planned speed if following or -1 if overtaking */
     double informLeader(AbstractLaneChangeModel::LCMessager& msgPass,
-                        EgoData* agent,
+                        egoData* agent,
                         bool nlexists,
                         int blocked, int dir,
                         SurroundingMovingObjectsData* neighLead,
@@ -153,7 +153,7 @@ protected:
 
     /// @brief decide whether we will try cut in before the follower or allow to be overtaken
     void informFollower(AbstractLaneChangeModel::LCMessager& msgPass,
-                        EgoData* agent,
+                        egoData* agent,
                         bool nfexists,
                         int blocked,
                         int dir,
@@ -171,15 +171,15 @@ protected:
          * @param[in] followerSpeed an assumed speed for the follower (default uses the current speed)
          * @return the distance that the relative positions would have to change.
          */
-    double overtakeDistance(EgoData* agent, SurroundingMovingObjectsData* follower, SurroundingMovingObjectsData* leader, const double* gap, double followerSpeed = INVALID_SPEED, double leaderSpeed = INVALID_SPEED);
+    double overtakeDistance(egoData* agent, SurroundingMovingObjectsData* follower, SurroundingMovingObjectsData* leader, const double* gap, double followerSpeed = INVALID_SPEED, double leaderSpeed = INVALID_SPEED);
 
-    double overtakeDistance(SurroundingMovingObjectsData* leader, EgoData* follower, const double* gap, double followerSpeed = INVALID_SPEED, double leaderSpeed = INVALID_SPEED);
+    double overtakeDistance(SurroundingMovingObjectsData* leader, egoData* follower, const double* gap, double followerSpeed = INVALID_SPEED, double leaderSpeed = INVALID_SPEED);
 
-    double overtakeDistance(EgoData* leader, SurroundingMovingObjectsData* follower, const double* gap, double followerSpeed = INVALID_SPEED, double leaderSpeed = INVALID_SPEED);
+    double overtakeDistance(egoData* leader, SurroundingMovingObjectsData* follower, const double* gap, double followerSpeed = INVALID_SPEED, double leaderSpeed = INVALID_SPEED);
 
 
     /// @brief compute useful slowdowns for blocked vehicles
-    int slowDownForBlocked(SurroundingMovingObjectsData* blocked, int state, EgoData* agent);
+    int slowDownForBlocked(SurroundingMovingObjectsData* blocked, int state, egoData* agent);
 
 
     // XXX: consider relocation of the roundabout functions (perhaps to AgentInterface or the abstract LC Model...) (Leo)
@@ -193,7 +193,7 @@ protected:
     /// @param[out] roundaboutEdgesAhead  Number of lanes in the next oncoming roundabout in curr
     /// @param[out] roundaboutEdgesAheadNeigh Number of lanes in the next oncoming roundabout in neigh
     static void
-    getRoundaboutAheadInfo(EgoData* agent, int curr, int neigh, //KBl const AgentInterface::LaneQ& curr, const AgentInterface::LaneQ& neigh,
+    getRoundaboutAheadInfo(egoData* agent, int curr, int neigh, //KBl const AgentInterface::LaneQ& curr, const AgentInterface::LaneQ& neigh,
                             double& roundaboutDistanceAhead, double& roundaboutDistanceAheadNeigh, int& roundaboutEdgesAhead, int& roundaboutEdgesAheadNeigh);
 
     /// @brief Computes the artificial bonus distance for roundabout lanes
@@ -214,7 +214,7 @@ protected:
     distanceAlongNextRoundabout(double position, const Lane* initialLane, const std::vector<Lane*>& continuationLanes);
 
     /// @brief save space for vehicles which need to counter-lane-change
-    void saveBlockerLength(SurroundingMovingObjectsData*  blocker, int lcaCounter, EgoData* agent);
+    void saveBlockerLength(SurroundingMovingObjectsData*  blocker, int lcaCounter, egoData* agent);
 
     //KBl /// @brief react to pedestrians on the given lane
     //KBl void adaptSpeedToPedestrians(const Lane* lane, double& v);
@@ -249,7 +249,7 @@ protected:
      *         where operation on the speed in the next sim step had to be replaced by acceleration
      *         throughout the next action step.
      */
-    void addLCSpeedAdvice(const double vSafe, EgoData* agent);
+    void addLCSpeedAdvice(const double vSafe, egoData* agent);
 
     long long PrintBin(int i);
 

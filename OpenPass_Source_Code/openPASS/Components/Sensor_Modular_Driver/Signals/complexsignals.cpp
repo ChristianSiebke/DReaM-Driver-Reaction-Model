@@ -60,7 +60,7 @@ structSignal<StaticEnvironmentData>::operator std::string() const
 };
 
 template<>
-structSignal<EgoData>::operator std::string() const
+structSignal<egoData>::operator std::string() const
 {
     std::ostringstream stream;
     stream<<value.GetName()<<std::endl;

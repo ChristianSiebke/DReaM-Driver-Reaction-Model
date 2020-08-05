@@ -117,7 +117,7 @@ std::vector<double> SituationCalculation::CalculateTHW(std::vector<int> *AgentWi
     return minThwVector;
 }
 
-SpeedLimit SituationCalculation::CheckSignsForRelevantSpeedLimit()
+speedLimit SituationCalculation::CheckSignsForRelevantSpeedLimit()
 {
     double relative_distance = {std::numeric_limits<double>::max()};
     std::vector<CommonTrafficSign::Entity> *trafficSigns = &Environment->trafficRuleInformation.laneEgo.trafficSigns;
@@ -125,22 +125,22 @@ SpeedLimit SituationCalculation::CheckSignsForRelevantSpeedLimit()
     {
         if (abs(it->relativeDistance) < Environment->roadGeometry.visibilityDistance/2 && abs(it->relativeDistance) < relative_distance)
         {
-            double sl = speedLimit.TransformSignToSpeed(it.base());
+            double sl = SpeedLimit.TransformSignToSpeed(it.base());
             if(sl != -1)
             {
                 relative_distance = it->relativeDistance;
-                speedLimit.UpdateSpeedLimitAndDistance(sl, it->relativeDistance);
+                SpeedLimit.UpdateSpeedLimitAndDistance(sl, it->relativeDistance);
             }
         }
     }
-    return speedLimit;
+    return SpeedLimit;
 }
 
-StopSign SituationCalculation::CheckSignsForRelevantStopSign()
+stopSign SituationCalculation::CheckSignsForRelevantStopSign()
 {
     double relative_distance = {std::numeric_limits<double>::max()};
     std::vector<CommonTrafficSign::Entity> *trafficSigns = &Environment->trafficRuleInformation.laneEgo.trafficSigns;
-    StopSign StopSign;
+    stopSign StopSign;
 
     for (std::vector<CommonTrafficSign::Entity>::iterator it = trafficSigns->begin() ; it!= trafficSigns->end(); ++it)
     {
@@ -163,7 +163,7 @@ double SituationCalculation::CheckForSpeedLimitViolation(double speedLimit)
     return violationDifference;
 }
 
-void SituationCalculation::UpdateMembers(EgoData *agent,
+void SituationCalculation::UpdateMembers(egoData* agent,
                                          std::list<std::unique_ptr<AgentRepresentation>> *agents,
                                          StaticEnvironmentData *Environment)
 {

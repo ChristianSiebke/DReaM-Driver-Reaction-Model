@@ -21,7 +21,6 @@ include(../../../global.pri)
 
 SUBDIRS +=  . \
             ../../Common \
-            ../../Common/twoTrack \
             ../../Interfaces \
             src \
             ..

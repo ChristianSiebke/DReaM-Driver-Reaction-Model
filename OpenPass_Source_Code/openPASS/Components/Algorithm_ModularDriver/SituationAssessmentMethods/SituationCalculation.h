@@ -32,7 +32,7 @@ public:
 
     void Initialize(const VehicleModelParameters *vehicleParameters);
 
-    void UpdateMembers(EgoData *Ego,
+    void UpdateMembers(egoData* Ego,
                        std::list<std::unique_ptr<AgentRepresentation>> *Agents,
                        StaticEnvironmentData *Environment);
     void UpdateMembers(BoundingBox *Ego,
@@ -43,8 +43,8 @@ public:
     std::vector<double> CalculateETTC(std::vector<int> *AgentWithMinEttc);
     std::vector<double> CalculateTHW(std::vector<int> *AgentWithMinThw);
 
-    SpeedLimit CheckSignsForRelevantSpeedLimit();
-    StopSign CheckSignsForRelevantStopSign();
+    speedLimit CheckSignsForRelevantSpeedLimit();
+    stopSign CheckSignsForRelevantStopSign();
     double CheckForSpeedLimitViolation(double speedLimit);
 
     int GetEgoId()
@@ -103,7 +103,7 @@ private:
     double thwCritical = 2;
     int cycleTime;
 
-    SpeedLimit speedLimit;
+    speedLimit SpeedLimit;
 
     std::list<std::pair<double,double>> lastSpeedLimit;
 };

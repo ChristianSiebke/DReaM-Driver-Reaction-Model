@@ -92,7 +92,7 @@ public:
 
     void SetNearVehicle(RelationType RelationType,
                         const SurroundingMovingObjectsData *it,
-                        State *ItState,
+                        state *ItState,
                         double *mindistance,
                         double currdist,
                         SituationAssessment_Output_BU *SA_Output_BU);

@@ -122,7 +122,7 @@ LCM_LC2013::initDerivedParameters() {
 int LCM_LC2013::wantsChange(
         int lane, int laneOffset,
         bool lexists, bool nlexists, bool nfexists,
-        EgoData* agent,
+        egoData* agent,
         int blocked,
         SurroundingMovingObjectsData* leader,
         SurroundingMovingObjectsData* neighLead,
@@ -293,7 +293,7 @@ LCM_LC2013::inform(std::pair<double, int> info, AgentInterface* sender) {
 }
 
 double
-LCM_LC2013::overtakeDistance(EgoData* agent, SurroundingMovingObjectsData* follower, SurroundingMovingObjectsData* leader, const double* gap, double followerSpeed, double leaderSpeed) {
+LCM_LC2013::overtakeDistance(egoData* agent, SurroundingMovingObjectsData* follower, SurroundingMovingObjectsData* leader, const double* gap, double followerSpeed, double leaderSpeed) {
     followerSpeed = followerSpeed == INVALID_SPEED ? follower->GetState()->velocity_long : followerSpeed;
     leaderSpeed = leaderSpeed == INVALID_SPEED ? leader->GetState()->velocity_long : leaderSpeed;
 
@@ -306,7 +306,7 @@ LCM_LC2013::overtakeDistance(EgoData* agent, SurroundingMovingObjectsData* follo
 }
 
 double
-LCM_LC2013::overtakeDistance(SurroundingMovingObjectsData* leader, EgoData* follower, const double* gap, double followerSpeed, double leaderSpeed) {
+LCM_LC2013::overtakeDistance(SurroundingMovingObjectsData* leader, egoData* follower, const double* gap, double followerSpeed, double leaderSpeed) {
     followerSpeed = followerSpeed == INVALID_SPEED ? follower->GetState_Ego()->velocity_long : followerSpeed;
     leaderSpeed = leaderSpeed == INVALID_SPEED ? leader->GetState()->velocity_long : leaderSpeed;
 
@@ -319,7 +319,7 @@ LCM_LC2013::overtakeDistance(SurroundingMovingObjectsData* leader, EgoData* foll
 }
 
 double
-LCM_LC2013::overtakeDistance(EgoData* leader, SurroundingMovingObjectsData* follower, const double* gap, double followerSpeed, double leaderSpeed) {
+LCM_LC2013::overtakeDistance(egoData* leader, SurroundingMovingObjectsData* follower, const double* gap, double followerSpeed, double leaderSpeed) {
     followerSpeed = followerSpeed == INVALID_SPEED ? follower->GetState()->velocity_long : followerSpeed;
     leaderSpeed = leaderSpeed == INVALID_SPEED ? leader->GetState_Ego()->velocity_long : leaderSpeed;
 
@@ -334,7 +334,7 @@ LCM_LC2013::overtakeDistance(EgoData* leader, SurroundingMovingObjectsData* foll
 
 double
 LCM_LC2013::informLeader(AbstractLaneChangeModel::LCMessager& msgPass,
-                         EgoData* agent,
+                         egoData* agent,
                          bool nlexists,
                          int blocked,
                          int dir,
@@ -423,7 +423,7 @@ LCM_LC2013::informLeader(AbstractLaneChangeModel::LCMessager& msgPass,
 
 void
 LCM_LC2013::informFollower(AbstractLaneChangeModel::LCMessager& msgPass,
-                           EgoData* agent,
+                           egoData* agent,
                            bool nfexists,
                            int blocked,
                            int dir,
@@ -613,7 +613,7 @@ int
 LCM_LC2013::_wantsChange(
         int lane, int laneOffset,
         bool lexists, bool nlexists, bool nfexists,
-        EgoData* agent,
+        egoData* agent,
         int blocked,
         SurroundingMovingObjectsData* leader,
         SurroundingMovingObjectsData* neighLead,
@@ -1103,7 +1103,7 @@ LCM_LC2013::_wantsChange(
 
 
 void
-LCM_LC2013::getRoundaboutAheadInfo(EgoData* agent, int curr, int neigh, //KBl const AgentInterface::LaneQ& curr, const AgentInterface::LaneQ& neigh,
+LCM_LC2013::getRoundaboutAheadInfo(egoData* agent, int curr, int neigh, //KBl const AgentInterface::LaneQ& curr, const AgentInterface::LaneQ& neigh,
                                      double& roundaboutDistanceAhead, double& roundaboutDistanceAheadNeigh, int& roundaboutEdgesAhead, int& roundaboutEdgesAheadNeigh) {
 
         // In what follows, we check whether a roundabout is ahead (or the vehicle is on a roundabout)
@@ -1151,7 +1151,7 @@ LCM_LC2013::roundaboutDistBonus(double roundaboutDistAhead, int roundaboutEdgesA
 }
 
 int
-LCM_LC2013::slowDownForBlocked(SurroundingMovingObjectsData* blocked, int state, EgoData* agent) {
+LCM_LC2013::slowDownForBlocked(SurroundingMovingObjectsData* blocked, int state, egoData* agent) {
     //  if this vehicle is blocking someone in front, we maybe decelerate to let him in
     if ((blocked) != 0) {
         double gap = blocked->GetState()->roadPos.s + blocked->GetProperties()->distanceReftoLeadingEdge - blocked->GetProperties()->lx - agent->GetState()->roadPos.s + vehicleParameters.distanceReferencePointToLeadingEdge - vehicleParameters.length - *agent->GetDriverInformation()->MinGap;
@@ -1189,7 +1189,7 @@ LCM_LC2013::slowDownForBlocked(SurroundingMovingObjectsData* blocked, int state,
 
 
 void
-LCM_LC2013::saveBlockerLength(SurroundingMovingObjectsData* blocker, int lcaCounter, EgoData* agent) {
+LCM_LC2013::saveBlockerLength(SurroundingMovingObjectsData* blocker, int lcaCounter, egoData* agent) {
 
     if (blocker != 0 && (blocker->GetState()->indicatorstate!=IndicatorState::IndicatorState_Off & lcaCounter) != 0) {
         // is there enough space in front of us for the blocker?
@@ -1233,14 +1233,14 @@ LCM_LC2013::saveBlockerLength(SurroundingMovingObjectsData* blocker, int lcaCoun
 //KBl }
 
 
-void LCM_LC2013::addLCSpeedAdvice(const double vSafe, EgoData* agent) {
+void LCM_LC2013::addLCSpeedAdvice(const double vSafe, egoData* agent) {
     const double accel = SPEED2ACCEL(vSafe - agent->GetState_Ego()->velocity_long);
     myLCAccelerationAdvices.push_back(accel);
 }
 
 
 double
-LCM_LC2013::computeSpeedLat(double latDist, double& maneuverDist, EgoData* agent) {
+LCM_LC2013::computeSpeedLat(double latDist, double& maneuverDist, egoData* agent) {
     double speedBound = myMaxSpeedLatStanding + myMaxSpeedLatFactor * agent->GetState_Ego()->velocity_long;
     //KBl if (isChangingLanes()) {
     //KBl     // Don't stay caught in the middle of a lane change while vehicle is standing, workaround for #3771
@@ -1251,7 +1251,7 @@ LCM_LC2013::computeSpeedLat(double latDist, double& maneuverDist, EgoData* agent
 }
 
 double
-LCM_LC2013::getAssumedDecelForLaneChangeDuration(EgoData* agent) const {
+LCM_LC2013::getAssumedDecelForLaneChangeDuration(egoData* agent) const {
     return std::max(LC_ASSUMED_DECEL, agent->GetState_Ego()->acceleration_long);
 }
 

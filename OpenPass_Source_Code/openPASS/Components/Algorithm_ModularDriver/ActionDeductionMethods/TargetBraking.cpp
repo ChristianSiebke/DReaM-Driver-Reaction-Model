@@ -28,7 +28,7 @@ TargetBraking::TargetBraking(int cycleTime, StochasticsInterface *stochastics):
 {
 }
 
-double TargetBraking::ReactOnStopSign(StopSign *StopSign, double v_long, double distRefToLed, double v_wish, double acomfort)
+double TargetBraking::ReactOnStopSign(stopSign *StopSign, double v_long, double distRefToLed, double v_wish, double acomfort)
 {
     double dsStop = StopSign->Sign->relativeDistance - distRefToLed;
     double dsStop_next = dsStop - v_long * cycleTime*0.001;

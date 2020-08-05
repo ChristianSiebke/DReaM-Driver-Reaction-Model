@@ -39,7 +39,7 @@
  * Input ID | signal class | contained variables
  * ------------|--------------|-------------
  * 0 | structSignal<StaticEnvironmentData> | IA_I_BU.StaticEnvironment
- * 1 | structSignal<EgoData> | IA_I_BU.EgoData
+ * 1 | structSignal<egoData> | IA_I_BU.EgoData
  * 2 | structSignal<SurroundingMovingObjectsData> | IA_I_BU.SurroundingMovingObjectsData
  *
  * @} */
@@ -165,7 +165,7 @@ private:
 
     StaticEnvironmentData StaticEnvironment;
     std::vector<SurroundingMovingObjectsData> SurroundingMovingObjects;
-    EgoData Ego;
+    egoData Ego;
 
     InformationAcquisition informationacquisition;
     MentalModel mentalmodel;

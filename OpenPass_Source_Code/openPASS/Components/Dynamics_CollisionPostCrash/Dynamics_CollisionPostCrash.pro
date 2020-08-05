@@ -23,9 +23,7 @@ CONFIG(debug, release|debug):DEFINES += QT_DEBUG
 
 SUBDIRS +=  . \
             ../../Common \
-            ../../Common/postCrash \
             ../../Interfaces \
-            src \
             ..
 
 INCLUDEPATH += $$SUBDIRS

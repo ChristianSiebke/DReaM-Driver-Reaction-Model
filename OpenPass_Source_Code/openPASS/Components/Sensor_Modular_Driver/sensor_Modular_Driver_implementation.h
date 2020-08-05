@@ -212,7 +212,7 @@ public:
 private:
 
     StaticEnvironmentData StaticEnvironment;
-    EgoData Ego;
+    egoData Ego;
     std::list<SurroundingMovingObjectsData> SurroundingMovingObjects;
 
     std::map<int, std::vector<MentalModelLane>> lanes;

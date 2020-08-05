@@ -84,7 +84,7 @@ public:
         initialBB.initialAccelerationY = agent->GetAcceleration() * sin(initialBB.initialYaw);;
     }
 
-    void UpdateInitialBoundingBox(EgoData *agent, const VehicleModelParameters *VehicleParameters)
+    void UpdateInitialBoundingBox(egoData* agent, const VehicleModelParameters *VehicleParameters)
     {
         initialBB.id = agent->GetState()->id;
 

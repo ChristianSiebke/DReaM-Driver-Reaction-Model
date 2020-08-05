@@ -33,7 +33,7 @@
 
 class AgentRepresentation;
 
-class SpeedLimit
+class speedLimit
 {
 public:
 
@@ -42,7 +42,7 @@ public:
         switch (sign->type)
         {
         case (274): //MaximumSpeedLimit
-            return sign->value;
+            return sign->value / 3.6;
         case (278): //EndOfMaximumSpeedLimit
             return INFINITY;
         case (310): //TownBegin
@@ -103,29 +103,29 @@ private:
     std::list<double> DistanceToSpeedLimits;
 };
 
-struct StopSign
+struct stopSign
 {
     bool exists = false;
     CommonTrafficSign::Entity *Sign;
 };
 
-struct AssessedEnvironment
+struct assessedEnvironment
 {
     StaticEnvironmentData *StaticEnvironment;
-    SpeedLimit SpeedLimit;
-    StopSign StopSign;
+    speedLimit SpeedLimit;
+    stopSign StopSign;
 };
 
 struct InformationAcquisition_Input_BU
 {
     StaticEnvironmentData StaticEnvironment;
     std::list<SurroundingMovingObjectsData> SurroundingMovingObjects;
-    EgoData EgoData;
+    egoData EgoData;
 };
 
 struct InformationAcquisition_Output
 {
-    EgoData *Ego;
+    egoData* Ego;
     std::list<SurroundingMovingObjectsData> *SurroundingMovingObjects;
     StaticEnvironmentData *EnvironmentInfo;
 };
@@ -137,7 +137,7 @@ struct MentalModel_Input_BU
 
 struct MentalModel_Output
 {
-    EgoData *Ego;
+    egoData* Ego;
     std::list <std::unique_ptr<AgentRepresentation>> *SurroundingMovingObjects={};
     StaticEnvironmentData *EnvironmentInfo;
 };
@@ -154,9 +154,9 @@ struct SituationAssessment_Output_TD //Top Down
 
 struct SituationAssessment_Output_BU //Bottom Up
 {
-    EgoData *Ego;
+    egoData* Ego;
     std::map<RelationType, SurroundingMovingObjectsData> NearTraffic;
-    AssessedEnvironment AssessedEnvironment;
+    assessedEnvironment AssessedEnvironment;
 };
 
 struct ActionDeduction_Input

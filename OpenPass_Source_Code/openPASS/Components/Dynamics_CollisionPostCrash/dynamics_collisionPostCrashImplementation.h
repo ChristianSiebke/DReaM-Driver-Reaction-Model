@@ -65,26 +65,17 @@
 #include "Interfaces/modelInterface.h"
 #include "Interfaces/observationInterface.h"
 #include "Common/dynamicsSignal.h"
-#include "collisionDetection_Impact_implementation.h"
 #include "Interfaces/worldInterface.h"
-
-//#ifdef QT_DEBUG
-#define POSTCRASH_DEBUG
-//#endif
-
-#ifdef POSTCRASH_DEBUG
-#include <fstream>
-#endif
 
 /**
 * \ingroup Dynamics_CollisionPostCrash
 */
-class DynamicsCollisionPostCrashImplementation : public UnrestrictedModelInterface
+class DynamicsPostCrashImplementation : public UnrestrictedModelInterface
 {
 public:
     const std::string COMPONENTNAME = "DynamicsCollisionPostCrash";
 
-    DynamicsCollisionPostCrashImplementation(
+    DynamicsPostCrashImplementation(
         std::string componentName,
         bool isInit,
         int priority,
@@ -97,11 +88,11 @@ public:
         const std::map<int, ObservationInterface*> *observations,
         const CallbackInterface *callbacks,
         AgentInterface *agent);
-    DynamicsCollisionPostCrashImplementation(const DynamicsCollisionPostCrashImplementation&) = delete;
-    DynamicsCollisionPostCrashImplementation(DynamicsCollisionPostCrashImplementation&&) = delete;
-    DynamicsCollisionPostCrashImplementation& operator=(const DynamicsCollisionPostCrashImplementation&) = delete;
-    DynamicsCollisionPostCrashImplementation& operator=(DynamicsCollisionPostCrashImplementation&&) = delete;
-    virtual ~DynamicsCollisionPostCrashImplementation();
+    DynamicsPostCrashImplementation(const DynamicsPostCrashImplementation&) = delete;
+    DynamicsPostCrashImplementation(DynamicsPostCrashImplementation&&) = delete;
+    DynamicsPostCrashImplementation& operator=(const DynamicsPostCrashImplementation&) = delete;
+    DynamicsPostCrashImplementation& operator=(DynamicsPostCrashImplementation&&) = delete;
+    virtual ~DynamicsPostCrashImplementation() = default;
 
     /*!
     * \brief Update Inputs
@@ -144,27 +135,19 @@ public:
 private:
 
     /*!
-    * \brief Write names of collision attributes to log.
-    */
-    void InitLog();
-
-    /*!
-    * \brief Log current values of collision attributes.
-    *
-    * @param[in]     time               Current scheduling time
-    * @param[in]     collPartnerId      Id of collision partner
-    */
-    void LogTimeStep(int time, int collPartnerId, PostCrashDynamic* postCrashDynamic1, PostCrashDynamic* postCrashDynamic2);
-
-    /*!
     * \brief Process data for collisionPartners as given by simulation core.
     *
     * Function is called by Trigger
     *
     * @param[in]     time           Current scheduling time
     */
-    bool TriggerPostCrashCalculation(int time);
+    bool TriggerPostCrashCheck(int time);
 
+    /*!
+    * \brief Calculate and set vehicle dynamics for fading out after collision.
+    *
+    * Function is called by Trigger
+    */
     void SetFadingDynamics();
 
     /** \name Internal states
@@ -187,13 +170,5 @@ private:
      * @{ */
     //! Output Signal
     DynamicsSignal dynamicsSignal;
-    //! Handles the calculation of post crash dynamics
-    CollisionDetectionPostCrash collisionDetection;
     /** @} */
-
-#ifdef POSTCRASH_DEBUG
-    const int timeStep_ms = 100; // default time step [ms]
-    int clockCount = 0;
-    std::ofstream logFile;
-#endif
 };

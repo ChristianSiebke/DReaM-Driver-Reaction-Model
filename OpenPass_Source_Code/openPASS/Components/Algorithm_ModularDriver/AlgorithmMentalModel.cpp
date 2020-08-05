@@ -48,6 +48,9 @@ void MentalModel::GetMentalModel_Output(MentalModel_Output *MM_Output)
     Update(*MM_Input_BU->IA_O->SurroundingMovingObjects, *MM_Input_BU->IA_O->EnvironmentInfo, 100);
     MM_Output->SurroundingMovingObjects = &_surrounding_Agents;
     MM_Output->EnvironmentInfo = MM_Input_BU->IA_O->EnvironmentInfo;
+
+    //if (MM_Output->Ego->GetState()->id == 26 || MM_Output->Ego->GetState()->id == 27)
+    //std::cout << "MM_Out: id: " << MM_Output->Ego->GetState()->id << ", size: " << MM_Output->SurroundingMovingObjects->size() << std::endl;
 }
 
 void MentalModel::Update(const std::list<SurroundingMovingObjectsData> &in_perceptionData,
@@ -55,18 +58,20 @@ void MentalModel::Update(const std::list<SurroundingMovingObjectsData> &in_perce
 {    
     std::list<std::unique_ptr<AgentRepresentation>>::const_iterator mentalmodel_agent_iter = _surrounding_Agents.begin();
     while(mentalmodel_agent_iter != _surrounding_Agents.end()) {
-        if ((*mentalmodel_agent_iter)->Get_internal_Data().GetState()->laneid == UINT64_MAX) {
+        if ((*mentalmodel_agent_iter)->Get_internal_Data().GetState()->laneid == -999) {
          // agent had left the road network
            mentalmodel_agent_iter = _surrounding_Agents.erase(mentalmodel_agent_iter);
            continue;
         }
+
         (*mentalmodel_agent_iter)->LifeTimeTicker();
-        
+
         if(!Forget( mentalmodel_agent_iter, in_perceptionData))
         {
             (*mentalmodel_agent_iter)->Extrapolate(_roadPerceptionData);
-             mentalmodel_agent_iter++;
+            mentalmodel_agent_iter++;
         }   
+
     }
     // "perception process"
      for( std::list<SurroundingMovingObjectsData>::const_reverse_iterator element_in_perceptionData = in_perceptionData.rbegin();
@@ -90,20 +95,20 @@ bool MentalModel::Forget(std::list<std::unique_ptr<AgentRepresentation>>::const_
 
        return true;
     }
+    //if (MM_Input_BU->IA_O->Ego->GetState()->id == 26 || MM_Input_BU->IA_O->Ego->GetState()->id == 27)
+    //std::cout << "INPerc_size: " << in_perceptionData.size() << std::endl;
 
   for( auto element_in_perceptionData : in_perceptionData)
   {
-
     //check whether an old agent representation of current visual fixated agent exist in Mental Modal Agents ("forget process")
     if((*mentalmodel_agent_iter)->Get_internal_Data().GetState()->id == element_in_perceptionData.GetState()->id)
     {
-      // delete old angent representation
+      // delete old agent representation
      mentalmodel_agent_iter = _surrounding_Agents.erase(std::find(_surrounding_Agents.begin(),_surrounding_Agents.end(), *mentalmodel_agent_iter));
 
       return true;
     }
   }
-
   return false;
 }
 

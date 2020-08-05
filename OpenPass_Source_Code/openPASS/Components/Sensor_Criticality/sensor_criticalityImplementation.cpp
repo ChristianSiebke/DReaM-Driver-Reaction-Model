@@ -148,7 +148,7 @@ void SensorCriticalityImplementation::SetMovingObjects(AgentInterface *agent, co
             State.laneid                  = it->second->GetMainLaneId();
             State.secondarycoveredlanes   = it->second->GetSecondaryCoveredLanes();
 
-            Properties Properties;
+            properties Properties;
             Properties.lx                       = it->second->GetLength();
             Properties.ly                       = it->second->GetWidth();
             Properties.lz                       = it->second->GetHeight();

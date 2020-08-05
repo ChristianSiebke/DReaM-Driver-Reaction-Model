@@ -19,6 +19,7 @@ CONFIG   += OPENPASS_LIBRARY
 include (../../../global.pri)
 
 SUBDIRS +=  . \
+            srcCollisionPostCrash
 
 INCLUDEPATH += $$SUBDIRS \
             ../../Common \
@@ -29,8 +30,10 @@ INCLUDEPATH += $$SUBDIRS \
 SOURCES += \
     $$getFiles(SUBDIRS, cpp) \
     $$getFiles(SUBDIRS, cc) \
-    $$getFiles(SUBDIRS, c)
+    $$getFiles(SUBDIRS, c) \
+    ../../Common/vector2d.cpp
 
 HEADERS += \
     $$getFiles(SUBDIRS, hpp) \
-    $$getFiles(SUBDIRS, h)
+    $$getFiles(SUBDIRS, h) \
+    ../../Common/vector2d.h

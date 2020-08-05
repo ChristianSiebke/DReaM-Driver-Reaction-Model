@@ -283,9 +283,9 @@ public:
     }
 
     void setFollowerGaps();
-    void setLeaderGaps(bool lexists, SurroundingMovingObjectsData* leader, double secGap, EgoData* agent);
-    void setOrigLeaderGaps(bool lexists, SurroundingMovingObjectsData* leader, double secGap, EgoData* agent);
-    void setFollowerGaps(bool fexists, SurroundingMovingObjectsData* follower, double secGap, EgoData* agent);
+    void setLeaderGaps(bool lexists, SurroundingMovingObjectsData* leader, double secGap, egoData* agent);
+    void setOrigLeaderGaps(bool lexists, SurroundingMovingObjectsData* leader, double secGap, egoData* agent);
+    void setFollowerGaps(bool fexists, SurroundingMovingObjectsData* follower, double secGap, egoData* agent);
 
     virtual void prepareStep() {
         //myCanceledStates[1] = LCA_NONE;
@@ -312,7 +312,7 @@ public:
     virtual int wantsChange(
             int lane, int laneOffset,
             bool lexists, bool nlexists, bool nfexists,
-            EgoData* agent,
+            egoData* agent,
             int blocked,
             SurroundingMovingObjectsData* leader,
             SurroundingMovingObjectsData* neighLead,
@@ -408,7 +408,7 @@ public:
     ///       If lcMaxSpeedStanding==0 the completion may be impossible, and -1 is returned.
     ///       2) In case that no maxSpeedLat is used to control lane changing, this is only called prior to a lane change,
     ///          and the duration is MSGlobals::gLaneChangeDuration.
-    virtual double estimateLCDuration(const double speed, const double remainingManeuverDist, const double decel, const DriverInformation* agent) const;
+    virtual double estimateLCDuration(const double speed, const double remainingManeuverDist, const double decel, const driverInformation* agent) const;
 
     /// @brief Get the current lane change completion ratio
     inline double getLaneChangeCompletion() const {
@@ -499,7 +499,7 @@ public:
 
     /// @brief decides the next lateral speed depending on the remaining lane change distance to be covered
     ///        and updates maneuverDist according to lateral safety constraints.
-    virtual double computeSpeedLat(EgoData* agent, double& maneuverDist);
+    virtual double computeSpeedLat(egoData* agent, double& maneuverDist);
 
     /// @brief Returns a deceleration value which is used for the estimation of the duration of a lane change.
     /// @note  Effective only for continuous lane-changing when using attributes myMaxSpeedLatFactor and myMaxSpeedLatStanding. See #3771
@@ -514,9 +514,9 @@ public:
     static const double NO_NEIGHBOR;
 
 protected:
-    virtual bool congested(SurroundingMovingObjectsData* neighLeader, EgoData* agent);
+    virtual bool congested(SurroundingMovingObjectsData* neighLeader, egoData* agent);
 
-    virtual bool predInteraction(bool lexists, SurroundingMovingObjectsData* leader, EgoData* agent);
+    virtual bool predInteraction(bool lexists, SurroundingMovingObjectsData* leader, egoData* agent);
 
     /// @brief whether the influencer cancels the given request
     bool cancelRequest(int state, int laneOffset);

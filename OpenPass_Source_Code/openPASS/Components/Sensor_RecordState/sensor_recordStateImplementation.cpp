@@ -90,31 +90,31 @@ void SensorRecordStateImplementation::ObserveEgo()
     observerInstance->Insert(timeMSec,
                              agentId,
                              LoggingGroup::Trace,
-                             "XPosition",
+                             "XPosition / (m)",
                              std::to_string(GetAgent()->GetPositionX()));
 
     observerInstance->Insert(timeMSec,
                              agentId,
                              LoggingGroup::Trace,
-                             "YPosition",
+                             "YPosition / (m)",
                              std::to_string(GetAgent()->GetPositionY()));
 
     observerInstance->Insert(timeMSec,
                              agentId,
                              LoggingGroup::Trace,
-                             "YawAngle",
+                             "YawAngle / (Degree)",
                              std::to_string(GetAgent()->GetYaw()));
 
     observerInstance->Insert(timeMSec,
                              agentId,
                              LoggingGroup::Visualization,
-                             "VelocityEgo",
+                             "VelocityEgo / (m/s)",
                              std::to_string(GetAgent()->GetVelocity()));
 
     observerInstance->Insert(timeMSec,
                              agentId,
                              LoggingGroup::Visualization,
-                             "AccelerationEgo",
+                             "AccelerationEgo / (m/s^2)",
                              std::to_string(GetAgent()->GetAcceleration()));
 
     observerInstance->Insert(timeMSec,
@@ -138,7 +138,7 @@ void SensorRecordStateImplementation::ObserveEgo()
     observerInstance->Insert(timeMSec,
                              agentId,
                              LoggingGroup::RoadPosition,
-                             "PositionRoute",
+                             "PositionRoute / (m)",
                              std::to_string(GetAgent()->GetDistanceToStartOfRoad()));
 
     observerInstance->Insert(timeMSec,
@@ -168,7 +168,7 @@ void SensorRecordStateImplementation::ObserveEgo()
     observerInstance->Insert(timeMSec,
                              agentId,
                              LoggingGroup::Vehicle,
-                             "YawRate",
+                             "YawRate / (Degree/s)",
                              std::to_string(GetAgent()->GetYawRate()));
 
     observerInstance->Insert(timeMSec,

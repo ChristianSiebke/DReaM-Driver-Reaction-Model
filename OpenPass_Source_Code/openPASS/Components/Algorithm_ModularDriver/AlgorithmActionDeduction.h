@@ -163,9 +163,9 @@ private:
 
     ActionDeduction_Input *AD_Input;
     std::map<RelationType,SurroundingMovingObjectsData> *NearTraffic;
-    State *State;
-    State_Ego *State_Ego;
-    DriverInformation *DriverInformation;
+    state *State;
+    state_Ego *State_Ego;
+    driverInformation *DriverInformation;
 
     bool Logged = false;
 

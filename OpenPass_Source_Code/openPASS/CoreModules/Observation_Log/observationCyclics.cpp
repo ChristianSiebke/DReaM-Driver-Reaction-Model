@@ -35,16 +35,15 @@ std::string ObservationCyclics::GetAgentHeader()
     std::string columnHeader;
     for(std::map<std::string, std::vector<std::string>>::iterator it = samples.begin(); it != samples.end(); ++it)
     {
-        if(it != samples.begin())
-        {
-            header += ", ";
-        }
         columnHeader = it->first;
         if(columnHeader.at(1) == '1')
         {
             return header;
         }
-
+        if(it != samples.begin())
+        {
+            header += ",";
+        }
         header += columnHeader.erase(0, 3);
     }
     return header;
@@ -92,7 +91,7 @@ std::vector<std::string> ObservationCyclics::GetAgentSamplesLine(std::uint32_t t
 
         if (!sampleLine.empty())
         {
-            sampleLine += ", ";
+            sampleLine += ",";
         }
 
         // not all channels are sampled until end of simulation time

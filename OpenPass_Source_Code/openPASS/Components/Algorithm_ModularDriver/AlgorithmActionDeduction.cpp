@@ -75,7 +75,7 @@ void ActionDeduction::CalcAccelerationWish(ActionDeduction_Output_BU &AD_Output_
     double delta_v_Ego;
     bool agentinfront = NearTraffic->find(RelationType::Leader) != NearTraffic->end();
     double v_long = AD_Input->MM_O->Ego->GetState_Ego()->velocity_long;
-    StopSign *StopSign = &AD_Input->SA_O_BU->AssessedEnvironment.StopSign;
+    stopSign *StopSign = &AD_Input->SA_O_BU->AssessedEnvironment.StopSign;
 
     double decel = minComfortDeceleration;
 

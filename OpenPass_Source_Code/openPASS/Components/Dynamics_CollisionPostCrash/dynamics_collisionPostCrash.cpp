@@ -42,7 +42,7 @@ extern "C" DYNAMICS_COLLISIONPOSTCRASH_SHARED_EXPORT ModelInterface *OpenPASS_Cr
 
     try
     {
-        return (ModelInterface*)(new (std::nothrow) DynamicsCollisionPostCrashImplementation(
+        return (ModelInterface*)(new (std::nothrow) DynamicsPostCrashImplementation(
                                      componentName,
                                      isInit,
                                      priority,
@@ -78,7 +78,7 @@ extern "C" DYNAMICS_COLLISIONPOSTCRASH_SHARED_EXPORT ModelInterface *OpenPASS_Cr
 
 extern "C" DYNAMICS_COLLISIONPOSTCRASH_SHARED_EXPORT void OpenPASS_DestroyInstance(ModelInterface *implementation)
 {
-    delete (DynamicsCollisionPostCrashImplementation*)implementation;
+    delete (DynamicsPostCrashImplementation*)implementation;
 }
 
 extern "C" DYNAMICS_COLLISIONPOSTCRASH_SHARED_EXPORT bool OpenPASS_UpdateInput(ModelInterface *implementation,

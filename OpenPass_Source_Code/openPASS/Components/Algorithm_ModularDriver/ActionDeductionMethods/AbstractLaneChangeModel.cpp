@@ -119,7 +119,7 @@ AbstractLaneChangeModel::getManeuverDist() const {
 }
 
 
-bool AbstractLaneChangeModel::congested(SurroundingMovingObjectsData* neighLeader, EgoData* agent) {
+bool AbstractLaneChangeModel::congested(SurroundingMovingObjectsData* neighLeader, egoData* agent) {
     if (neighLeader == 0) {
         return false;
     }
@@ -135,7 +135,7 @@ bool AbstractLaneChangeModel::congested(SurroundingMovingObjectsData* neighLeade
     return false;
 }
 
-bool AbstractLaneChangeModel::predInteraction(bool lexists, SurroundingMovingObjectsData* leader, EgoData* agent) {
+bool AbstractLaneChangeModel::predInteraction(bool lexists, SurroundingMovingObjectsData* leader, egoData* agent) {
     if (!lexists) {
         return false;
     }
@@ -147,7 +147,7 @@ bool AbstractLaneChangeModel::predInteraction(bool lexists, SurroundingMovingObj
 }
 
 double
-AbstractLaneChangeModel::computeSpeedLat(EgoData* agent, double& maneuverDist) {
+AbstractLaneChangeModel::computeSpeedLat(egoData* agent, double& maneuverDist) {
 
     return agent->GetState()->velocity_y;
 
@@ -182,7 +182,7 @@ int AbstractLaneChangeModel::getWaitingSeconds(double velocity_x)
 
 
 double
-AbstractLaneChangeModel::estimateLCDuration(const double speed, const double remainingManeuverDist, const double decel, const DriverInformation* agent) const {
+AbstractLaneChangeModel::estimateLCDuration(const double speed, const double remainingManeuverDist, const double decel, const driverInformation* agent) const {
 
     if(remainingManeuverDist==0)
     {
@@ -194,7 +194,7 @@ AbstractLaneChangeModel::estimateLCDuration(const double speed, const double rem
 }
 
 void
-AbstractLaneChangeModel::setFollowerGaps(bool fexists, SurroundingMovingObjectsData* follower, double secGap, EgoData* agent)  {
+AbstractLaneChangeModel::setFollowerGaps(bool fexists, SurroundingMovingObjectsData* follower, double secGap, egoData* agent)  {
     if (fexists) {
         myLastFollowerGap = agent->GetState()->roadPos.s + vehicleParameters.distanceReferencePointToLeadingEdge - vehicleParameters.length - follower->GetState()->roadPos.s - *agent->GetDriverInformation()->MinGap - follower->GetProperties()->distanceReftoLeadingEdge;
         myLastFollowerSecureGap = secGap;
@@ -202,7 +202,7 @@ AbstractLaneChangeModel::setFollowerGaps(bool fexists, SurroundingMovingObjectsD
 }
 
 void
-AbstractLaneChangeModel::setLeaderGaps(bool lexists, SurroundingMovingObjectsData* leader, double secGap, EgoData* agent) {
+AbstractLaneChangeModel::setLeaderGaps(bool lexists, SurroundingMovingObjectsData* leader, double secGap, egoData* agent) {
     if (lexists) {
         myLastLeaderGap = leader->GetState()->roadPos.s + leader->GetProperties()->distanceReftoLeadingEdge - leader->GetProperties()->lx - agent->GetState()->roadPos.s - *agent->GetDriverInformation()->MinGap - vehicleParameters.distanceReferencePointToLeadingEdge;
         myLastLeaderSecureGap = secGap;
@@ -210,7 +210,7 @@ AbstractLaneChangeModel::setLeaderGaps(bool lexists, SurroundingMovingObjectsDat
 }
 
 void
-AbstractLaneChangeModel::setOrigLeaderGaps(bool lexists, SurroundingMovingObjectsData* leader, double secGap, EgoData* agent) {
+AbstractLaneChangeModel::setOrigLeaderGaps(bool lexists, SurroundingMovingObjectsData* leader, double secGap, egoData* agent) {
     if (lexists) {
         myLastOrigLeaderGap = leader->GetState()->roadPos.s + leader->GetProperties()->distanceReftoLeadingEdge - leader->GetProperties()->lx - agent->GetState()->roadPos.s - *agent->GetDriverInformation()->MinGap - vehicleParameters.distanceReferencePointToLeadingEdge;
         myLastOrigLeaderSecureGap = secGap;

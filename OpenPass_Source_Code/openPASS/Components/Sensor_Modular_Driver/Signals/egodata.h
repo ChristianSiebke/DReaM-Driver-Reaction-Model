@@ -28,7 +28,7 @@
 #include "globalDefinitions.h"
 #include "worldDefinitions.h"
 
-struct State //absolute kinematic values in the global coordinate system
+struct state //absolute kinematic values in the global coordinate system
 {
     bool hornSwitch = false;
     bool headLightSwitch = false;
@@ -55,7 +55,7 @@ struct State //absolute kinematic values in the global coordinate system
     RoadPosition roadPos;
 };
 
-struct State_Ego
+struct state_Ego
 {
     int currentGear {-999};
     double velocity_long {-999};
@@ -76,7 +76,7 @@ struct Color //color specified in the RGB color space
     double b {-999};
 };
 
-struct DriverInformation
+struct driverInformation
 {
     // Ego-Vehicle Limits
     double *v_y_Max;
@@ -88,27 +88,27 @@ struct DriverInformation
     double *commonSpeedLimit_Violation;
 };
 
-class  EgoData
+class  egoData
 {
 public:
-    EgoData()
+    egoData()
     {
     }
 
     std::string GetName() const
     {
-        return  "EgoData";
+        return  "egoData*";
     }
 
     AgentVehicleType *GetVehicleType()
     {
         return &VehicleType;
     }
-    State_Ego *GetState_Ego()
+    state_Ego *GetState_Ego()
     {
         return &State_Ego;
     }
-    State *GetState()
+    state *GetState()
     {
         return &State;
     }
@@ -116,19 +116,19 @@ public:
     {
         this->VehicleType = VehicleType;
     }
-    void SetState_Ego(State_Ego State_Ego)
+    void SetState_Ego(state_Ego State_Ego)
     {
         this->State_Ego = State_Ego;
     }
-    void SetState(State State)
+    void SetState(state State)
     {
         this->State = State;
     }
-    void SetDriverInformation(DriverInformation DriverInformation)
+    void SetDriverInformation(driverInformation DriverInformation)
     {
         this->DriverInformation = DriverInformation;
     }
-    DriverInformation *GetDriverInformation()
+    driverInformation *GetDriverInformation()
     {
         return &DriverInformation;
     }
@@ -136,9 +136,9 @@ public:
 private:
 
     AgentVehicleType VehicleType;
-    State_Ego State_Ego;
-    State State;
+    state_Ego State_Ego;
+    state State;
 
-    DriverInformation DriverInformation {};
+    driverInformation DriverInformation {};
 };
 

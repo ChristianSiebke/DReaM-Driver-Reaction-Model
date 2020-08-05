@@ -209,6 +209,11 @@ public:
         return collisionPartners;
     }
 
+    PostCrashVelocity GetPostCrashVelocity() const override
+    {
+        return postCrashVelocity;
+    }
+
     AgentVehicleType GetVehicleType() const override
     {
         return vehicleType;
@@ -217,6 +222,11 @@ public:
     VehicleModelParameters GetVehicleModelParameters() const override
     {
         return vehicleModelParameters;
+    }
+
+    void SetPostCrashVelocity(PostCrashVelocity postCrashVelocity) override
+    {
+        this->postCrashVelocity = postCrashVelocity;
     }
 
     void SetPositionX(double value) override
@@ -860,14 +870,6 @@ public:
     {
         throw std::runtime_error("not implemented");
     }
-    virtual std::vector<void *> GetCollisionData(int collisionPartnerId,
-                                                 int collisionDataId) const override
-    {
-        Q_UNUSED(collisionPartnerId);
-        Q_UNUSED(collisionDataId);
-
-        throw std::runtime_error("not implemented");
-    }
     virtual void SetVelocityX(double velocityX) override
     {
         Q_UNUSED(velocityX);
@@ -1379,6 +1381,7 @@ private:
     Route route;
 
     std::vector<std::pair<ObjectTypeOSI, int>> collisionPartners;
+    PostCrashVelocity postCrashVelocity {};
     bool isValid = true;
 
     int id{0};

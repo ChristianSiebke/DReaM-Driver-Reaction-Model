@@ -87,94 +87,116 @@ AlgorithmModularDriverImplementation::AlgorithmModularDriverImplementation(
         throw std::runtime_error(msg);
     }
 
-    if (parameters->GetParametersDouble().count("VelocityWish") > 0)
+    if (parameters->GetParametersDouble().count("VelocityWish") > 0 || parameters->GetParametersDouble().count("7") > 0)
     {
-        situationassesment.SetVWish(1/3.6 * parameters->GetParametersDouble().at("VelocityWish"));
+        double VelocityWish = (parameters->GetParametersDouble().count("VelocityWish") > 0 ? parameters->GetParametersDouble().at("VelocityWish") : parameters->GetParametersDouble().at("7"));
+        situationassesment.SetVWish(1/3.6 * VelocityWish);
     }
-    if (parameters->GetParametersDouble().count("VelocityWishDeviation") > 0)
+    if (parameters->GetParametersDouble().count("VelocityWishDeviation") > 0 || parameters->GetParametersDouble().count("8"))
     {
-        situationassesment.SetVWishDeviation(1/3.6 * parameters->GetParametersDouble().at("VelocityWishDeviation"));
+        double VelocityWishDeviation = (parameters->GetParametersDouble().count("VelocityWishDeviation") > 0 ? parameters->GetParametersDouble().at("VelocityWishDeviation") : parameters->GetParametersDouble().at("8"));
+        situationassesment.SetVWishDeviation(1/3.6 * VelocityWishDeviation);
     }
-    if (parameters->GetParametersDouble().count("TGapWish") > 0)
+    if (parameters->GetParametersDouble().count("TGapWish") > 0 || parameters->GetParametersDouble().count("9") > 0)
     {
-        situationassesment.SetTGapWish(parameters->GetParametersDouble().at("TGapWish"));
-        actiondeduction.SetTGapWish(parameters->GetParametersDouble().at("TGapWish"));
+        double TGapWish = (parameters->GetParametersDouble().count("TGapWish") > 0 ? parameters->GetParametersDouble().at("TGapWish") : parameters->GetParametersDouble().at("9"));
+        situationassesment.SetTGapWish(TGapWish);
+        actiondeduction.SetTGapWish(TGapWish);
     }
-    if (parameters->GetParametersDouble().count("TGapWishDeviation") > 0)
+    if (parameters->GetParametersDouble().count("TGapWishDeviation") > 0 || parameters->GetParametersDouble().count("10") > 0)
     {
-        situationassesment.SetTGapWishDeviation(parameters->GetParametersDouble().at("TGapWishDeviation"));
+        double TGapWishDeviation = (parameters->GetParametersDouble().count("TGapWishDeviation") > 0 ? parameters->GetParametersDouble().at("TGapWishDeviation") : parameters->GetParametersDouble().at("10"));
+        situationassesment.SetTGapWishDeviation(TGapWishDeviation);
     }
-    if (parameters->GetParametersDouble().count("MaxComfortAcceleration") > 0)
+    if (parameters->GetParametersDouble().count("MaxComfortAcceleration") > 0 || parameters->GetParametersDouble().count("4") > 0)
     {
-        actiondeduction.SetMaxComfortAccel(parameters->GetParametersDouble().at("MaxComfortAcceleration"));
+        double MaxComfortAcceleration = (parameters->GetParametersDouble().count("MaxComfortAcceleration") > 0 ? parameters->GetParametersDouble().at("MaxComfortAcceleration") : parameters->GetParametersDouble().at("4"));
+        actiondeduction.SetMaxComfortAccel(MaxComfortAcceleration);
     }
-    if (parameters->GetParametersDouble().count("MinComfortDeceleration") > 0)
+    if (parameters->GetParametersDouble().count("MinComfortDeceleration") > 0 || parameters->GetParametersDouble().count("5") > 0)
     {
-        actiondeduction.SetMinComfortDecel(parameters->GetParametersDouble().at("MinComfortDeceleration"));
+        double MinComfortDeceleration = (parameters->GetParametersDouble().count("MinComfortDeceleration") > 0 ? parameters->GetParametersDouble().at("MinComfortDeceleration") : parameters->GetParametersDouble().at("5"));
+        actiondeduction.SetMinComfortDecel(MinComfortDeceleration);
     }
-    if (parameters->GetParametersDouble().count("ComfortAccelerationDeviation") > 0)
+    if (parameters->GetParametersDouble().count("ComfortAccelerationDeviation") > 0 || parameters->GetParametersDouble().count("6") > 0)
     {
-        actiondeduction.SetComfortAccelDev(parameters->GetParametersDouble().at("ComfortAccelerationDeviation"));
+        double ComfortAccelerationDeviation = (parameters->GetParametersDouble().count("ComfortAccelerationDeviation") > 0 ? parameters->GetParametersDouble().at("ComfortAccelerationDeviation") : parameters->GetParametersDouble().at("6"));
+        actiondeduction.SetComfortAccelDev(ComfortAccelerationDeviation);
     }
-    if (parameters->GetParametersDouble().count("MeanSpeedLimitViolation") > 0)
+    if (parameters->GetParametersDouble().count("MeanSpeedLimitViolation") > 0 || parameters->GetParametersDouble().count("11") > 0)
     {
-        situationassesment.SetSpeedLimit_Violation(1/3.6 * parameters->GetParametersDouble().at("MeanSpeedLimitViolation"));
+        double MeanSpeedLimitViolation = (parameters->GetParametersDouble().count("MeanSpeedLimitViolation") > 0 ? parameters->GetParametersDouble().at("MeanSpeedLimitViolation") : parameters->GetParametersDouble().at("11"));
+        situationassesment.SetSpeedLimit_Violation(1/3.6 * MeanSpeedLimitViolation);
     }
-    if (parameters->GetParametersDouble().count("MeanSpeedLimitViolationDeviation") > 0)
+    if (parameters->GetParametersDouble().count("MeanSpeedLimitViolationDeviation") > 0 || parameters->GetParametersDouble().count("12") > 0)
     {
-        situationassesment.SetSpeedLimit_ViolationDeviation(1/3.6 * parameters->GetParametersDouble().at("MeanSpeedLimitViolationDeviation"));
+        double MeanSpeedLimitViolationDeviation = (parameters->GetParametersDouble().count("MeanSpeedLimitViolationDeviation") > 0 ? parameters->GetParametersDouble().at("MeanSpeedLimitViolationDeviation") : parameters->GetParametersDouble().at("12"));
+        situationassesment.SetSpeedLimit_ViolationDeviation(1/3.6 * MeanSpeedLimitViolationDeviation);
     }
-    if (parameters->GetParametersDouble().count("MinDistance") > 0)
+    if (parameters->GetParametersDouble().count("MinDistance") > 0 || parameters->GetParametersDouble().count("13") > 0)
     {
-        situationassesment.SetMinDistance(parameters->GetParametersDouble().at("MinDistance"));
+        double MinDistance = (parameters->GetParametersDouble().count("MinDistance") > 0 ? parameters->GetParametersDouble().at("MinDistance") : parameters->GetParametersDouble().at("13"));
+        situationassesment.SetMinDistance(MinDistance);
     }
-    if (parameters->GetParametersDouble().count("SpeedGain") > 0)
+    if (parameters->GetParametersDouble().count("SpeedGain") > 0 || parameters->GetParametersDouble().count("14") > 0)
     {
-        actiondeduction.SetSpeedGain(parameters->GetParametersDouble().at("SpeedGain"));
+        double SpeedGain = (parameters->GetParametersDouble().count("SpeedGain") > 0 ? parameters->GetParametersDouble().at("SpeedGain") : parameters->GetParametersDouble().at("14"));
+        actiondeduction.SetSpeedGain(SpeedGain);
     }
-    if (parameters->GetParametersDouble().count("SpeedGainDeviation") > 0)
+    if (parameters->GetParametersDouble().count("SpeedGainDeviation") > 0 || parameters->GetParametersDouble().count("15") > 0)
     {
-        actiondeduction.SetSpeedGainDeviation(parameters->GetParametersDouble().at("SpeedGainDeviation"));
+        double SpeedGainDeviation = (parameters->GetParametersDouble().count("SpeedGainDeviation") > 0 ? parameters->GetParametersDouble().at("SpeedGainDeviation") : parameters->GetParametersDouble().at("15"));
+        actiondeduction.SetSpeedGainDeviation(SpeedGainDeviation);
     }
-    if (parameters->GetParametersDouble().count("KeepRight") > 0)
+    if (parameters->GetParametersDouble().count("KeepRight") > 0 || parameters->GetParametersDouble().count("16") > 0)
     {
-        actiondeduction.SetKeepRight(parameters->GetParametersDouble().at("KeepRight"));
+        double KeepRight = (parameters->GetParametersDouble().count("KeepRight") > 0 ? parameters->GetParametersDouble().at("KeepRight") : parameters->GetParametersDouble().at("16"));
+        actiondeduction.SetKeepRight(KeepRight);
     }
-    if (parameters->GetParametersDouble().count("KeepRightDeviation") > 0)
+    if (parameters->GetParametersDouble().count("KeepRightDeviation") > 0 || parameters->GetParametersDouble().count("17") > 0)
     {
-        actiondeduction.SetKeepRightDeviation(parameters->GetParametersDouble().at("KeepRightDeviation"));
+        double KeepRightDeviation = (parameters->GetParametersDouble().count("KeepRightDeviation") > 0 ? parameters->GetParametersDouble().at("KeepRightDeviation") : parameters->GetParametersDouble().at("17"));
+        actiondeduction.SetKeepRightDeviation(KeepRightDeviation);
     }
-    if (parameters->GetParametersDouble().count("Cooperative") > 0)
+    if (parameters->GetParametersDouble().count("Cooperative") > 0 || parameters->GetParametersDouble().count("18") > 0)
     {
-        actiondeduction.SetCooperative(parameters->GetParametersDouble().at("Cooperative"));
+        double Cooperative = (parameters->GetParametersDouble().count("Cooperative") > 0 ? parameters->GetParametersDouble().at("Cooperative") : parameters->GetParametersDouble().at("18"));
+        actiondeduction.SetCooperative(Cooperative);
     }
-    if (parameters->GetParametersDouble().count("CooperativeDeviation") > 0)
+    if (parameters->GetParametersDouble().count("CooperativeDeviation") > 0 || parameters->GetParametersDouble().count("19") > 0)
     {
-        actiondeduction.SetCooperativeDeviation(parameters->GetParametersDouble().at("CooperativeDeviation"));
+        double CooperativeDeviation = (parameters->GetParametersDouble().count("CooperativeDeviation") > 0 ? parameters->GetParametersDouble().at("CooperativeDeviation") : parameters->GetParametersDouble().at("19"));
+        actiondeduction.SetCooperativeDeviation(CooperativeDeviation);
     }
-    if (parameters->GetParametersInt().count("AvertViewTimeMean") > 0)
+    if (parameters->GetParametersInt().count("AvertViewTimeMean") > 0 || parameters->GetParametersInt().count("0") > 0)
     {
-        informationacquisition.SetMeanAvertViewTime(parameters->GetParametersInt().at("AvertViewTimeMean"));
+        int AvertViewTimeMean = (parameters->GetParametersInt().count("AvertViewTimeMean") > 0 ? parameters->GetParametersInt().at("AvertViewTimeMean") : parameters->GetParametersInt().at("0"));
+        informationacquisition.SetMeanAvertViewTime(AvertViewTimeMean);
     }
-    if (parameters->GetParametersInt().count("AvertViewTimeDeviation") > 0)
+    if (parameters->GetParametersInt().count("AvertViewTimeDeviation") > 0 || parameters->GetParametersInt().count("1") > 0)
     {
-        informationacquisition.SetAvertViewTimeDeviation(parameters->GetParametersInt().at("AvertViewTimeDeviation"));
+        int AvertViewTimeDeviation = (parameters->GetParametersInt().count("AvertViewTimeDeviation") > 0 ? parameters->GetParametersInt().at("AvertViewTimeDeviation") : parameters->GetParametersInt().at("1"));
+        informationacquisition.SetAvertViewTimeDeviation(AvertViewTimeDeviation);
     }
-    if (parameters->GetParametersInt().count("ReactionTimeMean") > 0)
+    if (parameters->GetParametersInt().count("ReactionTimeMean") > 0 || parameters->GetParametersInt().count("2") > 0)
     {
-        situationassesment.SetMeanReactionTime(parameters->GetParametersInt().at("ReactionTimeMean"));
+        int ReactionTimeMean = (parameters->GetParametersInt().count("ReactionTimeMean") > 0 ? parameters->GetParametersInt().at("ReactionTimeMean") : parameters->GetParametersInt().at("2"));
+        situationassesment.SetMeanReactionTime(ReactionTimeMean);
     }
-    if (parameters->GetParametersInt().count("ReactionTimeDeviation") > 0)
+    if (parameters->GetParametersInt().count("ReactionTimeDeviation") > 0 || parameters->GetParametersDouble().count("3") > 0)
     {
-        situationassesment.SetReactionTimeDeviation(parameters->GetParametersInt().at("ReactionTimeDeviation"));
+        int ReactionTimeDeviation = (parameters->GetParametersInt().count("ReactionTimeDeviation") > 0 ? parameters->GetParametersInt().at("ReactionTimeDeviation") : parameters->GetParametersInt().at("3"));
+        situationassesment.SetReactionTimeDeviation(ReactionTimeDeviation);
     }
     if (parameters->GetParametersInt().count("MinReactionTime") > 0)
     {
-        situationassesment.SetMinReactionTime(parameters->GetParametersInt().at("MinReactionTime"));
+        int MinReactionTime = parameters->GetParametersInt().at("MinReactionTime");
+        situationassesment.SetMinReactionTime(MinReactionTime);
     }
-    if (parameters->GetParametersString().count("CriticalityLogging") > 0)
+    if (parameters->GetParametersString().count("CriticalityLogging") > 0 || parameters->GetParametersDouble().count("20") > 0)
     {
-        situationassesment.SetLoggingGroups(parameters->GetParametersString().at("CriticalityLogging"));
+        std::string CriticalityLogging = (parameters->GetParametersString().count("CriticalityLogging") > 0 ? parameters->GetParametersString().at("CriticalityLogging") : parameters->GetParametersString().at("20"));
+        situationassesment.SetLoggingGroups(CriticalityLogging);
     }
 
     initialisationAD = true;
@@ -202,7 +224,7 @@ void AlgorithmModularDriverImplementation::UpdateInput(int localLinkId, const st
     }
     else if (localLinkId == 1)
     {
-        const std::shared_ptr<structSignal<EgoData> const> signal = std::dynamic_pointer_cast<structSignal<EgoData> const>(data);
+        const std::shared_ptr<structSignal<egoData> const> signal = std::dynamic_pointer_cast<structSignal<egoData> const>(data);
         if (!signal)
         {
             const std::string msg = COMPONENTNAME + " invalid signaltype";
