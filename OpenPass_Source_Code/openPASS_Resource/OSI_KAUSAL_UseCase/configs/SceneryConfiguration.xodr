@@ -8,22 +8,22 @@
 -->
 <OpenDRIVE>
   <header revMajor="1" revMinor="1" name="Testfile" version="1" date="Thu Feb 8 14:24:06 2007" north="2.0000000000000000e+003" south="-2.0000000000000000e+003" east="2.0000000000000000e+003" west="-2.0000000000000000e+003" />
-  <road name="" length="41139.7188686309819" id="1" junction="-1">
+  <road name="" length="3139.7188686309819" id="1" junction="-1">
     <link />
     <planView>
-      <geometry s="0.0000000000000000e+000" x="0" y="7.5" hdg="0" length="10000">
+      <geometry s="0.0000000000000000e+000" x="0" y="7.5" hdg="0" length="2000">
         <line />
       </geometry>
-      <geometry s="40000" x="40000" y="7.5" hdg="0" length="285">
+      <geometry s="2000" x="2000" y="7.5" hdg="0" length="285">
         <spiral curvStart="0.0000000000000000e+000" curvEnd="-0.0028500000000000066" />
       </geometry>
-      <geometry s="40285" x="40280.3350391612494" y="-30.629710830536482" hdg="-0.40612500000000096" length="183.7188686309816">
+      <geometry s="2285" x="2280.3350391612494" y="-30.629710830536482" hdg="-0.40612500000000096" length="183.7188686309816">
         <arc curvature="-0.0028500000000000066" />
       </geometry>
-      <geometry s="40468.7188686309819" x="40422.9323279193268" y="-143.12204699500415" hdg="-0.92972377559829977" length="571">
+      <geometry s="2468.7188686309819" x="2422.9323279193268" y="-143.12204699500415" hdg="-0.92972377559829977" length="571">
         <spiral curvStart="-0.0028500000000000066" curvEnd="0.0000000000000000e+000" />
       </geometry>
-      <geometry s="41039.7188686309819" x="40476.6651848689908" y="-694.88624436808436" hdg="-1.7453292519943295" length="100">
+      <geometry s="3039.7188686309819" x="2476.6651848689908" y="-694.88624436808436" hdg="-1.7453292519943295" length="100">
         <line />
       </geometry>
     </planView>
@@ -79,6 +79,6 @@
         <repeat s="0" distance = "0" length="5139.7188686309819"/>
       </object>
     </objects>
-    <signals />
+	<signals/>
   </road>
 </OpenDRIVE>

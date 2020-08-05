@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component>
+  <type>Algorithm</type>
+  <title>AEB</title>
+  <schedule>
+    <offset>0</offset>
+    <cycle>1</cycle>
+    <response>0</response>
+  </schedule>
+  <parameters>
+    <parameter>
+      <id>0</id>
+      <type>double</type>
+      <title>CollisionDetectionLongitudinalBoundary</title>
+      <unit>m</unit>
+      <value>4.0</value>
+    </parameter>
+    <parameter>
+      <id>1</id>
+      <type>double</type>
+      <title>CollisionDetectionLateralBoundary</title>
+      <unit>m</unit>
+      <value>1.5</value>
+    </parameter>
+    <parameter>
+      <id>2</id>
+      <type>double</type>
+      <title>TTC</title>
+      <unit>s</unit>
+      <value>2</value>
+    </parameter>
+    <parameter>
+      <id>3</id>
+      <type>double</type>
+      <title>Acceleration</title>
+      <unit>m/s^2</unit>
+      <value>-3.0</value>
+    </parameter>
+  </parameters>
+  <inputs>
+    <input>
+      <id>0</id>
+      <type>SensorDataSignal</type>
+      <title>Camera</title>
+      <unit></unit>
+      <cardinality>1</cardinality>
+    </input>
+  </inputs>
+  <outputs>
+    <output>
+      <id>0</id>
+      <type>AccelerationSignal</type>
+      <title>Acceleration Signal</title>
+      <unit></unit>
+    </output>
+  </outputs>
+</component>

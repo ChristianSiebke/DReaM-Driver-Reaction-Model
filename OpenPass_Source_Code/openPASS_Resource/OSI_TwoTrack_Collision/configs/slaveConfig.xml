@@ -16,7 +16,7 @@
             <LoggingGroup>Sensor</LoggingGroup>
             <LoggingGroup>Driver</LoggingGroup>
         </LoggingGroups>
-		<LoggingCyclicsToCsv>false</LoggingCyclicsToCsv>
+		<LoggingCyclicsToCsv>true</LoggingCyclicsToCsv>
     </ExperimentConfig>
     
     <ScenarioConfig Name="Default Scenario">

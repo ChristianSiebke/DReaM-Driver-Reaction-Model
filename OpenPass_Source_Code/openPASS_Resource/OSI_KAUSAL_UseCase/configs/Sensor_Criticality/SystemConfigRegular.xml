@@ -17,7 +17,7 @@
         </schedule>
         <parameters/>
         <position>
-          <x>45</x>
+          <x>40</x>
           <y>471</y>
         </position>
       </component>
@@ -33,7 +33,7 @@
         </schedule>
         <parameters/>
         <position>
-          <x>1108</x>
+          <x>1103</x>
           <y>556</y>
         </position>
       </component>
@@ -49,7 +49,7 @@
         </schedule>
         <parameters/>
         <position>
-          <x>1151</x>
+          <x>1146</x>
           <y>764</y>
         </position>
       </component>
@@ -94,7 +94,7 @@
           </parameter>
         </parameters>
         <position>
-          <x>776</x>
+          <x>771</x>
           <y>641</y>
         </position>
       </component>
@@ -110,7 +110,7 @@
         </schedule>
         <parameters/>
         <position>
-          <x>1729</x>
+          <x>1724</x>
           <y>720</y>
         </position>
       </component>
@@ -126,7 +126,7 @@
         </schedule>
         <parameters/>
         <position>
-          <x>1099</x>
+          <x>1094</x>
           <y>344</y>
         </position>
       </component>
@@ -142,7 +142,7 @@
         </schedule>
         <parameters/>
         <position>
-          <x>1108</x>
+          <x>1103</x>
           <y>451</y>
         </position>
       </component>
@@ -158,7 +158,7 @@
         </schedule>
         <parameters/>
         <position>
-          <x>50</x>
+          <x>45</x>
           <y>635</y>
         </position>
       </component>
@@ -322,7 +322,7 @@
           </parameter>
         </parameters>
         <position>
-          <x>377</x>
+          <x>372</x>
           <y>20</y>
         </position>
       </component>
@@ -338,8 +338,8 @@
         </schedule>
         <parameters/>
         <position>
-          <x>40</x>
-          <y>243</y>
+          <x>42</x>
+          <y>205</y>
         </position>
       </component>
       <component>
@@ -383,7 +383,7 @@
           </parameter>
         </parameters>
         <position>
-          <x>775</x>
+          <x>770</x>
           <y>355</y>
         </position>
       </component>
@@ -428,7 +428,7 @@
           </parameter>
         </parameters>
         <position>
-          <x>774</x>
+          <x>769</x>
           <y>59</y>
         </position>
       </component>
@@ -473,8 +473,39 @@
           </parameter>
         </parameters>
         <position>
-          <x>1440</x>
+          <x>1435</x>
           <y>570</y>
+        </position>
+      </component>
+      <component>
+        <id>21</id>
+        <library>Sensor_Criticality</library>
+        <title>Sensor_Criticality</title>
+        <schedule>
+          <priority>5</priority>
+          <offset>0</offset>
+          <cycle>100</cycle>
+          <response>0</response>
+        </schedule>
+        <parameters>
+          <parameter>
+            <!--parameter's title: Logging-->
+            <id>0</id>
+            <type>string</type>
+            <unit></unit>
+            <value>ttc</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: LoggingActivated-->
+            <id>0</id>
+            <type>bool</type>
+            <unit></unit>
+            <value>true</value>
+          </parameter>
+        </parameters>
+        <position>
+          <x>44</x>
+          <y>729</y>
         </position>
       </component>
     </components>
@@ -546,7 +577,7 @@
         </target>
       </connection>
       <connection>
-        <id>6</id>
+        <id>5</id>
         <source>
           <!--component title: AlgorithmModularDriver-->
           <component>16</component>
@@ -567,7 +598,7 @@
         </target>
       </connection>
       <connection>
-        <id>8</id>
+        <id>7</id>
         <source>
           <!--component title: AlgorithmModularDriver-->
           <component>16</component>
@@ -582,7 +613,7 @@
         </target>
       </connection>
       <connection>
-        <id>9</id>
+        <id>8</id>
         <source>
           <!--component title: AlgorithmModularDriver-->
           <component>16</component>
@@ -597,7 +628,7 @@
         </target>
       </connection>
       <connection>
-        <id>10</id>
+        <id>9</id>
         <source>
           <!--component title: SignalPrioritizer-->
           <component>19</component>
@@ -612,7 +643,7 @@
         </target>
       </connection>
       <connection>
-        <id>11</id>
+        <id>10</id>
         <source>
           <!--component title: SignalPrioritizer-->
           <component>18</component>
@@ -627,7 +658,7 @@
         </target>
       </connection>
       <connection>
-        <id>12</id>
+        <id>11</id>
         <source>
           <!--component title: SignalPrioritizer-->
           <component>11</component>
@@ -642,7 +673,7 @@
         </target>
       </connection>
       <connection>
-        <id>13</id>
+        <id>12</id>
         <source>
           <!--component title: DynamicsRegularDriving-->
           <component>9</component>
@@ -657,7 +688,7 @@
         </target>
       </connection>
       <connection>
-        <id>14</id>
+        <id>13</id>
         <source>
           <!--component title: DynamicsCollision-->
           <component>10</component>
@@ -672,7 +703,7 @@
         </target>
       </connection>
       <connection>
-        <id>15</id>
+        <id>14</id>
         <source>
           <!--component title: SignalPrioritizer-->
           <component>20</component>

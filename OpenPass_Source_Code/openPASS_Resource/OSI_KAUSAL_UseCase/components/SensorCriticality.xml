@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component>
+	<type>Sensor</type>
+	<title>SensorCriticality</title>
+	<schedule>
+		<offset>0</offset>
+		<cycle>100</cycle>
+		<response>0</response>
+	</schedule>
+	<library>Sensor_Criticality</library>
+	<parameters>
+		<parameter>
+			<id>0</id>
+			<type>bool</type>
+			<unit/>
+			<value>0</value> <!-- 1=on, 0=off , string parameters to track, delete unused--> 
+		</parameter>
+		<parameter>
+			<id>0</id>
+			<type>string</type>
+			<unit/>
+			<value>ttc</value>
+		</parameter>
+		<parameter>
+			<id>1</id>
+			<type>string</type>
+			<unit/>
+			<value>ettc</value>
+		</parameter>
+		<parameter>
+			<id>2</id>
+			<type>string</type>
+			<unit/>
+			<value>thw</value>
+		</parameter>							
+		<parameter>
+			<id>3</id>
+			<type>string</type>
+			<unit/>
+			<value>speeding</value>
+		</parameter>											
+	</parameters>	
+	<inputs/>
+	<outputs/>
+</component>
+  

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component>
+  <type>Sensor</type>
+  <title>ParametersVehicle</title>
+  <schedule>
+    <offset>0</offset>
+    <cycle>1</cycle>
+    <response>0</response>
+  </schedule>
+  <parameters/>
+  <inputs/>
+  <outputs>
+    <output>
+      <id>1</id>
+      <type>ParametersVehicleSignal</type>
+      <title>Vehicle Parameters</title>
+      <unit></unit>
+    </output>
+  </outputs>
+</component>

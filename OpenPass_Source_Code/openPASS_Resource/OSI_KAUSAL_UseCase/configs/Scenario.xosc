@@ -65,7 +65,7 @@
             <ConditionGroup>
                 <Condition name="EndTime" delay="0" edge="rising">
                     <ByValue>
-                        <SimulationTime value="40.0" rule="greater_than"/>
+                        <SimulationTime value="100.0" rule="greater_than"/>
                     </ByValue>
                 </Condition>
             </ConditionGroup>

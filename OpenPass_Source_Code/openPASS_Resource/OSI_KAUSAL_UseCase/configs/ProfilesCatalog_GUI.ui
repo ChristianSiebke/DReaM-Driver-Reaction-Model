@@ -6,39 +6,28 @@
         <File>SystemConfig.xml</File>
         <Id>0</Id>
       </System>
-      <VehicleModel>
-        <VehicleModelCatalogue>VehicleModelsCatalog.xosc</VehicleModelCatalogue>
-        <Model>car_bmw_7_1</Model>
-      </VehicleModel>
+      <VehicleModel>car_bmw_7_1</VehicleModel>
     </AgentProfile>
     <AgentProfile Name="LuxuryClassCarAgent" Type="Static">
       <System>
         <File>SystemConfig.xml</File>
         <Id>0</Id>
       </System>
-      <VehicleModel>
-        <VehicleModelCatalogue>VehicleModelsCatalog.xosc</VehicleModelCatalogue>
-        <Model>car_bmw_7_2</Model>
-      </VehicleModel>
+      <VehicleModel>car_bmw_7_2</VehicleModel>
     </AgentProfile>
-    <AgentProfile Name="MiddleClassCarAgent" Type="Dynamic">
-      <DriverProfiles>
-        <DriverProfile Name="Regular" Probability="1"/>
-      </DriverProfiles>
-      <VehicleProfiles>
-        <VehicleProfile Name="BMW 3" Probability="0.3"/>
-        <VehicleProfile Name="BMW i3" Probability="0.3"/>
-        <VehicleProfile Name="Mini Cooper" Probability="0.4"/>
-      </VehicleProfiles>
+    <AgentProfile Name="MiddleClassCarAgent" Type="Static">
+      <System>
+        <File>SystemConfig.xml</File>
+        <Id>0</Id>
+      </System>
+      <VehicleModel>car_bmw_7_1</VehicleModel>
     </AgentProfile>
-    <AgentProfile Name="TruckAgent" Type="Dynamic">
-      <DriverProfiles>
-        <DriverProfile Name="Regular" Probability="1"/>
-      </DriverProfiles>
-      <VehicleProfiles>
-        <VehicleProfile Name="Bus" Probability="0.5"/>
-        <VehicleProfile Name="Truck" Probability="0.5"/>
-      </VehicleProfiles>
+    <AgentProfile Name="TruckAgent" Type="Static">
+      <System>
+        <File>SystemConfig.xml</File>
+        <Id>0</Id>
+      </System>
+      <VehicleModel>truck</VehicleModel>
     </AgentProfile>
   </AgentProfiles>
   <!--#############################################################################################-->

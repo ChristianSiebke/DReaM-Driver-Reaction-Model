@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component>
+  <type>Action</type>
+  <title>ActionSecondaryDriverTasks</title>
+  <schedule>
+    <offset>0</offset>
+    <cycle>1</cycle>
+    <response>0</response>
+  </schedule>
+  <parameters/>
+  <inputs>
+    <input>
+      <id>0</id>
+      <type>SecondaryDriverTasksSignal</type>
+      <title>Secondary Driver Tasks</title>
+      <unit></unit>
+      <cardinality>1</cardinality>
+    </input>
+  </inputs>
+  <outputs/>
+</component>

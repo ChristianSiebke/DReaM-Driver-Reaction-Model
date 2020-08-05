@@ -178,14 +178,14 @@
             <id>0</id>
             <type>int</type>
             <unit>ms</unit>
-            <value>0</value>
+            <value>300</value>
           </parameter>
           <parameter>
             <!--parameter's title: AvertViewTimeDeviation-->
             <id>1</id>
             <type>int</type>
             <unit>ms</unit>
-            <value>0</value>
+            <value>100</value>
           </parameter>
           <parameter>
             <!--parameter's title: ReactionTimeMean-->
