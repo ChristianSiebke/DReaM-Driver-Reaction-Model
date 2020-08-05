@@ -8,6 +8,15 @@
 * SPDX-License-Identifier: EPL-2.0
 ******************************************************************************/
 
+//-----------------------------------------------------------------------------
+//! @file  ParameterMapPresenter.h
+//! @ingroup agentConfigurationPlugin
+//! @brief This class constitutes the re-implementation of QAbstractTableModel
+//!        for the table view of parameters. In fact, this class implements
+//!        a wrapper for the map of parameters (ParameterMapInterface)
+//!        to be editable by QTableView objects within Qt's Model/View framework.
+//-----------------------------------------------------------------------------
+
 #ifndef PARAMETERMAPPRESENTER_H
 #define PARAMETERMAPPRESENTER_H
 
@@ -15,13 +24,19 @@
 
 #include <QAbstractTableModel>
 
+//-----------------------------------------------------------------------------
+//! @brief This class constitutes the re-implementation of QAbstractTableModel
+//!        for the table view of parameters. In fact, this class implements
+//!        a wrapper for the map of parameters (ParameterMapInterface)
+//!        to be editable by QTableView objects within Qt's Model/View framework.
+//-----------------------------------------------------------------------------
 class ParameterMapPresenter : public QAbstractTableModel
 {
     Q_OBJECT
 
 public:
-    explicit ParameterMapPresenter(ParameterMapInterface * parameters = 0,
-                                   QObject *parent = 0);
+    explicit ParameterMapPresenter(ParameterMapInterface * parameters = nullptr,
+                                   QObject *parent = nullptr);
 
 public:
     //-----------------------------------------------------------------------------
@@ -41,7 +56,7 @@ public:
 public:
     //-----------------------------------------------------------------------------
     //! Reimplementation of the rowCount method. Returns the number of
-    //! rows in the table which is, in fact, the number of environment items.
+    //! rows in the table which is, in fact, the number of parameters.
     //!
     //! @param[in]      parent      This variable is unused (but required according to
     //!                             the signature of the method)
@@ -98,9 +113,11 @@ public:
 
 public:
     //-----------------------------------------------------------------------------
-    //! Method that adds a new row, i.e. a new environment item to the edited
-    //! component.
-    //!
+    //! Method that adds a new row, i.e. a new parameter with the given attributes.
+    //! @param[in]      _type       the datatype of the new parameter
+    //! @param[in]      _key        the key (name) of the new parameter
+    //! @param[in]      _unit       the unit of the new parameter
+    //! @param[in]      _value      the value of the new parameter
     //-----------------------------------------------------------------------------
     virtual void addRow(ParameterItemInterface::Type _type,
                         ParameterItemInterface::Key _key,
@@ -113,7 +130,7 @@ public:
     //!
     //! @param[in]      row     the row-index
     //!
-    //! @return                 "True", if row is between 0 and the number of inputs,
+    //! @return                 "True", if row is between 0 and the number of parameters,
     //!                         "false", otherwise
     //-----------------------------------------------------------------------------
     virtual bool removeRow(const int &row);
@@ -133,9 +150,9 @@ public:
     void update();
 
 private:
-    QMap<int, ParameterMapInterface::ID> RowToID;
-    QStringList _columnHeaders;
-    ParameterMapInterface *parameters;
+    QMap<int, ParameterMapInterface::ID> RowToID;       //!< a map of row indices to parameter Ids
+    QStringList _columnHeaders;                         //!< a string list containing the column header data of the table
+    ParameterMapInterface *parameters;                  //!< the pointer to the map of parameters edited by this table wrapper
 };
 
 #endif // PARAMETERMAPPRESENTER_H

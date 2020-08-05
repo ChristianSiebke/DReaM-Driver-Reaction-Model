@@ -46,11 +46,3 @@ SensorProfileMapInterface * AgentConfigurationModel::getSensorProfiles() const
     return sensorProfiles;
 }
 
-void AgentConfigurationModel::clear()
-{
-    agents->clear();
-    vehicleProfiles->clear();
-    driverProfiles->clear();
-    componentProfiles->clear();
-    sensorProfiles->clear();
-}

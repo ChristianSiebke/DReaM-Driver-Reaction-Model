@@ -44,7 +44,7 @@ AgentMapPresenter::AgentMapPresenter(AgentMapInterface *agents,
     connect(agentsView,&AgentMapView::add, this, &AgentMapPresenter::addAgent);
     connect(agentsView, &AgentMapView::remove, this, &AgentMapPresenter::removeAgent);
     connect(agentsView, &AgentMapView::modifiedName, this, &AgentMapPresenter::editAgent);
-    connect(agentsView,&AgentMapView::typeChanged, this, &AgentMapPresenter::setType );
+    connect(agentsView,&AgentMapView::typeChanged, this, &AgentMapPresenter::setType);
 
     // Connections concerning vehicle profiles
     connect(vehicleProfiles, &VehicleProfileMapInterface::added, this, &AgentMapPresenter::updateVehicleSelectionItems);

@@ -8,6 +8,15 @@
 * SPDX-License-Identifier: EPL-2.0
 ******************************************************************************/
 
+//-----------------------------------------------------------------------------
+//! @file  DriverProfilesMapPresenter.h
+//! @ingroup agentConfigurationPlugin
+//! @brief This class constitutes the re-implementation of QAbstractTableModel
+//!        for the table view of driver profiles. In fact, this class implements
+//!        a wrapper for the map of driver profiles (DriverProfileMapInterface)
+//!        to be editable by QTableView objects within Qt's Model/View framework.
+//-----------------------------------------------------------------------------
+
 #ifndef DRIVERPROFILESMAPPRESENTER_H
 #define DRIVERPROFILESMAPPRESENTER_H
 
@@ -15,6 +24,12 @@
 
 #include <QAbstractTableModel>
 
+//-----------------------------------------------------------------------------
+//! @brief This class constitutes the re-implementation of QAbstractTableModel
+//!        for the table view of driver profiles. In fact, this class implements
+//!        a wrapper for the map of driver profiles (DriverProfileMapInterface)
+//!        to be editable by QTableView objects within Qt's Model/View framework.
+//-----------------------------------------------------------------------------
 class DriverProfilesMapPresenter : public QAbstractTableModel
 {
     Q_OBJECT
@@ -24,6 +39,11 @@ public:
                                         QObject *parent = nullptr);
 
 Q_SIGNALS:
+    //-----------------------------------------------------------------------------
+    //! Signal emitted whenever the probability sum of the driver profile table
+    //! should be checked. This usually happens whenever driver profiles are added
+    //! or removed or if probability values are edited.
+    //-----------------------------------------------------------------------------
     void checkProbabilities();
 
 public:
@@ -44,7 +64,7 @@ public:
 public:
     //-----------------------------------------------------------------------------
     //! Reimplementation of the rowCount method. Returns the number of
-    //! rows in the table which is, in fact, the number of environment items.
+    //! rows in the table which is, in fact, the number of driver profiles.
     //!
     //! @param[in]      parent      This variable is unused (but required according to
     //!                             the signature of the method)
@@ -101,9 +121,10 @@ public:
 
 public:
     //-----------------------------------------------------------------------------
-    //! Method that adds a new row, i.e. a new environment item to the edited
-    //! component.
-    //!
+    //! Method that adds a new row, i.e. a driver profile with the given probability.
+    //! @param[in]      row         the index of the row to be added
+    //! @param[in]      profile     the name of the profile to be added
+    //! @param[in]      probability the probability of the profile
     //-----------------------------------------------------------------------------
     virtual void addRow(const int &row,
                         AgentItemInterface::DriverProfile const & profile,
@@ -115,36 +136,48 @@ public:
     //!
     //! @param[in]      row     the row-index
     //!
-    //! @return                 "True", if row is between 0 and the number of inputs,
+    //! @return                 "True", if row is between 0 and the number of profiles,
     //!                         "false", otherwise
     //-----------------------------------------------------------------------------
     virtual bool removeRow(const int &row);
 
     //-----------------------------------------------------------------------------
-    //! Method which sets the currently processed vehicle profiles map to the given
+    //! Method which sets the currently processed driver profiles map to the given
     //! argument.
     //!
-    //! @param[in]      _vehicleProfiles        the vehicle profiles map to be processed
+    //! @param[in]      _driverProfiles        the driver profiles map to be processed
     //-----------------------------------------------------------------------------
     void setDriverProfiles(AgentItemInterface::DriverProfiles * const _driverProfiles);
 
     //-----------------------------------------------------------------------------
     //! Method which updates the table according to the current entries of
-    //! #vehicleProfiles
+    //! #driverProfiles.
     //-----------------------------------------------------------------------------
     void update();
 
 public Q_SLOTS:
+    //-----------------------------------------------------------------------------
+    //! Slot which changes the name of the driver profile.
+    //!
+    //! @param[in]      oldName     the old name of the driver profile
+    //! @param[in]      newName     the new name of the driver profile
+    //-----------------------------------------------------------------------------
     void editName( AgentItemInterface::DriverProfile const & oldName,
                    AgentItemInterface::DriverProfile const & newName );
+
+    //-----------------------------------------------------------------------------
+    //! Slot removes the given driver profile if contained in the table.
+    //!
+    //! @param[in]      profile     the profile to be removed
+    //-----------------------------------------------------------------------------
     void remove(AgentItemInterface::DriverProfile const & profile);
 
 private:
-    AgentItemInterface::DriverProfiles * driverProfiles;
+    AgentItemInterface::DriverProfiles * driverProfiles;        //!< the pointer to the map of driver profiles assigned to an agent profile
 
 private:
-    QStringList _columnHeaders;
-    QMap<int, AgentItemInterface::DriverProfile> RowToProfile;
+    QStringList _columnHeaders;                                 //!< the list containing the header data for columns
+    QMap<int, AgentItemInterface::DriverProfile> RowToProfile;  //!< a mapping of row indices to profile names
 };
 
 #endif // DRIVERPROFILESMAPPRESENTER_H

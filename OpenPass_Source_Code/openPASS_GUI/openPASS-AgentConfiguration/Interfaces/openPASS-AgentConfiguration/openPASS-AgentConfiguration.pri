@@ -24,8 +24,6 @@ HEADERS += \
     $$PWD/SensorItemInterface.h \
     $$PWD/SensorProfileMapInterface.h \
     $$PWD/SensorProfileItemInterface.h \
-    $$PWD/SensorProfileParameterMapInterface.h \
-    $$PWD/SensorProfileParameterItemInterface.h \
     $$PWD/VehicleComponentProfileMapInterface.h \
     $$PWD/VehicleComponentProfileItemInterface.h \
     $$PWD/ParameterMapInterface.h \

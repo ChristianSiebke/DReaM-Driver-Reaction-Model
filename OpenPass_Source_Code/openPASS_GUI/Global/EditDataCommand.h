@@ -14,6 +14,10 @@
 #include <QUndoCommand>
 #include <QAbstractItemModel>
 
+//-----------------------------------------------------------------------------
+//! @brief This class defines the command for an undoable edit-operation on a
+//! general abstract item model.
+//-----------------------------------------------------------------------------
 class EditData : public QUndoCommand
 {
 

@@ -8,11 +8,20 @@
 * SPDX-License-Identifier: EPL-2.0
 ******************************************************************************/
 
+//-----------------------------------------------------------------------------
+//! @file  DriverProfileMapModel.h
+//! @ingroup agentConfigurationPlugin
+//! @brief This class implements the functionality of DriverProfileMapInterface.
+//-----------------------------------------------------------------------------
+
 #ifndef DRIVERPROFILEMAPMODEL_H
 #define DRIVERPROFILEMAPMODEL_H
 
 #include "openPASS-AgentConfiguration/DriverProfileMapInterface.h"
 
+//-----------------------------------------------------------------------------
+//! @brief This class implements the functionality of DriverProfileMapInterface.
+//-----------------------------------------------------------------------------
 class DriverProfileMapModel : public DriverProfileMapInterface
 {
 
@@ -20,7 +29,7 @@ class DriverProfileMapModel : public DriverProfileMapInterface
 
 public:
     DriverProfileMapModel(QObject * const parent = nullptr);
-    ~DriverProfileMapModel() = default;
+    virtual ~DriverProfileMapModel() override = default;
 
 public:
     virtual DriverProfileMapInterface::Iterator begin() override;
@@ -37,7 +46,6 @@ public:
 
 public:
     virtual bool remove(DriverProfileMapInterface::Name const & name) override;
-    virtual bool remove(DriverProfileMapInterface::Item * const item) override;
 
 public:
     virtual DriverProfileMapInterface::Item * getItem(DriverProfileMapInterface::Name const & name) const override;
@@ -52,15 +60,13 @@ public:
     virtual bool contains (DriverProfileMapInterface::Name const & name) const override;
     virtual int count() const override;
 
-public:
-    virtual void clear() override;
 
 public:
     virtual QStringList keys() const override;
     virtual QList<Item*> values() const override;
 
 private:
-    Map driverProfiles;
+    Map driverProfiles;     //!< the map (container) for registering driver profiles
 };
 
 #endif // DRIVERPROFILEMAPMODEL_H

@@ -339,12 +339,6 @@ void VehicleProfilesPresenter::loadModelCatalogue(const QString &filepath)
         }
     }
     vehicleProfilesView->setModelSelectionItems(modelList);
-
-    if(!modelList.isEmpty() && currentVehicleProfile->getModelCatalogue()!=filepath)
-    {
-        vehicleProfilesView->setModel(modelList.last());
-        currentVehicleProfile->setModel(modelList.last());
-    }
 }
 
 void VehicleProfilesPresenter::setModel(const QString &modelName)
@@ -374,7 +368,6 @@ void VehicleProfilesPresenter::updateView()
     }
     else
     {
-      //  qDeleteAll( findChildren<SystemProfilePresenter*>() );
         vehicleProfilesView->clearSystemProfileViews();
 
         vehicleProfilesView->enableConfiguration(false);
@@ -439,11 +432,6 @@ bool VehicleProfilesPresenter::systemsConsistent()
 void VehicleProfilesPresenter::updateVehicleSelectionItems()
 {
     vehicleProfilesView->setVehicleProfileSelectionItems(vehicleProfiles->keys());
-}
-
-QMap <VehicleProfileItemInterface::Name , QMap<QString, SystemProfilePresenter*>*> * VehicleProfilesPresenter::getSystemProfilePresenters()
-{
-    return &systemProfilePresenters;
 }
 
 using namespace VehicleProfileCommands;
@@ -608,7 +596,6 @@ SetModelCatalogue::SetModelCatalogue(VehicleProfileMapInterface * const vehicles
 
 void SetModelCatalogue::redo()
 {
-    vehicleProfilesPresenter->loadModelCatalogue(newModelCatalogue);
     vehicles->getItem(vehicleName)->setModelCatalogue(newModelCatalogue);
     vehicleProfilesView->setModelCatalogue(newModelCatalogue);
     vehicleProfilesPresenter->refreshModelCatalogue();
@@ -616,7 +603,6 @@ void SetModelCatalogue::redo()
 
 void SetModelCatalogue::undo()
 {
-    vehicleProfilesPresenter->loadModelCatalogue(oldModelCatalogue);
     vehicles->getItem(vehicleName)->setModelCatalogue(oldModelCatalogue);
     vehicleProfilesView->setModelCatalogue(oldModelCatalogue);
     vehicleProfilesPresenter->refreshModelCatalogue();

@@ -8,11 +8,20 @@
 * SPDX-License-Identifier: EPL-2.0
 ******************************************************************************/
 
+//-----------------------------------------------------------------------------
+//! @file  SensorProfileItemModel.h
+//! @ingroup agentConfigurationPlugin
+//! @brief This class implements the functionality of SensorProfileItemInterface.
+//-----------------------------------------------------------------------------
+
 #ifndef SENSORPROFILEITEMMODEL_H
 #define SENSORPROFILEITEMMODEL_H
 
 #include "openPASS-AgentConfiguration/SensorProfileItemInterface.h"
 
+//-----------------------------------------------------------------------------
+//! @brief This class implements the functionality of SensorProfileItemInterface.
+//-----------------------------------------------------------------------------
 class SensorProfileItemModel : public SensorProfileItemInterface
 {
 
@@ -32,7 +41,7 @@ public:
     virtual Type getType() const override;
 
 private:
-    Parameters * const parameters;
+    Parameters * const parameters;      //!< pointer to the parameter map of the sensor profile
 
 };
 

@@ -8,17 +8,28 @@
 * SPDX-License-Identifier: EPL-2.0
 ******************************************************************************/
 
+//-----------------------------------------------------------------------------
+//! @file  AgentItemModel.h
+//! @ingroup agentConfigurationPlugin
+//! @brief This class implements the functionality of AgentItemInterface.
+//-----------------------------------------------------------------------------
+
 #ifndef AGENTITEMMODEL_H
 #define AGENTITEMMODEL_H
 
 #include "openPASS-AgentConfiguration/AgentItemInterface.h"
 
+//-----------------------------------------------------------------------------
+//! @file  AgentItemModel.h
+//! @ingroup agentConfigurationPlugin
+//! @brief This class implements the functionality of AgentItemInterface.
+//-----------------------------------------------------------------------------
 class AgentItemModel : public AgentItemInterface
 {
 public:
     explicit AgentItemModel(QObject *parent = nullptr);
     AgentItemModel(AgentItemInterface const * const agent, QObject *parent = nullptr);
-    ~AgentItemModel();
+    virtual ~AgentItemModel() override;
 
 public:
     virtual AgentItemInterface::Name getName() const override;
@@ -55,13 +66,13 @@ public:
     virtual System * getSystem() override;
 
 private:
-    VehicleProfiles * const vehicleProfiles;
-    DriverProfiles * const driverProfiles;
-    Type type;
-    SystemConfig systemConfig;
-    System system;
-    VehicleModelCatalogue vehicleModelCatalogue;
-    VehicleModel vehicleModel;
+    VehicleProfiles * const vehicleProfiles;            //!< the pointer to the vehicle profiles (VehicleProfileMapInterface)
+    DriverProfiles * const driverProfiles;              //!< the pointer to the driver profiles (DriverProfileMapInterface)
+    Type type;                                          //!< the agent profiles type (i.e. "dynamic" or "static")
+    SystemConfig systemConfig;                          //!< the system config XML file
+    System system;                                      //!< the system (if static agent configuration is chosen)
+    VehicleModelCatalogue vehicleModelCatalogue;        //!< the vehicle model catalogue
+    VehicleModel vehicleModel;                          //!< the vehicle model
 
 };
 

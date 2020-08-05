@@ -172,5 +172,8 @@ void WindowView::closeEvent(QCloseEvent * event)
         }
 
     else
+    {
         event->accept();
+        QCoreApplication::quit();
+    }
 }

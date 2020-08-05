@@ -8,11 +8,20 @@
 * SPDX-License-Identifier: EPL-2.0
 ******************************************************************************/
 
+//-----------------------------------------------------------------------------
+//! @file  VehicleComponentMapModel.h
+//! @ingroup agentConfigurationPlugin
+//! @brief This class implements the functionality of VehicleComponentMapInterface.
+//-----------------------------------------------------------------------------
+
 #ifndef VEHICLECOMPONENTMAPMODEL_H
 #define VEHICLECOMPONENTMAPMODEL_H
 
 #include "openPASS-AgentConfiguration/VehicleComponentMapInterface.h"
 
+//-----------------------------------------------------------------------------
+//! @brief This class implements the functionality of VehicleComponentMapInterface.
+//-----------------------------------------------------------------------------
 class VehicleComponentMapModel : public VehicleComponentMapInterface
 {
     Q_OBJECT
@@ -34,7 +43,6 @@ public:
 
 public:
     virtual bool remove(VehicleComponentMapInterface::Type const & type)  override;
-    virtual bool remove(VehicleComponentMapInterface::Item * const item)  override;
 
 public:
     virtual VehicleComponentMapInterface::Item * getItem(VehicleComponentMapInterface::Type const & type) const  override;
@@ -57,7 +65,7 @@ public:
     virtual QList<Item*> values() const  override;
 
 private:
-    VehicleComponentMapInterface::Map components;
+    VehicleComponentMapInterface::Map components;       //!< the map (container) for registering vehicle components
 };
 
 #endif // VEHICLECOMPONENTMAPMODEL_H

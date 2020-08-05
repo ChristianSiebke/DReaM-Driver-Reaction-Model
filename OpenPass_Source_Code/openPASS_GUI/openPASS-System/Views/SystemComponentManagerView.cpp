@@ -60,7 +60,7 @@ void SystemComponentManagerView::updateManagerView()
     }
 
     // Load again the components
-    if (_components->loadFromDirectory(QDir(QCoreApplication::applicationDirPath() + SUBDIR_COMPONENTS)))
+    if (_components->loadFromDirectory(QDir(QCoreApplication::applicationDirPath()  + SUBDIR_COMPONENTS)))
     {
             for (unsigned char index = 0; index < ui->tree->topLevelItemCount(); ++index)
             {

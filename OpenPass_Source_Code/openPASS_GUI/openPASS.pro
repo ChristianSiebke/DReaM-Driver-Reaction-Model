@@ -22,4 +22,6 @@ SUBDIRS = \
     openPASS-System/openPASS-System.pro \
     openPASS-Window/openPASS-Window.pro \
     openPASS-TrafficSimulation/openPASS-TrafficSimulation.pro \
-    openPASS-AgentConfiguration/openPASS-AgentConfiguration.pro
+    openPASS-AgentConfiguration/openPASS-AgentConfiguration.pro \
+    openPASS-Timeplot/openPASS-Timeplot.pro \
+    openPASS-Statistics/openPASS-Statistics.pro \

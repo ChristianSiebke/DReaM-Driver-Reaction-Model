@@ -8,11 +8,20 @@
 * SPDX-License-Identifier: EPL-2.0
 ******************************************************************************/
 
+//-----------------------------------------------------------------------------
+//! @file  ParameterMapModel.h
+//! @ingroup agentConfigurationPlugin
+//! @brief This class implements the functionality of ParameterMapInterface.
+//-----------------------------------------------------------------------------
+
 #ifndef PARAMETERMAPMODEL_H
 #define PARAMETERMAPMODEL_H
 
 #include "openPASS-AgentConfiguration/ParameterMapInterface.h"
 
+//-----------------------------------------------------------------------------
+//! @brief This class implements the functionality of ParameterMapInterface.
+//-----------------------------------------------------------------------------
 class ParameterMapModel : public ParameterMapInterface
 {
 
@@ -20,7 +29,7 @@ class ParameterMapModel : public ParameterMapInterface
 
 public:
     ParameterMapModel(QObject *parent=nullptr);
-    ~ParameterMapModel() = default;
+    virtual ~ParameterMapModel() override = default;
 
 public:
     virtual ParameterMapInterface::Iterator begin() override;
@@ -62,7 +71,7 @@ public:
     virtual QList<Item*> values() const override;
 
 private:
-    Map parameters;
+    Map parameters;     //!< the map (container) for registering parameters
 };
 
 #endif // PARAMETERMAPMODEL_H

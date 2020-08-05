@@ -8,11 +8,20 @@
 * SPDX-License-Identifier: EPL-2.0
 ******************************************************************************/
 
+//-----------------------------------------------------------------------------
+//! @file  VehicleProfileItemModel.h
+//! @ingroup agentConfigurationPlugin
+//! @brief This class implements the functionality of VehicleProfileItemInterface.
+//-----------------------------------------------------------------------------
+
 #ifndef VEHICLEPROFILEITEMMODEL_H
 #define VEHICLEPROFILEITEMMODEL_H
 
 #include "openPASS-AgentConfiguration/VehicleProfileItemInterface.h"
 
+//-----------------------------------------------------------------------------
+//! @brief This class implements the functionality of VehicleProfileItemInterface.
+//-----------------------------------------------------------------------------
 class VehicleProfileItemModel : public VehicleProfileItemInterface
 {
 
@@ -46,19 +55,19 @@ public:
 
 
 public:
-    virtual VehicleComponents * getVehicleComponents() const override;      // interferes with systemConfig
-    virtual Sensors * getSensors() const override;                          // interferes with systemConfig
+    virtual VehicleComponents * getVehicleComponents() const override;
+    virtual Sensors * getSensors() const override;
 
 
 private:
-    ModelCatalogue modelCatalogue;
-    Model model;
-    SystemConfig systemConfig;
-    SystemProfiles * systemProfiles;
+    ModelCatalogue modelCatalogue;              //!< the string object storing the selected vehicle model catalogue
+    Model model;                                //!< the string object storing the current vehicle model
+    SystemConfig systemConfig;                  //!< the string object storing the selected system config file
+    SystemProfiles * systemProfiles;            //!< the map registering mappings of systems onto probabilities using the algorithm type as a key identifier
 
 private:
-    VehicleComponents * const components;       // interferes with systemConfig
-    Sensors * const sensors;                    // interferes with systemConfig
+    VehicleComponents * const components;       //!< the map containing all vehicle component data
+    Sensors * const sensors;                    //!< the map containing all sensor data
 };
 
 #endif // VEHICLEPROFILEITEMMODEL_H

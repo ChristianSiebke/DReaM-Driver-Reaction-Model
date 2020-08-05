@@ -8,11 +8,20 @@
 * SPDX-License-Identifier: EPL-2.0
 ******************************************************************************/
 
+//-----------------------------------------------------------------------------
+//! @file  SensorProfileMapModel.h
+//! @ingroup agentConfigurationPlugin
+//! @brief This class implements the functionality of SensorProfileMapInterface.
+//-----------------------------------------------------------------------------
+
 #ifndef SENSORPROFILEMAPMODEL_H
 #define SENSORPROFILEMAPMODEL_H
 
 #include "openPASS-AgentConfiguration/SensorProfileMapInterface.h"
 
+//-----------------------------------------------------------------------------
+//! @brief This class implements the functionality of SensorProfileMapInterface.
+//-----------------------------------------------------------------------------
 class SensorProfileMapModel : public SensorProfileMapInterface
 {
 
@@ -33,11 +42,9 @@ public:
 
 public:
     virtual bool add(SensorProfileMapInterface::ID const & id) override;
-//    virtual bool add(SensorProfileMapInterface::Item * const item) override;
 
 public:
     virtual bool remove(SensorProfileMapInterface::ID const & id) override;
-    virtual bool remove(SensorProfileMapInterface::Item * const item) override;
 
 public:
     virtual SensorProfileMapInterface::Item * getItem(SensorProfileMapInterface::ID const & id) const override;
@@ -62,7 +69,7 @@ public:
     virtual QList<Item*> values() const override;
 
 private:
-    Map sensorProfiles;
+    Map sensorProfiles;     //!< the map (container) for registering sensor profiles
 
 };
 

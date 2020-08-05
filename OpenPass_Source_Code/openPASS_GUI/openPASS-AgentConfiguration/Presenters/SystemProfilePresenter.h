@@ -8,12 +8,30 @@
 * SPDX-License-Identifier: EPL-2.0
 ******************************************************************************/
 
+//-----------------------------------------------------------------------------
+//! @file  SystemProfilePresenter.h
+//! @ingroup agentConfigurationPlugin
+//! @brief This class constitutes the re-implementation of QAbstractTableModel
+//!        for the table view of systems with a given algorithm type. The
+//!        corresponding model data object is referred to as "system profile".
+//!        In fact, this class implements a wrapper for these system profiles
+//!        to be editable by QTableView objects within Qt's Model/View framework.
+//-----------------------------------------------------------------------------
+
+
 #ifndef SYSTEMPROFILEPRESENTER_H
 #define SYSTEMPROFILEPRESENTER_H
 
 #include "openPASS-AgentConfiguration/VehicleProfileItemInterface.h"
 #include <QAbstractTableModel>
 
+//-----------------------------------------------------------------------------
+//! @brief This class constitutes the re-implementation of QAbstractTableModel
+//!        for the table view of systems with a given algorithm type. The
+//!        corresponding model data object is referred to as "system profile".
+//!        In fact, this class implements a wrapper for these system profiles
+//!        to be editable by QTableView objects within Qt's Model/View framework.
+//-----------------------------------------------------------------------------
 class SystemProfilePresenter : public QAbstractTableModel
 {
     Q_OBJECT
@@ -22,7 +40,7 @@ public:
     explicit SystemProfilePresenter(VehicleProfileItemInterface::Systems * const systems,
                                     QObject *parent = nullptr);
 
-    ~SystemProfilePresenter() = default;
+    ~SystemProfilePresenter() override = default;
 
 public:
     //-----------------------------------------------------------------------------
@@ -42,7 +60,7 @@ public:
 public:
     //-----------------------------------------------------------------------------
     //! Reimplementation of the rowCount method. Returns the number of
-    //! rows in the table which is, in fact, the number of environment items.
+    //! rows in the table which is, in fact, the number systems in the map.
     //!
     //! @param[in]      parent      This variable is unused (but required according to
     //!                             the signature of the method)
@@ -99,9 +117,10 @@ public:
 
 public:
     //-----------------------------------------------------------------------------
-    //! Method that adds a new row, i.e. a new environment item to the edited
-    //! component.
-    //!
+    //! Method that adds a new row, i.e. a system with the given probability.
+    //! @param[in]      row         the index of the row to be added
+    //! @param[in]      system      the name of the system to be added
+    //! @param[in]      probability the probability of the system
     //-----------------------------------------------------------------------------
     virtual void addRow(int const &row,
                         VehicleProfileItemInterface::System system,
@@ -113,7 +132,7 @@ public:
     //!
     //! @param[in]      row     the row-index
     //!
-    //! @return                 "True", if row is between 0 and the number of inputs,
+    //! @return                 "True", if row is between 0 and the number of systems,
     //!                         "false", otherwise
     //-----------------------------------------------------------------------------
     virtual bool removeRow(const int &row);
@@ -134,11 +153,11 @@ public:
     void update();
 
 private:
-    VehicleProfileItemInterface::Systems * systems;
+    VehicleProfileItemInterface::Systems * systems;                 //!< the map of systems to be edited by this presenter
 
 private:
-    QStringList _columnHeaders;
-    QMap<int, VehicleProfileItemInterface::System> RowToSystem;
+    QStringList _columnHeaders;                                     //!< the string list of header data for columns
+    QMap<int, VehicleProfileItemInterface::System> RowToSystem;     //!< the mapping of row indices to systems
 };
 
 #endif // SYSTEMPROFILEPRESENTER_H

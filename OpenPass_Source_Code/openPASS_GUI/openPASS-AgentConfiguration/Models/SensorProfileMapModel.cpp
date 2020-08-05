@@ -50,39 +50,10 @@ bool SensorProfileMapModel::add(const SensorProfileMapInterface::ID &id)
     return false;
 }
 
-/*
-bool SensorProfileMapModel::add(SensorProfileMapInterface::Item * const item)
-{
-      SensorProfileMapInterface::ID id = getID(item);
-
-    if(!contains(id))
-    {
-        sensorProfiles.insert(id, item);
-        item->setParent(this);
-        return true;
-    }
-
-    return false;
-}*/
-
 bool SensorProfileMapModel::remove(const SensorProfileMapInterface::ID &id)
 {
     if(contains(id))
     {
-        delete sensorProfiles.take(id);
-        return true;
-    }
-
-    return false;
-}
-
-
-bool SensorProfileMapModel::remove(SensorProfileMapInterface::Item * const item)
-{
-
-    if(sensorProfiles.values().contains(item) )
-    {
-        SensorProfileMapInterface::ID id = getID(item);
         delete sensorProfiles.take(id);
         return true;
     }

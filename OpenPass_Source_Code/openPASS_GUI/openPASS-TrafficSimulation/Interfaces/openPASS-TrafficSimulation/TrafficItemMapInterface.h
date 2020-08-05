@@ -44,13 +44,15 @@ public:
     using ConstIterator =  Map::ConstIterator;  //!< A constant iterator (for reading only)
 
 public:
-    explicit TrafficItemMapInterface(QObject *parent = 0)
+    explicit TrafficItemMapInterface(QObject *parent = nullptr)
         : QObject(parent){}
     virtual ~TrafficItemMapInterface() = default;
 
 Q_SIGNALS:
     //-----------------------------------------------------------------------------
-    //! Signal emitted 
+    //! Signal emitted when traffic items are added to or removed from this map.
+    //! It is also connected to the TrafficItemInterface::edited signal emitted
+    //! when the value or probability of a traffic item has been edited.
     //-----------------------------------------------------------------------------
     void edited();
 

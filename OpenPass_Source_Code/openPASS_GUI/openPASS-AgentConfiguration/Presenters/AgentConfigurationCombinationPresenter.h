@@ -8,6 +8,26 @@
 * SPDX-License-Identifier: EPL-2.0
 ******************************************************************************/
 
+//-----------------------------------------------------------------------------
+//! @file  AgentConfigurationCombinationPresenter.h
+//! @ingroup agentConfigurationPlugin
+//! @brief This class defines a presenter object for exporting the model data
+//!        (AgentConfigurationInterface) of this plugin to the profiles catalogue
+//!        XML file needed by the simulation slave.
+//!
+//!        The only reason why this class exists is because, for a dynamic agent
+//!        profile, the profiles catalogue partly repeats information already
+//!        contained in a system config file. In order to maintain a consistent
+//!        way of defining systems using the system config, this presenter object
+//!        gathers the required information from the system config and exports it
+//!        into the format needed by the profiles catalogue.
+//!
+//! @note  In future releases, the way of defining dynamic and static agent will
+//!        be unified in order to avoid such a doubling of information in two
+//!        different files. Hence, this class is only temporary and we refrain
+//!        from giving a detailed documentation here.
+//-----------------------------------------------------------------------------
+
 #ifndef VEHICLEPROFILESCOMBINATIONPRESENTER_H
 #define VEHICLEPROFILESCOMBINATIONPRESENTER_H
 
@@ -23,6 +43,23 @@
 
 #include <QObject>
 
+//-----------------------------------------------------------------------------
+//! @brief This class defines a presenter object for exporting the model data
+//!        (AgentConfigurationInterface) of this plugin to the profiles catalogue
+//!        XML file needed by the simulation slave.
+//!
+//!        The only reason why this class exists is because, for a dynamic agent
+//!        profile, the profiles catalogue partly repeats information already
+//!        contained in a system config file. In order to maintain a consistent
+//!        way of defining systems using the system config, this presenter object
+//!        gathers the required information from the system config and exports it
+//!        into the format needed by the profiles catalogue.
+//!
+//! @note  In future releases, the way of defining dynamic and static agent will
+//!        be unified in order to avoid such a doubling of information in two
+//!        different files. Hence, this class is only temporary and we refrain
+//!        from giving a detailed documentation here.
+//-----------------------------------------------------------------------------
 class AgentConfigurationCombinationPresenter : public QObject
 {
     Q_OBJECT

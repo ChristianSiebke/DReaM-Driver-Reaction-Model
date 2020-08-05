@@ -18,6 +18,7 @@
 #include "EditDataCommand.h"
 
 #include <QStyledItemDelegate>
+#include <QUndoStack>
 
 
 class DelegateFileBrowseView : public QStyledItemDelegate

@@ -8,11 +8,20 @@
 * SPDX-License-Identifier: EPL-2.0
 ******************************************************************************/
 
+//-----------------------------------------------------------------------------
+//! @file  ParameterItemModel.h
+//! @ingroup agentConfigurationPlugin
+//! @brief This class implements the functionality of ParameterItemInterface.
+//-----------------------------------------------------------------------------
+
 #ifndef PARAMETERITEMMODEL_H
 #define PARAMETERITEMMODEL_H
 
 #include "openPASS-AgentConfiguration/ParameterItemInterface.h"
 
+//-----------------------------------------------------------------------------
+//! @brief This class implements the functionality of ParameterItemInterface.
+//-----------------------------------------------------------------------------
 class ParameterItemModel : public ParameterItemInterface
 {
 
@@ -44,16 +53,16 @@ public:
     virtual void setUnit(Value const &_unit) override;
 
 private:
-    static Type default_type;
-    static Key default_key;
-    static Value default_value;
-    static Unit default_unit;
+    Type type;      //!< the string object for the parameter's datatype
+    Key key;        //!< the string object  for the parameter's description
+    Value value;    //!< the parameter's value. Taken as a string in order to make it independent its datatype
+    Unit unit;      //!< the string object for the parameter's unit
 
 private:
-    Type type;
-    Key key;
-    Value value;
-    Unit unit;
+    static Type default_type;       //!< the default datatype
+    static Key default_key;         //!< the default key desription
+    static Value default_value;     //!< the default value
+    static Unit default_unit;       //!< the default unit
 };
 
 #endif // PARAMETERITEMMODEL_H

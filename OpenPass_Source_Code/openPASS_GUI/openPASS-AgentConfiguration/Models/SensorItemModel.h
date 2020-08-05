@@ -8,16 +8,25 @@
 * SPDX-License-Identifier: EPL-2.0
 ******************************************************************************/
 
+//-----------------------------------------------------------------------------
+//! @file  SensorItemModel.h
+//! @ingroup agentConfigurationPlugin
+//! @brief This class implements the functionality of SensorItemInterface.
+//-----------------------------------------------------------------------------
+
 #ifndef SENSORITEMMODEL_H
 #define SENSORITEMMODEL_H
 
 #include "openPASS-AgentConfiguration/SensorItemInterface.h"
 
+//-----------------------------------------------------------------------------
+//! @brief This class implements the functionality of SensorItemInterface.
+//-----------------------------------------------------------------------------
 class SensorItemModel : public SensorItemInterface
 {
 public:
     SensorItemModel(QObject * parent = nullptr);
-    ~SensorItemModel() = default;
+    virtual ~SensorItemModel() override = default;
 
 public:
     virtual SensorPosition getSensorPosition() const override;
@@ -31,9 +40,9 @@ public:
     virtual ID getID() const override;
 
 private:
-    static SensorPosition default_position;
-    SensorPosition position;
-    Profile * profile;
+    SensorPosition position;                //!< the structure for storing sensor positioning data
+    Profile * profile;                      //!< the pointer to the sensor's profile
+    static SensorPosition default_position; //!< the default position structure
 
 };
 

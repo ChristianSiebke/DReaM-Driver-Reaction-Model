@@ -13,6 +13,8 @@
 #include "Models/ProjectXMLLoadModel.h"
 #include "Models/ProjectXMLSaveModel.h"
 
+#include "openPASS-Window/WindowInterface.h"
+
 #include <QCoreApplication>
 #include <QDir>
 #include <QList>
@@ -20,12 +22,14 @@
 #include <QStandardPaths>
 #include <QString>
 
+
 ProjectInterface::Library const ProjectModel::DefaultLibrary = QCoreApplication::applicationDirPath().append( QStringLiteral("/bin/lib"));
 ProjectInterface::Config const ProjectModel::DefaultConfig = QCoreApplication::applicationDirPath();
 ProjectInterface::Result const ProjectModel::DefaultResult = QCoreApplication::applicationDirPath();
 ProjectInterface::LogMaster const ProjectModel::DefaultLogMaster = QCoreApplication::applicationDirPath().append( QStringLiteral("/OpenPassMaster.log"));
 ProjectInterface::LogSlave const ProjectModel::DefaultLogSlave = QCoreApplication::applicationDirPath().append( QStringLiteral("/OpenPassSlave.log"));
 ProjectInterface::Slave const ProjectModel::DefaultSlave = QCoreApplication::applicationDirPath().append( QStringLiteral("/bin/OpenPassSlave.exe"));
+
 
 ProjectModel::ProjectModel(QObject *parent)
     : ProjectInterface(parent)

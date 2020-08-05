@@ -145,7 +145,7 @@ DriverProfilesView * AgentConfigurationView::getDriverProfilesView() const
     return driverProfilesView;
 }
 
-QUndoView * AgentConfigurationView::getUndoView()
+QUndoView * AgentConfigurationView::getUndoView() const
 {
     return undoView;
 }

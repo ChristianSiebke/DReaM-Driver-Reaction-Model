@@ -76,21 +76,6 @@ bool VehicleProfileMapModel::remove(const VehicleProfileMapInterface::Name &name
     return false;
 }
 
-
-bool   VehicleProfileMapModel::remove(VehicleProfileMapInterface::Item * const item)
-{
-
-    if( profiles.values().contains(item) )
-    {
-        VehicleProfileItemInterface::Name name = getName(item);
-        delete profiles.take(name);
-        Q_EMIT removed(name);
-        return true;
-    }
-
-    return false;
-}
-
 VehicleProfileMapInterface::Item * VehicleProfileMapModel::getItem(VehicleProfileMapInterface::Name const & name) const
 {
     if(contains(name))
@@ -138,10 +123,4 @@ QList <VehicleProfileItemInterface*> VehicleProfileMapModel::values() const
 int VehicleProfileMapModel::count() const
 {
     return profiles.count();
-}
-
-void VehicleProfileMapModel::clear()
-{
-   qDeleteAll(profiles);
-   profiles.clear();
 }

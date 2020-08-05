@@ -8,11 +8,20 @@
 * SPDX-License-Identifier: EPL-2.0
 ******************************************************************************/
 
+//-----------------------------------------------------------------------------
+//! @file  VehicleComponentProfileItemModel.h
+//! @ingroup agentConfigurationPlugin
+//! @brief This class implements the functionality of VehicleComponentProfileItemInterface.
+//-----------------------------------------------------------------------------
+
 #ifndef VEHICLECOMPONENTPROFILEITEMMODEL_H
 #define VEHICLECOMPONENTPROFILEITEMMODEL_H
 
 #include "openPASS-AgentConfiguration/VehicleComponentProfileItemInterface.h"
 
+//-----------------------------------------------------------------------------
+//! @brief This class implements the functionality of VehicleComponentProfileItemInterface.
+//-----------------------------------------------------------------------------
 class VehicleComponentProfileItemModel : public VehicleComponentProfileItemInterface
 {
 
@@ -30,7 +39,7 @@ public:
     virtual Type getType() const override;
 
 private:
-    Parameters * const parameters;
+    Parameters * const parameters;      //!< the pointer to the parameter map of this profile
 };
 
 #endif // VEHICLECOMPONENTPROFILEITEMMODEL_H

@@ -68,23 +68,7 @@ bool AgentMapModel::remove(const AgentMapInterface::Name &name)
 {
     if(contains(name))
     {
-
         delete agents.take(name);
-        Q_EMIT removed(name);
-        return true;
-    }
-
-    return false;
-}
-
-// Just for removing from the map! The item won't be deleted!
-bool AgentMapModel::remove( AgentMapInterface::Item * const item)
-{
-
-    if( agents.values().contains(item) )
-    {
-        AgentItemInterface::Name name = getName(item);    
-        agents.take(name);
         Q_EMIT removed(name);
         return true;
     }
@@ -139,22 +123,4 @@ QList <AgentItemInterface*> AgentMapModel::values() const
 int AgentMapModel::count() const
 {
     return agents.count();
-}
-
-void AgentMapModel::clear()
-{
-    qDeleteAll(agents);
-    agents.clear();
-
-    Q_EMIT cleared();
-}
-
-void AgentMapModel::removeAll()
-{
-    for(auto item : agents.values())
-        delete item;
-
-    agents.clear();
-
-    Q_EMIT cleared();
 }

@@ -8,6 +8,18 @@
 * SPDX-License-Identifier: EPL-2.0
 ******************************************************************************/
 
+//-----------------------------------------------------------------------------
+//! @file  AgentConfigurationView.h
+//! @ingroup agentConfigurationPlugin
+//! @brief This class constitutes the main view of the agent configuration
+//!        plugin. It instantiates the action menu as well as a tab widget as a
+//!        container widget for views of agent, driver and vehicle profiles as
+//!        well as the undo stack.
+//!        The main task of this view is to emit signals upon user actions
+//!        on the action menu which are handled in the corresponding prestenter
+//!        object (AgentConfigurationPresenter).
+//-----------------------------------------------------------------------------
+
 #ifndef AGENTCONFIGURATIONVIEW_H
 #define AGENTCONFIGURATIONVIEW_H
 
@@ -26,8 +38,15 @@ namespace Ui {
 class AgentConfigurationView;
 }
 
-class AgentConfigurationPresenter;
-
+//-----------------------------------------------------------------------------
+//! @brief This class constitutes the main view of the agent configuration
+//!        plugin. It instantiates the action menu as well as a tab widget as a
+//!        container widget for views of agent, driver and vehicle profiles as
+//!        well as the undo stack.
+//!        The main task of this view is to emit signals upon user actions
+//!        on the action menu which are handled in the corresponding prestenter
+//!        object (AgentConfigurationPresenter).
+//-----------------------------------------------------------------------------
 class AgentConfigurationView : public QWidget
 {
     Q_OBJECT
@@ -122,37 +141,50 @@ public:
     //!
     //! @return             the undo view
     //-----------------------------------------------------------------------------
-    QUndoView * getUndoView();
+    QUndoView * getUndoView() const;
 
-
-
-public:
+    //-----------------------------------------------------------------------------
+    //! Method that returns the view for agent profies
+    //!
+    //! @return             the agent profiles' view
+    //-----------------------------------------------------------------------------
     AgentMapView * getAgentsView() const;
+
+    //-----------------------------------------------------------------------------
+    //! Method that returns the view for vehicle profies
+    //!
+    //! @return             the vehicle profiles' view
+    //-----------------------------------------------------------------------------
     VehicleProfilesView * getVehicleProfilesView() const;
+
+    //-----------------------------------------------------------------------------
+    //! Method that returns the view for driver profies
+    //!
+    //! @return             the driver profiles' view
+    //-----------------------------------------------------------------------------
     DriverProfilesView * getDriverProfilesView() const;
 
+private:
+    static WindowInterface::ID const ViewID;            //!< a static Id used to register the view of this plugin in the window plugin
 
 private:
-    static WindowInterface::ID const ViewID;
-
-private:
-    WindowInterface * const window;
+    WindowInterface * const window;                     //!< the pointer to the window plugin for registering and deregistering this view
     QUndoView * const undoView;                         //!< the view of the undo stack
 
 private:
     WindowInterface::Action * const actionMenuSave;     //!< The action menu object for saving a profiles catalogue file
     WindowInterface::Action * const actionMenuExport;   //!< The action menu object for exporting an old  profiles catalogue file
     WindowInterface::Action * const actionMenuLoad;     //!< The action menu object for loading a profiles catalogue file
-    WindowInterface::Action * const actionMenuClear;     //!< The action menu object for clearing the entire worksheet
+    WindowInterface::Action * const actionMenuClear;    //!< The action menu object for clearing the entire worksheet
     WindowInterface::Action * const actionMenuUndo;     //!< The action menu object for undoing actions
     WindowInterface::Action * const actionMenuRedo;     //!< The action menu object for redoing actions
     WindowInterface::Action * const actionMenuHistory;  //!< The action menu object for showing the command history
 
 private:
-    Ui::AgentConfigurationView *ui;
-    AgentMapView * agentsView;
-    VehicleProfilesView * vehicleProfilesView;
-    DriverProfilesView * driverProfilesView;
+    Ui::AgentConfigurationView *ui;                     //!< the ui object defining the views appearance
+    AgentMapView * agentsView;                          //!< the view for editing agent profiles
+    VehicleProfilesView * vehicleProfilesView;          //!< the view for editing vehicle profiles
+    DriverProfilesView * driverProfilesView;            //!< the view for editing driver profiles
 
 
 };

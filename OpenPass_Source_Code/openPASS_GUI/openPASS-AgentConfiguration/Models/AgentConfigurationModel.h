@@ -33,7 +33,7 @@ class AgentConfigurationModel : public AgentConfigurationInterface
 
 public:
     explicit AgentConfigurationModel(QObject *parent = nullptr);
-    virtual ~AgentConfigurationModel() = default;
+    virtual ~AgentConfigurationModel() override = default;
 
 public:
     virtual AgentMapInterface * getAgents() const override;
@@ -41,9 +41,6 @@ public:
     virtual DriverProfileMapInterface * getDriverProfiles() const override;
     virtual VehicleComponentProfileMapInterface * getVehicleComponentProfiles() const override;
     virtual SensorProfileMapInterface * getSensorProfiles() const override;
-
-public:
-    virtual void clear() override;
 
 public:
     AgentMapModel * const agents;                               //!< the pointer to the map of agent profiles

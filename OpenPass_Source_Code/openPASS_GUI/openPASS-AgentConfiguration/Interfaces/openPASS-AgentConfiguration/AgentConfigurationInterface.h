@@ -96,12 +96,6 @@ public:
     //-----------------------------------------------------------------------------
     virtual SensorProfileMapInterface * getSensorProfiles() const = 0;
 
-public:
-    //-----------------------------------------------------------------------------
-    //! Method which clears all profile maps and deletes their entries.
-    //-----------------------------------------------------------------------------
-    virtual void clear() = 0;
-
 };
 
 #endif // AGENTCONFIGURATIONINTERFACE_H

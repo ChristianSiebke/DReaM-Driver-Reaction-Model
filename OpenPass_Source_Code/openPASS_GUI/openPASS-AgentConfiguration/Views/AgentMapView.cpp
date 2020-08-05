@@ -45,7 +45,7 @@ void AgentMapView::enableModelView(bool enable)
 
 void AgentMapView::enableSystemView(bool enable)
 {
-    ui->System->setEnabled(enable);
+    ui->system->setEnabled(enable);
 }
 
 void AgentMapView::enableConfiguration(bool enable)
@@ -60,7 +60,7 @@ void AgentMapView::enableConfiguration(bool enable)
     ui->addDriver->setEnabled(enable);
     ui->removeDriver->setEnabled(enable);
 
-    ui->System->setEnabled(enable);
+    ui->system->setEnabled(enable);
     ui->systemConfig->setEnabled(enable);
     ui->systemConfigBrowse->setEnabled(enable);
     ui->systemConfigRefresh->setEnabled(enable);
@@ -142,7 +142,10 @@ void AgentMapView::on_AgentProfileSelection_activated(const QString &name)
 void AgentMapView::clear()
 {
     ui->systemConfig->clear();
-    ui->System->clear();
+    ui->system->clear();
+    ui->ModelCatalogue->clear();
+    ui->Model->clear();
+
     ui->Type->setCurrentText("Dynamic");
     ui->TypeSpecificElements->setCurrentIndex(0);
 }
@@ -197,14 +200,13 @@ void AgentMapView::on_Type_activated(const QString &type)
     Q_EMIT typeChanged(type);
 }
 
-void AgentMapView::on_System_activated(const QString &system)
+void AgentMapView::on_system_activated(const QString &system)
 {
     Q_EMIT selectedSystem(system);
 }
 
 void AgentMapView::on_systemConfigBrowse_clicked()
 {
-    ui->Type->setCurrentIndex(1);
     Q_EMIT setSystemConfig();
 }
 
@@ -220,16 +222,16 @@ void AgentMapView::setCurrentSystemConfig(const QString &systemConfig)
 
 void AgentMapView::setCurrentSystem(const QString &system)
 {
-    if(ui->System->findText(system)!= -1)
-        ui->System->setCurrentText(system);
+    if(ui->system->findText(system)!= -1)
+        ui->system->setCurrentText(system);
 }
 
 void AgentMapView::setSystemSelectionItems(const QStringList &systemItems)
 {
-    ui->System->clear();
+    ui->system->clear();
 
     if(!systemItems.isEmpty())
-        ui->System->addItems(systemItems);
+        ui->system->addItems(systemItems);
 }
 
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component>
   <type>Algorithm</type>
-  <title>DynamicsTrajectoryFollower</title>
+  <title>Dynamics_TrajectoryFollower</title>
   <schedule>
     <offset>0</offset>
     <cycle>1</cycle>

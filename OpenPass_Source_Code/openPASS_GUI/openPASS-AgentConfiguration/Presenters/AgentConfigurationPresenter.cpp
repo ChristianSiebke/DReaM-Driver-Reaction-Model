@@ -24,7 +24,6 @@ AgentConfigurationPresenter::AgentConfigurationPresenter(AgentConfigurationInter
     : QObject(parent)
     , agentConfiguration(agentConfiguration)
     , agentConfigurationView(agentConfigurationView)
-    , system(system)
     , project(project)
     , undoStack(new QUndoStack(this))
     , redo(new QShortcut(QKeySequence(tr("Ctrl+Y", "redo")),agentConfigurationView))
@@ -246,7 +245,7 @@ void AgentConfigurationPresenter::copyVehicleProfiles(const AgentConfigurationIn
             vehicleProfilesPresenter->addSystemProfile(type);
 
             for(auto system : from->getVehicleProfiles()->getItem(name)->getSystems(type)->keys())
-                undoStack->push(new VehicleProfileCommands::AddSystem(vehicleProfilesPresenter->getSystemProfilePresenters()->value(name)->value(type),
+                undoStack->push(new VehicleProfileCommands::AddSystem(vehicleProfilesPresenter->systemProfilePresenters.value(name)->value(type),
                                                                       system, from->getVehicleProfiles()->getItem(name)->getSystems(type)->value(system)));
         }
 

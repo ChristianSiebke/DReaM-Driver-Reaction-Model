@@ -25,10 +25,10 @@
 #include "openPASS-Window/WindowInterface.h"
 
 #include "Views/ExperimentBaseView.h"
-#include "Views/EnvironmentBaseView.h"
-#include "Views/ScenarioBaseView.h"
+#include "Views/EnvironmentView.h"
+#include "Views/ScenarioView.h"
 #include "Views/StatusBarView.h"
-#include "Views/TrafficBaseView.h"
+#include "Views/TrafficView.h"
 
 #include <QWidget>
 #include <QResizeEvent>

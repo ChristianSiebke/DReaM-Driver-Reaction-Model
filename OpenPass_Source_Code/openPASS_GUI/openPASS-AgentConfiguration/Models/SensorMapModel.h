@@ -8,11 +8,20 @@
 * SPDX-License-Identifier: EPL-2.0
 ******************************************************************************/
 
+//-----------------------------------------------------------------------------
+//! @file  SensorMapModel.h
+//! @ingroup agentConfigurationPlugin
+//! @brief This class implements the functionality of SensorMapInterface.
+//-----------------------------------------------------------------------------
+
 #ifndef SENSORMAPMODEL_H
 #define SENSORMAPMODEL_H
 
 #include "openPASS-AgentConfiguration/SensorMapInterface.h"
 
+//-----------------------------------------------------------------------------
+//! @brief This class implements the functionality of SensorMapInterface.
+//-----------------------------------------------------------------------------
 class SensorMapModel : public SensorMapInterface
 {
 
@@ -61,7 +70,7 @@ public:
     virtual QList<Item*> values() const override;
 
 private:
-   SensorMapInterface::Map sensors;
+   SensorMapInterface::Map sensors;     //!< the map (container) for registering sensor data
 
 };
 

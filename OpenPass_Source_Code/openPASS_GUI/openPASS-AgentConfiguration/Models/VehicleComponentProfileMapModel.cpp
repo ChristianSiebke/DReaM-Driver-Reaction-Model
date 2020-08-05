@@ -62,20 +62,6 @@ bool VehicleComponentProfileMapModel::remove(const VehicleComponentProfileMapInt
     return false;
 }
 
-
-bool VehicleComponentProfileMapModel::remove(VehicleComponentProfileMapInterface::Item * const item)
-{
-
-    if(componentProfiles.values().contains(item) )
-    {
-        VehicleComponentProfileMapInterface::ID id = getID(item);
-        delete componentProfiles.take(id);
-        return true;
-    }
-
-    return false;
-}
-
 VehicleComponentProfileMapInterface::Item * VehicleComponentProfileMapModel::getItem(VehicleComponentProfileMapInterface::ID const & id) const
 {
     if(contains(id))

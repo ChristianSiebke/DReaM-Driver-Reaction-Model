@@ -272,17 +272,17 @@ void AddDriverProfile::addParameter(DriverProfileItemInterface::Parameters * con
 
 void AddDriverProfile::setParameters()
 {
-           // NOTE: Momentarily, the one and only driver model is hard-coded
-           addParameter(parameters, "Type", "String", "", "AlgorithmAgentFollowingDriverModel");
-           addParameter(parameters, "AlgorithmLateralModule", "String", "", "Algorithm_LateralAfdm");
-           addParameter(parameters, "AlgorithmLongitudinalModule", "String", "", "Algorithm_LongitudinalAfdm");
+    // NOTE: Momentarily, the one and only driver model is hard-coded
+    addParameter(parameters, "Type", "String", "", "AlgorithmAgentFollowingDriverModel");
+    addParameter(parameters, "AlgorithmLateralModule", "String", "", "Algorithm_LateralAfdm");
+    addParameter(parameters, "AlgorithmLongitudinalModule", "String", "", "Algorithm_LongitudinalAfdm");
 
-           addParameter(parameters, "VelocityWish", "Double", "m/s", "15.0");
-           addParameter(parameters, "Delta", "Double", "m", "4.0");
-           addParameter(parameters, "TGapWish", "Double", "s", "1.5");
-           addParameter(parameters, "MinDistance", "Double", "m", "2.0");
-           addParameter(parameters, "MaxAcceleration", "Double", "m/s^2", "2.0");
-           addParameter(parameters, "MaxDeceleration", "Double", "m/s^2", "2.0");
+    addParameter(parameters, "VelocityWish", "Double", "m/s", "15.0");
+    addParameter(parameters, "Delta", "Double", "m", "4.0");
+    addParameter(parameters, "TGapWish", "Double", "s", "1.5");
+    addParameter(parameters, "MinDistance", "Double", "m", "2.0");
+    addParameter(parameters, "MaxAcceleration", "Double", "m/s^2", "2.0");
+    addParameter(parameters, "MaxDeceleration", "Double", "m/s^2", "2.0");
 }
 
 void AddDriverProfile::redo()

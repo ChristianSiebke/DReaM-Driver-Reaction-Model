@@ -78,21 +78,6 @@ bool DriverProfileMapModel::remove(const DriverProfileMapInterface::Name &name)
     return false;
 }
 
-
-bool DriverProfileMapModel::remove(DriverProfileMapInterface::Item * const item)
-{
-
-    if(driverProfiles.values().contains(item) )
-    {
-        DriverProfileItemInterface::Name name = getName(item);
-        delete driverProfiles.take(name);
-        Q_EMIT removed(name);
-        return true;
-    }
-
-    return false;
-}
-
 DriverProfileMapInterface::Item * DriverProfileMapModel::getItem(DriverProfileMapInterface::Name const & name) const
 {
     if(contains(name))
@@ -138,10 +123,4 @@ QList <DriverProfileItemInterface*> DriverProfileMapModel::values() const
 int DriverProfileMapModel::count() const
 {
     return driverProfiles.count();
-}
-
-void DriverProfileMapModel::clear()
-{
-   qDeleteAll(driverProfiles);
-   driverProfiles.clear();
 }

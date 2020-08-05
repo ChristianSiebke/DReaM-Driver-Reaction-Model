@@ -51,39 +51,10 @@ bool VehicleComponentMapModel::add(const VehicleComponentMapInterface::Type &typ
     return false;
 }
 
-/*
-bool VehicleComponentMapModel::add(VehicleComponentMapInterface::Item * const item)
-{
-      VehicleComponentMapInterface::Type type = getType(item);
-
-    if(!contains(type))
-    {
-        components.insert(type, item);
-        item->setParent(this);
-        return true;
-    }
-
-    return false;
-}*/
-
 bool VehicleComponentMapModel::remove(const VehicleComponentMapInterface::Type &type)
 {
     if(contains(type))
     {
-        delete components.take(type);
-        return true;
-    }
-
-    return false;
-}
-
-
-bool VehicleComponentMapModel::remove(VehicleComponentMapInterface::Item * const item)
-{
-
-    if(components.values().contains(item) )
-    {
-        VehicleComponentItemInterface::Type type = getType(item);
         delete components.take(type);
         return true;
     }

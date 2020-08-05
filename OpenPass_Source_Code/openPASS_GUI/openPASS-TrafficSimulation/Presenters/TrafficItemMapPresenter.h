@@ -51,7 +51,7 @@ class TrafficItemMapPresenter : public QAbstractTableModel
 
 public:
     explicit TrafficItemMapPresenter(TrafficItemMapInterface * const trafficItemMap,
-                                     QObject *parent = 0);
+                                     QObject *parent = nullptr);
 
 public:
     //-----------------------------------------------------------------------------

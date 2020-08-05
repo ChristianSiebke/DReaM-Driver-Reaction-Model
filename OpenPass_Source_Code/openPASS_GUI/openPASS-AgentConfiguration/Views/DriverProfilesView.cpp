@@ -115,11 +115,6 @@ void DriverProfilesView::setDriverSelectionItems(const QStringList &names)
     ui->Name->addItems(names);
 }
 
-void DriverProfilesView::on_driverConfig_editingFinished()
-{
-    Q_EMIT selectedDriverConfig(ui->driverConfig->text());
-}
-
 void DriverProfilesView::setConfigView(const QString &filepath)
 {
     ui->driverConfig->setText(filepath);
@@ -128,19 +123,12 @@ void DriverProfilesView::setConfigView(const QString &filepath)
 void DriverProfilesView::addDriverView(const QString &name)
 {
     ui->Name->addItem(name);
-
- //   enableConfiguration(true);
 }
 
 void DriverProfilesView::removeDriverView(const QString &name)
 {
     int index = ui->Name->findText(name);
     ui->Name->removeItem(index);
-
-/*    if(ui->Name->count() == 0)
-    {
-        enableConfiguration(false);
-    }*/
 }
 
 

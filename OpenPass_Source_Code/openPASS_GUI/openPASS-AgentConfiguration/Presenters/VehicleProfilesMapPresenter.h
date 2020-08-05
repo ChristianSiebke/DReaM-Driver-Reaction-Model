@@ -8,6 +8,15 @@
 * SPDX-License-Identifier: EPL-2.0
 ******************************************************************************/
 
+//-----------------------------------------------------------------------------
+//! @file  VehicleProfilesMapPresenter.h
+//! @ingroup agentConfigurationPlugin
+//! @brief This class constitutes the re-implementation of QAbstractTableModel
+//!        for the table view of vehicle profiles. In fact, this class implements
+//!        a wrapper for the map of vehicle profiles (VehicleProfileMapInterface)
+//!        to be editable by QTableView objects within Qt's Model/View framework.
+//-----------------------------------------------------------------------------
+
 #ifndef VEHICLEPROFILESMAPPRESENTER_H
 #define VEHICLEPROFILESMAPPRESENTER_H
 
@@ -15,6 +24,12 @@
 
 #include <QAbstractTableModel>
 
+//-----------------------------------------------------------------------------
+//! @brief This class constitutes the re-implementation of QAbstractTableModel
+//!        for the table view of vehicle profiles. In fact, this class implements
+//!        a wrapper for the map of vehicle profiles (VehicleProfileMapInterface)
+//!        to be editable by QTableView objects within Qt's Model/View framework.
+//-----------------------------------------------------------------------------
 class VehicleProfilesMapPresenter : public QAbstractTableModel
 {
     Q_OBJECT
@@ -24,6 +39,11 @@ public:
                                           QObject *parent = nullptr);
 
 Q_SIGNALS:
+    //-----------------------------------------------------------------------------
+    //! Signal emitted whenever the probability sum of the vehicle profile table
+    //! should be checked. This usually happens whenever vehicle profiles are added
+    //! or removed or if probability values are edited.
+    //-----------------------------------------------------------------------------
     void checkProbabilities();
 
 public:
@@ -44,7 +64,7 @@ public:
 public:
     //-----------------------------------------------------------------------------
     //! Reimplementation of the rowCount method. Returns the number of
-    //! rows in the table which is, in fact, the number of environment items.
+    //! rows in the table which is, in fact, the number of vehicle profiles.
     //!
     //! @param[in]      parent      This variable is unused (but required according to
     //!                             the signature of the method)
@@ -101,9 +121,10 @@ public:
 
 public:
     //-----------------------------------------------------------------------------
-    //! Method that adds a new row, i.e. a new environment item to the edited
-    //! component.
-    //!
+    //! Method that adds a new row, i.e. a vehicle profile with the given probability.
+    //! @param[in]      row         the index of the row to be added
+    //! @param[in]      profile     the name of the profile to be added
+    //! @param[in]      probability the probability of the profile
     //-----------------------------------------------------------------------------
     virtual void addRow(int const &row,
                         AgentItemInterface::VehicleProfile const & profile,
@@ -115,7 +136,7 @@ public:
     //!
     //! @param[in]      row     the row-index
     //!
-    //! @return                 "True", if row is between 0 and the number of inputs,
+    //! @return                 "True", if row is between 0 and the number of profiles,
     //!                         "false", otherwise
     //-----------------------------------------------------------------------------
     virtual bool removeRow(const int &row);
@@ -135,18 +156,29 @@ public:
     void update();
 
 public Q_SLOTS:
+    //-----------------------------------------------------------------------------
+    //! Slot which changes the name of the vehicle profile.
+    //!
+    //! @param[in]      oldName     the old name of the vehicle profile
+    //! @param[in]      newName     the new name of the vehicle profile
+    //-----------------------------------------------------------------------------
     void editName(AgentItemInterface::VehicleProfile const & oldName,
                   AgentItemInterface::VehicleProfile const & newName);
 
+    //-----------------------------------------------------------------------------
+    //! Slot removes the given vehicle profile if contained in the table.
+    //!
+    //! @param[in]      profile     the profile to be removed
+    //-----------------------------------------------------------------------------
     void remove(AgentItemInterface::VehicleProfile const & profile);
 
 
 private:
-    AgentItemInterface::VehicleProfiles * vehicleProfiles;
+    AgentItemInterface::VehicleProfiles * vehicleProfiles;          //!< the pointer to the map of vehicle profiles assigned to an agent profile
 
 private:
-    QStringList _columnHeaders;
-    QMap<int, AgentItemInterface::VehicleProfile> RowToProfile;
+    QStringList _columnHeaders;                                     //!< the list containing the header data for columns
+    QMap<int, AgentItemInterface::VehicleProfile> RowToProfile;     //!< a mapping of row indices to profile names
 };
 
 #endif // VEHICLEPROFILESMAPPRESENTER_H

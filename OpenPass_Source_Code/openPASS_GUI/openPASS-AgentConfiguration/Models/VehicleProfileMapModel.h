@@ -8,15 +8,23 @@
 * SPDX-License-Identifier: EPL-2.0
 ******************************************************************************/
 
+//-----------------------------------------------------------------------------
+//! @file  VehicleProfileMapModel.h
+//! @ingroup agentConfigurationPlugin
+//! @brief This class implements the functionality of VehicleProfileMapInterface.
+//-----------------------------------------------------------------------------
+
 #ifndef VEHICLEPROFILEMAPMODEL_H
 #define VEHICLEPROFILEMAPMODEL_H
 
 #include "openPASS-AgentConfiguration/VehicleProfileMapInterface.h"
 
+//-----------------------------------------------------------------------------
+//! @brief This class implements the functionality of VehicleProfileMapInterface.
+//-----------------------------------------------------------------------------
 class VehicleProfileMapModel : public VehicleProfileMapInterface
 {
     Q_OBJECT
-
 public:
     explicit VehicleProfileMapModel(QObject *parent = nullptr);
     virtual ~VehicleProfileMapModel() override = default;
@@ -36,7 +44,6 @@ public:
 
 public:
     virtual bool remove(VehicleProfileMapInterface::Name const & name) override;
-    virtual bool remove(VehicleProfileMapInterface::Item * const item) override;
 
 public:
     virtual VehicleProfileMapInterface::Item * getItem(VehicleProfileMapInterface::Name const & name) const override;
@@ -50,9 +57,6 @@ public:
 public:
     virtual bool contains (VehicleProfileMapInterface::Name const & name) const  override;
     virtual int count() const  override;
-
-public:
-    virtual void clear()  override;
 
 public:
     virtual QStringList keys() const  override;
