@@ -1,7 +1,7 @@
 /*******************************************************************************
 * Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2018 AMFD GmbH
-*               2016, 2017, 2018, 2019 ITK Engineering GmbH
+*               2016, 2017, 2018, 2019, 2020 ITK Engineering GmbH
 *               2020 HLRS, University of Stuttgart.
 *               2020 BMW AG
 *
@@ -93,10 +93,10 @@ static double roundDoubleWithDecimals(double value, int decimals)
 //! Estimate the inertial momentum for rotation around the vehicle's z-axis, assuming
 //! a cuboid of homogeneous mass density. ( see .e.g. https://en.wikipedia.org/wiki/List_of_moments_of_inertia )
 //!
-//! @param[in]    double    mass
-//! @param[in]    double    length
-//! @param[in]    double    width
-//! @return       double    momentInertiaYaw
+//! @param[in] mass     Mass of the vehicle [kg]
+//! @param[in] length   Length of the vehicle [m]
+//! @param[in] width    Width of the vehicle [m]
+//! @return             momentInertiaYaw [kg*m^2]
 static double CalculateMomentInertiaYaw(double mass, double length, double width) {
     return mass * (length*length + width*width) / 12;
 }

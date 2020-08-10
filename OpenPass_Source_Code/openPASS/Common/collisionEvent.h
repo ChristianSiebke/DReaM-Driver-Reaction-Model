@@ -1,5 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2017, 2018, 2019 in-tech GmbH
+*               2020 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -52,28 +53,28 @@ public:
 
     void AddParameters(CollisionAngles angles, PostCrashDynamic postCrashDyn1, PostCrashDynamic postCrashDyn2)
     {
-        parameter.emplace("Velocity", std::to_string(postCrashDyn1.GetVelocity()));
-        parameter.emplace("Velocity", std::to_string(postCrashDyn1.GetVelocity()));
-        parameter.emplace("VelocityChange", std::to_string(postCrashDyn1.GetVelocityChange()));
-        parameter.emplace("VelocityDirection", std::to_string(postCrashDyn1.GetVelocityDirection()));
-        parameter.emplace("YawVelocity", std::to_string(postCrashDyn1.GetYawVelocity()));
-        parameter.emplace("PointOfContactLocalX", std::to_string(postCrashDyn1.GetPointOfContactLocal().x));
-        parameter.emplace("PointOfContactLocalY", std::to_string(postCrashDyn1.GetPointOfContactLocal().y));
-        parameter.emplace("CollisionVelocity", std::to_string(postCrashDyn1.GetCollisionVelocity()));
-        parameter.emplace("Sliding", std::to_string(postCrashDyn1.GetSliding()));
-        parameter.emplace("OpponentVelocity", std::to_string(postCrashDyn2.GetVelocity()));
-        parameter.emplace("OpponentVelocityChange", std::to_string(postCrashDyn2.GetVelocityChange()));
-        parameter.emplace("OpponentVelocityDirection", std::to_string(postCrashDyn2.GetVelocityDirection()));
-        parameter.emplace("OpponentYawVelocity", std::to_string(postCrashDyn2.GetYawVelocity()));
-        parameter.emplace("OpponentPointOfContactLocalX", std::to_string(postCrashDyn2.GetPointOfContactLocal().x));
-        parameter.emplace("OpponentPointOfContactLocalY", std::to_string(postCrashDyn2.GetPointOfContactLocal().y));
-        parameter.emplace("OpponentCollisionVelocity", std::to_string(postCrashDyn2.GetCollisionVelocity()));
-        parameter.emplace("OpponentSliding", std::to_string(postCrashDyn2.GetSliding()));
-        parameter.emplace("OYA", std::to_string(angles.OYA));
-        parameter.emplace("HCPAo", std::to_string(angles.HCPAo));
-        parameter.emplace("OCPAo", std::to_string(angles.OCPAo));
-        parameter.emplace("HCPA", std::to_string(angles.HCPA));
-        parameter.emplace("OCPA", std::to_string(angles.OCPA));
+        parameter.emplace("Velocity", postCrashDyn1.GetVelocity());
+        parameter.emplace("Velocity", postCrashDyn1.GetVelocity());
+        parameter.emplace("VelocityChange", postCrashDyn1.GetVelocityChange());
+        parameter.emplace("VelocityDirection", postCrashDyn1.GetVelocityDirection());
+        parameter.emplace("YawVelocity", postCrashDyn1.GetYawVelocity());
+        parameter.emplace("PointOfContactLocalX", postCrashDyn1.GetPointOfContactLocal().x);
+        parameter.emplace("PointOfContactLocalY", postCrashDyn1.GetPointOfContactLocal().y);
+        parameter.emplace("CollisionVelocity", postCrashDyn1.GetCollisionVelocity());
+        parameter.emplace("Sliding", postCrashDyn1.GetSliding());
+        parameter.emplace("OpponentVelocity", postCrashDyn2.GetVelocity());
+        parameter.emplace("OpponentVelocityChange", postCrashDyn2.GetVelocityChange());
+        parameter.emplace("OpponentVelocityDirection", postCrashDyn2.GetVelocityDirection());
+        parameter.emplace("OpponentYawVelocity", postCrashDyn2.GetYawVelocity());
+        parameter.emplace("OpponentPointOfContactLocalX", postCrashDyn2.GetPointOfContactLocal().x);
+        parameter.emplace("OpponentPointOfContactLocalY", postCrashDyn2.GetPointOfContactLocal().y);
+        parameter.emplace("OpponentCollisionVelocity", postCrashDyn2.GetCollisionVelocity());
+        parameter.emplace("OpponentSliding", postCrashDyn2.GetSliding());
+        parameter.emplace("OYA", angles.OYA);
+        parameter.emplace("HCPAo", angles.HCPAo);
+        parameter.emplace("OCPAo", angles.OCPAo);
+        parameter.emplace("HCPA", angles.HCPA);
+        parameter.emplace("OCPA", angles.OCPA);
     }
 
     [[deprecated("Will be replaced by BasicEvent::parameter")]] bool collisionWithAgent;

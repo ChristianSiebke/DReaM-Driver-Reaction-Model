@@ -1,7 +1,7 @@
 /*******************************************************************************
 * Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2018, 2019 AMFD GmbH
-*               2016, 2017, 2018, 2019 ITK Engineering GmbH
+*               2016, 2017, 2018, 2019, 2020 ITK Engineering GmbH
 *               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -565,10 +565,10 @@ private:
 
 struct PostCrashVelocity
 {
-    bool isActive = false;//! activity flag
-    double velocityAbsolute = 0.0;//! post crash velocity, absolute [m/s]
-    double velocityDirection = 0.0;//! post crash velocity direction [rad]
-    double yawVelocity = 0.0;//! post crash yaw velocity [rad/s]
+    bool isActive = false;//!< activity flag
+    double velocityAbsolute = 0.0;//!< post crash velocity, absolute [m/s]
+    double velocityDirection = 0.0;//!< post crash velocity direction [rad]
+    double yawVelocity = 0.0;//!< post crash yaw velocity [rad/s]
 };
 
 /*!
