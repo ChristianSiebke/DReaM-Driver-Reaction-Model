@@ -372,6 +372,7 @@ jm_status_enu_t check_fprintf_var_name(fmu_check_data_t* cdata, const char* vn) 
 }
 
 void init_fmu_check_data(fmu_check_data_t* cdata) {
+    cdata->slave_initialized = 0;
     cdata->num_errors = 0;
     cdata->num_warnings = 0;
     cdata->num_fatal = 0;
@@ -599,7 +600,7 @@ jm_status_enu_t fmi1_end_handling(fmu_check_data_t *cdata)
 
         fmi1_import_free_slave_instance(fmu);
 
-        cdata->slave_initialized  = fmi1_false;
+        cdata->slave_initialized = 0;
 
     }
     clear_fmu_check_data(cdata, 0);
@@ -666,7 +667,7 @@ jm_status_enu_t fmi2_end_handling(fmu_check_data_t *cdata)
 
         fmi2_import_free_instance(fmu);
 
-        cdata->slave_initialized  = fmi1_false;
+        cdata->slave_initialized = 0;
 
     }
     clear_fmu_check_data(cdata, 0);

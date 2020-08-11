@@ -58,7 +58,7 @@ jm_status_enu_t fmi1_cs_prep_simulate(fmu_check_data_t* cdata)
     if (fmi1_status_ok_or_warning(fmistatus = check_fmi1_set_with_zero_len_array(fmu, cb)) &&
         fmi1_status_ok_or_warning(fmistatus = fmi1_import_initialize_slave(fmu, tstart, StopTimeDefined, tend)))
     {
-        cdata->slave_initialized = fmi1_true;
+        cdata->slave_initialized = 1;
         jm_log_info(cb, fmu_checker_module, "Initialized FMU for simulation starting at time %g", tstart);
         if (fmi1_status_ok_or_warning(fmistatus = check_fmi1_get_with_zero_len_array(fmu, cb))) {
             fmistatus = fmi1_status_ok;

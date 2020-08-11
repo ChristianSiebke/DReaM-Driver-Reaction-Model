@@ -49,7 +49,7 @@ jm_status_enu_t fmi2_cs_prep_simulate(fmu_check_data_t* cdata)
     if( fmi2_status_ok_or_warning(fmistatus =  fmi2_import_setup_experiment(fmu, toleranceControlled,relativeTolerance, tstart, fmi2_false, 0.0)) &&
 		fmi2_status_ok_or_warning(fmistatus = fmi2_import_enter_initialization_mode(fmu)) &&
 		fmi2_status_ok_or_warning(fmi2_import_exit_initialization_mode(fmu))){
-        cdata->slave_initialized = fmi2_true;
+        cdata->slave_initialized = 1;
 			jm_log_info(cb, fmu_checker_module, "Initialized FMU for simulation starting at time %g", tstart);
 			fmistatus = fmi2_status_ok;
 	}
