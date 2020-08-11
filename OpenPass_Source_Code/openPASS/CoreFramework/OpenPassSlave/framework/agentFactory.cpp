@@ -66,8 +66,6 @@ void AgentFactory::Clear()
 Agent* AgentFactory::AddAgent(AgentBlueprintInterface* agentBlueprint)
 {
     auto agent = CreateAgent(lastAgentId, agentBlueprint);
-
-    PublishProperties(*agent);
     
     if (!agent)
     {
@@ -80,6 +78,8 @@ Agent* AgentFactory::AddAgent(AgentBlueprintInterface* agentBlueprint)
         LOG_INTERN(LogLevel::Error) << "could not add agent to network";
         return nullptr;
     }
+
+    PublishProperties(*agent);
 
     lastAgentId++;
     agentList.push_back(std::move(agent));

@@ -85,10 +85,10 @@ bool Scheduler::Run(
 
         UpdateAgents(taskList, world);
 
-        if (ExecuteTasks(taskList.GetPreAgentTasks(currentTime)) &&
-            ExecuteTasks(taskList.ConsumeNonRecurringAgentTasks(currentTime)) &&
-            ExecuteTasks(taskList.GetRecurringAgentTasks(currentTime)) &&
-            ExecuteTasks(taskList.GetSynchronizeTasks(currentTime)) == false)
+        if (!ExecuteTasks(taskList.GetPreAgentTasks(currentTime)) ||
+            !ExecuteTasks(taskList.ConsumeNonRecurringAgentTasks(currentTime)) ||
+            !ExecuteTasks(taskList.GetRecurringAgentTasks(currentTime)) ||
+            !ExecuteTasks(taskList.GetSynchronizeTasks(currentTime)))
         {
             return Scheduler::FAILURE;
         }
