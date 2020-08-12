@@ -180,10 +180,11 @@ The attributes have the following meaning:
 |RoadPosition|t          |negative for driving in roadDirection (i.e on lanes with negative Id) else positive           |
 |VisibilityAction|traffic   |Flag deciding if the scenario agent will be spawned (true = spawned, false = not spawned)  |
 
-Although OpenSCENARIO also states other ways for defining a position, we currently only support position via the <LanePosition> tag.
+Although OpenSCENARIO also states other ways for defining a position, we currently only support position via the <LanePosition> or the <WorldPosition> tag.
 Unlike OpenSCENARIO we also allow some of these values to be stochastic.
 This is marked by adding a subtag  <Stochastics value="valuetype" stdDeviation="value" lowerBound="value" upperBound="value"/> to the <Lane> tag.
-The valuetype can be one of s, offset, velocity or rate.
+The stochastics tag is intended to be used as NormalDistribution, but it is up to each module using it to define the actual usage.
+The valuetype can either be s, offset, velocity or rate.
 The value defined as attribute of the LanePosition/SpeedActionDynamics/AbsoluteTargetSpeed tag is then taken as mean value.
 The VisibilityAction is optional.
 If VisibilityAction is not defined the agent will be spawned.
