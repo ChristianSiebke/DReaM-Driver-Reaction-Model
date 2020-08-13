@@ -48,17 +48,6 @@
                 <parameters/>
             </component>
             <component>
-                <id>AlgorithmLateralVehicleComponents</id>
-                <schedule>
-                    <priority>100</priority>
-                    <offset>0</offset>
-                    <cycle>100</cycle>
-                    <response>0</response>
-                </schedule>
-                <library>AlgorithmLateral</library>
-                <parameters/>
-            </component>
-            <component>
                 <id>AlgorithmLateralAfdm</id>
                 <schedule>
                     <priority>100</priority>

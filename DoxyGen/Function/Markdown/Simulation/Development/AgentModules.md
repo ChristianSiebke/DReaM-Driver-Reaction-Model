@@ -467,12 +467,12 @@ One prioritizer modul can only handle signals of the same type. If there is no s
 \subsection dev_agent_modules_signalprioritizer_modules Existing prioritizer modules
 
 * PrioritizerAccelerationVehicleComponents
-* PrioritizerLateralVehicleComponents
+* PrioritizerSteeringVehicleComponents
 * PrioritizerLongitudinal
 * PrioritizerSteering
 * DynamicsPrioritizer
-    
-Also refer to the [Components and channels communication diagram](/ref dev_concepts_modulecomposition).
+
+Also refer to the [Components and channels communication diagram](\ref dev_concepts_modulecomposition).
 
 ---
 

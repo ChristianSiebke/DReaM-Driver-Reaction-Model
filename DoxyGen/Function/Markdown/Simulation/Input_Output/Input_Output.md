@@ -164,7 +164,7 @@ With corresponding defined indices :
 | PrioritizerDynamics                       | Dynamics          | 5  | 
 | Algorithm_LongitudinalVehicleComponent    | Algorithm         | 11 | 
 | Algorithm_LongitudinalAfdm                | Algorithm         | 12 |
-| Algorithm_LateralVehicleComponent         | Algorithm         | 14 | 
+| Algorithm_SteeringVehicleComponent        | Algorithm         | 14 |
 | Algorithm_LateralVehicleAfdm              | Algorithm         | 15 | 
 | LimiterVehicleLongitudinal                | Algorithm         | 17 | 
 | PrioritizerLongitudinal                   | Algorithm         | 21 | 
