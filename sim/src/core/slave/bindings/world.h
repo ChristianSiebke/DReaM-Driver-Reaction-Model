@@ -189,6 +189,11 @@ public:
         return implementation->IsSValidOnLane(roadId, laneId, distance);
     }
 
+    bool IsDirectionalRoadExisting(const std::string &roadId, bool inOdDirection) override
+    {
+        return implementation->IsDirectionalRoadExisting(roadId, inOdDirection);
+    }
+
     double GetLaneCurvature(std::string roadId, int laneId, double position) const override
     {
         return implementation->GetLaneCurvature(roadId, laneId, position);

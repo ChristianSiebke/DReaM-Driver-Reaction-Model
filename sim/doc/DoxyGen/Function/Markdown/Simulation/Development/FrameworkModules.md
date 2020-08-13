@@ -119,7 +119,6 @@ Additionally the EventNetwork offers several methods and filters to access the e
 
 List of Modules which use the EventNetwork:
 1. ObservationLog
-2. Respawner
 3. EventDetector
 4. Manipulator
 5. VehicleControlUnit

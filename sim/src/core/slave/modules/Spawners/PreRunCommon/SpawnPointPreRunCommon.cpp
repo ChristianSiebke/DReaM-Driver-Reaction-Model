@@ -30,23 +30,26 @@ SpawnPointInterface::Agents SpawnPointPreRunCommon::Trigger([[maybe_unused]]int 
 
     for (const auto &spawnArea : parameters.spawnAreas)
     {
-        for (const auto laneId : spawnArea.laneIds)
+        for (const auto &roadId : spawnArea.roadIds)
         {
-
-            const auto validLaneSpawningRanges = worldAnalyzer.GetValidLaneSpawningRanges(spawnArea.roadId,
-                                                                                          laneId,
-                                                                                          spawnArea.sStart,
-                                                                                          spawnArea.sEnd);
-            if (validLaneSpawningRanges)
+            for (const auto laneId : spawnArea.laneIds)
             {
-                for (const auto& spawningRange : *validLaneSpawningRanges)
+
+                const auto validLaneSpawningRanges = worldAnalyzer.GetValidLaneSpawningRanges(roadId,
+                                                                                              laneId,
+                                                                                              spawnArea.sStart,
+                                                                                              spawnArea.sEnd);
+                if (validLaneSpawningRanges)
                 {
-                    const auto generatedAgents = GenerateAgentsForRange(laneId,
-                                                                        spawnArea.roadId,
-                                                                        spawningRange);
-                    newAgents.insert(std::cend(newAgents),
-                                     std::cbegin(generatedAgents),
-                                     std::cend(generatedAgents));
+                    for (const auto& spawningRange : *validLaneSpawningRanges)
+                    {
+                        const auto generatedAgents = GenerateAgentsForRange(laneId,
+                                                                            roadId,
+                                                                            spawningRange);
+                        newAgents.insert(std::cend(newAgents),
+                                         std::cbegin(generatedAgents),
+                                         std::cend(generatedAgents));
+                    }
                 }
             }
         }

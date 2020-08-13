@@ -31,15 +31,15 @@ static std::vector<SpawnArea> ExtractSpawnAreas(const ParameterInterface &parame
 
     for (const auto& spawnPointParameter : spawnPointList.value())
     {
-        const auto roadIdElement = map::query(spawnPointParameter->GetParametersString(), ROAD);
+        const auto roadIdsElement = map::query(spawnPointParameter->GetParametersStringVector(), ROADS);
         const auto laneIdsElement = map::query(spawnPointParameter->GetParametersIntVector(), LANES);
         const auto sStartElement = map::query(spawnPointParameter->GetParametersDouble(), S_START);
         const auto sEndElement = map::query(spawnPointParameter->GetParametersDouble(), S_END);
 
-        ThrowIfFalse(roadIdElement.has_value(), "No road id provided in SceneryInformation for SpawnPointRuntimeCommon");
-        ThrowIfFalse(laneIdsElement.has_value(), "No lane id provided in SceneryInformation for SpawnPointRuntimeCommon");
-        ThrowIfFalse(sStartElement.has_value(), "No S-Start provided in SceneryInformation for SpawnPointRuntimeCommon");
-        ThrowIfFalse(sEndElement.has_value(), "No S-End provided in SceneryInformation for SpawnPointRuntimeCommon");
+        ThrowIfFalse(roadIdsElement.has_value(), "No road ids provided in SceneryInformation for SpawnPointPreRunCommon");
+        ThrowIfFalse(laneIdsElement.has_value(), "No lane ids provided in SceneryInformation for SpawnPointPreRunCommon");
+        ThrowIfFalse(sStartElement.has_value(), "No S-Start provided in SceneryInformation for SpawnPointPreRunCommon");
+        ThrowIfFalse(sEndElement.has_value(), "No S-End provided in SceneryInformation for SpawnPointPreRunCommon");
 
         std::vector<int> sortedLaneIds(laneIdsElement.value());
         if (sortedLaneIds.front() < 0)
@@ -51,7 +51,7 @@ static std::vector<SpawnArea> ExtractSpawnAreas(const ParameterInterface &parame
             std::sort(sortedLaneIds.begin(), sortedLaneIds.end(), std::greater<int>{});
         }
 
-        spawnAreas.emplace_back(SpawnArea{roadIdElement.value(),
+        spawnAreas.emplace_back(SpawnArea{roadIdsElement.value(),
                                            sortedLaneIds,
                                            sStartElement.value(),
                                            sEndElement.value()});

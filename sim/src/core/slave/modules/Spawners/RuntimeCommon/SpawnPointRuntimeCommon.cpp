@@ -24,6 +24,7 @@ SpawnPointRuntimeCommon::SpawnPointRuntimeCommon(const SpawnPointDependencies* d
 {
     for (const auto& spawnPosition : parameters.spawnPositions)
     {
+        worldAnalyzer.ValidateRoadIdInDirection(spawnPosition.roadId, spawnPosition.laneId);
         queuedSpawnDetails.push_back(GenerateSpawnDetailsForLane(spawnPosition, 0));
     }
 }

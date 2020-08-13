@@ -19,10 +19,11 @@
 namespace SpawnPointDefinitions
 {
 constexpr char SPAWNPOINTS[] = {"SpawnPoints"};
-constexpr char ROAD[] = {"Road"};
+constexpr char ROADS[] = {"Roads"};
 constexpr char LANES[] = {"Lanes"};
 
 using RoadId = std::string;
+using RoadIds = std::vector<RoadId>;
 using LaneId = int;
 using LaneIds = std::vector<LaneId>;
 using SPosition = double;

@@ -35,14 +35,14 @@ TEST(SpawnPointRuntimeCommonParameterExtractor, ExtractSpawnPointParameters)
     auto spawnPoint2 = std::make_shared<FakeParameter>();
     ParameterInterface::ParameterLists spawnPoint {{spawnPoint1, spawnPoint2}};
 
-    std::map<std::string, const std::string> strings1{{"Road", "RoadA"}};
-    ON_CALL(*spawnPoint1, GetParametersString()).WillByDefault(ReturnRef(strings1));
+    std::map<std::string, const std::vector<std::string>> strings1{{"Roads", {"RoadA"}}};
+    ON_CALL(*spawnPoint1, GetParametersStringVector()).WillByDefault(ReturnRef(strings1));
     std::map<std::string, const std::vector<int>> intVectors1{{"Lanes", {1,2,3}}};
     ON_CALL(*spawnPoint1, GetParametersIntVector()).WillByDefault(ReturnRef(intVectors1));
     std::map<std::string, double> doubles1{{"SCoordinate", 10.0}};
     ON_CALL(*spawnPoint1, GetParametersDouble()).WillByDefault(ReturnRef(doubles1));
-    std::map<std::string, const std::string> strings2{{"Road", "RoadB"}};
-    ON_CALL(*spawnPoint2, GetParametersString()).WillByDefault(ReturnRef(strings2));
+    std::map<std::string, const std::vector<std::string>> strings2{{"Roads", {"RoadB"}}};
+    ON_CALL(*spawnPoint2, GetParametersStringVector()).WillByDefault(ReturnRef(strings2));
     std::map<std::string, const std::vector<int>> intVectors2{{"Lanes", {-1,-2}}};
     ON_CALL(*spawnPoint2, GetParametersIntVector()).WillByDefault(ReturnRef(intVectors2));
     std::map<std::string, double> doubles2{{"SCoordinate", 11.0}};

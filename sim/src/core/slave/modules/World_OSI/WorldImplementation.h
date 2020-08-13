@@ -151,6 +151,7 @@ public:
 
     bool IsSValidOnLane(std::string roadId, int laneId, double distance) override;
 
+    bool IsDirectionalRoadExisting(const std::string& roadId, bool inOdDirection) override;
 
     double GetLaneCurvature(std::string roadId, int laneId, double position) const override;
     RouteQueryResult<std::optional<double> > GetLaneCurvature(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double position, double distance) const override;

@@ -238,7 +238,7 @@ using RouteElementProperty = boost::property<RouteElement, RouteElement>;
 
 //! Directed graph representing the road network.
 //! For each road there is one vertex for each possible driving direction.
-//! An edges between two vertices means, that an agent driving on the first road in this direction can after the road ends
+//! An edge between two vertices means, that an agent driving on the first road in this direction can after the road ends
 //! continue its way on the second road in the given direction.
 using RoadGraph = boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, RouteElementProperty>;
 using RoadGraphVertex = boost::graph_traits<RoadGraph>::vertex_descriptor;

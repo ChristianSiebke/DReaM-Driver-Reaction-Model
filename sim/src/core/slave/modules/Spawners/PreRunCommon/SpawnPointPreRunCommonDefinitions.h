@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -23,14 +23,14 @@ namespace SpawnPointPreRunCommonDefinitions
 
     struct SpawnArea
     {
-        const RoadId roadId;
+        const RoadIds roadIds;
         const LaneIds laneIds;
         const SPosition sStart;
         const SPosition sEnd;
 
         bool operator== (const SpawnArea& other) const
         {
-            return this->roadId == other.roadId
+            return this->roadIds == other.roadIds
                     && this->laneIds == other.laneIds
                     && CommonHelper::DoubleEquality(this->sStart, other.sStart)
                     && CommonHelper::DoubleEquality(this->sEnd, other.sEnd);

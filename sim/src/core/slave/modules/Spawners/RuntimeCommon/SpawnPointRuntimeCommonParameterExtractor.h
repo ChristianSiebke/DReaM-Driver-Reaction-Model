@@ -36,11 +36,11 @@ namespace SpawnPointRuntimeCommonParameterExtractor
 
         for (const auto& spawnPointParameter : spawnPointList.value())
         {
-            const auto roadIdElement = map::query(spawnPointParameter->GetParametersString(), ROAD);
+            const auto roadIdsElement = map::query(spawnPointParameter->GetParametersStringVector(), ROADS);
             const auto laneIdsElement = map::query(spawnPointParameter->GetParametersIntVector(), LANES);
             const auto sCoordinateElement = map::query(spawnPointParameter->GetParametersDouble(), SCOORDINATE);
 
-            ThrowIfFalse(roadIdElement.has_value(), "No road id provided in SceneryInformation for SpawnPointRuntimeCommon");
+            ThrowIfFalse(roadIdsElement.has_value(), "No road id provided in SceneryInformation for SpawnPointRuntimeCommon");
             ThrowIfFalse(laneIdsElement.has_value(), "No lane id provided in SceneryInformation for SpawnPointRuntimeCommon");
             ThrowIfFalse(sCoordinateElement.has_value(), "No s coordinate provided in SceneryInformation for SpawnPointRuntimeCommon");
 
@@ -54,9 +54,12 @@ namespace SpawnPointRuntimeCommonParameterExtractor
                 std::sort(sortedLaneIds.begin(), sortedLaneIds.end(), std::greater<int>{});
             }
 
-            for (const auto& laneId : sortedLaneIds)
+            for (const auto& roadId : roadIdsElement.value())
             {
-                spawnpoints.emplace_back(SpawnPosition{roadIdElement.value(), laneId, sCoordinateElement.value()});
+                for (const auto& laneId : sortedLaneIds)
+                {
+                    spawnpoints.emplace_back(SpawnPosition{roadId, laneId, sCoordinateElement.value()});
+                }
             }
         }
 

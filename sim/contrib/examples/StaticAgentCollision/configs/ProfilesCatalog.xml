@@ -1,4 +1,4 @@
-<Profiles SchemaVersion="0.4.1">
+<Profiles SchemaVersion="0.4.2">
   <AgentProfiles>
     <AgentProfile Name="EgoAgent" Type="Static">
       <System>
@@ -128,7 +128,7 @@
     <Profile Name="DefaultPreRunCommon">
       <List Name="SpawnPoints">
         <ListItem>
-          <String Key="Road" Value="1"/>
+          <StringVector Key="Roads" Value="1"/>
           <IntVector Key="Lanes" Value="-1,-2,-3,-4,-5"/>
           <Double Key="SStart" Value="0.0"/>
           <Double Key="SEnd" Value="1040.0"/>
@@ -144,7 +144,7 @@
     <Profile Name="DefaultRuntimeCommon">
       <List Name="SpawnPoints">
         <ListItem>
-          <String Key="Road" Value="1"/>
+          <StringVector Key="Roads" Value="1"/>
           <IntVector Key="Lanes" Value="-1,-2,-3,-4,-5"/>
           <Double Key="SCoordinate" Value="0.0"/>
         </ListItem>

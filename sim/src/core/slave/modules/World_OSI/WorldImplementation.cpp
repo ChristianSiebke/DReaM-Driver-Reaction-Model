@@ -381,6 +381,11 @@ bool WorldImplementation::IsSValidOnLane(std::string roadId, int laneId,
     return worldDataQuery.IsSValidOnLane(roadId, laneId, distance);
 }
 
+bool WorldImplementation::IsDirectionalRoadExisting(const std::string &roadId, bool inOdDirection)
+{
+    return worldData.GetRoadGraphVertexMapping().find(RouteElement {roadId, inOdDirection}) != worldData.GetRoadGraphVertexMapping().end();
+}
+
 double WorldImplementation::GetLaneCurvature(std::string roadId, int laneId, double position) const
 {
     auto& lane =  worldDataQuery.GetLaneByOdId(roadId, laneId, position);

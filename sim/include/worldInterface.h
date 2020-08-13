@@ -353,6 +353,16 @@ public:
     virtual bool IsSValidOnLane(std::string roadId, int laneId, double distance) = 0;
 
     //-----------------------------------------------------------------------------
+    //! Retrieve whether a road id exists in a specified openDrive direction.
+    //!
+    //! @param[in] roadId  OpenDriveId of the road to search in
+    //! @param[in] inOdDirection  true means in openDrive direction
+    //!
+    //! @return true if road id exists
+    //-----------------------------------------------------------------------------
+    virtual bool IsDirectionalRoadExisting(const std::string &, bool inOdDirection) = 0;
+
+    //-----------------------------------------------------------------------------
     //! Returns interpolated value for the curvature of the lane at the given position.
     //! Neighbouring joints are used as interpolation support point.
     //! Returns 0 if there is no lane at the given position.

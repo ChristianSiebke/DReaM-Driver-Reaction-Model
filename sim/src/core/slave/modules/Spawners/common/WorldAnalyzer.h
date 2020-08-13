@@ -124,6 +124,14 @@ public:
     //! \return number of lanes to the right
     size_t GetRightLaneCount(const RoadId& roadId, const LaneId& laneId, const double sPosition) const;
 
+    //! Checks if a roadId exists in direction of a laneId
+    //!
+    //! \param roadId       Id of the road
+    //! \param laneId       Id of the lane
+    //! \return true, if roadId exists in laneId direction
+    void ValidateRoadIdInDirection(const RoadId& roadId,
+                                   const LaneId laneId) const;
+
 private:
     static std::optional<ValidLaneSpawningRanges> GetValidSpawningInformationForRange(const double sStart,
                                                                                       const double sEnd,

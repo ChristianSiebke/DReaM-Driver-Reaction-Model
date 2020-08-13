@@ -31,6 +31,8 @@ class FakeWorld : public WorldInterface
     MOCK_METHOD6(IntersectsWithAgent, bool(double x, double y, double rotation, double length, double width, double center));
     MOCK_METHOD0(isInstantiated, bool());
     MOCK_METHOD3(IsSValidOnLane, bool(std::string roadId, int laneId, double distance));
+    MOCK_METHOD2(IsDirectionalRoadExisting, bool(const std::string &roadId, bool inOdDirection));
+
     MOCK_CONST_METHOD0(GetBicycle, const AgentInterface*());
     MOCK_METHOD1(GetLastCarInlane, const AgentInterface*(int laneNumber));
     MOCK_METHOD0(GetSpecialAgent, const AgentInterface*());

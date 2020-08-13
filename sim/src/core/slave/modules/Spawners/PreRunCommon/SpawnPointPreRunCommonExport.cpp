@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -51,5 +51,25 @@ extern "C" SPAWNPOINT_SHARED_EXPORT std::unique_ptr<SpawnPointInterface> OpenPAS
 
 extern "C" SPAWNPOINT_SHARED_EXPORT SpawnPointInterface::Agents OpenPASS_Trigger(SpawnPointInterface *implementation, int time)
 {
-    return implementation->Trigger(time);
+    try
+    {
+        return implementation->Trigger(time);
+    }
+    catch(const std::runtime_error &ex)
+    {
+        if(Callbacks != nullptr)
+        {
+            Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, ex.what());
+        }
+
+        return {};
+    }
+    catch(...)
+    {
+        if(Callbacks != nullptr)
+        {
+            Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, "unexpected exception");
+        }
+        return {};
+    }
 }

@@ -99,7 +99,7 @@ The PreRunCommon SpawnPoint requires a Spawner-Profile in the ProfilesCatalog. T
     <Profile Name="ExamplePreRunSpawner">
       <List Name="SpawnPoints">
         <ListItem>
-          <String Key="Road" Value="1"/>
+          <StringVector Key="Roads" Value="1"/>
           <IntVector Key="Lanes" Value="-1,-2,-3,-4,-5"/>
           <Double Key="SStart" Value="0.0"/>
           <Double Key="SEnd" Value="1000.0"/>
@@ -119,7 +119,7 @@ The SpawnAreas are defined by the following parameter:
 
 | Name            | Description |
 |-----------------|-------------|
-| Road            | The RoadID of the Road on which to spawn Agents |
+| Roads            | The RoadIDs of the Roads on which to spawn Agents |
 | Lanes           | The LaneIDs of the Lanes of the Road on which to spawn Agents |
 | SStart         | The S position specifying the minimum S for the range within which to spawn Agents |
 | SEnd           | The S position specifying the maximum S for the range within which to spawn Agents |
@@ -202,7 +202,7 @@ The RunTimeCommon SpawnPoint requires a Spawner-Profile to be defined in the Pro
     <Profile Name="ExamplePreRunSpawner">
       <List Name="SpawnPoints">
         <ListItem>
-          <String Key="Road" Value="1"/>
+          <StringVector Key="Roads" Value="1"/>
           <IntVector Key="Lanes" Value="-1,-2,-3,-4,-5"/>
           <Double Key="SCoordinate" Value="0.0"/>
         </ListItem>
@@ -221,7 +221,7 @@ The SpawnPoints are defined by the following parameter:
 
 | Name            | Description |
 |-----------------|-------------|
-| Road            | The RoadID of the Road on which to spawn Agents |
+| Roads           | The RoadIDs of the Roads on which to spawn Agents |
 | Lanes           | The LaneIDs of the Lanes of the Road on which to spawn Agents |
 | S-Position      | The S position specifying at which point to spawn Agents |
 
