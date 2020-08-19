@@ -8,6 +8,8 @@
 # * SPDX-License-Identifier: EPL-2.0
 # **********************************************************************/
 
+DEFINES += USE_PROTOBUF_ARENA
+
 TEMPLATE = subdirs
 SUBDIRS = \
     master \

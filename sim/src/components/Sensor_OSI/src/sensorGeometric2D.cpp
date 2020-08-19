@@ -264,12 +264,12 @@ SensorDetectionResults SensorGeometric2D::DetectObjects()
 {
     SensorDetectionResults results;
     osi3::SensorViewConfiguration sensorViewConfig = GenerateSensorViewConfiguration();
-    osi3::SensorView sensorView = static_cast<OWL::Interfaces::WorldData*>(world->GetWorldData())->GetSensorView(sensorViewConfig, GetAgent()->GetId());
+    auto sensorView = static_cast<OWL::Interfaces::WorldData*>(world->GetWorldData())->GetSensorView(sensorViewConfig, GetAgent()->GetId());
 
-    const auto hostVehicle = FindHostVehicleInSensorView(sensorView);
+    const auto hostVehicle = FindHostVehicleInSensorView(*sensorView);
 
     const auto [sensorPositionGlobal, detectionField] = CreateSensorDetectionField(hostVehicle);
-    const auto [movingObjectsInDetectionField, stationaryObjectsInDetectionField] = GetObjectsInDetectionAreaFromSensorView(sensorView,
+    const auto [movingObjectsInDetectionField, stationaryObjectsInDetectionField] = GetObjectsInDetectionAreaFromSensorView(*sensorView,
                                                                                                                             sensorPositionGlobal,
                                                                                                                             detectionField);
     if (enableVisualObstruction)
@@ -330,7 +330,7 @@ const osi3::MovingObject* SensorGeometric2D::FindHostVehicleInSensorView(const o
 {
     const auto hostVehicleIt = std::find_if(sensorView.global_ground_truth().moving_object().cbegin(),
                                             sensorView.global_ground_truth().moving_object().cend(),
-                                            [sensorView](const osi3::MovingObject& object)
+                                            [&sensorView](const osi3::MovingObject& object)
                                             {
                                                 return object.id().value() == sensorView.host_vehicle_id().value();
                                             });

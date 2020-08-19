@@ -34,7 +34,8 @@ namespace {
 WorldImplementation::WorldImplementation(const CallbackInterface* callbacks, StochasticsInterface* stochastics, DataStoreWriteInterface* dataStore):
     agentNetwork(this, callbacks),
     callbacks(callbacks),
-    dataStore(dataStore)
+    dataStore(dataStore),
+    worldData(callbacks)
 {}
 
 WorldImplementation::~WorldImplementation()

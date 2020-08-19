@@ -94,7 +94,7 @@ public:
 
     MOCK_CONST_METHOD0(GetRoadGraphVertexMapping, const RoadGraphVertexMapping& ());
 
-    MOCK_METHOD2(GetSensorView, osi3::SensorView(osi3::SensorViewConfiguration&, int));
+    MOCK_METHOD2(GetSensorView, SensorView_ptr(osi3::SensorViewConfiguration&, int));
 
     MOCK_CONST_METHOD0(GetLaneBoundaries, const std::unordered_map<OWL::Id, OWL::Interfaces::LaneBoundary*>& ());
 

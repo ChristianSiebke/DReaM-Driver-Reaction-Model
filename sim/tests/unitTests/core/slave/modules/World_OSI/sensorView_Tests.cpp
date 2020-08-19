@@ -144,7 +144,7 @@ public:
 class NormalizeAngle : public ::testing::TestWithParam<NormalizeAngle_Data>
 {
 protected:
-    OWL::WorldData worldData;
+    OWL::WorldData worldData{nullptr};
 };
 
 
@@ -162,7 +162,7 @@ private:
     Fakes::MovingObject fakeMovingRearRight;
 
 protected:
-    OWL::WorldData worldData;
+    OWL::WorldData worldData{nullptr};
 
     const std::vector<Fakes::MovingObject*> fakeMovingObjects
         { &fakeMovingFrontLeft,

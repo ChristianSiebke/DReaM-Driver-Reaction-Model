@@ -35,21 +35,39 @@
 
 namespace OWL {
 
-osi3::SensorView WorldData::GetSensorView(osi3::SensorViewConfiguration& conf, int agentId)
+WorldData::WorldData(const CallbackInterface* callbacks) :
+    callbacks(callbacks)
+{
+#ifdef USE_PROTOBUF_ARENA
+    osiGroundTruth = google::protobuf::Arena::CreateMessage<osi3::GroundTruth>(&arena);
+    if(!osiGroundTruth->GetArena())
+    {
+        LOGWARN("Protobuf arena allocation was defined when building the simulator but the loaded OSI library does not support arena alloaction.");
+    }
+#else
+    osiGroundTruth = std::make_unique<osi3::GroundTruth>();
+#endif
+}
+
+SensorView_ptr WorldData::GetSensorView(osi3::SensorViewConfiguration& conf, int agentId)
 {
     const auto host_id = GetOwlId(agentId);
-    osi3::SensorView sv;
+#ifdef USE_PROTOBUF_ARENA
+    SensorView_ptr sv = SensorView_ptr(google::protobuf::Arena::CreateMessage<osi3::SensorView>(&arena));
+#else
+    SensorView_ptr sv = std::make_unique<osi3::SensorView>();
+#endif
 
     auto currentInterfaceVersion = osi3::InterfaceVersion::descriptor()->file()->options().GetExtension(osi3::current_interface_version);
-    sv.mutable_version()->CopyFrom(currentInterfaceVersion);
+    sv->mutable_version()->CopyFrom(currentInterfaceVersion);
 
-    sv.mutable_sensor_id()->CopyFrom(conf.sensor_id());
-    sv.mutable_mounting_position()->CopyFrom(conf.mounting_position());
-    sv.mutable_mounting_position_rmse()->CopyFrom(conf.mounting_position());
+    sv->mutable_sensor_id()->CopyFrom(conf.sensor_id());
+    sv->mutable_mounting_position()->CopyFrom(conf.mounting_position());
+    sv->mutable_mounting_position_rmse()->CopyFrom(conf.mounting_position());
 
     auto filteredGroundTruth = GetFilteredGroundTruth(conf, GetMovingObjectById(host_id));
-    sv.mutable_global_ground_truth()->CopyFrom(filteredGroundTruth);
-    sv.mutable_host_vehicle_id()->set_value(host_id);
+    sv->mutable_global_ground_truth()->CopyFrom(*filteredGroundTruth);
+    sv->mutable_host_vehicle_id()->set_value(host_id);
 
     auto zeroVector3d = osi3::Vector3d();
     zeroVector3d.set_x(0.0);
@@ -73,17 +91,21 @@ osi3::SensorView WorldData::GetSensorView(osi3::SensorViewConfiguration& conf, i
     auto& movingObject = GetMovingObjectById(host_id);
     hostData.mutable_location_rmse()->CopyFrom(zeroError);
 
-    osi3::GroundTruth tempGroundTruth;
-    movingObject.CopyToGroundTruth(tempGroundTruth);
-    hostData.mutable_location()->CopyFrom(tempGroundTruth.mutable_moving_object(0)->base());
-    sv.mutable_host_vehicle_data()->CopyFrom(hostData);
+#ifdef USE_PROTOBUF_ARENA
+    GroundTruth_ptr tempGroundTruth = google::protobuf::Arena::CreateMessage<osi3::GroundTruth>(&arena);
+#else
+    GroundTruth_ptr tempGroundTruth = std::make_unique<osi3::GroundTruth>();
+#endif
+    movingObject.CopyToGroundTruth(*tempGroundTruth);
+    hostData.mutable_location()->CopyFrom(tempGroundTruth->mutable_moving_object(0)->base());
+    sv->mutable_host_vehicle_data()->CopyFrom(hostData);
 
     return sv;
 }
 
 const osi3::GroundTruth &WorldData::GetOsiGroundTruth() const
 {
-    return osiGroundTruth;
+    return *osiGroundTruth;
 }
 
 OWL::Id WorldData::GetOwlId(int agentId)
@@ -123,10 +145,15 @@ void WorldData::SetRoadGraph(const RoadGraph&& roadGraph, const RoadGraphVertexM
     this->vertexMapping = vertexMapping;
 }
 
-osi3::GroundTruth WorldData::GetFilteredGroundTruth(const osi3::SensorViewConfiguration& conf, const OWL::Interfaces::MovingObject& reference)
+WorldData::GroundTruth_ptr WorldData::GetFilteredGroundTruth(const osi3::SensorViewConfiguration& conf, const OWL::Interfaces::MovingObject& reference)
 {
     bool referenceObjectAdded = false;
-    osi3::GroundTruth filteredGroundTruth;
+
+#ifdef USE_PROTOBUF_ARENA
+    GroundTruth_ptr filteredGroundTruth = google::protobuf::Arena::CreateMessage<osi3::GroundTruth>(&arena);
+#else
+    GroundTruth_ptr filteredGroundTruth = std::make_unique<osi3::GroundTruth>();
+#endif
 
     Primitive::AbsPosition relativeSensorPos
         { conf.mounting_position().position().x(),
@@ -152,7 +179,7 @@ osi3::GroundTruth WorldData::GetFilteredGroundTruth(const osi3::SensorViewConfig
 
     for (const auto& object : filteredMovingObjects)
     {
-        object->CopyToGroundTruth(filteredGroundTruth);
+        object->CopyToGroundTruth(*filteredGroundTruth);
 
         if (object->GetId() == reference.GetId())
         {
@@ -162,32 +189,32 @@ osi3::GroundTruth WorldData::GetFilteredGroundTruth(const osi3::SensorViewConfig
 
     if (!referenceObjectAdded)
     {
-        reference.CopyToGroundTruth(filteredGroundTruth);
+        reference.CopyToGroundTruth(*filteredGroundTruth);
     }
 
     for (const auto& object : filteredStationaryObjects)
     {
-        object->CopyToGroundTruth(filteredGroundTruth);
+        object->CopyToGroundTruth(*filteredGroundTruth);
     }
 
     for (const auto& trafficSign : filteredTrafficSigns)
     {
-        trafficSign->CopyToGroundTruth(filteredGroundTruth);
+        trafficSign->CopyToGroundTruth(*filteredGroundTruth);
     }
 
     for (const auto& roadMarking : filteredRoadMarkings)
     {
-        roadMarking->CopyToGroundTruth(filteredGroundTruth);
+        roadMarking->CopyToGroundTruth(*filteredGroundTruth);
     }
 
     for (const auto& lane : filteredLanes)
     {
-        lane.second->CopyToGroundTruth(filteredGroundTruth);
+        lane.second->CopyToGroundTruth(*filteredGroundTruth);
     }
 
     for (const auto& laneboundaries : filteredLaneBoundaries)
     {
-        laneboundaries.second->CopyToGroundTruth(filteredGroundTruth);
+        laneboundaries.second->CopyToGroundTruth(*filteredGroundTruth);
     }
 
     return filteredGroundTruth;
@@ -273,7 +300,7 @@ void WorldData::AddLane(RoadLaneSectionInterface& odSection, const RoadLaneInter
     Id osiLaneId = CreateUid();
 
     Section& section = *(sections.at(&odSection));
-    osi3::Lane* osiLane = osiGroundTruth.add_lane();
+    osi3::Lane* osiLane = osiGroundTruth->add_lane();
     Lane& lane = *(new Implementation::Lane(osiLane, &section));
     osiLane->mutable_id()->set_value(osiLaneId);
     osiLane->mutable_classification()->set_centerline_is_driving_direction(odLaneId < 0);
@@ -330,7 +357,7 @@ Id WorldData::AddLaneBoundary(const RoadLaneRoadMark &odLaneRoadMark, double sec
     constexpr double standardWidth = 0.15;
     constexpr double boldWidth = 0.3;
     Id osiLaneBoundaryId = CreateUid();
-    osi3::LaneBoundary* osiLaneBoundary = osiGroundTruth.add_lane_boundary();
+    osi3::LaneBoundary* osiLaneBoundary = osiGroundTruth->add_lane_boundary();
     osiLaneBoundary->mutable_id()->set_value(osiLaneBoundaryId);
     osiLaneBoundary->mutable_classification()->set_color(OpenDriveTypeMapper::OdToOsiLaneMarkingColor(odLaneRoadMark.GetColor()));
     osiLaneBoundary->mutable_classification()->set_type(OpenDriveTypeMapper::OdToOsiLaneMarkingType(odLaneRoadMark.GetType(), side));
@@ -457,7 +484,7 @@ void WorldData::AddLanePredecessor(/* const */ RoadLaneInterface& odLane,
 Interfaces::MovingObject& WorldData::AddMovingObject(void* linkedObject)
 {
     Id id = CreateUid();
-    osi3::MovingObject* osiMovingObject = osiGroundTruth.add_moving_object();
+    osi3::MovingObject* osiMovingObject = osiGroundTruth->add_moving_object();
     auto movingObject = new MovingObject(osiMovingObject, linkedObject);
 
     osiMovingObject->mutable_id()->set_value(id);
@@ -469,7 +496,7 @@ Interfaces::MovingObject& WorldData::AddMovingObject(void* linkedObject)
 void WorldData::RemoveMovingObjectById(Id id)
 {
     bool found = false;
-    auto osiMovingObjects = osiGroundTruth.moving_object();
+    auto osiMovingObjects = osiGroundTruth->moving_object();
 
     for (int i = 0; i < osiMovingObjects.size(); ++i)
     {
@@ -490,7 +517,7 @@ void WorldData::RemoveMovingObjectById(Id id)
 
 Interfaces::StationaryObject& WorldData::AddStationaryObject(void* linkedObject)
 {
-    osi3::StationaryObject* osiStationaryObject = osiGroundTruth.add_stationary_object();
+    osi3::StationaryObject* osiStationaryObject = osiGroundTruth->add_stationary_object();
     auto stationaryObject = new StationaryObject(osiStationaryObject, linkedObject);
     Id id = CreateUid();
 
@@ -502,7 +529,7 @@ Interfaces::StationaryObject& WorldData::AddStationaryObject(void* linkedObject)
 
 Interfaces::TrafficSign& WorldData::AddTrafficSign(const std::string odId)
 {
-    osi3::TrafficSign* osiTrafficSign = osiGroundTruth.add_traffic_sign();
+    osi3::TrafficSign* osiTrafficSign = osiGroundTruth->add_traffic_sign();
     auto trafficSignal = new TrafficSign(osiTrafficSign);
     Id id = CreateUid();
 
@@ -516,7 +543,7 @@ Interfaces::TrafficSign& WorldData::AddTrafficSign(const std::string odId)
 
 Interfaces::RoadMarking& WorldData::AddRoadMarking()
 {
-    osi3::RoadMarking* osiRoadMarking = osiGroundTruth.add_road_marking();
+    osi3::RoadMarking* osiRoadMarking = osiGroundTruth->add_road_marking();
     auto roadMarking = new Implementation::RoadMarking(osiRoadMarking);
     Id id = CreateUid();
 
@@ -763,7 +790,8 @@ void WorldData::Clear()
 
     laneIdMapping.clear();
 
-    osiGroundTruth.Clear();
+    osiGroundTruth->Clear();
 }
 
 }
+

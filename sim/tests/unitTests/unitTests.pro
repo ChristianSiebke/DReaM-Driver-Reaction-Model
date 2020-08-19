@@ -10,6 +10,8 @@
 
 TEMPLATE = subdirs
 
+DEFINES += USE_PROTOBUF_ARENA
+
 SUBDIRS = \
     algorithmAEB_Tests \
     algorithmAgentFollowingDriverModel_Tests \

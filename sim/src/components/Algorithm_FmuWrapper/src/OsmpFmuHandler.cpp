@@ -237,14 +237,14 @@ void OsmpFmuHandler::PreStep(int time)
 {
     osi3::SensorViewConfiguration sensorViewConfig = GenerateSensorViewConfiguration();
     auto* worldData = static_cast<OWL::Interfaces::WorldData*>(world->GetWorldData());
-    osi3::SensorView sensorView = worldData->GetSensorView(sensorViewConfig, agent->GetId());
+    auto sensorView = worldData->GetSensorView(sensorViewConfig, agent->GetId());
 
     if (sensorViewVariable)
     {
-        SetSensorViewInput(sensorView);
+        SetSensorViewInput(*sensorView);
         if (writeSensorView)
         {
-            WriteJson(sensorView, "SensorView-" + QString::number(time) + ".json");
+            WriteJson(*sensorView, "SensorView-" + QString::number(time) + ".json");
         }
     }
 #ifdef USE_EXTENDED_OSI

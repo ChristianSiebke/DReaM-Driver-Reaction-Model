@@ -204,7 +204,7 @@ public:
 
     }
 
-    osi3::SensorView sensorView;
+    OWL::SensorView_ptr sensorView = OWL::SensorView_ptr(new osi3::SensorView());
     NiceMock<FakeStochastics> fakeStochastics;
     NiceMock<FakeParameter> fakeParameters;
     NiceMock<FakePublisher> fakePublisher;
@@ -252,18 +252,18 @@ TEST_P(DetectObjects, StoresSensorDataWithDetectedObjects)
     fakeDoubles["Lateral"] = data.mountingPositionLateral;
     fakeDoubles["Yaw"] = data.sensorYaw;
     fakeBools["EnableVisualObstruction"] = data.enableVisualObstruction;
-    sensorView.mutable_host_vehicle_id()->set_value(1);
+    sensorView->mutable_host_vehicle_id()->set_value(1);
     MovingObjectParameter hostVehicle{1, {data.vehicleX, data.vehicleY}, {10.0, 5.0}, {-2.0, 3.0}, data.vehicleYaw};
-    AddMovingObjectToSensorView(sensorView, hostVehicle);
+    AddMovingObjectToSensorView(*sensorView, hostVehicle);
     for (auto object : data.movingObjects)
     {
-        AddMovingObjectToSensorView(sensorView, object);
+        AddMovingObjectToSensorView(*sensorView, object);
     }
     for (auto object : data.stationaryObjects)
     {
-        AddStationaryObjectToSensorView(sensorView, object);
+        AddStationaryObjectToSensorView(*sensorView, object);
     }
-    ON_CALL(fakeWorldData, GetSensorView(_,_)).WillByDefault(Return(sensorView));
+    ON_CALL(fakeWorldData, GetSensorView(_,_)).WillByDefault([this](auto, auto){return std::move(sensorView);}); //test::Return does not work with unique pointer
     SensorGeometric2D sensor(
                 "",
                 false,

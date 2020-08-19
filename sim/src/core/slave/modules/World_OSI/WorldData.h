@@ -23,10 +23,15 @@
 #include "include/roadInterface/roadInterface.h"
 #include "include/roadInterface/junctionInterface.h"
 #include "include/worldInterface.h"
+#include "include/callbackInterface.h"
 
 #include "osi3/osi_groundtruth.pb.h"
 #include "osi3/osi_sensorview.pb.h"
 #include "osi3/osi_sensorviewconfiguration.pb.h"
+
+#ifdef USE_PROTOBUF_ARENA
+#include <google/protobuf/arena.h>
+#endif
 
 namespace OWL {
 
@@ -61,6 +66,17 @@ using CStationaryObjects = const std::list<CStationaryObject*>;
 using CMovingObjects     = const std::list<CMovingObject*>;
 using CVehicles          = const std::list<CVehicle*>;
 
+#ifdef USE_PROTOBUF_ARENA
+//If using protobuf arena the SensorView must not be manually deleted.
+struct DoNothing
+{
+    void operator() (osi3::SensorView*) {}
+};
+using SensorView_ptr = std::unique_ptr<osi3::SensorView, DoNothing>;
+#else
+using SensorView_ptr = std::unique_ptr<osi3::SensorView>;
+#endif
+
 namespace Interfaces {
 
 //!This class contains the entire road network and all objects in the world
@@ -80,7 +96,7 @@ public:
      *
      * \return      A OSI SensorView with filtered GroundTruth
      */
-    virtual osi3::SensorView GetSensorView(osi3::SensorViewConfiguration& conf, int agentId) = 0;
+    virtual SensorView_ptr GetSensorView(osi3::SensorViewConfiguration& conf, int agentId) = 0;
 
     virtual const osi3::GroundTruth& GetOsiGroundTruth() const = 0;
 
@@ -285,11 +301,20 @@ public:
 class WorldData : public Interfaces::WorldData
 {
 public:
+
+#ifdef USE_PROTOBUF_ARENA
+    using GroundTruth_ptr = osi3::GroundTruth*;
+#else
+    using GroundTruth_ptr = std::unique_ptr<osi3::GroundTruth>;
+#endif
+
+    WorldData(const CallbackInterface* callbacks);
+
     ~WorldData() override;
 
     void Clear() override;
 
-    osi3::SensorView GetSensorView(osi3::SensorViewConfiguration& conf, int agentId) override;
+    SensorView_ptr GetSensorView(osi3::SensorViewConfiguration& conf, int agentId) override;
 
     const osi3::GroundTruth& GetOsiGroundTruth() const override;
 
@@ -301,7 +326,7 @@ public:
      *
      * \return      A OSI GroundTruth filtered by the given SensorViewConfiguration
      */
-    osi3::GroundTruth GetFilteredGroundTruth(const osi3::SensorViewConfiguration& conf, const Interfaces::MovingObject& reference);
+    GroundTruth_ptr GetFilteredGroundTruth(const osi3::SensorViewConfiguration& conf, const Interfaces::MovingObject& reference);
 
     /*!
      * \brief Retrieves the TrafficSigns located in the given sector (geometric shape)
@@ -519,8 +544,31 @@ public:
 
     void Reset() override;
 
-private:
+protected:
+    //-----------------------------------------------------------------------------
+    //! Provides callback to LOG() macro
+    //!
+    //! @param[in]     logLevel    Importance of log
+    //! @param[in]     file        Name of file where log is called
+    //! @param[in]     line        Line within file where log is called
+    //! @param[in]     message     Message to log
+    //-----------------------------------------------------------------------------
+    void Log(CbkLogLevel logLevel,
+             const char* file,
+             int line,
+             const std::string& message)
+    {
+        if (callbacks)
+        {
+            callbacks->Log(logLevel,
+                           file,
+                           line,
+                           message);
+        }
+    }
 
+private:
+    const CallbackInterface* callbacks;
     uint64_t next_free_uid{0};
 
     std::unordered_map<Id, OdId>              laneIdMapping;
@@ -545,7 +593,10 @@ private:
     RoadGraph roadGraph;
     RoadGraphVertexMapping vertexMapping;
 
-    osi3::GroundTruth osiGroundTruth;
+#ifdef USE_PROTOBUF_ARENA
+    google::protobuf::Arena arena;
+#endif
+    GroundTruth_ptr osiGroundTruth;
 
     const Implementation::InvalidLane invalidLane;
 
