@@ -11,7 +11,6 @@ add_openpass_target(
     ${COMPONENT_SOURCE_DIR}/framework/dynamicAgentTypeGenerator.cpp
     ${COMPONENT_SOURCE_DIR}/framework/dynamicParametersSampler.cpp
     ${COMPONENT_SOURCE_DIR}/framework/dynamicProfileSampler.cpp
-    ${COMPONENT_SOURCE_DIR}/importer/systemConfig.cpp
     ${COMPONENT_SOURCE_DIR}/modelElements/agentType.cpp
     ${COMPONENT_SOURCE_DIR}/modelElements/componentType.cpp
 
@@ -70,6 +69,11 @@ add_openpass_target(
     slaveConfigImporter_Tests.cpp
     ${COMPONENT_SOURCE_DIR}/importer/slaveConfig.cpp
     ${COMPONENT_SOURCE_DIR}/importer/slaveConfigImporter.cpp
+
+    # SystemConfigImporter
+    systemConfigImporter_Tests.cpp
+    ${COMPONENT_SOURCE_DIR}/importer/systemConfig.cpp
+    ${COMPONENT_SOURCE_DIR}/importer/systemConfigImporter.cpp
 
     # VehicleModelsImporter
     vehicleModelsImporter_Tests.cpp

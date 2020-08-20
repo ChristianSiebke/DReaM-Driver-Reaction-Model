@@ -64,10 +64,22 @@ TEST(SystemConfigImporter_UnitTests, ImportParameters)
                                                "<value>1.2,2.3,3.4</value>"
                                            "</parameter>"
                                            "<parameter>"
-                                               "<id>FakeBoolVector</id>"
+                                               "<id>FakeBoolVectorAlpha</id>"
                                                "<type>boolVector</type>"
                                                "<unit/>"
                                                "<value>true,false,true</value>"
+                                           "</parameter>"
+                                           "<parameter>"
+                                               "<id>FakeBoolVectorNum</id>"
+                                               "<type>boolVector</type>"
+                                               "<unit/>"
+                                               "<value>1,0,1</value>"
+                                           "</parameter>"
+                                           "<parameter>"
+                                               "<id>FakeBoolVectorMixed</id>"
+                                               "<type>boolVector</type>"
+                                               "<unit/>"
+                                               "<value>true,0,1,false</value>"
                                            "</parameter>"
                                        "</root>"
                                     );
@@ -75,16 +87,36 @@ TEST(SystemConfigImporter_UnitTests, ImportParameters)
     openpass::parameter::ParameterSetLevel1 parameter;
     EXPECT_NO_THROW(parameter = SystemConfigImporter::ImportSystemParameters(fakeDocumentRoot));
 
-    EXPECT_THAT(parameter, SizeIs(7));
+    EXPECT_THAT(parameter, SizeIs(9));
     EXPECT_THAT(openpass::parameter::Get<bool>(parameter, "FakeBool").value(), Eq(true));
     EXPECT_THAT(openpass::parameter::Get<int>(parameter, "FakeInt").value(), Eq(10));
     EXPECT_THAT(openpass::parameter::Get<double>(parameter, "FakeDouble").value(), Eq(1.2));
     EXPECT_THAT(openpass::parameter::Get<std::string>(parameter, "FakeString").value(), Eq("TestString"));
     EXPECT_THAT(openpass::parameter::Get<std::vector<int>>(parameter, "FakeIntVector").value(), Eq(std::vector<int>{10,11,12}));
     EXPECT_THAT(openpass::parameter::Get<std::vector<double>>(parameter, "FakeDoubleVector").value(), Eq(std::vector<double>{1.2,2.3,3.4}));
-    EXPECT_THAT(openpass::parameter::Get<std::vector<bool>>(parameter, "FakeBoolVector").value(), Eq(std::vector<bool>{true,false,true}));
+    EXPECT_THAT(openpass::parameter::Get<std::vector<bool>>(parameter, "FakeBoolVectorAlpha").value(), Eq(std::vector<bool>{true,false,true}));
+    EXPECT_THAT(openpass::parameter::Get<std::vector<bool>>(parameter, "FakeBoolVectorNum").value(), Eq(std::vector<bool>{true,false,true}));
+    EXPECT_THAT(openpass::parameter::Get<std::vector<bool>>(parameter, "FakeBoolVectorMixed").value(), Eq(std::vector<bool>{true,false,true,false}));
 }
 
+TEST(SystemConfigImporter_UnitTests, ImportParameters_ThrowsOnInvalidBoolean)
+{
+    QDomElement fakeDocumentRoot = documentRootFromString(
+       "<root>"
+           "<parameter>"
+               "<id>FakeBoolVector</id>"
+               "<type>boolVector</type>"
+               "<unit/>"
+               "<value>true,abc,true</value>"
+           "</parameter>"
+       "</root>"
+    );
+
+    openpass::parameter::ParameterSetLevel1 parameter;
+    EXPECT_THROW(parameter = SystemConfigImporter::ImportSystemParameters(fakeDocumentRoot), std::runtime_error);
+
+    EXPECT_THAT(parameter, SizeIs(0));
+}
 
 TEST(SystemConfigImporter_UnitTests, ImportStochasticDistributionSuccessfully)
 {

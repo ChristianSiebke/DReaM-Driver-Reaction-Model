@@ -8,9 +8,13 @@
 *
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
-#include "importerLoggingHelper.h"
 #include "systemConfigImporter.h"
+
+#include <algorithm>
 #include <QCoreApplication>
+
+#include "Common/commonTools.h"
+#include "importerLoggingHelper.h"
 
 using namespace SimulationCommon;
 
@@ -89,18 +93,25 @@ openpass::parameter::ParameterSetLevel1 SystemConfigImporter::ImportSystemParame
         else if (type == "boolVector")
         {
             std::vector<bool> vector{};
-            std::stringstream valueStream(value.toStdString());
 
-            bool item;
-            while (valueStream >> item)
+            const auto items{CommonHelper::TokenizeString(value.toStdString())};
+
+            for (const auto& item : items)
             {
-                vector.push_back(item);
-
-                if (valueStream.peek() == ',')
+                if (item == "0" || item == "false")
                 {
-                    valueStream.ignore();
+                    vector.push_back(false);
+                }
+                else if (item == "1" || item == "true")
+                {
+                    vector.push_back(true);
+                }
+                else
+                {
+                    throw std::runtime_error("Invalid boolean value in SystemConfig parameter at line " + std::to_string(parametersElement.lineNumber()));
                 }
             }
+
             param.emplace_back(id, vector);
         }
         else if (type == "normalDistribution")
