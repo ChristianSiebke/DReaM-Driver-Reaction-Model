@@ -143,34 +143,5 @@ if(MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4250")
 endif()
 
-# packaging
-if(MSVC)
-# TODO
-elseif(MINGW)
-  get_filename_component(MINGW_PATH ${CMAKE_CXX_COMPILER} PATH)
-  string(REGEX REPLACE "\.a$" "" OSILIB "${OSI_LIBRARIES}")
-  string(REGEX REPLACE "\.a$" "" PROTOLIB "${Protobuf_LIBRARIES}")
-  string(REGEX REPLACE "\/lib\/" "/bin/" PROTOLIB "${PROTOLIB}")
-  string(REGEX REPLACE "\.a$" "" FMILIB "${FMILibrary_LIBRARIES}")
-  set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
-    ${MINGW_PATH}/libgcc_s_seh-1.dll
-    ${MINGW_PATH}/libstdc++-6.dll
-    ${MINGW_PATH}/libwinpthread-1.dll
-    $<TARGET_FILE:Qt5::Core>
-    $<TARGET_FILE:Qt5::Xml>
-    ${OSILIB}
-    ${PROTOLIB}
-    ${FMILIB})
-else()
-# TODO
-#  set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
-#    $<TARGET_FILE:Boost::filesystem>
-#    $<TARGET_FILE:Qt5::Core>
-#    $<TARGET_FILE:Qt5::Xml>
-#    ${OSI_LIBRARIES}
-#    ${Protobuf_LIBRARIES}
-#    ${FMILibrary_LIBRARIES})
-endif()
-
 set(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION .)
 include(InstallRequiredSystemLibraries)

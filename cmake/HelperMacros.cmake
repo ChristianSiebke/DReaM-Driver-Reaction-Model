@@ -247,6 +247,7 @@ function(add_openpass_target)
       set_target_properties(${PARSED_ARG_NAME} PROPERTIES INSTALL_RPATH "\$ORIGIN;\$ORIGIN/..")
       install(FILES $<TARGET_FILE:${PARSED_ARG_NAME}> DESTINATION "${DESTDIR}")
       install(TARGETS ${PARSED_ARG_NAME} RUNTIME DESTINATION "${DESTDIR}")
+      add_to_global_target_list(lib_target_list ${PARSED_ARG_NAME})
 
       if(OPENPASS_ADJUST_OUTPUT)
         openpass_adjust_output_dir(${PARSED_ARG_NAME} ${DESTDIR})
@@ -265,6 +266,7 @@ function(add_openpass_target)
       add_executable(${PARSED_ARG_NAME} ${PARSED_ARG_HEADERS} ${PARSED_ARG_SOURCES} ${PARSED_ARG_UIS})
       set_target_properties(${PARSED_ARG_NAME} PROPERTIES INSTALL_RPATH "\$ORIGIN;\$ORIGIN/lib")
       install(TARGETS ${PARSED_ARG_NAME} RUNTIME DESTINATION "${DESTDIR}")
+      add_to_global_target_list(exe_target_list ${PARSED_ARG_NAME})
 
       if(OPENPASS_ADJUST_OUTPUT)
         openpass_adjust_output_dir(${PARSED_ARG_NAME} ${DESTDIR})
@@ -480,6 +482,25 @@ function(add_openpass_target)
       endif()
     endif()
   endif()
+endfunction()
+
+##
+# Function to add a target's destination file to a global list
+#
+# Usage:
+#   add_to_global_target_list(<target-list> <target-name>)
+#
+#  target-list: the global property to append the file to
+#  target-name: the name of the target to be added to the list
+#
+# NOTE:
+# The generator expression won't be evaluated until usage of the target-list inside a scope that is able
+# to parse the expression. Thus, the cmake policy CMP0087 has to be set to NEW for that scope.
+#
+function(add_to_global_target_list target_list target_name)
+  get_property(tmp GLOBAL PROPERTY ${target_list})
+  list(APPEND tmp $<TARGET_FILE:${target_name}>)
+  set_property(GLOBAL PROPERTY ${target_list} ${tmp})
 endfunction()
 
 

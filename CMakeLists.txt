@@ -15,6 +15,12 @@ project(openPASS C CXX)
 
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmake")
 
+# used for collecting a list of targets for dependency resolving and installation at the bottom of this file
+set_property(GLOBAL PROPERTY exe_target_list)
+set_property(GLOBAL PROPERTY lib_target_list)
+
+cmake_policy(SET CMP0087 NEW)   # Install CODE|SCRIPT allow the use of generator expressions.
+
 include(global)
 
 set(CPACK_PACKAGE_NAME openPASS)
@@ -34,3 +40,27 @@ if(WITH_TESTS)
 endif()
 
 include(CPack)
+
+get_property(EXE_TARGET_LIST GLOBAL PROPERTY exe_target_list)
+get_property(LIB_TARGET_LIST GLOBAL PROPERTY lib_target_list)
+
+install(CODE
+  "
+  file(GET_RUNTIME_DEPENDENCIES
+       RESOLVED_DEPENDENCIES_VAR resolved_deps
+       UNRESOLVED_DEPENDENCIES_VAR unresolved_deps
+       EXECUTABLES ${EXE_TARGET_LIST}
+       LIBRARIES ${LIB_TARGET_LIST})
+
+  if(UNIX)
+    list(FILTER resolved_deps EXCLUDE REGEX \"^/lib|^/usr\")
+  endif()
+
+  message(\"Installing deps: \${resolved_deps}\")
+  message(\"Not found deps: \${unresolved_deps}\")
+
+  file(COPY \${resolved_deps}
+       DESTINATION ${CMAKE_INSTALL_PREFIX}
+       FOLLOW_SYMLINK_CHAIN)
+  "
+)
