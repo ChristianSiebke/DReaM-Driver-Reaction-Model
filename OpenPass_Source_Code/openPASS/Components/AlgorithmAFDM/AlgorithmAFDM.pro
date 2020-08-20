@@ -14,6 +14,9 @@
 # module AlgorithmAgentFollowingDriverModel
 #-----------------------------------------------------------------------------/
 
+# shortened .pro file name due to MinGW path length problems
+TARGET = AlgorithmAgentFollowingDriverModel
+
 DEFINES += ALGORITHM_AGENTFOLLOWINGDRIVERMODEL_LIBRARY
 CONFIG += OPENPASS_LIBRARY
 

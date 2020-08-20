@@ -15,7 +15,7 @@ include(../../../testing.pri)
 
 SPAWNPOINTS = $$OPEN_SRC/CoreModules/SpawnPoints
 
-UNIT_UNDER_TEST = $$SPAWNPOINTS/SpawnPointRuntimeCommon_OSI
+UNIT_UNDER_TEST = $$SPAWNPOINTS/SpawnPointRuntimeCommon
 
 OPENPASS_SLAVE = $$OPEN_SRC/CoreFramework/OpenPassSlave
 

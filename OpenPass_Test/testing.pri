@@ -81,12 +81,12 @@ QMAKE_LFLAGS += -Wl,-rpath=\'\$\$ORIGIN\'
 
 #thirdparty restructure workaround
 win32 {
-    QMAKE_CFLAGS += -isystem $$PWD\..\deps\thirdParty\win64\boost\include
+    QMAKE_CFLAGS += -isystem $$PWD\..\deps\thirdParty\win64\boost\include\boost-1_72
     QMAKE_CFLAGS += -isystem $$PWD\..\deps\thirdParty\win64\FMILibrary\include
     QMAKE_CFLAGS += -isystem $$PWD\..\deps\thirdParty\win64\googletest\include
     QMAKE_CFLAGS += -isystem $$PWD\..\deps\thirdParty\win64\osi\include
     QMAKE_CFLAGS += -isystem $$PWD\..\deps\thirdParty\win64\protobuf\include
-    QMAKE_CXXFLAGS += -isystem $$PWD\..\deps\thirdParty\win64\boost\include
+    QMAKE_CXXFLAGS += -isystem $$PWD\..\deps\thirdParty\win64\boost\include\boost-1_72
     QMAKE_CXXFLAGS += -isystem $$PWD\..\deps\thirdParty\win64\FMILibrary\include
     QMAKE_CXXFLAGS += -isystem $$PWD\..\deps\thirdParty\win64\googletest\include
     QMAKE_CXXFLAGS += -isystem $$PWD\..\deps\thirdParty\win64\osi\include

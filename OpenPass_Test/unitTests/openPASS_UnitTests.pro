@@ -98,7 +98,7 @@ spawnPointScenario_Tests.file = \
     $$PWD/CoreModules/SpawnPointScenario/spawnPointScenario_Tests.pro
 
 spawnPointRuntimeCommon_Tests.file = \
-    $$PWD/CoreModules/SpawnPointRuntimeCommon_OSI/spawnPointRuntimeCommon_Tests.pro
+    $$PWD/CoreModules/SpawnPointRuntimeCommon/spawnPointRuntimeCommon_Tests.pro
 
 spawnPointWorldAnalyzer_Tests.file = \
     $$PWD/CoreModules/SpawnPointWorldAnalyzer/spawnPointWorldAnalyzer_Tests.pro
