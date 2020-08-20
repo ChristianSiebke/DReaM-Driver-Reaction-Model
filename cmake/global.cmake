@@ -78,11 +78,21 @@ find_package(FMILibrary)
 option(WITH_SIMCORE "Build OSI based scenario simulation" ON)
 option(WITH_GUI "Build GUI" OFF)
 option(WITH_TESTS "Build unit tests" ON)
+option(WITH_EXTENDED_OSI "Assume an extended version of OSI is available" OFF)
+option(WITH_PROTOBUF_ARENA "Make use of protobuf arena allocation" ON)
 
 if(WITH_TESTS)
   find_package(GTest)
   # as GMock currently doesn't provide a find_package config, gmock file location is derived from gtest in HelperMacros.cmake
   #find_package(GMock)
+endif()
+
+if(WITH_EXTENDED_OSI)
+  add_compile_definitions(USE_EXTENDED_OSI)
+endif()
+
+if(WITH_PROTOBUF_ARENA)
+  add_compile_definitions(USE_PROTOBUF_ARENA)
 endif()
 
 if(WIN32)
