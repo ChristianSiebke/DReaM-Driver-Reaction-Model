@@ -155,6 +155,8 @@ int main(int argc, char* argv[])
 void SetupLogging(LogLevel logLevel, const std::string& logFile, const std::list<std::string>& bufferedMessages)
 {
     QDir logFilePath(QString::fromStdString(logFile));
+    QDir logFileDir = QFileInfo(QString::fromStdString(logFile)).absoluteDir();
+    logFileDir.mkpath(".");
     LogOutputPolicy::SetFile(logFilePath.absolutePath().toStdString());
 
     LogFile::ReportingLevel() = logLevel;
