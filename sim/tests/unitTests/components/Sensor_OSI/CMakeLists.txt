@@ -18,6 +18,7 @@ add_openpass_target(
 
   HEADERS
     sensorOSI_Tests.h
+    sensorOSI_TestsCommon.h
     ${COMPONENT_SOURCE_DIR}/objectDetectorBase.h
     ${COMPONENT_SOURCE_DIR}/sensorGeometric2D.h
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/OWL/DataTypes.h
