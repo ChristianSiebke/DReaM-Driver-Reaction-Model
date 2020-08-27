@@ -16,6 +16,7 @@ SUBDIRS = \
         CoreModules/EventDetector \
         CoreModules/Manipulator \
         CoreModules/Observation_Log \
+        CoreModules/Observation_LogAgent \
         CoreModules/SpawnPoints/SpawnPointScenario \
         CoreModules/SpawnPoints/SpawnPointPreRunCommon \
         CoreModules/SpawnPoints/SpawnPointRuntimeCommon \
@@ -31,7 +32,9 @@ SUBDIRS = \
         Components/AlgorithmAFDM \
         Components/ComponentController \
         Components/Dynamics_Collision \
+        Components/Dynamics_CollisionPostCrash \
         Components/Dynamics_RegularDriving \
+        Components/Dynamics_RegularTwoTrack \
         Components/Dynamics_TF \
         Components/LimiterAccVehComp \
         Components/OpenScenarioActions \

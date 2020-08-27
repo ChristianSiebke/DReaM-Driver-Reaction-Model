@@ -36,7 +36,9 @@ SOURCES += \
     NoOperationManipulator.cpp \
     RemoveAgentsManipulator.cpp \
     SpeedActionManipulator.cpp \
-    TrajectoryManipulator.cpp
+    TrajectoryManipulator.cpp \
+    srcCollisionPostCrash/collisionDetection_Impact_implementation.cpp \
+    srcCollisionPostCrash/polygon.cpp
 
 EVENT_HEADERS += \
     ../../Common/Events/componentStateChangeEvent.h \
@@ -57,4 +59,6 @@ HEADERS += \
     NoOperationManipulator.h \
     RemoveAgentsManipulator.h \
     SpeedActionManipulator.h \
-    TrajectoryManipulator.h
+    TrajectoryManipulator.h \
+    srcCollisionPostCrash/collisionDetection_Impact_implementation.h \
+    srcCollisionPostCrash/polygon.h

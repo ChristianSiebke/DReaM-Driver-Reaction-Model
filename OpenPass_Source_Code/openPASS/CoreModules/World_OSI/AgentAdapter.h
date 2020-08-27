@@ -160,9 +160,19 @@ public:
         return collisionPartners;
     }
 
+    PostCrashVelocity GetPostCrashVelocity() const override
+    {
+        return postCrashVelocity;
+    }
+
     VehicleModelParameters GetVehicleModelParameters() const override
     {
         return vehicleModelParameters;
+    }
+
+    void SetPostCrashVelocity(PostCrashVelocity postCrashVelocity) override
+    {
+        this->postCrashVelocity = postCrashVelocity;
     }
 
     void SetPositionX(double value) override
@@ -943,6 +953,7 @@ private:
     mutable std::vector<GlobalRoadPosition> boundaryPoints;
 
     std::vector<std::pair<ObjectTypeOSI, int>> collisionPartners;
+    PostCrashVelocity postCrashVelocity {};
     bool isValid = true;
 
     int id{0};

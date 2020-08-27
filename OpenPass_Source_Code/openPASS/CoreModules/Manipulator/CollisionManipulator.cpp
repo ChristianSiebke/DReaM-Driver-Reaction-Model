@@ -15,6 +15,7 @@
 #include "CollisionManipulator.h"
 
 #include <iostream>
+
 #include "Common/Events/collisionEvent.h"
 
 CollisionManipulator::CollisionManipulator(WorldInterface *world,
@@ -41,7 +42,10 @@ void CollisionManipulator::Trigger([[maybe_unused]] int time)
             {
                 AgentInterface *collisionOpponent = world->GetAgent(event->collisionOpponentId);
                 UpdateCollision(collisionAgent, collisionOpponent);
+                CalculateCrash(collisionAgent, collisionOpponent, event);
                 eventNetwork->AddCollision(event->collisionOpponentId);
+                // TODO: use to-be-added core data publisher
+                //eventNetwork->Log(event);
             }
             else
             {
@@ -59,6 +63,33 @@ void CollisionManipulator::Trigger([[maybe_unused]] int time)
             }
         }
     }
+}
+
+void CollisionManipulator::CalculateCrash(AgentInterface *agent, AgentInterface *opponent, std::shared_ptr<openpass::events::CollisionEvent> event)
+{
+    //! Stores calculated dynamics for ego/host agent
+    PostCrashDynamic postCrashDynamic1;
+    //! Stores calculated dynamics for opponent agent
+    PostCrashDynamic postCrashDynamic2;
+
+    int timeOfFirstContact = 0;
+    if (!collisionPostCrash.CreatePostCrashDynamics(agent,
+                                                    opponent,
+                                                    &postCrashDynamic1,
+                                                    &postCrashDynamic2,
+                                                    timeOfFirstContact)) {
+        std::cout << "PostCrash Calculation failed" << std::endl;
+    }
+
+    agent->SetPostCrashVelocity({true,
+                                 postCrashDynamic1.GetVelocity(),
+                                 postCrashDynamic1.GetVelocityDirection(),
+                                 postCrashDynamic1.GetYawVelocity()});
+    opponent->SetPostCrashVelocity({true,
+                                    postCrashDynamic2.GetVelocity(),
+                                    postCrashDynamic2.GetVelocityDirection(),
+                                    postCrashDynamic2.GetYawVelocity()});
+    event->AddParameters(collisionPostCrash.GetCollisionAngles(), postCrashDynamic1, postCrashDynamic2);
 }
 
 void CollisionManipulator::UpdateCollision(AgentInterface *agent, AgentInterface *opponent)

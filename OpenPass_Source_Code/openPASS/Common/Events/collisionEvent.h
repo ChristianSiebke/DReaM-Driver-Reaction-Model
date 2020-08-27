@@ -1,5 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2017, 2018, 2019 in-tech GmbH
+*               2020 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -17,6 +18,8 @@
 #pragma once
 
 #include "Common/Events/basicEvent.h"
+#include "Common/globalDefinitions.h"
+#include "Common/postCrashDynamic.h"
 
 namespace openpass::events {
 
@@ -40,6 +43,32 @@ public:
     bool collisionWithAgent;
     int collisionAgentId;
     int collisionOpponentId;
+
+    void AddParameters(CollisionAngles angles, PostCrashDynamic postCrashDyn1, PostCrashDynamic postCrashDyn2)
+    {
+        parameter.emplace("Velocity", postCrashDyn1.GetVelocity());
+        parameter.emplace("Velocity", postCrashDyn1.GetVelocity());
+        parameter.emplace("VelocityChange", postCrashDyn1.GetVelocityChange());
+        parameter.emplace("VelocityDirection", postCrashDyn1.GetVelocityDirection());
+        parameter.emplace("YawVelocity", postCrashDyn1.GetYawVelocity());
+        parameter.emplace("PointOfContactLocalX", postCrashDyn1.GetPointOfContactLocal().x);
+        parameter.emplace("PointOfContactLocalY", postCrashDyn1.GetPointOfContactLocal().y);
+        parameter.emplace("CollisionVelocity", postCrashDyn1.GetCollisionVelocity());
+        parameter.emplace("Sliding", postCrashDyn1.GetSliding());
+        parameter.emplace("OpponentVelocity", postCrashDyn2.GetVelocity());
+        parameter.emplace("OpponentVelocityChange", postCrashDyn2.GetVelocityChange());
+        parameter.emplace("OpponentVelocityDirection", postCrashDyn2.GetVelocityDirection());
+        parameter.emplace("OpponentYawVelocity", postCrashDyn2.GetYawVelocity());
+        parameter.emplace("OpponentPointOfContactLocalX", postCrashDyn2.GetPointOfContactLocal().x);
+        parameter.emplace("OpponentPointOfContactLocalY", postCrashDyn2.GetPointOfContactLocal().y);
+        parameter.emplace("OpponentCollisionVelocity", postCrashDyn2.GetCollisionVelocity());
+        parameter.emplace("OpponentSliding", postCrashDyn2.GetSliding());
+        parameter.emplace("OYA", angles.OYA);
+        parameter.emplace("HCPAo", angles.HCPAo);
+        parameter.emplace("OCPAo", angles.OCPAo);
+        parameter.emplace("HCPA", angles.HCPA);
+        parameter.emplace("OCPA", angles.OCPA);
+    }
 };
 
 } // namespace openpass::events

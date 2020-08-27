@@ -36,6 +36,8 @@ class FakeAgent : public FakeWorldObject, public AgentInterface
     MOCK_CONST_METHOD0(GetAccelerationX, double());
     MOCK_CONST_METHOD0(GetAccelerationY, double());
     MOCK_CONST_METHOD2(GetCollisionData, std::vector<void *>(int collisionPartnerId, int collisionDataId));
+    MOCK_CONST_METHOD0(GetPostCrashVelocity, PostCrashVelocity());
+    MOCK_METHOD1(SetPostCrashVelocity, void(PostCrashVelocity));
     MOCK_CONST_METHOD0(GetCollisionPartners, std::vector<CollisionPartner>());
     MOCK_METHOD1(SetPositionX, void(double positionX));
     MOCK_METHOD1(SetPositionY, void(double positionY));

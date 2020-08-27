@@ -20,7 +20,9 @@
 
 #pragma once
 
+#include "Common/Events/collisionEvent.h"
 #include "ManipulatorCommonBase.h"
+#include "collisionDetection_Impact_implementation.h"
 
 //-----------------------------------------------------------------------------
 /** \brief This class notifies all relevant modules about the collision.
@@ -57,6 +59,10 @@ private:
     * existing collisionPartners of both.
     */
     void UpdateCollision(AgentInterface* agent, AgentInterface* opponent);
+
+    void CalculateCrash(AgentInterface* agent, AgentInterface* opponent, std::shared_ptr<openpass::events::CollisionEvent> event);
+    //! Handles the calculation of post crash dynamics
+    CollisionDetectionPostCrash collisionPostCrash;
 };
 
 
