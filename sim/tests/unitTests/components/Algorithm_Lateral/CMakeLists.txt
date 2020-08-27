@@ -9,11 +9,13 @@ add_openpass_target(
     algorithmLateral_Tests.cpp
     testResourceManager.cpp
     ${COMPONENT_SOURCE_DIR}/lateralImpl.cpp
+    ${COMPONENT_SOURCE_DIR}/steeringController.cpp
 
   HEADERS
     testResourceManager.h
     testAlgorithmLateralImplementation.h
     ${COMPONENT_SOURCE_DIR}/lateralImpl.h
+    ${COMPONENT_SOURCE_DIR}/steeringController.h
 
   INCDIRS
     ${COMPONENT_SOURCE_DIR}

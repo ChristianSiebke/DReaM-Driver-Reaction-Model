@@ -84,44 +84,57 @@ public:
     double gainHeadingError {7.5};
     double kappaManoeuvre {0.};
     double kappaRoad {0.};
-    std::vector <double> curvatureOfSegmentsToFarPoint {0.};
     std::vector <double> curvatureOfSegmentsToNearPoint {0.};
+    std::vector <double> curvatureOfSegmentsToFarPoint {0.};
 
-        //-----------------------------------------------------------------------------
-        //! Constructor
-        //-----------------------------------------------------------------------------
-        LateralSignal(LateralSignal &other) :
-            LateralSignal(
-                other.componentState,
-                other.laneWidth,
-                other.lateralDeviation,
-                other.gainLateralDeviation,
-                other.headingError,
-                other.gainHeadingError,
-                other.kappaManoeuvre
-                )
-        {
-        }
-
-        //-----------------------------------------------------------------------------
-        //! Constructor
-        //-----------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------
+    //! Constructor
+    //-----------------------------------------------------------------------------
+    LateralSignal(LateralSignal &other) :
         LateralSignal(
-                ComponentState componentState,
-                double laneWidth,
-                double lateralDeviation,
-                double gainLateralDeviation,
-                double headingError,
-                double gainHeadingError,
-                double kappaManoeuvre
-                ):
-            laneWidth(laneWidth),
-            lateralDeviation(lateralDeviation),
-            gainLateralDeviation(gainLateralDeviation),
-            headingError(headingError),
-            gainHeadingError(gainHeadingError),
-            kappaManoeuvre(kappaManoeuvre)
-        {
-            this->componentState = componentState;
-        }
+            other.componentState,
+            other.laneWidth,
+            other.lateralDeviation,
+            other.gainLateralDeviation,
+            other.headingError,
+            other.gainHeadingError,
+            other.kappaManoeuvre
+            )
+    {
+    }
+
+    //-----------------------------------------------------------------------------
+    //! Constructor
+    //-----------------------------------------------------------------------------
+    LateralSignal(
+            ComponentState componentState,
+            double laneWidth,
+            double lateralDeviation,
+            double gainLateralDeviation,
+            double headingError,
+            double gainHeadingError,
+            double kappaManoeuvre
+            ):
+        laneWidth(laneWidth),
+        lateralDeviation(lateralDeviation),
+        gainLateralDeviation(gainLateralDeviation),
+        headingError(headingError),
+        gainHeadingError(gainHeadingError),
+        kappaManoeuvre(kappaManoeuvre)
+    {
+        this->componentState = componentState;
+    }
+
+    LateralSignal& operator=(const LateralSignal& other)
+    {
+        componentState = other.componentState;
+        laneWidth = other.laneWidth;
+        lateralDeviation = other.lateralDeviation;
+        gainLateralDeviation = other.gainLateralDeviation;
+        headingError = other.headingError;
+        gainHeadingError = other.gainHeadingError;
+        kappaManoeuvre = other.kappaManoeuvre;
+
+        return *this;
+    }
 };

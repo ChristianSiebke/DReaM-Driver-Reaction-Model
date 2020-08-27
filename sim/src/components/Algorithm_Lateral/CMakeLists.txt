@@ -8,10 +8,12 @@ add_openpass_target(
   HEADERS
     algorithm_lateral.h
     src/lateralImpl.h
+    src/steeringController.h
 
   SOURCES
     algorithm_lateral.cpp
     src/lateralImpl.cpp
+    src/steeringController.cpp
 
   LIBRARIES
     Qt5::Core

@@ -54,36 +54,24 @@ public:
 
     ~TestAlgorithmLateralImplementation(){}
 
-    void SetGainLateralDeviation(double gainLateralDeviation) {in_gainLateralDeviation = gainLateralDeviation;}
-    void SetSteeringRatio(double steeringRatio) {in_steeringRatio = steeringRatio;}
-    void SetWheelBase(double WheelBase) {in_wheelBase = WheelBase;}
-    void SetLongitudinalVelocity(double longitudinalVelocity) {velocity = longitudinalVelocity;}
-    void SetLateralDeviation(double lateralDeviation) {in_lateralDeviation = lateralDeviation;}
-    void SetGainHeadingError(double gainHeadingError) {in_gainHeadingError = gainHeadingError;}
-    void SetHeadingError(double headingError) {in_headingError = headingError;}
-    void SetCurvatureRoad(double curvature) {in_kappaRoad = curvature;}
-    void SetCurvatureManeuver(double curvature) {in_kappaManoeuvre = curvature;}
-    void SetCurvatureNear(std::vector <double> curvature) {in_curvatureOfSegmentsToNearPoint = curvature;}
-    void SetCurvatureFar(std::vector <double> curvature) {in_curvatureOfSegmentsToFarPoint = curvature;}
-    void SetSteeringMax(double steeringMax) {in_steeringMax =  steeringMax;}
-    void SetActualSteeringWheelAngle(double angle) {this->steeringWheelAngle = angle;}
     void SetDesiredSteeringWheelAngle(double Angle) {out_desiredSteeringWheelAngle = Angle;}
     void SetIsActive(bool active) {isActive = active;}
-    void SetTimeLast(int timeLast) {this->timeLast = timeLast;}
+
+    void SetLateralInput(const LateralSignal lateralSignal) {steeringController.SetLateralInput(lateralSignal);}
+    void SetVehicleParameter(const double &steeringRatio,
+                             const double &maximumSteeringWheelAngleAmplitude,
+                             const double &wheelbase)
+    {
+        steeringController.SetVehicleParameter(steeringRatio,
+                                               maximumSteeringWheelAngleAmplitude,
+                                               wheelbase);
+    }
+    void SetVelocityAndSteeringWheelAngle(const double &velocity,
+                                          const double &steeringWheelAngle)
+    {
+        steeringController.SetVelocityAndSteeringWheelAngle(velocity, steeringWheelAngle);
+    }
 
     double GetDesiredSteeringWheelAngle() {return out_desiredSteeringWheelAngle;}
-    double GetGainHeadingError() {return in_gainHeadingError;}
-    double GetGainLateralDeviation() {return in_gainLateralDeviation;}
-    double GetHeadingError() {return in_headingError;}
-    double GetKappaRoad() {return in_kappaRoad;}
-    double GetKappaManeuver() {return in_kappaManoeuvre;}
-    std::vector <double> GetKappaNear() {return in_curvatureOfSegmentsToNearPoint;}
-    std::vector <double> GetKappaFar() {return in_curvatureOfSegmentsToFarPoint;}
-    double GetLateralDeviation() {return in_lateralDeviation;}
-    double GetLongitudinalVelocity() {return velocity;}
-    double GetSteeringRatio() {return in_steeringRatio;}
-    double GetMaximumSteeringWheelAngleAmplitude() {return in_steeringMax;}
-    double GetWheelBase() {return in_wheelBase;}
-    double GetAbsoluteVelocity() {return velocity;}
 };
 

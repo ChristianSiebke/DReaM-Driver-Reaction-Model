@@ -28,8 +28,10 @@ INCLUDEPATH += \
 
 SOURCES += \
     algorithm_lateral.cpp \
-    src/lateralImpl.cpp
+    src/lateralImpl.cpp \
+    src/steeringController.cpp
 
 HEADERS += \
     algorithm_lateral.h \
-    src/lateralImpl.h
+    src/lateralImpl.h \
+    src/steeringController.h

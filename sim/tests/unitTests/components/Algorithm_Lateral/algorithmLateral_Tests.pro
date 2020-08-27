@@ -23,10 +23,12 @@ INCLUDEPATH += . \
 
 HEADERS += \
     $$UNIT_UNDER_TEST/lateralImpl.h \
+    $$UNIT_UNDER_TEST/steeringController.h \
     testResourceManager.h
 
 SOURCES += \
     $$UNIT_UNDER_TEST/lateralImpl.cpp \
+    $$UNIT_UNDER_TEST/steeringController.cpp \
     testResourceManager.cpp \
     algorithmLateral_Tests.cpp
 

@@ -13,6 +13,7 @@
 
 #include "include/modelInterface.h"
 #include "common/primitiveSignals.h"
+#include "steeringController.h"
 
 /** \addtogroup Algorithm_Lateral
 * @{
@@ -162,60 +163,10 @@ public:
     void Trigger(int time);
 
 protected:
-    // --- module internal functions
+    SteeringController steeringController{};
 
-    // --- module internal variables
-    //  --- Inputs
-    //! Time to Average regulation over
-    double tAverage {0.};
-    //! Current lateral deviation regarding trajectory [m].
-    double in_lateralDeviation = 0;
-    //! Gain for P controller lateral deviation error [-].
-    double in_gainLateralDeviation = 20.0;
-    //! Current heading error regarding trajectory [rad].
-    double in_headingError = 0;
-    //! Gain for P controller heading error [-].
-    double in_gainHeadingError = 7.5;
-    //! Set value for trajectory curvature due to manouevre[1/m].
-    double in_kappaManoeuvre = 0;
-    //! Set value for curvature of road at reference point[1/m].
-    double in_kappaRoad = 0;
-    //! curvature at the middle of each segment between reference point and near point
-    std::vector <double> in_curvatureOfSegmentsToNearPoint {0.};
-    //! curvature at the middle of each segment between near point and far point
-    std::vector <double> in_curvatureOfSegmentsToFarPoint {0.};
-    //! current velocity
-    double velocity = 0.0;
-    //! current angle of the steering wheel
-    double steeringWheelAngle = 0.0;
-
-    //  --- Outputs
     //! The steering wheel angle wish of the driver in degree.
     double out_desiredSteeringWheelAngle{0};
-    /** @} @} */
-
-    //  --- Internal Parameters
-
-    //! The steering ratio of the vehicle.
-    double in_steeringRatio = 10.7;
-    //! The maximum steering wheel angle of the car in both directions in degree.
-    double in_steeringMax = 180.0;
-    //! The wheelbase of the car in m.
-    double in_wheelBase = 2.89;
-    //! Helper constant to convert radiant into degree.
-    const double RadiantToDegree = 57.295779513082320876798154814105;
-    /** @} @} */
 
     bool isActive{false};
-
-    //! Previous scheduling time (for calculation of cycle time lenght).
-    int timeLast {-100};
-     //! moving average of total steering angle
-    double deltaHLast {0.};
-    //! running average of  mean curvature up to NearPoint
-    double meanCurvatureToNearPointSmoothLast {0.};
-    //! running average of  mean curvature from NearPoint up to FarPoint
-    double meanCurvatureToFarPointSmoothLast {0.};
-    //! running average of kappaRoad at referencepoint
-    double curvatureRoadSmoothLast {0.};
 };

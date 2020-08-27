@@ -70,23 +70,25 @@ TEST_P(LateralDriverTrigger, LateralDriver_CheckTriggerFunction)
     TestAlgorithmLateralImplementation* stubLateralDriver = resourceManager.stubLateralDriver;
 
     // Set data for test
-    stubLateralDriver->SetTimeLast(0.);
-    stubLateralDriver->SetGainLateralDeviation(20.);
-    stubLateralDriver->SetSteeringRatio(10.);
-    stubLateralDriver->SetWheelBase(3.);
-    stubLateralDriver->SetLongitudinalVelocity(data.input_LongitudinalVelocity);
-    stubLateralDriver->SetLateralDeviation(data.input_LateralDeviation);
-    stubLateralDriver->SetGainHeadingError(10.);
-    stubLateralDriver->SetHeadingError(data.input_HeadingError);
-    stubLateralDriver->SetCurvatureRoad(data.input_KappaRoad);
-    stubLateralDriver->SetCurvatureManeuver(data.input_KappaManeuver);
-    stubLateralDriver->SetCurvatureFar(data.input_CurvatureSegmentsFar);
-    stubLateralDriver->SetCurvatureNear(data.input_CurvatureSegmentsNear);
-    stubLateralDriver->SetSteeringMax(360.0);
-    stubLateralDriver->SetActualSteeringWheelAngle(data.input_LastSteeringWheelAngle);
+    LateralSignal lateralSignal {ComponentState::Acting,
+                                0.0,
+                                data.input_LateralDeviation,
+                                20.,
+                                data.input_HeadingError,
+                                10.,
+                                data.input_KappaManeuver,
+                                data.input_KappaRoad,
+                                data.input_CurvatureSegmentsNear,
+                                data.input_CurvatureSegmentsFar};
+    stubLateralDriver->SetLateralInput(lateralSignal);
+    stubLateralDriver->SetVehicleParameter(10.,
+                                           360.0,
+                                           3.);
+    stubLateralDriver->SetVelocityAndSteeringWheelAngle(data.input_LongitudinalVelocity,
+                                                        data.input_LastSteeringWheelAngle);
 
     // Call test
-    stubLateralDriver->Trigger(100);
+    stubLateralDriver->Trigger(0);
     double result = stubLateralDriver->GetDesiredSteeringWheelAngle();
 
     // Results must be within 1% of analytical results (since excact matches can't be guaranteed)
@@ -160,92 +162,6 @@ struct DataFor_AlgorithmLateralDriverImplementation_UpdateInput
                 << "| input_AbsoluteVelocity (double): "                    << obj.input_AbsoluteVelocity;
      }
 };
-
-class LateralDriverUpdateInput : public ::testing::Test,
-                            public ::testing::WithParamInterface<DataFor_AlgorithmLateralDriverImplementation_UpdateInput>
-{
-};
-
-TEST_P(LateralDriverUpdateInput, LateralDriver_CheckUpdateInputFunction)
-{
-    // Get Resources for testing
-    DataFor_AlgorithmLateralDriverImplementation_UpdateInput data = GetParam();
-
-    TestResourceManager resourceManager;
-    TestAlgorithmLateralImplementation* stubLateralDriver = resourceManager.stubLateralDriver;
-
-    // Create Signals
-    // Signal from Driver to module AlgorithmLateralDriver
-    const std::shared_ptr<SignalInterface const> signal0 = std::make_shared<LateralSignal const>(
-                                                               ComponentState::Acting,
-                                                               0.,
-                                                               data.input_LateralDeviation, data.input_GainLateralDeviation, data.input_HeadingError,
-                                                               data.input_GainHeadingError, data.input_KappaManeuver, data.input_KappaRoad,
-                                                               data.input_CurvatureOfSegmentsToNearPoint, data.input_CurvatureOfSegmentsToFarPoint);
-    int localLinkId0{0};
-    // Signal from Parameters_Vehicle (vehicle model parameters) to module AlgorithmLateralDriver
-    VehicleModelParameters vehicleParameters;
-    vehicleParameters.steeringRatio = data.input_SteeringRatio;
-    vehicleParameters.maximumSteeringWheelAngleAmplitude = data.input_MaximumSteeringWheelAngleAmplitude;
-    vehicleParameters.wheelbase = data.input_WheelBase;
-    const std::shared_ptr<SignalInterface const> signal1 = std::make_shared<ParametersVehicleSignal const>(vehicleParameters);
-    int localLinkId1{100};
-    // Signal from SensorDriver (own vehicle) to module AlgorithmLateralDriver
-    OwnVehicleInformation ownVehicle;
-    GeometryInformation geometryInfo;
-    TrafficRuleInformation trafficRuleInfo;
-    SurroundingObjects surroundingObjects;
-    ownVehicle.absoluteVelocity = data.input_AbsoluteVelocity;
-    const std::shared_ptr<SignalInterface const> signal2 = std::make_shared<SensorDriverSignal const>(ownVehicle, trafficRuleInfo, geometryInfo, surroundingObjects);
-    int localLinkId2{101};
-
-    // Call tests
-    int time{100};
-    stubLateralDriver->UpdateInput(localLinkId0, signal0, time);
-    stubLateralDriver->UpdateInput(localLinkId1, signal1, time);
-    stubLateralDriver->UpdateInput(localLinkId2, signal2, time);
-
-    // Evaluate result
-    ASSERT_EQ(data.input_GainHeadingError, stubLateralDriver->GetGainHeadingError());
-    ASSERT_EQ(data.input_GainLateralDeviation, stubLateralDriver->GetGainLateralDeviation());
-    ASSERT_EQ(data.input_HeadingError, stubLateralDriver->GetHeadingError());
-    ASSERT_EQ(data.input_KappaManeuver, stubLateralDriver->GetKappaManeuver());
-    ASSERT_EQ(data.input_KappaRoad, stubLateralDriver->GetKappaRoad());
-    ASSERT_EQ(data.input_CurvatureOfSegmentsToFarPoint, stubLateralDriver->GetKappaFar());
-    ASSERT_EQ(data.input_CurvatureOfSegmentsToNearPoint, stubLateralDriver->GetKappaNear());
-    ASSERT_EQ(data.input_LateralDeviation, stubLateralDriver->GetLateralDeviation());
-    ASSERT_EQ(data.input_SteeringRatio, stubLateralDriver->GetSteeringRatio());
-    ASSERT_EQ(data.input_MaximumSteeringWheelAngleAmplitude, stubLateralDriver->GetMaximumSteeringWheelAngleAmplitude());
-    ASSERT_EQ(data.input_WheelBase, stubLateralDriver->GetWheelBase());
-    ASSERT_EQ(data.input_AbsoluteVelocity, stubLateralDriver->GetAbsoluteVelocity());
-}
-
-/**********************************************************
- * The test data (must be defined below test)             *
- **********************************************************/
-INSTANTIATE_TEST_CASE_P(Default, LateralDriverUpdateInput,testing::Values
-(
-   /*
-        bool                    input_NotifyCollistion;
-        double                  input_LateralDeviation;
-        double                  input_GainLateralDeviation;
-        double                  input_HeadingError;
-        double                  input_GainHeadingError;
-        double                  input_KappaManeuver;
-        double                  input_KappaRoad;
-        double                  input_SteeringRatio;
-        double                  input_MaximumSteeringWheelAngleAmplitude;
-        double                  input_WheelBase;
-        double                  input_AbsoluteVelocity;
-        std::vector<double>     input_CurvatureOfSegmentsToNearPoint;
-        std::vector<double>     input_CurvatureOfSegmentsToFarPoint;
-   */
-
-    DataFor_AlgorithmLateralDriverImplementation_UpdateInput{ true,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9., 10., 11., {12., 13.}, {14., 15.}},
-    DataFor_AlgorithmLateralDriverImplementation_UpdateInput{false, 98., 97., 96., 95., 94., 93., 92., 91., 90., 89., {88., 87.}, {86., 85.}}
-)
-);
-
 
 /********************************************
  * CHECK Update output                      *
