@@ -32,11 +32,16 @@ set(CPACK_PACKAGE_CHECKSUM "SHA1")
 set(CPACK_STRIP_FILES TRUE)
 
 # descend to sources
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/OpenPass_Source_Code)
+if(WITH_SIMCORE)
+  add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/sim)
+endif()
+
+if(WITH_GUI)
+  add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/gui)
+endif()
 
 if(WITH_TESTS)
   enable_testing()
-  add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/OpenPass_Test)
 endif()
 
 include(CPack)

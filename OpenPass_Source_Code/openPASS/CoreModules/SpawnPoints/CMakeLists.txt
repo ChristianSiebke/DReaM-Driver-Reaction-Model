@@ -1,4 +1,0 @@
-#add_subdirectory(SpawnPoint_Start)
-add_subdirectory(SpawnPointPreRunCommon)
-add_subdirectory(SpawnPointRuntimeCommon)
-add_subdirectory(SpawnPointScenario)

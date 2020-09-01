@@ -34,8 +34,27 @@ if [ $# -lt 2 ]; then
   exit 1
 fi
 
-if [ ! -d "$1" -o ! -e "$1/OpenPassSlave" ]; then
-  echo "Invalid simulator directory"
+if [ ! -d "$1" ]; then
+  echo "Given simulator directory is not a directory"
+  echo
+  showUsage
+  exit 1
+fi
+
+SLAVE_FOUND=0
+SLAVE_NAME="OpenPassSlave"
+
+if [ -e "$1/$SLAVE_NAME" ]; then
+  SLAVE_FOUND=1
+else
+  SLAVE_NAME="${SLAVE_NAME}.exe"
+  if [ -e "$1/$SLAVE_NAME" ]; then
+    SLAVE_FOUND=1
+  fi
+fi
+
+if [ $SLAVE_FOUND -eq 0 ]; then
+  echo "Simulator executable not found"
   echo
   showUsage
   exit 1
@@ -64,7 +83,7 @@ while read -r -d $'\0' CONFIG_FULL; do
   cp -r "$CONFIG_FULL"/* .
 
   SUCCESS=0
-  ./OpenPassSlave "$@" && SUCCESS=1
+  ./$SLAVE_NAME "$@" && SUCCESS=1
 
   if [ $SUCCESS -eq 1 ]; then
     echo "Simulator result: SUCCESS"
