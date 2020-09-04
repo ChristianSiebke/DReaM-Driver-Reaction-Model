@@ -18,6 +18,7 @@
 
 class ScenarioInterface;
 class WorldInterface;
+class PublisherInterface;
 
 namespace SimulationSlave
 {
@@ -31,7 +32,8 @@ class CORESLAVEEXPORT ManipulatorNetwork : public ManipulatorNetworkInterface
 {
 public:
     ManipulatorNetwork(ManipulatorBinding *manipulatorBinding,
-                       WorldInterface *world);
+                       WorldInterface *world,
+                       PublisherInterface* publisher);
     ManipulatorNetwork(const ManipulatorNetwork&) = delete;
     ManipulatorNetwork(ManipulatorNetwork&&) = delete;
     ManipulatorNetwork& operator=(const ManipulatorNetwork&) = delete;
@@ -67,6 +69,7 @@ private:
     ManipulatorBinding *manipulatorBinding;
     std::vector<const Manipulator*> manipulators;
     WorldInterface *world;
+    PublisherInterface *publisher;
 };
 
 }// namespace SimulationSlave

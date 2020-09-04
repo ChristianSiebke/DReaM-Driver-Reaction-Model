@@ -21,6 +21,7 @@ FrameworkModuleContainer::FrameworkModuleContainer(
     CallbackInterface *callbacks) :
     dataStoreBinding(frameworkModules.dataStoreLibrary, runtimeInformation, callbacks),
     dataStore(&dataStoreBinding),
+    coreDataPublisher(&dataStore),
     stochasticsBinding(callbacks),
     stochastics(&stochasticsBinding),
     worldBinding(frameworkModules.worldLibrary, callbacks, &stochastics, &dataStore),
@@ -29,7 +30,7 @@ FrameworkModuleContainer::FrameworkModuleContainer(
     eventDetectorBinding(callbacks),
     eventDetectorNetwork(&eventDetectorBinding, &world),
     manipulatorBinding(callbacks),
-    manipulatorNetwork(&manipulatorBinding, &world),
+    manipulatorNetwork(&manipulatorBinding, &world, &coreDataPublisher),
     modelBinding(frameworkModules.libraryDir, runtimeInformation, callbacks),
     agentFactory(&modelBinding, &world, &stochastics, &observationNetwork, &eventNetwork, &dataStore),
     agentBlueprintProvider(configurationContainer, stochastics),
@@ -41,7 +42,7 @@ FrameworkModuleContainer::FrameworkModuleContainer(
         spawnPointBindings.emplace(libraryInfo.libraryName, SpawnPointBinding(callbacks));
     }
 
-    for (const auto& libraryInfo : frameworkModules.observationLibraries)
+    for (const auto &libraryInfo : frameworkModules.observationLibraries)
     {
         observationBindings.emplace(libraryInfo.libraryName, ObservationBinding(runtimeInformation, callbacks));
     }

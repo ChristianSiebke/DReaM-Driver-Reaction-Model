@@ -10,7 +10,7 @@
 
 #include "agentDataPublisher.h"
 
-#include "scheduler/timeKeeper.h" //TODO René/Reinhard: this is troublesome
+#include "common/timeKeeper.h"
 
 namespace openpass::publisher {
 

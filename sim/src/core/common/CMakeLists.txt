@@ -5,13 +5,16 @@ add_openpass_target(
 
   HEADERS
     callbacks.h
+    coreDataPublisher.h
     log.h
     parameters.h
+    timeKeeper.h
     ../../../../common/xmlParser.h
     cephesMIT/mconf.h
 
   SOURCES
     callbacks.cpp
+    coreDataPublisher.cpp
     log.cpp
     parameters.cpp
     ../../../../common/xmlParser.cpp

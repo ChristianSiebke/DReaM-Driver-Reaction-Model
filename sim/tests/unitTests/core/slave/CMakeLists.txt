@@ -43,7 +43,7 @@ add_openpass_target(
     # Publishers
     agentDataPublisher_Tests.cpp
     ${COMPONENT_SOURCE_DIR}/framework/agentDataPublisher.cpp
-    ${COMPONENT_SOURCE_DIR}/framework/eventNetworkDataPublisher.cpp
+    ${OPENPASS_SIMCORE_DIR}/core/common/coreDataPublisher.cpp
 
     # Sampler
     sampler_Tests.cpp
@@ -110,7 +110,7 @@ add_openpass_target(
 
     # Publishers
     ${COMPONENT_SOURCE_DIR}/framework/agentDataPublisher.h
-    ${COMPONENT_SOURCE_DIR}/framework/eventNetworkDataPublisher.h
+    ${OPENPASS_SIMCORE_DIR}/core/common/coreDataPublisher.h
 
     # Sampler
     ${COMPONENT_SOURCE_DIR}/framework/sampler.h

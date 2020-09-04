@@ -17,8 +17,5 @@
 
 #pragma once
 
-
 #include "ManipulatorGlobal.h"
 #include "include/manipulatorInterface.h"
-
-

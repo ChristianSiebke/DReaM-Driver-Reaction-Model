@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 * Copyright (c) 2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -170,7 +170,8 @@ Manipulator *ManipulatorLibrary::CreateManipulator(const openScenario::Manipulat
 
 Manipulator *ManipulatorLibrary::CreateManipulator(const std::string& manipulatorType,
                                                    EventNetworkInterface* eventNetwork,
-                                                   WorldInterface* world)
+                                                   WorldInterface* world,
+                                                   PublisherInterface *publisher)
 {
     if(!library)
     {
@@ -188,7 +189,8 @@ Manipulator *ManipulatorLibrary::CreateManipulator(const std::string& manipulato
     auto manipulatorInterface = createDefaultInstanceFunc(world,
                                                    manipulatorType,
                                                    eventNetwork,
-                                                   callbacks);
+                                                   callbacks,
+                                                   publisher);
 
     Manipulator *manipulator = new Manipulator(manipulatorInterface,
                                                this);

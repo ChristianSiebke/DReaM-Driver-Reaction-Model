@@ -1,5 +1,6 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+*               2020 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -23,6 +24,7 @@
 #include "common/events/collisionEvent.h"
 #include "ManipulatorCommonBase.h"
 #include "collisionDetection_Impact_implementation.h"
+#include "common/coreDataPublisher.h"
 
 //-----------------------------------------------------------------------------
 /** \brief This class notifies all relevant modules about the collision.
@@ -37,7 +39,8 @@ class CollisionManipulator : public ManipulatorCommonBase
 public:
     CollisionManipulator(WorldInterface *world,
                          SimulationSlave::EventNetworkInterface *eventNetwork,
-                         const CallbackInterface *callbacks);
+                         const CallbackInterface *callbacks,
+                         openpass::publisher::CoreDataPublisher* publisher);
 
     virtual ~CollisionManipulator() = default;
 
@@ -49,9 +52,16 @@ public:
     *
     * @param[in]     time    Current time.
     */
-    virtual void Trigger(int time);
+    virtual void Trigger(int time) override;
 
 private:
+    struct CrashInfo
+    {
+        CollisionAngles angles;
+        PostCrashDynamic postCrashDynamic1;
+        PostCrashDynamic postCrashDynamic2;
+    };
+
     EventContainer GetEvents() override;
 
     /** This function updates the collisionPartners of
@@ -60,9 +70,12 @@ private:
     */
     void UpdateCollision(AgentInterface* agent, AgentInterface* opponent);
 
-    void CalculateCrash(AgentInterface* agent, AgentInterface* opponent, std::shared_ptr<openpass::events::CollisionEvent> event);
+    CrashInfo CalculateCrash(AgentInterface *agent, AgentInterface *opponent);
+
     //! Handles the calculation of post crash dynamics
     CollisionDetectionPostCrash collisionPostCrash;
+
+    void PublishCrash(const std::shared_ptr<openpass::events::CollisionEvent>& event, const CrashInfo& crashInfo);
+
+    openpass::publisher::CoreDataPublisher* publisher;
 };
-
-

@@ -19,6 +19,7 @@ add_openpass_target(
     ../../../../common/vector2d.h
     srcCollisionPostCrash/polygon.h
     srcCollisionPostCrash/collisionDetection_Impact_implementation.h
+    ../../../../core/common/coreDataPublisher.h
 
   SOURCES
     CollisionManipulator.cpp
@@ -35,8 +36,10 @@ add_openpass_target(
 
   LIBRARIES
     Qt5::Core
+    CoreCommon
 
   INCDIRS
     ../../../../common
     srcCollisionPostCrash
+    core/common
 )

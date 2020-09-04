@@ -10,35 +10,45 @@
 
 #pragma once
 
+#include "common/events/basicEvent.h"
 #include "include/publisherInterface.h"
 
 namespace openpass::narrator {
 
-class Event : public EventBase
+class LogEntry : public EventBase
 {
 public:
-    Event(std::string name) :
+    LogEntry(std::string name) :
         EventBase(std::move(name))
     {
     }
 
-    explicit operator Acyclic() const noexcept override
+    template <typename BasicEvent>
+    static inline LogEntry FromEvent(const std::shared_ptr<BasicEvent> &event)
+    {
+        LogEntry logEntry(event->GetName());
+        logEntry.triggeringEntities = event->triggeringAgents;
+        logEntry.affectedEntities = event->actingAgents;
+        logEntry.parameter = event->GetParameter();
+        return logEntry;
+    }
+
+    operator Acyclic() const noexcept override
     {
         return Acyclic(name, triggeringEntities, affectedEntities, parameter);
     }
 
     openpass::datastore::Parameter parameter;
 };
-
 } // namespace openpass::narrator
 
 namespace openpass::publisher {
 
 ///! Interface which has to be provided by observation modules
-class EventNetworkDataPublisher : public PublisherInterface
+class CoreDataPublisher : public PublisherInterface
 {
 public:
-    EventNetworkDataPublisher(DataStoreWriteInterface *const dataStore) :
+    CoreDataPublisher(DataStoreWriteInterface *const dataStore) :
         PublisherInterface(dataStore)
     {
     }

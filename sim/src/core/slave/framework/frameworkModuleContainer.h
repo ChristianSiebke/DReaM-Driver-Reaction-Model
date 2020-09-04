@@ -40,6 +40,7 @@
 #include "bindings/stochastics.h"
 #include "bindings/stochasticsBinding.h"
 #include "bindings/world.h"
+#include "common/coreDataPublisher.h"
 
 namespace SimulationSlave {
 
@@ -65,6 +66,7 @@ public:
 private:
     DataStoreBinding dataStoreBinding;
     DataStore dataStore;
+    openpass::publisher::CoreDataPublisher coreDataPublisher;
 
     StochasticsBinding stochasticsBinding;
     Stochastics stochastics;

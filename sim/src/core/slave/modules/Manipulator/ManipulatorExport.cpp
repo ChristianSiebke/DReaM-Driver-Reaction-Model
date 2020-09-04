@@ -24,6 +24,11 @@
 #include "LaneChangeManipulator.h"
 #include "CustomCommandFactory.h"
 
+class PublisherInterface;
+namespace openpass::publisher {
+class CoreDataPublisher;
+}
+
 const std::string version = "0.0.1";
 static const CallbackInterface* Callbacks = nullptr;
 
@@ -182,7 +187,8 @@ extern "C" MANIPULATOR_SHARED_EXPORT ManipulatorInterface* OpenPASS_CreateDefaul
     WorldInterface* world,
     std::string manipulatorType,
     SimulationSlave::EventNetworkInterface* eventNetwork,
-    const CallbackInterface* callbacks)
+    const CallbackInterface* callbacks,
+    PublisherInterface *publisher)
 {
     Callbacks = callbacks;
 
@@ -190,10 +196,17 @@ extern "C" MANIPULATOR_SHARED_EXPORT ManipulatorInterface* OpenPASS_CreateDefaul
     {
         if (manipulatorType == "CollisionManipulator")
         {
+            auto coreDataPublisher = dynamic_cast<openpass::publisher::CoreDataPublisher*>(publisher);
+            if(!coreDataPublisher)
+            {
+                throw std::runtime_error("Publisher must a CoreDataPublisher");
+            }
+
             return static_cast<ManipulatorInterface*>(new (std::nothrow) CollisionManipulator(
                                                           world,
                                                           eventNetwork,
-                                                          callbacks));
+                                                          callbacks,
+                                                          coreDataPublisher));
         }
     }
     catch (...)

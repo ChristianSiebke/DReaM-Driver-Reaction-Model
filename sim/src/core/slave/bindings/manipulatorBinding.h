@@ -20,6 +20,8 @@
 #include "include/worldInterface.h"
 #include "include/scenarioInterface.h"
 
+class PublisherInterface;
+
 namespace SimulationSlave
 {
 
@@ -49,7 +51,8 @@ public:
     std::vector<const Manipulator *> Instantiate(const std::string libraryPath,
                                                  ScenarioInterface *scenario,
                                                  EventNetworkInterface *eventNetwork,
-                                                 WorldInterface *world);
+                                                 WorldInterface *world,
+                                                 PublisherInterface* publisher);
 
     //-----------------------------------------------------------------------------
     //! Unloads the spawn point binding by deleting all stored spawn point libraries.

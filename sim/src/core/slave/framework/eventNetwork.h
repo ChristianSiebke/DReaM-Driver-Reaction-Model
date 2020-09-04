@@ -26,10 +26,10 @@
 #include <vector>
 
 #include "common/opExport.h"
+#include "common/coreDataPublisher.h"
 #include "include/eventNetworkInterface.h"
 #include "include/runResultInterface.h"
 #include "include/worldInterface.h"
-#include "eventNetworkDataPublisher.h"
 
 namespace SimulationSlave {
 
@@ -96,7 +96,7 @@ public:
     std::vector<EventInterface const *> GetTrigger(const std::string &topic) const override;
 
 private:
-    openpass::publisher::EventNetworkDataPublisher publisher;
+    openpass::publisher::CoreDataPublisher publisher;
     std::unordered_map<std::string, std::vector<std::unique_ptr<EventInterface>>> trigger;
     std::unordered_map<EventDefinitions::EventCategory, EventContainer> events;
     RunResultInterface *runResult{nullptr};

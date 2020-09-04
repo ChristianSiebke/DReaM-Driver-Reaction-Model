@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -21,6 +21,8 @@
 #include "include/manipulatorInterface.h"
 #include "include/callbackInterface.h"
 
+class PublisherInterface;
+
 namespace SimulationSlave
 {
 
@@ -35,7 +37,8 @@ public:
     typedef ManipulatorInterface *(*ManipulatorInterface_CreateDefaultInstanceType)(WorldInterface *world,
                                                                              std::string manipulatorType,
                                                                              EventNetworkInterface* eventNetwork,
-                                                                             const CallbackInterface *callbacks);
+                                                                             const CallbackInterface *callbacks,
+                                                                             PublisherInterface* publisher);
     typedef void (*ManipulatorInterface_DestroyInstanceType)(ManipulatorInterface *implementation);
 
     ManipulatorLibrary(const std::string &libraryPath,
@@ -94,7 +97,8 @@ public:
 
     Manipulator *CreateManipulator(const std::string& manipulatorType,
                                    EventNetworkInterface* eventNetwork,
-                                   WorldInterface* world);
+                                   WorldInterface* world,
+                                   PublisherInterface* publisher);
 
 private:
     const std::string DllGetVersionId = "OpenPASS_GetVersion";

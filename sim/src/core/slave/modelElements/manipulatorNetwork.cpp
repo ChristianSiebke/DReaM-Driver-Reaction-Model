@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -16,9 +16,11 @@
 namespace SimulationSlave {
 
 ManipulatorNetwork::ManipulatorNetwork(ManipulatorBinding* manipulatorBinding,
-                                       WorldInterface* world):
+                                       WorldInterface* world,
+                                       PublisherInterface* publisher):
     manipulatorBinding(manipulatorBinding),
-    world(world)
+    world(world),
+    publisher(publisher)
 {
 }
 
@@ -39,7 +41,8 @@ bool ManipulatorNetwork::Instantiate(const std::string libraryPath,
             manipulators = manipulatorBinding->Instantiate(libraryPath,
                            scenario,
                            eventNetwork,
-                           world);
+                           world,
+                           publisher);
         }
         catch (const std::runtime_error& error)
         {

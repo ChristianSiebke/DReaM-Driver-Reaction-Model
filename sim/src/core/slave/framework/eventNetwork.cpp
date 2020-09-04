@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017 - 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -51,13 +51,8 @@ void EventNetwork::InsertTrigger(const std::string &identifier, std::unique_ptr<
 void EventNetwork::InsertEvent(std::shared_ptr<EventInterface> event)
 {
     events[event->GetCategory()].push_back(event);
-
-    openpass::narrator::Event narratorEvent(event->GetName());
-    narratorEvent.triggeringEntities = event->triggeringAgents;
-    narratorEvent.affectedEntities = event->actingAgents;
-    narratorEvent.parameter = event->GetParameter();
-
-    publisher.Publish(EventDefinitions::utils::GetAsString(event->GetCategory()), narratorEvent);
+    publisher.Publish(EventDefinitions::utils::GetAsString(event->GetCategory()),
+                      openpass::narrator::LogEntry::FromEvent(event));
 }
 
 void EventNetwork::Clear()

@@ -31,13 +31,11 @@ add_openpass_target(
     framework/agentFactory.h
     framework/commandLineParser.h
     framework/configurationContainer.h
-    framework/coreDataPublisher.h
     framework/directories.h
     framework/dynamicAgentTypeGenerator.h
     framework/dynamicParametersSampler.h
     framework/dynamicProfileSampler.h
     framework/eventNetwork.h
-    framework/eventNetworkDataPublisher.h
     framework/frameworkModuleContainer.h
     framework/observationModule.h
     framework/observationNetwork.h
@@ -50,7 +48,6 @@ add_openpass_target(
     framework/scheduler/schedulerTasks.h
     framework/scheduler/taskBuilder.h
     framework/scheduler/tasks.h
-    framework/scheduler/timeKeeper.h
     importer/configurationFiles.h
     importer/connection.h
     importer/csvParser.h
@@ -113,13 +110,11 @@ add_openpass_target(
     framework/agentFactory.cpp
     framework/commandLineParser.cpp
     framework/configurationContainer.cpp
-    framework/coreDataPublisher.cpp
     framework/directories.cpp
     framework/dynamicAgentTypeGenerator.cpp
     framework/dynamicParametersSampler.cpp
     framework/dynamicProfileSampler.cpp
     framework/eventNetwork.cpp
-    framework/eventNetworkDataPublisher.cpp
     framework/frameworkModuleContainer.cpp
     framework/observationModule.cpp
     framework/observationNetwork.cpp

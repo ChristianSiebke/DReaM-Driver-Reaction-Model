@@ -38,7 +38,7 @@ public:
     TriggeringEntities triggeringEntities;
     AffectedEntities affectedEntities;
 
-    virtual explicit operator Acyclic() const = 0;
+    virtual operator Acyclic() const = 0;
 
     // We do not allow copy to force move semantics
     EventBase(const EventBase &) = delete;
@@ -52,7 +52,7 @@ public:
     virtual ~EventBase() = default;
 };
 
-}
+} // namespace openpass::narrator
 
 namespace EventDefinitions {
 

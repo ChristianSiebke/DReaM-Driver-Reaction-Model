@@ -60,6 +60,7 @@ SOURCES += \
     $$getFiles(SUBDIRS, cc) \
     $$getFiles(SUBDIRS, c) \
     ../common/callbacks.cpp \
+    ../common/coreDataPublisher.cpp \
     ../common/log.cpp \
     ../common/parameters.cpp \
     ../../common/eventDetectorDefinitions.cpp \
@@ -69,6 +70,7 @@ HEADERS += \
     $$getFiles(SUBDIRS, hpp) \
     $$getFiles(SUBDIRS, h) \
     ../common/callbacks.h \
+    ../common/coreDataPublisher.h \
     ../common/log.h \
     ../common/parameters.h \
     ../../common/eventDetectorDefinitions.h \

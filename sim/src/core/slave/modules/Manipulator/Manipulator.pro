@@ -19,11 +19,12 @@ CONFIG   += OPENPASS_LIBRARY
 include (../../../../../global.pri)
 
 INCLUDEPATH += \
-    ../../../.. \
-    ../../../../..\
-    srcCollisionPostCrash \
     . \
-    ..
+    .. \
+    ../../.. \
+    ../../../.. \
+    ../../../../.. \
+    srcCollisionPostCrash
 
 SOURCES += \
     CollisionManipulator.cpp \
@@ -36,7 +37,8 @@ SOURCES += \
     SpeedActionManipulator.cpp \
     TrajectoryManipulator.cpp \
     srcCollisionPostCrash/collisionDetection_Impact_implementation.cpp \
-    srcCollisionPostCrash/polygon.cpp
+    srcCollisionPostCrash/polygon.cpp \
+    ../../../../core/common/coreDataPublisher.cpp
 
 EVENT_HEADERS += \
     ../../../../common/events/componentStateChangeEvent.h \
@@ -59,4 +61,5 @@ HEADERS += \
     SpeedActionManipulator.h \
     TrajectoryManipulator.h \
     srcCollisionPostCrash/collisionDetection_Impact_implementation.h \
-    srcCollisionPostCrash/polygon.h
+    srcCollisionPostCrash/polygon.h \
+    ../../../../core/common/coreDataPublisher.h

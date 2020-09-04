@@ -18,7 +18,7 @@
 #include "fakeWorld.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "scheduler/timeKeeper.h"
+#include "core/common/timeKeeper.h"
 
 using ::testing::_;
 using ::testing::DontCare;

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -27,7 +27,8 @@ ManipulatorBinding::~ManipulatorBinding()
 std::vector<const Manipulator*> ManipulatorBinding::Instantiate(const std::string libraryPath,
                                                           ScenarioInterface *scenario,
                                                           EventNetworkInterface* eventNetwork,
-                                                          WorldInterface *world)
+                                                          WorldInterface *world,
+                                                          PublisherInterface *publisher)
 {
     library = new ManipulatorLibrary(libraryPath,
                                      callbacks);
@@ -52,7 +53,8 @@ std::vector<const Manipulator*> ManipulatorBinding::Instantiate(const std::strin
     {
         const auto manipulator = library->CreateManipulator(manipulatorType,
                                                             eventNetwork,
-                                                            world);
+                                                            world,
+                                                            publisher);
 
         manipulators.push_back(manipulator);
     }

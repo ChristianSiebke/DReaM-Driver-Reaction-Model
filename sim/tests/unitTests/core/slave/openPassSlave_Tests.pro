@@ -79,7 +79,7 @@ VEHICLEMODELIMPORTER_TESTS = \
 EVENTDETECTOR_TESTS = \
     $$UNIT_UNDER_TEST/importer/eventDetectorImporter.cpp \
     $$UNIT_UNDER_TEST/framework/eventNetwork.cpp \
-    $$UNIT_UNDER_TEST/framework/eventNetworkDataPublisher.cpp \
+    $$UNIT_UNDER_TEST/../common/coreDataPublisher.cpp \
     \
     eventNetwork_Tests.cpp
 

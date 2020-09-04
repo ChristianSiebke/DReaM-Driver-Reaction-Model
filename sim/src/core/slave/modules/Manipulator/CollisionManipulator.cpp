@@ -20,10 +20,12 @@
 
 CollisionManipulator::CollisionManipulator(WorldInterface *world,
                                            SimulationSlave::EventNetworkInterface *eventNetwork,
-                                           const CallbackInterface *callbacks) :
+                                           const CallbackInterface *callbacks,
+                                           openpass::publisher::CoreDataPublisher *publisher) :
     ManipulatorCommonBase(world,
                           eventNetwork,
-                          callbacks)
+                          callbacks),
+    publisher{publisher}
 {
     cycleTime = 100;
 }
@@ -42,10 +44,10 @@ void CollisionManipulator::Trigger([[maybe_unused]] int time)
             {
                 AgentInterface *collisionOpponent = world->GetAgent(event->collisionOpponentId);
                 UpdateCollision(collisionAgent, collisionOpponent);
-                CalculateCrash(collisionAgent, collisionOpponent, event);
                 eventNetwork->AddCollision(event->collisionOpponentId);
-                // TODO: use to-be-added core data publisher
-                //eventNetwork->Log(event);
+
+                const auto crashInfo = CalculateCrash(collisionAgent, collisionOpponent);
+                PublishCrash(event, crashInfo);
             }
             else
             {
@@ -65,7 +67,7 @@ void CollisionManipulator::Trigger([[maybe_unused]] int time)
     }
 }
 
-void CollisionManipulator::CalculateCrash(AgentInterface *agent, AgentInterface *opponent, std::shared_ptr<openpass::events::CollisionEvent> event)
+CollisionManipulator::CrashInfo CollisionManipulator::CalculateCrash(AgentInterface *agent, AgentInterface *opponent)
 {
     //! Stores calculated dynamics for ego/host agent
     PostCrashDynamic postCrashDynamic1;
@@ -77,7 +79,8 @@ void CollisionManipulator::CalculateCrash(AgentInterface *agent, AgentInterface 
                                                     opponent,
                                                     &postCrashDynamic1,
                                                     &postCrashDynamic2,
-                                                    timeOfFirstContact)) {
+                                                    timeOfFirstContact))
+    {
         std::cout << "PostCrash Calculation failed" << std::endl;
     }
 
@@ -89,7 +92,35 @@ void CollisionManipulator::CalculateCrash(AgentInterface *agent, AgentInterface 
                                     postCrashDynamic2.GetVelocity(),
                                     postCrashDynamic2.GetVelocityDirection(),
                                     postCrashDynamic2.GetYawVelocity()});
-    event->AddParameters(collisionPostCrash.GetCollisionAngles(), postCrashDynamic1, postCrashDynamic2);
+
+    return {collisionPostCrash.GetCollisionAngles(), postCrashDynamic1, postCrashDynamic2};
+}
+
+void CollisionManipulator::PublishCrash(const std::shared_ptr<openpass::events::CollisionEvent>& event, const CrashInfo& crashInfo)
+{
+    auto logEntry = openpass::narrator::LogEntry::FromEvent(event);
+    logEntry.parameter.insert({{"Velocity", crashInfo.postCrashDynamic1.GetVelocity()},
+                               {"VelocityChange", crashInfo.postCrashDynamic1.GetVelocityChange()},
+                               {"VelocityDirection", crashInfo.postCrashDynamic1.GetVelocityDirection()},
+                               {"YawVelocity", crashInfo.postCrashDynamic1.GetYawVelocity()},
+                               {"PointOfContactLocalX", crashInfo.postCrashDynamic1.GetPointOfContactLocal().x},
+                               {"PointOfContactLocalY", crashInfo.postCrashDynamic1.GetPointOfContactLocal().y},
+                               {"CollisionVelocity", crashInfo.postCrashDynamic1.GetCollisionVelocity()},
+                               {"Sliding", crashInfo.postCrashDynamic1.GetSliding()},
+                               {"OpponentVelocity", crashInfo.postCrashDynamic2.GetVelocity()},
+                               {"OpponentVelocityChange", crashInfo.postCrashDynamic2.GetVelocityChange()},
+                               {"OpponentVelocityDirection", crashInfo.postCrashDynamic2.GetVelocityDirection()},
+                               {"OpponentYawVelocity", crashInfo.postCrashDynamic2.GetYawVelocity()},
+                               {"OpponentPointOfContactLocalX", crashInfo.postCrashDynamic2.GetPointOfContactLocal().x},
+                               {"OpponentPointOfContactLocalY", crashInfo.postCrashDynamic2.GetPointOfContactLocal().y},
+                               {"OpponentCollisionVelocity", crashInfo.postCrashDynamic2.GetCollisionVelocity()},
+                               {"OpponentSliding", crashInfo.postCrashDynamic2.GetSliding()},
+                               {"OYA", crashInfo.angles.OYA},
+                               {"HCPAo", crashInfo.angles.HCPAo},
+                               {"OCPAo", crashInfo.angles.OCPAo},
+                               {"HCPA", crashInfo.angles.HCPA},
+                               {"OCPA", crashInfo.angles.OCPA}});
+    publisher->Publish(EventDefinitions::utils::GetAsString(event->GetCategory()), logEntry);
 }
 
 void CollisionManipulator::UpdateCollision(AgentInterface *agent, AgentInterface *opponent)

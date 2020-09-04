@@ -10,13 +10,13 @@
 
 #include "coreDataPublisher.h"
 
-#include "scheduler/timeKeeper.h"
+#include "timeKeeper.h"
 
 namespace openpass::publisher {
 
 void CoreDataPublisher::Publish(const openpass::datastore::Key &key, const openpass::narrator::EventBase &event)
 {
-    dataStore->PutAcyclic(openpass::scheduling::TimeKeeper::Now(), openpass::type::CoreId, key, Acyclic(event));
+    dataStore->PutAcyclic(openpass::scheduling::TimeKeeper::Now(), openpass::type::CoreId, key, event);
 }
 
 } // namespace openpass::publisher
