@@ -536,7 +536,17 @@ void AlgorithmFmuWrapperImplementation::HandleFmiStatus(const jm_status_enu_t& f
             break;
 
         case jm_status_error:
-            fmi1_end_handling(&cdata);
+            switch (cdata.version)
+            {
+                case fmi_version_1_enu:
+                    fmi1_end_handling(&cdata);
+                    break;
+                case fmi_version_2_0_enu:
+                    fmi2_end_handling(&cdata);
+                    break;
+                default:
+                    throw std::runtime_error("Invalid FMI version");
+            }
             const std::string msg = logPrefix + " returned with error";
             LOGERROR(msg);
             throw std::runtime_error(msg);
