@@ -17,19 +17,19 @@ The parameter "OP_OSC_SchemaVersion" is mandatory. It is used to check if the sc
 Example
 ```xml
   <ParameterDeclarations>
-    <ParameterDeclaration name="OP_OSC_SchemaVersion" type="string" value="0.4.0"/>
+    <ParameterDeclaration name="OP_OSC_SchemaVersion" parameterType="string" value="0.4.0"/>
     <ParameterDeclaration name="EgoSCoordinate" type="double" value="50.0"/>
   </ParameterDeclarations>
 ```
 
 Example use of a parameter
 ```xml
-    <Lane roadId="1" s="$EgoSCoordinate" laneId="-2" offset="0.0">
+    <LanePosition roadId="1" s="$EgoSCoordinate" laneId="-2" offset="0.0">
 ```
 
 \section scenario_catalogs Catalogs
 
-The <Catalogs> tag defines references to various other files that describe sub features of OpenSCENARIO.
+The <CatalogsLocations> tag defines references to various other files that describe sub features of OpenSCENARIO.
 We currently support only three of these references: the [VehicleCatalog](\ref io_input_vehiclemodels), which defines the vehicle models, and the [PedestrianCatalog](\ref io_input_pedestrianmodels), which defines the pedestrian models.
 For the FollowTrajectory action one can also use a TrajectoryCatalog.
 
@@ -139,14 +139,16 @@ The schema is as follows:
 |tag				|parent			|attributes					|multiplicity|
 |-------------------|---------------|---------------------------|------------|
 |Actions			|Init			|-							|1		     |
-|Private			|Actions		|object						|1 per entity|
-|Position			|Private		|-							|1		     |
+|Private    		|Actions		|entityRef					|1 per entity|
+|PrivateAction		|Private    	|-							|at least 1  |
+|TeleportAction		|PrivateAction	|-							|1		     |
+|Position			|TeleportAction	|-							|1		     |
 |LanePosition		|Position		|roadId, laneId, s, offset	|0 or 1		 |
 |WorldPosition		|Position		|x, y, h	                |0 or 1		 |
-|Orientation		|Lane			|type, h					|0 or 1		 |
+|Orientation		|LanePosition	|type, h					|0 or 1		 |
 |LongitudinalAction |PrivateAction		|-						|1		     |
 |SpeedAction		|LongitudinalAction	|-						|1			 |
-|SpeedActionDynamics|SpeedAction	|rate, shape				|1			 |
+|SpeedActionDynamics|SpeedAction	|rate, dynamicsShape		|1			 |
 |SpeedActionTarget	|SpeedAction	|-							|1			 |
 |AbsoluteTargetSpeed|SpeedActionTarget |value					|1			 |
 |RoutingAction    	|PrivateAction  |-                          |0 or 1      |
@@ -161,28 +163,30 @@ The schema is as follows:
 All listed attributes are required.
 The attributes have the following meaning:
 
-|tag		|attribute	|meaning																						|
-|-----------|-----------|-----------------------------------------------------------------------------------------------|
-|Private	|entityRef		|name of the entity for which the initial values are described in the subtags				|
-|LanePosition|roadId		|Id of the road in the Scenery																|
-|LanePosition|laneId		|Id of the lane in the Scenery																|
-|LanePosition|s			|start position on the lane (i.e. distance from the start of the road) of the reference point	|
-|LanePosition|offset		|lateral distance of the reference point to the middle of the road (i.e. t coordinate)		|
-|WorldPosition|x		    |x coordinate of the reference point			                                            |
-|WorldPosition|y		    |y coordinate of the reference point			                                            |
-|WorldPosition|h		    |heading			                                                                        |
-|Orientation|type		|has to be "relative"																			|
-|Orientation|h			|heading angle in radiant relative to the lane													|
-|SpeedActionDynamics|rate		|acceleration																			|
-|SpeedActionDynamics|shape		|unsupported (but required by OpenSCENARIO)												|
-|AbsoluteTargetSpeed|Value		|velocity																				|
-|RoadPosition|roadId     |Id of the road in the Scenery																	|
-|RoadPosition|t          |negative for driving in roadDirection (i.e on lanes with negative Id) else positive           |
-|VisibilityAction|traffic   |Flag deciding if the scenario agent will be spawned (true = spawned, false = not spawned)  |
+|tag		            |attribute	|meaning																					 |
+|-----------------------|-----------|--------------------------------------------------------------------------------------------|
+|Private	            |entityRef  |name of the entity for which the initial values are described in the subtags				 |
+|LanePosition           |roadId		|Id of the road in the Scenery																 |
+|LanePosition           |laneId		|Id of the lane in the Scenery																 |
+|LanePosition           |s			|start position on the lane (i.e. distance from the start of the road) of the reference point|
+|LanePosition           |offset		|lateral distance of the reference point to the middle of the road (i.e. t coordinate)		|
+|WorldPosition          |x		    |x coordinate of the reference point			                                            |
+|WorldPosition          |y		    |y coordinate of the reference point			                                            |
+|WorldPosition          |h		    |heading			                                                                        |
+|Orientation            |type		|has to be "relative"																		|
+|Orientation            |h			|heading angle in radiant relative to the lane												|
+|SpeedActionDynamics    |rate		|acceleration																			    |
+|SpeedActionDynamics    |dynamicsShape|"linear" for constant acceleration, "step" for immediate transition				      	|
+|SpeedActionDynamics    |dynamicsDimension|has to be "rate"                                                         	      	|
+|AbsoluteTargetSpeed    |value		|velocity																			    	|
+|RoadPosition           |roadId     |Id of the road in the Scenery																|
+|RoadPosition           |t          |negative for driving in roadDirection (i.e on lanes with negative Id) else positive        |
+|RoadPosition           |s          |ignored                                                                                    |
+|VisibilityAction       |traffic    |Flag deciding if the scenario agent will be spawned (true = spawned, false = not spawned)  |
 
 Although OpenSCENARIO also states other ways for defining a position, we currently only support position via the <LanePosition> or the <WorldPosition> tag.
 Unlike OpenSCENARIO we also allow some of these values to be stochastic.
-This is marked by adding a subtag  <Stochastics value="valuetype" stdDeviation="value" lowerBound="value" upperBound="value"/> to the <Lane> tag.
+This is marked by adding a subtag  <Stochastics value="valuetype" stdDeviation="value" lowerBound="value" upperBound="value"/> to the <LanePosition> or <SpeedAction> tag.
 The stochastics tag is intended to be used as NormalDistribution, but it is up to each module using it to define the actual usage.
 The valuetype can either be s, offset, velocity or rate.
 The value defined as attribute of the LanePosition/SpeedActionDynamics/AbsoluteTargetSpeed tag is then taken as mean value.
@@ -193,7 +197,7 @@ Example
 ```xml
 	<Init>
 		<Actions>
-			<Private object="Ego">
+			<Private entityRef="Ego">
 				<PrivateAction>
 					<TeleportAction>
 						<Position>
@@ -207,7 +211,7 @@ Example
 				<PrivateAction>
 					<LongitudinalAction>
 						<SpeedAction>
-							<SpeedActionDynamics rate="0.0" shape="linear" />
+							<SpeedActionDynamics rate="0.0" dynamicsShape="linear" dynamicsDimension="rate"/>
 							<SpeedActionTarget>
 								<AbsoluteTargetSpeed value="10.0" />
 							</SpeedActionTarget>
@@ -215,25 +219,25 @@ Example
 					</LongitudinalAction>
 				</PrivateAction>
                 <PrivateAction>
-                    <Routing>
+                    <RoutingAction>
                         <AssignRouteAction>
                             <Route>
                                 <Waypoint>
                                     <Position>
-                                        <RoadPosition roadId="1" t="-1.0" />
+                                        <RoadPosition roadId="1" t="-1.0" s="0"/>
                                     </Position>
                                 </Waypoint>
                                 <Waypoint>
                                     <Position>
-                                        <RoadPosition roadId="2" t="-1.0" />
+                                        <RoadPosition roadId="2" t="-1.0" s="0"/>
                                     </Position>
                                 </Waypoint>
                             </Route>
                         </AssignRouteAction>
-                    </Routing>
+                    </RoutingAction>
                 </PrivateAction>
 			</Private>
-			<Private object="ScenarioAgent">
+			<Private entityRef="ScenarioAgent">
 				<PrivateAction>
 					<TeleportAction>
 						<Position>
@@ -244,7 +248,7 @@ Example
 				<PrivateAction>
 					<LongitudinalAction>
 						<SpeedAction>
-							<SpeedActionDynamics rate="0.0" shape="linear" />
+							<SpeedActionDynamics rate="0.0" dynamicsShape="linear" dynamicsDimension="rate"/>
 							<SpeedActionTarget>
 								<AbsoluteTargetSpeed value="10.0" />
 							</SpeedActionTarget>
@@ -259,21 +263,21 @@ Example
 \subsection scenario_storyboard_story Story
 
 Inside the (optional) <Story> tag all conditional interventions into the simulation during runtime are defined.
-When importing this tag its content is translated into EventDetectors and Manipulators.
+When importing this tag, its content is translated into EventDetectors and Manipulators.
 An EventDetector checks in every timestep if its condition is fullfilled.
 In this case it writes an event into the EventNetwork, which then triggers the associated Manipulator.
 The story consists of multiple acts, which itself can consist of multiple maneuvergroups.
 The grouping of maneuvergroups into acts currently has no effect in the simulator.
 A maneuvergroups must consist of exactly one <Actors> tag and one <Maneuver> tag.
-The numberOfExecutions attribute states the maximum number of times that each maneuver will by triggered.
-If the numberOfExecutions is -1 then the maneuver can triggered an unlimited number of times.
+The maximumExecutionCount attribute states the maximum number of times that each maneuver will by triggered.
+If the maximumExecutionCount is -1 then the maneuver can triggered an unlimited number of times.
 Multiple stories can be added.
 
 Example
 ```xml
 	<Story name="MyStory">
 		<Act name="Act1">
-			<ManeuverGroup name="MySequence" numberOfExecutions="-1">
+			<ManeuverGroup name="MySequence" maximumExecutionCount="-1">
 				<Actors>
 					...
 				</Actors>
@@ -288,7 +292,7 @@ Example
 \subsubsection scenario_storyboard_story_actors Actors
 
 The <Actors> tag defines the agents that are mainly affected by this sequence.
-These agents can either be defined directly by stating their name via <EntityRef entityRef="entityName"/>.
+These agents can either be defined directly by stating their name via subtags <EntityRef entityRef="entityName"/> or as the agent that triggered the event via <Actors selectTriggeringEntities="true"/>
 
 \subsubsection scenario_storyboard_story_maneuver Maneuver
 
@@ -342,8 +346,8 @@ Example
 ```xml
 <Condition name="Conditional">
     <ByEntity>
-        <TriggeringEntities rule="any">
-            <Entity name="Agent"/>
+        <TriggeringEntities triggeringEntitiesRule="any">
+            <EntityRef entityRef="Agent"/>
         </TriggeringEntities>
         <EntityCondition>
             <ReachPositionCondition tolerance="3.0">
@@ -370,8 +374,8 @@ Example
 ```xml
 <Condition name="Conditional">
     <ByEntity>
-        <TriggeringEntities rule="any">
-            <Entity name="Agent"/>
+        <TriggeringEntities triggeringEntitiesRule="any">
+            <EntityRef entityRef="Agent"/>
         </TriggeringEntities>
         <EntityCondition>
             <ReachPositionCondition tolerance="3.0">
@@ -396,11 +400,11 @@ Example
 ```xml
 <Condition name="Conditional">
     <ByEntity>
-        <TriggeringEntities rule="any">
-            <Entity name="Agent"/>
+        <TriggeringEntities triggeringEntitiesRule="any">
+            <EntityRef entityRef="Agent"/>
         </TriggeringEntities>
         <EntityCondition>
-            <RelativeSpeedCondition entityRef="referenceEntity" value="10.0" rule="greater_than"/>
+            <RelativeSpeedCondition entityRef="referenceEntity" value="10.0" rule="greaterThan"/>
         </EntityCondition>
     </ByEntity>
 </Condition>
@@ -417,11 +421,11 @@ Example
 ```xml
 <Condition name="Conditional">
 	  <ByEntity>
-		<TriggeringEntities rule="any">
-			<Entity name="Agent"/>
+        <TriggeringEntities triggeringEntitiesRule="any">
+            <EntityRef entityRef="Agent"/>
 		</TriggeringEntities>
 		<EntityCondition>
-			<TimeToCollisionCondition value="2.0" rule="less_than">
+			<TimeToCollisionCondition value="2.0" rule="lessThan">
 				<TimeToCollisionConditionTarget>
 					<EntityRef entityRef="referenceAgent"/>
 				</TimeToCollisionConditionTarget>
@@ -438,16 +442,17 @@ When the comparison of the calculated THW to the specified THW value using the p
 
 The TTC is calculated by dividing the s distance of the agents by the velocity of the triggering agent.
 If the freespace attribute is set to true the net distance of the bounding boxes is considered, otherwise the distance of the reference points.
+The alongRoute attribute has to be true (i.e. distance is calculated by following the road = s coordinate distance)
 
 Example
 ```xml
 <Condition name="Conditional">
     <ByEntity>
-        <TriggeringEntities rule="any">
-			<Entity name="Agent"/>
+        <TriggeringEntities triggeringEntitiesRule="any">
+            <EntityRef entityRef="Agent"/>
 		</TriggeringEntities>
 		<EntityCondition>
-			<TimeHeadwayCondition value="2.0" rule="less_than" entityRef="referenceAgent" freespace="true"/>
+			<TimeHeadwayCondition value="2.0" rule="lessThan" entityRef="referenceAgent" freespace="true" alongRoute="true"/>
 		</EntityCondition>
     </ByEntity>
 </Condition>
@@ -460,13 +465,13 @@ All ByValueConditions trigger based on a specified value and are unrelated to an
 **SimulationTime**
 Triggers at a specified time value, configured by the detector parameters in the [Scenario File](\ref io_input_scenario).
 Time is specified in seconds.
-The rule is required and only "greater_than" is accepted as valid.
+The rule is required and only "greaterThan" is accepted as valid.
 
 Example
 ```xml
 <Condition name="Conditional">
 	<ByValueCondition>
-		<SimulationTimeCondition value="5.0" rule="greater_than" />
+		<SimulationTimeCondition value="5.0" rule="greaterThan" />
 	</ByValueCondition>
 </Condition>
 ```
@@ -489,7 +494,7 @@ Example with absolute target and fixed length
     <PrivateAction>
         <LateralAction>
             <LaneChangeAction>
-                <LaneChangeActionDynamics distance="100.0" shape="sinusoidal"/>
+                <LaneChangeActionDynamics value="100.0" dynamicsShape="sinusoidal" dynamicsDimension="distance"/>
                 <LaneChangeTarget>
                     <AbsoluteTargetLane value="-1"/>
                 </Target>
@@ -505,7 +510,7 @@ Example with relative target and fixed time
     <PrivateAction>
         <LateralAction>
             <LaneChangeAction>
-                <LaneChangeActionDynamics time="2.0" shape="sinusoidal"/>
+                <LaneChangeActionDynamics value="2.0" dynamicsShape="sinusoidal" dynamicsDimension="time"/>
                 <LaneChangeTarget>
                     <RelativeTargetLane entityRef="Ego" value="0"/>
                 </LaneChangeTarget>
@@ -675,7 +680,7 @@ Example RelativeTargetSpeed
 \subsection scenario_storyboard_endconditions EndConditions
 
 Here the end conditions for the simulation are defined.
-One SimulationTime condition is required, which is the time in seconds, and the rule has to be "greater_than".
+One SimulationTime condition is required, which is the time in seconds, and the rule has to be "greaterThan".
 Any other or additional conditions are not supported.
 
 Example:
@@ -683,9 +688,9 @@ Example:
 ```xml
 <StopTrigger>
     <ConditionGroup>
-        <Condition name="EndTime" rule="greater_than" edge="rising">
+        <Condition name="EndTime" rule="greaterThan" edge="rising">
             <ByValueCondition>
-                <SimulationTimeCondition value="30.0" rule="greater_than" />
+                <SimulationTimeCondition value="30.0" rule="greaterThan" />
             </ByValueCondition>
         </Condition>
     </ConditionGroup>
