@@ -210,6 +210,24 @@ void TrajectoryFollowerImplementation::UpdateState(const ComponentState newState
     }
 }
 
+bool TrajectoryFollowerImplementation::CheckEndOfTrajectory()
+{
+    constexpr double EPSILON = 1e-3;
+    if (nextTrajectoryIterator == trajectory.points.end())
+    {
+        return true;
+    }
+    if (!inputAccelerationActive)
+    {
+        if (nextTrajectoryIterator + 1 == trajectory.points.end()
+            && nextTrajectoryIterator->time - lastCoordinateTimestamp < EPSILON)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 [[noreturn]] void TrajectoryFollowerImplementation::ThrowCouldNotInstantiateSignalError()
 {
     const std::string msg = std::string(COMPONENTNAME) + " could not instantiate signal";
@@ -299,24 +317,19 @@ void TrajectoryFollowerImplementation::TriggerWithInactiveAccelerationInput()
     while (timeBetweenCoordinates <= remainingTime &&
            nextTrajectoryIterator != trajectory.points.end())
     {
-        deltaS += CalculateDistanceBetweenWorldCoordinates(previousCoordinate, nextCoordinate);
 
         previousTrajectoryIterator = nextTrajectoryIterator;
         previousTimestamp = previousTrajectoryIterator->time;
-        previousCoordinate = *previousTrajectoryIterator;
         lastCoordinateTimestamp = previousTimestamp;
 
         nextTrajectoryIterator++;
         if (nextTrajectoryIterator != trajectory.points.end())
         {
+            deltaS += CalculateDistanceBetweenWorldCoordinates(previousCoordinate, nextCoordinate);
+            previousCoordinate = *previousTrajectoryIterator;
             nextCoordinate = *nextTrajectoryIterator;
             remainingTime -= timeBetweenCoordinates;
             timeBetweenCoordinates = nextCoordinate.time - previousTimestamp;
-        }
-        else
-        {
-            remainingTime = 1.0;
-            timeBetweenCoordinates = 1.0;
         }
     }
 
@@ -346,7 +359,11 @@ void TrajectoryFollowerImplementation::CalculateNextTimestep()
         return;
     }
 
-    if (nextTrajectoryIterator != trajectory.points.end())
+    if (CheckEndOfTrajectory())
+    {
+        HandleEndOfTrajectory();
+    }
+    else
     {
         if(inputAccelerationActive)
         {
@@ -356,10 +373,6 @@ void TrajectoryFollowerImplementation::CalculateNextTimestep()
         {
             TriggerWithInactiveAccelerationInput();
         }
-    }
-    else
-    {
-        HandleEndOfTrajectory();
     }
 }
 

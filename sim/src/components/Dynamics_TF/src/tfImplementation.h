@@ -169,6 +169,8 @@ private:
     ComponentState GetState() const;
     void UpdateState(const ComponentState newState);
 
+    bool CheckEndOfTrajectory();
+
     void HandleEndOfTrajectory();
 
     void ParseParameters(const ParameterInterface *parameters);
