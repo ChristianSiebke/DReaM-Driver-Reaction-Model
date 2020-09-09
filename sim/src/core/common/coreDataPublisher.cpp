@@ -14,9 +14,9 @@
 
 namespace openpass::publisher {
 
-void CoreDataPublisher::Publish(const openpass::datastore::Key &key, const openpass::narrator::EventBase &event)
+void CoreDataPublisher::Publish(const openpass::datastore::Key &key, const openpass::publisher::LogEntryBase &event)
 {
-    dataStore->PutAcyclic(openpass::scheduling::TimeKeeper::Now(), openpass::type::CoreId, key, event);
+    dataStore->PutAcyclic(openpass::scheduling::TimeKeeper::Now(), CORE_ID, key, event);
 }
 
 } // namespace openpass::publisher

@@ -232,10 +232,10 @@ TEST(StateManager_GetMaxReachableStateOfComponentAtLocalLinkId, ComponentMaxStat
     componentStateInformation->AddStateCondition(std::move(componentStateEquality), ComponentState::Acting);
     stateManager.AddComponent(localLinkId, componentStateInformation);
 
-    TriggeringEntities triggering {};
+    openpass::type::TriggeringEntities triggering {};
 
     openpass::type::AgentId agentId {0};
-    AffectedEntities affected {};
+    openpass::type::AffectedEntities affected {};
     affected.entities.push_back(agentId);
 
     auto event = std::make_unique<openpass::events::ComponentStateChangeEvent const>(0,

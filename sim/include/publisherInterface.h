@@ -23,7 +23,7 @@
 #include <variant>
 #include <vector>
 
-#include "common/eventTypes.h"
+#include "common/logEntryBase.h"
 #include "include/dataStoreInterface.h"
 
 //! Interface which has to be provided by observation modules
@@ -58,7 +58,7 @@ public:
      *
      * \param value[in]   The acyclic event
      */
-    virtual void Publish(const openpass::datastore::Key &key, const openpass::narrator::EventBase &event)
+    virtual void Publish(const openpass::datastore::Key &key, const openpass::publisher::LogEntryBase &event)
     {
     }
 

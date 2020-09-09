@@ -65,7 +65,7 @@ struct OutputTags
     const QString SAMPLE = "Sample";
     const QString SCENERYFILE = "SceneryFile";
     const QString VEHICLEATTRIBUTES = "VehicleAttributes";
-    const QString TRIGGERINGENTITIES = "TriggeringEntities";
+    const QString TRIGGERINGENTITIES = "openpass::type::TriggeringEntities";
     const QString AFFECTEDENTITIES = "AffectedEntities";
 };
 

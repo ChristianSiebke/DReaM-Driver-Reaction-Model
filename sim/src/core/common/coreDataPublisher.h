@@ -10,16 +10,18 @@
 
 #pragma once
 
-#include "common/events/basicEvent.h"
+#include "common/logEntryBase.h"
 #include "include/publisherInterface.h"
 
-namespace openpass::narrator {
+namespace openpass::publisher {
 
-class LogEntry : public EventBase
+static inline constexpr int CORE_ID = 67798269; // ASCII: C O R E
+
+class LogEntry : public LogEntryBase
 {
 public:
     LogEntry(std::string name) :
-        EventBase(std::move(name))
+        LogEntryBase(std::move(name))
     {
     }
 
@@ -40,9 +42,6 @@ public:
 
     openpass::datastore::Parameter parameter;
 };
-} // namespace openpass::narrator
-
-namespace openpass::publisher {
 
 ///! Interface which has to be provided by observation modules
 class CoreDataPublisher : public PublisherInterface
@@ -53,7 +52,7 @@ public:
     {
     }
 
-    void Publish(const openpass::datastore::Key &key, const openpass::narrator::EventBase &event) override;
+    void Publish(const openpass::datastore::Key &key, const openpass::publisher::LogEntryBase &event) override;
 };
 
 } // namespace openpass::publisher

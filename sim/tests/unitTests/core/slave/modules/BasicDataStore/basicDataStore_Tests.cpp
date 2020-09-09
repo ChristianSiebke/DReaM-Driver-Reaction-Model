@@ -458,8 +458,8 @@ TEST(BasicDataStore, PutAcyclicData_StoresData)
     const EntityId agentId = 1;
 
     const std::string name{"name"};
-    const TriggeringEntities triggeringEntities{{0, 1}};
-    const AffectedEntities affectedEntities{{2, 3}};
+    const openpass::type::TriggeringEntities triggeringEntities{{0, 1}};
+    const openpass::type::AffectedEntities affectedEntities{{2, 3}};
     const std::string key{"key/one/two"};
     const Parameter params{{"key", "value"}};
     const Acyclic acyclic{name, triggeringEntities, affectedEntities, params};

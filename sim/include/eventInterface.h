@@ -17,8 +17,8 @@
 
 #include <vector>
 
-#include "common/eventTypes.h"
 #include "common/openPassTypes.h"
+#include "common/eventTypes.h"
 
 struct EventParameter
 {
@@ -38,7 +38,7 @@ class EventInterface
 {
 public:
     EventInterface() = default;
-    EventInterface(const TriggeringEntities triggeringAgents, const AffectedEntities actingAgents) :
+    EventInterface(const openpass::type::TriggeringEntities triggeringAgents, const openpass::type::AffectedEntities actingAgents) :
         triggeringAgents{std::move(triggeringAgents)},
         actingAgents{std::move(actingAgents)}{}
 
@@ -76,13 +76,13 @@ public:
      * \brief GetTriggeringAgents
      * \return  List of triggering agents (might me empty)
      */
-    virtual const TriggeringEntities GetTriggeringAgents() const = 0;
+    virtual const openpass::type::TriggeringEntities GetTriggeringAgents() const = 0;
 
     /*!
      * \brief GetActingAgents
      * \return  List of acting agents (might me empty)
      */
-    virtual const AffectedEntities GetActingAgents() const = 0;
+    virtual const openpass::type::AffectedEntities GetActingAgents() const = 0;
 
     /*!
      * \brief Returns all parameter in their raw form
@@ -93,8 +93,8 @@ public:
 
 public:
     //! All agents which triggered the event
-    TriggeringEntities triggeringAgents {};
+    openpass::type::TriggeringEntities triggeringAgents {};
 
     //! All agents which are affected by the event
-    AffectedEntities actingAgents {};
+    openpass::type::AffectedEntities actingAgents {};
 };

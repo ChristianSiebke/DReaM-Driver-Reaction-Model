@@ -18,13 +18,31 @@
 
 namespace openpass::type {
 
-// TODO: MOVE TO CORE ONLY!
-static constexpr int CoreId = 67798269; // ASCII: C O R E
-
 using AgentId = int;
 using EntityId = NamedType<AgentId, struct EntityIdType>;
 using Timestamp = NamedType<int, struct TimestampType>;
 using EntityIds = std::vector<EntityId>;
+
+/*!
+ * \brief Contains the triggering entities of an acyclic
+ *
+ *  Might be enhanced in the future to hold additional information about the affected entities
+ */
+struct TriggeringEntities
+{
+    type::EntityIds entities;
+};
+
+/*!
+ * \brief Contains the affected entities of an acyclic
+ *
+ *  Might be enhanced in the future to hold additional information about the affected entities
+ */
+struct AffectedEntities
+{
+    type::EntityIds entities;
+};
+
 
 using FlatParameterKey = std::string;
 using FlatParameterValue = std::variant<

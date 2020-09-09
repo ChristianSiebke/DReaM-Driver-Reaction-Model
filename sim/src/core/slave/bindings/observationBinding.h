@@ -19,6 +19,7 @@
 
 #include <map>
 #include <string>
+#include "include/dataStoreInterface.h"
 #include "include/eventNetworkInterface.h"
 #include "include/stochasticsInterface.h"
 #include "include/worldInterface.h"

@@ -29,6 +29,7 @@
 
 #pragma once
 
+#include "include/callbackInterface.h"
 #include "include/eventNetworkInterface.h"
 #include "include/manipulatorInterface.h"
 #include "include/worldInterface.h"

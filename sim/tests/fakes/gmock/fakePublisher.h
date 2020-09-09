@@ -25,7 +25,7 @@ public:
     MOCK_METHOD2(Publish,
                  void(const openpass::datastore::Key &key, const openpass::datastore::Value &value));
     MOCK_METHOD1(Publish,
-                 void(const openpass::narrator::EventBase &event));
+                 void(const openpass::publisher::LogEntryBase &event));
     MOCK_METHOD2(Publish,
                  void(const openpass::datastore::Key &key, const openpass::datastore::ComponentEvent &event));
 };

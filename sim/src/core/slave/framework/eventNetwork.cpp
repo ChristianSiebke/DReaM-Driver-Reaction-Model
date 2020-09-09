@@ -52,7 +52,7 @@ void EventNetwork::InsertEvent(std::shared_ptr<EventInterface> event)
 {
     events[event->GetCategory()].push_back(event);
     publisher.Publish(EventDefinitions::utils::GetAsString(event->GetCategory()),
-                      openpass::narrator::LogEntry::FromEvent(event));
+                      openpass::publisher::LogEntry::FromEvent(event));
 }
 
 void EventNetwork::Clear()

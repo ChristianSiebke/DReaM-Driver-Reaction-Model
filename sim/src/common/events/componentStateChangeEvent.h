@@ -27,7 +27,7 @@ public:
     static constexpr char TOPIC[] {"OpenSCENARIO/UserDefinedAction/CustomCommandAction/SetComponentState"};
 
     ComponentStateChangeEvent(int time, std::string eventName, std::string source,
-                     TriggeringEntities triggeringAgents, AffectedEntities actingAgents,
+                     openpass::type::TriggeringEntities triggeringAgents, openpass::type::AffectedEntities actingAgents,
                      const std::string componentName, ComponentState componentState) :
         OpenScenarioEvent{time, eventName, source, triggeringAgents, actingAgents},
         componentName{std::move(componentName)},

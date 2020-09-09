@@ -144,7 +144,7 @@ TEST_P(ReachPositionConditionTest, TriggerEventInsertion_AddsEventIfNecessary)
         ON_CALL(mockWorld, GetAgentByName("mockAgent1")).WillByDefault(Return(&mockAgent1));
         ON_CALL(mockWorld, GetAgentByName("mockAgent2")).WillByDefault(Return(&mockAgent2));
 
-        TriggeringEntities triggering {};
+        openpass::type::TriggeringEntities triggering {};
 
         Invocationcontainer container{};
 

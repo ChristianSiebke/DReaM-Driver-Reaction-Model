@@ -20,7 +20,7 @@ public:
     MOCK_CONST_METHOD0(GetCategory, EventDefinitions::EventCategory());
     MOCK_CONST_METHOD0(GetSource, std::string());
     MOCK_CONST_METHOD0(GetName, std::string());
-    MOCK_CONST_METHOD0(GetTriggeringAgents, const TriggeringEntities());
-    MOCK_CONST_METHOD0(GetActingAgents, const AffectedEntities());
+    MOCK_CONST_METHOD0(GetTriggeringAgents, const openpass::type::TriggeringEntities());
+    MOCK_CONST_METHOD0(GetActingAgents, const openpass::type::AffectedEntities());
     MOCK_CONST_METHOD0(GetParameter, const openpass::type::FlatParameter&());
 };

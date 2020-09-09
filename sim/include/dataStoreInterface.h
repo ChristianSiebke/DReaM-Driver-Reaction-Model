@@ -34,26 +34,6 @@ static const std::string WILDCARD = "*";    //!< Wildcard to match any token ins
 static constexpr char SEPARATOR = '/';   //!< Separator for hierarchical DataStore key strings. Length of 1 is mandatory.
 
 /*!
- * \brief Contains the triggering entities of an acyclic
- *
- *  Might be enhanced in the future to hold additional information about the affected entities
- */
-struct TriggeringEntities
-{
-    type::EntityIds entities;
-};
-
-/*!
- * \brief Contains the affected entities of an acyclic
- *
- *  Might be enhanced in the future to hold additional information about the affected entities
- */
-struct AffectedEntities
-{
-    type::EntityIds entities;
-};
-
-/*!
  * \brief Representation of an component event
  */
 class ComponentEvent
@@ -75,7 +55,7 @@ class Acyclic
 {
 public:
     Acyclic() = default;
-    Acyclic(std::string name, TriggeringEntities triggeringEntities, AffectedEntities affectedEntities, Parameter parameter) :
+    Acyclic(std::string name, openpass::type::TriggeringEntities triggeringEntities, openpass::type::AffectedEntities affectedEntities, Parameter parameter) :
         name{std::move(name)},
         triggeringEntities{std::move(triggeringEntities)},
         affectedEntities{std::move(affectedEntities)},
@@ -99,8 +79,8 @@ public:
     }
 
     std::string name;                         //!< Name (or identifier) of this occurence
-    TriggeringEntities triggeringEntities;    //!< List of entities causing this occurence
-    AffectedEntities affectedEntities;        //!< List of entities affected by this occurence
+    openpass::type::TriggeringEntities triggeringEntities;    //!< List of entities causing this occurence
+    openpass::type::AffectedEntities affectedEntities;        //!< List of entities affected by this occurence
     Parameter parameter;                      //!< Generic parameter set associated with this occurence
 };
 

@@ -11,49 +11,6 @@
 
 #pragma once
 
-#include <map>
-#include <string>
-
-#include "common/openPassTypes.h"
-#include "include/dataStoreInterface.h"
-
-namespace openpass::narrator {
-
-class EventBase
-{
-public:
-    EventBase() = default;
-    explicit EventBase(std::string name) :
-        name{std::move(name)}
-    {
-    }
-    EventBase(std::string name, TriggeringEntities triggeringEntities, AffectedEntities affectedEntities) :
-        name{std::move(name)},
-        triggeringEntities{std::move(triggeringEntities)},
-        affectedEntities{std::move(affectedEntities)}
-    {
-    }
-
-    std::string name;
-    TriggeringEntities triggeringEntities;
-    AffectedEntities affectedEntities;
-
-    virtual operator Acyclic() const = 0;
-
-    // We do not allow copy to force move semantics
-    EventBase(const EventBase &) = delete;
-    EventBase &operator=(const EventBase &) = delete;
-
-    // Explicitly allow move
-    EventBase(EventBase &&) = default;
-    EventBase &operator=(EventBase &&) = default;
-
-    // Neccesary evil
-    virtual ~EventBase() = default;
-};
-
-} // namespace openpass::narrator
-
 namespace EventDefinitions {
 
 enum struct EventCategory

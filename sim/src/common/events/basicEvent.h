@@ -36,7 +36,7 @@ class BasicEvent : public EventInterface
 {
 public:
     BasicEvent(int time, std::string eventName, std::string source,
-               const TriggeringEntities triggeringAgents, const AffectedEntities actingAgents) :
+               const openpass::type::TriggeringEntities triggeringAgents, const openpass::type::AffectedEntities actingAgents) :
         EventInterface{std::move(triggeringAgents), std::move(actingAgents)},
         time(time),
         name(std::move(eventName)),
@@ -69,12 +69,12 @@ public:
         return source;
     }
 
-    virtual const TriggeringEntities GetTriggeringAgents() const override
+    virtual const openpass::type::TriggeringEntities GetTriggeringAgents() const override
     {
         return triggeringAgents;
     }
 
-    virtual const AffectedEntities GetActingAgents() const override
+    virtual const openpass::type::AffectedEntities GetActingAgents() const override
     {
         return actingAgents;
     }

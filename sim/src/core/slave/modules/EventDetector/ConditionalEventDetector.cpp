@@ -41,7 +41,7 @@ void ConditionalEventDetector::Trigger(int time)
 
 void ConditionalEventDetector::TriggerEventInsertion(int time, const std::vector<const AgentInterface *> triggeringAgents)
 {
-    TriggeringEntities triggering{};
+    openpass::type::TriggeringEntities triggering{};
     for (const auto triggeringAgent : triggeringAgents)
     {
         triggering.entities.push_back(triggeringAgent->GetId());
@@ -49,7 +49,7 @@ void ConditionalEventDetector::TriggerEventInsertion(int time, const std::vector
 
     const auto actors = GetActors(triggeringAgents);
 
-    AffectedEntities acting{};
+    openpass::type::AffectedEntities acting{};
     for (const auto actingAgent : actors)
     {
         acting.entities.push_back(actingAgent->GetId());

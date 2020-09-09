@@ -98,7 +98,7 @@ CollisionManipulator::CrashInfo CollisionManipulator::CalculateCrash(AgentInterf
 
 void CollisionManipulator::PublishCrash(const std::shared_ptr<openpass::events::CollisionEvent>& event, const CrashInfo& crashInfo)
 {
-    auto logEntry = openpass::narrator::LogEntry::FromEvent(event);
+    auto logEntry = openpass::publisher::LogEntry::FromEvent(event);
     logEntry.parameter.insert({{"Velocity", crashInfo.postCrashDynamic1.GetVelocity()},
                                {"VelocityChange", crashInfo.postCrashDynamic1.GetVelocityChange()},
                                {"VelocityDirection", crashInfo.postCrashDynamic1.GetVelocityDirection()},
