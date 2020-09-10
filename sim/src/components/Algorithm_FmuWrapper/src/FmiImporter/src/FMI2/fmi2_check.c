@@ -210,9 +210,12 @@ jm_status_enu_t fmi2_check(fmu_check_data_t* cdata) {
 			jm_log_fatal(cb,fmu_checker_module,"Could not create the DLL loading mechanism(C-API) for ME.");
 		}
 		else {
-			if(cdata->tmpPath == cdata->unzipPath) {
+            /* NOTE: setting debug mode prevents unloading of shared object during shutdown.
+             * This leads to segmentation faults when loading the same FMU multiple times.
+            if(cdata->tmpPath == cdata->unzipPath) {
 				fmi2_import_set_debug_mode(cdata->fmu2, 1);
 			}
+            */
 			jm_log_info(cb,fmu_checker_module,"Version returned from ME FMU: '%s'\n", fmi2_import_get_version(cdata->fmu2));
 
 			{
@@ -241,9 +244,12 @@ jm_status_enu_t fmi2_check(fmu_check_data_t* cdata) {
 			jm_log_fatal(cb,fmu_checker_module,"Could not create the DLL loading mechanism(C-API) for CoSimulation.");
 		}
 		else {
-			if(cdata->tmpPath == cdata->unzipPath) {
+            /* NOTE: setting debug mode prevents unloading of shared object during shutdown.
+             * This leads to segmentation faults when loading the same FMU multiple times.
+            if(cdata->tmpPath == cdata->unzipPath) {
 				fmi2_import_set_debug_mode(cdata->fmu2, 1);
-			}
+            }
+            */
 			jm_log_info(cb,fmu_checker_module,"Version returned from CS FMU:   %s", fmi2_import_get_version(cdata->fmu2));
 
 			{
