@@ -1,4 +1,4 @@
-set(COMPONENT_NAME master)
+set(COMPONENT_NAME OpenPassMaster)
 
 set(CMAKE_AUTOMOC ON)
 
