@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -9,21 +9,21 @@
 *******************************************************************************/
 
 //-----------------------------------------------------------------------------
-/** \file  SensorFusion.cpp */
+/** \file  SensorAggregation.cpp */
 //-----------------------------------------------------------------------------
 
-#include "sensorFusion.h"
-#include "src/sensorFusionImpl.h"
+#include "sensorAggregation.h"
+#include "src/sensorAggregationImpl.h"
 
 const std::string Version = "0.0.1";
 static const CallbackInterface *Callbacks = nullptr;
 
-extern "C" SENSOR_FUSION_SHARED_EXPORT const std::string &OpenPASS_GetVersion()
+extern "C" SENSOR_AGGREGATION_SHARED_EXPORT const std::string &OpenPASS_GetVersion()
 {
     return Version;
 }
 
-extern "C" SENSOR_FUSION_SHARED_EXPORT ModelInterface *OpenPASS_CreateInstance(
+extern "C" SENSOR_AGGREGATION_SHARED_EXPORT ModelInterface *OpenPASS_CreateInstance(
         std::string componentName,
         bool isInit,
         int priority,
@@ -41,7 +41,7 @@ extern "C" SENSOR_FUSION_SHARED_EXPORT ModelInterface *OpenPASS_CreateInstance(
 
     try
     {
-        return (ModelInterface*)(new (std::nothrow) SensorFusionImplementation(
+        return (ModelInterface*)(new (std::nothrow) SensorAggregationImplementation(
                                      componentName,
                                      isInit,
                                      priority,
@@ -75,12 +75,12 @@ extern "C" SENSOR_FUSION_SHARED_EXPORT ModelInterface *OpenPASS_CreateInstance(
     }
 }
 
-extern "C" SENSOR_FUSION_SHARED_EXPORT void OpenPASS_DestroyInstance(ModelInterface *implementation)
+extern "C" SENSOR_AGGREGATION_SHARED_EXPORT void OpenPASS_DestroyInstance(ModelInterface *implementation)
 {
-    delete (SensorFusionImplementation*)implementation;
+    delete (SensorAggregationImplementation*)implementation;
 }
 
-extern "C" SENSOR_FUSION_SHARED_EXPORT bool OpenPASS_UpdateInput(ModelInterface *implementation,
+extern "C" SENSOR_AGGREGATION_SHARED_EXPORT bool OpenPASS_UpdateInput(ModelInterface *implementation,
                                                              int localLinkId,
                                                              const std::shared_ptr<SignalInterface const> &data,
                                                              int time)
@@ -111,7 +111,7 @@ extern "C" SENSOR_FUSION_SHARED_EXPORT bool OpenPASS_UpdateInput(ModelInterface 
     return true;
 }
 
-extern "C" SENSOR_FUSION_SHARED_EXPORT bool OpenPASS_UpdateOutput(ModelInterface *implementation,
+extern "C" SENSOR_AGGREGATION_SHARED_EXPORT bool OpenPASS_UpdateOutput(ModelInterface *implementation,
                                                               int localLinkId,
                                                               std::shared_ptr<SignalInterface const> &data,
                                                               int time)
@@ -142,7 +142,7 @@ extern "C" SENSOR_FUSION_SHARED_EXPORT bool OpenPASS_UpdateOutput(ModelInterface
     return true;
 }
 
-extern "C" SENSOR_FUSION_SHARED_EXPORT bool OpenPASS_Trigger(ModelInterface *implementation,
+extern "C" SENSOR_AGGREGATION_SHARED_EXPORT bool OpenPASS_Trigger(ModelInterface *implementation,
                                                          int time)
 {
     try

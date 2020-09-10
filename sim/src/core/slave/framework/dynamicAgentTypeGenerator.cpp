@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -111,11 +111,11 @@ DynamicAgentTypeGenerator& DynamicAgentTypeGenerator::GatherVehicleComponents()
 
 DynamicAgentTypeGenerator& DynamicAgentTypeGenerator::GatherSensors()
 {
-    const std::string sensorFusionModulName = "SensorFusion";
+    const std::string sensorAggregationModulName = "SensorAggregation";
 
-    GatherComponent(sensorFusionModulName, agentBuildInformation.agentType);
+    GatherComponent(sensorAggregationModulName, agentBuildInformation.agentType);
 
-    int inputIdSensorFusion = systemConfigBlueprint->GetSystems().at(0)->GetComponents().at(sensorFusionModulName)->GetInputLinks().at(0);
+    int inputIdSensorAggregation = systemConfigBlueprint->GetSystems().at(0)->GetComponents().at(sensorAggregationModulName)->GetInputLinks().at(0);
     int sensorNumber = 0;
     auto vehicleProfile = profiles->GetVehicleProfiles().at(sampledProfiles.vehicleProfileName);
 
@@ -144,8 +144,8 @@ DynamicAgentTypeGenerator& DynamicAgentTypeGenerator::GatherSensors()
 
         if (sensorNumber > 0)
         {
-            agentBuildInformation.agentType->GetComponents().at(sensorFusionModulName)->AddInputLink(sensorNumber,
-                    inputIdSensorFusion + sensorNumber);
+            agentBuildInformation.agentType->GetComponents().at(sensorAggregationModulName)->AddInputLink(sensorNumber,
+                    inputIdSensorAggregation + sensorNumber);
         }
 
         // clone sensor and set specific parameters

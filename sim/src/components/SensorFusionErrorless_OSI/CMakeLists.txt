@@ -1,4 +1,4 @@
-set(COMPONENT_NAME SensorFusion_OSI)
+set(COMPONENT_NAME SensorFusionErrorless_OSI)
 
 add_compile_definitions(SENSOR_FUSION_LIBRARY)
 
@@ -6,12 +6,11 @@ add_openpass_target(
   NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
 
   HEADERS
-    sensorFusion.h
+    sensorFusionErrorless_OSI.h
     src/sensorFusionImpl.h
-    src/sensorFusionQuery.h
 
   SOURCES
-    sensorFusion.cpp
+    sensorFusionErrorless_OSI.cpp
     src/sensorFusionImpl.cpp
 
   LIBRARIES

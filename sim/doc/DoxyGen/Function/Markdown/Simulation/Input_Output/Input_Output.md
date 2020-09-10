@@ -97,6 +97,9 @@ The table below can be used as orientation when a new module is introduced.
 |---|-----------|-----------|-----------|-----------|
 | ParametersAgentModules| ParametersAgent| 500 | Parameters | Sets all init-data and is updated cyclically |
 | OpenScenarioActions | OpenScenarioActions | 400 | ADAS | Reads events from OpenScenario Actions and forwards them to other components |
+| SensorObjectDetector | Sensor_OSI | 398 | Sensor | Gets instantiated multiple time (one time per sensor) |
+| SensorAggregation | SensorAggregation_OSI | 351 | Sensor | - |
+| SensorFusionErrorless | SensorFusionErrorless_OSI | 350 | Sensor | - |
 | AlgorithmAgentFollowingDriverModel | AlgorithmAgentFollowingDriverModel | 310 | DriverModels | - |
 | AEB | AlgorithmAutonomousEmergencyBraking | 250 | ADAS | - |
 | ComponentController | ComponentController | 200 | ADAS | Manages vehicle component states with regard to other vehicle component states and conditions and in response to events. |
@@ -179,6 +182,8 @@ With corresponding defined indices :
 | ComponentController                       | Special           | 83 |
 | OpenScenarioActions                       | Special           | 84 |
 | Parameter_Vehicle                         | Sensor            | 92 | 
+| SensorAggregation                         | Sensor            | 93 | 
+| SensorFusion                              | Sensor            | 94 | 
 | Sensor_Driver                             | Sensor            | 95 | 
 
 **Ids for Signals (last two digits)**
@@ -206,6 +211,7 @@ With corresponding defined indices :
 | SecondaryDriverTasks          | Algorithm             | 19      |
 | Trajectory                    | OpenScenarioActions   | 71      |
 | SensorDriver                  | Sensor                | 81      |
+| SensorData                    | Sensor                | 90      |
 | ParametersVehicle             | Parameters            | 92      |
 
 \subsubsection io_input_systemconfigblueprint_paramters Parameters

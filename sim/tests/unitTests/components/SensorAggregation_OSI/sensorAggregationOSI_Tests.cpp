@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,7 @@
 
 #include "fakeAgent.h"
 
-#include "sensorFusionImpl.h"
+#include "sensorAggregationImpl.h"
 #include "common/sensorDataSignal.h"
 #include "osi3/osi_sensordata.pb.h"
 
@@ -21,7 +21,7 @@ using ::testing::Eq;
 using ::testing::NiceMock;
 using ::testing::Return;
 
-TEST(SensorFusionOSI_Unittest, TestAppendingDetectedObjectsWithinTheSameTimestamp)
+TEST(SensorAggregationOSI_Unittest, TestAppendingDetectedObjectsWithinTheSameTimestamp)
 {
     osi3::SensorData sensorData1;
     auto movingObject1 = sensorData1.add_moving_object();
@@ -42,7 +42,7 @@ TEST(SensorFusionOSI_Unittest, TestAppendingDetectedObjectsWithinTheSameTimestam
     NiceMock<FakeAgent> fakeAgent;
     ON_CALL(fakeAgent, GetId()).WillByDefault(Return(0));
 
-    SensorFusionImplementation sensorFusion("",
+    SensorAggregationImplementation sensorFusion("",
                                             false,
                                             0,
                                             0,
@@ -74,7 +74,7 @@ TEST(SensorFusionOSI_Unittest, TestAppendingDetectedObjectsWithinTheSameTimestam
 }
 
 
-TEST(SensorFusionOSI_Unittest, TestResettingDetectedObjectsInNewTimestamp)
+TEST(SensorAggregationOSI_Unittest, TestResettingDetectedObjectsInNewTimestamp)
 {
     osi3::SensorData sensorData1;
     auto movingObject1 = sensorData1.add_moving_object();
@@ -95,7 +95,7 @@ TEST(SensorFusionOSI_Unittest, TestResettingDetectedObjectsInNewTimestamp)
     NiceMock<FakeAgent> fakeAgent;
     ON_CALL(fakeAgent, GetId()).WillByDefault(Return(0));
 
-    SensorFusionImplementation sensorFusion("",
+    SensorAggregationImplementation sensorFusion("",
                                             false,
                                             0,
                                             0,

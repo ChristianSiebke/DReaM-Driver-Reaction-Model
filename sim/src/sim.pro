@@ -44,7 +44,8 @@ SUBDIRS = \
     components/Sensor_Driver \
     components/Sensor_OSI \
     components/Sensor_RecordState \
-    components/SensorFusion_OSI \
+    components/SensorAggregation_OSI \
+    components/SensorFusionErrorless_OSI \
     components/SignalPrioritizer
 
 slave.file = core/slave/OpenPassSlave.pro

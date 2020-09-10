@@ -30,7 +30,8 @@ SUBDIRS = \
     openScenarioActions_Tests \
     scheduler_Tests \
     sensorDriver_Tests \
-    sensorFusionOSI_Tests \
+    sensorAggregation_Tests \
+    sensorFusionErrorless_Tests \
     sensorOSI_Tests \
     signalPrioritizer_Tests \
     spawnPointScenario_Tests \
@@ -87,8 +88,11 @@ scheduler_Tests.file = \
 sensorDriver_Tests.file = \
     $$PWD/components/Sensor_Driver/sensorDriver_Tests.pro
 
-sensorFusionOSI_Tests.file = \
-    $$PWD/components/SensorFusion_OSI/sensorFusionOSI_Tests.pro
+sensorAggregation_Tests.file = \
+    $$PWD/components/SensorAggregation_OSI/sensorAggregationOSI_Tests.pro
+
+sensorFusionErrorless_Tests.file = \
+    $$PWD/components/SensorFusionErrorless_OSI/sensorFusionErrorless_Tests.pro
 
 sensorOSI_Tests.file = \
     $$PWD/components/Sensor_OSI/sensorOSI_Tests.pro

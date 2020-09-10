@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -300,9 +300,9 @@ TEST(DynamicAgentTypeGenerator, GatherSensors)
     std::map<int, std::shared_ptr<SimulationSlave::AgentTypeInterface>> systems = {{0, fakeAgentType}};
     std::map<std::string, std::shared_ptr<SimulationSlave::ComponentType>> components{};
 
-    auto sensorFusion = std::make_shared<SimulationSlave::ComponentType>("SensorFusion", false, 0, 0, 0, 0, "SensorFusion");
-    sensorFusion->AddInputLink(0, 100);
-    components.insert(std::make_pair("SensorFusion", sensorFusion));
+    auto sensorAggregation = std::make_shared<SimulationSlave::ComponentType>("SensorAggregation", false, 0, 0, 0, 0, "SensorAggregation");
+    sensorAggregation->AddInputLink(0, 100);
+    components.insert(std::make_pair("SensorAggregation", sensorAggregation));
 
     auto sensorObjectDetector = std::make_shared<SimulationSlave::ComponentType>("SensorObjectDetector", false, 0, 0, 0, 0, "SensorObjectDetector");
     sensorObjectDetector->AddOutputLink(3, 100);
@@ -317,14 +317,14 @@ TEST(DynamicAgentTypeGenerator, GatherSensors)
     const auto& gatheredComponents = agentBuildInformation.agentType->GetComponents();
 
     ASSERT_THAT(gatheredComponents.size(), Eq(3));
-    ASSERT_THAT(gatheredComponents.count("SensorFusion"), Eq(1));
+    ASSERT_THAT(gatheredComponents.count("SensorAggregation"), Eq(1));
     ASSERT_THAT(gatheredComponents.count("Sensor_5"), Eq(1));
     ASSERT_THAT(gatheredComponents.count("Sensor_7"), Eq(1));
 
-    ASSERT_THAT(gatheredComponents.at("SensorFusion")->GetInputLinks().size(), Eq(2));
-    ASSERT_THAT(gatheredComponents.at("SensorFusion")->GetModelLibrary(), Eq("SensorFusion"));
-    ASSERT_THAT(gatheredComponents.at("SensorFusion")->GetInputLinks().at(0), Eq(100));
-    ASSERT_THAT(gatheredComponents.at("SensorFusion")->GetInputLinks().at(1), Eq(101));
+    ASSERT_THAT(gatheredComponents.at("SensorAggregation")->GetInputLinks().size(), Eq(2));
+    ASSERT_THAT(gatheredComponents.at("SensorAggregation")->GetModelLibrary(), Eq("SensorAggregation"));
+    ASSERT_THAT(gatheredComponents.at("SensorAggregation")->GetInputLinks().at(0), Eq(100));
+    ASSERT_THAT(gatheredComponents.at("SensorAggregation")->GetInputLinks().at(1), Eq(101));
 
     ASSERT_THAT(gatheredComponents.at("Sensor_5")->GetModelLibrary(), Eq("SensorObjectDetector"));
     ASSERT_THAT(gatheredComponents.at("Sensor_5")->GetOutputLinks().at(3), Eq(100));

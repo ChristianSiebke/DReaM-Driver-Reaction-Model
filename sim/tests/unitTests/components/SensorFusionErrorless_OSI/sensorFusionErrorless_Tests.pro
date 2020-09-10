@@ -13,7 +13,7 @@ CONFIG += OPENPASS_GTEST \
 
 include(../../../testing.pri)
 
-UNIT_UNDER_TEST = $$OPEN_SRC/components/SensorFusion_OSI/src
+UNIT_UNDER_TEST = $$OPEN_SRC/components/SensorFusionErrorless_OSI/src
 
 INCLUDEPATH += \
     . \
@@ -25,7 +25,7 @@ HEADERS += \
 
 SOURCES += \
     $$UNIT_UNDER_TEST/sensorFusionImpl.cpp \
-    sensorFusionOSI_Tests.cpp
+    sensorFusionErrorless_Tests.cpp
 
 LIBS += \
     -lopen_simulation_interface \

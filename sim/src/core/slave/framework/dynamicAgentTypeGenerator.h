@@ -52,7 +52,8 @@ struct DefaultComponents
         "Algorithm_LongitudinalVehicleComponents",
         "PrioritizerAccelerationVehicleComponents",
         "PrioritizerSteeringVehicleComponents",
-        "LimiterAccelerationVehicleComponents"
+        "LimiterAccelerationVehicleComponents",
+        "SensorFusionErrorless"
     };
 };
 

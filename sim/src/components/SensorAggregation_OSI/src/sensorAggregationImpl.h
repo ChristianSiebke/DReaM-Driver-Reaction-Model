@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 * Copyright (c) 2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -9,11 +9,11 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
-/** \addtogroup SensorFusion
+/** \addtogroup SensorAggregation
 * @{
-* \brief This file models the SensorFusion.
+* \brief This file models the SensorAggregation.
 *
-* \details This file models the SensorFusion which can be part of an agent.
+* \details This file models the SensorAggregation which can be part of an agent.
 *          This module gets OSI SensorData of all sensors of the vehicle and forwards a combined
 *          SensorData to the driver assistance systems.
 *
@@ -48,18 +48,18 @@
 #include "osi3/osi_sensordata.pb.h"
 
 //-----------------------------------------------------------------------------
-/** \brief This class is the SensorFusion module.
+/** \brief This class is the SensorAggregation module.
 * 	\details This class contains all logic regarding the sensor fusion.
 *
-* 	\ingroup SensorFusion
+* 	\ingroup SensorAggregation
 */
 //-----------------------------------------------------------------------------
-class SensorFusionImplementation : public UnrestrictedModelInterface
+class SensorAggregationImplementation : public UnrestrictedModelInterface
 {
 public:
     const std::string COMPONENTNAME = "SensorFusion";
 
-    SensorFusionImplementation(
+    SensorAggregationImplementation(
             std::string componentName,
             bool isInit,
             int priority,
@@ -73,11 +73,11 @@ public:
             const CallbackInterface *callbacks,
             AgentInterface *agent);
 
-    SensorFusionImplementation(const SensorFusionImplementation&) = delete;
-    SensorFusionImplementation(SensorFusionImplementation&&) = delete;
-    SensorFusionImplementation& operator=(const SensorFusionImplementation&) = delete;
-    SensorFusionImplementation& operator=(SensorFusionImplementation&&) = delete;
-    virtual ~SensorFusionImplementation() = default;
+    SensorAggregationImplementation(const SensorAggregationImplementation&) = delete;
+    SensorAggregationImplementation(SensorAggregationImplementation&&) = delete;
+    SensorAggregationImplementation& operator=(const SensorAggregationImplementation&) = delete;
+    SensorAggregationImplementation& operator=(SensorAggregationImplementation&&) = delete;
+    virtual ~SensorAggregationImplementation() = default;
 
     /*!
      * \brief Update Inputs
