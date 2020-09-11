@@ -68,23 +68,32 @@ if(MINGW)
   list(GET _CVER_COMPONENTS 0 _CVER_MAJOR)
   list(GET _CVER_COMPONENTS 1 _CVER_MINOR)
   set(Boost_COMPILER "mgw${_CVER_MAJOR}${_CVER_MINOR}")
-  set(Boost_USE_STATIC_LIBS OFF)
 endif()
+set(Boost_USE_STATIC_LIBS OFF)
 find_package(Boost COMPONENTS filesystem REQUIRED)
-include_directories(${Boost_INCLUDE_DIRS})
-
 
 find_package(Qt5 COMPONENTS Concurrent Core Widgets Xml)
 find_package(FMILibrary)
 
 option(WITH_SIMCORE "Build OSI based scenario simulation" ON)
-option(WITH_GUI "Build GUI" ON)
+option(WITH_GUI "Build GUI" OFF)
 option(WITH_TESTS "Build unit tests" ON)
+option(WITH_EXTENDED_OSI "Assume an extended version of OSI is available" OFF)
+option(WITH_PROTOBUF_ARENA "Make use of protobuf arena allocation" ON)
+option(WITH_DEBUG_POSTFIX "Use 'd' binary postfix on Windows platform" ON)
 
 if(WITH_TESTS)
   find_package(GTest)
-  # as GMock currently doesn't provvide a find_package config, gmock file location is derived from gtest in HelperMacros.cmake
+  # as GMock currently doesn't provide a find_package config, gmock file location is derived from gtest in HelperMacros.cmake
   #find_package(GMock)
+endif()
+
+if(WITH_EXTENDED_OSI)
+  add_compile_definitions(USE_EXTENDED_OSI)
+endif()
+
+if(WITH_PROTOBUF_ARENA)
+  add_compile_definitions(USE_PROTOBUF_ARENA)
 endif()
 
 if(WIN32)
@@ -93,8 +102,10 @@ if(WIN32)
   add_compile_definitions(BOOST_ALL_NO_LIB)
   add_compile_definitions(BOOST_ALL_DYN_LINK)
   add_compile_definitions(_USE_MATH_DEFINES)
-  set(CMAKE_DEBUG_POSTFIX "d")
   option(OPENPASS_ADJUST_OUTPUT "Adjust output directory" ON)
+  if(WITH_DEBUG_POSTFIX)
+    set(CMAKE_DEBUG_POSTFIX "d")
+  endif()
 else()
   set(CMAKE_INSTALL_PREFIX "/OpenPASS" CACHE PATH "Destination directory")
   add_compile_definitions(unix)
@@ -105,7 +116,6 @@ endif()
 add_compile_definitions($<IF:$<CONFIG:Debug>,DEBUG_POSTFIX="${CMAKE_DEBUG_POSTFIX}",DEBUG_POSTFIX=\"\">)
 
 set(CMAKE_BUILD_RPATH \$ORIGIN)
-set(CMAKE_INSTALL_RPATH \$ORIGIN \$ORIGIN/lib)
 
 include(HelperMacros)
 
@@ -137,42 +147,15 @@ add_compile_definitions(SUBDIR_LIB_COMPONENTS="${SUBDIR_LIB_COMPONENTS}")
 add_compile_definitions(SUBDIR_XML_COMPONENTS="${SUBDIR_XML_COMPONENTS}")
 
 if(MSVC)
-  set(CMAKE_DEBUG_POSTFIX "d")
+  if(WITH_DEBUG_POSTFIX)
+    set(CMAKE_DEBUG_POSTFIX "d")
+  endif()
   add_compile_definitions(_CRT_SECURE_NO_DEPRECATE)
   add_compile_definitions(_CRT_NONSTDC_NO_DEPRECATE)
 
   # get rid of annoying template needs to have dll-interface warnings on VisualStudio
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4251 -wd4335")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4250")
-endif()
-
-# packaging
-if(MSVC)
-# TODO
-elseif(MINGW)
-  get_filename_component(MINGW_PATH ${CMAKE_CXX_COMPILER} PATH)
-  string(REGEX REPLACE "\.a$" "" OSILIB "${OSI_LIBRARIES}")
-  string(REGEX REPLACE "\.a$" "" PROTOLIB "${Protobuf_LIBRARIES}")
-  string(REGEX REPLACE "\/lib\/" "/bin/" PROTOLIB "${PROTOLIB}")
-  string(REGEX REPLACE "\.a$" "" FMILIB "${FMILibrary_LIBRARIES}")
-  set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
-    ${MINGW_PATH}/libgcc_s_seh-1.dll
-    ${MINGW_PATH}/libstdc++-6.dll
-    ${MINGW_PATH}/libwinpthread-1.dll
-    $<TARGET_FILE:Qt5::Core>
-    $<TARGET_FILE:Qt5::Xml>
-    ${OSILIB}
-    ${PROTOLIB}
-    ${FMILIB})
-else()
-# TODO
-#  set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS
-#    $<TARGET_FILE:Boost::filesystem>
-#    $<TARGET_FILE:Qt5::Core>
-#    $<TARGET_FILE:Qt5::Xml>
-#    ${OSI_LIBRARIES}
-#    ${Protobuf_LIBRARIES}
-#    ${FMILibrary_LIBRARIES})
 endif()
 
 set(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION .)

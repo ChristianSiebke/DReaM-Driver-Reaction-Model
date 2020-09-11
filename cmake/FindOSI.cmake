@@ -20,7 +20,7 @@ FIND_PATH(OSI_INCLUDE_DIR "osi3/osi_version.pb.h"
 )
 
 SET(OSI_NAMES
-    osi3/open_simulation_interface.lib 
+    osi3/open_simulation_interface.lib
     osi3/libopen_simulation_interface.dll.a
     osi3/libopen_simulation_interface_pic.lib
     osi3/libopen_simulation_interface.so

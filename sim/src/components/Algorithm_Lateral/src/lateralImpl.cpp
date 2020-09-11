@@ -1,0 +1,126 @@
+/*******************************************************************************
+* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+*               2018, 2019 AMFD GmbH
+*               2016, 2017 ITK Engineering GmbH
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+*******************************************************************************/
+
+//-----------------------------------------------------------------------------
+/** @file  algorithm_lateralImplementation.cpp */
+//-----------------------------------------------------------------------------
+
+#include <memory>
+#include <qglobal.h>
+#include "lateralImpl.h"
+#include "common/steeringSignal.h"
+#include "common/parametersVehicleSignal.h"
+#include "common/lateralSignal.h"
+#include "common/commonTools.h"
+#include "common/globalDefinitions.h"
+#include "components/Sensor_Driver/src/Signals/sensorDriverSignal.h"
+
+void AlgorithmLateralImplementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time)
+{
+    Q_UNUSED(time);
+
+    if (localLinkId == 0)
+    {
+        // from PrioritizerLateralVehicleComponent or Driver
+        const std::shared_ptr<ComponentStateSignalInterface const> stateSignal = std::dynamic_pointer_cast<ComponentStateSignalInterface const>(data);
+        if(stateSignal->componentState == ComponentState::Acting)
+        {
+            isActive = true;
+            const std::shared_ptr<LateralSignal const> signal = std::dynamic_pointer_cast<LateralSignal const>(data);
+            if (!signal)
+            {
+                const std::string msg = COMPONENTNAME + " invalid signaltype";
+                LOG(CbkLogLevel::Debug, msg);
+                throw std::runtime_error(msg);
+            }
+
+            steeringController.SetLateralInput(*signal);
+        }
+        else
+        {
+            isActive = false;
+        }
+    }
+    else if (localLinkId == 100)
+    {
+        // from ParametersAgent
+        const std::shared_ptr<ParametersVehicleSignal const> signal = std::dynamic_pointer_cast<ParametersVehicleSignal const>(data);
+        if (!signal)
+        {
+            const std::string msg = COMPONENTNAME + " invalid signaltype";
+            LOG(CbkLogLevel::Debug, msg);
+            throw std::runtime_error(msg);
+        }
+
+        steeringController.SetVehicleParameter(signal->vehicleParameters.steeringRatio,
+                                               signal->vehicleParameters.maximumSteeringWheelAngleAmplitude,
+                                               signal->vehicleParameters.wheelbase);
+    }
+    else if (localLinkId == 101 || localLinkId == 102)
+    {
+        // from SensorDriver
+        const std::shared_ptr<SensorDriverSignal const> signal = std::dynamic_pointer_cast<SensorDriverSignal const>(data);
+
+        if (!signal)
+        {
+            const std::string msg = COMPONENTNAME + " invalid signaltype";
+            LOG(CbkLogLevel::Debug, msg);
+            throw std::runtime_error(msg);
+        }
+
+        steeringController.SetVelocityAndSteeringWheelAngle(signal->GetOwnVehicleInformation().absoluteVelocity,
+                                                            signal->GetOwnVehicleInformation().steeringWheelAngle);
+    }
+    else
+    {
+        const std::string msg = COMPONENTNAME + " invalid link";
+        LOG(CbkLogLevel::Debug, msg);
+        throw std::runtime_error(msg);
+    }
+}
+
+void AlgorithmLateralImplementation::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterface const> &data, int time)
+{
+    Q_UNUSED(time);
+
+    if(localLinkId == 0)
+    {
+        try
+        {
+            if (isActive)
+            {
+                data = std::make_shared<SteeringSignal const>(ComponentState::Acting, out_desiredSteeringWheelAngle);
+            }
+            else
+            {
+                data = std::make_shared<SteeringSignal const>(ComponentState::Disabled, 0.0);
+            }
+        }
+        catch(const std::bad_alloc&)
+        {
+            const std::string msg = COMPONENTNAME + " could not instantiate signal";
+            LOG(CbkLogLevel::Debug, msg);
+            throw std::runtime_error(msg);
+        }
+    }
+    else
+    {
+        const std::string msg = COMPONENTNAME + " invalid link";
+        LOG(CbkLogLevel::Debug, msg);
+        throw std::runtime_error(msg);
+    }
+}
+
+void AlgorithmLateralImplementation::Trigger(int time)
+{
+    out_desiredSteeringWheelAngle = steeringController.CalculateSteeringAngle(time);
+}
