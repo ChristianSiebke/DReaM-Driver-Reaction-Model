@@ -1,0 +1,2 @@
+add_subdirectory(OpenPassSlave_IntegrationTests)
+add_subdirectory(Spawner_IntegrationTests)
