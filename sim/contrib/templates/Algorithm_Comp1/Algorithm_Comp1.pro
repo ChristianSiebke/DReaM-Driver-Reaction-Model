@@ -39,10 +39,6 @@ defineReplace(getFiles) {
 }
 
 SUBDIRS +=  . \
-            ../../Common \
-            ../../Common_PCM \
-            ../../Common_Daimler \
-            ../../Interfaces \
 
 INCLUDEPATH += $$SUBDIRS \
     ..

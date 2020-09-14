@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component>
+  <type>Algorithm</type>
+  <title>AlgorithmLateral</title>
+  <schedule>
+    <offset>0</offset>
+    <cycle>1</cycle>
+    <response>0</response>
+  </schedule>
+  <parameters/>
+  <inputs>
+    <input>
+      <id>0</id>
+      <type>LateralSignal</type>
+      <title>Lateral Signal</title>
+      <unit></unit>
+      <cardinality>1</cardinality>
+    </input>
+    <input>
+      <id>100</id>
+      <type>ParametersVehicleSignal</type>
+      <title>Vehicle Parameters</title>
+      <unit></unit>
+      <cardinality>1</cardinality>
+    </input>
+    <input>
+      <id>101</id>
+      <type>SensorDriverSignal</type>
+      <title>Driver Signal</title>
+      <unit></unit>
+      <cardinality>1</cardinality>
+    </input>
+  </inputs>
+  <outputs>
+    <output>
+      <id>0</id>
+      <type>SteeringSignal</type>
+      <title>Steering Signal</title>
+      <unit></unit>
+    </output>
+  </outputs>
+</component>

@@ -10,6 +10,7 @@ Thumbs.db
 .directory
 DoxyGen/Function/doxy_build/*
 build
+*.bak
 
 # third party references
 deps/*
