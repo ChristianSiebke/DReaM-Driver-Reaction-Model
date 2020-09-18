@@ -110,7 +110,7 @@ void SensorDriverImplementation::GetNewRoute()
     }
     auto [roadGraph, root] = GetWorld()->GetRoadGraph({roadIds.front(), GetAgent()->GetObjectPosition().mainLocatePoint.at(roadIds.front()).laneId < 0}, maxDepth);
     std::map<RoadGraph::edge_descriptor, double> weights = GetWorld()->GetEdgeWeights(roadGraph);
-    auto [route, target] = RouteCalculation::SampleRoute(roadGraph, root, weights, *GetStochastics());
+    auto target = RouteCalculation::SampleRoute(roadGraph, root, weights, *GetStochastics());
     egoAgent.SetRoadGraph(std::move(roadGraph), root, target);
 }
 
