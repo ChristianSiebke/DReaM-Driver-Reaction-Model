@@ -9,8 +9,7 @@
 
 rm -rf html
 
-[ -d "../../Source" ] && SourceDir='../../Source'
-[ ! -d "../../Source" ] && SourceDir='../../OpenPass_Source_Code'
+SourceDir='../../../src'
 
 export SourceDir
 export DocumentationDir='../'
