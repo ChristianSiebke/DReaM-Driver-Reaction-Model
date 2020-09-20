@@ -8,7 +8,7 @@
 # * SPDX-License-Identifier: EPL-2.0
 # **********************************************************************/
 
-include(../../global.pri)
+include(../../sim/global.pri)
 
 TARGET = openPASS
 TEMPLATE = app

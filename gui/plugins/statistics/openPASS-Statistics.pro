@@ -10,7 +10,7 @@
 
 
 CONFIG += OPENPASS_LIBRARY_GUI
-include(../../../global.pri)
+include(../../../sim/global.pri)
 
 TARGET = Statistics
 TEMPLATE = lib

@@ -15,7 +15,7 @@
 #-----------------------------------------------------------------------------/
 
 CONFIG += OPENPASS_LIBRARY_GUI
-include(../../../global.pri)
+include(../../../sim/global.pri)
 
 TARGET = System
 TEMPLATE = lib
@@ -47,9 +47,9 @@ DIR_PRO = $${PWD}
 
 win32 {
 DIR_PRO ~= s,/,\\,g
-copydata.commands = xcopy /s /q /y /i $$DIR_PRO\..\..\components $${DESTDIR_GUI}$${SUBDIR_COMPONENTS}\
+copydata.commands = xcopy /s /q /y /i $$DIR_PRO\..\..\components $${DESTDIR_GUI}$${SUBDIR_LIB_COMPONENTS}\
 } else {
-copydata.commands = cp -f -R $$DIR_PRO/../../components $${DESTDIR_GUI}$${SUBDIR_COMPONENTS}
+copydata.commands = cp -f -R $$DIR_PRO/../../components $${DESTDIR_GUI}$${SUBDIR_LIB_COMPONENTS}
 }
 first.depends = $(first) copydata
 export(first.depends)

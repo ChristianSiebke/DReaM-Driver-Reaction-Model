@@ -33,10 +33,10 @@ SUBDIR_LIB_SIMS = "/lib"
 DEFINES += SUBDIR_LIB_SIM=\\\"/lib\\\"
 
 ## gui libraries destination sub-directory ##
-SUBDIR_LIB_GUIS = "/bin/gui"
+SUBDIR_LIB_GUIS = "/gui"
 SUBDIR_LIB_COMPONENTS = "\components"
 
-DEFINES += SUBDIR_LIB_GUI=\\\"/bin/gui\\\"
+DEFINES += SUBDIR_LIB_GUI=\\\"/gui\\\"
 DEFINES += SUBDIR_LIB_COMPONENTS=\\\"/components\\\"
 
 ## Qt plugins sub-directory ##

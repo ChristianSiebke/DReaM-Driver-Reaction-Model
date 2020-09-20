@@ -19,7 +19,7 @@ win32 {
     }
 
     isEmpty(DESTDIR_GUI){
-        DESTDIR_GUI = "C:\OpenPASS"
+        DESTDIR_GUI = "C:\OpenPASS\bin"
     }
 
     isEmpty(EXTRA_INCLUDE_PATH) {
@@ -41,7 +41,7 @@ unix {
     }
 
     isEmpty(DESTDIR_GUI){
-        DESTDIR_GUI = "/OpenPASS"
+        DESTDIR_GUI = "/OpenPASS/bin"
     }
 
     isEmpty(EXTRA_INCLUDE_PATH) {
