@@ -62,13 +62,7 @@ HIDE_UNDOC_CLASSES     = NO
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = . \
-						 $(SourceDir)/openPASS/Common \
-						 $(SourceDir)/openPASS/Common_PCM \
-						 $(SourceDir)/openPASS/CoreFramework \
-						 $(SourceDir)/openPASS/Components_PCM \
-						 $(SourceDir)/openPASS/CoreModules \
-						 $(SourceDir)/openPASS/CoreModules_PCM \
-						 $(SourceDir)/openPASS/Interfaces \		 
+						 $(SourceDir)
 
 FILE_PATTERNS          = *.dox \
                          *.h \

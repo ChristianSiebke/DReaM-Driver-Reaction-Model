@@ -7,11 +7,7 @@
 
 rmdir /s /q html
 
-IF EXIST ../../Source (
-set SourceDir=../../Source
-) ELSE (
-set SourceDir=../../OpenPass_Source_Code
-)
+set SourceDir=../../../src
 
 set DocumentationDir=../
 

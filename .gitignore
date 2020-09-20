@@ -11,6 +11,7 @@ Thumbs.db
 DoxyGen/Function/doxy_build/*
 build
 *.bak
+Doxygen.log
 
 # third party references
 deps/*
