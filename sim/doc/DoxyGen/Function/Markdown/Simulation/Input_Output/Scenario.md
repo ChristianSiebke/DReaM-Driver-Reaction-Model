@@ -188,7 +188,7 @@ Although OpenSCENARIO also states other ways for defining a position, we current
 Unlike OpenSCENARIO we also allow some of these values to be stochastic.
 This is marked by adding a subtag  <Stochastics value="valuetype" stdDeviation="value" lowerBound="value" upperBound="value"/> to the <LanePosition> or <SpeedAction> tag.
 The stochastics tag is intended to be used as NormalDistribution, but it is up to each module using it to define the actual usage.
-The valuetype can either be s, offset, velocity or rate.
+The valuetype can either be s, offset (if inside LanePosition), velocity or rate (if inside SpeedAction).
 The value defined as attribute of the LanePosition/SpeedActionDynamics/AbsoluteTargetSpeed tag is then taken as mean value.
 The VisibilityAction is optional.
 If VisibilityAction is not defined the agent will be spawned.
@@ -215,6 +215,7 @@ Example
 							<SpeedActionTarget>
 								<AbsoluteTargetSpeed value="10.0" />
 							</SpeedActionTarget>
+                            <Stochastics value="velocity" stdDeviation="2.0" lowerBound="5.0" upperBound="15.0"/>
 						</SpeedAction>
 					</LongitudinalAction>
 				</PrivateAction>
