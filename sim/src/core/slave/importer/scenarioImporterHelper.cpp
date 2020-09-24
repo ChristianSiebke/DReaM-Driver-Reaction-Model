@@ -73,6 +73,10 @@ GlobalAction ScenarioImporterHelper::ImportGlobalAction(QDomElement globalAction
     {
         return ImportEntityAction(childOfGlobalActionElement, parameters);
     }
+    else if (SimulationCommon::GetFirstChildElement(globalActionElement, TAG::environmentAction, childOfGlobalActionElement))
+    {
+        return ImportEnvironmentAction(childOfGlobalActionElement, parameters);
+    }
     else
     {
         LogErrorAndThrow("Invalid GlobalAction type.");
@@ -253,6 +257,75 @@ EntityAction ScenarioImporterHelper::ImportEntityAction(QDomElement entityAction
     }
 
     return {entityRef, type};
+}
+
+EnvironmentAction ScenarioImporterHelper::ImportEnvironmentAction(QDomElement environmentActionElement, Parameters& parameters)
+{
+    EnvironmentAction environmentAction;
+
+    QDomElement environmentElement;
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(environmentActionElement, TAG::environment, environmentElement),
+                 environmentActionElement, "Tag " + std::string(TAG::environment) + " is missing.");
+
+    QDomElement weatherElement;
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(environmentElement, TAG::weather, weatherElement),
+                 environmentElement, "Tag " + std::string(TAG::weather) + " is missing.");
+
+    auto cloudState = ParseAttribute<std::string>(weatherElement, ATTRIBUTE::cloudState, parameters);
+    if (cloudState == "skyOff")
+    {
+        environmentAction.weather.cloudState = Weather::CloudState::skyOff;
+    }
+    else if (cloudState == "free")
+    {
+        environmentAction.weather.cloudState = Weather::CloudState::free;
+    }
+    else if (cloudState == "cloudy")
+    {
+        environmentAction.weather.cloudState = Weather::CloudState::cloudy;
+    }
+    else if (cloudState == "overcast")
+    {
+        environmentAction.weather.cloudState = Weather::CloudState::overcast;
+    }
+    else
+    {
+        ThrowIfFalse(cloudState == "rainy", environmentElement, "Unknown cloudState " + cloudState);
+        environmentAction.weather.cloudState = Weather::CloudState::rainy;
+    }
+
+    QDomElement fogElement;
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(weatherElement, TAG::fog, fogElement),
+                 weatherElement, "Tag " + std::string(TAG::fog) + " is missing.");
+    environmentAction.weather.fog.visualRange = ParseAttribute<double>(fogElement, ATTRIBUTE::visualRange, parameters);
+
+    QDomElement sunElement;
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(weatherElement, TAG::sun, sunElement),
+                 weatherElement, "Tag " + std::string(TAG::sun) + " is missing.");
+    environmentAction.weather.sun.azimuth = ParseAttribute<double>(sunElement, ATTRIBUTE::azimuth, parameters);
+    environmentAction.weather.sun.elevation = ParseAttribute<double>(sunElement, ATTRIBUTE::elevation, parameters);
+    environmentAction.weather.sun.intensity = ParseAttribute<double>(sunElement, ATTRIBUTE::intensity, parameters);
+
+    QDomElement precipitationElement;
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(weatherElement, TAG::precipitation, precipitationElement),
+                 weatherElement, "Tag " + std::string(TAG::precipitation) + " is missing.");
+    environmentAction.weather.precipitation.intensity = ParseAttribute<double>(precipitationElement, ATTRIBUTE::intensity, parameters);
+    auto precipitationType = ParseAttribute<std::string>(precipitationElement, ATTRIBUTE::precipitationType, parameters);
+    if (precipitationType == "dry")
+    {
+        environmentAction.weather.precipitation.type = Precipitation::Type::dry;
+    }
+    else if (precipitationType == "rain")
+    {
+        environmentAction.weather.precipitation.type = Precipitation::Type::rain;
+    }
+    else
+    {
+        ThrowIfFalse(precipitationType == "snow", precipitationElement, "Unknown precipitation type " + precipitationType);
+        environmentAction.weather.precipitation.type = Precipitation::Type::snow;
+    }
+
+    return  environmentAction;
 }
 
 LateralAction ScenarioImporterHelper::ImportLateralAction(QDomElement lateralActionElement, Parameters& parameters)

@@ -141,6 +141,16 @@ private:
     static EntityAction ImportEntityAction(QDomElement entityActionElement, Parameters& parameters);
 
     /*!
+    * \brief Import an openscenario EnvironmentAction Element
+    *
+    * @param[in]     environmentActionElement               EnvironmentAction xml Element
+    * @param[in]     parameters       Parametersset for openScenario parameter references
+    *
+    * return    EnvironmentAction
+    */
+    static EnvironmentAction ImportEnvironmentAction(QDomElement environmentActionElement, Parameters& parameters);
+
+    /*!
     * \brief Import an openscenario LateralAction Element
     *
     * @param[in]     lateralActionElement         LateralAction xml Element

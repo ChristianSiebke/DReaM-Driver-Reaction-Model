@@ -107,6 +107,9 @@ public:
     int GetEndTime() const override;
     void SetEndTime(const double endTime) override;
 
+    openScenario::EnvironmentAction GetEnvironment() override;
+    void SetEnvironment(const openScenario::EnvironmentAction environment) override;
+
 private:
     ScenarioEntity egoEntity;
     std::vector<ScenarioEntity> entities;
@@ -114,6 +117,7 @@ private:
 
     std::vector<openScenario::ConditionalEventDetectorInformation> eventDetectorInformations;
     std::vector<openScenario::ManipulatorInformation> actions;
+    openScenario::EnvironmentAction environment;
 
     std::string vehicleCatalogPath;     //!< The path of the vehicle catalog (relative to Scenario.xosc)
     std::string pedestrianCatalogPath;  //!< The path of the pedestrian catalog (relative to Scenario.xosc)

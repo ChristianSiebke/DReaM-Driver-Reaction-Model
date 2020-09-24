@@ -24,7 +24,7 @@ class FakeWorld : public WorldInterface
     MOCK_METHOD0(GetEgoAgent, AgentInterface*());
     MOCK_METHOD2(AddAgent, bool(int id, AgentInterface* agent));
     MOCK_METHOD0(CreateGlobalDrivingView, bool());
-    MOCK_METHOD1(CreateScenery, bool(SceneryInterface *scenery));
+    MOCK_METHOD2(CreateScenery, bool(SceneryInterface *scenery, const openScenario::EnvironmentAction& environment));
     MOCK_METHOD1(CreateWorldScenario, bool(const std::string &scenarioFilename));
     MOCK_METHOD1(CreateWorldScenery, bool(const std::string &sceneryFilename));
     MOCK_METHOD0(Instantiate, bool());

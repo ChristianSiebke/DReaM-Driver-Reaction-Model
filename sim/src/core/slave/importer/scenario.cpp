@@ -133,4 +133,14 @@ void Scenario::SetEndTime(const double endTime)
     this->endTimeInSeconds = endTime;
 }
 
+openScenario::EnvironmentAction Scenario::GetEnvironment()
+{
+    return environment;
+}
+
+void Scenario::SetEnvironment(const openScenario::EnvironmentAction environment)
+{
+    this->environment = environment;
+}
+
 } // namespace SimulationSlave

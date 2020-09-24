@@ -210,4 +210,16 @@ public:
     //! \param[in] endTime The desired end time of the simulation.
     //-------------------------------------------------------------------------
     virtual void SetEndTime(const double endTime) = 0;
+
+    //-------------------------------------------------------------------------
+    //! \brief Returns the environment conditions of the simulation.
+    //! \returns the environment conditions of the simulation.
+    //-------------------------------------------------------------------------
+    virtual openScenario::EnvironmentAction GetEnvironment() = 0;
+
+    //-------------------------------------------------------------------------
+    //! \brief Sets the environment conditions of the simulation.
+    //! \param[in] endTime The environment conditions of the simulation.
+    //-------------------------------------------------------------------------
+    virtual void SetEnvironment(const openScenario::EnvironmentAction environment) = 0;
 };

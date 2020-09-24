@@ -274,6 +274,8 @@ public:
                                         const std::map<int, int>& lanePairs,
                                         bool isPrev) = 0;
 
+    virtual void SetEnvironment(const openScenario::EnvironmentAction& environment) = 0;
+
     //!Resets the world for new run; deletes all moving objects
     virtual void Reset() = 0;
 
@@ -466,6 +468,10 @@ public:
     {
         return trafficSignIdMapping;
     }
+
+    void SetEnvironment(const openScenario::EnvironmentAction& environment) override;
+
+
     /*!
      * \brief Normalizes angles to +/- PI
      *

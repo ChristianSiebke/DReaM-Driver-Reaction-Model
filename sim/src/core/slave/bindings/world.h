@@ -137,9 +137,9 @@ public:
         return implementation->SyncGlobalData();
     }
 
-    bool CreateScenery(SceneryInterface* scenery) override
+    bool CreateScenery(SceneryInterface* scenery, const openScenario::EnvironmentAction& environment) override
     {
-        return implementation->CreateScenery(scenery);
+        return implementation->CreateScenery(scenery, environment);
     }
 
     AgentInterface* CreateAgentAdapterForAgent() override

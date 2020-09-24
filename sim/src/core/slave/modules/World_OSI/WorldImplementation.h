@@ -128,7 +128,7 @@ public:
     void PublishGlobalData(int timestamp) override;
     void SyncGlobalData() override;
 
-    bool CreateScenery(SceneryInterface* scenery) override;
+    bool CreateScenery(SceneryInterface* scenery, const openScenario::EnvironmentAction& environment) override;
 
     AgentInterface* CreateAgentAdapterForAgent() override;
 

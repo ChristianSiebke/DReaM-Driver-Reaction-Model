@@ -148,7 +148,52 @@ struct EntityAction
     EntityActionType type{};
 };
 
-using GlobalAction = std::variant<EntityAction>;
+struct Sun
+{
+    double intensity{0.};
+    double azimuth{0.};
+    double elevation{0.};
+};
+
+struct Fog
+{
+    double visualRange{0.};
+};
+
+struct Precipitation
+{
+    enum Type
+    {
+        dry,
+        rain,
+        snow
+    } type;
+
+    double intensity;
+};
+
+struct Weather
+{
+    enum CloudState
+    {
+        skyOff,
+        free,
+        cloudy,
+        overcast,
+        rainy
+    } cloudState;
+
+    Sun sun;
+    Fog fog;
+    Precipitation precipitation;
+};
+
+struct EnvironmentAction
+{
+    Weather weather;
+};
+
+using GlobalAction = std::variant<EntityAction, EnvironmentAction>;
 
 // PrivateAction
 struct TrajectoryPoint

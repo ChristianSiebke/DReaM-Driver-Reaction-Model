@@ -22,6 +22,7 @@
 #include "common/vector3d.h"
 #include "include/agentInterface.h"
 #include "include/roadInterface/roadInterface.h"
+#include "common/openScenarioDefinitions.h"
 
 #include "OWL/DataTypes.h"
 #include "OWL/OpenDriveTypeMapper.h"
@@ -710,6 +711,93 @@ const std::unordered_map<Id, Interfaces::TrafficSign *> &WorldData::GetTrafficSi
 const std::unordered_map<Id, Interfaces::RoadMarking*>& WorldData::GetRoadMarkings() const
 {
     return roadMarkings;
+}
+
+void WorldData::SetEnvironment(const openScenario::EnvironmentAction& environment)
+{
+    constexpr double THRESHOLD_ILLUMINATION_LEVEL1 = 0.01;
+    constexpr double THRESHOLD_ILLUMINATION_LEVEL2 = 1.0;
+    constexpr double THRESHOLD_ILLUMINATION_LEVEL3 = 3.0;
+    constexpr double THRESHOLD_ILLUMINATION_LEVEL4 = 10.0;
+    constexpr double THRESHOLD_ILLUMINATION_LEVEL5 = 20.0;
+    constexpr double THRESHOLD_ILLUMINATION_LEVEL6 = 400.0;
+    constexpr double THRESHOLD_ILLUMINATION_LEVEL7 = 1000.0;
+    constexpr double THRESHOLD_ILLUMINATION_LEVEL8 = 10000.0;
+    constexpr double THRESHOLD_FOG_DENSE = 50.0;
+    constexpr double THRESHOLD_FOG_THICK = 200.0;
+    constexpr double THRESHOLD_FOG_LIGHT = 1000.0;
+    constexpr double THRESHOLD_FOG_MIST = 2000.0;
+    constexpr double THRESHOLD_FOG_POOR = 4000.0;
+    constexpr double THRESHOLD_FOG_MODERATE = 10000.0;
+    constexpr double THRESHOLD_FOG_GOOD = 40000.0;
+    if (environment.weather.sun.intensity < THRESHOLD_ILLUMINATION_LEVEL1)
+    {
+        osiGroundTruth->mutable_environmental_conditions()->set_ambient_illumination(osi3::EnvironmentalConditions_AmbientIllumination_AMBIENT_ILLUMINATION_LEVEL1);
+    }
+    else if (environment.weather.sun.intensity < THRESHOLD_ILLUMINATION_LEVEL2)
+    {
+        osiGroundTruth->mutable_environmental_conditions()->set_ambient_illumination(osi3::EnvironmentalConditions_AmbientIllumination_AMBIENT_ILLUMINATION_LEVEL2);
+    }
+    else if (environment.weather.sun.intensity < THRESHOLD_ILLUMINATION_LEVEL3)
+    {
+        osiGroundTruth->mutable_environmental_conditions()->set_ambient_illumination(osi3::EnvironmentalConditions_AmbientIllumination_AMBIENT_ILLUMINATION_LEVEL3);
+    }
+    else if (environment.weather.sun.intensity < THRESHOLD_ILLUMINATION_LEVEL4)
+    {
+        osiGroundTruth->mutable_environmental_conditions()->set_ambient_illumination(osi3::EnvironmentalConditions_AmbientIllumination_AMBIENT_ILLUMINATION_LEVEL4);
+    }
+    else if (environment.weather.sun.intensity < THRESHOLD_ILLUMINATION_LEVEL5)
+    {
+        osiGroundTruth->mutable_environmental_conditions()->set_ambient_illumination(osi3::EnvironmentalConditions_AmbientIllumination_AMBIENT_ILLUMINATION_LEVEL5);
+    }
+    else if (environment.weather.sun.intensity < THRESHOLD_ILLUMINATION_LEVEL6)
+    {
+        osiGroundTruth->mutable_environmental_conditions()->set_ambient_illumination(osi3::EnvironmentalConditions_AmbientIllumination_AMBIENT_ILLUMINATION_LEVEL6);
+    }
+    else if (environment.weather.sun.intensity < THRESHOLD_ILLUMINATION_LEVEL7)
+    {
+        osiGroundTruth->mutable_environmental_conditions()->set_ambient_illumination(osi3::EnvironmentalConditions_AmbientIllumination_AMBIENT_ILLUMINATION_LEVEL7);
+    }
+    else if (environment.weather.sun.intensity < THRESHOLD_ILLUMINATION_LEVEL8)
+    {
+        osiGroundTruth->mutable_environmental_conditions()->set_ambient_illumination(osi3::EnvironmentalConditions_AmbientIllumination_AMBIENT_ILLUMINATION_LEVEL8);
+    }
+    else
+    {
+        osiGroundTruth->mutable_environmental_conditions()->set_ambient_illumination(osi3::EnvironmentalConditions_AmbientIllumination_AMBIENT_ILLUMINATION_LEVEL9);
+    }
+    if (environment.weather.fog.visualRange < THRESHOLD_FOG_DENSE)
+    {
+        osiGroundTruth->mutable_environmental_conditions()->set_fog(osi3::EnvironmentalConditions_Fog_FOG_DENSE);
+    }
+    else if (environment.weather.fog.visualRange < THRESHOLD_FOG_THICK)
+    {
+        osiGroundTruth->mutable_environmental_conditions()->set_fog(osi3::EnvironmentalConditions_Fog_FOG_THICK);
+    }
+    else if (environment.weather.fog.visualRange < THRESHOLD_FOG_LIGHT)
+    {
+        osiGroundTruth->mutable_environmental_conditions()->set_fog(osi3::EnvironmentalConditions_Fog_FOG_LIGHT);
+    }
+    else if (environment.weather.fog.visualRange < THRESHOLD_FOG_MIST)
+    {
+        osiGroundTruth->mutable_environmental_conditions()->set_fog(osi3::EnvironmentalConditions_Fog_FOG_MIST);
+    }
+    else if (environment.weather.fog.visualRange < THRESHOLD_FOG_POOR)
+    {
+        osiGroundTruth->mutable_environmental_conditions()->set_fog(osi3::EnvironmentalConditions_Fog_FOG_POOR_VISIBILITY);
+    }
+    else if (environment.weather.fog.visualRange < THRESHOLD_FOG_MODERATE)
+    {
+        osiGroundTruth->mutable_environmental_conditions()->set_fog(osi3::EnvironmentalConditions_Fog_FOG_MODERATE_VISIBILITY);
+    }
+    else if (environment.weather.fog.visualRange < THRESHOLD_FOG_GOOD)
+    {
+        osiGroundTruth->mutable_environmental_conditions()->set_fog(osi3::EnvironmentalConditions_Fog_FOG_GOOD_VISIBILITY);
+    }
+    else
+    {
+        osiGroundTruth->mutable_environmental_conditions()->set_fog(osi3::EnvironmentalConditions_Fog_FOG_EXCELLENT_VISIBILITY);
+    }
 }
 
 CMovingObject& WorldData::GetMovingObjectById(Id id) const

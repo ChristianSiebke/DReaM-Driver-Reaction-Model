@@ -168,7 +168,7 @@ void WorldImplementation::SyncGlobalData()
     agentNetwork.SyncGlobalData();
 }
 
-bool WorldImplementation::CreateScenery(SceneryInterface* scenery)
+bool WorldImplementation::CreateScenery(SceneryInterface* scenery, const openScenario::EnvironmentAction& environment)
 {
     this->scenery = scenery;
 
@@ -185,6 +185,7 @@ bool WorldImplementation::CreateScenery(SceneryInterface* scenery)
     RoadNetworkBuilder networkBuilder(*scenery);
     auto [roadGraph, vertexMapping] = networkBuilder.Build();
     worldData.SetRoadGraph(std::move(roadGraph), std::move(vertexMapping));
+    worldData.SetEnvironment(environment);
 
     return true;
 }
