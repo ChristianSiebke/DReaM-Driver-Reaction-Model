@@ -29,6 +29,7 @@ HEADERS += \
     $$UNIT_UNDER_TEST/commonTools.h
 
 SOURCES += \
+    commonHelper_Tests.cpp \
     tokenizeString_Tests.cpp \
     ttcCalculation_Tests.cpp \
     vectorToString_Tests.cpp

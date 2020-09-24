@@ -7,7 +7,10 @@ add_openpass_target(
   LINK_OSI
 
   SOURCES
+    commonHelper_Tests.cpp
     ttcCalculation_Tests.cpp
+    tokenizeString_Tests.cpp
+    vectorToString_Tests.cpp
 
   HEADERS
     ${COMPONENT_SOURCE_DIR}/commonTools.h
