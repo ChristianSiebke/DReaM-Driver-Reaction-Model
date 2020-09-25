@@ -1,7 +1,7 @@
 <masterConfig>
   <logLevel>0</logLevel>
   <logFileMaster>OpenPassMaster.log</logFileMaster>
-  <slave>OpenPassSlave</slave>
+  <slave>OpenPassSlave.exe</slave>
   <libraries>lib</libraries>
   <slaveConfigs>
     <slaveConfig>

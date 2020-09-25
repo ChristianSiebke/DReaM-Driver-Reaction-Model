@@ -117,6 +117,56 @@ static double CalculateMomentInertiaYaw(double mass, double length, double width
     return std::make_optional<Common::Vector2d>(intersectionPointX, intersectionPointY);
 }
 
+//! Calculates the net distance of the x and y coordinates of two bounding boxes
+//!
+//! \param ownBoundingBox       first bounding box
+//! \param otherBoundingBox     second bounding box
+//! \return net distance x, net distance y
+[[maybe_unused]] static std::pair<double, double> GetCartesianNetDistance(polygon_t ownBoundingBox, polygon_t otherBoundingBox)
+{
+    double ownMaxX{std::numeric_limits<double>::lowest()};
+    double ownMinX{std::numeric_limits<double>::max()};
+    double ownMaxY{std::numeric_limits<double>::lowest()};
+    double ownMinY{std::numeric_limits<double>::max()};
+    for (const auto& point : ownBoundingBox.outer())
+    {
+        ownMaxX = std::max(ownMaxX, bg::get<0>(point));
+        ownMinX = std::min(ownMinX, bg::get<0>(point));
+        ownMaxY = std::max(ownMaxY, bg::get<1>(point));
+        ownMinY = std::min(ownMinY, bg::get<1>(point));
+    }
+    double otherMaxX{std::numeric_limits<double>::lowest()};
+    double otherMinX{std::numeric_limits<double>::max()};
+    double otherMaxY{std::numeric_limits<double>::lowest()};
+    double otherMinY{std::numeric_limits<double>::max()};
+    for (const auto& point : otherBoundingBox.outer())
+    {
+        otherMaxX = std::max(otherMaxX, bg::get<0>(point));
+        otherMinX = std::min(otherMinX, bg::get<0>(point));
+        otherMaxY = std::max(otherMaxY, bg::get<1>(point));
+        otherMinY = std::min(otherMinY, bg::get<1>(point));
+    }
+    double netX{0.0};
+    if (ownMaxX < otherMinX)
+    {
+        netX = otherMinX - ownMaxX;
+    }
+    if (ownMinX > otherMaxX)
+    {
+        netX = otherMaxX - ownMinX;
+    }
+    double netY{0.0};
+    if (ownMaxY < otherMinY)
+    {
+        netY = otherMinY - ownMaxY;
+    }
+    if (ownMinY > otherMaxY)
+    {
+        netY = otherMaxY - ownMinY;
+    }
+    return {netX, netY};
+}
+
 //-----------------------------------------------------------------------------
 //! @brief Tokenizes string by delimiter.
 //!

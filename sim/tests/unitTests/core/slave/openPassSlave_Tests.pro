@@ -101,6 +101,7 @@ SCENERYIMPORTER_TESTS = \
     $$UNIT_UNDER_TEST/importer/road/roadSignal.cpp \
     $$UNIT_UNDER_TEST/importer/road/roadObject.cpp \
     \
+    roadGeometry_Tests.cpp \
     sceneryImporter_Tests.cpp
 
 SCENARIOIMPORTER_TESTS = \

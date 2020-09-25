@@ -15,7 +15,7 @@
 
 namespace RouteCalculation
 {
-    RoadGraphVertex FilterRoadGraphByStartPositionRecursive (const RoadGraph& roadGraph, RoadGraphVertex current, int maxDepth, RoadGraph& filteredGraph)
+    RoadGraphVertex FilterRoadGraphByStartPositionRecursive(const RoadGraph& roadGraph, RoadGraphVertex current, int maxDepth, RoadGraph& filteredGraph)
     {
         const auto& routeElement = get(RouteElement(), roadGraph, current);
         auto newVertex = add_vertex(routeElement, filteredGraph);
@@ -30,20 +30,32 @@ namespace RouteCalculation
         return newVertex;
     }
 
-    std::pair<RoadGraph, RoadGraphVertex> FilterRoadGraphByStartPosition (const RoadGraph& roadGraph, RoadGraphVertex start, int maxDepth)
+    //! Returns the road graph as a tree with defined maximum depth relative to a given start position.
+    //! The same route element can appear multiple times in the result, if there are multiple paths to it from the start position
+    //!
+    //! \param roadGraph    entire road network
+    //! \param start        start position in the network
+    //! \param maxDepth     maximum depth of resulting tree
+    //! \return road network as tree with given root
+    std::pair<RoadGraph, RoadGraphVertex> FilterRoadGraphByStartPosition(const RoadGraph& roadGraph, RoadGraphVertex start, int maxDepth)
     {
         RoadGraph filteredGraph;
         auto root = FilterRoadGraphByStartPositionRecursive(roadGraph, start, maxDepth, filteredGraph);
         return {filteredGraph, root};
     }
 
-    std::pair<RoadGraph, RoadGraphVertex> SampleRoute (const RoadGraph& roadGraph,
-                                                       RoadGraphVertex root,
-                                                       const std::map<RoadGraphEdge, double>& weights,
-                                                       StochasticsInterface& stochastics)
+    //! Random draws a target leaf in the given road graph tree based on the propability of each edge
+    //!
+    //! \param roadGraph    tree of road network starting at the agents current position
+    //! \param root         root vertex of the roadGraph
+    //! \param weights      weight map of all edges of the graph
+    //! \param stochastics  stochastics module
+    //! \return sampled target vertex
+    RoadGraphVertex SampleRoute(const RoadGraph& roadGraph,
+                                RoadGraphVertex root,
+                                const std::map<RoadGraphEdge, double>& weights,
+                                StochasticsInterface& stochastics)
     {
-        RoadGraph route;
-        auto firstVertex = add_vertex(get(RouteElement(), roadGraph, root), route);
         auto current = root;
         bool reachedEnd = false;
         while (!reachedEnd)
@@ -65,14 +77,11 @@ namespace RouteCalculation
                 probalitySum += weights.at(*successor);
                 if (roll <= probalitySum)
                 {
-                    auto secondVertex = add_vertex(get(RouteElement(), roadGraph, target(*successor, roadGraph)), route);
-                    add_edge(firstVertex, secondVertex, route);
                     current = target(*successor, roadGraph);
-                    firstVertex = secondVertex;
                     break;
                 }
             }
         }
-        return {route, firstVertex};
+        return current;
     }
 }

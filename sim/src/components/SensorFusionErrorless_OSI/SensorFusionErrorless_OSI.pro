@@ -9,9 +9,9 @@
 # **********************************************************************/
 
 #-----------------------------------------------------------------------------
-# \file  SensorFusion_OSI.pro
+# \file  SensorAggregation_OSI.pro
 # \brief This file contains the information for the QtCreator-project of the
-# module SensorFusion_OSI
+# module SensorAggregation_OSI
 #-----------------------------------------------------------------------------/
 
 DEFINES += SENSOR_FUSION_LIBRARY
@@ -28,11 +28,11 @@ INCLUDEPATH += \
     ../..
 
 SOURCES += \
-    sensorFusion.cpp \
+    sensorFusionErrorless_OSI.cpp \
     src/sensorFusionImpl.cpp
 
 HEADERS += \
-    sensorFusion.h \
+    sensorFusionErrorless_OSI.h \
     src/sensorFusionImpl.h
 
 LIBS += \

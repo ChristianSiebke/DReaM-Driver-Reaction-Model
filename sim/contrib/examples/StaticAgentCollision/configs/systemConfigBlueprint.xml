@@ -37,14 +37,25 @@
                 <parameters/>
             </component>
             <component>
-                <id>SensorFusion</id>
+                <id>SensorAggregation</id>
+                <schedule>
+                    <priority>351</priority>
+                    <offset>0</offset>
+                    <cycle>100</cycle>
+                    <response>0</response>
+                </schedule>
+                <library>SensorAggregation_OSI</library>
+                <parameters/>
+            </component>
+            <component>
+                <id>SensorFusionErrorless</id>
                 <schedule>
                     <priority>350</priority>
                     <offset>0</offset>
                     <cycle>100</cycle>
                     <response>0</response>
                 </schedule>
-                <library>SensorFusion_OSI</library>
+                <library>SensorFusionErrorless_OSI</library>
                 <parameters/>
             </component>
             <component>
@@ -110,7 +121,7 @@
                 </parameters>
             </component>
             <component>
-                <id>PrioritizerLateralVehicleComponents</id>
+                <id>PrioritizerSteeringVehicleComponents</id>
                 <schedule>
                     <priority>150</priority>
                     <offset>0</offset>
@@ -152,17 +163,6 @@
                     <response>0</response>
                 </schedule>
                 <library>Algorithm_Longitudinal</library>
-                <parameters/>
-            </component>
-            <component>
-                <id>Algorithm_LateralVehicleComponents</id>
-                <schedule>
-                    <priority>100</priority>
-                    <offset>0</offset>
-                    <cycle>100</cycle>
-                    <response>0</response>
-                </schedule>
-                <library>Algorithm_Lateral</library>
                 <parameters/>
             </component>
             <component>
@@ -418,17 +418,6 @@
                 </target>
             </connection>
             <connection>
-                <id>1412</id>
-                <source>
-                    <component>Algorithm_LateralVehicleComponents</component>
-                    <output>0</output>
-                </source>
-                <target>
-                    <component>PrioritizerSteering</component>
-                    <input>0</input>
-                </target>
-            </connection>
-            <connection>
                 <id>1512</id>
                 <source>
                     <component>Algorithm_LateralAfdm</component>
@@ -494,11 +483,11 @@
             <connection>
                 <id>2414</id>
                 <source>
-                    <component>PrioritizerLateralVehicleComponents</component>
+                    <component>PrioritizerSteeringVehicleComponents</component>
                     <output>0</output>
                 </source>
                 <target>
-                    <component>Algorithm_LateralVehicleComponents</component>
+                    <component>PrioritizerSteering</component>
                     <input>0</input>
                 </target>
                 <target>
@@ -573,17 +562,6 @@
                 </target>
             </connection>
             <connection>
-                <id>9190</id>
-                <source>
-                    <component>SensorFusion</component>
-                    <output>0</output>
-                </source>
-                <target>
-                    <component>AEB</component>
-                    <input>0</input>
-                </target>
-            </connection>
-            <connection>
                 <id>9292</id>
                 <source>
                     <component>Parameters_Vehicle</component>
@@ -606,12 +584,30 @@
                     <input>100</input>
                 </target>
                 <target>
-                    <component>Algorithm_LateralVehicleComponents</component>
-                    <input>100</input>
-                </target>
-                <target>
                     <component>Dynamics_RegularDriving</component>
                     <input>100</input>
+                </target>
+            </connection>
+            <connection>
+                <id>9390</id>
+                <source>
+                    <component>SensorAggregation</component>
+                    <output>0</output>
+                </source>
+                <target>
+                    <component>SensorFusionErrorless</component>
+                    <input>0</input>
+                </target>
+            </connection>
+            <connection>
+                <id>9490</id>
+                <source>
+                    <component>SensorFusionErrorless</component>
+                    <output>0</output>
+                </source>
+                <target>
+                    <component>AEB</component>
+                    <input>0</input>
                 </target>
             </connection>
             <connection>
@@ -636,10 +632,6 @@
                     <component>Algorithm_LateralAfdm</component>
                     <input>101</input>
                 </target>
-                <target>
-                    <component>Algorithm_LateralVehicleComponents</component>
-                    <input>101</input>
-                </target>
             </connection>
             <connection>
                 <id>9900</id>
@@ -648,7 +640,7 @@
                     <output>0</output>
                 </source>
                 <target>
-                    <component>SensorFusion</component>
+                    <component>SensorAggregation</component>
                     <input>0</input>
                 </target>
             </connection>

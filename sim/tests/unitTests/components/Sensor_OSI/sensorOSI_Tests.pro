@@ -32,7 +32,8 @@ HEADERS += \
     $$WORLD_OSI/OWL/OpenDriveTypeMapper.h \
     $$WORLD_OSI/WorldObjectAdapter.h \
     $$WORLD_OSI/WorldData.h \
-    $$WORLD_OSI/WorldDataException.h
+    $$WORLD_OSI/WorldDataException.h \
+    sensorOSI_TestsCommon.h
 
 SOURCES += \
     $$UNIT_UNDER_TEST/sensorGeometric2D.cpp \

@@ -57,6 +57,7 @@ add_openpass_target(
     ${COMPONENT_SOURCE_DIR}/importer/scenarioImporterHelper.cpp
 
     # SceneryImporter
+    roadGeometry_Tests.cpp
     sceneryImporter_Tests.cpp
     ${COMPONENT_SOURCE_DIR}/importer/connection.cpp
     ${COMPONENT_SOURCE_DIR}/importer/junction.cpp

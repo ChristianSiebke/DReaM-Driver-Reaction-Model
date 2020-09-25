@@ -130,27 +130,6 @@ private:
     static double CalcObjectVisibilityPercentage(const polygon_t& boundingBox, const multi_polygon_t &brightArea);
     
     /*!
-     * \brief Adds the information of a detected moving object as DetectedMovingObject to the sensor data
-     *
-     * \param object            detected moving object
-     * \param ownVelocity       velocity of own vehicle in global coordinates
-     * \param ownAcceleration   acceleration of own vehicle in global coordinates
-     * \param ownPosition       position of own vehicle in global coordinates
-     * \param yaw               yaw of own vehicle in global coordinates
-     * \param yawRate           yawRate of own vehicle in global coordinates
-     */
-    void AddMovingObjectToSensorData (osi3::MovingObject object, point_t ownVelocity, point_t ownAcceleration, point_t ownPosition, double yaw, double yawRate);
-
-    /*!
-     * \brief Adds the information of a detected stationary object as DetectedStationaryObject to the sensor data
-     *
-     * \param object            stationary moving object
-     * \param ownPosition       position of own vehicle in global coordinates
-     * \param yaw               yaw of own vehicle in global coordinates
-     */
-    void AddStationaryObjectToSensorData (osi3::StationaryObject object, point_t ownPosition, double yaw);
-    
-    /*!
      * \brief Returns true if opening angle is smaller than pi
      */
     bool OpeningAngleWithinHalfCircle() const;
@@ -170,8 +149,6 @@ private:
      */
     polygon_t CreateFivePointDetectionField() const;
 
-    point_t GetHostVehiclePosition(const osi3::MovingObject* hostVehicle) const;
-
     std::pair<point_t, polygon_t> CreateSensorDetectionField(const osi3::MovingObject* hostVehicle) const;
     template<typename T>
     static void ApplyVisualObstructionToDetectionArea(multi_polygon_t& brightArea,
@@ -186,7 +163,6 @@ private:
                                                                                                                                           const point_t& sensorPositionGlobal,
                                                                                                                                           const polygon_t& detectionField) const;
 
-    static const osi3::MovingObject* FindHostVehicleInSensorView(const osi3::SensorView& sensorView);
     std::string CreateAgentIdListString(const std::vector<OWL::Id>& owlIds) const;
 
     bool enableVisualObstruction = false;

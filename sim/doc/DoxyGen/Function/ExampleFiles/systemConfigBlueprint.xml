@@ -17,7 +17,7 @@
             <component>
                 <id>Sensor_Driver</id>
                 <schedule>
-                    <priority>490</priority>
+                    <priority>390</priority>
                     <offset>0</offset>
                     <cycle>100</cycle>
                     <response>0</response>
@@ -37,14 +37,25 @@
                 <parameters/>
             </component>
             <component>
-                <id>SensorFusion</id>
+                <id>SensorAggregation</id>
+                <schedule>
+                    <priority>351</priority>
+                    <offset>0</offset>
+                    <cycle>100</cycle>
+                    <response>0</response>
+                </schedule>
+                <library>SensorAggregation_OSI</library>
+                <parameters/>
+            </component>
+            <component>
+                <id>SensorFusionErrorless</id>
                 <schedule>
                     <priority>350</priority>
                     <offset>0</offset>
                     <cycle>100</cycle>
                     <response>0</response>
                 </schedule>
-                <library>SensorFusion_OSI</library>
+                <library>SensorFusionErrorless_OSI</library>
                 <parameters/>
             </component>
             <component>
@@ -61,12 +72,23 @@
             <component>
                 <id>ComponentController</id>
                 <schedule>
-                    <priority>1</priority>
+                    <priority>200</priority>
                     <offset>0</offset>
                     <cycle>100</cycle>
                     <response>0</response>
                 </schedule>
                 <library>ComponentController</library>
+                <parameters/>
+            </component>
+            <component>
+                <id>OpenScenarioActions</id>
+                <schedule>
+                    <priority>400</priority>
+                    <offset>0</offset>
+                    <cycle>100</cycle>
+                    <response>0</response>
+                </schedule>
+                <library>OpenScenarioActions</library>
                 <parameters/>
             </component>
             <component>
@@ -341,17 +363,6 @@
                 </target>
             </connection>
             <connection>
-                <id>283</id>
-                <source>
-                    <component>Dynamics_TrajectoryFollower</component>
-                    <output>83</output>
-                </source>
-                <target>
-                    <component>ComponentController</component>
-                    <input>100</input>
-                </target>
-            </connection>
-            <connection>
                 <id>301</id>
                 <source>
                     <component>Dynamics_RegularDriving</component>
@@ -540,14 +551,14 @@
                 </target>
             </connection>
             <connection>
-                <id>9190</id>
+                <id>8471</id>
                 <source>
-                    <component>SensorFusion</component>
+                    <component>OpenScenarioActions</component>
                     <output>0</output>
                 </source>
                 <target>
-                    <component>AEB</component>
-                    <input>0</input>
+                    <component>Dynamics_TrajectoryFollower</component>
+                    <input>2</input>
                 </target>
             </connection>
             <connection>
@@ -575,6 +586,28 @@
                 <target>
                     <component>Dynamics_RegularDriving</component>
                     <input>100</input>
+                </target>
+            </connection>
+            <connection>
+                <id>9390</id>
+                <source>
+                    <component>SensorAggregation</component>
+                    <output>0</output>
+                </source>
+                <target>
+                    <component>SensorFusionErrorless</component>
+                    <input>0</input>
+                </target>
+            </connection>
+            <connection>
+                <id>9490</id>
+                <source>
+                    <component>SensorFusionErrorless</component>
+                    <output>0</output>
+                </source>
+                <target>
+                    <component>AEB</component>
+                    <input>0</input>
                 </target>
             </connection>
             <connection>
@@ -607,7 +640,7 @@
                     <output>0</output>
                 </source>
                 <target>
-                    <component>SensorFusion</component>
+                    <component>SensorAggregation</component>
                     <input>0</input>
                 </target>
             </connection>

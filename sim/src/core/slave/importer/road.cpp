@@ -19,7 +19,7 @@ extern "C"
 
 namespace
 {
-const double SQRT_PI_2 = std::sqrt(M_PI_2);
+const double SQRT_PI = std::sqrt(M_PI);
 
 } // namespace
 
@@ -220,541 +220,116 @@ double RoadGeometryArc::GetDir(double sOffset) const
     return GetDirArc(sOffset, curvature);
 }
 
-Common::Vector2d RoadGeometrySpiral::HalfCoord(double sOffset, double tOffset) const
+RoadGeometrySpiral::RoadGeometrySpiral(double s, double x, double y, double hdg, double length, double curvStart, double curvEnd)
+    : RoadGeometry{s, x, y, hdg, length}, c_start{curvStart}, c_end{curvEnd}
 {
-    double _curvStart = curvStart;
-    double _curvEnd = curvEnd;
-
-    assert(_curvStart != _curvEnd);
-    assert((0.0 <= _curvStart && 0.0 <= _curvEnd) || (0.0 >= _curvStart && 0.0 >= _curvEnd));
-
-    if (length < sOffset)
+    if (length != 0.0)
     {
-        LOG_INTERN(LogLevel::Warning) << "exceeding length of geometry";
-        sOffset = length;
+        c_dot = (c_end - c_start) / length;
+    }
+    else
+    {
+        c_dot = 0.0;
     }
 
-    if (0.0 <= _curvStart && 0.0 <= _curvEnd)
+    if (c_dot != 0.0)
     {
-        if (_curvStart < _curvEnd)
-        {
-            assert(0.0 != _curvEnd);
-
-            double radiusEnd = 1.0 / _curvEnd;
-
-            // 1. equation (definition of clothoid): const = radiusStart * distanceStart = radiusEnd * distanceEnd
-            // 2. equation: length = distanceEnd - distanceStart
-            // -> distanceEnd = radiusStart * length / (radiusStart - radiusEnd)
-            // -> formed such that equation copes with _curvStart==0 (infinite radiusStart)
-            double distanceEnd = length / (1 - radiusEnd * _curvStart);
-            assert(length <= distanceEnd);
-
-            double distanceStart = distanceEnd - length;
-            double a = std::sqrt(2 * radiusEnd * distanceEnd);
-
-            Common::Vector2d start;
-            (void)fresnl(distanceStart / a / SQRT_PI_2, &start.y, &start.x);
-            start.Scale(a * SQRT_PI_2);
-
-            double distanceOffset = distanceStart + sOffset;
-            Common::Vector2d offset;
-            (void)fresnl(distanceOffset / a / SQRT_PI_2, &offset.y, &offset.x);
-            offset.Scale(a * SQRT_PI_2);
-            offset.Sub(start);
-
-            double tangentAngle = distanceOffset * distanceOffset / a / a;
-            if (0 > _curvEnd)
-            {
-                tangentAngle = -tangentAngle;
-            }
-
-            double normAngle = tangentAngle + M_PI_2;
-            normAngle = std::fmod(normAngle, 2 * M_PI);
-
-            // get perpendicular vector
-            Common::Vector2d norm(1, 0);
-            norm.Rotate(normAngle);
-            norm.Scale(tOffset);
-
-            offset.Add(norm);
-            offset.Rotate(hdg);
-
-            return Common::Vector2d(x + offset.x, y + offset.y);
-        }
-        else // _curvStart > _curvEnd ("curStart != _curvEnd" guaranteed by checks in caller)
-        {
-            std::swap(_curvStart, _curvEnd);
-            sOffset = length - sOffset;
-
-            assert(0.0 != _curvEnd);
-
-            double radiusEnd = 1.0 / _curvEnd;
-
-            // 1. equation (definition of clothoid): const = radiusStart * distanceStart = radiusEnd * distanceEnd
-            // 2. equation: length = distanceEnd - distanceStart
-            // -> distanceEnd = radiusStart * length / (radiusStart - radiusEnd)
-            // -> formed such that equation copes with _curvStart==0 (infinite radiusStart)
-            double distanceEnd = length / (1 - radiusEnd * _curvStart);
-            assert(length <= distanceEnd);
-
-            double distanceStart = distanceEnd - length;
-            double a = std::sqrt(2 * radiusEnd * distanceEnd);
-
-            Common::Vector2d start;
-            (void)fresnl(distanceStart / a / SQRT_PI_2, &start.y, &start.x);
-            start.Scale(a * SQRT_PI_2);
-
-            double distanceOffset = distanceStart + sOffset;
-            Common::Vector2d offset;
-            (void)fresnl(distanceOffset / a / SQRT_PI_2, &offset.y, &offset.x);
-            offset.Scale(a * SQRT_PI_2);
-            offset.Sub(start);
-
-            double tangentAngle = distanceOffset * distanceOffset / a / a;
-            if (0 > _curvEnd)
-            {
-                tangentAngle = -tangentAngle;
-            }
-
-            double normAngle = tangentAngle + M_PI_2;
-            normAngle = std::fmod(normAngle, 2 * M_PI);
-
-            // get perpendicular vector
-            Common::Vector2d norm(1, 0);
-            norm.Rotate(normAngle);
-            norm.Scale(tOffset);
-
-            offset.Add(norm);
-
-            // calculate end point
-            Common::Vector2d endOffset;
-            (void)fresnl(distanceEnd / a / SQRT_PI_2, &endOffset.y, &endOffset.x);
-            endOffset.Scale(a * SQRT_PI_2);
-            endOffset.Sub(start);
-
-            // compensate for inverted curvatures
-            double tangentAngleEnd = distanceEnd * distanceEnd / a / a;
-            if (0 > _curvEnd)
-            {
-                tangentAngleEnd = -tangentAngleEnd;
-            }
-            tangentAngleEnd = -tangentAngleEnd + M_PI;
-
-            offset.Sub(endOffset);
-            offset.y = -offset.y;
-            offset.Rotate(hdg - tangentAngleEnd);
-
-            return Common::Vector2d(x + offset.x, y + offset.y);
-        }
+        l_start = c_start / c_dot;
     }
-    else // 0.0 >= _curvStart && 0.0 >= _curvEnd
+    else
     {
-        _curvStart = -_curvStart;
-        _curvEnd = -_curvEnd;
-
-        if (_curvStart < _curvEnd)
-        {
-            assert(0.0 != _curvEnd);
-
-            double radiusEnd = 1.0 / _curvEnd;
-
-            // 1. equation (definition of clothoid): const = radiusStart * distanceStart = radiusEnd * distanceEnd
-            // 2. equation: length = distanceEnd - distanceStart
-            // -> distanceEnd = radiusStart * length / (radiusStart - radiusEnd)
-            // -> formed such that equation copes with _curvStart==0 (infinite radiusStart)
-            double distanceEnd = length / (1 - radiusEnd * _curvStart);
-            assert(length <= distanceEnd);
-
-            double distanceStart = distanceEnd - length;
-            double a = std::sqrt(2 * radiusEnd * distanceEnd);
-
-            Common::Vector2d start;
-            (void)fresnl(distanceStart / a / SQRT_PI_2, &start.y, &start.x);
-            start.Scale(a * SQRT_PI_2);
-
-            double distanceOffset = distanceStart + sOffset;
-            Common::Vector2d offset;
-            (void)fresnl(distanceOffset / a / SQRT_PI_2, &offset.y, &offset.x);
-            offset.Scale(a * SQRT_PI_2);
-            offset.Sub(start);
-
-            double tangentAngle = distanceOffset * distanceOffset / a / a;
-            if (0 > _curvEnd)
-            {
-                tangentAngle = -tangentAngle;
-            }
-
-            double normAngle = tangentAngle + M_PI_2;
-            normAngle = std::fmod(normAngle, 2 * M_PI);
-
-            // get perpendicular vector
-            Common::Vector2d norm(-1, 0);
-            norm.Rotate(normAngle);
-            norm.Scale(tOffset);
-
-            offset.Add(norm);
-            offset.y = -offset.y;
-            offset.Rotate(hdg);
-
-            return Common::Vector2d(x + offset.x, y + offset.y);
-        }
-        else // _curvStart > _curvEnd ("curStart != _curvEnd" guaranteed by checks in caller)
-        {
-            std::swap(_curvStart, _curvEnd);
-            sOffset = length - sOffset;
-
-            assert(0.0 != _curvEnd);
-
-            double radiusEnd = 1.0 / _curvEnd;
-
-            // 1. equation (definition of clothoid): const = radiusStart * distanceStart = radiusEnd * distanceEnd
-            // 2. equation: length = distanceEnd - distanceStart
-            // -> distanceEnd = radiusStart * length / (radiusStart - radiusEnd)
-            // -> formed such that equation copes with _curvStart==0 (infinite radiusStart)
-            double distanceEnd = length / (1 - radiusEnd * _curvStart);
-            assert(length <= distanceEnd);
-
-            double distanceStart = distanceEnd - length;
-            double a = std::sqrt(2 * radiusEnd * distanceEnd);
-
-            Common::Vector2d start;
-            (void)fresnl(distanceStart / a / SQRT_PI_2, &start.y, &start.x);
-            start.Scale(a * SQRT_PI_2);
-
-            double distanceOffset = distanceStart + sOffset;
-            Common::Vector2d offset;
-            (void)fresnl(distanceOffset / a / SQRT_PI_2, &offset.y, &offset.x);
-            offset.Scale(a * SQRT_PI_2);
-            offset.Sub(start);
-
-            double tangentAngle = distanceOffset * distanceOffset / a / a;
-            if (0 > _curvEnd)
-            {
-                tangentAngle = -tangentAngle;
-            }
-
-            double normAngle = tangentAngle + M_PI_2;
-            normAngle = std::fmod(normAngle, 2 * M_PI);
-
-            // get perpendicular vector
-            Common::Vector2d norm(-1, 0);
-            norm.Rotate(normAngle);
-            norm.Scale(tOffset);
-
-            offset.Add(norm);
-
-            // calculate end point
-            Common::Vector2d endOffset;
-            (void)fresnl(distanceEnd / a / SQRT_PI_2, &endOffset.y, &endOffset.x);
-            endOffset.Scale(a * SQRT_PI_2);
-            endOffset.Sub(start);
-
-            // compensate for inverted curvatures
-            double tangentAngleEnd = distanceEnd * distanceEnd / a / a;
-            if (0 > _curvEnd)
-            {
-                tangentAngleEnd = -tangentAngleEnd;
-            }
-            tangentAngleEnd = tangentAngleEnd - M_PI;
-
-            offset.Sub(endOffset);
-            offset.Rotate(hdg - tangentAngleEnd);
-
-            return Common::Vector2d(x + offset.x, y + offset.y);
-        }
+        l_start = 0.0;
     }
+
+    double l_end = l_start + length;
+    double rl;   // helper constant R * L
+
+    if (c_start != 0.0)
+    {
+        rl = l_start / c_start;
+    }
+    else if (c_end != 0.0)
+    {
+        rl = l_end / c_end;
+    }
+    else
+    {
+        t_start = 0.0;
+        a = 0.0;
+        sign = 0.0;
+        return;
+    }
+
+    t_start = 0.5 * l_start * curvStart;
+    a = std::sqrt(std::abs(rl));
+    sign = std::signbit(rl) ? -1.0 : 1.0;
 }
 
 Common::Vector2d RoadGeometrySpiral::FullCoord(double sOffset, double tOffset) const
 {
-    if ((0.0 <= curvStart && 0.0 <= curvEnd) || (0.0 >= curvStart && 0.0 >= curvEnd))
-    {
-        return HalfCoord(sOffset, tOffset);
-    }
+    // curvature of the spiral at sOffset
+    double curvAtsOffet = c_start + c_dot * sOffset;
 
-    assert((0.0 > curvStart && 0.0 < curvEnd) || (0.0 < curvStart && 0.0 > curvEnd));
+    // start and end coordinates of spiral
+    Common::Vector2d start, end;
 
-    // one degree of freedom: start position/end position can not be determined
-    LOG_INTERN(LogLevel::Warning) << "could not calculate spiral coordinate";
+    // calculate x and y of spiral start, assuming sOffset = 0 means start of spiral with curvature curvStart
+    (void)fresnl(l_start / a / SQRT_PI, &start.y, &start.x);
+    start.Scale(a * SQRT_PI);
+    start.y *= sign;
 
-    return Common::Vector2d();
-}
+    // calculate x and y of spiral end, assuming l_start + sOffset means end of spiral with curvature curvEnd
+    (void)fresnl((l_start + sOffset) / a / SQRT_PI, &end.y, &end.x);
+    end.Scale(a * SQRT_PI);
+    end.y *= sign;
 
-double RoadGeometrySpiral::HalfCurvature(double sOffset) const
-{
-    double _curvStart = curvStart;
-    double _curvEnd = curvEnd;
+    // delta x, y from start of spiral to end of spiral
+    auto diff = end - start;
 
-    assert(_curvStart != _curvEnd);
-    assert((0.0 <= _curvStart && 0.0 <= _curvEnd) || (0.0 >= _curvStart && 0.0 >= _curvEnd));
+    // tangent angle at end of spiral
+    double t_end = (l_start + sOffset) * curvAtsOffet / 2.0;
 
-    if (length < sOffset)
-    {
-        LOG_INTERN(LogLevel::Warning) << "exceeding length of geometry";
-        sOffset = length;
-    }
+    // heading change of spiral
+    double dHdg = t_end - t_start;
 
-    if (0.0 <= _curvStart && 0.0 <= _curvEnd)
-    {
-        if (_curvStart < _curvEnd)
-        {
-            assert(0.0 != _curvEnd);
+    // rotate delta x, y to match starting direction and origin heading
+    diff.Rotate(-t_start+hdg);
 
-            double radiusEnd = 1.0 / _curvEnd;
+    // heading at end of spiral
+    auto endHdg = hdg + dHdg;
 
-            // 1. equation (definition of clothoid): const = radiusStart * distanceStart = radiusEnd * distanceEnd
-            // 2. equation: length = distanceEnd - distanceStart
-            // -> distanceEnd = radiusStart * length / (radiusStart - radiusEnd)
-            // -> formed such that equation copes with _curvStart==0 (infinite radiusStart)
-            double distanceEnd = length / (1 - radiusEnd * _curvStart);
-            assert(length <= distanceEnd);
+    // calculate t-offset to spiral
+    Common::Vector2d unit{1.0,0};
+    unit.Rotate(endHdg + M_PI_2);
+    unit.Scale(tOffset);
 
-            double distanceStart = distanceEnd - length;
-            double distanceOffset = distanceStart + sOffset;
-
-            // equation const = radiusEnd * distanceEnd = radiusOffset * distanceOffset
-            // -> curvatureOffset = 1 / radiusOffset = distanceOffset / (radiusEnd * distanceEnd)
-            return distanceOffset / radiusEnd / distanceEnd;
-        }
-        else // _curvStart > _curvEnd ("curStart != _curvEnd" guaranteed by checks in caller)
-        {
-            std::swap(_curvStart, _curvEnd);
-            sOffset = length - sOffset;
-
-            assert(0.0 != _curvEnd);
-
-            double radiusEnd = 1.0 / _curvEnd;
-
-            // 1. equation (definition of clothoid): const = radiusStart * distanceStart = radiusEnd * distanceEnd
-            // 2. equation: length = distanceEnd - distanceStart
-            // -> distanceEnd = radiusStart * length / (radiusStart - radiusEnd)
-            // -> formed such that equation copes with _curvStart==0 (infinite radiusStart)
-            double distanceEnd = length / (1 - radiusEnd * _curvStart);
-            assert(length <= distanceEnd);
-
-            double distanceStart = distanceEnd - length;
-            double distanceOffset = distanceStart + sOffset;
-
-            // equation const = radiusEnd * distanceEnd = radiusOffset * distanceOffset
-            // -> curvatureOffset = 1 / radiusOffset = distanceOffset / (radiusEnd * distanceEnd)
-            return distanceOffset / radiusEnd / distanceEnd;
-        }
-    }
-    else // 0.0 >= _curvStart && 0.0 >= _curvEnd
-    {
-        _curvStart = -_curvStart;
-        _curvEnd = -_curvEnd;
-
-        if (_curvStart < _curvEnd)
-        {
-            assert(0.0 != _curvEnd);
-
-            double radiusEnd = 1.0 / _curvEnd;
-
-            // 1. equation (definition of clothoid): const = radiusStart * distanceStart = radiusEnd * distanceEnd
-            // 2. equation: length = distanceEnd - distanceStart
-            // -> distanceEnd = radiusStart * length / (radiusStart - radiusEnd)
-            // -> formed such that equation copes with _curvStart==0 (infinite radiusStart)
-            double distanceEnd = length / (1 - radiusEnd * _curvStart);
-            assert(length <= distanceEnd);
-
-            double distanceStart = distanceEnd - length;
-            double distanceOffset = distanceStart + sOffset;
-
-            // equation const = radiusEnd * distanceEnd = radiusOffset * distanceOffset
-            // -> curvatureOffset = 1 / radiusOffset = distanceOffset / (radiusEnd * distanceEnd)
-            return -distanceOffset / radiusEnd / distanceEnd;
-        }
-        else // _curvStart > _curvEnd ("curStart != _curvEnd" guaranteed by checks in caller)
-        {
-            std::swap(_curvStart, _curvEnd);
-            sOffset = length - sOffset;
-
-            assert(0.0 != _curvEnd);
-
-            double radiusEnd = 1.0 / _curvEnd;
-
-            // 1. equation (definition of clothoid): const = radiusStart * distanceStart = radiusEnd * distanceEnd
-            // 2. equation: length = distanceEnd - distanceStart
-            // -> distanceEnd = radiusStart * length / (radiusStart - radiusEnd)
-            // -> formed such that equation copes with _curvStart==0 (infinite radiusStart)
-            double distanceEnd = length / (1 - radiusEnd * _curvStart);
-            assert(length <= distanceEnd);
-
-            double distanceStart = distanceEnd - length;
-            double distanceOffset = distanceStart + sOffset;
-
-            // equation const = radiusEnd * distanceEnd = radiusOffset * distanceOffset
-            // -> curvatureOffset = 1 / radiusOffset = distanceOffset / (radiusEnd * distanceEnd)
-            return -distanceOffset / radiusEnd / distanceEnd;
-        }
-    }
+    return diff + unit + Common::Vector2d(x, y);
 }
 
 double RoadGeometrySpiral::FullCurvature(double sOffset) const
 {
-    if ((0.0 <= curvStart && 0.0 <= curvEnd) || (0.0 >= curvStart && 0.0 >= curvEnd))
-    {
-        return HalfCurvature(sOffset);
-    }
-
-    assert((0.0 > curvStart && 0.0 < curvEnd) || (0.0 < curvStart && 0.0 > curvEnd));
-
-    // one degree of freedom: start position/end position can not be determined
-    LOG_INTERN(LogLevel::Warning) << "could not calculate spiral curvature";
-
-    return 0.0;
-}
-
-double RoadGeometrySpiral::HalfDir(double sOffset) const
-{
-    double _curvStart = curvStart;
-    double _curvEnd = curvEnd;
-
-    assert(_curvStart != _curvEnd);
-    assert((0.0 <= _curvStart && 0.0 <= _curvEnd) || (0.0 >= _curvStart && 0.0 >= _curvEnd));
-
-    if (length < sOffset)
-    {
-        LOG_INTERN(LogLevel::Warning) << "exceeding length of geometry";
-        sOffset = length;
-    }
-
-    if (0.0 <= _curvStart && 0.0 <= _curvEnd)
-    {
-        if (_curvStart < _curvEnd)
-        {
-            assert(0.0 != _curvEnd);
-
-            double radiusEnd = 1.0 / _curvEnd;
-
-            // 1. equation (definition of clothoid): const = radiusStart * distanceStart = radiusEnd * distanceEnd
-            // 2. equation: length = distanceEnd - distanceStart
-            // -> distanceEnd = radiusStart * length / (radiusStart - radiusEnd)
-            // -> formed such that equation copes with _curvStart==0 (infinite radiusStart)
-            double distanceEnd = length / (1 - radiusEnd * _curvStart);
-            assert(length <= distanceEnd);
-
-            double distanceStart = distanceEnd - length;
-            double a = std::sqrt(2 * radiusEnd * distanceEnd);
-
-            double distanceOffset = distanceStart + sOffset;
-            double tangentAngle = distanceOffset * distanceOffset / a / a;
-
-            return hdg + tangentAngle;
-        }
-        else // _curvStart > _curvEnd ("curStart != _curvEnd" guaranteed by checks in caller)
-        {
-            std::swap(_curvStart, _curvEnd);
-            sOffset = length - sOffset;
-
-            assert(0.0 != _curvEnd);
-
-            double radiusEnd = 1.0 / _curvEnd;
-
-            // 1. equation (definition of clothoid): const = radiusStart * distanceStart = radiusEnd * distanceEnd
-            // 2. equation: length = distanceEnd - distanceStart
-            // -> distanceEnd = radiusStart * length / (radiusStart - radiusEnd)
-            // -> formed such that equation copes with _curvStart==0 (infinite radiusStart)
-            double distanceEnd = length / (1 - radiusEnd * _curvStart);
-            assert(length <= distanceEnd);
-
-            double distanceStart = distanceEnd - length;
-            double a = std::sqrt(2 * radiusEnd * distanceEnd);
-
-            double distanceOffset = distanceStart + sOffset;
-
-            double tangentAngle = distanceOffset * distanceOffset / a / a;
-
-            // compensate for inverted curvatures
-            double tangentAngleEnd = distanceEnd * distanceEnd / a / a;
-
-            return hdg + tangentAngleEnd - tangentAngle;
-        }
-    }
-    else // 0.0 >= _curvStart && 0.0 >= _curvEnd
-    {
-        _curvStart = -_curvStart;
-        _curvEnd = -_curvEnd;
-
-        if (_curvStart < _curvEnd)
-        {
-            assert(0.0 != _curvEnd);
-
-            double radiusEnd = 1.0 / _curvEnd;
-
-            // 1. equation (definition of clothoid): const = radiusStart * distanceStart = radiusEnd * distanceEnd
-            // 2. equation: length = distanceEnd - distanceStart
-            // -> distanceEnd = radiusStart * length / (radiusStart - radiusEnd)
-            // -> formed such that equation copes with _curvStart==0 (infinite radiusStart)
-            double distanceEnd = length / (1 - radiusEnd * _curvStart);
-            assert(length <= distanceEnd);
-
-            double distanceStart = distanceEnd - length;
-            double a = std::sqrt(2 * radiusEnd * distanceEnd);
-
-            double distanceOffset = distanceStart + sOffset;
-
-            double tangentAngle = distanceOffset * distanceOffset / a / a;
-
-            return hdg - tangentAngle;
-        }
-        else // _curvStart > _curvEnd ("curStart != _curvEnd" guaranteed by checks in caller)
-        {
-            std::swap(_curvStart, _curvEnd);
-            sOffset = length - sOffset;
-
-            assert(0.0 != _curvEnd);
-
-            double radiusEnd = 1.0 / _curvEnd;
-
-            // 1. equation (definition of clothoid): const = radiusStart * distanceStart = radiusEnd * distanceEnd
-            // 2. equation: length = distanceEnd - distanceStart
-            // -> distanceEnd = radiusStart * length / (radiusStart - radiusEnd)
-            // -> formed such that equation copes with _curvStart==0 (infinite radiusStart)
-            double distanceEnd = length / (1 - radiusEnd * _curvStart);
-            assert(length <= distanceEnd);
-
-            double distanceStart = distanceEnd - length;
-            double a = std::sqrt(2 * radiusEnd * distanceEnd);
-
-            double distanceOffset = distanceStart + sOffset;
-
-            double tangentAngle = distanceOffset * distanceOffset / a / a;
-
-            // compensate for inverted curvatures
-            double tangentAngleEnd = distanceEnd * distanceEnd / a / a;
-
-            return hdg - (tangentAngleEnd - tangentAngle);
-        }
-    }
+    return c_start + c_dot * sOffset;
 }
 
 double RoadGeometrySpiral::FullDir(double sOffset) const
 {
-    if ((0.0 <= curvStart && 0.0 <= curvEnd) || (0.0 >= curvStart && 0.0 >= curvEnd))
-    {
-        return HalfDir(sOffset);
-    }
+    // tangent_angle = L / (2 * R) = 0.5 * L * curv
+    // direction change in spiral = tangent_end - tangent_start
 
-    assert((0.0 > curvStart && 0.0 < curvEnd) || (0.0 < curvStart && 0.0 > curvEnd));
-
-    // one degree of freedom: start position/end position can not be determined
-    LOG_INTERN(LogLevel::Warning) << "could not calculate spiral curvature";
-
-    return 0.0;
+    double curvEnd = FullCurvature(sOffset);
+    return hdg + 0.5 * (curvEnd * (l_start + sOffset) - c_start * l_start);
 }
 
 Common::Vector2d RoadGeometrySpiral::GetCoord(double sOffset, double tOffset) const
 {
-    if (0.0 == curvStart && 0.0 == curvEnd)
+    if (0.0 == c_start && 0.0 == c_end)
     {
         return GetCoordLine(sOffset, tOffset);
     }
 
-    if (std::abs(curvStart - curvEnd) < 1e-6 /* assumed to be equal */)
+    if (std::abs(c_start - c_end) < 1e-6 /* assumed to be equal */)
     {
-        return GetCoordArc(sOffset, tOffset, curvStart);
+        return GetCoordArc(sOffset, tOffset, c_start);
     }
 
     return FullCoord(sOffset, tOffset);
@@ -762,14 +337,14 @@ Common::Vector2d RoadGeometrySpiral::GetCoord(double sOffset, double tOffset) co
 
 double RoadGeometrySpiral::GetDir(double sOffset) const
 {
-    if (0.0 == curvStart && 0.0 == curvEnd)
+    if (0.0 == c_start && 0.0 == c_end)
     {
         return GetDirLine(sOffset);
     }
 
-    if (std::abs(curvStart - curvEnd) < 1e-6 /* assumed to be equal */)
+    if (std::abs(c_start - c_end) < 1e-6 /* assumed to be equal */)
     {
-        return GetDirArc(sOffset, curvStart);
+        return GetDirArc(sOffset, c_start);
     }
 
     return FullDir(sOffset);

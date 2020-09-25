@@ -221,19 +221,6 @@ polygon_t SensorGeometric2D::CreateFivePointDetectionField() const
     return detectionField;
 }
 
-point_t SensorGeometric2D::GetHostVehiclePosition(const osi3::MovingObject* hostVehicle) const
-{
-    point_t bbCenterToRear{hostVehicle->vehicle_attributes().bbcenter_to_rear().x(), hostVehicle->vehicle_attributes().bbcenter_to_rear().y()};
-    bt::rotate_transformer<bg::radian, double, 2, 2> rotate(-hostVehicle->base().orientation().yaw());
-    bt::translate_transformer<double, 2, 2> bbCenter(hostVehicle->base().position().x(), hostVehicle->base().position().y());
-    point_t rotatedBbCenterToRear;
-    point_t ownPosition;
-    bg::transform(bbCenterToRear, rotatedBbCenterToRear, rotate);
-    bg::transform(rotatedBbCenterToRear, ownPosition, bbCenter);
-
-    return ownPosition;
-}
-
 std::pair<point_t, polygon_t> SensorGeometric2D::CreateSensorDetectionField(const osi3::MovingObject* hostVehicle) const
 {
     polygon_t detectionField;
@@ -324,23 +311,6 @@ SensorDetectionResults SensorGeometric2D::DetectObjects()
     }
 
     return results;
-}
-
-const osi3::MovingObject* SensorGeometric2D::FindHostVehicleInSensorView(const osi3::SensorView& sensorView)
-{
-    const auto hostVehicleIt = std::find_if(sensorView.global_ground_truth().moving_object().cbegin(),
-                                            sensorView.global_ground_truth().moving_object().cend(),
-                                            [&sensorView](const osi3::MovingObject& object)
-                                            {
-                                                return object.id().value() == sensorView.host_vehicle_id().value();
-                                            });
-
-    if (hostVehicleIt == sensorView.global_ground_truth().moving_object().cend())
-    {
-        throw std::runtime_error("Host vehicle not in SensorView");
-    }
-
-    return &(*hostVehicleIt);
 }
 
 std::pair<std::vector<const osi3::MovingObject*>, std::vector<const osi3::StationaryObject*>> SensorGeometric2D::GetObjectsInDetectionAreaFromSensorView(const osi3::SensorView& sensorView,
@@ -437,45 +407,6 @@ std::pair<std::vector<T>, std::vector<T>> SensorGeometric2D::CalcVisualObstructi
     }
 
     return std::make_pair(visibleObjects, detectedObjects);
-}
-
-void SensorGeometric2D::AddMovingObjectToSensorData(osi3::MovingObject object, point_t ownVelocity, point_t ownAcceleration, point_t ownPosition, double yaw, double yawRate)
-{
-    point_t objectReferencePointGlobal{object.base().position().x(), object.base().position().y()};
-    point_t objectReferencePointLocal = TransformPointToLocalCoordinates(objectReferencePointGlobal, ownPosition, yaw);
-
-    osi3::DetectedMovingObject* detectedObject = sensorData.add_moving_object();
-    detectedObject->mutable_header()->add_ground_truth_id()->set_value(object.id().value());
-    detectedObject->mutable_header()->add_sensor_id()->set_value(id);
-    detectedObject->mutable_base()->mutable_dimension()->CopyFrom(object.base().dimension());
-
-    detectedObject->mutable_base()->mutable_position()->set_x(objectReferencePointLocal.x());
-    detectedObject->mutable_base()->mutable_position()->set_y(objectReferencePointLocal.y());
-    detectedObject->mutable_base()->mutable_orientation()->set_yaw(object.base().orientation().yaw() - yaw);
-    detectedObject->mutable_base()->mutable_orientation_rate()->set_yaw(object.base().orientation_rate().yaw() - yawRate);
-    point_t objectVelocity{object.base().velocity().x(), object.base().velocity().y()};
-    point_t relativeVelocity = CalculateRelativeVector(objectVelocity, ownVelocity, yaw);
-    detectedObject->mutable_base()->mutable_velocity()->set_x(relativeVelocity.x());
-    detectedObject->mutable_base()->mutable_velocity()->set_y(relativeVelocity.y());
-    point_t objectAcceleration{object.base().acceleration().x(), object.base().acceleration().y()};
-    point_t relativeAcceleration = CalculateRelativeVector(objectAcceleration, ownAcceleration, yaw);
-    detectedObject->mutable_base()->mutable_acceleration()->set_x(relativeAcceleration.x());
-    detectedObject->mutable_base()->mutable_acceleration()->set_y(relativeAcceleration.y());
-}
-
-void SensorGeometric2D::AddStationaryObjectToSensorData(osi3::StationaryObject object, point_t ownPosition, double yaw)
-{
-    point_t objectReferencePointGlobal{object.base().position().x(), object.base().position().y()};
-    point_t objectReferencePointLocal = TransformPointToLocalCoordinates(objectReferencePointGlobal, ownPosition, yaw);
-
-    osi3::DetectedStationaryObject* detectedObject = sensorData.add_stationary_object();
-    detectedObject->mutable_header()->add_ground_truth_id()->set_value(object.id().value());
-    detectedObject->mutable_header()->add_sensor_id()->set_value(id);
-    detectedObject->mutable_base()->mutable_dimension()->CopyFrom(object.base().dimension());
-
-    detectedObject->mutable_base()->mutable_position()->set_x(objectReferencePointLocal.x());
-    detectedObject->mutable_base()->mutable_position()->set_y(objectReferencePointLocal.y());
-    detectedObject->mutable_base()->mutable_orientation()->set_yaw(object.base().orientation().yaw() - yaw);
 }
 
 polygon_t SensorGeometric2D::CalcInitialBrightArea(point_t sensorPosition)

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -9,13 +9,13 @@
 *******************************************************************************/
 
 //-----------------------------------------------------------------------------
-/** \brief SensorFusion.cpp */
+/** \brief sensorFusionImpl.cpp */
 //-----------------------------------------------------------------------------
 
 #include "sensorFusionImpl.h"
 #include <qglobal.h>
 
-SensorFusionImplementation::SensorFusionImplementation(
+SensorFusionErrorlessImplementation::SensorFusionErrorlessImplementation(
         std::string componentName,
         bool isInit,
         int priority,
@@ -44,13 +44,8 @@ SensorFusionImplementation::SensorFusionImplementation(
 {
 }
 
-void SensorFusionImplementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time)
+void SensorFusionErrorlessImplementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, [[maybe_unused]] int time)
 {
-    if(time != previousTimeStamp) {
-        out_sensorData.Clear();
-        previousTimeStamp = time;
-    }
-
     std::stringstream log;
     log << COMPONENTNAME << " (component " << GetComponentName() << ", agent " << GetAgent()->GetId() << ", input data for local link " << localLinkId << ": ";
     LOG(CbkLogLevel::Debug, log.str());
@@ -63,13 +58,11 @@ void SensorFusionImplementation::UpdateInput(int localLinkId, const std::shared_
         throw std::runtime_error(msg);
     }
 
-    out_sensorData.MergeFrom(signal->sensorData);
+    MergeSensorData(signal->sensorData);
 }
 
-void SensorFusionImplementation::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterface const> &data, int time)
+void SensorFusionErrorlessImplementation::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterface const> &data, [[maybe_unused]] int time)
 {
-    Q_UNUSED(time);
-
     std::stringstream log;
     log << COMPONENTNAME << " (component " << GetComponentName() << ", agent " << GetAgent()->GetId() << ", output data for local link " << localLinkId << ": ";
     LOG(CbkLogLevel::Debug, log.str());
@@ -98,7 +91,37 @@ void SensorFusionImplementation::UpdateOutput(int localLinkId, std::shared_ptr<S
     }
 }
 
-void SensorFusionImplementation::Trigger(int time)
+void SensorFusionErrorlessImplementation::Trigger(int)
 {
-    Q_UNUSED(time);
+}
+
+void SensorFusionErrorlessImplementation::MergeSensorData(const osi3::SensorData& in_SensorData)
+{
+    out_sensorData = {};
+    for (auto& movingObject : in_SensorData.moving_object())
+    {
+        auto existingObject = std::find_if(out_sensorData.mutable_moving_object()->begin(), out_sensorData.mutable_moving_object()->end(),
+                                           [&](const auto& object){return movingObject.header().ground_truth_id(0).value() == object.header().ground_truth_id(0).value();});
+        if (existingObject != out_sensorData.mutable_moving_object()->end())
+        {
+            existingObject->mutable_header()->mutable_sensor_id()->MergeFrom(movingObject.header().sensor_id());
+        }
+        else
+        {
+            out_sensorData.add_moving_object()->CopyFrom(movingObject);
+        }
+    }
+    for (auto& stationaryObject : in_SensorData.stationary_object())
+    {
+        auto existingObject = std::find_if(out_sensorData.mutable_stationary_object()->begin(), out_sensorData.mutable_stationary_object()->end(),
+                                           [&](const auto& object){return stationaryObject.header().ground_truth_id(0).value() == object.header().ground_truth_id(0).value();});
+        if (existingObject != out_sensorData.mutable_stationary_object()->end())
+        {
+            existingObject->mutable_header()->mutable_sensor_id()->MergeFrom(stationaryObject.header().sensor_id());
+        }
+        else
+        {
+            out_sensorData.add_stationary_object()->CopyFrom(stationaryObject);
+        }
+    }
 }

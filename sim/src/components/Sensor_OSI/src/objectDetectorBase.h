@@ -134,6 +134,27 @@ public:
 protected:
 
     /*!
+     * \brief Adds the information of a detected moving object as DetectedMovingObject to the sensor data
+     *
+     * \param object            detected moving object
+     * \param ownVelocity       velocity of own vehicle in global coordinates
+     * \param ownAcceleration   acceleration of own vehicle in global coordinates
+     * \param ownPosition       position of own vehicle in global coordinates
+     * \param yaw               yaw of own vehicle in global coordinates
+     * \param yawRate           yawRate of own vehicle in global coordinates
+     */
+    void AddMovingObjectToSensorData (osi3::MovingObject object, point_t ownVelocity, point_t ownAcceleration, point_t ownPosition, double yaw, double yawRate);
+
+    /*!
+     * \brief Adds the information of a detected stationary object as DetectedStationaryObject to the sensor data
+     *
+     * \param object            stationary moving object
+     * \param ownPosition       position of own vehicle in global coordinates
+     * \param yaw               yaw of own vehicle in global coordinates
+     */
+    void AddStationaryObjectToSensorData (osi3::StationaryObject object, point_t ownPosition, double yaw);
+
+    /*!
      * \brief Returns the absolute position of the sensor
      *
      * This method calculates and returns the absolute position of the sensor by adding the agent's position
@@ -225,6 +246,12 @@ protected:
    * @return relative velocity/acceleration of other vehicle in vehicle coordinates
    */
    virtual point_t CalculateRelativeVector(const point_t absolute, const point_t own, double yaw);
+
+   //! Returns the MovingObject in the sensor view which was defined as host vehicle (by id)
+   static const osi3::MovingObject* FindHostVehicleInSensorView(const osi3::SensorView& sensorView);
+
+   //! Returns the world coordinate position of the host vehicle
+   point_t GetHostVehiclePosition(const osi3::MovingObject* hostVehicle) const;
 
    std::list<std::pair<int, osi3::SensorData>> detectedObjectsBuffer;
 

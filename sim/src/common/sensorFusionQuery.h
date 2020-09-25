@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020 in-tech GmbH
 * Copyright (c) 2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -22,33 +22,39 @@
 
 #include "osi3/osi_sensordata.pb.h"
 
-class SensorFusionHelperFunctions
+namespace SensorFusionHelperFunctions
 {
-public:
-    static std::vector<osi3::DetectedMovingObject> RetrieveMovingObjectsBySensorId(std::vector<int> sensorIds, const osi3::SensorData &sensorData)
+    std::vector<osi3::DetectedMovingObject> RetrieveMovingObjectsBySensorId(std::vector<int> sensorIds, const osi3::SensorData &sensorData)
     {
         std::vector<osi3::DetectedMovingObject> result;
         auto detectedMovingObjects = sensorData.moving_object();
         for (const auto& object : detectedMovingObjects)
         {
-            if(std::count(sensorIds.cbegin(), sensorIds.cend(), object.header().sensor_id(0).value()) > 0)
+            for (auto sensorId : object.header().sensor_id())
             {
-                result.push_back(object);
+                if(std::count(sensorIds.cbegin(), sensorIds.cend(), sensorId.value()) > 0)
+                {
+                    result.push_back(object);
+                    break;
+                }
             }
         }
         return result;
     }
 
-
-    static std::vector<osi3::DetectedStationaryObject> RetrieveStationaryObjectsBySensorId(std::vector<int> sensorIds, const osi3::SensorData &sensorData)
+    std::vector<osi3::DetectedStationaryObject> RetrieveStationaryObjectsBySensorId(std::vector<int> sensorIds, const osi3::SensorData &sensorData)
     {
         std::vector<osi3::DetectedStationaryObject> result;
         auto detectedStationaryObjects = sensorData.stationary_object();
         for (const auto& object : detectedStationaryObjects)
         {
-            if(std::count(sensorIds.cbegin(), sensorIds.cend(), object.header().sensor_id(0).value()) > 0)
+            for (auto sensorId : object.header().sensor_id())
             {
-                result.push_back(object);
+                if(std::count(sensorIds.cbegin(), sensorIds.cend(), sensorId.value()) > 0)
+                {
+                    result.push_back(object);
+                    break;
+                }
             }
         }
         return result;

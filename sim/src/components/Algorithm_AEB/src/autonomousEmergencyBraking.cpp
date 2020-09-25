@@ -19,7 +19,7 @@
 
 #include "common/commonTools.h"
 #include "common/eventTypes.h"
-#include "components/SensorFusion_OSI/src/sensorFusionQuery.h"
+#include "common/sensorFusionQuery.h"
 #include "boundingBoxCalculation.h"
 
 AlgorithmAutonomousEmergencyBrakingImplementation::AlgorithmAutonomousEmergencyBrakingImplementation(

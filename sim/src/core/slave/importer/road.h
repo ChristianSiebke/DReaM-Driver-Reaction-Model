@@ -586,97 +586,46 @@ class RoadGeometryArc : public RoadGeometry
 //-----------------------------------------------------------------------------
 class RoadGeometrySpiral : public RoadGeometry
 {
-  public:
-    RoadGeometrySpiral(double s, double x, double y, double hdg, double length, double curvStart, double curvEnd)
-        : RoadGeometry{s, x, y, hdg, length}, curvStart{curvStart}, curvEnd{curvEnd}
-    {
-    }
+public:
+    RoadGeometrySpiral(double s, double x, double y, double hdg, double length, double curvStart, double curvEnd);
     virtual ~RoadGeometrySpiral() override = default;
     virtual Common::Vector2d GetCoord(double sOffset, double tOffset) const override;
     virtual double GetDir(double sOffset) const override;
 
+private:
     //-----------------------------------------------------------------------------
-    //! Returns the curvature at the start of the spiral.
-    //!
-    //! @return                         curvature at the start of the spiral
-    //-----------------------------------------------------------------------------
-    double GetCurvStart() const
-    {
-        return curvStart;
-    }
-
-    //-----------------------------------------------------------------------------
-    //! Returns the curvature at the end of the spiral.
-    //!
-    //! @return                         curvature at the end of the spiral
-    //-----------------------------------------------------------------------------
-    double GetCurvEnd() const
-    {
-        return curvEnd;
-    }
-
-  private:
-    //-----------------------------------------------------------------------------
-    //! Calculates the x/y coordinates as vector. Only valid if the start and end
-    //! curvature of the spiral are either both positive or negative.
+    //! Calculates the x/y coordinates as vector.
     //!
     //! @param[in]  sOffset    s offset within geometry section
     //! @param[in]  tOffset    offset to the left
     //! @return     vector with the x/y coordinates
     //-----------------------------------------------------------------------------
-    Common::Vector2d HalfCoord(double sOffset, double tOffset) const;
-
-    //-----------------------------------------------------------------------------
-    //! Calculates the x/y coordinates as vector. Returns an empty vector, if start
-    //! and end curvature of the spiral have different signs.
-    //!
-    //! @param[in]  sOffset    s offset within geometry section
-    //! @param[in]  tOffset    offset to the left
-    //! @return     vector with the x/y coordinates, empty vector,
-    //!             if start and end curvature of the spiral have
-    //!             different signs
-    //-----------------------------------------------------------------------------
     Common::Vector2d FullCoord(double sOffset, double tOffset) const;
 
     //-----------------------------------------------------------------------------
-    //! Calculates the curvature. Only valid if the start and end
-    //! curvature of the spiral are either both positive or negative.
+    //! Calculates the curvature.
     //!
     //! @param[in]  sOffset    s offset within geometry section
     //! @return                curvature
     //-----------------------------------------------------------------------------
-    double HalfCurvature(double sOffset) const;
-
-    //-----------------------------------------------------------------------------
-    //! Calculates the curvature. Returns 0.0, if start
-    //! and end curvature of the spiral have different signs.
-    //!
-    //! @param[in]  sOffset    s offset within geometry section
-    //! @return                curvature, 0.0, if start and end curvature
-    //!                        of the spiral have different signs
-    //-----------------------------------------------------------------------------
     double FullCurvature(double sOffset) const;
 
     //-----------------------------------------------------------------------------
-    //! Calculates the direction. Only valid if the start and end
-    //! curvature of the spiral are either both positive or negative.
-    //!
-    //! @param[in]  sOffset    s offset within geometry section
-    //! @return                direction
-    //-----------------------------------------------------------------------------
-    double HalfDir(double sOffset) const;
-
-    //-----------------------------------------------------------------------------
-    //! Calculates the direction. Returns 0.0, if start
-    //! and end curvature of the spiral have different signs.
+    //! Calculates the direction.
     //!
     //! @param[in]  sOffset    s offset within geometry section
     //! @return                direction
     //-----------------------------------------------------------------------------
     double FullDir(double sOffset) const;
 
-    double curvStart;
-    double curvEnd;
+
+    double c_start;  //!< spiral starting curvature
+    double c_end;    //!< spiral end curvature
+    double a;        //!< clothoid parameter of spiral
+    double sign;     //!< direction of curvature change (needes to correct Fresnel integral results)
+    double c_dot;    //!< change of curvature per unit
+    double l_start;  //!< offset of starting point along spiral
+    double t_start;  //!< tangent angle at start point
 };
 
 //-----------------------------------------------------------------------------
