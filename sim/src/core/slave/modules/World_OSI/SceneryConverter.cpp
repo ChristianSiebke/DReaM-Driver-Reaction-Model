@@ -733,9 +733,15 @@ void SceneryConverter::CreateObjects()
 
             if (isOnRoad)
             {
-                OWL::Primitive::AbsPosition pos{x, y, 0};
-                OWL::Primitive::Dimension dim{object->GetLength(), object->GetWidth(), object->GetHeight()};
-                OWL::Primitive::AbsOrientation orientation{object->GetHdg(), object->GetPitch(), object->GetRoll()};
+                if (object->GetType() == RoadObjectType::crosswalk)
+                {
+                    CreateRoadMarking(object ,Position{x,y,yaw,0}, section->GetLanes());
+                }
+                else
+                {
+                    OWL::Primitive::AbsPosition pos{x, y, 0};
+                    OWL::Primitive::Dimension dim{object->GetLength(), object->GetWidth(), object->GetHeight()};
+                    OWL::Primitive::AbsOrientation orientation{object->GetHdg(), object->GetPitch(), object->GetRoll()};
                 const auto id = repository.Register(openpass::entity::EntityType::StationaryObject, openpass::utils::GetEntityInfo(*object));
 
                 trafficObjects.emplace_back(std::make_unique<TrafficObjectAdapter>(
@@ -746,6 +752,7 @@ void SceneryConverter::CreateObjects()
                     dim,
                     orientation,
                     object->GetId()));
+                }
             }
         }
     }
@@ -896,6 +903,29 @@ void SceneryConverter::CreateRoadMarking(RoadSignalInterface *signal, Position p
     {
         OWL::OdId odId = worldData.GetLaneIdMapping().at(lane->GetId());
         if (signal->IsValidForLane(odId))
+        {
+            worldData.AssignRoadMarkingToLane(lane->GetId(), roadMarking);
+        }
+    }
+}
+
+void SceneryConverter::CreateRoadMarking(RoadObjectInterface* object, Position position, const OWL::Interfaces::Lanes& lanes)
+{
+    OWL::Interfaces::RoadMarking& roadMarking = worldData.AddRoadMarking();
+
+    roadMarking.SetS(object->GetS());
+
+    if (!roadMarking.SetSpecification(object, position))
+    {
+        const std::string message = "Unsupported traffic sign type: (id: " + object->GetId() + ")";
+        LOG(CbkLogLevel::Warning, message);
+        return;
+    }
+
+    for (auto lane : lanes)
+    {
+        OWL::OdId odId = worldData.GetLaneIdMapping().at(lane->GetId());
+        if (object->IsValidForLane(odId))
         {
             worldData.AssignRoadMarkingToLane(lane->GetId(), roadMarking);
         }

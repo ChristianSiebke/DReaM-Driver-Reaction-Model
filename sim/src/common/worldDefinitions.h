@@ -322,6 +322,7 @@ enum Type
     OvertakingBanEnd = 280,
     OvertakingBanTrucksEnd = 281,
     EndOffAllSpeedLimitsAndOvertakingRestrictions = 282,
+    PedestrianCrossing = 293,
     RightOfWayNextIntersection = 301,
     RightOfWayBegin = 306,
     RightOfWayEnd = 307,

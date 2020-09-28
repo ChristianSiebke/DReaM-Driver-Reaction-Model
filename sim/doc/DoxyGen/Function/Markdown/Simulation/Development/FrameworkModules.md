@@ -307,7 +307,10 @@ The following road markings are supported:
 
 | RoadMarking                                   | StVo Type | Subtype     | Value and Units   |
 |-----------------------------------------------|-----------|-------------|-------------------|
+| PedestrianCrossing                            | 293       | -           | -                 |
 | Stop line                                     | 294       | -           | -                 |
+
+The pedestrian crossing can also be defined in OpenDRIVE as object with type "crosswalk".
 
 \subsection dev_framework_modules_world_lanemarking Lane Markings
 

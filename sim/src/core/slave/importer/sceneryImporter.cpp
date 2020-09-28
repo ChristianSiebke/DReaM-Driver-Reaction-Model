@@ -68,27 +68,31 @@ bool ParseType(const std::string &element, RoadElementOrientation &orientation)
 bool ParseType(const std::string &element, RoadObjectType &objectType)
 {
     return
-            assignIfMatching(element, objectType, "barrier", RoadObjectType::barrier) ||
+            assignIfMatching(element, objectType, "none", RoadObjectType::none) ||
             assignIfMatching(element, objectType, "obstacle", RoadObjectType::obstacle) ||
             assignIfMatching(element, objectType, "car", RoadObjectType::car) ||
-            assignIfMatching(element, objectType, "truck", RoadObjectType::truck) ||
+            assignIfMatching(element, objectType, "pole", RoadObjectType::pole) ||
+            assignIfMatching(element, objectType, "tree", RoadObjectType::tree) ||
+            assignIfMatching(element, objectType, "vegetation", RoadObjectType::vegetation) ||
+            assignIfMatching(element, objectType, "barrier", RoadObjectType::barrier) ||
+            assignIfMatching(element, objectType, "building", RoadObjectType::building) ||
+            assignIfMatching(element, objectType, "parkingSpace", RoadObjectType::parkingSpace) ||
+            assignIfMatching(element, objectType, "patch", RoadObjectType::patch) ||
+            assignIfMatching(element, objectType, "railing", RoadObjectType::railing) ||
+            assignIfMatching(element, objectType, "trafficIsland", RoadObjectType::trafficIsland) ||
+            assignIfMatching(element, objectType, "crosswalk", RoadObjectType::crosswalk) ||
+            assignIfMatching(element, objectType, "streetlamp", RoadObjectType::streetlamp) ||
+            assignIfMatching(element, objectType, "gantry", RoadObjectType::gantry) ||
+            assignIfMatching(element, objectType, "soundBarrier", RoadObjectType::soundBarrier) ||
             assignIfMatching(element, objectType, "van", RoadObjectType::van) ||
             assignIfMatching(element, objectType, "bus", RoadObjectType::bus) ||
             assignIfMatching(element, objectType, "trailer", RoadObjectType::trailer) ||
             assignIfMatching(element, objectType, "bike", RoadObjectType::bike) ||
             assignIfMatching(element, objectType, "motorbike", RoadObjectType::motorbike) ||
-            assignIfMatching(element, objectType, "tram", RoadObjectType::tram) ||
             assignIfMatching(element, objectType, "train", RoadObjectType::train) ||
             assignIfMatching(element, objectType, "pedestrian", RoadObjectType::pedestrian)||
-            assignIfMatching(element, objectType, "pole", RoadObjectType::pole) ||
-            assignIfMatching(element, objectType, "tree", RoadObjectType::tree) ||
-            assignIfMatching(element, objectType, "vegetation", RoadObjectType::vegetation) ||
-            assignIfMatching(element, objectType, "building", RoadObjectType::building) ||
-            assignIfMatching(element, objectType, "parkingSpace", RoadObjectType::parkingSpace) ||
             assignIfMatching(element, objectType, "wind", RoadObjectType::wind)  ||
-            assignIfMatching(element, objectType, "patch", RoadObjectType::patch) ||
-            assignIfMatching(element, objectType, "GuardRail", RoadObjectType::guardRail) ||
-            assignIfMatching(element, objectType, "RoadSideMarkerPost", RoadObjectType::roadSideMarkerPost);
+            assignIfMatching(element, objectType, "roadMark", RoadObjectType::roadMark);
 }
 
 template <typename T>

@@ -125,6 +125,7 @@ SampledGeometry GeometryConverter::CalculateSectionBetweenRoadMarkChanges(double
     for(auto roadGeometry = roadGeometries.cbegin(); roadGeometry != roadGeometries.cend(); ++roadGeometry)
     {
         auto next = std::next(roadGeometry);
+        //To prevent rounding issues, the length is calculated as difference between the start s of the geometries
         double roadGeometryLength = (next == roadGeometries.end()) ? (*roadGeometry)->GetLength()
                                                                 : (*next)->GetS() - (*roadGeometry)->GetS();
         auto sampledGeometry = CalculateGeometry(roadSectionStart,

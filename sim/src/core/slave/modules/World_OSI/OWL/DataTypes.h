@@ -723,6 +723,13 @@ public:
     //! \return     true if succesfull, false if the road marking can not be converted
     virtual bool SetSpecification(RoadSignalInterface* signal, Position position) = 0;
 
+    //! Converts the specification imported from OpenDrive to OSI.
+    //!
+    //! \param signal       OpenDrive specification
+    //! \param position     position in the world
+    //! \return     true if succesfull, false if the road marking can not be converted
+    virtual bool SetSpecification(RoadObjectInterface* signal, Position position) = 0;
+
     /*!
      * \brief Copies the underlying OSI object to the given GroundTruth
      *
@@ -1289,6 +1296,8 @@ public:
     }
 
     virtual bool SetSpecification(RoadSignalInterface* signal, Position position) override;
+
+    virtual bool SetSpecification(RoadObjectInterface* object, Position position) override;
 
     virtual bool IsValidForLane(OWL::Id laneId) const override;
 

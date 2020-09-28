@@ -101,29 +101,24 @@ namespace openpass::utils {
 
 /// @brief constexpr map for transforming the a corresponding enumeration into
 ///        a string representation: try to_cstr(EnumType) or to_string(EnumType)
-static constexpr std::array<const char *, 22> RoadLaneTypeMapping{
+static constexpr std::array<const char *, 17> RoadLaneTypeMapping{
     "Undefined",
-    "None",
+    "Shoulder",
+    "Border",
     "Driving",
     "Stop",
-    "Shoulder",
-    "Biking",
-    "Sidewalk",
-    "Border",
+    "None",
     "Restricted",
     "Parking",
-    "Bidirectional",
     "Median",
-    "Special1",
-    "Special2",
-    "Special3",
-    "Roadworks",
-    "Tram",
-    "Rail",
-    "Entry",
+    "Biking",
+    "Sidewalk",
+    "Curb",
     "Exit",
+    "Entry",
+    "OnRamp",
     "OffRamp",
-    "OnRamp"};
+    "ConnectingRamp"};
 
 /// @brief Convert RoadLaneType to cstr (constexpr)
 constexpr const char *to_cstr(RoadLaneType roadLaneType)
@@ -142,7 +137,7 @@ inline std::string to_string(RoadLaneType roadLaneType) noexcept
 //-----------------------------------------------------------------------------
 //! Type of lane line
 //-----------------------------------------------------------------------------
-enum class RoadLaneRoadMarkType // http://www.opendrive.org/docs/OpenDRIVEFormatSpecRev1.4H.pdf page 92
+enum class RoadLaneRoadMarkType // https://www.asam.net/standards/detail/opendrive/
 {
     Undefined = 0,
     None,
@@ -189,7 +184,7 @@ inline std::string to_string(RoadLaneRoadMarkType roadLaneRoadMarkType) noexcept
 //-----------------------------------------------------------------------------
 //! Lane description: left, right or center
 //-----------------------------------------------------------------------------
-enum class RoadLaneRoadDescriptionType // http://www.opendrive.org/docs/OpenDRIVEFormatSpecRev1.4H.pdf page 59
+enum class RoadLaneRoadDescriptionType // https://www.asam.net/standards/detail/opendrive/
 {
     Left,
     Right,
@@ -199,7 +194,7 @@ enum class RoadLaneRoadDescriptionType // http://www.opendrive.org/docs/OpenDRIV
 //-----------------------------------------------------------------------------
 //! LaneChange of the lane line
 //-----------------------------------------------------------------------------
-enum class RoadLaneRoadMarkLaneChange // http://www.opendrive.org/docs/OpenDRIVEFormatSpecRev1.4H.pdf page 59
+enum class RoadLaneRoadMarkLaneChange // https://www.asam.net/standards/detail/opendrive/
 {
     Undefined = 0,
     None,
@@ -211,7 +206,7 @@ enum class RoadLaneRoadMarkLaneChange // http://www.opendrive.org/docs/OpenDRIVE
 //-----------------------------------------------------------------------------
 //! Color of the road mark
 //-----------------------------------------------------------------------------
-enum class RoadLaneRoadMarkColor // http://www.opendrive.org/docs/OpenDRIVEFormatSpecRev1.4H.pdf page 92
+enum class RoadLaneRoadMarkColor // https://www.asam.net/standards/detail/opendrive/
 {
     Undefined = 0,
     Blue,
@@ -223,7 +218,7 @@ enum class RoadLaneRoadMarkColor // http://www.opendrive.org/docs/OpenDRIVEForma
 };
 
 //! Weight of the road mark
-enum class RoadLaneRoadMarkWeight // http://www.opendrive.org/docs/OpenDRIVEFormatSpecRev1.4H.pdf page 92
+enum class RoadLaneRoadMarkWeight // https://www.asam.net/standards/detail/opendrive/
 {
     Undefined = 0,
     Standard,
@@ -240,7 +235,7 @@ enum class RoadElementOrientation
 //-----------------------------------------------------------------------------
 //! Units used by signals
 //-----------------------------------------------------------------------------
-enum class RoadSignalUnit // http://www.opendrive.org/docs/OpenDRIVEFormatSpecRev1.4H.pdf page 12
+enum class RoadSignalUnit // https://www.asam.net/standards/detail/opendrive/
 {
     Undefined = 0,
     Meter,
@@ -299,7 +294,19 @@ enum class RoadObjectType
     none = -1,
     obstacle,
     car,
-    truck,
+    pole,
+    tree,
+    vegetation,
+    barrier,
+    building,
+    parkingSpace,
+    patch,
+    railing,
+    trafficIsland,
+    crosswalk,
+    streetlamp,
+    gantry,
+    soundBarrier,
     van,
     bus,
     trailer,
@@ -308,27 +315,31 @@ enum class RoadObjectType
     tram,
     train,
     pedestrian,
-    pole,
-    tree,
-    vegetation,
-    barrier,
-    building,
-    parkingSpace,
     wind,
-    patch,
-    guardRail,
-    roadSideMarkerPost
+    roadMark
 };
 
 namespace openpass::utils {
 
 /// @brief constexpr map for transforming the a corresponding enumeration into
 ///        a string representation: try to_cstr(EnumType) or to_string(EnumType)
-static constexpr std::array<const char *, 22> RoadObjectTypeMapping{
+static constexpr std::array<const char *, 26> RoadObjectTypeMapping{
     "None",
     "Obstacle",
     "Car",
-    "Truck",
+    "Pole",
+    "Tree",
+    "Vegetation",
+    "Barrier",
+    "Building",
+    "ParkingSpace",
+    "Patch",
+    "Railing",
+    "TrafficIsland",
+    "Crosswalk",
+    "StreetLamp",
+    "Gantry",
+    "SoundBarrier",
     "Van",
     "Bus",
     "Trailer",
@@ -337,16 +348,8 @@ static constexpr std::array<const char *, 22> RoadObjectTypeMapping{
     "Tram",
     "Train",
     "Pedestrian",
-    "Pole",
-    "Tree",
-    "Vegetation",
-    "Barrier",
-    "Building",
-    "ParkingSpace",
     "Wind",
-    "Patch",
-    "GuardRail",
-    "RoadSideMarkerPost"};
+    "RoadMark"};
 
 constexpr const char *to_cstr(RoadObjectType roadObjectType)
 {

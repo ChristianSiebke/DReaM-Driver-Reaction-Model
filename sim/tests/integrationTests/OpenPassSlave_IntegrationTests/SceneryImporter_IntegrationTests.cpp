@@ -961,13 +961,25 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectTrafficSignGe
     ASSERT_THAT(trafficSign4.supplementary_sign(0).base().dimension().height(), DoubleEq(0.2));
     ASSERT_THAT(trafficSign4.supplementary_sign(0).base().orientation().yaw(), DoubleEq(0.0));
 
-    auto& roadMarking = groundTruth.road_marking(0);
-    ASSERT_THAT(roadMarking.base().position().x(), DoubleEq(41));
-    ASSERT_THAT(roadMarking.base().position().y(), DoubleEq(0.5));
-    ASSERT_THAT(roadMarking.base().position().z(), DoubleEq(0.0));
-    ASSERT_THAT(roadMarking.base().dimension().width(), DoubleEq(4.0));
-    ASSERT_THAT(roadMarking.base().dimension().height(), DoubleEq(0.0));
-    ASSERT_THAT(roadMarking.base().orientation().yaw(), DoubleEq(0.0));
+    ASSERT_THAT(groundTruth.road_marking_size(), Eq(2));
+
+    auto& roadMarking1 = groundTruth.road_marking(0);
+    ASSERT_THAT(roadMarking1.base().position().x(), DoubleEq(10));
+    ASSERT_THAT(roadMarking1.base().position().y(), DoubleEq(7.5));
+    ASSERT_THAT(roadMarking1.base().position().z(), DoubleEq(0.0));
+    ASSERT_THAT(roadMarking1.base().dimension().width(), DoubleEq(8.0));
+    ASSERT_THAT(roadMarking1.base().dimension().length(), DoubleEq(4.0));
+    ASSERT_THAT(roadMarking1.base().orientation().yaw(), DoubleEq(0.0));
+    ASSERT_THAT(roadMarking1.classification().traffic_main_sign_type(), Eq(osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_ZEBRA_CROSSING));
+
+    auto& roadMarking2 = groundTruth.road_marking(1);
+    ASSERT_THAT(roadMarking2.base().position().x(), DoubleEq(41));
+    ASSERT_THAT(roadMarking2.base().position().y(), DoubleEq(0.5));
+    ASSERT_THAT(roadMarking2.base().position().z(), DoubleEq(0.0));
+    ASSERT_THAT(roadMarking2.base().dimension().width(), DoubleEq(4.0));
+    ASSERT_THAT(roadMarking2.base().dimension().height(), DoubleEq(0.0));
+    ASSERT_THAT(roadMarking2.base().orientation().yaw(), DoubleEq(0.0));
+    ASSERT_THAT(roadMarking2.classification().traffic_main_sign_type(), Eq(osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_STOP));
 }
 
 TEST(SceneryImporter_IntegrationTests, TJunction_ImportWithCorrectConnectionsAndPriorities)

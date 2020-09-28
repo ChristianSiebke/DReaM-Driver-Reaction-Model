@@ -175,6 +175,7 @@ namespace OpenDriveTypeMapper
     //! Conversion map from OpenDrive traffic sign to OSI for road markings
     const std::map<std::string, osi3::TrafficSign_MainSign_Classification_Type> roadMarkings =
     {
+        {"293", osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_ZEBRA_CROSSING},
         {"294", osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_STOP},
     };
 
@@ -226,6 +227,7 @@ namespace OpenDriveTypeMapper
         {osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_HIGHWAY_EXIT, CommonTrafficSign::Type::HighWayExit},
         {osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_POLE_EXIT, CommonTrafficSign::Type::HighwayExitPole},
         {osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_ANNOUNCE_RIGHT_LANE_END, CommonTrafficSign::Type::AnnounceRightLaneEnd},
-        {osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_ANNOUNCE_LEFT_LANE_END, CommonTrafficSign::Type::AnnounceLeftLaneEnd}
+        {osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_ANNOUNCE_LEFT_LANE_END, CommonTrafficSign::Type::AnnounceLeftLaneEnd},
+        {osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_ZEBRA_CROSSING, CommonTrafficSign::Type::PedestrianCrossing}
     };
 };

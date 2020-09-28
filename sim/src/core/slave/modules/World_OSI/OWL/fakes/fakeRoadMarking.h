@@ -37,6 +37,8 @@ public:
                  void(OWL::Id));
     MOCK_METHOD2(SetSpecification,
                  bool(RoadSignalInterface*, Position position));
+    MOCK_METHOD2(SetSpecification,
+                 bool(RoadObjectInterface*, Position position));
     MOCK_CONST_METHOD1(CopyToGroundTruth,
                        void(osi3::GroundTruth&));
 };

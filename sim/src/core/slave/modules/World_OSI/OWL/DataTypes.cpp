@@ -1547,6 +1547,38 @@ bool RoadMarking::SetSpecification(RoadSignalInterface* signal, Position positio
     return mapping_succeeded;
 }
 
+bool RoadMarking::SetSpecification(RoadObjectInterface* object, Position position)
+{
+    bool mapping_succeeded = true;
+
+    const auto baseStationary = osiSign->mutable_base();
+
+    baseStationary->mutable_position()->set_x(position.xPos);
+    baseStationary->mutable_position()->set_y(position.yPos);
+    baseStationary->mutable_position()->set_z(0.0);
+    baseStationary->mutable_dimension()->set_width(object->GetWidth());
+    baseStationary->mutable_dimension()->set_length(object->GetLength());
+    double yaw = object->GetHdg();
+    yaw = CommonHelper::SetAngleToValidRange(yaw);
+    baseStationary->mutable_orientation()->set_yaw(yaw);
+
+    const auto mutableOsiClassification = osiSign->mutable_classification();
+
+    mutableOsiClassification->set_type(osi3::RoadMarking_Classification_Type::RoadMarking_Classification_Type_TYPE_SYMBOLIC_TRAFFIC_SIGN);
+    mutableOsiClassification->set_monochrome_color(osi3::RoadMarking_Classification_Color::RoadMarking_Classification_Color_COLOR_WHITE);
+    if(object->GetType() == RoadObjectType::crosswalk)
+    {
+        mutableOsiClassification->set_traffic_main_sign_type(osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_ZEBRA_CROSSING);
+    }
+    else
+    {
+        mutableOsiClassification->set_traffic_main_sign_type(osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_OTHER);
+        mapping_succeeded = false;
+    }
+
+    return mapping_succeeded;
+}
+
 CommonTrafficSign::Entity RoadMarking::GetSpecification(const double relativeDistance) const
 {
     CommonTrafficSign::Entity specification;
