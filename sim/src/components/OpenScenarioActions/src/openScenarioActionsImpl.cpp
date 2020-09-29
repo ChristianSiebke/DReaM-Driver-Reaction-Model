@@ -54,16 +54,6 @@ OpenScenarioActionsImplementation::OpenScenarioActionsImplementation(std::string
             linkIdMapping.emplace(key, value);
         }
     }
-
-    // check all identifiers, so we can faster access them in update output
-    const auto linkIdTest = ActionTransformRepository::Transform(GetEventNetwork(), GetWorld(), GetAgent(), GetCycleTime());
-    for (const auto &[identifier, update_for_current_agent, signal] : linkIdTest)
-    {
-        if (linkIdMapping.find(identifier) == linkIdMapping.end())
-        {
-            ThrowUnregisteredIdentifier(identifier);
-        }
-    }
 }
 
 void OpenScenarioActionsImplementation::UpdateInput(int, const std::shared_ptr<const SignalInterface> &, int)
@@ -86,7 +76,19 @@ void OpenScenarioActionsImplementation::UpdateOutput(LinkId localLinkId, std::sh
     // Case 3: Transformer1 and Transformer2 has something to do = 2 entries => report error
     for (auto [identifier, update_for_current_agent, signal] : pendingSignals)
     {
-        if (localLinkId != linkIdMapping[identifier]) // note that all identifiers were checked in the constructor
+        if (linkIdMapping.find(identifier) == linkIdMapping.end())
+        {
+            if (update_for_current_agent)
+            {
+                ThrowUnregisteredIdentifier(identifier);
+            }
+            else
+            {
+                continue;
+            }
+        }
+
+        if (localLinkId != linkIdMapping[identifier])
         {
             continue;
         }

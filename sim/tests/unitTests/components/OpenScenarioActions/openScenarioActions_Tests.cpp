@@ -82,6 +82,169 @@ struct CustomEventTransform : public openScenario::transformation::TransformerBa
     static inline bool registered = ActionTransformRepository::Register(Transform);
 };
 
+TEST(OpenScenarioActions_Test, MissingAssignmentForUnusedEvent_DoesNotThrow)
+{
+    std::map<std::string, int> fakeLinkIdAssignement = {};
+
+    NiceMock<FakeParameter> fakeParameter;
+    ON_CALL(fakeParameter, GetParametersInt()).WillByDefault(ReturnRef(fakeLinkIdAssignement));
+
+    constexpr int ownAgentId = 10;
+    FakeAgent fakeAgent;
+    ON_CALL(fakeAgent, GetId()).WillByDefault(Return(ownAgentId));
+    FakeEventNetwork fakeEventNetwork;
+
+    std::vector<EventInterface const *> events{};
+    ON_CALL(fakeEventNetwork, GetTrigger(CustomEvent::TOPIC)).WillByDefault(Return(events));
+
+    auto openScenarioActions = OpenScenarioActionsImplementation("",
+                                                                 0,
+                                                                 0,
+                                                                 0,
+                                                                 0,
+                                                                 0,
+                                                                 nullptr,
+                                                                 nullptr,
+                                                                 &fakeParameter,
+                                                                 nullptr,
+                                                                 nullptr,
+                                                                 &fakeAgent,
+                                                                 &fakeEventNetwork);
+
+    openScenarioActions.Trigger(0);
+
+    std::shared_ptr<SignalInterface const> signal;
+    EXPECT_NO_THROW(openScenarioActions.UpdateOutput(0, signal, 0));
+}
+
+TEST(OpenScenarioActions_Test, MissingAssignmentForUsedEvent_Throws)
+{
+    std::map<std::string, int> fakeLinkIdAssignement = {};
+
+    NiceMock<FakeParameter> fakeParameter;
+    ON_CALL(fakeParameter, GetParametersInt()).WillByDefault(ReturnRef(fakeLinkIdAssignement));
+
+    constexpr int ownAgentId = 10;
+    int fakeDeltaLaneId = -1;
+    FakeAgent fakeAgent;
+    ON_CALL(fakeAgent, GetId()).WillByDefault(Return(ownAgentId));
+    FakeEventNetwork fakeEventNetwork;
+
+    const auto event{std::make_shared<CustomEvent>(0, "", "", ownAgentId, fakeDeltaLaneId)};
+    std::vector<EventInterface const *> events{event.get()};
+    ON_CALL(fakeEventNetwork, GetTrigger(CustomEvent::TOPIC)).WillByDefault(Return(events));
+
+    auto openScenarioActions = OpenScenarioActionsImplementation("",
+                                                                 0,
+                                                                 0,
+                                                                 0,
+                                                                 0,
+                                                                 0,
+                                                                 nullptr,
+                                                                 nullptr,
+                                                                 &fakeParameter,
+                                                                 nullptr,
+                                                                 nullptr,
+                                                                 &fakeAgent,
+                                                                 &fakeEventNetwork);
+
+    openScenarioActions.Trigger(0);
+
+    std::shared_ptr<SignalInterface const> signal;
+    EXPECT_THROW(openScenarioActions.UpdateOutput(0, signal, 0), std::runtime_error);
+}
+
+TEST(OpenScenarioActions_Test, UpdateOutputForUnassignedLinkId_Throws)
+{
+    std::map<std::string, int> fakeLinkIdAssignement = {};
+
+    NiceMock<FakeParameter> fakeParameter;
+    ON_CALL(fakeParameter, GetParametersInt()).WillByDefault(ReturnRef(fakeLinkIdAssignement));
+
+    constexpr int ownAgentId = 10;
+    FakeAgent fakeAgent;
+    ON_CALL(fakeAgent, GetId()).WillByDefault(Return(ownAgentId));
+    FakeEventNetwork fakeEventNetwork;
+
+    std::vector<EventInterface const *> events{};
+    ON_CALL(fakeEventNetwork, GetTrigger(CustomEvent::TOPIC)).WillByDefault(Return(events));
+
+    auto openScenarioActions = OpenScenarioActionsImplementation("",
+                                                                 0,
+                                                                 0,
+                                                                 0,
+                                                                 0,
+                                                                 0,
+                                                                 nullptr,
+                                                                 nullptr,
+                                                                 &fakeParameter,
+                                                                 nullptr,
+                                                                 nullptr,
+                                                                 &fakeAgent,
+                                                                 &fakeEventNetwork);
+
+    openScenarioActions.Trigger(0);
+
+    std::shared_ptr<SignalInterface const> signal;
+    EXPECT_THROW(openScenarioActions.UpdateOutput(TEST_LINK, signal, 0), std::runtime_error);
+}
+
+TEST(OpenScenarioActions_Test, TwoEventsForSameLink_Throws)
+{
+    std::map<std::string, int> fakeLinkIdAssignement = {
+        {CustomEvent::TOPIC, TEST_LINK}};
+
+    NiceMock<FakeParameter> fakeParameter;
+    ON_CALL(fakeParameter, GetParametersInt()).WillByDefault(ReturnRef(fakeLinkIdAssignement));
+
+    constexpr int agentId = 10;
+    const openScenario::Trajectory trajectory{{}, "MyTrajectory"};
+    FakeAgent fakeAgent;
+    ON_CALL(fakeAgent, GetId()).WillByDefault(Return(agentId));
+
+    const auto event1{std::make_shared<TrajectoryEvent>(0, "", "", agentId, trajectory)};
+
+    ON_CALL(fakeAgent, GetVelocity()).WillByDefault(Return(1.0));
+    FakeEgoAgent fakeEgoAgent;
+    ON_CALL(fakeAgent, GetEgoAgent()).WillByDefault(ReturnRef(fakeEgoAgent));
+    std::string road{"Road"};
+    ON_CALL(fakeEgoAgent, GetRoadId()).WillByDefault(ReturnRef(road));
+    ObjectPosition position{{{road, GlobalRoadPosition{road,-1,0,0,0}}},{},{}};
+    ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(ReturnRef(position));
+    openScenario::LaneChangeParameter laneChange{};
+    laneChange.type = openScenario::LaneChangeParameter::Type::Absolute;
+    laneChange.value = -1;
+    laneChange.dynamicsType = openScenario::LaneChangeParameter::DynamicsType::Distance;
+    laneChange.dynamicsTarget = 1;
+
+    const auto event2{std::make_shared<LaneChangeEvent>(0, "", "", agentId, laneChange)};
+
+    FakeEventNetwork fakeEventNetwork;
+    std::vector<EventInterface const *> events1{event1.get()};
+    ON_CALL(fakeEventNetwork, GetTrigger(TrajectoryEvent::TOPIC)).WillByDefault(Return(events1));
+    std::vector<EventInterface const *> events2{event2.get()};
+    ON_CALL(fakeEventNetwork, GetTrigger(LaneChangeEvent::TOPIC)).WillByDefault(Return(events2));
+
+    auto openScenarioActions = OpenScenarioActionsImplementation("",
+                                                                 0,
+                                                                 0,
+                                                                 0,
+                                                                 0,
+                                                                 0,
+                                                                 nullptr,
+                                                                 nullptr,
+                                                                 &fakeParameter,
+                                                                 nullptr,
+                                                                 nullptr,
+                                                                 &fakeAgent,
+                                                                 &fakeEventNetwork);
+
+    openScenarioActions.Trigger(0);
+
+    std::shared_ptr<SignalInterface const> signal;
+    EXPECT_THROW(openScenarioActions.UpdateOutput(0, signal, 0), std::runtime_error);
+}
+
 TEST(OpenScenarioActions_Test, TrajectoryEventForOwnAgent_IsForwardedAsSignal)
 {
     std::map<std::string, int> fakeLinkIdAssignement = {
