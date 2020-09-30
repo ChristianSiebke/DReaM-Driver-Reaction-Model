@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<systems>
+  <system>
+    <id>0</id>
+    <title>Follow Trajectory</title>
+    <priority>0</priority>
+    <components>
+      <component>
+        <id>0</id>
+        <library>Algorithm_RouteControl</library>
+        <title>Algorithm_RouteControl</title>
+        <schedule>
+          <priority>30</priority>
+          <offset>0</offset>
+          <cycle>10</cycle>
+          <response>0</response>
+        </schedule>
+        <parameters>
+          <parameter>
+            <!--parameter's title: Driver aggressiveness-->
+            <id>0</id>
+            <type>double</type>
+            <unit></unit>
+            <value>1</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: Max. engine power-->
+            <id>1</id>
+            <type>double</type>
+            <unit>W</unit>
+            <value>100000</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: Min. brake torque-->
+            <id>2</id>
+            <type>double</type>
+            <unit>Nm</unit>
+            <value>-10000</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: Kp of the pedals PID control-->
+            <id>3</id>
+            <type>double</type>
+            <unit></unit>
+            <value>-0.5</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: Ki of the pedals PID control-->
+            <id>4</id>
+            <type>double</type>
+            <unit></unit>
+            <value>-0.4</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: Kd of the pedals PID control-->
+            <id>5</id>
+            <type>double</type>
+            <unit></unit>
+            <value>0.0</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: Kp of the steering PID control-->
+            <id>6</id>
+            <type>double</type>
+            <unit></unit>
+            <value>-18</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: Ki of the steering PID control-->
+            <id>7</id>
+            <type>double</type>
+            <unit></unit>
+            <value>-0.6</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: Kd of the steering PID control-->
+            <id>8</id>
+            <type>double</type>
+            <unit></unit>
+            <value>0.0</value>
+          </parameter>
+        </parameters>
+        <position>
+          <x>296</x>
+          <y>20</y>
+        </position>
+      </component>
+      <component>
+        <id>1</id>
+        <library>OpenScenarioActions</library>
+        <title>OpenScenarioActions</title>
+        <schedule>
+          <priority>500</priority>
+          <offset>0</offset>
+          <cycle>0</cycle>
+          <response>0</response>
+        </schedule>
+        <parameters/>
+        <position>
+          <x>40</x>
+          <y>220</y>
+        </position>
+      </component>
+      <component>
+        <id>2</id>
+        <library>Algorithm_ECU</library>
+        <title>Algorithm_ECU</title>
+        <schedule>
+          <priority>20</priority>
+          <offset>0</offset>
+          <cycle>10</cycle>
+          <response>0</response>
+        </schedule>
+        <parameters/>
+        <position>
+          <x>599</x>
+          <y>139</y>
+        </position>
+      </component>
+      <component>
+        <id>3</id>
+        <library>Algorithm_Switch</library>
+        <title>Algorithm_Switch</title>
+        <schedule>
+          <priority>10</priority>
+          <offset>0</offset>
+          <cycle>10</cycle>
+          <response>0</response>
+        </schedule>
+        <parameters/>
+        <position>
+          <x>862</x>
+          <y>320</y>
+        </position>
+      </component>
+      <component>
+        <id>5</id>
+        <library>Sensor_Collision</library>
+        <title>Sensor_Collision</title>
+        <schedule>
+          <priority>300</priority>
+          <offset>0</offset>
+          <cycle>10</cycle>
+          <response>0</response>
+        </schedule>
+        <parameters>
+          <parameter>
+            <!--parameter's title: penetrationTime_ms-->
+            <id>0</id>
+            <type>int</type>
+            <unit>ms</unit>
+            <value>30</value>
+          </parameter>
+        </parameters>
+        <position>
+          <x>276</x>
+          <y>565</y>
+        </position>
+      </component>
+      <component>
+        <id>6</id>
+        <library>Dynamics_CollisionPCM</library>
+        <title>Dynamics_CollisionPCM</title>
+        <schedule>
+          <priority>2</priority>
+          <offset>0</offset>
+          <cycle>10</cycle>
+          <response>0</response>
+        </schedule>
+        <parameters/>
+        <position>
+          <x>663</x>
+          <y>587</y>
+        </position>
+      </component>
+      <component>
+        <id>7</id>
+        <library>Dynamics_TwoTrack</library>
+        <title>Dynamics_TwoTrack</title>
+        <schedule>
+          <priority>3</priority>
+          <offset>0</offset>
+          <cycle>10</cycle>
+          <response>0</response>
+        </schedule>
+        <parameters>
+          <parameter>
+            <!--parameter's title: Radius of the tires-->
+            <id>0</id>
+            <type>double</type>
+            <unit>m</unit>
+            <value>0.3</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: Tire's max. mu-->
+            <id>1</id>
+            <type>double</type>
+            <unit></unit>
+            <value>1.1</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: Tire's slide mu-->
+            <id>2</id>
+            <type>double</type>
+            <unit></unit>
+            <value>0.8</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: Tire's slip at max. mu-->
+            <id>3</id>
+            <type>double</type>
+            <unit></unit>
+            <value>0.1</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: Engine power-->
+            <id>4</id>
+            <type>double</type>
+            <unit>W</unit>
+            <value>100000</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: Max. brake torque-->
+            <id>5</id>
+            <type>double</type>
+            <unit>Nm</unit>
+            <value>-10000</value>
+          </parameter>
+        </parameters>
+        <position>
+          <x>1176</x>
+          <y>369</y>
+        </position>
+      </component>
+      <component>
+        <id>8</id>
+        <library>Dynamics_Chassis</library>
+        <title>Dynamics_Chassis</title>
+        <schedule>
+          <priority>1</priority>
+          <offset>0</offset>
+          <cycle>10</cycle>
+          <response>0</response>
+        </schedule>
+        <parameters>
+          <parameter>
+            <!--parameter's title: Spring coefficient-->
+            <id>0</id>
+            <type>double</type>
+            <unit></unit>
+            <value>1.2e+06</value>
+          </parameter>
+          <parameter>
+            <!--parameter's title: Damper coefficient-->
+            <id>1</id>
+            <type>double</type>
+            <unit></unit>
+            <value>12000</value>
+          </parameter>
+        </parameters>
+        <position>
+          <x>815</x>
+          <y>692</y>
+        </position>
+      </component>
+    </components>
+    <connections>
+      <connection>
+        <id>0</id>
+        <source>
+          <!--component title: OpenScenarioActions-->
+          <component>1</component>
+          <!--output title: Trajectory Event-->
+          <output>0</output>
+        </source>
+        <target>
+          <!--component title: Algorithm_RouteControl-->
+          <component>0</component>
+          <!--input title: Desired trajectory-->
+          <input>0</input>
+        </target>
+      </connection>
+      <connection>
+        <id>1</id>
+        <source>
+          <!--component title: Algorithm_RouteControl-->
+          <component>0</component>
+          <!--output title: Control-->
+          <output>0</output>
+        </source>
+        <target>
+          <!--component title: Algorithm_Switch-->
+          <component>3</component>
+          <!--input title: DriverControl-->
+          <input>1</input>
+        </target>
+      </connection>
+      <connection>
+        <id>2</id>
+        <source>
+          <!--component title: Algorithm_ECU-->
+          <component>2</component>
+          <!--output title: index-->
+          <output>0</output>
+        </source>
+        <target>
+          <!--component title: Algorithm_Switch-->
+          <component>3</component>
+          <!--input title: Index-->
+          <input>0</input>
+        </target>
+      </connection>
+      <connection>
+        <id>3</id>
+        <source>
+          <!--component title: Sensor_Collision-->
+          <component>5</component>
+          <!--output title: CollisionOccured-->
+          <output>0</output>
+        </source>
+        <target>
+          <!--component title: Algorithm_ECU-->
+          <component>2</component>
+          <!--input title: collisionOccurred-->
+          <input>0</input>
+        </target>
+        <target>
+          <!--component title: Dynamics_CollisionPCM-->
+          <component>6</component>
+          <!--input title: CollisionOccured-->
+          <input>0</input>
+        </target>
+      </connection>
+      <connection>
+        <id>5</id>
+        <source>
+          <!--component title: Algorithm_Switch-->
+          <component>3</component>
+          <!--output title: Control-->
+          <output>0</output>
+        </source>
+        <target>
+          <!--component title: Dynamics_TwoTrack-->
+          <component>7</component>
+          <!--input title: Control-->
+          <input>0</input>
+        </target>
+      </connection>
+      <connection>
+        <id>6</id>
+        <source>
+          <!--component title: Dynamics_TwoTrack-->
+          <component>7</component>
+          <!--output title: Inertia force vector-->
+          <output>0</output>
+        </source>
+        <target>
+          <!--component title: Dynamics_Chassis-->
+          <component>8</component>
+          <!--input title: InertiaForce-->
+          <input>0</input>
+        </target>
+      </connection>
+      <connection>
+        <id>7</id>
+        <source>
+          <!--component title: Dynamics_Chassis-->
+          <component>8</component>
+          <!--output title: VerticalForce-->
+          <output>0</output>
+        </source>
+        <target>
+          <!--component title: Dynamics_TwoTrack-->
+          <component>7</component>
+          <!--input title: Vertical force on tires-->
+          <input>1</input>
+        </target>
+      </connection>
+    </connections>
+  </system>
+</systems>
