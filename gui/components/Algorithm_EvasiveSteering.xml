@@ -1,0 +1,76 @@
+<component>
+  <type>Algorithm</type>
+  <title>Algorithm_EvasiveSteering</title>
+  <schedule>
+    <offset>0</offset>
+    <cycle>10</cycle>
+    <response>0</response>
+  </schedule>
+  <parameters>
+	<parameter>
+      <id>0</id>
+      <type>bool</type>
+      <title>Enable</title>
+      <unit></unit>
+      <value>1</value>
+    </parameter>
+	<parameter>
+      <id>1</id>
+      <type>double</type>
+      <title>Max. steering angle</title>
+      <unit>degree</unit>
+      <value>5.0</value>
+    </parameter>
+	<parameter>
+      <id>2</id>
+      <type>double</type>
+      <title>Steering period</title>
+      <unit>s</unit>
+      <value>0.08</value>
+    </parameter>
+	<parameter>
+      <id>3</id>
+      <type>double</type>
+      <title>Critical steering derivative</title>
+      <unit>degree/s</unit>
+      <value>10.0</value>
+    </parameter>	
+	<parameter>
+      <id>4</id>
+      <type>double</type>
+      <title>Time-to-collision for intervention</title>
+      <unit>s</unit>
+      <value>1.0</value>
+    </parameter>
+  </parameters>
+  <inputs>
+  	<input>
+      <id>0</id>
+      <type>double</type>
+      <title>Steering angle</title>
+      <unit>rad</unit>
+      <cardinality>1</cardinality>	  
+    </input>
+	<input>
+      <id>1</id>
+      <type>double</type>
+      <title>Time-to-collision</title>
+      <unit>s</unit>
+      <cardinality>1</cardinality>
+    </input>
+  </inputs>
+  <outputs>
+	<output>
+	  <id>0</id>
+      <type>bool</type>
+      <title>Intervention</title>
+      <unit></unit>
+    </output>
+	<output>
+      <id>1</id>
+      <type>ControlData</type>
+      <title>Control</title>
+      <unit></unit>
+    </output>
+  </outputs>
+</component>

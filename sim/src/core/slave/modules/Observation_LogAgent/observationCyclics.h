@@ -13,7 +13,7 @@
 #pragma once
 
 #include <string>
-
+#include <QString>
 #include "include/eventNetworkInterface.h"
 
 //!
@@ -68,6 +68,11 @@ public:
     std::vector<std::string> GetAgentSamplesLine(uint32_t timeStepNumber);
 
     /*!
+     * \brief Returns for each agent a single line of samples for the given timestep for writing into the cyclics_*.csv
+     */
+    static std::vector<int> FilterSamplesLine(QString samplesLine, QString agentId);
+
+    /*!
      * \brief Returns all timesteps for which samples exist
      */
     std::set<int>& GetTimeSteps()
@@ -79,6 +84,8 @@ public:
      * \brief Clears all samples for a new run
      */
     void Clear();
+
+    static QString GetSamplesLineByAgent(QString samplesLine, std::vector<int> index);
 
 private:
     std::set<int> timeSteps;

@@ -14,6 +14,7 @@
 //-----------------------------------------------------------------------------
 
 #include "observationCyclics.h"
+#include <QStringList>
 
 std::string ObservationCyclics::GetHeader()
 {
@@ -43,7 +44,7 @@ std::string ObservationCyclics::GetAgentHeader()
         }
         if(it != samples.begin())
         {
-            header += ",";
+            header += ";";
         }
         header += columnHeader.erase(0, 3);
     }
@@ -93,7 +94,7 @@ std::vector<std::string> ObservationCyclics::GetAgentSamplesLine(std::uint32_t t
 
         if (!sampleLine.empty())
         {
-            sampleLine += ",";
+            sampleLine += ";";
         }
 
         // not all channels are sampled until end of simulation time
@@ -104,6 +105,43 @@ std::vector<std::string> ObservationCyclics::GetAgentSamplesLine(std::uint32_t t
     }
 
     return agentSamplesLines;
+}
+
+std::vector<int> ObservationCyclics::FilterSamplesLine(QString samplesLine, QString agentId)
+{
+    std::vector<int> indexAgent;
+    if (!samplesLine.contains(agentId))
+    {
+        return indexAgent;
+    }
+    QStringList values = samplesLine.split(",");
+    indexAgent.resize(values.size());
+    for (int i=0; i< values.size(); ++i)
+    {
+        if (values[i].contains(agentId))
+        {
+            indexAgent[i] = 1;
+        } else {
+            indexAgent[i] = 0;
+        }
+    }
+    return indexAgent;
+}
+
+QString ObservationCyclics::GetSamplesLineByAgent(QString samplesLine, std::vector<int> index)
+{
+    QString indexAgent;
+    QStringList values = samplesLine.split(",");
+
+    for (int i=0; i< values.size(); ++i)
+    {
+        if (index[i])
+        {
+            indexAgent += values[i] + ";";
+        }
+    }
+    indexAgent.chop(1);
+    return indexAgent;
 }
 
 void ObservationCyclics::Clear()

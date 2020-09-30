@@ -1,0 +1,25 @@
+<component>
+  <type>Sensor</type>
+  <title>Sensor_OSIAgent</title>
+  <schedule>
+    <offset>0</offset>
+    <cycle>10</cycle>
+    <response>0</response>
+  </schedule>
+  <parameters/>
+  <inputs/>
+  <outputs>
+	<output>
+      <id>0</id>
+      <type>double</type>
+      <title>distanceOpp</title>
+      <unit>m</unit>
+    </output>
+	<output>
+      <id>1</id>
+      <type>double</type>
+      <title>velOpp</title>
+      <unit>m/s</unit>
+    </output>
+  </outputs>
+</component>

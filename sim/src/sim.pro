@@ -1,6 +1,6 @@
 # /*********************************************************************
 # * Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
-# *
+# *                                 2020 ITK Engineering GmbH
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
 # * which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -12,6 +12,7 @@ DEFINES += USE_PROTOBUF_ARENA
 
 TEMPLATE = subdirs
 SUBDIRS = \
+    components/components.pro \
     master \
     slave \
     core/slave/modules/BasicDataStore \
@@ -24,29 +25,6 @@ SUBDIRS = \
     core/slave/modules/Spawners/RuntimeCommon \
     core/slave/modules/Stochastics \
     core/slave/modules/World_OSI \
-    components/Action_LongitudinalDriver \
-    components/Action_SecondaryDriverTasks \
-    components/AgentUpdater \
-    components/Algorithm_AEB \
-    components/Algorithm_FmuWrapper \
-    components/Algorithm_Lateral \
-    components/Algorithm_Longitudinal \
-    components/AlgorithmAFDM \
-    components/ComponentController \
-    components/Dynamics_Collision \
-    components/Dynamics_CollisionPostCrash \
-    components/Dynamics_RegularDriving \
-    components/Dynamics_RegularTwoTrack \
-    components/Dynamics_TF \
-    components/LimiterAccVehComp \
-    components/OpenScenarioActions \
-    components/Parameters_Vehicle \
-    components/Sensor_Driver \
-    components/Sensor_OSI \
-    components/Sensor_RecordState \
-    components/SensorAggregation_OSI \
-    components/SensorFusionErrorless_OSI \
-    components/SignalPrioritizer
 
 slave.file = core/slave/OpenPassSlave.pro
 master.file = core/master/OpenPassMaster.pro

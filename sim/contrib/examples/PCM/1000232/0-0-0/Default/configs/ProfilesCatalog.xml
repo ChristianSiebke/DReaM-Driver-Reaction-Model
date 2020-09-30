@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Profiles SchemaVersion="0.4.2">
+    <AgentProfiles>
+        <AgentProfile Name="Agent_0" Type="Static">
+            <System>
+                <File>SystemConfig.xml</File>
+                <Id>0</Id>
+            </System>
+            <VehicleModel>Agent_0</VehicleModel>
+        </AgentProfile>
+        <AgentProfile Name="Agent_1" Type="Static">
+            <System>
+                <File>SystemConfig.xml</File>
+                <Id>1</Id>
+            </System>
+            <VehicleModel>Agent_1</VehicleModel>
+        </AgentProfile>
+    </AgentProfiles>
+    <VehicleProfiles>
+        <VehicleProfile Name="Agent_0">
+            <Model Name="Agent_0"/>
+            <Components/>
+            <Sensors/>
+        </VehicleProfile>
+        <VehicleProfile Name="Agent_1">
+            <Model Name="Agent_1"/>
+            <Components/>
+            <Sensors/>
+        </VehicleProfile>
+    </VehicleProfiles>
+    <ProfileGroup Type="Driver">
+        <Profile Name="Regular"/>
+    </ProfileGroup>
+</Profiles>

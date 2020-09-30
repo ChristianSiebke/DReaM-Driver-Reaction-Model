@@ -114,7 +114,6 @@ void ObservationFileHandler::WriteRun([[maybe_unused]] const RunResultInterface&
 
     // write CyclicsTag
     xmlFileStream->writeStartElement(outputTags.CYCLICS);
-
     if (writeCyclicsToCsv)
     {
         QString runPrefix = "";
@@ -352,39 +351,66 @@ void ObservationFileHandler::WriteCsvCyclics(QString filename, ObservationCyclic
     {
         std::stringstream ss;
         ss << COMPONENTNAME << " could not create file: " << tmpPath.toStdString();
-        //        LOG(CbkLogLevel::Error, ss.str());
         throw std::runtime_error(ss.str());
     }
 
     QTextStream stream(csvFile.get());
-
-    stream << "frame,"
-           << "id,"
+    QString heads = QString::fromStdString(cyclics.GetHeader());
+    stream << "frame;"
+           << "id;"
            << QString::fromStdString(cyclics.GetAgentHeader())
            << '\n';
 
+    std::vector<std::vector<int>> agentSamplesLines;
+    bool agentValid = true;
+    int numAgents = 0;
+    QString preFix;
+    while (agentValid)
+    {
+        if (numAgents<10)
+        {
+            preFix = "0";
+        }
+        else if (numAgents<99)
+        {
+            preFix = "";
+        }
+        else
+        {
+            throw std::runtime_error("Maximum number of agents (99) is exceeded!");
+        }
+        std::vector<int> samplesLine = ObservationCyclics::FilterSamplesLine(heads, preFix + QString::number(numAgents));
+        if (samplesLine.empty())
+        {
+            agentValid = false;
+        }
+        else
+        {
+            agentSamplesLines.push_back(samplesLine);
+            ++numAgents;
+        }
+    }
+
     const auto& timeSteps = cyclics.GetTimeSteps();
-    std::vector<std::string> agentSamplesLines;
-    //for (unsigned int timeStepNumber = 0; timeStepNumber < timeSteps.size(); ++timeStepNumber)
     unsigned int timeStepNumber = 0;
     for (const auto timeStep : timeSteps)
     {
-        agentSamplesLines = cyclics.GetAgentSamplesLine(timeStepNumber);
-        for (size_t agentId = 0; agentId < agentSamplesLines.size(); ++agentId)
+        QString samplesLine = QString::fromStdString(cyclics.GetSamplesLine(timeStepNumber));
+        for (int agentId = 0; agentId < numAgents; ++agentId)
         {
             stream << QString::number(timeStep)
-                   << ","
-                   << QString::fromStdString(std::to_string(agentId))
-                   << ","
-                   << QString::fromStdString(agentSamplesLines.at(agentId))
+                   << ";"
+                   << QString::number(agentId)
+                   << ";"
+                   << ObservationCyclics::GetSamplesLineByAgent(samplesLine, agentSamplesLines[agentId])
                    << '\n';
         }
         ++timeStepNumber;
     }
 
     csvFile->flush();
-
     csvFile->close();
+
 }
 
 void ObservationFileHandler::WriteEntities(const QString tag, const openpass::type::EntityIds &entities, bool mandatory)

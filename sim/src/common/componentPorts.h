@@ -187,10 +187,10 @@ public:
     //! \param[in] id           Id of externalParameter
     //! \param[in,out] portMap  map of externalParameter this externalParameter shall be added
     externalParameter(int id,
-                      std::map<int, externalParameter<ValueType>*> *externalParameterMap):
+                      std::map<std::string, externalParameter<ValueType>*> *externalParameterMap):
         id(id)
     {
-        externalParameterMap->emplace(std::make_pair(id, this));
+        externalParameterMap->emplace(std::make_pair(std::to_string(id), this));
     }
 
     //! Destructor

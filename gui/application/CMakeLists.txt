@@ -19,7 +19,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_CXX_FLAGS "${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
 # add definitions: this needs to be in a certain gloabl file TODO
-add_definitions(-DAPPLICATION_NAME="openPASS" -DAPPLICATION_VERSION="0.6"  -DSUBDIR_LIB_GUI="/gui")
+add_definitions(-DAPPLICATION_NAME="openPASS" -DAPPLICATION_VERSION="0.7"  -DSUBDIR_LIB_GUI="/gui" -DSUBDIR_LIB_COMPONENTS="/components")
 add_definitions(${Qt5Widgets_DEFINITIONS})
 
 # include QtWidgets package

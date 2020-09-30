@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SimulationOutput FrameworkVersion="9999.9999.9999" SchemaVersion="0.2.1">
+    <SceneryFile>SceneryConfiguration.xodr</SceneryFile>
+    <RunResults>
+        <RunResult RunId="0">
+            <RunStatistics>
+                <RandomSeed>1000232</RandomSeed>
+                <VisibilityDistance>400</VisibilityDistance>
+                <StopReason>Due to time out</StopReason>
+                <StopTime>-1</StopTime>
+                <EgoAccident>False</EgoAccident>
+                <TotalDistanceTraveled>0</TotalDistanceTraveled>
+                <EgoDistanceTraveled>0</EgoDistanceTraveled>
+            </RunStatistics>
+            <Events>
+                <Event Time="0" Source="OpenSCENARIO" Name="TrajectoryStory/Act_0/TrajectorySequence/TrajectoryManeuver/TrajectoryEvent">
+                    <TriggeringEntities/>
+                    <AffectedEntities>
+                        <Entity Id="0"/>
+                    </AffectedEntities>
+                    <Parameters/>
+                </Event>
+                <Event Time="0" Source="OpenSCENARIO" Name="TrajectoryStory/Act_1/TrajectorySequence/TrajectoryManeuver/TrajectoryEvent">
+                    <TriggeringEntities/>
+                    <AffectedEntities>
+                        <Entity Id="1"/>
+                    </AffectedEntities>
+                    <Parameters/>
+                </Event>
+                <Event Time="5000" Source="OpenPASS" Name="Collision">
+                    <TriggeringEntities>
+                        <Entity Id="0"/>
+                        <Entity Id="1"/>
+                    </TriggeringEntities>
+                    <AffectedEntities/>
+                    <Parameters>
+                        <Parameter Key="CollisionWithAgent" Value="1"/>
+                    </Parameters>
+                </Event>
+                <Event Time="5000" Source="OpenPASS" Name="Collision">
+                    <TriggeringEntities>
+                        <Entity Id="0"/>
+                        <Entity Id="1"/>
+                    </TriggeringEntities>
+                    <AffectedEntities/>
+                    <Parameters>
+                        <Parameter Key="OCPA" Value="-2.663533"/>
+                        <Parameter Key="HCPAo" Value="-20.768362"/>
+                        <Parameter Key="OCPAo" Value="-1.117849"/>
+                        <Parameter Key="OYA" Value="130.764238"/>
+                        <Parameter Key="OpponentCollisionVelocity" Value="19.269068"/>
+                        <Parameter Key="OpponentPointOfContactLocalY" Value="-0.144814"/>
+                        <Parameter Key="OpponentPointOfContactLocalX" Value="1.705935"/>
+                        <Parameter Key="OpponentVelocityDirection" Value="2.444982"/>
+                        <Parameter Key="OpponentVelocityChange" Value="16.059632"/>
+                        <Parameter Key="OpponentVelocity" Value="4.767062"/>
+                        <Parameter Key="HCPA" Value="-44.967127"/>
+                        <Parameter Key="OpponentSliding" Value="0"/>
+                        <Parameter Key="OpponentYawVelocity" Value="-6.742458"/>
+                        <Parameter Key="Sliding" Value="0"/>
+                        <Parameter Key="CollisionVelocity" Value="8.276064"/>
+                        <Parameter Key="PointOfContactLocalX" Value="2.028524"/>
+                        <Parameter Key="YawVelocity" Value="4.740462"/>
+                        <Parameter Key="VelocityDirection" Value="2.414929"/>
+                        <Parameter Key="VelocityChange" Value="10.037270"/>
+                        <Parameter Key="PointOfContactLocalY" Value="-0.587954"/>
+                        <Parameter Key="Velocity" Value="6.152344"/>
+                        <Parameter Key="CollisionWithAgent" Value="1"/>
+                    </Parameters>
+                </Event>
+            </Events>
+            <Agents>
+                <Agent Id="0" AgentTypeGroupName="Scenario" AgentTypeName="Agent_0" VehicleModelType="Agent_0" DriverProfileName="">
+                    <VehicleAttributes Width="1.83" Length="4.82" Height="1.18" LongitudinalPivotOffset="-2.41"/>
+                </Agent>
+                <Agent Id="1" AgentTypeGroupName="Scenario" AgentTypeName="Agent_1" VehicleModelType="Agent_1" DriverProfileName="">
+                    <VehicleAttributes Width="1.64" Length="3.91" Height="1.04" LongitudinalPivotOffset="-2"/>
+                </Agent>
+            </Agents>
+            <Cyclics>
+                <CyclicsFile>Cyclics_Run_000.csv</CyclicsFile>
+            </Cyclics>
+        </RunResult>
+    </RunResults>
+</SimulationOutput>

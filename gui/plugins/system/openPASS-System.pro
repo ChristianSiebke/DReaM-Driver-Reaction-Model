@@ -47,6 +47,8 @@ DIR_PRO = $${PWD}
 
 win32 {
 DIR_PRO ~= s,/,\\,g
+DESTDIR_GUI ~= s,/,\\,g
+SUBDIR_LIB_COMPONENTS ~= s,/,\\,g
 copydata.commands = xcopy /s /q /y /i $$DIR_PRO\..\..\components $${DESTDIR_GUI}$${SUBDIR_LIB_COMPONENTS}\
 } else {
 copydata.commands = cp -f -R $$DIR_PRO/../../components $${DESTDIR_GUI}$${SUBDIR_LIB_COMPONENTS}

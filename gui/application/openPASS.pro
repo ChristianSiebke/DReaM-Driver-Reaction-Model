@@ -15,7 +15,7 @@ TEMPLATE = app
 CONFIG += c++17 no_keywords
 QT += core gui widgets
 
-VERSION = 0.6
+VERSION = 0.7
 QMAKE_TARGET_PRODUCT = openPASS
 QMAKE_TARGET_DESCRIPTION = openPASS
 QMAKE_TARGET_COMPANY = Volkswagen Group of America

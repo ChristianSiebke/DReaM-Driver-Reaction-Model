@@ -214,6 +214,13 @@ public:
     virtual void SetVelocity(double value) = 0;
 
     //-----------------------------------------------------------------------------
+    //! Sets forward velocity of agent
+    //!
+    //! @param[in]     velocityX    Forward velocity
+    //-----------------------------------------------------------------------------
+    virtual void SetVelocityVector(double vx, double vy, double vz) = 0;
+
+    //-----------------------------------------------------------------------------
     //! Sets forward acceleration of agent
     //!
     //! @param[in]     accelerationX    forward acceleration
@@ -868,7 +875,7 @@ public:
     //!
     //! @return
     //-----------------------------------------------------------------------------
-    virtual double GetYawAcceleration() = 0;
+    virtual double GetYawAcceleration() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Set the yaw acceleration of the agent.
@@ -885,12 +892,25 @@ public:
     virtual double GetCentripetalAcceleration() const = 0;
 
     //-----------------------------------------------------------------------------
+    //! Retrieve the tangential acceleration of the agent.
+    //!
+    //! @return   Tangential acceleration [m/s^2]
+    //-----------------------------------------------------------------------------
+    virtual double GetTangentialAcceleration() const = 0;
+
+    //-----------------------------------------------------------------------------
     //! Set the centripetal acceleration of the agent.
     //!
     //! @param[in]   centripetalAcceleration   The acceleration to set [m/s^2]
     //-----------------------------------------------------------------------------
     virtual void SetCentripetalAcceleration(double centripetalAcceleration) = 0;
 
+    //-----------------------------------------------------------------------------
+    //! Set the tangential acceleration of the agent.
+    //!
+    //! @param[in]   tangentialAcceleration   The acceleration to set [m/s^2]
+    //-----------------------------------------------------------------------------
+    virtual void SetTangentialAcceleration(double tangentialAcceleration) = 0;
     //-----------------------------------------------------------------------------
     //! Retrieve the trajectory of time of the agent.
     //!

@@ -26,7 +26,7 @@
 class DoubleSignal : public ComponentStateSignalInterface
 {
 public:
-    DoubleSignal(ComponentState state, double inValue) : value(inValue)
+    DoubleSignal(double inValue, ComponentState state = ComponentState::Undefined) : value(inValue)
     {
         componentState = state;
     }
@@ -53,7 +53,7 @@ public:
 class IntSignal : public ComponentStateSignalInterface
 {
 public:
-    IntSignal(int inValue, ComponentState state) : value(inValue)
+    IntSignal(int inValue, ComponentState state = ComponentState::Undefined) : value(inValue)
     {
         componentState = state;
     }
@@ -80,7 +80,7 @@ public:
 class BoolSignal : public ComponentStateSignalInterface
 {
 public:
-    BoolSignal(bool inValue, ComponentState state) : value(inValue)
+    BoolSignal(bool inValue, ComponentState state = ComponentState::Undefined) : value(inValue)
     {
         componentState = state;
     }

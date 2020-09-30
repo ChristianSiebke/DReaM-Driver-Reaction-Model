@@ -150,6 +150,8 @@ public:
 
         if (std::abs(length) < EPSILON)
         {
+            x = 0.0;
+            y = 0.0;
             return false;
         }
 

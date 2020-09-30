@@ -95,6 +95,23 @@ enum class AgentVehicleType
     Truck
 };
 
+//-----------------------------------------------------------------------------
+//! @brief Areas of interest for surrounding data
+//-----------------------------------------------------------------------------
+enum class AreaOfInterest
+{
+    LEFT_FRONT = 0,
+    RIGHT_FRONT,
+    LEFT_REAR,
+    RIGHT_REAR,
+    EGO_FRONT,
+    EGO_REAR,
+    LEFT_SIDE,
+    RIGHT_SIDE,
+    //  DOWNSTREAM
+    NumberOfAreaOfInterests
+};
+
 // convert a vehicle type name to VehicleType enum
 inline AgentVehicleType GetAgentVehicleType(const std::string &strVehicleType)
 {

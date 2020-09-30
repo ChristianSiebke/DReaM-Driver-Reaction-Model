@@ -200,6 +200,15 @@ public:
         });
     }
 
+    void SetVelocityVector(double vx, double vy, double vz) override
+    {
+        world->QueueAgentUpdate([this, vx, vy, vz]()
+        {
+            OWL::Primitive::AbsVelocity velocity{vx, vy, vz};
+            GetBaseTrafficObject().SetAbsVelocity(velocity);
+        });
+    }
+
     void SetAcceleration(double value) override
     {
         world->QueueAgentUpdate([this, value]()
@@ -226,12 +235,27 @@ public:
         });
     }
 
+    void SetYawAcceleration(double value) override
+    {
+        world->QueueAgentUpdate([this, value]()
+        {
+            yawAcceleration = value;
+        });
+    }
+
     void SetCentripetalAcceleration(double value) override
     {
         world->QueueAgentUpdate([this, value]()
         {
             centripetalAcceleration = value;
+        });
+    }
 
+    void SetTangentialAcceleration(double value) override
+    {
+        world->QueueAgentUpdate([this, value]()
+        {
+            tangentialAcceleration = value;
         });
     }
 
@@ -344,9 +368,19 @@ public:
         return GetBaseTrafficObject().GetAbsOrientationRate().yawRate;
     }
 
+    double GetYawAcceleration() const override
+    {
+        return yawAcceleration;
+    }
+
     double GetCentripetalAcceleration() const override
     {
         return centripetalAcceleration;
+    }
+
+    double GetTangentialAcceleration() const override
+    {
+        return tangentialAcceleration;
     }
 
     bool Locate() override;
@@ -804,16 +838,6 @@ public:
 
         throw std::runtime_error("not implemented");
     }
-    virtual double GetYawAcceleration() override
-    {
-        throw std::runtime_error("not implemented");
-    }
-    virtual void SetYawAcceleration(double yawAcceleration) override
-    {
-        Q_UNUSED(yawAcceleration);
-
-        throw std::runtime_error("not implemented");
-    }
     virtual const std::vector<int> *GetTrajectoryTime() const override
     {
         throw std::runtime_error("not implemented");
@@ -878,6 +902,7 @@ public:
     {
         throw std::runtime_error("not implemented");
     }
+
 
 private:
     WorldInterface* world;
@@ -946,8 +971,10 @@ private:
     double brakePedal = 0.;
     double steeringWheelAngle = 0.0;
     double centripetalAcceleration = 0.0;
+    double tangentialAcceleration = 0.0;
     double engineSpeed = 0.;
     double distanceTraveled = 0.0;
+    double yawAcceleration = 0.0;
 
     World::Localization::Result locateResult;
     mutable std::vector<GlobalRoadPosition> boundaryPoints;

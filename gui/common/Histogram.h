@@ -14,7 +14,6 @@
 #include <algorithm>
 #include <vector>
 
-#include <QDebug>
 #include <QString>
 
 class Histogram
