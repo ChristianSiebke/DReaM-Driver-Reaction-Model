@@ -10,7 +10,7 @@
 
 #pragma once
 #include <vector>
-#include "common/parameters.h"
+#include "modelElements/parameters.h"
 #include "include/systemConfigInterface.h"
 #include "include/agentTypeInterface.h"
 

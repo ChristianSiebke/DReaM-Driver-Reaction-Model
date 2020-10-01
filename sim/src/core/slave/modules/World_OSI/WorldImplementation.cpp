@@ -18,8 +18,6 @@
 #include "osi3/osi_sensorview.pb.h"
 #include "osi3/osi_sensorviewconfiguration.pb.h"
 
-#include "common/log.h"
-
 namespace {
     template <typename T>
     static std::vector<const T*> get_transformed(const std::vector<const OWL::Interfaces::WorldObject*>& worldObjects)
@@ -177,7 +175,7 @@ bool WorldImplementation::CreateScenery(SceneryInterface* scenery)
                                localizer,
                                callbacks);
 
-    ThrowIfFalse(converter.ConvertRoads(), "Unable to finish convertion process.");
+    THROWIFFALSE(converter.ConvertRoads(), "Unable to finish conversion process.")
     localizer.Init();
     converter.ConvertObjects();
     InitTrafficObjects();

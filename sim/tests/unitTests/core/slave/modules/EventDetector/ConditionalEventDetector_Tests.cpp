@@ -21,7 +21,7 @@
 #include "fakeStochastics.h"
 #include "fakeWorld.h"
 
-#include "core/common/parameters.h"
+#include "core/slave/modelElements/parameters.h"
 #include "ConditionalEventDetector.h"
 
 using namespace testing;

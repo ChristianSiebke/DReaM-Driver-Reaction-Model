@@ -20,7 +20,7 @@ SpawnPointRuntimeCommon::SpawnPointRuntimeCommon(const SpawnPointDependencies* d
     SpawnPointInterface(dependencies->world, callbacks),
     dependencies(*dependencies),
     worldAnalyzer(dependencies->world),
-    parameters(SpawnPointRuntimeCommonParameterExtractor::ExtractSpawnPointParameters(*(dependencies->parameters.value()), worldAnalyzer))
+    parameters(SpawnPointRuntimeCommonParameterExtractor::ExtractSpawnPointParameters(*(dependencies->parameters.value()), worldAnalyzer, callbacks))
 {
     for (const auto& spawnPosition : parameters.spawnPositions)
     {
@@ -104,7 +104,7 @@ void SpawnPointRuntimeCommon::AdjustVelocityForCrash(SpawnDetails& spawnDetails,
     }
     else
     {
-        LogErrorAndThrow("Can't adjust spawn velocity because of missing route.");
+        LogError("Can't adjust spawn velocity because of missing route.");
     }
 }
 
@@ -124,7 +124,7 @@ bool SpawnPointRuntimeCommon::AreSpawningCoordinatesValid(const SpawnDetails& sp
     }
     else
     {
-        LogErrorAndThrow("Can't validate spawning coordinates because of missing route.");
+        LogError("Can't validate spawning coordinates because of missing route.");
     }
 
 }
@@ -168,7 +168,7 @@ SpawningAgentProfile SpawnPointRuntimeCommon::SampleAgentProfile(bool rightLane)
     return Sampler::Sample(rightLane ? parameters.agentProfileLaneMaps.rightLanes : parameters.agentProfileLaneMaps.leftLanes, dependencies.stochastics);
 }
 
-void SpawnPointRuntimeCommon::LogError(const std::string& message)
+void SpawnPointRuntimeCommon::LogError(const std::string& message) const
 {
     std::stringstream log;
     log.str(std::string());

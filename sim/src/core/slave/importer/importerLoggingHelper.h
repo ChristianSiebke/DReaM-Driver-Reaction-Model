@@ -10,8 +10,6 @@
 
 #pragma once
 
-#include "common/log.h"
-
 namespace openpass::importer::xml::openScenario::rule
 {
     constexpr char greaterThan[] {"greaterThan"};

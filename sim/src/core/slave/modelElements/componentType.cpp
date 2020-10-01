@@ -14,7 +14,7 @@
 
 #include "componentType.h"
 #include "common/log.h"
-#include "common/parameters.h"
+#include "modelElements/parameters.h"
 
 namespace SimulationSlave
 {

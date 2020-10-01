@@ -17,9 +17,8 @@
 #include <QFile>
 
 #include "common/globalDefinitions.h"
-#include "common/log.h"
 #include "vehicleModels.h"
-#include "common/xmlParser.h"
+#include "importer/importerCommon.h"
 #include "oscImporterCommon.h"
 
 namespace Importer {

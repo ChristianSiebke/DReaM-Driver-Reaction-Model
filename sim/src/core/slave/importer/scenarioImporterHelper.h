@@ -18,7 +18,7 @@
 #include <string>
 #include <QDomDocument>
 #include "include/scenarioInterface.h"
-#include "common/parameters.h"
+#include "modelElements/parameters.h"
 #include "common/openScenarioDefinitions.h"
 #include "oscImporterCommon.h"
 

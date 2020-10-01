@@ -20,7 +20,7 @@
 #include <QFile>
 
 #include "common/log.h"
-#include "common/parameters.h"
+#include "modelElements/parameters.h"
 #include "include/observationNetworkInterface.h"
 #include "agentDataPublisher.h"
 #include "agentType.h"

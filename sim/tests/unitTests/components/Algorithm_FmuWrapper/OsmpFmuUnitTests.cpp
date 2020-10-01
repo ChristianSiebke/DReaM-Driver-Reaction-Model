@@ -15,6 +15,7 @@
 
 using ::testing::Eq;
 
+#ifdef USE_EXTENDED_OSI
 TEST(OsmpFmuUnitTests, GetTrafficCommandFromOpenScenarioTrajectory)
 {
     openScenario::Trajectory trajectory;
@@ -69,3 +70,4 @@ TEST(OsmpFmuUnitTests, GetTrafficCommandFromOpenScenarioPosition)
     ASSERT_FALSE(positionAction.orientation().has_yaw());
     ASSERT_FALSE(positionAction.has_action_header());
 }
+#endif

@@ -18,8 +18,8 @@
 #include "common/opMath.h"
 
 #include "slaveConfigImporter.h"
-#include "common/log.h"
 #include "importerLoggingHelper.h"
+#include "importer/importerCommon.h"
 
 namespace TAG = openpass::importer::xml::slaveConfigImporter::tag;
 namespace ATTRIBUTE = openpass::importer::xml::slaveConfigImporter::attribute;
@@ -91,28 +91,28 @@ void SlaveConfigImporter::ImportEnvironment(QDomElement environmentElement,
     QDomElement timeOfDaysElement;
     ThrowIfFalse(GetFirstChildElement(environmentElement, TAG::timeOfDays, timeOfDaysElement),
                  environmentElement, "Tag " + std::string(TAG::timeOfDays) + " is missing.");
-    ThrowIfFalse(ImportProbabilityMap(timeOfDaysElement, "Value", TAG::timeOfDay, environmentConfig.timeOfDays),
+    ThrowIfFalse(ImportProbabilityMap(timeOfDaysElement, "Value", TAG::timeOfDay, environmentConfig.timeOfDays, LogErrorAndThrow),
                  timeOfDaysElement, "Could not import Probabilities.");
 
     //Parse all visibility distances
     QDomElement visibilityDistancesElement;
     ThrowIfFalse(GetFirstChildElement(environmentElement, TAG::visibilityDistances, visibilityDistancesElement),
                  environmentElement, "Tag " + std::string(TAG::visibilityDistances) + " is missing.");
-    ThrowIfFalse(ImportProbabilityMap(visibilityDistancesElement, "Value", TAG::visibilityDistance, environmentConfig.visibilityDistances),
+    ThrowIfFalse(ImportProbabilityMap(visibilityDistancesElement, "Value", TAG::visibilityDistance, environmentConfig.visibilityDistances, LogErrorAndThrow),
                  visibilityDistancesElement, "Could not import Probabilities.");
 
     //Parse all frictions
     QDomElement frictionsElement;
     ThrowIfFalse(GetFirstChildElement(environmentElement, TAG::frictions, frictionsElement),
                  environmentElement, "Tag " + std::string(TAG::frictions) + " is missing.");
-    ThrowIfFalse(ImportProbabilityMap(frictionsElement, "Value", TAG::friction, environmentConfig.frictions),
+    ThrowIfFalse(ImportProbabilityMap(frictionsElement, "Value", TAG::friction, environmentConfig.frictions, LogErrorAndThrow),
                  frictionsElement, "Could not import Probabilities.");
 
     //Parse all weathers
     QDomElement weathersElement;
     ThrowIfFalse(GetFirstChildElement(environmentElement, TAG::weathers, weathersElement),
                  environmentElement, "Tag " + std::string(TAG::weathers) + " is missing.");
-    ThrowIfFalse(ImportProbabilityMap(weathersElement, "Value", TAG::weather, environmentConfig.weathers),
+    ThrowIfFalse(ImportProbabilityMap(weathersElement, "Value", TAG::weather, environmentConfig.weathers, LogErrorAndThrow),
                  weathersElement, "Could not import Probabilities.");
 }
 

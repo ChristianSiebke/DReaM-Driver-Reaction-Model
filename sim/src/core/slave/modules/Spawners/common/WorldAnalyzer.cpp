@@ -38,7 +38,7 @@ bool WorldAnalyzer::ValidateRoadIdInDirection(const RoadId& roadId,
 {
     if (!world->IsDirectionalRoadExisting(roadId, laneId < 0))
     {
-        LOG_INTERN(LogLevel::Warning) << "Invalid spawn information. RoadId: " + roadId + " not existing for laneId:" + std::to_string(laneId) + " and will be ignored.";
+        loggingCallback("Invalid spawn information. RoadId: " + roadId + " not existing for laneId:" + std::to_string(laneId) + " and will be ignored.");
         return false;
     }
 

@@ -21,7 +21,6 @@
 
 #include "common/globalDefinitions.h"
 #include "common/openScenarioDefinitions.h"
-#include "common/log.h"
 
 //! Resolves a parametrized attribute
 //!
@@ -51,11 +50,11 @@ T GetAttribute(openScenario::ParameterizedAttribute<T> attribute, const openScen
         }
         catch (const std::invalid_argument&)
         {
-            LogErrorAndThrow("Type of assigned parameter \"" + attribute.name + "\" in scenario does not match.");
+            throw std::runtime_error("Type of assigned parameter \"" + attribute.name + "\" in scenario does not match.");
         }
         catch (const std::out_of_range&)
         {
-            LogErrorAndThrow("Value of assigned parameter \"" + attribute.name + "\" is out of range.");
+            throw std::runtime_error("Value of assigned parameter \"" + attribute.name + "\" is out of range.");
         }
     }
     else

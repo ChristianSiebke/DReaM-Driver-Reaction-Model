@@ -25,7 +25,7 @@
 #include "bindings/stochastics.h"
 
 #include "common/log.h"
-#include "common/parameters.h"
+#include "modelElements/parameters.h"
 #include "include/componentInterface.h"
 #include "include/observationNetworkInterface.h"
 #include "include/worldInterface.h"

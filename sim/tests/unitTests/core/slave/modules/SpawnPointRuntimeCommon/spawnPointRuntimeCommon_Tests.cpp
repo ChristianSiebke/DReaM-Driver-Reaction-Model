@@ -17,6 +17,7 @@
 
 #include "fakeParameter.h"
 #include "fakeWorld.h"
+#include "fakeCallback.h"
 
 using ::testing::_;
 using ::testing::Return;
@@ -112,8 +113,9 @@ TEST(SpawnPointRuntimeCommonParameterExtractor, ExtractSpawnPointParameters)
     ON_CALL(fakeWorld, IsDirectionalRoadExisting(invalidRoadId, _)).WillByDefault(Return(false));
 
     WorldAnalyzer worldAnalyzer{&fakeWorld};
+    FakeCallback callbacks;
 
-    const auto result = SpawnPointRuntimeCommonParameterExtractor::ExtractSpawnPointParameters(parameter, worldAnalyzer);
+    const auto result = SpawnPointRuntimeCommonParameterExtractor::ExtractSpawnPointParameters(parameter, worldAnalyzer, &callbacks);
 
     const auto spawnPositions = result.spawnPositions;
     ASSERT_THAT(result.spawnPositions, UnorderedElementsAre(SpawnPosition{"RoadA", 1, 10.},

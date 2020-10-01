@@ -62,7 +62,6 @@ SOURCES += \
     ../common/callbacks.cpp \
     ../common/coreDataPublisher.cpp \
     ../common/log.cpp \
-    ../common/parameters.cpp \
     ../../common/eventDetectorDefinitions.cpp \
     ../../../../common/xmlParser.cpp
 
@@ -72,6 +71,5 @@ HEADERS += \
     ../common/callbacks.h \
     ../common/coreDataPublisher.h \
     ../common/log.h \
-    ../common/parameters.h \
     ../../common/eventDetectorDefinitions.h \
     ../../../../common/xmlParser.h

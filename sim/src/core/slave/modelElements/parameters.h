@@ -22,6 +22,8 @@
 #include <memory>
 #include <list>
 #include <map>
+
+#include "common/opExport.h"
 #include "include/parameterInterface.h"
 
 namespace SimulationCommon {

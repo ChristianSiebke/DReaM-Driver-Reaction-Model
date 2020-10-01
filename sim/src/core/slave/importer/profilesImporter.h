@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -8,9 +8,9 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 #include "profiles.h"
-#include "common/parameters.h"
+#include "modelElements/parameters.h"
 #include "parameterImporter.h"
-#include "common/xmlParser.h"
+#include "importer/importerCommon.h"
 
 //using namespace Configuration;
 

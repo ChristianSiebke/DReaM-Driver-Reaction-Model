@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 * Copyright (c) 2020 HLRS, University of Stuttgart.
 *
@@ -20,10 +20,9 @@
 #include <memory>
 #include <QFile>
 
-#include "common/log.h"
 #include "scenery.h"
 #include "sceneryImporter.h"
-#include "common/xmlParser.h"
+#include "importer/importerCommon.h"
 #include "common/commonTools.h"
 #include "importerLoggingHelper.h"
 

@@ -20,7 +20,7 @@ SpawnPointPreRunCommon::SpawnPointPreRunCommon(const SpawnPointDependencies* dep
                        const CallbackInterface* callbacks):
     SpawnPointInterface(dependencies->world, callbacks),
     dependencies(*dependencies),
-    parameters(ExtractSpawnPointParameters(*(dependencies->parameters.value()))),
+    parameters(ExtractSpawnPointParameters(*(dependencies->parameters.value()), callbacks)),
     worldAnalyzer(dependencies->world)
 {}
 

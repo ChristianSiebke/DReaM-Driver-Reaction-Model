@@ -97,7 +97,6 @@ SRC_SLAVECONFIG = $$OPENPASS_SLAVE/importer/slaveConfig.cpp \
                   $$OPENPASS_SLAVE/framework/directories.cpp
 
 SRC_CORESHARE = $$OPEN_SRC/../../common/xmlParser.cpp \
-                $$CORE_SHARE/parameters.cpp \
                 $$CORE_SHARE/log.cpp \
                 $$CORE_SHARE/callbacks.cpp \
                 $$CORE_SHARE/cephes/fresnl.c \
@@ -105,7 +104,6 @@ SRC_CORESHARE = $$OPEN_SRC/../../common/xmlParser.cpp \
                 $$CORE_SHARE/cephes/polevl.c
 
 INC_CORESHARE = $$OPEN_SRC/../../common/xmlParser.h \
-                $$CORE_SHARE/parameters.h \
                 $$CORE_SHARE/log.h \
                 $$CORE_SHARE/callbacks.h
 
@@ -136,6 +134,7 @@ INC_WORLD = $$WORLD_OSI/WorldData.h \
 SOURCES += \
     $$OPEN_SRC/common/eventDetectorDefinitions.cpp \
     $$OPENPASS_SLAVE/modelElements/agentBlueprint.cpp \
+    $$OPENPASS_SLAVE/modelElements/parameters.cpp \
     ScenarioImporter_IntegrationTests.cpp \
     SceneryImporter_IntegrationTests.cpp \
     SlaveConfigImporter_IntegrationTests.cpp \

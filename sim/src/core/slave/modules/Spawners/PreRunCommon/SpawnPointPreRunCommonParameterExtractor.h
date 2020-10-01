@@ -20,14 +20,14 @@ using namespace SpawnPointPreRunCommonDefinitions;
 constexpr char S_START[] = {"SStart"};
 constexpr char S_END[] = {"SEnd"};
 
-static std::vector<SpawnArea> ExtractSpawnAreas(const ParameterInterface &parameter)
+static std::vector<SpawnArea> ExtractSpawnAreas(const ParameterInterface &parameter, const CallbackInterface* callbacks)
 {
     using namespace helper;
 
     std::vector<SpawnArea> spawnAreas;
 
     const auto& spawnPointList = map::query(parameter.GetParameterLists(), SPAWNPOINTS);
-    ThrowIfFalse(spawnPointList.has_value(), "No SpawnPoint provided for SpawnPointPreRunCommon");
+    SPAWNER_THROWIFFALSE(spawnPointList.has_value(), "No SpawnPoint provided for SpawnPointPreRunCommon");
 
     for (const auto& spawnPointParameter : spawnPointList.value())
     {
@@ -36,10 +36,10 @@ static std::vector<SpawnArea> ExtractSpawnAreas(const ParameterInterface &parame
         const auto sStartElement = map::query(spawnPointParameter->GetParametersDouble(), S_START);
         const auto sEndElement = map::query(spawnPointParameter->GetParametersDouble(), S_END);
 
-        ThrowIfFalse(roadIdsElement.has_value(), "No road ids provided in SceneryInformation for SpawnPointPreRunCommon");
-        ThrowIfFalse(laneIdsElement.has_value(), "No lane ids provided in SceneryInformation for SpawnPointPreRunCommon");
-        ThrowIfFalse(sStartElement.has_value(), "No S-Start provided in SceneryInformation for SpawnPointPreRunCommon");
-        ThrowIfFalse(sEndElement.has_value(), "No S-End provided in SceneryInformation for SpawnPointPreRunCommon");
+        SPAWNER_THROWIFFALSE(roadIdsElement.has_value(), "No road ids provided in SceneryInformation for SpawnPointPreRunCommon");
+        SPAWNER_THROWIFFALSE(laneIdsElement.has_value(), "No lane ids provided in SceneryInformation for SpawnPointPreRunCommon");
+        SPAWNER_THROWIFFALSE(sStartElement.has_value(), "No S-Start provided in SceneryInformation for SpawnPointPreRunCommon");
+        SPAWNER_THROWIFFALSE(sEndElement.has_value(), "No S-End provided in SceneryInformation for SpawnPointPreRunCommon");
 
         std::vector<int> sortedLaneIds(laneIdsElement.value());
         if (sortedLaneIds.front() < 0)
@@ -60,7 +60,7 @@ static std::vector<SpawnArea> ExtractSpawnAreas(const ParameterInterface &parame
     return spawnAreas;
 }
 
-static PreRunSpawnerParameters ExtractSpawnPointParameters(const ParameterInterface &parameter)
+static PreRunSpawnerParameters ExtractSpawnPointParameters(const ParameterInterface &parameter, const CallbackInterface* callbacks)
 {
-    return {ExtractSpawnAreas(parameter), ExtractAgentProfileLaneMaps(parameter)};
+    return {ExtractSpawnAreas(parameter, callbacks), ExtractAgentProfileLaneMaps(parameter, callbacks)};
 }

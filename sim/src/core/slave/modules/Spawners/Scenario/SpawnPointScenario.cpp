@@ -222,7 +222,7 @@ SpawnParameter SpawnPointScenario::CalculateSpawnParameter(const SpawnInfo& spaw
         spawnParameter.yawAngle = worldPosition.h.value_or(0.0);
     }
     else {
-        LogErrorAndThrow("This Spawner only supports Lane- & WorldPositions.");
+        LogError("This Spawner only supports Lane- & WorldPositions.");
     }
 
     // Define velocity
