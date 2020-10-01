@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component>
+  <type>Algorithm</type>
+  <title>OpenScenarioActions</title>
+  <schedule>
+    <offset>0</offset>
+    <cycle>1</cycle>
+    <response>0</response>
+  </schedule>
+  <parameters/>
+  <inputs>
+  </inputs>
+  <outputs>
+    <output>
+      <id>0</id>
+      <type>TrajectoryEvent</type>
+      <title>Trajectory Event</title>
+      <unit></unit>
+    </output>
+    <output>
+      <id>1</id>
+      <type>CustomLaneChangeEvent</type>
+      <title>Custom Lane Change Event</title>
+      <unit></unit>
+    </output>
+    <output>
+      <id>2</id>
+      <type>GazeFollowerEvent</type>
+      <title>Gaze Follower Event</title>
+      <unit></unit>
+    </output>
+    <output>
+      <id>3</id>
+      <type>SpeedActionEvent</type>
+      <title>Speed Action Event</title>
+      <unit></unit>
+    </output>
+  </outputs>
+</component>

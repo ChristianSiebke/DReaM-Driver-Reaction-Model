@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component>
+  <type>Sensor</type>
+  <title>Sensor_RecordState</title>
+  <schedule>
+    <offset>0</offset>
+    <cycle>1</cycle>
+    <response>0</response>
+  </schedule>
+  <parameters/>
+  <inputs/>
+  <outputs/>
+</component>
