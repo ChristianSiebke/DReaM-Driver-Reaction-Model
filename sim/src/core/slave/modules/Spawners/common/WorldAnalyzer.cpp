@@ -33,13 +33,16 @@ namespace
     }
 }
 
-void WorldAnalyzer::ValidateRoadIdInDirection(const RoadId& roadId,
+bool WorldAnalyzer::ValidateRoadIdInDirection(const RoadId& roadId,
                                               const LaneId laneId) const
 {
     if (!world->IsDirectionalRoadExisting(roadId, laneId < 0))
     {
-        LogErrorAndThrow("Invalid spawn information. RoadId: " + roadId + " not existing for laneId:" + std::to_string(laneId) + ".");
+        LOG_INTERN(LogLevel::Warning) << "Invalid spawn information. RoadId: " + roadId + " not existing for laneId:" + std::to_string(laneId) + ".";
+        return false;
     }
+
+    return true;
 }
 
 Route WorldAnalyzer::SampleRoute(const std::string &roadId,
@@ -64,7 +67,10 @@ std::optional<ValidLaneSpawningRanges> WorldAnalyzer::GetValidLaneSpawningRanges
                                                                                  const SPosition sStart,
                                                                                  const SPosition sEnd) const
 {
-    ValidateRoadIdInDirection(roadId, laneId);
+    if(!ValidateRoadIdInDirection(roadId, laneId))
+    {
+        return std::nullopt;
+    }
 
     const auto [roadGraph, vertex] = world->GetRoadGraph(RouteElement{roadId, laneId < 0}, 1);
 

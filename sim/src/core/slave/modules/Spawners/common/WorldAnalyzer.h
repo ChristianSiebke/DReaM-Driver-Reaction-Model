@@ -134,7 +134,7 @@ public:
     //! \param roadId       Id of the road
     //! \param laneId       Id of the lane
     //! \return true, if roadId exists in laneId direction
-    void ValidateRoadIdInDirection(const RoadId& roadId,
+    bool ValidateRoadIdInDirection(const RoadId& roadId,
                                    const LaneId laneId) const;
 
     //! Randomly generates a route based on a starting roadId
