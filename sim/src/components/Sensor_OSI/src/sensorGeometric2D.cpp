@@ -254,6 +254,7 @@ SensorDetectionResults SensorGeometric2D::DetectObjects()
     auto sensorView = static_cast<OWL::Interfaces::WorldData*>(world->GetWorldData())->GetSensorView(sensorViewConfig, GetAgent()->GetId());
 
     const auto hostVehicle = FindHostVehicleInSensorView(*sensorView);
+    sensorData.mutable_host_vehicle_location()->CopyFrom(hostVehicle->base());
 
     const auto [sensorPositionGlobal, detectionField] = CreateSensorDetectionField(hostVehicle);
     const auto [movingObjectsInDetectionField, stationaryObjectsInDetectionField] = GetObjectsInDetectionAreaFromSensorView(*sensorView,
