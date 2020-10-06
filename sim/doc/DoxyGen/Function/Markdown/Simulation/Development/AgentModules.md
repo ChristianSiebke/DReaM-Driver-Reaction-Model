@@ -392,27 +392,47 @@ Both polygons are constructed from corner-points consisting out of the intersect
 \subsection dev_agent_modules_geometric2d_obstruction Visual Obstruction
 
 Objects in front of others block the sensors line of sight. If an object is large enough it might visually obstruct others.
-
 To check if one or multiple objects in combination "shadow" other objects the EnableVisualObstruction - flag can be set.
-
 Also the minimum required percentage of the visible area of an object to be detected can be specified.
-
 The implemented algorithm uses the concept of shadow-casting.
 
-The sensor can be pictured as a light source. Every object in the detection field of the sensor will therefore cast a shadow and reduce the overall detection area behind it.
-
-If an object is shadowed too much (e.g. the visible area is below a specified threshold) it is removed from the list of DetectedObject's and considered undetected.
-
+**Basic**  
 ![Example of shadow-casting](ShadowCasting.svg)
 
-
-As depicted in the figure above, inside the initial bright area (approximated as ciruclar sector) the following steps are taken:
-1. calculate the shadow polygon of each object inside the detection field and remove the casted shadow from the bright area
-2. check for each object the remaining area inside the bright area polygon. If (covered object area / total object area) < threshold  - remove object from the list of detected objects.
-
-After all shadows are removed the "real" detection field polygon (yellow area) remains.
-Objects in green and blue are detected. 
+The sensor can be pictured as a light source.
+Every object in the detection field of the sensor will therefore cast a shadow and reduce the overall detection area behind it.
+If an object is shadowed too much, it is removed from the list of detected objects.
+After all shadows are removed, only the "real" detection field polygon (yellow area) remains.
+Objects in green and blue are detected.
 The red object is completly covered by shadows and therefore not detected.
+
+**Step by Step**  
+Shadow casting is calculated as follows (see figure below _Example of shadow-casting_):
+1. Approximate detection field as ciruclar sector (bright area).
+2. Calculate the casted shadow of each object inside the detection field.
+3. Remove the casted shadow from the detection field.
+4. Check for each object if the remaining area is inside the remaining polygon.
+5. Removed objects if the relation  `covered object area/total object area` is smaller than a parameterizable threshold.
+
+**Details**  
+The approximation of the detection range is deliberatly calculated along its edge and not by means of a tangential approximation.
+The areal error along the edge is regarded as negligible w.r.t to the sizes of objects and commonly used detection ranges.
+
+![Shadow casting detail 1](shadowing1.png)  
+For the calcuation of the shadowing polygon, the confining vectors for the object of interest are calculated (see _detail 1_).
+
+![Shadow casting detail 2](shadowing2.png)  
+Scaling the length of the vectors w.r.t. the detection range would only to reach the boundary and not suffice, as the resulting polygon is too small (red area in _detail 2_ not covered).
+
+![Shadow casting detail 3](shadowing3.png)  
+A larger scale factor is necessary, but needs to be calculated dynamically, as a too small factor might not suffice for very close objects and a very large factor could lead to numerical issues.
+Hence, the scale is calculated dynamically as depicted in _detail 3_, by comparing two isosceles triangles, laying in between the two vectors.
+This is only an appoximation of the true triangles, but an upper bound, which allows faster processing.
+The final scale resolves to `detection_radius / projected_height`, where the projected heigth is taken from shorter vector.
+
+![Shadow casting detail 4](shadowing4.png)  
+As shown in _detail 4_, the scale is just large enought to include the whole detection range, preventing potential numerical issues.
+This only holds as long as the detection range is approximated as described above.
 
 ---
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -474,10 +474,21 @@ multi_polygon_t SensorGeometric2D::CalcObjectShadow(const polygon_t& boundingBox
         }
     }
 
-    //the outer points are obtained by stretching the leftVector and rightVector
-    double stretchFactor = 1e9;
-    point_t leftOuterPoint{sensorPosition.x() + stretchFactor * leftVector.x(), sensorPosition.y() + stretchFactor * leftVector.y()};
-    point_t rightOuterPoint{sensorPosition.x() + stretchFactor * rightVector.x(), sensorPosition.y() + stretchFactor * rightVector.y()};
+    // The outer points are obtained by scaling the leftVector and rightVector, 
+    // so that the calculated shadow just covers the detection range
+    // For a detailed description of the scaling factor please refer to the developer documentation.
+    const auto leftVectorLength = std::hypot(leftVector.x(), leftVector.y());
+    const auto rightVectorLength = std::hypot(rightVector.x(), rightVector.y());
+    const auto height = std::min(leftVectorLength, rightVectorLength) / std::cos(0.5 * (maxRightAngle + maxLeftAngle));
+    const auto scale = detectionRange / height;
+    
+    if(scale > WARNING_THRESHOLD_SCALE)
+    {
+       LOG(CbkLogLevel::Warning, "Scaling factor for shadow casting exceeds internal threshold: numeric issues could cause detection to fail.");
+    }
+
+    point_t leftOuterPoint{sensorPosition.x() + scale * leftVector.x(), sensorPosition.y() + scale * leftVector.y()};
+    point_t rightOuterPoint{sensorPosition.x() + scale * rightVector.x(), sensorPosition.y() + scale * rightVector.y()};
 
     //build the shadow polygon
     polygon_t shadow;

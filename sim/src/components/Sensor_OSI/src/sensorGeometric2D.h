@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 * Copyright (c) 2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -79,15 +79,12 @@ public:
     SensorDetectionResults DetectObjects();
 
 protected:
-
-
     /*!
     * \brief Generates the SensorViewConfiguration to send the world data for filtering of the SensorView
     *
     * @return SensorViewConfiguration for parametrization of Sensorview
     */
     osi3::SensorViewConfiguration GenerateSensorViewConfiguration() override;
-
 
 private:
     void Observe(const int time, const SensorDetectionResults& results);
@@ -119,7 +116,7 @@ private:
      * \param sensorPosition Position of the sensor (light source)
      * \returns shadow polygon
     */
-    static multi_polygon_t CalcObjectShadow(const polygon_t& boundingBox, point_t sensorPosition);
+    multi_polygon_t CalcObjectShadow(const polygon_t& boundingBox, point_t sensorPosition);
 
     /**
      * Calculate how many percent of an object are inside the bright area
@@ -150,10 +147,11 @@ private:
     polygon_t CreateFivePointDetectionField() const;
 
     std::pair<point_t, polygon_t> CreateSensorDetectionField(const osi3::MovingObject* hostVehicle) const;
+
     template<typename T>
-    static void ApplyVisualObstructionToDetectionArea(multi_polygon_t& brightArea,
-                                                      const point_t& sensorPositionGlobal,
-                                                      const std::vector<const T*>& objects);
+    void ApplyVisualObstructionToDetectionArea(multi_polygon_t& brightArea,
+                                               const point_t& sensorPositionGlobal,
+                                               const std::vector<const T*>& objects);
     template<typename T>
     bool ObjectIsInDetectionArea(const T& object,
                                  const point_t& sensorPositionGlobal,
@@ -172,5 +170,6 @@ private:
     std::map<int, SensorDetectionResults> latentSensorDetectionResultsBuffer;
 
     static constexpr double MIN_VISIBLE_UNOBSTRUCTED_PERCENTAGE = 0.0001;
+    static constexpr double WARNING_THRESHOLD_SCALE = 1e6;
 };
 
