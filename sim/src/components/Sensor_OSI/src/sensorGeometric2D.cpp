@@ -82,11 +82,11 @@ void SensorGeometric2D::UpdateInput(int, const std::shared_ptr<SignalInterface c
 
 void SensorGeometric2D::Observe(const int time, const SensorDetectionResults& results)
 {
-    std::vector<OWL::Id> visibleIds;
+    std::set<OWL::Id> visibleIds;
 
     std::transform(results.visibleMovingObjects.begin(),
                    results.visibleMovingObjects.end(),
-                   std::back_inserter(visibleIds),
+                   std::inserter(visibleIds, visibleIds.end()),
                    [](const auto object) -> OWL::Id
     {
         return object.id().value();
@@ -94,17 +94,17 @@ void SensorGeometric2D::Observe(const int time, const SensorDetectionResults& re
 
     std::transform(results.visibleStationaryObjects.begin(),
                    results.visibleStationaryObjects.end(),
-                   std::back_inserter(visibleIds),
+                   std::inserter(visibleIds, visibleIds.end()),
                    [](const auto object) -> OWL::Id
     {
         return object.id().value();
     });
 
-    std::vector<OWL::Id> detectedIds;
+    std::set<OWL::Id> detectedIds;
 
     std::transform(results.detectedMovingObjects.begin(),
                    results.detectedMovingObjects.end(),
-                   std::back_inserter(detectedIds),
+                   std::inserter(detectedIds, detectedIds.end()),
                    [](const auto object) -> OWL::Id
     {
         return object.id().value();
@@ -112,7 +112,7 @@ void SensorGeometric2D::Observe(const int time, const SensorDetectionResults& re
 
     std::transform(results.detectedStationaryObjects.begin(),
                    results.detectedStationaryObjects.end(),
-                   std::back_inserter(detectedIds),
+                   std::inserter(detectedIds, detectedIds.end()),
                    [](const auto object) -> OWL::Id
     {
         return object.id().value();
@@ -122,7 +122,7 @@ void SensorGeometric2D::Observe(const int time, const SensorDetectionResults& re
     GetPublisher()->Publish("Sensor" + std::to_string(id) + "_DetectedAgents", CreateAgentIdListString(detectedIds));
 }
 
-std::string SensorGeometric2D::CreateAgentIdListString(const std::vector<OWL::Id>& owlIds) const
+std::string SensorGeometric2D::CreateAgentIdListString(const std::set<OWL::Id>& owlIds) const
 {
     const auto worldData = static_cast<OWL::WorldData*>(world->GetWorldData());
 

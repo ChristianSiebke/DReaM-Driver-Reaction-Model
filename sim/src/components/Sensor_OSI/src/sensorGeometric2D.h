@@ -161,7 +161,7 @@ private:
                                                                                                                                           const point_t& sensorPositionGlobal,
                                                                                                                                           const polygon_t& detectionField) const;
 
-    std::string CreateAgentIdListString(const std::vector<OWL::Id>& owlIds) const;
+    std::string CreateAgentIdListString(const std::set<OWL::Id>& owlIds) const;
 
     bool enableVisualObstruction = false;
     double requiredPercentageOfVisibleArea = 0.001;
