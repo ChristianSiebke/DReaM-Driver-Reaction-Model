@@ -346,7 +346,7 @@ To evaluate this Condition, the s-delta is applied to the s-coordinate and the l
 Example
 ```xml
 <Condition name="Conditional">
-    <ByEntity>
+    <ByEntityCondition>
         <TriggeringEntities triggeringEntitiesRule="any">
             <EntityRef entityRef="Agent"/>
         </TriggeringEntities>
@@ -357,7 +357,7 @@ Example
                 </Position>
             </ReachPositionCondition>
         </EntityCondition>
-    </ByEntity>
+    </ByEntityCondition>
 </Condition>
 ```
 
@@ -374,7 +374,7 @@ The tolerance is applied both forward and backward.
 Example
 ```xml
 <Condition name="Conditional">
-    <ByEntity>
+    <ByEntityCondition>
         <TriggeringEntities triggeringEntitiesRule="any">
             <EntityRef entityRef="Agent"/>
         </TriggeringEntities>
@@ -385,7 +385,7 @@ Example
                 </Position>
             </ReachPositionCondition>
         </EntityCondition>
-    </ByEntity>
+    </ByEntityCondition>
 </Condition>
 ```
 
@@ -400,14 +400,14 @@ Below, if the TriggeringEntity has a velocity of 30.0 and the referenceEntity ha
 Example
 ```xml
 <Condition name="Conditional">
-    <ByEntity>
+    <ByEntityCondition>
         <TriggeringEntities triggeringEntitiesRule="any">
             <EntityRef entityRef="Agent"/>
         </TriggeringEntities>
         <EntityCondition>
             <RelativeSpeedCondition entityRef="referenceEntity" value="10.0" rule="greaterThan"/>
         </EntityCondition>
-    </ByEntity>
+    </ByEntityCondition>
 </Condition>
 ```
 
@@ -421,7 +421,7 @@ The TTC is determined by projecting the movement of the agents in timesteps of 0
 Example
 ```xml
 <Condition name="Conditional">
-	  <ByEntity>
+	  <ByEntityCondition>
         <TriggeringEntities triggeringEntitiesRule="any">
             <EntityRef entityRef="Agent"/>
 		</TriggeringEntities>
@@ -432,7 +432,7 @@ Example
 				</TimeToCollisionConditionTarget>
 			 </TimeToCollisionCondition>
 		</EntityCondition>
-	  </ByEntity>
+	  </ByEntityCondition>
 </Condition>
 ```
 
@@ -448,14 +448,14 @@ The alongRoute attribute has to be true (i.e. distance is calculated by followin
 Example
 ```xml
 <Condition name="Conditional">
-    <ByEntity>
+    <ByEntityCondition>
         <TriggeringEntities triggeringEntitiesRule="any">
             <EntityRef entityRef="Agent"/>
 		</TriggeringEntities>
 		<EntityCondition>
 			<TimeHeadwayCondition value="2.0" rule="lessThan" entityRef="referenceAgent" freespace="true" alongRoute="true"/>
 		</EntityCondition>
-    </ByEntity>
+    </ByEntityCondition>
 </Condition>
 ```
 
@@ -498,7 +498,7 @@ Example with absolute target and fixed length
                 <LaneChangeActionDynamics value="100.0" dynamicsShape="sinusoidal" dynamicsDimension="distance"/>
                 <LaneChangeTarget>
                     <AbsoluteTargetLane value="-1"/>
-                </Target>
+                </LaneChangeTarget>
             </LaneChangeAction>
         </LateralAction>
     </PrivateAction>
@@ -655,7 +655,9 @@ Example AbsoulteTargetSpeed
         <LongitudinalAction>
             <SpeedAction>
                 <SpeedActionDynamics dynamicsShape="" value="" dynamicsDimension=""/>
-                <AbsoluteTargetSpeed value="10.0"/>
+                <SpeedActionTarget>
+                    <AbsoluteTargetSpeed value="10.0"/>
+                <SpeedActionTarget>
             </SpeedAction>
         </LongitudinalAction>
     </PrivateAction>
@@ -689,9 +691,9 @@ Example:
 ```xml
 <StopTrigger>
     <ConditionGroup>
-        <Condition name="EndTime" rule="greaterThan" edge="rising">
+        <Condition name="EndTime" delay="0" conditionEdge="rising">
             <ByValueCondition>
-                <SimulationTimeCondition value="30.0" rule="greaterThan" />
+                <SimulationTimeCondition value="30.0" rule="greaterThan"/>
             </ByValueCondition>
         </Condition>
     </ConditionGroup>
