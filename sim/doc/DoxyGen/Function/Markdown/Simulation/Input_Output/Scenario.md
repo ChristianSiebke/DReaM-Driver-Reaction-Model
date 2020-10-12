@@ -295,6 +295,12 @@ Example
 The <Actors> tag defines the agents that are mainly affected by this sequence.
 These agents can either be defined directly by stating their name via subtags <EntityRef entityRef="entityName"/> or as the agent that triggered the event via <Actors selectTriggeringEntities="true"/>
 
+Example
+```xml
+<Actors selectTriggeringEntities="false">
+    <EntityRef entityRef="Ego"/>
+</Actors>
+```
 \subsubsection scenario_storyboard_story_maneuver Maneuver
 
 The <Maneuver> tag defines the conditions for the EventDetector and the resulting action in the simulator.
