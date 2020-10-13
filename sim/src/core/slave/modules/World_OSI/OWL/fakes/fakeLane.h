@@ -63,13 +63,13 @@ public:
                  void(const OWL::Interfaces::Lane& lane));
     MOCK_METHOD1(SetRightLane,
                  void(const OWL::Interfaces::Lane& lane));
-    MOCK_CONST_METHOD0(GetWorldObjects,
-                       const OWL::Interfaces::WorldObjects & ());
-    MOCK_METHOD1(AddMovingObject,
-                 void(OWL::Interfaces::MovingObject& movingObject));
-    MOCK_METHOD1(AddStationaryObject,
-                 void(OWL::Interfaces::StationaryObject& stationaryObject));
-    MOCK_METHOD1(AddWorldObject, void (OWL::Interfaces::WorldObject& worldObject));
+    MOCK_CONST_METHOD1(GetWorldObjects,
+                       const OWL::Interfaces::LaneAssignments& (bool direction));
+    MOCK_METHOD2(AddMovingObject,
+                 void(OWL::Interfaces::MovingObject& movingObject, const LaneOverlap& laneOverlap));
+    MOCK_METHOD2(AddStationaryObject,
+                 void(OWL::Interfaces::StationaryObject& stationaryObject, const LaneOverlap& laneOverlap));
+    MOCK_METHOD2(AddWorldObject, void (OWL::Interfaces::WorldObject& worldObject, const LaneOverlap& laneOverlap));
     MOCK_METHOD0(ClearMovingObjects, void());
 
     MOCK_METHOD1(AddNext,

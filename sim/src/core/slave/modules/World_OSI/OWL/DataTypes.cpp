@@ -349,9 +349,9 @@ void Lane::SetLaneType(LaneType specifiedType)
     laneType =  specifiedType;
 }
 
-const Interfaces::WorldObjects& Lane::GetWorldObjects() const
+const Interfaces::LaneAssignments& Lane::GetWorldObjects(bool direction) const
 {
-    return worldObjects;
+    return worldObjects.Get(direction);
 }
 
 const Interfaces::TrafficSigns &Lane::GetTrafficSigns() const
@@ -364,38 +364,27 @@ const Interfaces::RoadMarkings& Lane::GetRoadMarkings() const
     return roadMarkings;
 }
 
-//const Interfaces::MovingObjects& Lane::GetMovingObjects() const
-//{
-//    return movingObjects;
-//}
-
-//const Interfaces::StationaryObjects& Lane::GetStationaryObjects() const
-//{
-//    return stationaryObjects;
-//}
-
-void Lane::AddMovingObject(Interfaces::MovingObject& movingObject)
+void Lane::AddMovingObject(Interfaces::MovingObject& movingObject, const LaneOverlap& laneOverlap)
 {
-    worldObjects.push_back(&movingObject);
-    movingObjects.push_back(&movingObject);
+    worldObjects.Insert(laneOverlap, &movingObject);
 }
 
-void Lane::AddStationaryObject(Interfaces::StationaryObject& stationaryObject)
+void Lane::AddStationaryObject(Interfaces::StationaryObject& stationaryObject, const LaneOverlap& laneOverlap)
 {
-    worldObjects.push_back(&stationaryObject);
-    stationaryObjects.push_back(&stationaryObject);
+    worldObjects.Insert(laneOverlap, &stationaryObject);
+    stationaryObjects.push_back({laneOverlap, &stationaryObject});
 }
 
-void Lane::AddWorldObject(Interfaces::WorldObject& worldObject)
+void Lane::AddWorldObject(Interfaces::WorldObject& worldObject, const LaneOverlap& laneOverlap)
 {
     if (worldObject.Is<MovingObject>())
     {
-        AddMovingObject(*worldObject.As<MovingObject>());
+        AddMovingObject(*worldObject.As<MovingObject>(), laneOverlap);
     }
     else
         if (worldObject.Is<StationaryObject>())
         {
-            AddStationaryObject(*worldObject.As<StationaryObject>());
+            AddStationaryObject(*worldObject.As<StationaryObject>(), laneOverlap);
         }
 }
 
@@ -411,9 +400,11 @@ void Lane::AddRoadMarking(Interfaces::RoadMarking& roadMarking)
 
 void Lane::ClearMovingObjects()
 {
-    worldObjects.clear();
-    worldObjects.insert(worldObjects.end(), stationaryObjects.begin(), stationaryObjects.end());
-    movingObjects.clear();
+    worldObjects.Clear();
+    for (const auto& [laneOverlap, object] : stationaryObjects)
+    {
+        worldObjects.Insert(laneOverlap, object);
+    }
 }
 
 void Lane::AddNext(const Interfaces::Lane* lane)
@@ -1678,6 +1669,62 @@ void LaneBoundary::CopyToGroundTruth(osi3::GroundTruth& target) const
 {
     auto newLaneBoundary = target.add_lane_boundary();
     newLaneBoundary->CopyFrom(*osiLaneBoundary);
+}
+
+Lane::LaneAssignmentCollector::LaneAssignmentCollector() noexcept
+{
+    downstreamOrderAssignments.reserve(INITIAL_COLLECTION_SIZE);
+    upstreamOrderAssignments.reserve(INITIAL_COLLECTION_SIZE);
+}
+
+void Lane::LaneAssignmentCollector::Insert(const LaneOverlap& laneOverlap, const OWL::Interfaces::WorldObject* object)
+{
+    downstreamOrderAssignments.emplace_back(laneOverlap, object);
+    upstreamOrderAssignments.emplace_back(laneOverlap, object);
+    dirty = true;
+}
+
+void Lane::LaneAssignmentCollector::Clear()
+{
+    downstreamOrderAssignments.clear();
+    upstreamOrderAssignments.clear();
+    dirty = false;
+}
+
+void Lane::LaneAssignmentCollector::Sort() const
+{  
+    std::sort(downstreamOrderAssignments.begin(), downstreamOrderAssignments.end(),
+              [](const auto& lhs, const auto& rhs)
+    {
+        return lhs.first.s_min < rhs.first.s_min || 
+               (lhs.first.s_min == rhs.first.s_min && lhs.first.s_max < rhs.first.s_max);
+    });
+
+    std::sort(upstreamOrderAssignments.begin(), upstreamOrderAssignments.end(),
+              [](const auto& lhs, const auto& rhs)
+    {
+        return lhs.first.s_max > rhs.first.s_max || 
+               (lhs.first.s_max == rhs.first.s_max && lhs.first.s_min > rhs.first.s_min);
+    });
+
+    dirty = false;
+}
+
+const Interfaces::LaneAssignments& Lane::LaneAssignmentCollector::Get(bool downstream) const
+{
+    if(dirty)
+    {
+        Sort();
+    }
+
+    if(downstream)
+    {
+        return downstreamOrderAssignments;
+    }
+    else
+    {
+        return upstreamOrderAssignments;
+    }
 }
 
 // namespace Implementation

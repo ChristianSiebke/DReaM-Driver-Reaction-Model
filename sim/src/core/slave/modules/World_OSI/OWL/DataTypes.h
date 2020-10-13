@@ -65,6 +65,15 @@ enum class LaneMarkingSide
     Single
 };
 
+//! This struct describes the intersection of an object with a lane
+struct LaneOverlap
+{
+    double s_min {std::numeric_limits<double>::max()};
+    double s_max {0.0};
+    double min_delta_left {std::numeric_limits<double>::max()};
+    double min_delta_right {std::numeric_limits<double>::max()};
+};
+
 struct IntersectionInfo
 {
     std::string intersectingRoad;
@@ -135,6 +144,8 @@ using MovingObjects        = std::list<MovingObject*>;
 using StationaryObjects    = std::list<StationaryObject*>;
 using TrafficSigns         = std::list<TrafficSign*>;
 using RoadMarkings         = std::list<RoadMarking*>;
+using LaneAssignment       = std::pair<LaneOverlap, const Interfaces::WorldObject*>;
+using LaneAssignments      = std::vector<LaneAssignment>;
 
 //! This class represents a single lane inside a section
 class Lane
@@ -253,8 +264,8 @@ public:
     //!
     virtual void SetLeftLaneBoundaries(const std::vector<OWL::Id> laneBoundaries) = 0;
 
-    //!Returns a vector of all WorldObjects that are currently in this lane
-    virtual const Interfaces::WorldObjects& GetWorldObjects() const = 0;
+    //!Returns a map of all WorldObjects that are currently in this lane
+    virtual const LaneAssignments& GetWorldObjects(bool direction) const = 0;
 
     //!Returns a vector of all traffic signs that are assigned to this lane
     virtual const Interfaces::TrafficSigns& GetTrafficSigns() const = 0;
@@ -263,13 +274,13 @@ public:
     virtual const Interfaces::RoadMarkings& GetRoadMarkings() const = 0;
 
     //!Adds a MovingObject to the list of objects currently in this lane
-    virtual void AddMovingObject(OWL::Interfaces::MovingObject& movingObject) = 0;
+    virtual void AddMovingObject(OWL::Interfaces::MovingObject& movingObject, const LaneOverlap& laneOverlap) = 0;
 
     //!Adds a StationaryObject to the list of objects currently in this lane
-    virtual void AddStationaryObject(OWL::Interfaces::StationaryObject& stationaryObject) = 0;
+    virtual void AddStationaryObject(OWL::Interfaces::StationaryObject& stationaryObject, const LaneOverlap& laneOverlap) = 0;
 
     //!Adds a WorldObject to the list of objects currently in this lane
-    virtual void AddWorldObject(Interfaces::WorldObject& worldObject) = 0;
+    virtual void AddWorldObject(Interfaces::WorldObject& worldObject, const LaneOverlap& laneOverlap) = 0;
 
     //!Assigns a traffic sign to this lane
     virtual void AddTrafficSign (Interfaces::TrafficSign &trafficSign) = 0;
@@ -775,15 +786,13 @@ public:
     void SetLeftLaneBoundaries(const std::vector<OWL::Id> laneBoundaries) override;
     void SetLaneType(LaneType specifiedType) override;
 
-    const Interfaces::WorldObjects& GetWorldObjects() const override;
-    //    const Interfaces::MovingObjects& GetMovingObjects() const override;
-    //    const Interfaces::StationaryObjects& GetStationaryObjects() const override;
+    const Interfaces::LaneAssignments& GetWorldObjects(bool direction) const override;
     const Interfaces::TrafficSigns& GetTrafficSigns() const override;
     const Interfaces::RoadMarkings& GetRoadMarkings() const override;
 
-    void AddMovingObject(OWL::Interfaces::MovingObject& movingObject) override;
-    void AddStationaryObject(OWL::Interfaces::StationaryObject& stationaryObject) override;
-    void AddWorldObject(Interfaces::WorldObject& worldObject) override;
+    void AddMovingObject(OWL::Interfaces::MovingObject& movingObject, const LaneOverlap& laneOverlap) override;
+    void AddStationaryObject(OWL::Interfaces::StationaryObject& stationaryObject, const LaneOverlap& laneOverlap) override;
+    void AddWorldObject(Interfaces::WorldObject& worldObject, const LaneOverlap& laneOverlap) override;
     void AddTrafficSign (Interfaces::TrafficSign &trafficSign) override;
     void AddRoadMarking (Interfaces::RoadMarking &roadMarking) override;
     void ClearMovingObjects() override;
@@ -793,14 +802,55 @@ public:
 
     const Primitive::LaneGeometryJoint::Points GetInterpolatedPointsAtDistance(double distance) const override;
 
+    //! @brief Collects objects assigned to lanes and manages their order w.r.t the querying direction
+    //!
+    //! Depending on the querying direction, objects on a lane need to be sorted 
+    //! either by their starting coordinate (s_min) or their ending coordinate (s_max).
+    //! When looking downstream, objects are sorted ascending by their s_min coordinate.
+    //! When looking upstream, objects are sorted descending by their s_max coordinate.
+    class LaneAssignmentCollector
+    {
+        public:
+            LaneAssignmentCollector() noexcept;
+
+            //! @brief Insert an object, given it's lane overlap w.r.t the current lane
+            //! @param LaneOverlap minimum and maximum s coordinate of the object
+            //! @param object      the object
+            void Insert(const LaneOverlap& laneOverlap, const Interfaces::WorldObject* object);
+
+            //! @brief Get list of LaneAssignements
+            //! @param downstream  true for looking "in stream direction", else false
+            const Interfaces::LaneAssignments& Get(bool downstream) const;
+
+            //! @brief Clears the managed collections
+            void Clear();
+        private:
+            //! @brief Sorts the managed collections using a custom sorter for LaneOverlap
+            //!
+            //! The two internal collecions are sorted by the following comparisons:
+            //! Ascending: Unless equal, the smaller s_min wins, else the smaller s_max
+            //! Descending: Unless equal, the larger s_max wins, else the larger s_min
+            void Sort() const;
+
+            //! @brief  Flag indicating, that collections need sorting
+            //!
+            //! For performance reasons, this class uses lazy sorting, meaning that insertion
+            //! happens unordered and sorting is applied at the very first access of the collections.
+            bool mutable dirty{false};
+            
+            Interfaces::LaneAssignments mutable downstreamOrderAssignments;
+            Interfaces::LaneAssignments mutable upstreamOrderAssignments;
+
+            static constexpr size_t INITIAL_COLLECTION_SIZE = 32; //!!< Minimum reserved collection size to prevent to many reallocations
+    };
+
 protected:
     osi3::Lane* osiLane{nullptr};
 
 private:
     LaneType laneType;
-    Interfaces::WorldObjects worldObjects;
-    Interfaces::MovingObjects movingObjects;
-    Interfaces::StationaryObjects stationaryObjects;
+    LaneAssignmentCollector worldObjects;
+    Interfaces::LaneAssignments stationaryObjects;
     Interfaces::TrafficSigns trafficSigns;
     Interfaces::RoadMarkings roadMarkings;
     const Interfaces::Section* section;

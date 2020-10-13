@@ -15,7 +15,6 @@
 
 #include "common/globalDefinitions.h"
 #include "common/boostGeometryCommon.h"
-#include "common/globalDefinitions.h"
 #include "WorldData.h"
 #include "WorldToRoadCoordinateConverter.h"
 
@@ -48,21 +47,11 @@ public:
     {}
 };
 
-//! This struct describes the intersection of an object with a lane
-template <typename T = double>
-struct LaneIntersection
-{
-    T s_min {std::numeric_limits<T>::max()};
-    T s_max {0.0};
-    T min_delta_left {std::numeric_limits<T>::max()};
-    T min_delta_right {std::numeric_limits<T>::max()};
-};
-
 //! This struct is the result of the localization on all geometry element using an r-tree
 //! It is than used to build the localization result
 struct LocatedObject
 {
-    std::map<const OWL::Interfaces::Lane*, LaneIntersection<>> laneIntersections;
+    std::map<const OWL::Interfaces::Lane*, OWL::LaneOverlap> laneOverlaps;
     std::map<const std::string, GlobalRoadPosition> referencePoint;
     std::map<const std::string, GlobalRoadPosition> mainLaneLocator;
 };
@@ -92,7 +81,7 @@ polygon_t GetBoundingBox(double x, double y, double length, double width, double
 
 //! Assigns this object to all lanes it was located on, so that the result of Lane::GetWorldObjects
 //! contains this object
-void CreateLaneAssignments(OWL::Interfaces::WorldObject& object, const std::map<const OWL::Interfaces::Lane*, LaneIntersection<double>>& laneIntersections);
+void CreateLaneAssignments(OWL::Interfaces::WorldObject& object, const std::map<const OWL::Interfaces::Lane*, OWL::LaneOverlap>& laneOverlaps);
 
 class Localizer
 {

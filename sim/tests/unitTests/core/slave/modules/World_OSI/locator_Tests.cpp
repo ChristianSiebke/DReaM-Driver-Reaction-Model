@@ -71,7 +71,7 @@ TEST_F(LocateOnGeometryElement, ObjectOutsideElement_DoesNotLocateObject)
 
     EXPECT_THAT(locatedObject.referencePoint, IsEmpty());
     EXPECT_THAT(locatedObject.mainLaneLocator, IsEmpty());
-    EXPECT_THAT(locatedObject.laneIntersections, IsEmpty());
+    EXPECT_THAT(locatedObject.laneOverlaps, IsEmpty());
 }
 
 TEST_F(LocateOnGeometryElement, ObjectPartiallyInsideGeometryElement_CorrectlyLocatesObjectOnElement)
@@ -90,11 +90,11 @@ TEST_F(LocateOnGeometryElement, ObjectPartiallyInsideGeometryElement_CorrectlyLo
     EXPECT_THAT(locatedObject.mainLaneLocator.at("Road").laneId, Eq(-1));
     EXPECT_THAT(locatedObject.mainLaneLocator.at("Road").roadPosition.s, DoubleEq(2.1));
     EXPECT_THAT(locatedObject.mainLaneLocator.at("Road").roadPosition.t, DoubleEq(2));
-    ASSERT_THAT(locatedObject.laneIntersections, SizeIs(1));
-    EXPECT_THAT(locatedObject.laneIntersections.at(&lane).s_min, DoubleEq(0.0));
-    EXPECT_THAT(locatedObject.laneIntersections.at(&lane).s_max, DoubleEq(2.1));
-    EXPECT_THAT(locatedObject.laneIntersections.at(&lane).min_delta_left, DoubleEq(0.0));
-    EXPECT_THAT(locatedObject.laneIntersections.at(&lane).min_delta_right, DoubleEq(3.0));
+    ASSERT_THAT(locatedObject.laneOverlaps, SizeIs(1));
+    EXPECT_THAT(locatedObject.laneOverlaps.at(&lane).s_min, DoubleEq(0.0));
+    EXPECT_THAT(locatedObject.laneOverlaps.at(&lane).s_max, DoubleEq(2.1));
+    EXPECT_THAT(locatedObject.laneOverlaps.at(&lane).min_delta_left, DoubleEq(0.0));
+    EXPECT_THAT(locatedObject.laneOverlaps.at(&lane).min_delta_right, DoubleEq(3.0));
 }
 
 TEST_F(LocateOnGeometryElement, ObjectInsideGeometryElement_CorrectlyLocatesObjectOnElement)
@@ -117,11 +117,11 @@ TEST_F(LocateOnGeometryElement, ObjectInsideGeometryElement_CorrectlyLocatesObje
     EXPECT_THAT(locatedObject.mainLaneLocator.at("Road").laneId, Eq(-1));
     EXPECT_THAT(locatedObject.mainLaneLocator.at("Road").roadPosition.s, DoubleEq(2.1));
     EXPECT_THAT(locatedObject.mainLaneLocator.at("Road").roadPosition.t, DoubleEq(0.0));
-    ASSERT_THAT(locatedObject.laneIntersections, SizeIs(1));
-    EXPECT_THAT(locatedObject.laneIntersections.at(&lane).s_min, DoubleEq(1.0));
-    EXPECT_THAT(locatedObject.laneIntersections.at(&lane).s_max, DoubleEq(2.1));
-    EXPECT_THAT(locatedObject.laneIntersections.at(&lane).min_delta_left, DoubleEq(1.0));
-    EXPECT_THAT(locatedObject.laneIntersections.at(&lane).min_delta_right, DoubleEq(1.0));
+    ASSERT_THAT(locatedObject.laneOverlaps, SizeIs(1));
+    EXPECT_THAT(locatedObject.laneOverlaps.at(&lane).s_min, DoubleEq(1.0));
+    EXPECT_THAT(locatedObject.laneOverlaps.at(&lane).s_max, DoubleEq(2.1));
+    EXPECT_THAT(locatedObject.laneOverlaps.at(&lane).min_delta_left, DoubleEq(1.0));
+    EXPECT_THAT(locatedObject.laneOverlaps.at(&lane).min_delta_right, DoubleEq(1.0));
 }
 
 struct GetIntersectionPoints_Data
