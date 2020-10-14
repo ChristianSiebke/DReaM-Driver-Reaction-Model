@@ -92,13 +92,21 @@ void SpawnPointRuntimeCommon::AdjustVelocityForCrash(SpawnDetails& spawnDetails,
     const auto agentFrontLength = spawnDetails.agentBlueprint.GetVehicleModelParameters().distanceReferencePointToLeadingEdge;
     const auto agentRearLength = spawnDetails.agentBlueprint.GetVehicleModelParameters().length - spawnDetails.agentBlueprint.GetVehicleModelParameters().distanceReferencePointToLeadingEdge;
     const auto intendedVelocity = spawnDetails.agentBlueprint.GetSpawnParameter().velocity;
-    spawnDetails.agentBlueprint.GetSpawnParameter().velocity = worldAnalyzer.CalculateSpawnVelocityToPreventCrashing(sceneryInformation.roadId,
 
-                                                                                                                     sceneryInformation.laneId,
-                                                                                                                     sceneryInformation.sPosition,
-                                                                                                                     agentFrontLength,
-                                                                                                                     agentRearLength,
-                                                                                                                     intendedVelocity);
+    if (spawnDetails.agentBlueprint.GetSpawnParameter().route.has_value())
+    {
+        spawnDetails.agentBlueprint.GetSpawnParameter().velocity = worldAnalyzer.CalculateSpawnVelocityToPreventCrashing(sceneryInformation.roadId,
+                                                                                                                         sceneryInformation.laneId,
+                                                                                                                         sceneryInformation.sPosition,
+                                                                                                                         agentFrontLength,
+                                                                                                                         agentRearLength,
+                                                                                                                         intendedVelocity,
+                                                                                                                         spawnDetails.agentBlueprint.GetSpawnParameter().route.value());
+    }
+    else
+    {
+        LogErrorAndThrow("Can't adjust spawn velocity because of missing route.");
+    }
 }
 
 bool SpawnPointRuntimeCommon::AreSpawningCoordinatesValid(const SpawnDetails& spawnDetails,
@@ -106,11 +114,20 @@ bool SpawnPointRuntimeCommon::AreSpawningCoordinatesValid(const SpawnDetails& sp
 {
     const auto vehicleModelParameters = spawnDetails.agentBlueprint.GetVehicleModelParameters();
 
-    return worldAnalyzer.AreSpawningCoordinatesValid(sceneryInformation.roadId,
-                                                     sceneryInformation.laneId,
-                                                     sceneryInformation.sPosition,
-                                                     0 /* offset */,
-                                                     vehicleModelParameters);
+    if (spawnDetails.agentBlueprint.GetSpawnParameter().route.has_value())
+    {
+            return worldAnalyzer.AreSpawningCoordinatesValid(sceneryInformation.roadId,
+                                                             sceneryInformation.laneId,
+                                                             sceneryInformation.sPosition,
+                                                             0 /* offset */,
+                                                             spawnDetails.agentBlueprint.GetSpawnParameter().route.value(),
+                                                             vehicleModelParameters);
+    }
+    else
+    {
+        LogErrorAndThrow("Can't validate spawning coordinates because of missing route.");
+    }
+
 }
 
 void SpawnPointRuntimeCommon::CalculateSpawnParameter(AgentBlueprintInterface* agentBlueprint,
@@ -142,6 +159,9 @@ void SpawnPointRuntimeCommon::CalculateSpawnParameter(AgentBlueprintInterface* a
     spawnParameter.yawAngle  = pos.yawAngle;
     spawnParameter.velocity = spawnV;
     spawnParameter.acceleration = 0;
+    spawnParameter.route = worldAnalyzer.SampleRoute(roadId,
+                                                     laneId,
+                                                     dependencies.stochastics);
 }
 
 SpawningAgentProfile SpawnPointRuntimeCommon::SampleAgentProfile(bool rightLane)

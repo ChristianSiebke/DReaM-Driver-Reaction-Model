@@ -11,6 +11,7 @@
 #pragma once
 
 #include "include/agentBlueprintInterface.h"
+#include "include/stochasticsInterface.h"
 #include "include/worldInterface.h"
 
 #include "SpawnPointDefinitions.h"
@@ -66,7 +67,7 @@ public:
     //! \param agentRearLength      distance from reference point to rear of agent
     //! \param intendedVelocity     spawning velocity
     //! \param gapInSeconds         desired TGap between spawned agent and next agent
-    //! \param direction            wether to spawn from front to end of the road or from end to front
+    //! \param route                route of the agent
     //! \return s position
     std::optional<double> GetNextSpawnPosition(const RoadId& roadId,
                                                const LaneId laneId,
@@ -75,7 +76,7 @@ public:
                                                const double agentRearLength,
                                                const double intendedVelocity,
                                                const double gapInSeconds,
-                                               const Direction direction) const;
+                                               const Route& route) const;
 
 
     //! Adjust spawning velocity so that the spawned agent won't immediately crash.
@@ -86,18 +87,20 @@ public:
     //! \param agentFrontLength         distance from reference point to front of agent
     //! \param agentRearLength          distance from reference point to rear of agent
     //! \param intendedVelocity         spawning velocity
+    //! \param route                    initial route of the agent
     //! \return possibly adjusted velocity
     double CalculateSpawnVelocityToPreventCrashing(const RoadId& roadId,
                                                    const LaneId laneId,
                                                    const double intendedSpawnPosition,
                                                    const double agentFrontLength,
                                                    const double agentRearLength,
-                                                   const double intendedVelocity) const;
+                                                   const double intendedVelocity,
+                                                   const Route& route) const;
 
     //! Check wether the minimum distance the next object is satisfied
-    bool ValidMinimumSpawningDistanceToObjectInFront(const RoadId& roadId,
-                                                     const LaneId laneId,
+    bool ValidMinimumSpawningDistanceToObjectInFront(const LaneId laneId,
                                                      const SPosition sPosition,
+                                                     const Route& route,
                                                      const VehicleModelParameters& vehicleModelParameters) const;
 
     //! Check if it is allowed the spawn an agent at the given coordinate
@@ -105,6 +108,7 @@ public:
                                      const LaneId laneId,
                                      const SPosition sPosition,
                                      const double offset,
+                                     const Route &route,
                                      const VehicleModelParameters& vehicleModelParameters) const;
 
     //! Check wether spawning an agent with given parameters will result in a crash
@@ -114,7 +118,8 @@ public:
                              const double agentFrontLength,
                              const double agentRearLength,
                              const double velocity,
-                             const Direction direction) const;
+                             const Direction direction,
+                             const Route& route) const;
 
     //! Returns the number of lanes to the right the given lane at the given s coordinate
     //!
@@ -131,6 +136,16 @@ public:
     //! \return true, if roadId exists in laneId direction
     void ValidateRoadIdInDirection(const RoadId& roadId,
                                    const LaneId laneId) const;
+
+    //! Randomly generates a route based on a starting roadId
+    //!
+    //! \param roadId       Id of the road
+    //! \param laneId       Id of the lane
+    //! \param stochastics  Stochastics module which randomizes the route
+    //! \return route
+    Route SampleRoute(const std::string &roadId,
+                      const int laneId,
+                      StochasticsInterface* stochastics) const;
 
 private:
     static std::optional<ValidLaneSpawningRanges> GetValidSpawningInformationForRange(const double sStart,

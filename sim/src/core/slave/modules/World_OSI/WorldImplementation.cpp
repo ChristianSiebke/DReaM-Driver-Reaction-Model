@@ -13,7 +13,7 @@
 
 #include "WorldData.h"
 #include "WorldImplementation.h"
-#include "RoutePlanning/RouteCalculation.h"
+#include "common/RoutePlanning/RouteCalculation.h"
 
 #include "osi3/osi_sensorview.pb.h"
 #include "osi3/osi_sensorviewconfiguration.pb.h"

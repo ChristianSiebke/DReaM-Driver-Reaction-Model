@@ -29,7 +29,7 @@ add_openpass_target(
     OWL/LaneGeometryJoint.h
     OWL/OpenDriveTypeMapper.h
     OWL/Primitives.h
-    RoutePlanning/RouteCalculation.h
+    ../../../../common/RoutePlanning/RouteCalculation.h
     egoAgent.h
 
   SOURCES
@@ -54,6 +54,7 @@ add_openpass_target(
 
   INCDIRS
     ${CMAKE_CURRENT_LIST_DIR}
+    ../../../../common
 
   LIBRARIES
     Qt5::Core

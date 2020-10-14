@@ -17,7 +17,7 @@
 #include <qglobal.h>
 
 #include "include/worldInterface.h"
-#include "core/slave/modules/World_OSI/RoutePlanning/RouteCalculation.h"
+#include "common/RoutePlanning/RouteCalculation.h"
 #include "sensor_driverImpl.h"
 #include "Signals/sensorDriverSignal.h"
 

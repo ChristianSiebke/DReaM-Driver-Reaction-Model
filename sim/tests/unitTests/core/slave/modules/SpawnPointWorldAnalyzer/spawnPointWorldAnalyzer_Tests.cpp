@@ -71,10 +71,10 @@ TEST(WorldAnalyzer, GetValidLaneSpawningRanges_NoScenarioAgents_ReturnsFullRange
                                             DOUBLE_INFINITY,
                                             DOUBLE_INFINITY))
             .WillOnce(Return(NO_AGENTS_IN_RANGE));
+    EXPECT_CALL(fakeWorld, GetRoadGraph(_, _))
+                .WillOnce(Return(std::pair<RoadGraph, RoadGraphVertex>{roadGraph, vertex}));
     EXPECT_CALL(fakeWorld, IsDirectionalRoadExisting(_, _))
             .WillOnce(Return(true));
-    EXPECT_CALL(fakeWorld, GetRoadGraph(_, _))
-            .WillOnce(Return(std::pair<RoadGraph, RoadGraphVertex>{roadGraph, vertex}));
     EXPECT_CALL(fakeWorld, GetDistanceToEndOfLane(roadGraph, vertex, laneId, sStart, sEnd))
             .WillOnce(Return(endOfLaneResult));
 
@@ -118,7 +118,7 @@ TEST_P(GetValidLaneSpawningRanges_OneAgent, GetValidLaneSpawningRanges)
     EXPECT_CALL(fakeWorld, IsDirectionalRoadExisting(_, _))
             .WillOnce(Return(true));
     EXPECT_CALL(fakeWorld, GetRoadGraph(_, _))
-            .WillOnce(Return(std::pair<RoadGraph, RoadGraphVertex>{roadGraph, vertex}));
+                .WillOnce(Return(std::pair<RoadGraph, RoadGraphVertex>{roadGraph, vertex}));
     EXPECT_CALL(fakeWorld, GetDistanceToEndOfLane(roadGraph, vertex, data.laneId, data.sStart, data.sEnd))
             .WillOnce(Return(endOfLaneResult));
 
@@ -133,15 +133,12 @@ TEST_P(GetValidLaneSpawningRanges_OneAgent, GetValidLaneSpawningRanges)
     EXPECT_CALL(fakeAgent, GetAgentCategory())
             .WillRepeatedly(Return(data.agentCategory));
 
-    ObjectPosition fakeAgentRoadPosition{{{data.roadId, GlobalRoadPosition{data.roadId, data.laneId, data.scenarioAgentBounds.first, 0, 0}}},{},{}};
+    ObjectPosition fakeAgentRoadPosition{{},
+                                         {},
+                                         {{data.roadId, RoadInterval{{}, data.scenarioAgentBounds.first, data.scenarioAgentBounds.second, {}}}}};
     EXPECT_CALL(fakeAgent, GetObjectPosition())
             .WillRepeatedly(ReturnRef(fakeAgentRoadPosition));
 
-    VehicleModelParameters fakeAgentVehicleModelParameters;
-    fakeAgentVehicleModelParameters.length = data.scenarioAgentBounds.second - data.scenarioAgentBounds.first;
-    fakeAgentVehicleModelParameters.distanceReferencePointToLeadingEdge = fakeAgentVehicleModelParameters.length;
-    EXPECT_CALL(fakeAgent, GetVehicleModelParameters())
-            .WillRepeatedly(Return(fakeAgentVehicleModelParameters));
     EXPECT_CALL(fakeAgent, GetRoads(MeasurementPoint::Reference))
             .WillRepeatedly(Return(std::vector<std::string>{data.roadId}));
 
@@ -164,9 +161,9 @@ INSTANTIATE_TEST_CASE_P(WorldAnalyzer_AltersValidSpawnRangeCorrectly, GetValidLa
         // single common agent does not impact valid ranges
         GetValidLaneSpawningRanges_OneAgent_Data{"ROADID",      -1,       0,   100,   AgentCategory::Common,           {5, 10},                   true, {{0, 100}}},
         // single ego agent renders agent bounds invalid as spawning points
-        GetValidLaneSpawningRanges_OneAgent_Data{"ROADID",      -1,       0,   100,      AgentCategory::Ego,           {5, 10},                   true, {{0, 5.0}, {10.0, 100}}},
+        GetValidLaneSpawningRanges_OneAgent_Data{"ROADID",      -1,       0,   100,      AgentCategory::Ego,           {5, 10},                   true, {{0, 4.999}, {10.001, 100}}},
         // single scenario agent renders agent bounds invalid as spawning points
-        GetValidLaneSpawningRanges_OneAgent_Data{"ROADID",      -1,       0,   100, AgentCategory::Scenario,           {5, 10},                   true, {{0, 5}, {10.0, 100}}},
+        GetValidLaneSpawningRanges_OneAgent_Data{"ROADID",      -1,       0,   100, AgentCategory::Scenario,           {5, 10},                   true, {{0, 4.999}, {10.001, 100}}},
         // a range entirely encapsulated by a single agent is invalid
         GetValidLaneSpawningRanges_OneAgent_Data{"ROADID",      -1,      25,    30, AgentCategory::Scenario,           {20,35},                  false, DontCare<ValidLaneSpawningRanges>()},
         // a single ego agent outside the range leave full range valid
@@ -210,15 +207,11 @@ TEST_P(GetValidLaneSpawningRanges_TwoAgents, GetValidLaneSpawningRanges)
     EXPECT_CALL(firstFakeAgent, GetAgentCategory())
             .WillRepeatedly(Return(data.firstAgentCategory));
 
-    ObjectPosition fakeAgentRoadPosition{{{data.roadId, GlobalRoadPosition{data.roadId, data.laneId, data.firstScenarioAgentBounds.first, 0, 0}}},{},{}};
+    ObjectPosition fakeAgentRoadPosition{{},
+                                         {},
+                                         {{data.roadId, RoadInterval{{}, data.firstScenarioAgentBounds.first, data.firstScenarioAgentBounds.second, {}}}}};
     EXPECT_CALL(firstFakeAgent, GetObjectPosition())
             .WillRepeatedly(ReturnRef(fakeAgentRoadPosition));
-
-    VehicleModelParameters fakeAgentVehicleModelParameters;
-    fakeAgentVehicleModelParameters.length = data.firstScenarioAgentBounds.second - data.firstScenarioAgentBounds.first;
-    fakeAgentVehicleModelParameters.distanceReferencePointToLeadingEdge = fakeAgentVehicleModelParameters.length;
-    EXPECT_CALL(firstFakeAgent, GetVehicleModelParameters())
-            .WillRepeatedly(Return(fakeAgentVehicleModelParameters));
 
     EXPECT_CALL(firstFakeAgent, GetRoads(MeasurementPoint::Reference))
             .WillRepeatedly(Return(std::vector<std::string>{data.roadId}));
@@ -226,15 +219,11 @@ TEST_P(GetValidLaneSpawningRanges_TwoAgents, GetValidLaneSpawningRanges)
     EXPECT_CALL(secondFakeAgent, GetAgentCategory())
         .WillRepeatedly(Return(data.secondAgentCategory));
 
-    ObjectPosition secondFakeAgentRoadPosition{{{data.roadId, GlobalRoadPosition{data.roadId, data.laneId, data.secondScenarioAgentBounds.first, 0, 0}}},{},{}};
+    ObjectPosition secondFakeAgentRoadPosition{{},
+                                               {},
+                                               {{data.roadId, RoadInterval{{}, data.secondScenarioAgentBounds.first, data.secondScenarioAgentBounds.second, {}}}}};
     EXPECT_CALL(secondFakeAgent, GetObjectPosition())
             .WillRepeatedly(ReturnRef(secondFakeAgentRoadPosition));
-
-    VehicleModelParameters secondFakeAgentVehicleModelParameters;
-    secondFakeAgentVehicleModelParameters.length = data.secondScenarioAgentBounds.second - data.secondScenarioAgentBounds.first;
-    secondFakeAgentVehicleModelParameters.distanceReferencePointToLeadingEdge = secondFakeAgentVehicleModelParameters.length;
-    EXPECT_CALL(secondFakeAgent, GetVehicleModelParameters())
-            .WillRepeatedly(Return(secondFakeAgentVehicleModelParameters));
 
     EXPECT_CALL(secondFakeAgent, GetRoads(MeasurementPoint::Reference))
             .WillRepeatedly(Return(std::vector<std::string>{data.roadId}));
@@ -246,7 +235,7 @@ TEST_P(GetValidLaneSpawningRanges_TwoAgents, GetValidLaneSpawningRanges)
     EXPECT_CALL(fakeWorld, IsDirectionalRoadExisting(_, _))
             .WillOnce(Return(true));
     EXPECT_CALL(fakeWorld, GetRoadGraph(_, _))
-            .WillOnce(Return(std::pair<RoadGraph, RoadGraphVertex>{roadGraph, vertex}));
+                .WillOnce(Return(std::pair<RoadGraph, RoadGraphVertex>{roadGraph, vertex}));
     EXPECT_CALL(fakeWorld, GetDistanceToEndOfLane(roadGraph, vertex, data.laneId, data.sStart, data.sEnd))
             .WillOnce(Return(endOfLaneResult));
     EXPECT_CALL(fakeWorld, GetAgentsInRange(roadGraph,
@@ -277,19 +266,19 @@ INSTANTIATE_TEST_CASE_P(WorldAnalyzer_AltersValidSpawnRangeCorrectly, GetValidLa
         GetValidLaneSpawningRanges_TwoAgents_Data{"ROADID",      -1,       0,   100,   AgentCategory::Common,         DontCare<Range>(),   AgentCategory::Common,  DontCare<Range>(),                   true, {{0, 100}}},
         // only a scenario agent and a common agent (the reverse will act as a one agent situation with the agent having category common)
         // only range outside of agent bounds should be valid
-        GetValidLaneSpawningRanges_TwoAgents_Data{"ROADID",      -1,       0,   100,      AgentCategory::Ego,                   {5, 10},   AgentCategory::Common,           {20, 25},                   true, {{0, 5}, {10.0, 100}}}, // the first value of further ranges are padded with .01 to avoid re-detecting the same agent
-        GetValidLaneSpawningRanges_TwoAgents_Data{"ROADID",      -1,       0,   100, AgentCategory::Scenario,                   {5, 10},   AgentCategory::Common,           {20, 25},                   true, {{0, 5}, {10.0, 100}}},
+        GetValidLaneSpawningRanges_TwoAgents_Data{"ROADID",      -1,       0,   100,      AgentCategory::Ego,                   {5, 10},   AgentCategory::Common,           {20, 25},                   true, {{0, 4.999}, {10.001, 100}}}, // the first value of further ranges are padded with .01 to avoid re-detecting the same agent
+        GetValidLaneSpawningRanges_TwoAgents_Data{"ROADID",      -1,       0,   100, AgentCategory::Scenario,                   {5, 10},   AgentCategory::Common,           {20, 25},                   true, {{0, 4.999}, {10.001, 100}}},
         // two internal scenario agents
         // spawn range before rear of nearest agent and after front of furthest agent is valid
-        GetValidLaneSpawningRanges_TwoAgents_Data{"ROADID",      -1,       0,   100,      AgentCategory::Ego,                   {5, 10}, AgentCategory::Scenario,           {25, 50},                   true, {{0, 5}, {50.0, 100}}},
-        GetValidLaneSpawningRanges_TwoAgents_Data{"ROADID",      -1,       0,   100, AgentCategory::Scenario,                   {5, 10}, AgentCategory::Scenario,           {25, 50},                   true, {{0, 5}, {50.0, 100}}},
+        GetValidLaneSpawningRanges_TwoAgents_Data{"ROADID",      -1,       0,   100,      AgentCategory::Ego,                   {5, 10}, AgentCategory::Scenario,           {25, 50},                   true, {{0, 4.999}, {50.001, 100}}},
+        GetValidLaneSpawningRanges_TwoAgents_Data{"ROADID",      -1,       0,   100, AgentCategory::Scenario,                   {5, 10}, AgentCategory::Scenario,           {25, 50},                   true, {{0, 4.999}, {50.001, 100}}},
         // two external scenario agents encapsualting spawn range -- no valid spawn range
         GetValidLaneSpawningRanges_TwoAgents_Data{"ROADID",      -1,      10,   100,      AgentCategory::Ego,                    {0, 5}, AgentCategory::Scenario,         {105, 110},                  false, DontCare<ValidLaneSpawningRanges>()},
         GetValidLaneSpawningRanges_TwoAgents_Data{"ROADID",      -1,      10,   100, AgentCategory::Scenario,                    {0, 5}, AgentCategory::Scenario,         {105, 110},                  false, DontCare<ValidLaneSpawningRanges>()},
         // one internal scenario agent and one external (beyond range) -- partial valid spawn range
-        GetValidLaneSpawningRanges_TwoAgents_Data{"ROADID",      -1,      10,   100, AgentCategory::Scenario,                    {0, 5}, AgentCategory::Scenario,           {50, 55},                   true, {{55.0, 100}}},
+        GetValidLaneSpawningRanges_TwoAgents_Data{"ROADID",      -1,      10,   100, AgentCategory::Scenario,                    {0, 5}, AgentCategory::Scenario,           {50, 55},                   true, {{55.001, 100}}},
         // one internal scenario agent and one external (before range) -- partial valid spawn range
-        GetValidLaneSpawningRanges_TwoAgents_Data{"ROADID",      -1,      0,     75, AgentCategory::Scenario,                  {50, 55}, AgentCategory::Scenario,         {100, 105},                   true, {{0, 50}}},
+        GetValidLaneSpawningRanges_TwoAgents_Data{"ROADID",      -1,      0,     75, AgentCategory::Scenario,                  {50, 55}, AgentCategory::Scenario,         {100, 105},                   true, {{0, 49.999}}},
         // two external agents (outside of range - beyond) -- full valid range
         GetValidLaneSpawningRanges_TwoAgents_Data{"ROADID",      -1,      0,   100,       AgentCategory::Ego,                {105, 110}, AgentCategory::Scenario,         {125, 130},                   true, {{0, 100}}},
         // two external agents (outside of range - before) -- full valid range
@@ -323,14 +312,13 @@ TEST_P(CalculateSpawnVelocityToPreventCrashingTests, AdjustsVelocityToPreventCra
     const auto data = GetParam();
     const RoadId roadId = "ROADID";
     const auto [roadGraph, vertex] = GetSingleVertexRoadGraph(RouteElement{roadId, true});
+    const Route route {roadGraph, vertex, vertex};
     const LaneId laneId = -1;
 
     FakeAgent fakeAgent;
     FakeWorld fakeWorld;
 
     RouteQueryResult<std::vector<const AgentInterface*>> agentsInRange{{vertex, {&fakeAgent}}};
-    EXPECT_CALL(fakeWorld, GetRoadGraph(_, _))
-            .WillOnce(Return(std::pair<RoadGraph, RoadGraphVertex>{roadGraph, vertex}));
     EXPECT_CALL(fakeWorld, GetAgentsInRange(roadGraph,
                                             vertex,
                                             laneId,
@@ -353,7 +341,8 @@ TEST_P(CalculateSpawnVelocityToPreventCrashingTests, AdjustsVelocityToPreventCra
                                                                                               data.intendedSpawnPosition,
                                                                                               data.agentFrontLength,
                                                                                               data.agentRearLength,
-                                                                                              data.intendedVelocity);
+                                                                                              data.intendedVelocity,
+                                                                                              route);
 
     EXPECT_THAT(actualAdjustedVelocity, DoubleEq(data.expectedAdjustedVelocity));
 }
@@ -391,15 +380,13 @@ TEST_P(SpawnWillCauseCrashTests, PredictsCrashesAccurately)
 
     const RoadId roadId{"ROADID"};
     const auto [roadGraph, vertex] = GetSingleVertexRoadGraph(RouteElement{roadId, true});
+    const Route route {roadGraph, vertex, vertex};
     const LaneId laneId{-1};
     const SPosition sPosition{data.spawnPosition};
     const double agentFrontLength{.5};
     const double agentRearLength{.5};
     const double velocity{data.spawnVelocity};
     const bool searchDirection = (data.direction == Direction::FORWARD);
-
-    EXPECT_CALL(fakeWorld, GetRoadGraph(_, _))
-            .WillOnce(Return(std::pair<RoadGraph, RoadGraphVertex>{roadGraph, vertex}));
 
     if (!data.objectExistsInSearchDirection)
     {
@@ -446,7 +433,8 @@ TEST_P(SpawnWillCauseCrashTests, PredictsCrashesAccurately)
                                                                                    agentFrontLength,
                                                                                    agentRearLength,
                                                                                    velocity,
-                                                                                   data.direction);
+                                                                                   data.direction,
+                                                                                   route);
 
     EXPECT_THAT(actualSpawnWillCauseCrashResult, data.expectedSpawnWillCauseCrashResult);
 }

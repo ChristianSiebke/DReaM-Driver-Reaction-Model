@@ -95,7 +95,11 @@ SpawnPointInterface::Agents SpawnPointPreRunCommon::GenerateAgentsForRange(const
 
             const auto tGap = Sampler::RollForStochasticAttribute(agentProfile.tGap, dependencies.stochastics);
 
-            const auto spawnInfo = GetNextSpawnCarInfo(roadId, laneId, range, tGap, velocity, agentFrontLength, agentRearLength);
+            const auto route = worldAnalyzer.SampleRoute(roadId,
+                                                         laneId,
+                                                         dependencies.stochastics);
+
+            const auto spawnInfo = GetNextSpawnCarInfo(roadId, laneId, range, tGap, velocity, agentFrontLength, agentRearLength, route);
             if (!spawnInfo.has_value())
             {
                 generating = false;
@@ -106,6 +110,7 @@ SpawnPointInterface::Agents SpawnPointPreRunCommon::GenerateAgentsForRange(const
                                                            laneId,
                                                            sPosition,
                                                            0 /* offset */,
+                                                           route,
                                                            agentBlueprint.GetVehicleModelParameters())
                 || worldAnalyzer.SpawnWillCauseCrash(roadId,
                                                      laneId,
@@ -113,13 +118,14 @@ SpawnPointInterface::Agents SpawnPointPreRunCommon::GenerateAgentsForRange(const
                                                      agentFrontLength,
                                                      agentRearLength,
                                                      velocity,
-                                                     Direction::BACKWARD))
+                                                     Direction::BACKWARD,
+                                                     route))
             {
                 generating = false;
                 break;
             }
 
-            if (!CalculateSpawnParameter(&agentBlueprint, *spawnInfo))
+            if (!CalculateSpawnParameter(&agentBlueprint, *spawnInfo, route))
             {
                 generating = false;
                 break;
@@ -148,11 +154,12 @@ SpawnPointInterface::Agents SpawnPointPreRunCommon::GenerateAgentsForRange(const
 
 std::optional<SpawnInfo> SpawnPointPreRunCommon::GetNextSpawnCarInfo(const RoadId& roadId,
                                                                      const LaneId& laneId,
-                                                         const Range& range,
-                                                         const double gapInSeconds,
-                                                         const double velocity,
-                                                         const double agentFrontLength,
-                                                         const double agentRearLength) const
+                                                                     const Range& range,
+                                                                     const double gapInSeconds,
+                                                                     const double velocity,
+                                                                     const double agentFrontLength,
+                                                                     const double agentRearLength,
+                                                                     const Route &route) const
 {
     const auto spawnDistance = worldAnalyzer.GetNextSpawnPosition(roadId,
                                                                   laneId,
@@ -161,7 +168,7 @@ std::optional<SpawnInfo> SpawnPointPreRunCommon::GetNextSpawnCarInfo(const RoadI
                                                                   agentRearLength,
                                                                   velocity,
                                                                   gapInSeconds,
-                                                                  Direction::FORWARD);
+                                                                  route);
 
     if (!spawnDistance.has_value())
     {
@@ -173,7 +180,8 @@ std::optional<SpawnInfo> SpawnPointPreRunCommon::GetNextSpawnCarInfo(const RoadI
                                                                                         *spawnDistance,
                                                                                         agentFrontLength,
                                                                                         agentRearLength,
-                                                                                        velocity);
+                                                                                        velocity,
+                                                                                        route);
 
     openScenario::LanePosition lanePosition;
     lanePosition.roadId = roadId;
@@ -192,7 +200,8 @@ std::optional<SpawnInfo> SpawnPointPreRunCommon::GetNextSpawnCarInfo(const RoadI
 
 
 bool SpawnPointPreRunCommon::CalculateSpawnParameter(AgentBlueprintInterface* agentBlueprint,
-                                                     const SpawnInfo& spawnInfo)
+                                                     const SpawnInfo& spawnInfo,
+                                                     const Route &route)
 {
     const auto& lanePosition = std::get<openScenario::LanePosition>(spawnInfo.position);
 
@@ -223,6 +232,7 @@ bool SpawnPointPreRunCommon::CalculateSpawnParameter(AgentBlueprintInterface* ag
     spawnParameter.yawAngle  = pos.yawAngle;
     spawnParameter.velocity = spawnV;
     spawnParameter.acceleration = spawnInfo.acceleration.value_or(0.0);
+    spawnParameter.route = route;
 
     return true;
 }

@@ -53,7 +53,7 @@ add_openpass_target(
     ${COMPONENT_SOURCE_DIR}/OWL/OpenDriveTypeMapper.h
     ${COMPONENT_SOURCE_DIR}/PointQuery.h
     ${COMPONENT_SOURCE_DIR}/RamerDouglasPeucker.h
-    ${COMPONENT_SOURCE_DIR}/RoutePlanning/RouteCalculation.h
+    ${OPENPASS_SIMCORE_DIR}/common/RoutePlanning/RouteCalculation.h
     ${COMPONENT_SOURCE_DIR}/SceneryConverter.h
     ${COMPONENT_SOURCE_DIR}/TrafficObjectAdapter.h
     ${COMPONENT_SOURCE_DIR}/WorldData.h
@@ -66,6 +66,7 @@ add_openpass_target(
 
   INCDIRS
     ${OPENPASS_SIMCORE_DIR}/core
+    ${OPENPASS_SIMCORE_DIR}/common
     ${COMPONENT_SOURCE_DIR}
     ${COMPONENT_SOURCE_DIR}/OWL
     ${COMPONENT_SOURCE_DIR}/OWL/fakes
