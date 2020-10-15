@@ -88,7 +88,8 @@ private:
     SpawningAgentProfile SampleAgentProfile(bool rightLane);
 
     const SpawnPointDependencies dependencies;
-    const SpawnPointRuntimeCommonParameters parameters;
-    std::vector<SpawnDetails> queuedSpawnDetails;
     const WorldAnalyzer worldAnalyzer;
+    const SpawnPointRuntimeCommonParameters parameters;
+
+    std::vector<SpawnDetails> queuedSpawnDetails;
 };

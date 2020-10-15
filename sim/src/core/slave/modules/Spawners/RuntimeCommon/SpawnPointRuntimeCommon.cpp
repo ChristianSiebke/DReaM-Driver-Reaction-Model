@@ -19,15 +19,12 @@ SpawnPointRuntimeCommon::SpawnPointRuntimeCommon(const SpawnPointDependencies* d
                                                  const CallbackInterface * const callbacks):
     SpawnPointInterface(dependencies->world, callbacks),
     dependencies(*dependencies),
-    parameters(SpawnPointRuntimeCommonParameterExtractor::ExtractSpawnPointParameters(*(dependencies->parameters.value()))),
-    worldAnalyzer(dependencies->world)
+    worldAnalyzer(dependencies->world),
+    parameters(SpawnPointRuntimeCommonParameterExtractor::ExtractSpawnPointParameters(*(dependencies->parameters.value()), worldAnalyzer))
 {
     for (const auto& spawnPosition : parameters.spawnPositions)
     {
-        if(worldAnalyzer.ValidateRoadIdInDirection(spawnPosition.roadId, spawnPosition.laneId))
-        {
-            queuedSpawnDetails.push_back(GenerateSpawnDetailsForLane(spawnPosition, 0));
-        }
+        queuedSpawnDetails.push_back(GenerateSpawnDetailsForLane(spawnPosition, 0));
     }
 }
 

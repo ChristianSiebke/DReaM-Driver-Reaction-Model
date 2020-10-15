@@ -13,9 +13,13 @@
 
 #include "SpawnPointRuntimeCommon.h"
 #include "SpawnPointRuntimeCommonParameterExtractor.h"
+#include "common/WorldAnalyzer.h"
 
 #include "fakeParameter.h"
+#include "fakeWorld.h"
 
+using ::testing::_;
+using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::UnorderedElementsAre;
 
@@ -35,7 +39,8 @@ TEST(SpawnPointRuntimeCommonParameterExtractor, ExtractSpawnPointParameters)
     auto spawnPoint2 = std::make_shared<FakeParameter>();
     ParameterInterface::ParameterLists spawnPoint {{spawnPoint1, spawnPoint2}};
 
-    std::map<std::string, const std::vector<std::string>> strings1{{"Roads", {"RoadA"}}};
+    const std::string invalidRoadId = "InvalidRoad";
+    std::map<std::string, const std::vector<std::string>> strings1{{"Roads", {"RoadA", invalidRoadId}}};
     ON_CALL(*spawnPoint1, GetParametersStringVector()).WillByDefault(ReturnRef(strings1));
     std::map<std::string, const std::vector<int>> intVectors1{{"Lanes", {1,2,3}}};
     ON_CALL(*spawnPoint1, GetParametersIntVector()).WillByDefault(ReturnRef(intVectors1));
@@ -102,7 +107,13 @@ TEST(SpawnPointRuntimeCommonParameterExtractor, ExtractSpawnPointParameters)
     std::map<std::string, ParameterInterface::ParameterLists> parameterLists{{"SpawnPoints", spawnPoint}, {"TrafficGroups", trafficGroups}};
     ON_CALL(parameter, GetParameterLists()).WillByDefault(ReturnRef(parameterLists));
 
-    const auto result = SpawnPointRuntimeCommonParameterExtractor::ExtractSpawnPointParameters(parameter);
+    FakeWorld fakeWorld;
+    ON_CALL(fakeWorld, IsDirectionalRoadExisting(_, _)).WillByDefault(Return(true));
+    ON_CALL(fakeWorld, IsDirectionalRoadExisting(invalidRoadId, _)).WillByDefault(Return(false));
+
+    WorldAnalyzer worldAnalyzer{&fakeWorld};
+
+    const auto result = SpawnPointRuntimeCommonParameterExtractor::ExtractSpawnPointParameters(parameter, worldAnalyzer);
 
     const auto spawnPositions = result.spawnPositions;
     ASSERT_THAT(result.spawnPositions, UnorderedElementsAre(SpawnPosition{"RoadA", 1, 10.},

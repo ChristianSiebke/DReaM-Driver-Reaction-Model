@@ -16,6 +16,7 @@
 #include "include/parameterInterface.h"
 #include "common/SpawnPointDefinitions.h"
 #include "common/log.h"
+#include "common/WorldAnalyzer.h"
 
 using namespace SpawnPointDefinitions;
 
@@ -25,7 +26,7 @@ namespace SpawnPointRuntimeCommonParameterExtractor
 
     constexpr char SCOORDINATE[] = {"SCoordinate"};
 
-    static std::vector<SpawnPosition> ExtractSpawnPoints(const ParameterInterface &parameter)
+    static std::vector<SpawnPosition> ExtractSpawnPoints(const ParameterInterface &parameter, const WorldAnalyzer &worldAnalyzer)
     {
         using namespace helper;
 
@@ -58,7 +59,10 @@ namespace SpawnPointRuntimeCommonParameterExtractor
             {
                 for (const auto& laneId : sortedLaneIds)
                 {
-                    spawnpoints.emplace_back(SpawnPosition{roadId, laneId, sCoordinateElement.value()});
+                    if(worldAnalyzer.ValidateRoadIdInDirection(roadId, laneId))
+                    {
+                        spawnpoints.emplace_back(SpawnPosition{roadId, laneId, sCoordinateElement.value()});
+                    }
                 }
             }
         }
@@ -73,8 +77,8 @@ namespace SpawnPointRuntimeCommonParameterExtractor
      * \param sampler the sampler with which to sample random values
      * \return the parameters for the spawn point
      */
-    static SpawnPointRuntimeCommonParameters ExtractSpawnPointParameters(const ParameterInterface& parameter)
+    static SpawnPointRuntimeCommonParameters ExtractSpawnPointParameters(const ParameterInterface& parameter, const WorldAnalyzer &worldAnalyzer)
     {
-        return {ExtractSpawnPoints(parameter), SpawnPointDefinitions::ExtractAgentProfileLaneMaps(parameter)};
+        return {ExtractSpawnPoints(parameter, worldAnalyzer), SpawnPointDefinitions::ExtractAgentProfileLaneMaps(parameter)};
     }
 };
