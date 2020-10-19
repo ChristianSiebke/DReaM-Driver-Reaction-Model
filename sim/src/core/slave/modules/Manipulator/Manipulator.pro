@@ -36,6 +36,7 @@ SOURCES += \
     RemoveAgentsManipulator.cpp \
     SpeedActionManipulator.cpp \
     TrajectoryManipulator.cpp \
+    AcquirePositionManipulator.cpp \
     srcCollisionPostCrash/collisionDetection_Impact_implementation.cpp \
     srcCollisionPostCrash/polygon.cpp \
     ../../../../core/common/coreDataPublisher.cpp
@@ -45,7 +46,8 @@ EVENT_HEADERS += \
     ../../../../common/events/collisionEvent.h \
     ../../../../common/events/laneChangeEvent.h \
     ../../../../common/events/speedActionEvent.h \
-    ../../../../common/events/trajectoryEvent.h
+    ../../../../common/events/trajectoryEvent.h \
+    ../../../../common/events/acquirePositionEvent.h
 
 HEADERS += \
     $$EVENT_HEADERS \
@@ -60,6 +62,7 @@ HEADERS += \
     RemoveAgentsManipulator.h \
     SpeedActionManipulator.h \
     TrajectoryManipulator.h \
+    AcquirePositionManipulator.h \
     srcCollisionPostCrash/collisionDetection_Impact_implementation.h \
     srcCollisionPostCrash/polygon.h \
     ../../../../core/common/coreDataPublisher.h

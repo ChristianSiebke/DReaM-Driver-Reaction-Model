@@ -53,6 +53,9 @@ public:
 #ifdef USE_EXTENDED_OSI
     //! Converts a trajectory from OpenSCENARIO to a OSI TrafficCommand
     static osi3::TrafficCommand GetTrafficCommandFromOpenScenarioTrajectory(openScenario::Trajectory trajectory);
+
+    //! Converts a position from OpenSCENARIO to a OSI TrafficCommand
+    static osi3::TrafficCommand GetTrafficCommandFromOpenScenarioPosition(const openScenario::Position &position, WorldInterface *worldInterface, const std::function<void(const std::string&)> &errorCallback);
 #endif
 
 private:

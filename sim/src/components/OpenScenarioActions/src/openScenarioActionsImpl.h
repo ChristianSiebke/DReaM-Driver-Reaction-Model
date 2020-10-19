@@ -14,7 +14,7 @@
 #include <map>
 
 #include "include/modelInterface.h"
-#include "actionTransformRepository.h"
+#include "transformAcquirePosition.h"
 #include "transformLaneChange.h"
 #include "transformSpeedAction.h"
 #include "transformTrajectory.h"
@@ -40,7 +40,7 @@
 class OpenScenarioActionsImplementation : public UnrestrictedEventModelInterface
 {
 public:
-    static constexpr char COMPONENTNAME[] {"OpenScenarioActions"};
+    static constexpr char COMPONENTNAME[]{"OpenScenarioActions"};
 
     OpenScenarioActionsImplementation(std::string componentName,
                                       bool isInit,
@@ -60,22 +60,26 @@ public:
     void UpdateOutput(int localLinkId, std::shared_ptr<SignalInterface const> &data, int time) override;
     void Trigger(int time) override;
 
+    using TrajectorySignalLinkId = std::integral_constant<LinkId, 0>;
+    using AcquirePositionSignalLinkId = std::integral_constant<LinkId, 2>;
+    using SpeedActionSignalLinkId = std::integral_constant<LinkId, 3>;
+
 private:
-    [[noreturn]] void ThrowUnregisteredIdentifier(const std::string identifier);
+    [[noreturn]] void ThrowUnregisteredIdentifier(const std::string &identifier);
     [[noreturn]] void ThrowOnTooManySignals(LinkId localLinkId);
     [[noreturn]] void ThrowOnInvalidLinkId(LinkId localLinkId);
 
     TransformResults pendingSignals;
 
     inline static std::vector<bool> registeredActions{
-           ActionTransformRepository::Register(openScenario::transformation::Trajectory::Transform),
-           ActionTransformRepository::Register(openScenario::transformation::LaneChange::Transform),
-           ActionTransformRepository::Register(openScenario::transformation::SpeedAction::Transform),
-       };
+        ActionTransformRepository::Register(openScenario::transformation::Trajectory::Transform),
+        ActionTransformRepository::Register(openScenario::transformation::LaneChange::Transform),
+        ActionTransformRepository::Register(openScenario::transformation::SpeedAction::Transform),
+        ActionTransformRepository::Register(openScenario::transformation::AcquirePosition::Transform)};
 
     std::map<const std::string, LinkId> linkIdMapping{
-        {openpass::events::TrajectoryEvent::TOPIC, 0},
-        {openpass::events::LaneChangeEvent::TOPIC, 0},
-        {openpass::events::SpeedActionEvent::TOPIC, 3},
-    };
+        {openpass::events::TrajectoryEvent::TOPIC, TrajectorySignalLinkId::value},
+        {openpass::events::LaneChangeEvent::TOPIC, TrajectorySignalLinkId::value},
+        {openpass::events::SpeedActionEvent::TOPIC, SpeedActionSignalLinkId::value},
+        {openpass::events::AcquirePositionEvent::TOPIC, AcquirePositionSignalLinkId::value}};
 };

@@ -15,6 +15,7 @@ add_openpass_target(
     src/transformTrajectory.h
     src/transformLaneChange.h
     src/transformSpeedAction.h
+        src/transformAcquirePosition.h
 
   SOURCES
     openScenarioActions.cpp
@@ -23,6 +24,7 @@ add_openpass_target(
     src/oscActionsCalculation.cpp
     src/transformLaneChange.cpp
     src/transformSpeedAction.cpp
+        src/transformAcquirePosition.cpp
 
   LIBRARIES
     Qt5::Core

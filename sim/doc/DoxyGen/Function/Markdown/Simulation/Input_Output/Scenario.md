@@ -600,6 +600,65 @@ Example using TrajectoryCatalog
 </Action>
 ```
 
+**Acquire Position**
+
+The `AcquirePositionManipulator` adds an event to the `EventNetwork`, which tells the driver to acquire a given 
+`openScenario::Position`. Currently only `openScenario::WorldPosition` and `openScenario::RelativeObjectPosition` are
+supported. **This is only supported in the FMU_Wrapper component for OSMP messages**
+
+Example (WorldPosition)
+```xml
+<Action name="AcquirePosition">
+    <PrivateAction>
+        <RoutingAction>
+            <AcquirePositionAction>
+                <Position>
+                    <WorldPosition x="1.0" y="2.0" z="0.0" h="3.1415" p="0.0" r="0.0" />
+                </Position>
+            </AcquirePositionAction>
+        </RoutingAction>
+    </PrivateAction>
+</Action>
+```
+
+Example (WorldPosition)
+```xml
+<OpenSCENARIO>
+    <Entities>
+    ...
+        <ScenarioObject name="S1">
+        ...
+        </ScenarioObject>
+    </Entities>
+...
+  <Storyboard>
+    ...
+    <Story name="AcquirePositionStory">
+      <Act name="Act1">
+        <ManeuverGroup maximumExecutionCount="1" name="AcquirePositionManeuverGroup">
+          ...
+          <Maneuver name="AcquirePositionManeuver">
+            <Event name="AcquirePositionEvent" priority="overwrite">
+              <Action name="AcquirePosition">
+                <PrivateAction>
+                  <RoutingAction>
+                    <AcquirePositionAction>
+                      <Position>
+                        <RelativeObjectPosition dx="1.0" dy="1.0" entityRef="S1"/>
+                      </Position>
+                    </AcquirePositionAction>
+                  </RoutingAction>
+                </PrivateAction>
+              </Action>
+            </Event>
+          </Maneuver>
+        </ManeuverGroup>
+      </Act>
+    </Story>
+  </Storyboard>
+</OpenSCENARIO>
+```
+
 **Remove Agent**
 
 The RemoveAgentsManipulator simply removes the specifed agent from the simulation run.

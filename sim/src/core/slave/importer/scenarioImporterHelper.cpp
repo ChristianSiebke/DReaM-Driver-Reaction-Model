@@ -60,6 +60,14 @@ Position ScenarioImporterHelper::ImportPosition(QDomElement root, Parameters& pa
     {
         return ImportWorldPosition(childOfPositionElement, parameters);
     }
+    else if (SimulationCommon::GetFirstChildElement(positionElement, TAG::relativeObjectPosition, childOfPositionElement))
+    {
+        return ImportRelativeObjectPosition(childOfPositionElement, parameters);
+    }
+    else if (SimulationCommon::GetFirstChildElement(positionElement, TAG::relativeWorldPosition, childOfPositionElement))
+    {
+        return ImportRelativeWorldPosition(childOfPositionElement, parameters);
+    }
     else
     {
         LogErrorAndThrow(std::string("Position type not supported. Currently supported are: ") + TAG::lanePosition + ", " + TAG::roadPosition + ", " + TAG::worldPosition + ".");
@@ -546,12 +554,18 @@ RoutingAction ScenarioImporterHelper::ImportRoutingAction(QDomElement routingAct
 
                 vertexElement = vertexElement.nextSiblingElement(TAG::vertex);
             }
-            else {
+            else
+            {
                 LogErrorAndThrow("FollowTrajectoryAction only supports WorldPositions in Vertexes.");
             }
         }
 
-        return FollowTrajectoryAction {trajectory};
+        return FollowTrajectoryAction{trajectory};
+    }
+    else if (SimulationCommon::GetFirstChildElement(routingActionElement, TAG::acquirePositionAction, childOfRoutingActionElement))
+    {
+        AcquirePositionAction acquirePositionAction{ScenarioImporterHelper::ImportPosition(childOfRoutingActionElement, parameters)};
+        return acquirePositionAction;
     }
     else
     {
@@ -604,4 +618,41 @@ QDomElement ScenarioImporterHelper::GetTrajectoryElementFromCatalog(const std::s
 
     LogErrorAndThrow("Entry " + entryName + " not found in TrajectoryCatalog " + catalogName);
 }
+
+RelativeWorldPosition ScenarioImporterHelper::ImportRelativeWorldPosition(const QDomElement &positionElement, Parameters &parameters)
+{
+    RelativeWorldPosition relativeWorldPosition;
+
+    relativeWorldPosition.entityRef = ParseAttribute<std::string>(positionElement, ATTRIBUTE::entityRef, parameters);
+    relativeWorldPosition.dx = ParseAttribute<double>(positionElement, ATTRIBUTE::dx, parameters);
+    relativeWorldPosition.dy = ParseAttribute<double>(positionElement, ATTRIBUTE::dy, parameters);
+    relativeWorldPosition.dz = ParseOptionalAttribute<double>(positionElement, ATTRIBUTE::dz, parameters);
+
+    QDomElement orientationElement;
+    if (SimulationCommon::GetFirstChildElement(positionElement, TAG::orientation, orientationElement))
+    {
+        relativeWorldPosition.orientation = ImportOrientation(orientationElement, parameters);
+    }
+
+    return relativeWorldPosition;
+}
+
+RelativeObjectPosition ScenarioImporterHelper::ImportRelativeObjectPosition(const QDomElement &positionElement, Parameters &parameters)
+{
+    RelativeObjectPosition relativeObjectPosition;
+
+    relativeObjectPosition.entityRef = ParseAttribute<std::string>(positionElement, ATTRIBUTE::entityRef, parameters);
+    relativeObjectPosition.dx = ParseAttribute<double>(positionElement, ATTRIBUTE::dx, parameters);
+    relativeObjectPosition.dy = ParseAttribute<double>(positionElement, ATTRIBUTE::dy, parameters);
+    relativeObjectPosition.dz = ParseOptionalAttribute<double>(positionElement, ATTRIBUTE::dz, parameters);
+
+    QDomElement orientationElement;
+    if (SimulationCommon::GetFirstChildElement(positionElement, TAG::orientation, orientationElement))
+    {
+        relativeObjectPosition.orientation = ImportOrientation(orientationElement, parameters);
+    }
+
+    return relativeObjectPosition;
+}
+
 } // namespace openScenario

@@ -9,15 +9,21 @@
 *******************************************************************************/
 
 #include "OsmpFmuHandler.h"
+
 #include <cmath>
+#include <src/common/acquirePositionSignal.h>
+
+#include <QDir>
+#include <QFile>
+
 #include "common/dynamicsSignal.h"
 #include "common/trajectorySignal.h"
 #include "core/slave/modules/World_OSI/WorldData.h"
-#include <QFile>
-#include <QDir>
 #include "google/protobuf/util/json_util.h"
+#include "variant_visitor.h"
 
-extern "C" {
+extern "C"
+{
 #include "fmilib.h"
 #include "fmuChecker.h"
 }
@@ -159,6 +165,16 @@ void OsmpFmuHandler::UpdateInput(int localLinkId, const std::shared_ptr<const Si
         if (signal && signal->componentState == ComponentState::Acting)
         {
             trafficCommand = GetTrafficCommandFromOpenScenarioTrajectory(signal->trajectory);
+        }
+    }
+    else if (localLinkId == 11)
+    {
+        auto signal = std::dynamic_pointer_cast<AcquirePositionSignal const>(data);
+        if (signal && signal->componentState == ComponentState::Acting)
+        {
+            trafficCommand = GetTrafficCommandFromOpenScenarioPosition(signal->position,
+                                                                       this->world,
+                                                                       [this](const std::string& message){LOGERROR(message);});
         }
     }
 #endif
@@ -372,10 +388,61 @@ osi3::TrafficCommand OsmpFmuHandler::GetTrafficCommandFromOpenScenarioTrajectory
     return trafficCommand;
 }
 
+void logAndThrow(const std::string& message, const std::function<void(const std::string&)> &errorCallback) {
+    if (errorCallback) errorCallback(message);
+    throw std::runtime_error(message);
+}
+
+osi3::TrafficCommand OsmpFmuHandler::GetTrafficCommandFromOpenScenarioPosition(const openScenario::Position &position,
+                                                                               WorldInterface *worldInterface,
+                                                                               const std::function<void(const std::string&)> &errorCallback)
+{
+    osi3::TrafficCommand trafficCommand;
+    const auto trafficAction = trafficCommand.add_action();
+    auto acquireGlobalPositionAction = trafficAction->mutable_acquire_global_position_action();
+
+    std::visit(variant_visitor{
+                   [&acquireGlobalPositionAction](const openScenario::WorldPosition &worldPosition) {
+                       acquireGlobalPositionAction->mutable_position()->set_x(worldPosition.x);
+                       acquireGlobalPositionAction->mutable_position()->set_y(worldPosition.y);
+                       if (worldPosition.z.has_value())
+                           acquireGlobalPositionAction->mutable_position()->set_z(worldPosition.z.value());
+                       if (worldPosition.r.has_value())
+                           acquireGlobalPositionAction->mutable_orientation()->set_roll(worldPosition.r.value());
+                       if (worldPosition.p.has_value())
+                           acquireGlobalPositionAction->mutable_orientation()->set_pitch(worldPosition.p.value());
+                       if (worldPosition.h.has_value())
+                           acquireGlobalPositionAction->mutable_orientation()->set_yaw(worldPosition.h.value());
+                   },
+                   [&worldInterface, &errorCallback, &acquireGlobalPositionAction](const openScenario::RelativeObjectPosition &relativeObjectPosition) {
+                       const auto entityRef = relativeObjectPosition.entityRef;
+                       const auto referencedAgentInterface = worldInterface->GetAgentByName(entityRef);
+                       if (!referencedAgentInterface) logAndThrow("Reference to agent '" + entityRef + "' could not be resolved", errorCallback);
+
+                       acquireGlobalPositionAction->mutable_position()->set_x(referencedAgentInterface->GetPositionX() + relativeObjectPosition.dx);
+                       acquireGlobalPositionAction->mutable_position()->set_y(referencedAgentInterface->GetPositionY() + relativeObjectPosition.dy);
+                       if (relativeObjectPosition.orientation.has_value())
+                       {
+                           const auto orientation = relativeObjectPosition.orientation.value();
+                           if (orientation.r.has_value())
+                               acquireGlobalPositionAction->mutable_orientation()->set_roll(orientation.r.value());
+                           if (orientation.p.has_value())
+                               acquireGlobalPositionAction->mutable_orientation()->set_pitch(orientation.p.value());
+                           if (orientation.h.has_value())
+                               acquireGlobalPositionAction->mutable_orientation()->set_yaw(orientation.h.value());
+                       }
+                   },
+                   [&errorCallback](auto &&other) {
+                       logAndThrow("Position variant not supported for 'openScenario::AcquirePositionAction'", errorCallback);
+                   }},
+               position);
+    return trafficCommand;
+}
+
 void OsmpFmuHandler::GetTrafficUpdate()
 {
-    void* buffer = decode_integer_to_pointer(GetValue(fmuVariables.at(trafficUpdateVariable.value()+".base.hi").first, VariableType::Int).intValue,
-                                             GetValue(fmuVariables.at(trafficUpdateVariable.value()+".base.lo").first, VariableType::Int).intValue);
+    void *buffer = decode_integer_to_pointer(GetValue(fmuVariables.at(trafficUpdateVariable.value() + ".base.hi").first, VariableType::Int).intValue,
+                                             GetValue(fmuVariables.at(trafficUpdateVariable.value() + ".base.lo").first, VariableType::Int).intValue);
 
     if (enforceDoubleBuffering && buffer != nullptr && buffer == previousTrafficUpdate)
     {
@@ -385,7 +452,7 @@ void OsmpFmuHandler::GetTrafficUpdate()
     }
 
     previousTrafficUpdate = buffer;
-    trafficUpdate.ParseFromArray(buffer, GetValue(fmuVariables.at(trafficUpdateVariable.value()+".size").first, VariableType::Int).intValue);
+    trafficUpdate.ParseFromArray(buffer, GetValue(fmuVariables.at(trafficUpdateVariable.value() + ".size").first, VariableType::Int).intValue);
 }
 #endif
 

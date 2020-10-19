@@ -21,6 +21,7 @@
 #include "RemoveAgentsManipulator.h"
 #include "SpeedActionManipulator.h"
 #include "TrajectoryManipulator.h"
+#include "AcquirePositionManipulator.h"
 #include "LaneChangeManipulator.h"
 #include "CustomCommandFactory.h"
 
@@ -156,6 +157,16 @@ extern "C" MANIPULATOR_SHARED_EXPORT ManipulatorInterface* OpenPASS_CreateInstan
                                                                   callbacks,
                                                                   followTrajectoryAction,
                                                                   manipulatorInformation.eventName));
+                }
+                else if (std::holds_alternative<openScenario::AcquirePositionAction>(routingAction))
+                {
+                    const auto &acquirePositionAction = std::get<openScenario::AcquirePositionAction>(routingAction);
+                    return static_cast<ManipulatorInterface *>(new (std::nothrow) AcquirePositionManipulator(
+                        world,
+                        eventNetwork,
+                        callbacks,
+                        manipulatorInformation.eventName,
+                        acquirePositionAction));
                 }
                 else
                 {

@@ -40,10 +40,32 @@ TEST(OsmpFmuUnitTests, GetTrafficCommandFromOpenScenarioTrajectory)
     ASSERT_THAT(secondPoint.position().y(), Eq(1.2));
     ASSERT_THAT(secondPoint.orientation().yaw(), Eq(1.3));
 
-    const auto& thirdPoint = trajectoryAction.trajectory_point(2);
+    const auto &thirdPoint = trajectoryAction.trajectory_point(2);
     ASSERT_THAT(thirdPoint.timestamp().seconds(), Eq(15));
     ASSERT_THAT(thirdPoint.timestamp().nanos(), Eq(200000000));
     ASSERT_THAT(thirdPoint.position().x(), Eq(2.1));
     ASSERT_THAT(thirdPoint.position().y(), Eq(-2.2));
     ASSERT_THAT(thirdPoint.orientation().yaw(), Eq(-2.3));
+}
+
+TEST(OsmpFmuUnitTests, GetTrafficCommandFromOpenScenarioPosition)
+{
+    constexpr double x = 3.14, y = 42.0;
+    openScenario::Position position = openScenario::WorldPosition{3.14, 42.0};
+
+    auto trafficCommand = OsmpFmuHandler::GetTrafficCommandFromOpenScenarioPosition(position, nullptr, nullptr);
+
+    const auto &action = trafficCommand.action(0);
+    auto hasAcquireGlobalPositionAction = action.has_acquire_global_position_action();
+    ASSERT_TRUE(hasAcquireGlobalPositionAction);
+    const auto &positionAction = action.acquire_global_position_action();
+    ASSERT_TRUE(positionAction.has_position());
+    ASSERT_EQ(positionAction.position().x(), x);
+    ASSERT_EQ(positionAction.position().y(), y);
+    ASSERT_FALSE(positionAction.position().has_z());
+    ASSERT_FALSE(positionAction.has_orientation());
+    ASSERT_FALSE(positionAction.orientation().has_roll());
+    ASSERT_FALSE(positionAction.orientation().has_pitch());
+    ASSERT_FALSE(positionAction.orientation().has_yaw());
+    ASSERT_FALSE(positionAction.has_action_header());
 }

@@ -245,6 +245,9 @@ namespace openpass::importer::xml::scenarioImporter::tag
     constexpr char vertex[] {"Vertex"};
     constexpr char waypoint[] {"Waypoint"};
     constexpr char worldPosition[] {"WorldPosition"};
+    constexpr char acquirePositionAction[] {"AcquirePositionAction"};
+    constexpr char relativeWorldPosition[] {"RelativeWorldPosition"};
+    constexpr char relativeObjectPosition[] {"RelativeObjectPosition"};
 }
 
 namespace openpass::importer::xml::scenarioImporter::attribute
@@ -290,6 +293,9 @@ namespace openpass::importer::xml::scenarioImporter::attribute
     constexpr char x[] {"x"};
     constexpr char y[] {"y"};
     constexpr char z[] {"z"};
+    constexpr char dx[] {"dx"};
+    constexpr char dy[] {"dy"};
+    constexpr char dz[] {"dz"};
 }
 
 namespace openpass::importer::xml::sceneryImporter::tag

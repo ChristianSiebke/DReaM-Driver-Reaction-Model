@@ -129,10 +129,28 @@ struct WorldPosition
     std::optional<double> r;
 };
 
+struct RelativeObjectPosition {
+    std::optional<Orientation> orientation{};
+    std::string entityRef{};
+    double dx{};
+    double dy{};
+    std::optional<double> dz{};
+};
+
+struct RelativeWorldPosition {
+    std::optional<Orientation> orientation{};
+    std::string entityRef{};
+    double dx{};
+    double dy{};
+    std::optional<double> dz{};
+};
+
 using Position = std::variant<LanePosition,
                               RelativeLanePosition,
                               RoadPosition,
-                              WorldPosition>;
+                              WorldPosition,
+                              RelativeObjectPosition,
+                              RelativeWorldPosition>;
 
 // Action
 // GlobalAction
@@ -201,7 +219,12 @@ struct FollowTrajectoryAction
     Trajectory trajectory{};
 };
 
-using RoutingAction = std::variant<AssignRouteAction, FollowTrajectoryAction>;
+struct AcquirePositionAction
+{
+    Position position{};
+};
+
+using RoutingAction = std::variant<AssignRouteAction, FollowTrajectoryAction, AcquirePositionAction>;
 
 struct VisibilityAction
 {
