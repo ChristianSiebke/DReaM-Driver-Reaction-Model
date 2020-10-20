@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -68,11 +68,11 @@ T GetAttribute(openScenario::ParameterizedAttribute<T> attribute, const openScen
  */
 struct VehicleAxle
 {
-    openScenario::ParameterizedAttribute<double> maxSteering;     //!< Maximum steering angle
-    openScenario::ParameterizedAttribute<double> wheelDiameter;   //!< Diameter of the wheels
-    openScenario::ParameterizedAttribute<double> trackWidth;      //!< Trackwidth of the axle
-    openScenario::ParameterizedAttribute<double> positionX;       //!< Longitudinal position offset (measured from reference point)
-    openScenario::ParameterizedAttribute<double> positionZ;       //!< Vertical position offset (measured from reference point)
+    openScenario::ParameterizedAttribute<double> maxSteering = -999.0;     //!< Maximum steering angle
+    openScenario::ParameterizedAttribute<double> wheelDiameter = -999.0;   //!< Diameter of the wheels
+    openScenario::ParameterizedAttribute<double> trackWidth = -999.0;      //!< Trackwidth of the axle
+    openScenario::ParameterizedAttribute<double> positionX = -999.0;       //!< Longitudinal position offset (measured from reference point)
+    openScenario::ParameterizedAttribute<double> positionZ = -999.0;       //!< Vertical position offset (measured from reference point)
 };
 
 //! Contains the VehicleModelParameters as defined in the VehicleModelCatalog.
@@ -83,8 +83,8 @@ struct ParametrizedVehicleModelParameters
     openScenario::ParameterizedAttribute<double> width = -999.0;
     openScenario::ParameterizedAttribute<double> length = -999.0;
     openScenario::ParameterizedAttribute<double> height = -999.0;
-    VehicleAxle frontAxle;
-    VehicleAxle rearAxle;
+    VehicleAxle frontAxle{};
+    VehicleAxle rearAxle{};
     openScenario::ParameterizedAttribute<double> distanceReferencePointToLeadingEdge = -999.0;
     openScenario::ParameterizedAttribute<double> maxVelocity = -999.0;
     openScenario::ParameterizedAttribute<double> weight = -999.0;
