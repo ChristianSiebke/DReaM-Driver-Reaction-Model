@@ -370,7 +370,7 @@ struct RoadObjectSpecification // http://www.opendrive.org/docs/OpenDRIVEFormatS
     double t {0};
     double zOffset {0};
     double validLength {0};
-    RoadElementOrientation orientation;
+    RoadElementOrientation orientation{RoadElementOrientation::positive};
     double width {0};
     double length {0};
     double radius {0};
