@@ -17,6 +17,7 @@
 #include <QFile>
 
 #include "common/dynamicsSignal.h"
+#include "common/sensorDataSignal.h"
 #include "common/trajectorySignal.h"
 #include "core/slave/modules/World_OSI/WorldData.h"
 #include "google/protobuf/util/json_util.h"
@@ -184,8 +185,12 @@ constexpr double EPSILON = 0.001;
 
 void OsmpFmuHandler::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterface const>& data, int time)
 {
+    if (localLinkId == 6)
+    {
+        data = std::make_shared<SensorDataSignal const>(sensorData);
+    }
 #ifdef USE_EXTENDED_OSI
-    if (localLinkId == 0)
+    else if (localLinkId == 0)
     {
         const auto& baseMoving = trafficUpdate.mutable_update()->mutable_base();
         double velocity = std::sqrt(baseMoving->velocity().x() * baseMoving->velocity().x() + baseMoving->velocity().y() * baseMoving->velocity().y());
