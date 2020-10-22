@@ -27,7 +27,12 @@ DynamicProfileSampler& DynamicProfileSampler::SampleVehicleProfile()
 
 DynamicProfileSampler& DynamicProfileSampler::SampleVehicleComponentProfiles()
 {
-    VehicleProfile vehicleProfile = profiles->GetVehicleProfiles().at(sampledProfiles.vehicleProfileName);
+    auto find_result = profiles->GetVehicleProfiles().find(sampledProfiles.vehicleProfileName);
+    if (find_result == profiles->GetVehicleProfiles().end())
+    {
+        throw std::runtime_error("No vehicle profile with name \""+sampledProfiles.vehicleProfileName+"\" defined");
+    }
+    VehicleProfile& vehicleProfile = find_result->second;
     for (VehicleComponent vehicleComponentInProfile : vehicleProfile.vehicleComponents)
     {
         std::string vehicleComponentName = Sampler::Sample(vehicleComponentInProfile.componentProfiles, &stochastics);

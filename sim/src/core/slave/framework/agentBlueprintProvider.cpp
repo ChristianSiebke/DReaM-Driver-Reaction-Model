@@ -64,8 +64,13 @@ AgentBlueprint AgentBlueprintProvider::SampleAgent(const std::string& agentProfi
     }
     catch (const std::out_of_range& e)
     {
-        std::string message{e.what()};
-        message += ": Tried to sample undefined AgentProfile '" + agentProfileName + "'";
+        std::string message{"Error while sampling AgentProfile \""+agentProfileName+"\": "+e.what()};
+        LOG_INTERN(LogLevel::Error) << message;
+        throw std::runtime_error(message);
+    }
+    catch (const std::runtime_error& e)
+    {
+        std::string message{"Error while sampling AgentProfile \""+agentProfileName+"\": "+e.what()};
         LOG_INTERN(LogLevel::Error) << message;
         throw std::runtime_error(message);
     }
