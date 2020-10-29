@@ -15,7 +15,7 @@
 
 namespace RouteCalculation
 {
-    RoadGraphVertex FilterRoadGraphByStartPositionRecursive(const RoadGraph& roadGraph, RoadGraphVertex current, int maxDepth, RoadGraph& filteredGraph)
+    static RoadGraphVertex FilterRoadGraphByStartPositionRecursive(const RoadGraph& roadGraph, RoadGraphVertex current, int maxDepth, RoadGraph& filteredGraph)
     {
         const auto& routeElement = get(RouteElement(), roadGraph, current);
         auto newVertex = add_vertex(routeElement, filteredGraph);
@@ -37,7 +37,7 @@ namespace RouteCalculation
     //! \param start        start position in the network
     //! \param maxDepth     maximum depth of resulting tree
     //! \return road network as tree with given root
-    std::pair<RoadGraph, RoadGraphVertex> FilterRoadGraphByStartPosition(const RoadGraph& roadGraph, RoadGraphVertex start, int maxDepth)
+    static std::pair<RoadGraph, RoadGraphVertex> FilterRoadGraphByStartPosition(const RoadGraph& roadGraph, RoadGraphVertex start, int maxDepth)
     {
         RoadGraph filteredGraph;
         auto root = FilterRoadGraphByStartPositionRecursive(roadGraph, start, maxDepth, filteredGraph);
@@ -51,10 +51,10 @@ namespace RouteCalculation
     //! \param weights      weight map of all edges of the graph
     //! \param stochastics  stochastics module
     //! \return sampled target vertex
-    RoadGraphVertex SampleRoute(const RoadGraph& roadGraph,
-                                RoadGraphVertex root,
-                                const std::map<RoadGraphEdge, double>& weights,
-                                StochasticsInterface& stochastics)
+    static RoadGraphVertex SampleRoute(const RoadGraph& roadGraph,
+                                       RoadGraphVertex root,
+                                       const std::map<RoadGraphEdge, double>& weights,
+                                       StochasticsInterface& stochastics)
     {
         auto current = root;
         bool reachedEnd = false;

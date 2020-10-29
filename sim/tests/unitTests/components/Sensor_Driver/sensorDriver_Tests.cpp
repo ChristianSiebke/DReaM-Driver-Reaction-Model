@@ -50,7 +50,7 @@ TEST(SensorDriver_UnitTests, CorrectInformationInSignal)
     RoadGraphVertex target = add_vertex(roadGraph);
     RoadGraphEdge edge = add_edge(start, target, roadGraph).first;
 
-    ObjectPosition egoAgentPosition{{}, {{roadId, GlobalRoadPosition{roadId, -2, 50, 4.0, 5.0}}},{{roadId, RoadInterval{{-1}, 0, 0, {6.0, 7.0}}}}};
+    ObjectPosition egoAgentPosition{{}, {{roadId, GlobalRoadPosition{roadId, -2, 50, 4.0, 0.5}}},{{roadId, RoadInterval{{-1}, 0, 0, {6.0, 0.7}}}}};
     ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(ReturnRef(egoAgentPosition));
     ON_CALL(fakeAgent, GetVelocity(VelocityScope::Absolute)).WillByDefault(Return(2.0));
     ON_CALL(fakeAgent, GetAcceleration()).WillByDefault(Return(3.0));

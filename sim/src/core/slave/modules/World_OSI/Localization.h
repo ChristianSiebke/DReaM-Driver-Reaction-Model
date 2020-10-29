@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -75,6 +75,18 @@ std::function<void (const RTreeElement&)> LocateOnGeometryElement(const OWL::Int
                                                              const double& hdg,
                                                              LocatedObject& locatedObject);
 
+//! Calculates the coordinates of the point on the GeometryElement and stores the result in the map
+//!
+//! \param worldData        OWL WorldData
+//! \param point            point to locate
+//! \param hdg              heading of the object
+//! \param result    Output of the function is stored here
+//! \return         function that the boost r-tree calls for every LaneGeometryElement, that possibly intersects with the object
+std::function<void (const RTreeElement&)> LocateOnGeometryElement(const OWL::Interfaces::WorldData& worldData,
+                                                             const Common::Vector2d& point,
+                                                             const double& hdg,
+                                                             std::map<const std::string, GlobalRoadPosition>& result);
+
 std::vector<Common::Vector2d> GetIntersectionPoints (const std::vector<Common::Vector2d>& elementPoints, const std::vector<Common::Vector2d>& agentBoundary);
 
 polygon_t GetBoundingBox(double x, double y, double length, double width, double rotation, double center);
@@ -91,6 +103,8 @@ public:
     void Init();
 
     Result Locate(const polygon_t& boundingBox, OWL::Interfaces::WorldObject& object) const;
+
+    std::map<const std::string, GlobalRoadPosition> Locate(const Common::Vector2d& point, const double& hdg) const;
 
     void Unlocate(OWL::Interfaces::WorldObject& object) const;
 

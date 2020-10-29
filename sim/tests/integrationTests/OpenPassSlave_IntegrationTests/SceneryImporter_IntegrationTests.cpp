@@ -602,6 +602,10 @@ AgentAdapter* AddAgentToWorld (SimulationSlave::World& world,
     spawnParameter.positionY = y;
     spawnParameter.velocity = 1.0;
     spawnParameter.yawAngle = 0.0;
+    auto position = world.WorldCoord2LaneCoord(x,y,0);
+    RoadGraph roadGraph;
+    auto vertex = add_vertex(RouteElement{position.cbegin()->second.roadId, true}, roadGraph);
+    spawnParameter.route = {roadGraph, vertex, vertex};
 
     AgentBlueprint agentBlueprint;
     agentBlueprint.SetVehicleModelParameters(vehicleParameter);

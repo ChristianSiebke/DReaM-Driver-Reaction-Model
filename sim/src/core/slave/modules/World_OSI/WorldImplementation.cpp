@@ -374,6 +374,11 @@ Position WorldImplementation::LaneCoord2WorldCoord(double distanceOnLane, double
     return worldDataQuery.GetPositionByDistanceAndLane(lane, distanceOnLane, offset);
 }
 
+std::map<const std::string, GlobalRoadPosition> WorldImplementation::WorldCoord2LaneCoord(double x, double y, double heading) const
+{
+    return localizer.Locate({x,y}, heading);
+}
+
 bool WorldImplementation::IsSValidOnLane(std::string roadId, int laneId,
         double distance) //when necessary optional parameter with reference to get point
 {

@@ -116,7 +116,16 @@ private:
      *
      * \return  graph of road network from agent's perspective with target node as given by OpenScenario, nullopt if no road in OpenScenario defined
      */
-    std::optional<Route> GetRoute(const std::vector<RouteElement>& roads);
+    Route GetPredefinedRoute(const std::vector<RouteElement>& roads);
+
+    /*!
+     * \brief Samples a random route for the agent starting at the given position
+     *
+     * \param spawnParameter parameters containing spawn position
+     *
+     * \return sampled route
+     */
+    Route GetRandomRoute(const SpawnParameter& spawnParameter);
 
     /*!
     * \brief Logs a error message.

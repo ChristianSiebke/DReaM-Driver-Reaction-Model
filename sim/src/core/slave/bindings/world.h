@@ -184,6 +184,11 @@ public:
         return implementation->LaneCoord2WorldCoord(distance, offset, roadId, laneId);
     }
 
+    std::map<const std::string, GlobalRoadPosition> WorldCoord2LaneCoord(double x, double y, double heading) const override
+    {
+        return implementation->WorldCoord2LaneCoord(x, y, heading);
+    }
+
     bool IsSValidOnLane(std::string roadId, int laneId, double distance) override
     {
         return implementation->IsSValidOnLane(roadId, laneId, distance);

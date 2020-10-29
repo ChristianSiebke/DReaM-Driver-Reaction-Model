@@ -73,17 +73,14 @@ bool AgentAdapter::InitAgentParameter(int id,
     this->currentGear = static_cast<int>(spawnParameter.gear);
 
     SetSensorParameters(agentBlueprint->GetSensorParameters());
-
+    
     // spawn tasks are executed before any other task types within current scheduling time
     // other task types will have a consistent view of the world
     // calculate initial position
     Locate();
 
-    if (spawnParameter.route)
-    {
-        auto& route = spawnParameter.route.value();
-        egoAgent.SetRoadGraph(std::move(route.roadGraph), route.root, route.target);
-    }
+    auto& route = spawnParameter.route;
+    egoAgent.SetRoadGraph(std::move(route.roadGraph), route.root, route.target);
 
     return true;
 }

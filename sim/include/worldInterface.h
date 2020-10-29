@@ -266,6 +266,13 @@ public:
             int laneId) const = 0;
 
     //-----------------------------------------------------------------------------
+    //! Retrieve all lane positions corresponding to the specified world position
+    //!
+    //! @return Position on all lanes at specified world position
+    //-----------------------------------------------------------------------------
+    virtual std::map<const std::string, GlobalRoadPosition> WorldCoord2LaneCoord(double x, double y, double heading) const = 0;
+
+    //-----------------------------------------------------------------------------
     //! Tries to create an internal scenery from a given file.
     //!
     //! @return

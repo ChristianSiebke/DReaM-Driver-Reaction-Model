@@ -1,4 +1,4 @@
-/*******************************************************************************
+﻿/*******************************************************************************
 * Copyright (c) 2017, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
@@ -15,6 +15,9 @@
 #include "agentBlueprint.h"
 #include "framework/agentFactory.h"
 #include "framework/sampler.h"
+#include "common/RoutePlanning/RouteCalculation.h"
+
+constexpr size_t MAX_DEPTH = 10; //! Limits search depths in case of cyclic network
 
 SpawnPointScenario::SpawnPointScenario(const SpawnPointDependencies* dependencies,
                        const CallbackInterface* callbacks):
@@ -245,7 +248,14 @@ SpawnParameter SpawnPointScenario::CalculateSpawnParameter(const SpawnInfo& spaw
         spawnParameter.acceleration = spawnInfo.acceleration.value_or(0.0);
     }
 
-    spawnParameter.route = GetRoute(spawnInfo.route.value_or(std::vector<RouteElement>{}));
+    if (spawnInfo.route.has_value())
+    {
+        spawnParameter.route = GetPredefinedRoute(spawnInfo.route.value());
+    }
+    else
+    {
+        spawnParameter.route = GetRandomRoute(spawnParameter);
+    }
 
     return spawnParameter;
 }
@@ -257,14 +267,13 @@ double SpawnPointScenario::CalculateAttributeValue(const openScenario::Stochasti
                                                dependencies.stochastics);
 }
 
-std::optional<Route> SpawnPointScenario::GetRoute(const std::vector<RouteElement>& roads)
+Route SpawnPointScenario::GetPredefinedRoute(const std::vector<RouteElement>& roads)
 {
     if (roads.empty())
     {
-        return std::nullopt;
+        LogError("Route is empty");
     }
 
-    constexpr size_t MAX_DEPTH = 10; //! Limits search depths in case of cyclic network
     auto [roadGraph , root] = GetWorld()->GetRoadGraph(roads.front(), std::max(MAX_DEPTH, roads.size()));
 
     RoadGraphVertex target = root;
@@ -285,6 +294,21 @@ std::optional<Route> SpawnPointScenario::GetRoute(const std::vector<RouteElement
             LogError("Invalid route defined in Scenario. Node " + road->roadId + " not reachable");
         }
     }
+
+    return Route{roadGraph, root, target};
+}
+
+Route SpawnPointScenario::GetRandomRoute(const SpawnParameter& spawnParameter)
+{
+    const auto& roadPositions = GetWorld()->WorldCoord2LaneCoord(spawnParameter.positionX, spawnParameter.positionY, spawnParameter.yawAngle);
+    if (roadPositions.empty())
+    {
+        LogError("SpawnPosition is outside world.");
+    }
+    auto [roadGraph, root] = GetWorld()->GetRoadGraph(CommonHelper::GetRoadWithLowestHeading(roadPositions), MAX_DEPTH);
+    std::map<RoadGraph::edge_descriptor, double> weights = GetWorld()->GetEdgeWeights(roadGraph);
+    auto target = RouteCalculation::SampleRoute(roadGraph, root, weights, *dependencies
+            .stochastics);
 
     return Route{roadGraph, root, target};
 }

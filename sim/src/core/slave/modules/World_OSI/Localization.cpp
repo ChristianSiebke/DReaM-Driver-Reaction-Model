@@ -142,16 +142,53 @@ std::function<void (const RTreeElement&)>  LocateOnGeometryElement(const OWL::In
 }
 
 LocatedObject LocateOnGeometryElements(const bg_rTree& rTree, const OWL::Interfaces::WorldData& worldData, const std::vector<Common::Vector2d>& agentBoundary, CoarseBoundingBox theAgent,
-                           const Common::Vector2d referencePoint, const Common::Vector2d mainLaneLocator, double hdg)
+                        const Common::Vector2d referencePoint, const Common::Vector2d mainLaneLocator, double hdg)
 {
-    LocatedObject locatedObject;
-    rTree.query(bgi::intersects(theAgent),
-                            boost::make_function_output_iterator(LocateOnGeometryElement(worldData, agentBoundary, referencePoint, mainLaneLocator, hdg, locatedObject)));
+ LocatedObject locatedObject;
+ rTree.query(bgi::intersects(theAgent),
+                         boost::make_function_output_iterator(LocateOnGeometryElement(worldData, agentBoundary, referencePoint, mainLaneLocator, hdg, locatedObject)));
 
-    return locatedObject;
+ return locatedObject;
 }
 
+std::function<void (const RTreeElement&)> LocateOnGeometryElement(const OWL::Interfaces::WorldData& worldData, const Common::Vector2d& point,
+                                                                  const double& hdg, std::map<const std::string, GlobalRoadPosition>& result)
+{
+    return  [&](auto const& value)
+    {
+        const LocalizationElement& localizationElement = *value.second;
 
+        boost::geometry::de9im::mask mask("**F******"); // within
+        if (!boost::geometry::relate(point_t{point.x, point.y}, localizationElement.boost_polygon, mask)) //Check wether point is inside polygon
+        {
+            return;
+        }
+
+        WorldToRoadCoordinateConverter converter(localizationElement);
+
+        const OWL::Interfaces::Lane* lane = localizationElement.lane;
+        const auto laneOsiId = lane->GetId();
+        const auto laneOdId = worldData.GetLaneIdMapping().at(laneOsiId);
+        const auto roadId = lane->GetRoad().GetId();
+
+        if (converter.IsConvertible(point))
+        {
+            auto [s, t, yaw] = converter.GetRoadCoordinate(point, hdg);
+            result[roadId] = GlobalRoadPosition(roadId, laneOdId, s, t, yaw);
+        }
+    };
+}
+
+std::map<const std::string, GlobalRoadPosition> LocateOnGeometryElements(const bg_rTree& rTree, const OWL::Interfaces::WorldData& worldData,
+                           const Common::Vector2d point, double hdg)
+{
+    std::map<const std::string, GlobalRoadPosition> result;
+    CoarseBoundingBox box = GetSearchBox({point});
+    rTree.query(bgi::intersects(box),
+                            boost::make_function_output_iterator(LocateOnGeometryElement(worldData, point, hdg, result)));
+
+    return result;
+}
 
 polygon_t GetBoundingBox(double x, double y, double length, double width, double rotation, double center)
 {
@@ -265,9 +302,9 @@ Result Localizer::Locate(const polygon_t& boundingBox, OWL::Interfaces::WorldObj
 
     Common::Vector2d referencePoint{referencePointPosition.x, referencePointPosition.y};
     Common::Vector2d mainLaneLocator{referencePoint};
-    if (object.Is<OWL::MovingObject>())
+    if (object.Is<OWL::Interfaces::MovingObject>())
     {
-        const auto& movingObject = object.As<OWL::MovingObject>();
+        const auto& movingObject = object.As<OWL::Interfaces::MovingObject>();
         double distanceRefToFront = movingObject->GetDistanceReferencePointToLeadingEdge();
         mainLaneLocator = {referencePoint.x + distanceRefToFront * cos(orientation.yaw), referencePoint.y + distanceRefToFront * sin(orientation.yaw)};
     }
@@ -287,6 +324,14 @@ Result Localizer::Locate(const polygon_t& boundingBox, OWL::Interfaces::WorldObj
     }
 
     return result;
+}
+
+std::map<const std::string, GlobalRoadPosition> Localizer::Locate(const Common::Vector2d& point, const double& hdg) const
+{
+    return LocateOnGeometryElements(rTree,
+                                    worldData,
+                                    point,
+                                    hdg);
 }
 
 void Localizer::Unlocate(OWL::Interfaces::WorldObject& object) const

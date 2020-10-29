@@ -92,20 +92,13 @@ void SpawnPointRuntimeCommon::AdjustVelocityForCrash(SpawnDetails& spawnDetails,
     const auto agentRearLength = spawnDetails.agentBlueprint.GetVehicleModelParameters().length - spawnDetails.agentBlueprint.GetVehicleModelParameters().distanceReferencePointToLeadingEdge;
     const auto intendedVelocity = spawnDetails.agentBlueprint.GetSpawnParameter().velocity;
 
-    if (spawnDetails.agentBlueprint.GetSpawnParameter().route.has_value())
-    {
-        spawnDetails.agentBlueprint.GetSpawnParameter().velocity = worldAnalyzer.CalculateSpawnVelocityToPreventCrashing(sceneryInformation.roadId,
-                                                                                                                         sceneryInformation.laneId,
-                                                                                                                         sceneryInformation.sPosition,
-                                                                                                                         agentFrontLength,
-                                                                                                                         agentRearLength,
-                                                                                                                         intendedVelocity,
-                                                                                                                         spawnDetails.agentBlueprint.GetSpawnParameter().route.value());
-    }
-    else
-    {
-        LogError("Can't adjust spawn velocity because of missing route.");
-    }
+    spawnDetails.agentBlueprint.GetSpawnParameter().velocity = worldAnalyzer.CalculateSpawnVelocityToPreventCrashing(sceneryInformation.roadId,
+                                                                                                                     sceneryInformation.laneId,
+                                                                                                                     sceneryInformation.sPosition,
+                                                                                                                     agentFrontLength,
+                                                                                                                     agentRearLength,
+                                                                                                                     intendedVelocity,
+                                                                                                                     spawnDetails.agentBlueprint.GetSpawnParameter().route);
 }
 
 bool SpawnPointRuntimeCommon::AreSpawningCoordinatesValid(const SpawnDetails& spawnDetails,
@@ -113,19 +106,12 @@ bool SpawnPointRuntimeCommon::AreSpawningCoordinatesValid(const SpawnDetails& sp
 {
     const auto vehicleModelParameters = spawnDetails.agentBlueprint.GetVehicleModelParameters();
 
-    if (spawnDetails.agentBlueprint.GetSpawnParameter().route.has_value())
-    {
-            return worldAnalyzer.AreSpawningCoordinatesValid(sceneryInformation.roadId,
-                                                             sceneryInformation.laneId,
-                                                             sceneryInformation.sPosition,
-                                                             0 /* offset */,
-                                                             spawnDetails.agentBlueprint.GetSpawnParameter().route.value(),
-                                                             vehicleModelParameters);
-    }
-    else
-    {
-        LogError("Can't validate spawning coordinates because of missing route.");
-    }
+    return worldAnalyzer.AreSpawningCoordinatesValid(sceneryInformation.roadId,
+                                                     sceneryInformation.laneId,
+                                                     sceneryInformation.sPosition,
+                                                     0 /* offset */,
+                                                     spawnDetails.agentBlueprint.GetSpawnParameter().route,
+                                                     vehicleModelParameters);
 
 }
 

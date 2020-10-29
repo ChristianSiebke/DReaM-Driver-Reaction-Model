@@ -213,6 +213,28 @@ static double CalculateMomentInertiaYaw(double mass, double length, double width
 
     return tokens;
 }
+
+static RouteElement GetRoadWithLowestHeading(const std::map<const std::string, GlobalRoadPosition>& roadPositions)
+{
+    RouteElement bestFitting;
+    double minHeading = std::numeric_limits<double>::max();
+    for (const auto [roadId, position] : roadPositions)
+    {
+        const auto absHeadingInOdDirection = std::abs(position.roadPosition.hdg);
+        if (absHeadingInOdDirection < minHeading)
+        {
+            bestFitting = {roadId, true};
+            minHeading = absHeadingInOdDirection;
+        }
+        const auto absHeadingAgainstOdDirection = std::abs(SetAngleToValidRange(position.roadPosition.hdg + M_PI));
+        if (absHeadingAgainstOdDirection < minHeading)
+        {
+            bestFitting = {roadId, false};
+            minHeading = absHeadingAgainstOdDirection;
+        }
+    }
+    return bestFitting;
+}
 }; // namespace CommonHelper
 
 //-----------------------------------------------------------------------------

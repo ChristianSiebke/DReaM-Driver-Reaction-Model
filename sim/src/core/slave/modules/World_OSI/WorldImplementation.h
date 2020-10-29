@@ -149,6 +149,8 @@ public:
     Position LaneCoord2WorldCoord(double distanceOnLane, double offset, std::string roadId,
                                           int laneId) const override;
 
+    std::map<const std::string, GlobalRoadPosition> WorldCoord2LaneCoord(double x, double y, double heading) const override;
+
     bool IsSValidOnLane(std::string roadId, int laneId, double distance) override;
 
     bool IsDirectionalRoadExisting(const std::string& roadId, bool inOdDirection) override;
