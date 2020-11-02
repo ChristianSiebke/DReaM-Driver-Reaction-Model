@@ -132,7 +132,19 @@ LanePosition ScenarioImporterHelper::ImportLanePosition(QDomElement positionElem
 {
     LanePosition lanePosition;
     lanePosition.s = ParseAttribute<double>(positionElement, ATTRIBUTE::s, parameters);
-    lanePosition.laneId = ParseAttribute<int>(positionElement, ATTRIBUTE::laneId, parameters);
+    const auto laneIdString = ParseAttribute<std::string>(positionElement, ATTRIBUTE::laneId, parameters);
+    try
+    {
+        lanePosition.laneId = std::stoi(laneIdString);
+    }
+    catch(std::invalid_argument)
+    {
+        ThrowIfFalse(false, positionElement, "LaneId must be integer");
+    }
+    catch(std::out_of_range)
+    {
+        ThrowIfFalse(false, positionElement, "LaneId is out of range");
+    }
     lanePosition.roadId = ParseAttribute<std::string>(positionElement, ATTRIBUTE::roadId, parameters);
 
     lanePosition.offset = ParseOptionalAttribute<double>(positionElement, ATTRIBUTE::offset, parameters);
