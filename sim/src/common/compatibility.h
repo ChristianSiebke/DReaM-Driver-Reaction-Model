@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -10,26 +10,40 @@
 
 #pragma once
 
-#include <string>
 #include <sstream>
+#include <string>
 
 namespace openpass::common {
 
 struct Version
 {
-    unsigned int major;
-    unsigned int minor;
-    unsigned int patch;
+    std::string tag;
+    unsigned int major{0};
+    unsigned int minor{0};
+    unsigned int patch{0};
 
-    constexpr explicit Version (unsigned int major, unsigned int minor, unsigned int patch) noexcept : 
-    major{major}, minor{minor}, patch{patch}
-    {}
-    
+    explicit Version(const std::string& tag) :
+        tag{tag}
+    {
+    }
+
+    explicit Version(unsigned int major, unsigned int minor, unsigned int patch) noexcept :
+        major{major}, minor{minor}, patch{patch}
+    {
+    }
+
     std::string str() const noexcept
     {
-        std::ostringstream oss;
-        oss << major << '.' << minor << '.' << patch;
-        return oss.str();
+        if (tag.empty())
+        {
+            std::ostringstream oss;
+            oss << major << '.' << minor << '.' << patch;
+            return oss.str();
+        }
+        else
+        {
+            return tag;
+        }
     }
 };
 
