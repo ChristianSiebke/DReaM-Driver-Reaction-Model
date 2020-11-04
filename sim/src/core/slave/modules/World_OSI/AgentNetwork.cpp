@@ -126,14 +126,11 @@ void AgentNetwork::PublishGlobalData(Publisher publish)
         const auto& egoAgent = agent->GetEgoAgent();
         if (egoAgent.HasValidRoute())
         {
-            const auto frontAgents = egoAgent.GetAgentsInRange(0, std::numeric_limits<double>::max(), 0);
-
             publish(agentId, "PositionRoute", egoAgent.GetMainLocatePosition().roadPosition.s);
             publish(agentId, "TCoordinate", egoAgent.GetPositionLateral());
             publish(agentId, "Lane", egoAgent.GetMainLocatePosition().laneId);
             publish(agentId, "Road", egoAgent.GetRoadId());
             publish(agentId, "SecondaryLanes", agent->GetObjectPosition().touchedRoads.at(egoAgent.GetRoadId()).lanes);
-            publish(agentId, "AgentInFront", frontAgents.empty() ? -1 : frontAgents.front()->GetId());
         }
         else
         {

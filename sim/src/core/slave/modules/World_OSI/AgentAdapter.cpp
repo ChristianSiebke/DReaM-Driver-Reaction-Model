@@ -72,19 +72,18 @@ bool AgentAdapter::InitAgentParameter(int id,
     GetBaseTrafficObject().SetAbsAcceleration(spawnParameter.acceleration);
     this->currentGear = static_cast<int>(spawnParameter.gear);
 
-
     SetSensorParameters(agentBlueprint->GetSensorParameters());
+
+    // spawn tasks are executed before any other task types within current scheduling time
+    // other task types will have a consistent view of the world
+    // calculate initial position
+    Locate();
 
     if (spawnParameter.route)
     {
         auto& route = spawnParameter.route.value();
         egoAgent.SetRoadGraph(std::move(route.roadGraph), route.root, route.target);
     }
-
-    // spawn tasks are executed before any other task types within current scheduling time
-    // other task types will have a consistent view of the world
-    // calculate initial position
-    Locate();
 
     return true;
 }
@@ -99,7 +98,6 @@ bool AgentAdapter::Update()
     {
         return false;
     }
-    egoAgent.UpdatePositionInGraph();
     return true;
 }
 
@@ -121,6 +119,8 @@ bool AgentAdapter::Locate()
     locateResult = localizer.Locate(GetBoundingBox2D(), GetBaseTrafficObject());
 
     GetBaseTrafficObject().SetLocatedPosition(locateResult.position);
+
+    egoAgent.Update();
 
     return locateResult.isOnRoute;
 }

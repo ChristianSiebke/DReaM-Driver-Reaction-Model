@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -110,6 +110,7 @@ public:
     /*!
      * \brief GetAgentGeometry
      * Retrieve geometrical vectors of the agent.
+     * The vectors of each object are cached during the same timestep for better performance
      *
      * \param[in] agent                 agent reference
      * \param[out] resultCorners        vector of corners
@@ -288,6 +289,8 @@ private:
                                     AgentInterface *agent,
                                     AgentInterface *other);
 
+    //! Cache for the geometries of the world objects during one timestep
+    std::map<const WorldObjectInterface*, std::pair<std::array<Common::Vector2d, 4>, std::array<Common::Vector2d, 2>>> objectGeometryCache;
 };
 
 

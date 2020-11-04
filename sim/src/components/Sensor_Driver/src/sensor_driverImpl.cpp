@@ -255,6 +255,8 @@ void SensorDriverImplementation::GetSurroundingObjectsInformation()
     surroundingObjects.objectRearLeft = GetOtherObjectInformation(GetObject(visibilityDistance, 1, false));
     surroundingObjects.objectFrontRight = GetOtherObjectInformation(GetObject(visibilityDistance, -1, true));
     surroundingObjects.objectRearRight = GetOtherObjectInformation(GetObject(visibilityDistance, -1, false));
+
+    GetPublisher()->Publish("AgentInFront", surroundingObjects.objectFront.exist ? surroundingObjects.objectFront.id : -1);
 }
 
 const WorldObjectInterface* SensorDriverImplementation::GetObject(double visibilityDistance, int relativeLane, bool forwardSearch)

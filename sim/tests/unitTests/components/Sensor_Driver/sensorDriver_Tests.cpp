@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *               2019 AMFD GmbH
 *
 * This program and the accompanying materials are made
@@ -14,6 +14,7 @@
 
 #include "fakeAgent.h"
 #include "fakeEgoAgent.h"
+#include "fakePublisher.h"
 #include "fakeWorldObject.h"
 #include "fakeWorld.h"
 #include "fakeStochastics.h"
@@ -39,6 +40,7 @@ TEST(SensorDriver_UnitTests, CorrectInformationInSignal)
     NiceMock<FakeEgoAgent> fakeEgoAgent;
     NiceMock<FakeWorld> fakeWorld;
     NiceMock<FakeStochastics> fakeStochastics;
+    NiceMock<FakePublisher> fakePublisher;
 
     ON_CALL(fakeAgent, GetEgoAgent()).WillByDefault(ReturnRef(fakeEgoAgent));
     ON_CALL(fakeEgoAgent, GetAgent()).WillByDefault(Return(&fakeAgent));
@@ -124,7 +126,7 @@ TEST(SensorDriver_UnitTests, CorrectInformationInSignal)
                                             &fakeStochastics,
                                             &fakeWorld,
                                             nullptr,
-                                            nullptr,
+                                            &fakePublisher,
                                             nullptr,
                                             &fakeAgent);
 
