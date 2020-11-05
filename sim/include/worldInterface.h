@@ -370,6 +370,18 @@ public:
     virtual bool IsDirectionalRoadExisting(const std::string &, bool inOdDirection) = 0;
 
     //-----------------------------------------------------------------------------
+    //! Return whether a LaneType is valid based on a range of valid LaneTypes
+    //!
+    //! @param[in] roadId  OpenDriveId of the road being evaluated
+    //! @param[in] laneId  OpenDriveId of the lane being evaluated
+    //! @param[in] distanceOnLane  distance in m along the road
+    //! @param[in] validLaneTypes  container of valid laneTypes
+    //!
+    //! @return true if the lane has a valid LaneType
+    //-----------------------------------------------------------------------------
+    virtual bool IsLaneTypeValid(const std::string &roadId, const int laneId, const double distanceOnLane, const LaneTypes& validLaneTypes) = 0;
+
+    //-----------------------------------------------------------------------------
     //! Returns interpolated value for the curvature of the lane at the given position.
     //! Neighbouring joints are used as interpolation support point.
     //! Returns 0 if there is no lane at the given position.
@@ -492,6 +504,16 @@ public:
                                                                                             const ObjectPosition& objectPos,
                                                                                             const std::optional<double> objectReferenceS,
                                                                                             const ObjectPosition& targetObjectPos) const = 0;
+
+    //-----------------------------------------------------------------------------
+    //! \brief This method returns all LaneSections of a road
+    //!
+    //! \param roadId   Id of the road
+    //!
+    //! \return LaneSections
+    //-----------------------------------------------------------------------------
+    virtual LaneSections GetLaneSections(const std::string& roadId) const = 0;
+
     //-----------------------------------------------------------------------------
     //! Retrieve whether a new agent intersects with an existing agent
     //!

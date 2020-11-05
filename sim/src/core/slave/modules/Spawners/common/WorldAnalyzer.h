@@ -49,14 +49,16 @@ public:
     //! inbetween two scenario agents.
     //!
     //! \param roadId       Id of the road
-    //! \param laneId       Id of the lane
     //! \param sStart       start of the search range
     //! \param sEnd         end of the search range
+    //! \param validLaneIds         Container of all valid lane ids
+    //! \param supportedLaneTypes   Container of all valid lanetypes
     //! \return valid spawning ranges
-    std::optional<ValidLaneSpawningRanges> GetValidLaneSpawningRanges(const RoadId& roadId,
-                                                                      const LaneId laneId,
-                                                                      const SPosition sStart,
-                                                                      const SPosition sEnd) const;
+    LaneSpawningRanges GetValidLaneSpawningRanges(const RoadId& roadId,
+                                                  const SPosition sStart,
+                                                  const SPosition sEnd,
+                                                  const std::vector<int>& validLaneIds,
+                                                  const LaneTypes& supportedLaneTypes) const;
 
     //! Calculates the next s coordinate to spawn an agents on
     //!
@@ -68,6 +70,7 @@ public:
     //! \param intendedVelocity     spawning velocity
     //! \param gapInSeconds         desired TGap between spawned agent and next agent
     //! \param route                route of the agent
+    //! \param supportedLaneTypes   Container with all valid LaneTypes
     //! \return s position
     std::optional<double> GetNextSpawnPosition(const RoadId& roadId,
                                                const LaneId laneId,
@@ -76,7 +79,8 @@ public:
                                                const double agentRearLength,
                                                const double intendedVelocity,
                                                const double gapInSeconds,
-                                               const Route& route) const;
+                                               const Route& route,
+                                               const LaneTypes& supportedLaneTypes) const;
 
 
     //! Adjust spawning velocity so that the spawned agent won't immediately crash.
@@ -133,9 +137,14 @@ public:
     //!
     //! \param roadId       Id of the road
     //! \param laneId       Id of the lane
+    //! \param distanceOnLane   s Coordinate along road
+    //! \param validLaneTypes   Container of all valid lane types
+    //!
     //! \return true, if roadId exists in laneId direction
     bool ValidateRoadIdInDirection(const RoadId& roadId,
-                                   const LaneId laneId) const;
+                                   const LaneId laneId,
+                                   const double distanceOnLane,
+                                   const LaneTypes& validLaneTypes) const;
 
     //! Randomly generates a route based on a starting roadId
     //!
@@ -148,10 +157,11 @@ public:
                       StochasticsInterface* stochastics) const;
 
 private:
-    static std::optional<ValidLaneSpawningRanges> GetValidSpawningInformationForRange(const double sStart,
-                                                                                      const double sEnd,
-                                                                                      const double firstScenarioAgentSPosition,
-                                                                                      const double lastScenarioAgentSPosition);
+    static LaneSpawningRanges GetValidSpawningInformationForRange(const int laneId,
+                                                                  const double sStart,
+                                                                  const double sEnd,
+                                                                  const double firstScenarioAgentSPosition,
+                                                                  const double lastScenarioAgentSPosition);
 
     bool IsOffsetValidForLane(const RoadId& roadId,
                               const LaneId laneId,

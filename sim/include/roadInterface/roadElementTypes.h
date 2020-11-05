@@ -75,30 +75,25 @@ enum class RoadLinkSideType
 //-----------------------------------------------------------------------------
 //! Type of lane
 //-----------------------------------------------------------------------------
-enum class RoadLaneType // http://www.opendrive.org/docs/OpenDRIVEFormatSpecRev1.4H.pdf page 93
+enum class RoadLaneType // https://releases.asam.net/OpenDRIVE/1.6.0/ASAM_OpenDRIVE_BS_V1-6-0.html#_lanes  Section 9.5.3 Lane type
 {
     Undefined = 0,
-    None,
+    Shoulder,
+    Border,
     Driving,
     Stop,
-    Shoulder,
-    Biking,
-    Sidewalk,
-    Border,
+    None,
     Restricted,
     Parking,
-    Bidirectional, // full name: continuous two-way left turn lane
     Median,
-    Special1,
-    Special2,
-    Special3,
-    Roadworks,
-    Tram,
-    Rail,
-    Entry,
+    Biking,
+    Sidewalk,
+    Curb,
     Exit,
+    Entry,
+    OnRamp,
     OffRamp,
-    OnRamp
+    ConnectingRamp
 };
 
 //-----------------------------------------------------------------------------

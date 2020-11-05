@@ -161,48 +161,38 @@ LaneType OpenDriveTypeMapper::OdToOwlLaneType(const RoadLaneType laneType)
 {
     switch (laneType)
     {
-        case RoadLaneType::None:
-            return LaneType::None;
+        case RoadLaneType::Shoulder:
+            return LaneType::Shoulder;
+        case RoadLaneType::Border:
+            return LaneType::Border;
         case RoadLaneType::Driving:
             return LaneType::Driving;
         case RoadLaneType::Stop:
             return LaneType::Stop;
-        case RoadLaneType::Shoulder:
-            return LaneType::Shoulder;
-        case RoadLaneType::Biking:
-            return LaneType::Biking;
-        case RoadLaneType::Sidewalk:
-            return LaneType::Sidewalk;
-        case RoadLaneType::Border:
-            return LaneType::Border;
+        case RoadLaneType::None:
+            return LaneType::None;
         case RoadLaneType::Restricted:
             return LaneType::Restricted;
         case RoadLaneType::Parking:
             return LaneType::Parking;
-        case RoadLaneType::Bidirectional:
-            return LaneType::Bidirectional;
         case RoadLaneType::Median:
             return LaneType::Median;
-        case RoadLaneType::Special1:
-            return LaneType::Special1;
-        case RoadLaneType::Special2:
-            return LaneType::Special2;
-        case RoadLaneType::Special3:
-            return LaneType::Special3;
-        case RoadLaneType::Roadworks:
-            return LaneType::Roadworks;
-        case RoadLaneType::Tram:
-            return LaneType::Tram;
-        case RoadLaneType::Rail:
-            return LaneType::Rail;
-        case RoadLaneType::Entry:
-            return LaneType::Entry;
+        case RoadLaneType::Biking:
+            return LaneType::Biking;
+        case RoadLaneType::Sidewalk:
+            return LaneType::Sidewalk;
+        case RoadLaneType::Curb:
+            return LaneType::Curb;
         case RoadLaneType::Exit:
             return LaneType::Exit;
-        case RoadLaneType::OffRamp:
-            return LaneType::OffRamp;
+        case RoadLaneType::Entry:
+            return LaneType::Entry;
         case RoadLaneType::OnRamp:
             return LaneType::OnRamp;
+        case RoadLaneType::OffRamp:
+            return LaneType::OffRamp;
+        case RoadLaneType::ConnectingRamp:
+            return LaneType::ConnectingRamp;
         default:
             return LaneType::Undefined;
     }

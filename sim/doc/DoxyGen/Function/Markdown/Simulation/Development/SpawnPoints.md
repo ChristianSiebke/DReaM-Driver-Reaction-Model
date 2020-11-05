@@ -139,6 +139,8 @@ The TrafficGroups are defined by the following parameter:
 The PreRunCommon SpawnPoint will spawn common agents on the specified Lanes of the specified Road from the s position S-Start to the s position S-End based on the parameters of the TrafficGroups.
 The following restrictions apply:
 
+- The PreRunCommon SpawnPoint only spawns on the following OpenDRIVE lane types: Driving, OnRamp, OffRamp, ConnectingRamp
+
 - If the Scenario Spawn Point spawned Scenario Agents (including the Ego agent) before this Spawn Point is triggered (in the intended order of these Spawn Points), ranges between the Scenario Agents are invalid for spawning by this Spawn Point.
 The spawn ranges will only be augmented by Scenario Agents on the same Road and Lane.
 As such, there are 7 different potential scenarios that may arise in terms of how the spawn point's valid spawn ranges may be impacted:
@@ -246,5 +248,7 @@ The RuntimeCommon SpawnPoint will spawn based on the following logic:
 - A random route is sampled starting at the appropriate road
 - Once the timely gap expires, the spawnpoint evaluate if the TTC (2s) conditions and a minimum required distance between agents (5m) are met. If the TTC is critical the spawn velocity is reduced to fullfill the TTC requriements. If the minimum distance is not fullfilled, the agent will be held back.
 - If all requirements were fullfilled the agent is spawned.
+
+The RunTime SpawnPoint only spawns on the following OpenDRIVE lane types: Driving, OnRamp
 
 ![SpawnLogic](SpawningFlowChart.png)

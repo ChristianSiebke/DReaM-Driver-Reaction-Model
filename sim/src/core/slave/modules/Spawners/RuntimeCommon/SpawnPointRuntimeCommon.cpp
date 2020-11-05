@@ -20,7 +20,7 @@ SpawnPointRuntimeCommon::SpawnPointRuntimeCommon(const SpawnPointDependencies* d
     SpawnPointInterface(dependencies->world, callbacks),
     dependencies(*dependencies),
     worldAnalyzer(dependencies->world),
-    parameters(SpawnPointRuntimeCommonParameterExtractor::ExtractSpawnPointParameters(*(dependencies->parameters.value()), worldAnalyzer, callbacks))
+    parameters(SpawnPointRuntimeCommonParameterExtractor::ExtractSpawnPointParameters(*(dependencies->parameters.value()), worldAnalyzer, supportedLaneTypes, callbacks))
 {
     for (const auto& spawnPosition : parameters.spawnPositions)
     {

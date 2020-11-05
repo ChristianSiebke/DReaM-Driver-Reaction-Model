@@ -82,6 +82,8 @@ public:
 
         ON_CALL(world, IsDirectionalRoadExisting(_, _))
                 .WillByDefault(Return(true));
+        ON_CALL(world, IsLaneTypeValid(_, _, _, _))
+                .WillByDefault(Return(true));
         ON_CALL(world, GetRoadGraph(_, _))
                 .WillByDefault(Return(std::pair<RoadGraph, RoadGraphVertex>{roadGraph, vertex}));
         ON_CALL(world, GetAgentsInRange(_,_,_,_,_,_)).WillByDefault(
@@ -100,6 +102,11 @@ public:
         ON_CALL(world, LaneCoord2WorldCoord(_,_,_,_)).WillByDefault(
                     [&](double distanceOnLane, double offset, std::string , int laneId)
         {return Position{distanceOnLane, offset + 3 * laneId + 1.5, 0, 0};});
+
+        LaneSection fakeLaneSection1 {1000.0, 1500.0, {-1, -2, -3}};
+        LaneSections fakeLaneSections {fakeLaneSection1};
+        ON_CALL(world, GetLaneSections(ROADID))
+                .WillByDefault(Return(fakeLaneSections));
 
         AgentBlueprint agentBlueprint;
         VehicleModelParameters vehicleModelParameters;
@@ -237,8 +244,8 @@ TEST_F(SpawnerPreRun_IntegrationTests, ThreeContinuesLanes_SpawnWithCorrectTGapA
 
     ON_CALL(world, IsDirectionalRoadExisting(_, _))
             .WillByDefault(Return(true));
-    ON_CALL(world, GetDistanceToEndOfLane(_,_,_,_,_)).WillByDefault(
-                [](const RoadGraph&, RoadGraphVertex startNode, int, double initialSearchDistance, double)
+    ON_CALL(world, GetDistanceToEndOfLane(_,_,_,_,_,_)).WillByDefault(
+                [](const RoadGraph&, RoadGraphVertex startNode, int, double initialSearchDistance, double, const LaneTypes&)
     {return RouteQueryResult<double>{{startNode, 2000.0 - initialSearchDistance}};});
     ON_CALL(world, IsSValidOnLane(ROADID, AllOf(Le(-1),Ge(-3)),AllOf(Ge(0),Le(2000)))).WillByDefault(Return(true));
     ON_CALL(world, GetLaneWidth(_,_,_)).WillByDefault(Return(3.0));
@@ -283,8 +290,8 @@ TEST_F(SpawnerPreRun_IntegrationTests, IncreasingLaneNumber_SpawnWithCorrectTGap
 
     ON_CALL(world, IsDirectionalRoadExisting(_, _))
             .WillByDefault(Return(true));
-    ON_CALL(world, GetDistanceToEndOfLane(_,_,_,_,_)).WillByDefault(
-                [](const RoadGraph&, RoadGraphVertex startNode, int, double initialSearchDistance, double)
+    ON_CALL(world, GetDistanceToEndOfLane(_,_,_,_,_,_)).WillByDefault(
+                [](const RoadGraph&, RoadGraphVertex startNode, int, double initialSearchDistance, double, const LaneTypes&)
     {return RouteQueryResult<double>{{startNode, 2000.0 - initialSearchDistance}};});
     ON_CALL(world, IsSValidOnLane(ROADID, AllOf(Le(-1),Ge(-2)),AllOf(Ge(0),Le(2000)))).WillByDefault(Return(true));
     ON_CALL(world, IsSValidOnLane(ROADID, -3,AllOf(Ge(1400),Le(2000)))).WillByDefault(Return(true));
@@ -338,11 +345,11 @@ TEST_F(SpawnerPreRun_IntegrationTests, DecreasingLaneNumber_SpawnWithCorrectTGap
 
     ON_CALL(world, IsDirectionalRoadExisting(_, _))
             .WillByDefault(Return(true));
-    ON_CALL(world, GetDistanceToEndOfLane(_,_,-3,_,_)).WillByDefault(
-                [](const RoadGraph&, RoadGraphVertex startNode, int, double initialSearchDistance, double)
+    ON_CALL(world, GetDistanceToEndOfLane(_,_,-3,_,_,_)).WillByDefault(
+                [](const RoadGraph&, RoadGraphVertex startNode, int, double initialSearchDistance, double, const LaneTypes&)
     {return RouteQueryResult<double>{{startNode, 1200.0 - initialSearchDistance}};});
-    ON_CALL(world, GetDistanceToEndOfLane(_,_,AllOf(Le(-1),Ge(-2)),_,_)).WillByDefault(
-                [](const RoadGraph&, RoadGraphVertex startNode, int, double initialSearchDistance, double)
+    ON_CALL(world, GetDistanceToEndOfLane(_,_,AllOf(Le(-1),Ge(-2)),_,_,_)).WillByDefault(
+                [](const RoadGraph&, RoadGraphVertex startNode, int, double initialSearchDistance, double, const LaneTypes&)
     {return RouteQueryResult<double>{{startNode, 2000.0 - initialSearchDistance}};});
     ON_CALL(world, IsSValidOnLane(ROADID, AllOf(Le(-1),Ge(-2)),AllOf(Ge(0),Le(2000)))).WillByDefault(Return(true));
     ON_CALL(world, IsSValidOnLane(ROADID, -3,AllOf(Ge(0),Le(1200)))).WillByDefault(Return(true));
@@ -396,11 +403,11 @@ TEST_F(SpawnerPreRun_IntegrationTests, RightLaneStartsAndEndsWithinRange_SpawnWi
 
     ON_CALL(world, IsDirectionalRoadExisting(_, _))
             .WillByDefault(Return(true));
-    ON_CALL(world, GetDistanceToEndOfLane(_,_,-3,_,_)).WillByDefault(
-                [](const RoadGraph&, RoadGraphVertex startNode, int, double initialSearchDistance, double)
+    ON_CALL(world, GetDistanceToEndOfLane(_,_,-3,_,_,_)).WillByDefault(
+                [](const RoadGraph&, RoadGraphVertex startNode, int, double initialSearchDistance, double, const LaneTypes&)
     {return RouteQueryResult<double>{{startNode, 1400.0 - initialSearchDistance}};});
-    ON_CALL(world, GetDistanceToEndOfLane(_,_,AllOf(Le(-1),Ge(-2)),_,_)).WillByDefault(
-                [](const RoadGraph&, RoadGraphVertex startNode, int, double initialSearchDistance, double)
+    ON_CALL(world, GetDistanceToEndOfLane(_,_,AllOf(Le(-1),Ge(-2)),_,_,_)).WillByDefault(
+                [](const RoadGraph&, RoadGraphVertex startNode, int, double initialSearchDistance, double, const LaneTypes&)
     {return RouteQueryResult<double>{{startNode, 2000.0 - initialSearchDistance}};});
     ON_CALL(world, IsSValidOnLane(ROADID, AllOf(Le(-1),Ge(-2)),AllOf(Ge(0),Le(2000)))).WillByDefault(Return(true));
     ON_CALL(world, IsSValidOnLane(ROADID, -3,AllOf(Ge(1200),Le(1400)))).WillByDefault(Return(true));

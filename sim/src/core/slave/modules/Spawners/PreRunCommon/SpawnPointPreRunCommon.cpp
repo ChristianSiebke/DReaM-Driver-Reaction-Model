@@ -32,26 +32,20 @@ SpawnPointInterface::Agents SpawnPointPreRunCommon::Trigger([[maybe_unused]]int 
     {
         for (const auto &roadId : spawnArea.roadIds)
         {
-            for (const auto laneId : spawnArea.laneIds)
-            {
-
                 const auto validLaneSpawningRanges = worldAnalyzer.GetValidLaneSpawningRanges(roadId,
-                                                                                              laneId,
                                                                                               spawnArea.sStart,
-                                                                                              spawnArea.sEnd);
-                if (validLaneSpawningRanges)
+                                                                                              spawnArea.sEnd,
+                                                                                              spawnArea.laneIds,
+                                                                                              supportedLaneTypes);
+
+                for (const auto& validSpawningRange : validLaneSpawningRanges)
                 {
-                    for (const auto& spawningRange : *validLaneSpawningRanges)
-                    {
-                        const auto generatedAgents = GenerateAgentsForRange(laneId,
-                                                                            roadId,
-                                                                            spawningRange);
-                        newAgents.insert(std::cend(newAgents),
-                                         std::cbegin(generatedAgents),
-                                         std::cend(generatedAgents));
-                    }
+                    const auto generatedAgents = GenerateAgentsForRange(roadId,
+                                                                        validSpawningRange);
+                    newAgents.insert(std::cend(newAgents),
+                                     std::cbegin(generatedAgents),
+                                     std::cend(generatedAgents));
                 }
-            }
         }
     }
 
@@ -63,12 +57,15 @@ SpawningAgentProfile SpawnPointPreRunCommon::SampleAgentProfile(bool rightLane)
     return Sampler::Sample(rightLane ? parameters.agentProfileLaneMaps.rightLanes : parameters.agentProfileLaneMaps.leftLanes, dependencies.stochastics);
 }
 
-SpawnPointInterface::Agents SpawnPointPreRunCommon::GenerateAgentsForRange(const LaneId& laneId,
-                                                                           const RoadId& roadId,
-                                                                           const Range& range)
+SpawnPointInterface::Agents SpawnPointPreRunCommon::GenerateAgentsForRange(const RoadId& roadId,
+                                                                           const LaneSpawningRange& validLaneSpawningRange)
 {
     SpawnPointInterface::Agents agents;
+
+    const auto& laneId = validLaneSpawningRange.laneId;
+    const auto& range = validLaneSpawningRange.range;
     bool generating = true;
+
     size_t rightLaneCount = worldAnalyzer.GetRightLaneCount(roadId, laneId, range.second);
 
     while (generating)
@@ -168,7 +165,8 @@ std::optional<SpawnInfo> SpawnPointPreRunCommon::GetNextSpawnCarInfo(const RoadI
                                                                   agentRearLength,
                                                                   velocity,
                                                                   gapInSeconds,
-                                                                  route);
+                                                                  route,
+                                                                  supportedLaneTypes);
 
     if (!spawnDistance.has_value())
     {

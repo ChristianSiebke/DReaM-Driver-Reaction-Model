@@ -390,6 +390,18 @@ bool WorldImplementation::IsDirectionalRoadExisting(const std::string &roadId, b
     return worldData.GetRoadGraphVertexMapping().find(RouteElement {roadId, inOdDirection}) != worldData.GetRoadGraphVertexMapping().end();
 }
 
+bool WorldImplementation::IsLaneTypeValid(const std::string &roadId, const int laneId, const double distanceOnLane, const LaneTypes& validLaneTypes)
+{
+    const auto& laneType = worldDataQuery.GetLaneByOdId(roadId, laneId, distanceOnLane).GetLaneType();
+
+    if (std::find(validLaneTypes.begin(), validLaneTypes.end(), laneType) == validLaneTypes.end())
+    {
+        return false;
+    }
+
+    return true;
+}
+
 double WorldImplementation::GetLaneCurvature(std::string roadId, int laneId, double position) const
 {
     auto& lane =  worldDataQuery.GetLaneByOdId(roadId, laneId, position);
@@ -452,6 +464,30 @@ RouteQueryResult<double> WorldImplementation::GetDistanceToEndOfLane(const RoadG
     auto laneMultiStream = worldDataQuery.CreateLaneMultiStream(roadGraph, startNode, laneId, initialSearchDistance);
     auto initialPositionOnStream = laneMultiStream->GetPositionByVertexAndS(startNode, initialSearchDistance);
     return worldDataQuery.GetDistanceToEndOfLane(*laneMultiStream, initialPositionOnStream, maximumSearchLength, laneTypes);
+}
+
+LaneSections WorldImplementation::GetLaneSections(const std::string& roadId) const
+{
+    LaneSections result;
+
+    const auto& road = worldDataQuery.GetRoadByOdId(roadId);
+    for (const auto &section : road->GetSections())
+    {
+        LaneSection laneSection;
+        laneSection.startS = section->GetSOffset();
+        laneSection.endS = laneSection.startS + section->GetLength();
+
+
+
+        for (const auto& lane : section->GetLanes())
+        {
+            laneSection.laneIds.push_back(worldData.GetLaneIdMapping().at(lane->GetId()));
+        }
+
+        result.push_back(laneSection);
+    }
+
+    return result;
 }
 
 bool WorldImplementation::IntersectsWithAgent(double x, double y, double rotation, double length, double width,

@@ -26,7 +26,7 @@ namespace SpawnPointRuntimeCommonParameterExtractor
 
     constexpr char SCOORDINATE[] = {"SCoordinate"};
 
-    static std::vector<SpawnPosition> ExtractSpawnPoints(const ParameterInterface &parameter, const WorldAnalyzer &worldAnalyzer, const CallbackInterface* callbacks)
+    static std::vector<SpawnPosition> ExtractSpawnPoints(const ParameterInterface &parameter, const WorldAnalyzer &worldAnalyzer, const LaneTypes& supportedLaneTypes, const CallbackInterface* callbacks)
     {
         using namespace helper;
 
@@ -59,7 +59,7 @@ namespace SpawnPointRuntimeCommonParameterExtractor
             {
                 for (const auto& laneId : sortedLaneIds)
                 {
-                    if(worldAnalyzer.ValidateRoadIdInDirection(roadId, laneId))
+                    if(worldAnalyzer.ValidateRoadIdInDirection(roadId, laneId, sCoordinateElement.value(), supportedLaneTypes))
                     {
                         spawnpoints.emplace_back(SpawnPosition{roadId, laneId, sCoordinateElement.value()});
                     }
@@ -73,12 +73,14 @@ namespace SpawnPointRuntimeCommonParameterExtractor
     /*!
      * \brief ExtractSpawnPointParameters extracts the parameters for the
      *        spawn point from the provided parameterInterface
+     *
      * \param parameterInterface the parameterInterface from which to extract
      * \param sampler the sampler with which to sample random values
+     *
      * \return the parameters for the spawn point
      */
-    static SpawnPointRuntimeCommonParameters ExtractSpawnPointParameters(const ParameterInterface& parameter, const WorldAnalyzer &worldAnalyzer, const CallbackInterface* callbacks)
+    static SpawnPointRuntimeCommonParameters ExtractSpawnPointParameters(const ParameterInterface& parameter, const WorldAnalyzer &worldAnalyzer, const LaneTypes& supportedLaneTypes, const CallbackInterface* callbacks)
     {
-        return {ExtractSpawnPoints(parameter, worldAnalyzer, callbacks), SpawnPointDefinitions::ExtractAgentProfileLaneMaps(parameter, callbacks)};
+        return {ExtractSpawnPoints(parameter, worldAnalyzer, supportedLaneTypes, callbacks), SpawnPointDefinitions::ExtractAgentProfileLaneMaps(parameter, callbacks)};
     }
 };

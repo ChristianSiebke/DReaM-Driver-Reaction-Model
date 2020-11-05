@@ -155,6 +155,8 @@ public:
 
     bool IsDirectionalRoadExisting(const std::string& roadId, bool inOdDirection) override;
 
+    bool IsLaneTypeValid(const std::string &roadId, const int laneId, const double distanceOnLane, const LaneTypes& validLaneTypes) override;
+
     double GetLaneCurvature(std::string roadId, int laneId, double position) const override;
     RouteQueryResult<std::optional<double> > GetLaneCurvature(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double position, double distance) const override;
 
@@ -171,6 +173,8 @@ public:
                                   double maximumSearchLength, const LaneTypes& laneTypes) const override;
 
     RouteQueryResult<LongitudinalDistance> GetDistanceBetweenObjects(const RoadGraph& roadGraph, RoadGraphVertex startNode, const ObjectPosition& objectPos, const std::optional<double> objectReferenceS, const ObjectPosition& targetObjectPos) const override;
+
+    LaneSections GetLaneSections(const std::string& roadId) const;
 
     bool IntersectsWithAgent(double x, double y, double rotation, double length, double width, double center) override;
 

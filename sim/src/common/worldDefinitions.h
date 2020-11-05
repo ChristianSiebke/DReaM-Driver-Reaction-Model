@@ -78,28 +78,32 @@ struct IntersectingConnection
 enum class LaneType
 {
     Undefined = 0,
-    None,
+    Shoulder,
+    Border,
     Driving,
     Stop,
-    Shoulder,
-    Biking,
-    Sidewalk,
-    Border,
+    None,
     Restricted,
     Parking,
-    Bidirectional,
     Median,
-    Special1,
-    Special2,
-    Special3,
-    Roadworks,
-    Tram,
-    Rail,
-    Entry,
+    Biking,
+    Sidewalk,
+    Curb,
     Exit,
+    Entry,
+    OnRamp,
     OffRamp,
-    OnRamp
+    ConnectingRamp
 };
+
+struct LaneSection
+{
+    double startS;
+    double endS;
+    std::vector<int> laneIds;
+};
+
+using LaneSections = std::vector<LaneSection>;
 
 namespace RelativeWorldView {
 struct Lane

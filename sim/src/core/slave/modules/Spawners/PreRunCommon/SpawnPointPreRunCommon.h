@@ -62,14 +62,11 @@ private:
     /**
      * @brief Generates agents in specified lane based on specified range.
      *
-     * @param[in]   laneId      Id of the lane to spawn agents in.
      * @param[in]   roadId      Id of the road to spawn agents in.
-     * @param[in]   range       Range in which to spawn agents.
+     * @param[in]   validLaneSpawningRange       LaneSpawningRange containing laneId and Range.
      * @return
      */
-    Agents GenerateAgentsForRange(const LaneId& laneId,
-                                  const RoadId& roadId,
-                                  const Range& range);
+    Agents GenerateAgentsForRange(const RoadId& roadId, const LaneSpawningRange& validLaneSpawningRange);
 
     /**
      * @brief Get SpawnInfo for the next agent that should be spawned.
@@ -158,6 +155,14 @@ private:
     const SpawnPointDependencies dependencies;
     const PreRunSpawnerParameters parameters;
     const WorldAnalyzer worldAnalyzer;
+
+    const LaneTypes supportedLaneTypes =
+    {
+        LaneType::Driving,
+        LaneType::OnRamp,
+        LaneType::OffRamp,
+        LaneType::ConnectingRamp
+    };
 
     static constexpr double NON_PLATOON_GAP_EXTENSION = 10.0;
 };
