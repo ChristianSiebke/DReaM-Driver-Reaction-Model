@@ -526,26 +526,6 @@ Example with relative target and fixed time
     </PrivateAction>
 </Action>
 ```
-**Custom Lane Change**
-
-The Custom Lane Change triggers a custom lane change for an agent. The execution of the lane change is performed by an arbitrary agent component. 
-
-Note: The regular lane change action is performed according to the defined shape (see above). 
-The custom lane change is only forwarded to agent components, as defined in the signal architecture of the *systemConfigBlueprint.xml*. 
-The way of execution is left to the agent component in the later case.
-
-The command consists of two parts:
-1. "SetCustomLaneChange": The first command instantiates the CustomLaneChange and is set by default. This command does not need to be changed.
-2. "DeltaLaneId": The second command indicates the number of lanes over which the lane change should take place.
-
-Example
-```xml
-<Action name="CustomLaneChange">
-	<UserDefinedAction>
-		<CustomCommandAction>SetCustomLaneChange -1</CustomCommandAction>
-	</UserDefinedAction>
-</Action>
-```
 
 **Follow Trajectory**
 
@@ -683,22 +663,6 @@ Example
 <Action name="ComponentStateChange">
 	<UserDefinedAction>
 		<CustomCommandAction>SetComponentState Dynamics_TrajectoryFollower Acting</CustomCommandAction>
-	</UserDefinedAction>
-</Action>
-```
-
-**Gaze Follower**
-
-The GazeFollower influences the gaze behaviour of an agent. The command consists of three parts:
-1. "SetGazeFollower": The first command instantiates the GazeFollower and is set by default. This command does not need to be changed.
-2. "Activity State": The second command describes the activity state in which the GazeFollower should be put. The activity state is supposed to be "Active" or "Inactive".
-3. "GazeFollowerFileName": The last command needs to be replaced by the file that contains the gaze information. Here, the file name relative to the config directory with its corresponding file type [.txt, .csv, etc.] need to be provided. 
-
-Example
-```xml
-<Action name="GazeFollower">
-	<UserDefinedAction>
-		<CustomCommandAction>SetGazeFollower Active GazeFollowerFileName.csv</CustomCommandAction>
 	</UserDefinedAction>
 </Action>
 ```
