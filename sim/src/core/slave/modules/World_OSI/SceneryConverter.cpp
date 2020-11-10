@@ -28,7 +28,7 @@
 #include "SceneryConverter.h"
 #include "GeometryConverter.h"
 #include "TrafficObjectAdapter.h"
-
+#include "EntityRepository.h"
 #include "WorldData.h"
 #include "WorldDataQuery.h"
 
@@ -99,10 +99,12 @@ ConversionStatus ConnectJunction(const SceneryInterface *scenery, const Junction
 } // namespace
 
 SceneryConverter::SceneryConverter(SceneryInterface* scenery,
+                                   openpass::entity::RepositoryInterface& repository,
                                    OWL::Interfaces::WorldData& worldData,
                                    const World::Localization::Localizer& localizer,
                                    const CallbackInterface* callbacks) :
     scenery(scenery),
+    repository(repository),
     worldData(worldData),
     localizer(localizer),
     callbacks(callbacks)
@@ -708,6 +710,22 @@ void SceneryConverter::ConvertObjects()
     CreateRoadSignals();
 }
 
+openpass::entity::EntityMetaInfo From(const RoadObjectInterface &roadObject)
+{
+    using namespace std::string_literals;
+    openpass::entity::EntityMetaInfo entityMetaInfo("OpenDRIVE"s);
+    entityMetaInfo.parameter =
+        {
+            {"version"s, "1.5M"s},
+            {"id"s, roadObject.GetId()},
+            {"name"s, roadObject.GetName()},
+            {"type"s, openpass::utils::to_string(roadObject.GetType())},
+            {"subtype"s, ""},
+            {"repeating"s, false},
+        };
+    return entityMetaInfo;
+}
+
 void SceneryConverter::CreateObjects()
 {
     for (auto& item : scenery->GetRoads())
@@ -735,7 +753,9 @@ void SceneryConverter::CreateObjects()
                 OWL::Primitive::AbsPosition pos{x, y, 0};
                 OWL::Primitive::Dimension dim{object->GetLength(), object->GetWidth(), object->GetHeight()};
                 OWL::Primitive::AbsOrientation orientation{object->GetHdg(), object->GetPitch(), object->GetRoll()};
-                new TrafficObjectAdapter(worldData,
+                const auto id = repository.Register(openpass::entity::EntityType::StationaryObject, From(*object));
+                new TrafficObjectAdapter(id,
+                                         worldData,
                                          localizer,
                                          pos,
                                          dim,
@@ -746,24 +766,51 @@ void SceneryConverter::CreateObjects()
     }
 }
 
+openpass::entity::EntityMetaInfo From(const RoadLaneRoadMark &roadMark)
+{
+    using namespace std::string_literals;
+    openpass::entity::EntityMetaInfo entityMetaInfo("OpenDRIVE"s);
+    entityMetaInfo.parameter =
+        {
+            {"version"s, "1.5M"s},
+            {"id"s, ""s},
+            {"name"s, ""s},
+            {"type"s, openpass::utils::to_string(roadMark.GetType())},
+            {"subtype"s, ""},
+            {"repeating"s, false},
+        };
+    return entityMetaInfo;
+}
+
 std::vector<OWL::Id> SceneryConverter::CreateLaneBoundaries(RoadLaneInterface &odLane, RoadLaneSectionInterface& odSection)
 {
     std::vector<OWL::Id> laneBoundaries;
     for (const auto& roadMarkEntry : odLane.GetRoadMarks())
     {
-        switch (roadMarkEntry->GetType())
+        const auto roadMarkType = roadMarkEntry->GetType();
+
+        if (roadMarkType == RoadLaneRoadMarkType::Solid_Solid ||
+            roadMarkType ==  RoadLaneRoadMarkType::Solid_Broken ||
+            roadMarkType ==  RoadLaneRoadMarkType::Broken_Solid ||
+            roadMarkType ==  RoadLaneRoadMarkType::Broken_Broken)
         {
-        case RoadLaneRoadMarkType::Solid_Solid :
-        case RoadLaneRoadMarkType::Solid_Broken :
-        case RoadLaneRoadMarkType::Broken_Solid :
-        case RoadLaneRoadMarkType::Broken_Broken :
-            laneBoundaries.push_back(worldData.AddLaneBoundary(*roadMarkEntry, odSection.GetStart(), OWL::LaneMarkingSide::Left));
-            laneBoundaries.push_back(worldData.AddLaneBoundary(*roadMarkEntry, odSection.GetStart(), OWL::LaneMarkingSide::Right));
-            break;
-        default :
-            laneBoundaries.push_back(worldData.AddLaneBoundary(*roadMarkEntry, odSection.GetStart(), OWL::LaneMarkingSide::Single));
+            const auto id_left = repository.Register(From(*roadMarkEntry));
+            const auto id_right = repository.Register(From(*roadMarkEntry));
+
+            worldData.AddLaneBoundary(id_left, *roadMarkEntry, odSection.GetStart(), OWL::LaneMarkingSide::Left);
+            worldData.AddLaneBoundary(id_right, *roadMarkEntry, odSection.GetStart(), OWL::LaneMarkingSide::Right);
+
+            laneBoundaries.push_back(id_left.value);
+            laneBoundaries.push_back(id_right.value);
+        }
+        else
+        {
+            const auto id_single = repository.Register(From(*roadMarkEntry));
+            worldData.AddLaneBoundary(id_single, *roadMarkEntry, odSection.GetStart(), OWL::LaneMarkingSide::Single);
+            laneBoundaries.push_back(id_single.value);
         }
     }
+
     return laneBoundaries;
 }
 
@@ -840,9 +887,26 @@ void SceneryConverter::CreateRoadSignals()
     }
 }
 
+openpass::entity::EntityMetaInfo From(const RoadSignalInterface &roadSignal)
+{
+    using namespace std::string_literals;
+    openpass::entity::EntityMetaInfo entityMetaInfo("OpenDRIVE"s);
+    entityMetaInfo.parameter =
+        {
+            {"version"s, "1.5M"s},
+            {"id"s, roadSignal.GetType()},
+            {"name"s, ""s},
+            {"type"s, roadSignal.GetType()},
+            {"subtype"s, roadSignal.GetType()},
+            {"repeating"s, false},
+        };
+    return entityMetaInfo;
+}
+
 void SceneryConverter::CreateTrafficSign(RoadSignalInterface* signal, Position position, const OWL::Interfaces::Lanes& lanes)
 {
-    OWL::Interfaces::TrafficSign& trafficSign = worldData.AddTrafficSign(signal->GetId());
+    const auto id = repository.Register(From(*signal));
+    OWL::Interfaces::TrafficSign& trafficSign = worldData.AddTrafficSign(id, signal->GetId());
 
     trafficSign.SetS(signal->GetS());
 
@@ -865,7 +929,8 @@ void SceneryConverter::CreateTrafficSign(RoadSignalInterface* signal, Position p
 
 void SceneryConverter::CreateRoadMarking(RoadSignalInterface* signal, Position position, const OWL::Interfaces::Lanes& lanes)
 {
-    OWL::Interfaces::RoadMarking& roadMarking = worldData.AddRoadMarking();
+    const auto id = repository.Register(From(*signal));
+    OWL::Interfaces::RoadMarking& roadMarking = worldData.AddRoadMarking(id);
 
     roadMarking.SetS(signal->GetS());
 
@@ -928,7 +993,19 @@ std::tuple<bool, double, double, double> SceneryConverter::CalculateAbsoluteCoor
     return std::make_tuple(false, 0, 0, 0);
 }
 
-
+openpass::entity::EntityMetaInfo From(const RoadLaneInterface &odLane)
+{
+    using namespace std::string_literals;
+    openpass::entity::EntityMetaInfo entityMetaInfo("OpenDRIVE"s);
+    entityMetaInfo.parameter =
+        {
+            {"version"s, "1.5M"s},
+            {"id"s, odLane.GetId()},
+            {"type"s, openpass::utils::to_string(odLane.GetType())},
+            {"repeating"s, false},
+        };
+    return entityMetaInfo;
+}
 
 void SceneryConverter::CreateRoads()
 {
@@ -959,7 +1036,8 @@ void SceneryConverter::CreateRoads()
                 if (odLane.GetId() != 0)
                 {
                     auto laneBoundaries = CreateLaneBoundaries(odLane, odSection);
-                    worldData.AddLane(odSection, odLane, laneBoundaries);
+                    const auto id = repository.Register(From(odLane));
+                    worldData.AddLane(id, odSection, odLane, laneBoundaries);
                 }
             }
         }

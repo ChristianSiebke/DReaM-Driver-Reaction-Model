@@ -14,6 +14,7 @@
 #include "WorldData.h"
 #include "WorldImplementation.h"
 #include "common/RoutePlanning/RouteCalculation.h"
+#include "EntityRepository.h"
 
 #include "osi3/osi_sensorview.pb.h"
 #include "osi3/osi_sensorviewconfiguration.pb.h"
@@ -33,6 +34,7 @@ WorldImplementation::WorldImplementation(const CallbackInterface* callbacks, Sto
     agentNetwork(this, callbacks),
     callbacks(callbacks),
     dataStore(dataStore),
+    repository(dataStore),
     worldData(callbacks)
 {}
 
@@ -40,15 +42,10 @@ WorldImplementation::~WorldImplementation()
 {
 }
 
-bool WorldImplementation::AddAgent(int id, AgentInterface* agent)
+void WorldImplementation::RegisterAgent(AgentInterface* agent)
 {
-    if (agentNetwork.AddAgent(id, agent))
-    {
-        worldObjects.push_back(agent);
-        return true;
-    }
-
-    return false;
+    agentNetwork.AddAgent(agent);
+    worldObjects.push_back(agent);
 }
 
 AgentInterface *WorldImplementation::GetAgent(int id) const
@@ -104,6 +101,7 @@ void WorldImplementation::Reset()
     worldParameter.Reset();
     agentNetwork.Clear();
     worldObjects.clear();
+    repository.Reset();
     worldObjects.insert(worldObjects.end(), trafficObjects.begin(), trafficObjects.end());
 }
 
@@ -171,6 +169,7 @@ bool WorldImplementation::CreateScenery(SceneryInterface* scenery)
     this->scenery = scenery;
 
     SceneryConverter converter(scenery,
+                               repository,
                                worldData,
                                localizer,
                                callbacks);
@@ -187,11 +186,29 @@ bool WorldImplementation::CreateScenery(SceneryInterface* scenery)
     return true;
 }
 
-AgentInterface* WorldImplementation::CreateAgentAdapterForAgent()
+openpass::entity::EntityMetaInfo From(openpass::type::FlatParameter parameter)
 {
-    AgentInterface* agentAdapter = new AgentAdapter(this, callbacks, &worldData, localizer);
+    const std::string SOURCE_KEY {"source"};
+    std::string source {"Unknown"};
 
-    return agentAdapter;
+    if(const auto value = helper::map::query(parameter, SOURCE_KEY); value)
+    {
+        if(std::holds_alternative<std::string>(*value))
+        {
+            source = std::get<std::string>(*value);
+            parameter.erase(SOURCE_KEY);
+        }
+    }
+
+    openpass::entity::EntityMetaInfo entityMetaInfo(source);
+    entityMetaInfo.parameter = std::move(parameter);
+    return entityMetaInfo;
+}
+
+std::unique_ptr<AgentInterface> WorldImplementation::CreateAgentAdapter(openpass::type::FlatParameter parameter)
+{
+    const auto id = repository.Register(openpass::entity::EntityType::MovingObject, From(parameter));
+    return std::make_unique<AgentAdapter>(id, this, callbacks, &worldData, localizer);
 }
 
 std::string WorldImplementation::GetTimeOfDay() const
@@ -468,13 +485,9 @@ RouteQueryResult<double> WorldImplementation::GetDistanceToEndOfLane(const RoadG
 
 LaneSections WorldImplementation::GetLaneSections(const std::string& roadId) const
 {
-    const auto& road = worldDataQuery.GetRoadByOdId(roadId);
-    if (road == nullptr)
-    {
-        return {};
-    }
-
     LaneSections result;
+
+    const auto& road = worldDataQuery.GetRoadByOdId(roadId);
     for (const auto &section : road->GetSections())
     {
         LaneSection laneSection;

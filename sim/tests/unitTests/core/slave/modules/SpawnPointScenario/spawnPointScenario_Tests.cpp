@@ -112,10 +112,11 @@ TEST(SpawnPointScenario, Trigger_SpawnsEgoAgentAccordingToScenarioWorldPosition)
     auto vertex = add_vertex(RouteElement{"Road1",true}, roadGraph);
     ON_CALL(fakeWorld, GetRoadGraph(RouteElement{"Road1",true},_)).WillByDefault(Return(std::make_pair(roadGraph, vertex)));
 
-    SimulationSlave::Agent agent(0, &fakeWorld);
-    // if this is called and the blueprints match, we're creating our Agent correctly
+    // If this is called and the blueprints match, we're creating our Agent correctly
     EXPECT_CALL(fakeAgentFactory, AddAgent(MatchesAgentBlueprint(expectedAgentBlueprint)))
-        .WillOnce(Return(&agent));
+        // There is no interface for agent, so we need to fake a valid object (!= nullptr)
+        // If the spawnpoint ever needs a true object, this will crash (!)
+        .WillOnce(Return(reinterpret_cast<SimulationSlave::Agent*>(0x1234)));
 
     SpawnPointScenario spawnPointScenario{&dependencies, nullptr};
     spawnPointScenario.Trigger(0);
@@ -201,10 +202,11 @@ TEST(SpawnPointScenario, Trigger_SpawnsEgoAgentAccordingToScenarioLanePosition)
     auto vertex = add_vertex(RouteElement{"Road1",true}, roadGraph);
     ON_CALL(fakeWorld, GetRoadGraph(RouteElement{"Road1",true},_)).WillByDefault(Return(std::make_pair(roadGraph, vertex)));
 
-    SimulationSlave::Agent agent(0, &fakeWorld);
-    // if this is called and the blueprints match, we're creating our Agent correctly
+     // If this is called and the blueprints match, we're creating our Agent correctly
     EXPECT_CALL(fakeAgentFactory, AddAgent(MatchesAgentBlueprint(expectedAgentBlueprint)))
-        .WillOnce(Return(&agent));
+        // There is no interface for agent, so we need to fake a valid object (!= nullptr)
+        // If the spawnpoint ever needs a true object, this will crash (!)
+        .WillOnce(Return(reinterpret_cast<SimulationSlave::Agent*>(0x1234)));
 
     SpawnPointScenario spawnPointScenario{&dependencies, nullptr};
     spawnPointScenario.Trigger(0);
@@ -273,10 +275,11 @@ TEST(SpawnPointScenario, Trigger_SpawnsScenarioAgentAccordingToScenarioWorldPosi
     auto vertex = add_vertex(RouteElement{"Road1",true}, roadGraph);
     ON_CALL(fakeWorld, GetRoadGraph(RouteElement{"Road1",true},_)).WillByDefault(Return(std::make_pair(roadGraph, vertex)));
 
-    SimulationSlave::Agent agent(0, &fakeWorld);
-    // if this is called and the blueprints match, we're creating our Agent correctly
+    // If this is called and the blueprints match, we're creating our Agent correctly
     EXPECT_CALL(fakeAgentFactory, AddAgent(MatchesAgentBlueprint(expectedAgentBlueprint)))
-        .WillOnce(Return(&agent));
+        // There is no interface for agent, so we need to fake a valid object (!= nullptr)
+        // If the spawnpoint ever needs a true object, this will crash (!)
+        .WillOnce(Return(reinterpret_cast<SimulationSlave::Agent*>(0x1234)));
 
     SpawnPointScenario spawnPointScenario{&dependencies, nullptr};
     spawnPointScenario.Trigger(0);
@@ -363,10 +366,11 @@ TEST(SpawnPointScenario, Trigger_SpawnsScenarioAgentAccordingToScenarioLanePosit
     auto vertex = add_vertex(RouteElement{"Road1",true}, roadGraph);
     ON_CALL(fakeWorld, GetRoadGraph(RouteElement{"Road1",true},_)).WillByDefault(Return(std::make_pair(roadGraph, vertex)));
 
-    SimulationSlave::Agent agent(0, &fakeWorld);
-    // if this is called and the blueprints match, we're creating our Agent correctly
+    // If this is called and the blueprints match, we're creating our Agent correctly
     EXPECT_CALL(fakeAgentFactory, AddAgent(MatchesAgentBlueprint(expectedAgentBlueprint)))
-        .WillOnce(Return(&agent));
+        // There is no interface for agent, so we need to fake a valid object (!= nullptr)
+        // If the spawnpoint ever needs a true object, this will crash (!)
+        .WillOnce(Return(reinterpret_cast<SimulationSlave::Agent*>(0x1234)));
 
     SpawnPointScenario spawnPointScenario{&dependencies, nullptr};
     spawnPointScenario.Trigger(0);

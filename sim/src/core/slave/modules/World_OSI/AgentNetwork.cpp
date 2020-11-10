@@ -47,15 +47,14 @@ void AgentNetwork::Clear()
     removedAgentsPrevious.clear();
 }
 
-bool AgentNetwork::AddAgent(int id, AgentInterface* agent)
+void AgentNetwork::AddAgent(AgentInterface* agent)
 {
-    if (!agents.insert({id, agent}).second)
+    if (!agents.insert({agent->GetId(), agent}).second)
     {
-        LOG(CbkLogLevel::Warning, "agents must be unique");
-        return false;
-    }
 
-    return true;
+        LOG(CbkLogLevel::Error, "Agent Ids must be unique");
+        throw std::runtime_error("Agent Ids must be unique");
+    }
 }
 
 AgentInterface* AgentNetwork::GetAgent(int id) const

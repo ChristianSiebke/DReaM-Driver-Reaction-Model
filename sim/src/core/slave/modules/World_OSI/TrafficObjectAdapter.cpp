@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -17,13 +17,14 @@
 
 //TODO: replace GlobalObject with injected shared_pointer to locator
 
-TrafficObjectAdapter::TrafficObjectAdapter(OWL::Interfaces::WorldData& worldData,
+TrafficObjectAdapter::TrafficObjectAdapter(const openpass::type::EntityId id,
+                                           OWL::Interfaces::WorldData& worldData,
                                            const World::Localization::Localizer& localizer,
                                            OWL::Primitive::AbsPosition position,
                                            OWL::Primitive::Dimension dimension,
                                            OWL::Primitive::AbsOrientation orientation,
                                            const OpenDriveId odId) :
-    WorldObjectAdapter{worldData.AddStationaryObject(static_cast<void*>(static_cast<WorldObjectInterface*>(this)))}, // objects passed as void * need to be casted to WorldObjectInterface*, because they are retrieved by casting to that class
+    WorldObjectAdapter{worldData.AddStationaryObject(id.value, static_cast<void*>(static_cast<WorldObjectInterface*>(this)))}, // objects passed as void * need to be casted to WorldObjectInterface*, because they are retrieved by casting to that class
     localizer{localizer},
     openDriveId{odId}
 {

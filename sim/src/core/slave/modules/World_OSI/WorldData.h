@@ -105,19 +105,24 @@ public:
 
     //!Creates a new MovingObject linked to an AgentAdapter and returns it
     //!
-    //!@param linkedObject  Object of type AgentAdapter which will be linked to new MovingObject
-    virtual Interfaces::MovingObject& AddMovingObject(void* linkedObject) = 0;
+    //! \param Id            Unique ID
+    //! \param linkedObject  Object of type AgentAdapter which will be linked to new MovingObject
+    virtual Interfaces::MovingObject& AddMovingObject(const Id id, void* linkedObject) = 0;
 
     //!Creates a new StationaryObject linked to a TrafficObjectAdapter and returns it
     //!
-    //!@param linkedObject  Object of type TrafficObjectAdapter which will be linked to new StationaryObject
-    virtual Interfaces::StationaryObject& AddStationaryObject(void* linkedObject) = 0;
+    //! \param Id            Unique ID
+    //! \param linkedObject  Object of type TrafficObjectAdapter which will be linked to new StationaryObject
+    virtual Interfaces::StationaryObject& AddStationaryObject(const Id id, void* linkedObject) = 0;
 
     //!Creates a new TrafficSign and returns it
-    virtual Interfaces::TrafficSign& AddTrafficSign(const std::string odId) = 0;
+    //! \param Id            Unique ID
+    //! \param odId          OpenDRIVE Id
+    virtual Interfaces::TrafficSign& AddTrafficSign(const Id id, const std::string odId) = 0;
 
     //!Creates a new RoadMarking and returns it
-    virtual Interfaces::RoadMarking& AddRoadMarking() = 0;
+    //! \param Id            Unique ID
+    virtual Interfaces::RoadMarking& AddRoadMarking(const Id id) = 0;
 
     //! Adds a traffic sign to the assigned signs of lane
     //!
@@ -173,18 +178,20 @@ public:
 
     //!Creates a new lane with parameters specified by the OpenDrive lane
     //!
-    //!@param odSection         OpenDrive section to add lane to
-    //!@param odLane            OpenDrive lane to add
-    //!@param laneBoundaries    Osi Ids of the left lane boundaries of the new lane
-    virtual void AddLane(RoadLaneSectionInterface& odSection, const RoadLaneInterface& odLane, const std::vector<Id> laneBoundaries) = 0;
+    //! \param Id              Unique ID
+    //! \param odSection       OpenDrive section to add lane to
+    //! \param odLane          OpenDrive lane to add
+    //! \param laneBoundaries  Osi Ids of the left lane boundaries of the new lane
+    virtual void AddLane(const Id id, RoadLaneSectionInterface& odSection, const RoadLaneInterface& odLane, const std::vector<Id> laneBoundaries) = 0;
 
     //! Creates a new lane boundary specified by the OpenDrive RoadMark
     //!
+    //! \param Id               Unique ID
     //! \param odLaneRoadMark   OpenDrive roadMark (= laneBoundary) to add
     //! \param sectionStart     Start s coordinate of the section
     //! \param side             Specifies which side of a double line to add (or Single if not a double line)
     //! \return Osi id of the newly created laneBoundary
-    virtual Id AddLaneBoundary(const RoadLaneRoadMark &odLaneRoadMark, double sectionStart, LaneMarkingSide side) = 0;
+    virtual Id AddLaneBoundary(const Id id, const RoadLaneRoadMark &odLaneRoadMark, double sectionStart, LaneMarkingSide side) = 0;
 
     //! Sets the ids of the center lane boundaries for a section
     //!
@@ -194,18 +201,18 @@ public:
 
     //!Creates a new section with parameters specified by the OpenDrive section
     //!
-    //!@param odRoad    OpenDrive road to add section to
-    //!@param odSection OpenDrive section to add
+    //! \param odRoad    OpenDrive road to add section to
+    //! \param odSection OpenDrive section to add
     virtual void AddSection(const RoadInterface& odRoad, const RoadLaneSectionInterface& odSection) = 0;
 
     //!Creates a new road with parameters specified by the OpenDrive road
     //!
-    //!@param odRoad    OpenDrive road to add
+    //! \param odRoad    OpenDrive road to add
     virtual void AddRoad(const RoadInterface& odRoad) = 0;
 
     //!Creates a new junction with parameters specified by the OpenDrive junction
     //!
-    //!@param odJunction    OpenDrive junction to add
+    //! \param odJunction    OpenDrive junction to add
     virtual void AddJunction(const JunctionInterface* odJunction) = 0;
 
     //!Adds a connection road (path) to a junction
@@ -392,8 +399,8 @@ public:
     int GetAgentId(const OWL::Id owlId) const override;
 
     void SetRoadGraph (const RoadGraph&& roadGraph, const RoadGraphVertexMapping&& vertexMapping) override;
-    void AddLane(RoadLaneSectionInterface &odSection, const RoadLaneInterface& odLane, const std::vector<Id> laneBoundaries) override;
-    Id AddLaneBoundary(const RoadLaneRoadMark &odLaneRoadMark, double sectionStart, LaneMarkingSide side) override;
+    void AddLane(const Id id, RoadLaneSectionInterface &odSection, const RoadLaneInterface& odLane, const std::vector<Id> laneBoundaries) override;
+    Id AddLaneBoundary(const Id id, const RoadLaneRoadMark &odLaneRoadMark, double sectionStart, LaneMarkingSide side) override;
     virtual void SetCenterLaneBoundary(const RoadLaneSectionInterface& odSection, std::vector<Id> laneBoundaryIds) override;
     void AddSection(const RoadInterface& odRoad, const RoadLaneSectionInterface& odSection) override;
     void AddRoad(const RoadInterface& odRoad) override;
@@ -418,10 +425,10 @@ public:
     void SetSectionSuccessor(const RoadLaneSectionInterface& section,  const RoadLaneSectionInterface& successorSection) override;
     void SetSectionPredecessor(const RoadLaneSectionInterface& section,  const RoadLaneSectionInterface& predecessorSection) override;
 
-    Interfaces::MovingObject& AddMovingObject(void* linkedObject) override;
-    Interfaces::StationaryObject& AddStationaryObject(void* linkedObject) override;
-    Interfaces::TrafficSign& AddTrafficSign(const std::string odId) override;
-    Interfaces::RoadMarking& AddRoadMarking() override;
+    Interfaces::MovingObject& AddMovingObject(const Id id, void* linkedObject) override;
+    Interfaces::StationaryObject& AddStationaryObject(const Id id, void* linkedObject) override;
+    Interfaces::TrafficSign& AddTrafficSign(const Id id, const std::string odId) override;
+    Interfaces::RoadMarking& AddRoadMarking(const Id id) override;
 
     void AssignTrafficSignToLane(OWL::Id laneId, Interfaces::TrafficSign &trafficSign) override;
     void AssignRoadMarkingToLane(OWL::Id laneId, Interfaces::RoadMarking& roadMarking) override;
@@ -599,11 +606,6 @@ private:
     GroundTruth_ptr osiGroundTruth;
 
     const Implementation::InvalidLane invalidLane;
-
-    inline uint64_t CreateUid()
-    {
-        return next_free_uid++;
-    }
 };
 
 }

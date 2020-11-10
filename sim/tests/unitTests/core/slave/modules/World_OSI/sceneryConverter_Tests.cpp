@@ -12,6 +12,7 @@
 #include "gmock/gmock.h"
 
 #include "SceneryConverter.h"
+#include "EntityRepository.h"
 
 #include "fakeAgent.h"
 #include "fakeLane.h"
@@ -25,6 +26,7 @@
 #include "fakeWorldData.h"
 #include "fakeConnection.h"
 #include "fakeJunction.h"
+#include "fakeDataStore.h"
 
 #include "Generators/laneGeometryElementGenerator.h"
 
@@ -37,6 +39,14 @@ using ::testing::SetArgReferee;
 using ::testing::Invoke;
 using ::testing::Const;
 using ::testing::_;
+
+class FakeRepository : public openpass::entity::RepositoryInterface
+{
+public:
+    MOCK_METHOD0(Reset, void());
+    MOCK_METHOD1(Register, openpass::type::EntityId (openpass::entity::EntityMetaInfo metaInfo));
+    MOCK_METHOD2(Register, openpass::type::EntityId (openpass::entity::EntityType entityType, openpass::entity::EntityMetaInfo metaInfo));
+};
 
 std::tuple<const OWL::Primitive::LaneGeometryJoint*, const OWL::Primitive::LaneGeometryJoint*> CreateSectionPartJointsRect(double length)
 {
@@ -97,7 +107,8 @@ TEST(CalculateAbsolutCoordinates, Test2)
     ON_CALL(testRoadObject, GetHdg()).WillByDefault(Return(0));
     World::Localization::Localizer localizer{worldData};
 
-    SceneryConverter converter(nullptr, worldData, localizer, nullptr);
+    NiceMock<FakeRepository> fakeRepository;
+    SceneryConverter converter(nullptr, fakeRepository, worldData, localizer, nullptr);
 
     bool isInWorld;
     double x, y, yaw;

@@ -18,11 +18,13 @@
 
 namespace loc = World::Localization;
 
-AgentAdapter::AgentAdapter(WorldInterface* world,
+AgentAdapter::AgentAdapter(const openpass::type::EntityId id,
+                           WorldInterface* world,
                            const CallbackInterface* callbacks,
                            OWL::Interfaces::WorldData* worldData,
                            const World::Localization::Localizer& localizer) :
-    WorldObjectAdapter{worldData->AddMovingObject(static_cast<void*>(static_cast<WorldObjectInterface*>(this)))},
+    id{static_cast<int>(id.value)},
+    WorldObjectAdapter{worldData->AddMovingObject(id.value, static_cast<void*>(static_cast<WorldObjectInterface*>(this)))},
     world{world},
     callbacks{callbacks},
     worldData{worldData},
@@ -35,10 +37,9 @@ AgentAdapter::~AgentAdapter()
 {
 }
 
-bool AgentAdapter::InitAgentParameter(int id,
-                                      AgentBlueprintInterface* agentBlueprint)
+void AgentAdapter::InitParameter(const AgentBlueprintInterface& agentBlueprint)
 {
-    UpdateVehicleModelParameter(agentBlueprint->GetVehicleModelParameters());
+    UpdateVehicleModelParameter(agentBlueprint.GetVehicleModelParameters());
 
     const auto & vehicleType = this->vehicleModelParameters.vehicleType;
     if (vehicleType != AgentVehicleType::Car &&
@@ -48,23 +49,22 @@ bool AgentAdapter::InitAgentParameter(int id,
             vehicleType != AgentVehicleType::Pedestrian)
     {
         LOG(CbkLogLevel::Error, "undefined traffic object type");
-        return false;
+        throw std::runtime_error("undefined traffic object type");
     }
 
-    this->vehicleModelType = agentBlueprint->GetVehicleModelName();
-    this->driverProfileName = agentBlueprint->GetDriverProfileName();
-    this->id = id;
-    this->agentCategory = agentBlueprint->GetAgentCategory();
-    this->agentTypeName = agentBlueprint->GetAgentProfileName();
-    this->objectName = agentBlueprint->GetObjectName();
-    this->speedGoalMin = agentBlueprint->GetSpeedGoalMin();
+    this->vehicleModelType = agentBlueprint.GetVehicleModelName();
+    this->driverProfileName = agentBlueprint.GetDriverProfileName();
+    this->agentCategory = agentBlueprint.GetAgentCategory();
+    this->agentTypeName = agentBlueprint.GetAgentProfileName();
+    this->objectName = agentBlueprint.GetObjectName();
+    this->speedGoalMin = agentBlueprint.GetSpeedGoalMin();
 
     // set default values
     GetBaseTrafficObject().SetZ(0.0);
     GetBaseTrafficObject().SetPitch(0.0);
     GetBaseTrafficObject().SetRoll(0.0);
 
-    const auto &spawnParameter = agentBlueprint->GetSpawnParameter();
+    const auto &spawnParameter = agentBlueprint.GetSpawnParameter();
     UpdateYaw(spawnParameter.yawAngle);
     GetBaseTrafficObject().SetX(spawnParameter.positionX);
     GetBaseTrafficObject().SetY(spawnParameter.positionY);
@@ -72,8 +72,8 @@ bool AgentAdapter::InitAgentParameter(int id,
     GetBaseTrafficObject().SetAbsAcceleration(spawnParameter.acceleration);
     this->currentGear = static_cast<int>(spawnParameter.gear);
 
-    SetSensorParameters(agentBlueprint->GetSensorParameters());
-    
+    SetSensorParameters(agentBlueprint.GetSensorParameters());
+
     // spawn tasks are executed before any other task types within current scheduling time
     // other task types will have a consistent view of the world
     // calculate initial position
@@ -81,8 +81,6 @@ bool AgentAdapter::InitAgentParameter(int id,
 
     auto& route = spawnParameter.route;
     egoAgent.SetRoadGraph(std::move(route.roadGraph), route.root, route.target);
-
-    return true;
 }
 
 bool AgentAdapter::Update()

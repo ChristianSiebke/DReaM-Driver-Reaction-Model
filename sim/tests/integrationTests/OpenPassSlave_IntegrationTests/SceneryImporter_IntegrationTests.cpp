@@ -21,10 +21,10 @@
 #include "importer/sceneryImporter.h"
 #include "modelElements/agentBlueprint.h"
 #include "bindings/world.h"
+#include "fakeDataStore.h"
 
 #include "AgentAdapter.h"
 #include "WorldData.h"
-
 
 using ::testing::DoubleEq;
 using ::testing::DoubleNear;
@@ -34,6 +34,9 @@ using ::testing::IsEmpty;
 using ::testing::IsTrue;
 using ::testing::Ne;
 using ::testing::UnorderedElementsAre;
+using ::testing::SizeIs;
+using ::testing::IsEmpty;
+using ::testing::NiceMock;
 
 using namespace boost::filesystem;
 using namespace Configuration;
@@ -43,6 +46,7 @@ struct TESTSCENERY_FACTORY
 {
     const std::string libraryName = "World_OSI";
 
+    NiceMock<FakeDataStore> fakeDataStore;
     SimulationCommon::Callbacks callbacks;
     StochasticsImplementation stochastics{&callbacks};
     SimulationSlave::WorldBinding worldBinding;
@@ -50,7 +54,7 @@ struct TESTSCENERY_FACTORY
     Scenery scenery;
 
     TESTSCENERY_FACTORY() :
-        worldBinding(libraryName, &callbacks, &stochastics, nullptr),
+        worldBinding(libraryName, &callbacks, &stochastics, &fakeDataStore),
         world(&worldBinding)
     {
     }
@@ -588,8 +592,13 @@ TEST(SceneryImporter_IntegrationTests, MultipleRoadsWithIntersectingJunctions_Ju
     ASSERT_THAT(horizontalConnectionInfo.sOffsets.at(h2v2), GeometryDoublePairEq(h2v2SOffset));
 }
 
-AgentAdapter* AddAgentToWorld (SimulationSlave::World& world,
-                               int id, double x, double y, double width = 1.0, double length = 1.0)
+[[maybe_unused]] WorldObjectInterface* UNWRAP(const std::unique_ptr<AgentInterface>& agent)
+{
+    return dynamic_cast<WorldObjectInterface*>(agent.get());
+}
+
+[[nodiscard]] std::unique_ptr<AgentInterface> ADD_AGENT (SimulationSlave::World& world,
+                               double x, double y, double width = 1.0, double length = 1.0)
 {
     VehicleModelParameters vehicleParameter;
     vehicleParameter.vehicleType = AgentVehicleType::Car;
@@ -611,10 +620,20 @@ AgentAdapter* AddAgentToWorld (SimulationSlave::World& world,
     agentBlueprint.SetVehicleModelParameters(vehicleParameter);
     agentBlueprint.SetSpawnParameter(spawnParameter);
 
-    auto agent = static_cast<AgentAdapter*>(world.CreateAgentAdapterForAgent());
-    world.AddAgent(id, agent);
-    agent->InitAgentParameter(id, &agentBlueprint);
-    return agent;
+    auto agent = world.CreateAgentAdapter({});
+    world.RegisterAgent(agent.get());
+    agent->InitParameter(agentBlueprint);
+    return std::move(agent);
+}
+
+[[deprecated("Use ADD_AGENT instead as soon as AgentNetwork::Clear is not destroying the agents anymore")]]
+AgentInterface* AddAgentToWorld (SimulationSlave::World& world,
+                               double x, double y, double width = 1.0, double length = 1.0)
+{
+    auto agent = ADD_AGENT(world, x, y, width, length);
+    auto agent_ptr = agent.get();
+    agent.release(); // release unique_ptr without delete to mimic old ptr memory management
+    return agent_ptr;
 }
 
 TEST(GetObjectsInRange_IntegrationTests, OneObjectOnQueriedLane)
@@ -623,17 +642,16 @@ TEST(GetObjectsInRange_IntegrationTests, OneObjectOnQueriedLane)
     ASSERT_THAT(tsf.instantiate("SceneryLeftLaneEnds.xodr"), IsTrue());
 
     auto& world = tsf.world;
-    AddAgentToWorld(world, 0, 10.0, 2.0);
-    AddAgentToWorld(world, 1, 10.0, 5.0);
-    AddAgentToWorld(world, 2, 10.0, 9.0);
+    auto agent0 = AddAgentToWorld(world, 10.0, 2.0);
+    auto agent1 = AddAgentToWorld(world, 10.0, 5.0);
+    auto agent2 = AddAgentToWorld(world, 10.0, 9.0);
     world.SyncGlobalData();
 
     RoadGraph roadGraph;
     RoadGraphVertex root = add_vertex(RouteElement{"1", true}, roadGraph);
     const auto objectsInRange = world.GetObjectsInRange(roadGraph, root, -3, 0, 0, 500).at(root);
-    const auto agent1 = world.GetAgent(1);
-    ASSERT_THAT(objectsInRange.size(), Eq(1));
-    ASSERT_THAT(objectsInRange.at(0), Eq(agent1));
+    ASSERT_THAT(objectsInRange, SizeIs(1));
+    ASSERT_THAT(objectsInRange.at(0), Eq(world.GetAgent(1)));
 }
 
 TEST(GetObjectsInRange_IntegrationTests, NoObjectOnQueriedLane)
@@ -642,14 +660,14 @@ TEST(GetObjectsInRange_IntegrationTests, NoObjectOnQueriedLane)
     ASSERT_THAT(tsf.instantiate("SceneryLeftLaneEnds.xodr"), IsTrue());
 
     auto& world = tsf.world;
-    AddAgentToWorld(world, 0, 10.0, 2.0);
-    AddAgentToWorld(world, 1, 10.0, 9.0);
+    auto agent0 = AddAgentToWorld(world, 10.0, 2.0);
+    auto agent1 = AddAgentToWorld(world, 10.0, 9.0);
     world.SyncGlobalData();
 
     RoadGraph roadGraph;
     RoadGraphVertex root = add_vertex(RouteElement{"1", true}, roadGraph);
     const auto objectsInRange = world.GetObjectsInRange(roadGraph, root, -3, 0, 0, 500).at(root);
-    ASSERT_THAT(objectsInRange.size(), Eq(0));
+    ASSERT_THAT(objectsInRange, IsEmpty());
 }
 
 TEST(GetObjectsInRange_IntegrationTests, TwoObjectsInDifferentSections)
@@ -658,20 +676,18 @@ TEST(GetObjectsInRange_IntegrationTests, TwoObjectsInDifferentSections)
     ASSERT_THAT(tsf.instantiate("SceneryLeftLaneEnds.xodr"), IsTrue());
 
     auto& world = tsf.world;
-    AddAgentToWorld(world, 0, 10.0, 2.0);
-    AddAgentToWorld(world, 1, 310.0, 5.0);
-    AddAgentToWorld(world, 2, 10.0, 5.0);
-    AddAgentToWorld(world, 3, 10.0, 9.0);
+    auto agent0 = AddAgentToWorld(world, 10.0, 2.0);
+    auto agent1 = AddAgentToWorld(world, 310.0, 5.0);
+    auto agent2 = AddAgentToWorld(world, 10.0, 5.0);
+    auto agent3 = AddAgentToWorld(world, 10.0, 9.0);
     world.SyncGlobalData();
 
     RoadGraph roadGraph;
     RoadGraphVertex root = add_vertex(RouteElement{"1", true}, roadGraph);
     const auto objectsInRange = world.GetObjectsInRange(roadGraph, root, -3, 0, 0, 500).at(root);
-    const auto agent1 = world.GetAgent(1);
-    const auto agent2 = world.GetAgent(2);
-    ASSERT_THAT(objectsInRange.size(), Eq(2));
-    ASSERT_THAT(objectsInRange.at(0), Eq(agent2));
-    ASSERT_THAT(objectsInRange.at(1), Eq(agent1));
+    ASSERT_THAT(objectsInRange, SizeIs(2));
+    ASSERT_THAT(objectsInRange.at(0), Eq(world.GetAgent(2)));
+    ASSERT_THAT(objectsInRange.at(1), Eq(world.GetAgent(1)));
 }
 
 TEST(GetObjectsInRange_IntegrationTests, OneObjectOnSectionBorder)
@@ -680,17 +696,16 @@ TEST(GetObjectsInRange_IntegrationTests, OneObjectOnSectionBorder)
     ASSERT_THAT(tsf.instantiate("SceneryLeftLaneEnds.xodr"), IsTrue());
 
     auto& world = tsf.world;
-    AddAgentToWorld(world, 0, 300.0, 2.0);
-    AddAgentToWorld(world, 1, 300.0, 5.0);
-    AddAgentToWorld(world, 2, 300.0, 9.0);
+    auto agent0 = AddAgentToWorld(world, 300.0, 2.0);
+    auto agent1 = AddAgentToWorld(world, 300.0, 5.0);
+    auto agent2 = AddAgentToWorld(world, 300.0, 9.0);
     world.SyncGlobalData();
 
     RoadGraph roadGraph;
     RoadGraphVertex root = add_vertex(RouteElement{"1", true}, roadGraph);
     const auto objectsInRange = world.GetObjectsInRange(roadGraph, root, -3, 0, 0, 500).at(root);
-    const auto agent1 = world.GetAgent(1);
-    ASSERT_THAT(objectsInRange.size(), Eq(1));
-    ASSERT_THAT(objectsInRange.at(0), Eq(agent1));
+    ASSERT_THAT(objectsInRange, SizeIs(1));
+    ASSERT_THAT(objectsInRange.at(0), Eq(world.GetAgent(1)));
 }
 
 TEST(GetObjectsInRange_IntegrationTests, MultipleRoads)
@@ -699,10 +714,10 @@ TEST(GetObjectsInRange_IntegrationTests, MultipleRoads)
     ASSERT_THAT(tsf.instantiate("MultipleRoadsIntegrationScenery.xodr"), IsTrue());
 
     auto& world = tsf.world;
-    AddAgentToWorld(world, 0, 510.0, 6.0);
-    AddAgentToWorld(world, 1, 1300.0, 2.0);
-    AddAgentToWorld(world, 2, 510.0, 2.0);
-    AddAgentToWorld(world, 3, 510.0, -1.0);
+    auto agent0 = AddAgentToWorld(world, 510.0, 6.0);
+    auto agent1 = AddAgentToWorld(world, 1300.0, 2.0);
+    auto agent2 = AddAgentToWorld(world, 510.0, 2.0);
+    auto agent3 = AddAgentToWorld(world, 510.0, -1.0);
     world.SyncGlobalData();
 
     RoadGraph roadGraph;
@@ -712,11 +727,9 @@ TEST(GetObjectsInRange_IntegrationTests, MultipleRoads)
     add_edge(node1, node2, roadGraph);
     add_edge(node2, node3, roadGraph);
     const auto objectsInRange = world.GetObjectsInRange(roadGraph, node1, -2, 500, 0, 1500).at(node3);
-    const auto agent1 = world.GetAgent(1);
-    const auto agent2 = world.GetAgent(2);
-    ASSERT_THAT(objectsInRange.size(), Eq(2));
-    ASSERT_THAT(objectsInRange.at(0), Eq(agent2));
-    ASSERT_THAT(objectsInRange.at(1), Eq(agent1));
+    ASSERT_THAT(objectsInRange, SizeIs(2));
+    ASSERT_THAT(objectsInRange.at(0), Eq(world.GetAgent(2)));
+    ASSERT_THAT(objectsInRange.at(1), Eq(world.GetAgent(1)));
 }
 
 TEST(Locator_IntegrationTests, AgentOnStraightRoad_CalculatesCorrectLocateResult)
@@ -725,8 +738,8 @@ TEST(Locator_IntegrationTests, AgentOnStraightRoad_CalculatesCorrectLocateResult
     ASSERT_THAT(tsf.instantiate("MultipleRoadsIntegrationScenery.xodr"), IsTrue());
 
     auto& world = tsf.world;
-    const auto agent1 = AddAgentToWorld(world, 1, 399.0, 1.0, 2.0, 5.0);
-    const auto agent2 = AddAgentToWorld(world, 2, 2500.0, 2.0, 2.0, 5.0);
+    const auto agent1 = AddAgentToWorld(world, 399.0, 1.0, 2.0, 5.0);
+    const auto agent2 = AddAgentToWorld(world, 2500.0, 2.0, 2.0, 5.0);
     world.SyncGlobalData();
 
     ASSERT_THAT(agent1->GetRoads(MeasurementPoint::Front), ElementsAre("1"));
@@ -749,10 +762,9 @@ TEST(Locator_IntegrationTests, AgentOnJunction_CalculatesCorrectLocateResult)
     ASSERT_THAT(tsf.instantiate("TJunction.xodr"), IsTrue());
 
     auto& world = tsf.world;
-    AddAgentToWorld(world, 1, 208.0, -2.0, 2.0, 4.0);
+    auto agent = AddAgentToWorld(world, 208.0, -2.0, 2.0, 4.0);
     world.SyncGlobalData();
 
-    const auto agent = world.GetAgent(1);
     EXPECT_THAT(agent->GetDistanceToStartOfRoad(MeasurementPoint::Front, "R1-3"), DoubleNear(10.0, 0.01));
     EXPECT_THAT(agent->GetDistanceToStartOfRoad(MeasurementPoint::Rear, "R1-3"), DoubleNear(6.0, 0.01));
     EXPECT_THAT(agent->GetDistanceToStartOfRoad(MeasurementPoint::Front, "R2-3"), DoubleNear(std::atan(2.5) * 6, 0.15)); //front left corner
@@ -773,7 +785,7 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectLaneMarkings)
     RoadGraph roadGraph;
     RoadGraphVertex root = add_vertex(RouteElement{"1", true}, roadGraph);
     auto laneMarkings = world.GetLaneMarkings(roadGraph, root, -1, 0.0, 99.0, Side::Left).at(root);
-    ASSERT_THAT(laneMarkings.size(), Eq(5));
+    ASSERT_THAT(laneMarkings, SizeIs(5));
     ASSERT_THAT(laneMarkings.at(0).relativeStartDistance, DoubleEq(0.0));
     ASSERT_THAT(laneMarkings.at(0).type, Eq(LaneMarking::Type::Solid));
     ASSERT_THAT(laneMarkings.at(0).width, DoubleEq(0.15));
@@ -789,7 +801,7 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectLaneMarkings)
     ASSERT_THAT(laneMarkings.at(3).relativeStartDistance, DoubleEq(30.0));
 
     laneMarkings = world.GetLaneMarkings(roadGraph, root, -1, 0.0, 99.0, Side::Right).at(root);
-    ASSERT_THAT(laneMarkings.size(), Eq(5));
+    ASSERT_THAT(laneMarkings, SizeIs(5));
     ASSERT_THAT(laneMarkings.at(0).relativeStartDistance, DoubleEq(0.0));
     ASSERT_THAT(laneMarkings.at(0).type, Eq(LaneMarking::Type::Broken));
     ASSERT_THAT(laneMarkings.at(0).width, DoubleEq(0.15));
@@ -805,7 +817,7 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectLaneMarkings)
     ASSERT_THAT(laneMarkings.at(3).relativeStartDistance, DoubleEq(30.0));
 
     laneMarkings = world.GetLaneMarkings(roadGraph, root, -2, 11.0, 88.0, Side::Left).at(root);
-    ASSERT_THAT(laneMarkings.size(), Eq(4));
+    ASSERT_THAT(laneMarkings, SizeIs(4));
     ASSERT_THAT(laneMarkings.at(0).relativeStartDistance, DoubleEq(-1.0));
     ASSERT_THAT(laneMarkings.at(0).type, Eq(LaneMarking::Type::Broken_Solid));
     ASSERT_THAT(laneMarkings.at(0).width, DoubleEq(0.3));
@@ -817,7 +829,7 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectLaneMarkings)
     ASSERT_THAT(laneMarkings.at(2).relativeStartDistance, DoubleEq(19.0));
 
     laneMarkings = world.GetLaneMarkings(roadGraph, root, -2, 11.0, 88.0, Side::Right).at(root);
-    ASSERT_THAT(laneMarkings.size(), Eq(4));
+    ASSERT_THAT(laneMarkings, SizeIs(4));
     ASSERT_THAT(laneMarkings.at(0).relativeStartDistance, DoubleEq(-1.0));
     ASSERT_THAT(laneMarkings.at(0).type, Eq(LaneMarking::Type::Broken_Broken));
     ASSERT_THAT(laneMarkings.at(0).width, DoubleEq(0.15));
@@ -841,53 +853,53 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectTrafficSigns)
     auto trafficSigns = world.GetTrafficSignsInRange(roadGraph, root, -1, 5, 90).at(root);
     std::sort(trafficSigns.begin(), trafficSigns.end(),
               [](CommonTrafficSign::Entity first, CommonTrafficSign::Entity second){return first.relativeDistance < second.relativeDistance;});
-    ASSERT_THAT(trafficSigns.size(), Eq(3));
+    ASSERT_THAT(trafficSigns, SizeIs(3));
     ASSERT_THAT(trafficSigns.at(0).relativeDistance, DoubleEq(10.0));
     ASSERT_THAT(trafficSigns.at(0).type, Eq(CommonTrafficSign::Type::MaximumSpeedLimit));
     ASSERT_THAT(trafficSigns.at(0).value, DoubleNear(50 / 3.6, 1e-3));
     ASSERT_THAT(trafficSigns.at(0).unit, Eq(CommonTrafficSign::Unit::MeterPerSecond));
-    ASSERT_THAT(trafficSigns.at(0).supplementarySigns.size(), Eq(0));
+    ASSERT_THAT(trafficSigns.at(0).supplementarySigns, IsEmpty());
     ASSERT_THAT(trafficSigns.at(1).relativeDistance, DoubleEq(30.0));
     ASSERT_THAT(trafficSigns.at(1).type, Eq(CommonTrafficSign::Type::SpeedLimitZoneBegin));
     ASSERT_THAT(trafficSigns.at(1).value, DoubleNear(30 / 3.6, 1e-3));
     ASSERT_THAT(trafficSigns.at(1).unit, Eq(CommonTrafficSign::Unit::MeterPerSecond));
-    ASSERT_THAT(trafficSigns.at(1).supplementarySigns.size(), Eq(0));
+    ASSERT_THAT(trafficSigns.at(1).supplementarySigns, IsEmpty());
     ASSERT_THAT(trafficSigns.at(2).relativeDistance, DoubleEq(31.0));
     ASSERT_THAT(trafficSigns.at(2).type, Eq(CommonTrafficSign::Type::AnnounceLeftLaneEnd));
     ASSERT_THAT(trafficSigns.at(2).value, Eq(2));
-    ASSERT_THAT(trafficSigns.at(2).supplementarySigns.size(), Eq(0));
+    ASSERT_THAT(trafficSigns.at(2).supplementarySigns, IsEmpty());
 
     trafficSigns = world.GetTrafficSignsInRange(roadGraph, root, -2, 11, 90).at(root);
     std::sort(trafficSigns.begin(), trafficSigns.end(),
               [](CommonTrafficSign::Entity first, CommonTrafficSign::Entity second){return first.relativeDistance < second.relativeDistance;});
-    ASSERT_THAT(trafficSigns.size(), Eq(5));
+    ASSERT_THAT(trafficSigns, SizeIs(5));
     ASSERT_THAT(trafficSigns.at(0).relativeDistance, DoubleEq(4.0));
     ASSERT_THAT(trafficSigns.at(0).type, Eq(CommonTrafficSign::Type::MaximumSpeedLimit));
     ASSERT_THAT(trafficSigns.at(0).value, DoubleNear(50 / 3.6, 1e-3));
     ASSERT_THAT(trafficSigns.at(0).unit, Eq(CommonTrafficSign::Unit::MeterPerSecond));
-    ASSERT_THAT(trafficSigns.at(0).supplementarySigns.size(), Eq(0));
+    ASSERT_THAT(trafficSigns.at(0).supplementarySigns, IsEmpty());
     ASSERT_THAT(trafficSigns.at(1).relativeDistance, DoubleEq(14.0));
     ASSERT_THAT(trafficSigns.at(1).type, Eq(CommonTrafficSign::Type::OvertakingBanBegin));
-    ASSERT_THAT(trafficSigns.at(1).supplementarySigns.size(), Eq(0));
+    ASSERT_THAT(trafficSigns.at(1).supplementarySigns, IsEmpty());
     ASSERT_THAT(trafficSigns.at(2).relativeDistance, DoubleEq(24.0));
     ASSERT_THAT(trafficSigns.at(2).type, Eq(CommonTrafficSign::Type::SpeedLimitZoneBegin));
     ASSERT_THAT(trafficSigns.at(2).value, DoubleNear(30 / 3.6, 1e-3));
     ASSERT_THAT(trafficSigns.at(2).unit, Eq(CommonTrafficSign::Unit::MeterPerSecond));
-    ASSERT_THAT(trafficSigns.at(2).supplementarySigns.size(), Eq(0));
+    ASSERT_THAT(trafficSigns.at(2).supplementarySigns, IsEmpty());
     ASSERT_THAT(trafficSigns.at(3).relativeDistance, DoubleEq(25.0));
     ASSERT_THAT(trafficSigns.at(3).type, Eq(CommonTrafficSign::Type::AnnounceLeftLaneEnd));
     ASSERT_THAT(trafficSigns.at(3).value, Eq(2));
     ASSERT_THAT(trafficSigns.at(3).unit, Eq(CommonTrafficSign::Unit::None));
-    ASSERT_THAT(trafficSigns.at(3).supplementarySigns.size(), Eq(0));
+    ASSERT_THAT(trafficSigns.at(3).supplementarySigns, IsEmpty());
     ASSERT_THAT(trafficSigns.at(4).relativeDistance, DoubleEq(29.0));
     ASSERT_THAT(trafficSigns.at(4).type, Eq(CommonTrafficSign::Type::Stop));
-    ASSERT_THAT(trafficSigns.at(4).supplementarySigns.size(), Eq(1));
+    ASSERT_THAT(trafficSigns.at(4).supplementarySigns, SizeIs(1));
     ASSERT_THAT(trafficSigns.at(4).supplementarySigns.front().type, Eq(CommonTrafficSign::Type::DistanceIndication));
     ASSERT_THAT(trafficSigns.at(4).supplementarySigns.front().value, DoubleEq(200.0));
     ASSERT_THAT(trafficSigns.at(4).supplementarySigns.front().unit, Eq(CommonTrafficSign::Unit::Meter));
 
     auto roadMarkings = world.GetRoadMarkingsInRange(roadGraph, root, -2, 11, 90).at(root);
-    ASSERT_THAT(roadMarkings.size(), Eq(1));
+    ASSERT_THAT(roadMarkings, SizeIs(1));
     ASSERT_THAT(roadMarkings.at(0).relativeDistance, DoubleEq(30.0));
     ASSERT_THAT(roadMarkings.at(0).type, Eq(CommonTrafficSign::Type::Stop));
 }
@@ -966,7 +978,7 @@ TEST(SceneryImporter_IntegrationTests, TJunction_ImportWithCorrectConnectionsAnd
     auto& world = tsf.world;
 
     auto connections = world.GetConnectionsOnJunction("J0", "R1");
-    ASSERT_THAT(connections.size(), Eq(2));
+    ASSERT_THAT(connections, SizeIs(2));
     ASSERT_THAT(connections.at(0).connectingRoadId, Eq("R1-2"));
     ASSERT_THAT(connections.at(0).outgoingRoadId, Eq("R2"));
     ASSERT_THAT(connections.at(0).outgoingStreamDirection, Eq(false));
@@ -975,7 +987,7 @@ TEST(SceneryImporter_IntegrationTests, TJunction_ImportWithCorrectConnectionsAnd
     ASSERT_THAT(connections.at(1).outgoingStreamDirection, Eq(false));
 
     connections = world.GetConnectionsOnJunction("J0", "R2");
-    ASSERT_THAT(connections.size(), Eq(2));
+    ASSERT_THAT(connections, SizeIs(2));
     ASSERT_THAT(connections.at(0).connectingRoadId, Eq("R2-1"));
     ASSERT_THAT(connections.at(0).outgoingRoadId, Eq("R1"));
     ASSERT_THAT(connections.at(0).outgoingStreamDirection, Eq(false));
@@ -984,7 +996,7 @@ TEST(SceneryImporter_IntegrationTests, TJunction_ImportWithCorrectConnectionsAnd
     ASSERT_THAT(connections.at(1).outgoingStreamDirection, Eq(false));
 
     connections = world.GetConnectionsOnJunction("J0", "R3");
-    ASSERT_THAT(connections.size(), Eq(2));
+    ASSERT_THAT(connections, SizeIs(2));
     ASSERT_THAT(connections.at(0).connectingRoadId, Eq("R3-1"));
     ASSERT_THAT(connections.at(0).outgoingRoadId, Eq("R1"));
     ASSERT_THAT(connections.at(0).outgoingStreamDirection, Eq(false));
@@ -1016,15 +1028,15 @@ TEST(GetObstruction_IntegrationTests, AgentsOnStraightRoad)
     ASSERT_THAT(tsf.instantiate("SceneryLeftLaneEnds.xodr"), IsTrue());
 
     auto& world = tsf.world;
-    auto agent0 = AddAgentToWorld(world, 0, 10.0, 2.0);
-    auto agent1 = AddAgentToWorld(world, 1, 100.0, 2.5, 2.0);
+    auto agent0 = AddAgentToWorld(world, 10.0, 2.0);
+    auto agent1 = AddAgentToWorld(world, 100.0, 2.5, 2.0);
     world.SyncGlobalData();
 
     auto& egoAgent = agent0->GetEgoAgent();
     RoadGraph roadGraph;
     auto root = add_vertex(RouteElement{"1", true}, roadGraph);
     egoAgent.SetRoadGraph(std::move(roadGraph), root, root);
-    const auto obstruction = egoAgent.GetObstruction(agent1);
+    const auto obstruction = egoAgent.GetObstruction(agent1); // use UNWRAP when agent gets unique_ptr
     EXPECT_THAT(obstruction.left, DoubleEq(1.5));
     EXPECT_THAT(obstruction.right, DoubleEq(-0.5));
 }
@@ -1035,8 +1047,8 @@ TEST(GetObstruction_IntegrationTests, AgentBehindJunction)
     ASSERT_THAT(tsf.instantiate("TJunction.xodr"), IsTrue());
 
     auto& world = tsf.world;
-    auto agent0 = AddAgentToWorld(world, 0, 10.0, -3.0);
-    auto agent1 = AddAgentToWorld(world, 1, 203.5, -10.0, 1.0, 3.0);
+    auto agent0 = AddAgentToWorld(world, 10.0, -3.0);
+    auto agent1 = AddAgentToWorld(world, 203.5, -10.0, 1.0, 3.0);
     world.SyncGlobalData();
 
     auto& egoAgent = agent0->GetEgoAgent();
@@ -1047,7 +1059,7 @@ TEST(GetObstruction_IntegrationTests, AgentBehindJunction)
     add_edge(node1, node2, roadGraph);
     add_edge(node2, node3, roadGraph);
     egoAgent.SetRoadGraph(std::move(roadGraph), node1, node3);
-    const auto obstruction = egoAgent.GetObstruction(agent1);
+    const auto obstruction = egoAgent.GetObstruction(agent1); // use UNWRAP when agent gets unique_ptr
     EXPECT_THAT(obstruction.left, DoubleNear(2.0, 1e-3));
     EXPECT_THAT(obstruction.right, DoubleNear(-1.0, 1e-3));
 }

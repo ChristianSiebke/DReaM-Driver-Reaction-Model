@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -16,12 +16,9 @@
 #include <map>
 #include <vector>
 
-#include <QDomDocument>
-#include <QFile>
-
+#include "include/agentBlueprintInterface.h"
 #include "common/log.h"
 #include "modelElements/parameters.h"
-#include "include/observationNetworkInterface.h"
 #include "agentDataPublisher.h"
 #include "agentType.h"
 #include "channel.h"
@@ -34,11 +31,22 @@ class DataStoreWriteInterface;
 
 namespace SimulationSlave {
 
-Agent::Agent(int id, WorldInterface *world) :
-    id(id),
+Agent::Agent(WorldInterface *world, const AgentBlueprintInterface& agentBlueprint) :
     world(world)
 {
-    SetAgentAdapter(world->CreateAgentAdapterForAgent());
+    using namespace std::string_literals;
+    auto agentAdapter = world->CreateAgentAdapter({
+        {"source"s, "OpenScenario"s},
+        {"version"s, "1.0"s},
+        {"type"s, openpass::utils::to_string(agentBlueprint.GetAgentCategory())},
+        {"name"s, agentBlueprint.GetObjectName()}});
+
+
+    id = agentAdapter->GetId();
+
+    // This is a workaround until the memory management of the AgentAdapters has been refactored
+    SetAgentAdapter(agentAdapter.get());
+    agentAdapter.release(); // do not destroy for now
 }
 
 Agent::~Agent()
@@ -66,23 +74,17 @@ Agent::~Agent()
     channels.clear();
 }
 
-bool Agent::Instantiate(AgentBlueprintInterface *agentBlueprint,
+bool Agent::Instantiate(const AgentBlueprintInterface& agentBlueprint,
                         ModelBinding *modelBinding,
                         StochasticsInterface *stochastics,
                         ObservationNetworkInterface *observationNetwork,
                         EventNetworkInterface *eventNetwork,
                         DataStoreWriteInterface *dataStore)
 {
-    publisher = std::make_unique<openpass::publisher::AgentDataPublisher>(dataStore, id);
-
-    // setup
-    if (!agentInterface->InitAgentParameter(id, agentBlueprint))
-    {
-        return false;
-    }
+    agentInterface->InitParameter(agentBlueprint);
 
     // instantiate channels
-    for (int channelId : agentBlueprint->GetAgentType().GetChannels())
+    for (int channelId : agentBlueprint.GetAgentType().GetChannels())
     {
         LOG_INTERN(LogLevel::DebugCore) << "- instantiate channel " << channelId;
 
@@ -104,7 +106,8 @@ bool Agent::Instantiate(AgentBlueprintInterface *agentBlueprint,
     }
 
     // instantiate components
-    for (const std::pair<const std::string, std::shared_ptr<ComponentType>> &itemComponentType : agentBlueprint->GetAgentType().GetComponents())
+    publisher = std::make_unique<openpass::publisher::AgentDataPublisher>(dataStore, id);
+    for (const std::pair<const std::string, std::shared_ptr<ComponentType>> &itemComponentType : agentBlueprint.GetAgentType().GetComponents())
     {
         std::string componentName = itemComponentType.first;
         std::shared_ptr<ComponentType> componentType = itemComponentType.second;
@@ -193,9 +196,9 @@ AgentInterface *Agent::GetAgentAdapter() const
     return agentInterface;
 }
 
-void Agent::SetAgentAdapter(AgentInterface *agentAdapt)
+void Agent::SetAgentAdapter(AgentInterface *agentAdapter)
 {
-    agentInterface = agentAdapt;
+    agentInterface = agentAdapter;
 }
 
 bool Agent::AddComponent(std::string name, ComponentInterface *component)

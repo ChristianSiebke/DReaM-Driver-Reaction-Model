@@ -39,18 +39,19 @@ using Publisher = std::function<void(openpass::type::EntityId id, openpass::type
 */
 class AgentNetwork final
 {
-public:    
+public:
     AgentNetwork(WorldImplementation *world, const CallbackInterface *callbacks);
     ~AgentNetwork();
+
     /*!
-     * \brief AddAgent
-     * Add agent to agent network:
+     * \brief Add an agent to the agent network
      *
-     * \param[in] id        id of agent
+     * All added agents must have unique ids.
+     * Otherwise the method throws.
+     *
      * \param[in] agent     agent reference
-     * \return              true for success
      */
-    bool AddAgent(int id, AgentInterface *agent);
+    void AddAgent(AgentInterface *agent);
 
     /*!
      * \brief Clear

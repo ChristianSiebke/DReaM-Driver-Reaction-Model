@@ -28,7 +28,8 @@ private:
     void InitLaneDirection(double hdg);
 
 public:
-    TrafficObjectAdapter(OWL::Interfaces::WorldData& worldData,
+    TrafficObjectAdapter(const openpass::type::EntityId id,
+                         OWL::Interfaces::WorldData& worldData,
                          const World::Localization::Localizer& localizer,
                          OWL::Primitive::AbsPosition position,
                          OWL::Primitive::Dimension dimension,

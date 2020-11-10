@@ -422,6 +422,7 @@ public:
     //!
     // @return     true for success
     //-----------------------------------------------------------------------------
+    [[deprecated("Use InitParameter instead")]]
     virtual bool InitAgentParameter(int id,
                                     int agentTypeId,
                                     const AgentSpawnItem *agentSpawnItem,
@@ -432,8 +433,17 @@ public:
     //!
     //! @return    true for success
     //-----------------------------------------------------------------------------
+    [[deprecated("Use InitParameter instead")]]
     virtual bool InitAgentParameter(int id,
                                     AgentBlueprintInterface* agentBlueprint) = 0;
+
+    //-----------------------------------------------------------------------------
+    //! Initializes the parameters of an agent
+    //!
+    //! @param[in] agentBlueprint    Blueprint holding parameters such as dimensions
+    //!                              of a vehicle, or its initial spawning velocity
+    //-----------------------------------------------------------------------------
+    virtual void InitParameter(const AgentBlueprintInterface& agentBlueprint) = 0;
 
     //-----------------------------------------------------------------------------
     //! Retrieves type of agent

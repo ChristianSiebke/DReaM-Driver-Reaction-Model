@@ -189,17 +189,31 @@ private:
     /*!
     * \brief Removes old cyclic files from directory.
     *
-    * @param[in]    directory           directory to delete teh cyclic files
+    * @param[in]    directory           directory to delete the cyclic files
     */
     void RemoveCsvCyclics(QString directory);
 
     /*!
+    * \brief Removes old repositories from directory
+    *
+    * @param[in]    directory           directory to delete the repository file
+    */
+    void RemoveRepositories(QString directory);
+
+    /*!
     * \brief Writes the cyclics of one run to a csv.
     *
-    * @param[in]    runId               Id of the current run
+    * @param[in]    filename            Filename for current run
     * @param[in]    cyclics             Cyclics of the current run
     */
-    void WriteCsvCyclics(QString runId, ObservationCyclics &cyclics);
+    void WriteCsvCyclics(QString filename, ObservationCyclics &cyclics);
+
+    /*!
+    * \brief Writes the repository of one run to a csv.
+    *
+    * @param[in]    filename            Filename for current run
+    */
+    void WriteCsvRepository(QString filename);
 
     /*!
     * \brief Write entities to XML

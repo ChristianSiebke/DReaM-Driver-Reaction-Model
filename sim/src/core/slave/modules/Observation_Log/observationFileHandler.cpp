@@ -115,17 +115,18 @@ void ObservationFileHandler::WriteRun([[maybe_unused]] const RunResultInterface&
     // write CyclicsTag
     xmlFileStream->writeStartElement(outputTags.CYCLICS);
 
+    QString runPrefix = "";
+    if (runNumber < 10)
+    {
+        runPrefix = "00";
+    }
+    else if (runNumber < 100)
+    {
+        runPrefix = "0";
+    }
+
     if (writeCyclicsToCsv)
     {
-        QString runPrefix = "";
-        if (runNumber < 10)
-        {
-            runPrefix = "00";
-        }
-        else if (runNumber < 100)
-        {
-            runPrefix = "0";
-        }
         QString csvFilename = "Cyclics_Run_" + runPrefix + QString::number(runNumber) + ".csv";
 
         AddReference(csvFilename);
@@ -137,6 +138,9 @@ void ObservationFileHandler::WriteRun([[maybe_unused]] const RunResultInterface&
         AddHeader(cyclics);
         AddSamples(cyclics);
     }
+
+    QString repositoryFilename = "Repository_Run_" + runPrefix + QString::number(runNumber) + ".csv";
+    WriteCsvRepository(repositoryFilename);
 
     // close CyclicsTag
     xmlFileStream->writeEndElement();
@@ -171,6 +175,9 @@ void ObservationFileHandler::AddEvents()
 
     for (const AcyclicRow& event : *events)
     {
+        // necessary, as events and entities are currently both handled by acyclics and we don't have filters yet
+        if (event.key == "Entities") continue;
+
         xmlFileStream->writeStartElement(outputTags.EVENT);
         xmlFileStream->writeAttribute(outputAttributes.TIME, QString::number(event.timestamp));
         xmlFileStream->writeAttribute(outputAttributes.SOURCE, QString::fromStdString(event.key));
@@ -337,6 +344,20 @@ void ObservationFileHandler::RemoveCsvCyclics(QString directory)
     }
 }
 
+void ObservationFileHandler::RemoveRepositories(QString directory)
+{
+    QDirIterator it(directory, QStringList() << "Repository_Run*.csv", QDir::Files, QDirIterator::NoIteratorFlags);
+    while (it.hasNext())
+    {
+        it.next();
+        QFileInfo fileInfo = it.fileInfo();
+        if (fileInfo.baseName().startsWith("Repository_Run_") && fileInfo.suffix() == "csv")
+        {
+            QFile::remove(fileInfo.filePath());
+        }
+    }
+}
+
 void ObservationFileHandler::WriteCsvCyclics(QString filename, ObservationCyclics& cyclics)
 {
     QString path = folder + QDir::separator() + filename;
@@ -364,6 +385,58 @@ void ObservationFileHandler::WriteCsvCyclics(QString filename, ObservationCyclic
 
     csvFile->flush();
 
+    csvFile->close();
+}
+
+void ObservationFileHandler::WriteCsvRepository(QString filename)
+{
+    using namespace std::string_literals;
+    const QString DELIMITER {";"};
+
+    QString path = folder + QDir::separator() + filename;
+    csvFile = std::make_unique<QFile>(path);
+    if (!csvFile->open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        std::stringstream ss;
+        ss << COMPONENTNAME << " could not create file: " << tmpPath.toStdString();
+        throw std::runtime_error(ss.str());
+    }
+
+    QTextStream stream(csvFile.get());
+
+    const std::vector<std::string> columnHeaders {"time"s, "id"s, "source"s, "version"s, "secondary id", "type"s, "subtype"s, "name"};
+    stream << QString::fromStdString(openpass::utils::vector::to_string(columnHeaders, DELIMITER.toStdString())) << '\n';
+
+    const auto entities = dataStore.GetAcyclic(std::nullopt, std::nullopt, "Entities");
+    for (const AcyclicRow& entity : *entities)
+    {
+        stream << QString::number(entity.timestamp.value) << DELIMITER
+               << QString::number(entity.entityId.value) << DELIMITER
+               << QString::fromStdString(entity.data.name) << DELIMITER;
+
+        const std::vector<std::string> metaInfo {"version"s, "id", "type"s, "subtype"s, "name"s};
+        for(const auto& entry : metaInfo)
+        {
+            // No structured binding on purpose:
+            // see https://stackoverflow.com/questions/46114214/lambda-implicit-capture-fails-with-variable-declared-from-structured-binding
+            for (const auto &p : entity.data.parameter)
+            {
+                auto parameterWriter = [&](const std::string &value) {
+
+                    if (p.first == entry)
+                    {
+                        stream << QString::fromStdString(value);
+                    }
+                };
+
+                std::visit(openpass::utils::FlatParameter::to_string(parameterWriter), p.second);
+            }
+
+            stream << (entry != metaInfo.back() ? DELIMITER : QString("\n"));
+        }
+    }
+
+    csvFile->flush();
     csvFile->close();
 }
 

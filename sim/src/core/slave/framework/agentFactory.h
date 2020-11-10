@@ -44,8 +44,6 @@ class ObservationNetworkInterface;
 class CORESLAVEEXPORT AgentFactory : public AgentFactoryInterface
 {
 public:
-    static constexpr int INITIAL_AGENT_ID {0};
-
     AgentFactory(ModelBinding *modelBinding,
                  WorldInterface *world,
                  Stochastics *stochastics,
@@ -73,25 +71,17 @@ private:
     bool ConnectAgentLinks(Agent *agent);
 
     //-----------------------------------------------------------------------------
-    //! @brief Creates a new agent based on the provided parameters, initializes it
-    //!         and links its agent channels.
+    //! @brief Creates a new agent based on the provided parameters,
+    //!        initializes it, and links its agent channels.
     //!
-    //! Gets the agent type via the reference stored in the agent run configuration
-    //! definition, initializes a new agend using the parameters, resets its local
-    //! driving view and initializes it, before finally linking the agent channels
-    //! accordingly.
-    //!
-    //! @param[in]  id                  Agent ID
     //! @param[in]  agentBlueprint      agentBlueprint contains all necessary
     //!                                 informations to create an agent
-    //! @param[in]  spawnTime           Spawn time in ms
-    //!
     //! @return                         The created agent
     //-----------------------------------------------------------------------------
-    std::unique_ptr<Agent> CreateAgent(int id, AgentBlueprintInterface* agentBlueprint);
+    std::unique_ptr<Agent> CreateAgent(const AgentBlueprintInterface& agentBlueprint);
 
     void PublishProperties(const Agent& agent);
-    
+
     ModelBinding *modelBinding;
     WorldInterface *world;
     Stochastics *stochastics;
@@ -100,8 +90,6 @@ private:
     DataStoreWriteInterface *dataStore;
 
     std::vector<std::unique_ptr<Agent>> agentList;
-
-    int lastAgentId {INITIAL_AGENT_ID};
 };
 
 } // namespace SimulationSlave

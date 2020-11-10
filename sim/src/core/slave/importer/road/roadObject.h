@@ -77,6 +77,12 @@ public:
     //-----------------------------------------------------------------------------
     double GetWidth() const;
 
+    //-----------------------------------------------------------------------------
+    //! @brief Returns the name of the road object
+    //! @return                     name
+    //-----------------------------------------------------------------------------
+    std::string GetName() const;
+
 private:
     RoadInterface* road;
     const RoadObjectSpecification object;

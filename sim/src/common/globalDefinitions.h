@@ -81,6 +81,28 @@ enum class AgentCategory
     Any
 };
 
+namespace openpass::utils {
+
+/// @brief constexpr map for transforming the a corresponding enumeration into
+///        a string representation: try to_cstr(EnumType) or to_string(EnumType)
+static constexpr std::array<const char *, 4> AgentCategoryMapping{
+    "Ego",
+    "Scenaro",
+    "Common",
+    "Any"};
+
+constexpr const char *to_cstr(AgentCategory agentCategory)
+{
+    return AgentCategoryMapping[static_cast<size_t>(agentCategory)];
+}
+
+inline std::string to_string(AgentCategory agentCategory) noexcept
+{
+    return std::string(to_cstr(agentCategory));
+}
+
+} // namespace util
+
 //-----------------------------------------------------------------------------
 //! Agent type classification
 //-----------------------------------------------------------------------------
@@ -95,7 +117,36 @@ enum class AgentVehicleType
     Truck
 };
 
-// convert a vehicle type name to VehicleType enum
+
+namespace openpass::utils {
+
+/// @brief constexpr map for transforming the a corresponding enumeration into
+///        a string representation: try to_cstr(EnumType) or to_string(EnumType)
+static constexpr std::array<const char *, 7> AgentVehicleTypeMapping{
+    "NONE",
+    "Undefined",
+    "Car",
+    "Pedestrian",
+    "Motorbike",
+    "Bicycle",
+    "Truck"};
+
+
+constexpr const char *to_cstr(AgentVehicleType agentVehicleType)
+{
+    return AgentVehicleTypeMapping[static_cast<size_t>(agentVehicleType) -
+                                   static_cast<size_t>(AgentVehicleType::NONE)];
+}
+
+inline std::string to_string(AgentVehicleType agentVehicleType) noexcept
+{
+    return std::string(to_cstr(agentVehicleType));
+}
+
+} // namespace util
+
+
+/// @brief convert a vehicle type name to VehicleType enum
 inline AgentVehicleType GetAgentVehicleType(const std::string &strVehicleType)
 {
     if (0 == strVehicleType.compare("Car"))

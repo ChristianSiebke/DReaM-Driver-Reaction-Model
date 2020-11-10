@@ -41,6 +41,11 @@ public:
         return implementation->AddAgent(id, agent);
     }
 
+    void RegisterAgent(AgentInterface* agent) override
+    {
+        implementation->RegisterAgent(agent);
+    }
+
     AgentInterface* GetAgent(int id) const override
     {
         return implementation->GetAgent(id);
@@ -145,6 +150,11 @@ public:
     AgentInterface* CreateAgentAdapterForAgent() override
     {
         return implementation->CreateAgentAdapterForAgent();
+    }
+
+    std::unique_ptr<AgentInterface> CreateAgentAdapter(openpass::type::FlatParameter parameter) override
+    {
+        return std::move(implementation->CreateAgentAdapter(std::move(parameter)));
     }
 
     AgentInterface* GetEgoAgent() override

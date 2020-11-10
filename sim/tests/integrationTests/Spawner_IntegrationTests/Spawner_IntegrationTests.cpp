@@ -64,7 +64,8 @@ public:
         ON_CALL(stochastics, GetUniformDistributed(0,DoubleEq(6))).WillByDefault(Return(1));
         ON_CALL(stochastics, GetUniformDistributed(0,DoubleEq(41))).WillByDefault(Return(7));
         ON_CALL(agentFactory, AddAgent(_)).WillByDefault([&](AgentBlueprintInterface* bluePrint)
-        {agents.push_back(new SimulationSlave::Agent(0, &world));
+        {
+            agents.push_back(new SimulationSlave::Agent(&world, *bluePrint));
             auto laneId = -1 + static_cast<int>(bluePrint->GetSpawnParameter().positionY / 3.0);
             auto agent = new FakeAgent;
             agentsOnLane[laneId].insert(agentsOnLane[laneId].begin(), agent);
@@ -73,7 +74,8 @@ public:
             ON_CALL(*agent, GetDistanceReferencePointToLeadingEdge()).WillByDefault(Return(3.0));
             ON_CALL(*agent, GetVelocity()).WillByDefault(Return(bluePrint->GetSpawnParameter().velocity));
             ON_CALL(*agent, GetAgentTypeName()).WillByDefault(Return(bluePrint->GetAgentProfileName()));
-            return agents.back();});
+            return agents.back();
+        });
 
         RoadGraph roadGraph {};
         RoadGraphVertex vertex {};
@@ -233,6 +235,14 @@ void CheckAgentProfile(std::vector<FakeAgent*> agentsOnLane, std::string expecte
     }
 }
 
+auto GENERATE_AGENT_ADAPTER()
+{
+    return [](openpass::type::FlatParameter parameter) -> std::unique_ptr<AgentInterface>
+    {
+        return std::make_unique<FakeAgent>();
+    };
+}
+
 TEST_F(SpawnerPreRun_IntegrationTests, ThreeContinuesLanes_SpawnWithCorrectTGapAndProfiles)
 {
     std::map<std::string, const std::vector<std::string>> parametersStrings {{"Roads", {ROADID}}};
@@ -258,6 +268,8 @@ TEST_F(SpawnerPreRun_IntegrationTests, ThreeContinuesLanes_SpawnWithCorrectTGapA
     ON_CALL(world, GetRelativeLanes(_,_,-2,_,_)).WillByDefault(Return(relativeLanesMinus2));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus3{{0, {{0,0,{relativeLane0, relativeLanePlus1, relativeLanePlus2}}}}};
     ON_CALL(world, GetRelativeLanes(_,_,-3,_,_)).WillByDefault(Return(relativeLanesMinus3));
+
+    ON_CALL(world, CreateAgentAdapter(_)).WillByDefault(GENERATE_AGENT_ADAPTER());
 
     auto spawner = CreateSpawner();
 
@@ -309,6 +321,8 @@ TEST_F(SpawnerPreRun_IntegrationTests, IncreasingLaneNumber_SpawnWithCorrectTGap
     ON_CALL(world, GetRelativeLanes(_,_,-2,Ge(1400),_)).WillByDefault(Return(relativeLanesMinus2Second));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus3{{0, {{0,0,{relativeLane0, relativeLanePlus1, relativeLanePlus2}}}}};
     ON_CALL(world, GetRelativeLanes(_,_,-3,_,_)).WillByDefault(Return(relativeLanesMinus3));
+
+    ON_CALL(world, CreateAgentAdapter(_)).WillByDefault(GENERATE_AGENT_ADAPTER());
 
     auto spawner = CreateSpawner();
 
@@ -367,6 +381,8 @@ TEST_F(SpawnerPreRun_IntegrationTests, DecreasingLaneNumber_SpawnWithCorrectTGap
     ON_CALL(world, GetRelativeLanes(_,_,-2,Ge(1200),_)).WillByDefault(Return(relativeLanesMinus2Second));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus3{{0, {{0,0,{relativeLane0, relativeLanePlus1, relativeLanePlus2}}}}};
     ON_CALL(world, GetRelativeLanes(_,_,-3,_,_)).WillByDefault(Return(relativeLanesMinus3));
+
+    ON_CALL(world, CreateAgentAdapter(_)).WillByDefault(GENERATE_AGENT_ADAPTER());
 
     auto spawner = CreateSpawner();
 
@@ -429,6 +445,8 @@ TEST_F(SpawnerPreRun_IntegrationTests, RightLaneStartsAndEndsWithinRange_SpawnWi
     ON_CALL(world, GetRelativeLanes(_,_,-2,Le(1200),_)).WillByDefault(Return(relativeLanesMinus2Third));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus3{{0, {{0,0,{relativeLane0, relativeLanePlus1, relativeLanePlus2}}}}};
     ON_CALL(world, GetRelativeLanes(_,_,-3,_,_)).WillByDefault(Return(relativeLanesMinus3));
+
+    ON_CALL(world, CreateAgentAdapter(_)).WillByDefault(GENERATE_AGENT_ADAPTER());
 
     auto spawner = CreateSpawner();
 

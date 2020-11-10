@@ -23,8 +23,9 @@
 
 #include "common/boostGeometryCommon.h"
 #include "common/globalDefinitions.h"
-#include "common/worldDefinitions.h"
+#include "common/openPassTypes.h"
 #include "common/vector2d.h"
+#include "common/worldDefinitions.h"
 
 class AgentInterface;
 class ParameterInterface;
@@ -46,7 +47,6 @@ public:
     WorldInterface &operator=(const WorldInterface &) = delete;
     WorldInterface &operator=(WorldInterface &&) = delete;
     virtual ~WorldInterface() = default;
-
 
     virtual bool Instantiate() {return false;}
 
@@ -94,7 +94,7 @@ public:
     //! @return                Pointer OSI world data structure
     //-----------------------------------------------------------------------------
     virtual void* GetWorldData() = 0;
-    
+
     //-----------------------------------------------------------------------------
     //! Retrieves time of day (hour)
     //!
@@ -182,7 +182,13 @@ public:
     //!
     //! @return                true if successful
     //-----------------------------------------------------------------------------
-    virtual bool AddAgent(int id, AgentInterface *agent) = 0;
+    [[deprecated("Use RegisterAgent instead")]] virtual bool AddAgent(int id, AgentInterface *agent) = 0;
+
+    //-----------------------------------------------------------------------------
+    //! Add agent to world
+    //! @param[in]  agent      the agent, which shall be registered
+    //-----------------------------------------------------------------------------
+    virtual void RegisterAgent(AgentInterface* agent) = 0;
 
     //-----------------------------------------------------------------------------
     //! queue functions and values to update agent when SyncGlobalData is called
@@ -233,7 +239,17 @@ public:
     //!
     //! @return
     //-----------------------------------------------------------------------------
-    virtual AgentInterface *CreateAgentAdapterForAgent() = 0;
+    [[deprecated("Use CreateAgentAdapter instead")]] virtual AgentInterface *CreateAgentAdapterForAgent() = 0;
+
+    //------------------------------------------------------------------------------------
+    //! @brief Create an agentAdapter for an agent to communicate between the agent of the
+    //! framework and the world.
+    //!
+    //! @param parameter Used to communicate key/value pairs to the world, which might
+    //!                  be needed at creation of the AgentAdapter, e.g. type or source.
+    //! @return          Instance of the AgentAdapter (implementing AgentInterface)
+    //------------------------------------------------------------------------------------
+    [[nodiscard]] virtual std::unique_ptr<AgentInterface> CreateAgentAdapter(openpass::type::FlatParameter parameter) = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns one agent which is set to be special.

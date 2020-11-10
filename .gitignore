@@ -8,6 +8,7 @@ Thumbs.db
 *.user
 .qmake*
 .directory
+.vscode
 DoxyGen/Function/doxy_build/*
 build
 *.bak

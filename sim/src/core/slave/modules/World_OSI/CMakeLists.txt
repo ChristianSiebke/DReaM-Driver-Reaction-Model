@@ -9,6 +9,7 @@ add_openpass_target(
     AgentAdapter.h
     AgentNetwork.h
     GeometryConverter.h
+    EntityRepository.h
     JointsBuilder.h
     Localization.h
     LocalizationElement.h
@@ -36,6 +37,7 @@ add_openpass_target(
     AgentAdapter.cpp
     AgentNetwork.cpp
     GeometryConverter.cpp
+    EntityRepository.cpp
     JointsBuilder.cpp
     Localization.cpp
     PointQuery.cpp

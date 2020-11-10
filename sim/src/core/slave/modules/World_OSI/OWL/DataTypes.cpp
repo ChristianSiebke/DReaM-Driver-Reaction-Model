@@ -1126,7 +1126,7 @@ bool MovingObject::GetHighBeamLight() const
 
 Primitive::LaneOrientation MovingObject::GetLaneOrientation() const
 {
-    throw std::logic_error("not implemented");
+    throw std::logic_error("MovingObject::GetLaneOrientation not implemented");
 }
 
 Primitive::AbsVelocity MovingObject::GetAbsVelocity() const
@@ -1284,13 +1284,13 @@ void MovingObject::ClearLaneAssignments()
 
 Angle Vehicle::GetSteeringWheelAngle()
 {
-    throw std::logic_error("not implemented");
+    throw std::logic_error("Vehicle::GetSteeringWheelAngle not implemented");
 }
 
 void Vehicle::SetSteeringWheelAngle(const Angle newValue)
 {
     Q_UNUSED(newValue);
-    throw std::logic_error("not implemented");
+    throw std::logic_error("Vehicle::SetSteeringWheelAngle not implemented");
 }
 
 InvalidLane::~InvalidLane()

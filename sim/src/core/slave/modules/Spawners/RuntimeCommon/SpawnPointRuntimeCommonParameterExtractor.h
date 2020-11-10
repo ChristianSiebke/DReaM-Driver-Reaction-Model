@@ -32,7 +32,7 @@ namespace SpawnPointRuntimeCommonParameterExtractor
 
         std::vector<SpawnPosition> spawnpoints;
 
-        const auto& spawnPointList = map::query(parameter.GetParameterLists(),SPAWNPOINTS);
+        const auto spawnPointList = map::query(parameter.GetParameterLists(),SPAWNPOINTS);
         SPAWNER_THROWIFFALSE(spawnPointList.has_value(), "No SpawnPoint provided for SpawnPointRuntimeCommon")
 
         for (const auto& spawnPointParameter : spawnPointList.value())

@@ -19,10 +19,12 @@ class FakeWorld : public WorldInterface
 {
   public:
     MOCK_METHOD0(CreateAgentAdapterForAgent, AgentInterface*());
+    MOCK_METHOD1(CreateAgentAdapter, std::unique_ptr<AgentInterface>(openpass::type::FlatParameter));
     MOCK_CONST_METHOD1(GetAgent, AgentInterface*(int id));
     MOCK_METHOD1(GetAgentByName, AgentInterface*(const std::string &scenarioName));
     MOCK_METHOD0(GetEgoAgent, AgentInterface*());
     MOCK_METHOD2(AddAgent, bool(int id, AgentInterface* agent));
+    MOCK_METHOD1(RegisterAgent, void(AgentInterface* agent));
     MOCK_METHOD0(CreateGlobalDrivingView, bool());
     MOCK_METHOD1(CreateScenery, bool(SceneryInterface *scenery));
     MOCK_METHOD1(CreateWorldScenario, bool(const std::string &scenarioFilename));

@@ -26,6 +26,10 @@
 #include "Localization.h"
 #include "common/worldDefinitions.h"
 
+namespace openpass::entity {
+class RepositoryInterface;
+}
+
 namespace Internal
 {
 struct ConversionStatus
@@ -51,6 +55,7 @@ class SceneryConverter
 
 public:
     SceneryConverter(SceneryInterface *scenery,
+                     openpass::entity::RepositoryInterface& repository,
                      OWL::Interfaces::WorldData& worldData,
                      const World::Localization::Localizer& localizer,
                      const CallbackInterface *callbacks);
@@ -320,6 +325,7 @@ private:
     std::vector<OWL::Id> CreateLaneBoundaries(RoadLaneInterface &odLane, RoadLaneSectionInterface &odSection);
 
     SceneryInterface *scenery;
+    openpass::entity::RepositoryInterface& repository;
     OWL::Interfaces::WorldData& worldData;
     WorldDataQuery worldDataQuery{worldData};
     const World::Localization::Localizer& localizer;

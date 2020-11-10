@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -17,9 +17,7 @@
 
 #pragma once
 
-#include <QtGlobal>
 #include <functional>
-#include <tuple>
 #include <algorithm>
 #include <utility>
 #include <map>
@@ -30,6 +28,7 @@
 #include "include/componentInterface.h"
 
 class DataStoreWriteInterface;
+class AgentBlueprintInterface;
 
 namespace SimulationSlave
 {
@@ -44,7 +43,7 @@ class SpawnItemParameter;
 class Agent
 {
 public:
-    Agent(int id, WorldInterface* world);
+    Agent(WorldInterface *world, const AgentBlueprintInterface& agentBlueprint);
     Agent(const Agent&) = delete;
     Agent(Agent&&) = delete;
     Agent& operator=(const Agent&) = delete;
@@ -62,7 +61,7 @@ public:
         return id;
     }
 
-    bool Instantiate(AgentBlueprintInterface* agentBlueprint,
+    bool Instantiate(const AgentBlueprintInterface& agentBlueprint,
                      ModelBinding *modelBinding,
                      StochasticsInterface *stochastics,
                      SimulationSlave::ObservationNetworkInterface *observationNetwork,
@@ -76,10 +75,10 @@ public:
     void LinkSchedulerTime(int* const schedulerTime);
 
 private:
-    // framework parameters
-    std::vector<int> idsCollisionPartners;
-    int id;
     WorldInterface *world = nullptr;
+    int id;
+
+    std::vector<int> idsCollisionPartners;
     std::map<int, Channel*> channels;
     std::map<std::string, ComponentInterface*> components;
 

@@ -295,15 +295,14 @@ double WorldData::NormalizeAngle(double angle)
     return angle;
 }
 
-void WorldData::AddLane(RoadLaneSectionInterface& odSection, const RoadLaneInterface& odLane, const std::vector<Id> laneBoundaries)
+void WorldData::AddLane(const Id id, RoadLaneSectionInterface& odSection, const RoadLaneInterface& odLane, const std::vector<Id> laneBoundaries)
 {
     int odLaneId = odLane.GetId();
-    Id osiLaneId = CreateUid();
 
     Section& section = *(sections.at(&odSection));
     osi3::Lane* osiLane = osiGroundTruth->add_lane();
     Lane& lane = *(new Implementation::Lane(osiLane, &section));
-    osiLane->mutable_id()->set_value(osiLaneId);
+    osiLane->mutable_id()->set_value(id);
     osiLane->mutable_classification()->set_centerline_is_driving_direction(odLaneId < 0);
 
     for (const auto& laneBoundary : laneBoundaries)
@@ -347,19 +346,18 @@ void WorldData::AddLane(RoadLaneSectionInterface& odSection, const RoadLaneInter
 
     lane.SetLaneType(OpenDriveTypeMapper::OdToOwlLaneType(odLane.GetType()));
     osiLanes[&odLane] = osiLane;
-    lanes[osiLaneId] = &lane;
-    laneIdMapping[osiLaneId] = static_cast<OWL::OdId>(odLaneId);
+    lanes[id] = &lane;
+    laneIdMapping[id] = static_cast<OWL::OdId>(odLaneId);
 
     section.AddLane(lane);
 }
 
-Id WorldData::AddLaneBoundary(const RoadLaneRoadMark &odLaneRoadMark, double sectionStart, LaneMarkingSide side)
+Id WorldData::AddLaneBoundary(const Id id, const RoadLaneRoadMark &odLaneRoadMark, double sectionStart, LaneMarkingSide side)
 {
     constexpr double standardWidth = 0.15;
     constexpr double boldWidth = 0.3;
-    Id osiLaneBoundaryId = CreateUid();
     osi3::LaneBoundary* osiLaneBoundary = osiGroundTruth->add_lane_boundary();
-    osiLaneBoundary->mutable_id()->set_value(osiLaneBoundaryId);
+    osiLaneBoundary->mutable_id()->set_value(id);
     osiLaneBoundary->mutable_classification()->set_color(OpenDriveTypeMapper::OdToOsiLaneMarkingColor(odLaneRoadMark.GetColor()));
     osiLaneBoundary->mutable_classification()->set_type(OpenDriveTypeMapper::OdToOsiLaneMarkingType(odLaneRoadMark.GetType(), side));
 
@@ -373,9 +371,9 @@ Id WorldData::AddLaneBoundary(const RoadLaneRoadMark &odLaneRoadMark, double sec
         width = boldWidth;
     }
     LaneBoundary* laneBoundary = new OWL::Implementation::LaneBoundary(osiLaneBoundary, width, sectionStart + odLaneRoadMark.GetSOffset(), sectionStart + odLaneRoadMark.GetSEnd(), side);
-    laneBoundaries[osiLaneBoundaryId] = laneBoundary;
+    laneBoundaries[id] = laneBoundary;
 
-    return osiLaneBoundaryId;
+    return id;
 }
 
 void WorldData::SetCenterLaneBoundary(const RoadLaneSectionInterface &odSection, std::vector<Id> laneBoundaryIds)
@@ -482,9 +480,8 @@ void WorldData::AddLanePredecessor(/* const */ RoadLaneInterface& odLane,
     lane->AddPrevious(prevLane);
 }
 
-Interfaces::MovingObject& WorldData::AddMovingObject(void* linkedObject)
+Interfaces::MovingObject& WorldData::AddMovingObject(const Id id, void* linkedObject)
 {
-    Id id = CreateUid();
     osi3::MovingObject* osiMovingObject = osiGroundTruth->add_moving_object();
     auto movingObject = new MovingObject(osiMovingObject, linkedObject);
 
@@ -516,11 +513,10 @@ void WorldData::RemoveMovingObjectById(Id id)
     }
 }
 
-Interfaces::StationaryObject& WorldData::AddStationaryObject(void* linkedObject)
+Interfaces::StationaryObject& WorldData::AddStationaryObject(const Id id, void* linkedObject)
 {
     osi3::StationaryObject* osiStationaryObject = osiGroundTruth->add_stationary_object();
     auto stationaryObject = new StationaryObject(osiStationaryObject, linkedObject);
-    Id id = CreateUid();
 
     osiStationaryObject->mutable_id()->set_value(id);
     stationaryObjects[id] = stationaryObject;
@@ -528,11 +524,10 @@ Interfaces::StationaryObject& WorldData::AddStationaryObject(void* linkedObject)
     return *stationaryObject;
 }
 
-Interfaces::TrafficSign& WorldData::AddTrafficSign(const std::string odId)
+Interfaces::TrafficSign& WorldData::AddTrafficSign(const Id id, const std::string odId)
 {
     osi3::TrafficSign* osiTrafficSign = osiGroundTruth->add_traffic_sign();
     auto trafficSignal = new TrafficSign(osiTrafficSign);
-    Id id = CreateUid();
 
     trafficSignIdMapping[odId] = id;
 
@@ -542,11 +537,10 @@ Interfaces::TrafficSign& WorldData::AddTrafficSign(const std::string odId)
     return *trafficSignal;
 }
 
-Interfaces::RoadMarking& WorldData::AddRoadMarking()
+Interfaces::RoadMarking& WorldData::AddRoadMarking(const Id id)
 {
     osi3::RoadMarking* osiRoadMarking = osiGroundTruth->add_road_marking();
     auto roadMarking = new Implementation::RoadMarking(osiRoadMarking);
-    Id id = CreateUid();
 
     osiRoadMarking->mutable_id()->set_value(id);
     roadMarkings[id] = roadMarking;

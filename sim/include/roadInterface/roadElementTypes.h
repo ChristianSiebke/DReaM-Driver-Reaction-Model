@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -20,6 +20,7 @@
 #include <string>
 #include <list>
 #include <vector>
+#include <array>
 
 //-----------------------------------------------------------------------------
 //! Road link connection orientation
@@ -96,6 +97,48 @@ enum class RoadLaneType // https://releases.asam.net/OpenDRIVE/1.6.0/ASAM_OpenDR
     ConnectingRamp
 };
 
+namespace openpass::utils {
+
+/// @brief constexpr map for transforming the a corresponding enumeration into
+///        a string representation: try to_cstr(EnumType) or to_string(EnumType)
+static constexpr std::array<const char *, 22> RoadLaneTypeMapping{
+    "Undefined",
+    "None",
+    "Driving",
+    "Stop",
+    "Shoulder",
+    "Biking",
+    "Sidewalk",
+    "Border",
+    "Restricted",
+    "Parking",
+    "Bidirectional",
+    "Median",
+    "Special1",
+    "Special2",
+    "Special3",
+    "Roadworks",
+    "Tram",
+    "Rail",
+    "Entry",
+    "Exit",
+    "OffRamp",
+    "OnRamp"};
+
+/// @brief Convert RoadLaneType to cstr (constexpr)
+constexpr const char *to_cstr(RoadLaneType roadLaneType)
+{
+    return RoadLaneTypeMapping[static_cast<size_t>(roadLaneType)];
+}
+
+/// @brief Convert RoadLaneType to std::string
+inline std::string to_string(RoadLaneType roadLaneType) noexcept
+{
+    return std::string(to_cstr(roadLaneType));
+}
+
+} // namespace utils
+
 //-----------------------------------------------------------------------------
 //! Type of lane line
 //-----------------------------------------------------------------------------
@@ -114,6 +157,34 @@ enum class RoadLaneRoadMarkType // http://www.opendrive.org/docs/OpenDRIVEFormat
     Curb
 };
 
+namespace openpass::utils {
+
+/// @brief constexpr map for transforming the a corresponding enumeration into
+///        a string representation: try to_cstr(EnumType) or to_string(EnumType)
+static constexpr std::array<const char *, 11> RoadLaneRoadMarkTypeMapping{
+    "Undefined",
+    "None",
+    "Solid",
+    "Broken",
+    "Solid_Solid",
+    "Solid_Broken",
+    "Broken_Solid",
+    "Broken_Broken",
+    "Botts_Dots",
+    "Grass",
+    "Curb"};
+
+constexpr const char *to_cstr(RoadLaneRoadMarkType roadLaneRoadMarkType)
+{
+    return RoadLaneRoadMarkTypeMapping[static_cast<size_t>(roadLaneRoadMarkType)];
+}
+
+inline std::string to_string(RoadLaneRoadMarkType roadLaneRoadMarkType) noexcept
+{
+    return std::string(to_cstr(roadLaneRoadMarkType));
+}
+
+} // namespace utils
 
 //-----------------------------------------------------------------------------
 //! Lane description: left, right or center
@@ -223,8 +294,6 @@ struct RoadSignalSpecification
     std::list<std::string> dependencyIds {};
 };
 
-
-
 enum class RoadObjectType
 {
     none = -1,
@@ -250,6 +319,47 @@ enum class RoadObjectType
     guardRail,
     roadSideMarkerPost
 };
+
+namespace openpass::utils {
+
+/// @brief constexpr map for transforming the a corresponding enumeration into
+///        a string representation: try to_cstr(EnumType) or to_string(EnumType)
+static constexpr std::array<const char *, 22> RoadObjectTypeMapping{
+    "None",
+    "Obstacle",
+    "Car",
+    "Truck",
+    "Van",
+    "Bus",
+    "Trailer",
+    "Bike",
+    "Motorbike",
+    "Tram",
+    "Train",
+    "Pedestrian",
+    "Pole",
+    "Tree",
+    "Vegetation",
+    "Barrier",
+    "Building",
+    "ParkingSpace",
+    "Wind",
+    "Patch",
+    "GuardRail",
+    "RoadSideMarkerPost"};
+
+constexpr const char *to_cstr(RoadObjectType roadObjectType)
+{
+    return RoadObjectTypeMapping[static_cast<size_t>(roadObjectType) -
+                                 static_cast<size_t>(RoadObjectType::none) ];
+}
+
+inline std::string to_string(RoadObjectType roadObjectType) noexcept
+{
+    return std::string(to_cstr(roadObjectType));
+}
+
+} // namespace utils
 
 struct RoadObjectSpecification // http://www.opendrive.org/docs/OpenDRIVEFormatSpecRev1.4H.pdf page 65
 {
