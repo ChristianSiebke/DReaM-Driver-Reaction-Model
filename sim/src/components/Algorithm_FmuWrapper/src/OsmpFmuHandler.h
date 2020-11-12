@@ -23,6 +23,8 @@
 #ifdef USE_EXTENDED_OSI
     #include "osi3/osi_trafficcommand.pb.h"
     #include "osi3/osi_trafficupdate.pb.h"
+    #include "osi3/sl45_vehiclecommunicationdata.pb.h"
+    #include "osi3/sl45_motioncommand.pb.h"
 #endif
 
 #include "common/openScenarioDefinitions.h"
@@ -93,12 +95,21 @@ private:
     //! Sets the SensorView as input for the FMU
     void SetSensorViewInput(const osi3::SensorView& data);
 
+    //! Sets the SensorData as input for the FMU
+    void SetSensorDataInput(const osi3::SensorData& data);
+
     //! Reads the SensorData from the FMU
     void GetSensorData();
 
 #ifdef USE_EXTENDED_OSI
     //! Sets the TrafficCommand as input for the FMU
     void SetTrafficCommandInput(const osi3::TrafficCommand& data);
+
+    //! Sets the VehicleCommunicationData as input for the FMU
+    void SetVehicleCommunicationDataInput(const setlevel4to5::VehicleCommunicationData& data);
+
+    //! Reads the MotionCommand from the FMU
+    void GetMotionCommand();
 
     //! Reads the TrafficUpdate from the FMU
     void GetTrafficUpdate();
@@ -118,6 +129,8 @@ private:
     FmuParameters<bool> fmuBoolParameters;
     FmuParameters<std::string> fmuStringParameters;
 
+    std::string serializedSensorData;
+    std::string previousSerializedSensorData;
     std::string serializedSensorView;
     std::string previousSerializedSensorView;
     void* previousSensorData{nullptr};
@@ -129,23 +142,31 @@ private:
 #ifdef USE_EXTENDED_OSI
     std::string serializedTrafficCommand;
     std::string previousSerializedTrafficCommand;
+    std::string serializedVehicleCommunicationData;
+    std::string previousSerializedVehicleCommunicationData;
     osi3::TrafficUpdate trafficUpdate;
     void* previousTrafficUpdate{nullptr};
 
     osi3::TrafficCommand trafficCommand;
     std::map<int, std::unique_ptr<osi3::TrafficCommand>> trafficCommands{};
+    setlevel4to5::VehicleCommunicationData vehicleCommunicationData;
+    setlevel4to5::MotionCommand motionCommand;
+    void* previousMotionCommand{nullptr};
 #endif
 
 
     std::optional<std::string> sensorViewVariable;
     std::optional<std::string> sensorViewConfigVariable;
     std::optional<std::string> sensorViewConfigRequestVariable;
-    std::optional<std::string> sensorDataVariable;
+    std::optional<std::string> sensorDataInVariable;
+    std::optional<std::string> sensorDataOutVariable;
     std::optional<std::string> groundtruthVariable;
 
 #ifdef USE_EXTENDED_OSI
+    std::optional<std::string> motionCommandVariable;
     std::optional<std::string> trafficCommandVariable;
     std::optional<std::string> trafficUpdateVariable;
+    std::optional<std::string> vehicleCommunicationDataVariable;
 #endif
 
     bool writeSensorView{false};
@@ -156,6 +177,8 @@ private:
 #ifdef USE_EXTENDED_OSI
     bool writeTrafficCommand{false};
     bool writeTrafficUpdate{false};
+    bool writeMotionCommand{false};
+    bool writeVehicleCommunicationData{false};
 #endif
 
     //! check for double buffering of OSI messages allocated by FMU

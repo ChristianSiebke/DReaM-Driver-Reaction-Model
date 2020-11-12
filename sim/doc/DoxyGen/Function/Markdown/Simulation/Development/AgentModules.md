@@ -226,11 +226,13 @@ The OsmpFmuHandler has the following additional (optional) parameters:
 |----------------------------------|----------|-------------------------------------------------------------------------------------------------|
 | Init_Groundtruth                 | string   | Name of the FMU variable to which the Groundtruth is sent during the initialization             |
 | Input_SensorView                 | string   | Name of the FMU variable to which the SensorView is sent                                        |
-| Input_SensorViewConfig           | string   | Name of the FMU variable to which the SensorViewConfig is sent                                  |
+| Input_SensorViewConfig           | string   | Name of the FMU variable to which the SensorViewConfiguration is sent                           |
+| Input_SensorData                 | string   | Name of the FMU variable to which the SensorData is sent                                        |
 | Input_TrafficCommand             | string   | Name of the FMU variable to which the TrafficCommand is sent                                    |
 | Output_SensorViewConfigRequest   | string   | Name of the FMU variable from where the SensorViewConfigRequest should be received              |
 | Output_SensorData                | string   | Name of the FMU variable from where a SensorData should be received                             |
 | Output_TrafficUpdate             | string   | Name of the FMU variable from where a TrafficUpdate should be received                          |
+| Output_MotionCommand             | string   | Name of the FMU variable from where a MotionCommand should be received                          |
 | Parameter_&lt;name&gt;           | any      | The value of the parameter is assigned to the FMU variable &lt;name&gt;                         |
 | WriteSensorViewOutput            | bool     | If true the SensorView is written into a JSON file                                              |
 | WriteTrafficCommandOutput        | bool     | If true the TrafficCommand is written into a JSON file                                          |
@@ -244,11 +246,12 @@ An additional parameter defines whether the message should be logged as JSON fil
 
 Currently these messages are supported:
 
-* SensorView: SensorView generated from the Groundtruth with this agent is host vehicle
-* SensorViewConfig, SensorViewConfigRequest: Configuration of a sensor according to OSMP
-* TrafficCommand: Trajectory from openSCENARIO, that will be converted into a TrafficCommand
-* SensorData: Output of a sensor that can be sent to other components as SensorDataSignal
-* TrafficUpdate: Will be converted to a DynamicsSignal
+* SensorView: SensorView generated from the Groundtruth with this agent is host vehicle.
+* SensorViewConfig, SensorViewConfigRequest: Configuration of a sensor according to OSMP.
+* TrafficCommand: Trajectory from openSCENARIO, that will be converted into a TrafficCommand.
+* SensorData: Output of a sensor. Can be input and/or output of a FMU. Received SensorData is forwarded to other components as SensorDataSignal.
+* TrafficUpdate: Will be converted to a DynamicsSignal.
+* MotionCommand: Will be converted to a DynamicsSignal. Has priority over TrafficUpdate.
 
 ---
 
