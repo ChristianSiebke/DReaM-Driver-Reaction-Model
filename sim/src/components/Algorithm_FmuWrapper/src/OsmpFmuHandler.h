@@ -51,11 +51,15 @@ public:
     void PostStep(int time) override;
 
 #ifdef USE_EXTENDED_OSI
-    //! Converts a trajectory from OpenSCENARIO to a OSI TrafficCommand
-    static osi3::TrafficCommand GetTrafficCommandFromOpenScenarioTrajectory(openScenario::Trajectory trajectory);
+    //! Adds a trajectory from OpenSCENARIO to a OSI TrafficAction
+    static void AddTrafficCommandActionFromOpenScenarioTrajectory(osi3::TrafficAction *trafficAction,
+                                                                  const openScenario::Trajectory& trajectory);
 
-    //! Converts a position from OpenSCENARIO to a OSI TrafficCommand
-    static osi3::TrafficCommand GetTrafficCommandFromOpenScenarioPosition(const openScenario::Position &position, WorldInterface *worldInterface, const std::function<void(const std::string&)> &errorCallback);
+    //! Adds a position from OpenSCENARIO to a OSI TrafficAction
+    static void AddTrafficCommandActionFromOpenScenarioPosition(osi3::TrafficAction *trafficAction,
+                                                                const openScenario::Position &position,
+                                                                WorldInterface *worldInterface,
+                                                                const std::function<void(const std::string &)> &errorCallback);
 #endif
 
 private:
@@ -95,7 +99,9 @@ private:
     std::string previousSerializedTrafficCommand;
     osi3::TrafficUpdate trafficUpdate;
     void* previousTrafficUpdate{nullptr};
+
     osi3::TrafficCommand trafficCommand;
+    std::map<int, std::unique_ptr<osi3::TrafficCommand>> trafficCommands{};
 #endif
 
 

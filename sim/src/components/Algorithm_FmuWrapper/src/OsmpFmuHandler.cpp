@@ -160,24 +160,30 @@ OsmpFmuHandler::OsmpFmuHandler(fmu_check_data_t *cdata, WorldInterface *world, A
 void OsmpFmuHandler::UpdateInput(int localLinkId, const std::shared_ptr<const SignalInterface>& data, [[maybe_unused]] int time)
 {
 #ifdef USE_EXTENDED_OSI
+
+    trafficCommands.try_emplace(time, std::make_unique<osi3::TrafficCommand>());
+
     if (localLinkId == 10)
-    {
-        const std::shared_ptr<TrajectorySignal const> signal = std::dynamic_pointer_cast<TrajectorySignal const>(data);
-        if (signal && signal->componentState == ComponentState::Acting)
         {
-            trafficCommand = GetTrafficCommandFromOpenScenarioTrajectory(signal->trajectory);
+            const std::shared_ptr<TrajectorySignal const> signal = std::dynamic_pointer_cast<TrajectorySignal const>(data);
+            if (signal && signal->componentState == ComponentState::Acting)
+            {
+                AddTrafficCommandActionFromOpenScenarioTrajectory(trafficCommands[time]->add_action(), signal->trajectory);
+            }
         }
-    }
-    else if (localLinkId == 11)
+    if (localLinkId == 11)
     {
         auto signal = std::dynamic_pointer_cast<AcquirePositionSignal const>(data);
         if (signal && signal->componentState == ComponentState::Acting)
         {
-            trafficCommand = GetTrafficCommandFromOpenScenarioPosition(signal->position,
-                                                                       this->world,
-                                                                       [this](const std::string& message){LOGERROR(message);});
+            AddTrafficCommandActionFromOpenScenarioPosition(trafficCommands[time]->add_action(),
+                                                            signal->position,
+                                                            this->world,
+                                                            [this](const std::string &message) { LOGERROR(message); });
         }
     }
+
+    trafficCommand = *trafficCommands[time];
 #endif
 }
 
@@ -376,10 +382,8 @@ void OsmpFmuHandler::SetTrafficCommandInput(const osi3::TrafficCommand& data)
                                              fmuInputValues);     // array of values
 }
 
-osi3::TrafficCommand OsmpFmuHandler::GetTrafficCommandFromOpenScenarioTrajectory(openScenario::Trajectory trajectory)
+void OsmpFmuHandler::AddTrafficCommandActionFromOpenScenarioTrajectory(osi3::TrafficAction *trafficAction, const openScenario::Trajectory& trajectory)
 {
-    osi3::TrafficCommand trafficCommand;
-    auto trafficAction = trafficCommand.add_action();
     auto trajectoryAction = trafficAction->mutable_follow_trajectory_action();
     for (const auto& trajectoryPoint : trajectory.points)
     {
@@ -390,20 +394,18 @@ osi3::TrafficCommand OsmpFmuHandler::GetTrafficCommandFromOpenScenarioTrajectory
         statePoint->mutable_position()->set_y(trajectoryPoint.y);
         statePoint->mutable_orientation()->set_yaw(trajectoryPoint.yaw);
     }
-    return trafficCommand;
 }
 
-void logAndThrow(const std::string& message, const std::function<void(const std::string&)> &errorCallback) {
+void logAndThrow(const std::string& message, const std::function<void(const std::string&)> &errorCallback) noexcept(false) {
     if (errorCallback) errorCallback(message);
     throw std::runtime_error(message);
 }
 
-osi3::TrafficCommand OsmpFmuHandler::GetTrafficCommandFromOpenScenarioPosition(const openScenario::Position &position,
-                                                                               WorldInterface *worldInterface,
-                                                                               const std::function<void(const std::string&)> &errorCallback)
+void OsmpFmuHandler::AddTrafficCommandActionFromOpenScenarioPosition(osi3::TrafficAction *trafficAction,
+                                                                     const openScenario::Position &position,
+                                                                     WorldInterface *const worldInterface,
+                                                                     const std::function<void(const std::string &)> &errorCallback)
 {
-    osi3::TrafficCommand trafficCommand;
-    const auto trafficAction = trafficCommand.add_action();
     auto acquireGlobalPositionAction = trafficAction->mutable_acquire_global_position_action();
 
     std::visit(variant_visitor{
@@ -441,7 +443,6 @@ osi3::TrafficCommand OsmpFmuHandler::GetTrafficCommandFromOpenScenarioPosition(c
                        logAndThrow("Position variant not supported for 'openScenario::AcquirePositionAction'", errorCallback);
                    }},
                position);
-    return trafficCommand;
 }
 
 void OsmpFmuHandler::GetTrafficUpdate()

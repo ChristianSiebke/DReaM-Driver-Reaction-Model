@@ -23,7 +23,9 @@ TEST(OsmpFmuUnitTests, GetTrafficCommandFromOpenScenarioTrajectory)
     trajectory.points.emplace_back(openScenario::TrajectoryPoint{5.1, -1.1, 1.2, 1.3});
     trajectory.points.emplace_back(openScenario::TrajectoryPoint{15.2, 2.1, -2.2, -2.3});
 
-    const auto trafficCommand = OsmpFmuHandler::GetTrafficCommandFromOpenScenarioTrajectory(trajectory);
+    osi3::TrafficCommand trafficCommand;
+    OsmpFmuHandler::AddTrafficCommandActionFromOpenScenarioTrajectory(trafficCommand.add_action(), trajectory);
+
     const auto& trajectoryAction = trafficCommand.action(0).follow_trajectory_action();
     ASSERT_THAT(trajectoryAction.trajectory_point_size(), Eq(3));
 
@@ -54,7 +56,8 @@ TEST(OsmpFmuUnitTests, GetTrafficCommandFromOpenScenarioPosition)
     constexpr double x = 3.14, y = 42.0;
     openScenario::Position position = openScenario::WorldPosition{3.14, 42.0};
 
-    auto trafficCommand = OsmpFmuHandler::GetTrafficCommandFromOpenScenarioPosition(position, nullptr, nullptr);
+    osi3::TrafficCommand trafficCommand;
+    OsmpFmuHandler::AddTrafficCommandActionFromOpenScenarioPosition(trafficCommand.add_action(), position, nullptr, nullptr);
 
     const auto &action = trafficCommand.action(0);
     auto hasAcquireGlobalPositionAction = action.has_acquire_global_position_action();
