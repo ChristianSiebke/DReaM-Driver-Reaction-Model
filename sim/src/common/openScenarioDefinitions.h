@@ -195,10 +195,18 @@ struct TrajectoryPoint
     }
 };
 
+struct TrajectoryTimeReference
+{
+    std::string domainAbsoluteRelative;
+    double scale;
+    double offset;
+};
+
 struct Trajectory
 {
     std::vector<TrajectoryPoint> points;
     std::string name;
+    std::optional<TrajectoryTimeReference> timeReference;
 
     friend std::ostream& operator<<(std::ostream& os, const Trajectory& trajectory)
     {

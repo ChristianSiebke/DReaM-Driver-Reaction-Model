@@ -530,6 +530,28 @@ RoutingAction ScenarioImporterHelper::ImportRoutingAction(QDomElement routingAct
         }
         trajectory.name = ParseAttribute<std::string>(trajectoryElement, ATTRIBUTE::name, defaultParameters, assignedParameters);
 
+        QDomElement timeReferenceElement;
+        if(SimulationCommon::GetFirstChildElement(childOfRoutingActionElement, TAG::timeReference, timeReferenceElement))
+        {
+            QDomElement timingElement;
+            if(SimulationCommon::GetFirstChildElement(timeReferenceElement, TAG::timing, timingElement)) {
+                TrajectoryTimeReference timeReference;
+
+                ThrowIfFalse(SimulationCommon::HasAttribute(timingElement, ATTRIBUTE::domainAbsoluteRelative),
+                             timingElement,"Attribute " + std::string(ATTRIBUTE::domainAbsoluteRelative) + " is missing.");
+                ThrowIfFalse(SimulationCommon::HasAttribute(timingElement, ATTRIBUTE::scale),
+                             timingElement,"Attribute " + std::string(ATTRIBUTE::scale) + " is missing.");
+                ThrowIfFalse(SimulationCommon::HasAttribute(timingElement, ATTRIBUTE::offset),
+                             timingElement,"Attribute " + std::string(ATTRIBUTE::offset) + " is missing.");
+
+                timeReference.domainAbsoluteRelative = ParseAttribute<std::string>(timingElement, ATTRIBUTE::domainAbsoluteRelative, parameters);
+                timeReference.scale = ParseAttribute<double>(timingElement, ATTRIBUTE::scale, parameters);
+                timeReference.offset = ParseAttribute<double>(timingElement, ATTRIBUTE::offset, parameters);
+
+                trajectory.timeReference = timeReference;
+            }
+        }
+
         QDomElement shapeElement;
         ThrowIfFalse(SimulationCommon::GetFirstChildElement(trajectoryElement, TAG::shape, shapeElement),
                              trajectoryElement, "Tag " + std::string(TAG::shape) + " is missing.");

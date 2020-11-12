@@ -234,6 +234,8 @@ namespace openpass::importer::xml::scenarioImporter::tag
     constexpr char story[] {"Story"};
     constexpr char storyboard[] {"Storyboard"};
     constexpr char speedActionTarget[] {"SpeedActionTarget"};
+    constexpr char timeReference[] {"TimeReference"};
+    constexpr char timing[] {"Timing"};
     constexpr char trajectory[] {"Trajectory"};
     constexpr char trajectoryCatalog[] {"TrajectoryCatalog"};
     constexpr char teleportAction[] {"TeleportAction"};
@@ -256,6 +258,7 @@ namespace openpass::importer::xml::scenarioImporter::attribute
     constexpr char ds[] {"ds"};
     constexpr char conditionEdge[] {"conditionEdge"};
     constexpr char continuous[] {"continuous"};
+    constexpr char domainAbsoluteRelative[] {"domainAbsoluteRelative"};
     constexpr char dynamicsDimension[] {"dynamicsDimension"};
     constexpr char dynamicsShape[] {"dynamicsShape"};
     constexpr char entityRef[] {"entityRef"};
@@ -278,6 +281,7 @@ namespace openpass::importer::xml::scenarioImporter::attribute
     constexpr char roadId[] {"roadId"};
     constexpr char rule[] {"rule"};
     constexpr char s[] {"s"};
+    constexpr char scale[] {"scale"};
     constexpr char selectTriggeringEntities[] {"selectTriggeringEntities"};
     constexpr char sensors[] {"sensors"};
     constexpr char speedTargetValueType[] {"speedTargetValueType"};

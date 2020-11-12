@@ -384,15 +384,26 @@ void OsmpFmuHandler::SetTrafficCommandInput(const osi3::TrafficCommand& data)
 
 void OsmpFmuHandler::AddTrafficCommandActionFromOpenScenarioTrajectory(osi3::TrafficAction *trafficAction, const openScenario::Trajectory& trajectory)
 {
-    auto trajectoryAction = trafficAction->mutable_follow_trajectory_action();
-    for (const auto& trajectoryPoint : trajectory.points)
-    {
-        auto statePoint = trajectoryAction->add_trajectory_point();
-        statePoint->mutable_timestamp()->set_seconds(static_cast<google::protobuf::int64>(trajectoryPoint.time));
-        statePoint->mutable_timestamp()->set_nanos(static_cast<google::protobuf::uint32>(std::fmod(trajectoryPoint.time * 1e9, 1e9)));
-        statePoint->mutable_position()->set_x(trajectoryPoint.x);
-        statePoint->mutable_position()->set_y(trajectoryPoint.y);
-        statePoint->mutable_orientation()->set_yaw(trajectoryPoint.yaw);
+    if (trajectory.timeReference.has_value()) {
+        auto trajectoryAction = trafficAction->mutable_follow_trajectory_action();
+        for (const auto& trajectoryPoint : trajectory.points)
+        {
+            auto statePoint = trajectoryAction->add_trajectory_point();
+            statePoint->mutable_timestamp()->set_seconds(static_cast<google::protobuf::int64>(trajectoryPoint.time));
+            statePoint->mutable_timestamp()->set_nanos(static_cast<google::protobuf::uint32>(std::fmod(trajectoryPoint.time * 1e9, 1e9)));
+            statePoint->mutable_position()->set_x(trajectoryPoint.x);
+            statePoint->mutable_position()->set_y(trajectoryPoint.y);
+            statePoint->mutable_orientation()->set_yaw(trajectoryPoint.yaw);
+        }
+    } else {
+        auto followPathAction = trafficAction->mutable_follow_path_action();
+        for (const auto& trajectoryPoint : trajectory.points)
+        {
+            auto statePoint = followPathAction->add_path_point();
+            statePoint->mutable_position()->set_x(trajectoryPoint.x);
+            statePoint->mutable_position()->set_y(trajectoryPoint.y);
+            statePoint->mutable_orientation()->set_yaw(trajectoryPoint.yaw);
+        }
     }
 }
 

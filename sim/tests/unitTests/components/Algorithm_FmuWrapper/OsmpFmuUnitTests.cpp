@@ -16,12 +16,14 @@
 using ::testing::Eq;
 
 #ifdef USE_EXTENDED_OSI
-TEST(OsmpFmuUnitTests, GetTrafficCommandFromOpenScenarioTrajectory)
+TEST(OsmpFmuUnitTests, GetTrafficCommandFromOpenScenarioTrajectory_FollowTrajectoryAction)
 {
     openScenario::Trajectory trajectory;
     trajectory.points.emplace_back(openScenario::TrajectoryPoint{0.0, 0.1, -0.2, 0.3});
     trajectory.points.emplace_back(openScenario::TrajectoryPoint{5.1, -1.1, 1.2, 1.3});
     trajectory.points.emplace_back(openScenario::TrajectoryPoint{15.2, 2.1, -2.2, -2.3});
+    openScenario::TrajectoryTimeReference timeReference{"", 0.0, 0.0};
+    trajectory.timeReference = timeReference;
 
     osi3::TrafficCommand trafficCommand;
     OsmpFmuHandler::AddTrafficCommandActionFromOpenScenarioTrajectory(trafficCommand.add_action(), trajectory);
@@ -46,6 +48,33 @@ TEST(OsmpFmuUnitTests, GetTrafficCommandFromOpenScenarioTrajectory)
     const auto &thirdPoint = trajectoryAction.trajectory_point(2);
     ASSERT_THAT(thirdPoint.timestamp().seconds(), Eq(15));
     ASSERT_THAT(thirdPoint.timestamp().nanos(), Eq(200000000));
+    ASSERT_THAT(thirdPoint.position().x(), Eq(2.1));
+    ASSERT_THAT(thirdPoint.position().y(), Eq(-2.2));
+    ASSERT_THAT(thirdPoint.orientation().yaw(), Eq(-2.3));
+}
+
+TEST(OsmpFmuUnitTests, GetTrafficCommandFromOpenScenarioTrajectory_FollowPathAction)
+{
+    openScenario::Trajectory trajectory;
+    trajectory.points.emplace_back(openScenario::TrajectoryPoint{0.0, 0.1, -0.2, 0.3});
+    trajectory.points.emplace_back(openScenario::TrajectoryPoint{5.1, -1.1, 1.2, 1.3});
+    trajectory.points.emplace_back(openScenario::TrajectoryPoint{15.2, 2.1, -2.2, -2.3});
+
+    const auto trafficCommand = OsmpFmuHandler::GetTrafficCommandFromOpenScenarioTrajectory(trajectory);
+    const auto& pathAction = trafficCommand.action(0).follow_path_action();
+    ASSERT_THAT(pathAction.path_point_size(), Eq(3));
+
+    const auto& firstPoint = pathAction.path_point(0);
+    ASSERT_THAT(firstPoint.position().x(), Eq(0.1));
+    ASSERT_THAT(firstPoint.position().y(), Eq(-0.2));
+    ASSERT_THAT(firstPoint.orientation().yaw(), Eq(0.3));
+
+    const auto& secondPoint = pathAction.path_point(1);
+    ASSERT_THAT(secondPoint.position().x(), Eq(-1.1));
+    ASSERT_THAT(secondPoint.position().y(), Eq(1.2));
+    ASSERT_THAT(secondPoint.orientation().yaw(), Eq(1.3));
+
+    const auto &thirdPoint = pathAction.path_point(2);
     ASSERT_THAT(thirdPoint.position().x(), Eq(2.1));
     ASSERT_THAT(thirdPoint.position().y(), Eq(-2.2));
     ASSERT_THAT(thirdPoint.orientation().yaw(), Eq(-2.3));
