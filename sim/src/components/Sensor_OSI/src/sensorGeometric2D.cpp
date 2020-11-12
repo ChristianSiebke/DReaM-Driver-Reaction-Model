@@ -480,7 +480,7 @@ multi_polygon_t SensorGeometric2D::CalcObjectShadow(const polygon_t& boundingBox
     // For a detailed description of the scaling factor please refer to the developer documentation.
     const auto leftVectorLength = std::hypot(leftVector.x(), leftVector.y());
     const auto rightVectorLength = std::hypot(rightVector.x(), rightVector.y());
-    const auto height = std::min(leftVectorLength, rightVectorLength) / std::cos(0.5 * (maxRightAngle + maxLeftAngle));
+    const auto height = std::min(leftVectorLength, rightVectorLength) * std::cos(0.5 * (maxRightAngle + maxLeftAngle));
     const auto scale = detectionRange / height;
     
     if(scale > WARNING_THRESHOLD_SCALE)
