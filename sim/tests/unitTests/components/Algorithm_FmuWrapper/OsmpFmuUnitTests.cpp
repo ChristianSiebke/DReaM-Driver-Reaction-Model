@@ -60,7 +60,9 @@ TEST(OsmpFmuUnitTests, GetTrafficCommandFromOpenScenarioTrajectory_FollowPathAct
     trajectory.points.emplace_back(openScenario::TrajectoryPoint{5.1, -1.1, 1.2, 1.3});
     trajectory.points.emplace_back(openScenario::TrajectoryPoint{15.2, 2.1, -2.2, -2.3});
 
-    const auto trafficCommand = OsmpFmuHandler::GetTrafficCommandFromOpenScenarioTrajectory(trajectory);
+    osi3::TrafficCommand trafficCommand;
+    OsmpFmuHandler::AddTrafficCommandActionFromOpenScenarioTrajectory(trafficCommand.add_action(), trajectory);
+
     const auto& pathAction = trafficCommand.action(0).follow_path_action();
     ASSERT_THAT(pathAction.path_point_size(), Eq(3));
 
