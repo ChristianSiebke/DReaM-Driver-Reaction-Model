@@ -50,6 +50,10 @@ public:
 
     void PostStep(int time) override;
 
+    //! Public for testing
+    //! Reads an output value of the FMU
+    FmuHandlerInterface::FmuValue& GetValue(fmi2_value_reference_t valueReference, VariableType variableType);
+
 #ifdef USE_EXTENDED_OSI
     //! Adds a trajectory from OpenSCENARIO to a OSI TrafficAction
     static void AddTrafficCommandActionFromOpenScenarioTrajectory(osi3::TrafficAction *trafficAction,
@@ -62,7 +66,30 @@ public:
                                                                 const std::function<void(const std::string &)> &errorCallback);
 #endif
 
+    //! Parameter of the FMU that was defined in the profile
+    template <typename T>
+    struct FmuParameter
+    {
+        T value;
+        fmi2_value_reference_t valueReference;
+
+        FmuParameter(T value, fmi2_value_reference_t valueReference) :
+            value(value),
+            valueReference(valueReference)
+        {}
+    };
+
+    template <typename T>
+    using FmuParameters = std::vector<FmuParameter<T>>;
+
 private:
+
+    //! Reads the parameters in the profile that should be forwarded to the FMU
+    void ParseFmuParameters(const ParameterInterface* parameters);
+
+    //! Sets the parameters in the FMU
+    void SetFmuParameters();
+
     //! Sets the SensorView as input for the FMU
     void SetSensorViewInput(const osi3::SensorView& data);
 
@@ -80,13 +107,16 @@ private:
     //! Writes an OSI message into a JSON file
     void WriteJson(const google::protobuf::Message& message, const QString& fileName);
 
-    FmuHandlerInterface::FmuValue& GetValue(fmi2_value_reference_t valueReference, VariableType variableType);
-
     osi3::SensorViewConfiguration GenerateSensorViewConfiguration();
 
     WorldInterface* world;
     std::map<ValueReferenceAndType, FmuHandlerInterface::FmuValue>* fmuVariableValues = nullptr;
     const Fmu2Variables& fmuVariables;
+
+    FmuParameters<int> fmuIntegerParameters;
+    FmuParameters<double> fmuDoubleParameters;
+    FmuParameters<bool> fmuBoolParameters;
+    FmuParameters<std::string> fmuStringParameters;
 
     std::string serializedSensorView;
     std::string previousSerializedSensorView;

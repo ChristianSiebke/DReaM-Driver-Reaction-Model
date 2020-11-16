@@ -443,8 +443,10 @@ void AlgorithmFmuWrapperImplementation::ReadOutputValues()
             valRefAndType.emplace<FMI1>(valRefAndType1);
 
             fmi1_boolean_t value_bool_out[1];
-            fmi1_integer_t  value_int_out[1];
-            fmi1_real_t  value_real_out[1];
+            fmi1_integer_t value_int_out[1];
+            fmi1_real_t value_real_out[1];
+            fmi2_string_t value_string_out[1];
+
             switch(dataType)
             {
             case VariableType::Bool:
@@ -471,8 +473,14 @@ void AlgorithmFmuWrapperImplementation::ReadOutputValues()
                 fmuVariableValues[valRefAndType].intValue = value_int_out[0];
                 LOGDEBUG("int value '" + fmuVarName + "': " + std::to_string(value_int_out[0]));
                 break;
+            case VariableType::String:
+                value_string_out[0] = nullptr;
+                fmi1_import_get_string(cdata.fmu1, value_ref, 1, value_string_out);
+                fmuVariableValues[valRefAndType].stringValue = value_string_out[0];
+                LOGDEBUG("string value '" + fmuVarName + "': " + std::string(value_string_out[0]));
+                break;
             default:
-                throw std::logic_error("Unsupported datatype");
+                LOGERRORANDTHROW("Invalid FMI datatype during ReadOutputValues()");
             }
         }
     }
@@ -488,8 +496,10 @@ void AlgorithmFmuWrapperImplementation::ReadOutputValues()
             valRefAndType.emplace<FMI2>(valRefAndType2);
 
             fmi2_boolean_t value_bool_out[1];
-            fmi2_integer_t  value_int_out[1];
-            fmi2_real_t  value_real_out[1];
+            fmi2_integer_t value_int_out[1];
+            fmi2_real_t value_real_out[1];
+            fmi2_string_t value_string_out[1];
+
             switch(dataType)
             {
             case VariableType::Bool:
@@ -516,8 +526,14 @@ void AlgorithmFmuWrapperImplementation::ReadOutputValues()
                 fmuVariableValues[valRefAndType].intValue = value_int_out[0];
                 LOGDEBUG("int value '" + fmuVarName + "': " + std::to_string(value_int_out[0]));
                 break;
+            case VariableType::String:
+                value_string_out[0] = nullptr;
+                fmi2_import_get_string(cdata.fmu2, value_ref, 1, value_string_out);
+                fmuVariableValues[valRefAndType].stringValue = value_string_out[0];
+                LOGDEBUG("string value '" + fmuVarName + "': " + std::string(value_string_out[0]));
+                break;
             default:
-                throw std::logic_error("Unsupported datatype");
+                LOGERRORANDTHROW("Invalid FMI datatype during ReadOutputValues()");
             }
         }
     }

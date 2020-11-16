@@ -154,6 +154,8 @@ OsmpFmuHandler::OsmpFmuHandler(fmu_check_data_t *cdata, WorldInterface *world, A
         enforceDoubleBuffering = enforceDoubleBufferingFlag->second;
     }
 
+    ParseFmuParameters(parameters);
+
 }
 
 
@@ -233,6 +235,7 @@ void OsmpFmuHandler::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterfa
 
 void OsmpFmuHandler::Init()
 {
+    SetFmuParameters();
     if (groundtruthVariable.has_value())
     {
         auto* worldData = static_cast<OWL::Interfaces::WorldData*>(world->GetWorldData());
@@ -454,6 +457,171 @@ void OsmpFmuHandler::AddTrafficCommandActionFromOpenScenarioPosition(osi3::Traff
                        logAndThrow("Position variant not supported for 'openScenario::AcquirePositionAction'", errorCallback);
                    }},
                position);
+}
+
+void OsmpFmuHandler::ParseFmuParameters(const ParameterInterface* parameters)
+{
+    for(const auto& [key, value] : parameters->GetParametersInt())
+    {
+        if (key.substr(0, 10) == "Parameter_")
+        {
+            const auto variableName = key.substr(10);
+            const auto foundVariable = fmuVariables.find(variableName);
+            if (foundVariable == fmuVariables.cend())
+            {
+                LOGERRORANDTHROW("No variable with name \"" + variableName + "\" found in the FMU");
+            }
+            else if (foundVariable->second.second != VariableType::Int)
+            {
+                LOGERRORANDTHROW("Variable \"" + variableName + "\" has different type in FMU");
+            }
+            fmuIntegerParameters.emplace_back(value, foundVariable->second.first);
+        }
+    }
+    for(const auto& [key, value] : parameters->GetParametersBool())
+    {
+        if (key.substr(0, 10) == "Parameter_")
+        {
+            const auto variableName = key.substr(10);
+            const auto foundVariable = fmuVariables.find(variableName);
+            if (foundVariable == fmuVariables.cend())
+            {
+                LOGERRORANDTHROW("No variable with name \"" + variableName + "\" found in the FMU");
+            }
+            else if (foundVariable->second.second != VariableType::Bool)
+            {
+                LOGERRORANDTHROW("Variable \"" + variableName + "\" has different type in FMU");
+            }
+            fmuBoolParameters.emplace_back(value, foundVariable->second.first);
+        }
+    }
+    for(const auto& [key, value] : parameters->GetParametersDouble())
+    {
+        if (key.substr(0, 10) == "Parameter_")
+        {
+            const auto variableName = key.substr(10);
+            const auto foundVariable = fmuVariables.find(variableName);
+            if (foundVariable == fmuVariables.cend())
+            {
+                LOGERRORANDTHROW("No variable with name \"" + variableName + "\" found in the FMU");
+            }
+            else if (foundVariable->second.second != VariableType::Double)
+            {
+                LOGERRORANDTHROW("Variable \"" + variableName + "\" has different type in FMU");
+            }
+            fmuDoubleParameters.emplace_back(value, foundVariable->second.first);
+        }
+    }
+    for(const auto& [key, value] : parameters->GetParametersString())
+    {
+        if (key.substr(0, 10) == "Parameter_")
+        {
+            const auto variableName = key.substr(10);
+            const auto foundVariable = fmuVariables.find(variableName);
+            if (foundVariable == fmuVariables.cend())
+            {
+                LOGERRORANDTHROW("No variable with name \"" + variableName + "\" found in the FMU");
+            }
+            else if (foundVariable->second.second != VariableType::String)
+            {
+                LOGERRORANDTHROW("Variable \"" + variableName + "\" has different type in FMU");
+            }
+            fmuStringParameters.emplace_back(value, foundVariable->second.first);
+        }
+    }
+}
+
+void OsmpFmuHandler::SetFmuParameters()
+{
+    fmi2_status_t fmiStatus = fmi2_status_ok;
+
+    fmi2_value_reference_t realvrs[1];
+    fmi2_real_t realData[1];
+    for (const auto& fmuParameter : fmuDoubleParameters)
+    {
+        realData[0] = fmuParameter.value;
+        realvrs[0] = fmuParameter.valueReference;
+        fmiStatus = fmi2_import_set_real(cdata->fmu2,
+                                         realvrs,
+                                         1,
+                                         realData);
+    }
+
+    if (fmiStatus == fmi2_status_warning)
+    {
+        LOG(CbkLogLevel::Warning, "setting FMI variables returned warning");
+    }
+    else if (fmiStatus == fmi2_status_error)
+    {
+        LOG(CbkLogLevel::Error, "setting FMI variables returned error");
+        throw std::logic_error("Error setting FMI variables");
+    }
+
+    fmi2_value_reference_t intvrs[1];
+    fmi2_integer_t intData[1];
+    for (const auto& fmuParameter : fmuIntegerParameters)
+    {
+        intData[0] = fmuParameter.value;
+        intvrs[0] = fmuParameter.valueReference;
+        fmiStatus = fmi2_import_set_integer(cdata->fmu2,
+                                            intvrs,
+                                            1,
+                                            intData);
+    }
+
+    if (fmiStatus == fmi2_status_warning)
+    {
+        LOG(CbkLogLevel::Warning, "setting FMI variables returned warning");
+    }
+    else if (fmiStatus == fmi2_status_error)
+    {
+        LOG(CbkLogLevel::Error, "setting FMI variables returned error");
+        throw std::logic_error("Error setting FMI variables");
+    }
+
+    fmi2_value_reference_t boolvrs[1];
+    fmi2_boolean_t boolData[1];
+    for (const auto& fmuParameter : fmuBoolParameters)
+    {
+        boolData[0] = fmuParameter.value;
+        boolvrs[0] = fmuParameter.valueReference;
+        fmiStatus = fmi2_import_set_boolean(cdata->fmu2,
+                                            boolvrs,
+                                            1,
+                                            boolData);
+    }
+
+    if (fmiStatus == fmi2_status_warning)
+    {
+        LOG(CbkLogLevel::Warning, "setting FMI variables returned warning");
+    }
+    else if (fmiStatus == fmi2_status_error)
+    {
+        LOG(CbkLogLevel::Error, "setting FMI variables returned error");
+        throw std::logic_error("Error setting FMI variables");
+    }
+
+    fmi2_value_reference_t stringvrs[1];
+    fmi2_string_t stringData[1];
+    for (const auto& fmuParameter : fmuStringParameters)
+    {
+        stringData[0] = fmuParameter.value.data();
+        stringvrs[0] = fmuParameter.valueReference;
+        fmiStatus = fmi2_import_set_string(cdata->fmu2,
+                                           stringvrs,
+                                           1,
+                                           stringData);
+    }
+
+    if (fmiStatus == fmi2_status_warning)
+    {
+        LOG(CbkLogLevel::Warning, "setting FMI variables returned warning");
+    }
+    else if (fmiStatus == fmi2_status_error)
+    {
+        LOG(CbkLogLevel::Error, "setting FMI variables returned error");
+        throw std::logic_error("Error setting FMI variables");
+    }
 }
 
 void OsmpFmuHandler::GetTrafficUpdate()

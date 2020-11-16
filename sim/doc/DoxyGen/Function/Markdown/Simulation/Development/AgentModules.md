@@ -229,6 +229,7 @@ The OsmpFmuHandler has the following additional (optional) parameters:
 | Init_Groundtruth          | string   | Name of the FMU variable to which the Groundtruth is sent during the initialization             |
 | Output_SensorData         | string   | Name of the FMU variable from where a SensorData should be recieved                             |
 | Output_TrafficUpdate      | string   | Name of the FMU variable from where a TrafficUpdate should be recieved                          |
+| Parameter_&lt;name&gt;    | any      | The value of the parameter is assigned to the FMU variable &lt;name&gt;                         |
 | WriteSensorViewOutput     | bool     | If true the SensorView is written into a JSON file                                              |
 | WriteTrafficCommandOutput | bool     | If true the TrafficCommand is written into a JSON file                                          |
 | WriteGroundtruthOutput    | bool     | If true the Groundtruth is written into a JSON file                                             |
@@ -236,7 +237,7 @@ The OsmpFmuHandler has the following additional (optional) parameters:
 | WriteTrafficUpdateOutput  | bool     | If true the TrafficUpdate is written into a JSON file                                           |
 | EnforceDoubleBuffering    | bool     | If true the wrapper will throw an error if FMU doesn't use double buffering. Defaults to false. |
 
-The type of OSI messages the OsmpFmuHandler sends an recieves is defined by its parameters. Only messages for which a FMU variable is given in the configuration are sent/recieved.
+The type of OSI messages the OsmpFmuHandler sends an receives is defined by its parameters. Only messages for which a FMU variable is given in the configuration are sent/recieved.
 An additional parameter defines whether the message should be logged as JSON file for every agent and every timestep (see table above).
 
 Currently these messages are supported:
