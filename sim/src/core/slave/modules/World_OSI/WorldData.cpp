@@ -67,6 +67,7 @@ SensorView_ptr WorldData::GetSensorView(osi3::SensorViewConfiguration& conf, int
 
     auto filteredGroundTruth = GetFilteredGroundTruth(conf, GetMovingObjectById(host_id));
     sv->mutable_global_ground_truth()->CopyFrom(*filteredGroundTruth);
+    sv->mutable_global_ground_truth()->mutable_host_vehicle_id()->set_value(host_id);
     sv->mutable_host_vehicle_id()->set_value(host_id);
 
     auto zeroVector3d = osi3::Vector3d();
