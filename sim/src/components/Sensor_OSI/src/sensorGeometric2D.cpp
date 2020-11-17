@@ -72,6 +72,7 @@ void SensorGeometric2D::Trigger(int time)
     sensorData.mutable_timestamp()->set_nanos(((time + latencyInMs) % 1000) * 1e6);
     SensorDetectionResults results = DetectObjects();
     sensorData = ApplyLatency(time, sensorData);
+    sensorData.mutable_moving_object_header()->set_data_qualifier(osi3::DetectedEntityHeader_DataQualifier_DATA_QUALIFIER_AVAILABLE);
 
     Observe(time, ApplyLatencyToResults(time, results));
 }
@@ -252,6 +253,8 @@ SensorDetectionResults SensorGeometric2D::DetectObjects()
     SensorDetectionResults results;
     osi3::SensorViewConfiguration sensorViewConfig = GenerateSensorViewConfiguration();
     auto sensorView = static_cast<OWL::Interfaces::WorldData*>(world->GetWorldData())->GetSensorView(sensorViewConfig, GetAgent()->GetId());
+
+    sensorData.add_sensor_view()->CopyFrom(*sensorView);
 
     const auto hostVehicle = FindHostVehicleInSensorView(*sensorView);
     sensorData.mutable_host_vehicle_location()->CopyFrom(hostVehicle->base());
