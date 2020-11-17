@@ -20,7 +20,7 @@ if(SIMCORE_VERSION_MAJOR MATCHES "^[0-9]+$" AND
 elseif(DEFINED SIMCORE_VERSION_TAG)
   set(OPENPASS_VERSION "\"${SIMCORE_VERSION_TAG}\"")
 else()
-  set(OPENPASS_VERSION "\"undefined-version\"")
+  set(OPENPASS_VERSION "9999,9999,9999")
 endif()
 
 configure_file(
