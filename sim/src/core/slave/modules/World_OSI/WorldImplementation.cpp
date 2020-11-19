@@ -468,9 +468,13 @@ RouteQueryResult<double> WorldImplementation::GetDistanceToEndOfLane(const RoadG
 
 LaneSections WorldImplementation::GetLaneSections(const std::string& roadId) const
 {
-    LaneSections result;
-
     const auto& road = worldDataQuery.GetRoadByOdId(roadId);
+    if (road == nullptr)
+    {
+        return {};
+    }
+
+    LaneSections result;
     for (const auto &section : road->GetSections())
     {
         LaneSection laneSection;

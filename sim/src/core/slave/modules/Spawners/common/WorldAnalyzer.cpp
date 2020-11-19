@@ -18,6 +18,7 @@ namespace
     static constexpr double EPSILON = 0.001;
     static constexpr double MINIMUM_SEPARATION_BUFFER = 5.0;
     static constexpr double TTC_THRESHHOLD = 2.0;
+    static constexpr double TTC_ENDOFLANE = 4.0;
     static constexpr double ASSUMED_TTB = 1.0;
     static constexpr double ASSUMED_BRAKING_ACCELERATION = -6.0;
     static constexpr double ASSUMED_FRONT_AGENT_ACCELERATION = -10;
@@ -187,7 +188,7 @@ std::optional<double> WorldAnalyzer::GetNextSpawnPosition(const RoadId& roadId,
                                                                               maxSearchPosition,
                                                                               supportedLaneTypes).at(route.target);
 
-        const auto minDistanceToEndOfLane = intendedVelocity * TTC_THRESHHOLD;
+        const auto minDistanceToEndOfLane = intendedVelocity * TTC_ENDOFLANE;
 
         if (distanceToEndOfDrivingLane < minDistanceToEndOfLane)
         {
