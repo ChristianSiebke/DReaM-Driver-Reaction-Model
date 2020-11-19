@@ -107,7 +107,7 @@ private:
     //! Writes an OSI message into a JSON file
     void WriteJson(const google::protobuf::Message& message, const QString& fileName);
 
-    osi3::SensorViewConfiguration GenerateSensorViewConfiguration();
+    osi3::SensorViewConfiguration GenerateDefaultSensorViewConfiguration();
 
     WorldInterface* world;
     std::map<ValueReferenceAndType, FmuHandlerInterface::FmuValue>* fmuVariableValues = nullptr;
@@ -121,6 +121,8 @@ private:
     std::string serializedSensorView;
     std::string previousSerializedSensorView;
     void* previousSensorData{nullptr};
+    osi3::SensorViewConfiguration sensorViewConfig;
+    std::string serializedSensorViewConfig;
     osi3::SensorData sensorData;
     std::string serializedGroundtruth;
 
@@ -136,6 +138,8 @@ private:
 
 
     std::optional<std::string> sensorViewVariable;
+    std::optional<std::string> sensorViewConfigVariable;
+    std::optional<std::string> sensorViewConfigRequestVariable;
     std::optional<std::string> sensorDataVariable;
     std::optional<std::string> groundtruthVariable;
 
@@ -145,6 +149,7 @@ private:
 #endif
 
     bool writeSensorView{false};
+    bool writeSensorViewConfig{false};
     bool writeSensorData{false};
     bool writeGroundtruth{false};
 

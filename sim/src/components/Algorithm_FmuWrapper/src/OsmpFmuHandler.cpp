@@ -83,6 +83,20 @@ OsmpFmuHandler::OsmpFmuHandler(fmu_check_data_t *cdata, WorldInterface *world, A
     {
         sensorViewVariable = sensorViewParameter->second;
     }
+    auto sensorViewConfigParameter = parameters->GetParametersString().find("Input_SensorViewConfig");
+    if (sensorViewConfigParameter != parameters->GetParametersString().end())
+    {
+        sensorViewConfigVariable = sensorViewConfigParameter->second;
+    }
+    auto sensorViewConfigRequestParameter = parameters->GetParametersString().find("Output_SensorViewConfigRequest");
+    if (sensorViewConfigRequestParameter != parameters->GetParametersString().end())
+    {
+        sensorViewConfigRequestVariable = sensorViewConfigRequestParameter->second;
+        if(!sensorViewConfigVariable)
+        {
+            LOGERROR("Defined SensorViewConfigRequest without SensorViewConfig");
+        }
+    }
     auto sensorDataParameter = parameters->GetParametersString().find("Output_SensorData");
     if (sensorDataParameter != parameters->GetParametersString().end())
     {
@@ -114,6 +128,11 @@ OsmpFmuHandler::OsmpFmuHandler(fmu_check_data_t *cdata, WorldInterface *world, A
     if (writeSensorViewFlag != parameters->GetParametersBool().end())
     {
         writeSensorView = writeSensorViewFlag->second;
+    }
+    auto writeSensorViewConfigFlag = parameters->GetParametersBool().find("WriteSensorViewConfigOutput");
+    if (writeSensorViewConfigFlag != parameters->GetParametersBool().end())
+    {
+        writeSensorViewConfig = writeSensorViewConfigFlag->second;
     }
     auto writeGroundtruthFlag = parameters->GetParametersBool().find("WriteGroundtruthOutput");
     if (writeGroundtruthFlag != parameters->GetParametersBool().end())
@@ -261,16 +280,46 @@ void OsmpFmuHandler::Init()
             WriteJson(groundtruth, "Groundtruth.json");
         }
     }
+    if (sensorViewConfigRequestVariable.has_value())
+    {
+        void* buffer = decode_integer_to_pointer(GetValue(fmuVariables.at(sensorViewConfigRequestVariable.value()+".base.hi").first, VariableType::Int).intValue,
+                                                 GetValue(fmuVariables.at(sensorViewConfigRequestVariable.value()+".base.lo").first, VariableType::Int).intValue);
+        const auto size = static_cast<std::string::size_type>(GetValue(fmuVariables.at(sensorViewConfigRequestVariable.value()+".size").first, VariableType::Int).intValue);
+        serializedSensorViewConfig = {static_cast<char *>(buffer), size};
+        sensorViewConfig.ParseFromString(serializedSensorViewConfig);
+
+        fmi2_integer_t fmuInputValues[3];
+        fmi2_value_reference_t valueReferences[3] = {fmuVariables.at(sensorViewVariable.value()+".base.lo").first,
+                                                     fmuVariables.at(sensorViewVariable.value()+".base.hi").first,
+                                                     fmuVariables.at(sensorViewVariable.value()+".size").first};
+
+        encode_pointer_to_integer(serializedSensorViewConfig.data(),
+                                  fmuInputValues[1],
+                                  fmuInputValues[0]);
+        fmuInputValues[2] = serializedSensorView.size();
+
+        fmi2_import_set_integer(cdata->fmu2,
+                                valueReferences,     // array of value reference
+                                3,                   // number of elements
+                                fmuInputValues);     // array of values
+        if (writeSensorViewConfig)
+        {
+            WriteJson(sensorViewConfig, "SensorViewConfig.json");
+        }
+    }
+    else
+    {
+        sensorViewConfig = GenerateDefaultSensorViewConfiguration();
+    }
 }
 
 void OsmpFmuHandler::PreStep(int time)
 {
-    osi3::SensorViewConfiguration sensorViewConfig = GenerateSensorViewConfiguration();
-    auto* worldData = static_cast<OWL::Interfaces::WorldData*>(world->GetWorldData());
-    auto sensorView = worldData->GetSensorView(sensorViewConfig, agent->GetId());
-
     if (sensorViewVariable)
     {
+        auto* worldData = static_cast<OWL::Interfaces::WorldData*>(world->GetWorldData());
+        auto sensorView = worldData->GetSensorView(sensorViewConfig, agent->GetId());
+
         SetSensorViewInput(*sensorView);
         if (writeSensorView)
         {
@@ -653,7 +702,7 @@ void OsmpFmuHandler::WriteJson(const google::protobuf::Message& message, const Q
     file.close();
 }
 
-osi3::SensorViewConfiguration OsmpFmuHandler::GenerateSensorViewConfiguration()
+osi3::SensorViewConfiguration OsmpFmuHandler::GenerateDefaultSensorViewConfiguration()
 {
     osi3::SensorViewConfiguration viewConfiguration;
 

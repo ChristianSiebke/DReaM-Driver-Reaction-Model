@@ -316,11 +316,13 @@ void AlgorithmFmuWrapperImplementation::InitFmu()
     {
         case fmi_version_1_enu:
             fmiStatus = fmi1_cs_prep_init(&cdata);
+            ReadOutputValues();
             fmuHandler->Init();
             fmiStatus = fmi1_cs_prep_simulate(&cdata);
             break;
         case fmi_version_2_0_enu:
             fmiStatus = fmi2_cs_prep_init(&cdata);
+            ReadOutputValues();
             fmuHandler->Init();
             fmiStatus = fmi2_cs_prep_simulate(&cdata);
             break;

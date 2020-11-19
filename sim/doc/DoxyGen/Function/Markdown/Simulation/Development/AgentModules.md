@@ -217,34 +217,37 @@ If `UnzipOncePerInstance` is set to `true`, an integer number will be appended t
 \subsection dev_agent_modules_fmuwrapper_osmp OSMP FMU
 
 OSMP is currently the only supported type of FMU.
-It allows the pass input to the FMU as OSI messages as well as recieve output as OSI message.
+It allows to pass input to the FMU as OSI messages as well as receive output as OSI message.
 For more information on OSMP see https://github.com/OpenSimulationInterface/osi-sensor-model-packaging.
 
 The OsmpFmuHandler has the following additional (optional) parameters:
 
-| **Key**                   | **Type** | **Description**                                                                                 |
-|---------------------------|----------|-------------------------------------------------------------------------------------------------|
-| Input_SensorView          | string   | Name of the FMU variable to which the SensorView is sent                                        |
-| Input_TrafficCommand      | string   | Name of the FMU variable to which the TrafficCommand is sent                                    |
-| Init_Groundtruth          | string   | Name of the FMU variable to which the Groundtruth is sent during the initialization             |
-| Output_SensorData         | string   | Name of the FMU variable from where a SensorData should be recieved                             |
-| Output_TrafficUpdate      | string   | Name of the FMU variable from where a TrafficUpdate should be recieved                          |
-| Parameter_&lt;name&gt;    | any      | The value of the parameter is assigned to the FMU variable &lt;name&gt;                         |
-| WriteSensorViewOutput     | bool     | If true the SensorView is written into a JSON file                                              |
-| WriteTrafficCommandOutput | bool     | If true the TrafficCommand is written into a JSON file                                          |
-| WriteGroundtruthOutput    | bool     | If true the Groundtruth is written into a JSON file                                             |
-| WriteSensorDataOutput     | bool     | If true the SensorData is written into a JSON file                                              |
-| WriteTrafficUpdateOutput  | bool     | If true the TrafficUpdate is written into a JSON file                                           |
-| EnforceDoubleBuffering    | bool     | If true the wrapper will throw an error if FMU doesn't use double buffering. Defaults to false. |
+| **Key**                          | **Type** | **Description**                                                                                 |
+|----------------------------------|----------|-------------------------------------------------------------------------------------------------|
+| Init_Groundtruth                 | string   | Name of the FMU variable to which the Groundtruth is sent during the initialization             |
+| Input_SensorView                 | string   | Name of the FMU variable to which the SensorView is sent                                        |
+| Input_SensorViewConfig           | string   | Name of the FMU variable to which the SensorViewConfig is sent                                  |
+| Input_TrafficCommand             | string   | Name of the FMU variable to which the TrafficCommand is sent                                    |
+| Output_SensorViewConfigRequest   | string   | Name of the FMU variable from where the SensorViewConfigRequest should be received              |
+| Output_SensorData                | string   | Name of the FMU variable from where a SensorData should be received                             |
+| Output_TrafficUpdate             | string   | Name of the FMU variable from where a TrafficUpdate should be received                          |
+| Parameter_&lt;name&gt;           | any      | The value of the parameter is assigned to the FMU variable &lt;name&gt;                         |
+| WriteSensorViewOutput            | bool     | If true the SensorView is written into a JSON file                                              |
+| WriteTrafficCommandOutput        | bool     | If true the TrafficCommand is written into a JSON file                                          |
+| WriteGroundtruthOutput           | bool     | If true the Groundtruth is written into a JSON file                                             |
+| WriteSensorDataOutput            | bool     | If true the SensorData is written into a JSON file                                              |
+| WriteTrafficUpdateOutput         | bool     | If true the TrafficUpdate is written into a JSON file                                           |
+| EnforceDoubleBuffering           | bool     | If true the wrapper will throw an error if FMU doesn't use double buffering. Defaults to false. |
 
-The type of OSI messages the OsmpFmuHandler sends an receives is defined by its parameters. Only messages for which a FMU variable is given in the configuration are sent/recieved.
+The type of OSI messages the OsmpFmuHandler sends an receives is defined by its parameters. Only messages for which a FMU variable is given in the configuration are sent/received.
 An additional parameter defines whether the message should be logged as JSON file for every agent and every timestep (see table above).
 
 Currently these messages are supported:
 
 * SensorView: SensorView generated from the Groundtruth with this agent is host vehicle
+* SensorViewConfig, SensorViewConfigRequest: Configuration of a sensor according to OSMP
 * TrafficCommand: Trajectory from openSCENARIO, that will be converted into a TrafficCommand
-* SensorData: Output of a sensor, that can be send to other modules as SensorDataSignal
+* SensorData: Output of a sensor that can be sent to other components as SensorDataSignal
 * TrafficUpdate: Will be converted to a DynamicsSignal
 
 ---
