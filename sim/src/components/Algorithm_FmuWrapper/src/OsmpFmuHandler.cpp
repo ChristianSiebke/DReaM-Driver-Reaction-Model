@@ -70,7 +70,6 @@ void encode_pointer_to_integer(const void* ptr,fmi2_integer_t& hi,fmi2_integer_t
 #endif
 }
 
-
 OsmpFmuHandler::OsmpFmuHandler(fmu_check_data_t *cdata, WorldInterface *world, AgentInterface *agent, const CallbackInterface *callbacks, const Fmu2Variables &fmuVariables, std::map<ValueReferenceAndType, FmuHandlerInterface::FmuValue> *fmuVariableValues, const ParameterInterface *parameters) :
     FmuHandlerInterface(cdata, agent, callbacks),
     world(world),
@@ -78,62 +77,25 @@ OsmpFmuHandler::OsmpFmuHandler(fmu_check_data_t *cdata, WorldInterface *world, A
     fmuVariables(fmuVariables),
     previousPosition(agent->GetPositionX(), agent->GetPositionY())
 {
-    auto sensorViewParameter = parameters->GetParametersString().find("Input_SensorView");
-    if (sensorViewParameter != parameters->GetParametersString().end())
+    for (const auto& [key, value] : parameters->GetParametersString())
     {
-        sensorViewVariable = sensorViewParameter->second;
-    }
-    auto sensorViewConfigParameter = parameters->GetParametersString().find("Input_SensorViewConfig");
-    if (sensorViewConfigParameter != parameters->GetParametersString().end())
-    {
-        sensorViewConfigVariable = sensorViewConfigParameter->second;
-    }
-    auto sensorViewConfigRequestParameter = parameters->GetParametersString().find("Output_SensorViewConfigRequest");
-    if (sensorViewConfigRequestParameter != parameters->GetParametersString().end())
-    {
-        sensorViewConfigRequestVariable = sensorViewConfigRequestParameter->second;
-        if(!sensorViewConfigVariable)
+        const auto pos = key.find('_');
+        const auto type = key.substr(0, pos);
+        const auto variableName = key.substr(pos+1);
+        if (type == "Input" || type == "Output" || type == "Init")
         {
-            LOGERROR("Defined SensorViewConfigRequest without SensorViewConfig");
+            const auto findResult = variableMapping.at(type).find(value);
+            if (findResult != variableMapping.at(type).cend())
+            {
+                findResult->second = variableName;
+            }
+            else
+            {
+                LOGERRORANDTHROW("Unkown FMU \""+type+"\" variable \""+value+"\"")
+            }
         }
     }
-    auto sensorDataOutParameter = parameters->GetParametersString().find("Output_SensorData");
-    if (sensorDataOutParameter != parameters->GetParametersString().end())
-    {
-        sensorDataOutVariable = sensorDataOutParameter->second;
-    }
-    auto sensorDataInParameter = parameters->GetParametersString().find("Input_SensorData");
-    if (sensorDataInParameter != parameters->GetParametersString().end())
-    {
-        sensorDataInVariable = sensorDataInParameter->second;
-    }
-    auto groundtruthParameter = parameters->GetParametersString().find("Init_Groundtruth");
-    if (groundtruthParameter != parameters->GetParametersString().end())
-    {
-        groundtruthVariable = groundtruthParameter->second;
-    }
-#ifdef USE_EXTENDED_OSI
-    auto trafficCommandParameter = parameters->GetParametersString().find("Input_TrafficCommand");
-    if (trafficCommandParameter != parameters->GetParametersString().end())
-    {
-        trafficCommandVariable = trafficCommandParameter->second;
-    }
-    auto trafficUpdateParameter = parameters->GetParametersString().find("Output_TrafficUpdate");
-    if (trafficUpdateParameter != parameters->GetParametersString().end())
-    {
-        trafficUpdateVariable = trafficUpdateParameter->second;
-    }
-    auto motionCommandParameter = parameters->GetParametersString().find("Output_MotionCommand");
-    if (motionCommandParameter != parameters->GetParametersString().end())
-    {
-        motionCommandVariable = motionCommandParameter->second;
-    }
-    auto vehicleCommunicationDataParameter = parameters->GetParametersString().find("Input_VehicleCommunicationData");
-    if (vehicleCommunicationDataParameter != parameters->GetParametersString().end())
-    {
-        vehicleCommunicationDataVariable = vehicleCommunicationDataParameter->second;
-    }
-#endif
+
     auto writeSensorDataFlag = parameters->GetParametersBool().find("WriteSensorDataOutput");
     if (writeSensorDataFlag != parameters->GetParametersBool().end())
     {

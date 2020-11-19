@@ -1,4 +1,4 @@
-<Profiles SchemaVersion="0.4.2">
+<Profiles SchemaVersion="0.4.3">
   <AgentProfiles>
     <AgentProfile Name="EgoAgent" Type="Dynamic">
       <DriverProfiles>

@@ -169,6 +169,36 @@ private:
     std::optional<std::string> vehicleCommunicationDataVariable;
 #endif
 
+    const std::map<std::string, std::map<std::string, std::optional<std::string>&>> variableMapping
+    {
+        {"Input",
+            {
+                {"SensorView", sensorViewVariable},
+                {"SensorViewConfigRequest", sensorViewConfigRequestVariable},
+                {"SensorData", sensorDataInVariable},
+#ifdef USE_EXTENDED_OSI
+                {"TrafficCommand", trafficCommandVariable},
+                {"VehicleCommunicationData", vehicleCommunicationDataVariable}
+#endif
+            }
+        },
+        {"Output",
+            {
+                {"SensorData", sensorDataOutVariable},
+                {"SensorViewConfig", sensorViewConfigVariable},
+#ifdef USE_EXTENDED_OSI
+                {"MotionCommand", motionCommandVariable},
+                {"TrafficUpdate", trafficUpdateVariable}
+#endif
+            }
+        },
+        {"Init",
+            {
+                {"Groundtruth", groundtruthVariable}
+            }
+        }
+    };
+
     bool writeSensorView{false};
     bool writeSensorViewConfig{false};
     bool writeSensorData{false};
