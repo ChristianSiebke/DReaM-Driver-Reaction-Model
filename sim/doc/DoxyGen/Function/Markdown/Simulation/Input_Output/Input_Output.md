@@ -201,18 +201,20 @@ Index range for signal groups:
 
 With corresponding defined indices :
 
-| Signal                        | Group                 | Id      |
-|-------------------------------|-----------------------|---------|
-| Dynamics                      | Dynamics              | 01      | 
-| Longitudinal                  | Algorithm             | 11      | 
-| Steering                      | Algorithm             | 12      | 
-| Acceleration                  | Algorithm             | 13      | 
-| Lateral                       | Algorithm             | 14      |
-| SecondaryDriverTasks          | Algorithm             | 19      |
-| Trajectory                    | OpenScenarioActions   | 71      |
-| SensorDriver                  | Sensor                | 81      |
-| SensorData                    | Sensor                | 90      |
-| ParametersVehicle             | Parameters            | 92      |
+| Signal                                 | Group                 | Id      |
+|----------------------------------------|-----------------------|---------|
+| Dynamics                               | Dynamics              | 01      |
+| Longitudinal                           | Algorithm             | 11      |
+| Steering                               | Algorithm             | 12      |
+| Acceleration                           | Algorithm             | 13      |
+| Lateral                                | Algorithm             | 14      |
+| SecondaryDriverTasks                   | Algorithm             | 19      |
+| Trajectory                             | OpenScenarioActions   | 71      |
+| AcquireGlobalPosition                  | OpenScenarioActions   | 62      |
+| CustomParameters (CustomCommandAction) | OpenScenarioActions   | 63      |
+| SensorDriver                           | Sensor                | 81      |
+| SensorData                             | Sensor                | 90      |
+| ParametersVehicle                      | Parameters            | 92      |
 
 \subsubsection io_input_systemconfigblueprint_paramters Parameters
 

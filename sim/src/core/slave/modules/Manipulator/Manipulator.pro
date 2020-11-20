@@ -29,6 +29,7 @@ INCLUDEPATH += \
 SOURCES += \
     CollisionManipulator.cpp \
     ComponentStateChangeManipulator.cpp \
+    CustomParametersManipulator.cpp \
     LaneChangeManipulator.cpp \
     ManipulatorCommonBase.cpp \
     ManipulatorExport.cpp \
@@ -44,6 +45,7 @@ SOURCES += \
 EVENT_HEADERS += \
     ../../../../common/events/componentStateChangeEvent.h \
     ../../../../common/events/collisionEvent.h \
+    ../../../../common/events/customParametersEvent.h \
     ../../../../common/events/laneChangeEvent.h \
     ../../../../common/events/speedActionEvent.h \
     ../../../../common/events/trajectoryEvent.h \
@@ -54,6 +56,7 @@ HEADERS += \
     CollisionManipulator.h \
     ComponentStateChangeManipulator.h \
     CustomCommandFactory.h \
+    CustomParametersManipulator.h \
     LaneChangeManipulator.h \
     ManipulatorCommonBase.h \
     ManipulatorExport.h \

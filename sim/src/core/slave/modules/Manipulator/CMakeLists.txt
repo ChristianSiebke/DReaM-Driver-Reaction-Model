@@ -7,6 +7,7 @@ add_openpass_target(
 
   HEADERS
     CollisionManipulator.h
+    CustomParametersManipulator.h
     ComponentStateChangeManipulator.h
     LaneChangeManipulator.h
     ManipulatorCommonBase.h
@@ -24,6 +25,7 @@ add_openpass_target(
 
   SOURCES
     CollisionManipulator.cpp
+    CustomParametersManipulator.cpp
     ComponentStateChangeManipulator.cpp
     LaneChangeManipulator.cpp
     ManipulatorCommonBase.cpp

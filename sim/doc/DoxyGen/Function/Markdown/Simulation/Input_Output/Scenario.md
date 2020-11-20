@@ -654,7 +654,7 @@ Example
 </Action>
 ```
 
-**Component State Change**
+**UserDefinedAction: Component State Change**
 
 The ComponentStateChangeManipulator influences the maximum reachable state of an agent component that is handled by the ComponentController, i.e. it can either activate or deactivate a component.
 
@@ -664,6 +664,21 @@ Example
 	<UserDefinedAction>
 		<CustomCommandAction>SetComponentState Dynamics_TrajectoryFollower Acting</CustomCommandAction>
 	</UserDefinedAction>
+</Action>
+```
+
+**UserDefinedAction: Custom Parameters**
+
+The `CustomParametersManipulator` adds an event to the `EventNetwork`, which is relayed as list of strings (`CustomParametersSignal`).
+Currently, arguments are seperated by a SINGLE WHITESPACE, so parameters which contain a space are split.
+**FMU_Wrapper component for OSMP messages only**: The parameters are transformed into indiviudal custom actions of the TrafficCommand.
+
+Example
+```xml
+<Action name="CustomParameters">
+    <UserDefinedAction>
+        <CustomCommandAction>SetCustomParameters ARG1 ARG2 ARG3</CustomCommandAction>
+    </UserDefinedAction>
 </Action>
 ```
 

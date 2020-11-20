@@ -16,6 +16,7 @@
 #include <QDir>
 #include <QFile>
 
+#include "common/customParametersSignal.h"
 #include "common/dynamicsSignal.h"
 #include "common/sensorDataSignal.h"
 #include "common/trajectorySignal.h"
@@ -186,8 +187,7 @@ void OsmpFmuHandler::UpdateInput(int localLinkId, const std::shared_ptr<const Si
 
     if (localLinkId == 10)
     {
-        auto signal = std::dynamic_pointer_cast<TrajectorySignal const>(data);
-
+        const auto signal = std::dynamic_pointer_cast<TrajectorySignal const>(data);
         if (signal && signal->componentState == ComponentState::Acting)
         {
             AddTrafficCommandActionFromOpenScenarioTrajectory(trafficCommands[time]->add_action(), signal->trajectory);
@@ -195,14 +195,24 @@ void OsmpFmuHandler::UpdateInput(int localLinkId, const std::shared_ptr<const Si
     }
     else if (localLinkId == 11)
     {
-        auto signal = std::dynamic_pointer_cast<AcquirePositionSignal const>(data);
-
+        const auto signal = std::dynamic_pointer_cast<AcquirePositionSignal const>(data);
         if (signal && signal->componentState == ComponentState::Acting)
         {
             AddTrafficCommandActionFromOpenScenarioPosition(trafficCommands[time]->add_action(),
                                                             signal->position,
                                                             this->world,
                                                             [this](const std::string &message) { LOGERROR(message); });
+        }
+    }
+    else if (localLinkId == 12)
+    {
+        const auto signal = std::dynamic_pointer_cast<CustomParametersSignal const>(data);
+        if (signal && signal->componentState == ComponentState::Acting)
+        {
+            for(const auto& parameter : signal->parameters)
+            {
+                trafficCommands[time]->add_action()->mutable_custom_action()->set_command(parameter);
+            }
         }
     }
 
@@ -540,6 +550,11 @@ void OsmpFmuHandler::SetVehicleCommunicationDataInput(const setlevel4to5::Vehicl
                             fmuInputValues);     // array of values
 }
 
+void logAndThrow(const std::string& message, const std::function<void(const std::string&)> &errorCallback) noexcept(false) {
+    if (errorCallback) errorCallback(message);
+    throw std::runtime_error(message);
+}
+
 void OsmpFmuHandler::AddTrafficCommandActionFromOpenScenarioTrajectory(osi3::TrafficAction *trafficAction, const openScenario::Trajectory& trajectory)
 {
     if (trajectory.timeReference.has_value()) {
@@ -563,11 +578,6 @@ void OsmpFmuHandler::AddTrafficCommandActionFromOpenScenarioTrajectory(osi3::Tra
             statePoint->mutable_orientation()->set_yaw(trajectoryPoint.yaw);
         }
     }
-}
-
-void logAndThrow(const std::string& message, const std::function<void(const std::string&)> &errorCallback) noexcept(false) {
-    if (errorCallback) errorCallback(message);
-    throw std::runtime_error(message);
 }
 
 void OsmpFmuHandler::AddTrafficCommandActionFromOpenScenarioPosition(osi3::TrafficAction *trafficAction,
@@ -808,6 +818,7 @@ void OsmpFmuHandler::GetTrafficUpdate()
     previousTrafficUpdate = buffer;
     trafficUpdate.ParseFromArray(buffer, GetValue(fmuVariables.at(trafficUpdateVariable.value() + ".size").first, VariableType::Int).intValue);
 }
+
 #endif
 
 void OsmpFmuHandler::WriteJson(const google::protobuf::Message& message, const QString& fileName)
