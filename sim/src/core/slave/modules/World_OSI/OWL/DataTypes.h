@@ -656,6 +656,9 @@ public:
     //!Returns the position of the reference point of the object in absolute coordinates (i. e. world coordinates)
     virtual Primitive::AbsPosition GetReferencePointPosition() const = 0;
 
+    //!Returns the dimension of the sign
+    virtual Primitive::Dimension GetDimension() const = 0;
+
     //! Sets the s coordinate
     virtual void SetS(double sPos) = 0;
 
@@ -703,6 +706,9 @@ public:
 
     //!Returns the position of the reference point of the object in absolute coordinates (i. e. world coordinates)
     virtual Primitive::AbsPosition GetReferencePointPosition() const = 0;
+
+    //!Returns the dimension of the marking
+    virtual Primitive::Dimension GetDimension() const = 0;
 
     //! Sets the s coordinate
     virtual void SetS(double sPos) = 0;
@@ -1222,6 +1228,7 @@ public:
     virtual CommonTrafficSign::Entity GetSpecification(const double relativeDistance) const override;
 
     virtual Primitive::AbsPosition GetReferencePointPosition() const override;
+    virtual Primitive::Dimension GetDimension() const override;
 
     virtual void SetS(double sPos) override
     {
@@ -1269,6 +1276,7 @@ public:
     virtual CommonTrafficSign::Entity GetSpecification(const double relativeDistance) const override;
 
     virtual Primitive::AbsPosition GetReferencePointPosition() const override;
+    virtual Primitive::Dimension GetDimension() const override;
 
     virtual void SetS(double sPos) override
     {

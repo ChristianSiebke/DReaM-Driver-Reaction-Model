@@ -166,15 +166,15 @@ WorldData::GroundTruth_ptr WorldData::GetFilteredGroundTruth(const osi3::SensorV
     relativeSensorPos.RotateYaw(orientation.yaw);
     auto absoluteSensorPos = reference.GetReferencePointPosition() + relativeSensorPos;
 
-    const double yawMax = orientation.yaw + conf.mounting_position().orientation().yaw() + conf.field_of_view_horizontal() / 2.0;
-    const double yawMin = orientation.yaw + conf.mounting_position().orientation().yaw() - conf.field_of_view_horizontal() / 2.0;
+    const double leftBoundaryAngle = CommonHelper::SetAngleToValidRange(orientation.yaw + conf.mounting_position().orientation().yaw() + conf.field_of_view_horizontal() / 2.0);
+    const double rightBoundaryAngle = CommonHelper::SetAngleToValidRange(orientation.yaw + conf.mounting_position().orientation().yaw() - conf.field_of_view_horizontal() / 2.0);
 
     const double range = conf.range();
 
-    const auto& filteredMovingObjects = GetMovingObjectsInSector(absoluteSensorPos, range, yawMin, yawMax);
-    const auto& filteredStationaryObjects = GetStationaryObjectsInSector(absoluteSensorPos, range, yawMin, yawMax);
-    const auto& filteredTrafficSigns = GetTrafficSignsInSector(absoluteSensorPos, range, yawMin, yawMax);
-    const auto& filteredRoadMarkings = GetRoadMarkingsInSector(absoluteSensorPos, range, yawMin, yawMax);
+    const auto& filteredMovingObjects = GetMovingObjectsInSector(absoluteSensorPos, range, leftBoundaryAngle, rightBoundaryAngle);
+    const auto& filteredStationaryObjects = GetStationaryObjectsInSector(absoluteSensorPos, range, leftBoundaryAngle, rightBoundaryAngle);
+    const auto& filteredTrafficSigns = GetTrafficSignsInSector(absoluteSensorPos, range, leftBoundaryAngle, rightBoundaryAngle);
+    const auto& filteredRoadMarkings = GetRoadMarkingsInSector(absoluteSensorPos, range, leftBoundaryAngle, rightBoundaryAngle);
     const auto& filteredLanes = GetLanes();
     const auto& filteredLaneBoundaries = GetLaneBoundaries();
 
@@ -223,8 +223,8 @@ WorldData::GroundTruth_ptr WorldData::GetFilteredGroundTruth(const osi3::SensorV
 
 std::vector<const Interfaces::StationaryObject*> WorldData::GetStationaryObjectsInSector(const Primitive::AbsPosition& origin,
                                                                                          double radius,
-                                                                                         double absYawMin,
-                                                                                         double absYawMax)
+                                                                                         double leftBoundaryAngle,
+                                                                                         double rightBoundaryAngle)
 {
     std::vector<Interfaces::StationaryObject*> objects;
 
@@ -233,13 +233,13 @@ std::vector<const Interfaces::StationaryObject*> WorldData::GetStationaryObjects
         objects.push_back(mapItem.second);
     }
 
-    return ApplySectorFilter(objects, origin, radius, absYawMax, absYawMin);
+    return ApplySectorFilter(objects, origin, radius, leftBoundaryAngle, rightBoundaryAngle);
 }
 
 std::vector<const Interfaces::MovingObject*> WorldData::GetMovingObjectsInSector(const Primitive::AbsPosition& origin,
                                                                                  double radius,
-                                                                                 double absYawMin,
-                                                                                 double absYawMax)
+                                                                                 double leftBoundaryAngle,
+                                                                                 double rightBoundaryAngle)
 {
     std::vector<Interfaces::MovingObject*> objects;
 
@@ -248,13 +248,13 @@ std::vector<const Interfaces::MovingObject*> WorldData::GetMovingObjectsInSector
         objects.push_back(mapItem.second);
     }
 
-    return ApplySectorFilter(objects, origin, radius, absYawMax, absYawMin);
+    return ApplySectorFilter(objects, origin, radius, leftBoundaryAngle, rightBoundaryAngle);
 }
 
 std::vector<const Interfaces::TrafficSign*> WorldData::GetTrafficSignsInSector(const Primitive::AbsPosition& origin,
                                                                                double radius,
-                                                                               double absYawMin,
-                                                                               double absYawMax)
+                                                                               double leftBoundaryAngle,
+                                                                               double rightBoundaryAngle)
 {
     std::vector<Interfaces::TrafficSign*> objects;
 
@@ -263,10 +263,10 @@ std::vector<const Interfaces::TrafficSign*> WorldData::GetTrafficSignsInSector(c
         objects.push_back(mapItem.second);
     }
 
-    return ApplySectorFilter(objects, origin, radius, absYawMax, absYawMin);
+    return ApplySectorFilter(objects, origin, radius, leftBoundaryAngle, rightBoundaryAngle);
 }
 
-std::vector<const Interfaces::RoadMarking*> WorldData::GetRoadMarkingsInSector(const Primitive::AbsPosition& origin, double radius, double absYawMin, double absYawMax)
+std::vector<const Interfaces::RoadMarking*> WorldData::GetRoadMarkingsInSector(const Primitive::AbsPosition& origin, double radius, double leftBoundaryAngle, double rightBoundaryAngle)
 {
     std::vector<Interfaces::RoadMarking*> objects;
 
@@ -275,24 +275,7 @@ std::vector<const Interfaces::RoadMarking*> WorldData::GetRoadMarkingsInSector(c
         objects.push_back(mapItem.second);
     }
 
-    return ApplySectorFilter(objects, origin, radius, absYawMax, absYawMin);
-}
-
-
-double WorldData::NormalizeAngle(double angle)
-{
-    angle = std::fmod(angle, 2.0 * M_PI);
-
-    if (angle > M_PI)
-    {
-        angle -= 2.0 * M_PI;
-    }
-    else if (angle < - M_PI)
-    {
-        angle += 2.0 * M_PI;
-    }
-
-    return angle;
+    return ApplySectorFilter(objects, origin, radius, leftBoundaryAngle, rightBoundaryAngle);
 }
 
 void WorldData::AddLane(const Id id, RoadLaneSectionInterface& odSection, const RoadLaneInterface& odLane, const std::vector<Id> laneBoundaries)

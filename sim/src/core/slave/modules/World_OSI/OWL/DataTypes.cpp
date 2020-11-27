@@ -35,6 +35,13 @@
 
 namespace OWL {
 
+template <typename OsiObject>
+Primitive::Dimension GetDimensionFromOsiObject(const OsiObject& osiObject)
+{
+    const auto& d= osiObject->base().dimension();
+    return { d.length(), d.width(), d.height() };
+}
+
 namespace Implementation {
 
 Lane::Lane(osi3::Lane* osiLane, const Interfaces::Section* section) :
@@ -661,14 +668,7 @@ void StationaryObject::CopyToGroundTruth(osi3::GroundTruth& target) const
 
 Primitive::Dimension StationaryObject::GetDimension() const
 {
-    const osi3::Dimension3d& osiDimension = osiObject->base().dimension();
-    Primitive::Dimension dimension;
-
-    dimension.length = osiDimension.length();
-    dimension.width  = osiDimension.width();
-    dimension.height = osiDimension.height();
-
-    return dimension;
+    return GetDimensionFromOsiObject(osiObject);
 }
 
 Primitive::AbsOrientation StationaryObject::GetAbsOrientation() const
@@ -802,14 +802,7 @@ Id MovingObject::GetId() const
 
 Primitive::Dimension MovingObject::GetDimension() const
 {
-    const osi3::Dimension3d& osiDimension = osiObject->base().dimension();
-    Primitive::Dimension dimension;
-
-    dimension.length = osiDimension.length();
-    dimension.width  = osiDimension.width();
-    dimension.height = osiDimension.height();
-
-    return dimension;
+    return GetDimensionFromOsiObject(osiObject);
 }
 
 double MovingObject::GetDistanceReferencePointToLeadingEdge() const
@@ -1493,6 +1486,11 @@ Primitive::AbsPosition TrafficSign::GetReferencePointPosition() const
     return position;
 }
 
+Primitive::Dimension TrafficSign::GetDimension() const
+{
+    return GetDimensionFromOsiObject(&osiSign->main_sign());
+}
+
 bool TrafficSign::IsValidForLane(OWL::Id laneId) const
 {
     auto assignedLanes = osiSign->main_sign().classification().assigned_lane_id();
@@ -1578,6 +1576,11 @@ Primitive::AbsPosition RoadMarking::GetReferencePointPosition() const
     position.z = osiPosition.z();
 
     return position;
+}
+
+Primitive::Dimension RoadMarking::GetDimension() const
+{
+    return GetDimensionFromOsiObject(osiSign);
 }
 
 bool RoadMarking::IsValidForLane(OWL::Id laneId) const

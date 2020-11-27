@@ -76,3 +76,48 @@ INSTANTIATE_TEST_SUITE_P(GetRoadWithLowestHeadingTestCase, GetRoadWithLowestHead
  GetRoadWithLowestHeading_Data{{{"RoadA",{"RoadA",-1,0,0,-0.1+M_PI}},{"RoadB",{"RoadB",-1,0,0,0.2}}},   {"RoadA", false}},
  GetRoadWithLowestHeading_Data{{{"RoadA",{"RoadA",-1,0,0,-0.2}},{"RoadB",{"RoadB",-1,0,0,M_PI+0.1}}},   {"RoadB", false}}
 ));
+
+class SetAngleToValidRange_Data
+{
+public:
+    // do not change order of items
+    // unless you also change it in INSTANTIATE_TEST_CASE_P
+    double angle;
+    double normalizedAngle;
+
+    /// \brief This stream will be shown in case the test fails
+    friend std::ostream& operator<<(std::ostream& os, const SetAngleToValidRange_Data& data)
+    {
+        return os << "angle: " << data.angle << ", normalizedAngle: " << data.normalizedAngle;
+    }
+};
+
+class SetAngleToValidRange : public ::testing::TestWithParam<SetAngleToValidRange_Data>
+{
+};
+
+TEST_P(SetAngleToValidRange, ReturnsAngleWithinPlusMinusPi)
+{
+    auto data = GetParam();
+
+    double normalizedAngle = CommonHelper::SetAngleToValidRange(data.angle);
+
+    ASSERT_THAT(normalizedAngle, DoubleNear(data.normalizedAngle, 1e-3));
+}
+
+INSTANTIATE_TEST_SUITE_P(AngleList, SetAngleToValidRange,
+  /*                             angle   expectedNormalizedAngle  */
+  testing::Values(
+    SetAngleToValidRange_Data{                  0.0,               0.0 },
+    SetAngleToValidRange_Data{               M_PI_4,            M_PI_4 },
+    SetAngleToValidRange_Data{              -M_PI_4,           -M_PI_4 },
+    SetAngleToValidRange_Data{               M_PI_2,            M_PI_2 },
+    SetAngleToValidRange_Data{              -M_PI_2,           -M_PI_2 },
+    SetAngleToValidRange_Data{         3.0 * M_PI_4,      3.0 * M_PI_4 },
+    SetAngleToValidRange_Data{        -3.0 * M_PI_4,     -3.0 * M_PI_4 },
+    SetAngleToValidRange_Data{  2.0 * M_PI + M_PI_4,            M_PI_4 },
+    SetAngleToValidRange_Data{ -2.0 * M_PI - M_PI_4,           -M_PI_4 },
+    SetAngleToValidRange_Data{  2.0 * M_PI + M_PI_2,            M_PI_2 },
+    SetAngleToValidRange_Data{ -2.0 * M_PI - M_PI_2,           -M_PI_2 }
+  )
+);

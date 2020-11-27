@@ -338,62 +338,62 @@ public:
     /*!
      * \brief Retrieves the TrafficSigns located in the given sector (geometric shape)
      *
-     * \param[in]   origin      Origin of the sector shape
-     * \param[in]   radius      Radius of the sector shape
-     * \param[in]   absYawMin   Right boundary angle of the sector shape
-     * \param[in]   absYawMax   Left boundary angle of the sector shape
+     * \param[in]   origin              Origin of the sector shape
+     * \param[in]   radius              Radius of the sector shape
+     * \param[in]   leftBoundaryAngle   Left boundary angle of the sector shape
+     * \param[in]   rightBoundaryAngle  Right boundary angle of the sector shape
      *
      * \return      Vector of TrafficSing pointers located in the given sector
      */
     std::vector<const Interfaces::TrafficSign*> GetTrafficSignsInSector(const Primitive::AbsPosition& origin,
                                                                         double radius,
-                                                                        double absYawMin,
-                                                                        double absYawMax);
+                                                                        double leftBoundaryAngle,
+                                                                        double rightBoundaryAngle);
 
     /*!
      * \brief Retrieves the RoadMarkings located in the given sector (geometric shape)
      *
-     * \param[in]   origin      Origin of the sector shape
-     * \param[in]   radius      Radius of the sector shape
-     * \param[in]   absYawMin   Right boundary angle of the sector shape
-     * \param[in]   absYawMax   Left boundary angle of the sector shape
+     * \param[in]   origin              Origin of the sector shape
+     * \param[in]   radius              Radius of the sector shape
+     * \param[in]   leftBoundaryAngle   Left boundary angle of the sector shape
+     * \param[in]   rightBoundaryAngle  Right boundary angle of the sector shape
      *
      * \return      Vector of RoadMarking pointers located in the given sector
      */
     std::vector<const Interfaces::RoadMarking*> GetRoadMarkingsInSector(const Primitive::AbsPosition& origin,
                                                                         double radius,
-                                                                        double absYawMin,
-                                                                        double absYawMax);
+                                                                        double leftBoundaryAngle,
+                                                                        double rightBoundaryAngle);
 
     /*!
      * \brief Retrieves the StationaryObjects located in the given sector (geometric shape)
      *
-     * \param[in]   origin      Origin of the sector shape
-     * \param[in]   radius      Radius of the sector shape
-     * \param[in]   absYawMin   Right boundary angle of the sector shape
-     * \param[in]   absYawMax   Left boundary angle of the sector shape
+     * \param[in]   origin              Origin of the sector shape
+     * \param[in]   radius              Radius of the sector shape
+     * \param[in]   leftBoundaryAngle   Left boundary angle of the sector shape
+     * \param[in]   rightBoundaryAngle  Right boundary angle of the sector shape
      *
      * \return      Vector of StationaryObject pointers located in the given sector
      */
     std::vector<const Interfaces::StationaryObject*> GetStationaryObjectsInSector(const Primitive::AbsPosition& origin,
                                                                                   double radius,
-                                                                                  double absYawMin,
-                                                                                  double absYawMax);
+                                                                                  double leftBoundaryAngle,
+                                                                                  double rightBoundaryAngle);
 
     /*!
      * \brief Retrieves the MovingObjects located in the given sector (geometric shape)
      *
-     * \param[in]   origin      Origin of the sector shape
-     * \param[in]   radius      Radius of the sector shape
-     * \param[in]   absYawMin   Right boundary angle of the sector shape
-     * \param[in]   absYawMax   Left boundary angle of the sector shape
+     * \param[in]   origin              Origin of the sector shape
+     * \param[in]   radius              Radius of the sector shape
+     * \param[in]   leftBoundaryAngle   Left boundary angle of the sector shape
+     * \param[in]   rightBoundaryAngle  Right boundary angle of the sector shape
      *
      * \return      Vector of MovingObject pointers located in the given sector
      */
     std::vector<const Interfaces::MovingObject*> GetMovingObjectsInSector(const Primitive::AbsPosition& origin,
                                                                           double radius,
-                                                                          double absYawMin,
-                                                                          double absYawMax);
+                                                                          double leftBoundaryAngle,
+                                                                          double rightBoundaryAngle);
 
     OWL::Id GetOwlId(int agentId) override;
     int GetAgentId(const OWL::Id owlId) const override;
@@ -473,14 +473,23 @@ public:
     {
         return trafficSignIdMapping;
     }
-    /*!
-     * \brief Normalizes angles to +/- PI
-     *
-     * \param[in]   angle   Angle to normalize [rad]
-     *
-     * \return Normalized angle in range [-PI, PI] [rad]
-     */
-    double NormalizeAngle(double angle);
+
+    static bool IsCloseToSectorBoundaries(double distanceToCenter,
+                                          double angle,
+                                          double leftBoundaryAngle,
+                                          double rightBoundaryAngle,
+                                          double maxDistanceToBoundary)
+    {
+        const double rightAngleDifference = angle - rightBoundaryAngle;
+        const double leftAngleDifference = angle - leftBoundaryAngle;
+
+        //For angles > 90° the center of the sector is the closest point
+        const double distanceToRightBoundary = std::abs(rightAngleDifference) >= M_2_PI ? distanceToCenter
+                                                                                        : distanceToCenter * std::sin(rightAngleDifference);
+        const double distanceToLeftBoundary = std::abs(leftAngleDifference) >= M_2_PI ? distanceToCenter
+                                                                                      : distanceToCenter * std::sin(leftAngleDifference);
+        return distanceToRightBoundary <= maxDistanceToBoundary || distanceToLeftBoundary <= maxDistanceToBoundary;
+    }
 
     /*!
      * \brief Applies a sector-shaped filter on a list of objects
@@ -508,10 +517,6 @@ public:
         {
             return filteredObjects;
         }
-
-        leftBoundaryAngle  = NormalizeAngle(leftBoundaryAngle);
-        rightBoundaryAngle = NormalizeAngle(rightBoundaryAngle);
-
         bool wrappedAngle = leftBoundaryAngle < rightBoundaryAngle;
         anglesDiffer = std::abs(leftBoundaryAngle - rightBoundaryAngle) > EPS;
 
@@ -520,8 +525,10 @@ public:
             const auto& absPosition = object->GetReferencePointPosition();
             const auto relativePosition = absPosition - origin;
             const auto distance = relativePosition.distance();
+            const auto dimension = object->GetDimension();
+            const auto diagonal = std::hypot(dimension.width, dimension.length);
 
-            if (distance > radius)
+            if (distance > radius + 0.5 * diagonal)
             {
                 continue;
             }
@@ -534,12 +541,18 @@ public:
                 {
                     if (direction < rightBoundaryAngle && direction > leftBoundaryAngle)
                     {
-                        continue;
+                        if (!IsCloseToSectorBoundaries(distance, direction, leftBoundaryAngle, rightBoundaryAngle, 0.5 * diagonal))
+                        {
+                            continue;
+                        }
                     }
                 }
                 else if (direction < rightBoundaryAngle || direction > leftBoundaryAngle)
                 {
-                    continue;
+                    if (!IsCloseToSectorBoundaries(distance, direction, leftBoundaryAngle, rightBoundaryAngle, 0.5 * diagonal))
+                    {
+                        continue;
+                    }
                 }
             }
 
