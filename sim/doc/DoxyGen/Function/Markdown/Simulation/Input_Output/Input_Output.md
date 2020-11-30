@@ -386,6 +386,15 @@ The wildcard can be used at most one time in each column reference.
 
 For an example, please see the slaveConfig.xml snippet above.
 
+\paragraph io_input_slaveconfig_observations_observationentities Observation_EntityRepository
+
+This observation module writes the EntityRepository into a CSV file.  It has the following parameters:
+
+| Parameter               | Description                                                             |
+|-------------------------|-------------------------------------------------------------------------|
+| FilenamePrefix          | Prefix of the output files, e.g. `XY` will result in `XY_Run_000.csv`   |
+| WritePersistentEntities | Choose:<br>- Consolidated: Persistent entities are written together with non-persistent into one file per run.  <br>- Separate: Persistent entities are written once into a file `<prefix>_Persistent.csv`<br>- Skip: Persistent entities are not written |
+
 ---
 
 \subsubsection io_input_slaveconfig_spawners Spawners

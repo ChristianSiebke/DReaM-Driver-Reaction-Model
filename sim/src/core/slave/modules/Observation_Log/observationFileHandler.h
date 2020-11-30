@@ -194,26 +194,12 @@ private:
     void RemoveCsvCyclics(QString directory);
 
     /*!
-    * \brief Removes old repositories from directory
-    *
-    * @param[in]    directory           directory to delete the repository file
-    */
-    void RemoveRepositories(QString directory);
-
-    /*!
     * \brief Writes the cyclics of one run to a csv.
     *
     * @param[in]    filename            Filename for current run
     * @param[in]    cyclics             Cyclics of the current run
     */
     void WriteCsvCyclics(QString filename, ObservationCyclics &cyclics);
-
-    /*!
-    * \brief Writes the repository of one run to a csv.
-    *
-    * @param[in]    filename            Filename for current run
-    */
-    void WriteCsvRepository(QString filename);
 
     /*!
     * \brief Write entities to XML

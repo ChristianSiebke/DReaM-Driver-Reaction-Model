@@ -164,9 +164,13 @@ void SlaveConfigImporter::ImportObservations(const QDomElement& observationsElem
     ThrowIfFalse(GetFirstChildElement(observationsElement, TAG::observation, observationElement),
                  observationsElement, "Tag " + std::string(TAG::observation) + " is missing.");
 
+    int id = 0;
+
     while (!observationElement.isNull())
     {
         ObservationInstance observationInstance;
+        observationInstance.id = id;
+        ++id;
 
         ThrowIfFalse(ParseString(observationElement, TAG::library, observationInstance.libraryName),
                      observationElement, "Tag " + std::string(TAG::library) + " is missing.");

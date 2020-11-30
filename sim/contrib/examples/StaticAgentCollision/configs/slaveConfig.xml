@@ -43,6 +43,12 @@
         <StringVector Key="LoggingGroups" Value="Trace,Visualization,RoadPosition,Sensor"/>
       </Parameters>
     </Observation>
+    <Observation>
+      <Library>Observation_EntityRepository</Library>
+      <Parameters>
+        <String Key="WritePersistentEntities" Value="Consolidated"/>
+      </Parameters>
+    </Observation>
   </Observations>
   <Spawners>
     <Spawner>
