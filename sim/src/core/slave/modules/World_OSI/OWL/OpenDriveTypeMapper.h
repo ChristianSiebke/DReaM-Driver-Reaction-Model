@@ -177,6 +177,7 @@ namespace OpenDriveTypeMapper
     {
         {"293", osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_ZEBRA_CROSSING},
         {"294", osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_STOP},
+        {"1.000.003", osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_ZEBRA_CROSSING},
     };
 
     //! Conversion map from OSI units to SI units

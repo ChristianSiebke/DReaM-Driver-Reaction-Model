@@ -220,9 +220,7 @@ public:
     virtual bool AddLink(RoadLinkType type,
                  RoadLinkElementType elementType,
                  const std::string &elementId,
-                 ContactPointType contactPoint,
-                 RoadLinkDirectionType direction,
-                 RoadLinkSideType side) = 0;
+                 ContactPointType contactPoint) = 0;
 
     //-----------------------------------------------------------------------------
     //! Adds a new lane section to a road by creating a new RoadLaneSection object

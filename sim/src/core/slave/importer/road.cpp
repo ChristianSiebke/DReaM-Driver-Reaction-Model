@@ -771,9 +771,9 @@ bool Road::AddLaneOffset(double s, double a, double b, double c, double d)
 }
 
 bool Road::AddLink(RoadLinkType type, RoadLinkElementType elementType, const std::string &elementId,
-                   ContactPointType contactPoint, RoadLinkDirectionType direction, RoadLinkSideType side)
+                   ContactPointType contactPoint)
 {
-    RoadLink *roadLink = new (std::nothrow) RoadLink(type, elementType, elementId, contactPoint, direction, side);
+    RoadLink *roadLink = new (std::nothrow) RoadLink(type, elementType, elementId, contactPoint);
     if (!roadLink)
     {
         return false;

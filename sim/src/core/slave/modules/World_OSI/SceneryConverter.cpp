@@ -444,12 +444,6 @@ bool SceneryConverter::ConnectRoadExternalWithElementTypeRoad(RoadInterface *roa
             continue;
         }
 
-        if (roadLink->GetType() == RoadLinkType::Neighbor)
-        {
-            LOG(CbkLogLevel::Warning, "RoadLinkType 'Neighbor' not supported!");
-            continue;
-        }
-
         auto otherRoad = scenery->GetRoad(roadLink->GetElementId());
         RoadLaneSectionInterface *otherSection;
 
@@ -911,7 +905,8 @@ void SceneryConverter::CreateRoadMarking(RoadSignalInterface *signal, Position p
 
 void SceneryConverter::CreateRoadMarking(RoadObjectInterface* object, Position position, const OWL::Interfaces::Lanes& lanes)
 {
-    OWL::Interfaces::RoadMarking& roadMarking = worldData.AddRoadMarking();
+    const auto id = repository.Register(openpass::utils::GetEntityInfo(*object));
+    OWL::Interfaces::RoadMarking& roadMarking = worldData.AddRoadMarking(id);
 
     roadMarking.SetS(object->GetS());
 

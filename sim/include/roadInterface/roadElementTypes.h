@@ -29,8 +29,7 @@ enum class RoadLinkType
 {
     Undefined = 0,
     Predecessor,
-    Successor,
-    Neighbor
+    Successor
 };
 
 //-----------------------------------------------------------------------------
@@ -51,26 +50,6 @@ enum class ContactPointType
     Undefined = 0,
     Start,
     End
-};
-
-//-----------------------------------------------------------------------------
-//! Orientation between roads
-//-----------------------------------------------------------------------------
-enum class RoadLinkDirectionType
-{
-    Undefined = 0,
-    Same,
-    Opposite
-};
-
-//-----------------------------------------------------------------------------
-//! Connection between roads
-//-----------------------------------------------------------------------------
-enum class RoadLinkSideType
-{
-    Undefined = 0,
-    Left,
-    Right
 };
 
 //-----------------------------------------------------------------------------
@@ -366,7 +345,7 @@ inline std::string to_string(RoadObjectType roadObjectType) noexcept
 
 struct RoadObjectSpecification // http://www.opendrive.org/docs/OpenDRIVEFormatSpecRev1.4H.pdf page 65
 {
-    RoadObjectType type;
+    RoadObjectType type{RoadObjectType::none};
     std::string name {""};
     std::string id {""};
     double s {0};

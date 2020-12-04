@@ -138,8 +138,6 @@ public:
     MOCK_CONST_METHOD0(GetElementType, RoadLinkElementType());
     MOCK_CONST_METHOD0(GetElementId, const std::string &());
     MOCK_CONST_METHOD0(GetContactPoint, ContactPointType());
-    MOCK_CONST_METHOD0(GetDirection, RoadLinkDirectionType());
-    MOCK_CONST_METHOD0(GetSide, RoadLinkSideType());
 };
 
 void Connect(const RoadInterface* incomingRoad, const RoadInterface* connectingRoad,
