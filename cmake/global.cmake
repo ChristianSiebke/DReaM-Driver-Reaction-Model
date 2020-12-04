@@ -12,6 +12,16 @@
 # Global cmake file for the openPASS build process
 #
 
+option(WITH_SIMCORE "Build OSI based scenario simulation" ON)
+option(WITH_GUI "Build GUI" OFF)
+option(WITH_TESTS "Build unit tests" ON)
+option(WITH_EXTENDED_OSI "Assume an extended version of OSI is available" OFF)
+option(WITH_PROTOBUF_ARENA "Make use of protobuf arena allocation" ON)
+option(WITH_DEBUG_POSTFIX "Use 'd' binary postfix on Windows platform" ON)
+option(INSTALL_SYSTEM_RUNTIME_DEPS "Copy detected system runtime dependencies to install directory (i.e. MinGW system libraries)" OFF)
+option(INSTALL_EXTRA_RUNTIME_DEPS "Copy detected third party runtime dependencies to install directory (i.e. required shared libraries found in specified CMAKE_PREFIX_PATH)" OFF)
+option(WITH_MINGW_BOOST_1_72_FIX "Apply fix Boost 1.72 detection in MinGW environment (https://github.com/boostorg/boost_install/issues/33)" OFF)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # NOTE: undocumented feature of cmake
@@ -60,7 +70,7 @@ add_compile_definitions(PROTOBUF_USE_DLLS)
 
 find_package(OSI REQUIRED)
 
-if(MINGW)
+if(MINGW AND WITH_MINGW_BOOST_1_72_FIX)
   # Bug in boost-install 1.72.0
   # setting boost mingw version manually
   # https://github.com/boostorg/boost_install/issues/33
@@ -74,13 +84,6 @@ find_package(Boost COMPONENTS filesystem REQUIRED)
 
 find_package(Qt5 COMPONENTS Concurrent Core Widgets Xml)
 find_package(FMILibrary)
-
-option(WITH_SIMCORE "Build OSI based scenario simulation" ON)
-option(WITH_GUI "Build GUI" OFF)
-option(WITH_TESTS "Build unit tests" ON)
-option(WITH_EXTENDED_OSI "Assume an extended version of OSI is available" OFF)
-option(WITH_PROTOBUF_ARENA "Make use of protobuf arena allocation" ON)
-option(WITH_DEBUG_POSTFIX "Use 'd' binary postfix on Windows platform" ON)
 
 if(WITH_TESTS)
   find_package(GTest)
@@ -158,5 +161,3 @@ if(MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4250")
 endif()
 
-set(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION .)
-include(InstallRequiredSystemLibraries)
