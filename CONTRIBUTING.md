@@ -9,7 +9,7 @@ Eclipse sim@openPASS provides a software platform that enables the simulation of
 
   * [sim@openpass Website](https://openpass.eclipse.org/)
   * Mailing list: Join our [developer list](https://accounts.eclipse.org/mailing-list/simopenpass-dev)
-  * Bugs? [GitLab] (https://gitlab.eclipse.org/eclipse/simopenpass/simopenpass/-/issues)
+  * Bugs? [GitLab](https://gitlab.eclipse.org/eclipse/simopenpass/simopenpass/-/issues)
 
 ## Eclipse Contributor Agreement
 
