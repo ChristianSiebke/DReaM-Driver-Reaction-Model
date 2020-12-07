@@ -640,26 +640,7 @@ void WorldData::AddCenterLinePoint(const RoadLaneSectionInterface &odSection, co
 
 WorldData::~WorldData()
 {
-    for (auto road : roads)
-    {
-        delete road.second;
-    }
-
-    roads.clear();
-
-    for (auto section : sections)
-    {
-        delete section.second;
-    }
-
-    sections.clear();
-
-    for (auto lane : lanes)
-    {
-        delete lane.second;
-    }
-
-    lanes.clear();
+    Clear();
 }
 
 const std::unordered_map<Id, Lane*>& WorldData::GetLanes() const
@@ -733,58 +714,61 @@ void WorldData::Reset()
 
 void WorldData::Clear()
 {
-    for (auto sign : trafficSigns)
+    for (auto trafficSign : trafficSigns)
     {
-        delete sign.second;
+        delete trafficSign.second;
     }
+    trafficSigns.clear();
 
     for (auto movingObject : movingObjects)
     {
         delete movingObject.second;
     }
+    movingObjects.clear();
 
     for (auto stationaryObject : stationaryObjects)
     {
         delete stationaryObject.second;
     }
+    stationaryObjects.clear();
 
     for (auto lane : lanes)
     {
         delete lane.second;
     }
+    lanes.clear();
 
     for (auto laneBoundary : laneBoundaries)
     {
         delete laneBoundary.second;
     }
+    laneBoundaries.clear();
 
     for (auto section : sections)
     {
         delete section.second;
     }
+    sections.clear();
 
     for (auto road : roads)
     {
         delete road.second;
     }
+    roads.clear();
 
     for (auto junction : junctions)
     {
         delete junction.second;
     }
-
-    trafficSigns.clear();
-    movingObjects.clear();
-    stationaryObjects.clear();
-
-    lanes.clear();
-    laneBoundaries.clear();
-    sections.clear();
-    roads.clear();
     junctions.clear();
 
-    laneIdMapping.clear();
+    for (auto roadMarking : roadMarkings)
+    {
+        delete roadMarking.second;
+    }
+    roadMarkings.clear();
 
+    laneIdMapping.clear();
     osiGroundTruth->Clear();
 }
 

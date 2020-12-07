@@ -25,6 +25,7 @@
 #include "WorldDataQuery.h"
 #include "Localization.h"
 #include "common/worldDefinitions.h"
+#include "TrafficObjectAdapter.h"
 
 namespace openpass::entity {
 class RepositoryInterface;
@@ -330,6 +331,7 @@ private:
     WorldDataQuery worldDataQuery{worldData};
     const World::Localization::Localizer& localizer;
     const CallbackInterface *callbacks;
+    std::vector<std::unique_ptr<TrafficObjectAdapter>> trafficObjects;
 };
 
 inline bool IsWithinLeftClosedInterval(double value, double start, double end)

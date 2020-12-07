@@ -167,16 +167,15 @@ void WorldImplementation::SyncGlobalData()
 bool WorldImplementation::CreateScenery(SceneryInterface* scenery)
 {
     this->scenery = scenery;
+    sceneryConverter = std::make_unique<SceneryConverter>(scenery,
+                                                          repository,
+                                                          worldData,
+                                                          localizer,
+                                                          callbacks);
 
-    SceneryConverter converter(scenery,
-                               repository,
-                               worldData,
-                               localizer,
-                               callbacks);
-
-    THROWIFFALSE(converter.ConvertRoads(), "Unable to finish conversion process.")
+    THROWIFFALSE(sceneryConverter->ConvertRoads(), "Unable to finish conversion process.")
     localizer.Init();
-    converter.ConvertObjects();
+    sceneryConverter->ConvertObjects();
     InitTrafficObjects();
 
     RoadNetworkBuilder networkBuilder(*scenery);

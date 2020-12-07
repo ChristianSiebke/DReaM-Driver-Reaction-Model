@@ -326,4 +326,5 @@ private:
 
     DataStoreWriteInterface* dataStore;
     openpass::entity::Repository repository;
+    std::unique_ptr<SceneryConverter> sceneryConverter;
 };
