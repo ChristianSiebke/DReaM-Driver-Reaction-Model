@@ -35,7 +35,7 @@ Contact the project developers via the project's "dev" list.
 
 ## How to contribute
 
-The sim@openpass source code can be found [here](https://gitlab.eclipse.org/eclipse/simopenpass/simopenpass.git).
+The sim@openpass source code can be found [here](https://gitlab.eclipse.org/eclipse/simopenpass/simopenpass).
 
 To build the project, follow the guide in "pathToRepo\sim\doc\OSI World Setup Guide.pdf".
 
@@ -46,6 +46,6 @@ The branch 'servant' contains the contributions that will be included in the nex
 1. (you) If needed, create the Issue on GitLab and assign it to yourself.
 2. (you) In GitLab, create a merge request. The related branch will be created from the branch 'servant'. 
 3. (you) Work on it.
-5. (you) Assign the issue to another committer.
+4. (you) Assign the issue to another committer.
 5. (other committer) Review the code. 
 6. (other committer) To merge new branch into 'servant' you can close the merge request via GitLab.
