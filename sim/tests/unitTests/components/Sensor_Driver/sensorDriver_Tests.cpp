@@ -86,6 +86,7 @@ TEST(SensorDriver_UnitTests, CorrectInformationInSignal)
     ON_CALL(fakeEgoAgent, GetRelativeLanes(_, _)).WillByDefault(Return(relativeLanes));
 
     ON_CALL(fakeWorld, GetRoadGraph(RouteElement{roadId, true}, _)).WillByDefault(Return(std::make_pair(roadGraph, start)));
+    ON_CALL(fakeWorld, IsDirectionalRoadExisting(roadId, true)).WillByDefault(Return(true));
     ON_CALL(fakeWorld, GetVisibilityDistance()).WillByDefault(Return(123.4));
     std::map<RoadGraphEdge, double> edgeWeights{{edge, 1.0}};
     ON_CALL(fakeWorld, GetEdgeWeights(_)).WillByDefault([&edgeWeights](const RoadGraph& graph){auto [firstEdge, edgeEnd] = edges(graph); return std::map<RoadGraphEdge, double>{{*firstEdge, 1.0}};} );

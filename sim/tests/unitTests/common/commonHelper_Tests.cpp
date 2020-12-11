@@ -9,6 +9,7 @@
 # **********************************************************************/
 
 #include "common/commonTools.h"
+#include "fakeWorld.h"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -18,6 +19,7 @@ using ::testing::Eq;
 using ::testing::Values;
 using ::testing::Return;
 using ::testing::DoubleNear;
+using ::testing::_;
 
 struct CartesianNetDistance_Data
 {
@@ -62,7 +64,9 @@ class GetRoadWithLowestHeading_Test : public ::TestWithParam<GetRoadWithLowestHe
 TEST_P(GetRoadWithLowestHeading_Test, GetRoadWithLowestHeading)
 {
     auto data = GetParam();
-    auto result = CommonHelper::GetRoadWithLowestHeading(data.roadPositions);
+    FakeWorld world;
+    ON_CALL(world, IsDirectionalRoadExisting(_,_)).WillByDefault(Return(true));
+    auto result = CommonHelper::GetRoadWithLowestHeading(data.roadPositions, world);
 
     ASSERT_THAT(result, Eq(data.expectedResult));
 }

@@ -111,6 +111,7 @@ TEST(SpawnPointScenario, Trigger_SpawnsEgoAgentAccordingToScenarioWorldPosition)
     RoadGraph roadGraph{};
     auto vertex = add_vertex(RouteElement{"Road1",true}, roadGraph);
     ON_CALL(fakeWorld, GetRoadGraph(RouteElement{"Road1",true},_)).WillByDefault(Return(std::make_pair(roadGraph, vertex)));
+    ON_CALL(fakeWorld, IsDirectionalRoadExisting("Road1", true)).WillByDefault(Return(true));
 
     // If this is called and the blueprints match, we're creating our Agent correctly
     EXPECT_CALL(fakeAgentFactory, AddAgent(MatchesAgentBlueprint(expectedAgentBlueprint)))
@@ -201,6 +202,7 @@ TEST(SpawnPointScenario, Trigger_SpawnsEgoAgentAccordingToScenarioLanePosition)
     RoadGraph roadGraph{};
     auto vertex = add_vertex(RouteElement{"Road1",true}, roadGraph);
     ON_CALL(fakeWorld, GetRoadGraph(RouteElement{"Road1",true},_)).WillByDefault(Return(std::make_pair(roadGraph, vertex)));
+    ON_CALL(fakeWorld, IsDirectionalRoadExisting("Road1", true)).WillByDefault(Return(true));
 
      // If this is called and the blueprints match, we're creating our Agent correctly
     EXPECT_CALL(fakeAgentFactory, AddAgent(MatchesAgentBlueprint(expectedAgentBlueprint)))
@@ -274,6 +276,7 @@ TEST(SpawnPointScenario, Trigger_SpawnsScenarioAgentAccordingToScenarioWorldPosi
     RoadGraph roadGraph{};
     auto vertex = add_vertex(RouteElement{"Road1",true}, roadGraph);
     ON_CALL(fakeWorld, GetRoadGraph(RouteElement{"Road1",true},_)).WillByDefault(Return(std::make_pair(roadGraph, vertex)));
+    ON_CALL(fakeWorld, IsDirectionalRoadExisting("Road1", true)).WillByDefault(Return(true));
 
     // If this is called and the blueprints match, we're creating our Agent correctly
     EXPECT_CALL(fakeAgentFactory, AddAgent(MatchesAgentBlueprint(expectedAgentBlueprint)))
@@ -365,6 +368,7 @@ TEST(SpawnPointScenario, Trigger_SpawnsScenarioAgentAccordingToScenarioLanePosit
     RoadGraph roadGraph{};
     auto vertex = add_vertex(RouteElement{"Road1",true}, roadGraph);
     ON_CALL(fakeWorld, GetRoadGraph(RouteElement{"Road1",true},_)).WillByDefault(Return(std::make_pair(roadGraph, vertex)));
+    ON_CALL(fakeWorld, IsDirectionalRoadExisting("Road1", true)).WillByDefault(Return(true));
 
     // If this is called and the blueprints match, we're creating our Agent correctly
     EXPECT_CALL(fakeAgentFactory, AddAgent(MatchesAgentBlueprint(expectedAgentBlueprint)))

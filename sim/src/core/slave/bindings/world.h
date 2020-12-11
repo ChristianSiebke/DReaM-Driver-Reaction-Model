@@ -204,7 +204,7 @@ public:
         return implementation->IsSValidOnLane(roadId, laneId, distance);
     }
 
-    bool IsDirectionalRoadExisting(const std::string &roadId, bool inOdDirection) override
+    bool IsDirectionalRoadExisting(const std::string &roadId, bool inOdDirection) const override
     {
         return implementation->IsDirectionalRoadExisting(roadId, inOdDirection);
     }

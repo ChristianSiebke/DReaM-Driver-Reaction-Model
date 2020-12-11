@@ -162,7 +162,7 @@ public:
 
     bool IsSValidOnLane(std::string roadId, int laneId, double distance) override;
 
-    bool IsDirectionalRoadExisting(const std::string& roadId, bool inOdDirection) override;
+    bool IsDirectionalRoadExisting(const std::string& roadId, bool inOdDirection) const override;
 
     bool IsLaneTypeValid(const std::string &roadId, const int laneId, const double distanceOnLane, const LaneTypes& validLaneTypes) override;
 

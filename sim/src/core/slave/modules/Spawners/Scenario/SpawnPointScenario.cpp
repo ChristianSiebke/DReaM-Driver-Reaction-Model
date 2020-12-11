@@ -305,7 +305,7 @@ Route SpawnPointScenario::GetRandomRoute(const SpawnParameter& spawnParameter)
     {
         LogError("SpawnPosition is outside world.");
     }
-    auto [roadGraph, root] = GetWorld()->GetRoadGraph(CommonHelper::GetRoadWithLowestHeading(roadPositions), MAX_DEPTH);
+    auto [roadGraph, root] = GetWorld()->GetRoadGraph(CommonHelper::GetRoadWithLowestHeading(roadPositions, *GetWorld()), MAX_DEPTH);
     std::map<RoadGraph::edge_descriptor, double> weights = GetWorld()->GetEdgeWeights(roadGraph);
     auto target = RouteCalculation::SampleRoute(roadGraph, root, weights, *dependencies
             .stochastics);

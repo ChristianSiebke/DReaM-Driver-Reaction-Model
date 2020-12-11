@@ -29,6 +29,7 @@
 
 #include "include/agentInterface.h"
 #include "include/worldObjectInterface.h"
+#include "include/worldInterface.h"
 
 #include "common/boostGeometryCommon.h"
 
@@ -214,20 +215,20 @@ static double CalculateMomentInertiaYaw(double mass, double length, double width
     return tokens;
 }
 
-static RouteElement GetRoadWithLowestHeading(const std::map<const std::string, GlobalRoadPosition>& roadPositions)
+static RouteElement GetRoadWithLowestHeading(const std::map<const std::string, GlobalRoadPosition>& roadPositions, const WorldInterface& world)
 {
     RouteElement bestFitting;
     double minHeading = std::numeric_limits<double>::max();
     for (const auto [roadId, position] : roadPositions)
     {
         const auto absHeadingInOdDirection = std::abs(position.roadPosition.hdg);
-        if (absHeadingInOdDirection < minHeading)
+        if (absHeadingInOdDirection < minHeading && world.IsDirectionalRoadExisting(roadId, true))
         {
             bestFitting = {roadId, true};
             minHeading = absHeadingInOdDirection;
         }
         const auto absHeadingAgainstOdDirection = std::abs(SetAngleToValidRange(position.roadPosition.hdg + M_PI));
-        if (absHeadingAgainstOdDirection < minHeading)
+        if (absHeadingAgainstOdDirection < minHeading && world.IsDirectionalRoadExisting(roadId, false))
         {
             bestFitting = {roadId, false};
             minHeading = absHeadingAgainstOdDirection;

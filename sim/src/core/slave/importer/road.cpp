@@ -11,6 +11,7 @@
 
 #include "road.h"
 #include "importerLoggingHelper.h"
+#include "common/commonHelper.h"
 
 extern "C"
 {
@@ -126,9 +127,14 @@ RoadLane *RoadLaneSection::AddRoadLane(int id, RoadLaneType type)
 
 Common::Vector2d RoadGeometry::GetCoordLine(double sOffset, double tOffset) const
 {
-    if (length < sOffset)
+    if (sOffset > length)
     {
-        LOG_INTERN(LogLevel::Warning) << "exceeding length of geometry";
+        if (!CommonHelper::DoubleEquality(sOffset, length))
+        {
+            LOG_INTERN(LogLevel::Warning)
+                << "cummulative s-offset exceeds length of line geometry by " << (sOffset - length) << " m. "
+                << "Setting sOffset to length.";
+        }
         sOffset = length;
     }
 
@@ -151,9 +157,15 @@ double RoadGeometry::GetDirLine(double sOffset) const
 
 Common::Vector2d RoadGeometry::GetCoordArc(double sOffset, double tOffset, double curvature) const
 {
-    if (length < sOffset)
+    if (sOffset > length)
     {
-        LOG_INTERN(LogLevel::Warning) << "exceeding length of geometry";
+        if (!CommonHelper::DoubleEquality(sOffset, length))
+        {
+            LOG_INTERN(LogLevel::Warning)
+                << "cummulative s-offset exceeds length of arc geometry by " << (sOffset - length) << " m. "
+                << "Setting sOffset to length.";
+        }
+
         sOffset = length;
     }
 

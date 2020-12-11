@@ -383,7 +383,7 @@ public:
     //!
     //! @return true if road id exists
     //-----------------------------------------------------------------------------
-    virtual bool IsDirectionalRoadExisting(const std::string &, bool inOdDirection) = 0;
+    virtual bool IsDirectionalRoadExisting(const std::string &, bool inOdDirection) const = 0;
 
     //-----------------------------------------------------------------------------
     //! Return whether a LaneType is valid based on a range of valid LaneTypes
