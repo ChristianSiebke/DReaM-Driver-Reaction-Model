@@ -55,7 +55,7 @@ set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER "generated")
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-find_package(Protobuf 2.6.1 REQUIRED)
+find_package(Protobuf REQUIRED)
 add_compile_definitions(PROTOBUF_USE_DLLS)
 
 find_package(OSI REQUIRED)
