@@ -112,6 +112,11 @@ OsmpFmuHandler::OsmpFmuHandler(fmu_check_data_t *cdata, WorldInterface *world, A
     {
         writeSensorViewConfig = writeSensorViewConfigFlag->second;
     }
+    auto writeSensorViewConfigRequestFlag = parameters->GetParametersBool().find("WriteSensorViewConfigRequestOutput");
+    if (writeSensorViewConfigRequestFlag != parameters->GetParametersBool().end())
+    {
+        writeSensorViewConfigRequest = writeSensorViewConfigRequestFlag->second;
+    }
     auto writeGroundtruthFlag = parameters->GetParametersBool().find("WriteGroundtruthOutput");
     if (writeGroundtruthFlag != parameters->GetParametersBool().end())
     {
@@ -139,7 +144,7 @@ OsmpFmuHandler::OsmpFmuHandler(fmu_check_data_t *cdata, WorldInterface *world, A
         writeVehicleCommunicationData = writeVehicleCommunicationDataFlag->second;
     }
 
-    bool writeJsonOutput = writeSensorData || writeSensorView || writeTrafficCommand || writeTrafficUpdate || writeMotionCommand || writeVehicleCommunicationData || writeGroundtruth;
+    bool writeJsonOutput = writeSensorData || writeSensorView || writeSensorViewConfig || writeSensorViewConfigRequest || writeTrafficCommand || writeTrafficUpdate || writeMotionCommand || writeVehicleCommunicationData || writeGroundtruth;
 #else
     bool writeJsonOutput = writeSensorData || writeSensorView || writeGroundtruth;
 #endif
@@ -165,7 +170,6 @@ OsmpFmuHandler::OsmpFmuHandler(fmu_check_data_t *cdata, WorldInterface *world, A
     ParseFmuParameters(parameters);
 
 }
-
 
 void OsmpFmuHandler::UpdateInput(int localLinkId, const std::shared_ptr<const SignalInterface>& data, [[maybe_unused]] int time)
 {
@@ -334,13 +338,18 @@ void OsmpFmuHandler::Init()
         void* buffer = decode_integer_to_pointer(GetValue(fmuVariables.at(sensorViewConfigRequestVariable.value()+".base.hi").first, VariableType::Int).intValue,
                                                  GetValue(fmuVariables.at(sensorViewConfigRequestVariable.value()+".base.lo").first, VariableType::Int).intValue);
         const auto size = static_cast<std::string::size_type>(GetValue(fmuVariables.at(sensorViewConfigRequestVariable.value()+".size").first, VariableType::Int).intValue);
-        serializedSensorViewConfig = {static_cast<char *>(buffer), size};
+
+        serializedSensorViewConfigRequest = {static_cast<char *>(buffer), size};
+        sensorViewConfigRequest.ParseFromString(serializedSensorViewConfigRequest);
+
+        // Apply requested config structure from FMU to sensorViewConfig in OpenPASS, which will be sent back to FMU
+        serializedSensorViewConfig = serializedSensorViewConfigRequest;
         sensorViewConfig.ParseFromString(serializedSensorViewConfig);
 
         fmi2_integer_t fmuInputValues[3];
-        fmi2_value_reference_t valueReferences[3] = {fmuVariables.at(sensorViewVariable.value()+".base.lo").first,
-                                                     fmuVariables.at(sensorViewVariable.value()+".base.hi").first,
-                                                     fmuVariables.at(sensorViewVariable.value()+".size").first};
+        fmi2_value_reference_t valueReferences[3] = {fmuVariables.at(sensorViewConfigVariable.value()+".base.lo").first,
+                                                     fmuVariables.at(sensorViewConfigVariable.value()+".base.hi").first,
+                                                     fmuVariables.at(sensorViewConfigVariable.value()+".size").first};
 
         encode_pointer_to_integer(serializedSensorViewConfig.data(),
                                   fmuInputValues[1],
@@ -351,9 +360,14 @@ void OsmpFmuHandler::Init()
                                 valueReferences,     // array of value reference
                                 3,                   // number of elements
                                 fmuInputValues);     // array of values
+
         if (writeSensorViewConfig)
         {
             WriteJson(sensorViewConfig, "SensorViewConfig.json");
+        }
+        if (writeSensorViewConfigRequest)
+        {
+            WriteJson(sensorViewConfigRequest, "SensorViewConfigRequest.json");
         }
     }
     else

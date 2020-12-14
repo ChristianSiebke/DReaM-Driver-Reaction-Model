@@ -229,6 +229,8 @@ The OsmpFmuHandler has the following additional (optional) parameters:
 | Output_&lt;var_name&gt;   | string   | var_name references a FMU variable (as defined in FMU's modelDescription.xml) from which a specific OSI message is received. Allowed values: `SensorViewConfigRequest`, `SensorData`, `TrafficUpdate`, `MotionCommand`  |
 | Parameter_&lt;name&gt;    | any      | The value of the parameter is assigned to the FMU variable &lt;name&gt;                         |
 | WriteSensorViewOutput     | bool     | If true the SensorView is written into a JSON file                                              |
+| WriteSensorViewConfigOutput     | bool     | If true the SensorViewConfig is written into a JSON file                                              |
+| WriteSensorViewConfigRequestOutput     | bool     | If true the SensorViewConfigRequest is written into a JSON file                                              |
 | WriteTrafficCommandOutput | bool     | If true the TrafficCommand is written into a JSON file                                          |
 | WriteGroundtruthOutput    | bool     | If true the Groundtruth is written into a JSON file                                             |
 | WriteSensorDataOutput     | bool     | If true the SensorData is written into a JSON file                                              |
