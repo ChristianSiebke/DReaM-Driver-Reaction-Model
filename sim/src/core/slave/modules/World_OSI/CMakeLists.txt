@@ -9,6 +9,8 @@ add_openpass_target(
     AgentAdapter.h
     AgentNetwork.h
     GeometryConverter.h
+    EntityInfo.h
+    EntityInfoPublisher.h
     EntityRepository.h
     JointsBuilder.h
     Localization.h
@@ -16,12 +18,14 @@ add_openpass_target(
     PointQuery.h
     RamerDouglasPeucker.h
     SceneryConverter.h
+    SceneryEntities.h
     TrafficObjectAdapter.h
     World.h
     WorldData.h
     WorldDataException.h
     WorldDataQuery.h
     WorldGlobal.h
+    WorldEntities.h
     WorldImplementation.h
     WorldObjectAdapter.h
     WorldToRoadCoordinateConverter.h
@@ -37,6 +41,7 @@ add_openpass_target(
     AgentAdapter.cpp
     AgentNetwork.cpp
     GeometryConverter.cpp
+    EntityInfoPublisher.cpp
     EntityRepository.cpp
     JointsBuilder.cpp
     Localization.cpp

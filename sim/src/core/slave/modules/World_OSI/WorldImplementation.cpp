@@ -15,6 +15,7 @@
 #include "WorldImplementation.h"
 #include "common/RoutePlanning/RouteCalculation.h"
 #include "EntityRepository.h"
+#include "WorldEntities.h"
 
 #include "osi3/osi_sensorview.pb.h"
 #include "osi3/osi_sensorviewconfiguration.pb.h"
@@ -185,28 +186,9 @@ bool WorldImplementation::CreateScenery(SceneryInterface* scenery)
     return true;
 }
 
-openpass::entity::EntityMetaInfo From(openpass::type::FlatParameter parameter)
-{
-    const std::string SOURCE_KEY {"source"};
-    std::string source {"Unknown"};
-
-    if(const auto value = helper::map::query(parameter, SOURCE_KEY); value)
-    {
-        if(std::holds_alternative<std::string>(*value))
-        {
-            source = std::get<std::string>(*value);
-            parameter.erase(SOURCE_KEY);
-        }
-    }
-
-    openpass::entity::EntityMetaInfo entityMetaInfo(source);
-    entityMetaInfo.parameter = std::move(parameter);
-    return entityMetaInfo;
-}
-
 std::unique_ptr<AgentInterface> WorldImplementation::CreateAgentAdapter(openpass::type::FlatParameter parameter)
 {
-    const auto id = repository.Register(openpass::entity::EntityType::MovingObject, From(parameter));
+    const auto id = repository.Register(openpass::entity::EntityType::MovingObject, openpass::utils::GetEntityInfo(parameter));
     return std::make_unique<AgentAdapter>(id, this, callbacks, &worldData, localizer);
 }
 

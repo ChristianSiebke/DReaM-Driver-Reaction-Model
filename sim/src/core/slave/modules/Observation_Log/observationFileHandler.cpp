@@ -172,9 +172,6 @@ void ObservationFileHandler::AddEvents()
 
     for (const AcyclicRow& event : *events)
     {
-        // necessary, as events and entities are currently both handled by acyclics and we don't have filters yet
-        if (event.key == "Entities") continue;
-
         xmlFileStream->writeStartElement(outputTags.EVENT);
         xmlFileStream->writeAttribute(outputAttributes.TIME, QString::number(event.timestamp));
         xmlFileStream->writeAttribute(outputAttributes.SOURCE, QString::fromStdString(event.key));

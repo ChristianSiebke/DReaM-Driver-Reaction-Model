@@ -44,8 +44,8 @@ class FakeRepository : public openpass::entity::RepositoryInterface
 {
 public:
     MOCK_METHOD0(Reset, void());
-    MOCK_METHOD1(Register, openpass::type::EntityId (openpass::entity::EntityMetaInfo metaInfo));
-    MOCK_METHOD2(Register, openpass::type::EntityId (openpass::entity::EntityType entityType, openpass::entity::EntityMetaInfo metaInfo));
+    MOCK_METHOD1(Register, openpass::type::EntityId (openpass::type::EntityInfo));
+    MOCK_METHOD2(Register, openpass::type::EntityId (openpass::entity::EntityType entityType, openpass::type::EntityInfo));
 };
 
 std::tuple<const OWL::Primitive::LaneGeometryJoint*, const OWL::Primitive::LaneGeometryJoint*> CreateSectionPartJointsRect(double length)

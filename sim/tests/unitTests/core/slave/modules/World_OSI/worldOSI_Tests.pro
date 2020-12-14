@@ -95,10 +95,14 @@ INC_LOCALIZATION = \
 
 # entity repository
 SRC_ENTITYREPO = \
-            $$UNIT_UNDER_TEST/entityRepository.cpp
+            $$UNIT_UNDER_TEST/EntityRepository.cpp \
+            $$UNIT_UNDER_TEST/EntityInfoPublisher.cpp
 
 INC_ENTITYREPO = \
-            $$UNIT_UNDER_TEST/entityRepository.h
+            $$UNIT_UNDER_TEST/EntityRepository.h \
+            $$UNIT_UNDER_TEST/EntityInfoPublisher.h \
+            $$UNIT_UNDER_TEST/WorldEntities.h \
+            $$UNIT_UNDER_TEST/SceneryEntities.h
 
 INCLUDEPATH += \
             . \

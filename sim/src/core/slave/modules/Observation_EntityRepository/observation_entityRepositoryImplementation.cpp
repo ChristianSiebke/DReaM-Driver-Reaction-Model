@@ -12,9 +12,11 @@
 /** \file  observation_LogImplementation */
 //-----------------------------------------------------------------------------
 
-#include <unordered_map>
+#include "observation_entityRepositoryImplementation.h"
+
 #include <variant>
 #include <vector>
+
 #include <QDir>
 #include <QDirIterator>
 
@@ -22,18 +24,13 @@
 #include "common/openPassUtils.h"
 #include "include/parameterInterface.h"
 
-#include "observation_entityRepositoryImplementation.h"
-
-constexpr openpass::type::EntityId firstPersistentId = 100000;
-const QString DELIMITER {";"};
-
 ObservationEntityRepositoryImplementation::ObservationEntityRepositoryImplementation(
-        SimulationSlave::EventNetworkInterface* eventNetwork,
-        StochasticsInterface* stochastics,
-        WorldInterface* world,
-        const ParameterInterface* parameters,
-        const CallbackInterface* callbacks,
-        DataStoreReadInterface* dataStore) :
+    SimulationSlave::EventNetworkInterface *eventNetwork,
+    StochasticsInterface *stochastics,
+    WorldInterface *world,
+    const ParameterInterface *parameters,
+    const CallbackInterface *callbacks,
+    DataStoreReadInterface *dataStore) :
     ObservationInterface(stochastics,
                          world,
                          parameters,
@@ -43,7 +40,7 @@ ObservationEntityRepositoryImplementation::ObservationEntityRepositoryImplementa
 {
     directory = QString::fromStdString(parameters->GetRuntimeInformation().directories.output);
 
-    const auto& parametersString = parameters->GetParametersString();
+    const auto &parametersString = parameters->GetParametersString();
     const auto filenamePrefixParameter = parametersString.find("FilenamePrefix");
     if (filenamePrefixParameter != parametersString.cend())
     {
@@ -92,9 +89,17 @@ void ObservationEntityRepositoryImplementation::SlavePreRunHook()
 {
 }
 
-void ObservationEntityRepositoryImplementation::SlavePostRunHook(const RunResultInterface& runResult)
+void ObservationEntityRepositoryImplementation::SlavePostRunHook(const RunResultInterface &runResult)
 {
-    using namespace std::string_literals;
+    LOGDEBUG("Getting non-persistent entities");
+    const auto non_persistent = GetEntities(NON_PERSISTENT_ENTITIES);
+
+    if (writePersitent && runNumber == 0)
+    {
+        LOGDEBUG("Getting persistent entities");
+        persistentEntities = GetEntities(PERSISTENT_ENTITIES);
+    }
+
     QString runPrefix = "";
     if (runNumber < 10)
     {
@@ -116,15 +121,11 @@ void ObservationEntityRepositoryImplementation::SlavePostRunHook(const RunResult
 
     QTextStream stream(&csvFile);
 
-    const std::vector<std::string> columnHeaders {"time"s, "id"s, "source"s, "version"s, "secondary id", "type"s, "subtype"s, "name"};
-    stream << QString::fromStdString(openpass::utils::vector::to_string(columnHeaders, DELIMITER.toStdString())) << '\n';
+    const auto header = QString::fromStdString(openpass::utils::vector::to_string(CSV_HEADERS, CSV_DELIMITER.toStdString()));
 
-    const auto entities = dataStore->GetAcyclic(std::nullopt, std::nullopt, "Entities");
-    AcyclicRowRefs agents;
-    std::copy_if(entities->begin(), entities->end(), std::back_inserter(agents),
-                 [&](const AcyclicRow& row){return row.entityId < firstPersistentId;});
-    LOGDEBUG("Writing agents");
-    WriteEntities(agents, stream);
+    LOGDEBUG("Writing non-persistent entities");
+    stream << header << CSV_DELIMITER << '\n';
+    WriteEntities(non_persistent, stream);
 
     if (writePersitent)
     {
@@ -132,6 +133,7 @@ void ObservationEntityRepositoryImplementation::SlavePostRunHook(const RunResult
         {
             if (runNumber == 0)
             {
+                LOGDEBUG("Writing persistent entities (once only)");
                 QString filename = filenamePrefix + "_Persistent.csv";
                 QString path = directory + QDir::separator() + filename;
                 QFile persistentFile = {path};
@@ -141,12 +143,7 @@ void ObservationEntityRepositoryImplementation::SlavePostRunHook(const RunResult
                 }
                 QTextStream persistentStream(&persistentFile);
 
-                persistentStream << QString::fromStdString(openpass::utils::vector::to_string(columnHeaders, DELIMITER.toStdString())) << '\n';
-
-                AcyclicRowRefs persistentEntities;
-                std::copy_if(entities->begin(), entities->end(), std::back_inserter(persistentEntities),
-                             [&](const AcyclicRow& row){return row.entityId >= firstPersistentId;});
-                LOGDEBUG("Writing persistent entities into seperate file");
+                persistentStream << header << CSV_DELIMITER << '\n';
                 WriteEntities(persistentEntities, persistentStream);
                 persistentFile.flush();
                 persistentFile.close();
@@ -154,9 +151,6 @@ void ObservationEntityRepositoryImplementation::SlavePostRunHook(const RunResult
         }
         else
         {
-            AcyclicRowRefs persistentEntities;
-            std::copy_if(entities->begin(), entities->end(), std::back_inserter(persistentEntities),
-                         [&](const AcyclicRow& row){return row.entityId >= firstPersistentId;});
             LOGDEBUG("Writing persistent entities");
             WriteEntities(persistentEntities, stream);
         }
@@ -172,41 +166,97 @@ void ObservationEntityRepositoryImplementation::SlavePostHook()
 {
 }
 
-void ObservationEntityRepositoryImplementation::WriteEntities(AcyclicRowRefs& entities, QTextStream& stream)
+std::string ObservationEntityRepositoryImplementation::GetEntitySource(const std::string &source_key)
 {
-    using namespace std::string_literals;
-
-    for (const AcyclicRow& entity : entities)
+    try
     {
-        std::string debugMessage{"Writing entity " + std::to_string(entity.entityId) + " with the following parameters: "};
-        for (const auto& [key, value] : entity.data.parameter)
+        return std::get<std::string>(dataStore->GetStatic(source_key).at(0));
+    }
+    catch (const std::exception &e)
+    {
+        LOGERROR("While parsing datastore key " + source_key + ": " + e.what());
+        return "<error>";
+    }
+}
+
+Metainfo ObservationEntityRepositoryImplementation::GetEntityMetainfo(const std::string &metainfo_key)
+{
+    Metainfo metainfo;
+    try
+    {
+        const auto metainfoKeys = dataStore->GetKeys("Statics/" + metainfo_key);
+        for (const auto &subkey : metainfoKeys)
         {
-            debugMessage += key + ",";
-        }
-        LOGDEBUG(debugMessage);
-        stream << QString::number(entity.timestamp.value) << DELIMITER
-               << QString::number(entity.entityId.value) << DELIMITER
-               << QString::fromStdString(entity.data.name) << DELIMITER;
-
-        const std::vector<std::string> metaInfo {"version"s, "id", "type"s, "subtype"s, "name"s};
-        for(const auto& entry : metaInfo)
-        {
-            // No structured binding on purpose:
-            // see https://stackoverflow.com/questions/46114214/lambda-implicit-capture-fails-with-variable-declared-from-structured-binding
-            for (const auto &p : entity.data.parameter)
-            {
-                auto parameterWriter = [&](const std::string &value) {
-
-                    if (p.first == entry)
-                    {
-                        stream << QString::fromStdString(value);
-                    }
-                };
-
-                std::visit(openpass::utils::FlatParameter::to_string(parameterWriter), p.second);
-            }
-
-            stream << (entry != metaInfo.back() ? DELIMITER : QString("\n"));
+            auto value = dataStore->GetStatic(metainfo_key + "/" + subkey);
+            metainfo.emplace(subkey, to_string(value));
         }
     }
+    catch (const std::exception &e)
+    {
+        LOGERROR("While parsing datastore key " + metainfo_key + ": " + e.what());
+    }
+    return metainfo;
+}
+
+std::vector<CsvRow> ObservationEntityRepositoryImplementation::GetEntities(const std::string &entityBaseKey)
+{
+    const auto entityIdStrings = dataStore->GetKeys("Statics/" + entityBaseKey);
+
+    // entries in datastore are not sorted
+    std::vector<uint64_t> entityIds;
+    entityIds.reserve(entityIdStrings.size());
+    std::transform(entityIdStrings.cbegin(), entityIdStrings.cend(),
+                   std::back_inserter(entityIds),
+                   [](const std::string &s) { return stoi(s); });
+    std::sort(entityIds.begin(), entityIds.end());
+
+    std::vector<CsvRow> csvRows;
+
+    for (const auto &entityId : entityIds)
+    {
+        const auto entityKey = entityBaseKey + "/" + std::to_string(entityId);
+        csvRows.emplace_back(
+            entityId,
+            GetEntitySource(entityKey + "/Source"),
+            GetEntityMetainfo(entityKey + "/Metainfo"));
+    }
+
+    return csvRows;
+}
+
+void ObservationEntityRepositoryImplementation::WriteEntities(const std::vector<CsvRow> &entities, QTextStream &stream)
+{
+    for (const auto &row : entities)
+    {
+        stream << QString::number(row.id) << CSV_DELIMITER
+               << QString::fromStdString(row.source) << CSV_DELIMITER;
+
+        for (const auto &columnMapping : CSV_METAINFO)
+        {
+            for (const auto &column : columnMapping)
+            {
+                if (const auto &iter = row.metainfo.find(column); iter != row.metainfo.cend())
+                {
+                    stream << QString::fromStdString(iter->second) << CSV_DELIMITER;
+                }
+            }
+        }
+        stream << '\n';
+    }
+}
+
+const std::string ObservationEntityRepositoryImplementation::to_string(const openpass::datastore::Values &values)
+{
+    if (values.empty())
+    {
+        LOGERROR("Retrieved value from datastore contains no element");
+        return "<error>";
+    }
+
+    if (values.size() > 1)
+    {
+        LOGWARN("Multiple values per datastore request currently not supported");
+    }
+
+    return std::visit(openpass::utils::FlatParameter::to_string(), values.front());
 }

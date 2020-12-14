@@ -10,43 +10,28 @@
 
 #pragma once
 
-#include <algorithm>
-#include <exception>
 #include <map>
+#include <stdexcept>
 
-#include "common/logEntryBase.h"
+#include "EntityInfoPublisher.h"
 #include "common/openPassTypes.h"
-#include "include/dataStoreInterface.h"
-#include "include/roadInterface/roadElementTypes.h"
-#include "include/roadInterface/roadObjectInterface.h"
 
 namespace openpass::entity {
 
-class EntityMetaInfo : public openpass::publisher::LogEntryBase
-{
-public:
-    EntityMetaInfo(std::string name) :
-        LogEntryBase(std::move(name))
-    {
-    }
-
-    operator Acyclic() const noexcept override
-    {
-        return Acyclic(name, triggeringEntities, {}, parameter);
-    }
-
-    openpass::datastore::Parameter parameter;
-};
-
 using EntityGroupId = uint64_t;
 
+/**
+ * @brief Supported entity types
+ * 
+ * Moving objects are considered to be available only for one run
+ * Stationary objects and others will marked as persistent
+ */
 enum class EntityType
 {
     MovingObject,
     StationaryObject,
     Others
 };
-
 
 /// @brief Implementing classes of this interface shall handle unique IDs for various types of entities
 class RepositoryInterface
@@ -58,36 +43,37 @@ public:
     virtual void Reset() = 0;
 
     /// @brief Registers a new entity without entity type (assigned to "others")
-    /// @param metaInfo Additional info necessary e.g. for creation, or reporting
+    /// @param entityInfo Additional info necessary e.g. for creation, or reporting
     /// @returns unique EntityId
-    [[nodiscard]] virtual type::EntityId Register(EntityMetaInfo metaInfo) = 0;
+    [[nodiscard]] virtual type::EntityId Register(openpass::type::EntityInfo entityInfo) = 0;
 
     /// @brief Registers a new entity for given entity type
     /// @note  Throws if entity type is unknown
     ///
     /// @param entityType   @see EntityType
-    /// @param metaInfo
+    /// @param entityInfo
     /// @return EntityId
-    [[nodiscard]] virtual type::EntityId Register(EntityType entityType, EntityMetaInfo metaInfo) = 0;
+    [[nodiscard]] virtual type::EntityId Register(EntityType entityType, openpass::type::EntityInfo entityInfo) = 0;
 };
 
-/// @brief Handles unique IDs and reports creation to the datastore
+/// @brief Handles unique IDs and reports creation to the entityInfoPublisher
 class Repository final : public RepositoryInterface
 {
     static constexpr size_t MAX_ENTITIES_PER_GROUP{100000};
-    static constexpr char DATASTORE_TOPIC[] = {"Entities"};
 
     /// @brief Defines an index group for entities, such as "moving objects from 0 to 10000"
     class EntityGroup
     {
     public:
         /// @brief Create a group
-        /// @param capacity   maximum number of entities within the group
-        /// @param offset     initial index
-        constexpr EntityGroup(size_t capacity, size_t offset) noexcept :
+        /// @param capacity    maximum number of entities within the group
+        /// @param offset      initial index
+        /// @param persistent true if group shall not be affected by a reset (e.g. lanes)
+        constexpr EntityGroup(size_t capacity, size_t offset, bool persistent) noexcept :
             offset{offset},
             end{offset + capacity},
-            nextId{offset}
+            nextId{offset},
+            persistent{persistent}
         {
         }
 
@@ -103,58 +89,47 @@ class Repository final : public RepositoryInterface
             return nextId++;
         }
 
+        /// @brief Get persistence of the current group
+        /// @returns True if group is unaffected of resets
+        [[nodiscard]] constexpr bool GetPersistence() noexcept
+        {
+            return persistent;
+        }
+
         /// @brief Resets the index to the original offset
+        /// @note  If group is persistent, the index remains unchanged
         void Reset() noexcept
         {
-            nextId = offset;
+            if (!persistent)
+            {
+                nextId = offset;
+            }
         }
 
     private:
         size_t offset;
         size_t end;
         size_t nextId;
+        bool persistent;
     };
-
-    /// @brief Registers an index group for the given entity type
-    void RegisterGroup(EntityType entityType)
-    {
-        _repository.emplace(entityType, EntityGroup(MAX_ENTITIES_PER_GROUP,
-                                                    MAX_ENTITIES_PER_GROUP * _repository.size()));
-    }
-
-    DataStoreWriteInterface *const _dataStore;
-    std::map<EntityType, EntityGroup> _repository;
 
 public:
     /// @brief Create a new repository
-    /// @param datastore Reference to datastore
-    Repository(DataStoreWriteInterface *const dataStore) :
-        _dataStore(dataStore)
-    {
-        RegisterGroup(EntityType::MovingObject);
-        RegisterGroup(EntityType::StationaryObject);
-        RegisterGroup(EntityType::Others);
-    }
+    /// @param datastore Reference to a DataStoreWriteInterface
+    Repository(DataStoreWriteInterface *const datastore);
 
-    ~Repository() override = default;
+    ~Repository() override;
 
-    [[nodiscard]] type::EntityId Register(EntityMetaInfo metaInfo) override
-    {
-        return Register(EntityType::Others, std::move(metaInfo));
-    }
+    [[nodiscard]] type::EntityId Register(openpass::type::EntityInfo entityInfo) override;
+    [[nodiscard]] type::EntityId Register(EntityType entityType, openpass::type::EntityInfo entityInfo) override;
+    void Reset() override;
 
-    [[nodiscard]] type::EntityId Register(EntityType entityType, EntityMetaInfo metaInfo) override
-    {
-        const auto entityId = type::EntityId(_repository.at(entityType).GetNextIndex());
-        _dataStore->PutAcyclic(0, entityId, DATASTORE_TOPIC, metaInfo);
-        return entityId;
-    }
+private:
+    /// @brief Registers an index group for the given entity type
+    void RegisterGroup(EntityType entityType, bool persistence);
 
-    void Reset() override
-    {
-        std::for_each(_repository.begin(), _repository.end(),
-            [](auto& repoEntries){ repoEntries.second.Reset(); });
-    }
+    openpass::publisher::EntityInfoPublisher _entityInfoPublisher;
+    std::map<EntityType, EntityGroup> _repository;
 };
 
 } // namespace openpass::entity

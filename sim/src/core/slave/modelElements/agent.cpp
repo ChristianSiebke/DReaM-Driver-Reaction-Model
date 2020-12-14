@@ -36,11 +36,8 @@ Agent::Agent(WorldInterface *world, const AgentBlueprintInterface& agentBlueprin
 {
     using namespace std::string_literals;
     auto agentAdapter = world->CreateAgentAdapter({
-        {"source"s, "OpenScenario"s},
-        {"version"s, "1.0"s},
         {"type"s, openpass::utils::to_string(agentBlueprint.GetAgentCategory())},
         {"name"s, agentBlueprint.GetObjectName()}});
-
 
     id = agentAdapter->GetId();
 
