@@ -136,7 +136,7 @@ struct ParametrizedVehicleModelParameters
                     GetAttribute(axleRatio, assignedParameters),
                     GetAttribute(decelerationFromPowertrainDrag, assignedParameters),
                     GetAttribute(steeringRatio, assignedParameters),
-                    GetAttribute(frontAxle.maxSteering, assignedParameters) * GetAttribute(steeringRatio, assignedParameters) * 180.0 / M_PI,
+                    GetAttribute(frontAxle.maxSteering, assignedParameters) * GetAttribute(steeringRatio, assignedParameters),
                     std::sin(GetAttribute(frontAxle.maxSteering, assignedParameters)) / wheelbase,
                     rearAxle.wheelDiameter.defaultValue / 2.0,
                     GetAttribute(frictionCoeff, assignedParameters)

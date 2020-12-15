@@ -30,8 +30,8 @@ using Parameters = std::map<std::string, ParameterValue>;
 template <typename T>
 struct ParameterizedAttribute
 {
-    std::string name; //!Name of the parameter in OpenSCENARIO
-    T defaultValue; //!Value defined in the catalog (may later be overwriten in the CatalogReference)
+    std::string name; //!< Name of the parameter in OpenSCENARIO
+    T defaultValue;   //!< Value defined in the catalog (may be overwritten in the CatalogReference later)
 
     ParameterizedAttribute() = default;
 

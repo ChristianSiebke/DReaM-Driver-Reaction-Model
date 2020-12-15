@@ -280,30 +280,6 @@ public:
         return (netDistance <= 0.0) ? 0.0 : (vRear <= 1) ? netDistance : netDistance / vRear;
     }
 
-
-    //-----------------------------------------------------------------------------
-    //! @brief Limits a value between a lower and an upper limit
-    //!
-    //! Returns
-    //! low | value < low
-    //! value  | low <= value < high
-    //! high | value >= high
-    //!
-    //! @param [in]   low       lower limit
-    //! @param [in]   value     the value to be bounded
-    //! @param [in]   high      higher limit
-    //!
-    //! @return bounded value
-    //-----------------------------------------------------------------------------
-    template <typename T>
-    static T ValueInBounds(
-        const T &low,
-        const T &value,
-        const T &high)
-    {
-        return (value < low) ? low : ((value < high) ? value : high);
-    }
-
     //-----------------------------------------------------------------------------
     //! @brief Calculates if two agents will collide during braking
     //!

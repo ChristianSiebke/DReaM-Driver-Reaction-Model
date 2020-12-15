@@ -174,7 +174,7 @@ The attributes have the following meaning:
 |WorldPosition          |y		    |y coordinate of the reference point			                                            |
 |WorldPosition          |h		    |heading			                                                                        |
 |Orientation            |type		|has to be "relative"																		|
-|Orientation            |h			|heading angle in radiant relative to the lane												|
+|Orientation            |h			|heading angle in radian relative to the lane												|
 |SpeedActionDynamics    |rate		|acceleration																			    |
 |SpeedActionDynamics    |dynamicsShape|"linear" for constant acceleration, "step" for immediate transition				      	|
 |SpeedActionDynamics    |dynamicsDimension|has to be "rate"                                                         	      	|

@@ -353,7 +353,7 @@ struct VehicleModelParameters
 
     // The ratio of the steering gear
     double steeringRatio = -999.0;
-    // The maximum amplitude of the steering wheel angle in degree
+    // The maximum amplitude of the steering wheel angle in radian
     double maximumSteeringWheelAngleAmplitude = -999.0;
     // The maximum curavture the vehicle is able to drive in 1/m
     double maxCurvature = -999.0;
