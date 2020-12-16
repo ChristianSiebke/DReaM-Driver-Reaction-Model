@@ -350,8 +350,8 @@ TEST(DynamicAgentTypeGenerator, SetVehicleModelParameters)
     ON_CALL(profiles, GetVehicleProfiles()).WillByDefault(ReturnRef(vehicleProfiles));
 
     VehicleModelParameters vehicleModelParameters;
-    vehicleModelParameters.length = 5.0;
-    vehicleModelParameters.width = 2.0;
+    vehicleModelParameters.boundingBoxDimensions.length = 5.0;
+    vehicleModelParameters.boundingBoxDimensions.width = 2.0;
     ON_CALL(vehicleModels, GetVehicleModel("SomeVehicleModel", _)).WillByDefault(Return(vehicleModelParameters));
     openScenario::Parameters assignedParameters;
 
@@ -360,8 +360,8 @@ TEST(DynamicAgentTypeGenerator, SetVehicleModelParameters)
             .SetVehicleModelParameters(assignedParameters);
 
     ASSERT_THAT(agentBuildInformation.vehicleModelName, Eq("SomeVehicleModel"));
-    ASSERT_THAT(agentBuildInformation.vehicleModelParameters.length, Eq(5.0));
-    ASSERT_THAT(agentBuildInformation.vehicleModelParameters.width, Eq(2.0));
+    ASSERT_THAT(agentBuildInformation.vehicleModelParameters.boundingBoxDimensions.length, Eq(5.0));
+    ASSERT_THAT(agentBuildInformation.vehicleModelParameters.boundingBoxDimensions.width, Eq(2.0));
 }
 
 TEST(DynamicParametersSampler, SampleSensorLatencies)

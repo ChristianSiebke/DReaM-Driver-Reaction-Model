@@ -971,9 +971,9 @@ TEST(SceneryImporter_IntegrationTests, MultipleRoadsWithIntersectingJunctions_Ju
 {
     VehicleModelParameters vehicleParameter;
     vehicleParameter.vehicleType = AgentVehicleType::Car;
-    vehicleParameter.width = width;
-    vehicleParameter.length = length;
-    vehicleParameter.distanceReferencePointToLeadingEdge = length / 2.0;
+    vehicleParameter.boundingBoxDimensions.width = width;
+    vehicleParameter.boundingBoxDimensions.length = length;
+    vehicleParameter.boundingBoxCenter.x = 0.0;
 
     SpawnParameter spawnParameter;
     spawnParameter.positionX = x;

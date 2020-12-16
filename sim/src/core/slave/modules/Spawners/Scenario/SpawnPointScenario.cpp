@@ -84,9 +84,9 @@ bool SpawnPointScenario::ValidateOverlappingAgents(const STCoordinates &stCoordi
     if (GetWorld()->IntersectsWithAgent(position.xPos,
                                         position.yPos,
                                         position.yawAngle,
-                                        vehicleModelParameters.length,
-                                        vehicleModelParameters.width,
-                                        vehicleModelParameters.distanceReferencePointToLeadingEdge))
+                                        vehicleModelParameters.boundingBoxDimensions.length,
+                                        vehicleModelParameters.boundingBoxDimensions.width,
+                                        vehicleModelParameters.boundingBoxDimensions.length * 0.5 + vehicleModelParameters.boundingBoxCenter.x))
     {
         return false;
     }
@@ -180,7 +180,7 @@ STCoordinates SpawnPointScenario::GetSTCoordinates(const openScenario::LanePosit
                                                              vehicleModelParameters)
                     && ValidateSTCoordinatesOnLane(stCoordinates,
                                                              lanePosition,
-                                                             vehicleModelParameters.width))
+                                                             vehicleModelParameters.boundingBoxDimensions.width))
             {
                 return stCoordinates;
             }

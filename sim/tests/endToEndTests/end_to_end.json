@@ -26,7 +26,6 @@
                 "OSCAction_DoubleSinusoidalLaneChangeRight_Absolute",
                 "OSCAction_DoubleSinusoidalLaneChangeLeft_Relative",
                 "OSCAction_DoubleSinusoidalLaneChangeRight_Relative",
-                "Pedestrian_AFDM",
                 "Pedestrian_Trajectory",
                 "Sensor_Latency",
                 "StaticAgentProfiles",

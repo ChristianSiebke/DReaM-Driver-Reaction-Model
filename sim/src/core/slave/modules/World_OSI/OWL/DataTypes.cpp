@@ -873,9 +873,9 @@ void MovingObject::SetHeight(const double newHeight)
     osiDimension->set_height(newHeight);
 }
 
-void MovingObject::SetDistanceReferencPointToLeadingEdge(const double distance)
+void MovingObject::SetBoundingBoxCenterToRear(const double distance)
 {
-    osiObject->mutable_vehicle_attributes()->mutable_bbcenter_to_rear()->set_x(osiObject->base().dimension().length() * 0.5 - distance);
+    osiObject->mutable_vehicle_attributes()->mutable_bbcenter_to_rear()->set_x(distance);
 }
 
 Primitive::AbsPosition MovingObject::GetReferencePointPosition() const

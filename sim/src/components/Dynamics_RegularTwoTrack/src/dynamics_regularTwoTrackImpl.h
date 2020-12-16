@@ -213,6 +213,12 @@ private:
     /**
      * @} */
 
+    //! Returns the wheelbase from the VehicleModelParameter
+    double GetWheelbase() const;
+
+    //! Returns the weight from the VehicleModelParameter
+    double GetWeight() const;
+
     //! Update data on agent's actual position, velocity and acceleration
     void ReadPreviousState();
 

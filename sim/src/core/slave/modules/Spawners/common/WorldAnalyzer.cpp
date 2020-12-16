@@ -260,14 +260,15 @@ bool WorldAnalyzer::ValidMinimumSpawningDistanceToObjectInFront(const LaneId lan
                                                                 const Route &route,
                                                                 const VehicleModelParameters& vehicleModelParameters) const
 {
-    const double rearLength = vehicleModelParameters.length - vehicleModelParameters.distanceReferencePointToFrontAxle;
+    const double distanceReferencePointToFrontAxle = vehicleModelParameters.boundingBoxDimensions.length * 0.5 + vehicleModelParameters.boundingBoxCenter.x;
+    const double rearLength = vehicleModelParameters.boundingBoxDimensions.length * 0.5 - vehicleModelParameters.boundingBoxCenter.x;
 
     const auto agentsInRangeResult = world->GetAgentsInRange(route.roadGraph,
                                                              route.root,
                                                              laneId,
                                                              sPosition,
                                                              rearLength,
-                                                             vehicleModelParameters.distanceReferencePointToFrontAxle + MINIMUM_SEPARATION_BUFFER);
+                                                             distanceReferencePointToFrontAxle + MINIMUM_SEPARATION_BUFFER);
 
     if(!agentsInRangeResult.at(route.target).empty())
     {
@@ -297,7 +298,7 @@ bool WorldAnalyzer::AreSpawningCoordinatesValid(const RoadId& roadId,
         return false;
     }
 
-    if (!IsOffsetValidForLane(roadId, laneId, sPosition, offset, vehicleModelParameters.width))
+    if (!IsOffsetValidForLane(roadId, laneId, sPosition, offset, vehicleModelParameters.boundingBoxDimensions.width))
     {
         loggingCallback("Offset is not valid for vehicle on lane: " + std::to_string(laneId) + ". Invalid offset: " + std::to_string(
                      offset));
@@ -415,12 +416,13 @@ bool WorldAnalyzer::NewAgentIntersectsWithExistingAgent(const RoadId& roadId,
 {
     Position pos = world->LaneCoord2WorldCoord(sPosition, offset, roadId, laneId);
 
+    const double distanceReferencePointToLeadingEdge = vehicleModelParameters.boundingBoxDimensions.length * 0.5 + vehicleModelParameters.boundingBoxCenter.x;
     return world->IntersectsWithAgent(pos.xPos,
                                       pos.yPos,
                                       pos.yawAngle,
-                                      vehicleModelParameters.length,
-                                      vehicleModelParameters.width,
-                                      vehicleModelParameters.distanceReferencePointToLeadingEdge);
+                                      vehicleModelParameters.boundingBoxDimensions.length,
+                                      vehicleModelParameters.boundingBoxDimensions.width,
+                                      distanceReferencePointToLeadingEdge);
 }
 
 bool WorldAnalyzer::SpawnWillCauseCrash(const RoadId& roadId,

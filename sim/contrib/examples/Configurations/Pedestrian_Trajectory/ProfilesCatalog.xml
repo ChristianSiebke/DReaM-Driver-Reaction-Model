@@ -35,13 +35,12 @@
         <VehicleProfile Name="Bus MAN Lions Coach c 2007" Probability="1.0"/>
       </VehicleProfiles>
     </AgentProfile>
-    <AgentProfile Name="Pedestrian" Type="Dynamic">
-      <DriverProfiles>
-        <DriverProfile Name="Pedestrian" Probability="1.0"/>
-      </DriverProfiles>
-      <VehicleProfiles>
-        <VehicleProfile Name="Pedestrian" Probability="1.0"/>
-      </VehicleProfiles>
+    <AgentProfile Name="Pedestrian" Type="Static">
+      <System>
+        <File>systemConfigPedestrian.xml</File>
+        <Id>0</Id>
+      </System>
+      <VehicleModel>pedestrian_adult</VehicleModel>
     </AgentProfile>
   </AgentProfiles>
   <VehicleProfiles>
@@ -80,25 +79,8 @@
       <Components/>
       <Sensors/>
     </VehicleProfile>
-    <VehicleProfile Name="Pedestrian">
-      <Model Name="pedestrian_adult"/>
-      <Components>
-        <Component Type="Dynamics_TrajectoryFollower">
-          <Profiles>
-            <Profile Name="BasicTrajectoryFollower" Probability="1.0"/>
-          </Profiles>
-        </Component>
-      </Components>
-      <Sensors/>
-    </VehicleProfile>
   </VehicleProfiles>
   <ProfileGroup Type="Driver">
-    <Profile Name="Pedestrian">
-      <String Key="Type" Value="AlgorithmAgentFollowingDriverModel"/>
-      <String Key="AlgorithmLateralModule" Value="Algorithm_LateralAfdm"/>
-      <String Key="AlgorithmLongitudinalModule" Value="Algorithm_LongitudinalAfdm"/>
-      <Double Key="VelocityWish" Value="1.0"/>
-    </Profile>
     <Profile Name="Regular">
       <String Key="Type" Value="AlgorithmAgentFollowingDriverModel"/>
       <String Key="AlgorithmLateralModule" Value="Algorithm_LateralAfdm"/>

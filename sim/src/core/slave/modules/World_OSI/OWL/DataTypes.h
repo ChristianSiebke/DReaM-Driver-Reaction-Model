@@ -600,7 +600,7 @@ public:
     virtual void SetLength(const double newLength) = 0;
     virtual void SetWidth(const double newWidth) = 0;
     virtual void SetHeight(const double newHeight) = 0;
-    virtual void SetDistanceReferencPointToLeadingEdge(const double distance) = 0;
+    virtual void SetBoundingBoxCenterToRear(const double distance) = 0;
     virtual double GetDistanceReferencePointToLeadingEdge() const = 0;
 
     virtual void SetReferencePointPosition(const Primitive::AbsPosition& newPosition) = 0;
@@ -1164,7 +1164,7 @@ public:
     virtual void SetLength(const double newLength) override;
     virtual void SetWidth(const double newWidth) override;
     virtual void SetHeight(const double newHeight) override;
-    virtual void SetDistanceReferencPointToLeadingEdge(const double distance) override;
+    virtual void SetBoundingBoxCenterToRear(const double distance) override;
 
     virtual void SetReferencePointPosition(const Primitive::AbsPosition& newPosition) override;
     virtual void SetX(const double newX) override;

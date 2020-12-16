@@ -252,6 +252,7 @@ void OsmpFmuHandler::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterfa
         double positionY{0.0};
         double yaw{0.0};
         double yawRate{0.0};
+        double roll{0.0};
         double steeringWheelAngle{0.0};
         double centripetalAcceleration{0.0};
         double travelDistance{0.0};
@@ -279,6 +280,7 @@ void OsmpFmuHandler::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterfa
             const auto& baseMoving = trafficUpdate.mutable_update()->mutable_base();
             velocity = std::sqrt(baseMoving->velocity().x() * baseMoving->velocity().x() + baseMoving->velocity().y() * baseMoving->velocity().y());
             yaw = baseMoving->orientation().yaw();
+            roll = baseMoving->orientation().roll();
             acceleration = baseMoving->acceleration().x() * std::cos(yaw) + baseMoving->acceleration().y() * std::sin(yaw);
             centripetalAcceleration = -baseMoving->acceleration().x() * std::sin(yaw) + baseMoving->acceleration().y() * std::cos(yaw);
             positionX = baseMoving->position().x();
@@ -309,6 +311,7 @@ void OsmpFmuHandler::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterfa
                                                       positionY,
                                                       yaw,
                                                       yawRate,
+                                                      roll,
                                                       steeringWheelAngle,
                                                       centripetalAcceleration,
                                                       travelDistance);

@@ -78,8 +78,8 @@ SpawnPointInterface::Agents SpawnPointPreRunCommon::GenerateAgentsForRange(const
             agentBlueprint.SetAgentProfileName(agentProfile.name);
             agentBlueprint.SetAgentCategory(AgentCategory::Common);
 
-            const auto agentLength = agentBlueprint.GetVehicleModelParameters().length;
-            const auto agentFrontLength = agentBlueprint.GetVehicleModelParameters().distanceReferencePointToLeadingEdge;
+            const auto agentLength = agentBlueprint.GetVehicleModelParameters().boundingBoxDimensions.length;
+            const auto agentFrontLength = agentLength * 0.5 + agentBlueprint.GetVehicleModelParameters().boundingBoxCenter.x;
             const auto agentRearLength = agentLength - agentFrontLength;
 
             auto velocity = Sampler::RollForStochasticAttribute(agentProfile.velocity, dependencies.stochastics);

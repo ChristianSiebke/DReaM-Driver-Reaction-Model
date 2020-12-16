@@ -494,11 +494,14 @@ namespace openpass::importer::xml::vehicleModelsImporter::attribute
     constexpr char height[] {"height"};
     constexpr char length[] {"length"};
     constexpr char mass[] {"mass"};
+    constexpr char maxAcceleration[] {"maxAcceleration"};
+    constexpr char maxDeceleration[] {"maxDeceleration"};
     constexpr char maxSpeed[] {"maxSpeed"};
     constexpr char maxSteering[] {"maxSteering"};
     constexpr char name[] {"name"};
     constexpr char pedestrianCategory[] {"pedestrianCategory"};
     constexpr char positionX[] {"positionX"};
+    constexpr char positionZ[] {"positionZ"};
     constexpr char trackWidth[] {"trackWidth"};
     constexpr char value[] {"value"};
     constexpr char wheelDiameter[] {"wheelDiameter"};

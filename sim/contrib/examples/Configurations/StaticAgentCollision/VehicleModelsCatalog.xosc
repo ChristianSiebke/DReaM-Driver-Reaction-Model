@@ -7,7 +7,7 @@
         <Property name="AirDragCoefficient" value="0.3"/>
         <Property name="AxleRatio" value="1.0"/>
         <Property name="DecelerationFromPowertrainDrag" value="0.5"/>
-        <Property name="FrictionCoefficient" value="0.0"/>
+        <Property name="FrictionCoefficient" value="1.0"/>
         <Property name="FrontSurface" value="2.38"/>
         <Property name="GearRatio1" value="9.665"/>
         <Property name="Mass" value="1320.0"/>
@@ -25,7 +25,7 @@
         <Center x="1.25" y="0.0" z="0.84"/>
         <Dimensions width="2.04" length="3.96" height="1.68"/>
       </BoundingBox>
-      <Performance maxSpeed="41.67" maxDeceleration="9.80665"/>
+      <Performance maxSpeed="41.67" maxAcceleration="9.80665" maxDeceleration="9.80665"/>
       <Axles>
         <FrontAxle maxSteering="0.5282" wheelDiameter="0.682" trackWidth="1.8" positionX="2.52" positionZ="0.341"/>
         <RearAxle maxSteering="0.0" wheelDiameter="0.682" trackWidth="1.8" positionX="0.0" positionZ="0.341"/>
@@ -36,7 +36,7 @@
         <Property name="AirDragCoefficient" value="0.3"/>
         <Property name="AxleRatio" value="2.813"/>
         <Property name="DecelerationFromPowertrainDrag" value="0.5"/>
-        <Property name="FrictionCoefficient" value="0.0"/>
+        <Property name="FrictionCoefficient" value="1.0"/>
         <Property name="FrontSurface" value="2.2"/>
         <Property name="GearRatio1" value="5.0"/>
         <Property name="GearRatio2" value="3.2"/>
@@ -61,7 +61,7 @@
         <Center x="1.285" y="0.0" z="0.72"/>
         <Dimensions width="1.96" length="4.63" height="1.44"/>
       </BoundingBox>
-      <Performance maxSpeed="69.44" maxDeceleration="9.80665"/>
+      <Performance maxSpeed="69.44" maxAcceleration="9.80665" maxDeceleration="9.80665"/>
       <Axles>
         <FrontAxle maxSteering="0.5012" wheelDiameter="0.634" trackWidth="1.8" positionX="2.81" positionZ="0.317"/>
         <RearAxle maxSteering="0.0" wheelDiameter="0.634" trackWidth="1.8" positionX="0.0" positionZ="0.317"/>
@@ -72,7 +72,7 @@
         <Property name="AirDragCoefficient" value="0.3"/>
         <Property name="AxleRatio" value="3.077"/>
         <Property name="DecelerationFromPowertrainDrag" value="0.5"/>
-        <Property name="FrictionCoefficient" value="0.0"/>
+        <Property name="FrictionCoefficient" value="1.0"/>
         <Property name="FrontSurface" value="2.42"/>
         <Property name="GearRatio1" value="5.0"/>
         <Property name="GearRatio2" value="3.2"/>
@@ -97,7 +97,7 @@
         <Center x="1.46" y="0.0" z="0.755"/>
         <Dimensions width="2.18" length="5.26" height="1.51"/>
       </BoundingBox>
-      <Performance maxSpeed="69.44" maxDeceleration="9.80665"/>
+      <Performance maxSpeed="69.44" maxAcceleration="9.80665" maxDeceleration="9.80665"/>
       <Axles>
         <FrontAxle maxSteering="0.5226" wheelDiameter="0.682" trackWidth="1.8" positionX="3.22" positionZ="0.341"/>
         <RearAxle maxSteering="0.0" wheelDiameter="0.682" trackWidth="1.8" positionX="0.0" positionZ="0.341"/>
@@ -108,7 +108,7 @@
         <Property name="AirDragCoefficient" value="0.3"/>
         <Property name="AxleRatio" value="3.077"/>
         <Property name="DecelerationFromPowertrainDrag" value="0.5"/>
-        <Property name="FrictionCoefficient" value="0.0"/>
+        <Property name="FrictionCoefficient" value="1.0"/>
         <Property name="FrontSurface" value="2.42"/>
         <Property name="GearRatio1" value="4.714"/>
         <Property name="GearRatio2" value="3.143"/>
@@ -133,7 +133,7 @@
         <Center x="1.485" y="0.0" z="0.745"/>
         <Dimensions width="2.16" length="5.27" height="1.49"/>
       </BoundingBox>
-      <Performance maxSpeed="69.44" maxDeceleration="9.80665"/>
+      <Performance maxSpeed="69.44" maxAcceleration="9.80665" maxDeceleration="9.80665"/>
       <Axles>
         <FrontAxle maxSteering="0.5279" wheelDiameter="0.682" trackWidth="1.8" positionX="3.25" positionZ="0.341"/>
         <RearAxle maxSteering="0.0" wheelDiameter="0.682" trackWidth="1.8" positionX="0.0" positionZ="0.341"/>
@@ -144,7 +144,7 @@
         <Property name="AirDragCoefficient" value="0.3"/>
         <Property name="AxleRatio" value="3.789"/>
         <Property name="DecelerationFromPowertrainDrag" value="0.5"/>
-        <Property name="FrictionCoefficient" value="0.0"/>
+        <Property name="FrictionCoefficient" value="1.0"/>
         <Property name="FrontSurface" value="2.07"/>
         <Property name="GearRatio1" value="4.154"/>
         <Property name="GearRatio2" value="2.45"/>
@@ -168,7 +168,7 @@
         <Center x="1.35" y="0.0" z="0.71"/>
         <Dimensions width="1.89" length="3.8" height="1.42"/>
       </BoundingBox>
-      <Performance maxSpeed="58.33" maxDeceleration="9.80665"/>
+      <Performance maxSpeed="58.33" maxAcceleration="9.80665" maxDeceleration="9.80665"/>
       <Axles>
         <FrontAxle maxSteering="0.4766" wheelDiameter="0.59" trackWidth="1.8" positionX="2.48" positionZ="0.295"/>
         <RearAxle maxSteering="0.0" wheelDiameter="0.59" trackWidth="1.8" positionX="0.0" positionZ="0.295"/>
@@ -179,7 +179,7 @@
         <Property name="AirDragCoefficient" value="0.8"/>
         <Property name="AxleRatio" value="4.0"/>
         <Property name="DecelerationFromPowertrainDrag" value="1.0"/>
-        <Property name="FrictionCoefficient" value="0.0"/>
+        <Property name="FrictionCoefficient" value="1.0"/>
         <Property name="FrontSurface" value="9.0"/>
         <Property name="GearRatio1" value="6.316"/>
         <Property name="GearRatio2" value="4.554"/>
@@ -204,7 +204,7 @@
         <Center x="2.815" y="0.0" z="1.92"/>
         <Dimensions width="2.91" length="13.23" height="3.84"/>
       </BoundingBox>
-      <Performance maxSpeed="33.33" maxDeceleration="9.80665"/>
+      <Performance maxSpeed="33.33" maxAcceleration="9.80665" maxDeceleration="9.80665"/>
       <Axles>
         <FrontAxle maxSteering="0.6972" wheelDiameter="0.808" trackWidth="1.8" positionX="6.64" positionZ="0.404"/>
         <RearAxle maxSteering="0.0" wheelDiameter="0.808" trackWidth="1.8" positionX="0.0" positionZ="0.404"/>
@@ -215,7 +215,7 @@
         <Property name="AirDragCoefficient" value="0.8"/>
         <Property name="AxleRatio" value="4.0"/>
         <Property name="DecelerationFromPowertrainDrag" value="1.0"/>
-        <Property name="FrictionCoefficient" value="0.0"/>
+        <Property name="FrictionCoefficient" value="1.0"/>
         <Property name="FrontSurface" value="9.0"/>
         <Property name="GearRatio1" value="6.316"/>
         <Property name="GearRatio2" value="4.554"/>
@@ -240,7 +240,7 @@
         <Center x="2.685" y="0.0" z="1.74"/>
         <Dimensions width="3.16" length="8.83" height="3.48"/>
       </BoundingBox>
-      <Performance maxSpeed="25.0" maxDeceleration="9.80665"/>
+      <Performance maxSpeed="25.0" maxAcceleration="9.80665" maxDeceleration="9.80665"/>
       <Axles>
         <FrontAxle maxSteering="0.4352" wheelDiameter="0.808" trackWidth="1.8" positionX="4.36" positionZ="0.404"/>
         <RearAxle maxSteering="0.0" wheelDiameter="0.808" trackWidth="1.8" positionX="0.0" positionZ="0.404"/>
@@ -251,7 +251,7 @@
         <Property name="AirDragCoefficient" value="0.3"/>
         <Property name="AxleRatio" value="3.0"/>
         <Property name="DecelerationFromPowertrainDrag" value="0.5"/>
-        <Property name="FrictionCoefficient" value="0.0"/>
+        <Property name="FrictionCoefficient" value="1.0"/>
         <Property name="FrontSurface" value="1.9"/>
         <Property name="GearRatio1" value="4.350"/>
         <Property name="GearRatio2" value="2.496"/>
@@ -274,7 +274,7 @@
         <Center x="0.175" y="0.0" z="0.9325"/>
         <Dimensions width="0.5" length="1.89" height="1.865"/>
       </BoundingBox>
-      <Performance maxSpeed="10.0" maxDeceleration="9.80665"/>
+      <Performance maxSpeed="10.0" maxAcceleration="9.80665" maxDeceleration="9.80665"/>
       <Axles>
         <FrontAxle maxSteering="1.5708" wheelDiameter="0.636" trackWidth="0.1" positionX="1.04" positionZ="0.318"/>
         <RearAxle maxSteering="0.0" wheelDiameter="0.636" trackWidth="0.1" positionX="0.0" positionZ="0.318"/>

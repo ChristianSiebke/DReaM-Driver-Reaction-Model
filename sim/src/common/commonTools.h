@@ -408,6 +408,18 @@ public:
 
         return WillCrashDuringBrake(sFrontAtTtb - sEgoAtTtb, vEgo, assumedBrakeAccelerationEgo, vFrontAtTtb, aFrontAtTtb);
     }
+
+    //! Calculate the width left of the reference point of a leaning object
+    static double GetWidthLeft(double width, double height, double roll)
+    {
+        return 0.5 * width * std::cos(roll) + (roll < 0 ? height * std::sin(-roll) : 0);
+    }
+
+    //! Calculate the width right of the reference point of a leaning object
+    static double GetWidthRight(double width, double height, double roll)
+    {
+        return 0.5 * width * std::cos(roll) + (roll > 0 ? height * std::sin(roll) : 0);
+    }
 };
 
 namespace helper::vector {
@@ -474,7 +486,8 @@ public:
     //-----------------------------------------------------------------------------
     struct TtcParameters{
         double length;
-        double width;
+        double widthLeft;
+        double widthRight;
         double frontLength; // distance from reference point of object to leading edge of object
         double backLength;  // distance from reference point to back edge of object
         point_t position;
@@ -549,7 +562,8 @@ private:
 
         // Initial bounding box in local coordinate system
         parameters.length = object->GetLength() + collisionDetectionLongitudinalBoundary;
-        parameters.width  = object->GetWidth() + collisionDetectionLateralBoundary;
+        parameters.widthLeft = TrafficHelperFunctions::GetWidthLeft(object->GetWidth(), object->GetHeight(), object->GetRoll()) + 0.5 * collisionDetectionLateralBoundary;
+        parameters.widthRight = TrafficHelperFunctions::GetWidthRight(object->GetWidth(), object->GetHeight(), object->GetRoll()) + 0.5 * collisionDetectionLateralBoundary;
         parameters.frontLength = object->GetDistanceReferencePointToLeadingEdge() + 0.5 * collisionDetectionLongitudinalBoundary; //returns the distance from reference point of object to leading edge of object
         parameters.backLength = parameters.length - parameters.frontLength; // distance from reference point to back edge of object
 
@@ -587,11 +601,11 @@ private:
         // construct corner points from reference point position and current yaw angle
         polygon_t box;
 
-        bg::append(box, point_t{ parameters.position.get<0>() - std::cos(parameters.yaw) * parameters.backLength  + std::sin(parameters.yaw) * 0.5 * parameters.width		,		parameters.position.get<1>() - std::sin(parameters.yaw) * parameters.backLength  - std::cos(parameters.yaw) * 0.5 * parameters.width }); // back right corner
-        bg::append(box, point_t{ parameters.position.get<0>() - std::cos(parameters.yaw) * parameters.backLength  - std::sin(parameters.yaw) * 0.5 * parameters.width		,		parameters.position.get<1>() - std::sin(parameters.yaw) * parameters.backLength  + std::cos(parameters.yaw) * 0.5 * parameters.width }); // back left corner
-        bg::append(box, point_t{ parameters.position.get<0>() + std::cos(parameters.yaw) * parameters.frontLength - std::sin(parameters.yaw) * 0.5 * parameters.width		,		parameters.position.get<1>() + std::sin(parameters.yaw) * parameters.frontLength + std::cos(parameters.yaw) * 0.5 * parameters.width }); // front left corner
-        bg::append(box, point_t{ parameters.position.get<0>() + std::cos(parameters.yaw) * parameters.frontLength + std::sin(parameters.yaw) * 0.5 * parameters.width		,		parameters.position.get<1>() + std::sin(parameters.yaw) * parameters.frontLength - std::cos(parameters.yaw) * 0.5 * parameters.width }); // front right corner
-        bg::append(box, point_t{ parameters.position.get<0>() - std::cos(parameters.yaw) * parameters.backLength  + std::sin(parameters.yaw) * 0.5 * parameters.width		,		parameters.position.get<1>() - std::sin(parameters.yaw) * parameters.backLength  - std::cos(parameters.yaw) * 0.5 * parameters.width }); // back right corner
+        bg::append(box, point_t{ parameters.position.get<0>() - std::cos(parameters.yaw) * parameters.backLength  + std::sin(parameters.yaw) * parameters.widthRight	,		parameters.position.get<1>() - std::sin(parameters.yaw) * parameters.backLength  - std::cos(parameters.yaw) * parameters.widthRight }); // back right corner
+        bg::append(box, point_t{ parameters.position.get<0>() - std::cos(parameters.yaw) * parameters.backLength  - std::sin(parameters.yaw) * parameters.widthLeft		,		parameters.position.get<1>() - std::sin(parameters.yaw) * parameters.backLength  + std::cos(parameters.yaw) * parameters.widthLeft }); // back left corner
+        bg::append(box, point_t{ parameters.position.get<0>() + std::cos(parameters.yaw) * parameters.frontLength - std::sin(parameters.yaw) * parameters.widthLeft		,		parameters.position.get<1>() + std::sin(parameters.yaw) * parameters.frontLength + std::cos(parameters.yaw) * parameters.widthLeft }); // front left corner
+        bg::append(box, point_t{ parameters.position.get<0>() + std::cos(parameters.yaw) * parameters.frontLength + std::sin(parameters.yaw) * parameters.widthRight	,		parameters.position.get<1>() + std::sin(parameters.yaw) * parameters.frontLength - std::cos(parameters.yaw) * parameters.widthRight }); // front right corner
+        bg::append(box, point_t{ parameters.position.get<0>() - std::cos(parameters.yaw) * parameters.backLength  + std::sin(parameters.yaw) * parameters.widthRight	,		parameters.position.get<1>() - std::sin(parameters.yaw) * parameters.backLength  - std::cos(parameters.yaw) * parameters.widthRight }); // back right corner
         return box;
     }
     //-----------------------------------------------------------------------------

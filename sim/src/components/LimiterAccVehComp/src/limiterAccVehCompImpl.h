@@ -104,6 +104,8 @@ public:
     virtual void Trigger(int time);
 
 private:
+    double GetVehicleProperty(const std::string& propertyName);
+
     double InterpolateEngineTorqueBasedOnSpeed(const double &engineSpeed);
 
     std::vector<double> PrepareEngineTorqueVectorBasedOnGearRatios();

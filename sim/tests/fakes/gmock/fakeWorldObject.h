@@ -23,6 +23,7 @@ public:
     MOCK_CONST_METHOD0(GetLength, double());
     MOCK_CONST_METHOD0(GetHeight, double());
     MOCK_CONST_METHOD0(GetYaw, double());
+    MOCK_CONST_METHOD0(GetRoll, double());
     MOCK_CONST_METHOD0(GetId, int());
     MOCK_CONST_METHOD0(GetBoundingBox2D, const polygon_t& ());
     MOCK_CONST_METHOD2(GetDistanceToStartOfRoad, double(MeasurementPoint, std::string));

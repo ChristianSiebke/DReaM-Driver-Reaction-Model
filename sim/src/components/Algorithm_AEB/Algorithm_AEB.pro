@@ -29,13 +29,11 @@ INCLUDEPATH += \
 
 SOURCES += \
     algorithm_autonomousEmergencyBraking.cpp \
-    src/autonomousEmergencyBraking.cpp \
-    src/boundingBoxCalculation.cpp
+    src/autonomousEmergencyBraking.cpp
 
 HEADERS += \
     algorithm_autonomousEmergencyBraking.h \
-    src/autonomousEmergencyBraking.h \
-    src/boundingBoxCalculation.h
+    src/autonomousEmergencyBraking.h
 
 LIBS += \
     -lopen_simulation_interface \

@@ -84,7 +84,7 @@ public:
     MOCK_METHOD1(SetLength, void(const double newLength));
     MOCK_METHOD1(SetWidth, void(const double newWidth));
     MOCK_METHOD1(SetHeight, void(const double newHeight));
-    MOCK_METHOD1(SetDistanceReferencPointToLeadingEdge, void(const double distance));
+    MOCK_METHOD1(SetBoundingBoxCenterToRear, void(const double distance));
 
     MOCK_METHOD1(SetReferencePointPosition, void(const OWL::Primitive::AbsPosition& newPosition));
     MOCK_METHOD1(SetX, void(const double newX));

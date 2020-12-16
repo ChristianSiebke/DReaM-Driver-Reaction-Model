@@ -170,10 +170,10 @@ void AgentFactory::PublishProperties(const Agent& agent)
     dataStore->PutStatic(keyPrefix + "AgentType", std::string(openpass::utils::to_cstr(adapter->GetVehicleModelParameters().vehicleType)));   // std::string for compatibility with gcc-9 std::ariant
 
     const auto& vehicleModelParameters = adapter->GetVehicleModelParameters();
-    const double longitudinalPivotOffset = (vehicleModelParameters.length / 2.0) - vehicleModelParameters.distanceReferencePointToLeadingEdge;
-    dataStore->PutStatic(keyPrefix + "Vehicle/Width", vehicleModelParameters.width);
-    dataStore->PutStatic(keyPrefix + "Vehicle/Length", vehicleModelParameters.length);
-    dataStore->PutStatic(keyPrefix + "Vehicle/Height", vehicleModelParameters.height);
+    const double longitudinalPivotOffset = vehicleModelParameters.boundingBoxCenter.x;
+    dataStore->PutStatic(keyPrefix + "Vehicle/Width", vehicleModelParameters.boundingBoxDimensions.width);
+    dataStore->PutStatic(keyPrefix + "Vehicle/Length", vehicleModelParameters.boundingBoxDimensions.length);
+    dataStore->PutStatic(keyPrefix + "Vehicle/Height", vehicleModelParameters.boundingBoxDimensions.height);
     dataStore->PutStatic(keyPrefix + "Vehicle/LongitudinalPivotOffset", longitudinalPivotOffset);
 
     for (const auto& sensor : adapter->GetSensorParameters())

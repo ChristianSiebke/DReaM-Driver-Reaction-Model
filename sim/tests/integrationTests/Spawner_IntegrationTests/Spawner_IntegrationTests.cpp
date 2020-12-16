@@ -112,8 +112,9 @@ public:
 
         AgentBlueprint agentBlueprint;
         VehicleModelParameters vehicleModelParameters;
-        vehicleModelParameters.length = 5.0;
-        vehicleModelParameters.distanceReferencePointToLeadingEdge = 3.0;
+        vehicleModelParameters.vehicleType = AgentVehicleType::Car;
+        vehicleModelParameters.boundingBoxDimensions.length = 5.0;
+        vehicleModelParameters.boundingBoxCenter.x = 0.5;
         agentBlueprint.SetVehicleModelParameters(vehicleModelParameters);
         ON_CALL(agentBlueprintProvider, SampleAgent(_,_)).WillByDefault(Return(agentBlueprint));
     }

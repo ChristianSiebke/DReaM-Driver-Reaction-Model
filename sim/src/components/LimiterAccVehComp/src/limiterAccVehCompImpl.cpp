@@ -18,6 +18,7 @@
 #include <qglobal.h>
 
 #include "include/worldInterface.h"
+#include "components/common/vehicleProperties.h"
 
 #include "limiterAccVehCompImpl.h"
 
@@ -99,6 +100,13 @@ void LimiterAccelerationVehicleComponentsImplementation::Trigger(int time)
     outgoingAcceleration = std::max(std::min(incomingAcceleration, accelerationLimit), decelerationLimit);
 }
 
+double LimiterAccelerationVehicleComponentsImplementation::GetVehicleProperty(const std::string& propertyName)
+{
+    const auto property = helper::map::query(vehicleModelParameters.properties, propertyName);
+    THROWIFFALSE(property.has_value(), "Vehicle property \"" + propertyName + "\" was not set in the VehicleCatalog");
+    return property.value();
+}
+
 double LimiterAccelerationVehicleComponentsImplementation::InterpolateEngineTorqueBasedOnSpeed(const double &engineSpeed)
 {
     if(engineSpeedReferences.size() != engineTorqueReferences.size() || engineSpeedReferences.empty())
@@ -138,23 +146,23 @@ std::vector<double> LimiterAccelerationVehicleComponentsImplementation::PrepareE
 {
     std::vector<double> engineTorquesBasedOnGearRatios {};
 
-    if(vehicleModelParameters.gearRatios.size() < 2)
+    if(GetVehicleProperty(vehicle::properties::NumberOfGears) < 1)
     {
         throw std::runtime_error("At least on gear is required!");
     }
 
-    for(size_t i = 1; i < vehicleModelParameters.gearRatios.size(); i++)
+    for(size_t i = 1; i <= GetVehicleProperty(vehicle::properties::NumberOfGears); i++)
     {
         const double engineSpeedBasedOnGear = CalculateEngineSpeedBasedOnGear(GetAgent()->GetVelocity(), i);
 
-        if(engineSpeedBasedOnGear > vehicleModelParameters.maximumEngineSpeed || engineSpeedBasedOnGear < vehicleModelParameters.minimumEngineSpeed)
+        if(engineSpeedBasedOnGear > GetVehicleProperty(vehicle::properties::MaximumEngineSpeed) || engineSpeedBasedOnGear < GetVehicleProperty(vehicle::properties::MinimumEngineSpeed))
         {
             continue;
         }
 
         const double interpolatedEngineTorque = InterpolateEngineTorqueBasedOnSpeed(engineSpeedBasedOnGear);
 
-        double engineTorqueBasedOnGearRatio = interpolatedEngineTorque * vehicleModelParameters.gearRatios.at(i);
+        double engineTorqueBasedOnGearRatio = interpolatedEngineTorque * GetVehicleProperty(vehicle::properties::GearRatio+std::to_string(i));
         engineTorquesBasedOnGearRatios.push_back(engineTorqueBasedOnGearRatio);
     }
 
@@ -163,15 +171,15 @@ std::vector<double> LimiterAccelerationVehicleComponentsImplementation::PrepareE
 
 double LimiterAccelerationVehicleComponentsImplementation::CalculateEngineSpeedBasedOnGear(const double &currentVelocity, const size_t &gear)
 {
-    const double engineSpeed = currentVelocity * vehicleModelParameters.axleRatio * vehicleModelParameters.gearRatios.at(gear) / (twoPI * vehicleModelParameters.staticWheelRadius) * 60.0;
+    const double engineSpeed = currentVelocity * GetVehicleProperty(vehicle::properties::AxleRatio) * GetVehicleProperty(vehicle::properties::GearRatio+std::to_string(gear)) / (M_PI * vehicleModelParameters.rearAxle.wheelDiameter) * 60.0;
     return engineSpeed;
 }
 
 void LimiterAccelerationVehicleComponentsImplementation::PrepareReferences()
 {
-    const double& maxEngineTorque = vehicleModelParameters.maximumEngineTorque;
-    const double& maxEngineSpeed = vehicleModelParameters.maximumEngineSpeed;
-    const double& minEngineSpeed = vehicleModelParameters.minimumEngineSpeed;
+    const double& maxEngineTorque = GetVehicleProperty(vehicle::properties::MaximumEngineTorque);
+    const double& maxEngineSpeed = GetVehicleProperty(vehicle::properties::MaximumEngineSpeed);
+    const double& minEngineSpeed = GetVehicleProperty(vehicle::properties::MinimumEngineSpeed);
 
     engineTorqueReferences = {0.5 * maxEngineTorque,
                               1.0 * maxEngineTorque,
@@ -199,18 +207,18 @@ double LimiterAccelerationVehicleComponentsImplementation::CalculateAcceleration
 
     const double &engineTorqueBasedOnVelocity = *(std::max_element(engineTorquesBasedOnGearRatios.begin(), engineTorquesBasedOnGearRatios.end()));
 
-    const double forceAtWheel = engineTorqueBasedOnVelocity * vehicleModelParameters.axleRatio / vehicleModelParameters.staticWheelRadius;
-    const double forceRoll = vehicleModelParameters.weight * oneG * rollFrictionCoefficient;
-    const double forceAir = (airResistance / 2) * vehicleModelParameters.frontSurface * vehicleModelParameters.airDragCoefficient * std::pow(currentVelocity, 2);
+    const double forceAtWheel = engineTorqueBasedOnVelocity * GetVehicleProperty(vehicle::properties::AxleRatio) / (0.5 * vehicleModelParameters.rearAxle.wheelDiameter);
+    const double forceRoll = GetVehicleProperty(vehicle::properties::Mass) * oneG * rollFrictionCoefficient;
+    const double forceAir = (airResistance / 2) * GetVehicleProperty(vehicle::properties::FrontSurface) * GetVehicleProperty(vehicle::properties::AirDragCoefficient) * std::pow(currentVelocity, 2);
 
-    const double accelerationLimit = (forceAtWheel - forceRoll - forceAir) / vehicleModelParameters.weight;
+    const double accelerationLimit = (forceAtWheel - forceRoll - forceAir) / GetVehicleProperty(vehicle::properties::Mass);
 
     return accelerationLimit;
 }
 
 double LimiterAccelerationVehicleComponentsImplementation::CalculateDecelerationLimit()
 {
-    const double decelerationLimit = GetWorld()->GetFriction() * vehicleModelParameters.frictionCoeff * (-oneG);
+    const double decelerationLimit = GetWorld()->GetFriction() * GetVehicleProperty(vehicle::properties::FrictionCoefficient) * (-oneG);
 
     return decelerationLimit;
 }
