@@ -163,6 +163,11 @@ public:
     //!Returns a map of all road markings with their OSI Id
     virtual const std::unordered_map<Id, RoadMarking*>& GetRoadMarkings() const = 0;
 
+    //!Returns the stationary object with given Id
+    virtual const StationaryObject& GetStationaryObject(Id id) const = 0;
+
+    //!Returns the moving object with given Id
+    virtual const MovingObject& GetMovingObject(Id id) const = 0;
 
     //! Sets the road graph as imported from OpenDrive
     //!
@@ -451,8 +456,8 @@ public:
     const std::unordered_map<Id, MovingObject*>& GetMovingObjects() const;
     const std::unordered_map<Id, StationaryObject*>& GetStationaryObjects() const;
 
-    CStationaryObject& GetStationaryObjectById(Id id) const;
-    CMovingObject& GetMovingObjectById(Id id) const;
+    const StationaryObject& GetStationaryObject(Id id) const override;
+    const MovingObject& GetMovingObject(Id id) const override;
 
     const RoadGraph& GetRoadGraph() const override;
     const RoadGraphVertexMapping& GetRoadGraphVertexMapping() const override;

@@ -65,7 +65,7 @@ SensorView_ptr WorldData::GetSensorView(osi3::SensorViewConfiguration& conf, int
     sv->mutable_mounting_position()->CopyFrom(conf.mounting_position());
     sv->mutable_mounting_position_rmse()->CopyFrom(conf.mounting_position());
 
-    auto filteredGroundTruth = GetFilteredGroundTruth(conf, GetMovingObjectById(host_id));
+    auto filteredGroundTruth = GetFilteredGroundTruth(conf, GetMovingObject(host_id));
     sv->mutable_global_ground_truth()->CopyFrom(*filteredGroundTruth);
     sv->mutable_global_ground_truth()->mutable_host_vehicle_id()->set_value(host_id);
     sv->mutable_host_vehicle_id()->set_value(host_id);
@@ -89,7 +89,7 @@ SensorView_ptr WorldData::GetSensorView(osi3::SensorViewConfiguration& conf, int
     zeroError.mutable_orientation_acceleration()->CopyFrom(zeroOrientation3d);
 
     auto hostData = osi3::HostVehicleData();
-    auto& movingObject = GetMovingObjectById(host_id);
+    const auto& movingObject = GetMovingObject(host_id);
     hostData.mutable_location_rmse()->CopyFrom(zeroError);
 
 #ifdef USE_PROTOBUF_ARENA
@@ -651,7 +651,7 @@ const std::unordered_map<Id, StationaryObject*>& WorldData::GetStationaryObjects
     return stationaryObjects;
 }
 
-CStationaryObject& WorldData::GetStationaryObjectById(Id id) const
+const StationaryObject& WorldData::GetStationaryObject(Id id) const
 {
     return *(stationaryObjects.at(id));
 }
@@ -671,7 +671,7 @@ const std::unordered_map<Id, Interfaces::RoadMarking*>& WorldData::GetRoadMarkin
     return roadMarkings;
 }
 
-CMovingObject& WorldData::GetMovingObjectById(Id id) const
+const MovingObject& WorldData::GetMovingObject(Id id) const
 {
     return *(movingObjects.at(id));
 }

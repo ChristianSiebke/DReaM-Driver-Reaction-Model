@@ -51,6 +51,8 @@ public:
     MOCK_CONST_METHOD0(GetTrafficSignIdMapping, const std::unordered_map<std::string, OWL::Id> &());
     MOCK_METHOD1(AddRoadMarking, OWL::Interfaces::RoadMarking &(const Id));
     MOCK_CONST_METHOD0(GetRoadMarkings, const std::unordered_map<OWL::Id, OWL::Interfaces::RoadMarking *> &());
+    MOCK_CONST_METHOD1(GetStationaryObject, const OWL::Interfaces::StationaryObject& (Id id));
+    MOCK_CONST_METHOD1(GetMovingObject, OWL::Interfaces::MovingObject& (Id id));
     MOCK_CONST_METHOD0(GetRoadGraph, const RoadGraph &());
     MOCK_METHOD2(SetRoadGraph, void(const RoadGraph &&roadGraph, const RoadGraphVertexMapping &&vertexMapping));
     MOCK_CONST_METHOD0(GetRoadGraphVertexMapping, const RoadGraphVertexMapping &());
