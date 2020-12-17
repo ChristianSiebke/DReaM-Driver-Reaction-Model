@@ -301,8 +301,7 @@ function(add_openpass_target)
       )
 
       # currently not provided by FindGTest
-      get_filename_component(GMOCK_LIBRARY_PATH ${GTEST_LIBRARY} DIRECTORY)
-      set(GMOCK_LIBRARY ${GMOCK_LIBRARY_PATH}/libgmock.a)
+      string(REGEX REPLACE "libgtest" "libgmock" GMOCK_LIBRARY "${GTEST_LIBRARY}")
 
       target_link_libraries(${PARSED_ARG_NAME}
         ${GTEST_LIBRARY}

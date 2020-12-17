@@ -26,7 +26,7 @@ foreach(SEARCH_DIR IN LISTS SEARCH_DIRS)
   if(WIN32)
     execute_process (
         WORKING_DIRECTORY ${SEARCH_DIR}
-        COMMAND bash -c "for f in \$(find -iname \'*.dll\'); do realpath \$(dirname \$f); done | sort -u | sed -e \'s#^/mnt/\\([a-zA-Z]\\)/#\\1:/#\'"
+        COMMAND bash -c "for f in \$(find -iname \'*.dll\'); do realpath \$(dirname \$f); done | sort -u | sed -e \'s#^/\\([a-zA-Z]\\)/#\\1:/#\'"
         OUTPUT_VARIABLE DETECTED_LIBRARY_DIRS
     )
   else()

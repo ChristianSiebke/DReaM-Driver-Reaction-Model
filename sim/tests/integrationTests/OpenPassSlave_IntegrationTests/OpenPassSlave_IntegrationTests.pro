@@ -161,7 +161,7 @@ HEADERS += \
 LIBS += -lopen_simulation_interface -lprotobuf
 
 win32: {
-    LIBS += -llibboost_filesystem-mgw81-mt-x64-1_72
+    LIBS += -lboost_filesystem-mt
 } else {
     LIBS += -lboost_filesystem
 }

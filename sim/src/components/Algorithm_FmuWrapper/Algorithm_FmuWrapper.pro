@@ -45,7 +45,7 @@ HEADERS += \
     src/variant_visitor.h
 
 win32: {
-    LIBS += -llibboost_filesystem-mgw81-mt-x64-1_72
+    LIBS += -lboost_filesystem-mt
 }
 
 unix: {
