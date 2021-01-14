@@ -492,6 +492,106 @@ TEST(SceneryImporter_IntegrationTests, MultipleRoadsWithJunctions_CheckForCorrec
     CheckLaneConnections(worldData, lanesLowerConnectingRoad, lanesLowerOutgoingRoad, -2, -2);
 }
 
+//!Workaround, because the OSI lane is a private member
+osi3::Lane GetOsiLane(const OWL::Interfaces::Lane* lane)
+{
+    osi3::GroundTruth groundTruth;
+    lane->CopyToGroundTruth(groundTruth);
+    return groundTruth.lane(0);
+}
+
+void CheckLaneNeighbours(OWL::Interfaces::WorldData* worldData, std::list<const OWL::Interfaces::Lane*> lanes)
+{
+    auto nrOfLanes = static_cast<int>(lanes.size());
+    for (int laneId = -1; -laneId < nrOfLanes; --laneId)
+    {
+        auto firstLane = GetLaneById(worldData, lanes, laneId);
+        auto secondLane = GetLaneById(worldData, lanes, laneId-1);
+        auto firstLaneId = firstLane->GetId();
+        auto secondLaneId = secondLane->GetId();
+        EXPECT_THAT(GetOsiLane(firstLane).classification().right_adjacent_lane_id(0).value(), secondLaneId);
+        EXPECT_THAT(GetOsiLane(secondLane).classification().left_adjacent_lane_id(0).value(), firstLaneId);
+    }
+}
+
+void CheckLaneType(OWL::Interfaces::WorldData* worldData, std::list<const OWL::Interfaces::Lane*> lanes, std::vector<osi3::Lane_Classification_Type> expectedTypes)
+{
+    // Only negative lanes are checked and lane "0" is only a placeholder without internal representation.
+    // Calling GetLaneById with 0 would fail so start at 1.
+    // Yet, we expect expectedTypes to carry information about the 0th lane
+    for (size_t i = 1; i < lanes.size(); ++i)
+    {
+        int laneId = -i;
+        auto lane = GetLaneById(worldData, lanes, laneId);
+        EXPECT_THAT(GetOsiLane(lane).classification().type(), expectedTypes.at(i));
+    }
+}
+
+using OsiLaneType = osi3::Lane_Classification_Type;
+
+TEST(SceneryImporter_IntegrationTests, SingleRoad_CheckForCorrectOsiLaneClassification)
+{
+    TESTSCENERY_FACTORY tsf;
+    ASSERT_THAT(tsf.instantiate("IntegrationTestScenery.xodr"), IsTrue());
+
+    auto& world = tsf.world;
+
+    OWL::Interfaces::WorldData* worldData = static_cast<OWL::Interfaces::WorldData*>(world.GetWorldData());
+
+    ASSERT_EQ(worldData->GetRoads().at("1")->GetSections().size(), 5);
+
+    auto sections = GetDistanceSortedSectionsForRoad(worldData, "1");
+
+    for(const auto section: sections)
+    {
+        CheckLaneNeighbours(worldData, section->GetLanes());
+    }
+
+    CheckLaneType(worldData, sections[0]->GetLanes(), {OsiLaneType::Lane_Classification_Type_TYPE_NONDRIVING,
+                                                       OsiLaneType::Lane_Classification_Type_TYPE_DRIVING});
+
+    CheckLaneType(worldData, sections[1]->GetLanes(), {OsiLaneType::Lane_Classification_Type_TYPE_NONDRIVING,
+                                                       OsiLaneType::Lane_Classification_Type_TYPE_DRIVING,
+                                                       OsiLaneType::Lane_Classification_Type_TYPE_DRIVING});
+
+    CheckLaneType(worldData, sections[2]->GetLanes(), {OsiLaneType::Lane_Classification_Type_TYPE_NONDRIVING,
+                                                       OsiLaneType::Lane_Classification_Type_TYPE_DRIVING,
+                                                       OsiLaneType::Lane_Classification_Type_TYPE_NONDRIVING,
+                                                       OsiLaneType::Lane_Classification_Type_TYPE_DRIVING});
+}
+
+TEST(SceneryImporter_IntegrationTests, MultipleRoadsWithJunctions_CheckForCorrectOsiLaneClassification)
+{
+    TESTSCENERY_FACTORY tsf;
+    ASSERT_THAT(tsf.instantiate("MultipleRoadsWithJunctionIntegrationScenery.xodr"), IsTrue());
+
+    auto& world = tsf.world;
+
+    OWL::Interfaces::WorldData* worldData = static_cast<OWL::Interfaces::WorldData*>(world.GetWorldData());
+
+    ASSERT_EQ(worldData->GetRoads().at("1")->GetSections().size(), 1);
+
+    auto sections1 = GetDistanceSortedSectionsForRoad(worldData, "1");
+
+    CheckLaneNeighbours(worldData, sections1[0]->GetLanes());
+
+    CheckLaneType(worldData, sections1[0]->GetLanes(), {OsiLaneType::Lane_Classification_Type_TYPE_NONDRIVING,
+                                                       OsiLaneType::Lane_Classification_Type_TYPE_DRIVING,
+                                                       OsiLaneType::Lane_Classification_Type_TYPE_DRIVING,
+                                                       OsiLaneType::Lane_Classification_Type_TYPE_DRIVING,
+                                                       OsiLaneType::Lane_Classification_Type_TYPE_DRIVING});
+
+    ASSERT_EQ(worldData->GetRoads().at("4")->GetSections().size(), 1);
+
+    auto sections4 = GetDistanceSortedSectionsForRoad(worldData, "4");
+
+    CheckLaneNeighbours(worldData, sections4[0]->GetLanes());
+
+    CheckLaneType(worldData, sections4[0]->GetLanes(), {OsiLaneType::Lane_Classification_Type_TYPE_NONDRIVING,
+                                                       OsiLaneType::Lane_Classification_Type_TYPE_INTERSECTION,
+                                                       OsiLaneType::Lane_Classification_Type_TYPE_INTERSECTION});
+}
+
 TEST(SceneryImporter_IntegrationTests, MultipleRoadsWithNonIntersectingJunctions_JunctionsHaveNoIntersectionInformation)
 {
     TESTSCENERY_FACTORY tsf;

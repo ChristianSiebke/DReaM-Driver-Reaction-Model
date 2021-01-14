@@ -281,6 +281,33 @@ std::vector<const Interfaces::RoadMarking*> WorldData::GetRoadMarkingsInSector(c
     return ApplySectorFilter(objects, origin, radius, leftBoundaryAngle, rightBoundaryAngle);
 }
 
+bool LaneTypeIsDriving(const RoadLaneType& laneType)
+{
+    switch (laneType)
+    {
+        case RoadLaneType::Driving:
+        case RoadLaneType::Median:
+        case RoadLaneType::Exit:
+        case RoadLaneType::Entry:
+        case RoadLaneType::OnRamp:
+        case RoadLaneType::OffRamp:
+        case RoadLaneType::ConnectingRamp:
+            return true;
+        case RoadLaneType::None:
+        case RoadLaneType::Shoulder:
+        case RoadLaneType::Border:
+        case RoadLaneType::Stop:
+        case RoadLaneType::Restricted:
+        case RoadLaneType::Parking:
+        case RoadLaneType::Biking:
+        case RoadLaneType::Sidewalk:
+        case RoadLaneType::Curb:
+            return false;
+        default:
+            return false;
+    }
+}
+
 void WorldData::AddLane(const Id id, RoadLaneSectionInterface& odSection, const RoadLaneInterface& odLane, const std::vector<Id> laneBoundaries)
 {
     int odLaneId = odLane.GetId();
@@ -331,6 +358,23 @@ void WorldData::AddLane(const Id id, RoadLaneSectionInterface& odSection, const 
     }
 
     lane.SetLaneType(OpenDriveTypeMapper::OdToOwlLaneType(odLane.GetType()));
+    if (odSection.GetRoad()->GetJunctionId() != "-1")
+    {
+        osiLane->mutable_classification()->set_type(osi3::Lane_Classification_Type::Lane_Classification_Type_TYPE_INTERSECTION);
+    }
+    else if (LaneTypeIsDriving(odLane.GetType()))
+    {
+        osiLane->mutable_classification()->set_type(osi3::Lane_Classification_Type::Lane_Classification_Type_TYPE_DRIVING);
+    }
+    else
+    {
+        osiLane->mutable_classification()->set_type(osi3::Lane_Classification_Type::Lane_Classification_Type_TYPE_NONDRIVING);
+    }
+    osiLane->mutable_classification()->mutable_road_condition()->set_surface_temperature(293.0);
+    osiLane->mutable_classification()->mutable_road_condition()->set_surface_water_film(0.0);
+    osiLane->mutable_classification()->mutable_road_condition()->set_surface_ice(0.0);
+    osiLane->mutable_classification()->mutable_road_condition()->set_surface_roughness(5.0);
+    osiLane->mutable_classification()->mutable_road_condition()->set_surface_texture(0.0);
     osiLanes[&odLane] = osiLane;
     lanes[id] = &lane;
     laneIdMapping[id] = static_cast<OWL::OdId>(odLaneId);
