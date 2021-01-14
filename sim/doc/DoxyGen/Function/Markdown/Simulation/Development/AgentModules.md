@@ -232,7 +232,7 @@ The OsmpFmuHandler has the following additional (optional) parameters:
 | WriteSensorViewConfigOutput     | bool     | If true the SensorViewConfig is written into a JSON file                                              |
 | WriteSensorViewConfigRequestOutput     | bool     | If true the SensorViewConfigRequest is written into a JSON file                                              |
 | WriteTrafficCommandOutput | bool     | If true the TrafficCommand is written into a JSON file                                          |
-| WriteGroundtruthOutput    | bool     | If true the Groundtruth is written into a JSON file                                             |
+| WriteGroundTruthOutput    | bool     | If true the GroundTruth is written into a JSON file                                             |
 | WriteSensorDataOutput     | bool     | If true the SensorData is written into a JSON file                                              |
 | WriteTrafficUpdateOutput  | bool     | If true the TrafficUpdate is written into a JSON file                                           |
 | EnforceDoubleBuffering    | bool     | If true the wrapper will throw an error if FMU doesn't use double buffering. Defaults to false. |
@@ -242,7 +242,7 @@ An additional parameter defines whether the message should be logged as JSON fil
 
 Currently these messages are supported:
 
-* SensorView: SensorView generated from the Groundtruth with this agent is host vehicle.
+* SensorView: SensorView generated from the GroundTruth with this agent is host vehicle.
 * SensorViewConfig, SensorViewConfigRequest: Configuration of a sensor according to OSMP.
 * TrafficCommand: Trajectory from openSCENARIO, that will be converted into a TrafficCommand.
 * SensorData: Output of a sensor. Can be input and/or output of a FMU. Received SensorData is forwarded to other components as SensorDataSignal.

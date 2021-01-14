@@ -117,10 +117,10 @@ OsmpFmuHandler::OsmpFmuHandler(fmu_check_data_t *cdata, WorldInterface *world, A
     {
         writeSensorViewConfigRequest = writeSensorViewConfigRequestFlag->second;
     }
-    auto writeGroundtruthFlag = parameters->GetParametersBool().find("WriteGroundtruthOutput");
-    if (writeGroundtruthFlag != parameters->GetParametersBool().end())
+    auto writeGroundTruthFlag = parameters->GetParametersBool().find("WriteGroundTruthOutput");
+    if (writeGroundTruthFlag != parameters->GetParametersBool().end())
     {
-        writeGroundtruth = writeGroundtruthFlag->second;
+        writeGroundTruth = writeGroundTruthFlag->second;
     }
 #ifdef USE_EXTENDED_OSI
     auto writeTrafficCommandFlag = parameters->GetParametersBool().find("WriteTrafficCommandOutput");
@@ -144,9 +144,9 @@ OsmpFmuHandler::OsmpFmuHandler(fmu_check_data_t *cdata, WorldInterface *world, A
         writeVehicleCommunicationData = writeVehicleCommunicationDataFlag->second;
     }
 
-    bool writeJsonOutput = writeSensorData || writeSensorView || writeSensorViewConfig || writeSensorViewConfigRequest || writeTrafficCommand || writeTrafficUpdate || writeMotionCommand || writeVehicleCommunicationData || writeGroundtruth;
+    bool writeJsonOutput = writeSensorData || writeSensorView || writeSensorViewConfig || writeSensorViewConfigRequest || writeTrafficCommand || writeTrafficUpdate || writeMotionCommand || writeVehicleCommunicationData || writeGroundTruth;
 #else
-    bool writeJsonOutput = writeSensorData || writeSensorView || writeGroundtruth;
+    bool writeJsonOutput = writeSensorData || writeSensorView || writeGroundTruth;
 #endif
 
     if (writeJsonOutput)
@@ -308,29 +308,29 @@ void OsmpFmuHandler::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterfa
 void OsmpFmuHandler::Init()
 {
     SetFmuParameters();
-    if (groundtruthVariable.has_value())
+    if (groundTruthVariable.has_value())
     {
         auto* worldData = static_cast<OWL::Interfaces::WorldData*>(world->GetWorldData());
-        auto& groundtruth = worldData->GetOsiGroundTruth();
+        auto& groundTruth = worldData->GetOsiGroundTruth();
 
         fmi2_integer_t fmuInputValues[3];
-        fmi2_value_reference_t valueReferences[3] = {fmuVariables.at(groundtruthVariable.value()+".base.lo").first,
-                                                     fmuVariables.at(groundtruthVariable.value()+".base.hi").first,
-                                                     fmuVariables.at(groundtruthVariable.value()+".size").first};
+        fmi2_value_reference_t valueReferences[3] = {fmuVariables.at(groundTruthVariable.value()+".base.lo").first,
+                                                     fmuVariables.at(groundTruthVariable.value()+".base.hi").first,
+                                                     fmuVariables.at(groundTruthVariable.value()+".size").first};
 
-        groundtruth.SerializeToString(&serializedGroundtruth);
-        encode_pointer_to_integer(serializedGroundtruth.data(),
+        groundTruth.SerializeToString(&serializedGroundTruth);
+        encode_pointer_to_integer(serializedGroundTruth.data(),
                                   fmuInputValues[1],
                                   fmuInputValues[0]);
-        fmuInputValues[2] = serializedGroundtruth.length();
+        fmuInputValues[2] = serializedGroundTruth.length();
 
         fmi2_import_set_integer(cdata->fmu2,
                                 valueReferences,     // array of value reference
                                 3,                   // number of elements
                                 fmuInputValues);     // array of values
-        if (writeGroundtruth)
+        if (writeGroundTruth)
         {
-            WriteJson(groundtruth, "Groundtruth.json");
+            WriteJson(groundTruth, "GroundTruth.json");
         }
     }
     if (sensorViewConfigRequestVariable.has_value())

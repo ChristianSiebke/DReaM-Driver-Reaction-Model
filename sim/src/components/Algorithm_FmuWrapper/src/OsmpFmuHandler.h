@@ -139,7 +139,7 @@ private:
     std::string serializedSensorViewConfig;
     std::string serializedSensorViewConfigRequest;
     osi3::SensorData sensorData;
-    std::string serializedGroundtruth;
+    std::string serializedGroundTruth;
 
 #ifdef USE_EXTENDED_OSI
     std::string serializedTrafficCommand;
@@ -162,7 +162,7 @@ private:
     std::optional<std::string> sensorViewConfigRequestVariable;
     std::optional<std::string> sensorDataInVariable;
     std::optional<std::string> sensorDataOutVariable;
-    std::optional<std::string> groundtruthVariable;
+    std::optional<std::string> groundTruthVariable;
 
 #ifdef USE_EXTENDED_OSI
     std::optional<std::string> motionCommandVariable;
@@ -196,7 +196,7 @@ private:
         },
         {"Init",
             {
-                {"Groundtruth", groundtruthVariable}
+                {"GroundTruth", groundTruthVariable}
             }
         }
     };
@@ -205,7 +205,7 @@ private:
     bool writeSensorViewConfig{false};
     bool writeSensorViewConfigRequest{false};
     bool writeSensorData{false};
-    bool writeGroundtruth{false};
+    bool writeGroundTruth{false};
 
 #ifdef USE_EXTENDED_OSI
     bool writeTrafficCommand{false};
