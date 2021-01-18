@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -815,6 +815,7 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectLaneMarkings)
     ASSERT_THAT(laneMarkings.at(2).width, DoubleEq(0.3));
     ASSERT_THAT(laneMarkings.at(2).color, Eq(LaneMarking::Color::Blue));
     ASSERT_THAT(laneMarkings.at(3).relativeStartDistance, DoubleEq(30.0));
+    ASSERT_THAT(laneMarkings.at(3).type, Eq(LaneMarking::Type::None));
 
     laneMarkings = world.GetLaneMarkings(roadGraph, root, -2, 11.0, 88.0, Side::Left).at(root);
     ASSERT_THAT(laneMarkings, SizeIs(4));

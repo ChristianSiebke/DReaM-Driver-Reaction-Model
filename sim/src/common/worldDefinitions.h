@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019, 2020 in-tech GmbH
+* Copyright (c) 2019, 2020, 2021 in-tech GmbH
 *               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -384,7 +384,8 @@ enum class Color
     Yellow,
     Red,
     Blue,
-    Green
+    Green,
+    Other
 };
 
 struct Entity

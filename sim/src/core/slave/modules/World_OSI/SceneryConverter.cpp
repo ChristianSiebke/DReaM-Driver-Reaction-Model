@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2020 HLRS, University of Stuttgart.
 *               2020 BMW AG
 *
@@ -779,6 +779,20 @@ std::vector<OWL::Id> SceneryConverter::CreateLaneBoundaries(RoadLaneInterface &o
             worldData.AddLaneBoundary(id_single, *roadMarkEntry, odSection.GetStart(), OWL::LaneMarkingSide::Single);
             laneBoundaries.push_back(id_single.value);
         }
+    }
+
+    if (odLane.GetRoadMarks().empty())
+    {
+        //!If there are no RoadMarks defined in OpenDRIVE, there should still be a LaneBoundary, so we treat it as if there was a RoadMark of type none
+        const RoadLaneRoadMark defaultRoadMark(0,
+                                               RoadLaneRoadDescriptionType::Center,
+                                               RoadLaneRoadMarkType::None,
+                                               RoadLaneRoadMarkColor::Undefined,
+                                               RoadLaneRoadMarkLaneChange::Both,
+                                               RoadLaneRoadMarkWeight::Undefined);
+        const auto id = repository.Register(openpass::utils::GetEntityInfo(defaultRoadMark));
+        worldData.AddLaneBoundary(id, defaultRoadMark, odSection.GetStart(), OWL::LaneMarkingSide::Single);
+        laneBoundaries.push_back(id.value);
     }
 
     return laneBoundaries;

@@ -91,13 +91,13 @@ This scenery consists of linear sections only.
 				</lane>
 			</center>
 			<right>
+                <!-- lane without road marks to check for if it defaults to 'none' -->
 				<lane id="-1" type="driving" level="true">
 					<link>
 						<successor id="-1" />
 						<predecessor id="-1"/>
 					</link>
 					<width sOffset="0" a="3.0" b="0" c="0" d="0" />
-					<roadMark weight='standard' sOffset='0' type='broken' color='standard' width='0.12' laneChange='both' />
 				</lane>
 				<lane id="-2" type="stop" level="true">
 					<link>
