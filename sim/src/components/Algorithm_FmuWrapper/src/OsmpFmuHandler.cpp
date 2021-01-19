@@ -188,6 +188,10 @@ void OsmpFmuHandler::UpdateInput(int localLinkId, const std::shared_ptr<const Si
     }
 #ifdef USE_EXTENDED_OSI
     trafficCommands.try_emplace(time, std::make_unique<osi3::TrafficCommand>());
+    trafficCommands[time]->mutable_timestamp()->set_seconds(time / 1000);
+    trafficCommands[time]->mutable_timestamp()->set_nanos((time * 1000000) % 1000000000);
+    auto currentInterfaceVersion = osi3::InterfaceVersion::descriptor()->file()->options().GetExtension(osi3::current_interface_version);
+    trafficCommands[time]->mutable_version()->CopyFrom(currentInterfaceVersion);
 
     if (localLinkId == 10)
     {

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020, 2021 in-tech GmbH
 *               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -25,6 +25,7 @@
 
 #include "OWL/DataTypes.h"
 #include "OWL/OpenDriveTypeMapper.h"
+#include "common/osiUtils.h"
 
 #include "WorldData.h"
 #include "WorldDataException.h"
@@ -47,6 +48,9 @@ WorldData::WorldData(const CallbackInterface* callbacks) :
 #else
     osiGroundTruth = std::make_unique<osi3::GroundTruth>();
 #endif
+
+    auto currentInterfaceVersion = osi3::InterfaceVersion::descriptor()->file()->options().GetExtension(osi3::current_interface_version);
+    osiGroundTruth->mutable_version()->CopyFrom(currentInterfaceVersion);
 }
 
 SensorView_ptr WorldData::GetSensorView(osi3::SensorViewConfiguration& conf, int agentId)
@@ -58,8 +62,7 @@ SensorView_ptr WorldData::GetSensorView(osi3::SensorViewConfiguration& conf, int
     SensorView_ptr sv = std::make_unique<osi3::SensorView>();
 #endif
 
-    auto currentInterfaceVersion = osi3::InterfaceVersion::descriptor()->file()->options().GetExtension(osi3::current_interface_version);
-    sv->mutable_version()->CopyFrom(currentInterfaceVersion);
+    osi3::utils::SetVersion(*sv);
 
     sv->mutable_sensor_id()->CopyFrom(conf.sensor_id());
     sv->mutable_mounting_position()->CopyFrom(conf.mounting_position());

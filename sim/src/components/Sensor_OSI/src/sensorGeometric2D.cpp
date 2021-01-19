@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019, 2020 in-tech GmbH
+* Copyright (c) 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -17,6 +17,7 @@
 #include <numeric>
 #include "common/boostGeometryCommon.h"
 #include "include/parameterInterface.h"
+#include "common/osiUtils.h"
 
 SensorGeometric2D::SensorGeometric2D(
         std::string componentName,
@@ -68,8 +69,8 @@ SensorGeometric2D::SensorGeometric2D(
 void SensorGeometric2D::Trigger(int time)
 {
     sensorData = {};
-    sensorData.mutable_timestamp()->set_seconds((time + latencyInMs) / 1000);
-    sensorData.mutable_timestamp()->set_nanos(((time + latencyInMs) % 1000) * 1e6);
+    osi3::utils::SetTimestamp(sensorData, time + latencyInMs);
+    osi3::utils::SetVersion(sensorData);
     SensorDetectionResults results = DetectObjects();
     sensorData = ApplyLatency(time, sensorData);
     sensorData.mutable_moving_object_header()->set_data_qualifier(osi3::DetectedEntityHeader_DataQualifier_DATA_QUALIFIER_AVAILABLE);
