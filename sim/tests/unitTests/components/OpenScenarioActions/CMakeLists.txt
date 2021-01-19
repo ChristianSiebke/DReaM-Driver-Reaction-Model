@@ -12,6 +12,7 @@ add_openpass_target(
     ${COMPONENT_SOURCE_DIR}/transformLaneChange.cpp
     ${COMPONENT_SOURCE_DIR}/transformSpeedAction.cpp
     ${COMPONENT_SOURCE_DIR}/transformAcquirePosition.cpp
+    ${COMPONENT_SOURCE_DIR}/transformCustomParameters.cpp
 
   HEADERS
     ${COMPONENT_SOURCE_DIR}/openScenarioActionsImpl.h

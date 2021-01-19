@@ -18,6 +18,7 @@
 #include "transformLaneChange.h"
 #include "transformSpeedAction.h"
 #include "transformTrajectory.h"
+#include "transformCustomParameters.h"
 /**
 * \brief Relays triggered OpenScenario actions as signals to other components
 *
@@ -61,8 +62,9 @@ public:
     void Trigger(int time) override;
 
     using TrajectorySignalLinkId = std::integral_constant<LinkId, 0>;
-    using AcquirePositionSignalLinkId = std::integral_constant<LinkId, 2>;
     using SpeedActionSignalLinkId = std::integral_constant<LinkId, 3>;
+    using AcquirePositionSignalLinkId = std::integral_constant<LinkId, 4>;
+    using CustomParametersSignalLinkId = std::integral_constant<LinkId, 5>;
 
 private:
     [[noreturn]] void ThrowUnregisteredIdentifier(const std::string &identifier);
@@ -75,11 +77,13 @@ private:
         ActionTransformRepository::Register(openScenario::transformation::Trajectory::Transform),
         ActionTransformRepository::Register(openScenario::transformation::LaneChange::Transform),
         ActionTransformRepository::Register(openScenario::transformation::SpeedAction::Transform),
-        ActionTransformRepository::Register(openScenario::transformation::AcquirePosition::Transform)};
+        ActionTransformRepository::Register(openScenario::transformation::AcquirePosition::Transform),
+        ActionTransformRepository::Register(openScenario::transformation::CustomParameters::Transform)};
 
     std::map<const std::string, LinkId> linkIdMapping{
         {openpass::events::TrajectoryEvent::TOPIC, TrajectorySignalLinkId::value},
         {openpass::events::LaneChangeEvent::TOPIC, TrajectorySignalLinkId::value},
         {openpass::events::SpeedActionEvent::TOPIC, SpeedActionSignalLinkId::value},
-        {openpass::events::AcquirePositionEvent::TOPIC, AcquirePositionSignalLinkId::value}};
+        {openpass::events::AcquirePositionEvent::TOPIC, AcquirePositionSignalLinkId::value},
+        {openpass::events::CustomParametersEvent::TOPIC, CustomParametersSignalLinkId::value}};
 };

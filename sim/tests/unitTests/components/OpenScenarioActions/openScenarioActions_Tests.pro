@@ -33,6 +33,7 @@ SOURCES += \
     $$UNIT_UNDER_TEST/transformLaneChange.cpp \
     $$UNIT_UNDER_TEST/transformSpeedAction.cpp \
     $$UNIT_UNDER_TEST/transformAcquirePosition.cpp \
+    $$UNIT_UNDER_TEST/transformCustomParameters.cpp \
     $$UNIT_UNDER_TEST/openScenarioActionsImpl.cpp \
     $$UNIT_UNDER_TEST/oscActionsCalculation.cpp \
     openScenarioActions_Tests.cpp
