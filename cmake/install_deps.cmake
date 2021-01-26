@@ -1,5 +1,5 @@
 ################################################################################
-# Copyright (c) 2020 in-tech GmbH
+# Copyright (c) 2020, 2021 in-tech GmbH
 #
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,10 @@ get_property(LIB_TARGET_LIST GLOBAL PROPERTY lib_target_list)
 
 message(STATUS "Collecting runtime library paths...")
 
+if(WIN32)
+  find_program(CYGPATH NAMES cygpath REQUIRED)
+endif()
+
 set(SEARCH_DIRS)
 set(RT_LIB_DIRS)
 
@@ -20,13 +24,13 @@ if(INSTALL_EXTRA_RUNTIME_DEPS)
   list(APPEND SEARCH_DIRS "${CMAKE_PREFIX_PATH}")
 endif()
 
-# build a list of library directory candidates 
+# build a list of library directory candidates
 foreach(SEARCH_DIR IN LISTS SEARCH_DIRS)
   message(DEBUG "processing ${SEARCH_DIR}")
   if(WIN32)
     execute_process (
         WORKING_DIRECTORY ${SEARCH_DIR}
-        COMMAND bash -c "for f in \$(find -iname \'*.dll\'); do realpath \$(dirname \$f); done | sort -u | sed -e \'s#^/\\([a-zA-Z]\\)/#\\1:/#\'"
+        COMMAND bash -c "for f in \$(find -iname \'*.dll\'); do cygpath -a -m \$(dirname \$f); done | sort -u"
         OUTPUT_VARIABLE DETECTED_LIBRARY_DIRS
     )
   else()
@@ -50,9 +54,9 @@ install(CODE
        DIRECTORIES ${RT_LIB_DIRS}
        EXECUTABLES ${EXE_TARGET_LIST}
        LIBRARIES ${LIB_TARGET_LIST})
-  
+
   message(DEBUG \"Resolved runtime dependencies: \${resolved_deps}\")
-  
+
   # skip system libraries
   if(\"${INSTALL_SYSTEM_RUNTIME_DEPS}\" STREQUAL \"OFF\")
     message(STATUS \"Filtering system runtime dependencies...\")
@@ -62,7 +66,7 @@ install(CODE
       list(FILTER resolved_deps EXCLUDE REGEX \"^/lib|^/usr\")
     endif()
   endif()
-  
+
   message(DEBUG \"RT_LIB_DIRS: ${RT_LIB_DIRS}\")
   message(DEBUG \"EXE list: ${EXE_TARGET_LIST}\")
   message(DEBUG \"LIB list: ${LIB_TARGET_LIST}\")
