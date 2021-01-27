@@ -8,20 +8,33 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
-#include"osi3/osi_version.pb.h"
+#include "osi3/osi_version.pb.h"
 
 namespace osi3::utils
 {
 
-//! Writes the InterfaceVersion into a OSI message
+/*!
+ * \brief Writes the currently used OSI interface version into a protobuf message
+ *
+ * \param[inout]   message   The message to populate with the version information
+ *
+ * \note The message has to have a field of type `osi3::InterfaceVersion` and the name `version`
+ */
 template <typename Message>
 [[maybe_unused]] static void SetVersion(Message& message)
 {
-  const auto currentInterfaceVersion = osi3::InterfaceVersion::descriptor()->file()->options().GetExtension(osi3::current_interface_version);
-  message.mutable_version()->CopyFrom(currentInterfaceVersion);
+    const auto currentInterfaceVersion = osi3::InterfaceVersion::descriptor()->file()->options().GetExtension(osi3::current_interface_version);
+    message.mutable_version()->CopyFrom(currentInterfaceVersion);
 }
 
-//! Writes the given Timestamp into a OSI message
+/*!
+ * \brief Writes the given timestamp into a protobuf message
+ *
+ * \param[inout]   message    The message to write the timestamp into
+ * \param[in]      timeInMs   The time to write into the protobuf message [ms]
+ *
+ * \note The message has to have a field of type `osi3::Timestamp` and the name `timestamp`
+ */
 template <typename Message>
 [[maybe_unused]] static void SetTimestamp(Message& message, int timeInMs)
 {

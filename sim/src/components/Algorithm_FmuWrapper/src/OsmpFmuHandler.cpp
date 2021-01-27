@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019, 2020 in-tech GmbH
+* Copyright (c) 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -18,6 +18,7 @@
 
 #include "common/customParametersSignal.h"
 #include "common/dynamicsSignal.h"
+#include "common/osiUtils.h"
 #include "common/sensorDataSignal.h"
 #include "common/trajectorySignal.h"
 #include "core/slave/modules/World_OSI/WorldData.h"
@@ -188,10 +189,8 @@ void OsmpFmuHandler::UpdateInput(int localLinkId, const std::shared_ptr<const Si
     }
 #ifdef USE_EXTENDED_OSI
     trafficCommands.try_emplace(time, std::make_unique<osi3::TrafficCommand>());
-    trafficCommands[time]->mutable_timestamp()->set_seconds(time / 1000);
-    trafficCommands[time]->mutable_timestamp()->set_nanos((time * 1000000) % 1000000000);
-    auto currentInterfaceVersion = osi3::InterfaceVersion::descriptor()->file()->options().GetExtension(osi3::current_interface_version);
-    trafficCommands[time]->mutable_version()->CopyFrom(currentInterfaceVersion);
+    osi3::utils::SetTimestamp(*trafficCommands[time], time);
+    osi3::utils::SetVersion(*trafficCommands[time]);
 
     if (localLinkId == 10)
     {

@@ -49,8 +49,7 @@ WorldData::WorldData(const CallbackInterface* callbacks) :
     osiGroundTruth = std::make_unique<osi3::GroundTruth>();
 #endif
 
-    auto currentInterfaceVersion = osi3::InterfaceVersion::descriptor()->file()->options().GetExtension(osi3::current_interface_version);
-    osiGroundTruth->mutable_version()->CopyFrom(currentInterfaceVersion);
+    osi3::utils::SetVersion(*osiGroundTruth);
 }
 
 SensorView_ptr WorldData::GetSensorView(osi3::SensorViewConfiguration& conf, int agentId)
