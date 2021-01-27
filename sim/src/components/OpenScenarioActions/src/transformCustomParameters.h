@@ -18,8 +18,10 @@ namespace openScenario::transformation {
 
 struct CustomParameters : public TransformerBase<CustomParameters, CustomParametersSignal, openpass::events::CustomParametersEvent>
 {
-    static std::shared_ptr<CustomParametersSignal> ConvertToSignal(const openpass::events::CustomParametersEvent &event, WorldInterface *, AgentInterface *, int);
-    static inline bool registered = ActionTransformRepository::Register(Transform);
+    static std::shared_ptr<CustomParametersSignal> ConvertToSignal(const openpass::events::CustomParametersEvent &event,
+                                                                   WorldInterface *,
+                                                                   AgentInterface *,
+                                                                   int);
 };
 
 } // namespace openScenario::transformation
