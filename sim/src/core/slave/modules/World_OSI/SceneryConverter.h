@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -40,7 +40,7 @@ struct ConversionStatus
 };
 
 using PathInJunctionConnector = std::function<void(const JunctionInterface*, const RoadInterface *, const RoadInterface *, const RoadInterface *, ContactPointType,
-                                                   ContactPointType, std::map<int, int>)>;
+                                                   ContactPointType, ContactPointType, std::map<int, int>)>;
 
 ConversionStatus ConnectJunction(const SceneryInterface* scenery, const JunctionInterface* junction,
                                     PathInJunctionConnector connectPathInJunction);
@@ -268,12 +268,13 @@ private:
     //! @param[in]  connectingRoad          connecting road == path
     //! @param[in]  outgoingRoad            road going out of the path
     //! @param[in]  incomingContactPoint    contactPoint on the path connected to the incomingRoad
+    //! @param[in]  connectingContactPoint  contactPoint of the connector to the incomingRoad
     //! @param[in]  outgoingContactPoint    contactPoint on the outgoing road connected to the path
     //! @param[in]  laneIdMapping           mapping of the lane ids between the incoming road and the path
     //! @return                         False, if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
     void ConnectPathInJunction(const JunctionInterface* junction, const RoadInterface *incomingRoad, const RoadInterface *connectingRoad, const RoadInterface*outgoingRoad,
-                               ContactPointType incomingContactPoint, ContactPointType outgoingContactPoint, std::map<int, int> laneIdMapping);
+                               ContactPointType incomingContactPoint, ContactPointType connectingContactPoint, ContactPointType outgoingContactPoint, std::map<int, int> laneIdMapping);
 
     //-----------------------------------------------------------------------------
     //! Connects OSI sections for all roads in the scenery internally and externally.

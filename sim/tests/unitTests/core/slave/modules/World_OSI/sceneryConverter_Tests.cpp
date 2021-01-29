@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2018, 2019, 2020 in-tech
+* Copyright (c) 2018, 2019, 2020, 2021 in-tech
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -141,7 +141,8 @@ public:
 };
 
 void Connect(const RoadInterface* incomingRoad, const RoadInterface* connectingRoad,
-             const RoadInterface* outgoingRoad, ContactPointType incomingContactPoint, ContactPointType outgoingContactPoint,
+             const RoadInterface* outgoingRoad, ContactPointType incomingContactPoint,
+             ContactPointType connectingContactPoint, ContactPointType outgoingContactPoint,
              std::map<int, int> laneIdMapping)
 {
 
@@ -152,6 +153,7 @@ TEST(SceneryConverter, RefactoringSafeguard_DoNotDelete)
 {
     FakeScenery stubScenery;
     FakeConnection stubConnection;
+    ON_CALL(stubConnection, GetContactPoint()).WillByDefault(Return(ContactPointType::Start));
 
     FakeOdRoad incomingRoad;
     ON_CALL(stubConnection, GetIncommingRoadId()).WillByDefault(Return("incomingRoadId"));
@@ -186,9 +188,9 @@ TEST(SceneryConverter, RefactoringSafeguard_DoNotDelete)
             &stubJunction,
 
             [&](const JunctionInterface*, const RoadInterface *incomingRoad, const RoadInterface *connectingRoad, const RoadInterface *outgoingRoad,
-                ContactPointType incomingContactPoint, ContactPointType outgoingContactPoint,
+                ContactPointType incomingContactPoint, ContactPointType connectingContactPoint, ContactPointType outgoingContactPoint,
                 std::map<int, int> laneIdMapping) {
-                Connect(incomingRoad, connectingRoad, outgoingRoad, incomingContactPoint,
+                Connect(incomingRoad, connectingRoad, outgoingRoad, incomingContactPoint, connectingContactPoint,
                                       outgoingContactPoint, laneIdMapping); });
 
     ASSERT_THAT(status, true);

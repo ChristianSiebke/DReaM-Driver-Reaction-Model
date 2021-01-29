@@ -36,9 +36,6 @@
 
 namespace Internal {
 
-using PathInJunctionConnector = std::function<void(const JunctionInterface *, const RoadInterface *, const RoadInterface *, const RoadInterface *, ContactPointType,
-                                                   ContactPointType, std::map<int, int>)>;
-
 ConversionStatus ConnectJunction(const SceneryInterface *scenery, const JunctionInterface *junction,
                                  PathInJunctionConnector connectPathInJunction)
 {
@@ -54,16 +51,19 @@ ConversionStatus ConnectJunction(const SceneryInterface *scenery, const Junction
 
         std::string outgoingRoadId;
 
+        ContactPointType connectingContactPoint = connection->GetContactPoint();
         ContactPointType incomingContactPoint;
         ContactPointType outgoingContactPoint;
 
+        const auto incomingRoadLinkType = (connectingContactPoint == ContactPointType::Start ? RoadLinkType::Predecessor : RoadLinkType::Successor);
+        const auto outgoingRoadLinkType = (connectingContactPoint == ContactPointType::Start ? RoadLinkType::Successor : RoadLinkType::Predecessor);
         for (auto roadLink : connectingRoad->GetRoadLinks())
         {
-            if (roadLink->GetType() == RoadLinkType::Predecessor)
+            if (roadLink->GetType() == incomingRoadLinkType)
             {
                 incomingContactPoint = roadLink->GetContactPoint();
             }
-            if (roadLink->GetType() == RoadLinkType::Successor)
+            if (roadLink->GetType() == outgoingRoadLinkType)
             {
                 outgoingRoadId = roadLink->GetElementId();
                 outgoingContactPoint = roadLink->GetContactPoint();
@@ -91,7 +91,7 @@ ConversionStatus ConnectJunction(const SceneryInterface *scenery, const Junction
         }
 
         auto laneIdMapping = connection->GetLinks();
-        connectPathInJunction(junction, incomingRoad, connectingRoad, outgoingRoad, incomingContactPoint, outgoingContactPoint,
+        connectPathInJunction(junction, incomingRoad, connectingRoad, outgoingRoad, incomingContactPoint, connectingContactPoint, outgoingContactPoint,
                               laneIdMapping);
     }
 
@@ -565,10 +565,10 @@ bool SceneryConverter::ConnectJunction(const JunctionInterface *junction)
     // this indirection to an internal function is a first step towards better testability. please do not remove.
     if (auto [status, error_message] = Internal::ConnectJunction(scenery, junction,
                                                                  [&](const JunctionInterface *junction, const RoadInterface *incomingRoad, const RoadInterface *connectingRoad, const RoadInterface *outgoingRoad,
-                                                                     ContactPointType incomingContactPoint, ContactPointType outgoingContactPoint,
+                                                                     ContactPointType incomingContactPoint, ContactPointType connectingContactPoint, ContactPointType outgoingContactPoint,
                                                                      std::map<int, int> laneIdMapping) {
                                                                      ConnectPathInJunction(junction, incomingRoad, connectingRoad, outgoingRoad, incomingContactPoint,
-                                                                                           outgoingContactPoint, laneIdMapping);
+                                                                                           connectingContactPoint, outgoingContactPoint, laneIdMapping);
                                                                  });
         status)
     {
@@ -586,9 +586,10 @@ bool SceneryConverter::ConnectJunction(const JunctionInterface *junction)
 }
 
 void SceneryConverter::ConnectPathInJunction(const JunctionInterface *junction, const RoadInterface *incomingRoad, const RoadInterface *connectingRoad,
-                                             const RoadInterface *outgoingRoad, ContactPointType incomingContactPoint, ContactPointType outgoingContactPoint,
+                                             const RoadInterface *outgoingRoad, ContactPointType incomingContactPoint, ContactPointType connectingContactPoint, ContactPointType outgoingContactPoint,
                                              std::map<int, int> laneIdMapping)
 {
+    bool connectAtStart = (connectingContactPoint == ContactPointType::Start);
     if (incomingContactPoint == ContactPointType::Start)
     {
         worldData.SetRoadPredecessorJunction(*incomingRoad, junction);
@@ -617,8 +618,8 @@ void SceneryConverter::ConnectPathInJunction(const JunctionInterface *junction, 
         incomingRoadSection = incomingRoad->GetLaneSections().back();
     }
 
-    RoadLaneSectionInterface *connectingRoadFirstSection = connectingRoad->GetLaneSections().front();
-    RoadLaneSectionInterface *connectingRoadLastSection = connectingRoad->GetLaneSections().back();
+    RoadLaneSectionInterface *connectingRoadFirstSection = connectAtStart ? connectingRoad->GetLaneSections().front() : connectingRoad->GetLaneSections().back();
+    RoadLaneSectionInterface *connectingRoadLastSection = connectAtStart ? connectingRoad->GetLaneSections().back() : connectingRoad->GetLaneSections().front();
     RoadLaneSectionInterface *outgoingRoadSection;
     if (outgoingContactPoint == ContactPointType::Start)
     {
@@ -642,7 +643,7 @@ void SceneryConverter::ConnectPathInJunction(const JunctionInterface *junction, 
         {
             continue;
         }
-        int outgoingLaneId = connectingLane.second->GetSuccessor().front();
+        int outgoingLaneId = connectAtStart ? connectingLane.second->GetSuccessor().front() : connectingLane.second->GetPredecessor().front();
         RoadLaneInterface *outgoingLane = outgoingRoadSection->GetLanes().at(outgoingLaneId);
         ConnectLaneToLane(outgoingLane, outgoingContactPoint, connectingLane.second);
     }
