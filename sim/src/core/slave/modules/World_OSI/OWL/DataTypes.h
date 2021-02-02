@@ -254,15 +254,20 @@ public:
     virtual void SetLaneType(LaneType specifiedType) = 0;
 
     //!Sets lane to the left of this lane
-    virtual void SetLeftLane(const Interfaces::Lane& lane) = 0;
+    virtual void SetLeftLane(const Interfaces::Lane& lane, bool transferLaneBoundary) = 0;
 
     //!Sets lane to the right of this lane
-    virtual void SetRightLane(const Interfaces::Lane& lane) = 0;
+    virtual void SetRightLane(const Interfaces::Lane& lane, bool transferLaneBoundary) = 0;
 
     //! Adds the ids to the list of left lane boundaries
     //! \param laneBoundaries   ids to add
     //!
     virtual void SetLeftLaneBoundaries(const std::vector<OWL::Id> laneBoundaries) = 0;
+
+    //! Adds the ids to the list of right lane boundaries
+    //! \param laneBoundaries   ids to add
+    //!
+    virtual void SetRightLaneBoundaries(const std::vector<OWL::Id> laneBoundaries) = 0;
 
     //!Returns a map of all WorldObjects that are currently in this lane
     virtual const LaneAssignments& GetWorldObjects(bool direction) const = 0;
@@ -794,9 +799,10 @@ public:
                               double curvature,
                               double heading) override;
 
-    void SetLeftLane(const Interfaces::Lane& lane) override;
-    void SetRightLane(const Interfaces::Lane& lane) override;
+    void SetLeftLane(const Interfaces::Lane& lane, bool transferLaneBoundary) override;
+    void SetRightLane(const Interfaces::Lane& lane, bool transferLaneBoundary) override;
     void SetLeftLaneBoundaries(const std::vector<OWL::Id> laneBoundaries) override;
+    void SetRightLaneBoundaries(const std::vector<OWL::Id> laneBoundaries) override;
     void SetLaneType(LaneType specifiedType) override;
 
     const Interfaces::LaneAssignments& GetWorldObjects(bool direction) const override;

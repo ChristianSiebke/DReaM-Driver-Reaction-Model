@@ -59,10 +59,10 @@ public:
                       double sOffset, double curvature, double heading));
     MOCK_METHOD1(SetLaneType,
                  void(LaneType specifiedType));
-    MOCK_METHOD1(SetLeftLane,
-                 void(const OWL::Interfaces::Lane& lane));
-    MOCK_METHOD1(SetRightLane,
-                 void(const OWL::Interfaces::Lane& lane));
+    MOCK_METHOD2(SetLeftLane,
+                 void(const OWL::Interfaces::Lane& lane, bool transferLaneBoundary));
+    MOCK_METHOD2(SetRightLane,
+                 void(const OWL::Interfaces::Lane& lane, bool transferLaneBoundary));
     MOCK_CONST_METHOD1(GetWorldObjects,
                        const OWL::Interfaces::LaneAssignments& (bool direction));
     MOCK_METHOD2(AddMovingObject,
@@ -82,6 +82,8 @@ public:
     MOCK_CONST_METHOD0(GetRightLaneBoundaries,
                        const std::vector<OWL::Id> ());
     MOCK_METHOD1(SetLeftLaneBoundaries,
+                 void (const std::vector<OWL::Id> laneBoundaries));
+    MOCK_METHOD1(SetRightLaneBoundaries,
                  void (const std::vector<OWL::Id> laneBoundaries));
     MOCK_CONST_METHOD0(GetNext, const std::vector<OWL::Id>& ());
     MOCK_CONST_METHOD0(GetPrevious, const std::vector<OWL::Id>& ());

@@ -315,7 +315,7 @@ bool Lane::Covers(double distance) const
     return false;
 }
 
-void Lane::SetLeftLane(const Interfaces::Lane& lane)
+void Lane::SetLeftLane(const Interfaces::Lane& lane, bool transferLaneBoundary)
 {
     if (leftLaneIsDummy)
     {
@@ -325,13 +325,17 @@ void Lane::SetLeftLane(const Interfaces::Lane& lane)
 
     leftLane = &lane;
     osiLane->mutable_classification()->add_left_adjacent_lane_id()->set_value(lane.GetId());
-    for (const auto& laneBoundary : lane.GetRightLaneBoundaries())
+
+    if (transferLaneBoundary)
     {
-        osiLane->mutable_classification()->add_left_lane_boundary_id()->set_value(laneBoundary);
+        for (const auto& laneBoundary : lane.GetRightLaneBoundaries())
+        {
+            osiLane->mutable_classification()->add_left_lane_boundary_id()->set_value(laneBoundary);
+        }
     }
 }
 
-void Lane::SetRightLane(const Interfaces::Lane& lane)
+void Lane::SetRightLane(const Interfaces::Lane& lane, bool transferLaneBoundary)
 {
     if (rightLaneIsDummy)
     {
@@ -341,6 +345,13 @@ void Lane::SetRightLane(const Interfaces::Lane& lane)
 
     rightLane = &lane;
     osiLane->mutable_classification()->add_right_adjacent_lane_id()->set_value(lane.GetId());
+    if (transferLaneBoundary)
+    {
+        for (const auto& laneBoundary : lane.GetLeftLaneBoundaries())
+        {
+            osiLane->mutable_classification()->add_right_lane_boundary_id()->set_value(laneBoundary);
+        }
+    }
 }
 
 void Lane::SetLeftLaneBoundaries(const std::vector<Id> laneBoundaries)
@@ -348,6 +359,14 @@ void Lane::SetLeftLaneBoundaries(const std::vector<Id> laneBoundaries)
     for(const auto& laneBoundary : laneBoundaries)
     {
         osiLane->mutable_classification()->add_left_lane_boundary_id()->set_value(laneBoundary);
+    }
+}
+
+void Lane::SetRightLaneBoundaries(const std::vector<Id> laneBoundaries)
+{
+    for(const auto& laneBoundary : laneBoundaries)
+    {
+        osiLane->mutable_classification()->add_right_lane_boundary_id()->set_value(laneBoundary);
     }
 }
 

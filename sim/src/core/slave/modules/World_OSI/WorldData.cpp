@@ -317,32 +317,43 @@ void WorldData::AddLane(const Id id, RoadLaneSectionInterface& odSection, const 
     osiLane->mutable_id()->set_value(id);
     osiLane->mutable_classification()->set_centerline_is_driving_direction(odLaneId < 0);
 
-    for (const auto& laneBoundary : laneBoundaries)
+    if (odLaneId < 0)
     {
-        osiLane->mutable_classification()->add_right_lane_boundary_id()->set_value(laneBoundary);
+        for (const auto& laneBoundary : laneBoundaries)
+        {
+            osiLane->mutable_classification()->add_right_lane_boundary_id()->set_value(laneBoundary);
+        }
     }
+    else
+    {
+        for (const auto& laneBoundary : laneBoundaries)
+        {
+            osiLane->mutable_classification()->add_left_lane_boundary_id()->set_value(laneBoundary);
+        }
+    }
+
+    bool ownBoundaryIsRight = odLaneId < 0;
 
     for (const auto& odLaneMapItem : odSection.GetLanes())
     {
         try
-        {
-            if ((odLaneId < 0 && odLaneMapItem.first == odLaneId + 1)
-                    || (odLaneId > 0 && odLaneMapItem.first == odLaneId - 1))
+        {   // UnserLane = 1, Andere = 2
+            if (odLaneMapItem.first == odLaneId + 1)
             {
                 // find a left neighbor
-                osi3::Lane* leftOsiLane = osiLanes.at(odLaneMapItem.second);
-                Lane& leftLane = *(lanes.at(leftOsiLane->id().value()));
-                lane.SetLeftLane(leftLane);
-                leftLane.SetRightLane(lane);
+                osi3::Lane* leftOsiLane = osiLanes.at(odLaneMapItem.second); //OSI-Lane von 2
+                Lane& leftLane = *(lanes.at(leftOsiLane->id().value())); //Lane von 2
+
+                lane.SetLeftLane(leftLane, ownBoundaryIsRight); // -1: true; 1: false
+                leftLane.SetRightLane(lane, !ownBoundaryIsRight); // -1: false; 1: true
             }
-            else if ((odLaneId < 0 && odLaneMapItem.first == odLaneId - 1)
-                     || (odLaneId > 0 && odLaneMapItem.first == odLaneId + 1))
+            else if (odLaneMapItem.first == odLaneId - 1)
             {
                 // is right neighbor
                 osi3::Lane* rightOsiLane = osiLanes.at(odLaneMapItem.second);
                 Lane& rightLane = *(lanes.at(rightOsiLane->id().value()));
-                lane.SetRightLane(rightLane);
-                rightLane.SetLeftLane(lane);
+                lane.SetRightLane(rightLane, !ownBoundaryIsRight); // -1: false; 1: true
+                rightLane.SetLeftLane(lane, ownBoundaryIsRight); // -1: true; 1: false
             }
         }
         catch (std::out_of_range&)
@@ -351,9 +362,14 @@ void WorldData::AddLane(const Id id, RoadLaneSectionInterface& odSection, const 
         }
     }
 
-    if (odLaneId == 1 || odLaneId == -1)
+    if (odLaneId == -1)
     {
         lane.SetLeftLaneBoundaries(section.GetCenterLaneBoundary());
+    }
+
+    if (odLaneId == 1)
+    {
+        lane.SetRightLaneBoundaries(section.GetCenterLaneBoundary());
     }
 
     lane.SetLaneType(OpenDriveTypeMapper::OdToOwlLaneType(odLane.GetType()));
@@ -644,12 +660,28 @@ void WorldData::AddLaneGeometryPoint(const RoadLaneInterface& odLane,
 
     lane->AddLaneGeometryJoint(pointLeft, pointCenter, pointRight, sOffset, curvature, heading);
 
-    for (auto& laneBoundaryIndex : lane->GetRightLaneBoundaries())
+    auto odLaneId = odLane.GetId();
+
+    if (odLaneId < 0)
     {
-        auto& laneBoundary = laneBoundaries.at(laneBoundaryIndex);
-        if (laneBoundary->GetSStart() <= sOffset && laneBoundary->GetSEnd() >= sOffset)
+        for (auto& laneBoundaryIndex : lane->GetRightLaneBoundaries())
         {
-            laneBoundary->AddBoundaryPoint(pointRight, heading);
+            auto& laneBoundary = laneBoundaries.at(laneBoundaryIndex);
+            if (laneBoundary->GetSStart() <= sOffset && laneBoundary->GetSEnd() >= sOffset)
+            {
+                laneBoundary->AddBoundaryPoint(pointRight, heading);
+            }
+        }
+    }
+    else
+    {
+        for (auto& laneBoundaryIndex : lane->GetLeftLaneBoundaries())
+        {
+            auto& laneBoundary = laneBoundaries.at(laneBoundaryIndex);
+            if (laneBoundary->GetSStart() <= sOffset && laneBoundary->GetSEnd() >= sOffset)
+            {
+                laneBoundary->AddBoundaryPoint(pointLeft, heading);
+            }
         }
     }
 }
