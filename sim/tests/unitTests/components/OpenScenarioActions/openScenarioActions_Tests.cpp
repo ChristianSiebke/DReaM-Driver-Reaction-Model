@@ -29,6 +29,8 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 
 using AcquirePositionSignalLinkId = OpenScenarioActionsImplementation::AcquirePositionSignalLinkId;
+using SpeedActionSignalLinkId = OpenScenarioActionsImplementation::SpeedActionSignalLinkId;
+
 
 using namespace openpass::events;
 
@@ -609,6 +611,104 @@ TEST(OpenScenarioActions_Test, CustomEventForOtherAgent_IsIgnored)
     ASSERT_TRUE(customLaneChangeSignal);
     ASSERT_THAT(customLaneChangeSignal->componentState, Eq(ComponentState::Disabled));
     ASSERT_THAT(customLaneChangeSignal->value, 0);
+}
+
+TEST(OpenScenarioActions_Test, SpeedActionEventForOwnAgent_IsForwardedAsSignal)
+{
+    std::map<std::string, int> fakeLinkIdAssignement = {
+        {SpeedActionEvent::TOPIC, TEST_LINK}};
+
+    NiceMock<FakeParameter> fakeParameter;
+    ON_CALL(fakeParameter, GetParametersInt()).WillByDefault(ReturnRef(fakeLinkIdAssignement));
+
+    constexpr int agentId = 10;
+    constexpr double fakeSpeed = 7.0;
+    constexpr int time = 0;
+
+    openScenario::SpeedAction speedAction{};
+    speedAction.target = openScenario::AbsoluteTargetSpeed{fakeSpeed};
+
+    FakeAgent fakeAgent;
+    ON_CALL(fakeAgent, GetId()).WillByDefault(Return(agentId));
+    FakeEventNetwork fakeEventNetwork;
+
+    const auto event{std::make_shared<SpeedActionEvent>(time, "", "", agentId, speedAction)};
+    std::vector<EventInterface const *> events{event.get()};
+    ON_CALL(fakeEventNetwork, GetTrigger(SpeedActionEvent::TOPIC)).WillByDefault(Return(events));
+
+    auto openScenarioActions = OpenScenarioActionsImplementation("",
+                                                                 0,
+                                                                 0,
+                                                                 0,
+                                                                 0,
+                                                                 0,
+                                                                 nullptr,
+                                                                 nullptr,
+                                                                 &fakeParameter,
+                                                                 nullptr,
+                                                                 nullptr,
+                                                                 &fakeAgent,
+                                                                 &fakeEventNetwork);
+
+    openScenarioActions.Trigger(time);
+
+    std::shared_ptr<SignalInterface const> signal;
+
+    openScenarioActions.UpdateOutput(SpeedActionSignalLinkId::value, signal, time);
+
+    const auto speedActionSignal = std::dynamic_pointer_cast<const SpeedActionSignal>(signal);
+    ASSERT_TRUE(speedActionSignal);
+    ASSERT_THAT(speedActionSignal->componentState, Eq(ComponentState::Acting));
+    ASSERT_EQ(speedActionSignal->targetSpeed, fakeSpeed);
+}
+
+
+TEST(OpenScenarioActions_Test, SpeedActionEventForOtherAgent_IsIgnored)
+{
+    std::map<std::string, int> fakeLinkIdAssignment = {
+        {SpeedActionEvent::TOPIC, TEST_LINK}};
+
+    NiceMock<FakeParameter> fakeParameter;
+    ON_CALL(fakeParameter, GetParametersInt()).WillByDefault(ReturnRef(fakeLinkIdAssignment));
+
+    constexpr double fakeSpeed = 7.0;
+    constexpr int time = 0;
+    constexpr int ownAgentId = 10;
+    constexpr int otherAgentId = 11;
+
+    openScenario::SpeedAction speedAction{};
+    speedAction.target = openScenario::AbsoluteTargetSpeed{fakeSpeed};
+
+    FakeAgent fakeAgent;
+    ON_CALL(fakeAgent, GetId()).WillByDefault(Return(ownAgentId));
+    FakeEventNetwork fakeEventNetwork;
+
+    const auto event{std::make_shared<SpeedActionEvent>(time, "", "", otherAgentId, speedAction)};
+    std::vector<EventInterface const *> events{event.get()};
+    ON_CALL(fakeEventNetwork, GetTrigger(SpeedActionEvent::TOPIC)).WillByDefault(Return(events));
+
+    auto openScenarioActions = OpenScenarioActionsImplementation("",
+                                                                 0,
+                                                                 0,
+                                                                 0,
+                                                                 0,
+                                                                 0,
+                                                                 nullptr,
+                                                                 nullptr,
+                                                                 &fakeParameter,
+                                                                 nullptr,
+                                                                 nullptr,
+                                                                 &fakeAgent,
+                                                                 &fakeEventNetwork);
+
+    openScenarioActions.Trigger(time);
+
+    std::shared_ptr<SignalInterface const> signal;
+    openScenarioActions.UpdateOutput(SpeedActionSignalLinkId::value, signal, time);
+
+    const auto speedActionSignal = std::dynamic_pointer_cast<const SpeedActionSignal>(signal);
+    ASSERT_TRUE(speedActionSignal);
+    ASSERT_THAT(speedActionSignal->componentState, Eq(ComponentState::Disabled));
 }
 
 struct OscActionsCalculation_LaneChangeData

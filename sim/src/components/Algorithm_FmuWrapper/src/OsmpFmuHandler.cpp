@@ -21,6 +21,7 @@
 #include "common/osiUtils.h"
 #include "common/sensorDataSignal.h"
 #include "common/trajectorySignal.h"
+#include "common/speedActionSignal.h"
 #include "core/slave/modules/World_OSI/WorldData.h"
 #include "google/protobuf/util/json_util.h"
 #include "variant_visitor.h"
@@ -220,6 +221,14 @@ void OsmpFmuHandler::UpdateInput(int localLinkId, const std::shared_ptr<const Si
             {
                 trafficCommands[time]->add_action()->mutable_custom_action()->set_command(parameter);
             }
+        }
+    }
+    else if (localLinkId == 13)
+    {
+        const auto signal = std::dynamic_pointer_cast<SpeedActionSignal const>(data);
+        if (signal && signal->componentState == ComponentState::Acting)
+        {
+            trafficCommands[time]->add_action()->mutable_speed_action()->set_absolute_target_speed(signal->targetSpeed);
         }
     }
 
