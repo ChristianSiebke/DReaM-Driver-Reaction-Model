@@ -209,11 +209,10 @@ With corresponding defined indices :
 | Acceleration                           | Algorithm             | 13      |
 | Lateral                                | Algorithm             | 14      |
 | SecondaryDriverTasks                   | Algorithm             | 19      |
-| Trajectory                             | OpenScenarioActions   | 71      |
-| AcquireGlobalPosition                  | OpenScenarioActions   | 74      |
-| CustomParameters (CustomCommandAction) | OpenScenarioActions   | 75      |
-| SpeedAction                            | OpenScenarioActions   | 76      |
-| SpeedAction                            | Dynamics              | 76      |
+| Trajectory                             | Special               | 71      |
+| AcquireGlobalPosition                  | Special               | 74      |
+| CustomParameters (CustomCommandAction) | Special               | 75      |
+| SpeedAction                            | Special               | 76      |
 | SensorDriver                           | Sensor                | 81      |
 | SensorData                             | Sensor                | 90      |
 | ParametersVehicle                      | Parameters            | 92      |
