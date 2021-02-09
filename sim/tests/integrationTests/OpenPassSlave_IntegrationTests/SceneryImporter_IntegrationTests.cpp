@@ -29,6 +29,7 @@
 using ::testing::DoubleEq;
 using ::testing::DoubleNear;
 using ::testing::ElementsAre;
+using ::testing::Contains;
 using ::testing::Eq;
 using ::testing::IsEmpty;
 using ::testing::IsTrue;
@@ -82,6 +83,17 @@ struct TESTSCENERY_FACTORY
     }
 };
 
+std::ostream& operator<<(std::ostream& os, const RelativeWorldView::Lane& lane)
+{
+    os << "id: " << lane.relativeId << ", "
+       << "direction: " << lane.inDrivingDirection << ","
+       << "type: " << static_cast<int>(lane.type) << ","
+       << "predecessor: " << lane.predecessor.value_or(-999) << ","
+       << "successor: " <<lane.successor.value_or(-999);
+
+    return os;
+}
+
 //! This enum is used to help checking lane connections as specified in the openDrive file.
 //! Note: It's possible for two connected lanes to be each others predecessor/successor.
 enum LaneConnectionType
@@ -124,25 +136,46 @@ const OWL::Interfaces::Lane* GetLaneById(OWL::Interfaces::WorldData* worldData, 
 
 //! Check if lanes are connected according to openDrive definition.
 //! The connection (e.g. predecessor or succesor) can be specified for each lane.
-void CheckLaneConnections(OWL::Interfaces::WorldData* worldData, std::list<const OWL::Interfaces::Lane*> firstSectionLanes, std::list<const OWL::Interfaces::Lane*> secondSectionLanes, int firstLaneId, int secondLaneId, LaneConnectionType howIsConnection = LaneConnectionType::REGULAR)
+void CheckLaneConnections(OWL::Interfaces::WorldData* worldData, const std::list<const OWL::Interfaces::Lane*>& firstSectionLanes, std::list<const OWL::Interfaces::Lane*> secondSectionLanes, int firstLaneId, int secondLaneId, LaneConnectionType howIsConnection = LaneConnectionType::REGULAR, bool strict = true)
 {
     auto firstLane = GetLaneById(worldData, firstSectionLanes, firstLaneId);
     auto secondLane = GetLaneById(worldData, secondSectionLanes, secondLaneId);
 
-    switch(howIsConnection)
+    if (strict)
     {
-    case PREVIOUS:
-        ASSERT_THAT(firstLane->GetPrevious(), ElementsAre(secondLane->GetId()));
-        ASSERT_THAT(secondLane->GetPrevious(), ElementsAre(firstLane->GetId()));
-        break;
-    case NEXT:
-        ASSERT_THAT(firstLane->GetNext(), ElementsAre(secondLane->GetId()));
-        ASSERT_THAT(secondLane->GetNext(), ElementsAre(firstLane->GetId()));
-        break;
-    default:
-        ASSERT_THAT(firstLane->GetNext(), ElementsAre(secondLane->GetId()));
-        ASSERT_THAT(secondLane->GetPrevious(), ElementsAre(firstLane->GetId()));
-        break;
+        switch(howIsConnection)
+        {
+        case PREVIOUS:
+            ASSERT_THAT(firstLane->GetPrevious(), ElementsAre(secondLane->GetId()));
+            ASSERT_THAT(secondLane->GetPrevious(), ElementsAre(firstLane->GetId()));
+            break;
+        case NEXT:
+            ASSERT_THAT(firstLane->GetNext(), ElementsAre(secondLane->GetId()));
+            ASSERT_THAT(secondLane->GetNext(), ElementsAre(firstLane->GetId()));
+            break;
+        default:
+            ASSERT_THAT(firstLane->GetNext(), ElementsAre(secondLane->GetId()));
+            ASSERT_THAT(secondLane->GetPrevious(), ElementsAre(firstLane->GetId()));
+            break;
+        }
+    }
+    else
+    {
+        switch(howIsConnection)
+        {
+        case PREVIOUS:
+            ASSERT_THAT(firstLane->GetPrevious(), Contains(secondLane->GetId()));
+            ASSERT_THAT(secondLane->GetPrevious(), Contains(firstLane->GetId()));
+            break;
+        case NEXT:
+            ASSERT_THAT(firstLane->GetNext(), Contains(secondLane->GetId()));
+            ASSERT_THAT(secondLane->GetNext(), Contains(firstLane->GetId()));
+            break;
+        default:
+            ASSERT_THAT(firstLane->GetNext(), Contains(secondLane->GetId()));
+            ASSERT_THAT(secondLane->GetPrevious(), Contains(firstLane->GetId()));
+            break;
+        }
     }
 }
 
@@ -370,6 +403,76 @@ TEST(SceneryImporter_IntegrationTests, MultipleRoadsWithJunctions_ImportWithCorr
     ASSERT_DOUBLE_EQ(world.GetLaneWidth("5", -2, 15.0), 6.0);
 }
 
+TEST(DISABLED_SceneryImporter_IntegrationTests, TJunction_ImportWithCorrectLanes)
+{
+    TESTSCENERY_FACTORY tsf;
+    ASSERT_THAT(tsf.instantiate("TJunctionBig.xodr"), IsTrue());
+
+    auto& world = tsf.world;
+
+    RoadGraph roadGraph;
+    RoadGraphVertex node1 = add_vertex(RouteElement{"R1", true}, roadGraph);
+    RoadGraphVertex node2 = add_vertex(RouteElement{"R2", true}, roadGraph);
+    RoadGraphVertex node3 = add_vertex(RouteElement{"R3", true}, roadGraph);
+    RoadGraphVertex node2_1 = add_vertex(RouteElement{"R2-1", true}, roadGraph);
+    RoadGraphVertex node2_3 = add_vertex(RouteElement{"R2-3", true}, roadGraph);
+    add_edge(node2, node2_1, roadGraph);
+    add_edge(node2_1, node1, roadGraph);
+    add_edge(node2, node2_3, roadGraph);
+    add_edge(node2_3, node3, roadGraph);
+
+    const auto relativeLanes = world.GetRelativeLanes(roadGraph, node2, -1, 0.0, 320.0);
+    const auto relativeLanesLeft = relativeLanes.at(node1);
+    ASSERT_THAT(relativeLanesLeft, SizeIs(3));
+
+    const auto firstSectionLeft = relativeLanesLeft.at(0);
+    ASSERT_THAT(firstSectionLeft.startS, DoubleEq(0.0));
+    ASSERT_THAT(firstSectionLeft.endS, DoubleEq(200.0));
+    ASSERT_THAT(firstSectionLeft.lanes, UnorderedElementsAre(RelativeWorldView::Lane{2, false, LaneType::Driving, std::nullopt, std::nullopt},
+                                                             RelativeWorldView::Lane{1, false, LaneType::Driving, std::nullopt, std::nullopt},
+                                                             RelativeWorldView::Lane{0, true, LaneType::Driving, std::nullopt, 0},
+                                                             RelativeWorldView::Lane{-1, true, LaneType::Driving, std::nullopt, -1}));
+
+    const auto secondSectionLeft = relativeLanesLeft.at(1);
+    ASSERT_THAT(secondSectionLeft.startS, DoubleEq(200.0));
+    ASSERT_THAT(secondSectionLeft.endS, DoubleEq(215.708));
+    ASSERT_THAT(secondSectionLeft.lanes, UnorderedElementsAre(RelativeWorldView::Lane{0, true, LaneType::Driving, 0, 0},
+                                                              RelativeWorldView::Lane{-1, true, LaneType::Driving, -1, -1}));
+
+    const auto thirdSectionLeft = relativeLanesLeft.at(2);
+    ASSERT_THAT(thirdSectionLeft.startS, DoubleEq(215.708));
+    ASSERT_THAT(thirdSectionLeft.endS, DoubleEq(415.708));
+    ASSERT_THAT(thirdSectionLeft.lanes, UnorderedElementsAre(RelativeWorldView::Lane{2, false, LaneType::Driving, std::nullopt, std::nullopt},
+                                                             RelativeWorldView::Lane{1, false, LaneType::Driving, std::nullopt, std::nullopt},
+                                                             RelativeWorldView::Lane{0, true, LaneType::Driving, 0, std::nullopt},
+                                                             RelativeWorldView::Lane{-1, true, LaneType::Driving, -1, std::nullopt}));
+
+    const auto relativeLanesRight = relativeLanes.at(node3);
+    ASSERT_THAT(relativeLanesRight, SizeIs(3));
+
+    const auto firstSectionRight = relativeLanesRight.at(0);
+    ASSERT_THAT(firstSectionRight.startS, DoubleEq(0.0));
+    ASSERT_THAT(firstSectionRight.endS, DoubleEq(200.0));
+    ASSERT_THAT(firstSectionRight.lanes, UnorderedElementsAre(RelativeWorldView::Lane{2, false, LaneType::Driving, std::nullopt, std::nullopt},
+                                                              RelativeWorldView::Lane{1, false, LaneType::Driving, std::nullopt, std::nullopt},
+                                                              RelativeWorldView::Lane{0, true, LaneType::Driving, std::nullopt, 0},
+                                                              RelativeWorldView::Lane{-1, true, LaneType::Driving, std::nullopt, -1}));
+
+    const auto secondSectionRight = relativeLanesRight.at(1);
+    ASSERT_THAT(secondSectionRight.startS, DoubleEq(200.0));
+    ASSERT_THAT(secondSectionRight.endS, DoubleEq(215.708));
+    ASSERT_THAT(secondSectionRight.lanes, UnorderedElementsAre(RelativeWorldView::Lane{0, true, LaneType::Driving, 0, 0},
+                                                               RelativeWorldView::Lane{-1, true, LaneType::Driving, -1, -1}));
+
+    const auto thirdSectionRight = relativeLanesRight.at(2);
+    ASSERT_THAT(thirdSectionRight.startS, DoubleEq(215.708));
+    ASSERT_THAT(thirdSectionRight.endS, DoubleEq(415.708));
+    ASSERT_THAT(thirdSectionRight.lanes, UnorderedElementsAre(RelativeWorldView::Lane{2, false, LaneType::Driving, std::nullopt, std::nullopt},
+                                                              RelativeWorldView::Lane{1, false, LaneType::Driving, std::nullopt, std::nullopt},
+                                                              RelativeWorldView::Lane{0, true, LaneType::Driving, std::nullopt, 0},
+                                                              RelativeWorldView::Lane{-1, true, LaneType::Driving, std::nullopt, -1}));
+}
+
 
 //! Test correct lane predeccessor and successors
 //! Scope is on WorldData and OWL-Level
@@ -490,6 +593,74 @@ TEST(SceneryImporter_IntegrationTests, MultipleRoadsWithJunctions_CheckForCorrec
 
     CheckLaneConnections(worldData, lanesLowerConnectingRoad, lanesLowerOutgoingRoad, -1, -1);
     CheckLaneConnections(worldData, lanesLowerConnectingRoad, lanesLowerOutgoingRoad, -2, -2);
+}
+
+TEST(SceneryImporter_IntegrationTests, TJunction_CheckForCorrectLaneConnections)
+{
+    TESTSCENERY_FACTORY tsf;
+    ASSERT_THAT(tsf.instantiate("TJunctionBig.xodr"), IsTrue());
+
+    auto& world = tsf.world;
+
+    OWL::Interfaces::WorldData* worldData = static_cast<OWL::Interfaces::WorldData*>(world.GetWorldData());
+
+    ASSERT_EQ(worldData->GetRoads().at("R1")->GetSections().size(), 1);
+    ASSERT_EQ(worldData->GetRoads().at("R2")->GetSections().size(), 1);
+    ASSERT_EQ(worldData->GetRoads().at("R3")->GetSections().size(), 1);
+    ASSERT_EQ(worldData->GetRoads().at("R2-1")->GetSections().size(), 1);
+    ASSERT_EQ(worldData->GetRoads().at("R2-3")->GetSections().size(), 1);
+
+    const auto& lanesIncomingRoad = GetDistanceSortedSectionsForRoad(worldData, "R2").back()->GetLanes();
+    const auto& lanesLeftOutgoingRoad = GetDistanceSortedSectionsForRoad(worldData, "R1").back()->GetLanes();
+    const auto& lanesRightOutgoingRoad = GetDistanceSortedSectionsForRoad(worldData, "R3").back()->GetLanes();
+    const auto& lanesLeftConnectingRoad = GetDistanceSortedSectionsForRoad(worldData, "R2-1").back()->GetLanes();
+    const auto& lanesRightConnectingRoad = GetDistanceSortedSectionsForRoad(worldData, "R2-3").back()->GetLanes();
+
+
+    //check connections between incoming road and connecting roads
+    CheckLaneConnections(worldData, lanesIncomingRoad, lanesLeftConnectingRoad, -1, 1, LaneConnectionType::NEXT, false);
+    CheckLaneConnections(worldData, lanesIncomingRoad, lanesLeftConnectingRoad, -2, 2, LaneConnectionType::NEXT, false);
+
+    CheckLaneConnections(worldData, lanesIncomingRoad, lanesRightConnectingRoad, -1, -1, LaneConnectionType::REGULAR, false);
+    CheckLaneConnections(worldData, lanesIncomingRoad, lanesRightConnectingRoad, -2, -2, LaneConnectionType::REGULAR, false);
+
+    //check connections between connecting roads and outgoing roads
+    CheckLaneConnections(worldData, lanesLeftOutgoingRoad, lanesLeftConnectingRoad, 1, 1, LaneConnectionType::REGULAR, false);
+    CheckLaneConnections(worldData, lanesLeftOutgoingRoad, lanesLeftConnectingRoad, 2, 2, LaneConnectionType::REGULAR, false);
+
+    CheckLaneConnections(worldData, lanesRightConnectingRoad, lanesRightOutgoingRoad, -1, 1, LaneConnectionType::NEXT, false);
+    CheckLaneConnections(worldData, lanesRightConnectingRoad, lanesRightOutgoingRoad, -2, 2, LaneConnectionType::NEXT, false);
+}
+
+void CheckLaneNeighbours(OWL::Interfaces::WorldData* worldData, const std::list<const OWL::Interfaces::Lane*>& lanes, int leftLaneId, int rightLaneId)
+{
+    auto leftLane = GetLaneById(worldData, lanes, leftLaneId);
+    auto rightLane = GetLaneById(worldData, lanes, rightLaneId);
+
+    EXPECT_THAT(&leftLane->GetRightLane(), Eq(rightLane));
+    EXPECT_THAT(&rightLane->GetLeftLane(), Eq(leftLane));
+}
+
+TEST(SceneryImporter_IntegrationTests, TJunction_CheckForCorrectLaneNeighbours)
+{
+    TESTSCENERY_FACTORY tsf;
+    ASSERT_THAT(tsf.instantiate("TJunctionBig.xodr"), IsTrue());
+
+    auto& world = tsf.world;
+
+    OWL::Interfaces::WorldData* worldData = static_cast<OWL::Interfaces::WorldData*>(world.GetWorldData());
+
+    const auto& lanesRoad2 = GetDistanceSortedSectionsForRoad(worldData, "R2").back()->GetLanes();
+    const auto& lanesRoad2_1 = GetDistanceSortedSectionsForRoad(worldData, "R2-1").back()->GetLanes();
+    const auto& lanesRoad2_3 = GetDistanceSortedSectionsForRoad(worldData, "R2-3").back()->GetLanes();
+
+    CheckLaneNeighbours(worldData, lanesRoad2, 2, 1);
+    CheckLaneNeighbours(worldData, lanesRoad2, 1, -1);
+    CheckLaneNeighbours(worldData, lanesRoad2, -1, -2);
+
+    CheckLaneNeighbours(worldData, lanesRoad2_1, 2, 1);
+
+    CheckLaneNeighbours(worldData, lanesRoad2_3, -1, -2);
 }
 
 //!Workaround, because the OSI lane is a private member

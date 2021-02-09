@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020, 2021 in-tech GmbH
 *               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -1649,8 +1649,8 @@ bool RoadMarking::IsValidForLane(OWL::Id laneId) const
 
 void RoadMarking::CopyToGroundTruth(osi3::GroundTruth& target) const
 {
-    auto newTrafficSign = target.add_traffic_sign();
-    newTrafficSign->CopyFrom(*osiSign);
+    auto newRoadMarking = target.add_road_marking();
+    newRoadMarking->CopyFrom(*osiSign);
 }
 
 LaneBoundary::LaneBoundary(osi3::LaneBoundary *osiLaneBoundary, double width, double sStart, double sEnd, LaneMarkingSide side) :
