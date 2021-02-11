@@ -214,6 +214,32 @@
                     <lane id="2" type="driving" level="true">
                         <link>
                             <predecessor id="2"/>
+                            <successor id="2"/>
+                        </link>
+                        <width sOffset="0" a="4.0" b="0" c="0" d="0"/>
+                        <roadMark weight="standard" sOffset="0" type="none" color="standard" width="0.12" laneChange="both"/>
+                    </lane>
+                    <lane id="1" type="driving" level="true">
+                        <link>
+                            <predecessor id="1"/>
+                            <successor id="1"/>
+                        </link>
+                        <width sOffset="0" a="4.0" b="0" c="0" d="0"/>
+                        <roadMark weight="standard" sOffset="0" type="none" color="standard" width="0.12" laneChange="both"/>
+                    </lane>
+                </left>
+                <center>
+                    <lane id="0" type="border" level="true">
+                        <link/>
+                        <roadMark weight="standard" sOffset="0" type="none" color="standard" width="0.12" laneChange="both"/>
+                    </lane>
+                </center>
+            </laneSection>
+            <laneSection s="10.0000000000000000e+000">
+                <left>
+                    <lane id="2" type="driving" level="true">
+                        <link>
+                            <predecessor id="2"/>
                             <successor id="-2"/>
                         </link>
                         <width sOffset="0" a="4.0" b="0" c="0" d="0"/>
@@ -336,6 +362,32 @@
         <lateralProfile/>
         <lanes>
             <laneSection s="0.0000000000000000e+000">
+                <center>
+                    <lane id="0" type="border" level="true">
+                        <link/>
+                        <roadMark weight="standard" sOffset="0" type="none" color="standard" width="0.12" laneChange="both"/>
+                    </lane>
+                </center>
+                <right>
+                    <lane id="-1" type="driving" level="true">
+                        <link>
+                            <predecessor id="-1"/>
+                            <successor id="-1"/>
+                        </link>
+                        <width sOffset="0" a="4.0" b="0" c="0" d="0"/>
+                        <roadMark weight="standard" sOffset="0" type="none" color="standard" width="0.12" laneChange="both"/>
+                    </lane>
+                    <lane id="-2" type="driving" level="true">
+                        <link>
+                            <predecessor id="-2"/>
+                            <successor id="-2"/>
+                        </link>
+                        <width sOffset="0" a="4.0" b="0" c="0" d="0"/>
+                        <roadMark weight="standard" sOffset="0" type="solid" color="standard" width="0.12" laneChange="both"/>
+                    </lane>
+                </right>
+            </laneSection>
+            <laneSection s="10.0000000000000000e+000">
                 <center>
                     <lane id="0" type="border" level="true">
                         <link/>

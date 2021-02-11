@@ -403,7 +403,7 @@ TEST(SceneryImporter_IntegrationTests, MultipleRoadsWithJunctions_ImportWithCorr
     ASSERT_DOUBLE_EQ(world.GetLaneWidth("5", -2, 15.0), 6.0);
 }
 
-TEST(DISABLED_SceneryImporter_IntegrationTests, TJunction_ImportWithCorrectLanes)
+TEST(SceneryImporter_IntegrationTests, TJunction_ImportWithCorrectLanes)
 {
     TESTSCENERY_FACTORY tsf;
     ASSERT_THAT(tsf.instantiate("TJunctionBig.xodr"), IsTrue());
@@ -411,10 +411,10 @@ TEST(DISABLED_SceneryImporter_IntegrationTests, TJunction_ImportWithCorrectLanes
     auto& world = tsf.world;
 
     RoadGraph roadGraph;
-    RoadGraphVertex node1 = add_vertex(RouteElement{"R1", true}, roadGraph);
+    RoadGraphVertex node1 = add_vertex(RouteElement{"R1", false}, roadGraph);
     RoadGraphVertex node2 = add_vertex(RouteElement{"R2", true}, roadGraph);
-    RoadGraphVertex node3 = add_vertex(RouteElement{"R3", true}, roadGraph);
-    RoadGraphVertex node2_1 = add_vertex(RouteElement{"R2-1", true}, roadGraph);
+    RoadGraphVertex node3 = add_vertex(RouteElement{"R3", false}, roadGraph);
+    RoadGraphVertex node2_1 = add_vertex(RouteElement{"R2-1", false}, roadGraph);
     RoadGraphVertex node2_3 = add_vertex(RouteElement{"R2-3", true}, roadGraph);
     add_edge(node2, node2_1, roadGraph);
     add_edge(node2_1, node1, roadGraph);
@@ -423,7 +423,7 @@ TEST(DISABLED_SceneryImporter_IntegrationTests, TJunction_ImportWithCorrectLanes
 
     const auto relativeLanes = world.GetRelativeLanes(roadGraph, node2, -1, 0.0, 320.0);
     const auto relativeLanesLeft = relativeLanes.at(node1);
-    ASSERT_THAT(relativeLanesLeft, SizeIs(3));
+    ASSERT_THAT(relativeLanesLeft, SizeIs(4));
 
     const auto firstSectionLeft = relativeLanesLeft.at(0);
     ASSERT_THAT(firstSectionLeft.startS, DoubleEq(0.0));
@@ -435,20 +435,26 @@ TEST(DISABLED_SceneryImporter_IntegrationTests, TJunction_ImportWithCorrectLanes
 
     const auto secondSectionLeft = relativeLanesLeft.at(1);
     ASSERT_THAT(secondSectionLeft.startS, DoubleEq(200.0));
-    ASSERT_THAT(secondSectionLeft.endS, DoubleEq(215.708));
+    ASSERT_THAT(secondSectionLeft.endS, DoubleEq(205.708));
     ASSERT_THAT(secondSectionLeft.lanes, UnorderedElementsAre(RelativeWorldView::Lane{0, true, LaneType::Driving, 0, 0},
                                                               RelativeWorldView::Lane{-1, true, LaneType::Driving, -1, -1}));
 
     const auto thirdSectionLeft = relativeLanesLeft.at(2);
-    ASSERT_THAT(thirdSectionLeft.startS, DoubleEq(215.708));
-    ASSERT_THAT(thirdSectionLeft.endS, DoubleEq(415.708));
-    ASSERT_THAT(thirdSectionLeft.lanes, UnorderedElementsAre(RelativeWorldView::Lane{2, false, LaneType::Driving, std::nullopt, std::nullopt},
+    ASSERT_THAT(thirdSectionLeft.startS, DoubleEq(205.708));
+    ASSERT_THAT(thirdSectionLeft.endS, DoubleEq(215.708));
+    ASSERT_THAT(thirdSectionLeft.lanes, UnorderedElementsAre(RelativeWorldView::Lane{0, true, LaneType::Driving, 0, 0},
+                                                              RelativeWorldView::Lane{-1, true, LaneType::Driving, -1, -1}));
+
+    const auto forthSectionLeft = relativeLanesLeft.at(3);
+    ASSERT_THAT(forthSectionLeft.startS, DoubleEq(215.708));
+    ASSERT_THAT(forthSectionLeft.endS, DoubleEq(415.708));
+    ASSERT_THAT(forthSectionLeft.lanes, UnorderedElementsAre(RelativeWorldView::Lane{2, false, LaneType::Driving, std::nullopt, std::nullopt},
                                                              RelativeWorldView::Lane{1, false, LaneType::Driving, std::nullopt, std::nullopt},
                                                              RelativeWorldView::Lane{0, true, LaneType::Driving, 0, std::nullopt},
                                                              RelativeWorldView::Lane{-1, true, LaneType::Driving, -1, std::nullopt}));
 
     const auto relativeLanesRight = relativeLanes.at(node3);
-    ASSERT_THAT(relativeLanesRight, SizeIs(3));
+    ASSERT_THAT(relativeLanesRight, SizeIs(4));
 
     const auto firstSectionRight = relativeLanesRight.at(0);
     ASSERT_THAT(firstSectionRight.startS, DoubleEq(0.0));
@@ -460,17 +466,23 @@ TEST(DISABLED_SceneryImporter_IntegrationTests, TJunction_ImportWithCorrectLanes
 
     const auto secondSectionRight = relativeLanesRight.at(1);
     ASSERT_THAT(secondSectionRight.startS, DoubleEq(200.0));
-    ASSERT_THAT(secondSectionRight.endS, DoubleEq(215.708));
+    ASSERT_THAT(secondSectionRight.endS, DoubleEq(210.0));
     ASSERT_THAT(secondSectionRight.lanes, UnorderedElementsAre(RelativeWorldView::Lane{0, true, LaneType::Driving, 0, 0},
                                                                RelativeWorldView::Lane{-1, true, LaneType::Driving, -1, -1}));
 
     const auto thirdSectionRight = relativeLanesRight.at(2);
-    ASSERT_THAT(thirdSectionRight.startS, DoubleEq(215.708));
-    ASSERT_THAT(thirdSectionRight.endS, DoubleEq(415.708));
-    ASSERT_THAT(thirdSectionRight.lanes, UnorderedElementsAre(RelativeWorldView::Lane{2, false, LaneType::Driving, std::nullopt, std::nullopt},
+    ASSERT_THAT(thirdSectionRight.startS, DoubleEq(210.0));
+    ASSERT_THAT(thirdSectionRight.endS, DoubleEq(215.708));
+    ASSERT_THAT(thirdSectionRight.lanes, UnorderedElementsAre(RelativeWorldView::Lane{0, true, LaneType::Driving, 0, 0},
+                                                               RelativeWorldView::Lane{-1, true, LaneType::Driving, -1, -1}));
+
+    const auto forthSectionRight = relativeLanesRight.at(3);
+    ASSERT_THAT(forthSectionRight.startS, DoubleEq(215.708));
+    ASSERT_THAT(forthSectionRight.endS, DoubleEq(415.708));
+    ASSERT_THAT(forthSectionRight.lanes, UnorderedElementsAre(RelativeWorldView::Lane{2, false, LaneType::Driving, std::nullopt, std::nullopt},
                                                               RelativeWorldView::Lane{1, false, LaneType::Driving, std::nullopt, std::nullopt},
-                                                              RelativeWorldView::Lane{0, true, LaneType::Driving, std::nullopt, 0},
-                                                              RelativeWorldView::Lane{-1, true, LaneType::Driving, std::nullopt, -1}));
+                                                              RelativeWorldView::Lane{0, true, LaneType::Driving, 0, std::nullopt},
+                                                              RelativeWorldView::Lane{-1, true, LaneType::Driving, -1, std::nullopt}));
 }
 
 
@@ -607,29 +619,31 @@ TEST(SceneryImporter_IntegrationTests, TJunction_CheckForCorrectLaneConnections)
     ASSERT_EQ(worldData->GetRoads().at("R1")->GetSections().size(), 1);
     ASSERT_EQ(worldData->GetRoads().at("R2")->GetSections().size(), 1);
     ASSERT_EQ(worldData->GetRoads().at("R3")->GetSections().size(), 1);
-    ASSERT_EQ(worldData->GetRoads().at("R2-1")->GetSections().size(), 1);
-    ASSERT_EQ(worldData->GetRoads().at("R2-3")->GetSections().size(), 1);
+    ASSERT_EQ(worldData->GetRoads().at("R2-1")->GetSections().size(), 2);
+    ASSERT_EQ(worldData->GetRoads().at("R2-3")->GetSections().size(), 2);
 
-    const auto& lanesIncomingRoad = GetDistanceSortedSectionsForRoad(worldData, "R2").back()->GetLanes();
-    const auto& lanesLeftOutgoingRoad = GetDistanceSortedSectionsForRoad(worldData, "R1").back()->GetLanes();
-    const auto& lanesRightOutgoingRoad = GetDistanceSortedSectionsForRoad(worldData, "R3").back()->GetLanes();
-    const auto& lanesLeftConnectingRoad = GetDistanceSortedSectionsForRoad(worldData, "R2-1").back()->GetLanes();
-    const auto& lanesRightConnectingRoad = GetDistanceSortedSectionsForRoad(worldData, "R2-3").back()->GetLanes();
+    const auto& lanesRoad1 = GetDistanceSortedSectionsForRoad(worldData, "R1").back()->GetLanes();
+    const auto& lanesRoad2 = GetDistanceSortedSectionsForRoad(worldData, "R2").back()->GetLanes();
+    const auto& lanesRoad3 = GetDistanceSortedSectionsForRoad(worldData, "R3").back()->GetLanes();
+    const auto& lanesRoad2_1first = GetDistanceSortedSectionsForRoad(worldData, "R2-1").front()->GetLanes();
+    const auto& lanesRoad2_1second = GetDistanceSortedSectionsForRoad(worldData, "R2-1").back()->GetLanes();
+    const auto& lanesRoad2_3first = GetDistanceSortedSectionsForRoad(worldData, "R2-3").front()->GetLanes();
+    const auto& lanesRoad2_3second = GetDistanceSortedSectionsForRoad(worldData, "R2-3").back()->GetLanes();
 
 
     //check connections between incoming road and connecting roads
-    CheckLaneConnections(worldData, lanesIncomingRoad, lanesLeftConnectingRoad, -1, 1, LaneConnectionType::NEXT, false);
-    CheckLaneConnections(worldData, lanesIncomingRoad, lanesLeftConnectingRoad, -2, 2, LaneConnectionType::NEXT, false);
+    CheckLaneConnections(worldData, lanesRoad2, lanesRoad2_1second, -1, 1, LaneConnectionType::NEXT, false);
+    CheckLaneConnections(worldData, lanesRoad2, lanesRoad2_1second, -2, 2, LaneConnectionType::NEXT, false);
 
-    CheckLaneConnections(worldData, lanesIncomingRoad, lanesRightConnectingRoad, -1, -1, LaneConnectionType::REGULAR, false);
-    CheckLaneConnections(worldData, lanesIncomingRoad, lanesRightConnectingRoad, -2, -2, LaneConnectionType::REGULAR, false);
+    CheckLaneConnections(worldData, lanesRoad2, lanesRoad2_3first, -1, -1, LaneConnectionType::REGULAR, false);
+    CheckLaneConnections(worldData, lanesRoad2, lanesRoad2_3first, -2, -2, LaneConnectionType::REGULAR, false);
 
     //check connections between connecting roads and outgoing roads
-    CheckLaneConnections(worldData, lanesLeftOutgoingRoad, lanesLeftConnectingRoad, 1, 1, LaneConnectionType::REGULAR, false);
-    CheckLaneConnections(worldData, lanesLeftOutgoingRoad, lanesLeftConnectingRoad, 2, 2, LaneConnectionType::REGULAR, false);
+    CheckLaneConnections(worldData, lanesRoad1, lanesRoad2_1first, 1, 1, LaneConnectionType::REGULAR, false);
+    CheckLaneConnections(worldData, lanesRoad1, lanesRoad2_1first, 2, 2, LaneConnectionType::REGULAR, false);
 
-    CheckLaneConnections(worldData, lanesRightConnectingRoad, lanesRightOutgoingRoad, -1, 1, LaneConnectionType::NEXT, false);
-    CheckLaneConnections(worldData, lanesRightConnectingRoad, lanesRightOutgoingRoad, -2, 2, LaneConnectionType::NEXT, false);
+    CheckLaneConnections(worldData, lanesRoad2_3second, lanesRoad3, -1, 1, LaneConnectionType::NEXT, false);
+    CheckLaneConnections(worldData, lanesRoad2_3second, lanesRoad3, -2, 2, LaneConnectionType::NEXT, false);
 }
 
 void CheckLaneNeighbours(OWL::Interfaces::WorldData* worldData, const std::list<const OWL::Interfaces::Lane*>& lanes, int leftLaneId, int rightLaneId)
@@ -661,6 +675,65 @@ TEST(SceneryImporter_IntegrationTests, TJunction_CheckForCorrectLaneNeighbours)
     CheckLaneNeighbours(worldData, lanesRoad2_1, 2, 1);
 
     CheckLaneNeighbours(worldData, lanesRoad2_3, -1, -2);
+}
+TEST(SceneryImporter_IntegrationTests, TJunction_ImportWithCorrectLaneMarkings)
+{
+    TESTSCENERY_FACTORY tsf;
+    ASSERT_THAT(tsf.instantiate("TJunctionBig.xodr"), IsTrue());
+
+    auto& world = tsf.world;
+
+    RoadGraph roadGraph;
+    RoadGraphVertex node1 = add_vertex(RouteElement{"R1", true}, roadGraph);
+    RoadGraphVertex node2 = add_vertex(RouteElement{"R2", false}, roadGraph);
+    RoadGraphVertex node1_2 = add_vertex(RouteElement{"R1-2", true}, roadGraph);
+    add_edge(node1, node1_2, roadGraph);
+    add_edge(node1_2, node2, roadGraph);
+
+    auto laneMarkings = world.GetLaneMarkings(roadGraph, node1, 2, 0.0, 400.0, Side::Left).at(node2);
+
+    ASSERT_THAT(laneMarkings, SizeIs(1));
+    ASSERT_THAT(laneMarkings.at(0).relativeStartDistance, DoubleEq(0.0));
+    ASSERT_THAT(laneMarkings.at(0).type, Eq(LaneMarking::Type::Solid));
+    ASSERT_THAT(laneMarkings.at(0).width, DoubleEq(0.15));
+    ASSERT_THAT(laneMarkings.at(0).color, Eq(LaneMarking::Color::White));
+
+    laneMarkings = world.GetLaneMarkings(roadGraph, node1, 2, 0.0, 400.0, Side::Right).at(node2);
+
+    ASSERT_THAT(laneMarkings, SizeIs(1));
+    ASSERT_THAT(laneMarkings.at(0).relativeStartDistance, DoubleEq(0.0));
+    ASSERT_THAT(laneMarkings.at(0).type, Eq(LaneMarking::Type::Broken));
+    ASSERT_THAT(laneMarkings.at(0).width, DoubleEq(0.15));
+    ASSERT_THAT(laneMarkings.at(0).color, Eq(LaneMarking::Color::White));
+
+    laneMarkings = world.GetLaneMarkings(roadGraph, node1, 1, 0.0, 400.0, Side::Left).at(node2);
+
+    ASSERT_THAT(laneMarkings, SizeIs(1));
+    ASSERT_THAT(laneMarkings.at(0).relativeStartDistance, DoubleEq(0.0));
+    ASSERT_THAT(laneMarkings.at(0).type, Eq(LaneMarking::Type::Broken));
+    ASSERT_THAT(laneMarkings.at(0).width, DoubleEq(0.15));
+    ASSERT_THAT(laneMarkings.at(0).color, Eq(LaneMarking::Color::White));
+
+    laneMarkings = world.GetLaneMarkings(roadGraph, node1, 1, 0.0, 400.0, Side::Right).at(node2);
+
+    ASSERT_THAT(laneMarkings, SizeIs(1));
+    ASSERT_THAT(laneMarkings.at(0).relativeStartDistance, DoubleEq(0.0));
+    ASSERT_THAT(laneMarkings.at(0).type, Eq(LaneMarking::Type::Solid));
+    ASSERT_THAT(laneMarkings.at(0).width, DoubleEq(0.15));
+    ASSERT_THAT(laneMarkings.at(0).color, Eq(LaneMarking::Color::White));
+
+    laneMarkings = world.GetLaneMarkings(roadGraph, node1, -1, 0.0, 400.0, Side::Left).at(node2);
+    ASSERT_THAT(laneMarkings, SizeIs(3));
+    ASSERT_THAT(laneMarkings.at(0).relativeStartDistance, DoubleEq(0.0));
+    ASSERT_THAT(laneMarkings.at(0).type, Eq(LaneMarking::Type::Solid));
+    ASSERT_THAT(laneMarkings.at(0).width, DoubleEq(0.15));
+    ASSERT_THAT(laneMarkings.at(0).color, Eq(LaneMarking::Color::White));
+    ASSERT_THAT(laneMarkings.at(1).relativeStartDistance, DoubleEq(200.0));
+    ASSERT_THAT(laneMarkings.at(1).type, Eq(LaneMarking::Type::None));
+    ASSERT_THAT(laneMarkings.at(2).relativeStartDistance, DoubleEq(215.708));
+    ASSERT_THAT(laneMarkings.at(2).type, Eq(LaneMarking::Type::Solid));
+    ASSERT_THAT(laneMarkings.at(2).width, DoubleEq(0.15));
+    ASSERT_THAT(laneMarkings.at(2).color, Eq(LaneMarking::Color::White));
 }
 
 //!Workaround, because the OSI lane is a private member
