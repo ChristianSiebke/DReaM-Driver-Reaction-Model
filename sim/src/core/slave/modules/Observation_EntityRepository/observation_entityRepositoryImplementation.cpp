@@ -237,8 +237,9 @@ void ObservationEntityRepositoryImplementation::WriteEntities(const std::vector<
             {
                 if (const auto &iter = row.metainfo.find(column); iter != row.metainfo.cend())
                 {
-                    stream << QString::fromStdString(iter->second) << CSV_DELIMITER;
+                    stream << QString::fromStdString(iter->second);
                 }
+                stream << CSV_DELIMITER;
             }
         }
         stream << '\n';

@@ -61,7 +61,7 @@ static const std::vector<std::string> CSV_HEADERS{"id", "source", "version", "na
  */
 static const std::vector<std::vector<std::string>> CSV_METAINFO{{"version"}, {"name"}, {"id"}, {"type"}, {"subtype"}};
 
-const QString CSV_DELIMITER{";"};
+const QString CSV_DELIMITER{","};
 
 /**
  * @brief Single entry holding information for printing entity information into CSV
