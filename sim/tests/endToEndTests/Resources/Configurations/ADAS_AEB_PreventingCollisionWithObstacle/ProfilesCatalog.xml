@@ -1,0 +1,88 @@
+<Profiles SchemaVersion="0.4.3">
+  <AgentProfiles>
+    <AgentProfile Name="MiddleClassCarAgent" Type="Dynamic">
+      <DriverProfiles>
+        <DriverProfile Name="CantStop" Probability="1.0"/>
+      </DriverProfiles>
+      <VehicleProfiles>
+        <VehicleProfile Name="Mini Cooper" Probability="1.0"/>
+      </VehicleProfiles>
+    </AgentProfile>
+    <AgentProfile Name="ScenarioAgent" Type="Dynamic">
+      <DriverProfiles>
+        <DriverProfile Name="StandingStill" Probability="1.0"/>
+      </DriverProfiles>
+      <VehicleProfiles>
+        <VehicleProfile Name="BMW 3" Probability="1.0"/>
+      </VehicleProfiles>
+    </AgentProfile>
+  </AgentProfiles>
+  <VehicleProfiles>
+    <VehicleProfile Name="Mini Cooper">
+      <Model Name="car_mini_cooper"/>
+       <Components>
+        <Component Type="AEB">
+          <Profiles>
+            <Profile Name="AEB1" Probability="1.0"/>
+          </Profiles>
+          <SensorLinks>
+            <SensorLink InputId="Camera" SensorId="0"/>
+          </SensorLinks>
+        </Component>
+      </Components>
+      <Sensors>
+        <Sensor Id="0">
+          <Position Height="0.5" Lateral="0.0" Longitudinal="0.0" Name="Default" Pitch="0.0" Roll="0.0" Yaw="0.0"/>
+          <Profile Name="Standard" Type="Geometric2D"/>
+        </Sensor>
+      </Sensors>
+    </VehicleProfile>
+    <VehicleProfile Name="BMW 3">
+      <Model Name="car_bmw_3"/>
+      <Components/>
+      <Sensors/>
+    </VehicleProfile>
+  </VehicleProfiles>
+  <ProfileGroup Type="Driver">
+    <Profile Name="CantStop">
+     	<String Key="Type" Value="AlgorithmAgentFollowingDriverModel"/>
+	<String Key="AlgorithmLateralModule" Value="Algorithm_LateralAfdm"/>
+	<String Key="AlgorithmLongitudinalModule" Value="Algorithm_LongitudinalAfdm"/>
+	<Double Key="VelocityWish" Value="35.0"/>
+	<Double Key="Delta" Value="0.0"/>
+	<Double Key="TGapWish" Value="0.0"/>
+	<Double Key="MinDistance" Value="0.0"/>
+	<Double Key="MaxAcceleration" Value="0.0"/>
+	<Double Key="MaxDeceleration" Value="0.0"/>
+    </Profile>
+    <Profile Name="StandingStill">
+     	<String Key="Type" Value="AlgorithmAgentFollowingDriverModel"/>
+	<String Key="AlgorithmLateralModule" Value="Algorithm_LateralAfdm"/>
+	<String Key="AlgorithmLongitudinalModule" Value="Algorithm_LongitudinalAfdm"/>
+	<Double Key="VelocityWish" Value="0.0"/>
+	<Double Key="Delta" Value="0.0"/>
+	<Double Key="TGapWish" Value="0.0"/>
+	<Double Key="MinDistance" Value="0.0"/>
+	<Double Key="MaxAcceleration" Value="1.4"/>
+	<Double Key="MaxDeceleration" Value="2.0"/>
+    </Profile>
+  </ProfileGroup>
+    <ProfileGroup Type="AEB">
+    <Profile Name="AEB1">
+      <Double Key="CollisionDetectionLongitudinalBoundary" Value="4.0"/>
+      <Double Key="CollisionDetectionLateralBoundary" Value="1.5"/>
+      <Double Key="TTC" Value="1.5"/>
+      <Double Key="Acceleration" Value="-8"/>
+    </Profile>
+  </ProfileGroup>
+  <ProfileGroup Type="Geometric2D">
+    <Profile Name="Standard">
+      <Double Key="DetectionRange" Value="300"/>
+      <Bool Key="EnableVisualObstruction" Value="false"/>
+      <Double Key="FailureProbability" Value="0"/>
+      <NormalDistribution Key="Latency" Max="0.0" Mean="0.0" Min="0.0" SD="0.0"/>
+      <Double Key="OpeningAngleH" Value="0.35"/>
+      <Double Key="RequiredPercentageOfVisibleArea" Value="0.001"/>
+    </Profile>
+  </ProfileGroup>
+</Profiles>

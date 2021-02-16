@@ -1,0 +1,51 @@
+<OpenDRIVE>
+  <header date="Thu Feb 8 14:24:06 2007" east="2.0000000000000000e+003" name="Testfile" north="2.0000000000000000e+003" revMajor="1" revMinor="1" south="-2.0000000000000000e+003" version="1" west="-2.0000000000000000e+003"/>
+  <road id="1" junction="-1" length="5139.7188686309819" name="">
+    <link/>
+    <planView>
+			<geometry hdg="0" length="3000" s="0.0000000000000000e+000" x="0" y="7.5">
+				<line/>
+			</geometry>
+		</planView>
+    <elevationProfile/>
+    <lateralProfile/>
+    <lanes>
+			<laneSection s="0.0000000000000000e+000">
+				<left/>
+				<center>
+					<lane id="0" level="true" type="border">
+						<link>
+							<successor id="0"/>
+						</link>
+						<roadMark color="standard" laneChange="both" sOffset="0" type="solid" weight="standard" width="0.12"/>
+					</lane>
+				</center>
+				<right>
+					<lane id="-1" level="true" type="driving">
+						<link>
+							<successor id="-1"/>
+						</link>
+						<width a="3.75" b="0" c="0" d="0" sOffset="0"/>
+						<roadMark color="standard" laneChange="both" sOffset="0" type="solid" weight="standard" width="0.12"/>
+					</lane>
+				</right>
+			</laneSection>
+		</lanes>
+    <objects>
+      <object hdg="0" height="1.0" id="" length="0.80" name="Absperrung" orientation="-" pitch="0" roll="0" s="300.0" t="-2.0" type="obstacle" validLength="0" width="3.0" zOffset="0"/>
+      <object hdg="0" height="1.2" id="" length="0.12" name="RoadSideMarkerPost" orientation="+" pitch="0" roll="0" s="0" t="1" type="roadMark" validLength="0.12" width="0.12" zOffset="0">
+        <repeat distance="50" length="5139.7188686309819" s="0"/>
+      </object>
+      <object hdg="0" height="1.2" id="" length="0.12" name="RoadSideMarkerPost" orientation="-" pitch="0" roll="0" s="0" t="-4.5" type="roadMark" validLength="0.12" width="0.12" zOffset="0">
+        <repeat distance="50" length="5139.7188686309819" s="0"/>
+      </object>
+      <object hdg="0" height="0.9" id="" length="3" name="GuardRail" orientation="+" pitch="0" roll="0" s="0" t="0.5" type="railing" validLength="3" width="0.25" zOffset="0">
+        <repeat distance="0" length="5139.7188686309819" s="0"/>
+      </object>
+      <object hdg="0" height="0.9" id="" length="3" name="GuardRail" orientation="-" pitch="0" roll="0" s="0" t="-4.3" type="railing" validLength="3" width="0.25" zOffset="0">
+        <repeat distance="0" length="5139.7188686309819" s="0"/>
+      </object>
+    </objects>
+    <signals/>
+  </road>
+</OpenDRIVE>

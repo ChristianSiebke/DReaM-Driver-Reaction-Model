@@ -1,0 +1,230 @@
+{
+    "scopes": {
+        "generic": {
+            "baseConfig": {
+                "duration": 30,
+                "invocations": 1
+            },
+            "configurations": [
+                "AFDM_TJunction",
+                "ByEntityCondition_RelativeLane",
+                "ByEntityCondition_RelativeSpeed",
+                "ByEntityCondition_RoadPosition",
+                "ByEntityCondition_TimeHeadway",
+                "ByEntityCondition_TimeToCollision",
+                "OSCAction_DoubleSinusoidalLaneChangeLeft_Absolute",
+                "OSCAction_DoubleSinusoidalLaneChangeLeft_Relative",
+                "OSCAction_DoubleSinusoidalLaneChangeRight_Absolute",
+                "OSCAction_DoubleSinusoidalLaneChangeRight_Relative",
+                "OSCAction_FullSetParameterVariation",
+                "OSCAction_RemoveAgent",
+                "OSCAction_DoubleSinusoidalLaneChangeLeft_Absolute",
+                "OSCAction_DoubleSinusoidalLaneChangeRight_Absolute",
+                "OSCAction_DoubleSinusoidalLaneChangeLeft_Relative",
+                "OSCAction_DoubleSinusoidalLaneChangeRight_Relative",
+                "Pedestrian_AFDM",
+                "Pedestrian_Trajectory",
+                "Sensor_Latency",
+                "StaticAgentProfileAFDM",
+                "SupplementaryTrafficSigns",
+                "TrafficJam"
+            ]
+        },
+        "ADAS_AEB": {
+            "baseConfig": {
+                "duration": 30,
+                "invocations": 100
+            },
+            "specialized": {
+                "description": "AEB triggers if agent cannot stop",
+                "query": "mean(VelocityEgo | AgentId == 0 and PositionRoute > 285 and PositionRoute < 295) < 28.5",
+                "success_rate": 0.85
+            },
+            "configurations": [
+                "ADAS_AEB_PreventingCollisionWithObstacle"
+            ]
+        },
+        "ADAS_AEB_InCurve": {
+            "baseConfig": {
+                "duration": 20,
+                "invocations": 100
+            },
+            "specialized": {
+                "description": "AEB Acting stage triggers with obstacle in curve",
+                "query": "count(AgentId | #(Algorithm_AutonomousEmergencyBraking):ComponentState=='Acting') >= 1",
+                "success_rate": 1
+            },
+            "configurations": [
+                "ADAS_AEB_PreventingCollisionWithObstacleInCurve"
+            ]
+        },
+        "ByEntityCondition":
+        {
+            "baseConfig":
+            {
+                "duration": 11,
+                "invocations": 1
+            },
+            "specialized":
+            {
+                "description": "Agent performs left sinusoidal lane change to lane id -3 if entity condition is met",
+                "query": "count(AgentId | AgentId == 0 and Timestep >= 10000 and Lane == -3) > 0",
+                "success_rate": 1.0
+            },
+            "configurations":
+            [
+                "ByEntityCondition_RelativeLane",
+                "ByEntityCondition_RelativeSpeed",
+                "ByEntityCondition_RoadPosition",
+                "ByEntityCondition_TimeHeadway",
+                "ByEntityCondition_TimeToCollision"
+            ]
+        },
+        "OSCAction_DoubleLaneChange":
+        {
+            "baseConfig":
+            {
+                "duration": 10,
+                "invocations": 1
+            },
+            "specialized":
+            {
+                "description": "Agent performs a double lane change",
+                "query": "count(AgentId | AgentId == 0 and (Lane-1 != Lane)) == 2",
+                "success_rate": 1.0
+            },
+            "configurations":
+            [
+                "OSCAction_DoubleSinusoidalLaneChangeLeft_Absolute",
+                "OSCAction_DoubleSinusoidalLaneChangeRight_Absolute",
+                "OSCAction_DoubleSinusoidalLaneChangeLeft_Relative",
+                "OSCAction_DoubleSinusoidalLaneChangeRight_Relative"
+            ]
+        },
+        "OSCAction_RemoveAgent": {
+            "baseConfig": {
+                "duration": 2.0,
+                "invocations": 10
+            },
+            "specialized": {
+                "description": "The ego should despawn",
+                "query": "count(XPosition | AgentId == 0 and Timestep > 1000) == 0",
+                "success_rate": 1.0
+            },
+            "configurations": [
+                "OSCAction_RemoveAgent"
+            ]
+        },
+        "OSCAction_SingleLaneChange":
+        {
+            "baseConfig":
+            {
+                "duration": 10,
+                "invocations": 1
+            },
+            "specialized":
+            {
+                "description": "Agent performs a single lane change",
+                "query": "count(AgentId | AgentId == 0 and (Lane-1 != Lane)) == 1",
+                "success_rate": 1.0
+            },
+            "configurations":
+            [
+                "OSCAction_SinusoidalLaneChangeLeft_Absolute",
+                "OSCAction_SinusoidalLaneChangeRight_Absolute",
+                "OSCAction_SinusoidalLaneChangeLeft_Relative",
+                "OSCAction_SinusoidalLaneChangeRight_Relative"
+            ]
+        },
+        "OSCAction_StochasticTCoordinate":
+        {
+            "baseConfig":
+            {
+                "duration": 10,
+                "invocations": 100
+            },
+            "specialized":
+            {
+                "description": "TCoordinate gets initialized stochastically",
+                "query": "count(AgentId | (AgentId == 0 and TCoordinate == 0 and Timestep == 0)) == 0",
+                "success_rate": 0.99
+            },
+            "configurations":
+            [
+                "OSCAction_FullSetParameterVariation"
+            ]
+        },
+        "OSCAction_StochasticVelocityEgo":
+        {
+            "baseConfig":
+            {
+                "duration": 10,
+                "invocations": 100
+            },
+            "specialized":
+            {
+                "description": "VelocityEgo gets initialized stochastically",
+                "query": "count(AgentId | (AgentId == 0 and VelocityEgo == 25 and Timestep == 0)) == 0",
+                "success_rate": 0.99
+            },
+            "configurations":
+            [
+                "OSCAction_FullSetParameterVariation"
+            ]
+        },
+        "OSCAction_StochasticXPosition":
+        {
+            "baseConfig":
+            {
+                "duration": 10,
+                "invocations": 100
+            },
+            "specialized":
+            {
+                "description": "XPosition gets initialized stochastically",
+                "query": "count(AgentId | (AgentId == 0 and XPosition == 100 and Timestep == 0)) == 0",
+                "success_rate": 0.99
+            },
+            "configurations":
+            [
+                "OSCAction_FullSetParameterVariation"
+            ]
+        },
+        "LocalizationOnJunction":
+        {
+            "baseConfig":
+            {
+                "duration": 45,
+                "invocations": 10
+            },
+            "specialized":
+            {
+                "description": "Agent is always located on defined route",
+                "query": "count(Road | Road !='R1' and Road !='R1_3' and Road !='R3') == 0",
+                "success_rate": 0.99
+            },
+            "configurations":
+            [
+                "LocalizationOnJunction"
+            ]
+        },
+        "Sensor_Latency":
+        {
+            "baseConfig":
+            {
+                "duration": 5,
+                "invocations": 20
+            },
+            "specialized":
+            {
+                "description": "Sensor detects scenario agent with 1 second delay.",
+                "query": "count(AgentId | AgentId == 0 and Timestep == 1000 and Sensor0_DetectedAgents-1 != Sensor0_DetectedAgents and Sensor0_DetectedAgents == '1') == 1",
+                "success_rate": 1
+            },
+            "configurations":
+            [
+                "Sensor_Latency"
+            ]
+        }
+    }
+}
