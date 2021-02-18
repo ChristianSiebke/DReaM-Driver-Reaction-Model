@@ -16,6 +16,7 @@ import argparse
 import os.path
 import json
 import glob
+import locale
 from reports import HtmlReport
 
 from junitparser import JUnitXml
@@ -38,10 +39,11 @@ def parse_arguments():
                         nargs='+',
                         help='path to the resources (e.g. /openPASS/bin/examples)', required=True)
     parser.add_argument('-c', '--config',
-                        help='config file (e.g. end_to_end.json)', required=True)
+                        nargs='+',
+                        help='config files to read (e.g. end_to_end.json)', required=True)
     parser.add_argument('--scope',
                         nargs='+',
-                        help='scope (e.g. generic)', required=True)
+                        help='scopes to consider (e.g. generic)', required=True)
     parser.add_argument('--results',
                         help='path to test results', required=True)
     parser.add_argument('--output',
@@ -49,11 +51,20 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def load_test_config(config):
-    if not os.path.isfile(config):
-        terminate_program(f'Cannot find config ({config})')
-    with open(config) as c:
-        return json.load(c)
+def load_test_config(configs):
+    result = {"scopes": {}}
+
+    for config in configs:
+        if not os.path.isfile(config):
+            terminate_program(f'Cannot find config ({config})')
+        with open(config) as c:
+            parsed_config = json.load(c)
+            if 'scopes' not in parsed_config.keys():
+                terminate_program(f'Missing section scopes in file {config}')
+            for key in parsed_config['scopes']:
+                result['scopes'][key] = parsed_config['scopes'][key]
+
+    return result
 
 
 def get_scope(config, scope):
@@ -66,10 +77,10 @@ def get_scope(config, scope):
 
 def get_parameterization_variants(scopes, directory):
     """
-    Scans the config if a directory is available within a scope 
+    Scans the config if a directory is available within a scope
     without parameterization, with parameterization, or both
-    
-    Returns 
+
+    Returns
     - unparameterized True if in a scope without parameterization
     - unparameter     True if in a scope with parameterization
     - num_parameters  Number of parameters if parameterized
@@ -77,7 +88,7 @@ def get_parameterization_variants(scopes, directory):
     parameterized = False
     unparameterized = False
     num_parameters = 0
-    
+
     for scope in scopes.values():
         if directory in scope['configurations']:
             if 'parameterization' in scope:
@@ -86,18 +97,18 @@ def get_parameterization_variants(scopes, directory):
             else:
                 unparameterized = True
     return unparameterized, parameterized, num_parameters
-            
+
 
 def apply_parameterization_variants(scopes, directories):
     """
     Configurations can be available with and without parameterization
     These variants result in different output directories.
-    
+
     Returns an sorted and updated list of directories
     """
     add_list = []
-    remove_list = [] 
-        
+    remove_list = []
+
     for d in directories:
         unparameterized, parameterized, num_parameters = get_parameterization_variants(scopes, d)
         if not unparameterized:
@@ -107,7 +118,7 @@ def apply_parameterization_variants(scopes, directories):
                 add_list.append(f'{d}_{i}')
 
     return [d for d in directories if (d not in remove_list)] + add_list
-   
+
 
 def get_dirs(base_path, exclude_list=[]):
     """
@@ -115,13 +126,13 @@ def get_dirs(base_path, exclude_list=[]):
     """
     if not os.path.isdir(base_path):
         terminate_program(f'Not a directory: {base_path}')
-        
+
     return [d for d in os.listdir(base_path) if d not in exclude_list and os.path.isdir(os.path.join(base_path, d))]
 
 
 def get_configuration_dirs(scopes, base_path, exclude_list=[]):
     """
-    Retrieves the a list of configuration directories, matched against the available 
+    Retrieves the a list of configuration directories, matched against the available
     scopes, and considering potential parameterization of individual configs
     """
     return apply_parameterization_variants(scopes, get_dirs(base_path, exclude_list))
@@ -200,9 +211,9 @@ def get_rates(results_path, config_under_test):
         return None
 
     lines = []
-    with open(rates_file, "r") as rates: 
+    with open(rates_file, "r") as rates:
         lines = rates.readlines()
-    
+
     rates = lines[1].split(";")
     return (float(rates[0]), float(rates[1]), rates[2])
 
@@ -215,6 +226,7 @@ def get_configs_under_test(scope):
         return [f'{c}_{i}' for c in configs for i in range(0,num_parameters)]
 
 def main():
+    locale.setlocale(locale.LC_ALL, "C")
     args = parse_arguments()
 
     config = load_test_config(args.config)

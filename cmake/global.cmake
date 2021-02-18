@@ -1,6 +1,6 @@
 ################################################################################
 # Copyright (c) 2020 Uwe Woessner
-# Copyright (c) 2020 in-tech GmbH
+# Copyright (c) 2020, 2021 in-tech GmbH
 #
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
@@ -21,6 +21,7 @@ option(WITH_DEBUG_POSTFIX "Use 'd' binary postfix on Windows platform" ON)
 option(INSTALL_SYSTEM_RUNTIME_DEPS "Copy detected system runtime dependencies to install directory (i.e. MinGW system libraries)" OFF)
 option(INSTALL_EXTRA_RUNTIME_DEPS "Copy detected third party runtime dependencies to install directory (i.e. required shared libraries found in specified CMAKE_PREFIX_PATH)" OFF)
 option(WITH_MINGW_BOOST_1_72_FIX "Apply fix Boost 1.72 detection in MinGW environment (https://github.com/boostorg/boost_install/issues/33)" OFF)
+option(WITH_ENDTOEND_TESTS "Create pyOpenPASS target for running end to end tests" OFF)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
