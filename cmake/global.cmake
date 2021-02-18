@@ -24,6 +24,7 @@ option(INSTALL_SYSTEM_RUNTIME_DEPS "Copy detected system runtime dependencies to
 option(INSTALL_EXTRA_RUNTIME_DEPS "Copy detected third party runtime dependencies to install directory (i.e. required shared libraries found in specified CMAKE_PREFIX_PATH)" OFF)
 option(WITH_MINGW_BOOST_1_72_FIX "Apply fix Boost 1.72 detection in MinGW environment (https://github.com/boostorg/boost_install/issues/33)" OFF)
 option(WITH_ENDTOEND_TESTS "Create pyOpenPASS target for running end to end tests" OFF)
+option(WITH_COVERAGE "Generate test coverage report using gcov (needs fastcov)" OFF)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -162,6 +163,12 @@ if(MSVC)
   # get rid of annoying template needs to have dll-interface warnings on VisualStudio
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4251 -wd4335")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4250")
+endif()
+
+if(WITH_COVERAGE)
+  find_package(Gcov REQUIRED)
+  find_package(Fastcov REQUIRED)
+  find_package(Genhtml REQUIRED)
 endif()
 
 ###############################################################################
