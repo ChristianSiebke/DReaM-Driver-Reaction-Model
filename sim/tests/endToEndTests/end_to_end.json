@@ -6,12 +6,15 @@
                 "invocations": 1
             },
             "configurations": [
+                "ADAS_AEB_PreventingCollisionWithObstacle",
+                "ADAS_AEB_PreventingCollisionWithObstacleInCurve",
                 "AFDM_TJunction",
                 "ByEntityCondition_RelativeLane",
                 "ByEntityCondition_RelativeSpeed",
                 "ByEntityCondition_RoadPosition",
                 "ByEntityCondition_TimeHeadway",
                 "ByEntityCondition_TimeToCollision",
+                "LocalizationOnJunction",
                 "OSCAction_DoubleSinusoidalLaneChangeLeft_Absolute",
                 "OSCAction_DoubleSinusoidalLaneChangeLeft_Relative",
                 "OSCAction_DoubleSinusoidalLaneChangeRight_Absolute",
@@ -78,6 +81,24 @@
                 "ByEntityCondition_RoadPosition",
                 "ByEntityCondition_TimeHeadway",
                 "ByEntityCondition_TimeToCollision"
+            ]
+        },
+        "LocalizationOnJunction":
+        {
+            "baseConfig":
+            {
+                "duration": 45,
+                "invocations": 10
+            },
+            "specialized":
+            {
+                "description": "Agent is always located on defined route",
+                "query": "count(Road | Road !='R1' and Road !='R1_3' and Road !='R3') == 0",
+                "success_rate": 0.99
+            },
+            "configurations":
+            [
+                "LocalizationOnJunction"
             ]
         },
         "OSCAction_DoubleLaneChange":
@@ -188,24 +209,6 @@
             "configurations":
             [
                 "OSCAction_FullSetParameterVariation"
-            ]
-        },
-        "LocalizationOnJunction":
-        {
-            "baseConfig":
-            {
-                "duration": 45,
-                "invocations": 10
-            },
-            "specialized":
-            {
-                "description": "Agent is always located on defined route",
-                "query": "count(Road | Road !='R1' and Road !='R1_3' and Road !='R3') == 0",
-                "success_rate": 0.99
-            },
-            "configurations":
-            [
-                "LocalizationOnJunction"
             ]
         },
         "Sensor_Latency":
