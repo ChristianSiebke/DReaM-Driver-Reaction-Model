@@ -61,7 +61,7 @@ install(CODE
   if(\"${INSTALL_SYSTEM_RUNTIME_DEPS}\" STREQUAL \"OFF\")
     message(STATUS \"Filtering system runtime dependencies...\")
     if(WIN32)
-      list(FILTER resolved_deps EXCLUDE REGEX \"^[A-Za-z]:/[A-Za-z0-9_]*/system32|^api-ms-.*|ext-ms-.*\")
+      list(FILTER resolved_deps EXCLUDE REGEX \"^[A-Za-z]:[/\\][A-Za-z0-9_]*[/\\]system32|^api-ms-.*|ext-ms-.*\")
     elseif(UNIX)
       list(FILTER resolved_deps EXCLUDE REGEX \"^/lib|^/usr\")
     endif()
