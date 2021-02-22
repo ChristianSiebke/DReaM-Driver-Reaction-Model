@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -99,7 +99,7 @@ private:
      * \param[in]    vehicleModelParameters Parameter of the vehicle
     * \return       Valid SpawnParameter
     */
-    SpawnParameter CalculateSpawnParameter(const SpawnInfo& spawnInfo,
+    SpawnParameter CalculateSpawnParameter(const ScenarioEntity& entity,
                                            const VehicleModelParameters& vehicleModelParameters);
 
     /*!
@@ -126,6 +126,13 @@ private:
      * \return sampled route
      */
     Route GetRandomRoute(const SpawnParameter& spawnParameter);
+
+    /*!
+     * \brief Checks wether the agent is inside the world
+     *
+     * \param spawnParameter parameters containing spawn position
+     */
+    bool IsInsideWorld(const SpawnParameter& spawnParameter);
 
     /*!
     * \brief Logs a error message.

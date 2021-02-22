@@ -1,5 +1,5 @@
 ﻿/*******************************************************************************
-* Copyright (c) 2017, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -46,7 +46,7 @@ SpawnPointInterface::Agents SpawnPointScenario::Trigger([[maybe_unused]]int time
                                                     ? AgentCategory::Ego
                                                     : AgentCategory::Scenario);
                 agentBlueprint.SetObjectName(entity.name);
-                agentBlueprint.SetSpawnParameter(CalculateSpawnParameter(entity.spawnInfo,
+                agentBlueprint.SetSpawnParameter(CalculateSpawnParameter(entity,
                                                                          agentBlueprint.GetVehicleModelParameters()));
 
                 SimulationSlave::Agent* newAgent = dependencies.agentFactory->AddAgent(&agentBlueprint);
@@ -190,9 +190,10 @@ STCoordinates SpawnPointScenario::GetSTCoordinates(const openScenario::LanePosit
     }
 }
 
-SpawnParameter SpawnPointScenario::CalculateSpawnParameter(const SpawnInfo& spawnInfo,
+SpawnParameter SpawnPointScenario::CalculateSpawnParameter(const ScenarioEntity &entity,
                                                            const VehicleModelParameters &vehicleModelParameters)
 {
+    const auto& spawnInfo = entity.spawnInfo;
     SpawnParameter spawnParameter;
 
     // Define position and orientation
@@ -226,6 +227,11 @@ SpawnParameter SpawnPointScenario::CalculateSpawnParameter(const SpawnInfo& spaw
     }
     else {
         LogError("This Spawner only supports Lane- & WorldPositions.");
+    }
+
+    if(!IsInsideWorld(spawnParameter))
+    {
+        LogError("Agent \"" + entity.name + "\" is outside world");
     }
 
     // Define velocity
@@ -301,16 +307,18 @@ Route SpawnPointScenario::GetPredefinedRoute(const std::vector<RouteElement>& ro
 Route SpawnPointScenario::GetRandomRoute(const SpawnParameter& spawnParameter)
 {
     const auto& roadPositions = GetWorld()->WorldCoord2LaneCoord(spawnParameter.positionX, spawnParameter.positionY, spawnParameter.yawAngle);
-    if (roadPositions.empty())
-    {
-        LogError("SpawnPosition is outside world.");
-    }
     auto [roadGraph, root] = GetWorld()->GetRoadGraph(CommonHelper::GetRoadWithLowestHeading(roadPositions, *GetWorld()), MAX_DEPTH);
     std::map<RoadGraph::edge_descriptor, double> weights = GetWorld()->GetEdgeWeights(roadGraph);
     auto target = RouteCalculation::SampleRoute(roadGraph, root, weights, *dependencies
             .stochastics);
 
     return Route{roadGraph, root, target};
+}
+
+bool SpawnPointScenario::IsInsideWorld(const SpawnParameter &spawnParameter)
+{
+    const auto& roadPositions = GetWorld()->WorldCoord2LaneCoord(spawnParameter.positionX, spawnParameter.positionY, spawnParameter.yawAngle);
+    return !roadPositions.empty();
 }
 
 

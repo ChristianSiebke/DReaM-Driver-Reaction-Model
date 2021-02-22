@@ -118,6 +118,7 @@ void AlgorithmFmuWrapperImplementation::SetupFilenames()
     outputFileName.append(".txt");
 
     boost::filesystem::path fmuPath(FMU_fullName);
+    THROWIFFALSE(exists(fmuPath), "Can not find file " + FMU_fullName);
 
     FMU_path = fmuPath.parent_path().string();
     FMU_name = fmuPath.filename().string();
