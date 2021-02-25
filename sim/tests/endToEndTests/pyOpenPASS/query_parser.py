@@ -39,7 +39,7 @@ class Query:
 
         for key, value, _ in matches:
             if len(value):
-                split = re.search('\s?([=<>!]|no|is|contains)', value)
+                split = re.search(r'\s?([=<>!]|no|is|contains)', value)
                 if split is not None:
                     value = value[:split.start(1)]
 
