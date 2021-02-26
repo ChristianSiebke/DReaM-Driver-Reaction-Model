@@ -290,13 +290,16 @@ jm_status_enu_t checked_print_quoted_str(fmu_check_data_t* cdata, const char* st
 
 jm_status_enu_t checked_fprintf(fmu_check_data_t* cdata, const char* fmt, ...) {
     jm_status_enu_t status = jm_status_success;
-    va_list args;
-    va_start (args, fmt);
-    if(vfprintf(cdata->out_file, fmt, args) <= 0) {
-        jm_log_fatal(&cdata->callbacks, fmu_checker_module, "Error writing output file (%s)", strerror(errno));
-        status = jm_status_error;
+    if (cdata->write_output_files)
+    {
+        va_list args;
+        va_start (args, fmt);
+        if(vfprintf(cdata->out_file, fmt, args) <= 0) {
+            jm_log_fatal(&cdata->callbacks, fmu_checker_module, "Error writing output file (%s)", strerror(errno));
+            status = jm_status_error;
+        }
+        va_end (args);
     }
-    va_end (args);
     return status;
 }
 
