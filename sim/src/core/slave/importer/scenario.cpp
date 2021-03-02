@@ -53,6 +53,16 @@ void Scenario::SetSceneryPath(const std::string& sceneryPath)
     this->sceneryPath = sceneryPath;
 }
 
+const std::vector<openScenario::TrafficSignalController> &Scenario::GetTrafficSignalControllers() const
+{
+    return trafficSignalControllers;
+}
+
+void Scenario::AddTrafficSignalController(const openScenario::TrafficSignalController &controller)
+{
+    trafficSignalControllers.push_back(controller);
+}
+
 void Scenario::AddScenarioEntity(const ScenarioEntity& entity)
 {
     entities.push_back(entity);

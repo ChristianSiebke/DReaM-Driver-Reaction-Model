@@ -55,7 +55,7 @@ struct TESTSCENERY_FACTORY
     {
     }
 
-    bool instantiate(const std::string& sceneryFile)
+    bool instantiate(const std::string& sceneryFile, const std::vector<openScenario::TrafficSignalController>&& trafficSignalControllers = {})
     {
         path sceneryPath = initial_path() / "Resources" / "ImporterTest" / sceneryFile;
 
@@ -69,7 +69,7 @@ struct TESTSCENERY_FACTORY
             return false;
         }
 
-        if (!(world.CreateScenery(&scenery)))
+        if (!(world.CreateScenery(&scenery, trafficSignalControllers)))
         {
             return false;
         }
@@ -622,7 +622,7 @@ TEST(GetObjectsInRange_IntegrationTests, OneObjectOnQueriedLane)
     AddAgentToWorld(world, 0, 10.0, 2.0);
     AddAgentToWorld(world, 1, 10.0, 5.0);
     AddAgentToWorld(world, 2, 10.0, 9.0);
-    world.SyncGlobalData();
+    world.SyncGlobalData(0);
 
     RoadGraph roadGraph;
     RoadGraphVertex root = add_vertex(RouteElement{"1", true}, roadGraph);
@@ -640,7 +640,7 @@ TEST(GetObjectsInRange_IntegrationTests, NoObjectOnQueriedLane)
     auto& world = tsf.world;
     AddAgentToWorld(world, 0, 10.0, 2.0);
     AddAgentToWorld(world, 1, 10.0, 9.0);
-    world.SyncGlobalData();
+    world.SyncGlobalData(0);
 
     RoadGraph roadGraph;
     RoadGraphVertex root = add_vertex(RouteElement{"1", true}, roadGraph);
@@ -658,7 +658,7 @@ TEST(GetObjectsInRange_IntegrationTests, TwoObjectsInDifferentSections)
     AddAgentToWorld(world, 1, 310.0, 5.0);
     AddAgentToWorld(world, 2, 10.0, 5.0);
     AddAgentToWorld(world, 3, 10.0, 9.0);
-    world.SyncGlobalData();
+    world.SyncGlobalData(0);
 
     RoadGraph roadGraph;
     RoadGraphVertex root = add_vertex(RouteElement{"1", true}, roadGraph);
@@ -679,7 +679,7 @@ TEST(GetObjectsInRange_IntegrationTests, OneObjectOnSectionBorder)
     AddAgentToWorld(world, 0, 300.0, 2.0);
     AddAgentToWorld(world, 1, 300.0, 5.0);
     AddAgentToWorld(world, 2, 300.0, 9.0);
-    world.SyncGlobalData();
+    world.SyncGlobalData(0);
 
     RoadGraph roadGraph;
     RoadGraphVertex root = add_vertex(RouteElement{"1", true}, roadGraph);
@@ -699,7 +699,7 @@ TEST(GetObjectsInRange_IntegrationTests, MultipleRoads)
     AddAgentToWorld(world, 1, 1300.0, 2.0);
     AddAgentToWorld(world, 2, 510.0, 2.0);
     AddAgentToWorld(world, 3, 510.0, -1.0);
-    world.SyncGlobalData();
+    world.SyncGlobalData(0);
 
     RoadGraph roadGraph;
     RoadGraphVertex node1 = add_vertex(RouteElement{"1", true}, roadGraph);
@@ -723,7 +723,7 @@ TEST(Locator_IntegrationTests, AgentOnStraightRoad_CalculatesCorrectLocateResult
     auto& world = tsf.world;
     const auto agent1 = AddAgentToWorld(world, 1, 399.0, 1.0, 2.0, 5.0);
     const auto agent2 = AddAgentToWorld(world, 2, 2500.0, 2.0, 2.0, 5.0);
-    world.SyncGlobalData();
+    world.SyncGlobalData(0);
 
     ASSERT_THAT(agent1->GetRoads(MeasurementPoint::Front), ElementsAre("1"));
     ASSERT_THAT(agent1->GetObjectPosition().mainLocatePoint.at("1").laneId, Eq(-2));
@@ -746,7 +746,7 @@ TEST(Locator_IntegrationTests, AgentOnJunction_CalculatesCorrectLocateResult)
 
     auto& world = tsf.world;
     AddAgentToWorld(world, 1, 208.0, -2.0, 2.0, 4.0);
-    world.SyncGlobalData();
+    world.SyncGlobalData(0);
 
     const auto agent = world.GetAgent(1);
     EXPECT_THAT(agent->GetDistanceToStartOfRoad(MeasurementPoint::Front, "R1-3"), DoubleNear(10.0, 0.01));
@@ -827,8 +827,11 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectLaneMarkings)
 
 TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectTrafficSigns)
 {
+    openScenario::TrafficSignalController trafficSignalController;
+    trafficSignalController.delay = 0.0;
+    trafficSignalController.phases.push_back(openScenario::TrafficSignalControllerPhase{"", 1, {{"8", "red yellow"}, {"9", "green"}}});
     TESTSCENERY_FACTORY tsf;
-    ASSERT_THAT(tsf.instantiate("IntegrationTestScenery.xodr"), IsTrue());
+    ASSERT_THAT(tsf.instantiate("IntegrationTestScenery.xodr", {trafficSignalController}), IsTrue());
 
     auto& world = tsf.world;
 
@@ -886,6 +889,21 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectTrafficSigns)
     ASSERT_THAT(roadMarkings.size(), Eq(1));
     ASSERT_THAT(roadMarkings.at(0).relativeDistance, DoubleEq(30.0));
     ASSERT_THAT(roadMarkings.at(0).type, Eq(CommonTrafficSign::Type::Stop));
+
+    auto trafficLights = world.GetTrafficLightsInRange(roadGraph, root, -2, 11, 90).at(root);
+    ASSERT_THAT(trafficLights.size(), Eq(1));
+    ASSERT_THAT(trafficLights.at(0).relativeDistance, DoubleEq(49.0));
+    ASSERT_THAT(trafficLights.at(0).type, Eq(CommonTrafficLight::Type::ThreeLightsLeft));
+    ASSERT_THAT(trafficLights.at(0).state, Eq(CommonTrafficLight::State::RedYellow));
+
+    trafficLights = world.GetTrafficLightsInRange(roadGraph, root, -3, 31, 90).at(root);
+    ASSERT_THAT(trafficLights.size(), Eq(2));
+    ASSERT_THAT(trafficLights.at(0).relativeDistance, DoubleEq(29.0));
+    ASSERT_THAT(trafficLights.at(0).type, Eq(CommonTrafficLight::Type::ThreeLightsLeft));
+    ASSERT_THAT(trafficLights.at(0).state, Eq(CommonTrafficLight::State::RedYellow));
+    ASSERT_THAT(trafficLights.at(1).relativeDistance, DoubleEq(34.0));
+    ASSERT_THAT(trafficLights.at(1).type, Eq(CommonTrafficLight::Type::ThreeLights));
+    ASSERT_THAT(trafficLights.at(1).state, Eq(CommonTrafficLight::State::Green));
 }
 
 TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectTrafficSignGeometriess)
@@ -1014,7 +1032,7 @@ TEST(GetObstruction_IntegrationTests, AgentsOnStraightRoad)
     auto& world = tsf.world;
     auto agent0 = AddAgentToWorld(world, 0, 10.0, 2.0);
     auto agent1 = AddAgentToWorld(world, 1, 100.0, 2.5, 2.0);
-    world.SyncGlobalData();
+    world.SyncGlobalData(0);
 
     auto& egoAgent = agent0->GetEgoAgent();
     RoadGraph roadGraph;
@@ -1033,7 +1051,7 @@ TEST(GetObstruction_IntegrationTests, AgentBehindJunction)
     auto& world = tsf.world;
     auto agent0 = AddAgentToWorld(world, 0, 10.0, -3.0);
     auto agent1 = AddAgentToWorld(world, 1, 203.5, -10.0, 1.0, 3.0);
-    world.SyncGlobalData();
+    world.SyncGlobalData(0);
 
     auto& egoAgent = agent0->GetEgoAgent();
     RoadGraph roadGraph;

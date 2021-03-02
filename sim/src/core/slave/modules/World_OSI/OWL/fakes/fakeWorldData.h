@@ -80,6 +80,8 @@ public:
 
     MOCK_METHOD1(AddTrafficSign, OWL::Interfaces::TrafficSign&(const std::string odId));
 
+    MOCK_METHOD1(AddTrafficLight, OWL::Interfaces::TrafficLight&(const std::string odId));
+
     MOCK_CONST_METHOD0(GetTrafficSigns, const std::unordered_map<OWL::Id, OWL::Interfaces::TrafficSign*>& ());
 
     MOCK_CONST_METHOD0(GetTrafficSignIdMapping, const std::unordered_map<std::string, OWL::Id>& ());
@@ -87,6 +89,8 @@ public:
     MOCK_METHOD0(AddRoadMarking, OWL::Interfaces::RoadMarking&());
     
     MOCK_CONST_METHOD0(GetRoadMarkings, const std::unordered_map<OWL::Id, OWL::Interfaces::RoadMarking*>& ());
+
+    MOCK_CONST_METHOD0(GetTrafficLights, const std::unordered_map<OWL::Id, OWL::Interfaces::TrafficLight*>& ());
 
     MOCK_CONST_METHOD0(GetRoadGraph, const RoadGraph& ());
     
@@ -111,6 +115,8 @@ public:
     MOCK_METHOD2(AssignTrafficSignToLane, void (OWL::Id laneId, OWL::Interfaces::TrafficSign& trafficSign));
 
     MOCK_METHOD2(AssignRoadMarkingToLane, void (OWL::Id laneId, OWL::Interfaces::RoadMarking& roadMarking));
+
+    MOCK_METHOD2(AssignTrafficLightToLane, void (OWL::Id laneId, OWL::Interfaces::TrafficLight& trafficLight));
 
     MOCK_METHOD3(AddJunctionPriority, void (const JunctionInterface* odJunction, const std::string& high, const std::string& low));
 

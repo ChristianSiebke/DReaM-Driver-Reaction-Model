@@ -50,6 +50,8 @@ public:
 
     std::vector<CommonTrafficSign::Entity> GetRoadMarkingsInRange(double range, int relativeLane = 0) const override;
 
+    std::vector<CommonTrafficLight::Entity> GetTrafficLightsInRange(double range, int relativeLane = 0) const override;
+
     std::vector<LaneMarking::Entity> GetLaneMarkingsInRange(double range, Side side, int relativeLane = 0) const override;
 
     LongitudinalDistance GetDistanceToObject(const WorldObjectInterface* otherObject) const override;

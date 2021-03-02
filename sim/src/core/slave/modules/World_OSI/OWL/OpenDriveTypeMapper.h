@@ -21,6 +21,7 @@
 
 #include "osi3/osi_lane.pb.h"
 #include "osi3/osi_trafficsign.pb.h"
+#include "osi3/osi_trafficlight.pb.h"
 
 #include "include/roadInterface/roadElementTypes.h"
 #include "common/globalDefinitions.h"
@@ -178,6 +179,24 @@ namespace OpenDriveTypeMapper
         {"294", osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_STOP},
     };
 
+    const std::map<std::string, std::map<std::string, osi3::TrafficLight_Classification_Icon>> trafficLights =
+    {
+        {"1.000.001",
+         {
+             {"", osi3::TrafficLight_Classification_Icon::TrafficLight_Classification_Icon_ICON_NONE}
+         }
+        },
+        {"1.000.011",
+         {
+             {"10", osi3::TrafficLight_Classification_Icon::TrafficLight_Classification_Icon_ICON_ARROW_LEFT},
+             {"20", osi3::TrafficLight_Classification_Icon::TrafficLight_Classification_Icon_ICON_ARROW_RIGHT},
+             {"30", osi3::TrafficLight_Classification_Icon::TrafficLight_Classification_Icon_ICON_ARROW_STRAIGHT_AHEAD},
+             {"40", osi3::TrafficLight_Classification_Icon::TrafficLight_Classification_Icon_ICON_ARROW_STRAIGHT_AHEAD_LEFT},
+             {"50", osi3::TrafficLight_Classification_Icon::TrafficLight_Classification_Icon_ICON_ARROW_STRAIGHT_AHEAD_RIGHT}
+         }
+        },
+    };
+
     //! Conversion map from OSI units to SI units
     const std::map<osi3::TrafficSignValue_Unit, std::pair<double, CommonTrafficSign::Unit>> unitConversionMap =
     {
@@ -227,5 +246,16 @@ namespace OpenDriveTypeMapper
         {osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_POLE_EXIT, CommonTrafficSign::Type::HighwayExitPole},
         {osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_ANNOUNCE_RIGHT_LANE_END, CommonTrafficSign::Type::AnnounceRightLaneEnd},
         {osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_ANNOUNCE_LEFT_LANE_END, CommonTrafficSign::Type::AnnounceLeftLaneEnd}
+    };
+
+    //! Conversion map from OSI traffic sign type to enum defined in globalDefinitions
+    const std::map<osi3::TrafficLight_Classification_Icon, CommonTrafficLight::Type> trafficLightTypeConversionMap =
+    {
+        {osi3::TrafficLight_Classification_Icon_ICON_NONE, CommonTrafficLight::Type::ThreeLights},
+        {osi3::TrafficLight_Classification_Icon_ICON_ARROW_LEFT, CommonTrafficLight::Type::ThreeLightsLeft},
+        {osi3::TrafficLight_Classification_Icon_ICON_ARROW_RIGHT, CommonTrafficLight::Type::ThreeLightsRight},
+        {osi3::TrafficLight_Classification_Icon_ICON_ARROW_STRAIGHT_AHEAD, CommonTrafficLight::Type::ThreeLightsStraight},
+        {osi3::TrafficLight_Classification_Icon_ICON_ARROW_STRAIGHT_AHEAD_LEFT, CommonTrafficLight::Type::ThreeLightsLeftStraight},
+        {osi3::TrafficLight_Classification_Icon_ICON_ARROW_STRAIGHT_AHEAD_RIGHT, CommonTrafficLight::Type::ThreeLightsRightStraight}
     };
 };

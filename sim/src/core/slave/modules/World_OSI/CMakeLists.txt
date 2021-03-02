@@ -16,6 +16,7 @@ add_openpass_target(
     RamerDouglasPeucker.h
     SceneryConverter.h
     TrafficObjectAdapter.h
+    TrafficLightNetwork.h
     World.h
     WorldData.h
     WorldDataException.h
@@ -41,6 +42,7 @@ add_openpass_target(
     PointQuery.cpp
     SceneryConverter.cpp
     TrafficObjectAdapter.cpp
+    TrafficLightNetwork.cpp
     World.cpp
     WorldData.cpp
     WorldDataException.cpp

@@ -86,8 +86,10 @@ public:
     MOCK_CONST_METHOD0(GetNext, const std::vector<OWL::Id>& ());
     MOCK_CONST_METHOD0(GetPrevious, const std::vector<OWL::Id>& ());
     MOCK_CONST_METHOD0(GetTrafficSigns, const OWL::Interfaces::TrafficSigns& ());
+    MOCK_CONST_METHOD0(GetTrafficLights, const OWL::Interfaces::TrafficLights& ());
     MOCK_CONST_METHOD0(GetRoadMarkings, const OWL::Interfaces::RoadMarkings& ());
     MOCK_METHOD1(AddTrafficSign, void (OWL::Interfaces::TrafficSign &trafficSign));
     MOCK_METHOD1(AddRoadMarking, void (OWL::Interfaces::RoadMarking &roadMarking));
+    MOCK_METHOD1(AddTrafficLight, void (OWL::Interfaces::TrafficLight &trafficLight));
 };
 }

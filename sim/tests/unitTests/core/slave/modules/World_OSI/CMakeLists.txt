@@ -32,6 +32,7 @@ add_openpass_target(
     ${COMPONENT_SOURCE_DIR}/PointQuery.cpp
     ${COMPONENT_SOURCE_DIR}/SceneryConverter.cpp
     ${COMPONENT_SOURCE_DIR}/TrafficObjectAdapter.cpp
+    ${COMPONENT_SOURCE_DIR}/TrafficLightNetwork.cpp
     ${COMPONENT_SOURCE_DIR}/WorldData.cpp
     ${COMPONENT_SOURCE_DIR}/WorldDataException.cpp
     ${COMPONENT_SOURCE_DIR}/WorldDataQuery.cpp
@@ -56,6 +57,7 @@ add_openpass_target(
     ${COMPONENT_SOURCE_DIR}/RoutePlanning/RouteCalculation.h
     ${COMPONENT_SOURCE_DIR}/SceneryConverter.h
     ${COMPONENT_SOURCE_DIR}/TrafficObjectAdapter.h
+    ${COMPONENT_SOURCE_DIR}/TrafficLightNetwork.h
     ${COMPONENT_SOURCE_DIR}/WorldData.h
     ${COMPONENT_SOURCE_DIR}/WorldDataException.h
     ${COMPONENT_SOURCE_DIR}/WorldDataQuery.h

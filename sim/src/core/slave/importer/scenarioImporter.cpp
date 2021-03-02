@@ -67,9 +67,7 @@ bool ScenarioImporter::Import(const std::string& filename, ScenarioInterface* sc
 
         ImportAndValidateVersion(parameters);
 
-        std::string sceneryPath;
-        ImportRoadNetwork(documentRoot, sceneryPath, parameters);
-        scenario->SetSceneryPath(sceneryPath);
+        ImportRoadNetwork(documentRoot, scenario, parameters);
 
         auto path = Directories::StripFile(filename);
         ImportCatalogs(documentRoot, scenario, path, parameters);
@@ -121,16 +119,64 @@ void ScenarioImporter::ImportCatalogs(QDomElement& documentRoot, ScenarioInterfa
     scenario->SetTrajectoryCatalogPath(trajectoryCatalogPath);
 }
 
-void ScenarioImporter::ImportRoadNetwork(QDomElement& documentRoot, std::string& sceneryPath, openScenario::Parameters& parameters)
+void ScenarioImporter::ImportRoadNetwork(QDomElement& documentRoot, ScenarioInterface *scenario, openScenario::Parameters& parameters)
 {
     QDomElement roadNetworkElement;
     QDomElement logicsElement;
+    QDomElement trafficSignalsElement;
+    QDomElement trafficSignalControllerElement;
 
     ThrowIfFalse(SimulationCommon::GetFirstChildElement(documentRoot, TAG::roadNetwork, roadNetworkElement),
                  documentRoot, "Tag " + std::string(TAG::roadNetwork) + " is missing.");
     ThrowIfFalse(SimulationCommon::GetFirstChildElement(roadNetworkElement, TAG::logicFile, logicsElement),
                  roadNetworkElement, "Tag " + std::string(TAG::logicFile) + " is missing.");
-    sceneryPath = ParseAttribute<std::string>(logicsElement, ATTRIBUTE::filepath, parameters);
+    scenario->SetSceneryPath(ParseAttribute<std::string>(logicsElement, ATTRIBUTE::filepath, parameters));
+
+    if(SimulationCommon::GetFirstChildElement(roadNetworkElement, TAG::trafficSignals, trafficSignalsElement));
+    {
+        SimulationCommon::GetFirstChildElement(trafficSignalsElement, TAG::trafficSignalController, trafficSignalControllerElement);
+        while (!trafficSignalControllerElement.isNull())
+        {
+            openScenario::TrafficSignalController controller;
+            ImportTrafficSignalsElement(trafficSignalControllerElement, controller, parameters);
+            scenario->AddTrafficSignalController(controller);
+
+            trafficSignalControllerElement = trafficSignalControllerElement.nextSiblingElement(TAG::trafficSignalController);
+        }
+    }
+}
+
+void ScenarioImporter::ImportTrafficSignalsElement(QDomElement &trafficSignalControllerElement, openScenario::TrafficSignalController &controller, Parameters &parameters)
+{
+    controller.name = ParseAttribute<std::string>(trafficSignalControllerElement, ATTRIBUTE::name, parameters);
+    controller.delay = ParseOptionalAttribute<double>(trafficSignalControllerElement, ATTRIBUTE::delay, parameters).value_or(0.0);
+
+    QDomElement phaseElement;
+
+    SimulationCommon::GetFirstChildElement(trafficSignalControllerElement, TAG::phase, phaseElement);
+    while (!phaseElement.isNull())
+    {
+        TrafficSignalControllerPhase phase;
+        phase.name = ParseAttribute<std::string>(phaseElement, ATTRIBUTE::name, parameters);
+        phase.duration = ParseAttribute<double>(phaseElement, ATTRIBUTE::duration, parameters);
+
+        QDomElement trafficSignalStateElement;
+        SimulationCommon::GetFirstChildElement(phaseElement, TAG::trafficSignalState, trafficSignalStateElement);
+
+        while (!trafficSignalStateElement.isNull())
+        {
+            auto trafficSignalId = ParseAttribute<std::string>(trafficSignalStateElement, ATTRIBUTE::trafficSignalId, parameters);
+            auto state = ParseAttribute<std::string>(trafficSignalStateElement, ATTRIBUTE::state, parameters);
+
+            phase.states[trafficSignalId] = state;
+
+            trafficSignalStateElement = trafficSignalStateElement.nextSiblingElement(TAG::trafficSignalState);
+        }
+
+        controller.phases.push_back(phase);
+
+        phaseElement = phaseElement.nextSiblingElement(TAG::phase);
+    }
 }
 
 void ScenarioImporter::ImportStoryboard(QDomElement& documentRoot, std::vector<ScenarioEntity>& entities,

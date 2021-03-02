@@ -158,6 +158,14 @@ public:
     //! \return road markings in range
     virtual std::vector<CommonTrafficSign::Entity> GetRoadMarkingsInRange(double range, int relativeLane = 0) const = 0;
 
+    //! Returns all TrafficLights in front of the agent inside the specified range on the specified
+    //! lane along the route
+    //!
+    //! \param range            search range (calculated from MainLaneLocator)
+    //! \param relativeLane     lane id relative to own lane (in driving direction)
+    //! \return traffic lights in range
+    virtual std::vector<CommonTrafficLight::Entity> GetTrafficLightsInRange(double range, int relativeLane = 0) const = 0;
+
     //! Returns all LaneMarkings in front of the agent inside the specified range on the specified
     //! lane along the route
     //!

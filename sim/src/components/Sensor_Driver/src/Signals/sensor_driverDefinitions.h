@@ -50,6 +50,8 @@ struct LaneInformationTrafficRules
 {
     //! Vector of all traffic signs valid for this lane inside the visibility distance
     std::vector<CommonTrafficSign::Entity> trafficSigns;
+    //! Vector of all traffic lights valid for this lane inside the visibility distance
+    std::vector<CommonTrafficLight::Entity> trafficLights;
 };
 
 //! This struct is used to transport data of a lane concerning its geometric features as seen by the driver

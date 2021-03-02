@@ -24,6 +24,7 @@
 #include "WorldData.h"
 #include "WorldDataQuery.h"
 #include "Localization.h"
+#include "TrafficLightNetwork.h"
 #include "common/worldDefinitions.h"
 
 namespace Internal
@@ -296,7 +297,7 @@ private:
     //! \param lanes        lanes for which this road marking is valid
     void CreateRoadMarking(RoadSignalInterface* signal, Position position, const OWL::Interfaces::Lanes& lanes);
 
-    void CreateTrafficLight(RoadSignalInterface* signal, RoadInterface* road);
+    void CreateTrafficLight(RoadSignalInterface* signal, Position position, const OWL::Interfaces::Lanes& lanes);
 
     std::list<RoadLaneInterface*> GetRoadLanesAtDistance(RoadInterface *road, double s);
 
@@ -352,4 +353,22 @@ public:
 
 private:
     SceneryInterface& scenery;
+};
+
+//!This class build the TrafficLightNetwork
+class TrafficLightNetworkBuilder
+{
+public:
+    TrafficLightNetworkBuilder(const std::vector<openScenario::TrafficSignalController>& controllers,
+                               const OWL::Interfaces::WorldData& worldData) :
+        controllers(controllers),
+        worldData(worldData)
+    {}
+
+    //! Converts the traffic controller definitions of OpenDrive into the internal TrafficLightNetwork
+    TrafficLightNetwork Build();
+
+private:
+    const std::vector<openScenario::TrafficSignalController>& controllers;
+    const OWL::Interfaces::WorldData& worldData;
 };

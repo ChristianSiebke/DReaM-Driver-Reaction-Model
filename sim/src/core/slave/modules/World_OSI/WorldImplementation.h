@@ -126,9 +126,9 @@ public:
     void RemoveAgent(const AgentInterface* agent);
 
     void PublishGlobalData(int timestamp) override;
-    void SyncGlobalData() override;
+    void SyncGlobalData(int timestamp) override;
 
-    bool CreateScenery(SceneryInterface* scenery) override;
+    bool CreateScenery(SceneryInterface* scenery, const std::vector<openScenario::TrafficSignalController>& trafficSignalControllers) override;
 
     AgentInterface* CreateAgentAdapterForAgent() override;
 
@@ -186,6 +186,9 @@ public:
 
     RouteQueryResult<std::vector<CommonTrafficSign::Entity>> GetRoadMarkingsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId,
                                                                                     double startDistance, double searchRange) const override;
+
+    RouteQueryResult<std::vector<CommonTrafficLight::Entity>> GetTrafficLightsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId,
+                                                                                     double startDistance, double searchRange) const override;
 
     RouteQueryResult<std::vector<LaneMarking::Entity>> GetLaneMarkings(const RoadGraph& roadGraph, RoadGraphVertex startNode,
                                                                        int laneId, double startDistance, double range, Side side) const override;
@@ -314,6 +317,8 @@ private:
     WorldParameterOSI worldParameter;
 
     AgentNetwork agentNetwork;
+
+    TrafficLightNetwork trafficLightNetwork;
 
     const CallbackInterface* callbacks;
 

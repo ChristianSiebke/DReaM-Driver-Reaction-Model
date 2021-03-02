@@ -24,6 +24,7 @@
 #include "common/boostGeometryCommon.h"
 #include "common/globalDefinitions.h"
 #include "common/worldDefinitions.h"
+#include "common/openScenarioDefinitions.h"
 #include "common/vector2d.h"
 
 class AgentInterface;
@@ -218,14 +219,14 @@ public:
     //!
     //! @return
     //-----------------------------------------------------------------------------
-    virtual void SyncGlobalData() = 0;
+    virtual void SyncGlobalData(int timestamp) = 0;
 
     //-----------------------------------------------------------------------------
     //! Create a scenery in world.
     //!
     //! @return
     //-----------------------------------------------------------------------------
-    virtual bool CreateScenery(SceneryInterface *scenery) = 0;
+    virtual bool CreateScenery(SceneryInterface *scenery, const std::vector<openScenario::TrafficSignalController>& trafficSignalControllers) = 0;
 
     //-----------------------------------------------------------------------------
     //! Create an agentAdapter for an agent to communicate between the agent of the
@@ -535,6 +536,17 @@ public:
     //! \return road markings in range (can also be negative)
     virtual RouteQueryResult<std::vector<CommonTrafficSign::Entity>> GetRoadMarkingsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId,
                                                                                             double startDistance, double searchRange) const = 0;
+
+    //! Returns all traffic lights valid for a lane inside the range
+    //!
+    //! \param route            route to search along
+    //! \param roadId           OpenDrive Id of the road
+    //! \param laneId           OpenDrive Id of the lane
+    //! \param startDistance    s coordinate
+    //! \param searchRange      range of search (can also be negative)
+    //! \return traffic lights in range
+    virtual RouteQueryResult<std::vector<CommonTrafficLight::Entity>> GetTrafficLightsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId,
+                                                                                             double startDistance, double searchRange) const = 0;
 
     //! Retrieves all lane markings on the given position on the given side of the lane inside the range
     //!

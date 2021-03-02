@@ -390,3 +390,31 @@ struct Entity
     double width{0.0};
 };
 }
+
+namespace CommonTrafficLight
+{
+enum class Type
+{
+    ThreeLights,             //! Standard red, yellow, green without arrows
+    ThreeLightsLeft,         //! red, yellow, green with arrows pointing left
+    ThreeLightsRight,        //! red, yellow, green with arrows pointing right
+    ThreeLightsStraight,     //! red, yellow, green with arrows pointing upwards
+    ThreeLightsLeftStraight, //! red, yellow, green with arrows pointing left and upwards
+    ThreeLightsRightStraight //! red, yellow, green with arrows pointing right and upwards
+};
+
+enum class State
+{
+    Green,
+    Yellow,
+    Red,
+    RedYellow
+};
+
+struct Entity
+{
+    Type type{Type::ThreeLights};
+    State state{State::Red};
+    double relativeDistance{0.0};
+};
+}

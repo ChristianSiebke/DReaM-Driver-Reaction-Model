@@ -218,6 +218,7 @@ namespace openpass::importer::xml::scenarioImporter::tag
     constexpr char parameterDeclaration[] {"ParameterDeclaration"};
     constexpr char parameterDeclarations[] {"ParameterDeclarations"};
     constexpr char pedestrianCatalog[] {"PedestrianCatalog"};
+    constexpr char phase[] {"Phase"};
     constexpr char polyline[] {"Polyline"};
     constexpr char position[] {"Position"};
     constexpr char Private[] {"Private"};
@@ -237,6 +238,9 @@ namespace openpass::importer::xml::scenarioImporter::tag
     constexpr char storyboard[] {"Storyboard"};
     constexpr char speedActionTarget[] {"SpeedActionTarget"};
     constexpr char trajectory[] {"Trajectory"};
+    constexpr char trafficSignals[] {"TrafficSignals"};
+    constexpr char trafficSignalController[] {"TrafficSignalController"};
+    constexpr char trafficSignalState[] {"TrafficSignalState"};
     constexpr char trajectoryCatalog[] {"TrajectoryCatalog"};
     constexpr char teleportAction[] {"TeleportAction"};
     constexpr char userDefinedAction[] {"UserDefinedAction"};
@@ -250,11 +254,12 @@ namespace openpass::importer::xml::scenarioImporter::tag
 namespace openpass::importer::xml::scenarioImporter::attribute
 {
     constexpr char catalogName[] {"catalogName"};
+    constexpr char conditionEdge[] {"conditionEdge"};
+    constexpr char continuous[] {"continuous"};
     constexpr char delay[] {"delay"};
     constexpr char dLane[] {"dLane"};
     constexpr char ds[] {"ds"};
-    constexpr char conditionEdge[] {"conditionEdge"};
-    constexpr char continuous[] {"continuous"};
+    constexpr char duration[] {"duration"};
     constexpr char dynamicsDimension[] {"dynamicsDimension"};
     constexpr char dynamicsShape[] {"dynamicsShape"};
     constexpr char entityRef[] {"entityRef"};
@@ -280,10 +285,12 @@ namespace openpass::importer::xml::scenarioImporter::attribute
     constexpr char selectTriggeringEntities[] {"selectTriggeringEntities"};
     constexpr char sensors[] {"sensors"};
     constexpr char speedTargetValueType[] {"speedTargetValueType"};
+    constexpr char state[] {"state"};
     constexpr char stdDeviation[] {"stdDeviation"};
     constexpr char t[] {"t"};
     constexpr char time[] {"time"};
     constexpr char traffic[] {"traffic"};
+    constexpr char trafficSignalId[] {"trafficSignalId"};
     constexpr char type[] {"type"};
     constexpr char upperBound[] {"upperBound"};
     constexpr char value[] {"value"};

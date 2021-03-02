@@ -169,6 +169,7 @@ LaneInformationTrafficRules SensorDriverImplementation::GetTrafficRuleLaneInform
     const double visibilityDistance = GetWorld()->GetVisibilityDistance();
 
     laneInformation.trafficSigns            = egoAgent.GetTrafficSignsInRange(visibilityDistance);
+    laneInformation.trafficLights           = egoAgent.GetTrafficLightsInRange(visibilityDistance);
 
     return laneInformation;
 }
@@ -180,6 +181,7 @@ LaneInformationTrafficRules SensorDriverImplementation::GetTrafficRuleLaneInform
     const double visibilityDistance = GetWorld()->GetVisibilityDistance();
 
     laneInformation.trafficSigns            = egoAgent.GetTrafficSignsInRange(visibilityDistance, relativeLaneId);
+    laneInformation.trafficLights           = egoAgent.GetTrafficLightsInRange(visibilityDistance, relativeLaneId);
 
     return laneInformation;
 }
@@ -191,6 +193,7 @@ LaneInformationTrafficRules SensorDriverImplementation::GetTrafficRuleLaneInform
     const double visibilityDistance = GetWorld()->GetVisibilityDistance();
 
     laneInformation.trafficSigns            = egoAgent.GetTrafficSignsInRange(visibilityDistance, relativeLaneId);
+    laneInformation.trafficLights           = egoAgent.GetTrafficLightsInRange(visibilityDistance, relativeLaneId);
 
     return laneInformation;
 }

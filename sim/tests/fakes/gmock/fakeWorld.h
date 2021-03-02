@@ -24,7 +24,7 @@ class FakeWorld : public WorldInterface
     MOCK_METHOD0(GetEgoAgent, AgentInterface*());
     MOCK_METHOD2(AddAgent, bool(int id, AgentInterface* agent));
     MOCK_METHOD0(CreateGlobalDrivingView, bool());
-    MOCK_METHOD1(CreateScenery, bool(SceneryInterface *scenery));
+    MOCK_METHOD2(CreateScenery, bool(SceneryInterface *scenery, const std::vector<openScenario::TrafficSignalController>& trafficSignalControllers));
     MOCK_METHOD1(CreateWorldScenario, bool(const std::string &scenarioFilename));
     MOCK_METHOD1(CreateWorldScenery, bool(const std::string &sceneryFilename));
     MOCK_METHOD0(Instantiate, bool());
@@ -62,6 +62,7 @@ class FakeWorld : public WorldInterface
     MOCK_CONST_METHOD0(GetTimeOfDay, std::string());
     MOCK_CONST_METHOD5(GetTrafficSignsInRange, RouteQueryResult<std::vector<CommonTrafficSign::Entity>>(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance, double searchRange));
     MOCK_CONST_METHOD5(GetRoadMarkingsInRange, RouteQueryResult<std::vector<CommonTrafficSign::Entity>>(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance, double searchRange));
+    MOCK_CONST_METHOD5(GetTrafficLightsInRange, RouteQueryResult<std::vector<CommonTrafficLight::Entity>>(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance, double searchRange));
     MOCK_CONST_METHOD6(GetLaneMarkings, RouteQueryResult<std::vector<LaneMarking::Entity>> (const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance, double range, Side side));
     MOCK_CONST_METHOD6(GetAgentsInRange, RouteQueryResult<std::vector<const AgentInterface*>>(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance, double backwardRange, double forwardRange));
     MOCK_CONST_METHOD6(GetObjectsInRange, RouteQueryResult<std::vector<const WorldObjectInterface*>>(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance, double backwardRange, double forwardRange));
@@ -80,7 +81,7 @@ class FakeWorld : public WorldInterface
     MOCK_METHOD1(SetParameter, void(WorldParameter *worldParameter));
     MOCK_METHOD1(SetTimeOfDay, void(int timeOfDay));
     MOCK_METHOD1(SetWeekday, void(Weekday weekday));
-    MOCK_METHOD0(SyncGlobalData, void());
+    MOCK_METHOD1(SyncGlobalData, void(int timestamp));
     MOCK_METHOD1(PublishGlobalData, void (int timestamp));
     MOCK_METHOD0(GetOsiGroundTruth, void*());
     MOCK_METHOD0(GetWorldData, void*());

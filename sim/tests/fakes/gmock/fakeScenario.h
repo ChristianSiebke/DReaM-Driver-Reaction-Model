@@ -34,6 +34,10 @@ public:
                  const std::string & ());
     MOCK_METHOD1(SetSceneryPath,
                  void(const std::string&));
+    MOCK_CONST_METHOD0(GetTrafficSignalControllers,
+                       const std::vector<openScenario::TrafficSignalController>& ());
+    MOCK_METHOD1(AddTrafficSignalController,
+                 void (const openScenario::TrafficSignalController& controller));
     MOCK_METHOD1(AddScenarioEntity,
                  void(const ScenarioEntity&));
     MOCK_METHOD1(AddScenarioGroupsByEntityNames,

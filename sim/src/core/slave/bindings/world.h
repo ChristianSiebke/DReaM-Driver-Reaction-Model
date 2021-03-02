@@ -132,14 +132,14 @@ public:
         return implementation->PublishGlobalData(timestamp);
     }
 
-    void SyncGlobalData() override
+    void SyncGlobalData(int timestamp) override
     {
-        return implementation->SyncGlobalData();
+        return implementation->SyncGlobalData(timestamp);
     }
 
-    bool CreateScenery(SceneryInterface* scenery) override
+    bool CreateScenery(SceneryInterface* scenery, const std::vector<openScenario::TrafficSignalController>& trafficSignalControllers) override
     {
-        return implementation->CreateScenery(scenery);
+        return implementation->CreateScenery(scenery, trafficSignalControllers);
     }
 
     AgentInterface* CreateAgentAdapterForAgent() override
@@ -296,6 +296,12 @@ public:
                                                                                                 double startDistance, double searchRange) const override
     {
         return implementation->GetRoadMarkingsInRange(roadGraph, startNode, laneId, startDistance, searchRange);
+    }
+
+    RouteQueryResult<std::vector<CommonTrafficLight::Entity>> GetTrafficLightsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId,
+                                                                                      double startDistance, double searchRange) const override
+    {
+        return implementation->GetTrafficLightsInRange(roadGraph, startNode, laneId, startDistance, searchRange);
     }
 
     RouteQueryResult<std::vector<LaneMarking::Entity>> GetLaneMarkings(const RoadGraph& roadGraph, RoadGraphVertex startNode,

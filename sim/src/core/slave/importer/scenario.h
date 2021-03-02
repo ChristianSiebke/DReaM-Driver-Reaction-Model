@@ -88,6 +88,9 @@ public:
      */
     void SetSceneryPath(const std::string& sceneryPath) override;
 
+    const std::vector<openScenario::TrafficSignalController>& GetTrafficSignalControllers() const;
+    void AddTrafficSignalController (const openScenario::TrafficSignalController& controller);
+
     void AddScenarioEntity(const ScenarioEntity& entity) override;
     void AddScenarioGroupsByEntityNames(const std::map<std::string, std::list<std::string>> &groupDefinitions) override;
 
@@ -112,6 +115,7 @@ private:
     std::vector<ScenarioEntity> entities;
     std::map<std::string, std::vector<ScenarioEntity*>> scenarioGroups;
 
+    std::vector<openScenario::TrafficSignalController> trafficSignalControllers;
     std::vector<openScenario::ConditionalEventDetectorInformation> eventDetectorInformations;
     std::vector<openScenario::ManipulatorInformation> actions;
 

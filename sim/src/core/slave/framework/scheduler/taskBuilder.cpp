@@ -71,7 +71,7 @@ std::list<TaskItem> TaskBuilder::CreatePreAgentTasks()
 
 std::list<TaskItem> TaskBuilder::CreateSynchronizeTasks()
 {
-    return {SyncWorldTaskItem(ScheduleAtEachCycle, [&] { world->SyncGlobalData(); })};
+    return {SyncWorldTaskItem(ScheduleAtEachCycle, [&] { world->SyncGlobalData(currentTime); })};
 }
 
 std::list<TaskItem> TaskBuilder::CreateFinalizeTasks()

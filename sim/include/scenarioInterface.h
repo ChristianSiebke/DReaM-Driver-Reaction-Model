@@ -146,6 +146,18 @@ public:
     virtual void SetSceneryPath(const std::string& sceneryPath) = 0;
 
     //-----------------------------------------------------------------------------
+    //! Retreives the traffic signal controllers
+    //!
+    //! \return    traffic signal controllers
+    //-----------------------------------------------------------------------------
+    virtual const std::vector<openScenario::TrafficSignalController>& GetTrafficSignalControllers() const = 0;
+
+    //-----------------------------------------------------------------------------
+    //! Adds one traffic signal controller
+    //----------------------------------------------------------------------------
+    virtual void AddTrafficSignalController (const openScenario::TrafficSignalController& controller) = 0;
+
+    //-----------------------------------------------------------------------------
     //! Adds one scenario entity to the scenery entities of the scenario.
     //-----------------------------------------------------------------------------
     virtual void AddScenarioEntity(const ScenarioEntity& entity) = 0;

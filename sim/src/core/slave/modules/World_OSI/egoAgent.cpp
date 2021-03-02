@@ -163,6 +163,15 @@ std::vector<CommonTrafficSign::Entity> EgoAgent::GetRoadMarkingsInRange(double r
                                          range).at(0);
 }
 
+std::vector<CommonTrafficLight::Entity> EgoAgent::GetTrafficLightsInRange(double range, int relativeLane) const
+{
+    return world->GetTrafficLightsInRange(wayToTarget,
+                                          rootOfWayToTargetGraph,
+                                          GetLaneIdFromRelative(relativeLane),
+                                          GetMainLocatePosition().roadPosition.s,
+                                          range).at(0);
+}
+
 std::vector<LaneMarking::Entity> EgoAgent::GetLaneMarkingsInRange(double range, Side side, int relativeLane) const
 {
     return world->GetLaneMarkings(wayToTarget,

@@ -207,6 +207,12 @@ This scenery consists of linear sections only.
             <validity toLane="-2" fromLane="-2"/>
             <dependency id="5" />
          </signal>
+        <signal id="8" type="1.000.011" subtype="10" s="60" t="-8" width="0.3" hOffset="0" pitch="0" roll="0" dynamic="no" country="DEU" name="" orientation="+" zOffset="3.0">
+        <validity toLane="-3" fromLane="-2"/>
+        </signal>
+        <signal id="9" type="1.000.001" subtype="" s="65" t="-8" width="0.3" hOffset="0" pitch="0" roll="0" dynamic="no" country="DEU" name="" orientation="+" zOffset="3.0">
+        <validity toLane="-3" fromLane="-3"/>
+        </signal>
       </signals>
 	<type s="0" type="motorway"/>
   </road>

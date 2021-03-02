@@ -364,6 +364,11 @@ const Interfaces::RoadMarkings& Lane::GetRoadMarkings() const
     return roadMarkings;
 }
 
+const Interfaces::TrafficLights& Lane::GetTrafficLights() const
+{
+    return trafficLights;
+}
+
 //const Interfaces::MovingObjects& Lane::GetMovingObjects() const
 //{
 //    return movingObjects;
@@ -407,6 +412,11 @@ void Lane::AddTrafficSign(Interfaces::TrafficSign& trafficSign)
 void Lane::AddRoadMarking(Interfaces::RoadMarking& roadMarking)
 {
     roadMarkings.push_back(&roadMarking);
+}
+
+void Lane::AddTrafficLight(Interfaces::TrafficLight &trafficLight)
+{
+    trafficLights.push_back(&trafficLight);
 }
 
 void Lane::ClearMovingObjects()
@@ -1678,6 +1688,151 @@ void LaneBoundary::CopyToGroundTruth(osi3::GroundTruth& target) const
 {
     auto newLaneBoundary = target.add_lane_boundary();
     newLaneBoundary->CopyFrom(*osiLaneBoundary);
+}
+
+TrafficLight::TrafficLight(osi3::TrafficLight *osiLightRed, osi3::TrafficLight *osiLightYellow, osi3::TrafficLight *osiLightGreen) :
+    osiLightRed(osiLightRed),
+    osiLightYellow(osiLightYellow),
+    osiLightGreen(osiLightGreen)
+{
+}
+
+bool TrafficLight::IsValidForLane(Id laneId) const
+{
+    auto assignedLanes = osiLightRed->classification().assigned_lane_id();
+    for (auto lane : assignedLanes)
+    {
+        if (lane.value() == laneId)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool TrafficLight::SetSpecification(RoadSignalInterface* signal, const Position &position)
+{
+    double yaw = position.yawAngle + signal->GetHOffset() + (signal->GetOrientation() ? 0 : M_PI);
+    yaw = CommonHelper::SetAngleToValidRange(yaw);
+    const auto type = helper::map::query(OpenDriveTypeMapper::trafficLights, signal->GetType());
+    if (!type.has_value())
+    {
+        return false;
+    }
+    const auto icon = helper::map::query(type.value(), signal->GetSubType());
+    if (!icon.has_value())
+    {
+        return false;
+    }
+    osiLightRed->mutable_base()->mutable_position()->set_x(position.xPos);
+    osiLightRed->mutable_base()->mutable_position()->set_y(position.yPos);
+    osiLightRed->mutable_base()->mutable_position()->set_z(signal->GetZOffset() + 0.5 * signal->GetHeight());
+    osiLightRed->mutable_base()->mutable_dimension()->set_width(signal->GetWidth());
+    osiLightRed->mutable_base()->mutable_dimension()->set_height(signal->GetHeight());
+    osiLightRed->mutable_base()->mutable_orientation()->set_yaw(yaw);
+    osiLightRed->mutable_classification()->set_icon(icon.value());
+    osiLightYellow->mutable_base()->mutable_position()->set_x(position.xPos);
+    osiLightYellow->mutable_base()->mutable_position()->set_y(position.yPos);
+    osiLightYellow->mutable_base()->mutable_position()->set_z(signal->GetZOffset() + 0.5 * signal->GetHeight());
+    osiLightYellow->mutable_base()->mutable_dimension()->set_width(signal->GetWidth());
+    osiLightYellow->mutable_base()->mutable_dimension()->set_height(signal->GetHeight());
+    osiLightYellow->mutable_base()->mutable_orientation()->set_yaw(yaw);
+    osiLightYellow->mutable_classification()->set_icon(icon.value());
+    osiLightGreen->mutable_base()->mutable_position()->set_x(position.xPos);
+    osiLightGreen->mutable_base()->mutable_position()->set_y(position.yPos);
+    osiLightGreen->mutable_base()->mutable_position()->set_z(signal->GetZOffset() + 0.5 * signal->GetHeight());
+    osiLightGreen->mutable_base()->mutable_dimension()->set_width(signal->GetWidth());
+    osiLightGreen->mutable_base()->mutable_dimension()->set_height(signal->GetHeight());
+    osiLightGreen->mutable_base()->mutable_orientation()->set_yaw(yaw);
+    osiLightGreen->mutable_classification()->set_icon(icon.value());
+
+    return true;
+}
+
+Primitive::AbsPosition TrafficLight::GetReferencePointPosition() const
+{
+    const osi3::Vector3d osiPosition = osiLightYellow->base().position();
+    Primitive::AbsPosition position;
+
+    position.x = osiPosition.x();
+    position.y = osiPosition.y();
+    position.z = osiPosition.z();
+
+    return position;
+}
+
+void TrafficLight::CopyToGroundTruth(osi3::GroundTruth &target) const
+{
+
+}
+
+void TrafficLight::SetState(CommonTrafficLight::State newState)
+{
+    switch (newState)
+    {
+    case CommonTrafficLight::State::Red :
+        osiLightRed->mutable_classification()->set_mode(osi3::TrafficLight_Classification_Mode_MODE_CONSTANT);
+        osiLightYellow->mutable_classification()->set_mode(osi3::TrafficLight_Classification_Mode_MODE_OFF);
+        osiLightGreen->mutable_classification()->set_mode(osi3::TrafficLight_Classification_Mode_MODE_OFF);
+        break;
+    case CommonTrafficLight::State::Yellow :
+        osiLightRed->mutable_classification()->set_mode(osi3::TrafficLight_Classification_Mode_MODE_OFF);
+        osiLightYellow->mutable_classification()->set_mode(osi3::TrafficLight_Classification_Mode_MODE_CONSTANT);
+        osiLightGreen->mutable_classification()->set_mode(osi3::TrafficLight_Classification_Mode_MODE_OFF);
+        break;
+    case CommonTrafficLight::State::Green :
+        osiLightRed->mutable_classification()->set_mode(osi3::TrafficLight_Classification_Mode_MODE_OFF);
+        osiLightYellow->mutable_classification()->set_mode(osi3::TrafficLight_Classification_Mode_MODE_OFF);
+        osiLightGreen->mutable_classification()->set_mode(osi3::TrafficLight_Classification_Mode_MODE_CONSTANT);
+        break;
+    case CommonTrafficLight::State::RedYellow :
+        osiLightRed->mutable_classification()->set_mode(osi3::TrafficLight_Classification_Mode_MODE_CONSTANT);
+        osiLightYellow->mutable_classification()->set_mode(osi3::TrafficLight_Classification_Mode_MODE_CONSTANT);
+        osiLightGreen->mutable_classification()->set_mode(osi3::TrafficLight_Classification_Mode_MODE_OFF);
+        break;
+    }
+}
+
+CommonTrafficLight::Entity TrafficLight::GetSpecification(const double relativeDistance) const
+{
+    CommonTrafficLight::Entity specification;
+
+    specification.relativeDistance = relativeDistance;
+
+    const auto osiType = osiLightRed->classification().icon();
+
+    if (OpenDriveTypeMapper::trafficLightTypeConversionMap.find(osiType) != OpenDriveTypeMapper::trafficLightTypeConversionMap.end())
+    {
+        specification.type = OpenDriveTypeMapper::trafficLightTypeConversionMap.at(osiType);
+    }
+
+    specification.state = GetState();
+
+    return specification;
+}
+
+CommonTrafficLight::State TrafficLight::GetState() const
+{
+    bool red = osiLightRed->classification().mode() == osi3::TrafficLight_Classification_Mode_MODE_CONSTANT;
+    bool yellow = osiLightYellow->classification().mode() == osi3::TrafficLight_Classification_Mode_MODE_CONSTANT;
+    bool green = osiLightGreen->classification().mode() == osi3::TrafficLight_Classification_Mode_MODE_CONSTANT;
+    if (red && !yellow && !green)
+    {
+        return CommonTrafficLight::State::Red;
+    }
+    else if (!red && yellow && !green)
+    {
+        return CommonTrafficLight::State::Yellow;
+    }
+    else if (!red && !yellow && green)
+    {
+        return CommonTrafficLight::State::Green;
+    }
+    else if (red && yellow && !green)
+    {
+        return CommonTrafficLight::State::RedYellow;
+    }
+    throw std::runtime_error("Illegal traffic light state");
 }
 
 // namespace Implementation

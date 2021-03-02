@@ -30,6 +30,7 @@ class FakeEgoAgent : public EgoAgentInterface
     MOCK_CONST_METHOD3(GetAgentsInRange, std::vector<const AgentInterface*> (double backwardRange, double forwardRange, int relativeLane));
     MOCK_CONST_METHOD2(GetTrafficSignsInRange, std::vector<CommonTrafficSign::Entity> (double range, int relativeLane));
     MOCK_CONST_METHOD2(GetRoadMarkingsInRange, std::vector<CommonTrafficSign::Entity> (double range, int relativeLane));
+    MOCK_CONST_METHOD2(GetTrafficLightsInRange, std::vector<CommonTrafficLight::Entity> (double range, int relativeLane));
     MOCK_CONST_METHOD3(GetLaneMarkingsInRange, std::vector<LaneMarking::Entity> (double range, Side side, int relativeLane));
     MOCK_CONST_METHOD1(GetDistanceToObject, LongitudinalDistance (const WorldObjectInterface* otherObject));
     MOCK_CONST_METHOD1(GetObstruction, Obstruction (const WorldObjectInterface* otherObject));

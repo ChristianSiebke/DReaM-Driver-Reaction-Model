@@ -134,6 +134,20 @@ using Position = std::variant<LanePosition,
                               RoadPosition,
                               WorldPosition>;
 
+struct TrafficSignalControllerPhase
+{
+    std::string name;
+    double duration;
+    std::map<std::string, std::string> states;
+};
+
+struct TrafficSignalController
+{
+    std::string name;
+    double delay;
+    std::vector<TrafficSignalControllerPhase> phases;
+};
+
 // Action
 // GlobalAction
 enum EntityActionType

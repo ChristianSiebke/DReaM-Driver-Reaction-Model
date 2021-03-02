@@ -268,6 +268,40 @@ RouteQueryResult<std::vector<CommonTrafficSign::Entity>> WorldDataQuery::GetRoad
     worldData);
 }
 
+RouteQueryResult<std::vector<CommonTrafficLight::Entity>> WorldDataQuery::GetTrafficLightsInRange(LaneMultiStream laneStream, double startDistance, double searchRange) const
+{
+    const bool backwardsSearch = searchRange < 0;
+    const double startPosition = backwardsSearch ? startDistance + searchRange : startDistance;
+    const double endPosition = backwardsSearch ? startDistance : startDistance + searchRange;
+    return laneStream.Traverse(LaneMultiStream::TraversedFunction<std::vector<CommonTrafficLight::Entity>>{[&](const auto& lane, const auto& previousTraffiLights)
+    {
+        std::vector<CommonTrafficLight::Entity> foundTrafficLights{previousTraffiLights};
+
+        if (lane.EndS() < startPosition)
+        {
+            return foundTrafficLights;
+        }
+        if (lane.StartS() > endPosition)
+        {
+            return foundTrafficLights;
+        }
+        auto sortedTrafficLights = lane().GetTrafficLights();
+        sortedTrafficLights.sort([lane](const auto first, const auto second)
+        {return lane.GetStreamPosition(first->GetS()) < lane.GetStreamPosition(second->GetS());});
+        for (const auto& trafficLight : sortedTrafficLights)
+        {
+            double trafficLightPosition = lane.GetStreamPosition(trafficLight->GetS() - lane().GetDistance(OWL::MeasurementPoint::RoadStart));
+            if (startPosition <= trafficLightPosition && trafficLightPosition <= endPosition)
+            {
+                foundTrafficLights.push_back(trafficLight->GetSpecification(trafficLightPosition - startDistance));
+            }
+        }
+        return foundTrafficLights;
+    }},
+    {},
+    worldData);
+}
+
 RouteQueryResult<std::vector<LaneMarking::Entity>> WorldDataQuery::GetLaneMarkings(const LaneMultiStream& laneStream, double startDistance, double range, Side side) const
 {
     return laneStream.Traverse(LaneMultiStream::TraversedFunction<std::vector<LaneMarking::Entity>>{[&](const auto& lane, const auto& previousLaneMarkings)

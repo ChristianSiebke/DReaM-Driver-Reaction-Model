@@ -411,7 +411,6 @@ public:
     //! @param searchRange      range of search (positive)
     RouteQueryResult<std::vector<CommonTrafficSign::Entity>> GetTrafficSignsInRange(LaneMultiStream laneStream, double startDistance, double searchRange) const;
 
-
     //! Returns all RoadMarkings valid for the lanes in the LaneMultiStream within startDistance and startDistance + searchRange
     //! The result is returned for every node.
     //!
@@ -419,6 +418,14 @@ public:
     //! @param startDistance    start position in stream
     //! @param searchRange      range of search (positive)
     RouteQueryResult<std::vector<CommonTrafficSign::Entity>> GetRoadMarkingsInRange(LaneMultiStream laneStream, double startDistance, double searchRange) const;
+
+    //! Returns all TrafficLights valid for the lanes in the LaneMultiStream within startDistance and startDistance + searchRange
+    //! The result is returned for every node.
+    //!
+    //! @param laneStream       lane stream to search in
+    //! @param startDistance    start position in stream
+    //! @param searchRange      range of search (positive)
+    RouteQueryResult<std::vector<CommonTrafficLight::Entity>> GetTrafficLightsInRange(LaneMultiStream laneStream, double startDistance, double searchRange) const;
 
     //! Retrieves all lane markings within the given range on the given side of the lane inside the range
     //! The result is returned for every node.
