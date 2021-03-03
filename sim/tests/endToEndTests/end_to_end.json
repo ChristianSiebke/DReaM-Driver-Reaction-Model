@@ -8,6 +8,7 @@
             "configurations": [
                 "ADAS_AEB_PreventingCollisionWithObstacle",
                 "ADAS_AEB_PreventingCollisionWithObstacleInCurve",
+                "AEB",
                 "AFDM_TJunction",
                 "ByEntityCondition_RelativeLane",
                 "ByEntityCondition_RelativeSpeed",
@@ -28,6 +29,8 @@
                 "Pedestrian_AFDM",
                 "Pedestrian_Trajectory",
                 "Sensor_Latency",
+                "StaticAgentProfiles",
+                "StaticAgentCollision",
                 "StaticAgentProfileAFDM",
                 "SupplementaryTrafficSigns",
                 "TrafficJam"

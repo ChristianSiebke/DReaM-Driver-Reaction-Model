@@ -12,7 +12,7 @@
 set(PYOPENPASS_DEFAULT_CONFIG ${CMAKE_CURRENT_LIST_DIR}/end_to_end.json)
 
 # Default resource directory
-set(PYOPENPASS_DEFAULT_RESOURCES ${CMAKE_CURRENT_LIST_DIR}/Resources)
+set(PYOPENPASS_DEFAULT_RESOURCES ${CMAKE_CURRENT_LIST_DIR}/../../contrib/examples)
 
 # Selection of specialized tests to run. For each entry a scope has to be defined in the PYOPENPASS_DEFAULT_CONFIG file.
 set(PYOPENPASS_SPECIALIZED_TEST_SCOPES
