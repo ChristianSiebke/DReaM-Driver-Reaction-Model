@@ -15,6 +15,8 @@
 option(WITH_SIMCORE "Build OSI based scenario simulation" ON)
 option(WITH_GUI "Build GUI" OFF)
 option(WITH_TESTS "Build unit tests" ON)
+option(WITH_DOC "Build documentation" ON)
+option(WITH_API_DOC "Build API documentation (takes pretty long)" OFF)
 option(WITH_EXTENDED_OSI "Assume an extended version of OSI is available" OFF)
 option(WITH_PROTOBUF_ARENA "Make use of protobuf arena allocation" ON)
 option(WITH_DEBUG_POSTFIX "Use 'd' binary postfix on Windows platform" ON)
@@ -162,3 +164,17 @@ if(MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4250")
 endif()
 
+###############################################################################
+# Documentation
+###############################################################################
+
+if(WITH_API_DOC)
+  set(WITH_DOC ON)
+  find_package(Doxygen REQUIRED dot)
+endif()
+
+if(WITH_DOC)
+  find_package(Sphinx REQUIRED)
+endif()
+
+###############################################################################

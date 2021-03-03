@@ -1,6 +1,10 @@
 <?xml version="1.0"?>
 <OpenSCENARIO>
-  <FileHeader revMajor="1" revMinor="0" date="2020-06-26T00:17:00" description="openPASS ByEntityCondition_TimeHeadway" author="BMW AG"/>
+  <FileHeader revMajor="1"
+    revMinor="0"
+    date="2020-06-26T00:17:00"
+    description="openPASS ByEntityCondition_TimeHeadway"
+    author="BMW AG"/>
   <ParameterDeclarations>
     <ParameterDeclaration name="OP_OSC_SchemaVersion" parameterType="string" value="0.4.0"/>
   </ParameterDeclarations>
@@ -38,7 +42,7 @@
     <ScenarioObject name="Ego">
       <CatalogReference catalogName="ProfilesCatalog.xml" entryName="TFAgent"/>
     </ScenarioObject>
-	<ScenarioObject name="StandingAgent">
+    <ScenarioObject name="StandingAgent">
       <CatalogReference catalogName="ProfilesCatalog.xml" entryName="StandingAgent"/>
     </ScenarioObject>
     <EntitySelection name="ScenarioAgents">
@@ -67,7 +71,7 @@
             </LongitudinalAction>
           </PrivateAction>
         </Private>
-		<Private entityRef="StandingAgent">
+        <Private entityRef="StandingAgent">
           <PrivateAction>
             <TeleportAction>
               <Position>
@@ -88,46 +92,50 @@
         </Private>
       </Actions>
     </Init>
-	<Story name="LaneChange">
+    <Story name="LaneChange">
       <Act name="Act1">
         <ManeuverGroup maximumExecutionCount="1" name="StateChangeSequenceA">
           <Actors selectTriggeringEntities="false">
             <EntityRef entityRef="Ego"/>
-			<EntityRef entityRef="StandingAgent"/>
+            <EntityRef entityRef="StandingAgent"/>
           </Actors>
           <Maneuver name="StateChangeManeuverA">
             <Event name="StateChangeEventA" priority="overwrite">
-				<Action name="LaneChange">
-					<PrivateAction>
-						<LateralAction>
-							<LaneChangeAction>
-								<LaneChangeActionDynamics value="2.0" dynamicsShape="sinusoidal" dynamicsDimension="time"/>
-								<LaneChangeTarget>
-									<AbsoluteTargetLane value="-3"/>
-								</LaneChangeTarget>
-							</LaneChangeAction>
-						</LateralAction>
-					</PrivateAction>
-				</Action>
+              <Action name="LaneChange">
+                <PrivateAction>
+                  <LateralAction>
+                    <LaneChangeAction>
+                      <LaneChangeActionDynamics value="2.0" dynamicsShape="sinusoidal" dynamicsDimension="time"/>
+                      <LaneChangeTarget>
+                        <AbsoluteTargetLane value="-3"/>
+                      </LaneChangeTarget>
+                    </LaneChangeAction>
+                  </LateralAction>
+                </PrivateAction>
+              </Action>
               <StartTrigger>
                 <ConditionGroup>
-					<Condition name="Conditional">
-						<ByEntityCondition>
-							<TriggeringEntities triggeringEntitiesRule="any">
-								<EntityRef entityRef="Ego"/>
-							</TriggeringEntities>
-							<EntityCondition>
-								<TimeHeadwayCondition value="3.0" rule="lessThan" entityRef="StandingAgent" freespace="true" alongRoute="true"/>
-							</EntityCondition>
-						</ByEntityCondition>
-					</Condition>
+                  <Condition name="TimeHeadway">
+                    <ByEntityCondition>
+                      <TriggeringEntities triggeringEntitiesRule="any">
+                        <EntityRef entityRef="Ego"/>
+                      </TriggeringEntities>
+                      <EntityCondition>
+                        <TimeHeadwayCondition value="3.0"
+                          rule="lessThan"
+                          entityRef="StandingAgent"
+                          freespace="true"
+                          alongRoute="true"/>
+                      </EntityCondition>
+                    </ByEntityCondition>
+                  </Condition>
                 </ConditionGroup>
               </StartTrigger>
             </Event>
           </Maneuver>
         </ManeuverGroup>
       </Act>
-    </Story>					  
+    </Story>
     <StopTrigger>
       <ConditionGroup>
         <Condition name="EndTime" delay="0" conditionEdge="rising">

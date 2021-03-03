@@ -1,6 +1,10 @@
 <?xml version="1.0"?>
 <OpenSCENARIO>
-  <FileHeader revMajor="1" revMinor="0" date="2020-06-26T00:17:00" description="OSCAction_SinusoidalLaneChangeRight_Relative" author="BMW AG"/>
+  <FileHeader revMajor="1"
+    revMinor="0"
+    date="2020-06-26T00:17:00"
+    description="OSCAction_SinusoidalLaneChangeRight_Relative"
+    author="BMW AG"/>
   <ParameterDeclarations>
     <ParameterDeclaration name="OP_OSC_SchemaVersion" parameterType="string" value="0.4.0"/>
   </ParameterDeclarations>
@@ -66,7 +70,7 @@
         </Private>
       </Actions>
     </Init>
-	<Story name="LaneChange">
+    <Story name="LaneChange">
       <Act name="Act1">
         <ManeuverGroup maximumExecutionCount="1" name="StateChangeSequenceA">
           <Actors selectTriggeringEntities="false">
@@ -74,18 +78,18 @@
           </Actors>
           <Maneuver name="StateChangeManeuverA">
             <Event name="StateChangeEventA" priority="overwrite">
-				<Action name="LaneChange">
-					<PrivateAction>
-						<LateralAction>
-							<LaneChangeAction>
-								<LaneChangeActionDynamics value="2.0" dynamicsShape="sinusoidal" dynamicsDimension="time"/>
-								<LaneChangeTarget>
-									<RelativeTargetLane entityRef="Ego" value="-1"/>
-								</LaneChangeTarget>
-							</LaneChangeAction>
-						</LateralAction>
-					</PrivateAction>
-				</Action>
+              <Action name="LaneChange">
+                <PrivateAction>
+                  <LateralAction>
+                    <LaneChangeAction>
+                      <LaneChangeActionDynamics value="2.0" dynamicsShape="sinusoidal" dynamicsDimension="time"/>
+                      <LaneChangeTarget>
+                        <RelativeTargetLane entityRef="Ego" value="-1"/>
+                      </LaneChangeTarget>
+                    </LaneChangeAction>
+                  </LateralAction>
+                </PrivateAction>
+              </Action>
               <StartTrigger>
                 <ConditionGroup>
                   <Condition name="Conditional">
@@ -99,7 +103,7 @@
           </Maneuver>
         </ManeuverGroup>
       </Act>
-    </Story>					  
+    </Story>
     <StopTrigger>
       <ConditionGroup>
         <Condition name="EndTime" delay="0" conditionEdge="rising">

@@ -32,7 +32,13 @@
       </Components>
       <Sensors>
         <Sensor Id="0">
-          <Position Height="0.5" Lateral="0.0" Longitudinal="0.0" Name="Default" Pitch="0.0" Roll="0.0" Yaw="0.0"/>
+          <Position Height="0.5"
+            Lateral="0.0"
+            Longitudinal="0.0"
+            Name="Default"
+            Pitch="0.0"
+            Roll="0.0"
+            Yaw="0.0"/>
           <Profile Name="Standard" Type="Geometric2D"/>
         </Sensor>
       </Sensors>
@@ -45,26 +51,26 @@
   </VehicleProfiles>
   <ProfileGroup Type="Driver">
     <Profile Name="CantStop">
-     	<String Key="Type" Value="AlgorithmAgentFollowingDriverModel"/>
-	<String Key="AlgorithmLateralModule" Value="Algorithm_LateralAfdm"/>
-	<String Key="AlgorithmLongitudinalModule" Value="Algorithm_LongitudinalAfdm"/>
-	<Double Key="VelocityWish" Value="35.0"/>
-	<Double Key="Delta" Value="0.0"/>
-	<Double Key="TGapWish" Value="0.0"/>
-	<Double Key="MinDistance" Value="0.0"/>
-	<Double Key="MaxAcceleration" Value="0.0"/>
-	<Double Key="MaxDeceleration" Value="0.0"/>
+      <String Key="Type" Value="AlgorithmAgentFollowingDriverModel"/>
+      <String Key="AlgorithmLateralModule" Value="Algorithm_LateralAfdm"/>
+      <String Key="AlgorithmLongitudinalModule" Value="Algorithm_LongitudinalAfdm"/>
+      <Double Key="VelocityWish" Value="35.0"/>
+      <Double Key="Delta" Value="0.0"/>
+      <Double Key="TGapWish" Value="0.0"/>
+      <Double Key="MinDistance" Value="0.0"/>
+      <Double Key="MaxAcceleration" Value="0.0"/>
+      <Double Key="MaxDeceleration" Value="0.0"/>
     </Profile>
     <Profile Name="StandingStill">
-     	<String Key="Type" Value="AlgorithmAgentFollowingDriverModel"/>
-	<String Key="AlgorithmLateralModule" Value="Algorithm_LateralAfdm"/>
-	<String Key="AlgorithmLongitudinalModule" Value="Algorithm_LongitudinalAfdm"/>
-	<Double Key="VelocityWish" Value="0.0"/>
-	<Double Key="Delta" Value="0.0"/>
-	<Double Key="TGapWish" Value="0.0"/>
-	<Double Key="MinDistance" Value="0.0"/>
-	<Double Key="MaxAcceleration" Value="1.4"/>
-	<Double Key="MaxDeceleration" Value="2.0"/>
+      <String Key="Type" Value="AlgorithmAgentFollowingDriverModel"/>
+      <String Key="AlgorithmLateralModule" Value="Algorithm_LateralAfdm"/>
+      <String Key="AlgorithmLongitudinalModule" Value="Algorithm_LongitudinalAfdm"/>
+      <Double Key="VelocityWish" Value="0.0"/>
+      <Double Key="Delta" Value="0.0"/>
+      <Double Key="TGapWish" Value="0.0"/>
+      <Double Key="MinDistance" Value="0.0"/>
+      <Double Key="MaxAcceleration" Value="1.4"/>
+      <Double Key="MaxDeceleration" Value="2.0"/>
     </Profile>
   </ProfileGroup>
     <ProfileGroup Type="AEB">
@@ -80,7 +86,11 @@
       <Double Key="DetectionRange" Value="300"/>
       <Bool Key="EnableVisualObstruction" Value="false"/>
       <Double Key="FailureProbability" Value="0"/>
-      <NormalDistribution Key="Latency" Max="0.0" Mean="0.0" Min="0.0" SD="0.0"/>
+      <NormalDistribution Key="Latency"
+        Max="0.0"
+        Mean="0.0"
+        Min="0.0"
+        SD="0.0"/>
       <Double Key="OpeningAngleH" Value="0.35"/>
       <Double Key="RequiredPercentageOfVisibleArea" Value="0.001"/>
     </Profile>

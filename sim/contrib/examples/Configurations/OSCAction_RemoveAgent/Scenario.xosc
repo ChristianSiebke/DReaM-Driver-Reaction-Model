@@ -1,6 +1,10 @@
 <?xml version="1.0"?>
 <OpenSCENARIO>
-  <FileHeader revMajor="1" revMinor="0" date="2020-06-26T00:17:00" description="OSCAction_RemoveAgent" author="in-tech GmbH"/>
+  <FileHeader revMajor="1"
+    revMinor="0"
+    date="2020-06-26T00:17:00"
+    description="OSCAction_RemoveAgent"
+    author="in-tech GmbH"/>
   <ParameterDeclarations>
     <ParameterDeclaration name="OP_OSC_SchemaVersion" parameterType="string" value="0.4.0"/>
   </ParameterDeclarations>
@@ -71,7 +75,7 @@
           </Actors>
           <Maneuver name="RemoveAgentsManeuver">
             <Event name="RemoveAgentsEvent" priority="overwrite">
-              <Action name="RemoveAgentsManipulator">
+              <Action name="RemoveAgents">
                 <GlobalAction>
                   <EntityAction entityRef="">
                     <DeleteEntityAction/>
