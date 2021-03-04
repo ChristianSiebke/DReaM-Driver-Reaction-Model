@@ -3124,6 +3124,60 @@ TEST(GetRelativeLanes, BranchingTree_ReturnsLanesOfWayToNode)
     EXPECT_THAT(result3.at(1).lanes.at(1).successor, Eq(std::nullopt));
 }
 
+TEST(GetLaneCurvature, OnLaneStreamReturnsCorrectCurvature)
+{
+    OWL::Fakes::WorldData worldData;
+    FakeLaneMultiStream laneStream;
+    auto [node1, lane1] = laneStream.AddRoot(100.0, true);
+    auto [node2, lane2] = laneStream.AddLane(150.0, true, *node1);
+    auto [node3, lane3] = laneStream.AddLane(200.0, false, *node1);
+
+    ON_CALL(*lane2, GetCurvature(DoubleEq(50.0))).WillByDefault(Return(0.1));
+    ON_CALL(*lane3, GetCurvature(DoubleEq(150.0))).WillByDefault(Return(0.2));
+
+    WorldDataQuery wdQuery{worldData};
+    auto result = wdQuery.GetLaneCurvature(laneStream.Get(), 150.0);
+
+    EXPECT_THAT(result.at(node2->roadGraphVertex), Eq(0.1));
+    EXPECT_THAT(result.at(node3->roadGraphVertex), Eq(0.2));
+}
+
+TEST(GetLaneWidth, OnLaneStreamReturnsCorrectCurvature)
+{
+    OWL::Fakes::WorldData worldData;
+    FakeLaneMultiStream laneStream;
+    auto [node1, lane1] = laneStream.AddRoot(100.0, true);
+    auto [node2, lane2] = laneStream.AddLane(150.0, true, *node1);
+    auto [node3, lane3] = laneStream.AddLane(200.0, false, *node1);
+
+    ON_CALL(*lane2, GetWidth(DoubleEq(50.0))).WillByDefault(Return(1.1));
+    ON_CALL(*lane3, GetWidth(DoubleEq(150.0))).WillByDefault(Return(2.2));
+
+    WorldDataQuery wdQuery{worldData};
+    auto result = wdQuery.GetLaneWidth(laneStream.Get(), 150.0);
+
+    EXPECT_THAT(result.at(node2->roadGraphVertex), Eq(1.1));
+    EXPECT_THAT(result.at(node3->roadGraphVertex), Eq(2.2));
+}
+
+TEST(GetLaneDirection, OnLaneStreamReturnsCorrectCurvature)
+{
+    OWL::Fakes::WorldData worldData;
+    FakeLaneMultiStream laneStream;
+    auto [node1, lane1] = laneStream.AddRoot(100.0, true);
+    auto [node2, lane2] = laneStream.AddLane(150.0, true, *node1);
+    auto [node3, lane3] = laneStream.AddLane(200.0, false, *node1);
+
+    ON_CALL(*lane2, GetDirection(DoubleEq(50.0))).WillByDefault(Return(0.1));
+    ON_CALL(*lane3, GetDirection(DoubleEq(150.0))).WillByDefault(Return(0.2));
+
+    WorldDataQuery wdQuery{worldData};
+    auto result = wdQuery.GetLaneDirection(laneStream.Get(), 150.0);
+
+    EXPECT_THAT(result.at(node2->roadGraphVertex), Eq(0.1));
+    EXPECT_THAT(result.at(node3->roadGraphVertex), Eq(0.2));
+}
+
 class LaneStreamTest_Data
 {
 public:

@@ -956,7 +956,7 @@ RouteQueryResult<std::optional<double> > WorldDataQuery::GetLaneCurvature(const 
 {
     return laneStream.Traverse<std::optional<double>>(LaneMultiStream::TraversedFunction<std::optional<double>>{[&](const auto& lane, const auto& previousResult)
     {
-        if (lane.StartS() >= position && lane.EndS() <= position)
+        if (lane.StartS() <= position && lane.EndS() >= position)
         {
             return std::optional<double>(std::in_place_t(), lane.element->GetCurvature(lane.GetElementPosition(position) + lane.element->GetDistance(OWL::MeasurementPoint::RoadStart)));
         }
@@ -970,7 +970,7 @@ RouteQueryResult<std::optional<double> > WorldDataQuery::GetLaneWidth(const Lane
 {
     return laneStream.Traverse<std::optional<double>>(LaneMultiStream::TraversedFunction<std::optional<double>>{[&](const auto& lane, const auto& previousResult)
     {
-        if (lane.StartS() >= position && lane.EndS() <= position)
+        if (lane.StartS() <= position && lane.EndS() >= position)
         {
             return std::optional<double>(std::in_place_t(), lane.element->GetWidth(lane.GetElementPosition(position) + lane.element->GetDistance(OWL::MeasurementPoint::RoadStart)));
         }
@@ -984,7 +984,7 @@ RouteQueryResult<std::optional<double> > WorldDataQuery::GetLaneDirection(const 
 {
     return laneStream.Traverse<std::optional<double>>(LaneMultiStream::TraversedFunction<std::optional<double>>{[&](const auto& lane, const auto& previousResult)
     {
-        if (lane.StartS() >= position && lane.EndS() <= position)
+        if (lane.StartS() <= position && lane.EndS() >= position)
         {
             return std::optional<double>(std::in_place_t(), lane.element->GetDirection(lane.GetElementPosition(position) + lane.element->GetDistance(OWL::MeasurementPoint::RoadStart)));
         }
