@@ -1,5 +1,6 @@
 /*
     Copyright (C) 2012 Modelon AB <http://www.modelon.com>
+                  2020, 2021 in-tech GmbH
 
     You should have received a copy of the LICENCE-FMUChecker.txt
     along with this program. If not, contact Modelon AB.
