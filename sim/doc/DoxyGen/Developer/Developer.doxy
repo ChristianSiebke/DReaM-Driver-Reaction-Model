@@ -103,7 +103,7 @@ INLINE_SOURCES         = NO
 # files will be copied as-is; there are no commands or markers available.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_FILES       = openPASS_Setup_StepByStep.pdf
+HTML_EXTRA_FILES       = $(DocumentationDir)\Common\openPASS_Setup_StepByStep.pdf
 
 
 
@@ -112,7 +112,7 @@ HTML_EXTRA_FILES       = openPASS_Setup_StepByStep.pdf
 # written to the html output directory.
 # This tag requires that the tag GENERATE_HTMLHELP is set to YES.
 
-CHM_FILE               = openPASS_Delevoper_Docu.chm
+CHM_FILE               = openPASS_Developer_Docu.chm
 
 
 

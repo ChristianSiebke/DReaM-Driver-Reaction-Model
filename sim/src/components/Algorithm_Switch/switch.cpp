@@ -55,7 +55,7 @@ ControlData Switch::Perform(int index, ControlData driver, ControlData prio1, Co
     else if (index == 100)
     {
         double fadingOutBrake = 0.7;
-        double fadingOutSteer = std::clamp(driver.steer, -0.10, 0.10);
+        double fadingOutSteer = (driver.steer<-0.1) ? -0.1 : (driver.steer>0.1) ? 0.1 : driver.steer;
         resultingControl = ControlData{fadingOutSteer, 0.0, fadingOutBrake, {0.0, 0.0, 0.0, 0.0}};
     }
 

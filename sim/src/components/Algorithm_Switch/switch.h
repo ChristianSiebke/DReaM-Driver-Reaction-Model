@@ -2,7 +2,6 @@
 #define SWITCH_H
 
 #include "controlData.h"
-#include "common/commonTools.h"
 
 class Switch
 {

@@ -12,7 +12,7 @@ DEFINES += USE_PROTOBUF_ARENA
 
 TEMPLATE = subdirs
 SUBDIRS = \
-    components/components.pro \
+    components \
     master \
     slave \
     core/slave/modules/BasicDataStore \

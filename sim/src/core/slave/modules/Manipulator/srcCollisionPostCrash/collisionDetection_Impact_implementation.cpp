@@ -585,6 +585,7 @@ bool CollisionDetectionPostCrash::CreatePostCrashDynamics(const AgentInterface *
 {
     timeOfFirstContact = 0;
     if (!GetFirstContact(agent1, agent2, timeOfFirstContact)) {
+        LOG(CbkLogLevel::Error, "Could not calculate time of first contact");
         return false;
     }
     //
