@@ -281,14 +281,11 @@ TEST(GetObjectsOfTypeInRange, OneObjectInEveryNode_ReturnsFirstObjectForAllNodes
 {
     FakeLaneMultiStream laneMultiStream;
     Fakes::MovingObject object1;
-    ON_CALL(object1, GetDistance(_,_)).WillByDefault(Return(10));
-    OWL::Interfaces::LaneAssignments objectsList1{{OWL::LaneOverlap{10,10,0,0},&object1}};
+    OWL::Interfaces::LaneAssignments objectsList1{{OWL::LaneOverlap{45,55,0,0},&object1}};
     Fakes::MovingObject object2;
-    ON_CALL(object2, GetDistance(_,_)).WillByDefault(Return(110));
-    OWL::Interfaces::LaneAssignments objectsList2{{OWL::LaneOverlap{110,110,0,0},&object2}};
+    OWL::Interfaces::LaneAssignments objectsList2{{OWL::LaneOverlap{95,105,0,0},&object2}};
     Fakes::MovingObject object3;
-    ON_CALL(object3, GetDistance(_,_)).WillByDefault(Return(110));
-    OWL::Interfaces::LaneAssignments objectsList3{{OWL::LaneOverlap{110,110,0,0},&object3}};
+    OWL::Interfaces::LaneAssignments objectsList3{{OWL::LaneOverlap{95,105,0,0},&object3}};
     Fakes::Road road1;
     std::string idRoad1 = "Road1";
     ON_CALL(road1, GetId()).WillByDefault(ReturnRef(idRoad1));
@@ -310,7 +307,7 @@ TEST(GetObjectsOfTypeInRange, OneObjectInEveryNode_ReturnsFirstObjectForAllNodes
     Fakes::WorldData worldData;
     WorldDataQuery wdQuery(worldData);
 
-    auto result = wdQuery.GetObjectsOfTypeInRange<OWL::Interfaces::WorldObject>(laneMultiStream.Get(), 0, 1000);
+    auto result = wdQuery.GetObjectsOfTypeInRange<OWL::Interfaces::WorldObject>(laneMultiStream.Get(), 50, 200);
     std::vector<const OWL::Interfaces::WorldObject*> expectedResult1{&object1};
     std::vector<const OWL::Interfaces::WorldObject*> expectedResult2{&object1, &object2};
     std::vector<const OWL::Interfaces::WorldObject*> expectedResult3{&object1, &object3};

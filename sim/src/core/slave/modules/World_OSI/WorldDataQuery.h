@@ -262,8 +262,8 @@ public:
 
             for (const auto& [laneOverlap, object] : laneStreamElement.element->GetWorldObjects(streamDirection))
             {
-                const auto s_min = streamDirection ? laneOverlap.s_max : laneOverlap.s_min;
-                const auto s_max = streamDirection ? laneOverlap.s_min : laneOverlap.s_max;
+                const auto s_min = streamDirection ? laneOverlap.s_min : laneOverlap.s_max;
+                const auto s_max = streamDirection ? laneOverlap.s_max : laneOverlap.s_min;
 
                 auto streamPositionStart = laneStreamElement.GetStreamPosition(s_min - s_lanestart);
                 if (streamPositionStart > endDistance)
@@ -317,8 +317,8 @@ public:
 
                     for (const auto& [laneOverlap, object] : laneStreamElement.element->GetWorldObjects(streamDirection))
                     {
-                        const auto s_min = streamDirection ? laneOverlap.s_max : laneOverlap.s_min;
-                        const auto s_max = streamDirection ? laneOverlap.s_min : laneOverlap.s_max;
+                        const auto s_min = streamDirection ? laneOverlap.s_min : laneOverlap.s_max;
+                        const auto s_max = streamDirection ? laneOverlap.s_max : laneOverlap.s_min;
 
                         auto streamPositionStart = laneStreamElement.GetStreamPosition(s_min - s_lanestart);
                         if (streamPositionStart > endDistance)
