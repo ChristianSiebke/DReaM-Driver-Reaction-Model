@@ -13,7 +13,7 @@ Eclipse sim@openPASS provides a software platform that enables the simulation of
   * Bugs can be reported in [GitLab](https://gitlab.eclipse.org/eclipse/simopenpass/simopenpass/-/issues) by anybody who owns an Eclipse account. Please use type “Incident”
   * [Documentation](https://openpass.eclipse.org/resources/#documentation)
 
-## Eclipse Contributor/ Committer Agreement
+## Eclipse Contributor / Committer Agreement
 
 Before your contribution can be accepted by the project team, contributors and committers must sign the correct agreement depending on their status. Please read on how to proceed on: https://www.eclipse.org/legal/committer_process/re-sign/.
 
@@ -35,14 +35,14 @@ The branch 'servant' contains the contributions that will be included in the nex
 
 ### Committer contribution process
 
-1.	(you) Discuss your planned contribution with the project lead first.
-2.	(you) If needed, create the Issue on GitLab and assign it to yourself.
-3.	(you) In GitLab, create a merge request. The related branch will be created from the branch 'servant'.
-4.	(you) Work on it and respect the following points:
-  4.1. Stick to the [coding guideline](https://wiki.eclipse.org/images/3/3f/OpenPASS_Conventions.pdf)
-  4.2. Amend the documentation if necessary
-  4.3. Provide unit-tests in googletest format
-  4.4. Make sure, the servant compiles and runs in combination with your contribution
+1.  (you) Discuss your planned contribution with the project lead first.
+2.  (you) If needed, create the Issue on GitLab and assign it to yourself.
+3.  (you) In GitLab, create a merge request. The related branch will be created from the branch 'servant'.
+4.  (you) Work on it and respect the following points:
+    - Stick to the [coding guideline](https://wiki.eclipse.org/images/3/3f/OpenPASS_Conventions.pdf)
+    - Amend the documentation if necessary
+    - Provide unit-tests in googletest format
+    - Make sure, the servant compiles and runs in combination with your contribution
 5.	(you) Assign the issue to another committer.
 6.	(other committer) Review the code.
 7.	(other committer) To merge new branch into 'servant' you can close the merge request via GitLab.
