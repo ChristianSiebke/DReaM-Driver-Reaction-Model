@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,7 @@
 *******************************************************************************/
 
 #include <cstdint>
+#include <iomanip>
 #include <memory>
 #include <string>
 #include <sstream>
@@ -25,6 +26,8 @@
 
 #include "fmuWrapper.h"
 #include "OsmpFmuHandler.h"
+
+namespace fs = boost::filesystem;
 
 AlgorithmFmuWrapperImplementation::AlgorithmFmuWrapperImplementation(std::string componentName,
                                                                      bool isInit,
@@ -55,7 +58,10 @@ AlgorithmFmuWrapperImplementation::AlgorithmFmuWrapperImplementation(std::string
 {
     LOGDEBUG("constructor started");
 
-    agentIdString   = std::to_string(GetAgent()->GetId());
+    std::stringstream ss;
+    ss << std::setw(4) << std::setfill('0');
+    ss << GetAgent()->GetId();
+    agentIdString = ss.str();
 
     cdata.stepSize    = cycleTime / 1000.0;
     cdata.stepSizeSetByUser = 1;
@@ -76,8 +82,9 @@ AlgorithmFmuWrapperImplementation::AlgorithmFmuWrapperImplementation(std::string
         fmuType = "Generic";
     }
 
-    FMU_fullName = parameters->GetParametersString().at("FmuPath");
+    FMU_configPath = parameters->GetParametersString().at("FmuPath");
 
+    SetOutputPath();
     SetupFilenames();
 
     if (parameters->GetParametersBool().at("Logging"))
@@ -105,30 +112,40 @@ AlgorithmFmuWrapperImplementation::AlgorithmFmuWrapperImplementation(std::string
     LOGDEBUG("constructor finished");
 }
 
+void AlgorithmFmuWrapperImplementation::SetOutputPath()
+{
+    const std::string& resultsPath = GetParameters()->GetRuntimeInformation().directories.output;
+    fs::path agentOutputPath = fs::path(resultsPath) / "FmuWrapper" / ("Agent" + agentIdString);
+    outputPath = agentOutputPath.string();
+}
+
 void AlgorithmFmuWrapperImplementation::SetupFilenames()
 {
-    // log file name: <fmuName>/LogFile-<agentId>.txt
-    logFileName.assign("LogFile-");
-    logFileName.append(agentIdString);
-    logFileName.append(".txt");
+    fs::path configBasePath(GetParameters()->GetRuntimeInformation().directories.configuration);
+    fs::path fmuPath(FMU_configPath);
+    fs::path fmuAbsPath = configBasePath / fmuPath;
 
-    // output filename: <fmuName>/Output-<agentId>.txt
-    outputFileName.assign("Output-");
-    outputFileName.append(agentIdString);
-    outputFileName.append(".txt");
+    THROWIFFALSE(fs::exists(fmuAbsPath), "Can not find file " + fmuAbsPath.string());
 
-    boost::filesystem::path fmuPath(FMU_fullName);
-    THROWIFFALSE(exists(fmuPath), "Can not find file " + FMU_fullName);
+    FMU_name = fmuAbsPath.filename().replace_extension().string();
 
-    FMU_path = fmuPath.parent_path().string();
-    FMU_name = fmuPath.filename().string();
+    FMU_absPath = fmuAbsPath.string();
 
-    cdata.FMUPath = FMU_fullName.c_str();
+    // set FMU absolute path in context struct
+    cdata.FMUPath =  FMU_absPath.c_str();
+
+    // log file name: <fmuName>.log
+    logFileName.assign(FMU_name);
+    logFileName.append(".log");
+
+    // output filename: <fmuName>.csv
+    outputFileName.assign(FMU_name);
+    outputFileName.append(".csv");
 }
 
 void AlgorithmFmuWrapperImplementation::SetupLog()
 {
-    boost::filesystem::path logPath = boost::filesystem::path(FMU_path) / "Log" / FMU_name;
+    fs::path logPath{outputPath};
 
     MkDirOrThrowError(logPath);
 
@@ -143,14 +160,14 @@ void AlgorithmFmuWrapperImplementation::SetupLog()
 
 void AlgorithmFmuWrapperImplementation::SetupOutput()
 {
-    boost::filesystem::path outputPath = boost::filesystem::path(FMU_path) / "Output" / FMU_name;
+    fs::path csvPath{outputPath};
 
     MkDirOrThrowError(outputPath);
 
     // construct output file name including full path
-    outputPath = outputPath / outputFileName;
+    csvPath = csvPath / outputFileName;
 
-    outputFileFullName = outputPath.string();
+    outputFileFullName = csvPath.string();
     cdata.output_file_name = outputFileFullName.c_str();
 
     cdata.write_output_files = 1;
@@ -158,7 +175,7 @@ void AlgorithmFmuWrapperImplementation::SetupOutput()
 
 void AlgorithmFmuWrapperImplementation::SetupUnzip(const bool individualUnzip)
 {
-    boost::filesystem::path unzipRoot = boost::filesystem::path(FMU_fullName).parent_path() / "Unzip" / FMU_name;
+    fs::path unzipRoot = fs::temp_directory_path() / fs::unique_path();
 
     if (individualUnzip)
     {
@@ -166,20 +183,15 @@ void AlgorithmFmuWrapperImplementation::SetupUnzip(const bool individualUnzip)
         unzipRoot = unzipRoot / agentIdString;
     }
 
-    folderUnzip = unzipRoot.string();
-
     // make dir if not existing
     MkDirOrThrowError(unzipRoot);
 
     // set unzipPath to NULL to have the temporary folders removed in fmi1_end_handling
     cdata.unzipPath = nullptr;
 
-    // store unzip directory in cdata
-    // cdata.unzipPath != 0 prevents folder from being removed in end_handling
-    cdata.unzipPath = folderUnzip.c_str();
-
-    // set unzip folder name in working variable
-    cdata.tmpPath = const_cast<char*>(folderUnzip.c_str());
+    // set unzip temporary path
+    tmpPath = unzipRoot.string();
+    cdata.tmpPath = const_cast<char*>(tmpPath.c_str());
 }
 
 AlgorithmFmuWrapperImplementation::~AlgorithmFmuWrapperImplementation()
@@ -572,13 +584,13 @@ void AlgorithmFmuWrapperImplementation::HandleFmiStatus(const jm_status_enu_t& f
     }
 }
 
-void AlgorithmFmuWrapperImplementation::MkDirOrThrowError(const boost::filesystem::path path)
+void AlgorithmFmuWrapperImplementation::MkDirOrThrowError(const fs::path& path)
 {
     try
     {
-        boost::filesystem::create_directories(path);
+        fs::create_directories(path);
     }
-    catch(boost::filesystem::filesystem_error& e)
+    catch(fs::filesystem_error& e)
     {
         const std::string msg = "could not create folder " + path.string() + ": " + e.what();
         LOGERROR(msg);

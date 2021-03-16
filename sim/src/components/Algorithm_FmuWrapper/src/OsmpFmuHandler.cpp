@@ -153,9 +153,12 @@ OsmpFmuHandler::OsmpFmuHandler(fmu_check_data_t *cdata, WorldInterface *world, A
 
     if (writeJsonOutput)
     {
-        outputDir = QString::fromStdString(parameters->GetRuntimeInformation().directories.output) +
-                    QDir::separator() + cdata->modelName + QDir::separator() +
-                    "Agent" + QString::number(agent->GetId());
+        outputDir =
+            QString::fromStdString(parameters->GetRuntimeInformation().directories.output) + QDir::separator() +
+            "FmuWrapper" + QDir::separator() +
+            "Agent " + QString::number(agent->GetId()) + QDir::separator() +
+            cdata->modelName;
+
         QDir directory{outputDir};
         if (!directory.exists())
         {
@@ -170,7 +173,6 @@ OsmpFmuHandler::OsmpFmuHandler(fmu_check_data_t *cdata, WorldInterface *world, A
     }
 
     ParseFmuParameters(parameters);
-
 }
 
 void OsmpFmuHandler::UpdateInput(int localLinkId, const std::shared_ptr<const SignalInterface>& data, [[maybe_unused]] int time)
@@ -849,7 +851,7 @@ void OsmpFmuHandler::GetTrafficUpdate()
 
 void OsmpFmuHandler::WriteJson(const google::protobuf::Message& message, const QString& fileName)
 {
-    QFile file{outputDir + "/" + fileName};
+    QFile file{outputDir + QDir::separator() + fileName};
     file.open(QIODevice::WriteOnly);
     std::string outputString;
     google::protobuf::util::JsonPrintOptions options;
