@@ -11,29 +11,12 @@
 
 set(FOLDER "src")
 
-include_directories(${CMAKE_CURRENT_LIST_DIR})
-
-if(SIMCORE_VERSION_MAJOR MATCHES "^[0-9]+$" AND
-   SIMCORE_VERSION_MINOR MATCHES "^[0-9]+$" AND
-   SIMCORE_VERSION_PATCH MATCHES "^[0-9]+$")
-  set(OPENPASS_VERSION "${SIMCORE_VERSION_MAJOR},${SIMCORE_VERSION_MINOR},${SIMCORE_VERSION_PATCH}")
-elseif(DEFINED SIMCORE_VERSION_TAG)
-  set(OPENPASS_VERSION "\"${SIMCORE_VERSION_TAG}\"")
-else()
-  set(OPENPASS_VERSION "9999,9999,9999")
-endif()
-
+include_directories(${CMAKE_CURRENT_LIST_DIR}
+                    ${CMAKE_CURRENT_LIST_DIR}/..)
 
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/common/version.h.in
   ${CMAKE_CURRENT_SOURCE_DIR}/common/version.h
-  )
-
-string(REPLACE "," "." OPENPASS_DOC_VERSION ${OPENPASS_VERSION})
-
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/../doc/version.txt.in
-  ${CMAKE_CURRENT_SOURCE_DIR}/../doc/version.txt
 )
 
 add_subdirectory(common)

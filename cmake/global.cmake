@@ -69,39 +69,48 @@ set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER "generated")
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-find_package(Protobuf REQUIRED)
-add_compile_definitions(PROTOBUF_USE_DLLS)
+if(WITH_SIMCORE OR WITH_TESTS)
 
-find_package(OSI REQUIRED)
+  find_package(Protobuf REQUIRED)
+  add_compile_definitions(PROTOBUF_USE_DLLS)
 
-if(MINGW AND WITH_MINGW_BOOST_1_72_FIX)
-  # Bug in boost-install 1.72.0
-  # setting boost mingw version manually
-  # https://github.com/boostorg/boost_install/issues/33
-  string(REGEX MATCHALL "[0-9]+" _CVER_COMPONENTS ${CMAKE_CXX_COMPILER_VERSION})
-  list(GET _CVER_COMPONENTS 0 _CVER_MAJOR)
-  list(GET _CVER_COMPONENTS 1 _CVER_MINOR)
-  set(Boost_COMPILER "mgw${_CVER_MAJOR}${_CVER_MINOR}")
+  find_package(OSI REQUIRED)
+
+  if(MINGW AND WITH_MINGW_BOOST_1_72_FIX)
+    # Bug in boost-install 1.72.0
+    # setting boost mingw version manually
+    # https://github.com/boostorg/boost_install/issues/33
+    string(REGEX MATCHALL "[0-9]+" _CVER_COMPONENTS ${CMAKE_CXX_COMPILER_VERSION})
+    list(GET _CVER_COMPONENTS 0 _CVER_MAJOR)
+    list(GET _CVER_COMPONENTS 1 _CVER_MINOR)
+    set(Boost_COMPILER "mgw${_CVER_MAJOR}${_CVER_MINOR}")
+  endif()
+  set(Boost_USE_STATIC_LIBS OFF)
+  find_package(Boost COMPONENTS filesystem REQUIRED)
+
+  find_package(Qt5 COMPONENTS Concurrent Core Widgets Xml)
+  find_package(FMILibrary)
+
+  if(WITH_EXTENDED_OSI)
+    add_compile_definitions(USE_EXTENDED_OSI)
+  endif()
+
+  if(WITH_PROTOBUF_ARENA)
+    add_compile_definitions(USE_PROTOBUF_ARENA)
+  endif()
 endif()
-set(Boost_USE_STATIC_LIBS OFF)
-find_package(Boost COMPONENTS filesystem REQUIRED)
-
-find_package(Qt5 COMPONENTS Concurrent Core Widgets Xml)
-find_package(FMILibrary)
 
 if(WITH_TESTS)
   find_package(GTest)
   # as GMock currently doesn't provide a find_package config, gmock file location is derived from gtest in HelperMacros.cmake
   #find_package(GMock)
+  if(WITH_COVERAGE)
+    find_package(Gcov REQUIRED)
+    find_package(Fastcov REQUIRED)
+    find_package(Genhtml REQUIRED)
+  endif()
 endif()
 
-if(WITH_EXTENDED_OSI)
-  add_compile_definitions(USE_EXTENDED_OSI)
-endif()
-
-if(WITH_PROTOBUF_ARENA)
-  add_compile_definitions(USE_PROTOBUF_ARENA)
-endif()
 
 if(WIN32)
   set(CMAKE_INSTALL_PREFIX "C:/OpenPASS" CACHE PATH "Destination directory")
@@ -163,12 +172,6 @@ if(MSVC)
   # get rid of annoying template needs to have dll-interface warnings on VisualStudio
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4251 -wd4335")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4250")
-endif()
-
-if(WITH_COVERAGE)
-  find_package(Gcov REQUIRED)
-  find_package(Fastcov REQUIRED)
-  find_package(Genhtml REQUIRED)
 endif()
 
 ###############################################################################
