@@ -448,8 +448,6 @@ void clear_fmu_check_data(fmu_check_data_t* cdata, int close_log) {
     }
     if(cdata->tmpPath && (cdata->tmpPath != cdata->unzipPath)) {
         jm_rmdir(&cdata->callbacks,cdata->tmpPath);
-        cdata->callbacks.free(cdata->tmpPath);
-        cdata->tmpPath = 0;
     }
     if(cdata->out_file && (cdata->out_file != stdout)) {
         fclose(cdata->out_file);
