@@ -46,6 +46,14 @@
     <Observation>
       <Library>Observation_EntityRepository</Library>
       <Parameters>
+        <!-- If "FilenamePrefix" is skipped, defaults to Value="Repository" -->
+        <String Key="FilenamePrefix" Value="Repository"/>
+        <!-- If "WritePersistentEntities" is skipped, defaults to Value="Consolidated"
+             Options: 
+             - Consolidated: Concatenate with {FilenamePrefix}_Run_###.csv for each run
+             - Separate: Write to {FilenamePrefix}_Persistent.csv
+             - Skip: No output for persistent entities
+        -->
         <String Key="WritePersistentEntities" Value="Consolidated"/>
       </Parameters>
     </Observation>
