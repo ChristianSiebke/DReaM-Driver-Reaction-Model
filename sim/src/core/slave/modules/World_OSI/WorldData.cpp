@@ -63,45 +63,19 @@ SensorView_ptr WorldData::GetSensorView(osi3::SensorViewConfiguration& conf, int
 
     osi3::utils::SetVersion(*sv);
 
+#ifdef USE_PROTOBUF_ARENA
+    GroundTruth_ptr tempGroundTruth = google::protobuf::Arena::CreateMessage<osi3::GroundTruth>(&arena);
+#else
+    GroundTruth_ptr tempGroundTruth = std::make_unique<osi3::GroundTruth>();
+#endif
     sv->mutable_sensor_id()->CopyFrom(conf.sensor_id());
     sv->mutable_mounting_position()->CopyFrom(conf.mounting_position());
     sv->mutable_mounting_position_rmse()->CopyFrom(conf.mounting_position());
 
     auto filteredGroundTruth = GetFilteredGroundTruth(conf, GetMovingObject(host_id));
     sv->mutable_global_ground_truth()->CopyFrom(*filteredGroundTruth);
-    sv->mutable_global_ground_truth()->mutable_host_vehicle_id()->set_value(host_id);
-    sv->mutable_host_vehicle_id()->set_value(host_id);
 
-    auto zeroVector3d = osi3::Vector3d();
-    zeroVector3d.set_x(0.0);
-    zeroVector3d.set_y(0.0);
-    zeroVector3d.set_z(0.0);
-
-    auto zeroOrientation3d = osi3::Orientation3d();
-    zeroOrientation3d.set_yaw(0.0);
-    zeroOrientation3d.set_pitch(0.0);
-    zeroOrientation3d.set_roll(0.0);
-
-    auto zeroError = osi3::BaseMoving();
-    zeroError.mutable_position()->CopyFrom(zeroVector3d);
-    zeroError.mutable_velocity()->CopyFrom(zeroVector3d);
-    zeroError.mutable_acceleration()->CopyFrom(zeroVector3d);
-    zeroError.mutable_orientation()->CopyFrom(zeroOrientation3d);
-    zeroError.mutable_orientation_rate()->CopyFrom(zeroOrientation3d);
-    zeroError.mutable_orientation_acceleration()->CopyFrom(zeroOrientation3d);
-
-    auto hostData = osi3::HostVehicleData();
-    const auto& movingObject = GetMovingObject(host_id);
-    hostData.mutable_location_rmse()->CopyFrom(zeroError);
-
-#ifdef USE_PROTOBUF_ARENA
-    GroundTruth_ptr tempGroundTruth = google::protobuf::Arena::CreateMessage<osi3::GroundTruth>(&arena);
-#else
-    GroundTruth_ptr tempGroundTruth = std::make_unique<osi3::GroundTruth>();
-#endif
-    movingObject.CopyToGroundTruth(*tempGroundTruth);
-    hostData.mutable_location()->CopyFrom(tempGroundTruth->mutable_moving_object(0)->base());
-    sv->mutable_host_vehicle_data()->CopyFrom(hostData);
+    AddHostVehicleToSensorView(host_id, *sv);
 
     return sv;
 }
@@ -111,7 +85,7 @@ const osi3::GroundTruth &WorldData::GetOsiGroundTruth() const
     return *osiGroundTruth;
 }
 
-OWL::Id WorldData::GetOwlId(int agentId)
+OWL::Id WorldData::GetOwlId(int agentId) const
 {
     const auto& movingObject = std::find_if(movingObjects.cbegin(),
                                             movingObjects.cend(),
@@ -291,6 +265,55 @@ std::vector<const Interfaces::RoadMarking*> WorldData::GetRoadMarkingsInSector(c
     return ApplySectorFilter(objects, origin, radius, leftBoundaryAngle, rightBoundaryAngle);
 }
 
+void WorldData::AddHostVehicleToSensorView(OWL::Id host_id, osi3::SensorView &sensorView)
+{
+    sensorView.mutable_global_ground_truth()->mutable_host_vehicle_id()->set_value(host_id);
+    sensorView.mutable_host_vehicle_id()->set_value(host_id);
+
+    auto zeroVector3d = osi3::Vector3d();
+    zeroVector3d.set_x(0.0);
+    zeroVector3d.set_y(0.0);
+    zeroVector3d.set_z(0.0);
+
+    auto zeroOrientation3d = osi3::Orientation3d();
+    zeroOrientation3d.set_yaw(0.0);
+    zeroOrientation3d.set_pitch(0.0);
+    zeroOrientation3d.set_roll(0.0);
+
+    auto zeroError = osi3::BaseMoving();
+    zeroError.mutable_position()->CopyFrom(zeroVector3d);
+    zeroError.mutable_velocity()->CopyFrom(zeroVector3d);
+    zeroError.mutable_acceleration()->CopyFrom(zeroVector3d);
+    zeroError.mutable_orientation()->CopyFrom(zeroOrientation3d);
+    zeroError.mutable_orientation_rate()->CopyFrom(zeroOrientation3d);
+    zeroError.mutable_orientation_acceleration()->CopyFrom(zeroOrientation3d);
+
+    auto hostData = osi3::HostVehicleData();
+    const auto& movingObject = GetMovingObject(host_id);
+    hostData.mutable_location_rmse()->CopyFrom(zeroError);
+
+#ifdef USE_PROTOBUF_ARENA
+    GroundTruth_ptr tempGroundTruth = google::protobuf::Arena::CreateMessage<osi3::GroundTruth>(&arena);
+#else
+    GroundTruth_ptr tempGroundTruth = std::make_unique<osi3::GroundTruth>();
+#endif
+    movingObject.CopyToGroundTruth(*tempGroundTruth);
+    hostData.mutable_location()->CopyFrom(tempGroundTruth->mutable_moving_object(0)->base());
+    sensorView.mutable_host_vehicle_data()->CopyFrom(hostData);
+
+    const auto assignedLanes = GetMovingObject(host_id).GetLaneAssignments();
+
+    for(auto& lane : *(sensorView.mutable_global_ground_truth()->mutable_lane()))
+    {
+        bool is_host_vehicle_lane =
+                std::find_if(assignedLanes.cbegin(), assignedLanes.cend(),
+                             [&](const OWL::Interfaces::Lane* assignedLane)
+                                {return assignedLane->GetId() == lane.id().value();})
+                != assignedLanes.cend();
+        lane.mutable_classification()->set_is_host_vehicle_lane(is_host_vehicle_lane);
+    }
+}
+
 bool LaneTypeIsDriving(const RoadLaneType& laneType)
 {
     switch (laneType)
@@ -399,20 +422,37 @@ void WorldData::AddLane(const Id id, RoadLaneSectionInterface& odSection, const 
         lane.SetRightLaneBoundaries(section.GetCenterLaneBoundary());
     }
 
-    lane.SetLaneType(OpenDriveTypeMapper::OdToOwlLaneType(odLane.GetType()));
+    const auto laneType = odLane.GetType();
+    lane.SetLaneType(OpenDriveTypeMapper::OdToOwlLaneType(laneType));
     if (odSection.GetRoad()->GetJunctionId() != "-1")
     {
-        osiLane->mutable_classification()->set_type(osi3::Lane_Classification_Type::Lane_Classification_Type_TYPE_INTERSECTION);
+        osiLane->mutable_classification()->set_type(osi3::Lane_Classification_Type_TYPE_INTERSECTION);
     }
-    else if (LaneTypeIsDriving(odLane.GetType()))
+    else if (LaneTypeIsDriving(laneType))
     {
-        osiLane->mutable_classification()->set_type(osi3::Lane_Classification_Type::Lane_Classification_Type_TYPE_DRIVING);
+        osiLane->mutable_classification()->set_type(osi3::Lane_Classification_Type_TYPE_DRIVING);
     }
     else
     {
-        osiLane->mutable_classification()->set_type(osi3::Lane_Classification_Type::Lane_Classification_Type_TYPE_NONDRIVING);
+        osiLane->mutable_classification()->set_type(osi3::Lane_Classification_Type_TYPE_NONDRIVING);
     }
-    osiLane->mutable_classification()->mutable_road_condition()->set_surface_temperature(293.0);
+    switch (laneType)
+    {
+    case RoadLaneType::Driving:
+        osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_NORMAL);
+        break;
+    case RoadLaneType::Biking:
+        osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_BIKING);
+        break;
+    case RoadLaneType::Sidewalk:
+        osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_SIDEWALK);
+        break;
+    default:
+        osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_OTHER);
+    }
+
+    osiLane->mutable_classification()->mutable_road_condition()->set_surface_temperature(293.15);
+    osiLane->mutable_classification()->mutable_road_condition()->set_surface_freezing_point(273.15);
     osiLane->mutable_classification()->mutable_road_condition()->set_surface_water_film(0.0);
     osiLane->mutable_classification()->mutable_road_condition()->set_surface_ice(0.0);
     osiLane->mutable_classification()->mutable_road_condition()->set_surface_roughness(5.0);
@@ -743,7 +783,7 @@ const std::unordered_map<Id, StationaryObject*>& WorldData::GetStationaryObjects
     return stationaryObjects;
 }
 
-const StationaryObject& WorldData::GetStationaryObject(Id id) const
+const Interfaces::StationaryObject& WorldData::GetStationaryObject(Id id) const
 {
     return *(stationaryObjects.at(id));
 }
@@ -763,7 +803,7 @@ const std::unordered_map<Id, Interfaces::RoadMarking*>& WorldData::GetRoadMarkin
     return roadMarkings;
 }
 
-const MovingObject& WorldData::GetMovingObject(Id id) const
+const Interfaces::MovingObject& WorldData::GetMovingObject(Id id) const
 {
     return *(movingObjects.at(id));
 }

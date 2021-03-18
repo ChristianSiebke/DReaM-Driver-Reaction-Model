@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -65,7 +65,7 @@ public:
     MOCK_METHOD2(AssignTrafficSignToLane, void(OWL::Id laneId, OWL::Interfaces::TrafficSign &trafficSign));
     MOCK_METHOD2(AssignRoadMarkingToLane, void(OWL::Id laneId, OWL::Interfaces::RoadMarking &roadMarking));
     MOCK_METHOD3(AddJunctionPriority, void(const JunctionInterface *odJunction, const std::string &high, const std::string &low));
-    MOCK_METHOD1(GetOwlId, OWL::Id(int));
+    MOCK_CONST_METHOD1(GetOwlId, OWL::Id(int));
     MOCK_CONST_METHOD1(GetAgentId, int(const OWL::Id));
     const OWL::Implementation::InvalidLane &GetInvalidLane() const override
     {

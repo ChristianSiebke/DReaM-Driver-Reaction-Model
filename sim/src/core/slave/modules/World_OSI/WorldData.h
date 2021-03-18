@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020, 2021 in-tech GmbH
 *               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -296,7 +296,7 @@ public:
      *
      * \return  OWL Id of the underlying OSI object
      */
-    virtual OWL::Id GetOwlId(int agentId) = 0;
+    virtual OWL::Id GetOwlId(int agentId) const = 0;
 
     /*!
      * \brief Retrieves the simualtion framework Id of an agent associated to the given OWL Id
@@ -400,7 +400,15 @@ public:
                                                                           double leftBoundaryAngle,
                                                                           double rightBoundaryAngle);
 
-    OWL::Id GetOwlId(int agentId) override;
+    /*!
+     * \brief Add the information about the host vehicle to the given SensorView
+     *
+     * \param host_id       id of the host vehicle
+     * \param sensorView    SensorView to modify
+     */
+    void AddHostVehicleToSensorView(Id host_id, osi3::SensorView& sensorView);
+
+    OWL::Id GetOwlId(int agentId) const override;
     int GetAgentId(const OWL::Id owlId) const override;
 
     void SetRoadGraph (const RoadGraph&& roadGraph, const RoadGraphVertexMapping&& vertexMapping) override;
@@ -456,8 +464,8 @@ public:
     const std::unordered_map<Id, MovingObject*>& GetMovingObjects() const;
     const std::unordered_map<Id, StationaryObject*>& GetStationaryObjects() const;
 
-    const StationaryObject& GetStationaryObject(Id id) const override;
-    const MovingObject& GetMovingObject(Id id) const override;
+    const Interfaces::StationaryObject& GetStationaryObject(Id id) const override;
+    const Interfaces::MovingObject& GetMovingObject(Id id) const override;
 
     const RoadGraph& GetRoadGraph() const override;
     const RoadGraphVertexMapping& GetRoadGraphVertexMapping() const override;
