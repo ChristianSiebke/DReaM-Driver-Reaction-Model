@@ -19,7 +19,6 @@
 #include <QTextStream>
 
 #include "common/vector2d.h"
-#include "pcm_trajectory.h"
 
 //! Lightweight structure comprising all information on a way point within a trajectory
 struct WaypointData

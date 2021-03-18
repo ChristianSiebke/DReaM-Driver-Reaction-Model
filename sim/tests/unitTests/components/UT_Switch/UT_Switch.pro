@@ -3,7 +3,6 @@ CONFIG += OPENPASS_GTEST \
 
 include(../../../testing.pri)
 
-
 TEMPLATE = app
 CONFIG += console c++17
 CONFIG -= app_bundle
@@ -18,7 +17,6 @@ INCLUDEPATH += c:/OpenPASS/thirdParty/include
 INCLUDEPATH += . \
                $$MAIN_SRC_DIR/common \
                $$MAIN_SRC_DIR/../../common/pcm \
-               $$MAIN_SRC_DIR/../../common/pcm/PCM_Data \
                $$MAIN_SRC_DIR/components/Algorithm_Switch
 
 HEADERS += $$MAIN_SRC_DIR/components/Algorithm_Switch/switch.h \
@@ -27,8 +25,7 @@ HEADERS += $$MAIN_SRC_DIR/components/Algorithm_Switch/switch.h \
 
 
 SOURCES += $$MAIN_SRC_DIR/components/Algorithm_Switch/switch.cpp \
-           tst_ut_switch.cpp \
-           main.cpp
+           tst_ut_switch.cpp
 
 Release:DESTDIR = $$DIR_RELEASE
 Debug:DESTDIR = $$DIR_DEBUG

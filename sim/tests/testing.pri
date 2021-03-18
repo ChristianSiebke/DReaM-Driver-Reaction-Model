@@ -8,6 +8,8 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
+include($$PWD/../defaults.pri)
+
 isEmpty(OPEN_SRC) {
     OPEN_SRC=$$absolute_path($$system_path($$PWD/../src))
     warning(OPEN_SRC not set. Falling back to default ($$OPEN_SRC))

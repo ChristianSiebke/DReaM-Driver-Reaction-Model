@@ -3,11 +3,34 @@
 * All rights reserved.
 *****************************/
 
+#include <QString>
+#include <QtTest>
 #include <qDebug>
-#include "tst_ut_RouteControl.h"
+
 #include "routeControl.h"
 
 using namespace Common;
+
+class UT_RouteControl : public QObject
+{
+    Q_OBJECT
+
+public:
+    UT_RouteControl() = default;
+    ~UT_RouteControl() = default;
+
+private Q_SLOTS:
+    void testCase_data();
+    void testCase();
+
+private:
+    void TestCaseSequence1(double lenLeft, double lenRight, double lenFront, double drivingAggressivity);
+    void TestCaseSequence2(double lenLeft, double lenRight, double lenFront, double drivingAggressivity);
+    void TestCaseSequence3(double lenLeft, double lenRight, double lenFront, double drivingAggressivity);
+    void TestCaseSequence4(double lenLeft, double lenRight, double lenFront, double drivingAggressivity);
+    void TestCaseSequence5(double lenLeft, double lenRight, double lenFront, double drivingAggressivity);
+    void TestCaseSequence6(double lenLeft, double lenRight, double lenFront, double drivingAggressivity);
+};
 
 std::vector<WaypointData> * CreateWayPointData(double cycleTime, double longVelocity)
 {
@@ -243,3 +266,7 @@ void UT_RouteControl::testCase()
     QCOMPARE(routeControl.GetBrakePedal(), expectedBrake);
     QCOMPARE(routeControl.GetFrontWheelAngle(), expectedSteer);
 }
+
+QTEST_MAIN(UT_RouteControl);
+
+#include "tst_ut_RouteControl.moc"

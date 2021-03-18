@@ -25,8 +25,7 @@ HEADERS += $$MAIN_SRC_DIR/common/vector2d.h \
 
 
 SOURCES += $$MAIN_SRC_DIR/components/Algorithm_ECU/ecu.cpp \
-           tst_ut_ecu.cpp \
-           main.cpp
+           tst_ut_ecu.cpp
 
 Release:DESTDIR = $$DIR_RELEASE
 Debug:DESTDIR = $$DIR_DEBUG
