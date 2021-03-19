@@ -121,18 +121,20 @@ void AlgorithmFmuWrapperImplementation::SetOutputPath()
 
 void AlgorithmFmuWrapperImplementation::SetupFilenames()
 {
-    fs::path configBasePath(GetParameters()->GetRuntimeInformation().directories.configuration);
     fs::path fmuPath(FMU_configPath);
-    fs::path fmuAbsPath = configBasePath / fmuPath;
 
-    THROWIFFALSE(fs::exists(fmuAbsPath), "Can not find file " + fmuAbsPath.string());
+    if (!fmuPath.is_absolute())
+    {
+        fs::path configBasePath(GetParameters()->GetRuntimeInformation().directories.configuration);
+        fmuPath = configBasePath / fmuPath;
+    }
 
-    FMU_name = fmuAbsPath.filename().replace_extension().string();
+    THROWIFFALSE(fs::exists(fmuPath), "FMU file '" + fmuPath.string() + "' doesn't exist");
 
-    FMU_absPath = fmuAbsPath.string();
+    FMU_absPath = fmuPath.string();         // keep string for context struct
+    cdata.FMUPath =  FMU_absPath.c_str();   // set FMU absolute path in context struct
 
-    // set FMU absolute path in context struct
-    cdata.FMUPath =  FMU_absPath.c_str();
+    const std::string FMU_name = fmuPath.filename().replace_extension().string();
 
     // log file name: <fmuName>.log
     logFileName.assign(FMU_name);

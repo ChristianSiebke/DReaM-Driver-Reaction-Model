@@ -163,7 +163,6 @@ private:
 
     const CallbackInterface*  callbacks;     //!< callback interface
 
-    std::string FMU_name;           //!< Name of FMU file without extension
     std::string FMU_absPath;        //!< Absolute path to the FMU file including
     std::string FMU_configPath;     //!< Relative path to the FMU file (originating in core config directory)
     std::string tmpPath;            //!< Temporary path used for unzipping the FMU archive
