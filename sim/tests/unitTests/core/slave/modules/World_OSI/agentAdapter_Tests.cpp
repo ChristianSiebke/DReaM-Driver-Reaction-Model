@@ -78,3 +78,26 @@ TEST(MovingObject_Tests, SetReferencePointPosition_SetsCorrectPositionOnOSIObjec
     ASSERT_THAT(resultPosition.y(), DoubleEq(position.y + std::sqrt(2)));
     ASSERT_THAT(resultPosition.z(), DoubleEq(position.z));
 }
+
+TEST(MovingObject_Tests, SetAgentType_MapsCorrectOSIType)
+{
+    osi3::MovingObject osiObject;
+    OWL::Implementation::MovingObject movingObject(&osiObject, nullptr);
+
+    const std::vector<std::pair<AgentVehicleType, osi3::MovingObject_VehicleClassification_Type>> expectedVehicleTypes = 
+    {{AgentVehicleType::Car, osi3::MovingObject_VehicleClassification_Type::MovingObject_VehicleClassification_Type_TYPE_MEDIUM_CAR},
+     {AgentVehicleType::Motorbike, osi3::MovingObject_VehicleClassification_Type::MovingObject_VehicleClassification_Type_TYPE_MOTORBIKE},
+     {AgentVehicleType::Bicycle, osi3::MovingObject_VehicleClassification_Type::MovingObject_VehicleClassification_Type_TYPE_BICYCLE},
+     {AgentVehicleType::Truck, osi3::MovingObject_VehicleClassification_Type::MovingObject_VehicleClassification_Type_TYPE_HEAVY_TRUCK}};
+
+    for (const auto & [agentVehicleType, expectedOsiVehicleType] : expectedVehicleTypes)
+    {
+        movingObject.SetType(agentVehicleType);
+
+        ASSERT_THAT(osiObject.type(), osi3::MovingObject_Type::MovingObject_Type_TYPE_VEHICLE);
+        ASSERT_THAT(osiObject.vehicle_classification().type(), expectedOsiVehicleType);
+    }
+
+    movingObject.SetType(AgentVehicleType::Pedestrian);
+    ASSERT_THAT(osiObject.type(), osi3::MovingObject_Type::MovingObject_Type_TYPE_PEDESTRIAN);
+}

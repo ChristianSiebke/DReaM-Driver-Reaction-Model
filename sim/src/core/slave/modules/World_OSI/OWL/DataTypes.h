@@ -635,6 +635,8 @@ public:
     virtual bool GetHeadLight() const = 0;
     virtual void SetHighBeamLight(bool highbeamLight) = 0;
     virtual bool GetHighBeamLight() const = 0;
+
+    virtual void SetType(AgentVehicleType type) = 0;
 };
 
 //! This class represents a static traffic sign
@@ -1196,6 +1198,8 @@ public:
     virtual bool GetHeadLight() const override;
     virtual void SetHighBeamLight(bool highbeamLight) override;
     virtual bool GetHighBeamLight() const override;
+
+    virtual void SetType(AgentVehicleType) override;
 
     void CopyToGroundTruth(osi3::GroundTruth& target) const override;
 private:

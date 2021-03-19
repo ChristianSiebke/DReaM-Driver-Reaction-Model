@@ -212,6 +212,7 @@ void ObservationFileHandler::AddAgent(const std::string& agentId)
     xmlFileStream->writeAttribute(outputAttributes.AGENTTYPENAME, QString::fromStdString(std::get<std::string>(dataStore.GetStatic(keyPrefix + "AgentTypeName").at(0))));
     xmlFileStream->writeAttribute(outputAttributes.VEHICLEMODELTYPE, QString::fromStdString(std::get<std::string>(dataStore.GetStatic(keyPrefix + "VehicleModelType").at(0))));
     xmlFileStream->writeAttribute(outputAttributes.DRIVERPROFILENAME, QString::fromStdString(std::get<std::string>(dataStore.GetStatic(keyPrefix + "DriverProfileName").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.AGENTTYPE, QString::fromStdString(std::get<std::string>(dataStore.GetStatic(keyPrefix + "AgentType").at(0))));
 
     AddVehicleAttributes(agentId);
     AddSensors(agentId);

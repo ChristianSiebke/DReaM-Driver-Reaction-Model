@@ -908,7 +908,8 @@ private:
 
         GetBaseTrafficObject().SetDimension(dimension);
         GetBaseTrafficObject().SetDistanceReferencPointToLeadingEdge(parameter.distanceReferencePointToLeadingEdge);
-
+        GetBaseTrafficObject().SetType(parameter.vehicleType);
+        
         vehicleModelParameters = parameter;
     }
 

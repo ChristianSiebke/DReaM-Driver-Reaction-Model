@@ -1136,6 +1136,40 @@ bool MovingObject::GetHighBeamLight() const
     throw std::logic_error("HighBeamLightState is not supported");
 }
 
+void MovingObject::SetType(AgentVehicleType type)
+{
+    if(type == AgentVehicleType::Pedestrian)
+    {
+        osiObject->set_type(osi3::MovingObject_Type::MovingObject_Type_TYPE_PEDESTRIAN);
+    }
+    else
+    {
+        osiObject->set_type(osi3::MovingObject_Type::MovingObject_Type_TYPE_VEHICLE);
+
+        switch(type) 
+        {
+            case AgentVehicleType::Car:
+            osiObject->mutable_vehicle_classification()->set_type(osi3::MovingObject_VehicleClassification_Type::MovingObject_VehicleClassification_Type_TYPE_MEDIUM_CAR);
+            break;
+            
+            case AgentVehicleType::Motorbike:
+            osiObject->mutable_vehicle_classification()->set_type(osi3::MovingObject_VehicleClassification_Type::MovingObject_VehicleClassification_Type_TYPE_MOTORBIKE);
+            break;
+
+            case AgentVehicleType::Bicycle:
+            osiObject->mutable_vehicle_classification()->set_type(osi3::MovingObject_VehicleClassification_Type::MovingObject_VehicleClassification_Type_TYPE_BICYCLE);
+            break;
+
+            case AgentVehicleType::Truck:
+            osiObject->mutable_vehicle_classification()->set_type(osi3::MovingObject_VehicleClassification_Type::MovingObject_VehicleClassification_Type_TYPE_HEAVY_TRUCK);
+            break;
+
+            default:
+            throw(std::runtime_error("AgentVehicleType not supported"));
+        }       
+    }
+}
+
 Primitive::LaneOrientation MovingObject::GetLaneOrientation() const
 {
     throw std::logic_error("MovingObject::GetLaneOrientation not implemented");

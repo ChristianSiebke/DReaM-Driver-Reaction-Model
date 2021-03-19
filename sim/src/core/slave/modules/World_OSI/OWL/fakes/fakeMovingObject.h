@@ -121,6 +121,8 @@ public:
     MOCK_METHOD1(SetHighBeamLight, void(bool highbeamLight));
     MOCK_CONST_METHOD0(GetHighBeamLight, bool());
 
+    MOCK_METHOD1(SetType, void(AgentVehicleType));
+
     MOCK_CONST_METHOD1(CopyToGroundTruth, void(osi3::GroundTruth&));
 };
 }
