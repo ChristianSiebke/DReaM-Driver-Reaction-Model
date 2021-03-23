@@ -10,10 +10,13 @@
 # SPDX-License-Identifier: EPL-2.0
 ################################################################################
 
-MYDIR="$(dirname "$(readlink -f $0)")"
-cd "$MYDIR/../../../.."
+################################################################################
+# This script packs the artifacts
+################################################################################
 
-cd dist
+MYDIR="$(dirname "$(readlink -f $0)")"
+cd "$MYDIR/../../../../dist" || exit 1
+
 util_tar.sh ../artifacts/openPASS_SIM.tar.gz lib OpenPassMaster OpenPassSlave *.so* --ignore-failed-read
 util_tar.sh ../artifacts/openPASS_EndToEndTests.tar.gz results_* --ignore-failed-read
 

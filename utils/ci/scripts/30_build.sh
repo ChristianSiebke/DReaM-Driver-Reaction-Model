@@ -10,8 +10,12 @@
 # SPDX-License-Identifier: EPL-2.0
 ################################################################################
 
-MYDIR="$(dirname "$(readlink -f $0)")"
-cd "$MYDIR/../../../.."
+################################################################################
+# This script executes the build and installs files to destination directory
+################################################################################
 
-cd build && make -j2 install
+MYDIR="$(dirname "$(readlink -f $0)")"
+cd "$MYDIR/../../../../build" || exit 1
+
+make -j4 install
 

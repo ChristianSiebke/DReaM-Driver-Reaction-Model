@@ -10,20 +10,24 @@
 # SPDX-License-Identifier: EPL-2.0
 ################################################################################
 
-MYDIR="$(dirname "$(readlink -f $0)")"
-cd "$MYDIR/../../../.."
+################################################################################
+# This script configures cmake
+################################################################################
 
-cd build
+MYDIR="$(dirname "$(readlink -f $0)")"
+cd "$MYDIR/../../../../build" || exit 1
 
 cmake \
-  -D CMAKE_PREFIX_PATH="$PWD/../repo/deps/FMILibrary;$PWD/../repo/deps/osi" \
+  -D CMAKE_PREFIX_PATH="$PWD/../deps/FMILibrary;$PWD/../deps/osi" \
   -D CMAKE_INSTALL_PREFIX="$PWD/../dist/Slave" \
   -D CMAKE_BUILD_TYPE=Release \
   -D CMAKE_C_COMPILER=gcc-10 \
   -D CMAKE_CXX_COMPILER=g++-10 \
   -D OPENPASS_ADJUST_OUTPUT=OFF \
   -D USE_CCACHE=OFF \
+  -D WITH_COVERAGE=OFF \
   -D WITH_DEBUG_POSTFIX=OFF \
+  -D WITH_DOC=OFF \
   -D WITH_ENDTOEND_TESTS=ON \
   -D WITH_EXTENDED_OSI=OFF \
   -D WITH_GUI=OFF \

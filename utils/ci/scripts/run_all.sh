@@ -11,20 +11,22 @@
 ################################################################################
 
 ################################################################################
-# This script fetches and builds open-simulation-interface
+# This script runs all build scripts, in order
+#
+# NOTE: Files to be executed have to be named like 00_script.sh, where 00 is
+# used to specifiy execution order. The executability permission has to be set.
 ################################################################################
 
 MYDIR="$(dirname "$(readlink -f $0)")"
-cd "$MYDIR/../../../.."
+cd "$MYDIR" || exit 1
 
-WORKSPACE_ROOT="$PWD"
+for SCRIPT in $(find -maxdepth 1 -type f -executable -name '[0-9]*_*.sh' | sort); do
+  echo
+  echo "======================================================================="
+  echo "Executing ${SCRIPT}..."
+  echo "======================================================================="
+  echo
 
-mkdir -p build-osi && cd build-osi
-
-git clone --branch v3.2.0 --depth=1 https://github.com/OpenSimulationInterface/open-simulation-interface.git src || exit 1
-
-mkdir -p src/build && cd src/build
-cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX="$WORKSPACE_ROOT/deps/osi" ..
-make -j4
-make install
+  $SCRIPT || exit 1
+done
 

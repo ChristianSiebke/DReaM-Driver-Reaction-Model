@@ -10,10 +10,14 @@
 # SPDX-License-Identifier: EPL-2.0
 ################################################################################
 
+################################################################################
+# This script fetches and builds fmi-library
+################################################################################
+
 MYDIR="$(dirname "$(readlink -f $0)")"
 cd "$MYDIR/../../../.."
 
-WD="$PWD"
+WORKSPACE_ROOT="$PWD"
 
 mkdir -p build-fmi-library && cd build-fmi-library
 
@@ -23,7 +27,7 @@ cd src
 patch -p1 < "$MYDIR/patches/fmi-library-2.0.3-fixes.patch" || exit 1
 
 mkdir -p build && cd build
-cmake -D CMAKE_BUILD_TYPE=Release -D FMILIB_INSTALL_PREFIX="$WD/repo/deps/FMILibrary" -D FMILIB_BUILD_STATIC_LIB=OFF -D FMILIB_BUILD_SHARED_LIB=ON ..
-make -j2
+cmake -D CMAKE_BUILD_TYPE=Release -D FMILIB_INSTALL_PREFIX="$WORKSPACE_ROOT/deps/FMILibrary" -D FMILIB_BUILD_STATIC_LIB=OFF -D FMILIB_BUILD_SHARED_LIB=ON ..
+make -j4
 make install
 

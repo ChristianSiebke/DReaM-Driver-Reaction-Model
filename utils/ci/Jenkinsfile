@@ -12,11 +12,11 @@ spec:
     tty: true
     resources:
       limits:
-        memory: "8Gi"
-        cpu: "2"
+        memory: "16Gi"
+        cpu: "4"
       requests:
-        memory: "8Gi"
-        cpu: "2"
+        memory: "16Gi"
+        cpu: "4"
 """
     }
   }
@@ -24,15 +24,11 @@ spec:
     stage('Build and test simulation core') {
       steps {
         container('openpass-build') {
+          // move repository to subfolder
           sh 'mkdir repo && find . -mindepth 1 -maxdepth 1 -not -name repo -print0 | xargs -0 mv -t repo'
-          sh 'repo/utils/ci/scripts/10_prepare.sh'
-          sh 'repo/utils/ci/scripts/15_dep_osi.sh'
-          sh 'repo/utils/ci/scripts/16_dep_fmilibrary.sh'
-          sh 'repo/utils/ci/scripts/20_configure.sh'
-          sh 'repo/utils/ci/scripts/30_build.sh'
-          sh 'repo/utils/ci/scripts/50_test.sh'
-          sh 'repo/utils/ci/scripts/55_endtoend.sh'
-          sh 'repo/utils/ci/scripts/90_pack_artifacts.sh'
+
+          // run build steps
+          sh 'repo/utils/ci/scripts/run_all.sh'
         }
       }
     }

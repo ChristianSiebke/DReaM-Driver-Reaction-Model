@@ -10,8 +10,12 @@
 # SPDX-License-Identifier: EPL-2.0
 ################################################################################
 
-MYDIR="$(dirname "$(readlink -f $0)")"
-cd "$MYDIR/../../../.."
+################################################################################
+# This script builds and executes unit tests
+################################################################################
 
-cd build && make -j2 test ARGS="-j1 --output-on-failure"
+MYDIR="$(dirname "$(readlink -f $0)")"
+cd "$MYDIR/../../../../build" || exit 1
+
+make -j2 test ARGS="-j2 --output-on-failure"
 

@@ -10,11 +10,12 @@
 # SPDX-License-Identifier: EPL-2.0
 ################################################################################
 
+################################################################################
+# This script executes end-to-end tests
+################################################################################
+
 MYDIR="$(dirname "$(readlink -f $0)")"
-cd "$MYDIR/../../../.."
+cd "$MYDIR/../../../../build"
 
-# TODO: remvove this workaround
-pushd dist && mv bin/* . && popd
-
-cd build && make pyOpenPASS
+make pyOpenPASS
 
