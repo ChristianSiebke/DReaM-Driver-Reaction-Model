@@ -24,6 +24,7 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::UnorderedElementsAre;
 
+namespace SpawnPointRuntimeCommonDefinitions {
 std::ostream& operator<<(std::ostream& os, const SpawnPosition& position)
 {
     os << "road: " << position.roadId
@@ -31,6 +32,7 @@ std::ostream& operator<<(std::ostream& os, const SpawnPosition& position)
        << " s: " << position.sPosition;
 
     return os;
+}
 }
 
 TEST(SpawnPointRuntimeCommonParameterExtractor, ExtractSpawnPointParameters)
