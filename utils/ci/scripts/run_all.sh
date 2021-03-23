@@ -20,6 +20,8 @@
 MYDIR="$(dirname "$(readlink -f $0)")"
 cd "$MYDIR" || exit 1
 
+export CCACHE_DIR=$MYDIR/../../../../ccache
+
 for SCRIPT in $(find -maxdepth 1 -type f -executable -name '[0-9]*_*.sh' | sort); do
   echo
   echo "======================================================================="
