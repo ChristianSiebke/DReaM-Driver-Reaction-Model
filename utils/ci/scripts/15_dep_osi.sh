@@ -21,7 +21,7 @@ WORKSPACE_ROOT="$PWD"
 
 mkdir -p build-osi && cd build-osi
 
-git clone --branch v3.2.0 --depth=1 https://github.com/OpenSimulationInterface/open-simulation-interface.git src || exit 1
+git clone --branch v3.2.0 --depth=1 -c advice.detachedHead=false https://github.com/OpenSimulationInterface/open-simulation-interface.git src || exit 1
 
 mkdir -p src/build && cd src/build
 cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX="$WORKSPACE_ROOT/deps/osi" ..

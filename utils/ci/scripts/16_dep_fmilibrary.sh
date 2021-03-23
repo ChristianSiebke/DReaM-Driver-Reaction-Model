@@ -21,7 +21,7 @@ WORKSPACE_ROOT="$PWD"
 
 mkdir -p build-fmi-library && cd build-fmi-library
 
-git clone --branch 2.0.3 --depth=1 https://github.com/modelon-community/fmi-library.git src || exit 1
+git clone --branch 2.0.3 --depth=1 -c advice.detachedHead=false https://github.com/modelon-community/fmi-library.git src || exit 1
 
 cd src
 patch -p1 < "$MYDIR/patches/fmi-library-2.0.3-fixes.patch" || exit 1
