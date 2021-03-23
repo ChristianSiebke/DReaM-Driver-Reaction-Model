@@ -18,5 +18,5 @@ MYDIR="$(dirname "$(readlink -f $0)")"
 cd "$MYDIR/../../../../dist" || exit 1
 
 util_tar.sh ../artifacts/openPASS_SIM.tar.gz lib OpenPassMaster OpenPassSlave *.so* --ignore-failed-read
-util_tar.sh ../artifacts/openPASS_EndToEndTests.tar.gz results_* --ignore-failed-read
+util_tar.sh ../artifacts/openPASS_EndToEndTests.tar.gz artifacts --ignore-failed-read
 
