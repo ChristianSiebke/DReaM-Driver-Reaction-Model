@@ -47,7 +47,7 @@ spec:
   post {
     always {
       archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/**', followSymlinks: false
-      junit 'build/**/*_Tests.xml,repo/sim/tests/endToEndTests/pyOpenPASS/result_*.xml'
+      junit allowEmptyResults: true, testResults: 'build/**/*_Tests.xml,repo/sim/tests/endToEndTests/pyOpenPASS/result_*.xml'
     }
   }
 }
