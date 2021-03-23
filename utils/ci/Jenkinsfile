@@ -20,29 +20,14 @@ spec:
 """
     }
   }
+  options {
+    checkoutToSubdirectory('repo')
+  }
   stages {
     stage('Build and test simulation core') {
       steps {
         container('openpass-build') {
-          // move repository to subfolder
-          sh 'mkdir repo && find . -mindepth 1 -maxdepth 1 -not -name repo -print0 | xargs -0 mv -t repo'
-
-          // get previous ccache
-          script {
-            try {
-              unarchive mapping: ['ccache.tar.gz': 'ccache.tar.gz' ]
-              sh 'tar zxf ccache.tar.gz'
-            } finally {
-            }
-          }
-
-          // run build steps
           sh 'repo/utils/ci/scripts/run_all.sh'
-
-          // pack ccache
-          dir(artifacts) {
-            sh 'tar zcf ccache.tar.gz ../ccache'
-          }
         }
       }
     }
