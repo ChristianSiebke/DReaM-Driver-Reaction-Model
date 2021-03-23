@@ -29,7 +29,10 @@ spec:
 
           // get previous ccache
           script {
-            copyArtifacts(projectName: currentBuild.projectName, selector: lastWithArtifacts(), filter: 'ccache.tar.gz')
+            try {
+              copyArtifacts(projectName: currentBuild.projectName, selector: lastWithArtifacts(), filter: 'ccache.tar.gz')
+            } finally {
+            }
           }
           sh 'test -f ccache.tar.gz && tar zxf ccache.tar.gz'
 
