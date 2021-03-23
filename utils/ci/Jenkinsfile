@@ -30,7 +30,7 @@ spec:
           // get previous ccache
           script {
             try {
-              copyArtifacts(projectName: currentBuild.projectName, selector: lastWithArtifacts(), filter: 'ccache.tar.gz')
+              copyArtifacts(projectName: currentBuild.projectName, selector: lastCompleted(), filter: 'ccache.tar.gz')
             } finally {
             }
           }
