@@ -28,13 +28,8 @@ spec:
           sh 'mkdir repo && find . -mindepth 1 -maxdepth 1 -not -name repo -print0 | xargs -0 mv -t repo'
 
           // get previous ccache
-          script {
-            try {
-              copyArtifacts(projectName: currentBuild.projectName, filter: 'ccache.tar.gz')
-            } finally {
-            }
-          }
-          sh 'test -f ccache.tar.gz && tar zxf ccache.tar.gz'
+          unarchive mapping: ['ccache.tar.gz': 'ccache.tar.gz' ]
+          sh 'if test -f ccache.tar.gz; then tar zxf ccache.tar.gz; fi'
 
           // run build steps
           sh 'repo/utils/ci/scripts/run_all.sh'
