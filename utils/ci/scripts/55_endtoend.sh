@@ -19,3 +19,5 @@ cd "$MYDIR/../../../../build"
 
 make pyOpenPASS
 
+exit 0
+

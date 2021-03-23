@@ -19,3 +19,5 @@ cd "$MYDIR/../../../../build" || exit 1
 
 make -j2 test ARGS="-j2 --output-on-failure"
 
+exit 0
+
