@@ -17,6 +17,13 @@ spec:
       requests:
         memory: "16Gi"
         cpu: "4"
+    volumeMounts:
+    - name: volume-known-hosts
+      mountPath: /home/jenkins/.ssh
+  volumes:
+  - name: volume-known-hosts
+    configMap:
+      name: known-hosts
 """
     }
   }
