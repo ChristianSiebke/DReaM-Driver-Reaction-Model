@@ -15,17 +15,7 @@ spec:
         memory: "16Gi"
         cpu: "4"
       requests:
-        memory: "8Gi"
-        cpu: "4"
-  - name: openpass-unittest
-    image: rbiegel/openpass-build:latest
-    tty: true
-    resources:
-      limits:
         memory: "16Gi"
-        cpu: "4"
-      requests:
-        memory: "8Gi"
         cpu: "4"
 """
     }
@@ -41,21 +31,17 @@ spec:
         }
       }
     }
-    stage('Build and test simulation core') {
-      parallel {
-        stage('Build and end-to-end tests') {
-          steps {
-            container('openpass-build') {
-              sh 'repo/utils/ci/scripts/build_core_and_e2e.sh'
-            }
-          }
+    stage('Build and E2E tests') {
+      steps {
+        container('openpass-build') {
+          sh 'repo/utils/ci/scripts/build_core_and_e2e.sh'
         }
-        stage('Unit tests') {
-          steps {
-            container('openpass-unittest') {
-              sh 'repo/utils/ci/scripts/build_unittests.sh'
-            }
-          }
+      }
+    }
+    stage('Unit tests') {
+      steps {
+        container('openpass-build') {
+          sh 'repo/utils/ci/scripts/build_unittests.sh'
         }
       }
     }
