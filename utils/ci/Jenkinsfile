@@ -27,6 +27,7 @@ spec:
       requests:
         memory: "16Gi"
         cpu: "4"
+  - name: jnlp
     volumeMounts:
     - name: volume-known-hosts
       mountPath: /home/jenkins/.ssh
@@ -64,7 +65,7 @@ spec:
     }
     stage('Deploy') {
       steps {
-        container('openpass-build') {
+        container('jnlp') {
           sshagent ( ['projects-storage.eclipse.org-bot-ssh']) {
             sh '''
               ssh -o BatchMode=yes genie.simopenpass@projects-storage.eclipse.org mkdir -p /home/data/httpd/download.eclipse.org/simopenpass/snapshots
