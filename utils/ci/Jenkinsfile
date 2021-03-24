@@ -25,10 +25,26 @@ spec:
   }
   stages {
     stage('Build and test simulation core') {
-      steps {
-        container('openpass-build') {
-          sh 'repo/utils/ci/scripts/run_all.sh'
+      parallel {
+        stage('Build and end-to-end tests') {
+          steps {
+            container('openpass-build') {
+              sh 'repo/utils/ci/scripts/build_core_and_e2e.sh'
+            }
+          }
         }
+        stage('Unit tests') {
+          steps {
+            container('openpass-build') {
+              sh 'repo/utils/ci/scripts/build_unittests.sh'
+            }
+          }
+        }
+      }
+    }
+    stage('Deploy') {
+      steps {
+        echo 'Deploying...'
       }
     }
   }
