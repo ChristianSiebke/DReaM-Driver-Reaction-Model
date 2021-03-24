@@ -1,7 +1,7 @@
 pipeline {
   agent {
     kubernetes {
-      label 'openpass-agent-pod'
+      label 'openpass-agent-pod-' + env.BUILD_NUMBER
       yaml """
 apiVersion: v1
 kind: Pod
@@ -15,7 +15,17 @@ spec:
         memory: "16Gi"
         cpu: "4"
       requests:
+        memory: "8Gi"
+        cpu: "4"
+  - name: openpass-unittest
+    image: rbiegel/openpass-build:latest
+    tty: true
+    resources:
+      limits:
         memory: "16Gi"
+        cpu: "4"
+      requests:
+        memory: "8Gi"
         cpu: "4"
 """
     }
@@ -42,7 +52,7 @@ spec:
         }
         stage('Unit tests') {
           steps {
-            container('openpass-build') {
+            container('openpass-unittest') {
               sh 'repo/utils/ci/scripts/build_unittests.sh'
             }
           }
