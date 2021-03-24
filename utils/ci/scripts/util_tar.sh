@@ -10,6 +10,10 @@
 # SPDX-License-Identifier: EPL-2.0
 ################################################################################
 
+################################################################################
+# This script just wraps the call to tar by adding common flags
+################################################################################
+
 if [ $# -lt 2 ]; then
   echo "Usage: $0 <target artifact path> <files/dirs to add...>"
   exit 1
