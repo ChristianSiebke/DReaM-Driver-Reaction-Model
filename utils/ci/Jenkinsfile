@@ -24,6 +24,13 @@ spec:
     checkoutToSubdirectory('repo')
   }
   stages {
+    stage('Prepare dependencies') {
+      steps {
+        container('openpass-build') {
+          sh 'repo/utils/ci/scripts/build_prepare.sh'
+        }
+      }
+    }
     stage('Build and test simulation core') {
       parallel {
         stage('Build and end-to-end tests') {

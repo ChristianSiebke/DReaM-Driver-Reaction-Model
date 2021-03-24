@@ -19,7 +19,7 @@ cd "$MYDIR" || exit 1
 
 export CCACHE_DIR=$MYDIR/../../../../ccache
 
-for SCRIPT in 10_prepare.sh 15_dep_osi.sh 16_dep_fmilibrary.sh 20_configure.sh 50_test.sh; do
+for SCRIPT in 50_test.sh; do
   echo
   echo "======================================================================="
   echo "Executing ${SCRIPT}..."

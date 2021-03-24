@@ -11,7 +11,7 @@
 ################################################################################
 
 ################################################################################
-# This script runs the simulation core build and end-to-end tests
+# This script prepares the dependencies for building and testing
 ################################################################################
 
 MYDIR="$(dirname "$(readlink -f $0)")"
@@ -19,7 +19,7 @@ cd "$MYDIR" || exit 1
 
 export CCACHE_DIR=$MYDIR/../../../../ccache
 
-for SCRIPT in 30_build.sh 55_endtoend.sh 90_pack_artifacts.sh; do
+for SCRIPT in 10_prepare.sh 15_dep_osi.sh 16_dep_fmilibrary.sh 20_configure.sh; do
   echo
   echo "======================================================================="
   echo "Executing ${SCRIPT}..."
