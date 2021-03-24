@@ -64,7 +64,7 @@ spec:
     }
     stage('Deploy') {
       steps {
-        container('jnlp') {
+        container('openpass-build') {
           sshagent ( ['projects-storage.eclipse.org-bot-ssh']) {
             sh '''
               ssh -o BatchMode=yes genie.simopenpass@projects-storage.eclipse.org mkdir -p /home/data/httpd/download.eclipse.org/simopenpass/snapshots
