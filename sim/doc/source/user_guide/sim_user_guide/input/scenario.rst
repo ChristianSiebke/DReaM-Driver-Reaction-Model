@@ -298,7 +298,7 @@ Depending on the selected type, the actual mean value is then taken from the att
              <Position>
                <LanePosition roadId="1" s="20.0" laneId="-2" offset="0.0">
                  <Orientation type="relative" h="0.2"/>
-                 <Stochastics value="s" stdDeviation="5.0" lowerBound="10.0" 
+                 <Stochastics value="s" stdDeviation="5.0" lowerBound="10.0"
                                                            upperBound="30.0"/>
                </LanePosition>
              </Position>
@@ -307,12 +307,12 @@ Depending on the selected type, the actual mean value is then taken from the att
          <PrivateAction>
            <LongitudinalAction>
              <SpeedAction>
-               <SpeedActionDynamics rate="0.0" dynamicsShape="linear" 
+               <SpeedActionDynamics rate="0.0" dynamicsShape="linear"
                                                dynamicsDimension="rate"/>
                <SpeedActionTarget>
                  <AbsoluteTargetSpeed value="10.0" />
                </SpeedActionTarget>
-               <Stochastics value="velocity" stdDeviation="2.0" lowerBound="5.0" 
+               <Stochastics value="velocity" stdDeviation="2.0" lowerBound="5.0"
                                                                 upperBound="15.0"/>
              </SpeedAction>
            </LongitudinalAction>
@@ -322,12 +322,12 @@ Depending on the selected type, the actual mean value is then taken from the att
              <AssignRouteAction>
                <Route>
                  <Waypoint>
-                   <Position>  
+                   <Position>
                      <RoadPosition roadId="1" t="-1.0" s="0"/>
                    </Position>
                  </Waypoint>
                  <Waypoint>
-                   <Position>  
+                   <Position>
                      <RoadPosition roadId="2" t="-1.0" s="0"/>
                    </Position>
                  </Waypoint>
@@ -347,7 +347,7 @@ Depending on the selected type, the actual mean value is then taken from the att
          <PrivateAction>
            <LongitudinalAction>
              <SpeedAction>
-               <SpeedActionDynamics rate="0.0" dynamicsShape="linear" 
+               <SpeedActionDynamics rate="0.0" dynamicsShape="linear"
                                                dynamicsDimension="rate"/>
                <SpeedActionTarget>
                  <AbsoluteTargetSpeed value="10.0" />
@@ -437,7 +437,7 @@ Conditions
 While a **by value condition** trigger based on a specified value and is unrelated to any specific agent, a **by entity condition** is bound to an triggering agent, defined by a mandatory section ``TriggeringEntities``.
 Entities can be either ego or scenario agents, or all agents if the section is left blank.
 
-.. note:: 
+.. note::
 
   OpenSCENARIO specifies that a rule should be applied to the ``TriggeringEntities`` element.
   Currently, only the rule ``any`` is supported, so any of the listed entities may satisfy the condition independent of the others.
@@ -509,7 +509,7 @@ The condition is satisfied, if a TriggeringEntity touches this zone.
    :end-at: </Condition>
 
 .. _scenario_relativespeed:
-  
+
 RelativeSpeed
 +++++++++++++
 
@@ -638,14 +638,14 @@ Right now, the mandatory attributes  *z*, *pitch* and *roll* are ignored.
       </Private>
    </Action>
 
-   
+
 .. _scenario_acquireposition:
 
 Acquire Position
 ++++++++++++++++
 
 If triggered, the defined position is relayed as signal to listening components.
-Currently only "WorldPosition" and "RelativeObjectPosition" are supported. 
+Currently only "WorldPosition" and "RelativeObjectPosition" are supported.
 
 .. warning: Currently, this is only the supported by the component *FMU_Wrapper* and for OSMP messages.
 
@@ -708,7 +708,7 @@ Both variants, "RelativeTargetSpeed" and "AbsoluteTargetSpeed", are supported, b
 - The SpeedActionDynamics attribute "dynamicsDimension" only supports "rate".
 - The RelativeTargetSpeed attribute "continuous" is ignored.
 
-.. note:: 
+.. note::
 
    Values defined in the SpeedAction might not reflect actual values used by the simulator due to physical boundaries of the simulator.
 
@@ -747,72 +747,69 @@ Both variants, "RelativeTargetSpeed" and "AbsoluteTargetSpeed", are supported, b
      </PrivateAction>
    </Action>
 
-.. _scenario_componentstatechange:
-
-Component State Change
-++++++++++++++++++++++
-
-.. todo:: Write a paragraph in the developer zone about the concept "Component State Change"
-
-*UserDefinedAction*
-
-The ComponentStateChangeManipulator influences the maximum reachable state of an agent component that is handled by the ComponentController, i.e. it can either activate or deactivate a component.
-
-Example
-
-.. code-block:: xml
-
-   <Action name="ComponentStateChange">
-     <UserDefinedAction>
-       <CustomCommandAction>SetComponentState Dynamics_TrajectoryFollower Acting</CustomCommandAction>
-     </UserDefinedAction>
-   </Action>
-
-.. _scenario_customparameters:
-
-Custom Parameters
-+++++++++++++++++
-
-.. todo:: Write a paragraph in the developer zone about the concept "wrapping FMUs" and the "OSMP FMU"
-
-*UserDefinedAction*
-
-The `CustomParametersManipulator` adds an event to the `EventNetwork`, which is relayed as list of strings (`CustomParametersSignal`).
-
-.. warning::
-   
-   Arguments are separated by a *single whitespace*, so parameter values containing spaces are split.
-   Double-spaces could even cause runtime errors.
-
-.. admonition:: FMU_Wrapper component for OSMP messages only
-
-   The parameters are transformed into individual custom actions of the TrafficCommand.
-
-**Example**
-
-.. code-block:: xml
-
-   <Action name="CustomParameters">
-       <UserDefinedAction>
-           <CustomCommandAction>SetCustomParameters ARG1 ARG2 ARG3</CustomCommandAction>
-       </UserDefinedAction>
-   </Action>
-
 .. _scenario_stoptrigger:
 
 StopTrigger
-~~~~~~~~~~~~~
+~~~~~~~~~~~
 
 Here, end conditions for the simulation are defined.
 
 Right now, only SimulationTime is supported, given in seconds, with the fixed ``rule="greaterThan"``.
 
 **Example**
+.. literalinclude:: /../../deps/os/sim/tests/endToEndTests/Resources/DefaultConfigurations/Scenario.xosc
+  :language: xml
+  :dedent: 2
+  :start-at: <StopTrigger>
+  :end-at: </StopTrigger>
 
+.. _scenario_defaultCustomCommandAction:
 
-.. literalinclude:: @OP_REL_SIM@/contrib/examples/DefaultConfigurations/Scenario.xosc
-   :language: xml
-   :dedent: 2
-   :start-at: <StopTrigger>
-   :end-at: </StopTrigger>
-   
+UsedDefinedAction: DefaultCustomCommandAction
++++++++++++++++++++++++++++++++++++++++++++++
+
+.. todo:: Write a paragraph in the developer zone about the concept "wrapping FMUs" and the "OSMP FMU"
+
+This is **the** default custom command, and is always selected, if **the first WORD** (Keyword) in the command string is **not** registered as a special custom command.
+
+The ``DefaultCustomCommandAction`` adds an event to the ``EventNetwork``, which is relayed as a string (``StringSignal``) by the component``OSCActions``.
+
+.. admonition:: FMU_Wrapper component for OSMP messages only
+
+   The linked string signal is set as custom action of the TrafficCommand.
+
+**Example**
+
+.. code-block:: xml
+
+  <Action name="CustomParameters">
+      <UserDefinedAction>
+          <CustomCommandAction>Arbitrary String, e.g. { "hello": "world"}</CustomCommandAction>
+      </UserDefinedAction>
+  </Action>
+
+.. note::
+
+   Here, "Arbitrary" is first checked, if it matches any other available Keyword for used defined actions, such as :ref:`_scenario_componentstatechange`.
+
+.. _scenario_componentstatechange:
+
+UserDefinedAction: Component State Change
++++++++++++++++++++++++++++++++++++++++++
+
+Command Keyword: SetComponentState
+
+.. todo:: Write a paragraph in the developer zone about the concept "Component State Change"
+
+The ComponentStateChangeManipulator influences the maximum reachable state of an agent component that is handled by the ComponentController, i.e. it can either activate or deactivate a component.
+
+**Example**
+
+.. code-block:: xml
+
+   <Action name="ComponentStateChange">
+       <UserDefinedAction>
+           <CustomCommandAction>SetComponentState Dynamics_TrajectoryFollower Acting</CustomCommandAction>
+       </UserDefinedAction>
+   </Action>
+

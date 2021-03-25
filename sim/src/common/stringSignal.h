@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 in-tech GmbH
+* Copyright (c) 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -9,7 +9,7 @@
 *******************************************************************************/
 
 //-----------------------------------------------------------------------------
-//! @file  CustomParametersSignal.h
+//! @file  StringSignal.h
 //! @brief Transport a vector of strings
 //-----------------------------------------------------------------------------
 
@@ -18,42 +18,36 @@
 #include "include/modelInterface.h"
 
 //! @brief Transport a vector of strings
-class CustomParametersSignal : public ComponentStateSignalInterface
+class StringSignal : public ComponentStateSignalInterface
 {
 public:
-    static constexpr char COMPONENTNAME[] = "'CustomParametersSignal";
+    static constexpr char COMPONENTNAME[]{"StringSignal"};
 
-    CustomParametersSignal() :
-        parameters{}
+    StringSignal() :
+        payload{}
     {
         componentState = ComponentState::Disabled;
     }
 
-    CustomParametersSignal(CustomParametersSignal &other) :
-        CustomParametersSignal(other.componentState, other.parameters)
+    StringSignal(StringSignal &other) :
+        StringSignal(other.componentState, other.payload)
     {
     }
 
-    CustomParametersSignal(ComponentState componentState, std::vector<std::string> parameters) :
-        parameters(parameters)
+    StringSignal(ComponentState componentState, const std::string payload) :
+        payload{std::move(payload)}
     {
         this->componentState = componentState;
     }
 
-    virtual ~CustomParametersSignal() = default;
+    virtual ~StringSignal() = default;
 
     //! @brief Conversion method for printing
     //! @return Payload of the signal as string
     virtual operator std::string() const
     {
-        std::ostringstream sstream;
-        sstream << COMPONENTNAME << " ";
-        for (const auto parameter : parameters)
-        {
-            sstream << parameter << " ";
-        }
-        return sstream.str();
+        return payload;
     }
 
-    const std::vector<std::string> parameters;
+    const std::string payload;
 };

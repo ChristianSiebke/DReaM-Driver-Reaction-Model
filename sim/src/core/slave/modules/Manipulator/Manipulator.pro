@@ -29,7 +29,7 @@ INCLUDEPATH += \
 SOURCES += \
     CollisionManipulator.cpp \
     ComponentStateChangeManipulator.cpp \
-    CustomParametersManipulator.cpp \
+    DefaultCustomCommandAction.cpp \
     LaneChangeManipulator.cpp \
     ManipulatorCommonBase.cpp \
     ManipulatorExport.cpp \
@@ -56,7 +56,7 @@ HEADERS += \
     CollisionManipulator.h \
     ComponentStateChangeManipulator.h \
     CustomCommandFactory.h \
-    CustomParametersManipulator.h \
+    DefaultCustomCommandAction.h \
     LaneChangeManipulator.h \
     ManipulatorCommonBase.h \
     ManipulatorExport.h \
