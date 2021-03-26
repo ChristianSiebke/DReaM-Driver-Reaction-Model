@@ -825,6 +825,8 @@ void WorldData::Reset()
         delete movingObject.second;
     }
     movingObjects.clear();
+
+    osiGroundTruth->mutable_moving_object()->Clear();
 }
 
 void WorldData::Clear()
