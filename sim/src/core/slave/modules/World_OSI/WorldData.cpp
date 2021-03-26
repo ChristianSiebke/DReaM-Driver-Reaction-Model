@@ -788,7 +788,7 @@ const Interfaces::StationaryObject& WorldData::GetStationaryObject(Id id) const
     return *(stationaryObjects.at(id));
 }
 
-const std::unordered_map<Id, MovingObject*>& WorldData::GetMovingObjects() const
+const std::map<Id, MovingObject*>& WorldData::GetMovingObjects() const
 {
     return movingObjects;
 }

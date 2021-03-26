@@ -461,7 +461,7 @@ public:
                                     const double sOffset,
                                     double heading) override;
 
-    const std::unordered_map<Id, MovingObject*>& GetMovingObjects() const;
+    const std::map<Id, MovingObject*>& GetMovingObjects() const;
     const std::unordered_map<Id, StationaryObject*>& GetStationaryObjects() const;
 
     const Interfaces::StationaryObject& GetStationaryObject(Id id) const override;
@@ -610,7 +610,7 @@ private:
     std::unordered_map<Id, Lane*>               lanes;
     std::unordered_map<Id, LaneBoundary*>       laneBoundaries;
     std::unordered_map<Id, StationaryObject*>   stationaryObjects;
-    std::unordered_map<Id, MovingObject*>       movingObjects;
+    std::map<Id, MovingObject*>                 movingObjects;
     std::unordered_map<Id, Interfaces::TrafficSign*>  trafficSigns;
     std::unordered_map<Id, Interfaces::RoadMarking*>  roadMarkings;
 
