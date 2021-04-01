@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2020 ITK Engineering GmbH
+* Copyright (c) 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -83,7 +83,7 @@ void VehicleSimpleTT::SetVelocity(Common::Vector2d velocityCars, const double w)
 }
 
 void VehicleSimpleTT::DriveTrain(double throttlePedal, double brakePedal,
-                                 std::vector<double> brakeSuperpose)
+                                 std::array<double, NUMBER_OF_WHEELS> brakeSuperpose)
 {
 
     double torqueEngineMax;

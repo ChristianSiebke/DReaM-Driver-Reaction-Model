@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -57,8 +57,10 @@ Q_SIGNALS:
     void Car2FileChanged(const QString &newResultFolder) const;
     void RandomSeedChanged(const int seed) const;
     void VariationCountChanged(const int varCount) const;
+    void ShiftRadiusEnabled(const bool enable) const;
     void ShiftRadius1Changed(const double radius) const;
     void ShiftRadius2Changed(const double radius) const;
+    void VelocityScaleEnabled(const bool enable) const;
     void VelocityScale1Changed(const double maxScale) const;
     void VelocityScale2Changed(const double maxScale) const;
     void StartSimulation() const;

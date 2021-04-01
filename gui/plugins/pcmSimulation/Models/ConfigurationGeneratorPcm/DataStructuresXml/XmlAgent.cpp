@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -10,28 +10,33 @@
 
 #include "XmlAgent.h"
 
-XmlAgent::XmlAgent(int id, int agentTypeRef, PCM_ParticipantData participant):
+XmlAgent::XmlAgent(int id, int agentTypeRef, PCM_ParticipantData *participant) :
     XmlBaseClass(id),
     agentTypeRef(agentTypeRef),
-    type(participant.GetType()),
-    width(participant.GetWidth()),
-    length(participant.GetLength()),
-    distanceCOGToFrontAxle(participant.GetDistcgfa()),
-    weight(participant.GetWeight()),
-    heightCOG(participant.GetHeightcg()),
-    wheelbase(participant.GetWheelbase()),
-    momentInertiaRoll(participant.GetIxx()),
-    momentInertiaPitch(participant.GetIyy()),
-    momentInertiaYaw(participant.GetIzz()),
-    frictionCoeff(participant.GetMue()),
-    trackWidth(participant.GetTrackwidth()),
-    distCOGtoLeadingEdge(participant.GetCgfront())
+    type(participant->GetType()),
+    width(participant->GetWidth()),
+    length(participant->GetLength()),
+    distanceCOGToFrontAxle(participant->GetDistcgfa()),
+    weight(participant->GetWeight()),
+    heightCOG(participant->GetHeightcg()),
+    wheelbase(participant->GetWheelbase()),
+    momentInertiaRoll(participant->GetIxx()),
+    momentInertiaPitch(participant->GetIyy()),
+    momentInertiaYaw(participant->GetIzz()),
+    frictionCoeff(participant->GetMue()),
+    trackWidth(participant->GetTrackwidth()),
+    distCOGtoLeadingEdge(participant->GetCgfront())
 {}
 
 bool XmlAgent::WriteToXml(QXmlStreamWriter *xmlWriter)
 {
+    if (xmlWriter == nullptr)
+    {
+        return false;
+    }
+
     xmlWriter->writeStartElement("Agent");
-    xmlWriter->writeAttribute( "id", QString::number(_id) );
+    xmlWriter->writeAttribute("id", QString::number(id));
 
     xmlWriter->writeTextElement("AgentTypeRef", QString::number(agentTypeRef));
     xmlWriter->writeTextElement("Type", type);

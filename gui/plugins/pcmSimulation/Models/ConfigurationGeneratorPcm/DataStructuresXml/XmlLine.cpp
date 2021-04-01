@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -17,6 +17,11 @@ XmlLine::XmlLine(const PCM_Line *line)
 
 bool XmlLine::WriteToXml(QXmlStreamWriter *xmlWriter)
 {
+    if (xmlWriter == nullptr)
+    {
+        return false;
+    }
+
     xmlWriter->writeStartElement("line");
     xmlWriter->writeAttribute("id", QString::number(line->GetId()));
     const std::map<int, const PCM_Point *> *pointMap = line->GetPointMap();
@@ -24,7 +29,10 @@ bool XmlLine::WriteToXml(QXmlStreamWriter *xmlWriter)
     {
         const PCM_Point *point = pointPair.second;
         XmlPoint xmlPoint(point);
-        xmlPoint.WriteToXml(xmlWriter);
+        if (!xmlPoint.WriteToXml(xmlWriter))
+        {
+            return false;
+        }
     }
 
     xmlWriter->writeEndElement();

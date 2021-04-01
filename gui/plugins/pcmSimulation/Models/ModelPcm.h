@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -43,8 +43,11 @@ public Q_SLOTS:
     void SetInitRandomSeed(const int seed);
     void SetVariationCount(const int varCount);
 
+    void EnableShiftRadius(const bool enable);
     void SetShiftRadius1(const double radius);
     void SetShiftRadius2(const double radius);
+
+    void EnableVelocityScale(const bool enable);
     void SetVelocityScale1(const double maxScale);
     void SetVelocityScale2(const double maxScale);
 
@@ -63,6 +66,20 @@ Q_SIGNALS:
 
 private:
     void StartSimulation();
+    void CreateConfigs(ConfigGenerator &configGenerator,
+                       QModelIndexList &pcmCaseIndexList,
+                       QStringList &otherSytemList,
+                       QStringList &car1SystemList,
+                       QStringList &car2SystemList);
+    bool PrepareFolderstructure(QString folder);
+    void RelocateCog(PCM_SimulationSet *simulationSet);
+    PCM_SimulationSet *ReadSimulationSetFromDb(QString pcmCase);
+    PCM_SimulationSet *ReadSimulationSetFromPrevCase(QString pcmCase);
+    PCM_SimulationSet *ReadSimulationSet(bool inputFromDb, QString pcmCase);
+
+    void SaveState(PCM_SimulationSet *simulationSet);
+    void ApplyVariation(PCM_SimulationSet *simulationSet, double randomSeed);
+    void ResetState(PCM_SimulationSet *simulationSet);
 
     QStringListModel *listModelPcm = nullptr;
     QItemSelectionModel *selectionModelPcm = nullptr;
@@ -85,19 +102,18 @@ private:
     int initRandomSeed = INIT_RANDOM_SEED; // if the seed=-1, then the random seed is actually the case number
     int variationCount = VARIATION_COUNT_DEFAULT;
 
+    bool shiftRadiusEnabled = true;
     double shiftRadius1 = SHIFT_RADIUS_CAR1;
     double shiftRadius2 = SHIFT_RADIUS_CAR2;
+
+    bool velocityScaleEnabled = true;
     double velocityMaxScale1 = VELOCITY_SCALE_CAR1;
     double velocityMaxScale2 = VELOCITY_SCALE_CAR2;
 
-    QSqlDatabase db;
-    QString connection = "";
-
-    ConfigGenerator *configGenerator;
-    DatabaseReader dbReader;
-
     bool simulationStop = false;
     bool inputFromPCMDB = true;
+
+    int progress = 0;
 };
 
 #endif // MODELPCM_H

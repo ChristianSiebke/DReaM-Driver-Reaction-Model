@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -19,12 +19,12 @@ class XmlGlobalData: public XmlBaseClass
 {
 public:
     XmlGlobalData() = default;
-    XmlGlobalData(PCM_GlobalData *globalData);
+    XmlGlobalData(const PCM_GlobalData *globalData);
 
     bool WriteToXml( QXmlStreamWriter *xmlWriter );
 
 private:
-    PCM_GlobalData *globalData = nullptr;              //!< PCM global data
+    const PCM_GlobalData *globalData = nullptr; //!< PCM global data
 };
 
 #endif // XMLGLOBALDATA_H

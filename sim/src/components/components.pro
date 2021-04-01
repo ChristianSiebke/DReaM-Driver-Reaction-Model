@@ -15,7 +15,7 @@ SUBDIRS = \
     Action_SecondaryDriverTasks \
     AgentUpdater \
     Algorithm_AEB \
-    Algorithm_FmuWrapper \
+    #Algorithm_FmuWrapper \
     Algorithm_Lateral \
     Algorithm_Longitudinal \
     AlgorithmAFDM \
@@ -29,7 +29,7 @@ SUBDIRS = \
     OpenScenarioActions \
     Parameters_Vehicle \
     Sensor_Driver \
-    Sensor_OSI \
+    #Sensor_OSI \
     Sensor_RecordState \
     SensorAggregation_OSI \
     SensorFusionErrorless_OSI \

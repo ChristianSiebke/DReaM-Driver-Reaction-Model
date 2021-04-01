@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -10,67 +10,106 @@
 
 #include "XmlScenery.h"
 
+XmlScenery::~XmlScenery()
+{
+    for (XmlMarks *marks : marksVec)
+    {
+        if (marks != nullptr)
+        {
+            delete marks;
+        }
+    }
+    marksVec.clear();
+
+    for (XmlTrajectory *trajectory : trajectories)
+    {
+        if (trajectory != nullptr)
+        {
+            delete trajectory;
+        }
+    }
+    trajectories.clear();
+
+    if (object != nullptr)
+    {
+        delete object;
+    }
+
+    if (viewObject != nullptr)
+    {
+        delete viewObject;
+    }
+
+    if (globalData != nullptr)
+    {
+        delete globalData;
+    }
+}
+
 bool XmlScenery::WriteToXml(QXmlStreamWriter *xmlWriter)
 {
+    if (xmlWriter == nullptr)
+    {
+        return false;
+    }
+
     xmlWriter->writeStartElement("PCM");
 
-    globalData.WriteToXml(xmlWriter);
+    if (!globalData->WriteToXml(xmlWriter))
+    {
+        return false;
+    }
 
     xmlWriter->writeStartElement("Marks");
-    for (XmlMarks marks : marksVec)
+    for (XmlMarks *marks : marksVec)
     {
-        marks.WriteToXml(xmlWriter);
+        if (!marks->WriteToXml(xmlWriter))
+        {
+            return false;
+        }
     }
-    xmlWriter->writeEndElement();
+    xmlWriter->writeEndElement(); // Marks
 
     xmlWriter->writeStartElement("Objects");
-    object.WriteToXml(xmlWriter);
-    xmlWriter->writeEndElement();
+    if (!object->WriteToXml(xmlWriter))
+    {
+        return false;
+    }
+    xmlWriter->writeEndElement(); // Objects
 
     xmlWriter->writeStartElement("ViewObjects");
-    viewObject.WriteToXml(xmlWriter);
-    xmlWriter->writeEndElement();
+    if (!viewObject->WriteToXml(xmlWriter))
+    {
+        return false;
+    }
+    xmlWriter->writeEndElement(); // ViewObjects
 
-    intendedCourse.WriteToXml(xmlWriter);
-
-//    xmlWriter->writeStartElement("Trajectories");
-//    for (XmlTrajectory trajectory : trajectories)
-//    {
-//        trajectory.WriteToXml(xmlWriter);
-//    }
-//    xmlWriter->writeEndElement();
-
-    xmlWriter->writeEndElement();
+    xmlWriter->writeEndElement(); // PCM
 
     return true;
 }
 
-void XmlScenery::AddMarks(PCM_Marks *marks)
+void XmlScenery::AddMarks(const PCM_Marks *marks)
 {
-    marksVec.push_back(XmlMarks(marks));
+    marksVec.push_back(new XmlMarks(marks));
 }
 
-void XmlScenery::AddObject(PCM_Object &object)
+void XmlScenery::SetObject(const PCM_Object *object)
 {
-    this->object = XmlObject(&object);
+    this->object = new XmlObject(object);
 }
 
-void XmlScenery::AddViewObject(PCM_ViewObject &viewObject)
+void XmlScenery::SetViewObject(const PCM_ViewObject *viewObject)
 {
-    this->viewObject = XmlViewObject(&viewObject);
+    this->viewObject = new XmlViewObject(viewObject);
 }
 
-void XmlScenery::AddTrajectory(int agentId, PCM_Trajectory *trajectory)
+void XmlScenery::AddTrajectory(int agentId, const PCM_Trajectory *trajectory)
 {
-    trajectories.push_back(XmlTrajectory(agentId, trajectory));
+    trajectories.push_back(new XmlTrajectory(agentId, trajectory));
 }
 
-void XmlScenery::AddIntendedCourse(PCM_IntendedCourses &intendedCourse)
+void XmlScenery::SetGlobalData(const PCM_GlobalData *globalData)
 {
-    this->intendedCourse = XmlIntendedCourses(intendedCourse);
-}
-
-void XmlScenery::AddGlobalData(PCM_GlobalData &globalData)
-{
-    this->globalData = XmlGlobalData(&globalData);
+    this->globalData = new XmlGlobalData(globalData);
 }

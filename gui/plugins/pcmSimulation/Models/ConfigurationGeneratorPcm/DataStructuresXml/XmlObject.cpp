@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -10,13 +10,18 @@
 
 #include "XmlObject.h"
 
-XmlObject::XmlObject(PCM_Object *object)
+XmlObject::XmlObject(const PCM_Object *object)
 {
     this->object = object;
 }
 
 bool XmlObject::WriteToXml(QXmlStreamWriter *xmlWriter)
 {
+    if (xmlWriter == nullptr)
+    {
+        return false;
+    }
+
     if (object != nullptr)
     {
         xmlWriter->writeStartElement(QString::fromStdString(PCM_Helper::ConvertObjectTypeToDBString(
@@ -27,7 +32,10 @@ bool XmlObject::WriteToXml(QXmlStreamWriter *xmlWriter)
         {
             PCM_Line *line = linePair.second;
             XmlLine xmlLine(line);
-            xmlLine.WriteToXml(xmlWriter);
+            if (!xmlLine.WriteToXml(xmlWriter))
+            {
+                return false;
+            }
         }
         xmlWriter->writeTextElement("ObjectType", QString::number(object->GetObjectType()));
 

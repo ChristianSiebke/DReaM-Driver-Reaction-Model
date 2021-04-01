@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2020 ITK Engineering GmbH
+* Copyright (c) 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -55,18 +55,17 @@ public:
 
     //! Constructor
     //!
-    //! @param[in]     componentId    Corresponds to "id" of "Component"
+    //! @param[in]     componentName  Name of the component
     //! @param[in]     isInit         Corresponds to "init" of "Component"
     //! @param[in]     priority       Corresponds to "priority" of "Component"
     //! @param[in]     offsetTime     Corresponds to "offsetTime" of "Component"
     //! @param[in]     responseTime   Corresponds to "responseTime" of "Component"
     //! @param[in]     cycleTime      Corresponds to "cycleTime" of "Component"
     //! @param[in]     stochastics    Pointer to the stochastics class loaded by the framework
-    //! @param[in]     world          Pointer to the world
     //! @param[in]     parameters     Pointer to the parameters of the module
-    //! @param[in]     evaluations    Pointer to the evaluations of the module
+    //! @param[in]     publisher      Pointer to the publisher instance
     //! @param[in]     callbacks      Pointer to the callbacks
-    //! @param[in]     agent          Pointer to the agent in which the module is situated
+    //! @param[in]     agent          Pointer to agent instance
     Sensor_Collision_Implementation(std::string componentName,
                                     bool isInit,
                                     int priority,

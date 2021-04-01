@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -38,9 +38,14 @@ void XmlComponent::AddObservation(int id, int observationRef)
 
 bool XmlComponent::WriteToXml(QXmlStreamWriter *xmlWriter)
 {
+    if (xmlWriter == nullptr)
+    {
+        return false;
+    }
+
     xmlWriter->writeStartElement("Component");
 
-    xmlWriter->writeAttribute( "id",       QString::number(_id) );
+    xmlWriter->writeAttribute("id", QString::number(id));
     xmlWriter->writeAttribute( "init",     (type == XML_COMPONENT_TYPE::init) ? "true" : "false" );
     xmlWriter->writeAttribute( "priority", QString::number(priority) );
     if (type != XML_COMPONENT_TYPE::init)
@@ -52,7 +57,7 @@ bool XmlComponent::WriteToXml(QXmlStreamWriter *xmlWriter)
     xmlWriter->writeAttribute( "library", library );
 
     xmlWriter->writeStartElement("ComponentInputs");
-    for (XmlComponentSignal input : componentInputs)
+    for (XmlComponentSignal &input : componentInputs)
     {
         if ( !input.WriteToXml(xmlWriter) )
         {
@@ -62,7 +67,7 @@ bool XmlComponent::WriteToXml(QXmlStreamWriter *xmlWriter)
     xmlWriter->writeEndElement(); // ComponentInputs
 
     xmlWriter->writeStartElement("ComponentOutputs");
-    for (XmlComponentSignal output : componentOutputs)
+    for (XmlComponentSignal &output : componentOutputs)
     {
         if ( !output.WriteToXml(xmlWriter) )
         {
@@ -72,7 +77,7 @@ bool XmlComponent::WriteToXml(QXmlStreamWriter *xmlWriter)
     xmlWriter->writeEndElement(); // ComponentOutputs
 
     xmlWriter->writeStartElement("ComponentParameters");
-    for (XmlParameter parameter : componentParameters)
+    for (XmlParameter &parameter : componentParameters)
     {
         if ( !parameter.WriteToXml(xmlWriter) )
         {
@@ -82,7 +87,7 @@ bool XmlComponent::WriteToXml(QXmlStreamWriter *xmlWriter)
     xmlWriter->writeEndElement(); //ComponentParameters
 
     xmlWriter->writeStartElement("ComponentObservations");
-    for (XmlComponentObservation observation : componentObservations)
+    for (XmlComponentObservation &observation : componentObservations)
     {
         if ( !observation.WriteToXml(xmlWriter) )
         {

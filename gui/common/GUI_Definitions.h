@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2017 ITK Engineering GmbH.
+* Copyright (c) 2021 ITK Engineering GmbH.
 * Copyright (c) 2018 in-tech GmbH.
 *
 * This program and the accompanying materials are made available under the
@@ -17,33 +17,33 @@
 #ifndef GUIDEFINITIONS
 #define GUIDEFINITIONS
 
-#define DIRNAME_CASE_RESULTS        "results"
+static constexpr char DIRNAME_CASE_RESULTS[] = "results";
 
-#define FILENAME_RUN_CONIG          "slaveConfig.xml"
-#define FILENAME_SYSTEM_CONIG       "SystemConfig.xml"
-#define FILENAME_SCENERY_CONIG      "sceneryConfiguration.xml"
-#define FILENAME_PARKING_CONIG      "SceneryConfiguration.xodr"
-#define FILENAME_SCENARIO_CONIG     "Scenario.xosc"
-#define FILENAME_PROFILES_CONIG     "ProfilesCatalog.xml"
-#define FILENAME_MODELS_CONIG       "VehicleModelsCatalog.xosc"
-#define FILENAME_FRAMEWORK_CONIG    "masterConfig.xml"
+static constexpr char FILENAME_SLAVE_CONFIG[] = "slaveConfig.xml";
+static constexpr char FILENAME_SYSTEM_CONFIG[] = "SystemConfig.xml";
+static constexpr char FILENAME_SCENERY_CONFIG[] = "sceneryConfiguration.xml";
+static constexpr char FILENAME_PARKING_CONFIG[] = "SceneryConfiguration.xodr";
+static constexpr char FILENAME_SCENARIO_CONFIG[] = "Scenario.xosc";
+static constexpr char FILENAME_PROFILES_CONFIG[] = "ProfilesCatalog.xml";
+static constexpr char FILENAME_MODELS_CONFIG[] = "VehicleModelsCatalog.xosc";
+static constexpr char FILENAME_FRAMEWORK_CONFIG[] = "masterConfig.xml";
 
-#define FILENAME_OPENPASSSLAVE_EXE  "OpenPassSlave.exe"
-#define FILENAME_OPENPASSMASTER_EXE "OpenPassMaster.exe"
+static constexpr char FILENAME_OPENPASSSLAVE_EXE[] = "OpenPassSlave.exe";
+static constexpr char FILENAME_OPENPASSMASTER_EXE[] = "OpenPassMaster.exe";
 
-#define FILENAME_OPENPASSSLAVE_LOG  "OpenPassSlave.log"
-#define FILENAME_OPENPASSSLAVE_CONFIGS  "configs"
-#define FILENAME_OPENPASSMASTER_LOG  "OpenPassMaster.log"
+static constexpr char FILENAME_OPENPASSSLAVE_LOG[] = "OpenPassSlave.log";
+static constexpr char FILENAME_OPENPASSSLAVE_CONFIGS[] = "configs";
+static constexpr char ILENAME_OPENPASSMASTER_LOG[] = "OpenPassMaster.log";
 
-#define REGEX_CASE_NUMBER           "\\d*"
-#define REGEX_CASE_SYSTEM           "\\d\\-\\d\\-\\d"
+static constexpr char REGEX_CASE_NUMBER[] = "\\d*";
+static constexpr char REGEX_CASE_SYSTEM[] = "\\d\\-\\d\\-\\d";
 
-#define DIR_NO_VARIATION            "Default"
-#define VARIATION_COUNT_DEFAULT     2
-#define INIT_RANDOM_SEED            -1
-#define SHIFT_RADIUS_CAR1           1.0
-#define SHIFT_RADIUS_CAR2           1.0
-#define VELOCITY_SCALE_CAR1         5.0
-#define VELOCITY_SCALE_CAR2         5.0
+static constexpr char DIR_NO_VARIATION[] = "Default";
+static constexpr int VARIATION_COUNT_DEFAULT = 2;
+static constexpr int INIT_RANDOM_SEED = -1;
+static constexpr int SHIFT_RADIUS_CAR1 = 1.0;
+static constexpr int SHIFT_RADIUS_CAR2 = 1.0;
+static constexpr int VELOCITY_SCALE_CAR1 = 5.0;
+static constexpr int VELOCITY_SCALE_CAR2 = 5.0;
 
 #endif // GUIDEFINITIONS

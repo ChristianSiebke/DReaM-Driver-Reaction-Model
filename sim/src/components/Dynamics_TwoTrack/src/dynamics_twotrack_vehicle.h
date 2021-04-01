@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2020 ITK Engineering GmbH
+* Copyright (c) 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -11,8 +11,11 @@
 #ifndef VEHICLESIMPLETT_H
 #define VEHICLESIMPLETT_H
 
-#include <QtGlobal>
+#include <array>
 #include <vector>
+
+#include <QtGlobal>
+
 #include "common/vector2d.h"
 #include "dynamics_twotrack_tire.h"
 #define NUMBER_OF_WHEELS 4
@@ -60,7 +63,7 @@ public:
      *    @{
     */
     //! Calculate local tire torques
-    void DriveTrain(double throttlePedal, double brakePedal, std::vector<double> brakeSuperpose);
+    void DriveTrain(double throttlePedal, double brakePedal, std::array<double, NUMBER_OF_WHEELS> brakeSuperpose);
     //! Local forces and moments transferred onto road
     void ForceLocal(double timeStep, double, std::vector<double> forceVertical);
     //! Global force and moment
@@ -89,7 +92,7 @@ public:
      *    \name Parameters
      *    @{
     */
-    double forceTireVerticalStatic[NUMBER_OF_WHEELS];
+    std::array<double, NUMBER_OF_WHEELS> forceTireVerticalStatic;
     /**
      *    @}
     */
@@ -100,7 +103,7 @@ private:
      *    @{
     */
     //! Inertial moment of tires [kg*m^2]
-    double inertiaTireX[NUMBER_OF_WHEELS];
+    std::array<double, NUMBER_OF_WHEELS> inertiaTireX;
 
     //! Maximal engine power [W]
     double powerEngineLimit;
@@ -110,7 +113,7 @@ private:
     //! Mass of the car [kg]
     double massTotal;
     //! Tire positions in car CS [m]
-    Common::Vector2d positionTire[NUMBER_OF_WHEELS];
+    std::array<Common::Vector2d, NUMBER_OF_WHEELS> positionTire;
     /**
      *  @}
     */
@@ -138,15 +141,15 @@ private:
     */
 
     // Dynamics to remember
-    double rotationVelocityTireX[NUMBER_OF_WHEELS];
-    double rotationVelocityGradTireX[NUMBER_OF_WHEELS];
+    std::array<double, NUMBER_OF_WHEELS> rotationVelocityTireX;
+    std::array<double, NUMBER_OF_WHEELS> rotationVelocityGradTireX;
     double yawVelocity;
     Common::Vector2d velocityCar;
-    Common::Vector2d forceTire[NUMBER_OF_WHEELS];
-    Common::Vector2d slipTire[NUMBER_OF_WHEELS];
-    double torqueTireXthrottle[NUMBER_OF_WHEELS];
-    double torqueTireXbrake[NUMBER_OF_WHEELS];
-    double momentTireZ[NUMBER_OF_WHEELS];
+    std::array<Common::Vector2d, NUMBER_OF_WHEELS> forceTire;
+    std::array<Common::Vector2d, NUMBER_OF_WHEELS> slipTire;
+    std::array<double, NUMBER_OF_WHEELS> torqueTireXthrottle;
+    std::array<double, NUMBER_OF_WHEELS> torqueTireXbrake;
+    std::array<double, NUMBER_OF_WHEELS> momentTireZ;
 
     /** \name Container
      *    @{

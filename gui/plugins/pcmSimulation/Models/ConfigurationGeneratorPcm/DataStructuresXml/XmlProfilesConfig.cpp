@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -34,14 +34,9 @@ void XmlProfilesConfig::AddSpawnPoint(XmlSpawnPoint *sp)
     spawnPoints.push_back(sp);
 }
 
-void XmlProfilesConfig::AddAgent(int id, int agentTypeRef, PCM_ParticipantData participant)
+void XmlProfilesConfig::AddModelId(int id)
 {
-    agents.push_back( XmlAgent(id, agentTypeRef, participant) );
-}
-
-void XmlProfilesConfig::AddModel(int id, int agentTypeRef, PCM_ParticipantData participant)
-{
-    models.push_back( XmlModel(id, agentTypeRef, participant) );
+    modelIds.push_back(id);
 }
 
 void XmlProfilesConfig::AddObservation(XmlObservation *observation)
@@ -51,33 +46,38 @@ void XmlProfilesConfig::AddObservation(XmlObservation *observation)
 
 bool XmlProfilesConfig::WriteToXml(QXmlStreamWriter *xmlWriter)
 {
-
-
+    if (xmlWriter == nullptr)
+    {
+        return false;
+    }
 
     xmlWriter->writeStartElement("AgentProfiles");
-    int ia=0;
-    for (XmlAgent agent : agents)
+
+    for (uint i = 0; i < modelIds.size(); ++i)
     {
+        QString name = "Agent_" + QString::number(modelIds.at(i));
+
         xmlWriter->writeStartElement("AgentProfile");
-        xmlWriter->writeAttribute("Name","Agent_" + QString::number(agent._id));
+        xmlWriter->writeAttribute("Name", name);
         xmlWriter->writeAttribute("Type","Static");
         xmlWriter->writeStartElement("System");
         xmlWriter->writeTextElement("File","SystemConfig.xml");
-        xmlWriter->writeTextElement("Id",QString::number(agent._id));
+        xmlWriter->writeTextElement("Id", QString::number(modelIds.at(i)));
         xmlWriter->writeEndElement(); // System
-        xmlWriter->writeTextElement("VehicleModel",models[ia].modelName);
+        xmlWriter->writeTextElement("VehicleModel", name);
         xmlWriter->writeEndElement(); // AgentProfile
-        ia++;
     }
     xmlWriter->writeEndElement(); // AgentProfiles
 
     xmlWriter->writeStartElement("VehicleProfiles");
-    for (XmlModel model : models)
+    for (int id : modelIds)
     {
+        QString name = "Agent_" + QString::number(id);
+
         xmlWriter->writeStartElement("VehicleProfile");
-        xmlWriter->writeAttribute("Name",model.modelName);
+        xmlWriter->writeAttribute("Name", name);
         xmlWriter->writeStartElement("Model");
-        xmlWriter->writeAttribute("Name",model.modelName);
+        xmlWriter->writeAttribute("Name", name);
         xmlWriter->writeEndElement(); // Model
         xmlWriter->writeStartElement("Components");
         xmlWriter->writeEndElement(); // Components

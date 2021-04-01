@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -18,7 +18,7 @@
 #include <QObject>
 
 #include "ResultDirItemModel.h"
-#include "TableModelCsv.h"
+#include "TrajectoryTableModel.h"
 #include "pcm_data.h"
 #include "pcm_definitions.h"
 #include "pcm_line.h"
@@ -54,7 +54,7 @@ private Q_SLOTS:
 
 private:
     QVector<QPointF> ConvertPcmLine(const PCM_Line *pcmLine, QVector<QPointF> &line);
-    QMap<QString, TableModelCsv *> tableMap;
+    QMap<QString, TrajectoryTableModel *> tableMap;
 
     ResultDirItemModel *treeModelPcm = nullptr;
     QItemSelectionModel *selectionModelPcm = nullptr;

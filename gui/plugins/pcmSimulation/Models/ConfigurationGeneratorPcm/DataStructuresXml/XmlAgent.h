@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -24,7 +24,7 @@ public:
     //! @param[in]     agentTypeRef     The reference to the agent equipment
     //! @param[in]     participant      The information on the agent read from the PCM
     //-----------------------------------------------------------------------------
-    XmlAgent( int id, int agentTypeRef, PCM_ParticipantData participant );
+    XmlAgent(int id, int agentTypeRef, PCM_ParticipantData *participant);
 
     //-----------------------------------------------------------------------------
     //! Function writing all information of the class onto a stream of an xml

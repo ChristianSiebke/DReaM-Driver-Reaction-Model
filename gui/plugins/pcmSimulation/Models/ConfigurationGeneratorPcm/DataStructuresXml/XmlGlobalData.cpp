@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -10,13 +10,18 @@
 
 #include "XmlGlobalData.h"
 
-XmlGlobalData::XmlGlobalData(PCM_GlobalData *globalData)
+XmlGlobalData::XmlGlobalData(const PCM_GlobalData *globalData)
 {
     this->globalData = globalData;
 }
 
 bool XmlGlobalData::WriteToXml(QXmlStreamWriter *xmlWriter)
 {
+    if (xmlWriter == nullptr)
+    {
+        return false;
+    }
+
     xmlWriter->writeStartElement(QString::fromStdString(PCM_Helper::GetGlobalDataDBString()));
 
     if (globalData != nullptr)

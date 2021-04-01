@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -11,7 +11,6 @@
 #pragma once
 
 #include "XmlAgent.h"
-#include "XmlModel.h"
 #include "XmlObservation.h"
 #include "XmlSpawnPoint.h"
 
@@ -26,8 +25,7 @@ public:
     bool WriteToXml( QXmlStreamWriter *xmlWriter );
 
     void AddSpawnPoint( XmlSpawnPoint *sp );
-    void AddAgent     ( int id, int agentTypeRef, PCM_ParticipantData participant );
-    void AddModel (int id, int agentTypeRef, PCM_ParticipantData participant);
+    void AddModelId(int id);
     void AddObservation( XmlObservation *observation );
 
 private:
@@ -44,8 +42,7 @@ private:
     QString collisionDetection = "CollisionDetection_Impact"; //!< CollisionDetection.dll
 
     std::vector<XmlSpawnPoint *> spawnPoints;  //!< vector of all spawn points of the situation
-    std::vector<XmlAgent>       agents;        //!< vector of all agents of the situation
-    std::vector<XmlModel>       models;        //!< vector of all agents of the situation
+    std::vector<int> modelIds;                 //!< vector of all model ids
     std::vector<XmlObservation *> observations;  //!< vector of all observations of the situation
 };
 

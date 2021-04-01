@@ -1,6 +1,6 @@
 # /*********************************************************************
 # * Copyright (c) 2017, 2018, 2019 in-tech GmbH
-# * Copyright (c) 2016, 2017 ITK Engineering GmbH
+# * Copyright (c) 2021 ITK Engineering GmbH
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -20,10 +20,10 @@ include(../../../global.pri)
 
 QT += concurrent widgets xml
 
-SRC_CORESHARE = ../../../../common/xmlParser.cpp \
+SRC_CORESHARE = ../../common/xmlParser.cpp \
                 ../common/log.cpp
 
-INC_CORESHARE = ../../../../common/xmlParser.h \
+INC_CORESHARE = ../..//common/xmlParser.h \
                 ../common/log.h
 
 INCLUDEPATH += \

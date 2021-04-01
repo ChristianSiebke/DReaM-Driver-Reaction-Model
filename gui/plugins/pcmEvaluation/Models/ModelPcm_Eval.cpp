@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -80,7 +80,7 @@ void ModelPcm_Eval::OnSelectionChanged(const QItemSelection &selected,
                     }                 
                 }
             }
-            QString sceneryFile = caseSystemVarFolder + "/" + FILENAME_OPENPASSSLAVE_CONFIGS + "/" + FILENAME_SCENERY_CONIG;
+            QString sceneryFile = caseSystemVarFolder + "/" + FILENAME_OPENPASSSLAVE_CONFIGS + "/" + FILENAME_SCENERY_CONFIG;
             LoadSceneryData(sceneryFile);
         }
     }
@@ -105,14 +105,14 @@ bool ModelPcm_Eval::LoadFileData(const QString &fileName, unsigned indexAgent)
     QString fileNameAgent = fileInfo.fileName() + "_" + QString::number(indexAgent);
     if (stringList.last() == "csv")
     {
-        TableModelCsv *tableModel;
+        TrajectoryTableModel *tableModel;
         if (tableMap.contains(fileNameAgent))
         {
             tableModel = tableMap.value(fileNameAgent);
         }
         else
         {
-            tableModel = new TableModelCsv(this, fileName, indexAgent);
+            tableModel = new TrajectoryTableModel(this, fileName, indexAgent);
             tableMap.insert(fileName, tableModel);
         }
 
@@ -134,13 +134,13 @@ bool ModelPcm_Eval::LoadSceneryData(const QString &sceneryFile)
 {
     PCM_Data pcmData;
     SceneryImporterPCM sceneryImporter;
-    std::map<int, PCM_Trajectory> trajectories;
+    std::map<int, PCM_Trajectory *> trajectories;
     if (!sceneryImporter.Import(sceneryFile.toStdString(), pcmData, trajectories))
     {
         return false;
     }
 
-    std::vector<const PCM_Marks *> *marksVec = pcmData.GetMarksVec();
+    const std::vector<const PCM_Marks *> *marksVec = pcmData.GetMarksVec();
 
     for (const PCM_Marks *marks : *marksVec)
     {

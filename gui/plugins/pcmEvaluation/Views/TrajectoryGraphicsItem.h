@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -27,10 +27,10 @@ public:
 private:
     QPen pen;
 
-    double minX = 0;
-    double minY = 0;
-    double maxX = 0;
-    double maxY = 0;
+    double minX = std::numeric_limits<double>::max();
+    double minY = std::numeric_limits<double>::max();
+    double maxX = std::numeric_limits<double>::lowest();
+    double maxY = std::numeric_limits<double>::lowest();
 };
 
 #endif // TRAJECTORYGRAPHICSITEM_H

@@ -1,7 +1,7 @@
 /*******************************************************************************
 * Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2018 AMFD GmbH
-*               2016, 2017, 2018 ITK Engineering GmbH
+*               2016, 2017, 2018, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -214,9 +214,11 @@ public:
     virtual void SetVelocity(double value) = 0;
 
     //-----------------------------------------------------------------------------
-    //! Sets forward velocity of agent
+    //! Sets velocity of agent
     //!
-    //! @param[in]     velocityX    Forward velocity
+    //! @param[in]     vx    Forward velocity
+    //! @param[in]     vy    Sideward velocity
+    //! @param[in]     vz    Upward velocity
     //-----------------------------------------------------------------------------
     virtual void SetVelocityVector(double vx, double vy, double vz) = 0;
 

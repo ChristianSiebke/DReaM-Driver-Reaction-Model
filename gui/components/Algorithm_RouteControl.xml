@@ -7,63 +7,63 @@
     <response>0</response>
   </schedule>
   <parameters>
-    <parameter>	
+    <parameter>
       <id>0</id>
       <type>double</type>
       <title>Driver aggressiveness</title>
       <unit></unit>
       <value>1.0</value>
     </parameter>
-	<parameter>	
+    <parameter>
       <id>1</id>
       <type>double</type>
       <title>Max. engine power</title>
       <unit>W</unit>
       <value>100000</value>
     </parameter>
-	<parameter>	
+        <parameter>
       <id>2</id>
       <type>double</type>
       <title>Min. brake torque</title>
       <unit>Nm</unit>
       <value>-10000</value>
     </parameter>
-	<parameter>	
+    <parameter>
       <id>3</id>
       <type>double</type>
       <title>Kp of the pedals PID control</title>
       <unit></unit>
       <value>-0.5</value>
     </parameter>
-	<parameter>	
+    <parameter>
       <id>4</id>
       <type>double</type>
       <title>Ki of the pedals PID control</title>
       <unit></unit>
       <value>-0.4</value>
     </parameter>
-	<parameter>	
+    <parameter>
       <id>5</id>
       <type>double</type>
       <title>Kd of the pedals PID control</title>
       <unit></unit>
       <value>0.0</value>
     </parameter>
-	<parameter>	
+    <parameter>
       <id>6</id>
       <type>double</type>
       <title>Kp of the steering PID control</title>
       <unit></unit>
       <value>-18.0</value>
     </parameter>
-	<parameter>	
+    <parameter>
       <id>7</id>
       <type>double</type>
       <title>Ki of the steering PID control</title>
       <unit></unit>
       <value>-0.6</value>
     </parameter>
-	<parameter>	
+    <parameter>
       <id>8</id>
       <type>double</type>
       <title>Kd of the steering PID control</title>
@@ -72,7 +72,7 @@
     </parameter>
   </parameters>
   <inputs>
-  	<input>
+    <input>
       <id>0</id>
       <type>TrajectoryEvent</type>
       <title>Desired trajectory</title>

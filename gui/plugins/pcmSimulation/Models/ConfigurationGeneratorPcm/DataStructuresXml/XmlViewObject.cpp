@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -10,13 +10,18 @@
 
 #include "XmlViewObject.h"
 
-XmlViewObject::XmlViewObject(PCM_ViewObject *viewObject)
+XmlViewObject::XmlViewObject(const PCM_ViewObject *viewObject)
 {
     this->viewObject = viewObject;
 }
 
 bool XmlViewObject::WriteToXml(QXmlStreamWriter *xmlWriter)
 {
+    if (xmlWriter == nullptr)
+    {
+        return false;
+    }
+
     if (viewObject != nullptr)
     {
         xmlWriter->writeStartElement(QString::fromStdString(PCM_Helper::ConvertObjectTypeToDBString(
@@ -26,7 +31,10 @@ bool XmlViewObject::WriteToXml(QXmlStreamWriter *xmlWriter)
         {
             PCM_Line *line = linePair.second;
             XmlLine xmlLine(line);
-            xmlLine.WriteToXml(xmlWriter);
+            if (!xmlLine.WriteToXml(xmlWriter))
+            {
+                return false;
+            }
         }
         xmlWriter->writeEndElement();
     }

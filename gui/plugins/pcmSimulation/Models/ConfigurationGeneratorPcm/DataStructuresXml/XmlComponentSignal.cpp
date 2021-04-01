@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,11 @@ XmlComponentSignal::XmlComponentSignal(int id, bool isInput, QString name, int c
 
 bool XmlComponentSignal::WriteToXml(QXmlStreamWriter *xmlWriter)
 {
+    if (xmlWriter == nullptr)
+    {
+        return false;
+    }
+
     if (isInput)
     {
         xmlWriter->writeStartElement("ComponentInput");
@@ -24,7 +29,7 @@ bool XmlComponentSignal::WriteToXml(QXmlStreamWriter *xmlWriter)
     {
         xmlWriter->writeStartElement("ComponentOutput");
     }
-    xmlWriter->writeAttribute("id", QString::number(_id));
+    xmlWriter->writeAttribute("id", QString::number(id));
     xmlWriter->writeAttribute("name", name);
     xmlWriter->writeAttribute("channelRef", QString::number(channelRef));
 

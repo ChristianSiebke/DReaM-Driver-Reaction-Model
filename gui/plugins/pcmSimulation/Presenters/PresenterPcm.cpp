@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -48,11 +48,17 @@ PresenterPcm::PresenterPcm(ModelPcm *modelPcm, ViewPcm *viewPcm,
     connect(viewPcm, &ViewPcm::VariationCountChanged,
             modelPcm, &ModelPcm::SetVariationCount);
 
+    connect(viewPcm, &ViewPcm::ShiftRadiusEnabled,
+            modelPcm, &ModelPcm::EnableShiftRadius);
+
     connect(viewPcm, &ViewPcm::ShiftRadius1Changed,
             modelPcm, &ModelPcm::SetShiftRadius1);
 
     connect(viewPcm, &ViewPcm::ShiftRadius2Changed,
             modelPcm, &ModelPcm::SetShiftRadius2);
+
+    connect(viewPcm, &ViewPcm::VelocityScaleEnabled,
+            modelPcm, &ModelPcm::EnableVelocityScale);
 
     connect(viewPcm, &ViewPcm::VelocityScale1Changed,
             modelPcm, &ModelPcm::SetVelocityScale1);

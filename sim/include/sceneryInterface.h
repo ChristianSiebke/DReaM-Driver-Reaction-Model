@@ -1,6 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
-*               2016, 2017, 2018 ITK Engineering GmbH
+*               2016, 2017, 2018, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -29,10 +29,10 @@ class SceneryInterface
 {
 public:
     SceneryInterface() = default;
-    //SceneryInterface(const SceneryInterface&) = delete;
-    //SceneryInterface(SceneryInterface&&) = delete;
-    //SceneryInterface& operator=(const SceneryInterface&) = delete;
-    //SceneryInterface& operator=(SceneryInterface&&) = delete;
+    SceneryInterface(const SceneryInterface &) = delete;
+    SceneryInterface(SceneryInterface &&) = delete;
+    SceneryInterface &operator=(const SceneryInterface &) = delete;
+    SceneryInterface &operator=(SceneryInterface &&) = delete;
     virtual ~SceneryInterface() = default;
 
     //-----------------------------------------------------------------------------

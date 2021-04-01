@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -18,11 +18,11 @@ class XoscTrajectory : public XmlBaseClass
 {
 public:
     XoscTrajectory(int agentId,
-                   PCM_Trajectory *trajectory);
+                   const PCM_Trajectory *trajectory);
 
     bool WriteToXml(QXmlStreamWriter *xmlWriter);
 
-    PCM_Trajectory *trajectory; //!< PCM marks
+    const PCM_Trajectory *trajectory; //!< PCM marks
     int agentId;
 private:
 };

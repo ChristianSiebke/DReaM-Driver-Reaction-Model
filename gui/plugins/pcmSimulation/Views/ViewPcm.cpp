@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -582,6 +582,8 @@ void ViewPcm::on_groupBoxVarPos_toggled(bool checked)
 {
     Q_EMIT ShiftRadius1Changed((checked ? ui->doubleSpinBox_Radius_1->value() : -1));
     Q_EMIT ShiftRadius2Changed((checked ? ui->doubleSpinBox_Radius_2->value() : -1));
+
+    Q_EMIT ShiftRadiusEnabled(checked);
 }
 
 void ViewPcm::on_doubleSpinBox_VelScale_1_valueChanged(double maxScale)
@@ -598,6 +600,8 @@ void ViewPcm::on_groupBoxVarVelocity_toggled(bool checked)
 {
     Q_EMIT VelocityScale1Changed((checked ? (ui->doubleSpinBox_VelScale_1->value()) : INFINITY));
     Q_EMIT VelocityScale2Changed((checked ? (ui->doubleSpinBox_VelScale_2->value()) : INFINITY));
+
+    Q_EMIT VelocityScaleEnabled(checked);
 }
 
 

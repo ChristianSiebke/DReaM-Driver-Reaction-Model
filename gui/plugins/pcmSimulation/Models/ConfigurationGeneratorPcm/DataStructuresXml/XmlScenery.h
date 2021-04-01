@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -15,29 +15,46 @@
 #include "XmlTrajectory.h"
 #include "XmlObject.h"
 #include "XmlViewObject.h"
-#include "XmlIntendedCourses.h"
 #include "XmlGlobalData.h"
 
+/*!
+ * \brief The xml scenery class.
+ * This class is responsible to manage all data for the scenery config file.
+ */
 class XmlScenery: public XmlBaseClass
 {
 public:
+    //-----------------------------------------------------------------------------
+    //! Default Constructor
+    //-----------------------------------------------------------------------------
     XmlScenery() = default;
-    bool WriteToXml( QXmlStreamWriter *xmlWriter );
 
-    void AddMarks(PCM_Marks *marks);
-    void AddObject(PCM_Object &object);
-    void AddViewObject(PCM_ViewObject &viewObject);
-    void AddTrajectory(int agentId, PCM_Trajectory *trajectory);
-    void AddIntendedCourse(PCM_IntendedCourses &intendedCourse);
-    void AddGlobalData(PCM_GlobalData &globalData);
+    //-----------------------------------------------------------------------------
+    //! Destructor
+    //-----------------------------------------------------------------------------
+    virtual ~XmlScenery();
+
+    //-----------------------------------------------------------------------------
+    //! Implementation of Interface function.
+    //! @see base class for more information
+    //-----------------------------------------------------------------------------
+    bool WriteToXml(QXmlStreamWriter *xmlWriter);
+
+    //-----------------------------------------------------------------------------
+    //! Setter and Adder functions.
+    //-----------------------------------------------------------------------------
+    void AddMarks(const PCM_Marks *marks);
+    void SetObject(const PCM_Object *object);
+    void SetViewObject(const PCM_ViewObject *viewObject);
+    void AddTrajectory(int agentId, const PCM_Trajectory *trajectory);
+    void SetGlobalData(const PCM_GlobalData *globalData);
 
 private:
-    std::vector<XmlMarks> marksVec;              //!< vector containing the information of PCM marks
-    std::vector<XmlTrajectory> trajectories;     //!< vector of all trajectories of all agents
-    XmlObject object;                            //!< containing information of PCM_Object
-    XmlViewObject viewObject;                    //!< containing information of PCM_ViewObject
-    XmlIntendedCourses intendedCourse;          //!< containing information of PCM_IntendedCourses
-    XmlGlobalData globalData;                    //!< containing information of PCM_GlobalData
+    std::vector<XmlMarks *> marksVec;             //!< vector containing the information of PCM marks
+    std::vector<XmlTrajectory *> trajectories;    //!< vector of all trajectories of all agents
+    XmlObject *object = nullptr;                  //!< containing information of PCM_Object
+    XmlViewObject *viewObject = nullptr;          //!< containing information of PCM_ViewObject
+    XmlGlobalData *globalData = nullptr;          //!< containing information of PCM_GlobalData
 };
 
 

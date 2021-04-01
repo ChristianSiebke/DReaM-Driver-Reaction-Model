@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -11,7 +11,6 @@
 #pragma once
 
 #include "XmlAgent.h"
-#include "XmlModel.h"
 #include "XmlObservation.h"
 #include "XmlSpawnPoint.h"
 
@@ -26,7 +25,7 @@ public:
     bool WriteToXml( QXmlStreamWriter *xmlWriter );
 
     void AddSpawnPoint( XmlSpawnPoint *sp );
-    void AddAgent     ( int id, int agentTypeRef, PCM_ParticipantData participant );
+    void AddAgent(int id, int agentTypeRef, PCM_ParticipantData *participant);
     void AddObservation( XmlObservation *observation );
 
 private:

@@ -11,7 +11,7 @@
 #include "XoscTrajectory.h"
 
 XoscTrajectory::XoscTrajectory(int agentId,
-                               PCM_Trajectory *trajectory)
+                               const PCM_Trajectory *trajectory)
 {
     this->agentId = agentId;
     this->trajectory = trajectory;
@@ -55,7 +55,7 @@ bool XoscTrajectory::WriteToXml(QXmlStreamWriter *xmlWriter)
         for (unsigned int i = 0; i < trajectory->GetTimeVec()->size(); i++)
         {
             xmlWriter->writeStartElement("Vertex");
-            xmlWriter->writeAttribute("time", QString::number((double)trajectory->GetTimeVec()->at(i)/1000.0));
+            xmlWriter->writeAttribute("time", QString::number(trajectory->GetTimeVec()->at(i)));
             xmlWriter->writeStartElement("Position");
             xmlWriter->writeStartElement("WorldPosition");
             xmlWriter->writeAttribute("x", QString::number(trajectory->GetXPosVec()->at(i), 'g', 10));

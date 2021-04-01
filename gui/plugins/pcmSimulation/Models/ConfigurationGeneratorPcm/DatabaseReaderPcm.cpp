@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -60,7 +60,9 @@ bool DatabaseReader::OpenDataBase()
     success =  db.open();
     if (!success)
     {
-        CloseDataBase();
+        db = QSqlDatabase();
+        QSqlDatabase::removeDatabase(connection);
+        connection = "";
     }
 
     return success;
@@ -106,77 +108,85 @@ bool DatabaseReader::ReadCaseList(QStringList &caseList)
 
 }
 
-bool DatabaseReader::ReadAllData(const QString &pcmCase,
-                                 std::vector<PCM_ParticipantData> &participants,
-                                 std::vector<PCM_InitialValues> &initials,
-                                 std::vector<PCM_Trajectory *> &trajectories,
-                                 std::vector<PCM_Marks *> &marksVec,
-                                 PCM_Object &object,
-                                 PCM_ViewObject &viewObject,
-                                 PCM_IntendedCourses &intendedCourses,
-                                 PCM_GlobalData &globalData)
+PCM_SimulationSet *DatabaseReader::Read(const QString &pcmCase)
 {
+    std::vector<PCM_ParticipantData *> participants;
+    std::vector<PCM_InitialValues *> initials;
+    std::vector<PCM_Trajectory *> trajectories;
+    PCM_Data *pcmData = new PCM_Data();
+
+    if (!OpenDataBase())
+    {
+        std::cout << "Error (ConfigGenerator): could not open database." << std::endl;
+        return nullptr;
+    }
+
     if (!ReadParticipantData(pcmCase,
                              participants))
     {
         std::cout << "Error (ConfigGenerator): could not read participant data" << std::endl;
-        return false;
+        return nullptr;
     }
 
     if (!ReadDynamicsData(pcmCase,
                           initials))
     {
         std::cout << "Error (ConfigGenerator): could not read dynamics data" << std::endl;
-        return false;
+        return nullptr;
     }
 
     if (!ReadTrajectoryData(pcmCase,
                             trajectories))
     {
         std::cout << "Error (ConfigGenerator): could not read trajectory data" << std::endl;
-        return false;
+        return nullptr;
     }
 
     if (!ReadMarksData(pcmCase,
-                       marksVec))
+                       pcmData))
     {
         std::cout << "Error (ConfigGenerator): could not read marks data" << std::endl;
-        return false;
+        return nullptr;
     }
 
     if (!ReadObjectsData(pcmCase,
-                         object))
+                         pcmData))
     {
         std::cout << "Error (ConfigGenerator): could not read object data" << std::endl;
-        return false;
+        return nullptr;
     }
 
     if (!ReadViewObjectsData(pcmCase,
-                             viewObject))
+                             pcmData))
     {
         std::cout << "Error (ConfigGenerator): could not read viewObject data" << std::endl;
-        return false;
+        return nullptr;
     }
 
     if (!ReadIntendedCourseData(pcmCase,
-                                intendedCourses))
+                                pcmData))
     {
         std::cout << "Error (ConfigGenerator): could not read intendedCourses data" << std::endl;
-        return false;
+        return nullptr;
     }
 
     if (!ReadGlobalData(pcmCase,
-                        globalData))
+                        pcmData))
     {
         std::cout << "Error (ConfigGenerator): could not read intendedCourses data" << std::endl;
-        return false;
+        return nullptr;
     }
 
-    return true;
+    CloseDataBase();
+
+    return new PCM_SimulationSet(participants,
+                                 initials,
+                                 trajectories,
+                                 pcmData);
 }
 
 bool DatabaseReader::ReadParticipantData(const QString &pcmCase,
-                                         std::vector<PCM_ParticipantData> &participants)
+                                         std::vector<PCM_ParticipantData *> &participants)
 {
     if (!IsDataBaseOpen())
     {
@@ -188,20 +198,20 @@ bool DatabaseReader::ReadParticipantData(const QString &pcmCase,
                + pcmCase);
     while (query.next())
     {
-        participants.push_back(PCM_ParticipantData(query.value(0).toString(),
-                                                   query.value(1).toString(),
-                                                   query.value(2).toString(),
-                                                   query.value(3).toString(),
-                                                   query.value(4).toString(),
-                                                   query.value(5).toString(),
-                                                   query.value(6).toString(),
-                                                   query.value(7).toString(),
-                                                   query.value(8).toString(),
-                                                   query.value(9).toString(),
-                                                   query.value(10).toString(),
-                                                   query.value(11).toString(),
-                                                   query.value(12).toString(),
-                                                   query.value(13).toString()));
+        participants.push_back(new PCM_ParticipantData(query.value(0).toString(),
+                                                       query.value(1).toString(),
+                                                       query.value(2).toString(),
+                                                       query.value(3).toString(),
+                                                       query.value(4).toString(),
+                                                       query.value(5).toString(),
+                                                       query.value(6).toString(),
+                                                       query.value(7).toString(),
+                                                       query.value(8).toString(),
+                                                       query.value(9).toString(),
+                                                       query.value(10).toString(),
+                                                       query.value(11).toString(),
+                                                       query.value(12).toString(),
+                                                       query.value(13).toString()));
     }
 
     query.clear();
@@ -210,7 +220,7 @@ bool DatabaseReader::ReadParticipantData(const QString &pcmCase,
 }
 
 bool DatabaseReader::ReadDynamicsData(const QString &pcmCase,
-                                      std::vector<PCM_InitialValues> &initials)
+                                      std::vector<PCM_InitialValues *> &initials)
 {
     if (!IsDataBaseOpen())
     {
@@ -221,13 +231,13 @@ bool DatabaseReader::ReadDynamicsData(const QString &pcmCase,
     query.exec("SELECT XPOS,YPOS,VX,VY,AX,AY,PSI FROM dynamics WHERE STEP = 0 AND FALL = " + pcmCase);
     while (query.next())
     {
-        initials.push_back(PCM_InitialValues(query.value(0).toString(),
-                                             query.value(1).toString(),
-                                             query.value(2).toString(),
-                                             query.value(3).toString(),
-                                             query.value(4).toString(),
-                                             query.value(5).toString(),
-                                             query.value(6).toString()));
+        initials.push_back(new PCM_InitialValues(query.value(0).toString(),
+                                                 query.value(1).toString(),
+                                                 query.value(2).toString(),
+                                                 query.value(3).toString(),
+                                                 query.value(4).toString(),
+                                                 query.value(5).toString(),
+                                                 query.value(6).toString()));
     }
 
     query.clear();
@@ -255,20 +265,18 @@ bool DatabaseReader::ReadTrajectoryData(const QString &pcmCase,
 
     for (size_t i = 0; i < betNr.size(); i++)
     {
-        query.exec( "SELECT STEP,XPOS,YPOS,VX,VY,PSI FROM dynamics WHERE BETNR = "
-                    + betNr.at(i) + "AND FALL = " + pcmCase + " ORDER BY STEP ASC" );
+        query.exec("SELECT STEP,XPOS,YPOS,VX,VY,PSI FROM dynamics WHERE BETNR = " + betNr.at(i) + "AND FALL = " + pcmCase + " ORDER BY STEP ASC");
 
-
-        std::vector<int> *timeVec = new std::vector<int>;
-        std::vector<double> *xPosVec = new std::vector<double>;
-        std::vector<double> *yPosVec = new std::vector<double>;
-        std::vector<double> *uVelVec = new std::vector<double>;
-        std::vector<double> *vVelVec = new std::vector<double>;
-        std::vector<double> *psiVec = new std::vector<double>;
+        std::vector<double> *timeVec = new std::vector<double>();
+        std::vector<double> *xPosVec = new std::vector<double>();
+        std::vector<double> *yPosVec = new std::vector<double>();
+        std::vector<double> *uVelVec = new std::vector<double>();
+        std::vector<double> *vVelVec = new std::vector<double>();
+        std::vector<double> *psiVec = new std::vector<double>();
 
         while (query.next())
         {
-            timeVec->push_back((qRound(query.value(0).toDouble() * 1000)));
+            timeVec->push_back(query.value(0).toDouble());
             xPosVec->push_back(query.value(1).toDouble());
             yPosVec->push_back(query.value(2).toDouble());
             uVelVec->push_back(query.value(3).toDouble());
@@ -289,7 +297,7 @@ bool DatabaseReader::ReadTrajectoryData(const QString &pcmCase,
     return !(trajectories.empty());
 }
 
-bool DatabaseReader::ReadMarksData(const QString &pcmCase, std::vector<PCM_Marks *> &marksVec)
+bool DatabaseReader::ReadMarksData(const QString &pcmCase, PCM_Data *pcmData)
 {
     if (!IsDataBaseOpen())
     {
@@ -301,7 +309,7 @@ bool DatabaseReader::ReadMarksData(const QString &pcmCase, std::vector<PCM_Marks
         PCM_Marks *marks = new PCM_Marks(static_cast<MarkType>(i));
 
         QString marksTypeName = QString::fromStdString(PCM_Helper::ConvertMarkTypeToDBString(
-                                                           marks->GetMarkType()));
+            marks->GetMarkType()));
 
         QSqlQuery query;
         query.exec( "SELECT LINENO,POINTNO,X,Y,Z FROM " + marksTypeName + " WHERE FALL = " + pcmCase +
@@ -317,14 +325,15 @@ bool DatabaseReader::ReadMarksData(const QString &pcmCase, std::vector<PCM_Marks
 
             AddLineData(marks, lineNo, pointNo, x, y, z);
         }
-        marksVec.push_back(marks);
+
+        pcmData->AddPCM_Marks(marks);
         query.clear();
     }
 
     return true;
 }
 
-bool DatabaseReader::ReadObjectsData(const QString &pcmCase, PCM_Object &objects)
+bool DatabaseReader::ReadObjectsData(const QString &pcmCase, PCM_Data *pcmData)
 {
     if (!IsDataBaseOpen())
     {
@@ -335,9 +344,10 @@ bool DatabaseReader::ReadObjectsData(const QString &pcmCase, PCM_Object &objects
                                                      ObjectType::OBJECT));
 
     QSqlQuery query;
-    query.exec( "SELECT LINENO,POINTNO,X,Y,Z,OBJTYPE FROM " + objectsName + " WHERE FALL = " + pcmCase +
-                " ORDER BY LINENO, POINTNO");
+    query.exec("SELECT LINENO,POINTNO,X,Y,Z,OBJTYPE FROM " + objectsName + " WHERE FALL = " + pcmCase +
+               " ORDER BY LINENO, POINTNO");
 
+    PCM_Object *object = new PCM_Object();
     while (query.next())
     {
         int lineNo = query.value(0).toInt();
@@ -347,16 +357,17 @@ bool DatabaseReader::ReadObjectsData(const QString &pcmCase, PCM_Object &objects
         double z = query.value(4).toDouble();
         int objectType = query.value(5).toInt();
 
-        AddLineData(&objects, lineNo, pointNo, x, y, z);
-        objects.SetObjectType(objectType);
+        AddLineData(object, lineNo, pointNo, x, y, z);
+        object->SetObjectType(objectType);
     }
+    pcmData->SetPCM_Object(object);
 
     query.clear();
 
     return true;
 }
 
-bool DatabaseReader::ReadViewObjectsData(const QString &pcmCase, PCM_ViewObject &viewObject)
+bool DatabaseReader::ReadViewObjectsData(const QString &pcmCase, PCM_Data *pcmData)
 {
     if (!IsDataBaseOpen())
     {
@@ -367,9 +378,10 @@ bool DatabaseReader::ReadViewObjectsData(const QString &pcmCase, PCM_ViewObject 
                                                          ObjectType::VIEWOBJECT));
 
     QSqlQuery query;
-    query.exec( "SELECT LINENO,POINTNO,X,Y,Z FROM " + viewObjectsName + " WHERE FALL = " + pcmCase +
-                " ORDER BY LINENO, POINTNO");
+    query.exec("SELECT LINENO,POINTNO,X,Y,Z FROM " + viewObjectsName + " WHERE FALL = " + pcmCase +
+               " ORDER BY LINENO, POINTNO");
 
+    PCM_ViewObject *viewObject = new PCM_ViewObject();
     while (query.next())
     {
         int lineNo = query.value(0).toInt();
@@ -378,16 +390,17 @@ bool DatabaseReader::ReadViewObjectsData(const QString &pcmCase, PCM_ViewObject 
         double y = query.value(3).toDouble();
         double z = query.value(4).toDouble();
 
-        AddLineData(&viewObject, lineNo, pointNo, x, y, z);
+        AddLineData(viewObject, lineNo, pointNo, x, y, z);
     }
 
+    pcmData->SetPCM_ViewObject(viewObject);
     query.clear();
 
     return true;
 }
 
 bool DatabaseReader::ReadIntendedCourseData(const QString &pcmCase,
-                                            PCM_IntendedCourses &intendedCources)
+                                            PCM_Data *pcmData)
 {
     if (!IsDataBaseOpen())
     {
@@ -409,11 +422,7 @@ bool DatabaseReader::ReadIntendedCourseData(const QString &pcmCase,
         double y = query.value(3).toDouble();
         double z = query.value(4).toDouble();
 
-        if (!intendedCources.IsCoursePresent(betNr))
-        {
-            intendedCources.AddPCM_Course(PCM_Course(betNr));
-        }
-        PCM_Course *course = intendedCources.GetCourseByBetNr(betNr);
+        PCM_Course *course = new PCM_Course(betNr);
 
         if (!course->IsPointPresent(pointNo))
         {
@@ -428,6 +437,7 @@ bool DatabaseReader::ReadIntendedCourseData(const QString &pcmCase,
                       << ". Point is not added to line." << std::endl;
         }
 
+        pcmData->AddPCM_Course(course);
     }
 
     query.clear();
@@ -435,7 +445,7 @@ bool DatabaseReader::ReadIntendedCourseData(const QString &pcmCase,
     return true;
 }
 
-bool DatabaseReader::ReadGlobalData(const QString &pcmCase, PCM_GlobalData &globalData)
+bool DatabaseReader::ReadGlobalData(const QString &pcmCase, PCM_Data *pcmData)
 {
     if (!IsDataBaseOpen())
     {
@@ -445,9 +455,10 @@ bool DatabaseReader::ReadGlobalData(const QString &pcmCase, PCM_GlobalData &glob
     QString globalDataName = QString::fromStdString(PCM_Helper::GetGlobalDataDBString());
 
     QSqlQuery query;
-    query.exec( "SELECT OFFSETX,OFFSETY,PARTICIP,SIMUVERS FROM " + globalDataName + " WHERE FALL = " +
-                pcmCase);
+    query.exec("SELECT OFFSETX,OFFSETY,PARTICIP,SIMUVERS FROM " + globalDataName + " WHERE FALL = " +
+               pcmCase);
 
+    PCM_GlobalData *globalData = new PCM_GlobalData();
     while (query.next())
     {
         double offsetX = query.value(0).toDouble();
@@ -455,11 +466,13 @@ bool DatabaseReader::ReadGlobalData(const QString &pcmCase, PCM_GlobalData &glob
         int participants = query.value(2).toInt();
         int simulationVersion = query.value(3).toInt();
 
-        globalData.SetOffsetX(offsetX);
-        globalData.SetOffsetY(offsetY);
-        globalData.SetParticipants(participants);
-        globalData.SetSimulationVersion(simulationVersion);
+        globalData->SetOffsetX(offsetX);
+        globalData->SetOffsetY(offsetY);
+        globalData->SetParticipants(participants);
+        globalData->SetSimulationVersion(simulationVersion);
     }
+    pcmData->SetPCM_GlobalData(globalData);
+
     query.clear();
 
     return true;

@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -10,29 +10,28 @@
 
 #include "openScenarioWriter.h"
 
-const QString OpenScenarioWriter::CreateScenarioFile(QString &scenarioFile,
-                                                     std::vector<PCM_Trajectory *> &trajectories,
-                                                     std::vector<PCM_ParticipantData> &participants)
+const QString OpenScenarioWriter::CreateScenarioFile(const QString &scenarioFile,
+                                                     const PCM_SimulationSet *simSet)
 {
     XoscScenario scenarioConfig;
 
+    const std::vector<PCM_ParticipantData *> &participants = simSet->GetParticipants();
+
     for (size_t iParticipant = 0; iParticipant < participants.size(); iParticipant++)
     {
-
-        scenarioConfig.AddAgent( iParticipant, iParticipant, participants[iParticipant] );
+        scenarioConfig.AddAgent(iParticipant, iParticipant, participants.at(iParticipant));
     }
 
+    const std::vector<PCM_Trajectory *> &trajectories = simSet->GetTrajectories();
     for (size_t i = 0; i < trajectories.size(); i++)
     {
         scenarioConfig.AddTrajectory(i, trajectories.at(i));
     }
 
-    scenarioConfig.ReReferenceTrajectory(participants);
-
     return WriteScenarioFile(scenarioFile, scenarioConfig);
 }
 
-const QString OpenScenarioWriter::WriteScenarioFile(QString &scenarioFile,
+const QString OpenScenarioWriter::WriteScenarioFile(const QString &scenarioFile,
                                                     XoscScenario &scenarioConfig)
 {
     // write the xml agent file

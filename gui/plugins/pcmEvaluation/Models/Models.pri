@@ -1,5 +1,5 @@
 # /*********************************************************************
-# * Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+# * Copyright (c) 2021 ITK Engineering GmbH
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -10,10 +10,10 @@
 
 HEADERS += \
     $$PWD/ModelPcm_Eval.h \
-    $$PWD/TableModelCsv.h \
-    $$PWD/ResultDirItemModel.h
+    $$PWD/ResultDirItemModel.h \
+    $$PWD/TrajectoryTableModel.h
 
 SOURCES += \
     $$PWD/ModelPcm_Eval.cpp \
-    $$PWD/TableModelCsv.cpp \
-    $$PWD/ResultDirItemModel.cpp
+    $$PWD/ResultDirItemModel.cpp \
+    $$PWD/TrajectoryTableModel.cpp

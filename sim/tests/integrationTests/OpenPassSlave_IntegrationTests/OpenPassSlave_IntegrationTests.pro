@@ -96,7 +96,7 @@ SRC_SLAVECONFIG = $$OPENPASS_SLAVE/importer/slaveConfig.cpp \
                   $$OPENPASS_SLAVE/importer/parameterImporter.cpp \
                   $$OPENPASS_SLAVE/framework/directories.cpp
 
-SRC_CORESHARE = $$OPEN_SRC/../../common/xmlParser.cpp \
+SRC_CORESHARE = $$OPEN_SRC/common/xmlParser.cpp \
                 $$CORE_SHARE/parameters.cpp \
                 $$CORE_SHARE/log.cpp \
                 $$CORE_SHARE/callbacks.cpp \
@@ -104,7 +104,7 @@ SRC_CORESHARE = $$OPEN_SRC/../../common/xmlParser.cpp \
                 $$CORE_SHARE/cephes/const.c \
                 $$CORE_SHARE/cephes/polevl.c
 
-INC_CORESHARE = $$OPEN_SRC/../../common/xmlParser.h \
+INC_CORESHARE = $$OPEN_SRC/common/xmlParser.h \
                 $$CORE_SHARE/parameters.h \
                 $$CORE_SHARE/log.h \
                 $$CORE_SHARE/callbacks.h

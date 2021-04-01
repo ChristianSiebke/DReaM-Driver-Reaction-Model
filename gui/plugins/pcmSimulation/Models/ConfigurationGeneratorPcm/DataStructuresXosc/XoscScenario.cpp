@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -169,7 +169,7 @@ bool XoscScenario::WriteToXml(QXmlStreamWriter *xmlWriter)
     xmlWriter->writeAttribute("conditionEdge","rising");
     xmlWriter->writeStartElement("ByValueCondition");
     xmlWriter->writeStartElement("SimulationTimeCondition");
-    xmlWriter->writeAttribute("value",QString::number((double)trajectories[0].trajectory->GetEndTime()/1000.0*2));
+    xmlWriter->writeAttribute("value", QString::number(trajectories[0].trajectory->GetEndTime() * 2));
     xmlWriter->writeAttribute("rule","greaterThan");
     xmlWriter->writeEndElement(); // SimulationTimeCondition
     xmlWriter->writeEndElement(); // ByValueCondition
@@ -184,21 +184,12 @@ bool XoscScenario::WriteToXml(QXmlStreamWriter *xmlWriter)
 }
 
 void XoscScenario::AddTrajectory(int agentId,
-                                 PCM_Trajectory *trajectory)
+                                 const PCM_Trajectory *trajectory)
 {
     trajectories.push_back(XoscTrajectory(agentId, trajectory));
 }
 
-void XoscScenario::AddAgent(int id, int agentTypeRef, PCM_ParticipantData participant)
+void XoscScenario::AddAgent(int id, int agentTypeRef, PCM_ParticipantData *participant)
 {
     agents.push_back( XmlAgent(id, agentTypeRef, participant) );
 }
-
-void XoscScenario::ReReferenceTrajectory(std::vector<PCM_ParticipantData> &participants)
-{
-    for (XoscTrajectory &traj: trajectories)
-    {
-        traj.trajectory->ReReference(participants[traj.agentId]);
-    }
-}
-

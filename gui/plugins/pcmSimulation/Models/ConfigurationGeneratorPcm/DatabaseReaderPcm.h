@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -12,21 +12,13 @@
 #define DATABASEREADER_H
 
 #include <iostream>
+#include <memory>
 
 #include <QStringList>
 #include <QtSql>
 
-#include "pcm_globalData.h"
-#include "pcm_initialValues.h"
-#include "pcm_intendedCourse.h"
-#include "pcm_marks.h"
-#include "pcm_object.h"
-#include "pcm_participantData.h"
-#include "pcm_trajectory.h"
-#include "pcm_viewObject.h"
-//#include "globalDefinitions.h"
 #include "pcm_definitions.h"
-
+#include "pcm_simulationSet.h"
 
 class DatabaseReader
 {
@@ -43,32 +35,24 @@ public:
 
     bool ReadCaseList(QStringList &caseList);
 
-    bool ReadAllData(const QString &pcmCase,
-                     std::vector<PCM_ParticipantData> &participants,
-                     std::vector<PCM_InitialValues> &initials,
-                     std::vector<PCM_Trajectory *> &trajectories,
-                     std::vector<PCM_Marks *> &marksVec,
-                     PCM_Object &object,
-                     PCM_ViewObject &viewObject,
-                     PCM_IntendedCourses &intendedCourses,
-                     PCM_GlobalData &globalData);
+    PCM_SimulationSet *Read(const QString &pcmCase);
 
     bool ReadParticipantData(const QString &pcmCase,
-                             std::vector<PCM_ParticipantData> &participants);
+                             std::vector<PCM_ParticipantData *> &participants);
     bool ReadDynamicsData(const QString &pcmCase,
-                          std::vector<PCM_InitialValues> &initials);
+                          std::vector<PCM_InitialValues *> &initials);
     bool ReadTrajectoryData(const QString &pcmCase,
                             std::vector<PCM_Trajectory *> &trajectories);
     bool ReadMarksData(const QString &pcmCase,
-                       std::vector<PCM_Marks *> &marksVec);
+                       PCM_Data *pcmData);
     bool ReadObjectsData(const QString &pcmCase,
-                         PCM_Object &objects);
+                         PCM_Data *pcmData);
     bool ReadViewObjectsData(const QString &pcmCase,
-                             PCM_ViewObject &viewObject);
+                             PCM_Data *pcmData);
     bool ReadIntendedCourseData(const QString &pcmCase,
-                                PCM_IntendedCourses &intendedCources);
+                                PCM_Data *pcmData);
     bool ReadGlobalData(const QString &pcmCase,
-                        PCM_GlobalData &globalData);
+                        PCM_Data *pcmData);
 
 private:
     bool AddLineData(PCM_LineContainer *lineContainer,

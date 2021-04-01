@@ -40,7 +40,7 @@ DEPENDENCIES = \
     $$OPEN_SRC/core/common/cephes/polevl.c \
     $$OPEN_SRC/core/common/cephes/const.c \
     $$OPEN_SRC/core/common/log.cpp \
-    $$OPEN_SRC/../../common/xmlParser.cpp \
+    $$OPEN_SRC/common/xmlParser.cpp \
     $$OPEN_SRC/core/common/parameters.cpp
 
 AGENTSAMPLER_TESTS = \

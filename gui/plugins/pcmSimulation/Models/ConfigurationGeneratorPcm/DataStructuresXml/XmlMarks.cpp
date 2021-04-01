@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -10,13 +10,18 @@
 
 #include "XmlMarks.h"
 
-XmlMarks::XmlMarks(PCM_Marks *marks)
+XmlMarks::XmlMarks(const PCM_Marks *marks)
 {
     this->marks = marks;
 }
 
 bool XmlMarks::WriteToXml(QXmlStreamWriter *xmlWriter)
 {
+    if (xmlWriter == nullptr)
+    {
+        return false;
+    }
+
     if (marks != nullptr)
     {
         xmlWriter->writeStartElement(QString::fromStdString(PCM_Helper::ConvertMarkTypeToDBString(
@@ -26,7 +31,10 @@ bool XmlMarks::WriteToXml(QXmlStreamWriter *xmlWriter)
         {
             PCM_Line *line = linePair.second;
             XmlLine xmlLine(line);
-            xmlLine.WriteToXml(xmlWriter);
+            if (!xmlLine.WriteToXml(xmlWriter))
+            {
+                return false;
+            }
         }
         xmlWriter->writeEndElement();
     }

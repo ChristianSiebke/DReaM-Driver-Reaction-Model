@@ -1,5 +1,5 @@
 # /*********************************************************************
-# * Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+# * Copyright (c) 2021 ITK Engineering GmbH
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,7 @@
 # **********************************************************************/
 
 HEADERS += \
+    $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlSlaveConfig.h \
     $$PWD/ModelPcm.h \
     $$PWD/ConfigurationGeneratorPcm/ConfigGeneratorPcm.h \
     $$PWD/ConfigurationGeneratorPcm/DatabaseReaderPcm.h \
@@ -22,12 +23,10 @@ HEADERS += \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlSpawnPoint.h \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlAgent.h \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlObservation.h \
-    $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlRunConfig.h \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlMarks.h \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlObject.h \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlTrajectory.h \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlViewObject.h \
-    $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlIntendedCourses.h \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlGlobalData.h \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlScenery.h \
     $$PWD/ConfigurationGeneratorPcm/XmlMergeHelper.h \
@@ -36,13 +35,13 @@ HEADERS += \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlPoint.h \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlProfilesConfig.h \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlModelsConfig.h \
-    $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlParking.h \
-    $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlModel.h \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXosc/XoscScenario.h \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXosc/XoscTrajectory.h \
     $$PWD/ConfigurationGeneratorPcm/openScenarioWriter.h \
+    $$PWD/ConfigurationGeneratorPcm/ConfigSetReaderPcm.h \
 
 SOURCES += \
+    $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlSlaveConfig.cpp \
     $$PWD/ModelPcm.cpp \
     $$PWD/ConfigurationGeneratorPcm/ConfigGeneratorPcm.cpp \
     $$PWD/ConfigurationGeneratorPcm/DatabaseReaderPcm.cpp \
@@ -56,12 +55,10 @@ SOURCES += \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlSpawnPoint.cpp \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlAgent.cpp \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlObservation.cpp \
-    $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlRunConfig.cpp \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlMarks.cpp \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlObject.cpp \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlTrajectory.cpp \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlViewObject.cpp \
-    $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlIntendedCourses.cpp \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlGlobalData.cpp \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlScenery.cpp \
     $$PWD/ConfigurationGeneratorPcm/XmlMergeHelper.cpp \
@@ -70,8 +67,7 @@ SOURCES += \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlPoint.cpp \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlProfilesConfig.cpp \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlModelsConfig.cpp \
-    $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlParking.cpp \
-    $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlModel.cpp \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXosc/XoscScenario.cpp \
     $$PWD/ConfigurationGeneratorPcm/DataStructuresXosc/XoscTrajectory.cpp \
     $$PWD/ConfigurationGeneratorPcm/openScenarioWriter.cpp \
+    $$PWD/ConfigurationGeneratorPcm/ConfigSetReaderPcm.cpp \

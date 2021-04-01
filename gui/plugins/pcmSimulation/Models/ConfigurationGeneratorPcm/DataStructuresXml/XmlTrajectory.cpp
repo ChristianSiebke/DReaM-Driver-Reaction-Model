@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -10,7 +10,7 @@
 
 #include "XmlTrajectory.h"
 
-XmlTrajectory::XmlTrajectory(int agentId, PCM_Trajectory *trajectory)
+XmlTrajectory::XmlTrajectory(int agentId, const PCM_Trajectory *trajectory)
 {
     this->agentId = agentId;
     this->trajectory = trajectory;
@@ -18,6 +18,11 @@ XmlTrajectory::XmlTrajectory(int agentId, PCM_Trajectory *trajectory)
 
 bool XmlTrajectory::WriteToXml(QXmlStreamWriter *xmlWriter)
 {
+    if (xmlWriter == nullptr)
+    {
+        return false;
+    }
+
     xmlWriter->writeStartElement("Trajectory");
 
     if (trajectory != nullptr)

@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,7 @@
 #include <QDir>
 
 #include "DataStructuresXosc/XoscScenario.h"
+#include "pcm_simulationSet.h"
 
 class OpenScenarioWriter
 {
@@ -23,11 +24,11 @@ public:
     OpenScenarioWriter() = default;
     virtual ~OpenScenarioWriter() = default;
 
-    const QString CreateScenarioFile(QString &scenarioFile,
-                                     std::vector<PCM_Trajectory *> &trajectories, std::vector<PCM_ParticipantData> &participants);
+    const QString CreateScenarioFile(const QString &scenarioFile,
+                                     const PCM_SimulationSet *simSet);
 
 private:
-    const QString WriteScenarioFile(QString &scenarioFile,
+    const QString WriteScenarioFile(const QString &scenarioFile,
                                     XoscScenario &scenarioConfig);
 };
 

@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2020 ITK Engineering GmbH
+* Copyright (c) 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -58,6 +58,7 @@
 
 #include "algorithm_routecontrol_implementation.h"
 
+#include <array>
 #include <memory>
 
 #include <qglobal.h>
@@ -230,7 +231,7 @@ void Algorithm_Routecontrol_Implementation::Trigger(int time_ms)
      * - brake superposition state
     */
     double brake = routeControl->GetBrakePedal();
-    std::vector<double> brakeSuperpose{0.0, 0.0, 0.0, 0.0};
+    std::array<double, 4> brakeSuperpose{0.0, 0.0, 0.0, 0.0};
     ControlData result{routeControl->GetFrontWheelAngle(), routeControl->GetThrottlePedal(), brake, brakeSuperpose};
     control.SetValue(result);
 

@@ -1,5 +1,5 @@
 # /*********************************************************************
-# * Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+# * Copyright (c) 2021 ITK Engineering GmbH
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -43,26 +43,26 @@ defineReplace(getFiles) {
 }
 
 SUBDIRS +=  . \
-            ../../../common/pcm/PCM_Data \
+            ../../common/pcm/PCM_Data \
 
 INCLUDEPATH += . \
             .. \
             ../../common \
             ../../../sim/src \
             ../../../sim/src/common \
-            ../../../common/pcm/PCM_Data \
-            ../../../common/pcm/PCM_Importer \
+            ../../common/pcm/PCM_Data \
+            ../../common/pcm/PCM_Importer \
 
 HEADERS += \
     $$getFiles(SUBDIRS, hpp) \
     $$getFiles(SUBDIRS, h) \
-    ../../../common/pcm/PCM_Importer/scenarioImporterPCM.h \
-    ../../../common/pcm/PCM_Importer/sceneryImporterPCM.h
+    ../../common/pcm/PCM_Importer/scenarioImporterPCM.h \
+    ../../common/pcm/PCM_Importer/sceneryImporterPCM.h
     ../../common/GUI_Definitions.h
 
 SOURCES += \
     $$getFiles(SUBDIRS, cpp) \
     $$getFiles(SUBDIRS, cc) \
     $$getFiles(SUBDIRS, c) \
-    ../../../common/pcm/PCM_Importer/scenarioImporterPCM.cpp \
-    ../../../common/pcm/PCM_Importer/sceneryImporterPCM.cpp
+    ../../common/pcm/PCM_Importer/scenarioImporterPCM.cpp \
+    ../../common/pcm/PCM_Importer/sceneryImporterPCM.cpp

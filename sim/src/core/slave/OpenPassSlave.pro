@@ -1,6 +1,6 @@
 # /*********************************************************************
 # * Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
-# * Copyright (c) 2016, 2017 ITK Engineering GmbH
+# * Copyright (c) 2021 ITK Engineering GmbH
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -64,7 +64,7 @@ SOURCES += \
     ../common/log.cpp \
     ../common/parameters.cpp \
     ../../common/eventDetectorDefinitions.cpp \
-    ../../../../common/xmlParser.cpp
+    ../../common/xmlParser.cpp
 
 HEADERS += \
     $$getFiles(SUBDIRS, hpp) \
@@ -74,4 +74,4 @@ HEADERS += \
     ../common/log.h \
     ../common/parameters.h \
     ../../common/eventDetectorDefinitions.h \
-    ../../../../common/xmlParser.h
+    ../../common/xmlParser.h

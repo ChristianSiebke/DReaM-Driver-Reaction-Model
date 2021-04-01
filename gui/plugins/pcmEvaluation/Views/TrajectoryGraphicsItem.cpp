@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -29,11 +29,10 @@ TrajectoryGraphicsItem::TrajectoryGraphicsItem(QVector<QPointF> *trajectoryData,
                                                         this);
         line->setPen(pen);
 
-        minX = std::min(minX, std::min(firstPoint.x(), secondPoint.x()));
-        minY = std::min(minY, std::min(firstPoint.y(), secondPoint.y()));
-        maxX = std::max(maxX, std::max(firstPoint.x(), secondPoint.x()));
-        maxY = std::max(maxY, std::max(firstPoint.y(), secondPoint.y()));
-
+        minX = std::min({minX, firstPoint.x(), secondPoint.x()});
+        minY = std::min({minY, firstPoint.y(), secondPoint.y()});
+        maxX = std::max({maxX, firstPoint.x(), secondPoint.x()});
+        maxY = std::max({maxY, firstPoint.y(), secondPoint.y()});
     }
 }
 

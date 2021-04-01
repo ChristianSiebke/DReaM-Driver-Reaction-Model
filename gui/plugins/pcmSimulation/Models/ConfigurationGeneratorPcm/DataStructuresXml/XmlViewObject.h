@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -18,12 +18,12 @@ class XmlViewObject: public XmlBaseClass
 {
 public:
     XmlViewObject() = default;
-    XmlViewObject(PCM_ViewObject *viewObject);
+    XmlViewObject(const PCM_ViewObject *viewObject);
 
     bool WriteToXml( QXmlStreamWriter *xmlWriter );
 
 private:
-    PCM_ViewObject *viewObject = nullptr;              //!< PCM viewObject
+    const PCM_ViewObject *viewObject = nullptr; //!< PCM viewObject
 };
 
 #endif // XMLVIEWOBJECT_H

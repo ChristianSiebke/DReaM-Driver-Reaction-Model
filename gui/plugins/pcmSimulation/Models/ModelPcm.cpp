@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
 
 #include "ModelPcm.h"
 
+#include "ConfigurationGeneratorPcm/ConfigSetReaderPcm.h"
 #include "GUI_Definitions.h"
 
 ModelPcm::ModelPcm(QObject *parent) :
@@ -19,8 +20,6 @@ ModelPcm::ModelPcm(QObject *parent) :
     listModelPcm->setStringList(pcmCaseList);
 
     baseFolder = QCoreApplication::applicationDirPath();
-
-    configGenerator = new ConfigGenerator(baseFolder);
 }
 
 ModelPcm::~ModelPcm()
@@ -30,8 +29,6 @@ ModelPcm::~ModelPcm()
     {
         delete listModelPcm;
     }
-
-    delete configGenerator;
 }
 
 QAbstractItemModel *ModelPcm::GetItemModelPcm() const
@@ -70,7 +67,12 @@ bool ModelPcm::LoadCasesFromPcmFile(const QString &pcmFilePath)
     inputFromPCMDB = true;
     ClearCaseList();
 
-    dbReader.CloseDataBase();
+    DatabaseReader dbReader;
+
+    if(pcmFilePath.isEmpty()){
+        return false;
+    }
+
     currentPcmFilePath = pcmFilePath;
     dbReader.SetDatabase(currentPcmFilePath);
     bool success = dbReader.OpenDataBase();
@@ -88,7 +90,6 @@ bool ModelPcm::LoadCasesFromPcmFile(const QString &pcmFilePath)
     if (success)
     {
         listModelPcm->setStringList(pcmCaseList);
-        success = listModelPcm != nullptr;
     }
 
     if (!success)
@@ -162,6 +163,11 @@ void ModelPcm::SetVariationCount(const int varCount)
     this->variationCount = varCount;
 }
 
+void ModelPcm::EnableShiftRadius(const bool enable)
+{
+    this->shiftRadiusEnabled = enable;
+}
+
 void ModelPcm::SetShiftRadius1(const double radius)
 {
     this->shiftRadius1 = radius;
@@ -170,6 +176,11 @@ void ModelPcm::SetShiftRadius1(const double radius)
 void ModelPcm::SetShiftRadius2(const double radius)
 {
     this->shiftRadius2 = radius;
+}
+
+void ModelPcm::EnableVelocityScale(const bool enable)
+{
+    this->velocityScaleEnabled = enable;
 }
 
 void ModelPcm::SetVelocityScale1(const double maxScale)
@@ -193,15 +204,13 @@ void ModelPcm::StartSimulation()
         return;
     }
 
-    //    //when reading input from previous results, forbid the result folder and previous result folder to be the same
-    //    if((!inputFromPCMDB) && (resultFolder.compare(prevResultFolder) == 0))
-    //    {
-    //        Q_EMIT ShowMessage("ERROR", "The result directory [" + resultFolder + "] should be different from the previous result folder");
-    //        Q_EMIT SimulationFinished();
-    //        return;
-    //    }
-
-    QString baseFolder = QCoreApplication::applicationDirPath();
+    //when reading input from previous results, forbid the result folder and previous result folder to be the same
+    if((!inputFromPCMDB) && (resultFolder.compare(prevResultFolder) == 0))
+    {
+        Q_EMIT ShowMessage("ERROR", "The result directory [" + resultFolder + "] should be different from the previous result folder");
+        Q_EMIT SimulationFinished();
+        return;
+    }
 
     QModelIndexList pcmCaseIndexList = selectionModelPcm->selectedIndexes();
     QStringList otherSytemList = otherSystemFile.split(QRegExp(",|;"));
@@ -210,16 +219,66 @@ void ModelPcm::StartSimulation()
 
     Q_EMIT SimulationProgressMaximum(pcmCaseIndexList.count() * otherSytemList.count() * car1SystemList.count() * car2SystemList.count() * 2);
 
-    int progress = 0;
     Q_EMIT SimulationProgressChanged(progress++);
 
-    configGenerator->Clear();
+    ConfigGenerator configGenerator(resultFolder);
 
+    CreateConfigs(configGenerator,
+                  pcmCaseIndexList,
+                  otherSytemList,
+                  car1SystemList,
+                  car2SystemList);
+
+    const QString frameworkConfigFile = configGenerator.GenerateFrameworkConfig(logLevel);
+    if (frameworkConfigFile == "")
+    {
+        Q_EMIT ShowMessage("ERROR", "Failed to generate framework configuration file");
+        Q_EMIT SimulationFinished();
+        return;
+    }
+
+    // execute the master process
+    QString masterPath = baseFolder + "/" + FILENAME_OPENPASSMASTER_EXE;
+    QProcess *masterProcess = new QProcess();
+    QStringList arguments;
+    arguments << "--config" << QDir(baseFolder).filePath(frameworkConfigFile);
+
+    masterProcess->start(masterPath, arguments);
+    masterProcess->waitForFinished(-1);
+    if (masterProcess->exitCode() != 0)
+    {
+        Q_EMIT ShowMessage("ERROR", "Simulation aborted. Master returned with -1");
+        Q_EMIT SimulationFinished();
+        delete masterProcess;
+        return;
+    }
+    delete masterProcess;
+
+    Q_EMIT SimulationProgressChanged(progress++);
+
+    Q_EMIT ShowMessage("Information", "Simulation successfully finished.");
+    Q_EMIT SimulationFinished();
+
+    progress = 0;
+}
+
+void ModelPcm::CreateConfigs(ConfigGenerator &configGenerator, QModelIndexList &pcmCaseIndexList, QStringList &otherSytemList, QStringList &car1SystemList, QStringList &car2SystemList)
+{
     for (QModelIndex &pcmCaseIndex : pcmCaseIndexList)
     {
         if (simulationStop)
         {
             Q_EMIT ShowMessage("Information", "Simulation aborted.");
+            Q_EMIT SimulationFinished();
+            return;
+        }
+
+        // Prepare to read a simulation set
+        QString pcmCase = QString("%1").arg(pcmCaseIndex.data().toInt());
+        PCM_SimulationSet *simulationSet = ReadSimulationSet(inputFromPCMDB, pcmCase);
+        if (simulationSet == nullptr)
+        {
+            Q_EMIT ShowMessage("ERROR", "Failed to read data for case: " + pcmCase);
             Q_EMIT SimulationFinished();
             return;
         }
@@ -245,91 +304,58 @@ void ModelPcm::StartSimulation()
                     {
                         continue;
                     }
-                    QString pcmCase = QString("%1").arg(pcmCaseIndex.data().toInt());
+
                     QString systemName = QString::number(otherSystemCount) + "-" + QString::number(car1SystemCount) + "-" + QString::number(car2SystemCount);
-                    QString caseSystemFolder = resultFolder + "/" + pcmCase + "/" + systemName;
+                    QString caseSystemName = pcmCase + "/" + systemName;
 
                     for (int varIndex = 0; varIndex <= variationCount; varIndex++)
                     {
-                        QString varName = (varIndex == 0) ? DIR_NO_VARIATION : QString("Var_%1").arg(varIndex, 5, 10, QChar('0')); // zero padding if var index less than 5 digits
-                        QString caseSystemVarFolder = caseSystemFolder + "/" + varName;
+                        QString varName = "";
+                        bool withVariation = false;
 
-                        QDir caseSystemVarDir(caseSystemVarFolder);
-                        if (caseSystemVarDir.exists())
+                        if (varIndex == 0)
                         {
-                            if (!caseSystemVarDir.removeRecursively())
-                            {
-                                Q_EMIT ShowMessage("ERROR", "Failed to delete directory " + caseSystemVarFolder + " due to access control from another program");
-                                Q_EMIT SimulationFinished();
-                                return;
-                            }
+                            varName = DIR_NO_VARIATION;
+                            withVariation = false;
                         }
-                        if (!caseSystemVarDir.mkpath(caseSystemVarDir.absolutePath()))
+                        else
                         {
-                            Q_EMIT ShowMessage("ERROR", "Failed to create directory " + caseSystemVarFolder);
-                            Q_EMIT SimulationFinished();
-                            return;
+                            varName = QString("Var_%1").arg(varIndex, 5, 10, QChar('0')); // zero padding if var index less than 5 digits
+                            withVariation = true;
                         }
+
+                        QString caseSystemVarName = caseSystemName + "/" + varName;
 
                         // the random seed uses PCM case number if the inital seed is negative. Otherwise it uses the inital seed.
                         int randomSeed = (initRandomSeed < 0) ? (pcmCaseIndex.data().toInt() + varIndex)
                                                               : (initRandomSeed + varIndex);
 
-
-                        if (inputFromPCMDB)
+                        if (withVariation)
                         {
-                            if (!configGenerator->GenerateConfigFromDB(dbReader,
-                                                                       pcmCase,
-                                                                       caseSystemVarFolder,
-                                                                       otherSystem, car1System, car2System,
-                                                                       randomSeed,
-                                                                       (varIndex == 0) ? std::vector<double>{-1, -1} : std::vector<double>{shiftRadius1, shiftRadius2},
-                                                                       (varIndex == 0) ? std::vector<double>{INFINITY, INFINITY} : std::vector<double>{velocityMaxScale1, velocityMaxScale2}))
-                            {
-                                Q_EMIT ShowMessage("ERROR", "Failed to generate configuration file for case: " + pcmCase);
-                                Q_EMIT SimulationFinished();
-                                return;
-                            }
+                            SaveState(simulationSet);
+                            ApplyVariation(simulationSet, randomSeed);
                         }
-                        else
+
+                        if (!configGenerator.GenerateConfigs(pcmCase,
+                                                             caseSystemVarName,
+                                                             otherSystem, car1System, car2System,
+                                                             randomSeed,
+                                                             simulationSet))
                         {
-                            // Generate Configs from previous result folder
-                            QString prevCaseFolder = prevResultFolder + "/" + pcmCase;
-                            QString prevCaseSystemVarFolder, prevSystemName;
+                            Q_EMIT ShowMessage("ERROR", "Failed to generate configuration file for case: " + pcmCase);
+                            Q_EMIT SimulationFinished();
 
-                            QDirIterator it(prevCaseFolder, QDir::Dirs | QDir::NoSymLinks | QDir::NoDotAndDotDot);
-                            while (it.hasNext())
+                            if (simulationSet != nullptr)
                             {
-                                prevSystemName = QFileInfo(it.next()).baseName();          // get the base name of the subfolder without path prefix
-                                if (QRegExp(REGEX_CASE_SYSTEM).exactMatch(prevSystemName)) // check if the subfolder name matches the pattern like "0-0-0"
-                                {
-                                    prevCaseSystemVarFolder = prevCaseFolder + "/" + prevSystemName + "/" + DIR_NO_VARIATION;
-                                    QDir prevCaseSystemVarDir(prevCaseSystemVarFolder);
-                                    if (prevCaseSystemVarDir.exists())
-                                    {
-                                        break; // found a valid previous result folder
-                                    }
-                                }
+                                delete simulationSet;
                             }
 
-                            if (prevCaseSystemVarFolder.isEmpty())
-                            {
-                                Q_EMIT ShowMessage("ERROR", "No valid case result folder in previous results for case " + pcmCase);
-                                Q_EMIT SimulationFinished();
-                                return;
-                            }
+                            return;
+                        }
 
-                            //                            if (!configGenerator->GenerateConfigFromPrevResult(prevCaseSystemVarFolder,
-                            //                                                                               caseSystemVarFolder,
-                            //                                                                               otherSystem, car1System, car2System,
-                            //                                                                               randomSeed,
-                            //                                                                               (varIndex == 0)?std::vector<double>{-1, -1}: std::vector<double>{shiftRadius1, shiftRadius2},
-                            //                                                                               (varIndex == 0)?std::vector<double>{INFINITY, INFINITY}: std::vector<double>{velocityMaxScale1, velocityMaxScale2}))
-                            //                            {
-                            //                                Q_EMIT ShowMessage("ERROR", "Failed to generate configuration files for case: " + pcmCase);
-                            //                                Q_EMIT SimulationFinished();
-                            //                                return;
-                            //                            }
+                        if (withVariation)
+                        {
+                            ResetState(simulationSet);
                         }
                     }
 
@@ -341,35 +367,167 @@ void ModelPcm::StartSimulation()
             }
             otherSystemCount++;
         }
-    }
 
-    const QString frameworkConfigFile = configGenerator->GenerateFrameworkConfig(resultFolder + "/..", logLevel);
-    if (frameworkConfigFile == "")
+        if (simulationSet != nullptr)
+        {
+            delete simulationSet;
+        }
+    }
+}
+
+bool ModelPcm::PrepareFolderstructure(QString folder)
+{
+    QDir caseSystemVarDir(folder);
+    if (caseSystemVarDir.exists())
     {
-        Q_EMIT ShowMessage("ERROR", "Failed to generate framework configuration file");
-        Q_EMIT SimulationFinished();
-        return;
+        if (!caseSystemVarDir.removeRecursively())
+        {
+            Q_EMIT ShowMessage("ERROR", "Failed to delete directory " + folder + " due to access control from another program");
+            return false;
+        }
     }
-
-    // execute the master process
-    QString masterPath = baseFolder + "/" + FILENAME_OPENPASSMASTER_EXE;
-    QProcess *masterProcess = new QProcess();
-    QStringList arguments;
-    arguments << frameworkConfigFile;
-
-    masterProcess->start(masterPath, arguments);
-    masterProcess->waitForFinished(-1);
-    if (masterProcess->exitCode() != 0)
+    if (!caseSystemVarDir.mkpath(caseSystemVarDir.absolutePath()))
     {
-        Q_EMIT ShowMessage("ERROR", "Simulation aborted. Master returned with -1");
-        Q_EMIT SimulationFinished();
-        delete masterProcess;
-        return;
+        Q_EMIT ShowMessage("ERROR", "Failed to create directory " + folder);
+        return false;
     }
-    delete masterProcess;
 
-    Q_EMIT SimulationProgressChanged(progress++);
+    return true;
+}
 
-    Q_EMIT ShowMessage("Information", "Simulation successfully finished.");
-    Q_EMIT SimulationFinished();
+void ModelPcm::RelocateCog(PCM_SimulationSet *simulationSet)
+{
+    for (uint i = 0; i < simulationSet->GetTrajectories().size(); i++)
+    {
+        double wheelBase = simulationSet->GetParticipants().at(i)->GetWheelbase().toDouble();
+        double distCgfa = simulationSet->GetParticipants().at(i)->GetDistcgfa().toDouble();
+        double distanceRearAxleToCOG = wheelBase - distCgfa;
+
+        simulationSet->GetTrajectories().at(i)->ShiftForward(distanceRearAxleToCOG);
+    }
+}
+
+PCM_SimulationSet *ModelPcm::ReadSimulationSetFromDb(QString pcmCase)
+{
+    // Read from database
+    DatabaseReader dbReader;
+    dbReader.SetDatabase(currentPcmFilePath);
+    PCM_SimulationSet *simulationSet = dbReader.Read(pcmCase);
+
+    if (simulationSet == nullptr)
+    {
+        Q_EMIT ShowMessage("ERROR", "Failed to read database for case: " + pcmCase);
+        return nullptr;
+    }
+
+    // Relocate trajectory because pcm cog is in the geometric middle of the car
+    // but simulated cog is between the rear axle
+    RelocateCog(simulationSet);
+
+    return simulationSet;
+}
+
+PCM_SimulationSet *ModelPcm::ReadSimulationSetFromPrevCase(QString pcmCase)
+{
+    // Generate Configs from previous result folder
+    QString prevCaseFolder = prevResultFolder + "/" + pcmCase;
+    QString prevCaseSystemVarFolder, prevSystemName;
+
+    QDirIterator it(prevCaseFolder, QDir::Dirs | QDir::NoSymLinks | QDir::NoDotAndDotDot);
+    while (it.hasNext())
+    {
+        prevSystemName = QFileInfo(it.next()).baseName();          // get the base name of the subfolder without path prefix
+        if (QRegExp(REGEX_CASE_SYSTEM).exactMatch(prevSystemName)) // check if the subfolder name matches the pattern like "0-0-0"
+        {
+            prevCaseSystemVarFolder = prevCaseFolder + "/" + prevSystemName + "/" + DIR_NO_VARIATION + "/" + FILENAME_OPENPASSSLAVE_CONFIGS;
+            QDir prevCaseSystemVarDir(prevCaseSystemVarFolder);
+            if (prevCaseSystemVarDir.exists())
+            {
+                break; // found a valid previous result folder
+            }
+        }
+    }
+
+    if (prevCaseSystemVarFolder.isEmpty())
+    {
+        Q_EMIT ShowMessage("ERROR", "No valid case result folder in previous results for case " + pcmCase);
+        return nullptr;
+    }
+
+    ConfigSetReaderPcm configSetReader(prevCaseSystemVarFolder);
+    PCM_SimulationSet *simulationSet = configSetReader.Read();
+
+    if (simulationSet == nullptr)
+    {
+        Q_EMIT ShowMessage("ERROR", "Failed to read database for case: " + pcmCase);
+        return nullptr;
+    }
+
+    return simulationSet;
+}
+
+PCM_SimulationSet *ModelPcm::ReadSimulationSet(bool inputFromDb, QString pcmCase)
+{
+    if (inputFromDb)
+    {
+        return ReadSimulationSetFromDb(pcmCase);
+    }
+    else
+    {
+        return ReadSimulationSetFromPrevCase(pcmCase);
+    }
+}
+
+void ModelPcm::SaveState(PCM_SimulationSet *simulationSet)
+{
+    // Reset to original value without variation
+    for (uint i = 0; i < simulationSet->GetTrajectories().size(); ++i)
+    {
+        simulationSet->GetTrajectories().at(i)->SaveOriginalState();
+    }
+}
+
+void ModelPcm::ApplyVariation(PCM_SimulationSet *simulationSet, double randomSeed)
+{
+    std::vector<double> shiftRadiusVector;
+    shiftRadiusVector.push_back(shiftRadius1);
+    shiftRadiusVector.push_back(shiftRadius2);
+
+    std::vector<double> velocityScaleVector;
+    velocityScaleVector.push_back(velocityMaxScale1);
+    velocityScaleVector.push_back(velocityMaxScale2);
+
+    if (simulationSet->GetTrajectories().size() == shiftRadiusVector.size())
+    {
+        for (uint i = 0; i < simulationSet->GetTrajectories().size(); ++i)
+        {
+            StochasticsPCM stochastics(static_cast<std::uint32_t>(randomSeed));
+
+            if (shiftRadiusEnabled)
+            {
+                double shiftDistance = stochastics.GetUniformDistributed(0, shiftRadiusVector.at(i));
+                double shiftAngle = stochastics.GetUniformDistributed(0, M_PI * 2);
+                simulationSet->GetTrajectories().at(i)->ShiftPosition(shiftDistance, shiftAngle);
+            }
+
+            if (velocityScaleEnabled)
+            {
+                double min = 1.0 - velocityScaleVector.at(i) / 100;
+                double max = 1.0 + velocityScaleVector.at(i) / 100;
+                double velocityScale = stochastics.GetUniformDistributed(min, max);
+                simulationSet->GetTrajectories().at(i)->ScaleVelocity(velocityScale);
+            }
+        }
+    }
+
+    return;
+}
+
+void ModelPcm::ResetState(PCM_SimulationSet *simulationSet)
+{
+    // Reset to original value without variation
+    for (uint i = 0; i < simulationSet->GetTrajectories().size(); ++i)
+    {
+        simulationSet->GetTrajectories().at(i)->ResetToOriginalState();
+    }
 }

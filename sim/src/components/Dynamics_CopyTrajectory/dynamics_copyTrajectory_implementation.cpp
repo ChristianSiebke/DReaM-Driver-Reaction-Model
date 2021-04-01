@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2020 ITK Engineering GmbH
+* Copyright (c) 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -55,8 +55,6 @@ void Dynamics_CopyTrajectory_Implementation::UpdateInput(int localLinkId,
 
     //    bool success = false;
     const auto trajectorySignal = std::dynamic_pointer_cast<TrajectorySignal const>(data);
-
-    //success = inputPorts.at(localLinkId)->SetSignalValue(trajectorySignal);
 
     try
     {

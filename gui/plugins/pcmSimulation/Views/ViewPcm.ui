@@ -97,7 +97,7 @@
           <item>
            <widget class="QRadioButton" name="radioButtonSimResult">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">

@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -17,6 +17,11 @@ XmlPoint::XmlPoint(const PCM_Point *point)
 
 bool XmlPoint::WriteToXml(QXmlStreamWriter *xmlWriter)
 {
+    if (xmlWriter == nullptr)
+    {
+        return false;
+    }
+
     xmlWriter->writeStartElement("point");
     xmlWriter->writeAttribute("id", QString::number(point->GetId(), 'g', 10));
     xmlWriter->writeTextElement("x", QString::number(point->GetX(), 'g', 10));

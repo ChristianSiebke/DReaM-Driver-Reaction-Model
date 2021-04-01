@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2020 ITK Engineering GmbH
+* Copyright (c) 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -16,8 +16,6 @@
 #include "algorithm_Switch.h"
 #include "include/modelInterface.h"
 #include "algorithm_Switch_implementation.h"
-#include "defaultPrio_PCM.h"
-
 
 const std::string Version = "0.0.1";
 static const CallbackInterface *Callbacks = nullptr;
@@ -46,7 +44,10 @@ extern "C" ALGORITHM_SWITCH_SHARED_EXPORT ModelInterface *OpenPASS_CreateInstanc
 
     if (priority == 0)
     {
-		priority = (int)PCMdefaultPrio::Algorithm_Switch;
+        if (Callbacks != nullptr)
+        {
+            Callbacks->Log(CbkLogLevel::Warning, __FILE__, __LINE__, "Priority 0 can lead to undefined behavior.");
+        }
     }
     try
     {

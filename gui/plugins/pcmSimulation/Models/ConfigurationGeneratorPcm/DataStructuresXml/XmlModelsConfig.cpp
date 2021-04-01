@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -34,7 +34,7 @@ void XmlModelsConfig::AddSpawnPoint(XmlSpawnPoint *sp)
     spawnPoints.push_back(sp);
 }
 
-void XmlModelsConfig::AddAgent(int id, int agentTypeRef, PCM_ParticipantData participant)
+void XmlModelsConfig::AddAgent(int id, int agentTypeRef, PCM_ParticipantData *participant)
 {
     agents.push_back( XmlAgent(id, agentTypeRef, participant) );
 }
@@ -46,6 +46,10 @@ void XmlModelsConfig::AddObservation(XmlObservation *observation)
 
 bool XmlModelsConfig::WriteToXml(QXmlStreamWriter *xmlWriter)
 {
+    if (xmlWriter == nullptr)
+    {
+        return false;
+    }
 
     QXmlStreamAttributes attrib;
     attrib.append("revMajor","1");
@@ -62,12 +66,9 @@ bool XmlModelsConfig::WriteToXml(QXmlStreamWriter *xmlWriter)
     xmlWriter->writeAttribute("name","VehicleCatalog");
     for (XmlAgent agent : agents)
     {
-        //        switch (agent.type){
-        //        case ("Car"):
-
         xmlWriter->writeStartElement("Vehicle");
-        xmlWriter->writeAttribute("name","Agent_" + QString::number(agent._id));
-        xmlWriter->writeAttribute("vehicleCategory","car"); // always "car"
+        xmlWriter->writeAttribute("name","Agent_" + QString::number(agent.id));
+        xmlWriter->writeAttribute("vehicleCategory", "car"); // always "car"
         xmlWriter->writeStartElement("Properties");
         xmlWriter->writeStartElement("Property");
         xmlWriter->writeAttribute("name","AirDragCoefficient");
@@ -136,8 +137,7 @@ bool XmlModelsConfig::WriteToXml(QXmlStreamWriter *xmlWriter)
         xmlWriter->writeEndElement(); // Properties
         xmlWriter->writeStartElement("BoundingBox");
         xmlWriter->writeStartElement("Center");
-//        xmlWriter->writeAttribute("x",QString::number(agent.wheelbase.toDouble() - agent.distanceCOGToFrontAxle.toDouble()));
-        xmlWriter->writeAttribute("x",QString::number(agent.length.toDouble() - agent.distCOGtoLeadingEdge.toDouble()));
+        xmlWriter->writeAttribute("x", QString::number(agent.length.toDouble() - agent.distCOGtoLeadingEdge.toDouble()));
         xmlWriter->writeAttribute("y",QString::number(0.0));
         xmlWriter->writeAttribute("z",agent.heightCOG);
         xmlWriter->writeEndElement(); // Center
@@ -168,24 +168,6 @@ bool XmlModelsConfig::WriteToXml(QXmlStreamWriter *xmlWriter)
         xmlWriter->writeEndElement(); // RearAxle
         xmlWriter->writeEndElement(); // Axles
         xmlWriter->writeEndElement(); // Vehicle
-
-        //            break;
-        //        case ("Pedestrian"):
-
-        //        case ("Motorbike"):
-        //            break;
-
-        //        case ("Bicycle"):
-        //            break;
-        //        case ("Truck"):
-        //            break;
-        //        case ("Pedestrian"):
-
-        //            break;
-        //        default:
-
-        //        }
-
     }
     xmlWriter->writeEndElement(); // Catalog
 

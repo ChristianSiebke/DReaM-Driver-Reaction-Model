@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2020 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2020, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -9,46 +9,50 @@
 **********************************************************************/
 
 #include "ConfigWriter.h"
+
 #include "GUI_Definitions.h"
 
-ConfigWriter::ConfigWriter():
-    ConfigWriter(baseFolder)
-{
-
-}
-
-ConfigWriter::ConfigWriter(const QString &baseFolder):
-    baseFolder(baseFolder)
+ConfigWriter::ConfigWriter(const QString &baseFolder)
 {
     baseDirectory.setPath(baseFolder);
 }
 
 const QString ConfigWriter::CreateSlaveConfiguration(const QString &configPath,
-                                                   const QString &endTime,
-                                                   std::vector<PCM_ParticipantData> &participants,
-                                                   std::vector<PCM_InitialValues> &initials,
-                                                   std::vector<PCM_Trajectory *> &trajectories,
-                                                   const QString &supposedCollisionTime,
-                                                   const QString &resultFolderName,
-                                                   const QString &pcmCase,
-                                                   const int randomSeed)
+                                                     const PCM_SimulationSet *simSet,
+                                                     const QString &resultFolderName,
+                                                     const QString &pcmCase,
+                                                     const int randomSeed)
 {
-    XmlRunConfig runConfig(0, endTime, 1, "undefined", -1, randomSeed);
+    QString supposedCollisionTime;
+    QString endTime;
 
-    for (size_t iParticipant = 0; iParticipant < participants.size(); iParticipant++)
+    const std::vector<PCM_Trajectory *> &trajectories = simSet->GetTrajectories();
+
+    if (trajectories.size() > 0)
     {
-        XmlSpawnPoint *sp = new XmlSpawnPoint( iParticipant, "SpawnPoint_PCM" );
-        sp->AddAgentRef( iParticipant );
-        sp->AddParameter(0, XML_PARAMETER_TYPE::double_, "PositionX", initials[iParticipant].GetXpos() );
-        sp->AddParameter(1, XML_PARAMETER_TYPE::double_, "PositionY", initials[iParticipant].GetYpos() );
-        sp->AddParameter(2, XML_PARAMETER_TYPE::double_, "VelocityX", initials[iParticipant].GetVx() );
-        sp->AddParameter(3, XML_PARAMETER_TYPE::double_, "VelocityY", initials[iParticipant].GetVy() );
-        sp->AddParameter(4, XML_PARAMETER_TYPE::double_, "AccelerationX", initials[iParticipant].GetAx() );
-        sp->AddParameter(5, XML_PARAMETER_TYPE::double_, "AccelerationY", initials[iParticipant].GetAy() );
-        sp->AddParameter(6, XML_PARAMETER_TYPE::double_, "YawAngle", initials[iParticipant].GetPsi() );
+        supposedCollisionTime = QString::number(trajectories.at(0)->GetEndTime());
+        endTime = QString::number(supposedCollisionTime.toInt() * 2); //set endTime twice as supposedCollisionTime in order to allow simulation after collision
+    }
+
+    XmlSlaveConfig runConfig(0, endTime, 1, "undefined", -1, randomSeed);
+
+    const std::vector<PCM_ParticipantData *> &participants = simSet->GetParticipants();
+    const std::vector<PCM_InitialValues *> &initials = simSet->GetInitials();
+
+    for (uint i = 0; i < participants.size(); i++)
+    {
+        XmlSpawnPoint *sp = new XmlSpawnPoint(i, "SpawnPoint_PCM");
+        sp->AddAgentRef(i);
+        sp->AddParameter(0, XML_PARAMETER_TYPE::double_, "PositionX", initials.at(i)->GetXpos());
+        sp->AddParameter(1, XML_PARAMETER_TYPE::double_, "PositionY", initials.at(i)->GetYpos());
+        sp->AddParameter(2, XML_PARAMETER_TYPE::double_, "VelocityX", initials.at(i)->GetVx());
+        sp->AddParameter(3, XML_PARAMETER_TYPE::double_, "VelocityY", initials.at(i)->GetVy());
+        sp->AddParameter(4, XML_PARAMETER_TYPE::double_, "AccelerationX", initials.at(i)->GetAx());
+        sp->AddParameter(5, XML_PARAMETER_TYPE::double_, "AccelerationY", initials.at(i)->GetAy());
+        sp->AddParameter(6, XML_PARAMETER_TYPE::double_, "YawAngle", initials.at(i)->GetPsi());
         runConfig.AddSpawnPoint(sp);
 
-        runConfig.AddAgent( iParticipant, iParticipant, participants[iParticipant] );
+        runConfig.AddAgent(i, i, participants.at(i));
     }
 
     XmlObservation *observation = new XmlObservation(0, "Evaluation_Pcm");
@@ -97,32 +101,41 @@ const QString ConfigWriter::CreateSlaveConfiguration(const QString &configPath,
 }
 
 const QString ConfigWriter::CreateProfilesCatalog(const QString &configPath,
-                                                   const QString &endTime,
-                                                   std::vector<PCM_ParticipantData> &participants,
-                                                   std::vector<PCM_InitialValues> &initials,
-                                                   std::vector<PCM_Trajectory *> &trajectories,
-                                                   const QString &supposedCollisionTime,
-                                                   const QString &resultFolderName,
-                                                   const QString &pcmCase,
-                                                   const int randomSeed)
+                                                  const PCM_SimulationSet *simSet,
+                                                  const QString &resultFolderName,
+                                                  const QString &pcmCase,
+                                                  const int randomSeed)
 {
-    XmlProfilesConfig runConfig(0, endTime, 1, "undefined", -1, randomSeed);
+    QString supposedCollisionTime;
+    QString endTime;
 
-    for (size_t iParticipant = 0; iParticipant < participants.size(); iParticipant++)
+    const std::vector<PCM_Trajectory *> &trajectories = simSet->GetTrajectories();
+
+    if (trajectories.size() > 0)
     {
-        XmlSpawnPoint *sp = new XmlSpawnPoint( iParticipant, "SpawnPoint_PCM" );
-        sp->AddAgentRef( iParticipant );
-        sp->AddParameter(0, XML_PARAMETER_TYPE::double_, "PositionX", initials[iParticipant].GetXpos() );
-        sp->AddParameter(1, XML_PARAMETER_TYPE::double_, "PositionY", initials[iParticipant].GetYpos() );
-        sp->AddParameter(2, XML_PARAMETER_TYPE::double_, "VelocityX", initials[iParticipant].GetVx() );
-        sp->AddParameter(3, XML_PARAMETER_TYPE::double_, "VelocityY", initials[iParticipant].GetVy() );
-        sp->AddParameter(4, XML_PARAMETER_TYPE::double_, "AccelerationX", initials[iParticipant].GetAx() );
-        sp->AddParameter(5, XML_PARAMETER_TYPE::double_, "AccelerationY", initials[iParticipant].GetAy() );
-        sp->AddParameter(6, XML_PARAMETER_TYPE::double_, "YawAngle", initials[iParticipant].GetPsi() );
-        runConfig.AddSpawnPoint(sp);
+        supposedCollisionTime = QString::number(trajectories.at(0)->GetEndTime());
+        endTime = QString::number(supposedCollisionTime.toInt() * 2); //set endTime twice as supposedCollisionTime in order to allow simulation after collision
+    }
 
-        runConfig.AddAgent( iParticipant, iParticipant, participants[iParticipant] );
-        runConfig.AddModel( iParticipant, iParticipant, participants[iParticipant] );
+    XmlProfilesConfig profilesConfig(0, endTime, 1, "undefined", -1, randomSeed);
+
+    const std::vector<PCM_ParticipantData *> &participants = simSet->GetParticipants();
+    const std::vector<PCM_InitialValues *> &initials = simSet->GetInitials();
+
+    for (uint i = 0; i < participants.size(); i++)
+    {
+        XmlSpawnPoint *sp = new XmlSpawnPoint(i, "SpawnPoint_PCM");
+        sp->AddAgentRef(i);
+        sp->AddParameter(0, XML_PARAMETER_TYPE::double_, "PositionX", initials.at(i)->GetXpos());
+        sp->AddParameter(1, XML_PARAMETER_TYPE::double_, "PositionY", initials.at(i)->GetYpos());
+        sp->AddParameter(2, XML_PARAMETER_TYPE::double_, "VelocityX", initials.at(i)->GetVx());
+        sp->AddParameter(3, XML_PARAMETER_TYPE::double_, "VelocityY", initials.at(i)->GetVy());
+        sp->AddParameter(4, XML_PARAMETER_TYPE::double_, "AccelerationX", initials.at(i)->GetAx());
+        sp->AddParameter(5, XML_PARAMETER_TYPE::double_, "AccelerationY", initials.at(i)->GetAy());
+        sp->AddParameter(6, XML_PARAMETER_TYPE::double_, "YawAngle", initials.at(i)->GetPsi());
+        profilesConfig.AddSpawnPoint(sp);
+
+        profilesConfig.AddModelId(i);
     }
 
     XmlObservation *observation = new XmlObservation(0, "Evaluation_Pcm");
@@ -157,46 +170,55 @@ const QString ConfigWriter::CreateProfilesCatalog(const QString &configPath,
     observation->AddParameter(idCounter++, XML_PARAMETER_TYPE::string_, "pcmCaseIndex",
                               QString::number(-1));
 
-    runConfig.AddObservation(observation);
+    profilesConfig.AddObservation(observation);
 
     XmlObservation *observerCollision = new XmlObservation(1, "Observation_Collision");
     observerCollision->AddParameter(0, XML_PARAMETER_TYPE::double_, "endVelocity", "1.0");
 
-    runConfig.AddObservation(observerCollision);
+    profilesConfig.AddObservation(observerCollision);
 
     XmlObservation *observerScopeLogger = new XmlObservation(2, "Observation_ScopeLogger");
-    runConfig.AddObservation(observerScopeLogger);
+    profilesConfig.AddObservation(observerScopeLogger);
 
-    return WriteProfilesCatalog(runConfig, configPath);
+    return WriteProfilesCatalog(profilesConfig, configPath);
 }
 
-
 const QString ConfigWriter::CreateModelsVehicle(const QString &configPath,
-                                                   const QString &endTime,
-                                                   std::vector<PCM_ParticipantData> &participants,
-                                                   std::vector<PCM_InitialValues> &initials,
-                                                   std::vector<PCM_Trajectory *> &trajectories,
-                                                   const QString &supposedCollisionTime,
-                                                   const QString &resultFolderName,
-                                                   const QString &pcmCase,
-                                                   const int randomSeed)
+                                                const PCM_SimulationSet *simSet,
+                                                const QString &resultFolderName,
+                                                const QString &pcmCase,
+                                                const int randomSeed)
 {
-    XmlModelsConfig runConfig(0, endTime, 1, "undefined", -1, randomSeed);
+    QString supposedCollisionTime;
+    QString endTime;
 
-    for (size_t iParticipant = 0; iParticipant < participants.size(); iParticipant++)
+    const std::vector<PCM_Trajectory *> &trajectories = simSet->GetTrajectories();
+
+    if (trajectories.size() > 0)
     {
-        XmlSpawnPoint *sp = new XmlSpawnPoint( iParticipant, "SpawnPoint_PCM" );
-        sp->AddAgentRef( iParticipant );
-        sp->AddParameter(0, XML_PARAMETER_TYPE::double_, "PositionX", initials[iParticipant].GetXpos() );
-        sp->AddParameter(1, XML_PARAMETER_TYPE::double_, "PositionY", initials[iParticipant].GetYpos() );
-        sp->AddParameter(2, XML_PARAMETER_TYPE::double_, "VelocityX", initials[iParticipant].GetVx() );
-        sp->AddParameter(3, XML_PARAMETER_TYPE::double_, "VelocityY", initials[iParticipant].GetVy() );
-        sp->AddParameter(4, XML_PARAMETER_TYPE::double_, "AccelerationX", initials[iParticipant].GetAx() );
-        sp->AddParameter(5, XML_PARAMETER_TYPE::double_, "AccelerationY", initials[iParticipant].GetAy() );
-        sp->AddParameter(6, XML_PARAMETER_TYPE::double_, "YawAngle", initials[iParticipant].GetPsi() );
-        runConfig.AddSpawnPoint(sp);
+        supposedCollisionTime = QString::number(trajectories.at(0)->GetEndTime());
+        endTime = QString::number(supposedCollisionTime.toInt() * 2); //set endTime twice as supposedCollisionTime in order to allow simulation after collision
+    }
 
-        runConfig.AddAgent( iParticipant, iParticipant, participants[iParticipant] );
+    XmlModelsConfig modelsConfig(0, endTime, 1, "undefined", -1, randomSeed);
+
+    const std::vector<PCM_ParticipantData *> &participants = simSet->GetParticipants();
+    const std::vector<PCM_InitialValues *> &initials = simSet->GetInitials();
+
+    for (uint i = 0; i < participants.size(); i++)
+    {
+        XmlSpawnPoint *sp = new XmlSpawnPoint(i, "SpawnPoint_PCM");
+        sp->AddAgentRef(i);
+        sp->AddParameter(0, XML_PARAMETER_TYPE::double_, "PositionX", initials.at(i)->GetXpos());
+        sp->AddParameter(1, XML_PARAMETER_TYPE::double_, "PositionY", initials.at(i)->GetYpos());
+        sp->AddParameter(2, XML_PARAMETER_TYPE::double_, "VelocityX", initials.at(i)->GetVx());
+        sp->AddParameter(3, XML_PARAMETER_TYPE::double_, "VelocityY", initials.at(i)->GetVy());
+        sp->AddParameter(4, XML_PARAMETER_TYPE::double_, "AccelerationX", initials.at(i)->GetAx());
+        sp->AddParameter(5, XML_PARAMETER_TYPE::double_, "AccelerationY", initials.at(i)->GetAy());
+        sp->AddParameter(6, XML_PARAMETER_TYPE::double_, "YawAngle", initials.at(i)->GetPsi());
+        modelsConfig.AddSpawnPoint(sp);
+
+        modelsConfig.AddAgent(i, i, participants.at(i));
     }
 
     XmlObservation *observation = new XmlObservation(0, "Evaluation_Pcm");
@@ -231,26 +253,26 @@ const QString ConfigWriter::CreateModelsVehicle(const QString &configPath,
     observation->AddParameter(idCounter++, XML_PARAMETER_TYPE::string_, "pcmCaseIndex",
                               QString::number(-1));
 
-    runConfig.AddObservation(observation);
+    modelsConfig.AddObservation(observation);
 
     XmlObservation *observerCollision = new XmlObservation(1, "Observation_Collision");
     observerCollision->AddParameter(0, XML_PARAMETER_TYPE::double_, "endVelocity", "1.0");
 
-    runConfig.AddObservation(observerCollision);
+    modelsConfig.AddObservation(observerCollision);
 
     XmlObservation *observerScopeLogger = new XmlObservation(2, "Observation_ScopeLogger");
-    runConfig.AddObservation(observerScopeLogger);
+    modelsConfig.AddObservation(observerScopeLogger);
 
-    return WriteModelsVehicle(runConfig, configPath);
+    return WriteModelsVehicle(modelsConfig, configPath);
 }
 
 const QString ConfigWriter::CreateSystemConfiguration(const QString &caseOutputFolder,
                                                       const QString &otherSystemFile,
                                                       const QString &car1SystemFile,
                                                       const QString &car2SystemFile,
-                                                      std::vector<PCM_ParticipantData> &participants)
+                                                      const PCM_SimulationSet *simSet)
 {
-    QString systemConfigFile = caseOutputFolder + "/" + FILENAME_SYSTEM_CONIG;
+    QString systemConfigFile = caseOutputFolder + "/" + FILENAME_SYSTEM_CONFIG;
 
     QString agent_OtherSystemFile = "Systems/agent_NoDynamic.xml";
     if (otherSystemFile != "")
@@ -274,6 +296,8 @@ const QString ConfigWriter::CreateSystemConfiguration(const QString &caseOutputF
         agent_Car2SystemFile = agent_Car1SystemFile;
     }
 
+    const std::vector<PCM_ParticipantData *> &participants = simSet->GetParticipants();
+
     if (participants.size() < 1)
     {
         return "";
@@ -287,7 +311,7 @@ const QString ConfigWriter::CreateSystemConfiguration(const QString &caseOutputF
     QString firstAgentFile;
     bool firstAgentFileIsSet = false; //only the first agent which is a car will get agent_Car1SystemFile
 
-    if ((participants.at(0).GetType() == "Car") || (participants.at(0).GetType() == "Truck"))
+    if ((participants.at(0)->GetType() == "car") || (participants.at(0)->GetType() == "truck"))
     {
         firstAgentFile = agent_Car1SystemFile;
         firstAgentFileIsSet = true;
@@ -309,7 +333,7 @@ const QString ConfigWriter::CreateSystemConfiguration(const QString &caseOutputF
     for (size_t i = 1; i < participants.size(); i++)
     {
         QString agentFile;
-        if ((participants.at(i).GetType() == "Car") || (participants.at(i).GetType() == "Truck"))
+        if ((participants.at(i)->GetType() == "car") || (participants.at(i)->GetType() == "truck"))
         {
             if (firstAgentFileIsSet)
             {
@@ -355,29 +379,25 @@ const QString ConfigWriter::CreateSystemConfiguration(const QString &caseOutputF
 }
 
 const QString ConfigWriter::CreateSceneryConfiguration(const QString &configPath,
-                                                       std::vector<PCM_Marks *> &marksVec,
-                                                       std::vector<PCM_ParticipantData> &participants,
-                                                       std::vector<PCM_Trajectory *> &trajectories,
-                                                       PCM_Object &object,
-                                                       PCM_ViewObject &viewObject,
-                                                       PCM_IntendedCourses &intendedCourses,
-                                                       PCM_GlobalData &globalData)
+                                                       const PCM_SimulationSet *simSet)
 {
-    Q_UNUSED(intendedCourses);
     XmlScenery sceneryConfig;
 
-    for (size_t i = 0; i < marksVec.size(); i++)
+    const std::vector<const PCM_Marks *> *marksVec = simSet->GetPcmData()->GetMarksVec();
+
+    for (size_t i = 0; i < marksVec->size(); i++)
     {
-        sceneryConfig.AddMarks(marksVec.at(i));
+        sceneryConfig.AddMarks(marksVec->at(i));
     }
 
-    sceneryConfig.AddObject(object);
-    sceneryConfig.AddViewObject(viewObject);
+    sceneryConfig.SetObject(simSet->GetPcmData()->GetObject());
+    sceneryConfig.SetViewObject(simSet->GetPcmData()->GetViewObject());
 
-    sceneryConfig.AddGlobalData(globalData);
+    sceneryConfig.SetGlobalData(simSet->GetPcmData()->GetGlobalData());
 
-    for (size_t i = 0; i < participants.size(); i++)
+    for (size_t i = 0; i < simSet->GetParticipants().size(); i++)
     {
+        const std::vector<PCM_Trajectory *> trajectories = simSet->GetTrajectories();
         if (i < trajectories.size())
         {
             sceneryConfig.AddTrajectory(i, trajectories.at(i));
@@ -396,7 +416,7 @@ const QString ConfigWriter::CreateFrameworkConfiguration(const QString framework
                                                          QList<QMap<QString, QString> > configList,
                                                          const int logLevel)
 {
-    QString frameworkConfigFile = frameworkConfigPath + "/" + FILENAME_FRAMEWORK_CONIG;
+    QString frameworkConfigFile = frameworkConfigPath + "/" + FILENAME_FRAMEWORK_CONFIG;
     QFile file(frameworkConfigFile);
 
     // open file
@@ -417,10 +437,10 @@ const QString ConfigWriter::CreateFrameworkConfiguration(const QString framework
 
     xmlWriter.writeStartElement("masterConfig");
     xmlWriter.writeTextElement("logLevel", QString::number(logLevel));
-    xmlWriter.writeTextElement("logFileMaster",
-                               baseDirectory.relativeFilePath(frameworkConfigPath + "/" + FILENAME_OPENPASSMASTER_LOG));
-    xmlWriter.writeTextElement("slave", "OpenPassSlave.exe");
-    xmlWriter.writeTextElement("libraries", baseDirectory.relativeFilePath(baseFolder) + SUBDIR_LIB_SIM);
+    //    xmlWriter.writeTextElement("logFileMaster",
+    //                               baseDirectory.relativeFilePath(frameworkConfigPath + "/" + FILENAME_OPENPASSMASTER_LOG));
+    //    xmlWriter.writeTextElement("slave", "OpenPassSlave.exe");
+    //    xmlWriter.writeTextElement("libraries", baseDirectory.relativeFilePath(baseFolder) + SUBDIR_LIB_SIM);
 
     xmlWriter.writeStartElement("slaveConfigs");
 
@@ -447,19 +467,19 @@ const QString ConfigWriter::CreateFrameworkConfiguration(const QString framework
     return frameworkConfigFile;
 }
 
-const QString ConfigWriter::WriteSlaveConfiguration(XmlRunConfig &runConfig,
-                                                  const QString &configPath)
+const QString ConfigWriter::WriteSlaveConfiguration(XmlSlaveConfig &slaveConfig,
+                                                    const QString &configPath)
 {
     // Create the xml with the chosen cases
-    QString runConfigFile = configPath + "/" + FILENAME_RUN_CONIG;
-    QFile file(runConfigFile);
+    QString slaveConfigFile = configPath + "/" + FILENAME_SLAVE_CONFIG;
+    QFile file(slaveConfigFile);
 
     // open file
     if (!file.open(QIODevice::WriteOnly))
     {
         // show error message if not able to open file
         std::cout << "Error (ConfigGenerator): could not open "
-                  << FILENAME_RUN_CONIG << std::endl;
+                  << FILENAME_SLAVE_CONFIG << std::endl;
         return "";
     }
 
@@ -473,9 +493,9 @@ const QString ConfigWriter::WriteSlaveConfiguration(XmlRunConfig &runConfig,
     xmlWriter.writeStartElement("slaveConfig");
     xmlWriter.writeAttribute("SchemaVersion","0.8.1");
 
-    bool success = runConfig.WriteToXml(&xmlWriter);
+    bool success = slaveConfig.WriteToXml(&xmlWriter);
 
-    xmlWriter.writeEndElement(); //RunConfiguration
+    xmlWriter.writeEndElement(); //SlaveConfig
 
     xmlWriter.writeEndDocument();
 
@@ -484,7 +504,7 @@ const QString ConfigWriter::WriteSlaveConfiguration(XmlRunConfig &runConfig,
 
     if (success)
     {
-        return runConfigFile;
+        return slaveConfigFile;
     }
     else
     {
@@ -492,19 +512,19 @@ const QString ConfigWriter::WriteSlaveConfiguration(XmlRunConfig &runConfig,
     }
 }
 
-const QString ConfigWriter::WriteProfilesCatalog(XmlProfilesConfig &runConfig,
-                                                  const QString &configPath)
+const QString ConfigWriter::WriteProfilesCatalog(XmlProfilesConfig &profilesConfig,
+                                                 const QString &configPath)
 {
     // Create the xml with the chosen cases
-    QString runConfigFile = configPath + "/" + FILENAME_PROFILES_CONIG;
-    QFile file(runConfigFile);
+    QString profilesConfigFile = configPath + "/" + FILENAME_PROFILES_CONFIG;
+    QFile file(profilesConfigFile);
 
     // open file
     if (!file.open(QIODevice::WriteOnly))
     {
         // show error message if not able to open file
         std::cout << "Error (ConfigGenerator): could not open "
-                  << FILENAME_PROFILES_CONIG << std::endl;
+                  << FILENAME_PROFILES_CONFIG << std::endl;
         return "";
     }
 
@@ -519,9 +539,9 @@ const QString ConfigWriter::WriteProfilesCatalog(XmlProfilesConfig &runConfig,
 
     xmlWriter.writeAttribute("SchemaVersion","0.4.2");
 
-    bool success = runConfig.WriteToXml(&xmlWriter);
+    bool success = profilesConfig.WriteToXml(&xmlWriter);
 
-    xmlWriter.writeEndElement(); //RunConfiguration
+    xmlWriter.writeEndElement(); //Profiles
 
     xmlWriter.writeEndDocument();
 
@@ -530,7 +550,7 @@ const QString ConfigWriter::WriteProfilesCatalog(XmlProfilesConfig &runConfig,
 
     if (success)
     {
-        return runConfigFile;
+        return profilesConfigFile;
     }
     else
     {
@@ -538,19 +558,19 @@ const QString ConfigWriter::WriteProfilesCatalog(XmlProfilesConfig &runConfig,
     }
 }
 
-const QString ConfigWriter::WriteModelsVehicle(XmlModelsConfig &runConfig,
-                                                  const QString &configPath)
+const QString ConfigWriter::WriteModelsVehicle(XmlModelsConfig &modelsConfig,
+                                               const QString &configPath)
 {
     // Create the xml with the chosen cases
-    QString runConfigFile = configPath + "/" + FILENAME_MODELS_CONIG;
-    QFile file(runConfigFile);
+    QString modelsConfigFile = configPath + "/" + FILENAME_MODELS_CONFIG;
+    QFile file(modelsConfigFile);
 
     // open file
     if (!file.open(QIODevice::WriteOnly))
     {
         // show error message if not able to open file
         std::cout << "Error (ConfigGenerator): could not open "
-                  << FILENAME_MODELS_CONIG << std::endl;
+                  << FILENAME_MODELS_CONFIG << std::endl;
         return "";
     }
 
@@ -563,7 +583,7 @@ const QString ConfigWriter::WriteModelsVehicle(XmlModelsConfig &runConfig,
 
     xmlWriter.writeStartElement("OpenSCENARIO");
 
-    bool success = runConfig.WriteToXml(&xmlWriter);
+    bool success = modelsConfig.WriteToXml(&xmlWriter);
 
     xmlWriter.writeEndElement(); //OpenSCENARIO
 
@@ -574,7 +594,7 @@ const QString ConfigWriter::WriteModelsVehicle(XmlModelsConfig &runConfig,
 
     if (success)
     {
-        return runConfigFile;
+        return modelsConfigFile;
     }
     else
     {
@@ -586,7 +606,7 @@ const QString ConfigWriter::WriteSceneryConfiguration(XmlScenery &sceneryConfig,
                                                       const QString &configPath)
 {
     // write the xml agent file
-    QString sceneryConfigFile = configPath + "/" + FILENAME_SCENERY_CONIG;
+    QString sceneryConfigFile = configPath + "/" + FILENAME_SCENERY_CONFIG;
     QFile file(sceneryConfigFile);
 
     //open file
@@ -594,7 +614,7 @@ const QString ConfigWriter::WriteSceneryConfiguration(XmlScenery &sceneryConfig,
     {
         // show error message if not able to open file
         std::cout << "Error (ConfigGenerator): could not open "
-                  << FILENAME_SCENERY_CONIG << std::endl;
+                  << FILENAME_SCENERY_CONFIG << std::endl;
         return "";
     }
 
@@ -618,7 +638,7 @@ const QString ConfigWriter::WriteSceneryConfiguration(XmlScenery &sceneryConfig,
 const QString ConfigWriter::WriteParkingConfiguration(const QString &configPath)
 {
     // write the xml agent file
-    QString sceneryConfigFile = configPath + "/" + FILENAME_PARKING_CONIG;
+    QString sceneryConfigFile = configPath + "/" + FILENAME_PARKING_CONFIG;
     QFile file(sceneryConfigFile);
 
     //open file
@@ -626,7 +646,7 @@ const QString ConfigWriter::WriteParkingConfiguration(const QString &configPath)
     {
         // show error message if not able to open file
         std::cout << "Error (ConfigGenerator): could not open "
-                  << FILENAME_PARKING_CONIG << std::endl;
+                  << FILENAME_PARKING_CONFIG << std::endl;
         return "";
     }
 
