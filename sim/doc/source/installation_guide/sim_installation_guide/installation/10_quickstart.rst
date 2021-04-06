@@ -47,6 +47,7 @@ This section describes how compile and run |op| as quickly as possible.
                   -D CMAKE_PREFIX_PATH="/mingw64/bin;\
                      ../deps/thirdParty/win64/FMILibrary;\
                      ../deps/thirdParty/win64/osi;"\
+                     ../deps/thirdParty/win64/minizip;"\
                   -D CMAKE_INSTALL_PREFIX=/C/OpenPASS/bin/core \
                   -D CMAKE_BUILD_TYPE=Release \
                   -D CMAKE_WITH_DEBUG_POSTIX=OFF \
@@ -66,6 +67,7 @@ This section describes how compile and run |op| as quickly as possible.
                      ../deps/thirdParty/linux64/FMILibrary\;\
                      ../deps/thirdParty/linux64/boost\;\
                      ../deps/thirdParty/linux64/osi\;\
+                     ../deps/thirdParty/linux64/minizip\;\
                      ../deps/thirdParty/linux64/protobuf\;\
                      ../deps/thirdParty/linux64/googletest \
                   -D CMAKE_INSTALL_PREFIX=/OpenPASS/bin/core \

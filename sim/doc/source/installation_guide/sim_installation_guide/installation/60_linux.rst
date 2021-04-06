@@ -32,7 +32,7 @@ Refer to :ref:`cmake` for details on the arguments.
      -D WITH_GUI=OFF \
      -D WITH_PROTOBUF_ARENA=ON \
      -D CMAKE_INSTALL_PREFIX=/OpenPASS/bin/core \
-     -D CMAKE_PREFIX_PATH=PATH_FMIL\;PATH_BOOST\;PATH_OSI\;PATH_PROTOBUF\;PATH_GTEST \
+     -D CMAKE_PREFIX_PATH=PATH_FMIL\;PATH_BOOST\;PATH_OSI\;PATH_PROTOBUF\;PATH_GTEST\;PATH_MINIZIP \
      ..
      
      make -j3

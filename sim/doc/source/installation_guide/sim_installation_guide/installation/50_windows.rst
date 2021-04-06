@@ -105,6 +105,7 @@ Update and install required packages (see also :ref:`prerequisites`).
       pacman -S dos2unix
       pacman -S mingw-w64-x86_64-ag
       pacman -S mingw-w64-x86_64-qt5-debug
+      pacman -S zlib-devel
 
 .. admonition:: GIT/SSH
  
@@ -127,7 +128,7 @@ Refer to :ref:`cmake` for details on the arguments.
      -D WITH_GUI=OFF \
      -D WITH_PROTOBUF_ARENA=ON \
      -D CMAKE_INSTALL_PREFIX=C:/OpenPASS/bin/core \
-     -D CMAKE_PREFIX_PATH="PATH_FMIL;PATH_BOOST;PATH_OSI;PATH_PROTOBUF;PATH_GTEST" \
+     -D CMAKE_PREFIX_PATH="PATH_FMIL;PATH_BOOST;PATH_OSI;PATH_PROTOBUF;PATH_GTEST;PATH_MINIZIP" \
      ..
      
      mingw32-make -j3

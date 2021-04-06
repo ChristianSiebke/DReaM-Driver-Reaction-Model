@@ -40,6 +40,7 @@ In short:
          apt install libprotobuf-dev
          apt install protobuf-compiler  # when building osi
          apt install qt5-default
+         apt install zlib1g-dev
 
       Details: :ref:`building_under_linux`
 

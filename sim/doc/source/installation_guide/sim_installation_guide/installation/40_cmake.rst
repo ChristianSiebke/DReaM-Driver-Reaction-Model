@@ -66,6 +66,7 @@ Use this, when an exact library version, or a customized library shall be used i
                   /mingw64/bin;\
                   $PWD/../deps/thirdParty/win64/FMILibrary;\
                   $PWD/../deps/thirdParty/win64/osi;\
+                  $PWD/../deps/thirdParty/win64/minizip;\
                -D <other variables>\
                ..
 
@@ -76,6 +77,7 @@ Use this, when an exact library version, or a customized library shall be used i
          cmake -D CMAKE_PREFIX_PATH=\
                   $PWD/../deps/thirdParty/linux64/FMILibrary\;\
                   $PWD/../deps/thirdParty/linux64/osi\;\
+                  $PWD/../deps/thirdParty/linux64/minizip\;\
                -D <other variables> \
                ..
 
