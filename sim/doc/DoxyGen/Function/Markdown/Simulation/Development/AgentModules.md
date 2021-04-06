@@ -228,6 +228,7 @@ The OsmpFmuHandler has the following additional (optional) parameters:
 | Input_&lt;var_name&gt;    | string   | var_name references a FMU variable (as defined in FMU's modelDescription.xml) to which a specific OSI message is sent. Allowed values: `SensorView`, `SensorViewConfig`, `SensorData`, `TrafficCommand`                 |
 | Output_&lt;var_name&gt;   | string   | var_name references a FMU variable (as defined in FMU's modelDescription.xml) from which a specific OSI message is received. Allowed values: `SensorViewConfigRequest`, `SensorData`, `TrafficUpdate`, `MotionCommand`  |
 | Parameter_&lt;name&gt;    | any      | The value of the parameter is assigned to the FMU variable &lt;name&gt;                         |
+| Parameter_&lt;transformation&gt;[&lt;mapping&gt;]_&lt;name&gt;    | string/string/any&ast;      | Same as Parameter_&lt;name&gt; but with an preceding &lt;transformation&gt; according to a &lt;mapping&gt;.<br/>Currently, only mappings between the same types are supported.<br/>&ast;When using `TransformList` as &lt;transformation&gt;, the type of the data is expected to be a string and the string must be a comma separated list of values.<br/><br/>Allowed values:<br />&lt;transformation&gt;: `Transform`, `TransformList`<br />&lt;mapping&gt;: `ScenarioName>Id`<br/><br/>Example: `Parameter_TransformList[ScenarioName>Id]_<name>` |
 | WriteSensorViewOutput     | bool     | If true the SensorView is written into a JSON file                                              |
 | WriteSensorViewConfigOutput     | bool     | If true the SensorViewConfig is written into a JSON file                                              |
 | WriteSensorViewConfigRequestOutput     | bool     | If true the SensorViewConfigRequest is written into a JSON file                                              |
@@ -557,4 +558,3 @@ Output to other components:
 | TrajectoryFollower | Current max. reachable state                                               | ComponentStateSignal        |
 | Driver             | List of all ADAS with names, stati and types                               | AdasStateSignal             |
 | VehicleComponent   | Current max. reachable state, list of all ADAS with names, stati and types | CompCtrlToVehicleCompSignal |
-
