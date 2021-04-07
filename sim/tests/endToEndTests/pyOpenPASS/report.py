@@ -17,9 +17,10 @@ import os.path
 import json
 import glob
 import locale
+import re
+from math import nan, isnan
+from junitparser import JUnitXml, Failure
 from reports import HtmlReport
-
-from junitparser import JUnitXml
 
 class SLAVEINFO:
     exe = 'OpenPassSlave' + ('.exe' if os.name == 'nt' else '')
@@ -158,32 +159,21 @@ class Scope:
         self.test_results[result.test_name].append(result)
         self.test_rates[result.test_name].append(rates)
 
-
-class JUnitReport:
-    def __init__(self, filepath):
-        self.xml = JUnitXml.fromfile(filepath)
-
-    def status(self, test_case=None):
-        from junitparser import TestSuite, Failure
-        if isinstance(self.xml, TestSuite):
-            for test in self.xml:
-                if f'[{test_case}]' in test.name:
-                    return not isinstance(test.result, Failure), test.time
-        return True, 0.0
-
-
 class TestResult:
     def __init__(self, test_result_file, test_name):
         self.test_name = test_name
-        self.status = False
-        self.duration = 0.0
         self.data = ""
-        self.parse_result_dir(test_result_file, test_name)
+        self.duration = nan
+        self.status = True
+        self.get_status_and_duration(test_result_file, test_name)
 
-    def parse_result_dir(self, test_result_file, test_name):
-        ju = JUnitReport(test_result_file)
-        (self.status, self.duration) = ju.status(test_name)
-
+    def get_status_and_duration(self, filepath, test_case=None):
+        xml = JUnitXml.fromfile(filepath)
+        matcher = re.compile(rf'.*\[{re.escape(test_case)}\d*\].*')
+        for test in filter(lambda t: re.match(matcher, t.name), xml):
+            self.duration = self.duration + test.time if not isnan(self.duration) else test.time
+            if len(test.result) and next(filter(lambda r: isinstance(r, Failure), test.result)):
+                self.status = False
 
 def remove_testsuites(file):
     """
