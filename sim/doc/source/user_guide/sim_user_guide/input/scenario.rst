@@ -574,7 +574,7 @@ The following openSCENARIO actions are supported:
 In addition, the following user defined actions are interpreted:
 
 - :ref:`scenario_componentstatechange`
-- :ref:`scenario_customparameters`
+- :ref:`scenario_defaultCustomCommandAction`
 
 
 .. todo:: Write a paragraph about the concept "Trajectories, OSC Actions, and so" in the developer zone.
@@ -747,22 +747,6 @@ Both variants, "RelativeTargetSpeed" and "AbsoluteTargetSpeed", are supported, b
      </PrivateAction>
    </Action>
 
-.. _scenario_stoptrigger:
-
-StopTrigger
-~~~~~~~~~~~
-
-Here, end conditions for the simulation are defined.
-
-Right now, only SimulationTime is supported, given in seconds, with the fixed ``rule="greaterThan"``.
-
-**Example**
-.. literalinclude:: /../../deps/os/sim/tests/endToEndTests/Resources/DefaultConfigurations/Scenario.xosc
-  :language: xml
-  :dedent: 2
-  :start-at: <StopTrigger>
-  :end-at: </StopTrigger>
-
 .. _scenario_defaultCustomCommandAction:
 
 UsedDefinedAction: DefaultCustomCommandAction
@@ -790,7 +774,7 @@ The ``DefaultCustomCommandAction`` adds an event to the ``EventNetwork``, which 
 
 .. note::
 
-   Here, "Arbitrary" is first checked, if it matches any other available Keyword for used defined actions, such as :ref:`_scenario_componentstatechange`.
+   Here, "Arbitrary" is first checked, if it matches any other available Keyword for used defined actions, such as :ref:`scenario_componentstatechange`.
 
 .. _scenario_componentstatechange:
 
@@ -813,3 +797,19 @@ The ComponentStateChangeManipulator influences the maximum reachable state of an
        </UserDefinedAction>
    </Action>
 
+.. _scenario_stoptrigger:
+
+StopTrigger
+~~~~~~~~~~~
+
+Here, end conditions for the simulation are defined.
+
+Right now, only SimulationTime is supported, given in seconds, with the fixed ``rule="greaterThan"``.
+
+**Example**
+
+.. literalinclude:: @OP_REL_SIM@/contrib/examples/DefaultConfigurations/Scenario.xosc
+   :language: xml
+   :dedent: 2
+   :start-at: <StopTrigger>
+   :end-at: </StopTrigger>

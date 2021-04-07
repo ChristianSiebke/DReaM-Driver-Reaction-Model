@@ -9,6 +9,8 @@
   SPDX-License-Identifier: EPL-2.0
   ************************************************************
 
+.. _sphinx:
+
 Sphinx
 ======
 
@@ -49,8 +51,9 @@ Building this Documentation (Linux/Debian)
    
    # install sphinx extensions
    pip3 install sphinx sphinx-rtd-theme sphinx-tabs breathe exhale sphinxcontrib-spelling
-   
-   # assuming you're in the repositories root
-   cd utils
-   ./make_doc.sh ../build && \
-   xdg-open ../build/doc/html/index.html
+
+   # build doc (only)
+   mkdir build
+   cd build
+   cmake -DWITH_SIMCORE=OFF -DWITH_TESTS=OFF -DWITH_DOC=ON ..
+   make doc
