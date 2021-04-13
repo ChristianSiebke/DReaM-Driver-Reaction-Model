@@ -27,29 +27,25 @@ using namespace Configuration;
 
 namespace Importer
 {
-const std::unordered_map<std::string, RoadLaneType> roadLaneTypeConversionMap = {
-                                                                                 {"none", RoadLaneType::None},
-                                                                                 {"driving", RoadLaneType::Driving},
-                                                                                 {"stop", RoadLaneType::Stop},
-                                                                                 {"shoulder", RoadLaneType::Shoulder},
-                                                                                 {"biking", RoadLaneType::Biking},
-                                                                                 {"sidewalk", RoadLaneType::Sidewalk},
-                                                                                 {"border", RoadLaneType::Border},
-                                                                                 {"restricted", RoadLaneType::Restricted},
-                                                                                 {"parking", RoadLaneType::Parking},
-                                                                                 {"bidirectional", RoadLaneType::Bidirectional},
-                                                                                 {"median", RoadLaneType::Median},
-                                                                                 {"special1", RoadLaneType::Special1},
-                                                                                 {"special2", RoadLaneType::Special2},
-                                                                                 {"special3", RoadLaneType::Special3},
-                                                                                 {"roadworks", RoadLaneType::Roadworks},
-                                                                                 {"tram", RoadLaneType::Tram},
-                                                                                 {"rail", RoadLaneType::Rail},
-                                                                                 {"entry", RoadLaneType::Entry},
-                                                                                 {"exit", RoadLaneType::Exit},
-                                                                                 {"offRamp", RoadLaneType::OffRamp},
-                                                                                 {"onRamp", RoadLaneType::OnRamp}
-                                                                                };
+const std::unordered_map<std::string, RoadLaneType> roadLaneTypeConversionMap =
+{
+    {"shoulder", RoadLaneType::Shoulder},
+    {"border", RoadLaneType::Border},
+    {"driving", RoadLaneType::Driving},
+    {"stop", RoadLaneType::Stop},
+    {"none", RoadLaneType::None},
+    {"restricted", RoadLaneType::Restricted},
+    {"parking", RoadLaneType::Parking},
+    {"median", RoadLaneType::Median},
+    {"biking", RoadLaneType::Biking},
+    {"sidewalk", RoadLaneType::Sidewalk},
+    {"curb", RoadLaneType::Curb},
+    {"exit", RoadLaneType::Exit},
+    {"entry", RoadLaneType::Entry},
+    {"onRamp", RoadLaneType::OnRamp},
+    {"offRamp", RoadLaneType::OffRamp},
+    {"connectingRamp", RoadLaneType::ConnectingRamp}
+};
 
 const std::unordered_map<std::string, RoadTypeInformation> roadTypeConversionMap = {
                                                                                     {"unknown", RoadTypeInformation::Unknown},

@@ -14,6 +14,7 @@
 /** @file  algorithm_lateralImplementation.cpp */
 //-----------------------------------------------------------------------------
 
+#include <algorithm>
 #include <memory>
 #include <qglobal.h>
 #include "steeringController.h"
@@ -35,12 +36,12 @@ double SteeringController::CalculateSteeringAngle(int time)
     // Controller for lateral deviation
     double deltaHLateralDeviation = in_lateralSignal.gainLateralDeviation
             * in_steeringRatio * in_wheelBase / (velocityForCalculations * velocityForCalculations)
-            * in_lateralSignal.lateralDeviation * RadiantToDegree;
+            * in_lateralSignal.lateralDeviation;
 
     // Controller for heading angle error
     double deltaHHeadingError = in_lateralSignal.gainHeadingError
             * in_steeringRatio * in_wheelBase / velocityForCalculations
-            * in_lateralSignal.headingError * RadiantToDegree;
+            * in_lateralSignal.headingError;
 
     // Controller for road curvature
     double meanCurvatureToNearPoint = 0.;
@@ -93,21 +94,22 @@ double SteeringController::CalculateSteeringAngle(int time)
 
     // Controller for road curvaturedelta due to manoeuvre
     double deltaHkappa = std::atan((in_lateralSignal.kappaManoeuvre + calc_kappaRoadAnticipated) * in_wheelBase)
-            * in_steeringRatio * RadiantToDegree;
+            * in_steeringRatio;
 
 
     // Total steering wheel angle
     double deltaH = deltaHLateralDeviation + deltaHHeadingError + deltaHkappa;
 
     // Limit steering wheel velocity. Human limit set to 320°/s.
-    const auto maxDeltaSteeringWheelAngle = (320. / velocityFactor) * dt;
+    constexpr double HUMAN_LIMIT {320.0 * M_PI / 180.0};
+    const auto maxDeltaSteeringWheelAngle = (HUMAN_LIMIT / velocityFactor) * dt;
     const auto deltaSteeringWheelAngle = deltaH - in_steeringWheelAngle;
     if (std::fabs(deltaSteeringWheelAngle) > maxDeltaSteeringWheelAngle)
     {
         deltaH = std::copysign(maxDeltaSteeringWheelAngle, deltaSteeringWheelAngle) + in_steeringWheelAngle;
     }
 
-    const auto desiredSteeringWheelAngle = TrafficHelperFunctions::ValueInBounds(-in_steeringMax, deltaH , in_steeringMax);
+    const auto desiredSteeringWheelAngle = std::clamp(deltaH, -in_steeringMax, in_steeringMax);
 
     timeLast = time;
     meanCurvatureToNearPointSmoothLast = meanCurvatureToNearPointSmooth;

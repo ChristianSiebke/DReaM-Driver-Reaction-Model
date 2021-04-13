@@ -15,6 +15,7 @@
 
 #include "common/commonTools.h"
 #include "importerLoggingHelper.h"
+#include "importer/importerCommon.h"
 
 using namespace SimulationCommon;
 

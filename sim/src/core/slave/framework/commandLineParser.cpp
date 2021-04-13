@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -20,8 +20,12 @@ CommandLineArguments CommandLineParser::Parse(const QStringList& arguments)
 {
     QCommandLineParser commandLineParser;
     commandLineParser.addOptions(GetOptions());
+    commandLineParser.addHelpOption();
+    commandLineParser.addVersionOption();
     commandLineParser.process(arguments);
+
     EvaluateDefaultedValues(commandLineParser);
+
     return CompileCommandLineArguments(commandLineParser);
 }
 
@@ -75,10 +79,10 @@ std::list<std::string> CommandLineParser::parsingLog {};
  * and add them to the command line parser.
  *
  * Syntax:
- * 1) name used on the command line for this flag (e.g "-o", "--output")
- * 2) description - a description of what the flag does
- * 3) valueName - REQUIRED for options that take an input value;
- * 4) defaultValue
+ * 1) name used on the command line for this flag/option (e.g "-o", "--output")
+ * 2) description - a description of what the flag/option does
+ * 3) valueName - shown as placeholder in help text for options that take an input value
+ * 4) defaultValue - value to use, if the option is not specified on the command line
  *
  * Don't forget to update test GivenNoValues_SetDefaultsAndLogsEntryForEachDefaultedValue too
  */
@@ -105,7 +109,7 @@ const std::list<CommandLineOption> CommandLineParser::commandLineOptions
     {
         "configs",
         "Path where to retrieve configuration files",
-        "resultPath",
+        "configPath",
         "configs"
     },
     {

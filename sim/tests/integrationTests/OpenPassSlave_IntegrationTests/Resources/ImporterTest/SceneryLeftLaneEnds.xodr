@@ -105,16 +105,16 @@
             </laneSection>
         </lanes>
         <objects>
-            <object type="RoadSideMarkerPost" name="" id="" s="0" t="1" zOffset="0" validLength="0" orientation="+" length="0.12" width="0.12" height="1.2" hdg="0" pitch="0" roll="0">
+            <object type="roadMark" name="" id="" s="0" t="1" zOffset="0" validLength="0" orientation="+" length="0.12" width="0.12" height="1.2" hdg="0" pitch="0" roll="0">
                 <repeat s="0" distance = "50" length="5139.7188686309819"/>
             </object>
-            <object type="RoadSideMarkerPost" name="" id="" s="0" t="-16" zOffset="0" validLength="0" orientation="-" length="0.12" width="0.12" height="1.2" hdg="0" pitch="0" roll="0">
+            <object type="roadMark" name="" id="" s="0" t="-16" zOffset="0" validLength="0" orientation="-" length="0.12" width="0.12" height="1.2" hdg="0" pitch="0" roll="0">
                 <repeat s="0" distance = "50" length="5139.7188686309819"/>
             </object>
-            <object type="GuardRail" name="Leitplanke" id="" s="0" t="0.5" zOffset="0" validLength="0" orientation="+" length="3.0" width="0.25" height="0.9" hdg="0" pitch="0" roll="0">
+            <object type="railing" name="Leitplanke" id="" s="0" t="0.5" zOffset="0" validLength="0" orientation="+" length="3.0" width="0.25" height="0.9" hdg="0" pitch="0" roll="0">
                 <repeat s="0" distance = "0" length="5139.7188686309819"/>
             </object>
-            <object type="GuardRail" name="Leitplanke" id="" s="0" t="-15.5" zOffset="0" validLength="0" orientation="-" length="3.0" width="0.25" height="0.9" hdg="0" pitch="0" roll="0">
+            <object type="railing" name="Leitplanke" id="" s="0" t="-15.5" zOffset="0" validLength="0" orientation="-" length="3.0" width="0.25" height="0.9" hdg="0" pitch="0" roll="0">
                 <repeat s="0" distance = "0" length="5139.7188686309819"/>
             </object>
         </objects>

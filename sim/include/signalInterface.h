@@ -24,6 +24,8 @@ enum class ComponentState
 
 namespace openpass::utils {
 
+/// @brief constexpr map for transforming the a corresponding enumeration into
+///        a string representation: try to_cstr(EnumType) or to_string(EnumType)
 static constexpr std::array<const char *, 4> ComponentStateMapping{
     "Undefined",
     "Disabled",

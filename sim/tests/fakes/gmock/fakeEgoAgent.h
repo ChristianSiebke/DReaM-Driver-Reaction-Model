@@ -18,7 +18,7 @@ class FakeEgoAgent : public EgoAgentInterface
   public:
     MOCK_CONST_METHOD0(GetAgent, const AgentInterface* ());
     MOCK_METHOD3(SetRoadGraph, void (const RoadGraph&& roadGraph, RoadGraphVertex current, RoadGraphVertex target));
-    MOCK_METHOD0(UpdatePositionInGraph, void ());
+    MOCK_METHOD0(Update, void ());
     MOCK_CONST_METHOD0(HasValidRoute, bool ());
     MOCK_METHOD1(SetNewTarget, void (size_t alternativeIndex));
     MOCK_CONST_METHOD0(GetRoadId, const std::string& ());

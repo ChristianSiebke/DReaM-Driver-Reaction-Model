@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
+* Copyright (c) 2018, 2019, 2021 in-tech GmbH
 *               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -161,48 +161,38 @@ LaneType OpenDriveTypeMapper::OdToOwlLaneType(const RoadLaneType laneType)
 {
     switch (laneType)
     {
-        case RoadLaneType::None:
-            return LaneType::None;
+        case RoadLaneType::Shoulder:
+            return LaneType::Shoulder;
+        case RoadLaneType::Border:
+            return LaneType::Border;
         case RoadLaneType::Driving:
             return LaneType::Driving;
         case RoadLaneType::Stop:
             return LaneType::Stop;
-        case RoadLaneType::Shoulder:
-            return LaneType::Shoulder;
-        case RoadLaneType::Biking:
-            return LaneType::Biking;
-        case RoadLaneType::Sidewalk:
-            return LaneType::Sidewalk;
-        case RoadLaneType::Border:
-            return LaneType::Border;
+        case RoadLaneType::None:
+            return LaneType::None;
         case RoadLaneType::Restricted:
             return LaneType::Restricted;
         case RoadLaneType::Parking:
             return LaneType::Parking;
-        case RoadLaneType::Bidirectional:
-            return LaneType::Bidirectional;
         case RoadLaneType::Median:
             return LaneType::Median;
-        case RoadLaneType::Special1:
-            return LaneType::Special1;
-        case RoadLaneType::Special2:
-            return LaneType::Special2;
-        case RoadLaneType::Special3:
-            return LaneType::Special3;
-        case RoadLaneType::Roadworks:
-            return LaneType::Roadworks;
-        case RoadLaneType::Tram:
-            return LaneType::Tram;
-        case RoadLaneType::Rail:
-            return LaneType::Rail;
-        case RoadLaneType::Entry:
-            return LaneType::Entry;
+        case RoadLaneType::Biking:
+            return LaneType::Biking;
+        case RoadLaneType::Sidewalk:
+            return LaneType::Sidewalk;
+        case RoadLaneType::Curb:
+            return LaneType::Curb;
         case RoadLaneType::Exit:
             return LaneType::Exit;
-        case RoadLaneType::OffRamp:
-            return LaneType::OffRamp;
+        case RoadLaneType::Entry:
+            return LaneType::Entry;
         case RoadLaneType::OnRamp:
             return LaneType::OnRamp;
+        case RoadLaneType::OffRamp:
+            return LaneType::OffRamp;
+        case RoadLaneType::ConnectingRamp:
+            return LaneType::ConnectingRamp;
         default:
             return LaneType::Undefined;
     }
@@ -210,56 +200,42 @@ LaneType OpenDriveTypeMapper::OdToOwlLaneType(const RoadLaneType laneType)
 
 LaneMarking::Color OpenDriveTypeMapper::OsiToOdLaneMarkingColor(const osi3::LaneBoundary_Classification_Color color)
 {
-    if(color == osi3::LaneBoundary_Classification_Color::LaneBoundary_Classification_Color_COLOR_WHITE)
+    switch (color)
     {
+    case osi3::LaneBoundary_Classification_Color::LaneBoundary_Classification_Color_COLOR_WHITE:
         return LaneMarking::Color::White;
-    }
-    if(color == osi3::LaneBoundary_Classification_Color::LaneBoundary_Classification_Color_COLOR_YELLOW)
-    {
+    case osi3::LaneBoundary_Classification_Color::LaneBoundary_Classification_Color_COLOR_YELLOW:
         return LaneMarking::Color::Yellow;
-    }
-    if(color == osi3::LaneBoundary_Classification_Color::LaneBoundary_Classification_Color_COLOR_GREEN)
-    {
+    case osi3::LaneBoundary_Classification_Color::LaneBoundary_Classification_Color_COLOR_GREEN:
         return LaneMarking::Color::Green;
-    }
-    if(color == osi3::LaneBoundary_Classification_Color::LaneBoundary_Classification_Color_COLOR_RED)
-    {
+    case osi3::LaneBoundary_Classification_Color::LaneBoundary_Classification_Color_COLOR_RED:
         return LaneMarking::Color::Red;
-    }
-    if(color == osi3::LaneBoundary_Classification_Color::LaneBoundary_Classification_Color_COLOR_BLUE)
-    {
+    case osi3::LaneBoundary_Classification_Color::LaneBoundary_Classification_Color_COLOR_BLUE:
         return LaneMarking::Color::Blue;
+    case osi3::LaneBoundary_Classification_Color::LaneBoundary_Classification_Color_COLOR_OTHER:
+        return LaneMarking::Color::Other;
+    default:
+        std::invalid_argument("Type of lane marking color not supported.");
     }
-
-    throw std::invalid_argument("Type of lane marking color not supported.");
 }
 
 LaneMarking::Type OpenDriveTypeMapper::OsiToOdLaneMarkingType(const osi3::LaneBoundary_Classification_Type type)
 {
-    if (type == osi3::LaneBoundary_Classification_Type_TYPE_NO_LINE)
+    switch(type)
     {
+    case osi3::LaneBoundary_Classification_Type_TYPE_NO_LINE:
         return LaneMarking::Type::None;
-    }
-    if (type == osi3::LaneBoundary_Classification_Type_TYPE_SOLID_LINE)
-    {
+    case osi3::LaneBoundary_Classification_Type_TYPE_SOLID_LINE:
         return LaneMarking::Type::Solid;
-    }
-    if (type == osi3::LaneBoundary_Classification_Type_TYPE_DASHED_LINE)
-    {
+    case osi3::LaneBoundary_Classification_Type_TYPE_DASHED_LINE:
         return LaneMarking::Type::Broken;
-    }
-    if (type == osi3::LaneBoundary_Classification_Type_TYPE_BOTTS_DOTS)
-    {
+    case osi3::LaneBoundary_Classification_Type_TYPE_BOTTS_DOTS:
         return LaneMarking::Type::Botts_Dots;
-    }
-    if (type == osi3::LaneBoundary_Classification_Type_TYPE_GRASS_EDGE)
-    {
+    case osi3::LaneBoundary_Classification_Type_TYPE_GRASS_EDGE:
         return LaneMarking::Type::Grass;
-    }
-    if (type == osi3::LaneBoundary_Classification_Type_TYPE_CURB)
-    {
+    case osi3::LaneBoundary_Classification_Type_TYPE_CURB:
         return LaneMarking::Type::Curb;
+    default:
+        throw std::invalid_argument("Type of lane marking not supported.");
     }
-
-    throw std::invalid_argument("Type of lane marking not supported.");
 }

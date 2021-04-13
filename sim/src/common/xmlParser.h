@@ -22,7 +22,19 @@
 #include <QDomDocument>
 #include <QFile>
 
-#include "common/log.h"
+//! Writes a message into the log including the line and column number of the erronous xml element
+//!
+//! \param element      erronous xml element
+//! \param message      message describing error
+//! \param logFunction  function to use for logging
+static void LogMessage(const QDomElement element, const std::string &message,
+                       std::function<void(const std::string&)> logFunction)
+{
+    logFunction("Could not import element " + element.tagName().toStdString() +
+                " (line " + std::to_string(element.lineNumber()) +
+                ", column " + std::to_string(element.columnNumber()) + "): " +
+                message);
+}
 
 namespace SimulationCommon {
 
@@ -101,6 +113,7 @@ bool ImportProbabilityMap(QDomElement parentElement,
                           const std::string key,
                           const QString tag,
                           std::vector<std::pair<T, double>> &probabilities,
+                          std::function<void(const std::string&)> logFunction,
                           bool mustAddUpToOne = true)
 {
     double probabilitySum = 0.0;
@@ -108,7 +121,7 @@ bool ImportProbabilityMap(QDomElement parentElement,
     QDomElement childElement;
     if (!GetFirstChildElement(parentElement, tag.toStdString(), childElement))
     {
-        LOG_INTERN(LogLevel::Error) << "At least one element is required.";
+        LogMessage(parentElement, "At least one element is required.", logFunction);
         return false;
     }
 
@@ -119,13 +132,13 @@ bool ImportProbabilityMap(QDomElement parentElement,
 
         if (!ParseAttribute<T>(childElement, key, keyValue))
         {
-            LOG_INTERN(LogLevel::Error) << "Key is invalid.";
+            LogMessage(childElement, "Key is invalid.", logFunction);
             return false;
         }
 
         if (!ParseAttributeDouble(childElement, "Probability", probability))
         {
-            LOG_INTERN(LogLevel::Error) << "Probability is invalid.";
+            LogMessage(childElement, "Probability is invalid.", logFunction);
             return false;
         }
 
@@ -139,13 +152,13 @@ bool ImportProbabilityMap(QDomElement parentElement,
     //Checks probabilities
     if (mustAddUpToOne && std::abs(probabilitySum - 1.0) > 1e-6)
     {
-        LOG_INTERN(LogLevel::Error) << "Probabilities do not add up to 1.0.";
+        LogMessage(parentElement, "Probabilities do not add up to 1.0.", logFunction);
         return false;
     }
 
     if (probabilitySum > 1.0 + 1e-6)
     {
-        LOG_INTERN(LogLevel::Error) << "Probabilities add up to more than 1.0.";
+        LogMessage(parentElement, "Probabilities add up to more than 1.0.", logFunction);
         return false;
     }
 
@@ -153,14 +166,3 @@ bool ImportProbabilityMap(QDomElement parentElement,
 }
 
 } // namespace SimulationCommon
-
-[[maybe_unused]] static void ThrowIfFalse(bool success, const QDomElement element, const std::string &message)
-{
-    if (!success)
-    {
-        LogErrorAndThrow("Could not import element " + element.tagName().toStdString() +
-                         " (line " + std::to_string(element.lineNumber()) +
-                         ", column " + std::to_string(element.columnNumber()) + "): " +
-                         message);
-    }
-}

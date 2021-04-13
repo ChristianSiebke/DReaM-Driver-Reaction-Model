@@ -62,14 +62,11 @@ private:
     /**
      * @brief Generates agents in specified lane based on specified range.
      *
-     * @param[in]   laneId      Id of the lane to spawn agents in.
      * @param[in]   roadId      Id of the road to spawn agents in.
-     * @param[in]   range       Range in which to spawn agents.
+     * @param[in]   validLaneSpawningRange       LaneSpawningRange containing laneId and Range.
      * @return
      */
-    Agents GenerateAgentsForRange(const LaneId& laneId,
-                                  const RoadId& roadId,
-                                  const Range& range);
+    Agents GenerateAgentsForRange(const RoadId& roadId, const LaneSpawningRange& validLaneSpawningRange);
 
     /**
      * @brief Get SpawnInfo for the next agent that should be spawned.
@@ -80,6 +77,7 @@ private:
      * @param[in]   velocity            Velocity of the new agent.
      * @param[in]   agentFrontLength
      * @param[in]   agentRearLength
+     * @param[in]   route
      * @return      SpawnInfo for new agent.
      */
     std::optional<SpawnInfo> GetNextSpawnCarInfo(const RoadId& roadId,
@@ -88,7 +86,8 @@ private:
                                                  const double gapInSeconds,
                                                  const double velocity,
                                                  const double agentFrontLength,
-                                                 const double agentRearLength) const;
+                                                 const double agentRearLength,
+                                                 const Route& route) const;
     /**
      * @brief Checks validity of spawning coordinates.
      * @param[in]   roadId                  Id of the road in which agent is to be spawned.
@@ -134,10 +133,12 @@ private:
      * @param[in]   agentBlueprint      AgentBlueprint for new agent.
      * @param[in]   laneId              Id of lane in which new agent should be spawned.
      * @param[in]   spawnInfo           SpawnInfo of new agent.
+     * @param[in]   route               Route
      * @return      return true if successful
      */
     bool CalculateSpawnParameter(AgentBlueprintInterface* agentBlueprint,
-                                 const SpawnInfo& spawnInfo);
+                                 const SpawnInfo& spawnInfo,
+                                 const Route& route);
 
     /**
      * \brief Logs a message for error mode.
@@ -154,6 +155,14 @@ private:
     const SpawnPointDependencies dependencies;
     const PreRunSpawnerParameters parameters;
     const WorldAnalyzer worldAnalyzer;
+
+    const LaneTypes supportedLaneTypes =
+    {
+        LaneType::Driving,
+        LaneType::OnRamp,
+        LaneType::OffRamp,
+        LaneType::ConnectingRamp
+    };
 
     static constexpr double NON_PLATOON_GAP_EXTENSION = 10.0;
 };

@@ -12,10 +12,12 @@ add_openpass_target(
   HEADERS
     ${COMPONENT_SOURCE_DIR}/common/SpawnPointDefinitions.h
     ${COMPONENT_SOURCE_DIR}/common/WorldAnalyzer.h
+    ${OPENPASS_SIMCORE_DIR}/common/RoutePlanning/RouteCalculation.h
 
   INCDIRS
     ${COMPONENT_SOURCE_DIR}
     ${OPENPASS_SIMCORE_DIR}/core
+    ${OPENPASS_SIMCORE_DIR}/common
 
   LIBRARIES
     Qt5::Core

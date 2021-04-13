@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -17,6 +17,7 @@
 #include <numeric>
 #include "common/boostGeometryCommon.h"
 #include "include/parameterInterface.h"
+#include "common/osiUtils.h"
 
 SensorGeometric2D::SensorGeometric2D(
         std::string componentName,
@@ -68,10 +69,11 @@ SensorGeometric2D::SensorGeometric2D(
 void SensorGeometric2D::Trigger(int time)
 {
     sensorData = {};
-    sensorData.mutable_timestamp()->set_seconds((time + latencyInMs) / 1000);
-    sensorData.mutable_timestamp()->set_nanos(((time + latencyInMs) % 1000) * 1e6);
+    osi3::utils::SetTimestamp(sensorData, time + latencyInMs);
+    osi3::utils::SetVersion(sensorData);
     SensorDetectionResults results = DetectObjects();
     sensorData = ApplyLatency(time, sensorData);
+    sensorData.mutable_moving_object_header()->set_data_qualifier(osi3::DetectedEntityHeader_DataQualifier_DATA_QUALIFIER_AVAILABLE);
 
     Observe(time, ApplyLatencyToResults(time, results));
 }
@@ -82,11 +84,11 @@ void SensorGeometric2D::UpdateInput(int, const std::shared_ptr<SignalInterface c
 
 void SensorGeometric2D::Observe(const int time, const SensorDetectionResults& results)
 {
-    std::vector<OWL::Id> visibleIds;
+    std::set<OWL::Id> visibleIds;
 
     std::transform(results.visibleMovingObjects.begin(),
                    results.visibleMovingObjects.end(),
-                   std::back_inserter(visibleIds),
+                   std::inserter(visibleIds, visibleIds.end()),
                    [](const auto object) -> OWL::Id
     {
         return object.id().value();
@@ -94,17 +96,17 @@ void SensorGeometric2D::Observe(const int time, const SensorDetectionResults& re
 
     std::transform(results.visibleStationaryObjects.begin(),
                    results.visibleStationaryObjects.end(),
-                   std::back_inserter(visibleIds),
+                   std::inserter(visibleIds, visibleIds.end()),
                    [](const auto object) -> OWL::Id
     {
         return object.id().value();
     });
 
-    std::vector<OWL::Id> detectedIds;
+    std::set<OWL::Id> detectedIds;
 
     std::transform(results.detectedMovingObjects.begin(),
                    results.detectedMovingObjects.end(),
-                   std::back_inserter(detectedIds),
+                   std::inserter(detectedIds, detectedIds.end()),
                    [](const auto object) -> OWL::Id
     {
         return object.id().value();
@@ -112,7 +114,7 @@ void SensorGeometric2D::Observe(const int time, const SensorDetectionResults& re
 
     std::transform(results.detectedStationaryObjects.begin(),
                    results.detectedStationaryObjects.end(),
-                   std::back_inserter(detectedIds),
+                   std::inserter(detectedIds, detectedIds.end()),
                    [](const auto object) -> OWL::Id
     {
         return object.id().value();
@@ -122,7 +124,7 @@ void SensorGeometric2D::Observe(const int time, const SensorDetectionResults& re
     GetPublisher()->Publish("Sensor" + std::to_string(id) + "_DetectedAgents", CreateAgentIdListString(detectedIds));
 }
 
-std::string SensorGeometric2D::CreateAgentIdListString(const std::vector<OWL::Id>& owlIds) const
+std::string SensorGeometric2D::CreateAgentIdListString(const std::set<OWL::Id>& owlIds) const
 {
     const auto worldData = static_cast<OWL::WorldData*>(world->GetWorldData());
 
@@ -253,7 +255,10 @@ SensorDetectionResults SensorGeometric2D::DetectObjects()
     osi3::SensorViewConfiguration sensorViewConfig = GenerateSensorViewConfiguration();
     auto sensorView = static_cast<OWL::Interfaces::WorldData*>(world->GetWorldData())->GetSensorView(sensorViewConfig, GetAgent()->GetId());
 
+    sensorData.add_sensor_view()->CopyFrom(*sensorView);
+
     const auto hostVehicle = FindHostVehicleInSensorView(*sensorView);
+    sensorData.mutable_host_vehicle_location()->CopyFrom(hostVehicle->base());
 
     const auto [sensorPositionGlobal, detectionField] = CreateSensorDetectionField(hostVehicle);
     const auto [movingObjectsInDetectionField, stationaryObjectsInDetectionField] = GetObjectsInDetectionAreaFromSensorView(*sensorView,
@@ -474,10 +479,21 @@ multi_polygon_t SensorGeometric2D::CalcObjectShadow(const polygon_t& boundingBox
         }
     }
 
-    //the outer points are obtained by stretching the leftVector and rightVector
-    double stretchFactor = 1e9;
-    point_t leftOuterPoint{sensorPosition.x() + stretchFactor * leftVector.x(), sensorPosition.y() + stretchFactor * leftVector.y()};
-    point_t rightOuterPoint{sensorPosition.x() + stretchFactor * rightVector.x(), sensorPosition.y() + stretchFactor * rightVector.y()};
+    // The outer points are obtained by scaling the leftVector and rightVector, 
+    // so that the calculated shadow just covers the detection range
+    // For a detailed description of the scaling factor please refer to the developer documentation.
+    const auto leftVectorLength = std::hypot(leftVector.x(), leftVector.y());
+    const auto rightVectorLength = std::hypot(rightVector.x(), rightVector.y());
+    const auto height = std::min(leftVectorLength, rightVectorLength) * std::cos(0.5 * (maxRightAngle + maxLeftAngle));
+    const auto scale = detectionRange / height;
+    
+    if(scale > WARNING_THRESHOLD_SCALE)
+    {
+       LOG(CbkLogLevel::Warning, "Scaling factor for shadow casting exceeds internal threshold: numeric issues could cause detection to fail.");
+    }
+
+    point_t leftOuterPoint{sensorPosition.x() + scale * leftVector.x(), sensorPosition.y() + scale * leftVector.y()};
+    point_t rightOuterPoint{sensorPosition.x() + scale * rightVector.x(), sensorPosition.y() + scale * rightVector.y()};
 
     //build the shadow polygon
     polygon_t shadow;

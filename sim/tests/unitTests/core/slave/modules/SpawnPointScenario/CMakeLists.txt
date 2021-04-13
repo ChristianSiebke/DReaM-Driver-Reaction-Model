@@ -8,6 +8,7 @@ add_openpass_target(
   SOURCES
     spawnPointScenario_Tests.cpp
     ${COMPONENT_SOURCE_DIR}/SpawnPointScenario.cpp
+    ${OPENPASS_SIMCORE_DIR}/core/common/log.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/framework/agentBlueprintProvider.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/framework/agentDataPublisher.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/framework/dynamicProfileSampler.cpp
@@ -20,11 +21,13 @@ add_openpass_target(
     ${OPENPASS_SIMCORE_DIR}/core/slave/modelElements/channel.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/modelElements/component.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/modelElements/componentType.cpp
+    ${OPENPASS_SIMCORE_DIR}/core/slave/modelElements/parameters.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/bindings/modelBinding.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/bindings/modelLibrary.cpp
 
   HEADERS
     ${COMPONENT_SOURCE_DIR}/SpawnPointScenario.h
+    ${OPENPASS_SIMCORE_DIR}/core/common/log.h
     ${OPENPASS_SIMCORE_DIR}/core/slave/framework/agentBlueprintProvider.h
     ${OPENPASS_SIMCORE_DIR}/core/slave/framework/agentDataPublisher.h
     ${OPENPASS_SIMCORE_DIR}/core/slave/framework/dynamicProfileSampler.h
@@ -37,6 +40,7 @@ add_openpass_target(
     ${OPENPASS_SIMCORE_DIR}/core/slave/modelElements/channel.h
     ${OPENPASS_SIMCORE_DIR}/core/slave/modelElements/component.h
     ${OPENPASS_SIMCORE_DIR}/core/slave/modelElements/componentType.h
+    ${OPENPASS_SIMCORE_DIR}/core/slave/modelElements/parameters.h
     ${OPENPASS_SIMCORE_DIR}/core/slave/bindings/modelBinding.h
     ${OPENPASS_SIMCORE_DIR}/core/slave/bindings/modelLibrary.h
 

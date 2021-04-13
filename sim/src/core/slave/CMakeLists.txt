@@ -48,6 +48,7 @@ add_openpass_target(
     framework/scheduler/schedulerTasks.h
     framework/scheduler/taskBuilder.h
     framework/scheduler/tasks.h
+    importer/importerCommon.h
     importer/configurationFiles.h
     importer/connection.h
     importer/csvParser.h
@@ -84,9 +85,11 @@ add_openpass_target(
     modelElements/eventDetectorNetwork.h
     modelElements/manipulator.h
     modelElements/manipulatorNetwork.h
+    modelElements/parameters.h
     modelElements/spawnItemParameter.h
     modelElements/spawnPoint.h
     modelElements/spawnPointNetwork.h
+    ../common/log.h
 
   SOURCES
     bindings/dataStoreBinding.cpp
@@ -157,10 +160,13 @@ add_openpass_target(
     modelElements/dataStore.cpp
     modelElements/eventDetectorNetwork.cpp
     modelElements/manipulatorNetwork.cpp
+    modelElements/parameters.cpp
     modelElements/spawnPointNetwork.cpp
+    ../common/log.cpp
 
   INCDIRS
     .
+    ../..
     ../../../..
     ../common
     framework

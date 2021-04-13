@@ -6,6 +6,8 @@ add_openpass_target(
   DEFAULT_MAIN
 
   SOURCES
+    ${OPENPASS_SIMCORE_DIR}/core/common/log.cpp
+
     # AgentSampler
     agentSampler_Tests.cpp
     ${COMPONENT_SOURCE_DIR}/framework/dynamicAgentTypeGenerator.cpp
@@ -81,6 +83,8 @@ add_openpass_target(
     ${COMPONENT_SOURCE_DIR}/importer/vehicleModelsImporter.cpp
 
   HEADERS
+    ${OPENPASS_SIMCORE_DIR}/core/common/log.h
+
     # AgentSampler
     ${COMPONENT_SOURCE_DIR}/framework/dynamicAgentTypeGenerator.h
     ${COMPONENT_SOURCE_DIR}/framework/dynamicParametersSampler.h

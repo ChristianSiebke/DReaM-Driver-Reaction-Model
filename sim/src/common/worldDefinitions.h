@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019, 2020 in-tech GmbH
+* Copyright (c) 2019, 2020, 2021 in-tech GmbH
 *               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -78,28 +78,32 @@ struct IntersectingConnection
 enum class LaneType
 {
     Undefined = 0,
-    None,
+    Shoulder,
+    Border,
     Driving,
     Stop,
-    Shoulder,
-    Biking,
-    Sidewalk,
-    Border,
+    None,
     Restricted,
     Parking,
-    Bidirectional,
     Median,
-    Special1,
-    Special2,
-    Special3,
-    Roadworks,
-    Tram,
-    Rail,
-    Entry,
+    Biking,
+    Sidewalk,
+    Curb,
     Exit,
+    Entry,
+    OnRamp,
     OffRamp,
-    OnRamp
+    ConnectingRamp
 };
+
+struct LaneSection
+{
+    double startS;
+    double endS;
+    std::vector<int> laneIds;
+};
+
+using LaneSections = std::vector<LaneSection>;
 
 namespace RelativeWorldView {
 struct Lane
@@ -318,6 +322,7 @@ enum Type
     OvertakingBanEnd = 280,
     OvertakingBanTrucksEnd = 281,
     EndOffAllSpeedLimitsAndOvertakingRestrictions = 282,
+    PedestrianCrossing = 293,
     RightOfWayNextIntersection = 301,
     RightOfWayBegin = 306,
     RightOfWayEnd = 307,
@@ -379,7 +384,8 @@ enum class Color
     Yellow,
     Red,
     Blue,
-    Green
+    Green,
+    Other
 };
 
 struct Entity

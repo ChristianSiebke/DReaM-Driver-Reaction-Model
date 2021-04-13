@@ -82,7 +82,7 @@ TEST_P(LateralDriverTrigger, LateralDriver_CheckTriggerFunction)
                                 data.input_CurvatureSegmentsFar};
     stubLateralDriver->SetLateralInput(lateralSignal);
     stubLateralDriver->SetVehicleParameter(10.,
-                                           360.0,
+                                           2 * M_PI,
                                            3.);
     stubLateralDriver->SetVelocityAndSteeringWheelAngle(data.input_LongitudinalVelocity,
                                                         data.input_LastSteeringWheelAngle);
@@ -115,11 +115,11 @@ INSTANTIATE_TEST_CASE_P(Default, LateralDriverTrigger,testing::Values
         double                  result_SteeringWheelAngle;
    */
 
-    DataFor_AlgorithmLateralDriverImplementation_Trigger{50., 0., 0.,   0., {0., 0., 0., 0., 0.}, {0., 0., 0., 0., 0.}, 0., 0.,        0.},  // Driving straight
-    DataFor_AlgorithmLateralDriverImplementation_Trigger{50., 1., 0.,   0., {0., 0., 0., 0., 0.}, {0., 0., 0., 0., 0.}, 0., 0., 13.750987},  // Lateral deviation from trajectory
-    DataFor_AlgorithmLateralDriverImplementation_Trigger{50., 0., 1., 300., {0., 0., 0., 0., 0.}, {0., 0., 0., 0., 0.}, 0., 0.,      332.},  // Lateral deviation from trajectory with non central steering wheel capped to 320°/s (actual 343.77467)
-    DataFor_AlgorithmLateralDriverImplementation_Trigger{50., 0., 2., 350., {0., 0., 0., 0., 0.}, {0., 0., 0., 0., 0.}, 0., 0.,      360.},  // Curvature of trajectory, 687.54935° capped at 360°
-    DataFor_AlgorithmLateralDriverImplementation_Trigger{50., 2., 1., 350., {0., 0., 0., 0., 0.}, {0., 0., 0., 0., 0.}, 0., 0.,      360.}  // Total steering wheel angle, 371.27665° capped at 360°
+    DataFor_AlgorithmLateralDriverImplementation_Trigger{50., 0., 0.,   0. * M_PI / 180.0, {0., 0., 0., 0., 0.}, {0., 0., 0., 0., 0.}, 0., 0., 000.000000 * M_PI / 180.}, // Driving straight
+    DataFor_AlgorithmLateralDriverImplementation_Trigger{50., 1., 0.,   0. * M_PI / 180.0, {0., 0., 0., 0., 0.}, {0., 0., 0., 0., 0.}, 0., 0., 013.750987 * M_PI / 180.}, // Lateral deviation from trajectory
+    DataFor_AlgorithmLateralDriverImplementation_Trigger{50., 0., 1., 300. * M_PI / 180.0, {0., 0., 0., 0., 0.}, {0., 0., 0., 0., 0.}, 0., 0., 332.000000 * M_PI / 180.}, // Lateral deviation from trajectory with non central steering wheel capped to 320°/s (actual 343.77467)
+    DataFor_AlgorithmLateralDriverImplementation_Trigger{50., 0., 2., 350. * M_PI / 180.0, {0., 0., 0., 0., 0.}, {0., 0., 0., 0., 0.}, 0., 0., 360.000000 * M_PI / 180.}, // Curvature of trajectory, 687.54935° capped at 360°
+    DataFor_AlgorithmLateralDriverImplementation_Trigger{50., 2., 1., 350. * M_PI / 180.0, {0., 0., 0., 0., 0.}, {0., 0., 0., 0., 0.}, 0., 0., 360.000000 * M_PI / 180.}  // Total steering wheel angle, 371.27665° capped at 360°
 )
 );
 
@@ -229,7 +229,7 @@ INSTANTIATE_TEST_CASE_P(Default, LateralDriverUpdateOutput,testing::Values
         bool input_IsActive;
    */
 
-    DataFor_AlgorithmLateralDriverImplementation_UpdateOutput{0.27, true},
-    DataFor_AlgorithmLateralDriverImplementation_UpdateOutput{0.74, false}
+    DataFor_AlgorithmLateralDriverImplementation_UpdateOutput{0.27 * M_PI / 180., true},
+    DataFor_AlgorithmLateralDriverImplementation_UpdateOutput{0.74 * M_PI / 180., false}
 )
 );

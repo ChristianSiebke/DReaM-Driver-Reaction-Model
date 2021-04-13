@@ -26,8 +26,7 @@ class FakeOdRoad : public RoadInterface
                  bool(double s, double x, double y, double hdg, double length, ParamPoly3Parameters parameters));
     MOCK_METHOD5(AddElevation, bool(double s, double a, double b, double c, double d));
     MOCK_METHOD5(AddLaneOffset, bool(double s, double a, double b, double c, double d));
-    MOCK_METHOD6(AddLink, bool(RoadLinkType, RoadLinkElementType, const std::string &, ContactPointType,
-                               RoadLinkDirectionType, RoadLinkSideType));
+    MOCK_METHOD4(AddLink, bool(RoadLinkType, RoadLinkElementType, const std::string &, ContactPointType));
     MOCK_METHOD1(AddRoadLaneSection, RoadLaneSectionInterface *(double start));
     MOCK_METHOD1(AddRoadSignal, void(const RoadSignalSpecification &signal));
     MOCK_METHOD1(AddRoadObject, void(const RoadObjectSpecification &object));

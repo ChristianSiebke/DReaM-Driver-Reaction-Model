@@ -18,6 +18,7 @@ SUBDIRS = \
     core/slave/modules/BasicDataStore \
     core/slave/modules/EventDetector \
     core/slave/modules/Manipulator \
+    core/slave/modules/Observation_EntityRepository \
     core/slave/modules/Observation_Log \
     core/slave/modules/Observation_LogAgent \
     core/slave/modules/Spawners/Scenario \

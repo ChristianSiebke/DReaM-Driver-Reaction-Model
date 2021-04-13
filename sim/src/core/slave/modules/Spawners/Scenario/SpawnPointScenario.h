@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -99,7 +99,7 @@ private:
      * \param[in]    vehicleModelParameters Parameter of the vehicle
     * \return       Valid SpawnParameter
     */
-    SpawnParameter CalculateSpawnParameter(const SpawnInfo& spawnInfo,
+    SpawnParameter CalculateSpawnParameter(const ScenarioEntity& entity,
                                            const VehicleModelParameters& vehicleModelParameters);
 
     /*!
@@ -116,7 +116,23 @@ private:
      *
      * \return  graph of road network from agent's perspective with target node as given by OpenScenario, nullopt if no road in OpenScenario defined
      */
-    std::optional<Route> GetRoute(const std::vector<RouteElement>& roads);
+    Route GetPredefinedRoute(const std::vector<RouteElement>& roads);
+
+    /*!
+     * \brief Samples a random route for the agent starting at the given position
+     *
+     * \param spawnParameter parameters containing spawn position
+     *
+     * \return sampled route
+     */
+    Route GetRandomRoute(const SpawnParameter& spawnParameter);
+
+    /*!
+     * \brief Checks wether the agent is inside the world
+     *
+     * \param spawnParameter parameters containing spawn position
+     */
+    bool IsInsideWorld(const SpawnParameter& spawnParameter);
 
     /*!
     * \brief Logs a error message.

@@ -93,9 +93,6 @@ protected:
 
     //! Time to Average regulation over
     double tAverage {0.};
-
-    //! Helper constant to convert radiant into degree.
-    const double RadiantToDegree = 57.295779513082320876798154814105;
     /** @} @} */
 
     //! Previous scheduling time (for calculation of cycle time lenght).

@@ -279,7 +279,7 @@ public:
     virtual void SetEffBrakePedal(double percent) = 0;
 
     //-----------------------------------------------------------------------------
-    //! Sets current angle of the steering wheel in degree
+    //! Sets current angle of the steering wheel in radian
     //!
     //! @param[in]     steeringWheelAngle    current steering wheel angle
     //-----------------------------------------------------------------------------
@@ -431,6 +431,7 @@ public:
     //!
     // @return     true for success
     //-----------------------------------------------------------------------------
+    [[deprecated("Use InitParameter instead")]]
     virtual bool InitAgentParameter(int id,
                                     int agentTypeId,
                                     const AgentSpawnItem *agentSpawnItem,
@@ -441,8 +442,17 @@ public:
     //!
     //! @return    true for success
     //-----------------------------------------------------------------------------
+    [[deprecated("Use InitParameter instead")]]
     virtual bool InitAgentParameter(int id,
                                     AgentBlueprintInterface* agentBlueprint) = 0;
+
+    //-----------------------------------------------------------------------------
+    //! Initializes the parameters of an agent
+    //!
+    //! @param[in] agentBlueprint    Blueprint holding parameters such as dimensions
+    //!                              of a vehicle, or its initial spawning velocity
+    //-----------------------------------------------------------------------------
+    virtual void InitParameter(const AgentBlueprintInterface& agentBlueprint) = 0;
 
     //-----------------------------------------------------------------------------
     //! Retrieves type of agent
@@ -636,7 +646,7 @@ public:
     //-----------------------------------------------------------------------------
     //! Retrieve the view direction to the nearest mark of specific markType (NONE for no
     //! specific or any markType). The direction is seen from the agents
-    //! perspective in radiant.
+    //! perspective in radian.
     //!
     //! @return
     //-----------------------------------------------------------------------------
@@ -653,7 +663,7 @@ public:
 
     //-----------------------------------------------------------------------------
     //! Retrieve the distance to the nearest mark of specific markType (NONE for no
-    //! specific or any markType) in a specific direction angle in radiant.
+    //! specific or any markType) in a specific direction angle in radian.
     //!
     //! @return
     //-----------------------------------------------------------------------------
@@ -662,7 +672,7 @@ public:
 
     //-----------------------------------------------------------------------------
     //! Retrieve the distance to the nearest mark of specific markType (NONE for no
-    //! specific or any markType) in a specific direction angle in radiant.
+    //! specific or any markType) in a specific direction angle in radian.
     //!
     //! @return
     //-----------------------------------------------------------------------------
@@ -671,7 +681,7 @@ public:
 
     //-----------------------------------------------------------------------------
     //! Retrieve the relative angle of the nearest mark of specific markType (NONE for no
-    //! specific or any markType) in a specific direction angle in radiant.
+    //! specific or any markType) in a specific direction angle in radian.
     //!
     //! @return
     //-----------------------------------------------------------------------------
@@ -680,7 +690,7 @@ public:
 
     //-----------------------------------------------------------------------------
     //! Retrieve the relative angle of the nearest mark of specific markType (NONE for no
-    //! specific or any markType) in a specific direction angle in radiant.
+    //! specific or any markType) in a specific direction angle in radian.
     //!
     //! @return
     //-----------------------------------------------------------------------------
@@ -690,7 +700,7 @@ public:
     //-----------------------------------------------------------------------------
     //! Retrieve the distance to the nearest mark of specific markType (NONE for no
     //! specific or any markType) in a specific range about a viewing direction
-    //! angle in radiant.
+    //! angle in radian.
     //!
     //! @return
     //-----------------------------------------------------------------------------
@@ -700,7 +710,7 @@ public:
     //-----------------------------------------------------------------------------
     //! Retrieve the distance to the nearest mark of specific markType (NONE for no
     //! specific or any markType) in a specific range about a viewing direction
-    //! angle in radiant.
+    //! angle in radian.
     //!
     //! @return
     //-----------------------------------------------------------------------------
@@ -710,7 +720,7 @@ public:
     //-----------------------------------------------------------------------------
     //! Retrieve the relative angle of the nearest mark of specific markType (NONE for no
     //! specific or any markType) in a specific range about a viewing direction
-    //! angle in radiant.
+    //! angle in radian.
     //!
     //! @return
     //-----------------------------------------------------------------------------
@@ -720,7 +730,7 @@ public:
     //-----------------------------------------------------------------------------
     //! Retrieve the relative angle of the nearest mark of specific markType (NONE for no
     //! specific or any markType) in a specific range about a viewing direction
-    //! angle in radiant.
+    //! angle in radian.
     //!
     //! @return
     //-----------------------------------------------------------------------------
@@ -762,7 +772,7 @@ public:
     //-----------------------------------------------------------------------------
     //! Retrieve the distance to the nearest object of specific objectType (NONE for no
     //! specific or any objectType) in a specific range about a viewing direction
-    //! angle in radiant.
+    //! angle in radian.
     //!
     //! @return
     //-----------------------------------------------------------------------------
@@ -773,7 +783,7 @@ public:
     //-----------------------------------------------------------------------------
     //! Retrieve the distance to the nearest object of specific objectType (NONE for no
     //! specific or any objectType) in a specific range about a viewing direction
-    //! angle in radiant.
+    //! angle in radian.
     //!
     //! @return
     //-----------------------------------------------------------------------------
@@ -817,7 +827,7 @@ public:
 
     //-----------------------------------------------------------------------------
     //! Retrieve the distance to the nearest agent in a specific range about a viewing direction
-    //! angle in radiant.
+    //! angle in radian.
     //!
     //! @return
     //-----------------------------------------------------------------------------
@@ -826,7 +836,7 @@ public:
 
     //-----------------------------------------------------------------------------
     //! Retrieve the distance to the nearest agent in a specific range about a viewing direction
-    //! angle in radiant.
+    //! angle in radian.
     //!
     //! @return
     //-----------------------------------------------------------------------------
@@ -851,7 +861,7 @@ public:
 
     //-----------------------------------------------------------------------------
     //! Retrieve the visibility to an agent in a specific range about a viewing direction
-    //! angle in radiant.
+    //! angle in radian.
     //!
     //! @return
     //-----------------------------------------------------------------------------
@@ -1040,7 +1050,7 @@ public:
     virtual double GetEffBrakePedal() const = 0;
 
     //-----------------------------------------------------------------------------
-    //! Gets current angle of the steering wheel in degree
+    //! Gets current angle of the steering wheel in radian
     //!
     //! @return     current steering wheel angle
     //-----------------------------------------------------------------------------

@@ -35,7 +35,7 @@
 * in_gainHeadingError       | Gain for heading error control in AlgorithmLateralDriver [1/s].
 * in_kappaSet               | Set value for trajectory curvature [1/m].
 * velocity                  | Current velocity
-* steeringWheelAngle        | Current steering wheel angle
+* steeringWheelAngle        | Current steering wheel angle [rad]
 *
 * Input channel IDs:
 * Input ID | signal class | contained variables
@@ -48,7 +48,7 @@
 * name | meaning
 * -----|------
 * in_steeringRatio          | The steering ratio of the vehicle.
-* in_steeringMax            | The maximum possible steering wheel angle in both directions in degree.
+* in_steeringMax            | The maximum possible steering wheel angle in both directions in radian.
 * in_wheelBase              | The wheel base of the vehicle in m.
 *
 * Note that these variables are only used implicetly by the component without assigning the values to variable names.
@@ -62,7 +62,7 @@
 * Output variables:
 * name | meaning
 * -----|------
-* out_desiredSteeringWheelAngle | The steering wheel angle wish of the driver in degree.
+* out_desiredSteeringWheelAngle | The steering wheel angle wish of the driver in radian.
 *
 * Output channel IDs:
 * Output Id | signal class | contained variables
@@ -165,7 +165,7 @@ public:
 protected:
     SteeringController steeringController{};
 
-    //! The steering wheel angle wish of the driver in degree.
+    //! The steering wheel angle wish of the driver in radian
     double out_desiredSteeringWheelAngle{0};
 
     bool isActive{false};

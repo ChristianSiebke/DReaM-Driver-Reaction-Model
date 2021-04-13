@@ -310,9 +310,14 @@ void VehicleModelsImporter::ImportPedestrianModel(QDomElement& pedestrianElement
     modelParameters.gearRatios.push_back(0.0);
     modelParameters.gearRatios.push_back(1.0);
     modelParameters.numberOfGears = 1;
-    modelParameters.maximumEngineTorque = 100;
+    modelParameters.maximumEngineTorque = 200;
     modelParameters.maximumEngineSpeed = 1e5;
     modelParameters.minimumEngineSpeed = 1;
+    modelParameters.rearAxle.wheelDiameter = 1;
+    modelParameters.rearAxle.positionX = 0;
+    modelParameters.frontAxle.positionX = 1;
+    modelParameters.axleRatio = 1;
+    modelParameters.airDragCoefficient = 0;
     modelParameters.weight = ParseParametrizedAttribute<double>(pedestrianElement, ATTRIBUTE::mass, parameters);
 
     vehicleModelsMap[pedestrianModelName.defaultValue] = modelParameters;

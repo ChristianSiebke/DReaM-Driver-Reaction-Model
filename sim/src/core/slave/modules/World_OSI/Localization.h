@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,6 @@
 
 #include "common/globalDefinitions.h"
 #include "common/boostGeometryCommon.h"
-#include "common/globalDefinitions.h"
 #include "WorldData.h"
 #include "WorldToRoadCoordinateConverter.h"
 
@@ -48,21 +47,11 @@ public:
     {}
 };
 
-//! This struct describes the intersection of an object with a lane
-template <typename T = double>
-struct LaneIntersection
-{
-    T s_min {std::numeric_limits<T>::max()};
-    T s_max {0.0};
-    T min_delta_left {std::numeric_limits<T>::max()};
-    T min_delta_right {std::numeric_limits<T>::max()};
-};
-
 //! This struct is the result of the localization on all geometry element using an r-tree
 //! It is than used to build the localization result
 struct LocatedObject
 {
-    std::map<const OWL::Interfaces::Lane*, LaneIntersection<>> laneIntersections;
+    std::map<const OWL::Interfaces::Lane*, OWL::LaneOverlap> laneOverlaps;
     std::map<const std::string, GlobalRoadPosition> referencePoint;
     std::map<const std::string, GlobalRoadPosition> mainLaneLocator;
 };
@@ -86,13 +75,25 @@ std::function<void (const RTreeElement&)> LocateOnGeometryElement(const OWL::Int
                                                              const double& hdg,
                                                              LocatedObject& locatedObject);
 
+//! Calculates the coordinates of the point on the GeometryElement and stores the result in the map
+//!
+//! \param worldData        OWL WorldData
+//! \param point            point to locate
+//! \param hdg              heading of the object
+//! \param result    Output of the function is stored here
+//! \return         function that the boost r-tree calls for every LaneGeometryElement, that possibly intersects with the object
+std::function<void (const RTreeElement&)> LocateOnGeometryElement(const OWL::Interfaces::WorldData& worldData,
+                                                             const Common::Vector2d& point,
+                                                             const double& hdg,
+                                                             std::map<const std::string, GlobalRoadPosition>& result);
+
 std::vector<Common::Vector2d> GetIntersectionPoints (const std::vector<Common::Vector2d>& elementPoints, const std::vector<Common::Vector2d>& agentBoundary);
 
 polygon_t GetBoundingBox(double x, double y, double length, double width, double rotation, double center);
 
 //! Assigns this object to all lanes it was located on, so that the result of Lane::GetWorldObjects
 //! contains this object
-void CreateLaneAssignments(OWL::Interfaces::WorldObject& object, const std::map<const OWL::Interfaces::Lane*, LaneIntersection<double>>& laneIntersections);
+void CreateLaneAssignments(OWL::Interfaces::WorldObject& object, const std::map<const OWL::Interfaces::Lane*, OWL::LaneOverlap>& laneOverlaps);
 
 class Localizer
 {
@@ -102,6 +103,8 @@ public:
     void Init();
 
     Result Locate(const polygon_t& boundingBox, OWL::Interfaces::WorldObject& object) const;
+
+    std::map<const std::string, GlobalRoadPosition> Locate(const Common::Vector2d& point, const double& hdg) const;
 
     void Unlocate(OWL::Interfaces::WorldObject& object) const;
 

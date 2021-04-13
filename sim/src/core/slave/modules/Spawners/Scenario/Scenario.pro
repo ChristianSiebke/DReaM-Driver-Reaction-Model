@@ -32,12 +32,10 @@ INCLUDEPATH += \
 DEPENDENCY_HEADERS = \
                      ../common/SpawnPointDefinitions.h \
                      ../common/stochasticDefinitions.h \
-                     ../../../../common/log.h \
                      ../../../modelElements/agentBlueprint.h \
                      ../../../framework/sampler.h
 
 DEPENDENCY_SOURCES = \
-                     ../../../../common/log.cpp \
                      ../../../modelElements/agentBlueprint.cpp \
                      ../../../framework/sampler.cpp
 

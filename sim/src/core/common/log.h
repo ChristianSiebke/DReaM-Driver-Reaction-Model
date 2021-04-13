@@ -27,6 +27,8 @@
 #include <QThread>
 #include <map>
 
+#include "common/opExport.h"
+
 #if defined(LOG_TIME_ENABLED)
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
 #include <windows.h>
@@ -194,7 +196,7 @@ std::string Log<T>::ToString(LogLevel level)
 }
 
 //! Handles access of file
-class LogOutputPolicy
+class CORESLAVEEXPORT LogOutputPolicy
 {
 public:
     ~LogOutputPolicy ()

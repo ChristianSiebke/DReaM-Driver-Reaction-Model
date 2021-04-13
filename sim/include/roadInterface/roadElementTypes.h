@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -20,6 +20,7 @@
 #include <string>
 #include <list>
 #include <vector>
+#include <array>
 
 //-----------------------------------------------------------------------------
 //! Road link connection orientation
@@ -28,8 +29,7 @@ enum class RoadLinkType
 {
     Undefined = 0,
     Predecessor,
-    Successor,
-    Neighbor
+    Successor
 };
 
 //-----------------------------------------------------------------------------
@@ -53,58 +53,70 @@ enum class ContactPointType
 };
 
 //-----------------------------------------------------------------------------
-//! Orientation between roads
-//-----------------------------------------------------------------------------
-enum class RoadLinkDirectionType
-{
-    Undefined = 0,
-    Same,
-    Opposite
-};
-
-//-----------------------------------------------------------------------------
-//! Connection between roads
-//-----------------------------------------------------------------------------
-enum class RoadLinkSideType
-{
-    Undefined = 0,
-    Left,
-    Right
-};
-
-//-----------------------------------------------------------------------------
 //! Type of lane
 //-----------------------------------------------------------------------------
-enum class RoadLaneType // http://www.opendrive.org/docs/OpenDRIVEFormatSpecRev1.4H.pdf page 93
+enum class RoadLaneType // https://releases.asam.net/OpenDRIVE/1.6.0/ASAM_OpenDRIVE_BS_V1-6-0.html#_lanes  Section 9.5.3 Lane type
 {
     Undefined = 0,
-    None,
+    Shoulder,
+    Border,
     Driving,
     Stop,
-    Shoulder,
-    Biking,
-    Sidewalk,
-    Border,
+    None,
     Restricted,
     Parking,
-    Bidirectional, // full name: continuous two-way left turn lane
     Median,
-    Special1,
-    Special2,
-    Special3,
-    Roadworks,
-    Tram,
-    Rail,
-    Entry,
+    Biking,
+    Sidewalk,
+    Curb,
     Exit,
+    Entry,
+    OnRamp,
     OffRamp,
-    OnRamp
+    ConnectingRamp
 };
+
+namespace openpass::utils {
+
+/// @brief constexpr map for transforming the a corresponding enumeration into
+///        a string representation: try to_cstr(EnumType) or to_string(EnumType)
+static constexpr std::array<const char *, 17> RoadLaneTypeMapping{
+    "Undefined",
+    "Shoulder",
+    "Border",
+    "Driving",
+    "Stop",
+    "None",
+    "Restricted",
+    "Parking",
+    "Median",
+    "Biking",
+    "Sidewalk",
+    "Curb",
+    "Exit",
+    "Entry",
+    "OnRamp",
+    "OffRamp",
+    "ConnectingRamp"};
+
+/// @brief Convert RoadLaneType to cstr (constexpr)
+constexpr const char *to_cstr(RoadLaneType roadLaneType)
+{
+    return RoadLaneTypeMapping[static_cast<size_t>(roadLaneType)];
+}
+
+/// @brief Convert RoadLaneType to std::string
+inline std::string to_string(RoadLaneType roadLaneType) noexcept
+{
+    return std::string(to_cstr(roadLaneType));
+}
+
+} // namespace utils
 
 //-----------------------------------------------------------------------------
 //! Type of lane line
 //-----------------------------------------------------------------------------
-enum class RoadLaneRoadMarkType // http://www.opendrive.org/docs/OpenDRIVEFormatSpecRev1.4H.pdf page 92
+enum class RoadLaneRoadMarkType // https://www.asam.net/standards/detail/opendrive/
 {
     Undefined = 0,
     None,
@@ -119,11 +131,39 @@ enum class RoadLaneRoadMarkType // http://www.opendrive.org/docs/OpenDRIVEFormat
     Curb
 };
 
+namespace openpass::utils {
+
+/// @brief constexpr map for transforming the a corresponding enumeration into
+///        a string representation: try to_cstr(EnumType) or to_string(EnumType)
+static constexpr std::array<const char *, 11> RoadLaneRoadMarkTypeMapping{
+    "Undefined",
+    "None",
+    "Solid",
+    "Broken",
+    "Solid_Solid",
+    "Solid_Broken",
+    "Broken_Solid",
+    "Broken_Broken",
+    "Botts_Dots",
+    "Grass",
+    "Curb"};
+
+constexpr const char *to_cstr(RoadLaneRoadMarkType roadLaneRoadMarkType)
+{
+    return RoadLaneRoadMarkTypeMapping[static_cast<size_t>(roadLaneRoadMarkType)];
+}
+
+inline std::string to_string(RoadLaneRoadMarkType roadLaneRoadMarkType) noexcept
+{
+    return std::string(to_cstr(roadLaneRoadMarkType));
+}
+
+} // namespace utils
 
 //-----------------------------------------------------------------------------
 //! Lane description: left, right or center
 //-----------------------------------------------------------------------------
-enum class RoadLaneRoadDescriptionType // http://www.opendrive.org/docs/OpenDRIVEFormatSpecRev1.4H.pdf page 59
+enum class RoadLaneRoadDescriptionType // https://www.asam.net/standards/detail/opendrive/
 {
     Left,
     Right,
@@ -133,7 +173,7 @@ enum class RoadLaneRoadDescriptionType // http://www.opendrive.org/docs/OpenDRIV
 //-----------------------------------------------------------------------------
 //! LaneChange of the lane line
 //-----------------------------------------------------------------------------
-enum class RoadLaneRoadMarkLaneChange // http://www.opendrive.org/docs/OpenDRIVEFormatSpecRev1.4H.pdf page 59
+enum class RoadLaneRoadMarkLaneChange // https://www.asam.net/standards/detail/opendrive/
 {
     Undefined = 0,
     None,
@@ -145,7 +185,7 @@ enum class RoadLaneRoadMarkLaneChange // http://www.opendrive.org/docs/OpenDRIVE
 //-----------------------------------------------------------------------------
 //! Color of the road mark
 //-----------------------------------------------------------------------------
-enum class RoadLaneRoadMarkColor // http://www.opendrive.org/docs/OpenDRIVEFormatSpecRev1.4H.pdf page 92
+enum class RoadLaneRoadMarkColor // https://www.asam.net/standards/detail/opendrive/
 {
     Undefined = 0,
     Blue,
@@ -157,7 +197,7 @@ enum class RoadLaneRoadMarkColor // http://www.opendrive.org/docs/OpenDRIVEForma
 };
 
 //! Weight of the road mark
-enum class RoadLaneRoadMarkWeight // http://www.opendrive.org/docs/OpenDRIVEFormatSpecRev1.4H.pdf page 92
+enum class RoadLaneRoadMarkWeight // https://www.asam.net/standards/detail/opendrive/
 {
     Undefined = 0,
     Standard,
@@ -174,7 +214,7 @@ enum class RoadElementOrientation
 //-----------------------------------------------------------------------------
 //! Units used by signals
 //-----------------------------------------------------------------------------
-enum class RoadSignalUnit // http://www.opendrive.org/docs/OpenDRIVEFormatSpecRev1.4H.pdf page 12
+enum class RoadSignalUnit // https://www.asam.net/standards/detail/opendrive/
 {
     Undefined = 0,
     Meter,
@@ -228,14 +268,24 @@ struct RoadSignalSpecification
     std::list<std::string> dependencyIds {};
 };
 
-
-
 enum class RoadObjectType
 {
     none = -1,
     obstacle,
     car,
-    truck,
+    pole,
+    tree,
+    vegetation,
+    barrier,
+    building,
+    parkingSpace,
+    patch,
+    railing,
+    trafficIsland,
+    crosswalk,
+    streetlamp,
+    gantry,
+    soundBarrier,
     van,
     bus,
     trailer,
@@ -244,28 +294,65 @@ enum class RoadObjectType
     tram,
     train,
     pedestrian,
-    pole,
-    tree,
-    vegetation,
-    barrier,
-    building,
-    parkingSpace,
     wind,
-    patch,
-    guardRail,
-    roadSideMarkerPost
+    roadMark
 };
+
+namespace openpass::utils {
+
+/// @brief constexpr map for transforming the a corresponding enumeration into
+///        a string representation: try to_cstr(EnumType) or to_string(EnumType)
+static constexpr std::array<const char *, 26> RoadObjectTypeMapping{
+    "None",
+    "Obstacle",
+    "Car",
+    "Pole",
+    "Tree",
+    "Vegetation",
+    "Barrier",
+    "Building",
+    "ParkingSpace",
+    "Patch",
+    "Railing",
+    "TrafficIsland",
+    "Crosswalk",
+    "StreetLamp",
+    "Gantry",
+    "SoundBarrier",
+    "Van",
+    "Bus",
+    "Trailer",
+    "Bike",
+    "Motorbike",
+    "Tram",
+    "Train",
+    "Pedestrian",
+    "Wind",
+    "RoadMark"};
+
+constexpr const char *to_cstr(RoadObjectType roadObjectType)
+{
+    return RoadObjectTypeMapping[static_cast<size_t>(roadObjectType) -
+                                 static_cast<size_t>(RoadObjectType::none) ];
+}
+
+inline std::string to_string(RoadObjectType roadObjectType) noexcept
+{
+    return std::string(to_cstr(roadObjectType));
+}
+
+} // namespace utils
 
 struct RoadObjectSpecification // http://www.opendrive.org/docs/OpenDRIVEFormatSpecRev1.4H.pdf page 65
 {
-    RoadObjectType type;
+    RoadObjectType type{RoadObjectType::none};
     std::string name {""};
     std::string id {""};
     double s {0};
     double t {0};
     double zOffset {0};
     double validLength {0};
-    RoadElementOrientation orientation;
+    RoadElementOrientation orientation{RoadElementOrientation::positive};
     double width {0};
     double length {0};
     double radius {0};

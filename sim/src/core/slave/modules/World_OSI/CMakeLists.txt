@@ -9,18 +9,23 @@ add_openpass_target(
     AgentAdapter.h
     AgentNetwork.h
     GeometryConverter.h
+    EntityInfo.h
+    EntityInfoPublisher.h
+    EntityRepository.h
     JointsBuilder.h
     Localization.h
     LocalizationElement.h
     PointQuery.h
     RamerDouglasPeucker.h
     SceneryConverter.h
+    SceneryEntities.h
     TrafficObjectAdapter.h
     World.h
     WorldData.h
     WorldDataException.h
     WorldDataQuery.h
     WorldGlobal.h
+    WorldEntities.h
     WorldImplementation.h
     WorldObjectAdapter.h
     WorldToRoadCoordinateConverter.h
@@ -29,13 +34,15 @@ add_openpass_target(
     OWL/LaneGeometryJoint.h
     OWL/OpenDriveTypeMapper.h
     OWL/Primitives.h
-    RoutePlanning/RouteCalculation.h
+    ../../../../common/RoutePlanning/RouteCalculation.h
     egoAgent.h
 
   SOURCES
     AgentAdapter.cpp
     AgentNetwork.cpp
     GeometryConverter.cpp
+    EntityInfoPublisher.cpp
+    EntityRepository.cpp
     JointsBuilder.cpp
     Localization.cpp
     PointQuery.cpp
@@ -54,6 +61,7 @@ add_openpass_target(
 
   INCDIRS
     ${CMAKE_CURRENT_LIST_DIR}
+    ../../../../common
 
   LIBRARIES
     Qt5::Core

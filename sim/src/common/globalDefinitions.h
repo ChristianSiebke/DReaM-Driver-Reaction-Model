@@ -71,31 +71,6 @@ enum class Weekday
 };
 
 //-----------------------------------------------------------------------------
-//! Agent category classification
-//-----------------------------------------------------------------------------
-enum class AgentCategory
-{
-    Ego = 0,
-    Scenario,
-    Common,
-    Any
-};
-
-//-----------------------------------------------------------------------------
-//! Agent type classification
-//-----------------------------------------------------------------------------
-enum class AgentVehicleType
-{
-    NONE = -2,
-    Undefined = -1,
-    Car = 0,
-    Pedestrian,
-    Motorbike,
-    Bicycle,
-    Truck
-};
-
-//-----------------------------------------------------------------------------
 //! @brief Areas of interest for surrounding data
 //-----------------------------------------------------------------------------
 enum class AreaOfInterest
@@ -112,7 +87,82 @@ enum class AreaOfInterest
     NumberOfAreaOfInterests
 };
 
-// convert a vehicle type name to VehicleType enum
+//-----------------------------------------------------------------------------
+//! Agent category classification
+//-----------------------------------------------------------------------------
+enum class AgentCategory
+{
+    Ego = 0,
+    Scenario,
+    Common,
+    Any
+};
+
+namespace openpass::utils {
+
+/// @brief constexpr map for transforming the a corresponding enumeration into
+///        a string representation: try to_cstr(EnumType) or to_string(EnumType)
+static constexpr std::array<const char *, 4> AgentCategoryMapping{
+    "Ego",
+    "Scenaro",
+    "Common",
+    "Any"};
+
+constexpr const char *to_cstr(AgentCategory agentCategory)
+{
+    return AgentCategoryMapping[static_cast<size_t>(agentCategory)];
+}
+
+inline std::string to_string(AgentCategory agentCategory) noexcept
+{
+    return std::string(to_cstr(agentCategory));
+}
+
+} // namespace util
+
+//-----------------------------------------------------------------------------
+//! Agent type classification
+//-----------------------------------------------------------------------------
+enum class AgentVehicleType
+{
+    NONE = -2,
+    Undefined = -1,
+    Car = 0,
+    Pedestrian,
+    Motorbike,
+    Bicycle,
+    Truck
+};
+
+namespace openpass::utils {
+
+/// @brief constexpr map for transforming the a corresponding enumeration into
+///        a string representation: try to_cstr(EnumType) or to_string(EnumType)
+static constexpr std::array<const char *, 7> AgentVehicleTypeMapping{
+    "NONE",
+    "Undefined",
+    "Car",
+    "Pedestrian",
+    "Motorbike",
+    "Bicycle",
+    "Truck"};
+
+
+constexpr const char *to_cstr(AgentVehicleType agentVehicleType)
+{
+    return AgentVehicleTypeMapping[static_cast<size_t>(agentVehicleType) -
+                                   static_cast<size_t>(AgentVehicleType::NONE)];
+}
+
+inline std::string to_string(AgentVehicleType agentVehicleType) noexcept
+{
+    return std::string(to_cstr(agentVehicleType));
+}
+
+} // namespace util
+
+
+/// @brief convert a vehicle type name to VehicleType enum
 inline AgentVehicleType GetAgentVehicleType(const std::string &strVehicleType)
 {
     if (0 == strVehicleType.compare("Car"))
@@ -319,7 +369,7 @@ struct VehicleModelParameters
 
     // The ratio of the steering gear
     double steeringRatio = -999.0;
-    // The maximum amplitude of the steering wheel angle in degree
+    // The maximum amplitude of the steering wheel angle in radian
     double maximumSteeringWheelAngleAmplitude = -999.0;
     // The maximum curavture the vehicle is able to drive in 1/m
     double maxCurvature = -999.0;

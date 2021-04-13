@@ -17,6 +17,7 @@
 #pragma once
 
 #include <string>
+#include <stdexcept>
 
 //-----------------------------------------------------------------------------
 //! The following macro should only be called within classes providing a Log() member function
@@ -27,6 +28,9 @@
 #define LOGWARN(message) Log(CbkLogLevel::Warning, __FILE__, __LINE__, message)
 #define LOGINFO(message) Log(CbkLogLevel::Info, __FILE__, __LINE__, message)
 #define LOGDEBUG(message) Log(CbkLogLevel::Debug, __FILE__, __LINE__, message)
+#define LOGERRORANDTHROW(message) do { LOGERROR(message); throw std::runtime_error(message); } while(0);
+#define THROWIFFALSE(success,message) if (!(success)) LOGERRORANDTHROW(message)
+
 
 //-----------------------------------------------------------------------------
 //! Log level for the log callback

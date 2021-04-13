@@ -13,12 +13,18 @@
 
 #include "SpawnPointRuntimeCommon.h"
 #include "SpawnPointRuntimeCommonParameterExtractor.h"
+#include "common/WorldAnalyzer.h"
 
 #include "fakeParameter.h"
+#include "fakeWorld.h"
+#include "fakeCallback.h"
 
+using ::testing::_;
+using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::UnorderedElementsAre;
 
+namespace SpawnPointRuntimeCommonDefinitions {
 std::ostream& operator<<(std::ostream& os, const SpawnPosition& position)
 {
     os << "road: " << position.roadId
@@ -26,6 +32,7 @@ std::ostream& operator<<(std::ostream& os, const SpawnPosition& position)
        << " s: " << position.sPosition;
 
     return os;
+}
 }
 
 TEST(SpawnPointRuntimeCommonParameterExtractor, ExtractSpawnPointParameters)
@@ -35,7 +42,8 @@ TEST(SpawnPointRuntimeCommonParameterExtractor, ExtractSpawnPointParameters)
     auto spawnPoint2 = std::make_shared<FakeParameter>();
     ParameterInterface::ParameterLists spawnPoint {{spawnPoint1, spawnPoint2}};
 
-    std::map<std::string, const std::vector<std::string>> strings1{{"Roads", {"RoadA"}}};
+    const std::string invalidRoadId = "InvalidRoad";
+    std::map<std::string, const std::vector<std::string>> strings1{{"Roads", {"RoadA", invalidRoadId}}};
     ON_CALL(*spawnPoint1, GetParametersStringVector()).WillByDefault(ReturnRef(strings1));
     std::map<std::string, const std::vector<int>> intVectors1{{"Lanes", {1,2,3}}};
     ON_CALL(*spawnPoint1, GetParametersIntVector()).WillByDefault(ReturnRef(intVectors1));
@@ -102,7 +110,17 @@ TEST(SpawnPointRuntimeCommonParameterExtractor, ExtractSpawnPointParameters)
     std::map<std::string, ParameterInterface::ParameterLists> parameterLists{{"SpawnPoints", spawnPoint}, {"TrafficGroups", trafficGroups}};
     ON_CALL(parameter, GetParameterLists()).WillByDefault(ReturnRef(parameterLists));
 
-    const auto result = SpawnPointRuntimeCommonParameterExtractor::ExtractSpawnPointParameters(parameter);
+    FakeWorld fakeWorld;
+    ON_CALL(fakeWorld, IsDirectionalRoadExisting(_, _)).WillByDefault(Return(true));
+    ON_CALL(fakeWorld, IsDirectionalRoadExisting(invalidRoadId, _)).WillByDefault(Return(false));
+    ON_CALL(fakeWorld, IsLaneTypeValid(_, _, _, _)).WillByDefault(Return(true));
+
+    WorldAnalyzer worldAnalyzer{&fakeWorld};
+    FakeCallback callbacks;
+
+    const LaneTypes validLaneTypes = {};
+
+    const auto result = SpawnPointRuntimeCommonParameterExtractor::ExtractSpawnPointParameters(parameter, worldAnalyzer, validLaneTypes, &callbacks);
 
     const auto spawnPositions = result.spawnPositions;
     ASSERT_THAT(result.spawnPositions, UnorderedElementsAre(SpawnPosition{"RoadA", 1, 10.},
@@ -122,4 +140,55 @@ TEST(SpawnPointRuntimeCommonParameterExtractor, ExtractSpawnPointParameters)
 
     ASSERT_THAT(result.agentProfileLaneMaps.leftLanes, UnorderedElementsAre(
                     std::make_pair(spawningAgentProfile3, 4)));
+}
+
+TEST(SpawnPointRuntimeCommonParameterExtractor, ExtractSpawnPoints)
+{
+    FakeParameter parameter;
+    auto spawnPoint1 = std::make_shared<FakeParameter>();
+    auto spawnPoint2 = std::make_shared<FakeParameter>();
+    ParameterInterface::ParameterLists spawnPoint {{spawnPoint1, spawnPoint2}};
+
+    const std::string roadA = "RoadA";
+    const std::string roadB = "RoadB";
+    const std::string invalidRoadId = "InvalidRoad";
+    std::map<std::string, const std::vector<std::string>> strings1{{"Roads", {roadA, invalidRoadId}}};
+    ON_CALL(*spawnPoint1, GetParametersStringVector()).WillByDefault(ReturnRef(strings1));
+    std::map<std::string, const std::vector<int>> intVectors1{{"Lanes", {1,2,3}}};
+    ON_CALL(*spawnPoint1, GetParametersIntVector()).WillByDefault(ReturnRef(intVectors1));
+    std::map<std::string, double> doubles1{{"SCoordinate", 10.0}};
+    ON_CALL(*spawnPoint1, GetParametersDouble()).WillByDefault(ReturnRef(doubles1));
+
+    std::map<std::string, const std::vector<std::string>> strings2{{"Roads", {"RoadB"}}};
+    ON_CALL(*spawnPoint2, GetParametersStringVector()).WillByDefault(ReturnRef(strings2));
+    std::map<std::string, const std::vector<int>> intVectors2{{"Lanes", {-1,-2}}};
+    ON_CALL(*spawnPoint2, GetParametersIntVector()).WillByDefault(ReturnRef(intVectors2));
+    std::map<std::string, double> doubles2{{"SCoordinate", 11.0}};
+    ON_CALL(*spawnPoint2, GetParametersDouble()).WillByDefault(ReturnRef(doubles2));
+
+    std::map<std::string, ParameterInterface::ParameterLists> parameterLists{{"SpawnPoints", spawnPoint}};
+    ON_CALL(parameter, GetParameterLists()).WillByDefault(ReturnRef(parameterLists));
+
+    const LaneTypes validLaneTypes = {LaneType::Driving};
+
+    FakeWorld fakeWorld;
+    ON_CALL(fakeWorld, IsDirectionalRoadExisting(_, _)).WillByDefault(Return(true));
+    ON_CALL(fakeWorld, IsDirectionalRoadExisting(invalidRoadId, _)).WillByDefault(Return(false));
+    ON_CALL(fakeWorld, IsLaneTypeValid(roadA, _, _, validLaneTypes)).WillByDefault(Return(true));
+    ON_CALL(fakeWorld, IsLaneTypeValid(roadB, _, _, validLaneTypes)).WillByDefault(Return(true));
+    ON_CALL(fakeWorld, IsLaneTypeValid(roadB, -2, _, validLaneTypes)).WillByDefault(Return(false));
+
+    WorldAnalyzer worldAnalyzer{&fakeWorld};
+    FakeCallback callbacks;
+
+    const auto result = SpawnPointRuntimeCommonParameterExtractor::ExtractSpawnPoints(parameter, worldAnalyzer, validLaneTypes, &callbacks);
+
+    ASSERT_THAT(result, UnorderedElementsAre(SpawnPosition{roadA, 1, 10.},
+                                             SpawnPosition{roadA, 2, 10.},
+                                             SpawnPosition{roadA, 3, 10.},
+                                             SpawnPosition{roadB , -1, 11.}));
+
+    SpawningAgentProfile spawningAgentProfile1 = {"Profile1", openpass::parameter::NormalDistribution{1.,2.,3.,4.}, {0.1,0.2}, openpass::parameter::NormalDistribution{2.,3.,4.,5.}};
+    SpawningAgentProfile spawningAgentProfile2 = {"Profile2", openpass::parameter::NormalDistribution{1.,2.,3.,4.}, {0.1,0.2}, openpass::parameter::NormalDistribution{2.,3.,4.,5.}};
+    SpawningAgentProfile spawningAgentProfile3 = {"Profile3", openpass::parameter::NormalDistribution{10.,20.,30.,40.}, {1}, openpass::parameter::NormalDistribution{20.,30.,40.,50.}};
 }

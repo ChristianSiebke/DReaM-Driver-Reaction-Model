@@ -7,6 +7,7 @@ add_openpass_target(
 
   HEADERS
     CollisionManipulator.h
+    CustomParametersManipulator.h
     ComponentStateChangeManipulator.h
     LaneChangeManipulator.h
     ManipulatorCommonBase.h
@@ -16,6 +17,7 @@ add_openpass_target(
     RemoveAgentsManipulator.h
     SpeedActionManipulator.h
     TrajectoryManipulator.h
+    AcquirePositionManipulator.h
     ../../../../common/vector2d.h
     srcCollisionPostCrash/polygon.h
     srcCollisionPostCrash/collisionDetection_Impact_implementation.h
@@ -23,6 +25,7 @@ add_openpass_target(
 
   SOURCES
     CollisionManipulator.cpp
+    CustomParametersManipulator.cpp
     ComponentStateChangeManipulator.cpp
     LaneChangeManipulator.cpp
     ManipulatorCommonBase.cpp
@@ -31,6 +34,7 @@ add_openpass_target(
     RemoveAgentsManipulator.cpp
     SpeedActionManipulator.cpp
     TrajectoryManipulator.cpp
+    AcquirePositionManipulator.cpp
     srcCollisionPostCrash/polygon.cpp
     srcCollisionPostCrash/collisionDetection_Impact_implementation.cpp
 
