@@ -14,7 +14,7 @@ TEST(UT_Switch, noActivity)
     Switch switchAssist;
     ControlData controlResult = switchAssist.Perform(index, driver, prio1, prio2, prio3);
 
-    std::vector<double> expectedBrakeSuperpose = {0.0, 0.0, 0.0, 0.0};
+    std::array<double, 4> expectedBrakeSuperpose = {0.0, 0.0, 0.0, 0.0};
     ASSERT_EQ(controlResult.steer, 0.0);
     ASSERT_EQ(controlResult.throttle, 0.0);
     ASSERT_EQ(controlResult.brakePedal, 0.0);
@@ -33,7 +33,7 @@ TEST(UT_Switch, prio1Active)
     Switch switchAssist;
     ControlData controlResult = switchAssist.Perform(index, driver, prio1, prio2, prio3);
 
-    std::vector<double> expectedBrakeSuperpose = {0.0, 0.0, 0.0, 0.0};
+    std::array<double, 4> expectedBrakeSuperpose = {0.0, 0.0, 0.0, 0.0};
     ASSERT_EQ(controlResult.steer, 1.0);
     ASSERT_EQ(controlResult.throttle, 0.0);
     ASSERT_EQ(controlResult.brakePedal, 0.0);
@@ -52,7 +52,7 @@ TEST(UT_Switch, collisionOccurred)
     Switch switchAssist;
     ControlData controlResult = switchAssist.Perform(index, driver, prio1, prio2, prio3);
 
-    std::vector<double> expectedBrakeSuperpose = {0.0, 0.0, 0.0, 0.0};
+    std::array<double, 4> expectedBrakeSuperpose = {0.0, 0.0, 0.0, 0.0};
     ASSERT_EQ(controlResult.steer, 0.0);
     ASSERT_EQ(controlResult.throttle, 0.0);
     ASSERT_EQ(controlResult.brakePedal, 1.0);

@@ -8,11 +8,6 @@
 # * SPDX-License-Identifier: EPL-2.0
 # **********************************************************************/
 
-# \file  Algorithm_ECU.pro
-# \brief This file contains the information for the QtCreator-project of the
-#        module Algorithm_ECU
-#-----------------------------------------------------------------------------/
-
 DEFINES += ALGORITHM_ECU_LIBRARY
 CONFIG += OPENPASS_LIBRARY
 include(../../../global.pri)

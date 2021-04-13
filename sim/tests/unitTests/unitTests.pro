@@ -18,10 +18,15 @@ SUBDIRS = \
     algorithmFmuWrapper_Tests \
     algorithmLateral_Tests \
     algorithmLongitudinal_Tests \
+    Algorithm_ECU \
+    Algorithm_RouteControl \
+    Algorithm_Switch \
     basicDataStore_Tests \
     componentController_Tests \
+    Dynamics_Chassis \
     dynamicsCollision_Tests \
     dynamicsTrajectoryFollower_Tests \
+    Dynamics_TwoTrack \
     eventDetector_Tests \
     limiterAccelerationVehiclecomponents_Tests \
     observationLog_Tests \
@@ -40,6 +45,9 @@ SUBDIRS = \
     worldOSI_Tests \
     common_Tests
 
+Algorithm_ECU.file = \
+    $$PWD/components/Algorithm_ECU/Algorithm_ECU.pro
+
 algorithmAEB_Tests.file = \
     $$PWD/components/AlgorithmAEB/algorithmAEB_Tests.pro
 
@@ -55,6 +63,15 @@ algorithmLateral_Tests.file = \
 algorithmLongitudinal_Tests.file = \
     $$PWD/components/Algorithm_Longitudinal/algorithmLongitudinal_Tests.pro
 
+Algorithm_ECU.file = \
+    $$PWD/components/Algorithm_ECU/Algorithm_ECU.pro
+
+Algorithm_RouteControl.file = \
+    $$PWD/components/Algorithm_RouteControl/Algorithm_RouteControl.pro
+
+Algorithm_Switch.file = \
+    $$PWD/components/Algorithm_Switch/Algorithm_Switch.pro
+
 basicDataStore_Tests.file = \
     $$PWD/core/slave/modules/BasicDataStore/basicDataStore_Tests.pro
 
@@ -66,6 +83,12 @@ dynamicsCollision_Tests.file = \
 
 dynamicsTrajectoryFollower_Tests.file = \
     $$PWD/components/Dynamics_TF/dynamicsTF_Tests.pro
+
+Dynamics_Chassis.file = \
+    $$PWD/components/Dynamics_Chassis/Dynamics_Chassis.pro
+
+Dynamics_TwoTrack.file = \
+    $$PWD/components/Dynamics_TwoTrack/Dynamics_TwoTrack.pro
 
 eventDetector_Tests.file = \
     $$PWD/core/slave/modules/EventDetector/eventDetector_Tests.pro

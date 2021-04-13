@@ -8,23 +8,31 @@
 # * SPDX-License-Identifier: EPL-2.0
 # **********************************************************************/
 
-QT += testlib
+CONFIG += OPENPASS_GTEST \
+          OPENPASS_GTEST_DEFAULT_MAIN
 
-TARGET = tst_ut_RouteControl
+include(../../../../testing.pri)
+
+TEMPLATE = app
+CONFIG += console c++17
+CONFIG -= app_bundle
+CONFIG += thread
+CONFIG += qt
 
 MAIN_SRC_DIR = $$PWD/../../../../../src
-include($$MAIN_SRC_DIR/../global.pri)
+
+INCLUDEPATH += c:/OpenPASS/thirdParty/include
 
 INCLUDEPATH += . \
-               $$MAIN_SRC_DIR \
                $$MAIN_SRC_DIR/common \
-               $$MAIN_SRC_DIR/components/Algorithm_Routecontrol \
+               $$MAIN_SRC_DIR/components/Algorithm_ECU
 
-HEADERS += $$MAIN_SRC_DIR/common/vector2d.h \
-           $$MAIN_SRC_DIR/components/Algorithm_Routecontrol/routeControl.h \
+HEADERS += $$MAIN_SRC_DIR/components/Algorithm_ECU/ecu.h \
+           tst_ut_ecu.h
 
-SOURCES += $$MAIN_SRC_DIR/components/Algorithm_Routecontrol/routeControl.cpp \
-           tst_ut_RouteControl.cpp
 
-DEFINES += SRCDIR=\\\"$$PWD/\\\"
+SOURCES += $$MAIN_SRC_DIR/components/Algorithm_ECU/ecu.cpp \
+           tst_ut_ecu.cpp
 
+Release:DESTDIR = $$DIR_RELEASE
+Debug:DESTDIR = $$DIR_DEBUG

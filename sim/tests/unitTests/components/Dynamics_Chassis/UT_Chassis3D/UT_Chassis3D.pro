@@ -8,21 +8,24 @@
 # * SPDX-License-Identifier: EPL-2.0
 # **********************************************************************/
 
-include(../../../components_custom/UT.pri)
+QT += testlib
 
 TARGET = tst_ut_Chassis3D
 
+MAIN_SRC_DIR = $$PWD/../../../../../src
+include($$MAIN_SRC_DIR/../global.pri)
+
 INCLUDEPATH += . \
-               $$MAIN_SRC_DIR/src/components/Dynamics_Chassis \
+               $$MAIN_SRC_DIR/components/Dynamics_Chassis \
 
 
-HEADERS += $$MAIN_SRC_DIR/src/components/Dynamics_Chassis/VehicleBasics.h \
-           $$MAIN_SRC_DIR/src/components/Dynamics_Chassis/ForceWheelZ.h \
-           $$MAIN_SRC_DIR/src/components/Dynamics_Chassis/WheelOscillation.h \
+HEADERS += $$MAIN_SRC_DIR/components/Dynamics_Chassis/VehicleBasics.h \
+           $$MAIN_SRC_DIR/components/Dynamics_Chassis/ForceWheelZ.h \
+           $$MAIN_SRC_DIR/components/Dynamics_Chassis/WheelOscillation.h \
 
 
-SOURCES += $$MAIN_SRC_DIR/src/components/Dynamics_Chassis/ForceWheelZ.cpp \
-           $$MAIN_SRC_DIR/src/components/Dynamics_Chassis/WheelOscillation.cpp \
+SOURCES += $$MAIN_SRC_DIR/components/Dynamics_Chassis/ForceWheelZ.cpp \
+           $$MAIN_SRC_DIR/components/Dynamics_Chassis/WheelOscillation.cpp \
            tst_ut_Chassis3D.cpp \
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"

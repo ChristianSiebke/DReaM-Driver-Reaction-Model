@@ -224,7 +224,7 @@ void UT_Dynamics2TMTest::testCase1()
     Common::Vector2d vVel(vel*std::cos(angleSlide), vel*std::sin(angleSlide));
 
     vehicle->SetVelocity(vVel, rateYaw);
-    std::vector<double> brkSuper = {0.0, 0.0, 0.0, 0.0};
+    std::array<double, 4> brkSuper = {0.0, 0.0, 0.0, 0.0};
     std::vector<double> vertForce = {
         vehicle->forceTireVerticalStatic[0],
         vehicle->forceTireVerticalStatic[1],
