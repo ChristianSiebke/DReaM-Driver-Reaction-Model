@@ -20,8 +20,7 @@ include(../../../../../global.pri)
 
 INCLUDEPATH += \
     ../../../.. \
-    ../../../../.. \
-    ../../.. \
+    ../../../../..\
 
 SOURCES += \
     observationFileHandler.cpp \
@@ -29,7 +28,7 @@ SOURCES += \
     observation_logImplementation.cpp \
     observationCyclics.cpp \
     runStatistic.cpp \
-    runStatisticCalculation.cpp \
+    runStatisticCalculation.cpp
 
 HEADERS += \
     observationFileHandler.h \
@@ -38,4 +37,4 @@ HEADERS += \
     observation_logImplementation.h \
     observationCyclics.h \
     runStatistic.h \
-    runStatisticCalculation.h \
+    runStatisticCalculation.h

@@ -59,17 +59,10 @@ bool ConfigurationContainer::ImportAllConfigurations()
     }
 
     //Import VehicleModels
-    std::string vehicleCatalogPath = "";
-    if (!scenario.GetVehicleCatalogPath().empty())
-    {
-        vehicleCatalogPath = openpass::core::Directories::Concat(configurationFiles.configurationDir, scenario.GetVehicleCatalogPath());
-    }
-    std::string pedestrianCatalogPath = "";
-    if (!scenario.GetPedestrianCatalogPath().empty())
-    {
-        pedestrianCatalogPath = openpass::core::Directories::Concat(configurationFiles.configurationDir, scenario.GetPedestrianCatalogPath());
-    }
-    if (!VehicleModelsImporter::Import(vehicleCatalogPath,pedestrianCatalogPath,vehicleModels))
+    if (!VehicleModelsImporter::Import(
+                openpass::core::Directories::Concat(configurationFiles.configurationDir, scenario.GetVehicleCatalogPath()),
+                openpass::core::Directories::Concat(configurationFiles.configurationDir, scenario.GetPedestrianCatalogPath()),
+                vehicleModels))
     {
         LOG_INTERN(LogLevel::Error) << "could not import vehicle models";
         return false;

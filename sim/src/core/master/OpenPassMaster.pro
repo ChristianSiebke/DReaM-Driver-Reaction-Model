@@ -23,7 +23,7 @@ QT += concurrent widgets xml
 SRC_CORESHARE = ../../common/xmlParser.cpp \
                 ../common/log.cpp
 
-INC_CORESHARE = ../..//common/xmlParser.h \
+INC_CORESHARE = ../../common/xmlParser.h \
                 ../common/log.h
 
 INCLUDEPATH += \

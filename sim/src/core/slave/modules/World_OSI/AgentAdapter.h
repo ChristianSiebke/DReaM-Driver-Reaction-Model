@@ -202,6 +202,15 @@ public:
         });
     }
 
+    void SetVelocityVector(double vx, double vy, double vz) override
+    {
+        world->QueueAgentUpdate([this, vx, vy, vz]()
+        {
+            OWL::Primitive::AbsVelocity velocity{vx, vy, vz};
+            GetBaseTrafficObject().SetAbsVelocity(velocity);
+        });
+    }
+
     void SetAcceleration(double value) override
     {
         world->QueueAgentUpdate([this, value]()
@@ -233,7 +242,14 @@ public:
         world->QueueAgentUpdate([this, value]()
         {
             centripetalAcceleration = value;
+        });
+    }
 
+    void SetTangentialAcceleration(double value) override
+    {
+        world->QueueAgentUpdate([this, value]()
+        {
+            tangentialAcceleration = value;
         });
     }
 
@@ -349,6 +365,11 @@ public:
     double GetCentripetalAcceleration() const override
     {
         return centripetalAcceleration;
+    }
+
+    double GetTangentialAcceleration() const override
+    {
+        return tangentialAcceleration;
     }
 
     bool Locate() override;
@@ -949,6 +970,7 @@ private:
     double brakePedal = 0.;
     double steeringWheelAngle = 0.0;
     double centripetalAcceleration = 0.0;
+    double tangentialAcceleration = 0.0;
     double engineSpeed = 0.;
     double distanceTraveled = 0.0;
 

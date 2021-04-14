@@ -11,6 +11,7 @@
 #include <cassert>
 #include <limits>
 #include <array>
+
 #include "collisionDetection_Impact_implementation.h"
 
 namespace {
@@ -31,7 +32,7 @@ CollisionDetectionPostCrash::~CollisionDetectionPostCrash()
 }
 
 std::vector<Common::Vector2d> CollisionDetectionPostCrash::GetAgentCorners(
-        const AgentInterface *agent)
+    const AgentInterface *agent)
 {
     Common::Vector2d agentPosition(agent->GetPositionX(), agent->GetPositionY()); // reference point (rear axle) in glabal CS
     double agentAngle = agent->GetYaw();
@@ -74,8 +75,8 @@ std::vector<Common::Vector2d> CollisionDetectionPostCrash::GetAgentCorners(
 
 std::vector<Common::Vector2d>
 CollisionDetectionPostCrash::CalculateAllIntersectionPoints(
-        std::vector<Common::Vector2d> corners1,
-        std::vector<Common::Vector2d> corners2)
+    std::vector<Common::Vector2d> corners1,
+    std::vector<Common::Vector2d> corners2)
 {
     // Sutherland-Hodgman-Algorith for polygon clipping
     for (unsigned int i1 = 0; i1 < corners1.size(); i1++) { // loop over 1st polygon, must be convex
@@ -106,9 +107,9 @@ CollisionDetectionPostCrash::CalculateAllIntersectionPoints(
 
             // check if edges are parallel
             bool areParallel     = fabs( n1.x - n2.x ) < std::numeric_limits<double>::epsilon()
-                    && fabs( n1.y - n2.y ) < std::numeric_limits<double>::epsilon();
+                                   && fabs( n1.y - n2.y ) < std::numeric_limits<double>::epsilon();
             bool areAntiParallel = fabs( n1.x + n2.x ) < std::numeric_limits<double>::epsilon()
-                    && fabs( n1.y + n2.y ) < std::numeric_limits<double>::epsilon();
+                                   && fabs( n1.y + n2.y ) < std::numeric_limits<double>::epsilon();
             if ( areParallel ||  areAntiParallel) {
                 if ( n1.Dot( corners2[i2_1]) <= d1 ) {
                     // first point of the edge of polygon2 is inside the edge of polygon1
@@ -146,7 +147,7 @@ CollisionDetectionPostCrash::CalculateAllIntersectionPoints(
 }
 
 bool CollisionDetectionPostCrash::CalculatePlaneOfContact(Polygon intersection,
-                                                          std::vector<int> vertexTypes, Common::Vector2d &pointOfImpact, double &phi)
+                                                                       std::vector<int> vertexTypes, Common::Vector2d &pointOfImpact, double &phi)
 {
     if (!intersection.CalculateCentroid(pointOfImpact)) {
         return false;
@@ -192,34 +193,35 @@ bool CollisionDetectionPostCrash::CalculatePlaneOfContact(Polygon intersection,
 }
 
 bool CollisionDetectionPostCrash::CalculatePostCrashDynamic(Common::Vector2d cog1,
-                                                            const AgentInterface *agent1,
-                                                            Common::Vector2d cog2, const AgentInterface *agent2,
-                                                            Common::Vector2d poi, double phi,
-                                                            PostCrashDynamic* postCrashDynamic1,
-                                                            PostCrashDynamic* postCrashDynamic2)
+                                                                         const AgentInterface *agent1,
+                                                                         Common::Vector2d cog2, const AgentInterface *agent2,
+                                                                         Common::Vector2d poi, double phi,
+                                                                         PostCrashDynamic* postCrashDynamic1,
+                                                                         PostCrashDynamic* postCrashDynamic2)
 {
     // input parameters of agent 1
     double yaw1 = agent1->GetYaw();                                             // yaw angle [rad]
-    Common::Vector2d vel;
-    vel.x = agent1->GetVelocity(VelocityScope::DirectionX);
-    vel.y = agent1->GetVelocity(VelocityScope::DirectionY);
-    vel.Rotate(-yaw1);
-    double yawVel1 = agent1->GetYawRate();                                                         // pre crash yaw velocity [rad/s]
-    double vel1  = sqrt( vel.x * vel.x + vel.y * vel.y );                       // absolute velocity of first vehicle [m/s]
+    double yawVel1 = 0;                                                         // pre crash yaw velocity [rad/s]
+    double velX1 = agent1->GetVelocity(VelocityScope::Longitudinal);            // x-velocity in the local coordinate system of the agent
+    double velY1 = agent1->GetVelocity(VelocityScope::Lateral);                 // y-velocity in the local coordinate system of the agent
+    double vel1  = sqrt( velX1 * velX1 + velY1 * velY1 );                       // absolute velocity of first vehicle [m/s]
     double velDir1 = yaw1;                                                      // velocity direction of first vehicle [rad]
     double mass1 = agent1->GetVehicleModelParameters().weight;                                         // mass of first vehicle [kg]
-    double momentIntertiaYaw1 = agent1->GetVehicleModelParameters().momentInertiaYaw;     // moment of inertia 1st vehicle [kg*m^2]
+    double length1 = agent1->GetLength();
+    double width1 = agent1->GetWidth();
+    double momentIntertiaYaw1 = CommonHelper::CalculateMomentInertiaYaw(mass1, length1, width1);     // moment of inertia 1st vehicle [kg*m^2]
 
     // input parameters of agent 2
     double yaw2 = agent2->GetYaw();                                             // yaw angle [rad]
-    vel.x = agent2->GetVelocity(VelocityScope::DirectionX);
-    vel.y = agent2->GetVelocity(VelocityScope::DirectionY);
-    vel.Rotate(-yaw2);
-    double yawVel2 = agent2->GetYawRate();                                                         // pre crash yaw velocity [rad/s]
-    double vel2  = sqrt( vel.x * vel.x + vel.y * vel.y );                       // absolute velocity of 2nd vehicle [m/s]
+    double yawVel2 = 0;                                                         // pre crash yaw velocity [rad/s]
+    double velX2 = agent2->GetVelocity(VelocityScope::Longitudinal);            // x-velocity in the local coordinate system of the agent
+    double velY2 = agent2->GetVelocity(VelocityScope::Lateral);                 // y-velocity in the local coordinate system of the agent
+    double vel2  = sqrt( velX2 * velX2 + velY2 * velY2 );                       // absolute velocity of 2nd vehicle [m/s]
     double velDir2 = yaw2;                                                      // velocity direction of 2nd vehicle [rad]
     double mass2 = agent2->GetVehicleModelParameters().weight;                                         // mass of 2nd vehicle [kg]
-    double momentIntertiaYaw2 = agent2->GetVehicleModelParameters().momentInertiaYaw; // moment of inertia 2nd vehicle [kg*m^2]
+    double length2 = agent2->GetLength();
+    double width2 = agent2->GetWidth();
+    double momentIntertiaYaw2 = CommonHelper::CalculateMomentInertiaYaw(mass2, length2, width2); // moment of inertia 2nd vehicle [kg*m^2]
 
     // new coordinate system axis: tangent and normal to contact plane
     Common::Vector2d tang = Common::Vector2d( cos(phi), sin(phi) );
@@ -265,8 +267,8 @@ bool CollisionDetectionPostCrash::CalculatePostCrashDynamic(Common::Vector2d cog
     if ( fabs(Tc) > fabs( interFriction * Nc ) ) {
         out1_sliding = true;
         out2_sliding = true;
-        //        LOG(CbkLogLevel::Warning,
-        //            "Sliding collision detected. Calculation of post-crash dynamics not valid for sliding collisions.");
+//        LOG(CbkLogLevel::Warning,
+//            "Sliding collision detected. Calculation of post-crash dynamics not valid for sliding collisions.");
     }
     // vector total pulse
     double T = Tc * ( 1 + coeffRest );
@@ -354,18 +356,22 @@ bool CollisionDetectionPostCrash::CalculatePostCrashDynamic(Common::Vector2d cog
     double out2_CollVel = vel2;
 
     *postCrashDynamic1 = PostCrashDynamic(out1_Vel, out1_dV, out1_VelDir, out1_YawVel,
-                                          out1_Pulse, out1_PulseDir, out1_PulseLocal,
-                                          out1_poiLocal, out1_CollVel, out1_sliding );
+                                             out1_Pulse, out1_PulseDir, out1_PulseLocal,
+                                             out1_poiLocal, out1_CollVel, out1_sliding );
 
     *postCrashDynamic2 = PostCrashDynamic(out2_Vel, out2_dV, out2_VelDir, out2_YawVel,
-                                          out2_Pulse, out2_PulseDir, out2_PulseLocal,
-                                          out2_poiLocal, out2_CollVel, out2_sliding );
+                                             out2_Pulse, out2_PulseDir, out2_PulseLocal,
+                                             out2_poiLocal, out2_CollVel, out2_sliding );
+
+    //for debug purpose
+//    LogPostCrashDynamic(postCrashDynamic1, agent1->GetId());
+//    LogPostCrashDynamic(postCrashDynamic2, agent2->GetId());
 
     return true; // Calculation successful
 }
 
 bool CollisionDetectionPostCrash::GetIntersectionPoint(Common::Vector2d n1,
-                                                       Common::Vector2d n2, double d1, double d2, Common::Vector2d &intersectionPoint)
+                                                                    Common::Vector2d n2, double d1, double d2, Common::Vector2d &intersectionPoint)
 {
     double det = (n1.x * n2.y - n1.y * n2.x);
 
@@ -381,8 +387,8 @@ bool CollisionDetectionPostCrash::GetIntersectionPoint(Common::Vector2d n1,
 }
 
 bool CollisionDetectionPostCrash::GetFirstContact(const AgentInterface *agent1,
-                                                  const AgentInterface *agent2,
-                                                  int &timeFirstContact)
+                                                         const AgentInterface *agent2,
+                                                         int &timeFirstContact)
 {
     std::vector<Common::Vector2d> agent1Corners = GetAgentCorners(agent1);
     std::vector<Common::Vector2d> agent2Corners = GetAgentCorners(agent2);
@@ -439,8 +445,8 @@ bool CollisionDetectionPostCrash::GetFirstContact(const AgentInterface *agent1,
 }
 
 std::vector<int> CollisionDetectionPostCrash::GetVertexTypes(
-        std::vector<Common::Vector2d> vertices1, std::vector<Common::Vector2d> vertices2,
-        std::vector<Common::Vector2d> verticesIntersection)
+    std::vector<Common::Vector2d> vertices1, std::vector<Common::Vector2d> vertices2,
+    std::vector<Common::Vector2d> verticesIntersection)
 {
     std::vector<int> vertexTypes;
 
@@ -481,10 +487,17 @@ std::vector<int> CollisionDetectionPostCrash::GetVertexTypes(
 }
 
 Common::Vector2d CollisionDetectionPostCrash::GetAgentVelocityVector(
-        const AgentInterface *agent)
+    const AgentInterface *agent)
 {
+    Common::Vector2d agentVelocityX(agent->GetVelocity(VelocityScope::Longitudinal),
+                                    0);   // x-velocity in the local coordinate system of the agent
+    Common::Vector2d agentVelocityY(0,
+                                    agent->GetVelocity(VelocityScope::Lateral));   // y-velocity in the local coordinate system of the agent
+    double agentYawAngle = agent->GetYaw();
+    agentVelocityX.Rotate(agentYawAngle);
+    agentVelocityY.Rotate(agentYawAngle);
+    Common::Vector2d agentVelocity = agentVelocityX + agentVelocityY;
 
-    Common::Vector2d agentVelocity(agent->GetVelocity(VelocityScope::DirectionX),agent->GetVelocity(VelocityScope::DirectionY));
     return agentVelocity;
 }
 
@@ -497,7 +510,7 @@ bool CollisionDetectionPostCrash::ShiftPolygonsAndCheckIntersection(Polygon poly
     polygon2.Translate(shiftVector2);
 
     std::vector<Common::Vector2d> intersectionPoints = CalculateAllIntersectionPoints(
-                polygon1.GetVertices(), polygon2.GetVertices());
+                                                           polygon1.GetVertices(), polygon2.GetVertices());
 
     if (intersectionPoints.size() > 0) {
         return true;
@@ -585,7 +598,6 @@ bool CollisionDetectionPostCrash::CreatePostCrashDynamics(const AgentInterface *
 {
     timeOfFirstContact = 0;
     if (!GetFirstContact(agent1, agent2, timeOfFirstContact)) {
-        LOG(CbkLogLevel::Error, "Could not calculate time of first contact");
         return false;
     }
     //
