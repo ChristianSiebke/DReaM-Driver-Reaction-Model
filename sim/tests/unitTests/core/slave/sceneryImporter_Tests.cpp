@@ -296,7 +296,7 @@ TEST(SceneryImporter_UnitTests, ParseObjectsWithValidObject_ReturnsCorrectValues
     EXPECT_DOUBLE_EQ(ObjectInterceptor::object.roll, 0);
 }
 
-TEST(SceneryImporter_UnitTests, ParseObjectsWithMissingField_Fails)
+TEST(SceneryImporter_UnitTests, ParseObjectsWithMissingField_ThrowsException)
 {
     QDomElement documentRoot = documentRootFromString(
     "<root>"
@@ -310,7 +310,7 @@ TEST(SceneryImporter_UnitTests, ParseObjectsWithMissingField_Fails)
     ASSERT_THROW(SceneryImporter::ParseObjects(documentRoot, &mockRoad), std::runtime_error);
 }
 
-TEST(SceneryImporter_UnitTests, ParseObjectssWithInvalidS_Fails)
+TEST(SceneryImporter_UnitTests, ParseObjectssWithInvalidS_ThrowsException)
 {
     QDomElement documentRoot = documentRootFromString(
     "<root>"
@@ -324,7 +324,7 @@ TEST(SceneryImporter_UnitTests, ParseObjectssWithInvalidS_Fails)
     ASSERT_THROW(SceneryImporter::ParseObjects(documentRoot, &mockRoad), std::runtime_error);
 }
 
-TEST(SceneryImporter_UnitTests, ParseObjectssWithInvalidDimensions_Fails)
+TEST(SceneryImporter_UnitTests, ParseObjectssWithInvalidDimensions_ThrowsException)
 {
     QDomElement documentRoot = documentRootFromString(
     "<root>"
@@ -338,7 +338,7 @@ TEST(SceneryImporter_UnitTests, ParseObjectssWithInvalidDimensions_Fails)
     ASSERT_THROW(SceneryImporter::ParseObjects(documentRoot, &mockRoad), std::runtime_error);
 }
 
-TEST(SceneryImporter_UnitTests, ParseObjectsWithZeroLength_ThrowsException)
+TEST(SceneryImporter_UnitTests, ParseObjectsWithZeroLength_IsIgnored)
 {
     QDomElement documentRoot = documentRootFromString(
     "<root>"
@@ -349,10 +349,11 @@ TEST(SceneryImporter_UnitTests, ParseObjectsWithZeroLength_ThrowsException)
 
     NiceMock<FakeOdRoad> mockRoad;
 
-    ASSERT_THROW(SceneryImporter::ParseObjects(documentRoot, &mockRoad), std::runtime_error);
+    EXPECT_CALL(mockRoad, AddRoadObject(_)).Times(0);
+    SceneryImporter::ParseObjects(documentRoot, &mockRoad);
 }
 
-TEST(SceneryImporter_UnitTests, ParseObjectsWithZeroWidth_ThrowsException)
+TEST(SceneryImporter_UnitTests, ParseObjectsWithZeroWidth_IsIgnored)
 {
     QDomElement documentRoot = documentRootFromString(
     "<root>"
@@ -363,7 +364,8 @@ TEST(SceneryImporter_UnitTests, ParseObjectsWithZeroWidth_ThrowsException)
 
     NiceMock<FakeOdRoad> mockRoad;
 
-    ASSERT_THROW(SceneryImporter::ParseObjects(documentRoot, &mockRoad), std::runtime_error);
+    EXPECT_CALL(mockRoad, AddRoadObject(_)).Times(0);
+    SceneryImporter::ParseObjects(documentRoot, &mockRoad);
 }
 
 TEST(SceneryImporter_UnitTests, ParseRepeatWithNoOverridingOfOptionalParameters)

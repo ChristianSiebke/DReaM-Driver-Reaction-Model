@@ -585,6 +585,18 @@ bool SceneryConverter::ConnectJunction(const JunctionInterface *junction)
     }
 }
 
+std::optional<int> GetOutgoingLaneId (const RoadLaneInterface& connectingLane, bool connectAtStart)
+{
+    if (connectAtStart ? connectingLane.GetSuccessor().empty() : connectingLane.GetPredecessor().empty())
+    {
+        return std::nullopt;
+    }
+    else
+    {
+        return connectAtStart ? connectingLane.GetSuccessor().front() : connectingLane.GetPredecessor().front();
+    }
+}
+
 void SceneryConverter::ConnectPathInJunction(const JunctionInterface *junction, const RoadInterface *incomingRoad, const RoadInterface *connectingRoad,
                                              const RoadInterface *outgoingRoad, ContactPointType incomingContactPoint, ContactPointType connectingContactPoint, ContactPointType outgoingContactPoint,
                                              std::map<int, int> laneIdMapping)
@@ -637,15 +649,15 @@ void SceneryConverter::ConnectPathInJunction(const JunctionInterface *junction, 
         ConnectLaneToLane(incomingLane, incomingContactPoint, connectingLane);
     }
 
-    for (auto connectingLane : connectingRoadLastSection->GetLanes())
+    for (auto [connectingLaneId, connectingLane] : connectingRoadLastSection->GetLanes())
     {
-        if (connectingLane.first == 0) //Do not try to connect the center lane
+        auto outgoingLaneId = GetOutgoingLaneId(*connectingLane, connectAtStart);
+        if (!outgoingLaneId.has_value() || connectingLaneId == 0)
         {
             continue;
         }
-        int outgoingLaneId = connectAtStart ? connectingLane.second->GetSuccessor().front() : connectingLane.second->GetPredecessor().front();
-        RoadLaneInterface *outgoingLane = outgoingRoadSection->GetLanes().at(outgoingLaneId);
-        ConnectLaneToLane(outgoingLane, outgoingContactPoint, connectingLane.second);
+        RoadLaneInterface *outgoingLane = outgoingRoadSection->GetLanes().at(outgoingLaneId.value());
+        ConnectLaneToLane(outgoingLane, outgoingContactPoint, connectingLane);
     }
 }
 
@@ -864,7 +876,10 @@ void SceneryConverter::CreateRoadSignals()
                 auto parentSign = worldData.GetTrafficSigns().at(worldData.GetTrafficSignIdMapping().at(parentId));
 
                 auto position = GetPositionForRoadCoordinates(road, supplementarySign->GetS(), supplementarySign->GetT());
-                parentSign->AddSupplementarySign(supplementarySign, position);
+                if(!parentSign->AddSupplementarySign(supplementarySign, position))
+                {
+                    LOGWARN("Unsupported supplementary sign type " + supplementarySign->GetType() + " (id: " + supplementarySign->GetId() + ")");
+                }
             }
         }
     }
@@ -879,9 +894,8 @@ void SceneryConverter::CreateTrafficSign(RoadSignalInterface *signal, Position p
 
     if (!trafficSign.SetSpecification(signal, position))
     {
-        const std::string message = "Unsupported traffic sign type: " + signal->GetType() + (" (id: " + signal->GetId() + ")");
+        const std::string message = "Unsupported traffic sign type: " + signal->GetType() + "-" + signal->GetSubType() + " (id: " + signal->GetId() + ")";
         LOG(CbkLogLevel::Warning, message);
-        return;
     }
 
     for (auto lane : lanes)

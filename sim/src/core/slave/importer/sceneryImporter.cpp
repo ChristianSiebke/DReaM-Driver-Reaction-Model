@@ -775,12 +775,16 @@ void SceneryImporter::ParseObject(QDomElement& objectElement, RoadInterface* roa
 
     ThrowIfFalse(object.checkStandardCompliance(), objectElement, "limits of object are not valid for openDrive standard");
 
-    ThrowIfFalse(object.checkSimulatorCompliance(), objectElement, "Limits of object are not valid for the simulation. The Object will be ignored.");
-
-    ParseElementValidity(objectElement, object.validity);
-
-    std::list<RoadObjectSpecification> parsedObjectRepetitions = ParseObjectRepeat(objectElement, object);
-    AddParsedObjectsToRoad(parsedObjectRepetitions, road);
+    if (object.checkSimulatorCompliance())
+    {
+        ParseElementValidity(objectElement, object.validity);
+        auto objects = ParseObjectRepeat(objectElement, object);
+        AddParsedObjectsToRoad(objects, road);
+    }
+    else
+    {
+        LOG_INTERN(LogLevel::Warning) << "Object with Id \"" << object.id << "\" ignored (Parameters are not valid for simulation).";
+    }
 
 }
 

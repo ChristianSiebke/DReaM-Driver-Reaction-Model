@@ -1395,8 +1395,8 @@ bool TrafficSign::SetSpecification(RoadSignalInterface* signal, Position positio
         }
         else
         {
-            const std::string message = "Invalid subtype: " + subType + " of traffic sign type: " + odType;
-            throw std::invalid_argument(message);
+            mutableOsiClassification->set_type(osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_OTHER);
+            mapping_succeeded = false;
         }
     }
     else if(OpenDriveTypeMapper::trafficSignsSubTypeDefinesValue.find(odType) != OpenDriveTypeMapper::trafficSignsSubTypeDefinesValue.end())
@@ -1418,7 +1418,7 @@ bool TrafficSign::SetSpecification(RoadSignalInterface* signal, Position positio
     return mapping_succeeded;
 }
 
-void TrafficSign::AddSupplementarySign(RoadSignalInterface* odSignal, Position position)
+bool TrafficSign::AddSupplementarySign(RoadSignalInterface* odSignal, Position position)
 {
     auto *supplementarySign = osiSign->add_supplementary_sign();
 
@@ -1443,27 +1443,32 @@ void TrafficSign::AddSupplementarySign(RoadSignalInterface* odSignal, Position p
             osiValue->set_value(odSignal->GetValue());
             osiValue->set_value_unit(osi3::TrafficSignValue_Unit::TrafficSignValue_Unit_UNIT_METER);
             osiValue->set_text(std::to_string(odSignal->GetValue()) + " m");
+            return true;
         }
         else if (odSignal->GetSubType() == "31")
         {
             osiValue->set_value(odSignal->GetValue());
             osiValue->set_value_unit(osi3::TrafficSignValue_Unit::TrafficSignValue_Unit_UNIT_KILOMETER);
             osiValue->set_text(std::to_string(odSignal->GetValue()) + " km");
+            return true;
         }
         else if (odSignal->GetSubType() == "32")
         {
             osiValue->set_value(100.0);
             osiValue->set_value_unit(osi3::TrafficSignValue_Unit::TrafficSignValue_Unit_UNIT_METER);
             osiValue->set_text("STOP 100 m");
+            return true;
         }
         else
         {
-            throw std::logic_error("Invalid supplementary sign subtype for type 1004");
+            supplementarySign->mutable_classification()->set_type(osi3::TrafficSign_SupplementarySign_Classification_Type::TrafficSign_SupplementarySign_Classification_Type_TYPE_OTHER);
+            return false;
         }
     }
     else
     {
-        throw std::logic_error("Invalid supplementary sign type: " + odSignal->GetType());
+        supplementarySign->mutable_classification()->set_type(osi3::TrafficSign_SupplementarySign_Classification_Type::TrafficSign_SupplementarySign_Classification_Type_TYPE_OTHER);
+        return false;
     }
 }
 

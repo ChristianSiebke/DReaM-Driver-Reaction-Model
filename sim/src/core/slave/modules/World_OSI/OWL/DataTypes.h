@@ -676,14 +676,15 @@ public:
     //!
     //! \param signal       OpenDrive specification
     //! \param position     position in the world
-    //! \return     true if succesfull, false if the sign can not be converted
+    //! \return     true if succesful, false if the sign can not be converted
     virtual bool SetSpecification(RoadSignalInterface* signal, Position position) = 0;
 
     //! Adds a supplementary sign to this sign and converts its specifation from OpenDrive to OSI
     //!
     //! \param odSignal     OpenDrive specification of supplementary sign
     //! \param position     position of the supplementary sign
-    virtual void AddSupplementarySign(RoadSignalInterface* odSignal, Position position) = 0;
+    //! \return     true if succesful, false if the sign can not be converted
+    virtual bool AddSupplementarySign(RoadSignalInterface* odSignal, Position position) = 0;
 
     /*!
      * \brief Copies the underlying OSI object to the given GroundTruth
@@ -1259,7 +1260,7 @@ public:
 
     virtual bool SetSpecification(RoadSignalInterface* signal, Position position) override;
 
-    virtual void AddSupplementarySign(RoadSignalInterface* odSignal, Position position) override;
+    virtual bool AddSupplementarySign(RoadSignalInterface* odSignal, Position position) override;
 
     virtual bool IsValidForLane(OWL::Id laneId) const override;
 

@@ -74,7 +74,7 @@ void GeometryConverter::CalculateSection(OWL::Interfaces::WorldData& worldData,
 
      while (roadMarkStart + roadSectionStart < roadSectionEnd)
      {
-         double roadMarkEnd = roadSectionEnd - roadSectionStart;
+         double roadMarkEnd = std::numeric_limits<double>::max();
          for (const auto& roadLane : roadSection->GetLanes())
          {
              for (const auto& roadMark : roadLane.second->GetRoadMarks())
@@ -88,7 +88,7 @@ void GeometryConverter::CalculateSection(OWL::Interfaces::WorldData& worldData,
          }
 
          auto sampledGeometry = CalculateSectionBetweenRoadMarkChanges(roadSectionStart + roadMarkStart,
-                                                                       roadSectionStart + roadMarkEnd,
+                                                                       std::min(roadSectionStart + roadMarkEnd, roadSectionEnd),
                                                                        road,
                                                                        roadSection);
          if (firstRoadMark)
@@ -262,7 +262,7 @@ BorderPoints GeometryConverter::CalculateBorderPoints(const RoadLaneSectionInter
     const auto maxLaneId = roadLanes.crbegin()->first;
     const auto minLaneId = roadLanes.cbegin()->first;
 
-    const double sectionOffset = sCoordinate - roadSectionStart;
+    const double sectionOffset = std::max(sCoordinate - roadSectionStart, 0.0); //Take only positive value to prevent rounding imprecision
     const double laneOffset = CalculateLaneOffset(road, sCoordinate);
     const auto centerPoint = roadGeometry->GetCoord(geometryOffset, laneOffset);
     const double heading = roadGeometry->GetDir(geometryOffset);
