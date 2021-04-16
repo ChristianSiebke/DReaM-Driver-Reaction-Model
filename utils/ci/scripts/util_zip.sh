@@ -11,20 +11,19 @@
 ################################################################################
 
 ################################################################################
-# This script fetches and builds open-simulation-interface
+# This script just wraps the call to zip by adding common flags
 ################################################################################
 
-MYDIR="$(dirname "$(readlink -f $0)")"
-cd "$MYDIR/../../../.."
+if [ $# -lt 2 ]; then
+  echo "Usage: $0 <target artifact path> <files/dirs to add...>"
+  exit 1
+fi
 
-WORKSPACE_ROOT="$PWD"
+ARTIFACT_PATH="$(readlink -f $1)"
+shift
 
-mkdir -p build-osi && cd build-osi
+SRCFILES=("$@")
 
-git clone --branch v3.2.0 --depth=1 -c advice.detachedHead=false https://github.com/OpenSimulationInterface/open-simulation-interface.git src || exit 1
-
-mkdir -p src/build && cd src/build
-cmake "$CMAKE_GENERATOR_ARG" -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX="$WORKSPACE_ROOT/deps/osi" ..
-make -j4
-make install
-
+# not quoted to allow glob expansion
+echo Archiving into $ARTIFACT_PATH: ${SRCFILES[@]}
+zip -r -9 "$ARTIFACT_PATH" ${SRCFILES[@]}

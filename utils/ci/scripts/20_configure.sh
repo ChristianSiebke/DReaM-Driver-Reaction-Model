@@ -14,15 +14,44 @@
 # This script configures cmake
 ################################################################################
 
+# joins arguments using the cmake list separator (;)
+function join_paths()
+{
+  local IFS=\;
+  echo "$*"
+}
+
 MYDIR="$(dirname "$(readlink -f $0)")"
 cd "$MYDIR/../../../../build" || exit 1
 
+# dependencies built previously
+DEPS=(
+  "$PWD/../deps/FMILibrary"
+  "$PWD/../deps/osi"
+)
+
+# preparations for building on Windows/MSYS
+if [[ "${OSTYPE}" = "msys" ]]; then
+  # set the correct CMake generator
+  CMAKE_GENERATOR_ARG="-GMSYS Makefiles"
+
+  # prepare dependency paths
+  # it seems cmake doesn't like MSYS paths starting with drive letters (e.g. /c/thirdParty/...)
+  # cygpath is used here to format the paths in "mixed format" (e.g. c:/thirdparty/...)
+  # also, add the mingw64 base path to allow resolving of runtime dependencies during install
+  OLD_DEPS=(${DEPS[@]})
+  OLD_DEPS+=("/mingw64")
+  DEPS=()
+  for DEP in "${OLD_DEPS[@]}"; do
+    DEPS+=("$(cygpath -a -m ${DEP})")
+  done
+fi
+
 cmake \
-  -D CMAKE_PREFIX_PATH="$PWD/../deps/FMILibrary;$PWD/../deps/osi" \
+  "$CMAKE_GENERATOR_ARG" \
+  -D CMAKE_PREFIX_PATH="$(join_paths ${DEPS[@]})" \
   -D CMAKE_INSTALL_PREFIX="$PWD/../dist/Slave" \
   -D CMAKE_BUILD_TYPE=Release \
-  -D CMAKE_C_COMPILER=gcc-10 \
-  -D CMAKE_CXX_COMPILER=g++-10 \
   -D INSTALL_BIN_DIR:STRING=. \
   -D INSTALL_EXTRA_RUNTIME_DEPS=ON \
   -D OPENPASS_ADJUST_OUTPUT=OFF \
@@ -34,4 +63,3 @@ cmake \
   -D WITH_EXTENDED_OSI=OFF \
   -D WITH_GUI=OFF \
   ../repo
-

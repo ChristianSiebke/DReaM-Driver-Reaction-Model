@@ -27,4 +27,3 @@ SRCFILES=("$@")
 # not quoted to allow glob expansion
 echo Archiving into $ARTIFACT_PATH: ${SRCFILES[@]}
 tar zcvf "$ARTIFACT_PATH" ${SRCFILES[@]}
-

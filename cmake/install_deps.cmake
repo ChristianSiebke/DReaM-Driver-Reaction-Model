@@ -30,13 +30,13 @@ foreach(SEARCH_DIR IN LISTS SEARCH_DIRS)
   if(WIN32)
     execute_process (
         WORKING_DIRECTORY ${SEARCH_DIR}
-        COMMAND bash -c "for f in \$(find -iname \'*.dll\'); do cygpath -a -m \$(dirname \$f); done | sort -u"
+        COMMAND $ENV{SHELL} -c "for f in \$(find -iname \'*.dll\'); do cygpath -a -m \$(dirname \$f); done | sort -u"
         OUTPUT_VARIABLE DETECTED_LIBRARY_DIRS
     )
   else()
     execute_process (
         WORKING_DIRECTORY ${SEARCH_DIR}
-        COMMAND bash -c "for f in \$(find -iname \'*.so\'); do realpath \$(dirname \$f); done | sort -u"
+        COMMAND $ENV{SHELL} -lc "for f in \$(find -iname \'*.so\'); do realpath \$(dirname \$f); done | sort -u"
         OUTPUT_VARIABLE DETECTED_LIBRARY_DIRS
     )
   endif()
@@ -61,7 +61,7 @@ install(CODE
   if(\"${INSTALL_SYSTEM_RUNTIME_DEPS}\" STREQUAL \"OFF\")
     message(STATUS \"Filtering system runtime dependencies...\")
     if(WIN32)
-      list(FILTER resolved_deps EXCLUDE REGEX \"^[A-Za-z]:[/\\][A-Za-z0-9_]*[/\\]system32|^api-ms-.*|ext-ms-.*\")
+      list(FILTER resolved_deps EXCLUDE REGEX \"^[A-Za-z]:[/\\\\][A-Za-z0-9_]*[/\\\\]system32|^api-ms-.*|ext-ms-.*\")
     elseif(UNIX)
       list(FILTER resolved_deps EXCLUDE REGEX \"^/lib|^/usr\")
     endif()

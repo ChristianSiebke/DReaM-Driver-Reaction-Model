@@ -45,21 +45,21 @@ spec:
     stage('Prepare dependencies') {
       steps {
         container('openpass-build') {
-          sh 'repo/utils/ci/scripts/build_prepare.sh'
+          sh 'bash repo/utils/ci/scripts/build_prepare.sh'
         }
       }
     }
     stage('Build and E2E tests') {
       steps {
         container('openpass-build') {
-          sh 'repo/utils/ci/scripts/build_core_and_e2e.sh'
+          sh 'bash repo/utils/ci/scripts/build_core_and_e2e.sh'
         }
       }
     }
     stage('Unit tests') {
       steps {
         container('openpass-build') {
-          sh 'repo/utils/ci/scripts/build_unittests.sh'
+          sh 'bash repo/utils/ci/scripts/build_unittests.sh'
         }
       }
     }
@@ -69,7 +69,8 @@ spec:
           sshagent ( ['projects-storage.eclipse.org-bot-ssh']) {
             sh '''
               ssh -o BatchMode=yes genie.simopenpass@projects-storage.eclipse.org mkdir -p /home/data/httpd/download.eclipse.org/simopenpass/snapshots
-              scp -o BatchMode=yes artifacts/openPASS_SIM.tar.gz genie.simopenpass@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/simopenpass/snapshots/openPASS_SIM_$(date -u +%Y%m%d_%H%M%S).tar.gz
+              [ -f artifacts/openPASS_SIM.tar.gz ] && scp -o BatchMode=yes artifacts/openPASS_SIM.tar.gz genie.simopenpass@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/simopenpass/snapshots/openPASS_SIM_$(date -u +%Y%m%d_%H%M%S).tar.gz
+              [ -f artifacts/openPASS_SIM.zip ] && scp -o BatchMode=yes artifacts/openPASS_SIM.zip genie.simopenpass@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/simopenpass/snapshots/openPASS_SIM_$(date -u +%Y%m%d_%H%M%S).zip
             '''
           }
         }
