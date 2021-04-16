@@ -41,6 +41,7 @@ DEPENDENCIES = \
     $$OPEN_SRC/core/common/cephes/const.c \
     $$OPEN_SRC/core/common/log.cpp \
     $$OPEN_SRC/common/xmlParser.cpp \
+
 AGENTSAMPLER_TESTS = \
     $$UNIT_UNDER_TEST/framework/dynamicProfileSampler.h \
     $$UNIT_UNDER_TEST/framework/dynamicProfileSampler.cpp \
