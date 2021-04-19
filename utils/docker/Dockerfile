@@ -8,6 +8,7 @@ RUN apt-get -qq update && apt-get -qq dist-upgrade && apt-get install -qq -y --n
     ca-certificates \
     ccache \
     cmake \
+    dos2unix \
     doxygen \
     g++-10 \
     gcc-10 \
