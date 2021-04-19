@@ -97,6 +97,7 @@ spec:
           environment {
             MSYSTEM = 'MINGW64'
             CHERE_INVOKING = 'yes'
+            PATH = "C:\\msys64\\usr\\bin;${env.PATH}"
           }
           stages {
             stage('Prepare dependencies') {
