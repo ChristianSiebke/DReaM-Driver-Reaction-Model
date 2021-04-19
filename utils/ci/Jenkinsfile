@@ -45,6 +45,7 @@ spec:
     stage('Prepare dependencies') {
       steps {
         container('openpass-build') {
+          sh 'bash set'
           sh 'bash repo/utils/ci/scripts/build_prepare.sh'
         }
       }
