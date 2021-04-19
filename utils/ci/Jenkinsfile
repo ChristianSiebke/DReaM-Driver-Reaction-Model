@@ -50,7 +50,7 @@ spec:
             stage('Prepare dependencies') {
               steps {
                 container('openpass-build') {
-                  sh 'bash set'
+                  sh 'bash -c set'
                   sh 'bash repo/utils/ci/scripts/build_prepare.sh'
                 }
               }
@@ -102,7 +102,7 @@ spec:
           stages {
             stage('Prepare dependencies') {
               steps {
-                bat 'bash set'
+                bat 'bash -c set'
                 bat 'bash repo/utils/ci/scripts/build_prepare.sh'
               }
             }
