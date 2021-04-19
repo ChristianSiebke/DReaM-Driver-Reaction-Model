@@ -9,10 +9,18 @@
  *******************************************************************************/
 
 pipeline {
-  agent {
-    kubernetes {
-      label 'openpass-agent-pod-' + env.BUILD_NUMBER
-      yaml """
+  agent none
+  options {
+    checkoutToSubdirectory('repo')
+  }
+  stages {
+    stage('Linux and Windows build') {
+      parallel {
+        stage('Linux build') {
+          agent {
+            kubernetes {
+              label 'openpass-agent-pod-' + env.BUILD_NUMBER
+              yaml """
 apiVersion: v1
 kind: Pod
 spec:
@@ -36,53 +44,97 @@ spec:
     configMap:
       name: known-hosts
 """
-    }
-  }
-  options {
-    checkoutToSubdirectory('repo')
-  }
-  stages {
-    stage('Prepare dependencies') {
-      steps {
-        container('openpass-build') {
-          sh 'bash set'
-          sh 'bash repo/utils/ci/scripts/build_prepare.sh'
+            }
+          }
+          stages {
+            stage('Prepare dependencies') {
+              steps {
+                container('openpass-build') {
+                  sh 'bash set'
+                  sh 'bash repo/utils/ci/scripts/build_prepare.sh'
+                }
+              }
+            }
+            stage('Build and E2E tests') {
+              steps {
+                container('openpass-build') {
+                  sh 'bash repo/utils/ci/scripts/build_core_and_e2e.sh'
+                }
+              }
+            }
+            stage('Unit tests') {
+              steps {
+                container('openpass-build') {
+                  sh 'bash repo/utils/ci/scripts/build_unittests.sh'
+                }
+              }
+            }
+            stage('Deploy') {
+              steps {
+                container('jnlp') {
+                  sshagent ( ['projects-storage.eclipse.org-bot-ssh']) {
+                    sh '''
+                      ssh -o BatchMode=yes genie.simopenpass@projects-storage.eclipse.org mkdir -p /home/data/httpd/download.eclipse.org/simopenpass/snapshots
+                      [ -f artifacts/openPASS_SIM.tar.gz ] && scp -o BatchMode=yes artifacts/openPASS_SIM.tar.gz genie.simopenpass@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/simopenpass/snapshots/openPASS_SIM_$(date -u +%Y%m%d_%H%M%S).tar.gz
+                      [ -f artifacts/openPASS_SIM.zip ] && scp -o BatchMode=yes artifacts/openPASS_SIM.zip genie.simopenpass@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/simopenpass/snapshots/openPASS_SIM_$(date -u +%Y%m%d_%H%M%S).zip
+                    '''
+                  }
+                }
+              }
+            }
+          }
+          post {
+            always {
+              archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/**', followSymlinks: false
+              junit allowEmptyResults: true, testResults: 'build/**/*Tests.xml,repo/sim/tests/endToEndTests/pyOpenPASS/result_*.xml'
+            }
+          }
         }
-      }
-    }
-    stage('Build and E2E tests') {
-      steps {
-        container('openpass-build') {
-          sh 'bash repo/utils/ci/scripts/build_core_and_e2e.sh'
-        }
-      }
-    }
-    stage('Unit tests') {
-      steps {
-        container('openpass-build') {
-          sh 'bash repo/utils/ci/scripts/build_unittests.sh'
-        }
-      }
-    }
-    stage('Deploy') {
-      steps {
-        container('jnlp') {
-          sshagent ( ['projects-storage.eclipse.org-bot-ssh']) {
-            sh '''
-              ssh -o BatchMode=yes genie.simopenpass@projects-storage.eclipse.org mkdir -p /home/data/httpd/download.eclipse.org/simopenpass/snapshots
-              [ -f artifacts/openPASS_SIM.tar.gz ] && scp -o BatchMode=yes artifacts/openPASS_SIM.tar.gz genie.simopenpass@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/simopenpass/snapshots/openPASS_SIM_$(date -u +%Y%m%d_%H%M%S).tar.gz
-              [ -f artifacts/openPASS_SIM.zip ] && scp -o BatchMode=yes artifacts/openPASS_SIM.zip genie.simopenpass@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/simopenpass/snapshots/openPASS_SIM_$(date -u +%Y%m%d_%H%M%S).zip
-            '''
+        stage('Windows build') {
+          agent {
+            label 'windows'
+          }
+          environment {
+            MSYSTEM = 'MINGW64'
+            CHERE_INVOKING = 'yes'
+          }
+          stages {
+            stage('Prepare dependencies') {
+              steps {
+                bat 'bash set'
+                bat 'bash repo/utils/ci/scripts/build_prepare.sh'
+              }
+            }
+            stage('Build and E2E tests') {
+              steps {
+                bat 'bash repo/utils/ci/scripts/build_core_and_e2e.sh'
+              }
+            }
+            stage('Unit tests') {
+              steps {
+                bat 'bash repo/utils/ci/scripts/build_unittests.sh'
+              }
+            }
+            stage('Deploy') {
+              steps {
+                sshagent ( ['projects-storage.eclipse.org-bot-ssh']) {
+                  bat '''
+                    bash -c 'ssh -o BatchMode=yes genie.simopenpass@projects-storage.eclipse.org mkdir -p /home/data/httpd/download.eclipse.org/simopenpass/snapshots'
+                    bash -c '[ -f artifacts/openPASS_SIM.tar.gz ] && scp -o BatchMode=yes artifacts/openPASS_SIM.tar.gz genie.simopenpass@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/simopenpass/snapshots/openPASS_SIM_$(date -u +%Y%m%d_%H%M%S).tar.gz'
+                    bash -c '[ -f artifacts/openPASS_SIM.zip ] && scp -o BatchMode=yes artifacts/openPASS_SIM.zip genie.simopenpass@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/simopenpass/snapshots/openPASS_SIM_$(date -u +%Y%m%d_%H%M%S).zip'
+                    '''
+                }
+              }
+            }
+          }
+          post {
+            always {
+              archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/**', followSymlinks: false
+              junit allowEmptyResults: true, testResults: 'build/**/*Tests.xml,repo/sim/tests/endToEndTests/pyOpenPASS/result_*.xml'
+            }
           }
         }
       }
     }
   }
-  post {
-    always {
-      archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/**', followSymlinks: false
-      junit allowEmptyResults: true, testResults: 'build/**/*_Tests.xml,repo/sim/tests/endToEndTests/pyOpenPASS/result_*.xml'
-    }
-  }
 }
-
