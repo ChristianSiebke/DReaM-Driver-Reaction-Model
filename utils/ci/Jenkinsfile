@@ -102,6 +102,7 @@ spec:
             stage('Prepare dependencies') {
               steps {
                 bat 'C:\\msys64\\usr\\bin\\bash -lc set'
+                bat 'C:\\msys64\\usr\\bin\\bash -lc "where cmake; which cmake; cmake --version; cmake --help"'
                 bat 'C:\\msys64\\usr\\bin\\bash -lc repo/utils/ci/scripts/build_prepare.sh'
               }
             }
