@@ -887,7 +887,7 @@ public:
     //!
     //! @return
     //-----------------------------------------------------------------------------
-    virtual double GetYawAcceleration() = 0;
+    virtual double GetYawAcceleration() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Set the yaw acceleration of the agent.

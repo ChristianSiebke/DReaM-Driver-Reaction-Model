@@ -237,6 +237,14 @@ public:
         });
     }
 
+    void SetYawAcceleration(double value) override
+    {
+        world->QueueAgentUpdate([this, value]()
+        {
+            yawAcceleration = value;
+        });
+    }
+
     void SetCentripetalAcceleration(double value) override
     {
         world->QueueAgentUpdate([this, value]()
@@ -360,6 +368,11 @@ public:
     double GetYawRate() const override
     {
         return GetBaseTrafficObject().GetAbsOrientationRate().yawRate;
+    }
+
+    double GetYawAcceleration() const override
+    {
+        return yawAcceleration;
     }
 
     double GetCentripetalAcceleration() const override
@@ -827,16 +840,7 @@ public:
 
         throw std::runtime_error("AgentAdapter::GetAgentViewDirectionToNearestMark not implemented");
     }
-    virtual double GetYawAcceleration() override
-    {
-        throw std::runtime_error("AgentAdapter::GetYawAcceleration not implemented");
-    }
-    virtual void SetYawAcceleration(double yawAcceleration) override
-    {
-        Q_UNUSED(yawAcceleration);
 
-        throw std::runtime_error("AgentAdapter::SetYawAcceleration not implemented");
-    }
     virtual const std::vector<int> *GetTrajectoryTime() const override
     {
         throw std::runtime_error("AgentAdapter::GetTrajectoryTime not implemented");
@@ -971,6 +975,7 @@ private:
     double steeringWheelAngle = 0.0;
     double centripetalAcceleration = 0.0;
     double tangentialAcceleration = 0.0;
+    double yawAcceleration = 0.0;
     double engineSpeed = 0.;
     double distanceTraveled = 0.0;
 
