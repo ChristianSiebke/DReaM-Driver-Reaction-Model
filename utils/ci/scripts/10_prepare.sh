@@ -17,6 +17,15 @@
 MYDIR="$(dirname "$(readlink -f $0)")"
 cd "$MYDIR/../../../.." || exit 1
 
+if [ ! -d repo ]; then
+  echo "repo folder doesn't exist as expected. exiting."
+  exit 1
+fi
+
+# wipe build directories and pyOpenPASS results
+rm -rf build build-fmi-library build-osi
+rm -f repo/sim/tests/endToEndTests/pyOpenPASS/result_*.xml
+
 # prepare
 mkdir build
 
