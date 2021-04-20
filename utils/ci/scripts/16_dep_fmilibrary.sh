@@ -19,6 +19,11 @@ cd "$MYDIR/../../../.."
 
 WORKSPACE_ROOT="$PWD"
 
+if [[ "${OSTYPE}" = "msys" ]]; then
+  # set the correct CMake generator
+  CMAKE_GENERATOR_ARG="-GMSYS Makefiles"
+fi
+
 mkdir -p build-fmi-library && cd build-fmi-library
 
 git clone --branch 2.0.3 --depth=1 -c advice.detachedHead=false https://github.com/modelon-community/fmi-library.git src || exit 1

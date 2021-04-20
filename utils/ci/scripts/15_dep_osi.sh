@@ -19,6 +19,11 @@ cd "$MYDIR/../../../.."
 
 WORKSPACE_ROOT="$PWD"
 
+if [[ "${OSTYPE}" = "msys" ]]; then
+  # set the correct CMake generator
+  CMAKE_GENERATOR_ARG="-GMSYS Makefiles"
+fi
+
 mkdir -p build-osi && cd build-osi
 
 git clone --branch v3.2.0 --depth=1 -c advice.detachedHead=false https://github.com/OpenSimulationInterface/open-simulation-interface.git src || exit 1
