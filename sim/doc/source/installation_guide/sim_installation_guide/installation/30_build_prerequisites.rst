@@ -19,7 +19,7 @@ In general, this should work for Linux as well by adjusting paths and the ``make
   
 .. note::
    
-   If you are unfamiliar to ``Cmake`` or working within a |mingw_shell|, Section :ref:`cmake` and :ref:`msys2` might give you a short introduction on these topics in the scope of Building OpenPASS itself.
+   If you are unfamiliar to ``CMake`` or working within a |mingw_shell|, Section :ref:`cmake` and :ref:`msys2` might give you a short introduction on these topics in the scope of Building OpenPASS itself.
 
 .. _ref_prerequisites:
 
@@ -87,11 +87,11 @@ Finally, the sources are then compiled into a library.
       mkdir build
       cd build
 
-#. Run Cmake
+#. Run CMake
 
    .. code-block:: bash
 
-      cmake -G “MinGW Makefiles” \
+      cmake -G “MSYS Makefiles” \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_PREFIX=C:/OpenPASS/thirdParty \
             -DProtobuf_INCLUDE_DIR=C:/OpenPASS/thirdParty/include \
@@ -118,13 +118,13 @@ Finally, the sources are then compiled into a library.
    
    .. code-block:: bash
 
-      mingw32-make -j3
+      make -j3
 
 #. Install
 
    .. code-block:: bash
 
-      mingw32-make install
+      make install
 
 #. Deprecated: Establish unified layout for prerequisites (c.f. :ref:`ref_prerequisites`)
 
@@ -166,12 +166,12 @@ Exemplarily, it gives instructions, how to compile version 3.11.4. and hook it i
       mkdir build
       cd build
 
-#. Run Cmake
+#. Run CMake
 
    .. code-block:: bash
      :emphasize-lines: 5
 
-      cmake -G "MinGW Makefiles" \
+      cmake -G "MSYS Makefiles" \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_INSTALL_PREFIX=C:/OpenPASS/thirdParty \
             -Dprotobuf_BUILD_SHARED_LIBS=ON \
@@ -186,13 +186,13 @@ Exemplarily, it gives instructions, how to compile version 3.11.4. and hook it i
 
    .. code-block:: bash
 
-      mingw32-make -j3
+      make -j3
   
 #. Install
 
    .. code-block:: bash
   
-      mingw32-make install
+      make install
 
 #. Deprecated: Establish unified layout for prerequisites (c.f. :ref:`ref_prerequisites`)
 
@@ -223,11 +223,11 @@ Building FMIL
       mkdir build
       cd build
 
-#. Run Cmake
+#. Run CMake
 
    .. code-block:: bash
 
-      cmake -G "MinGW Makefiles" \
+      cmake -G "MSYS Makefiles" \
             -DFMILIB_INSTALL_PREFIX=C:/OpenPASS/thirdParty \
             -DCMAKE_BUILD_TYPE=Release \
             -DFMILIB_BUILD_STATIC_LIB=OFF \
@@ -242,13 +242,13 @@ Building FMIL
 
    .. code-block:: bash
 
-      mingw32-make -j3
+      make -j3
   
 #. Install
 
    .. code-block:: bash
   
-      mingw32-make install
+      make install
 
 #. Deprecated: Establish unified layout for prerequisites (c.f. :ref:`ref_prerequisites`)
     

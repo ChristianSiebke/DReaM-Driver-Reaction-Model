@@ -9,9 +9,13 @@
 ################################################################################
 
 # be prepared for support of C++20
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.14)
 
 project(openPASS C CXX)
+
+if(WIN32 AND NOT MSYS)
+  message(WARNING "It seems you are using a build environment different from MSYS. This is not officially supported by the openPASS project.")
+endif()
 
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmake")
 

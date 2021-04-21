@@ -56,7 +56,7 @@ Install and Config
                "CXX": "C:\\msys64\\mingw64\\bin\\g++.exe"
            },
            "preferredGenerator": {
-               "name": "MinGW Makefiles"
+               "name": "MSYS Makefiles"
            },
            "environmentVariables": {
                "PATH": "C:\\msys64\\mingw64\\bin"
@@ -82,7 +82,7 @@ Install and Config
                    "cmake.mingwSearchDirs": [
                        "C:\\msys64\\mingw64\\bin"
                    ],
-                   "cmake.generator": "MinGW Makefiles",
+                   "cmake.generator": "MSYS Makefiles",
                    "cmake.parallelJobs": 2,
                    "cmake.configureArgs": [
                        "-DCMAKE_PREFIX_PATH=${workspaceRoot}/deps/thirdParty/win64/FMILibrary;${workspaceRoot}/deps/thirdParty/win64/osi",
@@ -126,7 +126,7 @@ If not, check the extension setting ``testMate.cpp.test.executables`` and ``test
 Debugging
 ---------
 
-Cmake offers its own debugging functionality, but does not respect the dependencies between the |op| core and its components.
+CMake offers its own debugging functionality, but does not respect the dependencies between the |op| core and its components.
 This means, it tries to run the executable from within the build folder, e.g. ``./build/sim/src/core/slave/OpenPassSlave``.
 Unfortunately, in here, the core does not find any libraries or configurations.
 

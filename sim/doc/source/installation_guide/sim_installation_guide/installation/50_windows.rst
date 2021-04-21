@@ -120,7 +120,7 @@ Refer to :ref:`cmake` for details on the arguments.
 
 .. code-block:: bash
 
-   cmake -G "MinGW Makefiles" \
+   cmake -G "MSYS Makefiles" \
      -D CMAKE_BUILD_TYPE=Debug \
      -D OPENPASS_ADJUST_OUTPUT=OFF \
      -D USE_CCACHE=ON \
@@ -131,12 +131,8 @@ Refer to :ref:`cmake` for details on the arguments.
      -D CMAKE_PREFIX_PATH="PATH_FMIL;PATH_BOOST;PATH_OSI;PATH_PROTOBUF;PATH_GTEST;PATH_MINIZIP" \
      ..
      
-     mingw32-make -j3
-     mingw32-make install
-
-.. note::
-   
-   The call to mingw32-make might be misleading, but actually calls gcc/g++ 64-bit.
+     make -j3
+     make install
 
 .. _runmingwexe:
 

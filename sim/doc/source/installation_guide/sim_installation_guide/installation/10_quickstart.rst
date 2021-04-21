@@ -43,7 +43,7 @@ This section describes how compile and run |op| as quickly as possible.
 
             mkdir build
             cd build
-            cmake -G "MinGW Makefiles"\
+            cmake -G "MSYS Makefiles"\
                   -D CMAKE_PREFIX_PATH="/mingw64/bin;\
                      ../deps/thirdParty/win64/FMILibrary;\
                      ../deps/thirdParty/win64/osi;"\

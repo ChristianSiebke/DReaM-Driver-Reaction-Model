@@ -15,10 +15,10 @@ Working with Qt Creator
 Settings (MSYS2)
 ----------------
 
-Setup Cmake-Kit
+Setup CMake-Kit
 ~~~~~~~~~~~~~~~
 
-#. Add Cmake under ``Tools -> Options -> Kits -> Cmake``
+#. Add CMake under ``Tools -> Options -> Kits -> CMake``
 
    .. figure:: _static/images/qtcreator_settings_cmake.png
       :align: center
@@ -51,7 +51,7 @@ Setup Cmake-Kit
       :scale: 60%
 
 
-#. Adjust ``Cmake Generator`` under ``Tools -> Options -> Kits -> Kits`` to ``MinGW Makefiles``
+#. Adjust ``CMake Generator`` under ``Tools -> Options -> Kits -> Kits`` to ``MSYS Makefiles``
 
    .. figure:: _static/images/qtcreator_settings_cmake_generator.png
       :align: center
@@ -66,19 +66,10 @@ Setup Project
 
 #. Load the project by opening a ``CMakeLists.txt`` file and configure it to use the new kit.
 
-#. Setup missing Cmake flags (c.f. :ref:'Cmake')
+#. Setup missing CMake flags (c.f. :ref:'CMake')
 
    .. todo:: The configuration is still "itchy", as Qt creator changes the interface with every version
 
-#. Override the make command under ``Project -> Build -> Build Steps`` to ``mingw32-make``
-
-   .. figure:: _static/images/qtcreator_project_make.png
-      :align: center
-      :scale: 60%
-
-   .. note::
-      
-      Unfortunatly, there seems to be no way to enable ``mingw32-make`` on the kit level.
 
 Settings (Linux)
 ----------------
@@ -92,9 +83,9 @@ If not, check if all :ref:`prerequisites` are met. Also, the steps above should 
 Setup Project
 ~~~~~~~~~~~~~~
 
-#. Load the project by opening a ``CmakeLists.txt`` file and configure it to use a proper kit.
+#. Load the project by opening a ``CMakeLists.txt`` file and configure it to use a proper kit.
 
-#. Setup missing Cmake flags (c.f. :ref:'Cmake')
+#. Setup missing CMake flags (c.f. :ref:'CMake')
 
    .. todo:: The configuration is still "itchy", as Qt creator changes the interface with every version
 
@@ -103,7 +94,7 @@ Alternative Method
 
 .. admonition:: Version Issues
    
-   Qt Creator is constantly improving the Cmake integration.
+   Qt Creator is constantly improving the CMake integration.
    Unfortunatly, some versions seem to be **buggy**.
 
    Tested Versions: 4.13.2 | 4.12.2

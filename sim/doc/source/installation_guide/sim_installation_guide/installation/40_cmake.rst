@@ -11,29 +11,29 @@
 
 .. _cmake:
 
-Cmake Build Environment
+CMake Build Environment
 =======================
 
-|Op| uses Cmake as default cross-platform build environment.
+|Op| uses CMake as default cross-platform build environment.
 This section describes the available variables and options.
 If available, recommended options are shown in bold.
 
-The first part of this section approaches Cmake from the *command line perspective*.
+The first part of this section approaches CMake from the *command line perspective*.
 Adjustments for the corresponding IDEs will follow shortly.
 
-The result of a proper Cmake call is a Makefile, which acts as base for the actual build using ``make`` or, under Windows, ``mingw32-make`` (c.f. :ref:`msys2`).
+The result of a proper CMake call is a Makefile, which acts as base for the actual build using ``make``.
 Hence, the second part of this section describes best practices around the make commands.
 
 .. admonition:: See also
 
-   Cmake Documentation: https://cmake.org/cmake/help/latest/index.html
+   CMake Documentation: https://cmake.org/cmake/help/latest/index.html
 
 Generator (Windows only)
 ------------------------
 
-To generate MinGW compatible makefiles use ``-G "MinGW Makefiles"`` (c.f. :ref:`msys2`).
+To generate MSYS compatible makefiles use ``-G "MSYS Makefiles"`` (c.f. :ref:`msys2`).
 
-Cmake Variables
+CMake Variables
 ---------------
 
 .. _cmake_prefix_path:
@@ -43,7 +43,7 @@ CMAKE_PREFIX_PATH
 
 This command makes the prerequisite available to |op| as semicolon-separated list of directories, specifying installation prefixes to be searched by cmake.
 Please refer to :ref:`Prerequisites` for the list of mandatory packages and libraries.
-Cmake will issue an error, if one prerequisite is missing.
+CMake will issue an error, if one prerequisite is missing.
 
 Generally, cmake recognizes installed libraries (e.g. googletest) on its own.
 By setting an explicit ``CMAKE_PREFIX_PATH`` for a library, it is possible to override the system libraries.
@@ -61,7 +61,7 @@ Use this, when an exact library version, or a customized library shall be used i
 
       .. code-block:: bash
 
-         cmake -G "MinGW Makefiles"
+         cmake -G "MSYS Makefiles"
                -D CMAKE_PREFIX_PATH="\
                   /mingw64/bin;\
                   $PWD/../deps/thirdParty/win64/FMILibrary;\
@@ -195,17 +195,10 @@ WITH_TESTS
 - Build unit tests
 - Options: OFF | **ON**
 
-WITH_MINGW_BOOST_1_72_FIX
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-- Options: **OFF** | ON
-- This enables a fix for detection within the MinGW environment, necessary when using the (for compatibility reasons supported) boost version 1.72.
-- See: https://github.com/boostorg/boost_install/issues/33.
-
 OPENPASS_ADJUST_OUTPUT
 ~~~~~~~~~~~~~~~~~~~~~~
 
-- Adjusts if builds are executed in the (Cmake default) folder ``build`` or directly in the specified install directory.
+- Adjusts if builds are executed in the (CMake default) folder ``build`` or directly in the specified install directory.
   Latter mimics the former qmake behavior let you skip the call ``make install``.
 - Options: **OFF** | ON
 
@@ -266,7 +259,7 @@ Make Targets/Commands
 ---------------------
 
 |Op| defines build targets by major modules or components, such as ``OpenPassSlave`` or ``Algorithm_FmuWrapper``.
-After calling Cmake, simply build |op| by calling ``make``.
+After calling CMake, simply build |op| by calling ``make``.
 
 .. admonition:: See also
 
