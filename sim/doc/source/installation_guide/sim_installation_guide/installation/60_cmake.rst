@@ -11,8 +11,8 @@
 
 .. _cmake:
 
-CMake Build Environment
-=======================
+CMake Variables and Options
+===========================
 
 |Op| uses CMake as default cross-platform build environment.
 This section describes the available variables and options.

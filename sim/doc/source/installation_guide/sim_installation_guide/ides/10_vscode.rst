@@ -9,6 +9,8 @@
   SPDX-License-Identifier: EPL-2.0
   ************************************************************
 
+.. _vscode:
+
 Working with VSCode
 ===================
 

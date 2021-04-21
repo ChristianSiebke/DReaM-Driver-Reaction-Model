@@ -1,6 +1,7 @@
 ..
   ************************************************************
   Copyright (c) 2021 in-tech GmbH
+                2021 BMW AG
 
   This program and the accompanying materials are made
   available under the terms of the Eclipse Public License 2.0
@@ -14,17 +15,65 @@
 Prerequisites
 =============
 
+Before being able to compile and run the |op|, make sure to have all dependencies installed. 
+The thirdparty software dependency of |op| can be divided into:
+
+- Binary packages, which can be easily installed via package manager
+- Source packages, which provide all necessary files to compile and need to be built from source code
+
 This section gives detailed information about the prerequisite and tested version.
-In short:
+
+.. _binary_packages:
+
+Install Binary Packages
+-----------------------
+
+The first set of dependencies we need to install in order to successfully compile |op| are the binary packages. These can be installed via appropiate package manager. 
 
 .. tabs::
    
    .. tab:: Windows (MSYS2)
 
-      .. literalinclude:: _static/msys2_packages.txt
-         :language: bash
+      #. Open ``MSYS2 MSYS`` and execute the following package manager ``pacman`` commands to update the package repository and upgrade system packages:
 
-      Details: :ref:`building_under_windows`
+         .. code-block:: bash
+
+            pacman -Syuu
+      
+         If the upgrade requires a restart of MSYS2, resume the upgrade by re-opening the shell and call:
+
+         .. code-block:: bash
+         
+            pacman -Suu
+
+      #. Required packages (can be specified in single command line if desired):
+
+         .. literalinclude:: _static/msys2_packages.txt
+            :language: bash
+
+         .. admonition:: Versions
+            
+            | MSYS2 provides rolling release versions, so some packages might be too "up-to-date".
+            | Tested packages - ate time of writing - have been listed above as comment.
+            | If in doubt, download the package in the right version from the `MSYS2 package repository <http://repo.msys2.org/mingw/x86_64/>`_.
+            | Install with ``pacman -U <package-filename>``
+
+      #. Optional Packages
+
+         .. code-block:: bash
+
+            pacman -S git
+            pacman -S diffutils
+            pacman -S patch
+            pacman -S dos2unix
+            pacman -S mingw-w64-x86_64-ag
+            pacman -S mingw-w64-x86_64-qt5-debug
+            pacman -S zlib-devel
+
+      .. admonition:: GIT/SSH
+      
+         The |mingw_shell| does not access an already existing git installation or available SSH keys.
+         Make sure, to update/copy your configuration and credentials within the |mingw_shell| before working with git.   
 
    .. tab:: Linux (Debian Bullseye)
 
@@ -42,10 +91,12 @@ In short:
          apt install qt5-default
          apt install zlib1g-dev
 
-      Details: :ref:`building_under_linux`
+
+
+Details on binary packages:
 
 GNU Compiler Collection (gcc)
------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Version (latest tested):** 10.2.3
 
@@ -59,14 +110,14 @@ GNU Compiler Collection (gcc)
    - Generally, there is support for `MSVC <https://docs.microsoft.com/en-us/cpp/build/reference/c-cpp-building-reference>`_ , but currently not actively maintained by the |opwg|.
 
 GNU Debugger (gdb)
-------------------
+~~~~~~~~~~~~~~~~~~
 
 **Version (latest tested):** 9.2
 
 Debugging tools for gcc: https://www.gnu.org/savannah-checkouts/gnu/gdb/index.html
 
 CMake
------
+~~~~~
 
 **Version (latest tested):** 3.18.4
 
@@ -78,7 +129,7 @@ For details on the provided options, see :ref:`cmake`.
 .. _prerequisites_ccache:
 
 Ccache
-------
+~~~~~~
 
 **Version (latest tested):** 3.7.11
 
@@ -91,7 +142,7 @@ Use only, if you need to recompile regularly.
    - If used regularily, increasing the cache size is recommended, e.g.: ``ccache -M 20G``
 
 Doxygen
--------
+~~~~~~~
 
 **Version (latest tested):** 1.8.20
 
@@ -103,7 +154,7 @@ Documentation is created using `Doxygen <https://www.doxygen.nl/index.html>`_.
      Don't use older versions.
 
 Qt Framework
-------------
+~~~~~~~~~~~~
 
 **Version (officially supported):** 5.12.3
 
@@ -116,7 +167,7 @@ While the GUI of |op_oss| heavily relies on it, the simulation core tries to sti
    | Version 5.15.1 has been reported to work well.
 
 Boost C++ Libraries
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 **Version (officially supported):** 1.72.0
 
@@ -127,7 +178,7 @@ Especially for geometrical calculations, |op| uses parts of the `Boost C++ Libra
    More recent versions should integrate without issues, but 1.74.0 already raise warnings for some deprecated headers.
 
 googletest
-----------
+~~~~~~~~~~
 
 **Version (officially supported)** 1.10.0
 
@@ -138,10 +189,19 @@ Tests are written in `googletest <https://github.com/google/googletest>`_ and |O
    The lastest major release brought several API changes, which made some code fixes necessary. 
    Use newer versions with precaution.
 
+Install Source Packages
+-----------------------
+
+The second and last set of dependencies we need to dissolve are based on source packages.
+Since installing such source packages is not easy, we have dedicated a separate chapter on this topic. 
+See :ref:`Building prerequisites` for a step-by-step instruction on how to download, build and install needed source packages.
+
+Details on source packages:
+
 .. _prerequisites_osi:
 
 Open Simulation Interface (OSI)
--------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Version (officially supported):** 3.2.0
 
@@ -169,7 +229,7 @@ If not already installed, the library and headers have to be built prior to OSI.
 .. _prerequisites_protobuf:
 
 Protocol Buffers (protobuf)
----------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Supported Version (officially supported):** 3.12.2
 
@@ -181,7 +241,7 @@ Protocol Buffers (protobuf)
    - |Op| lets you integrate your own protobuf libraries if necessary (see :ref:`building_protobuf`).
 
 Modelon FMI Library (FMIL)
---------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Supported Version:**  2.0.3
 

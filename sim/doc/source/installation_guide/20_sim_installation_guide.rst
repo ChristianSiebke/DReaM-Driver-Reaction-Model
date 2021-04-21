@@ -17,22 +17,22 @@ Simulation Installation Guide
 This guide summarizes all installation related topics, necessary to setup and build the |op| simulation core (|release|).
 
 .. toctree::
-   :caption: Meta
-   :maxdepth: 1
-
-   sim_installation_guide/meta/sphinx
-
-.. toctree::
    :caption: Installation
    :glob:
    :maxdepth: 1
 
    sim_installation_guide/installation/*
 
-.. toctree::
+   .. toctree::
    :caption: IDEs
    :glob:
    :maxdepth: 1
 
    sim_installation_guide/ides/*
+   
+.. toctree::
+   :caption: Meta
+   :maxdepth: 1
+
+   sim_installation_guide/meta/sphinx
    
