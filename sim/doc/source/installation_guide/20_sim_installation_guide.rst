@@ -23,16 +23,17 @@ This guide summarizes all installation related topics, necessary to setup and bu
 
    sim_installation_guide/installation/*
 
+..
    .. toctree::
-   :caption: IDEs
-   :glob:
-   :maxdepth: 1
+      :caption: IDEs
+      :glob:
+      :maxdepth: 1
 
-   sim_installation_guide/ides/*
-   
-.. toctree::
-   :caption: Meta
-   :maxdepth: 1
+      sim_installation_guide/ides/*
+      
+   .. toctree::
+      :caption: Meta
+      :maxdepth: 1
 
-   sim_installation_guide/meta/sphinx
+      sim_installation_guide/meta/sphinx
    
