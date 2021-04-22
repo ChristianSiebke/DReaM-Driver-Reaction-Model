@@ -17,108 +17,171 @@ Build and Install OpenPASS
 
 This section describes how compile and run |op|.
 
-Please note:
+.. tabs::
 
-- ``C:\simopenpass`` refers to the standard checkout path when cloning the |op| repository
-- ``C:\simopenpass\deps\thirdParty`` refers to a directory within the |op| repository  
-- ``C:\OpenPASS\thirdParty`` refers to a temporary directory used to built the prerequisites from source, **not** the |op| repository
-- ``C:\OpenPASS\bin`` refers to the installation directory
+   .. tab:: Notes for Windows
+
+      - ``C:\simopenpass`` refers to the standard checkout path when cloning the |op| repository
+      - ``C:\simopenpass\deps\thirdParty`` refers to a directory within the |op| repository  
+      - ``C:\OpenPASS\thirdParty`` refers to a temporary directory used to built the prerequisites from source, **not** the |op| repository
+      - ``C:\OpenPASS\bin\core`` refers to the installation directory
+
+      This section assumes that the installed source packages are located on your machine at ``C:\OpenPASS\thirdParty``. 
+      If you have strictly followed the recommended paths of this guide to this point, no command modifications are necessary.
+      In the following, |Op| gets installed into ``C:\OpenPASS\bin``.
+
+   .. tab:: Notes for Linux
+
+      - ``~/simopenpass`` refers to the standard checkout path when cloning the |op| repository
+      - ``~/simopenpass/deps/thirdParty`` refers to a directory within the |op| repository  
+      - ``~/OpenPASS/thirdParty`` refers to a temporary directory used to built the prerequisites from source, **not** the |op| repository
+      - ``/usr/local/OpenPASS/bin/core`` refers to the installation directory
+
+      This section assumes  that the installed source packages are located on your machine at ``~/OpenPASS/thirdParty``. 
+      If you have strictly followed the recommended paths of this guide to this point, no command modifications are necessary. 
+      In the following, |Op| gets installed into ``/usr/local/OpenPASS/bin``.
  
 .. note::
 
    For **Windows**, an up-to-date MinGW 64-bit environment is assumed, for **Linux**, Debian Bullseye or Ubuntu 20.10 is recommended.
 
 #. Install dependencies. See :ref:`Prerequisites` for binary packages and :ref:`Building prerequisites` for source packages. 
-   
-   For brevity, the following description assumes that installed source packages are located on your machine at ``C:\OpenPASS\thirdParty``. 
-   if you have strictly followed the recommended paths of this guide, this is automatically fulfilled. 
-   As will be stated soon, the prerequisites will be copied from ``C:\OpenPASS\thirdParty`` into the |op| repository.
 
 #. Clone |Op| repository
 
-   For brevity, the following description assumes that the checkout path of the repository is the default ``simopenpass``.
+   As described above, the checkout path of the repository is assumed to be the default ``simopenpass``.
 
    .. tabs::
 
       .. tab:: Windows
 
-         As stated in :ref:`Building_under_windows`, the windows programming tools suffer from a `path length restriction`.
-         It is therefore recommended to use a short path for source code checkout, e.g. a drive letter.
-
-         .. code-block:: bash
+         Start |mingw_shell|
+         
+         .. code-block:: 
 
             cd /C/
             git clone https://gitlab.eclipse.org/eclipse/simopenpass/simopenpass.git
 
+         .. note::
+
+            As stated in :ref:`Building_under_windows`, the windows programming tools suffer from a `path length restriction`.
+            It is therefore recommended to use a short path for source code checkout, e.g. a drive letter.
+
       .. tab:: Linux
 
-         .. code-block:: bash
+         Start ``Bash`` shell
+
+         .. code-block:: 
          
             git clone https://gitlab.eclipse.org/eclipse/simopenpass/simopenpass.git
 
 #. Navigate into repository and checkout master branch
 
-   .. code-block:: bash
+   .. code-block:: 
 
       cd simopenpass
       git checkout master
 
 #. Create directory structure
 
-   .. code-block:: bash
+   .. code-block:: 
 
       mkdir -p deps/thirdParty
 
 #. Navigate into directory where installed prerequisites are located
 
-   .. code-block:: bash
+   .. tabs::
 
-      cd /C/OpenPASS/thirdParty
+      .. tab:: Windows
 
-#. Copy prerequisites into repository (c.f. :ref:`ref_prerequisites`)
+         .. code-block:: 
 
-   .. code-block:: bash
+            cd /C/OpenPASS/thirdParty
 
-      cp -r osi /C/simopenpass/deps/thirdParty
-      cp -r FMILibrary /C/simopenpass/deps/thirdParty
+      .. tab:: Linux
+
+         .. code-block:: 
+      
+               cd ~/OpenPASS/thirdParty
+
+#. Copy prerequisites into repository (c.f. :ref:`Prerequisites`)
+
+   .. tabs::
+
+      .. tab:: Windows
+
+         .. code-block:: 
+
+            cp -r osi /C/simopenpass/deps/thirdParty
+            cp -r FMILibrary /C/simopenpass/deps/thirdParty
+
+      .. tab:: Linux
+
+         .. code-block:: 
+      
+            cp -r osi ~/simopenpass/deps/thirdParty
+            cp -r FMILibrary ~/simopenpass/deps/thirdParty
 
    .. note::
 
       If custom protobuf build is used, add 
 
-      .. code-block:: bash
+      .. tabs::
 
-         cp -r protobuf /C/simopenpass/deps/thirdParty
+         .. tab:: Windows
+
+            .. code-block:: 
+
+               cp -r protobuf /C/simopenpass/deps/thirdParty
+
+         .. tab:: Windows
+
+            .. code-block:: 
+   
+               cp -r protobuf ~/simopenpass/deps/thirdParty
 
    .. _ref_prerequisites:
 
    Once prerequisites are in place, all third party dependencies within ``simopenpass`` can be resolved by ``CMake``. 
-   For ``CMake`` builds, each installed prerequisite, which is located in its own subdirectory under ``simopenpass\deps\thirdParty``, can be referenced by its path. 
+   For ``CMake`` builds, each installed prerequisite, which is located in its own subdirectory under 
+
+   - ``C:\simopenpass\deps\thirdParty`` for Windows and
+   - ``~/simopenpass/deps/thirdParty`` for Linux,
+  
+   can be referenced by its path. 
    The reference is made via the :ref:`CMAKE_PREFIX_PATH` environmental variable, which holds a list of directories specifying the installed prerequisite. 
    This will be explained in more detail in the following.
 
 #. Navigate back into repository
 
-   .. code-block:: bash
+   .. tabs::
 
-      cd /C/simopenpass
+      .. tab:: Windows
+
+         .. code-block:: 
+
+            cd /C/simopenpass
+
+      .. tab:: Windows
+
+         .. code-block:: 
+      
+            cd ~/simopenpass
 
 #. Create build directory and navigate into it
 
-   ..code-block:: bash
+   .. code-block:: 
       
       mkdir build
       cd build
 
 #. Prepare build
 
-   Starting from ``simopenpass/build``
-
    .. tabs::
 
       .. tab:: Windows
 
-         .. code-block:: bash
+         .. code-block:: 
 
             cmake -G "MinGW Makefiles" \
             -D CMAKE_PREFIX_PATH="C:\msys64\mingw64\bin;{CMAKE_CURRENT_SOURCE_DIR}\..\deps\thirdParty\FMILibrary;{CMAKE_CURRENT_SOURCE_DIR}\..\deps\thirdParty\osi;" \
@@ -133,7 +196,7 @@ Please note:
 
       .. tab:: Linux
 
-         .. code-block:: bash
+         .. code-block:: 
 
             cmake -D CMAKE_PREFIX_PATH=/opt/qt5.12.3/5.12.3/gcc_64\;\
                      ../deps/thirdParty/FMILibrary\;\
@@ -142,7 +205,7 @@ Please note:
                      ../deps/thirdParty/minizip\;\
                      ../deps/thirdParty/protobuf\;\
                      ../deps/thirdParty/googletest \
-                  -D CMAKE_INSTALL_PREFIX=/OpenPASS/bin/core \
+                  -D CMAKE_INSTALL_PREFIX=/usr/local/OpenPASS/bin/core \
                   -D CMAKE_BUILD_TYPE=Release \
                   -D CMAKE_WITH_DEBUG_POSTIX=OFF \
                   -D OPENPASS_ADJUST_OUTPUT=OFF \
@@ -161,13 +224,13 @@ Please note:
 
       .. tab:: Windows
 
-         .. code-block:: bash
+         .. code-block:: 
 
             mingw32-make test ARGS="--output-on-failure -j3"
 
       .. tab:: Linux
 
-         .. code-block:: bash
+         .. code-block:: 
 
             make test ARGS="--output-on-failure -j3"
 
@@ -184,7 +247,7 @@ Please note:
 
       .. tab:: Windows
 
-         .. code-block:: bash
+         .. code-block:: 
 
             mingw32-make -j3 install
 
@@ -194,7 +257,7 @@ Please note:
 
       .. tab:: Linux
 
-         .. code-block:: bash
+         .. code-block:: 
    
             make -j3 install
 
@@ -206,15 +269,15 @@ Please note:
 
       .. tab:: Windows
 
-         .. code-block:: bash
+         .. code-block:: 
 
             cp /C/OpenPASS/bin/core/bin/* /C/OpenPASS/bin/core
 
       .. tab:: Linux
 
-         .. code-block:: bash
+         .. code-block:: 
 
-            cp ./OpenPASS/bin/core/bin/* ./OpenPASS/bin/core
+            cp /usr/local/OpenPASS/bin/core/bin/* /usr/local/OpenPASS/bin/core
 
 #. Provide libraries
 
@@ -224,7 +287,7 @@ Please note:
 
          Firstly, osi and FMILibrary library have to be provided. This can be done by manual copying or using the |mingw_shell|:
 
-         .. code-block:: bash
+         .. code-block:: 
 
             cp /C/simopenpass/deps/thirdParty/{osi/lib/osi3/libopen_simulation_interface.dll,FMILibrary/lib/libfmilib_shared.dll} /C/OpenPASS/bin/core
 
@@ -278,12 +341,18 @@ Please note:
 
       .. tab:: Windows
 
-         .. code-block:: bash
+         .. code-block:: 
 
-            ./C/OpenPASS/bin/core/OpenPassSlave --config ../sim/contrib/examples/DefaultConfigurations
+            cd /C/OpenPASS/bin/core
+            mkdir configs
+            cp /C/simopenpass/sim/contrib/examples/DefaultConfigurations/* /C/OpenPASS/bin/core/configs
+            ./OpenPassSlave.exe
 
       .. tab:: Linux
 
-         .. code-block:: bash
+         .. code-block:: 
 
-            ./OpenPASS/bin/core/OpenPassSlave --config ../sim/contrib/examples/DefaultConfigurations
+            cd /usr/local/OpenPASS/bin/core
+            mkdir configs
+            cp ~/simopenpass/sim/contrib/examples/DefaultConfigurations/* /usr/local/OpenPASS/bin/core/configs
+            ./OpenPassSlave

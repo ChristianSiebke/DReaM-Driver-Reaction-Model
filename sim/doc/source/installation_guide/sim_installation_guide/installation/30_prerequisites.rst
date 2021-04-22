@@ -36,13 +36,13 @@ The first set of dependencies we need to install in order to successfully compil
 
       #. Open ``MSYS2 MSYS`` and execute the following package manager ``pacman`` commands to update the package repository and upgrade system packages:
 
-         .. code-block:: bash
+         .. code-block:: 
 
             pacman -Syuu
       
          If the upgrade requires a restart of MSYS2, resume the upgrade by re-opening the shell and call:
 
-         .. code-block:: bash
+         .. code-block:: 
          
             pacman -Suu
 
@@ -60,7 +60,7 @@ The first set of dependencies we need to install in order to successfully compil
 
       #. Optional Packages
 
-         .. code-block:: bash
+         .. code-block:: 
 
             pacman -S git
             pacman -S diffutils
@@ -77,7 +77,7 @@ The first set of dependencies we need to install in order to successfully compil
 
    .. tab:: Linux (Debian Bullseye)
 
-      .. code-block:: bash
+      .. code-block:: 
 
          apt install ccache
          apt install cmake
@@ -210,23 +210,45 @@ The goal of this section is to download, build and install
 all necessary prerequisites into a suitable directory which later will be copied into the repository in order to resolve third party dependency.
 The following directory tree shows the folder structure, which will be created by following the recommendations of this guide. 
 
-.. code-block:: bash
+.. tabs::
 
-   C:\OpenPASS\thirdParty
-   ├── FMILibrary
-   │   ├── include
-   │   └── lib
-   └── osi
-       ├── include
-       └── lib 
+   .. tab:: Windows
+         
+      ::
+
+         C:\OpenPASS\thirdParty
+         ├── FMILibrary
+         │   ├── include
+         │   └── lib
+         └── osi
+            ├── include
+            └── lib 
+
+      In the folder structure above:
+
+      - ``C:\OpenPASS\thirdParty`` refers to a temporary directory used to built the prerequisites from source, **not** the ``simopenpass`` repository
+      - ``FMILibrary`` is the install directory of the ``Functional Mock-up Interface (FMI)`` when build from source
+      - ``osi`` is the install directory of the ``Open Simulation Interface (OSI)`` when build from source.
+
+   .. tab:: Linux
+         
+      ::
+
+         ~/OpenPASS/thirdParty
+         ├── FMILibrary
+         │   ├── include
+         │   └── lib
+         └── osi
+            ├── include
+            └── lib 
+
+      In the folder structure above:
+
+      - ``~/OpenPASS/thirdParty`` refers to a temporary directory used to built the prerequisites from source, **not** the ``simopenpass`` repository
+      - ``FMILibrary`` is the install directory of the ``Functional Mock-up Interface (FMI)`` when build from source
+      - ``osi`` is the install directory of the ``Open Simulation Interface (OSI)`` when build from source.
 
 On the basis of this structure, we will explain further steps.
-
-In the folder structure above:
-
-- ``C:\OpenPASS\thirdParty`` refers to a temporary directory used to built the prerequisites from source, **not** the ``simopenpass`` repository
-- ``FMILibrary`` is the install directory of the ``Functional Mock-up Interface (FMI)`` when build from source
-- ``osi`` is the install directory of the ``Open Simulation Interface (OSI)`` when build from source.
 
 .. _building_osi:
 
@@ -239,22 +261,51 @@ When building OSI, these files are converted into C++ headers and sources, using
 Finally, the sources are then compiled into a library.
 |Op| finally uses the library and the generated headers to interface the library.
 
-#. Open |mingw_shell| and create directory structure
+#. Open and create directory structure
 
-   .. code-block:: bash
+   .. tabs::
 
-      cd /C/
-      mkdir -p OpenPASS/thirdParty/sources
+      .. tab:: Windows
+
+         Start |mingw_shell|
+
+         .. code-block::
+
+            cd /C/
+            mkdir -p OpenPASS/thirdParty/sources
+
+      .. tab:: Linux
+
+         Start ``Bash`` shell
+
+         .. code-block::
+
+            cd ~
+            mkdir -p OpenPASS/thirdParty/sources
 
 #. Download release 3.2.0 from https://github.com/OpenSimulationInterface/open-simulation-interface 
 
-#. Extract to ``C:\OpenPASS\thirdParty\sources\open-simulation-interface-3.2.0``
+#. Extract
+
+   - for Windows to ``C:\OpenPASS\thirdParty\sources\open-simulation-interface-3.2.0``
+
+   - for Linux to ``~/OpenPASS/thirdParty/sources/open-simulation-interface-3.2.0``
 
 #. Navigate to the extracted folder
 
-   .. code-block:: bash
+   .. tabs::
 
-      cd /C/OpenPASS/thirdParty/sources/open-simulation-interface-3.2.0
+      .. tab:: Windows
+
+         .. code-block:: 
+
+            cd /C/OpenPASS/thirdParty/sources/open-simulation-interface-3.2.0
+
+      .. tab:: Linux
+
+         .. code-block:: 
+      
+               cd ~/OpenPASS/thirdParty/sources/open-simulation-interface-3.2.0
 
 #. Optional: Enable Arenas
    
@@ -263,9 +314,15 @@ Finally, the sources are then compiled into a library.
    See :ref:`cmake_protobuf_arenas` how this feature is enabled in |op|.
 
    To enable Arenas support for OSI, the line ``option cc_enable_arenas = true;`` needs to be added **manually** to all OSI proto files before compilation.
-   This can be achieved in two ways. Either the line ``option cc_enable_arenas = true;`` gets added manually **after the second line** of each PROTO file in ``C:\OpenPASS\thirdParty\sources\open-simulation-interface`` by using a text editor or one makes use of the stream editor in the |mingw_shell|:
+   
+   This can be achieved in two ways. Either the line ``option cc_enable_arenas = true;`` gets added manually **after the second line** of each PROTO file 
+   
+   - for Windows in ``C:\OpenPASS\thirdParty\sources\open-simulation-interface`` 
+   - for Linux in ``~/OpenPASS/thirdParty/sources/open-simulation-interface`` 
+  
+   by using a text editor or one makes use of the stream editor in the shell:
 
-   .. code-block:: bash
+   .. code-block:: 
 
       find . -maxdepth 1 -name '*.proto' -exec sed -i '2i option cc_enable_arenas = true;' {} \;
 
@@ -276,72 +333,130 @@ Finally, the sources are then compiled into a library.
 
    If everything goes well, ``protoc`` will generate all the magic necessary, otherwise issues an error during compilation.
 
-
-
 #. Create build directory
 
-   .. code-block:: bash
+   .. code-block:: 
 
       mkdir build
       cd build
 
 #. Run Cmake
 
-   .. code-block:: bash
+   .. tabs::
 
-      cmake -G "MinGW Makefiles" \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX=C:/OpenPASS/thirdParty/osi \
-            ..
+      .. tab:: Windows
 
-   .. note:: 
-   
-      If protobuf is used as custom build (see :ref:`building_protobuf`),
-      additional ``CMake`` variables have to be set.
+         .. code-block:: 
 
-      .. code-block:: bash
+            cmake -G "MinGW Makefiles" \
+                  -DCMAKE_BUILD_TYPE=Release \
+                  -DCMAKE_INSTALL_PREFIX=C:/OpenPASS/thirdParty/osi \
+                  ..
 
-         cmake -G “MinGW Makefiles” \
-               -DCMAKE_BUILD_TYPE=Release \
-               -DCMAKE_INSTALL_PREFIX=C:/OpenPASS/thirdParty/osi \
-               -DProtobuf_INCLUDE_DIR=C:/OpenPASS/thirdParty/protobuf/include \
-               -DProtobuf_PROTOC_EXECUTABLE=C:/OpenPASS/thirdParty/protobuf/bin/protoc.exe \
-               -DProtobuf_LIBRARIES=C:/OpenPASS/thirdParty/protobuf/lib  \
-               ..
+      .. tab:: Linux
 
-
-      Moreover, linker flags for protobuf have to be added. 
-      Please note that OSI does not allow to hook in a custom protobuf library.
-      To force compilation against a custom library, edit ``open-simulation-interface-3.2.0\build\CMakeFiles\open_simulation_interface.dir\linklibs.rsp``
-      and add ``-LC:/OpenPASS/thirdParty/protobuf/lib -lprotobuf`` to the end of the line by using a text editor or make use of the folowwing command within the |mingw_shell|:.
-
-      .. code-block:: bash
-
-         echo -n " -LC:/OpenPASS/thirdParty/protobuf/lib -lprotobuf" >> /C/OpenPASS/thirdParty/sources/open-simulation-interface-3.2.0/build/CMakeFiles/open_simulation_interface.dir/linklibs.rsp
+         .. code-block:: 
          
-      .. admonition:: A little bit hacky...
+            cmake -DCMAKE_BUILD_TYPE=Release \
+                  -DCMAKE_INSTALL_PREFIX=~/OpenPASS/thirdParty/osi \
+                  ..
+
+   **Note for Custom Protobuf Builds**
       
-         If anybody knows how to avoid this step, please let us know.
+   If protobuf is used as custom build (see :ref:`building_protobuf`),
+   additional ``CMake`` variables have to be set.
+
+   .. tabs::
+
+      .. tab:: Windows
+
+         .. code-block:: 
+
+            cmake -G “MinGW Makefiles” \
+                  -DCMAKE_BUILD_TYPE=Release \
+                  -DCMAKE_INSTALL_PREFIX=C:/OpenPASS/thirdParty/osi \
+                  -DProtobuf_INCLUDE_DIR=C:/OpenPASS/thirdParty/protobuf/include \
+                  -DProtobuf_PROTOC_EXECUTABLE=C:/OpenPASS/thirdParty/protobuf/bin/protoc.exe \
+                  -DProtobuf_LIBRARIES=C:/OpenPASS/thirdParty/protobuf/lib  \
+                  ..
+
+      .. tab:: Linux
+
+         .. code-block:: 
+
+            cmake -DCMAKE_BUILD_TYPE=Release \
+                  -DCMAKE_INSTALL_PREFIX=~/OpenPASS/thirdParty/osi \
+                  -DProtobuf_INCLUDE_DIR=~/OpenPASS/thirdParty/protobuf/include \
+                  -DProtobuf_PROTOC_EXECUTABLE=~/OpenPASS/thirdParty/protobuf/bin/protoc.exe \
+                  -DProtobuf_LIBRARIES=~/OpenPASS/thirdParty/protobuf/lib  \
+                  ..
+
+   Moreover, linker flags for protobuf have to be added. 
+   Please note that OSI does not allow to hook in a custom protobuf library.
+
+   .. tabs::
+
+      .. tab:: Windows
+
+         To force compilation against a custom library, edit ``open-simulation-interface-3.2.0\build\CMakeFiles\open_simulation_interface.dir\linklibs.rsp``
+         and add ``-LC:/OpenPASS/thirdParty/protobuf/lib -lprotobuf`` to the end of the line by using a text editor or make use of the folowwing command within the |mingw_shell|:
+
+         .. code-block:: 
+
+            echo -n " -LC:/OpenPASS/thirdParty/protobuf/lib -lprotobuf" >> /C/OpenPASS/thirdParty/sources/open-simulation-interface-3.2.0/build/CMakeFiles/open_simulation_interface.dir/linklibs.rsp
+            
+      .. tab:: Linux
+
+         To force compilation against a custom library, edit ``open-simulation-interface-3.2.0/build/CMakeFiles/open_simulation_interface.dir/linklibs.rsp``
+         and add ``-L~/OpenPASS/thirdParty/protobuf/lib -lprotobuf`` to the end of the line by using a text editor or make use of the following command within ``Bash`` shell:
+
+         .. code-block:: 
+
+            echo -n " -L~/OpenPASS/thirdParty/protobuf/lib -lprotobuf" >> ~/OpenPASS/thirdParty/sources/open-simulation-interface-3.2.0/build/CMakeFiles/open_simulation_interface.dir/linklibs.rsp
+
+   .. admonition:: A little bit hacky...
+   
+      If anybody knows how to avoid this step, please let us know.
 
 #. Compile
-   
-   .. code-block:: bash
 
-      mingw32-make -j3
+   .. tabs::
+
+      .. tab:: Windows
+         
+         .. code-block:: 
+
+            mingw32-make -j3
+
+
+      .. tab:: Linux
+         
+         .. code-block:: 
+   
+               make -j3
 
 #. Install
 
-   .. code-block:: bash
+   .. tabs::
 
-      mingw32-make install
+      .. tab:: Windows
+         
+         .. code-block:: 
 
-   
-.. admonition:: Documentation
-   
-   The OSI class documentation is part of the source code and can be compiled using Doxygen.
-   Instructions are located in the OSI ``Readme.md``. A pre-compiled version is located `here <https://opensimulationinterface.github.io/open-simulation-interface/index.html>`_. 
-   
-   So far, the documentation does not include the extensions from the openpass-trafficAgents branch.
+            mingw32-make install
+
+      .. tab:: Linux
+         
+         .. code-block:: 
+      
+            make install
+      
+   .. admonition:: Documentation
+      
+      The OSI class documentation is part of the source code and can be compiled using Doxygen.
+      Instructions are located in the OSI ``Readme.md``. A pre-compiled version is located `here <https://opensimulationinterface.github.io/open-simulation-interface/index.html>`_. 
+      
+      So far, the documentation does not include the extensions from the openpass-trafficAgents branch.
 
 
 .. _building_fmil:
@@ -351,31 +466,63 @@ Build and Install FMIL
 
 #. Download release 2.0.3 from https://github.com/modelon-community/fmi-library
 
-#. Extract to ``C:\OpenPASS\thirdParty\sources\fmi-library-2.0.3``
+#. Extract
 
-#. Open |mingw_shell| and navigate to the extracted folder
+   - for Windows to ``C:\OpenPASS\thirdParty\sources\fmi-library-2.0.3``
 
-   .. code-block:: bash 
+   - for Linux to ``~/OpenPASS/thirdParty/sources/fmi-library-2.0.3``
 
-      cd /C/OpenPASS/thirdParty/sources/fmi-library-2.0.3
+#. Navigate to the extracted folder
+
+   .. tabs::
+
+      .. tab:: Windows
+
+         Start |mingw_shell|
+
+         .. code-block:: 
+
+            cd /C/OpenPASS/thirdParty/sources/fmi-library-2.0.3
+
+      .. tab:: Linux
+
+         Start ``Bash`` shell
+
+         .. code-block:: 
+      
+            cd ~/OpenPASS/thirdParty/sources/fmi-library-2.0.3
 
 #. Create build directory
 
-   .. code-block:: bash
+   .. code-block:: 
 
       mkdir build
       cd build
 
 #. Run Cmake
 
-   .. code-block:: bash
+   .. tabs::
 
-      cmake -G "MinGW Makefiles" \
-            -DFMILIB_INSTALL_PREFIX=C:/OpenPASS/thirdParty/FMILibrary \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DFMILIB_BUILD_STATIC_LIB=OFF \
-            -DFMILIB_BUILD_SHARED_LIB=ON  \
-            ..
+      .. tab:: Windows
+
+         .. code-block:: 
+
+            cmake -G "MinGW Makefiles" \
+                  -DFMILIB_INSTALL_PREFIX=C:/OpenPASS/thirdParty/FMILibrary \
+                  -DCMAKE_BUILD_TYPE=Release \
+                  -DFMILIB_BUILD_STATIC_LIB=OFF \
+                  -DFMILIB_BUILD_SHARED_LIB=ON  \
+                  ..
+
+      .. tab:: Linux
+
+         .. code-block:: 
+
+            cmake -DFMILIB_INSTALL_PREFIX=~/OpenPASS/thirdParty/FMILibrary \
+                  -DCMAKE_BUILD_TYPE=Release \
+                  -DFMILIB_BUILD_STATIC_LIB=OFF \
+                  -DFMILIB_BUILD_SHARED_LIB=ON  \
+                  ..
 
 #. Apply Patch
    
@@ -385,15 +532,35 @@ Build and Install FMIL
 
 #. Compile
 
-   .. code-block:: bash
+   .. tabs::
 
-      mingw32-make -j3
-  
+      .. tab:: Windows
+
+         .. code-block:: 
+
+            mingw32-make -j3
+
+      .. tab:: Linux
+      
+         .. code-block:: 
+
+            make -j3
+
 #. Install
 
-   .. code-block:: bash
-  
-      mingw32-make install
+   .. tabs::
+
+      .. tab:: Windows
+
+         .. code-block:: 
+      
+            mingw32-make install
+
+      .. tab:: Linux
+
+         .. code-block:: 
+      
+            make install
 
 
 .. _building_protobuf:
@@ -407,17 +574,35 @@ Adjust this guide to your needs.
 
 #. Download release 3.11.4 from https://github.com/protocolbuffers/protobuf/releases
 
-#. Extract to e.g. ``C:\OpenPASS\thirdParty\sources\protobuf-cpp-3.11.4``
+#. Extract
 
-#. Open |mingw_shell| and navigate to the extracted folder
+   - for Windows to ``C:\OpenPASS\thirdParty\sources\protobuf-cpp-3.11.4``
 
-   .. code-block:: bash
+   - for Linux to ``~/OpenPASS/thirdParty/sources/protobuf-cpp-3.11.4``
 
-      cd /C/OpenPASS/thirdParty/sources/protobuf-cpp-3.11.4
+#. Navigate to the extracted folder
+
+   .. tabs::
+
+      .. tab:: Windows
+
+         Start |mingw_shell|
+
+         .. code-block:: 
+
+            cd /C/OpenPASS/thirdParty/sources/protobuf-cpp-3.11.4
+
+      .. tab:: Linux
+
+         Start ``Bash`` shell
+
+         .. code-block:: 
+      
+            cd ~/OpenPASS/thirdParty/sources/protobuf-cpp-3.11.4
 
 #. Create build directory
 
-   .. code-block:: bash
+   .. code-block:: 
       
       cd cmake
       mkdir build
@@ -425,31 +610,66 @@ Adjust this guide to your needs.
 
 #. Run Cmake
 
-   .. code-block:: bash
-      :emphasize-lines: 5
+   .. tabs::
 
-      cmake -G "MinGW Makefiles" \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX=C:/OpenPASS/thirdParty/protobuf \
-            -Dprotobuf_BUILD_SHARED_LIBS=ON \
-            -Dprotobuf_BUILD_TESTS=OFF  \
-            ..
+      .. tab:: Windows
+
+         .. code-block:: 
+            :emphasize-lines: 5
+
+            cmake -G "MinGW Makefiles" \
+                  -DCMAKE_BUILD_TYPE=Release \
+                  -DCMAKE_INSTALL_PREFIX=C:/OpenPASS/thirdParty/protobuf \
+                  -Dprotobuf_BUILD_SHARED_LIBS=ON \
+                  -Dprotobuf_BUILD_TESTS=OFF \
+                  ..
+
+      .. tab:: Linux
+
+         .. code-block:: 
+            :emphasize-lines: 5
+
+            cmake -DCMAKE_BUILD_TYPE=Release \
+                  -DCMAKE_INSTALL_PREFIX=~/OpenPASS/thirdParty/protobuf \
+                  -Dprotobuf_BUILD_SHARED_LIBS=ON \
+                  -Dprotobuf_BUILD_TESTS=OFF \
+                  ..
 
    .. note::
-   
+
       Tests are disabled due to compiler warnings treated as errors (may vary with compiler version).
 
 #. Compile
 
-   .. code-block:: bash
+   .. tabs::
 
-      mingw32-make -j3
-   
+      .. tab:: Windows
+
+         .. code-block:: 
+
+            mingw32-make -j3
+
+      .. tab:: Linux
+      
+         .. code-block:: 
+
+            make -j3
+
 #. Install
 
-   .. code-block:: bash
-   
-      mingw32-make install
+   .. tabs::
+
+      .. tab:: Windows
+
+         .. code-block:: 
+      
+            mingw32-make install
+
+      .. tab:: Linux
+
+         .. code-block:: 
+      
+            make install
    
 .. note::
 
@@ -465,7 +685,7 @@ Deprecated: qmake build
 
 Historically, |op_oss| uses a **single entry-point** for libraries and headers, so all prerequisites had to be located within a common folder structure:
 
-.. code-block:: bash
+::
    
    C:\OpenPASS\thirdParty
    ├── include
