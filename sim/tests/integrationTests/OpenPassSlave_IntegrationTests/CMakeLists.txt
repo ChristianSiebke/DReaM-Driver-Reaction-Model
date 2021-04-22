@@ -59,7 +59,6 @@ add_openpass_target(
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/OWL/OpenDriveTypeMapper.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/AgentAdapter.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/Localization.cpp
-    ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/PointQuery.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/WorldData.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/WorldDataQuery.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/WorldDataException.cpp
@@ -114,7 +113,6 @@ add_openpass_target(
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/OWL/OpenDriveTypeMapper.h
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/AgentAdapter.h
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/Localization.h
-    ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/PointQuery.h
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/WorldData.h
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/WorldDataQuery.h
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/WorldDataException.h

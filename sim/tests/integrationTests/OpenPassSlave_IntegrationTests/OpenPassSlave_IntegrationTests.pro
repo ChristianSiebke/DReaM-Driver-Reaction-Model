@@ -1,5 +1,5 @@
 #/*******************************************************************************
-#* Copyright (c) 2019, 2020 in-tech GmbH
+#* Copyright (c) 2019-2021 in-tech GmbH
 #*
 #* This program and the accompanying materials are made
 #* available under the terms of the Eclipse Public License 2.0
@@ -116,7 +116,6 @@ SRC_WORLD = $$WORLD_OSI/WorldData.cpp \
             $$WORLD_OSI/OWL/OpenDriveTypeMapper.cpp \
             $$WORLD_OSI/Localization.cpp \
             $$WORLD_OSI/WorldToRoadCoordinateConverter.cpp \
-            $$WORLD_OSI/PointQuery.cpp \
             $$WORLD_OSI/egoAgent.cpp
 
 INC_WORLD = $$WORLD_OSI/WorldData.h \
@@ -128,10 +127,10 @@ INC_WORLD = $$WORLD_OSI/WorldData.h \
             $$WORLD_OSI/OWL/OpenDriveTypeMapper.h \
             $$WORLD_OSI/Localization.h \
             $$WORLD_OSI/WorldToRoadCoordinateConverter.h \
-            $$WORLD_OSI/PointQuery.h \
             $$WORLD_OSI/egoAgent.h
 
 SOURCES += \
+    $$OPEN_SRC/common/commonTools.cpp \
     $$OPEN_SRC/common/eventDetectorDefinitions.cpp \
     $$OPENPASS_SLAVE/modelElements/agentBlueprint.cpp \
     $$OPENPASS_SLAVE/modelElements/parameters.cpp \
@@ -149,6 +148,7 @@ SOURCES += \
     $$SRC_SLAVECONFIG
 
 HEADERS += \
+    $$OPEN_SRC/common/commonTools.h \
     $$INC_SCENARIO \
     $$INC_SCENERY \
     $$INC_SYSTEMCONFIG \

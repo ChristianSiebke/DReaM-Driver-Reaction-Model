@@ -15,7 +15,6 @@ add_openpass_target(
     JointsBuilder.h
     Localization.h
     LocalizationElement.h
-    PointQuery.h
     RamerDouglasPeucker.h
     SceneryConverter.h
     SceneryEntities.h
@@ -45,7 +44,6 @@ add_openpass_target(
     EntityRepository.cpp
     JointsBuilder.cpp
     Localization.cpp
-    PointQuery.cpp
     SceneryConverter.cpp
     TrafficObjectAdapter.cpp
     World.cpp

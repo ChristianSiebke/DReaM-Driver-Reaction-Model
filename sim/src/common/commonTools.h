@@ -24,6 +24,7 @@
 
 #include "common/globalDefinitions.h"
 #include "common/vector2d.h"
+#include "common/opExport.h"
 #include <optional>
 #include <algorithm>
 
@@ -123,7 +124,7 @@ static double CalculateMomentInertiaYaw(double mass, double length, double width
 //! \param ownBoundingBox       first bounding box
 //! \param otherBoundingBox     second bounding box
 //! \return net distance x, net distance y
-[[maybe_unused]] static std::pair<double, double> GetCartesianNetDistance(polygon_t ownBoundingBox, polygon_t otherBoundingBox)
+[[maybe_unused]] static std::pair<double, double> GetCartesianNetDistance(const polygon_t& ownBoundingBox, const polygon_t& otherBoundingBox)
 {
     double ownMaxX{std::numeric_limits<double>::lowest()};
     double ownMinX{std::numeric_limits<double>::max()};
@@ -167,6 +168,70 @@ static double CalculateMomentInertiaYaw(double mass, double length, double width
     }
     return {netX, netY};
 }
+
+class IntersectionCalculation
+{
+public:
+
+    /**
+     * @brief Checks whether a point lies within or on the edges
+     *        of a convex quadrilateral.
+     *
+     * The quadrilateral must be convex and it points ordered clockwise:
+     *              A
+     *              #-------_______      B
+     *             /   P           ------#
+     *            /    #                  \
+     *           /                         \
+     *          #---------------------------#
+     *          C                           D
+     *
+     * @param[in] A First corner of quadrilateral
+     * @param[in] B Second corner of quadrilateral
+     * @param[in] C Third corner of quadrilateral
+     * @param[in] D Forth corner of quadrilateral
+     * @param[in] P Point to be queried
+     * @returns true if point is within on the edges of the quadrilateral
+     */
+    static OPENPASSCOMMONEXPORT bool IsWithin(const Common::Vector2d& A,
+                                                  const Common::Vector2d& B,
+                                                  const Common::Vector2d& C,
+                                                  const Common::Vector2d& D,
+                                                  const Common::Vector2d& P);
+
+    //! \brief Calculates the intersection polygon of two quadrangles.
+    //!
+    //! This method calculates all points of the intersection polygon of two quadrangles.
+    //! It is assumed, that the first quadrangle is rectangular, the second quadrangle is convex and that the points are given in clockwise order.
+    //! Solve the linear equation "first point + lambda * first edge = second point + kappa * second edge" for each pair of edges to get the intersection of the edges.
+    //! If both lamda and kappa are between 0 and 1, then the intersection lies on both edges. If the determinat is 0, then the two egdes are parallel.
+    //!
+    //! \param firstPoints    corner points of the first quadrangle in clockwise order
+    //! \param secondPoints   corner points of the second quadrangle in clockwise order
+    //! \return points of the intersection polygon
+    static OPENPASSCOMMONEXPORT std::vector<Common::Vector2d> GetIntersectionPoints(const std::vector<Common::Vector2d>& firstPoints, const std::vector<Common::Vector2d>& secondPoints);
+
+    //! \brief Calculates the intersection polygon of two quadrangles.
+    //!
+    //! This method calculates all points of the intersection polygon of two quadrangles.
+    //! It is assumed, that the first quadrangle is rectangular, the second quadrangle is convex and that the points are given in clockwise order.
+    //!
+    //! \param firstPolygon    first quadrangle
+    //! \param secondPolygon   second quadrangle
+    //! \return points of the intersection polygon
+    static OPENPASSCOMMONEXPORT std::vector<Common::Vector2d> GetIntersectionPoints(const polygon_t& firstPolygon, const polygon_t& secondPolygon);
+
+private:
+    static bool OnEdge(const Common::Vector2d& A,
+                       const Common::Vector2d& B,
+                       const Common::Vector2d& P);
+
+    static bool WithinBarycentricCoords(double dot00,
+                                        double dot02,
+                                        double dot01,
+                                        double dot11,
+                                        double dot12);
+};
 
 //-----------------------------------------------------------------------------
 //! @brief Tokenizes string by delimiter.
