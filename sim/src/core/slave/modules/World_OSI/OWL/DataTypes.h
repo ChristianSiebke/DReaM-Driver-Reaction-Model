@@ -869,7 +869,7 @@ protected:
     osi3::Lane* osiLane{nullptr};
 
 private:
-    LaneType laneType;
+    LaneType laneType{LaneType::Undefined};
     LaneAssignmentCollector worldObjects;
     Interfaces::LaneAssignments stationaryObjects;
     Interfaces::TrafficSigns trafficSigns;
@@ -881,7 +881,7 @@ private:
     std::vector<Id> previous;
     const Interfaces::Lane* leftLane;
     const Interfaces::Lane* rightLane;
-    double length;
+    double length{0.0};
     bool leftLaneIsDummy{section == nullptr};
     bool rightLaneIsDummy{section == nullptr};
 };
