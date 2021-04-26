@@ -186,6 +186,9 @@ std::optional<SpawnInfo> SpawnPointPreRunCommon::GetNextSpawnCarInfo(const RoadI
     lanePosition.laneId = laneId;
     lanePosition.offset = 0.0;
     lanePosition.s = spawnDistance.value();
+    openScenario::Orientation orientation;
+    orientation.h = (laneId < 0) ? 0.0 : M_PI;
+    lanePosition.orientation = orientation;
 
     SpawnInfo spawnInfo;
     spawnInfo.position = lanePosition;
@@ -228,6 +231,10 @@ bool SpawnPointPreRunCommon::CalculateSpawnParameter(AgentBlueprintInterface* ag
     spawnParameter.positionX = pos.xPos;
     spawnParameter.positionY = pos.yPos;
     spawnParameter.yawAngle  = pos.yawAngle;
+    if(lanePosition.orientation.has_value())
+    {
+        spawnParameter.yawAngle += lanePosition.orientation.value().h.value_or(0.0);
+    }
     spawnParameter.velocity = spawnV;
     spawnParameter.acceleration = spawnInfo.acceleration.value_or(0.0);
     spawnParameter.route = route;

@@ -141,7 +141,7 @@ void SpawnPointRuntimeCommon::CalculateSpawnParameter(AgentBlueprintInterface* a
     SpawnParameter& spawnParameter = agentBlueprint->GetSpawnParameter();
     spawnParameter.positionX = pos.xPos;
     spawnParameter.positionY = pos.yPos;
-    spawnParameter.yawAngle  = pos.yawAngle;
+    spawnParameter.yawAngle  = pos.yawAngle + (laneId < 0 ? 0.0 : M_PI);
     spawnParameter.velocity = spawnV;
     spawnParameter.acceleration = 0;
     spawnParameter.route = worldAnalyzer.SampleRoute(roadId,
