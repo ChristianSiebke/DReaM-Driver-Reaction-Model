@@ -77,6 +77,22 @@ The first set of dependencies we need to install in order to successfully compil
 
    .. tab:: Linux (Debian Bullseye)
 
+      Update the package database on the system:
+
+      Update package repository
+
+      .. code-block:: 
+
+         apt update
+
+      Upgrade existing software to latest version
+
+      .. code-block:: 
+
+         apt upgrade
+
+      Install required binary packages
+
       .. code-block:: 
 
          apt install ccache
@@ -91,6 +107,15 @@ The first set of dependencies we need to install in order to successfully compil
          apt install qt5-default
          apt install zlib1g-dev
 
+      Under Linux, it is deliberate that the googletest package only installs the header files to the system, 
+      but not the static and dynamic libraries. The missing libraries can be build and installed to ``/usr/lib`` via
+
+      .. code-block:: 
+
+         cd /usr/src/googletest
+         cmake .
+         make
+         make install
 
 Binary Packages: Details
 ------------------------------------------
@@ -195,9 +220,6 @@ Source Packages: Installation Instructions
 -----------------------
 
 This section describes how to compile prerequisites of |op| using source packages.
-
-To keep this guide as slim as possible, it only describes the **Windows perspective**.
-In general, this should work for Linux as well by adjusting paths and the ``make`` command accordingly.
   
 .. note::
    
@@ -331,8 +353,6 @@ Finally, the sources are then compiled into a library.
       The first line of each OSI proto file specifies the protobuf syntax used. 
       If Arenas support is added before the syntax specification, errors occur.
 
-   If everything goes well, ``protoc`` will generate all the magic necessary, otherwise issues an error during compilation.
-
 #. Create build directory
 
    .. code-block:: 
@@ -434,6 +454,18 @@ Finally, the sources are then compiled into a library.
          .. code-block:: 
    
                make -j3
+
+   .. warning::
+
+      If ``protobuf`` compiler complains, do 
+
+      .. code-block:: 
+
+         protoc --version
+
+      and check if correct protobuf version is used.
+   
+      
 
 #. Install
 

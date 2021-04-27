@@ -73,6 +73,7 @@ This section describes how compile and run |op|.
 
          .. code-block:: 
          
+            cd ~
             git clone https://gitlab.eclipse.org/eclipse/simopenpass/simopenpass.git
 
 #. Navigate into repository and checkout master branch
@@ -134,7 +135,7 @@ This section describes how compile and run |op|.
 
                cp -r protobuf /C/simopenpass/deps/thirdParty
 
-         .. tab:: Windows
+         .. tab:: Linux
 
             .. code-block:: 
    
@@ -162,7 +163,7 @@ This section describes how compile and run |op|.
 
             cd /C/simopenpass
 
-      .. tab:: Windows
+      .. tab:: Linux
 
          .. code-block:: 
       
@@ -184,10 +185,10 @@ This section describes how compile and run |op|.
          .. code-block:: 
 
             cmake -G "MinGW Makefiles" \
-            -D CMAKE_PREFIX_PATH="C:\msys64\mingw64\bin;{CMAKE_CURRENT_SOURCE_DIR}\..\deps\thirdParty\FMILibrary;{CMAKE_CURRENT_SOURCE_DIR}\..\deps\thirdParty\osi;" \
+            -D CMAKE_PREFIX_PATH="C:\msys64\mingw64\bin;C:\simopenpass\deps\thirdParty\FMILibrary;C:\simopenpass\deps\thirdParty\osi;" \
             -D CMAKE_INSTALL_PREFIX=/C/OpenPASS/bin/core \
             -D CMAKE_BUILD_TYPE=Release \
-            -D CMAKE_WITH_DEBUG_POSTIX=OFF \
+            -D WITH_DEBUG_POSTFIX=OFF \
             -D OPENPASS_ADJUST_OUTPUT=OFF \
             -D USE_CCACHE=ON \
             -D CMAKE_C_COMPILER=gcc \
@@ -198,21 +199,15 @@ This section describes how compile and run |op|.
 
          .. code-block:: 
 
-            cmake -D CMAKE_PREFIX_PATH=/opt/qt5.12.3/5.12.3/gcc_64\;\
-                     ../deps/thirdParty/FMILibrary\;\
-                     ../deps/thirdParty/boost\;\
-                     ../deps/thirdParty/osi\;\
-                     ../deps/thirdParty/minizip\;\
-                     ../deps/thirdParty/protobuf\;\
-                     ../deps/thirdParty/googletest \
-                  -D CMAKE_INSTALL_PREFIX=/usr/local/OpenPASS/bin/core \
-                  -D CMAKE_BUILD_TYPE=Release \
-                  -D CMAKE_WITH_DEBUG_POSTIX=OFF \
-                  -D OPENPASS_ADJUST_OUTPUT=OFF \
-                  -D USE_CCACHE=ON \
-                  -D CMAKE_C_COMPILER=gcc-10 \
-                  -D CMAKE_CXX_COMPILER=g++-10 \
-                  ..
+            cmake -D CMAKE_PREFIX_PATH="/opt/qt5.12.3/5.12.3/gcc_64;~/simopenpass/deps/thirdParty/FMILibrary;~/simopenpass/deps/thirdParty/osi" \
+            -D CMAKE_INSTALL_PREFIX=/usr/local/OpenPASS/bin/core \
+            -D CMAKE_BUILD_TYPE=Release \
+            -D WITH_DEBUG_POSTFIX=OFF \
+            -D OPENPASS_ADJUST_OUTPUT=OFF \
+            -D USE_CCACHE=ON \
+            -D CMAKE_C_COMPILER=gcc-9 \
+            -D CMAKE_CXX_COMPILER=g++-9 \
+            ..
 
    .. note:: Adjust paths and options based on your system and needs and don't forget to escape the semicolon ``;`` (see :ref:`CMAKE_PREFIX_PATH`)
 
