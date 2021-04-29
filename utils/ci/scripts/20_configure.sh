@@ -52,9 +52,20 @@ if [[ "${OSTYPE}" = "msys" ]]; then
   done
 fi
 
+# generate version information
+if [[ "${TAG_NAME}" =~ ^openPASS_[0-9]+.[0-9]+.[0-9]+ ]]; then
+  MAJOR=$(echo ${TAG_NAME} | sed -e 's/openPASS_\([0-9]\+\)\.\([0-9]\+\)\.\([0-9]\+\)\(.*\)/\1/')
+  MINOR=$(echo ${TAG_NAME} | sed -e 's/openPASS_\([0-9]\+\)\.\([0-9]\+\)\.\([0-9]\+\)\(.*\)/\2/')
+  PATCH=$(echo ${TAG_NAME} | sed -e 's/openPASS_\([0-9]\+\)\.\([0-9]\+\)\.\([0-9]\+\)\(.*\)/\3/')
+  CMAKE_VERSION_ARG="-DSIMCORE_VERSION_MAJOR=${MAJOR} -DSIMCORE_VERSION_MINOR=${MINOR} -DSIMCORE_VERSION_PATCH=${PATCH}"
+elif [[ -n "${GIT_BRANCH}" || -n "${GIT_COMMIT}" ]]; then
+  CMAKE_VERSION_ARG="-DSIMCORE_VERSION_TAG=${GIT_BRANCH:-no-branch}_${GIT_COMMIT}"
+fi
+
 cmake \
   "$CMAKE_GENERATOR_ARG" \
   "$CMAKE_PYTHON_COMMAND_ARG" \
+  $CMAKE_VERSION_ARG \
   -D CMAKE_PREFIX_PATH="$(join_paths ${DEPS[@]})" \
   -D CMAKE_INSTALL_PREFIX="$PWD/../dist/Slave" \
   -D CMAKE_BUILD_TYPE=Release \
@@ -69,3 +80,4 @@ cmake \
   -D WITH_EXTENDED_OSI=OFF \
   -D WITH_GUI=OFF \
   ../repo
+
