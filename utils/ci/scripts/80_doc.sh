@@ -11,21 +11,13 @@
 ################################################################################
 
 ################################################################################
-# This script runs the simulation core build and end-to-end tests
+# This script builds the documentation
 ################################################################################
 
 MYDIR="$(dirname "$(readlink -f $0)")"
-cd "$MYDIR" || exit 1
+cd "$MYDIR/../../../../build"
 
-export CCACHE_DIR=$MYDIR/../../../../ccache
+make doc
 
-for SCRIPT in 30_build.sh 55_endtoend.sh 80_doc.sh 90_pack_artifacts.sh; do
-  echo
-  echo "======================================================================="
-  echo "Executing ${SCRIPT}..."
-  echo "======================================================================="
-  echo
-
-  ./$SCRIPT || exit 1
-done
+exit 0
 
