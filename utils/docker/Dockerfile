@@ -23,11 +23,10 @@ RUN apt-get -qq update && apt-get -qq dist-upgrade && apt-get install -qq -y --n
     libprotobuf-dev \
     protobuf-compiler \
     python3 \
+    python3-pip \
     python3-distutils \
-    python3-junitparser \
-    python3-lxml \
-    python3-pandas \
-    python3-pytest \
     qtbase5-dev \
     && apt-get -qq clean
+
+RUN pip install breathe exhale junitparser lxml pandas pytest sphinx sphinx-rtd-theme sphinx-tabs sphinxcontrib-spelling
 
