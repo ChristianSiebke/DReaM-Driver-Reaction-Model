@@ -97,7 +97,7 @@ spec:
           environment {
             MSYSTEM = 'MINGW64'
             CHERE_INVOKING = 'yes'
-            PYTHON_WINDOWS_EXE = 'C:/Program Files/Python/Python39/python.exe'
+            PYTHON_WINDOWS_EXE = 'C:/Program Files/Python39/python.exe'
           }
           stages {
             stage('Prepare dependencies') {
