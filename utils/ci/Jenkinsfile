@@ -69,6 +69,12 @@ spec:
               }
             }
             stage('Linux: Deploy') {
+              when {
+                anyOf {
+                  tag pattern: "openPASS_.*", comparator: "REGEXP"
+                  triggeredBy 'TimerTrigger'
+                }
+              }
               steps {
                 container('jnlp') {
                   sshagent ( ['projects-storage.eclipse.org-bot-ssh']) {
@@ -122,6 +128,12 @@ spec:
               }
             }
             stage('Windows: Deploy') {
+              when {
+                anyOf {
+                  tag pattern: "openPASS_.*", comparator: "REGEXP"
+                  triggeredBy 'TimerTrigger'
+                }
+              }
               steps {
                 sshagent ( ['projects-storage.eclipse.org-bot-ssh']) {
                   bat '''
