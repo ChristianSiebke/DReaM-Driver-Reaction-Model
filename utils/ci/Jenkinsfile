@@ -85,7 +85,7 @@ spec:
           }
           post {
             always {
-              archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/**', followSymlinks: false
+              archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/**,dist/Slave/testreport/**', followSymlinks: false
               junit allowEmptyResults: true, testResults: 'build/**/*Tests.xml,repo/sim/tests/endToEndTests/pyOpenPASS/result_*.xml'
             }
           }
@@ -134,7 +134,7 @@ spec:
           post {
             always {
               bat 'subst W: /d'
-              archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/**', followSymlinks: false
+              archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/**,dist/Slave/testreport/**', followSymlinks: false
               junit allowEmptyResults: true, testResults: 'build/**/*Tests.xml,repo/sim/tests/endToEndTests/pyOpenPASS/result_*.xml'
             }
           }
