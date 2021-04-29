@@ -50,12 +50,11 @@ elseif(UNIX)
   list(APPEND PYOPENPASS_GENERIC_TEST_SCOPES ${PYOPENPASS_GENERIC_TEST_SCOPES_LINUX64})
 endif()
 
-set(PYTHON_COMMAND python3)
-
-# allow override of incomplete MSYS python installation
-if(WIN32 AND $ENV{PYTHON_WINDOWS_EXE})
-  set(PYTHON_COMMAND $ENV{PYTHON_WINDOWS_EXE})
+if(NOT DEFINED PYTHON_COMMAND)
+  set(PYTHON_COMMAND "python3")
 endif()
+
+message(STATUS "EndToEnd-Tests: Using python command '${PYTHON_COMMAND}' for execution of pyOpenPASS")
 
 # This is the main pyOpenPASS target. It will create a HTML report of the individual tests.
 add_custom_target(pyOpenPASS

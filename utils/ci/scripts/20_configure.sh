@@ -35,6 +35,11 @@ if [[ "${OSTYPE}" = "msys" ]]; then
   # set the correct CMake generator
   CMAKE_GENERATOR_ARG="-GMSYS Makefiles"
 
+  # set python command
+  if [[ -n "${PYTHON_WINDOWS_EXE}" ]]; then
+    CMAKE_PYTHON_COMMAND_ARG="-DPYTHON_COMMAND=${PYTHON_WINDOWS_EXE}"
+  fi
+
   # prepare dependency paths
   # it seems cmake doesn't like MSYS paths starting with drive letters (e.g. /c/thirdParty/...)
   # cygpath is used here to format the paths in "mixed format" (e.g. c:/thirdparty/...)
@@ -49,6 +54,7 @@ fi
 
 cmake \
   "$CMAKE_GENERATOR_ARG" \
+  "$CMAKE_PYTHON_COMMAND_ARG" \
   -D CMAKE_PREFIX_PATH="$(join_paths ${DEPS[@]})" \
   -D CMAKE_INSTALL_PREFIX="$PWD/../dist/Slave" \
   -D CMAKE_BUILD_TYPE=Release \
