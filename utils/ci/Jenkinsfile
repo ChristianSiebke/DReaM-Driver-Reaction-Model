@@ -16,7 +16,7 @@ pipeline {
   stages {
     stage('Linux and Windows build') {
       parallel {
-        stage('Linux build') {
+        stage('Linux') {
           agent {
             kubernetes {
               label 'openpass-agent-pod-' + env.BUILD_NUMBER
@@ -47,29 +47,28 @@ spec:
             }
           }
           stages {
-            stage('Prepare dependencies') {
+            stage('Linux: Cleanup and prepare dependencies') {
               steps {
                 container('openpass-build') {
-                  sh 'bash -c set'
                   sh 'bash repo/utils/ci/scripts/build_prepare.sh'
                 }
               }
             }
-            stage('Build and E2E tests') {
+            stage('Linux: Build core and run end-to-end tests') {
               steps {
                 container('openpass-build') {
                   sh 'bash repo/utils/ci/scripts/build_core_and_e2e.sh'
                 }
               }
             }
-            stage('Unit tests') {
+            stage('Linux: Build and run unit tests') {
               steps {
                 container('openpass-build') {
                   sh 'bash repo/utils/ci/scripts/build_unittests.sh'
                 }
               }
             }
-            stage('Deploy') {
+            stage('Linux: Deploy') {
               steps {
                 container('jnlp') {
                   sshagent ( ['projects-storage.eclipse.org-bot-ssh']) {
@@ -90,7 +89,7 @@ spec:
             }
           }
         }
-        stage('Windows build') {
+        stage('Windows') {
           agent {
             label 'windows'
           }
@@ -100,32 +99,29 @@ spec:
             PYTHON_WINDOWS_EXE = 'C:/Program Files/Python39/python.exe'
           }
           stages {
-            stage('Prepare dependencies') {
+            stage('Windows: Cleanup and prepare dependencies') {
               steps {
                 bat 'subst W: %WORKSPACE%'
-                bat 'C:\\msys64\\usr\\bin\\bash -lc set'
-                bat 'C:\\msys64\\usr\\bin\\bash -lc "where cmake; which cmake; cmake --version; cmake --help"'
                 dir('W:/') {
                   bat 'C:\\msys64\\usr\\bin\\bash -lc repo/utils/ci/scripts/build_prepare.sh'
                 }
               }
             }
-            stage('Build and E2E tests') {
+            stage('Windows: Build core and run end-to-end tests') {
               steps {
-                bat 'C:\\msys64\\usr\\bin\\bash -lc "cd build && cat CMakeCache.txt"'
                 dir('W:/') {
                   bat 'C:\\msys64\\usr\\bin\\bash -lc repo/utils/ci/scripts/build_core_and_e2e.sh'
                 }
               }
             }
-            stage('Unit tests') {
+            stage('Windows: Build and run unit tests') {
               steps {
                 dir('W:/') {
                   bat 'C:\\msys64\\usr\\bin\\bash -lc repo/utils/ci/scripts/build_unittests.sh'
                 }
               }
             }
-            stage('Deploy') {
+            stage('Windows: Deploy') {
               steps {
                 sshagent ( ['projects-storage.eclipse.org-bot-ssh']) {
                   bat '''
