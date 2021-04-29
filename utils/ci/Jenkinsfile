@@ -109,7 +109,7 @@ spec:
             }
             stage('Build and E2E tests') {
               steps {
-                bat 'C:\\msys64\\usr\\bin\\bash -lc "cd build && make Common_Tests VERBOSE=1"'
+                bat 'C:\\msys64\\usr\\bin\\bash -lc "cd build && cat CMakeCache.txt"'
                 bat 'C:\\msys64\\usr\\bin\\bash -lc repo/utils/ci/scripts/build_core_and_e2e.sh'
               }
             }
