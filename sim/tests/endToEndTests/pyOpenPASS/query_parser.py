@@ -16,13 +16,16 @@ class Query:
     class Pd:
         def __init__(self, parsed_query):
             match = re.match(
-                r'([a-z]+)\s?\(\s?([A-Za-z0-9]+)\s?\|\s?(.*)\)\s?([~><=!]=?)\s([0-9\.]+)', parsed_query)
+                r'([a-z]+)\s?\(\s?([A-Za-z0-9-]+)\s?\|\s?(.*)\)\s?([~><=!]=?)\s([0-9\.]+)', parsed_query)
 
             self.group = match.group(1)
             self.column = match.group(2)
             self.filter = match.group(3)
             self.operator = match.group(4)
             self.value = match.group(5)
+
+            # quote columns containing `-` in name using backticks (required by DataFrame.query())
+            self.filter = re.sub(r'([a-zA-Z0-9_]+(?:-+[a-zA-Z0-9_]*)+[a-zA-Z0-9_]*)', r'`\1`', self.filter)
 
     def __init__(self, query):
         self.raw_query = query
@@ -57,7 +60,7 @@ class Query:
             raw_query = raw_query.replace(
                 f'#({event})', f'Event_{normalize(event)}')
 
-        matches = set(re.findall(r'(([A-Za-z\d_]+)-(\d+))', raw_query))
+        matches = set(re.findall(r'\|.*?(([A-Za-z\d_-]+)-(\d+))', raw_query))
 
         for match, column, shift in matches:
             new_column = f'{column}_prev{shift}'

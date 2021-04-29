@@ -23,7 +23,7 @@ def execute_query(data: pd.DataFrame, qpd, run_id):
     print(f"  filter '{qpd.filter}'")
     data.query(qpd.filter, inplace=True)
 
-    lhs = f'data.{qpd.column}.{qpd.group}()'
+    lhs = f'data[["{qpd.column}"]].{qpd.group}().to_list()[0]'
 
     if qpd.operator == '~=':
         lower_value = float(qpd.value) * (1 - 1e-6)
