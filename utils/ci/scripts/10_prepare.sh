@@ -23,7 +23,7 @@ if [ ! -d repo ]; then
 fi
 
 # wipe build directories and pyOpenPASS results
-rm -rf build build-fmi-library build-osi
+rm -rf artifacts build build-fmi-library build-osi
 rm -f repo/sim/tests/endToEndTests/pyOpenPASS/result_*.xml
 
 # prepare
