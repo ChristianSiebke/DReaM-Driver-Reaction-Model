@@ -102,6 +102,7 @@ spec:
           stages {
             stage('Prepare dependencies') {
               steps {
+                bat 'subst W: %WORKSPACE% && cd /d W:\\'
                 bat 'C:\\msys64\\usr\\bin\\bash -lc set'
                 bat 'C:\\msys64\\usr\\bin\\bash -lc "where cmake; which cmake; cmake --version; cmake --help"'
                 bat 'C:\\msys64\\usr\\bin\\bash -lc repo/utils/ci/scripts/build_prepare.sh'
@@ -132,6 +133,7 @@ spec:
           }
           post {
             always {
+              bat 'subst W: /d'
               archiveArtifacts allowEmptyArchive: true, artifacts: 'artifacts/**', followSymlinks: false
               junit allowEmptyResults: true, testResults: 'build/**/*Tests.xml,repo/sim/tests/endToEndTests/pyOpenPASS/result_*.xml'
             }
