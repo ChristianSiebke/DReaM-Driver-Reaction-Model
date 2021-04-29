@@ -102,21 +102,27 @@ spec:
           stages {
             stage('Prepare dependencies') {
               steps {
-                bat 'subst W: %WORKSPACE% && cd /d W:\\'
+                bat 'subst W: %WORKSPACE%'
                 bat 'C:\\msys64\\usr\\bin\\bash -lc set'
                 bat 'C:\\msys64\\usr\\bin\\bash -lc "where cmake; which cmake; cmake --version; cmake --help"'
-                bat 'C:\\msys64\\usr\\bin\\bash -lc repo/utils/ci/scripts/build_prepare.sh'
+                dir('W:/') {
+                  bat 'C:\\msys64\\usr\\bin\\bash -lc repo/utils/ci/scripts/build_prepare.sh'
+                }
               }
             }
             stage('Build and E2E tests') {
               steps {
                 bat 'C:\\msys64\\usr\\bin\\bash -lc "cd build && cat CMakeCache.txt"'
-                bat 'C:\\msys64\\usr\\bin\\bash -lc repo/utils/ci/scripts/build_core_and_e2e.sh'
+                dir('W:/') {
+                  bat 'C:\\msys64\\usr\\bin\\bash -lc repo/utils/ci/scripts/build_core_and_e2e.sh'
+                }
               }
             }
             stage('Unit tests') {
               steps {
-                bat 'C:\\msys64\\usr\\bin\\bash -lc repo/utils/ci/scripts/build_unittests.sh'
+                dir('W:/') {
+                  bat 'C:\\msys64\\usr\\bin\\bash -lc repo/utils/ci/scripts/build_unittests.sh'
+                }
               }
             }
             stage('Deploy') {
