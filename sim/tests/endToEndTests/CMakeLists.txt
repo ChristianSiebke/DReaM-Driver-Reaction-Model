@@ -50,10 +50,16 @@ elseif(UNIX)
   list(APPEND PYOPENPASS_GENERIC_TEST_SCOPES ${PYOPENPASS_GENERIC_TEST_SCOPES_LINUX64})
 endif()
 
+set(PYTHON_COMMAND python3)
+
+# allow override of incomplete MSYS python installation
+if(WIN32 AND $ENV{PYTHON_WINDOWS_EXE})
+  set(PYTHON_COMMAND $ENV{PYTHON_WINDOWS_EXE})
+endif()
 
 # This is the main pyOpenPASS target. It will create a HTML report of the individual tests.
 add_custom_target(pyOpenPASS
-  COMMAND python report.py -r ${PYOPENPASS_DEFAULT_RESOURCES}/Configurations $<$<BOOL:${PYOPENPASS_EXTRA_RESOURCES}>:${PYOPENPASS_EXTRA_RESOURCES}/Configurations> -c ${PYOPENPASS_DEFAULT_CONFIG} ${PYOPENPASS_EXTRA_CONFIG} --scope ${PYOPENPASS_GENERIC_TEST_SCOPES} ${PYOPENPASS_SPECIALIZED_TEST_SCOPES} ${PYOPENPASS_EXTRA_TEST_SCOPES} --results ${CMAKE_INSTALL_PREFIX}/results --output ${CMAKE_INSTALL_PREFIX}/testreport
+  COMMAND ${PYTHON_COMMAND} report.py -r ${PYOPENPASS_DEFAULT_RESOURCES}/Configurations $<$<BOOL:${PYOPENPASS_EXTRA_RESOURCES}>:${PYOPENPASS_EXTRA_RESOURCES}/Configurations> -c ${PYOPENPASS_DEFAULT_CONFIG} ${PYOPENPASS_EXTRA_CONFIG} --scope ${PYOPENPASS_GENERIC_TEST_SCOPES} ${PYOPENPASS_SPECIALIZED_TEST_SCOPES} ${PYOPENPASS_EXTRA_TEST_SCOPES} --results ${CMAKE_INSTALL_PREFIX}/results --output ${CMAKE_INSTALL_PREFIX}/testreport
   WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/pyOpenPASS
 )
 
@@ -61,7 +67,7 @@ add_custom_target(pyOpenPASS
 # This also adds a dependency on the main pyOpenPASS target specified above.
 foreach(SCOPE IN LISTS PYOPENPASS_GENERIC_TEST_SCOPES PYOPENPASS_SPECIALIZED_TEST_SCOPES)
   add_custom_target(pyOpenPASS_${SCOPE}
-    COMMAND python main.py --slave ${CMAKE_INSTALL_PREFIX} --mutual ${PYOPENPASS_DEFAULT_RESOURCES}/DefaultConfigurations --resources ${PYOPENPASS_DEFAULT_RESOURCES}/Configurations --config ${PYOPENPASS_DEFAULT_CONFIG} --scope ${SCOPE}
+    COMMAND ${PYTHON_COMMAND} main.py --slave ${CMAKE_INSTALL_PREFIX} --mutual ${PYOPENPASS_DEFAULT_RESOURCES}/DefaultConfigurations --resources ${PYOPENPASS_DEFAULT_RESOURCES}/Configurations --config ${PYOPENPASS_DEFAULT_CONFIG} --scope ${SCOPE}
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/pyOpenPASS
   )
   add_dependencies(pyOpenPASS pyOpenPASS_${SCOPE})
@@ -74,7 +80,7 @@ endforeach()
 # This also adds a dependency on the main pyOpenPASS target specified above.
 foreach(SCOPE IN LISTS PYOPENPASS_EXTRA_TEST_SCOPES)
   add_custom_target(pyOpenPASS_${SCOPE}
-    COMMAND python main.py --slave ${CMAKE_INSTALL_PREFIX} --mutual ${PYOPENPASS_EXTRA_RESOURCES}/DefaultConfigurations --resources ${PYOPENPASS_EXTRA_RESOURCES}/Configurations --config ${PYOPENPASS_EXTRA_CONFIG} --scope ${SCOPE}
+    COMMAND ${PYTHON_COMMAND} main.py --slave ${CMAKE_INSTALL_PREFIX} --mutual ${PYOPENPASS_EXTRA_RESOURCES}/DefaultConfigurations --resources ${PYOPENPASS_EXTRA_RESOURCES}/Configurations --config ${PYOPENPASS_EXTRA_CONFIG} --scope ${SCOPE}
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/pyOpenPASS
   )
   add_dependencies(pyOpenPASS pyOpenPASS_${SCOPE})
