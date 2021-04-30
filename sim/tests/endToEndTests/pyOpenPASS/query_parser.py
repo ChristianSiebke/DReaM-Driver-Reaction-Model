@@ -60,7 +60,7 @@ class Query:
             raw_query = raw_query.replace(
                 f'#({event})', f'Event_{normalize(event)}')
 
-        matches = set(re.findall(r'\|.*?(([A-Za-z\d_-]+)-(\d+))', raw_query))
+        matches = set(re.findall(r"\|.*?(((?=[^'])[A-Za-z\d_-]+)-(\d+)(?=[^']))", raw_query))
 
         for match, column, shift in matches:
             new_column = f'{column}_prev{shift}'

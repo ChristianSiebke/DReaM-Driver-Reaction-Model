@@ -230,6 +230,9 @@ Syntax: Column-Shift => PositionRoute-1 means PositionRoute at one timestep earl
 Example: Counting Agents passing PositionRoute == 350 on LaneId == -1
 Query: `count(AgentId | LaneId == -1 and PositionRoute-1 < 350 and PositionRoute >= 350 ) > 0`
 
+If a column happens to have a name like `Name-N` where N is an integer, time shifting would be applied mistakenly.
+Thus, it is possible to escape columns using surrounding single quotes (e.g. ``'Name-1'``).
+
 # Test Report Generator
 
 Generates a report for results from the pyOpenPASS EndToEndTest Framework tool.

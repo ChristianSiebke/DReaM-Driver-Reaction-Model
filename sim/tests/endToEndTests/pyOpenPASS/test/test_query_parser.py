@@ -51,6 +51,13 @@ def test_query_parser_time_shift():
     assert(q.shifted_columns == [("some_prev2", "some", 2)])
 
 
+def test_query_parser_time_shift_not_applied_to_quoted_strings():
+    q = Query(
+        "count(aggregate | some == 0 and 'some-2' == 1) > 0")
+    assert(q.parsed == "count(aggregate | some == 0 and 'some-2' == 1) > 0")
+    assert(len(q.shifted_columns) == 0)
+
+
 def test_query_parser_time_shift_with_underscore_and_number_in_name():
     q = Query(
         "count(aggregate | some0_test == 0 and some0_test-1 == 1) > 0")
