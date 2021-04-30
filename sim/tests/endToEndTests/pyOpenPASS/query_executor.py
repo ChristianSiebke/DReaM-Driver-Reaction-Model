@@ -120,4 +120,6 @@ def prepare_output(csv_file):
             agent_columns.add(c[0])
 
     # convert to long table, based on the indices (= AgentIds) after the separator
-    return pd.wide_to_long(data, i='Timestep', j='AgentId', stubnames=list(agent_columns), sep=':').reset_index()
+    data = pd.wide_to_long(data, i='Timestep', j='AgentId', stubnames=list(agent_columns), sep=':').reset_index()
+    data.dropna(how='all', subset=agent_columns, inplace=True)
+    return data
