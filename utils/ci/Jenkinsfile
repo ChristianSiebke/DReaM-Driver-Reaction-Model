@@ -128,12 +128,6 @@ spec:
               }
             }
             stage('Windows: Deploy') {
-              when {
-                anyOf {
-                  tag pattern: "openPASS_.*", comparator: "REGEXP"
-                  triggeredBy 'TimerTrigger'
-                }
-              }
               steps {
                 sshagent ( ['projects-storage.eclipse.org-bot-ssh']) {
                   bat '''
