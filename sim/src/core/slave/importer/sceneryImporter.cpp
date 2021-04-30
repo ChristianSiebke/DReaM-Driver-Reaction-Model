@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 * Copyright (c) 2020 HLRS, University of Stuttgart.
 *
@@ -860,12 +860,13 @@ void SceneryImporter::ParseRepeat(QDomElement& repeatElement, RoadObjectSpecific
 void SceneryImporter::ApplyRepeat(ObjectRepeat repeat, RoadObjectSpecification object,
                                   std::list<RoadObjectSpecification>& objectRepitions)
 {
-    if (repeat.distance == 0)
-    {
-        repeat.distance = object.length;
-    }
+    const auto isRepeating = (repeat.distance == 0);
 
-    int objectCount = int(repeat.length / repeat.distance);
+    if (isRepeating)
+    {
+        object.length = repeat.length;
+    }
+    size_t objectCount = isRepeating ? 1 : size_t(repeat.length / repeat.distance);
 
     std::vector<double> interpolatedT, interpolatedHeight, interpolatedWidth, interpolatedZOffset;
 
@@ -874,7 +875,7 @@ void SceneryImporter::ApplyRepeat(ObjectRepeat repeat, RoadObjectSpecification o
     if (repeat.width.isSet) { interpolatedWidth = CommonHelper::InterpolateLinear(repeat.width.start, repeat.width.end, objectCount); }
     if (repeat.zOffset.isSet) { interpolatedZOffset = CommonHelper::InterpolateLinear(repeat.zOffset.start, repeat.zOffset.end, objectCount); }
 
-    for (int i = 0; i < objectCount; i++)
+    for (size_t i = 0; i < objectCount; i++)
     {
         RoadObjectSpecification repeatingObject = object;
         repeatingObject.s = repeat.s + (i * repeat.distance);
@@ -883,6 +884,7 @@ void SceneryImporter::ApplyRepeat(ObjectRepeat repeat, RoadObjectSpecification o
         if (repeat.height.isSet) { repeatingObject.height = interpolatedHeight.at(i); }
         if (repeat.width.isSet) { repeatingObject.width = interpolatedWidth.at(i); }
         if (repeat.zOffset.isSet) { repeatingObject.zOffset = interpolatedZOffset.at(i); }
+        repeatingObject.continuous = (repeat.distance == 0);
 
         ThrowIfFalse(repeatingObject.checkStandardCompliance(), "Standard compliance invalid.");
 

@@ -99,6 +99,20 @@ ConversionStatus ConnectJunction(const SceneryInterface *scenery, const Junction
 }
 } // namespace Internal
 
+Position SceneryConverter::RoadCoord2WorldCoord(const RoadInterface *road, double s, double t, double yaw)
+{
+    auto &geometries = road->GetGeometries();
+    auto geometry = std::find_if(geometries.cbegin(), geometries.cend(),
+                                 [&](const RoadGeometryInterface *geometry) { return (geometry->GetS() <= s) && (geometry->GetS() + geometry->GetLength() >= s); });
+    if (geometry == geometries.end())
+    {
+        throw std::runtime_error("GetPositionForRoadCoordinates: No matching geometry within given s-coordinate");
+    }
+    auto coordinates = (*geometry)->GetCoord(s - (*geometry)->GetS(), t);
+    auto absoluteYaw = CommonHelper::SetAngleToValidRange((*geometry)->GetDir(s - (*geometry)->GetS()) + yaw);
+    return {coordinates.x, coordinates.y, absoluteYaw, 0};
+}
+
 SceneryConverter::SceneryConverter(SceneryInterface *scenery,
                                    openpass::entity::RepositoryInterface &repository,
                                    OWL::Interfaces::WorldData &worldData,
@@ -734,33 +748,75 @@ void SceneryConverter::CreateObjects()
                 continue;
             }
 
-            bool isOnRoad;
-            double x, y, yaw;
-            std::tie(isOnRoad, x, y, yaw) = CalculateAbsoluteCoordinates(road, section, object);
+            const auto position = RoadCoord2WorldCoord(road, object->GetS(), object->GetT(), object->GetHdg());
 
-            if (isOnRoad)
+            if (object->GetType() == RoadObjectType::crosswalk)
             {
-                if (object->GetType() == RoadObjectType::crosswalk)
-                {
-                    CreateRoadMarking(object ,Position{x,y,yaw,0}, section->GetLanes());
-                }
-                else
-                {
-                    OWL::Primitive::AbsPosition pos{x, y, 0};
-                    OWL::Primitive::Dimension dim{object->GetLength(), object->GetWidth(), object->GetHeight()};
-                    OWL::Primitive::AbsOrientation orientation{object->GetHdg(), object->GetPitch(), object->GetRoll()};
-                const auto id = repository.Register(openpass::entity::EntityType::StationaryObject, openpass::utils::GetEntityInfo(*object));
-
-                trafficObjects.emplace_back(std::make_unique<TrafficObjectAdapter>(
-                    id,
-                    worldData,
-                    localizer,
-                    pos,
-                    dim,
-                    orientation,
-                    object->GetId()));
-                }
+                CreateRoadMarking(object, position, section->GetLanes());
             }
+            else if(object->IsContinuous())
+            {
+                CreateContinuousObject(object, road);
+            }
+            else
+            {
+                CreateObject(object, position);
+            }
+        }
+    }
+}
+
+void SceneryConverter::CreateObject(const RoadObjectInterface *object, const Position& position)
+{
+    OWL::Primitive::AbsPosition absPos{position.xPos, position.yPos, 0};
+    OWL::Primitive::Dimension dim{object->GetLength(), object->GetWidth(), object->GetHeight()};
+    OWL::Primitive::AbsOrientation orientation{position.yawAngle, object->GetPitch(), object->GetRoll()};
+    const auto id = repository.Register(openpass::entity::EntityType::StationaryObject, openpass::utils::GetEntityInfo(*object));
+
+    trafficObjects.emplace_back(std::make_unique<TrafficObjectAdapter>(
+                                    id,
+                                    worldData,
+                                    localizer,
+                                    absPos,
+                                    dim,
+                                    orientation,
+                                    object->GetId()));
+}
+
+void SceneryConverter::CreateContinuousObject(const RoadObjectInterface *object, const RoadInterface *road)
+{
+    auto section = worldDataQuery.GetSectionByDistance(road->GetId(), object->GetS());
+    const double sStart = object->GetS();
+    const double sEnd = sStart + object->GetLength();
+    const auto laneElements = section->GetLanes().front()->GetLaneGeometryElements();
+    for (const auto& laneElement : laneElements)
+    {
+        const double elementStart = laneElement->joints.current.sOffset;
+        const double elementEnd = laneElement->joints.next.sOffset;
+        const double objectStart = std::max(sStart, elementStart);
+        const double objectEnd = std::min(sEnd, elementEnd);
+        if (objectStart < objectEnd)
+        {
+            const auto startPosition = RoadCoord2WorldCoord(road, objectStart, object->GetT(), 0);
+            const auto endPosition = RoadCoord2WorldCoord(road, objectEnd, object->GetT(), 0);
+            const double deltaX = endPosition.xPos - startPosition.xPos;
+            const double deltaY = endPosition.yPos - startPosition.yPos;
+            const double length = std::hypot(deltaX, deltaY);
+            double yaw = std::atan2(deltaY, deltaX);
+
+            OWL::Primitive::AbsPosition pos{(startPosition.xPos + endPosition.xPos) / 2.0, (startPosition.yPos + endPosition.yPos) / 2.0, 0};
+            OWL::Primitive::Dimension dim{length, object->GetWidth(), object->GetHeight()};
+            OWL::Primitive::AbsOrientation orientation{yaw, object->GetPitch(), object->GetRoll()};
+            const auto id = repository.Register(openpass::entity::EntityType::StationaryObject, openpass::utils::GetEntityInfo(*object));
+
+            trafficObjects.emplace_back(std::make_unique<TrafficObjectAdapter>(
+                                            id,
+                                            worldData,
+                                            localizer,
+                                            pos,
+                                            dim,
+                                            orientation,
+                                            object->GetId()));
         }
     }
 }
@@ -811,20 +867,6 @@ std::vector<OWL::Id> SceneryConverter::CreateLaneBoundaries(RoadLaneInterface &o
     return laneBoundaries;
 }
 
-Position GetPositionForRoadCoordinates(RoadInterface *road, double s, double t)
-{
-    auto &geometries = road->GetGeometries();
-    auto geometry = std::find_if(geometries.cbegin(), geometries.cend(),
-                                 [&](const RoadGeometryInterface *geometry) { return (geometry->GetS() <= s) && (geometry->GetS() + geometry->GetLength() >= s); });
-    if (geometry == geometries.end())
-    {
-        throw std::runtime_error("No valid geometry found");
-    }
-    auto coordinates = (*geometry)->GetCoord(s - (*geometry)->GetS(), t);
-    auto yaw = (*geometry)->GetDir(s - (*geometry)->GetS());
-    return {coordinates.x, coordinates.y, yaw, 0};
-}
-
 void SceneryConverter::CreateRoadSignals()
 {
     for (auto &item : scenery->GetRoads())
@@ -856,7 +898,8 @@ void SceneryConverter::CreateRoadSignals()
                 continue;
             }
 
-            auto position = GetPositionForRoadCoordinates(road, signal->GetS(), signal->GetT());
+            double yaw = signal->GetHOffset() + (signal->GetOrientation() ? 0 : M_PI);
+            auto position = RoadCoord2WorldCoord(road, signal->GetS(), signal->GetT(), yaw);
             if (OpenDriveTypeMapper::roadMarkings.find(signal->GetType()) != OpenDriveTypeMapper::roadMarkings.end())
             {
                 CreateRoadMarking(signal, position, section->GetLanes());
@@ -881,7 +924,8 @@ void SceneryConverter::CreateRoadSignals()
                     continue;
                 }
 
-                auto position = GetPositionForRoadCoordinates(road, supplementarySign->GetS(), supplementarySign->GetT());
+                double yaw = supplementarySign->GetHOffset() + (supplementarySign->GetOrientation() ? 0 : M_PI);
+                auto position = RoadCoord2WorldCoord(road, supplementarySign->GetS(), supplementarySign->GetT(), yaw);
                 if(!parentSign->second->AddSupplementarySign(supplementarySign, position))
                 {
                     LOGWARN("Unsupported supplementary sign type " + supplementarySign->GetType() + " (id: " + supplementarySign->GetId() + ")");
@@ -960,46 +1004,6 @@ void SceneryConverter::CreateRoadMarking(RoadObjectInterface* object, Position p
             worldData.AssignRoadMarkingToLane(lane->GetId(), roadMarking);
         }
     }
-}
-
-std::tuple<bool, double, double, double> SceneryConverter::CalculateAbsoluteCoordinates(RoadInterface *road,
-                                                                                        OWL::CSection *section, const RoadObjectInterface *object) const
-{
-    double absolutS = object->GetS();
-    double t = object->GetT();
-    double hdg = object->GetHdg();
-
-    //Note: only negative t supported so far
-    if (t > 0)
-    {
-        return std::make_tuple(false, 0, 0, 0);
-    }
-
-    double absT = -t;
-    double leftBoundary = 0;
-
-    for (int i = -1; i >= -static_cast<int>(section->GetLanes().size()); i--)
-    {
-        OWL::CLane &lane = worldDataQuery.GetLaneByOdId(road->GetId(), i, absolutS);
-        double rightBoundary = leftBoundary + lane.GetWidth(absolutS);
-
-        if (absT >= leftBoundary && absT <= rightBoundary)
-        {
-            auto interpolatedPoint = lane.GetInterpolatedPointsAtDistance(absolutS);
-            double dir = lane.GetDirection(absolutS);
-
-            double x = interpolatedPoint.left.x + (absT - leftBoundary) * sin(dir);
-            double y = interpolatedPoint.left.y + (absT - leftBoundary) * -cos(dir);
-            double yaw = dir + hdg;
-
-            return std::make_tuple(true, x, y, yaw);
-        }
-
-        leftBoundary = rightBoundary;
-    }
-
-    //Note: Only t <= roadWidth supported
-    return std::make_tuple(false, 0, 0, 0);
 }
 
 void SceneryConverter::CreateRoads()

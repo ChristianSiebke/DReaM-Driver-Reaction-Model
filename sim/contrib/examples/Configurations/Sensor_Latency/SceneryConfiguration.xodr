@@ -33,34 +33,24 @@
           </lane>
         </center>
         <right>
-			<lane id="-1" type="driving" level="true">
-				<link>
-					<successor id="-1"/>
-				</link>
-				<width sOffset="0" a="3.75" b="0" c="0" d="0"/>
-				<roadMark weight="standard" sOffset="0" type="broken" color="standard" width="0.12" laneChange="both"/>
-			</lane>
-			<lane id="-2" type="driving" level="true">
-				<link>
-					<successor id="-2"/>
-				</link>
-				<width sOffset="0" a="3.75" b="0" c="0" d="0"/>
-				<roadMark weight="standard" sOffset="0" type="broken" color="standard" width="0.12" laneChange="both"/>
-			</lane>
-			<lane id="-3" type="driving" level="true">
-				<link>
-					<successor id="-3"/>
-				</link>
-				<width sOffset="0" a="3.75" b="0" c="0" d="0"/>
-				<roadMark weight="standard" sOffset="0" type="solid" color="standard" width="0.12" laneChange="both"/>
-			</lane>
+          <lane id="-1" type="driving" level="true">
+        <link>
+        <successor id="-1"/>
+        </link>
+        <width sOffset="0" a="3.75" b="0" c="0" d="0"/>
+        <roadMark weight="standard" sOffset="0" type="broken" color="standard" width="0.12" laneChange="both"/>
+        </lane>
+        <lane id="-2" type="driving" level="true">
+        <link>
+        <successor id="-2"/>
+        </link>
+        <width sOffset="0" a="3.75" b="0" c="0" d="0"/>
+        <roadMark weight="standard" sOffset="0" type="solid" color="standard" width="0.12" laneChange="both"/>
+        </lane>
         </right>
       </laneSection>
     </lanes>
     <objects>
-      <object type="obstacle" name="Absperrung" id="" s="600" t="-9.55" zOffset="0" validLength="0" orientation="-" length="0.80" width="3.0" height="1.0" hdg="0" pitch="0" roll="0"/>
-      <object type="obstacle" name="Absperrung" id="" s="600" t="-2.05" zOffset="0" validLength="0" orientation="-" length="0.80" width="3.0" height="1.0" hdg="0" pitch="0" roll="0"/>
-      <object type="obstacle" name="Absperrung" id="" s="4600" t="-5.8" zOffset="0" validLength="0" orientation="-" length="0.80" width="3.0" height="1.0" hdg="0" pitch="0" roll="0"/>
     </objects>
     <signals/>
   </road>

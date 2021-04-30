@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2021 in-tech GmbH
 *               2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -76,6 +76,8 @@ public:
     //! @return                     width [m]
     //-----------------------------------------------------------------------------
     double GetWidth() const;
+
+    bool IsContinuous() const override;
 
     //-----------------------------------------------------------------------------
     //! @brief Returns the name of the road object

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -402,6 +402,7 @@ TEST(SceneryImporter_UnitTests, ParseRepeatWithNoOverridingOfOptionalParameters)
       ASSERT_EQ(object.width, 1.0);
       ASSERT_EQ(object.height, 0);
       ASSERT_EQ(object.zOffset, 0);
+      ASSERT_EQ(object.continuous, false);
     }
 }
 
@@ -467,4 +468,41 @@ TEST(SceneryImporter_UnitTests, ParseRepeatOverridesAllOptionalParameters)
     ASSERT_EQ(firstObject.type, RoadObjectType::obstacle);
     ASSERT_EQ(firstObject.length, 5);
     ASSERT_EQ(firstObject.hdg, 0);
+    ASSERT_EQ(firstObject.continuous, false);
+}
+
+TEST(SceneryImporter_UnitTests, ParseRepeatWithDistanceZero)
+{
+    QDomElement documentRoot = documentRootFromString(
+    "<root>"
+    "  <repeat s=\"100\" length=\"200\" distance=\"0\"/>"
+    "</root>");
+
+    RoadObjectSpecification object;
+    object.type = RoadObjectType::obstacle;
+    object.name = "Leitplanke";
+    object.id = "";
+    object.s = 0;
+    object.t = 1;
+    object.zOffset = 0;
+    object.validLength = 0;
+    object.orientation = RoadElementOrientation::negative;
+    object.length = 2.0;
+    object.width = 1.0;
+    object.height = 0;
+    object.hdg = 0;
+    object.pitch = 0;
+    object.roll = 0;
+    object.radius = 0;
+    std::list<RoadObjectSpecification> objectRepitions;
+
+    objectRepitions = SceneryImporter::ParseObjectRepeat(documentRoot, object);
+
+    ASSERT_THAT(objectRepitions, SizeIs(1));
+
+    RoadObjectSpecification firstObject = objectRepitions.front();
+
+    ASSERT_EQ(firstObject.type, RoadObjectType::obstacle);
+    ASSERT_EQ(firstObject.length, 200);
+    ASSERT_EQ(firstObject.continuous, true);
 }

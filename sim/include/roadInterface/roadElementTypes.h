@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -360,6 +360,7 @@ struct RoadObjectSpecification // http://www.opendrive.org/docs/OpenDRIVEFormatS
     double hdg {0};
     double pitch {0};
     double roll {0};
+    bool continuous {false};
 
     RoadElementValidity validity;
 

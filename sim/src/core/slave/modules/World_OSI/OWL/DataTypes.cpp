@@ -1363,9 +1363,7 @@ bool TrafficSign::SetSpecification(RoadSignalInterface* signal, Position positio
     baseStationary->mutable_position()->set_z(signal->GetZOffset() + 0.5 * signal->GetHeight());
     baseStationary->mutable_dimension()->set_width(signal->GetWidth());
     baseStationary->mutable_dimension()->set_height(signal->GetHeight());
-    double yaw = position.yawAngle + signal->GetHOffset() + (signal->GetOrientation() ? 0 : M_PI);
-    yaw = CommonHelper::SetAngleToValidRange(yaw);
-    baseStationary->mutable_orientation()->set_yaw(yaw);
+    baseStationary->mutable_orientation()->set_yaw(position.yawAngle);
 
     const auto mutableOsiClassification = osiSign->mutable_main_sign()->mutable_classification();
     const std::string odType = signal->GetType();
@@ -1583,9 +1581,7 @@ bool RoadMarking::SetSpecification(RoadSignalInterface* signal, Position positio
     baseStationary->mutable_position()->set_z(0.0);
     baseStationary->mutable_dimension()->set_width(signal->GetWidth());
     baseStationary->mutable_dimension()->set_length(0.5);
-    double yaw = position.yawAngle + signal->GetHOffset() + (signal->GetOrientation() ? 0 : M_PI);
-    yaw = CommonHelper::SetAngleToValidRange(yaw);
-    baseStationary->mutable_orientation()->set_yaw(yaw);
+    baseStationary->mutable_orientation()->set_yaw(position.yawAngle);
 
     const auto mutableOsiClassification = osiSign->mutable_classification();
     const std::string odType = signal->GetType();
