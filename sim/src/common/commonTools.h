@@ -202,24 +202,30 @@ public:
     //! \brief Calculates the intersection polygon of two quadrangles.
     //!
     //! This method calculates all points of the intersection polygon of two quadrangles.
-    //! It is assumed, that the first quadrangle is rectangular, the second quadrangle is convex and that the points are given in clockwise order.
+    //! It is assumed, that both quadrangles are convex and that the points are given in clockwise order.
+    //! If one or both are rectangles then a faster calculation is used
     //! Solve the linear equation "first point + lambda * first edge = second point + kappa * second edge" for each pair of edges to get the intersection of the edges.
     //! If both lamda and kappa are between 0 and 1, then the intersection lies on both edges. If the determinat is 0, then the two egdes are parallel.
     //!
-    //! \param firstPoints    corner points of the first quadrangle in clockwise order
-    //! \param secondPoints   corner points of the second quadrangle in clockwise order
+    //! \param firstPoints          corner points of the first quadrangle in clockwise order
+    //! \param secondPoints         corner points of the second quadrangle in clockwise order
+    //! \param firstIsRectangular   specify that first quadrangele is rectangular
+    //! \param secondIsRectangular  specify that second quadrangele is rectangular
     //! \return points of the intersection polygon
-    static OPENPASSCOMMONEXPORT std::vector<Common::Vector2d> GetIntersectionPoints(const std::vector<Common::Vector2d>& firstPoints, const std::vector<Common::Vector2d>& secondPoints);
+    static OPENPASSCOMMONEXPORT std::vector<Common::Vector2d> GetIntersectionPoints(const std::vector<Common::Vector2d>& firstPoints, const std::vector<Common::Vector2d>& secondPoints, bool firstIsRectangular = true, bool secondIsRectangular = true);
 
     //! \brief Calculates the intersection polygon of two quadrangles.
     //!
     //! This method calculates all points of the intersection polygon of two quadrangles.
-    //! It is assumed, that the first quadrangle is rectangular, the second quadrangle is convex and that the points are given in clockwise order.
+    //! It is assumed, that both quadrangles are convex and that the points are given in clockwise order.
+    //! If one or both are rectangles then a faster calculation is used
     //!
-    //! \param firstPolygon    first quadrangle
-    //! \param secondPolygon   second quadrangle
+    //! \param firstPolygon         first quadrangle
+    //! \param secondPolygon        second quadrangle
+    //! \param firstIsRectangular   specify that first quadrangele is rectangular
+    //! \param secondIsRectangular  specify that second quadrangele is rectangular
     //! \return points of the intersection polygon
-    static OPENPASSCOMMONEXPORT std::vector<Common::Vector2d> GetIntersectionPoints(const polygon_t& firstPolygon, const polygon_t& secondPolygon);
+    static OPENPASSCOMMONEXPORT std::vector<Common::Vector2d> GetIntersectionPoints(const polygon_t& firstPolygon, const polygon_t& secondPolygon, bool firstIsRectangular = true, bool secondIsRectangular = true);
 
 private:
     static bool OnEdge(const Common::Vector2d& A,

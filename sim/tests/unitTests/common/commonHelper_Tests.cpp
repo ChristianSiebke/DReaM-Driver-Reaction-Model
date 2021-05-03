@@ -131,6 +131,7 @@ struct GetIntersectionPoints_Data
 {
     std::vector<Common::Vector2d> firstQuadrangle;
     std::vector<Common::Vector2d> secondQuadrangle;
+    bool firstIsRectangular;
     std::vector<Common::Vector2d> expectedIntersection;
 };
 
@@ -142,28 +143,28 @@ class GetIntersectionPoints_Test : public testing::Test,
 TEST_P(GetIntersectionPoints_Test, CorrectIntersectionPoints)
 {
     auto data = GetParam();
-    const auto result = CommonHelper::IntersectionCalculation::GetIntersectionPoints(data.firstQuadrangle, data.secondQuadrangle);
+    const auto result = CommonHelper::IntersectionCalculation::GetIntersectionPoints(data.firstQuadrangle, data.secondQuadrangle, data.firstIsRectangular);
     EXPECT_THAT(result, UnorderedElementsAreArray(data.expectedIntersection));
 }
 
 INSTANTIATE_TEST_CASE_P(BothRectangular, GetIntersectionPoints_Test,
                         testing::Values(
-                         //Element corners                  Object corners                       Intersection points
-GetIntersectionPoints_Data{{{1,1},{1,3},{3,3},{3,1}},       {{2,4},{2,6},{4,6},{4,4}},           {}},
-GetIntersectionPoints_Data{{{1,1},{1,3},{3,3},{3,1}},       {{2,2},{2,6},{4,6},{4,2}},           {{2,2},{2,3},{3,2},{3,3}}},
-GetIntersectionPoints_Data{{{1,1},{1,3},{3,3},{3,1}},       {{0,0},{0,4},{4,4},{4,0}},           {{1,1},{1,3},{3,3},{3,1}}},
-GetIntersectionPoints_Data{{{1,1},{1,3},{3,3},{3,1}},       {{2,2},{2,2.5},{2.5,2.5},{2.5,2}},   {{2,2},{2,2.5},{2.5,2.5},{2.5,2}}},
-GetIntersectionPoints_Data{{{1,1},{1,3},{3,3},{3,1}},       {{1,4},{3,6},{6,3},{4,1}},           {{3,2},{2,3},{3,3}}},
-GetIntersectionPoints_Data{{{-1,0},{0,1},{1,0},{0,-1}},     {{0,0},{1,1},{2,0},{1,-1}},          {{0,0},{0.5,0.5},{1,0},{0.5,-0.5}}}));
+                         //Element corners                  Object corners                             Intersection points
+GetIntersectionPoints_Data{{{1,1},{1,3},{3,3},{3,1}},       {{2,4},{2,6},{4,6},{4,4}},           true, {}},
+GetIntersectionPoints_Data{{{1,1},{1,3},{3,3},{3,1}},       {{2,2},{2,6},{4,6},{4,2}},           true, {{2,2},{2,3},{3,2},{3,3}}},
+GetIntersectionPoints_Data{{{1,1},{1,3},{3,3},{3,1}},       {{0,0},{0,4},{4,4},{4,0}},           true, {{1,1},{1,3},{3,3},{3,1}}},
+GetIntersectionPoints_Data{{{1,1},{1,3},{3,3},{3,1}},       {{2,2},{2,2.5},{2.5,2.5},{2.5,2}},   true, {{2,2},{2,2.5},{2.5,2.5},{2.5,2}}},
+GetIntersectionPoints_Data{{{1,1},{1,3},{3,3},{3,1}},       {{1,4},{3,6},{6,3},{4,1}},           true, {{3,2},{2,3},{3,3}}},
+GetIntersectionPoints_Data{{{-1,0},{0,1},{1,0},{0,-1}},     {{0,0},{1,1},{2,0},{1,-1}},          true, {{0,0},{0.5,0.5},{1,0},{0.5,-0.5}}}));
 
 INSTANTIATE_TEST_CASE_P(SecondNotRectangular, GetIntersectionPoints_Test,
                         testing::Values(
-                         //Element corners                  Object corners                       Intersection points
-GetIntersectionPoints_Data{{{1,1},{1,2},{3,4},{3,1}},       {{2,5},{2,6},{4,6},{4,5}},           {}},
-GetIntersectionPoints_Data{{{1,1},{1,2},{3,4},{3,1}},       {{2,2},{2,6},{4,6},{4,2}},           {{2,2},{2,3},{3,2},{3,4}}},
-GetIntersectionPoints_Data{{{1,1},{1,2},{3,4},{3,1}},       {{0,0},{0,5},{4,5},{4,0}},           {{1,1},{1,2},{3,4},{3,1}}},
-GetIntersectionPoints_Data{{{1,1},{1,2},{3,4},{3,1}},       {{2,2},{2,2.5},{2.5,2.5},{2.5,2}},   {{2,2},{2,2.5},{2.5,2.5},{2.5,2}}},
-GetIntersectionPoints_Data{{{1,1},{1,2},{3,4},{3,1}},       {{-2,0},{-2,2},{0,2},{0,0}},         {}}));
+                         //Element corners                  Object corners                              Intersection points
+GetIntersectionPoints_Data{{{1,1},{1,2},{3,4},{3,1}},       {{2,5},{2,6},{4,6},{4,5}},           false, {}},
+GetIntersectionPoints_Data{{{1,1},{1,2},{3,4},{3,1}},       {{2,2},{2,6},{4,6},{4,2}},           false, {{2,2},{2,3},{3,2},{3,4}}},
+GetIntersectionPoints_Data{{{1,1},{1,2},{3,4},{3,1}},       {{0,0},{0,5},{4,5},{4,0}},           false, {{1,1},{1,2},{3,4},{3,1}}},
+GetIntersectionPoints_Data{{{1,1},{1,2},{3,4},{3,1}},       {{2,2},{2,2.5},{2.5,2.5},{2.5,2}},   false, {{2,2},{2,2.5},{2.5,2.5},{2.5,2}}},
+GetIntersectionPoints_Data{{{1,1},{1,2},{3,4},{3,1}},       {{-2,0},{-2,2},{0,2},{0,0}},         false, {}}));
 
 /// Data table with the basic Informations for situations
 /// \see PointQuery

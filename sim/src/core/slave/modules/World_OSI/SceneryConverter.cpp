@@ -873,10 +873,16 @@ void SceneryConverter::CreateRoadSignals()
         {
             for (const auto &parentId : parentIds)
             {
-                auto parentSign = worldData.GetTrafficSigns().at(worldData.GetTrafficSignIdMapping().at(parentId));
+                auto parentSign = worldData.GetTrafficSigns().find(worldData.GetTrafficSignIdMapping().at(parentId));
+
+                if (parentSign == worldData.GetTrafficSigns().cend())
+                {
+                    LOGWARN("Could not add supplementary sign \"" + supplementarySign->GetId() + "\" to sign \"" + parentId + "\"");
+                    continue;
+                }
 
                 auto position = GetPositionForRoadCoordinates(road, supplementarySign->GetS(), supplementarySign->GetT());
-                if(!parentSign->AddSupplementarySign(supplementarySign, position))
+                if(!parentSign->second->AddSupplementarySign(supplementarySign, position))
                 {
                     LOGWARN("Unsupported supplementary sign type " + supplementarySign->GetType() + " (id: " + supplementarySign->GetId() + ")");
                 }

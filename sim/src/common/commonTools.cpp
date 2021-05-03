@@ -84,7 +84,7 @@ bool CommonHelper::IntersectionCalculation::IsWithin(const Common::Vector2d &A, 
             OnEdge(B, C, P);   // along triangular split
 }
 
-std::vector<Common::Vector2d> CommonHelper::IntersectionCalculation::GetIntersectionPoints(const std::vector<Common::Vector2d> &firstPoints, const std::vector<Common::Vector2d> &secondPoints)
+std::vector<Common::Vector2d> CommonHelper::IntersectionCalculation::GetIntersectionPoints(const std::vector<Common::Vector2d> &firstPoints, const std::vector<Common::Vector2d> &secondPoints, bool firstIsRectangular, bool secondIsRectangular)
 {
     std::vector<Common::Vector2d> intersectionPoints{};
     intersectionPoints.reserve(8);
@@ -125,24 +125,53 @@ std::vector<Common::Vector2d> CommonHelper::IntersectionCalculation::GetIntersec
     // For each vertex of the first quadrangle check, if it is inside the second. If true, it is also part of the intersection polygon.
     for (size_t k = 0; k < 4; k++)
     {
-        if ((!parallel[0][k] ? kappa[0][k] * kappa[2][k] < 0 : (1 - kappa[0][(k -1) % 4]) * (1 - kappa[2][(k -1) % 4]) < 0) &&
-                (!parallel[1][k] ? kappa[1][k] * kappa[3][k] < 0 : (1 - kappa[1][(k -1) % 4]) * (1 - kappa[3][(k -1) % 4]) < 0))
+        if (secondIsRectangular)
         {
-            intersectionPoints.emplace_back(firstPoints[k]);
+            // Quicker check for rectangle
+            if ((!parallel[0][k] ? kappa[0][k] * kappa[2][k] < 0 : (1 - kappa[0][(k -1) % 4]) * (1 - kappa[2][(k -1) % 4]) < 0) &&
+                    (!parallel[1][k] ? kappa[1][k] * kappa[3][k] < 0 : (1 - kappa[1][(k -1) % 4]) * (1 - kappa[3][(k -1) % 4]) < 0))
+            {
+                intersectionPoints.emplace_back(firstPoints[k]);
+            }
+        }
+        else
+        {
+            if (IsWithin(secondPoints[1], secondPoints[2], secondPoints[0], secondPoints[3], firstPoints[k]))
+            {
+                intersectionPoints.emplace_back(firstPoints[k]);
+            }
         }
     }
     // For each object vertex of the second quadrangle check, if it is inside the first. If true, it is also part of the intersection polygon.
     for (size_t i = 0; i < 4; i++)
     {
-        if (IsWithin(firstPoints[1], firstPoints[2], firstPoints[0], firstPoints[3], secondPoints[i]))
+        if (firstIsRectangular)
         {
-            intersectionPoints.emplace_back(secondPoints[i]);
+            // Quicker check for rectangle
+            if ((!parallel[i][0] ? lambda[i][0] * lambda[i][2] < 0 : (1 - lambda[(i -1) % 4][0]) * (1 - lambda[(i -1) % 4][2]) < 0) &&
+                    (!parallel[i][1] ? lambda[i][1] * lambda[i][3] < 0 : (1 - lambda[(i -1) % 4][1]) * (1 - lambda[(i -1) % 4][3]) < 0))
+            {
+                if(std::find(intersectionPoints.cbegin(), intersectionPoints.cend(), secondPoints[i]) == intersectionPoints.cend())
+                {
+                    intersectionPoints.emplace_back(secondPoints[i]);
+                }
+            }
+        }
+        else
+        {
+            if (IsWithin(firstPoints[1], firstPoints[2], firstPoints[0], firstPoints[3], secondPoints[i]))
+            {
+                if(std::find(intersectionPoints.cbegin(), intersectionPoints.cend(), secondPoints[i]) == intersectionPoints.cend())
+                {
+                    intersectionPoints.emplace_back(secondPoints[i]);
+                }
+            }
         }
     }
     return intersectionPoints;
 }
 
-std::vector<Common::Vector2d> CommonHelper::IntersectionCalculation::GetIntersectionPoints(const polygon_t &firstPolygon, const polygon_t &secondPolygon)
+std::vector<Common::Vector2d> CommonHelper::IntersectionCalculation::GetIntersectionPoints(const polygon_t &firstPolygon, const polygon_t &secondPolygon, bool firstIsRectangular, bool secondIsRectangular)
 {
     std::vector<Common::Vector2d> firstPoints;
     std::transform(firstPolygon.outer().begin(), firstPolygon.outer().end(), std::back_insert_iterator(firstPoints),
@@ -154,5 +183,5 @@ std::vector<Common::Vector2d> CommonHelper::IntersectionCalculation::GetIntersec
                    [&](const auto& point){return Common::Vector2d{bg::get<0>(point), bg::get<1>(point)};});
     secondPoints.pop_back();
 
-    return GetIntersectionPoints(firstPoints, secondPoints);
+    return GetIntersectionPoints(firstPoints, secondPoints, firstIsRectangular, secondIsRectangular);
 }

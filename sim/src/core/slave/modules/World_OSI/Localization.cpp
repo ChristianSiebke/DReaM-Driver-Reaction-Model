@@ -28,7 +28,7 @@ std::function<void (const RTreeElement&)>  LocateOnGeometryElement(const OWL::In
     {
         const LocalizationElement& localizationElement = *value.second;
 
-        auto intersection = CommonHelper::IntersectionCalculation::GetIntersectionPoints(localizationElement.polygon, objectBoundary);
+        auto intersection = CommonHelper::IntersectionCalculation::GetIntersectionPoints(localizationElement.polygon, objectBoundary, false);
 
         if(intersection.size() < 3)
         {

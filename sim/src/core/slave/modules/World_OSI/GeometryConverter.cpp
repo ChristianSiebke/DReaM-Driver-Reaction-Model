@@ -689,40 +689,40 @@ std::optional<OWL::IntersectionInfo> GeometryConverter::CalculateIntersectionInf
     {
         for (const auto& polygonToCompare : roadPolygonsToCompare.second)
         {
-            std::vector<polygon_t> intersectionPolygons;
-            bg::intersection(laneGeometryPolygon.polygon, polygonToCompare.polygon, intersectionPolygons);
+            const auto intersection = CommonHelper::IntersectionCalculation::GetIntersectionPoints(laneGeometryPolygon.polygon, polygonToCompare.polygon, false, false);
 
-            if (!intersectionPolygons.empty() && !(bg::area(intersectionPolygons.front()) < EPS))
+            if (intersection.size() < 3)
             {
-                World::Localization::LocalizationElement localizationElement{*laneGeometryPolygon.laneGeometryElement};
-                World::Localization::WorldToRoadCoordinateConverter processor{localizationElement};
+                continue;
+            }
 
-                double minS = std::numeric_limits<double>::max();
-                double maxS = 0;
+            World::Localization::LocalizationElement localizationElement{*laneGeometryPolygon.laneGeometryElement};
+            World::Localization::WorldToRoadCoordinateConverter processor{localizationElement};
 
-                for (const auto& point : intersectionPolygons.front().outer())
-                {
-                    double s = processor.GetS(Common::Vector2d(bg::get<0>(point), bg::get<1>(point)));
-                    minS = std::min(minS, s);
-                    maxS = std::max(maxS, s);
-                }
+            double minS = std::numeric_limits<double>::max();
+            double maxS = 0;
 
-                std::pair<OWL::Id, OWL::Id> intersectingLanesPair{laneGeometryPolygon.laneId, polygonToCompare.laneId};
-                const auto intersectingLanesPairIter = info.sOffsets.find(intersectingLanesPair);
+            for (const auto& point : intersection)
+            {
+                double s = processor.GetS(point);
+                minS = std::min(minS, s);
+                maxS = std::max(maxS, s);
+            }
 
-                // if these lane ids are already marked as intersecting, update the startSOffset and endSOffset to reflect new intersection information
-                if (intersectingLanesPairIter != info.sOffsets.end())
-                {
-                    double recordedStartS = (*intersectingLanesPairIter).second.first;
-                    double recordedEndS = (*intersectingLanesPairIter).second.second;
-                    (*intersectingLanesPairIter).second.first = std::min(recordedStartS, minS);
-                    (*intersectingLanesPairIter).second.second = std::max(recordedEndS, maxS);
-                }
-                else
-                {
-                    info.sOffsets.emplace(intersectingLanesPair, std::make_pair(minS, maxS));
-                }
+            std::pair<OWL::Id, OWL::Id> intersectingLanesPair{laneGeometryPolygon.laneId, polygonToCompare.laneId};
+            const auto intersectingLanesPairIter = info.sOffsets.find(intersectingLanesPair);
 
+            // if these lane ids are already marked as intersecting, update the startSOffset and endSOffset to reflect new intersection information
+            if (intersectingLanesPairIter != info.sOffsets.end())
+            {
+                double recordedStartS = (*intersectingLanesPairIter).second.first;
+                double recordedEndS = (*intersectingLanesPairIter).second.second;
+                (*intersectingLanesPairIter).second.first = std::min(recordedStartS, minS);
+                (*intersectingLanesPairIter).second.second = std::max(recordedEndS, maxS);
+            }
+            else
+            {
+                info.sOffsets.emplace(intersectingLanesPair, std::make_pair(minS, maxS));
             }
         }
     }
