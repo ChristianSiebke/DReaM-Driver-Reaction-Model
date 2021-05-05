@@ -132,8 +132,8 @@ spec:
                 sshagent ( ['projects-storage.eclipse.org-bot-ssh']) {
                   bat '''
                     C:\\msys64\\usr\\bin\\bash -lc 'ssh -o BatchMode=yes genie.simopenpass@projects-storage.eclipse.org mkdir -p /home/data/httpd/download.eclipse.org/simopenpass/snapshots'
-                    C:\\msys64\\usr\\bin\\bash -lc '[ -f artifacts/openPASS_SIM.tar.gz ] && scp -o BatchMode=yes artifacts/openPASS_SIM.tar.gz genie.simopenpass@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/simopenpass/snapshots/openPASS_SIM_$(date -u +%Y%m%d_%H%M%S).tar.gz'
-                    C:\\msys64\\usr\\bin\\bash -lc '[ -f artifacts/openPASS_SIM.zip ] && scp -o BatchMode=yes artifacts/openPASS_SIM.zip genie.simopenpass@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/simopenpass/snapshots/openPASS_SIM_$(date -u +%Y%m%d_%H%M%S).zip'
+                    C:\\msys64\\usr\\bin\\bash -lc '[ -f artifacts/openPASS_SIM.tar.gz ] && scp -o BatchMode=yes artifacts/openPASS_SIM.tar.gz genie.simopenpass@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/simopenpass/snapshots/openPASS_SIM_$(date -u +%%Y%m%%d_%%H%%M%%S).tar.gz'
+                    C:\\msys64\\usr\\bin\\bash -lc '[ -f artifacts/openPASS_SIM.zip ] && scp -o BatchMode=yes artifacts/openPASS_SIM.zip genie.simopenpass@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/simopenpass/snapshots/openPASS_SIM_$(date -u +%%Y%%m%%d_%%H%%M%%S).zip'
                     '''
                 }
               }
