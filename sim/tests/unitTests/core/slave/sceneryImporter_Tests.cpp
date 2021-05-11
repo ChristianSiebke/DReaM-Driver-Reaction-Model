@@ -341,31 +341,31 @@ TEST(SceneryImporter_UnitTests, ParseObjectssWithInvalidDimensions_ThrowsExcepti
 TEST(SceneryImporter_UnitTests, ParseObjectsWithZeroLength_IsIgnored)
 {
     QDomElement documentRoot = documentRootFromString(
-    "<root>"
-    "  <objects>"
-    "    <object type=\"barrier\" name=\"obstacle\" id=\"b01\" s=\"100\" t=\"10\" zOffset=\"0\" validLength=\"0\" orientation=\"none\" length=\"0.0\" width=\"2.0\" height=\"2\" hdg=\"0\" pitch=\"0\" roll=\"0\" />"
-    "  </objects>"
-    "</root>");
+            "<root>"
+            "  <objects>"
+            "    <object type=\"barrier\" name=\"obstacle\" id=\"b01\" s=\"100\" t=\"10\" zOffset=\"0\" validLength=\"0\" orientation=\"none\" length=\"0.0\" width=\"2.0\" height=\"2\" hdg=\"0\" pitch=\"0\" roll=\"0\" />"
+            "  </objects>"
+            "</root>");
 
     NiceMock<FakeOdRoad> mockRoad;
 
     EXPECT_CALL(mockRoad, AddRoadObject(_)).Times(0);
-    SceneryImporter::ParseObjects(documentRoot, &mockRoad);
+    ASSERT_NO_THROW(SceneryImporter::ParseObjects(documentRoot, &mockRoad));
 }
 
 TEST(SceneryImporter_UnitTests, ParseObjectsWithZeroWidth_IsIgnored)
 {
     QDomElement documentRoot = documentRootFromString(
-    "<root>"
-    "  <objects>"
-    "    <object type=\"barrier\" name=\"obstacle\" id=\"b01\" s=\"100\" t=\"10\" zOffset=\"0\" validLength=\"0\" orientation=\"none\" length=\"2.0\" width=\"0.0\" height=\"2\" hdg=\"0\" pitch=\"0\" roll=\"0\" />"
-    "  </objects>"
-    "</root>");
+            "<root>"
+            "  <objects>"
+            "    <object type=\"barrier\" name=\"obstacle\" id=\"b01\" s=\"100\" t=\"10\" zOffset=\"0\" validLength=\"0\" orientation=\"none\" length=\"2.0\" width=\"0.0\" height=\"2\" hdg=\"0\" pitch=\"0\" roll=\"0\" />"
+            "  </objects>"
+            "</root>");
 
     NiceMock<FakeOdRoad> mockRoad;
 
     EXPECT_CALL(mockRoad, AddRoadObject(_)).Times(0);
-    SceneryImporter::ParseObjects(documentRoot, &mockRoad);
+    ASSERT_NO_THROW(SceneryImporter::ParseObjects(documentRoot, &mockRoad));
 }
 
 TEST(SceneryImporter_UnitTests, ParseRepeatWithNoOverridingOfOptionalParameters)

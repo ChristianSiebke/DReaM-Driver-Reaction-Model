@@ -773,19 +773,31 @@ void SceneryImporter::ParseObject(QDomElement& objectElement, RoadInterface* roa
     ParseAttributeDouble(objectElement, ATTRIBUTE::roll, object.roll);
     ParseAttributeDouble(objectElement, "radius", object.radius);
 
-    ThrowIfFalse(object.checkStandardCompliance(), objectElement, "limits of object are not valid for openDrive standard");
+    ThrowIfFalse(object.checkStandardCompliance(), objectElement,
+                 "limits of object are not valid for openDrive standard");
 
-    if (object.checkSimulatorCompliance())
+    if (object.radius > 0)
     {
+        ConvertRadius(object);
+    }
+
+    if (object.checkSimulatorCompliance()) {
         ParseElementValidity(objectElement, object.validity);
         auto objects = ParseObjectRepeat(objectElement, object);
         AddParsedObjectsToRoad(objects, road);
     }
     else
     {
-        LOG_INTERN(LogLevel::Warning) << "Object with Id \"" << object.id << "\" ignored (Parameters are not valid for simulation).";
+        LOG_INTERN(LogLevel::Warning) << "Limits of object " << object.name << "with id: " << object.id
+                                      << " are not valid for the simulation. The Object will be ignored.";
     }
+}
 
+void SceneryImporter::ConvertRadius(RoadObjectSpecification& object)
+{
+    object.width = 2.0 * object.radius;
+    object.length = 2.0 * object.radius;
+    object.radius = 0.0;
 }
 
 void SceneryImporter::AddParsedObjectsToRoad(std::list<RoadObjectSpecification> parsedObjects, RoadInterface* road)

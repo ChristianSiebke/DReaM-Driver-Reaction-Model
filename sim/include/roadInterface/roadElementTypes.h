@@ -73,14 +73,17 @@ enum class RoadLaneType // https://releases.asam.net/OpenDRIVE/1.6.0/ASAM_OpenDR
     Entry,
     OnRamp,
     OffRamp,
-    ConnectingRamp
+    ConnectingRamp,
+    Tram,
+    RoadWorks,
+    Bidirectional
 };
 
 namespace openpass::utils {
 
 /// @brief constexpr map for transforming the a corresponding enumeration into
 ///        a string representation: try to_cstr(EnumType) or to_string(EnumType)
-static constexpr std::array<const char *, 17> RoadLaneTypeMapping{
+static constexpr std::array<const char *, 20> RoadLaneTypeMapping{
     "Undefined",
     "Shoulder",
     "Border",
@@ -97,7 +100,10 @@ static constexpr std::array<const char *, 17> RoadLaneTypeMapping{
     "Entry",
     "OnRamp",
     "OffRamp",
-    "ConnectingRamp"};
+    "ConnectingRamp",
+    "Tram",
+    "RoadWorks",
+    "Bidirectional"};
 
 /// @brief Convert RoadLaneType to cstr (constexpr)
 constexpr const char *to_cstr(RoadLaneType roadLaneType)

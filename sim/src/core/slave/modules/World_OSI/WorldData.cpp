@@ -325,6 +325,8 @@ bool LaneTypeIsDriving(const RoadLaneType& laneType)
         case RoadLaneType::OnRamp:
         case RoadLaneType::OffRamp:
         case RoadLaneType::ConnectingRamp:
+        case RoadLaneType::RoadWorks:
+        case RoadLaneType::Bidirectional:
             return true;
         case RoadLaneType::None:
         case RoadLaneType::Shoulder:
@@ -335,6 +337,7 @@ bool LaneTypeIsDriving(const RoadLaneType& laneType)
         case RoadLaneType::Biking:
         case RoadLaneType::Sidewalk:
         case RoadLaneType::Curb:
+        case RoadLaneType::Tram:
             return false;
         default:
             return false;

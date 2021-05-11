@@ -44,7 +44,10 @@ const std::unordered_map<std::string, RoadLaneType> roadLaneTypeConversionMap =
     {"entry", RoadLaneType::Entry},
     {"onRamp", RoadLaneType::OnRamp},
     {"offRamp", RoadLaneType::OffRamp},
-    {"connectingRamp", RoadLaneType::ConnectingRamp}
+    {"connectingRamp", RoadLaneType::ConnectingRamp},
+    {"tram", RoadLaneType::Tram},
+    {"roadWorks", RoadLaneType::RoadWorks},
+    {"bidirectional", RoadLaneType::Bidirectional}
 };
 
 const std::unordered_map<std::string, RoadTypeInformation> roadTypeConversionMap = {
@@ -232,7 +235,7 @@ private:
 
 
     //-----------------------------------------------------------------------------
-
+    static void ConvertRadius(RoadObjectSpecification &object);
 
 
 public:

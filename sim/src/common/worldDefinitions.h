@@ -99,7 +99,10 @@ enum class LaneType
     Entry,
     OnRamp,
     OffRamp,
-    ConnectingRamp
+    ConnectingRamp,
+    Tram,
+    RoadWorks,
+    Bidirectional
 };
 
 //! interval on a road over multiple lanes
