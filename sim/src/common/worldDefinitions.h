@@ -395,20 +395,27 @@ namespace CommonTrafficLight
 {
 enum class Type
 {
-    ThreeLights,             //! Standard red, yellow, green without arrows
-    ThreeLightsLeft,         //! red, yellow, green with arrows pointing left
-    ThreeLightsRight,        //! red, yellow, green with arrows pointing right
-    ThreeLightsStraight,     //! red, yellow, green with arrows pointing upwards
-    ThreeLightsLeftStraight, //! red, yellow, green with arrows pointing left and upwards
-    ThreeLightsRightStraight //! red, yellow, green with arrows pointing right and upwards
+    Undefined,
+    ThreeLights,                //! Standard red, yellow, green without arrows or symbols
+    ThreeLightsLeft,            //! red, yellow, green with arrows pointing left
+    ThreeLightsRight,           //! red, yellow, green with arrows pointing right
+    ThreeLightsStraight,        //! red, yellow, green with arrows pointing upwards
+    ThreeLightsLeftStraight,    //! red, yellow, green with arrows pointing left and upwards
+    ThreeLightsRightStraight,   //! red, yellow, green with arrows pointing right and upwards
+    TwoLights,                  //! red, green without arrows or symbols
+    TwoLightsPedestrian,        //! red, green with pedestrian symbol
+    TwoLightsBicycle,           //! red, green with bicycle symbol
+    TwoLightsPedestrianBicycle  //! red, green with pedestrian and bicycle symbol
 };
 
 enum class State
 {
+    Off,
     Green,
     Yellow,
     Red,
-    RedYellow
+    RedYellow,
+    YellowFlashing
 };
 
 struct Entity

@@ -118,7 +118,7 @@ public:
     virtual Interfaces::TrafficSign& AddTrafficSign(const std::string odId) = 0;
 
     //!Creates a new TrafficTraffic and returns it
-    virtual Interfaces::TrafficLight& AddTrafficLight(const std::string odId) = 0;
+    virtual Interfaces::TrafficLight& AddTrafficLight(const std::string odId, bool withYellow) = 0;
 
     //!Creates a new RoadMarking and returns it
     virtual Interfaces::RoadMarking& AddRoadMarking() = 0;
@@ -434,7 +434,7 @@ public:
     Interfaces::MovingObject& AddMovingObject(void* linkedObject) override;
     Interfaces::StationaryObject& AddStationaryObject(void* linkedObject) override;
     Interfaces::TrafficSign& AddTrafficSign(const std::string odId) override;
-    Interfaces::TrafficLight& AddTrafficLight(const std::string odId) override;
+    Interfaces::TrafficLight& AddTrafficLight(const std::string odId, bool withYellow) override;
     Interfaces::RoadMarking& AddRoadMarking() override;
 
     void AssignTrafficSignToLane(OWL::Id laneId, Interfaces::TrafficSign &trafficSign) override;

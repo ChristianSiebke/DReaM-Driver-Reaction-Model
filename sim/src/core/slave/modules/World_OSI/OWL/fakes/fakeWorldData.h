@@ -80,7 +80,7 @@ public:
 
     MOCK_METHOD1(AddTrafficSign, OWL::Interfaces::TrafficSign&(const std::string odId));
 
-    MOCK_METHOD1(AddTrafficLight, OWL::Interfaces::TrafficLight&(const std::string odId));
+    MOCK_METHOD2(AddTrafficLight, OWL::Interfaces::TrafficLight&(const std::string odId, bool withYellow));
 
     MOCK_CONST_METHOD0(GetTrafficSigns, const std::unordered_map<OWL::Id, OWL::Interfaces::TrafficSign*>& ());
 

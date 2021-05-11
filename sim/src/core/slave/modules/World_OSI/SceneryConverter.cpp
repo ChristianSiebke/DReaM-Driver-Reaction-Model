@@ -814,9 +814,13 @@ void SceneryConverter::CreateRoadSignals()
             {
                 CreateRoadMarking(signal, position, section->GetLanes());
             }
-            else if (OpenDriveTypeMapper::trafficLights.find(signal->GetType()) != OpenDriveTypeMapper::trafficLights.end())
+            else if (OpenDriveTypeMapper::trafficLightsThreeLights.find(signal->GetType()) != OpenDriveTypeMapper::trafficLightsThreeLights.end())
             {
-                CreateTrafficLight(signal, position, section->GetLanes());
+                CreateTrafficLight(signal, position, section->GetLanes(), true);
+            }
+            else if (OpenDriveTypeMapper::trafficLightsTwoLights.find(signal->GetType()) != OpenDriveTypeMapper::trafficLightsTwoLights.end())
+            {
+                CreateTrafficLight(signal, position, section->GetLanes(), false);
             }
             else
             {
@@ -884,9 +888,9 @@ void SceneryConverter::CreateRoadMarking(RoadSignalInterface* signal, Position p
     }
 }
 
-void SceneryConverter::CreateTrafficLight(RoadSignalInterface* signal, Position position, const OWL::Interfaces::Lanes& lanes)
+void SceneryConverter::CreateTrafficLight(RoadSignalInterface* signal, Position position, const OWL::Interfaces::Lanes& lanes, bool withYellow)
 {
-    OWL::Interfaces::TrafficLight& trafficLight = worldData.AddTrafficLight(signal->GetId());
+    OWL::Interfaces::TrafficLight& trafficLight = worldData.AddTrafficLight(signal->GetId(), withYellow);
 
     trafficLight.SetS(signal->GetS());
 
@@ -1078,10 +1082,12 @@ std::pair<RoadGraph, RoadGraphVertexMapping> RoadNetworkBuilder::Build()
 
 const std::map<std::string, CommonTrafficLight::State> stateConversionMap
 {
+    {"off", CommonTrafficLight::State::Off},
     {"red", CommonTrafficLight::State::Red},
     {"yellow", CommonTrafficLight::State::Yellow},
     {"green", CommonTrafficLight::State::Green},
-    {"red yellow", CommonTrafficLight::State::RedYellow}
+    {"red yellow", CommonTrafficLight::State::RedYellow},
+    {"yellow flashing", CommonTrafficLight::State::YellowFlashing}
 };
 
 TrafficLightNetwork TrafficLightNetworkBuilder::Build()

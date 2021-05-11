@@ -541,14 +541,18 @@ Interfaces::TrafficSign& WorldData::AddTrafficSign(const std::string odId)
     return *trafficSignal;
 }
 
-Interfaces::TrafficLight &WorldData::AddTrafficLight(const std::string odId)
+Interfaces::TrafficLight &WorldData::AddTrafficLight(const std::string odId, bool withYellow)
 {
     osi3::TrafficLight* osiLightRed = osiGroundTruth->add_traffic_light();
     osiLightRed->mutable_classification()->set_color(osi3::TrafficLight_Classification_Color_COLOR_RED);
-    osi3::TrafficLight* osiLightYellow = osiGroundTruth->add_traffic_light();
-    osiLightYellow->mutable_classification()->set_color(osi3::TrafficLight_Classification_Color_COLOR_YELLOW);
     osi3::TrafficLight* osiLightGreen = osiGroundTruth->add_traffic_light();
     osiLightGreen->mutable_classification()->set_color(osi3::TrafficLight_Classification_Color_COLOR_GREEN);
+    osi3::TrafficLight* osiLightYellow = nullptr;
+    if (withYellow)
+    {
+    osiLightYellow = osiGroundTruth->add_traffic_light();
+    osiLightYellow->mutable_classification()->set_color(osi3::TrafficLight_Classification_Color_COLOR_YELLOW);
+    }
     auto trafficLight = new TrafficLight(osiLightRed, osiLightYellow, osiLightGreen);
     Id id = CreateUid();
 

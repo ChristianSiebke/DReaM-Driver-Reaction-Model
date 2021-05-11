@@ -297,7 +297,13 @@ private:
     //! \param lanes        lanes for which this road marking is valid
     void CreateRoadMarking(RoadSignalInterface* signal, Position position, const OWL::Interfaces::Lanes& lanes);
 
-    void CreateTrafficLight(RoadSignalInterface* signal, Position position, const OWL::Interfaces::Lanes& lanes);
+    //! Creates a traffic light in OWL from an OpenDrive RoadSignal
+    //!
+    //! \param signal       OpenDrive specification of the traffic light
+    //! \param position     position of the traffic light in the world
+    //! \param lanes        lanes for which this traffic light is valid
+    //! \param withYellow   wether this traffic light has a yellow bulb
+    void CreateTrafficLight(RoadSignalInterface* signal, Position position, const OWL::Interfaces::Lanes& lanes, bool withYellow);
 
     std::list<RoadLaneInterface*> GetRoadLanesAtDistance(RoadInterface *road, double s);
 

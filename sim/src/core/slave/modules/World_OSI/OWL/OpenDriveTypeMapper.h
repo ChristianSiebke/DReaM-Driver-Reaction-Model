@@ -179,7 +179,7 @@ namespace OpenDriveTypeMapper
         {"294", osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_STOP},
     };
 
-    const std::map<std::string, std::map<std::string, osi3::TrafficLight_Classification_Icon>> trafficLights =
+    const std::map<std::string, std::map<std::string, osi3::TrafficLight_Classification_Icon>> trafficLightsThreeLights =
     {
         {"1.000.001",
          {
@@ -193,6 +193,25 @@ namespace OpenDriveTypeMapper
              {"30", osi3::TrafficLight_Classification_Icon::TrafficLight_Classification_Icon_ICON_ARROW_STRAIGHT_AHEAD},
              {"40", osi3::TrafficLight_Classification_Icon::TrafficLight_Classification_Icon_ICON_ARROW_STRAIGHT_AHEAD_LEFT},
              {"50", osi3::TrafficLight_Classification_Icon::TrafficLight_Classification_Icon_ICON_ARROW_STRAIGHT_AHEAD_RIGHT}
+         }
+        },
+    };
+
+    const std::map<std::string, std::map<std::string, osi3::TrafficLight_Classification_Icon>> trafficLightsTwoLights =
+    {
+        {"1.000.002",
+         {
+             {"", osi3::TrafficLight_Classification_Icon::TrafficLight_Classification_Icon_ICON_PEDESTRIAN}
+         }
+        },
+        {"1.000.007",
+         {
+             {"", osi3::TrafficLight_Classification_Icon::TrafficLight_Classification_Icon_ICON_PEDESTRIAN_AND_BICYCLE}
+         }
+        },
+        {"1.000.013",
+         {
+             {"", osi3::TrafficLight_Classification_Icon::TrafficLight_Classification_Icon_ICON_BICYCLE}
          }
         },
     };
@@ -249,7 +268,7 @@ namespace OpenDriveTypeMapper
     };
 
     //! Conversion map from OSI traffic sign type to enum defined in globalDefinitions
-    const std::map<osi3::TrafficLight_Classification_Icon, CommonTrafficLight::Type> trafficLightTypeConversionMap =
+    const std::map<osi3::TrafficLight_Classification_Icon, CommonTrafficLight::Type> trafficLightTypeThreeLightsConversionMap =
     {
         {osi3::TrafficLight_Classification_Icon_ICON_NONE, CommonTrafficLight::Type::ThreeLights},
         {osi3::TrafficLight_Classification_Icon_ICON_ARROW_LEFT, CommonTrafficLight::Type::ThreeLightsLeft},
@@ -257,5 +276,14 @@ namespace OpenDriveTypeMapper
         {osi3::TrafficLight_Classification_Icon_ICON_ARROW_STRAIGHT_AHEAD, CommonTrafficLight::Type::ThreeLightsStraight},
         {osi3::TrafficLight_Classification_Icon_ICON_ARROW_STRAIGHT_AHEAD_LEFT, CommonTrafficLight::Type::ThreeLightsLeftStraight},
         {osi3::TrafficLight_Classification_Icon_ICON_ARROW_STRAIGHT_AHEAD_RIGHT, CommonTrafficLight::Type::ThreeLightsRightStraight}
+    };
+
+    //! Conversion map from OSI traffic sign type to enum defined in globalDefinitions
+    const std::map<osi3::TrafficLight_Classification_Icon, CommonTrafficLight::Type> trafficLightTypeTwoLightsConversionMap =
+    {
+        {osi3::TrafficLight_Classification_Icon_ICON_NONE, CommonTrafficLight::Type::TwoLights},
+        {osi3::TrafficLight_Classification_Icon_ICON_PEDESTRIAN, CommonTrafficLight::Type::TwoLightsPedestrian},
+        {osi3::TrafficLight_Classification_Icon_ICON_BICYCLE, CommonTrafficLight::Type::TwoLightsBicycle},
+        {osi3::TrafficLight_Classification_Icon_ICON_PEDESTRIAN_AND_BICYCLE, CommonTrafficLight::Type::TwoLightsPedestrianBicycle}
     };
 };
