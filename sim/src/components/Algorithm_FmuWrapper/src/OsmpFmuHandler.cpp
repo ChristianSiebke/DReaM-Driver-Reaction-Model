@@ -332,18 +332,22 @@ void OsmpFmuHandler::UpdateInput(int localLinkId, const std::shared_ptr<const Si
 
     trafficCommand = *trafficCommands[time];
 
-    SetSensorViewConfigRequest();
-    if (sensorViewConfigRequestVariable.has_value() && previousSerializedSensorViewConfigRequest != serializedSensorViewConfigRequest)
+    if (sensorViewConfigRequestVariable.has_value())
     {
-        SetSensorViewConfig();
+        SetSensorViewConfigRequest();
 
-        if (writeSensorViewConfig)
+        if (previousSerializedSensorViewConfigRequest != serializedSensorViewConfigRequest)
         {
-            WriteJson(sensorViewConfig, "SensorViewConfig-" + QString::number(time) + ".json");
-        }
-        if (writeSensorViewConfigRequest)
-        {
-            WriteJson(sensorViewConfigRequest, "SensorViewConfigRequest-" + QString::number(time) + ".json");
+            SetSensorViewConfig();
+
+            if (writeSensorViewConfig)
+            {
+                WriteJson(sensorViewConfig, "SensorViewConfig-" + QString::number(time) + ".json");
+            }
+            if (writeSensorViewConfigRequest)
+            {
+                WriteJson(sensorViewConfigRequest, "SensorViewConfigRequest-" + QString::number(time) + ".json");
+            }
         }
     }
 #endif
