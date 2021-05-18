@@ -72,7 +72,7 @@ struct ActorInformation
     std::optional<std::vector<std::string>> actors{};
 };
 
-// OSCOrientation
+//! OSC Orientation
 enum class OrientationType
 {
     Undefined = 0,
@@ -80,7 +80,7 @@ enum class OrientationType
     Absolute
 };
 
-// OSCOrientation
+//! OSC Orientation
 struct Orientation
 {
     std::optional<OrientationType> type{};
@@ -89,7 +89,7 @@ struct Orientation
     std::optional<double> r{};
 };
 
-// OSCPosition
+//! OSC Position
 struct LanePosition
 {
     std::optional<Orientation> orientation{};
@@ -102,6 +102,7 @@ struct LanePosition
     std::optional<StochasticAttribute> stochasticS;
 };
 
+//! OSC RelativeLanePosition
 struct RelativeLanePosition
 {
     std::string entityRef{};
@@ -111,6 +112,7 @@ struct RelativeLanePosition
     std::optional<Orientation> orientation{};
 };
 
+//! OSC RoadPosition
 struct RoadPosition
 {
     std::optional<Orientation> orientation{};
@@ -119,6 +121,7 @@ struct RoadPosition
     double t{};
 };
 
+//! OSC WorldPosition
 struct WorldPosition
 {
     double x{};
@@ -129,6 +132,7 @@ struct WorldPosition
     std::optional<double> r;
 };
 
+//! OSC RelativeObjectPosition
 struct RelativeObjectPosition {
     std::optional<Orientation> orientation{};
     std::string entityRef{};
@@ -137,6 +141,7 @@ struct RelativeObjectPosition {
     std::optional<double> dz{};
 };
 
+//! OSC RelativeWorldPosition
 struct RelativeWorldPosition {
     std::optional<Orientation> orientation{};
     std::string entityRef{};
@@ -145,6 +150,7 @@ struct RelativeWorldPosition {
     std::optional<double> dz{};
 };
 
+//! One of different variants of Position in OpenSCENARIO
 using Position = std::variant<LanePosition,
                               RelativeLanePosition,
                               RoadPosition,
@@ -195,6 +201,7 @@ struct TrajectoryPoint
     }
 };
 
+//! OSC TimeReference (for FollowTrajectoryAction)
 struct TrajectoryTimeReference
 {
     std::string domainAbsoluteRelative;
@@ -202,6 +209,7 @@ struct TrajectoryTimeReference
     double offset;
 };
 
+//! OSC Trajectory
 struct Trajectory
 {
     std::vector<TrajectoryPoint> points;
@@ -220,18 +228,22 @@ struct Trajectory
     }
 };
 
+//! OSC AssignRouteAction
 using AssignRouteAction = std::vector<RoadPosition>;
 
+//! OSC FollowTrajectoryAction
 struct FollowTrajectoryAction
 {
     Trajectory trajectory{};
 };
 
+//! OSC AcquirePositionAction
 struct AcquirePositionAction
 {
     Position position{};
 };
 
+//! Some variant of a RoutingAction in OpenSCENARIO
 using RoutingAction = std::variant<AssignRouteAction, FollowTrajectoryAction, AcquirePositionAction>;
 
 struct VisibilityAction

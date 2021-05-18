@@ -30,6 +30,7 @@ using SPosition = double;
 using Range = std::pair<SPosition, SPosition>;
 using VehicleRearAndFrontCoordinates = std::pair<SPosition, SPosition>;
 
+//! Defines a interval on a lane for spawning
 struct LaneSpawningRange
 {
     LaneSpawningRange (const LaneId laneId, const SPosition startOfRange, const SPosition endOfRange):
@@ -49,6 +50,7 @@ struct LaneSpawningRange
 
 using LaneSpawningRanges = std::vector<LaneSpawningRange>;
 
+//! Defines a AgentProfile for spawning and its associated spawn parameters
 struct SpawningAgentProfile
 {
     const std::string name;
@@ -67,6 +69,7 @@ struct SpawningAgentProfile
 
 using AgentProfiles = std::vector<std::pair<SpawningAgentProfile, double>>;
 
+//! Defines possible AgentProfiles for a SpawnPoint
 struct AgentProfileLaneMaps
 {
     AgentProfiles leftLanes;
@@ -75,6 +78,11 @@ struct AgentProfileLaneMaps
 
 #define SPAWNER_THROWIFFALSE(success,message) if (!(success)) { callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, message); throw std::runtime_error(message); }
 
+//! Reads the possible AgentProfiles and their spawn parameters from the Spawner profile
+//!
+//! \param parameter    Spawner profile
+//! \param callbacks    CallbackInterface for logging
+//! \return AgentProfile
 static AgentProfileLaneMaps ExtractAgentProfileLaneMaps(const ParameterInterface &parameter, const CallbackInterface* callbacks)
 {
     using namespace helper;
