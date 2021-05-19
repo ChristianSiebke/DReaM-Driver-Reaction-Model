@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019, 2020 in-tech GmbH
+* Copyright (c) 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -16,7 +16,6 @@
 namespace
 {
     static constexpr double EPSILON = 0.001;
-    static constexpr double MINIMUM_SEPARATION_BUFFER = 5.0;
     static constexpr double TTC_THRESHHOLD = 2.0;
     static constexpr double TTC_ENDOFLANE = 4.0;
     static constexpr double ASSUMED_TTB = 1.0;
@@ -26,9 +25,10 @@ namespace
 
     static inline double GetSeparation(const double gapInSeconds,
                                        const double velocity,
-                                       const double consideredCarLengths)
+                                       const double consideredCarLengths,
+                                       const double minimumSeparationBuffer)
     {
-        const auto minimumBuffer = MINIMUM_SEPARATION_BUFFER + consideredCarLengths;
+        const auto minimumBuffer = minimumSeparationBuffer + consideredCarLengths;
 
         return std::max((gapInSeconds * velocity) + consideredCarLengths, minimumBuffer);
     }
@@ -158,6 +158,7 @@ std::optional<double> WorldAnalyzer::GetNextSpawnPosition(const RoadId& roadId,
                                                           const double agentRearLength,
                                                           const double intendedVelocity,
                                                           const double gapInSeconds,
+                                                          const double minimumSeparationBuffer,
                                                           const Route &route,
                                                           const LaneTypes& supportedLaneTypes) const
 {
@@ -203,7 +204,8 @@ std::optional<double> WorldAnalyzer::GetNextSpawnPosition(const RoadId& roadId,
                                       - firstDownstreamObject->GetDistanceReferencePointToLeadingEdge();
         const auto separation = GetSeparation(gapInSeconds,
                                               intendedVelocity,
-                                              frontCarRearLength + agentFrontLength);
+                                              frontCarRearLength + agentFrontLength,
+                                              minimumSeparationBuffer);
 
         const auto frontCarPositionOnRoad = firstDownstreamObject->GetDistanceToStartOfRoad(downstream ? MeasurementPoint::Rear : MeasurementPoint::Front, roadId);
         spawnDistance = frontCarPositionOnRoad + (downstream ? -separation : separation);
@@ -260,7 +262,8 @@ double WorldAnalyzer::CalculateSpawnVelocityToPreventCrashing(const RoadId& road
 bool WorldAnalyzer::ValidMinimumSpawningDistanceToObjectInFront(const LaneId laneId,
                                                                 const SPosition sPosition,
                                                                 const Route &route,
-                                                                const VehicleModelParameters& vehicleModelParameters) const
+                                                                const VehicleModelParameters& vehicleModelParameters,
+                                                                const double minimumSeparationBuffer) const
 {
     const double distanceReferencePointToFrontAxle = vehicleModelParameters.boundingBoxDimensions.length * 0.5 + vehicleModelParameters.boundingBoxCenter.x;
     const double rearLength = vehicleModelParameters.boundingBoxDimensions.length * 0.5 - vehicleModelParameters.boundingBoxCenter.x;
@@ -270,7 +273,7 @@ bool WorldAnalyzer::ValidMinimumSpawningDistanceToObjectInFront(const LaneId lan
                                                              laneId,
                                                              sPosition,
                                                              rearLength,
-                                                             distanceReferencePointToFrontAxle + MINIMUM_SEPARATION_BUFFER);
+                                                             distanceReferencePointToFrontAxle + minimumSeparationBuffer);
 
     if(!agentsInRangeResult.at(route.target).empty())
     {
@@ -285,6 +288,7 @@ bool WorldAnalyzer::AreSpawningCoordinatesValid(const RoadId& roadId,
                                                 const LaneId laneId,
                                                 const SPosition sPosition,
                                                 const double offset,
+                                                const double minimumSeparationBuffer,
                                                 const Route& route,
                                                 const VehicleModelParameters& vehicleModelParameters) const
 {
@@ -303,7 +307,7 @@ bool WorldAnalyzer::AreSpawningCoordinatesValid(const RoadId& roadId,
         return false;
     }
 
-    if (!ValidMinimumSpawningDistanceToObjectInFront(laneId, sPosition, route, vehicleModelParameters))
+    if (!ValidMinimumSpawningDistanceToObjectInFront(laneId, sPosition, route, vehicleModelParameters, minimumSeparationBuffer))
     {
         loggingCallback("New Agent does not fullfill the required minimum distance on lane: " + std::to_string(laneId) + ".");
         return false;

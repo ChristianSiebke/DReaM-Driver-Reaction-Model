@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -107,6 +107,7 @@ SpawnPointInterface::Agents SpawnPointPreRunCommon::GenerateAgentsForRange(const
                                                            laneId,
                                                            sPosition,
                                                            0 /* offset */,
+                                                           GetStochasticOrPredefinedValue(parameters.minimumSeparationBuffer, dependencies.stochastics),
                                                            route,
                                                            agentBlueprint.GetVehicleModelParameters())
                 || worldAnalyzer.SpawnWillCauseCrash(roadId,
@@ -165,6 +166,7 @@ std::optional<SpawnInfo> SpawnPointPreRunCommon::GetNextSpawnCarInfo(const RoadI
                                                                   agentRearLength,
                                                                   velocity,
                                                                   gapInSeconds,
+                                                                  GetStochasticOrPredefinedValue(parameters.minimumSeparationBuffer, dependencies.stochastics),
                                                                   route,
                                                                   supportedLaneTypes);
 

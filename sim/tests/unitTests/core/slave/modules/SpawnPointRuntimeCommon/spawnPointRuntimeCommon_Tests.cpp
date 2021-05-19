@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2019, 2020 in-tech
+* Copyright (c) 2019, 2020, 2021 in-tech
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -20,6 +20,7 @@
 #include "fakeCallback.h"
 
 using ::testing::_;
+using ::testing::Eq;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::UnorderedElementsAre;
@@ -41,6 +42,11 @@ TEST(SpawnPointRuntimeCommonParameterExtractor, ExtractSpawnPointParameters)
     auto spawnPoint1 = std::make_shared<FakeParameter>();
     auto spawnPoint2 = std::make_shared<FakeParameter>();
     ParameterInterface::ParameterLists spawnPoint {{spawnPoint1, spawnPoint2}};
+
+    std::map<std::string, const openpass::parameter::StochasticDistribution> stochasticParameters;
+    ON_CALL(parameter, GetParametersStochastic()).WillByDefault(ReturnRef(stochasticParameters));
+    std::map<std::string, double> doubleParameters;
+    ON_CALL(parameter, GetParametersDouble()).WillByDefault(ReturnRef(doubleParameters));
 
     const std::string invalidRoadId = "InvalidRoad";
     std::map<std::string, const std::vector<std::string>> strings1{{"Roads", {"RoadA", invalidRoadId}}};
@@ -149,6 +155,11 @@ TEST(SpawnPointRuntimeCommonParameterExtractor, ExtractSpawnPoints)
     auto spawnPoint2 = std::make_shared<FakeParameter>();
     ParameterInterface::ParameterLists spawnPoint {{spawnPoint1, spawnPoint2}};
 
+    std::map<std::string, const openpass::parameter::StochasticDistribution> stochasticParameters;
+    ON_CALL(parameter, GetParametersStochastic()).WillByDefault(ReturnRef(stochasticParameters));
+    std::map<std::string, double> doubleParameters;
+    ON_CALL(parameter, GetParametersDouble()).WillByDefault(ReturnRef(doubleParameters));
+
     const std::string roadA = "RoadA";
     const std::string roadB = "RoadB";
     const std::string invalidRoadId = "InvalidRoad";
@@ -191,4 +202,35 @@ TEST(SpawnPointRuntimeCommonParameterExtractor, ExtractSpawnPoints)
     SpawningAgentProfile spawningAgentProfile1 = {"Profile1", openpass::parameter::NormalDistribution{1.,2.,3.,4.}, {0.1,0.2}, openpass::parameter::NormalDistribution{2.,3.,4.,5.}};
     SpawningAgentProfile spawningAgentProfile2 = {"Profile2", openpass::parameter::NormalDistribution{1.,2.,3.,4.}, {0.1,0.2}, openpass::parameter::NormalDistribution{2.,3.,4.,5.}};
     SpawningAgentProfile spawningAgentProfile3 = {"Profile3", openpass::parameter::NormalDistribution{10.,20.,30.,40.}, {1}, openpass::parameter::NormalDistribution{20.,30.,40.,50.}};
+}
+
+TEST(SpawnPointRuntimeCommonParameterExtractor, ExtractMinimumSeparationBuffer_FixedValue)
+{
+    FakeParameter parameter;
+    std::map<std::string, const openpass::parameter::StochasticDistribution> stochasticParameters;
+    ON_CALL(parameter, GetParametersStochastic()).WillByDefault(ReturnRef(stochasticParameters));
+    std::map<std::string, double> doubleParameters {{"MinimumSeparationBuffer", 12.3}};
+    ON_CALL(parameter, GetParametersDouble()).WillByDefault(ReturnRef(doubleParameters));
+
+    const LaneTypes validLaneTypes = {};
+
+    const auto result = SpawnPointDefinitions::ExtractMinimumSpawnBuffer(parameter);
+    ASSERT_THAT(std::holds_alternative<double>(result), Eq(true));
+    ASSERT_THAT(std::get<double>(result), Eq(12.3));
+}
+
+TEST(SpawnPointRuntimeCommonParameterExtractor, ExtractMinimumSeparationBuffer_StochasticValue)
+{
+    FakeParameter parameter;
+    std::map<std::string, const openpass::parameter::StochasticDistribution> stochasticParameters{{"MinimumSeparationBuffer", openpass::parameter::UniformDistribution(0,10)}};
+    ON_CALL(parameter, GetParametersStochastic()).WillByDefault(ReturnRef(stochasticParameters));
+    std::map<std::string, double> doubleParameters;
+    ON_CALL(parameter, GetParametersDouble()).WillByDefault(ReturnRef(doubleParameters));
+
+    const LaneTypes validLaneTypes = {};
+
+    const auto result = SpawnPointDefinitions::ExtractMinimumSpawnBuffer(parameter);
+    ASSERT_THAT(std::holds_alternative<openpass::parameter::StochasticDistribution>(result), Eq(true));
+    const auto& distribution = std::get<openpass::parameter::StochasticDistribution>(result);
+    ASSERT_THAT(std::holds_alternative<openpass::parameter::UniformDistribution>(distribution), Eq(true));
 }

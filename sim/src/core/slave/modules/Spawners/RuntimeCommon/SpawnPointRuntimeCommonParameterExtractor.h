@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019, 2020 in-tech GmbH
+* Copyright (c) 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -81,6 +81,6 @@ namespace SpawnPointRuntimeCommonParameterExtractor
      */
     static SpawnPointRuntimeCommonParameters ExtractSpawnPointParameters(const ParameterInterface& parameter, const WorldAnalyzer &worldAnalyzer, const LaneTypes& supportedLaneTypes, const CallbackInterface* callbacks)
     {
-        return {ExtractSpawnPoints(parameter, worldAnalyzer, supportedLaneTypes, callbacks), SpawnPointDefinitions::ExtractAgentProfileLaneMaps(parameter, callbacks)};
+        return {ExtractMinimumSpawnBuffer(parameter), ExtractSpawnPoints(parameter, worldAnalyzer, supportedLaneTypes, callbacks), SpawnPointDefinitions::ExtractAgentProfileLaneMaps(parameter, callbacks)};
     }
 };

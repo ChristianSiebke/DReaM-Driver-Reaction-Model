@@ -61,6 +61,9 @@ The SpawnPoints have the following parameters:
    SStart    Double       m    The S position specifying the minimum S for the range within which to spawn Agents
    SEnd      Double       m    The S position specifying the maximum S for the range within which to spawn Agents
    ========= ============ ==== ===================================================================================
+   
+It is also possible to define the minimum gap in meters either as fixed parameter of type double or as stochastic distribution.
+If it isn't defined the default value of 5m is used.
 
 .. literalinclude:: @OP_REL_SIM@/contrib/examples/DefaultConfigurations/ProfilesCatalog.xml
    :language: xml
@@ -160,6 +163,9 @@ The Spawners have the following parameters:
    Lanes      IntVector         The LaneIDs of the Lanes of the Road on which to spawn Agents
    S-Position Double       m    The S position specifying at which point to spawn Agents
    ========== ============ ==== ==============================================================
+
+It is also possible to define the minimum gap in meters either as fixed parameter of type double or as stochastic distribution.
+If it isn't defined the default value of 5m is used.
 
 .. literalinclude:: @OP_REL_SIM@/contrib/examples/DefaultConfigurations/ProfilesCatalog.xml
    :language: xml
