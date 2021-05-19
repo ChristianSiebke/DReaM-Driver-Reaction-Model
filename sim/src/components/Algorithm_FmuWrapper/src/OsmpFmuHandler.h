@@ -116,6 +116,12 @@ private:
     //! Reads the SensorData from the FMU
     void GetSensorData();
 
+    //! Sets the SensorViewConfig as input for the FMU
+    void SetSensorViewConfig();
+
+    //! Sets the SensorViewConfigRequest
+    void SetSensorViewConfigRequest();
+
 #ifdef USE_EXTENDED_OSI
     //! Sets the TrafficCommand as input for the FMU
     void SetTrafficCommandInput(const osi3::TrafficCommand &data);
@@ -128,12 +134,6 @@ private:
 
     //! Reads the TrafficUpdate from the FMU
     void GetTrafficUpdate();
-
-    //! Sets the SensorViewConfig as input for the FMU
-    void SetSensorViewConfig();
-
-    //! Sets the SensorViewConfigRequest
-    void SetSensorViewConfigRequest();
 #endif
 
     //! Writes an OSI message into a JSON file
