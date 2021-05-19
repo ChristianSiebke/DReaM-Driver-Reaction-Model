@@ -22,458 +22,135 @@
 
 using namespace OWL;
 
-using ::testing::AllOf;
-using ::testing::UnorderedElementsAreArray;
 using ::testing::Eq;
-using ::testing::Ge;
-using ::testing::Le;
 using ::testing::Return;
+using ::testing::SizeIs;
 
-const OWL::Primitive::AbsPosition frontLeftPosition  {  50.0,  10.0, 0.0 };
-const OWL::Primitive::AbsPosition frontPosition      {  50.0,   0.0, 0.0 };
-const OWL::Primitive::AbsPosition frontRightPosition {  50.0, -10.0, 0.0 };
-const OWL::Primitive::AbsPosition leftPosition       {   0.0,  10.0, 0.0 };
-const OWL::Primitive::AbsPosition centerPosition     {   0.0,   0.0, 0.0 };
-const OWL::Primitive::AbsPosition rightPosition      {   0.0, -10.0, 0.0 };
-const OWL::Primitive::AbsPosition rearLeftPosition   { -50.0,  10.0, 0.0 };
-const OWL::Primitive::AbsPosition rearPosition       { -50.0,   0.0, 0.0 };
-const OWL::Primitive::AbsPosition rearRightPosition  { -50.0, -10.0, 0.0 };
-
-template<typename K, typename V>
-int CountMapValues(const std::unordered_map<K, V>& theMap, const V value)
+struct SensorViewTest_Data
 {
-    return std::count_if(theMap.cbegin(),
-                         theMap.cend(),
-                         [value](const std::pair<K,V>& item)
-                         {
-                             return item.second == value;
-                         });
-}
-
-std::vector<int> GetVisibleObjectIds(const std::unordered_map<int, bool>& idVisibility)
-{
-    std::vector<int> visibleIds;
-
-    for (const auto& mapItem : idVisibility)
+    struct Sensor
     {
-        if (mapItem.second)
+        Sensor(double x, double y, double angle_left_abs_degree, double angle_right_abs_degree, double radius)
+        : x{x},
+          y{y},
+          angle_left_abs_rad{angle_left_abs_degree * M_PI / 180.},
+          angle_right_abs_rad{angle_right_abs_degree * M_PI / 180.},
+          radius{radius}
+        {}
+
+        double  x;
+        double  y;
+        double  angle_left_abs_rad;
+        double angle_right_abs_rad;
+        double radius;
+        friend std::ostream& operator<<(std::ostream& os, const Sensor& obj)
         {
-            visibleIds.push_back(mapItem.first);
+            return os
+            << "Position: "              << obj.x << ";" << obj.y
+            << " | Opening Angles (deg): " << (obj.angle_left_abs_rad * 180. / M_PI) << ";" << (obj.angle_right_abs_rad * 180. / M_PI)
+            << " | Radius: "               << obj.radius;
         }
-    }
+    };
 
-    return visibleIds;
-}
-
-template <typename T>
-std::vector<int> GetObjectIds(const std::vector<T>& objects)
-{
-    std::vector<int> ids;
-
-    for (const auto& object : objects)
+    struct Object
     {
-        ids.push_back(object->GetId());
-    }
-
-    return ids;
-}
-
-std::string ElementsToString(std::vector<int>& vec)
-{
-    std::string str{""};
-
-    for (auto it = vec.cbegin(); it != vec.cend(); ++it)
-    {
-        str += std::to_string(*it);
-
-        if (std::next(it) != vec.cend())
+        double x;
+        double y;
+        double length;
+        double width;
+        double rotation;
+        friend std::ostream& operator<<(std::ostream& os, const Object& obj)
         {
-            str += ", ";
+            return os
+            << "Position: "   << obj.x << ";" << obj.y
+            << " | Dimension: " << obj.length << ";" << obj.width
+            << " | Rotation: "  << obj.rotation;
         }
-    }
+    };
 
-    return str;
-}
-
-class NormalizeAngle_Data
-{
-public:
-    // do not change order of items
-    // unless you also change it in INSTANTIATE_TEST_CASE_P
-    double angle;
-    double normalizedAngle;
-
+    std::string testcase;
+    Sensor sensor;
+    Object object;
     /// \brief This stream will be shown in case the test fails
-    friend std::ostream& operator<<(std::ostream& os, const NormalizeAngle_Data& data)
-    {
-        return os << "angle: " << data.angle << ", normalizedAngle: " << data.normalizedAngle;
-    }
+    friend std::ostream& operator<<(std::ostream& os, const SensorViewTest_Data& obj)
+     {
+        return os
+         << "\n[ TESTCASE ] " << obj.testcase
+         << "\n[  SENSOR  ] " << obj.sensor
+         << "\n[  OBJECT  ] " << obj.object;
+     }
 };
 
-class ApplySectorFilter_Data
-{
-public:
-    // do not change order of items
-    // unless you also change it in INSTANTIATE_TEST_CASE_P
-    OWL::Primitive::AbsPosition origin;
-    double radius;
-    double yawMax;
-    double yawMin;
-    std::unordered_map<int, bool> idVisibility;
-
-    /// \brief This stream will be shown in case the test fails
-    friend std::ostream& operator<<(std::ostream& os, const ApplySectorFilter_Data& obj)
-    {
-        os << "origin: (" << obj.origin.x << ", " << obj.origin.y << ", " << obj.origin.z << "), "
-           << "radius: " << obj.radius << ", "
-           << "yawMax: " << obj.yawMax << ", "
-           << "yawMin: " << obj.yawMin << ", "
-           << "idVisibility: (" << std::boolalpha;
-
-        for (const auto& id : obj.idVisibility)
-        {
-            os << id.first << ": " << id.second << ", ";
-        }
-
-        os << ")" << std::noboolalpha;
-
-        return os;
-    }
-};
-
-class NormalizeAngle : public ::testing::TestWithParam<NormalizeAngle_Data>
+class SensorViewTestObjectDetection : public ::testing::TestWithParam<SensorViewTest_Data>
 {
 protected:
     OWL::WorldData worldData{nullptr};
 };
 
-
-class ApplySectorFilter : public ::testing::TestWithParam<ApplySectorFilter_Data>
-{
-private:
-    Fakes::MovingObject fakeMovingFrontLeft;
-    Fakes::MovingObject fakeMovingFront;
-    Fakes::MovingObject fakeMovingFrontRight;
-    Fakes::MovingObject fakeMovingLeft;
-    Fakes::MovingObject fakeMovingCenter;
-    Fakes::MovingObject fakeMovingRight;
-    Fakes::MovingObject fakeMovingRearLeft;
-    Fakes::MovingObject fakeMovingRear;
-    Fakes::MovingObject fakeMovingRearRight;
-
-protected:
-    OWL::WorldData worldData{nullptr};
-
-    const std::vector<Fakes::MovingObject*> fakeMovingObjects
-        { &fakeMovingFrontLeft,
-          &fakeMovingFront,
-          &fakeMovingFrontRight,
-          &fakeMovingLeft,
-          &fakeMovingCenter,
-          &fakeMovingRight,
-          &fakeMovingRearLeft,
-          &fakeMovingRear,
-          &fakeMovingRearRight };
-
-public:
-    ApplySectorFilter()
-    {
-        ON_CALL(fakeMovingFrontLeft,  GetId()).WillByDefault(Return(1));
-        ON_CALL(fakeMovingFront,      GetId()).WillByDefault(Return(2));
-        ON_CALL(fakeMovingFrontRight, GetId()).WillByDefault(Return(3));
-        ON_CALL(fakeMovingLeft,       GetId()).WillByDefault(Return(4));
-        ON_CALL(fakeMovingCenter,     GetId()).WillByDefault(Return(5));
-        ON_CALL(fakeMovingRight,      GetId()).WillByDefault(Return(6));
-        ON_CALL(fakeMovingRearLeft,   GetId()).WillByDefault(Return(7));
-        ON_CALL(fakeMovingRear,       GetId()).WillByDefault(Return(8));
-        ON_CALL(fakeMovingRearRight,  GetId()).WillByDefault(Return(9));
-
-        ON_CALL(fakeMovingFrontLeft,  GetReferencePointPosition()).WillByDefault(Return(frontLeftPosition));
-        ON_CALL(fakeMovingFront,      GetReferencePointPosition()).WillByDefault(Return(frontPosition));
-        ON_CALL(fakeMovingFrontRight, GetReferencePointPosition()).WillByDefault(Return(frontRightPosition));
-        ON_CALL(fakeMovingLeft,       GetReferencePointPosition()).WillByDefault(Return(leftPosition));
-        ON_CALL(fakeMovingCenter,     GetReferencePointPosition()).WillByDefault(Return(centerPosition));
-        ON_CALL(fakeMovingRight,      GetReferencePointPosition()).WillByDefault(Return(rightPosition));
-        ON_CALL(fakeMovingRearLeft,   GetReferencePointPosition()).WillByDefault(Return(rearLeftPosition));
-        ON_CALL(fakeMovingRear,       GetReferencePointPosition()).WillByDefault(Return(rearPosition));
-        ON_CALL(fakeMovingRearRight,  GetReferencePointPosition()).WillByDefault(Return(rearRightPosition));
-    }
-};
-
-
-TEST_P(NormalizeAngle, ReturnsAngleWithinPlusMinusPi)
+TEST_P(SensorViewTestObjectDetection, TestGenerator)
 {
     auto data = GetParam();
 
-    double normalizedAngle = worldData.NormalizeAngle(data.angle);
+    Primitive::AbsPosition sensorPosition = {data.sensor.x, data.sensor.y, 0};
 
-    ASSERT_THAT(normalizedAngle, AllOf(Ge(-M_PI), Le(M_PI)));
-    ASSERT_THAT(normalizedAngle, Eq(data.normalizedAngle));
+    OWL::Fakes::MovingObject object;
+    Primitive::AbsPosition  objectPosition = {data.object.x, data.object.y, 0};
+    ON_CALL(object,  GetReferencePointPosition()).WillByDefault(Return(objectPosition));
+    Primitive::Dimension  objectDimension = {data.object.length, data.object.width, 0};
+    ON_CALL(object,  GetDimension()).WillByDefault(Return(objectDimension));
+    std::vector<OWL::Interfaces::MovingObject*> fakeMovingObjects{&object};
+
+    auto filteredMoving = worldData.ApplySectorFilter(fakeMovingObjects, sensorPosition, data.sensor.radius, data.sensor.angle_left_abs_rad, data.sensor.angle_right_abs_rad);
+    ASSERT_THAT(filteredMoving, SizeIs(1));
 }
 
-INSTANTIATE_TEST_CASE_P(AngleList, NormalizeAngle,
-  /*                             angle   expectedNormalizedAngle  */
-  testing::Values(
-    NormalizeAngle_Data{                  0.0,               0.0 },
-    NormalizeAngle_Data{               M_PI_4,            M_PI_4 },
-    NormalizeAngle_Data{              -M_PI_4,           -M_PI_4 },
-    NormalizeAngle_Data{               M_PI_2,            M_PI_2 },
-    NormalizeAngle_Data{                -M_PI,             -M_PI },
-    NormalizeAngle_Data{                 M_PI,              M_PI },
-    NormalizeAngle_Data{              -M_PI_2,           -M_PI_2 },
-    NormalizeAngle_Data{         3.0 * M_PI_4,      3.0 * M_PI_4 },
-    NormalizeAngle_Data{        -3.0 * M_PI_4,     -3.0 * M_PI_4 },
-    NormalizeAngle_Data{  2.0 * M_PI + M_PI_4,            M_PI_4 },
-    NormalizeAngle_Data{ -2.0 * M_PI - M_PI_4,           -M_PI_4 },
-    NormalizeAngle_Data{  2.0 * M_PI + M_PI_2,            M_PI_2 },
-    NormalizeAngle_Data{ -2.0 * M_PI - M_PI_2,           -M_PI_2 },
-    NormalizeAngle_Data{  4.0 * M_PI + M_PI_2,            M_PI_2 },
-    NormalizeAngle_Data{ -4.0 * M_PI - M_PI_2,           -M_PI_2 }
-  )
-);
+INSTANTIATE_TEST_SUITE_P(ObjectsTouchingSensorView, SensorViewTestObjectDetection, ::testing::Values(
+    SensorViewTest_Data{"Large object in backshadow or regular sensor",
+                        SensorViewTest_Data::Sensor{0.0, 0.0, 45.0, -45.0, 10.0},
+                        SensorViewTest_Data::Object{-40.0, -0.50, 82.0, 2.0, 3.0}},
+    SensorViewTest_Data{"Small object in gap of pacman-style sensor",
+                        SensorViewTest_Data::Sensor{0.0, 0.0, 170.0, -170.0, 10.0},
+                        SensorViewTest_Data::Object{-6.0, 0.50, 4.0, 0.50, -175.0}},
+    SensorViewTest_Data{"Medium object in 'negative' sensorconfig",
+                        SensorViewTest_Data::Sensor{-5.0, 3.0, -45.0, 20.0, 20.0},
+                        SensorViewTest_Data::Object{25.0, -8.0, 50.0, 5.0, -30.0}}
+));
 
-
-TEST_P(ApplySectorFilter, ReturnsVisibleObjects)
-{
-    auto data = GetParam();
-
-    int numberOfVisibleObjects = CountMapValues(data.idVisibility, true);
-    std::vector<int> listOfVisibleObjects = GetVisibleObjectIds(data.idVisibility);
-
-    auto filteredMoving = worldData.ApplySectorFilter(fakeMovingObjects, data.origin, data.radius, data.yawMax, data.yawMin);
-    auto filteredIds = GetObjectIds(filteredMoving);
-
-    ASSERT_THAT(filteredMoving.size(), Eq(numberOfVisibleObjects)) << "Visible IDs: " << ElementsToString(filteredIds);
-    ASSERT_THAT(filteredIds, UnorderedElementsAreArray(listOfVisibleObjects));
-}
-
-// angle = 0.0 equals to "east" direction, which shows up "right" in the idVisibility table below
-INSTANTIATE_TEST_CASE_P(FullCircle, ApplySectorFilter,
-  testing::Values(
-    /*                              origin   radius        leftAngle   rightAngle                                    idVisibility */
-    ApplySectorFilter_Data{ centerPosition,     5.0,    3.0 * M_PI_2,     -M_PI_2, { { 7, false }, { 4, false }, { 1, false },
-                                                                                     { 8, false }, { 5, true  }, { 2, false },
-                                                                                     { 9, false }, { 6, false }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    20.0,    3.0 * M_PI_2,     -M_PI_2, { { 7, false }, { 4, true  }, { 1, false },
-                                                                                     { 8, false }, { 5, true  }, { 2, false },
-                                                                                     { 9, false }, { 6, true  }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    50.0,    3.0 * M_PI_2,     -M_PI_2, { { 7, false }, { 4, true  }, { 1, false },
-                                                                                     { 8, true  }, { 5, true  }, { 2, true  },
-                                                                                     { 9, false }, { 6, true  }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,    3.0 * M_PI_2,     -M_PI_2, { { 7, true  }, { 4, true  }, { 1, true  },
-                                                                                     { 8, true  }, { 5, true  }, { 2, true  },
-                                                                                     { 9, true  }, { 6, true  }, { 3, true  } } },
-
-    ApplySectorFilter_Data{ centerPosition,     5.0,          M_PI,         -M_PI, { { 7, false }, { 4, false }, { 1, false },
-                                                                                     { 8, false }, { 5, true  }, { 2, false },
-                                                                                     { 9, false }, { 6, false }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    20.0,          M_PI,         -M_PI, { { 7, false }, { 4, true  }, { 1, false },
-                                                                                     { 8, false }, { 5, true  }, { 2, false },
-                                                                                     { 9, false }, { 6, true  }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    50.0,          M_PI,         -M_PI, { { 7, false }, { 4, true  }, { 1, false },
-                                                                                     { 8, true  }, { 5, true  }, { 2, true  },
-                                                                                     { 9, false }, { 6, true  }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,          M_PI,         -M_PI, { { 7, true  }, { 4, true  }, { 1, true  },
-                                                                                     { 8, true  }, { 5, true  }, { 2, true  },
-                                                                                     { 9, true  }, { 6, true  }, { 3, true  } } },
-
-    ApplySectorFilter_Data{ centerPosition,     5.0,        M_PI_2, -3.0 * M_PI_2, { { 7, false }, { 4, false }, { 1, false },
-                                                                                     { 8, false }, { 5, true  }, { 2, false },
-                                                                                     { 9, false }, { 6, false }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    20.0,        M_PI_2, -3.0 * M_PI_2, { { 7, false }, { 4, true  }, { 1, false },
-                                                                                     { 8, false }, { 5, true  }, { 2, false },
-                                                                                     { 9, false }, { 6, true  }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    50.0,        M_PI_2, -3.0 * M_PI_2, { { 7, false }, { 4, true  }, { 1, false },
-                                                                                     { 8, true  }, { 5, true  }, { 2, true  },
-                                                                                     { 9, false }, { 6, true  }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,        M_PI_2, -3.0 * M_PI_2, { { 7, true  }, { 4, true  }, { 1, true  },
-                                                                                     { 8, true  }, { 5, true  }, { 2, true  },
-                                                                                     { 9, true  }, { 6, true  }, { 3, true  } } },
-
-    ApplySectorFilter_Data{ centerPosition,     5.0,    2.0 * M_PI,           0.0, { { 7, false }, { 4, false }, { 1, false },
-                                                                                     { 8, false }, { 5, true  }, { 2, false },
-                                                                                     { 9, false }, { 6, false }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    20.0,    2.0 * M_PI,           0.0, { { 7, false }, { 4, true  }, { 1, false },
-                                                                                     { 8, false }, { 5, true  }, { 2, false },
-                                                                                     { 9, false }, { 6, true  }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    50.0,    2.0 * M_PI,           0.0, { { 7, false }, { 4, true  }, { 1, false },
-                                                                                     { 8, true  }, { 5, true  }, { 2, true  },
-                                                                                     { 9, false }, { 6, true  }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,    2.0 * M_PI,           0.0, { { 7, true  }, { 4, true  }, { 1, true  },
-                                                                                     { 8, true  }, { 5, true  }, { 2, true  },
-                                                                                     { 9, true  }, { 6, true  }, { 3, true  } } },
-
-    ApplySectorFilter_Data{  frontPosition,    25.0,          M_PI,         -M_PI, { { 7, false }, { 4, false }, { 1, true  },
-                                                                                     { 8, false }, { 5, false }, { 2, true  },
-                                                                                     { 9, false }, { 6, false }, { 3, true  } } },
-
-    ApplySectorFilter_Data{   rearPosition,    25.0,          M_PI,         -M_PI, { { 7, true  }, { 4, false }, { 1, false },
-                                                                                     { 8, true  }, { 5, false }, { 2, false },
-                                                                                     { 9, true  }, { 6, false }, { 3, false } } },
-
-    ApplySectorFilter_Data{   leftPosition,    15.0,          M_PI,         -M_PI, { { 7, false }, { 4, true  }, { 1, false },
-                                                                                     { 8, false }, { 5, true  }, { 2, false },
-                                                                                     { 9, false }, { 6, false }, { 3, false } } },
-
-    ApplySectorFilter_Data{  rightPosition,    15.0,          M_PI,         -M_PI, { { 7, false }, { 4, false }, { 1, false },
-                                                                                     { 8, false }, { 5, true  }, { 2, false },
-                                                                                     { 9, false }, { 6, true  }, { 3, false } } }
-
-  )
-);
-
-// angle = 0.0 equals to "east" direction, which shows up "right" in the idVisibility table below
-INSTANTIATE_TEST_CASE_P(InsideConeOfInterest, ApplySectorFilter,
-  testing::Values(
-    /*                              origin   radius      leftAngle     rightAngle                                    idVisibility */
-    ApplySectorFilter_Data{ centerPosition,    70.0,  3.0 * M_PI_4,        M_PI_4, { { 7, false }, { 4, true  }, { 1, false },
-                                                                                     { 8, false }, { 5, true  }, { 2, false },
-                                                                                     { 9, false }, { 6, false }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,  M_PI_2 + 0.1,  M_PI_2 - 0.1, { { 7, false }, { 4, true  }, { 1, false },
-                                                                                     { 8, false }, { 5, true  }, { 2, false },
-                                                                                     { 9, false }, { 6, false }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,  3.0 * M_PI_4,  M_PI_2 - 0.1, { { 7, false }, { 4, true  }, { 1, false },
-                                                                                     { 8, false }, { 5, true  }, { 2, false },
-                                                                                     { 9, false }, { 6, false }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,        M_PI_4,       -M_PI_4, { { 7, false }, { 4, false }, { 1, true  },
-                                                                                     { 8, false }, { 5, true  }, { 2, true  },
-                                                                                     { 9, false }, { 6, false }, { 3, true  } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,           0.1,          -0.1, { { 7, false }, { 4, false }, { 1, false },
-                                                                                     { 8, false }, { 5, true  }, { 2, true  },
-                                                                                     { 9, false }, { 6, false }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,        M_PI_4,          -0.1, { { 7, false }, { 4, false }, { 1, true  },
-                                                                                     { 8, false }, { 5, true  }, { 2, true  },
-                                                                                     { 9, false }, { 6, false }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,  7.0 * M_PI_4,  5.0 * M_PI_4, { { 7, false }, { 4, false }, { 1, false },
-                                                                                     { 8, false }, { 5, true  }, { 2, false },
-                                                                                     { 9, false }, { 6, true  }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,       -M_PI_4, -3.0 * M_PI_4, { { 7, false }, { 4, false }, { 1, false },
-                                                                                     { 8, false }, { 5, true  }, { 2, false },
-                                                                                     { 9, false }, { 6, true  }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,   3.0 * M_PI_2 + 0.1,  3.0 * M_PI_2 - 0.1, { { 7, false }, { 4, false }, { 1, false },
-                                                                                                  { 8, false }, { 5, true  }, { 2, false },
-                                                                                                  { 9, false }, { 6, true  }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,         7.0 * M_PI_4,  3.0 * M_PI_2 - 0.1, { { 7, false }, { 4, false }, { 1, false },
-                                                                                                  { 8, false }, { 5, true  }, { 2, false },
-                                                                                                  { 9, false }, { 6, true  }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,  5.0 * M_PI_4,  3.0 * M_PI_4, { { 7, true  }, { 4, false }, { 1, false },
-                                                                                     { 8, true  }, { 5, true  }, { 2, false },
-                                                                                     { 9, true  }, { 6, false }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0, -3.0 * M_PI_4, -5.0 * M_PI_4, { { 7, true  }, { 4, false }, { 1, false },
-                                                                                     { 8, true  }, { 5, true  }, { 2, false },
-                                                                                     { 9, true  }, { 6, false }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,    M_PI + 0.1,    M_PI - 0.1, { { 7, false }, { 4, false }, { 1, false },
-                                                                                     { 8, true  }, { 5, true  }, { 2, false },
-                                                                                     { 9, false }, { 6, false }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,  5.0 * M_PI_4,    M_PI - 0.1, { { 7, false }, { 4, false }, { 1, false },
-                                                                                     { 8, true  }, { 5, true  }, { 2, false },
-                                                                                     { 9, true  }, { 6, false }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,        M_PI_2,           0.0, { { 7, false }, { 4, true  }, { 1, true  },
-                                                                                     { 8, false }, { 5, true  }, { 2, true  },
-                                                                                     { 9, false }, { 6, false }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,    2.0 * M_PI,  3.0 * M_PI_2, { { 7, false }, { 4, false }, { 1, false },
-                                                                                     { 8, false }, { 5, true  }, { 2, true  },
-                                                                                     { 9, false }, { 6, true  }, { 3, true  } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,           0.0,       -M_PI_2, { { 7, false }, { 4, false }, { 1, false },
-                                                                                     { 8, false }, { 5, true  }, { 2, true  },
-                                                                                     { 9, false }, { 6, true  }, { 3, true  } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,  3.0 * M_PI_2,          M_PI, { { 7, false }, { 4, false }, { 1, false },
-                                                                                     { 8, true  }, { 5, true  }, { 2, false },
-                                                                                     { 9, true  }, { 6, true  }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,       -M_PI_2,          M_PI, { { 7, false }, { 4, false }, { 1, false },
-                                                                                     { 8, true  }, { 5, true  }, { 2, false },
-                                                                                     { 9, true  }, { 6, true  }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,          M_PI,        M_PI_2, { { 7, true  }, { 4, true  }, { 1, false },
-                                                                                     { 8, true  }, { 5, true  }, { 2, false },
-                                                                                     { 9, false }, { 6, false }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,         -M_PI, -3.0 * M_PI_2, { { 7, true  }, { 4, true  }, { 1, false },
-                                                                                     { 8, true  }, { 5, true  }, { 2, false },
-                                                                                     { 9, false }, { 6, false }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,           0.0,        M_PI_2, { { 7, true  }, { 4, true  }, { 1, false },
-                                                                                     { 8, true  }, { 5, true  }, { 2, true  },
-                                                                                     { 9, true  }, { 6, true  }, { 3, true  } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,        M_PI_2,          M_PI, { { 7, false }, { 4, true  }, { 1, true  },
-                                                                                     { 8, true  }, { 5, true  }, { 2, true  },
-                                                                                     { 9, true  }, { 6, true  }, { 3, true  } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,  3.0 * M_PI_2,    2.0 * M_PI, { { 7, true  }, { 4, true  }, { 1, true  },
-                                                                                     { 8, true  }, { 5, true  }, { 2, true  },
-                                                                                     { 9, true  }, { 6, true  }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,          M_PI,  3.0 * M_PI_2, { { 7, true  }, { 4, true  }, { 1, true  },
-                                                                                     { 8, true  }, { 5, true  }, { 2, true  },
-                                                                                     { 9, false }, { 6, true  }, { 3, true  } } },
-
-    ApplySectorFilter_Data{ centerPosition,    70.0,  M_PI_2 + 0.1,  M_PI_2 - 0.1, { { 7, false }, { 4, true  }, { 1, false },
-                                                                                     { 8, false }, { 5, true  }, { 2, false },
-                                                                                     { 9, false }, { 6, false }, { 3, false } } },
-
-    ApplySectorFilter_Data{  frontPosition,    70.0,  M_PI_2 + 0.1,  M_PI_2 - 0.1, { { 7, false }, { 4, false }, { 1, true  },
-                                                                                     { 8, false }, { 5, false }, { 2, true  },
-                                                                                     { 9, false }, { 6, false }, { 3, false } } },
-
-    ApplySectorFilter_Data{   rearPosition,    70.0,  M_PI_2 + 0.1,  M_PI_2 - 0.1, { { 7, true  }, { 4, false }, { 1, false },
-                                                                                     { 8, true  }, { 5, false }, { 2, false },
-                                                                                     { 9, false }, { 6, false }, { 3, false } } },
-
-    ApplySectorFilter_Data{frontLeftPosition,  70.0, -M_PI_2 + 0.1, -M_PI_2 - 0.1, { { 7, false }, { 4, false }, { 1, true  },
-                                                                                     { 8, false }, { 5, false }, { 2, true  },
-                                                                                     { 9, false }, { 6, false }, { 3, true  } } },
-
-    ApplySectorFilter_Data{ rearLeftPosition,  70.0, -M_PI_2 + 0.1, -M_PI_2 - 0.1, { { 7, true  }, { 4, false }, { 1, false },
-                                                                                     { 8, true  }, { 5, false }, { 2, false },
-                                                                                     { 9, true  }, { 6, false }, { 3, false } } }
-
-  )
-);
-
-INSTANTIATE_TEST_CASE_P(ZeroRadius, ApplySectorFilter,
-  testing::Values(
-    /*                              origin   orientation   radius   yawMax   yawMin   idVisibility */
-    ApplySectorFilter_Data{ centerPosition,   0.0,  M_PI_4, -M_PI_4, { { 7, false }, { 4, false }, { 1, false },
-                                                                       { 8, false }, { 5, false }, { 2, false },
-                                                                       { 9, false }, { 6, false }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,   0.0,     0.1,    -0.1, { { 7, false }, { 4, false }, { 1, false },
-                                                                       { 8, false }, { 5, false }, { 2, false },
-                                                                       { 9, false }, { 6, false }, { 3, false } } },
-
-    ApplySectorFilter_Data{ centerPosition,   0.0,  M_PI_4,    -0.1, { { 7, false }, { 4, false }, { 1, false },
-                                                                       { 8, false }, { 5, false }, { 2, false },
-                                                                       { 9, false }, { 6, false }, { 3, false } } }
-  )
-);
+INSTANTIATE_TEST_SUITE_P(SimpleCasesWithSensor60Degree, SensorViewTestObjectDetection, ::testing::Values(
+    SensorViewTest_Data{"Small Object touches sensor looking north",
+                        SensorViewTest_Data::Sensor{0.0, 0.0, 120.0, 60.0, 10.0},
+                        SensorViewTest_Data::Object{-2.0, 10.0, 2.0, 1.0, 90.0}},
+    SensorViewTest_Data{"Object on backshadow of sensor looking north",
+                        SensorViewTest_Data::Sensor{0.0, 0.0, 120.0, 60.0, 10.0},
+                        SensorViewTest_Data::Object{2.0, 8.0, 2.0, 1.0, 175.0}},
+    SensorViewTest_Data{"Object within cone of sensor looking north",
+                        SensorViewTest_Data::Sensor{0.0, 0.0, 120.0, 60.0, 10.0},
+                        SensorViewTest_Data::Object{-3.50, 4.0, 2.0, 1.0, -175.0}},
+    SensorViewTest_Data{"Object touches sensor looking south",
+                        SensorViewTest_Data::Sensor{0.0, 0.0, -60.0, -120.0, 10.0},
+                        SensorViewTest_Data::Object{2.0, -10.0, 2.0, 1.0, -90.0}},
+    SensorViewTest_Data{"Object on backshadow of sensor looking south",
+                        SensorViewTest_Data::Sensor{0.0, 0.0, -60.0, -120.0, 10.0},
+                        SensorViewTest_Data::Object{-2.0, -8.0, 2.0, 1.0, -175.0}},
+    SensorViewTest_Data{"Object within cone of sensor looking south",
+                        SensorViewTest_Data::Sensor{0.0, 0.0, -60.0, -120.0, 10.0},
+                        SensorViewTest_Data::Object{3.50, -4.0, 2.0, 1.0, 175.0}},
+    SensorViewTest_Data{"Object touches sensor looking west",
+                        SensorViewTest_Data::Sensor{0.0, 0.0, -150.0, 150.0, 10.0},
+                        SensorViewTest_Data::Object{-10.0, 2.0, 2.0, 1.0, 0.0}},
+    SensorViewTest_Data{"Object on backshadow of sensor looking west",
+                        SensorViewTest_Data::Sensor{0.0, 0.0, -150.0, 150.0, 10.0},
+                        SensorViewTest_Data::Object{-8.0, -2.0, 2.0, 1.0, 85.0}},
+    SensorViewTest_Data{"Object within cone of sensor looking west",
+                        SensorViewTest_Data::Sensor{0.0, 0.0, -150.0, 150.0, 10.0},
+                        SensorViewTest_Data::Object{-4.0, 3.50, 2.0, 1.0, -265.0}},
+    SensorViewTest_Data{"Object touches sensor looking east",
+                        SensorViewTest_Data::Sensor{0.0, 0.0, 30.0, -30.0, 10.0},
+                        SensorViewTest_Data::Object{10.0, -2.0, 2.0, 1.0, 180.0}},
+    SensorViewTest_Data{"Object on backshadow of sensor looking east",
+                        SensorViewTest_Data::Sensor{0.0, 0.0, 30.0, -30.0, 10.0},
+                        SensorViewTest_Data::Object{8.0, 2.0, 2.0, 1.0, 95.0}},
+    SensorViewTest_Data{"Object within cone of sensor looking east",
+                        SensorViewTest_Data::Sensor{0.0, 0.0, 30.0, -30.0, 10.0},
+                        SensorViewTest_Data::Object{4.0, -3.50, 2.0, 1.0, 445.0}}
+));

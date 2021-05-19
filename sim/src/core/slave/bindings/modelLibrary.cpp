@@ -26,7 +26,7 @@
 #include "include/observationNetworkInterface.h"
 #include "observationModule.h"
 #include "parameterbuilder.h"
-#include "common/parameters.h"
+#include "modelElements/parameters.h"
 
 namespace SimulationSlave {
 

@@ -93,6 +93,17 @@ INC_LOCALIZATION = \
             $$UNIT_UNDER_TEST/PointQuery.h \
             $$UNIT_UNDER_TEST/LocalizationElement.h
 
+# entity repository
+SRC_ENTITYREPO = \
+            $$UNIT_UNDER_TEST/EntityRepository.cpp \
+            $$UNIT_UNDER_TEST/EntityInfoPublisher.cpp
+
+INC_ENTITYREPO = \
+            $$UNIT_UNDER_TEST/EntityRepository.h \
+            $$UNIT_UNDER_TEST/EntityInfoPublisher.h \
+            $$UNIT_UNDER_TEST/WorldEntities.h \
+            $$UNIT_UNDER_TEST/SceneryEntities.h
+
 INCLUDEPATH += \
             . \
             $$UNIT_UNDER_TEST \
@@ -110,6 +121,7 @@ SOURCES += \
             $$SRC_WORLD \
             $$SRC_OTHER \
             $$SRC_LOCALIZATION \
+            $$SRC_ENTITYREPO \
             \ # GENERATOR-TESTS
             Generators/laneGeometryElementGenerator_Tests.cpp \
             \ # UNIT-TESTS
@@ -126,7 +138,8 @@ SOURCES += \
             sensorView_Tests.cpp \
             datatypes_Tests.cpp \
             worldToRoadCoordinateConverter_Tests.cpp \
-            egoAgent_Tests.cpp
+            egoAgent_Tests.cpp \
+            entityRepository_Tests.cpp
 
 HEADERS += \
             $$INC_COMMONS \
@@ -134,6 +147,7 @@ HEADERS += \
             $$INC_OTHER \
             $$INC_WORLD \
             $$INC_LOCALIZATION \
+            $$INC_ENTITYREPO \
             AgentManager_Testhelper.h
 
 LIBS += \

@@ -1,5 +1,5 @@
-/*******************************************************************************
-* Copyright (c) 2017, 2019, 2020 in-tech GmbH
+﻿/*******************************************************************************
+* Copyright (c) 2017, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,9 @@
 #include "agentBlueprint.h"
 #include "framework/agentFactory.h"
 #include "framework/sampler.h"
+#include "common/RoutePlanning/RouteCalculation.h"
+
+constexpr size_t MAX_DEPTH = 10; //! Limits search depths in case of cyclic network
 
 SpawnPointScenario::SpawnPointScenario(const SpawnPointDependencies* dependencies,
                        const CallbackInterface* callbacks):
@@ -43,7 +46,7 @@ SpawnPointInterface::Agents SpawnPointScenario::Trigger([[maybe_unused]]int time
                                                     ? AgentCategory::Ego
                                                     : AgentCategory::Scenario);
                 agentBlueprint.SetObjectName(entity.name);
-                agentBlueprint.SetSpawnParameter(CalculateSpawnParameter(entity.spawnInfo,
+                agentBlueprint.SetSpawnParameter(CalculateSpawnParameter(entity,
                                                                          agentBlueprint.GetVehicleModelParameters()));
 
                 SimulationSlave::Agent* newAgent = dependencies.agentFactory->AddAgent(&agentBlueprint);
@@ -187,9 +190,10 @@ STCoordinates SpawnPointScenario::GetSTCoordinates(const openScenario::LanePosit
     }
 }
 
-SpawnParameter SpawnPointScenario::CalculateSpawnParameter(const SpawnInfo& spawnInfo,
+SpawnParameter SpawnPointScenario::CalculateSpawnParameter(const ScenarioEntity &entity,
                                                            const VehicleModelParameters &vehicleModelParameters)
 {
+    const auto& spawnInfo = entity.spawnInfo;
     SpawnParameter spawnParameter;
 
     // Define position and orientation
@@ -222,7 +226,12 @@ SpawnParameter SpawnPointScenario::CalculateSpawnParameter(const SpawnInfo& spaw
         spawnParameter.yawAngle = worldPosition.h.value_or(0.0);
     }
     else {
-        LogErrorAndThrow("This Spawner only supports Lane- & WorldPositions.");
+        LogError("This Spawner only supports Lane- & WorldPositions.");
+    }
+
+    if(!IsInsideWorld(spawnParameter))
+    {
+        LogError("Agent \"" + entity.name + "\" is outside world");
     }
 
     // Define velocity
@@ -245,7 +254,14 @@ SpawnParameter SpawnPointScenario::CalculateSpawnParameter(const SpawnInfo& spaw
         spawnParameter.acceleration = spawnInfo.acceleration.value_or(0.0);
     }
 
-    spawnParameter.route = GetRoute(spawnInfo.route.value_or(std::vector<RouteElement>{}));
+    if (spawnInfo.route.has_value())
+    {
+        spawnParameter.route = GetPredefinedRoute(spawnInfo.route.value());
+    }
+    else
+    {
+        spawnParameter.route = GetRandomRoute(spawnParameter);
+    }
 
     return spawnParameter;
 }
@@ -257,14 +273,13 @@ double SpawnPointScenario::CalculateAttributeValue(const openScenario::Stochasti
                                                dependencies.stochastics);
 }
 
-std::optional<Route> SpawnPointScenario::GetRoute(const std::vector<RouteElement>& roads)
+Route SpawnPointScenario::GetPredefinedRoute(const std::vector<RouteElement>& roads)
 {
     if (roads.empty())
     {
-        return std::nullopt;
+        LogError("Route is empty");
     }
 
-    constexpr size_t MAX_DEPTH = 10; //! Limits search depths in case of cyclic network
     auto [roadGraph , root] = GetWorld()->GetRoadGraph(roads.front(), std::max(MAX_DEPTH, roads.size()));
 
     RoadGraphVertex target = root;
@@ -287,6 +302,23 @@ std::optional<Route> SpawnPointScenario::GetRoute(const std::vector<RouteElement
     }
 
     return Route{roadGraph, root, target};
+}
+
+Route SpawnPointScenario::GetRandomRoute(const SpawnParameter& spawnParameter)
+{
+    const auto& roadPositions = GetWorld()->WorldCoord2LaneCoord(spawnParameter.positionX, spawnParameter.positionY, spawnParameter.yawAngle);
+    auto [roadGraph, root] = GetWorld()->GetRoadGraph(CommonHelper::GetRoadWithLowestHeading(roadPositions, *GetWorld()), MAX_DEPTH);
+    std::map<RoadGraph::edge_descriptor, double> weights = GetWorld()->GetEdgeWeights(roadGraph);
+    auto target = RouteCalculation::SampleRoute(roadGraph, root, weights, *dependencies
+            .stochastics);
+
+    return Route{roadGraph, root, target};
+}
+
+bool SpawnPointScenario::IsInsideWorld(const SpawnParameter &spawnParameter)
+{
+    const auto& roadPositions = GetWorld()->WorldCoord2LaneCoord(spawnParameter.positionX, spawnParameter.positionY, spawnParameter.yawAngle);
+    return !roadPositions.empty();
 }
 
 

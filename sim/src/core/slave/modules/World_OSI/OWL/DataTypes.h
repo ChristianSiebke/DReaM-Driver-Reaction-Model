@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020, 2021 in-tech GmbH
 *               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -63,6 +63,15 @@ enum class LaneMarkingSide
     Left,
     Right,
     Single
+};
+
+//! This struct describes the intersection of an object with a lane
+struct LaneOverlap
+{
+    double s_min {std::numeric_limits<double>::max()};
+    double s_max {0.0};
+    double min_delta_left {std::numeric_limits<double>::max()};
+    double min_delta_right {std::numeric_limits<double>::max()};
 };
 
 struct IntersectionInfo
@@ -135,6 +144,8 @@ using MovingObjects        = std::list<MovingObject*>;
 using StationaryObjects    = std::list<StationaryObject*>;
 using TrafficSigns         = std::list<TrafficSign*>;
 using RoadMarkings         = std::list<RoadMarking*>;
+using LaneAssignment       = std::pair<LaneOverlap, const Interfaces::WorldObject*>;
+using LaneAssignments      = std::vector<LaneAssignment>;
 
 //! This class represents a single lane inside a section
 class Lane
@@ -243,18 +254,23 @@ public:
     virtual void SetLaneType(LaneType specifiedType) = 0;
 
     //!Sets lane to the left of this lane
-    virtual void SetLeftLane(const Interfaces::Lane& lane) = 0;
+    virtual void SetLeftLane(const Interfaces::Lane& lane, bool transferLaneBoundary) = 0;
 
     //!Sets lane to the right of this lane
-    virtual void SetRightLane(const Interfaces::Lane& lane) = 0;
+    virtual void SetRightLane(const Interfaces::Lane& lane, bool transferLaneBoundary) = 0;
 
     //! Adds the ids to the list of left lane boundaries
     //! \param laneBoundaries   ids to add
     //!
     virtual void SetLeftLaneBoundaries(const std::vector<OWL::Id> laneBoundaries) = 0;
 
-    //!Returns a vector of all WorldObjects that are currently in this lane
-    virtual const Interfaces::WorldObjects& GetWorldObjects() const = 0;
+    //! Adds the ids to the list of right lane boundaries
+    //! \param laneBoundaries   ids to add
+    //!
+    virtual void SetRightLaneBoundaries(const std::vector<OWL::Id> laneBoundaries) = 0;
+
+    //!Returns a map of all WorldObjects that are currently in this lane
+    virtual const LaneAssignments& GetWorldObjects(bool direction) const = 0;
 
     //!Returns a vector of all traffic signs that are assigned to this lane
     virtual const Interfaces::TrafficSigns& GetTrafficSigns() const = 0;
@@ -263,13 +279,13 @@ public:
     virtual const Interfaces::RoadMarkings& GetRoadMarkings() const = 0;
 
     //!Adds a MovingObject to the list of objects currently in this lane
-    virtual void AddMovingObject(OWL::Interfaces::MovingObject& movingObject) = 0;
+    virtual void AddMovingObject(OWL::Interfaces::MovingObject& movingObject, const LaneOverlap& laneOverlap) = 0;
 
     //!Adds a StationaryObject to the list of objects currently in this lane
-    virtual void AddStationaryObject(OWL::Interfaces::StationaryObject& stationaryObject) = 0;
+    virtual void AddStationaryObject(OWL::Interfaces::StationaryObject& stationaryObject, const LaneOverlap& laneOverlap) = 0;
 
     //!Adds a WorldObject to the list of objects currently in this lane
-    virtual void AddWorldObject(Interfaces::WorldObject& worldObject) = 0;
+    virtual void AddWorldObject(Interfaces::WorldObject& worldObject, const LaneOverlap& laneOverlap) = 0;
 
     //!Assigns a traffic sign to this lane
     virtual void AddTrafficSign (Interfaces::TrafficSign &trafficSign) = 0;
@@ -645,6 +661,9 @@ public:
     //!Returns the position of the reference point of the object in absolute coordinates (i. e. world coordinates)
     virtual Primitive::AbsPosition GetReferencePointPosition() const = 0;
 
+    //!Returns the dimension of the sign
+    virtual Primitive::Dimension GetDimension() const = 0;
+
     //! Sets the s coordinate
     virtual void SetS(double sPos) = 0;
 
@@ -693,6 +712,9 @@ public:
     //!Returns the position of the reference point of the object in absolute coordinates (i. e. world coordinates)
     virtual Primitive::AbsPosition GetReferencePointPosition() const = 0;
 
+    //!Returns the dimension of the marking
+    virtual Primitive::Dimension GetDimension() const = 0;
+
     //! Sets the s coordinate
     virtual void SetS(double sPos) = 0;
 
@@ -705,6 +727,13 @@ public:
     //! \param position     position in the world
     //! \return     true if succesfull, false if the road marking can not be converted
     virtual bool SetSpecification(RoadSignalInterface* signal, Position position) = 0;
+
+    //! Converts the specification imported from OpenDrive to OSI.
+    //!
+    //! \param signal       OpenDrive specification
+    //! \param position     position in the world
+    //! \return     true if succesfull, false if the road marking can not be converted
+    virtual bool SetSpecification(RoadObjectInterface* signal, Position position) = 0;
 
     /*!
      * \brief Copies the underlying OSI object to the given GroundTruth
@@ -770,20 +799,19 @@ public:
                               double curvature,
                               double heading) override;
 
-    void SetLeftLane(const Interfaces::Lane& lane) override;
-    void SetRightLane(const Interfaces::Lane& lane) override;
+    void SetLeftLane(const Interfaces::Lane& lane, bool transferLaneBoundary) override;
+    void SetRightLane(const Interfaces::Lane& lane, bool transferLaneBoundary) override;
     void SetLeftLaneBoundaries(const std::vector<OWL::Id> laneBoundaries) override;
+    void SetRightLaneBoundaries(const std::vector<OWL::Id> laneBoundaries) override;
     void SetLaneType(LaneType specifiedType) override;
 
-    const Interfaces::WorldObjects& GetWorldObjects() const override;
-    //    const Interfaces::MovingObjects& GetMovingObjects() const override;
-    //    const Interfaces::StationaryObjects& GetStationaryObjects() const override;
+    const Interfaces::LaneAssignments& GetWorldObjects(bool direction) const override;
     const Interfaces::TrafficSigns& GetTrafficSigns() const override;
     const Interfaces::RoadMarkings& GetRoadMarkings() const override;
 
-    void AddMovingObject(OWL::Interfaces::MovingObject& movingObject) override;
-    void AddStationaryObject(OWL::Interfaces::StationaryObject& stationaryObject) override;
-    void AddWorldObject(Interfaces::WorldObject& worldObject) override;
+    void AddMovingObject(OWL::Interfaces::MovingObject& movingObject, const LaneOverlap& laneOverlap) override;
+    void AddStationaryObject(OWL::Interfaces::StationaryObject& stationaryObject, const LaneOverlap& laneOverlap) override;
+    void AddWorldObject(Interfaces::WorldObject& worldObject, const LaneOverlap& laneOverlap) override;
     void AddTrafficSign (Interfaces::TrafficSign &trafficSign) override;
     void AddRoadMarking (Interfaces::RoadMarking &roadMarking) override;
     void ClearMovingObjects() override;
@@ -793,14 +821,55 @@ public:
 
     const Primitive::LaneGeometryJoint::Points GetInterpolatedPointsAtDistance(double distance) const override;
 
+    //! @brief Collects objects assigned to lanes and manages their order w.r.t the querying direction
+    //!
+    //! Depending on the querying direction, objects on a lane need to be sorted 
+    //! either by their starting coordinate (s_min) or their ending coordinate (s_max).
+    //! When looking downstream, objects are sorted ascending by their s_min coordinate.
+    //! When looking upstream, objects are sorted descending by their s_max coordinate.
+    class LaneAssignmentCollector
+    {
+        public:
+            LaneAssignmentCollector() noexcept;
+
+            //! @brief Insert an object, given it's lane overlap w.r.t the current lane
+            //! @param LaneOverlap minimum and maximum s coordinate of the object
+            //! @param object      the object
+            void Insert(const LaneOverlap& laneOverlap, const Interfaces::WorldObject* object);
+
+            //! @brief Get list of LaneAssignements
+            //! @param downstream  true for looking "in stream direction", else false
+            const Interfaces::LaneAssignments& Get(bool downstream) const;
+
+            //! @brief Clears the managed collections
+            void Clear();
+        private:
+            //! @brief Sorts the managed collections using a custom sorter for LaneOverlap
+            //!
+            //! The two internal collecions are sorted by the following comparisons:
+            //! Ascending: Unless equal, the smaller s_min wins, else the smaller s_max
+            //! Descending: Unless equal, the larger s_max wins, else the larger s_min
+            void Sort() const;
+
+            //! @brief  Flag indicating, that collections need sorting
+            //!
+            //! For performance reasons, this class uses lazy sorting, meaning that insertion
+            //! happens unordered and sorting is applied at the very first access of the collections.
+            bool mutable dirty{false};
+            
+            Interfaces::LaneAssignments mutable downstreamOrderAssignments;
+            Interfaces::LaneAssignments mutable upstreamOrderAssignments;
+
+            static constexpr size_t INITIAL_COLLECTION_SIZE = 32; //!!< Minimum reserved collection size to prevent to many reallocations
+    };
+
 protected:
     osi3::Lane* osiLane{nullptr};
 
 private:
     LaneType laneType;
-    Interfaces::WorldObjects worldObjects;
-    Interfaces::MovingObjects movingObjects;
-    Interfaces::StationaryObjects stationaryObjects;
+    LaneAssignmentCollector worldObjects;
+    Interfaces::LaneAssignments stationaryObjects;
     Interfaces::TrafficSigns trafficSigns;
     Interfaces::RoadMarkings roadMarkings;
     const Interfaces::Section* section;
@@ -1172,6 +1241,7 @@ public:
     virtual CommonTrafficSign::Entity GetSpecification(const double relativeDistance) const override;
 
     virtual Primitive::AbsPosition GetReferencePointPosition() const override;
+    virtual Primitive::Dimension GetDimension() const override;
 
     virtual void SetS(double sPos) override
     {
@@ -1219,6 +1289,7 @@ public:
     virtual CommonTrafficSign::Entity GetSpecification(const double relativeDistance) const override;
 
     virtual Primitive::AbsPosition GetReferencePointPosition() const override;
+    virtual Primitive::Dimension GetDimension() const override;
 
     virtual void SetS(double sPos) override
     {
@@ -1231,6 +1302,8 @@ public:
     }
 
     virtual bool SetSpecification(RoadSignalInterface* signal, Position position) override;
+
+    virtual bool SetSpecification(RoadObjectInterface* object, Position position) override;
 
     virtual bool IsValidForLane(OWL::Id laneId) const override;
 

@@ -179,7 +179,7 @@ TEST(VehicleModelsImporter, GivenValidGeometry_ImportsCorrectDynamics)
     EXPECT_THAT(vehicleModelParameters.frontSurface, DoubleEq(5.0));
     EXPECT_THAT(vehicleModelParameters.weight, DoubleEq(24.0));
     EXPECT_THAT(vehicleModelParameters.maxVelocity, DoubleEq(22.0));
-    EXPECT_THAT(vehicleModelParameters.maximumSteeringWheelAngleAmplitude, DoubleEq(1.1 * 15.0 / M_PI * 180.0));   // maxSteering front wheel * SteeringRatio
+    EXPECT_THAT(vehicleModelParameters.maximumSteeringWheelAngleAmplitude, DoubleEq(1.1 * 15.0));   // maxSteering front wheel * SteeringRatio
     EXPECT_THAT(vehicleModelParameters.maxCurvature, DoubleEq(std::sin(1.1) / 28.0));   // sin(maxSteering fron wheel) / wheelbase
     EXPECT_THAT(vehicleModelParameters.momentInertiaRoll, DoubleEq(11.0));
     EXPECT_THAT(vehicleModelParameters.momentInertiaPitch, DoubleEq(12.0));

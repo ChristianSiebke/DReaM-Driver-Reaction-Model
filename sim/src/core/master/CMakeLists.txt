@@ -2,6 +2,8 @@ set(COMPONENT_NAME OpenPassMaster)
 
 set(CMAKE_AUTOMOC ON)
 
+add_compile_definitions(CoreSlave_EXPORTS)
+
 add_openpass_target(
   NAME ${COMPONENT_NAME} TYPE executable COMPONENT bin
 
@@ -11,11 +13,13 @@ add_openpass_target(
     framework/slaveConfig.h
     importer/masterConfigImporter.h
     openPassMaster.h
+    ../common/log.h
 
   SOURCES
     framework/main.cpp
     framework/processManager.cpp
     importer/masterConfigImporter.cpp
+    ../common/log.cpp
 
   INCDIRS
     framework

@@ -4,7 +4,7 @@
 #include "common/helper/importerHelper.h"
 
 #include "parameterImporter.h"
-#include "common/parameters.h"
+#include "modelElements/parameters.h"
 
 using ::testing::Eq;
 using ::testing::SizeIs;

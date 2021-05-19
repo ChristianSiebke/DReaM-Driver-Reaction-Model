@@ -49,7 +49,7 @@
 * Output variables:
 * name | meaning
 * -----|------
-* out_desiredSteeringWheelAngle | The steering wheel angle wish of the driver in degree.
+* out_desiredSteeringWheelAngle | The steering wheel angle wish of the driver in radian.
 *
 * Output channel IDs:
 * Output Id | signal class | contained variables

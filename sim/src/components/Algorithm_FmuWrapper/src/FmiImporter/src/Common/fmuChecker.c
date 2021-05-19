@@ -1,5 +1,6 @@
 /*
     Copyright (C) 2012 Modelon AB <http://www.modelon.com>
+                  2020, 2021 in-tech GmbH
 
     You should have received a copy of the LICENCE-FMUChecker.txt
     along with this program. If not, contact Modelon AB.
@@ -290,13 +291,16 @@ jm_status_enu_t checked_print_quoted_str(fmu_check_data_t* cdata, const char* st
 
 jm_status_enu_t checked_fprintf(fmu_check_data_t* cdata, const char* fmt, ...) {
     jm_status_enu_t status = jm_status_success;
-    va_list args;
-    va_start (args, fmt);
-    if(vfprintf(cdata->out_file, fmt, args) <= 0) {
-        jm_log_fatal(&cdata->callbacks, fmu_checker_module, "Error writing output file (%s)", strerror(errno));
-        status = jm_status_error;
+    if (cdata->write_output_files)
+    {
+        va_list args;
+        va_start (args, fmt);
+        if(vfprintf(cdata->out_file, fmt, args) <= 0) {
+            jm_log_fatal(&cdata->callbacks, fmu_checker_module, "Error writing output file (%s)", strerror(errno));
+            status = jm_status_error;
+        }
+        va_end (args);
     }
-    va_end (args);
     return status;
 }
 
@@ -444,8 +448,6 @@ void clear_fmu_check_data(fmu_check_data_t* cdata, int close_log) {
     }
     if(cdata->tmpPath && (cdata->tmpPath != cdata->unzipPath)) {
         jm_rmdir(&cdata->callbacks,cdata->tmpPath);
-        cdata->callbacks.free(cdata->tmpPath);
-        cdata->tmpPath = 0;
     }
     if(cdata->out_file && (cdata->out_file != stdout)) {
         fclose(cdata->out_file);

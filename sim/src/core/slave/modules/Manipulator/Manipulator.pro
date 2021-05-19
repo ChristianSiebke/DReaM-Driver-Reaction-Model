@@ -29,6 +29,7 @@ INCLUDEPATH += \
 SOURCES += \
     CollisionManipulator.cpp \
     ComponentStateChangeManipulator.cpp \
+    CustomParametersManipulator.cpp \
     LaneChangeManipulator.cpp \
     ManipulatorCommonBase.cpp \
     ManipulatorExport.cpp \
@@ -36,6 +37,7 @@ SOURCES += \
     RemoveAgentsManipulator.cpp \
     SpeedActionManipulator.cpp \
     TrajectoryManipulator.cpp \
+    AcquirePositionManipulator.cpp \
     srcCollisionPostCrash/collisionDetection_Impact_implementation.cpp \
     srcCollisionPostCrash/polygon.cpp \
     ../../../../core/common/coreDataPublisher.cpp
@@ -43,15 +45,18 @@ SOURCES += \
 EVENT_HEADERS += \
     ../../../../common/events/componentStateChangeEvent.h \
     ../../../../common/events/collisionEvent.h \
+    ../../../../common/events/customParametersEvent.h \
     ../../../../common/events/laneChangeEvent.h \
     ../../../../common/events/speedActionEvent.h \
-    ../../../../common/events/trajectoryEvent.h
+    ../../../../common/events/trajectoryEvent.h \
+    ../../../../common/events/acquirePositionEvent.h
 
 HEADERS += \
     $$EVENT_HEADERS \
     CollisionManipulator.h \
     ComponentStateChangeManipulator.h \
     CustomCommandFactory.h \
+    CustomParametersManipulator.h \
     LaneChangeManipulator.h \
     ManipulatorCommonBase.h \
     ManipulatorExport.h \
@@ -60,6 +65,7 @@ HEADERS += \
     RemoveAgentsManipulator.h \
     SpeedActionManipulator.h \
     TrajectoryManipulator.h \
+    AcquirePositionManipulator.h \
     srcCollisionPostCrash/collisionDetection_Impact_implementation.h \
     srcCollisionPostCrash/polygon.h \
     ../../../../core/common/coreDataPublisher.h

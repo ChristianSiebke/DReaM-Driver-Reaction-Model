@@ -253,7 +253,7 @@ bool ParseBool(QDomElement rootElement, const std::string &tag, bool &result)
 template <typename T>
 bool Parse(QDomElement, const std::string&, T&)
 {
-    throw std::runtime_error("not implemented yet");
+    throw std::runtime_error("xmlParser::Parse<T> not implemented yet");
 }
 
 template <>

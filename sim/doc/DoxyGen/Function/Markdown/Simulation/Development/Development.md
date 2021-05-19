@@ -4,14 +4,13 @@
 
 \section dev_tech Technologies
 
-The OpenPASS Slave is written in C++11 and has the following dependencies:
+The OpenPASS Slave is written in C++17 and has the following dependencies:
 
 Simulation Core:
 - Qt (v5.12.2) -- mainly XML reading, dynamic library access methods, file writing
 - Boost Geometry (v1.63)
 - Open system interface (v3.0.1)
 - Protocol Buffers (v3.6.1)
-- ZeroMQ (v5.1.2)
 
 Additional dependencies (Simulation Core Tests):
 - Boost system and filesystem (v1.63)
@@ -28,7 +27,7 @@ As shown in the next figure, the modules can be roughly divided into the groups 
 Thereby, the modules themself can consist of several submodules, such as sensor (reading from an interface) and action (writing to an interface).
 ![Modules for longitudinal and lateral dynamics](DynamicsModules.png)
 
-For information on the content of the signals, please refer to the correspondig developer documentation:
+For information on the content of the signals, please refer to the corresponding developer documentation:
 - AccelerationSignal
 - DynamicsSignal
 - LateralSignal
@@ -38,10 +37,10 @@ For information on the content of the signals, please refer to the correspondig 
 
 ---
 
-By statistic means, based on corresponding probabilites defined in the `slaveConfig.xml`, each individual agent is composed from a superset of all possible (valid) combinations, which is defined by the `systemConfigBlueprint.xml` (see also the corresponding sections within [Input & Output](@ref io)).
+By statistic means, based on corresponding probabilities defined in the `slaveConfig.xml`, each individual agent is composed from a superset of all possible (valid) combinations, which is defined by the `systemConfigBlueprint.xml` (see also the corresponding sections within [Input & Output](@ref io)).
 This config defines all available framework modules and agent modules and connects them by corresponding channels, which in turn have a specific signal type (refer to section [Channel IDs](@ref io_input_channelids) and [Signal Prioritizer](@ref dev_agent_modules_signalprioritizer) for more information).
 
-The next figure gives an exhautive overview over the current superset:
+The next figure gives an exhaustive overview over the current superset:
 ![Components and channel communication](ComponentsChannelCommunicationDiagram.svg)
 
 For detailed information on the individual modules refer to the sections [systemConfigBlueprint.xml](@ref io_input_systemconfigblueprint), [Framework Modules](@ref dev_framework_modules), and [Agent Modules](@ref dev_agent_modules).
@@ -87,7 +86,7 @@ In addition, this section gives additional insights on part, which cannot be eas
 \subsection dev_tools_commonTools_ttcttb Time to collision / Time to brake
 
 For a given opponent (vehicle in front) with respect to the current ego vehicle, the method `TrafficHelperFunctions::WillCrash` calculates if a collision is imminent.
-Thereby, it is assumend that the acceleration of the opponent stays constant and that the ego slows down with a given braking deceleration.  
+Thereby, it is assumed that the acceleration of the opponent stays constant and that the ego slows down with a given braking deceleration.  
 
 **Sequence:**  
 1. Check for a collision during the reaction time of the ego driver.

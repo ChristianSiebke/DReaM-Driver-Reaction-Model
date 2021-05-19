@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -21,7 +21,6 @@
 
 #include "common/globalDefinitions.h"
 #include "common/openScenarioDefinitions.h"
-#include "common/log.h"
 
 //! Resolves a parametrized attribute
 //!
@@ -51,11 +50,11 @@ T GetAttribute(openScenario::ParameterizedAttribute<T> attribute, const openScen
         }
         catch (const std::invalid_argument&)
         {
-            LogErrorAndThrow("Type of assigned parameter \"" + attribute.name + "\" in scenario does not match.");
+            throw std::runtime_error("Type of assigned parameter \"" + attribute.name + "\" in scenario does not match.");
         }
         catch (const std::out_of_range&)
         {
-            LogErrorAndThrow("Value of assigned parameter \"" + attribute.name + "\" is out of range.");
+            throw std::runtime_error("Value of assigned parameter \"" + attribute.name + "\" is out of range.");
         }
     }
     else
@@ -69,11 +68,11 @@ T GetAttribute(openScenario::ParameterizedAttribute<T> attribute, const openScen
  */
 struct VehicleAxle
 {
-    openScenario::ParameterizedAttribute<double> maxSteering;     //!< Maximum steering angle
-    openScenario::ParameterizedAttribute<double> wheelDiameter;   //!< Diameter of the wheels
-    openScenario::ParameterizedAttribute<double> trackWidth;      //!< Trackwidth of the axle
-    openScenario::ParameterizedAttribute<double> positionX;       //!< Longitudinal position offset (measured from reference point)
-    openScenario::ParameterizedAttribute<double> positionZ;       //!< Vertical position offset (measured from reference point)
+    openScenario::ParameterizedAttribute<double> maxSteering = -999.0;     //!< Maximum steering angle
+    openScenario::ParameterizedAttribute<double> wheelDiameter = -999.0;   //!< Diameter of the wheels
+    openScenario::ParameterizedAttribute<double> trackWidth = -999.0;      //!< Trackwidth of the axle
+    openScenario::ParameterizedAttribute<double> positionX = -999.0;       //!< Longitudinal position offset (measured from reference point)
+    openScenario::ParameterizedAttribute<double> positionZ = -999.0;       //!< Vertical position offset (measured from reference point)
 };
 
 //! Contains the VehicleModelParameters as defined in the VehicleModelCatalog.
@@ -84,8 +83,8 @@ struct ParametrizedVehicleModelParameters
     openScenario::ParameterizedAttribute<double> width = -999.0;
     openScenario::ParameterizedAttribute<double> length = -999.0;
     openScenario::ParameterizedAttribute<double> height = -999.0;
-    VehicleAxle frontAxle;
-    VehicleAxle rearAxle;
+    VehicleAxle frontAxle{};
+    VehicleAxle rearAxle{};
     openScenario::ParameterizedAttribute<double> distanceReferencePointToLeadingEdge = -999.0;
     openScenario::ParameterizedAttribute<double> maxVelocity = -999.0;
     openScenario::ParameterizedAttribute<double> weight = -999.0;
@@ -137,7 +136,7 @@ struct ParametrizedVehicleModelParameters
                     GetAttribute(axleRatio, assignedParameters),
                     GetAttribute(decelerationFromPowertrainDrag, assignedParameters),
                     GetAttribute(steeringRatio, assignedParameters),
-                    GetAttribute(frontAxle.maxSteering, assignedParameters) * GetAttribute(steeringRatio, assignedParameters) * 180.0 / M_PI,
+                    GetAttribute(frontAxle.maxSteering, assignedParameters) * GetAttribute(steeringRatio, assignedParameters),
                     std::sin(GetAttribute(frontAxle.maxSteering, assignedParameters)) / wheelbase,
                     rearAxle.wheelDiameter.defaultValue / 2.0,
                     GetAttribute(frictionCoeff, assignedParameters)

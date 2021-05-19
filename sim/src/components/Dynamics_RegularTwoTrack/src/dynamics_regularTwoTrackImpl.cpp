@@ -91,7 +91,7 @@ void DynamicsRegularTwoTrackImplementation::UpdateInput(int localLinkId, const s
                 LOG(CbkLogLevel::Debug, msg);
                 throw std::runtime_error(msg);
             }
-            angleTireFront.SetDefaultValue(signal->steeringWheelAngle * M_PI / 180);
+            angleTireFront.SetDefaultValue(signal->steeringWheelAngle);
         }
     }
     else if (localLinkId == 100)
@@ -389,7 +389,7 @@ void DynamicsRegularTwoTrackImplementation::NextStateSet()
     dynamicsSignal.positionX = midRearAxleX;
     dynamicsSignal.positionY = midRearAxleY;
     dynamicsSignal.travelDistance = velocityCar.x * GetCycleTime() * 0.001;
-    dynamicsSignal.steeringWheelAngle = angleTireFront.GetValue() * 180 / M_PI;
+    dynamicsSignal.steeringWheelAngle = angleTireFront.GetValue();
     dynamicsSignal.yawRate = yawVelocity;
     dynamicsSignal.yaw = yawAngle;
 }

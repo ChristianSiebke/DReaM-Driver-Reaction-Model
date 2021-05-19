@@ -13,12 +13,12 @@
 
 #include "WorldData.h"
 #include "WorldImplementation.h"
-#include "RoutePlanning/RouteCalculation.h"
+#include "common/RoutePlanning/RouteCalculation.h"
+#include "EntityRepository.h"
+#include "WorldEntities.h"
 
 #include "osi3/osi_sensorview.pb.h"
 #include "osi3/osi_sensorviewconfiguration.pb.h"
-
-#include "common/log.h"
 
 namespace {
     template <typename T>
@@ -35,6 +35,7 @@ WorldImplementation::WorldImplementation(const CallbackInterface* callbacks, Sto
     agentNetwork(this, callbacks),
     callbacks(callbacks),
     dataStore(dataStore),
+    repository(dataStore),
     worldData(callbacks)
 {}
 
@@ -42,15 +43,10 @@ WorldImplementation::~WorldImplementation()
 {
 }
 
-bool WorldImplementation::AddAgent(int id, AgentInterface* agent)
+void WorldImplementation::RegisterAgent(AgentInterface* agent)
 {
-    if (agentNetwork.AddAgent(id, agent))
-    {
-        worldObjects.push_back(agent);
-        return true;
-    }
-
-    return false;
+    agentNetwork.AddAgent(agent);
+    worldObjects.push_back(agent);
 }
 
 AgentInterface *WorldImplementation::GetAgent(int id) const
@@ -106,6 +102,7 @@ void WorldImplementation::Reset()
     worldParameter.Reset();
     agentNetwork.Clear();
     worldObjects.clear();
+    repository.Reset();
     worldObjects.insert(worldObjects.end(), trafficObjects.begin(), trafficObjects.end());
 }
 
@@ -171,15 +168,15 @@ void WorldImplementation::SyncGlobalData()
 bool WorldImplementation::CreateScenery(SceneryInterface* scenery)
 {
     this->scenery = scenery;
+    sceneryConverter = std::make_unique<SceneryConverter>(scenery,
+                                                          repository,
+                                                          worldData,
+                                                          localizer,
+                                                          callbacks);
 
-    SceneryConverter converter(scenery,
-                               worldData,
-                               localizer,
-                               callbacks);
-
-    ThrowIfFalse(converter.ConvertRoads(), "Unable to finish convertion process.");
+    THROWIFFALSE(sceneryConverter->ConvertRoads(), "Unable to finish conversion process.")
     localizer.Init();
-    converter.ConvertObjects();
+    sceneryConverter->ConvertObjects();
     InitTrafficObjects();
 
     RoadNetworkBuilder networkBuilder(*scenery);
@@ -189,11 +186,10 @@ bool WorldImplementation::CreateScenery(SceneryInterface* scenery)
     return true;
 }
 
-AgentInterface* WorldImplementation::CreateAgentAdapterForAgent()
+std::unique_ptr<AgentInterface> WorldImplementation::CreateAgentAdapter(openpass::type::FlatParameter parameter)
 {
-    AgentInterface* agentAdapter = new AgentAdapter(this, callbacks, &worldData, localizer);
-
-    return agentAdapter;
+    const auto id = repository.Register(openpass::entity::EntityType::MovingObject, openpass::utils::GetEntityInfo(parameter));
+    return std::make_unique<AgentAdapter>(id, this, callbacks, &worldData, localizer);
 }
 
 std::string WorldImplementation::GetTimeOfDay() const
@@ -376,15 +372,32 @@ Position WorldImplementation::LaneCoord2WorldCoord(double distanceOnLane, double
     return worldDataQuery.GetPositionByDistanceAndLane(lane, distanceOnLane, offset);
 }
 
+std::map<const std::string, GlobalRoadPosition> WorldImplementation::WorldCoord2LaneCoord(double x, double y, double heading) const
+{
+    return localizer.Locate({x,y}, heading);
+}
+
 bool WorldImplementation::IsSValidOnLane(std::string roadId, int laneId,
         double distance) //when necessary optional parameter with reference to get point
 {
     return worldDataQuery.IsSValidOnLane(roadId, laneId, distance);
 }
 
-bool WorldImplementation::IsDirectionalRoadExisting(const std::string &roadId, bool inOdDirection)
+bool WorldImplementation::IsDirectionalRoadExisting(const std::string &roadId, bool inOdDirection) const
 {
     return worldData.GetRoadGraphVertexMapping().find(RouteElement {roadId, inOdDirection}) != worldData.GetRoadGraphVertexMapping().end();
+}
+
+bool WorldImplementation::IsLaneTypeValid(const std::string &roadId, const int laneId, const double distanceOnLane, const LaneTypes& validLaneTypes)
+{
+    const auto& laneType = worldDataQuery.GetLaneByOdId(roadId, laneId, distanceOnLane).GetLaneType();
+
+    if (std::find(validLaneTypes.begin(), validLaneTypes.end(), laneType) == validLaneTypes.end())
+    {
+        return false;
+    }
+
+    return true;
 }
 
 double WorldImplementation::GetLaneCurvature(std::string roadId, int laneId, double position) const
@@ -449,6 +462,30 @@ RouteQueryResult<double> WorldImplementation::GetDistanceToEndOfLane(const RoadG
     auto laneMultiStream = worldDataQuery.CreateLaneMultiStream(roadGraph, startNode, laneId, initialSearchDistance);
     auto initialPositionOnStream = laneMultiStream->GetPositionByVertexAndS(startNode, initialSearchDistance);
     return worldDataQuery.GetDistanceToEndOfLane(*laneMultiStream, initialPositionOnStream, maximumSearchLength, laneTypes);
+}
+
+LaneSections WorldImplementation::GetLaneSections(const std::string& roadId) const
+{
+    LaneSections result;
+
+    const auto& road = worldDataQuery.GetRoadByOdId(roadId);
+    for (const auto &section : road->GetSections())
+    {
+        LaneSection laneSection;
+        laneSection.startS = section->GetSOffset();
+        laneSection.endS = laneSection.startS + section->GetLength();
+
+
+
+        for (const auto& lane : section->GetLanes())
+        {
+            laneSection.laneIds.push_back(worldData.GetLaneIdMapping().at(lane->GetId()));
+        }
+
+        result.push_back(laneSection);
+    }
+
+    return result;
 }
 
 bool WorldImplementation::IntersectsWithAgent(double x, double y, double rotation, double length, double width,

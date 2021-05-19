@@ -6,10 +6,12 @@ add_openpass_target(
   DEFAULT_MAIN
 
   SOURCES
+    ${OPENPASS_SIMCORE_DIR}/core/common/log.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/modelElements/agentBlueprint.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/modelElements/agent.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/modelElements/channel.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/modelElements/component.cpp
+    ${OPENPASS_SIMCORE_DIR}/core/slave/modelElements/parameters.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/bindings/modelBinding.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/bindings/modelLibrary.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/framework/agentDataPublisher.cpp
@@ -19,6 +21,7 @@ add_openpass_target(
     Spawner_IntegrationTests.cpp
 
   HEADERS
+    ${OPENPASS_SIMCORE_DIR}/core/common/log.h
     ${OPENPASS_SIMCORE_DIR}/core/slave/framework/sampler.h
     ${COMPONENT_SOURCE_DIR}/common/WorldAnalyzer.h
     ${COMPONENT_SOURCE_DIR}/PreRunCommon/SpawnPointPreRunCommon.h

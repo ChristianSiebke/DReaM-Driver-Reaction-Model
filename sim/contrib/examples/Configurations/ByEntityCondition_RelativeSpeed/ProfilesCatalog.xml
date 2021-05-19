@@ -1,0 +1,68 @@
+<Profiles SchemaVersion="0.4.3">
+  <AgentProfiles>
+	<AgentProfile Name="TFAgent" Type="Dynamic">
+      <DriverProfiles>
+        <DriverProfile Name="Regular" Probability="1.0"/>
+      </DriverProfiles>
+      <VehicleProfiles>
+        <VehicleProfile Name="TFVehicle" Probability="1.0"/>
+      </VehicleProfiles>
+    </AgentProfile>
+    <AgentProfile Name="StandingAgent" Type="Dynamic">
+      <DriverProfiles>
+        <DriverProfile Name="Standing" Probability="1.0"/>
+      </DriverProfiles>
+      <VehicleProfiles>
+        <VehicleProfile Name="StandingVehicle" Probability="1.0"/>
+      </VehicleProfiles>
+    </AgentProfile>
+  </AgentProfiles>
+  <VehicleProfiles>
+	<VehicleProfile Name="TFVehicle">
+      <Model Name="car_bmw_7_1"/>
+      <Components>
+        <Component Type="Dynamics_TrajectoryFollower">
+          <Profiles>
+            <Profile Name="BasicTrajectoryFollower" Probability="1.0"/>
+          </Profiles>
+        </Component>
+      </Components>
+      <Sensors/>
+    </VehicleProfile>
+    <VehicleProfile Name="StandingVehicle">
+      <Model Name="car_bmw_i3"/>
+      <Components/>
+      <Sensors/>
+    </VehicleProfile>
+  </VehicleProfiles>
+   <ProfileGroup Type="Driver">
+      <Profile Name="Regular">
+		<String Key="Type" Value="AlgorithmAgentFollowingDriverModel"/>
+		<String Key="AlgorithmLateralModule" Value="Algorithm_LateralAfdm"/>
+		<String Key="AlgorithmLongitudinalModule" Value="Algorithm_LongitudinalAfdm"/>
+		<Double Key="VelocityWish" Value="35.0"/>
+		<Double Key="Delta" Value="4.0"/>
+		<Double Key="TGapWish" Value="1.5"/>
+		<Double Key="MinDistance" Value="2.0"/>
+		<Double Key="MaxAcceleration" Value="0.0"/>
+		<Double Key="MaxDeceleration" Value="0.0"/>
+      </Profile>
+	  <Profile Name="Standing">
+		<String Key="Type" Value="AlgorithmAgentFollowingDriverModel"/>
+		<String Key="AlgorithmLateralModule" Value="Algorithm_LateralAfdm"/>
+		<String Key="AlgorithmLongitudinalModule" Value="Algorithm_LongitudinalAfdm"/>
+		<Double Key="VelocityWish" Value="0.0"/>
+		<Double Key="Delta" Value="4.0"/>
+		<Double Key="TGapWish" Value="1.5"/>
+		<Double Key="MinDistance" Value="2.0"/>
+		<Double Key="MaxAcceleration" Value="1.4"/>
+		<Double Key="MaxDeceleration" Value="2.0"/>
+      </Profile>
+    </ProfileGroup>
+	<ProfileGroup Type="Dynamics_TrajectoryFollower">
+		<Profile Name="BasicTrajectoryFollower">
+			<Bool Key="AutomaticDeactivation" Value="true"/>
+			<Bool Key="EnforceTrajectory" Value="true"/>
+		</Profile>
+	</ProfileGroup>
+</Profiles>

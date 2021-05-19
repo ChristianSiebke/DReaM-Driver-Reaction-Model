@@ -64,6 +64,8 @@ It is only called once initially and is recommended for each simulation.
 This SpawnPoint should trigger before any other SpawnPoints.
 A position and velocity are required for each Ego and Scenario agent in the scenario file.
 The portion of the Scenario file relevant to this SpawnPoint can be found [here](\ref scenario_entities).
+If there is no route defined in the Scenario the Spawner will set a random route starting at the spawning position.
+If there are multiple lanes at this position (this is only possible on junctions) it will take the lane with the lowest relative heading.
 
 \section dev_framework_modules_spawnpoints_preruncommonspawnpoint PreRunSpawnPoint
 The PreRun Spawnpoint (included in library "SpawnPointPreRunCommon") is responsible for populating the scenery/world with Common-Agents before the simulator starts.
@@ -137,6 +139,8 @@ The TrafficGroups are defined by the following parameter:
 The PreRunCommon SpawnPoint will spawn common agents on the specified Lanes of the specified Road from the s position S-Start to the s position S-End based on the parameters of the TrafficGroups.
 The following restrictions apply:
 
+- The PreRunCommon SpawnPoint only spawns on the following OpenDRIVE lane types: Driving, OnRamp, OffRamp, ConnectingRamp
+
 - If the Scenario Spawn Point spawned Scenario Agents (including the Ego agent) before this Spawn Point is triggered (in the intended order of these Spawn Points), ranges between the Scenario Agents are invalid for spawning by this Spawn Point.
 The spawn ranges will only be augmented by Scenario Agents on the same Road and Lane.
 As such, there are 7 different potential scenarios that may arise in terms of how the spawn point's valid spawn ranges may be impacted:
@@ -166,6 +170,7 @@ Once the spawning ranges are determined the PreRun SpawnPoint will spawn for eac
 - Then the time gap between the new agent and the closest existing agent is sampled.
 - Afterwards the velocity of the new agent is being sampled under consideration of the homogeneity.
 - The gap and velocity are used to calculate the distance between the new agent and the next agent in this spawnarea. Here a minimum distance of 5m between agents is required.
+- A random route is sampled starting at the appropriate road
 - Based on the distance and the velocity the TTC (2s) conditions are evaluated.If the TTC is critical the spawn velocity is reduced to fullfill the TTC requriements. 
 - As a final step the spawnpoint evaluates the spawncoordinates. If they are valid the agent is created, else the spawnpoint moves on to the next spawning range. 
 
@@ -240,7 +245,10 @@ The RuntimeCommon SpawnPoint will spawn based on the following logic:
 - First the agentprofile needs to be determined. If the current spawn position evaluates to a right lane, the pool from which the agentprofile is drafted is extended by all traffic groups which contain the RightLaneOnly flag set to true.
 - Then the time gap between the new agent and the closest existing agent is sampled.
 - Afterwards the velocity of the new agent is being sampled under consideration of the homogeneity.
+- A random route is sampled starting at the appropriate road
 - Once the timely gap expires, the spawnpoint evaluate if the TTC (2s) conditions and a minimum required distance between agents (5m) are met. If the TTC is critical the spawn velocity is reduced to fullfill the TTC requriements. If the minimum distance is not fullfilled, the agent will be held back.
 - If all requirements were fullfilled the agent is spawned.
+
+The RunTime SpawnPoint only spawns on the following OpenDRIVE lane types: Driving, OnRamp
 
 ![SpawnLogic](SpawningFlowChart.png)

@@ -68,7 +68,7 @@ private:
      * \brief LogError logs an error and throws
      * \param message the message for the error to log
      */
-    [[noreturn]] void LogError(const std::string& message);
+    [[noreturn]] void LogError(const std::string& message) const;
 
     void AdjustVelocityForCrash(SpawnDetails& spawnDetails, const SpawnPosition& sceneryInformation) const;
 
@@ -87,8 +87,15 @@ private:
 
     SpawningAgentProfile SampleAgentProfile(bool rightLane);
 
+    const LaneTypes supportedLaneTypes =
+    {
+        LaneType::Driving,
+        LaneType::OnRamp
+    };
+
     const SpawnPointDependencies dependencies;
-    const SpawnPointRuntimeCommonParameters parameters;
-    std::vector<SpawnDetails> queuedSpawnDetails;
     const WorldAnalyzer worldAnalyzer;
+    const SpawnPointRuntimeCommonParameters parameters;
+
+    std::vector<SpawnDetails> queuedSpawnDetails;
 };

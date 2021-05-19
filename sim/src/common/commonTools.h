@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2018 AMFD GmbH
 *               2016, 2017, 2018, 2019, 2020 ITK Engineering GmbH
 *               2020 HLRS, University of Stuttgart.
@@ -29,6 +29,7 @@
 
 #include "include/agentInterface.h"
 #include "include/worldObjectInterface.h"
+#include "include/worldInterface.h"
 
 #include "common/boostGeometryCommon.h"
 
@@ -213,6 +214,33 @@ static double CalculateMomentInertiaYaw(double mass, double length, double width
 
     return tokens;
 }
+
+//! Returns the directional road for which the heading is the lowest for a given position
+//!
+//! \param roadPositions    all possible road positions as calculated by the localization
+//! \param world            world
+//! \return road and direction with lowest heading
+static RouteElement GetRoadWithLowestHeading(const std::map<const std::string, GlobalRoadPosition>& roadPositions, const WorldInterface& world)
+{
+    RouteElement bestFitting;
+    double minHeading = std::numeric_limits<double>::max();
+    for (const auto [roadId, position] : roadPositions)
+    {
+        const auto absHeadingInOdDirection = std::abs(position.roadPosition.hdg);
+        if (absHeadingInOdDirection < minHeading && world.IsDirectionalRoadExisting(roadId, true))
+        {
+            bestFitting = {roadId, true};
+            minHeading = absHeadingInOdDirection;
+        }
+        const auto absHeadingAgainstOdDirection = std::abs(SetAngleToValidRange(position.roadPosition.hdg + M_PI));
+        if (absHeadingAgainstOdDirection < minHeading && world.IsDirectionalRoadExisting(roadId, false))
+        {
+            bestFitting = {roadId, false};
+            minHeading = absHeadingAgainstOdDirection;
+        }
+    }
+    return bestFitting;
+}
 }; // namespace CommonHelper
 
 //-----------------------------------------------------------------------------
@@ -256,30 +284,6 @@ public:
         }
 
         return (netDistance <= 0.0) ? 0.0 : (vRear <= 1) ? netDistance : netDistance / vRear;
-    }
-
-
-    //-----------------------------------------------------------------------------
-    //! @brief Limits a value between a lower and an upper limit
-    //!
-    //! Returns
-    //! low | value < low
-    //! value  | low <= value < high
-    //! high | value >= high
-    //!
-    //! @param [in]   low       lower limit
-    //! @param [in]   value     the value to be bounded
-    //! @param [in]   high      higher limit
-    //!
-    //! @return bounded value
-    //-----------------------------------------------------------------------------
-    template <typename T>
-    static T ValueInBounds(
-        const T &low,
-        const T &value,
-        const T &high)
-    {
-        return (value < low) ? low : ((value < high) ? value : high);
     }
 
     //-----------------------------------------------------------------------------

@@ -15,7 +15,8 @@
 #include "common/commonTools.h"
 #include "include/parameterInterface.h"
 #include "common/SpawnPointDefinitions.h"
-#include "common/log.h"
+#include "include/callbackInterface.h"
+#include "common/WorldAnalyzer.h"
 
 using namespace SpawnPointDefinitions;
 
@@ -25,14 +26,14 @@ namespace SpawnPointRuntimeCommonParameterExtractor
 
     constexpr char SCOORDINATE[] = {"SCoordinate"};
 
-    static std::vector<SpawnPosition> ExtractSpawnPoints(const ParameterInterface &parameter)
+    static std::vector<SpawnPosition> ExtractSpawnPoints(const ParameterInterface &parameter, const WorldAnalyzer &worldAnalyzer, const LaneTypes& supportedLaneTypes, const CallbackInterface* callbacks)
     {
         using namespace helper;
 
         std::vector<SpawnPosition> spawnpoints;
 
-        const auto& spawnPointList = map::query(parameter.GetParameterLists(),SPAWNPOINTS);
-        ThrowIfFalse(spawnPointList.has_value(), "No SpawnPoint provided for SpawnPointRuntimeCommon");
+        const auto spawnPointList = map::query(parameter.GetParameterLists(),SPAWNPOINTS);
+        SPAWNER_THROWIFFALSE(spawnPointList.has_value(), "No SpawnPoint provided for SpawnPointRuntimeCommon")
 
         for (const auto& spawnPointParameter : spawnPointList.value())
         {
@@ -40,9 +41,9 @@ namespace SpawnPointRuntimeCommonParameterExtractor
             const auto laneIdsElement = map::query(spawnPointParameter->GetParametersIntVector(), LANES);
             const auto sCoordinateElement = map::query(spawnPointParameter->GetParametersDouble(), SCOORDINATE);
 
-            ThrowIfFalse(roadIdsElement.has_value(), "No road id provided in SceneryInformation for SpawnPointRuntimeCommon");
-            ThrowIfFalse(laneIdsElement.has_value(), "No lane id provided in SceneryInformation for SpawnPointRuntimeCommon");
-            ThrowIfFalse(sCoordinateElement.has_value(), "No s coordinate provided in SceneryInformation for SpawnPointRuntimeCommon");
+            SPAWNER_THROWIFFALSE(roadIdsElement.has_value(), "No road id provided in SceneryInformation for SpawnPointRuntimeCommon")
+            SPAWNER_THROWIFFALSE(laneIdsElement.has_value(), "No lane id provided in SceneryInformation for SpawnPointRuntimeCommon")
+            SPAWNER_THROWIFFALSE(sCoordinateElement.has_value(), "No s coordinate provided in SceneryInformation for SpawnPointRuntimeCommon")
 
             std::vector<int> sortedLaneIds(laneIdsElement.value());
             if (sortedLaneIds.front() < 0)
@@ -58,7 +59,10 @@ namespace SpawnPointRuntimeCommonParameterExtractor
             {
                 for (const auto& laneId : sortedLaneIds)
                 {
-                    spawnpoints.emplace_back(SpawnPosition{roadId, laneId, sCoordinateElement.value()});
+                    if(worldAnalyzer.ValidateRoadIdInDirection(roadId, laneId, sCoordinateElement.value(), supportedLaneTypes))
+                    {
+                        spawnpoints.emplace_back(SpawnPosition{roadId, laneId, sCoordinateElement.value()});
+                    }
                 }
             }
         }
@@ -69,12 +73,14 @@ namespace SpawnPointRuntimeCommonParameterExtractor
     /*!
      * \brief ExtractSpawnPointParameters extracts the parameters for the
      *        spawn point from the provided parameterInterface
+     *
      * \param parameterInterface the parameterInterface from which to extract
      * \param sampler the sampler with which to sample random values
+     *
      * \return the parameters for the spawn point
      */
-    static SpawnPointRuntimeCommonParameters ExtractSpawnPointParameters(const ParameterInterface& parameter)
+    static SpawnPointRuntimeCommonParameters ExtractSpawnPointParameters(const ParameterInterface& parameter, const WorldAnalyzer &worldAnalyzer, const LaneTypes& supportedLaneTypes, const CallbackInterface* callbacks)
     {
-        return {ExtractSpawnPoints(parameter), SpawnPointDefinitions::ExtractAgentProfileLaneMaps(parameter)};
+        return {ExtractSpawnPoints(parameter, worldAnalyzer, supportedLaneTypes, callbacks), SpawnPointDefinitions::ExtractAgentProfileLaneMaps(parameter, callbacks)};
     }
 };

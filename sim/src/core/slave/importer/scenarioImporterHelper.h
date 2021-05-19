@@ -18,7 +18,7 @@
 #include <string>
 #include <QDomDocument>
 #include "include/scenarioInterface.h"
-#include "common/parameters.h"
+#include "modelElements/parameters.h"
 #include "common/openScenarioDefinitions.h"
 #include "oscImporterCommon.h"
 
@@ -119,6 +119,26 @@ private:
     * return    WorldPosition
     */
     static WorldPosition ImportWorldPosition(QDomElement positionElement, Parameters& parameters);
+
+    /*!
+    * \brief Import an openscenario RelativeWorldPosition Element
+    *
+    * @param[in]     positionElement                   Position xml Element
+    * @param[in]     parameters       Parametersset for openScenario parameter references
+    *
+    * return    RelativeWorldPosition
+    */
+    static RelativeWorldPosition ImportRelativeWorldPosition(const QDomElement& positionElement, Parameters& parameters);
+
+    /*!
+    * \brief Import an openscenario RelativeObjectPosition Element
+    *
+    * @param[in]     positionElement                   Position xml Element
+    * @param[in]     parameters       Parametersset for openScenario parameter references
+    *
+    * return    RelativeObjectPosition
+    */
+    static RelativeObjectPosition ImportRelativeObjectPosition(const QDomElement& positionElement, Parameters& parameters);
 
     /*!
     * \brief Import an openPASS custom Stochastic Element

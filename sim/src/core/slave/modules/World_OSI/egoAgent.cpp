@@ -29,6 +29,17 @@ void EgoAgent::SetRoadGraph(const RoadGraph&& roadGraph, RoadGraphVertex current
         }
     }
     SetWayToTarget(target);
+    Update();
+}
+
+void EgoAgent::Update()
+{
+    UpdatePositionInGraph();
+    if (graphValid)
+    {
+        //buffer mainLocatePosition to prevent multiple map lookups (yields better performance)
+        mainLocatePosition = agent->GetObjectPosition().mainLocatePoint.at(GetRoadId());
+    }
 }
 
 void EgoAgent::UpdatePositionInGraph()
@@ -265,7 +276,7 @@ std::optional<double> EgoAgent::GetLaneDirection(double distance, int relativeLa
 
 const GlobalRoadPosition& EgoAgent::GetMainLocatePosition() const
 {
-    return agent->GetObjectPosition().mainLocatePoint.at(GetRoadId());
+    return mainLocatePosition;
 }
 
 std::optional<GlobalRoadPosition> EgoAgent::GetReferencePointPosition() const

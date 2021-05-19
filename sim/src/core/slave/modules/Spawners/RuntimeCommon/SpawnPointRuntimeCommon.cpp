@@ -19,12 +19,11 @@ SpawnPointRuntimeCommon::SpawnPointRuntimeCommon(const SpawnPointDependencies* d
                                                  const CallbackInterface * const callbacks):
     SpawnPointInterface(dependencies->world, callbacks),
     dependencies(*dependencies),
-    parameters(SpawnPointRuntimeCommonParameterExtractor::ExtractSpawnPointParameters(*(dependencies->parameters.value()))),
-    worldAnalyzer(dependencies->world)
+    worldAnalyzer(dependencies->world),
+    parameters(SpawnPointRuntimeCommonParameterExtractor::ExtractSpawnPointParameters(*(dependencies->parameters.value()), worldAnalyzer, supportedLaneTypes, callbacks))
 {
     for (const auto& spawnPosition : parameters.spawnPositions)
     {
-        worldAnalyzer.ValidateRoadIdInDirection(spawnPosition.roadId, spawnPosition.laneId);
         queuedSpawnDetails.push_back(GenerateSpawnDetailsForLane(spawnPosition, 0));
     }
 }
@@ -92,13 +91,14 @@ void SpawnPointRuntimeCommon::AdjustVelocityForCrash(SpawnDetails& spawnDetails,
     const auto agentFrontLength = spawnDetails.agentBlueprint.GetVehicleModelParameters().distanceReferencePointToLeadingEdge;
     const auto agentRearLength = spawnDetails.agentBlueprint.GetVehicleModelParameters().length - spawnDetails.agentBlueprint.GetVehicleModelParameters().distanceReferencePointToLeadingEdge;
     const auto intendedVelocity = spawnDetails.agentBlueprint.GetSpawnParameter().velocity;
-    spawnDetails.agentBlueprint.GetSpawnParameter().velocity = worldAnalyzer.CalculateSpawnVelocityToPreventCrashing(sceneryInformation.roadId,
 
+    spawnDetails.agentBlueprint.GetSpawnParameter().velocity = worldAnalyzer.CalculateSpawnVelocityToPreventCrashing(sceneryInformation.roadId,
                                                                                                                      sceneryInformation.laneId,
                                                                                                                      sceneryInformation.sPosition,
                                                                                                                      agentFrontLength,
                                                                                                                      agentRearLength,
-                                                                                                                     intendedVelocity);
+                                                                                                                     intendedVelocity,
+                                                                                                                     spawnDetails.agentBlueprint.GetSpawnParameter().route);
 }
 
 bool SpawnPointRuntimeCommon::AreSpawningCoordinatesValid(const SpawnDetails& spawnDetails,
@@ -110,7 +110,9 @@ bool SpawnPointRuntimeCommon::AreSpawningCoordinatesValid(const SpawnDetails& sp
                                                      sceneryInformation.laneId,
                                                      sceneryInformation.sPosition,
                                                      0 /* offset */,
+                                                     spawnDetails.agentBlueprint.GetSpawnParameter().route,
                                                      vehicleModelParameters);
+
 }
 
 void SpawnPointRuntimeCommon::CalculateSpawnParameter(AgentBlueprintInterface* agentBlueprint,
@@ -142,6 +144,9 @@ void SpawnPointRuntimeCommon::CalculateSpawnParameter(AgentBlueprintInterface* a
     spawnParameter.yawAngle  = pos.yawAngle;
     spawnParameter.velocity = spawnV;
     spawnParameter.acceleration = 0;
+    spawnParameter.route = worldAnalyzer.SampleRoute(roadId,
+                                                     laneId,
+                                                     dependencies.stochastics);
 }
 
 SpawningAgentProfile SpawnPointRuntimeCommon::SampleAgentProfile(bool rightLane)
@@ -149,7 +154,7 @@ SpawningAgentProfile SpawnPointRuntimeCommon::SampleAgentProfile(bool rightLane)
     return Sampler::Sample(rightLane ? parameters.agentProfileLaneMaps.rightLanes : parameters.agentProfileLaneMaps.leftLanes, dependencies.stochastics);
 }
 
-void SpawnPointRuntimeCommon::LogError(const std::string& message)
+void SpawnPointRuntimeCommon::LogError(const std::string& message) const
 {
     std::stringstream log;
     log.str(std::string());

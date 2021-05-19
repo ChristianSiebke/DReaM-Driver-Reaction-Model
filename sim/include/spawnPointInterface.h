@@ -69,7 +69,7 @@ protected:
     void Log(CbkLogLevel logLevel,
              const char *file,
              int line,
-             const std::string &message)
+             const std::string &message) const
     {
         if(callbacks)
         {

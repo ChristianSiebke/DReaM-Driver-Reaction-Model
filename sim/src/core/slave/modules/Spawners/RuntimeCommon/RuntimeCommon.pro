@@ -1,5 +1,5 @@
 # /*********************************************************************
-# * Copyright (c) 2017, 2018, 2019 in-tech GmbH
+# * Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -34,13 +34,11 @@ INCLUDEPATH += \
 
 DEPENDENCY_HEADERS = \
                      ../common/WorldAnalyzer.h \
-                     ../../../../common/log.h \
                      ../../../modelElements/agentBlueprint.h \
                      ../../../framework/sampler.h
 
 DEPENDENCY_SOURCES = \
                      ../common/WorldAnalyzer.cpp \
-                     ../../../../common/log.cpp \
                      ../../../modelElements/agentBlueprint.cpp \
                      ../../../framework/sampler.cpp
 

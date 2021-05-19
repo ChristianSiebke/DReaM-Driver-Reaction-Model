@@ -14,12 +14,14 @@
 #include "DataTypes.h"
 
 #include "fakeRoadSignal.h"
+#include "OWL/fakes/fakeMovingObject.h"
 
 using ::testing::Return;
 using ::testing::Eq;
 using ::testing::DoubleEq;
 using ::testing::DoubleNear;
 using ::testing::SizeIs;
+using ::testing::ElementsAre;
 
 TEST(TrafficSigns, SetSpecificationWithUnsupportedMainType_ReturnsFalse)
 {
@@ -318,4 +320,52 @@ TEST(RoadMarking, SetSpecification_SetsCorrectBaseStationaryForNegativeOrientati
     ASSERT_THAT(osiMarking.base().position().z(), Eq(0));
     ASSERT_THAT(osiMarking.base().dimension().width(), Eq(4));
     ASSERT_THAT(osiMarking.base().orientation().yaw(), DoubleEq(2.5 - M_PI));
+}
+
+namespace OWL
+{
+bool operator== (const OWL::LaneOverlap& rhs, const OWL::LaneOverlap& lhs)
+{
+    return rhs.s_min == lhs.s_min && rhs.s_max == lhs.s_max;
+}
+}
+
+TEST(LaneAssignmentCollector, GetDownstream_ReturnObjectsInCorrectOrder)
+{
+    OWL::Implementation::Lane::LaneAssignmentCollector laneAssignmentCollector;
+    OWL::Fakes::MovingObject object1;
+    OWL::Fakes::MovingObject object2;
+    OWL::Fakes::MovingObject object3;
+    OWL::LaneOverlap overlap1{10,15,0,0};
+    OWL::LaneOverlap overlap2{12,17,0,0};
+    OWL::LaneOverlap overlap3{11,20,0,0};
+    laneAssignmentCollector.Insert(overlap1, &object1);
+    laneAssignmentCollector.Insert(overlap2, &object2);
+    laneAssignmentCollector.Insert(overlap3, &object3);
+
+    auto result = laneAssignmentCollector.Get(true);
+
+    ASSERT_THAT(result, ElementsAre(OWL::Interfaces::LaneAssignment{overlap1, &object1},
+                                    OWL::Interfaces::LaneAssignment{overlap3, &object3},
+                                    OWL::Interfaces::LaneAssignment{overlap2, &object2}));
+}
+
+TEST(LaneAssignmentCollector, GetUpstream_ReturnObjectsInCorrectOrder)
+{
+    OWL::Implementation::Lane::LaneAssignmentCollector laneAssignmentCollector;
+    OWL::Fakes::MovingObject object1;
+    OWL::Fakes::MovingObject object2;
+    OWL::Fakes::MovingObject object3;
+    OWL::LaneOverlap overlap1{10,15,0,0};
+    OWL::LaneOverlap overlap2{12,17,0,0};
+    OWL::LaneOverlap overlap3{11,20,0,0};
+    laneAssignmentCollector.Insert(overlap1, &object1);
+    laneAssignmentCollector.Insert(overlap2, &object2);
+    laneAssignmentCollector.Insert(overlap3, &object3);
+
+    auto result = laneAssignmentCollector.Get(false);
+
+    ASSERT_THAT(result, ElementsAre(OWL::Interfaces::LaneAssignment{overlap3, &object3},
+                                    OWL::Interfaces::LaneAssignment{overlap2, &object2},
+                                    OWL::Interfaces::LaneAssignment{overlap1, &object1}));
 }

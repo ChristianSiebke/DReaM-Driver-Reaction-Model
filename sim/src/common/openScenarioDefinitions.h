@@ -30,8 +30,8 @@ using Parameters = std::map<std::string, ParameterValue>;
 template <typename T>
 struct ParameterizedAttribute
 {
-    std::string name; //!Name of the parameter in OpenSCENARIO
-    T defaultValue; //!Value defined in the catalog (may later be overwriten in the CatalogReference)
+    std::string name; //!< Name of the parameter in OpenSCENARIO
+    T defaultValue;   //!< Value defined in the catalog (may be overwritten in the CatalogReference later)
 
     ParameterizedAttribute() = default;
 
@@ -72,7 +72,7 @@ struct ActorInformation
     std::optional<std::vector<std::string>> actors{};
 };
 
-// OSCOrientation
+//! OSC Orientation
 enum class OrientationType
 {
     Undefined = 0,
@@ -80,7 +80,7 @@ enum class OrientationType
     Absolute
 };
 
-// OSCOrientation
+//! OSC Orientation
 struct Orientation
 {
     std::optional<OrientationType> type{};
@@ -89,7 +89,7 @@ struct Orientation
     std::optional<double> r{};
 };
 
-// OSCPosition
+//! OSC Position
 struct LanePosition
 {
     std::optional<Orientation> orientation{};
@@ -102,6 +102,7 @@ struct LanePosition
     std::optional<StochasticAttribute> stochasticS;
 };
 
+//! OSC RelativeLanePosition
 struct RelativeLanePosition
 {
     std::string entityRef{};
@@ -111,6 +112,7 @@ struct RelativeLanePosition
     std::optional<Orientation> orientation{};
 };
 
+//! OSC RoadPosition
 struct RoadPosition
 {
     std::optional<Orientation> orientation{};
@@ -119,6 +121,7 @@ struct RoadPosition
     double t{};
 };
 
+//! OSC WorldPosition
 struct WorldPosition
 {
     double x{};
@@ -129,10 +132,31 @@ struct WorldPosition
     std::optional<double> r;
 };
 
+//! OSC RelativeObjectPosition
+struct RelativeObjectPosition {
+    std::optional<Orientation> orientation{};
+    std::string entityRef{};
+    double dx{};
+    double dy{};
+    std::optional<double> dz{};
+};
+
+//! OSC RelativeWorldPosition
+struct RelativeWorldPosition {
+    std::optional<Orientation> orientation{};
+    std::string entityRef{};
+    double dx{};
+    double dy{};
+    std::optional<double> dz{};
+};
+
+//! One of different variants of Position in OpenSCENARIO
 using Position = std::variant<LanePosition,
                               RelativeLanePosition,
                               RoadPosition,
-                              WorldPosition>;
+                              WorldPosition,
+                              RelativeObjectPosition,
+                              RelativeWorldPosition>;
 
 // Action
 // GlobalAction
@@ -177,10 +201,20 @@ struct TrajectoryPoint
     }
 };
 
+//! OSC TimeReference (for FollowTrajectoryAction)
+struct TrajectoryTimeReference
+{
+    std::string domainAbsoluteRelative;
+    double scale;
+    double offset;
+};
+
+//! OSC Trajectory
 struct Trajectory
 {
     std::vector<TrajectoryPoint> points;
     std::string name;
+    std::optional<TrajectoryTimeReference> timeReference;
 
     friend std::ostream& operator<<(std::ostream& os, const Trajectory& trajectory)
     {
@@ -194,14 +228,23 @@ struct Trajectory
     }
 };
 
+//! OSC AssignRouteAction
 using AssignRouteAction = std::vector<RoadPosition>;
 
+//! OSC FollowTrajectoryAction
 struct FollowTrajectoryAction
 {
     Trajectory trajectory{};
 };
 
-using RoutingAction = std::variant<AssignRouteAction, FollowTrajectoryAction>;
+//! OSC AcquirePositionAction
+struct AcquirePositionAction
+{
+    Position position{};
+};
+
+//! Some variant of a RoutingAction in OpenSCENARIO
+using RoutingAction = std::variant<AssignRouteAction, FollowTrajectoryAction, AcquirePositionAction>;
 
 struct VisibilityAction
 {

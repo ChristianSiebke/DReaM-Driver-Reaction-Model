@@ -2,6 +2,7 @@ add_openpass_target(
   NAME Common TYPE library LINKAGE shared COMPONENT bin
 
   HEADERS
+    events/acquirePositionEvent.h
     events/basicEvent.h
     events/collisionEvent.h
     events/componentStateChangeEvent.h
@@ -10,6 +11,7 @@ add_openpass_target(
     events/trajectoryEvent.h
     accelerationSignal.h
     agentCompToCompCtrlSignal.h
+    acquirePositionSignal.h
     boostGeometryCommon.h
     commonTools.h
     compCtrlToAgentCompSignal.h

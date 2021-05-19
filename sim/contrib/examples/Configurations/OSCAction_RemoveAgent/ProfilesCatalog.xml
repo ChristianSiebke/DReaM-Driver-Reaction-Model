@@ -1,0 +1,26 @@
+<Profiles SchemaVersion="0.4.3">
+  <AgentProfiles>
+    <AgentProfile Name="LuxuryClassCarAgent" Type="Dynamic">
+      <DriverProfiles>
+        <DriverProfile Name="AgentFollowingDriver" Probability="1.0"/>
+      </DriverProfiles>
+      <VehicleProfiles>
+        <VehicleProfile Name="BMW 7 g12 2016" Probability="1.0"/>
+      </VehicleProfiles>
+    </AgentProfile>
+  </AgentProfiles>
+  <VehicleProfiles>
+    <VehicleProfile Name="BMW 7 g12 2016">
+      <Model Name="car_bmw_7_1"/>
+      <Components/>
+      <Sensors/>
+    </VehicleProfile>
+  </VehicleProfiles>
+  <ProfileGroup Type="Driver">
+    <Profile Name="AgentFollowingDriver">
+      <String Key="Type" Value="AlgorithmAgentFollowingDriverModel"/>
+      <String Key="AlgorithmLateralModule" Value="Algorithm_LateralAfdm"/>
+      <String Key="AlgorithmLongitudinalModule" Value="Algorithm_LongitudinalAfdm"/>
+    </Profile>
+  </ProfileGroup>
+</Profiles>

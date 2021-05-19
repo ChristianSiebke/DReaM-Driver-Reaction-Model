@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -61,7 +61,7 @@ public:
         // do not change order, as agent adapter needs the faked world data
 
         auto fakeMovingObject = new Fakes::MovingObject();
-        ON_CALL(fakeWorldData, AddMovingObject(_)).WillByDefault(ReturnRef(*fakeMovingObject));
+        ON_CALL(fakeWorldData, AddMovingObject(_, _)).WillByDefault(ReturnRef(*fakeMovingObject));
         World::Localization::Localizer localizer{fakeWorldData};
 
         auto agent = new AgentAdapter(&fakeWorld, nullptr, &fakeWorldData, localizer);

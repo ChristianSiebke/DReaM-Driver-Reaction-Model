@@ -124,24 +124,19 @@ TEST(FakeLaneManager, ApplyMovingObjectTest)
     Fakes::MovingObject fmo01;
     Fakes::MovingObject fmo11;
 
-    flm.AddWorldObject(0, 0, fmo00);
-    flm.AddWorldObject(0, 0, fmo01);
-    flm.AddWorldObject(1, 1, fmo11);
+    flm.AddWorldObject(0, 0, fmo00, LaneOverlap{1,1,0,0});
+    flm.AddWorldObject(0, 0, fmo01, LaneOverlap{2,2,0,0});
+    flm.AddWorldObject(1, 1, fmo11, LaneOverlap{3,3,0,0});
 
-    auto gmo00 = flm.lanes[0][0]->GetWorldObjects();
-    auto gmo01 = flm.lanes[0][1]->GetWorldObjects();
-    auto gmo10 = flm.lanes[1][0]->GetWorldObjects();
-    auto gmo11 = flm.lanes[1][1]->GetWorldObjects();
+    ASSERT_THAT(flm.lanes[0][0]->GetWorldObjects(true), SizeIs(2));
+    ASSERT_THAT(flm.lanes[0][1]->GetWorldObjects(true), SizeIs(0));
+    ASSERT_THAT(flm.lanes[1][0]->GetWorldObjects(true), SizeIs(0));
+    ASSERT_THAT(flm.lanes[1][1]->GetWorldObjects(true), SizeIs(1));
 
-    ASSERT_THAT(gmo00, SizeIs(2));
-    ASSERT_THAT(gmo01, SizeIs(0));
-    ASSERT_THAT(gmo10, SizeIs(0));
-    ASSERT_THAT(gmo11, SizeIs(1));
-
-    EXPECT_THAT(gmo00.front(), Eq(&fmo00));
-    EXPECT_THAT(gmo00.back(), Eq(&fmo01));
-
-    EXPECT_THAT(gmo11.front(), Eq(&fmo11));
+    ASSERT_THAT(flm.lanes[0][0]->GetWorldObjects(false), SizeIs(2));
+    ASSERT_THAT(flm.lanes[0][1]->GetWorldObjects(false), SizeIs(0));
+    ASSERT_THAT(flm.lanes[1][0]->GetWorldObjects(false), SizeIs(0));
+    ASSERT_THAT(flm.lanes[1][1]->GetWorldObjects(false), SizeIs(1));
 }
 
 TEST(FakeLaneManager, SetWidth)
