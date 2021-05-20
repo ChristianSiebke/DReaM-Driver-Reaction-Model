@@ -37,6 +37,9 @@ extern "C" {
 
 std::string log_prefix(const std::string &agentIdString, const std::string &componentName);
 
+static constexpr bool DEFAULT_LOGGING {true};
+static constexpr bool DEFAULT_CSV_OUTPUT {true};
+static constexpr bool DEFAULT_UNZIP_ONCE_PER_INSTANCE {true};
 
 class AlgorithmFmuWrapperImplementation : public UnrestrictedModelInterface, public FmuWrapperInterface
 {

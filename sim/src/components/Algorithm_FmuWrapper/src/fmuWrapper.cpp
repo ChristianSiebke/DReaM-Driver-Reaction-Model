@@ -77,10 +77,10 @@ AlgorithmFmuWrapperImplementation::AlgorithmFmuWrapperImplementation(std::string
     cdata.log_file_name      = nullptr;
     cdata.output_file_name   = nullptr;
 
-    auto fmuTypeParameter = parameters->GetParametersString().find("FmuType");
-    if (fmuTypeParameter != parameters->GetParametersString().end())
+    auto fmuTypeParameter = helper::map::query(parameters->GetParametersString(), "FmuType");
+    if (fmuTypeParameter.has_value())
     {
-        fmuType = fmuTypeParameter->second;
+        fmuType = fmuTypeParameter.value();
     }
     else
     {
@@ -88,22 +88,26 @@ AlgorithmFmuWrapperImplementation::AlgorithmFmuWrapperImplementation(std::string
         fmuType = "Generic";
     }
 
-    FMU_configPath = parameters->GetParametersString().at("FmuPath");
+    const auto fmuPath = helper::map::query(parameters->GetParametersString(), "FmuPath");
+    THROWIFFALSE(fmuPath.has_value(), "Missing parameter \"FmuPath\"");
+    FMU_configPath = fmuPath.value();
 
     SetOutputPath();
     SetupFilenames();
 
-    if (parameters->GetParametersBool().at("Logging"))
+    const auto logging = helper::map::query(parameters->GetParametersBool(), "Logging").value_or(DEFAULT_LOGGING);
+    if (logging)
     {
         SetupLog();
     }
 
-    if (parameters->GetParametersBool().at("CsvOutput"))
+    const auto csvOutput = helper::map::query(parameters->GetParametersBool(), "CsvOutput").value_or(DEFAULT_CSV_OUTPUT);
+    if (csvOutput)
     {
         SetupOutput();
     }
 
-    bool unzipOncePerInstance = parameters->GetParametersBool().at("UnzipOncePerInstance");
+    auto unzipOncePerInstance = helper::map::query(parameters->GetParametersBool(), "UnzipOncePerInstance").value_or(DEFAULT_UNZIP_ONCE_PER_INSTANCE);
 
 #ifdef unix
     if (!unzipOncePerInstance)
