@@ -27,13 +27,14 @@ HEADERS += \
     $$OPEN_SRC/common/acquirePositionEvent.h \
     $$OPEN_SRC/common/acquirePositionSignal.h \
     $$UNIT_UNDER_TEST/openScenarioActionsImpl.h \
-    $$UNIT_UNDER_TEST/oscActionsCalculation.h
+    $$UNIT_UNDER_TEST/oscActionsCalculation.h \
+    $$UNIT_UNDER_TEST/transformDefaultCustomCommandAction.h
 
 SOURCES += \
     $$UNIT_UNDER_TEST/transformLaneChange.cpp \
     $$UNIT_UNDER_TEST/transformSpeedAction.cpp \
     $$UNIT_UNDER_TEST/transformAcquirePosition.cpp \
-    $$UNIT_UNDER_TEST/transformCustomParameters.cpp \
+    $$UNIT_UNDER_TEST/transformDefaultCustomCommandAction.cpp \
     $$UNIT_UNDER_TEST/openScenarioActionsImpl.cpp \
     $$UNIT_UNDER_TEST/oscActionsCalculation.cpp \
     openScenarioActions_Tests.cpp

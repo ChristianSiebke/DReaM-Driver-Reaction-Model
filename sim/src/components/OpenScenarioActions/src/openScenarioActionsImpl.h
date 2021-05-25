@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 in-tech GmbH
+* Copyright (c) 2020, 2021 in-tech GmbH
 *               2020 BMW AG
 *
 * This program and the accompanying materials are made
@@ -15,10 +15,10 @@
 
 #include "include/modelInterface.h"
 #include "transformAcquirePosition.h"
+#include "transformDefaultCustomCommandAction.h"
 #include "transformLaneChange.h"
 #include "transformSpeedAction.h"
 #include "transformTrajectory.h"
-#include "transformCustomParameters.h"
 /**
 * \brief Relays triggered OpenScenario actions as signals to other components
 *
@@ -64,7 +64,7 @@ public:
     using TrajectorySignalLinkId = std::integral_constant<LinkId, 0>;
     using SpeedActionSignalLinkId = std::integral_constant<LinkId, 3>;
     using AcquirePositionSignalLinkId = std::integral_constant<LinkId, 4>;
-    using CustomParametersSignalLinkId = std::integral_constant<LinkId, 5>;
+    using StringSignalLinkId = std::integral_constant<LinkId, 5>;
 
 private:
     [[noreturn]] void ThrowUnregisteredIdentifier(const std::string &identifier);
@@ -78,12 +78,12 @@ private:
         ActionTransformRepository::Register(openScenario::transformation::LaneChange::Transform),
         ActionTransformRepository::Register(openScenario::transformation::SpeedAction::Transform),
         ActionTransformRepository::Register(openScenario::transformation::AcquirePosition::Transform),
-        ActionTransformRepository::Register(openScenario::transformation::CustomParameters::Transform)};
+        ActionTransformRepository::Register(openScenario::transformation::DefaultCustomCommandAction::Transform)};
 
     std::map<const std::string, LinkId> linkIdMapping{
         {openpass::events::TrajectoryEvent::TOPIC, TrajectorySignalLinkId::value},
         {openpass::events::LaneChangeEvent::TOPIC, TrajectorySignalLinkId::value},
         {openpass::events::SpeedActionEvent::TOPIC, SpeedActionSignalLinkId::value},
         {openpass::events::AcquirePositionEvent::TOPIC, AcquirePositionSignalLinkId::value},
-        {openpass::events::CustomParametersEvent::TOPIC, CustomParametersSignalLinkId::value}};
+        {openpass::events::DefaultCustomCommandActionEvent::TOPIC, StringSignalLinkId::value}};
 };
