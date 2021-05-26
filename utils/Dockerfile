@@ -5,22 +5,13 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get -qq update && apt-get -qq dist-upgrade && apt-get install -qq -y --no-install-recommends \
     build-essential \
-    ca-certificates \
     ccache \
     cmake \
     doxygen \
-    g++-10 \
-    gcc-10 \
-    git \
-    google-mock \
-    googletest \
+    gcc-9 \
+    g++-9 \
     graphviz \
     lcov \
-    libboost-filesystem-dev \
-    libgmock-dev \
-    libgtest-dev \
-    libprotobuf-dev \
-    protobuf-compiler \
     python3 \
     python3-distutils \
     python3-junitparser \
