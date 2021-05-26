@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2018 AMFD GmbH
 *               2016, 2017, 2018, 2019, 2020 ITK Engineering GmbH
 *               2020 HLRS, University of Stuttgart.
@@ -215,6 +215,11 @@ static double CalculateMomentInertiaYaw(double mass, double length, double width
     return tokens;
 }
 
+//! Returns the directional road for which the heading is the lowest for a given position
+//!
+//! \param roadPositions    all possible road positions as calculated by the localization
+//! \param world            world
+//! \return road and direction with lowest heading
 static RouteElement GetRoadWithLowestHeading(const std::map<const std::string, GlobalRoadPosition>& roadPositions, const WorldInterface& world)
 {
     RouteElement bestFitting;

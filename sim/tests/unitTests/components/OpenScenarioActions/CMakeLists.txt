@@ -12,7 +12,7 @@ add_openpass_target(
     ${COMPONENT_SOURCE_DIR}/transformLaneChange.cpp
     ${COMPONENT_SOURCE_DIR}/transformSpeedAction.cpp
     ${COMPONENT_SOURCE_DIR}/transformAcquirePosition.cpp
-    ${COMPONENT_SOURCE_DIR}/transformCustomParameters.cpp
+    ${COMPONENT_SOURCE_DIR}/transformDefaultCustomCommandAction.cpp
     ${COMPONENT_SOURCE_DIR}/transformSpeedAction.cpp
 
   HEADERS
@@ -22,6 +22,7 @@ add_openpass_target(
     ${OPENPASS_SIMCORE_DIR}/common/events/trajectoryEvent.h
     ${OPENPASS_SIMCORE_DIR}/common/trajectorySignal.h
     ${OPENPASS_SIMCORE_DIR}/common/acquirePositionSignal.h
+    ${COMPONENT_SOURCE_DIR}/transformDefaultCustomCommandAction.h
     ${OPENPASS_SIMCORE_DIR}/common/speedActionSignal.h
 
   INCDIRS

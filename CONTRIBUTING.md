@@ -42,7 +42,7 @@ The branch 'servant' contains the contributions that will be included in the nex
     - Stick to the [coding guideline](https://wiki.eclipse.org/images/3/3f/OpenPASS_Conventions.pdf)
     - Amend the documentation if necessary
     - Provide unit-tests in googletest format
-    - Make sure, the servant compiles and runs in combination with your contribution
+    - Make sure, the code base with your contribution compiles
 5.	(you) Assign the issue to another committer.
 6.	(other committer) Review the code.
 7.	(other committer) To merge new branch into 'servant' you can close the merge request via GitLab.

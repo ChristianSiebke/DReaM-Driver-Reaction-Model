@@ -104,7 +104,7 @@ namespace openpass::utils {
 ///        a string representation: try to_cstr(EnumType) or to_string(EnumType)
 static constexpr std::array<const char *, 4> AgentCategoryMapping{
     "Ego",
-    "Scenaro",
+    "Scenario",
     "Common",
     "Any"};
 

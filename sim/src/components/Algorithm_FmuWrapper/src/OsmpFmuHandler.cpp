@@ -16,12 +16,12 @@
 #include <QDir>
 #include <QFile>
 
-#include "common/customParametersSignal.h"
 #include "common/dynamicsSignal.h"
 #include "common/osiUtils.h"
 #include "common/sensorDataSignal.h"
-#include "common/trajectorySignal.h"
 #include "common/speedActionSignal.h"
+#include "common/stringSignal.h"
+#include "common/trajectorySignal.h"
 #include "core/slave/modules/World_OSI/WorldData.h"
 #include "google/protobuf/util/json_util.h"
 #include "variant_visitor.h"
@@ -183,7 +183,7 @@ void OsmpFmuHandler::UpdateInput(int localLinkId, const std::shared_ptr<const Si
 
         if (!signal)
         {
-            const std::string msg = "AlgorithmFmuHandler invalid singnaltype";
+            const std::string msg = "AlgorithmFmuHandler invalid signaltype";
             LOG(CbkLogLevel::Debug, msg);
             throw std::runtime_error(msg);
         }
@@ -216,13 +216,10 @@ void OsmpFmuHandler::UpdateInput(int localLinkId, const std::shared_ptr<const Si
     }
     else if (localLinkId == 12)
     {
-        const auto signal = std::dynamic_pointer_cast<CustomParametersSignal const>(data);
+        const auto signal = std::dynamic_pointer_cast<StringSignal const>(data);
         if (signal && signal->componentState == ComponentState::Acting)
         {
-            for(const auto& parameter : signal->parameters)
-            {
-                trafficCommands[time]->add_action()->mutable_custom_action()->set_command(parameter);
-            }
+            trafficCommands[time]->add_action()->mutable_custom_action()->set_command(signal->payload);
         }
     }
     else if (localLinkId == 13)

@@ -12,6 +12,7 @@ set(OPENPASS_SIMCORE_DIR ${CMAKE_CURRENT_LIST_DIR}/../src)
 set(TEST_PATH ${CMAKE_CURRENT_LIST_DIR})
 
 include_directories(
+  ${CMAKE_CURRENT_LIST_DIR}/..
   ${TEST_PATH}
   ${TEST_PATH}/common
   ${TEST_PATH}/common/gtest
