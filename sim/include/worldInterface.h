@@ -27,6 +27,7 @@
 #include "common/openScenarioDefinitions.h"
 #include "common/vector2d.h"
 #include "common/worldDefinitions.h"
+#include "include/streamInterface.h"
 
 class AgentInterface;
 class ParameterInterface;
@@ -288,7 +289,7 @@ public:
     //!
     //! @return Position on all lanes at specified world position
     //-----------------------------------------------------------------------------
-    virtual std::map<const std::string, GlobalRoadPosition> WorldCoord2LaneCoord(double x, double y, double heading) const = 0;
+    virtual std::map<std::string, GlobalRoadPosition> WorldCoord2LaneCoord(double x, double y, double heading) const = 0;
 
     //-----------------------------------------------------------------------------
     //! Tries to create an internal scenery from a given file.
@@ -662,6 +663,12 @@ public:
     virtual std::pair<RoadGraph, RoadGraphVertex> GetRoadGraph (const RouteElement& start, int maxDepth) const = 0;
 
     virtual std::map<RoadGraphEdge, double> GetEdgeWeights (const RoadGraph& roadGraph) const = 0;
+
+    //! Returns the RoadStream that is defined by the given route
+    //!
+    //! \param route    list of roads with direction
+    //! \return RoadStream along route
+    virtual std::unique_ptr<RoadStreamInterface> GetRoadStream(const std::vector<RouteElement>& route) const = 0;
 
     //-----------------------------------------------------------------------------
     //! Retrieves the friction

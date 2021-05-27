@@ -1,5 +1,5 @@
 #/*******************************************************************************
-#* Copyright (c) 2019, 2020 in-tech GmbH
+#* Copyright (c) 2019, 2020, 2021 in-tech GmbH
 #* Copyright (c) 2021 ITK Engineering GmbH
 #*
 #* This program and the accompanying materials are made
@@ -41,6 +41,7 @@ SUBDIRS = \
     sensorOSI_Tests \
     signalPrioritizer_Tests \
     spawnPointScenario_Tests \
+    spawnPointPreRunCommon_Tests \
     spawnPointRuntimeCommon_Tests \
     spawnPointWorldAnalyzer_Tests \
     worldOSI_Tests \
@@ -126,6 +127,9 @@ signalPrioritizer_Tests.file = \
 
 spawnPointScenario_Tests.file = \
     $$PWD/core/slave/modules/SpawnPointScenario/spawnPointScenario_Tests.pro
+
+spawnPointPreRunCommon_Tests.file = \
+    $$PWD/core/slave/modules/SpawnPointPreRunCommon/spawnPointPreRunCommon_Tests.pro
 
 spawnPointRuntimeCommon_Tests.file = \
     $$PWD/core/slave/modules/SpawnPointRuntimeCommon/spawnPointRuntimeCommon_Tests.pro

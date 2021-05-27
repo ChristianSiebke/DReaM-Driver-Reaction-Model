@@ -39,8 +39,7 @@ std::function<void (const RTreeElement&)>  LocateOnGeometryElement(const OWL::In
         WorldToRoadCoordinateConverter converter(localizationElement);
 
         const OWL::Interfaces::Lane* lane = localizationElement.lane;
-        const auto laneOsiId = lane->GetId();
-        const auto laneOdId = worldData.GetLaneIdMapping().at(laneOsiId);
+        const auto laneOdId = lane->GetOdId();
         const auto roadId = lane->GetRoad().GetId();
 
         if (converter.IsConvertible(referencePoint))
@@ -83,7 +82,7 @@ LocatedObject LocateOnGeometryElements(const bg_rTree& rTree, const OWL::Interfa
 }
 
 std::function<void (const RTreeElement&)> LocateOnGeometryElement(const OWL::Interfaces::WorldData& worldData, const Common::Vector2d& point,
-                                                                  const double& hdg, std::map<const std::string, GlobalRoadPosition>& result)
+                                                                  const double& hdg, std::map<std::string, GlobalRoadPosition>& result)
 {
     return  [&](auto const& value)
     {
@@ -98,8 +97,7 @@ std::function<void (const RTreeElement&)> LocateOnGeometryElement(const OWL::Int
         WorldToRoadCoordinateConverter converter(localizationElement);
 
         const OWL::Interfaces::Lane* lane = localizationElement.lane;
-        const auto laneOsiId = lane->GetId();
-        const auto laneOdId = worldData.GetLaneIdMapping().at(laneOsiId);
+        const auto laneOdId = lane->GetOdId();
         const auto roadId = lane->GetRoad().GetId();
 
         if (converter.IsConvertible(point))
@@ -110,10 +108,10 @@ std::function<void (const RTreeElement&)> LocateOnGeometryElement(const OWL::Int
     };
 }
 
-std::map<const std::string, GlobalRoadPosition> LocateOnGeometryElements(const bg_rTree& rTree, const OWL::Interfaces::WorldData& worldData,
+std::map<std::string, GlobalRoadPosition> LocateOnGeometryElements(const bg_rTree& rTree, const OWL::Interfaces::WorldData& worldData,
                            const Common::Vector2d point, double hdg)
 {
-    std::map<const std::string, GlobalRoadPosition> result;
+    std::map<std::string, GlobalRoadPosition> result;
     CoarseBoundingBox box = GetSearchBox({point});
     rTree.query(bgi::intersects(box),
                             boost::make_function_output_iterator(LocateOnGeometryElement(worldData, point, hdg, result)));
@@ -181,7 +179,7 @@ Result Localizer::BuildResult(const LocatedObject& locatedObject) const
     for (const auto& [lane, laneOverlap] : locatedObject.laneOverlaps)
     {
         std::string roadId = lane->GetRoad().GetId();
-        touchedRoads[roadId].lanes.push_back(worldData.GetLaneIdMapping().at(lane->GetId()));
+        touchedRoads[roadId].lanes.push_back(lane->GetOdId());
         touchedRoads[roadId].sStart = std::min(touchedRoads[roadId].sStart, laneOverlap.s_min);
         touchedRoads[roadId].sEnd = std::max(touchedRoads[roadId].sEnd, laneOverlap.s_max);
         double remainder_left = std::max(touchedRoads[roadId].remainder.left, laneOverlap.min_delta_left);
@@ -257,7 +255,7 @@ Result Localizer::Locate(const polygon_t& boundingBox, OWL::Interfaces::WorldObj
     return result;
 }
 
-std::map<const std::string, GlobalRoadPosition> Localizer::Locate(const Common::Vector2d& point, const double& hdg) const
+std::map<std::string, GlobalRoadPosition> Localizer::Locate(const Common::Vector2d& point, const double& hdg) const
 {
     return LocateOnGeometryElements(rTree,
                                     worldData,

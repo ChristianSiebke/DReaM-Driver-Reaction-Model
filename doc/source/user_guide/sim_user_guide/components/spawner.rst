@@ -14,10 +14,10 @@
 Spawner
 -------
 
-.. _components_scenariospawner:
-
 Spawners are responsible to populate the world.
 In order to do so, several spawners can be used, whereas only the **ScenarioSpawner** is mandatory.
+
+.. _components_scenariospawner:
 
 ScenarioSpawner
 ~~~~~~~~~~~~~~~
@@ -49,18 +49,22 @@ The SpawnPoints have the following parameters:
 .. table::
    :class: tight-table
 
-   ========= ============ ==== ===================================================================================
-   Parameter Type         Unit Description
-   ========= ============ ==== ===================================================================================
-   Roads     StringVector      The RoadIDs of the Roads on which to spawn Agents.
-                               Multiple roads can be given as a comma-separated list. 
-                               Inexistent roads are ignored.
-   Lanes     IntVector         The LaneIDs of the Lanes of the Road on which to spawn Agents.
-                               Multiple lanes can be given as a comma-separated list.
-                               Inexistent lanes are ignored.
-   SStart    Double       m    The S position specifying the minimum S for the range within which to spawn Agents
-   SEnd      Double       m    The S position specifying the maximum S for the range within which to spawn Agents
-   ========= ============ ==== ===================================================================================
+   ========= ============ ==== ======== ==================================================================================
+   Parameter Type         Unit optional Description
+   ========= ============ ==== ======== ==================================================================================
+   Roads     StringVector      no       List of linked Roads on which to spawn Agents.
+                                        Intermediate roads may be omitted.
+                                        If a road is not linked to the previous in the list, this road and the roads after it are ignored
+   Lanes     IntVector         yes      The LaneIDs of the Lanes of the Road on which to spawn Agents (given on SStart).
+                                        Inexistent lanes are ignored.
+                                        If omitted all lanes are used.
+   SStart    Double       m    yes      The S position on the first road specifying the start of the range within which to spawn Agents
+                                        If omitted the whole road is included
+   SEnd      Double       m    yes      The S position on the last road specifying the start of the range within which to spawn Agents
+   SLength   Double       m    yes      Length of spawned area calculated from SStart      
+                                        This is ignored if SEnd is explicitly defined.
+                                        If neither is given the whole road is included
+   ========= ============ ==== ======== ==================================================================================
    
 It is also possible to define the minimum gap in meters either as fixed parameter of type double or as stochastic distribution.
 If it isn't defined the default value of 5m is used.
@@ -71,7 +75,7 @@ If it isn't defined the default value of 5m is used.
    :start-at: <Profile Name="DefaultPreRunCommon">
    :end-at: </Profile>
 
-The PreRunCommonSpawner will spawn common agents on the specified Lanes of the specified Road from the s position S-Start to the s position S-End based on the parameters of the TrafficGroups.
+The PreRunCommonSpawner will spawn common agents on the specified Lanes of the specified continuous Road sequence (= RoadStream) inside the specified s interval based on the parameters of the TrafficGroups.
 The following restrictions apply:
 
 - The PreRunCommonSpawner only spawns on the following OpenDRIVE lane types: 
@@ -81,51 +85,46 @@ The following restrictions apply:
     - ConnectingRamp
 
 - If the ScenarioSpawner spawned Scenario Agents (including the Ego agent) before this Spawner is triggered (in the intended order of these Spawners), ranges between the Scenario Agents are invalid for spawning by this Spawner.
-  The spawn ranges will only be augmented by Scenario Agents on the same Road and Lane.
+  The spawn ranges will only be augmented by Scenario Agents on the same Lane.
   As such, there are 7 different potential scenarios that may arise in terms of how the valid spawn ranges of the spawner may be impacted:
   
-  #) **Two Scenario Agents on the same Road and Lane**
+  #) **Two Scenario Agents on the same Lane**
 
      One before S-Start position and one after S-End position:
      This invalidates the entirety of the spawning range; no agents may be spawned here
 
-  #) **Two Scenario Agents on the same Road and Lane**
+  #) **Two Scenario Agents on the same Lane**
   
      One between S-Start position and S-End position and one either before S-Start or after S-End:
      The only valid spawn range is that on the opposite side of the in-specified-range Agent from the outside-specified-range agent
 
-  #) **Two Scenario Agents on the same Road and Lane**
+  #) **Two Scenario Agents on the same Lane**
   
      Both within the specified S-Start and S-End positions
      The valid spawn ranges are between S-Start and the first car and between the second car and S-End
 
-  #) **Two Scenario Agents on the same Road and Lane**
+  #) **Two Scenario Agents on the same Lane**
   
      Both outside the specified S-Start and S-End positions on the same side (both before S-Start or both after S-End):
      The specified spawn range is entirely valid
   
-  #) **One Scenario Agent on the same Road and Lane**
+  #) **One Scenario Agent on the same Lane**
   
      Within specified S-Start and S-End positions:
      The valid spawn ranges include all but the bounds of the Agent within the specified S-Start and S-End positions
-  #) **One Scenario Agent on the same Road and Lane**
+     
+  #) **One Scenario Agent on the same Lane**
      
      Outside specified S-Start and S-End positions:
      The specified spawn range is entirely valid
 
-  #) **No Scenario Agents on the same Road and Lane**
+  #) **No Scenario Agents on the same Lane**
     
      The specified spawn range is entirely valid
 
-- If a non-existent road is specified, no spawning will occur
+- If only non-existent lanes on SStart are specified, no spawning will occur
 
-- If only non-existent lanes for an existent road are specified, no spawning will occur
-
-- If some specified lanes exist and some are non-existent for an existent road, spawning will occur for the lanes which do exist
-
-- If the specified S-Start and S-End positions are either beyond or before the S positions at which the specified Road and Lane combination exists, no spawning will occur
-
-- In the situation where a section of a Road adds a new lane to the left of the currently existing lanes, one should be aware that the laneId "-1" will shift to the newest left lane and should adjust Spawner profiles with this in mind
+- If some specified lanes exist and some are non-existent, spawning will occur for the lanes which do exist
 
 Once the spawning ranges are determined the PreRunSpawner will spawn for each spawning area based on the following logic:
 

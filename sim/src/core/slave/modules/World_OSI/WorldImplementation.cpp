@@ -287,6 +287,11 @@ std::map<RoadGraphEdge, double> WorldImplementation::GetEdgeWeights(const RoadGr
     return weights;
 }
 
+std::unique_ptr<RoadStreamInterface> WorldImplementation::GetRoadStream(const std::vector<RouteElement> &route) const
+{
+    return worldDataQuery.CreateRoadStream(route);
+}
+
 AgentInterface* WorldImplementation::GetEgoAgent()
 {
     const std::map<int, AgentInterface*> agents = agentNetwork.GetAgents();
@@ -383,7 +388,7 @@ Position WorldImplementation::LaneCoord2WorldCoord(double distanceOnLane, double
     return worldDataQuery.GetPositionByDistanceAndLane(lane, distanceOnLane, offset);
 }
 
-std::map<const std::string, GlobalRoadPosition> WorldImplementation::WorldCoord2LaneCoord(double x, double y, double heading) const
+std::map<std::string, GlobalRoadPosition> WorldImplementation::WorldCoord2LaneCoord(double x, double y, double heading) const
 {
     return localizer.Locate({x,y}, heading);
 }
@@ -490,7 +495,7 @@ LaneSections WorldImplementation::GetLaneSections(const std::string& roadId) con
 
         for (const auto& lane : section->GetLanes())
         {
-            laneSection.laneIds.push_back(worldData.GetLaneIdMapping().at(lane->GetId()));
+            laneSection.laneIds.push_back(lane->GetOdId());
         }
 
         result.push_back(laneSection);

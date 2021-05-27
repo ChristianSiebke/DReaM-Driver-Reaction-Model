@@ -54,6 +54,8 @@ SRC_WORLD = \
             $$UNIT_UNDER_TEST/egoAgent.cpp \
             $$UNIT_UNDER_TEST/GeometryConverter.cpp \
             $$UNIT_UNDER_TEST/JointsBuilder.cpp \
+            $$UNIT_UNDER_TEST/LaneStream.cpp \
+            $$UNIT_UNDER_TEST/RoadStream.cpp \
             $$UNIT_UNDER_TEST/TrafficObjectAdapter.cpp \
             $$UNIT_UNDER_TEST/SceneryConverter.cpp \
             $$UNIT_UNDER_TEST/WorldData.cpp \
@@ -68,6 +70,8 @@ INC_WORLD = \
             $$UNIT_UNDER_TEST/egoAgent.h \
             $$UNIT_UNDER_TEST/GeometryConverter.h \
             $$UNIT_UNDER_TEST/JointsBuilder.h \
+            $$UNIT_UNDER_TEST/LaneStream.h \
+            $$UNIT_UNDER_TEST/RoadStream.h \
             $$UNIT_UNDER_TEST/TrafficObjectAdapter.h \
             $$UNIT_UNDER_TEST/SceneryConverter.h \
             $$UNIT_UNDER_TEST/WorldData.h \
@@ -136,6 +140,7 @@ SOURCES += \
             worldQuery_Tests.cpp \
             lane_Tests.cpp \
             sensorView_Tests.cpp \
+            stream_Tests.cpp \
             datatypes_Tests.cpp \
             worldToRoadCoordinateConverter_Tests.cpp \
             egoAgent_Tests.cpp \

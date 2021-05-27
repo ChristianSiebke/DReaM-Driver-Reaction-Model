@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019, 2020 in-tech GmbH
+* Copyright (c) 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -24,7 +24,6 @@
 #include "common/spawnPointLibraryDefinitions.h"
 #include "include/spawnPointInterface.h"
 #include "include/worldInterface.h"
-#include "include/scenarioInterface.h"
 #include "include/agentBlueprintProviderInterface.h"
 #include "SpawnPointPreRunCommonDefinitions.h"
 
@@ -62,83 +61,29 @@ private:
     /**
      * @brief Generates agents in specified lane based on specified range.
      *
-     * @param[in]   roadId      Id of the road to spawn agents in.
-     * @param[in]   validLaneSpawningRange       LaneSpawningRange containing laneId and Range.
-     * @return
+    /* @param[in]  laneStream               LaneStream to spawn in
+     * @param[in]  validLaneSpawningRange   range to spawn
+     * @return generated agent
      */
-    Agents GenerateAgentsForRange(const RoadId& roadId, const LaneSpawningRange& validLaneSpawningRange);
+    Agents GenerateAgentsForRange(const std::unique_ptr<LaneStreamInterface>& laneStream,
+                                  const Range& range);
 
     /**
      * @brief Get SpawnInfo for the next agent that should be spawned.
-     * @param[in]   roadId              Id of the road to spawn agents in.
-     * @param[in]   laneId              Id of the lane in which new agent should be spawned.
+    /* @param[in]   laneStream          LaneStream to spawn in
      * @param[in]   range               Range of the lane in which new agent should be spawned.
      * @param[in]   gapInSeconds        Gap between new agent and other agents in the lane.
      * @param[in]   velocity            Velocity of the new agent.
      * @param[in]   agentFrontLength
      * @param[in]   agentRearLength
-     * @param[in]   route
      * @return      SpawnInfo for new agent.
      */
-    std::optional<SpawnInfo> GetNextSpawnCarInfo(const RoadId& roadId,
-                                                 const LaneId& laneId,
-                                                 const Range& range,
-                                                 const double gapInSeconds,
-                                                 const double velocity,
-                                                 const double agentFrontLength,
-                                                 const double agentRearLength,
-                                                 const Route& route) const;
-    /**
-     * @brief Checks validity of spawning coordinates.
-     * @param[in]   roadId                  Id of the road in which agent is to be spawned.
-     * @param[in]   laneId                  Id of the lane in which agent is to be spawned.
-     * @param[in]   sPosition               Position on the road in which agent is to be spawned.
-     * @param[in]   offset
-     * @param[in]   vehicleModelParameters  Contains information about the vehicle model.
-     * @return      true if valid. false if not valid.
-     */
-    bool AreSpawningCoordinatesValid(const std::string& roadId,
-                                     const int laneId,
-                                     const double sPosition,
-                                     const double offset,
-                                     const VehicleModelParameters& vehicleModelParameters);
-    /**
-     * @brief Checks if offset for lane is valid.
-     * @param[in]   roadId              Id of the road in which agent is to be spawned.
-     * @param[in]   laneId              Id of the lane in which agent is to be spawned.
-     * @param[in]   distanceFromStart   Distance from the start of the road.
-     * @param[in]   offset
-     * @param[in]   vehicleWidth        Width of the vehicle.
-     * @return      true if valid. false if not valid.
-     */
-    bool IsOffsetValidForLane(const std::string& roadId,
-                              const int laneId,
-                              const double distanceFromStart,
-                              const double offset,
-                              const double vehicleWidth);
-    /**
-     * @brief NewAgentIntersectsWithExistingAgent
-     * @param[in]   laneId                  Id of the lane in which agent is to be spawned.
-     * @param[in]   sPosition               Position along the road where agent is to be spawned.
-     * @param[in]   offset
-     * @param[in]   vehicleModelParameters  Contains information about the vehicle model.
-     * @return      returns true if new agent intersects with existing agent. returns false if not.
-     */
-    bool NewAgentIntersectsWithExistingAgent(const int laneId,
-                                             const double sPosition,
-                                             const double offset,
-                                             const VehicleModelParameters& vehicleModelParameters) const;
-    /**
-     * @brief CalculateSpawnParameter
-     * @param[in]   agentBlueprint      AgentBlueprint for new agent.
-     * @param[in]   laneId              Id of lane in which new agent should be spawned.
-     * @param[in]   spawnInfo           SpawnInfo of new agent.
-     * @param[in]   route               Route
-     * @return      return true if successful
-     */
-    bool CalculateSpawnParameter(AgentBlueprintInterface* agentBlueprint,
-                                 const SpawnInfo& spawnInfo,
-                                 const Route& route);
+    std::optional<SpawnInfo> GetNextSpawnCarInfo(const std::unique_ptr<LaneStreamInterface> &laneStream,
+                                                      const Range& range,
+                                                      const double gapInSeconds,
+                                                      const double velocity,
+                                                      const double agentFrontLength,
+                                                      const double agentRearLength) const;
 
     /**
      * \brief Logs a message for error mode.

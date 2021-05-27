@@ -194,7 +194,7 @@ public:
         return implementation->LaneCoord2WorldCoord(distance, offset, roadId, laneId);
     }
 
-    std::map<const std::string, GlobalRoadPosition> WorldCoord2LaneCoord(double x, double y, double heading) const override
+    std::map<std::string, GlobalRoadPosition> WorldCoord2LaneCoord(double x, double y, double heading) const override
     {
         return implementation->WorldCoord2LaneCoord(x, y, heading);
     }
@@ -378,6 +378,11 @@ public:
     std::map<RoadGraphEdge, double> GetEdgeWeights (const RoadGraph& roadGraph) const override
     {
         return implementation->GetEdgeWeights(roadGraph);
+    }
+
+    std::unique_ptr<RoadStreamInterface> GetRoadStream(const std::vector<RouteElement>& route) const override
+    {
+        return implementation->GetRoadStream(route);
     }
 
     virtual RouteQueryResult<Obstruction> GetObstruction(const RoadGraph& roadGraph, RoadGraphVertex startNode, const GlobalRoadPosition& ownPosition,

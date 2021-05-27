@@ -159,7 +159,7 @@ public:
     Position LaneCoord2WorldCoord(double distanceOnLane, double offset, std::string roadId,
                                           int laneId) const override;
 
-    std::map<const std::string, GlobalRoadPosition> WorldCoord2LaneCoord(double x, double y, double heading) const override;
+    std::map<std::string, GlobalRoadPosition> WorldCoord2LaneCoord(double x, double y, double heading) const override;
 
     bool IsSValidOnLane(std::string roadId, int laneId, double distance) override;
 
@@ -226,6 +226,8 @@ public:
     std::pair<RoadGraph, RoadGraphVertex> GetRoadGraph (const RouteElement& start, int maxDepth) const override;
 
     std::map<RoadGraphEdge, double> GetEdgeWeights (const RoadGraph& roadGraph) const override;
+
+    std::unique_ptr<RoadStreamInterface> GetRoadStream(const std::vector<RouteElement>& route) const override;
 
     double GetFriction() const override;
 

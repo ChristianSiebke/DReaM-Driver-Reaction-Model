@@ -21,6 +21,7 @@
 #include "fakeParameter.h"
 #include "fakeStochastics.h"
 #include "fakeWorld.h"
+#include "fakeStream.h"
 
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -30,6 +31,7 @@ using ::testing::Ge;
 using ::testing::AllOf;
 using ::testing::Eq;
 using ::testing::DoubleEq;
+using ::testing::ByMove;
 
 constexpr char ROADID[] = "MyRoad";
 
@@ -82,31 +84,98 @@ public:
 
         RoadGraph roadGraph {};
         RoadGraphVertex vertex {};
-        RouteElement routeElement{ROADID, false};
+        RouteElement routeElement{ROADID, true};
         add_vertex(routeElement, roadGraph);
 
-        ON_CALL(world, IsDirectionalRoadExisting(_, _))
+        ON_CALL(world, IsDirectionalRoadExisting(ROADID, true))
                 .WillByDefault(Return(true));
+        ON_CALL(world, IsDirectionalRoadExisting(ROADID, false))
+                .WillByDefault(Return(false));
         ON_CALL(world, IsLaneTypeValid(_, _, _, _))
                 .WillByDefault(Return(true));
         ON_CALL(world, GetRoadGraph(_, _))
                 .WillByDefault(Return(std::pair<RoadGraph, RoadGraphVertex>{roadGraph, vertex}));
-        ON_CALL(world, GetAgentsInRange(_,_,_,_,_,_)).WillByDefault(
-        [&](const RoadGraph&, RoadGraphVertex startNode, int laneId, double s, double, double range)
+        ON_CALL(world, LaneCoord2WorldCoord(_,_,_,_)).WillByDefault(
+                    [&](double distanceOnLane, double offset, std::string , int laneId)
+        {return Position{distanceOnLane, offset + 3 * laneId + 1.5, 0, 0};});
+
+        FakeRoadStream* roadStream = new FakeRoadStream;
+        ON_CALL(*roadStream, GetStreamPosition(_)).WillByDefault(
+                    [](const GlobalRoadPosition& roadPosition){return StreamPosition{roadPosition.roadPosition.s, 0};});
+        FakeLaneStream* laneStream1 = new FakeLaneStream;
+        ON_CALL(*laneStream1, GetAgentsInRange(_,_)).WillByDefault(
+                    [&](StreamPosition start, StreamPosition end)
         {
             std::vector<const AgentInterface*> agentsInRange;
-            for (const auto agent : agentsOnLane[laneId])
+            for (const auto agent : agentsOnLane[-1])
             {
                 auto agentS = agent->GetDistanceToStartOfRoad(MeasurementPoint::Reference, "");
-                if (s <= agentS && agentS <= s + range)
+                if (start.s <= agentS && agentS <= end.s)
                 {
                     agentsInRange.push_back(agent);
                 }
             }
-            return RouteQueryResult<std::vector<const AgentInterface*>>{{startNode, agentsInRange}};});
-        ON_CALL(world, LaneCoord2WorldCoord(_,_,_,_)).WillByDefault(
-                    [&](double distanceOnLane, double offset, std::string , int laneId)
-        {return Position{distanceOnLane, offset + 3 * laneId + 1.5, 0, 0};});
+            return agentsInRange;
+        });
+        ON_CALL(*laneStream1, GetStreamPosition(_)).WillByDefault(
+                    [](const GlobalRoadPosition& roadPosition){return StreamPosition{roadPosition.roadPosition.s, 0};});
+        ON_CALL(*laneStream1, GetRoadPosition(_)).WillByDefault(
+                    [](const StreamPosition& streamPosition){return GlobalRoadPosition{ROADID, -1, streamPosition.s, streamPosition.t, 0};});
+        std::vector<std::pair<double, LaneType>> laneTypes{{0, LaneType::Driving}};
+        ON_CALL(*laneStream1, GetLaneTypes()).WillByDefault(Return(laneTypes));
+        ON_CALL(*laneStream1, GetStreamPosition(_, MeasurementPoint::Rear)).WillByDefault(
+                    [](const WorldObjectInterface* object, const MeasurementPoint&)
+        {return StreamPosition{object->GetDistanceToStartOfRoad(MeasurementPoint::Rear, ROADID),0};});
+        FakeLaneStream* laneStream2 = new FakeLaneStream;
+        ON_CALL(*laneStream2, GetAgentsInRange(_,_)).WillByDefault(
+                    [&](StreamPosition start, StreamPosition end)
+        {
+            std::vector<const AgentInterface*> agentsInRange;
+            for (const auto agent : agentsOnLane[-2])
+            {
+                auto agentS = agent->GetDistanceToStartOfRoad(MeasurementPoint::Reference, "");
+                if (start.s <= agentS && agentS <= end.s)
+                {
+                    agentsInRange.push_back(agent);
+                }
+            }
+            return agentsInRange;
+        });
+        ON_CALL(*laneStream2, GetStreamPosition(_)).WillByDefault(
+                    [](const GlobalRoadPosition& roadPosition){return StreamPosition{roadPosition.roadPosition.s, 0};});
+        ON_CALL(*laneStream2, GetRoadPosition(_)).WillByDefault(
+                    [](const StreamPosition& streamPosition){return GlobalRoadPosition{ROADID, -2, streamPosition.s, streamPosition.t, 0};});
+        ON_CALL(*laneStream2, GetLaneTypes()).WillByDefault(Return(laneTypes));
+        ON_CALL(*laneStream2, GetStreamPosition(_, MeasurementPoint::Rear)).WillByDefault(
+                    [](const WorldObjectInterface* object, const MeasurementPoint&)
+        {return StreamPosition{object->GetDistanceToStartOfRoad(MeasurementPoint::Rear, ROADID),0};});
+        FakeLaneStream* laneStream3 = new FakeLaneStream;
+        ON_CALL(*laneStream3, GetAgentsInRange(_,_)).WillByDefault(
+                    [&](StreamPosition start, StreamPosition end)
+        {
+            std::vector<const AgentInterface*> agentsInRange;
+            for (const auto agent : agentsOnLane[-3])
+            {
+                auto agentS = agent->GetDistanceToStartOfRoad(MeasurementPoint::Reference, "");
+                if (start.s <= agentS && agentS <= end.s)
+                {
+                    agentsInRange.push_back(agent);
+                }
+            }
+            return agentsInRange;
+        });
+        ON_CALL(*laneStream3, GetStreamPosition(_)).WillByDefault(
+                    [](const GlobalRoadPosition& roadPosition){return StreamPosition{roadPosition.roadPosition.s, 0};});
+        ON_CALL(*laneStream3, GetRoadPosition(_)).WillByDefault(
+                    [](const StreamPosition& streamPosition){return GlobalRoadPosition{ROADID, -3, streamPosition.s, streamPosition.t, 0};});
+        ON_CALL(*laneStream3, GetLaneTypes()).WillByDefault(Return(laneTypes));
+        ON_CALL(*laneStream3, GetStreamPosition(_, MeasurementPoint::Rear)).WillByDefault(
+                    [](const WorldObjectInterface* object, const MeasurementPoint&)
+        {return StreamPosition{object->GetDistanceToStartOfRoad(MeasurementPoint::Rear, ROADID),0};});
+        ON_CALL(*roadStream, GetLaneStream(_,-1)).WillByDefault(Return(ByMove(std::unique_ptr<LaneStreamInterface>(laneStream1))));
+        ON_CALL(*roadStream, GetLaneStream(_,-2)).WillByDefault(Return(ByMove(std::unique_ptr<LaneStreamInterface>(laneStream2))));
+        ON_CALL(*roadStream, GetLaneStream(_,-3)).WillByDefault(Return(ByMove(std::unique_ptr<LaneStreamInterface>(laneStream3))));
+        ON_CALL(world, GetRoadStream(std::vector<RouteElement>{{ROADID,true}})).WillByDefault(Return(ByMove(std::unique_ptr<RoadStreamInterface>(roadStream))));
 
         LaneSection fakeLaneSection1 {1000.0, 1500.0, {-1, -2, -3}};
         LaneSections fakeLaneSections {fakeLaneSection1};
@@ -117,6 +186,7 @@ public:
         VehicleModelParameters vehicleModelParameters;
         vehicleModelParameters.vehicleType = AgentVehicleType::Car;
         vehicleModelParameters.boundingBoxDimensions.length = 5.0;
+        vehicleModelParameters.boundingBoxDimensions.width = 1.0;
         vehicleModelParameters.boundingBoxCenter.x = 0.5;
         agentBlueprint.SetVehicleModelParameters(vehicleModelParameters);
         ON_CALL(agentBlueprintProvider, SampleAgent(_,_)).WillByDefault(Return(agentBlueprint));
@@ -259,11 +329,11 @@ TEST_F(SpawnerPreRun_IntegrationTests, ThreeContinuesLanes_SpawnWithCorrectTGapA
     std::map<std::string, double> parametersDouble {{"SStart", 1000.0}, {"SEnd", 1500.0}};
     ON_CALL(*spawnPoint, GetParametersDouble()).WillByDefault(ReturnRef(parametersDouble));
 
-    ON_CALL(world, IsDirectionalRoadExisting(_, _))
-            .WillByDefault(Return(true));
     ON_CALL(world, GetDistanceToEndOfLane(_,_,_,_,_,_)).WillByDefault(
                 [](const RoadGraph&, RoadGraphVertex startNode, int, double initialSearchDistance, double, const LaneTypes&)
-    {return RouteQueryResult<double>{{startNode, 2000.0 - initialSearchDistance}};});
+    {
+        return RouteQueryResult<double>{{startNode, 2000.0 - initialSearchDistance}};
+    });
     ON_CALL(world, IsSValidOnLane(ROADID, AllOf(Le(-1),Ge(-3)),AllOf(Ge(0),Le(2000)))).WillByDefault(Return(true));
     ON_CALL(world, GetLaneWidth(_,_,_)).WillByDefault(Return(3.0));
 
@@ -307,8 +377,6 @@ TEST_F(SpawnerPreRun_IntegrationTests, IncreasingLaneNumber_SpawnWithCorrectTGap
     std::map<std::string, double> parametersDouble {{"SStart", 1000.0}, {"SEnd", 1500.0}};
     ON_CALL(*spawnPoint, GetParametersDouble()).WillByDefault(ReturnRef(parametersDouble));
 
-    ON_CALL(world, IsDirectionalRoadExisting(_, _))
-            .WillByDefault(Return(true));
     ON_CALL(world, GetDistanceToEndOfLane(_,_,_,_,_,_)).WillByDefault(
                 [](const RoadGraph&, RoadGraphVertex startNode, int, double initialSearchDistance, double, const LaneTypes&)
     {return RouteQueryResult<double>{{startNode, 2000.0 - initialSearchDistance}};});
@@ -364,8 +432,6 @@ TEST_F(SpawnerPreRun_IntegrationTests, DecreasingLaneNumber_SpawnWithCorrectTGap
     std::map<std::string, double> parametersDouble {{"SStart", 1000.0}, {"SEnd", 1500.0}};
     ON_CALL(*spawnPoint, GetParametersDouble()).WillByDefault(ReturnRef(parametersDouble));
 
-    ON_CALL(world, IsDirectionalRoadExisting(_, _))
-            .WillByDefault(Return(true));
     ON_CALL(world, GetDistanceToEndOfLane(_,_,-3,_,_,_)).WillByDefault(
                 [](const RoadGraph&, RoadGraphVertex startNode, int, double initialSearchDistance, double, const LaneTypes&)
     {return RouteQueryResult<double>{{startNode, 1200.0 - initialSearchDistance}};});
@@ -424,8 +490,6 @@ TEST_F(SpawnerPreRun_IntegrationTests, RightLaneStartsAndEndsWithinRange_SpawnWi
     std::map<std::string, double> parametersDouble {{"SStart", 1000.0}, {"SEnd", 1500.0}};
     ON_CALL(*spawnPoint, GetParametersDouble()).WillByDefault(ReturnRef(parametersDouble));
 
-    ON_CALL(world, IsDirectionalRoadExisting(_, _))
-            .WillByDefault(Return(true));
     ON_CALL(world, GetDistanceToEndOfLane(_,_,-3,_,_,_)).WillByDefault(
                 [](const RoadGraph&, RoadGraphVertex startNode, int, double initialSearchDistance, double, const LaneTypes&)
     {return RouteQueryResult<double>{{startNode, 1400.0 - initialSearchDistance}};});

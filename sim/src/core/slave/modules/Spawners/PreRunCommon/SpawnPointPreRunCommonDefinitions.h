@@ -21,19 +21,20 @@ namespace SpawnPointPreRunCommonDefinitions
 {
     using namespace SpawnPointDefinitions;
 
+    //! Defines an area in which agents should be spawned
     struct SpawnArea
     {
-        const RoadIds roadIds;
-        const LaneIds laneIds;
-        const SPosition sStart;
-        const SPosition sEnd;
+        std::unique_ptr<LaneStreamInterface> laneStream; //!< laneStream to spawn on
+        const SPosition sStart; //! start position on the stream
+        const SPosition sEnd; //! end position on the stream
 
-        bool operator== (const SpawnArea& other) const
+        SpawnArea(std::unique_ptr<LaneStreamInterface> laneStream,
+                  const SPosition sStart,
+                  const SPosition sEnd) :
+            sStart(sStart),
+            sEnd(sEnd)
         {
-            return this->roadIds == other.roadIds
-                    && this->laneIds == other.laneIds
-                    && CommonHelper::DoubleEquality(this->sStart, other.sStart)
-                    && CommonHelper::DoubleEquality(this->sEnd, other.sEnd);
+            this->laneStream = std::move(laneStream);
         }
     };
 
@@ -43,5 +44,15 @@ namespace SpawnPointPreRunCommonDefinitions
         const std::variant<double, openpass::parameter::StochasticDistribution> minimumSeparationBuffer; //!< Minimum distance between two agents
         const std::vector<SpawnArea> spawnAreas; //!< Areas to spawn in
         const AgentProfileLaneMaps agentProfileLaneMaps; //!< AgentProfiles to spawn, separated for left lane and other lanes
+    };
+
+    //! position and parameters of an agent to spawn
+    struct SpawnInfo
+    {
+        SpawnParameter spawnParameter;
+        std::string roadId;
+        int laneId;
+        double s;
+        double streamPosition;
     };
 } // SpawnPointPreRunDefinitions

@@ -30,27 +30,8 @@ using LaneId = int;
 using LaneIds = std::vector<LaneId>;
 using SPosition = double;
 using Range = std::pair<SPosition, SPosition>;
+using Ranges = std::vector<Range>;
 using VehicleRearAndFrontCoordinates = std::pair<SPosition, SPosition>;
-
-//! Defines a interval on a lane for spawning
-struct LaneSpawningRange
-{
-    LaneSpawningRange (const LaneId laneId, const SPosition startOfRange, const SPosition endOfRange):
-        laneId(laneId),
-        range(startOfRange, endOfRange)
-    {};
-
-    bool operator== (const LaneSpawningRange& other) const
-    {
-        return this->laneId == other.laneId
-                && this->range == other.range;
-    }
-
-    LaneId laneId;
-    Range range;
-};
-
-using LaneSpawningRanges = std::vector<LaneSpawningRange>;
 
 //! Defines a AgentProfile for spawning and its associated spawn parameters
 struct SpawningAgentProfile

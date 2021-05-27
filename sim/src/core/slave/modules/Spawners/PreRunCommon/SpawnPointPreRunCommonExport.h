@@ -19,6 +19,5 @@
 
 #include "SpawnPointPreRunCommonGlobal.h"
 #include "include/spawnPointInterface.h"
-#include "include/scenarioInterface.h"
 
 
