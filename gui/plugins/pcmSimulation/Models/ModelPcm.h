@@ -13,7 +13,6 @@
 
 #include <QObject>
 #include <QStringListModel>
-#include <QtConcurrent>
 #include "ConfigurationGeneratorPcm/ConfigGeneratorPcm.h"
 #include "FileHelper.h"
 #include "GUI_Definitions.h"

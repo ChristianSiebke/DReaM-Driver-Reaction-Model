@@ -44,15 +44,12 @@ void ModelPcm::SetSelectionModelPcm(QItemSelectionModel *selectionModel)
 void ModelPcm::StartSimulationTrigger()
 {
     simulationStop = false;
-    //QtConcurrent::run(this, StartSimulation());
     StartSimulation();
 }
 
 void ModelPcm::SimulationStop()
 {
     simulationStop = true;
-
-    //todo: terminate running simulation threads if existing
 }
 
 bool ModelPcm::ClearCaseList()
