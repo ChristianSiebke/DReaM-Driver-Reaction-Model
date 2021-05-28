@@ -17,9 +17,9 @@ const QString OpenScenarioWriter::CreateScenarioFile(const QString &scenarioFile
 
     const std::vector<PCM_ParticipantData *> &participants = simSet->GetParticipants();
 
-    for (size_t iParticipant = 0; iParticipant < participants.size(); iParticipant++)
+    for (size_t i = 0; i < participants.size(); i++)
     {
-        scenarioConfig.AddAgent(iParticipant, iParticipant, participants.at(iParticipant));
+        scenarioConfig.AddAgent(i, i, participants.at(i));
     }
 
     const std::vector<PCM_Trajectory *> &trajectories = simSet->GetTrajectories();
