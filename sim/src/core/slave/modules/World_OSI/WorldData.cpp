@@ -441,17 +441,47 @@ void WorldData::AddLane(const Id id, RoadLaneSectionInterface& odSection, const 
     }
     switch (laneType)
     {
-    case RoadLaneType::Driving:
-        osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_NORMAL);
-        break;
-    case RoadLaneType::Biking:
-        osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_BIKING);
-        break;
-    case RoadLaneType::Sidewalk:
-        osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_SIDEWALK);
-        break;
-    default:
-        osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_OTHER);
+        case RoadLaneType::Shoulder:
+            osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_SHOULDER);
+            break;
+        case RoadLaneType::Border:
+            osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_BORDER);
+            break;
+        case RoadLaneType::Driving:
+            osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_NORMAL);
+            break;
+        case RoadLaneType::Stop:
+            osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_STOP);
+            break;
+        case RoadLaneType::Restricted:
+            osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_RESTRICTED);
+            break;
+        case RoadLaneType::Parking:
+            osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_PARKING);
+            break;
+        case RoadLaneType::Biking:
+            osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_BIKING);
+            break;
+        case RoadLaneType::Sidewalk:
+            osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_SIDEWALK);
+            break;
+        case RoadLaneType::Exit:
+            osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_EXIT);
+            break;
+        case RoadLaneType::Entry:
+            osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_ENTRY);
+            break;
+        case RoadLaneType::OnRamp:
+            osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_ONRAMP);
+            break;
+        case RoadLaneType::OffRamp:
+            osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_OFFRAMP);
+            break;
+        case RoadLaneType::ConnectingRamp:
+            osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_CONNECTINGRAMP);
+            break;
+        default:
+            osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_OTHER);
     }
 
     osiLane->mutable_classification()->mutable_road_condition()->set_surface_temperature(293.15);
