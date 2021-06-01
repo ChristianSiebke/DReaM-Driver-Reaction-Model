@@ -64,8 +64,8 @@ MSYS2 provides three different environments, located in the MSYS2 installation d
 .. _fig_msys2_environments:
 
 .. figure:: _static/images/msys2.png
-:align: center
-:alt: MSYS2 Apps
+   :align: center
+   :alt: MSYS2 Apps
 
 MSYS2 Environments
 

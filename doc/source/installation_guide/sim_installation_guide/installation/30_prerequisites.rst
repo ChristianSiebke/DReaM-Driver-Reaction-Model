@@ -54,7 +54,7 @@ The first set of dependencies we need to install in order to successfully compil
          .. admonition:: Versions
             
             | MSYS2 provides rolling release versions, so some packages might be too "up-to-date".
-            | Tested packages - at time of writing - have been listed above as comment.
+            | Tested packages - ate time of writing - have been listed above as comment.
             | If in doubt, download the package in the right version from the `MSYS2 package repository <http://repo.msys2.org/mingw/x86_64/>`_.
             | Install with ``pacman -U <package-filename>``
 
@@ -68,6 +68,7 @@ The first set of dependencies we need to install in order to successfully compil
             pacman -S dos2unix
             pacman -S mingw-w64-x86_64-ag
             pacman -S mingw-w64-x86_64-qt5-debug
+            pacman -S zlib-devel
 
       .. admonition:: GIT/SSH
       
@@ -367,7 +368,7 @@ Finally, the sources are then compiled into a library.
 
          .. code-block:: 
 
-            cmake -G "MinGW Makefiles" \
+            cmake -G "MSYS Makefiles" \
                   -DCMAKE_BUILD_TYPE=Release \
                   -DCMAKE_INSTALL_PREFIX=C:/OpenPASS/thirdParty/osi \
                   ..
@@ -379,80 +380,12 @@ Finally, the sources are then compiled into a library.
             cmake -DCMAKE_BUILD_TYPE=Release \
                   -DCMAKE_INSTALL_PREFIX=~/OpenPASS/thirdParty/osi \
                   ..
-
-   **Note for Custom Protobuf Builds**
-      
-   If protobuf is used as custom build (see :ref:`building_protobuf`),
-   additional ``CMake`` variables have to be set.
-
-   .. tabs::
-
-      .. tab:: Windows
-
-         .. code-block:: 
-
-            cmake -G “MinGW Makefiles” \
-                  -DCMAKE_BUILD_TYPE=Release \
-                  -DCMAKE_INSTALL_PREFIX=C:/OpenPASS/thirdParty/osi \
-                  -DProtobuf_INCLUDE_DIR=C:/OpenPASS/thirdParty/protobuf/include \
-                  -DProtobuf_PROTOC_EXECUTABLE=C:/OpenPASS/thirdParty/protobuf/bin/protoc.exe \
-                  -DProtobuf_LIBRARIES=C:/OpenPASS/thirdParty/protobuf/lib  \
-                  ..
-
-      .. tab:: Linux
-
-         .. code-block:: 
-
-            cmake -DCMAKE_BUILD_TYPE=Release \
-                  -DCMAKE_INSTALL_PREFIX=~/OpenPASS/thirdParty/osi \
-                  -DProtobuf_INCLUDE_DIR=~/OpenPASS/thirdParty/protobuf/include \
-                  -DProtobuf_PROTOC_EXECUTABLE=~/OpenPASS/thirdParty/protobuf/bin/protoc.exe \
-                  -DProtobuf_LIBRARIES=~/OpenPASS/thirdParty/protobuf/lib  \
-                  ..
-
-   Moreover, linker flags for protobuf have to be added. 
-   Please note that OSI does not allow to hook in a custom protobuf library.
-
-   .. tabs::
-
-      .. tab:: Windows
-
-         To force compilation against a custom library, edit ``open-simulation-interface-3.2.0\build\CMakeFiles\open_simulation_interface.dir\linklibs.rsp``
-         and add ``-LC:/OpenPASS/thirdParty/protobuf/lib -lprotobuf`` to the end of the line by using a text editor or make use of the folowwing command within the |mingw_shell|:
-
-         .. code-block:: 
-
-            echo -n " -LC:/OpenPASS/thirdParty/protobuf/lib -lprotobuf" >> /C/OpenPASS/thirdParty/sources/open-simulation-interface-3.2.0/build/CMakeFiles/open_simulation_interface.dir/linklibs.rsp
-            
-      .. tab:: Linux
-
-         To force compilation against a custom library, edit ``open-simulation-interface-3.2.0/build/CMakeFiles/open_simulation_interface.dir/linklibs.rsp``
-         and add ``-L~/OpenPASS/thirdParty/protobuf/lib -lprotobuf`` to the end of the line by using a text editor or make use of the following command within ``Bash`` shell:
-
-         .. code-block:: 
-
-            echo -n " -L~/OpenPASS/thirdParty/protobuf/lib -lprotobuf" >> ~/OpenPASS/thirdParty/sources/open-simulation-interface-3.2.0/build/CMakeFiles/open_simulation_interface.dir/linklibs.rsp
-
-   .. admonition:: A little bit hacky...
-   
-      If anybody knows how to avoid this step, please let us know.
 
 #. Compile
 
-   .. tabs::
+   .. code-block:: 
 
-      .. tab:: Windows
-         
-         .. code-block:: 
-
-            mingw32-make -j3
-
-
-      .. tab:: Linux
-         
-         .. code-block:: 
-   
-               make -j3
+         make -j3
 
    .. warning::
 
@@ -464,23 +397,11 @@ Finally, the sources are then compiled into a library.
 
       and check if correct protobuf version is used.
    
-      
-
 #. Install
-
-   .. tabs::
-
-      .. tab:: Windows
          
-         .. code-block:: 
+   .. code-block:: 
 
-            mingw32-make install
-
-      .. tab:: Linux
-         
-         .. code-block:: 
-      
-            make install
+      make install
       
    .. admonition:: Documentation
       
@@ -538,7 +459,7 @@ Build and Install FMIL
 
          .. code-block:: 
 
-            cmake -G "MinGW Makefiles" \
+            cmake -G "MSYS Makefiles" \
                   -DFMILIB_INSTALL_PREFIX=C:/OpenPASS/thirdParty/FMILibrary \
                   -DCMAKE_BUILD_TYPE=Release \
                   -DFMILIB_BUILD_STATIC_LIB=OFF \
@@ -563,148 +484,16 @@ Build and Install FMIL
 
 #. Compile
 
-   .. tabs::
+   .. code-block:: 
 
-      .. tab:: Windows
-
-         .. code-block:: 
-
-            mingw32-make -j3
-
-      .. tab:: Linux
-      
-         .. code-block:: 
-
-            make -j3
+      make -j3
 
 #. Install
-
-   .. tabs::
-
-      .. tab:: Windows
-
-         .. code-block:: 
-      
-            mingw32-make install
-
-      .. tab:: Linux
-
-         .. code-block:: 
-      
-            make install
-
-
-.. _building_protobuf:
-
-Optional: Custom Protobuf Build
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-As Protobuf can be installed easily as binary package in different versions (see :ref:`Binary_packages`) via appropiate packaging managing systems, there is no need to build protobuf from source.
-However, if a custom build is necessary, this section gives instructions, how to compile version 3.11.4. and hook it into the |op| build.
-Adjust this guide to your needs.
-
-#. Download release 3.11.4 from https://github.com/protocolbuffers/protobuf/releases
-
-#. Extract
-
-   - for Windows to ``C:\OpenPASS\thirdParty\sources\protobuf-cpp-3.11.4``
-
-   - for Linux to ``~/OpenPASS/thirdParty/sources/protobuf-cpp-3.11.4``
-
-#. Navigate to the extracted folder
-
-   .. tabs::
-
-      .. tab:: Windows
-
-         Start |mingw_shell|
-
-         .. code-block:: 
-
-            cd /C/OpenPASS/thirdParty/sources/protobuf-cpp-3.11.4
-
-      .. tab:: Linux
-
-         Start ``Bash`` shell
-
-         .. code-block:: 
-      
-            cd ~/OpenPASS/thirdParty/sources/protobuf-cpp-3.11.4
-
-#. Create build directory
 
    .. code-block:: 
-      
-      cd cmake
-      mkdir build
-      cd build
 
-#. Run Cmake
+      make install
 
-   .. tabs::
-
-      .. tab:: Windows
-
-         .. code-block:: 
-            :emphasize-lines: 5
-
-            cmake -G "MinGW Makefiles" \
-                  -DCMAKE_BUILD_TYPE=Release \
-                  -DCMAKE_INSTALL_PREFIX=C:/OpenPASS/thirdParty/protobuf \
-                  -Dprotobuf_BUILD_SHARED_LIBS=ON \
-                  -Dprotobuf_BUILD_TESTS=OFF \
-                  ..
-
-      .. tab:: Linux
-
-         .. code-block:: 
-            :emphasize-lines: 5
-
-            cmake -DCMAKE_BUILD_TYPE=Release \
-                  -DCMAKE_INSTALL_PREFIX=~/OpenPASS/thirdParty/protobuf \
-                  -Dprotobuf_BUILD_SHARED_LIBS=ON \
-                  -Dprotobuf_BUILD_TESTS=OFF \
-                  ..
-
-   .. note::
-
-      Tests are disabled due to compiler warnings treated as errors (may vary with compiler version).
-
-#. Compile
-
-   .. tabs::
-
-      .. tab:: Windows
-
-         .. code-block:: 
-
-            mingw32-make -j3
-
-      .. tab:: Linux
-      
-         .. code-block:: 
-
-            make -j3
-
-#. Install
-
-   .. tabs::
-
-      .. tab:: Windows
-
-         .. code-block:: 
-      
-            mingw32-make install
-
-      .. tab:: Linux
-
-         .. code-block:: 
-      
-            make install
-   
-.. note::
-
-   Please refer to :ref:`runmingwexe` to see how to run the protobuf compiler ``protoc.exe`` outside of the |mingw_shell|.
 
 
 Deprecated: qmake build

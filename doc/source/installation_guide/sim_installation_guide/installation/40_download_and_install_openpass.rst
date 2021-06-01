@@ -184,13 +184,14 @@ This section describes how compile and run |op|.
 
          .. code-block:: 
 
-            cmake -G "MinGW Makefiles" \
+            cmake -G "MSYS Makefiles" \
             -D CMAKE_PREFIX_PATH="C:\msys64\mingw64\bin;C:\simopenpass\deps\thirdParty\FMILibrary;C:\simopenpass\deps\thirdParty\osi;" \
             -D CMAKE_INSTALL_PREFIX=/C/OpenPASS/bin/core \
             -D CMAKE_BUILD_TYPE=Release \
+            -D USE_CCACHE=ON \
             -D WITH_DEBUG_POSTFIX=OFF \
             -D OPENPASS_ADJUST_OUTPUT=OFF \
-            -D USE_CCACHE=ON \
+            -D INSTALL_EXTRA_RUNTIME_DEPS=ON \
             -D CMAKE_C_COMPILER=gcc \
             -D CMAKE_CXX_COMPILER=g++ \
             ..
@@ -202,32 +203,24 @@ This section describes how compile and run |op|.
             cmake -D CMAKE_PREFIX_PATH="/opt/qt5.12.3/5.12.3/gcc_64;~/simopenpass/deps/thirdParty/FMILibrary;~/simopenpass/deps/thirdParty/osi" \
             -D CMAKE_INSTALL_PREFIX=/usr/local/OpenPASS/bin/core \
             -D CMAKE_BUILD_TYPE=Release \
+            -D USE_CCACHE=ON \
             -D WITH_DEBUG_POSTFIX=OFF \
             -D OPENPASS_ADJUST_OUTPUT=OFF \
-            -D USE_CCACHE=ON \
+            -D INSTALL_EXTRA_RUNTIME_DEPS=ON \
             -D CMAKE_C_COMPILER=gcc-9 \
             -D CMAKE_CXX_COMPILER=g++-9 \
             ..
 
-   .. note:: Adjust paths and options based on your system and needs and don't forget to escape the semicolon ``;`` (see :ref:`CMAKE_PREFIX_PATH`)
+   .. note:: Adjust paths and options based on your system and needs and don't forget to escape the semicolon ``;`` (see :ref:`Cmake_prefix_path`).
+             For a build that goes beyond the default settings, see :ref:`Cmake` for more available variables and options that can be set.
 
 #. Optional: Build and execute unit tests
 
    Starting from ``simopenpass/build``:
 
-   .. tabs::
+   .. code-block:: 
 
-      .. tab:: Windows
-
-         .. code-block:: 
-
-            mingw32-make test ARGS="--output-on-failure -j3"
-
-      .. tab:: Linux
-
-         .. code-block:: 
-
-            make test ARGS="--output-on-failure -j3"
+      make test ARGS="--output-on-failure -j3"
 
    .. note::
 
@@ -238,23 +231,9 @@ This section describes how compile and run |op|.
 
    Starting from ``simopenpass/build``:
 
-   .. tabs::
+   .. code-block:: 
 
-      .. tab:: Windows
-
-         .. code-block:: 
-
-            mingw32-make -j3 install
-
-         .. note::
-   
-            The call to mingw32-make might be misleading, but actually calls gcc/g++ 64-bit.
-
-      .. tab:: Linux
-
-         .. code-block:: 
-   
-            make -j3 install
+      make -j3 install
 
    .. note:: Again, adjust parallel build flag ``-j3`` based on your system.
 
