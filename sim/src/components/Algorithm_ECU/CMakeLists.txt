@@ -9,12 +9,12 @@ add_openpass_target(
     algorithm_ECU.h
     algorithm_ECU_implementation.h
     algorithm_ECU_global.h
-	ecu.h
+    ecu.h
 
   SOURCES
     algorithm_ECU.cpp
     algorithm_ECU_implementation.cpp
-	ecu.cpp
+    ecu.cpp
 
   LIBRARIES
     Qt5::Core
