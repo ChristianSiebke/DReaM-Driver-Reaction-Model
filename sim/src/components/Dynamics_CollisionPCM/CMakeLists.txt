@@ -1,6 +1,6 @@
 set(COMPONENT_NAME Dynamics_CollisionPCM)
 
-add_compile_definitions(DYNAMICS_COLLISIONPCM_LIBRARY)
+add_compile_definitions(DYNAMICS_COLLISION_LIBRARY)
 
 add_openpass_target(
   NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
