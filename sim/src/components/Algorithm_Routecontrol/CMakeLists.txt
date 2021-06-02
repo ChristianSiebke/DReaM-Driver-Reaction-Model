@@ -9,12 +9,17 @@ add_openpass_target(
     algorithm_RouteControl.h
     algorithm_RouteControl_implementation.h
     algorithm_RouteControl_global.h
-	routeControl.h
+    routeControl.h
+    ../../common/pcm/controlSignal.h
 
   SOURCES
     algorithm_RouteControl.cpp
     algorithm_RouteControl_implementation.cpp
-	routeControl.cpp
+    routeControl.cpp
+    ../../common/pcm/controlSignal.cpp
+
+  INCDIRS
+    ../../common/pcm
 
   LIBRARIES
     Qt5::Core

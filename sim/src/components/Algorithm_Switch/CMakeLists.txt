@@ -9,12 +9,17 @@ add_openpass_target(
     algorithm_Switch.h
     algorithm_Switch_implementation.h
     algorithm_Switch_global.h
-	switch.h
+    switch.h
+    ../../common/pcm/controlSignal.h
 
   SOURCES
     algorithm_Switch.cpp
     algorithm_Switch_implementation.cpp
-	switch.cpp
+    switch.cpp
+    ../../common/pcm/controlSignal.cpp
+
+  INCDIRS
+    ../../common/pcm
 
   LIBRARIES
     Qt5::Core
