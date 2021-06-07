@@ -916,7 +916,13 @@ void SceneryConverter::CreateRoadSignals()
         {
             for (const auto &parentId : parentIds)
             {
-                auto parentSign = worldData.GetTrafficSigns().find(worldData.GetTrafficSignIdMapping().at(parentId));
+                auto mapEntry = worldData.GetTrafficSignIdMapping().find(parentId);
+                if (mapEntry == worldData.GetTrafficSignIdMapping().end())
+                {
+                    LOGWARN("Parent id '" + parentId + "' not found in world data's traffic sign id mapping for supplementary sign's id '" + supplementarySign->GetId() + "'");
+                    continue;
+                }
+                auto parentSign = worldData.GetTrafficSigns().find(mapEntry->second);
 
                 if (parentSign == worldData.GetTrafficSigns().cend())
                 {
@@ -926,7 +932,7 @@ void SceneryConverter::CreateRoadSignals()
 
                 double yaw = supplementarySign->GetHOffset() + (supplementarySign->GetOrientation() ? 0 : M_PI);
                 auto position = RoadCoord2WorldCoord(road, supplementarySign->GetS(), supplementarySign->GetT(), yaw);
-                if(!parentSign->second->AddSupplementarySign(supplementarySign, position))
+                if (!parentSign->second->AddSupplementarySign(supplementarySign, position))
                 {
                     LOGWARN("Unsupported supplementary sign type " + supplementarySign->GetType() + " (id: " + supplementarySign->GetId() + ")");
                 }

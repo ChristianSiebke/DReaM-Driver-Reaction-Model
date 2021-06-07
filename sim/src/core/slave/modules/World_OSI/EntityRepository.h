@@ -59,7 +59,7 @@ public:
 /// @brief Handles unique IDs and reports creation to the entityInfoPublisher
 class Repository final : public RepositoryInterface
 {
-    static constexpr size_t MAX_ENTITIES_PER_GROUP{100000};
+    static constexpr size_t MAX_ENTITIES_PER_GROUP{1000000};
 
     /// @brief Defines an index group for entities, such as "moving objects from 0 to 10000"
     class EntityGroup
