@@ -31,6 +31,8 @@
 #include <any>
 #include <regex>
 #include <fstream>
+#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include "common/openScenarioDefinitions.h"
 

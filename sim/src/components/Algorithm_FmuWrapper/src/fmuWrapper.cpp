@@ -92,8 +92,8 @@ AlgorithmFmuWrapperImplementation::AlgorithmFmuWrapperImplementation(std::string
     THROWIFFALSE(fmuPath.has_value(), "Missing parameter \"FmuPath\"");
     FMU_configPath = fmuPath.value();
 
-    SetOutputPath();
     SetupFilenames();
+    SetOutputPath();
 
     const auto logging = helper::map::query(parameters->GetParametersBool(), "Logging").value_or(DEFAULT_LOGGING);
     if (logging)
@@ -124,8 +124,9 @@ AlgorithmFmuWrapperImplementation::AlgorithmFmuWrapperImplementation(std::string
 
 void AlgorithmFmuWrapperImplementation::SetOutputPath()
 {
+    fs::path fmuPath = cdata.FMUPath;
     const std::string& resultsPath = GetParameters()->GetRuntimeInformation().directories.output;
-    fs::path agentOutputPath = fs::path(resultsPath) / "FmuWrapper" / ("Agent" + agentIdString);
+    fs::path agentOutputPath = fs::path(resultsPath) / "FmuWrapper" / ("Agent" + agentIdString) / fmuPath.filename().replace_extension().string();
     outputPath = agentOutputPath.string();
 }
 

@@ -14,7 +14,6 @@
 #include <src/common/acquirePositionSignal.h>
 
 #include <QDir>
-#include <QFile>
 
 #include "common/dynamicsSignal.h"
 #include "common/osiUtils.h"
@@ -206,11 +205,17 @@ OsmpFmuHandler::OsmpFmuHandler(fmu_check_data_t *cdata, WorldInterface *world, A
 
     if (writeJsonOutput)
     {
+        std::stringstream ss;
+        ss << std::setw(4) << std::setfill('0');
+        ss << agent->GetId();
+
+        std::filesystem::path fmuPath = cdata->FMUPath;
+
         outputDir =
             QString::fromStdString(parameters->GetRuntimeInformation().directories.output) + QDir::separator() +
             "FmuWrapper" + QDir::separator() +
-            "Agent " + QString::number(agent->GetId()) + QDir::separator() +
-            cdata->modelName;
+            "Agent" +  QString::fromStdString(ss.str()) + QDir::separator() +
+            QString::fromStdString(fmuPath.filename().replace_extension().string()) + QDir::separator() + "JsonFiles";
 
         QDir directory{outputDir};
         if (!directory.exists())
@@ -221,9 +226,16 @@ OsmpFmuHandler::OsmpFmuHandler(fmu_check_data_t *cdata, WorldInterface *world, A
 
     if (writeTraceOutput)
     {
-        traceOutputDir = QString::fromStdString(parameters->GetRuntimeInformation().directories.output) +
-                    QDir::separator() + cdata->modelName + QDir::separator() +
-                    "Agent" + QString::number(agent->GetId()) + QDir::separator() + "binaryTrace";
+        std::stringstream ss;
+        ss << std::setw(4) << std::setfill('0');
+        ss << agent->GetId();
+
+        std::filesystem::path fmuPath = cdata->FMUPath;
+
+        traceOutputDir = QString::fromStdString(parameters->GetRuntimeInformation().directories.output) + QDir::separator() +
+                         "FmuWrapper" + QDir::separator() +
+                         "Agent" +  QString::fromStdString(ss.str()) + QDir::separator() +
+                         QString::fromStdString(fmuPath.filename().replace_extension().string()) + QDir::separator() + "BinaryTraceFiles";
         QDir directory{traceOutputDir};
         if (!directory.exists())
         {
