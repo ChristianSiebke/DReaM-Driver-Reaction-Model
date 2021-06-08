@@ -154,12 +154,12 @@ In the currently implementation, these points must be located - otherwise the ag
 
 .. _world_trafficsigns:
 
-Traffic Signs and Road Markings
--------------------------------
+Traffic Signs, Road Markings and TrafficLights
+----------------------------------------------
 
-The world currently supports a variety of traffic signs and road markings.
-Both are defined in OpenDRIVE as "RoadSignal".
-At the moment it can only interpret traffic signs according to the German regulations "StVo".
+The world currently supports a variety of traffic signs, road markings and traffic lights.
+All of these are defined in OpenDRIVE as "RoadSignal".
+At the moment it can only interpret traffic signs and road markings according to the German regulations "StVo" and traffic lights according the the OpenDRIVE appendix.
 Traffic signs can contain optional supplementary traffic signs. Supplementary signs are dependent on a main traffic sign and contain additional information.
 The following traffic signs are supported:
 
@@ -228,6 +228,24 @@ The following road markings are supported:
    ======================= ========= =======     ================
 
 The pedestrian crossing can also be defined in OpenDRIVE as object with type "crosswalk".
+
+The following traffic lights are supported:
+
+.. table::
+   :class: tight-table
+   
+   ============================================= =============== ======= ===============
+   TrafficLight                                  OpenDRIVE Type  Subtype Value and Units
+   ============================================= =============== ======= ===============
+   Standard traffic light (red, yellow, green)   1.000.001       -       -              
+   Left arrows                                   1.000.011       10      -              
+   Right arrows                                  1.000.011       20      -              
+   Upwards arrows                                1.000.011       30      -              
+   Left und upwards arrows                       1.000.011       40      -              
+   Right und upwards arrows                      1.000.011       50      -               
+   ============================================= =============== ======= ===============
+
+These traffic lights are controlled by OpenScenario.
 
 .. _world_lanemarkings:
 
