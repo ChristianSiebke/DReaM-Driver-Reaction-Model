@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 in-tech GmbH
+* Copyright (c) 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -14,8 +14,8 @@
 
 namespace openpass::entity {
 
-Repository::Repository(DataStoreWriteInterface *const datastore) :
-    _entityInfoPublisher(datastore)
+Repository::Repository(DataBufferWriteInterface *const databuffer) :
+    _entityInfoPublisher(databuffer)
 {
     static constexpr bool AS_PERSISTENT_GROUP{true};
     static constexpr bool AS_NOT_PERSISTENT_GROUP{false};

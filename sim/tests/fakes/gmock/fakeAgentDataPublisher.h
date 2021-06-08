@@ -16,5 +16,5 @@
 class FakeAgentDataPublisher : public PublisherInterface
 {
 public:
-    MOCK_METHOD2(Publish, void(const openpass::datastore::Key&, const openpass::datastore::Value&));
+    MOCK_METHOD2(Publish, void(const openpass::databuffer::Key&, const openpass::databuffer::Value&));
 };

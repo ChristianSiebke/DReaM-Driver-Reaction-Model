@@ -9,7 +9,7 @@
 *******************************************************************************/
 
 #include "EntityRepository.h"
-#include "fakeDataStore.h"
+#include "fakeDataBuffer.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -28,8 +28,8 @@ using namespace openpass::type;
  */
 struct REPOSITORY_TEST_WRAPPER
 {
-    NiceMock<FakeDataStore> datastore;
-    Repository repository{Repository(&datastore)};
+    NiceMock<FakeDataBuffer> databuffer;
+    Repository repository{Repository(&databuffer)};
 
     Repository *operator->()
     {
@@ -74,10 +74,10 @@ TEST(EntitityRepository, RegisterAnyObject_Returns2000000)
     ASSERT_THAT(entityId, 2000000);
 }
 
-TEST(EntitityRepository, RegisteredObject_IsAddedToDatastore)
+TEST(EntitityRepository, RegisteredObject_IsAddedToDatabuffer)
 {
     auto repo = REPOSITORY_TEST_WRAPPER();
-    EXPECT_CALL(repo.datastore, PutStatic(_, _, _));
+    EXPECT_CALL(repo.databuffer, PutStatic(_, _, _));
     auto entityId = repo->Register(EntityInfo());
 }
 

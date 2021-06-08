@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 in-tech GmbH
+* Copyright (c) 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
-#include "bindings/dataStoreLibrary.h"
+#include "bindings/dataBufferLibrary.h"
 
 #include "common/log.h"
 #include "modelElements/parameters.h"
@@ -18,9 +18,9 @@
 namespace SimulationSlave
 {
 
-bool DataStoreLibrary::Init()
+bool DataBufferLibrary::Init()
 {
-    library = new (std::nothrow) QLibrary(QString::fromStdString(dataStoreLibraryPath));
+    library = new (std::nothrow) QLibrary(QString::fromStdString(dataBufferLibraryPath));
 
     if (!library)
     {
@@ -35,30 +35,30 @@ bool DataStoreLibrary::Init()
         return false;
     }
 
-    getVersionFunc = reinterpret_cast<DataStoreInterface_GetVersion>(library->resolve(DllGetVersionId.c_str()));
+    getVersionFunc = reinterpret_cast<DataBufferInterface_GetVersion>(library->resolve(DllGetVersionId.c_str()));
     if (!getVersionFunc)
     {
         LOG_INTERN(LogLevel::Error) << "could not retrieve version information from DLL";
         return false;
     }
 
-    createInstanceFunc = reinterpret_cast<DataStoreInterface_CreateInstanceType>(library->resolve(DllCreateInstanceId.c_str()));
+    createInstanceFunc = reinterpret_cast<DataBufferInterface_CreateInstanceType>(library->resolve(DllCreateInstanceId.c_str()));
     if (!createInstanceFunc)
     {
         LOG_INTERN(LogLevel::Error) << "could not create instance from DLL";
         return false;
     }
 
-    destroyInstanceFunc = reinterpret_cast<DataStoreInterface_DestroyInstanceType>(library->resolve(DllDestroyInstanceId.c_str()));
+    destroyInstanceFunc = reinterpret_cast<DataBufferInterface_DestroyInstanceType>(library->resolve(DllDestroyInstanceId.c_str()));
     if (!destroyInstanceFunc)
     {
-        LOG_INTERN(LogLevel::Warning) << "dataStore could not be released";
+        LOG_INTERN(LogLevel::Warning) << "dataBuffer could not be released";
         return false;
     }
 
     try
     {
-        LOG_INTERN(LogLevel::DebugCore) << "loaded dataStore library " << library->fileName().toStdString()
+        LOG_INTERN(LogLevel::DebugCore) << "loaded dataBuffer library " << library->fileName().toStdString()
                                         << ", version " << getVersionFunc();
     }
     catch (std::runtime_error const &ex)
@@ -75,9 +75,9 @@ bool DataStoreLibrary::Init()
     return true;
 }
 
-DataStoreLibrary::~DataStoreLibrary()
+DataBufferLibrary::~DataBufferLibrary()
 {
-    if (dataStoreInterface)
+    if (dataBufferInterface)
     {
         LOG_INTERN(LogLevel::Warning) << "unloading library which is still in use";
     }
@@ -86,7 +86,7 @@ DataStoreLibrary::~DataStoreLibrary()
     {
         if (library->isLoaded())
         {
-            LOG_INTERN(LogLevel::DebugCore) << "unloading dataStore library ";
+            LOG_INTERN(LogLevel::DebugCore) << "unloading dataBuffer library ";
             library->unload();
         }
 
@@ -95,9 +95,9 @@ DataStoreLibrary::~DataStoreLibrary()
     }
 }
 
-bool DataStoreLibrary::ReleaseDataStore()
+bool DataBufferLibrary::ReleaseDataBuffer()
 {
-    if (!dataStoreInterface)
+    if (!dataBufferInterface)
     {
         return true;
     }
@@ -109,25 +109,25 @@ bool DataStoreLibrary::ReleaseDataStore()
 
     try
     {
-        destroyInstanceFunc(dataStoreInterface);
+        destroyInstanceFunc(dataBufferInterface);
     }
     catch (std::runtime_error const &ex)
     {
-        LOG_INTERN(LogLevel::Error) << "dataStore could not be released: " << ex.what();
+        LOG_INTERN(LogLevel::Error) << "dataBuffer could not be released: " << ex.what();
         return false;
     }
     catch (...)
     {
-        LOG_INTERN(LogLevel::Error) << "dataStore could not be released";
+        LOG_INTERN(LogLevel::Error) << "dataBuffer could not be released";
         return false;
     }
 
-    dataStoreInterface = nullptr;
+    dataBufferInterface = nullptr;
 
     return true;
 }
 
-DataStoreInterface* DataStoreLibrary::CreateDataStore(const openpass::common::RuntimeInformation& runtimeInformation)
+DataBufferInterface* DataBufferLibrary::CreateDataBuffer(const openpass::common::RuntimeInformation& runtimeInformation)
 {
     if (!library)
     {
@@ -142,11 +142,11 @@ DataStoreInterface* DataStoreLibrary::CreateDataStore(const openpass::common::Ru
         }
     }
 
-    dataStoreInterface = nullptr;
+    dataBufferInterface = nullptr;
 
     try
     {
-        dataStoreInterface = createInstanceFunc(&runtimeInformation, callbacks);
+        dataBufferInterface = createInstanceFunc(&runtimeInformation, callbacks);
     }
     catch (std::runtime_error const &ex)
     {
@@ -159,7 +159,7 @@ DataStoreInterface* DataStoreLibrary::CreateDataStore(const openpass::common::Ru
         return nullptr;
     }
 
-    return dataStoreInterface;
+    return dataBufferInterface;
 }
 
 } // namespace SimulationSlave

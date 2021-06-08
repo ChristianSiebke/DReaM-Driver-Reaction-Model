@@ -1,5 +1,6 @@
+
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -19,7 +20,6 @@
 #include "common/commonTools.h"
 #include "common/openPassUtils.h"
 
-#include "include/dataStoreInterface.h"
 #include "include/stochasticsInterface.h"
 #include "include/parameterInterface.h"
 #include "include/worldInterface.h"
@@ -30,22 +30,21 @@
 #include "runStatisticCalculation.h"
 #include "runStatistic.h"
 
-ObservationLogImplementation::ObservationLogImplementation(
-        SimulationSlave::EventNetworkInterface* eventNetwork,
+ObservationLogImplementation::ObservationLogImplementation(SimulationSlave::EventNetworkInterface* eventNetwork,
         StochasticsInterface* stochastics,
         WorldInterface* world,
         const ParameterInterface* parameters,
         const CallbackInterface* callbacks,
-        DataStoreReadInterface* dataStore) :
+        DataBufferReadInterface *dataBuffer) :
     ObservationInterface(stochastics,
                          world,
                          parameters,
                          callbacks,
-                         dataStore),
+                         dataBuffer),
     runtimeInformation(parameters->GetRuntimeInformation()),
     eventNetwork(eventNetwork),
-    dataStore(dataStore),
-    fileHandler{*dataStore}
+    dataBuffer(dataBuffer),
+    fileHandler{*dataBuffer}
 {
 }
 
@@ -116,7 +115,7 @@ void ObservationLogImplementation::SlavePreHook()
     }
 
     fileHandler.SetOutputLocation(runtimeInformation.directories.output, filename);
-    fileHandler.SetSceneryFile(std::get<std::string>(dataStore->GetStatic("SceneryFile").at(0)));
+    fileHandler.SetSceneryFile(std::get<std::string>(dataBuffer->GetStatic("SceneryFile").at(0)));
     fileHandler.WriteStartOfFile(runtimeInformation.versions.framework.str());
 }
 
@@ -124,18 +123,32 @@ void ObservationLogImplementation::SlavePreRunHook()
 {
     runStatistic = RunStatistic(GetStochastics()->GetRandomSeed());
     cyclics.Clear();
+    events.clear();
 }
 
-void ObservationLogImplementation::SlavePostRunHook(const RunResultInterface& runResult)
+void Accumulate(const std::string& key, const DataBufferReadInterface* dataBuffer, std::map<std::string, double>& result)
 {
-    RunStatisticCalculation::DetermineEgoCollision(runStatistic, runResult, GetWorld());
-    runStatistic.VisibilityDistance = GetWorld()->GetVisibilityDistance();
+    const auto agentIds = dataBuffer->GetKeys("Statics/Agents");
 
-    const auto dsCyclics = dataStore->GetCyclic(std::nullopt, std::nullopt, "*");
+    for (const auto& agentId : agentIds)
+    {
+        const auto tdtResult = dataBuffer->GetCyclic(std::stoi(agentId), key);
+        if(tdtResult->size() == 0)
+        {
+            continue;
+        }
+        const auto& distanceTraveled = tdtResult->begin()->get();
+        result[agentId] += std::get<double>(distanceTraveled.value);
+    }
+}
+
+void ObservationLogImplementation::SlaveUpdateHook(int time, [[maybe_unused]] RunResultInterface& runResult)
+{
+    const auto dsCyclics = dataBuffer->GetCyclic(std::nullopt, "*");
 
     for (const CyclicRow& dsCyclic : *dsCyclics)
     {
-        std::visit(openpass::utils::FlatParameter::to_string([this, &dsCyclic](const std::string& valueStr)
+        std::visit(openpass::utils::FlatParameter::to_string([this, &dsCyclic, &time](const std::string& valueStr)
         {
             if (std::any_of(selectedColumns.cbegin(), selectedColumns.cend(),
                             [&dsCyclic](const std::string& column)
@@ -149,12 +162,27 @@ void ObservationLogImplementation::SlavePostRunHook(const RunResultInterface& ru
                                        dsCyclic.key.find(column.second, dsCyclic.key.size() - column.second.size()) == dsCyclic.key.size() - column.second.size();
                             }))
             {
-                cyclics.Insert(dsCyclic.timestamp, (dsCyclic.entityId < 10 ? "0" : "") + std::to_string(dsCyclic.entityId) + ":" + dsCyclic.key, valueStr);
+                cyclics.Insert(time, (dsCyclic.entityId < 10 ? "0" : "") + std::to_string(dsCyclic.entityId) + ":" + dsCyclic.key, valueStr);
             }
         }), dsCyclic.value);
     }
 
-    fileHandler.WriteRun(runResult, runStatistic, cyclics);
+    Accumulate("TotalDistanceTraveled", dataBuffer, runStatistic.distanceTraveled);
+
+    const auto acyclics = dataBuffer->GetAcyclic(std::nullopt, "*");
+
+    for (const AcyclicRow& event : *acyclics)
+    {
+        events.emplace_back(time, event);
+    }
+}
+
+void ObservationLogImplementation::SlavePostRunHook(const RunResultInterface& runResult)
+{
+    RunStatisticCalculation::DetermineEgoCollision(runStatistic, runResult, GetWorld());
+    runStatistic.VisibilityDistance = GetWorld()->GetVisibilityDistance();
+
+    fileHandler.WriteRun(runResult, runStatistic, cyclics, events);
 }
 
 void ObservationLogImplementation::SlavePostHook()

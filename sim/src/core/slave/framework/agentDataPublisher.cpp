@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 in-tech GmbH
+* Copyright (c) 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -10,18 +10,16 @@
 
 #include "agentDataPublisher.h"
 
-#include "common/timeKeeper.h"
-
 namespace openpass::publisher {
 
-void AgentDataPublisher::Publish(const openpass::datastore::Key &key, const openpass::datastore::Value &value)
+void AgentDataPublisher::Publish(const openpass::databuffer::Key &key, const openpass::databuffer::Value &value)
 {
-    dataStore->PutCyclic(openpass::scheduling::TimeKeeper::Now(), agentId, key, value);
+    dataBuffer->PutCyclic(agentId, key, value);
 }
 
-void AgentDataPublisher::Publish(const openpass::datastore::Key &key, const openpass::datastore::ComponentEvent &event)
+void AgentDataPublisher::Publish(const openpass::databuffer::Key &key, const openpass::databuffer::ComponentEvent &event)
 {
-    dataStore->PutAcyclic(openpass::scheduling::TimeKeeper::Now(), agentId, key, Acyclic(key, agentId, event.parameter));
+    dataBuffer->PutAcyclic(agentId, key, Acyclic(key, agentId, event.parameter));
 }
 
 } // namespace openpass::publisher

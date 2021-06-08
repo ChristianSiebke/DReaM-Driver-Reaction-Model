@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 in-tech GmbH
+* Copyright (c) 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,7 @@
 #include "observation_log.h"
 #include "observation_logImplementation.h"
 
-class DataStoreReadInterface;
+class DataBufferReadInterface;
 
 const std::string Version = "0.2.0";    //!< The version of the current module - has to be incremented manually
 static const CallbackInterface* Callbacks = nullptr;
@@ -45,7 +45,7 @@ extern "C" OBSERVATION_LOG_SHARED_EXPORT ObservationInterface* OpenPASS_CreateIn
     SimulationSlave::EventNetworkInterface* eventNetwork,
     const ParameterInterface* parameters,
     const CallbackInterface* callbacks,
-    DataStoreReadInterface* dataStore)
+    DataBufferReadInterface* dataBuffer)
 {
     Callbacks = callbacks;
 
@@ -56,7 +56,7 @@ extern "C" OBSERVATION_LOG_SHARED_EXPORT ObservationInterface* OpenPASS_CreateIn
                                                                                          world,
                                                                                          parameters,
                                                                                          callbacks,
-                                                                                         dataStore));
+                                                                                         dataBuffer));
     }
     catch (const std::runtime_error& ex)
     {

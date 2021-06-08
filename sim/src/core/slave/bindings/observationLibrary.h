@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2021 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -39,7 +39,7 @@ public:
             EventNetworkInterface* eventNetwork,
             const ParameterInterface* parameters,
             const CallbackInterface* callbacks,
-            DataStoreReadInterface* const dataStore);
+            DataBufferReadInterface* const dataBuffer);
     typedef void (*ObservationInterface_DestroyInstanceType)(ObservationInterface* implementation);
     typedef bool (*ObservationInterface_MasterPreHook)(ObservationInterface* implementation);
     typedef bool (*ObservationInterface_MasterPostHook)(ObservationInterface* implementation,
@@ -98,7 +98,7 @@ public:
             StochasticsInterface* stochastics,
             WorldInterface* world,
             EventNetworkInterface* eventNetwork,
-            DataStoreReadInterface* const dataStore);
+            DataBufferReadInterface* const dataBuffer);
 
     bool SlavePreHook(ObservationInterface* implementation)
     {

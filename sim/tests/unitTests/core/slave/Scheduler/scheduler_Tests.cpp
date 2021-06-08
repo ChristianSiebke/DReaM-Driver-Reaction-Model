@@ -5,6 +5,7 @@
 
 #include "eventDetector.h"
 #include "eventDetectorLibrary.h"
+#include "fakeDataBuffer.h"
 #include "fakeEventDetectorNetwork.h"
 #include "fakeEventNetwork.h"
 #include "fakeManipulatorNetwork.h"
@@ -15,6 +16,7 @@
 #include "gtest/gtest.h"
 #include "scheduler.h"
 #include "schedulerTasks.h"
+#include "runResult.h"
 
 using namespace openpass::scheduling;
 
@@ -60,6 +62,7 @@ TEST(DISABLED_Scheduler, RunWorks)
     NiceMock<FakeWorld> fakeWorld;
 
     NiceMock<FakeSpawnPointNetwork> fakeSpawnPointNetwork;
+    NiceMock<FakeDataBuffer> fakeDataBuffer;
     NiceMock<FakeEventDetector> fakeEventDetector;
     NiceMock<FakeManipulatorNetwork> fakeManipulatorNetwork;
     NiceMock<FakeObservationNetwork> fakeObservationNetwork;
@@ -76,7 +79,7 @@ TEST(DISABLED_Scheduler, RunWorks)
 
     ON_CALL(fakeEventDetectorNetwork, GetEventDetectors()).WillByDefault(Return(fakeEventDetectors));
 
-    Scheduler scheduler(fakeWorld, fakeSpawnPointNetwork, fakeEventDetectorNetwork, fakeManipulatorNetwork, fakeObservationNetwork);
+    Scheduler scheduler(fakeWorld, fakeSpawnPointNetwork, fakeEventDetectorNetwork, fakeManipulatorNetwork, fakeObservationNetwork, fakeDataBuffer);
 
     RunResult runResult{};
     scheduler.Run(0, 300, runResult, fakeEventNetwork);

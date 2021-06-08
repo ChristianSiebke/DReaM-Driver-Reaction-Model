@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2016, 2017 ITK Engineering GmbH
 *               2020 HLRS, University of Stuttgart.
 *
@@ -18,7 +18,7 @@
 #include "SceneryConverter.h"
 #include "include/parameterInterface.h"
 #include "Localization.h"
-#include "include/dataStoreInterface.h"
+#include "include/dataBufferInterface.h"
 #include "EntityRepository.h"
 #include "WorldData.h"
 #include "WorldDataQuery.h"
@@ -91,7 +91,7 @@ class WorldImplementation : public WorldInterface
 public:
     const std::string MODULENAME = "WORLD";
 
-    WorldImplementation(const CallbackInterface* callbacks, StochasticsInterface* stochastics, DataStoreWriteInterface* dataStore);
+    WorldImplementation(const CallbackInterface* callbacks, StochasticsInterface* stochastics, DataBufferWriteInterface* dataBuffer);
     WorldImplementation(const WorldImplementation&) = delete;
     WorldImplementation(WorldImplementation&&) = delete;
     WorldImplementation& operator=(const WorldImplementation&) = delete;
@@ -324,7 +324,7 @@ private:
     std::unordered_map<const OWL::Interfaces::MovingObject*, AgentInterface*> movingObjectMapping{{nullptr, nullptr}};
     std::unordered_map<const OWL::Interfaces::MovingObject*, TrafficObjectInterface*> stationaryObjectMapping{{nullptr, nullptr}};
 
-    DataStoreWriteInterface* dataStore;
+    DataBufferWriteInterface* dataBuffer;
     openpass::entity::Repository repository;
     std::unique_ptr<SceneryConverter> sceneryConverter;
 };

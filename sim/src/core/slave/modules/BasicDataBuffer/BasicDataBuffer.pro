@@ -9,13 +9,13 @@
 # **********************************************************************/
 
 #-----------------------------------------------------------------------------
-# \file  BasicDataStore.pro
+# \file  BasicDataBuffer.pro
 # \brief This file contains the information for the QtCreator-project of the
-# module BasicDataStore
+# module BasicDataBuffer
 #-----------------------------------------------------------------------------/
 
 CONFIG += OPENPASS_LIBRARY
-DEFINES += BASIC_DATASTORE_LIBRARY
+DEFINES += BASIC_DATABUFFER_LIBRARY
 
 include(../../../../../global.pri)
 
@@ -24,9 +24,9 @@ INCLUDEPATH += \
     ../../../../..
 
 SOURCES += \
-    basicDataStore.cpp \
-    basicDataStoreImplementation.cpp
+    basicDataBuffer.cpp \
+    basicDataBufferImplementation.cpp
 
 HEADERS += \
-    basicDataStore.h \
-    basicDataStoreImplementation.h
+    basicDataBuffer.h \
+    basicDataBufferImplementation.h

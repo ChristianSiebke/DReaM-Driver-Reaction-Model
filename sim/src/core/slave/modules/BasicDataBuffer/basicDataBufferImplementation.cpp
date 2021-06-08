@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 in-tech GmbH
+* Copyright (c) 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -9,10 +9,10 @@
 *******************************************************************************/
 
 //-----------------------------------------------------------------------------
-/** \file  basicDataStoreImplementation.cpp */
+/** \file  basicDataBufferImplementation.cpp */
 //-----------------------------------------------------------------------------
 
-#include "basicDataStoreImplementation.h"
+#include "basicDataBufferImplementation.h"
 
 #include <memory>
 #include <utility>
@@ -29,11 +29,11 @@ using namespace openpass::type;
  * \brief Tests, if two vectors of tokens have matching elements
  *
  * The test result will be true, if each token A in the matcher, the token B at the same position (index) in the reference are string equal.
- * A matcher token containing \c openpass::datastore::WILDCARD ('*') will match every string in the reference.
+ * A matcher token containing \c openpass::databuffer::WILDCARD ('*') will match every string in the reference.
  * The test result will always be false, if the matcher contains more elements than the reference.
  *
  * \param[in]    matcher     Tokens to test against reference
- * \param[out]   reference   A full stack of tokens to match against (i. e. a 'path' of DataStore keys in the DataStore hierarchy)
+ * \param[out]   reference   A full stack of tokens to match against (i. e. a 'path' of DataBuffer keys in the DataBuffer hierarchy)
  *
  * \return True if the token vectores are considered to be matching, false otherwise.
  */
@@ -107,13 +107,13 @@ AcyclicRowRefs::const_iterator AcyclicResult::end() const
     return elements.cend();
 }
 
-BasicDataStoreImplementation::BasicDataStoreImplementation(const openpass::common::RuntimeInformation *runtimeInformation, const CallbackInterface *callbacks) :
-    DataStoreInterface(runtimeInformation, callbacks)
+BasicDataBufferImplementation::BasicDataBufferImplementation(const openpass::common::RuntimeInformation *runtimeInformation, const CallbackInterface *callbacks) :
+    DataBufferInterface(runtimeInformation, callbacks)
 {
 }
 
 template <>
-std::unique_ptr<CyclicResultInterface> BasicDataStoreImplementation::GetIndexed<EntityId>([[maybe_unused]] const std::optional<Timestamp> time, const std::optional<EntityId> entityId, const Tokens &tokens) const
+std::unique_ptr<CyclicResultInterface> BasicDataBufferImplementation::GetIndexed<EntityId>(const std::optional<EntityId> entityId, const Tokens &tokens) const
 {
     CyclicRowRefs rowRefs;
 
@@ -132,48 +132,7 @@ std::unique_ptr<CyclicResultInterface> BasicDataStoreImplementation::GetIndexed<
     return std::make_unique<CyclicResult>(cyclicStore, rowRefs);
 }
 
-template <>
-std::unique_ptr<CyclicResultInterface> BasicDataStoreImplementation::GetIndexed<Timestamp>(const std::optional<Timestamp> time, [[maybe_unused]] const std::optional<EntityId> entityId, const Tokens &tokens) const
-{
-    CyclicRowRefs rowRefs;
-
-    auto range = timestampIndex.equal_range(time.value());
-
-    for (auto it = range.first; it != range.second; ++it)
-    {
-        const auto& storeValue = cyclicStore.at(it->second);
-
-        if (TokensMatch(tokens, storeValue.tokens))
-        {
-            rowRefs.emplace_back(storeValue);
-        }
-    }
-
-    return std::make_unique<CyclicResult>(cyclicStore, rowRefs);
-}
-
-template <>
-std::unique_ptr<CyclicResultInterface> BasicDataStoreImplementation::GetIndexed<Timestamp, EntityId>(const std::optional<Timestamp> time, const std::optional<EntityId> entityId, const Tokens &tokens) const
-{
-    std::vector<size_t> filteredIndexes;
-    CyclicRowRefs rowRefs;
-
-    auto range = timeAndEntityIdIndex.equal_range(std::make_tuple(time.value(), entityId.value()));
-
-    for (auto it = range.first; it != range.second; ++it)
-    {
-        const auto& storeValue = cyclicStore.at(it->second);
-
-        if (TokensMatch(tokens, storeValue.tokens))
-        {
-            rowRefs.emplace_back(storeValue);
-        }
-    }
-
-    return std::make_unique<CyclicResult>(cyclicStore, rowRefs);
-}
-
-std::unique_ptr<CyclicResultInterface> BasicDataStoreImplementation::GetCyclic(const Key& key) const
+std::unique_ptr<CyclicResultInterface> BasicDataBufferImplementation::GetCyclic(const Key& key) const
 {
     const Tokens tokens = CommonHelper::TokenizeString(key, SEPARATOR);
     CyclicRowRefs rowRefs;
@@ -189,21 +148,13 @@ std::unique_ptr<CyclicResultInterface> BasicDataStoreImplementation::GetCyclic(c
     return std::make_unique<CyclicResult>(cyclicStore, rowRefs);
 }
 
-std::unique_ptr<CyclicResultInterface> BasicDataStoreImplementation::GetCyclic(const std::optional<Timestamp> time, const std::optional<EntityId> entityId, const Key &key) const
+std::unique_ptr<CyclicResultInterface> BasicDataBufferImplementation::GetCyclic(const std::optional<EntityId> entityId, const Key &key) const
 {
     const Tokens tokens = CommonHelper::TokenizeString(key, SEPARATOR);
 
-    if (!time.has_value() && entityId.has_value())
+    if (entityId.has_value())
     {
-        return GetIndexed<EntityId>(time, entityId, tokens);
-    }
-    else if (time.has_value() && !entityId.has_value())
-    {
-        return GetIndexed<Timestamp>(time, entityId, tokens);
-    }
-    else if (time.has_value() && entityId.has_value())
-    {
-        return GetIndexed<Timestamp, EntityId>(time, entityId, tokens);
+        return GetIndexed<EntityId>(entityId, tokens);
     }
     else
     {
@@ -211,22 +162,20 @@ std::unique_ptr<CyclicResultInterface> BasicDataStoreImplementation::GetCyclic(c
     }
 }
 
-void BasicDataStoreImplementation::PutCyclic(const Timestamp time, const EntityId agentId, const Key &key, const Value &value)
+void BasicDataBufferImplementation::PutCyclic(const EntityId agentId, const Key &key, const Value &value)
 {
-    cyclicStore.emplace_back(time, agentId, key, value);
+    cyclicStore.emplace_back(agentId, key, value);
 
     size_t newValueIndex = cyclicStore.size() - 1;
-    timestampIndex.emplace(time, newValueIndex);
     entityIdIndex.emplace(agentId, newValueIndex);
-    timeAndEntityIdIndex.emplace(std::tuple(time, agentId), newValueIndex);
 }
 
-void BasicDataStoreImplementation::PutAcyclic(const Timestamp time, const EntityId entityId, const Key &key, const openpass::datastore::Acyclic&acyclic)
+void BasicDataBufferImplementation::PutAcyclic(const EntityId entityId, const Key &key, const Acyclic &acyclic)
 {
-    acyclicStore.emplace_back(time, entityId, key, acyclic);
+    acyclicStore.emplace_back(entityId, key, acyclic);
 }
 
-void BasicDataStoreImplementation::PutStatic(const Key &key, const Value &value, bool persist)
+void BasicDataBufferImplementation::PutStatic(const Key &key, const Value &value, bool persist)
 {
     if (staticStore.find(key) == staticStore.end())
     {
@@ -234,14 +183,9 @@ void BasicDataStoreImplementation::PutStatic(const Key &key, const Value &value,
     }
 }
 
-void BasicDataStoreImplementation::Clear()
+void BasicDataBufferImplementation::ClearRun()
 {
-    cyclicStore.clear();
-    entityIdIndex.clear();
-    timestampIndex.clear();
-    timeAndEntityIdIndex.clear();
-
-    acyclicStore.clear();
+    ClearTimeStep();
 
     auto it = staticStore.begin();
 
@@ -258,7 +202,14 @@ void BasicDataStoreImplementation::Clear()
     }
 }
 
-std::unique_ptr<AcyclicResultInterface> BasicDataStoreImplementation::GetAcyclic(const Key& key) const
+void BasicDataBufferImplementation::ClearTimeStep()
+{
+    cyclicStore.clear();
+    entityIdIndex.clear();
+    acyclicStore.clear();
+}
+
+std::unique_ptr<AcyclicResultInterface> BasicDataBufferImplementation::GetAcyclic(const Key& key) const
 {
     const Tokens tokens = CommonHelper::TokenizeString(key, SEPARATOR);
 
@@ -275,7 +226,7 @@ std::unique_ptr<AcyclicResultInterface> BasicDataStoreImplementation::GetAcyclic
     return std::make_unique<AcyclicResult>(acyclicStore, rowRefs);
 }
 
-std::unique_ptr<AcyclicResultInterface> BasicDataStoreImplementation::GetAcyclic([[maybe_unused]] const std::optional<Timestamp> time, [[maybe_unused]] const std::optional<EntityId> entityId, const Key &key) const
+std::unique_ptr<AcyclicResultInterface> BasicDataBufferImplementation::GetAcyclic([[maybe_unused]] const std::optional<EntityId> entityId, const Key &key) const
 {
     if (key == WILDCARD)
     {
@@ -294,7 +245,7 @@ std::unique_ptr<AcyclicResultInterface> BasicDataStoreImplementation::GetAcyclic
     }
 }
 
-Values BasicDataStoreImplementation::GetStatic(const Key &key) const
+Values BasicDataBufferImplementation::GetStatic(const Key &key) const
 {
     try
     {
@@ -307,7 +258,7 @@ Values BasicDataStoreImplementation::GetStatic(const Key &key) const
     }
 }
 
-Keys BasicDataStoreImplementation::GetKeys(const Key &key) const
+Keys BasicDataBufferImplementation::GetKeys(const Key &key) const
 {
     const Tokens tokens = CommonHelper::TokenizeString(key, SEPARATOR);
 
@@ -316,25 +267,25 @@ Keys BasicDataStoreImplementation::GetKeys(const Key &key) const
         if (tokens.size() == 1)
         {
             Keys keys;
-            Timestamp lastTimestamp{-1};
+            EntityId lastEntityId{-1};
 
-            auto it = timestampIndex.cbegin();
+            auto it = entityIdIndex.cbegin();
 
-            while (it != timestampIndex.cend())
+            while (it != entityIdIndex.cend())
             {
-                lastTimestamp = std::get<0>(it->first);
-                keys.push_back(std::to_string(lastTimestamp));
-                it = timestampIndex.upper_bound(lastTimestamp);
+                lastEntityId = std::get<0>(it->first);
+                keys.push_back(std::to_string(lastEntityId));
+                it = entityIdIndex.upper_bound(lastEntityId);
             }
 
             return keys;
         }
-        else if (tokens.size() >= 3)
+        else
         {
             std::set<Key> result;
-            Tokens searchKeyTokens{tokens.cbegin() + 3, tokens.cend()};
+            Tokens searchKeyTokens{tokens.cbegin() + 2, tokens.cend()};
 
-            const auto entries = GetIndexed<Timestamp, EntityId>(std::stod(tokens.at(1)), std::stod(tokens.at(2)), searchKeyTokens);
+            const auto entries = GetIndexed<EntityId>(std::stod(tokens.at(1)), searchKeyTokens);
 
             for (const auto& entry : *entries)
             {
@@ -357,11 +308,11 @@ Keys BasicDataStoreImplementation::GetKeys(const Key &key) const
         return GetStaticKeys(tokens);
     }
 
-    LOG(CbkLogLevel::Warning, "Using unsupported key format for GetKeys() on datastore: '" + key + "'");
+    LOG(CbkLogLevel::Warning, "Using unsupported key format for GetKeys() on databuffer: '" + key + "'");
     return {};
 }
 
-Keys BasicDataStoreImplementation::GetStaticKeys(const Tokens &tokens) const
+Keys BasicDataBufferImplementation::GetStaticKeys(const Tokens &tokens) const
 {
     const Tokens searchKeyTokens{tokens.cbegin() + 1, tokens.cend()};
     std::set<Key> result;  // keys in result  shall be unique

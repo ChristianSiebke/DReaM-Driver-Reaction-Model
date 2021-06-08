@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -43,7 +43,7 @@ bool ObservationNetwork::Instantiate(const ObservationInstanceCollection& observ
                                      WorldInterface* world,
                                      EventNetworkInterface* eventNetwork,
                                      const std::string& sceneryPath,
-                                     DataStoreReadInterface* dataStore)
+                                     DataBufferReadInterface* dataBuffer)
 {
     for (auto& observationInstance : observationInstances)
     {
@@ -64,7 +64,7 @@ bool ObservationNetwork::Instantiate(const ObservationInstanceCollection& observ
                                               stochastics,
                                               world,
                                               eventNetwork,
-                                              dataStore);
+                                              dataBuffer);
 
             modules.insert({observationInstance.id, module});
         }

@@ -17,7 +17,7 @@
 namespace openpass::type {
 
 /**
- * @brief Data capsule for publishing entity metainfo into the datastore
+ * @brief Data capsule for publishing entity metainfo into the databuffer
  */
 struct EntityInfo
 {

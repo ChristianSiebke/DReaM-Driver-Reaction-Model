@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 in-tech GmbH
+* Copyright (c) 2020, 2021 in-tech GmbH
 *               2020 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -16,7 +16,7 @@
 #include "observation_log.h"
 #include "observation_logImplementation.h"
 
-class DataStoreReadInterface;
+class DataBufferReadInterface;
 
 const std::string Version = "0.2.0";    //!< The version of the current module - has to be incremented manually
 static const CallbackInterface* Callbacks = nullptr;
@@ -46,7 +46,7 @@ extern "C" OBSERVATION_LOGAGENT_SHARED_EXPORT ObservationInterface* OpenPASS_Cre
     SimulationSlave::EventNetworkInterface* eventNetwork,
     const ParameterInterface* parameters,
     const CallbackInterface* callbacks,
-    DataStoreReadInterface* dataStore)
+    DataBufferReadInterface* dataBuffer)
 {
     Callbacks = callbacks;
 
@@ -57,7 +57,7 @@ extern "C" OBSERVATION_LOGAGENT_SHARED_EXPORT ObservationInterface* OpenPASS_Cre
                                                                                          world,
                                                                                          parameters,
                                                                                          callbacks,
-                                                                                         dataStore));
+                                                                                         dataBuffer));
     }
     catch (const std::runtime_error& ex)
     {

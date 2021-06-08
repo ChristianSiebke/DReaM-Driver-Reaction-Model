@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -27,7 +27,7 @@
 #include "bindings/modelBinding.h"
 #include "spawnPoint.h"
 
-class DataStoreWriteInterface;
+class DataBufferWriteInterface;
 
 namespace SimulationSlave {
 
@@ -77,7 +77,7 @@ bool Agent::Instantiate(const AgentBlueprintInterface& agentBlueprint,
                         StochasticsInterface *stochastics,
                         ObservationNetworkInterface *observationNetwork,
                         EventNetworkInterface *eventNetwork,
-                        DataStoreWriteInterface *dataStore)
+                        DataBufferWriteInterface *dataBuffer)
 {
     agentInterface->InitParameter(agentBlueprint);
 
@@ -104,7 +104,7 @@ bool Agent::Instantiate(const AgentBlueprintInterface& agentBlueprint,
     }
 
     // instantiate components
-    publisher = std::make_unique<openpass::publisher::AgentDataPublisher>(dataStore, id);
+    publisher = std::make_unique<openpass::publisher::AgentDataPublisher>(dataBuffer, id);
     for (const std::pair<const std::string, std::shared_ptr<ComponentType>> &itemComponentType : agentBlueprint.GetAgentType().GetComponents())
     {
         std::string componentName = itemComponentType.first;

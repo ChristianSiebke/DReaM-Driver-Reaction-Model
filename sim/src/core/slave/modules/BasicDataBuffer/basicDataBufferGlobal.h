@@ -9,7 +9,7 @@
 *******************************************************************************/
 
 /**
- * \file  basicDataStoreGlobal.h
+ * \file  basicDataBufferGlobal.h
  * \brief This file contains DLL export declarations
  */
 
@@ -17,10 +17,10 @@
 
 #include <QtCore/qglobal.h>
 
-#if defined(BASIC_DATASTORE_LIBRARY)
-#  define BASIC_DATASTORE_SHARED_EXPORT Q_DECL_EXPORT   //! Export of the dll-functions
+#if defined(BASIC_DATABUFFER_LIBRARY)
+#  define BASIC_DATABUFFER_SHARED_EXPORT Q_DECL_EXPORT   //! Export of the dll-functions
 #else
-#  define BASIC_DATASTORE_SHARED_EXPORT Q_DECL_IMPORT   //! Import of the dll-functions
+#  define BASIC_DATABUFFER_SHARED_EXPORT Q_DECL_IMPORT   //! Import of the dll-functions
 #endif
 
 

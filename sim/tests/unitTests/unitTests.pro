@@ -18,7 +18,7 @@ SUBDIRS = \
     algorithmFmuWrapper_Tests \
     algorithmLateral_Tests \
     algorithmLongitudinal_Tests \
-    basicDataStore_Tests \
+    basicDataBuffer_Tests \
     componentController_Tests \
     dynamicsCollision_Tests \
     dynamicsTrajectoryFollower_Tests \
@@ -55,8 +55,8 @@ algorithmLateral_Tests.file = \
 algorithmLongitudinal_Tests.file = \
     $$PWD/components/Algorithm_Longitudinal/algorithmLongitudinal_Tests.pro
 
-basicDataStore_Tests.file = \
-    $$PWD/core/slave/modules/BasicDataStore/basicDataStore_Tests.pro
+basicDataBuffer_Tests.file = \
+    $$PWD/core/slave/modules/BasicDataBuffer/basicDataBuffer_Tests.pro
 
 componentController_Tests.file = \
     $$PWD/components/ComponentController/componentController_Tests.pro

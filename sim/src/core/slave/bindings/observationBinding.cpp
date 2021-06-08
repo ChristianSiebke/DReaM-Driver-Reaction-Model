@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2021 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -31,7 +31,7 @@ ObservationModule* ObservationBinding::Instantiate(const std::string& libraryPat
         StochasticsInterface* stochastics,
         WorldInterface* world,
         EventNetworkInterface* eventNetwork,
-        DataStoreReadInterface* const dataStore)
+        DataBufferReadInterface* const dataBuffer)
 {
     if (!library)
     {
@@ -53,7 +53,7 @@ ObservationModule* ObservationBinding::Instantiate(const std::string& libraryPat
                                             stochastics,
                                             world,
                                             eventNetwork,
-                                            dataStore);
+                                            dataBuffer);
 }
 
 void ObservationBinding::Unload()
