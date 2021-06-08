@@ -333,7 +333,7 @@ TEST(GetInterpolatedPointsAtDistance, DistanceBetweenJointsWithHeading_ReturnsIn
     { 0.0, 0.0 },  // origin
     width,           // width
     length,
-    PI/4);          // heading
+    M_PI/4);          // heading
 
     const OWL::Primitive::LaneGeometryJoint& firstJoint = laneGeometryElement.joints.current;
     const OWL::Primitive::LaneGeometryJoint& secondJoint = laneGeometryElement.joints.next;

@@ -322,7 +322,7 @@ public:
     virtual void PutStatic(const Key &key, const Value &value, bool persist = false) = 0;
 
     /*!
-     * \brief Clears the datastore contents, except persistant static data
+     * \brief Clears the datastore contents, except persistent static data
      */
     virtual void Clear() = 0;
 

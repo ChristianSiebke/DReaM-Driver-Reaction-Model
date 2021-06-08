@@ -88,16 +88,18 @@ SampledGeometry CalculateSectionBetweenRoadMarkChanges(double roadSectionStart,
 //! Samples the lane boundary points of one geometry for one section with a defined maximum lateral error
 //!
 //! \param roadSectionStart start s coordinate of the section / first RoadMark change
-//! \param roadSectionEnd   end s coordinate of the section / second RoadMark change
-//! \param road             road the section is part of
-//! \param roadSection      section to convert
-//! \param roadGeometry     geometry to sample
+//! \param roadSectionEnd       end s coordinate of the section / second RoadMark change
+//! \param road                 road the section is part of
+//! \param roadSection          section to convert
+//! \param roadGeometry         geometry to sample
+//! \param roadGeometryLength   length of the geometry
 //! \return                 sampled boundary points
 SampledGeometry CalculateGeometry(double roadSectionStart,
                                   double roadSectionEnd,
                                   const RoadInterface *road,
                                   const RoadLaneSectionInterface *roadSection,
-                                  const RoadGeometryInterface *roadGeometry);
+                                  const RoadGeometryInterface *roadGeometry,
+                                  double roadGeometryLength);
 
 //! Calculates the start s offset of a geometry inside a section
 //!

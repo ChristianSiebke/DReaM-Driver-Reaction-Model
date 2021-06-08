@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -9,7 +9,6 @@
 *******************************************************************************/
 
 #include "profilesImporter.h"
-#include "common/log.h"
 #include "common/sensorDefinitions.h"
 #include "importerLoggingHelper.h"
 
@@ -46,14 +45,14 @@ void ProfilesImporter::ImportAgentProfiles(QDomElement agentProfilesElement,
             QDomElement driverProfilesElement;
             ThrowIfFalse(GetFirstChildElement(agentProfileElement, TAG::driverProfiles, driverProfilesElement),
                          agentProfileElement, "Tag " + std::string(TAG::driverProfiles) + " is missing.");
-            ThrowIfFalse(ImportProbabilityMap(driverProfilesElement, ATTRIBUTE::name, TAG::driverProfile, agentProfile.driverProfiles),
+            ThrowIfFalse(ImportProbabilityMap(driverProfilesElement, ATTRIBUTE::name, TAG::driverProfile, agentProfile.driverProfiles, LogErrorAndThrow),
                          driverProfilesElement, "Invalid probalities");
 
             //Parses all vehicle profiles
             QDomElement vehicleProfilesElement;
             ThrowIfFalse(GetFirstChildElement(agentProfileElement, TAG::vehicleProfiles, vehicleProfilesElement),
                          agentProfileElement, "Tag " + std::string(TAG::vehicleProfiles) + " is missing.");
-            ThrowIfFalse(ImportProbabilityMap(vehicleProfilesElement, ATTRIBUTE::name, TAG::vehicleProfile, agentProfile.vehicleProfiles),
+            ThrowIfFalse(ImportProbabilityMap(vehicleProfilesElement, ATTRIBUTE::name, TAG::vehicleProfile, agentProfile.vehicleProfiles, LogErrorAndThrow),
                          vehicleProfilesElement, "Invalid probalities");
         }
         else
@@ -163,7 +162,7 @@ void ProfilesImporter::ImportVehicleComponent(QDomElement vehicleComponentElemen
     QDomElement profilesElement;
     ThrowIfFalse(GetFirstChildElement(vehicleComponentElement, TAG::profiles, profilesElement),
                  vehicleComponentElement, "Tag " + std::string(TAG::profiles) + " is missing.");
-    ThrowIfFalse(ImportProbabilityMap(profilesElement, ATTRIBUTE::name, "Profile", vehicleComponent.componentProfiles, false),
+    ThrowIfFalse(ImportProbabilityMap(profilesElement, ATTRIBUTE::name, "Profile", vehicleComponent.componentProfiles, LogErrorAndThrow, false),
                  profilesElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
 
     QDomElement sensorLinksElement;

@@ -14,18 +14,21 @@
 //! @brief This file contains the implementation header file
 //-----------------------------------------------------------------------------
 
-#include "common/opMath.h"
-#include <memory>
-#include <qglobal.h>
-#include <cassert>
 #include "regularDriving.h"
-#include "common/longitudinalSignal.h"
-#include "common/commonTools.h"
-#include "common/accelerationSignal.h"
-#include "common/steeringSignal.h"
-#include "common/parametersVehicleSignal.h"
-#include "common/globalDefinitions.h"
 
+#include <algorithm>
+#include <cassert>
+#include <memory>
+
+#include <qglobal.h>
+
+#include "common/accelerationSignal.h"
+#include "common/commonTools.h"
+#include "common/globalDefinitions.h"
+#include "common/longitudinalSignal.h"
+#include "common/opMath.h"
+#include "common/parametersVehicleSignal.h"
+#include "common/steeringSignal.h"
 #include "include/worldInterface.h"
 
 void DynamicsRegularDrivingImplementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time)
@@ -291,17 +294,21 @@ void DynamicsRegularDrivingImplementation::Trigger(int time)
     dynamicsSignal.positionY = y;
     dynamicsSignal.travelDistance = ds;
 
-    // convert steering wheel angle to steering angle of front wheels [degree]
-    double steering_angle_degrees = TrafficHelperFunctions::ValueInBounds(-vehicleModelParameters.maximumSteeringWheelAngleAmplitude, in_steeringWheelAngle, vehicleModelParameters.maximumSteeringWheelAngleAmplitude) / vehicleModelParameters.steeringRatio;
-    dynamicsSignal.steeringWheelAngle = TrafficHelperFunctions::ValueInBounds(-vehicleModelParameters.maximumSteeringWheelAngleAmplitude, in_steeringWheelAngle, vehicleModelParameters.maximumSteeringWheelAngleAmplitude);
-    GetPublisher()->Publish("SteeringAngle", steering_angle_degrees);
-    // calculate curvature (Ackermann model; reference point of yawing = rear axle!) [radiant]
-    double steeringCurvature = std::tan(DegreeToRadiant * steering_angle_degrees) / vehicleModelParameters.wheelbase;
-    // change of yaw angle due to ds and curvature [radiant]
+    // convert steering wheel angle to steering angle of front wheels [radian]
+    const auto steeringWheelAngle = std::clamp(in_steeringWheelAngle,
+                                               -vehicleModelParameters.maximumSteeringWheelAngleAmplitude,
+                                               vehicleModelParameters.maximumSteeringWheelAngleAmplitude);
+    dynamicsSignal.steeringWheelAngle = steeringWheelAngle;
+
+    const auto steering_angle = steeringWheelAngle / vehicleModelParameters.steeringRatio;
+    GetPublisher()->Publish("SteeringAngle", steering_angle);
+    // calculate curvature (Ackermann model; reference point of yawing = rear axle!) [radian]
+    double steeringCurvature = std::tan(steering_angle) / vehicleModelParameters.wheelbase;
+    // change of yaw angle due to ds and curvature [radian]
     double dpsi = std::atan(steeringCurvature*ds);
     dynamicsSignal.yawRate = dpsi / (GetCycleTime() * 0.001);
     dynamicsSignal.centripetalAcceleration = dynamicsSignal.yawRate * v;
-    // new yaw angle in current time step [radiant]
+    // new yaw angle in current time step [radian]
     double psi = agent->GetYaw() + dpsi;
     dynamicsSignal.yaw = psi;
 }

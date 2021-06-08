@@ -76,7 +76,7 @@ rm -rf results_*
 
 OVERALL_SUCCESS=1
 
-while read -r -d $'\0' CONFIG_FULL; do
+find "$CONFIG_DIR" -mindepth 1 -maxdepth 1 -type d -print0 | while IFS= read -r -d '' CONFIG_FULL; do
   CONFIG=$(basename "$CONFIG_FULL")
   echo Executing config: "$CONFIG"
 
@@ -102,8 +102,7 @@ while read -r -d $'\0' CONFIG_FULL; do
   mv results "results_$CONFIG"
 
   rm -rf configs
-
-done < <(find "$CONFIG_DIR" -mindepth 1 -maxdepth 1 -type d -print0)
+done
 
 [ $OVERALL_SUCCESS -eq 1 ] && exit 0 || exit 1
 

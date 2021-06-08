@@ -66,3 +66,7 @@ bool RoadObject::IsValidForLane(int laneId) const
       ( std::find( object.validity.lanes.begin(), object.validity.lanes.end(), laneId) != object.validity.lanes.end() );
 }
 
+std::string RoadObject::GetName() const
+{
+    return object.name;
+}

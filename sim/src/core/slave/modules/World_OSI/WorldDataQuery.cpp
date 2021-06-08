@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -283,16 +283,20 @@ RouteQueryResult<std::vector<LaneMarking::Entity>> WorldDataQuery::GetLaneMarkin
             return laneMarkings;;
         }
 
-        const auto& laneBoundaries = (side == Side::Left) ? lane().GetLeftLaneBoundaries() : lane().GetRightLaneBoundaries();
+        const auto& laneBoundaries = ((side == Side::Right) xor lane.inStreamDirection) ? lane().GetLeftLaneBoundaries() : lane().GetRightLaneBoundaries();
 
         for (auto laneBoundaryIndex : laneBoundaries)
         {
             const auto& laneBoundary = worldData.GetLaneBoundaries().at(laneBoundaryIndex);
-            if (lane.GetStreamPosition(laneBoundary->GetSStart() - lane().GetDistance(OWL::MeasurementPoint::RoadStart)) <= startDistance + range
-                    && lane.GetStreamPosition(laneBoundary->GetSEnd() - lane().GetDistance(OWL::MeasurementPoint::RoadStart)) >= startDistance)
+            const double boundaryStart = lane.inStreamDirection ? laneBoundary->GetSStart() : std::min(laneBoundary->GetSEnd(), lane().GetLength());
+            const double boundaryEnd = lane.inStreamDirection ? std::min(laneBoundary->GetSEnd(), lane().GetLength()) : laneBoundary->GetSStart();
+            const double boundaryStreamStart = lane.GetStreamPosition(boundaryStart - lane().GetDistance(OWL::MeasurementPoint::RoadStart));
+            const double boundaryStreamEnd = lane.GetStreamPosition(boundaryEnd - lane().GetDistance(OWL::MeasurementPoint::RoadStart));
+            if (boundaryStreamStart <= startDistance + range
+                    && boundaryStreamEnd >= startDistance)
             {
                 LaneMarking::Entity laneMarking;
-                laneMarking.relativeStartDistance = lane.GetStreamPosition(laneBoundary->GetSStart() - lane().GetDistance(OWL::MeasurementPoint::RoadStart)) - startDistance;
+                laneMarking.relativeStartDistance = boundaryStreamStart - startDistance;
                 laneMarking.width = laneBoundary->GetWidth();
                 laneMarking.type = laneBoundary->GetType();
                 laneMarking.color = laneBoundary->GetColor();
@@ -952,7 +956,7 @@ RouteQueryResult<std::optional<double> > WorldDataQuery::GetLaneCurvature(const 
 {
     return laneStream.Traverse<std::optional<double>>(LaneMultiStream::TraversedFunction<std::optional<double>>{[&](const auto& lane, const auto& previousResult)
     {
-        if (lane.StartS() >= position && lane.EndS() <= position)
+        if (lane.StartS() <= position && lane.EndS() >= position)
         {
             return std::optional<double>(std::in_place_t(), lane.element->GetCurvature(lane.GetElementPosition(position) + lane.element->GetDistance(OWL::MeasurementPoint::RoadStart)));
         }
@@ -966,7 +970,7 @@ RouteQueryResult<std::optional<double> > WorldDataQuery::GetLaneWidth(const Lane
 {
     return laneStream.Traverse<std::optional<double>>(LaneMultiStream::TraversedFunction<std::optional<double>>{[&](const auto& lane, const auto& previousResult)
     {
-        if (lane.StartS() >= position && lane.EndS() <= position)
+        if (lane.StartS() <= position && lane.EndS() >= position)
         {
             return std::optional<double>(std::in_place_t(), lane.element->GetWidth(lane.GetElementPosition(position) + lane.element->GetDistance(OWL::MeasurementPoint::RoadStart)));
         }
@@ -980,7 +984,7 @@ RouteQueryResult<std::optional<double> > WorldDataQuery::GetLaneDirection(const 
 {
     return laneStream.Traverse<std::optional<double>>(LaneMultiStream::TraversedFunction<std::optional<double>>{[&](const auto& lane, const auto& previousResult)
     {
-        if (lane.StartS() >= position && lane.EndS() <= position)
+        if (lane.StartS() <= position && lane.EndS() >= position)
         {
             return std::optional<double>(std::in_place_t(), lane.element->GetDirection(lane.GetElementPosition(position) + lane.element->GetDistance(OWL::MeasurementPoint::RoadStart)));
         }

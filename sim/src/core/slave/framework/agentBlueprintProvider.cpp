@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
 #include "dynamicProfileSampler.h"
 #include "dynamicParametersSampler.h"
 #include "agentBlueprint.h"
+#include "common/log.h"
 
 AgentBlueprintProvider::AgentBlueprintProvider(ConfigurationContainerInterface *configurationContainer, StochasticsInterface& stochastics) :
     stochastics(stochastics),
@@ -63,8 +64,13 @@ AgentBlueprint AgentBlueprintProvider::SampleAgent(const std::string& agentProfi
     }
     catch (const std::out_of_range& e)
     {
-        std::string message{e.what()};
-        message += ": Tried to sample undefined AgentProfile '" + agentProfileName + "'";
+        std::string message{"Error while sampling AgentProfile \""+agentProfileName+"\": "+e.what()};
+        LOG_INTERN(LogLevel::Error) << message;
+        throw std::runtime_error(message);
+    }
+    catch (const std::runtime_error& e)
+    {
+        std::string message{"Error while sampling AgentProfile \""+agentProfileName+"\": "+e.what()};
         LOG_INTERN(LogLevel::Error) << message;
         throw std::runtime_error(message);
     }

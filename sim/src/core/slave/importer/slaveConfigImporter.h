@@ -20,9 +20,8 @@
 
 #include "configurationFiles.h"
 #include "slaveConfig.h"
-#include "common/parameters.h"
+#include "modelElements/parameters.h"
 #include "parameterImporter.h"
-#include "common/xmlParser.h"
 
 namespace Importer {
 

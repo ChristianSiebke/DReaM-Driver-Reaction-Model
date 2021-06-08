@@ -12,9 +12,9 @@
 
 #include <string>
 #include <vector>
-#include "include/parameterInterface.h"
 #include "common/commonTools.h"
-#include "common/log.h"
+#include "include/parameterInterface.h"
+#include "include/callbackInterface.h"
 
 namespace SpawnPointDefinitions
 {
@@ -28,9 +28,29 @@ using LaneId = int;
 using LaneIds = std::vector<LaneId>;
 using SPosition = double;
 using Range = std::pair<SPosition, SPosition>;
-using ValidLaneSpawningRanges = std::vector<Range>;
 using VehicleRearAndFrontCoordinates = std::pair<SPosition, SPosition>;
 
+//! Defines a interval on a lane for spawning
+struct LaneSpawningRange
+{
+    LaneSpawningRange (const LaneId laneId, const SPosition startOfRange, const SPosition endOfRange):
+        laneId(laneId),
+        range(startOfRange, endOfRange)
+    {};
+
+    bool operator== (const LaneSpawningRange& other) const
+    {
+        return this->laneId == other.laneId
+                && this->range == other.range;
+    }
+
+    LaneId laneId;
+    Range range;
+};
+
+using LaneSpawningRanges = std::vector<LaneSpawningRange>;
+
+//! Defines a AgentProfile for spawning and its associated spawn parameters
 struct SpawningAgentProfile
 {
     const std::string name;
@@ -49,20 +69,27 @@ struct SpawningAgentProfile
 
 using AgentProfiles = std::vector<std::pair<SpawningAgentProfile, double>>;
 
+//! Defines possible AgentProfiles for a SpawnPoint
 struct AgentProfileLaneMaps
 {
     AgentProfiles leftLanes;
     AgentProfiles rightLanes;
 };
 
-static AgentProfileLaneMaps ExtractAgentProfileLaneMaps(const ParameterInterface &parameter)
+#define SPAWNER_THROWIFFALSE(success,message) if (!(success)) { callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, message); throw std::runtime_error(message); }
+
+//! Reads the possible AgentProfiles and their spawn parameters from the Spawner profile
+//!
+//! \param parameter    Spawner profile
+//! \param callbacks    CallbackInterface for logging
+//! \return AgentProfile
+static AgentProfileLaneMaps ExtractAgentProfileLaneMaps(const ParameterInterface &parameter, const CallbackInterface* callbacks)
 {
     using namespace helper;
 
     AgentProfileLaneMaps agentProfileLaneMaps;
 
     const auto& trafficGroupsList = map::query(parameter.GetParameterLists(),"TrafficGroups");
-    ThrowIfFalse(trafficGroupsList.has_value(), "No TrafficGroups provided for SpawnPointRuntimeCommon");
 
     for (const auto& trafficGroupParameter : trafficGroupsList.value())
     {
@@ -74,14 +101,14 @@ static AgentProfileLaneMaps ExtractAgentProfileLaneMaps(const ParameterInterface
 
         const auto& agentProfilesList = map::query(trafficGroupParameter->GetParameterLists(),"AgentProfiles");
 
-        ThrowIfFalse(velocity.has_value(), "No velocity provided in TrafficGroup for SpawnPointRuntimeCommon");
-        ThrowIfFalse(tGap.has_value(), "No t gap provided in TrafficGroup for SpawnPointRuntimeCommon");
-        ThrowIfFalse(agentProfilesList.has_value(), "No AgentProfile provided in TrafficGroup for SpawnPointRuntimeCommon");
+        SPAWNER_THROWIFFALSE(velocity.has_value(), "No velocity provided in TrafficGroup for SpawnPointRuntimeCommon")
+        SPAWNER_THROWIFFALSE(tGap.has_value(), "No t gap provided in TrafficGroup for SpawnPointRuntimeCommon")
+        SPAWNER_THROWIFFALSE(agentProfilesList.has_value(), "No AgentProfile provided in TrafficGroup for SpawnPointRuntimeCommon")
         for (const auto& agentProfileParameter : agentProfilesList.value())
         {
             const auto weightOfProfile = map::query(agentProfileParameter->GetParametersDouble(), "Weight");
             const auto name = map::query(agentProfileParameter->GetParametersString(), "Name");
-            ThrowIfFalse(name.has_value(), "No AgentProfile name provided in TrafficGroup for SpawnPointRuntimeCommon");
+            SPAWNER_THROWIFFALSE(name.has_value(), "No AgentProfile name provided in TrafficGroup for SpawnPointRuntimeCommon")
             agentProfileLaneMaps.rightLanes.push_back(std::make_pair(SpawningAgentProfile{name.value(), velocity.value(),
                                                                                  homogeneity.value_or(std::vector<double>{1.0}), tGap.value()},
                                                             weightOfGroup.value_or(1.0) * weightOfProfile.value_or(1.0)));

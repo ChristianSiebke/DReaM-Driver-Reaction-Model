@@ -7,6 +7,9 @@ add_openpass_target(
   LINKOSI
 
   SOURCES
+    ${OPENPASS_SIMCORE_DIR}/core/common/callbacks.cpp
+    ${OPENPASS_SIMCORE_DIR}/core/common/log.cpp
+
     # Parameter
     ${COMPONENT_SOURCE_DIR}/importer/parameterImporter.cpp
 
@@ -65,6 +68,8 @@ add_openpass_target(
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/egoAgent.cpp
 
   HEADERS
+    ${OPENPASS_SIMCORE_DIR}/core/common/log.h
+
     # Parameter
     ${COMPONENT_SOURCE_DIR}/importer/parameterImporter.h
 

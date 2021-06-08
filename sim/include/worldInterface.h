@@ -23,8 +23,9 @@
 
 #include "common/boostGeometryCommon.h"
 #include "common/globalDefinitions.h"
-#include "common/worldDefinitions.h"
+#include "common/openPassTypes.h"
 #include "common/vector2d.h"
+#include "common/worldDefinitions.h"
 
 class AgentInterface;
 class ParameterInterface;
@@ -50,7 +51,6 @@ public:
     WorldInterface &operator=(const WorldInterface &) = delete;
     WorldInterface &operator=(WorldInterface &&) = delete;
     virtual ~WorldInterface() = default;
-
 
     virtual bool Instantiate() {return false;}
 
@@ -98,7 +98,7 @@ public:
     //! @return                Pointer OSI world data structure
     //-----------------------------------------------------------------------------
     virtual void* GetWorldData() = 0;
-    
+
     //-----------------------------------------------------------------------------
     //! Retrieves time of day (hour)
     //!
@@ -186,7 +186,13 @@ public:
     //!
     //! @return                true if successful
     //-----------------------------------------------------------------------------
-    virtual bool AddAgent(int id, AgentInterface *agent) = 0;
+    [[deprecated("Use RegisterAgent instead")]] virtual bool AddAgent(int id, AgentInterface *agent) = 0;
+
+    //-----------------------------------------------------------------------------
+    //! Add agent to world
+    //! @param[in]  agent      the agent, which shall be registered
+    //-----------------------------------------------------------------------------
+    virtual void RegisterAgent(AgentInterface* agent) = 0;
 
     //-----------------------------------------------------------------------------
     //! queue functions and values to update agent when SyncGlobalData is called
@@ -237,7 +243,17 @@ public:
     //!
     //! @return
     //-----------------------------------------------------------------------------
-    virtual AgentInterface *CreateAgentAdapterForAgent() = 0;
+    [[deprecated("Use CreateAgentAdapter instead")]] virtual AgentInterface *CreateAgentAdapterForAgent() = 0;
+
+    //------------------------------------------------------------------------------------
+    //! @brief Create an agentAdapter for an agent to communicate between the agent of the
+    //! framework and the world.
+    //!
+    //! @param parameter Used to communicate key/value pairs to the world, which might
+    //!                  be needed at creation of the AgentAdapter, e.g. type or source.
+    //! @return          Instance of the AgentAdapter (implementing AgentInterface)
+    //------------------------------------------------------------------------------------
+    [[nodiscard]] virtual std::unique_ptr<AgentInterface> CreateAgentAdapter(openpass::type::FlatParameter parameter) = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns one agent which is set to be special.
@@ -268,6 +284,13 @@ public:
     //-----------------------------------------------------------------------------
     virtual Position LaneCoord2WorldCoord(double distanceOnLane, double offset, std::string roadId,
             int laneId) const = 0;
+
+    //-----------------------------------------------------------------------------
+    //! Retrieve all lane positions corresponding to the specified world position
+    //!
+    //! @return Position on all lanes at specified world position
+    //-----------------------------------------------------------------------------
+    virtual std::map<const std::string, GlobalRoadPosition> WorldCoord2LaneCoord(double x, double y, double heading) const = 0;
 
     //-----------------------------------------------------------------------------
     //! Tries to create an internal scenery from a given file.
@@ -364,7 +387,19 @@ public:
     //!
     //! @return true if road id exists
     //-----------------------------------------------------------------------------
-    virtual bool IsDirectionalRoadExisting(const std::string &, bool inOdDirection) = 0;
+    virtual bool IsDirectionalRoadExisting(const std::string &, bool inOdDirection) const = 0;
+
+    //-----------------------------------------------------------------------------
+    //! Return whether a LaneType is valid based on a range of valid LaneTypes
+    //!
+    //! @param[in] roadId  OpenDriveId of the road being evaluated
+    //! @param[in] laneId  OpenDriveId of the lane being evaluated
+    //! @param[in] distanceOnLane  distance in m along the road
+    //! @param[in] validLaneTypes  container of valid laneTypes
+    //!
+    //! @return true if the lane has a valid LaneType
+    //-----------------------------------------------------------------------------
+    virtual bool IsLaneTypeValid(const std::string &roadId, const int laneId, const double distanceOnLane, const LaneTypes& validLaneTypes) = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns interpolated value for the curvature of the lane at the given position.
@@ -489,6 +524,16 @@ public:
                                                                                             const ObjectPosition& objectPos,
                                                                                             const std::optional<double> objectReferenceS,
                                                                                             const ObjectPosition& targetObjectPos) const = 0;
+
+    //-----------------------------------------------------------------------------
+    //! \brief This method returns all LaneSections of a road
+    //!
+    //! \param roadId   Id of the road
+    //!
+    //! \return LaneSections
+    //-----------------------------------------------------------------------------
+    virtual LaneSections GetLaneSections(const std::string& roadId) const = 0;
+
     //-----------------------------------------------------------------------------
     //! Retrieve whether a new agent intersects with an existing agent
     //!

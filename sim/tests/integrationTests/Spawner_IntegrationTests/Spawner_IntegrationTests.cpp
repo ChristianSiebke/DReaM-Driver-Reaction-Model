@@ -30,6 +30,8 @@ using ::testing::AllOf;
 using ::testing::Eq;
 using ::testing::DoubleEq;
 
+constexpr char ROADID[] = "MyRoad";
+
 class SpawnerPreRun_IntegrationTests : public testing::Test
 {
 public:
@@ -62,7 +64,8 @@ public:
         ON_CALL(stochastics, GetUniformDistributed(0,DoubleEq(6))).WillByDefault(Return(1));
         ON_CALL(stochastics, GetUniformDistributed(0,DoubleEq(41))).WillByDefault(Return(7));
         ON_CALL(agentFactory, AddAgent(_)).WillByDefault([&](AgentBlueprintInterface* bluePrint)
-        {agents.push_back(new SimulationSlave::Agent(0, &world));
+        {
+            agents.push_back(new SimulationSlave::Agent(&world, *bluePrint));
             auto laneId = -1 + static_cast<int>(bluePrint->GetSpawnParameter().positionY / 3.0);
             auto agent = new FakeAgent;
             agentsOnLane[laneId].insert(agentsOnLane[laneId].begin(), agent);
@@ -71,18 +74,20 @@ public:
             ON_CALL(*agent, GetDistanceReferencePointToLeadingEdge()).WillByDefault(Return(3.0));
             ON_CALL(*agent, GetVelocity()).WillByDefault(Return(bluePrint->GetSpawnParameter().velocity));
             ON_CALL(*agent, GetAgentTypeName()).WillByDefault(Return(bluePrint->GetAgentProfileName()));
-            return agents.back();});
+            return agents.back();
+        });
 
-        RoadGraph roadGraph;
-        RoadGraphVertex vertex;
-        const RouteQueryResult<double> endOfLaneResult {{vertex, std::numeric_limits<double>::infinity()}};
+        RoadGraph roadGraph {};
+        RoadGraphVertex vertex {};
+        RouteElement routeElement{ROADID, false};
+        add_vertex(routeElement, roadGraph);
 
         ON_CALL(world, IsDirectionalRoadExisting(_, _))
                 .WillByDefault(Return(true));
+        ON_CALL(world, IsLaneTypeValid(_, _, _, _))
+                .WillByDefault(Return(true));
         ON_CALL(world, GetRoadGraph(_, _))
                 .WillByDefault(Return(std::pair<RoadGraph, RoadGraphVertex>{roadGraph, vertex}));
-        ON_CALL(world, GetDistanceToEndOfLane(_, _, _, _, _))
-                .WillByDefault(Return(endOfLaneResult));
         ON_CALL(world, GetAgentsInRange(_,_,_,_,_,_)).WillByDefault(
         [&](const RoadGraph&, RoadGraphVertex startNode, int laneId, double s, double, double range)
         {
@@ -99,6 +104,11 @@ public:
         ON_CALL(world, LaneCoord2WorldCoord(_,_,_,_)).WillByDefault(
                     [&](double distanceOnLane, double offset, std::string , int laneId)
         {return Position{distanceOnLane, offset + 3 * laneId + 1.5, 0, 0};});
+
+        LaneSection fakeLaneSection1 {1000.0, 1500.0, {-1, -2, -3}};
+        LaneSections fakeLaneSections {fakeLaneSection1};
+        ON_CALL(world, GetLaneSections(ROADID))
+                .WillByDefault(Return(fakeLaneSections));
 
         AgentBlueprint agentBlueprint;
         VehicleModelParameters vehicleModelParameters;
@@ -225,9 +235,17 @@ void CheckAgentProfile(std::vector<FakeAgent*> agentsOnLane, std::string expecte
     }
 }
 
+auto GENERATE_AGENT_ADAPTER()
+{
+    return [](openpass::type::FlatParameter parameter) -> std::unique_ptr<AgentInterface>
+    {
+        return std::make_unique<FakeAgent>();
+    };
+}
+
 TEST_F(SpawnerPreRun_IntegrationTests, ThreeContinuesLanes_SpawnWithCorrectTGapAndProfiles)
 {
-    std::map<std::string, const std::vector<std::string>> parametersStrings {{"Roads", {"MyRoad"}}};
+    std::map<std::string, const std::vector<std::string>> parametersStrings {{"Roads", {ROADID}}};
     ON_CALL(*spawnPoint, GetParametersStringVector()).WillByDefault(ReturnRef(parametersStrings));
     std::map<std::string, const std::vector<int>> parametersIntVector {{"Lanes", {-1,-2,-3}}};
     ON_CALL(*spawnPoint, GetParametersIntVector()).WillByDefault(ReturnRef(parametersIntVector));
@@ -239,17 +257,8 @@ TEST_F(SpawnerPreRun_IntegrationTests, ThreeContinuesLanes_SpawnWithCorrectTGapA
     ON_CALL(world, GetDistanceToEndOfLane(_,_,_,_,_,_)).WillByDefault(
                 [](const RoadGraph&, RoadGraphVertex startNode, int, double initialSearchDistance, double, const LaneTypes&)
     {return RouteQueryResult<double>{{startNode, 2000.0 - initialSearchDistance}};});
-    ON_CALL(world, IsSValidOnLane("MyRoad", AllOf(Le(-1),Ge(-3)),AllOf(Ge(0),Le(2000)))).WillByDefault(Return(true));
+    ON_CALL(world, IsSValidOnLane(ROADID, AllOf(Le(-1),Ge(-3)),AllOf(Ge(0),Le(2000)))).WillByDefault(Return(true));
     ON_CALL(world, GetLaneWidth(_,_,_)).WillByDefault(Return(3.0));
-
-    RoadGraph roadGraph;
-    RoadGraphVertex vertex;
-    const RouteQueryResult<double> endOfLaneResult {{vertex, 1500.0}};
-
-    ON_CALL(world, GetRoadGraph(_, _))
-            .WillByDefault(Return(std::pair<RoadGraph, RoadGraphVertex>{roadGraph, vertex}));
-    ON_CALL(world, GetDistanceToEndOfLane(_, _, _, _, _))
-            .WillByDefault(Return(endOfLaneResult));
 
     RouteQueryResult<std::vector<const WorldObjectInterface*>> noObjects{{0, {}}};
     ON_CALL(world, GetObjectsInRange(_,_,_,_,_,_)).WillByDefault(Return(noObjects));
@@ -259,6 +268,8 @@ TEST_F(SpawnerPreRun_IntegrationTests, ThreeContinuesLanes_SpawnWithCorrectTGapA
     ON_CALL(world, GetRelativeLanes(_,_,-2,_,_)).WillByDefault(Return(relativeLanesMinus2));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus3{{0, {{0,0,{relativeLane0, relativeLanePlus1, relativeLanePlus2}}}}};
     ON_CALL(world, GetRelativeLanes(_,_,-3,_,_)).WillByDefault(Return(relativeLanesMinus3));
+
+    ON_CALL(world, CreateAgentAdapter(_)).WillByDefault(GENERATE_AGENT_ADAPTER());
 
     auto spawner = CreateSpawner();
 
@@ -282,7 +293,7 @@ TEST_F(SpawnerPreRun_IntegrationTests, ThreeContinuesLanes_SpawnWithCorrectTGapA
 
 TEST_F(SpawnerPreRun_IntegrationTests, IncreasingLaneNumber_SpawnWithCorrectTGapAndProfiles)
 {
-    std::map<std::string, const std::vector<std::string>> parametersStrings {{"Roads", {"MyRoad"}}};
+    std::map<std::string, const std::vector<std::string>> parametersStrings {{"Roads", {ROADID}}};
     ON_CALL(*spawnPoint, GetParametersStringVector()).WillByDefault(ReturnRef(parametersStrings));
     std::map<std::string, const std::vector<int>> parametersIntVector {{"Lanes", {-1,-2,-3}}};
     ON_CALL(*spawnPoint, GetParametersIntVector()).WillByDefault(ReturnRef(parametersIntVector));
@@ -294,18 +305,9 @@ TEST_F(SpawnerPreRun_IntegrationTests, IncreasingLaneNumber_SpawnWithCorrectTGap
     ON_CALL(world, GetDistanceToEndOfLane(_,_,_,_,_,_)).WillByDefault(
                 [](const RoadGraph&, RoadGraphVertex startNode, int, double initialSearchDistance, double, const LaneTypes&)
     {return RouteQueryResult<double>{{startNode, 2000.0 - initialSearchDistance}};});
-    ON_CALL(world, IsSValidOnLane("MyRoad", AllOf(Le(-1),Ge(-2)),AllOf(Ge(0),Le(2000)))).WillByDefault(Return(true));
-    ON_CALL(world, IsSValidOnLane("MyRoad", -3,AllOf(Ge(1400),Le(2000)))).WillByDefault(Return(true));
+    ON_CALL(world, IsSValidOnLane(ROADID, AllOf(Le(-1),Ge(-2)),AllOf(Ge(0),Le(2000)))).WillByDefault(Return(true));
+    ON_CALL(world, IsSValidOnLane(ROADID, -3,AllOf(Ge(1400),Le(2000)))).WillByDefault(Return(true));
     ON_CALL(world, GetLaneWidth(_,_,_)).WillByDefault(Return(3.0));
-
-    RoadGraph roadGraph;
-    RoadGraphVertex vertex;
-    const RouteQueryResult<double> endOfLaneResult {{vertex, 1500.0}};
-
-    ON_CALL(world, GetRoadGraph(_, _))
-            .WillByDefault(Return(std::pair<RoadGraph, RoadGraphVertex>{roadGraph, vertex}));
-    ON_CALL(world, GetDistanceToEndOfLane(_, _, _, _, _))
-            .WillByDefault(Return(endOfLaneResult));
 
     RouteQueryResult<std::vector<const WorldObjectInterface*>> noObjects{{0, {}}};
     ON_CALL(world, GetObjectsInRange(_,_,_,_,_,_)).WillByDefault(Return(noObjects));
@@ -319,6 +321,8 @@ TEST_F(SpawnerPreRun_IntegrationTests, IncreasingLaneNumber_SpawnWithCorrectTGap
     ON_CALL(world, GetRelativeLanes(_,_,-2,Ge(1400),_)).WillByDefault(Return(relativeLanesMinus2Second));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus3{{0, {{0,0,{relativeLane0, relativeLanePlus1, relativeLanePlus2}}}}};
     ON_CALL(world, GetRelativeLanes(_,_,-3,_,_)).WillByDefault(Return(relativeLanesMinus3));
+
+    ON_CALL(world, CreateAgentAdapter(_)).WillByDefault(GENERATE_AGENT_ADAPTER());
 
     auto spawner = CreateSpawner();
 
@@ -346,7 +350,7 @@ TEST_F(SpawnerPreRun_IntegrationTests, IncreasingLaneNumber_SpawnWithCorrectTGap
 
 TEST_F(SpawnerPreRun_IntegrationTests, DecreasingLaneNumber_SpawnWithCorrectTGapAndProfiles)
 {
-    std::map<std::string, const std::vector<std::string>> parametersStrings {{"Roads", {"MyRoad"}}};
+    std::map<std::string, const std::vector<std::string>> parametersStrings {{"Roads", {ROADID}}};
     ON_CALL(*spawnPoint, GetParametersStringVector()).WillByDefault(ReturnRef(parametersStrings));
     std::map<std::string, const std::vector<int>> parametersIntVector {{"Lanes", {-1,-2,-3}}};
     ON_CALL(*spawnPoint, GetParametersIntVector()).WillByDefault(ReturnRef(parametersIntVector));
@@ -361,18 +365,9 @@ TEST_F(SpawnerPreRun_IntegrationTests, DecreasingLaneNumber_SpawnWithCorrectTGap
     ON_CALL(world, GetDistanceToEndOfLane(_,_,AllOf(Le(-1),Ge(-2)),_,_,_)).WillByDefault(
                 [](const RoadGraph&, RoadGraphVertex startNode, int, double initialSearchDistance, double, const LaneTypes&)
     {return RouteQueryResult<double>{{startNode, 2000.0 - initialSearchDistance}};});
-    ON_CALL(world, IsSValidOnLane("MyRoad", AllOf(Le(-1),Ge(-2)),AllOf(Ge(0),Le(2000)))).WillByDefault(Return(true));
-    ON_CALL(world, IsSValidOnLane("MyRoad", -3,AllOf(Ge(0),Le(1200)))).WillByDefault(Return(true));
+    ON_CALL(world, IsSValidOnLane(ROADID, AllOf(Le(-1),Ge(-2)),AllOf(Ge(0),Le(2000)))).WillByDefault(Return(true));
+    ON_CALL(world, IsSValidOnLane(ROADID, -3,AllOf(Ge(0),Le(1200)))).WillByDefault(Return(true));
     ON_CALL(world, GetLaneWidth(_,_,_)).WillByDefault(Return(3.0));
-
-    RoadGraph roadGraph;
-    RoadGraphVertex vertex;
-    const RouteQueryResult<double> endOfLaneResult {{vertex, 1500.0}};
-
-    ON_CALL(world, GetRoadGraph(_, _))
-            .WillByDefault(Return(std::pair<RoadGraph, RoadGraphVertex>{roadGraph, vertex}));
-    ON_CALL(world, GetDistanceToEndOfLane(_, _, _, _, _))
-            .WillByDefault(Return(endOfLaneResult));
 
     RouteQueryResult<std::vector<const WorldObjectInterface*>> noObjects{{0, {}}};
     ON_CALL(world, GetObjectsInRange(_,_,_,_,_,_)).WillByDefault(Return(noObjects));
@@ -386,6 +381,8 @@ TEST_F(SpawnerPreRun_IntegrationTests, DecreasingLaneNumber_SpawnWithCorrectTGap
     ON_CALL(world, GetRelativeLanes(_,_,-2,Ge(1200),_)).WillByDefault(Return(relativeLanesMinus2Second));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus3{{0, {{0,0,{relativeLane0, relativeLanePlus1, relativeLanePlus2}}}}};
     ON_CALL(world, GetRelativeLanes(_,_,-3,_,_)).WillByDefault(Return(relativeLanesMinus3));
+
+    ON_CALL(world, CreateAgentAdapter(_)).WillByDefault(GENERATE_AGENT_ADAPTER());
 
     auto spawner = CreateSpawner();
 
@@ -413,7 +410,7 @@ TEST_F(SpawnerPreRun_IntegrationTests, DecreasingLaneNumber_SpawnWithCorrectTGap
 
 TEST_F(SpawnerPreRun_IntegrationTests, RightLaneStartsAndEndsWithinRange_SpawnWithCorrectTGapAndProfiles)
 {
-    std::map<std::string, const std::vector<std::string>> parametersStrings {{"Roads", {"MyRoad"}}};
+    std::map<std::string, const std::vector<std::string>> parametersStrings {{"Roads", {ROADID}}};
     ON_CALL(*spawnPoint, GetParametersStringVector()).WillByDefault(ReturnRef(parametersStrings));
     std::map<std::string, const std::vector<int>> parametersIntVector {{"Lanes", {-1,-2,-3}}};
     ON_CALL(*spawnPoint, GetParametersIntVector()).WillByDefault(ReturnRef(parametersIntVector));
@@ -428,18 +425,9 @@ TEST_F(SpawnerPreRun_IntegrationTests, RightLaneStartsAndEndsWithinRange_SpawnWi
     ON_CALL(world, GetDistanceToEndOfLane(_,_,AllOf(Le(-1),Ge(-2)),_,_,_)).WillByDefault(
                 [](const RoadGraph&, RoadGraphVertex startNode, int, double initialSearchDistance, double, const LaneTypes&)
     {return RouteQueryResult<double>{{startNode, 2000.0 - initialSearchDistance}};});
-    ON_CALL(world, IsSValidOnLane("MyRoad", AllOf(Le(-1),Ge(-2)),AllOf(Ge(0),Le(2000)))).WillByDefault(Return(true));
-    ON_CALL(world, IsSValidOnLane("MyRoad", -3,AllOf(Ge(1200),Le(1400)))).WillByDefault(Return(true));
+    ON_CALL(world, IsSValidOnLane(ROADID, AllOf(Le(-1),Ge(-2)),AllOf(Ge(0),Le(2000)))).WillByDefault(Return(true));
+    ON_CALL(world, IsSValidOnLane(ROADID, -3,AllOf(Ge(1200),Le(1400)))).WillByDefault(Return(true));
     ON_CALL(world, GetLaneWidth(_,_,_)).WillByDefault(Return(3.0));
-
-    RoadGraph roadGraph;
-    RoadGraphVertex vertex;
-    const RouteQueryResult<double> endOfLaneResult {{vertex, 1500.0}};
-
-    ON_CALL(world, GetRoadGraph(_, _))
-            .WillByDefault(Return(std::pair<RoadGraph, RoadGraphVertex>{roadGraph, vertex}));
-    ON_CALL(world, GetDistanceToEndOfLane(_, _, _, _, _))
-            .WillByDefault(Return(endOfLaneResult));
 
     RouteQueryResult<std::vector<const WorldObjectInterface*>> noObjects{{0, {}}};
     ON_CALL(world, GetObjectsInRange(_,_,_,_,_,_)).WillByDefault(Return(noObjects));
@@ -457,6 +445,8 @@ TEST_F(SpawnerPreRun_IntegrationTests, RightLaneStartsAndEndsWithinRange_SpawnWi
     ON_CALL(world, GetRelativeLanes(_,_,-2,Le(1200),_)).WillByDefault(Return(relativeLanesMinus2Third));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus3{{0, {{0,0,{relativeLane0, relativeLanePlus1, relativeLanePlus2}}}}};
     ON_CALL(world, GetRelativeLanes(_,_,-3,_,_)).WillByDefault(Return(relativeLanesMinus3));
+
+    ON_CALL(world, CreateAgentAdapter(_)).WillByDefault(GENERATE_AGENT_ADAPTER());
 
     auto spawner = CreateSpawner();
 

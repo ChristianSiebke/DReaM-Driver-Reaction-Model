@@ -30,6 +30,8 @@ TEST(EgoAgent_Test, GetDistanceToEndOfLane)
 
     ObjectPosition agentPosition{{},{{"Road1", GlobalRoadPosition{"Road1", -2, 12, 0, 0}}},{}};
     ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(ReturnRef(agentPosition));
+    std::vector<std::string> roads{"Road1"};
+    ON_CALL(fakeAgent, GetRoads(_)).WillByDefault(Return(roads));
 
     RoadGraph roadGraph;
     RoadGraphVertex root = add_vertex(RouteElement{"Road1", true}, roadGraph);
@@ -53,6 +55,8 @@ TEST(EgoAgent_Test, GetObjectsInRange)
 
     ObjectPosition agentPosition{{},{{"Road1", GlobalRoadPosition{"Road1", -2, 12, 0, 0}}},{}};
     ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(ReturnRef(agentPosition));
+    std::vector<std::string> roads{"Road1"};
+    ON_CALL(fakeAgent, GetRoads(_)).WillByDefault(Return(roads));
 
     RoadGraph roadGraph;
     RoadGraphVertex root = add_vertex(RouteElement{"Road1", true}, roadGraph);
@@ -77,6 +81,8 @@ TEST(EgoAgent_Test, GetAgentsInRange)
 
     ObjectPosition agentPosition{{},{{"Road1", GlobalRoadPosition{"Road1", -2, 12, 0, 0}}},{}};
     ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(ReturnRef(agentPosition));
+    std::vector<std::string> roads{"Road1"};
+    ON_CALL(fakeAgent, GetRoads(_)).WillByDefault(Return(roads));
 
     RoadGraph roadGraph;
     RoadGraphVertex root = add_vertex(RouteElement{"Road1", true}, roadGraph);
@@ -101,6 +107,8 @@ TEST(EgoAgent_Test, GetTrafficSignsInRange)
 
     ObjectPosition agentPosition{{},{{"Road1", GlobalRoadPosition{"Road1", -2, 12, 0, 0}}},{}};
     ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(ReturnRef(agentPosition));
+    std::vector<std::string> roads{"Road1"};
+    ON_CALL(fakeAgent, GetRoads(_)).WillByDefault(Return(roads));
 
     RoadGraph roadGraph;
     RoadGraphVertex root = add_vertex(RouteElement{"Road1", true}, roadGraph);
@@ -129,8 +137,10 @@ TEST(EgoAgent_Test, GetReferencePointPosition_FirstRoad)
     add_edge(root, target, roadGraph);
 
     GlobalRoadPosition referencePoint{"Road1", -2, 2.0, 3.0, 0.1};
-    ObjectPosition position{{{"Road1", referencePoint}},{},{}};
+    ObjectPosition position{{{"Road1", referencePoint}},{{"Road1", referencePoint}},{}};
     ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(ReturnRef(position));
+    std::vector<std::string> roads{"Road1"};
+    ON_CALL(fakeAgent, GetRoads(_)).WillByDefault(Return(roads));
 
     EgoAgent egoAgent {&fakeAgent, &fakeWorld};
     egoAgent.SetRoadGraph(std::move(roadGraph), root, target);
@@ -155,14 +165,14 @@ TEST(EgoAgent_Test, GetReferencePointPosition_SecondRoad)
     add_edge(root, target, roadGraph);
 
     GlobalRoadPosition referencePoint{"Road2", -2, 2.0, 3.0, 0.1};
-    ObjectPosition position{{{"Road2", referencePoint}},{},{}};
+    ObjectPosition position{{{"Road2", referencePoint}},{{"Road2", referencePoint}},{}};
     ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(ReturnRef(position));
     std::vector<std::string> roads{"Road2"};
     ON_CALL(fakeAgent, GetRoads(MeasurementPoint::Front)).WillByDefault(Return(roads));
 
     EgoAgent egoAgent {&fakeAgent, &fakeWorld};
     egoAgent.SetRoadGraph(std::move(roadGraph), root, target);
-    egoAgent.UpdatePositionInGraph();
+    egoAgent.Update();
 
     const auto result = egoAgent.GetReferencePointPosition();
 
@@ -206,6 +216,7 @@ public:
         add_edge(node2, node22, roadGraph);
         add_edge(root, node3, roadGraph);
         ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(ReturnRef(agentPosition));
+        ON_CALL(fakeAgent, GetRoads(_)).WillByDefault(Return(roads));
         RouteQueryResult<double> distances {{node1, 100},
                                             {node21, 150},
                                             {node22, 200},
@@ -225,6 +236,7 @@ public:
     NiceMock<FakeWorld> fakeWorld;
     EgoAgent egoAgent {&fakeAgent, &fakeWorld};
     ObjectPosition agentPosition{{},{{"Road1", GlobalRoadPosition{"Road1", -2, 12, 0, 0}}},{}};
+    std::vector<std::string> roads{"Road1"};
     RoadGraph roadGraph;
     RoadGraphVertex root = add_vertex(RouteElement{"Road1", true}, roadGraph);
     RoadGraphVertex node1 = add_vertex(roadGraph);
@@ -281,7 +293,7 @@ TEST(EgoAgent_Test, GetWorldPosition_SameRoadInOdDirection)
     NiceMock<FakeAgent> fakeAgent;
     NiceMock<FakeWorld> fakeWorld;
 
-    ObjectPosition agentPosition{{{"Road1", GlobalRoadPosition{"Road1", -2, 12, 1, 0.2}}},{},{}};
+    ObjectPosition agentPosition{{{"Road1", GlobalRoadPosition{"Road1", -2, 12, 1, 0.2}}},{{"Road1", GlobalRoadPosition{"Road1", -2, 12, 1, 0.2}}},{}};
     ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(ReturnRef(agentPosition));
 
     RoadGraph roadGraph;
@@ -294,6 +306,8 @@ TEST(EgoAgent_Test, GetWorldPosition_SameRoadInOdDirection)
     Position worldPosition{1, 2, 0.5, 0.0};
     RoadPosition expectedRoadPosition {62.0, -3.5, 0.3};
     EXPECT_CALL(fakeWorld, RoadCoord2WorldCoord(expectedRoadPosition,"Road1")).WillOnce(Return(worldPosition));
+    std::vector<std::string> roads{"Road1"};
+    ON_CALL(fakeAgent, GetRoads(MeasurementPoint::Front)).WillByDefault(Return(roads));
 
     EgoAgent egoAgent {&fakeAgent, &fakeWorld};
     egoAgent.SetRoadGraph(std::move(roadGraph), root, target);
@@ -308,7 +322,7 @@ TEST(EgoAgent_Test, GetWorldPosition_SameRoadAgainstOdDirection)
     NiceMock<FakeAgent> fakeAgent;
     NiceMock<FakeWorld> fakeWorld;
 
-    ObjectPosition agentPosition{{{"Road1", GlobalRoadPosition{"Road1", 2, 12, -1, 0.2}}},{},{}};
+    ObjectPosition agentPosition{{{"Road1", GlobalRoadPosition{"Road1", 2, 12, -1, 0.2}}},{{"Road1", GlobalRoadPosition{"Road1", -2, 12, 1, 0.2}}},{}};
     ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(ReturnRef(agentPosition));
 
     RoadGraph roadGraph;
@@ -321,6 +335,8 @@ TEST(EgoAgent_Test, GetWorldPosition_SameRoadAgainstOdDirection)
     Position worldPosition{1, 2, 0.5, 0.0};
     RoadPosition expectedRoadPosition {2.0, 3.5, 0.3 - M_PI};
     EXPECT_CALL(fakeWorld, RoadCoord2WorldCoord(expectedRoadPosition,"Road1")).WillOnce(Return(worldPosition));
+    std::vector<std::string> roads{"Road1"};
+    ON_CALL(fakeAgent, GetRoads(MeasurementPoint::Front)).WillByDefault(Return(roads));
 
     EgoAgent egoAgent {&fakeAgent, &fakeWorld};
     egoAgent.SetRoadGraph(std::move(roadGraph), root, target);
@@ -335,7 +351,7 @@ TEST(EgoAgent_Test, GetWorldPosition_NextRoadBothInOdDirection)
     NiceMock<FakeAgent> fakeAgent;
     NiceMock<FakeWorld> fakeWorld;
 
-    ObjectPosition agentPosition{{{"Road1", GlobalRoadPosition{"Road1", -2, 12, 1, 0.2}}},{},{}};
+    ObjectPosition agentPosition{{{"Road1", GlobalRoadPosition{"Road1", -2, 12, 1, 0.2}}},{{"Road1", GlobalRoadPosition{"Road1", -2, 12, 1, 0.2}}},{}};
     ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(ReturnRef(agentPosition));
 
     RoadGraph roadGraph;
@@ -349,6 +365,8 @@ TEST(EgoAgent_Test, GetWorldPosition_NextRoadBothInOdDirection)
     Position worldPosition{1, 2, 0.5, 0.0};
     RoadPosition expectedRoadPosition {62.0, -3.5, 0.3};
     EXPECT_CALL(fakeWorld, RoadCoord2WorldCoord(expectedRoadPosition,"Road2")).WillOnce(Return(worldPosition));
+    std::vector<std::string> roads{"Road1"};
+    ON_CALL(fakeAgent, GetRoads(MeasurementPoint::Front)).WillByDefault(Return(roads));
 
     EgoAgent egoAgent {&fakeAgent, &fakeWorld};
     egoAgent.SetRoadGraph(std::move(roadGraph), root, target);
@@ -363,7 +381,7 @@ TEST(EgoAgent_Test, GetWorldPosition_NextRoadBothAgainstOdDirection)
     NiceMock<FakeAgent> fakeAgent;
     NiceMock<FakeWorld> fakeWorld;
 
-    ObjectPosition agentPosition{{{"Road1", GlobalRoadPosition{"Road1", 2, 12, -1, 0.2}}},{},{}};
+    ObjectPosition agentPosition{{{"Road1", GlobalRoadPosition{"Road1", 2, 12, -1, 0.2}}},{{"Road1", GlobalRoadPosition{"Road1", -2, 12, 1, 0.2}}},{}};
     ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(ReturnRef(agentPosition));
 
     RoadGraph roadGraph;
@@ -377,6 +395,8 @@ TEST(EgoAgent_Test, GetWorldPosition_NextRoadBothAgainstOdDirection)
     Position worldPosition{1, 2, 0.5, 0.0};
     RoadPosition expectedRoadPosition {122.0, 3.5, 0.3 - M_PI};
     EXPECT_CALL(fakeWorld, RoadCoord2WorldCoord(expectedRoadPosition,"Road2")).WillOnce(Return(worldPosition));
+    std::vector<std::string> roads{"Road1"};
+    ON_CALL(fakeAgent, GetRoads(MeasurementPoint::Front)).WillByDefault(Return(roads));
 
     EgoAgent egoAgent {&fakeAgent, &fakeWorld};
     egoAgent.SetRoadGraph(std::move(roadGraph), root, target);
@@ -391,7 +411,7 @@ TEST(EgoAgent_Test, GetWorldPosition_NextRoadInThenAgainstOdDirection)
     NiceMock<FakeAgent> fakeAgent;
     NiceMock<FakeWorld> fakeWorld;
 
-    ObjectPosition agentPosition{{{"Road1", GlobalRoadPosition{"Road1", -2, 12, 1, 0.2}}},{},{}};
+    ObjectPosition agentPosition{{{"Road1", GlobalRoadPosition{"Road1", -2, 12, 1, 0.2}}},{{"Road1", GlobalRoadPosition{"Road1", -2, 12, 1, 0.2}}},{}};
     ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(ReturnRef(agentPosition));
 
     RoadGraph roadGraph;
@@ -405,6 +425,8 @@ TEST(EgoAgent_Test, GetWorldPosition_NextRoadInThenAgainstOdDirection)
     Position worldPosition{1, 2, 0.5, 0.0};
     RoadPosition expectedRoadPosition {98.0, 3.5, 0.3 - M_PI};
     EXPECT_CALL(fakeWorld, RoadCoord2WorldCoord(expectedRoadPosition,"Road2")).WillOnce(Return(worldPosition));
+    std::vector<std::string> roads{"Road1"};
+    ON_CALL(fakeAgent, GetRoads(MeasurementPoint::Front)).WillByDefault(Return(roads));
 
     EgoAgent egoAgent {&fakeAgent, &fakeWorld};
     egoAgent.SetRoadGraph(std::move(roadGraph), root, target);
@@ -420,7 +442,7 @@ TEST(EgoAgent_Test, GetWorldPosition_NextRoadAgainstThenInOdDirection)
     NiceMock<FakeAgent> fakeAgent;
     NiceMock<FakeWorld> fakeWorld;
 
-    ObjectPosition agentPosition{{{"Road1", GlobalRoadPosition{"Road1", 2, 12, -1, 0.2}}},{},{}};
+    ObjectPosition agentPosition{{{"Road1", GlobalRoadPosition{"Road1", 2, 12, -1, 0.2}}},{{"Road1", GlobalRoadPosition{"Road1", -2, 12, 1, 0.2}}},{}};
     ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(ReturnRef(agentPosition));
 
     RoadGraph roadGraph;
@@ -434,6 +456,8 @@ TEST(EgoAgent_Test, GetWorldPosition_NextRoadAgainstThenInOdDirection)
     Position worldPosition{1, 2, 0.5, 0.0};
     RoadPosition expectedRoadPosition {38.0, -3.5, 0.3};
     EXPECT_CALL(fakeWorld, RoadCoord2WorldCoord(expectedRoadPosition,"Road2")).WillOnce(Return(worldPosition));
+    std::vector<std::string> roads{"Road1"};
+    ON_CALL(fakeAgent, GetRoads(MeasurementPoint::Front)).WillByDefault(Return(roads));
 
     EgoAgent egoAgent {&fakeAgent, &fakeWorld};
     egoAgent.SetRoadGraph(std::move(roadGraph), root, target);

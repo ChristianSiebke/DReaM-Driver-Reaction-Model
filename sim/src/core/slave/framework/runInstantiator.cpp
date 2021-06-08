@@ -23,7 +23,7 @@
 #include "component.h"
 #include "bindings/dataStore.h"
 #include "observationModule.h"
-#include "common/parameters.h"
+#include "modelElements/parameters.h"
 #include "scheduler/runResult.h"
 #include "scheduler/scheduler.h"
 #include "spawnPointNetwork.h"

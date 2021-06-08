@@ -53,12 +53,12 @@
 * name                       | meaning
 * ---------------------------|------
 * acceleration               | Acceleration of the current agent coresponding to the pedalpositions [m/s²]
-* velocity                   | The driven curvature of the car coresponding to the steering wheel angle based on Ackermann [radiant]
+* velocity                   | The driven curvature of the car coresponding to the steering wheel angle based on Ackermann [radian]
 * positionX                  | new inertial x-position [m]
 * positionY                  | new inertial y-position [m]
-* yaw                        | new yaw angle in current time step [radiant]
-* yawRate                    | change of yaw angle due to ds and curvature [radiant]
-* steeringWheelAngle         | new angle of the steering wheel angle [degree]
+* yaw                        | new yaw angle in current time step [radian]
+* yawRate                    | change of yaw angle due to ds and curvature [radian]
+* steeringWheelAngle         | new angle of the steering wheel angle [radian]
 * travelDistance             | distance traveled by the agent during this timestep [m]
 *
 *

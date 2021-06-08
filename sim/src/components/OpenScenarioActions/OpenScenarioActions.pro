@@ -31,7 +31,9 @@ SOURCES += \
         src/openScenarioActionsImpl.cpp \
         src/oscActionsCalculation.cpp \
         src/transformLaneChange.cpp \
-        src/transformSpeedAction.cpp
+        src/transformSpeedAction.cpp \
+        src/transformAcquirePosition.cpp \
+        src/transformDefaultCustomCommandAction.cpp
 
 HEADERS += \
         openScenarioActions.h \
@@ -41,4 +43,6 @@ HEADERS += \
         src/transformerBase.h \
         src/transformTrajectory.h \
         src/transformLaneChange.h \
-        src/transformSpeedAction.h
+        src/transformSpeedAction.h \
+        src/transformAcquirePosition.h \
+        src/transformDefaultCustomCommandAction.h

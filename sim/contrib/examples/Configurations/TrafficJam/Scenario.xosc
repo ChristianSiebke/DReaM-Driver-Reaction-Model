@@ -1,0 +1,340 @@
+<?xml version="1.0"?>
+<OpenSCENARIO>
+  <FileHeader revMajor="1" revMinor="0" date="2020-06-26T00:17:00" description="TrafficJam" author="in-tech GmbH"/>
+  <ParameterDeclarations>
+    <ParameterDeclaration name="OP_OSC_SchemaVersion" parameterType="string" value="0.4.0"/>
+    <ParameterDeclaration name="Agent1_S" parameterType="double" value="250.0"/>
+    <ParameterDeclaration name="Agent1_Lane" parameterType="string" value="-1"/>
+    <ParameterDeclaration name="Agent1_Velocity" parameterType="double" value="10.0"/>
+    <ParameterDeclaration name="Agent2_S" parameterType="double" value="241.0"/>
+    <ParameterDeclaration name="Agent2_Lane" parameterType="string" value="-1"/>
+    <ParameterDeclaration name="Agent2_Velocity" parameterType="double" value="10.0"/>
+    <ParameterDeclaration name="Agent3_S" parameterType="double" value="233.5"/>
+    <ParameterDeclaration name="Agent3_Lane" parameterType="string" value="-1"/>
+    <ParameterDeclaration name="Agent3_Velocity" parameterType="double" value="10.0"/>
+    <ParameterDeclaration name="Agent4_S" parameterType="double" value="223.5"/>
+    <ParameterDeclaration name="Agent4_Lane" parameterType="string" value="-1"/>
+    <ParameterDeclaration name="Agent4_Velocity" parameterType="double" value="10.0"/>
+    <ParameterDeclaration name="Agent5_S" parameterType="double" value="215.5"/>
+    <ParameterDeclaration name="Agent5_Lane" parameterType="string" value="-1"/>
+    <ParameterDeclaration name="Agent5_Velocity" parameterType="double" value="10.0"/>
+    <ParameterDeclaration name="Agent6_S" parameterType="double" value="204.3"/>
+    <ParameterDeclaration name="Agent6_Lane" parameterType="string" value="-1"/>
+    <ParameterDeclaration name="Agent6_Velocity" parameterType="double" value="8.0"/>
+    <ParameterDeclaration name="Agent7_S" parameterType="double" value="250.0"/>
+    <ParameterDeclaration name="Agent7_Lane" parameterType="string" value="-2"/>
+    <ParameterDeclaration name="Agent7_Velocity" parameterType="double" value="10.0"/>
+    <ParameterDeclaration name="Agent8_S" parameterType="double" value="235.0"/>
+    <ParameterDeclaration name="Agent8_Lane" parameterType="string" value="-2"/>
+    <ParameterDeclaration name="Agent8_Velocity" parameterType="double" value="10.0"/>
+    <ParameterDeclaration name="Agent9_S" parameterType="double" value="220.3"/>
+    <ParameterDeclaration name="Agent9_Lane" parameterType="string" value="-2"/>
+    <ParameterDeclaration name="Agent9_Velocity" parameterType="double" value="10.0"/>
+    <ParameterDeclaration name="Agent10_S" parameterType="double" value="215.5"/>
+    <ParameterDeclaration name="Agent10_Lane" parameterType="string" value="-2"/>
+    <ParameterDeclaration name="Agent10_Velocity" parameterType="double" value="10.0"/>
+  </ParameterDeclarations>
+  <CatalogLocations>
+    <VehicleCatalog>
+      <Directory path="VehicleModelsCatalog.xosc"/>
+    </VehicleCatalog>
+    <PedestrianCatalog>
+      <Directory path="PedestrianModelsCatalog.xosc"/>
+    </PedestrianCatalog>
+    <ControllerCatalog>
+      <Directory path=""/>
+    </ControllerCatalog>
+    <ManeuverCatalog>
+      <Directory path=""/>
+    </ManeuverCatalog>
+    <MiscObjectCatalog>
+      <Directory path=""/>
+    </MiscObjectCatalog>
+    <EnvironmentCatalog>
+      <Directory path=""/>
+    </EnvironmentCatalog>
+    <TrajectoryCatalog>
+      <Directory path=""/>
+    </TrajectoryCatalog>
+    <RouteCatalog>
+      <Directory path=""/>
+    </RouteCatalog>
+  </CatalogLocations>
+  <RoadNetwork>
+    <LogicFile filepath="SceneryConfiguration.xodr"/>
+    <SceneGraphFile filepath=""/>
+  </RoadNetwork>
+  <Entities>
+    <ScenarioObject name="Ego">
+      <CatalogReference catalogName="ProfilesCatalog.xml" entryName="MiddleClassCarAgent"/>
+    </ScenarioObject>
+    <ScenarioObject name="ScenarioAgent1">
+      <CatalogReference catalogName="ProfilesCatalog.xml" entryName="MiddleClassCarAgent"/>
+    </ScenarioObject>
+    <ScenarioObject name="ScenarioAgent2">
+      <CatalogReference catalogName="ProfilesCatalog.xml" entryName="LuxuryClassCarAgent"/>
+    </ScenarioObject>
+    <ScenarioObject name="ScenarioAgent3">
+      <CatalogReference catalogName="ProfilesCatalog.xml" entryName="MiddleClassCarAgent"/>
+    </ScenarioObject>
+    <ScenarioObject name="ScenarioAgent4">
+      <CatalogReference catalogName="ProfilesCatalog.xml" entryName="LuxuryClassCarAgent"/>
+    </ScenarioObject>
+    <ScenarioObject name="ScenarioAgent5">
+      <CatalogReference catalogName="ProfilesCatalog.xml" entryName="MiddleClassCarAgent"/>
+    </ScenarioObject>
+    <ScenarioObject name="ScenarioAgent6">
+      <CatalogReference catalogName="ProfilesCatalog.xml" entryName="LuxuryClassCarAgent"/>
+    </ScenarioObject>
+    <ScenarioObject name="ScenarioAgent7">
+      <CatalogReference catalogName="ProfilesCatalog.xml" entryName="LuxuryClassCarAgent"/>
+    </ScenarioObject>
+    <ScenarioObject name="ScenarioAgent8">
+      <CatalogReference catalogName="ProfilesCatalog.xml" entryName="MiddleClassCarAgent"/>
+    </ScenarioObject>
+    <ScenarioObject name="ScenarioAgent9">
+      <CatalogReference catalogName="ProfilesCatalog.xml" entryName="MiddleClassCarAgent"/>
+    </ScenarioObject>
+    <ScenarioObject name="ScenarioAgent10">
+      <CatalogReference catalogName="ProfilesCatalog.xml" entryName="MiddleClassCarAgent"/>
+    </ScenarioObject>
+    <EntitySelection name="ScenarioAgents">
+      <Members>
+        <EntityRef entityRef="ScenarioAgent1"/>
+        <EntityRef entityRef="ScenarioAgent2"/>
+        <EntityRef entityRef="ScenarioAgent3"/>
+        <EntityRef entityRef="ScenarioAgent4"/>
+        <EntityRef entityRef="ScenarioAgent5"/>
+        <EntityRef entityRef="ScenarioAgent6"/>
+        <EntityRef entityRef="ScenarioAgent7"/>
+        <EntityRef entityRef="ScenarioAgent8"/>
+        <EntityRef entityRef="ScenarioAgent9"/>
+        <EntityRef entityRef="ScenarioAgent10"/>
+      </Members>
+    </EntitySelection>
+  </Entities>
+  <Storyboard>
+    <Init>
+      <Actions>
+        <Private entityRef="Ego">
+          <PrivateAction>
+            <TeleportAction>
+              <Position>
+                <LanePosition roadId="1" laneId="-1" offset="0.0" s="0.0"/>
+              </Position>
+            </TeleportAction>
+          </PrivateAction>
+          <PrivateAction>
+            <LongitudinalAction>
+              <SpeedAction>
+                <SpeedActionDynamics dynamicsShape="linear" value="0.0" dynamicsDimension="rate"/>
+                <SpeedActionTarget>
+                  <AbsoluteTargetSpeed value="43.5"/>
+                </SpeedActionTarget>
+              </SpeedAction>
+            </LongitudinalAction>
+          </PrivateAction>
+        </Private>
+        <Private entityRef="ScenarioAgent1">
+          <PrivateAction>
+            <TeleportAction>
+              <Position>
+                <LanePosition roadId="1" laneId="$Agent1_Lane" offset="0.0" s="$Agent1_S"/>
+              </Position>
+            </TeleportAction>
+          </PrivateAction>
+          <PrivateAction>
+            <LongitudinalAction>
+              <SpeedAction>
+                <SpeedActionDynamics dynamicsShape="linear" value="0.5" dynamicsDimension="rate"/>
+                <SpeedActionTarget>
+                  <AbsoluteTargetSpeed value="$Agent1_Velocity"/>
+                </SpeedActionTarget>
+              </SpeedAction>
+            </LongitudinalAction>
+          </PrivateAction>
+        </Private>
+        <Private entityRef="ScenarioAgent2">
+          <PrivateAction>
+            <TeleportAction>
+              <Position>
+                <LanePosition roadId="1" laneId="$Agent2_Lane" offset="0.0" s="$Agent2_S"/>
+              </Position>
+            </TeleportAction>
+          </PrivateAction>
+          <PrivateAction>
+            <LongitudinalAction>
+              <SpeedAction>
+                <SpeedActionDynamics dynamicsShape="linear" value="0.5" dynamicsDimension="rate"/>
+                <SpeedActionTarget>
+                  <AbsoluteTargetSpeed value="$Agent2_Velocity"/>
+                </SpeedActionTarget>
+              </SpeedAction>
+            </LongitudinalAction>
+          </PrivateAction>
+        </Private>
+        <Private entityRef="ScenarioAgent3">
+          <PrivateAction>
+            <TeleportAction>
+              <Position>
+                <LanePosition roadId="1" laneId="$Agent3_Lane" offset="0.0" s="$Agent3_S"/>
+              </Position>
+            </TeleportAction>
+          </PrivateAction>
+          <PrivateAction>
+            <LongitudinalAction>
+              <SpeedAction>
+                <SpeedActionDynamics dynamicsShape="linear" value="0.5" dynamicsDimension="rate"/>
+                <SpeedActionTarget>
+                  <AbsoluteTargetSpeed value="$Agent3_Velocity"/>
+                </SpeedActionTarget>
+              </SpeedAction>
+            </LongitudinalAction>
+          </PrivateAction>
+        </Private>
+        <Private entityRef="ScenarioAgent4">
+          <PrivateAction>
+            <TeleportAction>
+              <Position>
+                <LanePosition roadId="1" laneId="$Agent4_Lane" offset="0.0" s="$Agent4_S"/>
+              </Position>
+            </TeleportAction>
+          </PrivateAction>
+          <PrivateAction>
+            <LongitudinalAction>
+              <SpeedAction>
+                <SpeedActionDynamics dynamicsShape="linear" value="0.5" dynamicsDimension="rate"/>
+                <SpeedActionTarget>
+                  <AbsoluteTargetSpeed value="$Agent4_Velocity"/>
+                </SpeedActionTarget>
+              </SpeedAction>
+            </LongitudinalAction>
+          </PrivateAction>
+        </Private>
+        <Private entityRef="ScenarioAgent5">
+          <PrivateAction>
+            <TeleportAction>
+              <Position>
+                <LanePosition roadId="1" laneId="$Agent5_Lane" offset="0.0" s="$Agent5_S"/>
+              </Position>
+            </TeleportAction>
+          </PrivateAction>
+          <PrivateAction>
+            <LongitudinalAction>
+              <SpeedAction>
+                <SpeedActionDynamics dynamicsShape="linear" value="0.5" dynamicsDimension="rate"/>
+                <SpeedActionTarget>
+                  <AbsoluteTargetSpeed value="$Agent5_Velocity"/>
+                </SpeedActionTarget>
+              </SpeedAction>
+            </LongitudinalAction>
+          </PrivateAction>
+        </Private>
+        <Private entityRef="ScenarioAgent6">
+          <PrivateAction>
+            <TeleportAction>
+              <Position>
+                <LanePosition roadId="1" laneId="$Agent6_Lane" offset="0.0" s="$Agent6_S"/>
+              </Position>
+            </TeleportAction>
+          </PrivateAction>
+          <PrivateAction>
+            <LongitudinalAction>
+              <SpeedAction>
+                <SpeedActionDynamics dynamicsShape="linear" value="0.5" dynamicsDimension="rate"/>
+                <SpeedActionTarget>
+                  <AbsoluteTargetSpeed value="$Agent6_Velocity"/>
+                </SpeedActionTarget>
+              </SpeedAction>
+            </LongitudinalAction>
+          </PrivateAction>
+        </Private>
+        <Private entityRef="ScenarioAgent7">
+          <PrivateAction>
+            <TeleportAction>
+              <Position>
+                <LanePosition roadId="1" laneId="$Agent7_Lane" offset="0.0" s="$Agent7_S"/>
+              </Position>
+            </TeleportAction>
+          </PrivateAction>
+          <PrivateAction>
+            <LongitudinalAction>
+              <SpeedAction>
+                <SpeedActionDynamics dynamicsShape="linear" value="0.5" dynamicsDimension="rate"/>
+                <SpeedActionTarget>
+                  <AbsoluteTargetSpeed value="$Agent7_Velocity"/>
+                </SpeedActionTarget>
+              </SpeedAction>
+            </LongitudinalAction>
+          </PrivateAction>
+        </Private>
+        <Private entityRef="ScenarioAgent8">
+          <PrivateAction>
+            <TeleportAction>
+              <Position>
+                <LanePosition roadId="1" laneId="$Agent8_Lane" offset="0.0" s="$Agent8_S"/>
+              </Position>
+            </TeleportAction>
+          </PrivateAction>
+          <PrivateAction>
+            <LongitudinalAction>
+              <SpeedAction>
+                <SpeedActionDynamics dynamicsShape="linear" value="0.5" dynamicsDimension="rate"/>
+                <SpeedActionTarget>
+                  <AbsoluteTargetSpeed value="$Agent8_Velocity"/>
+                </SpeedActionTarget>
+              </SpeedAction>
+            </LongitudinalAction>
+          </PrivateAction>
+        </Private>
+        <Private entityRef="ScenarioAgent9">
+          <PrivateAction>
+            <TeleportAction>
+              <Position>
+                <LanePosition roadId="1" laneId="$Agent9_Lane" offset="0.0" s="$Agent9_S"/>
+              </Position>
+            </TeleportAction>
+          </PrivateAction>
+          <PrivateAction>
+            <LongitudinalAction>
+              <SpeedAction>
+                <SpeedActionDynamics dynamicsShape="linear" value="0.5" dynamicsDimension="rate"/>
+                <SpeedActionTarget>
+                  <AbsoluteTargetSpeed value="$Agent9_Velocity"/>
+                </SpeedActionTarget>
+              </SpeedAction>
+            </LongitudinalAction>
+          </PrivateAction>
+        </Private>
+        <Private entityRef="ScenarioAgent10">
+          <PrivateAction>
+            <TeleportAction>
+              <Position>
+                <LanePosition roadId="1" laneId="$Agent10_Lane" offset="0.0" s="$Agent10_S"/>
+              </Position>
+            </TeleportAction>
+          </PrivateAction>
+          <PrivateAction>
+            <LongitudinalAction>
+              <SpeedAction>
+                <SpeedActionDynamics dynamicsShape="linear" value="0.5" dynamicsDimension="rate"/>
+                <SpeedActionTarget>
+                  <AbsoluteTargetSpeed value="$Agent10_Velocity"/>
+                </SpeedActionTarget>
+              </SpeedAction>
+            </LongitudinalAction>
+          </PrivateAction>
+        </Private>
+      </Actions>
+    </Init>
+    <StopTrigger>
+      <ConditionGroup>
+        <Condition name="EndTime" delay="0" conditionEdge="rising">
+          <ByValueCondition>
+            <SimulationTimeCondition value="30.0" rule="greaterThan"/>
+          </ByValueCondition>
+        </Condition>
+      </ConditionGroup>
+    </StopTrigger>
+  </Storyboard>
+</OpenSCENARIO>

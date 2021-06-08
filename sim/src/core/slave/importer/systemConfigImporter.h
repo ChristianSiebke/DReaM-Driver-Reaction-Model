@@ -25,12 +25,10 @@
 #include <iostream>
 
 #include "common/parameter.h"
-#include "common/log.h"
 #include "componentType.h"
 #include "systemConfig.h"
 #include "agentType.h"
 #include "parameterImporter.h"
-#include "common/xmlParser.h"
 
 using namespace Configuration;
 

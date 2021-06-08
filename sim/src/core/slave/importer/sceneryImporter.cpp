@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 * Copyright (c) 2020 HLRS, University of Stuttgart.
 *
@@ -20,10 +20,9 @@
 #include <memory>
 #include <QFile>
 
-#include "common/log.h"
 #include "scenery.h"
 #include "sceneryImporter.h"
-#include "common/xmlParser.h"
+#include "importer/importerCommon.h"
 #include "common/commonTools.h"
 #include "importerLoggingHelper.h"
 
@@ -69,10 +68,22 @@ bool ParseType(const std::string &element, RoadElementOrientation &orientation)
 bool ParseType(const std::string &element, RoadObjectType &objectType)
 {
     return
-            assignIfMatching(element, objectType, "barrier", RoadObjectType::barrier) ||
+            assignIfMatching(element, objectType, "none", RoadObjectType::none) ||
             assignIfMatching(element, objectType, "obstacle", RoadObjectType::obstacle) ||
             assignIfMatching(element, objectType, "car", RoadObjectType::car) ||
-            assignIfMatching(element, objectType, "truck", RoadObjectType::truck) ||
+            assignIfMatching(element, objectType, "pole", RoadObjectType::pole) ||
+            assignIfMatching(element, objectType, "tree", RoadObjectType::tree) ||
+            assignIfMatching(element, objectType, "vegetation", RoadObjectType::vegetation) ||
+            assignIfMatching(element, objectType, "barrier", RoadObjectType::barrier) ||
+            assignIfMatching(element, objectType, "building", RoadObjectType::building) ||
+            assignIfMatching(element, objectType, "parkingSpace", RoadObjectType::parkingSpace) ||
+            assignIfMatching(element, objectType, "patch", RoadObjectType::patch) ||
+            assignIfMatching(element, objectType, "railing", RoadObjectType::railing) ||
+            assignIfMatching(element, objectType, "trafficIsland", RoadObjectType::trafficIsland) ||
+            assignIfMatching(element, objectType, "crosswalk", RoadObjectType::crosswalk) ||
+            assignIfMatching(element, objectType, "streetlamp", RoadObjectType::streetlamp) ||
+            assignIfMatching(element, objectType, "gantry", RoadObjectType::gantry) ||
+            assignIfMatching(element, objectType, "soundBarrier", RoadObjectType::soundBarrier) ||
             assignIfMatching(element, objectType, "van", RoadObjectType::van) ||
             assignIfMatching(element, objectType, "bus", RoadObjectType::bus) ||
             assignIfMatching(element, objectType, "trailer", RoadObjectType::trailer) ||
@@ -81,15 +92,8 @@ bool ParseType(const std::string &element, RoadObjectType &objectType)
             assignIfMatching(element, objectType, "tram", RoadObjectType::tram) ||
             assignIfMatching(element, objectType, "train", RoadObjectType::train) ||
             assignIfMatching(element, objectType, "pedestrian", RoadObjectType::pedestrian)||
-            assignIfMatching(element, objectType, "pole", RoadObjectType::pole) ||
-            assignIfMatching(element, objectType, "tree", RoadObjectType::tree) ||
-            assignIfMatching(element, objectType, "vegetation", RoadObjectType::vegetation) ||
-            assignIfMatching(element, objectType, "building", RoadObjectType::building) ||
-            assignIfMatching(element, objectType, "parkingSpace", RoadObjectType::parkingSpace) ||
             assignIfMatching(element, objectType, "wind", RoadObjectType::wind)  ||
-            assignIfMatching(element, objectType, "patch", RoadObjectType::patch) ||
-            assignIfMatching(element, objectType, "GuardRail", RoadObjectType::guardRail) ||
-            assignIfMatching(element, objectType, "RoadSideMarkerPost", RoadObjectType::roadSideMarkerPost);
+            assignIfMatching(element, objectType, "roadMark", RoadObjectType::roadMark);
 }
 
 template <typename T>
@@ -568,117 +572,67 @@ void SceneryImporter::ParseRoadLinks(QDomElement& roadElement,
                 RoadLinkElementType roadLinkElementType = RoadLinkElementType::Undefined;
                 std::string roadLinkElementId;
                 ContactPointType roadLinkContactPoint = ContactPointType::Undefined;
-                RoadLinkDirectionType roadLinkDirection = RoadLinkDirectionType::Undefined;
-                RoadLinkSideType roadLinkSide = RoadLinkSideType::Undefined;
 
-                if (0 == roadLinkItemElement.tagName().compare(TAG::predecessor) ||
-                        0 == roadLinkItemElement.tagName().compare(TAG::successor))
+                if (0 == roadLinkItemElement.tagName().compare(TAG::predecessor))
                 {
-                    if (0 == roadLinkItemElement.tagName().compare(TAG::predecessor))
-                    {
-                        roadLinkType = RoadLinkType::Predecessor;
-                    }
-                    else
-                    {
-                        roadLinkType = RoadLinkType::Successor;
-                    }
-
-                    std::string roadLinkItem_ElementTypeAttribute;
-                    ThrowIfFalse(SimulationCommon::ParseAttributeString(roadLinkItemElement, ATTRIBUTE::elementType, roadLinkItem_ElementTypeAttribute),
-                                 roadLinkItemElement, "Attribute " + std::string(ATTRIBUTE::elementType) + " is missing.");
-
-                    if (0 == roadLinkItem_ElementTypeAttribute.compare(ATTRIBUTE::road))
-                    {
-                        roadLinkElementType = RoadLinkElementType::Road;
-                    }
-                    else if (0 == roadLinkItem_ElementTypeAttribute.compare(ATTRIBUTE::junction))
-                    {
-                        roadLinkElementType = RoadLinkElementType::Junction;
-                    }
-                    else
-                    {
-                        LogErrorAndThrow("invalid road link attribute");
-                    }
-
-                    ThrowIfFalse(SimulationCommon::ParseAttributeString(roadLinkItemElement, ATTRIBUTE::elementId, roadLinkElementId),
-                                 roadLinkItemElement, "Attribute " + std::string(ATTRIBUTE::elementId) + " is missing.");
-
-                    if (RoadLinkElementType::Road == roadLinkElementType)
-                    {
-                        std::string roadLinkItem_ContactPointAttribute;
-                        ThrowIfFalse(SimulationCommon::ParseAttributeString(roadLinkItemElement, ATTRIBUTE::contactPoint, roadLinkItem_ContactPointAttribute),
-                                     roadLinkItemElement, "Attribute " + std::string(ATTRIBUTE::contactPoint) + " is missing.");
-
-                        if (0 == roadLinkItem_ContactPointAttribute.compare(ATTRIBUTE::start))
-                        {
-                            roadLinkContactPoint = ContactPointType::Start;
-                        }
-                        else if (0 == roadLinkItem_ContactPointAttribute.compare(ATTRIBUTE::end))
-                        {
-                            roadLinkContactPoint = ContactPointType::End;
-                        }
-                        else
-                        {
-                            LogErrorAndThrow("invalid road link attribute");
-                        }
-                    }
+                    roadLinkType = RoadLinkType::Predecessor;
                 }
-                else if (0 == roadLinkItemElement.tagName().compare(TAG::neighbor))
+                else if (0 == roadLinkItemElement.tagName().compare(TAG::successor))
                 {
-                    roadLinkType = RoadLinkType::Neighbor;
-
-                    std::string roadLinkItem_SideAttribute;
-                    ThrowIfFalse(SimulationCommon::ParseAttributeString(roadLinkItemElement, ATTRIBUTE::side, roadLinkItem_SideAttribute),
-                                 roadLinkItemElement, "Attribute " + std::string(ATTRIBUTE::side) + " is missing.");
-
-                    if (0 == roadLinkItem_SideAttribute.compare(ATTRIBUTE::left))
-                    {
-                        roadLinkSide = RoadLinkSideType::Left;
-                    }
-                    else if (0 == roadLinkItem_SideAttribute.compare(ATTRIBUTE::right))
-                    {
-                        roadLinkSide = RoadLinkSideType::Right;
-                    }
-                    else
-                    {
-                        LogErrorAndThrow("invalid road link attribute.");
-                    }
-
-                    ThrowIfFalse(SimulationCommon::ParseAttributeString(roadLinkItemElement, ATTRIBUTE::elementId, roadLinkElementId),
-                                 roadLinkItemElement, "Attribute " + std::string(ATTRIBUTE::elementId) + " is missing.");
-
-                    std::string roadLinkItem_DirectionAttribute;
-                    ThrowIfFalse(SimulationCommon::ParseAttributeString(roadLinkItemElement, ATTRIBUTE::direction, roadLinkItem_DirectionAttribute),
-                                 roadLinkItemElement, "Attribute " + std::string(ATTRIBUTE::direction) + " is missing.");
-
-                    if (0 == roadLinkItem_DirectionAttribute.compare(ATTRIBUTE::same))
-                    {
-                        roadLinkDirection = RoadLinkDirectionType::Same;
-                    }
-                    else if (0 == roadLinkItem_DirectionAttribute.compare(ATTRIBUTE::opposite))
-                    {
-                        roadLinkDirection = RoadLinkDirectionType::Opposite;
-                    }
-                    else
-                    {
-                        LogErrorAndThrow("invalid road link attribute");
-                    }
+                    roadLinkType = RoadLinkType::Successor;
                 }
                 else
                 {
                     LogErrorAndThrow("invalid road link type");
                 }
 
+                std::string roadLinkItem_ElementTypeAttribute;
+                ThrowIfFalse(SimulationCommon::ParseAttributeString(roadLinkItemElement, ATTRIBUTE::elementType, roadLinkItem_ElementTypeAttribute),
+                             roadLinkItemElement, "Attribute " + std::string(ATTRIBUTE::elementType) + " is missing.");
+
+                if (0 == roadLinkItem_ElementTypeAttribute.compare(ATTRIBUTE::road))
+                {
+                    roadLinkElementType = RoadLinkElementType::Road;
+                }
+                else if (0 == roadLinkItem_ElementTypeAttribute.compare(ATTRIBUTE::junction))
+                {
+                    roadLinkElementType = RoadLinkElementType::Junction;
+                }
+                else
+                {
+                    LogErrorAndThrow("invalid road link attribute");
+                }
+
+                ThrowIfFalse(SimulationCommon::ParseAttributeString(roadLinkItemElement, ATTRIBUTE::elementId, roadLinkElementId),
+                             roadLinkItemElement, "Attribute " + std::string(ATTRIBUTE::elementId) + " is missing.");
+
+                if (RoadLinkElementType::Road == roadLinkElementType)
+                {
+                    std::string roadLinkItem_ContactPointAttribute;
+                    ThrowIfFalse(SimulationCommon::ParseAttributeString(roadLinkItemElement, ATTRIBUTE::contactPoint, roadLinkItem_ContactPointAttribute),
+                                 roadLinkItemElement, "Attribute " + std::string(ATTRIBUTE::contactPoint) + " is missing.");
+
+                    if (0 == roadLinkItem_ContactPointAttribute.compare(ATTRIBUTE::start))
+                    {
+                        roadLinkContactPoint = ContactPointType::Start;
+                    }
+                    else if (0 == roadLinkItem_ContactPointAttribute.compare(ATTRIBUTE::end))
+                    {
+                        roadLinkContactPoint = ContactPointType::End;
+                    }
+                    else
+                    {
+                        LogErrorAndThrow("invalid road link attribute");
+                    }
+                }
+
                 LOG_INTERN(LogLevel::DebugCore) << "roadlink: " << roadLinkItemElement.tagName().toStdString() << " (" <<
-                                                (int)roadLinkElementType << ", " << roadLinkElementId << ", " << (int)roadLinkContactPoint << ", " <<
-                                                (int)roadLinkDirection << ", " << (int)roadLinkSide << ")";
+                                                   (int)roadLinkElementType << ", " << roadLinkElementId << ", " << (int)roadLinkContactPoint;
 
                 ThrowIfFalse(road->AddLink(roadLinkType,
-                                         roadLinkElementType,
-                                         roadLinkElementId,
-                                         roadLinkContactPoint,
-                                         roadLinkDirection,
-                                         roadLinkSide),
+                                           roadLinkElementType,
+                                           roadLinkElementId,
+                                           roadLinkContactPoint),
                              roadLinkItemElement,
                              "Unable to add road link.");
 
@@ -693,7 +647,6 @@ void SceneryImporter::checkRoadSignalBoundaries(RoadSignalSpecification signal)
     ThrowIfFalse((signal.s >= 0 &&
                  (signal.dynamic == "yes" || signal.dynamic == "no") &&
                  (signal.orientation == "+" || signal.orientation == "-" || signal.orientation == "none") &&
-                 !signal.country.empty() &&
                  signal.height >= 0 &&
                  signal.width >= 0),
             "Invalid road signal boundaries.");
@@ -720,20 +673,12 @@ void SceneryImporter::ParseSignals(QDomElement& roadElement,
                              signalElement, "Attribute " + std::string(ATTRIBUTE::t) + " is missing.");
                 ThrowIfFalse(ParseAttributeDouble(signalElement, ATTRIBUTE::zOffset,     signal.zOffset),
                              signalElement, "Attribute " + std::string(ATTRIBUTE::zOffset) + " is missing.");
-                ThrowIfFalse(ParseAttributeDouble(signalElement, ATTRIBUTE::hOffset,     signal.hOffset),
-                             signalElement, "Attribute " + std::string(ATTRIBUTE::hOffset) + " is missing.");
-                ThrowIfFalse(ParseAttributeDouble(signalElement, ATTRIBUTE::pitch,       signal.pitch),
-                             signalElement, "Attribute " + std::string(ATTRIBUTE::pitch) + " is missing.");
                 ThrowIfFalse(ParseAttributeString(signalElement, ATTRIBUTE::id,          signal.id),
                              signalElement, "Attribute " + std::string(ATTRIBUTE::id) + " is missing.");
-                ThrowIfFalse(ParseAttributeString(signalElement, ATTRIBUTE::name,        signal.name),
-                             signalElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
                 ThrowIfFalse(ParseAttributeString(signalElement, ATTRIBUTE::dynamic,     signal.dynamic, "no"),
                              signalElement, "Attribute " + std::string(ATTRIBUTE::dynamic) + " is missing.");
                 ThrowIfFalse(ParseAttributeString(signalElement, ATTRIBUTE::orientation, signal.orientation),
                              signalElement, "Attribute " + std::string(ATTRIBUTE::orientation) + " is missing.");
-                ThrowIfFalse(ParseAttributeString(signalElement, ATTRIBUTE::country,     signal.country),
-                             signalElement, "Attribute " + std::string(ATTRIBUTE::country) + " is missing.");
                 ThrowIfFalse(ParseAttributeString(signalElement, ATTRIBUTE::type,        signal.type),
                              signalElement, "Attribute " + std::string(ATTRIBUTE::type) + " is missing.");
                 ThrowIfFalse(ParseAttributeString(signalElement, ATTRIBUTE::subtype,     signal.subtype),
@@ -741,14 +686,15 @@ void SceneryImporter::ParseSignals(QDomElement& roadElement,
                 // optional
                 std::string signalUnit;
                 ParseAttributeDouble(signalElement, ATTRIBUTE::value, signal.value);
-                ParseAttributeString(signalElement, ATTRIBUTE::unit, signalUnit);
+                ParseAttributeString(signalElement, ATTRIBUTE::unit,  signalUnit);
                 ParseSignalUnit(signalUnit, signal.unit);
-
-                // not generated by ODDlot
-                // potentially optional - no clue from the standard
-                ParseAttributeDouble(signalElement, ATTRIBUTE::height, signal.height);
-                ParseAttributeDouble(signalElement, ATTRIBUTE::width,  signal.width);
-                ParseAttributeString(signalElement, ATTRIBUTE::text,   signal.text);
+                ParseAttributeDouble(signalElement, ATTRIBUTE::hOffset, signal.hOffset);
+                ParseAttributeDouble(signalElement, ATTRIBUTE::pitch,   signal.pitch);
+                ParseAttributeString(signalElement, ATTRIBUTE::name,    signal.name);
+                ParseAttributeDouble(signalElement, ATTRIBUTE::height,  signal.height);
+                ParseAttributeDouble(signalElement, ATTRIBUTE::width,   signal.width);
+                ParseAttributeString(signalElement, ATTRIBUTE::text,    signal.text);
+                ParseAttributeString(signalElement, ATTRIBUTE::country, signal.country);
 
                 // check validity subtag
                 ParseElementValidity(signalElement, signal.validity);
@@ -806,10 +752,6 @@ void SceneryImporter::ParseObject(QDomElement& objectElement, RoadInterface* roa
 
     RoadObjectSpecification object;
 
-    ThrowIfFalse(ParseAttributeType(objectElement, ATTRIBUTE::type, object.type),
-                 objectElement, "Attribute " + std::string(ATTRIBUTE::type) + " is missing.");
-    ThrowIfFalse(ParseAttributeString(objectElement, ATTRIBUTE::name, object.name),
-                 objectElement, "Attribute " + std::string(ATTRIBUTE::name) + " is missing.");
     ThrowIfFalse(ParseAttributeString(objectElement, ATTRIBUTE::id, object.id),
                  objectElement, "Attribute " + std::string(ATTRIBUTE::id) + " is missing.");
     ThrowIfFalse(ParseAttributeDouble(objectElement, ATTRIBUTE::s, object.s),
@@ -818,22 +760,17 @@ void SceneryImporter::ParseObject(QDomElement& objectElement, RoadInterface* roa
                  objectElement, "Attribute " + std::string(ATTRIBUTE::t) + " is missing.");
     ThrowIfFalse(ParseAttributeDouble(objectElement, ATTRIBUTE::zOffset, object.zOffset),
                  objectElement, "Attribute " + std::string(ATTRIBUTE::zOffset) + " is missing.");
-    ThrowIfFalse(ParseAttributeDouble(objectElement, ATTRIBUTE::validLength, object.validLength),
-                 objectElement, "Attribute " + std::string(ATTRIBUTE::validLength) + " is missing.");
-    ThrowIfFalse(ParseAttributeType(objectElement, ATTRIBUTE::orientation, object.orientation),
-                 objectElement, "Attribute " + std::string(ATTRIBUTE::orientation) + " is missing.");
-    ThrowIfFalse(ParseAttributeDouble(objectElement, ATTRIBUTE::width, object.width),
-                 objectElement, "Attribute " + std::string(ATTRIBUTE::width) + " is missing.");
-    ThrowIfFalse(ParseAttributeDouble(objectElement, ATTRIBUTE::length, object.length),
-                 objectElement, "Attribute " + std::string(ATTRIBUTE::length) + " is missing.");
-    ThrowIfFalse(ParseAttributeDouble(objectElement, ATTRIBUTE::height, object.height),
-                 objectElement, "Attribute " + std::string(ATTRIBUTE::height) + " is missing.");
-    ThrowIfFalse(ParseAttributeDouble(objectElement, ATTRIBUTE::hdg, object.hdg),
-                 objectElement, "Attribute " + std::string(ATTRIBUTE::hdg) + " is missing.");
-    ThrowIfFalse(ParseAttributeDouble(objectElement, ATTRIBUTE::pitch, object.pitch),
-                 objectElement, "Attribute " + std::string(ATTRIBUTE::pitch) + " is missing.");
-    ThrowIfFalse(ParseAttributeDouble(objectElement, ATTRIBUTE::roll, object.roll),
-                 objectElement, "Attribute " + std::string(ATTRIBUTE::roll) + " is missing.");
+    // optional
+    ParseAttributeType(objectElement, ATTRIBUTE::type, object.type);
+    ParseAttributeString(objectElement, ATTRIBUTE::name, object.name);
+    ParseAttributeDouble(objectElement, ATTRIBUTE::validLength, object.validLength);
+    ParseAttributeType(objectElement, ATTRIBUTE::orientation, object.orientation);
+    ParseAttributeDouble(objectElement, ATTRIBUTE::width, object.width);
+    ParseAttributeDouble(objectElement, ATTRIBUTE::length, object.length);
+    ParseAttributeDouble(objectElement, ATTRIBUTE::height, object.height);
+    ParseAttributeDouble(objectElement, ATTRIBUTE::hdg, object.hdg);
+    ParseAttributeDouble(objectElement, ATTRIBUTE::pitch, object.pitch);
+    ParseAttributeDouble(objectElement, ATTRIBUTE::roll, object.roll);
     ParseAttributeDouble(objectElement, "radius", object.radius);
 
     ThrowIfFalse(object.checkStandardCompliance(), objectElement, "limits of object are not valid for openDrive standard");
@@ -1103,43 +1040,42 @@ void SceneryImporter::ParseRoadLanes(QDomElement& roadElement,
 void SceneryImporter::ParseJunctionConnections(QDomElement& junctionElement, JunctionInterface* junction)
 {
     QDomElement connectionElement;
-    if (SimulationCommon::GetFirstChildElement(junctionElement, TAG::connection, connectionElement))
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(junctionElement, TAG::connection, connectionElement),
+                 junctionElement, "Tag " + std::string(TAG::connection) + " is missing.");
+    while (!connectionElement.isNull())
     {
-        while (!connectionElement.isNull())
+        std::string id;
+        ThrowIfFalse(SimulationCommon::ParseAttributeString(connectionElement, ATTRIBUTE::id, id),
+                     connectionElement, "Attribute " + std::string(ATTRIBUTE::id) + " is missing.");
+        std::string incomingRoad;
+        ThrowIfFalse(SimulationCommon::ParseAttributeString(connectionElement, ATTRIBUTE::incomingRoad, incomingRoad),
+                     connectionElement, "Attribute " + std::string(ATTRIBUTE::incomingRoad) + " is missing.");
+        std::string connectingRoad;
+        ThrowIfFalse(SimulationCommon::ParseAttributeString(connectionElement, ATTRIBUTE::connectingRoad, connectingRoad),
+                     connectionElement, "Attribute " + std::string(ATTRIBUTE::connectingRoad) + " is missing.");
+        std::string contactPoint;
+        ThrowIfFalse(SimulationCommon::ParseAttributeString(connectionElement, ATTRIBUTE::contactPoint, contactPoint),
+                     connectionElement, "Attribute " + std::string(ATTRIBUTE::contactPoint) + " is missing.");
+
+        ContactPointType roadLinkContactPoint = ContactPointType::Undefined;
+
+
+        if (0 == contactPoint.compare("start"))
         {
-            std::string id;
-            ThrowIfFalse(SimulationCommon::ParseAttributeString(connectionElement, ATTRIBUTE::id, id),
-                         connectionElement, "Attribute " + std::string(ATTRIBUTE::id) + " is missing.");
-            std::string incomingRoad;
-            ThrowIfFalse(SimulationCommon::ParseAttributeString(connectionElement, ATTRIBUTE::incomingRoad, incomingRoad),
-                         connectionElement, "Attribute " + std::string(ATTRIBUTE::incomingRoad) + " is missing.");
-            std::string connectingRoad;
-            ThrowIfFalse(SimulationCommon::ParseAttributeString(connectionElement, ATTRIBUTE::connectingRoad, connectingRoad),
-                         connectionElement, "Attribute " + std::string(ATTRIBUTE::connectingRoad) + " is missing.");
-            std::string contactPoint;
-            ThrowIfFalse(SimulationCommon::ParseAttributeString(connectionElement, ATTRIBUTE::contactPoint, contactPoint),
-                         connectionElement, "Attribute " + std::string(ATTRIBUTE::contactPoint) + " is missing.");
-
-            ContactPointType roadLinkContactPoint = ContactPointType::Undefined;
-
-
-            if (0 == contactPoint.compare("start"))
-            {
-                roadLinkContactPoint = ContactPointType::Start;
-            }
-            else
-                if (0 == contactPoint.compare("end"))
-                {
-                    roadLinkContactPoint = ContactPointType::End;
-                }
-
-
-            ConnectionInterface* connection = junction->AddConnection(id, incomingRoad, connectingRoad, roadLinkContactPoint);
-
-            ParseJunctionConnectionLinks(connectionElement, connection);
-
-            connectionElement = connectionElement.nextSiblingElement(TAG::connection);
+            roadLinkContactPoint = ContactPointType::Start;
         }
+        else
+            if (0 == contactPoint.compare("end"))
+            {
+                roadLinkContactPoint = ContactPointType::End;
+            }
+
+
+        ConnectionInterface* connection = junction->AddConnection(id, incomingRoad, connectingRoad, roadLinkContactPoint);
+
+        ParseJunctionConnectionLinks(connectionElement, connection);
+
+        connectionElement = connectionElement.nextSiblingElement(TAG::connection);
     }
 }
 
@@ -1188,45 +1124,44 @@ void SceneryImporter::ParseRoads(QDomElement& documentRoot,
                                  Scenery* scenery)
 {
     QDomElement roadElement;
-    if (SimulationCommon::GetFirstChildElement(documentRoot, TAG::road, roadElement))
+    ThrowIfFalse(SimulationCommon::GetFirstChildElement(documentRoot, TAG::road, roadElement),
+                 documentRoot, "Tag " + std::string(TAG::road) + " is missing.");
+    while (!roadElement.isNull())
     {
-        while (!roadElement.isNull())
+        // road id
+        std::string id;
+        ThrowIfFalse(SimulationCommon::ParseAttributeString(roadElement, ATTRIBUTE::id, id),
+                     roadElement, "Attribute " + std::string(ATTRIBUTE::id) + " is missing.");
+
+        RoadInterface* road = scenery->AddRoad(id);
+        ThrowIfFalse(road != nullptr, roadElement, "Could not add Road");
+
+        std::string junctionId;
+        if (!SimulationCommon::ParseAttributeString(roadElement, ATTRIBUTE::junction, junctionId))
         {
-            // road id
-            std::string id;
-            ThrowIfFalse(SimulationCommon::ParseAttributeString(roadElement, ATTRIBUTE::id, id),
-                         roadElement, "Attribute " + std::string(ATTRIBUTE::id) + " is missing.");
-
-            RoadInterface* road = scenery->AddRoad(id);
-            ThrowIfFalse(road != nullptr, roadElement, "Could not add Road");
-
-            std::string junctionId;
-            if (!SimulationCommon::ParseAttributeString(roadElement, ATTRIBUTE::junction, junctionId))
-            {
-                junctionId = "-1";
-            }
-            road->SetJunctionId(junctionId);
+            junctionId = "-1";
+        }
+        road->SetJunctionId(junctionId);
 
 
-            LOG_INTERN(LogLevel::DebugCore) << "road: id: " << id;
+        LOG_INTERN(LogLevel::DebugCore) << "road: id: " << id;
 
-            ParseGeometries(roadElement, road);
+        ParseGeometries(roadElement, road);
 
-            ParseElevationProfile(roadElement, road);
+        ParseElevationProfile(roadElement, road);
 
-            ParseRoadLinks(roadElement, road);
+        ParseRoadLinks(roadElement, road);
 
-            ParseRoadLanes(roadElement, road); // parsing laneOffset is included here
+        ParseRoadLanes(roadElement, road); // parsing laneOffset is included here
 
-            ParseObjects(roadElement, road);
+        ParseObjects(roadElement, road);
 
-            ParseSignals(roadElement, road);
+        ParseSignals(roadElement, road);
 
-            ParseRoadTypes(roadElement, road);
+        ParseRoadTypes(roadElement, road);
 
-            roadElement = roadElement.nextSiblingElement(TAG::road);
-        } // road loop
-    } // if roads exist
+        roadElement = roadElement.nextSiblingElement(TAG::road);
+    } // road loop
 }
 
 void SceneryImporter::ParseJunctions(QDomElement& documentRoot, Scenery* scenery)

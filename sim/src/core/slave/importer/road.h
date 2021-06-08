@@ -45,9 +45,8 @@ class RoadLink : public RoadLinkInterface
 {
   public:
     RoadLink(RoadLinkType type, RoadLinkElementType elementType, const std::string &elementId,
-             ContactPointType contactPoint, RoadLinkDirectionType direction, RoadLinkSideType side)
-        : type(type), elementType(elementType), elementId(elementId), contactPoint(contactPoint), direction(direction),
-          side(side)
+             ContactPointType contactPoint)
+        : type(type), elementType(elementType), elementId(elementId), contactPoint(contactPoint)
     {
     }
     virtual ~RoadLink() override = default;
@@ -92,33 +91,11 @@ class RoadLink : public RoadLinkInterface
         return contactPoint;
     }
 
-    //-----------------------------------------------------------------------------
-    //! Returns the RoadLinkDirectionType of the RoadLink.
-    //!
-    //! @return                         RoadLinkDirectionType of the RoadLink
-    //-----------------------------------------------------------------------------
-    RoadLinkDirectionType GetDirection() const override
-    {
-        return direction;
-    }
-
-    //-----------------------------------------------------------------------------
-    //! Returns the RoadLinkSideType of the RoadLink.
-    //!
-    //! @return                         RoadLinkSideType of the RoadLink
-    //-----------------------------------------------------------------------------
-    RoadLinkSideType GetSide() const override
-    {
-        return side;
-    }
-
   private:
     RoadLinkType type;
     RoadLinkElementType elementType;
     std::string elementId;
     ContactPointType contactPoint;
-    RoadLinkDirectionType direction;
-    RoadLinkSideType side;
 };
 
 //-----------------------------------------------------------------------------
@@ -916,7 +893,7 @@ class Road : public RoadInterface
     //! @return                         false if an error has occurred, true otherwise
     //-----------------------------------------------------------------------------
     bool AddLink(RoadLinkType type, RoadLinkElementType elementType, const std::string &elementId,
-                 ContactPointType contactPoint, RoadLinkDirectionType direction, RoadLinkSideType side) override;
+                 ContactPointType contactPoint) override;
 
     //-----------------------------------------------------------------------------
     //! Adds a new lane section to a road by creating a new RoadLaneSection object

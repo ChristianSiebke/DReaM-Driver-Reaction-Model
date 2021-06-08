@@ -46,6 +46,11 @@ struct LocalizationElement
         laneGeometryElement{element},
         lane{element.lane},
         polygon{element.joints.current.points.left, element.joints.next.points.left, element.joints.next.points.right, element.joints.current.points.right},
+        boost_polygon{{{element.joints.current.points.left.x, element.joints.current.points.left.y},
+                       {element.joints.next.points.left.x, element.joints.next.points.left.y},
+                       {element.joints.next.points.right.x, element.joints.next.points.right.y},
+                       {element.joints.current.points.right.x, element.joints.current.points.right.y},
+                       {element.joints.current.points.left.x, element.joints.current.points.left.y}}},
         search_box {GetSearchBox(polygon)},
         referenceVector{element.joints.next.points.reference - element.joints.current.points.reference},
         referenceScale{(element.joints.next.sOffset - element.joints.current.sOffset) / referenceVector.Length()},
@@ -58,6 +63,7 @@ struct LocalizationElement
         laneGeometryElement(other.laneGeometryElement),
         lane(other.lane),
         polygon(other.polygon),
+        boost_polygon(other.boost_polygon),
         search_box(other.search_box),
         referenceVector(other.referenceVector),
         referenceScale(other.referenceScale),
@@ -67,6 +73,7 @@ struct LocalizationElement
     const OWL::Primitive::LaneGeometryElement& laneGeometryElement;
     const OWL::Interfaces::Lane* lane;
     std::vector<Common::Vector2d> polygon;
+    polygon_t boost_polygon;
     const CoarseBoundingBox search_box; //!< Box for r-tree in millimeters
     Common::Vector2d referenceVector; //!< Vector from reference point of current joint to reference point of next joint
     double referenceScale; //!< Factor between the actual length of the referenceVector and the s coordinate distance

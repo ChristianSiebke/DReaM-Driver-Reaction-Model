@@ -18,7 +18,7 @@
 
 #include <list>
 
-#include "common/parameters.h"
+#include "modelElements/parameters.h"
 #include "include/spawnPointInterface.h"
 #include "bindings/spawnPointLibrary.h"
 #include "include/worldInterface.h"

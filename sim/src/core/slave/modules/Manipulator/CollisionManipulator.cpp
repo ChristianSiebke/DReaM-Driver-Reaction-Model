@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -99,6 +99,7 @@ CollisionManipulator::CrashInfo CollisionManipulator::CalculateCrash(AgentInterf
 void CollisionManipulator::PublishCrash(const std::shared_ptr<openpass::events::CollisionEvent>& event, const CrashInfo& crashInfo)
 {
     auto logEntry = openpass::publisher::LogEntry::FromEvent(event);
+    logEntry.name = "ExtendedCollisionInformation";
     logEntry.parameter.insert({{"Velocity", crashInfo.postCrashDynamic1.GetVelocity()},
                                {"VelocityChange", crashInfo.postCrashDynamic1.GetVelocityChange()},
                                {"VelocityDirection", crashInfo.postCrashDynamic1.GetVelocityDirection()},

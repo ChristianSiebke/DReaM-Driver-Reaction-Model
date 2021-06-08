@@ -211,18 +211,12 @@ public:
     //! @param[in]  elementType         element type of the link
     //! @param[in]  elementId           ID of the linked element
     //! @param[in]  contactPoint        contact point type of link on the linked element
-    //! @param[in]  direction           orientation of the lanes to link; only relevant
-    //!                                 for a neighbor link type
-    //! @param[in]  side                at which side the neighboring road lies; only
-    //!                                 relevant for a neighbor link type
     //! @return                         false if an error has occurred, true otherwise
     //-----------------------------------------------------------------------------
     virtual bool AddLink(RoadLinkType type,
                  RoadLinkElementType elementType,
                  const std::string &elementId,
-                 ContactPointType contactPoint,
-                 RoadLinkDirectionType direction,
-                 RoadLinkSideType side) = 0;
+                 ContactPointType contactPoint) = 0;
 
     //-----------------------------------------------------------------------------
     //! Adds a new lane section to a road by creating a new RoadLaneSection object

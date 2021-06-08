@@ -17,7 +17,7 @@
 
 #include <list>
 
-#include "common/parameters.h"
+#include "modelElements/parameters.h"
 #include "include/eventDetectorInterface.h"
 #include "bindings/eventDetectorLibrary.h"
 #include "include/worldInterface.h"

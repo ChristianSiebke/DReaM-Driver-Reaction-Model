@@ -245,41 +245,36 @@ public:
     {
         const auto& lanesOnStream = laneStream.GetElements();
         std::vector<const OWL::Interfaces::WorldObject*> foundObjects;
-        for (const auto& lane : lanesOnStream)
+        for (const auto& laneStreamElement : lanesOnStream)
         {
-            if (lane.EndS() < startDistance) //Ignore lanes ending before startDistance
+            if (laneStreamElement.EndS() < startDistance) //Ignore lanes ending before startDistance
             {
                 continue;
             }
-            if (lane.StartS() > endDistance) //Stop if reached endDistance
+            if (laneStreamElement.StartS() > endDistance) //Stop if reached endDistance
             {
                 break;
             }
-            const auto& roadId = lane.element->GetRoad().GetId();
-            auto sortedObjects = lane.element->GetWorldObjects();
-            if (lane.inStreamDirection)
+            const auto& roadId = laneStreamElement.element->GetRoad().GetId();
+
+            const auto streamDirection = laneStreamElement.inStreamDirection;
+            const auto s_lanestart = laneStreamElement.element->GetDistance(OWL::MeasurementPoint::RoadStart);
+
+            for (const auto& [laneOverlap, object] : laneStreamElement.element->GetWorldObjects(streamDirection))
             {
-                sortedObjects.sort(
-                                [lane, roadId](OWL::Interfaces::WorldObject* first, OWL::Interfaces::WorldObject* second)
-                                {
-                                    return first->GetDistance(OWL::MeasurementPoint::RoadStart, roadId) < second->GetDistance(OWL::MeasurementPoint::RoadStart, roadId);
-                                }
-                                );
-            }
-            else
-            {
-                sortedObjects.sort(
-                                [lane, roadId](OWL::Interfaces::WorldObject* first, OWL::Interfaces::WorldObject* second)
-                                {
-                                    return first->GetDistance(OWL::MeasurementPoint::RoadStart, roadId) > second->GetDistance(OWL::MeasurementPoint::RoadStart, roadId);
-                                }
-                                );
-            }
-            for (const auto object : sortedObjects)
-            {
-                if (ObjectIsOfTypeAndWithinRange<T>(object, startDistance, endDistance, lane))
+                const auto s_min = streamDirection ? laneOverlap.s_min : laneOverlap.s_max;
+                const auto s_max = streamDirection ? laneOverlap.s_max : laneOverlap.s_min;
+
+                auto streamPositionStart = laneStreamElement.GetStreamPosition(s_min - s_lanestart);
+                if (streamPositionStart > endDistance)
                 {
-                    if (std::count(foundObjects.begin(), foundObjects.end(), object) == 0)
+                    break;
+                }
+
+                auto streamPositionEnd = laneStreamElement.GetStreamPosition(s_max - s_lanestart);
+                if (dynamic_cast<const T*>(object) && streamPositionEnd >= startDistance)
+                {
+                    if (std::find(foundObjects.crbegin(), foundObjects.crend(), object) == foundObjects.crend())
                     {
                         foundObjects.push_back(object);
                     }
@@ -301,45 +296,40 @@ public:
     {
         return laneStream.Traverse<std::vector<const OWL::Interfaces::WorldObject*>>(
             LaneMultiStream::TraversedFunction<std::vector<const OWL::Interfaces::WorldObject*>>(
-                [&](const LaneStreamInfo& lane, const std::vector<const OWL::Interfaces::WorldObject*>& previousOjects)
+                [&](const LaneStreamInfo& laneStreamElement, const std::vector<const OWL::Interfaces::WorldObject*>& previousOjects)
                 {
                     std::vector<const OWL::Interfaces::WorldObject*> foundObjects{previousOjects};
 
-                    if (lane.EndS() < startDistance)
+                    if (laneStreamElement.EndS() < startDistance)
                     {
                         return foundObjects;
                     }
 
-                    if (lane.StartS() > endDistance)
+                    if (laneStreamElement.StartS() > endDistance)
                     {
                         return foundObjects;
                     }
 
-                    const auto& roadId = lane.element->GetRoad().GetId();
-                    auto sortedObjects = lane.element->GetWorldObjects();
+                    const auto& roadId = laneStreamElement.element->GetRoad().GetId();
 
-                    if (lane.inStreamDirection)
-                    {
-                        sortedObjects.sort(
-                            [lane, roadId](OWL::Interfaces::WorldObject* first, OWL::Interfaces::WorldObject* second)
-                            {
-                                return first->GetDistance(OWL::MeasurementPoint::RoadStart, roadId) < second->GetDistance(OWL::MeasurementPoint::RoadStart, roadId);
-                            });
-                    }
-                    else
-                    {
-                        sortedObjects.sort(
-                            [lane, roadId](OWL::Interfaces::WorldObject* first, OWL::Interfaces::WorldObject* second)
-                            {
-                                return first->GetDistance(OWL::MeasurementPoint::RoadStart, roadId) > second->GetDistance(OWL::MeasurementPoint::RoadStart, roadId);
-                            });
-                    }
+                    const auto streamDirection = laneStreamElement.inStreamDirection;
+                    const auto s_lanestart = laneStreamElement.element->GetDistance(OWL::MeasurementPoint::RoadStart);
 
-                    for (const auto object : sortedObjects)
+                    for (const auto& [laneOverlap, object] : laneStreamElement.element->GetWorldObjects(streamDirection))
                     {
-                        if (ObjectIsOfTypeAndWithinRange<T>(object, startDistance, endDistance, lane))
+                        const auto s_min = streamDirection ? laneOverlap.s_min : laneOverlap.s_max;
+                        const auto s_max = streamDirection ? laneOverlap.s_max : laneOverlap.s_min;
+
+                        auto streamPositionStart = laneStreamElement.GetStreamPosition(s_min - s_lanestart);
+                        if (streamPositionStart > endDistance)
                         {
-                            if (std::count(foundObjects.begin(), foundObjects.end(), object) == 0)
+                            break;
+                        }
+
+                        auto streamPositionEnd = laneStreamElement.GetStreamPosition(s_max - s_lanestart);
+                        if (dynamic_cast<const T*>(object) && streamPositionEnd >= startDistance)
+                        {
+                            if (std::find(foundObjects.crbegin(), foundObjects.crend(), object) == foundObjects.crend())
                             {
                                 foundObjects.push_back(object);
                             }

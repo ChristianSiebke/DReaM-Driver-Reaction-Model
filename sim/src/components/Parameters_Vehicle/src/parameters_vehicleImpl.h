@@ -47,7 +47,7 @@
 * maxCurvature                                        | The maximum curavture the vehicle is able to drive in 1/m
 * maximumEngineSpeed                                  | The maximum engine speed in 1/min
 * maximumEngineTorque                                 | The maximum torque of the engine in Nm
-* maximumSteeringWheelAngleAmplitude                  | The maximum amplitude of the steering wheel angle in degree
+* maximumSteeringWheelAngleAmplitude                  | The maximum amplitude of the steering wheel angle in radian
 * maxVelocity                                         | The maximum velocity of the vehicle in m/s
 * minimumEngineSpeed                                  | The idle speed of the engine in 1/min
 * minimumEngineTorque                                 | The drag torque of the engine in Nm

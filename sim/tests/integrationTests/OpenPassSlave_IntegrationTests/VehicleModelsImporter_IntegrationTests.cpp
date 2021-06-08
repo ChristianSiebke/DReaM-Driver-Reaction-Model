@@ -48,8 +48,7 @@ TEST(VehicleModelImporter, GivenVehicleAndPedestrianCatalogs_ImportsAllModels)
     EXPECT_THAT(vehicleModel1.maxVelocity, DoubleEq(10.0));
     EXPECT_THAT(vehicleModel1.maximumEngineSpeed, DoubleEq(6000.0));
     EXPECT_THAT(vehicleModel1.maximumEngineTorque, DoubleEq(250.0));
-    EXPECT_THAT(vehicleModel1.maximumSteeringWheelAngleAmplitude,
-                DoubleEq(0.707 * 7.7 / M_PI * 180.0));   // maxSteering front wheel * SteeringRatio
+    EXPECT_THAT(vehicleModel1.maximumSteeringWheelAngleAmplitude, DoubleEq(0.707 * 7.7));   // maxSteering front wheel * SteeringRatio
     EXPECT_THAT(vehicleModel1.minimumEngineSpeed, DoubleEq(900.0));
     EXPECT_THAT(vehicleModel1.minimumEngineTorque, DoubleEq(-54.0));
     EXPECT_THAT(vehicleModel1.momentInertiaPitch, DoubleEq(0.0));
@@ -80,8 +79,7 @@ TEST(VehicleModelImporter, GivenVehicleAndPedestrianCatalogs_ImportsAllModels)
     EXPECT_THAT(vehicleModel2.maxVelocity, DoubleEq(11.0));
     EXPECT_THAT(vehicleModel2.maximumEngineSpeed, DoubleEq(6000.0));
     EXPECT_THAT(vehicleModel2.maximumEngineTorque, DoubleEq(250.0));
-    EXPECT_THAT(vehicleModel2.maximumSteeringWheelAngleAmplitude,
-                DoubleEq(0.5 * 9.9 / M_PI * 180.0));   // maxSteering front wheel * SteeringRatio
+    EXPECT_THAT(vehicleModel2.maximumSteeringWheelAngleAmplitude, DoubleEq(0.5 * 9.9));   // maxSteering front wheel * SteeringRatio
     EXPECT_THAT(vehicleModel2.minimumEngineSpeed, DoubleEq(900.0));
     EXPECT_THAT(vehicleModel2.minimumEngineTorque, DoubleEq(-54.0));
     EXPECT_THAT(vehicleModel2.momentInertiaPitch, DoubleEq(0.0));

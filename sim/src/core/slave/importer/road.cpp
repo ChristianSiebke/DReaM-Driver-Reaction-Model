@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+ * Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
  *               2016, 2017, 2018 ITK Engineering GmbH
  *
  * This program and the accompanying materials are made
@@ -11,6 +11,7 @@
 
 #include "road.h"
 #include "importerLoggingHelper.h"
+#include "common/commonHelper.h"
 
 extern "C"
 {
@@ -126,9 +127,14 @@ RoadLane *RoadLaneSection::AddRoadLane(int id, RoadLaneType type)
 
 Common::Vector2d RoadGeometry::GetCoordLine(double sOffset, double tOffset) const
 {
-    if (length < sOffset)
+    if (sOffset > length)
     {
-        LOG_INTERN(LogLevel::Warning) << "exceeding length of geometry";
+        if (!CommonHelper::DoubleEquality(sOffset, length))
+        {
+            LOG_INTERN(LogLevel::Warning)
+                << "cummulative s-offset exceeds length of line geometry by " << (sOffset - length) << " m. "
+                << "Setting sOffset to length.";
+        }
         sOffset = length;
     }
 
@@ -151,9 +157,15 @@ double RoadGeometry::GetDirLine(double sOffset) const
 
 Common::Vector2d RoadGeometry::GetCoordArc(double sOffset, double tOffset, double curvature) const
 {
-    if (length < sOffset)
+    if (sOffset > length)
     {
-        LOG_INTERN(LogLevel::Warning) << "exceeding length of geometry";
+        if (!CommonHelper::DoubleEquality(sOffset, length))
+        {
+            LOG_INTERN(LogLevel::Warning)
+                << "cummulative s-offset exceeds length of arc geometry by " << (sOffset - length) << " m. "
+                << "Setting sOffset to length.";
+        }
+
         sOffset = length;
     }
 
@@ -492,6 +504,10 @@ double RoadGeometryPoly3::GetDir(double sOffset) const
         return M_PI - angle;
     }
 }
+
+//!Maximum distance between two steps for ParamPoly3 calculations
+constexpr double MAXIMUM_DELTALENGTH = 0.1;
+
 Common::Vector2d RoadGeometryParamPoly3::GetCoord(double sOffset, double tOffset) const
 {
     if (0.0 == parameters.aV && 0.0 == parameters.bV && 0.0 == parameters.cV && 0.0 == parameters.dV)
@@ -508,12 +524,21 @@ Common::Vector2d RoadGeometryParamPoly3::GetCoord(double sOffset, double tOffset
     while (s < sOffset)
     {
         lastPos = pos;
-        p += 1 / length;
-        pos.x = parameters.aU + parameters.bU * p + parameters.cU * p * p + parameters.dU * p * p * p;
-        pos.y = parameters.aV + parameters.bV * p + parameters.cV * p * p + parameters.dV * p * p * p;
+        double stepSize = 1.0;
+        double deltaLength = std::numeric_limits<double>::max();
 
-        delta = pos - lastPos;
-        double deltaLength = delta.Length();
+        while(deltaLength > MAXIMUM_DELTALENGTH)
+        {
+            double p_new = p + stepSize;
+            pos.x = parameters.aU + parameters.bU * p_new + parameters.cU * p_new * p_new + parameters.dU * p_new * p_new * p_new;
+            pos.y = parameters.aV + parameters.bV * p_new + parameters.cV * p_new * p_new + parameters.dV * p_new * p_new * p_new;
+
+            delta = pos - lastPos;
+            deltaLength = delta.Length();
+
+            stepSize *= 0.5;
+        }
+        p += stepSize;
 
         if (0.0 == deltaLength)
         {
@@ -562,11 +587,6 @@ Common::Vector2d RoadGeometryParamPoly3::GetCoord(double sOffset, double tOffset
 
 double RoadGeometryParamPoly3::GetDir(double sOffset) const
 {
-    if (0.0 == parameters.aV && 0.0 == parameters.bV && 0.0 == parameters.cV && 0.0 == parameters.dV)
-    {
-        return GetDirLine(sOffset);
-    }
-
     double s = 0.0;
     Common::Vector2d lastPos;
     Common::Vector2d delta;
@@ -576,17 +596,26 @@ double RoadGeometryParamPoly3::GetDir(double sOffset) const
     while (s < sOffset)
     {
         lastPos = pos;
-        p += 1 / length;
-        pos.x = parameters.aU + parameters.bU * p + parameters.cU * p * p + parameters.dU * p * p * p;
-        pos.y = parameters.aV + parameters.bV * p + parameters.cV * p * p + parameters.dV * p * p * p;
+        double stepSize = 1.0;
+        double deltaLength = std::numeric_limits<double>::max();
 
-        delta = pos - lastPos;
-        double deltaLength = delta.Length();
+        while(deltaLength > MAXIMUM_DELTALENGTH)
+        {
+            double p_new = p + stepSize;
+            pos.x = parameters.aU + parameters.bU * p_new + parameters.cU * p_new * p_new + parameters.dU * p_new * p_new * p_new;
+            pos.y = parameters.aV + parameters.bV * p_new + parameters.cV * p_new * p_new + parameters.dV * p_new * p_new * p_new;
+
+            delta = pos - lastPos;
+            deltaLength = delta.Length();
+
+            stepSize *= 0.5;
+        }
+        p += stepSize;
 
         if (0.0 == deltaLength)
         {
             LOG_INTERN(LogLevel::Warning) << "could not calculate road geometry correctly";
-            return 0.0;
+            return 0.;
         }
 
         if (s + deltaLength > sOffset)
@@ -601,42 +630,10 @@ double RoadGeometryParamPoly3::GetDir(double sOffset) const
         s += deltaLength;
     }
 
-    Common::Vector2d direction;
-    if (0 < sOffset)
-    {
-        direction = delta;
-    }
-    else // account for start point
-    {
-        direction.x = 1.0;
-    }
+    double dU = parameters.bU + 2 * parameters.cU * p + 3 * parameters.dU * p * p;
+    double dV = parameters.bV + 2 * parameters.cV * p + 3 * parameters.dV * p * p;
 
-    direction.Rotate(hdg);
-    if (!direction.Norm())
-    {
-        LOG_INTERN(LogLevel::Error) << "division by 0";
-    }
-
-    if (1.0 < direction.y)
-    {
-        direction.y = 1.0;
-    }
-
-    if (-1.0 > direction.y)
-    {
-        direction.y = -1.0;
-    }
-
-    double angle = std::asin(direction.y);
-
-    if (0.0 <= direction.x)
-    {
-        return angle;
-    }
-    else
-    {
-        return M_PI - angle;
-    }
+    return GetHdg() + atan2(dV, dU);
 }
 
 Road::~Road()
@@ -771,9 +768,9 @@ bool Road::AddLaneOffset(double s, double a, double b, double c, double d)
 }
 
 bool Road::AddLink(RoadLinkType type, RoadLinkElementType elementType, const std::string &elementId,
-                   ContactPointType contactPoint, RoadLinkDirectionType direction, RoadLinkSideType side)
+                   ContactPointType contactPoint)
 {
-    RoadLink *roadLink = new (std::nothrow) RoadLink(type, elementType, elementId, contactPoint, direction, side);
+    RoadLink *roadLink = new (std::nothrow) RoadLink(type, elementType, elementId, contactPoint);
     if (!roadLink)
     {
         return false;

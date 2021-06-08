@@ -48,7 +48,7 @@ struct FakeLaneManager
     std::list<const OWL::Interfaces::Section*> sectionsList;
     std::map<size_t, std::list<const OWL::Interfaces::Lane*>> sectionLanes;
     OWL::Implementation::InvalidLane invalidLane;
-    std::vector<std::vector<OWL::Interfaces::WorldObjects*>> objectAssignments;
+    std::vector<std::vector<OWL::Implementation::Lane::LaneAssignmentCollector>> objectAssignments;
     std::unordered_map<OWL::Id, OWL::OdId> laneIdMapping;
     std::vector<std::vector<OWL::Id>> lanePredecessors;
     std::vector<std::vector<OWL::Id>> laneSuccessors;
@@ -69,9 +69,9 @@ struct FakeLaneManager
         ON_CALL(*lanes[col][row], GetWidth(distance)).WillByDefault(Return(width));
     }
 
-    void AddWorldObject(size_t col, size_t row, OWL::Interfaces::WorldObject& worldObject)
+    void AddWorldObject(size_t col, size_t row, OWL::Interfaces::WorldObject& worldObject, const OWL::LaneOverlap& laneOverlap)
     {
-        objectAssignments[col][row]->push_back(&worldObject);
+        objectAssignments[col][row].Insert(laneOverlap, &worldObject);
     }
 
     void GenerateLaneMatrix(OWL::Interfaces::Road* road)
@@ -80,7 +80,7 @@ struct FakeLaneManager
         for (size_t col = 0; col < cols; col++)
         {
             std::vector<OWL::Fakes::Lane*> fakeLaneRow;
-            std::vector<OWL::Interfaces::WorldObjects*> objectAssignmentRow;
+            std::vector<OWL::Implementation::Lane::LaneAssignmentCollector> objectAssignmentRow;
 
             for (size_t row = 0; row < rows; row++)
             {
@@ -92,7 +92,7 @@ struct FakeLaneManager
                 ON_CALL(*newLane, GetRoad()).WillByDefault(ReturnRef(*road));
                 laneIdMapping.insert({id, -(1 + row)});
                 fakeLaneRow.push_back(newLane);
-                objectAssignmentRow.push_back(new OWL::Interfaces::WorldObjects());
+                objectAssignmentRow.emplace_back();
             }
             lanes.push_back(fakeLaneRow);
             objectAssignments.push_back(objectAssignmentRow);
@@ -241,7 +241,8 @@ struct FakeLaneManager
         {
             for (size_t row = 0; row < rows; row++)
             {
-                ON_CALL(*lanes[col][row], GetWorldObjects()).WillByDefault(ReturnRef(*objectAssignments[col][row]));
+                ON_CALL(*lanes[col][row], GetWorldObjects(true)).WillByDefault(ReturnRef(objectAssignments[col][row].Get(true)));
+                ON_CALL(*lanes[col][row], GetWorldObjects(false)).WillByDefault(ReturnRef(objectAssignments[col][row].Get(false)));
             }
         }
     }
@@ -280,11 +281,6 @@ struct FakeLaneManager
         for (auto fakeLaneRow : lanes)
         {
             for (auto fakeLane : fakeLaneRow) { delete fakeLane; }
-        }
-
-        for (auto objectAssignmentRow : objectAssignments)
-        {
-            for (auto objectAssignment : objectAssignmentRow) { delete objectAssignment; }
         }
 
         for (auto section : sections) { delete section.second; }

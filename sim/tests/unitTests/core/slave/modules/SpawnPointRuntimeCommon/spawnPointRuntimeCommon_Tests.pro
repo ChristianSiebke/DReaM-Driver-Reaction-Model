@@ -55,8 +55,8 @@ HEADERS += \
     $$MODEL_ELEMENTS/agent.h \
     $$MODEL_ELEMENTS/component.h \
     $$MODEL_ELEMENTS/channel.h \
+    $$MODEL_ELEMENTS/parameters.h \
     $$CORE_SHARE/log.h \
-    $$CORE_SHARE/parameters.h \
     $$OPENPASS_SLAVE/bindings/modelLibrary.h \
     $$SPAWNPOINTS/common/WorldAnalyzer.h
 
@@ -75,8 +75,8 @@ SOURCES += \
     $$MODEL_ELEMENTS/channel.cpp \
     $$MODEL_ELEMENTS/agent.cpp \
     $$MODEL_ELEMENTS/component.cpp \
+    $$MODEL_ELEMENTS/parameters.cpp \
     $$CORE_SHARE/log.cpp \
-    $$CORE_SHARE/parameters.cpp \
     $$OPENPASS_SLAVE/bindings/modelLibrary.cpp \
     $$SPAWNPOINTS/common/WorldAnalyzer.cpp \
     spawnPointRuntimeCommon_Tests.cpp

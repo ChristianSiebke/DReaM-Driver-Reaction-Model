@@ -41,14 +41,14 @@ public:
 
     bool spawning {true}; //!< Spawning flag, spawning agent if true
 
-    openScenario::Position position; //!< Initial position
+    openScenario::Position position{}; //!< Initial position
     std::optional<std::vector<RouteElement>> route {std::nullopt}; //!< Optional predfined route
 
-    double velocity; //!< Initial velocity
-    std::optional<openScenario::StochasticAttribute> stochasticVelocity; //!< optional stochastic initial velocity
+    double velocity{0.0}; //!< Initial velocity
+    std::optional<openScenario::StochasticAttribute> stochasticVelocity{}; //!< optional stochastic initial velocity
 
-    std::optional<double> acceleration; //!< Optional initial acceleration
-    std::optional<openScenario::StochasticAttribute> stochasticAcceleration; //!< optional stochastic initial acceleration
+    std::optional<double> acceleration{0.0}; //!< Optional initial acceleration
+    std::optional<openScenario::StochasticAttribute> stochasticAcceleration{}; //!< optional stochastic initial acceleration
 };
 
 /*!

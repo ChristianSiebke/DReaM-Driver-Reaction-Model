@@ -1,0 +1,60 @@
+<Profiles SchemaVersion="0.4.3">
+  <AgentProfiles>
+    <AgentProfile Name="EgoAgent" Type="Dynamic">
+      <DriverProfiles>
+        <DriverProfile Name="Regular" Probability="1.0"/>
+      </DriverProfiles>
+      <VehicleProfiles>
+        <VehicleProfile Name="CarWithCircularSensor" Probability="1"/>
+      </VehicleProfiles>
+    </AgentProfile>
+    <AgentProfile Name="MiddleClassCarAgent" Type="Dynamic">
+      <DriverProfiles>
+        <DriverProfile Name="Regular" Probability="1.0"/>
+      </DriverProfiles>
+      <VehicleProfiles>
+        <VehicleProfile Name="Mini Cooper" Probability="1"/>
+      </VehicleProfiles>
+    </AgentProfile>
+  </AgentProfiles>
+  <VehicleProfiles>
+    <VehicleProfile Name="CarWithCircularSensor">
+      <Model Name="car_mini_cooper"/>
+      <Components/>
+      <Sensors>
+        <Sensor Id="0">
+          <Position Height="0.5" Lateral="0.0" Longitudinal="0.0" Name="Default" Pitch="0.0" Roll="0.0" Yaw="0.0"/>
+          <Profile Name="Standard" Type="Geometric2D"/>
+        </Sensor>
+      </Sensors>
+    </VehicleProfile>
+    <VehicleProfile Name="Mini Cooper">
+      <Model Name="car_mini_cooper"/>
+      <Components/>
+      <Sensors/>
+    </VehicleProfile>
+  </VehicleProfiles>
+  <ProfileGroup Type="Driver">
+    <Profile Name="Regular">
+      <String Key="Type" Value="AlgorithmAgentFollowingDriverModel"/>
+      <String Key="AlgorithmLateralModule" Value="Algorithm_LateralAfdm"/>
+      <String Key="AlgorithmLongitudinalModule" Value="Algorithm_LongitudinalAfdm"/>
+      <Double Key="VelocityWish" Value="36.11"/>
+      <Double Key="Delta" Value="4.0"/>
+      <Double Key="TGapWish" Value="1.5"/>
+      <Double Key="MinDistance" Value="2.0"/>
+      <Double Key="MaxAcceleration" Value="1.4"/>
+      <Double Key="MaxDeceleration" Value="2.0"/>
+    </Profile>
+  </ProfileGroup>
+  <ProfileGroup Type="Geometric2D">
+    <Profile Name="Standard">
+      <Double Key="DetectionRange" Value="1000"/>
+      <Bool Key="EnableVisualObstruction" Value="false"/>
+      <Double Key="FailureProbability" Value="0"/>
+      <NormalDistribution Key="Latency" Max="1.0" Mean="1.0" Min="1.0" SD="0.0"/>
+      <Double Key="OpeningAngleH" Value="6.2"/>
+      <Double Key="RequiredPercentageOfVisibleArea" Value="0.001"/>
+    </Profile>
+  </ProfileGroup>
+</Profiles>

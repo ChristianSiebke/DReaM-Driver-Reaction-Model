@@ -78,6 +78,7 @@ class FakeAgent : public FakeWorldObject, public AgentInterface
     MOCK_METHOD4(InitAgentParameter, bool(int id, int agentTypeId, const AgentSpawnItem *agentSpawnItem,
                                           const SpawnItemParameterInterface &spawnItemParameter));
     MOCK_METHOD2(InitAgentParameter, bool(int id, AgentBlueprintInterface *agentBlueprint));
+    MOCK_METHOD1(InitParameter, void(const AgentBlueprintInterface &agentBlueprint));
     MOCK_CONST_METHOD0(IsValid, bool());
     MOCK_CONST_METHOD0(GetAgentTypeId, int());
     MOCK_CONST_METHOD0(IsAgentInWorld, bool());

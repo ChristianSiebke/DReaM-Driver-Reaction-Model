@@ -85,10 +85,8 @@ public:
     virtual void SetRoadGraph(const RoadGraph&& roadGraph, RoadGraphVertex current, RoadGraphVertex target) = 0;
 
 
-    //! Updates the roadGraph in the case the agent changes from road to the next
-    //!
-    //! \return true of the agent is still on the route to his assigned target, false otherwise
-    virtual void UpdatePositionInGraph() = 0;
+    //! Updates the EgoAgent for the next timestep, e.g. updates the roadGraph in the case the agent changes from one road to the next
+    virtual void Update() = 0;
 
 
     //! Returns true if a route has been set and the agent is still on this route

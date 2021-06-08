@@ -1,7 +1,7 @@
 # @file HelperMacros.cmake
 #
 # @author Blasius Czink
-# @author Reinhard Biegel, in-tech GmbH
+# @author Reinhard Biegel, René Paris, in-tech GmbH
 #
 # Provides helper macros for build control:
 #
@@ -66,7 +66,6 @@
 #
 # @author Uwe Woessner
 #
-
 include(MSVC)
 
 # helper to dump the lib-values to a simple text-file
@@ -139,6 +138,23 @@ function(openpass_adjust_output_dir targetname)
       SET_TARGET_PROPERTIES(${ARGV0} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_${upper_build_type_str} "${OPENPASS_DESTDIR}${MYPATH_POSTFIX}")
     ENDIF(CMAKE_CONFIGURATION_TYPES)
 endfunction(openpass_adjust_output_dir)
+
+##
+# WITH_COVERAGE extension
+#
+# When set, add compiler flags and make additional test targets available
+#
+# @author René Paris, in-tech GmbH
+#
+if(WITH_COVERAGE)
+  if(CMAKE_COMPILER_IS_GNUCXX)
+    include(TestCoverage)
+    set_coverage_compiler_flags()
+  else()
+    message(FATAL_ERROR "Generating code coverage is only supported for GNU gcc")
+  endif()
+endif()
+
 
 ##
 # Macro to add openPASS libraries, executables and tests
@@ -301,8 +317,7 @@ function(add_openpass_target)
       )
 
       # currently not provided by FindGTest
-      get_filename_component(GMOCK_LIBRARY_PATH ${GTEST_LIBRARY} DIRECTORY)
-      set(GMOCK_LIBRARY ${GMOCK_LIBRARY_PATH}/libgmock.a)
+      string(REGEX REPLACE "libgtest" "libgmock" GMOCK_LIBRARY "${GTEST_LIBRARY}")
 
       target_link_libraries(${PARSED_ARG_NAME}
         ${GTEST_LIBRARY}
@@ -314,10 +329,12 @@ function(add_openpass_target)
       add_test(NAME ${PARSED_ARG_NAME} COMMAND ${PARSED_ARG_NAME} ${ADDITIONAL_TEST_ARGS})
       set_tests_properties(${PARSED_ARG_NAME} PROPERTIES DEPENDS ${PARSED_ARG_NAME}_build)
 
+      if(WITH_COVERAGE)
+        add_test_coverage_fastcov(NAME ${PARSED_ARG_NAME})
+      endif()
+
     else()
-
       message(FATAL_ERROR "Target type '${PARSED_TARGET_TYPE}' is not supported.")
-
     endif()
 
     set_target_properties(${PARSED_ARG_NAME} PROPERTIES DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}")
@@ -528,7 +545,7 @@ endfunction()
 #  #UNSET(UIS)
 #ENDMACRO(ADD_OPENPASS_PLUGIN)
 
-#MACRO(OPENPASS_GUI_add_plugin targetname category)  
+#MACRO(OPENPASS_GUI_add_plugin targetname category)
 #   ADD_OPENPASS_PLUGIN(${targetname} "lib/gui" ${ARGN})
 #   IF("${category}" STREQUAL "")
 #       set_target_properties(${targetname} PROPERTIES FOLDER "GUI")

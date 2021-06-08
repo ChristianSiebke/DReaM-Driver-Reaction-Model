@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020, 2021 in-tech GmbH
 *               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -26,6 +26,7 @@
 
 #include "OWL/DataTypes.h"
 #include "OWL/OpenDriveTypeMapper.h"
+#include "common/osiUtils.h"
 
 #include "WorldData.h"
 #include "WorldDataException.h"
@@ -48,6 +49,8 @@ WorldData::WorldData(const CallbackInterface* callbacks) :
 #else
     osiGroundTruth = std::make_unique<osi3::GroundTruth>();
 #endif
+
+    osi3::utils::SetVersion(*osiGroundTruth);
 }
 
 SensorView_ptr WorldData::GetSensorView(osi3::SensorViewConfiguration& conf, int agentId)
@@ -59,15 +62,15 @@ SensorView_ptr WorldData::GetSensorView(osi3::SensorViewConfiguration& conf, int
     SensorView_ptr sv = std::make_unique<osi3::SensorView>();
 #endif
 
-    auto currentInterfaceVersion = osi3::InterfaceVersion::descriptor()->file()->options().GetExtension(osi3::current_interface_version);
-    sv->mutable_version()->CopyFrom(currentInterfaceVersion);
+    osi3::utils::SetVersion(*sv);
 
     sv->mutable_sensor_id()->CopyFrom(conf.sensor_id());
     sv->mutable_mounting_position()->CopyFrom(conf.mounting_position());
     sv->mutable_mounting_position_rmse()->CopyFrom(conf.mounting_position());
 
-    auto filteredGroundTruth = GetFilteredGroundTruth(conf, GetMovingObjectById(host_id));
+    auto filteredGroundTruth = GetFilteredGroundTruth(conf, GetMovingObject(host_id));
     sv->mutable_global_ground_truth()->CopyFrom(*filteredGroundTruth);
+    sv->mutable_global_ground_truth()->mutable_host_vehicle_id()->set_value(host_id);
     sv->mutable_host_vehicle_id()->set_value(host_id);
 
     auto zeroVector3d = osi3::Vector3d();
@@ -89,7 +92,7 @@ SensorView_ptr WorldData::GetSensorView(osi3::SensorViewConfiguration& conf, int
     zeroError.mutable_orientation_acceleration()->CopyFrom(zeroOrientation3d);
 
     auto hostData = osi3::HostVehicleData();
-    auto& movingObject = GetMovingObjectById(host_id);
+    const auto& movingObject = GetMovingObject(host_id);
     hostData.mutable_location_rmse()->CopyFrom(zeroError);
 
 #ifdef USE_PROTOBUF_ARENA
@@ -166,15 +169,26 @@ WorldData::GroundTruth_ptr WorldData::GetFilteredGroundTruth(const osi3::SensorV
     relativeSensorPos.RotateYaw(orientation.yaw);
     auto absoluteSensorPos = reference.GetReferencePointPosition() + relativeSensorPos;
 
-    const double yawMax = orientation.yaw + conf.mounting_position().orientation().yaw() + conf.field_of_view_horizontal() / 2.0;
-    const double yawMin = orientation.yaw + conf.mounting_position().orientation().yaw() - conf.field_of_view_horizontal() / 2.0;
+    const double fieldOfView = conf.field_of_view_horizontal();
+    double leftBoundaryAngle;
+    double rightBoundaryAngle;
+    if (fieldOfView >= 2 * M_PI)
+    {
+        leftBoundaryAngle = M_PI;
+        rightBoundaryAngle = -M_PI;
+    }
+    else
+    {
+        leftBoundaryAngle = CommonHelper::SetAngleToValidRange(orientation.yaw + conf.mounting_position().orientation().yaw() + fieldOfView / 2.0);
+        rightBoundaryAngle = CommonHelper::SetAngleToValidRange(orientation.yaw + conf.mounting_position().orientation().yaw() - fieldOfView / 2.0);
+    }
 
     const double range = conf.range();
 
-    const auto& filteredMovingObjects = GetMovingObjectsInSector(absoluteSensorPos, range, yawMin, yawMax);
-    const auto& filteredStationaryObjects = GetStationaryObjectsInSector(absoluteSensorPos, range, yawMin, yawMax);
-    const auto& filteredTrafficSigns = GetTrafficSignsInSector(absoluteSensorPos, range, yawMin, yawMax);
-    const auto& filteredRoadMarkings = GetRoadMarkingsInSector(absoluteSensorPos, range, yawMin, yawMax);
+    const auto& filteredMovingObjects = GetMovingObjectsInSector(absoluteSensorPos, range, leftBoundaryAngle, rightBoundaryAngle);
+    const auto& filteredStationaryObjects = GetStationaryObjectsInSector(absoluteSensorPos, range, leftBoundaryAngle, rightBoundaryAngle);
+    const auto& filteredTrafficSigns = GetTrafficSignsInSector(absoluteSensorPos, range, leftBoundaryAngle, rightBoundaryAngle);
+    const auto& filteredRoadMarkings = GetRoadMarkingsInSector(absoluteSensorPos, range, leftBoundaryAngle, rightBoundaryAngle);
     const auto& filteredLanes = GetLanes();
     const auto& filteredLaneBoundaries = GetLaneBoundaries();
 
@@ -223,8 +237,8 @@ WorldData::GroundTruth_ptr WorldData::GetFilteredGroundTruth(const osi3::SensorV
 
 std::vector<const Interfaces::StationaryObject*> WorldData::GetStationaryObjectsInSector(const Primitive::AbsPosition& origin,
                                                                                          double radius,
-                                                                                         double absYawMin,
-                                                                                         double absYawMax)
+                                                                                         double leftBoundaryAngle,
+                                                                                         double rightBoundaryAngle)
 {
     std::vector<Interfaces::StationaryObject*> objects;
 
@@ -233,13 +247,13 @@ std::vector<const Interfaces::StationaryObject*> WorldData::GetStationaryObjects
         objects.push_back(mapItem.second);
     }
 
-    return ApplySectorFilter(objects, origin, radius, absYawMax, absYawMin);
+    return ApplySectorFilter(objects, origin, radius, leftBoundaryAngle, rightBoundaryAngle);
 }
 
 std::vector<const Interfaces::MovingObject*> WorldData::GetMovingObjectsInSector(const Primitive::AbsPosition& origin,
                                                                                  double radius,
-                                                                                 double absYawMin,
-                                                                                 double absYawMax)
+                                                                                 double leftBoundaryAngle,
+                                                                                 double rightBoundaryAngle)
 {
     std::vector<Interfaces::MovingObject*> objects;
 
@@ -248,13 +262,13 @@ std::vector<const Interfaces::MovingObject*> WorldData::GetMovingObjectsInSector
         objects.push_back(mapItem.second);
     }
 
-    return ApplySectorFilter(objects, origin, radius, absYawMax, absYawMin);
+    return ApplySectorFilter(objects, origin, radius, leftBoundaryAngle, rightBoundaryAngle);
 }
 
 std::vector<const Interfaces::TrafficSign*> WorldData::GetTrafficSignsInSector(const Primitive::AbsPosition& origin,
                                                                                double radius,
-                                                                               double absYawMin,
-                                                                               double absYawMax)
+                                                                               double leftBoundaryAngle,
+                                                                               double rightBoundaryAngle)
 {
     std::vector<Interfaces::TrafficSign*> objects;
 
@@ -263,10 +277,10 @@ std::vector<const Interfaces::TrafficSign*> WorldData::GetTrafficSignsInSector(c
         objects.push_back(mapItem.second);
     }
 
-    return ApplySectorFilter(objects, origin, radius, absYawMax, absYawMin);
+    return ApplySectorFilter(objects, origin, radius, leftBoundaryAngle, rightBoundaryAngle);
 }
 
-std::vector<const Interfaces::RoadMarking*> WorldData::GetRoadMarkingsInSector(const Primitive::AbsPosition& origin, double radius, double absYawMin, double absYawMax)
+std::vector<const Interfaces::RoadMarking*> WorldData::GetRoadMarkingsInSector(const Primitive::AbsPosition& origin, double radius, double leftBoundaryAngle, double rightBoundaryAngle)
 {
     std::vector<Interfaces::RoadMarking*> objects;
 
@@ -275,63 +289,99 @@ std::vector<const Interfaces::RoadMarking*> WorldData::GetRoadMarkingsInSector(c
         objects.push_back(mapItem.second);
     }
 
-    return ApplySectorFilter(objects, origin, radius, absYawMax, absYawMin);
+    return ApplySectorFilter(objects, origin, radius, leftBoundaryAngle, rightBoundaryAngle);
 }
 
-
-double WorldData::NormalizeAngle(double angle)
+bool LaneTypeIsDriving(const RoadLaneType& laneType)
 {
-    angle = std::fmod(angle, 2.0 * M_PI);
-
-    if (angle > M_PI)
+    switch (laneType)
     {
-        angle -= 2.0 * M_PI;
+        case RoadLaneType::Driving:
+        case RoadLaneType::Median:
+        case RoadLaneType::Exit:
+        case RoadLaneType::Entry:
+        case RoadLaneType::OnRamp:
+        case RoadLaneType::OffRamp:
+        case RoadLaneType::ConnectingRamp:
+            return true;
+        case RoadLaneType::None:
+        case RoadLaneType::Shoulder:
+        case RoadLaneType::Border:
+        case RoadLaneType::Stop:
+        case RoadLaneType::Restricted:
+        case RoadLaneType::Parking:
+        case RoadLaneType::Biking:
+        case RoadLaneType::Sidewalk:
+        case RoadLaneType::Curb:
+            return false;
+        default:
+            return false;
     }
-    else if (angle < - M_PI)
-    {
-        angle += 2.0 * M_PI;
-    }
-
-    return angle;
 }
 
-void WorldData::AddLane(RoadLaneSectionInterface& odSection, const RoadLaneInterface& odLane, const std::vector<Id> laneBoundaries)
+void WorldData::AddLane(const Id id, RoadLaneSectionInterface& odSection, const RoadLaneInterface& odLane, const std::vector<Id> laneBoundaries)
 {
     int odLaneId = odLane.GetId();
-    Id osiLaneId = CreateUid();
 
     Section& section = *(sections.at(&odSection));
     osi3::Lane* osiLane = osiGroundTruth->add_lane();
     Lane& lane = *(new Implementation::Lane(osiLane, &section));
-    osiLane->mutable_id()->set_value(osiLaneId);
+    osiLane->mutable_id()->set_value(id);
     osiLane->mutable_classification()->set_centerline_is_driving_direction(odLaneId < 0);
+    const bool isLeft = odLaneId > 0;
 
-    for (const auto& laneBoundary : laneBoundaries)
+    if (isLeft)
     {
-        osiLane->mutable_classification()->add_right_lane_boundary_id()->set_value(laneBoundary);
+        for (const auto& laneBoundary : laneBoundaries)
+        {
+            osiLane->mutable_classification()->add_left_lane_boundary_id()->set_value(laneBoundary);
+        }
+    }
+    else
+    {
+        for (const auto& laneBoundary : laneBoundaries)
+        {
+            osiLane->mutable_classification()->add_right_lane_boundary_id()->set_value(laneBoundary);
+        }
     }
 
     for (const auto& odLaneMapItem : odSection.GetLanes())
     {
         try
         {
-            if ((odLaneId < 0 && odLaneMapItem.first == odLaneId + 1)
-                    || (odLaneId > 0 && odLaneMapItem.first == odLaneId - 1))
+            if (odLaneMapItem.first == odLaneId + 1)
             {
-                // find a left neighbor
+                // is left neighbor
                 osi3::Lane* leftOsiLane = osiLanes.at(odLaneMapItem.second);
                 Lane& leftLane = *(lanes.at(leftOsiLane->id().value()));
-                lane.SetLeftLane(leftLane);
-                leftLane.SetRightLane(lane);
+
+                lane.SetLeftLane(leftLane, !isLeft);
+                leftLane.SetRightLane(lane, isLeft);
             }
-            else if ((odLaneId < 0 && odLaneMapItem.first == odLaneId - 1)
-                     || (odLaneId > 0 && odLaneMapItem.first == odLaneId + 1))
+            else if (odLaneMapItem.first == odLaneId - 1)
             {
                 // is right neighbor
                 osi3::Lane* rightOsiLane = osiLanes.at(odLaneMapItem.second);
                 Lane& rightLane = *(lanes.at(rightOsiLane->id().value()));
-                lane.SetRightLane(rightLane);
-                rightLane.SetLeftLane(lane);
+                lane.SetRightLane(rightLane, isLeft);
+                rightLane.SetLeftLane(lane, !isLeft);
+            }
+            else if (odLaneId == -1 && odLaneMapItem.first == 1)
+            {
+                // is left neighbour across centerline
+                osi3::Lane* leftOsiLane = osiLanes.at(odLaneMapItem.second);
+                Lane& leftLane = *(lanes.at(leftOsiLane->id().value()));
+
+                lane.SetLeftLane(leftLane, false);
+                leftLane.SetRightLane(lane, false);
+            }
+            else if (odLaneId == 1 && odLaneMapItem.first == -1)
+            {
+                // is right neighbour across centerline
+                osi3::Lane* rightOsiLane = osiLanes.at(odLaneMapItem.second);
+                Lane& rightLane = *(lanes.at(rightOsiLane->id().value()));
+                lane.SetRightLane(rightLane, false);
+                rightLane.SetLeftLane(lane, false);
             }
         }
         catch (std::out_of_range&)
@@ -340,26 +390,47 @@ void WorldData::AddLane(RoadLaneSectionInterface& odSection, const RoadLaneInter
         }
     }
 
-    if (odLaneId == 1 || odLaneId == -1)
+    if (odLaneId == -1)
     {
         lane.SetLeftLaneBoundaries(section.GetCenterLaneBoundary());
     }
 
+    if (odLaneId == 1)
+    {
+        lane.SetRightLaneBoundaries(section.GetCenterLaneBoundary());
+    }
+
     lane.SetLaneType(OpenDriveTypeMapper::OdToOwlLaneType(odLane.GetType()));
+    if (odSection.GetRoad()->GetJunctionId() != "-1")
+    {
+        osiLane->mutable_classification()->set_type(osi3::Lane_Classification_Type::Lane_Classification_Type_TYPE_INTERSECTION);
+    }
+    else if (LaneTypeIsDriving(odLane.GetType()))
+    {
+        osiLane->mutable_classification()->set_type(osi3::Lane_Classification_Type::Lane_Classification_Type_TYPE_DRIVING);
+    }
+    else
+    {
+        osiLane->mutable_classification()->set_type(osi3::Lane_Classification_Type::Lane_Classification_Type_TYPE_NONDRIVING);
+    }
+    osiLane->mutable_classification()->mutable_road_condition()->set_surface_temperature(293.0);
+    osiLane->mutable_classification()->mutable_road_condition()->set_surface_water_film(0.0);
+    osiLane->mutable_classification()->mutable_road_condition()->set_surface_ice(0.0);
+    osiLane->mutable_classification()->mutable_road_condition()->set_surface_roughness(5.0);
+    osiLane->mutable_classification()->mutable_road_condition()->set_surface_texture(0.0);
     osiLanes[&odLane] = osiLane;
-    lanes[osiLaneId] = &lane;
-    laneIdMapping[osiLaneId] = static_cast<OWL::OdId>(odLaneId);
+    lanes[id] = &lane;
+    laneIdMapping[id] = static_cast<OWL::OdId>(odLaneId);
 
     section.AddLane(lane);
 }
 
-Id WorldData::AddLaneBoundary(const RoadLaneRoadMark &odLaneRoadMark, double sectionStart, LaneMarkingSide side)
+Id WorldData::AddLaneBoundary(const Id id, const RoadLaneRoadMark &odLaneRoadMark, double sectionStart, LaneMarkingSide side)
 {
     constexpr double standardWidth = 0.15;
     constexpr double boldWidth = 0.3;
-    Id osiLaneBoundaryId = CreateUid();
     osi3::LaneBoundary* osiLaneBoundary = osiGroundTruth->add_lane_boundary();
-    osiLaneBoundary->mutable_id()->set_value(osiLaneBoundaryId);
+    osiLaneBoundary->mutable_id()->set_value(id);
     osiLaneBoundary->mutable_classification()->set_color(OpenDriveTypeMapper::OdToOsiLaneMarkingColor(odLaneRoadMark.GetColor()));
     osiLaneBoundary->mutable_classification()->set_type(OpenDriveTypeMapper::OdToOsiLaneMarkingType(odLaneRoadMark.GetType(), side));
 
@@ -373,9 +444,9 @@ Id WorldData::AddLaneBoundary(const RoadLaneRoadMark &odLaneRoadMark, double sec
         width = boldWidth;
     }
     LaneBoundary* laneBoundary = new OWL::Implementation::LaneBoundary(osiLaneBoundary, width, sectionStart + odLaneRoadMark.GetSOffset(), sectionStart + odLaneRoadMark.GetSEnd(), side);
-    laneBoundaries[osiLaneBoundaryId] = laneBoundary;
+    laneBoundaries[id] = laneBoundary;
 
-    return osiLaneBoundaryId;
+    return id;
 }
 
 void WorldData::SetCenterLaneBoundary(const RoadLaneSectionInterface &odSection, std::vector<Id> laneBoundaryIds)
@@ -482,9 +553,8 @@ void WorldData::AddLanePredecessor(/* const */ RoadLaneInterface& odLane,
     lane->AddPrevious(prevLane);
 }
 
-Interfaces::MovingObject& WorldData::AddMovingObject(void* linkedObject)
+Interfaces::MovingObject& WorldData::AddMovingObject(const Id id, void* linkedObject)
 {
-    Id id = CreateUid();
     osi3::MovingObject* osiMovingObject = osiGroundTruth->add_moving_object();
     auto movingObject = new MovingObject(osiMovingObject, linkedObject);
 
@@ -516,11 +586,10 @@ void WorldData::RemoveMovingObjectById(Id id)
     }
 }
 
-Interfaces::StationaryObject& WorldData::AddStationaryObject(void* linkedObject)
+Interfaces::StationaryObject& WorldData::AddStationaryObject(const Id id, void* linkedObject)
 {
     osi3::StationaryObject* osiStationaryObject = osiGroundTruth->add_stationary_object();
     auto stationaryObject = new StationaryObject(osiStationaryObject, linkedObject);
-    Id id = CreateUid();
 
     osiStationaryObject->mutable_id()->set_value(id);
     stationaryObjects[id] = stationaryObject;
@@ -528,11 +597,10 @@ Interfaces::StationaryObject& WorldData::AddStationaryObject(void* linkedObject)
     return *stationaryObject;
 }
 
-Interfaces::TrafficSign& WorldData::AddTrafficSign(const std::string odId)
+Interfaces::TrafficSign& WorldData::AddTrafficSign(const Id id, const std::string odId)
 {
     osi3::TrafficSign* osiTrafficSign = osiGroundTruth->add_traffic_sign();
     auto trafficSignal = new TrafficSign(osiTrafficSign);
-    Id id = CreateUid();
 
     trafficSignIdMapping[odId] = id;
 
@@ -542,11 +610,10 @@ Interfaces::TrafficSign& WorldData::AddTrafficSign(const std::string odId)
     return *trafficSignal;
 }
 
-Interfaces::RoadMarking& WorldData::AddRoadMarking()
+Interfaces::RoadMarking& WorldData::AddRoadMarking(const Id id)
 {
     osi3::RoadMarking* osiRoadMarking = osiGroundTruth->add_road_marking();
     auto roadMarking = new Implementation::RoadMarking(osiRoadMarking);
-    Id id = CreateUid();
 
     osiRoadMarking->mutable_id()->set_value(id);
     roadMarkings[id] = roadMarking;
@@ -621,12 +688,15 @@ void WorldData::AddLaneGeometryPoint(const RoadLaneInterface& odLane,
 
     lane->AddLaneGeometryJoint(pointLeft, pointCenter, pointRight, sOffset, curvature, heading);
 
-    for (auto& laneBoundaryIndex : lane->GetRightLaneBoundaries())
+    const auto odLaneId = odLane.GetId();
+    const bool isLeft = odLaneId > 0;
+
+    for (auto& laneBoundaryIndex : (isLeft ? lane->GetLeftLaneBoundaries() : lane->GetRightLaneBoundaries()))
     {
         auto& laneBoundary = laneBoundaries.at(laneBoundaryIndex);
         if (laneBoundary->GetSStart() <= sOffset && laneBoundary->GetSEnd() >= sOffset)
         {
-            laneBoundary->AddBoundaryPoint(pointRight, heading);
+            laneBoundary->AddBoundaryPoint(isLeft ? pointLeft : pointRight, heading);
         }
     }
 }
@@ -646,26 +716,7 @@ void WorldData::AddCenterLinePoint(const RoadLaneSectionInterface &odSection, co
 
 WorldData::~WorldData()
 {
-    for (auto road : roads)
-    {
-        delete road.second;
-    }
-
-    roads.clear();
-
-    for (auto section : sections)
-    {
-        delete section.second;
-    }
-
-    sections.clear();
-
-    for (auto lane : lanes)
-    {
-        delete lane.second;
-    }
-
-    lanes.clear();
+    Clear();
 }
 
 const std::unordered_map<Id, Lane*>& WorldData::GetLanes() const
@@ -693,7 +744,7 @@ const std::unordered_map<Id, StationaryObject*>& WorldData::GetStationaryObjects
     return stationaryObjects;
 }
 
-CStationaryObject& WorldData::GetStationaryObjectById(Id id) const
+const StationaryObject& WorldData::GetStationaryObject(Id id) const
 {
     return *(stationaryObjects.at(id));
 }
@@ -800,7 +851,7 @@ void WorldData::SetEnvironment(const openScenario::EnvironmentAction& environmen
     }
 }
 
-CMovingObject& WorldData::GetMovingObjectById(Id id) const
+const MovingObject& WorldData::GetMovingObject(Id id) const
 {
     return *(movingObjects.at(id));
 }
@@ -826,58 +877,61 @@ void WorldData::Reset()
 
 void WorldData::Clear()
 {
-    for (auto sign : trafficSigns)
+    for (auto trafficSign : trafficSigns)
     {
-        delete sign.second;
+        delete trafficSign.second;
     }
+    trafficSigns.clear();
 
     for (auto movingObject : movingObjects)
     {
         delete movingObject.second;
     }
+    movingObjects.clear();
 
     for (auto stationaryObject : stationaryObjects)
     {
         delete stationaryObject.second;
     }
+    stationaryObjects.clear();
 
     for (auto lane : lanes)
     {
         delete lane.second;
     }
+    lanes.clear();
 
     for (auto laneBoundary : laneBoundaries)
     {
         delete laneBoundary.second;
     }
+    laneBoundaries.clear();
 
     for (auto section : sections)
     {
         delete section.second;
     }
+    sections.clear();
 
     for (auto road : roads)
     {
         delete road.second;
     }
+    roads.clear();
 
     for (auto junction : junctions)
     {
         delete junction.second;
     }
-
-    trafficSigns.clear();
-    movingObjects.clear();
-    stationaryObjects.clear();
-
-    lanes.clear();
-    laneBoundaries.clear();
-    sections.clear();
-    roads.clear();
     junctions.clear();
 
-    laneIdMapping.clear();
+    for (auto roadMarking : roadMarkings)
+    {
+        delete roadMarking.second;
+    }
+    roadMarkings.clear();
 
+    laneIdMapping.clear();
     osiGroundTruth->Clear();
 }
 

@@ -248,24 +248,24 @@ TEST(GetDistanceToEndOfLane, BranchingTree)
 TEST(GetObjectsOfTypeInRange, NoObjectstInRange_ReturnsEmptyVector)
 {
     FakeLaneMultiStream laneMultiStream;
-    OWL::Interfaces::WorldObjects emptyObjectsList{};
+    OWL::Interfaces::LaneAssignments emptyObjectsList{};
     Fakes::Road road1;
     std::string idRoad1 = "Road1";
     ON_CALL(road1, GetId()).WillByDefault(ReturnRef(idRoad1));
     auto [node1, lane1] = laneMultiStream.AddRoot(100, true);
     ON_CALL(*lane1, GetRoad()).WillByDefault(ReturnRef(road1));
-    ON_CALL(*lane1, GetWorldObjects()).WillByDefault(ReturnRef(emptyObjectsList));
+    ON_CALL(*lane1, GetWorldObjects(true)).WillByDefault(ReturnRef(emptyObjectsList));
     Fakes::Road road2;
     std::string idRoad2 = "Road2";
     ON_CALL(road2, GetId()).WillByDefault(ReturnRef(idRoad2));
     auto [node2, lane2] = laneMultiStream.AddLane(200, false, *node1);
-    ON_CALL(*lane2, GetWorldObjects()).WillByDefault(ReturnRef(emptyObjectsList));
+    ON_CALL(*lane2, GetWorldObjects(false)).WillByDefault(ReturnRef(emptyObjectsList));
     ON_CALL(*lane2, GetRoad()).WillByDefault(ReturnRef(road2));
     Fakes::Road road3;
     std::string idRoad3 = "Road3";
     ON_CALL(road3, GetId()).WillByDefault(ReturnRef(idRoad3));
     auto [node3, lane3] = laneMultiStream.AddLane(300, true, *node1);
-    ON_CALL(*lane3, GetWorldObjects()).WillByDefault(ReturnRef(emptyObjectsList));
+    ON_CALL(*lane3, GetWorldObjects(true)).WillByDefault(ReturnRef(emptyObjectsList));
     ON_CALL(*lane3, GetRoad()).WillByDefault(ReturnRef(road3));
     Fakes::WorldData worldData;
     WorldDataQuery wdQuery(worldData);
@@ -281,36 +281,33 @@ TEST(GetObjectsOfTypeInRange, OneObjectInEveryNode_ReturnsFirstObjectForAllNodes
 {
     FakeLaneMultiStream laneMultiStream;
     Fakes::MovingObject object1;
-    ON_CALL(object1, GetDistance(_,_)).WillByDefault(Return(10));
-    OWL::Interfaces::WorldObjects objectsList1{&object1};
+    OWL::Interfaces::LaneAssignments objectsList1{{OWL::LaneOverlap{45,55,0,0},&object1}};
     Fakes::MovingObject object2;
-    ON_CALL(object2, GetDistance(_,_)).WillByDefault(Return(110));
-    OWL::Interfaces::WorldObjects objectsList2{&object2};
+    OWL::Interfaces::LaneAssignments objectsList2{{OWL::LaneOverlap{95,105,0,0},&object2}};
     Fakes::MovingObject object3;
-    ON_CALL(object3, GetDistance(_,_)).WillByDefault(Return(110));
-    OWL::Interfaces::WorldObjects objectsList3{&object3};
+    OWL::Interfaces::LaneAssignments objectsList3{{OWL::LaneOverlap{95,105,0,0},&object3}};
     Fakes::Road road1;
     std::string idRoad1 = "Road1";
     ON_CALL(road1, GetId()).WillByDefault(ReturnRef(idRoad1));
     auto [node1, lane1] = laneMultiStream.AddRoot(100, true);
     ON_CALL(*lane1, GetRoad()).WillByDefault(ReturnRef(road1));
-    ON_CALL(*lane1, GetWorldObjects()).WillByDefault(ReturnRef(objectsList1));
+    ON_CALL(*lane1, GetWorldObjects(true)).WillByDefault(ReturnRef(objectsList1));
     Fakes::Road road2;
     std::string idRoad2 = "Road2";
     ON_CALL(road2, GetId()).WillByDefault(ReturnRef(idRoad2));
     auto [node2, lane2] = laneMultiStream.AddLane(200, false, *node1);
-    ON_CALL(*lane2, GetWorldObjects()).WillByDefault(ReturnRef(objectsList2));
+    ON_CALL(*lane2, GetWorldObjects(false)).WillByDefault(ReturnRef(objectsList2));
     ON_CALL(*lane2, GetRoad()).WillByDefault(ReturnRef(road2));
     Fakes::Road road3;
     std::string idRoad3 = "Road3";
     ON_CALL(road3, GetId()).WillByDefault(ReturnRef(idRoad3));
     auto [node3, lane3] = laneMultiStream.AddLane(300, true, *node1);
-    ON_CALL(*lane3, GetWorldObjects()).WillByDefault(ReturnRef(objectsList3));
+    ON_CALL(*lane3, GetWorldObjects(true)).WillByDefault(ReturnRef(objectsList3));
     ON_CALL(*lane3, GetRoad()).WillByDefault(ReturnRef(road3));
     Fakes::WorldData worldData;
     WorldDataQuery wdQuery(worldData);
 
-    auto result = wdQuery.GetObjectsOfTypeInRange<OWL::Interfaces::WorldObject>(laneMultiStream.Get(), 0, 1000);
+    auto result = wdQuery.GetObjectsOfTypeInRange<OWL::Interfaces::WorldObject>(laneMultiStream.Get(), 50, 200);
     std::vector<const OWL::Interfaces::WorldObject*> expectedResult1{&object1};
     std::vector<const OWL::Interfaces::WorldObject*> expectedResult2{&object1, &object2};
     std::vector<const OWL::Interfaces::WorldObject*> expectedResult3{&object1, &object3};
@@ -324,18 +321,19 @@ TEST(GetObjectsOfTypeInRange, OneObjectInTwoNodes_ReturnsObjectOnlyOnce)
     FakeLaneMultiStream laneMultiStream;
     Fakes::MovingObject object;
     ON_CALL(object, GetDistance(_,_)).WillByDefault(Return(100));
-    OWL::Interfaces::WorldObjects objectsList{&object};
+    OWL::Interfaces::LaneAssignments objectsList1{{OWL::LaneOverlap{100,100,0,0},&object}};
+    OWL::Interfaces::LaneAssignments objectsList2{{OWL::LaneOverlap{100,100,0,0},&object}};
     Fakes::Road road1;
     std::string idRoad1 = "Road1";
     ON_CALL(road1, GetId()).WillByDefault(ReturnRef(idRoad1));
     auto [node1, lane1] = laneMultiStream.AddRoot(100, true);
     ON_CALL(*lane1, GetRoad()).WillByDefault(ReturnRef(road1));
-    ON_CALL(*lane1, GetWorldObjects()).WillByDefault(ReturnRef(objectsList));
+    ON_CALL(*lane1, GetWorldObjects(true)).WillByDefault(ReturnRef(objectsList1));
     Fakes::Road road2;
     std::string idRoad2 = "Road2";
     ON_CALL(road2, GetId()).WillByDefault(ReturnRef(idRoad2));
     auto [node2, lane2] = laneMultiStream.AddLane(200, false, *node1);
-    ON_CALL(*lane2, GetWorldObjects()).WillByDefault(ReturnRef(objectsList));
+    ON_CALL(*lane2, GetWorldObjects(false)).WillByDefault(ReturnRef(objectsList2));
     ON_CALL(*lane2, GetRoad()).WillByDefault(ReturnRef(road2));
     Fakes::WorldData worldData;
     WorldDataQuery wdQuery(worldData);
@@ -351,23 +349,23 @@ TEST(GetObjectsOfTypeInRange, TwoObjectInTwoNodes_ReturnsObjectsInCorrectOrder)
     FakeLaneMultiStream laneMultiStream;
     Fakes::MovingObject object1;
     ON_CALL(object1, GetDistance(_,_)).WillByDefault(Return(10));
-    OWL::Interfaces::WorldObjects objectsList1{&object1};
+    OWL::Interfaces::LaneAssignments objectsList1{{OWL::LaneOverlap{10,10,0,0},&object1}};
     Fakes::MovingObject object2;
     ON_CALL(object2, GetDistance(_,_)).WillByDefault(Return(100));
     Fakes::MovingObject object3;
     ON_CALL(object3, GetDistance(_,_)).WillByDefault(Return(50));
-    OWL::Interfaces::WorldObjects objectsList2{&object2, &object3};
+    OWL::Interfaces::LaneAssignments objectsList2{{OWL::LaneOverlap{50,50,0,0},&object3}, {OWL::LaneOverlap{100,100,0,0},&object2}};
     Fakes::Road road1;
     std::string idRoad1 = "Road1";
     ON_CALL(road1, GetId()).WillByDefault(ReturnRef(idRoad1));
     auto [node1, lane1] = laneMultiStream.AddRoot(100, true);
     ON_CALL(*lane1, GetRoad()).WillByDefault(ReturnRef(road1));
-    ON_CALL(*lane1, GetWorldObjects()).WillByDefault(ReturnRef(objectsList1));
+    ON_CALL(*lane1, GetWorldObjects(true)).WillByDefault(ReturnRef(objectsList1));
     Fakes::Road road2;
     std::string idRoad2 = "Road2";
     ON_CALL(road2, GetId()).WillByDefault(ReturnRef(idRoad2));
     auto [node2, lane2] = laneMultiStream.AddLane(200, true, *node1);
-    ON_CALL(*lane2, GetWorldObjects()).WillByDefault(ReturnRef(objectsList2));
+    ON_CALL(*lane2, GetWorldObjects(true)).WillByDefault(ReturnRef(objectsList2));
     ON_CALL(*lane2, GetRoad()).WillByDefault(ReturnRef(road2));
     Fakes::WorldData worldData;
     WorldDataQuery wdQuery(worldData);
@@ -384,34 +382,34 @@ TEST(GetObjectsOfTypeInRange, ObjectsOutsideRange_ReturnsOnlyObjectsInRange)
     FakeLaneMultiStream laneMultiStream;
     Fakes::MovingObject object1;
     ON_CALL(object1, GetDistance(_,_)).WillByDefault(Return(10));
-    OWL::Interfaces::WorldObjects objectsList1{&object1};
+    OWL::Interfaces::LaneAssignments objectsList1{{OWL::LaneOverlap{10,10,0,0},&object1}};
     Fakes::MovingObject object2a;
     ON_CALL(object2a, GetDistance(_,_)).WillByDefault(Return(10));
     Fakes::MovingObject object2b;
     ON_CALL(object2b, GetDistance(_,_)).WillByDefault(Return(110));
-    OWL::Interfaces::WorldObjects objectsList2{&object2a, &object2b};
+    OWL::Interfaces::LaneAssignments objectsList2{{OWL::LaneOverlap{110,110,0,0},&object2b}, {OWL::LaneOverlap{10,10,0,0},&object2a}};
     Fakes::MovingObject object3a;
     ON_CALL(object3a, GetDistance(_,_)).WillByDefault(Return(110));
     Fakes::MovingObject object3b;
     ON_CALL(object3b, GetDistance(_,_)).WillByDefault(Return(160));
-    OWL::Interfaces::WorldObjects objectsList3{&object3a, &object3b};
+    OWL::Interfaces::LaneAssignments objectsList3{{OWL::LaneOverlap{110,110,0,0},&object3a}, {OWL::LaneOverlap{160,160,0,0},&object3b}};
     Fakes::Road road1;
     std::string idRoad1 = "Road1";
     ON_CALL(road1, GetId()).WillByDefault(ReturnRef(idRoad1));
     auto [node1, lane1] = laneMultiStream.AddRoot(100, true);
     ON_CALL(*lane1, GetRoad()).WillByDefault(ReturnRef(road1));
-    ON_CALL(*lane1, GetWorldObjects()).WillByDefault(ReturnRef(objectsList1));
+    ON_CALL(*lane1, GetWorldObjects(true)).WillByDefault(ReturnRef(objectsList1));
     Fakes::Road road2;
     std::string idRoad2 = "Road2";
     ON_CALL(road2, GetId()).WillByDefault(ReturnRef(idRoad2));
     auto [node2, lane2] = laneMultiStream.AddLane(200, false, *node1);
-    ON_CALL(*lane2, GetWorldObjects()).WillByDefault(ReturnRef(objectsList2));
+    ON_CALL(*lane2, GetWorldObjects(false)).WillByDefault(ReturnRef(objectsList2));
     ON_CALL(*lane2, GetRoad()).WillByDefault(ReturnRef(road2));
     Fakes::Road road3;
     std::string idRoad3 = "Road3";
     ON_CALL(road3, GetId()).WillByDefault(ReturnRef(idRoad3));
     auto [node3, lane3] = laneMultiStream.AddLane(300, true, *node1);
-    ON_CALL(*lane3, GetWorldObjects()).WillByDefault(ReturnRef(objectsList3));
+    ON_CALL(*lane3, GetWorldObjects(true)).WillByDefault(ReturnRef(objectsList3));
     ON_CALL(*lane3, GetRoad()).WillByDefault(ReturnRef(road3));
     Fakes::WorldData worldData;
     WorldDataQuery wdQuery(worldData);
@@ -1895,11 +1893,11 @@ public:
 
 TEST_F(GetMovingObjectsInRangeOfJunctionConnection, NoAgents_ReturnsEmptyVector)
 {
-    OWL::Interfaces::WorldObjects emptyWorldObjects;
-    ON_CALL(connectingLane1, GetWorldObjects()).WillByDefault(ReturnRef(emptyWorldObjects));
-    ON_CALL(connectingLane2, GetWorldObjects()).WillByDefault(ReturnRef(emptyWorldObjects));
-    ON_CALL(incomingLane1, GetWorldObjects()).WillByDefault(ReturnRef(emptyWorldObjects));
-    ON_CALL(incomingLane2, GetWorldObjects()).WillByDefault(ReturnRef(emptyWorldObjects));
+    OWL::Interfaces::LaneAssignments emptyWorldObjects;
+    ON_CALL(connectingLane1, GetWorldObjects(true)).WillByDefault(ReturnRef(emptyWorldObjects));
+    ON_CALL(connectingLane2, GetWorldObjects(true)).WillByDefault(ReturnRef(emptyWorldObjects));
+    ON_CALL(incomingLane1, GetWorldObjects(true)).WillByDefault(ReturnRef(emptyWorldObjects));
+    ON_CALL(incomingLane2, GetWorldObjects(true)).WillByDefault(ReturnRef(emptyWorldObjects));
 
     WorldDataQuery wdQuery(worldData);
 
@@ -1912,12 +1910,12 @@ TEST_F(GetMovingObjectsInRangeOfJunctionConnection, OneAgentsOnConnector_Returns
 {
     OWL::Fakes::MovingObject object;
     ON_CALL(object, GetDistance(_,"Connection")).WillByDefault(Return(5.0));
-    OWL::Interfaces::WorldObjects worldObjectsOnConnector{&object};
-    OWL::Interfaces::WorldObjects emptyWorldObjects;
-    ON_CALL(connectingLane1, GetWorldObjects()).WillByDefault(ReturnRef(emptyWorldObjects));
-    ON_CALL(connectingLane2, GetWorldObjects()).WillByDefault(ReturnRef(worldObjectsOnConnector));
-    ON_CALL(incomingLane1, GetWorldObjects()).WillByDefault(ReturnRef(emptyWorldObjects));
-    ON_CALL(incomingLane2, GetWorldObjects()).WillByDefault(ReturnRef(emptyWorldObjects));
+    OWL::Interfaces::LaneAssignments worldObjectsOnConnector{{OWL::LaneOverlap{5,5,0,0},&object}};
+    OWL::Interfaces::LaneAssignments emptyWorldObjects;
+    ON_CALL(connectingLane1, GetWorldObjects(true)).WillByDefault(ReturnRef(emptyWorldObjects));
+    ON_CALL(connectingLane2, GetWorldObjects(true)).WillByDefault(ReturnRef(worldObjectsOnConnector));
+    ON_CALL(incomingLane1, GetWorldObjects(true)).WillByDefault(ReturnRef(emptyWorldObjects));
+    ON_CALL(incomingLane2, GetWorldObjects(true)).WillByDefault(ReturnRef(emptyWorldObjects));
 
     WorldDataQuery wdQuery(worldData);
 
@@ -1932,12 +1930,12 @@ TEST_F(GetMovingObjectsInRangeOfJunctionConnection, TwoAgentsOnInComingRoad_Retu
     OWL::Fakes::MovingObject objectInRange, objectOutsideRange;
     ON_CALL(objectInRange, GetDistance(_,"IncomingRoad")).WillByDefault(Return(950.0));
     ON_CALL(objectOutsideRange, GetDistance(_,"IncomingRoad")).WillByDefault(Return(850.0));
-    OWL::Interfaces::WorldObjects worldObjectsOnInComingRoad{&objectInRange, &objectOutsideRange};
-    OWL::Interfaces::WorldObjects emptyWorldObjects;
-    ON_CALL(connectingLane1, GetWorldObjects()).WillByDefault(ReturnRef(emptyWorldObjects));
-    ON_CALL(connectingLane2, GetWorldObjects()).WillByDefault(ReturnRef(emptyWorldObjects));
-    ON_CALL(incomingLane1, GetWorldObjects()).WillByDefault(ReturnRef(worldObjectsOnInComingRoad));
-    ON_CALL(incomingLane2, GetWorldObjects()).WillByDefault(ReturnRef(emptyWorldObjects));
+    OWL::Interfaces::LaneAssignments worldObjectsOnInComingRoad{{OWL::LaneOverlap{950,950,0,0},&objectInRange}, {OWL::LaneOverlap{850,850,0,0},&objectOutsideRange}};
+    OWL::Interfaces::LaneAssignments emptyWorldObjects;
+    ON_CALL(connectingLane1, GetWorldObjects(true)).WillByDefault(ReturnRef(emptyWorldObjects));
+    ON_CALL(connectingLane2, GetWorldObjects(true)).WillByDefault(ReturnRef(emptyWorldObjects));
+    ON_CALL(incomingLane1, GetWorldObjects(true)).WillByDefault(ReturnRef(worldObjectsOnInComingRoad));
+    ON_CALL(incomingLane2, GetWorldObjects(true)).WillByDefault(ReturnRef(emptyWorldObjects));
 
     WorldDataQuery wdQuery(worldData);
 
@@ -1951,12 +1949,12 @@ TEST_F(GetMovingObjectsInRangeOfJunctionConnection, OneAgentsOnBothConnectors_Re
 {
     OWL::Fakes::MovingObject object;
     ON_CALL(object, GetDistance(_,"Connection")).WillByDefault(Return(5.0));
-    OWL::Interfaces::WorldObjects worldObjectsOnConnector{&object};
-    OWL::Interfaces::WorldObjects emptyWorldObjects;
-    ON_CALL(connectingLane1, GetWorldObjects()).WillByDefault(ReturnRef(worldObjectsOnConnector));
-    ON_CALL(connectingLane2, GetWorldObjects()).WillByDefault(ReturnRef(worldObjectsOnConnector));
-    ON_CALL(incomingLane1, GetWorldObjects()).WillByDefault(ReturnRef(emptyWorldObjects));
-    ON_CALL(incomingLane2, GetWorldObjects()).WillByDefault(ReturnRef(emptyWorldObjects));
+    OWL::Interfaces::LaneAssignments worldObjectsOnConnector{{OWL::LaneOverlap{5,5,0,0},&object}};
+    OWL::Interfaces::LaneAssignments emptyWorldObjects;
+    ON_CALL(connectingLane1, GetWorldObjects(true)).WillByDefault(ReturnRef(worldObjectsOnConnector));
+    ON_CALL(connectingLane2, GetWorldObjects(true)).WillByDefault(ReturnRef(worldObjectsOnConnector));
+    ON_CALL(incomingLane1, GetWorldObjects(true)).WillByDefault(ReturnRef(emptyWorldObjects));
+    ON_CALL(incomingLane2, GetWorldObjects(true)).WillByDefault(ReturnRef(emptyWorldObjects));
 
     WorldDataQuery wdQuery(worldData);
 
@@ -1970,12 +1968,12 @@ TEST_F(GetMovingObjectsInRangeOfJunctionConnection, OneAgentsOnBothIncomingRoads
 {
     OWL::Fakes::MovingObject object;
     ON_CALL(object, GetDistance(_,"IncomingRoad")).WillByDefault(Return(950.0));
-    OWL::Interfaces::WorldObjects worldObjectsOnInComingRoad{&object};
-    OWL::Interfaces::WorldObjects emptyWorldObjects;
-    ON_CALL(connectingLane1, GetWorldObjects()).WillByDefault(ReturnRef(emptyWorldObjects));
-    ON_CALL(connectingLane2, GetWorldObjects()).WillByDefault(ReturnRef(emptyWorldObjects));
-    ON_CALL(incomingLane1, GetWorldObjects()).WillByDefault(ReturnRef(worldObjectsOnInComingRoad));
-    ON_CALL(incomingLane2, GetWorldObjects()).WillByDefault(ReturnRef(worldObjectsOnInComingRoad));
+    OWL::Interfaces::LaneAssignments worldObjectsOnInComingRoad{{OWL::LaneOverlap{950,950,0,0},&object}};
+    OWL::Interfaces::LaneAssignments emptyWorldObjects;
+    ON_CALL(connectingLane1, GetWorldObjects(true)).WillByDefault(ReturnRef(emptyWorldObjects));
+    ON_CALL(connectingLane2, GetWorldObjects(true)).WillByDefault(ReturnRef(emptyWorldObjects));
+    ON_CALL(incomingLane1, GetWorldObjects(true)).WillByDefault(ReturnRef(worldObjectsOnInComingRoad));
+    ON_CALL(incomingLane2, GetWorldObjects(true)).WillByDefault(ReturnRef(worldObjectsOnInComingRoad));
 
     WorldDataQuery wdQuery(worldData);
 
@@ -1989,12 +1987,12 @@ TEST_F(GetMovingObjectsInRangeOfJunctionConnection, OneAgentsOnConnectorAndIncom
 {
     OWL::Fakes::MovingObject object;
     ON_CALL(object, GetDistance(_,_)).WillByDefault(Return(5.0));
-    OWL::Interfaces::WorldObjects worldObjectsOnConnector{&object};
-    OWL::Interfaces::WorldObjects emptyWorldObjects;
-    ON_CALL(connectingLane1, GetWorldObjects()).WillByDefault(ReturnRef(worldObjectsOnConnector));
-    ON_CALL(connectingLane2, GetWorldObjects()).WillByDefault(ReturnRef(emptyWorldObjects));
-    ON_CALL(incomingLane1, GetWorldObjects()).WillByDefault(ReturnRef(worldObjectsOnConnector));
-    ON_CALL(incomingLane2, GetWorldObjects()).WillByDefault(ReturnRef(emptyWorldObjects));
+    OWL::Interfaces::LaneAssignments worldObjectsOnConnector{{OWL::LaneOverlap{5,5,0,0},&object}};
+    OWL::Interfaces::LaneAssignments emptyWorldObjects;
+    ON_CALL(connectingLane1, GetWorldObjects(true)).WillByDefault(ReturnRef(worldObjectsOnConnector));
+    ON_CALL(connectingLane2, GetWorldObjects(true)).WillByDefault(ReturnRef(emptyWorldObjects));
+    ON_CALL(incomingLane1, GetWorldObjects(true)).WillByDefault(ReturnRef(worldObjectsOnConnector));
+    ON_CALL(incomingLane2, GetWorldObjects(true)).WillByDefault(ReturnRef(emptyWorldObjects));
 
     WorldDataQuery wdQuery(worldData);
 
@@ -2009,13 +2007,13 @@ TEST_F(GetMovingObjectsInRangeOfJunctionConnection, OneAgentsOnEachConnector_Ret
     OWL::Fakes::MovingObject object1, object2;
     ON_CALL(object1, GetDistance(_,"Connection")).WillByDefault(Return(5.0));
     ON_CALL(object2, GetDistance(_,"Connection")).WillByDefault(Return(5.0));
-    OWL::Interfaces::WorldObjects worldObjectsOnConnector1{&object1};
-    OWL::Interfaces::WorldObjects worldObjectsOnConnector2{&object2};
-    OWL::Interfaces::WorldObjects emptyWorldObjects;
-    ON_CALL(connectingLane1, GetWorldObjects()).WillByDefault(ReturnRef(worldObjectsOnConnector1));
-    ON_CALL(connectingLane2, GetWorldObjects()).WillByDefault(ReturnRef(worldObjectsOnConnector2));
-    ON_CALL(incomingLane1, GetWorldObjects()).WillByDefault(ReturnRef(emptyWorldObjects));
-    ON_CALL(incomingLane2, GetWorldObjects()).WillByDefault(ReturnRef(emptyWorldObjects));
+    OWL::Interfaces::LaneAssignments worldObjectsOnConnector1{{OWL::LaneOverlap{5,5,0,0},&object1}};
+    OWL::Interfaces::LaneAssignments worldObjectsOnConnector2{{OWL::LaneOverlap{5,5,0,0},&object2}};
+    OWL::Interfaces::LaneAssignments emptyWorldObjects;
+    ON_CALL(connectingLane1, GetWorldObjects(true)).WillByDefault(ReturnRef(worldObjectsOnConnector1));
+    ON_CALL(connectingLane2, GetWorldObjects(true)).WillByDefault(ReturnRef(worldObjectsOnConnector2));
+    ON_CALL(incomingLane1, GetWorldObjects(true)).WillByDefault(ReturnRef(emptyWorldObjects));
+    ON_CALL(incomingLane2, GetWorldObjects(true)).WillByDefault(ReturnRef(emptyWorldObjects));
 
     WorldDataQuery wdQuery(worldData);
 
@@ -3121,6 +3119,60 @@ TEST(GetRelativeLanes, BranchingTree_ReturnsLanesOfWayToNode)
     EXPECT_THAT(result3.at(1).lanes.at(1).type, Eq(LaneType::Stop));
     EXPECT_THAT(result3.at(1).lanes.at(1).predecessor.value(), Eq(-1));
     EXPECT_THAT(result3.at(1).lanes.at(1).successor, Eq(std::nullopt));
+}
+
+TEST(GetLaneCurvature, OnLaneStreamReturnsCorrectCurvature)
+{
+    OWL::Fakes::WorldData worldData;
+    FakeLaneMultiStream laneStream;
+    auto [node1, lane1] = laneStream.AddRoot(100.0, true);
+    auto [node2, lane2] = laneStream.AddLane(150.0, true, *node1);
+    auto [node3, lane3] = laneStream.AddLane(200.0, false, *node1);
+
+    ON_CALL(*lane2, GetCurvature(DoubleEq(50.0))).WillByDefault(Return(0.1));
+    ON_CALL(*lane3, GetCurvature(DoubleEq(150.0))).WillByDefault(Return(0.2));
+
+    WorldDataQuery wdQuery{worldData};
+    auto result = wdQuery.GetLaneCurvature(laneStream.Get(), 150.0);
+
+    EXPECT_THAT(result.at(node2->roadGraphVertex), Eq(0.1));
+    EXPECT_THAT(result.at(node3->roadGraphVertex), Eq(0.2));
+}
+
+TEST(GetLaneWidth, OnLaneStreamReturnsCorrectCurvature)
+{
+    OWL::Fakes::WorldData worldData;
+    FakeLaneMultiStream laneStream;
+    auto [node1, lane1] = laneStream.AddRoot(100.0, true);
+    auto [node2, lane2] = laneStream.AddLane(150.0, true, *node1);
+    auto [node3, lane3] = laneStream.AddLane(200.0, false, *node1);
+
+    ON_CALL(*lane2, GetWidth(DoubleEq(50.0))).WillByDefault(Return(1.1));
+    ON_CALL(*lane3, GetWidth(DoubleEq(150.0))).WillByDefault(Return(2.2));
+
+    WorldDataQuery wdQuery{worldData};
+    auto result = wdQuery.GetLaneWidth(laneStream.Get(), 150.0);
+
+    EXPECT_THAT(result.at(node2->roadGraphVertex), Eq(1.1));
+    EXPECT_THAT(result.at(node3->roadGraphVertex), Eq(2.2));
+}
+
+TEST(GetLaneDirection, OnLaneStreamReturnsCorrectCurvature)
+{
+    OWL::Fakes::WorldData worldData;
+    FakeLaneMultiStream laneStream;
+    auto [node1, lane1] = laneStream.AddRoot(100.0, true);
+    auto [node2, lane2] = laneStream.AddLane(150.0, true, *node1);
+    auto [node3, lane3] = laneStream.AddLane(200.0, false, *node1);
+
+    ON_CALL(*lane2, GetDirection(DoubleEq(50.0))).WillByDefault(Return(0.1));
+    ON_CALL(*lane3, GetDirection(DoubleEq(150.0))).WillByDefault(Return(0.2));
+
+    WorldDataQuery wdQuery{worldData};
+    auto result = wdQuery.GetLaneDirection(laneStream.Get(), 150.0);
+
+    EXPECT_THAT(result.at(node2->roadGraphVertex), Eq(0.1));
+    EXPECT_THAT(result.at(node3->roadGraphVertex), Eq(0.2));
 }
 
 class LaneStreamTest_Data

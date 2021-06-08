@@ -13,14 +13,13 @@
 #pragma once
 
 #include <algorithm>
-#include <qglobal.h>
 #include "include/worldInterface.h"
 #include "AgentNetwork.h"
 #include "SceneryConverter.h"
 #include "include/parameterInterface.h"
 #include "Localization.h"
 #include "include/dataStoreInterface.h"
-
+#include "EntityRepository.h"
 #include "WorldData.h"
 #include "WorldDataQuery.h"
 
@@ -100,7 +99,12 @@ public:
 
     virtual ~WorldImplementation() override;
 
-    bool AddAgent(int id, AgentInterface* agent) override;
+    bool AddAgent(int id, AgentInterface* agent) override
+    {
+        throw std::runtime_error("WorldImplementation::AddAgent: Deprecated method not implemented (see worldInterface.h)");
+    }
+
+    void RegisterAgent(AgentInterface* agent) override;
     AgentInterface* GetAgent(int id) const override;
     const std::vector<const WorldObjectInterface*>& GetWorldObjects() const override;
     const std::map<int, AgentInterface *> &GetAgents() const override;
@@ -130,7 +134,12 @@ public:
 
     bool CreateScenery(SceneryInterface* scenery, const openScenario::EnvironmentAction& environment) override;
 
-    AgentInterface* CreateAgentAdapterForAgent() override;
+    AgentInterface* CreateAgentAdapterForAgent() override
+    {
+        throw std::runtime_error("WorldImplementation::CreateAgentAdapterForAgent: Deprecated method not implemented (see worldInterface.h)");
+    }
+
+    std::unique_ptr<AgentInterface> CreateAgentAdapter(openpass::type::FlatParameter parameter) override;
 
     AgentInterface* GetEgoAgent() override;
 
@@ -142,16 +151,20 @@ public:
     RouteQueryResult<std::vector<const WorldObjectInterface*>> GetObjectsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance,
                                                                                  double backwardRange, double forwardRange) const override;
     std::vector<const AgentInterface*> GetAgentsInRangeOfJunctionConnection(std::string connectingRoadId, double range) const override;
-    
+
     double GetDistanceToConnectorEntrance(const ObjectPosition position, std::string intersectingConnectorId, int intersectingLaneId, std::string ownConnectorId) const override;
     double GetDistanceToConnectorDeparture(const ObjectPosition position, std::string intersectingConnectorId, int intersectingLaneId, std::string ownConnectorId) const override;
-    
+
     Position LaneCoord2WorldCoord(double distanceOnLane, double offset, std::string roadId,
                                           int laneId) const override;
 
+    std::map<const std::string, GlobalRoadPosition> WorldCoord2LaneCoord(double x, double y, double heading) const override;
+
     bool IsSValidOnLane(std::string roadId, int laneId, double distance) override;
 
-    bool IsDirectionalRoadExisting(const std::string& roadId, bool inOdDirection) override;
+    bool IsDirectionalRoadExisting(const std::string& roadId, bool inOdDirection) const override;
+
+    bool IsLaneTypeValid(const std::string &roadId, const int laneId, const double distanceOnLane, const LaneTypes& validLaneTypes) override;
 
     double GetLaneCurvature(std::string roadId, int laneId, double position) const override;
     RouteQueryResult<std::optional<double> > GetLaneCurvature(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double position, double distance) const override;
@@ -169,6 +182,8 @@ public:
                                   double maximumSearchLength, const LaneTypes& laneTypes) const override;
 
     RouteQueryResult<LongitudinalDistance> GetDistanceBetweenObjects(const RoadGraph& roadGraph, RoadGraphVertex startNode, const ObjectPosition& objectPos, const std::optional<double> objectReferenceS, const ObjectPosition& targetObjectPos) const override;
+
+    LaneSections GetLaneSections(const std::string& roadId) const;
 
     bool IntersectsWithAgent(double x, double y, double rotation, double length, double width, double center) override;
 
@@ -199,7 +214,7 @@ public:
     std::vector<IntersectingConnection> GetIntersectingConnections(std::string connectingRoadId) const override;
 
     std::vector<JunctionConnectorPriority> GetPrioritiesOnJunction(std::string junctionId) const override;
-    
+
     RoadNetworkElement GetRoadSuccessor(std::string roadId) const override;
 
     RoadNetworkElement GetRoadPredecessor(std::string roadId) const override;
@@ -212,71 +227,55 @@ public:
 
     virtual void *GetGlobalDrivingView() override
     {
-        throw std::runtime_error("not implemented");
+        throw std::runtime_error("WorldImplementation::GetGlobalDrivingView not implemented");
     }
     virtual void *GetGlobalObjects() override
     {
-        throw std::runtime_error("not implemented");
+        throw std::runtime_error("WorldImplementation::GetGlobalObjects not implemented");
     }
-    virtual void SetTimeOfDay(int timeOfDay) override
+    virtual void SetTimeOfDay([[maybe_unused]] int timeOfDay) override
     {
-        Q_UNUSED(timeOfDay);
-
-        throw std::runtime_error("not implemented");
+        throw std::runtime_error("WorldImplementation::SetTimeOfDay not implemented");
     }
-    virtual void SetWeekday(Weekday weekday) override
+    virtual void SetWeekday([[maybe_unused]]Weekday weekday) override
     {
-        Q_UNUSED(weekday);
-
-        throw std::runtime_error("not implemented");
+        throw std::runtime_error("WorldImplementation::SetWeekday not implemented");
     }
     virtual Weekday GetWeekday() const override
     {
-        throw std::runtime_error("not implemented");
+        throw std::runtime_error("WorldImplementation::GetWeekday not implemented");
     }
-    virtual void SetParameter(WorldParameter *worldParameter) override
+    virtual void SetParameter([[maybe_unused]]WorldParameter *worldParameter) override
     {
-        Q_UNUSED(worldParameter);
-
-        throw std::runtime_error("not implemented");
+        throw std::runtime_error("WorldImplementation::SetParameter not implemented");
     }
     virtual bool CreateGlobalDrivingView() override
     {
-        throw std::runtime_error("not implemented");
+        throw std::runtime_error("WorldImplementation::CreateGlobalDrivingView not implemented");
     }
     virtual const AgentInterface *GetSpecialAgent() override
     {
-        throw std::runtime_error("not implemented");
+        throw std::runtime_error("WorldImplementation::GetSpecialAgent not implemented");
     }
-    virtual const AgentInterface *GetLastCarInlane(int laneNumber) override
+    virtual const AgentInterface *GetLastCarInlane([[maybe_unused]]int laneNumber) override
     {
-        Q_UNUSED(laneNumber);
-
-        throw std::runtime_error("not implemented");
+        throw std::runtime_error("WorldImplementation::GetLastCarInlane not implemented");
     }
     virtual const AgentInterface *GetBicycle() const override
     {
-        throw std::runtime_error("not implemented");
+        throw std::runtime_error("WorldImplementation::GetBicycle not implemented");
     }
-    virtual void QueueAgentUpdate(std::function<void(double)> func,
-                                  double val) override
+    virtual void QueueAgentUpdate([[maybe_unused]] std::function<void(double)> func, [[maybe_unused]] double val) override
     {
-        Q_UNUSED(func);
-        Q_UNUSED(val);
-
-        throw std::runtime_error("not implemented");
+        throw std::runtime_error("WorldImplementation::QueueAgentUpdate not implemented");
     }
-    virtual bool CreateWorldScenery(const  std::string &sceneryFilename) override
+    virtual bool CreateWorldScenery([[maybe_unused]] const std::string &sceneryFilename) override
     {
-        Q_UNUSED(sceneryFilename);
-
-        throw std::runtime_error("not implemented");
+        throw std::runtime_error("WorldImplementation::CreateWorldScenery not implemented");
     }
-    virtual bool CreateWorldScenario(const  std::string &scenarioFilename) override
+    virtual bool CreateWorldScenario([[maybe_unused]] const std::string &scenarioFilename) override
     {
-        Q_UNUSED(scenarioFilename);
-
-        throw std::runtime_error("not implemented");
+        throw std::runtime_error("WorldImplementation::CreateWorldScenario not implemented");
     }
 protected:
     //-----------------------------------------------------------------------------
@@ -326,4 +325,6 @@ private:
     std::unordered_map<const OWL::Interfaces::MovingObject*, TrafficObjectInterface*> stationaryObjectMapping{{nullptr, nullptr}};
 
     DataStoreWriteInterface* dataStore;
+    openpass::entity::Repository repository;
+    std::unique_ptr<SceneryConverter> sceneryConverter;
 };
