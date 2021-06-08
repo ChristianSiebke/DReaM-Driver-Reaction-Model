@@ -14,6 +14,7 @@
 #include "include/parameterInterface.h"
 #include "include/worldInterface.h"
 #include "common/globalDefinitions.h"
+#include "common/openScenarioDefinitions.h"
 
 class FakeWorld : public WorldInterface
 {

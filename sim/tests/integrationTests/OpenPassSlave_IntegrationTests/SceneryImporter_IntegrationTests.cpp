@@ -53,6 +53,7 @@ struct TESTSCENERY_FACTORY
     SimulationSlave::WorldBinding worldBinding;
     SimulationSlave::World world;
     Scenery scenery;
+    openScenario::EnvironmentAction environment;
 
     TESTSCENERY_FACTORY() :
         worldBinding(libraryName, &callbacks, &stochastics, &fakeDataStore),
@@ -74,7 +75,7 @@ struct TESTSCENERY_FACTORY
             return false;
         }
 
-        if (!(world.CreateScenery(&scenery)))
+        if (!(world.CreateScenery(&scenery, environment)))
         {
             return false;
         }

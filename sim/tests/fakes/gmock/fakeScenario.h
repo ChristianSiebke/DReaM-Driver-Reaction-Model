@@ -54,4 +54,8 @@ public:
                  void(const double));
     MOCK_CONST_METHOD0(GetEntities,
                        const std::vector<ScenarioEntity>&());
+    MOCK_METHOD0(GetEnvironment,
+                openScenario::EnvironmentAction ());
+    MOCK_METHOD1(SetEnvironment,
+                 void (const openScenario::EnvironmentAction ));
 };

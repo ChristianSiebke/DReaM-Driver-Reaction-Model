@@ -24,6 +24,7 @@
 #include "include/roadInterface/junctionInterface.h"
 #include "include/worldInterface.h"
 #include "include/callbackInterface.h"
+#include "common/openScenarioDefinitions.h"
 
 #include "osi3/osi_groundtruth.pb.h"
 #include "osi3/osi_sensorview.pb.h"
