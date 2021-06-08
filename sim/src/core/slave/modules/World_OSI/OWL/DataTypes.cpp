@@ -1789,6 +1789,7 @@ const Interfaces::LaneAssignments& Lane::LaneAssignmentCollector::Get(bool downs
     {
         return upstreamOrderAssignments;
     }
+}
 
 TrafficLight::TrafficLight(osi3::TrafficLight *osiLightRed, osi3::TrafficLight *osiLightYellow, osi3::TrafficLight *osiLightGreen) :
     osiLightRed(osiLightRed),

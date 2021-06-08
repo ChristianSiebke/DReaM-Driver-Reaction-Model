@@ -121,8 +121,11 @@ public:
     //! \param odId          OpenDRIVE Id
     virtual Interfaces::TrafficSign& AddTrafficSign(const Id id, const std::string odId) = 0;
 
-    //!Creates a new TrafficTraffic and returns it
-    virtual Interfaces::TrafficLight& AddTrafficLight(const std::string odId, bool withYellow) = 0;
+    //!Creates a new TrafficLight and returns it
+    //! \param Id            Unique ID
+    //! \param odId          OpenDRIVE Id
+    //! \param withYellow    flag indication wether this traffic light has a yellow bulb
+    virtual Interfaces::TrafficLight& AddTrafficLight(const Id id, const std::string odId, bool withYellow) = 0;
 
     //!Creates a new RoadMarking and returns it
     //! \param Id            Unique ID
@@ -446,7 +449,7 @@ public:
     Interfaces::MovingObject& AddMovingObject(const Id id, void* linkedObject) override;
     Interfaces::StationaryObject& AddStationaryObject(const Id id, void* linkedObject) override;
     Interfaces::TrafficSign& AddTrafficSign(const Id id, const std::string odId) override;
-    Interfaces::TrafficLight& AddTrafficLight(const std::string odId, bool withYellow) override;
+    Interfaces::TrafficLight& AddTrafficLight(const Id id, const std::string odId, bool withYellow) override;
     Interfaces::RoadMarking& AddRoadMarking(const Id id) override;
 
     void AssignTrafficSignToLane(OWL::Id laneId, Interfaces::TrafficSign &trafficSign) override;

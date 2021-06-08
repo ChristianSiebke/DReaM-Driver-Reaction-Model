@@ -920,34 +920,34 @@ void SceneryConverter::CreateRoadMarking(RoadSignalInterface *signal, Position p
     }
 }
 
-void SceneryConverter::CreateTrafficLight(RoadSignalInterface* signal, Position position, const OWL::Interfaces::Lanes& lanes, bool withYellow)
+void SceneryConverter::CreateRoadMarking(RoadObjectInterface* object, Position position, const OWL::Interfaces::Lanes& lanes)
 {
-    OWL::Interfaces::TrafficLight& trafficLight = worldData.AddTrafficLight(signal->GetId(), withYellow);
+    const auto id = repository.Register(openpass::utils::GetEntityInfo(*object));
+    OWL::Interfaces::RoadMarking& roadMarking = worldData.AddRoadMarking(id);
 
-    trafficLight.SetS(signal->GetS());
+    roadMarking.SetS(object->GetS());
 
-    if (!trafficLight.SetSpecification(signal, position))
+    if (!roadMarking.SetSpecification(object, position))
     {
-        const std::string message = "Unsupported traffic sign type: " + signal->GetType() + (" (id: " + signal->GetId() + ")");
+        const std::string message = "Unsupported traffic sign type: (id: " + object->GetId() + ")";
         LOG(CbkLogLevel::Warning, message);
         return;
     }
 
-    trafficLight.SetState(CommonTrafficLight::State::Red);
-
     for (auto lane : lanes)
     {
         OWL::OdId odId = worldData.GetLaneIdMapping().at(lane->GetId());
-        if (signal->IsValidForLane(odId))
+        if (object->IsValidForLane(odId))
         {
-            worldData.AssignTrafficLightToLane(lane->GetId(), trafficLight);
+            worldData.AssignRoadMarkingToLane(lane->GetId(), roadMarking);
         }
     }
 }
 
 void SceneryConverter::CreateTrafficLight(RoadSignalInterface* signal, Position position, const OWL::Interfaces::Lanes& lanes, bool withYellow)
 {
-    OWL::Interfaces::TrafficLight& trafficLight = worldData.AddTrafficLight(signal->GetId(), withYellow);
+    const auto id = repository.Register(openpass::utils::GetEntityInfo(*signal));
+    OWL::Interfaces::TrafficLight& trafficLight = worldData.AddTrafficLight(id, signal->GetId(), withYellow);
 
     trafficLight.SetS(signal->GetS());
 
