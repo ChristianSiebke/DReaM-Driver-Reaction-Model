@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017 in-tech GmbH
+* Copyright (c) 2017, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -23,6 +23,7 @@
 #include "schedulerTasks.h"
 
 using ::testing::_;
+using ::testing::ByMove;
 using ::testing::Contains;
 using ::testing::Eq;
 using ::testing::Field;
@@ -36,9 +37,11 @@ using namespace openpass::scheduling;
 
 TEST(AgentParser, RecurringComponent_IsParsed)
 {
-    NiceMock<FakeWorld> fakeWorld;
     NiceMock<FakeAgentBlueprint> fakeAgentBlueprint;
-    Agent testAgent(0, &fakeWorld);
+    NiceMock<FakeWorld> fakeWorld;
+    EXPECT_CALL(fakeWorld, CreateAgentAdapter(_)).WillOnce(Return(ByMove(std::make_unique<FakeAgent>())));
+
+    Agent testAgent(&fakeWorld, fakeAgentBlueprint);
 
     Channel testChannel(1);
     Component testTargetComponent("", &testAgent);
@@ -73,9 +76,11 @@ TEST(AgentParser, RecurringComponent_IsParsed)
 
 TEST(AgentParser, ThreeRecurringComponents_AreParsed)
 {
-    NiceMock<FakeWorld> fakeWorld;
     NiceMock<FakeAgentBlueprint> fakeAgentBlueprint;
-    Agent testAgent(0, &fakeWorld);
+    NiceMock<FakeWorld> fakeWorld;
+    EXPECT_CALL(fakeWorld, CreateAgentAdapter(_)).WillOnce(Return(ByMove(std::make_unique<FakeAgent>())));
+
+    Agent testAgent(&fakeWorld, fakeAgentBlueprint);
 
     Channel testChannel(1);
     Component testTargetComponent("", &testAgent);
@@ -128,9 +133,11 @@ TEST(AgentParser, ThreeRecurringComponents_AreParsed)
 
 TEST(AgentParser, NonRecurringComponent_IsParsed)
 {
-    NiceMock<FakeWorld> fakeWorld;
     NiceMock<FakeAgentBlueprint> fakeAgentBlueprint;
-    Agent testAgent(0, &fakeWorld);
+    NiceMock<FakeWorld> fakeWorld;
+    EXPECT_CALL(fakeWorld, CreateAgentAdapter(_)).WillOnce(Return(ByMove(std::make_unique<FakeAgent>())));
+
+    Agent testAgent(&fakeWorld, fakeAgentBlueprint);
 
     Channel testChannel(1);
     Component testTargetComponent("", &testAgent);
@@ -164,9 +171,11 @@ TEST(AgentParser, NonRecurringComponent_IsParsed)
 
 TEST(AgentParser, MixedComponents_AreParsedWithRightTaskType)
 {
-    NiceMock<FakeWorld> fakeWorld;
     NiceMock<FakeAgentBlueprint> fakeAgentBlueprint;
-    Agent testAgent(0, &fakeWorld);
+    NiceMock<FakeWorld> fakeWorld;
+    EXPECT_CALL(fakeWorld, CreateAgentAdapter(_)).WillOnce(Return(ByMove(std::make_unique<FakeAgent>())));
+
+    Agent testAgent(&fakeWorld, fakeAgentBlueprint);
 
     Channel testChannel(1);
     Component testTargetComponent("", &testAgent);

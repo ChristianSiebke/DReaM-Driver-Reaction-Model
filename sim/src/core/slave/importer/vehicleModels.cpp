@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -28,7 +28,12 @@ VehicleModelMap &VehicleModels::GetVehicleModelMap()
 
 VehicleModelParameters VehicleModels::GetVehicleModel(std::string vehicleModelType, const openScenario::Parameters& parameters)
 {
-    return vehicleModelMap.at(vehicleModelType).Get(parameters);
+    auto find_result = vehicleModelMap.find(vehicleModelType);
+    if (find_result == vehicleModelMap.cend())
+    {
+        throw std::runtime_error("No VehicleModel with name \"" + vehicleModelType + "\" defined in VehicleCatalog and PedestrianCatalog");
+    }
+    return find_result->second.Get(parameters);
 }
 
 } //namespace Configuration

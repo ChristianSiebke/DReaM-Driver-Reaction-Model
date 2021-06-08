@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2020 BMW AG
 *
 * This program and the accompanying materials are made
@@ -14,15 +14,18 @@
 //-----------------------------------------------------------------------------
 
 #include "ManipulatorExport.h"
-#include "include/callbackInterface.h"
-#include "include/eventNetworkInterface.h"
-#include "common/openScenarioDefinitions.h"
+
+#include "AcquirePositionManipulator.h"
 #include "CollisionManipulator.h"
+#include "CustomCommandFactory.h"
+#include "DefaultCustomCommandAction.h"
+#include "LaneChangeManipulator.h"
 #include "RemoveAgentsManipulator.h"
 #include "SpeedActionManipulator.h"
 #include "TrajectoryManipulator.h"
-#include "LaneChangeManipulator.h"
-#include "CustomCommandFactory.h"
+#include "common/openScenarioDefinitions.h"
+#include "include/callbackInterface.h"
+#include "include/eventNetworkInterface.h"
 
 class PublisherInterface;
 namespace openpass::publisher {
@@ -55,23 +58,32 @@ extern "C" MANIPULATOR_SHARED_EXPORT ManipulatorInterface* OpenPASS_CreateInstan
 
             if (std::holds_alternative<openScenario::CustomCommandAction>(userDefinedAction))
             {
-                const auto customCommandAction = std::get<openScenario::CustomCommandAction>(userDefinedAction);
-                const auto command = customCommandAction.command;
-                const auto firstSplitInCommand = command.find(' ');
-                const auto commandType = command.substr(0, firstSplitInCommand);
-
-                if (auto instance = CustomCommandFactory::Create(commandType,
+                const auto action = std::get<openScenario::CustomCommandAction>(userDefinedAction);
+                const auto command = action.command;
+                
+                // the keyword is the first word in the command
+                const auto keyword = command.substr(0, command.find(' '));
+                const auto eventName = manipulatorInformation.eventName;
+                
+                // get the manipulator for the given keyword from the factory
+                if (auto instance = CustomCommandFactory::Create(keyword,
                                                                  world,
                                                                  eventNetwork,
                                                                  callbacks,
-                                                                 customCommandAction,
-                                                                 manipulatorInformation.eventName))
+                                                                 action,
+                                                                 eventName))
                 {
                     return instance;
                 }
-
-                Callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, "Invalid CustomCommandAction as manipulator.");
-                return nullptr;
+                // fallback: relay command without interpretation
+                else
+                {
+                    return new DefaultCustomCommandAction(world,
+                                                          eventNetwork,
+                                                          callbacks,
+                                                          action,
+                                                          eventName);
+                }
             }
             else
             {
@@ -156,6 +168,16 @@ extern "C" MANIPULATOR_SHARED_EXPORT ManipulatorInterface* OpenPASS_CreateInstan
                                                                   callbacks,
                                                                   followTrajectoryAction,
                                                                   manipulatorInformation.eventName));
+                }
+                else if (std::holds_alternative<openScenario::AcquirePositionAction>(routingAction))
+                {
+                    const auto &acquirePositionAction = std::get<openScenario::AcquirePositionAction>(routingAction);
+                    return static_cast<ManipulatorInterface *>(new (std::nothrow) AcquirePositionManipulator(
+                        world,
+                        eventNetwork,
+                        callbacks,
+                        manipulatorInformation.eventName,
+                        acquirePositionAction));
                 }
                 else
                 {

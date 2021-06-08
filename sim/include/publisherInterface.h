@@ -26,7 +26,9 @@
 #include "common/logEntryBase.h"
 #include "include/dataStoreInterface.h"
 
-//! Interface which has to be provided by observation modules
+/**
+ * @brief Interface which has to be provided by observation modules
+ */
 class PublisherInterface
 {
 public:

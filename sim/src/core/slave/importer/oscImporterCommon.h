@@ -13,8 +13,7 @@
 #include <QDomDocument>
 #include <optional>
 
-#include "common/xmlParser.h"
-#include "common/log.h"
+#include "importer/importerCommon.h"
 #include "common/openScenarioDefinitions.h"
 
 namespace Importer

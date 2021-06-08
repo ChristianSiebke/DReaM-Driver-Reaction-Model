@@ -10,8 +10,6 @@
 
 #pragma once
 
-#include "common/log.h"
-
 namespace openpass::importer::xml::openScenario::rule
 {
     constexpr char greaterThan[] {"greaterThan"};
@@ -237,6 +235,8 @@ namespace openpass::importer::xml::scenarioImporter::tag
     constexpr char story[] {"Story"};
     constexpr char storyboard[] {"Storyboard"};
     constexpr char speedActionTarget[] {"SpeedActionTarget"};
+    constexpr char timeReference[] {"TimeReference"};
+    constexpr char timing[] {"Timing"};
     constexpr char trajectory[] {"Trajectory"};
     constexpr char trafficSignals[] {"TrafficSignals"};
     constexpr char trafficSignalController[] {"TrafficSignalController"};
@@ -249,6 +249,9 @@ namespace openpass::importer::xml::scenarioImporter::tag
     constexpr char vertex[] {"Vertex"};
     constexpr char waypoint[] {"Waypoint"};
     constexpr char worldPosition[] {"WorldPosition"};
+    constexpr char acquirePositionAction[] {"AcquirePositionAction"};
+    constexpr char relativeWorldPosition[] {"RelativeWorldPosition"};
+    constexpr char relativeObjectPosition[] {"RelativeObjectPosition"};
 }
 
 namespace openpass::importer::xml::scenarioImporter::attribute
@@ -260,6 +263,7 @@ namespace openpass::importer::xml::scenarioImporter::attribute
     constexpr char dLane[] {"dLane"};
     constexpr char ds[] {"ds"};
     constexpr char duration[] {"duration"};
+    constexpr char domainAbsoluteRelative[] {"domainAbsoluteRelative"};
     constexpr char dynamicsDimension[] {"dynamicsDimension"};
     constexpr char dynamicsShape[] {"dynamicsShape"};
     constexpr char entityRef[] {"entityRef"};
@@ -282,6 +286,7 @@ namespace openpass::importer::xml::scenarioImporter::attribute
     constexpr char roadId[] {"roadId"};
     constexpr char rule[] {"rule"};
     constexpr char s[] {"s"};
+    constexpr char scale[] {"scale"};
     constexpr char selectTriggeringEntities[] {"selectTriggeringEntities"};
     constexpr char sensors[] {"sensors"};
     constexpr char speedTargetValueType[] {"speedTargetValueType"};
@@ -297,6 +302,9 @@ namespace openpass::importer::xml::scenarioImporter::attribute
     constexpr char x[] {"x"};
     constexpr char y[] {"y"};
     constexpr char z[] {"z"};
+    constexpr char dx[] {"dx"};
+    constexpr char dy[] {"dy"};
+    constexpr char dz[] {"dz"};
 }
 
 namespace openpass::importer::xml::sceneryImporter::tag

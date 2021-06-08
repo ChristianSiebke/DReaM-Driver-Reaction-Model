@@ -1,5 +1,5 @@
 # /*********************************************************************
-# * Copyright (c) 2019 in-tech GmbH
+# * Copyright (c) 2019, 2020 in-tech GmbH
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -30,8 +30,6 @@ INCLUDEPATH += \
 
 HEADERS += \
     $$HDR_COMMONS \
-    $$OPEN_SRC/core/common/log.h \
-    $$OPEN_SRC/core/common/parameters.h \
     $$UNIT_UNDER_TEST/CollisionDetector.h \
     $$UNIT_UNDER_TEST/ConditionalEventDetector.h \
     $$UNIT_UNDER_TEST/EventDetectorCommonBase.h \
@@ -39,11 +37,9 @@ HEADERS += \
     $$OPEN_SRC/common/eventDetectorDefinitions.h
 
 SOURCES += \
-    $$OPEN_SRC/core/common/log.cpp \
-    $$OPEN_SRC/core/common/parameters.cpp \
     $$UNIT_UNDER_TEST/CollisionDetector.cpp \
     $$UNIT_UNDER_TEST/ConditionalEventDetector.cpp \
     $$UNIT_UNDER_TEST/EventDetectorCommonBase.cpp \
     $$OPEN_SRC/common/eventDetectorDefinitions.cpp \
-    ./CollisionDetectorUnitTests.cpp \
-    ./ConditionalEventDetector_Tests.cpp
+    CollisionDetectorUnitTests.cpp \
+    ConditionalEventDetector_Tests.cpp

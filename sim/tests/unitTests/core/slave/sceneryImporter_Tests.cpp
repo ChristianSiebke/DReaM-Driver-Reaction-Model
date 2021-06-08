@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -301,9 +301,9 @@ TEST(SceneryImporter_UnitTests, ParseObjectsWithMissingField_Fails)
     QDomElement documentRoot = documentRootFromString(
     "<root>"
     "  <objects>"
-    "    <object type=\"barrier\" name=\"obstacle\" id=\"b01\" s=\"100\" t=\"0\" zOffset=\"0\" orientation=\"none\" length=\"10\" width=\"2\" height=\"2\" hdg=\"0\" pitch=\"0\" roll=\"0\" />"
+    "    <object type=\"barrier\" name=\"obstacle\" id=\"b01\" t=\"0\" zOffset=\"0\" orientation=\"none\" length=\"10\" width=\"2\" height=\"2\" hdg=\"0\" pitch=\"0\" roll=\"0\" />"
     "  </objects>"
-    "</root>");         // validLength is missing
+    "</root>");         // s is missing
 
     NiceMock<FakeOdRoad> mockRoad;
 

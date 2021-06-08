@@ -10,7 +10,7 @@
 
 #include "eventDetectorImporter.h"
 #include "scenarioImporterHelper.h"
-#include "common/xmlParser.h"
+#include "importer/importerCommon.h"
 
 namespace TAG = openpass::importer::xml::eventDetectorImporter::tag;
 namespace ATTRIBUTE = openpass::importer::xml::eventDetectorImporter::attribute;

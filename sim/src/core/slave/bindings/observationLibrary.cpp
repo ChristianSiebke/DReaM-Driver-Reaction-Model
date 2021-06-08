@@ -18,7 +18,7 @@
 #include "common/log.h"
 #include "include/observationInterface.h"
 #include "parameterbuilder.h"
-#include "common/parameters.h"
+#include "modelElements/parameters.h"
 #include "bindings/observationBinding.h"
 #include "bindings/observationLibrary.h"
 #include "observationModule.h"

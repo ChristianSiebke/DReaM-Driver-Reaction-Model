@@ -47,15 +47,14 @@ void AgentNetwork::Clear()
     removedAgentsPrevious.clear();
 }
 
-bool AgentNetwork::AddAgent(int id, AgentInterface* agent)
+void AgentNetwork::AddAgent(AgentInterface* agent)
 {
-    if (!agents.insert({id, agent}).second)
+    if (!agents.insert({agent->GetId(), agent}).second)
     {
-        LOG(CbkLogLevel::Warning, "agents must be unique");
-        return false;
-    }
 
-    return true;
+        LOG(CbkLogLevel::Error, "Agent Ids must be unique");
+        throw std::runtime_error("Agent Ids must be unique");
+    }
 }
 
 AgentInterface* AgentNetwork::GetAgent(int id) const
@@ -126,14 +125,11 @@ void AgentNetwork::PublishGlobalData(Publisher publish)
         const auto& egoAgent = agent->GetEgoAgent();
         if (egoAgent.HasValidRoute())
         {
-            const auto frontAgents = egoAgent.GetAgentsInRange(0, std::numeric_limits<double>::max(), 0);
-
             publish(agentId, "PositionRoute", egoAgent.GetMainLocatePosition().roadPosition.s);
             publish(agentId, "TCoordinate", egoAgent.GetPositionLateral());
             publish(agentId, "Lane", egoAgent.GetMainLocatePosition().laneId);
             publish(agentId, "Road", egoAgent.GetRoadId());
             publish(agentId, "SecondaryLanes", agent->GetObjectPosition().touchedRoads.at(egoAgent.GetRoadId()).lanes);
-            publish(agentId, "AgentInFront", frontAgents.empty() ? -1 : frontAgents.front()->GetId());
         }
         else
         {

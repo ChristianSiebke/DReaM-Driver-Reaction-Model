@@ -115,17 +115,18 @@ void ObservationFileHandler::WriteRun([[maybe_unused]] const RunResultInterface&
     // write CyclicsTag
     xmlFileStream->writeStartElement(outputTags.CYCLICS);
 
+    QString runPrefix = "";
+    if (runNumber < 10)
+    {
+        runPrefix = "00";
+    }
+    else if (runNumber < 100)
+    {
+        runPrefix = "0";
+    }
+
     if (writeCyclicsToCsv)
     {
-        QString runPrefix = "";
-        if (runNumber < 10)
-        {
-            runPrefix = "00";
-        }
-        else if (runNumber < 100)
-        {
-            runPrefix = "0";
-        }
         QString csvFilename = "Cyclics_Run_" + runPrefix + QString::number(runNumber) + ".csv";
 
         AddReference(csvFilename);

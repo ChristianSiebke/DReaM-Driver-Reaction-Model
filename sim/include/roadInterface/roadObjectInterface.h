@@ -33,6 +33,7 @@ public:
     virtual double GetHeight() const = 0;
     virtual double GetPitch() const = 0;
     virtual double GetRoll() const = 0;
+    virtual std::string GetName() const = 0;
 };
 
 

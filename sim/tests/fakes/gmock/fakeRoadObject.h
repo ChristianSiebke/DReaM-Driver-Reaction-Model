@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2019 in-tech
+* Copyright (c) 2019, 2020 in-tech
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -26,6 +26,6 @@ public:
     MOCK_CONST_METHOD0(GetHeight, double());
     MOCK_CONST_METHOD0(GetPitch, double());
     MOCK_CONST_METHOD0(GetRoll, double());
-
+    MOCK_CONST_METHOD0(GetName, std::string());
 };
 

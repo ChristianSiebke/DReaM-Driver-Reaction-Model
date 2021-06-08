@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -25,7 +25,7 @@
 #include "bindings/stochastics.h"
 
 #include "common/log.h"
-#include "common/parameters.h"
+#include "modelElements/parameters.h"
 #include "include/componentInterface.h"
 #include "include/observationNetworkInterface.h"
 #include "include/worldInterface.h"
@@ -60,42 +60,39 @@ AgentFactory::AgentFactory(ModelBinding *modelBinding,
 void AgentFactory::Clear()
 {
     agentList.clear();
-    lastAgentId = INITIAL_AGENT_ID;
 }
 
 Agent* AgentFactory::AddAgent(AgentBlueprintInterface* agentBlueprint)
 {
-    auto agent = CreateAgent(lastAgentId, agentBlueprint);
-    
-    if (!agent)
+    try
     {
-        LOG_INTERN(LogLevel::Error) << "could not create agent";
+        auto agent = CreateAgent(*agentBlueprint);
+        world->RegisterAgent(agent->GetAgentAdapter());
+        PublishProperties(*agent);
+        agentList.push_back(std::move(agent));
+        return agentList.back().get();
+    }
+    catch (const std::runtime_error& e)
+    {
+        LOG_INTERN(LogLevel::Error) << "could not create agent: " << e.what();
         return nullptr;
     }
-
-    if (!world->AddAgent(lastAgentId, agent->GetAgentAdapter()))
-    {
-        LOG_INTERN(LogLevel::Error) << "could not add agent to network";
-        return nullptr;
-    }
-
-    PublishProperties(*agent);
-
-    lastAgentId++;
-    agentList.push_back(std::move(agent));
-
-    return agentList.back().get();
 }
 
-std::unique_ptr<Agent> AgentFactory::CreateAgent(int id, AgentBlueprintInterface* agentBlueprint)
+std::unique_ptr<Agent> AgentFactory::CreateAgent(const AgentBlueprintInterface& agentBlueprint)
 {
-    LOG_INTERN(LogLevel::DebugCore) << "instantiate agent (id " << id << ")";
+    LOG_INTERN(LogLevel::DebugCore) << "create new agent";
 
-    auto agent = std::make_unique<Agent>(id, world);
+    auto agent = std::make_unique<Agent>(world, agentBlueprint);
 
     if (!agent)
     {
+        LOG_INTERN(LogLevel::Error) << "agent creation failed";
         return nullptr;
+    }
+    else
+    {
+        LOG_INTERN(LogLevel::DebugCore) << "agent created (" << agent->GetId() << ")";
     }
 
     if (!agent->Instantiate(agentBlueprint,

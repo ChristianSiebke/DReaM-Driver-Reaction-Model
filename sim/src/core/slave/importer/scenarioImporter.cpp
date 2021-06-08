@@ -20,8 +20,7 @@
 #include "eventDetectorImporter.h"
 #include "scenario.h"
 #include "scenarioImporter.h"
-#include "common/xmlParser.h"
-#include "common/log.h"
+#include "importer/importerCommon.h"
 #include "directories.h"
 #include "common/openPassUtils.h"
 #include "scenarioImporterHelper.h"
@@ -188,7 +187,7 @@ void ScenarioImporter::ImportStoryboard(QDomElement& documentRoot, std::vector<S
 
     //Import Init
     QDomElement initElement;
-    // for initial entitiy parameters we just use first child "Init" --> others will be ignore
+    // for initial entity parameters we just use first child "Init" --> others will be ignore
     ThrowIfFalse(SimulationCommon::GetFirstChildElement(storyboardElement, TAG::init, initElement),
                  storyboardElement, "Tag " + std::string(TAG::init) + " is missing.");
     ImportInitElement(initElement, entities, parameters);
@@ -374,7 +373,7 @@ void ScenarioImporter::ImportManeuverElement(QDomElement &maneuverElement,
 
 void ScenarioImporter::ImportInitElement(QDomElement& initElement, std::vector<ScenarioEntity>& entities, openScenario::Parameters& parameters)
 {
-    // for initial entitiy parameters we just use first child "Actions" --> others will be ignore
+    // for initial entity parameters we just use first child "Actions" --> others will be ignore
     QDomElement actionsElement;
     SimulationCommon::GetFirstChildElement(initElement, TAG::actions, actionsElement);
 

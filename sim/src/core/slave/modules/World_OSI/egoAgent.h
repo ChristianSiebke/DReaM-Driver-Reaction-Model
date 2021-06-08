@@ -26,7 +26,9 @@ public:
 
     void SetRoadGraph(const RoadGraph&& roadGraph, RoadGraphVertex current, RoadGraphVertex target) override;
 
-    void UpdatePositionInGraph() override;
+    void Update() override;
+
+    void UpdatePositionInGraph();
 
     bool HasValidRoute() const override;
 
@@ -104,4 +106,5 @@ private:
     RoadGraph wayToTarget{};
     RoadGraphVertex rootOfWayToTargetGraph{0};
     std::vector<RoadGraphVertex> alternatives{};
+    GlobalRoadPosition mainLocatePosition;
 };

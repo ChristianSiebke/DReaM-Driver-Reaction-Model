@@ -18,6 +18,6 @@ RUN apt-get -qq update && apt-get -qq dist-upgrade && apt-get install -qq -y --n
     python3-lxml \
     python3-pandas \
     python3-pytest \
-    qt5-default \
+    qtbase5-dev \
     && apt-get -qq clean
 

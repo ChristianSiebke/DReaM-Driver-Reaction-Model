@@ -37,11 +37,11 @@ SOURCES += \
     $$SPAWNER_COMMON/WorldAnalyzer.cpp \
     $$SPAWNER_PRERUN/SpawnPointPreRunCommon.cpp \
     Spawner_IntegrationTests.cpp \
-    $$OPEN_SRC/core/common/parameters.cpp \
     $$OPEN_SRC/core/slave/modelElements/agentBlueprint.cpp \
     $$OPEN_SRC/core/slave/modelElements/agent.cpp \
     $$OPEN_SRC/core/slave/modelElements/channel.cpp \
     $$OPEN_SRC/core/slave/modelElements/component.cpp \
+    $$OPEN_SRC/core/slave/modelElements/parameters.cpp \
     $$OPEN_SRC/core/slave/bindings/modelBinding.cpp \
     $$OPEN_SRC/core/slave/bindings/modelLibrary.cpp \
     $$OPEN_SRC/core/slave/framework/agentDataPublisher.cpp \

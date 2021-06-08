@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -78,8 +78,22 @@ void CollisionDetector::GetWorldObjectGeometry(const WorldObjectInterface *world
                                                std::array<Common::Vector2d, 4> &resultCorners,
                                                std::array<Common::Vector2d, 2> &resultNormals)
 {
-    Common::Vector2d agentPosition(worldObject->GetPositionX(), worldObject->GetPositionY());
-    CalculateWorldObjectGeometry(worldObject, agentPosition, resultCorners, resultNormals);
+    const auto iter =  objectGeometryCache.find(worldObject) ;
+    if(iter != objectGeometryCache.end())
+    {
+        resultCorners = std::get<0>(iter->second);
+        resultNormals = std::get<1>(iter->second);
+    }
+    else
+    {
+        Common::Vector2d agentPosition(worldObject->GetPositionX(), worldObject->GetPositionY());
+        CalculateWorldObjectGeometry(worldObject, agentPosition, resultCorners, resultNormals);
+
+        objectGeometryCache[worldObject] = {resultCorners, resultNormals};
+    }
+
+
+
 }
 
 void CollisionDetector::GetMinMax4(std::array<double, 4> &input,
@@ -580,6 +594,7 @@ void CollisionDetector::Trigger(int time)
             }
         }
     }
+    objectGeometryCache.clear();
 }
 
 template <typename T>

@@ -1,5 +1,6 @@
 /*********************************************************************
 * Copyright (c) 2017 ITK Engineering GmbH
+*               2020 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -58,20 +59,6 @@ public:
     //! @return                         ContactPointType of the RoadLink
     //-----------------------------------------------------------------------------
     virtual ContactPointType GetContactPoint() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns the RoadLinkDirectionType of the RoadLink.
-    //!
-    //! @return                         RoadLinkDirectionType of the RoadLink
-    //-----------------------------------------------------------------------------
-    virtual RoadLinkDirectionType GetDirection() const = 0;
-
-    //-----------------------------------------------------------------------------
-    //! Returns the RoadLinkSideType of the RoadLink.
-    //!
-    //! @return                         RoadLinkSideType of the RoadLink
-    //-----------------------------------------------------------------------------
-    virtual RoadLinkSideType GetSide() const = 0;
 };
 
 #endif // ROADLINKINTERFACE

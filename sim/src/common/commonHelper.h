@@ -28,48 +28,6 @@ static constexpr double EPSILON = 0.001; //!Treat values smaller than epsilon as
     return std::abs(value1 - value2) <= epsilon;
 }
 
-[[maybe_unused]] static inline constexpr double ConvertRadiantToDegree(double radian)
-{
-    return radian * 180 / M_PI;
-}
-
-[[maybe_unused]] static inline constexpr double ConvertDegreeToRadian(double degree)
-{
-    return degree / 180 * M_PI;
-}
-
-[[maybe_unused]] static inline constexpr double ConvertAngleToPi(double angle)
-{
-    double out_angle = angle;
-
-    if (std::abs(out_angle) > M_PI)
-    {
-        if (out_angle > 0)
-        {
-            out_angle -= 2 * M_PI;
-        }
-        else
-        {
-            out_angle += 2 * M_PI;
-        }
-    }
-
-    return out_angle;
-}
-
-// check if an angle is in the range of [angleRight, angleLeft]. All 3 inputs should be in the range of [-PI, PI]
-[[maybe_unused]] static inline constexpr bool Angle_In_Range(double angel, double angleRight, double angleLeft)
-{
-  if (angleRight <= angleLeft)
-  {
-      return ((angel >= angleRight) && (angel <= angleLeft));
-  }
-  else // angleRight > angleLeft, meaning that the range passes through the line of PI/-PI
-  {
-      return ((angel >= angleRight) || (angel <= angleLeft));
-  }
-}
-
 //! Returns the same angle but within the range [-PI, PI]
 [[maybe_unused]] static inline double SetAngleToValidRange(double angel)
 {

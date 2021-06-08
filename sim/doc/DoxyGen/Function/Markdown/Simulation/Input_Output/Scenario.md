@@ -198,7 +198,7 @@ The attributes have the following meaning:
 |WorldPosition          |y		    |y coordinate of the reference point			                                            |
 |WorldPosition          |h		    |heading			                                                                        |
 |Orientation            |type		|has to be "relative"																		|
-|Orientation            |h			|heading angle in radiant relative to the lane												|
+|Orientation            |h			|heading angle in radian relative to the lane												|
 |SpeedActionDynamics    |rate		|acceleration																			    |
 |SpeedActionDynamics    |dynamicsShape|"linear" for constant acceleration, "step" for immediate transition				      	|
 |SpeedActionDynamics    |dynamicsDimension|has to be "rate"                                                         	      	|
@@ -319,6 +319,12 @@ Example
 The <Actors> tag defines the agents that are mainly affected by this sequence.
 These agents can either be defined directly by stating their name via subtags <EntityRef entityRef="entityName"/> or as the agent that triggered the event via <Actors selectTriggeringEntities="true"/>
 
+Example
+```xml
+<Actors selectTriggeringEntities="false">
+    <EntityRef entityRef="Ego"/>
+</Actors>
+```
 \subsubsection scenario_storyboard_story_maneuver Maneuver
 
 The <Maneuver> tag defines the conditions for the EventDetector and the resulting action in the simulator.
@@ -370,7 +376,7 @@ To evaluate this Condition, the s-delta is applied to the s-coordinate and the l
 Example
 ```xml
 <Condition name="Conditional">
-    <ByEntity>
+    <ByEntityCondition>
         <TriggeringEntities triggeringEntitiesRule="any">
             <EntityRef entityRef="Agent"/>
         </TriggeringEntities>
@@ -381,7 +387,7 @@ Example
                 </Position>
             </ReachPositionCondition>
         </EntityCondition>
-    </ByEntity>
+    </ByEntityCondition>
 </Condition>
 ```
 
@@ -398,7 +404,7 @@ The tolerance is applied both forward and backward.
 Example
 ```xml
 <Condition name="Conditional">
-    <ByEntity>
+    <ByEntityCondition>
         <TriggeringEntities triggeringEntitiesRule="any">
             <EntityRef entityRef="Agent"/>
         </TriggeringEntities>
@@ -409,7 +415,7 @@ Example
                 </Position>
             </ReachPositionCondition>
         </EntityCondition>
-    </ByEntity>
+    </ByEntityCondition>
 </Condition>
 ```
 
@@ -424,14 +430,14 @@ Below, if the TriggeringEntity has a velocity of 30.0 and the referenceEntity ha
 Example
 ```xml
 <Condition name="Conditional">
-    <ByEntity>
+    <ByEntityCondition>
         <TriggeringEntities triggeringEntitiesRule="any">
             <EntityRef entityRef="Agent"/>
         </TriggeringEntities>
         <EntityCondition>
             <RelativeSpeedCondition entityRef="referenceEntity" value="10.0" rule="greaterThan"/>
         </EntityCondition>
-    </ByEntity>
+    </ByEntityCondition>
 </Condition>
 ```
 
@@ -445,7 +451,7 @@ The TTC is determined by projecting the movement of the agents in timesteps of 0
 Example
 ```xml
 <Condition name="Conditional">
-	  <ByEntity>
+	  <ByEntityCondition>
         <TriggeringEntities triggeringEntitiesRule="any">
             <EntityRef entityRef="Agent"/>
 		</TriggeringEntities>
@@ -456,7 +462,7 @@ Example
 				</TimeToCollisionConditionTarget>
 			 </TimeToCollisionCondition>
 		</EntityCondition>
-	  </ByEntity>
+	  </ByEntityCondition>
 </Condition>
 ```
 
@@ -472,14 +478,14 @@ The alongRoute attribute has to be true (i.e. distance is calculated by followin
 Example
 ```xml
 <Condition name="Conditional">
-    <ByEntity>
+    <ByEntityCondition>
         <TriggeringEntities triggeringEntitiesRule="any">
             <EntityRef entityRef="Agent"/>
 		</TriggeringEntities>
 		<EntityCondition>
 			<TimeHeadwayCondition value="2.0" rule="lessThan" entityRef="referenceAgent" freespace="true" alongRoute="true"/>
 		</EntityCondition>
-    </ByEntity>
+    </ByEntityCondition>
 </Condition>
 ```
 
@@ -522,7 +528,7 @@ Example with absolute target and fixed length
                 <LaneChangeActionDynamics value="100.0" dynamicsShape="sinusoidal" dynamicsDimension="distance"/>
                 <LaneChangeTarget>
                     <AbsoluteTargetLane value="-1"/>
-                </Target>
+                </LaneChangeTarget>
             </LaneChangeAction>
         </LateralAction>
     </PrivateAction>
@@ -542,26 +548,6 @@ Example with relative target and fixed time
             </LaneChangeAction>
         </LateralAction>
     </PrivateAction>
-</Action>
-```
-**Custom Lane Change**
-
-The Custom Lane Change triggers a custom lane change for an agent. The execution of the lane change is performed by an arbitrary agent component. 
-
-Note: The regular lane change action is performed according to the defined shape (see above). 
-The custom lane change is only forwarded to agent components, as defined in the signal architecture of the *systemConfigBlueprint.xml*. 
-The way of execution is left to the agent component in the later case.
-
-The command consists of two parts:
-1. "SetCustomLaneChange": The first command instantiates the CustomLaneChange and is set by default. This command does not need to be changed.
-2. "DeltaLaneId": The second command indicates the number of lanes over which the lane change should take place.
-
-Example
-```xml
-<Action name="CustomLaneChange">
-	<UserDefinedAction>
-		<CustomCommandAction>SetCustomLaneChange -1</CustomCommandAction>
-	</UserDefinedAction>
 </Action>
 ```
 
@@ -618,6 +604,65 @@ Example using TrajectoryCatalog
 </Action>
 ```
 
+**Acquire Position**
+
+The `AcquirePositionManipulator` adds an event to the `EventNetwork`, which tells the driver to acquire a given 
+`openScenario::Position`. Currently only `openScenario::WorldPosition` and `openScenario::RelativeObjectPosition` are
+supported. **This is only supported in the FMU_Wrapper component for OSMP messages**
+
+Example (WorldPosition)
+```xml
+<Action name="AcquirePosition">
+    <PrivateAction>
+        <RoutingAction>
+            <AcquirePositionAction>
+                <Position>
+                    <WorldPosition x="1.0" y="2.0" z="0.0" h="3.1415" p="0.0" r="0.0" />
+                </Position>
+            </AcquirePositionAction>
+        </RoutingAction>
+    </PrivateAction>
+</Action>
+```
+
+Example (WorldPosition)
+```xml
+<OpenSCENARIO>
+    <Entities>
+    ...
+        <ScenarioObject name="S1">
+        ...
+        </ScenarioObject>
+    </Entities>
+...
+  <Storyboard>
+    ...
+    <Story name="AcquirePositionStory">
+      <Act name="Act1">
+        <ManeuverGroup maximumExecutionCount="1" name="AcquirePositionManeuverGroup">
+          ...
+          <Maneuver name="AcquirePositionManeuver">
+            <Event name="AcquirePositionEvent" priority="overwrite">
+              <Action name="AcquirePosition">
+                <PrivateAction>
+                  <RoutingAction>
+                    <AcquirePositionAction>
+                      <Position>
+                        <RelativeObjectPosition dx="1.0" dy="1.0" entityRef="S1"/>
+                      </Position>
+                    </AcquirePositionAction>
+                  </RoutingAction>
+                </PrivateAction>
+              </Action>
+            </Event>
+          </Maneuver>
+        </ManeuverGroup>
+      </Act>
+    </Story>
+  </Storyboard>
+</OpenSCENARIO>
+```
+
 **Remove Agent**
 
 The RemoveAgentsManipulator simply removes the specifed agent from the simulation run.
@@ -633,7 +678,7 @@ Example
 </Action>
 ```
 
-**Component State Change**
+**UserDefinedAction: Component State Change**
 
 The ComponentStateChangeManipulator influences the maximum reachable state of an agent component that is handled by the ComponentController, i.e. it can either activate or deactivate a component.
 
@@ -646,19 +691,18 @@ Example
 </Action>
 ```
 
-**Gaze Follower**
+**UserDefinedAction: Custom Parameters**
 
-The GazeFollower influences the gaze behaviour of an agent. The command consists of three parts:
-1. "SetGazeFollower": The first command instantiates the GazeFollower and is set by default. This command does not need to be changed.
-2. "Activity State": The second command describes the activity state in which the GazeFollower should be put. The activity state is supposed to be "Active" or "Inactive".
-3. "GazeFollowerFileName": The last command needs to be replaced by the file that contains the gaze information. Here, the file name relative to the config directory with its corresponding file type [.txt, .csv, etc.] need to be provided. 
+The `CustomParametersManipulator` adds an event to the `EventNetwork`, which is relayed as list of strings (`CustomParametersSignal`).
+Currently, arguments are seperated by a SINGLE WHITESPACE, so parameters which contain a space are split.
+**FMU_Wrapper component for OSMP messages only**: The parameters are transformed into indiviudal custom actions of the TrafficCommand.
 
 Example
 ```xml
-<Action name="GazeFollower">
-	<UserDefinedAction>
-		<CustomCommandAction>SetGazeFollower Active GazeFollowerFileName.csv</CustomCommandAction>
-	</UserDefinedAction>
+<Action name="CustomParameters">
+    <UserDefinedAction>
+        <CustomCommandAction>SetCustomParameters ARG1 ARG2 ARG3</CustomCommandAction>
+    </UserDefinedAction>
 </Action>
 ```
 
@@ -679,7 +723,9 @@ Example AbsoulteTargetSpeed
         <LongitudinalAction>
             <SpeedAction>
                 <SpeedActionDynamics dynamicsShape="" value="" dynamicsDimension=""/>
-                <AbsoluteTargetSpeed value="10.0"/>
+                <SpeedActionTarget>
+                    <AbsoluteTargetSpeed value="10.0"/>
+                <SpeedActionTarget>
             </SpeedAction>
         </LongitudinalAction>
     </PrivateAction>
@@ -713,9 +759,9 @@ Example:
 ```xml
 <StopTrigger>
     <ConditionGroup>
-        <Condition name="EndTime" rule="greaterThan" edge="rising">
+        <Condition name="EndTime" delay="0" conditionEdge="rising">
             <ByValueCondition>
-                <SimulationTimeCondition value="30.0" rule="greaterThan" />
+                <SimulationTimeCondition value="30.0" rule="greaterThan"/>
             </ByValueCondition>
         </Condition>
     </ConditionGroup>

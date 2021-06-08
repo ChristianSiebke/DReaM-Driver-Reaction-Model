@@ -19,19 +19,23 @@ class FakeWorld : public WorldInterface
 {
   public:
     MOCK_METHOD0(CreateAgentAdapterForAgent, AgentInterface*());
+    MOCK_METHOD1(CreateAgentAdapter, std::unique_ptr<AgentInterface>(openpass::type::FlatParameter));
     MOCK_CONST_METHOD1(GetAgent, AgentInterface*(int id));
     MOCK_METHOD1(GetAgentByName, AgentInterface*(const std::string &scenarioName));
     MOCK_METHOD0(GetEgoAgent, AgentInterface*());
     MOCK_METHOD2(AddAgent, bool(int id, AgentInterface* agent));
+    MOCK_METHOD1(RegisterAgent, void(AgentInterface* agent));
     MOCK_METHOD0(CreateGlobalDrivingView, bool());
     MOCK_METHOD2(CreateScenery, bool(SceneryInterface *scenery, const std::vector<openScenario::TrafficSignalController>& trafficSignalControllers));
     MOCK_METHOD1(CreateWorldScenario, bool(const std::string &scenarioFilename));
     MOCK_METHOD1(CreateWorldScenery, bool(const std::string &sceneryFilename));
     MOCK_METHOD0(Instantiate, bool());
+    MOCK_CONST_METHOD1(GetLaneSections, LaneSections(const std::string& roadId));
     MOCK_METHOD6(IntersectsWithAgent, bool(double x, double y, double rotation, double length, double width, double center));
     MOCK_METHOD0(isInstantiated, bool());
     MOCK_METHOD3(IsSValidOnLane, bool(std::string roadId, int laneId, double distance));
-    MOCK_METHOD2(IsDirectionalRoadExisting, bool(const std::string &roadId, bool inOdDirection));
+    MOCK_CONST_METHOD2(IsDirectionalRoadExisting, bool(const std::string &roadId, bool inOdDirection));
+    MOCK_METHOD4(IsLaneTypeValid, bool(const std::string &roadId, const int laneId, const double distanceOnLane, const LaneTypes& validLaneTypes));
 
     MOCK_CONST_METHOD0(GetBicycle, const AgentInterface*());
     MOCK_METHOD1(GetLastCarInlane, const AgentInterface*(int laneNumber));
@@ -56,6 +60,7 @@ class FakeWorld : public WorldInterface
     MOCK_CONST_METHOD2(GetLaneId, int(uint64_t streamId, double endDistance));
     MOCK_CONST_METHOD4(LaneCoord2WorldCoord, Position(double distanceOnLane, double offset, std::string roadId, int laneId));
     MOCK_CONST_METHOD2(RoadCoord2WorldCoord, Position(RoadPosition roadCoord, std::string roadID));
+    MOCK_CONST_METHOD3(WorldCoord2LaneCoord, std::map<const std::string, GlobalRoadPosition> (double x, double y, double heading));
     MOCK_CONST_METHOD1(GetRoadLength, double(const std::string& roadId));
     MOCK_CONST_METHOD6(GetObstruction, RouteQueryResult<Obstruction> (const RoadGraph& roadGraph, RoadGraphVertex startNode, const GlobalRoadPosition& ownPosition,
                                                                       const ObjectPosition& otherPosition, const std::vector<Common::Vector2d>& objectCorner, const Common::Vector2d& mainLaneLocator));

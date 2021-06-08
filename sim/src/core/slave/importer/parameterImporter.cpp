@@ -10,8 +10,7 @@
 
 #include "parameterImporter.h"
 #include "importerLoggingHelper.h"
-#include "common/log.h"
-#include "common/xmlParser.h"
+#include "importer/importerCommon.h"
 #include <cmath>
 
 namespace TAG = openpass::importer::xml::parameterImporter::tag;

@@ -49,11 +49,11 @@ SOURCES += \
     $$OPEN_PASS_SLAVE/modelElements/agentBlueprint.cpp \
     $$OPEN_PASS_SLAVE/modelElements/channel.cpp \
     $$OPEN_PASS_SLAVE/modelElements/component.cpp \
+    $$OPEN_PASS_SLAVE/modelElements/parameters.cpp \
     $$OPEN_PASS_SLAVE/bindings/modelBinding.cpp \
     $$OPEN_PASS_SLAVE/bindings/modelLibrary.cpp \
     $$OPEN_SRC/common/eventDetectorDefinitions.cpp \
     $$OPEN_SRC/core/common/log.cpp \
-    $$OPEN_SRC/core/common/parameters.cpp \
     taskBuilder_Tests.cpp \
     schedulerTasks_Tests.cpp \
     agentParser_Tests.cpp \

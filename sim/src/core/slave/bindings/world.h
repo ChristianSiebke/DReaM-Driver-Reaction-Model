@@ -41,6 +41,11 @@ public:
         return implementation->AddAgent(id, agent);
     }
 
+    void RegisterAgent(AgentInterface* agent) override
+    {
+        implementation->RegisterAgent(agent);
+    }
+
     AgentInterface* GetAgent(int id) const override
     {
         return implementation->GetAgent(id);
@@ -147,6 +152,11 @@ public:
         return implementation->CreateAgentAdapterForAgent();
     }
 
+    std::unique_ptr<AgentInterface> CreateAgentAdapter(openpass::type::FlatParameter parameter) override
+    {
+        return std::move(implementation->CreateAgentAdapter(std::move(parameter)));
+    }
+
     AgentInterface* GetEgoAgent() override
     {
         return implementation->GetEgoAgent();
@@ -184,14 +194,24 @@ public:
         return implementation->LaneCoord2WorldCoord(distance, offset, roadId, laneId);
     }
 
+    std::map<const std::string, GlobalRoadPosition> WorldCoord2LaneCoord(double x, double y, double heading) const override
+    {
+        return implementation->WorldCoord2LaneCoord(x, y, heading);
+    }
+
     bool IsSValidOnLane(std::string roadId, int laneId, double distance) override
     {
         return implementation->IsSValidOnLane(roadId, laneId, distance);
     }
 
-    bool IsDirectionalRoadExisting(const std::string &roadId, bool inOdDirection) override
+    bool IsDirectionalRoadExisting(const std::string &roadId, bool inOdDirection) const override
     {
         return implementation->IsDirectionalRoadExisting(roadId, inOdDirection);
+    }
+
+    bool IsLaneTypeValid(const std::string &roadId, const int laneId, const double distanceOnLane, const LaneTypes& validLaneTypes) override
+    {
+        return implementation->IsLaneTypeValid(roadId, laneId, distanceOnLane, validLaneTypes);
     }
 
     double GetLaneCurvature(std::string roadId, int laneId, double position) const override
@@ -234,6 +254,11 @@ public:
                                                                      double maximumSearchLength, const LaneTypes& laneTypes) const override
     {
         return implementation->GetDistanceToEndOfLane(roadGraph, startNode, laneId, initialSearchDistance, maximumSearchLength, laneTypes);
+    }
+
+    LaneSections GetLaneSections(const std::string& roadId) const
+    {
+        return implementation->GetLaneSections(roadId);
     }
 
     bool IntersectsWithAgent(double x, double y, double rotation, double length, double width, double center) override

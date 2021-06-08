@@ -87,7 +87,7 @@ DynamicAgentTypeGenerator& DynamicAgentTypeGenerator::GatherVehicleComponents()
         {
             throw std::logic_error("No vehicle profile of type " + sampledProfiles.vehicleProfileName);
         }
-        auto vehicleProfile = profiles->GetVehicleProfiles().at(sampledProfiles.vehicleProfileName);
+        auto vehicleProfile = profiles->GetVehicleProfiles().at(sampledProfiles.vehicleProfileName); // Existence checked by DynamicProfileSampler
 
         auto matchedComponent = std::find_if(vehicleProfile.vehicleComponents.begin(),
                                              vehicleProfile.vehicleComponents.end(), [vehicleComponentProfile](VehicleComponent curComponent)
@@ -117,7 +117,7 @@ DynamicAgentTypeGenerator& DynamicAgentTypeGenerator::GatherSensors()
 
     int inputIdSensorAggregation = systemConfigBlueprint->GetSystems().at(0)->GetComponents().at(sensorAggregationModulName)->GetInputLinks().at(0);
     int sensorNumber = 0;
-    auto vehicleProfile = profiles->GetVehicleProfiles().at(sampledProfiles.vehicleProfileName);
+    auto vehicleProfile = profiles->GetVehicleProfiles().at(sampledProfiles.vehicleProfileName); // Existence checked by DynamicProfileSampler
 
     for (const auto& sensor : vehicleProfile.sensors)
     {
@@ -161,7 +161,7 @@ DynamicAgentTypeGenerator& DynamicAgentTypeGenerator::GatherSensors()
 
 DynamicAgentTypeGenerator& DynamicAgentTypeGenerator::SetVehicleModelParameters(const openScenario::Parameters& assignedParameters)
 {
-    VehicleProfile vehicleProfile = profiles->GetVehicleProfiles().at(sampledProfiles.vehicleProfileName);
+    VehicleProfile vehicleProfile = profiles->GetVehicleProfiles().at(sampledProfiles.vehicleProfileName); // Existence checked by DynamicProfileSampler
     agentBuildInformation.vehicleModelName = vehicleProfile.vehicleModel;
     agentBuildInformation.vehicleModelParameters = vehicleModels->GetVehicleModel(vehicleProfile.vehicleModel, assignedParameters);
 
@@ -171,8 +171,13 @@ DynamicAgentTypeGenerator& DynamicAgentTypeGenerator::SetVehicleModelParameters(
 void DynamicAgentTypeGenerator::GatherComponent(const std::string componentName,
         std::shared_ptr<SimulationSlave::AgentType> agentType)
 {
-    auto componentType = std::make_shared<SimulationSlave::ComponentType>(*systemConfigBlueprint->GetSystems().at(
-                             0)->GetComponents().at(componentName));
+    auto& systemComponents = systemConfigBlueprint->GetSystems().at(0)->GetComponents();
+    auto find_result = systemComponents.find(componentName);
+    if (find_result == systemComponents.end())
+    {
+        throw std::runtime_error("Could not find component " + componentName + " in systemConfigBlueprint");
+    }
+    auto componentType = std::make_shared<SimulationSlave::ComponentType>(*(find_result->second));
 
     for (const auto& componentOutput : componentType->GetOutputLinks())
     {
@@ -196,12 +201,13 @@ void DynamicAgentTypeGenerator::GatherComponentWithParameters(std::string compon
         std::shared_ptr<SimulationSlave::AgentType> agentType,
         const openpass::parameter::ParameterSetLevel1 &parameters, std::string componentNameInSystemConfigBlueprint, int channelOffset)
 {
-    if (systemConfigBlueprint->GetSystems().at(0)->GetComponents().count(componentNameInSystemConfigBlueprint) == 0)
+    auto& systemComponents = systemConfigBlueprint->GetSystems().at(0)->GetComponents();
+    auto find_result = systemComponents.find(componentNameInSystemConfigBlueprint);
+    if (find_result == systemComponents.end())
     {
-        throw std::logic_error("Could not find compenent " + componentNameInSystemConfigBlueprint + " in systemConfigBlueprint");
+        throw std::runtime_error("Could not find component " + componentNameInSystemConfigBlueprint + " in systemConfigBlueprint");
     }
-
-    auto componentTypeFromSystemConfigBlueprint = systemConfigBlueprint->GetSystems().at(0)->GetComponents().at(componentNameInSystemConfigBlueprint);
+    auto componentTypeFromSystemConfigBlueprint = std::make_shared<SimulationSlave::ComponentType>(*(find_result->second));
 
     auto componentType = std::make_shared<SimulationSlave::ComponentType>(componentName,
                          componentTypeFromSystemConfigBlueprint->GetInit(),

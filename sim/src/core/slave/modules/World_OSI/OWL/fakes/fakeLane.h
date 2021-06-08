@@ -59,17 +59,17 @@ public:
                       double sOffset, double curvature, double heading));
     MOCK_METHOD1(SetLaneType,
                  void(LaneType specifiedType));
-    MOCK_METHOD1(SetLeftLane,
-                 void(const OWL::Interfaces::Lane& lane));
-    MOCK_METHOD1(SetRightLane,
-                 void(const OWL::Interfaces::Lane& lane));
-    MOCK_CONST_METHOD0(GetWorldObjects,
-                       const OWL::Interfaces::WorldObjects & ());
-    MOCK_METHOD1(AddMovingObject,
-                 void(OWL::Interfaces::MovingObject& movingObject));
-    MOCK_METHOD1(AddStationaryObject,
-                 void(OWL::Interfaces::StationaryObject& stationaryObject));
-    MOCK_METHOD1(AddWorldObject, void (OWL::Interfaces::WorldObject& worldObject));
+    MOCK_METHOD2(SetLeftLane,
+                 void(const OWL::Interfaces::Lane& lane, bool transferLaneBoundary));
+    MOCK_METHOD2(SetRightLane,
+                 void(const OWL::Interfaces::Lane& lane, bool transferLaneBoundary));
+    MOCK_CONST_METHOD1(GetWorldObjects,
+                       const OWL::Interfaces::LaneAssignments& (bool direction));
+    MOCK_METHOD2(AddMovingObject,
+                 void(OWL::Interfaces::MovingObject& movingObject, const LaneOverlap& laneOverlap));
+    MOCK_METHOD2(AddStationaryObject,
+                 void(OWL::Interfaces::StationaryObject& stationaryObject, const LaneOverlap& laneOverlap));
+    MOCK_METHOD2(AddWorldObject, void (OWL::Interfaces::WorldObject& worldObject, const LaneOverlap& laneOverlap));
     MOCK_METHOD0(ClearMovingObjects, void());
 
     MOCK_METHOD1(AddNext,
@@ -82,6 +82,8 @@ public:
     MOCK_CONST_METHOD0(GetRightLaneBoundaries,
                        const std::vector<OWL::Id> ());
     MOCK_METHOD1(SetLeftLaneBoundaries,
+                 void (const std::vector<OWL::Id> laneBoundaries));
+    MOCK_METHOD1(SetRightLaneBoundaries,
                  void (const std::vector<OWL::Id> laneBoundaries));
     MOCK_CONST_METHOD0(GetNext, const std::vector<OWL::Id>& ());
     MOCK_CONST_METHOD0(GetPrevious, const std::vector<OWL::Id>& ());

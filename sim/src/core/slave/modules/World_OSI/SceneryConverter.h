@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -26,6 +26,11 @@
 #include "Localization.h"
 #include "TrafficLightNetwork.h"
 #include "common/worldDefinitions.h"
+#include "TrafficObjectAdapter.h"
+
+namespace openpass::entity {
+class RepositoryInterface;
+}
 
 namespace Internal
 {
@@ -36,7 +41,7 @@ struct ConversionStatus
 };
 
 using PathInJunctionConnector = std::function<void(const JunctionInterface*, const RoadInterface *, const RoadInterface *, const RoadInterface *, ContactPointType,
-                                                   ContactPointType, std::map<int, int>)>;
+                                                   ContactPointType, ContactPointType, std::map<int, int>)>;
 
 ConversionStatus ConnectJunction(const SceneryInterface* scenery, const JunctionInterface* junction,
                                     PathInJunctionConnector connectPathInJunction);
@@ -52,6 +57,7 @@ class SceneryConverter
 
 public:
     SceneryConverter(SceneryInterface *scenery,
+                     openpass::entity::RepositoryInterface& repository,
                      OWL::Interfaces::WorldData& worldData,
                      const World::Localization::Localizer& localizer,
                      const CallbackInterface *callbacks);
@@ -263,12 +269,13 @@ private:
     //! @param[in]  connectingRoad          connecting road == path
     //! @param[in]  outgoingRoad            road going out of the path
     //! @param[in]  incomingContactPoint    contactPoint on the path connected to the incomingRoad
+    //! @param[in]  connectingContactPoint  contactPoint of the connector to the incomingRoad
     //! @param[in]  outgoingContactPoint    contactPoint on the outgoing road connected to the path
     //! @param[in]  laneIdMapping           mapping of the lane ids between the incoming road and the path
     //! @return                         False, if an error occurred, true otherwise
     //-----------------------------------------------------------------------------
     void ConnectPathInJunction(const JunctionInterface* junction, const RoadInterface *incomingRoad, const RoadInterface *connectingRoad, const RoadInterface*outgoingRoad,
-                               ContactPointType incomingContactPoint, ContactPointType outgoingContactPoint, std::map<int, int> laneIdMapping);
+                               ContactPointType incomingContactPoint, ContactPointType connectingContactPoint, ContactPointType outgoingContactPoint, std::map<int, int> laneIdMapping);
 
     //-----------------------------------------------------------------------------
     //! Connects OSI sections for all roads in the scenery internally and externally.
@@ -297,6 +304,13 @@ private:
     //! \param lanes        lanes for which this road marking is valid
     void CreateRoadMarking(RoadSignalInterface* signal, Position position, const OWL::Interfaces::Lanes& lanes);
 
+    //! Creates a road marking in OWL from an OpenDrive RoadSignal
+    //!
+    //! \param object       OpenDrive specification of the road marking as object
+    //! \param position     position of the road marking in the world
+    //! \param lanes        lanes for which this road marking is valid
+    void CreateRoadMarking(RoadObjectInterface* object, Position position, const OWL::Interfaces::Lanes& lanes);
+
     //! Creates a traffic light in OWL from an OpenDrive RoadSignal
     //!
     //! \param signal       OpenDrive specification of the traffic light
@@ -304,6 +318,7 @@ private:
     //! \param lanes        lanes for which this traffic light is valid
     //! \param withYellow   wether this traffic light has a yellow bulb
     void CreateTrafficLight(RoadSignalInterface* signal, Position position, const OWL::Interfaces::Lanes& lanes, bool withYellow);
+
 
     std::list<RoadLaneInterface*> GetRoadLanesAtDistance(RoadInterface *road, double s);
 
@@ -327,10 +342,12 @@ private:
     std::vector<OWL::Id> CreateLaneBoundaries(RoadLaneInterface &odLane, RoadLaneSectionInterface &odSection);
 
     SceneryInterface *scenery;
+    openpass::entity::RepositoryInterface& repository;
     OWL::Interfaces::WorldData& worldData;
     WorldDataQuery worldDataQuery{worldData};
     const World::Localization::Localizer& localizer;
     const CallbackInterface *callbacks;
+    std::vector<std::unique_ptr<TrafficObjectAdapter>> trafficObjects;
 };
 
 inline bool IsWithinLeftClosedInterval(double value, double start, double end)

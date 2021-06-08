@@ -44,7 +44,7 @@ struct SpawnParameter
     double acceleration = -999;
     double gear = -999;
     double yawAngle = -999;
-    std::optional<Route> route{};
+    Route route{};
 };
 
 class AgentBlueprintInterface

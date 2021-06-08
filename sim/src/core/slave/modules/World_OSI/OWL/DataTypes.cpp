@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020, 2021 in-tech GmbH
 *               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -34,6 +34,13 @@
 #include "WorldObjectAdapter.h"
 
 namespace OWL {
+
+template <typename OsiObject>
+Primitive::Dimension GetDimensionFromOsiObject(const OsiObject& osiObject)
+{
+    const auto& d= osiObject->base().dimension();
+    return { d.length(), d.width(), d.height() };
+}
 
 namespace Implementation {
 
@@ -308,7 +315,7 @@ bool Lane::Covers(double distance) const
     return false;
 }
 
-void Lane::SetLeftLane(const Interfaces::Lane& lane)
+void Lane::SetLeftLane(const Interfaces::Lane& lane, bool transferLaneBoundary)
 {
     if (leftLaneIsDummy)
     {
@@ -318,13 +325,17 @@ void Lane::SetLeftLane(const Interfaces::Lane& lane)
 
     leftLane = &lane;
     osiLane->mutable_classification()->add_left_adjacent_lane_id()->set_value(lane.GetId());
-    for (const auto& laneBoundary : lane.GetRightLaneBoundaries())
+
+    if (transferLaneBoundary)
     {
-        osiLane->mutable_classification()->add_left_lane_boundary_id()->set_value(laneBoundary);
+        for (const auto& laneBoundary : lane.GetRightLaneBoundaries())
+        {
+            osiLane->mutable_classification()->add_left_lane_boundary_id()->set_value(laneBoundary);
+        }
     }
 }
 
-void Lane::SetRightLane(const Interfaces::Lane& lane)
+void Lane::SetRightLane(const Interfaces::Lane& lane, bool transferLaneBoundary)
 {
     if (rightLaneIsDummy)
     {
@@ -334,6 +345,13 @@ void Lane::SetRightLane(const Interfaces::Lane& lane)
 
     rightLane = &lane;
     osiLane->mutable_classification()->add_right_adjacent_lane_id()->set_value(lane.GetId());
+    if (transferLaneBoundary)
+    {
+        for (const auto& laneBoundary : lane.GetLeftLaneBoundaries())
+        {
+            osiLane->mutable_classification()->add_right_lane_boundary_id()->set_value(laneBoundary);
+        }
+    }
 }
 
 void Lane::SetLeftLaneBoundaries(const std::vector<Id> laneBoundaries)
@@ -344,14 +362,22 @@ void Lane::SetLeftLaneBoundaries(const std::vector<Id> laneBoundaries)
     }
 }
 
+void Lane::SetRightLaneBoundaries(const std::vector<Id> laneBoundaries)
+{
+    for(const auto& laneBoundary : laneBoundaries)
+    {
+        osiLane->mutable_classification()->add_right_lane_boundary_id()->set_value(laneBoundary);
+    }
+}
+
 void Lane::SetLaneType(LaneType specifiedType)
 {
     laneType =  specifiedType;
 }
 
-const Interfaces::WorldObjects& Lane::GetWorldObjects() const
+const Interfaces::LaneAssignments& Lane::GetWorldObjects(bool direction) const
 {
-    return worldObjects;
+    return worldObjects.Get(direction);
 }
 
 const Interfaces::TrafficSigns &Lane::GetTrafficSigns() const
@@ -369,38 +395,27 @@ const Interfaces::TrafficLights& Lane::GetTrafficLights() const
     return trafficLights;
 }
 
-//const Interfaces::MovingObjects& Lane::GetMovingObjects() const
-//{
-//    return movingObjects;
-//}
-
-//const Interfaces::StationaryObjects& Lane::GetStationaryObjects() const
-//{
-//    return stationaryObjects;
-//}
-
-void Lane::AddMovingObject(Interfaces::MovingObject& movingObject)
+void Lane::AddMovingObject(Interfaces::MovingObject& movingObject, const LaneOverlap& laneOverlap)
 {
-    worldObjects.push_back(&movingObject);
-    movingObjects.push_back(&movingObject);
+    worldObjects.Insert(laneOverlap, &movingObject);
 }
 
-void Lane::AddStationaryObject(Interfaces::StationaryObject& stationaryObject)
+void Lane::AddStationaryObject(Interfaces::StationaryObject& stationaryObject, const LaneOverlap& laneOverlap)
 {
-    worldObjects.push_back(&stationaryObject);
-    stationaryObjects.push_back(&stationaryObject);
+    worldObjects.Insert(laneOverlap, &stationaryObject);
+    stationaryObjects.push_back({laneOverlap, &stationaryObject});
 }
 
-void Lane::AddWorldObject(Interfaces::WorldObject& worldObject)
+void Lane::AddWorldObject(Interfaces::WorldObject& worldObject, const LaneOverlap& laneOverlap)
 {
     if (worldObject.Is<MovingObject>())
     {
-        AddMovingObject(*worldObject.As<MovingObject>());
+        AddMovingObject(*worldObject.As<MovingObject>(), laneOverlap);
     }
     else
         if (worldObject.Is<StationaryObject>())
         {
-            AddStationaryObject(*worldObject.As<StationaryObject>());
+            AddStationaryObject(*worldObject.As<StationaryObject>(), laneOverlap);
         }
 }
 
@@ -421,9 +436,11 @@ void Lane::AddTrafficLight(Interfaces::TrafficLight &trafficLight)
 
 void Lane::ClearMovingObjects()
 {
-    worldObjects.clear();
-    worldObjects.insert(worldObjects.end(), stationaryObjects.begin(), stationaryObjects.end());
-    movingObjects.clear();
+    worldObjects.Clear();
+    for (const auto& [laneOverlap, object] : stationaryObjects)
+    {
+        worldObjects.Insert(laneOverlap, object);
+    }
 }
 
 void Lane::AddNext(const Interfaces::Lane* lane)
@@ -680,14 +697,7 @@ void StationaryObject::CopyToGroundTruth(osi3::GroundTruth& target) const
 
 Primitive::Dimension StationaryObject::GetDimension() const
 {
-    const osi3::Dimension3d& osiDimension = osiObject->base().dimension();
-    Primitive::Dimension dimension;
-
-    dimension.length = osiDimension.length();
-    dimension.width  = osiDimension.width();
-    dimension.height = osiDimension.height();
-
-    return dimension;
+    return GetDimensionFromOsiObject(osiObject);
 }
 
 Primitive::AbsOrientation StationaryObject::GetAbsOrientation() const
@@ -821,14 +831,7 @@ Id MovingObject::GetId() const
 
 Primitive::Dimension MovingObject::GetDimension() const
 {
-    const osi3::Dimension3d& osiDimension = osiObject->base().dimension();
-    Primitive::Dimension dimension;
-
-    dimension.length = osiDimension.length();
-    dimension.width  = osiDimension.width();
-    dimension.height = osiDimension.height();
-
-    return dimension;
+    return GetDimensionFromOsiObject(osiObject);
 }
 
 double MovingObject::GetDistanceReferencePointToLeadingEdge() const
@@ -1145,7 +1148,7 @@ bool MovingObject::GetHighBeamLight() const
 
 Primitive::LaneOrientation MovingObject::GetLaneOrientation() const
 {
-    throw std::logic_error("not implemented");
+    throw std::logic_error("MovingObject::GetLaneOrientation not implemented");
 }
 
 Primitive::AbsVelocity MovingObject::GetAbsVelocity() const
@@ -1303,13 +1306,13 @@ void MovingObject::ClearLaneAssignments()
 
 Angle Vehicle::GetSteeringWheelAngle()
 {
-    throw std::logic_error("not implemented");
+    throw std::logic_error("Vehicle::GetSteeringWheelAngle not implemented");
 }
 
 void Vehicle::SetSteeringWheelAngle(const Angle newValue)
 {
     Q_UNUSED(newValue);
-    throw std::logic_error("not implemented");
+    throw std::logic_error("Vehicle::SetSteeringWheelAngle not implemented");
 }
 
 InvalidLane::~InvalidLane()
@@ -1512,6 +1515,11 @@ Primitive::AbsPosition TrafficSign::GetReferencePointPosition() const
     return position;
 }
 
+Primitive::Dimension TrafficSign::GetDimension() const
+{
+    return GetDimensionFromOsiObject(&osiSign->main_sign());
+}
+
 bool TrafficSign::IsValidForLane(OWL::Id laneId) const
 {
     auto assignedLanes = osiSign->main_sign().classification().assigned_lane_id();
@@ -1568,6 +1576,38 @@ bool RoadMarking::SetSpecification(RoadSignalInterface* signal, Position positio
     return mapping_succeeded;
 }
 
+bool RoadMarking::SetSpecification(RoadObjectInterface* object, Position position)
+{
+    bool mapping_succeeded = true;
+
+    const auto baseStationary = osiSign->mutable_base();
+
+    baseStationary->mutable_position()->set_x(position.xPos);
+    baseStationary->mutable_position()->set_y(position.yPos);
+    baseStationary->mutable_position()->set_z(0.0);
+    baseStationary->mutable_dimension()->set_width(object->GetWidth());
+    baseStationary->mutable_dimension()->set_length(object->GetLength());
+    double yaw = object->GetHdg();
+    yaw = CommonHelper::SetAngleToValidRange(yaw);
+    baseStationary->mutable_orientation()->set_yaw(yaw);
+
+    const auto mutableOsiClassification = osiSign->mutable_classification();
+
+    mutableOsiClassification->set_type(osi3::RoadMarking_Classification_Type::RoadMarking_Classification_Type_TYPE_SYMBOLIC_TRAFFIC_SIGN);
+    mutableOsiClassification->set_monochrome_color(osi3::RoadMarking_Classification_Color::RoadMarking_Classification_Color_COLOR_WHITE);
+    if(object->GetType() == RoadObjectType::crosswalk)
+    {
+        mutableOsiClassification->set_traffic_main_sign_type(osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_ZEBRA_CROSSING);
+    }
+    else
+    {
+        mutableOsiClassification->set_traffic_main_sign_type(osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_OTHER);
+        mapping_succeeded = false;
+    }
+
+    return mapping_succeeded;
+}
+
 CommonTrafficSign::Entity RoadMarking::GetSpecification(const double relativeDistance) const
 {
     CommonTrafficSign::Entity specification;
@@ -1599,6 +1639,11 @@ Primitive::AbsPosition RoadMarking::GetReferencePointPosition() const
     return position;
 }
 
+Primitive::Dimension RoadMarking::GetDimension() const
+{
+    return GetDimensionFromOsiObject(osiSign);
+}
+
 bool RoadMarking::IsValidForLane(OWL::Id laneId) const
 {
     auto assignedLanes = osiSign->classification().assigned_lane_id();
@@ -1614,8 +1659,8 @@ bool RoadMarking::IsValidForLane(OWL::Id laneId) const
 
 void RoadMarking::CopyToGroundTruth(osi3::GroundTruth& target) const
 {
-    auto newTrafficSign = target.add_traffic_sign();
-    newTrafficSign->CopyFrom(*osiSign);
+    auto newRoadMarking = target.add_road_marking();
+    newRoadMarking->CopyFrom(*osiSign);
 }
 
 LaneBoundary::LaneBoundary(osi3::LaneBoundary *osiLaneBoundary, double width, double sStart, double sEnd, LaneMarkingSide side) :
@@ -1689,6 +1734,61 @@ void LaneBoundary::CopyToGroundTruth(osi3::GroundTruth& target) const
     auto newLaneBoundary = target.add_lane_boundary();
     newLaneBoundary->CopyFrom(*osiLaneBoundary);
 }
+
+Lane::LaneAssignmentCollector::LaneAssignmentCollector() noexcept
+{
+    downstreamOrderAssignments.reserve(INITIAL_COLLECTION_SIZE);
+    upstreamOrderAssignments.reserve(INITIAL_COLLECTION_SIZE);
+}
+
+void Lane::LaneAssignmentCollector::Insert(const LaneOverlap& laneOverlap, const OWL::Interfaces::WorldObject* object)
+{
+    downstreamOrderAssignments.emplace_back(laneOverlap, object);
+    upstreamOrderAssignments.emplace_back(laneOverlap, object);
+    dirty = true;
+}
+
+void Lane::LaneAssignmentCollector::Clear()
+{
+    downstreamOrderAssignments.clear();
+    upstreamOrderAssignments.clear();
+    dirty = false;
+}
+
+void Lane::LaneAssignmentCollector::Sort() const
+{  
+    std::sort(downstreamOrderAssignments.begin(), downstreamOrderAssignments.end(),
+              [](const auto& lhs, const auto& rhs)
+    {
+        return lhs.first.s_min < rhs.first.s_min || 
+               (lhs.first.s_min == rhs.first.s_min && lhs.first.s_max < rhs.first.s_max);
+    });
+
+    std::sort(upstreamOrderAssignments.begin(), upstreamOrderAssignments.end(),
+              [](const auto& lhs, const auto& rhs)
+    {
+        return lhs.first.s_max > rhs.first.s_max || 
+               (lhs.first.s_max == rhs.first.s_max && lhs.first.s_min > rhs.first.s_min);
+    });
+
+    dirty = false;
+}
+
+const Interfaces::LaneAssignments& Lane::LaneAssignmentCollector::Get(bool downstream) const
+{
+    if(dirty)
+    {
+        Sort();
+    }
+
+    if(downstream)
+    {
+        return downstreamOrderAssignments;
+    }
+    else
+    {
+        return upstreamOrderAssignments;
+    }
 
 TrafficLight::TrafficLight(osi3::TrafficLight *osiLightRed, osi3::TrafficLight *osiLightYellow, osi3::TrafficLight *osiLightGreen) :
     osiLightRed(osiLightRed),

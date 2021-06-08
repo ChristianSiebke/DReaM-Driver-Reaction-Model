@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2018, 2019, 2020 in-tech
+* Copyright (c) 2018, 2019, 2020, 2021 in-tech
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,7 @@
 #include "gmock/gmock.h"
 
 #include "SceneryConverter.h"
+#include "EntityRepository.h"
 
 #include "fakeAgent.h"
 #include "fakeLane.h"
@@ -25,6 +26,7 @@
 #include "fakeWorldData.h"
 #include "fakeConnection.h"
 #include "fakeJunction.h"
+#include "fakeDataStore.h"
 
 #include "Generators/laneGeometryElementGenerator.h"
 
@@ -37,6 +39,14 @@ using ::testing::SetArgReferee;
 using ::testing::Invoke;
 using ::testing::Const;
 using ::testing::_;
+
+class FakeRepository : public openpass::entity::RepositoryInterface
+{
+public:
+    MOCK_METHOD0(Reset, void());
+    MOCK_METHOD1(Register, openpass::type::EntityId (openpass::type::EntityInfo));
+    MOCK_METHOD2(Register, openpass::type::EntityId (openpass::entity::EntityType entityType, openpass::type::EntityInfo));
+};
 
 std::tuple<const OWL::Primitive::LaneGeometryJoint*, const OWL::Primitive::LaneGeometryJoint*> CreateSectionPartJointsRect(double length)
 {
@@ -97,7 +107,8 @@ TEST(CalculateAbsolutCoordinates, Test2)
     ON_CALL(testRoadObject, GetHdg()).WillByDefault(Return(0));
     World::Localization::Localizer localizer{worldData};
 
-    SceneryConverter converter(nullptr, worldData, localizer, nullptr);
+    NiceMock<FakeRepository> fakeRepository;
+    SceneryConverter converter(nullptr, fakeRepository, worldData, localizer, nullptr);
 
     bool isInWorld;
     double x, y, yaw;
@@ -127,12 +138,11 @@ public:
     MOCK_CONST_METHOD0(GetElementType, RoadLinkElementType());
     MOCK_CONST_METHOD0(GetElementId, const std::string &());
     MOCK_CONST_METHOD0(GetContactPoint, ContactPointType());
-    MOCK_CONST_METHOD0(GetDirection, RoadLinkDirectionType());
-    MOCK_CONST_METHOD0(GetSide, RoadLinkSideType());
 };
 
 void Connect(const RoadInterface* incomingRoad, const RoadInterface* connectingRoad,
-             const RoadInterface* outgoingRoad, ContactPointType incomingContactPoint, ContactPointType outgoingContactPoint,
+             const RoadInterface* outgoingRoad, ContactPointType incomingContactPoint,
+             ContactPointType connectingContactPoint, ContactPointType outgoingContactPoint,
              std::map<int, int> laneIdMapping)
 {
 
@@ -143,6 +153,7 @@ TEST(SceneryConverter, RefactoringSafeguard_DoNotDelete)
 {
     FakeScenery stubScenery;
     FakeConnection stubConnection;
+    ON_CALL(stubConnection, GetContactPoint()).WillByDefault(Return(ContactPointType::Start));
 
     FakeOdRoad incomingRoad;
     ON_CALL(stubConnection, GetIncommingRoadId()).WillByDefault(Return("incomingRoadId"));
@@ -177,9 +188,9 @@ TEST(SceneryConverter, RefactoringSafeguard_DoNotDelete)
             &stubJunction,
 
             [&](const JunctionInterface*, const RoadInterface *incomingRoad, const RoadInterface *connectingRoad, const RoadInterface *outgoingRoad,
-                ContactPointType incomingContactPoint, ContactPointType outgoingContactPoint,
+                ContactPointType incomingContactPoint, ContactPointType connectingContactPoint, ContactPointType outgoingContactPoint,
                 std::map<int, int> laneIdMapping) {
-                Connect(incomingRoad, connectingRoad, outgoingRoad, incomingContactPoint,
+                Connect(incomingRoad, connectingRoad, outgoingRoad, incomingContactPoint, connectingContactPoint,
                                       outgoingContactPoint, laneIdMapping); });
 
     ASSERT_THAT(status, true);

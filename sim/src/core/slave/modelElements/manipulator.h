@@ -17,11 +17,11 @@
 
 #include <list>
 
-#include "common/parameters.h"
-#include "include/manipulatorInterface.h"
 #include "bindings/manipulatorLibrary.h"
-#include "include/worldInterface.h"
 #include "common/log.h"
+#include "include/manipulatorInterface.h"
+#include "include/worldInterface.h"
+#include "modelElements/parameters.h"
 
 namespace SimulationSlave
 {

@@ -128,7 +128,7 @@ public:
         bool boolValue;
         int intValue;
         double realValue;
-        char* stringValue;
+        const char* stringValue;
     };
 
 protected:

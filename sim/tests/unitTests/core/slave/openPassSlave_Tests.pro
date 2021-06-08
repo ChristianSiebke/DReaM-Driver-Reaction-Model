@@ -40,8 +40,7 @@ DEPENDENCIES = \
     $$OPEN_SRC/core/common/cephes/polevl.c \
     $$OPEN_SRC/core/common/cephes/const.c \
     $$OPEN_SRC/core/common/log.cpp \
-    $$OPEN_SRC/../../common/xmlParser.cpp \
-    $$OPEN_SRC/core/common/parameters.cpp
+    $$OPEN_SRC/../../common/xmlParser.cpp
 
 AGENTSAMPLER_TESTS = \
     $$UNIT_UNDER_TEST/framework/dynamicProfileSampler.h \
@@ -50,6 +49,7 @@ AGENTSAMPLER_TESTS = \
     $$UNIT_UNDER_TEST/framework/dynamicAgentTypeGenerator.cpp \
     $$UNIT_UNDER_TEST/modelElements/componentType.cpp \
     $$UNIT_UNDER_TEST/modelElements/agentType.cpp \
+    $$UNIT_UNDER_TEST/modelElements/parameters.cpp \
     $$UNIT_UNDER_TEST/importer/systemConfig.cpp \
     \
     agentSampler_Tests.cpp

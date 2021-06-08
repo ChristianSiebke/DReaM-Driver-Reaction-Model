@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019, 2020 in-tech GmbH
+* Copyright (c) 2019, 2020, 2021 in-tech GmbH
 *               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -20,6 +20,7 @@
 
 constexpr double EQUALITY_BOUND = 1e-3;
 
+//! Type of element in RoadNetwork
 enum class RoadNetworkElementType
 {
     Road,
@@ -27,6 +28,7 @@ enum class RoadNetworkElementType
     None
 };
 
+//! Element in RoadNetwork (as used as successor/predecessor of a road in OpenDRIVE)
 struct RoadNetworkElement
 {
     RoadNetworkElementType type;
@@ -39,6 +41,7 @@ struct RoadNetworkElement
     {}
 };
 
+//! Single connection of a junction
 struct JunctionConnection
 {
     std::string connectingRoadId;
@@ -46,14 +49,16 @@ struct JunctionConnection
     bool outgoingStreamDirection;
 };
 
+//! Priority defintion of two crossing connections on a junction
+//! (i.e. defines which vehicle has right of way)
 struct JunctionConnectorPriority
 {
     JunctionConnectorPriority(std::string high, std::string low) :
         high(high),
         low(low)
     {}
-    std::string high;
-    std::string low;
+    std::string high; //!id of connecting road with higher priority
+    std::string low; //!id of connecting road with lower priority
 };
 
 //!Rank of one junction connection w.r.t. another
@@ -75,33 +80,40 @@ struct IntersectingConnection
     }
 };
 
+//! Type of a lane
 enum class LaneType
 {
     Undefined = 0,
-    None,
+    Shoulder,
+    Border,
     Driving,
     Stop,
-    Shoulder,
-    Biking,
-    Sidewalk,
-    Border,
+    None,
     Restricted,
     Parking,
-    Bidirectional,
     Median,
-    Special1,
-    Special2,
-    Special3,
-    Roadworks,
-    Tram,
-    Rail,
-    Entry,
+    Biking,
+    Sidewalk,
+    Curb,
     Exit,
+    Entry,
+    OnRamp,
     OffRamp,
-    OnRamp
+    ConnectingRamp
 };
 
+//! interval on a road over multiple lanes
+struct LaneSection
+{
+    double startS;
+    double endS;
+    std::vector<int> laneIds;
+};
+
+using LaneSections = std::vector<LaneSection>;
+
 namespace RelativeWorldView {
+//! Lane as viewed relative to a position / agent
 struct Lane
 {
     int relativeId;
@@ -120,6 +132,7 @@ struct Lane
     }
 };
 
+//! interval on a road over multiple lanes relative to a position / agent
 struct LanesInterval
 {
     double startS;
@@ -127,8 +140,11 @@ struct LanesInterval
     std::vector<Lane> lanes;
 };
 
+//! Relative view of a portion of the road network
+//! as viewed from a specific position / agent
 using Lanes = std::vector<LanesInterval>;
 
+//! Position of a junction relative to a agent
 struct Junction
 {
     double startS;
@@ -318,6 +334,7 @@ enum Type
     OvertakingBanEnd = 280,
     OvertakingBanTrucksEnd = 281,
     EndOffAllSpeedLimitsAndOvertakingRestrictions = 282,
+    PedestrianCrossing = 293,
     RightOfWayNextIntersection = 301,
     RightOfWayBegin = 306,
     RightOfWayEnd = 307,
@@ -379,7 +396,8 @@ enum class Color
     Yellow,
     Red,
     Blue,
-    Green
+    Green,
+    Other
 };
 
 struct Entity

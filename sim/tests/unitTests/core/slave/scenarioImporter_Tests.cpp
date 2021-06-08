@@ -142,6 +142,38 @@ TEST(ScenarioImporter_UnitTests, ImportPositionElementWorld)
     ASSERT_THAT(worldPosition.h.value(), Eq(0.5));
 }
 
+TEST(ScenarioImporter_UnitTests, ImportPositionElementRelativeWorldPosition)
+{
+    QDomElement rootElement = documentRootFromString(
+        R"(<root><Position><RelativeWorldPosition dx="10.0" dy="-4.0" entityRef="ref"><Orientation type="relative" h="1.57"></RelativeWorldPosition></Position></root>)");
+
+    openScenario::Parameters parameters;
+
+    openScenario::RelativeWorldPosition relativeWorldPosition;
+    EXPECT_NO_THROW(relativeWorldPosition = std::get<openScenario::RelativeWorldPosition>(openScenario::ScenarioImporterHelper::ImportPosition(rootElement, parameters)));
+    ASSERT_EQ(relativeWorldPosition.entityRef, "ref");
+    ASSERT_EQ(relativeWorldPosition.dx, 10.0);
+    ASSERT_EQ(relativeWorldPosition.dy, -4);
+    ASSERT_FALSE(relativeWorldPosition.dz.has_value());
+    ASSERT_TRUE(relativeWorldPosition.orientation.has_value());
+}
+
+TEST(ScenarioImporter_UnitTests, ImportPositionElementRelativeObjectPosition)
+{
+    QDomElement rootElement = documentRootFromString(
+        R"(<root><Position><RelativeObjectPosition dx="10.0" dy="-4.0" entityRef="ref"><Orientation type="relative" h="1.57"></RelativeObjectPosition></Position></root>)");
+
+    openScenario::Parameters parameters;
+
+    openScenario::RelativeObjectPosition relativeObjectPosition;
+    EXPECT_NO_THROW(relativeObjectPosition = std::get<openScenario::RelativeObjectPosition>(openScenario::ScenarioImporterHelper::ImportPosition(rootElement, parameters)));
+    ASSERT_EQ(relativeObjectPosition.entityRef, "ref");
+    ASSERT_EQ(relativeObjectPosition.dx, 10.0);
+    ASSERT_EQ(relativeObjectPosition.dy, -4);
+    ASSERT_FALSE(relativeObjectPosition.dz.has_value());
+    ASSERT_TRUE(relativeObjectPosition.orientation.has_value());
+}
+
 TEST(ScenarioImporter_UnitTests, ImportSpeedAction)
 {
     QDomElement rootElement = documentRootFromString(
@@ -290,6 +322,21 @@ TEST(ScenarioImporter_UnitTests, ImportAssignRoutingAction)
     ASSERT_THAT(assignRouteAction[1].t, DoubleEq(1));
     ASSERT_THAT(assignRouteAction[2].roadId, Eq("RoadId3"));
     ASSERT_THAT(assignRouteAction[2].t, DoubleEq(-1));
+}
+
+TEST(ScenarioImporter_UnitTests, ImportAcquirePositionAction)
+{
+    QDomElement rootElement = documentRootFromString(
+        R"(<root><RoutingAction><AcquirePositionAction><Position><WorldPosition x="76.17" y="5.625" z="0" h="0.0" p="0" r="0"/></Position></AcquirePositionAction></RoutingAction></root>)");
+
+    openScenario::Parameters parameters;
+
+    openScenario::Action action;
+    EXPECT_NO_THROW(action = openScenario::ScenarioImporterHelper::ImportPrivateAction(rootElement, parameters));
+    EXPECT_NO_THROW(
+        std::get<openScenario::AcquirePositionAction>(
+            std::get<openScenario::RoutingAction>(
+                std::get<openScenario::PrivateAction>(action))));
 }
 
 TEST(ScenarioImporter_UnitTests, ImportVehicleCatalog_ReturnsSuccess)

@@ -122,13 +122,18 @@ SampledGeometry GeometryConverter::CalculateSectionBetweenRoadMarkChanges(double
     std::list<RoadGeometryInterface*> roadGeometries = road->GetGeometries();
     bool firstGeometry{true};
 
-    for(RoadGeometryInterface* roadGeometry: roadGeometries)
+    for(auto roadGeometry = roadGeometries.cbegin(); roadGeometry != roadGeometries.cend(); ++roadGeometry)
     {
+        auto next = std::next(roadGeometry);
+        //To prevent rounding issues, the length is calculated as difference between the start s of the geometries
+        double roadGeometryLength = (next == roadGeometries.end()) ? (*roadGeometry)->GetLength()
+                                                                : (*next)->GetS() - (*roadGeometry)->GetS();
         auto sampledGeometry = CalculateGeometry(roadSectionStart,
                                                  roadSectionEnd,
                                                  road,
                                                  roadSection,
-                                                 roadGeometry);
+                                                 *roadGeometry,
+                                                 roadGeometryLength);
         if (sampledGeometry.borderPoints.empty())
         {
             continue;
@@ -150,10 +155,9 @@ SampledGeometry GeometryConverter::CalculateGeometry(double roadSectionStart,
                                                      double roadSectionEnd,
                                                      const RoadInterface* road,
                                                      const RoadLaneSectionInterface *roadSection,
-                                                     const RoadGeometryInterface* roadGeometry)
+                                                     const RoadGeometryInterface* roadGeometry,
+                                                     double roadGeometryLength)
 {
-    double roadGeometryLength = roadGeometry->GetLength();
-
     auto roadGeometryStart = roadGeometry->GetS();
     auto roadGeometryEnd = roadGeometryStart + roadGeometryLength;
 

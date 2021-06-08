@@ -9,6 +9,7 @@ add_openpass_target(
     AlgorithmFmuWrapper.h
     src/fmuWrapper.h
     src/OsmpFmuHandler.h
+    src/variant_visitor.h
 
   SOURCES
     AlgorithmFmuWrapper.cpp

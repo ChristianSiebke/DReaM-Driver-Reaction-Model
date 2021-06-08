@@ -1,5 +1,5 @@
 # /*********************************************************************
-# * Copyright (c) 2017, 2018, 2019 in-tech GmbH
+# * Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -35,12 +35,10 @@ INCLUDEPATH += \
 SOURCES += \
     $$getFiles(SUBDIRS, cpp) \
     $$getFiles(SUBDIRS, cc) \
-    $$getFiles(SUBDIRS, c) \
-    ../../../common/log.cpp
+    $$getFiles(SUBDIRS, c)
 
 HEADERS += \
     $$getFiles(SUBDIRS, hpp) \
-    $$getFiles(SUBDIRS, h) \
-    ../../../common/log.h
+    $$getFiles(SUBDIRS, h)
 
 LIBS += -lopen_simulation_interface -lprotobuf
