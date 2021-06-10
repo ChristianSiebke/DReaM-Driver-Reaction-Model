@@ -1,0 +1,11 @@
+[requires]
+ boost/1.76.0@openpass/testing
+ osi/3.2.0@openpass/testing
+ fmi/2.0.3@openpass/testing
+ gtest/1.10.0
+
+[options]
+ boost:shared=True
+
+[generators]
+ cmake
