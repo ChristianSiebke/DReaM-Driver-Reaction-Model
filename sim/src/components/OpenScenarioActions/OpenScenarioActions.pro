@@ -33,7 +33,7 @@ SOURCES += \
         src/transformLaneChange.cpp \
         src/transformSpeedAction.cpp \
         src/transformAcquirePosition.cpp \
-        src/transformCustomParameters.cpp
+        src/transformDefaultCustomCommandAction.cpp
 
 HEADERS += \
         openScenarioActions.h \
@@ -45,4 +45,4 @@ HEADERS += \
         src/transformLaneChange.h \
         src/transformSpeedAction.h \
         src/transformAcquirePosition.h \
-        src/transformCustomParameters.h
+        src/transformDefaultCustomCommandAction.h

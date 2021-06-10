@@ -15,6 +15,9 @@
 
 namespace openpass::common {
 
+//! Struct for defining the version of the simulator build
+//! The version can either be given by using semantic versioning with three integers
+//! or as some generic string
 struct Version
 {
     std::string tag;
@@ -22,16 +25,19 @@ struct Version
     unsigned int minor{0};
     unsigned int patch{0};
 
+    //! Constructor using generic string
     explicit Version(const std::string& tag) :
         tag{tag}
     {
     }
 
+    //! Constructor using semantic versioning
     explicit Version(unsigned int major, unsigned int minor, unsigned int patch) noexcept :
         major{major}, minor{minor}, patch{patch}
     {
     }
 
+    //! Return the version as string
     std::string str() const noexcept
     {
         if (tag.empty())
@@ -46,67 +52,5 @@ struct Version
         }
     }
 };
-
-//std::ostream& operator<<(std::ostream& os, const Version& version)
-//{
-//    return (os << version.major << '.' << version.minor << '.' << version.patch);
-//}
-
-
-//bool operator==(const Version &lhs, const Version &rhs) noexcept
-//{
-//    return rhs.patch == lhs.patch &&
-//           rhs.minor == lhs.minor &&
-//           rhs.major == lhs.major;
-//}
-
-//bool operator!=(const Version &lhs, const Version &rhs) noexcept
-//{
-//    return !(rhs == lhs);
-//}
-    
-//bool operator==(const Version &lhs, const std::string &rhs) noexcept
-//{
-//    std::stringstream ss;
-//    ss << lhs.major << '.' << lhs.minor << '.' << lhs.patch;
-//    return ss.str() == rhs;
-//}
-
-//bool operator!=(const Version &lhs, const std::string &rhs) noexcept
-//{
-//    return !(lhs == rhs);
-//}
-
-//bool operator==(const std::string &lhs, const Version &rhs) noexcept
-//{
-//    return rhs == lhs;
-//}
-
-//bool operator!=(const std::string &lhs, const Version &rhs) noexcept
-//{
-//    return !(rhs == lhs);
-//}
-
-//bool operator<(const Version& lhs, const Version& rhs) noexcept
-//{
-//    return lhs.major < rhs.major &&
-//           lhs.minor < rhs.minor &&
-//           lhs.patch < rhs.patch;
-//}
-
-//bool operator>(const Version& lhs, const Version& rhs) noexcept
-//{
-//    return !(lhs < rhs);
-//}
-
-//bool operator<=(const Version& lhs, const Version& rhs) noexcept
-//{
-//    return (lhs == rhs) || (lhs < rhs);
-//}
-
-//bool operator>=(const Version& lhs, const Version& rhs) noexcept
-//{
-//    return !(lhs <= rhs);
-//}
 
 } // namespace openpass::common

@@ -19,18 +19,20 @@
 #include "include/worldInterface.h"
 #include "common/openScenarioDefinitions.h"
 
-/// \brief Use this class as static auto registering factory for custom commands
+/// @brief Use this class as static auto registering factory for custom commands
 ///
 /// Note that registration happens automatically without additional construction code,
 /// when the register method is used in a static assignment. This means that registering
 /// will be done if the translation unit holds an according statement (!)
 ///
 /// Example:
-/// SomeClass.h -> static inline bool registered = CustomCommandFactory::Register("myCommand");
+/// SomeClass.h -> static inline bool registered = CustomCommandFactory::Register("myKeyword");
 /// SomeClass.cpp is part of the translation unit
 ///
 /// Effect:
-/// SomeOtherFile.cpp -> CustomCommandFactory::Create("myCommand", ...); // Args must be delivered
+/// SomeOtherFile.cpp -> CustomCommandFactory::Create("myKeyword", ...); // Args must be delivered
+///
+/// @ingroup Manipulator
 class CustomCommandFactory final
 {
     using CreateSignature = ManipulatorInterface *(*)(WorldInterface *,
@@ -40,15 +42,15 @@ class CustomCommandFactory final
                                                       const std::string &);
 
 public:
-    /// \brief  Create registered class from command
-    /// \param  command   The command, used during Register
+    /// \brief  Create registered class from keyword
+    /// \param  keyword   The keyword used during Register
     /// \param  args      Arguments of the underlying class
     /// \return The created instance
     ///
     template <typename... Args>
-    static ManipulatorInterface* Create(const std::string &command, Args... args)
+    static ManipulatorInterface *Create(const std::string &keyword, Args... args)
     {
-        if (auto it = repository().find(command); it != repository().end())
+        if (auto it = repository().find(keyword); it != repository().end())
         {
             return it->second(std::forward<Args>(args)...);
         }
@@ -58,20 +60,20 @@ public:
         }
     }
 
-    /// \brief Register a type T for a given command
-    /// \return True if command could been registered
+    /// \brief Register a type T for a given keyword
+    /// \return True if keyword could been registered
     template <typename T>
-    static bool Register(const std::string command)
+    static bool Register(const std::string keyword)
     {
-        if (auto it = repository().find(command); it == repository().end())
+        if (auto it = repository().find(keyword); it == repository().end())
         {
-            repository()[command] = [](
+            repository()[keyword] = [](
                                         WorldInterface *world,
                                         SimulationSlave::EventNetworkInterface *eventNetwork,
                                         const CallbackInterface *callback,
-                                        const openScenario::CustomCommandAction customCommandAction,
+                                        const openScenario::CustomCommandAction action,
                                         const std::string &eventName) -> ManipulatorInterface * {
-                return new T(world, eventNetwork, callback, customCommandAction, eventName);
+                return new T(world, eventNetwork, callback, action, eventName);
             };
             return true;
         }
