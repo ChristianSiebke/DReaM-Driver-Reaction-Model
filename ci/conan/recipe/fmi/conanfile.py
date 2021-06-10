@@ -12,7 +12,7 @@ class FmiConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    generators = "cmake_find_package", "cmake_paths"
+    generators = "cmake"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -24,16 +24,23 @@ class FmiConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(source_folder="fmi")
+        cmake.configure(source_folder="fmi",
+                        defs={"FMILIB_BUILD_STATIC_LIB":"OFF",
+                              "FMILIB_BUILD_SHARED_LIB":"ON"})
         cmake.build()
 
     def package(self):
-        self.copy("*.h", dst="include", src="fmi")
-        self.copy("*hello.lib", dst="lib", keep_path=False)
-        self.copy("*.dll", dst="bin", keep_path=False)
-        self.copy("*.so", dst="lib", keep_path=False)
-        self.copy("*.dylib", dst="lib", keep_path=False)
-        self.copy("*.a", dst="lib", keep_path=False)
+        # self.copy("*.h", dst="include", keep_path=False)
+        # self.copy("*.lib", dst="lib", keep_path=False)
+        # self.copy("*.dll", dst="lib", keep_path=False)
+        # self.copy("*.so", dst="lib", keep_path=False)
+        # self.copy("*.dylib", dst="lib", keep_path=False)
+        # self.copy("*.a", dst="lib", keep_path=False)
+        self.copy("*", dst="include/FMILibrary", src= "FMI")
+        self.copy("*", dst="include/FMILibrary", src= "FMI2")
+        self.copy("*", dst="include/FMILibrary", src= "JM")
+        self.copy("fmilib.h", dst="include/FMILibrary")
+        self.copy("fmilib_config.h", dst="include/FMILibrary")
 
     def package_info(self):
         self.cpp_info.libs = ["fmi"]

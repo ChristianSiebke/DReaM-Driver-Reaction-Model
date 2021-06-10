@@ -11,9 +11,9 @@ class OpenpassConan(ConanFile):
     topics = ("<Put some tag here>", "<here>", "<and here>")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False], "Gui_only": [True, False]}
-    default_options = {"shared": False, "fPIC": True, "boost:shared": True, "Gui_only": False}
+    default_options = {"shared": True, "fPIC": True, "boost:shared": True, "Gui_only": False}
     generators = "cmake_find_package", "cmake_paths"
-    exports_sources = "../../../../external/simopenpass/*"
+    exports_sources = "../../../../*" # use source of the repo
     short_paths = True
 
     def config_options(self):
@@ -35,7 +35,7 @@ class OpenpassConan(ConanFile):
 
     def build(self):
         PATH_MINGW = "/mingw64/bin;"
-        PATH_FMIL = "C:/OpenPASS/thirdParty"
+        PATH_FMIL = ""
         PATH_BOOST = ""
         PATH_OSI = ""
         PATH_PROTOBUF = ""
@@ -45,7 +45,7 @@ class OpenpassConan(ConanFile):
                         "WITH_SIMCORE":"OFF",
                         "WITH_TESTS":"OFF",
                         "WITH_DOC":"OFF",
-                        "WITH_PROTOBUF_ARENA":"",
+                        "WITH_PROTOBUF_ARENA":"OFF",
                         "WITH_DEBUG_POSTFIX":"OFF",
                         "CMAKE_PREFIX_PATH": PATH_MINGW + ";"
                                             + PATH_FMIL + ";"
@@ -64,7 +64,7 @@ class OpenpassConan(ConanFile):
                             "WITH_TESTS":"OFF",
                             "WITH_DOC":"OFF",
                             "WITH_PROTOBUF_ARENA":"OFF",
-                            "WITH_DEBUG_POSTFIX":"ON",
+                            "WITH_DEBUG_POSTFIX":"OFF",
                         }
 
         cmake.configure(defs=arguments)

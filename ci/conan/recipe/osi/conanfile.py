@@ -11,7 +11,7 @@ class OsiConan(ConanFile):
     topics = ("<Put some tag here>", "<here>", "<and here>")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    default_options = {"shared": True, "fPIC": True}
     generators = "cmake"
     requires = "protobuf/3.15.5"
     short_paths = True
