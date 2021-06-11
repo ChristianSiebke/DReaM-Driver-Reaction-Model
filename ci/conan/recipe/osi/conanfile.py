@@ -1,6 +1,5 @@
 from conans import ConanFile, CMake, tools
 
-
 class OsiConan(ConanFile):
     name = "osi"
     version = "3.2.0"
@@ -13,7 +12,6 @@ class OsiConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": True, "fPIC": True}
     generators = "cmake"
-    requires = "protobuf/3.15.5"
     short_paths = True
 
     def config_options(self):
@@ -28,14 +26,10 @@ class OsiConan(ConanFile):
         cmake = CMake(self)
         cmake.configure(source_folder="osi3")
         cmake.build()
+        cmake.install()
 
     def package(self):
-        self.copy("*.h", dst=".", keep_path=False)
-        self.copy("*.cc", dst=".", keep_path=False)
-        self.copy("*.dll", dst=".", keep_path=False)
-        self.copy("*.lib", dst=".", keep_path=False)
-        self.copy("*.so", dst=".", keep_path=False)
-        self.copy("*.a", dst=".", keep_path=False)
+        self.copy("*", src="package")
 
     def package_info(self):
         self.cpp_info.libs = ["osi3"]

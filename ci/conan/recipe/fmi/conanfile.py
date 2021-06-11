@@ -1,6 +1,5 @@
 from conans import ConanFile, CMake, tools
 
-
 class FmiConan(ConanFile):
     name = "fmi"
     version = "2.0.3"
@@ -31,21 +30,11 @@ class FmiConan(ConanFile):
         if self.settings.os == "Linux":
             tools.patch(patch_file="fmil203.patch")
         cmake.build()
+        cmake.install()
 
     def package(self):
-        # self.copy("*.h", dst="include", keep_path=False)
-        # self.copy("*.lib", dst="lib", keep_path=False)
-        # self.copy("*.dll", dst="lib", keep_path=False)
-        # self.copy("*.so", dst="lib", keep_path=False)
-        # self.copy("*.dylib", dst="lib", keep_path=False)
-        # self.copy("*.a", dst="lib", keep_path=False)
-        self.copy("*", dst="include/FMILibrary", src= "FMI")
-        self.copy("*", dst="include/FMILibrary", src= "FMI2")
-        self.copy("*", dst="include/FMILibrary", src= "JM")
-        self.copy("fmilib.h", dst="include/FMILibrary")
-        self.copy("fmilib_config.h", dst="include/FMILibrary")
+        self.copy("*", src="../install")
 
     def package_info(self):
         self.cpp_info.libs = ["fmi"]
         
-
