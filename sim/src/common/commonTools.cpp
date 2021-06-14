@@ -84,6 +84,17 @@ bool CommonHelper::IntersectionCalculation::IsWithin(const Common::Vector2d &A, 
             OnEdge(B, C, P);   // along triangular split
 }
 
+//! Adds a new point to the list if it is not already in the list (or a point near it within a small epsilon)
+void AddPointIfNotDuplicate(std::vector<Common::Vector2d>& points, const Common::Vector2d& newPoint)
+{
+    //! Note: find uses the operator== which is defined for Vector2d taking a small epsilon into account
+    //! This mitigates rounding errors
+    if(std::find(points.cbegin(), points.cend(), newPoint) == points.cend())
+    {
+        points.emplace_back(newPoint);
+    }
+}
+
 std::vector<Common::Vector2d> CommonHelper::IntersectionCalculation::GetIntersectionPoints(const std::vector<Common::Vector2d> &firstPoints, const std::vector<Common::Vector2d> &secondPoints, bool firstIsRectangular, bool secondIsRectangular)
 {
     std::vector<Common::Vector2d> intersectionPoints{};
@@ -131,14 +142,14 @@ std::vector<Common::Vector2d> CommonHelper::IntersectionCalculation::GetIntersec
             if ((!parallel[0][k] ? kappa[0][k] * kappa[2][k] < 0 : (1 - kappa[0][(k -1) % 4]) * (1 - kappa[2][(k -1) % 4]) < 0) &&
                     (!parallel[1][k] ? kappa[1][k] * kappa[3][k] < 0 : (1 - kappa[1][(k -1) % 4]) * (1 - kappa[3][(k -1) % 4]) < 0))
             {
-                intersectionPoints.emplace_back(firstPoints[k]);
+                AddPointIfNotDuplicate(intersectionPoints, firstPoints[k]);
             }
         }
         else
         {
             if (IsWithin(secondPoints[1], secondPoints[2], secondPoints[0], secondPoints[3], firstPoints[k]))
             {
-                intersectionPoints.emplace_back(firstPoints[k]);
+                AddPointIfNotDuplicate(intersectionPoints, firstPoints[k]);
             }
         }
     }
@@ -151,20 +162,14 @@ std::vector<Common::Vector2d> CommonHelper::IntersectionCalculation::GetIntersec
             if ((!parallel[i][0] ? lambda[i][0] * lambda[i][2] < 0 : (1 - lambda[(i -1) % 4][0]) * (1 - lambda[(i -1) % 4][2]) < 0) &&
                     (!parallel[i][1] ? lambda[i][1] * lambda[i][3] < 0 : (1 - lambda[(i -1) % 4][1]) * (1 - lambda[(i -1) % 4][3]) < 0))
             {
-                if(std::find(intersectionPoints.cbegin(), intersectionPoints.cend(), secondPoints[i]) == intersectionPoints.cend())
-                {
-                    intersectionPoints.emplace_back(secondPoints[i]);
-                }
+                AddPointIfNotDuplicate(intersectionPoints, secondPoints[i]);
             }
         }
         else
         {
             if (IsWithin(firstPoints[1], firstPoints[2], firstPoints[0], firstPoints[3], secondPoints[i]))
             {
-                if(std::find(intersectionPoints.cbegin(), intersectionPoints.cend(), secondPoints[i]) == intersectionPoints.cend())
-                {
-                    intersectionPoints.emplace_back(secondPoints[i]);
-                }
+                AddPointIfNotDuplicate(intersectionPoints, secondPoints[i]);
             }
         }
     }
