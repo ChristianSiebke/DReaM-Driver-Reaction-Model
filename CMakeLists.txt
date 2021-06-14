@@ -12,6 +12,7 @@
 cmake_minimum_required(VERSION 3.13)
 
 project(openPASS C CXX)
+include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
 
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmake")
 
