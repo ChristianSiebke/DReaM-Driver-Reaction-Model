@@ -13,7 +13,7 @@ class OpenpassConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False], "Gui_only": [True, False]}
     default_options = {"shared": True, "fPIC": True, "boost:shared": True, "Gui_only": False}
     generators = "cmake_find_package", "cmake_paths"
-    exports_sources = "../../../../*" # use source of the repo
+    exports_sources = "../../../../../*" # use source of the repo
     short_paths = True
 
     def config_options(self):
@@ -26,7 +26,7 @@ class OpenpassConan(ConanFile):
             #self.requires("protobuf/3.15.5")
             self.requires("osi/3.2.0@openpass/testing")
             self.requires("fmi/2.0.3@openpass/testing")
-            self.requires("gtest/1.10.0")
+            #self.requires("gtest/1.10.0")
 
     #def source(self):
         #git = tools.Git(folder="openpass")
