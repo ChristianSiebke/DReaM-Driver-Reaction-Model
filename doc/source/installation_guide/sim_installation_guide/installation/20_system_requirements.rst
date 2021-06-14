@@ -84,5 +84,5 @@ Building under Linux
 ====================
 
 |Op| is developed under Debian 64-Bit, which means that developing under a recent Ubuntu distribution should also work.
-Debian uses ``apt`` (or ``apt-get``) as package managing system, and most prerequisites should be installable via ``app install package``.
-Details will be given in :ref:`prerequisites`.
+Debian Bullseye or Ubuntu 20.10 is recommended. Debian uses ``apt`` (or ``apt-get``) as package managing system, and most 
+prerequisites should be installable via ``app install package``.Details will be given in :ref:`prerequisites`. 

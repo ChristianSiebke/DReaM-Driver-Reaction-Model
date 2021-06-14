@@ -23,15 +23,10 @@ Installation
 - :ref:`Prerequisites` and :ref:`Building prerequisites` contain the instructions for installing the thirdparty software required by |op|
 - :ref:`Download_and_install_openpass` describes how to compile and run |op| once all prerequisites are installed
 
-Build System
-------------
-- :ref:`Cmake` holds information about available variables and options for the cross-platform build environment CMake
-
-Development Environment
-------------
-- :ref:`Vscode` describes the basic setup for Visual Studio Code
-- :ref:`Qtcreator` describes the basic setup for QtCreator
-
-Documentation Generator
-------------------
+Further Guidance
+----------------
 - :ref:`Sphinx` holds information about the documentation generator used to build this installation guide
+- :ref:`Cmake` holds information about available variables and options for the cross-platform build environment CMake
+- :ref:`Qtcreator` describes the basic setup for QtCreator
+- :ref:`Vscode` describes the basic setup for Visual Studio Code
+- :ref:`Building_protobuf` shows how to compile different versions of Protobuf and hook it into the |op| build

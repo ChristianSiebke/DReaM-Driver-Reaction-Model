@@ -12,40 +12,33 @@
 
 .. _download_and_install_openpass:
 
-Build and Install OpenPASS
-=============================
+Installing OpenPASS
+===================
 
-This section describes how compile and run |op|.
+This section describes how compile and run |op|. Please make sure that all system requirements are resolved according to 
+:ref:`System_requirements` and all prerequisites have been properly installed according to section :ref:`Prerequisites`.
+If you have strictly followed the instructions, the installed source packages should be located on your machine under 
+``C:\OpenPASS\thirdParty`` for **Windows** and ``~/OpenPASS/thirdParty`` for **Linux**. If there is a path deviation, 
+the following commands must be adjusted.
+
+To keep the installation process of |op| as simple as possible, we again recommend a specific folder structure.
+If you have strictly followed and will follow the recommended paths of this guide, no command modifications are necessary.
 
 .. tabs::
 
    .. tab:: Notes for Windows
 
-      - ``C:\simopenpass`` refers to the standard checkout path when cloning the |op| repository
-      - ``C:\simopenpass\deps\thirdParty`` refers to a directory within the |op| repository  
-      - ``C:\OpenPASS\thirdParty`` refers to a temporary directory used to built the prerequisites from source, **not** the |op| repository
-      - ``C:\OpenPASS\bin\core`` refers to the installation directory
-
-      This section assumes that the installed source packages are located on your machine at ``C:\OpenPASS\thirdParty``. 
-      If you have strictly followed the recommended paths of this guide to this point, no command modifications are necessary.
-      In the following, |Op| gets installed into ``C:\OpenPASS\bin``.
+      - Recommended checkout path of |op| repository: ``C:\simopenpass``
+      - Recommended dependendy directory within the |op| repository: ``C:\simopenpass\deps\thirdParty``
+      - Recommended installation directory of |op|: ``C:\OpenPASS\bin\core``
 
    .. tab:: Notes for Linux
 
-      - ``~/simopenpass`` refers to the standard checkout path when cloning the |op| repository
-      - ``~/simopenpass/deps/thirdParty`` refers to a directory within the |op| repository  
-      - ``~/OpenPASS/thirdParty`` refers to a temporary directory used to built the prerequisites from source, **not** the |op| repository
-      - ``/usr/local/OpenPASS/bin/core`` refers to the installation directory
-
-      This section assumes  that the installed source packages are located on your machine at ``~/OpenPASS/thirdParty``. 
-      If you have strictly followed the recommended paths of this guide to this point, no command modifications are necessary. 
-      In the following, |Op| gets installed into ``/usr/local/OpenPASS/bin``.
+      - Recommended checkout path of |op| repository: ``~/simopenpass``
+      - Recommended dependendy directory within the |op| repository: ``~/simopenpass/deps/thirdParty``
+      - Recommended installation directory of |op|: ``/usr/local/OpenPASS/bin/core``
  
-.. note::
-
-   For **Windows**, an up-to-date MinGW 64-bit environment is assumed, for **Linux**, Debian Bullseye or Ubuntu 20.10 is recommended.
-
-#. Install dependencies. See :ref:`Prerequisites` for binary packages and :ref:`Building prerequisites` for source packages. 
+The above directory structure will be created by following the instructions of this guide. 
 
 #. Clone |Op| repository
 
@@ -122,24 +115,6 @@ This section describes how compile and run |op|.
       
             cp -r osi ~/simopenpass/deps/thirdParty
             cp -r FMILibrary ~/simopenpass/deps/thirdParty
-
-   .. note::
-
-      If custom protobuf build is used, add 
-
-      .. tabs::
-
-         .. tab:: Windows
-
-            .. code-block:: 
-
-               cp -r protobuf /C/simopenpass/deps/thirdParty
-
-         .. tab:: Linux
-
-            .. code-block:: 
-   
-               cp -r protobuf ~/simopenpass/deps/thirdParty
 
    .. _ref_prerequisites:
 

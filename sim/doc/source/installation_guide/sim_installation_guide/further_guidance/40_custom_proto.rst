@@ -13,7 +13,7 @@
 .. _building_protobuf:
 
 Custom Protobuf Build
-*******************************
+*********************
 
 Build and Install Protobuf
 ==========================
