@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -368,4 +368,124 @@ TEST(LaneAssignmentCollector, GetUpstream_ReturnObjectsInCorrectOrder)
     ASSERT_THAT(result, ElementsAre(OWL::Interfaces::LaneAssignment{overlap3, &object3},
                                     OWL::Interfaces::LaneAssignment{overlap2, &object2},
                                     OWL::Interfaces::LaneAssignment{overlap1, &object1}));
+}
+
+TEST(TrafficLights, SetSpecification_ThreeLights)
+{
+    FakeRoadSignal roadSignal;
+    ON_CALL(roadSignal, GetType()).WillByDefault(Return("1.000.011"));
+    ON_CALL(roadSignal, GetSubType()).WillByDefault(Return("20"));
+    Position position{};
+
+    osi3::TrafficLight osiLightRed;
+    osi3::TrafficLight osiLightYellow;
+    osi3::TrafficLight osiLightGreen;
+    OWL::Implementation::TrafficLight trafficLight(&osiLightRed, &osiLightYellow, &osiLightGreen);
+
+    ASSERT_THAT(trafficLight.SetSpecification(&roadSignal, position), Eq(true));
+
+    const auto specification = trafficLight.GetSpecification(5);
+
+    ASSERT_THAT(specification.type, Eq(CommonTrafficLight::Type::ThreeLightsRight));
+    ASSERT_THAT(osiLightRed.classification().icon(), Eq(osi3::TrafficLight_Classification_Icon_ICON_ARROW_RIGHT));
+    ASSERT_THAT(osiLightYellow.classification().icon(), Eq(osi3::TrafficLight_Classification_Icon_ICON_ARROW_RIGHT));
+    ASSERT_THAT(osiLightGreen.classification().icon(), Eq(osi3::TrafficLight_Classification_Icon_ICON_ARROW_RIGHT));
+};
+
+TEST(TrafficLights, SetSpecification_TwoLights)
+{
+    FakeRoadSignal roadSignal;
+    ON_CALL(roadSignal, GetType()).WillByDefault(Return("1.000.013"));
+    ON_CALL(roadSignal, GetSubType()).WillByDefault(Return(""));
+    Position position{};
+
+    osi3::TrafficLight osiLightRed;
+    osi3::TrafficLight osiLightGreen;
+    OWL::Implementation::TrafficLight trafficLight(&osiLightRed, nullptr, &osiLightGreen);
+
+    ASSERT_THAT(trafficLight.SetSpecification(&roadSignal, position), Eq(true));
+
+    const auto specification = trafficLight.GetSpecification(5);
+
+    ASSERT_THAT(specification.type, Eq(CommonTrafficLight::Type::TwoLightsBicycle));
+    ASSERT_THAT(osiLightRed.classification().icon(), Eq(osi3::TrafficLight_Classification_Icon_ICON_BICYCLE));
+    ASSERT_THAT(osiLightGreen.classification().icon(), Eq(osi3::TrafficLight_Classification_Icon_ICON_BICYCLE));
+};
+
+TEST(TrafficLights, SetSpecification_SetsCorrectBaseStationaryForPositiveOrientation)
+{
+    FakeRoadSignal roadSignal;
+    ON_CALL(roadSignal, GetType()).WillByDefault(Return("333"));
+    ON_CALL(roadSignal, GetWidth()).WillByDefault(Return(4.0));
+    ON_CALL(roadSignal, GetHeight()).WillByDefault(Return(5.0));
+    ON_CALL(roadSignal, GetZOffset()).WillByDefault(Return(3.0));
+    ON_CALL(roadSignal, GetHOffset()).WillByDefault(Return(2.0));
+    ON_CALL(roadSignal, GetOrientation()).WillByDefault(Return(true));
+    ON_CALL(roadSignal, GetType()).WillByDefault(Return("1.000.011"));
+    ON_CALL(roadSignal, GetSubType()).WillByDefault(Return("20"));
+    Position position{10, 11, -1.5, 0};
+
+    osi3::TrafficLight osiLightRed;
+    osi3::TrafficLight osiLightYellow;
+    osi3::TrafficLight osiLightGreen;
+    OWL::Implementation::TrafficLight trafficLight(&osiLightRed, &osiLightYellow, &osiLightGreen);
+
+    ASSERT_THAT(trafficLight.SetSpecification(&roadSignal, position), Eq(true));
+    ASSERT_THAT(osiLightRed.base().position().x(), Eq(10));
+    ASSERT_THAT(osiLightRed.base().position().y(), Eq(11));
+    ASSERT_THAT(osiLightRed.base().position().z(), Eq(5.5));
+    ASSERT_THAT(osiLightRed.base().dimension().width(), Eq(4));
+    ASSERT_THAT(osiLightRed.base().dimension().height(), Eq(5));
+    ASSERT_THAT(osiLightRed.base().orientation().yaw(), DoubleEq(0.5));
+    ASSERT_THAT(osiLightYellow.base().position().x(), Eq(10));
+    ASSERT_THAT(osiLightYellow.base().position().y(), Eq(11));
+    ASSERT_THAT(osiLightYellow.base().position().z(), Eq(5.5));
+    ASSERT_THAT(osiLightYellow.base().dimension().width(), Eq(4));
+    ASSERT_THAT(osiLightYellow.base().dimension().height(), Eq(5));
+    ASSERT_THAT(osiLightYellow.base().orientation().yaw(), DoubleEq(0.5));
+    ASSERT_THAT(osiLightGreen.base().position().x(), Eq(10));
+    ASSERT_THAT(osiLightGreen.base().position().y(), Eq(11));
+    ASSERT_THAT(osiLightGreen.base().position().z(), Eq(5.5));
+    ASSERT_THAT(osiLightGreen.base().dimension().width(), Eq(4));
+    ASSERT_THAT(osiLightGreen.base().dimension().height(), Eq(5));
+    ASSERT_THAT(osiLightGreen.base().orientation().yaw(), DoubleEq(0.5));
+}
+
+TEST(TrafficLights, SetSpecification_SetsCorrectBaseStationaryForNegativeOrientation)
+{
+    FakeRoadSignal roadSignal;
+    ON_CALL(roadSignal, GetType()).WillByDefault(Return("333"));
+    ON_CALL(roadSignal, GetWidth()).WillByDefault(Return(4.0));
+    ON_CALL(roadSignal, GetHeight()).WillByDefault(Return(5.0));
+    ON_CALL(roadSignal, GetZOffset()).WillByDefault(Return(3.0));
+    ON_CALL(roadSignal, GetHOffset()).WillByDefault(Return(1.0));
+    ON_CALL(roadSignal, GetOrientation()).WillByDefault(Return(false));
+    ON_CALL(roadSignal, GetType()).WillByDefault(Return("1.000.011"));
+    ON_CALL(roadSignal, GetSubType()).WillByDefault(Return("20"));
+    Position position{10, 11, 1.5, 0};
+
+    osi3::TrafficLight osiLightRed;
+    osi3::TrafficLight osiLightYellow;
+    osi3::TrafficLight osiLightGreen;
+    OWL::Implementation::TrafficLight trafficLight(&osiLightRed, &osiLightYellow, &osiLightGreen);
+
+    ASSERT_THAT(trafficLight.SetSpecification(&roadSignal, position), Eq(true));
+    ASSERT_THAT(osiLightRed.base().position().x(), Eq(10));
+    ASSERT_THAT(osiLightRed.base().position().y(), Eq(11));
+    ASSERT_THAT(osiLightRed.base().position().z(), Eq(5.5));
+    ASSERT_THAT(osiLightRed.base().dimension().width(), Eq(4));
+    ASSERT_THAT(osiLightRed.base().dimension().height(), Eq(5));
+    ASSERT_THAT(osiLightRed.base().orientation().yaw(), DoubleEq(2.5 - M_PI));
+    ASSERT_THAT(osiLightYellow.base().position().x(), Eq(10));
+    ASSERT_THAT(osiLightYellow.base().position().y(), Eq(11));
+    ASSERT_THAT(osiLightYellow.base().position().z(), Eq(5.5));
+    ASSERT_THAT(osiLightYellow.base().dimension().width(), Eq(4));
+    ASSERT_THAT(osiLightYellow.base().dimension().height(), Eq(5));
+    ASSERT_THAT(osiLightYellow.base().orientation().yaw(), DoubleEq(2.5 - M_PI));
+    ASSERT_THAT(osiLightGreen.base().position().x(), Eq(10));
+    ASSERT_THAT(osiLightGreen.base().position().y(), Eq(11));
+    ASSERT_THAT(osiLightGreen.base().position().z(), Eq(5.5));
+    ASSERT_THAT(osiLightGreen.base().dimension().width(), Eq(4));
+    ASSERT_THAT(osiLightGreen.base().dimension().height(), Eq(5));
+    ASSERT_THAT(osiLightGreen.base().orientation().yaw(), DoubleEq(2.5 - M_PI));
 }

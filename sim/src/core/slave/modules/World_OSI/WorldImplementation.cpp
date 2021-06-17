@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2016, 2017 ITK Engineering GmbH
 *               2020 HLRS, University of Stuttgart.
 *               2020 BMW AG
@@ -184,8 +184,7 @@ bool WorldImplementation::CreateScenery(SceneryInterface* scenery, const std::ve
     auto [roadGraph, vertexMapping] = networkBuilder.Build();
     worldData.SetRoadGraph(std::move(roadGraph), std::move(vertexMapping));
 
-    TrafficLightNetworkBuilder trafficLightNetworkBuilder(trafficSignalControllers, worldData);
-    trafficLightNetwork = trafficLightNetworkBuilder.Build();
+    trafficLightNetwork = TrafficLightNetworkBuilder::Build(trafficSignalControllers, worldData);
 
     return true;
 }

@@ -33,7 +33,7 @@ void TrafficLightController::UpdateStates(int time)
     double deltaTime = time - lastTime;
     lastTime = time;
     timeRemainingInCurrentPhase -= deltaTime;
-    while (timeRemainingInCurrentPhase < 0)
+    while (timeRemainingInCurrentPhase <= 0)
     {
         currentPhase++;
         if (currentPhase == phases.cend())

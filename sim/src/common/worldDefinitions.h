@@ -411,6 +411,7 @@ struct Entity
 
 namespace CommonTrafficLight
 {
+//! Type of a traffic light
 enum class Type
 {
     Undefined,
@@ -426,6 +427,7 @@ enum class Type
     TwoLightsPedestrianBicycle  //! red, green with pedestrian and bicycle symbol
 };
 
+//! State of a traffic light
 enum class State
 {
     Off,
@@ -436,6 +438,7 @@ enum class State
     YellowFlashing
 };
 
+//! Represents a single traffic light as seen from an agent
 struct Entity
 {
     Type type{Type::ThreeLights};

@@ -378,20 +378,9 @@ private:
     SceneryInterface& scenery;
 };
 
-//!This class build the TrafficLightNetwork
-class TrafficLightNetworkBuilder
+namespace TrafficLightNetworkBuilder
 {
-public:
-    TrafficLightNetworkBuilder(const std::vector<openScenario::TrafficSignalController>& controllers,
-                               const OWL::Interfaces::WorldData& worldData) :
-        controllers(controllers),
-        worldData(worldData)
-    {}
-
     //! Converts the traffic controller definitions of OpenDrive into the internal TrafficLightNetwork
-    TrafficLightNetwork Build();
-
-private:
-    const std::vector<openScenario::TrafficSignalController>& controllers;
-    const OWL::Interfaces::WorldData& worldData;
+    TrafficLightNetwork Build(const std::vector<openScenario::TrafficSignalController>& controllers,
+                              const OWL::Interfaces::WorldData& worldData);
 };

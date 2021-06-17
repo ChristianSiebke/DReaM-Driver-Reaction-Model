@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2021 in-tech GmbH
 *               2019 AMFD GmbH
 *
 * This program and the accompanying materials are made

@@ -1145,7 +1145,10 @@ const std::map<std::string, CommonTrafficLight::State> stateConversionMap
     {"yellow flashing", CommonTrafficLight::State::YellowFlashing}
 };
 
-TrafficLightNetwork TrafficLightNetworkBuilder::Build()
+namespace TrafficLightNetworkBuilder
+{
+TrafficLightNetwork Build(const std::vector<openScenario::TrafficSignalController>& controllers,
+                                                      const OWL::Interfaces::WorldData& worldData)
 {
     TrafficLightNetwork network;
     for(auto& controller : controllers)
@@ -1179,4 +1182,5 @@ TrafficLightNetwork TrafficLightNetworkBuilder::Build()
         network.AddController(TrafficLightController{std::move(internalPhases), controller.delay * 1000});
     }
     return network;
+}
 }

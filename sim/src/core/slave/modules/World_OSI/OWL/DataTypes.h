@@ -720,6 +720,11 @@ public:
     //! Sets the s coordinate
     virtual void SetS(double sPos) = 0;
 
+    //! Converts the specification imported from OpenDrive to OSI.
+    //!
+    //! \param signal       OpenDrive specification
+    //! \param position     position in the world
+    //! \return     true if succesfull, false if the sign can not be converted
     virtual bool SetSpecification(RoadSignalInterface* signal, const Position& position) = 0;
 
     //! Adds the specified lane to the list of valid lanes
@@ -732,11 +737,13 @@ public:
      */
     virtual void CopyToGroundTruth(osi3::GroundTruth& target) const = 0;
 
+    //! Sets the state
     virtual void SetState(CommonTrafficLight::State newState) = 0;
 
     //! Returns the specification of the light with the set relative distance
     virtual CommonTrafficLight::Entity GetSpecification(const double relativeDistance) const = 0;
 
+    //!Returns the current state
     virtual CommonTrafficLight::State GetState() const = 0;
 };
 
