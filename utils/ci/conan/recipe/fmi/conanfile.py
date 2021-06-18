@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake, tools
 
 class FmiConan(ConanFile):
-    name = "fmi"
+    name = "FMILibrary"
     version = "2.0.3"
     license = "<Put the package license here>"
     author = "<Put your name here> <And your email here>"
