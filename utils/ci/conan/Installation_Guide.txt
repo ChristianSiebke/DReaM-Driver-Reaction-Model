@@ -2,14 +2,10 @@
 	https://www.msys2.org/
 	
 2. Open MSYS2 Shell and execute the following commands. Reply with "yes" or "return" if necessary.
-	- $ yes | pacman -Syu
-	- $ pacman -Sy
-	- $ pacman -Su
-	- $ pacman -S --needed base-devel mingw-w64-x86_64-toolchain git 
-	- $ yes | pacman -S mingw-w64-x86_64-cmake mingw-w64-x86_64-boost mingw-w64-x86_64-ccache mingw-w64-x86_64-doxygen mingw-w64-x86_64-graphviz mingw-w64-x86_64-qt5
-	- $ pacman -S --needed base-devel mingw-w64-x86_64-toolchain git
-	- $ pacman -S mingw-w64-x86_64-cmake
-	- $ pacman -S python-pip	
+	- $ yes | pacman -Syu (repeat until no additional packages where installed)
+	- $ pacman -S --needed base-devel mingw-w64-x86_64-toolchain 
+	- $ yes | pacman -S mingw-w64-x86_64-cmake mingw-w64-x86_64-boost mingw-w64-x86_64-protobuf mingw-w64-x86_64-gtest mingw-w64-x86_64-ccache mingw-w64-x86_64-doxygen mingw-w64-x86_64-graphviz mingw-w64-x86_64-qt5 git
+	- $ pacman -S mingw-w64-x86_64-python-pip	
 	- close MSYS2 shell
 3.	- Add the following to you enviroment variables (Use "/" NOT "\")
 		- CC=C:/msys64/mingw64/bin/gcc
@@ -18,13 +14,11 @@
 4. Open MSYS2 MINGW64 Shell and execute the following commands. Reply with "yes" or "return" if necessary.
 	- $ pip install pyodbc
 	- $ pip install conan
-	- $ conan profile new default --detect
 	- $ conan profile update settings.compiler.libcxx=libstdc++11 default
 	- $ conan profile update env.CONAN_USE_ALWAYS_SHORT_PATHS=True default
 	- navigate to "/ci/conan" in repo with cd
-	- $ conan export ./recipe/boost boost/1.76.0@openpass/testing
-	- $ conan export ./recipe/osi osi/3.2.0@openpass/testing
-	- $ conan export ./recipe/fmi fmi/2.0.3@openpass/testing
+	- $ conan export ./recipe/osi OSI/3.2.0@openpass/testing
+	- $ conan export ./recipe/fmi FMILibrary/2.0.3@openpass/testing
 	- $ mkdir build && cd build
 	- $ conan install .. --build=missing
 	
@@ -52,7 +46,7 @@ pacman -S mingw-w64-x86_64-enchant
 pacman -S dvipng -->Missing
 pip install sphinx-rtd-theme
 pip install sphinx-tabs
-
+pip install sphinxcontrib-spelling
 
 cmake -G "MinGW Makefiles" -DWITH_SIMCORE=OFF -DWITH_TESTS=OFF -DWITH_DOC=ON ..
 mingw32-make doc
