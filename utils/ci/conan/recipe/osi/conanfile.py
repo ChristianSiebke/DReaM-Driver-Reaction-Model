@@ -12,7 +12,7 @@ class OsiConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": True, "fPIC": True, "protobuf:shared": True}
     generators = "cmake"
-    short_paths = True
+    # short_paths = True
 
     def configure(self):
         if self.settings.os == "Linux": #For Windows it is required that Protobuf is installed via pacman or pip in MSYS2

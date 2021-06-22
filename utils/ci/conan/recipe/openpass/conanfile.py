@@ -13,7 +13,7 @@ class OpenpassConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False], "Gui_only": [True, False]}
     default_options = {"shared": True, "fPIC": True, "boost:shared": True, "Gui_only": False}
     generators = "cmake"
-    #build_folder=""
+    # build_folder=""
     exports_sources = "../../../../../*" # use source of the repo
     short_paths = True
 
@@ -34,26 +34,15 @@ class OpenpassConan(ConanFile):
             #self.requires("gtest/1.10.0")
     
     def imports(self):
-        self.copy("*")
+        self.copy("*", dst="ThirdParty")
 
-    #def source(self):
-        # git = tools.Git()
-        # git.clone("https://gitlab.eclipse.org/eclipse/simopenpass/simopenpass.git", "servant", "--recursive")
-
-        # tools.replace_in_file("CMakeLists.txt",
-        #                       "project(openPASS C CXX)",
-        #                       'project(openPASS C CXX)\n' +
-        #                       'include(${CMAKE_BINARY_DIR}/conan_paths.cmake)\n')
-                            #   'set( OSI_INCLUDE_DIR, ${CONAN_OSI_ROOT}/include)\n' +
-                            #   'set( OSI_LIBRARIES, ${CONAN_OSI_ROOT}/lib)\n' +
-                            #   'set( FMILibrary_INCLUDE_DIR, ${CONAN_FMI_ROOT}/include)\n' + 
-                            #   'set( FMILibrary_LIBRARY_DIR, ${CONAN_FMI_ROOT}/lib)\n'+
-                            #   'include_directories(${CONAN_OSI_ROOT}/include)\n'
-
+    # def source(self):
+    #     git = tools.Git()
+    #     git.clone("https://gitlab.eclipse.org/eclipse/simopenpass/simopenpass.git", "servant", "--recursive")
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(defs={"CMAKE_PREFIX_PATH": "../build"})
+        cmake.configure(defs={"CMAKE_PREFIX_PATH": "./ThirdParty"})
         cmake.build()
 
     def package(self):

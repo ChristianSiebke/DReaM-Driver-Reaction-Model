@@ -1,6 +1,5 @@
 [requires]
- openpass/0.8@openpass/testing
+ openpass/0.8
 
 [generators]
- cmake_find_package
- cmake_paths
+ cmake

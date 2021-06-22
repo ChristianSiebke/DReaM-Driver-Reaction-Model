@@ -14,11 +14,12 @@
 4. Open MSYS2 MINGW64 Shell and execute the following commands. Reply with "yes" or "return" if necessary.
 	- $ pip install pyodbc
 	- $ pip install conan
+	- $ conan profile new default --detect
 	- $ conan profile update settings.compiler.libcxx=libstdc++11 default
-	- $ conan profile update env.CONAN_USE_ALWAYS_SHORT_PATHS=True default
 	- navigate to "/ci/conan" in repo with cd
-	- $ conan export ./recipe/osi OSI/3.2.0@openpass/testing
-	- $ conan export ./recipe/fmi FMILibrary/2.0.3@openpass/testing
+	- $ conan export ./recipe/osi openpass/testing
+	- $ conan export ./recipe/fmi openpass/testing
+	- $ conan export ./recipe/openpass
 	- $ mkdir build && cd build
 	- $ conan install .. --build=missing
 	
