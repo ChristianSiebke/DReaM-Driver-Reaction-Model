@@ -45,9 +45,9 @@ class OsiConan(ConanFile):
         # self.copy("*.lib", src="../package", keep_path=False)
         # self.copy("*.a", src="../package", keep_path=False)
         self.copy("*.h", dst="include/osi3")
-        self.copy("*.dll", dst="lib", keep_path=False)
-        self.copy("*.lib", dst="lib", keep_path=False)
-        self.copy("*.a", dst="lib", keep_path=False)
+        self.copy("*.dll", dst="lib/osi3", keep_path=False)
+        self.copy("*.lib", dst="lib/osi3", keep_path=False)
+        self.copy("*.a", dst="lib/osi3", keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ["osi3"]
