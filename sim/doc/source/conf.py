@@ -71,6 +71,8 @@ if generate_api_doc:
     breathe_projects = {"openpass":"doxyoutput/xml"}
     breathe_default_project = "openpass"
 
+    cpp_id_attributes = ['Q_DECL_IMPORT']
+
     # -- Setup the exhale extension ----------------------------------------------
     exhale_args = {
         # These arguments are required

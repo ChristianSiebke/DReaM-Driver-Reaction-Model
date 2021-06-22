@@ -12,4 +12,4 @@
 .. toctree::
     :caption: Developer Doc
  
-    .. include:: api/index.rst
+    api/index.rst
