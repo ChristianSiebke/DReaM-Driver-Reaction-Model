@@ -12,14 +12,14 @@ class OpenpassConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False], "Gui_only": [True, False]}
     default_options = {"shared": True, "fPIC": True, "boost:shared": True, "Gui_only": False}
-    generators = "cmake_find_package", "cmake_paths"
-    build_folder=""
+    generators = "cmake"
+    #build_folder=""
     exports_sources = "../../../../../*" # use source of the repo
     short_paths = True
 
-    def configure(self):
-        if self.settings.os == "Windows":
-            self.build_folder = "C:/tmp/op"
+    # def configure(self):
+    #     if self.settings.os == "Windows":
+    #         self.build_folder = "C:/tmp/op"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -32,6 +32,9 @@ class OpenpassConan(ConanFile):
             self.requires("OSI/3.2.0@openpass/testing")
             self.requires("FMILibrary/2.0.3@openpass/testing")
             #self.requires("gtest/1.10.0")
+    
+    def imports(self):
+        self.copy("*")
 
     #def source(self):
         # git = tools.Git()
@@ -50,7 +53,7 @@ class OpenpassConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(defs={"CMAKE_PREFIX_PATH": "../build"})
         cmake.build()
 
     def package(self):
