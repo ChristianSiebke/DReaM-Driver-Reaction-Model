@@ -7,11 +7,8 @@
 	- $ yes | pacman -S mingw-w64-x86_64-cmake mingw-w64-x86_64-boost mingw-w64-x86_64-protobuf mingw-w64-x86_64-gtest mingw-w64-x86_64-ccache mingw-w64-x86_64-doxygen mingw-w64-x86_64-graphviz mingw-w64-x86_64-qt5 git
 	- $ pacman -S mingw-w64-x86_64-python-pip	
 	- close MSYS2 shell
-3.	- Add the following to you enviroment variables (Use "/" NOT "\")
-		- CC=C:/msys64/mingw64/bin/gcc
-		- CXX=C:/msys64/mingw64/bin/g++
 	
-4. Open MSYS2 MINGW64 Shell and execute the following commands. Reply with "yes" or "return" if necessary.
+3. Open MSYS2 MINGW64 Shell and execute the following commands. Reply with "yes" or "return" if necessary.
 	- $ pip install pyodbc
 	- $ pip install conan
 	- $ conan profile new default --detect
