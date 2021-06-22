@@ -280,7 +280,7 @@ Build and Install
      - Make install seems to have troubles on some systems when copying the dependencies.
       Check if the libraries of e.g. OSI are copied into the execution directory of the core.
 
-     - MinGW system libraries are not a dependency visible to make (see :ref:`runmingwexe`).
+     - MinGW system libraries are not a dependency visible to make.
 
 - ``make <target>``: Build a single target
 

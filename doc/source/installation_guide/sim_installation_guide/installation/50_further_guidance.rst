@@ -17,13 +17,6 @@ Further Guidance
   :glob:
   :maxdepth: 1
 
-  ../ides/*
-
-.. toctree::
-  :caption: IDEs
-  :glob:
-  :maxdepth: 1
-
   ../further_guidance/*
 
 .. toctree::

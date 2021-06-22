@@ -100,16 +100,10 @@ Adjust this guide to your needs.
    .. code-block:: 
 
       make install
-   
-.. note::
-
-   Please refer to :ref:`runmingwexe` to see how to run the protobuf compiler ``protoc.exe`` outside of the |mingw_shell|.
 
 
 Hook Protobuf into OSI
 ======================
-
-.. _building_osi:
 
 If you want to build and install OSI with a custom build of Protobuf, most of the 
 steps can be followed as described in instruction :ref:`Building_osi`. However, one 
