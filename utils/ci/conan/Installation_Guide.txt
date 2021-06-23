@@ -3,47 +3,11 @@
 	
 2. Open MSYS2 Shell and execute the following commands. Reply with "yes" or "return" if necessary.
 	- $ yes | pacman -Syu (repeat until no additional packages where installed)
-	- $ pacman -S --needed base-devel mingw-w64-x86_64-toolchain 
-	- $ yes | pacman -S mingw-w64-x86_64-cmake mingw-w64-x86_64-boost mingw-w64-x86_64-protobuf mingw-w64-x86_64-gtest mingw-w64-x86_64-ccache mingw-w64-x86_64-doxygen mingw-w64-x86_64-graphviz mingw-w64-x86_64-qt5 git
-	- $ pacman -S mingw-w64-x86_64-python-pip	
-	- close MSYS2 shell
+	- navigate with "cd" to script folder
+	- $ sh 10_prepare_msys2.sh
 	
 3. Open MSYS2 MINGW64 Shell and execute the following commands. Reply with "yes" or "return" if necessary.
-	- $ pip install pyodbc
-	- $ pip install conan
-	- $ conan profile new default --detect
-	- $ conan profile update settings.compiler.libcxx=libstdc++11 default
-	- navigate to "/ci/conan" in repo with cd
-	- $ conan export ./recipe/osi openpass/testing
-	- $ conan export ./recipe/fmi openpass/testing
-	- $ conan export ./recipe/openpass
-	- $ mkdir build && cd build
-	- $ conan install .. --build=missing
-	
-Conan tips:
-	- Install and build if something is binaries are missing
-		$ conan install <path to conanfile.txt> --build=missing
-	- CleanUp everything
-		$ conan remove "*" -s -b -f
-	- create new package
-		$ conan new myPackage
-	- build and export recipe to local cache
-		$ conan create <path to conanfile.py> myPackage/<version>
-	- export recipe to local cache
-		$ conan export <path to conanfile.py> myPackage/<version>
-	- show what packages are currently in the local cache
-		$ conan search
-	- show what´s in your current default profile
-		$ conan profile show default
-	- show dependencies 
-		$ conan info <path to conanfile.txt>
+	- $ sh 15_prepare_mingw.sh
 
-pacman -S mingw-w64-x86_64-python		
-pacman -S mingw-w64-x86_64-python-sphinx		
-pacman -S mingw-w64-x86_64-enchant
-pip install sphinx-rtd-theme
-pip install sphinx-tabs
-pip install sphinxcontrib-spelling
-
-cmake -G "MinGW Makefiles" -DWITH_SIMCORE=OFF -DWITH_TESTS=OFF -DWITH_DOC=ON ..
-mingw32-make doc
+4. Configure Conan and build openpass with the following command
+	- $ sh build.sh
