@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2017 ITK Engineering GmbH.
+* Copyright (c) 2021 ITK Engineering GmbH.
 *               2018, 2020 in-tech GmbH.
 *               2020 HLRS, University of Stuttgart.
 *
