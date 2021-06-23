@@ -41,7 +41,6 @@ Conan tips:
 pacman -S mingw-w64-x86_64-python		
 pacman -S mingw-w64-x86_64-python-sphinx		
 pacman -S mingw-w64-x86_64-enchant
-pacman -S dvipng -->Missing
 pip install sphinx-rtd-theme
 pip install sphinx-tabs
 pip install sphinxcontrib-spelling
