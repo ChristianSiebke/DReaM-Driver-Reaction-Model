@@ -77,45 +77,50 @@ The first set of dependencies we need to install in order to successfully compil
 
    .. tab:: Linux (Debian Bullseye)
 
-      Update the package database on the system:
+      #. Update  the package database on the system
 
-      Update package repository
+         .. code-block:: 
 
-      .. code-block:: 
+            apt update
 
-         apt update
+      #. Upgrade existing software to latest version
 
-      Upgrade existing software to latest version
+         .. code-block:: 
 
-      .. code-block:: 
+            apt upgrade
 
-         apt upgrade
+      #. Install required binary packages
 
-      Install required binary packages
+         .. code-block:: 
 
-      .. code-block:: 
+            apt install ccache
+            apt install cmake
+            apt install doxygen
+            apt install googletest
+            apt install gcc
+            apt install g++
+            apt install graphviz
+            apt install libprotobuf-dev
+            apt install protobuf-compiler  # when building osi
+            apt install qt5-default
+            apt install zlib1g-dev
 
-         apt install ccache
-         apt install cmake
-         apt install doxygen
-         apt install googletest
-         apt install gcc
-         apt install g++
-         apt install graphviz
-         apt install libprotobuf-dev
-         apt install protobuf-compiler  # when building osi
-         apt install qt5-default
-         apt install zlib1g-dev
+         Under Linux, it is deliberate that the googletest package only installs the header files to the system, 
+         but not the static and dynamic libraries. The missing libraries can be build and installed to ``/usr/lib`` via
 
-      Under Linux, it is deliberate that the googletest package only installs the header files to the system, 
-      but not the static and dynamic libraries. The missing libraries can be build and installed to ``/usr/lib`` via
+         .. code-block:: 
 
-      .. code-block:: 
+            cd /usr/src/googletest
+            cmake .
+            make
+            make install
 
-         cd /usr/src/googletest
-         cmake .
-         make
-         make install
+      #. Install Qt Framework
+      
+         Qt needs to be installed under Linux. Qt version 5.12.3 can be downloaded under 
+         `Qt 5.12.3 <https://download.qt.io/official_releases/qt/5.12/5.12.3/qt-opensource-linux-x64-5.12.3.run>`_. 
+
+         Please install to ``/opt/qt5.12.3/``.
 
 
 .. _building prerequisites:
