@@ -37,7 +37,7 @@ Resources
 ---------
 
 - `reStructuredText Primer <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_
-- `A "How to" Guide for Sphinx + ReadTheDocs <https://sphinx-rtd-tutorial.readthedocs.io/en/latest/index.html>`_
+- `A "How to" Guide for Sphinx + ReadTheDocs <https://source-rtd-tutorial.readthedocs.io/en/latest/index.html>`_
 - `Sphinx Documentation <https://www.sphinx-doc.org>`_
 - `OSI Sphinx Config <https://github.com/OpenSimulationInterface/osi-documentation/blob/master/conf.py>`_
 

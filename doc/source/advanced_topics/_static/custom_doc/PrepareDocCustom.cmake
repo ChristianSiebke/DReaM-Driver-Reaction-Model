@@ -17,9 +17,10 @@
 # to the the new origin.
 #
 # Currently supported PLACEHOLDERS
-# - @OP_REL_SIM@ => relative path to the "op sim" root (e.g. deps/os/sim if
-#   using a git submodule with the openPASS open source code at deps/os inside
-#   the local repository)
+# - @OP_REL_ROOT@ => relative path to root of the openpass repository
+# - @OP_REL_GUI@  => resolves to @OP_REL_ROOT@/gui
+# - @OP_REL_SIM@  => resolves to @OP_REL_ROOT@/sim
+# - @CUSTOM_REL_SIM@ => relative path to the "custom" root (.)
 
 macro(copy_documentation source destination)
     message(VERBOSE "Copy ${source} to ${destination}")
@@ -34,14 +35,20 @@ macro(update_placeholder source destination)
     string(REGEX REPLACE "(.*)/$" "\\1" target ${target})
 
     # Placeholder for conf.py: no initial '/' => real relative paths
-    set(OP_REL_SIM ../${target})   # relative path to the openPASS open source code
+    set(OP_REL_ROOT ../${target}/deps/os) # relative path to the openPASS open source code, with prefix '../${target}' pointing to the custom repository root if this file is located at <root>/doc
+    set(OP_REL_GUI ${OP_REL_ROOT}/gui)    # relative path to gui root
+    set(OP_REL_SIM ${OP_REL_ROOT}/sim)    # relative path to simulation root
+    set(CUSTOM_REL_SIM ../${target})      # relative path to the custom repository root (here, equal to custom sim root)
 
     configure_file(${destination}/source/conf.py
                    ${destination}/source/conf.py @ONLY)
 
     # Placeholder for RST files: use initial '/' => sphinx style for "from source"
     # Override old one, because we want to use the same placeholder in both contexts
+    set(OP_REL_ROOT /${OP_REL_ROOT})
+    set(OP_REL_GUI /${OP_REL_GUI})
     set(OP_REL_SIM /${OP_REL_SIM})
+    set(CUSTOM_REL_SIM /${CUSTOM_REL_SIM})
 
     file(GLOB_RECURSE rstFiles LIST_DIRECTORIES false ${destination}/*.rst)
 

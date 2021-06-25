@@ -13,9 +13,9 @@ if(WITH_DOC)
       # Copy documentation and change placeholders
       # (see PrepareDoc for more information)
       COMMAND ${CMAKE_COMMAND}
-          -DSRC=${OPENPASS_OS_DIR}/sim/doc/source
+          -DSRC=${OPENPASS_OS_DIR}/doc/source
           -DDST=${CMAKE_BINARY_DIR}/doc
-          -P ${OPENPASS_OS_DIR}/sim/doc/PrepareDoc.cmake
+          -P ${OPENPASS_OS_DIR}/doc/PrepareDoc.cmake
           COMMENT "Copy OS documentation and replace placeholders"
       COMMAND ${CMAKE_COMMAND}
           -DSRC=${CMAKE_CURRENT_LIST_DIR}/source

@@ -64,11 +64,11 @@ endif()
 if(WITH_DOC OR WITH_API_DOC)
   string(REPLACE "," "." OPENPASS_DOC_VERSION ${OPENPASS_VERSION})
   configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/sim/doc/source/version.txt.in
-    ${CMAKE_CURRENT_SOURCE_DIR}/sim/doc/source/version.txt
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/source/version.txt.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/source/version.txt
   )
 
-  add_subdirectory(sim/doc)
+  add_subdirectory(doc)
 endif()
 
 # copies runtime dependencies to installation directory (on running 'make install')
