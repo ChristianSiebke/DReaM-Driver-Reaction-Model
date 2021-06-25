@@ -292,6 +292,8 @@ bool ProfilesImporter::Import(const std::string& filename, Profiles& profiles)
         int errorLine{};
         ThrowIfFalse(document.setContent(xmlData, &errorMsg, &errorLine), "Invalid xml format (" + filename + ") in line " + std::to_string(errorLine) + ": " + errorMsg.toStdString());
 
+        ImporterCommon::validateProfilesCatalogXMLSchema(xmlFile.fileName(), xmlData);
+
         QDomElement documentRoot = document.documentElement();
         ThrowIfFalse(!documentRoot.isNull(), "invalid document root " + filename);
 

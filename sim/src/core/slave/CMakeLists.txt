@@ -133,6 +133,7 @@ add_openpass_target(
     importer/connection.cpp
     importer/csvParser.cpp
     importer/eventDetectorImporter.cpp
+    importer/importerCommon.cpp
     importer/junction.cpp
     importer/oscImporterCommon.cpp
     importer/parameterImporter.cpp
@@ -179,6 +180,7 @@ add_openpass_target(
   LIBRARIES
     Qt5::Core
     Qt5::Xml
+    Qt5::XmlPatterns
     Boost::headers
     Common
     CoreCommon
