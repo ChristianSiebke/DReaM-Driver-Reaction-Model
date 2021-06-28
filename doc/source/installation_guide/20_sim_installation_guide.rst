@@ -11,10 +11,12 @@
 
 .. _sim_install_guide:
 
-Simulation Installation Guide
-=============================
+Simulator Installation Guide
+============================
 
-This guide summarizes all installation related topics, necessary to setup and build the |op| simulation core (|release|).
+This guide summarizes all installation related topics, necessary to setup and build the |op| simulator (|release|).
+
+.. note:: The |op| simulator is also called |op| simulation core.
 
 .. toctree::
    :caption: Installation

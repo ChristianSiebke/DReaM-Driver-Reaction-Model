@@ -15,18 +15,81 @@
 Installing Prerequisites
 ========================
 
-Before being able to compile and run the |op|, make sure to have all dependencies installed. 
+Before being able to compile and run |op|, make sure to have all dependencies installed. 
 The thirdparty software dependency of |op| can be divided into:
 
-- **Binary packages**, which can be easily installed via package manager
-- **Source packages**, which provide all necessary files to compile and need to be built from source code
+- **Build environment**, which manages thirdparty software and is used to compile and install |op|
+- **Binary packages**, which can be easily installed via a package manager of the respective build environment
+- **Source packages**, which need to be built from source code
 
-This section gives detailed information about the prerequisite and tested version.
+This section gives detailed information about the prerequisites and tested version.
+
+.. _building_under_windows:
+
+Installing the Build Environment
+--------------------------------
+
+.. tabs::
+   
+   .. tab:: Windows
+
+      #. MSYS2
+      
+         On Windows, the build environment of choice are :term:`MSYS2` programming tools.
+         :term:`MSYS2` is used to install some third-party software on which |op| depends. 
+         Also, the unix-like shell simplifies c++ compilation on Windows.
+         For details, see `MSYS2 website <https://www.msys2.org/>`_.
+
+         .. _msys2:
+
+
+      #. Download MSYS2
+
+         The latest 64-bit packages are located at https://repo.msys2.org/distrib/x86_64/. 
+         Download a non-base package, i.e. `msys2-x86_64-20200903.exe <https://repo.msys2.org/distrib/x86_64/msys2-x86_64-20200903.exe>`_
+
+
+         .. _msys2_installation:
+
+      #. Install MSYS2
+
+         Run the downloaded executable and adjust suggested settings to your needs (defaults are fine).
+         In the following, it is assumed that MSYS2 is installed under ``C:\msys64``.
+
+      #. Understand the Build Environment
+
+         MSYS2 provides three different environments, located in the MSYS2 installation directory:
+
+         .. _fig_msys2_environments:
+
+         .. figure:: _static/images/msys2.png
+            :align: center
+            :alt: MSYS2 Apps
+
+         MSYS2 Environments
+
+         - MSYS2 MSYS: Common environment, i.e. for package management
+         - MSYS2 MinGW 32-bit: A MinGW 32-bit environment
+         - MSYS2 MinGW 64-bit: A MinGW 64-bit environment
+
+         .. warning::
+
+            | MSYS2 MinGW 64-bi is **the**  |op| development environment and will be referred to as |mingw_shell|.
+
+   .. _building_under_linux:
+
+   .. tab:: Linux
+
+      On Linux, no special build environment is needed. |Op| is developed under Debian 64-Bit, 
+      which means that developing under a recent Ubuntu distribution also work.
+      Debian Bullseye or Ubuntu 20.10 is recommended. Debian uses ``apt`` (or ``apt-get``) as package managing system. 
+      Details will be given in :ref:`prerequisites`. 
+
 
 .. _binary_packages:
 
-Installing Binary Packages
---------------------------
+Installing the Binary Packages
+------------------------------
 
 The first set of dependencies we need to install in order to successfully compile |op| are the binary packages. These can be installed via appropiate package manager. 
 
@@ -115,18 +178,11 @@ The first set of dependencies we need to install in order to successfully compil
             make
             make install
 
-      #. Install Qt Framework
-      
-         Qt needs to be installed under Linux. Qt version 5.12.3 can be downloaded under 
-         `Qt 5.12.3 <https://download.qt.io/official_releases/qt/5.12/5.12.3/qt-opensource-linux-x64-5.12.3.run>`_. 
-
-         Please install to ``/opt/qt5.12.3/``.
-
 
 .. _building prerequisites:
 
-Installing Source Packages
---------------------------
+Installing the Source Packages
+------------------------------
 
 This section describes how to compile prerequisites of |op| using source packages.
   
@@ -137,8 +193,8 @@ This section describes how to compile prerequisites of |op| using source package
 Location Of Installed Source Packages
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The goal of this section is to download, build and install
-all necessary prerequisites into a suitable directory which later will be copied into the repository in order to resolve third party dependency.
+The goal of this section is to download necessary source packages and install
+them into a suitable directory. This directory will later on be copied into the |op| repository in order to resolve third party dependency.
 The following directory tree shows the folder structure, which will be created by following the recommendations of this guide. 
 
 .. tabs::
@@ -471,7 +527,7 @@ Qt Framework
 Version (officially supported): 5.12.3
 
 |Op| uses some features from the `Qt <https://www.qt.io/>`_ framework.
-While the GUI of |op_oss| heavily relies on it, the simulation core tries to stick to the C++ standard framework as far as possible.
+While the GUI of |op_oss| heavily relies on it, the simulator tries to stick to the C++ standard framework as far as possible.
 
 .. admonition:: Note on Versions
 

@@ -12,19 +12,24 @@
 Overview
 ========
 
-You can install |op| on Windows and Linux. 
+You can install |op| simulator on Windows and Linux.
 
 The installation manual is structured as follows:
 
-Installation
-------------
+**Setting up your system**
 
-- :ref:`System_requirements` explains which system requirements are necessary
-- :ref:`Prerequisites` and :ref:`Building prerequisites` contain the instructions for installing the thirdparty software required by |op|
+- :ref:`Prerequisites` contains instructions for installing the thirdparty software required by |op|
+
+**Installation of the simulator**
+
 - :ref:`Download_and_install_openpass` describes how to compile and run |op| once all prerequisites are installed
 
-Further Guidance
-----------------
+**Run a default simulation**
+
+- :ref:`Getting_started` shows how to run an example simulation
+
+**Further guidance**
+
 - :ref:`Sphinx` holds information about the documentation generator used to build this installation guide
 - :ref:`Cmake` holds information about available variables and options for the cross-platform build environment CMake
 - :ref:`Qtcreator` describes the basic setup for QtCreator

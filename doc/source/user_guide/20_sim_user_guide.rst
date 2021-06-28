@@ -9,6 +9,8 @@
   SPDX-License-Identifier: EPL-2.0
   ************************************************************
 
+.. _sim_user_guide:
+
 Simulation User Guide
 ======================
 

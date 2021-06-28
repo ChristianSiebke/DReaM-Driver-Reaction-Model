@@ -15,8 +15,7 @@
 Installing OpenPASS
 ===================
 
-This section describes how compile and run |op|. Please make sure that all system requirements are resolved according to 
-:ref:`System_requirements` and all prerequisites have been properly installed according to section :ref:`Prerequisites`.
+This section describes how compile and run |op|. Please make sure that all prerequisites have been properly installed according to section :ref:`Prerequisites`.
 If you have strictly followed the instructions, the installed source packages should be located on your machine under 
 ``C:\OpenPASS\thirdParty`` for **Windows** and ``~/OpenPASS/thirdParty`` for **Linux**. If there is a path deviation, 
 the following commands must be adjusted.
@@ -58,7 +57,9 @@ The above directory structure will be created by following the instructions of t
          .. note::
 
             As stated in :ref:`Building_under_windows`, the windows programming tools suffer from a `path length restriction`.
+            This error manifests as strange **file not found** compile errors.
             It is therefore recommended to use a short path for source code checkout, e.g. a drive letter.
+            This can also be done by the windows command `subst <https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/subst>`_.
 
       .. tab:: Linux
 
@@ -153,6 +154,10 @@ The above directory structure will be created by following the instructions of t
 
 #. Prepare build
 
+   |Op| links against shared libraries, which are located in the paths specified by ``CMAKE_PREFIX_PATH``. 
+   To be able to install |Op| with resolved dependencies, all libraries found under the paths have to be copied right next to the executable during the installation step. 
+   This is done by setting ``INSTALL_EXTRA_RUNTIME_DEPS=ON``. If you have followed the instructions strictly, no changes are necessary. 
+
    .. tabs::
 
       .. tab:: Windows
@@ -171,11 +176,23 @@ The above directory structure will be created by following the instructions of t
             -D CMAKE_CXX_COMPILER=g++ \
             ..
 
+         .. note:: Even though it is recommended, you do not have to copy :term:`MinGW` libraries next to the executable. Providing the libraries can also be done in the following ways:
+
+                   - either |op| gets **only** executed exclusively from the |mingw_shell|, then all necessary :term:`MinGW` libraries get linked automatically by the shell
+                   - or one can add ``C:\msys64\mingw64\bin`` permanently to the *Windows Environment Variable* ``Path``
+                   - or temporarily set ``Path`` prior to the execution, e.g. in a wrapper:
+
+                     .. code-block:: batch
+                           
+                        # your_program.cmd
+                        Path=C:\msys64\mingw64\bin;%Path% # set Path
+                        your_program.exe                  # execute
+
       .. tab:: Linux
 
          .. code-block:: 
 
-            cmake -D CMAKE_PREFIX_PATH="/opt/qt5.12.3/5.12.3/gcc_64;~/simopenpass/deps/thirdParty/FMILibrary;~/simopenpass/deps/thirdParty/osi" \
+            cmake -D CMAKE_PREFIX_PATH="~/simopenpass/deps/thirdParty/FMILibrary;~/simopenpass/deps/thirdParty/osi" \
             -D CMAKE_INSTALL_PREFIX=/usr/local/OpenPASS/bin/core \
             -D CMAKE_BUILD_TYPE=Release \
             -D USE_CCACHE=ON \
@@ -185,9 +202,10 @@ The above directory structure will be created by following the instructions of t
             -D CMAKE_C_COMPILER=gcc-9 \
             -D CMAKE_CXX_COMPILER=g++-9 \
             ..
-
-   .. note:: Adjust paths and options based on your system and needs and don't forget to escape the semicolon ``;`` (see :ref:`Cmake_prefix_path`).
+   
+   .. note:: If you need to adjust paths and options based on your system and needs and don't forget to escape the semicolon ``;`` (see :ref:`Cmake_prefix_path`). 
              For a build that goes beyond the default settings, see :ref:`Cmake` for more available variables and options that can be set.
+             
 
 #. Optional: Build and execute unit tests
 
@@ -227,81 +245,3 @@ The above directory structure will be created by following the instructions of t
          .. code-block:: 
 
             cp /usr/local/OpenPASS/bin/core/bin/* /usr/local/OpenPASS/bin/core
-
-#. Provide libraries
-
-   .. tabs::
-
-      .. tab:: Windows
-
-         Firstly, osi and FMILibrary library have to be provided. This can be done by manual copying or using the |mingw_shell|:
-
-         .. code-block:: 
-
-            cp /C/simopenpass/deps/thirdParty/{osi/lib/osi3/libopen_simulation_interface.dll,FMILibrary/lib/libfmilib_shared.dll} /C/OpenPASS/bin/core
-
-         Secondly, files compiled within the |mingw_shell| depend on the following :term:`MinGW` libraries located under ``C:\msys64\mingw64\bin``
-
-         - libboost_filesystem-mt.dll
-         - libdouble-conversion.dll
-         - libgcc_s_seh-1.dll
-         - libicudt68.dll
-         - libicuin68.dll
-         - libicuuc68.dll
-         - libpcre2-16-0.dll
-         - libstdc++-6.dll
-         - libwinpthread-1.dll
-         - libzstd.dll
-         - zlib1.dll
-
-         Copy the required libraries right next to your executable either by manual copying or by using the |mingw_shell|:
-
-         .. code-block:: batch
-
-            cp /C/msys64/mingw64/bin/{libboost_filesystem-mt.dll,libdouble-conversion.dll,libgcc_s_seh-1.dll,libicudt68.dll,libicuin68.dll,libicuuc68.dll,libpcre2-16-0.dll,libstdc++-6.dll,libwinpthread-1.dll,libzstd.dll,zlib1.dll} /C/OpenPASS/bin/core
-
-         .. warning::
-         
-            You might need to update the some libraries manually, when package are upgraded.
-
-         .. note::
-
-            You do not have to copy these libraries next to the executable. Providing the libraries can also be done in the following ways:
-
-            - either |op| gets :term:`MinGW` libraries **only** executed exclusively from the |mingw_shell|. Then, all necessary libraries get linked automatically by the shell
-            - or one can add ``C:\msys64\mingw64\bin`` permanently to the *Windows Environment Variable* ``Path``
-            - or temporarily set ``Path`` prior to the execution, e.g. in a wrapper:
-
-               .. code-block:: batch
-                     
-                  # your_program.cmd
-                  Path=C:\msys64\mingw64\bin;%Path% # set Path
-                  your_program.exe                  # execute
-
-      .. tab:: Linux
-
-         Under Linux, no additional libraries have to be provided.
-
-#. Run simulation (example)
-
-   Starting from ``simopenpass/build`` and using an example configuration:
-
-   .. tabs::
-
-      .. tab:: Windows
-
-         .. code-block:: 
-
-            cd /C/OpenPASS/bin/core
-            mkdir configs
-            cp /C/simopenpass/sim/contrib/examples/DefaultConfigurations/* /C/OpenPASS/bin/core/configs
-            ./OpenPassSlave.exe
-
-      .. tab:: Linux
-
-         .. code-block:: 
-
-            cd /usr/local/OpenPASS/bin/core
-            mkdir configs
-            cp ~/simopenpass/sim/contrib/examples/DefaultConfigurations/* /usr/local/OpenPASS/bin/core/configs
-            ./OpenPassSlave
