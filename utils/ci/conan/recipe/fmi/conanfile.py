@@ -12,7 +12,7 @@ class FmiConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     generators = "cmake"
-    exports_sources = "fmil203.patch"
+    exports_sources = "fmi-library-2.0.3-fixes.patch"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -28,7 +28,7 @@ class FmiConan(ConanFile):
                         defs={"FMILIB_BUILD_STATIC_LIB":"OFF",
                               "FMILIB_BUILD_SHARED_LIB":"ON"})
         if self.settings.os == "Linux":
-            tools.patch(patch_file="fmil203.patch")
+            tools.patch(patch_file="fmi-library-2.0.3-fixes.patch")
         cmake.build()
         cmake.install()
 
