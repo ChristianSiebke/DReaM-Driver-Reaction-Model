@@ -21,3 +21,6 @@ wget -P /mingw64/share/texmf-dist/tex/latex/anyfontsize \
 
 # finally install fonts (which also picks up anyfontsize)
 pacman -S mingw-w64-x86_64-texlive-font-utils #2021.20210519-1
+
+# for sphinx/exhale
+pacman -S libxslt-devel

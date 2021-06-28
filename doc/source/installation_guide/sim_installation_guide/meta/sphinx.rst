@@ -46,10 +46,10 @@ Building this Documentation (Linux/Debian)
 
 .. code-block:: bash
 
-   # install python, pip, sphinx, spellchecker, ...
-   sudo apt install doxygen python3 python3-pip python3-sphinx libenchant-2-2 dvipng
-   
-   # install sphinx extensions
+   # install python, pip, spellchecker, ...
+   sudo apt install doxygen python3 python3-pip libenchant-2-2 dvipng
+
+   # install sphinx and its extensions
    pip3 install sphinx sphinx-rtd-theme sphinx-tabs breathe exhale sphinxcontrib-spelling
 
    # build doc (only)
