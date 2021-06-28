@@ -54,7 +54,7 @@ The first set of dependencies we need to install in order to successfully compil
          .. admonition:: Versions
             
             | MSYS2 provides rolling release versions, so some packages might be too "up-to-date".
-            | Tested packages - ate time of writing - have been listed above as comment.
+            | Tested packages - at time of writing - have been listed above as comment.
             | If in doubt, download the package in the right version from the `MSYS2 package repository <http://repo.msys2.org/mingw/x86_64/>`_.
             | Install with ``pacman -U <package-filename>``
 
@@ -68,7 +68,6 @@ The first set of dependencies we need to install in order to successfully compil
             pacman -S dos2unix
             pacman -S mingw-w64-x86_64-ag
             pacman -S mingw-w64-x86_64-qt5-debug
-            pacman -S zlib-devel
 
       .. admonition:: GIT/SSH
       

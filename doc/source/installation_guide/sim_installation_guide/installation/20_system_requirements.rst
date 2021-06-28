@@ -83,6 +83,6 @@ MSYS2 Environments
 Building under Linux
 ====================
 
-OpenPass is developed under Debian 64-Bit, which means that developing under a recent Ubuntu distribution should also work.
+|Op| is developed under Debian 64-Bit, which means that developing under a recent Ubuntu distribution should also work.
 Debian uses ``apt`` (or ``apt-get``) as package managing system, and most prerequisites should be installable via ``app install package``.
 Details will be given in :ref:`prerequisites`.
