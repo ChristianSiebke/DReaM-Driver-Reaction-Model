@@ -253,6 +253,7 @@ The calculation adheres to the following process:
 #) Calculate the Euclidean distance of each of the target object's corners to the created line
 #) Return the left-most and right-most points with respect to the created line
 
+If the first step fails, because the ego lane does not extend to the object's position (i. e. it ends prematurely or the objects is outside the ego's route), then the result is invalid, which is indicated by a separate valid flag.
 
 .. figure:: ./images/GetObstruction.png
 
