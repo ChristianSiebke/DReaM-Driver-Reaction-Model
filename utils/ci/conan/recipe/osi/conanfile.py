@@ -20,7 +20,7 @@ class OsiConan(ConanFile):
     
     def requirements(self):
         if self.settings.os == "Linux":
-            self.requires = "protobuf/3.11.4"
+            self.requires("protobuf/3.11.4")
 
     def source(self):
         git = tools.Git(folder="osi3")
