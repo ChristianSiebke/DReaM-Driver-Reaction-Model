@@ -34,7 +34,9 @@ int main(int argc, char *argv[])
     // Schedule application
     QTimer::singleShot(0, [&plugins]() {
         // Load plugins
-        plugins.loadDirectory(QDir(QApplication::applicationDirPath() + SUBDIR_LIB_GUI));
+        QString subdirLibGuiCmake = SUBDIR_LIB_GUI;
+        QDir subdirLibGui = QDir(QApplication::applicationDirPath()).filePath(subdirLibGuiCmake);
+        plugins.loadDirectory(subdirLibGui);
 
         // Emit signal 'started'
         Q_EMIT plugins.started();
