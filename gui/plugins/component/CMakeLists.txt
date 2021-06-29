@@ -45,5 +45,6 @@ target_link_libraries(Component PRIVATE
 
 # target directories. Needs to be defined in some global file TODO
 set_target_properties(Component PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "C:/OpenPASS/bin/gui"
+    RUNTIME_OUTPUT_DIRECTORY "${OPENPASS_DESTDIR}/${SUBDIR_LIB_GUI}"
     PREFIX "")
+#message("Blubb hier: ${OPENPASS_DESTDIR}/${SUBDIR_LIB_GUI}")

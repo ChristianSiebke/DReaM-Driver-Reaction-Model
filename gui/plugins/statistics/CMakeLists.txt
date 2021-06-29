@@ -53,5 +53,5 @@ target_link_libraries(Statistics PRIVATE
 
 # target directories. Needs to be defined in some global file TODO
 set_target_properties(Statistics PROPERTIES
-                      RUNTIME_OUTPUT_DIRECTORY "C:/OpenPASS/bin/gui"
+                      RUNTIME_OUTPUT_DIRECTORY "${OPENPASS_DESTDIR}/${SUBDIR_LIB_GUI}"
                       PREFIX "")
