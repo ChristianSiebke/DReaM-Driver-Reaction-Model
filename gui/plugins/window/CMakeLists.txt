@@ -53,5 +53,5 @@ target_link_libraries(Window PRIVATE
 
 # target directories. Needs to be defined in some global file TODO
 set_target_properties(Window PROPERTIES
-                      RUNTIME_OUTPUT_DIRECTORY "${OPENPASS_DESTDIR}/${SUBDIR_LIB_GUI}"
+                      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_INSTALL_PREFIX}/${SUBDIR_LIB_GUI}"
                       PREFIX "")
