@@ -23,7 +23,6 @@
 #include "common/stringSignal.h"
 #include "common/trajectorySignal.h"
 #include "core/slave/modules/World_OSI/WorldData.h"
-#include "error_handler.h"
 #include "google/protobuf/util/json_util.h"
 #include "variant_visitor.h"
 
