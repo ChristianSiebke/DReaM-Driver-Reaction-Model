@@ -11,20 +11,19 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <memory>
 
 #include "importer/systemConfig.h"
 #include "importer/systemConfigImporter.h"
 #include "modelElements/agentType.h"
 
-using namespace boost::filesystem;
 using namespace Configuration;
 using namespace Importer;
 
 TEST(SystemConfigImporter_IntegrationTests, ImportConfigWithTwoSystems_Succeeds)
 {
-    const boost::filesystem::path testScenarioFile = boost::filesystem::initial_path() / "Resources" / "ImporterTest" / "SystemConfiguration.xml";
+    const std::filesystem::path testScenarioFile = std::filesystem::current_path() / "Resources" / "ImporterTest" / "SystemConfiguration.xml";
     auto systemConfig = std::make_shared<Configuration::SystemConfig>();
 
     ASSERT_TRUE(Importer::SystemConfigImporter::Import(testScenarioFile.string(), systemConfig));

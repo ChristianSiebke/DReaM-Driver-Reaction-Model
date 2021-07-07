@@ -14,7 +14,7 @@
 
 #include <algorithm>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include "core/slave/modules/Stochastics/stochastics_implementation.h"
 #include "importer/scenery.h"
@@ -41,7 +41,6 @@ using ::testing::SizeIs;
 using ::testing::IsEmpty;
 using ::testing::NiceMock;
 
-using namespace boost::filesystem;
 using namespace Configuration;
 using namespace Importer;
 
@@ -65,7 +64,7 @@ struct TESTSCENERY_FACTORY
 
     bool instantiate(const std::string& sceneryFile, const std::vector<openScenario::TrafficSignalController>&& trafficSignalControllers = {})
     {
-        path sceneryPath = initial_path() / "Resources" / "ImporterTest" / sceneryFile;
+        std::filesystem::path sceneryPath = std::filesystem::current_path() / "Resources" / "ImporterTest" / sceneryFile;
 
         if (!world.Instantiate())
         {
