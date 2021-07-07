@@ -329,11 +329,11 @@ int EgoAgent::GetLaneIdFromRelative(int relativeLaneId) const
     const auto mainLaneId = GetMainLocatePosition().laneId;
     if (routeElement.inOdDirection)
     {
-        return  mainLaneId + relativeLaneId + (relativeLaneId >= -mainLaneId ? 1 : 0);
+        return  mainLaneId + relativeLaneId + ((mainLaneId < 0) && (relativeLaneId >= -mainLaneId) ? 1 : 0) + ((mainLaneId > 0) && (relativeLaneId <= -mainLaneId) ? -1 : 0);
     }
     else
     {
-        return  mainLaneId - relativeLaneId + (relativeLaneId <= -mainLaneId ? -1 : 0);
+        return  mainLaneId - relativeLaneId + ((mainLaneId < 0) && (relativeLaneId <= mainLaneId) ? 1 : 0) + ((mainLaneId > 0) && (relativeLaneId >= mainLaneId) ? -1 : 0);
     }
 }
 
