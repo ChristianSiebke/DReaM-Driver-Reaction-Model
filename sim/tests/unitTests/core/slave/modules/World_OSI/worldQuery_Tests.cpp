@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -2753,7 +2753,7 @@ TEST(GetRelativeLanes, OnlySectionInDrivingDirection_ReturnsLanesOfThisSection)
     ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneIdMapping));
 
     WorldDataQuery wdQuery{worldData};
-    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 10.0, -1, 300.0).at(node->roadGraphVertex);
+    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 10.0, -1, 300.0, true).at(node->roadGraphVertex);
 
     ASSERT_THAT(result, SizeIs(1));
     EXPECT_THAT(result.at(0).startS, Eq(-10));
@@ -2774,6 +2774,54 @@ TEST(GetRelativeLanes, OnlySectionInDrivingDirection_ReturnsLanesOfThisSection)
     EXPECT_THAT(result.at(0).lanes.at(2).type, Eq(LaneType::Stop));
     EXPECT_THAT(result.at(0).lanes.at(2).predecessor, Eq(std::nullopt));
     EXPECT_THAT(result.at(0).lanes.at(2).successor, Eq(std::nullopt));
+}
+
+TEST(GetRelativeLanes, IncludeOncomingFalse_IgnoresOncomingLanes)
+{
+    OWL::Fakes::WorldData worldData;
+    FakeRoadMultiStream roadStream;
+
+    auto [node, road] = roadStream.AddRoot(100.0, true);
+    OWL::Fakes::Lane lane1;
+    OWL::Fakes::Lane lane2;
+    OWL::Fakes::Lane lane3;
+    OWL::Id idLane1 = 1, idLane2 = 2, idLane3 = 3;
+    ON_CALL(lane1, GetId()).WillByDefault(Return(idLane1));
+    ON_CALL(lane2, GetId()).WillByDefault(Return(idLane2));
+    ON_CALL(lane3, GetId()).WillByDefault(Return(idLane3));
+    std::vector<OWL::Id> emptyIds{};
+    ON_CALL(lane1, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
+    ON_CALL(lane2, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
+    ON_CALL(lane3, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
+    ON_CALL(lane1, GetLaneType()).WillByDefault(Return(LaneType::Driving));
+    ON_CALL(lane2, GetLaneType()).WillByDefault(Return(LaneType::Exit));
+    ON_CALL(lane3, GetLaneType()).WillByDefault(Return(LaneType::Stop));
+    OWL::Fakes::Section section;
+    OWL::Interfaces::Lanes lanes{{&lane1, &lane2, &lane3}};
+    ON_CALL(section, GetLanes()).WillByDefault(ReturnRef(lanes));
+    ON_CALL(section, GetLength()).WillByDefault(Return(100.0));
+    std::list<const OWL::Interfaces::Section*> sections{&section};
+    ON_CALL(*road, GetSections()).WillByDefault(ReturnRef(sections));
+    std::unordered_map<OWL::Id, OWL::OdId> laneIdMapping{{idLane1, -1}, {idLane2, -2}, {idLane3, 1}};
+    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneIdMapping));
+
+    WorldDataQuery wdQuery{worldData};
+    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 10.0, -1, 300.0, false).at(node->roadGraphVertex);
+
+    ASSERT_THAT(result, SizeIs(1));
+    EXPECT_THAT(result.at(0).startS, Eq(-10));
+    EXPECT_THAT(result.at(0).endS, Eq(90));
+    ASSERT_THAT(result.at(0).lanes, SizeIs(2));
+    EXPECT_THAT(result.at(0).lanes.at(0).relativeId, Eq(0));
+    EXPECT_THAT(result.at(0).lanes.at(0).inDrivingDirection, Eq(true));
+    EXPECT_THAT(result.at(0).lanes.at(0).type, Eq(LaneType::Driving));
+    EXPECT_THAT(result.at(0).lanes.at(0).predecessor, Eq(std::nullopt));
+    EXPECT_THAT(result.at(0).lanes.at(0).successor, Eq(std::nullopt));
+    EXPECT_THAT(result.at(0).lanes.at(1).relativeId, Eq(-1));
+    EXPECT_THAT(result.at(0).lanes.at(1).inDrivingDirection, Eq(true));
+    EXPECT_THAT(result.at(0).lanes.at(1).type, Eq(LaneType::Exit));
+    EXPECT_THAT(result.at(0).lanes.at(1).predecessor, Eq(std::nullopt));
+    EXPECT_THAT(result.at(0).lanes.at(1).successor, Eq(std::nullopt));
 }
 
 TEST(GetRelativeLanes, OnlySectionAgainstDrivingDirection_ReturnsLanesOfThisSection)
@@ -2809,7 +2857,7 @@ TEST(GetRelativeLanes, OnlySectionAgainstDrivingDirection_ReturnsLanesOfThisSect
     ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneIdMapping));
 
     WorldDataQuery wdQuery{worldData};
-    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 0.0, -1, 300.0).at(node->roadGraphVertex);
+    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 0.0, -1, 300.0, true).at(node->roadGraphVertex);
 
     ASSERT_THAT(result, SizeIs(1));
     EXPECT_THAT(result.at(0).startS, Eq(0));
@@ -2878,7 +2926,7 @@ TEST(GetRelativeLanes, TwoSectionsOnSameRoad_ReturnsLanesOfBothSections)
     ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneIdMapping));
 
     WorldDataQuery wdQuery{worldData};
-    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 0.0, -1, 300.0).at(node->roadGraphVertex);
+    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 0.0, -1, 300.0, true).at(node->roadGraphVertex);
 
     ASSERT_THAT(result, SizeIs(2));
     EXPECT_THAT(result.at(0).startS, Eq(0));
@@ -2960,7 +3008,7 @@ TEST(GetRelativeLanes, IdOfEgoLaneChanges_ReturnsLanesWithCorrectRelativeId)
     ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneIdMapping));
 
     WorldDataQuery wdQuery{worldData};
-    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 0.0, -1, 300.0).at(node->roadGraphVertex);
+    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 0.0, -1, 300.0, true).at(node->roadGraphVertex);
 
     ASSERT_THAT(result, SizeIs(2));
     EXPECT_THAT(result.at(0).startS, Eq(0));
@@ -3060,7 +3108,7 @@ TEST(GetRelativeLanes, BranchingTree_ReturnsLanesOfWayToNode)
     ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneIdMapping));
 
     WorldDataQuery wdQuery{worldData};
-    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 0.0, -1, 300.0);
+    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 0.0, -1, 300.0, true);
     auto result2 = result.at(node2->roadGraphVertex);
     auto result3 = result.at(node3->roadGraphVertex);
 

@@ -901,7 +901,7 @@ int WorldDataQuery::FindNextEgoLaneId (const OWL::Interfaces::Lanes& lanesOnSect
     return 0;
 }
 
-std::map<int, OWL::Id> WorldDataQuery::AddLanesOfSection(const OWL::Interfaces::Lanes& lanesOnSection, bool inStreamDirection, int currentOwnLaneId,
+std::map<int, OWL::Id> WorldDataQuery::AddLanesOfSection(const OWL::Interfaces::Lanes& lanesOnSection, bool inStreamDirection, int currentOwnLaneId, bool includeOncoming,
                                                          const std::map<int, OWL::Id>& previousSectionLaneIds, std::vector<RelativeWorldView::Lane>& previousSectionLanes,
                                                          RelativeWorldView::LanesInterval& laneInterval) const
 {
@@ -910,6 +910,10 @@ std::map<int, OWL::Id> WorldDataQuery::AddLanesOfSection(const OWL::Interfaces::
     {
         const auto& laneId = worldData.GetLaneIdMapping().at(lane->GetId());
         bool inDrivingDirection = inStreamDirection ? (laneId < 0) : (laneId > 0);
+        if(!includeOncoming && !inDrivingDirection)
+        {
+            continue;
+        }
         int relativeLaneId = inStreamDirection ? (laneId - currentOwnLaneId) : (currentOwnLaneId - laneId);
         bool differentSigns = (currentOwnLaneId * laneId < 0) && currentOwnLaneId != 0;
         if (differentSigns)
@@ -930,7 +934,7 @@ std::map<int, OWL::Id> WorldDataQuery::AddLanesOfSection(const OWL::Interfaces::
     return lanesOnSectionLaneIds;
 }
 
-RouteQueryResult<RelativeWorldView::Lanes> WorldDataQuery::GetRelativeLanes(const RoadMultiStream& roadStream, double startPosition, int startLaneId, double range) const
+RouteQueryResult<RelativeWorldView::Lanes> WorldDataQuery::GetRelativeLanes(const RoadMultiStream& roadStream, double startPosition, int startLaneId, double range, bool includeOncoming) const
 {
     int currentOwnLaneId = startLaneId;
     return roadStream.Traverse<RelativeWorldView::Lanes, std::map<int, OWL::Id>>(
@@ -975,7 +979,7 @@ RouteQueryResult<RelativeWorldView::Lanes> WorldDataQuery::GetRelativeLanes(cons
             {
                 currentOwnLaneId = FindNextEgoLaneId(lanesOnSection, road.inStreamDirection, previousSectionLaneIds);
             }
-            auto lanesOnSectionLaneIds = AddLanesOfSection(lanesOnSection, road.inStreamDirection, currentOwnLaneId, previousSectionLaneIds, relativeLanes.back().lanes, laneInterval);
+            auto lanesOnSectionLaneIds = AddLanesOfSection(lanesOnSection, road.inStreamDirection, currentOwnLaneId, includeOncoming, previousSectionLaneIds, relativeLanes.back().lanes, laneInterval);
             previousSectionLaneIds = lanesOnSectionLaneIds;
             relativeLanes.push_back(laneInterval);
         }
