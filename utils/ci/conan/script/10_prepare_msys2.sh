@@ -26,6 +26,6 @@ yes | pacman -S mingw-w64-x86_64-cmake \
                 mingw-w64-x86_64-doxygen \
                 mingw-w64-x86_64-graphviz \
                 mingw-w64-x86_64-python-pip \
-                pacman -S mingw-w64-x86_64-python-sphinx \
-                pacman -S mingw-w64-x86_64-enchant
+                mingw-w64-x86_64-python-sphinx \
+                mingw-w64-x86_64-enchant
 	
