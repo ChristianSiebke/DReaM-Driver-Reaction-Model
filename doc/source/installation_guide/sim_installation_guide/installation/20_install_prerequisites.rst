@@ -40,8 +40,8 @@ Installing the Build Environment
          Also, the unix-like shell simplifies c++ compilation on Windows.
          For details, see `MSYS2 website <https://www.msys2.org/>`_.
 
+         
          .. _msys2:
-
 
       #. Download MSYS2
 
@@ -156,6 +156,7 @@ The first set of dependencies we need to install in order to successfully compil
 
          .. code-block:: 
 
+            # for simulator
             apt install ccache
             apt install cmake
             apt install doxygen
@@ -167,6 +168,10 @@ The first set of dependencies we need to install in order to successfully compil
             apt install protobuf-compiler  # when building osi
             apt install qt5-default
             apt install zlib1g-dev
+
+            # for documentation
+            sudo apt install doxygen python3 python3-pip libenchant-2-2 dvipng
+            pip3 install sphinx sphinx-rtd-theme sphinx-tabs breathe exhale sphinxcontrib-spelling
 
          Under Linux, it is deliberate that the googletest package only installs the header files to the system, 
          but not the static and dynamic libraries. The missing libraries can be build and installed to ``/usr/lib`` via

@@ -220,6 +220,16 @@ The above directory structure will be created by following the instructions of t
       ARGS is optional, but recommended.
       Adjust parallel build flag ``-j3`` based on your system.
 
+#. Build documentation
+
+   Starting from ``simopenpass/build``:
+
+   .. code-block:: 
+
+      make doc
+
+   .. note:: Currently the documentation must be built before |op| can be successfully installed if the CMake variable `WITH_DOC=ON` (default).
+
 #. Build simulation core
 
    Starting from ``simopenpass/build``:

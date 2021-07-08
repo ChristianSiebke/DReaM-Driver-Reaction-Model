@@ -1,3 +1,4 @@
+# for simulator
 pacman -S mingw-w64-x86_64-boost        #1.75.0-2
 pacman -S mingw-w64-x86_64-ccache       #3.7.9-1
 pacman -S mingw-w64-x86_64-cmake        #3.19.2-1
@@ -19,7 +20,7 @@ pacman -S mingw-w64-x86_64-texlive-core #2021.20210519-2
 wget -P /mingw64/share/texmf-dist/tex/latex/anyfontsize \
   http://mirrors.ctan.org/macros/latex/contrib/anyfontsize/anyfontsize.sty
 
-# finally install fonts (which also picks up anyfontsize)
+# install fonts (which also picks up anyfontsize)
 pacman -S mingw-w64-x86_64-texlive-font-utils #2021.20210519-1
 
 # for sphinx/exhale
