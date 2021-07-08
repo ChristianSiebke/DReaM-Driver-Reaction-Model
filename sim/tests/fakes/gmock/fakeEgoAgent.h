@@ -22,6 +22,8 @@ class FakeEgoAgent : public EgoAgentInterface
     MOCK_CONST_METHOD0(HasValidRoute, bool ());
     MOCK_METHOD1(SetNewTarget, void (size_t alternativeIndex));
     MOCK_CONST_METHOD0(GetRoadId, const std::string& ());
+    MOCK_CONST_METHOD1(GetVelocity, double (VelocityScope velocityScope));
+    MOCK_CONST_METHOD2(GetVelocity, double (VelocityScope velocityScope, const WorldObjectInterface* object));
     MOCK_CONST_METHOD2(GetDistanceToEndOfLane, double (double range, int relativeLane));
     MOCK_CONST_METHOD3(GetDistanceToEndOfLane, double (double range, int relativeLane, const LaneTypes& acceptableLaneTypes));
     MOCK_CONST_METHOD2(GetRelativeLanes, RelativeWorldView::Lanes (double range, int relativeLane));

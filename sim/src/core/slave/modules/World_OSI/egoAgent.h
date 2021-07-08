@@ -36,6 +36,10 @@ public:
 
     const std::string& GetRoadId() const override;
 
+    double GetVelocity(VelocityScope velocityScope) const override;
+
+    double GetVelocity(VelocityScope velocityScope, const WorldObjectInterface* object) const override;
+
     double GetDistanceToEndOfLane (double range, int relativeLane = 0) const override;
 
     double GetDistanceToEndOfLane(double range, int relativeLane, const LaneTypes &acceptableLaneTypes) const override;
@@ -89,6 +93,8 @@ public:
 private:
 
     std::optional<RouteElement> GetPreviousRoad(size_t steps = 1) const;
+
+    std::optional<GlobalRoadPosition> GetReferencePointPosition(const WorldObjectInterface *object) const;
 
     std::optional<RoadGraphVertex> GetReferencePointVertex() const;
 
