@@ -1,0 +1,9 @@
+[requires]
+ OSI/3.2.0@openpass/testing
+ FMILibrary/2.0.3@openpass/testing
+
+[generators]
+ cmake
+
+[imports]
+ . , * -> C:/OpenPASS/ThirdParty @

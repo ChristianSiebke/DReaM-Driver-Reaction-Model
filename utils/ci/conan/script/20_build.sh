@@ -21,8 +21,8 @@ conan export ../recipe/osi openpass/testing
 conan export ../recipe/fmi openpass/testing
 conan export ../recipe/openpass
 
-mkdir ../build 
-cd ../build
+mkdir ../install_file/openpass/build 
+cd ../install_file/openpass/build
 
 conan install .. --build=missing
 	
