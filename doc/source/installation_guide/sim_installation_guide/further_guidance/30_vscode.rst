@@ -9,190 +9,220 @@
   SPDX-License-Identifier: EPL-2.0
   ************************************************************
 
+.. |win_only| image:: /_static/win_only.png
+
 .. _vscode:
 
-Working with VSCode
-===================
+Working with Visual Studio Code
+===============================
 
 This section describes the basic setup for Visual Studio Code.
-Use it as a template for starting.
 
-.. figure:: _static/images/vscode.png
+.. figure:: _static/images/vscode_quick_intro.png
    :align: center
-   :scale: 60%
-   
-   Proper setup VSCode showing **left**, debugging, testmate, and cmake pane selectors, and at the **bottom**, build type, kit, current target, and CTest runner.
+
+   Correctly configured Visual Studio Code showing -- among other things -- **left**, debugging, testmate, and cmake pane selectors, and at the **bottom**, build type, kit, current target, and CTest runner.
 
 Assumptions
 -----------
 
-- For Windows, it is expected, that a **MSYS2/MinGW 64 Bit** is used.
-- For brevity, non-standard libraries are expected to be in the folder ``deps/thirdParty``. 
+- For brevity, non-standard libraries are expected to be in the folder ``./deps/thirdParty``.
+- |win_only| **MSYS2/MinGW 64 Bit** is used.
 
-Install and Config
-------------------
+Installation
+------------
 
-#. Install Visual Studio Code
+1. Install Visual Studio Code (https://code.visualstudio.com)
 
-#. Install extensions
-   
-   - C/C++ 
-   - CMake Tools
-   - C++ Testmate
+2. Install Extensions
 
-#. Open the repository as folder, e.g. by calling ``code simopenpass`` after checking out.
-   If CMakeTools are setup right, it should as, if you like to configure it now and always on opening.
-   Say yes to configuration, which will create a ``build`` folder, but fails to do more (config follows below).
+.. table::
 
-#. **Windows only** Make Kit available:
-   
-   #. ``Ctrk+Shift+P``: ``CMake: Edit User-Local CMake Kits``
-   #. Insert/Update:
+   ======================================================================================================== =======================================================
+   Name                                                                                                     Purpose
+   ======================================================================================================== =======================================================
+   `C/C++ <https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools>`_                        Support for C/C++, including IntelliSense and debugging
+   `CMake Tools <https://vector-of-bool.github.io/docs/vscode-cmake-tools>`_                                Extended CMake support
+   `C++ Testmate <https://marketplace.visualstudio.com/items?itemName=matepek.vscode-catch2-test-adapter>`_ Run and debug GoogleTest
+   `MSYS2/Cygwin/MinGW/Clang support <https://marketplace.visualstudio.com/items?itemName=fougas.msys2>`_   |win_only| MSYS2/MinGW configuration adapter
+   ======================================================================================================== =======================================================
 
-      .. code-block:: JSON
-   
-         {
-           "name": "MinGW64 GCC",
-           "compilers": {
-               "C": "C:\\msys64\\mingw64\\bin\\gcc.exe",
-               "CXX": "C:\\msys64\\mingw64\\bin\\g++.exe"
-           },
-           "preferredGenerator": {
-               "name": "MSYS Makefiles"
-           },
-           "environmentVariables": {
-               "PATH": "C:\\msys64\\mingw64\\bin"
-           }
-         } 
+3. Open the repository as folder, e.g. by calling ``code simopenpass`` after checking out.
+   Say yes, when CMake Tools ask to configure the project.
+   This creates a ``build`` folder, **but fails** (well, we need to config some stages).
 
-   +. ``Ctrk+Shift+P``: ``CMake: Select a Kit`` = ``MinGW64 GCC``
+Configuration
+-------------
 
-#. Configure:
+|win_only| MSYS2 Path
++++++++++++++++++++++
 
-   #. ``Ctrk+Shift+P``: ``Preferences Open Workspace Settings (JSON)``
+Normally, runtime dependencies (DLLs) are not copied into the executables folder within the build process.
+This means, that programs cannot be executed natively from Windows shells or the explorer.
+It is highly recommended, to add the ``bin`` folder of MSYS2 to the ``PATH`` environment variable, so Windows will look for DLLs within these folders, allowing native execution.
+Visual Studio Code needs to be reloaded/restarted after the path update.
 
-   #. Insert/Update:
+.. code:: PowerShell
 
-      .. tabs::
-   
-         .. tab:: Windows
-   
-            .. code-block:: JSON
-   
-               {
-                   "cmake.cmakePath": "C:\\msys64\\mingw64\\bin\\cmake.exe",
-                   "cmake.mingwSearchDirs": [
-                       "C:\\msys64\\mingw64\\bin"
-                   ],
-                   "cmake.generator": "MSYS Makefiles",
-                   "cmake.parallelJobs": 2,
-                   "cmake.configureArgs": [
-                       "-DCMAKE_PREFIX_PATH=${workspaceRoot}/deps/thirdParty/win64/FMILibrary;${workspaceRoot}/deps/thirdParty/win64/osi",
-                       "-DUSE_CCACHE=ON",
-                       "-DWITH_EXTENDED_OSI=ON",
-                       "-DWITH_DEBUG_POSTFIX=OFF",
-                       "-DOPENPASS_ADJUST_OUTPUT=OFF"
-                   ]
-               }
-   
-         .. tab:: Linux
-   
-            .. code-block:: JSON
-         
-               {
-                   "cmake.parallelJobs": 2,
-                   "cmake.configureArgs": [
-                       "-DCMAKE_PREFIX_PATH=${workspaceRoot}/deps/thirdParty/linux64/FMILibrary;${workspaceRoot}/deps/thirdParty/linux64/osi",
-                       "-DUSE_CCACHE=ON",
-                       "-DCMAKE_INSTALL_PREFIX=/OpenPASS/bin"
-                   ]
-               }
-   
-   #. ``Ctrk+Shift+P``: ``CMake: Configure`` - cmake should now be able to configure the project.
-      If not, cmake should give you at least a hint, what's missing (normally external libraries).
-      Read :ref:`cmake` or :ref:`prerequisites` for more information.
- 
-      .. note::
-      
-         When changing libraries, it's recommended to wipe the cmake cache before reconfiguration:
-         ``Ctrk+Shift+P`` > ``CMake: Delete Cache and Reconfigure``
+   # check if set
+   echo ${env.path}
 
-Testing
--------
+   # if not
+   setx path "%PATH%;C:\msys64\mingw64\bin"
 
-Testmate discovers tests only after they are built for the first time.
-It pays to run ``ctest`` on the console to build all test targets.
-After this, you should see all tests in the testing pane on the left.
-If not, check the extension setting ``testMate.cpp.test.executables`` and ``testMate.cpp.test.workingDirectory``
-
-Debugging
----------
-
-CMake offers its own debugging functionality, but does not respect the dependencies between the |op| core and its components.
-This means, it tries to run the executable from within the build folder, e.g. ``./build/sim/src/core/slave/OpenPassSlave``.
-Unfortunately, in here, the core does not find any libraries or configurations.
-
-As a solution, setup a debug target, pointing at the installed executable instead:
-
-#. Got to "Run and Debug" (``Ctrl+Shift+D``) and *create a launch.json file*.
-
-#. Insert/Update:
+Build Kit
++++++++++
 
 .. tabs::
 
    .. tab:: Windows
 
-      .. code-block:: JSON
+      **Add and select MSYS2/MinGW64 Build Kit:**
 
-         {
-             "configurations": [
-             {
-                 "name": "Debug OpenPass",
-                 "type": "cppdbg",
-                 "request": "launch",
-                 "program": "C:/OpenPASS/bin/core/OpenPassSlave.exe",
-                 "args": [],
-                 "stopAtEntry": false,
-                 "cwd": "c:/openpass/bin/core",
-                 "environment": [],
-                 "externalConsole": false,
-                 "MIMode": "gdb",
-                 "miDebuggerPath": "C:/msys64/mingw64/bin/gdb.exe",
-                 "setupCommands": [
-                     {
-                         "description": "Enable pretty-printing for gdb",
-                         "text": "-enable-pretty-printing",
-                         "ignoreFailures": true
-                     }
-                 ]
-             }
-         }
+      1. Execute ``Ctrk+Shift+P``: ``CMake: Edit User-Local CMake Kits``
+
+      2. Insert/Update:
+
+         .. literalinclude:: _static/vscode/config/win/cmake-tools-kits.json
+            :caption: cmake-tools-kits.json
+            :language: javascript
+            :linenos:
+
+         :download:`Download <_static/vscode/config/win/cmake-tools-kits.json>`
+
+      3. ``Ctrk+Shift+P``: ``CMake: Select a Kit`` = ``MinGW64``
 
    .. tab:: Linux
 
-      .. code-block:: JSON
+      **Select System Build Kit:**
 
-         {
-             "configurations": [
-             {
-                 "name": "Debug OpenPass",
-                 "type": "cppdbg",
-                 "request": "launch",
-                 "program": "/openPASS/bin/core/OpenPassSlave",
-                 "args": [],
-                 "stopAtEntry": false,
-                 "cwd": "/openPASS/bin/core/",
-                 "environment": [],
-                 "externalConsole": false,
-                 "MIMode": "gdb",
-                 "setupCommands": [
-                     {
-                         "description": "Enable pretty-printing for gdb",
-                         "text": "-enable-pretty-printing",
-                         "ignoreFailures": true
-                     }
-                 ]
-             }
-         }
+      ``Ctrk+Shift+P``: ``CMake: Select a Kit`` = ``GCC 10.2.0``
 
-.. warning:: Don't forget to run the target ``install`` before debugging.
+      See also :ref:`prerequisites`.
+
+User Settings
++++++++++++++
+
+1. Execute ``Ctrk+Shift+P``: ``Preferences Open Workspace Settings (JSON)``
+
+2. Insert/Update:
+
+   .. tabs::
+
+      .. tab:: Windows
+
+         .. literalinclude:: _static/vscode/config/win/settings.json
+            :caption: settings.json
+            :language: javascript
+            :linenos:
+
+         :download:`Download <_static/vscode/config/win/settings.json>`
+
+      .. tab:: Linux
+
+         .. literalinclude:: _static/vscode/config/linux/settings.json
+            :caption: settings.json
+            :language: javascript
+            :linenos:
+
+         :download:`Download <_static/vscode/config/linux/settings.json>`
+
+
+C++ and IntelliSense
+++++++++++++++++++++
+
+1. Execute ``Ctrk+Shift+P``: ``C/C++: Edit Configurations (JSON)``
+
+2. .. literalinclude:: _static/vscode/config/c_cpp_properties.json
+     :caption: c_cpp_properties.json
+     :language: javascript
+     :linenos:
+
+   :download:`Download <_static/vscode/config/c_cpp_properties.json>`
+
+Configure the Build
++++++++++++++++++++
+
+Execute ``Ctrk+Shift+P``: ``CMake: Configure``
+
+
+CMake should now be able to configure the project.
+If not, cmake should give you at least a hint, what's missing (normally external libraries).  
+Read :ref:`cmake` or :ref:`prerequisites` for more information.
+
+.. admonition:: CMake
+
+ Some changes such as changing the build type (Debug/Release) will cause CMake to updates the configuration automatically.
+ Other changes won't trigger an update, such as changing the paths to libraries (`CMAKE_PREFIX_PATH`), the cmake cache needs to be cleared before reconfiguration:  
+ ``Ctrk+Shift+P`` > ``CMake: Delete Cache and Reconfigure``
+
+Debug Targets
++++++++++++++
+
+CMake Tools and C++ Testmate automatically use custom launch configurations, if available.
+When using the debugging functionality, the according executable will be executed from where they are built (per default inside the ``build`` folder).  
+
+- This is acceptable for unit test, which do not require openPASS specific libraries.  
+  The corresponding config is ``CMake Target``.
+
+- For the core, located at ``./build/sim/src/core/slave/OpenPassSlave``, this does not work, as no libraries and no configurations are available.  
+  As a solution, a second debug target ``opsimulation`` points at the installed executable instead.
+
+  .. warning:: Don't forget to run the target ``install`` before debugging .
+
+1. Got to "Run and Debug" (``Ctrl+Shift+D``) and *create a launch.json file*.
+
+2. Insert/Update:
+
+.. tabs::
+
+   .. tab:: Windows
+
+      .. literalinclude:: _static/vscode/config/win/launch.json
+         :caption: launch.json
+         :language: javascript
+         :linenos:
+
+      :download:`Download <_static/vscode/config/win/launch.json>`
+
+   .. tab:: Linux
+
+      .. literalinclude:: _static/vscode/config/linux/launch.json
+         :caption: launch.json
+         :language: javascript
+         :linenos:
+
+      :download:`Download <_static/vscode/config/linux/launch.json>`
+
+.. note::
+
+   IntelliSense uses the ``compile_commands.json`` of generated through ``CMAKE_EXPORT_COMPILE_COMMANDS=ON`` (see ``settings.json``).
+   This is necessary for proper resolution of the include files.
+
+
+Troubleshooting
+---------------
+
+|win_only| **Program does not start**
+
+The most effective way to debug startup issues is by means of the `Process Monitor <https://docs.microsoft.com/en-us/sysinternals/downloads/procmon>`_.
+
+But normally, its a missing DLL. When executing the program via command line or explorer a message box should prompt which DLLs are missing.
+A simple solution is to copy the according DLLs into the folder of the executable.
+Another solution is to make the path available by extending the ``PATH`` environment variable.
+Potential sources for missing DLLs are ``C:\msys64\mingw64\bin``, ``C:\msys64\mingw64\x86_64-w64-mingw32\lib``, and the ``build`` folder itself.
+
+**Tests are not listed**
+
+For test discovery, C++ Testmate needs to know the location of all additional dependencies.
+This information is retrieved from the current debug configuration.
+
+#. Testmate discovers tests only after they are built.
+   It pays to ``Run CTest`` to build all test targets.
+   After this, you should see all tests in the testing pane on the left.
+
+#. Still not listed? Set ``testMate.cpp.log.logfile`` in ``settings.json`` and check log.
+
+   #. Test executable not mentioned at all:
+      Executable name might not fit (check glob pattern in ``testMate.cpp.test.executables``).
+   #. Log reports *Error: Not a supported test executable*: a library/DLL might be missing.
