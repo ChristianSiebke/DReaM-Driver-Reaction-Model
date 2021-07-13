@@ -4,15 +4,13 @@ class OsiConan(ConanFile):
     name = "OSI"
     version = "3.2.0"
     license = "<Put the package license here>"
-    author = "<Put your name here> <And your email here>"
-    url = "<Package recipe repository url here, for issues about the package>"
+    author = "Michael Scharfenberg michael.scharfenberg@itk-engineering.de"
+    url = "https://github.com/OpenSimulationInterface"
     description = "<Description of Osi here>"
-    topics = ("<Put some tag here>", "<here>", "<and here>")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": True, "fPIC": True, "protobuf:shared": True}
     generators = "cmake"
-    # short_paths = True
 
     def configure(self):
         if self.settings.os == "Linux": #For Windows it is required that Protobuf is installed via pacman or pip in MSYS2
@@ -40,10 +38,6 @@ class OsiConan(ConanFile):
         #cmake.install()
 
     def package(self):
-        # self.copy("*", src="../package")
-        # self.copy("*.dll", src="../package", keep_path=False)
-        # self.copy("*.lib", src="../package", keep_path=False)
-        # self.copy("*.a", src="../package", keep_path=False)
         self.copy("*.h", dst="include/osi3")
         self.copy("*.dll", dst="lib/osi3", keep_path=False)
         self.copy("*.lib", dst="lib/osi3", keep_path=False)

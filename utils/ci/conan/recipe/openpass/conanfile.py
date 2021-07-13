@@ -4,11 +4,10 @@ from conans import ConanFile, CMake, tools
 class OpenpassConan(ConanFile):
     name = "openpass"
     version = "0.8"
-    license = "<Put the package license here>"
-    author = "<Put your name here> <And your email here>"
-    url = "<Package recipe repository url here, for issues about the package>"
+    license = "Eclipse Public License 2.0"
+    author = "Michael Scharfenberg michael.scharfenberg@itk-engineering.de"
+    url = "https://gitlab.eclipse.org/eclipse/simopenpass"
     description = "<Description of Openpass here>"
-    topics = ("<Put some tag here>", "<here>", "<and here>")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False], "Gui_only": [True, False]}
     default_options = {"shared": True, "fPIC": True, "boost:shared": True, "Gui_only": False}
@@ -16,10 +15,6 @@ class OpenpassConan(ConanFile):
     # build_folder=""
     exports_sources = "../../../../../*" # use source of the repo
     short_paths = True
-
-    # def configure(self):
-    #     if self.settings.os == "Windows":
-    #         self.build_folder = "C:/tmp/op"
 
     def config_options(self):
         if self.settings.os == "Windows":

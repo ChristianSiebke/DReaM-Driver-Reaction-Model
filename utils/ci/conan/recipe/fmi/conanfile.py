@@ -4,10 +4,9 @@ class FmiConan(ConanFile):
     name = "FMILibrary"
     version = "2.0.3"
     license = "<Put the package license here>"
-    author = "<Put your name here> <And your email here>"
-    url = "<Package recipe repository url here, for issues about the package>"
+    author = "Michael Scharfenberg michael.scharfenberg@itk-engineering.de"
+    url = "https://github.com/modelon-community"
     description = "<Description of Fmi here>"
-    topics = ("<Put some tag here>", "<here>", "<and here>")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
