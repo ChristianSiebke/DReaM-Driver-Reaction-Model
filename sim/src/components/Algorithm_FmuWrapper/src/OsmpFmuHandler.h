@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019, 2020 in-tech GmbH
+* Copyright (c) 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -282,4 +282,6 @@ private:
     void AppendMessages(std::string &appendedMessage, std::string& message);
 
     std::ofstream traceOutputFile;
+
+    double bb_center_offset_x{0.0};    //!< Offset of bounding box center to agent reference point (rear axle)
 };
