@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2016, 2017 ITK Engineering GmbH
 *               2020 HLRS, University of Stuttgart.
 *
@@ -130,9 +130,9 @@ public:
     void RemoveAgent(const AgentInterface* agent);
 
     void PublishGlobalData(int timestamp) override;
-    void SyncGlobalData() override;
+    void SyncGlobalData(int timestamp) override;
 
-    bool CreateScenery(SceneryInterface* scenery, const openScenario::EnvironmentAction& environment) override;
+    bool CreateScenery(SceneryInterface* scenery, const std::vector<openScenario::TrafficSignalController>& trafficSignalControllers, const openScenario::EnvironmentAction& environment) override;
 
     AgentInterface* CreateAgentAdapterForAgent() override
     {
@@ -201,6 +201,9 @@ public:
 
     RouteQueryResult<std::vector<CommonTrafficSign::Entity>> GetRoadMarkingsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId,
                                                                                     double startDistance, double searchRange) const override;
+
+    RouteQueryResult<std::vector<CommonTrafficLight::Entity>> GetTrafficLightsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId,
+                                                                                     double startDistance, double searchRange) const override;
 
     RouteQueryResult<std::vector<LaneMarking::Entity>> GetLaneMarkings(const RoadGraph& roadGraph, RoadGraphVertex startNode,
                                                                        int laneId, double startDistance, double range, Side side) const override;
@@ -313,6 +316,8 @@ private:
     WorldParameterOSI worldParameter;
 
     AgentNetwork agentNetwork;
+
+    TrafficLightNetwork trafficLightNetwork;
 
     const CallbackInterface* callbacks;
 

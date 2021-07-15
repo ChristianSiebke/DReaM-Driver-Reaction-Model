@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019, 2020 in-tech GmbH
+* Copyright (c) 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -26,6 +26,7 @@ using ::testing::StrEq;
 using ::testing::DontCare;
 using ::testing::ElementsAre;
 using ::testing::SizeIs;
+using ::testing::_;
 
 TEST(ScenarioImporter_UnitTests, ImportEntity)
 {
@@ -618,4 +619,50 @@ TEST(ScenarioImporter_UnitTests, ParseAttributeWithParameterWrongType_Throws)
     openScenario::Parameters parameters{{"ParameterString", parameterString}, {"ParameterDouble", parameterDouble}, {"ParameterInt", parameterInt}};
 
     ASSERT_THROW(ParseAttribute<double>(element, "valueString", parameters), std::runtime_error);
+}
+
+TEST(ScenarioImporter_UnitTests, ImportRoadNetworkWithTrafficLSignalController)
+{
+    QDomElement entityElement = documentRootFromString(
+        "<root>"
+         "<RoadNetwork>"
+            "<LogicFile filepath=\"SceneryConfiguration.xodr\"/>"
+            "<SceneGraphFile filepath=\"\"/>"
+            "<TrafficSignals>"
+                "<TrafficSignalController name=\"ControllerA\" delay=\"1.0\">"
+                    "<Phase name=\"Phase1\" duration=\"20\">"
+                        "<TrafficSignalState trafficSignalId=\"100\" state=\"red\"/>"
+                        "<TrafficSignalState trafficSignalId=\"101\" state=\"green\"/>"
+                    "</Phase>"
+                    "<Phase name=\"Phase2\" duration=\"3\">"
+                        "<TrafficSignalState trafficSignalId=\"100\" state=\"red yellow\"/>"
+                        "<TrafficSignalState trafficSignalId=\"101\" state=\"yellow\"/>"
+                    "</Phase>"
+                "</TrafficSignalController>"
+            "</TrafficSignals>"
+          "</RoadNetwork>"
+        "</root>"
+    );
+
+    FakeScenario scenario;
+    EXPECT_CALL(scenario, SetSceneryPath("SceneryConfiguration.xodr"));
+    std::vector<openScenario::TrafficSignalController> controllers;
+    ON_CALL(scenario, AddTrafficSignalController(_)).WillByDefault(
+                [&](const openScenario::TrafficSignalController& controller){controllers.push_back(controller);});
+
+    openScenario::Parameters parameters;
+
+    EXPECT_NO_THROW(ScenarioImporter::ImportRoadNetwork(entityElement, &scenario, parameters));
+
+    EXPECT_THAT(controllers, SizeIs(1));
+    const auto controller = controllers.front();
+    EXPECT_THAT(controller.name, Eq("ControllerA"));
+    EXPECT_THAT(controller.delay, Eq(1));
+    EXPECT_THAT(controller.phases, SizeIs(2));
+    EXPECT_THAT(controller.phases[0].name, Eq("Phase1"));
+    EXPECT_THAT(controller.phases[0].duration, Eq(20));
+    EXPECT_THAT(controller.phases[0].states, ElementsAre(std::make_pair("100", "red"), std::make_pair("101", "green")));
+    EXPECT_THAT(controller.phases[1].name, Eq("Phase2"));
+    EXPECT_THAT(controller.phases[1].duration, Eq(3));
+    EXPECT_THAT(controller.phases[1].states, ElementsAre(std::make_pair("100", "red yellow"), std::make_pair("101", "yellow")));
 }

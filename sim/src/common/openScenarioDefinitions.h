@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019, 2020 in-tech GmbH
+* Copyright (c) 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -157,6 +157,20 @@ using Position = std::variant<LanePosition,
                               WorldPosition,
                               RelativeObjectPosition,
                               RelativeWorldPosition>;
+
+struct TrafficSignalControllerPhase
+{
+    std::string name;
+    double duration;
+    std::map<std::string, std::string> states;
+};
+
+struct TrafficSignalController
+{
+    std::string name;
+    double delay;
+    std::vector<TrafficSignalControllerPhase> phases;
+};
 
 // Action
 // GlobalAction

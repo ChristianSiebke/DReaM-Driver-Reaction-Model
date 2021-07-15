@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -144,6 +144,18 @@ public:
     //! \param[in]      sceneryPath     Relative path to the scenery file
     //-----------------------------------------------------------------------------
     virtual void SetSceneryPath(const std::string& sceneryPath) = 0;
+
+    //-----------------------------------------------------------------------------
+    //! Retreives the traffic signal controllers
+    //!
+    //! \return    traffic signal controllers
+    //-----------------------------------------------------------------------------
+    virtual const std::vector<openScenario::TrafficSignalController>& GetTrafficSignalControllers() const = 0;
+
+    //-----------------------------------------------------------------------------
+    //! Adds one traffic signal controller
+    //----------------------------------------------------------------------------
+    virtual void AddTrafficSignalController (const openScenario::TrafficSignalController& controller) = 0;
 
     //-----------------------------------------------------------------------------
     //! Adds one scenario entity to the scenery entities of the scenario.

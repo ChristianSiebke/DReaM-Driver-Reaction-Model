@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -48,12 +48,16 @@ public:
     MOCK_METHOD4(ConnectLanes, void(/* const */ RoadLaneSectionInterface &, /* const */ RoadLaneSectionInterface &, const std::map<int, int> &, bool));
     MOCK_METHOD1(SetEnvironment, void (const openScenario::EnvironmentAction& environment));
     MOCK_METHOD2(AddTrafficSign, OWL::Interfaces::TrafficSign &(const Id, const std::string odId));
+    MOCK_METHOD3(AddTrafficLight, OWL::Interfaces::TrafficLight&(const Id, const std::string odId, bool withYellow));
+
     MOCK_CONST_METHOD0(GetTrafficSigns, const std::unordered_map<OWL::Id, OWL::Interfaces::TrafficSign *> &());
     MOCK_CONST_METHOD0(GetTrafficSignIdMapping, const std::unordered_map<std::string, OWL::Id> &());
     MOCK_METHOD1(AddRoadMarking, OWL::Interfaces::RoadMarking &(const Id));
     MOCK_CONST_METHOD0(GetRoadMarkings, const std::unordered_map<OWL::Id, OWL::Interfaces::RoadMarking *> &());
     MOCK_CONST_METHOD1(GetStationaryObject, const OWL::Interfaces::StationaryObject& (Id id));
     MOCK_CONST_METHOD1(GetMovingObject, OWL::Interfaces::MovingObject& (Id id));
+    MOCK_CONST_METHOD0(GetTrafficLights, const std::unordered_map<OWL::Id, OWL::Interfaces::TrafficLight*>& ());
+
     MOCK_CONST_METHOD0(GetRoadGraph, const RoadGraph &());
     MOCK_METHOD2(SetRoadGraph, void(const RoadGraph &&roadGraph, const RoadGraphVertexMapping &&vertexMapping));
     MOCK_CONST_METHOD0(GetRoadGraphVertexMapping, const RoadGraphVertexMapping &());
@@ -65,6 +69,8 @@ public:
     MOCK_CONST_METHOD0(GetJunctions, const std::map<std::string, OWL::Junction *> &());
     MOCK_METHOD2(AssignTrafficSignToLane, void(OWL::Id laneId, OWL::Interfaces::TrafficSign &trafficSign));
     MOCK_METHOD2(AssignRoadMarkingToLane, void(OWL::Id laneId, OWL::Interfaces::RoadMarking &roadMarking));
+
+    MOCK_METHOD2(AssignTrafficLightToLane, void (OWL::Id laneId, OWL::Interfaces::TrafficLight& trafficLight));
     MOCK_METHOD3(AddJunctionPriority, void(const JunctionInterface *odJunction, const std::string &high, const std::string &low));
     MOCK_METHOD1(GetOwlId, OWL::Id(int));
     MOCK_CONST_METHOD1(GetAgentId, int(const OWL::Id));

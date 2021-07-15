@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -51,6 +51,16 @@ const std::string& Scenario::GetSceneryPath()
 void Scenario::SetSceneryPath(const std::string& sceneryPath)
 {
     this->sceneryPath = sceneryPath;
+}
+
+const std::vector<openScenario::TrafficSignalController> &Scenario::GetTrafficSignalControllers() const
+{
+    return trafficSignalControllers;
+}
+
+void Scenario::AddTrafficSignalController(const openScenario::TrafficSignalController &controller)
+{
+    trafficSignalControllers.push_back(controller);
 }
 
 void Scenario::AddScenarioEntity(const ScenarioEntity& entity)

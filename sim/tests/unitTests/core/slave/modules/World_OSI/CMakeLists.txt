@@ -20,6 +20,7 @@ add_openpass_target(
     entityRepository_Tests.cpp
     sceneryConverter_Tests.cpp
     sensorView_Tests.cpp
+    trafficLightNetwork_Tests.cpp
     worldQuery_Tests.cpp
     worldToRoadCoordinateConverter_Tests.cpp
     Generators/laneGeometryElementGenerator_Tests.cpp
@@ -35,6 +36,7 @@ add_openpass_target(
     ${COMPONENT_SOURCE_DIR}/EntityRepository.cpp
     ${COMPONENT_SOURCE_DIR}/SceneryConverter.cpp
     ${COMPONENT_SOURCE_DIR}/TrafficObjectAdapter.cpp
+    ${COMPONENT_SOURCE_DIR}/TrafficLightNetwork.cpp
     ${COMPONENT_SOURCE_DIR}/WorldData.cpp
     ${COMPONENT_SOURCE_DIR}/WorldDataException.cpp
     ${COMPONENT_SOURCE_DIR}/WorldDataQuery.cpp
@@ -62,6 +64,7 @@ add_openpass_target(
     ${COMPONENT_SOURCE_DIR}/SceneryEntities.h
     ${COMPONENT_SOURCE_DIR}/SceneryConverter.h
     ${COMPONENT_SOURCE_DIR}/TrafficObjectAdapter.h
+    ${COMPONENT_SOURCE_DIR}/TrafficLightNetwork.h
     ${COMPONENT_SOURCE_DIR}/WorldData.h
     ${COMPONENT_SOURCE_DIR}/WorldDataException.h
     ${COMPONENT_SOURCE_DIR}/WorldDataQuery.h

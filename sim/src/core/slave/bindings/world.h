@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -137,14 +137,14 @@ public:
         return implementation->PublishGlobalData(timestamp);
     }
 
-    void SyncGlobalData() override
+    void SyncGlobalData(int timestamp) override
     {
-        return implementation->SyncGlobalData();
+        return implementation->SyncGlobalData(timestamp);
     }
 
-    bool CreateScenery(SceneryInterface* scenery, const openScenario::EnvironmentAction& environment) override
+    bool CreateScenery(SceneryInterface* scenery, const std::vector<openScenario::TrafficSignalController>& trafficSignalControllers, const openScenario::EnvironmentAction& environment) override
     {
-        return implementation->CreateScenery(scenery, environment);
+        return implementation->CreateScenery(scenery, trafficSignalControllers, environment);
     }
 
     AgentInterface* CreateAgentAdapterForAgent() override
@@ -321,6 +321,12 @@ public:
                                                                                                 double startDistance, double searchRange) const override
     {
         return implementation->GetRoadMarkingsInRange(roadGraph, startNode, laneId, startDistance, searchRange);
+    }
+
+    RouteQueryResult<std::vector<CommonTrafficLight::Entity>> GetTrafficLightsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId,
+                                                                                      double startDistance, double searchRange) const override
+    {
+        return implementation->GetTrafficLightsInRange(roadGraph, startNode, laneId, startDistance, searchRange);
     }
 
     RouteQueryResult<std::vector<LaneMarking::Entity>> GetLaneMarkings(const RoadGraph& roadGraph, RoadGraphVertex startNode,

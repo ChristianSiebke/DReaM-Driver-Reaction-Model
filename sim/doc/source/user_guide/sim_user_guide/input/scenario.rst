@@ -137,6 +137,35 @@ The ``RoadNetwork`` tag contains the mandatory reference to the OpenDRIVE :ref:`
    :dedent: 2
    :start-at: <RoadNetwork>
    :end-at: </RoadNetwork>
+   
+Furthermore the controllers of the traffic lights are defined in this section.
+Each controller defines the phases of a set of linked traffic lights (e.g. one junction).
+The state must be one of the following: "red", "yellow", "green", "red yellow".
+
+Example
+
+.. literalinclude:: @OP_REL_SIM@/contrib/examples/TrafficLight/Scenario.xosc
+   :language: xml
+   :dedent: 4
+   :start-at: <TrafficSignals>
+   :end-at: </TrafficSignals>
+   
+Currently these states are supported
+
+.. table::
+   :class: tight-table
+   
+   =================
+   off
+   red
+   yellow
+   green
+   red yellow
+   yellow flashing
+   =================
+
+
+
 
 .. _scenario_entities:
 
