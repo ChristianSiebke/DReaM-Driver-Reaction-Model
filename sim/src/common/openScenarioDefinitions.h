@@ -186,6 +186,7 @@ struct EntityAction
     EntityActionType type{};
 };
 
+//! OpenSCENARIO Sun
 struct Sun
 {
     double intensity{0.};
@@ -193,11 +194,13 @@ struct Sun
     double elevation{0.};
 };
 
+//! OpenSCENARIO Fog
 struct Fog
 {
     double visualRange{0.};
 };
 
+//! OpenSCENARIO Precipitation
 struct Precipitation
 {
     enum Type
@@ -210,6 +213,7 @@ struct Precipitation
     double intensity;
 };
 
+//! OpenSCENARIO Weather
 struct Weather
 {
     enum CloudState
@@ -226,6 +230,7 @@ struct Weather
     Precipitation precipitation;
 };
 
+//! OpenSCENARIO EnvironmentAction
 struct EnvironmentAction
 {
     Weather weather;

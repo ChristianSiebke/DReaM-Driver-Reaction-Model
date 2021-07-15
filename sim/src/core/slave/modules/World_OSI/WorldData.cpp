@@ -799,21 +799,6 @@ const std::unordered_map<Id, Interfaces::TrafficLight *> &WorldData::GetTrafficL
 
 void WorldData::SetEnvironment(const openScenario::EnvironmentAction& environment)
 {
-    constexpr double THRESHOLD_ILLUMINATION_LEVEL1 = 0.01;
-    constexpr double THRESHOLD_ILLUMINATION_LEVEL2 = 1.0;
-    constexpr double THRESHOLD_ILLUMINATION_LEVEL3 = 3.0;
-    constexpr double THRESHOLD_ILLUMINATION_LEVEL4 = 10.0;
-    constexpr double THRESHOLD_ILLUMINATION_LEVEL5 = 20.0;
-    constexpr double THRESHOLD_ILLUMINATION_LEVEL6 = 400.0;
-    constexpr double THRESHOLD_ILLUMINATION_LEVEL7 = 1000.0;
-    constexpr double THRESHOLD_ILLUMINATION_LEVEL8 = 10000.0;
-    constexpr double THRESHOLD_FOG_DENSE = 50.0;
-    constexpr double THRESHOLD_FOG_THICK = 200.0;
-    constexpr double THRESHOLD_FOG_LIGHT = 1000.0;
-    constexpr double THRESHOLD_FOG_MIST = 2000.0;
-    constexpr double THRESHOLD_FOG_POOR = 4000.0;
-    constexpr double THRESHOLD_FOG_MODERATE = 10000.0;
-    constexpr double THRESHOLD_FOG_GOOD = 40000.0;
     if (environment.weather.sun.intensity < THRESHOLD_ILLUMINATION_LEVEL1)
     {
         osiGroundTruth->mutable_environmental_conditions()->set_ambient_illumination(osi3::EnvironmentalConditions_AmbientIllumination_AMBIENT_ILLUMINATION_LEVEL1);

@@ -303,6 +303,43 @@ public:
                                         const std::map<int, int>& lanePairs,
                                         bool isPrev) = 0;
 
+
+    static constexpr double THRESHOLD_ILLUMINATION_LEVEL1 = 0.01;       //!< Upper threshold for osi3::EnvironmentalConditions::AmbientIllumination::Level1
+    static constexpr double THRESHOLD_ILLUMINATION_LEVEL2 = 1.0;        //!< Upper threshold for osi3::EnvironmentalConditions::AmbientIllumination::Level2
+    static constexpr double THRESHOLD_ILLUMINATION_LEVEL3 = 3.0;        //!< Upper threshold for osi3::EnvironmentalConditions::AmbientIllumination::Level3
+    static constexpr double THRESHOLD_ILLUMINATION_LEVEL4 = 10.0;       //!< Upper threshold for osi3::EnvironmentalConditions::AmbientIllumination::Level4
+    static constexpr double THRESHOLD_ILLUMINATION_LEVEL5 = 20.0;       //!< Upper threshold for osi3::EnvironmentalConditions::AmbientIllumination::Level5
+    static constexpr double THRESHOLD_ILLUMINATION_LEVEL6 = 400.0;      //!< Upper threshold for osi3::EnvironmentalConditions::AmbientIllumination::Level6
+    static constexpr double THRESHOLD_ILLUMINATION_LEVEL7 = 1000.0;     //!< Upper threshold for osi3::EnvironmentalConditions::AmbientIllumination::Level7
+    static constexpr double THRESHOLD_ILLUMINATION_LEVEL8 = 10000.0;    //!< Upper threshold for osi3::EnvironmentalConditions::AmbientIllumination::Level8
+    static constexpr double THRESHOLD_FOG_DENSE = 50.0;         //!< Upper threshold for osi3::EnvironmentalConditions::Fog::Dense
+    static constexpr double THRESHOLD_FOG_THICK = 200.0;        //!< Upper threshold for osi3::EnvironmentalConditions::Fog::Thick
+    static constexpr double THRESHOLD_FOG_LIGHT = 1000.0;       //!< Upper threshold for osi3::EnvironmentalConditions::Fog::Light
+    static constexpr double THRESHOLD_FOG_MIST = 2000.0;        //!< Upper threshold for osi3::EnvironmentalConditions::Fog::Mist
+    static constexpr double THRESHOLD_FOG_POOR = 4000.0;        //!< Upper threshold for osi3::EnvironmentalConditions::Fog::Poor_Visibility
+    static constexpr double THRESHOLD_FOG_MODERATE = 10000.0;   //!< Upper threshold for osi3::EnvironmentalConditions::Fog::Moderate_Visibility
+    static constexpr double THRESHOLD_FOG_GOOD = 40000.0;       //!< Upper threshold for osi3::EnvironmentalConditions::Fog::Good_Visibility
+
+    //! \brief Translates an openScenario environment to OSI3
+    //!
+    //! The following thresholds are used for a mapping of illumination level:
+    //! - \see THRESHOLD_ILLUMINATION_LEVEL1
+    //! - \see THRESHOLD_ILLUMINATION_LEVEL2
+    //! - \see THRESHOLD_ILLUMINATION_LEVEL3
+    //! - \see THRESHOLD_ILLUMINATION_LEVEL4
+    //! - \see THRESHOLD_ILLUMINATION_LEVEL5
+    //! - \see THRESHOLD_ILLUMINATION_LEVEL6
+    //! - \see THRESHOLD_ILLUMINATION_LEVEL7
+    //! - \see THRESHOLD_ILLUMINATION_LEVEL8
+    //!
+    //! The following thresholds are used for a mapping of fog:
+    //! - \see THRESHOLD_FOG_DENSE
+    //! - \see THRESHOLD_FOG_THICK
+    //! - \see THRESHOLD_FOG_LIGHT
+    //! - \see THRESHOLD_FOG_MIST
+    //! - \see THRESHOLD_FOG_POOR
+    //! - \see THRESHOLD_FOG_MODERATE
+    //! - \see THRESHOLD_FOG_GOOD
     virtual void SetEnvironment(const openScenario::EnvironmentAction& environment) = 0;
 
     //!Resets the world for new run; deletes all moving objects

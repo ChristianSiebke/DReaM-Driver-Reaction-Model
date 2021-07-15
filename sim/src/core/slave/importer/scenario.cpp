@@ -53,14 +53,14 @@ void Scenario::SetSceneryPath(const std::string& sceneryPath)
     this->sceneryPath = sceneryPath;
 }
 
-const std::vector<openScenario::TrafficSignalController> &Scenario::GetTrafficSignalControllers() const
+const SceneryDynamicsInterface &Scenario::GetSceneryDynamics()
 {
-    return trafficSignalControllers;
+    return sceneryDynamics;
 }
 
 void Scenario::AddTrafficSignalController(const openScenario::TrafficSignalController &controller)
 {
-    trafficSignalControllers.push_back(controller);
+    sceneryDynamics.AddTrafficSignalController(controller);
 }
 
 void Scenario::AddScenarioEntity(const ScenarioEntity& entity)
@@ -143,14 +143,9 @@ void Scenario::SetEndTime(const double endTime)
     this->endTimeInSeconds = endTime;
 }
 
-openScenario::EnvironmentAction Scenario::GetEnvironment()
+void Scenario::SetEnvironment(const openScenario::EnvironmentAction& environment)
 {
-    return environment;
-}
-
-void Scenario::SetEnvironment(const openScenario::EnvironmentAction environment)
-{
-    this->environment = environment;
+    sceneryDynamics.SetEnvironment(environment);
 }
 
 } // namespace SimulationSlave

@@ -31,12 +31,9 @@
 class AgentInterface;
 class ParameterInterface;
 class SceneryInterface;
+class SceneryDynamicsInterface;
 class TrafficObjectInterface;
 class WorldObjectInterface;
-namespace openScenario
-{
-class EnvironmentAction;
-}
 
 using LaneTypes = std::vector<LaneType>;
 
@@ -236,7 +233,7 @@ public:
     //!
     //! @return
     //-----------------------------------------------------------------------------
-    virtual bool CreateScenery(SceneryInterface *scenery, const std::vector<openScenario::TrafficSignalController>& trafficSignalControllers, const openScenario::EnvironmentAction& environment) = 0;
+    virtual bool CreateScenery(SceneryInterface *scenery, const SceneryDynamicsInterface& sceneryDynamics) = 0;
 
     //-----------------------------------------------------------------------------
     //! Create an agentAdapter for an agent to communicate between the agent of the

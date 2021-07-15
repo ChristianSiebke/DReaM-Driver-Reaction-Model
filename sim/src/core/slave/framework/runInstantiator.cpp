@@ -105,7 +105,7 @@ bool RunInstantiator::InitPreRun(ScenarioInterface& scenario, SceneryInterface& 
     try
     {
         InitializeFrameworkModules(scenario);
-        world.CreateScenery(&scenery, scenario.GetTrafficSignalControllers(), scenario.GetEnvironment());
+        world.CreateScenery(&scenery, scenario.GetSceneryDynamics());
         return true;
     }
     catch (const std::exception &error)

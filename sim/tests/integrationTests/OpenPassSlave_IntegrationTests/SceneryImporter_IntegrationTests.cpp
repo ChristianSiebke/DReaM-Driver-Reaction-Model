@@ -22,10 +22,12 @@
 #include "modelElements/agentBlueprint.h"
 #include "bindings/world.h"
 #include "fakeDataStore.h"
+#include "fakeSceneryDynamics.h"
 
 #include "AgentAdapter.h"
 #include "WorldData.h"
 
+using ::testing::Return;
 using ::testing::DoubleEq;
 using ::testing::DoubleNear;
 using ::testing::ElementsAre;
@@ -75,7 +77,11 @@ struct TESTSCENERY_FACTORY
             return false;
         }
 
-        if (!(world.CreateScenery(&scenery, trafficSignalControllers, environment)))
+        FakeSceneryDynamics sceneryDynamics;
+        ON_CALL(sceneryDynamics, GetEnvironment()).WillByDefault(Return(environment));
+        ON_CALL(sceneryDynamics, GetTrafficSignalControllers()).WillByDefault(Return(trafficSignalControllers));
+
+        if (!(world.CreateScenery(&scenery, sceneryDynamics)))
         {
             return false;
         }

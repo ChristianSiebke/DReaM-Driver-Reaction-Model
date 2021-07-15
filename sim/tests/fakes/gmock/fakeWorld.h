@@ -12,6 +12,7 @@
 #include "gmock/gmock.h"
 
 #include "include/parameterInterface.h"
+#include "include/sceneryDynamicsInterface.h"
 #include "include/worldInterface.h"
 #include "common/globalDefinitions.h"
 #include "common/openScenarioDefinitions.h"
@@ -27,7 +28,7 @@ class FakeWorld : public WorldInterface
     MOCK_METHOD2(AddAgent, bool(int id, AgentInterface* agent));
     MOCK_METHOD1(RegisterAgent, void(AgentInterface* agent));
     MOCK_METHOD0(CreateGlobalDrivingView, bool());
-    MOCK_METHOD3(CreateScenery, bool(SceneryInterface *scenery, const std::vector<openScenario::TrafficSignalController>& trafficSignalControllers, const openScenario::EnvironmentAction& environment));
+    MOCK_METHOD2(CreateScenery, bool(SceneryInterface *scenery, const SceneryDynamicsInterface& sceneryDynamics));
     MOCK_METHOD1(CreateWorldScenario, bool(const std::string &scenarioFilename));
     MOCK_METHOD1(CreateWorldScenery, bool(const std::string &sceneryFilename));
     MOCK_METHOD0(Instantiate, bool());

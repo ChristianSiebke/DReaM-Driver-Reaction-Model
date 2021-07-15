@@ -166,7 +166,7 @@ void WorldImplementation::SyncGlobalData(int timestamp)
     trafficLightNetwork.UpdateStates(timestamp);
 }
 
-bool WorldImplementation::CreateScenery(SceneryInterface* scenery, const std::vector<openScenario::TrafficSignalController>& trafficSignalControllers, const openScenario::EnvironmentAction& environment)
+bool WorldImplementation::CreateScenery(SceneryInterface* scenery, const SceneryDynamicsInterface& sceneryDynamics)
 {
     this->scenery = scenery;
     sceneryConverter = std::make_unique<SceneryConverter>(scenery,
@@ -183,9 +183,9 @@ bool WorldImplementation::CreateScenery(SceneryInterface* scenery, const std::ve
     RoadNetworkBuilder networkBuilder(*scenery);
     auto [roadGraph, vertexMapping] = networkBuilder.Build();
     worldData.SetRoadGraph(std::move(roadGraph), std::move(vertexMapping));
-    worldData.SetEnvironment(environment);
+    worldData.SetEnvironment(sceneryDynamics.GetEnvironment());
 
-    trafficLightNetwork = TrafficLightNetworkBuilder::Build(trafficSignalControllers, worldData);
+    trafficLightNetwork = TrafficLightNetworkBuilder::Build(sceneryDynamics.GetTrafficSignalControllers(), worldData);
 
     return true;
 }

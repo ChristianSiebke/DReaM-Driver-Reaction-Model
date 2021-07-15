@@ -22,6 +22,7 @@
 #include "EntityRepository.h"
 #include "WorldData.h"
 #include "WorldDataQuery.h"
+#include "include/sceneryDynamicsInterface.h"
 
 namespace osi3
 {
@@ -132,7 +133,7 @@ public:
     void PublishGlobalData(int timestamp) override;
     void SyncGlobalData(int timestamp) override;
 
-    bool CreateScenery(SceneryInterface* scenery, const std::vector<openScenario::TrafficSignalController>& trafficSignalControllers, const openScenario::EnvironmentAction& environment) override;
+    bool CreateScenery(SceneryInterface* scenery, const SceneryDynamicsInterface& sceneryDynamics) override;
 
     AgentInterface* CreateAgentAdapterForAgent() override
     {

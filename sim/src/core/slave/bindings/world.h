@@ -142,9 +142,9 @@ public:
         return implementation->SyncGlobalData(timestamp);
     }
 
-    bool CreateScenery(SceneryInterface* scenery, const std::vector<openScenario::TrafficSignalController>& trafficSignalControllers, const openScenario::EnvironmentAction& environment) override
+    bool CreateScenery(SceneryInterface* scenery, const SceneryDynamicsInterface& sceneryDynamics) override
     {
-        return implementation->CreateScenery(scenery, trafficSignalControllers, environment);
+        return implementation->CreateScenery(scenery, sceneryDynamics);
     }
 
     AgentInterface* CreateAgentAdapterForAgent() override
