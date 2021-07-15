@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020, 2021 in-tech GmbH
 *               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -44,6 +44,7 @@ using StationaryObject  = Implementation::StationaryObject;
 using MovingObject      = Implementation::MovingObject;
 using Vehicle           = Implementation::Vehicle;
 using TrafficSign       = Implementation::TrafficSign;
+using TrafficLight      = Implementation::TrafficLight;
 
 using CLane              = const Interfaces::Lane;
 using CSection           = const Interfaces::Section;
@@ -120,6 +121,12 @@ public:
     //! \param odId          OpenDRIVE Id
     virtual Interfaces::TrafficSign& AddTrafficSign(const Id id, const std::string odId) = 0;
 
+    //!Creates a new TrafficLight and returns it
+    //! \param Id            Unique ID
+    //! \param odId          OpenDRIVE Id
+    //! \param withYellow    flag indication wether this traffic light has a yellow bulb
+    virtual Interfaces::TrafficLight& AddTrafficLight(const Id id, const std::string odId, bool withYellow) = 0;
+
     //!Creates a new RoadMarking and returns it
     //! \param Id            Unique ID
     virtual Interfaces::RoadMarking& AddRoadMarking(const Id id) = 0;
@@ -135,6 +142,12 @@ public:
     //! \param laneId       OSI Id of the lane
     //! \param roadMarking  roadMarking to assign
     virtual void AssignRoadMarkingToLane(OWL::Id laneId, Interfaces::RoadMarking& roadMarking) = 0;
+
+    //! Adds a traffic light to the assigned traffic lights of lane
+    //!
+    //! \param laneId       OSI Id of the lane
+    //! \param trafficLight traffic light to assign
+    virtual void AssignTrafficLightToLane(OWL::Id laneId, Interfaces::TrafficLight &trafficLight) = 0;
 
     //!Deletes the moving object with the specified Id
     virtual void RemoveMovingObjectById(Id id) = 0; // change Id to MovingObject
@@ -163,6 +176,9 @@ public:
     //!Returns a map of all road markings with their OSI Id
     virtual const std::unordered_map<Id, RoadMarking*>& GetRoadMarkings() const = 0;
 
+    //!Returns a map of all traffic lights with their OSI Id
+    virtual const std::unordered_map<Id, TrafficLight*>& GetTrafficLights() const = 0;
+    
     //!Returns the stationary object with given Id
     virtual const StationaryObject& GetStationaryObject(Id id) const = 0;
 
@@ -433,10 +449,12 @@ public:
     Interfaces::MovingObject& AddMovingObject(const Id id, void* linkedObject) override;
     Interfaces::StationaryObject& AddStationaryObject(const Id id, void* linkedObject) override;
     Interfaces::TrafficSign& AddTrafficSign(const Id id, const std::string odId) override;
+    Interfaces::TrafficLight& AddTrafficLight(const Id id, const std::string odId, bool withYellow) override;
     Interfaces::RoadMarking& AddRoadMarking(const Id id) override;
 
     void AssignTrafficSignToLane(OWL::Id laneId, Interfaces::TrafficSign &trafficSign) override;
     void AssignRoadMarkingToLane(OWL::Id laneId, Interfaces::RoadMarking& roadMarking) override;
+    void AssignTrafficLightToLane(OWL::Id laneId, Interfaces::TrafficLight &trafficLight) override;
 
     void RemoveMovingObjectById(Id id) override;
 
@@ -467,6 +485,7 @@ public:
     const std::map<std::string, Junction*>& GetJunctions() const override;
     const std::unordered_map<Id, Interfaces::TrafficSign*>& GetTrafficSigns() const override;
     const std::unordered_map<Id, Interfaces::RoadMarking*>& GetRoadMarkings() const override;
+    const std::unordered_map<Id, Interfaces::TrafficLight*>& GetTrafficLights() const override;
     const Implementation::InvalidLane& GetInvalidLane() const override {return invalidLane;}
 
     const std::unordered_map<Id, OdId>& GetLaneIdMapping() const override
@@ -604,6 +623,7 @@ private:
     std::unordered_map<Id, StationaryObject*>   stationaryObjects;
     std::unordered_map<Id, MovingObject*>       movingObjects;
     std::unordered_map<Id, Interfaces::TrafficSign*>  trafficSigns;
+    std::unordered_map<Id, Interfaces::TrafficLight*>  trafficLights;
     std::unordered_map<Id, Interfaces::RoadMarking*>  roadMarkings;
 
     std::unordered_map<std::string, Road*> roadsById;

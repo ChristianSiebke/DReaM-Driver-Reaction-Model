@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -69,6 +69,17 @@ public:
      */
     static std::string ImportCatalog(const std::string& catalogName, QDomElement& catalogsElement, openScenario::Parameters& parameters);
 
+    /*!
+     * \brief Imports the roadnetwork information from OpenSCENARIO DOM
+     *
+     * Currently, the path to the OpenDRIVE scenery file is extracted.
+     *
+     * \param[in]   roadNetworkElement  DOM element of the roadnetwork tag
+     * \param[out]  scenario            roadnetwork information are imported into this scenario
+     * \param[in]   parameters          declared parameters
+     */
+    static void ImportRoadNetwork(QDomElement& roadNetworkElement, ScenarioInterface* scenario, openScenario::Parameters& parameters);
+
 private:
     /*!
      * \brief Imports and validates the internally used OpenSCENARIO schema version
@@ -91,15 +102,13 @@ private:
     static void ImportCatalogs(QDomElement& documentRoot, ScenarioInterface* scenario, const std::string& filePath, openScenario::Parameters& parameters);
 
     /*!
-     * \brief Imports the roadnetwork information from OpenSCENARIO DOM
+     * \brief Imports a TrafficSignalController element from OpenSCENARIO
      *
-     * Currently, the path to the OpenDRIVE scenery file is extracted.
-     *
-     * \param[in]   roadNetworkElement  DOM element of the roadnetwork tag
-     * \param[out]  sceneryPath         File path to the scenery
-     * \param[in]   parameters          declared parameters
+     * \param[in]   trafficSignalControllerElement   The element to import
+     * \param[out]  controller                       result is parsed into this
+     * \param[in]   parameters                       declared parameters
      */
-    static void ImportRoadNetwork(QDomElement& roadNetworkElement, std::string& sceneryPath, openScenario::Parameters& parameters);
+    static void ImportTrafficSignalsElement(QDomElement& trafficSignalControllerElement, openScenario::TrafficSignalController &controller, openScenario::Parameters& parameters);
 
     /*!
      * \brief Imports the init element of a OpenSCENARIO storyboard DOM

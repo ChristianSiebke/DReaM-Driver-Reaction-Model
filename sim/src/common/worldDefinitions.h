@@ -408,3 +408,41 @@ struct Entity
     double width{0.0};
 };
 }
+
+namespace CommonTrafficLight
+{
+//! Type of a traffic light
+enum class Type
+{
+    Undefined,
+    ThreeLights,                //! Standard red, yellow, green without arrows or symbols
+    ThreeLightsLeft,            //! red, yellow, green with arrows pointing left
+    ThreeLightsRight,           //! red, yellow, green with arrows pointing right
+    ThreeLightsStraight,        //! red, yellow, green with arrows pointing upwards
+    ThreeLightsLeftStraight,    //! red, yellow, green with arrows pointing left and upwards
+    ThreeLightsRightStraight,   //! red, yellow, green with arrows pointing right and upwards
+    TwoLights,                  //! red, green without arrows or symbols
+    TwoLightsPedestrian,        //! red, green with pedestrian symbol
+    TwoLightsBicycle,           //! red, green with bicycle symbol
+    TwoLightsPedestrianBicycle  //! red, green with pedestrian and bicycle symbol
+};
+
+//! State of a traffic light
+enum class State
+{
+    Off,
+    Green,
+    Yellow,
+    Red,
+    RedYellow,
+    YellowFlashing
+};
+
+//! Represents a single traffic light as seen from an agent
+struct Entity
+{
+    Type type{Type::ThreeLights};
+    State state{State::Red};
+    double relativeDistance{0.0};
+};
+}

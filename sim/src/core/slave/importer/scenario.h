@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -88,6 +88,10 @@ public:
      */
     void SetSceneryPath(const std::string& sceneryPath) override;
 
+    const std::vector<openScenario::TrafficSignalController>& GetTrafficSignalControllers() const override;
+
+    void AddTrafficSignalController (const openScenario::TrafficSignalController& controller) override;
+
     void AddScenarioEntity(const ScenarioEntity& entity) override;
     void AddScenarioGroupsByEntityNames(const std::map<std::string, std::list<std::string>> &groupDefinitions) override;
 
@@ -112,6 +116,7 @@ private:
     std::vector<ScenarioEntity> entities;
     std::map<std::string, std::vector<ScenarioEntity*>> scenarioGroups;
 
+    std::vector<openScenario::TrafficSignalController> trafficSignalControllers;
     std::vector<openScenario::ConditionalEventDetectorInformation> eventDetectorInformations;
     std::vector<openScenario::ManipulatorInformation> actions;
 

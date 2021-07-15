@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -24,6 +24,7 @@
 #include "common/boostGeometryCommon.h"
 #include "common/globalDefinitions.h"
 #include "common/openPassTypes.h"
+#include "common/openScenarioDefinitions.h"
 #include "common/vector2d.h"
 #include "common/worldDefinitions.h"
 
@@ -224,14 +225,14 @@ public:
     //!
     //! @return
     //-----------------------------------------------------------------------------
-    virtual void SyncGlobalData() = 0;
+    virtual void SyncGlobalData(int timestamp) = 0;
 
     //-----------------------------------------------------------------------------
     //! Create a scenery in world.
     //!
     //! @return
     //-----------------------------------------------------------------------------
-    virtual bool CreateScenery(SceneryInterface *scenery) = 0;
+    virtual bool CreateScenery(SceneryInterface *scenery, const std::vector<openScenario::TrafficSignalController>& trafficSignalControllers) = 0;
 
     //-----------------------------------------------------------------------------
     //! Create an agentAdapter for an agent to communicate between the agent of the
@@ -580,6 +581,17 @@ public:
     //! \return road markings in range (can also be negative)
     virtual RouteQueryResult<std::vector<CommonTrafficSign::Entity>> GetRoadMarkingsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId,
                                                                                             double startDistance, double searchRange) const = 0;
+
+    //! Returns all traffic lights valid for a lane inside the range
+    //!
+    //! \param route            route to search along
+    //! \param roadId           OpenDrive Id of the road
+    //! \param laneId           OpenDrive Id of the lane
+    //! \param startDistance    s coordinate
+    //! \param searchRange      range of search (can also be negative)
+    //! \return traffic lights in range
+    virtual RouteQueryResult<std::vector<CommonTrafficLight::Entity>> GetTrafficLightsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId,
+                                                                                             double startDistance, double searchRange) const = 0;
 
     //! Retrieves all lane markings on the given position on the given side of the lane inside the range
     //!

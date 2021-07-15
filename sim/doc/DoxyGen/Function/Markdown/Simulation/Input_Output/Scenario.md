@@ -78,6 +78,30 @@ Example
     </RoadNetwork>
 ```
 
+Furthermore the controllers of the traffic lights are defined in this section.
+Each controller defines the phases of a set of linked traffic lights (e.g. one junction).
+The state must be one of the following: "red", "yellow", "green", "red yellow".
+
+Example
+```xml
+    <TrafficSignals>
+        <TrafficSignalController name="ControllerA" delay="0.0">
+            <Phase name="Phase1" duration="20">
+                <TrafficSignalState trafficSignalId="100" state="red"/>
+            </Phase>
+            <Phase name="Phase2" duration="3">
+                <TrafficSignalState trafficSignalId="100" state="red yellow"/>
+            </Phase>
+            <Phase name="Phase3" duration="20">
+                <TrafficSignalState trafficSignalId="100" state="green"/>
+            </Phase>
+            <Phase name="Phase4" duration="3">
+                <TrafficSignalState trafficSignalId="100" state="yellow"/>
+            </Phase>
+        </TrafficSignalController>
+    </TrafficSignals>
+```
+
 \section scenario_entities Entities
 
 The <Entities> tag defines all agents that are present at the start of the simulation at a predefined position.

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2016, 2017 ITK Engineering GmbH
 *               2020 HLRS, University of Stuttgart.
 *               2020 BMW AG
@@ -155,7 +155,7 @@ void WorldImplementation::PublishGlobalData(int timestamp)
         });
 }
 
-void WorldImplementation::SyncGlobalData()
+void WorldImplementation::SyncGlobalData(int timestamp)
 {
     auto lanes = worldData.GetLanes();
     for (auto lane : lanes)
@@ -163,9 +163,10 @@ void WorldImplementation::SyncGlobalData()
         lane.second->ClearMovingObjects();
     }
     agentNetwork.SyncGlobalData();
+    trafficLightNetwork.UpdateStates(timestamp);
 }
 
-bool WorldImplementation::CreateScenery(SceneryInterface* scenery)
+bool WorldImplementation::CreateScenery(SceneryInterface* scenery, const std::vector<openScenario::TrafficSignalController>& trafficSignalControllers)
 {
     this->scenery = scenery;
     sceneryConverter = std::make_unique<SceneryConverter>(scenery,
@@ -182,6 +183,8 @@ bool WorldImplementation::CreateScenery(SceneryInterface* scenery)
     RoadNetworkBuilder networkBuilder(*scenery);
     auto [roadGraph, vertexMapping] = networkBuilder.Build();
     worldData.SetRoadGraph(std::move(roadGraph), std::move(vertexMapping));
+
+    trafficLightNetwork = TrafficLightNetworkBuilder::Build(trafficSignalControllers, worldData);
 
     return true;
 }
@@ -219,6 +222,13 @@ RouteQueryResult<std::vector<CommonTrafficSign::Entity> > WorldImplementation::G
     const auto laneMultiStream = worldDataQuery.CreateLaneMultiStream(roadGraph, startNode, laneId, startDistance);
     double startDistanceOnStream = laneMultiStream->GetPositionByVertexAndS(startNode, startDistance);
     return worldDataQuery.GetRoadMarkingsInRange(*laneMultiStream, startDistanceOnStream, searchRange);
+}
+
+RouteQueryResult<std::vector<CommonTrafficLight::Entity>> WorldImplementation::GetTrafficLightsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance, double searchRange) const
+{
+    const auto laneMultiStream = worldDataQuery.CreateLaneMultiStream(roadGraph, startNode, laneId, startDistance);
+    double startDistanceOnStream = laneMultiStream->GetPositionByVertexAndS(startNode, startDistance);
+    return worldDataQuery.GetTrafficLightsInRange(*laneMultiStream, startDistanceOnStream, searchRange);
 }
 
 RouteQueryResult<std::vector<LaneMarking::Entity> > WorldImplementation::GetLaneMarkings(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance, double range, Side side) const
