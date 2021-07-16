@@ -14,7 +14,7 @@
 # This script prepares the Mingw64 environment
 ################################################################################
 
-yes | pip install conan \
+yes | pip install conan --ignore-installed six \
                   sphinx-rtd-theme \
                   sphinx-tabs \
                   sphinxcontrib-spelling
