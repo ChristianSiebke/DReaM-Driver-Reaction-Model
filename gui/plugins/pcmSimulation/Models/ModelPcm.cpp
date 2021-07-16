@@ -235,7 +235,7 @@ void ModelPcm::StartSimulation()
     }
 
     // execute the master process
-    QString masterPath = baseFolder + "/bin/" + FILENAME_OPENPASSMASTER_EXE;
+    QString masterPath = baseFolder + "/" + FILENAME_OPENPASSMASTER_EXE;
     QProcess *masterProcess = new QProcess();
     QStringList arguments;
     arguments << "--config" << QDir(baseFolder).filePath(frameworkConfigFile);

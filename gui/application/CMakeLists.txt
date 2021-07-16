@@ -50,4 +50,4 @@ target_link_libraries(openPASS PRIVATE
 
 # target directories. Needs to be defined in some global file TODO
 set_target_properties(openPASS PROPERTIES
-                      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
+                      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_INSTALL_PREFIX}/${INSTALL_BIN_DIR}")
