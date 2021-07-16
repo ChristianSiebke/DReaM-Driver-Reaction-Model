@@ -10,4 +10,6 @@
 	- $ sh 15_prepare_mingw.sh
 
 4. Configure Conan and build openpass with the following command
-	- $ sh build.sh
+	- $ sh 20_build.sh
+
+5. Add "c:\msys64\mingw64\bin" (your Msys2 Installation path) to your PATH enviromnent variables.
