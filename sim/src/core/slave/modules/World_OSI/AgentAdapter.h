@@ -247,17 +247,47 @@ public:
 
     void SetCentripetalAcceleration(double value) override
     {
-        world->QueueAgentUpdate([this, value]()
-        {
+        world->QueueAgentUpdate([this, value]() {
             centripetalAcceleration = value;
+
+            // Code seems to work incorrectly here, further investigation needed
+            // OWL::Primitive::AbsAcceleration absAcceleration = GetBaseTrafficObject().GetAbsAcceleration();
+            // OWL::Primitive::AbsOrientation absOrientation = GetBaseTrafficObject().GetAbsOrientation();
+
+            // Common::Vector2d vec(absAcceleration.ax, absAcceleration.ay);
+
+            // // Rotate reference frame from groundTruth to car and back
+            // vec.Rotate(-absOrientation.yaw);
+            // vec.y = value;
+            // vec.Rotate(absOrientation.yaw);
+
+            // absAcceleration.ax = vec.x;
+            // absAcceleration.ay = vec.y;
+
+            // GetBaseTrafficObject().SetAbsAcceleration(absAcceleration);
         });
     }
 
     void SetTangentialAcceleration(double value) override
     {
-        world->QueueAgentUpdate([this, value]()
-        {
+        world->QueueAgentUpdate([this, value]() {
             tangentialAcceleration = value;
+
+            // Code seems to work incorrectly here, further investigation needed
+            // OWL::Primitive::AbsAcceleration absAcceleration = GetBaseTrafficObject().GetAbsAcceleration();
+            // OWL::Primitive::AbsOrientation absOrientation = GetBaseTrafficObject().GetAbsOrientation();
+
+            // Common::Vector2d vec(absAcceleration.ax, absAcceleration.ay);
+
+            // // Rotate reference frame from groundTruth to car and back
+            // vec.Rotate(-absOrientation.yaw);
+            // vec.x = value;
+            // vec.Rotate(absOrientation.yaw);
+
+            // absAcceleration.ax = vec.x;
+            // absAcceleration.ay = vec.y;
+
+            // GetBaseTrafficObject().SetAbsAcceleration(absAcceleration);
         });
     }
 
@@ -378,11 +408,33 @@ public:
     double GetCentripetalAcceleration() const override
     {
         return centripetalAcceleration;
+
+        // Code seems to work incorrectly here, further investigation needed
+        // OWL::Primitive::AbsAcceleration absAcceleration = GetBaseTrafficObject().GetAbsAcceleration();
+        // OWL::Primitive::AbsOrientation absOrientation = GetBaseTrafficObject().GetAbsOrientation();
+
+        // Common::Vector2d vec(absAcceleration.ax, absAcceleration.ay);
+
+        // // Rotate reference frame from groundTruth to car
+        // vec.Rotate(-absOrientation.yaw);
+
+        // return vec.y;
     }
 
     double GetTangentialAcceleration() const override
     {
         return tangentialAcceleration;
+
+        // Code seems to work incorrectly here, further investigation needed
+        // OWL::Primitive::AbsAcceleration absAcceleration = GetBaseTrafficObject().GetAbsAcceleration();
+        // OWL::Primitive::AbsOrientation absOrientation = GetBaseTrafficObject().GetAbsOrientation();
+
+        // Common::Vector2d vec(absAcceleration.ax, absAcceleration.ay);
+
+        // // Rotate reference frame from groundTruth to car
+        // vec.Rotate(-absOrientation.yaw);
+
+        // return vec.x;
     }
 
     bool Locate() override;
