@@ -52,4 +52,3 @@ set(HEADERS
     )
 
 add_library(${PROJECT_NAME}_Models STATIC ${SOURCES} ${HEADERS})
-add_definitions(-DSUBDIR_LIB_COMPONENTS="/components")
