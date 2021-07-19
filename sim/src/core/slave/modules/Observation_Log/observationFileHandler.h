@@ -105,7 +105,7 @@ public:
      */
     void WriteEndOfFile();
 
-private:
+protected:
     std::unique_ptr<QXmlStreamWriter> xmlFileStream;
     const DataBufferReadInterface& dataBuffer;
 
@@ -123,7 +123,6 @@ private:
     QString tmpPath;
     QString finalPath;
     std::unique_ptr<QTemporaryFile> xmlFile;
-    std::unique_ptr<QFile> csvFile;
 
     //add infos to the file stream
     /*!
@@ -179,14 +178,14 @@ private:
     *
     * @param[in]     cyclics    cyclics of the run
     */
-    void AddHeader(ObservationCyclics& cyclics);
+    void AddHeader(const ObservationCyclics& cyclics);
 
     /*!
     * \brief Writes the samples into the simulation output during full logging.
     *
     * @param[in]     cyclics    cyclics of the run
     */
-    void AddSamples(ObservationCyclics& cyclics);
+    void AddSamples(const ObservationCyclics& cyclics);
 
     /*!
     * \brief Writes the filename for the cyclics file into the simulation output during full logging.
@@ -205,10 +204,10 @@ private:
     /*!
     * \brief Writes the cyclics of one run to a csv.
     *
-    * @param[in]    filename            Filename for current run
+    * @param[in]    filepath            Filepath for current run
     * @param[in]    cyclics             Cyclics of the current run
     */
-    void WriteCsvCyclics(QString filename, ObservationCyclics &cyclics);
+    void WriteCsvCyclics(const QString &filepath, const ObservationCyclics &cyclics);
 
     /*!
     * \brief Write entities to XML
@@ -229,6 +228,5 @@ private:
     */
     void WriteParameter(const openpass::type::FlatParameter &parameters, bool mandatory = false);
 
-private:
     const QString outputFileVersion = "0.3.1";
 };
