@@ -51,7 +51,5 @@ target_link_libraries(Project PRIVATE
                       ${PROJECT_NAME}_Presenters
                       ${PROJECT_NAME}_Interfaces)
 
-# target directories. Needs to be defined in some global file TODO
-set_target_properties(Project PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_INSTALL_PREFIX}/${SUBDIR_LIB_GUI}"
-    PREFIX "")
+install(TARGETS Project
+        DESTINATION ${SUBDIR_LIB_GUI})

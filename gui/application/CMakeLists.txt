@@ -48,6 +48,5 @@ target_link_libraries(openPASS PRIVATE
                       ${PROJECT_NAME}_Models
                       ${PROJECT_NAME}_Interfaces)
 
-# target directories. Needs to be defined in some global file TODO
-set_target_properties(openPASS PROPERTIES
-                      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_INSTALL_PREFIX}/${INSTALL_BIN_DIR}")
+install(TARGETS openPASS
+        DESTINATION ${INSTALL_BIN_DIR})

@@ -51,7 +51,5 @@ target_link_libraries(TimePlot PRIVATE
                       ${PROJECT_NAME}_Interfaces
                       ${PROJECT_NAME}_Presenters)
 
-# target directories. Needs to be defined in some global file TODO
-set_target_properties(TimePlot PROPERTIES
-                      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_INSTALL_PREFIX}/${SUBDIR_LIB_GUI}"
-                      PREFIX "")
+install(TARGETS TimePlot
+        DESTINATION ${SUBDIR_LIB_GUI})

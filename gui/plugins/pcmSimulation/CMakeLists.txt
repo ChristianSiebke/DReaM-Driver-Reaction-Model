@@ -61,7 +61,5 @@ target_link_libraries(Pcm_sim PRIVATE
                       ${PROJECT_NAME}_Interfaces
                       ${PROJECT_NAME}_Presenters)
 
-# target directories. Needs to be defined in some global file TODO
-set_target_properties(Pcm_sim PROPERTIES
-                      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_INSTALL_PREFIX}/${SUBDIR_LIB_GUI}"
-                      PREFIX "")
+install(TARGETS Pcm_sim
+        DESTINATION ${SUBDIR_LIB_GUI})
