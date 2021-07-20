@@ -32,6 +32,7 @@
 #include "TrafficObjectAdapter.h"
 #include "WorldData.h"
 #include "WorldDataQuery.h"
+#include "common/commonTools.h"
 #include "common/opMath.h"
 
 namespace Internal {
@@ -823,12 +824,6 @@ void SceneryConverter::CreateRoadSignals()
 
         for (RoadSignalInterface *signal : road->GetRoadSignals())
         {
-            if (signal->GetIsDynamic())
-            {
-                LOG(CbkLogLevel::Warning, std::string("Ignoring dynamic signal: ") + signal->GetId());
-                continue;
-            }
-
             // Gather all dependent signals
             if (!signal->GetDependencies().empty())
             {
@@ -849,7 +844,14 @@ void SceneryConverter::CreateRoadSignals()
             {
                 CreateRoadMarking(signal, position, section->GetLanes());
             }
-
+            else if (OpenDriveTypeMapper::trafficLightsThreeLights.find(signal->GetType()) != OpenDriveTypeMapper::trafficLightsThreeLights.end())
+            {
+                CreateTrafficLight(signal, position, section->GetLanes(), true);
+            }
+            else if (OpenDriveTypeMapper::trafficLightsTwoLights.find(signal->GetType()) != OpenDriveTypeMapper::trafficLightsTwoLights.end())
+            {
+                CreateTrafficLight(signal, position, section->GetLanes(), false);
+            }
             else
             {
                 CreateTrafficSign(signal, position, section->GetLanes());
@@ -938,6 +940,32 @@ void SceneryConverter::CreateRoadMarking(RoadObjectInterface* object, Position p
         if (object->IsValidForLane(odId))
         {
             worldData.AssignRoadMarkingToLane(lane->GetId(), roadMarking);
+        }
+    }
+}
+
+void SceneryConverter::CreateTrafficLight(RoadSignalInterface* signal, Position position, const OWL::Interfaces::Lanes& lanes, bool withYellow)
+{
+    const auto id = repository.Register(openpass::utils::GetEntityInfo(*signal));
+    OWL::Interfaces::TrafficLight& trafficLight = worldData.AddTrafficLight(id, signal->GetId(), withYellow);
+
+    trafficLight.SetS(signal->GetS());
+
+    if (!trafficLight.SetSpecification(signal, position))
+    {
+        const std::string message = "Unsupported traffic sign type: " + signal->GetType() + (" (id: " + signal->GetId() + ")");
+        LOG(CbkLogLevel::Warning, message);
+        return;
+    }
+
+    trafficLight.SetState(CommonTrafficLight::State::Red);
+
+    for (auto lane : lanes)
+    {
+        OWL::OdId odId = worldData.GetLaneIdMapping().at(lane->GetId());
+        if (signal->IsValidForLane(odId))
+        {
+            worldData.AssignTrafficLightToLane(lane->GetId(), trafficLight);
         }
     }
 }
@@ -1105,4 +1133,54 @@ std::pair<RoadGraph, RoadGraphVertexMapping> RoadNetworkBuilder::Build()
     }
 
     return {roadGraph, vertices};
+}
+
+const std::map<std::string, CommonTrafficLight::State> stateConversionMap
+{
+    {"off", CommonTrafficLight::State::Off},
+    {"red", CommonTrafficLight::State::Red},
+    {"yellow", CommonTrafficLight::State::Yellow},
+    {"green", CommonTrafficLight::State::Green},
+    {"red yellow", CommonTrafficLight::State::RedYellow},
+    {"yellow flashing", CommonTrafficLight::State::YellowFlashing}
+};
+
+namespace TrafficLightNetworkBuilder
+{
+TrafficLightNetwork Build(const std::vector<openScenario::TrafficSignalController>& controllers,
+                                                      const OWL::Interfaces::WorldData& worldData)
+{
+    TrafficLightNetwork network;
+    for(auto& controller : controllers)
+    {
+        std::vector<TrafficLightController::Phase> internalPhases;
+        for(auto& phase : controller.phases)
+        {
+            TrafficLightController::Phase internalPhase;
+            internalPhase.duration = phase.duration * 1000;
+            for(auto [signalId, stateString] : phase.states)
+            {
+                const auto owlId = helper::map::query(worldData.GetTrafficSignIdMapping(), signalId);
+                if (!owlId.has_value())
+                {
+                    throw std::runtime_error("No signal with id \""+signalId+"\" defined in Scenery");
+                }
+                const auto trafficLight = helper::map::query(worldData.GetTrafficLights(), owlId.value());
+                if (!trafficLight.has_value())
+                {
+                    throw std::runtime_error("Signal with id \""+signalId+"\" is not a traffic light");
+                }
+                const auto state = helper::map::query(stateConversionMap, stateString);
+                if (!state.has_value())
+                {
+                    throw std::runtime_error("Unknown state \""+stateString);
+                }
+                internalPhase.states.emplace_back(trafficLight.value(), state.value());
+            }
+            internalPhases.push_back(std::move(internalPhase));
+        }
+        network.AddController(TrafficLightController{std::move(internalPhases), controller.delay * 1000});
+    }
+    return network;
+}
 }

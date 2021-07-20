@@ -609,6 +609,28 @@ Interfaces::TrafficSign& WorldData::AddTrafficSign(const Id id, const std::strin
     return *trafficSignal;
 }
 
+Interfaces::TrafficLight &WorldData::AddTrafficLight(const Id id, const std::string odId, bool withYellow)
+{
+    osi3::TrafficLight* osiLightRed = osiGroundTruth->add_traffic_light();
+    osiLightRed->mutable_classification()->set_color(osi3::TrafficLight_Classification_Color_COLOR_RED);
+    osi3::TrafficLight* osiLightGreen = osiGroundTruth->add_traffic_light();
+    osiLightGreen->mutable_classification()->set_color(osi3::TrafficLight_Classification_Color_COLOR_GREEN);
+    osi3::TrafficLight* osiLightYellow = nullptr;
+    if (withYellow)
+    {
+    osiLightYellow = osiGroundTruth->add_traffic_light();
+    osiLightYellow->mutable_classification()->set_color(osi3::TrafficLight_Classification_Color_COLOR_YELLOW);
+    }
+    auto trafficLight = new TrafficLight(osiLightRed, osiLightYellow, osiLightGreen);
+
+    trafficSignIdMapping[odId] = id;
+
+    osiLightRed->mutable_id()->set_value(id);
+    trafficLights[id] = trafficLight;
+
+    return *trafficLight;
+}
+
 Interfaces::RoadMarking& WorldData::AddRoadMarking(const Id id)
 {
     osi3::RoadMarking* osiRoadMarking = osiGroundTruth->add_road_marking();
@@ -630,6 +652,12 @@ void WorldData::AssignRoadMarkingToLane(Id laneId, Interfaces::RoadMarking& road
 {
     lanes.at(laneId)->AddRoadMarking(roadMarking);
     roadMarking.SetValidForLane(laneId);
+}
+
+void WorldData::AssignTrafficLightToLane(Id laneId, Interfaces::TrafficLight& trafficLight)
+{
+    lanes.at(laneId)->AddTrafficLight(trafficLight);
+    trafficLight.SetValidForLane(laneId);
 }
 
 void WorldData::SetSectionSuccessor(const RoadLaneSectionInterface &section, const RoadLaneSectionInterface &successorSection)
@@ -761,6 +789,11 @@ const std::unordered_map<Id, Interfaces::TrafficSign *> &WorldData::GetTrafficSi
 const std::unordered_map<Id, Interfaces::RoadMarking*>& WorldData::GetRoadMarkings() const
 {
     return roadMarkings;
+}
+
+const std::unordered_map<Id, Interfaces::TrafficLight *> &WorldData::GetTrafficLights() const
+{
+    return trafficLights;
 }
 
 const MovingObject& WorldData::GetMovingObject(Id id) const
