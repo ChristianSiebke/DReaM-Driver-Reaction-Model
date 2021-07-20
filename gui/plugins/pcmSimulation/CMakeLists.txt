@@ -62,4 +62,4 @@ target_link_libraries(Pcm_sim PRIVATE
                       ${PROJECT_NAME}_Presenters)
 
 install(TARGETS Pcm_sim
-        DESTINATION ${SUBDIR_LIB_GUI})
+        RUNTIME DESTINATION ${SUBDIR_LIB_GUI})

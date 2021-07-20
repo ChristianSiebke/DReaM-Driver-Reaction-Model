@@ -44,4 +44,4 @@ target_link_libraries(Component PRIVATE
                       ${PROJECT_NAME}_Interfaces)
 
 install(TARGETS Component
-        DESTINATION ${SUBDIR_LIB_GUI})
+        RUNTIME DESTINATION ${SUBDIR_LIB_GUI})

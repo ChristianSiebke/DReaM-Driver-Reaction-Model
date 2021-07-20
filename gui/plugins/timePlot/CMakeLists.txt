@@ -52,4 +52,4 @@ target_link_libraries(TimePlot PRIVATE
                       ${PROJECT_NAME}_Presenters)
 
 install(TARGETS TimePlot
-        DESTINATION ${SUBDIR_LIB_GUI})
+        RUNTIME DESTINATION ${SUBDIR_LIB_GUI})

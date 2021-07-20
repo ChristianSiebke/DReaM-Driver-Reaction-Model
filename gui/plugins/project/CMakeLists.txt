@@ -52,4 +52,4 @@ target_link_libraries(Project PRIVATE
                       ${PROJECT_NAME}_Interfaces)
 
 install(TARGETS Project
-        DESTINATION ${SUBDIR_LIB_GUI})
+        RUNTIME DESTINATION ${SUBDIR_LIB_GUI})

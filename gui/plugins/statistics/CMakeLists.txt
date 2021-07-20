@@ -52,4 +52,4 @@ target_link_libraries(Statistics PRIVATE
                       ${PROJECT_NAME}_Presenters)
 
 install(TARGETS Statistics
-        DESTINATION ${SUBDIR_LIB_GUI})
+        RUNTIME DESTINATION ${SUBDIR_LIB_GUI})

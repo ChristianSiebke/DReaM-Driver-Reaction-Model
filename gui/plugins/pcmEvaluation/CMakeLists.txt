@@ -59,4 +59,4 @@ target_link_libraries(Pcm_eval PRIVATE
                       ${PROJECT_NAME}_Presenters)
 
 install(TARGETS Pcm_eval
-        DESTINATION ${SUBDIR_LIB_GUI})
+        RUNTIME DESTINATION ${SUBDIR_LIB_GUI})

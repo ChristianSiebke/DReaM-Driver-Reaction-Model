@@ -49,4 +49,4 @@ target_link_libraries(openPASS PRIVATE
                       ${PROJECT_NAME}_Interfaces)
 
 install(TARGETS openPASS
-        DESTINATION ${INSTALL_BIN_DIR})
+        RUNTIME DESTINATION ${INSTALL_BIN_DIR})
