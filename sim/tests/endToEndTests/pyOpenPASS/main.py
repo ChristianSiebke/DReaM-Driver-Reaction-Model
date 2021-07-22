@@ -203,6 +203,7 @@ def main():
     config.MetaInfo.scope = args.scope
     config.MetaInfo.base_config = scope["baseConfig"]
     config.MetaInfo.configs_under_test = configs_under_test
+    config.MetaInfo.datatypes = the_config["datatypes"] if "datatypes" in the_config else {}
     
     if "parameterization" in scope.keys():
         config.MetaInfo.parameterization = scope["parameterization"]

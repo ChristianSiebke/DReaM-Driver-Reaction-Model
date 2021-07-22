@@ -1,4 +1,7 @@
 {
+    "datatypes": {
+        "DISABLED_Sensor0_DetectedAgents": "string"
+    },
     "scopes": {
         "generic": {
             "baseConfig": {
