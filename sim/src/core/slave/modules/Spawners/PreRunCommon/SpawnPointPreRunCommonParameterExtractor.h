@@ -52,10 +52,12 @@ static std::pair<std::vector<RouteElement>,RoadGraphVertex> GetWayToNextRoad(con
 //! as long as there is a possible way in the network.
 //! If there is no such way, the rest of the list is ignored.
 //! If the first route has lanes in both directions on all roads, then a second route is also returned, which is the reverse.
+//! If a specified road doesn't exist, the route(s) built up to this road are returned.
+//! This also means, an empty list of routes is returned, if the first road doesn't exist.
 //!
 //! \param roads    list of roads defined in the spawner profile
 //! \param world    world
-//! \return one or two routes to spawn in
+//! \return routes to spawn in
 static std::vector<std::vector<RouteElement>> GetRoutesForSpawnArea(const std::vector<std::string>& roads, const WorldInterface& world)
 {
     std::vector<RouteElement> route;
@@ -64,6 +66,10 @@ static std::vector<std::vector<RouteElement>> GetRoutesForSpawnArea(const std::v
     bool inOdDirection = true;
     bool inOdDirectionExisting = world.IsDirectionalRoadExisting(firstRoad, true);
     bool againstOdDirectionExisting = world.IsDirectionalRoadExisting(firstRoad, false);
+    if (!inOdDirectionExisting && !againstOdDirectionExisting)
+    {
+        return {};
+    }
     RoadGraph roadGraphInOdDirection;
     RoadGraphVertex startInOdDirection;
     if (inOdDirectionExisting)
