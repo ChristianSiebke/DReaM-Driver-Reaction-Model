@@ -345,6 +345,11 @@ public:
         return implementation->GetRelativeLanes(roadGraph, startNode, laneId, distance, range, includeOncoming);
     }
 
+    RouteQueryResult<std::optional<int>> GetRelativeLaneId(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, std::map<std::string, GlobalRoadPosition> targetPosition) const override
+    {
+        return implementation->GetRelativeLaneId(roadGraph, startNode, laneId, distance, targetPosition);
+    }
+
     std::vector<JunctionConnection> GetConnectionsOnJunction(std::string junctionId, std::string incomingRoadId) const override
     {
         return implementation->GetConnectionsOnJunction(junctionId, incomingRoadId);

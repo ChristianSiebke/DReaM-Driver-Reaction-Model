@@ -159,6 +159,28 @@ RelativeWorldView::Lanes EgoAgent::GetRelativeLanes(double range, int relativeLa
                                    range).at(0);
 }
 
+std::optional<int> EgoAgent::GetRelativeLaneId(const WorldObjectInterface *object, MeasurementPoint mp) const
+{
+    std::map<std::string, GlobalRoadPosition> objectPosition;
+    if (mp == MeasurementPoint::Front)
+    {
+        objectPosition = object->GetObjectPosition().mainLocatePoint;
+    }
+    else if (mp == MeasurementPoint::Reference)
+    {
+        objectPosition = object->GetObjectPosition().referencePoint;
+    }
+    else
+    {
+        throw std::runtime_error("MeasurementPoint not supported for RelativeLaneId");
+    }
+    return world->GetRelativeLaneId(wayToTarget,
+                                    rootOfWayToTargetGraph,
+                                    GetMainLocatePosition().laneId,
+                                    GetMainLocatePosition().roadPosition.s,
+                                    objectPosition).at(0);
+}
+
 std::vector<const WorldObjectInterface*> EgoAgent::GetObjectsInRange(double backwardRange, double forwardRange, int relativeLane) const
 {
     auto objectsInRange = world->GetObjectsInRange(wayToTarget,
