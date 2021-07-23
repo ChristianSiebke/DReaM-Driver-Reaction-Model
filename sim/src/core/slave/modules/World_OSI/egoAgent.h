@@ -42,6 +42,8 @@ public:
 
     RelativeWorldView::Lanes GetRelativeLanes(double range, int relativeLane = 0) const override;
 
+    std::optional<int> GetRelativeLaneId(const WorldObjectInterface* object, MeasurementPoint mp) const override;
+
     RelativeWorldView::Junctions GetRelativeJunctions(double range) const override;
 
     std::vector<const WorldObjectInterface*> GetObjectsInRange (double backwardRange, double forwardRange, int relativeLane = 0) const override;

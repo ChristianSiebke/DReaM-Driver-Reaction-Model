@@ -492,6 +492,16 @@ public:
     //! \return information about all lanes in range
     RouteQueryResult<RelativeWorldView::Lanes> GetRelativeLanes(const RoadMultiStream& roadStream, double startPosition, int startLaneId, double range) const;
 
+    //! Returns the relative lane id of the located position of a point relative to the given position
+    //!
+    //! \param roadStream       road stream to search
+    //! \param startPosition    start search position on the road stream
+    //! \param ownPosition      own position on stream
+    //! \param ownLaneId        id of own lane
+    //! \param targetPosition   position of queried point
+    //! \return lane id relative to own position
+    RouteQueryResult<std::optional<int>> GetRelativeLaneId(const RoadMultiStream& roadStream, double ownPosition, int ownLaneId, std::map<std::string, GlobalRoadPosition> targetPosition) const;
+
     RouteQueryResult<std::optional<double>> GetLaneCurvature (const LaneMultiStream& laneStream, double position) const;
 
     RouteQueryResult<std::optional<double>> GetLaneWidth (const LaneMultiStream& laneStream, double position) const;
