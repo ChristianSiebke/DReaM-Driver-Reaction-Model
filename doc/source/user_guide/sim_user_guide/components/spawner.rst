@@ -69,7 +69,7 @@ The SpawnPoints have the following parameters:
 It is also possible to define the minimum gap in meters either as fixed parameter of type double or as stochastic distribution.
 If it isn't defined the default value of 5m is used.
 
-.. literalinclude:: @OP_REL_SIM@/contrib/examples/DefaultConfigurations/ProfilesCatalog.xml
+.. literalinclude:: @OP_REL_SIM@/contrib/examples/Common/ProfilesCatalog.xml
    :language: xml
    :dedent: 4
    :start-at: <Profile Name="DefaultPreRunCommon">
@@ -166,7 +166,7 @@ The Spawners have the following parameters:
 It is also possible to define the minimum gap in meters either as fixed parameter of type double or as stochastic distribution.
 If it isn't defined the default value of 5m is used.
 
-.. literalinclude:: @OP_REL_SIM@/contrib/examples/DefaultConfigurations/ProfilesCatalog.xml
+.. literalinclude:: @OP_REL_SIM@/contrib/examples/Common/ProfilesCatalog.xml
    :language: xml
    :dedent: 4
    :start-at: <Profile Name="DefaultRuntimeCommon">
@@ -205,7 +205,7 @@ In this way both spawner can use the same TrafficGroups.
    RightLaneOnly Bool               OPTIONAL: A flag determining whether this TrafficGroup can only be applied to the right most lane
    ============= ============= ==== =======================================================================================================================================================================
 
-.. literalinclude:: @OP_REL_SIM@/contrib/examples/DefaultConfigurations/ProfilesCatalog.xml
+.. literalinclude:: @OP_REL_SIM@/contrib/examples/Common/ProfilesCatalog.xml
    :language: xml
    :dedent: 4
    :start-at: <Profile Name="LightVehicles">

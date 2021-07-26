@@ -34,7 +34,7 @@ Objects, which do no meet these requirements are ignored.
 Full Example
 ------------
 
-.. literalinclude:: @OP_REL_SIM@/contrib/examples/DefaultConfigurations/SceneryConfiguration.xodr
+.. literalinclude:: @OP_REL_SIM@/contrib/examples/Common/SceneryConfiguration.xodr
    :language: xml
    :caption: SceneryConfiguration.xodr
    :linenos:
