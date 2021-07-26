@@ -40,10 +40,10 @@ SUBDIRS = \
     sensorFusionErrorless_Tests \
     sensorOSI_Tests \
     signalPrioritizer_Tests \
-    spawnPointScenario_Tests \
-    spawnPointPreRunCommon_Tests \
-    spawnPointRuntimeCommon_Tests \
-    spawnPointWorldAnalyzer_Tests \
+    spawnerScenario_Tests \
+    spawnerPreRunCommon_Tests \
+    spawnerRuntimeCommon_Tests \
+    spawnerWorldAnalyzer_Tests \
     worldOSI_Tests \
     common_Tests
 
@@ -125,17 +125,17 @@ sensorOSI_Tests.file = \
 signalPrioritizer_Tests.file = \
     $$PWD/components/SignalPrioritizer/signalPrioritizer_Tests.pro
 
-spawnPointScenario_Tests.file = \
-    $$PWD/core/slave/modules/SpawnPointScenario/spawnPointScenario_Tests.pro
+spawnerScenario_Tests.file = \
+    $$PWD/core/slave/modules/SpawnerScenario/spawnerScenario_Tests.pro
 
-spawnPointPreRunCommon_Tests.file = \
-    $$PWD/core/slave/modules/SpawnPointPreRunCommon/spawnPointPreRunCommon_Tests.pro
+spawnerPreRunCommon_Tests.file = \
+    $$PWD/core/slave/modules/SpawnerPreRunCommon/spawnerPreRunCommon_Tests.pro
 
-spawnPointRuntimeCommon_Tests.file = \
-    $$PWD/core/slave/modules/SpawnPointRuntimeCommon/spawnPointRuntimeCommon_Tests.pro
+spawnerRuntimeCommon_Tests.file = \
+    $$PWD/core/slave/modules/SpawnerRuntimeCommon/spawnerRuntimeCommon_Tests.pro
 
-spawnPointWorldAnalyzer_Tests.file = \
-    $$PWD/core/slave/modules/SpawnPointWorldAnalyzer/spawnPointWorldAnalyzer_Tests.pro
+spawnerWorldAnalyzer_Tests.file = \
+    $$PWD/core/slave/modules/SpawnerWorldAnalyzer/spawnerWorldAnalyzer_Tests.pro
 
 worldOSI_Tests.file = \
     $$PWD/core/slave/modules/World_OSI/worldOSI_Tests.pro

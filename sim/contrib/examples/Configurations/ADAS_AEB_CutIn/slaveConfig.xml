@@ -1,4 +1,4 @@
-<slaveConfig SchemaVersion="0.8.1">
+<slaveConfig SchemaVersion="0.8.2">
   <ProfilesCatalog>ProfilesCatalog.xml</ProfilesCatalog>
   <Experiment>
     <ExperimentID>0</ExperimentID>
@@ -52,18 +52,18 @@
   </Observations>
   <Spawners>
     <Spawner>
-      <Library>SpawnPointScenario</Library>
+      <Library>SpawnerScenario</Library>
       <Type>PreRun</Type>
       <Priority>1</Priority>
     </Spawner>
     <Spawner>
-      <Library>SpawnPointPreRunCommon</Library>
+      <Library>SpawnerPreRunCommon</Library>
       <Type>PreRun</Type>
       <Priority>0</Priority>
       <Profile>DefaultPreRunCommon</Profile>
     </Spawner>
     <Spawner>
-      <Library>SpawnPointRuntimeCommon</Library>
+      <Library>SpawnerRuntimeCommon</Library>
       <Type>Runtime</Type>
       <Priority>0</Priority>
       <Profile>DefaultRuntimeCommon</Profile>

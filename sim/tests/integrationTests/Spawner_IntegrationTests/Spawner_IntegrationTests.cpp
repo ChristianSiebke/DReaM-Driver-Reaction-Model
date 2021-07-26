@@ -9,10 +9,7 @@
 * SPDX-License-Identifier: EPL-2.0
 **********************************************************************/
 
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
-
-#include "SpawnPointPreRunCommon.h"
+#include "SpawnerPreRunCommon.h"
 #include "fakeAgent.h"
 #include "fakeAgentBlueprint.h"
 #include "fakeAgentBlueprintProvider.h"
@@ -20,8 +17,10 @@
 #include "fakeCallback.h"
 #include "fakeParameter.h"
 #include "fakeStochastics.h"
-#include "fakeWorld.h"
 #include "fakeStream.h"
+#include "fakeWorld.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -207,9 +206,9 @@ public:
         }
     }
 
-    SpawnPointPreRunCommon CreateSpawner()
+    SpawnerPreRunCommon CreateSpawner()
     {
-        return SpawnPointPreRunCommon{&dependencies, &callbacks};
+        return SpawnerPreRunCommon{&dependencies, &callbacks};
     }
 
     FakeAgentFactory agentFactory;
@@ -219,7 +218,7 @@ public:
     SpawnPointDependencies dependencies{&agentFactory, &world, &agentBlueprintProvider, &stochastics};
     FakeParameter parameters;
 
-    std::shared_ptr<FakeParameter> spawnPoint = std::make_shared<FakeParameter>();
+    std::shared_ptr<FakeParameter> spawnZone = std::make_shared<FakeParameter>();
     std::shared_ptr<FakeParameter> trafficGroup1 = std::make_shared<FakeParameter>();
     std::shared_ptr<FakeParameter> trafficGroup2 = std::make_shared<FakeParameter>();
     std::map<std::string, double> trafficGroup1Double {{"Weight", 2}};
@@ -248,7 +247,7 @@ public:
     std::map<std::string, const std::string> agentProfile2aString {{"Name", "AgentProfile2a"}};
     std::map<std::string, const std::string> agentProfile2bString {{"Name", "AgentProfile2b"}};
 
-    std::map<std::string, ParameterInterface::ParameterLists> parameterLists{{"SpawnPoints", {spawnPoint}},
+    std::map<std::string, ParameterInterface::ParameterLists> parameterLists{{"SpawnZones", {spawnZone}},
                                                                              {"TrafficGroups", {trafficGroup1, trafficGroup2}}};
 
     std::map<std::string, const openpass::parameter::StochasticDistribution> parametersStochastic;
@@ -323,11 +322,11 @@ auto GENERATE_AGENT_ADAPTER()
 TEST_F(SpawnerPreRun_IntegrationTests, ThreeContinuesLanes_SpawnWithCorrectTGapAndProfiles)
 {
     std::map<std::string, const std::vector<std::string>> parametersStrings {{"Roads", {ROADID}}};
-    ON_CALL(*spawnPoint, GetParametersStringVector()).WillByDefault(ReturnRef(parametersStrings));
+    ON_CALL(*spawnZone, GetParametersStringVector()).WillByDefault(ReturnRef(parametersStrings));
     std::map<std::string, const std::vector<int>> parametersIntVector {{"Lanes", {-1,-2,-3}}};
-    ON_CALL(*spawnPoint, GetParametersIntVector()).WillByDefault(ReturnRef(parametersIntVector));
+    ON_CALL(*spawnZone, GetParametersIntVector()).WillByDefault(ReturnRef(parametersIntVector));
     std::map<std::string, double> parametersDouble {{"SStart", 1000.0}, {"SEnd", 1500.0}};
-    ON_CALL(*spawnPoint, GetParametersDouble()).WillByDefault(ReturnRef(parametersDouble));
+    ON_CALL(*spawnZone, GetParametersDouble()).WillByDefault(ReturnRef(parametersDouble));
 
     ON_CALL(world, GetDistanceToEndOfLane(_,_,_,_,_,_)).WillByDefault(
                 [](const RoadGraph&, RoadGraphVertex startNode, int, double initialSearchDistance, double, const LaneTypes&)
@@ -371,11 +370,11 @@ TEST_F(SpawnerPreRun_IntegrationTests, ThreeContinuesLanes_SpawnWithCorrectTGapA
 TEST_F(SpawnerPreRun_IntegrationTests, IncreasingLaneNumber_SpawnWithCorrectTGapAndProfiles)
 {
     std::map<std::string, const std::vector<std::string>> parametersStrings {{"Roads", {ROADID}}};
-    ON_CALL(*spawnPoint, GetParametersStringVector()).WillByDefault(ReturnRef(parametersStrings));
+    ON_CALL(*spawnZone, GetParametersStringVector()).WillByDefault(ReturnRef(parametersStrings));
     std::map<std::string, const std::vector<int>> parametersIntVector {{"Lanes", {-1,-2,-3}}};
-    ON_CALL(*spawnPoint, GetParametersIntVector()).WillByDefault(ReturnRef(parametersIntVector));
+    ON_CALL(*spawnZone, GetParametersIntVector()).WillByDefault(ReturnRef(parametersIntVector));
     std::map<std::string, double> parametersDouble {{"SStart", 1000.0}, {"SEnd", 1500.0}};
-    ON_CALL(*spawnPoint, GetParametersDouble()).WillByDefault(ReturnRef(parametersDouble));
+    ON_CALL(*spawnZone, GetParametersDouble()).WillByDefault(ReturnRef(parametersDouble));
 
     ON_CALL(world, GetDistanceToEndOfLane(_,_,_,_,_,_)).WillByDefault(
                 [](const RoadGraph&, RoadGraphVertex startNode, int, double initialSearchDistance, double, const LaneTypes&)
@@ -426,11 +425,11 @@ TEST_F(SpawnerPreRun_IntegrationTests, IncreasingLaneNumber_SpawnWithCorrectTGap
 TEST_F(SpawnerPreRun_IntegrationTests, DecreasingLaneNumber_SpawnWithCorrectTGapAndProfiles)
 {
     std::map<std::string, const std::vector<std::string>> parametersStrings {{"Roads", {ROADID}}};
-    ON_CALL(*spawnPoint, GetParametersStringVector()).WillByDefault(ReturnRef(parametersStrings));
+    ON_CALL(*spawnZone, GetParametersStringVector()).WillByDefault(ReturnRef(parametersStrings));
     std::map<std::string, const std::vector<int>> parametersIntVector {{"Lanes", {-1,-2,-3}}};
-    ON_CALL(*spawnPoint, GetParametersIntVector()).WillByDefault(ReturnRef(parametersIntVector));
+    ON_CALL(*spawnZone, GetParametersIntVector()).WillByDefault(ReturnRef(parametersIntVector));
     std::map<std::string, double> parametersDouble {{"SStart", 1000.0}, {"SEnd", 1500.0}};
-    ON_CALL(*spawnPoint, GetParametersDouble()).WillByDefault(ReturnRef(parametersDouble));
+    ON_CALL(*spawnZone, GetParametersDouble()).WillByDefault(ReturnRef(parametersDouble));
 
     ON_CALL(world, GetDistanceToEndOfLane(_,_,-3,_,_,_)).WillByDefault(
                 [](const RoadGraph&, RoadGraphVertex startNode, int, double initialSearchDistance, double, const LaneTypes&)
@@ -484,11 +483,11 @@ TEST_F(SpawnerPreRun_IntegrationTests, DecreasingLaneNumber_SpawnWithCorrectTGap
 TEST_F(SpawnerPreRun_IntegrationTests, RightLaneStartsAndEndsWithinRange_SpawnWithCorrectTGapAndProfiles)
 {
     std::map<std::string, const std::vector<std::string>> parametersStrings {{"Roads", {ROADID}}};
-    ON_CALL(*spawnPoint, GetParametersStringVector()).WillByDefault(ReturnRef(parametersStrings));
+    ON_CALL(*spawnZone, GetParametersStringVector()).WillByDefault(ReturnRef(parametersStrings));
     std::map<std::string, const std::vector<int>> parametersIntVector {{"Lanes", {-1,-2,-3}}};
-    ON_CALL(*spawnPoint, GetParametersIntVector()).WillByDefault(ReturnRef(parametersIntVector));
+    ON_CALL(*spawnZone, GetParametersIntVector()).WillByDefault(ReturnRef(parametersIntVector));
     std::map<std::string, double> parametersDouble {{"SStart", 1000.0}, {"SEnd", 1500.0}};
-    ON_CALL(*spawnPoint, GetParametersDouble()).WillByDefault(ReturnRef(parametersDouble));
+    ON_CALL(*spawnZone, GetParametersDouble()).WillByDefault(ReturnRef(parametersDouble));
 
     ON_CALL(world, GetDistanceToEndOfLane(_,_,-3,_,_,_)).WillByDefault(
                 [](const RoadGraph&, RoadGraphVertex startNode, int, double initialSearchDistance, double, const LaneTypes&)

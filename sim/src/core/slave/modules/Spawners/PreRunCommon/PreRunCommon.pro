@@ -9,15 +9,15 @@
 # **********************************************************************/
 
 #-----------------------------------------------------------------------------
-# \file  SpawnPointCommonPreRun.pro
+# \file  PreRunCommon.pro
 # \brief This file contains the information for the QtCreator-project of the
-# module SpawnPointCommonPreRun
+# module PreRunCommon
 #-----------------------------------------------------------------------------/
 
 # shortened .pro file name due to MinGW path length problems
-TARGET = SpawnPointPreRunCommon
+TARGET = PreRunCommon
 
-DEFINES += SPAWNPOINT_COMMON_PRERUN_LIBRARY
+DEFINES += SPAWNER_COMMON_PRERUN_LIBRARY
 CONFIG += OPENPASS_LIBRARY
 include(../../../../../../global.pri)
 
@@ -40,20 +40,20 @@ DEPENDENCY_SOURCES = \
                      ../../../framework/sampler.cpp
 
 SPAWNPOINT_HEADERS = \
-                     SpawnPointPreRunCommonDefinitions.h \
-                     SpawnPointPreRunCommonParameterExtractor.h \
-                     SpawnPointPreRunCommon.h \
-                     SpawnPointPreRunCommonExport.h \
-                     SpawnPointPreRunCommonGlobal.h
+                     SpawnerPreRunCommonDefinitions.h \
+                     SpawnerPreRunCommonParameterExtractor.h \
+                     SpawnerPreRunCommon.h \
+                     SpawnerPreRunCommonExport.h \
+                     SpawnerPreRunCommonGlobal.h
 
 SPAWNPOINT_SOURCES = \
-                     SpawnPointPreRunCommon.cpp \
-                     SpawnPointPreRunCommonExport.cpp
+                     SpawnerPreRunCommon.cpp \
+                     SpawnerPreRunCommonExport.cpp
 
 SOURCES += \
     $$DEPENDENCY_SOURCES \
-    $$SPAWNPOINT_SOURCES
+    $$SPAWNER_SOURCES
 
 HEADERS += \
     $$DEPENDENCY_HEADERS \
-    $$SPAWNPOINT_HEADERS
+    $$SPAWNER_HEADERS

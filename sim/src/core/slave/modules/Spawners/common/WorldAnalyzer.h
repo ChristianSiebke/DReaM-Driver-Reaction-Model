@@ -10,11 +10,10 @@
 
 #pragma once
 
+#include "SpawnerDefinitions.h"
 #include "include/agentBlueprintInterface.h"
 #include "include/stochasticsInterface.h"
 #include "include/worldInterface.h"
-
-#include "SpawnPointDefinitions.h"
 
 using namespace SpawnPointDefinitions;
 

@@ -43,8 +43,8 @@ PreRunSpawner
 
 The PreRunSpawner is responsible for populating the scenery/world with Common-Agents before the simulator starts.
 This Spawner only acts once before the simulator starts and not during the simulation run.
-The PreRunSpawner needs a list of SpawnPoints that define where it will spawn agents and a list of weighted :ref:`components_trafficgroups` that defines the type and parameters of the spawned agents.
-The SpawnPoints have the following parameters:
+The PreRunSpawner needs a list of SpawnZones that define where it will spawn agents and a list of weighted :ref:`components_trafficgroups` that defines the type and parameters of the spawned agents.
+The SpawnZones have the following parameters:
 
 .. table::
    :class: tight-table
@@ -140,14 +140,14 @@ Once the spawning ranges are determined the PreRunSpawner will spawn for each sp
 
 #) Based on the distance and the velocity the TTC (2s) conditions are evaluated.If the TTC is critical the spawn velocity is reduced to fulfill the TTC requirements.
 
-#) As a final step the spawnpoint evaluates the spawncoordinates. If they are valid the agent is created, else the spawnpoint moves on to the next spawning range.
+#) As a final step the spawnzone evaluates the spawncoordinates. If they are valid the agent is created, else the spawnzone moves on to the next spawning range.
 
 .. _components_runtimespawner:
 
 RuntimeSpawner
 ~~~~~~~~~~~~~~~~~~~
 
-The RuntimeSpawner (included in library "SpawnPointRuntimeCommon_OSI") is responsible for maintaining a populated scenery throughout the simulation runtime.
+The RuntimeSpawner (included in library "SpawnerRuntimeCommon_OSI") is responsible for maintaining a populated scenery throughout the simulation runtime.
 It acts at each timestep throughout the simulation run and attempts to spawn Common Agents at the specified location(s).
 The RuntimeSpawner needs a list of Spawners that define where it will spawn agents and a list of weighted :ref:`components_trafficgroups` that defines the type and parameters of the spawned agents.
 The Spawners have the following parameters:

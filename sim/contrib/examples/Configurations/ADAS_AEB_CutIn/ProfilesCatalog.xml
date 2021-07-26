@@ -1,4 +1,4 @@
-<Profiles SchemaVersion="0.4.5">
+<Profiles SchemaVersion="0.4.6">
   <AgentProfiles>
     <AgentProfile Name="EgoAgent" Type="Dynamic">
       <DriverProfiles>
@@ -201,7 +201,7 @@
   </ProfileGroup>
   <ProfileGroup Type="Spawner">
     <Profile Name="DefaultPreRunCommon">
-      <List Name="SpawnPoints">
+      <List Name="SpawnZones">
         <ListItem>
           <StringVector Key="Roads" Value="1"/>
           <IntVector Key="Lanes" Value="-1,-2,-3,-4,-5"/>
