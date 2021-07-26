@@ -396,11 +396,14 @@ void ModelPcm::RelocateCog(PCM_SimulationSet *simulationSet)
 {
     for (uint i = 0; i < simulationSet->GetTrajectories().size(); i++)
     {
-        double wheelBase = simulationSet->GetParticipants().at(i)->GetWheelbase().toDouble();
-        double distCgfa = simulationSet->GetParticipants().at(i)->GetDistcgfa().toDouble();
-        double distanceRearAxleToCOG = wheelBase - distCgfa;
+        if (simulationSet->GetParticipants().at(i)->GetType() == "0")
+        {
+            double wheelBase = simulationSet->GetParticipants().at(i)->GetWheelbase().toDouble();
+            double distCgfa = simulationSet->GetParticipants().at(i)->GetDistcgfa().toDouble();
+            double distanceRearAxleToCOG = wheelBase - distCgfa;
 
-        simulationSet->GetTrajectories().at(i)->ShiftForward(distanceRearAxleToCOG);
+            simulationSet->GetTrajectories().at(i)->ShiftForward(distanceRearAxleToCOG);
+        }
     }
 }
 
