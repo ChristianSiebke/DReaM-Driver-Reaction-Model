@@ -18,6 +18,8 @@ set(PYOPENPASS_DEFAULT_RESOURCES ${CMAKE_CURRENT_LIST_DIR}/../../contrib/example
 set(PYOPENPASS_SPECIALIZED_TEST_SCOPES
   ADAS_AEB
   ADAS_AEB_InCurve
+  ADAS_AEB_CutIn_Triggers
+  ADAS_AEB_CutIn_NoCollision
   ByEntityCondition
   OSCAction_DoubleLaneChange
   OSCAction_RemoveAgent
