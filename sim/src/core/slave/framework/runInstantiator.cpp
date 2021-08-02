@@ -49,6 +49,7 @@ bool RunInstantiator::ExecuteRun()
     auto &scenario = *configurationContainer.GetScenario();
     auto &scenery = *configurationContainer.GetScenery();
     auto &slaveConfig = *configurationContainer.GetSlaveConfig();
+    auto &profiles = *configurationContainer.GetProfiles();
     auto &experimentConfig = slaveConfig.GetExperimentConfig();
     auto &environmentConfig = slaveConfig.GetEnvironmentConfig();
 
@@ -72,7 +73,7 @@ bool RunInstantiator::ExecuteRun()
         LOG_INTERN(LogLevel::DebugCore) << std::endl
                                         << "### run number: " << invocation << " ###";
         auto seed = static_cast<std::uint32_t>(experimentConfig.randomSeed + invocation);
-        if (!InitRun(seed, environmentConfig, runResult))
+        if (!InitRun(seed, environmentConfig, profiles, runResult))
         {
             LOG_INTERN(LogLevel::DebugCore) << std::endl
                                             << "### run initialization failed ###";
@@ -152,23 +153,27 @@ void RunInstantiator::InitializeSpawnPointNetwork()
                  "Failed to instantiate SpawnPointNetwork");
 }
 
-std::unique_ptr<ParameterInterface> RunInstantiator::SampleWorldParameters(const EnvironmentConfig& environmentConfig, StochasticsInterface* stochastics, const openpass::common::RuntimeInformation& runtimeInformation)
+std::unique_ptr<ParameterInterface> RunInstantiator::SampleWorldParameters(const EnvironmentConfig& environmentConfig, const ProfileGroup& trafficRules, StochasticsInterface* stochastics, const openpass::common::RuntimeInformation& runtimeInformation)
 {
-    return openpass::parameter::make<SimulationCommon::Parameters>(
-        runtimeInformation, openpass::parameter::ParameterSetLevel1 {
-            { "TimeOfDay", Sampler::Sample(environmentConfig.timeOfDays, stochastics) },
-            { "VisibilityDistance", Sampler::Sample(environmentConfig.visibilityDistances, stochastics) },
-            { "Friction", Sampler::Sample(environmentConfig.frictions, stochastics) },
-            { "Weather", Sampler::Sample(environmentConfig.weathers, stochastics) }}
-    );
+    auto trafficRule = helper::map::query(trafficRules, environmentConfig.trafficRules);
+    ThrowIfFalse(trafficRule.has_value(), "No traffic rule set with name " + environmentConfig.trafficRules + " defined in ProfilesCatalog");
+    auto parameters = trafficRule.value();
+    parameters.emplace_back("TimeOfDay", Sampler::Sample(environmentConfig.timeOfDays, stochastics));
+    parameters.emplace_back("VisibilityDistance", Sampler::Sample(environmentConfig.visibilityDistances, stochastics));
+    parameters.emplace_back("Friction", Sampler::Sample(environmentConfig.frictions, stochastics));
+    parameters.emplace_back("Weather", Sampler::Sample(environmentConfig.weathers, stochastics));
+
+    return openpass::parameter::make<SimulationCommon::Parameters>(runtimeInformation, parameters);
 }
-bool RunInstantiator::InitRun(std::uint32_t seed, const EnvironmentConfig &environmentConfig, RunResult &runResult)
+bool RunInstantiator::InitRun(std::uint32_t seed, const EnvironmentConfig &environmentConfig, ProfilesInterface& profiles, RunResult &runResult)
 {
     try
     {
         stochastics.InitGenerator(seed);
 
-        worldParameter = SampleWorldParameters(environmentConfig, &stochastics, configurationContainer.GetRuntimeInformation());
+        auto trafficRules = helper::map::query(profiles.GetProfileGroups(), "TrafficRules");
+        ThrowIfFalse(trafficRules.has_value(), "No traffic rules defined in ProfilesCatalog");
+        worldParameter = SampleWorldParameters(environmentConfig, trafficRules.value(), &stochastics, configurationContainer.GetRuntimeInformation());
         world.ExtractParameter(worldParameter.get());
 
         observationNetwork.InitRun();

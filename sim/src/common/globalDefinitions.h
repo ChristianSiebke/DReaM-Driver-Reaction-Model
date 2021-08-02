@@ -368,42 +368,14 @@ enum class LaneCategory
     RightMostLane
 };
 
-class WorldParameter
+//! Defines which traffic rules are in effect
+struct TrafficRules
 {
-public:
-    WorldParameter(Weekday weekday,
-                   int timeOfDay,
-                   const std::string &libraryName) :
-        weekday(weekday),
-        timeOfDay(timeOfDay),
-        libraryName(libraryName)
-    {
-    }
-    WorldParameter(const WorldParameter &) = delete;
-    WorldParameter(WorldParameter &&) = delete;
-    WorldParameter &operator=(const WorldParameter &) = delete;
-    WorldParameter &operator=(WorldParameter &&) = delete;
-    virtual ~WorldParameter() = default;
-
-    Weekday GetWeekday()
-    {
-        return weekday;
-    }
-
-    int GetTimeOfDay()
-    {
-        return timeOfDay;
-    }
-
-    const std::string &GetLibraryName() const
-    {
-        return libraryName;
-    }
-
-private:
-    Weekday weekday;
-    int timeOfDay;
-    const std::string libraryName;
+    double openSpeedLimit; //!< maximum allowed speed if not restricted by signs
+    bool keepToOuterLanes; //!< if true, vehicles must use the outermost free lane for driving
+    bool dontOvertakeOnOuterLanes; //!< if true, it is prohibited to overtake another vehicle, that is driving further left (or right for lefthand traffic)
+    bool formRescueLane; //!< if true, vehicles driving in a traffic jam must form a corridor for emergency vehicles
+    bool zipperMerge; //!< if true all merging shall be performed using zipper merge
 };
 
 //-----------------------------------------------------------------------------

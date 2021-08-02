@@ -1,4 +1,4 @@
-<slaveConfig SchemaVersion="0.8.1">
+<slaveConfig SchemaVersion="0.8.2">
   <ProfilesCatalog>ProfilesCatalog.xml</ProfilesCatalog>
   <Experiment>
     <ExperimentID>123</ExperimentID>
@@ -27,6 +27,7 @@
       <Weather Probability="0.5" Value="Rainy"/>
       <Weather Probability="0.5" Value="Snowy"/>
     </Weathers>
+    <TrafficRules>Germany</TrafficRules>
   </Environment>
   <Observations>
     <Observation>

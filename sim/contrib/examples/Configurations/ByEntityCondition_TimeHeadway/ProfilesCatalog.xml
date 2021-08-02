@@ -1,4 +1,4 @@
-<Profiles SchemaVersion="0.4.5">
+<Profiles SchemaVersion="0.4.6">
   <AgentProfiles>
 	<AgentProfile Name="TFAgent" Type="Dynamic">
       <DriverProfiles>
@@ -35,7 +35,7 @@
       <Sensors/>
     </VehicleProfile>
   </VehicleProfiles>
-   <ProfileGroup Type="Driver">
+  <ProfileGroup Type="Driver">
       <Profile Name="Regular">
 		<String Key="Type" Value="AlgorithmAgentFollowingDriverModel"/>
 		<String Key="AlgorithmLateralModule" Value="Algorithm_LateralAfdm"/>
@@ -59,10 +59,33 @@
 		<Double Key="MaxDeceleration" Value="0.0"/>
       </Profile>
     </ProfileGroup>
-	<ProfileGroup Type="Dynamics_TrajectoryFollower">
+  <ProfileGroup Type="Dynamics_TrajectoryFollower">
 		<Profile Name="BasicTrajectoryFollower">
 			<Bool Key="AutomaticDeactivation" Value="true"/>
 			<Bool Key="EnforceTrajectory" Value="true"/>
 		</Profile>
 	</ProfileGroup>
+  <ProfileGroup Type="TrafficRules">
+    <Profile Name="Germany">
+      <Double Key="OpenSpeedLimit" Value="infinity"/>
+      <Bool Key="KeepToOuterLanes" Value="true"/>
+      <Bool Key="DontOvertakeOnOuterLanes" Value="true"/>
+      <Bool Key="FormRescueLane" Value="true"/>
+      <Bool Key="ZipperMerge" Value="true"/>
+    </Profile>
+    <Profile Name="USA">
+      <Double Key="OpenSpeedLimit" Value="31.2928"/>
+      <Bool Key="KeepToOuterLanes" Value="false"/>
+      <Bool Key="DontOvertakeOnOuterLanes" Value="false"/>
+      <Bool Key="FormRescueLane" Value="true"/>
+      <Bool Key="ZipperMerge" Value="false"/>
+    </Profile>
+    <Profile Name="China">
+      <Double Key="OpenSpeedLimit" Value="33.3333"/>
+      <Bool Key="KeepToOuterLanes" Value="false"/>
+      <Bool Key="DontOvertakeOnOuterLanes" Value="true"/>
+      <Bool Key="FormRescueLane" Value="false"/>
+      <Bool Key="ZipperMerge" Value="true"/>
+    </Profile>
+  </ProfileGroup>
 </Profiles>

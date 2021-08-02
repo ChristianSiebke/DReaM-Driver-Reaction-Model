@@ -15,7 +15,7 @@ ProfilesCatalog
 ===============
 
 The ProfilesCatalog contains all AgentProfiles, VehicleProfiles and generic ProfileGroups and Profiles. 
-Depending on the configuration the simulator could require a "Driver"-ProfileGroup, a "Spawner"- and "TrafficGroup"-ProfileGroup, or sensor and vehiclecomponent specific ProfileGroups.
+Depending on the configuration the simulator could require a "Driver"-ProfileGroup, a "Spawner"- and "TrafficGroup"-ProfileGroup, a "TrafficRules"-ProfileGroup or sensor and vehiclecomponent specific ProfileGroups.
 
 * :ref:`profilescatalog_agentprofiles`
 * :ref:`profilescatalog_vehicleprofiles`
@@ -23,6 +23,7 @@ Depending on the configuration the simulator could require a "Driver"-ProfileGro
 * :ref:`profilescatalog_driverprofiles`
 * :ref:`profilescatalog_vehiclecomponentprofiles`
 * :ref:`profilescatalog_spawnerprofiles`
+* :ref:`profilescatalog_trafficrulesprofiles`
 
 .. _profilescatalog_agentprofiles:
 
@@ -303,3 +304,33 @@ For details on the indivual parameters see the :ref:`components reference <compo
     </Profile>
     ...
   </ProfileGroup>
+
+  
+.. _profilescatalog_trafficrulesprofiles:
+
+TrafficRules ProfileGroup
+-------------------------
+
+This sections contains the global traffic rules, that may vary depending on the country.
+The :ref:`slaveconfig_environment` section in the SlaveConfig defines which set is used.
+Currently there are only rules regulating highway traffic. These are the following:
+
++---------------------------+---------+---------------------------------------------------------------------------------------------------------------------+
+| Name                      | Type    | Description                                                                                                         |
++===========================+=========+=====================================================================================================================+
+| OpenSpeedLimit            | Double  | maximum allowed speed if not restricted by signs                                                                    |
++---------------------------+---------+---------------------------------------------------------------------------------------------------------------------+
+| KeepToOuterLanes          | Bool    | if true, vehicles must use the outermost free lane for driving                                                      |
++---------------------------+---------+---------------------------------------------------------------------------------------------------------------------+
+| DontOvertakeOnOuterLanes  | Bool    | if true, it is prohibited to overtake another vehicle, that is driving further left (or right for lefthand traffic) |
++---------------------------+---------+---------------------------------------------------------------------------------------------------------------------+
+| FormRescueLane            | Bool    | if true, vehicles driving in a traffic jam must form a corridor for emergency vehicles                              |
++---------------------------+---------+---------------------------------------------------------------------------------------------------------------------+
+| ZipperMerge               | Bool    | if true all merging shall be performed using zipper merge                                                           |
++---------------------------+---------+---------------------------------------------------------------------------------------------------------------------+
+
+.. literalinclude:: @OP_REL_SIM@/contrib/examples/Common/ProfilesCatalog.xml
+   :language: xml
+   :start-at: <ProfileGroup Type="TrafficRules">
+   :end-at: </ProfileGroup>
+   

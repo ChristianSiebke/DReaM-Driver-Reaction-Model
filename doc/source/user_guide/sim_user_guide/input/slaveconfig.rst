@@ -112,6 +112,7 @@ All probabilities need to add up to 1.0.
    VisibilityDistance  Defines how far a human driver can see [m].                                                    1+ entry
    Friction            Friction on the road. Used by DynamicsRegularDriving and LimiterAccelerationVehicleComponents. 1+ entry
    Weather             **Currently unused.** Weather as string                                                        1+ entry
+   TrafficRules        Defines which set of TrafficRules to use from the ProfilesCatalog                              yes
    =================== ============================================================================================== =========
 
 **Example**

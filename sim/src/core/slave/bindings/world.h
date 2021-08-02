@@ -107,6 +107,11 @@ public:
         return implementation->GetVisibilityDistance();
     }
 
+    const TrafficRules& GetTrafficRules() const override
+    {
+        return implementation->GetTrafficRules();
+    }
+
     double GetFriction() const override
     {
         return implementation->GetFriction();
@@ -278,8 +283,6 @@ public:
 
     //-----------------------------------------------------------------------------
     //! Instantiate the world by creating a WorldInterface out of a world library
-    //! with given world parameters
-    //! @param[in]  worldParameter  parameters of world inclusive library path
     //!
     //! @return                true if successful
     //-----------------------------------------------------------------------------
@@ -405,10 +408,6 @@ public:
     virtual Weekday GetWeekday() const override
     {
         return implementation->GetWeekday();
-    }
-    virtual void SetParameter(WorldParameter *worldParameter) override
-    {
-        return implementation->SetParameter(worldParameter);
     }
     virtual bool CreateGlobalDrivingView() override
     {

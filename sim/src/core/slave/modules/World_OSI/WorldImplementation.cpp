@@ -79,16 +79,42 @@ const std::vector<const TrafficObjectInterface*>& WorldImplementation::GetTraffi
     return trafficObjects;
 }
 
+const TrafficRules& WorldImplementation::GetTrafficRules() const
+{
+    return worldParameter.trafficRules;
+}
+
 void WorldImplementation::ExtractParameter(ParameterInterface* parameters)
 {
     auto intParameter = parameters->GetParametersInt();
     auto doubleParameter = parameters->GetParametersDouble();
     auto stringParameter = parameters->GetParametersString();
+    auto boolParameter = parameters->GetParametersBool();
 
     worldParameter.timeOfDay = stringParameter.at("TimeOfDay");
     worldParameter.visibilityDistance = intParameter.at("VisibilityDistance");
     worldParameter.friction = doubleParameter.at("Friction");
     worldParameter.weather = stringParameter.at("Weather");
+
+    auto openSpeedLimit = helper::map::query(doubleParameter, "OpenSpeedLimit");
+    THROWIFFALSE(openSpeedLimit.has_value(), "Missing traffic rule OpenSpeedLimit")
+    worldParameter.trafficRules.openSpeedLimit = openSpeedLimit.value();
+
+    auto keepToOuterLanes = helper::map::query(boolParameter, "KeepToOuterLanes");
+    THROWIFFALSE(keepToOuterLanes.has_value(), "Missing traffic rule KeepToOuterLanes")
+    worldParameter.trafficRules.keepToOuterLanes = keepToOuterLanes.value();
+
+    auto dontOvertakeOnOuterLanes = helper::map::query(boolParameter, "DontOvertakeOnOuterLanes");
+    THROWIFFALSE(dontOvertakeOnOuterLanes.has_value(), "Missing traffic rule DontOvertakeOnOuterLanes")
+    worldParameter.trafficRules.dontOvertakeOnOuterLanes = dontOvertakeOnOuterLanes.value();
+
+    auto formRescueLane = helper::map::query(boolParameter, "FormRescueLane");
+    THROWIFFALSE(formRescueLane.has_value(), "Missing traffic rule FormRescueLane")
+    worldParameter.trafficRules.formRescueLane = formRescueLane.value();
+
+    auto zipperMerge = helper::map::query(boolParameter, "ZipperMerge");
+    THROWIFFALSE(zipperMerge.has_value(), "Missing traffic rule ZipperMerge")
+    worldParameter.trafficRules.zipperMerge = zipperMerge.value();
 }
 
 void WorldImplementation::Reset()
