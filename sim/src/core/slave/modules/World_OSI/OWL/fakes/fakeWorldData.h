@@ -46,6 +46,7 @@ public:
     MOCK_METHOD2(SetSectionSuccessor, void(const RoadLaneSectionInterface &, const RoadLaneSectionInterface &));
     MOCK_METHOD2(SetSectionPredecessor, void(const RoadLaneSectionInterface &, const RoadLaneSectionInterface &));
     MOCK_METHOD4(ConnectLanes, void(/* const */ RoadLaneSectionInterface &, /* const */ RoadLaneSectionInterface &, const std::map<int, int> &, bool));
+    MOCK_METHOD1(SetEnvironment, void (const openScenario::EnvironmentAction& environment));
     MOCK_METHOD2(AddTrafficSign, OWL::Interfaces::TrafficSign &(const Id, const std::string odId));
     MOCK_METHOD3(AddTrafficLight, OWL::Interfaces::TrafficLight&(const Id, const std::string odId, bool withYellow));
 

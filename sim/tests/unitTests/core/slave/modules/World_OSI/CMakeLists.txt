@@ -21,6 +21,7 @@ add_openpass_target(
     sceneryConverter_Tests.cpp
     sensorView_Tests.cpp
     trafficLightNetwork_Tests.cpp
+    worldData_Tests.cpp
     worldQuery_Tests.cpp
     worldToRoadCoordinateConverter_Tests.cpp
     Generators/laneGeometryElementGenerator_Tests.cpp

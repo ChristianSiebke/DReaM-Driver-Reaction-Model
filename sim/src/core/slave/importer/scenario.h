@@ -19,6 +19,7 @@
 #include "common/eventDetectorDefinitions.h"
 #include "common/opExport.h"
 #include "include/scenarioInterface.h"
+#include "sceneryDynamics.h"
 
 namespace Configuration {
 
@@ -88,7 +89,7 @@ public:
      */
     void SetSceneryPath(const std::string& sceneryPath) override;
 
-    const std::vector<openScenario::TrafficSignalController>& GetTrafficSignalControllers() const override;
+    const SceneryDynamicsInterface& GetSceneryDynamics() override;
 
     void AddTrafficSignalController (const openScenario::TrafficSignalController& controller) override;
 
@@ -111,14 +112,16 @@ public:
     int GetEndTime() const override;
     void SetEndTime(const double endTime) override;
 
+    void SetEnvironment(const openScenario::EnvironmentAction &environment) override;
+
 private:
     ScenarioEntity egoEntity;
     std::vector<ScenarioEntity> entities;
     std::map<std::string, std::vector<ScenarioEntity*>> scenarioGroups;
 
-    std::vector<openScenario::TrafficSignalController> trafficSignalControllers;
     std::vector<openScenario::ConditionalEventDetectorInformation> eventDetectorInformations;
     std::vector<openScenario::ManipulatorInformation> actions;
+    SceneryDynamics sceneryDynamics;
 
     std::string vehicleCatalogPath;     //!< The path of the vehicle catalog (relative to Scenario.xosc)
     std::string pedestrianCatalogPath;  //!< The path of the pedestrian catalog (relative to Scenario.xosc)

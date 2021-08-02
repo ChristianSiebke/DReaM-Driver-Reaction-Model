@@ -190,7 +190,7 @@ void ScenarioImporter::ImportStoryboard(QDomElement& documentRoot, std::vector<S
     // for initial entity parameters we just use first child "Init" --> others will be ignore
     ThrowIfFalse(SimulationCommon::GetFirstChildElement(storyboardElement, TAG::init, initElement),
                  storyboardElement, "Tag " + std::string(TAG::init) + " is missing.");
-    ImportInitElement(initElement, entities, parameters);
+    ImportInitElement(initElement, entities, scenario, parameters);
 
     // Import Story
     QDomElement storyElement;
@@ -371,7 +371,7 @@ void ScenarioImporter::ImportManeuverElement(QDomElement &maneuverElement,
     }
 }
 
-void ScenarioImporter::ImportInitElement(QDomElement& initElement, std::vector<ScenarioEntity>& entities, openScenario::Parameters& parameters)
+void ScenarioImporter::ImportInitElement(QDomElement& initElement, std::vector<ScenarioEntity>& entities, ScenarioInterface *scenario, openScenario::Parameters& parameters)
 {
     // for initial entity parameters we just use first child "Actions" --> others will be ignore
     QDomElement actionsElement;
@@ -457,6 +457,19 @@ void ScenarioImporter::ImportInitElement(QDomElement& initElement, std::vector<S
         }
 
         privateElement = privateElement.nextSiblingElement(TAG::Private);
+    }
+
+    QDomElement globalActionElement;
+    SimulationCommon::GetFirstChildElement(actionsElement, TAG::globalAction, globalActionElement);
+    while (!globalActionElement.isNull())
+    {
+        const auto action = ScenarioImporterHelper::ImportGlobalAction(globalActionElement, parameters);
+        if (std::holds_alternative<EnvironmentAction>(action))
+        {
+            scenario->SetEnvironment(std::get<EnvironmentAction>(action));
+        }
+
+        globalActionElement = globalActionElement.nextSiblingElement(TAG::globalAction);
     }
 }
 
