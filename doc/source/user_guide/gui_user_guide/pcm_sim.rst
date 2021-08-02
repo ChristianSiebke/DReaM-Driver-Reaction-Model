@@ -11,8 +11,8 @@
 
 .. _pcm_sim:
 
-PCM_Sim
-=======
+PCM Simulation
+==============
 
 This plugin is used to configure and start a simulation based pcm data or simulation configuration sets of previous simualations.
 

@@ -11,8 +11,8 @@
 
 .. _sim_user_guide:
 
-Simulation User Guide
-======================
+Scenario Simulation 
+===================
 
 .. admonition:: Before we start...
 

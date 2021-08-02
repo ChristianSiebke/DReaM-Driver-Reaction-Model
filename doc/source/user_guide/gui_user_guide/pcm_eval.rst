@@ -11,8 +11,8 @@
 
 .. _pcm_eval:
 
-PCM_Eval
-========
+PCM Evaluation
+==============
 
 This plugin is used to load results of previous simulations. 
 
