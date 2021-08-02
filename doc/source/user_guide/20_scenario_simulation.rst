@@ -23,7 +23,7 @@ Simulation User Guide
 
 #. **Experiment:** Topmost, an experiment defines the domains of possible inputs, which shall be compared, such as *"traffic at high volume"* with *"traffic at low volume"*.
    In this sense, a parameter variation is done at a very coarse level, resulting in two sets of inputs.
-   Note that this level is covered by the GUI (see :ref:`gui_user_guide`).
+   Note that this level is covered by the GUI (see :ref:`pcm_simulation_guide`).
 
 #. **Invocation:** When an input-set is available, |op| invokes a defined number of runs, resulting in a probabilistic sampling of the given state under parameterizable conditions.
    For example, in the aforementioned situation *"traffic at high volume"*, it would generate participants at *"lower speeds"* and *"smaller gaps"*.
