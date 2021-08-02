@@ -14,7 +14,7 @@
 PCM_Sim
 =======
 
-This plugin is used to configure and start a simulation based pcm data or simualtion configuration sets of previous simualations.
+This plugin is used to configure and start a simulation based pcm data or simulation configuration sets of previous simualations.
 
 Simulation Input
 ----------------
@@ -36,8 +36,8 @@ Simulation Input
 
   .. warning::
 
-    To ensure that the previous results are correctly read, the folder structure of the results has to follow the structure the gui itself generates
-    when simulation from a database. 
+    To ensure that the previous results are correctly read, the folder structure of the results has to follow the structure the GUI itself generates
+    when the simulation is started from a database. 
     Only the configuration files of the default folders are loaded. No variation is loaded and taken into account at this place.
 
 
@@ -59,7 +59,7 @@ Simulation Output
 
 Simulation Configuration
 ------------------------
-At this point the User is able to choose what system configuration shall be used for each agent.
+At this point, the User is able to choose what system configuration shall be used for each agent.
 The User can either select one or multiple system configuration files (comma separated). 
 In the case of multiple files are configured, there will be unique sets of simulation configuration files generated for each possbile combination, 
 which are placed in folders named / coded like ``<Car1_Index>-<Car2_Index>-<Other_Index>`` e.g. ``1-0-2`` 

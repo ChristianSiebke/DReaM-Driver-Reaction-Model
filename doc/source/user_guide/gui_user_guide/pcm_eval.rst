@@ -35,6 +35,6 @@ Evaluating results
 * Select result files to be shown. 
 
 .. note::
-  It is possible to select multiple files compare the trajectories in the visualization area.
+  It is possible to select multiple files to compare different trajectories in the visualization area.
 
 .. image:: _static/images/plugin/pcm_eval/select.png

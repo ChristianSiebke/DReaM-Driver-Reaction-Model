@@ -14,7 +14,7 @@
 TimePlot
 ========
 
-This plugin is used plot trajectories (position, velocity, etc.) over time.
+This plugin is used to plot trajectories (position, velocity, etc.) over time.
 
 Loading results
 ---------------
@@ -26,7 +26,8 @@ Loading results
 Evaluating results
 ------------------
 
-* Select an input folder that contains files in format
+* Select an input folder that contains files in this format:
+
   * Relevant files need ending ``.csv``
   * Columns can be separated by comma, semicolon or space
   * First two columns need *frame* and *id** in header

@@ -23,7 +23,7 @@ Loading results
 
 .. note::
 
-  It´s possible to add multiple result folders.
+  It is possible to add multiple result folders.
 
     * Subsequently selected folders are added to the list in the TreeView
     * Histograms will be calculated for each folder including subfolders and will be shown in a new row
