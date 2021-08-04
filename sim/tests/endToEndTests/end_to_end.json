@@ -26,6 +26,7 @@
                 "OSCAction_DoubleSinusoidalLaneChangeRight_Absolute",
                 "OSCAction_DoubleSinusoidalLaneChangeLeft_Relative",
                 "OSCAction_DoubleSinusoidalLaneChangeRight_Relative",
+				"PCM",
                 "Pedestrian_AFDM",
                 "Pedestrian_Trajectory",
                 "Sensor_Latency",
@@ -231,6 +232,24 @@
             "configurations":
             [
                 "Sensor_Latency"
+            ]
+        },
+		"PCM":
+        {
+            "baseConfig":
+            {
+                "duration": 10,
+                "invocations": 10
+            },
+            "specialized":
+            {
+                "description": "Run a pcm case and check if the end state is as expected",
+                "query": "max(XPosition | (AgentId == 0 and Timestep == 10000)) ~= -6.1778",
+                "success_rate": 1
+            },
+            "configurations":
+            [
+                "PCM"
             ]
         }
     }
