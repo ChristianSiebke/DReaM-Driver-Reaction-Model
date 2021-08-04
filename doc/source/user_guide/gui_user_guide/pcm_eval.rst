@@ -16,25 +16,25 @@ PCM Evaluation
 
 This plugin is used to load results of previous simulations. 
 
-Loading results
+Loading Results
 ---------------
 
-* Click ``Browse Result Files`` to choose a result folder to be evaluated.
+* Click ``Browse Result Files`` to choose a result folder to be evaluated
 * Simulation results are displayed in a tree structure
 
 .. note::
 
-  Result folder has to be structured like the result folder of a previous simulation.
-  See :ref:`result_folder_structure`
+   Result folder has to be structured like the result folder of a previous simulation.
+   See :ref:`result_folder_structure`
 
 .. image:: _static/images/plugin/pcm_eval/overview.png
 
-Evaluating results
+Evaluating Results
 ------------------
 
 * Select result files to be shown. 
 
 .. note::
-  It is possible to select multiple files to compare different trajectories in the visualization area.
+   It is possible to select multiple files to compare different trajectories in the visualization area.
 
 .. image:: _static/images/plugin/pcm_eval/select.png

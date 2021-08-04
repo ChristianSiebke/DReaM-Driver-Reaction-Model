@@ -14,12 +14,13 @@
 Overview
 ========
 
-Getting started
+Getting Started
 ---------------
 
 This tutorial is a guide on how to configure a simulation. 
-  * Scenario Simulation: by changing the configuration files.
-  * PCM simulation: by using the openPASS graphical user interface (GUI). 
+
+   * Scenario Simulation: by changing the configuration files.
+   * PCM simulation: by using the openPASS graphical user interface (GUI). 
 
 In particular, it is presented how to go through the required steps until a simulation can be run successfully.  
 To enhance the guiding, there are going to be examples in every section. 
@@ -32,29 +33,29 @@ Interaction GUI and Framework
 .. image:: gui_user_guide/_static/images/plugin/gui_framework_overview.png
 
 The GUI sits on top of the simulation framework. It produces configuration files for the framework based on the User Input.
-With these files, the GUI can trigger the simulation to start und produce results in form of different files. These files can then be read 
-evaluated by the GUI.
+With these files, the GUI can trigger the simulation to start und produce results in form of different files. 
+These files can then be read evaluated by the GUI.
 
 
 Overview about Plugins
 ^^^^^^^^^^^^^^^^^^^^^^
 
-  * Simulation Plugins
+   * Simulation Plugins
 
-    * :ref:`project`
-    * :ref:`system_editor`
-    * :ref:`pcm_sim`
+      * :ref:`project`
+      * :ref:`system_editor`
+      * :ref:`pcm_sim`
 
-  * Result Preview Plugins
+   * Result Preview Plugins
 
-    * :ref:`pcm_eval`
-    * :ref:`timeplot`
-    * :ref:`statistics`
+      * :ref:`pcm_eval`
+      * :ref:`timeplot`
+      * :ref:`statistics`
 
-  * Work in Progress (only listed)
+   * Work in Progress (only listed)
 
-    * agentConfiguration
-    * trafficSimulation
+      * agentConfiguration
+      * trafficSimulation
 
 
 Workflow
@@ -62,10 +63,11 @@ Workflow
 
 A typical workflow can be:
 
-  1. Create a system in the system editor
-  2. Configure a simulation and start it using a Simulation plugin
-  3. Evaluate the results using a Result Preview plugin
-  4. Use the generated results and make use of them by starting from point 2 again
+   1. Create a system in the system editor
+   2. Configure a simulation and start it using a Simulation plugin
+   3. Evaluate the results using a Result Preview plugin
+   4. Use the generated results and make use of them by starting from point 2 again
+
 
 Simulation Start from GUI
 -------------------------
@@ -90,21 +92,25 @@ General
 
 In this segment you are able to name the Master Configuration. In our example it is called *MasterConfiguratioNo1*.
 
-Path settings
+Path Settings
 """""""""""""
 
 .. image:: gui_user_guide/_static/images/plugin/project/pathSettings.png
 
-The next step is path settings. These will change depending on where your openPASS.exe is located. 
+The next step is path settings. 
+These will change depending on where your openPASS.exe is located. 
 In the screen shot above the openPASS.exe is located at ``C:/OpenPASS``. 
 For easier use of this tutorial it is recommended to save the Demo Folder in ``C:/`` and name it *OpenPASS*.
-On to the settings. As you can see three paths need to be set. The library comes with openPASS. 
+On to the settings. 
+As you can see three paths need to be set. 
+The library comes with openPASS. 
 There are plans to remove the option for the user to set the library path, but at this moment there is still the option to change it, although this is not recommended.
-The Slave Path references the OpenPassSlave.exe, the file to execute the slave. If you are using the provided Demo, 
-there is no need for you to change it. The only path you need to set is the path of the Configuration Files. 
+The Slave Path references the OpenPassSlave.exe, the file to execute the slave. 
+If you are using the provided Demo, there is no need for you to change it. 
+The only path you need to set is the path of the Configuration Files. 
 In the Demo it will be located at [directory of openPASS.exe]/configs, so in this case it would be C:/OpenPASS/configs.
 
-Simulation Output settings
+Simulation Output Settings
 """"""""""""""""""""""""""
 
 .. image:: gui_user_guide/_static/images/plugin/project/simOutputSettings.png
@@ -118,4 +124,4 @@ The results path specifies the folder in which the results of a successful simul
 
 .. note:: 
 
-  It is recommended to create a new folder in C:/OpenPASS called “results” and set it as the results path as in the picture above.
+   It is recommended to create a new folder in C:/OpenPASS called “results” and set it as the results path as in the picture above.
