@@ -90,7 +90,8 @@ struct TESTSCENERY_FACTORY
     }
 };
 
-std::ostream& operator<<(std::ostream& os, const RelativeWorldView::Lane& lane)
+namespace RelativeWorldView {
+std::ostream& operator<<(std::ostream& os, const Lane& lane)
 {
     os << "id: " << lane.relativeId << ", "
        << "direction: " << lane.inDrivingDirection << ","
@@ -99,6 +100,7 @@ std::ostream& operator<<(std::ostream& os, const RelativeWorldView::Lane& lane)
        << "successor: " <<lane.successor.value_or(-999);
 
     return os;
+}
 }
 
 //! This enum is used to help checking lane connections as specified in the openDrive file.

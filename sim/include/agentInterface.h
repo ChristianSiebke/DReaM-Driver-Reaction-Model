@@ -1,7 +1,7 @@
 /*******************************************************************************
 * Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2018 AMFD GmbH
-*               2016, 2017, 2018 ITK Engineering GmbH
+*               2016, 2017, 2018, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -212,6 +212,15 @@ public:
     //! @param[in]     velocityX    Forward velocity
     //-----------------------------------------------------------------------------
     virtual void SetVelocity(double value) = 0;
+
+    //-----------------------------------------------------------------------------
+    //! Sets velocity of agent
+    //!
+    //! @param[in]     vx    Forward velocity
+    //! @param[in]     vy    Sideward velocity
+    //! @param[in]     vz    Upward velocity
+    //-----------------------------------------------------------------------------
+    virtual void SetVelocityVector(double vx, double vy, double vz) = 0;
 
     //-----------------------------------------------------------------------------
     //! Sets forward acceleration of agent
@@ -878,7 +887,7 @@ public:
     //!
     //! @return
     //-----------------------------------------------------------------------------
-    virtual double GetYawAcceleration() = 0;
+    virtual double GetYawAcceleration() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Set the yaw acceleration of the agent.
@@ -895,12 +904,25 @@ public:
     virtual double GetCentripetalAcceleration() const = 0;
 
     //-----------------------------------------------------------------------------
+    //! Retrieve the tangential acceleration of the agent.
+    //!
+    //! @return   Tangential acceleration [m/s^2]
+    //-----------------------------------------------------------------------------
+    virtual double GetTangentialAcceleration() const = 0;
+
+    //-----------------------------------------------------------------------------
     //! Set the centripetal acceleration of the agent.
     //!
     //! @param[in]   centripetalAcceleration   The acceleration to set [m/s^2]
     //-----------------------------------------------------------------------------
     virtual void SetCentripetalAcceleration(double centripetalAcceleration) = 0;
 
+    //-----------------------------------------------------------------------------
+    //! Set the tangential acceleration of the agent.
+    //!
+    //! @param[in]   tangentialAcceleration   The acceleration to set [m/s^2]
+    //-----------------------------------------------------------------------------
+    virtual void SetTangentialAcceleration(double tangentialAcceleration) = 0;
     //-----------------------------------------------------------------------------
     //! Retrieve the trajectory of time of the agent.
     //!

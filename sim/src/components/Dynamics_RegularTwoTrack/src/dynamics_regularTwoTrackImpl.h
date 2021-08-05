@@ -158,7 +158,7 @@ private:
     //! Output Signal
     DynamicsSignal dynamicsSignal;
 
-    std::map<int, externalParameter<double>*> parameterMapDouble;
+    std::map<std::string, externalParameter<double> *> parameterMapDouble;
     /** \name External Parameters
      *  Parameter which are set externally in configuration file.
      *  @{ */

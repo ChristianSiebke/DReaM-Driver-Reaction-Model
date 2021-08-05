@@ -9,7 +9,9 @@ rmdir /s /q html
 
 set SourceDir=../../../src
 
+set DocumentationDir=../
+
 doxygen Developer.doxy -d markdown
 
-move /y html\openPASS_Delevoper_Docu.chm ../openPASS_Delevoper_Docu.chm
+move /y html\openPASS_Developer_Docu.chm ../openPASS_Developer_Docu.chm
 rmdir /s /q html

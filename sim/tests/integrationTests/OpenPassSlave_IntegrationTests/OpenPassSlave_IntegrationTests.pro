@@ -1,5 +1,6 @@
 #/*******************************************************************************
 #* Copyright (c) 2019, 2020 in-tech GmbH
+#* Copyright (c) 2021 ITK Engineering GmbH
 #*
 #* This program and the accompanying materials are made
 #* available under the terms of the Eclipse Public License 2.0
@@ -98,14 +99,14 @@ SRC_SLAVECONFIG = $$OPENPASS_SLAVE/importer/slaveConfig.cpp \
                   $$OPENPASS_SLAVE/importer/parameterImporter.cpp \
                   $$OPENPASS_SLAVE/framework/directories.cpp
 
-SRC_CORESHARE = $$OPEN_SRC/../../common/xmlParser.cpp \
+SRC_CORESHARE = $$OPEN_SRC/common/xmlParser.cpp \
                 $$CORE_SHARE/log.cpp \
                 $$CORE_SHARE/callbacks.cpp \
                 $$CORE_SHARE/cephes/fresnl.c \
                 $$CORE_SHARE/cephes/const.c \
                 $$CORE_SHARE/cephes/polevl.c
 
-INC_CORESHARE = $$OPEN_SRC/../../common/xmlParser.h \
+INC_CORESHARE = $$OPEN_SRC/common/xmlParser.h \
                 $$CORE_SHARE/log.h \
                 $$CORE_SHARE/callbacks.h
 

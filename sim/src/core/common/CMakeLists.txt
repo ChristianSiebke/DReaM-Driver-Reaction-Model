@@ -7,13 +7,13 @@ add_openpass_target(
     callbacks.h
     coreDataPublisher.h
     timeKeeper.h
-    ../../../../common/xmlParser.h
+    ../../common/xmlParser.h
     cephesMIT/mconf.h
 
   SOURCES
     callbacks.cpp
     coreDataPublisher.cpp
-    ../../../../common/xmlParser.cpp
+    ../../common/xmlParser.cpp
     cephesMIT/const.c
     cephesMIT/fresnl.c
     cephesMIT/polevl.c

@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018 ITK Engineering GmbH
+* Copyright (c) 2017, 2018, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -187,10 +187,10 @@ public:
     //! \param[in] id           Id of externalParameter
     //! \param[in,out] portMap  map of externalParameter this externalParameter shall be added
     externalParameter(int id,
-                      std::map<int, externalParameter<ValueType>*> *externalParameterMap):
+                      std::map<std::string, externalParameter<ValueType>*> *externalParameterMap):
         id(id)
     {
-        externalParameterMap->emplace(std::make_pair(id, this));
+        externalParameterMap->emplace(std::make_pair(std::to_string(id), this));
     }
 
     //! Destructor

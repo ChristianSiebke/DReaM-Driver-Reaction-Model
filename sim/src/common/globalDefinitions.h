@@ -1,7 +1,7 @@
 /*******************************************************************************
 * Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2018, 2019 AMFD GmbH
-*               2016, 2017, 2018, 2019, 2020 ITK Engineering GmbH
+*               2016, 2017, 2018, 2019, 2020, 2021 ITK Engineering GmbH
 *               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -71,6 +71,23 @@ enum class Weekday
 };
 
 //-----------------------------------------------------------------------------
+//! @brief Areas of interest for surrounding data
+//-----------------------------------------------------------------------------
+enum class AreaOfInterest
+{
+    LEFT_FRONT = 0,
+    RIGHT_FRONT,
+    LEFT_REAR,
+    RIGHT_REAR,
+    EGO_FRONT,
+    EGO_REAR,
+    LEFT_SIDE,
+    RIGHT_SIDE,
+    //  DOWNSTREAM
+    NumberOfAreaOfInterests
+};
+
+//-----------------------------------------------------------------------------
 //! Agent category classification
 //-----------------------------------------------------------------------------
 enum class AgentCategory
@@ -116,7 +133,6 @@ enum class AgentVehicleType
     Bicycle,
     Truck
 };
-
 
 namespace openpass::utils {
 
