@@ -59,16 +59,44 @@ Configuration
 
 Normally, runtime dependencies (DLLs) are not copied into the executables folder within the build process.
 This means, that programs cannot be executed natively from Windows shells or the explorer.
-It is highly recommended, to add the ``bin`` folder of MSYS2 to the ``PATH`` environment variable, so Windows will look for DLLs within these folders, allowing native execution.
-Visual Studio Code needs to be reloaded/restarted after the path update.
+It is therefore highly recommended, to set the environmental variable ``MSYSTEM=MINGW64`` and ``CHERE_INVOKING=1``. 
+The setting of ``MSYSTEM`` will cause the environment to be set up correctly for MinGW64.
+Windows will then look for DLLs within the msys64 folders, allowing native execution.
+``CHERE_INVOKING`` makes sure the shell stays in the current working directory.
+As investigated recently, the ``C:\msys64\usr\bin``must also be added to the ``PATH`` environment variable in order to resolve dependencies to ``cygpath.exe``. 
+
+Either set environment variable through the ``Windows PowerShell``
 
 .. code:: PowerShell
 
    # check if set
    echo ${env.path}
+   echo ${env.MSYSTEM}
+   echo ${env.CHERE_INVOKING}
 
    # if not
-   setx path "%PATH%;C:\msys64\mingw64\bin"
+   setx path "%PATH%;C:\msys64\usr\bin"
+   setx MSYSTEM "MINGW64"
+   setx CHERE_INVOKING "1"
+
+or 
+
+1. Open the start search
+2. Type in “env” and choose “Edit the system environment variables”
+3. Choose “Environment Variables…” 
+4. Set the environment variables:
+   
+   i. MSYSTEM=MINGW64
+   ii. CHERE_INVOKING=1
+   iii. Add ``C:\msys64\usr\bin`` to PATH
+
+Visual Studio Code needs to be reloaded/restarted after the path update.
+
+.. note:: 
+
+   An optimal solution would be to set the system environment variables in VSCode under ``settings.json``. This is currently not possible. Please contact us if you find a better solution.
+
+IDEs, as Qt Creator, might set this variable base on the current build type on their own.
 
 Build Kit
 +++++++++
