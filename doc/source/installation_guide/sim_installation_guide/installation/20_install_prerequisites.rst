@@ -446,11 +446,38 @@ Build and Install FMIL
                   -DFMILIB_BUILD_SHARED_LIB=ON  \
                   ..
 
+#. Leave build directory
+
+   .. code-block:: 
+
+      cd ..
+               
 #. Apply Patch
    
    As FMIL and the internally used `FMU Compliance Checker <https://github.com/modelica-tools/FMUComplianceChecker>`_ has issues with loading and private entry points, the following patch needs to be applied: 
    
-   - :download:`Windows/Linux Patch </_static/resources/fmil/fmil203.patch>`
+   - :download:`Windows/Linux Patch </_static/resources/fmil/fmi-library-2.0.3-fixes.patch>`
+
+   .. tabs::
+
+      .. tab:: Windows
+
+         .. code-block:: 
+
+            patch -l -p1 "<path/to>/fmi-library-2.0.3-fixes.patch"
+
+      .. tab:: Linux
+
+         .. code-block:: 
+
+            dos2unix src/Import/src/FMI1/fmi1_import_capi.c src/Import/src/FMI2/fmi2_import_capi.c src/Util/include/JM/jm_portability.h
+            patch -l -p1 "<path/to>/fmi-library-2.0.3-fixes.patch"
+
+#. Enter build directory
+
+   .. code-block:: 
+
+      cd build
 
 #. Compile
 
