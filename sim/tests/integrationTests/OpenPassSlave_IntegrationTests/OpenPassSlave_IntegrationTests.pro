@@ -41,11 +41,13 @@ SRC_SCENARIO =  $$OPENPASS_SLAVE/importer/eventDetectorImporter.cpp \
                 $$OPENPASS_SLAVE/importer/scenario.cpp \
                 $$OPENPASS_SLAVE/importer/scenarioImporter.cpp \
                 $$OPENPASS_SLAVE/importer/scenarioImporterHelper.cpp \
+                $$OPENPASS_SLAVE/importer/sceneryDynamics.cpp \
                 $$OPENPASS_SLAVE/importer/oscImporterCommon.cpp
 
 INC_SCENARIO =  $$OPENPASS_SLAVE/importer/scenario.h \
                 $$OPENPASS_SLAVE/importer/scenarioImporter.h \
                 $$OPENPASS_SLAVE/importer/scenarioImporterHelper.h \
+                $$OPENPASS_SLAVE/importer/sceneryDynamics.h \
                 $$OPEN_SRC/common/openScenarioDefinitions.h \
                 $$OPENPASS_SLAVE/importer/oscImporterCommon.h
 
