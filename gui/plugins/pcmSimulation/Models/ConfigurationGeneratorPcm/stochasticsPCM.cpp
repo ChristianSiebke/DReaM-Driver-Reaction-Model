@@ -9,7 +9,7 @@
 **********************************************************************/
 
 #include <qglobal.h>
-#include "StochasticsPCM.h"
+#include "stochasticsPCM.h"
 
 StochasticsPCM::StochasticsPCM(std::uint32_t seed) : randomSeed(seed), baseGenerator(0), uniformDistribution(0, 1)
 {

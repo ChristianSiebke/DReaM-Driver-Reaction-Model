@@ -51,5 +51,10 @@ target_link_libraries(Window PRIVATE
                       ${PROJECT_NAME}_Presenters
                       ${PROJECT_NAME}_Interfaces)
 
-install(TARGETS Window
-        RUNTIME DESTINATION ${SUBDIR_LIB_GUI})
+if(WIN32)
+        install(TARGETS Window
+                RUNTIME DESTINATION ${SUBDIR_LIB_GUI}) 
+elseif(UNIX)
+        install(TARGETS Window
+                LIBRARY DESTINATION ${SUBDIR_LIB_GUI}) 
+endif()

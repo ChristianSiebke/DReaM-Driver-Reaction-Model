@@ -13,7 +13,7 @@ set(HEADERS
     )
 
 set(SOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/PresenterPcm_eval.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/PresenterPcm_Eval.cpp
     )
 
 
