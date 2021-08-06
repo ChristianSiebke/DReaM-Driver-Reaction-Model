@@ -32,10 +32,10 @@
             "name": "opsimulation",
             "type": "cppdbg",
             "request": "launch",
-            "program": "C:\\OpenPASS\\bin\\OpenPassSlave.exe",
+            "program": "C:\\OpenPASS\\bin\\core\\OpenPassSlave.exe",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "C:\\OpenPASS\\bin",
+            "cwd": "C:\\OpenPASS\\bin\\core",
             "environment": [
                 {
                     "name": "PATH",

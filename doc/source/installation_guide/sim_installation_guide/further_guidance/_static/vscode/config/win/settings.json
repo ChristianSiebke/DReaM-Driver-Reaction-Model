@@ -13,14 +13,18 @@
     "cmake.parallelJobs": 4,
     // See openPASS documentation for individual WITH_* settings
     "cmake.configureArgs": [
-    "-DCMAKE_INSTALL_PREFIX=/C/OpenPASS/bin/core",
+    "-DCMAKE_INSTALL_PREFIX=C:\\OpenPASS\\bin\\core",
     // Adjust paths depending on your system
     "-DCMAKE_PREFIX_PATH=${workspaceRoot}/deps/thirdParty/win64/FMILibrary;${workspaceRoot}/deps/thirdParty/win64/osi;${workspaceRoot}/deps/thirdParty/win64/minizip;${command:mingw64.root};${command:mingw64.root}/bin;${command:mingw64.root}/lib",
     "-DUSE_CCACHE=ON",
+    "-DCMAKE_BUILD_TYPE=Debug",
     "-DWITH_GUI=OFF",
     "-DWITH_SIMCORE=ON",
     "-DWITH_TESTS=ON",
     "-DWITH_DOC=OFF",
+    "-DWITH_DEBUG_POSTFIX=OFF",
+    "-DINSTALL_SYSTEM_RUNTIME_DEPS=OFF",
+    "-DINSTALL_EXTRA_RUNTIME_DEPS=ON",
     // For integration with IntelliSense (see c_cpp_properties.json)
     "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
     ],
@@ -32,6 +36,19 @@
     "testMate.cpp.test.parallelExecutionOfExecutableLimit": 2,
     // Optional: Set, if you like to debug test discovery and test start issues
     "testMate.cpp.log.logfile": "C:\\temp\\cpp.testmate.log",
+    // Optional:    As CTest triggers the install step, dependencies between test executables 
+    //              and openpass libraries can be resolved by linking text executables to
+    //              openpass install directory
+    // Alternative: Check dependencies of test executables by 'ldd <_Tests.exe> and copy 
+    //              libraries right next to test executable within build direcory
+    "testMate.cpp.test.advancedExecutables": [
+        {
+            "pattern": "build/**/*{tests,Tests,TESTS}*",
+            "env": {
+                "Path": "C:\\msys64\\mingw64\\bin;C:\\OpenPASS\\bin\\core;C:\\OpenPASS\\bin\\core\\lib;${os_env:PATH};${workspaceFolder}\\deps\\thirdParty\\win64\\FMILibrary\\lib;${workspaceFolder}\\deps\\thirdParty\\win64\\osi\\lib\\osi3"
+            }
+        }
+    ],
     //
     // VSCODE
     //
