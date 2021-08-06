@@ -172,11 +172,6 @@ double AgentAdapter::GetDistanceToStartOfRoad(MeasurementPoint mp, std::string r
     }
 }
 
-double AgentAdapter::GetMainLocateS(const std::string& roadId) const
-{
-    return locateResult.position.mainLocatePoint.at(roadId).roadPosition.s;
-}
-
 double AgentAdapter::GetVelocity(VelocityScope velocityScope) const
 {
     if (velocityScope == VelocityScope::Absolute)
