@@ -133,6 +133,7 @@ SOURCES += \
             \ # AGENTADAPTER-TESTS:
             agentAdapter_Tests.cpp \
             fakeLaneManager_Tests.cpp \
+            worldData_Tests.cpp \
             worldQuery_Tests.cpp \
             lane_Tests.cpp \
             sensorView_Tests.cpp \

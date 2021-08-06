@@ -117,7 +117,7 @@ private:
      * \param[in]   entities        Objects from 'Entities' tag
      * \param[in]   parameters      declared parameters
      */
-    static void ImportInitElement(QDomElement& initElement, std::vector<ScenarioEntity>& entities, openScenario::Parameters& parameters);
+    static void ImportInitElement(QDomElement& initElement, std::vector<ScenarioEntity>& entities, ScenarioInterface *scenario, openScenario::Parameters& parameters);
 
     /*!
      * \brief Imports the simulation end conditions

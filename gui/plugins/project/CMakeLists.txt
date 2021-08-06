@@ -46,10 +46,16 @@ add_library(Project SHARED ${SOURCES} ${HEADERS})
 # link with Qt libraries, models, views and Interfaces
 target_link_libraries(Project PRIVATE
                       Qt5::Widgets
+                      Window
                       ${PROJECT_NAME}_Models
                       ${PROJECT_NAME}_Views
                       ${PROJECT_NAME}_Presenters
                       ${PROJECT_NAME}_Interfaces)
 
-install(TARGETS Project
-        RUNTIME DESTINATION ${SUBDIR_LIB_GUI})
+if(WIN32)
+        install(TARGETS Project
+                RUNTIME DESTINATION ${SUBDIR_LIB_GUI}) 
+elseif(UNIX)
+        install(TARGETS Project
+                LIBRARY DESTINATION ${SUBDIR_LIB_GUI}) 
+endif()

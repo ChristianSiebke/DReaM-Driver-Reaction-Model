@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 **********************************************************************/
 
-#include "ConfigSetreaderPcm.h"
+#include "ConfigSetReaderPcm.h"
 
 #include "GUI_Definitions.h"
 #include "pcm_data.h"

@@ -8,7 +8,7 @@
 * SPDX-License-Identifier: EPL-2.0
 **********************************************************************/
 
-#include "VehicleModelImporter.h"
+#include "vehicleModelImporter.h"
 #include "pcm_definitions.h"
 
 bool VehicleModelImporter::Import(const std::string &filename,

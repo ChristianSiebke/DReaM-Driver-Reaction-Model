@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 
+#include "include/sceneryDynamicsInterface.h"
 #include "common/worldDefinitions.h"
 #include "common/eventDetectorDefinitions.h"
 
@@ -146,11 +147,11 @@ public:
     virtual void SetSceneryPath(const std::string& sceneryPath) = 0;
 
     //-----------------------------------------------------------------------------
-    //! Retreives the traffic signal controllers
+    //! Retreives the dynamic scenery portions
     //!
-    //! \return    traffic signal controllers
+    //! \return     scenery dynamics
     //-----------------------------------------------------------------------------
-    virtual const std::vector<openScenario::TrafficSignalController>& GetTrafficSignalControllers() const = 0;
+    virtual const SceneryDynamicsInterface& GetSceneryDynamics() = 0;
 
     //-----------------------------------------------------------------------------
     //! Adds one traffic signal controller
@@ -222,4 +223,10 @@ public:
     //! \param[in] endTime The desired end time of the simulation.
     //-------------------------------------------------------------------------
     virtual void SetEndTime(const double endTime) = 0;
+
+    //-------------------------------------------------------------------------
+    //! \brief Sets the environment conditions of the simulation.
+    //! \param[in] endTime The environment conditions of the simulation.
+    //-------------------------------------------------------------------------
+    virtual void SetEnvironment(const openScenario::EnvironmentAction& environment) = 0;
 };

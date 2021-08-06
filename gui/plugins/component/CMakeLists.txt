@@ -43,5 +43,10 @@ target_link_libraries(Component PRIVATE
                       ${PROJECT_NAME}_Models
                       ${PROJECT_NAME}_Interfaces)
 
-install(TARGETS Component
-        RUNTIME DESTINATION ${SUBDIR_LIB_GUI})
+if(WIN32)
+        install(TARGETS Component
+                RUNTIME DESTINATION ${SUBDIR_LIB_GUI}) 
+elseif(UNIX)
+        install(TARGETS Component
+                LIBRARY DESTINATION ${SUBDIR_LIB_GUI}) 
+endif()

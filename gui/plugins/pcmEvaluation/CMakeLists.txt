@@ -48,15 +48,24 @@ set(HEADERS PluginPcm_Eval.h)
 # declare target library
 add_library(Pcm_eval SHARED ${SOURCES} ${HEADERS} )
 
+# include directory of lib 'window'
+link_directories(${openPASS-Window_SOURCE_DIR})
+
 # link with Qt libraries, models, views and Interfaces
 target_link_libraries(Pcm_eval PRIVATE
                       Qt5::Widgets
                       Qt5::Core
                       Qt5::Xml
+                      Window
                       ${PROJECT_NAME}_Models
                       ${PROJECT_NAME}_Views
                       ${PROJECT_NAME}_Interfaces
                       ${PROJECT_NAME}_Presenters)
 
-install(TARGETS Pcm_eval
-        RUNTIME DESTINATION ${SUBDIR_LIB_GUI})
+if(WIN32)
+        install(TARGETS Pcm_eval
+                RUNTIME DESTINATION ${SUBDIR_LIB_GUI}) 
+elseif(UNIX)
+        install(TARGETS Pcm_eval
+                LIBRARY DESTINATION ${SUBDIR_LIB_GUI}) 
+endif()

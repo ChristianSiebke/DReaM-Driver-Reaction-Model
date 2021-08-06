@@ -666,3 +666,33 @@ TEST(ScenarioImporter_UnitTests, ImportRoadNetworkWithTrafficLSignalController)
     EXPECT_THAT(controller.phases[1].duration, Eq(3));
     EXPECT_THAT(controller.phases[1].states, ElementsAre(std::make_pair("100", "red yellow"), std::make_pair("101", "yellow")));
 }
+
+
+TEST(ScenarioImporter_UnitTests, ImportEnvironmentAction)
+{
+    QDomElement element = documentRootFromString(
+                "<root>"
+                 "<EnvironmentAction>"
+                    "<Environment>"
+                        "<Weather cloudState=\"free\">"
+                            "<Sun intensity=\"1.0\" azimuth=\"1.1\" elevation=\"1.3\" />"
+                            "<Fog visualRange=\"20.0\" />"
+                            "<Precipitation intensity=\"0.5\" precipitationType=\"rain\" />"
+                        "</Weather>"
+                    "</Environment>"
+                 "</EnvironmentAction>"
+                "</root>"
+              );
+
+    openScenario::Parameters parameters;
+
+    openScenario::EnvironmentAction result;
+    EXPECT_NO_THROW(result = std::get<openScenario::EnvironmentAction>(openScenario::ScenarioImporterHelper::ImportGlobalAction(element, parameters)));
+    EXPECT_THAT(result.weather.cloudState, Eq(openScenario::Weather::CloudState::free));
+    EXPECT_THAT(result.weather.sun.intensity, Eq(1.0));
+    EXPECT_THAT(result.weather.sun.azimuth, Eq(1.1));
+    EXPECT_THAT(result.weather.sun.elevation, Eq(1.3));
+    EXPECT_THAT(result.weather.fog.visualRange, Eq(20.0));
+    EXPECT_THAT(result.weather.precipitation.intensity, Eq(0.5));
+    EXPECT_THAT(result.weather.precipitation.type, Eq(openScenario::Precipitation::Type::rain));
+}

@@ -56,10 +56,16 @@ target_link_libraries(Pcm_sim PRIVATE
                       Qt5::Core
                       Qt5::Xml
                       Qt5::Sql
+                      Window
                       ${PROJECT_NAME}_Models
                       ${PROJECT_NAME}_Views
                       ${PROJECT_NAME}_Interfaces
                       ${PROJECT_NAME}_Presenters)
 
-install(TARGETS Pcm_sim
-        RUNTIME DESTINATION ${SUBDIR_LIB_GUI})
+if(WIN32)
+        install(TARGETS Pcm_sim
+                RUNTIME DESTINATION ${SUBDIR_LIB_GUI}) 
+elseif(UNIX)
+        install(TARGETS Pcm_sim
+                LIBRARY DESTINATION ${SUBDIR_LIB_GUI}) 
+endif()

@@ -12,7 +12,7 @@ set(SOURCES
         ModelPcm_Eval.cpp
         ResultDirItemModel.cpp
         TrajectoryTableModel.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/pcm/PCM_Importer/SceneryImporterPCM.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/../../../common/pcm/PCM_Importer/sceneryImporterPCM.cpp
         ${CMAKE_CURRENT_LIST_DIR}/../../../common/pcm/PCM_Data/pcm_agent.cpp
         ${CMAKE_CURRENT_LIST_DIR}/../../../common/pcm/PCM_Data/pcm_course.cpp
         ${CMAKE_CURRENT_LIST_DIR}/../../../common/pcm/PCM_Data/pcm_data.cpp
@@ -30,7 +30,7 @@ set(HEADERS
         ModelPcm_Eval.h
         ResultDirItemModel.h
         TrajectoryTableModel.h
-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/pcm/PCM_Importer/SceneryImporterPCM.h
+        ${CMAKE_CURRENT_LIST_DIR}/../../../common/pcm/PCM_Importer/sceneryImporterPCM.h
         ${CMAKE_CURRENT_LIST_DIR}/../../../common/pcm/PCM_Data/pcm_agent.h
         ${CMAKE_CURRENT_LIST_DIR}/../../../common/pcm/PCM_Data/pcm_course.h
         ${CMAKE_CURRENT_LIST_DIR}/../../../common/pcm/PCM_Data/pcm_data.h

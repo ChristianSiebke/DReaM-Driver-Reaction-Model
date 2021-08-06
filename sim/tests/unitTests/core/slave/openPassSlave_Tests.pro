@@ -109,6 +109,7 @@ SCENARIOIMPORTER_TESTS = \
     $$UNIT_UNDER_TEST/importer/scenario.cpp \
     $$UNIT_UNDER_TEST/importer/scenarioImporter.cpp \
     $$UNIT_UNDER_TEST/importer/scenarioImporterHelper.cpp \
+    $$UNIT_UNDER_TEST/importer/sceneryDynamics.cpp \
     $$UNIT_UNDER_TEST/importer/oscImporterCommon.cpp \
     \
     scenarioImporter_Tests.cpp
