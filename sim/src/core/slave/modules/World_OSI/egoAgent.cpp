@@ -150,13 +150,14 @@ double EgoAgent::GetDistanceToEndOfLane(double range, int relativeLane, const La
                                          range, acceptableLaneTypes).at(0);
 }
 
-RelativeWorldView::Lanes EgoAgent::GetRelativeLanes(double range, int relativeLane) const
+RelativeWorldView::Lanes EgoAgent::GetRelativeLanes(double range, int relativeLane, bool includeOncoming) const
 {
     return world->GetRelativeLanes(wayToTarget,
                                    rootOfWayToTargetGraph,
                                    GetLaneIdFromRelative(relativeLane),
                                    GetMainLocatePosition().roadPosition.s,
-                                   range).at(0);
+                                   range,
+                                   includeOncoming).at(0);
 }
 
 std::optional<int> EgoAgent::GetRelativeLaneId(const WorldObjectInterface *object, MeasurementPoint mp) const

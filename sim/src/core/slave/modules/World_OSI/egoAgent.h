@@ -44,7 +44,7 @@ public:
 
     double GetDistanceToEndOfLane(double range, int relativeLane, const LaneTypes &acceptableLaneTypes) const override;
 
-    RelativeWorldView::Lanes GetRelativeLanes(double range, int relativeLane = 0) const override;
+    RelativeWorldView::Lanes GetRelativeLanes(double range, int relativeLane = 0, bool includeOncoming = true) const override;
 
     std::optional<int> GetRelativeLaneId(const WorldObjectInterface* object, MeasurementPoint mp) const override;
 

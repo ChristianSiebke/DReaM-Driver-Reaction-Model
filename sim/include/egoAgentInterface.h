@@ -125,7 +125,7 @@ public:
     //! \param range            maximum search range (calculated from MainLaneLocator)
     //! \param relativeLane     lane id relative to own lane (in driving direction)
     //! \return lanes relative to agent
-    virtual RelativeWorldView::Lanes GetRelativeLanes(double range, int relativeLane = 0) const = 0;
+    virtual RelativeWorldView::Lanes GetRelativeLanes(double range, int relativeLane = 0, bool includeOncoming = true) const = 0;
 
     //! Returns the relative lane of the ReferencePoint or MainLocatePoint of another object
     //!
