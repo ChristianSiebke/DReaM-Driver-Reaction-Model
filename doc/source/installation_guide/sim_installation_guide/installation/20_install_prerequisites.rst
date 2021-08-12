@@ -74,7 +74,7 @@ Installing the Build Environment
 
          .. warning::
 
-            | MSYS2 MinGW 64-bi is **the**  |op| development environment and will be referred to as |mingw_shell|.
+            | MSYS2 MinGW 64-bit is **the**  |op| development environment and will be referred to as |mingw_shell|.
 
    .. _building_under_linux:
 
@@ -193,7 +193,7 @@ This section describes how to compile prerequisites of |op| using source package
   
 .. note::
    
-   If you are unfamiliar to ``CMake`` or working within a |mingw_shell|, Section :ref:`cmake` and :ref:`msys2` might give you a short introduction on these topics in the scope of building |op| itself.
+   If you are unfamiliar to ``CMake`` or working within a |mingw_shell|, Section :ref:`cmake` and :ref:`MSYS2 <msys2>` might give you a short introduction on these topics in the scope of building |op| itself.
    
 Location Of Installed Source Packages
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
