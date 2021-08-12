@@ -79,12 +79,14 @@ public:
     //! Calculates the adjusted spawn distance such that the minimum ttc to the end of lane is not violated
     //!
     //! \param laneId                   lane to spawn
-    //! \param intendedSpawnPosition    initially calcuted spawn distance
+    //! \param sCoordinate              s coordinate on road
+    //! \param intendedSpawnPosition    initially calcuted spawn distance on stream
     //! \param intendedVelocity         velocity of the agent
     //! \param route                    route of the agent
     //! \param supportedLaneTypes   Container of all valid lanetypes
     //! \return adjusted spawn distance
     double CalculateAdjustedSpawnDistanceToEndOfLane(const LaneId laneId,
+                                                     const double sCoordinate,
                                                      const double intendedSpawnPosition,
                                                      const double intendedVelocity,
                                                      const Route& route,

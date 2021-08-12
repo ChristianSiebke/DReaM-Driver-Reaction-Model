@@ -210,12 +210,12 @@ std::optional<double> WorldAnalyzer::GetNextSpawnPosition(const std::unique_ptr<
     return spawnDistance;
 }
 
-double WorldAnalyzer::CalculateAdjustedSpawnDistanceToEndOfLane(const LaneId laneId, const double intendedSpawnPosition, const double intendedVelocity, const Route &route, const LaneTypes &supportedLaneTypes) const
+double WorldAnalyzer::CalculateAdjustedSpawnDistanceToEndOfLane(const LaneId laneId, const double sCoordinate, const double intendedSpawnPosition, const double intendedVelocity, const Route &route, const LaneTypes &supportedLaneTypes) const
 {
     const auto distanceToEndOfDrivingLane = world->GetDistanceToEndOfLane(route.roadGraph,
                                                                           route.root,
                                                                           laneId,
-                                                                          intendedSpawnPosition,
+                                                                          sCoordinate,
                                                                           std::numeric_limits<double>::max(),
                                                                           supportedLaneTypes).at(route.target);
 

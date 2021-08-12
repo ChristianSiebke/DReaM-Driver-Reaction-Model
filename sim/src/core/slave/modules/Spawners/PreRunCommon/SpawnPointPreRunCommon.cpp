@@ -159,7 +159,7 @@ std::optional<SpawnInfo> SpawnPointPreRunCommon::GetNextSpawnCarInfo(const std::
                                            dependencies.stochastics);
 
     //We don't want to spawn agents too close to the end of lane, so adjust the spawn position if neccessary
-    spawnDistance = worldAnalyzer.CalculateAdjustedSpawnDistanceToEndOfLane(roadPosition.laneId, spawnDistance.value(), velocity, route, supportedLaneTypes);
+    spawnDistance = worldAnalyzer.CalculateAdjustedSpawnDistanceToEndOfLane(roadPosition.laneId, roadPosition.roadPosition.s, spawnDistance.value(), velocity, route, supportedLaneTypes);
     if (spawnDistance.value() < range.first)
     {
         return {};
