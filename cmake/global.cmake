@@ -92,9 +92,9 @@ if(WITH_SIMCORE OR WITH_TESTS)
 endif()
 
 if(WITH_TESTS)
-  find_package(GTest)
-  # as GMock currently doesn't provide a find_package config, gmock file location is derived from gtest in HelperMacros.cmake
-  #find_package(GMock)
+  find_package(GTest REQUIRED CONFIG)   # force config mode for better lookup consistency with newer gtest versions
+  message(STATUS "Found GTest: ${GTest_DIR}")
+
   if(WITH_COVERAGE)
     find_package(Gcov REQUIRED)
     find_package(Fastcov REQUIRED)

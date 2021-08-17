@@ -311,17 +311,9 @@ function(add_openpass_target)
 
       add_executable(${PARSED_ARG_NAME} EXCLUDE_FROM_ALL ${PARSED_ARG_HEADERS} ${PARSED_ARG_SOURCES} ${PARSED_ARG_UIS})
 
-      target_include_directories(${PARSED_ARG_NAME}
-        SYSTEM PRIVATE
-        ${GTEST_INCLUDE_DIR}
-      )
-
-      # currently not provided by FindGTest
-      string(REGEX REPLACE "libgtest" "libgmock" GMOCK_LIBRARY "${GTEST_LIBRARY}")
-
       target_link_libraries(${PARSED_ARG_NAME}
-        ${GTEST_LIBRARY}
-        ${GMOCK_LIBRARY}
+        GTest::gtest
+        GTest::gmock
         pthread
       )
 
