@@ -26,6 +26,10 @@ endif()
 
 # build a list of library directory candidates
 foreach(SEARCH_DIR IN LISTS SEARCH_DIRS)
+   if("${SEARCH_DIR}" STREQUAL "")
+    continue()
+  endif()
+
   message(DEBUG "processing ${SEARCH_DIR}")
   if(WIN32 AND NOT MSVC)
     execute_process (
