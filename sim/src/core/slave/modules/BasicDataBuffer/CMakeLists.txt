@@ -3,7 +3,7 @@ set(COMPONENT_NAME BasicDataBuffer)
 add_compile_definitions(BASIC_DATABUFFER_LIBRARY)
 
 add_openpass_target(
-  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT module
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
 
   HEADERS
     basicDataBuffer.h

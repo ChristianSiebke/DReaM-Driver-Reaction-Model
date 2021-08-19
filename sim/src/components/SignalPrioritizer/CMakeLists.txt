@@ -3,7 +3,7 @@ set(COMPONENT_NAME SignalPrioritizer)
 add_compile_definitions(SIGNAL_PRIORITIZER_LIBRARY)
 
 add_openpass_target(
-  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT module
 
   HEADERS
     signalPrioritizer.h

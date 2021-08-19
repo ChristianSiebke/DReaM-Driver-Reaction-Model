@@ -3,7 +3,7 @@ set(COMPONENT_NAME Action_BrakeLight_Basic)
 add_compile_definitions(ACTION_BRAKELIGHT_BASIC_LIBRARY)
 
 add_openpass_target(
-  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT module
 
   HEADERS
     action_brakelight_basic.h

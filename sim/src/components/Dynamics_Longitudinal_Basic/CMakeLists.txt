@@ -3,7 +3,7 @@ set(COMPONENT_NAME Dynamics_Longitudinal_Basic)
 add_compile_definitions(DYNAMICS_LONGITUDINAL_BASIC_LIBRARY)
 
 add_openpass_target(
-  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT module
 
   HEADERS
     dynamics_longitudinal_basic.h

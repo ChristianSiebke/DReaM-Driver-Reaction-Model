@@ -3,7 +3,7 @@ set(COMPONENT_NAME World_OSI)
 add_compile_definitions(WORLD_OSI_LIBRARY WORLD_LIBRARY)
 
 add_openpass_target(
-  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT module
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
 
   HEADERS
     AgentAdapter.h

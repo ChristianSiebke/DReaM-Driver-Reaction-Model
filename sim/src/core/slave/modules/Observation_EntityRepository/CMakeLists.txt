@@ -3,7 +3,7 @@ set(COMPONENT_NAME Observation_EntityRepository)
 add_compile_definitions(OBSERVATION_ENTITYREPOSITORY_LIBRARY)
 
 add_openpass_target(
-  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT module
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
 
   HEADERS
     observation_entityRepositoryGlobal.h

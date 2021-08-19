@@ -3,7 +3,7 @@ set(COMPONENT_NAME EventDetector)
 add_compile_definitions(EVENT_DETECTOR_LIBRARY)
 
 add_openpass_target(
-  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT module
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
 
   HEADERS
     CollisionDetector.h

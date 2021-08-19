@@ -83,8 +83,6 @@ int main(int argc, char* argv[])
     QCoreApplication application(argc, argv);
 
     application.setApplicationVersion(QString::fromStdString(openpass::common::framework.str()));
-    application.addLibraryPath(application.applicationDirPath() + "/../" + SUBDIR_LIB_COMPONENTS);
-    application.addLibraryPath(application.applicationDirPath() + "/../" + SUBDIR_LIB_SIM);
 
     CommandLineArguments parsedArguments = CommandLineParser::Parse(application.arguments());
 

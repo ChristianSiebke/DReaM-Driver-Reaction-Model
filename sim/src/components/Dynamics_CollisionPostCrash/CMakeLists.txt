@@ -13,7 +13,7 @@ set(COMPONENT_NAME Dynamics_CollisionPostCrash)
 add_compile_definitions(DYNAMICS_COLLISIONPOSTCRASH_LIBRARY)
 
 add_openpass_target(
-  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT module
 
   HEADERS
     dynamics_collisionPostCrash.h
