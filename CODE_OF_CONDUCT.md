@@ -1,6 +1,6 @@
 # Community Code of Conduct
 
-** August 23, 2021**
+August 23, 2021
 
 ## Our Pledge
 
