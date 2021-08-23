@@ -24,11 +24,11 @@ A list of frequently asked questions:
 
 2. __Which traffic signs does openPASS support?__
 
-https://gitlab.eclipse.org/eclipse/simopenpass/simopenpass/-/blob/servant/sim/doc/DoxyGen/Function/Markdown/Simulation/Development/FrameworkModules.md#L310
+[Here](https://gitlab.eclipse.org/eclipse/simopenpass/simopenpass/-/blob/servant/sim/doc/DoxyGen/Function/Markdown/Simulation/Development/FrameworkModules.md#L310) is an overview over the supported traffic signs. 
 
 3. __Can openPASS simulate parallel processes?__
 
-Currently openPASS only computes sequential time steps because we only compute on one core. Scheduler agents can be computed in parallel. Synchronization works only after all agents have been computed.
+Currently openPASS only computes sequential time steps because openPASS only compute on one core. Scheduler agents can be computed in parallel. Synchronization works only after all agents have been computed.
 
 4. __Where do I find information about the accidents?__
 
