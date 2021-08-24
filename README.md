@@ -6,7 +6,7 @@ The software suite of openPASS started as a set of stand-alone applications, whi
 
 # Where to get it
 
-As the program is still under development and is extended continuously, we advice you to use the latest sources from our [GitLab repository](https://gitlab.eclipse.org/eclipse/simopenpass/simopenpass).
+As the program is still under development and is extended continuously, we advice you to use the latest sources from our [GitLab repository](https://gitlab.eclipse.org/eclipse/simopenpass/simopenpass). Pleaes download from the master branch which consists the most stable and recent openPASS version. The servant branch contains current developments which are planned to be pushed to the master branch after a comprehensive review by the openPASS Working Group.
 
 # Installation
 An installation guide can be found [here](https://www.eclipse.org/simopenpass/content/html/index.html).
@@ -16,8 +16,7 @@ A list of frequently asked questions:
 1. __Which standards does openPASS support?__
 
 * ASAM OpenSCENARIO 1.0
-* ASAM OpenSCENARIO 1.1
-* ASAM OpenDRIVE1.6
+* ASAM OpenDRIVE 1.6
 * OSI 3.2.0 (a switch to OSI 3.3 is planned)
 * FMI 1
 * FMI 2
@@ -32,15 +31,15 @@ Currently openPASS only computes sequential time steps because openPASS only com
 
 4. __Where do I find information about the accidents?__
 
-You can find them in the SimulationOutput.xml
+The output of each simulation is written to a simulationOutput.xml and potentially additional files. They contain information on the agents of the simulation along with cyclic data from all timesteps. Further events are logged which will contain collision along with a lot of other information.
 
 5. __Can openPASS calculate criticality KPIs?__
 
 OpenPASS can calculate Time-To-Collision (TTC) and Time-To-Headway (THW). The output of those numbers is quite challenging. It is possible to extract those numbers over a FMU.
 
-6. __Which probability distributions can be implemented in openPASS?__
+6. __Which probability distributions for parameter variations can be used in openPASS?__
 
-It is possible to implement exponential distributions, normal distributions, logarithmic distributions and equal probability distributions.
+Parameters can either be simple or stochastic. Simple parameters only have one value, while stochastic parameters have a minimum and maximum value as well as distribution specific parameters. If a parameter is stochastic a distribution can be choosen from [this list](https://gitlab.eclipse.org/eclipse/simopenpass/simopenpass/-/blob/servant/sim/src/core/slave/modules/Stochastics/stochastics_implementation.h). In future (with OpenSCENARIO 1.1) the number of distributions will be extended.
 
 # Contact
 
