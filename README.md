@@ -1,6 +1,6 @@
 # What is openPASS
 
-The openPASS (Open Platform for Assessment of Safety Systems) tool is an open source developed framework for the simulation of interaction between traffic participants to evaluate and parametrize active safety systems. The simulation is based on a specific situation configuration and can contain several simulation runs, which differ due to random parameters.
+OpenPASS (Open Platform for Assessment of Safety Systems) is an open source simulation platform for the effectiveness analysis of advanced driver and assistance systems (ADAS) and autonomous driving (AD) systems. OpenPASS takes a specific but configurable traffic situation and offers possibilities to repeat this situation under varying conditions, each generated from a diverse set of user defined probability distributions, such as for vehicle speeds. As a result, multiple simulation outputs are generated which can be evaluated in each case.
 
 The software suite of openPASS started as a set of stand-alone applications, which can be installed and configured individually. Over time, especially the graphical user interface evolved to a single entry point, enabling the average user to use openPASS as a “monolithic” tool.
 
@@ -25,9 +25,9 @@ A list of frequently asked questions:
 
 [Here](https://gitlab.eclipse.org/eclipse/simopenpass/simopenpass/-/blob/servant/sim/doc/DoxyGen/Function/Markdown/Simulation/Development/FrameworkModules.md#L310) is an overview over the supported traffic signs. 
 
-3. __Can openPASS simulate parallel processes?__
+3. __Can openPASS simulate multiple simulation runs in parallel?__
 
-Currently openPASS only computes sequential time steps because openPASS only compute on one core. Scheduler agents can be computed in parallel. Synchronization works only after all agents have been computed.
+OpenPASS has a strong focus on performance. Simulations commonly run multiple times faster than real time, even though no parallelization is used within a simulation so far. As each simulation only uses a single core, multiple simulations can easily be executed in parallel to speed up simulation campaigns.
 
 4. __Where do I find information about the accidents?__
 
