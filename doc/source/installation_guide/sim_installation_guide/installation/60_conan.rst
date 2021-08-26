@@ -28,7 +28,7 @@ Conan is used in the |op| project to create and manage the binaries of the used 
 Additional Prerequisitions
 --------------------------
 
-To be able to work with it´s necessary to add additional packages.
+To be able to work with Conan it´s necessary to add additional packages.
 
 .. tabs::
    
@@ -47,6 +47,14 @@ To be able to work with it´s necessary to add additional packages.
 
 Export Recipes
 --------------
+
+.. note::
+
+   A *recipe* is python file, which is used by conan to build and create a package. 
+   In this file there are several hooks available, which can be used for several tasks.
+   E.g. Retrieving the source files, building from source, configuring dependencies, packaging, etc.
+   Visit `Conan <https://conan.io/>`_. for detailed information about *recipes*.
+
 
 To make Conan aware and to use the custom recipes for the ThirdParty libraries, these recipes have to be exported to the *local cache* of Conan.
 This can be done in different ways.
@@ -86,7 +94,7 @@ Conan is now able to differentiate different version and the user can now instal
    conan install <package_name>
 
 This command has a look into the *local cache* for the recipe and the binaries of the package and installs them into the *local cache*.
-If no binaries where found an Error is thrown. 
+If no binaries where found an error is thrown. 
 
 .. note::
 
@@ -105,6 +113,7 @@ Both of the previous commands can be combined with the ``create``` command. what
 At this step the binaries of this package are now available in the *local cache*. 
 
 .. note::
+
    There are several additional commands, arguments and fields for these commands available. 
    Please see `Conan Docs <https://docs.conan.io/en/latest/>`_ for additional information.
 
