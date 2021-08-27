@@ -6,7 +6,7 @@ The software suite of openPASS started as a set of stand-alone applications, whi
 
 # Where to get it
 
-As the program is still under development and is extended continuously, we advice you to use the latest sources from our [GitLab repository](https://gitlab.eclipse.org/eclipse/simopenpass/simopenpass). Pleaes download from the master branch which consists the most stable and recent openPASS version. The servant branch contains current developments which are planned to be pushed to the master branch after a comprehensive review by the openPASS Working Group.
+As the program is still under development and is extended continuously, we advice you to use the latest sources from our [GitLab repository](https://gitlab.eclipse.org/eclipse/simopenpass/simopenpass). Pleaes download from the master branch which contains the most stable and recent openPASS version. The servant branch contains current developments which are planned to be pushed to the master branch after a comprehensive review by the openPASS Working Group.
 
 # Installation
 An installation guide can be found [here](https://www.eclipse.org/simopenpass/content/html/index.html).
