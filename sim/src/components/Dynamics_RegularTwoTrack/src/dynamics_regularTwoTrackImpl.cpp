@@ -43,6 +43,7 @@
 
 #include <memory>
 #include <qglobal.h>
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include "dynamics_regularTwoTrackImpl.h"

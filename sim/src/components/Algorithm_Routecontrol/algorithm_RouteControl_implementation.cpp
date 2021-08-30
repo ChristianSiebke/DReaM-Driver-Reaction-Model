@@ -63,6 +63,9 @@
 
 #include <qglobal.h>
 
+#include "common/commonTools.h"
+#include "components/common/vehicleProperties.h"
+
 Algorithm_Routecontrol_Implementation::Algorithm_Routecontrol_Implementation(
         std::string componentName,
         bool isInit,
@@ -186,7 +189,11 @@ void Algorithm_Routecontrol_Implementation::Trigger(int time_ms)
          *  - maximum brake torque
          *  - driver aggressivity
         */
-        routeControl->SetVehicleProperties(GetAgent()->GetVehicleModelParameters().weight,
+
+        auto weight = helper::map::query(GetAgent()->GetVehicleModelParameters().properties, vehicle::properties::Mass);
+        THROWIFFALSE(weight.has_value(), "Mass was not defined in VehicleCatalog");
+
+        routeControl->SetVehicleProperties(weight.value(),
                                            maxpower.GetValue(),
                                            mintorque.GetValue(),
                                            drivingAgressivity.GetValue());
