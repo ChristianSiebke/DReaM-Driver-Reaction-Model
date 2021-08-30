@@ -70,9 +70,9 @@ Either set environment variable through the ``Windows PowerShell``
 .. code:: PowerShell
 
    # check if set
-   echo ${env.path}
-   echo ${env.MSYSTEM}
-   echo ${env.CHERE_INVOKING}
+   echo ${env:path}
+   echo ${env:MSYSTEM}
+   echo ${env:CHERE_INVOKING}
 
    # if not
    setx path "%PATH%;C:\msys64\usr\bin"
