@@ -14,9 +14,9 @@
 //!        instance construction and destruction
 //-----------------------------------------------------------------------------
 
-#include "algorithm_routecontrol.h"
+#include "algorithm_RouteControl.h"
 
-#include "algorithm_routecontrol_implementation.h"
+#include "algorithm_RouteControl_implementation.h"
 
 const std::string Version = "0.7";
 static const CallbackInterface *Callbacks = nullptr;

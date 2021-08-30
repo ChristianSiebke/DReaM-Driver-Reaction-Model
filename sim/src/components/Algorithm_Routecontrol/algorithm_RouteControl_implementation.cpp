@@ -56,7 +56,7 @@
  * @defgroup sim_step_40_rc_out Simulation step output
 */
 
-#include "algorithm_routecontrol_implementation.h"
+#include "algorithm_RouteControl_implementation.h"
 
 #include <array>
 #include <memory>
