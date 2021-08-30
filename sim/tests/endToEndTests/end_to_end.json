@@ -1,6 +1,6 @@
 {
     "datatypes": {
-        "DISABLED_Sensor0_DetectedAgents": "string"
+        "Sensor0_DetectedAgents": "str"
     },
     "scopes": {
         "generic": {
@@ -258,7 +258,7 @@
             "specialized":
             {
                 "description": "Sensor detects scenario agent with 1 second delay.",
-                "query": "count(AgentId | AgentId == 0 and Timestep == 1000 and Sensor0_DetectedAgents-1 != Sensor0_DetectedAgents and Sensor0_DetectedAgents == 1) == 1",
+                "query": "count(AgentId | Timestep==1000 and AgentId==0 and Sensor0_DetectedAgents-1=='nan' and Sensor0_DetectedAgents!='nan') == 1",
                 "success_rate": 1
             },
             "configurations":
