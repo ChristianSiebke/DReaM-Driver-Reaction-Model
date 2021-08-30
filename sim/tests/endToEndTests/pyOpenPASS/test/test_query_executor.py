@@ -27,6 +27,7 @@ csv_test_data_despawned_agent = """
     3, 11, 12, ,
 """
 
+
 def test_query_executor_parses_csv():
     csv = StringIO(csv_test_data)
     df = query_executor.prepare_output(csv)
@@ -38,16 +39,20 @@ def test_query_executor_parses_csv_with_despawned_agents():
     df = query_executor.prepare_output(csv)
     assert(len(df) == 6)
 
+
 def test_query_executor_obeys_datatypes():
-    explicit_types = { "other": "string", "other2": "float" }
-    expected_types = pd.from_dict({"some": [1], "other": ['2'], "other2": [3.0]}).astype({"other": "string"})
+    explicit_types = {"other": "string", "other2": "float"}
+    expected_types = pd.from_dict({"some": [1], "other": ['2'], "other2": [
+                                  3.0]}).astype({"other": "string"})
 
     csv = StringIO(csv_test_data)
     df = query_executor.prepare_output(csv, explicit_types)
-    assert((df.dtypes[["some", "other", "other2"]] == expected_types.dtypes[["some", "other", "other2"]]).all())
+    assert((df.dtypes[["some", "other", "other2"]] ==
+           expected_types.dtypes[["some", "other", "other2"]]).all())
+
 
 def test_query_executor_ignores_unknown_columns():
-    explicit_types = { "unknown": "string"}
+    explicit_types = {"unknown": "string"}
 
     csv = StringIO(csv_test_data)
 
@@ -55,3 +60,4 @@ def test_query_executor_ignores_unknown_columns():
         df = query_executor.prepare_output(csv, explicit_types)
     except KeyError:
         pytest.fail("Unknown column not ignored during datatype conversion")
+
