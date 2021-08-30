@@ -37,7 +37,7 @@ With these files, the GUI can trigger the simulation to start und produce result
 These files can then be read evaluated by the GUI.
 
 
-Overview about Plugins
+Overview of the GUI Plugins
 ^^^^^^^^^^^^^^^^^^^^^^
 
    * Simulation Plugins
@@ -81,7 +81,7 @@ Project
 
 .. image:: gui_user_guide/_static/images/plugin/project/overview.png
 
-Before the simulation adjustments begins, the user is obligated to load or create a “Master Configuration” (masterConfig). 
+Before the simulation adjustments begin, the user is obligated to load or create a “Master Configuration” (masterConfig). 
 A Master Configuration in openPASS can be understood as a project. 
 It is a XML-File which get inscribed the path settings and simulation settings after you click **SAVE**.
 

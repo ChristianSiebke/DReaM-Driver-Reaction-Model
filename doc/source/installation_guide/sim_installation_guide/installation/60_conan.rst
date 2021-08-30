@@ -80,7 +80,7 @@ E.g.
 
 .. note::
 
-   At least this step has to be done in prior before any ThirdParty library can be installed by conan.
+   At least this step has to be done in prior before any ThirdParty library can be installed by Conan.
    Every upcoming step is optional, but can be useful while developing or debugging.
    Also with these steps it´s possible to install ThirdParty libraries separatly.
 
@@ -103,7 +103,7 @@ If no binaries where found an error is thrown.
 Conan Create
 ^^^^^^^^^^^^
 
-Both of the previous commands can be combined with the ``create``` command. what it basically does is calling ``export`` and ``install`` after another.
+Both of the previous commands can be combined with the ``create``` command. What it basically does is calling ``export`` and ``install`` after another.
 
 .. code-block:: bash
 
@@ -146,7 +146,7 @@ It´s also possible to add more packages here or change the version.
 
 The ``generator`` field is used to add different generators to the process. 
 In this example the ``cmake`` generator would generate cmake files, which describe where to find the |op| in the *local cache*. 
-There are also other possbilities like a ``cmake_find_package`` generator, which generates *cmake* *FindPackage* files. 
+There are also other possibilities like a ``cmake_find_package`` generator, which generates *cmake* *FindPackage* files. 
 
 At this point |op| only exists in the *local cache* of Conan. 
 With the ``imports`` field it´s possible to specify where and how the binaries shall be copied from the *local cache* to the *user space*.
@@ -156,13 +156,13 @@ The example follows the following pattern:
 
 .. note::
 
-   It possible to add several lines for more specific copiing operations. 
+   It is possible to add several lines for more specific copying operations. 
    Also there are more field available than this simple example shows.
    See `Conan Docs <https://docs.conan.io/en/latest/>`_ for additional information.
 
 Conan can simply install |op| with the following command. 
-If the dependencies or |op| where not build in any previous step, so that the binaries are currently not available in the *local cache*. 
-Conan can build them by adding ``--build=missing`` on the following command.
+If the dependencies or |op| were not build in any previous step, the binaries will not be available in the *local cache* of Conan. 
+Conan can build them by adding ``--build=missing`` to the following command.
 
 .. code-block:: bash
 
