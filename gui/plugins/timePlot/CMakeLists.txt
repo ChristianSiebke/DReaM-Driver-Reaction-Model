@@ -46,12 +46,16 @@ add_library(TimePlot SHARED ${SOURCES} ${HEADERS} )
 # link with Qt libraries, models, views and Interfaces
 target_link_libraries(TimePlot PRIVATE
                       Qt5::Widgets
+                      Window
                       ${PROJECT_NAME}_Models
                       ${PROJECT_NAME}_Views
                       ${PROJECT_NAME}_Interfaces
                       ${PROJECT_NAME}_Presenters)
 
-# target directories. Needs to be defined in some global file TODO
-set_target_properties(TimePlot PROPERTIES
-                      RUNTIME_OUTPUT_DIRECTORY "C:/OpenPASS/bin/gui"
-                      PREFIX "")
+if(WIN32)
+        install(TARGETS TimePlot
+                RUNTIME DESTINATION ${SUBDIR_LIB_GUI}) 
+elseif(UNIX)
+        install(TARGETS TimePlot
+                LIBRARY DESTINATION ${SUBDIR_LIB_GUI}) 
+endif()

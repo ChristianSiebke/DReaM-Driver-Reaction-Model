@@ -1,6 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2017, 2018, 2019 in-tech GmbH
-*               2016, 2017, 2018 ITK Engineering GmbH
+*               2016, 2017, 2018, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -26,7 +26,7 @@
 class DoubleSignal : public ComponentStateSignalInterface
 {
 public:
-    DoubleSignal(ComponentState state, double inValue) : value(inValue)
+    DoubleSignal(double inValue, ComponentState state = ComponentState::Undefined) : value(inValue)
     {
         componentState = state;
     }
@@ -53,7 +53,7 @@ public:
 class IntSignal : public ComponentStateSignalInterface
 {
 public:
-    IntSignal(int inValue, ComponentState state) : value(inValue)
+    IntSignal(int inValue, ComponentState state = ComponentState::Undefined) : value(inValue)
     {
         componentState = state;
     }
@@ -80,7 +80,7 @@ public:
 class BoolSignal : public ComponentStateSignalInterface
 {
 public:
-    BoolSignal(bool inValue, ComponentState state) : value(inValue)
+    BoolSignal(bool inValue, ComponentState state = ComponentState::Undefined) : value(inValue)
     {
         componentState = state;
     }

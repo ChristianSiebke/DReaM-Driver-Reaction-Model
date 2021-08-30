@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020, 2021 in-tech GmbH
 *               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -21,6 +21,7 @@
 
 #include "osi3/osi_lane.pb.h"
 #include "osi3/osi_trafficsign.pb.h"
+#include "osi3/osi_trafficlight.pb.h"
 
 #include "include/roadInterface/roadElementTypes.h"
 #include "common/globalDefinitions.h"
@@ -180,6 +181,43 @@ namespace OpenDriveTypeMapper
         {"1.000.003", osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_ZEBRA_CROSSING},
     };
 
+    const std::map<std::string, std::map<std::string, osi3::TrafficLight_Classification_Icon>> trafficLightsThreeLights =
+    {
+        {"1.000.001",
+         {
+             {"", osi3::TrafficLight_Classification_Icon::TrafficLight_Classification_Icon_ICON_NONE}
+         }
+        },
+        {"1.000.011",
+         {
+             {"10", osi3::TrafficLight_Classification_Icon::TrafficLight_Classification_Icon_ICON_ARROW_LEFT},
+             {"20", osi3::TrafficLight_Classification_Icon::TrafficLight_Classification_Icon_ICON_ARROW_RIGHT},
+             {"30", osi3::TrafficLight_Classification_Icon::TrafficLight_Classification_Icon_ICON_ARROW_STRAIGHT_AHEAD},
+             {"40", osi3::TrafficLight_Classification_Icon::TrafficLight_Classification_Icon_ICON_ARROW_STRAIGHT_AHEAD_LEFT},
+             {"50", osi3::TrafficLight_Classification_Icon::TrafficLight_Classification_Icon_ICON_ARROW_STRAIGHT_AHEAD_RIGHT}
+         }
+        },
+    };
+
+    const std::map<std::string, std::map<std::string, osi3::TrafficLight_Classification_Icon>> trafficLightsTwoLights =
+    {
+        {"1.000.002",
+         {
+             {"", osi3::TrafficLight_Classification_Icon::TrafficLight_Classification_Icon_ICON_PEDESTRIAN}
+         }
+        },
+        {"1.000.007",
+         {
+             {"", osi3::TrafficLight_Classification_Icon::TrafficLight_Classification_Icon_ICON_PEDESTRIAN_AND_BICYCLE}
+         }
+        },
+        {"1.000.013",
+         {
+             {"", osi3::TrafficLight_Classification_Icon::TrafficLight_Classification_Icon_ICON_BICYCLE}
+         }
+        },
+    };
+
     //! Conversion map from OSI units to SI units
     const std::map<osi3::TrafficSignValue_Unit, std::pair<double, CommonTrafficSign::Unit>> unitConversionMap =
     {
@@ -230,5 +268,25 @@ namespace OpenDriveTypeMapper
         {osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_ANNOUNCE_RIGHT_LANE_END, CommonTrafficSign::Type::AnnounceRightLaneEnd},
         {osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_ANNOUNCE_LEFT_LANE_END, CommonTrafficSign::Type::AnnounceLeftLaneEnd},
         {osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_ZEBRA_CROSSING, CommonTrafficSign::Type::PedestrianCrossing}
+    };
+
+    //! Conversion map from OSI traffic sign type to enum defined in globalDefinitions
+    const std::map<osi3::TrafficLight_Classification_Icon, CommonTrafficLight::Type> trafficLightTypeThreeLightsConversionMap =
+    {
+        {osi3::TrafficLight_Classification_Icon_ICON_NONE, CommonTrafficLight::Type::ThreeLights},
+        {osi3::TrafficLight_Classification_Icon_ICON_ARROW_LEFT, CommonTrafficLight::Type::ThreeLightsLeft},
+        {osi3::TrafficLight_Classification_Icon_ICON_ARROW_RIGHT, CommonTrafficLight::Type::ThreeLightsRight},
+        {osi3::TrafficLight_Classification_Icon_ICON_ARROW_STRAIGHT_AHEAD, CommonTrafficLight::Type::ThreeLightsStraight},
+        {osi3::TrafficLight_Classification_Icon_ICON_ARROW_STRAIGHT_AHEAD_LEFT, CommonTrafficLight::Type::ThreeLightsLeftStraight},
+        {osi3::TrafficLight_Classification_Icon_ICON_ARROW_STRAIGHT_AHEAD_RIGHT, CommonTrafficLight::Type::ThreeLightsRightStraight}
+    };
+
+    //! Conversion map from OSI traffic sign type to enum defined in globalDefinitions
+    const std::map<osi3::TrafficLight_Classification_Icon, CommonTrafficLight::Type> trafficLightTypeTwoLightsConversionMap =
+    {
+        {osi3::TrafficLight_Classification_Icon_ICON_NONE, CommonTrafficLight::Type::TwoLights},
+        {osi3::TrafficLight_Classification_Icon_ICON_PEDESTRIAN, CommonTrafficLight::Type::TwoLightsPedestrian},
+        {osi3::TrafficLight_Classification_Icon_ICON_BICYCLE, CommonTrafficLight::Type::TwoLightsBicycle},
+        {osi3::TrafficLight_Classification_Icon_ICON_PEDESTRIAN_AND_BICYCLE, CommonTrafficLight::Type::TwoLightsPedestrianBicycle}
     };
 };
