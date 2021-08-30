@@ -36,7 +36,6 @@ std::ostream& operator<<(std::ostream& os, const SpawnPosition& position)
     return os;
 }
 }
-}
 
 TEST(SpawnPointRuntimeCommonParameterExtractor, ExtractSpawnPointParameters)
 {
