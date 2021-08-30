@@ -59,9 +59,9 @@ Thus, an existing simulation configuration is used and the simulation is started
 
         i. Ensure all files from directory ``examples/DefaultConfigurations`` have been copied to ``configs`` (this has been done in the previous step). Repeat this step every time another simulation is chosen. 
                 
-        ii. Navigate to the directory ``examples/Configurations``. Here, all folders contain special preconfigured simulations (which either can be used as demo cases or as end-to-end test cases primarly used for development). 
+        ii. Navigate to the directory ``examples/Configurations``. Here, all folders contain special pre-configured simulations (which either can be used as demo cases or as end-to-end test cases primarily used for development). 
 
-        iv. Copy all files from the directory specifying the specific scenario you want to simulate (in our case all files from directory ``examples/Configurations/AEB``) to the directory ``configs``. Overwrite existing files when promted. 
+        iii. Copy all files from the directory specifying the specific scenario you want to simulate (in our case all files from directory ``examples/Configurations/AEB``) to the directory ``configs``. Overwrite existing files when prompted. 
 
     .. note::
 
@@ -107,7 +107,7 @@ Thus, an existing simulation configuration is used and the simulation is started
 
 #. Once the simulation is successfully completed, the following results can be found in the directory ``results``:
 
-    * ``simulationOutput.xml``: Contains general information about the experiment and an overview on all agents from the simulation. Further, an event log is contained. If the csv-output is set to false in the ``slaveConfig.xml``, the ``simulationOutput.xml`` will also include the „cyclics” (state in each timestep) of the simulation.
+    * ``simulationOutput.xml``: Contains general information about the experiment and an overview on all agents from the simulation. Further, an event log is contained. If the csv-output is set to false in the ``slaveConfig.xml``, the ``simulationOutput.xml`` will also include the „cyclics” (state in each time step) of the simulation.
     * ``Cyclics_Run_xxx.csv``: In case the csv-output is activated, the „cyclics” of each run in the simulation are logged to a separated csv-file. This file is missing, if "cyclics" are written directly to the ``simulationOutput.xml`` (i.e. when "LoggingCyclicsToCsv" is set to false).
     * ``Repository_Run_xxx.csv``: Overview of the agents and objects from the simulation as well as some details on scenery components like lane markings, guard rails, etc.
 
