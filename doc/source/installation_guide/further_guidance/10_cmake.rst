@@ -87,7 +87,7 @@ Use this, when an exact library version, or a customized library shall be used.
 
       .. warning:: The semicolon ``;`` needs to be escaped (``\;``) unless the string is quoted.
 
-.. note:: Please also read through ref:`openpass_variables` for further useful hints, e.g. why explicitly setting the MinGW path might be a necessary in some situations.
+.. note:: Please also read through :ref:`cmake_openpass_variables` for further useful hints, e.g. why explicitly setting the MinGW path might be a necessary in some situations.
 
 Installation directory
 
