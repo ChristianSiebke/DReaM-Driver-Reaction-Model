@@ -814,14 +814,14 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_CheckForCorrectOsiLaneClassifi
     CheckLaneType(worldData, sections[0]->GetLanes(), {osi3::Lane_Classification_Type_TYPE_NONDRIVING,
                                                        osi3::Lane_Classification_Type_TYPE_DRIVING});
 
-    CheckLaneSubtype(worldData, sections[0]->GetLanes(), {osi3::Lane_Classification_Subtype_SUBTYPE_BORDER,
+    CheckLaneSubtype(worldData, sections[0]->GetLanes(), {osi3::Lane_Classification_Subtype_SUBTYPE_OTHER,
                                                           osi3::Lane_Classification_Subtype_SUBTYPE_NORMAL});
 
     CheckLaneType(worldData, sections[1]->GetLanes(), {osi3::Lane_Classification_Type_TYPE_NONDRIVING,
                                                        osi3::Lane_Classification_Type_TYPE_DRIVING,
                                                        osi3::Lane_Classification_Type_TYPE_DRIVING});
 
-    CheckLaneSubtype(worldData, sections[1]->GetLanes(), {osi3::Lane_Classification_Subtype_SUBTYPE_BORDER,
+    CheckLaneSubtype(worldData, sections[1]->GetLanes(), {osi3::Lane_Classification_Subtype_SUBTYPE_OTHER,
                                                           osi3::Lane_Classification_Subtype_SUBTYPE_NORMAL,
                                                           osi3::Lane_Classification_Subtype_SUBTYPE_NORMAL});
 
