@@ -12,6 +12,7 @@ rm -rf html
 SourceDir='../../../src'
 
 export SourceDir
+export DocumentationDir='../'
 
 doxygen Developer.doxy -d markdown
 

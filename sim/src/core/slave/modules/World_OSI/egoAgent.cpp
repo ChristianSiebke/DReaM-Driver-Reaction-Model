@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 in-tech GmbH
+* Copyright (c) 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -172,6 +172,15 @@ std::vector<CommonTrafficSign::Entity> EgoAgent::GetRoadMarkingsInRange(double r
                                          GetLaneIdFromRelative(relativeLane),
                                          GetMainLocatePosition().roadPosition.s,
                                          range).at(0);
+}
+
+std::vector<CommonTrafficLight::Entity> EgoAgent::GetTrafficLightsInRange(double range, int relativeLane) const
+{
+    return world->GetTrafficLightsInRange(wayToTarget,
+                                          rootOfWayToTargetGraph,
+                                          GetLaneIdFromRelative(relativeLane),
+                                          GetMainLocatePosition().roadPosition.s,
+                                          range).at(0);
 }
 
 std::vector<LaneMarking::Entity> EgoAgent::GetLaneMarkingsInRange(double range, Side side, int relativeLane) const

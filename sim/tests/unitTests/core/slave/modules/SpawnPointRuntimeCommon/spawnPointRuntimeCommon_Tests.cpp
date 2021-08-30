@@ -1,5 +1,6 @@
 /*********************************************************************
-* Copyright (c) 2019, 2020, 2021 in-tech
+* Copyright (c) 2019, 2021 in-tech
+* Copyright (c) 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -33,6 +34,7 @@ std::ostream& operator<<(std::ostream& os, const SpawnPosition& position)
        << " s: " << position.sPosition;
 
     return os;
+}
 }
 }
 

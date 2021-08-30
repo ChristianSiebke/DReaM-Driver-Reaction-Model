@@ -1,7 +1,7 @@
 /*******************************************************************************
 * Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
 *               2018 AMFD GmbH
-*               2016 ITK Engineering GmbH
+*               2016, 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -153,8 +153,6 @@ public:
         return GetBaseTrafficObject().GetLocatedPosition();
     }
 
-    double GetMainLocateS() const;
-
     void UpdateCollision(std::pair<ObjectTypeOSI, int> collisionPartner) override;
 
     std::vector<std::pair<ObjectTypeOSI, int>> GetCollisionPartners() const override
@@ -202,6 +200,15 @@ public:
         });
     }
 
+    void SetVelocityVector(double vx, double vy, double vz) override
+    {
+        world->QueueAgentUpdate([this, vx, vy, vz]()
+        {
+            OWL::Primitive::AbsVelocity velocity{vx, vy, vz};
+            GetBaseTrafficObject().SetAbsVelocity(velocity);
+        });
+    }
+
     void SetAcceleration(double value) override
     {
         world->QueueAgentUpdate([this, value]()
@@ -236,12 +243,57 @@ public:
         });
     }
 
-    void SetCentripetalAcceleration(double value) override
+    void SetYawAcceleration(double value) override
     {
         world->QueueAgentUpdate([this, value]()
         {
+            yawAcceleration = value;
+        });
+    }
+
+    void SetCentripetalAcceleration(double value) override
+    {
+        world->QueueAgentUpdate([this, value]() {
             centripetalAcceleration = value;
 
+            // Code seems to work incorrectly here, further investigation needed
+            // OWL::Primitive::AbsAcceleration absAcceleration = GetBaseTrafficObject().GetAbsAcceleration();
+            // OWL::Primitive::AbsOrientation absOrientation = GetBaseTrafficObject().GetAbsOrientation();
+
+            // Common::Vector2d vec(absAcceleration.ax, absAcceleration.ay);
+
+            // // Rotate reference frame from groundTruth to car and back
+            // vec.Rotate(-absOrientation.yaw);
+            // vec.y = value;
+            // vec.Rotate(absOrientation.yaw);
+
+            // absAcceleration.ax = vec.x;
+            // absAcceleration.ay = vec.y;
+
+            // GetBaseTrafficObject().SetAbsAcceleration(absAcceleration);
+        });
+    }
+
+    void SetTangentialAcceleration(double value) override
+    {
+        world->QueueAgentUpdate([this, value]() {
+            tangentialAcceleration = value;
+
+            // Code seems to work incorrectly here, further investigation needed
+            // OWL::Primitive::AbsAcceleration absAcceleration = GetBaseTrafficObject().GetAbsAcceleration();
+            // OWL::Primitive::AbsOrientation absOrientation = GetBaseTrafficObject().GetAbsOrientation();
+
+            // Common::Vector2d vec(absAcceleration.ax, absAcceleration.ay);
+
+            // // Rotate reference frame from groundTruth to car and back
+            // vec.Rotate(-absOrientation.yaw);
+            // vec.x = value;
+            // vec.Rotate(absOrientation.yaw);
+
+            // absAcceleration.ax = vec.x;
+            // absAcceleration.ay = vec.y;
+
+            // GetBaseTrafficObject().SetAbsAcceleration(absAcceleration);
         });
     }
 
@@ -354,9 +406,41 @@ public:
         return GetBaseTrafficObject().GetAbsOrientationRate().yawRate;
     }
 
+    double GetYawAcceleration() const override
+    {
+        return yawAcceleration;
+    }
+
     double GetCentripetalAcceleration() const override
     {
         return centripetalAcceleration;
+
+        // Code seems to work incorrectly here, further investigation needed
+        // OWL::Primitive::AbsAcceleration absAcceleration = GetBaseTrafficObject().GetAbsAcceleration();
+        // OWL::Primitive::AbsOrientation absOrientation = GetBaseTrafficObject().GetAbsOrientation();
+
+        // Common::Vector2d vec(absAcceleration.ax, absAcceleration.ay);
+
+        // // Rotate reference frame from groundTruth to car
+        // vec.Rotate(-absOrientation.yaw);
+
+        // return vec.y;
+    }
+
+    double GetTangentialAcceleration() const override
+    {
+        return tangentialAcceleration;
+
+        // Code seems to work incorrectly here, further investigation needed
+        // OWL::Primitive::AbsAcceleration absAcceleration = GetBaseTrafficObject().GetAbsAcceleration();
+        // OWL::Primitive::AbsOrientation absOrientation = GetBaseTrafficObject().GetAbsOrientation();
+
+        // Common::Vector2d vec(absAcceleration.ax, absAcceleration.ay);
+
+        // // Rotate reference frame from groundTruth to car
+        // vec.Rotate(-absOrientation.yaw);
+
+        // return vec.x;
     }
 
     bool Locate() override;
@@ -384,8 +468,6 @@ public:
     void SetPosition(Position pos) override;
 
     double GetDistanceToStartOfRoad(MeasurementPoint mp, std::string roadId) const override;
-
-    double GetMainLocateS(const std::string& roadId) const;
 
     double  GetDistanceTraveled() const override
     {
@@ -439,454 +521,6 @@ protected:
                            line,
                            message);
         }
-    }
-
-public:
-    virtual int GetAgentId() const override
-    {
-        throw std::runtime_error("AgentAdapter::GetAgentId not implemented");
-    }
-    virtual double GetVelocityX() const override
-    {
-        throw std::runtime_error("AgentAdapter::GetVelocityX not implemented");
-    }
-    virtual double GetVelocityY() const override
-    {
-        throw std::runtime_error("AgentAdapter::GetVelocityY not implemented");
-    }
-    virtual double GetAccelerationX() const override
-    {
-        throw std::runtime_error("AgentAdapter::GetAccelerationX not implemented");
-    }
-    virtual double GetAccelerationY() const override
-    {
-        throw std::runtime_error("AgentAdapter::GetAccelerationY not implemented");
-    }
-    virtual std::vector<void *> GetCollisionData(int collisionPartnerId,
-                                                 int collisionDataId) const override
-    {
-        Q_UNUSED(collisionPartnerId);
-        Q_UNUSED(collisionDataId);
-
-        throw std::runtime_error("AgentAdapter::GetCollisionData not implemented");
-    }
-    virtual void SetVelocityX(double velocityX) override
-    {
-        Q_UNUSED(velocityX);
-
-        throw std::runtime_error("AgentAdapter::SetVelocityX not implemented");
-    }
-    virtual void SetVelocityY(double velocityY) override
-    {
-        Q_UNUSED(velocityY);
-
-        throw std::runtime_error("AgentAdapter::SetVelocityY not implemented");
-    }
-    virtual void SetAccelerationX(double accelerationX) override
-    {
-        Q_UNUSED(accelerationX);
-
-        throw std::runtime_error("AgentAdapter::SetAccelerationX not implemented");
-    }
-    virtual void SetAccelerationY(double accelerationY) override
-    {
-        Q_UNUSED(accelerationY);
-
-        throw std::runtime_error("AgentAdapter::SetAccelerationY not implemented");
-    }
-    bool InitAgentParameter([[maybe_unused]] int id, 
-                            [[maybe_unused]] AgentBlueprintInterface* agentBlueprint) override
-    {
-        throw std::runtime_error("Deprecated method: See agentInterface.h");
-    }
-    virtual bool InitAgentParameter([[maybe_unused]] int id,
-                                    [[maybe_unused]] int agentTypeId,
-                                    [[maybe_unused]] const AgentSpawnItem *agentSpawnItem,
-                                    [[maybe_unused]] const SpawnItemParameterInterface &spawnItemParameter) override
-    {
-        throw std::runtime_error("Deprecated method: See agentInterface.h");
-    }
-    virtual int GetAgentTypeId() const override
-    {
-        throw std::runtime_error("AgentAdapter::GetAgentTypeId not implemented");
-    }
-    virtual bool IsAgentAtEndOfRoad() override
-    {
-        throw std::runtime_error("AgentAdapter::IsAgentAtEndOfRoad not implemented");
-    }
-    virtual double GetDistanceToFrontAgent(int laneId) override
-    {
-        Q_UNUSED(laneId);
-
-        throw std::runtime_error("AgentAdapter::GetDistanceToFrontAgent not implemented");
-    }
-    virtual double GetDistanceToRearAgent(int laneId) override
-    {
-        Q_UNUSED(laneId);
-
-        throw std::runtime_error("AgentAdapter::GetDistanceToRearAgent not implemented");
-    }
-    virtual void SetSpecialAgentMarker() override
-    {
-        throw std::runtime_error("AgentAdapter::SetSpecialAgentMarker not implemented");
-    }
-    virtual void SetObstacleFlag() override
-    {
-        throw std::runtime_error("AgentAdapter::SetObstacleFlag not implemented");
-    }
-    virtual void RemoveSpecialAgentMarker() override
-    {
-        throw std::runtime_error("AgentAdapter::RemoveSpecialAgentMarker not implemented");
-    }
-    virtual double GetDistanceToSpecialAgent() override
-    {
-        throw std::runtime_error("AgentAdapter::GetDistanceToSpecialAgent not implemented");
-    }
-    virtual bool IsObstacle() override
-    {
-        throw std::runtime_error("AgentAdapter::IsObstacle not implemented");
-    }
-    virtual double GetDistanceFrontAgentToEgo() override
-    {
-        throw std::runtime_error("AgentAdapter::GetDistanceFrontAgentToEgo not implemented");
-    }
-    virtual bool HasTwoLeftLanes() override
-    {
-        throw std::runtime_error("AgentAdapter::HasTwoLeftLanes not implemented");
-    }
-    virtual bool HasTwoRightLanes() override
-    {
-        throw std::runtime_error("AgentAdapter::HasTwoRightLanes not implemented");
-    }
-    virtual LaneChangeState EstimateLaneChangeState(double thresholdLooming) override
-    {
-        Q_UNUSED(thresholdLooming);
-
-        throw std::runtime_error("AgentAdapter::EstimateLaneChangeState not implemented");
-    }
-    virtual std::list<AgentInterface *> GetAllAgentsInLane(int laneId,
-                                                           double minDistance,
-                                                           double maxDistance,
-                                                           double AccSensDist) override
-    {
-        Q_UNUSED(laneId);
-        Q_UNUSED(minDistance);
-        Q_UNUSED(maxDistance);
-        Q_UNUSED(AccSensDist);
-
-        throw std::runtime_error("AgentAdapter::GetAllAgentsInLane not implemented");
-    }
-    virtual bool IsBicycle() const override
-    {
-        throw std::runtime_error("AgentAdapter::IsBicycle not implemented");
-    }
-    virtual bool IsFirstCarInLane() const override
-    {
-        throw std::runtime_error("AgentAdapter::IsFirstCarInLane not implemented");
-    }
-    virtual MarkType GetTypeOfNearestMark() const override
-    {
-        throw std::runtime_error("AgentAdapter::GetTypeOfNearestMark not implemented");
-    }
-    virtual std::string GetTypeOfNearestMarkString() const override
-    {
-        throw std::runtime_error("AgentAdapter::GetTypeOfNearestMarkString not implemented");
-    }
-    virtual double GetDistanceToNearestMark(MarkType markType) const override
-    {
-        Q_UNUSED(markType);
-
-        throw std::runtime_error("AgentAdapter::GetDistanceToNearestMark not implemented");
-    }
-    virtual double GetOrientationOfNearestMark(MarkType markType) const override
-    {
-        Q_UNUSED(markType);
-
-        throw std::runtime_error("AgentAdapter::GetOrientationOfNearestMark not implemented");
-    }
-    virtual double GetViewDirectionToNearestMark(MarkType markType) const override
-    {
-        Q_UNUSED(markType);
-
-        throw std::runtime_error("AgentAdapter::GetViewDirectionToNearestMark not implemented");
-    }
-    virtual double GetDistanceToNearestMarkInViewDirection(MarkType markType,
-                                                           AgentViewDirection agentViewDirection) const override
-    {
-        Q_UNUSED(markType);
-        Q_UNUSED(agentViewDirection);
-
-        throw std::runtime_error("AgentAdapter::GetDistanceToNearestMarkInViewDirection not implemented");
-    }
-    virtual double GetDistanceToNearestMarkInViewDirection(MarkType markType,
-                                                           double mainViewDirection) const override
-    {
-        Q_UNUSED(markType);
-        Q_UNUSED(mainViewDirection);
-
-        throw std::runtime_error("AgentAdapter::GetDistanceToNearestMarkInViewDirection not implemented");
-    }
-    virtual double GetOrientationOfNearestMarkInViewDirection(MarkType markType,
-                                                              AgentViewDirection agentViewDirection)const override
-    {
-        Q_UNUSED(markType);
-        Q_UNUSED(agentViewDirection);
-
-        throw std::runtime_error("AgentAdapter::GetOrientationOfNearestMarkInViewDirection not implemented");
-    }
-    virtual double GetOrientationOfNearestMarkInViewDirection(MarkType markType,
-                                                              double mainViewDirection) const override
-    {
-        Q_UNUSED(markType);
-        Q_UNUSED(mainViewDirection);
-
-        throw std::runtime_error("AgentAdapter::GetOrientationOfNearestMarkInViewDirection not implemented");
-    }
-    virtual double GetDistanceToNearestMarkInViewRange(MarkType markType,
-                                                       AgentViewDirection agentViewDirection, double range) const override
-    {
-        Q_UNUSED(markType);
-        Q_UNUSED(agentViewDirection);
-        Q_UNUSED(range);
-
-        throw std::runtime_error("AgentAdapter::GetDistanceToNearestMarkInViewRange not implemented");
-    }
-    virtual double GetDistanceToNearestMarkInViewRange(MarkType markType, double mainViewDirection,
-                                                       double range) const override
-    {
-        Q_UNUSED(markType);
-        Q_UNUSED(mainViewDirection);
-        Q_UNUSED(range);
-
-        throw std::runtime_error("AgentAdapter::GetDistanceToNearestMarkInViewRange not implemented");
-    }
-    virtual double GetOrientationOfNearestMarkInViewRange(MarkType markType,
-                                                          AgentViewDirection agentViewDirection, double range) const override
-    {
-        Q_UNUSED(markType);
-        Q_UNUSED(agentViewDirection);
-        Q_UNUSED(range);
-
-        throw std::runtime_error("AgentAdapter::GetOrientationOfNearestMarkInViewRange not implemented");
-    }
-    virtual double GetOrientationOfNearestMarkInViewRange(MarkType markType, double mainViewDirection,
-                                                          double range) const override
-    {
-        Q_UNUSED(markType);
-        Q_UNUSED(mainViewDirection);
-        Q_UNUSED(range);
-
-        throw std::runtime_error("AgentAdapter::GetOrientationOfNearestMarkInViewRange not implemented");
-    }
-    virtual double GetViewDirectionToNearestMarkInViewRange(MarkType markType,
-                                                            AgentViewDirection agentViewDirection, double range) const override
-    {
-        Q_UNUSED(markType);
-        Q_UNUSED(agentViewDirection);
-        Q_UNUSED(range);
-
-        throw std::runtime_error("AgentAdapter::GetViewDirectionToNearestMarkInViewRange not implemented");
-    }
-    virtual double GetViewDirectionToNearestMarkInViewRange(MarkType markType, double mainViewDirection,
-                                                            double range) const override
-    {
-        Q_UNUSED(markType);
-        Q_UNUSED(mainViewDirection);
-        Q_UNUSED(range);
-
-        throw std::runtime_error("AgentAdapter::GetViewDirectionToNearestMarkInViewRange not implemented");
-    }
-    virtual std::string GetTypeOfNearestObject(AgentViewDirection agentViewDirection,
-                                               double range) const override
-    {
-        Q_UNUSED(agentViewDirection);
-        Q_UNUSED(range);
-
-        throw std::runtime_error("AgentAdapter::GetTypeOfNearestObject not implemented");
-    }
-    virtual std::string GetTypeOfNearestObject(double mainViewDirection,
-                                               double range) const override
-    {
-        Q_UNUSED(mainViewDirection);
-        Q_UNUSED(range);
-
-        throw std::runtime_error("AgentAdapter::GetTypeOfNearestObject not implemented");
-    }
-    virtual double GetDistanceToNearestObjectInViewRange(ObjectType objectType,
-                                                         AgentViewDirection agentViewDirection,
-                                                         double range) const override
-    {
-        Q_UNUSED(objectType);
-        Q_UNUSED(agentViewDirection);
-        Q_UNUSED(range);
-
-        throw std::runtime_error("AgentAdapter::GetDistanceToNearestObjectInViewRange not implemented");
-    }
-    virtual double GetDistanceToNearestObjectInViewRange(ObjectType objectType,
-                                                         double mainViewDirection,
-                                                         double range) const override
-    {
-        Q_UNUSED(objectType);
-        Q_UNUSED(mainViewDirection);
-        Q_UNUSED(range);
-
-        throw std::runtime_error("AgentAdapter::GetDistanceToNearestObjectInViewRange not implemented");
-    }
-    virtual double GetViewDirectionToNearestObjectInViewRange(ObjectType objectType,
-                                                              AgentViewDirection agentViewDirection,
-                                                              double range) const override
-    {
-        Q_UNUSED(objectType);
-        Q_UNUSED(agentViewDirection);
-        Q_UNUSED(range);
-
-        throw std::runtime_error("AgentAdapter::GetViewDirectionToNearestObjectInViewRange not implemented");
-    }
-    virtual double GetViewDirectionToNearestObjectInViewRange(ObjectType objectType,
-                                                              double mainViewDirection,
-                                                              double range) const override
-    {
-        Q_UNUSED(objectType);
-        Q_UNUSED(mainViewDirection);
-        Q_UNUSED(range);
-
-        throw std::runtime_error("AgentAdapter::GetViewDirectionToNearestObjectInViewRange not implemented");
-    }
-    virtual int GetIdOfNearestAgent(AgentViewDirection agentViewDirection,
-                                    double range) const override
-    {
-        Q_UNUSED(agentViewDirection);
-        Q_UNUSED(range);
-
-        throw std::runtime_error("AgentAdapter::GetIdOfNearestAgent not implemented");
-    }
-    virtual int GetIdOfNearestAgent(double mainViewDirection,
-                                    double range) const override
-    {
-        Q_UNUSED(mainViewDirection);
-        Q_UNUSED(range);
-
-        throw std::runtime_error("AgentAdapter::GetIdOfNearestAgent not implemented");
-    }
-    virtual double GetDistanceToNearestAgentInViewRange(AgentViewDirection agentViewDirection,
-                                                        double range) const override
-    {
-        Q_UNUSED(agentViewDirection);
-        Q_UNUSED(range);
-
-        throw std::runtime_error("AgentAdapter::GetDistanceToNearestAgentInViewRange not implemented");
-    }
-    virtual double GetDistanceToNearestAgentInViewRange(double mainViewDirection,
-                                                        double range) const override
-    {
-        Q_UNUSED(mainViewDirection);
-        Q_UNUSED(range);
-
-        throw std::runtime_error("AgentAdapter::GetDistanceToNearestAgentInViewRange not implemented");
-    }
-    virtual double GetViewDirectionToNearestAgentInViewRange(AgentViewDirection agentViewDirection,
-                                                             double range) const override
-    {
-        Q_UNUSED(agentViewDirection);
-        Q_UNUSED(range);
-
-        throw std::runtime_error("AgentAdapter::GetViewDirectionToNearestAgentInViewRange not implemented");
-    }
-    virtual double GetViewDirectionToNearestAgentInViewRange(double mainViewDirection,
-                                                             double range) const override
-    {
-        Q_UNUSED(mainViewDirection);
-        Q_UNUSED(range);
-
-        throw std::runtime_error("AgentAdapter::GetViewDirectionToNearestAgentInViewRange not implemented");
-    }
-    virtual double GetVisibilityToNearestAgentInViewRange(double mainViewDirection,
-                                                        double range) const override
-    {
-        Q_UNUSED(mainViewDirection);
-        Q_UNUSED(range);
-
-        throw std::runtime_error("AgentAdapter::GetVisibilityToNearestAgentInViewRange not implemented");
-    }
-    virtual AgentViewDirection GetAgentViewDirectionToNearestMark(MarkType markType) const override
-    {
-        Q_UNUSED(markType);
-
-        throw std::runtime_error("AgentAdapter::GetAgentViewDirectionToNearestMark not implemented");
-    }
-    virtual double GetYawAcceleration() override
-    {
-        throw std::runtime_error("AgentAdapter::GetYawAcceleration not implemented");
-    }
-    virtual void SetYawAcceleration(double yawAcceleration) override
-    {
-        Q_UNUSED(yawAcceleration);
-
-        throw std::runtime_error("AgentAdapter::SetYawAcceleration not implemented");
-    }
-    virtual const std::vector<int> *GetTrajectoryTime() const override
-    {
-        throw std::runtime_error("AgentAdapter::GetTrajectoryTime not implemented");
-    }
-    virtual const std::vector<double> *GetTrajectoryXPos() const override
-    {
-        throw std::runtime_error("AgentAdapter::GetTrajectoryXPos not implemented");
-    }
-    virtual const std::vector<double> *GetTrajectoryYPos() const override
-    {
-        throw std::runtime_error("AgentAdapter::GetTrajectoryYPos not implemented");
-    }
-    virtual const std::vector<double> *GetTrajectoryVelocity() const override
-    {
-        throw std::runtime_error("AgentAdapter::GetTrajectoryVelocity not implemented");
-    }
-    virtual const std::vector<double> *GetTrajectoryAngle() const override
-    {
-        throw std::runtime_error("AgentAdapter::GetTrajectoryAngle not implemented");
-    }
-    virtual void SetAccelerationIntention(double accelerationIntention) override
-    {
-        Q_UNUSED(accelerationIntention);
-
-        throw std::runtime_error("AgentAdapter::SetAccelerationIntention not implemented");
-    }
-    virtual double GetAccelerationIntention() const override
-    {
-        throw std::runtime_error("AgentAdapter::GetAccelerationIntention not implemented");
-    }
-    virtual void SetDecelerationIntention(double decelerationIntention) override
-    {
-        Q_UNUSED(decelerationIntention);
-
-        throw std::runtime_error("AgentAdapter::SetDecelerationIntention not implemented");
-    }
-    virtual double GetDecelerationIntention() const override
-    {
-        throw std::runtime_error("AgentAdapter::GetDecelerationIntention not implemented");
-    }
-    virtual void SetAngleIntention(double angleIntention) override
-    {
-        Q_UNUSED(angleIntention);
-
-        throw std::runtime_error("AgentAdapter::SetAngleIntention not implemented");
-    }
-    virtual double GetAngleIntention() const override
-    {
-        throw std::runtime_error("AgentAdapter::GetAngleIntention not implemented");
-    }
-    virtual void SetCollisionState(bool collisionState) override
-    {
-        Q_UNUSED(collisionState);
-
-        throw std::runtime_error("AgentAdapter::SetCollisionState not implemented");
-    }
-    virtual bool GetCollisionState() const override
-    {
-        throw std::runtime_error("AgentAdapter::GetCollisionState not implemented");
-    }
-    virtual double GetAccelerationAbsolute() const override
-    {
-        throw std::runtime_error("AgentAdapter::GetAccelerationAbsolute not implemented");
     }
 
 private:
@@ -965,6 +599,8 @@ private:
     double brakePedal = 0.;
     double steeringWheelAngle = 0.0;
     double centripetalAcceleration = 0.0;
+    double tangentialAcceleration = 0.0;
+    double yawAcceleration = 0.0;
     double engineSpeed = 0.;
     double distanceTraveled = 0.0;
 

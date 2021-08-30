@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2019 ITK Engineering GmbH
+* Copyright (c) 2019, 2020 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -40,7 +40,6 @@ void ModelTimePlot::LoadPathData(const QString &pathName)
     Q_EMIT Clear();
     selectedIndexList.clear();
 
-    qDebug("LoadPathData %s", qPrintable(rootPath));
     treeModelHighD->setRootResultDir(rootPath);
 }
 

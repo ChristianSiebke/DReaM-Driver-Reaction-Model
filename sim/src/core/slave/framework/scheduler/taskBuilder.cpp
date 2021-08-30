@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -71,7 +71,7 @@ std::list<TaskItem> TaskBuilder::CreatePreAgentTasks()
 
 std::list<TaskItem> TaskBuilder::CreateSynchronizeTasks()
 {
-    return {SyncWorldTaskItem(ScheduleAtEachCycle, [&] { world->SyncGlobalData(); })};
+    return {SyncWorldTaskItem(ScheduleAtEachCycle, [&] { world->SyncGlobalData(currentTime); })};
 }
 
 std::list<TaskItem> TaskBuilder::CreateFinalizeTasks()

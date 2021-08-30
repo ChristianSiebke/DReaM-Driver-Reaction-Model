@@ -52,7 +52,10 @@ target_link_libraries(TrafficSimulation PRIVATE
                       ${PROJECT_NAME}_Presenters
                       ${PROJECT_NAME}_Interfaces)
 
-# target directories. Needs to be defined in some global file TODO
-set_target_properties(TrafficSimulation PROPERTIES
-                      RUNTIME_OUTPUT_DIRECTORY "C:/OpenPASS/bin/gui"
-                      PREFIX "")
+if(WIN32)
+    install(TARGETS TrafficSimulation
+        RUNTIME DESTINATION ${SUBDIR_LIB_GUI}) 
+elseif(UNIX)
+    install(TARGETS TrafficSimulation
+        LIBRARY DESTINATION ${SUBDIR_LIB_GUI}) 
+endif()

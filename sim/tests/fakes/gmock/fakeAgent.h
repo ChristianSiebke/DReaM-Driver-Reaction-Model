@@ -1,5 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -182,5 +183,9 @@ class FakeAgent : public FakeWorldObject, public AgentInterface
     MOCK_METHOD1(SetSensorParameters, void(openpass::sensors::Parameters sensorParameters));
     MOCK_CONST_METHOD3(GetDistanceToConnectorEntrance, double (std::string intersectingConnectorId, int intersectingLaneId, std::string ownConnectorId));
     MOCK_CONST_METHOD3(GetDistanceToConnectorDeparture, double (std::string intersectingConnectorId, int intersectingLaneId, std::string ownConnectorId));
-    MOCK_CONST_METHOD0(GetDistanceToNextJunction, double ());
+    MOCK_CONST_METHOD0(GetDistanceToNextJunction, double());
+    MOCK_CONST_METHOD0(GetYawAcceleration, double());
+    MOCK_CONST_METHOD0(GetTangentialAcceleration, double());
+    MOCK_METHOD1(SetTangentialAcceleration, void(double));
+    MOCK_METHOD3(SetVelocityVector, void(double, double, double));
 };

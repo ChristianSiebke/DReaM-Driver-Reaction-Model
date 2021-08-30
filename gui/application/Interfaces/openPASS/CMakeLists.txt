@@ -15,4 +15,4 @@ set(HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/RandomInterface.h
     ${CMAKE_CURRENT_LIST_DIR}/ServiceInterface.h
     ${CMAKE_CURRENT_LIST_DIR}/ServiceManagerInterface.h
-    ${CMAKE_CURRENT_LIST_DIR}/IOPluginInterface.h)
+    ${CMAKE_CURRENT_LIST_DIR}/ioplugininterface.h)

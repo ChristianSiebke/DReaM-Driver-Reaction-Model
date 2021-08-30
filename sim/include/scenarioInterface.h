@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 
+#include "include/sceneryDynamicsInterface.h"
 #include "common/worldDefinitions.h"
 #include "common/eventDetectorDefinitions.h"
 
@@ -146,6 +147,18 @@ public:
     virtual void SetSceneryPath(const std::string& sceneryPath) = 0;
 
     //-----------------------------------------------------------------------------
+    //! Retreives the dynamic scenery portions
+    //!
+    //! \return     scenery dynamics
+    //-----------------------------------------------------------------------------
+    virtual const SceneryDynamicsInterface& GetSceneryDynamics() = 0;
+
+    //-----------------------------------------------------------------------------
+    //! Adds one traffic signal controller
+    //----------------------------------------------------------------------------
+    virtual void AddTrafficSignalController (const openScenario::TrafficSignalController& controller) = 0;
+
+    //-----------------------------------------------------------------------------
     //! Adds one scenario entity to the scenery entities of the scenario.
     //-----------------------------------------------------------------------------
     virtual void AddScenarioEntity(const ScenarioEntity& entity) = 0;
@@ -210,4 +223,10 @@ public:
     //! \param[in] endTime The desired end time of the simulation.
     //-------------------------------------------------------------------------
     virtual void SetEndTime(const double endTime) = 0;
+
+    //-------------------------------------------------------------------------
+    //! \brief Sets the environment conditions of the simulation.
+    //! \param[in] endTime The environment conditions of the simulation.
+    //-------------------------------------------------------------------------
+    virtual void SetEnvironment(const openScenario::EnvironmentAction& environment) = 0;
 };

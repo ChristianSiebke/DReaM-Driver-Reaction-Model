@@ -32,7 +32,8 @@
                 "StaticAgentCollision",
                 "StaticAgentProfileAFDM",
                 "SupplementaryTrafficSigns",
-                "TrafficJam"
+                "TrafficJam",
+                "TrafficLight"
             ]
         },
         "ADAS_AEB": {
