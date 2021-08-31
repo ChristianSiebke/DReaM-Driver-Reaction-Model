@@ -24,6 +24,7 @@
 #include "include/roadInterface/junctionInterface.h"
 #include "include/worldInterface.h"
 #include "include/callbackInterface.h"
+#include "common/openScenarioDefinitions.h"
 
 #include "osi3/osi_groundtruth.pb.h"
 #include "osi3/osi_sensorview.pb.h"
@@ -44,6 +45,7 @@ using StationaryObject  = Implementation::StationaryObject;
 using MovingObject      = Implementation::MovingObject;
 using Vehicle           = Implementation::Vehicle;
 using TrafficSign       = Implementation::TrafficSign;
+using TrafficLight      = Implementation::TrafficLight;
 
 using CLane              = const Interfaces::Lane;
 using CSection           = const Interfaces::Section;
@@ -120,6 +122,12 @@ public:
     //! \param odId          OpenDRIVE Id
     virtual Interfaces::TrafficSign& AddTrafficSign(const Id id, const std::string odId) = 0;
 
+    //!Creates a new TrafficLight and returns it
+    //! \param Id            Unique ID
+    //! \param odId          OpenDRIVE Id
+    //! \param withYellow    flag indication wether this traffic light has a yellow bulb
+    virtual Interfaces::TrafficLight& AddTrafficLight(const Id id, const std::string odId, bool withYellow) = 0;
+
     //!Creates a new RoadMarking and returns it
     //! \param Id            Unique ID
     virtual Interfaces::RoadMarking& AddRoadMarking(const Id id) = 0;
@@ -135,6 +143,12 @@ public:
     //! \param laneId       OSI Id of the lane
     //! \param roadMarking  roadMarking to assign
     virtual void AssignRoadMarkingToLane(OWL::Id laneId, Interfaces::RoadMarking& roadMarking) = 0;
+
+    //! Adds a traffic light to the assigned traffic lights of lane
+    //!
+    //! \param laneId       OSI Id of the lane
+    //! \param trafficLight traffic light to assign
+    virtual void AssignTrafficLightToLane(OWL::Id laneId, Interfaces::TrafficLight &trafficLight) = 0;
 
     //!Deletes the moving object with the specified Id
     virtual void RemoveMovingObjectById(Id id) = 0; // change Id to MovingObject
@@ -163,6 +177,9 @@ public:
     //!Returns a map of all road markings with their OSI Id
     virtual const std::unordered_map<Id, RoadMarking*>& GetRoadMarkings() const = 0;
 
+    //!Returns a map of all traffic lights with their OSI Id
+    virtual const std::unordered_map<Id, TrafficLight*>& GetTrafficLights() const = 0;
+    
     //!Returns the stationary object with given Id
     virtual const StationaryObject& GetStationaryObject(Id id) const = 0;
 
@@ -285,6 +302,45 @@ public:
                                         /*const*/ RoadLaneSectionInterface& secondOdSection,
                                         const std::map<int, int>& lanePairs,
                                         bool isPrev) = 0;
+
+
+    static constexpr double THRESHOLD_ILLUMINATION_LEVEL1 = 0.01;       //!< Upper threshold for osi3::EnvironmentalConditions::AmbientIllumination::Level1
+    static constexpr double THRESHOLD_ILLUMINATION_LEVEL2 = 1.0;        //!< Upper threshold for osi3::EnvironmentalConditions::AmbientIllumination::Level2
+    static constexpr double THRESHOLD_ILLUMINATION_LEVEL3 = 3.0;        //!< Upper threshold for osi3::EnvironmentalConditions::AmbientIllumination::Level3
+    static constexpr double THRESHOLD_ILLUMINATION_LEVEL4 = 10.0;       //!< Upper threshold for osi3::EnvironmentalConditions::AmbientIllumination::Level4
+    static constexpr double THRESHOLD_ILLUMINATION_LEVEL5 = 20.0;       //!< Upper threshold for osi3::EnvironmentalConditions::AmbientIllumination::Level5
+    static constexpr double THRESHOLD_ILLUMINATION_LEVEL6 = 400.0;      //!< Upper threshold for osi3::EnvironmentalConditions::AmbientIllumination::Level6
+    static constexpr double THRESHOLD_ILLUMINATION_LEVEL7 = 1000.0;     //!< Upper threshold for osi3::EnvironmentalConditions::AmbientIllumination::Level7
+    static constexpr double THRESHOLD_ILLUMINATION_LEVEL8 = 10000.0;    //!< Upper threshold for osi3::EnvironmentalConditions::AmbientIllumination::Level8
+    static constexpr double THRESHOLD_FOG_DENSE = 50.0;         //!< Upper threshold for osi3::EnvironmentalConditions::Fog::Dense
+    static constexpr double THRESHOLD_FOG_THICK = 200.0;        //!< Upper threshold for osi3::EnvironmentalConditions::Fog::Thick
+    static constexpr double THRESHOLD_FOG_LIGHT = 1000.0;       //!< Upper threshold for osi3::EnvironmentalConditions::Fog::Light
+    static constexpr double THRESHOLD_FOG_MIST = 2000.0;        //!< Upper threshold for osi3::EnvironmentalConditions::Fog::Mist
+    static constexpr double THRESHOLD_FOG_POOR = 4000.0;        //!< Upper threshold for osi3::EnvironmentalConditions::Fog::Poor_Visibility
+    static constexpr double THRESHOLD_FOG_MODERATE = 10000.0;   //!< Upper threshold for osi3::EnvironmentalConditions::Fog::Moderate_Visibility
+    static constexpr double THRESHOLD_FOG_GOOD = 40000.0;       //!< Upper threshold for osi3::EnvironmentalConditions::Fog::Good_Visibility
+
+    //! \brief Translates an openScenario environment to OSI3
+    //!
+    //! The following thresholds are used for a mapping of illumination level:
+    //! - \see THRESHOLD_ILLUMINATION_LEVEL1
+    //! - \see THRESHOLD_ILLUMINATION_LEVEL2
+    //! - \see THRESHOLD_ILLUMINATION_LEVEL3
+    //! - \see THRESHOLD_ILLUMINATION_LEVEL4
+    //! - \see THRESHOLD_ILLUMINATION_LEVEL5
+    //! - \see THRESHOLD_ILLUMINATION_LEVEL6
+    //! - \see THRESHOLD_ILLUMINATION_LEVEL7
+    //! - \see THRESHOLD_ILLUMINATION_LEVEL8
+    //!
+    //! The following thresholds are used for a mapping of fog:
+    //! - \see THRESHOLD_FOG_DENSE
+    //! - \see THRESHOLD_FOG_THICK
+    //! - \see THRESHOLD_FOG_LIGHT
+    //! - \see THRESHOLD_FOG_MIST
+    //! - \see THRESHOLD_FOG_POOR
+    //! - \see THRESHOLD_FOG_MODERATE
+    //! - \see THRESHOLD_FOG_GOOD
+    virtual void SetEnvironment(const openScenario::EnvironmentAction& environment) = 0;
 
     //!Resets the world for new run; deletes all moving objects
     virtual void Reset() = 0;
@@ -441,10 +497,12 @@ public:
     Interfaces::MovingObject& AddMovingObject(const Id id, void* linkedObject) override;
     Interfaces::StationaryObject& AddStationaryObject(const Id id, void* linkedObject) override;
     Interfaces::TrafficSign& AddTrafficSign(const Id id, const std::string odId) override;
+    Interfaces::TrafficLight& AddTrafficLight(const Id id, const std::string odId, bool withYellow) override;
     Interfaces::RoadMarking& AddRoadMarking(const Id id) override;
 
     void AssignTrafficSignToLane(OWL::Id laneId, Interfaces::TrafficSign &trafficSign) override;
     void AssignRoadMarkingToLane(OWL::Id laneId, Interfaces::RoadMarking& roadMarking) override;
+    void AssignTrafficLightToLane(OWL::Id laneId, Interfaces::TrafficLight &trafficLight) override;
 
     void RemoveMovingObjectById(Id id) override;
 
@@ -475,6 +533,7 @@ public:
     const std::map<std::string, Junction*>& GetJunctions() const override;
     const std::unordered_map<Id, Interfaces::TrafficSign*>& GetTrafficSigns() const override;
     const std::unordered_map<Id, Interfaces::RoadMarking*>& GetRoadMarkings() const override;
+    const std::unordered_map<Id, Interfaces::TrafficLight*>& GetTrafficLights() const override;
     const Implementation::InvalidLane& GetInvalidLane() const override {return invalidLane;}
 
     const std::unordered_map<Id, OdId>& GetLaneIdMapping() const override
@@ -486,6 +545,9 @@ public:
     {
         return trafficSignIdMapping;
     }
+
+    void SetEnvironment(const openScenario::EnvironmentAction& environment) override;
+
 
     static bool IsCloseToSectorBoundaries(double distanceToCenter,
                                           double angle,
@@ -612,6 +674,7 @@ private:
     std::unordered_map<Id, StationaryObject*>   stationaryObjects;
     std::map<Id, MovingObject*>                 movingObjects;
     std::unordered_map<Id, Interfaces::TrafficSign*>  trafficSigns;
+    std::unordered_map<Id, Interfaces::TrafficLight*>  trafficLights;
     std::unordered_map<Id, Interfaces::RoadMarking*>  roadMarkings;
 
     std::unordered_map<std::string, Road*> roadsById;

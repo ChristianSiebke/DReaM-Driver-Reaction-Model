@@ -74,7 +74,7 @@ std::list<TaskItem> TaskBuilder::CreateSynchronizeTasks()
 {
     return {
         ObservationTaskItem(ScheduleAtEachCycle, [&] { return observationNetwork->UpdateTimeStep(currentTime, runResult); }),
-        SyncWorldTaskItem(ScheduleAtEachCycle, [&] { world->SyncGlobalData(); })};
+        SyncWorldTaskItem(ScheduleAtEachCycle, [&] { world->SyncGlobalData(currentTime); })};
 }
 
 std::list<TaskItem> TaskBuilder::CreateFinalizeTasks()

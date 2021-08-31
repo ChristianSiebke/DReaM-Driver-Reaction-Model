@@ -1,5 +1,6 @@
 # /*********************************************************************
-# * Copyright (c) 2019 Volkswagen Group of America.
+# * Copyright (c) 2019 Volkswagen Group of America
+# *               2020 ITK Engineering GmbH
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -17,11 +18,17 @@
 TEMPLATE = subdirs
 SUBDIRS = \
     application/openPASS.pro \
-    #plugins/agentConfiguration/openPASS-AgentConfiguration.pro \
     plugins/component/openPASS-Component.pro \
+    plugins/window/openPASS-Window.pro \
     plugins/project/openPASS-Project.pro \
     plugins/statistics/openPASS-Statistics.pro \
-    plugins/system/openPASS-System.pro \
     plugins/timePlot/openPASS-TimePlot.pro \
+    plugins/pcmSimulation/openPASS-PCM.pro \
+    plugins/pcmEvaluation/openPASS-PCM_Eval.pro \
+    plugins/system/openPASS-System.pro \
+
+
+#-----------------------------------------------------------------------------
+# temporary excluded until compatiblity is established
+    #plugins/agentConfiguration/openPASS-AgentConfiguration.pro \
     #plugins/trafficSimulation/openPASS-TrafficSimulation.pro \
-    plugins/window/openPASS-Window.pro \

@@ -47,11 +47,17 @@ add_library(System SHARED ${SOURCES} ${HEADERS} )
 # link with Qt libraries, models, views and Interfaces
 target_link_libraries(System PRIVATE
                       Qt5::Widgets
+                      Window
+                      Component
+                      Project
                       ${PROJECT_NAME}_Models
                       ${PROJECT_NAME}_Views
                       ${PROJECT_NAME}_Interfaces)
 
-# target directories. Needs to be defined in some global file TODO
-set_target_properties(System PROPERTIES
-                      RUNTIME_OUTPUT_DIRECTORY "C:/OpenPASS/bin/gui"
-                      PREFIX "")
+if(WIN32)
+        install(TARGETS System
+                RUNTIME DESTINATION ${SUBDIR_LIB_GUI}) 
+elseif(UNIX)
+        install(TARGETS System
+                LIBRARY DESTINATION ${SUBDIR_LIB_GUI}) 
+endif()

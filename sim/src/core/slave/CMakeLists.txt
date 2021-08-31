@@ -65,6 +65,7 @@ add_openpass_target(
     importer/scenarioImporter.h
     importer/scenarioImporterHelper.h
     importer/scenery.h
+    importer/sceneryDynamics.h
     importer/sceneryImporter.h
     importer/slaveConfig.h
     importer/slaveConfigImporter.h
@@ -142,6 +143,7 @@ add_openpass_target(
     importer/scenarioImporter.cpp
     importer/scenarioImporterHelper.cpp
     importer/scenery.cpp
+    importer/sceneryDynamics.cpp
     importer/sceneryImporter.cpp
     importer/slaveConfig.cpp
     importer/slaveConfigImporter.cpp

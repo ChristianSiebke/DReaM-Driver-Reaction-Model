@@ -19,6 +19,7 @@ add_openpass_target(
     SceneryConverter.h
     SceneryEntities.h
     TrafficObjectAdapter.h
+    TrafficLightNetwork.h
     World.h
     WorldData.h
     WorldDataException.h
@@ -46,6 +47,7 @@ add_openpass_target(
     Localization.cpp
     SceneryConverter.cpp
     TrafficObjectAdapter.cpp
+    TrafficLightNetwork.cpp
     World.cpp
     WorldData.cpp
     WorldDataException.cpp

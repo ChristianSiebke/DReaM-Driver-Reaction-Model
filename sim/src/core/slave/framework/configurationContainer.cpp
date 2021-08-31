@@ -1,5 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2018, 2019 in-tech GmbH
+* Copyright (c) 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -59,10 +60,17 @@ bool ConfigurationContainer::ImportAllConfigurations()
     }
 
     //Import VehicleModels
-    if (!VehicleModelsImporter::Import(
-                openpass::core::Directories::Concat(configurationFiles.configurationDir, scenario.GetVehicleCatalogPath()),
-                openpass::core::Directories::Concat(configurationFiles.configurationDir, scenario.GetPedestrianCatalogPath()),
-                vehicleModels))
+    std::string vehicleCatalogPath = "";
+    if (!scenario.GetVehicleCatalogPath().empty())
+    {
+        vehicleCatalogPath = openpass::core::Directories::Concat(configurationFiles.configurationDir, scenario.GetVehicleCatalogPath());
+    }
+    std::string pedestrianCatalogPath = "";
+    if (!scenario.GetPedestrianCatalogPath().empty())
+    {
+        pedestrianCatalogPath = openpass::core::Directories::Concat(configurationFiles.configurationDir, scenario.GetPedestrianCatalogPath());
+    }
+    if (!VehicleModelsImporter::Import(vehicleCatalogPath,pedestrianCatalogPath,vehicleModels))
     {
         LOG_INTERN(LogLevel::Error) << "could not import vehicle models";
         return false;

@@ -74,6 +74,8 @@ endif()
 # copies runtime dependencies to installation directory (on running 'make install')
 # requires global properties defined above
 # only has an effect, if at least one of INSTALL_SYSTEM_RUNTIME_DEPS and INSTALL_EXTRA_RUNTIME_DEPS is set to ON
-include(install_deps)
+if(INSTALL_SYSTEM_RUNTIME_DEPS OR INSTALL_EXTRA_RUNTIME_DEPS)
+    include(install_deps)
+endif()
 
 include(CPack)
