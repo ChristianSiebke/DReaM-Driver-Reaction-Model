@@ -19,7 +19,7 @@
 #ifndef ALGORITHM_ROUTECONTROL_H
 #define ALGORITHM_ROUTECONTROL_H
 
-#include "algorithm_routecontrol_global.h"
+#include "algorithm_RouteControl_global.h"
 #include "include/modelInterface.h"
 
 #endif // ALGORITHM_ROUTECONTROL_H

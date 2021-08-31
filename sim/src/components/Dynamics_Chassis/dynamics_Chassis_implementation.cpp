@@ -35,6 +35,9 @@
 #include "dynamics_Chassis_implementation.h"
 #include <QString>
 
+#include "common/commonTools.h"
+#include "components/common/vehicleProperties.h"
+
 Dynamics_Chassis_Implementation::Dynamics_Chassis_Implementation(std::string componentName,
                                                                  bool isInit,
                                                                  int priority,
@@ -77,15 +80,16 @@ Dynamics_Chassis_Implementation::Dynamics_Chassis_Implementation(std::string com
     /** @addtogroup init_3dc
      * Get basic parameters of the ego vehicle.
     */
-    double wheelBase = GetAgent()->GetVehicleModelParameters().wheelbase;
+    double wheelBase = agent->GetVehicleModelParameters().frontAxle.positionX - agent->GetVehicleModelParameters().rearAxle.positionX;
     double lenFront = wheelBase / 2.0;
     double lenRear = wheelBase - lenFront;
-    double trackWidth = GetAgent()->GetVehicleModelParameters().trackwidth;
-    double hCOG = GetAgent()->GetVehicleModelParameters().height/2.0;
-    double mass = GetAgent()->GetVehicleModelParameters().weight;
+    double trackWidth = GetAgent()->GetVehicleModelParameters().frontAxle.trackWidth;
+    double hCOG = GetAgent()->GetVehicleModelParameters().boundingBoxDimensions.height/2.0;
+    auto mass = helper::map::query(GetAgent()->GetVehicleModelParameters().properties, vehicle::properties::Mass);
+    THROWIFFALSE(mass.has_value(), "Mass was not defined in VehicleCatalog");
 
     // define car parameters including lLeft, lRight, lFront, lRear, hMC, mass
-    carParam = VehicleBasics(trackWidth*0.5, trackWidth*0.5, lenFront, lenRear, hCOG, mass);
+    carParam = VehicleBasics(trackWidth*0.5, trackWidth*0.5, lenFront, lenRear, hCOG, mass.value());
 
     /** @addtogroup init_3dc
      * For each wheel, initialize the correspondig oscillation object for later simulation.
