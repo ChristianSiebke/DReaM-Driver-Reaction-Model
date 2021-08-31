@@ -61,18 +61,6 @@
       <object type="obstacle" name="Absperrung" id="" s="600" t="-9.55" zOffset="0" validLength="0" orientation="-" length="0.80" width="3.0" height="1.0" hdg="0" pitch="0" roll="0"/>
       <object type="obstacle" name="Absperrung" id="" s="600" t="-2.05" zOffset="0" validLength="0" orientation="-" length="0.80" width="3.0" height="1.0" hdg="0" pitch="0" roll="0"/>
       <object type="obstacle" name="Absperrung" id="" s="4600" t="-5.8" zOffset="0" validLength="0" orientation="-" length="0.80" width="3.0" height="1.0" hdg="0" pitch="0" roll="0"/>
-      <object type="roadMark" name="RoadSideMarkerPost" id="" s="0" t="1" zOffset="0" validLength="0" orientation="+" length="0.12" width="0.12" height="1.2" hdg="0" pitch="0" roll="0">
-        <repeat s="0" distance="50" length="5139.7188686309819"/>
-      </object>
-      <object type="roadMark" name="RoadSideMarkerPost" id="" s="0" t="-12" zOffset="0" validLength="0" orientation="-" length="0.12" width="0.12" height="1.2" hdg="0" pitch="0" roll="0">
-        <repeat s="0" distance="50" length="5139.7188686309819"/>
-      </object>
-      <object type="railing" name="GuardRail" id="" s="0" t="0.5" zOffset="0" validLength="0" orientation="+" length="3.0" width="0.25" height="0.9" hdg="0" pitch="0" roll="0">
-        <repeat s="0" distance="0" length="5139.7188686309819"/>
-      </object>
-      <object type="railing" name="GuardRail" id="" s="0" t="-11.5" zOffset="0" validLength="0" orientation="-" length="3.0" width="0.25" height="0.9" hdg="0" pitch="0" roll="0">
-        <repeat s="0" distance="0" length="5139.7188686309819"/>
-      </object>
     </objects>
     <signals/>
   </road>

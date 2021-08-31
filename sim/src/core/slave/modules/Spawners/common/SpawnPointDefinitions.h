@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019, 2020 in-tech GmbH
+* Copyright (c) 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -15,12 +15,14 @@
 #include "common/commonTools.h"
 #include "include/parameterInterface.h"
 #include "include/callbackInterface.h"
+#include "framework/sampler.h"
 
 namespace SpawnPointDefinitions
 {
 constexpr char SPAWNPOINTS[] = {"SpawnPoints"};
 constexpr char ROADS[] = {"Roads"};
 constexpr char LANES[] = {"Lanes"};
+constexpr double DEFAULT_MINIMUM_SEPARATION_BUFFER = 5.0;
 
 using RoadId = std::string;
 using RoadIds = std::vector<RoadId>;
@@ -78,6 +80,21 @@ struct AgentProfileLaneMaps
 
 #define SPAWNER_THROWIFFALSE(success,message) if (!(success)) { callbacks->Log(CbkLogLevel::Error, __FILE__, __LINE__, message); throw std::runtime_error(message); }
 
+//! Read the (fixed or stochastic) MinimumSeparationBuffer parameter or sets it to the default value if not defined
+//!
+//! \param parameter SpawnPointParameter
+//! \return MinimumSeparationBuffer
+static std::variant<double, openpass::parameter::StochasticDistribution> ExtractMinimumSpawnBuffer(const ParameterInterface &parameter)
+{
+    const auto& separationBufferStochastic = helper::map::query(parameter.GetParametersStochastic(), "MinimumSeparationBuffer");
+    if (separationBufferStochastic.has_value())
+    {
+        return separationBufferStochastic.value();
+    }
+    const auto& separationBufferDouble = helper::map::query(parameter.GetParametersDouble(), "MinimumSeparationBuffer");
+    return separationBufferDouble.value_or(DEFAULT_MINIMUM_SEPARATION_BUFFER);
+}
+
 //! Reads the possible AgentProfiles and their spawn parameters from the Spawner profile
 //!
 //! \param parameter    Spawner profile
@@ -122,6 +139,18 @@ static AgentProfileLaneMaps ExtractAgentProfileLaneMaps(const ParameterInterface
     }
 
     return agentProfileLaneMaps;
+}
+
+static double GetStochasticOrPredefinedValue (std::variant<double, openpass::parameter::StochasticDistribution> value, StochasticsInterface* stochastics)
+{
+    if (std::holds_alternative<openpass::parameter::StochasticDistribution>(value))
+    {
+        return Sampler::RollForStochasticAttribute(std::get<openpass::parameter::StochasticDistribution>(value), stochastics);
+    }
+    else
+    {
+        return std::get<double>(value);
+    }
 }
 
 } // namespace SpawnPointDefinitions

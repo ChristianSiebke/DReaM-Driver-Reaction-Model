@@ -228,17 +228,14 @@ The OsmpFmuHandler has the following additional (optional) parameters:
 | Input_&lt;var_name&gt;    | string   | var_name references a FMU variable (as defined in FMU's modelDescription.xml) to which a specific OSI message is sent. Allowed values: `SensorView`, `SensorViewConfig`, `SensorData`, `TrafficCommand`                 |
 | Output_&lt;var_name&gt;   | string   | var_name references a FMU variable (as defined in FMU's modelDescription.xml) from which a specific OSI message is received. Allowed values: `SensorViewConfigRequest`, `SensorData`, `TrafficUpdate`, `MotionCommand`  |
 | Parameter_&lt;name&gt;    | any      | The value of the parameter is assigned to the FMU variable &lt;name&gt;                         |
-| WriteSensorViewOutput     | bool     | If true the SensorView is written into a JSON file                                              |
-| WriteSensorViewConfigOutput     | bool     | If true the SensorViewConfig is written into a JSON file                                              |
-| WriteSensorViewConfigRequestOutput     | bool     | If true the SensorViewConfigRequest is written into a JSON file                                              |
-| WriteTrafficCommandOutput | bool     | If true the TrafficCommand is written into a JSON file                                          |
-| WriteGroundTruthOutput    | bool     | If true the GroundTruth is written into a JSON file                                             |
-| WriteSensorDataOutput     | bool     | If true the SensorData is written into a JSON file                                              |
-| WriteTrafficUpdateOutput  | bool     | If true the TrafficUpdate is written into a JSON file                                           |
+| Parameter_&lt;transformation&gt;[&lt;mapping&gt;]_&lt;name&gt;    | string/string/any&ast;      | Same as Parameter_&lt;name&gt; but with an preceding &lt;transformation&gt; according to a &lt;mapping&gt;.<br/>Currently, only mappings between the same types are supported.<br/>&ast;When using `TransformList` as &lt;transformation&gt;, the type of the data is expected to be a string and the string must be a comma separated list of values.<br/><br/>Allowed values:<br />&lt;transformation&gt;: `Transform`, `TransformList`<br />&lt;mapping&gt;: `ScenarioName>Id`<br/><br/>Example: `Parameter_TransformList[ScenarioName>Id]_<name>` |
+| WriteJson_&lt;var_name&gt;     | bool     | var_name references a FMU variable (as defined in FMU's modelDescription.xml). Allowed values: `SensorView`, `SensorViewConfig`, `SensorViewConfigRequest`, `SensorData`, `TrafficCommand`, `GroundTruth`, `TrafficUpdate`<br/>If true the var_name is written into a JSON file                  |
+| WriteTrace_&lt;var_name&gt;     | bool     | var_name references a FMU variable (as defined in FMU's modelDescription.xml). Allowed values: `SensorView`, `SensorViewConfig`, `SensorViewConfigRequest`, `SensorData`, `TrafficCommand`, `GroundTruth`, `TrafficUpdate`<br/>If true the binary trace of the var_name is written into an OSI trace file                                              |
 | EnforceDoubleBuffering    | bool     | If true the wrapper will throw an error if FMU doesn't use double buffering. Defaults to false. |
 
 The type of OSI messages the OsmpFmuHandler sends an receives is defined by its parameters. Only messages for which a FMU variable is given in the configuration are sent/received.
-An additional parameter defines whether the message should be logged as JSON file for every agent and every timestep (see table above).
+There are two additional parameters.
+One parameter defines whether the message should be logged as JSON file for every agent and every timestep. The other one defines whether all messages of the same type should be logged as one OSI trace file for every agent (see table above).
 
 Currently these messages are supported:
 
@@ -557,4 +554,3 @@ Output to other components:
 | TrajectoryFollower | Current max. reachable state                                               | ComponentStateSignal        |
 | Driver             | List of all ADAS with names, stati and types                               | AdasStateSignal             |
 | VehicleComponent   | Current max. reachable state, list of all ADAS with names, stati and types | CompCtrlToVehicleCompSignal |
-

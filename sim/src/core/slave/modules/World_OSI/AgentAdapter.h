@@ -225,6 +225,14 @@ public:
         });
     }
 
+    void SetRoll(double value) override
+    {
+        world->QueueAgentUpdate([this, value]()
+        {
+            UpdateRoll(value);
+        });
+    }
+
     void SetYawRate(double value) override
     {
         world->QueueAgentUpdate([this, value]()
@@ -535,13 +543,14 @@ private:
 
     void UpdateVehicleModelParameter(const VehicleModelParameters& parameter)
     {
-        OWL::Primitive::Dimension dimension = baseTrafficObject.GetDimension();
-        dimension.width = parameter.width;
-        dimension.length = parameter.length;
-        dimension.height = parameter.height;
+        OWL::Primitive::Dimension dimension;
+        dimension.width = parameter.boundingBoxDimensions.width;
+        dimension.length = parameter.boundingBoxDimensions.length;
+        dimension.height = parameter.boundingBoxDimensions.height;
 
         GetBaseTrafficObject().SetDimension(dimension);
-        GetBaseTrafficObject().SetDistanceReferencPointToLeadingEdge(parameter.distanceReferencePointToLeadingEdge);
+        GetBaseTrafficObject().SetBoundingBoxCenterToRear(-parameter.boundingBoxCenter.x);
+        GetBaseTrafficObject().SetType(parameter.vehicleType);
 
         vehicleModelParameters = parameter;
     }
@@ -550,6 +559,13 @@ private:
     {
         OWL::Primitive::AbsOrientation orientation = baseTrafficObject.GetAbsOrientation();
         orientation.yaw = yawAngle;
+        GetBaseTrafficObject().SetAbsOrientation(orientation);
+    }
+
+    void UpdateRoll(double rollAngle)
+    {
+        OWL::Primitive::AbsOrientation orientation = baseTrafficObject.GetAbsOrientation();
+        orientation.roll = rollAngle;
         GetBaseTrafficObject().SetAbsOrientation(orientation);
     }
 

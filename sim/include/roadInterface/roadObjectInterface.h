@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -33,6 +33,7 @@ public:
     virtual double GetHeight() const = 0;
     virtual double GetPitch() const = 0;
     virtual double GetRoll() const = 0;
+    virtual bool IsContinuous() const = 0;
     virtual std::string GetName() const = 0;
 };
 

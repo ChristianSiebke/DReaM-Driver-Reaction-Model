@@ -43,7 +43,7 @@ public:
     MOCK_METHOD2(SetSpecification,
                  bool(RoadSignalInterface*, Position position));
     MOCK_METHOD2(AddSupplementarySign,
-                 void (RoadSignalInterface* odSignal, Position position));
+                 bool (RoadSignalInterface* odSignal, Position position));
     MOCK_CONST_METHOD1(CopyToGroundTruth,
                        void(osi3::GroundTruth&));
 };

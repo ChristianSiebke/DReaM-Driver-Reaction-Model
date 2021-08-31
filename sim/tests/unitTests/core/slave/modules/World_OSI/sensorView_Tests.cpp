@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
+* Copyright (c) 2018, 2019, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,7 @@
 
 #include "fakeMovingObject.h"
 #include "fakeTrafficSign.h"
+#include "fakeLane.h"
 #include "Primitives.h"
 #include "WorldData.h"
 
@@ -24,7 +25,9 @@ using namespace OWL;
 
 using ::testing::Eq;
 using ::testing::Return;
+using ::testing::ReturnRef;
 using ::testing::SizeIs;
+using ::testing::_;
 
 struct SensorViewTest_Data
 {
@@ -154,3 +157,59 @@ INSTANTIATE_TEST_SUITE_P(SimpleCasesWithSensor60Degree, SensorViewTestObjectDete
                         SensorViewTest_Data::Sensor{0.0, 0.0, 30.0, -30.0, 10.0},
                         SensorViewTest_Data::Object{4.0, -3.50, 2.0, 1.0, 445.0}}
 ));
+
+class TestWorldData : public OWL::WorldData
+{
+public:
+    TestWorldData() :
+        OWL::WorldData{nullptr}
+    {}
+
+    MOCK_CONST_METHOD1(GetMovingObject, const Interfaces::MovingObject& (Id id));
+};
+
+TEST(SensorViewTests, AddHostVehicleToSensorView_SetsHostVehicleAndLaneAssignments)
+{
+    TestWorldData worldData;
+    osi3::SensorView sensorView;
+
+    OWL::Id idLane1 = 101, idLane2 = 102, idLane3 = 103;
+    sensorView.mutable_global_ground_truth()->add_lane()->mutable_id()->set_value(idLane1);
+    sensorView.mutable_global_ground_truth()->add_lane()->mutable_id()->set_value(idLane2);
+    sensorView.mutable_global_ground_truth()->add_lane()->mutable_id()->set_value(idLane3);
+
+    OWL::Fakes::MovingObject hostVehicle;
+
+    ON_CALL(hostVehicle, CopyToGroundTruth(_)).WillByDefault(
+                [](osi3::GroundTruth& groundTruth)
+    {auto baseMoving = groundTruth.add_moving_object()->mutable_base();
+    baseMoving->mutable_position()->set_x(2.0);
+    baseMoving->mutable_position()->set_y(3.0);});
+
+    OWL::Fakes::Lane lane1;
+    ON_CALL(lane1, GetId()).WillByDefault(Return(idLane1));
+    OWL::Fakes::Lane lane3;
+    ON_CALL(lane3, GetId()).WillByDefault(Return(idLane3));
+    OWL::Interfaces::Lanes laneAssignments{{&lane1, &lane3}};
+    ON_CALL(hostVehicle, GetLaneAssignments()).WillByDefault(ReturnRef(laneAssignments));
+
+    const OWL::Id host_id = 11;
+    ON_CALL(worldData, GetMovingObject(host_id)).WillByDefault(ReturnRef(hostVehicle));
+    worldData.AddHostVehicleToSensorView(host_id, sensorView);
+
+    EXPECT_THAT(sensorView.host_vehicle_id().value(), Eq(host_id));
+    EXPECT_THAT(sensorView.global_ground_truth().host_vehicle_id().value(), Eq(host_id));
+    EXPECT_THAT(sensorView.host_vehicle_data().location().position().x(), Eq(2.0));
+    EXPECT_THAT(sensorView.host_vehicle_data().location().position().y(), Eq(3.0));
+    for(const auto& lane : sensorView.global_ground_truth().lane())
+    {
+        if(lane.id().value() == idLane1 || lane.id().value() == idLane3)
+        {
+            EXPECT_THAT(lane.classification().is_host_vehicle_lane(), Eq(true));
+        }
+        else
+        {
+            EXPECT_THAT(lane.classification().is_host_vehicle_lane(), Eq(false));
+        }
+    }
+}

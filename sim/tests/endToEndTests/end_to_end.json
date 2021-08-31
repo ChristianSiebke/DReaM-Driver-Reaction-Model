@@ -26,7 +26,6 @@
                 "OSCAction_DoubleSinusoidalLaneChangeRight_Absolute",
                 "OSCAction_DoubleSinusoidalLaneChangeLeft_Relative",
                 "OSCAction_DoubleSinusoidalLaneChangeRight_Relative",
-                "Pedestrian_AFDM",
                 "Pedestrian_Trajectory",
                 "Sensor_Latency",
                 "StaticAgentProfiles",
@@ -225,7 +224,7 @@
             "specialized":
             {
                 "description": "Sensor detects scenario agent with 1 second delay.",
-                "query": "count(AgentId | AgentId == 0 and Timestep == 1000 and Sensor0_DetectedAgents-1 != Sensor0_DetectedAgents and Sensor0_DetectedAgents == '1') == 1",
+                "query": "count(AgentId | AgentId == 0 and Timestep == 1000 and Sensor0_DetectedAgents-1 != Sensor0_DetectedAgents and Sensor0_DetectedAgents == 1) == 1",
                 "success_rate": 1
             },
             "configurations":

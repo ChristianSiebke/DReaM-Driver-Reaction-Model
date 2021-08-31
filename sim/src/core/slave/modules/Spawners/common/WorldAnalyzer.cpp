@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019, 2020 in-tech GmbH
+* Copyright (c) 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -16,7 +16,6 @@
 namespace
 {
     static constexpr double EPSILON = 0.001;
-    static constexpr double MINIMUM_SEPARATION_BUFFER = 5.0;
     static constexpr double TTC_THRESHHOLD = 2.0;
     static constexpr double TTC_ENDOFLANE = 4.0;
     static constexpr double ASSUMED_TTB = 1.0;
@@ -26,9 +25,10 @@ namespace
 
     static inline double GetSeparation(const double gapInSeconds,
                                        const double velocity,
-                                       const double consideredCarLengths)
+                                       const double consideredCarLengths,
+                                       const double minimumSeparationBuffer)
     {
-        const auto minimumBuffer = MINIMUM_SEPARATION_BUFFER + consideredCarLengths;
+        const auto minimumBuffer = minimumSeparationBuffer + consideredCarLengths;
 
         return std::max((gapInSeconds * velocity) + consideredCarLengths, minimumBuffer);
     }
@@ -158,9 +158,11 @@ std::optional<double> WorldAnalyzer::GetNextSpawnPosition(const RoadId& roadId,
                                                           const double agentRearLength,
                                                           const double intendedVelocity,
                                                           const double gapInSeconds,
+                                                          const double minimumSeparationBuffer,
                                                           const Route &route,
                                                           const LaneTypes& supportedLaneTypes) const
 {
+    const bool downstream = laneId < 0;
     double spawnDistance;
 
     const auto maxSearchPosition = bounds.second + intendedVelocity * gapInSeconds;
@@ -168,7 +170,7 @@ std::optional<double> WorldAnalyzer::GetNextSpawnPosition(const RoadId& roadId,
     const auto downstreamObjects = world->GetAgentsInRange(route.roadGraph,
                                                            route.root,
                                                            laneId,
-                                                           bounds.first,
+                                                           downstream ? bounds.first : bounds.second,
                                                            0,
                                                            maxSearchPosition).at(route.target);
     const AgentInterface* firstDownstreamObject = nullptr;
@@ -177,14 +179,14 @@ std::optional<double> WorldAnalyzer::GetNextSpawnPosition(const RoadId& roadId,
         firstDownstreamObject = downstreamObjects.front();
     }
 
-    if (!firstDownstreamObject || firstDownstreamObject->GetDistanceToStartOfRoad(MeasurementPoint::Rear, roadId) > maxSearchPosition)
+    if (!firstDownstreamObject || firstDownstreamObject->GetDistanceToStartOfRoad(downstream ? MeasurementPoint::Rear : MeasurementPoint::Front, roadId) > maxSearchPosition)
     {
-        spawnDistance = bounds.second - agentFrontLength;
+        spawnDistance = downstream ? bounds.second - agentFrontLength : bounds.first + agentFrontLength;
 
         const auto distanceToEndOfDrivingLane = world->GetDistanceToEndOfLane(route.roadGraph,
                                                                               route.root,
                                                                               laneId,
-                                                                              bounds.second - EPSILON,
+                                                                              downstream ? bounds.second - EPSILON : bounds.first + EPSILON,
                                                                               maxSearchPosition,
                                                                               supportedLaneTypes).at(route.target);
 
@@ -193,7 +195,7 @@ std::optional<double> WorldAnalyzer::GetNextSpawnPosition(const RoadId& roadId,
         if (distanceToEndOfDrivingLane < minDistanceToEndOfLane)
         {
             const auto difference = minDistanceToEndOfLane - distanceToEndOfDrivingLane;
-            spawnDistance -= difference;
+            spawnDistance += downstream ? -difference : difference;
         }
     }
     else
@@ -202,10 +204,11 @@ std::optional<double> WorldAnalyzer::GetNextSpawnPosition(const RoadId& roadId,
                                       - firstDownstreamObject->GetDistanceReferencePointToLeadingEdge();
         const auto separation = GetSeparation(gapInSeconds,
                                               intendedVelocity,
-                                              frontCarRearLength + agentFrontLength);
+                                              frontCarRearLength + agentFrontLength,
+                                              minimumSeparationBuffer);
 
-        const auto frontCarPositionOnRoad = firstDownstreamObject->GetDistanceToStartOfRoad(MeasurementPoint::Rear, roadId);
-        spawnDistance = frontCarPositionOnRoad - separation;
+        const auto frontCarPositionOnRoad = firstDownstreamObject->GetDistanceToStartOfRoad(downstream ? MeasurementPoint::Rear : MeasurementPoint::Front, roadId);
+        spawnDistance = frontCarPositionOnRoad + (downstream ? -separation : separation);
     }
 
     if (spawnDistance - agentRearLength < bounds.first)
@@ -224,8 +227,8 @@ double WorldAnalyzer::CalculateSpawnVelocityToPreventCrashing(const RoadId& road
                                                               const double intendedVelocity,
                                                               const Route &route) const
 {
-    const auto intendedVehicleFrontPosition = intendedSpawnPosition + agentFrontLength;
-    const auto maxSearchDistance = intendedVehicleFrontPosition + (intendedVelocity * TTC_THRESHHOLD);
+    const auto& inOdDirection = get(RouteElement(), route.roadGraph, route.root).inOdDirection;
+    const auto maxSearchDistance = agentFrontLength + (intendedVelocity * TTC_THRESHHOLD);
 
     const auto nextObjectsInLane =  world->GetAgentsInRange(route.roadGraph,
                                                             route.root,
@@ -244,7 +247,8 @@ double WorldAnalyzer::CalculateSpawnVelocityToPreventCrashing(const RoadId& road
             return intendedVelocity;
         }
 
-        const auto& relativeDistance = opponent->GetDistanceToStartOfRoad(MeasurementPoint::Rear, roadId) - intendedVehicleFrontPosition;
+        const auto& relativeDistance = inOdDirection ? opponent->GetDistanceToStartOfRoad(MeasurementPoint::Rear, roadId) - intendedSpawnPosition - agentFrontLength
+                                                     : intendedSpawnPosition - agentFrontLength - opponent->GetDistanceToStartOfRoad(MeasurementPoint::Rear, roadId);
 
         if (relativeDistance / relativeVelocity < TTC_THRESHHOLD)
         {
@@ -258,16 +262,18 @@ double WorldAnalyzer::CalculateSpawnVelocityToPreventCrashing(const RoadId& road
 bool WorldAnalyzer::ValidMinimumSpawningDistanceToObjectInFront(const LaneId laneId,
                                                                 const SPosition sPosition,
                                                                 const Route &route,
-                                                                const VehicleModelParameters& vehicleModelParameters) const
+                                                                const VehicleModelParameters& vehicleModelParameters,
+                                                                const double minimumSeparationBuffer) const
 {
-    const double rearLength = vehicleModelParameters.length - vehicleModelParameters.distanceReferencePointToFrontAxle;
+    const double distanceReferencePointToFrontAxle = vehicleModelParameters.boundingBoxDimensions.length * 0.5 + vehicleModelParameters.boundingBoxCenter.x;
+    const double rearLength = vehicleModelParameters.boundingBoxDimensions.length * 0.5 - vehicleModelParameters.boundingBoxCenter.x;
 
     const auto agentsInRangeResult = world->GetAgentsInRange(route.roadGraph,
                                                              route.root,
                                                              laneId,
                                                              sPosition,
                                                              rearLength,
-                                                             vehicleModelParameters.distanceReferencePointToFrontAxle + MINIMUM_SEPARATION_BUFFER);
+                                                             distanceReferencePointToFrontAxle + minimumSeparationBuffer);
 
     if(!agentsInRangeResult.at(route.target).empty())
     {
@@ -282,14 +288,10 @@ bool WorldAnalyzer::AreSpawningCoordinatesValid(const RoadId& roadId,
                                                 const LaneId laneId,
                                                 const SPosition sPosition,
                                                 const double offset,
+                                                const double minimumSeparationBuffer,
                                                 const Route& route,
                                                 const VehicleModelParameters& vehicleModelParameters) const
 {
-    if (laneId >= 0) //HOTFIX: Spawning on left lanes is currently not supported
-    {
-        return false;
-    }
-
     if (!world->IsSValidOnLane(roadId, laneId, sPosition))
     {
         loggingCallback("S is not valid for vehicle on lane: " + std::to_string(laneId) + ". Invalid s: " + std::to_string(
@@ -297,7 +299,7 @@ bool WorldAnalyzer::AreSpawningCoordinatesValid(const RoadId& roadId,
         return false;
     }
 
-    if (!IsOffsetValidForLane(roadId, laneId, sPosition, offset, vehicleModelParameters.width))
+    if (!IsOffsetValidForLane(roadId, laneId, sPosition, offset, vehicleModelParameters.boundingBoxDimensions.width))
     {
         loggingCallback("Offset is not valid for vehicle on lane: " + std::to_string(laneId) + ". Invalid offset: " + std::to_string(
                      offset));
@@ -305,7 +307,7 @@ bool WorldAnalyzer::AreSpawningCoordinatesValid(const RoadId& roadId,
         return false;
     }
 
-    if (!ValidMinimumSpawningDistanceToObjectInFront(laneId, sPosition, route, vehicleModelParameters))
+    if (!ValidMinimumSpawningDistanceToObjectInFront(laneId, sPosition, route, vehicleModelParameters, minimumSeparationBuffer))
     {
         loggingCallback("New Agent does not fullfill the required minimum distance on lane: " + std::to_string(laneId) + ".");
         return false;
@@ -415,12 +417,13 @@ bool WorldAnalyzer::NewAgentIntersectsWithExistingAgent(const RoadId& roadId,
 {
     Position pos = world->LaneCoord2WorldCoord(sPosition, offset, roadId, laneId);
 
+    const double distanceReferencePointToLeadingEdge = vehicleModelParameters.boundingBoxDimensions.length * 0.5 + vehicleModelParameters.boundingBoxCenter.x;
     return world->IntersectsWithAgent(pos.xPos,
                                       pos.yPos,
                                       pos.yawAngle,
-                                      vehicleModelParameters.length,
-                                      vehicleModelParameters.width,
-                                      vehicleModelParameters.distanceReferencePointToLeadingEdge);
+                                      vehicleModelParameters.boundingBoxDimensions.length,
+                                      vehicleModelParameters.boundingBoxDimensions.width,
+                                      distanceReferencePointToLeadingEdge);
 }
 
 bool WorldAnalyzer::SpawnWillCauseCrash(const RoadId& roadId,
@@ -433,6 +436,7 @@ bool WorldAnalyzer::SpawnWillCauseCrash(const RoadId& roadId,
                                         const Route &route) const
 {
     const auto searchForward = (direction == Direction::FORWARD);
+    const auto& inOdDirection = get(RouteElement(), route.roadGraph, route.root).inOdDirection;
     const auto nextObjectsInLane = world->GetObjectsInRange(route.roadGraph,
                                                             route.root,
                                                             laneId,
@@ -462,7 +466,7 @@ bool WorldAnalyzer::SpawnWillCauseCrash(const RoadId& roadId,
     {
         velocityOfRearObject = velocity;
         accelerationOfRearObject = ASSUMED_BRAKING_ACCELERATION;
-        spaceBetweenObjects = opponent->GetDistanceToStartOfRoad(MeasurementPoint::Rear, roadId) - (sPosition + agentFrontLength);
+        spaceBetweenObjects = opponent->GetDistanceToStartOfRoad(inOdDirection ? MeasurementPoint::Rear : MeasurementPoint::Front, roadId) - (sPosition + agentFrontLength);
         velocityOfFrontObject = opponent->GetVelocity();
         accelerationOfFrontObject = ASSUMED_FRONT_AGENT_ACCELERATION;
     }
@@ -470,7 +474,7 @@ bool WorldAnalyzer::SpawnWillCauseCrash(const RoadId& roadId,
     {
         velocityOfRearObject = opponent->GetVelocity();
         accelerationOfRearObject = ASSUMED_BRAKING_ACCELERATION;
-        spaceBetweenObjects = (sPosition - agentRearLength) - opponent->GetDistanceToStartOfRoad(MeasurementPoint::Front, roadId);
+        spaceBetweenObjects = (sPosition - agentRearLength) - opponent->GetDistanceToStartOfRoad(inOdDirection ? MeasurementPoint::Front : MeasurementPoint::Rear, roadId);
         velocityOfFrontObject = velocity;
         accelerationOfFrontObject = ASSUMED_FRONT_AGENT_ACCELERATION;
     }

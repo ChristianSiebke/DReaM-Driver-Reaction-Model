@@ -1,3 +1,13 @@
+/*******************************************************************************
+* Copyright (c) 2019, 2020, 2021 in-tech GmbH
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+*******************************************************************************/
+
 #pragma once
 
 #include <string>
@@ -34,9 +44,11 @@ namespace SpawnPointRuntimeCommonDefinitions
         }
     };
 
+    //! Parameters of the RuntimeCommonSpawner
     struct SpawnPointRuntimeCommonParameters
     {
-        const std::vector<SpawnPosition> spawnPositions;
-        const SpawnPointDefinitions::AgentProfileLaneMaps agentProfileLaneMaps;
+        const std::variant<double, openpass::parameter::StochasticDistribution> minimumSeparationBuffer; //!< Minimum distance between two agents
+        const std::vector<SpawnPosition> spawnPositions; //!< Areas to spawn in
+        const SpawnPointDefinitions::AgentProfileLaneMaps agentProfileLaneMaps; //!< AgentProfiles to spawn, separated for left lane and other lanes
     };
 }

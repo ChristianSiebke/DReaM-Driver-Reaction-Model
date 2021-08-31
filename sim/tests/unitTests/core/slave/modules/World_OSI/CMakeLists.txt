@@ -15,7 +15,6 @@ add_openpass_target(
     lane_Tests.cpp
     locator_Tests.cpp
 #    objectLocator_Tests.cpp
-    pointQuery_Tests.cpp
 #    roadNetworkMapper_Tests.cpp
     entityRepository_Tests.cpp
     sceneryConverter_Tests.cpp
@@ -32,7 +31,6 @@ add_openpass_target(
     ${COMPONENT_SOURCE_DIR}/Localization.cpp
     ${COMPONENT_SOURCE_DIR}/OWL/DataTypes.cpp
     ${COMPONENT_SOURCE_DIR}/OWL/OpenDriveTypeMapper.cpp
-    ${COMPONENT_SOURCE_DIR}/PointQuery.cpp
     ${COMPONENT_SOURCE_DIR}/EntityInfoPublisher.cpp
     ${COMPONENT_SOURCE_DIR}/EntityRepository.cpp
     ${COMPONENT_SOURCE_DIR}/SceneryConverter.cpp
@@ -57,7 +55,6 @@ add_openpass_target(
     ${COMPONENT_SOURCE_DIR}/Localization.h
     ${COMPONENT_SOURCE_DIR}/OWL/DataTypes.h
     ${COMPONENT_SOURCE_DIR}/OWL/OpenDriveTypeMapper.h
-    ${COMPONENT_SOURCE_DIR}/PointQuery.h
     ${COMPONENT_SOURCE_DIR}/RamerDouglasPeucker.h
     ${OPENPASS_SIMCORE_DIR}/common/RoutePlanning/RouteCalculation.h
     ${COMPONENT_SOURCE_DIR}/EntityInfoPublisher.h

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -86,8 +86,6 @@ std::function<void (const RTreeElement&)> LocateOnGeometryElement(const OWL::Int
                                                              const Common::Vector2d& point,
                                                              const double& hdg,
                                                              std::map<const std::string, GlobalRoadPosition>& result);
-
-std::vector<Common::Vector2d> GetIntersectionPoints (const std::vector<Common::Vector2d>& elementPoints, const std::vector<Common::Vector2d>& agentBoundary);
 
 polygon_t GetBoundingBox(double x, double y, double length, double width, double rotation, double center);
 

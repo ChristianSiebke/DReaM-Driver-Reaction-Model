@@ -99,7 +99,7 @@ This scenery consists of linear sections only.
 					</link>
 					<width sOffset="0" a="3.0" b="0" c="0" d="0" />
 				</lane>
-				<lane id="-2" type="stop" level="true">
+				<lane id="-2" type="biking" level="true">
 					<link>
 						<successor id="-2" />
 						<predecessor id="-2"/>
@@ -107,7 +107,7 @@ This scenery consists of linear sections only.
 					<width sOffset="0" a="4.0" b="0" c="0" d="0" />
 					<roadMark weight='standard' sOffset='0' type='broken' color='standard' width='0.12' laneChange='both' />
 				</lane>
-				<lane id="-3" type="driving" level="true">
+				<lane id="-3" type="sidewalk" level="true">
 					<link>
 						<successor id="-3" />
 					</link>

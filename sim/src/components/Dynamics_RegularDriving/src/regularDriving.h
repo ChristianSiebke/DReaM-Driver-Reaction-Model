@@ -256,7 +256,9 @@ private:
     //! @return friction coefficient (currently ALWAYS 1)
     double GetFrictionCoefficient();
 
-
+    //! Returns the property with given name in the VehicleModelParameters
+    //! or throws an error if the property is missing
+    double GetVehicleProperty(const std::string& propertyName);
 
     /** @name Private Variables
      * @{

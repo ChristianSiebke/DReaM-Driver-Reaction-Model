@@ -37,7 +37,8 @@ Agent::Agent(WorldInterface *world, const AgentBlueprintInterface& agentBlueprin
     using namespace std::string_literals;
     auto agentAdapter = world->CreateAgentAdapter({
         {"type"s, openpass::utils::to_string(agentBlueprint.GetAgentCategory())},
-        {"name"s, agentBlueprint.GetObjectName()}});
+        {"name"s, agentBlueprint.GetObjectName()},
+        {"subtype"s, openpass::utils::to_string(agentBlueprint.GetVehicleModelParameters().vehicleType)}});
 
     id = agentAdapter->GetId();
 

@@ -1,5 +1,5 @@
 # /*********************************************************************
-# * Copyright (c) 2019, 2020 in-tech GmbH
+# * Copyright (c) 2019-2021 in-tech GmbH
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -19,7 +19,8 @@ UNIT_UNDER_TEST = $$OPEN_SRC/core/slave/modules/EventDetector
 CONDITIONS = $$OPEN_SRC/core/slave/modules/EventDetector/Conditions
 
 # commons
-HDR_COMMONS = $$OPEN_SRC/Common/Vector2D.h \
+HDR_COMMONS = $$OPEN_SRC/common/commonTools.h \
+              $$OPEN_SRC/Common/Vector2D.h \
               $$OPEN_SRC/Common/openScenarioDefinitions.h
 
 INCLUDEPATH += \
@@ -30,16 +31,14 @@ INCLUDEPATH += \
 
 HEADERS += \
     $$HDR_COMMONS \
-    $$UNIT_UNDER_TEST/CollisionDetector.h \
     $$UNIT_UNDER_TEST/ConditionalEventDetector.h \
     $$UNIT_UNDER_TEST/EventDetectorCommonBase.h \
     $$CONDITIONS/ConditionCommonBase.h \
     $$OPEN_SRC/common/eventDetectorDefinitions.h
 
 SOURCES += \
-    $$UNIT_UNDER_TEST/CollisionDetector.cpp \
     $$UNIT_UNDER_TEST/ConditionalEventDetector.cpp \
     $$UNIT_UNDER_TEST/EventDetectorCommonBase.cpp \
+    $$OPEN_SRC/common/commonTools.cpp \
     $$OPEN_SRC/common/eventDetectorDefinitions.cpp \
-    CollisionDetectorUnitTests.cpp \
     ConditionalEventDetector_Tests.cpp

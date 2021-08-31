@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019, 2020 in-tech GmbH
+* Copyright (c) 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -37,9 +37,11 @@ namespace SpawnPointPreRunCommonDefinitions
         }
     };
 
+    //!Parameters of the PreRunCommonSpawner
     struct PreRunSpawnerParameters
     {
-        const std::vector<SpawnArea> spawnAreas;
-        const AgentProfileLaneMaps agentProfileLaneMaps;
+        const std::variant<double, openpass::parameter::StochasticDistribution> minimumSeparationBuffer; //!< Minimum distance between two agents
+        const std::vector<SpawnArea> spawnAreas; //!< Areas to spawn in
+        const AgentProfileLaneMaps agentProfileLaneMaps; //!< AgentProfiles to spawn, separated for left lane and other lanes
     };
 } // SpawnPointPreRunDefinitions

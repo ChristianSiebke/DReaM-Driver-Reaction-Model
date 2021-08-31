@@ -193,6 +193,12 @@ LaneType OpenDriveTypeMapper::OdToOwlLaneType(const RoadLaneType laneType)
             return LaneType::OffRamp;
         case RoadLaneType::ConnectingRamp:
             return LaneType::ConnectingRamp;
+        case RoadLaneType::Tram:
+            return LaneType::Tram;
+        case RoadLaneType::RoadWorks:
+            return LaneType::RoadWorks;
+        case RoadLaneType::Bidirectional:
+            return LaneType::Bidirectional;
         default:
             return LaneType::Undefined;
     }

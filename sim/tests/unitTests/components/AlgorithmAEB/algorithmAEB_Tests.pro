@@ -24,14 +24,11 @@ HEADERS += \
     AlgorithmAebOSIUnitTests.h \
     $$relative_path($$OPEN_SRC)/common/boostGeometryCommon.h \
     $$relative_path($$OPEN_SRC)/common/vector2d.h \
-    $$relative_path($$OPEN_SRC)/components/Algorithm_AEB/src/autonomousEmergencyBraking.h \
-    $$relative_path($$OPEN_SRC)/components/Algorithm_AEB/src/boundingBoxCalculation.h
+    $$relative_path($$OPEN_SRC)/components/Algorithm_AEB/src/autonomousEmergencyBraking.h
 
 SOURCES += \
     AlgorithmAeb_Tests.cpp \
-    BoundingBoxCalculation_Tests.cpp \
-    $$relative_path($$OPEN_SRC)/components/Algorithm_AEB/src/autonomousEmergencyBraking.cpp \
-    $$relative_path($$OPEN_SRC)/components/Algorithm_AEB/src/boundingBoxCalculation.cpp
+    $$relative_path($$OPEN_SRC)/components/Algorithm_AEB/src/autonomousEmergencyBraking.cpp
 
 LIBS += \
     -lopen_simulation_interface \

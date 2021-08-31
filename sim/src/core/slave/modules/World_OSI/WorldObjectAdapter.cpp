@@ -66,6 +66,11 @@ double WorldObjectAdapter::GetYaw() const
 {
     return baseTrafficObject.GetAbsOrientation().yaw;
 }
+
+double WorldObjectAdapter::GetRoll() const
+{
+    return baseTrafficObject.GetAbsOrientation().roll;
+}
     
 double WorldObjectAdapter::GetAcceleration() const
 {
@@ -79,24 +84,28 @@ const OWL::Interfaces::WorldObject& WorldObjectAdapter::GetBaseTrafficObject() c
 
 const polygon_t WorldObjectAdapter::CalculateBoundingBox() const
 {
-    double length = GetLength();
-    double width = GetWidth();
-    double rotation = GetYaw();
+    const double length = GetLength();
+    const double width = GetWidth();
+    const double height = GetHeight();
+    const double rotation = GetYaw();
+    const double roll = GetRoll();
 
-    double x = GetPositionX();
-    double y = GetPositionY();
+    const double x = GetPositionX();
+    const double y = GetPositionY();
 
-    double center = GetDistanceReferencePointToLeadingEdge();
+    const double center = GetDistanceReferencePointToLeadingEdge();
 
-    double halfWidth = width / 2.0;
+    const double halfWidth = width / 2.0;
+    const double widthLeft = halfWidth * std::cos(roll) + (roll < 0 ? height * std::sin(-roll) : 0);
+    const double widthRight = halfWidth * std::cos(roll) + (roll > 0 ? height * std::sin(roll) : 0);
 
     point_t boxPoints[]
     {
-        {center - length, -halfWidth},
-        {center - length,  halfWidth},
-        {center,           halfWidth},
-        {center,          -halfWidth},
-        {center - length, -halfWidth}
+        {center - length, -widthRight},
+        {center - length,  widthLeft},
+        {center,           widthLeft},
+        {center,          -widthRight},
+        {center - length, -widthRight}
     };
 
     polygon_t box;

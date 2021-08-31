@@ -46,6 +46,7 @@ add_openpass_target(
     worldDefinitions.h
 
   SOURCES
+    commonTools.cpp
     vector3d.cpp
     eventDetectorDefinitions.cpp
 )

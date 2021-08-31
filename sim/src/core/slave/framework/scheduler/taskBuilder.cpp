@@ -91,7 +91,7 @@ void TaskBuilder::BuildEventDetectorTasks()
     for (const auto &eventDetector : eventDetectorNetwork->GetEventDetectors())
     {
         auto impl = eventDetector->GetImplementation();
-        eventDetectorTasks.emplace_back(EventDetectorTaskItem(frameworkUpdateRate, [this, impl] { impl->Trigger(this->currentTime); }));
+        eventDetectorTasks.emplace_back(EventDetectorTaskItem(ScheduleAtEachCycle, [this, impl] { impl->Trigger(this->currentTime); }));
     }
 }
 
@@ -100,7 +100,7 @@ void TaskBuilder::BuildManipulatorTasks()
     for (const auto &manipulator : manipulatorNetwork->GetManipulators())
     {
         auto impl = manipulator->GetImplementation();
-        manipulatorTasks.emplace_back(ManipulatorTaskItem(frameworkUpdateRate, [this, impl] { impl->Trigger(this->currentTime); }));
+        manipulatorTasks.emplace_back(ManipulatorTaskItem(ScheduleAtEachCycle, [this, impl] { impl->Trigger(this->currentTime); }));
     }
 }
 

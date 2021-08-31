@@ -883,9 +883,9 @@ void MovingObject::SetHeight(const double newHeight)
     osiDimension->set_height(newHeight);
 }
 
-void MovingObject::SetDistanceReferencPointToLeadingEdge(const double distance)
+void MovingObject::SetBoundingBoxCenterToRear(const double distance)
 {
-    osiObject->mutable_vehicle_attributes()->mutable_bbcenter_to_rear()->set_x(osiObject->base().dimension().length() * 0.5 - distance);
+    osiObject->mutable_vehicle_attributes()->mutable_bbcenter_to_rear()->set_x(distance);
 }
 
 Primitive::AbsPosition MovingObject::GetReferencePointPosition() const
@@ -1146,6 +1146,40 @@ bool MovingObject::GetHighBeamLight() const
     throw std::logic_error("HighBeamLightState is not supported");
 }
 
+void MovingObject::SetType(AgentVehicleType type)
+{
+    if(type == AgentVehicleType::Pedestrian)
+    {
+        osiObject->set_type(osi3::MovingObject_Type::MovingObject_Type_TYPE_PEDESTRIAN);
+    }
+    else
+    {
+        osiObject->set_type(osi3::MovingObject_Type::MovingObject_Type_TYPE_VEHICLE);
+
+        switch(type) 
+        {
+            case AgentVehicleType::Car:
+            osiObject->mutable_vehicle_classification()->set_type(osi3::MovingObject_VehicleClassification_Type::MovingObject_VehicleClassification_Type_TYPE_MEDIUM_CAR);
+            break;
+            
+            case AgentVehicleType::Motorbike:
+            osiObject->mutable_vehicle_classification()->set_type(osi3::MovingObject_VehicleClassification_Type::MovingObject_VehicleClassification_Type_TYPE_MOTORBIKE);
+            break;
+
+            case AgentVehicleType::Bicycle:
+            osiObject->mutable_vehicle_classification()->set_type(osi3::MovingObject_VehicleClassification_Type::MovingObject_VehicleClassification_Type_TYPE_BICYCLE);
+            break;
+
+            case AgentVehicleType::Truck:
+            osiObject->mutable_vehicle_classification()->set_type(osi3::MovingObject_VehicleClassification_Type::MovingObject_VehicleClassification_Type_TYPE_HEAVY_TRUCK);
+            break;
+
+            default:
+            throw(std::runtime_error("AgentVehicleType not supported"));
+        }       
+    }
+}
+
 Primitive::LaneOrientation MovingObject::GetLaneOrientation() const
 {
     throw std::logic_error("MovingObject::GetLaneOrientation not implemented");
@@ -1339,9 +1373,7 @@ bool TrafficSign::SetSpecification(RoadSignalInterface* signal, Position positio
     baseStationary->mutable_position()->set_z(signal->GetZOffset() + 0.5 * signal->GetHeight());
     baseStationary->mutable_dimension()->set_width(signal->GetWidth());
     baseStationary->mutable_dimension()->set_height(signal->GetHeight());
-    double yaw = position.yawAngle + signal->GetHOffset() + (signal->GetOrientation() ? 0 : M_PI);
-    yaw = CommonHelper::SetAngleToValidRange(yaw);
-    baseStationary->mutable_orientation()->set_yaw(yaw);
+    baseStationary->mutable_orientation()->set_yaw(position.yawAngle);
 
     const auto mutableOsiClassification = osiSign->mutable_main_sign()->mutable_classification();
     const std::string odType = signal->GetType();
@@ -1371,8 +1403,8 @@ bool TrafficSign::SetSpecification(RoadSignalInterface* signal, Position positio
         }
         else
         {
-            const std::string message = "Invalid subtype: " + subType + " of traffic sign type: " + odType;
-            throw std::invalid_argument(message);
+            mutableOsiClassification->set_type(osi3::TrafficSign_MainSign_Classification_Type::TrafficSign_MainSign_Classification_Type_TYPE_OTHER);
+            mapping_succeeded = false;
         }
     }
     else if(OpenDriveTypeMapper::trafficSignsSubTypeDefinesValue.find(odType) != OpenDriveTypeMapper::trafficSignsSubTypeDefinesValue.end())
@@ -1394,7 +1426,7 @@ bool TrafficSign::SetSpecification(RoadSignalInterface* signal, Position positio
     return mapping_succeeded;
 }
 
-void TrafficSign::AddSupplementarySign(RoadSignalInterface* odSignal, Position position)
+bool TrafficSign::AddSupplementarySign(RoadSignalInterface* odSignal, Position position)
 {
     auto *supplementarySign = osiSign->add_supplementary_sign();
 
@@ -1419,27 +1451,32 @@ void TrafficSign::AddSupplementarySign(RoadSignalInterface* odSignal, Position p
             osiValue->set_value(odSignal->GetValue());
             osiValue->set_value_unit(osi3::TrafficSignValue_Unit::TrafficSignValue_Unit_UNIT_METER);
             osiValue->set_text(std::to_string(odSignal->GetValue()) + " m");
+            return true;
         }
         else if (odSignal->GetSubType() == "31")
         {
             osiValue->set_value(odSignal->GetValue());
             osiValue->set_value_unit(osi3::TrafficSignValue_Unit::TrafficSignValue_Unit_UNIT_KILOMETER);
             osiValue->set_text(std::to_string(odSignal->GetValue()) + " km");
+            return true;
         }
         else if (odSignal->GetSubType() == "32")
         {
             osiValue->set_value(100.0);
             osiValue->set_value_unit(osi3::TrafficSignValue_Unit::TrafficSignValue_Unit_UNIT_METER);
             osiValue->set_text("STOP 100 m");
+            return true;
         }
         else
         {
-            throw std::logic_error("Invalid supplementary sign subtype for type 1004");
+            supplementarySign->mutable_classification()->set_type(osi3::TrafficSign_SupplementarySign_Classification_Type::TrafficSign_SupplementarySign_Classification_Type_TYPE_OTHER);
+            return false;
         }
     }
     else
     {
-        throw std::logic_error("Invalid supplementary sign type: " + odSignal->GetType());
+        supplementarySign->mutable_classification()->set_type(osi3::TrafficSign_SupplementarySign_Classification_Type::TrafficSign_SupplementarySign_Classification_Type_TYPE_OTHER);
+        return false;
     }
 }
 
@@ -1554,9 +1591,7 @@ bool RoadMarking::SetSpecification(RoadSignalInterface* signal, Position positio
     baseStationary->mutable_position()->set_z(0.0);
     baseStationary->mutable_dimension()->set_width(signal->GetWidth());
     baseStationary->mutable_dimension()->set_length(0.5);
-    double yaw = position.yawAngle + signal->GetHOffset() + (signal->GetOrientation() ? 0 : M_PI);
-    yaw = CommonHelper::SetAngleToValidRange(yaw);
-    baseStationary->mutable_orientation()->set_yaw(yaw);
+    baseStationary->mutable_orientation()->set_yaw(position.yawAngle);
 
     const auto mutableOsiClassification = osiSign->mutable_classification();
     const std::string odType = signal->GetType();

@@ -84,7 +84,7 @@ public:
     MOCK_METHOD1(SetLength, void(const double newLength));
     MOCK_METHOD1(SetWidth, void(const double newWidth));
     MOCK_METHOD1(SetHeight, void(const double newHeight));
-    MOCK_METHOD1(SetDistanceReferencPointToLeadingEdge, void(const double distance));
+    MOCK_METHOD1(SetBoundingBoxCenterToRear, void(const double distance));
 
     MOCK_METHOD1(SetReferencePointPosition, void(const OWL::Primitive::AbsPosition& newPosition));
     MOCK_METHOD1(SetX, void(const double newX));
@@ -120,6 +120,8 @@ public:
     MOCK_CONST_METHOD0(GetHeadLight, bool());
     MOCK_METHOD1(SetHighBeamLight, void(bool highbeamLight));
     MOCK_CONST_METHOD0(GetHighBeamLight, bool());
+
+    MOCK_METHOD1(SetType, void(AgentVehicleType));
 
     MOCK_CONST_METHOD1(CopyToGroundTruth, void(osi3::GroundTruth&));
 };

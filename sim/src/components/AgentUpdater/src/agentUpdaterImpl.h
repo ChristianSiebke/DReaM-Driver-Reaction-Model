@@ -123,6 +123,7 @@ private:
     double positionY {0.0};
     double yaw {0.0};
     double yawRate {0.0};
+    double roll {0.0};
     double steeringWheelAngle {0.0};
     double centripetalAcceleration {0.0};
     double travelDistance {0.0};

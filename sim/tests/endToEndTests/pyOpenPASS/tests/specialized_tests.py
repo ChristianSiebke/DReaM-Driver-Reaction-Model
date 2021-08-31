@@ -56,11 +56,9 @@ def run(config_under_test, slave_config, subdir):
     slave_state = slave.execute()
     slave.copy_artifacts(os.path.join('artifacts', subdir))
 
-    assert(slave_state == 0), f'Slave execution failed {slave.print_log()}'
-    assert(slave.log_size() == 0), f'Slave log not empty {slave.print_log()}'
-
-    if slave_state != 0 or slave.log_size() > 0:
-        slave.print_log()
+    assert(slave_state == 0), f'Slave execution failed\n{slave.get_log()}'
+    assert(slave.log_empty()), f'Slave log not empty\n{slave.get_log()}'
+    print(slave.get_log())
 
 
 class TestSpecialized:
