@@ -210,7 +210,7 @@ void ModelStatistics::CalculateHistograms(QString folderName, const TableModel &
 bool ModelStatistics::ContainsHighDFormat(const QString &fileName)
 {
     TableModel tableModel(this, fileName);
-    if (tableModel.headerData(0, Qt::Horizontal, Qt::DisplayRole).toString() == "TimeStep" &&
+    if (tableModel.headerData(0, Qt::Horizontal, Qt::DisplayRole).toString() == "Timestep" &&
         tableModel.headerData(1, Qt::Horizontal, Qt::DisplayRole).toString() == "AgentId")
     {
         return true;

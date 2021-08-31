@@ -78,7 +78,7 @@ void ResultDirItemModel::SetTracks(const QString &fileName, QStandardItem *paren
     {
         TableModelPlot tableModel(this, fileName);
 
-        if (tableModel.headerData(0, Qt::Horizontal, Qt::DisplayRole).toString() == "TimeStep" &&
+        if (tableModel.headerData(0, Qt::Horizontal, Qt::DisplayRole).toString() == "Timestep" &&
             tableModel.headerData(1, Qt::Horizontal, Qt::DisplayRole).toString() == "AgentId")
         {
             if (!firstHeader.isEmpty() && firstHeader != tableModel.GetHeaderData())
