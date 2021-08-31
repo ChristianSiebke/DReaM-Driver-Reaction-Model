@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2021 in-tech GmbH
 *               2017, 2020 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -22,9 +22,18 @@
 
 #include "include/eventNetworkInterface.h"
 #include "include/observationInterface.h"
+#include "include/dataBufferInterface.h"
 #include "observationCyclics.h"
 #include "observationLogConstants.h"
 #include "runStatistic.h"
+
+struct Event
+{
+    int time;
+    openpass::databuffer::AcyclicRow dataRow;
+};
+
+using Events = std::vector<Event>;
 
 //-----------------------------------------------------------------------------
 /** \brief Provides the basic logging and observer functionality.
@@ -41,7 +50,7 @@ class ObservationFileHandler
 public:
     const std::string COMPONENTNAME = "ObservationFileHandler";
 
-    ObservationFileHandler(const DataStoreReadInterface& dataStore);
+    ObservationFileHandler(const DataBufferReadInterface& dataBuffer);
     ObservationFileHandler(const ObservationFileHandler &) = delete;
     ObservationFileHandler(ObservationFileHandler &&) = delete;
     ObservationFileHandler &operator=(const ObservationFileHandler &) = delete;
@@ -81,9 +90,9 @@ public:
      * \param runResult
      * \param runStatistik
      * \param cyclics
-     * \param dataStore
+     * \param dataBuffer
      */
-    void WriteRun(const RunResultInterface& runResult, RunStatistic runStatistik, ObservationCyclics& cyclics);
+    void WriteRun(const RunResultInterface& runResult, RunStatistic runStatistik, ObservationCyclics& cyclics, Events& events);
 
     /*!
      * \brief Closes the xml tags flushes the output file, closes it and renames it to simulationOutput.xlm
@@ -92,7 +101,7 @@ public:
 
 private:
     std::unique_ptr<QXmlStreamWriter> xmlFileStream;
-    const DataStoreReadInterface& dataStore;
+    const DataBufferReadInterface& dataBuffer;
 
     int runNumber; //!< run number
     std::string sceneryFile;
@@ -162,7 +171,7 @@ private:
     *
     * @param[in]     fStream            Shared pointer of the stream writer.
     */
-    void AddEvents();
+    void AddEvents(Events &events);
 
     /*!
     * \brief Writes the header into the simulation output during full logging.

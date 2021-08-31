@@ -13,7 +13,7 @@ CONFIG += OPENPASS_GTEST \
 
 include(../../../../../testing.pri)
 
-UNIT_UNDER_TEST = $$OPEN_SRC/core/slave/modules/BasicDataStore
+UNIT_UNDER_TEST = $$OPEN_SRC/core/slave/modules/BasicDataBuffer
 
 #win32:QMAKE_CXXFLAGS += -Wa,-mbig-obj
 
@@ -22,8 +22,8 @@ INCLUDEPATH += \
     ../../../../../..
 
 HEADERS += \
-    $$UNIT_UNDER_TEST/basicDataStoreImplementation.h
+    $$UNIT_UNDER_TEST/basicDataBufferImplementation.h
 
 SOURCES += \
-    $$UNIT_UNDER_TEST/basicDataStoreImplementation.cpp \
-    basicDataStore_Tests.cpp
+    $$UNIT_UNDER_TEST/basicDataBufferImplementation.cpp \
+    basicDataBuffer_Tests.cpp

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 in-tech GmbH
+* Copyright (c) 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -9,46 +9,46 @@
 *******************************************************************************/
 
 //-----------------------------------------------------------------------------
-//! @file  dataStoreLibrary.h
+//! @file  dataBufferLibrary.h
 //! @brief This file contains the internal representation of the library of a
-//!        dataStoreInterface.
+//!        dataBufferInterface.
 //-----------------------------------------------------------------------------
 
 #pragma once
 
 #include <QLibrary>
 
-#include "bindings/dataStoreBinding.h"
+#include "bindings/dataBufferBinding.h"
 
 #include "include/callbackInterface.h"
 
 namespace SimulationSlave
 {
 
-class DataStoreLibrary
+class DataBufferLibrary
 {
 public:
-    typedef const std::string &(*DataStoreInterface_GetVersion)();
-    typedef DataStoreInterface *(*DataStoreInterface_CreateInstanceType)(
+    typedef const std::string &(*DataBufferInterface_GetVersion)();
+    typedef DataBufferInterface *(*DataBufferInterface_CreateInstanceType)(
             const openpass::common::RuntimeInformation* runtimeInformation, CallbackInterface* callbacks);
-    typedef void (*DataStoreInterface_DestroyInstanceType)(DataStoreInterface *implementation);
+    typedef void (*DataBufferInterface_DestroyInstanceType)(DataBufferInterface *implementation);
 
 
-    DataStoreLibrary(const std::string &dataStoreLibraryPath, CallbackInterface *callbacks) :
-           dataStoreLibraryPath(dataStoreLibraryPath),
+    DataBufferLibrary(const std::string &dataBufferLibraryPath, CallbackInterface *callbacks) :
+           dataBufferLibraryPath(dataBufferLibraryPath),
            callbacks(callbacks)
     {
     }
 
-    DataStoreLibrary(const DataStoreLibrary&) = delete;
-    DataStoreLibrary(DataStoreLibrary&&) = delete;
-    DataStoreLibrary& operator=(const DataStoreLibrary&) = delete;
-    DataStoreLibrary& operator=(DataStoreLibrary&&) = delete;
+    DataBufferLibrary(const DataBufferLibrary&) = delete;
+    DataBufferLibrary(DataBufferLibrary&&) = delete;
+    DataBufferLibrary& operator=(const DataBufferLibrary&) = delete;
+    DataBufferLibrary& operator=(DataBufferLibrary&&) = delete;
 
     //-----------------------------------------------------------------------------
     //! Destructor, deletes the stored library (unloads it if necessary)
     //-----------------------------------------------------------------------------
-    virtual ~DataStoreLibrary();
+    virtual ~DataBufferLibrary();
 
     //-----------------------------------------------------------------------------
     //! Creates a QLibrary based on the path from the constructor and stores function
@@ -61,35 +61,35 @@ public:
     bool Init();
 
     //-----------------------------------------------------------------------------
-    //! Delete the DataStoreInterface and the library
+    //! Delete the dataBufferInterface and the library
     //!
     //! @return   Flag if the release was successful
     //-----------------------------------------------------------------------------
-    bool ReleaseDataStore();
+    bool ReleaseDataBuffer();
 
     //-----------------------------------------------------------------------------
     //! Make sure that the library exists and is loaded, then call the "create instance"
-    //! function pointer, which instantiates a DataStoreInterface. The created Interface
+    //! function pointer, which instantiates a DataBufferInterface. The created Interface
     //! is stored.
     //!
     //! @param[in]   runtimeInformation   Reference to the simulation slave runtime information
     //!
-    //! @return   DataStoreInterface created
+    //! @return   DataBufferInterface created
     //-----------------------------------------------------------------------------
-    DataStoreInterface* CreateDataStore(const openpass::common::RuntimeInformation& runtimeInformation);
+    DataBufferInterface* CreateDataBuffer(const openpass::common::RuntimeInformation& runtimeInformation);
 
 private:
     const std::string DllGetVersionId = "OpenPASS_GetVersion";
     const std::string DllCreateInstanceId = "OpenPASS_CreateInstance";
     const std::string DllDestroyInstanceId = "OpenPASS_DestroyInstance";
 
-    const std::string dataStoreLibraryPath;
-    DataStoreInterface* dataStoreInterface = nullptr;
+    const std::string dataBufferLibraryPath;
+    DataBufferInterface* dataBufferInterface = nullptr;
     QLibrary* library = nullptr;
     CallbackInterface* callbacks;
-    DataStoreInterface_GetVersion getVersionFunc{nullptr};
-    DataStoreInterface_CreateInstanceType createInstanceFunc{nullptr};
-    DataStoreInterface_DestroyInstanceType destroyInstanceFunc{nullptr};
+    DataBufferInterface_GetVersion getVersionFunc{nullptr};
+    DataBufferInterface_CreateInstanceType createInstanceFunc{nullptr};
+    DataBufferInterface_DestroyInstanceType destroyInstanceFunc{nullptr};
 };
 
 } // namespace SimulationSlave

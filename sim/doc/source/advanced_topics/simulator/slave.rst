@@ -53,7 +53,7 @@ Each simulation run splits up into 3 phases: Bootstrap tasks, Stepping and Final
 2. After this Spawning, PreAgent, NonRecurring, Recurring and Syncronize Tasks are processed for each timestep.
    First all Runtime Spawners are triggered.
    Whenever a new agent is spawned, all its components are parsed to *Trigger* and *Update* tasks, grouped and sorted by execution time as non-recurring and recurring tasks.
-   Next all PreAgents task are executed, which includes publishing the world state to the DataStore in triggering all EventDetectors and Manipulators
+   Next all PreAgents task are executed, which includes publishing the world state to the DataBuffer in triggering all EventDetectors and Manipulators
    Non-recurring tasks are executed just once and will be deleted afterwards (*init* flag in ComponentRepository).
    Right after execution of all agent-based tasks, the Syncronize phase synchronizes all changes to the world as world state for the next timestep.
 

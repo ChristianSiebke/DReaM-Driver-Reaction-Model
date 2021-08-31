@@ -48,7 +48,7 @@ struct CORESLAVEEXPORT FrameworkModules
 public:
     FrameworkModules(const int logLevel,
                      const std::string& libraryDir,
-                     const std::string& dataStoreLibrary,
+                     const std::string& dataBufferLibrary,
                      const std::string& eventDetectorLibrary,
                      const std::string& manipulatorLibrary,
                      const ObservationInstanceCollection& observationLibraries,
@@ -57,7 +57,7 @@ public:
                      const SpawnPointLibraryInfoCollection& spawnPointLibraries) :
         logLevel{logLevel},
         libraryDir{libraryDir},
-        dataStoreLibrary{openpass::core::Directories::Concat(libraryDir, dataStoreLibrary)},
+        dataBufferLibrary{openpass::core::Directories::Concat(libraryDir, dataBufferLibrary)},
         eventDetectorLibrary{openpass::core::Directories::Concat(libraryDir, eventDetectorLibrary)},
         manipulatorLibrary{openpass::core::Directories::Concat(libraryDir, manipulatorLibrary)},
         observationLibraries{ConcatenateObservationLibraries(libraryDir, observationLibraries)},
@@ -68,7 +68,7 @@ public:
 
     const int logLevel;
     const std::string libraryDir;
-    const std::string dataStoreLibrary;
+    const std::string dataBufferLibrary;
     const std::string eventDetectorLibrary;
     const std::string manipulatorLibrary;
     const ObservationInstanceCollection observationLibraries;

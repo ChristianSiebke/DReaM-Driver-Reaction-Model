@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 in-tech GmbH
+* Copyright (c) 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -8,13 +8,13 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 
-#include "bindings/dataStoreBinding.h"
-#include "bindings/dataStoreLibrary.h"
+#include "bindings/dataBufferBinding.h"
+#include "bindings/dataBufferLibrary.h"
 
 namespace SimulationSlave
 {
 
-DataStoreBinding::DataStoreBinding(std::string libraryPath,
+DataBufferBinding::DataBufferBinding(std::string libraryPath,
                                    const openpass::common::RuntimeInformation& runtimeInformation,
                                    CallbackInterface *callbacks) :
         libraryPath{libraryPath},
@@ -23,16 +23,16 @@ DataStoreBinding::DataStoreBinding(std::string libraryPath,
 {
 }
 
-DataStoreBinding::~DataStoreBinding()
+DataBufferBinding::~DataBufferBinding()
 {
     Unload();
 }
 
-DataStoreInterface* DataStoreBinding::Instantiate()
+DataBufferInterface* DataBufferBinding::Instantiate()
 {
     if (!library)
     {
-        library = new (std::nothrow) DataStoreLibrary(libraryPath, callbacks);
+        library = new (std::nothrow) DataBufferLibrary(libraryPath, callbacks);
         
         if (!library)
         {
@@ -47,14 +47,14 @@ DataStoreInterface* DataStoreBinding::Instantiate()
         }
     }
 
-    return library->CreateDataStore(runtimeInformation);
+    return library->CreateDataBuffer(runtimeInformation);
 }
 
-void DataStoreBinding::Unload()
+void DataBufferBinding::Unload()
 {
     if (library)
     {
-        library->ReleaseDataStore();
+        library->ReleaseDataBuffer();
         delete library;
         library = nullptr;
     }

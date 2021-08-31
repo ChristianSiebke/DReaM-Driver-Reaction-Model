@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -16,7 +16,7 @@ class FakeObservationNetwork : public SimulationSlave::ObservationNetworkInterfa
 {
 public:
     MOCK_METHOD6(Instantiate,
-        bool(const ObservationInstanceCollection&, StochasticsInterface*, WorldInterface*, EventNetworkInterface*, const std::string&, DataStoreReadInterface*));
+        bool(const ObservationInstanceCollection&, StochasticsInterface*, WorldInterface*, EventNetworkInterface*, const std::string&, DataBufferReadInterface*));
     MOCK_METHOD0(GetObservationModules,
         const std::map<int, ObservationModule*>&());
     MOCK_METHOD0(InitAll,

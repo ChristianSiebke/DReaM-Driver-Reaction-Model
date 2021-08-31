@@ -2,6 +2,7 @@
 
 #include "include/scenarioInterface.h"
 #include "eventDetector.h"
+#include "fakeDataBuffer.h"
 #include "fakeEventDetectorNetwork.h"
 #include "fakeManipulatorNetwork.h"
 #include "fakeSpawnPointNetwork.h"
@@ -31,6 +32,7 @@ TEST(TaskBuilder, SpawningTaskCreation_Works)
     int currentTime = 0;
 
     NiceMock<FakeWorld> fakeWorld;
+    NiceMock<FakeDataBuffer> fakeDataBuffer;
     RunResult runResult{};
     TaskBuilder taskBuilder(currentTime,
                             runResult,
@@ -39,7 +41,8 @@ TEST(TaskBuilder, SpawningTaskCreation_Works)
                             nullptr,
                             nullptr,
                             &fakeEventDetectorNetwork,
-                            &fakeManipulatorNetwork);
+                            &fakeManipulatorNetwork,
+                            &fakeDataBuffer);
 
     auto commonTasks = taskBuilder.CreateSpawningTasks();
     ASSERT_THAT(commonTasks, SizeIs(Gt(size_t(0))));
@@ -64,6 +67,7 @@ TEST(TaskBuilder, PreAgentTaskCreation_Works)
     int currentTime = 0;
 
     NiceMock<FakeWorld> fakeWorld;
+    NiceMock<FakeDataBuffer> fakeDataBuffer;
     RunResult runResult{};
     TaskBuilder taskBuilder(currentTime,
                             runResult,
@@ -72,7 +76,8 @@ TEST(TaskBuilder, PreAgentTaskCreation_Works)
                             nullptr,
                             nullptr,
                             &fakeEventDetectorNetwork,
-                            &fakeManipulatorNetwork);
+                            &fakeManipulatorNetwork,
+                            &fakeDataBuffer);
 
     auto commonTasks = taskBuilder.CreatePreAgentTasks();
     ASSERT_THAT(commonTasks, SizeIs(Gt(size_t(0))));
@@ -89,6 +94,7 @@ TEST(TaskBuilder, SynchronizeTaskCreation_Works)
     int currentTime = 0;
 
     NiceMock<FakeWorld> fakeWorld;
+    NiceMock<FakeDataBuffer> fakeDataBuffer;
     RunResult runResult{};
     TaskBuilder taskBuilder(currentTime,
                             runResult,
@@ -97,7 +103,8 @@ TEST(TaskBuilder, SynchronizeTaskCreation_Works)
                             nullptr,
                             nullptr,
                             &fakeEventDetectorNetwork,
-                            &fakeManipulatorNetwork);
+                            &fakeManipulatorNetwork,
+                            &fakeDataBuffer);
 
     auto finalizeTasks = taskBuilder.CreateSynchronizeTasks();
     ASSERT_THAT(finalizeTasks, SizeIs(Gt(size_t(0))));

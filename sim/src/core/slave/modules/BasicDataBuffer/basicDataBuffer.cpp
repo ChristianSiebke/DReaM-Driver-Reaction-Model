@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 in-tech GmbH
+* Copyright (c) 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -9,11 +9,11 @@
 *******************************************************************************/
 
 //-----------------------------------------------------------------------------
-/** \file  basicDataStore.cpp */
+/** \file  basicDataBuffer.cpp */
 //-----------------------------------------------------------------------------
 
-#include "basicDataStore.h"
-#include "basicDataStoreImplementation.h"
+#include "basicDataBuffer.h"
+#include "basicDataBufferImplementation.h"
 
 const std::string Version = "1.0.0";    //!< The version of the current module - has to be incremented manually
 
@@ -22,7 +22,7 @@ const std::string Version = "1.0.0";    //!< The version of the current module -
 //!
 //! @return                       Version of the current module
 //-----------------------------------------------------------------------------
-extern "C" BASIC_DATASTORE_SHARED_EXPORT const std::string& OpenPASS_GetVersion()
+extern "C" BASIC_DATABUFFER_SHARED_EXPORT const std::string& OpenPASS_GetVersion()
 {
     return Version;
 }
@@ -35,11 +35,11 @@ extern "C" BASIC_DATASTORE_SHARED_EXPORT const std::string& OpenPASS_GetVersion(
 //!
 //! @return                       A pointer to the created module instance
 //-----------------------------------------------------------------------------
-extern "C" BASIC_DATASTORE_SHARED_EXPORT DataStoreInterface* OpenPASS_CreateInstance(const openpass::common::RuntimeInformation* runtimeInformation, const CallbackInterface* callbacks)
+extern "C" BASIC_DATABUFFER_SHARED_EXPORT DataBufferInterface* OpenPASS_CreateInstance(const openpass::common::RuntimeInformation* runtimeInformation, const CallbackInterface* callbacks)
 {
     try
     {
-        return (DataStoreInterface*)(new (std::nothrow) BasicDataStoreImplementation(runtimeInformation, callbacks));
+        return (DataBufferInterface*)(new (std::nothrow) BasicDataBufferImplementation(runtimeInformation, callbacks));
     }
     catch (const std::runtime_error& ex)
     {
@@ -66,7 +66,7 @@ extern "C" BASIC_DATASTORE_SHARED_EXPORT DataStoreInterface* OpenPASS_CreateInst
 //!
 //! @param[in]     implementation    The instance that should be freed
 //-----------------------------------------------------------------------------
-extern "C" BASIC_DATASTORE_SHARED_EXPORT void OpenPASS_DestroyInstance(DataStoreInterface* implementation)
+extern "C" BASIC_DATABUFFER_SHARED_EXPORT void OpenPASS_DestroyInstance(DataBufferInterface* implementation)
 {
     delete implementation;
 }

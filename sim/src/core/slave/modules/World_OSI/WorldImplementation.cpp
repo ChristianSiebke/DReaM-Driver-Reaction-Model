@@ -31,11 +31,11 @@ namespace {
     }
 }
 
-WorldImplementation::WorldImplementation(const CallbackInterface* callbacks, StochasticsInterface* stochastics, DataStoreWriteInterface* dataStore):
+WorldImplementation::WorldImplementation(const CallbackInterface* callbacks, StochasticsInterface* stochastics, DataBufferWriteInterface* dataBuffer):
     agentNetwork(this, callbacks),
     callbacks(callbacks),
-    dataStore(dataStore),
-    repository(dataStore),
+    dataBuffer(dataBuffer),
+    repository(dataBuffer),
     worldData(callbacks)
 {}
 
@@ -151,7 +151,7 @@ void WorldImplementation::PublishGlobalData(int timestamp)
     agentNetwork.PublishGlobalData(
         [&](openpass::type::EntityId id, openpass::type::FlatParameterKey key, openpass::type::FlatParameterValue value)
         {
-            dataStore->PutCyclic(timestamp, id, key, value);
+            dataBuffer->PutCyclic(id, key, value);
         });
 }
 

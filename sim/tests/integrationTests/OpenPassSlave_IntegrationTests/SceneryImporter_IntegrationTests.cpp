@@ -21,7 +21,7 @@
 #include "importer/sceneryImporter.h"
 #include "modelElements/agentBlueprint.h"
 #include "bindings/world.h"
-#include "fakeDataStore.h"
+#include "fakeDataBuffer.h"
 #include "fakeSceneryDynamics.h"
 
 #include "AgentAdapter.h"
@@ -49,7 +49,7 @@ struct TESTSCENERY_FACTORY
 {
     const std::string libraryName = "World_OSI";
 
-    NiceMock<FakeDataStore> fakeDataStore;
+    NiceMock<FakeDataBuffer> fakeDataBuffer;
     SimulationCommon::Callbacks callbacks;
     StochasticsImplementation stochastics{&callbacks};
     SimulationSlave::WorldBinding worldBinding;
@@ -58,7 +58,7 @@ struct TESTSCENERY_FACTORY
     openScenario::EnvironmentAction environment;
 
     TESTSCENERY_FACTORY() :
-        worldBinding(libraryName, &callbacks, &stochastics, &fakeDataStore),
+        worldBinding(libraryName, &callbacks, &stochastics, &fakeDataBuffer),
         world(&worldBinding)
     {
     }

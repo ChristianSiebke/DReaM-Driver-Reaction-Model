@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019, 2020 in-tech GmbH
+* Copyright (c) 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -9,7 +9,7 @@
 *******************************************************************************/
 #include "common/events/basicEvent.h"
 #include "eventNetwork.h"
-#include "fakeDataStore.h"
+#include "fakeDataBuffer.h"
 #include "fakeEvent.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -23,22 +23,22 @@ using ::testing::SizeIs;
 
 TEST(DISABLED_EventNetwork, InsertEvent_LogsEvent)
 {
-    NiceMock<FakeDataStore> mockDataStore;
+    NiceMock<FakeDataBuffer> mockDataBuffer;
 
     auto fakeEvent1 = std::make_shared<openpass::events::OpenScenarioEvent>(100, "test_event_1", "dont_care");
     auto fakeEvent2 = std::make_shared<openpass::events::OpenScenarioEvent>(200, "test_event_2", "dont_care");
 
-    SimulationSlave::EventNetwork eventNetwork(&mockDataStore);
+    SimulationSlave::EventNetwork eventNetwork(&mockDataBuffer);
 
     eventNetwork.InsertEvent(fakeEvent1);
     eventNetwork.InsertEvent(fakeEvent2);
 
-    EXPECT_CALL(mockDataStore, PutAcyclic(_, _, _, _)).Times(2);
+    EXPECT_CALL(mockDataBuffer, PutAcyclic(_, _, _)).Times(2);
 }
 
 TEST(EventNetwork, GetCategoryWithoutEvent_IsEmpty)
 {
-    NiceMock<FakeDataStore> fds;
+    NiceMock<FakeDataBuffer> fds;
     SimulationSlave::EventNetwork eventNetwork(&fds);
     ASSERT_THAT(eventNetwork.GetEvents(EventDefinitions::EventCategory::OpenSCENARIO), IsEmpty());
 }
@@ -50,7 +50,7 @@ std::shared_ptr<EventInterface> GENERATE_FAKE_CONDITIONAL_EVENT()
 
 TEST(EventNetwork, InsertEventOnEmptyNetwork_AddsToNewCategory)
 {
-    NiceMock<FakeDataStore> fds;
+    NiceMock<FakeDataBuffer> fds;
     SimulationSlave::EventNetwork eventNetwork(&fds);
 
     eventNetwork.InsertEvent(GENERATE_FAKE_CONDITIONAL_EVENT());
@@ -59,7 +59,7 @@ TEST(EventNetwork, InsertEventOnEmptyNetwork_AddsToNewCategory)
 
 TEST(EventNetwork, InsertEventOfAlreadyAddedCategory_AddsToExistingCategory)
 {
-    NiceMock<FakeDataStore> fds;
+    NiceMock<FakeDataBuffer> fds;
     SimulationSlave::EventNetwork eventNetwork(&fds);
 
     eventNetwork.InsertEvent(GENERATE_FAKE_CONDITIONAL_EVENT());
@@ -70,7 +70,7 @@ TEST(EventNetwork, InsertEventOfAlreadyAddedCategory_AddsToExistingCategory)
 
 TEST(EventNetwork, InsertEventOnNewCategory_AddsToNewCategory)
 {
-    NiceMock<FakeDataStore> fds;
+    NiceMock<FakeDataBuffer> fds;
     SimulationSlave::EventNetwork eventNetwork(&fds);
 
     auto fakeOpenPassEvent = std::make_shared<openpass::events::OpenPassEvent>(100, "test_event_1", "dont_care");

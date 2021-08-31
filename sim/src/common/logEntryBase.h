@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 in-tech GmbH
+* Copyright (c) 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -11,12 +11,12 @@
 #pragma once
 
 #include "common/openPassTypes.h"
-#include "include/dataStoreInterface.h"
+#include "include/dataBufferInterface.h"
 
 namespace openpass::publisher {
 
 /**
- * @brief Base class for logging of acyclic events in the datastore
+ * @brief Base class for logging of acyclic events in the dataBuffer
  * @see   openpass::publisher::coreDataPublisher
  * @see   openpass::publisher::LogEntry
  */
@@ -40,7 +40,7 @@ public:
     openpass::type::TriggeringEntities triggeringEntities;
     openpass::type::AffectedEntities affectedEntities;
 
-    virtual operator openpass::datastore::Acyclic() const = 0;
+    virtual operator openpass::databuffer::Acyclic() const = 0;
 
     // We do not allow copy to force move semantics
     LogEntryBase(const LogEntryBase &) = delete;

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019. 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019. 2020, 2021 in-tech GmbH
 *               2016, 2017 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -53,12 +53,18 @@ void RunStatistic::WriteStatistics(QXmlStreamWriter* fileStream)
     fileStream->writeCharacters(BoolToString(EgoCollision));
     fileStream->writeEndElement();
 
+    double totalDistanceTraveled = 0;
+    for(const auto& [_, distance] : distanceTraveled)
+    {
+        totalDistanceTraveled += distance;
+    }
+
     fileStream->writeStartElement("TotalDistanceTraveled");
-    fileStream->writeCharacters(QString::number(TotalDistanceTraveled));
+    fileStream->writeCharacters(QString::number(totalDistanceTraveled));
     fileStream->writeEndElement();
 
     fileStream->writeStartElement("EgoDistanceTraveled");
-    fileStream->writeCharacters(QString::number(EgoDistanceTraveled));
+    fileStream->writeCharacters(QString::number(distanceTraveled.at("0")));
     fileStream->writeEndElement();
 }
 

@@ -10,7 +10,7 @@
 
 set(FOLDER "CoreModules")
 
-add_subdirectory(BasicDataStore)
+add_subdirectory(BasicDataBuffer)
 #add_subdirectory(CollisionDetection)
 add_subdirectory(EventDetector)
 add_subdirectory(Manipulator)

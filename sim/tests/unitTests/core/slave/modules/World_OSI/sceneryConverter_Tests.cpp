@@ -26,7 +26,7 @@
 #include "fakeWorldData.h"
 #include "fakeConnection.h"
 #include "fakeJunction.h"
-#include "fakeDataStore.h"
+#include "fakeDataBuffer.h"
 
 #include "Generators/laneGeometryElementGenerator.h"
 
