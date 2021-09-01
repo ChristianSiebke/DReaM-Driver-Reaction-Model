@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -60,7 +60,7 @@ public:
                              WorldInterface* world,
                              EventNetworkInterface* eventNetwork,
                              const std::string& sceneryPath,
-                             DataStoreReadInterface* dataStore) = 0;
+                             DataBufferReadInterface* dataBuffer) = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the observation module mapping.

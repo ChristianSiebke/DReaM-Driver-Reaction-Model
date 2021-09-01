@@ -15,7 +15,7 @@ SUBDIRS = \
     components \
     master \
     slave \
-    core/slave/modules/BasicDataStore \
+    core/slave/modules/BasicDataBuffer \
     core/slave/modules/EventDetector \
     core/slave/modules/Manipulator \
     core/slave/modules/Observation_EntityRepository \

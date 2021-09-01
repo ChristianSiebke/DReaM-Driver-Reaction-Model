@@ -57,7 +57,7 @@ Please refer to the individual components, for information about their published
 
 .. todo::
 
-   The concept Cyclics and the DataStore needs further explanation.
+   The concept Cyclics and the DataBuffer needs further explanation.
    We also need a way to better communicate, who is publishing what.
    This should directly come out of the source code, to keep the documentation up to date.
 

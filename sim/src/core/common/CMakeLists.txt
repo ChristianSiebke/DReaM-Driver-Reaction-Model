@@ -6,7 +6,6 @@ add_openpass_target(
   HEADERS
     callbacks.h
     coreDataPublisher.h
-    timeKeeper.h
     ../../common/xmlParser.h
     cephesMIT/mconf.h
 

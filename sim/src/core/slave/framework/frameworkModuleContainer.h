@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 * Copyright (c) 2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -23,8 +23,8 @@
 #include "include/frameworkModuleContainerInterface.h"
 #include "agentBlueprintProvider.h"
 #include "agentFactory.h"
-#include "bindings/dataStore.h"
-#include "bindings/dataStoreBinding.h"
+#include "bindings/dataBuffer.h"
+#include "bindings/dataBufferBinding.h"
 #include "directories.h"
 #include "bindings/eventDetectorBinding.h"
 #include "eventDetectorNetwork.h"
@@ -54,7 +54,7 @@ public:
 
     AgentBlueprintProviderInterface *GetAgentBlueprintProvider() override;
     AgentFactoryInterface *GetAgentFactory() override;
-    DataStoreInterface *GetDataStore() override;
+    DataBufferInterface *GetDataBuffer() override;
     EventDetectorNetworkInterface *GetEventDetectorNetwork() override;
     EventNetworkInterface *GetEventNetwork() override;
     ManipulatorNetworkInterface *GetManipulatorNetwork() override;
@@ -64,8 +64,8 @@ public:
     WorldInterface *GetWorld() override;
 
 private:
-    DataStoreBinding dataStoreBinding;
-    DataStore dataStore;
+    DataBufferBinding dataBufferBinding;
+    DataBuffer dataBuffer;
     openpass::publisher::CoreDataPublisher coreDataPublisher;
 
     StochasticsBinding stochasticsBinding;

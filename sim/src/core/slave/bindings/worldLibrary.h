@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2021 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -20,7 +20,7 @@
 #include <QLibrary>
 #include "bindings/worldBinding.h"
 #include "include/callbackInterface.h"
-#include "include/dataStoreInterface.h"
+#include "include/dataBufferInterface.h"
 
 namespace SimulationSlave
 {
@@ -30,18 +30,18 @@ class WorldLibrary
 public:
     typedef const std::string &(*WorldInterface_GetVersion)();
     typedef WorldInterface *(*WorldInterface_CreateInstanceType)(
-            const CallbackInterface *callbacks, StochasticsInterface* stochastics, DataStoreWriteInterface* dataStore);
+            const CallbackInterface *callbacks, StochasticsInterface* stochastics, DataBufferWriteInterface* dataBuffer);
     typedef void (*WorldInterface_DestroyInstanceType)(WorldInterface *implementation);
 
 
     WorldLibrary(const std::string &worldLibraryPath,
                  CallbackInterface *callbacks,
                  StochasticsInterface* stochastics,
-                 DataStoreWriteInterface* dataStore) :
+                 DataBufferWriteInterface* dataBuffer) :
            worldLibraryPath(worldLibraryPath),
            callbacks(callbacks),
            stochastics(stochastics),
-           dataStore(dataStore)
+           dataBuffer(dataBuffer)
     {}
 
     WorldLibrary(const WorldLibrary&) = delete;
@@ -91,7 +91,7 @@ private:
     QLibrary *library = nullptr;
     CallbackInterface *callbacks;
     StochasticsInterface* stochastics;
-    DataStoreWriteInterface* dataStore;
+    DataBufferWriteInterface* dataBuffer;
     WorldInterface_GetVersion getVersionFunc{nullptr};
     WorldInterface_CreateInstanceType createInstanceFunc{nullptr};
     WorldInterface_DestroyInstanceType destroyInstanceFunc{nullptr};

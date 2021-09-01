@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 in-tech GmbH
+* Copyright (c) 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -115,8 +115,8 @@ class Repository final : public RepositoryInterface
 
 public:
     /// @brief Create a new repository
-    /// @param datastore Reference to a DataStoreWriteInterface
-    Repository(DataStoreWriteInterface *const datastore);
+    /// @param databuffer Reference to a DataBufferWriteInterface
+    Repository(DataBufferWriteInterface *const databuffer);
 
     ~Repository() override;
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -17,11 +17,13 @@
 #include "common/log.h"
 #include "include/agentBlueprintProviderInterface.h"
 #include "include/observationNetworkInterface.h"
+#include "include/eventDetectorNetworkInterface.h"
+#include "include/manipulatorNetworkInterface.h"
 #include "agentFactory.h"
 #include "agentType.h"
 #include "channel.h"
 #include "component.h"
-#include "bindings/dataStore.h"
+#include "bindings/dataBuffer.h"
 #include "observationModule.h"
 #include "modelElements/parameters.h"
 #include "scheduler/runResult.h"
@@ -57,10 +59,10 @@ bool RunInstantiator::ExecuteRun()
         return false;
     }
 
-    dataStore.PutStatic("SceneryFile", scenario.GetSceneryPath(), true);
+    dataBuffer.PutStatic("SceneryFile", scenario.GetSceneryPath(), true);
     ThrowIfFalse(observationNetwork.InitAll(), "Failed to initialize ObservationNetwork");
 
-    openpass::scheduling::Scheduler scheduler(world, spawnPointNetwork, eventDetectorNetwork, manipulatorNetwork, observationNetwork);
+    openpass::scheduling::Scheduler scheduler(world, spawnPointNetwork, eventDetectorNetwork, manipulatorNetwork, observationNetwork, dataBuffer);
     bool scheduler_state{false};
 
     for (auto invocation = 0; invocation < experimentConfig.numberOfInvocations; invocation++)
@@ -122,8 +124,8 @@ bool RunInstantiator::InitPreRun(ScenarioInterface& scenario, SceneryInterface& 
 
 void RunInstantiator::InitializeFrameworkModules(ScenarioInterface& scenario)
 {
-    ThrowIfFalse(dataStore.Instantiate(),
-                 "Failed to instantiate DataStore");
+    ThrowIfFalse(dataBuffer.Instantiate(),
+                 "Failed to instantiate DataBuffer");
     ThrowIfFalse(stochastics.Instantiate(frameworkModules.stochasticsLibrary),
                  "Failed to instantiate Stochastics");
     ThrowIfFalse(world.Instantiate(),
@@ -132,7 +134,7 @@ void RunInstantiator::InitializeFrameworkModules(ScenarioInterface& scenario)
                  "Failed to instantiate EventDetectorNetwork");
     ThrowIfFalse(manipulatorNetwork.Instantiate(frameworkModules.manipulatorLibrary, &scenario, &eventNetwork),
                  "Failed to instantiate ManipulatorNetwork");
-    ThrowIfFalse(observationNetwork.Instantiate(frameworkModules.observationLibraries, &stochastics, &world, &eventNetwork, scenario.GetSceneryPath(), &dataStore),
+    ThrowIfFalse(observationNetwork.Instantiate(frameworkModules.observationLibraries, &stochastics, &world, &eventNetwork, scenario.GetSceneryPath(), &dataBuffer),
                  "Failed to instantiate ObservationNetwork");
 }
 
@@ -194,7 +196,7 @@ void RunInstantiator::ClearRun()
     spawnPointNetwork.Clear();
     eventNetwork.Clear();
     eventDetectorNetwork.ResetAll();
-    dataStore.Clear();
+    dataBuffer.ClearRun();
 }
 
 } // namespace SimulationSlave

@@ -22,7 +22,7 @@ SUBDIRS = \
     Algorithm_ECU \
     Algorithm_RouteControl \
     Algorithm_Switch \
-    basicDataStore_Tests \
+    basicDataBuffer_Tests \
     componentController_Tests \
     Dynamics_Chassis \
     dynamicsCollision_Tests \
@@ -73,8 +73,8 @@ Algorithm_RouteControl.file = \
 Algorithm_Switch.file = \
     $$PWD/components/Algorithm_Switch/Algorithm_Switch.pro
 
-basicDataStore_Tests.file = \
-    $$PWD/core/slave/modules/BasicDataStore/basicDataStore_Tests.pro
+basicDataBuffer_Tests.file = \
+    $$PWD/core/slave/modules/BasicDataBuffer/basicDataBuffer_Tests.pro
 
 componentController_Tests.file = \
     $$PWD/components/ComponentController/componentController_Tests.pro

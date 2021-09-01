@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -19,7 +19,7 @@
 
 #include <map>
 #include <string>
-#include "include/dataStoreInterface.h"
+#include "include/dataBufferInterface.h"
 #include "include/eventNetworkInterface.h"
 #include "include/stochasticsInterface.h"
 #include "include/worldInterface.h"
@@ -60,7 +60,7 @@ public:
                                    StochasticsInterface* stochastics,
                                    WorldInterface* world,
                                    SimulationSlave::EventNetworkInterface* eventNetwork,
-                                   DataStoreReadInterface* dataStore);
+                                   DataBufferReadInterface* dataBuffer);
     //-----------------------------------------------------------------------------
     //! Deletes the library mapping and all referenced observation library objects
     //-----------------------------------------------------------------------------
