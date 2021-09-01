@@ -144,6 +144,7 @@ TEST(SpawnerPreRunCommonParameterExtractor, ExtractSpawnAreas_AllOptionalParamet
         return StreamPosition{-1, 0};});
     ON_CALL(fakeWorld, GetRoadStream(std::vector<RouteElement>{{"RoadA", true}})).
             WillByDefault(Return(ByMove(std::move(roadStreamShort))));
+    ON_CALL(fakeWorld, GetRoadLength(_)).WillByDefault(Return(1000.));
 
     auto result = ExtractSpawnAreas(parameter, fakeWorld, &callbacks);
 
@@ -222,6 +223,7 @@ TEST(SpawnerPreRunCommonParameterExtractor, ExtractSpawnAreas_NoOptionalParamete
     ON_CALL(*roadStreamShort, GetLength()).WillByDefault(Return(1000.0));
     ON_CALL(fakeWorld, GetRoadStream(std::vector<RouteElement>{{"RoadA", true}})).
             WillByDefault(Return(ByMove(std::move(roadStreamShort))));
+    ON_CALL(fakeWorld, GetRoadLength(_)).WillByDefault(Return(1000.));
 
     auto result = ExtractSpawnAreas(parameter, fakeWorld, &callbacks);
 
@@ -240,7 +242,66 @@ TEST(SpawnerPreRunCommonParameterExtractor, ExtractSpawnAreas_NoOptionalParamete
     EXPECT_THAT(result.at(3).sEnd, Eq(1000.0));
 }
 
-TEST(SpawnerPreRunCommonParameterExtractor, ExtractSpawnAreas_AgaintOdDirection)
+TEST(SpawnerPreRunCommonParameterExtractor, ExtractSpawnAreasWithSOutOfRange_ReturnsValidS)
+{
+    FakeCallback callbacks;
+
+    FakeParameter parameter;
+    auto spawnPoint = std::make_shared<FakeParameter>();
+    ParameterInterface::ParameterLists spawnPoints {{spawnPoint}};
+
+    std::map<std::string, const std::vector<std::string>> strings1{{"Roads", {"RoadA", "RoadB"}}};
+    ON_CALL(*spawnPoint, GetParametersStringVector()).WillByDefault(ReturnRef(strings1));
+    std::map<std::string, const std::vector<int>> intVectors1{{"Lanes", {-1,-2}}};
+    ON_CALL(*spawnPoint, GetParametersIntVector()).WillByDefault(ReturnRef(intVectors1));
+    std::map<std::string, double> doubles1{{"SStart", -10.0}, {"SEnd", 750.0}};
+    ON_CALL(*spawnPoint, GetParametersDouble()).WillByDefault(ReturnRef(doubles1));
+
+    std::map<std::string, ParameterInterface::ParameterLists> parameterLists{{"SpawnZones", spawnPoints}};
+    ON_CALL(parameter, GetParameterLists()).WillByDefault(ReturnRef(parameterLists));
+
+    FakeWorld fakeWorld;
+    ON_CALL(fakeWorld, IsDirectionalRoadExisting(_,true)).WillByDefault(Return(true));
+    ON_CALL(fakeWorld, IsDirectionalRoadExisting(_,false)).WillByDefault(Return(false));
+
+    RoadGraph roadGraphIn;
+    auto nodeA = add_vertex(RouteElement{"RoadA", true}, roadGraphIn);
+    auto nodeB = add_vertex(RouteElement{"RoadB", true}, roadGraphIn);
+    add_edge(nodeA, nodeB, roadGraphIn);
+    RoadGraph roadGraphAgainst;
+    auto nodeAAgainst = add_vertex(RouteElement{"RoadA", false}, roadGraphAgainst);
+    ON_CALL(fakeWorld, GetRoadGraph(RouteElement{"RoadA", true}, _)).WillByDefault(Return(std::make_pair(roadGraphIn, nodeA)));
+    ON_CALL(fakeWorld, GetRoadGraph(RouteElement{"RoadA", false}, _)).WillByDefault(Return(std::make_pair(roadGraphAgainst, nodeAAgainst)));
+
+    std::unique_ptr<FakeRoadStream> roadStreamLong = std::make_unique<FakeRoadStream>();
+    LaneStreamInterface* laneStream1 = new FakeLaneStream;
+    ON_CALL(*roadStreamLong, GetLaneStream(_,-1)).WillByDefault(Return(ByMove(std::unique_ptr<LaneStreamInterface>(laneStream1))));
+    LaneStreamInterface* laneStream2 = new FakeLaneStream;
+    ON_CALL(*roadStreamLong, GetLaneStream(_,-2)).WillByDefault(Return(ByMove(std::unique_ptr<LaneStreamInterface>(laneStream2))));
+    ON_CALL(*roadStreamLong, GetStreamPosition(_)).WillByDefault([](GlobalRoadPosition position)
+    {if(position.roadId == "RoadA")
+        {return StreamPosition{position.roadPosition.s, 0};}
+        if(position.roadId == "RoadB")
+        {return StreamPosition{position.roadPosition.s + 1000.0, 0};}
+        return StreamPosition{-1, 0};});
+    ON_CALL(fakeWorld, GetRoadStream(std::vector<RouteElement>{{"RoadA", true}, {"RoadB", true}})).
+            WillByDefault(Return(ByMove(std::move(roadStreamLong))));
+
+    ON_CALL(fakeWorld, GetRoadLength("RoadA")).WillByDefault(Return(1000.));
+    ON_CALL(fakeWorld, GetRoadLength("RoadB")).WillByDefault(Return(500.));
+
+    auto result = ExtractSpawnAreas(parameter, fakeWorld, &callbacks);
+
+    ASSERT_THAT(result, SizeIs(2));
+    EXPECT_THAT(result.at(0).laneStream.get(), Eq(laneStream1));
+    EXPECT_THAT(result.at(0).sStart, Eq(0.0));
+    EXPECT_THAT(result.at(0).sEnd, Eq(1500.0));
+    EXPECT_THAT(result.at(1).laneStream.get(), Eq(laneStream2));
+    EXPECT_THAT(result.at(1).sStart, Eq(0.0));
+    EXPECT_THAT(result.at(1).sEnd, Eq(1500.0));
+}
+
+TEST(SpawnerPreRunCommonParameterExtractor, ExtractSpawnAreas_AgainstOdDirection)
 {
     FakeCallback callbacks;
 
@@ -281,6 +342,8 @@ TEST(SpawnerPreRunCommonParameterExtractor, ExtractSpawnAreas_AgaintOdDirection)
         return StreamPosition{-1, 0};});
     ON_CALL(fakeWorld, GetRoadStream(std::vector<RouteElement>{{"RoadA", false}, {"RoadB", false}})).
             WillByDefault(Return(ByMove(std::move(roadStream))));
+    ON_CALL(fakeWorld, GetRoadLength("RoadA")).WillByDefault(Return(1000.));
+    ON_CALL(fakeWorld, GetRoadLength("RoadB")).WillByDefault(Return(500.));
 
     auto result = ExtractSpawnAreas(parameter, fakeWorld, &callbacks);
 
@@ -356,6 +419,8 @@ TEST(SpawnerPreRunCommonParameterExtractor, ExtractSpawnAreas_AllLanesBothDirect
         return StreamPosition{-1, 0};});
     ON_CALL(fakeWorld, GetRoadStream(std::vector<RouteElement>{{"RoadB", false}, {"RoadA", false}})).
             WillByDefault(Return(ByMove(std::move(roadStreamAgainst))));
+    ON_CALL(fakeWorld, GetRoadLength("RoadA")).WillByDefault(Return(1000.));
+    ON_CALL(fakeWorld, GetRoadLength("RoadB")).WillByDefault(Return(500.));
 
     auto result = ExtractSpawnAreas(parameter, fakeWorld, &callbacks);
 

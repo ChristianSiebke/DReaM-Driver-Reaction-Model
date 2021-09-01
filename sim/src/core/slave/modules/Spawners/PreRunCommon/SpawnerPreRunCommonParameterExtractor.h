@@ -179,11 +179,13 @@ static std::vector<SpawnArea> ExtractSpawnAreas(const ParameterInterface &parame
             {
                 if (sStartElement.has_value())
                 {
-                    sStartOnStream = roadStream->GetStreamPosition(GlobalRoadPosition{route.front().roadId, 0, sStartElement.value(), 0, 0}).s;
+                    double sStart = std::clamp(sStartElement.value(), 0.0, world.GetRoadLength(route.front().roadId));
+                    sStartOnStream = roadStream->GetStreamPosition(GlobalRoadPosition{route.front().roadId, 0, sStart, 0, 0}).s;
                 }
                 if (sEndElement.has_value())
                 {
-                    sEndOnStream = roadStream->GetStreamPosition(GlobalRoadPosition{route.back().roadId, 0, sEndElement.value(), 0, 0}).s;
+                    double sEnd = std::clamp(sEndElement.value(), 0.0, world.GetRoadLength(route.back().roadId));
+                    sEndOnStream = roadStream->GetStreamPosition(GlobalRoadPosition{route.back().roadId, 0, sEnd, 0, 0}).s;
                 }
                 else if (sLengthElement.has_value())
                 {
@@ -194,11 +196,13 @@ static std::vector<SpawnArea> ExtractSpawnAreas(const ParameterInterface &parame
             {
                 if (sStartElement.has_value())
                 {
-                    sEndOnStream = roadStream->GetStreamPosition(GlobalRoadPosition{route.back().roadId, 0, sStartElement.value(), 0, 0}).s;
+                    double sStart = std::clamp(sStartElement.value(), 0.0, world.GetRoadLength(route.back().roadId));
+                    sEndOnStream = roadStream->GetStreamPosition(GlobalRoadPosition{route.back().roadId, 0, sStart, 0, 0}).s;
                 }
                 if (sEndElement.has_value())
                 {
-                    sStartOnStream = roadStream->GetStreamPosition(GlobalRoadPosition{route.front().roadId, 0, sEndElement.value(), 0, 0}).s;
+                    double sEnd = std::clamp(sEndElement.value(), 0.0, world.GetRoadLength(route.front().roadId));
+                    sStartOnStream = roadStream->GetStreamPosition(GlobalRoadPosition{route.front().roadId, 0, sEnd, 0, 0}).s;
                 }
                 else if (sLengthElement.has_value())
                 {
