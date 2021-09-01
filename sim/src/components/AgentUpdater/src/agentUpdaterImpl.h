@@ -116,6 +116,11 @@ public:
     */
     virtual void Trigger(int time);
 
+    /*!
+    * \brief Checks that the given value is not Nan and logs an error otherwise
+    */
+    void Validate(double value, const std::string& description);
+
 private:
     double acceleration {0.0};
     double velocity {0.0};

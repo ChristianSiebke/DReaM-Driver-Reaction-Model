@@ -59,14 +59,33 @@ void AgentUpdaterImplementation::Trigger([[maybe_unused]] int time)
 {
     AgentInterface *agent = GetAgent();
 
+    Validate(acceleration, "acceleration");
     agent->SetAcceleration(acceleration);
+    Validate(velocity, "velocity");
     agent->SetVelocity(velocity);
+    Validate(positionX, "positionX");
     agent->SetPositionX(positionX);
+    Validate(positionY, "positionY");
     agent->SetPositionY(positionY);
+    Validate(yaw, "yaw");
     agent->SetYaw(yaw);
+    Validate(yawRate, "yawRate");
     agent->SetYawRate(yawRate);
+    Validate(roll, "roll");
     agent->SetRoll(roll);
+    Validate(steeringWheelAngle, "steeringWheelAngle");
     agent->SetSteeringWheelAngle(steeringWheelAngle);
+    Validate(centripetalAcceleration, "centripetalAcceleration");
     agent->SetCentripetalAcceleration(centripetalAcceleration);
+    Validate(travelDistance, "travelDistance");
     agent->SetDistanceTraveled(agent->GetDistanceTraveled() + travelDistance);
+}
+
+
+void AgentUpdaterImplementation::Validate(double value, const std::string &description)
+{
+    if (std::isnan(value))
+    {
+        LOGERRORANDTHROW("AgentUpdater got NaN as value of " + description + " for Agent " + std::to_string(GetAgent()->GetId()));
+    }
 }
