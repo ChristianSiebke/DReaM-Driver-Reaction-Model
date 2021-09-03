@@ -38,7 +38,7 @@ These files can then be read evaluated by the GUI.
 
 
 Overview of the GUI Plugins
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
    * Simulation Plugins
 
