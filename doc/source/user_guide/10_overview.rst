@@ -107,7 +107,7 @@ There are plans to remove the option for the user to set the library path, but a
 The Slave Path references the OpenPassSlave.exe, the file to execute the slave. 
 If you are using the provided Demo, there is no need for you to change it. 
 The only path you need to set is the path of the Configuration Files. 
-In the Demo it will be located at [directory of openPASS.exe]/configs, so in this case it would be C:/OpenPASS/configs.
+In the Demo it will be located at ``[directory of openPASS.exe]/configs``, so in this case it would be ``C:/OpenPASS/configs``.
 
 Simulation Output Settings
 """"""""""""""""""""""""""
