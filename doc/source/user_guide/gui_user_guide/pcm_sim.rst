@@ -97,7 +97,7 @@ Variation
       `x(t) = x_{0} + k \int_{0}^{t} v_{x} (t) dt` 
       `y(t) = y_{0} + k \int_{0}^{t} v_{y} (t) dt` 
    
-   * with a scaling factor k
+* with a scaling factor k
 
 .. image:: _static/images/plugin/pcm_sim/velocity_scaling.png
 
