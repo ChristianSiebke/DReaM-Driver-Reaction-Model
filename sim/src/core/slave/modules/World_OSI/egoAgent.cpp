@@ -49,17 +49,12 @@ void EgoAgent::UpdatePositionInGraph()
         return;
     }
     auto roadIds = GetAgent()->GetRoads(MeasurementPoint::Front);
-    if (std::find(roadIds.cbegin(), roadIds.cend(), GetRoadId()) == roadIds.end())
+    while (std::find(roadIds.cbegin(), roadIds.cend(), GetRoadId()) == roadIds.end())
     {
         if (rootOfWayToTargetGraph > 0)
         {
             rootOfWayToTargetGraph--;
             auto routeElement = get(RouteElement(), wayToTarget, rootOfWayToTargetGraph);
-            if (std::find(roadIds.cbegin(), roadIds.cend(), routeElement.roadId) == roadIds.end())
-            {
-                graphValid = false;
-                return;
-            }
             auto [successorBegin, successorsEnd] = adjacent_vertices(current, roadGraph);
                     auto successor = std::find_if(successorBegin, successorsEnd, [&](const auto& vertex){return get(RouteElement(), roadGraph, vertex) == routeElement;});
             if (successor == successorsEnd)
@@ -68,10 +63,15 @@ void EgoAgent::UpdatePositionInGraph()
                 return;
             }
             current = *successor;
+            if (std::find(roadIds.cbegin(), roadIds.cend(), routeElement.roadId) == roadIds.end())
+            {
+                continue;
+            }
         }
         else
         {
             graphValid = false;
+            return;
         }
     }
 }
