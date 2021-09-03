@@ -36,6 +36,16 @@ The GUI sits on top of the simulation framework. It produces configuration files
 With these files, the GUI can trigger the simulation to start und produce results in form of different files. 
 These files can then be read evaluated by the GUI.
 
+Workflow
+^^^^^^^^
+
+A typical workflow can be:
+
+   1. Configure systems and agents
+   2. Configure the simulation
+   3. Run the simulation
+   4. Evaluate the simulation results
+   5. Close the loop by continuing with your next simulation
 
 Overview of the GUI Plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -56,18 +66,6 @@ Overview of the GUI Plugins
 
       * agentConfiguration
       * trafficSimulation
-
-
-Workflow
-^^^^^^^^
-
-A typical workflow can be:
-
-   1. Create a system in the system editor
-   2. Configure a simulation and start it using a Simulation plugin
-   3. Evaluate the results using a Result Preview plugin
-   4. Use the generated results and make use of them by starting from point 2 again
-
 
 Simulation Start from GUI
 -------------------------
