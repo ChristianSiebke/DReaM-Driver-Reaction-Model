@@ -76,10 +76,28 @@ Variation
 
    * Given a shift radius R for a vehicle
    * For each position P in trajectory, it shifted position P’ is calculated by randomly generating a distance D (D<= R) and a relative angle in polar coordinate 
+
+   .. math::
+      `x_{\text{new}}(t) = x(t) + \delta x`
+      `y_{\text{new}}(t) = x(y) + \delta y`
   
 .. image:: _static/images/plugin/pcm_sim/trajectory_shifting.png
 
 * The original velocity can be scaled randomly by setting the ``Max scale`` for *Car1* and *Car2*
+* Given a velocity deviation :math `\delta V` for a vehicle
+* In a trajectory, a position P_{i} is represented as
+
+   .. math::
+      `x(t) = x_{0} + \int_{0}^{t} v_{x} (t) dt` 
+      `y(t) = y_{0} + \int_{0}^{t} v_{y} (t) dt` 
+
+* The new position P_{i} can be represented as
+
+  .. math::
+      `x(t) = x_{0} + k \int_{0}^{t} v_{x} (t) dt` 
+      `y(t) = y_{0} + k \int_{0}^{t} v_{y} (t) dt` 
+   
+   * with a scaling factor k
 
 .. image:: _static/images/plugin/pcm_sim/velocity_scaling.png
 
