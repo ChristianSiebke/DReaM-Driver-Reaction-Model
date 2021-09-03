@@ -17,10 +17,11 @@ Overview
 Getting Started
 ---------------
 
-This tutorial is a guide on how to configure a simulation. 
+This chapter provides insights on openPASS and how to work with the simulation.
+The following step-by-step guides are included to guide you through your first simulations with openPASS:
 
-   * Scenario Simulation: by changing the configuration files.
-   * PCM simulation: by using the openPASS graphical user interface (GUI). 
+   * Scenario-based Simulation: traffic simulation based on OpenSCENARIO description
+   * PCM Simulation: crash re-simulation based on GIDAS record
 
 In particular, it is presented how to go through the required steps until a simulation can be run successfully.  
 To enhance the guiding, there are going to be examples in every section. 
