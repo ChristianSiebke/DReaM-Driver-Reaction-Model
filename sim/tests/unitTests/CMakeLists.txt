@@ -17,7 +17,7 @@ add_subdirectory(components/Sensor_OSI)
 add_subdirectory(components/SignalPrioritizer)
 
 add_subdirectory(core/slave)
-add_subdirectory(core/slave/modules/BasicDataStore)
+add_subdirectory(core/slave/modules/BasicDataBuffer)
 add_subdirectory(core/slave/modules/EventDetector)
 add_subdirectory(core/slave/modules/Observation_Log)
 add_subdirectory(core/slave/modules/SpawnPointRuntimeCommon)

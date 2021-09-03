@@ -33,82 +33,97 @@ TEST(VehicleModelImporter, GivenVehicleAndPedestrianCatalogs_ImportsAllModels)
 
     auto vehicleModel1 = vehicleModels.GetVehicleModel("car_one");
     EXPECT_THAT(vehicleModel1.vehicleType, Eq(AgentVehicleType::Car));
-    EXPECT_THAT(vehicleModel1.airDragCoefficient, DoubleEq(1.1));
-    EXPECT_THAT(vehicleModel1.axleRatio, DoubleEq(2.2));
-    EXPECT_THAT(vehicleModel1.decelerationFromPowertrainDrag, DoubleEq(3.3));
-    EXPECT_THAT(vehicleModel1.distanceReferencePointToFrontAxle, DoubleEq(2.0));
-    EXPECT_THAT(vehicleModel1.distanceReferencePointToLeadingEdge, DoubleEq(3.0));
-    EXPECT_THAT(vehicleModel1.frictionCoeff, DoubleEq(4.4));
-    EXPECT_THAT(vehicleModel1.frontSurface, DoubleEq(5.5));
-    EXPECT_THAT(vehicleModel1.gearRatios, ElementsAre(0.0, 6.6));
-    EXPECT_THAT(vehicleModel1.height, DoubleEq(2.2));
-    EXPECT_THAT(vehicleModel1.heightCOG, DoubleEq(0.0));                         // unsupported parameter, fixed to 0.0
-    EXPECT_THAT(vehicleModel1.length, DoubleEq(4.0));
-    EXPECT_THAT(vehicleModel1.maxCurvature, DoubleEq(std::sin(0.707) / 2.0));    // sin(maxSteering fron wheel) / wheelbase
-    EXPECT_THAT(vehicleModel1.maxVelocity, DoubleEq(10.0));
-    EXPECT_THAT(vehicleModel1.maximumEngineSpeed, DoubleEq(6000.0));
-    EXPECT_THAT(vehicleModel1.maximumEngineTorque, DoubleEq(250.0));
-    EXPECT_THAT(vehicleModel1.maximumSteeringWheelAngleAmplitude, DoubleEq(0.707 * 7.7));   // maxSteering front wheel * SteeringRatio
-    EXPECT_THAT(vehicleModel1.minimumEngineSpeed, DoubleEq(900.0));
-    EXPECT_THAT(vehicleModel1.minimumEngineTorque, DoubleEq(-54.0));
-    EXPECT_THAT(vehicleModel1.momentInertiaPitch, DoubleEq(0.0));
-    EXPECT_THAT(vehicleModel1.momentInertiaRoll, DoubleEq(0.0));
-    EXPECT_THAT(vehicleModel1.momentInertiaYaw, DoubleEq(0.0));
-    EXPECT_THAT(vehicleModel1.numberOfGears, 1);
-    EXPECT_THAT(vehicleModel1.staticWheelRadius, DoubleEq(0.25));
-    EXPECT_THAT(vehicleModel1.steeringRatio, DoubleEq(7.7));
-    EXPECT_THAT(vehicleModel1.trackwidth, DoubleEq(1.0));
-    EXPECT_THAT(vehicleModel1.weight, DoubleEq(1000.0));
-    EXPECT_THAT(vehicleModel1.wheelbase, DoubleEq(2.0));
-    EXPECT_THAT(vehicleModel1.width, DoubleEq(1.0));
+    EXPECT_THAT(vehicleModel1.boundingBoxCenter.x, DoubleEq(1.0));
+    EXPECT_THAT(vehicleModel1.boundingBoxCenter.y, DoubleEq(0));
+    EXPECT_THAT(vehicleModel1.boundingBoxCenter.z, DoubleEq(1.1));
+    EXPECT_THAT(vehicleModel1.boundingBoxDimensions.width, DoubleEq(1.0));
+    EXPECT_THAT(vehicleModel1.boundingBoxDimensions.length, DoubleEq(4.0));
+    EXPECT_THAT(vehicleModel1.boundingBoxDimensions.height, DoubleEq(2.2));
+    EXPECT_THAT(vehicleModel1.performance.maxSpeed, DoubleEq(10.0));
+    EXPECT_THAT(vehicleModel1.performance.maxAcceleration, DoubleEq(10.0));
+    EXPECT_THAT(vehicleModel1.performance.maxDeceleration, DoubleEq(9.8));
+    EXPECT_THAT(vehicleModel1.frontAxle.maxSteering, DoubleEq(0.707));
+    EXPECT_THAT(vehicleModel1.frontAxle.wheelDiameter, DoubleEq(0.5));
+    EXPECT_THAT(vehicleModel1.frontAxle.trackWidth, DoubleEq(1.0));
+    EXPECT_THAT(vehicleModel1.frontAxle.positionX, DoubleEq(2.0));
+    EXPECT_THAT(vehicleModel1.frontAxle.positionZ, DoubleEq(0.25));
+    EXPECT_THAT(vehicleModel1.rearAxle.maxSteering, DoubleEq(0.0));
+    EXPECT_THAT(vehicleModel1.rearAxle.wheelDiameter, DoubleEq(0.5));
+    EXPECT_THAT(vehicleModel1.rearAxle.trackWidth, DoubleEq(1.0));
+    EXPECT_THAT(vehicleModel1.rearAxle.positionX, DoubleEq(0.0));
+    EXPECT_THAT(vehicleModel1.rearAxle.positionZ, DoubleEq(0.25));
+    EXPECT_THAT(vehicleModel1.properties, ElementsAre(
+                    std::make_pair("AirDragCoefficient", 1.1),
+                    std::make_pair("AxleRatio", 2.2),
+                    std::make_pair("DecelerationFromPowertrainDrag", 3.3),
+                    std::make_pair("FrictionCoefficient", 4.4),
+                    std::make_pair("FrontSurface", 5.5),
+                    std::make_pair("GearRatio1", 6.6),
+                    std::make_pair("Mass", 1000.0),
+                    std::make_pair("MaximumEngineSpeed", 6000.),
+                    std::make_pair("MaximumEngineTorque", 250.),
+                    std::make_pair("MinimumEngineSpeed", 900.),
+                    std::make_pair("MinimumEngineTorque", -54.),
+                    std::make_pair("MomentInertiaPitch", 0.0),
+                    std::make_pair("MomentInertiaRoll", 0.0),
+                    std::make_pair("MomentInertiaYaw", 0.0),
+                    std::make_pair("NumberOfGears", 1.),
+                    std::make_pair("SteeringRatio", 7.7)));
 
     auto vehicleModel2 = vehicleModels.GetVehicleModel("car_two");
     EXPECT_THAT(vehicleModel2.vehicleType, Eq(AgentVehicleType::Car));
-    EXPECT_THAT(vehicleModel2.airDragCoefficient, DoubleEq(2.2));
-    EXPECT_THAT(vehicleModel2.axleRatio, DoubleEq(3.3));
-    EXPECT_THAT(vehicleModel2.decelerationFromPowertrainDrag, DoubleEq(4.4));
-    EXPECT_THAT(vehicleModel2.distanceReferencePointToFrontAxle, DoubleEq(2.5));
-    EXPECT_THAT(vehicleModel2.distanceReferencePointToLeadingEdge, DoubleEq(3.5));
-    EXPECT_THAT(vehicleModel2.frictionCoeff, DoubleEq(5.5));
-    EXPECT_THAT(vehicleModel2.frontSurface, DoubleEq(6.6));
-    EXPECT_THAT(vehicleModel2.gearRatios, ElementsAre(0.0, 7.7, 8.8));
-    EXPECT_THAT(vehicleModel2.height, DoubleEq(4.4));
-    EXPECT_THAT(vehicleModel2.heightCOG, DoubleEq(0.0));                       // unsupported parameter, fixed to 0.0
-    EXPECT_THAT(vehicleModel2.length, DoubleEq(3.0));
-    EXPECT_THAT(vehicleModel2.maxCurvature, DoubleEq(std::sin(0.5) / 2.5));    // sin(maxSteering fron wheel) / wheelbase
-    EXPECT_THAT(vehicleModel2.maxVelocity, DoubleEq(11.0));
-    EXPECT_THAT(vehicleModel2.maximumEngineSpeed, DoubleEq(6000.0));
-    EXPECT_THAT(vehicleModel2.maximumEngineTorque, DoubleEq(250.0));
-    EXPECT_THAT(vehicleModel2.maximumSteeringWheelAngleAmplitude, DoubleEq(0.5 * 9.9));   // maxSteering front wheel * SteeringRatio
-    EXPECT_THAT(vehicleModel2.minimumEngineSpeed, DoubleEq(900.0));
-    EXPECT_THAT(vehicleModel2.minimumEngineTorque, DoubleEq(-54.0));
-    EXPECT_THAT(vehicleModel2.momentInertiaPitch, DoubleEq(0.0));
-    EXPECT_THAT(vehicleModel2.momentInertiaRoll, DoubleEq(0.0));
-    EXPECT_THAT(vehicleModel2.momentInertiaYaw, DoubleEq(0.0));
-    EXPECT_THAT(vehicleModel2.numberOfGears, 2);
-    EXPECT_THAT(vehicleModel2.staticWheelRadius, DoubleEq(0.2));
-    EXPECT_THAT(vehicleModel2.steeringRatio, DoubleEq(9.9));
-    EXPECT_THAT(vehicleModel2.trackwidth, DoubleEq(1.1));
-    EXPECT_THAT(vehicleModel2.weight, DoubleEq(999.9));
-    EXPECT_THAT(vehicleModel2.wheelbase, DoubleEq(2.5));
-    EXPECT_THAT(vehicleModel2.width, DoubleEq(1.5));
+    EXPECT_THAT(vehicleModel2.boundingBoxCenter.x, DoubleEq(2.0));
+    EXPECT_THAT(vehicleModel2.boundingBoxCenter.y, DoubleEq(0));
+    EXPECT_THAT(vehicleModel2.boundingBoxCenter.z, DoubleEq(2.2));
+    EXPECT_THAT(vehicleModel2.boundingBoxDimensions.width, DoubleEq(1.5));
+    EXPECT_THAT(vehicleModel2.boundingBoxDimensions.length, DoubleEq(3.0));
+    EXPECT_THAT(vehicleModel2.boundingBoxDimensions.height, DoubleEq(4.4));
+    EXPECT_THAT(vehicleModel2.performance.maxSpeed, DoubleEq(11.0));
+    EXPECT_THAT(vehicleModel2.performance.maxAcceleration, DoubleEq(10.0));
+    EXPECT_THAT(vehicleModel2.performance.maxDeceleration, DoubleEq(4.5));
+    EXPECT_THAT(vehicleModel2.frontAxle.maxSteering, DoubleEq(0.5));
+    EXPECT_THAT(vehicleModel2.frontAxle.wheelDiameter, DoubleEq(0.4));
+    EXPECT_THAT(vehicleModel2.frontAxle.trackWidth, DoubleEq(1.1));
+    EXPECT_THAT(vehicleModel2.frontAxle.positionX, DoubleEq(2.5));
+    EXPECT_THAT(vehicleModel2.frontAxle.positionZ, DoubleEq(0.2));
+    EXPECT_THAT(vehicleModel2.rearAxle.maxSteering, DoubleEq(0.0));
+    EXPECT_THAT(vehicleModel2.rearAxle.wheelDiameter, DoubleEq(0.4));
+    EXPECT_THAT(vehicleModel2.rearAxle.trackWidth, DoubleEq(1.1));
+    EXPECT_THAT(vehicleModel2.rearAxle.positionX, DoubleEq(0.0));
+    EXPECT_THAT(vehicleModel2.rearAxle.positionZ, DoubleEq(0.2));
+    EXPECT_THAT(vehicleModel2.properties, ElementsAre(
+                    std::make_pair("AirDragCoefficient", 2.2),
+                    std::make_pair("AxleRatio", 3.3),
+                    std::make_pair("DecelerationFromPowertrainDrag", 4.4),
+                    std::make_pair("FrictionCoefficient", 5.5),
+                    std::make_pair("FrontSurface", 6.6),
+                    std::make_pair("GearRatio1", 7.7),
+                    std::make_pair("GearRatio2", 8.8),
+                    std::make_pair("Mass", 999.9),
+                    std::make_pair("MaximumEngineSpeed", 6000.),
+                    std::make_pair("MaximumEngineTorque", 250.),
+                    std::make_pair("MinimumEngineSpeed", 900.),
+                    std::make_pair("MinimumEngineTorque", -54.),
+                    std::make_pair("MomentInertiaPitch", 0.0),
+                    std::make_pair("MomentInertiaRoll", 0.0),
+                    std::make_pair("MomentInertiaYaw", 0.0),
+                    std::make_pair("NumberOfGears", 2.),
+                    std::make_pair("SteeringRatio", 9.9)));
 
     auto pedestrianModel1 = vehicleModels.GetVehicleModel("pedestrian_one");
     // workaround for ground truth not being able to handle pedestrians
     //EXPECT_THAT(pedestrianModel1.vehicleType, Eq(AgentVehicleType::Pedestrian));
     EXPECT_THAT(pedestrianModel1.vehicleType, Eq(AgentVehicleType::Car));
-    EXPECT_THAT(pedestrianModel1.length, DoubleEq(5.5));
-    EXPECT_THAT(pedestrianModel1.width, DoubleEq(4.4));
-    EXPECT_THAT(pedestrianModel1.height, DoubleEq(6.6));
-    EXPECT_THAT(pedestrianModel1.weight, DoubleEq(100.0));
+    EXPECT_THAT(pedestrianModel1.boundingBoxDimensions.length, DoubleEq(5.5));
+    EXPECT_THAT(pedestrianModel1.boundingBoxDimensions.width, DoubleEq(4.4));
+    EXPECT_THAT(pedestrianModel1.boundingBoxDimensions.height, DoubleEq(6.6));
 
     auto pedestrianModel2 = vehicleModels.GetVehicleModel("pedestrian_two");
     // workaround for ground truth not being able to handle pedestrians
     //EXPECT_THAT(pedestrianModel1.vehicleType, Eq(AgentVehicleType::Pedestrian));
     EXPECT_THAT(pedestrianModel1.vehicleType, Eq(AgentVehicleType::Car));
-    EXPECT_THAT(pedestrianModel2.length, DoubleEq(2.2));
-    EXPECT_THAT(pedestrianModel2.width, DoubleEq(3.3));
-    EXPECT_THAT(pedestrianModel2.height, DoubleEq(1.1));
-    EXPECT_THAT(pedestrianModel2.weight, DoubleEq(111.1));
+    EXPECT_THAT(pedestrianModel2.boundingBoxDimensions.length, DoubleEq(2.2));
+    EXPECT_THAT(pedestrianModel2.boundingBoxDimensions.width, DoubleEq(3.3));
+    EXPECT_THAT(pedestrianModel2.boundingBoxDimensions.height, DoubleEq(1.1));
 }
 

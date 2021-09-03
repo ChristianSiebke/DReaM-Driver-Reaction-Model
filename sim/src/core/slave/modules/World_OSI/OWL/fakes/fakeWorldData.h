@@ -72,7 +72,7 @@ public:
 
     MOCK_METHOD2(AssignTrafficLightToLane, void (OWL::Id laneId, OWL::Interfaces::TrafficLight& trafficLight));
     MOCK_METHOD3(AddJunctionPriority, void(const JunctionInterface *odJunction, const std::string &high, const std::string &low));
-    MOCK_METHOD1(GetOwlId, OWL::Id(int));
+    MOCK_CONST_METHOD1(GetOwlId, OWL::Id(int));
     MOCK_CONST_METHOD1(GetAgentId, int(const OWL::Id));
     const OWL::Implementation::InvalidLane &GetInvalidLane() const override
     {

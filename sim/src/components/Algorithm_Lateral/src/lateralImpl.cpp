@@ -22,6 +22,7 @@
 #include "common/lateralSignal.h"
 #include "common/commonTools.h"
 #include "common/globalDefinitions.h"
+#include "components/common/vehicleProperties.h"
 #include "components/Sensor_Driver/src/Signals/sensorDriverSignal.h"
 
 void AlgorithmLateralImplementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time)
@@ -60,10 +61,12 @@ void AlgorithmLateralImplementation::UpdateInput(int localLinkId, const std::sha
             LOG(CbkLogLevel::Debug, msg);
             throw std::runtime_error(msg);
         }
+        const auto steeringRatio = helper::map::query(signal->vehicleParameters.properties, vehicle::properties::SteeringRatio);
+        THROWIFFALSE(steeringRatio.has_value(), "SteeringRatio was not defined in VehicleCatalog");
 
-        steeringController.SetVehicleParameter(signal->vehicleParameters.steeringRatio,
-                                               signal->vehicleParameters.maximumSteeringWheelAngleAmplitude,
-                                               signal->vehicleParameters.wheelbase);
+        steeringController.SetVehicleParameter(steeringRatio.value(),
+                                               signal->vehicleParameters.frontAxle.maxSteering * steeringRatio.value(),
+                                               signal->vehicleParameters.frontAxle.positionX - signal->vehicleParameters.rearAxle.positionX);
     }
     else if (localLinkId == 101 || localLinkId == 102)
     {

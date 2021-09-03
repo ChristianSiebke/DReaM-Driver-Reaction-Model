@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019, 2020 in-tech GmbH
+* Copyright (c) 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -62,15 +62,16 @@ public:
 
     //! Calculates the next s coordinate to spawn an agents on
     //!
-    //! \param roadId               Id of the road
-    //! \param laneId               Id of the lane
-    //! \param bounds               s range to spawn in
-    //! \param agentFrontLength     distance from reference point to front of agent
-    //! \param agentRearLength      distance from reference point to rear of agent
-    //! \param intendedVelocity     spawning velocity
-    //! \param gapInSeconds         desired TGap between spawned agent and next agent
-    //! \param route                route of the agent
-    //! \param supportedLaneTypes   Container with all valid LaneTypes
+    //! \param roadId                   Id of the road
+    //! \param laneId                   Id of the lane
+    //! \param bounds                   s range to spawn in
+    //! \param agentFrontLength         distance from reference point to front of agent
+    //! \param agentRearLength          distance from reference point to rear of agent
+    //! \param intendedVelocity         spawning velocity
+    //! \param gapInSeconds             desired TGap between spawned agent and next agent
+    //! \param minimumSeparationBuffer  minimum distance between agents
+    //! \param route                    route of the agent
+    //! \param supportedLaneTypes       Container with all valid LaneTypes
     //! \return s position
     std::optional<double> GetNextSpawnPosition(const RoadId& roadId,
                                                const LaneId laneId,
@@ -79,6 +80,7 @@ public:
                                                const double agentRearLength,
                                                const double intendedVelocity,
                                                const double gapInSeconds,
+                                               const double minimumSeparationBuffer,
                                                const Route& route,
                                                const LaneTypes& supportedLaneTypes) const;
 
@@ -105,13 +107,15 @@ public:
     bool ValidMinimumSpawningDistanceToObjectInFront(const LaneId laneId,
                                                      const SPosition sPosition,
                                                      const Route& route,
-                                                     const VehicleModelParameters& vehicleModelParameters) const;
+                                                     const VehicleModelParameters& vehicleModelParameters,
+                                                     const double minimumSeparationBuffer) const;
 
     //! Check if it is allowed the spawn an agent at the given coordinate
     bool AreSpawningCoordinatesValid(const RoadId& roadId,
                                      const LaneId laneId,
                                      const SPosition sPosition,
                                      const double offset,
+                                     const double minimumSeparationBuffer,
                                      const Route &route,
                                      const VehicleModelParameters& vehicleModelParameters) const;
 

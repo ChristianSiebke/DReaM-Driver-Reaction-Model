@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,7 @@
 #include "include/stochasticsInterface.h"
 
 class AgentBlueprintProviderInterface;
-class DataStoreInterface;
+class DataBufferInterface;
 class WorldInterface;
 
 namespace SimulationSlave {
@@ -46,11 +46,11 @@ public:
     virtual AgentFactoryInterface* GetAgentFactory() = 0;
 
     /*!
-    * \brief Returns a pointer to the data store
+    * \brief Returns a pointer to the data buffer
     *
-    * @return   data store pointer
+    * @return   data buffer pointer
     */
-    virtual DataStoreInterface* GetDataStore() = 0;
+    virtual DataBufferInterface* GetDataBuffer() = 0;
 
     /*!
     * \brief Returns a pointer to the EventDetectorNetwork

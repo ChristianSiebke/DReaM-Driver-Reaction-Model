@@ -22,8 +22,10 @@
 
 #include "common/opMath.h"
 #include <vector>
+#include <functional>
 
 #include "common/globalDefinitions.h"
+#include "include/callbackInterface.h"
 
 //! \brief This class does all the calculations in the Algorithm_Longitudinal module.
 //!
@@ -43,7 +45,7 @@ public:
     //! \param accelerationWish         desired acceleration (can be negative)
     //! \param vehicleModelParameters   parameters of the vehicle model
     //!
-    AlgorithmLongitudinalCalculations(double velocity, double accelerationWish, const VehicleModelParameters &vehicleModelParameters);
+    AlgorithmLongitudinalCalculations(double velocity, double accelerationWish, const VehicleModelParameters &vehicleModelParameters, std::function<void (CbkLogLevel, const char*, int, const std::string &)> Log);
 
     //!
     //! \brief Calculates the necessary gear and engine to achieve the desired acceleration at the current velocity
@@ -109,6 +111,10 @@ public:
     double GetEngineTorqueAtGear(int gear, double acceleration);
 
 protected:
+    double GetVehicleProperty(const std::string& propertyName);
+
+    std::function<void (CbkLogLevel, const char*, int, const std::string &)> Log;
+
     //Input
     double velocity{0.0};
     double accelerationWish{0.0};

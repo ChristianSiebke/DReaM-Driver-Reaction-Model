@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2021 in-tech GmbH
 *               2020 HLRS, University of Stuttgart.
 *
 * This program and the accompanying materials are made
@@ -18,6 +18,10 @@
 
 #pragma once
 
+#include <sstream>
+#include <string>
+
+#include "include/signalInterface.h"
 #include "osi3/osi_sensordata.pb.h"
 
 class SensorDataSignal : public SignalInterface

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 in-tech GmbH
+* Copyright (c) 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -12,7 +12,7 @@
 
 #include "EntityInfo.h"
 
-class DataStoreWriteInterface;
+class DataBufferWriteInterface;
 
 namespace openpass::publisher {
 
@@ -20,13 +20,13 @@ static constexpr char PERSISTENT_ENTITIES_ROOT[]{"Entities/Persistent"};
 static constexpr char NONPERSISTENT_ENTITIES_ROOT[]{"Entities/NonPersistent"};
 
 /**
- * @brief This class acts as specialized interface for publishing Entity Information into the datastore
+ * @brief This class acts as specialized interface for publishing Entity Information into the databuffer
  */
 class EntityInfoPublisher
 {
 public:
-    EntityInfoPublisher(DataStoreWriteInterface *const dataStore) :
-        dataStore(dataStore)
+    EntityInfoPublisher(DataBufferWriteInterface *const dataBuffer) :
+        dataBuffer(dataBuffer)
     {
     }
 
@@ -41,7 +41,7 @@ public:
     void Publish(openpass::type::EntityId entityId, const openpass::type::EntityInfo &entityInfo, bool persistent);
 
 private:
-    DataStoreWriteInterface *const dataStore;
+    DataBufferWriteInterface *const dataBuffer;
 };
 
 } // namespace openpass::publisher

@@ -13,6 +13,7 @@
 #include <array>
 
 #include "collisionDetection_Impact_implementation.h"
+#include "components/common/vehicleProperties.h"
 
 namespace {
 
@@ -36,8 +37,9 @@ std::vector<Common::Vector2d> CollisionDetectionPostCrash::GetAgentCorners(
 {
     Common::Vector2d agentPosition(agent->GetPositionX(), agent->GetPositionY()); // reference point (rear axle) in glabal CS
     double agentAngle = agent->GetYaw();
-    agentPosition.x = agentPosition.x + std::cos(agentAngle) * agent->GetVehicleModelParameters().wheelbase / 2.0; // geometrical center of vehicle in global CS
-    agentPosition.y = agentPosition.y + std::sin(agentAngle) * agent->GetVehicleModelParameters().wheelbase / 2.0; // geometrical center of vehicle in global CS
+    const double wheelbase = agent->GetVehicleModelParameters().frontAxle.positionX - agent->GetVehicleModelParameters().rearAxle.positionX;
+    agentPosition.x = agentPosition.x + std::cos(agentAngle) * wheelbase / 2.0; // geometrical center of vehicle in global CS
+    agentPosition.y = agentPosition.y + std::sin(agentAngle) * wheelbase / 2.0; // geometrical center of vehicle in global CS
 
     double agentLength = agent->GetLength();
     double agentWidthHalf = agent->GetWidth() / 2;
@@ -206,10 +208,12 @@ bool CollisionDetectionPostCrash::CalculatePostCrashDynamic(Common::Vector2d cog
     double velY1 = agent1->GetVelocity(VelocityScope::Lateral);                 // y-velocity in the local coordinate system of the agent
     double vel1  = sqrt( velX1 * velX1 + velY1 * velY1 );                       // absolute velocity of first vehicle [m/s]
     double velDir1 = yaw1;                                                      // velocity direction of first vehicle [rad]
-    double mass1 = agent1->GetVehicleModelParameters().weight;                                         // mass of first vehicle [kg]
+    const auto mass1 = helper::map::query(agent1->GetVehicleModelParameters().properties, vehicle::properties::Mass); // mass of first vehicle [kg]
+    THROWIFFALSE(mass1.has_value(), "Mass was not defined in VehicleCatalog");
+
     double length1 = agent1->GetLength();
     double width1 = agent1->GetWidth();
-    double momentIntertiaYaw1 = CommonHelper::CalculateMomentInertiaYaw(mass1, length1, width1);     // moment of inertia 1st vehicle [kg*m^2]
+    double momentIntertiaYaw1 = CommonHelper::CalculateMomentInertiaYaw(mass1.value(), length1, width1);     // moment of inertia 1st vehicle [kg*m^2]
 
     // input parameters of agent 2
     double yaw2 = agent2->GetYaw();                                             // yaw angle [rad]
@@ -218,10 +222,11 @@ bool CollisionDetectionPostCrash::CalculatePostCrashDynamic(Common::Vector2d cog
     double velY2 = agent2->GetVelocity(VelocityScope::Lateral);                 // y-velocity in the local coordinate system of the agent
     double vel2  = sqrt( velX2 * velX2 + velY2 * velY2 );                       // absolute velocity of 2nd vehicle [m/s]
     double velDir2 = yaw2;                                                      // velocity direction of 2nd vehicle [rad]
-    double mass2 = agent2->GetVehicleModelParameters().weight;                                         // mass of 2nd vehicle [kg]
+    const auto mass2 = helper::map::query(agent2->GetVehicleModelParameters().properties, vehicle::properties::Mass); // mass of 2nd vehicle [kg]
+    THROWIFFALSE(mass2.has_value(), "Mass was not defined in VehicleCatalog");
     double length2 = agent2->GetLength();
     double width2 = agent2->GetWidth();
-    double momentIntertiaYaw2 = CommonHelper::CalculateMomentInertiaYaw(mass2, length2, width2); // moment of inertia 2nd vehicle [kg*m^2]
+    double momentIntertiaYaw2 = CommonHelper::CalculateMomentInertiaYaw(mass2.value(), length2, width2); // moment of inertia 2nd vehicle [kg*m^2]
 
     // new coordinate system axis: tangent and normal to contact plane
     Common::Vector2d tang = Common::Vector2d( cos(phi), sin(phi) );
@@ -255,8 +260,8 @@ bool CollisionDetectionPostCrash::CalculatePostCrashDynamic(Common::Vector2d cog
     double vrel_pre_tang = v1tang - v2tang;
 
     // auxiliary parameters
-    double c1 = 1 / mass1 + 1 / mass2 + n1 * n1 / momentIntertiaYaw1 + n2 * n2 / momentIntertiaYaw2;
-    double c2 = 1 / mass1 + 1 / mass2 + t1 * t1 / momentIntertiaYaw1 + t2 * t2 / momentIntertiaYaw2;
+    double c1 = 1 / mass1.value() + 1 / mass2.value() + n1 * n1 / momentIntertiaYaw1 + n2 * n2 / momentIntertiaYaw2;
+    double c2 = 1 / mass1.value() + 1 / mass2.value() + t1 * t1 / momentIntertiaYaw1 + t2 * t2 / momentIntertiaYaw2;
     double c3 = t1 * n1 / momentIntertiaYaw1 + t2 * n2 / momentIntertiaYaw2;
     // compute pulse vector in compression phase
     double Tc = ( c3 * vrel_pre_norm + c2 * vrel_pre_tang ) / ( c3 * c3 - c1 * c2 );
@@ -290,10 +295,10 @@ bool CollisionDetectionPostCrash::CalculatePostCrashDynamic(Common::Vector2d cog
     }
 
     // compute post crash velocities in COG with momentum balance equations
-    double v1tang_post_cog =  T / mass1 + v1tang_cog;
-    double v1norm_post_cog =  N / mass1 + v1norm_cog;
-    double v2tang_post_cog = -T / mass2 + v2tang_cog;
-    double v2norm_post_cog = -N / mass2 + v2norm_cog;
+    double v1tang_post_cog =  T / mass1.value() + v1tang_cog;
+    double v1norm_post_cog =  N / mass1.value() + v1norm_cog;
+    double v2tang_post_cog = -T / mass2.value() + v2tang_cog;
+    double v2norm_post_cog = -N / mass2.value() + v2norm_cog;
 
     // matrix for coordinate transformation between global and local
     // POI-coordinates

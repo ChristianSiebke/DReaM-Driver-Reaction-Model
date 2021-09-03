@@ -145,7 +145,8 @@ void AlgorithmLongitudinalImplementation::CalculatePedalPositionAndGear()
     {
         AlgorithmLongitudinalCalculations calculations{currentVelocity,
                     accelerationWish,
-                    vehicleModelParameters};
+                    vehicleModelParameters,
+                    [&](auto logLevel, auto line, auto file, auto& message){Log(logLevel, line, file, message);}};
         calculations.CalculateGearAndEngineSpeed();
         calculations.CalculatePedalPositions();
 

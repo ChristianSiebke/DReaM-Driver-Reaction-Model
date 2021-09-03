@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 * Copyright (c) 2020 HLRS, University of Stuttgart.
 *
@@ -27,7 +27,7 @@
 
 #include "include/agentFactoryInterface.h"
 #include "include/configurationContainerInterface.h"
-#include "include/dataStoreInterface.h"
+#include "include/dataBufferInterface.h"
 #include "include/frameworkModuleContainerInterface.h"
 #include "include/observationNetworkInterface.h"
 #include "include/parameterInterface.h"
@@ -51,7 +51,7 @@ public:
         stochastics(*frameworkModuleContainer.GetStochastics()),
         eventDetectorNetwork(*frameworkModuleContainer.GetEventDetectorNetwork()),
         manipulatorNetwork(*frameworkModuleContainer.GetManipulatorNetwork()),
-        dataStore(*frameworkModuleContainer.GetDataStore()),
+        dataBuffer(*frameworkModuleContainer.GetDataBuffer()),
         frameworkModules{frameworkModules}
     {}
 
@@ -107,7 +107,7 @@ private:
     StochasticsInterface& stochastics;
     EventDetectorNetworkInterface& eventDetectorNetwork;
     ManipulatorNetworkInterface& manipulatorNetwork;
-    DataStoreInterface& dataStore;
+    DataBufferInterface& dataBuffer;
     FrameworkModules& frameworkModules;
 
     std::unique_ptr<ParameterInterface> worldParameter;

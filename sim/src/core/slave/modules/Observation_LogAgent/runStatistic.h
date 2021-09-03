@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2016, 2017, 2020 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -31,11 +31,10 @@ public:
     void WriteStatistics(QXmlStreamWriter* fileStream);
 
     // general
-    int StopTime = -1; //this stays on UNDEFINED_NUMBER, if due time out -> replace in c#
+    int StopTime = -1; //!<this stays on UNDEFINED_NUMBER, if due time out -> replace in c#
     bool EgoCollision = false;
-    double TotalDistanceTraveled = 0.0;
-    double EgoDistanceTraveled = 0.0;
-    double VisibilityDistance = -999.0; //Visibility distance of world in current run (defined in slaveConfig.xml)
+    std::map<std::string, double> distanceTraveled{}; //!< travel distance per agent
+    double VisibilityDistance = -999.0; //!< Visibility distance of world in current run (defined in slaveConfig.xml)
 
     static QString BoolToString(bool b);
 

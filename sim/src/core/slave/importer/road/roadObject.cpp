@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -23,6 +23,11 @@ double RoadObject::GetLength() const
 double RoadObject::GetWidth() const
 {
     return object.width;
+}
+
+bool RoadObject::IsContinuous() const
+{
+    return object.continuous;
 }
 
 double RoadObject::GetHdg() const

@@ -31,11 +31,11 @@ namespace {
     }
 }
 
-WorldImplementation::WorldImplementation(const CallbackInterface* callbacks, StochasticsInterface* stochastics, DataStoreWriteInterface* dataStore):
+WorldImplementation::WorldImplementation(const CallbackInterface* callbacks, StochasticsInterface* stochastics, DataBufferWriteInterface* dataBuffer):
     agentNetwork(this, callbacks),
     callbacks(callbacks),
-    dataStore(dataStore),
-    repository(dataStore),
+    dataBuffer(dataBuffer),
+    repository(dataBuffer),
     worldData(callbacks)
 {}
 
@@ -151,7 +151,7 @@ void WorldImplementation::PublishGlobalData(int timestamp)
     agentNetwork.PublishGlobalData(
         [&](openpass::type::EntityId id, openpass::type::FlatParameterKey key, openpass::type::FlatParameterValue value)
         {
-            dataStore->PutCyclic(timestamp, id, key, value);
+            dataBuffer->PutCyclic(id, key, value);
         });
 }
 
@@ -522,11 +522,6 @@ bool WorldImplementation::IntersectsWithAgent(double x, double y, double rotatio
 
 Position WorldImplementation::RoadCoord2WorldCoord(RoadPosition roadCoord, std::string roadID) const
 {
-    Position worldCoord;
-    worldCoord.xPos = 0;
-    worldCoord.yPos = 0;
-    worldCoord.yawAngle = 0;
-
     RoadInterface* road = nullptr;
 
     if (roadID.empty())
@@ -557,25 +552,7 @@ Position WorldImplementation::RoadCoord2WorldCoord(RoadPosition roadCoord, std::
 
     std::list<RoadGeometryInterface*> roadGeometries = road->GetGeometries();
 
-    for (RoadGeometryInterface* roadGeometry : roadGeometries)
-    {
-        double roadGeometryLength = roadGeometry->GetLength();
-        double roadGeometryStart = roadGeometry->GetS();
-        double roadGeometryEnd = roadGeometryStart + roadGeometryLength;
-
-        if (roadCoord.s > roadGeometryStart && roadCoord.s < roadGeometryEnd)
-        {
-            double localS = roadCoord.s - roadGeometryStart;
-            Common::Vector2d coord = roadGeometry->GetCoord(localS, roadCoord.t);
-            double dir = roadGeometry->GetDir(localS);
-            worldCoord.xPos = coord.x;
-            worldCoord.yPos = coord.y;
-            worldCoord.yawAngle = dir + roadCoord.hdg;
-            break;
-        }
-    }
-
-    return worldCoord;
+    return SceneryConverter::RoadCoord2WorldCoord(road, roadCoord.s, roadCoord.t, roadCoord.hdg);
 }
 
 double WorldImplementation::GetRoadLength(const std::string& roadId) const

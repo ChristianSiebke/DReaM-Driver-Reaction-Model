@@ -82,8 +82,7 @@ public:
     //! Places all static traffic objects and all traffic signs in the world
     void ConvertObjects();
 
-    std::tuple<bool, double, double, double> CalculateAbsoluteCoordinates(RoadInterface* road, OWL::CSection* section, const RoadObjectInterface *object) const;
-
+    static Position RoadCoord2WorldCoord(const RoadInterface *road, double s, double t, double yaw);
 protected:
     //-----------------------------------------------------------------------------
     //! Provides callback to LOG() macro
@@ -323,6 +322,10 @@ private:
     std::list<RoadLaneInterface*> GetRoadLanesAtDistance(RoadInterface *road, double s);
 
     void CreateObjects();
+
+    void CreateObject(const RoadObjectInterface* object, const Position &position);
+
+    void CreateContinuousObject(const RoadObjectInterface* object, const RoadInterface* road);
 
     bool IsMovingObject(RoadObjectInterface* object);
 

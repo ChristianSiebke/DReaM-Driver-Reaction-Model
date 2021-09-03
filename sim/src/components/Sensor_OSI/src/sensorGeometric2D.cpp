@@ -120,37 +120,18 @@ void SensorGeometric2D::Observe(const int time, const SensorDetectionResults& re
         return object.id().value();
     });
 
-    GetPublisher()->Publish("Sensor" + std::to_string(id) + "_VisibleAgents", CreateAgentIdListString(visibleIds));
-    GetPublisher()->Publish("Sensor" + std::to_string(id) + "_DetectedAgents", CreateAgentIdListString(detectedIds));
+    GetPublisher()->Publish("Sensor" + std::to_string(id) + "_VisibleAgents", CreateObjectIdListString(visibleIds));
+    GetPublisher()->Publish("Sensor" + std::to_string(id) + "_DetectedAgents", CreateObjectIdListString(detectedIds));
 }
 
-std::string SensorGeometric2D::CreateAgentIdListString(const std::set<OWL::Id>& owlIds) const
+std::string SensorGeometric2D::CreateObjectIdListString(const std::set<OWL::Id>& owlIds) const
 {
-    const auto worldData = static_cast<OWL::WorldData*>(world->GetWorldData());
-
-    std::vector<std::string> agentIds;
-    std::transform(owlIds.begin(),
-                   owlIds.end(),
-                   std::back_inserter(agentIds),
-                   [worldData](const auto owlId) -> std::string
-    {
-        try
-        {
-            return std::to_string(worldData->GetAgentId(owlId));
-        }
-        catch (const std::out_of_range&)
-        {
-            // agent id could not be resolved, maybe stationary object
-            return "x";
-        }
-    });
-
-    return std::accumulate(agentIds.begin(),
-                           agentIds.end(),
+    return std::accumulate(owlIds.begin(),
+                           owlIds.end(),
                            std::string(""),
                            [](const auto& first, const auto& second) -> std::string
     {
-        return first + ';' + second;
+        return first + ';' + std::to_string(second);
     }).erase(0,1);
 }
 

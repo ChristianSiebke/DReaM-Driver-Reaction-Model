@@ -25,6 +25,7 @@ public:
     double GetPositionLateral() const;
     double GetWidth() const;
     double GetYaw() const;
+    double GetRoll() const;
     double GetDistanceReferencePointToLeadingEdge() const;
     double GetAcceleration() const;
     const OWL::Interfaces::WorldObject& GetBaseTrafficObject() const;

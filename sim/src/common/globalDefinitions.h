@@ -305,83 +305,41 @@ enum class Side
 
 struct VehicleModelParameters
 {
-    // -----------------------------------------
-    // full vehicle related parameters
-    // -----------------------------------------
+    AgentVehicleType vehicleType;
 
-    // The type of the vehicle
-    AgentVehicleType vehicleType = AgentVehicleType::Undefined;
-    // The maximum width of the vehicle in m
-    double width = -999.0;
-    // The maximum length of the vehicle in m
-    double length = -999.0;
-    // The maximum height of the vehicle in m
-    double height = -999.0;
-    // The wheelbase of the vehicle in m
-    double wheelbase = -999.0;
-    // The trackwidth of the vehicle in m
-    double trackwidth = -999.0;
-    // The distance between the vehicle coordinate system's reference point (rear axle) and the front bumper in m
-    double distanceReferencePointToLeadingEdge = -999.0;
-    // The distance between the vehicle coordinate system's reference point (rear axle) and the front axle in m
-    double distanceReferencePointToFrontAxle = -999.0;
-    // The maximum velocity of the vehicle in m/s
-    double maxVelocity = -999.0;
-    // The overall mass of the vehicle in kg
-    double weight = -999.0;
-    // The height of the center of gravity above ground in m
-    double heightCOG = -999.0;
-    // The moment of inertia along the vehicle's longtudinal axes in kgm2
-    double momentInertiaRoll = -999.0;
-    // The moment of inertia along the vehicle's lateral axes in kgm2
-    double momentInertiaPitch = -999.0;
-    // The moment of inertia along the vehicle's vertical axes in kgm2
-    double momentInertiaYaw = -999.0;
-    // The projected front surface of the vehicle in m2
-    double frontSurface = -999.0;
-    // The air drag coefficient of the vehicle
-    double airDragCoefficient = -999.0;
+    struct BoundingBoxCenter
+    {
+        double x;
+        double y;
+        double z;
+    } boundingBoxCenter;
 
-    // -----------------------------------------
-    // power train related parameters
-    // -----------------------------------------
+    struct BoundingBoxDimensions
+    {
+        double width;
+        double length;
+        double height;
+    } boundingBoxDimensions;
 
-    // The idle speed of the engine in 1/min
-    double minimumEngineSpeed = -999.0;
-    // The maximum engine speed in 1/min
-    double maximumEngineSpeed = -999.0;
-    // The drag torque of the engine in Nm
-    double minimumEngineTorque = -999.0;
-    // The maximum torque of the engine in Nm
-    double maximumEngineTorque = -999.0;
-    // The number of gears in the gearbox (no reverse gear)
-    int numberOfGears = -999;
-    // The ratios of all gears in the gearbox (no reverse gear)
-    std::vector<double> gearRatios;
-    // The ratio of the axle gear
-    double axleRatio = -999.0;
-    // The deceleration caused by the overall powertrain drag torque in m/s2
-    double decelerationFromPowertrainDrag = -999.0;
+    struct Performance
+    {
+        double maxSpeed;
+        double maxAcceleration;
+        double maxDeceleration;
+    } performance;
 
-    // -----------------------------------------
-    // steering related parameters
-    // -----------------------------------------
+    struct Axle
+    {
+        double maxSteering;
+        double wheelDiameter;
+        double trackWidth;
+        double positionX;
+        double positionZ;
+    };
+    Axle frontAxle;
+    Axle rearAxle;
 
-    // The ratio of the steering gear
-    double steeringRatio = -999.0;
-    // The maximum amplitude of the steering wheel angle in radian
-    double maximumSteeringWheelAngleAmplitude = -999.0;
-    // The maximum curavture the vehicle is able to drive in 1/m
-    double maxCurvature = -999.0;
-
-    // -----------------------------------------
-    // wheel related parameters
-    // -----------------------------------------
-
-    // The static wheel radius in m
-    double staticWheelRadius = -999.0;
-    // The friction coefficient between road and the vehicles tires
-    double frictionCoeff = -999.0;
+    std::map<std::string, double> properties;
 };
 
 enum class AdasType

@@ -42,6 +42,9 @@
 #include <QString>
 #include <qglobal.h>
 
+#include "common/commonTools.h"
+#include "components/common/vehicleProperties.h"
+
 Dynamics_TwoTrack_Implementation::Dynamics_TwoTrack_Implementation(
         std::string componentName,
         bool isInit,
@@ -96,13 +99,16 @@ Dynamics_TwoTrack_Implementation::Dynamics_TwoTrack_Implementation(
     yawAcceleration = 0.0;
     vehicle = new VehicleSimpleTT();
 
+    auto weight = helper::map::query(GetAgent()->GetVehicleModelParameters().properties, vehicle::properties::Mass);
+    THROWIFFALSE(weight.has_value(), "Mass was not defined in VehicleCatalog");
+
     /** @addtogroup init_tt
      * Define vehicle's body and engine characteristics:
      *  - total mass
      *  - power
      *  - maximum brake torque
     */
-    vehicle->InitSetEngine(agent->GetVehicleModelParameters().weight, powerEngineMax.GetValue(), torqueBrakeMin.GetValue());
+    vehicle->InitSetEngine(weight.value(), powerEngineMax.GetValue(), torqueBrakeMin.GetValue());
 
     /** @addtogroup init_tt
      * Define vehicle's geometry:
@@ -111,10 +117,13 @@ Dynamics_TwoTrack_Implementation::Dynamics_TwoTrack_Implementation(
      *  - set the wheelbase
      *  - set the track width
     */
-    vehicle->InitSetGeometry(agent->GetVehicleModelParameters().wheelbase,
+    vehicle->InitSetGeometry(agent->GetVehicleModelParameters().frontAxle.positionX - agent->GetVehicleModelParameters().rearAxle.positionX,
                              0.0,//agent->GetVehicleModelParameters().wheelbase / 2.0 - agent->GetDistanceCOGtoFrontAxle(),
-                             agent->GetVehicleModelParameters().trackwidth,
+                             agent->GetVehicleModelParameters().frontAxle.trackWidth,
                              0.0);
+
+    auto frictionCoeff = helper::map::query(GetAgent()->GetVehicleModelParameters().properties, vehicle::properties::FrictionCoefficient);
+    THROWIFFALSE(frictionCoeff.has_value(), "FrictionCoefficient was not defined in VehicleCatalog");
 
     /** @addtogroup init_tt
      * Define vehicle's tire properties:
@@ -127,7 +136,7 @@ Dynamics_TwoTrack_Implementation::Dynamics_TwoTrack_Implementation(
     */
     vehicle->InitSetTire(agent->GetVelocity(VelocityScope::Absolute),
                          muTireMax.GetValue(), muTireSlide.GetValue(),
-                         slipTireMax.GetValue(), radiusTire.GetValue(), agent->GetVehicleModelParameters().frictionCoeff);
+                         slipTireMax.GetValue(), radiusTire.GetValue(), frictionCoeff.value());
 
     ControlData defaultControl = {0.0, 1.0, 0.0, {0.0, 0.0, 0.0, 0.0}};
     if (!control.SetDefaultValue(defaultControl))
@@ -326,7 +335,10 @@ void Dynamics_TwoTrack_Implementation::NextStateTranslation()
     Vector2d velocityCarNew = velocityCar + accelerationCar * timeStep;
 
     // update acceleration
-    accelerationCar = vehicle->forceTotalXY * (1 / GetAgent()->GetVehicleModelParameters().weight);
+    auto weight = helper::map::query(GetAgent()->GetVehicleModelParameters().properties, vehicle::properties::Mass);
+    THROWIFFALSE(weight.has_value(), "Mass was not defined in VehicleCatalog");
+
+    accelerationCar = vehicle->forceTotalXY * (1 / weight.value());
 
     // correct velocity and acceleration for zero-crossing
     if (velocityCarNew.Dot(velocityCar) < 0.0)
@@ -356,7 +368,11 @@ void Dynamics_TwoTrack_Implementation::NextStateRotation()
     double yawVelocityNew = yawVelocity + yawAcceleration * timeStep;
 
     // update acceleration
-    yawAcceleration = vehicle->momentTotalZ / GetAgent()->GetVehicleModelParameters().momentInertiaYaw;
+    auto momentInertiaYaw = helper::map::query(GetAgent()->GetVehicleModelParameters().properties, "MomentInertiaYaw");
+    THROWIFFALSE(momentInertiaYaw.has_value(), "MomentInertiaYaw was not defined in VehicleCatalog");
+    THROWIFFALSE(momentInertiaYaw != 0.0, "MomentInertiaYaw was defined as 0.0 in VehicleCatalog");
+
+    yawAcceleration = vehicle->momentTotalZ / momentInertiaYaw.value();
 
     // correct velocity and acceleration for zero-crossing
     if (yawVelocityNew * yawVelocity < 0.0)

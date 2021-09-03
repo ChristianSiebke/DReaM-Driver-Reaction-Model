@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2020 in-tech GmbH
+* Copyright (c) 2020, 2021 in-tech GmbH
 * Copyright (c) 2021 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -40,6 +40,8 @@ public:
     {
         dependencies.parameters = &parameters;
         ON_CALL(parameters, GetParameterLists()).WillByDefault(ReturnRef(parameterLists));
+        ON_CALL(parameters, GetParametersStochastic()).WillByDefault(ReturnRef(parametersStochastic));
+        ON_CALL(parameters, GetParametersDouble()).WillByDefault(ReturnRef(parametersDouble));
         ON_CALL(*trafficGroup1, GetParametersDouble()).WillByDefault(ReturnRef(trafficGroup1Double));
         ON_CALL(*trafficGroup1, GetParametersStochastic()).WillByDefault(ReturnRef(trafficGroup1Stochastic));
         ON_CALL(*trafficGroup1, GetParametersBool()).WillByDefault(ReturnRef(trafficGroup1Bool));
@@ -113,8 +115,9 @@ public:
 
         AgentBlueprint agentBlueprint;
         VehicleModelParameters vehicleModelParameters;
-        vehicleModelParameters.length = 5.0;
-        vehicleModelParameters.distanceReferencePointToLeadingEdge = 3.0;
+        vehicleModelParameters.vehicleType = AgentVehicleType::Car;
+        vehicleModelParameters.boundingBoxDimensions.length = 5.0;
+        vehicleModelParameters.boundingBoxCenter.x = 0.5;
         agentBlueprint.SetVehicleModelParameters(vehicleModelParameters);
         ON_CALL(agentBlueprintProvider, SampleAgent(_,_)).WillByDefault(Return(agentBlueprint));
     }
@@ -177,6 +180,9 @@ public:
 
     std::map<std::string, ParameterInterface::ParameterLists> parameterLists{{"SpawnPoints", {spawnPoint}},
                                                                              {"TrafficGroups", {trafficGroup1, trafficGroup2}}};
+
+    std::map<std::string, const openpass::parameter::StochasticDistribution> parametersStochastic;
+    std::map<std::string, double> parametersDouble;
 
     FakeCallback callbacks;
     std::vector<SimulationSlave::Agent*> agents;

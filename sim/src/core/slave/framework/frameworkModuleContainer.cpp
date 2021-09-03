@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -19,12 +19,12 @@ FrameworkModuleContainer::FrameworkModuleContainer(
     ConfigurationContainerInterface *configurationContainer,
     const openpass::common::RuntimeInformation &runtimeInformation,
     CallbackInterface *callbacks) :
-    dataStoreBinding(frameworkModules.dataStoreLibrary, runtimeInformation, callbacks),
-    dataStore(&dataStoreBinding),
-    coreDataPublisher(&dataStore),
+    dataBufferBinding(frameworkModules.dataBufferLibrary, runtimeInformation, callbacks),
+    dataBuffer(&dataBufferBinding),
+    coreDataPublisher(&dataBuffer),
     stochasticsBinding(callbacks),
     stochastics(&stochasticsBinding),
-    worldBinding(frameworkModules.worldLibrary, callbacks, &stochastics, &dataStore),
+    worldBinding(frameworkModules.worldLibrary, callbacks, &stochastics, &dataBuffer),
     world(&worldBinding),
     observationNetwork(&observationBindings),
     eventDetectorBinding(callbacks),
@@ -32,9 +32,9 @@ FrameworkModuleContainer::FrameworkModuleContainer(
     manipulatorBinding(callbacks),
     manipulatorNetwork(&manipulatorBinding, &world, &coreDataPublisher),
     modelBinding(frameworkModules.libraryDir, runtimeInformation, callbacks),
-    agentFactory(&modelBinding, &world, &stochastics, &observationNetwork, &eventNetwork, &dataStore),
+    agentFactory(&modelBinding, &world, &stochastics, &observationNetwork, &eventNetwork, &dataBuffer),
     agentBlueprintProvider(configurationContainer, stochastics),
-    eventNetwork(&dataStore),
+    eventNetwork(&dataBuffer),
     spawnPointNetwork(&spawnPointBindings, &world, runtimeInformation)
 {
     for (const auto &libraryInfo : frameworkModules.spawnPointLibraries)
@@ -58,9 +58,9 @@ AgentFactoryInterface *FrameworkModuleContainer::GetAgentFactory()
     return &agentFactory;
 }
 
-DataStoreInterface *FrameworkModuleContainer::GetDataStore()
+DataBufferInterface *FrameworkModuleContainer::GetDataBuffer()
 {
-    return &dataStore;
+    return &dataBuffer;
 }
 
 EventDetectorNetworkInterface *FrameworkModuleContainer::GetEventDetectorNetwork()

@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
     {
         parsedArguments.logLevel,
         directories.libraryDir,
-        libraries.at("DataStoreLibrary"),
+        libraries.at("DataBufferLibrary"),
         libraries.at("EventDetectorLibrary"),
         libraries.at("ManipulatorLibrary"),
         configurationContainer.GetSlaveConfig()->GetObservationConfig(),

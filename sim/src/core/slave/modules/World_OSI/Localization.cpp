@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -11,80 +11,11 @@
 #include <numeric>
 
 #include "Localization.h"
-#include "PointQuery.h"
 
 #include <boost/function_output_iterator.hpp>
 
 namespace World {
 namespace Localization {
-
-std::vector<Common::Vector2d> CalculateEdges(const std::vector<Common::Vector2d>& corners)
-{
-    std::vector<Common::Vector2d> edges;
-    for (size_t i = 0; i < corners.size(); i++)
-    {
-        edges.push_back(corners[(i + 1) % corners.size()] - corners[i]);
-    }
-    return edges;
-}
-
-//! \brief Calculates the intersection polygon of a lane element with an object bounding box
-//!
-//! This method calculates all points of the intersection polygon of a lane element with the bounding box of an object.
-//! It is assumed, that the object bounding box is rectangular, the element polygon is convex and that the points are given in clockwise order.
-//! Solve the linear equation "boundary point + lambda * boundary edge = element point + kappa * element edge" for each pair of edges to get the intersection of the edges.
-//! If both lamda and kappa are between 0 and 1, then the intersection lies on both edges. If the determinat is 0, then the two egdes are parallel.
-//!
-//! \param elementPoints    corner points of the lane element in clockwise order
-//! \param boundaryPoints   corner points of the object bounding box in clockwise order
-//! \return points of the intersection polygon
-std::vector<Common::Vector2d> GetIntersectionPoints (const std::vector<Common::Vector2d>& elementPoints, const std::vector<Common::Vector2d>& boundaryPoints)
-{
-    std::vector<Common::Vector2d> intersectionPoints;
-    std::vector<Common::Vector2d> elementEdges = CalculateEdges(elementPoints);
-    std::vector<Common::Vector2d> boundaryEdges = CalculateEdges(boundaryPoints);
-
-    double lambda[4][4];
-    double kappa[4][4];
-    bool parallel[4][4];
-    for (size_t i = 0; i < 4; i++)
-    {
-        for (size_t k = 0; k < 4; k++)
-        {
-            double determinant = boundaryEdges[i].x * elementEdges[k].y - boundaryEdges[i].y * elementEdges[k].x;
-            parallel[i][k] = (std::abs(determinant) < CommonHelper::EPSILON);
-            lambda[i][k] = ( - boundaryPoints[i].x * elementEdges[k].y + boundaryPoints[i].y * elementEdges[k].x
-                             + elementPoints[k].x * elementEdges[k].y - elementPoints[k].y * elementEdges[k].x ) / determinant;
-            kappa[i][k] = ( - boundaryPoints[i].x * boundaryEdges[i].y + boundaryPoints[i].y * boundaryEdges[i].x
-                            + elementPoints[k].x * boundaryEdges[i].y - elementPoints[k].y * boundaryEdges[i].x) / determinant;
-            if (lambda[i][k] > 0 && lambda[i][k] < 1 && kappa[i][k] > 0 && kappa[i][k] < 1)
-            {
-                //0 < lambda < 1 and 0 < kappa < 1 => edges intersect. Intersection point is left hand side (and rhs) of the above equation
-                double intersectionPointX = boundaryPoints[i].x + lambda[i][k] * boundaryEdges[i].x;
-                double intersectionPointY = boundaryPoints[i].y + lambda[i][k] * boundaryEdges[i].y;
-                intersectionPoints.emplace_back(intersectionPointX, intersectionPointY);
-            }
-        }
-    }
-    // For each element corner check, if it is inside the object bounding box. If true, it is also part of the intersection polygon.
-    for (size_t k = 0; k < 4; k++)
-    {
-        if ((!parallel[0][k] ? kappa[0][k] * kappa[2][k] < 0 : (1 - kappa[0][(k -1) % 4]) * (1 - kappa[2][(k -1) % 4]) < 0) &&
-            (!parallel[1][k] ? kappa[1][k] * kappa[3][k] < 0 : (1 - kappa[1][(k -1) % 4]) * (1 - kappa[3][(k -1) % 4]) < 0))
-        {
-            intersectionPoints.emplace_back(elementPoints[k]);
-        }
-    }
-    // For each object corner check, if it is inside the element polygon. If true, it is also part of the intersection polygon.
-    for (size_t i = 0; i < 4; i++)
-    {
-        if (World::Localization::PointQuery::IsWithin(elementPoints[1], elementPoints[2], elementPoints[0], elementPoints[3], boundaryPoints[i]))
-        {
-            intersectionPoints.emplace_back(boundaryPoints[i]);
-        }
-    }
-    return intersectionPoints;
-}
 
 std::function<void (const RTreeElement&)>  LocateOnGeometryElement(const OWL::Interfaces::WorldData& worldData,
                                                               const std::vector<Common::Vector2d>& objectBoundary,
@@ -97,7 +28,7 @@ std::function<void (const RTreeElement&)>  LocateOnGeometryElement(const OWL::In
     {
         const LocalizationElement& localizationElement = *value.second;
 
-        auto intersection = GetIntersectionPoints(localizationElement.polygon, objectBoundary);
+        auto intersection = CommonHelper::IntersectionCalculation::GetIntersectionPoints(localizationElement.polygon, objectBoundary, false);
 
         if(intersection.size() < 3)
         {

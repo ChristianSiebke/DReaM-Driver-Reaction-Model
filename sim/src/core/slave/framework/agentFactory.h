@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 * Copyright (c) 2020 HLRS, University of Stuttgart.
 *
@@ -30,7 +30,7 @@
 #include "include/worldInterface.h"
 #include "common/opExport.h"
 
-class DataStoreWriteInterface;
+class DataBufferWriteInterface;
 
 namespace SimulationSlave
 {
@@ -49,7 +49,7 @@ public:
                  Stochastics *stochastics,
                  ObservationNetworkInterface *observationNetwork,
                  SimulationSlave::EventNetworkInterface *eventNetwork,
-                 DataStoreWriteInterface* dataStore);
+                 DataBufferWriteInterface* dataBuffer);
     virtual ~AgentFactory() override = default;
 
     virtual void Clear() override;
@@ -87,7 +87,7 @@ private:
     Stochastics *stochastics;
     ObservationNetworkInterface *observationNetwork;
     EventNetworkInterface *eventNetwork;
-    DataStoreWriteInterface *dataStore;
+    DataBufferWriteInterface *dataBuffer;
 
     std::vector<std::unique_ptr<Agent>> agentList;
 };

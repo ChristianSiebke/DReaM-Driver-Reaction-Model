@@ -77,27 +77,27 @@ table.results tfoot td {
 }
 
 div.green {
-    height: 3px;
-    background-color: darkgreen;
-}
-
-div.greengap {
-    height: 3px;
+    height: 5px;
     background-color: green;
 }
 
+div.greengap {
+    height: 5px;
+    background-color: rgb(119, 199, 119);
+}
+
 div.red {
-    height: 3px;
+    height: 5px;
     background-color: red;
 }
 
 div.redgap {
-    height: 3px;
+    height: 5px;
     background-color: red;
 }
 
 div.black {
-    height: 3px;
+    height: 5px;
     background-color: black;
 }
 
@@ -122,4 +122,3 @@ a:active {
 a:visited {
     color: #555555;
 }
-

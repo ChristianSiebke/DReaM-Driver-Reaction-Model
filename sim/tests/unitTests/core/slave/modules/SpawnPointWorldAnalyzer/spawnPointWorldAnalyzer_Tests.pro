@@ -23,14 +23,17 @@ DEPENDENCIES_SOURCES = \
 INCLUDEPATH += \
     $$SPAWNPOINTS \
     $$OPEN_SRC/core \
+    $$OPEN_SRC/core/slave \
     $$OPEN_SRC/core/slave/modelElements \
     ../../../../../.. \
     ../../../../../../..
 
 HEADERS += \
+    $$OPEN_SRC/core/slave/framework/sampler.h \
     $$SPAWNPOINTS/common/WorldAnalyzer.h
 
 SOURCES += \
     $$DEPENDENCIES_SOURCES \
     $$SPAWNPOINTS/common/WorldAnalyzer.cpp \
+    $$OPEN_SRC/core/slave/framework/sampler.cpp \
     spawnPointWorldAnalyzer_Tests.cpp

@@ -13,19 +13,19 @@
 #include "gmock/gmock.h"
 #include "include/publisherInterface.h"
 
-#include "fakeDataStore.h"
+#include "fakeDataBuffer.h"
 using ::testing::NiceMock;
 
 class FakePublisher : public PublisherInterface
 {
 public:
-    NiceMock<FakeDataStore> fakeDataStore;
-    FakePublisher() : PublisherInterface(&fakeDataStore) {}
+    NiceMock<FakeDataBuffer> fakeDataBuffer;
+    FakePublisher() : PublisherInterface(&fakeDataBuffer) {}
 
     MOCK_METHOD2(Publish,
-                 void(const openpass::datastore::Key &key, const openpass::datastore::Value &value));
+                 void(const openpass::databuffer::Key &key, const openpass::databuffer::Value &value));
     MOCK_METHOD1(Publish,
                  void(const openpass::publisher::LogEntryBase &event));
     MOCK_METHOD2(Publish,
-                 void(const openpass::datastore::Key &key, const openpass::datastore::ComponentEvent &event));
+                 void(const openpass::databuffer::Key &key, const openpass::databuffer::ComponentEvent &event));
 };

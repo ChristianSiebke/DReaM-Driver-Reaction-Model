@@ -608,7 +608,7 @@ public:
     virtual void SetLength(const double newLength) = 0;
     virtual void SetWidth(const double newWidth) = 0;
     virtual void SetHeight(const double newHeight) = 0;
-    virtual void SetDistanceReferencPointToLeadingEdge(const double distance) = 0;
+    virtual void SetBoundingBoxCenterToRear(const double distance) = 0;
     virtual double GetDistanceReferencePointToLeadingEdge() const = 0;
 
     virtual void SetReferencePointPosition(const Primitive::AbsPosition& newPosition) = 0;
@@ -643,6 +643,8 @@ public:
     virtual bool GetHeadLight() const = 0;
     virtual void SetHighBeamLight(bool highbeamLight) = 0;
     virtual bool GetHighBeamLight() const = 0;
+
+    virtual void SetType(AgentVehicleType type) = 0;
 };
 
 //! This class represents a static traffic sign
@@ -682,14 +684,15 @@ public:
     //!
     //! \param signal       OpenDrive specification
     //! \param position     position in the world
-    //! \return     true if succesfull, false if the sign can not be converted
+    //! \return     true if succesful, false if the sign can not be converted
     virtual bool SetSpecification(RoadSignalInterface* signal, Position position) = 0;
 
     //! Adds a supplementary sign to this sign and converts its specifation from OpenDrive to OSI
     //!
     //! \param odSignal     OpenDrive specification of supplementary sign
     //! \param position     position of the supplementary sign
-    virtual void AddSupplementarySign(RoadSignalInterface* odSignal, Position position) = 0;
+    //! \return     true if succesful, false if the sign can not be converted
+    virtual bool AddSupplementarySign(RoadSignalInterface* odSignal, Position position) = 0;
 
     /*!
      * \brief Copies the underlying OSI object to the given GroundTruth
@@ -925,7 +928,7 @@ protected:
     osi3::Lane* osiLane{nullptr};
 
 private:
-    LaneType laneType;
+    LaneType laneType{LaneType::Undefined};
     LaneAssignmentCollector worldObjects;
     Interfaces::LaneAssignments stationaryObjects;
     Interfaces::TrafficSigns trafficSigns;
@@ -938,7 +941,7 @@ private:
     std::vector<Id> previous;
     const Interfaces::Lane* leftLane;
     const Interfaces::Lane* rightLane;
-    double length;
+    double length{0.0};
     bool leftLaneIsDummy{section == nullptr};
     bool rightLaneIsDummy{section == nullptr};
 };
@@ -1221,7 +1224,7 @@ public:
     virtual void SetLength(const double newLength) override;
     virtual void SetWidth(const double newWidth) override;
     virtual void SetHeight(const double newHeight) override;
-    virtual void SetDistanceReferencPointToLeadingEdge(const double distance) override;
+    virtual void SetBoundingBoxCenterToRear(const double distance) override;
 
     virtual void SetReferencePointPosition(const Primitive::AbsPosition& newPosition) override;
     virtual void SetX(const double newX) override;
@@ -1255,6 +1258,8 @@ public:
     virtual bool GetHeadLight() const override;
     virtual void SetHighBeamLight(bool highbeamLight) override;
     virtual bool GetHighBeamLight() const override;
+
+    virtual void SetType(AgentVehicleType) override;
 
     void CopyToGroundTruth(osi3::GroundTruth& target) const override;
 private:
@@ -1314,7 +1319,7 @@ public:
 
     virtual bool SetSpecification(RoadSignalInterface* signal, Position position) override;
 
-    virtual void AddSupplementarySign(RoadSignalInterface* odSignal, Position position) override;
+    virtual bool AddSupplementarySign(RoadSignalInterface* odSignal, Position position) override;
 
     virtual bool IsValidForLane(OWL::Id laneId) const override;
 

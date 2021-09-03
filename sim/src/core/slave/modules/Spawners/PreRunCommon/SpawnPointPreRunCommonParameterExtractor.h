@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019, 2020 in-tech GmbH
+* Copyright (c) 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -62,5 +62,5 @@ static std::vector<SpawnArea> ExtractSpawnAreas(const ParameterInterface &parame
 
 static PreRunSpawnerParameters ExtractSpawnPointParameters(const ParameterInterface &parameter, const CallbackInterface* callbacks)
 {
-    return {ExtractSpawnAreas(parameter, callbacks), ExtractAgentProfileLaneMaps(parameter, callbacks)};
+    return {ExtractMinimumSpawnBuffer(parameter), ExtractSpawnAreas(parameter, callbacks), ExtractAgentProfileLaneMaps(parameter, callbacks)};
 }

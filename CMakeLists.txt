@@ -9,9 +9,13 @@
 ################################################################################
 
 # be prepared for support of C++20
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.14)
 
 project(openPASS C CXX)
+
+if(WIN32 AND NOT MSYS)
+  message(WARNING "It seems you are using a build environment different from MSYS. This is not officially supported by the openPASS project.")
+endif()
 
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmake")
 
@@ -60,11 +64,11 @@ endif()
 if(WITH_DOC OR WITH_API_DOC)
   string(REPLACE "," "." OPENPASS_DOC_VERSION ${OPENPASS_VERSION})
   configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/sim/doc/source/version.txt.in
-    ${CMAKE_CURRENT_SOURCE_DIR}/sim/doc/source/version.txt
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/source/version.txt.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/doc/source/version.txt
   )
 
-  add_subdirectory(sim/doc)
+  add_subdirectory(doc)
 endif()
 
 # copies runtime dependencies to installation directory (on running 'make install')

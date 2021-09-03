@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019, 2020 in-tech GmbH
+* Copyright (c) 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -88,8 +88,8 @@ SpawnDetails SpawnPointRuntimeCommon::GenerateSpawnDetailsForLane(const SpawnPos
 void SpawnPointRuntimeCommon::AdjustVelocityForCrash(SpawnDetails& spawnDetails,
                                                      const SpawnPosition& sceneryInformation) const
 {
-    const auto agentFrontLength = spawnDetails.agentBlueprint.GetVehicleModelParameters().distanceReferencePointToLeadingEdge;
-    const auto agentRearLength = spawnDetails.agentBlueprint.GetVehicleModelParameters().length - spawnDetails.agentBlueprint.GetVehicleModelParameters().distanceReferencePointToLeadingEdge;
+    const double agentFrontLength = spawnDetails.agentBlueprint.GetVehicleModelParameters().boundingBoxDimensions.length * 0.5 + spawnDetails.agentBlueprint.GetVehicleModelParameters().boundingBoxCenter.x;
+    const double agentRearLength = spawnDetails.agentBlueprint.GetVehicleModelParameters().boundingBoxDimensions.length * 0.5 - spawnDetails.agentBlueprint.GetVehicleModelParameters().boundingBoxCenter.x;
     const auto intendedVelocity = spawnDetails.agentBlueprint.GetSpawnParameter().velocity;
 
     spawnDetails.agentBlueprint.GetSpawnParameter().velocity = worldAnalyzer.CalculateSpawnVelocityToPreventCrashing(sceneryInformation.roadId,
@@ -110,6 +110,7 @@ bool SpawnPointRuntimeCommon::AreSpawningCoordinatesValid(const SpawnDetails& sp
                                                      sceneryInformation.laneId,
                                                      sceneryInformation.sPosition,
                                                      0 /* offset */,
+                                                     GetStochasticOrPredefinedValue(parameters.minimumSeparationBuffer, dependencies.stochastics),
                                                      spawnDetails.agentBlueprint.GetSpawnParameter().route,
                                                      vehicleModelParameters);
 
@@ -141,7 +142,7 @@ void SpawnPointRuntimeCommon::CalculateSpawnParameter(AgentBlueprintInterface* a
     SpawnParameter& spawnParameter = agentBlueprint->GetSpawnParameter();
     spawnParameter.positionX = pos.xPos;
     spawnParameter.positionY = pos.yPos;
-    spawnParameter.yawAngle  = pos.yawAngle;
+    spawnParameter.yawAngle  = pos.yawAngle + (laneId < 0 ? 0.0 : M_PI);
     spawnParameter.velocity = spawnV;
     spawnParameter.acceleration = 0;
     spawnParameter.route = worldAnalyzer.SampleRoute(roadId,

@@ -95,16 +95,20 @@ TEST_P(MaximumLimit,
     const auto accelerationInputSignal = std::make_shared<AccelerationSignal const>(ComponentState::Acting, INFINITY);
 
     VehicleModelParameters fakeVehicleParameters;
-    fakeVehicleParameters.weight = testInput.weight;
-    fakeVehicleParameters.frontSurface = testInput.frontSurface;
-    fakeVehicleParameters.airDragCoefficient = testInput.airDragCoefficient;
-    fakeVehicleParameters.maximumEngineTorque = testInput.maximumEngineTorque;
-    fakeVehicleParameters.maximumEngineSpeed = testInput.maximumEngineSpeed;
-    fakeVehicleParameters.minimumEngineSpeed = testInput.minimumEngineSpeed;
-    fakeVehicleParameters.gearRatios = testInput.gearRatios;
-    fakeVehicleParameters.axleRatio = testInput.axleRatio;
-    fakeVehicleParameters.staticWheelRadius = testInput.staticWheelRadius;
-    fakeVehicleParameters.frictionCoeff = 1.0;
+    fakeVehicleParameters.properties = {{"Mass", testInput.weight},
+                                        {"FrontSurface", testInput.frontSurface},
+                                        {"AirDragCoefficient", testInput.airDragCoefficient},
+                                        {"MaximumEngineTorque", testInput.maximumEngineTorque},
+                                        {"MinimumEngineSpeed", testInput.minimumEngineSpeed},
+                                        {"MaximumEngineSpeed", testInput.maximumEngineSpeed},
+                                        {"AxleRatio", testInput.axleRatio},
+                                        {"FrictionCoefficient", 1.0},
+                                        {"NumberOfGears", testInput.gearRatios.size()}};
+    for (size_t i = 0; i < testInput.gearRatios.size(); i++)
+    {
+        fakeVehicleParameters.properties.insert({"GearRatio"+std::to_string(i+1), testInput.gearRatios[i]});
+    }
+    fakeVehicleParameters.rearAxle.wheelDiameter = 2 * testInput.staticWheelRadius;
 
     const auto vehicleParameterInputSignal = std::make_shared<ParametersVehicleSignal const>(fakeVehicleParameters);
 

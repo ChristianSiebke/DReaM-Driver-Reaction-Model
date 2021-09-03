@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -29,14 +29,14 @@
 #include <QTextStream>
 
 #include "common/runtimeInformation.h"
-#include "include/dataStoreInterface.h"
+#include "include/dataBufferInterface.h"
 #include "include/observationInterface.h"
 
 namespace SimulationSlave {
 class EventNetworkInterface;
 }
 
-class DataStoreReadInterface;
+class DataBufferReadInterface;
 
 using Metainfo = std::unordered_map<std::string, std::string>;
 
@@ -99,7 +99,7 @@ public:
                                               WorldInterface *world,
                                               const ParameterInterface *parameters,
                                               const CallbackInterface *callbacks,
-                                              DataStoreReadInterface *dataStore);
+                                              DataBufferReadInterface *dataBuffer);
     ObservationEntityRepositoryImplementation(const ObservationEntityRepositoryImplementation &) = delete;
     ObservationEntityRepositoryImplementation(ObservationEntityRepositoryImplementation &&) = delete;
     ObservationEntityRepositoryImplementation &operator=(const ObservationEntityRepositoryImplementation &) = delete;
@@ -127,7 +127,7 @@ public:
 
 private:
     /**
-     * @brief Get the Entities from the datastore as CSV row container
+     * @brief Get the Entities from the databuffer as CSV row container
      * 
      * @param entityBaseKey \see NON_PERSISTENT_ENTITIES or \see PERSISTENT_ENTITIES
      * @return All retrieved entities as individual entries
@@ -137,7 +137,7 @@ private:
     /**
      * @brief Helper method to retrieve the source attribute from an entity
      * 
-     * @param source_key   Attribute key within datastore, e.g. 'Entities/Persistent/0/Source'
+     * @param source_key   Attribute key within databuffer, e.g. 'Entities/Persistent/0/Source'
      * @return The contained value, or "<error>" if not available
      */
     std::string GetEntitySource(const std::string &source_key);
@@ -145,18 +145,18 @@ private:
     /**
      * @brief Helper method to retreive the Metainfo provided by an entity
      * 
-     * @param metainfo_key Attribute key within datastore, e.g. 'Entities/Persistent/0/Metainfo'
+     * @param metainfo_key Attribute key within databuffer, e.g. 'Entities/Persistent/0/Metainfo'
      * @return key/value string pairs containing the parsed metainfo (\see to_string)
      */
     Metainfo GetEntityMetainfo(const std::string &metainfo_key);
 
     /**
-     * @brief Converts any static datastore value into its string representation
+     * @brief Converts any static dataBuffer value into its string representation
      * 
-     * @param values value retrieved from the datastore
+     * @param values value retrieved from the dataBuffer
      * @return converted string
      */
-    const std::string to_string(const openpass::datastore::Values &values);
+    const std::string to_string(const Values &values);
 
     /**
      * @brief Takes a CSV row container and writes it to a stream
@@ -166,7 +166,7 @@ private:
      */
     void WriteEntities(const std::vector<CsvRow> &entities, QTextStream &stream);
 
-    DataStoreReadInterface *dataStore;
+    DataBufferReadInterface *dataBuffer;
     int runNumber = 0;
     QString directory;
     QString filenamePrefix{"Repository"};

@@ -179,6 +179,13 @@ public:
     virtual void SetYaw(double value) = 0;
 
     //-----------------------------------------------------------------------------
+    //! Sets roll angle of agent
+    //!
+    //! @param[in]     yawAngle    agent orientation
+    //-----------------------------------------------------------------------------
+    virtual void SetRoll(double value) = 0;
+
+    //-----------------------------------------------------------------------------
     //! Sets the total traveled distance of agent
     //!
     //! @param[in]     distanceTraveled    total traveled distance

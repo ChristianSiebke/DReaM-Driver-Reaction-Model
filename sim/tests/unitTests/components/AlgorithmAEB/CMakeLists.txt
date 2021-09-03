@@ -8,14 +8,11 @@ add_openpass_target(
 
   SOURCES
     AlgorithmAeb_Tests.cpp
-    BoundingBoxCalculation_Tests.cpp
     ${COMPONENT_SOURCE_DIR}/autonomousEmergencyBraking.cpp
-    ${COMPONENT_SOURCE_DIR}/boundingBoxCalculation.cpp
 
   HEADERS
     AlgorithmAebOSIUnitTests.h
     ${COMPONENT_SOURCE_DIR}/autonomousEmergencyBraking.h
-    ${COMPONENT_SOURCE_DIR}/boundingBoxCalculation.h
 
   INCDIRS
     ${COMPONENT_SOURCE_DIR}

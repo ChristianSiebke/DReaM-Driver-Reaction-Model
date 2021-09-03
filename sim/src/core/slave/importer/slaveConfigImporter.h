@@ -107,7 +107,7 @@ private:
     //! \note: The identifier is identical to the XML tag
     inline static const ExperimentConfig::Libraries defaultLibraryMapping =
     {
-        {"DataStoreLibrary", "BasicDataStore"},
+        {"DataBufferLibrary", "BasicDataBuffer"},
         {"EventDetectorLibrary", "EventDetector"},
         {"ManipulatorLibrary", "Manipulator"},
         {"WorldLibrary", "World"},

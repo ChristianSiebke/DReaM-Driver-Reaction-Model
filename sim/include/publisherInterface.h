@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 in-tech GmbH
+* Copyright (c) 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -24,7 +24,7 @@
 #include <vector>
 
 #include "common/logEntryBase.h"
-#include "include/dataStoreInterface.h"
+#include "include/dataBufferInterface.h"
 
 /**
  * @brief Interface which has to be provided by observation modules
@@ -32,8 +32,8 @@
 class PublisherInterface
 {
 public:
-    PublisherInterface(DataStoreWriteInterface *const dataStore) :
-        dataStore(dataStore)
+    PublisherInterface(DataBufferWriteInterface *const dataBuffer) :
+        dataBuffer(dataBuffer)
     {
     }
 
@@ -46,33 +46,33 @@ public:
     virtual ~PublisherInterface() = default;
 
     /*!
-     * \brief Writes information into a data store backend
+     * \brief Writes information into a data buffer backend
      *
      * \param key[in]     Unique topic identification
      * \param value[in]   Value to be written
      */
-    virtual void Publish(const openpass::datastore::Key &key, const openpass::datastore::Value &value)
+    virtual void Publish(const openpass::databuffer::Key &key, const openpass::databuffer::Value &value)
     {
     }
 
     /*!
-     * \brief Writes acyclic information into a data store backend
+     * \brief Writes acyclic information into a data buffer backend
      *
      * \param value[in]   The acyclic event
      */
-    virtual void Publish(const openpass::datastore::Key &key, const openpass::publisher::LogEntryBase &event)
+    virtual void Publish(const openpass::databuffer::Key &key, const openpass::publisher::LogEntryBase &event)
     {
     }
 
     /*!
-     * \brief Writes acyclic information into a data store backend
+     * \brief Writes acyclic information into a data buffer backend
      *
      * \param value[in]   The acyclic event
      */
-    virtual void Publish(const openpass::datastore::Key &key, const openpass::datastore::ComponentEvent &event)
+    virtual void Publish(const openpass::databuffer::Key &key, const openpass::databuffer::ComponentEvent &event)
     {
     }
 
 protected:
-    DataStoreWriteInterface *const dataStore; //!< References the datastore backend
+    DataBufferWriteInterface *const dataBuffer; //!< References the dataBuffer backend
 };

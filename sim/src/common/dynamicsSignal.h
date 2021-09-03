@@ -39,6 +39,7 @@ public:
                   double positionY,
                   double yaw,
                   double yawRate,
+                  double roll,
                   double steeringWheelAngle,
                   double centripetalAcceleration,
                   double travelDistance) :
@@ -49,6 +50,7 @@ public:
         positionY(positionY),
         yaw(yaw),
         yawRate(yawRate),
+        roll(roll),
         steeringWheelAngle(steeringWheelAngle),
         centripetalAcceleration(centripetalAcceleration),
         travelDistance(travelDistance)
@@ -76,6 +78,7 @@ public:
         stream << "positionY: " << positionY << std::endl;
         stream << "yaw: " << yaw << std::endl;
         stream << "yawRate: " << yawRate << std::endl;
+        stream << "roll: " << roll << std::endl;
         stream << "steeringWheelAngle: " << steeringWheelAngle << std::endl;
         stream << "centripetalAcceleration: " << centripetalAcceleration << std::endl;
         stream << "travelDistance: " << travelDistance << std::endl;
@@ -88,6 +91,7 @@ public:
     double positionY = 0.0;
     double yaw = 0.0;
     double yawRate = 0.0;
+    double roll = 0.0;
     double steeringWheelAngle = 0.0;
     double centripetalAcceleration = 0.0;
     double travelDistance = 0.0;

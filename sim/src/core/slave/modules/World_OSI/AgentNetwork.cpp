@@ -118,6 +118,7 @@ void AgentNetwork::PublishGlobalData(Publisher publish)
         publish(agentId, "VelocityEgo", agent->GetVelocity());
         publish(agentId, "AccelerationEgo", agent->GetAcceleration());
         publish(agentId, "YawAngle", agent->GetYaw());
+        publish(agentId, "RollAngle", agent->GetRoll());
         publish(agentId, "YawRate", agent->GetYawRate());
         publish(agentId, "SteeringAngle", agent->GetSteeringWheelAngle());
         publish(agentId, "TotalDistanceTraveled", agent->GetDistanceTraveled());

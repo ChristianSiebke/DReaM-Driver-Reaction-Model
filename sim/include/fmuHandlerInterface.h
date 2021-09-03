@@ -131,6 +131,7 @@ public:
         const char* stringValue;
     };
 
+
 protected:
     struct fmu_check_data_t* cdata;   //!< check data to be passed around between the FMIL functions
 

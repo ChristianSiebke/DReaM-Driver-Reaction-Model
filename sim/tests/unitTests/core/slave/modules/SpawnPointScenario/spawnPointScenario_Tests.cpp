@@ -41,7 +41,9 @@ MATCHER_P(MatchesAgentBlueprint, referenceAgentBlueprint, "matches blueprint")
     }
     const auto actualVehicleModelParameters = arg->GetVehicleModelParameters();
     const auto expectedVehicleModelParameters = referenceAgentBlueprint.GetVehicleModelParameters();
-    if (!(actualVehicleModelParameters.length == expectedVehicleModelParameters.length && actualVehicleModelParameters.width == expectedVehicleModelParameters.width && actualVehicleModelParameters.distanceReferencePointToLeadingEdge == expectedVehicleModelParameters.distanceReferencePointToLeadingEdge))
+    if (!(actualVehicleModelParameters.boundingBoxDimensions.length == expectedVehicleModelParameters.boundingBoxDimensions.length
+          && actualVehicleModelParameters.boundingBoxDimensions.width == expectedVehicleModelParameters.boundingBoxDimensions.width
+          && actualVehicleModelParameters.boundingBoxCenter.x == expectedVehicleModelParameters.boundingBoxCenter.x))
     {
         return false;
     }
@@ -80,9 +82,9 @@ TEST(SpawnPointScenario, Trigger_SpawnsEgoAgentAccordingToScenarioWorldPosition)
     std::optional<AgentBlueprint> actualAgentBlueprintOptional;
     AgentBlueprint actualAgentBlueprint;
     VehicleModelParameters vehicleModelParameters;
-    vehicleModelParameters.length = 1;
-    vehicleModelParameters.width = 0.5;
-    vehicleModelParameters.distanceReferencePointToLeadingEdge = 0.5;
+    vehicleModelParameters.boundingBoxDimensions.length = 1;
+    vehicleModelParameters.boundingBoxDimensions.width = 0.5;
+    vehicleModelParameters.boundingBoxCenter.x = 0.;
     actualAgentBlueprint.SetVehicleModelParameters(vehicleModelParameters);
     actualAgentBlueprintOptional = actualAgentBlueprint;
 
@@ -159,9 +161,9 @@ TEST(SpawnPointScenario, Trigger_SpawnsEgoAgentAccordingToScenarioLanePosition)
     std::optional<AgentBlueprint> actualAgentBlueprintOptional;
     AgentBlueprint actualAgentBlueprint;
     VehicleModelParameters vehicleModelParameters;
-    vehicleModelParameters.length = 1;
-    vehicleModelParameters.width = 0.5;
-    vehicleModelParameters.distanceReferencePointToLeadingEdge = 0.5;
+    vehicleModelParameters.boundingBoxDimensions.length = 1;
+    vehicleModelParameters.boundingBoxDimensions.width = 0.5;
+    vehicleModelParameters.boundingBoxCenter.x = 0.;
     actualAgentBlueprint.SetVehicleModelParameters(vehicleModelParameters);
     actualAgentBlueprintOptional = actualAgentBlueprint;
 
@@ -245,9 +247,9 @@ TEST(SpawnPointScenario, Trigger_SpawnsScenarioAgentAccordingToScenarioWorldPosi
     std::optional<AgentBlueprint> actualAgentBlueprintOptional;
     AgentBlueprint actualAgentBlueprint;
     VehicleModelParameters vehicleModelParameters;
-    vehicleModelParameters.length = 1;
-    vehicleModelParameters.width = 0.5;
-    vehicleModelParameters.distanceReferencePointToLeadingEdge = 0.5;
+    vehicleModelParameters.boundingBoxDimensions.length = 1;
+    vehicleModelParameters.boundingBoxDimensions.width = 0.5;
+    vehicleModelParameters.boundingBoxCenter.x = 0.;
     actualAgentBlueprint.SetVehicleModelParameters(vehicleModelParameters);
     actualAgentBlueprintOptional = actualAgentBlueprint;
 
@@ -324,9 +326,9 @@ TEST(SpawnPointScenario, Trigger_SpawnsScenarioAgentAccordingToScenarioLanePosit
     std::optional<AgentBlueprint> actualAgentBlueprintOptional;
     AgentBlueprint actualAgentBlueprint;
     VehicleModelParameters vehicleModelParameters;
-    vehicleModelParameters.length = 1;
-    vehicleModelParameters.width = 0.5;
-    vehicleModelParameters.distanceReferencePointToLeadingEdge = 0.5;
+    vehicleModelParameters.boundingBoxDimensions.length = 1;
+    vehicleModelParameters.boundingBoxDimensions.width = 0.5;
+    vehicleModelParameters.boundingBoxCenter.x = 0.;
     actualAgentBlueprint.SetVehicleModelParameters(vehicleModelParameters);
     actualAgentBlueprintOptional = actualAgentBlueprint;
 
