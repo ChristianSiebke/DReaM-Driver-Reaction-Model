@@ -33,7 +33,7 @@ Loading Results
 Evaluating Results
 ------------------
 
-* Select a result folder for showing their statistics and histogramms
+* Select a result folder for showing their statistics and histograms
 * Histograms over a folder are shown in one (scrollable) row of images
 * Selecting the white background of the folder list clears the histogram preview panel
 * Each row of histograms contains the contents of the corresponding folder in the folder list

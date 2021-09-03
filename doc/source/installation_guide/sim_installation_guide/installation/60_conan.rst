@@ -25,7 +25,7 @@ To learn more about Conan itself you can visit `Conan <https://conan.io/>`_.
 
 Conan is used in the |op| project to create and manage the binaries of the used ThirdParty libraries.
 
-Additional Prerequisitions
+Additional Prerequisites
 --------------------------
 
 To be able to work with Conan it´s necessary to add additional packages.
@@ -82,7 +82,7 @@ E.g.
 
    At least this step has to be done in prior before any ThirdParty library can be installed by Conan.
    Every upcoming step is optional, but can be useful while developing or debugging.
-   Also with these steps it´s possible to install ThirdParty libraries separatly.
+   Also with these steps it´s possible to install ThirdParty libraries separately.
 
 Conan Install
 ^^^^^^^^^^^^^
@@ -141,7 +141,7 @@ This example is also available in the ``conan`` folder in the ``simopenpass`` re
    [imports]
       . , * -> C:/openpass @
 
-The ``requires`` field descibes what package with what version shall be installed. 
+The ``requires`` field describes what package with what version shall be installed. 
 It´s also possible to add more packages here or change the version.
 
 The ``generator`` field is used to add different generators to the process. 

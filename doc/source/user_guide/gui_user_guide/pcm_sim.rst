@@ -14,7 +14,7 @@
 PCM Simulation
 ==============
 
-This plugin is used to configure and start a simulation based pcm data or simulation configuration sets of previous simualations.
+This plugin is used to configure and start a simulation based pcm data or simulation configuration sets of previous simulations.
 
 Simulation Input
 ----------------
@@ -62,7 +62,7 @@ Simulation Configuration
 
 At this point, the User is able to choose what system configuration shall be used for each agent.
 The User can either select one or multiple system configuration files (comma separated). 
-In the case of multiple files are configured, there will be unique sets of simulation configuration files generated for each possbile combination, which are placed in folders named / coded like ``<Car1_Index>-<Car2_Index>-<Other_Index>`` e.g. ``1-0-2`` 
+In the case of multiple files are configured, there will be unique sets of simulation configuration files generated for each possible combination, which are placed in folders named / coded like ``<Car1_Index>-<Car2_Index>-<Other_Index>`` e.g. ``1-0-2`` 
 
 
 .. image:: _static/images/plugin/pcm_sim/system_config.png
@@ -85,8 +85,8 @@ Variation
 
 .. note::
 
-   The additional random seeds which are used by the variation are choosen randomly depending on the initial random seed.
-   Therefore they´re reproducable
+   The additional random seeds which are used by the variation are chosen randomly depending on the initial random seed.
+   Therefore they´re reproducible
 
 .. image:: _static/images/plugin/pcm_sim/variation.png
 

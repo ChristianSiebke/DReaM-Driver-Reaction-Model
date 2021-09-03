@@ -90,7 +90,7 @@ General
 
 .. image:: gui_user_guide/_static/images/plugin/project/general.png
 
-In this segment you are able to name the Master Configuration. In our example it is called *MasterConfiguratioNo1*.
+In this segment you are able to name the Master Configuration. In our example it is called *MasterConfigurationNo1*.
 
 Path Settings
 """""""""""""
