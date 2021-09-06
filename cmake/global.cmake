@@ -56,6 +56,9 @@ if(USE_CCACHE)
   set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
 endif()
 
+set(CMAKE_C_FLAGS_DEBUG "-g -ggdb3 -Og")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -ggdb3 -Og")
+
 if(MINGW)
   if(CMAKE_BUILD_TYPE STREQUAL Debug)
     # this avoids string table overflow errors during compilation
