@@ -1,0 +1,43 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            // FOR TESTMATE (SELECTED TEST) AND CMAKE (DEBUG CMAKE TARGET)
+            "name": "CMake Target",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${command:cmake.launchTargetPath}",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            // FOR DEBUGGING OpenPassSlave (DON'T FORGET TO CALL make install)
+            "name": "opsimulation",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/openPASS/bin/core/OpenPassSlave",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "/openPASS/bin/core/",
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+    ]
+}

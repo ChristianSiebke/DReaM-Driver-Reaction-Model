@@ -40,8 +40,8 @@ Installing the Build Environment
          Also, the unix-like shell simplifies c++ compilation on Windows.
          For details, see `MSYS2 website <https://www.msys2.org/>`_.
 
+         
          .. _msys2:
-
 
       #. Download MSYS2
 
@@ -74,7 +74,7 @@ Installing the Build Environment
 
          .. warning::
 
-            | MSYS2 MinGW 64-bi is **the**  |op| development environment and will be referred to as |mingw_shell|.
+            | MSYS2 MinGW 64-bit is **the**  |op| development environment and will be referred to as |mingw_shell|.
 
    .. _building_under_linux:
 
@@ -156,6 +156,7 @@ The first set of dependencies we need to install in order to successfully compil
 
          .. code-block:: 
 
+            # for simulator
             apt install ccache
             apt install cmake
             apt install doxygen
@@ -167,6 +168,10 @@ The first set of dependencies we need to install in order to successfully compil
             apt install protobuf-compiler  # when building osi
             apt install qt5-default
             apt install zlib1g-dev
+
+            # for documentation
+            sudo apt install doxygen python3 python3-pip libenchant-2-2 dvipng
+            pip3 install sphinx sphinx-rtd-theme sphinx-tabs breathe exhale sphinxcontrib-spelling
 
          Under Linux, it is deliberate that the googletest package only installs the header files to the system, 
          but not the static and dynamic libraries. The missing libraries can be build and installed to ``/usr/lib`` via
@@ -188,7 +193,7 @@ This section describes how to compile prerequisites of |op| using source package
   
 .. note::
    
-   If you are unfamiliar to ``CMake`` or working within a |mingw_shell|, Section :ref:`cmake` and :ref:`msys2` might give you a short introduction on these topics in the scope of building |op| itself.
+   If you are unfamiliar to ``CMake`` or working within a |mingw_shell|, Section :ref:`cmake` and :ref:`MSYS2 <msys2>` might give you a short introduction on these topics in the scope of building |op| itself.
    
 Location Of Installed Source Packages
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -441,11 +446,38 @@ Build and Install FMIL
                   -DFMILIB_BUILD_SHARED_LIB=ON  \
                   ..
 
+#. Leave build directory
+
+   .. code-block:: 
+
+      cd ..
+               
 #. Apply Patch
    
    As FMIL and the internally used `FMU Compliance Checker <https://github.com/modelica-tools/FMUComplianceChecker>`_ has issues with loading and private entry points, the following patch needs to be applied: 
    
-   - :download:`Windows/Linux Patch </_static/resources/fmil/fmil203.patch>`
+   - :download:`Windows/Linux Patch </_static/resources/fmil/fmi-library-2.0.3-fixes.patch>`
+
+   .. tabs::
+
+      .. tab:: Windows
+
+         .. code-block:: 
+
+            patch -l -p1 "<path/to>/fmi-library-2.0.3-fixes.patch"
+
+      .. tab:: Linux
+
+         .. code-block:: 
+
+            dos2unix src/Import/src/FMI1/fmi1_import_capi.c src/Import/src/FMI2/fmi2_import_capi.c src/Util/include/JM/jm_portability.h
+            patch -l -p1 "<path/to>/fmi-library-2.0.3-fixes.patch"
+
+#. Enter build directory
+
+   .. code-block:: 
+
+      cd build
 
 #. Compile
 

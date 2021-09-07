@@ -37,7 +37,7 @@ CMake Generator
 ---------------
 
 This is only important for **Windows**.
-To generate MSYS compatible makefiles use ``-G "MSYS Makefiles"`` (c.f. :ref:`msys2`).
+To generate MSYS compatible makefiles use ``-G "MSYS Makefiles"`` (c.f. :ref:`MSYS2 <msys2>`).
 
 .. _cmake_prefix_path:
 

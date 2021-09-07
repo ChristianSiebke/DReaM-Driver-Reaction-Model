@@ -165,8 +165,8 @@ The above directory structure will be created by following the instructions of t
          .. code-block:: 
 
             cmake -G "MSYS Makefiles" \
-            -D CMAKE_PREFIX_PATH="C:\msys64\mingw64\bin;C:\simopenpass\deps\thirdParty\FMILibrary;C:\simopenpass\deps\thirdParty\osi;" \
-            -D CMAKE_INSTALL_PREFIX=/C/OpenPASS/bin/core \
+            -D CMAKE_PREFIX_PATH="C:/msys64/mingw64/bin;C:/simopenpass/deps/thirdParty/FMILibrary;C:/simopenpass/deps/thirdParty/osi" \
+            -D CMAKE_INSTALL_PREFIX=C:/OpenPASS/bin/core \
             -D CMAKE_BUILD_TYPE=Release \
             -D USE_CCACHE=ON \
             -D WITH_DEBUG_POSTFIX=OFF \
@@ -192,7 +192,7 @@ The above directory structure will be created by following the instructions of t
 
          .. code-block:: 
 
-            cmake -D CMAKE_PREFIX_PATH="~/simopenpass/deps/thirdParty/FMILibrary;~/simopenpass/deps/thirdParty/osi" \
+            cmake -D CMAKE_PREFIX_PATH="$HOME/simopenpass/deps/thirdParty/FMILibrary;$HOME/simopenpass/deps/thirdParty/osi" \
             -D CMAKE_INSTALL_PREFIX=/usr/local/OpenPASS/bin/core \
             -D CMAKE_BUILD_TYPE=Release \
             -D USE_CCACHE=ON \
@@ -203,7 +203,7 @@ The above directory structure will be created by following the instructions of t
             -D CMAKE_CXX_COMPILER=g++-9 \
             ..
    
-   .. note:: If you need to adjust paths and options based on your system and needs and don't forget to escape the semicolon ``;`` (see :ref:`Cmake_prefix_path`). 
+   .. note:: If you need to adjust paths and options based on your system and needs, don't forget to escape the semicolon ``;`` (see :ref:`Cmake_prefix_path`). 
              For a build that goes beyond the default settings, see :ref:`Cmake` for more available variables and options that can be set.
              
 
@@ -219,6 +219,16 @@ The above directory structure will be created by following the instructions of t
 
       ARGS is optional, but recommended.
       Adjust parallel build flag ``-j3`` based on your system.
+
+#. Build documentation
+
+   Starting from ``simopenpass/build``:
+
+   .. code-block:: 
+
+      make doc
+
+   .. note:: Currently the documentation must be built before |op| can be successfully installed if the CMake variable `WITH_DOC=ON` (default).
 
 #. Build simulation core
 

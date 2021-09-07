@@ -15,7 +15,6 @@ import os
 import sys
 import datetime
 import sphinx_rtd_theme
-import sphinxcontrib.spelling
 from textwrap import dedent
 
 # -- Path setup --------------------------------------------------------------
@@ -43,9 +42,9 @@ if os.path.exists(version_file):
 # -- General configuration ---------------------------------------------------
 def setup(app):
    app.add_css_file('css/custom.css')
-   
+
 extensions = []
-extensions.append('sphinxcontrib.spelling')
+
 extensions.append("sphinx_rtd_theme")
 extensions.append('sphinx.ext.todo')
 extensions.append('sphinx_tabs.tabs')

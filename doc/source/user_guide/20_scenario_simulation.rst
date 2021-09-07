@@ -154,6 +154,8 @@ Model components are again roughly divided into **drivers** and **vehicle compon
 
 .. todo:: Move Inputs, Outputs, and Components to their own master section
 
+.. _inputs_in_depth:
+
 Inputs in Depth
 ---------------
 

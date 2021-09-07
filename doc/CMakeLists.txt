@@ -12,7 +12,7 @@ if(WITH_DOC)
   if(TARGET doc)
     message(STATUS "Target doc already defined. Skipping.")
   else()
-    add_custom_target(doc
+    add_custom_target(doc ALL
         COMMAND ${CMAKE_COMMAND}
             -DSRC=${CMAKE_CURRENT_LIST_DIR}/source
             -DDST=${CMAKE_BINARY_DIR}/doc
