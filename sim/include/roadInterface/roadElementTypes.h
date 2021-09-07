@@ -271,7 +271,7 @@ struct RoadSignalSpecification
     double yaw{0};
 
     RoadElementValidity validity;
-    std::list<std::string> dependencyIds {};
+    std::vector<std::string> dependencyIds {};
 };
 
 enum class RoadObjectType

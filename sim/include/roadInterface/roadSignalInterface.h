@@ -33,7 +33,7 @@ public:
     virtual double GetValue() const = 0;
     virtual RoadSignalUnit GetUnit() const = 0;
     virtual std::string GetText() const = 0;
-    virtual std::list<std::string> GetDependencies() const = 0;
+    virtual std::vector<std::string> GetDependencies() const = 0;
     virtual bool GetIsDynamic() const = 0;
     virtual double GetWidth() const = 0;
     virtual double GetHeight() const = 0;

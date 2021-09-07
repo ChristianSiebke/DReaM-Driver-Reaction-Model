@@ -19,7 +19,7 @@ class FakeLaneStream : public LaneStreamInterface
 public:
     MOCK_CONST_METHOD1(GetStreamPosition, StreamPosition (const GlobalRoadPosition& roadPosition));
     MOCK_CONST_METHOD1(GetRoadPosition, GlobalRoadPosition (const StreamPosition& streamPosition));
-    MOCK_CONST_METHOD2(GetAgentsInRange, std::vector<const AgentInterface*> (const StreamPosition& start, const StreamPosition& end));
+    MOCK_CONST_METHOD2(GetAgentsInRange, AgentInterfaces (const StreamPosition& start, const StreamPosition& end));
     MOCK_CONST_METHOD2(GetObjectsInRange, std::vector<const WorldObjectInterface*> (const StreamPosition& start, const StreamPosition& end));
     MOCK_CONST_METHOD2(GetStreamPosition, std::optional<StreamPosition> (const WorldObjectInterface* object, const MeasurementPoint& mp));
     MOCK_CONST_METHOD0(GetLength, double ());

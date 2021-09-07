@@ -156,7 +156,7 @@ bool ObservationLibrary::ReleaseObservationModule(ObservationModule* observation
         return false;
     }
 
-    std::list<ObservationModule*>::iterator findIter = std::find(observationModules.begin(), observationModules.end(),
+    auto findIter = std::find(observationModules.begin(), observationModules.end(),
             observationModule);
     if (observationModules.end() == findIter)
     {
@@ -179,7 +179,7 @@ bool ObservationLibrary::ReleaseObservationModule(ObservationModule* observation
         return false;
     }
 
-    observationModules.remove(observationModule);
+    observationModules.erase(findIter);
 
     return true;
 }

@@ -112,7 +112,7 @@ bool EventDetectorLibrary::ReleaseEventDetector(EventDetector *eventDetector)
         return false;
     }
 
-    std::list<EventDetector*>::iterator findIter = std::find(eventDetectors.begin(), eventDetectors.end(), eventDetector);
+    auto findIter = std::find(eventDetectors.begin(), eventDetectors.end(), eventDetector);
     if(eventDetectors.end() == findIter)
     {
         LOG_INTERN(LogLevel::Warning) << "event detector doesn't belong to library";
@@ -134,7 +134,7 @@ bool EventDetectorLibrary::ReleaseEventDetector(EventDetector *eventDetector)
         return false;
     }
 
-    eventDetectors.remove(eventDetector);
+    eventDetectors.erase(findIter);
 
     return true;
 }

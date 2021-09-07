@@ -959,7 +959,7 @@ RouteQueryResult<RelativeWorldView::Lanes> WorldDataQuery::GetRelativeLanes(cons
     worldData);
 }
 
-RouteQueryResult<std::optional<int>> WorldDataQuery::GetRelativeLaneId(const RoadMultiStream &roadStream, double ownPosition, int ownLaneId, std::map<std::string, GlobalRoadPosition> targetPosition) const
+RouteQueryResult<std::optional<int>> WorldDataQuery::GetRelativeLaneId(const RoadMultiStream &roadStream, double ownPosition, int ownLaneId, GlobalRoadPositions targetPosition) const
 {
     std::optional<int> currentOwnLaneId;
     std::optional<int> currentTargetLaneId;

@@ -28,12 +28,12 @@ class FakeRoadLane : public RoadLaneInterface
     MOCK_METHOD1(AddPredecessor, bool (int id));
     MOCK_CONST_METHOD0(GetId, int ());
     MOCK_CONST_METHOD0(GetType, RoadLaneType ());
-    MOCK_CONST_METHOD0(GetWidths, const std::list<RoadLaneWidth*> &());
-    MOCK_CONST_METHOD0(GetBorders, const std::list<RoadLaneWidth*> &());
-    MOCK_CONST_METHOD0(GetSuccessor, const std::list<int> &());
-    MOCK_CONST_METHOD0(GetPredecessor, const std::list<int> &());
+    MOCK_CONST_METHOD0(GetWidths, const RoadLaneWidths &());
+    MOCK_CONST_METHOD0(GetBorders, const RoadLaneWidths &());
+    MOCK_CONST_METHOD0(GetSuccessor, const std::vector<int> &());
+    MOCK_CONST_METHOD0(GetPredecessor, const std::vector<int> &());
     MOCK_METHOD1(SetInDirection, void (bool inDirection));
     MOCK_CONST_METHOD0(GetInDirection, bool ());
     MOCK_CONST_METHOD0(GetLaneSection, RoadLaneSectionInterface *());
-    MOCK_CONST_METHOD0(GetRoadMarks, const std::list<RoadLaneRoadMark*> &());
+    MOCK_CONST_METHOD0(GetRoadMarks, const RoadLaneRoadMarks &());
 };

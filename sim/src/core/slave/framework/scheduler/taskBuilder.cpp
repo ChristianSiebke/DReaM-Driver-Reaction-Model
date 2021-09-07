@@ -45,23 +45,23 @@ TaskBuilder::TaskBuilder(const int &currentTime,
     BuildManipulatorTasks();
 }
 
-std::list<TaskItem> TaskBuilder::CreateBootstrapTasks()
+std::vector<TaskItem> TaskBuilder::CreateBootstrapTasks()
 {
     return {
         SpawningTaskItem(frameworkUpdateRate, [&] { return spawnPointNetwork->TriggerPreRunSpawnZones(); }),
     };
 }
 
-std::list<TaskItem> TaskBuilder::CreateSpawningTasks()
+std::vector<TaskItem> TaskBuilder::CreateSpawningTasks()
 {
     return {
         SpawningTaskItem(frameworkUpdateRate, [&] { return spawnPointNetwork->TriggerRuntimeSpawnPoints(currentTime); }),
         SyncWorldTaskItem(ScheduleAtEachCycle, [&] { dataInterface->ClearTimeStep(); })};
 }
 
-std::list<TaskItem> TaskBuilder::CreatePreAgentTasks()
+std::vector<TaskItem> TaskBuilder::CreatePreAgentTasks()
 {
-    std::list<TaskItem> items{
+    std::vector<TaskItem> items{
         SyncWorldTaskItem(ScheduleAtEachCycle, [&] { world->PublishGlobalData(currentTime); })};
 
     std::copy(std::begin(eventDetectorTasks), std::end(eventDetectorTasks), std::back_inserter(items));
@@ -70,16 +70,16 @@ std::list<TaskItem> TaskBuilder::CreatePreAgentTasks()
     return items;
 }
 
-std::list<TaskItem> TaskBuilder::CreateSynchronizeTasks()
+std::vector<TaskItem> TaskBuilder::CreateSynchronizeTasks()
 {
     return {
         ObservationTaskItem(ScheduleAtEachCycle, [&] { return observationNetwork->UpdateTimeStep(currentTime, runResult); }),
         SyncWorldTaskItem(ScheduleAtEachCycle, [&] { world->SyncGlobalData(currentTime); })};
 }
 
-std::list<TaskItem> TaskBuilder::CreateFinalizeTasks()
+std::vector<TaskItem> TaskBuilder::CreateFinalizeTasks()
 {
-    std::list<TaskItem> items{};
+    std::vector<TaskItem> items{};
 
     std::copy(std::begin(eventDetectorTasks), std::end(eventDetectorTasks), std::back_inserter(items));
     std::copy(std::begin(manipulatorTasks), std::end(manipulatorTasks), std::back_inserter(items));

@@ -94,7 +94,7 @@ public:
     void AddTrafficSignalController (const openScenario::TrafficSignalController& controller) override;
 
     void AddScenarioEntity(const ScenarioEntity& entity) override;
-    void AddScenarioGroupsByEntityNames(const std::map<std::string, std::list<std::string>> &groupDefinitions) override;
+    void AddScenarioGroupsByEntityNames(const std::map<std::string, std::vector<std::string>> &groupDefinitions) override;
 
     const std::vector<ScenarioEntity> &GetEntities() const override;
     const std::vector<ScenarioEntity*> &GetScenarioEntities() override;

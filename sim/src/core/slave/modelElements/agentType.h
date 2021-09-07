@@ -34,11 +34,11 @@ public:
     virtual bool AddComponent(std::shared_ptr<ComponentType> component);
 
     //Getter
-    virtual const std::list<int> &GetChannels() const;
+    virtual const std::vector<int> &GetChannels() const;
     virtual const std::map<std::string, std::shared_ptr<ComponentType>> &GetComponents() const;
 
 private:
-    std::list<int> channels;
+    std::vector<int> channels;
     std::map<std::string, std::shared_ptr<ComponentType>> components;
 };
 

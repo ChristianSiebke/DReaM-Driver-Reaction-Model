@@ -19,6 +19,7 @@ const OWL::Interfaces::Section& GetSectionAtDistance(const OWL::Interfaces::Road
             return *section;
         }
     }
+    throw std::runtime_error("RoadStream distance out of range");
 }
 
 double GetLaneWidth(const OWL::Interfaces::Section& section, double laneId, double distance)

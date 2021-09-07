@@ -105,7 +105,7 @@ public:
         ON_CALL(*laneStream1, GetAgentsInRange(_,_)).WillByDefault(
                     [&](StreamPosition start, StreamPosition end)
         {
-            std::vector<const AgentInterface*> agentsInRange;
+            AgentInterfaces agentsInRange;
             for (const auto agent : agentsOnLane[-1])
             {
                 auto agentS = agent->GetDistanceToStartOfRoad(MeasurementPoint::Reference, "");
@@ -129,7 +129,7 @@ public:
         ON_CALL(*laneStream2, GetAgentsInRange(_,_)).WillByDefault(
                     [&](StreamPosition start, StreamPosition end)
         {
-            std::vector<const AgentInterface*> agentsInRange;
+            AgentInterfaces agentsInRange;
             for (const auto agent : agentsOnLane[-2])
             {
                 auto agentS = agent->GetDistanceToStartOfRoad(MeasurementPoint::Reference, "");
@@ -152,7 +152,7 @@ public:
         ON_CALL(*laneStream3, GetAgentsInRange(_,_)).WillByDefault(
                     [&](StreamPosition start, StreamPosition end)
         {
-            std::vector<const AgentInterface*> agentsInRange;
+            AgentInterfaces agentsInRange;
             for (const auto agent : agentsOnLane[-3])
             {
                 auto agentS = agent->GetDistanceToStartOfRoad(MeasurementPoint::Reference, "");

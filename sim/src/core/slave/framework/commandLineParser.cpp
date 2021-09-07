@@ -29,7 +29,7 @@ CommandLineArguments CommandLineParser::Parse(const QStringList& arguments)
     return CompileCommandLineArguments(commandLineParser);
 }
 
-std::list<std::string> CommandLineParser::GetParsingLog()
+std::vector<std::string> CommandLineParser::GetParsingLog()
 {
     return parsingLog;
 }
@@ -71,7 +71,7 @@ void CommandLineParser::EvaluateDefaultedValues(const QCommandLineParser& comman
     }
 }
 
-std::list<std::string> CommandLineParser::parsingLog {};
+std::vector<std::string> CommandLineParser::parsingLog {};
 
 /* Put all information for command line options here.
  *
@@ -86,7 +86,7 @@ std::list<std::string> CommandLineParser::parsingLog {};
  *
  * Don't forget to update test GivenNoValues_SetDefaultsAndLogsEntryForEachDefaultedValue too
  */
-const std::list<CommandLineOption> CommandLineParser::commandLineOptions
+const std::vector<CommandLineOption> CommandLineParser::commandLineOptions
 {
     {
         "logLevel",

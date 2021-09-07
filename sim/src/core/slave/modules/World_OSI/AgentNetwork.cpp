@@ -72,12 +72,12 @@ const std::map<int, AgentInterface*>& AgentNetwork::GetAgents() const
     return agents;
 }
 
-const std::list<const AgentInterface*>& AgentNetwork::GetRemovedAgents() const
+const AgentInterfaces& AgentNetwork::GetRemovedAgents() const
 {
     return removedAgents;
 }
 
-const std::list<const AgentInterface*> AgentNetwork::GetRemovedAgentsInPreviousTimestep()
+const AgentInterfaces AgentNetwork::GetRemovedAgentsInPreviousTimestep()
 {
     auto agents = std::move(removedAgentsPrevious);
     removedAgentsPrevious.clear();
@@ -147,12 +147,11 @@ void AgentNetwork::PublishGlobalData(Publisher publish)
 // udpate global data at occurrence of time step
 void AgentNetwork::SyncGlobalData()
 {
-    while (!updateQueue.empty())
+    for (const auto& func : updateQueue)
     {
-        const auto& func = updateQueue.front();
         func();
-        updateQueue.pop_front();
     }
+    updateQueue.clear();
 
     for (auto& agent : removeQueue)
     {

@@ -119,7 +119,7 @@ SampledGeometry GeometryConverter::CalculateSectionBetweenRoadMarkChanges(double
                                                                                     const RoadLaneSectionInterface* roadSection)
 {
     SampledGeometry sampledGeometries;
-    std::list<RoadGeometryInterface*> roadGeometries = road->GetGeometries();
+    auto roadGeometries = road->GetGeometries();
     bool firstGeometry{true};
 
     for(auto roadGeometry = roadGeometries.cbegin(); roadGeometry != roadGeometries.cend(); ++roadGeometry)
@@ -411,7 +411,7 @@ const RoadElevation* GeometryConverter::GetRelevantRoadElevation(double roadOffs
     }
 }
 
-const RoadLaneWidth* GeometryConverter::GetRelevantRoadLaneWidth(double sectionOffset, const std::list<RoadLaneWidth*> widthsOrBorders)
+const RoadLaneWidth* GeometryConverter::GetRelevantRoadLaneWidth(double sectionOffset, const RoadLaneWidths widthsOrBorders)
 {
     auto roadLaneIt = widthsOrBorders.begin();
     while(widthsOrBorders.end() != roadLaneIt)

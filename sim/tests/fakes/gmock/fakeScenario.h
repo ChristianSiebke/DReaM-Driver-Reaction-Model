@@ -41,7 +41,7 @@ public:
     MOCK_METHOD1(AddScenarioEntity,
                  void(const ScenarioEntity&));
     MOCK_METHOD1(AddScenarioGroupsByEntityNames,
-                 void(const std::map<std::string, std::list<std::string>>&));
+                 void(const std::map<std::string, std::vector<std::string>>&));
     MOCK_METHOD1(AddConditionalEventDetector,
                  void(const openScenario::ConditionalEventDetectorInformation&));
     MOCK_METHOD2(AddAction,

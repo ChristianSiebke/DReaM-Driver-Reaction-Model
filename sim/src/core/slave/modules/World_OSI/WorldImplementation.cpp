@@ -64,12 +64,12 @@ const std::map<int, AgentInterface *> &WorldImplementation::GetAgents() const
     return agentNetwork.GetAgents();
 }
 
-const std::list<const AgentInterface*>& WorldImplementation::GetRemovedAgents() const
+const AgentInterfaces& WorldImplementation::GetRemovedAgents() const
 {
     return agentNetwork.GetRemovedAgents();
 }
 
-const std::list<const AgentInterface*> WorldImplementation::GetRemovedAgentsInPreviousTimestep()
+const AgentInterfaces WorldImplementation::GetRemovedAgentsInPreviousTimestep()
 {
     return agentNetwork.GetRemovedAgentsInPreviousTimestep();
 }
@@ -365,7 +365,7 @@ RouteQueryResult<RelativeWorldView::Lanes> WorldImplementation::GetRelativeLanes
     return worldDataQuery.GetRelativeLanes(*roadMultiStream, startDistanceOnStream, laneId, range, includeOncoming);
 }
 
-RouteQueryResult<std::optional<int> > WorldImplementation::GetRelativeLaneId(const RoadGraph &roadGraph, RoadGraphVertex startNode, int laneId, double distance, std::map<std::string, GlobalRoadPosition> targetPosition) const
+RouteQueryResult<std::optional<int> > WorldImplementation::GetRelativeLaneId(const RoadGraph &roadGraph, RoadGraphVertex startNode, int laneId, double distance, GlobalRoadPositions targetPosition) const
 {
     const auto roadMultiStream = worldDataQuery.CreateRoadMultiStream(roadGraph, startNode);
     double startDistanceOnStream = roadMultiStream->GetPositionByVertexAndS(startNode, distance);
@@ -373,12 +373,12 @@ RouteQueryResult<std::optional<int> > WorldImplementation::GetRelativeLaneId(con
     return worldDataQuery.GetRelativeLaneId(*roadMultiStream, startDistanceOnStream, laneId, targetPosition);
 }
 
-RouteQueryResult<std::vector<const AgentInterface*> > WorldImplementation::GetAgentsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance, double backwardRange, double forwardRange) const
+RouteQueryResult<AgentInterfaces > WorldImplementation::GetAgentsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance, double backwardRange, double forwardRange) const
 {
     const auto laneMultiStream = worldDataQuery.CreateLaneMultiStream(roadGraph, startNode, laneId, startDistance);
     double startDistanceOnStream = laneMultiStream->GetPositionByVertexAndS(startNode, startDistance);
     const auto queryResult = worldDataQuery.GetObjectsOfTypeInRange<OWL::Interfaces::MovingObject>(*laneMultiStream, startDistanceOnStream - backwardRange, startDistanceOnStream + forwardRange);
-    RouteQueryResult<std::vector<const AgentInterface*>> result;
+    RouteQueryResult<AgentInterfaces> result;
     for (const auto& [node, objects]: queryResult)
     {
         result[node] = get_transformed<AgentInterface>(objects);
@@ -422,7 +422,7 @@ Position WorldImplementation::LaneCoord2WorldCoord(double distanceOnLane, double
     return worldDataQuery.GetPositionByDistanceAndLane(lane, distanceOnLane, offset);
 }
 
-std::map<std::string, GlobalRoadPosition> WorldImplementation::WorldCoord2LaneCoord(double x, double y, double heading) const
+GlobalRoadPositions WorldImplementation::WorldCoord2LaneCoord(double x, double y, double heading) const
 {
     return localizer.Locate({x,y}, heading);
 }
@@ -589,7 +589,7 @@ Position WorldImplementation::RoadCoord2WorldCoord(RoadPosition roadCoord, std::
         throw std::runtime_error(msg);
     }
 
-    std::list<RoadGeometryInterface*> roadGeometries = road->GetGeometries();
+    std::vector<RoadGeometryInterface*> roadGeometries = road->GetGeometries();
 
     return SceneryConverter::RoadCoord2WorldCoord(road, roadCoord.s, roadCoord.t, roadCoord.hdg);
 }
