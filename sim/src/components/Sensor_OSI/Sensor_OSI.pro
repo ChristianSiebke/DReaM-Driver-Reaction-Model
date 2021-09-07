@@ -14,7 +14,7 @@
 # module Sensor_OSI
 #-----------------------------------------------------------------------------/
 
-DEFINES += SENSOR_OBJECT_DETECTOR_LIBRARY
+DEFINES += SENSOR_OSI_LIBRARY
 CONFIG += OPENPASS_LIBRARY
 include(../../../global.pri)
 
