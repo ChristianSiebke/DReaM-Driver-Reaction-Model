@@ -9,18 +9,15 @@
   SPDX-License-Identifier: EPL-2.0
   ************************************************************
 
-.. _sim_install_guide:
+.. _sim_user_guide:
 
-Simulator Installation Guide
-============================
+Simulator 
+=========
 
-This guide summarizes all installation related topics, necessary to setup and build the |op| simulator (|release|).
-
-.. note:: The |op| simulator is also called |op| simulation core.
 
 .. toctree::
-   :caption: Installation
    :glob:
-   :maxdepth: 1
+   :maxdepth: 3
 
-   sim_installation_guide/installation/*
+   sim_user_guide/*
+

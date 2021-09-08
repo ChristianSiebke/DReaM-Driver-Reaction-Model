@@ -22,7 +22,7 @@ The following sections describe this restrictions and the process of integrating
 Basic Build Mechanics
 ---------------------
 
-The required steps to build the documentation are described in :ref:`sphinx`, provided by CMake files.
+The required steps to build the documentation are described in :ref:`download_and_install_openpass`, provided by CMake files using the build option ``WITH_GUI=ON``.
 Before building, a temporary copy of the original documentation is made.
 This temporary copy acts as *seam* for custom extension, as proprietary content is simply copied into the temporary folder (see below).
 This mechanism keeps contents clearly separated during development and allows easy transition from closed to open source if desired.
@@ -40,7 +40,7 @@ Note that this also makes sources more readable.
 
 **Example**
 
-.. literalinclude:: @OP_REL_ROOT@/doc/source/user_guide/sim_user_guide/input/scenery.rst
+.. literalinclude:: @OP_REL_ROOT@/doc/source/user_guide/configs/scenery.rst
    :start-at: OP_REL_SIM
    :lines: 1
 
@@ -80,7 +80,7 @@ openPASS as Submodule
 
    This diff highlights the important parts in comparison to the original ``PrepareDoc.cmake``, used in the open source documentation build:
 
-   .. literalinclude:: /advanced_topics/_static/custom_doc/PrepareDocCustom.cmake
+   .. literalinclude:: _static/custom_doc/PrepareDocCustom.cmake
       :diff: @OP_REL_ROOT@/doc/PrepareDoc.cmake
 
 #. **Add a ``doc`` CMake target to your custom build**
@@ -88,7 +88,7 @@ openPASS as Submodule
    To add your custom build target, the following ``CMakeLists.txt`` snippet can be used as template.
    Note the usage of the ``PrepareDocCustom.cmake``.
 
-   .. literalinclude:: /advanced_topics/_static/custom_doc/CMakeLists_doc.cmake
+   .. literalinclude:: _static/custom_doc/CMakeLists_doc.cmake
       :emphasize-lines: 23
 
 #. **Provide a config file for Sphinx**

@@ -1,6 +1,7 @@
 ..
   ************************************************************
   Copyright (c) 2021 ITK Engineering GmbH
+  Copyright (c) 2021 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 
   This program and the accompanying materials are made
   available under the terms of the Eclipse Public License 2.0
@@ -9,17 +10,18 @@
   SPDX-License-Identifier: EPL-2.0
   ************************************************************
 
-.. _result_visualization:
+.. _gui_plugins:
 
-Result Visualization
-====================
-
-.. image:: gui_user_guide/_static/images/plugin/timePlot/select.png
+GUI Plugins
+===========================
 
 .. toctree::
    :glob:
    :maxdepth: 1
 
-   gui_user_guide/statistics
-   gui_user_guide/timePlot
+   gui_user_guide/*
 
+Additionally, the following plugins are currently work in progress:
+
+      * agentConfiguration
+      * trafficSimulation

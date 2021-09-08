@@ -64,7 +64,7 @@ In other words, ``Repository_Run_000.csv`` will contain all moving objects, spaw
 **Example**
 
 .. csv-table::
-   :file: ../_static/Repository_Run_000.csv
+   :file: _static/Repository_Run_000.csv
    :header-rows: 1
    :delim: ;
 
