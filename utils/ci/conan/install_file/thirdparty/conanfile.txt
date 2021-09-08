@@ -19,5 +19,3 @@
 [generators]
  cmake
 
-[imports]
- . , * -> C:/OpenPASS/ThirdParty @
