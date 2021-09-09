@@ -87,7 +87,7 @@
   </ProfileGroup>
   <ProfileGroup Type="TrafficRules">
     <Profile Name="Germany">
-      <Double Key="OpenSpeedLimit" Value="infinity"/>
+      <Double Key="OpenSpeedLimit" Value="INF"/>
       <Bool Key="KeepToOuterLanes" Value="true"/>
       <Bool Key="DontOvertakeOnOuterLanes" Value="true"/>
       <Bool Key="FormRescueLane" Value="true"/>
