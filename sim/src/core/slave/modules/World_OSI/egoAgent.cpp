@@ -339,12 +339,12 @@ std::optional<double> EgoAgent::GetLaneCurvature(double distance, int relativeLa
 
 double EgoAgent::GetLaneDirection(int relativeLane) const
 {
-    return world->GetLaneWidth(GetRoadId(), GetLaneIdFromRelative(relativeLane), GetMainLocatePosition().roadPosition.s);
+    return world->GetLaneDirection(GetRoadId(), GetLaneIdFromRelative(relativeLane), GetMainLocatePosition().roadPosition.s);
 }
 
 std::optional<double> EgoAgent::GetLaneDirection(double distance, int relativeLane) const
 {
-    return world->GetLaneWidth(wayToTarget, rootOfWayToTargetGraph, GetLaneIdFromRelative(relativeLane), GetMainLocatePosition().roadPosition.s, distance).at(0);
+    return world->GetLaneDirection(wayToTarget, rootOfWayToTargetGraph, GetLaneIdFromRelative(relativeLane), GetMainLocatePosition().roadPosition.s, distance).at(0);
 }
 
 const GlobalRoadPosition& EgoAgent::GetMainLocatePosition() const
