@@ -83,7 +83,8 @@ OsmpFmuHandler::OsmpFmuHandler(fmu_check_data_t *cdata, WorldInterface *world, A
     fmuVariableValues(fmuVariableValues),
     fmuVariables(fmuVariables),
     previousPosition(agent->GetPositionX(), agent->GetPositionY()),
-    agentIdString(std::to_string(agent->GetId()))
+    agentIdString(std::to_string(agent->GetId())),
+    bb_center_offset_x(agent->GetVehicleModelParameters().boundingBoxCenter.x)
 {
     for (const auto& [key, value] : parameters->GetParametersString())
     {
@@ -401,8 +402,8 @@ void OsmpFmuHandler::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterfa
 
             acceleration = dynamicState.acceleration();
             velocity = dynamicState.velocity();
-            positionX = dynamicState.position_x();
-            positionY = dynamicState.position_y();
+            positionX = dynamicState.position_x() - bb_center_offset_x * std::cos(yaw);
+            positionY = dynamicState.position_y() - bb_center_offset_x * std::sin(yaw);
             yaw = dynamicState.heading_angle();
         }
         else if (trafficUpdateVariable.has_value())
@@ -413,10 +414,9 @@ void OsmpFmuHandler::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterfa
             roll = baseMoving->orientation().roll();
             acceleration = baseMoving->acceleration().x() * std::cos(yaw) + baseMoving->acceleration().y() * std::sin(yaw);
             centripetalAcceleration = -baseMoving->acceleration().x() * std::sin(yaw) + baseMoving->acceleration().y() * std::cos(yaw);
-            positionX = baseMoving->position().x();
-            positionY = baseMoving->position().y();
+            positionX = baseMoving->position().x() - bb_center_offset_x * std::cos(yaw);
+            positionY = baseMoving->position().y() - bb_center_offset_x * std::sin(yaw);
             yawRate = baseMoving->orientation_rate().yaw();
-
         }
         else
         {

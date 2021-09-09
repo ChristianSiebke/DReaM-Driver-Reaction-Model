@@ -942,8 +942,8 @@ private:
     const Interfaces::Lane* leftLane;
     const Interfaces::Lane* rightLane;
     double length{0.0};
-    bool leftLaneIsDummy{section == nullptr};
-    bool rightLaneIsDummy{section == nullptr};
+    bool leftLaneIsDummy{true};
+    bool rightLaneIsDummy{true};
 };
 
 class InvalidLane : public Lane

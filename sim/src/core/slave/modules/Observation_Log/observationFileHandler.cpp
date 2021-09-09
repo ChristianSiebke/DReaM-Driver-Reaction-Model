@@ -53,7 +53,8 @@ void ObservationFileHandler::WriteStartOfFile(const std::string& frameworkVersio
 
     RemoveCsvCyclics(folder);
 
-    xmlFile = std::make_unique<QTemporaryFile>(folder + "/simulationOutput_XXXXXX.tmp");
+    auto fileNameWithoutType = finalFilename.split(".").front();
+    xmlFile = std::make_unique<QTemporaryFile>(folder + "/" + fileNameWithoutType + "_XXXXXX.tmp");
     xmlFile->setAutoRemove(false);
     xmlFile->fileName();   // required for setAutoRemove to be applied, see https://doc.qt.io/qt-5/qtemporaryfile.html#setAutoRemove
 
@@ -112,11 +113,13 @@ void ObservationFileHandler::WriteRun([[maybe_unused]] const RunResultInterface&
 
     if (writeCyclicsToCsv)
     {
-        QString csvFilename = "Cyclics_Run_" + runPrefix + QString::number(runNumber) + ".csv";
+        const QString csvFilename = "Cyclics_Run_" + runPrefix + QString::number(runNumber) + ".csv";
 
         AddReference(csvFilename);
 
-        WriteCsvCyclics(csvFilename, cyclics);
+        const QString path = folder + QDir::separator() + csvFilename;
+
+        WriteCsvCyclics(path, cyclics);
     }
     else
     {
@@ -267,14 +270,14 @@ void ObservationFileHandler::AddSensor(const std::string& agentId, const::std::s
     xmlFileStream->writeEndElement();
 }
 
-void ObservationFileHandler::AddHeader(ObservationCyclics& cyclics)
+void ObservationFileHandler::AddHeader(const ObservationCyclics &cyclics)
 {
     xmlFileStream->writeStartElement(outputTags.HEADER);
     xmlFileStream->writeCharacters(QString::fromStdString(cyclics.GetHeader()));
     xmlFileStream->writeEndElement();
 }
 
-void ObservationFileHandler::AddSamples(ObservationCyclics& cyclics)
+void ObservationFileHandler::AddSamples(const ObservationCyclics& cyclics)
 {
     // write SamplesTag
     xmlFileStream->writeStartElement(outputTags.SAMPLES);
@@ -322,12 +325,10 @@ void ObservationFileHandler::RemoveCsvCyclics(QString directory)
     }
 }
 
-void ObservationFileHandler::WriteCsvCyclics(QString filename, ObservationCyclics& cyclics)
+void ObservationFileHandler::WriteCsvCyclics(const QString& filepath, const ObservationCyclics &cyclics)
 {
-    QString path = folder + QDir::separator() + filename;
-
-    csvFile = std::make_unique<QFile>(path);
-    if (!csvFile->open(QIODevice::WriteOnly | QIODevice::Text))
+    QFile csvFile{filepath};
+    if (!csvFile.open(QIODevice::WriteOnly | QIODevice::Text))
     {
         std::stringstream ss;
         ss << COMPONENTNAME << " could not create file: " << tmpPath.toStdString();
@@ -335,7 +336,7 @@ void ObservationFileHandler::WriteCsvCyclics(QString filename, ObservationCyclic
         throw std::runtime_error(ss.str());
     }
 
-    QTextStream stream(csvFile.get());
+    QTextStream stream(&csvFile);
 
     stream << "Timestep, " << QString::fromStdString(cyclics.GetHeader()) << '\n';
 
@@ -347,9 +348,9 @@ void ObservationFileHandler::WriteCsvCyclics(QString filename, ObservationCyclic
         ++timeStepNumber;
     }
 
-    csvFile->flush();
+    csvFile.flush();
 
-    csvFile->close();
+    csvFile.close();
 }
 
 void ObservationFileHandler::WriteEntities(const QString tag, const openpass::type::EntityIds &entities, bool mandatory)

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 in-tech GmbH
+* Copyright (c) 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -466,3 +466,62 @@ TEST(EgoAgent_Test, GetWorldPosition_NextRoadAgainstThenInOdDirection)
     ASSERT_THAT(result.xPos, Eq(1));
     ASSERT_THAT(result.yPos, Eq(2));
 }
+
+struct GetLaneIdFromRelative_Data
+{
+    bool inOdDirection;
+    int ownLaneId;
+    int relativeLane;
+    int expectedLaneId;
+};
+
+class GetLaneIdFromRelativeTest : public::testing::TestWithParam<GetLaneIdFromRelative_Data>
+{};
+
+TEST_P(GetLaneIdFromRelativeTest, CalculatesCorrectLaneId)
+{
+    const auto& data = GetParam();
+
+    NiceMock<FakeAgent> fakeAgent;
+    NiceMock<FakeWorld> fakeWorld;
+
+    ObjectPosition agentPosition{{},{{"Road1", GlobalRoadPosition{"Road1", data.ownLaneId, 0, 0, 0}}},{}};
+    ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(ReturnRef(agentPosition));
+    std::vector<std::string> roads{"Road1"};
+    ON_CALL(fakeAgent, GetRoads(MeasurementPoint::Front)).WillByDefault(Return(roads));
+    RoadGraph roadGraph;
+    RoadGraphVertex root = add_vertex(RouteElement{"Road1", data.inOdDirection}, roadGraph);
+
+    EgoAgent egoAgent {&fakeAgent, &fakeWorld};
+    egoAgent.SetRoadGraph(std::move(roadGraph), root, root);
+
+    auto result = egoAgent.GetLaneIdFromRelative(data.relativeLane);
+
+    ASSERT_THAT(result, Eq(data.expectedLaneId));
+}
+
+INSTANTIATE_TEST_SUITE_P(InOdDirection, GetLaneIdFromRelativeTest, ::testing::Values(
+GetLaneIdFromRelative_Data{true, -1, 0, -1},
+GetLaneIdFromRelative_Data{true, -1, 1, 1},
+GetLaneIdFromRelative_Data{true, -1, 2, 2},
+GetLaneIdFromRelative_Data{true, -1, -1, -2},
+GetLaneIdFromRelative_Data{true, -2, 1, -1},
+GetLaneIdFromRelative_Data{true, -2, 2, 1},
+GetLaneIdFromRelative_Data{true, 1, 0, 1},
+GetLaneIdFromRelative_Data{true, 1, 1, 2},
+GetLaneIdFromRelative_Data{true, 1, -1, -1},
+GetLaneIdFromRelative_Data{true, 2, -3, -2}
+));
+
+INSTANTIATE_TEST_SUITE_P(AgainstOdDirection, GetLaneIdFromRelativeTest, ::testing::Values(
+GetLaneIdFromRelative_Data{false, -1, 0, -1},
+GetLaneIdFromRelative_Data{false, -1, 1, -2},
+GetLaneIdFromRelative_Data{false, -1, -1, 1},
+GetLaneIdFromRelative_Data{false, -1, -2, 2},
+GetLaneIdFromRelative_Data{false, -2, -1, -1},
+GetLaneIdFromRelative_Data{false, -2, -2, 1},
+GetLaneIdFromRelative_Data{false, 1, 0, 1},
+GetLaneIdFromRelative_Data{false, 1, 1, -1},
+GetLaneIdFromRelative_Data{false, 1, -1, 2},
+GetLaneIdFromRelative_Data{false, 2, 3, -2}
+));
