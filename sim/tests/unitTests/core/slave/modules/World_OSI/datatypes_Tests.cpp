@@ -167,9 +167,10 @@ TEST(TrafficSigns_GetSpecification, GivenSignWithoutSupplementarySigns_ReturnsCo
 
     OWL::Implementation::TrafficSign sign{&osiSign};
 
-    const auto spec = sign.GetSpecification(0.0);
+    const auto spec = sign.GetSpecification(1.1);
 
     ASSERT_THAT(spec.value, DoubleEq(5.0));
+    ASSERT_THAT(spec.relativeDistance, DoubleEq(1.1));
     ASSERT_THAT(spec.supplementarySigns, SizeIs(0));
 }
 
@@ -186,14 +187,16 @@ TEST(TrafficSigns_GetSpecification, GivenSignWithOneSupplementarySign_ReturnsCor
 
     OWL::Implementation::TrafficSign sign{&osiSign};
 
-    const auto spec = sign.GetSpecification(0.0);
+    const auto spec = sign.GetSpecification(1.1);
 
     ASSERT_THAT(spec.value, DoubleEq(6.0));
+    ASSERT_THAT(spec.relativeDistance, DoubleEq(1.1));
     ASSERT_THAT(spec.supplementarySigns, SizeIs(1));
 
     auto supplementary = spec.supplementarySigns.begin();
 
     EXPECT_THAT(supplementary->type, Eq(CommonTrafficSign::Type::DistanceIndication));
+    ASSERT_THAT(supplementary->relativeDistance, DoubleEq(1.1));
     EXPECT_THAT(supplementary->value, Eq(7.0));
 }
 
@@ -213,17 +216,20 @@ TEST(TrafficSigns_GetSpecification, GivenSignWithTwoSupplementarySigns_ReturnsCo
 
     OWL::Implementation::TrafficSign sign{&osiSign};
 
-    const auto spec = sign.GetSpecification(0.0);
+    const auto spec = sign.GetSpecification(1.1);
 
     ASSERT_THAT(spec.value, DoubleEq(8.0));
+    ASSERT_THAT(spec.relativeDistance, DoubleEq(1.1));
     ASSERT_THAT(spec.supplementarySigns, SizeIs(2));
 
     auto supplementary1 = spec.supplementarySigns.begin();
     auto supplementary2 = std::next(supplementary1);
 
     EXPECT_THAT(supplementary1->type, Eq(CommonTrafficSign::Type::DistanceIndication));
+    ASSERT_THAT(supplementary1->relativeDistance, DoubleEq(1.1));
     EXPECT_THAT(supplementary1->value, Eq(9.0));
     EXPECT_THAT(supplementary2->type, Eq(CommonTrafficSign::Type::DistanceIndication));
+    ASSERT_THAT(supplementary2->relativeDistance, DoubleEq(1.1));
     EXPECT_THAT(supplementary2->value, Eq(10.0));
 }
 

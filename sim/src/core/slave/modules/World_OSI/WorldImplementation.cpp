@@ -326,12 +326,20 @@ RouteQueryResult<Obstruction> WorldImplementation::GetObstruction(const RoadGrap
     return worldDataQuery.GetObstruction(*laneMultiStream, ownPosition.roadPosition.t, otherPosition, objectCorners, mainLaneLocator);
 }
 
-RouteQueryResult<RelativeWorldView::Lanes> WorldImplementation::GetRelativeLanes(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, double range) const
+RouteQueryResult<RelativeWorldView::Lanes> WorldImplementation::GetRelativeLanes(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, double range, bool includeOncoming) const
 {
     const auto roadMultiStream = worldDataQuery.CreateRoadMultiStream(roadGraph, startNode);
     double startDistanceOnStream = roadMultiStream->GetPositionByVertexAndS(startNode, distance);
 
-    return worldDataQuery.GetRelativeLanes(*roadMultiStream, startDistanceOnStream, laneId, range);
+    return worldDataQuery.GetRelativeLanes(*roadMultiStream, startDistanceOnStream, laneId, range, includeOncoming);
+}
+
+RouteQueryResult<std::optional<int> > WorldImplementation::GetRelativeLaneId(const RoadGraph &roadGraph, RoadGraphVertex startNode, int laneId, double distance, std::map<std::string, GlobalRoadPosition> targetPosition) const
+{
+    const auto roadMultiStream = worldDataQuery.CreateRoadMultiStream(roadGraph, startNode);
+    double startDistanceOnStream = roadMultiStream->GetPositionByVertexAndS(startNode, distance);
+
+    return worldDataQuery.GetRelativeLaneId(*roadMultiStream, startDistanceOnStream, laneId, targetPosition);
 }
 
 RouteQueryResult<std::vector<const AgentInterface*> > WorldImplementation::GetAgentsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance, double backwardRange, double forwardRange) const

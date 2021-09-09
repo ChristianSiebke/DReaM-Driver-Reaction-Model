@@ -72,10 +72,15 @@ JointsBuilder& JointsBuilder::CalculatePoints()
 
 JointsBuilder& JointsBuilder::CalculateHeadings()
 {
-    for (auto joint = joints.begin(); joint < joints.end() - 1; joint++)
+    for (auto joint = joints.begin(); joint < joints.end(); joint++)
     {
         for (auto& [laneId, laneJoint] : joint->laneJoints)
         {
+            if (joint == joints.end() - 1)
+            {
+                laneJoint.heading = (joints.end() - 2)->laneJoints.at(laneId).heading;
+                continue;
+            }
             auto& currentCenter = laneJoint.center;
             auto& nextCenter = (joint + 1)->laneJoints.at(laneId).center;
             auto vector = nextCenter - currentCenter;
