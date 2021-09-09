@@ -28,5 +28,5 @@ RUN apt-get -qq update && apt-get -qq dist-upgrade && apt-get install -qq -y --n
     qtbase5-dev \
     && apt-get -qq clean
 
-RUN pip install breathe exhale junitparser lxml pandas pytest sphinx sphinx-rtd-theme sphinx-tabs sphinxcontrib-spelling
+RUN pip install breathe exhale junitparser lxml pandas pytest sphinx sphinx-rtd-theme sphinx-tabs sphinxcontrib-spelling conan
 
