@@ -10,7 +10,6 @@
 
 #include "fmuWrapper.h"
 
-#include <boost/filesystem.hpp>
 #include <cstdint>
 #include <iomanip>
 #include <memory>
@@ -30,9 +29,6 @@ std::string log_prefix(const std::string &agentIdString, const std::string &comp
 {
     return "Agent " + agentIdString + ": Component " + componentName + ": ";
 }
-
-
-namespace fs = boost::filesystem;
 
 AlgorithmFmuWrapperImplementation::AlgorithmFmuWrapperImplementation(std::string componentName,
                                                                      bool isInit,
@@ -124,23 +120,23 @@ AlgorithmFmuWrapperImplementation::AlgorithmFmuWrapperImplementation(std::string
 
 void AlgorithmFmuWrapperImplementation::SetOutputPath()
 {
-    fs::path fmuPath = cdata.FMUPath;
+    std::filesystem::path fmuPath = cdata.FMUPath;
     const std::string& resultsPath = GetParameters()->GetRuntimeInformation().directories.output;
-    fs::path agentOutputPath = fs::path(resultsPath) / "FmuWrapper" / ("Agent" + agentIdString) / fmuPath.filename().replace_extension().string();
+    std::filesystem::path agentOutputPath = std::filesystem::path(resultsPath) / "FmuWrapper" / ("Agent" + agentIdString) / fmuPath.filename().replace_extension().string();
     outputPath = agentOutputPath.string();
 }
 
 void AlgorithmFmuWrapperImplementation::SetupFilenames()
 {
-    fs::path fmuPath(FMU_configPath);
+    std::filesystem::path fmuPath(FMU_configPath);
 
     if (!fmuPath.is_absolute())
     {
-        fs::path configBasePath(GetParameters()->GetRuntimeInformation().directories.configuration);
+        std::filesystem::path configBasePath(GetParameters()->GetRuntimeInformation().directories.configuration);
         fmuPath = configBasePath / fmuPath;
     }
 
-    THROWIFFALSE(fs::exists(fmuPath), "FMU file '" + fmuPath.string() + "' doesn't exist");
+    THROWIFFALSE(std::filesystem::exists(fmuPath), "FMU file '" + fmuPath.string() + "' doesn't exist");
 
     FMU_absPath = fmuPath.string();         // keep string for context struct
     cdata.FMUPath =  FMU_absPath.c_str();   // set FMU absolute path in context struct
@@ -158,7 +154,7 @@ void AlgorithmFmuWrapperImplementation::SetupFilenames()
 
 void AlgorithmFmuWrapperImplementation::SetupLog()
 {
-    fs::path logPath{outputPath};
+    std::filesystem::path logPath{outputPath};
 
     MkDirOrThrowError(logPath);
 
@@ -173,7 +169,7 @@ void AlgorithmFmuWrapperImplementation::SetupLog()
 
 void AlgorithmFmuWrapperImplementation::SetupOutput()
 {
-    fs::path csvPath{outputPath};
+    std::filesystem::path csvPath{outputPath};
 
     MkDirOrThrowError(outputPath);
 
@@ -188,7 +184,7 @@ void AlgorithmFmuWrapperImplementation::SetupOutput()
 
 void AlgorithmFmuWrapperImplementation::SetupUnzip(const bool individualUnzip)
 {
-    fs::path unzipRoot = fs::temp_directory_path() / fs::unique_path();
+    std::filesystem::path unzipRoot = std::filesystem::temp_directory_path() / std::tmpnam(nullptr);
 
     if (individualUnzip)
     {
@@ -593,13 +589,13 @@ void AlgorithmFmuWrapperImplementation::HandleFmiStatus(const jm_status_enu_t& f
         }
 }
 
-void AlgorithmFmuWrapperImplementation::MkDirOrThrowError(const fs::path& path)
+void AlgorithmFmuWrapperImplementation::MkDirOrThrowError(const std::filesystem::path& path)
 {
     try
     {
-        fs::create_directories(path);
+        std::filesystem::create_directories(path);
     }
-    catch(fs::filesystem_error& e)
+    catch(std::filesystem::filesystem_error& e)
     {
         LOGERRORANDTHROW(log_prefix(agentIdString, componentName) + "could not create folder " + path.string() + ": " + e.what());
     }

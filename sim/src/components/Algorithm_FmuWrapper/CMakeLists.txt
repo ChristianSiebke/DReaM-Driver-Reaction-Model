@@ -34,7 +34,6 @@ add_openpass_target(
 
   LIBRARIES
     Qt5::Core
-    Boost::filesystem
     ${FMILibrary_LIBRARY_DIR}
     Common
 
