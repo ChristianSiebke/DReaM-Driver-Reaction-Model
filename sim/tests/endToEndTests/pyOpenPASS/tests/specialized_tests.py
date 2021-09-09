@@ -64,7 +64,7 @@ def run(config_under_test, slave_config, subdir):
 class TestSpecialized:
     @staticmethod
     def query_result(base_run, events, run_id, query):
-        output = query_executor.prepare_output(base_run)
+        output = query_executor.prepare_output(base_run, config.MetaInfo.datatypes)
         return query_executor.query_output(output, events, run_id, query)
 
     @staticmethod
