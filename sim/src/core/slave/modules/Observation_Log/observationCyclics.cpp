@@ -14,7 +14,7 @@
 
 #include "observationCyclics.h"
 
-std::string ObservationCyclics::GetHeader()
+std::string ObservationCyclics::GetHeader() const
 {
     std::string header;
     for (auto it = samples.begin(); it != samples.end(); ++it)
@@ -29,7 +29,7 @@ std::string ObservationCyclics::GetHeader()
     return header;
 }
 
-std::string ObservationCyclics::GetSamplesLine(std::uint32_t timeStepNumber)
+std::string ObservationCyclics::GetSamplesLine(std::uint32_t timeStepNumber) const
 {
     std::string sampleLine;
     for (auto it = samples.begin(); it != samples.end(); ++it)
