@@ -1,4 +1,7 @@
 {
+    "datatypes": {
+        "DISABLED_Sensor0_DetectedAgents": "string"
+    },
     "scopes": {
         "generic": {
             "baseConfig": {
@@ -6,6 +9,7 @@
                 "invocations": 1
             },
             "configurations": [
+                "ADAS_AEB_CutIn",
                 "ADAS_AEB_PreventingCollisionWithObstacle",
                 "ADAS_AEB_PreventingCollisionWithObstacleInCurve",
                 "AEB",
@@ -64,6 +68,34 @@
             },
             "configurations": [
                 "ADAS_AEB_PreventingCollisionWithObstacleInCurve"
+            ]
+        },
+        "ADAS_AEB_CutIn_Triggers": {
+            "baseConfig": {
+                "duration": 30,
+                "invocations": 100
+            },
+            "specialized": {
+                "description": "AEB triggers",
+                "query": "count(AgentId | AgentId == 0  and #(Algorithm_AutonomousEmergencyBraking):ComponentState=='Acting') >= 1",
+                "success_rate": 0.9
+            },
+            "configurations": [
+                "ADAS_AEB_CutIn"
+            ]
+        },
+        "ADAS_AEB_CutIn_NoCollision": {
+            "baseConfig": {
+                "duration": 30,
+                "invocations": 100
+            },
+            "specialized": {
+                "description": "AEB prevents collision",
+                "query": "count(AgentId | AgentId == 0 and #(Collision) >= 1) == 0",
+                "success_rate": 0.9
+            },
+            "configurations": [
+                "ADAS_AEB_CutIn"
             ]
         },
         "ByEntityCondition":
