@@ -17,18 +17,7 @@
         </AgentProfile>
     </AgentProfiles>
     <VehicleProfiles>
-        <VehicleProfile Name="Agent_0">
-            <Model Name="Agent_0"/>
-            <Components/>
-            <Sensors/>
-        </VehicleProfile>
-        <VehicleProfile Name="Agent_1">
-            <Model Name="Agent_1"/>
-            <Components/>
-            <Sensors/>
-        </VehicleProfile>
     </VehicleProfiles>
     <ProfileGroup Type="Driver">
-        <Profile Name="Regular"/>
     </ProfileGroup>
 </Profiles>
