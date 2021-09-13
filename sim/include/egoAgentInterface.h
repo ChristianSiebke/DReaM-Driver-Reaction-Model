@@ -127,13 +127,6 @@ public:
     //! \return lanes relative to agent
     virtual RelativeWorldView::Lanes GetRelativeLanes(double range, int relativeLane = 0, bool includeOncoming = true) const = 0;
 
-    //! Returns the relative lane of the ReferencePoint or MainLocatePoint of another object
-    //!
-    //! \param object   other object
-    //! \param mp       either Front for MainLocatePoint or Reference (Rear not supported)
-    //! \return relative lane id
-    virtual std::optional<int> GetRelativeLaneId(const WorldObjectInterface* object, MeasurementPoint mp) const = 0;
-
     virtual RelativeWorldView::Junctions GetRelativeJunctions(double range) const = 0;
 
     //! Returns all WorldObjects around the agent inside the specified range on the specified

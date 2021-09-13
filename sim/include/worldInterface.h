@@ -553,8 +553,7 @@ public:
     //! Calculates the obstruction of an agent with another object i.e. how far to left or the right the object is from my position
     //! For more information see the [markdown documentation](\ref dev_framework_modules_world_getobstruction)
     //!
-    //! \param roadGraph        road network as viewed from agent
-    //! \param startNode        position on roadGraph of agent
+    //! \param route            route of the agent
     //! \param ownPosition      position of the agent
     //! \param otherPosition    position of the other object
     //! \param objectCorners    corners of the other object
@@ -564,8 +563,8 @@ public:
 
     //! Returns all traffic signs valid for a lane inside the range
     //!
-    //! \param roadGraph        road network as viewed from agent
-    //! \param startNode        position on roadGraph of agent
+    //! \param route            route to search along
+    //! \param roadId           OpenDrive Id of the road
     //! \param laneId           OpenDrive Id of the lane
     //! \param startDistance    s coordinate
     //! \param searchRange      range of search (can also be negative)
@@ -575,8 +574,8 @@ public:
 
     //! Returns all road markings valid for a lane inside the range
     //!
-    //! \param roadGraph        road network as viewed from agent
-    //! \param startNode        position on roadGraph of agent
+    //! \param route            route to search along
+    //! \param roadId           OpenDrive Id of the road
     //! \param laneId           OpenDrive Id of the lane
     //! \param startDistance    s coordinate
     //! \param searchRange      range of search
@@ -597,8 +596,7 @@ public:
 
     //! Retrieves all lane markings on the given position on the given side of the lane inside the range
     //!
-    //! \param roadGraph        road network as viewed from agent
-    //! \param startNode        position on roadGraph of agent
+    //! \param roadId           OpenDrive Id of the road
     //! \param laneId           OpenDrive Id of the lane
     //! \param startDistance    s coordinate
     //! \param range            search range
@@ -607,8 +605,8 @@ public:
 
     //! Returns the relative distances (start and end) and the connecting road id of all junctions on the route in range
     //!
-    //! \param roadGraph        road network as viewed from agent
-    //! \param startNode        position on roadGraph of agent
+    //! \param route            route of the agent
+    //! \param roadId           OpenDrive Id of the road
     //! \param startDistance    start s coordinate on the road
     //! \param range            range of search
     //! \return information about all junctions in range
@@ -619,24 +617,14 @@ public:
     //! driving direction of the lane is the same as the direction of the route. If the ego lane prematurely ends, then
     //! the further lane ids are relative to the middle of the road.
     //!
-    //! \param roadGraph        road network as viewed from agent
-    //! \param startNode        position on roadGraph of agent
+    //! \param route            route of the agent
+    //! \param roadId           OpenDrive Id of the road
     //! \param laneId           OpenDrive Id of the lane
     //! \param distance         start s coordinate on the road
     //! \param range            range of search
     //! \param includeOncoming  indicating whether oncoming lanes should be included
     //! \return information about all lanes in range
     virtual RouteQueryResult<RelativeWorldView::Lanes> GetRelativeLanes(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, double range, bool includeOncoming = true) const = 0;
-
-    //! Returns the relative lane id of the located position of a point relative to the given position
-    //!
-    //! \param roadGraph        road network as viewed from agent
-    //! \param startNode        position on roadGraph of agent
-    //! \param laneId           OpenDrive Id of the lane
-    //! \param distance         own s coordinate
-    //! \param targetPosition   position of queried point
-    //! \return lane id relative to own position
-    virtual RouteQueryResult<std::optional<int>> GetRelativeLaneId(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, std::map<std::string, GlobalRoadPosition> targetPosition) const = 0;
 
     //! Returns all possible connections on the junction, that an agent has when coming from the specified road
     //!
