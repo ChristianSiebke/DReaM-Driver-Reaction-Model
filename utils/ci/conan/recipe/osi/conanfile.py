@@ -1,5 +1,6 @@
 ################################################################################
 # Copyright (c) 2021 ITK Engineering GmbH
+#		        2021 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 #
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
@@ -29,10 +30,6 @@ class OsiConan(ConanFile):
     def configure(self):
         if self.settings.os == "Linux": #For Windows it is required that Protobuf is installed via pacman or pip in MSYS2
             self.generators = "cmake_find_package", "cmake_paths"
-    
-    def requirements(self):
-        if self.settings.os == "Linux":
-            self.requires("protobuf/3.11.4")
 
     def source(self):
         git = tools.Git(folder="osi3")
@@ -45,18 +42,17 @@ class OsiConan(ConanFile):
                                 'include(${CMAKE_BINARY_DIR}/conan_paths.cmake)\n' +
                                 'include_directories(${CONAN_PROTOBUF_ROOT}/include)\n')
 
+        self.run("find . -maxdepth 1 -name '*.proto' -exec sed -i '2i option cc_enable_arenas = true;' {} \;", win_bash=True, cwd="osi3")
+
     def build(self):
         cmake = CMake(self)
-        cmake.configure(source_folder="osi3")
+        cmake.configure(source_folder="osi3",
+                        defs={"CMAKE_INSTALL_PREFIX":"./temp-deploy"})
         cmake.build()
-        #cmake.install()
+        cmake.install() # cmake stays in charge of install step logic
 
     def package(self):
-        self.copy("*.h", dst="include/osi3")
-        self.copy("*.dll", dst="lib/osi3", keep_path=False)
-        self.copy("*.lib", dst="lib/osi3", keep_path=False)
-        self.copy("*.a", dst="lib/osi3", keep_path=False)
-        self.copy("libopen_simulation_interface.dll", dst="lib", keep_path=False)
+        self.copy("*", src="temp-deploy")
 
     def package_info(self):
         self.cpp_info.libs = ["osi3"]

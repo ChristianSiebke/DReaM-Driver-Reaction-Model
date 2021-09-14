@@ -1,5 +1,6 @@
 ################################################################################
 # Copyright (c) 2021 ITK Engineering GmbH
+#		        2021 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 #
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
@@ -13,6 +14,8 @@
 ################################################################################
 
 from conans import ConanFile, CMake, tools
+from pathlib import Path
+import shutil
 
 class OpenpassConan(ConanFile):
     name = "openpass"
@@ -34,11 +37,11 @@ class OpenpassConan(ConanFile):
             del self.options.fPIC   
 
     def requirements(self):
-        if self.options.Gui_only == False:
+        #if self.options.Gui_only == False:
             #self.requires("boost/1.76.0@openpass/testing")
             #self.requires("protobuf/3.15.5")
-            self.requires("OSI/3.2.0@openpass/testing")
-            self.requires("FMILibrary/2.0.3@openpass/testing")
+            self.requires("OSI/3.2.0")
+            self.requires("FMILibrary/2.0.3")
             #self.requires("gtest/1.10.0")
     
     def imports(self):
@@ -50,15 +53,19 @@ class OpenpassConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(defs={"CMAKE_PREFIX_PATH": "./ThirdParty"})
+        cmake.configure(defs={"CMAKE_PREFIX_PATH":"./ThirdParty",
+                              "CMAKE_INSTALL_PREFIX":"./temp-deploy",
+                              "CMAKE_C_COMPILER":"gcc-10",
+                              "CMAKE_CXX_COMPILER":"g++-10",
+                              "WITH_GUI":"OFF",
+                              "INSTALL_EXTRA_RUNTIME_DEPS":"ON"})
         cmake.build()
+        self.run("make doc", win_bash=True)
+        cmake.install() # cmake stays in charge of install step logic
 
     def package(self):
-        self.copy("*.exe", dst="bin", keep_path=False)
-        self.copy("*.dll", dst="bin/lib", keep_path=False)
-        self.copy("*.a", dst="bin/lib", keep_path=False)
-        self.copy("*.so", dst="bin/lib", keep_path=False)
-        self.copy("*.html", dst="doc")
+        self.copy("*", src="temp-deploy", excludes=["bin/*"])
+        self.copy("*", src="temp-deploy/bin")
 
     def package_info(self):
         self.cpp_info.libs = ["openpass"]

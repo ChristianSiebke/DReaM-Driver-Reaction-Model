@@ -1,5 +1,6 @@
 ################################################################################
 # Copyright (c) 2021 ITK Engineering GmbH
+#		        2021 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 #
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
@@ -38,15 +39,16 @@ class FmiConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.configure(source_folder="fmi",
-                        defs={"FMILIB_BUILD_STATIC_LIB":"OFF",
+                        defs={"FMILIB_INSTALL_PREFIX":"./temp-deploy",
+                              "FMILIB_BUILD_STATIC_LIB":"OFF",
                               "FMILIB_BUILD_SHARED_LIB":"ON"})
         if self.settings.os == "Linux":
             tools.patch(patch_file="fmi-library-2.0.3-fixes.patch")
         cmake.build()
-        cmake.install()
+        cmake.install() # cmake stays in charge of install step logic
 
     def package(self):
-        self.copy("*", src="../install")
+        self.copy("*", src="temp-deploy")
 
     def package_info(self):
         self.cpp_info.libs = ["fmi"]
