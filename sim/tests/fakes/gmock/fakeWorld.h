@@ -101,7 +101,6 @@ class FakeWorld : public WorldInterface
     MOCK_CONST_METHOD5(GetDistanceBetweenObjects, RouteQueryResult<LongitudinalDistance> (const RoadGraph& roadGraph, RoadGraphVertex startNode, const ObjectPosition&, const std::optional<double>, const ObjectPosition&));
     MOCK_CONST_METHOD4(GetRelativeJunctions, RouteQueryResult<RelativeWorldView::Junctions> (const RoadGraph& roadGraph, RoadGraphVertex startNode, double startDistance, double range));
     MOCK_CONST_METHOD6(GetRelativeLanes, RouteQueryResult<RelativeWorldView::Lanes> (const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, double range, bool includeOncoming));
-    MOCK_CONST_METHOD5(GetRelativeLaneId, RouteQueryResult<std::optional<int>> (const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, std::map<std::string, GlobalRoadPosition> targetPosition));
     MOCK_CONST_METHOD2(GetRoadGraph, std::pair<RoadGraph, RoadGraphVertex>(const RouteElement& start, int maxDepth));
     MOCK_CONST_METHOD1(GetEdgeWeights, std::map<RoadGraphEdge, double>(const RoadGraph& roadGraph));
 };

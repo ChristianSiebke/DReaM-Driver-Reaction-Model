@@ -915,7 +915,7 @@ std::map<int, OWL::Id> WorldDataQuery::AddLanesOfSection(const OWL::Interfaces::
             continue;
         }
         int relativeLaneId = inStreamDirection ? (laneId - currentOwnLaneId) : (currentOwnLaneId - laneId);
-        bool differentSigns = currentOwnLaneId * laneId < 0;
+        bool differentSigns = (currentOwnLaneId * laneId < 0) && currentOwnLaneId != 0;
         if (differentSigns)
         {
             relativeLaneId += (relativeLaneId > 0) ? -1 : 1;
@@ -984,97 +984,6 @@ RouteQueryResult<RelativeWorldView::Lanes> WorldDataQuery::GetRelativeLanes(cons
             relativeLanes.push_back(laneInterval);
         }
         return std::make_tuple(relativeLanes, previousSectionLaneIds);
-    }},
-    {},
-    {},
-    worldData);
-}
-
-RouteQueryResult<std::optional<int>> WorldDataQuery::GetRelativeLaneId(const RoadMultiStream &roadStream, double ownPosition, int ownLaneId, std::map<std::string, GlobalRoadPosition> targetPosition) const
-{
-    std::optional<int> currentOwnLaneId;
-    std::optional<int> currentTargetLaneId;
-    return roadStream.Traverse<std::optional<int>, std::map<int, OWL::Id>>(
-     RoadMultiStream::TraversedFunction<std::optional<int>, std::map<int, OWL::Id>>{[&](const auto& road, const auto& previousResult, const auto& previousLaneIds)->std::tuple<std::optional<int>, std::map<int, OWL::Id>>
-    {
-        if (previousResult.has_value())
-        {
-            return std::make_tuple(previousResult, previousLaneIds);
-        }
-        const auto& roadId = road.element->GetId();
-        auto positionOnRoad = helper::map::query(targetPosition, roadId);
-        auto streamPosition = road.GetStreamPosition(positionOnRoad->roadPosition.s);
-        auto sections = road().GetSections();
-        if (!road.inStreamDirection)
-        {
-            sections.reverse();
-        }
-        std::map<int, OWL::Id> previousSectionLaneIds{previousLaneIds};
-        for (const auto& section : sections)
-        {
-            const double sectionStart = road.GetStreamPosition(section->GetSOffset() + (road.inStreamDirection ? 0 : section->GetLength()));
-            const double sectionEnd = road.GetStreamPosition(section->GetSOffset() + (road.inStreamDirection ? section->GetLength() : 0));
-            bool onSection = positionOnRoad.has_value() && sectionStart <= streamPosition && sectionEnd >= streamPosition;
-            const auto& lanesOnSection = section->GetLanes();
-            if (sectionStart <= ownPosition && sectionEnd >= ownPosition)
-            {
-                if (currentTargetLaneId.has_value())
-                {
-                    currentTargetLaneId = FindNextEgoLaneId(lanesOnSection, road.inStreamDirection, previousSectionLaneIds);
-                }
-                else
-                {
-                    currentOwnLaneId = ownLaneId;
-                }
-            }
-            else
-            {
-                if (onSection)
-                {
-                    currentTargetLaneId = positionOnRoad->laneId;
-                }
-                else if (currentTargetLaneId.has_value())
-                {
-                    currentTargetLaneId = FindNextEgoLaneId(lanesOnSection, road.inStreamDirection, previousSectionLaneIds);
-                }
-                if (currentOwnLaneId.has_value())
-                {
-                    currentOwnLaneId = FindNextEgoLaneId(lanesOnSection, road.inStreamDirection, previousSectionLaneIds);
-                }
-            }
-            if (!currentOwnLaneId && !currentTargetLaneId)
-            {
-                continue;
-            }
-            previousSectionLaneIds = {};
-            for (auto lane : section->GetLanes())
-            {
-                const auto& laneId = lane->GetOdId();
-                const auto currentId = currentOwnLaneId.has_value() ? currentOwnLaneId.value() : currentTargetLaneId.value();
-                int relativeLaneId = road.inStreamDirection ? (laneId - currentId) : (currentId - laneId);
-                bool differentSigns = currentId * laneId < 0;
-                if (differentSigns)
-                {
-                    relativeLaneId += (relativeLaneId > 0) ? -1 : 1;
-                }
-                if (currentOwnLaneId.has_value())
-                {
-                    if (onSection && positionOnRoad->laneId == laneId)
-                    {
-                        return std::make_tuple(relativeLaneId, previousLaneIds);
-                    }
-                }
-                else
-                {
-                    if (sectionStart <= ownPosition && sectionEnd >= ownPosition && ownLaneId == laneId)
-                    {
-                        return std::make_tuple(-relativeLaneId, previousLaneIds);
-                    }
-                }
-                previousSectionLaneIds.insert({relativeLaneId, lane->GetId()});
-            }
-         }
-         return std::make_tuple(std::nullopt, previousSectionLaneIds);
     }},
     {},
     {},
