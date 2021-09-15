@@ -2762,7 +2762,7 @@ TEST(GetRelativeLanes, OnlySectionInDrivingDirection_ReturnsLanesOfThisSection)
     ON_CALL(*road, GetSections()).WillByDefault(ReturnRef(sections));
 
     WorldDataQuery wdQuery{worldData};
-    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 10.0, -1, 300.0).at(node->roadGraphVertex);
+    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 10.0, -1, 300.0, true).at(node->roadGraphVertex);
 
     ASSERT_THAT(result, SizeIs(1));
     EXPECT_THAT(result.at(0).startS, Eq(-10));
@@ -2868,7 +2868,7 @@ TEST(GetRelativeLanes, OnlySectionAgainstDrivingDirection_ReturnsLanesOfThisSect
     ON_CALL(*road, GetSections()).WillByDefault(ReturnRef(sections));
 
     WorldDataQuery wdQuery{worldData};
-    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 0.0, -1, 300.0).at(node->roadGraphVertex);
+    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 0.0, -1, 300.0, true).at(node->roadGraphVertex);
 
     ASSERT_THAT(result, SizeIs(1));
     EXPECT_THAT(result.at(0).startS, Eq(0));
@@ -2940,7 +2940,7 @@ TEST(GetRelativeLanes, TwoSectionsOnSameRoad_ReturnsLanesOfBothSections)
     ON_CALL(*road, GetSections()).WillByDefault(ReturnRef(sections));
 
     WorldDataQuery wdQuery{worldData};
-    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 0.0, -1, 300.0).at(node->roadGraphVertex);
+    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 0.0, -1, 300.0, true).at(node->roadGraphVertex);
 
     ASSERT_THAT(result, SizeIs(2));
     EXPECT_THAT(result.at(0).startS, Eq(0));
@@ -3025,7 +3025,7 @@ TEST(GetRelativeLanes, IdOfEgoLaneChanges_ReturnsLanesWithCorrectRelativeId)
     ON_CALL(*road, GetSections()).WillByDefault(ReturnRef(sections));
 
     WorldDataQuery wdQuery{worldData};
-    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 0.0, -1, 300.0).at(node->roadGraphVertex);
+    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 0.0, -1, 300.0, true).at(node->roadGraphVertex);
 
     ASSERT_THAT(result, SizeIs(2));
     EXPECT_THAT(result.at(0).startS, Eq(0));
@@ -3129,7 +3129,7 @@ TEST(GetRelativeLane, BranchingTree_ReturnsLanesOfWayToNode)
     ON_CALL(*road3, GetSections()).WillByDefault(ReturnRef(sections3));
 
     WorldDataQuery wdQuery{worldData};
-    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 0.0, -1, 300.0);
+    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 0.0, -1, 300.0, true);
     auto result2 = result.at(node2->roadGraphVertex);
     auto result3 = result.at(node3->roadGraphVertex);
 

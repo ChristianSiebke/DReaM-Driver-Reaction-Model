@@ -625,8 +625,9 @@ public:
     //! \param laneId           OpenDrive Id of the lane
     //! \param distance         start s coordinate on the road
     //! \param range            range of search
+    //! \param includeOncoming  indicating whether oncoming lanes should be included
     //! \return information about all lanes in range
-    virtual RouteQueryResult<RelativeWorldView::Lanes> GetRelativeLanes(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, double range) const = 0;
+    virtual RouteQueryResult<RelativeWorldView::Lanes> GetRelativeLanes(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, double range, bool includeOncoming = true) const = 0;
 
     //! Returns the relative lane id of the located position of a point relative to the given position
     //!

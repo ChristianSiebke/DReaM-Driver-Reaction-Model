@@ -1528,7 +1528,7 @@ CommonTrafficSign::Entity TrafficSign::GetSpecification(const double relativeDis
                    [this, relativeDistance](const auto& osiSupplementarySign) {
         CommonTrafficSign::Entity supplementarySignSpecification;
         supplementarySignSpecification.distanceToStartOfRoad = s;
-        supplementarySignSpecification.relativeDistance = s - relativeDistance;
+        supplementarySignSpecification.relativeDistance = relativeDistance;
 
         if (osiSupplementarySign.classification().type() == osi3::TrafficSign_SupplementarySign_Classification_Type::TrafficSign_SupplementarySign_Classification_Type_TYPE_SPACE)
         {

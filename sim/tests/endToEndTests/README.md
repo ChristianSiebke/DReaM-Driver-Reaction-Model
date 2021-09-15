@@ -233,6 +233,25 @@ Query: `count(AgentId | LaneId == -1 and PositionRoute-1 < 350 and PositionRoute
 If a column happens to have a name like `Name-N` where N is an integer, time shifting would be applied mistakenly.
 Thus, it is possible to escape columns using surrounding single quotes (e.g. ``'Name-1'``).
 
+
+### Explicit Datatypes
+
+pyOpenPASS uses Pandas DataFrames internally.
+Pandas will try to detect the datatype of the individial cyclic columns automatically.
+This won't fit the user's intention in some cases (e.g. when the column holds a semicolon separated list of integers but every list contains just one element, it is not possible to distinguish between integers and strings based on the data.
+
+For this reason, datatypes can be specified explicitly in the JSON config file:
+```json
+{
+    "datatypes": {
+        "Sensor0_DetectedAgents": "string"
+    },
+    "scopes":
+    {
+      ...
+```
+
+
 # Test Report Generator
 
 Generates a report for results from the pyOpenPASS EndToEndTest Framework tool.

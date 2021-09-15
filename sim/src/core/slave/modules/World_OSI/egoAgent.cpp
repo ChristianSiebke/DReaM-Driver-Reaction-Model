@@ -91,6 +91,47 @@ const std::string& EgoAgent::GetRoadId() const
     return get(RouteElement(), roadGraph, current).roadId;
 }
 
+double EgoAgent::GetVelocity(VelocityScope velocityScope) const
+{
+    return GetVelocity(velocityScope, agent);
+}
+
+double EgoAgent::GetVelocity(VelocityScope velocityScope, const WorldObjectInterface *object) const
+{
+    if (velocityScope == VelocityScope::Absolute)
+    {
+        return object->GetVelocity(VelocityScope::Absolute);
+    }
+    else if (velocityScope == VelocityScope::Lateral)
+    {
+        const auto referencePoint = GetReferencePointPosition();
+        if (!referencePoint.has_value())
+        {
+            return std::numeric_limits<double>::quiet_NaN();
+        }
+        return object->GetVelocity(VelocityScope::Absolute) * std::sin(referencePoint.value().roadPosition.hdg);
+    }
+    else if (velocityScope == VelocityScope::Longitudinal)
+    {
+        const auto referencePoint = GetReferencePointPosition();
+        if (!referencePoint.has_value())
+        {
+            return std::numeric_limits<double>::quiet_NaN();
+        }
+        return object->GetVelocity(VelocityScope::Absolute) * std::cos(referencePoint.value().roadPosition.hdg);
+    }
+    else if (velocityScope == VelocityScope::DirectionX)
+    {
+        return object->GetVelocity(VelocityScope::DirectionX);
+    }
+    else if (velocityScope == VelocityScope::DirectionY)
+    {
+        return object->GetVelocity(VelocityScope::DirectionY);
+    }
+
+    throw std::invalid_argument("velocity scope not within valid bounds");
+}
+
 double EgoAgent::GetDistanceToEndOfLane(double range, int relativeLane) const
 {
     return world->GetDistanceToEndOfLane(wayToTarget,
@@ -109,13 +150,14 @@ double EgoAgent::GetDistanceToEndOfLane(double range, int relativeLane, const La
                                          range, acceptableLaneTypes).at(0);
 }
 
-RelativeWorldView::Lanes EgoAgent::GetRelativeLanes(double range, int relativeLane) const
+RelativeWorldView::Lanes EgoAgent::GetRelativeLanes(double range, int relativeLane, bool includeOncoming) const
 {
     return world->GetRelativeLanes(wayToTarget,
                                    rootOfWayToTargetGraph,
                                    GetLaneIdFromRelative(relativeLane),
                                    GetMainLocatePosition().roadPosition.s,
-                                   range).at(0);
+                                   range,
+                                   includeOncoming).at(0);
 }
 
 std::optional<int> EgoAgent::GetRelativeLaneId(const WorldObjectInterface *object, MeasurementPoint mp) const
@@ -310,9 +352,9 @@ const GlobalRoadPosition& EgoAgent::GetMainLocatePosition() const
     return mainLocatePosition;
 }
 
-std::optional<GlobalRoadPosition> EgoAgent::GetReferencePointPosition() const
+std::optional<GlobalRoadPosition> EgoAgent::GetReferencePointPosition(const WorldObjectInterface* object) const
 {
-    auto referencePoint = agent->GetObjectPosition().referencePoint;
+    auto referencePoint = object->GetObjectPosition().referencePoint;
     auto referencePointPosition = referencePoint.find(GetRoadId());
     if (referencePointPosition != referencePoint.end())
     {
@@ -329,6 +371,11 @@ std::optional<GlobalRoadPosition> EgoAgent::GetReferencePointPosition() const
         steps++;
     }
     return std::nullopt;
+}
+
+std::optional<GlobalRoadPosition> EgoAgent::GetReferencePointPosition() const
+{
+    return GetReferencePointPosition(agent);
 }
 
 std::optional<RoadGraphVertex> EgoAgent::GetReferencePointVertex() const
@@ -351,11 +398,11 @@ int EgoAgent::GetLaneIdFromRelative(int relativeLaneId) const
     const auto mainLaneId = GetMainLocatePosition().laneId;
     if (routeElement.inOdDirection)
     {
-        return  mainLaneId + relativeLaneId + (relativeLaneId >= -mainLaneId ? 1 : 0);
+        return  mainLaneId + relativeLaneId + ((mainLaneId < 0) && (relativeLaneId >= -mainLaneId) ? 1 : 0) + ((mainLaneId > 0) && (relativeLaneId <= -mainLaneId) ? -1 : 0);
     }
     else
     {
-        return  mainLaneId - relativeLaneId + (relativeLaneId <= -mainLaneId ? -1 : 0);
+        return  mainLaneId - relativeLaneId + ((mainLaneId < 0) && (relativeLaneId <= mainLaneId) ? 1 : 0) + ((mainLaneId > 0) && (relativeLaneId >= mainLaneId) ? -1 : 0);
     }
 }
 

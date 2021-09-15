@@ -44,12 +44,4 @@ HEADERS += \
     src/OsmpFmuHandler.h \
     src/variant_visitor.h
 
-win32: {
-    LIBS += -lboost_filesystem-mt
-}
-
-unix: {
-    LIBS += -lboost_filesystem
-}
-
 LIBS += -lfmilib_shared -lopen_simulation_interface -lprotobuf

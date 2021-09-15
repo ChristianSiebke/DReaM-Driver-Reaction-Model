@@ -103,6 +103,13 @@ public:
     //! \return road id of the agent
     virtual const std::string& GetRoadId() const = 0;
 
+    //! Returns the velocity of the own agent taking the route into account
+    virtual double GetVelocity(VelocityScope velocityScope) const = 0;
+
+    //! Returns the velocity of another object taking the own route into account
+    //! This means that, if the other object is an agent driving in opposite direction the longitudinal velocity will be negative
+    virtual double GetVelocity(VelocityScope velocityScope, const WorldObjectInterface* object) const = 0;
+
     //! Return the distane to the end of the driving lane (i.e. as defined by the corresponding
     //! WorldInterface function) along the set route. Returns infinity if the end is father away than the range
     //!
@@ -118,7 +125,7 @@ public:
     //! \param range            maximum search range (calculated from MainLaneLocator)
     //! \param relativeLane     lane id relative to own lane (in driving direction)
     //! \return lanes relative to agent
-    virtual RelativeWorldView::Lanes GetRelativeLanes(double range, int relativeLane = 0) const = 0;
+    virtual RelativeWorldView::Lanes GetRelativeLanes(double range, int relativeLane = 0, bool includeOncoming = true) const = 0;
 
     //! Returns the relative lane of the ReferencePoint or MainLocatePoint of another object
     //!

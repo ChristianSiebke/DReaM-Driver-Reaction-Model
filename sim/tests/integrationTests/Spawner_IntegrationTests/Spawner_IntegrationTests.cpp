@@ -339,11 +339,11 @@ TEST_F(SpawnerPreRun_IntegrationTests, ThreeContinuesLanes_SpawnWithCorrectTGapA
     RouteQueryResult<std::vector<const WorldObjectInterface*>> noObjects{{0, {}}};
     ON_CALL(world, GetObjectsInRange(_,_,_,_,_,_)).WillByDefault(Return(noObjects));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus1{{0, {{0,0,{relativeLaneMinus2, relativeLaneMinus1, relativeLane0}}}}};
-    ON_CALL(world, GetRelativeLanes(_,_,-1,_,_)).WillByDefault(Return(relativeLanesMinus1));
+    ON_CALL(world, GetRelativeLanes(_,_,-1,_,_,_)).WillByDefault(Return(relativeLanesMinus1));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus2{{0, {{0,0,{relativeLaneMinus1, relativeLane0, relativeLanePlus1}}}}};
-    ON_CALL(world, GetRelativeLanes(_,_,-2,_,_)).WillByDefault(Return(relativeLanesMinus2));
+    ON_CALL(world, GetRelativeLanes(_,_,-2,_,_,_)).WillByDefault(Return(relativeLanesMinus2));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus3{{0, {{0,0,{relativeLane0, relativeLanePlus1, relativeLanePlus2}}}}};
-    ON_CALL(world, GetRelativeLanes(_,_,-3,_,_)).WillByDefault(Return(relativeLanesMinus3));
+    ON_CALL(world, GetRelativeLanes(_,_,-3,_,_,_)).WillByDefault(Return(relativeLanesMinus3));
 
     ON_CALL(world, CreateAgentAdapter(_)).WillByDefault(GENERATE_AGENT_ADAPTER());
 
@@ -386,15 +386,15 @@ TEST_F(SpawnerPreRun_IntegrationTests, IncreasingLaneNumber_SpawnWithCorrectTGap
     RouteQueryResult<std::vector<const WorldObjectInterface*>> noObjects{{0, {}}};
     ON_CALL(world, GetObjectsInRange(_,_,_,_,_,_)).WillByDefault(Return(noObjects));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus1First{{0, {{0,0,{relativeLaneMinus1, relativeLane0}}}}};
-    ON_CALL(world, GetRelativeLanes(_,_,-1,Le(1400),_)).WillByDefault(Return(relativeLanesMinus1First));
+    ON_CALL(world, GetRelativeLanes(_,_,-1,Le(1400),_,_)).WillByDefault(Return(relativeLanesMinus1First));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus1Second{{0, {{0,0,{relativeLaneMinus2, relativeLaneMinus1, relativeLane0}}}}};
-    ON_CALL(world, GetRelativeLanes(_,_,-1,Ge(1400),_)).WillByDefault(Return(relativeLanesMinus1Second));
+    ON_CALL(world, GetRelativeLanes(_,_,-1,Ge(1400),_,_)).WillByDefault(Return(relativeLanesMinus1Second));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus2First{{0, {{0,0,{relativeLane0, relativeLanePlus1}}}}};
-    ON_CALL(world, GetRelativeLanes(_,_,-2,Le(1400),_)).WillByDefault(Return(relativeLanesMinus2First));
+    ON_CALL(world, GetRelativeLanes(_,_,-2,Le(1400),_,_)).WillByDefault(Return(relativeLanesMinus2First));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus2Second{{0, {{0,0,{relativeLaneMinus1, relativeLane0, relativeLanePlus1}}}}};
-    ON_CALL(world, GetRelativeLanes(_,_,-2,Ge(1400),_)).WillByDefault(Return(relativeLanesMinus2Second));
+    ON_CALL(world, GetRelativeLanes(_,_,-2,Ge(1400),_,_)).WillByDefault(Return(relativeLanesMinus2Second));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus3{{0, {{0,0,{relativeLane0, relativeLanePlus1, relativeLanePlus2}}}}};
-    ON_CALL(world, GetRelativeLanes(_,_,-3,_,_)).WillByDefault(Return(relativeLanesMinus3));
+    ON_CALL(world, GetRelativeLanes(_,_,-3,_,_,_)).WillByDefault(Return(relativeLanesMinus3));
 
     ON_CALL(world, CreateAgentAdapter(_)).WillByDefault(GENERATE_AGENT_ADAPTER());
 
@@ -444,15 +444,15 @@ TEST_F(SpawnerPreRun_IntegrationTests, DecreasingLaneNumber_SpawnWithCorrectTGap
     RouteQueryResult<std::vector<const WorldObjectInterface*>> noObjects{{0, {}}};
     ON_CALL(world, GetObjectsInRange(_,_,_,_,_,_)).WillByDefault(Return(noObjects));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus1First{{0, {{0,0,{relativeLaneMinus2, relativeLaneMinus1, relativeLane0}}}}};
-    ON_CALL(world, GetRelativeLanes(_,_,-1,Le(1200),_)).WillByDefault(Return(relativeLanesMinus1First));
+    ON_CALL(world, GetRelativeLanes(_,_,-1,Le(1200),_,_)).WillByDefault(Return(relativeLanesMinus1First));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus1Second{{0, {{0,0,{relativeLaneMinus1, relativeLane0}}}}};
-    ON_CALL(world, GetRelativeLanes(_,_,-1,Ge(1200),_)).WillByDefault(Return(relativeLanesMinus1Second));
+    ON_CALL(world, GetRelativeLanes(_,_,-1,Ge(1200),_,_)).WillByDefault(Return(relativeLanesMinus1Second));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus2First{{0, {{0,0,{relativeLaneMinus1, relativeLane0, relativeLanePlus1}}}}};
-    ON_CALL(world, GetRelativeLanes(_,_,-2,Le(1200),_)).WillByDefault(Return(relativeLanesMinus2First));
+    ON_CALL(world, GetRelativeLanes(_,_,-2,Le(1200),_,_)).WillByDefault(Return(relativeLanesMinus2First));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus2Second{{0, {{0,0,{relativeLane0, relativeLanePlus1}}}}};
-    ON_CALL(world, GetRelativeLanes(_,_,-2,Ge(1200),_)).WillByDefault(Return(relativeLanesMinus2Second));
+    ON_CALL(world, GetRelativeLanes(_,_,-2,Ge(1200),_,_)).WillByDefault(Return(relativeLanesMinus2Second));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus3{{0, {{0,0,{relativeLane0, relativeLanePlus1, relativeLanePlus2}}}}};
-    ON_CALL(world, GetRelativeLanes(_,_,-3,_,_)).WillByDefault(Return(relativeLanesMinus3));
+    ON_CALL(world, GetRelativeLanes(_,_,-3,_,_,_)).WillByDefault(Return(relativeLanesMinus3));
 
     ON_CALL(world, CreateAgentAdapter(_)).WillByDefault(GENERATE_AGENT_ADAPTER());
 
@@ -502,19 +502,19 @@ TEST_F(SpawnerPreRun_IntegrationTests, RightLaneStartsAndEndsWithinRange_SpawnWi
     RouteQueryResult<std::vector<const WorldObjectInterface*>> noObjects{{0, {}}};
     ON_CALL(world, GetObjectsInRange(_,_,_,_,_,_)).WillByDefault(Return(noObjects));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus1First{{0, {{0,0,{relativeLaneMinus1, relativeLane0}}}}};
-    ON_CALL(world, GetRelativeLanes(_,_,-1,Ge(1400),_)).WillByDefault(Return(relativeLanesMinus1First));
+    ON_CALL(world, GetRelativeLanes(_,_,-1,Ge(1400),_,_)).WillByDefault(Return(relativeLanesMinus1First));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus1Second{{0, {{0,0,{relativeLaneMinus2, relativeLaneMinus1, relativeLane0}}}}};
-    ON_CALL(world, GetRelativeLanes(_,_,-1,AllOf(Ge(1200),Le(1400)),_)).WillByDefault(Return(relativeLanesMinus1Second));
+    ON_CALL(world, GetRelativeLanes(_,_,-1,AllOf(Ge(1200),Le(1400)),_,_)).WillByDefault(Return(relativeLanesMinus1Second));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus1Third{{0, {{0,0,{relativeLaneMinus1, relativeLane0}}}}};
-    ON_CALL(world, GetRelativeLanes(_,_,-1,Le(1200),_)).WillByDefault(Return(relativeLanesMinus1Third));
+    ON_CALL(world, GetRelativeLanes(_,_,-1,Le(1200),_,_)).WillByDefault(Return(relativeLanesMinus1Third));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus2First{{0, {{0,0,{relativeLane0, relativeLanePlus1}}}}};
-    ON_CALL(world, GetRelativeLanes(_,_,-2,Ge(1400),_)).WillByDefault(Return(relativeLanesMinus2First));
+    ON_CALL(world, GetRelativeLanes(_,_,-2,Ge(1400),_,_)).WillByDefault(Return(relativeLanesMinus2First));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus2Second{{0, {{0,0,{relativeLaneMinus1, relativeLane0, relativeLanePlus1}}}}};
-    ON_CALL(world, GetRelativeLanes(_,_,-2,AllOf(Ge(1200),Le(1400)),_)).WillByDefault(Return(relativeLanesMinus2Second));
+    ON_CALL(world, GetRelativeLanes(_,_,-2,AllOf(Ge(1200),Le(1400)),_,_)).WillByDefault(Return(relativeLanesMinus2Second));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus2Third{{0, {{0,0,{relativeLane0, relativeLanePlus1}}}}};
-    ON_CALL(world, GetRelativeLanes(_,_,-2,Le(1200),_)).WillByDefault(Return(relativeLanesMinus2Third));
+    ON_CALL(world, GetRelativeLanes(_,_,-2,Le(1200),_,_)).WillByDefault(Return(relativeLanesMinus2Third));
     RouteQueryResult<RelativeWorldView::Lanes> relativeLanesMinus3{{0, {{0,0,{relativeLane0, relativeLanePlus1, relativeLanePlus2}}}}};
-    ON_CALL(world, GetRelativeLanes(_,_,-3,_,_)).WillByDefault(Return(relativeLanesMinus3));
+    ON_CALL(world, GetRelativeLanes(_,_,-3,_,_,_)).WillByDefault(Return(relativeLanesMinus3));
 
     ON_CALL(world, CreateAgentAdapter(_)).WillByDefault(GENERATE_AGENT_ADAPTER());
 

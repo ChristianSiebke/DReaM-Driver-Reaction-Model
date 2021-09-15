@@ -126,7 +126,7 @@ void ObservationLogImplementation::SlavePreRunHook()
     events.clear();
 }
 
-void Accumulate(const std::string& key, const DataBufferReadInterface* dataBuffer, std::map<std::string, double>& result)
+void ReadIfSet(const std::string& key, const DataBufferReadInterface* dataBuffer, std::map<std::string, double>& result)
 {
     const auto agentIds = dataBuffer->GetKeys("Statics/Agents");
 
@@ -137,8 +137,8 @@ void Accumulate(const std::string& key, const DataBufferReadInterface* dataBuffe
         {
             continue;
         }
-        const auto& distanceTraveled = tdtResult->begin()->get();
-        result[agentId] += std::get<double>(distanceTraveled.value);
+        const auto& cyclicRow = tdtResult->begin()->get();
+        result[agentId] = std::get<double>(cyclicRow.value);
     }
 }
 
@@ -167,7 +167,7 @@ void ObservationLogImplementation::SlaveUpdateHook(int time, [[maybe_unused]] Ru
         }), dsCyclic.value);
     }
 
-    Accumulate("TotalDistanceTraveled", dataBuffer, runStatistic.distanceTraveled);
+    ReadIfSet("TotalDistanceTraveled", dataBuffer, runStatistic.distanceTraveled);
 
     const auto acyclics = dataBuffer->GetAcyclic(std::nullopt, "*");
 

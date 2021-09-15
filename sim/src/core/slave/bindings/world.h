@@ -340,9 +340,9 @@ public:
         return implementation->GetRelativeJunctions(roadGraph, startNode, startDistance, range);
     }
 
-    RouteQueryResult<RelativeWorldView::Lanes> GetRelativeLanes(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, double range) const override
+    RouteQueryResult<RelativeWorldView::Lanes> GetRelativeLanes(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, double range, bool includeOncoming = true) const override
     {
-        return implementation->GetRelativeLanes(roadGraph, startNode, laneId, distance, range);
+        return implementation->GetRelativeLanes(roadGraph, startNode, laneId, distance, range, includeOncoming);
     }
 
     RouteQueryResult<std::optional<int>> GetRelativeLaneId(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, std::map<std::string, GlobalRoadPosition> targetPosition) const override

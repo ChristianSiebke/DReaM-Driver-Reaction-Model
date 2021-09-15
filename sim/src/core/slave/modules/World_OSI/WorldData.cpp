@@ -440,20 +440,6 @@ void WorldData::AddLane(const Id id, RoadLaneSectionInterface& odSection, const 
     {
         osiLane->mutable_classification()->set_type(osi3::Lane_Classification_Type_TYPE_NONDRIVING);
     }
-    switch (laneType)
-    {
-    case RoadLaneType::Driving:
-        osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_NORMAL);
-        break;
-    case RoadLaneType::Biking:
-        osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_BIKING);
-        break;
-    case RoadLaneType::Sidewalk:
-        osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_SIDEWALK);
-        break;
-    default:
-        osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_OTHER);
-    }
 
     osiLane->mutable_classification()->mutable_road_condition()->set_surface_temperature(293.15);
     osiLane->mutable_classification()->mutable_road_condition()->set_surface_freezing_point(273.15);

@@ -537,7 +537,7 @@ const QString ConfigWriter::WriteProfilesCatalog(XmlProfilesConfig &profilesConf
 
     xmlWriter.writeStartElement("Profiles");
 
-    xmlWriter.writeAttribute("SchemaVersion", "0.4.3");
+    xmlWriter.writeAttribute("SchemaVersion", "0.4.5");
 
     bool success = profilesConfig.WriteToXml(&xmlWriter);
 

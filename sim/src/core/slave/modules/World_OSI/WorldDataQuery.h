@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019, 2020 2021 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -489,8 +489,9 @@ public:
     //! \param startPosition    start search position on the road stream
     //! \param startLaneId      ego lane id
     //! \param range            range of search
+    //! \param includeOncoming  indicating whether oncoming lanes should be included
     //! \return information about all lanes in range
-    RouteQueryResult<RelativeWorldView::Lanes> GetRelativeLanes(const RoadMultiStream& roadStream, double startPosition, int startLaneId, double range) const;
+    RouteQueryResult<RelativeWorldView::Lanes> GetRelativeLanes(const RoadMultiStream& roadStream, double startPosition, int startLaneId, double range, bool includeOncoming) const;
 
     //! Returns the relative lane id of the located position of a point relative to the given position
     //!
@@ -526,7 +527,7 @@ private:
     int FindNextEgoLaneId(const OWL::Interfaces::Lanes& lanesOnSection, bool inStreamDirection, std::map<int, OWL::Id> previousSectionLaneIds) const;
 
     std::map<int, OWL::Id> AddLanesOfSection(const OWL::Interfaces::Lanes& lanesOnSection, bool inStreamDirection,
-                                             int currentOwnLaneId, const std::map<int, OWL::Id>& previousSectionLaneIds,
+                                             int currentOwnLaneId, bool includeOncoming, const std::map<int, OWL::Id>& previousSectionLaneIds,
                                              std::vector<RelativeWorldView::Lane>& previousSectionLanes, RelativeWorldView::LanesInterval& laneInterval) const;
 
     RoadMultiStream::Node CreateRoadMultiStreamRecursive(const RoadGraph& roadGraph, const RoadGraphVertex& current, double sOffset) const;

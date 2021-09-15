@@ -137,7 +137,6 @@ add_openpass_target(
   LIBRARIES
     Qt5::Core
     Qt5::Xml
-    Boost::filesystem
     Common
     CoreCommon
 
