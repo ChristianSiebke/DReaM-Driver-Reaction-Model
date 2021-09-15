@@ -18,10 +18,10 @@ from conans import ConanFile, CMake, tools
 class FmiConan(ConanFile):
     name = "FMILibrary"
     version = "2.0.3"
-    license = "<Put the package license here>"
+    license = "2-Clause BSD"
     author = "Michael Scharfenberg michael.scharfenberg@itk-engineering.de"
     url = "https://github.com/modelon-community"
-    description = "<Description of Fmi here>"
+    description = "The Functional Mock-up Interface (or FMI) defines a standardized interface to be used in computer simulations to develop complex cyber-physical systems"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
@@ -45,7 +45,7 @@ class FmiConan(ConanFile):
         if self.settings.os == "Linux":
             tools.patch(patch_file="fmi-library-2.0.3-fixes.patch")
         cmake.build()
-        cmake.install() # cmake stays in charge of install step logic
+        cmake.install()
 
     def package(self):
         self.copy("*", src="temp-deploy")

@@ -18,10 +18,10 @@ from conans import ConanFile, CMake, tools
 class OsiConan(ConanFile):
     name = "OSI"
     version = "3.2.0"
-    license = "<Put the package license here>"
+    license = "Mozilla Public License 2.0"
     author = "Michael Scharfenberg michael.scharfenberg@itk-engineering.de"
     url = "https://github.com/OpenSimulationInterface"
-    description = "<Description of Osi here>"
+    description = "The Open Simulation Interface (OSI) is a specification for interfaces between models and components of a distributed simulation"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": True, "fPIC": True, "protobuf:shared": True}
@@ -49,7 +49,7 @@ class OsiConan(ConanFile):
         cmake.configure(source_folder="osi3",
                         defs={"CMAKE_INSTALL_PREFIX":"./temp-deploy"})
         cmake.build()
-        cmake.install() # cmake stays in charge of install step logic
+        cmake.install()
 
     def package(self):
         self.copy("*", src="temp-deploy")

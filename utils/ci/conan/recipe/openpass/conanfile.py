@@ -23,12 +23,11 @@ class OpenpassConan(ConanFile):
     license = "Eclipse Public License 2.0"
     author = "Michael Scharfenberg michael.scharfenberg@itk-engineering.de"
     url = "https://gitlab.eclipse.org/eclipse/simopenpass"
-    description = "<Description of Openpass here>"
+    description = "OpenPASS is an open source platform for effectiveness assessment of advanced driver assistance systems and automated driving"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False], "Gui_only": [True, False]}
     default_options = {"shared": True, "fPIC": True, "boost:shared": True, "Gui_only": False}
     generators = "cmake"
-    # build_folder=""
     exports_sources = "../../../../../*" # use source of the repo
     short_paths = True
 
@@ -53,15 +52,27 @@ class OpenpassConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(defs={"CMAKE_PREFIX_PATH":"./ThirdParty",
-                              "CMAKE_INSTALL_PREFIX":"./temp-deploy",
-                              "CMAKE_C_COMPILER":"gcc-10",
-                              "CMAKE_CXX_COMPILER":"g++-10",
-                              "WITH_GUI":"OFF",
-                              "INSTALL_EXTRA_RUNTIME_DEPS":"ON"})
+        if self.settings.os == "Windows":
+            cmake.configure(defs={"CMAKE_PREFIX_PATH":"ThirdParty",
+                                "CMAKE_INSTALL_PREFIX":"temp-deploy",
+                                "WITH_GUI":"OFF",
+                                "WITH_TESTS":"OFF",
+                                "INSTALL_EXTRA_RUNTIME_DEPS":"ON"})
+        elif self.settings.os == "Linux":
+            cmake.configure(defs={"CMAKE_PREFIX_PATH":"./ThirdParty",
+                                "CMAKE_INSTALL_PREFIX":"./temp-deploy",
+                                "CMAKE_C_COMPILER":"gcc-10",
+                                "CMAKE_CXX_COMPILER":"g++-10",
+                                "WITH_GUI":"OFF",
+                                "WITH_TESTS":"OFF",
+                                "INSTALL_EXTRA_RUNTIME_DEPS":"ON"})
         cmake.build()
-        self.run("make doc", win_bash=True)
-        cmake.install() # cmake stays in charge of install step logic
+        # can be deleted as soon as branch is up to date
+        if self.settings.os == "Windows":
+            self.run("mingw32-make doc", win_bash=True)
+        elif self.settings.os == "Linux":
+            self.run("make doc", win_bash=True)
+        cmake.install()
 
     def package(self):
         self.copy("*", src="temp-deploy", excludes=["bin/*"])
