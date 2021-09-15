@@ -1,5 +1,6 @@
 ################################################################################
 # Copyright (c) 2021 ITK Engineering GmbH
+#		        2021 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 #
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
@@ -17,10 +18,10 @@ from conans import ConanFile, CMake, tools
 class FmiConan(ConanFile):
     name = "FMILibrary"
     version = "2.0.3"
-    license = "<Put the package license here>"
+    license = "2-Clause BSD"
     author = "Michael Scharfenberg michael.scharfenberg@itk-engineering.de"
     url = "https://github.com/modelon-community"
-    description = "<Description of Fmi here>"
+    description = "The Functional Mock-up Interface (or FMI) defines a standardized interface to be used in computer simulations to develop complex cyber-physical systems"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
@@ -38,7 +39,8 @@ class FmiConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.configure(source_folder="fmi",
-                        defs={"FMILIB_BUILD_STATIC_LIB":"OFF",
+                        defs={"FMILIB_INSTALL_PREFIX":"./temp-deploy",
+                              "FMILIB_BUILD_STATIC_LIB":"OFF",
                               "FMILIB_BUILD_SHARED_LIB":"ON"})
         if self.settings.os == "Linux":
             tools.patch(patch_file="fmi-library-2.0.3-fixes.patch")
@@ -46,7 +48,7 @@ class FmiConan(ConanFile):
         cmake.install()
 
     def package(self):
-        self.copy("*", src="../install")
+        self.copy("*", src="temp-deploy")
 
     def package_info(self):
         self.cpp_info.libs = ["fmi"]
