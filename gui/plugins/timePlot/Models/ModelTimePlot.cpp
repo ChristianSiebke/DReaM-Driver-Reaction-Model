@@ -147,8 +147,8 @@ void ModelTimePlot::CreateTabTables(const QString &fileName, int trackId, QStrin
 bool ModelTimePlot::ContainsHighDFormat(const QString &fileName)
 {
     TableModelPlot tableModel(this, fileName);
-    if (tableModel.headerData(0, Qt::Horizontal, Qt::DisplayRole).toString() == "frame" &&
-        tableModel.headerData(1, Qt::Horizontal, Qt::DisplayRole).toString() == "id")
+    if (tableModel.headerData(0, Qt::Horizontal, Qt::DisplayRole).toString() == "Timestep" &&
+        tableModel.headerData(1, Qt::Horizontal, Qt::DisplayRole).toString() == "AgentId")
     {
         if (!firstHeader.isEmpty() && firstHeader != tableModel.GetHeaderData())
         {

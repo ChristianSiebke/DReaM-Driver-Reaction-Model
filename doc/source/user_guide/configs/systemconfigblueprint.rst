@@ -41,7 +41,7 @@ All components are listed here. An agent consists of a subset of this components
 Example:
 This example describes the Sensor_Driver module.
 
-.. literalinclude:: @OP_REL_SIM@/contrib/examples/DefaultConfigurations/systemConfigBlueprint.xml
+.. literalinclude:: @OP_REL_SIM@/contrib/examples/Common/systemConfigBlueprint.xml
    :language: xml
    :dedent: 12
    :lines: 28-38

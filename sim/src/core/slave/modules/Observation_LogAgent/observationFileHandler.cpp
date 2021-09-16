@@ -341,8 +341,8 @@ void ObservationFileHandler::WriteCsvCyclics(QString filename, ObservationCyclic
 
     QTextStream stream(csvFile.get());
 
-    stream << "frame,"
-           << "id,"
+    stream << "Timestep,"
+           << "AgentId,"
            << QString::fromStdString(cyclics.GetAgentHeader())
            << '\n';
 

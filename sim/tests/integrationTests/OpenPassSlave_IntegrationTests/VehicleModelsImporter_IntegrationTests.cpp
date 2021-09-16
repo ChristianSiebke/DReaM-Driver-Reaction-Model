@@ -11,8 +11,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include <boost/filesystem.hpp>
-
+#include <filesystem>
 #include "importer/vehicleModels.h"
 #include "importer/vehicleModelsImporter.h"
 
@@ -22,7 +21,7 @@ using ::testing::Eq;
 
 TEST(VehicleModelImporter, GivenVehicleAndPedestrianCatalogs_ImportsAllModels)
 {
-    boost::filesystem::path catalogsDirectory = boost::filesystem::initial_path() / "Resources" / "ImporterTest";
+    std::filesystem::path catalogsDirectory = std::filesystem::current_path() / "Resources" / "ImporterTest";
 
     Configuration::VehicleModels vehicleModels;
 

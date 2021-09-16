@@ -194,7 +194,7 @@ public:
         return implementation->LaneCoord2WorldCoord(distance, offset, roadId, laneId);
     }
 
-    std::map<const std::string, GlobalRoadPosition> WorldCoord2LaneCoord(double x, double y, double heading) const override
+    std::map<std::string, GlobalRoadPosition> WorldCoord2LaneCoord(double x, double y, double heading) const override
     {
         return implementation->WorldCoord2LaneCoord(x, y, heading);
     }
@@ -340,9 +340,14 @@ public:
         return implementation->GetRelativeJunctions(roadGraph, startNode, startDistance, range);
     }
 
-    RouteQueryResult<RelativeWorldView::Lanes> GetRelativeLanes(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, double range) const override
+    RouteQueryResult<RelativeWorldView::Lanes> GetRelativeLanes(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, double range, bool includeOncoming = true) const override
     {
-        return implementation->GetRelativeLanes(roadGraph, startNode, laneId, distance, range);
+        return implementation->GetRelativeLanes(roadGraph, startNode, laneId, distance, range, includeOncoming);
+    }
+
+    RouteQueryResult<std::optional<int>> GetRelativeLaneId(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, std::map<std::string, GlobalRoadPosition> targetPosition) const override
+    {
+        return implementation->GetRelativeLaneId(roadGraph, startNode, laneId, distance, targetPosition);
     }
 
     std::vector<JunctionConnection> GetConnectionsOnJunction(std::string junctionId, std::string incomingRoadId) const override
@@ -378,6 +383,11 @@ public:
     std::map<RoadGraphEdge, double> GetEdgeWeights (const RoadGraph& roadGraph) const override
     {
         return implementation->GetEdgeWeights(roadGraph);
+    }
+
+    std::unique_ptr<RoadStreamInterface> GetRoadStream(const std::vector<RouteElement>& route) const override
+    {
+        return implementation->GetRoadStream(route);
     }
 
     virtual RouteQueryResult<Obstruction> GetObstruction(const RoadGraph& roadGraph, RoadGraphVertex startNode, const GlobalRoadPosition& ownPosition,

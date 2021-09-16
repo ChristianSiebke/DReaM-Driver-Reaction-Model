@@ -83,7 +83,7 @@ TEST(SensorDriver_UnitTests, CorrectInformationInSignal)
             {{-1, true, LaneType::Driving, std::nullopt, std::nullopt},
             {0, true, LaneType::Driving, std::nullopt, std::nullopt},
             {1, true, LaneType::Driving, std::nullopt, std::nullopt}}}};
-    ON_CALL(fakeEgoAgent, GetRelativeLanes(_, _)).WillByDefault(Return(relativeLanes));
+    ON_CALL(fakeEgoAgent, GetRelativeLanes(_, _, _)).WillByDefault(Return(relativeLanes));
 
     ON_CALL(fakeWorld, GetRoadGraph(RouteElement{roadId, true}, _)).WillByDefault(Return(std::make_pair(roadGraph, start)));
     ON_CALL(fakeWorld, IsDirectionalRoadExisting(roadId, true)).WillByDefault(Return(true));

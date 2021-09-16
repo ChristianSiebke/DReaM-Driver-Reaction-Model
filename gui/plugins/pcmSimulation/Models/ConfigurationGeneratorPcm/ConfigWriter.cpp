@@ -491,7 +491,7 @@ const QString ConfigWriter::WriteSlaveConfiguration(XmlSlaveConfig &slaveConfig,
     xmlWriter.writeStartDocument();
 
     xmlWriter.writeStartElement("slaveConfig");
-    xmlWriter.writeAttribute("SchemaVersion","0.8.1");
+    xmlWriter.writeAttribute("SchemaVersion","0.8.2");
 
     bool success = slaveConfig.WriteToXml(&xmlWriter);
 
@@ -537,7 +537,7 @@ const QString ConfigWriter::WriteProfilesCatalog(XmlProfilesConfig &profilesConf
 
     xmlWriter.writeStartElement("Profiles");
 
-    xmlWriter.writeAttribute("SchemaVersion", "0.4.3");
+    xmlWriter.writeAttribute("SchemaVersion", "0.4.6");
 
     bool success = profilesConfig.WriteToXml(&xmlWriter);
 

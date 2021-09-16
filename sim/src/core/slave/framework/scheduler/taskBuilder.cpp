@@ -48,7 +48,7 @@ TaskBuilder::TaskBuilder(const int &currentTime,
 std::list<TaskItem> TaskBuilder::CreateBootstrapTasks()
 {
     return {
-        SpawningTaskItem(frameworkUpdateRate, [&] { return spawnPointNetwork->TriggerPreRunSpawnPoints(); }),
+        SpawningTaskItem(frameworkUpdateRate, [&] { return spawnPointNetwork->TriggerPreRunSpawnZones(); }),
     };
 }
 

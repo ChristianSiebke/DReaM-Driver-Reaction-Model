@@ -49,17 +49,17 @@ public:
     /*!
      * \brief Returns the string header that is written into the simulationOuput.xml
      */
-    std::string GetHeader();
+    std::string GetHeader() const;
 
     /*!
      * \brief Returns a single line of samples for the given timestep for writing into the simulationOutput
      */
-    std::string GetSamplesLine(uint32_t timeStepNumber);
+    std::string GetSamplesLine(uint32_t timeStepNumber) const;
 
     /*!
      * \brief Returns all timesteps for which samples exist
      */
-    std::set<int>& GetTimeSteps()
+    const std::set<int>& GetTimeSteps() const
     {
         return timeSteps;
     }

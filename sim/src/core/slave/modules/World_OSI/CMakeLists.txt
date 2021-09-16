@@ -13,9 +13,11 @@ add_openpass_target(
     EntityInfoPublisher.h
     EntityRepository.h
     JointsBuilder.h
+    LaneStream.h
     Localization.h
     LocalizationElement.h
     RamerDouglasPeucker.h
+    RoadStream.h
     SceneryConverter.h
     SceneryEntities.h
     TrafficObjectAdapter.h
@@ -44,7 +46,9 @@ add_openpass_target(
     EntityInfoPublisher.cpp
     EntityRepository.cpp
     JointsBuilder.cpp
+    LaneStream.cpp
     Localization.cpp
+    RoadStream.cpp
     SceneryConverter.cpp
     TrafficObjectAdapter.cpp
     TrafficLightNetwork.cpp

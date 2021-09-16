@@ -35,7 +35,7 @@ INCLUDEPATH += . \
 
 SOURCES += \
     $$SPAWNER_COMMON/WorldAnalyzer.cpp \
-    $$SPAWNER_PRERUN/SpawnPointPreRunCommon.cpp \
+    $$SPAWNER_PRERUN/SpawnerPreRunCommon.cpp \
     Spawner_IntegrationTests.cpp \
     $$OPEN_SRC/core/slave/modelElements/agentBlueprint.cpp \
     $$OPEN_SRC/core/slave/modelElements/agent.cpp \
@@ -50,6 +50,6 @@ SOURCES += \
 
 HEADERS += \
     $$SPAWNER_COMMON/WorldAnalyzer.h \
-    $$SPAWNER_PRERUN/SpawnPointPreRunCommon.h \
+    $$SPAWNER_PRERUN/SpawnerPreRunCommon.h \
     $$OPEN_SRC/core/slave/framework/sampler.h \
 

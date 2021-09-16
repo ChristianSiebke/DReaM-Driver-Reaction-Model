@@ -14,10 +14,15 @@ RUN apt-get -qq update && apt-get -qq dist-upgrade && apt-get install -qq -y --n
     lcov \
     python3 \
     python3-distutils \
-    python3-junitparser \
-    python3-lxml \
-    python3-pandas \
-    python3-pytest \
+    python3-pip \
     qtbase5-dev \
     && apt-get -qq clean
+
+RUN pip install \
+    approvaltests \
+    junitparser \
+    lxml \
+    pandas \
+    pytest \
+    watchdog
 

@@ -21,7 +21,7 @@ AlgorithmAgentFollowingDriverModel
 
 This driver type adapts its velocity to an agent in front and holds a desired velocity if there's no front agent available (like adaptive cruise control). The lateral guidance always keeps the agent in the middle of the lane.
 
-.. literalinclude:: @OP_REL_SIM@/contrib/examples/DefaultConfigurations/ProfilesCatalog.xml
+.. literalinclude:: @OP_REL_SIM@/contrib/examples/Common/ProfilesCatalog.xml
    :language: xml
    :dedent: 4
    :start-at: <Profile Name="Regular">

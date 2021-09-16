@@ -68,7 +68,7 @@ Please refer to the individual components, for information about their published
 
 **Example**
 
-.. literalinclude:: @OP_REL_SIM@/contrib/examples/DefaultConfigurations/slaveConfig.xml
+.. literalinclude:: @OP_REL_SIM@/contrib/examples/Common/slaveConfig.xml
    :language: xml
    :start-at: <Library>Observation_Log</Library>
    :end-at: </Parameters>

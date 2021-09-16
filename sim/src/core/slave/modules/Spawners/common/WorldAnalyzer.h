@@ -10,11 +10,10 @@
 
 #pragma once
 
+#include "SpawnerDefinitions.h"
 #include "include/agentBlueprintInterface.h"
 #include "include/stochasticsInterface.h"
 #include "include/worldInterface.h"
-
-#include "SpawnPointDefinitions.h"
 
 using namespace SpawnPointDefinitions;
 
@@ -48,42 +47,49 @@ public:
     //! It excludes s positions where a scenario agent is standing as well as the range
     //! inbetween two scenario agents.
     //!
-    //! \param roadId       Id of the road
-    //! \param sStart       start of the search range
-    //! \param sEnd         end of the search range
-    //! \param validLaneIds         Container of all valid lane ids
+    //! \param laneStream           LaneStream to spawn in
+    //! \param sStart               start of the search range
+    //! \param sEnd                 end of the search range
     //! \param supportedLaneTypes   Container of all valid lanetypes
     //! \return valid spawning ranges
-    LaneSpawningRanges GetValidLaneSpawningRanges(const RoadId& roadId,
-                                                  const SPosition sStart,
-                                                  const SPosition sEnd,
-                                                  const std::vector<int>& validLaneIds,
-                                                  const LaneTypes& supportedLaneTypes) const;
+    Ranges GetValidLaneSpawningRanges(const std::unique_ptr<LaneStreamInterface>& laneStream,
+                                      const SPosition sStart,
+                                      const SPosition sEnd,
+                                      const LaneTypes& supportedLaneTypes) const;
 
-    //! Calculates the next s coordinate to spawn an agents on
+    //! Calculates the next s coordinate to spawn an agent on
     //!
-    //! \param roadId                   Id of the road
-    //! \param laneId                   Id of the lane
+    //! \param laneStream               LaneStream to spawn in
     //! \param bounds                   s range to spawn in
     //! \param agentFrontLength         distance from reference point to front of agent
     //! \param agentRearLength          distance from reference point to rear of agent
     //! \param intendedVelocity         spawning velocity
     //! \param gapInSeconds             desired TGap between spawned agent and next agent
     //! \param minimumSeparationBuffer  minimum distance between agents
-    //! \param route                    route of the agent
-    //! \param supportedLaneTypes       Container with all valid LaneTypes
-    //! \return s position
-    std::optional<double> GetNextSpawnPosition(const RoadId& roadId,
-                                               const LaneId laneId,
+    //! \return s position or nullopt if this would be outside the range
+    std::optional<double> GetNextSpawnPosition(const std::unique_ptr<LaneStreamInterface> &laneStream,
                                                const Range& bounds,
                                                const double agentFrontLength,
                                                const double agentRearLength,
                                                const double intendedVelocity,
                                                const double gapInSeconds,
-                                               const double minimumSeparationBuffer,
-                                               const Route& route,
-                                               const LaneTypes& supportedLaneTypes) const;
+                                               const double minimumSeparationBuffer) const;
 
+    //! Calculates the adjusted spawn distance such that the minimum ttc to the end of lane is not violated
+    //!
+    //! \param laneId                   lane to spawn
+    //! \param sCoordinate              s coordinate on road
+    //! \param intendedSpawnPosition    initially calcuted spawn distance on stream
+    //! \param intendedVelocity         velocity of the agent
+    //! \param route                    route of the agent
+    //! \param supportedLaneTypes   Container of all valid lanetypes
+    //! \return adjusted spawn distance
+    double CalculateAdjustedSpawnDistanceToEndOfLane(const LaneId laneId,
+                                                     const double sCoordinate,
+                                                     const double intendedSpawnPosition,
+                                                     const double intendedVelocity,
+                                                     const Route& route,
+                                                     const LaneTypes& supportedLaneTypes) const;
 
     //! Adjust spawning velocity so that the spawned agent won't immediately crash.
     //!
@@ -103,7 +109,28 @@ public:
                                                    const double intendedVelocity,
                                                    const Route& route) const;
 
+    //! Adjust spawning velocity so that the spawned agent won't immediately crash.
+    //!
+    //! \param laneStream               LaneStream to spawn in
+    //! \param intendedSpawnPosition    s coordinate
+    //! \param agentFrontLength         distance from reference point to front of agent
+    //! \param agentRearLength          distance from reference point to rear of agent
+    //! \param intendedVelocity         spawning velocity
+    //! \return possibly adjusted velocity
+    double CalculateSpawnVelocityToPreventCrashing(const std::unique_ptr<LaneStreamInterface> &laneStream,
+                                                   const double intendedSpawnPosition,
+                                                   const double agentFrontLength,
+                                                   const double agentRearLength,
+                                                   const double intendedVelocity) const;
+
     //! Check wether the minimum distance the next object is satisfied
+    //!
+    //! \param laneId                   Id of the lane
+    //! \param sPosition                s coordinate of own agent
+    //! \param route                    initial route of the agent
+    //! \param vehicleModelParameters   parameters of the vehicle model
+    //! \param minimumSeparationBuffer  minimum distance between agents
+    //! \return true if minimum distance is met
     bool ValidMinimumSpawningDistanceToObjectInFront(const LaneId laneId,
                                                      const SPosition sPosition,
                                                      const Route& route,
@@ -111,6 +138,15 @@ public:
                                                      const double minimumSeparationBuffer) const;
 
     //! Check if it is allowed the spawn an agent at the given coordinate
+    //!
+    //! \param roadId                   Id of the road
+    //! \param laneId                   Id of the lane
+    //! \param sPosition                s coordinate of own agent
+    //! \param offset                   lateral position in lane
+    //! \param minimumSeparationBuffer  minimum distance between agents
+    //! \param route                    initial route of the agent
+    //! \param vehicleModelParameters   parameters of the vehicle model
+    //! \true if spawning coordinates are valid
     bool AreSpawningCoordinatesValid(const RoadId& roadId,
                                      const LaneId laneId,
                                      const SPosition sPosition,
@@ -120,22 +156,34 @@ public:
                                      const VehicleModelParameters& vehicleModelParameters) const;
 
     //! Check wether spawning an agent with given parameters will result in a crash
-    bool SpawnWillCauseCrash(const RoadId& roadId,
-                             const LaneId laneId,
+    //!
+    //! \param laneStream               LaneStream to spawn in
+    //! \param sPosition                s coordinate
+    //! \param agentFrontLength         distance from reference point to front of agent
+    //! \param agentRearLength          distance from reference point to rear of agent
+    //! \param velocity                 spawning velocity
+    //! \return true if spawning would cause a crash
+    bool SpawnWillCauseCrash(const std::unique_ptr<LaneStreamInterface> &laneStream,
                              const SPosition sPosition,
                              const double agentFrontLength,
                              const double agentRearLength,
                              const double velocity,
-                             const Direction direction,
-                             const Route& route) const;
+                             const Direction direction) const;
 
-    //! Returns the number of lanes to the right the given lane at the given s coordinate
+    //! Returns the number of lanes to the right of the given lane at the given s coordinate
     //!
     //! \param roadId       Id of the road
     //! \param laneId       Id of the lane
     //! \param sPosition    s coordinate
     //! \return number of lanes to the right
     size_t GetRightLaneCount(const RoadId& roadId, const LaneId& laneId, const double sPosition) const;
+
+    //! Returns the number of lanes to the right the given lane at the given s coordinate
+    //!
+    //! \param laneStream   LaneStream to spawn in
+    //! \param sPosition    s coordinate
+    //! \return number of lanes to the right
+    size_t GetRightLaneCount(const std::unique_ptr<LaneStreamInterface> &laneStream, const double sPosition) const;
 
     //! Checks if a roadId exists in direction of a laneId
     //!
@@ -156,16 +204,15 @@ public:
     //! \param laneId       Id of the lane
     //! \param stochastics  Stochastics module which randomizes the route
     //! \return route
-    Route SampleRoute(const std::string &roadId,
-                      const int laneId,
+    Route SampleRoute(const RoadId& roadId,
+                      const LaneId laneId,
                       StochasticsInterface* stochastics) const;
 
 private:
-    static LaneSpawningRanges GetValidSpawningInformationForRange(const int laneId,
-                                                                  const double sStart,
-                                                                  const double sEnd,
-                                                                  const double firstScenarioAgentSPosition,
-                                                                  const double lastScenarioAgentSPosition);
+    static Ranges GetValidSpawningInformationForRange(const double sStart,
+                                                      const double sEnd,
+                                                      const double firstScenarioAgentSPosition,
+                                                      const double lastScenarioAgentSPosition);
 
     bool IsOffsetValidForLane(const RoadId& roadId,
                               const LaneId laneId,

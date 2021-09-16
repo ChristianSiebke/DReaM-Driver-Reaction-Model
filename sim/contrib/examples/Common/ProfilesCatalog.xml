@@ -1,0 +1,184 @@
+<Profiles SchemaVersion="0.4.6">
+  <AgentProfiles>
+    <AgentProfile Name="LuxuryClassCarAgent" Type="Dynamic">
+      <DriverProfiles>
+        <DriverProfile Name="Regular" Probability="1.0"/>
+      </DriverProfiles>
+      <VehicleProfiles>
+        <VehicleProfile Name="BMW 7 1" Probability="0.5"/>
+        <VehicleProfile Name="BMW 7 2" Probability="0.5"/>
+      </VehicleProfiles>
+    </AgentProfile>
+    <AgentProfile Name="MiddleClassCarAgent" Type="Dynamic">
+      <DriverProfiles>
+        <DriverProfile Name="Regular" Probability="1.0"/>
+      </DriverProfiles>
+      <VehicleProfiles>
+        <VehicleProfile Name="Mini Cooper" Probability="0.4"/>
+        <VehicleProfile Name="BMW i3" Probability="0.3"/>
+        <VehicleProfile Name="BMW 3" Probability="0.3"/>
+      </VehicleProfiles>
+    </AgentProfile>
+    <AgentProfile Name="TruckAgent" Type="Dynamic">
+      <DriverProfiles>
+        <DriverProfile Name="RegularTruck" Probability="1.0"/>
+      </DriverProfiles>
+      <VehicleProfiles>
+        <VehicleProfile Name="Truck" Probability="1.0"/>
+      </VehicleProfiles>
+    </AgentProfile>
+      <AgentProfile Name="BusAgent" Type="Dynamic">
+      <DriverProfiles>
+        <DriverProfile Name="RegularBus" Probability="1.0"/>
+      </DriverProfiles>
+      <VehicleProfiles>
+        <VehicleProfile Name="Bus" Probability="1.0"/>
+      </VehicleProfiles>
+    </AgentProfile>
+  </AgentProfiles>
+  <VehicleProfiles>
+    <VehicleProfile Name="BMW 7 1">
+      <Model Name="car_bmw_7_1"/>
+      <Components/>
+      <Sensors/>
+    </VehicleProfile>
+    <VehicleProfile Name="BMW 7 2">
+      <Model Name="car_bmw_7_2"/>
+      <Components/>
+      <Sensors/>
+    </VehicleProfile>
+    <VehicleProfile Name="Mini Cooper">
+      <Model Name="car_mini_cooper"/>
+      <Components/>
+      <Sensors/>
+    </VehicleProfile>
+    <VehicleProfile Name="BMW i3">
+      <Model Name="car_bmw_i3"/>
+      <Components/>
+      <Sensors/>
+    </VehicleProfile>
+    <VehicleProfile Name="BMW 3">
+      <Model Name="car_bmw_3"/>
+      <Components/>
+      <Sensors/>
+    </VehicleProfile>
+    <VehicleProfile Name="Truck">
+      <Model Name="truck"/>
+      <Components/>
+      <Sensors/>
+    </VehicleProfile>
+    <VehicleProfile Name="Bus">
+      <Model Name="bus"/>
+      <Components/>
+      <Sensors/>
+    </VehicleProfile>
+  </VehicleProfiles>
+  <ProfileGroup Type="Driver">
+    <Profile Name="Regular">
+      <String Key="Type" Value="AlgorithmAgentFollowingDriverModel"/>
+      <String Key="AlgorithmLateralModule" Value="Algorithm_LateralAfdm"/>
+      <String Key="AlgorithmLongitudinalModule" Value="Algorithm_LongitudinalAfdm"/>
+      <Double Key="VelocityWish" Value="36.11"/>
+      <Double Key="Delta" Value="4.0"/>
+      <Double Key="TGapWish" Value="1.5"/>
+      <Double Key="MinDistance" Value="2.0"/>
+      <Double Key="MaxAcceleration" Value="1.4"/>
+      <Double Key="MaxDeceleration" Value="2.0"/>
+    </Profile>
+    <Profile Name="RegularBus">
+      <String Key="Type" Value="AlgorithmAgentFollowingDriverModel"/>
+      <String Key="AlgorithmLateralModule" Value="Algorithm_LateralAfdm"/>
+      <String Key="AlgorithmLongitudinalModule" Value="Algorithm_LongitudinalAfdm"/>
+      <Double Key="VelocityWish" Value="24.24"/>
+      <Double Key="Delta" Value="4.0"/>
+      <Double Key="TGapWish" Value="1.5"/>
+      <Double Key="MinDistance" Value="2.0"/>
+      <Double Key="MaxAcceleration" Value="1.4"/>
+      <Double Key="MaxDeceleration" Value="2.0"/>
+    </Profile>
+    <Profile Name="RegularTruck">
+      <String Key="Type" Value="AlgorithmAgentFollowingDriverModel"/>
+      <String Key="AlgorithmLateralModule" Value="Algorithm_LateralAfdm"/>
+      <String Key="AlgorithmLongitudinalModule" Value="Algorithm_LongitudinalAfdm"/>
+      <Double Key="VelocityWish" Value="24.24"/>
+      <Double Key="Delta" Value="4.0"/>
+      <Double Key="TGapWish" Value="1.5"/>
+      <Double Key="MinDistance" Value="2.0"/>
+      <Double Key="MaxAcceleration" Value="1.4"/>
+      <Double Key="MaxDeceleration" Value="2.0"/>
+    </Profile>
+  </ProfileGroup>
+  <ProfileGroup Type="TrafficGroup">
+    <Profile Name="LightVehicles">
+      <List Name="AgentProfiles">
+        <ListItem>
+          <String Key="Name" Value="LuxuryClassCarAgent"/>
+          <Double Key="Weight" Value="0.4"/>
+        </ListItem>
+        <ListItem>
+          <String Key="Name" Value="MiddleClassCarAgent"/>
+          <Double Key="Weight" Value="0.6"/>
+        </ListItem>
+      </List>
+      <NormalDistribution Key="Velocity" Max="43.685" Mean="31.475" Min="19.265" SD="6.105"/>
+      <LogNormalDistribution Key="TGap" Max="80" Min="0.5" Mu="1.5" Sigma="1.7"/>
+      <DoubleVector Key="Homogeneity" Value="0.820, 1.0"/>
+    </Profile>
+    <Profile Name="HeavyVehicles">
+      <List Name="AgentProfiles">
+        <ListItem>
+          <String Key="Name" Value="TruckAgent"/>
+          <Double Key="Weight" Value="1.0"/>
+        </ListItem>
+        <ListItem>
+          <String Key="Name" Value="BusAgent"/>
+          <Double Key="Weight" Value="1.0"/>
+        </ListItem>
+      </List>
+      <NormalDistribution Key="Velocity" Max="25" Mean="22.22" Min="19.44" SD="1.39"/>
+      <LogNormalDistribution Key="TGap" Max="100" Min="0.5" Mu="1.94" Sigma="2.35"/>
+      <Bool Key="RightLaneOnly" Value="true"/>
+    </Profile>
+  </ProfileGroup>
+  <ProfileGroup Type="Spawner">
+    <Profile Name="DefaultPreRunCommon">
+      <List Name="SpawnZones">
+        <ListItem>
+          <StringVector Key="Roads" Value="1"/>
+          <IntVector Key="Lanes" Value="-1,-2,-3,-4,-5"/>
+          <Double Key="SStart" Value="0.0"/>
+          <Double Key="SEnd" Value="1000.0"/>
+        </ListItem>
+      </List>
+      <List Name="TrafficGroups">
+        <ListItem>
+          <Double Key="Weight" Value="4"/>
+          <Reference Type="TrafficGroup" Name="LightVehicles"/>
+        </ListItem>
+        <ListItem>
+          <Double Key="Weight" Value="1"/>
+          <Reference Type="TrafficGroup" Name="HeavyVehicles"/>
+        </ListItem>
+      </List>
+    </Profile>
+    <Profile Name="DefaultRuntimeCommon">
+      <List Name="SpawnPoints">
+        <ListItem>
+          <StringVector Key="Roads" Value="1"/>
+          <IntVector Key="Lanes" Value="-1,-2,-3,-4,-5"/>
+          <Double Key="SCoordinate" Value="0.0"/>
+        </ListItem>
+      </List>
+      <List Name="TrafficGroups">
+        <ListItem>
+          <Double Key="Weight" Value="4"/>
+          <Reference Type="TrafficGroup" Name="LightVehicles"/>
+        </ListItem>
+        <ListItem>
+          <Double Key="Weight" Value="1"/>
+          <Reference Type="TrafficGroup" Name="HeavyVehicles"/>
+        </ListItem>
+      </List>
+    </Profile>
+  </ProfileGroup>
+</Profiles>

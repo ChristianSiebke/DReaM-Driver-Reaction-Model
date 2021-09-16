@@ -9,15 +9,15 @@
 # **********************************************************************/
 
 #-----------------------------------------------------------------------------
-# \file  SpawnPointRuntimeCommon.pro
+# \file  RuntimeCommon.pro
 # \brief This file contains the information for the QtCreator-project of the
-# module SpawnPointRuntimeCommon
+# module RuntimeCommon
 #-----------------------------------------------------------------------------/
 
 # shortened .pro file name due to MinGW path length problems
-TARGET = SpawnPointRuntimeCommon
+TARGET = RuntimeCommon
 
-DEFINES += SPAWNPOINT_COMMON_RUNTIME_LIBRARY
+DEFINES += SPAWNER_COMMON_RUNTIME_LIBRARY
 CONFIG += OPENPASS_LIBRARY
 include(../../../../../../global.pri)
 
@@ -44,13 +44,13 @@ DEPENDENCY_SOURCES = \
 
 SOURCES += \
     $$DEPENDENCY_SOURCES \
-    SpawnPointRuntimeCommon.cpp \
-    SpawnPointRuntimeCommonExport.cpp
+    SpawnerRuntimeCommon.cpp \
+    SpawnerRuntimeCommonExport.cpp
 
 HEADERS += \
     $$DEPENDENCYS_HEADERS \
-    SpawnPointRuntimeCommon.h \
-    SpawnPointRuntimeCommonExport.h \
-    SpawnPointRuntimeCommonGlobal.h \
-    SpawnPointRuntimeCommonParameterExtractor.h \
-    SpawnPointRuntimeCommonDefinitions.h
+    SpawnerRuntimeCommon.h \
+    SpawnerRuntimeCommonExport.h \
+    SpawnerRuntimeCommonGlobal.h \
+    SpawnerRuntimeCommonParameterExtractor.h \
+    SpawnerRuntimeCommonDefinitions.h
