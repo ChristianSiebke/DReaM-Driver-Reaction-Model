@@ -41,7 +41,7 @@ TEST(SlaveConfigImporter_UnitTests, ImportSpawnersSuccessfully)
                                        "</root>"
                                     );
 
-    SpawnPointLibraryInfoCollection spawnPointsConfig {};
+    SpawnPointLibraryInfoCollection spawnPointsConfig{};
 
     EXPECT_NO_THROW(SlaveConfigImporter::ImportSpawners(fakeDocumentRoot, spawnPointsConfig));
     EXPECT_THAT(spawnPointsConfig, SizeIs(2));
@@ -84,11 +84,11 @@ TEST(SlaveConfigImporter_UnitTests, ImportSpawnersUnsuccessfully)
                                            "</Spawner>"
                                        "</root>"
                                     );
-    SpawnPointLibraryInfoCollection spawnPointsConfig;
+    SpawnPointLibraryInfoCollection spawnPointConfig;
 
-    ASSERT_THROW(SlaveConfigImporter::ImportSpawners(fakeDocumentRootMissingLibrary, spawnPointsConfig), std::runtime_error);
-    ASSERT_THROW(SlaveConfigImporter::ImportSpawners(fakeDocumentRootMissingType, spawnPointsConfig), std::runtime_error);
-    ASSERT_THROW(SlaveConfigImporter::ImportSpawners(fakeDocumentRootMissingPriority, spawnPointsConfig), std::runtime_error);
+    ASSERT_THROW(SlaveConfigImporter::ImportSpawners(fakeDocumentRootMissingLibrary, spawnPointConfig), std::runtime_error);
+    ASSERT_THROW(SlaveConfigImporter::ImportSpawners(fakeDocumentRootMissingType, spawnPointConfig), std::runtime_error);
+    ASSERT_THROW(SlaveConfigImporter::ImportSpawners(fakeDocumentRootMissingPriority, spawnPointConfig), std::runtime_error);
 }
 
 TEST(SlaveConfigImporter_UnitTests, ImportObserversSuccessfully)

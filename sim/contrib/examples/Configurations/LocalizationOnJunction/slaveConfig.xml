@@ -42,7 +42,7 @@
   </Observations>
   <Spawners>
     <Spawner>
-      <Library>SpawnPointScenario</Library>
+      <Library>SpawnerScenario</Library>
       <Type>PreRun</Type>
       <Priority>1</Priority>
     </Spawner>

@@ -165,6 +165,9 @@ public:
     //! Returns the OSI Id
     virtual Id GetId() const = 0;
 
+    //! Returns the OpenDrive Id
+    virtual OdId GetOdId() const = 0;
+
     //! Returns false of this lane is invalid, otherwise returns true
     virtual bool Exists() const = 0;
 
@@ -815,12 +818,13 @@ public:
     //! @param[in] osiLane  representation of the road in OpenDrive
     //! @param[in] section  section that this lane is part of
     //! @param[in] isInStreamDirection  flag whether this lane is in the same direction as the LaneStream it belongs to
-    Lane(osi3::Lane* osiLane, const Interfaces::Section* section);
+    Lane(osi3::Lane* osiLane, const Interfaces::Section* section, OdId odId);
     ~Lane() override;
 
     void CopyToGroundTruth(osi3::GroundTruth& target) const override;
 
     Id GetId() const override;
+    OdId GetOdId() const override;
     bool Exists() const override;
     const Interfaces::Section& GetSection() const override;
     const Interfaces::Road& GetRoad() const override;
@@ -928,6 +932,7 @@ protected:
     osi3::Lane* osiLane{nullptr};
 
 private:
+    OdId odId;
     LaneType laneType{LaneType::Undefined};
     LaneAssignmentCollector worldObjects;
     Interfaces::LaneAssignments stationaryObjects;
@@ -942,14 +947,14 @@ private:
     const Interfaces::Lane* leftLane;
     const Interfaces::Lane* rightLane;
     double length{0.0};
-    bool leftLaneIsDummy{section == nullptr};
-    bool rightLaneIsDummy{section == nullptr};
+    bool leftLaneIsDummy{true};
+    bool rightLaneIsDummy{true};
 };
 
 class InvalidLane : public Lane
 {
 public:
-    InvalidLane() : Lane(new osi3::Lane(), nullptr)
+    InvalidLane() : Lane(new osi3::Lane(), nullptr, 0)
     {
         // set 'invalid' id
         osiLane->mutable_id()->set_value(InvalidId);

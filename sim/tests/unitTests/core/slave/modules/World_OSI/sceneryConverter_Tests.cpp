@@ -51,7 +51,7 @@ public:
 std::tuple<const OWL::Primitive::LaneGeometryJoint*, const OWL::Primitive::LaneGeometryJoint*> CreateSectionPartJointsRect(double length)
 {
     osi3::Lane osiLane;
-    OWL::Implementation::Lane lane(&osiLane, nullptr);
+    OWL::Implementation::Lane lane(&osiLane, nullptr, -1);
 
     auto laneGeometryElement =
         OWL::Testing::LaneGeometryElementGenerator::RectangularLaneGeometryElement(

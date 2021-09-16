@@ -25,7 +25,7 @@ public:
                       StochasticsInterface*,
                       ScenarioInterface*,
                       const std::optional<ProfileGroup>&));
-    MOCK_METHOD0(TriggerPreRunSpawnPoints,
+    MOCK_METHOD0(TriggerPreRunSpawnZones,
                  bool());
     MOCK_METHOD1(TriggerRuntimeSpawnPoints,
                  bool(const int));

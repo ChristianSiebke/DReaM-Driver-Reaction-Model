@@ -351,7 +351,7 @@ void WorldData::AddLane(const Id id, RoadLaneSectionInterface& odSection, const 
 
     Section& section = *(sections.at(&odSection));
     osi3::Lane* osiLane = osiGroundTruth->add_lane();
-    Lane& lane = *(new Implementation::Lane(osiLane, &section));
+    Lane& lane = *(new Implementation::Lane(osiLane, &section, odLaneId));
     osiLane->mutable_id()->set_value(id);
     osiLane->mutable_classification()->set_centerline_is_driving_direction(odLaneId < 0);
     const bool isLeft = odLaneId > 0;
@@ -440,20 +440,6 @@ void WorldData::AddLane(const Id id, RoadLaneSectionInterface& odSection, const 
     {
         osiLane->mutable_classification()->set_type(osi3::Lane_Classification_Type_TYPE_NONDRIVING);
     }
-    switch (laneType)
-    {
-    case RoadLaneType::Driving:
-        osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_NORMAL);
-        break;
-    case RoadLaneType::Biking:
-        osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_BIKING);
-        break;
-    case RoadLaneType::Sidewalk:
-        osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_SIDEWALK);
-        break;
-    default:
-        osiLane->mutable_classification()->set_subtype(osi3::Lane_Classification_Subtype_SUBTYPE_OTHER);
-    }
 
     osiLane->mutable_classification()->mutable_road_condition()->set_surface_temperature(293.15);
     osiLane->mutable_classification()->mutable_road_condition()->set_surface_freezing_point(273.15);
@@ -463,7 +449,6 @@ void WorldData::AddLane(const Id id, RoadLaneSectionInterface& odSection, const 
     osiLane->mutable_classification()->mutable_road_condition()->set_surface_texture(0.0);
     osiLanes[&odLane] = osiLane;
     lanes[id] = &lane;
-    laneIdMapping[id] = static_cast<OWL::OdId>(odLaneId);
 
     section.AddLane(lane);
 }
@@ -994,7 +979,6 @@ void WorldData::Clear()
     }
     roadMarkings.clear();
 
-    laneIdMapping.clear();
     osiGroundTruth->Clear();
 }
 

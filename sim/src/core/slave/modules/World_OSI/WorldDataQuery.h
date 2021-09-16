@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019, 2020 2021 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,7 @@
 #include <tuple>
 #include "OWL/DataTypes.h"
 #include "WorldData.h"
+#include "RoadStream.h"
 #include <numeric>
 #include <algorithm>
 
@@ -104,9 +105,7 @@ private:
 };
 
 using LaneStreamInfo = StreamInfo<OWL::Interfaces::Lane>;
-using LaneStream = Stream<OWL::Interfaces::Lane>;
 using RoadStreamInfo = StreamInfo<OWL::Interfaces::Road>;
-using RoadStream = Stream<OWL::Interfaces::Road>;
 
 //! This class represent a directed tree of elements.
 //! It is used by various queries to search along consecutive elements within a range starting at some start point
@@ -158,7 +157,7 @@ public:
             {
                 return this;
             }
-            for (auto successor : next)
+            for (const auto& successor : next)
             {
                 if (auto foundNode = successor.FindVertex(vertex))
                 {
@@ -192,7 +191,7 @@ public:
 
    double GetPositionByVertexAndS(const RoadGraphVertex& vertex, double sCoordinate) const
    {
-       auto node = root.FindVertex(vertex);
+       const Node* node = root.FindVertex(vertex);
        if (!node)
        {
            throw std::runtime_error("Cannot find vertex in multistream");
@@ -202,7 +201,8 @@ public:
            return std::numeric_limits<double>::lowest();
        }
        const auto& element = node->element.value();
-       return element.GetStreamPosition(sCoordinate - element.element->GetDistance(OWL::MeasurementPoint::RoadStart));
+       auto distance = element.element->GetDistance(OWL::MeasurementPoint::RoadStart);
+       return element.GetStreamPosition(sCoordinate - distance);
    }
 
 private:
@@ -232,56 +232,6 @@ public:
         return (worldObject->Is<T>() &&
                 lane.GetStreamPosition(worldObject->GetDistance(OWL::MeasurementPoint::RoadEnd, roadId) - lane.element->GetDistance(OWL::MeasurementPoint::RoadStart)) > minS &&
                 lane.GetStreamPosition(worldObject->GetDistance(OWL::MeasurementPoint::RoadStart, roadId) - lane.element->GetDistance(OWL::MeasurementPoint::RoadStart)) < maxS);
-    }
-
-    //! Searches along a lane stream starting at startDistance and returns the all objects
-    //! found until endDistance that are of type T.
-    //! Returns an empty vector if there is no such object within the range
-    //! T can be one of WorldObject, MovingObject or StationaryObject
-    template<typename T>
-    std::vector<const OWL::Interfaces::WorldObject*> GetObjectsOfTypeInRange(const LaneStream& laneStream,
-                                                                             const double startDistance,
-                                                                             const double endDistance) const
-    {
-        const auto& lanesOnStream = laneStream.GetElements();
-        std::vector<const OWL::Interfaces::WorldObject*> foundObjects;
-        for (const auto& laneStreamElement : lanesOnStream)
-        {
-            if (laneStreamElement.EndS() < startDistance) //Ignore lanes ending before startDistance
-            {
-                continue;
-            }
-            if (laneStreamElement.StartS() > endDistance) //Stop if reached endDistance
-            {
-                break;
-            }
-            const auto& roadId = laneStreamElement.element->GetRoad().GetId();
-
-            const auto streamDirection = laneStreamElement.inStreamDirection;
-            const auto s_lanestart = laneStreamElement.element->GetDistance(OWL::MeasurementPoint::RoadStart);
-
-            for (const auto& [laneOverlap, object] : laneStreamElement.element->GetWorldObjects(streamDirection))
-            {
-                const auto s_min = streamDirection ? laneOverlap.s_min : laneOverlap.s_max;
-                const auto s_max = streamDirection ? laneOverlap.s_max : laneOverlap.s_min;
-
-                auto streamPositionStart = laneStreamElement.GetStreamPosition(s_min - s_lanestart);
-                if (streamPositionStart > endDistance)
-                {
-                    break;
-                }
-
-                auto streamPositionEnd = laneStreamElement.GetStreamPosition(s_max - s_lanestart);
-                if (dynamic_cast<const T*>(object) && streamPositionEnd >= startDistance)
-                {
-                    if (std::find(foundObjects.crbegin(), foundObjects.crend(), object) == foundObjects.crend())
-                    {
-                        foundObjects.push_back(object);
-                    }
-                }
-            }
-        }
-        return foundObjects;
     }
 
     //! Searches along a lane multi stream starting at startDistance and returns the all objects
@@ -470,16 +420,6 @@ public:
     //! \return distance of rear of object to last intersection with connecting road
     double GetDistanceUntilObjectLeavesConnector(const ObjectPosition position, std::string intersectingConnectorId, int intersectingLaneId, std::string ownConnectorId) const;
 
-    //! Creates the longest possible laneStream along the given route that contains the given startLane
-    //!
-    //! \param route        OpenDrive ids of the roads along which the laneStream should flow
-    //! \param startRoadId  OpenDrive id of the road of the startLane
-    //! \param startLaneId  OpenDrive id of the startLane
-    //! \param startDistance    s coordinate on the startLane
-    //! \return
-    //!
-    std::shared_ptr<const LaneStream> CreateLaneStream(const std::vector<RouteElement>& route, std::string startRoadId, OWL::OdId startLaneId, double startDistance) const;
-
     //! Creates a LaneMultiStream that contains the OWL lanes out of a roadGraph.
     //!
     //! \param roadGraph        road graph to convert, must be a tree
@@ -495,7 +435,7 @@ public:
     //!
     //! \return a RoadStream across the Roads specified in route
     //!
-    std::shared_ptr<const RoadStream> CreateRoadStream(const std::vector<RouteElement>& route) const;
+    std::unique_ptr<RoadStream> CreateRoadStream(const std::vector<RouteElement>& route) const;
 
     //! Creates a RoadMultiStream that contains the OWL roads out of a roadGraph.
     //!
@@ -549,8 +489,19 @@ public:
     //! \param startPosition    start search position on the road stream
     //! \param startLaneId      ego lane id
     //! \param range            range of search
+    //! \param includeOncoming  indicating whether oncoming lanes should be included
     //! \return information about all lanes in range
-    RouteQueryResult<RelativeWorldView::Lanes> GetRelativeLanes(const RoadMultiStream& roadStream, double startPosition, int startLaneId, double range) const;
+    RouteQueryResult<RelativeWorldView::Lanes> GetRelativeLanes(const RoadMultiStream& roadStream, double startPosition, int startLaneId, double range, bool includeOncoming) const;
+
+    //! Returns the relative lane id of the located position of a point relative to the given position
+    //!
+    //! \param roadStream       road stream to search
+    //! \param startPosition    start search position on the road stream
+    //! \param ownPosition      own position on stream
+    //! \param ownLaneId        id of own lane
+    //! \param targetPosition   position of queried point
+    //! \return lane id relative to own position
+    RouteQueryResult<std::optional<int>> GetRelativeLaneId(const RoadMultiStream& roadStream, double ownPosition, int ownLaneId, std::map<std::string, GlobalRoadPosition> targetPosition) const;
 
     RouteQueryResult<std::optional<double>> GetLaneCurvature (const LaneMultiStream& laneStream, double position) const;
 
@@ -567,7 +518,7 @@ private:
     OWL::CRoad* GetOriginatingRouteRoad(const std::vector<std::string>& route, const std::string& startRoadId, const OWL::OdId startLaneId, const double startDistance) const;
 
     //! Returns the ids of the stream of roads leading the connecting road including the connecting road itself
-    std::vector<RouteElement> GetRouteLeadingToConnector(std::string connectingRoadId) const;
+    std::tuple<RoadGraph, RoadGraphVertex, RoadGraphVertex> GetRouteLeadingToConnector(std::string connectingRoadId) const;
 
     //! Returns the WorldPosition corresponding to the (s,t) position on the lane, if s is valid on the lane
     //! Otherwise the bool in the pair is false
@@ -576,7 +527,7 @@ private:
     int FindNextEgoLaneId(const OWL::Interfaces::Lanes& lanesOnSection, bool inStreamDirection, std::map<int, OWL::Id> previousSectionLaneIds) const;
 
     std::map<int, OWL::Id> AddLanesOfSection(const OWL::Interfaces::Lanes& lanesOnSection, bool inStreamDirection,
-                                             int currentOwnLaneId, const std::map<int, OWL::Id>& previousSectionLaneIds,
+                                             int currentOwnLaneId, bool includeOncoming, const std::map<int, OWL::Id>& previousSectionLaneIds,
                                              std::vector<RelativeWorldView::Lane>& previousSectionLanes, RelativeWorldView::LanesInterval& laneInterval) const;
 
     RoadMultiStream::Node CreateRoadMultiStreamRecursive(const RoadGraph& roadGraph, const RoadGraphVertex& current, double sOffset) const;

@@ -17,14 +17,14 @@ add_openpass_target(
     ${OPENPASS_SIMCORE_DIR}/core/slave/framework/agentDataPublisher.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/framework/sampler.cpp
     ${COMPONENT_SOURCE_DIR}/common/WorldAnalyzer.cpp
-    ${COMPONENT_SOURCE_DIR}/PreRunCommon/SpawnPointPreRunCommon.cpp
+    ${COMPONENT_SOURCE_DIR}/PreRunCommon/SpawnerPreRunCommon.cpp
     Spawner_IntegrationTests.cpp
 
   HEADERS
     ${OPENPASS_SIMCORE_DIR}/core/common/log.h
     ${OPENPASS_SIMCORE_DIR}/core/slave/framework/sampler.h
     ${COMPONENT_SOURCE_DIR}/common/WorldAnalyzer.h
-    ${COMPONENT_SOURCE_DIR}/PreRunCommon/SpawnPointPreRunCommon.h
+    ${COMPONENT_SOURCE_DIR}/PreRunCommon/SpawnerPreRunCommon.h
 
   INCDIRS
     ${OPENPASS_SIMCORE_DIR}/core

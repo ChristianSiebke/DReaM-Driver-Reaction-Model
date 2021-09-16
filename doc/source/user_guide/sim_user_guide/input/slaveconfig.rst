@@ -37,7 +37,7 @@ ProfilesCatalog
 
 Specifies the :ref:`profilescatalog` for the experiment.
 
-.. literalinclude:: @OP_REL_SIM@/contrib/examples/DefaultConfigurations/slaveConfig.xml
+.. literalinclude:: @OP_REL_SIM@/contrib/examples/Common/slaveConfig.xml
    :language: xml
    :start-at: <ProfilesCatalog> 
    :end-at: </ProfilesCatalog>
@@ -64,7 +64,7 @@ Specifies the general experiment setup, not specific to a single invocation.
                          If not specified the default name is assumed.      yes
    ===================== ================================================== =========
 
-.. literalinclude:: @OP_REL_SIM@/contrib/examples/DefaultConfigurations/slaveConfig.xml
+.. literalinclude:: @OP_REL_SIM@/contrib/examples/Common/slaveConfig.xml
    :language: xml
    :start-at: <Experiment> 
    :end-at: </Experiment>
@@ -89,7 +89,7 @@ This section contains information about the scenario setup for the experiment. T
 
 This experiment uses the "HighwayScenario.xosc" scenario file.
 
-.. literalinclude:: @OP_REL_SIM@/contrib/examples/DefaultConfigurations/slaveConfig.xml
+.. literalinclude:: @OP_REL_SIM@/contrib/examples/Common/slaveConfig.xml
    :language: xml
    :start-at: <Scenario> 
    :end-at: </Scenario>
@@ -122,7 +122,7 @@ In 70% of all invocation drivers can see 125 meter and for the other 30% of invo
 Every invocation has a friction of 0.3.
 Every invocation has sunny weather.
 
-.. literalinclude:: @OP_REL_SIM@/contrib/examples/DefaultConfigurations/slaveConfig.xml
+.. literalinclude:: @OP_REL_SIM@/contrib/examples/Common/slaveConfig.xml
    :language: xml
    :start-at: <Environment> 
    :end-at: </Environment>
@@ -174,7 +174,7 @@ The same library can be loaded multiple times with different profiles.
 A spawner is either of type "PreRun", meaning it is triggered only once at the start of the simulation, or "Runtime", meaning it is triggered in every timestep.
 If different spawners are to be triggered at the same time the spawner with the highest priority is triggered first.
 
-.. literalinclude:: @OP_REL_SIM@/contrib/examples/DefaultConfigurations/slaveConfig.xml
+.. literalinclude:: @OP_REL_SIM@/contrib/examples/Common/slaveConfig.xml
    :language: xml
    :start-at: <Spawners> 
    :end-at: </Spawners>
@@ -183,7 +183,7 @@ If different spawners are to be triggered at the same time the spawner with the 
 Full Example
 ------------
 
-.. literalinclude:: @OP_REL_SIM@/contrib/examples/DefaultConfigurations/slaveConfig.xml
+.. literalinclude:: @OP_REL_SIM@/contrib/examples/Common/slaveConfig.xml
    :language: xml
    :caption: slaveConfig.xodr
    :linenos:

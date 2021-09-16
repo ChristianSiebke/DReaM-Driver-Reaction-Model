@@ -36,7 +36,7 @@
     </VehicleProfile>
   </VehicleProfiles>
   <ProfileGroup Type="Driver">
-      <Profile Name="Regular">
+    <Profile Name="Regular">
 		<String Key="Type" Value="AlgorithmAgentFollowingDriverModel"/>
 		<String Key="AlgorithmLateralModule" Value="Algorithm_LateralAfdm"/>
 		<String Key="AlgorithmLongitudinalModule" Value="Algorithm_LongitudinalAfdm"/>
@@ -47,7 +47,7 @@
 		<Double Key="MaxAcceleration" Value="0.0"/>
 		<Double Key="MaxDeceleration" Value="0.0"/>
       </Profile>
-	  <Profile Name="Standing">
+    <Profile Name="Standing">
 		<String Key="Type" Value="AlgorithmAgentFollowingDriverModel"/>
 		<String Key="AlgorithmLateralModule" Value="Algorithm_LateralAfdm"/>
 		<String Key="AlgorithmLongitudinalModule" Value="Algorithm_LongitudinalAfdm"/>
@@ -58,13 +58,13 @@
 		<Double Key="MaxAcceleration" Value="1.4"/>
 		<Double Key="MaxDeceleration" Value="2.0"/>
       </Profile>
-    </ProfileGroup>
+  </ProfileGroup>
   <ProfileGroup Type="Dynamics_TrajectoryFollower">
-		<Profile Name="BasicTrajectoryFollower">
+    <Profile Name="BasicTrajectoryFollower">
 			<Bool Key="AutomaticDeactivation" Value="true"/>
 			<Bool Key="EnforceTrajectory" Value="true"/>
 		</Profile>
-	</ProfileGroup>
+  </ProfileGroup>
   <ProfileGroup Type="TrafficRules">
     <Profile Name="Germany">
       <Double Key="OpenSpeedLimit" Value="infinity"/>

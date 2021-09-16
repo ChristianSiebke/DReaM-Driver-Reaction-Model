@@ -126,7 +126,7 @@
   </ProfileGroup>
   <ProfileGroup Type="Spawner">
     <Profile Name="DefaultPreRunCommon">
-      <List Name="SpawnPoints">
+      <List Name="SpawnZones">
         <ListItem>
           <StringVector Key="Roads" Value="1"/>
           <IntVector Key="Lanes" Value="-1,-2,-3,-4,-5"/>

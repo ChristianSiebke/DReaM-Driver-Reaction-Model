@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
+* Copyright (c) 2018, 2019, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -49,7 +49,6 @@ struct FakeLaneManager
     std::map<size_t, std::list<const OWL::Interfaces::Lane*>> sectionLanes;
     OWL::Implementation::InvalidLane invalidLane;
     std::vector<std::vector<OWL::Implementation::Lane::LaneAssignmentCollector>> objectAssignments;
-    std::unordered_map<OWL::Id, OWL::OdId> laneIdMapping;
     std::vector<std::vector<OWL::Id>> lanePredecessors;
     std::vector<std::vector<OWL::Id>> laneSuccessors;
     std::string roadId;
@@ -88,9 +87,9 @@ struct FakeLaneManager
                 OWL::Id id = GetNewId();
                 if (col == 0) { streamId[row] = id; }
                 ON_CALL(*newLane, GetId()).WillByDefault(Return(id));
+                ON_CALL(*newLane, GetOdId()).WillByDefault(Return(-1 - row));
                 ON_CALL(*newLane, GetLaneType()).WillByDefault(Return(LaneType::Driving));
                 ON_CALL(*newLane, GetRoad()).WillByDefault(ReturnRef(*road));
-                laneIdMapping.insert({id, -(1 + row)});
                 fakeLaneRow.push_back(newLane);
                 objectAssignmentRow.emplace_back();
             }
@@ -260,11 +259,6 @@ struct FakeLaneManager
     const std::unordered_map<std::string, OWL::Interfaces::Road* >& GetRoads() const
     {
         return roads;
-    }
-
-    std::unordered_map<OWL::Id, OWL::OdId>& GetLaneIdMapping()
-    {
-        return laneIdMapping;
     }
 
     FakeLaneManager(size_t cols, size_t rows, double width, const std::vector<double>& sectionLengths, const std::string& roadId) : cols{cols}, rows{rows},

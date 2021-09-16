@@ -52,7 +52,7 @@ public:
                      ScenarioInterface* scenario,
                      const std::optional<ProfileGroup>& spawnPointProfiles) override;
 
-    bool TriggerPreRunSpawnPoints() override;
+    bool TriggerPreRunSpawnZones() override;
 
     bool TriggerRuntimeSpawnPoints(const int timestamp) override;
 
@@ -69,7 +69,7 @@ private:
     std::map<std::string, SpawnPointBinding> * spawnPointBindings;
     WorldInterface* world;
     const openpass::common::RuntimeInformation& runtimeInformation;
-    std::multimap<int, std::unique_ptr<SpawnPoint>> preRunSpawnPoints;
+    std::multimap<int, std::unique_ptr<SpawnPoint>> preRunSpawnZones;
     std::multimap<int, std::unique_ptr<SpawnPoint>> runtimeSpawnPoints;
     std::vector<Agent*> newAgents {};
 };

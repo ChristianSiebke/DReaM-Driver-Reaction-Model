@@ -141,7 +141,7 @@ bool XmlSlaveConfig::WriteToXml(QXmlStreamWriter *xmlWriter)
 
     xmlWriter->writeStartElement("Spawners");
     xmlWriter->writeStartElement("Spawner");
-    xmlWriter->writeTextElement("Library","SpawnPointScenario");
+    xmlWriter->writeTextElement("Library","SpawnerScenario");
     xmlWriter->writeTextElement("Type","PreRun");
     xmlWriter->writeTextElement("Priority","1");
     xmlWriter->writeEndElement(); // Spawner

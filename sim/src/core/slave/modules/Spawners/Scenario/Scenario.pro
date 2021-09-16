@@ -9,15 +9,15 @@
 # **********************************************************************/
 
 #-----------------------------------------------------------------------------
-# \file  SpawnPointScenario.pro
+# \file  SpawnerScenario.pro
 # \brief This file contains the information for the QtCreator-project of the
-# module SpawnPointScenario
+# module SpawnerScenario
 #-----------------------------------------------------------------------------/
 
 # shortened .pro file name due to MinGW path length problems
-TARGET = SpawnPointScenario
+TARGET = SpawnerScenario
 
-DEFINES += SPAWNPOINT_SCENARIO_LIBRARY
+DEFINES += SPAWNER_SCENARIO_LIBRARY
 CONFIG += OPENPASS_LIBRARY
 include(../../../../../../global.pri)
 
@@ -30,7 +30,7 @@ INCLUDEPATH += \
     ../../../modelElements
 
 DEPENDENCY_HEADERS = \
-                     ../common/SpawnPointDefinitions.h \
+                     ../common/SpawnerDefinitions.h \
                      ../common/stochasticDefinitions.h \
                      ../../../modelElements/agentBlueprint.h \
                      ../../../framework/sampler.h
@@ -39,18 +39,18 @@ DEPENDENCY_SOURCES = \
                      ../../../modelElements/agentBlueprint.cpp \
                      ../../../framework/sampler.cpp
 
-SPAWNPOINT_HEADERS = SpawnPointScenario.h \
-                     SpawnPointScenarioExport.h \
-                     SpawnPointScenarioGlobal.h
+SPAWNER_HEADERS = SpawnerScenario.h \
+                     SpawnerScenarioExport.h \
+                     SpawnerScenarioGlobal.h
 
-SPAWNPOINT_SOURCES = SpawnPointScenario.cpp \
-                     SpawnPointScenarioExport.cpp
+SPAWNER_SOURCES = SpawnerScenario.cpp \
+                     SpawnerScenarioExport.cpp
 
 SOURCES += \
     $$DEPENDENCY_SOURCES \
-    $$SPAWNPOINT_SOURCES
+    $$SPAWNER_SOURCES
 
 HEADERS += \
     $$DEPENDENCY_HEADERS \
-    $$SPAWNPOINT_HEADERS
+    $$SPAWNER_HEADERS
 
