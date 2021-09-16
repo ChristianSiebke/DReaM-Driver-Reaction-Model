@@ -50,6 +50,7 @@ spec:
             stage('Linux: Cleanup and prepare dependencies') {
               steps {
                 container('openpass-build') {
+                  sh "chmod +x -R ${env.WORKSPACE}"
                   sh 'bash repo/utils/ci/scripts/build_prepare.sh'
                 }
               }
@@ -101,7 +102,7 @@ spec:
           environment {
             MSYSTEM = 'MINGW64'
             CHERE_INVOKING = 'yes'
-            PYTHON_WINDOWS_EXE = '"C:/Program Files/Python39/python.exe"'
+            PYTHON_WINDOWS_EXE = 'C:/%ProgramFiles%/Python39/python.exe'
           }
           stages {
             stage('Windows: Cleanup and prepare dependencies') {
