@@ -20,15 +20,15 @@ cd "$MYDIR/../../../.."
 WORKSPACE_ROOT="$PWD"
 
 # Detect system settings and create a conan profile
-${PYTHON_WINDOWS_EXE} -m conans.conan profile new default --detect
-${PYTHON_WINDOWS_EXE} -m conans.conan profile update settings.compiler.libcxx=libstdc++11 default
+C:/Program Files/Python39/python.exe -m conans.conan profile new default --detect
+C:/Program Files/Python39/python.exe -m conans.conan profile update settings.compiler.libcxx=libstdc++11 default
 
 # export conan recipes of thirdParty dependencies to conans local cache
-${PYTHON_WINDOWS_EXE} -m conans.conan export $WORKSPACE_ROOT/utils/ci/conan/recipe/osi openpass/testing
-${PYTHON_WINDOWS_EXE} -m conans.conan export $WORKSPACE_ROOT/utils/ci/conan/recipe/fmi openpass/testing
+C:/Program Files/Python39/python.exe -m conans.conan export $WORKSPACE_ROOT/utils/ci/conan/recipe/osi openpass/testing
+C:/Program Files/Python39/python.exe -m conans.conan export $WORKSPACE_ROOT/utils/ci/conan/recipe/fmi openpass/testing
 
 # prepare a build directory
 mkdir -p build-thirdParty && cd build-thirdParty
 
 # (build and) install thirdParty dependencies to conans local cache and deploy them
-${PYTHON_WINDOWS_EXE} -m conans.conan install $WORKSPACE_ROOT/utils/ci/conan/install_file/thirdParty --build=missing --install-folder="$WORKSPACE_ROOT/deps/" -g deploy
+C:/Program Files/Python39/python.exe -m conans.conan install $WORKSPACE_ROOT/utils/ci/conan/install_file/thirdParty --build=missing --install-folder="$WORKSPACE_ROOT/deps/" -g deploy
