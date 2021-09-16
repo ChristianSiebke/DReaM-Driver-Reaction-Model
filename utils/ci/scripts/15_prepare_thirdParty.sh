@@ -27,15 +27,15 @@ else
 fi 
 
 # Detect system settings and create a conan profile
-PYTHON_COMMAND -m conans.conan profile new default --detect
-PYTHON_COMMAND -m conans.conan profile update settings.compiler.libcxx=libstdc++11 default
+$PYTHON_COMMAND -m conans.conan profile new default --detect
+$PYTHON_COMMAND -m conans.conan profile update settings.compiler.libcxx=libstdc++11 default
 
 # export conan recipes of thirdParty dependencies to conans local cache
-PYTHON_COMMAND -m conans.conan export $WORKSPACE_ROOT/utils/ci/conan/recipe/osi openpass/testing
-PYTHON_COMMAND -m conans.conan export $WORKSPACE_ROOT/utils/ci/conan/recipe/fmi openpass/testing
+$PYTHON_COMMAND -m conans.conan export $WORKSPACE_ROOT/utils/ci/conan/recipe/osi openpass/testing
+$PYTHON_COMMAND -m conans.conan export $WORKSPACE_ROOT/utils/ci/conan/recipe/fmi openpass/testing
 
 # prepare a build directory
 mkdir -p build-thirdParty && cd build-thirdParty
 
 # (build and) install thirdParty dependencies to conans local cache and deploy them
-PYTHON_COMMAND -m conans.conan install $WORKSPACE_ROOT/utils/ci/conan/install_file/thirdParty --build=missing --install-folder="$WORKSPACE_ROOT/deps/" -g deploy
+$PYTHON_COMMAND -m conans.conan install $WORKSPACE_ROOT/utils/ci/conan/install_file/thirdParty --build=missing --install-folder="$WORKSPACE_ROOT/deps/" -g deploy
