@@ -323,7 +323,7 @@ void DynamicsRegularDrivingImplementation::Trigger(int time)
     dynamicsSignal.travelDistance = ds;
 
     // convert steering wheel angle to steering angle of front wheels [radian]
-    const auto steering_angle = std::clamp(-vehicleModelParameters.frontAxle.maxSteering, in_steeringWheelAngle / GetVehicleProperty(vehicle::properties::SteeringRatio), vehicleModelParameters.frontAxle.maxSteering);
+    const auto steering_angle = std::clamp(in_steeringWheelAngle / GetVehicleProperty(vehicle::properties::SteeringRatio), -vehicleModelParameters.frontAxle.maxSteering, vehicleModelParameters.frontAxle.maxSteering);
     dynamicsSignal.steeringWheelAngle = steering_angle * GetVehicleProperty(vehicle::properties::SteeringRatio) ;
     GetPublisher()->Publish("SteeringAngle", steering_angle);
     const double wheelbase = vehicleModelParameters.frontAxle.positionX - vehicleModelParameters.rearAxle.positionX;
