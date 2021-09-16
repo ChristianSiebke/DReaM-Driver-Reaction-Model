@@ -50,7 +50,6 @@ spec:
             stage('Linux: Cleanup and prepare dependencies') {
               steps {
                 container('openpass-build') {
-                  sh "chmod +x -R ${env.WORKSPACE}"
                   sh 'bash repo/utils/ci/scripts/build_prepare.sh'
                 }
               }
