@@ -14,6 +14,10 @@
 Overview
 ========
 
+.. admonition:: Before we start...
+
+   The official Working Group website of |op_oss| (https://openpass.eclipse.org/) offers a lot of information, well suited for beginners.
+
 Getting Started
 ---------------
 
@@ -27,9 +31,22 @@ In particular, it is presented how to go through the required steps until a simu
 To enhance the guiding, there are going to be examples in every section. 
 It is important to mention that openPASS is still in progress and e. g. some plugins and options have not been fully implemented yet.
 
+Intended Audience
+-----------------
+
+This manual serves as an entry point for users who have an operational simulator at hand (see :ref:`sim_install_guide`) and want to carry out (first) experiments at the invocation level (*GUI-less mode*).
+In this sense, it primarily tackles how input-sets are composed, their interdependencies and, finally, the generated outputs.
+
+.. image:: sim_user_guide/_static/images/workflow.png
+      :alt: |op| Workflow
+
+This image shows the *GUI-less* workflow, starting with the input-set, bundled together in a folder typically named ``configs``.
+The ``core``, executed manually by the experimenter, processes these configs and generates an (configurable) output-set typically placed in a folder named ``results``.
+Thereby, the **Simulation Output** is again a set of files.
+
 
 Interaction GUI and Framework
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------------
 
 .. image:: gui_user_guide/_static/images/plugin/gui_framework_overview.png
 
@@ -38,7 +55,7 @@ With these files, the GUI can trigger the simulation to start und produce result
 These files can then be read evaluated by the GUI.
 
 Workflow
-^^^^^^^^
+--------
 
 A typical workflow can be:
 
@@ -48,79 +65,99 @@ A typical workflow can be:
    4. Evaluate the simulation results
    5. Close the loop by continuing with your next simulation
 
-Overview of the GUI Plugins
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. _primer:
 
-   * Simulation Plugins
+Primer
+------
 
-      * :ref:`project`
-      * :ref:`system_editor`
-      * :ref:`pcm_sim`
+In the following the input and output sets are described with respect to the intended audience.
+For detailed information please refer to the "in-depth" documentation of the individual files.
 
-   * Result Preview Plugins
+Inputs
+^^^^^^
 
-      * :ref:`pcm_eval`
-      * :ref:`timeplot`
-      * :ref:`statistics`
+The input is focused around the following files, with decreasing importance for the current audience. 
 
-   * Work in Progress (only listed)
+- **Scenario**
+  
+  This file describes the overall situation in terms of the **ASAM OpenSCENARIO 1.0** standard.
+  This includes placement of cars, the story (what happens when), how long the simulation will run.
+  
+  On top it contains links to additionally needed files, where the following might need modification with respect to the current audience:
 
-      * agentConfiguration
-      * trafficSimulation
+  - **Scenery** (``*.xosc``)
+  
+    The **scenery** file, which follows the **ASAM OpenDRIVE 1.6** standard, describes the world in which the experiment runs, such as a highway, or a parking lot.
+    As such, it contains the description of the road network and any static object, such as traffic signs or obstacles.
 
-Simulation Start from GUI
--------------------------
+  - **ProfilesCatalog** (``*.xml``)
 
-To simply start a simulation from the gui, the :ref:`project` Plugin can be used
+   This catalog describes the profiles of moving participants and are the probabilistic heart of the simulation.
+   A profile could be a **MiddleClassCar**, and describes which components could be available with what probability.
+   Such components could be ADAS's or sensors and as such, their parametrization is also found here.
 
-.. _project:
+   .. note:: As **OpenSCENARIO** does not support probabilities (yet), this file is not conform to the standard.
 
-Project
+  - **VehiclesCatalog** and **PedestriansCatalog**: (``*.xosc``)
+
+    These catalogs, also based on **OpenSCENARIO**, describes the physical parameters of available vehicles or pedestrians, respectively.
+
+    .. note:: 
+    
+       Historically, the referenced files have carry an additional *Model* in the filename: ``VehicleModelsCatalog.xosc`` and ``PedestrianModelsCatalog.xosc``
+
+- **SlaveConfig** (``slaveConfig.xml``)
+
+  This is the entry point for the simulation, containing the setup of the core, such as active observers, reference to the scenario, the initial random seed, and the number or invocations.
+
+  .. note::
+     
+     This file is normally of limited interest.
+     Yet, some variations, such as *environmental conditions* are historically placed in here and not in the scenario description. 
+     It is therefore recommended to study the contents of this file.
+
+- **SystemConfigBlueprint** (``systemConfigBlueprint.xml``)
+
+  This file is contains a superset of all possible *components* and their valid connections. 
+  Such components can be lateral and longitudinal controllers, assistance systems, prioritizers, driver models, and so on.
+  Depending on the configured profiles and their probabilities, the core picks a subset of components to create one complete *system*.
+
+  .. warning:: This file should not be changed without the proper (developer) expertise.
+
+  .. note:: 
+  
+     Instead of using an overall blueprint, concrete (static) systems can be specified using the same format. 
+     These files are simply referred to as ``SystemConfig`` files.
+
+Some components need their own input files (e.g. a configuration).
+It is convention to put these files also into the ``configs`` folder, which is internally provided as path to the components.
+This helps to keep experiments separated.
+
+Outputs
 ^^^^^^^
 
-.. image:: gui_user_guide/_static/images/plugin/project/overview.png
+Outputs are generated by individual observers, configured by the **SlaveConfig**, and collected within the folder `results`.
+This section describes the output files by the :ref:`observation_log`, as configured by the provided example configurations.
 
-Before the simulation adjustments begin, the user is obligated to load or create a “Master Configuration” (masterConfig). 
-A Master Configuration in openPASS can be understood as a project. 
-It is a XML-File which get inscribed the path settings and simulation settings after you click **SAVE**.
+Please refer to the documentation of the individual observers and files for more details.
 
-General
-"""""""
+- **Simulation Output** (``simulationOutput.xml``)
 
-.. image:: gui_user_guide/_static/images/plugin/project/general.png
+  This file acts as central entry point for further evaluation, such as the visualization.
+  It contains central information about all executed invocations within an experiment, such as the executed scenario and the run results, which can be seen as current values from the random sampling of the given probabilities.
+  As such, each run result contains, a list of participating moving entities (also referred to as agents), events related to the entities, such as collisions or activation of ADAS's, and a reference to the *cyclics file*.
 
-In this segment you are able to name the Master Configuration. In our example it is called *MasterConfigurationNo1*.
+  .. note:: This file **does not** contain information about the actual position of agents.
 
-Path Settings
-"""""""""""""
+- **Cyclic Output** (``Cyclics_Run_###.csv``)
 
-.. image:: gui_user_guide/_static/images/plugin/project/pathSettings.png
+  This file contains the ground truth information for each agent at each time step.
+  For each invocation, a new file is generated (starting with ``Cyclics_Run_000.csv`` and referenced in the according run results in the ``simulationOutput.xml``.
 
-The next step is path settings. 
-These will change depending on where your openPASS.exe is located. 
-In the screen shot above the openPASS.exe is located at ``C:/OpenPASS``. 
-For easier use of this tutorial it is recommended to save the Demo Folder in ``C:/`` and name it *OpenPASS*.
-On to the settings. 
-As you can see three paths need to be set. 
-The library comes with openPASS. 
-There are plans to remove the option for the user to set the library path, but at this moment there is still the option to change it, although this is not recommended.
-The Slave Path references the OpenPassSlave.exe, the file to execute the slave. 
-If you are using the provided Demo, there is no need for you to change it. 
-The only path you need to set is the path of the Configuration Files. 
-In the Demo it will be located at ``[directory of openPASS.exe]/configs``, so in this case it would be ``C:/OpenPASS/configs``.
-
-Simulation Output Settings
-""""""""""""""""""""""""""
-
-.. image:: gui_user_guide/_static/images/plugin/project/simOutputSettings.png
-
-Next step is the Simulation Output Settings. There are three output files. First is the log file of the master. 
-However, when simulation jobs are started by the GUI, the openPASS master is not executed and, hence, the master log will not contain any log entries. 
-Second is the log file created by the slave. In this log file you will find error messages, actions of the slave etc. depending on the log level. 
-The Log level lets you choose which type of messages are logged. “0” means that only errors are logged, 
-whereas the highest log level of “5” leads to the most detailed description of which steps are executed by the slave. 
-The results path specifies the folder in which the results of a successful simulation will be saved. 
+  .. note:: This file **does not** contain information about the interaction between agents.
 
 .. note:: 
 
-   It is recommended to create a new folder in C:/OpenPASS called “results” and set it as the results path as in the picture above.
+   The core generates a file called ``LogSlave.txt`` at the execution path, which logs errors and warnings.
+   If the simulation behaves strange or did not produce any output, check this file.
+

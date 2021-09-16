@@ -21,7 +21,7 @@ Over time, especially the graphical user interface evolved to a single entry poi
 This guide contains information about installation, configuration and usage of all tools in the |Op| environment.
 
 .. toctree::
-   :caption: Installation Guides
+   :caption: Installation Guide
    :glob:
    :maxdepth: 1
 
@@ -47,11 +47,18 @@ Based on these the simulation core calculates different simulation runs and comp
 .. include:: api.rst
 
 .. toctree::
-   :caption: Other Information
+   :caption: Developer Information
+   :glob:
    :maxdepth: 1
 
-   glossary.rst
-   license.rst
+   developer_information/*
+
+.. toctree::
+   :caption: Other Information
+   :glob:
+   :maxdepth: 1
+
+   other_information/*
 
 Todolist
 ========

@@ -28,7 +28,7 @@ Loading Results
       * Subsequently selected folders are added to the list in the TreeView
       * Histograms will be calculated for each folder including subfolders and will be shown in a new row
 
-.. image:: _static/images/plugin/statistics/overview.png
+.. image:: _static/images/statistics/overview.png
 
 Evaluating Results
 ------------------
@@ -54,4 +54,4 @@ Evaluating Results
       * All of these files consistent with the first read header are used to calculate histograms for all columns
       * Files with non-consistent headers are ignored
 
-.. image:: _static/images/plugin/statistics/select.png
+.. image:: _static/images/statistics/select.png

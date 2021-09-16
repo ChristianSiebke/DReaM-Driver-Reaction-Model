@@ -1,6 +1,6 @@
 ..
   ************************************************************
-  Copyright (c) 2021 ITK Engineering GmbH
+  Copyright (c) 2021 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 
   This program and the accompanying materials are made
   available under the terms of the Eclipse Public License 2.0
@@ -9,18 +9,16 @@
   SPDX-License-Identifier: EPL-2.0
   ************************************************************
 
-.. _pcm_simulation_guide:
 
-PCM Simulation
-==============
+.. _ide_support:
 
-.. image:: gui_user_guide/_static/images/plugin/pcm_sim/overview.png
+IDE Support 
+===========
+
+Development of |op| is often done in Qt Creator and Visual Studio Code. This section provides guides to set up your build environment. 
 
 .. toctree::
    :glob:
    :maxdepth: 1
 
-   gui_user_guide/pcm_sim
-   gui_user_guide/pcm_eval
-   gui_user_guide/system_editor
-
+   ide_support/*

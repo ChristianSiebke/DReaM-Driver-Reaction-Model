@@ -1,0 +1,33 @@
+# for simulator
+pacman -S mingw-w64-x86_64-boost        #Tested with 1.75.0-2
+pacman -S mingw-w64-x86_64-ccache       #Tested with 3.7.9-1
+pacman -S mingw-w64-x86_64-cmake        #Tested with 3.19.2-1
+pacman -S mingw-w64-x86_64-doxygen      #Tested with 1.8.20-1
+pacman -S mingw-w64-x86_64-gcc          #Tested with 10.2.0-6
+pacman -S mingw-w64-x86_64-gdb          #Tested with 10.1-2
+pacman -S mingw-w64-x86_64-graphviz     #Tested with 2.44.1-3
+pacman -S mingw-w64-x86_64-gtest        #Tested with 1.10.0-1
+pacman -S mingw-w64-x86_64-protobuf     #Tested with 3.12.4-1
+pacman -S mingw-w64-x86_64-qt5          #Tested with 5.15.2-5
+pacman -S make                          #Tested with 4.3-1
+
+# for documentation
+pacman -S mingw-w64-x86_64-python       #Tested with 3.9.6.2
+pacman -S mingw-w64-x86_64-python-pip   #Tested with 21.1.3-2
+pacman -S mingw-w64-x86_64-python-lxml  #Tested with 4.6.2-2
+
+# get necessary latex style (assuming default paths for MSYS2)
+wget -P /mingw64/share/texmf-dist/tex/latex/anyfontsize \
+  http://mirrors.ctan.org/macros/latex/contrib/anyfontsize/anyfontsize.sty
+
+# fonts (picks up anyfontsize) and equation rendering in the documentation
+pacman -S mingw-w64-x86_64-zziplib      #Tested with 0.13.72-3
+pacman -S mingw-w64-x86_64-texlive-bin  #Tested with 2021.20210424-5
+pacman -S mingw-w64-x86_64-texlive-core #Tested with 2021.20210519-2
+pacman -S mingw-w64-x86_64-texlive-font-utils #Tested with 2021.20210519-1
+
+# for sphinx/exhale
+pacman -S libxslt-devel
+
+# additional python packages for documentation
+pip3 install sphinx sphinx-rtd-theme sphinx-tabs breathe exhale sphinxcontrib-spelling

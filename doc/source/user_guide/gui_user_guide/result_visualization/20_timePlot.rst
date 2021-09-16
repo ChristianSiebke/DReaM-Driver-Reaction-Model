@@ -21,7 +21,7 @@ Loading Results
 
 * Click ``Select result folder`` to choose a result folder that contains files in the required format (see below) to be plotted.
 
-.. image:: _static/images/plugin/timeplot/overview.png
+.. image:: _static/images/timeplot/overview.png
 
 Evaluating Results
 ------------------
@@ -45,4 +45,4 @@ Evaluating Results
    * Selecting the lowest subfolders yields tabs for all contained tracks
    * Selections can be combined with ``Ctrl+select`` or ``Shift+select``
 
-.. image:: _static/images/plugin/timeplot/select.png
+.. image:: _static/images/timeplot/select.png

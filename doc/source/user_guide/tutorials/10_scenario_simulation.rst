@@ -57,15 +57,15 @@ Thus, an existing simulation configuration is used and the simulation is started
 
     b. The *specific configuration* files located under ``examples/Configurations`` complement the default configuration files. Examples are provided for different simulations.
 
-        i. Ensure all files from directory ``examples/DefaultConfigurations`` have been copied to ``configs`` (this has been done in the previous step). Repeat this step everytime another simulation is chosen. 
+        i. Ensure all files from directory ``examples/DefaultConfigurations`` have been copied to ``configs`` (this has been done in the previous step). Repeat this step every time another simulation is chosen. 
                 
         ii. Navigate to the directory ``examples/Configurations``. Here, all folders contain special preconfigured simulations (which either can be used as demo cases or as end-to-end test cases primarly used for development). 
 
-        iv. Copy all files from the directory specifiying the specific scenario you want to simulate (in our case all files from directory ``examples/Configurations/AEB``) to the directory ``configs``. Overwrite existing files when promted. 
+        iv. Copy all files from the directory specifying the specific scenario you want to simulate (in our case all files from directory ``examples/Configurations/AEB``) to the directory ``configs``. Overwrite existing files when promted. 
 
     .. note::
 
-	A detailed description of the various configuration files can be found under see :ref:`inputs_in_depth`.
+	A detailed description of the various configuration files can be found under see :ref:`configs_in_depth`.
 
 #. Learn how to modify configuration files 
 
@@ -93,13 +93,13 @@ Thus, an existing simulation configuration is used and the simulation is started
 
     b. ``Scenario.xosc``:
 
-        * The scenario set-up containes the initial positions und velocities of the ego and scenario agent.
+        * The scenario set-up contains the initial positions und velocities of the ego and scenario agent.
         * The trajectory that defines the cut-in maneuver of the scenario agent is defined and editable here.
         * The overall simulation time, which determines the end condition of the simulation in seconds, can be adjusted.
 
     c. ``slaveConfig.xml``:
 
-        * The number of invocations can be changed in case more than one run is desired to be simulated. This will incorporate stochasitc variation (i.e. initial constellation of surrounding traffic)
+        * The number of invocations can be changed in case more than one run is desired to be simulated. This will incorporate stochastic variation (i.e. initial constellation of surrounding traffic)
         * If surrounding traffic is not desired in the experiment, the spawner libraries "SpawnPointPreRunCommon" and "SpawnPointRuntimeCommon" can be deactivated by removing the corresponding sections. Only the "SpawnPointScenario" is mandatory to spawn the ego and scenario agent. More information on the functionality of spawners can be found in :ref:`components_spawner`.
         * The output format can be modified by setting the parameter "LoggingCyclicsToCsv" to true.
 
@@ -108,6 +108,6 @@ Thus, an existing simulation configuration is used and the simulation is started
 #. Once the simulation is successfully completed, the following results can be found in the directory ``results``:
 
     * ``simulationOutput.xml``: Contains general information about the experiment and an overview on all agents from the simulation. Further, an event log is contained. If the csv-output is set to false in the ``slaveConfig.xml``, the ``simulationOutput.xml`` will also include the „cyclics” (state in each timestep) of the simulation.
-    * ``Cyclics_Run_xxx.csv``: In case the csv-output is activated, the „cyclics” of each run in the simulation are logged to a separated csv-file. This file is missing, if "cyclis" are written directly to the ``simulationOutput.xml`` (i.e. when "LoggingCyclicsToCsv" is set to false).
+    * ``Cyclics_Run_xxx.csv``: In case the csv-output is activated, the „cyclics” of each run in the simulation are logged to a separated csv-file. This file is missing, if "cyclics" are written directly to the ``simulationOutput.xml`` (i.e. when "LoggingCyclicsToCsv" is set to false).
     * ``Repository_Run_xxx.csv``: Overview of the agents and objects from the simulation as well as some details on scenery components like lane markings, guard rails, etc.
 

@@ -161,7 +161,7 @@ Please refer to the documentation of the individual observers for available para
    :glob:
    :maxdepth: 1
 
-   ../output/*
+   ../outputs/*
 
 .. _slaveconfig_spawners:
 
