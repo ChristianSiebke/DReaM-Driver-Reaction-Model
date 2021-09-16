@@ -21,7 +21,7 @@ WORKSPACE_ROOT="$PWD"
 
 # Set python command depending on OS
 if [[ "${OSTYPE}" = "msys" ]]; then
-  PYTHON_COMMAND='"${PYTHON_WINDOWS_EXE}"'
+  PYTHON_COMMAND=${PYTHON_WINDOWS_EXE}
 else
   PYTHON_COMMAND=python
 fi 
