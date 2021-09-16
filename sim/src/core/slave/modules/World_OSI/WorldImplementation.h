@@ -159,7 +159,7 @@ public:
     Position LaneCoord2WorldCoord(double distanceOnLane, double offset, std::string roadId,
                                           int laneId) const override;
 
-    std::map<const std::string, GlobalRoadPosition> WorldCoord2LaneCoord(double x, double y, double heading) const override;
+    std::map<std::string, GlobalRoadPosition> WorldCoord2LaneCoord(double x, double y, double heading) const override;
 
     bool IsSValidOnLane(std::string roadId, int laneId, double distance) override;
 
@@ -213,6 +213,8 @@ public:
 
     RouteQueryResult<RelativeWorldView::Lanes> GetRelativeLanes(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, double range, bool includeOncoming = true) const override;
 
+    RouteQueryResult<std::optional<int>> GetRelativeLaneId(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, std::map<std::string, GlobalRoadPosition> targetPosition) const override;
+
     std::vector<JunctionConnection> GetConnectionsOnJunction(std::string junctionId, std::string incomingRoadId) const override;
 
     std::vector<IntersectingConnection> GetIntersectingConnections(std::string connectingRoadId) const override;
@@ -226,6 +228,8 @@ public:
     std::pair<RoadGraph, RoadGraphVertex> GetRoadGraph (const RouteElement& start, int maxDepth) const override;
 
     std::map<RoadGraphEdge, double> GetEdgeWeights (const RoadGraph& roadGraph) const override;
+
+    std::unique_ptr<RoadStreamInterface> GetRoadStream(const std::vector<RouteElement>& route) const override;
 
     double GetFriction() const override;
 

@@ -1,5 +1,5 @@
 <!-- Invalid Type for SpawnPoint -->
-<slaveConfig SchemaVersion="0.8.1">
+<slaveConfig SchemaVersion="0.8.2">
   <ProfilesCatalog>ProfilesCatalog.xml</ProfilesCatalog>
   <Experiment>
     <ExperimentID>0</ExperimentID>
@@ -47,7 +47,7 @@
   </Observations>
   <Spawners>
     <Spawner>
-      <Library>SpawnPointScenario</Library>
+      <Library>SpawnerScenario</Library>
       <Type>ThisTypeDoesNotExist</Type>
       <Priority>1</Priority>
     </Spawner>

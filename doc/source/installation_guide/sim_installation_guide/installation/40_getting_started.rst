@@ -52,13 +52,13 @@ Using the recommended repository path and install path, you can run an example s
 
          .. code-block:: 
 
-            cp /C/simopenpass/sim/contrib/examples/DefaultConfigurations/* /C/OpenPASS/bin/core/configs
+            cp /C/simopenpass/sim/contrib/examples/Common/* /C/OpenPASS/bin/core/configs
 
       .. tab:: Linux
 
          .. code-block:: 
 
-            cp ~/simopenpass/sim/contrib/examples/DefaultConfigurations/* /usr/local/OpenPASS/bin/core/configs
+            cp ~/simopenpass/sim/contrib/examples/Common/* /usr/local/OpenPASS/bin/core/configs
 
 #. Start executable
 

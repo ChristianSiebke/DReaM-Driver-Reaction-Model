@@ -33,7 +33,7 @@ The tag ``ParameterDeclarations`` allow to define generic parameters, which can 
 
 **Example declaration**
 
-.. literalinclude:: @OP_REL_SIM@/contrib/examples/DefaultConfigurations/Scenario.xosc
+.. literalinclude:: @OP_REL_SIM@/contrib/examples/Common/Scenario.xosc
    :language: xml
    :dedent: 2
    :start-at: <ParameterDeclarations>
@@ -41,7 +41,7 @@ The tag ``ParameterDeclarations`` allow to define generic parameters, which can 
 
 **Example usage**
 
-.. literalinclude:: @OP_REL_SIM@/contrib/examples/DefaultConfigurations/Scenario.xosc
+.. literalinclude:: @OP_REL_SIM@/contrib/examples/Common/Scenario.xosc
    :language: xml
    :dedent: 12
    :start-at: <SimulationTime
@@ -74,7 +74,7 @@ The following catalogs interpreted:
 
 **Example**
 
-.. literalinclude:: @OP_REL_SIM@/contrib/examples/DefaultConfigurations/Scenario.xosc
+.. literalinclude:: @OP_REL_SIM@/contrib/examples/Common/Scenario.xosc
    :language: xml
    :dedent: 2
    :start-at: <CatalogLocations>
@@ -100,7 +100,7 @@ For each vehicle the physical parameters are stored here.
 - truck
 - bicycle
 
-**Full Example:** :download:`@OP_REL_SIM@/contrib/examples/DefaultConfigurations/VehicleModelsCatalog.xosc`
+**Full Example:** :download:`@OP_REL_SIM@/contrib/examples/Common/VehicleModelsCatalog.xosc`
 
 .. _scenario_pedestrianmodels:
 
@@ -121,7 +121,7 @@ For each pedestrian the physical parameters are stored here.
 - pedestrian_child
 - pedestrian_adult
 
-**Full Example:** :download:`@OP_REL_SIM@/contrib/examples/DefaultConfigurations/PedestrianModelsCatalog.xosc`
+**Full Example:** :download:`@OP_REL_SIM@/contrib/examples/Common/PedestrianModelsCatalog.xosc`
 
 .. _scenario_roadnetwork:
 
@@ -132,7 +132,7 @@ The ``RoadNetwork`` tag contains the mandatory reference to the OpenDRIVE :ref:`
 
 **Example**
 
-.. literalinclude:: @OP_REL_SIM@/contrib/examples/DefaultConfigurations/Scenario.xosc
+.. literalinclude:: @OP_REL_SIM@/contrib/examples/Common/Scenario.xosc
    :language: xml
    :dedent: 2
    :start-at: <RoadNetwork>
@@ -159,7 +159,7 @@ Entities can also be grouped into selections.
 
 **Example**
 
-.. literalinclude:: @OP_REL_SIM@/contrib/examples/DefaultConfigurations/Scenario.xosc
+.. literalinclude:: @OP_REL_SIM@/contrib/examples/Common/Scenario.xosc
    :language: xml
    :dedent: 2
    :start-at: <Entities>
@@ -467,7 +467,7 @@ The rule is required and only ``greaterThan`` is currently supported.
 
 **Example**
 
-.. literalinclude:: @OP_REL_SIM@/contrib/examples/DefaultConfigurations/Scenario.xosc
+.. literalinclude:: @OP_REL_SIM@/contrib/examples/Common/Scenario.xosc
    :language: xml
    :dedent: 8
    :start-at: <Condition name="EndTime"
@@ -808,7 +808,7 @@ Right now, only SimulationTime is supported, given in seconds, with the fixed ``
 
 **Example**
 
-.. literalinclude:: @OP_REL_SIM@/contrib/examples/DefaultConfigurations/Scenario.xosc
+.. literalinclude:: @OP_REL_SIM@/contrib/examples/Common/Scenario.xosc
    :language: xml
    :dedent: 2
    :start-at: <StopTrigger>

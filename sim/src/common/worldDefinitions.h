@@ -18,6 +18,7 @@
 #include <set>
 #include "boost/graph/adjacency_list.hpp"
 
+//! Double values with difference lower than this should be considered equal
 constexpr double EQUALITY_BOUND = 1e-3;
 
 //! Type of element in RoadNetwork
@@ -220,8 +221,8 @@ struct RoadInterval
 //! Position of an object in the road network
 struct ObjectPosition
 {
-    std::map<const std::string, GlobalRoadPosition> referencePoint{};    //! position of the reference point mapped by roadId
-    std::map<const std::string, GlobalRoadPosition> mainLocatePoint{};   //! position of the mainLocatePoint (middle of agent front) mapped by roadId
+    std::map<std::string, GlobalRoadPosition> referencePoint{};    //! position of the reference point mapped by roadId
+    std::map<std::string, GlobalRoadPosition> mainLocatePoint{};   //! position of the mainLocatePoint (middle of agent front) mapped by roadId
     std::map<std::string, RoadInterval> touchedRoads{}; //! all roads the object is on (fully or partially), key is the roadId
 };
 

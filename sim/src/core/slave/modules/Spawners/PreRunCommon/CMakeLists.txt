@@ -8,9 +8,9 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-set(COMPONENT_NAME SpawnPointPreRunCommon)
+set(COMPONENT_NAME SpawnerPreRunCommon)
 
-add_compile_definitions(SPAWNPOINT_COMMON_PRERUN_LIBRARY)
+add_compile_definitions(SPAWNER_COMMON_PRERUN_LIBRARY)
 
 add_openpass_target(
   NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT module
@@ -18,19 +18,19 @@ add_openpass_target(
   HEADERS
     ../../../framework/sampler.h
     ../../../modelElements/agentBlueprint.h
-    ../common/SpawnPointDefinitions.h
+        ../common/SpawnerDefinitions.h
     ../common/WorldAnalyzer.h
-    SpawnPointPreRunCommon.h
-    SpawnPointPreRunCommonExport.h
-    SpawnPointPreRunCommonGlobal.h
-    SpawnPointPreRunCommonParameterExtractor.h
+        SpawnerPreRunCommon.h
+        SpawnerPreRunCommonExport.h
+        SpawnerPreRunCommonGlobal.h
+        SpawnerPreRunCommonParameterExtractor.h
 
   SOURCES
     ../../../framework/sampler.cpp
     ../../../modelElements/agentBlueprint.cpp
     ../common/WorldAnalyzer.cpp
-    SpawnPointPreRunCommon.cpp
-    SpawnPointPreRunCommonExport.cpp
+        SpawnerPreRunCommon.cpp
+        SpawnerPreRunCommonExport.cpp
 
   INCDIRS
     ..

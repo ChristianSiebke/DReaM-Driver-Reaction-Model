@@ -44,8 +44,9 @@ Primitive::Dimension GetDimensionFromOsiObject(const OsiObject& osiObject)
 
 namespace Implementation {
 
-Lane::Lane(osi3::Lane* osiLane, const Interfaces::Section* section) :
+Lane::Lane(osi3::Lane* osiLane, const Interfaces::Section* section, OdId odId) :
     osiLane(osiLane),
+    odId(odId),
     section(section),
     leftLane(section ? new InvalidLane() : nullptr),
     rightLane(section ? new InvalidLane() : nullptr)
@@ -77,6 +78,11 @@ void Lane::CopyToGroundTruth(osi3::GroundTruth& target) const
 Id Lane::GetId() const
 {
     return osiLane->id().value();
+}
+
+OdId Lane::GetOdId() const
+{
+    return odId;
 }
 
 bool Lane::Exists() const

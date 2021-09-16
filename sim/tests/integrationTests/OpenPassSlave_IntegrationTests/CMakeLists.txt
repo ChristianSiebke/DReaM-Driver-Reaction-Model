@@ -59,7 +59,9 @@ add_openpass_target(
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/OWL/DataTypes.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/OWL/OpenDriveTypeMapper.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/AgentAdapter.cpp
+    ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/LaneStream.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/Localization.cpp
+    ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/RoadStream.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/WorldData.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/WorldDataQuery.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/WorldDataException.cpp

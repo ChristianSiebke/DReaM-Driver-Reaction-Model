@@ -958,7 +958,7 @@ void SceneryConverter::CreateTrafficSign(RoadSignalInterface *signal, Position p
 
     for (auto lane : lanes)
     {
-        OWL::OdId odId = worldData.GetLaneIdMapping().at(lane->GetId());
+        OWL::OdId odId = lane->GetOdId();
         if (signal->IsValidForLane(odId))
         {
             worldData.AssignTrafficSignToLane(lane->GetId(), trafficSign);
@@ -982,7 +982,7 @@ void SceneryConverter::CreateRoadMarking(RoadSignalInterface *signal, Position p
 
     for (auto lane : lanes)
     {
-        OWL::OdId odId = worldData.GetLaneIdMapping().at(lane->GetId());
+        OWL::OdId odId = lane->GetOdId();
         if (signal->IsValidForLane(odId))
         {
             worldData.AssignRoadMarkingToLane(lane->GetId(), roadMarking);
@@ -1006,7 +1006,7 @@ void SceneryConverter::CreateRoadMarking(RoadObjectInterface* object, Position p
 
     for (auto lane : lanes)
     {
-        OWL::OdId odId = worldData.GetLaneIdMapping().at(lane->GetId());
+        OWL::OdId odId = lane->GetOdId();
         if (object->IsValidForLane(odId))
         {
             worldData.AssignRoadMarkingToLane(lane->GetId(), roadMarking);
@@ -1032,7 +1032,7 @@ void SceneryConverter::CreateTrafficLight(RoadSignalInterface* signal, Position 
 
     for (auto lane : lanes)
     {
-        OWL::OdId odId = worldData.GetLaneIdMapping().at(lane->GetId());
+        OWL::OdId odId = lane->GetOdId();
         if (signal->IsValidForLane(odId))
         {
             worldData.AssignTrafficLightToLane(lane->GetId(), trafficLight);

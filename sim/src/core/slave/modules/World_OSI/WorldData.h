@@ -153,9 +153,6 @@ public:
     //!Deletes the moving object with the specified Id
     virtual void RemoveMovingObjectById(Id id) = 0; // change Id to MovingObject
 
-    //!Returns the mapping of OSI Ids to OpenDrive Ids for lanes
-    virtual const std::unordered_map<Id, OdId>& GetLaneIdMapping() const = 0;
-
     //!Returns the mapping of OpenDrive Ids to OSI Ids for trafficSigns
     virtual const std::unordered_map<std::string, Id>& GetTrafficSignIdMapping() const = 0;
 
@@ -536,11 +533,6 @@ public:
     const std::unordered_map<Id, Interfaces::TrafficLight*>& GetTrafficLights() const override;
     const Implementation::InvalidLane& GetInvalidLane() const override {return invalidLane;}
 
-    const std::unordered_map<Id, OdId>& GetLaneIdMapping() const override
-    {
-        return laneIdMapping;
-    }
-
     const std::unordered_map<std::string, Id>& GetTrafficSignIdMapping() const override
     {
         return trafficSignIdMapping;
@@ -665,8 +657,6 @@ protected:
 private:
     const CallbackInterface* callbacks;
     uint64_t next_free_uid{0};
-
-    std::unordered_map<Id, OdId>              laneIdMapping;
     std::unordered_map<std::string, Id>         trafficSignIdMapping;
 
     std::unordered_map<Id, Lane*>               lanes;
