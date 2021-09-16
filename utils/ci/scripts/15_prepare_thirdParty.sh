@@ -21,9 +21,9 @@ WORKSPACE_ROOT="$PWD"
 
 # Set python command depending on OS
 if [[ "${OSTYPE}" = "msys" ]]; then
-  PYTHON_COMMAND=python
+  PYTHON_COMMAND="${PYTHON_WINDOWS_EXE}"
 else
-  PYTHON_COMMAND=python
+  PYTHON_COMMAND=python3
 fi 
 
 # Detect system settings and create a conan profile
