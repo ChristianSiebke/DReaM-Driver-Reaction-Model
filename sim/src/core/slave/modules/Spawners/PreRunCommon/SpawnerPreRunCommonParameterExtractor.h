@@ -189,7 +189,8 @@ static std::vector<SpawnArea> ExtractSpawnAreas(const ParameterInterface &parame
                 }
                 else if (sLengthElement.has_value())
                 {
-                    sEndOnStream = sStartOnStream + sLengthElement.value();
+                    double sLength = std::clamp(sLengthElement.value(), 0.0, roadStream->GetLength() - sStartOnStream);
+                    sEndOnStream = sStartOnStream + sLength;
                 }
             }
             else
@@ -206,7 +207,8 @@ static std::vector<SpawnArea> ExtractSpawnAreas(const ParameterInterface &parame
                 }
                 else if (sLengthElement.has_value())
                 {
-                    sStartOnStream = sEndOnStream - sLengthElement.value();
+                    double sLength = std::clamp(sLengthElement.value(), 0.0, sEndOnStream);
+                    sStartOnStream = sEndOnStream - sLength;
                 }
             }
             SPAWNER_THROWIFFALSE(sStartOnStream < sEndOnStream, "Invalid range");
