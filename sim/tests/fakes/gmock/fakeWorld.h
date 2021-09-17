@@ -67,6 +67,7 @@ class FakeWorld : public WorldInterface
     MOCK_CONST_METHOD6(GetObstruction, RouteQueryResult<Obstruction> (const RoadGraph& roadGraph, RoadGraphVertex startNode, const GlobalRoadPosition& ownPosition,
                                                                       const ObjectPosition& otherPosition, const std::vector<Common::Vector2d>& objectCorner, const Common::Vector2d& mainLaneLocator));
     MOCK_CONST_METHOD0(GetTimeOfDay, std::string());
+    MOCK_CONST_METHOD0(GetTrafficRules, const TrafficRules& ());
     MOCK_CONST_METHOD5(GetTrafficSignsInRange, RouteQueryResult<std::vector<CommonTrafficSign::Entity>>(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance, double searchRange));
     MOCK_CONST_METHOD5(GetRoadMarkingsInRange, RouteQueryResult<std::vector<CommonTrafficSign::Entity>>(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance, double searchRange));
     MOCK_CONST_METHOD5(GetTrafficLightsInRange, RouteQueryResult<std::vector<CommonTrafficLight::Entity>>(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance, double searchRange));
@@ -85,7 +86,6 @@ class FakeWorld : public WorldInterface
     MOCK_METHOD1(QueueAgentUpdate, void(std::function<void()> func));
     MOCK_METHOD2(QueueAgentUpdate, void(std::function<void(double)> func, double val));
     MOCK_METHOD0(Reset, void());
-    MOCK_METHOD1(SetParameter, void(WorldParameter *worldParameter));
     MOCK_METHOD1(SetTimeOfDay, void(int timeOfDay));
     MOCK_METHOD1(SetWeekday, void(Weekday weekday));
     MOCK_METHOD1(SyncGlobalData, void(int timestamp));

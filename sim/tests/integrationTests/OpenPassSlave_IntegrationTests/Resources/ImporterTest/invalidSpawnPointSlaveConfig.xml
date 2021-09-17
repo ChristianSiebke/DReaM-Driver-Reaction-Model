@@ -28,6 +28,7 @@
       <Weather Value="Rainy" Probability="0.5"/>
       <Weather Value="Snowy" Probability="0.5"/>
     </Weathers>
+    <TrafficRules>Germany</TrafficRules>
   </Environment>
   <Observations>
     <Observation>

@@ -44,6 +44,7 @@ struct WorldParameterOSI
     int visibilityDistance {0};
     double friction {0.0};
     std::string weather {""};
+    TrafficRules trafficRules{};
 };
 
 #include "osi3/osi_groundtruth.pb.h"
@@ -113,6 +114,7 @@ public:
     const std::list<const AgentInterface*> GetRemovedAgentsInPreviousTimestep() override;
 
     const std::vector<const TrafficObjectInterface*>& GetTrafficObjects() const override;
+    const TrafficRules& GetTrafficRules() const override;
 
     // framework internal methods to access members without restrictions
     void ExtractParameter(ParameterInterface* parameters) override;
@@ -252,10 +254,6 @@ public:
     virtual Weekday GetWeekday() const override
     {
         throw std::runtime_error("WorldImplementation::GetWeekday not implemented");
-    }
-    virtual void SetParameter([[maybe_unused]]WorldParameter *worldParameter) override
-    {
-        throw std::runtime_error("WorldImplementation::SetParameter not implemented");
     }
     virtual bool CreateGlobalDrivingView() override
     {

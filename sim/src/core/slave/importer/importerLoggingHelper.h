@@ -446,6 +446,7 @@ namespace openpass::importer::xml::slaveConfigImporter::tag
     constexpr char spawners[] {"Spawners"};
     constexpr char timeOfDay[] {"TimeOfDay"};
     constexpr char timeOfDays[] {"TimeOfDays"};
+    constexpr char trafficRules[] {"TrafficRules"};
     constexpr char type[] {"Type"};
     constexpr char visibilityDistance[] {"VisibilityDistance"};
     constexpr char visibilityDistances[] {"VisibilityDistances"};

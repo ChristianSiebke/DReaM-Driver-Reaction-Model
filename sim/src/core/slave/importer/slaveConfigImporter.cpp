@@ -114,6 +114,10 @@ void SlaveConfigImporter::ImportEnvironment(QDomElement environmentElement,
                  environmentElement, "Tag " + std::string(TAG::weathers) + " is missing.");
     ThrowIfFalse(ImportProbabilityMap(weathersElement, "Value", TAG::weather, environmentConfig.weathers, LogErrorAndThrow),
                  weathersElement, "Could not import Probabilities.");
+
+    //Parse traffic rules
+    ThrowIfFalse(ParseString(environmentElement, TAG::trafficRules, environmentConfig.trafficRules),
+                 environmentElement, "Tag " + std::string(TAG::trafficRules) + " is missing.");
 }
 
 void SlaveConfigImporter::ImportSpawners(const QDomElement &spawnersElement,

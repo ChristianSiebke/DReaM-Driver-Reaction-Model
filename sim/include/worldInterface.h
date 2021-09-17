@@ -120,12 +120,11 @@ public:
     virtual double GetVisibilityDistance() const = 0;
 
     //-----------------------------------------------------------------------------
-    //! Sets the world parameters like weekday, library
-    //! @param[in]     worldParamter  parameter to setup world
+    //! Retrieves traffic rules
     //!
-    //! @return
+    //! @return                traffic rules
     //-----------------------------------------------------------------------------
-    virtual void SetParameter(WorldParameter *worldParameter) = 0;
+    virtual const TrafficRules& GetTrafficRules() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Sets the world parameters like weekday, library

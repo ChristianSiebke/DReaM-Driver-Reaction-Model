@@ -91,6 +91,7 @@ bool XmlSlaveConfig::WriteToXml(QXmlStreamWriter *xmlWriter)
     xmlWriter->writeAttribute("Value","Clear");
     xmlWriter->writeEndElement(); // Weather
     xmlWriter->writeEndElement(); // Weathers
+    xmlWriter->writeTextElement("TrafficRules", "Germany");
     xmlWriter->writeEndElement(); // Environment
 
 

@@ -292,6 +292,7 @@ TEST(SlaveConfigImporter_UnitTests, ImportEnvironmentConfigSuccessfully)
                                        "<Weather Value=\"Rainy\" Probability=\"0.5\"/>"
                                        "<Weather Value=\"Snowy\" Probability=\"0.5\"/>"
                                        "</Weathers>"
+                                       "<TrafficRules>Country</TrafficRules>"
                                        "</root>"
                                    );
 
@@ -308,6 +309,7 @@ TEST(SlaveConfigImporter_UnitTests, ImportEnvironmentConfigSuccessfully)
                                                           Pair(0.7, 0.5)));
     ASSERT_THAT(environmentConfig.weathers, ElementsAre(Pair("Rainy", 0.5),
                                                           Pair("Snowy", 0.5)));
+    ASSERT_THAT(environmentConfig.trafficRules, Eq("Country"));
 }
 
 TEST(SlaveConfigImporter_UnitTests, ImportEnvironmentConfigUnsuccessfully)

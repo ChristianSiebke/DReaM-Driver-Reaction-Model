@@ -50,6 +50,7 @@ struct EnvironmentConfig
     IntProbabilities visibilityDistances {};
     DoubleProbabilities frictions {};
     StringProbabilities weathers {};
+    std::string trafficRules {};
 };
 
 //-----------------------------------------------------------------------------
