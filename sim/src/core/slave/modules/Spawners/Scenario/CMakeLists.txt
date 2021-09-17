@@ -9,9 +9,9 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-set(COMPONENT_NAME SpawnPointScenario)
+set(COMPONENT_NAME SpawnerScenario)
 
-add_compile_definitions(SPAWNPOINT_SCENARIO_LIBRARY)
+add_compile_definitions(SPAWNER_SCENARIO_LIBRARY)
 
 add_openpass_target(
   NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
@@ -19,15 +19,15 @@ add_openpass_target(
   HEADERS
     ../../../framework/sampler.h
     ../../../modelElements/agentBlueprint.h
-    SpawnPointScenario.h
-    SpawnPointScenarioExport.h
-    SpawnPointScenarioGlobal.h
+        SpawnerScenario.h
+        SpawnerScenarioExport.h
+        SpawnerScenarioGlobal.h
 
   SOURCES
     ../../../framework/sampler.cpp
     ../../../modelElements/agentBlueprint.cpp
-    SpawnPointScenario.cpp
-    SpawnPointScenarioExport.cpp
+        SpawnerScenario.cpp
+        SpawnerScenarioExport.cpp
 
   INCDIRS
     ..

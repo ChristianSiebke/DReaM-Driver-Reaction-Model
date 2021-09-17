@@ -62,11 +62,12 @@ class FakeWorld : public WorldInterface
     MOCK_CONST_METHOD2(GetLaneId, int(uint64_t streamId, double endDistance));
     MOCK_CONST_METHOD4(LaneCoord2WorldCoord, Position(double distanceOnLane, double offset, std::string roadId, int laneId));
     MOCK_CONST_METHOD2(RoadCoord2WorldCoord, Position(RoadPosition roadCoord, std::string roadID));
-    MOCK_CONST_METHOD3(WorldCoord2LaneCoord, std::map<const std::string, GlobalRoadPosition> (double x, double y, double heading));
+    MOCK_CONST_METHOD3(WorldCoord2LaneCoord, std::map<std::string, GlobalRoadPosition> (double x, double y, double heading));
     MOCK_CONST_METHOD1(GetRoadLength, double(const std::string& roadId));
     MOCK_CONST_METHOD6(GetObstruction, RouteQueryResult<Obstruction> (const RoadGraph& roadGraph, RoadGraphVertex startNode, const GlobalRoadPosition& ownPosition,
                                                                       const ObjectPosition& otherPosition, const std::vector<Common::Vector2d>& objectCorner, const Common::Vector2d& mainLaneLocator));
     MOCK_CONST_METHOD0(GetTimeOfDay, std::string());
+    MOCK_CONST_METHOD0(GetTrafficRules, const TrafficRules& ());
     MOCK_CONST_METHOD5(GetTrafficSignsInRange, RouteQueryResult<std::vector<CommonTrafficSign::Entity>>(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance, double searchRange));
     MOCK_CONST_METHOD5(GetRoadMarkingsInRange, RouteQueryResult<std::vector<CommonTrafficSign::Entity>>(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance, double searchRange));
     MOCK_CONST_METHOD5(GetTrafficLightsInRange, RouteQueryResult<std::vector<CommonTrafficLight::Entity>>(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance, double searchRange));
@@ -85,7 +86,6 @@ class FakeWorld : public WorldInterface
     MOCK_METHOD1(QueueAgentUpdate, void(std::function<void()> func));
     MOCK_METHOD2(QueueAgentUpdate, void(std::function<void(double)> func, double val));
     MOCK_METHOD0(Reset, void());
-    MOCK_METHOD1(SetParameter, void(WorldParameter *worldParameter));
     MOCK_METHOD1(SetTimeOfDay, void(int timeOfDay));
     MOCK_METHOD1(SetWeekday, void(Weekday weekday));
     MOCK_METHOD1(SyncGlobalData, void(int timestamp));
@@ -100,7 +100,9 @@ class FakeWorld : public WorldInterface
     MOCK_CONST_METHOD1(GetRoadPredecessor, RoadNetworkElement (std::string roadId));
     MOCK_CONST_METHOD5(GetDistanceBetweenObjects, RouteQueryResult<LongitudinalDistance> (const RoadGraph& roadGraph, RoadGraphVertex startNode, const ObjectPosition&, const std::optional<double>, const ObjectPosition&));
     MOCK_CONST_METHOD4(GetRelativeJunctions, RouteQueryResult<RelativeWorldView::Junctions> (const RoadGraph& roadGraph, RoadGraphVertex startNode, double startDistance, double range));
-    MOCK_CONST_METHOD5(GetRelativeLanes, RouteQueryResult<RelativeWorldView::Lanes> (const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, double range));
+    MOCK_CONST_METHOD6(GetRelativeLanes, RouteQueryResult<RelativeWorldView::Lanes> (const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, double range, bool includeOncoming));
+    MOCK_CONST_METHOD5(GetRelativeLaneId, RouteQueryResult<std::optional<int>> (const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, std::map<std::string, GlobalRoadPosition> targetPosition));
     MOCK_CONST_METHOD2(GetRoadGraph, std::pair<RoadGraph, RoadGraphVertex>(const RouteElement& start, int maxDepth));
     MOCK_CONST_METHOD1(GetEdgeWeights, std::map<RoadGraphEdge, double>(const RoadGraph& roadGraph));
+    MOCK_CONST_METHOD1(GetRoadStream, std::unique_ptr<RoadStreamInterface> (const std::vector<RouteElement>& route));
 };

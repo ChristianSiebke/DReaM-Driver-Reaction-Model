@@ -291,7 +291,7 @@ private:
 //! \param roadPositions    all possible road positions as calculated by the localization
 //! \param world            world
 //! \return road and direction with lowest heading
-static RouteElement GetRoadWithLowestHeading(const std::map<const std::string, GlobalRoadPosition>& roadPositions, const WorldInterface& world)
+static RouteElement GetRoadWithLowestHeading(const std::map<std::string, GlobalRoadPosition>& roadPositions, const WorldInterface& world)
 {
     RouteElement bestFitting;
     double minHeading = std::numeric_limits<double>::max();

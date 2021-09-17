@@ -22,6 +22,8 @@ class Lane : public OWL::Interfaces::Lane
 public:
     MOCK_CONST_METHOD0(GetId,
                        OWL::Id());
+    MOCK_CONST_METHOD0(GetOdId,
+                       OdId ());
     MOCK_CONST_METHOD0(GetLaneType,
                        LaneType());
     MOCK_CONST_METHOD0(Exists,

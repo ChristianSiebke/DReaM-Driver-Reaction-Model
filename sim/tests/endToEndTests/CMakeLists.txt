@@ -1,5 +1,6 @@
 ################################################################################
 # Copyright (c) 2020, 2021 in-tech GmbH
+#               2021 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 #
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
@@ -18,6 +19,8 @@ set(PYOPENPASS_DEFAULT_RESOURCES ${CMAKE_CURRENT_LIST_DIR}/../../contrib/example
 set(PYOPENPASS_SPECIALIZED_TEST_SCOPES
   ADAS_AEB
   ADAS_AEB_InCurve
+  ADAS_AEB_CutIn_Triggers
+  ADAS_AEB_CutIn_NoCollision
   ByEntityCondition
   OSCAction_DoubleLaneChange
   OSCAction_RemoveAgent
@@ -50,10 +53,12 @@ elseif(UNIX)
   list(APPEND PYOPENPASS_GENERIC_TEST_SCOPES ${PYOPENPASS_GENERIC_TEST_SCOPES_LINUX64})
 endif()
 
+# Find python3 interpreter
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
 
 # This is the main pyOpenPASS target. It will create a HTML report of the individual tests.
 add_custom_target(pyOpenPASS
-  COMMAND ./report.py -r ${PYOPENPASS_DEFAULT_RESOURCES}/Configurations $<$<BOOL:${PYOPENPASS_EXTRA_RESOURCES}>:${PYOPENPASS_EXTRA_RESOURCES}/Configurations> -c ${PYOPENPASS_DEFAULT_CONFIG} ${PYOPENPASS_EXTRA_CONFIG} --scope ${PYOPENPASS_GENERIC_TEST_SCOPES} ${PYOPENPASS_SPECIALIZED_TEST_SCOPES} ${PYOPENPASS_EXTRA_TEST_SCOPES} --results ${CMAKE_INSTALL_PREFIX}/results --output ${CMAKE_INSTALL_PREFIX}/testreport
+  COMMAND ${Python3_EXECUTABLE} report.py -r ${PYOPENPASS_DEFAULT_RESOURCES}/Configurations $<$<BOOL:${PYOPENPASS_EXTRA_RESOURCES}>:${PYOPENPASS_EXTRA_RESOURCES}/Configurations> -c ${PYOPENPASS_DEFAULT_CONFIG} ${PYOPENPASS_EXTRA_CONFIG} --scope ${PYOPENPASS_GENERIC_TEST_SCOPES} ${PYOPENPASS_SPECIALIZED_TEST_SCOPES} ${PYOPENPASS_EXTRA_TEST_SCOPES} --results ${CMAKE_INSTALL_PREFIX}/results --output ${CMAKE_INSTALL_PREFIX}/testreport
   WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/pyOpenPASS
 )
 
@@ -61,7 +66,7 @@ add_custom_target(pyOpenPASS
 # This also adds a dependency on the main pyOpenPASS target specified above.
 foreach(SCOPE IN LISTS PYOPENPASS_GENERIC_TEST_SCOPES PYOPENPASS_SPECIALIZED_TEST_SCOPES)
   add_custom_target(pyOpenPASS_${SCOPE}
-    COMMAND ./main.py --slave ${CMAKE_INSTALL_PREFIX} --mutual ${PYOPENPASS_DEFAULT_RESOURCES}/DefaultConfigurations --resources ${PYOPENPASS_DEFAULT_RESOURCES}/Configurations --config ${PYOPENPASS_DEFAULT_CONFIG} --scope ${SCOPE}
+    COMMAND ${Python3_EXECUTABLE} main.py --slave ${CMAKE_INSTALL_PREFIX} --mutual ${PYOPENPASS_DEFAULT_RESOURCES}/Common --resources ${PYOPENPASS_DEFAULT_RESOURCES}/Configurations --config ${PYOPENPASS_DEFAULT_CONFIG} --scope ${SCOPE}
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/pyOpenPASS
   )
   add_dependencies(pyOpenPASS pyOpenPASS_${SCOPE})
@@ -74,7 +79,7 @@ endforeach()
 # This also adds a dependency on the main pyOpenPASS target specified above.
 foreach(SCOPE IN LISTS PYOPENPASS_EXTRA_TEST_SCOPES)
   add_custom_target(pyOpenPASS_${SCOPE}
-    COMMAND ./main.py --slave ${CMAKE_INSTALL_PREFIX} --mutual ${PYOPENPASS_EXTRA_RESOURCES}/DefaultConfigurations --resources ${PYOPENPASS_EXTRA_RESOURCES}/Configurations --config ${PYOPENPASS_EXTRA_CONFIG} --scope ${SCOPE}
+    COMMAND ${Python3_EXECUTABLE} main.py --slave ${CMAKE_INSTALL_PREFIX} --mutual ${PYOPENPASS_EXTRA_RESOURCES}/Common --resources ${PYOPENPASS_EXTRA_RESOURCES}/Configurations --config ${PYOPENPASS_EXTRA_CONFIG} --scope ${SCOPE}
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/pyOpenPASS
   )
   add_dependencies(pyOpenPASS pyOpenPASS_${SCOPE})

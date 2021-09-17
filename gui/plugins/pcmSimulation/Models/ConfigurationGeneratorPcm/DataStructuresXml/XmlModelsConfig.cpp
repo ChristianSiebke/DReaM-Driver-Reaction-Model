@@ -149,6 +149,7 @@ bool XmlModelsConfig::WriteToXml(QXmlStreamWriter *xmlWriter)
         xmlWriter->writeEndElement(); // BoundingBox
         xmlWriter->writeStartElement("Performance");
         xmlWriter->writeAttribute("maxSpeed",QString::number(100.0));
+        xmlWriter->writeAttribute("maxAcceleration",QString::number(10.0));
         xmlWriter->writeAttribute("maxDeceleration",QString::number(10.0));
         xmlWriter->writeEndElement(); // Performance
         xmlWriter->writeStartElement("Axles");

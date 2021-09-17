@@ -87,10 +87,10 @@ public:
 
 private:
     bool InitPreRun(ScenarioInterface& scenario, SceneryInterface& scenery);
-    bool InitRun(std::uint32_t seed, const EnvironmentConfig& environmentConfig, RunResult& runResult);
+    bool InitRun(std::uint32_t seed, const EnvironmentConfig& environmentConfig, ProfilesInterface &profiles, RunResult& runResult);
     void InitializeFrameworkModules(ScenarioInterface &scenario);
     void InitializeSpawnPointNetwork();
-    std::unique_ptr<ParameterInterface> SampleWorldParameters(const EnvironmentConfig& environmentConfig, StochasticsInterface* stochastics, const openpass::common::RuntimeInformation& runtimeInformation);
+    std::unique_ptr<ParameterInterface> SampleWorldParameters(const EnvironmentConfig& environmentConfig, const ProfileGroup& trafficRules, StochasticsInterface* stochastics, const openpass::common::RuntimeInformation& runtimeInformation);
 
     void ClearRun();
 

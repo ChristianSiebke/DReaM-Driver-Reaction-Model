@@ -79,16 +79,42 @@ const std::vector<const TrafficObjectInterface*>& WorldImplementation::GetTraffi
     return trafficObjects;
 }
 
+const TrafficRules& WorldImplementation::GetTrafficRules() const
+{
+    return worldParameter.trafficRules;
+}
+
 void WorldImplementation::ExtractParameter(ParameterInterface* parameters)
 {
     auto intParameter = parameters->GetParametersInt();
     auto doubleParameter = parameters->GetParametersDouble();
     auto stringParameter = parameters->GetParametersString();
+    auto boolParameter = parameters->GetParametersBool();
 
     worldParameter.timeOfDay = stringParameter.at("TimeOfDay");
     worldParameter.visibilityDistance = intParameter.at("VisibilityDistance");
     worldParameter.friction = doubleParameter.at("Friction");
     worldParameter.weather = stringParameter.at("Weather");
+
+    auto openSpeedLimit = helper::map::query(doubleParameter, "OpenSpeedLimit");
+    THROWIFFALSE(openSpeedLimit.has_value(), "Missing traffic rule OpenSpeedLimit")
+    worldParameter.trafficRules.openSpeedLimit = openSpeedLimit.value();
+
+    auto keepToOuterLanes = helper::map::query(boolParameter, "KeepToOuterLanes");
+    THROWIFFALSE(keepToOuterLanes.has_value(), "Missing traffic rule KeepToOuterLanes")
+    worldParameter.trafficRules.keepToOuterLanes = keepToOuterLanes.value();
+
+    auto dontOvertakeOnOuterLanes = helper::map::query(boolParameter, "DontOvertakeOnOuterLanes");
+    THROWIFFALSE(dontOvertakeOnOuterLanes.has_value(), "Missing traffic rule DontOvertakeOnOuterLanes")
+    worldParameter.trafficRules.dontOvertakeOnOuterLanes = dontOvertakeOnOuterLanes.value();
+
+    auto formRescueLane = helper::map::query(boolParameter, "FormRescueLane");
+    THROWIFFALSE(formRescueLane.has_value(), "Missing traffic rule FormRescueLane")
+    worldParameter.trafficRules.formRescueLane = formRescueLane.value();
+
+    auto zipperMerge = helper::map::query(boolParameter, "ZipperMerge");
+    THROWIFFALSE(zipperMerge.has_value(), "Missing traffic rule ZipperMerge")
+    worldParameter.trafficRules.zipperMerge = zipperMerge.value();
 }
 
 void WorldImplementation::Reset()
@@ -287,6 +313,11 @@ std::map<RoadGraphEdge, double> WorldImplementation::GetEdgeWeights(const RoadGr
     return weights;
 }
 
+std::unique_ptr<RoadStreamInterface> WorldImplementation::GetRoadStream(const std::vector<RouteElement> &route) const
+{
+    return worldDataQuery.CreateRoadStream(route);
+}
+
 AgentInterface* WorldImplementation::GetEgoAgent()
 {
     const std::map<int, AgentInterface*> agents = agentNetwork.GetAgents();
@@ -326,12 +357,20 @@ RouteQueryResult<Obstruction> WorldImplementation::GetObstruction(const RoadGrap
     return worldDataQuery.GetObstruction(*laneMultiStream, ownPosition.roadPosition.t, otherPosition, objectCorners, mainLaneLocator);
 }
 
-RouteQueryResult<RelativeWorldView::Lanes> WorldImplementation::GetRelativeLanes(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, double range) const
+RouteQueryResult<RelativeWorldView::Lanes> WorldImplementation::GetRelativeLanes(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, double range, bool includeOncoming) const
 {
     const auto roadMultiStream = worldDataQuery.CreateRoadMultiStream(roadGraph, startNode);
     double startDistanceOnStream = roadMultiStream->GetPositionByVertexAndS(startNode, distance);
 
-    return worldDataQuery.GetRelativeLanes(*roadMultiStream, startDistanceOnStream, laneId, range);
+    return worldDataQuery.GetRelativeLanes(*roadMultiStream, startDistanceOnStream, laneId, range, includeOncoming);
+}
+
+RouteQueryResult<std::optional<int> > WorldImplementation::GetRelativeLaneId(const RoadGraph &roadGraph, RoadGraphVertex startNode, int laneId, double distance, std::map<std::string, GlobalRoadPosition> targetPosition) const
+{
+    const auto roadMultiStream = worldDataQuery.CreateRoadMultiStream(roadGraph, startNode);
+    double startDistanceOnStream = roadMultiStream->GetPositionByVertexAndS(startNode, distance);
+
+    return worldDataQuery.GetRelativeLaneId(*roadMultiStream, startDistanceOnStream, laneId, targetPosition);
 }
 
 RouteQueryResult<std::vector<const AgentInterface*> > WorldImplementation::GetAgentsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance, double backwardRange, double forwardRange) const
@@ -383,7 +422,7 @@ Position WorldImplementation::LaneCoord2WorldCoord(double distanceOnLane, double
     return worldDataQuery.GetPositionByDistanceAndLane(lane, distanceOnLane, offset);
 }
 
-std::map<const std::string, GlobalRoadPosition> WorldImplementation::WorldCoord2LaneCoord(double x, double y, double heading) const
+std::map<std::string, GlobalRoadPosition> WorldImplementation::WorldCoord2LaneCoord(double x, double y, double heading) const
 {
     return localizer.Locate({x,y}, heading);
 }
@@ -490,7 +529,7 @@ LaneSections WorldImplementation::GetLaneSections(const std::string& roadId) con
 
         for (const auto& lane : section->GetLanes())
         {
-            laneSection.laneIds.push_back(worldData.GetLaneIdMapping().at(lane->GetId()));
+            laneSection.laneIds.push_back(lane->GetOdId());
         }
 
         result.push_back(laneSection);

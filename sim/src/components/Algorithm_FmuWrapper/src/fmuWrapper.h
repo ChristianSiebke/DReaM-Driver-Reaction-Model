@@ -24,7 +24,7 @@
 #include <unordered_map>
 #include <vector>
 #include <map>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 extern "C" {
 #include "fmilib.h"
@@ -170,7 +170,7 @@ private:
      *
      * \throws      std::runtime_error
      */
-    void MkDirOrThrowError(const boost::filesystem::path& path);
+    void MkDirOrThrowError(const std::filesystem::path& path);
 
     struct fmu_check_data_t cdata;   //!< check data to be passed around between the FMIL functions
 
