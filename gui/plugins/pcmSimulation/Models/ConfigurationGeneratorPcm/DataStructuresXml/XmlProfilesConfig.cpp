@@ -89,8 +89,32 @@ bool XmlProfilesConfig::WriteToXml(QXmlStreamWriter *xmlWriter)
 
     xmlWriter->writeStartElement("ProfileGroup");
     xmlWriter->writeAttribute("Type","Driver");
+    xmlWriter->writeEndElement(); // ProfileGroup
+
+    xmlWriter->writeStartElement("ProfileGroup");
+    xmlWriter->writeAttribute("Type","TrafficRules");
     xmlWriter->writeStartElement("Profile");
-    xmlWriter->writeAttribute("Name","Regular");
+    xmlWriter->writeAttribute("Name","Germany");
+    xmlWriter->writeStartElement("Double");
+    xmlWriter->writeAttribute("Key", "OpenSpeedLimit");
+    xmlWriter->writeAttribute("Value", "infinity");
+    xmlWriter->writeEndElement(); // Double
+    xmlWriter->writeStartElement("Bool");
+    xmlWriter->writeAttribute("Key", "KeepToOuterLanes");
+    xmlWriter->writeAttribute("Value", "true");
+    xmlWriter->writeEndElement(); // Bool
+    xmlWriter->writeStartElement("Bool");
+    xmlWriter->writeAttribute("Key", "DontOvertakeOnOuterLanes");
+    xmlWriter->writeAttribute("Value", "true");
+    xmlWriter->writeEndElement(); // Bool
+    xmlWriter->writeStartElement("Bool");
+    xmlWriter->writeAttribute("Key", "FormRescueLane");
+    xmlWriter->writeAttribute("Value", "true");
+    xmlWriter->writeEndElement(); // Bool
+    xmlWriter->writeStartElement("Bool");
+    xmlWriter->writeAttribute("Key", "ZipperMerge");
+    xmlWriter->writeAttribute("Value", "true");
+    xmlWriter->writeEndElement(); // Bool
     xmlWriter->writeEndElement(); // Profile
     xmlWriter->writeEndElement(); // ProfileGroup
 
