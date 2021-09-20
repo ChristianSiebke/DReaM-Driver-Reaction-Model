@@ -54,7 +54,8 @@ The SpawnZones have the following parameters:
    ========= ============ ==== ======== ==================================================================================
    Roads     StringVector      no       List of linked Roads on which to spawn Agents.
                                         Intermediate roads may be omitted.
-                                        If a road is not linked to the previous in the list, this road and the roads after it are ignored
+                                        If a road is not linked to the previous in the list (or doesn't exist), this road and the roads after it are ignored.
+                                        This means in particular, that if the first road in the list does not exist, the entire SpawnZone is ignored.
    Lanes     IntVector         yes      The LaneIDs of the Lanes of the Road on which to spawn Agents (given on SStart).
                                         Inexistent lanes are ignored.
                                         If omitted all lanes are used.
@@ -65,7 +66,13 @@ The SpawnZones have the following parameters:
                                         This is ignored if SEnd is explicitly defined.
                                         If neither is given the whole road is included
    ========= ============ ==== ======== ==================================================================================
-   
+
+    .. note::
+    
+    Two SpawnZones should not intersect each other. The behavior in this case is undefined. The PreRunSpawner is not required to fill the SpawnZones in the given order.
+
+SStart, SEnd and SLength may be out of range for the road.
+In this case they are cropped such that the spawn range is maximum within the road's bounds.
 It is also possible to define the minimum gap in meters either as fixed parameter of type double or as stochastic distribution.
 If it isn't defined the default value of 5m is used.
 
