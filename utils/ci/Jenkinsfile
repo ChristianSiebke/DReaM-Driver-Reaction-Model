@@ -46,6 +46,9 @@ spec:
 """
             }
           }
+          environment {
+            CONAN_USER_HOME = '/home/jenkins'
+          }
           stages {
             stage('Linux: Cleanup and prepare dependencies') {
               steps {
