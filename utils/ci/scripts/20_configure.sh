@@ -27,7 +27,7 @@ cd "$MYDIR/../../../../build" || exit 1
 # dependencies built previously
 DEPS=(
   "$PWD/../deps/FMILibrary"
-  "$PWD/../deps/osi"
+  "$PWD/../deps/OSI"
 )
 
 # preparations for building on Windows/MSYS
