@@ -38,4 +38,4 @@ fi
 mkdir -p build-thirdParty && cd build-thirdParty
 
 # (build and) install thirdParty dependencies to conans local cache and deploy them
-"$PYTHON_COMMAND" -m conans.conan install $WORKSPACE_ROOT/utils/ci/conan/install_file/thirdParty --build --install-folder="$WORKSPACE_ROOT/deps/" -g deploy
+"$PYTHON_COMMAND" -m conans.conan install $WORKSPACE_ROOT/utils/ci/conan/install_file/thirdParty --build --install-folder="$WORKSPACE_ROOT/../deps/" -g deploy
