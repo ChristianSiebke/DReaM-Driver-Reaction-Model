@@ -47,7 +47,7 @@ spec:
             }
           }
           environment {
-            CONAN_USER_HOME = '/home/jenkins'
+            CONAN_USER_HOME = '/home/jenkins/agent/workspace'
           }
           stages {
             stage('Linux: Cleanup and prepare dependencies') {
