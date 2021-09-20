@@ -30,7 +30,7 @@ const std::unordered_map<std::string, AgentVehicleType> vehicleTypeConversionMap
                                                                                     {"motorbike", AgentVehicleType::Motorbike},
                                                                                     {"bicycle", AgentVehicleType::Bicycle}};
 
-using Properties = std::map<std::string, std::string>;
+using Properties = std::map<std::string, openScenario::ParameterizedAttribute<double>>;
 
 /*!
  * \brief Provides methods for importing vehicle models from OpenSCENARIO catalog files
@@ -178,7 +178,7 @@ private:
      * \throw   std::runtime_error  On missing `Axles`, `Front` or `Rear` tag, reference point not being on rear axle or
      *                              steering defined for rear axle
      */
-    static void ImportVehicleModelAxle(QDomElement& axleElement, VehicleAxle& axleParameters, openScenario::Parameters& parameters);
+    static void ImportVehicleModelAxle(QDomElement& axleElement, ParametrizedVehicleModelParameters::Axle& axleParameters, openScenario::Parameters& parameters);
 
     /*!
      * \brief Validates the axle parameters
@@ -188,7 +188,7 @@ private:
      *
      * \throw std::runtime_error    When reference point not on rear axle or rear axle steering != 0.0
      */
-    static void ValidateAxles(const VehicleAxle& frontAxle, const VehicleAxle& rearAxle);
+    static void ValidateAxles(const ParametrizedVehicleModelParameters::Axle& frontAxle, const ParametrizedVehicleModelParameters::Axle& rearAxle);
 
     /*!
      * \brief Imports the models' performance tag from OpenSCENARIO DOM
@@ -206,18 +206,6 @@ private:
     static void ImportVehicleModelPerformance(QDomElement& vehicleElement, ParametrizedVehicleModelParameters& modelParameters, openScenario::Parameters& parameters);
 
     /*!
-     * \brief Imports the models' gears from its `ParameterDeclaration` in OpenSCENARIO DOM
-     *
-     * The paramters `NumberOfGears` has to specifiy the number of gears in a model. The first entry in ParametrizedVehicleModelParameters
-     * `gearRatios` will always be 0.0. For every gear, a `Parameter` tag `GearRatioN` has to exist, where N represents the
-     * number of a gear. Ratios are imported in ascending order of the gear number.
-     *
-     * \param[out]  modelParameters     Storage for the imported values
-     * \param[in]   properties          openScenario properties
-     */
-    static void ImportVehicleModelGears(ParametrizedVehicleModelParameters& modelParameters, const Properties& properties);
-
-    /*!
      * \brief Helper for template type deduction with std::optional parameters
      *
      * As template type deduction is only able to directly match types, the type passed std::optional arguments has to be
@@ -227,48 +215,6 @@ private:
      */
     template<typename T>
     struct TypeHelper { typedef T type; };
-
-    /*!
-     * \brief Assigns the value of a property to a attribute
-     *
-     * \param[in]   propertyName       Name of the parameter to import
-     * \param[out]  attribtue               Reference to the attribute
-     * \param[in]   properties              Properties
-     * \param[in]   defaultValue        An optional default value to use if it cannot be imported
-     *
-     * \throw   std::runtime_error  On missing model `Parameter` tag or invalid `name` or `value` attribute.
-     */
-    template<typename T>
-    static void AssignProperty(const std::string& propertyName,
-                               openScenario::ParameterizedAttribute<T>& attribute,
-                               const Properties& properties,
-                               std::optional<typename TypeHelper<T>::type> defaultValue = std::nullopt)
-    {
-        auto propertyIt = properties.find(propertyName);
-        if (propertyIt != properties.cend())
-        {
-            if(std::is_same<T, double>::value)
-            {
-                attribute = {propertyName, std::stod(properties.at(propertyName))};
-            }
-            else if (std::is_same<T, int>::value)
-            {
-                attribute = {propertyName, std::stoi(properties.at(propertyName))};
-            }
-            else
-            {
-                throw std::runtime_error("Property data type not supported.");
-            }
-        }
-        else if (defaultValue)
-        {
-            attribute = {propertyName, defaultValue.value()};
-        }
-        else
-        {
-            LogErrorAndThrow("Missing parameter " + propertyName);
-        }
-    }
 
     /*!
      * \brief Imports the properties of an element

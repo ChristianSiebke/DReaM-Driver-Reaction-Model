@@ -1,4 +1,4 @@
-<Profiles SchemaVersion="0.4.3">
+<Profiles SchemaVersion="0.4.6">
   <AgentProfiles>
     <AgentProfile Name="LuxuryClassCarAgent" Type="Dynamic">
       <DriverProfiles>
@@ -35,13 +35,12 @@
         <VehicleProfile Name="Bus MAN Lions Coach c 2007" Probability="1.0"/>
       </VehicleProfiles>
     </AgentProfile>
-    <AgentProfile Name="Pedestrian" Type="Dynamic">
-      <DriverProfiles>
-        <DriverProfile Name="Pedestrian" Probability="1.0"/>
-      </DriverProfiles>
-      <VehicleProfiles>
-        <VehicleProfile Name="Pedestrian" Probability="1.0"/>
-      </VehicleProfiles>
+    <AgentProfile Name="Pedestrian" Type="Static">
+      <System>
+        <File>systemConfigPedestrian.xml</File>
+        <Id>0</Id>
+      </System>
+      <VehicleModel>pedestrian_adult</VehicleModel>
     </AgentProfile>
   </AgentProfiles>
   <VehicleProfiles>
@@ -80,25 +79,8 @@
       <Components/>
       <Sensors/>
     </VehicleProfile>
-    <VehicleProfile Name="Pedestrian">
-      <Model Name="pedestrian_adult"/>
-      <Components>
-        <Component Type="Dynamics_TrajectoryFollower">
-          <Profiles>
-            <Profile Name="BasicTrajectoryFollower" Probability="1.0"/>
-          </Profiles>
-        </Component>
-      </Components>
-      <Sensors/>
-    </VehicleProfile>
   </VehicleProfiles>
   <ProfileGroup Type="Driver">
-    <Profile Name="Pedestrian">
-      <String Key="Type" Value="AlgorithmAgentFollowingDriverModel"/>
-      <String Key="AlgorithmLateralModule" Value="Algorithm_LateralAfdm"/>
-      <String Key="AlgorithmLongitudinalModule" Value="Algorithm_LongitudinalAfdm"/>
-      <Double Key="VelocityWish" Value="1.0"/>
-    </Profile>
     <Profile Name="Regular">
       <String Key="Type" Value="AlgorithmAgentFollowingDriverModel"/>
       <String Key="AlgorithmLateralModule" Value="Algorithm_LateralAfdm"/>
@@ -173,7 +155,7 @@
   </ProfileGroup>
   <ProfileGroup Type="Spawner">
     <Profile Name="DefaultPreRunCommon">
-      <List Name="SpawnPoints">
+      <List Name="SpawnZones">
         <ListItem>
           <StringVector Key="Roads" Value="1"/>
           <IntVector Key="Lanes" Value="-1,-2,-3,-4,-5"/>
@@ -210,6 +192,29 @@
           <Reference Type="TrafficGroup" Name="HeavyVehicles"/>
         </ListItem>
       </List>
+    </Profile>
+  </ProfileGroup>
+  <ProfileGroup Type="TrafficRules">
+    <Profile Name="Germany">
+      <Double Key="OpenSpeedLimit" Value="infinity"/>
+      <Bool Key="KeepToOuterLanes" Value="true"/>
+      <Bool Key="DontOvertakeOnOuterLanes" Value="true"/>
+      <Bool Key="FormRescueLane" Value="true"/>
+      <Bool Key="ZipperMerge" Value="true"/>
+    </Profile>
+    <Profile Name="USA">
+      <Double Key="OpenSpeedLimit" Value="31.2928"/>
+      <Bool Key="KeepToOuterLanes" Value="false"/>
+      <Bool Key="DontOvertakeOnOuterLanes" Value="false"/>
+      <Bool Key="FormRescueLane" Value="true"/>
+      <Bool Key="ZipperMerge" Value="false"/>
+    </Profile>
+    <Profile Name="China">
+      <Double Key="OpenSpeedLimit" Value="33.3333"/>
+      <Bool Key="KeepToOuterLanes" Value="false"/>
+      <Bool Key="DontOvertakeOnOuterLanes" Value="true"/>
+      <Bool Key="FormRescueLane" Value="false"/>
+      <Bool Key="ZipperMerge" Value="true"/>
     </Profile>
   </ProfileGroup>
 </Profiles>

@@ -1,6 +1,7 @@
 ################################################################################
 # Copyright (c) 2020 Uwe Woessner
 # Copyright (c) 2020, 2021 in-tech GmbH
+# Copyright (c) 2021 ITK-Engineering GmbH
 #
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
@@ -22,7 +23,6 @@ option(WITH_PROTOBUF_ARENA "Make use of protobuf arena allocation" ON)
 option(WITH_DEBUG_POSTFIX "Use 'd' binary postfix on Windows platform" ON)
 option(INSTALL_SYSTEM_RUNTIME_DEPS "Copy detected system runtime dependencies to install directory (i.e. MinGW system libraries)" OFF)
 option(INSTALL_EXTRA_RUNTIME_DEPS "Copy detected third party runtime dependencies to install directory (i.e. required shared libraries found in specified CMAKE_PREFIX_PATH)" OFF)
-option(WITH_MINGW_BOOST_1_72_FIX "Apply fix Boost 1.72 detection in MinGW environment (https://github.com/boostorg/boost_install/issues/33)" OFF)
 option(WITH_ENDTOEND_TESTS "Create pyOpenPASS target for running end to end tests" OFF)
 option(WITH_COVERAGE "Generate test coverage report using gcov (needs fastcov)" OFF)
 
@@ -76,15 +76,6 @@ if(WITH_SIMCORE OR WITH_TESTS)
 
   find_package(OSI REQUIRED)
 
-  if(MINGW AND WITH_MINGW_BOOST_1_72_FIX)
-    # Bug in boost-install 1.72.0
-    # setting boost mingw version manually
-    # https://github.com/boostorg/boost_install/issues/33
-    string(REGEX MATCHALL "[0-9]+" _CVER_COMPONENTS ${CMAKE_CXX_COMPILER_VERSION})
-    list(GET _CVER_COMPONENTS 0 _CVER_MAJOR)
-    list(GET _CVER_COMPONENTS 1 _CVER_MINOR)
-    set(Boost_COMPILER "mgw${_CVER_MAJOR}${_CVER_MINOR}")
-  endif()
   set(Boost_USE_STATIC_LIBS OFF)
   find_package(Boost COMPONENTS filesystem REQUIRED)
 
@@ -149,12 +140,12 @@ set(INSTALL_MAN_DIR "share/man" CACHE PATH "Installation directory for manual pa
 set(INSTALL_PKGCONFIG_DIR "share/pkgconfig" CACHE PATH "Installation directory for pkgconfig (.pc) files")
 
 if(OPENPASS_ADJUST_OUTPUT)
-set(OPENPASS_DESTDIR ${CMAKE_BINARY_DIR}/OpenPASS CACHE PATH "Destination directory")
-file(MAKE_DIRECTORY ${OPENPASS_DESTDIR})
-file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}${SUBDIR_LIB_SIM})
-file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}${SUBDIR_LIB_GUI})
-file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}${SUBDIR_LIB_COMPONENTS})
-file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}${SUBDIR_LIB_COMPONENTS})
+    set(OPENPASS_DESTDIR ${CMAKE_BINARY_DIR}/OpenPASS CACHE PATH "Destination directory")
+    file(MAKE_DIRECTORY ${OPENPASS_DESTDIR})
+    file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}/${SUBDIR_LIB_SIM})
+    file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}/${SUBDIR_LIB_GUI})
+    file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}/${SUBDIR_LIB_COMPONENTS})
+    file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}/${SUBDIR_LIB_COMPONENTS})
 endif()
 
 add_compile_definitions(SUBDIR_LIB_SIM="${SUBDIR_LIB_SIM}")
@@ -163,9 +154,6 @@ add_compile_definitions(SUBDIR_LIB_COMPONENTS="${SUBDIR_LIB_COMPONENTS}")
 add_compile_definitions(SUBDIR_XML_COMPONENTS="${SUBDIR_XML_COMPONENTS}")
 
 if(MSVC)
-  if(WITH_DEBUG_POSTFIX)
-    set(CMAKE_DEBUG_POSTFIX "d")
-  endif()
   add_compile_definitions(_CRT_SECURE_NO_DEPRECATE)
   add_compile_definitions(_CRT_NONSTDC_NO_DEPRECATE)
 
@@ -188,3 +176,4 @@ if(WITH_DOC)
 endif()
 
 ###############################################################################
+

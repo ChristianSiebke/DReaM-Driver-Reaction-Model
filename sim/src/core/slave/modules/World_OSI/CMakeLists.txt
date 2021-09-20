@@ -13,13 +13,15 @@ add_openpass_target(
     EntityInfoPublisher.h
     EntityRepository.h
     JointsBuilder.h
+    LaneStream.h
     Localization.h
     LocalizationElement.h
-    PointQuery.h
     RamerDouglasPeucker.h
+    RoadStream.h
     SceneryConverter.h
     SceneryEntities.h
     TrafficObjectAdapter.h
+    TrafficLightNetwork.h
     World.h
     WorldData.h
     WorldDataException.h
@@ -44,10 +46,12 @@ add_openpass_target(
     EntityInfoPublisher.cpp
     EntityRepository.cpp
     JointsBuilder.cpp
+    LaneStream.cpp
     Localization.cpp
-    PointQuery.cpp
+    RoadStream.cpp
     SceneryConverter.cpp
     TrafficObjectAdapter.cpp
+    TrafficLightNetwork.cpp
     World.cpp
     WorldData.cpp
     WorldDataException.cpp

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -52,8 +52,8 @@ public:
 struct LocatedObject
 {
     std::map<const OWL::Interfaces::Lane*, OWL::LaneOverlap> laneOverlaps;
-    std::map<const std::string, GlobalRoadPosition> referencePoint;
-    std::map<const std::string, GlobalRoadPosition> mainLaneLocator;
+    std::map<std::string, GlobalRoadPosition> referencePoint;
+    std::map<std::string, GlobalRoadPosition> mainLaneLocator;
 };
 
 //! Calculates the intersection of the object boundary with an GeometryElement and stores the min and max s coordinates
@@ -85,9 +85,7 @@ std::function<void (const RTreeElement&)> LocateOnGeometryElement(const OWL::Int
 std::function<void (const RTreeElement&)> LocateOnGeometryElement(const OWL::Interfaces::WorldData& worldData,
                                                              const Common::Vector2d& point,
                                                              const double& hdg,
-                                                             std::map<const std::string, GlobalRoadPosition>& result);
-
-std::vector<Common::Vector2d> GetIntersectionPoints (const std::vector<Common::Vector2d>& elementPoints, const std::vector<Common::Vector2d>& agentBoundary);
+                                                             std::map<std::string, GlobalRoadPosition>& result);
 
 polygon_t GetBoundingBox(double x, double y, double length, double width, double rotation, double center);
 
@@ -104,7 +102,7 @@ public:
 
     Result Locate(const polygon_t& boundingBox, OWL::Interfaces::WorldObject& object) const;
 
-    std::map<const std::string, GlobalRoadPosition> Locate(const Common::Vector2d& point, const double& hdg) const;
+    std::map<std::string, GlobalRoadPosition> Locate(const Common::Vector2d& point, const double& hdg) const;
 
     void Unlocate(OWL::Interfaces::WorldObject& object) const;
 

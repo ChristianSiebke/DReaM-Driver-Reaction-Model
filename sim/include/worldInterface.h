@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -24,12 +24,15 @@
 #include "common/boostGeometryCommon.h"
 #include "common/globalDefinitions.h"
 #include "common/openPassTypes.h"
+#include "common/openScenarioDefinitions.h"
 #include "common/vector2d.h"
 #include "common/worldDefinitions.h"
+#include "include/streamInterface.h"
 
 class AgentInterface;
 class ParameterInterface;
 class SceneryInterface;
+class SceneryDynamicsInterface;
 class TrafficObjectInterface;
 class WorldObjectInterface;
 
@@ -117,12 +120,11 @@ public:
     virtual double GetVisibilityDistance() const = 0;
 
     //-----------------------------------------------------------------------------
-    //! Sets the world parameters like weekday, library
-    //! @param[in]     worldParamter  parameter to setup world
+    //! Retrieves traffic rules
     //!
-    //! @return
+    //! @return                traffic rules
     //-----------------------------------------------------------------------------
-    virtual void SetParameter(WorldParameter *worldParameter) = 0;
+    virtual const TrafficRules& GetTrafficRules() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Sets the world parameters like weekday, library
@@ -224,14 +226,14 @@ public:
     //!
     //! @return
     //-----------------------------------------------------------------------------
-    virtual void SyncGlobalData() = 0;
+    virtual void SyncGlobalData(int timestamp) = 0;
 
     //-----------------------------------------------------------------------------
     //! Create a scenery in world.
     //!
     //! @return
     //-----------------------------------------------------------------------------
-    virtual bool CreateScenery(SceneryInterface *scenery) = 0;
+    virtual bool CreateScenery(SceneryInterface *scenery, const SceneryDynamicsInterface& sceneryDynamics) = 0;
 
     //-----------------------------------------------------------------------------
     //! Create an agentAdapter for an agent to communicate between the agent of the
@@ -286,7 +288,7 @@ public:
     //!
     //! @return Position on all lanes at specified world position
     //-----------------------------------------------------------------------------
-    virtual std::map<const std::string, GlobalRoadPosition> WorldCoord2LaneCoord(double x, double y, double heading) const = 0;
+    virtual std::map<std::string, GlobalRoadPosition> WorldCoord2LaneCoord(double x, double y, double heading) const = 0;
 
     //-----------------------------------------------------------------------------
     //! Tries to create an internal scenery from a given file.
@@ -551,7 +553,8 @@ public:
     //! Calculates the obstruction of an agent with another object i.e. how far to left or the right the object is from my position
     //! For more information see the [markdown documentation](\ref dev_framework_modules_world_getobstruction)
     //!
-    //! \param route            route of the agent
+    //! \param roadGraph        road network as viewed from agent
+    //! \param startNode        position on roadGraph of agent
     //! \param ownPosition      position of the agent
     //! \param otherPosition    position of the other object
     //! \param objectCorners    corners of the other object
@@ -561,8 +564,8 @@ public:
 
     //! Returns all traffic signs valid for a lane inside the range
     //!
-    //! \param route            route to search along
-    //! \param roadId           OpenDrive Id of the road
+    //! \param roadGraph        road network as viewed from agent
+    //! \param startNode        position on roadGraph of agent
     //! \param laneId           OpenDrive Id of the lane
     //! \param startDistance    s coordinate
     //! \param searchRange      range of search (can also be negative)
@@ -572,8 +575,8 @@ public:
 
     //! Returns all road markings valid for a lane inside the range
     //!
-    //! \param route            route to search along
-    //! \param roadId           OpenDrive Id of the road
+    //! \param roadGraph        road network as viewed from agent
+    //! \param startNode        position on roadGraph of agent
     //! \param laneId           OpenDrive Id of the lane
     //! \param startDistance    s coordinate
     //! \param searchRange      range of search
@@ -581,9 +584,21 @@ public:
     virtual RouteQueryResult<std::vector<CommonTrafficSign::Entity>> GetRoadMarkingsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId,
                                                                                             double startDistance, double searchRange) const = 0;
 
+    //! Returns all traffic lights valid for a lane inside the range
+    //!
+    //! \param route            route to search along
+    //! \param roadId           OpenDrive Id of the road
+    //! \param laneId           OpenDrive Id of the lane
+    //! \param startDistance    s coordinate
+    //! \param searchRange      range of search (can also be negative)
+    //! \return traffic lights in range
+    virtual RouteQueryResult<std::vector<CommonTrafficLight::Entity>> GetTrafficLightsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId,
+                                                                                             double startDistance, double searchRange) const = 0;
+
     //! Retrieves all lane markings on the given position on the given side of the lane inside the range
     //!
-    //! \param roadId           OpenDrive Id of the road
+    //! \param roadGraph        road network as viewed from agent
+    //! \param startNode        position on roadGraph of agent
     //! \param laneId           OpenDrive Id of the lane
     //! \param startDistance    s coordinate
     //! \param range            search range
@@ -592,8 +607,8 @@ public:
 
     //! Returns the relative distances (start and end) and the connecting road id of all junctions on the route in range
     //!
-    //! \param route            route of the agent
-    //! \param roadId           OpenDrive Id of the road
+    //! \param roadGraph        road network as viewed from agent
+    //! \param startNode        position on roadGraph of agent
     //! \param startDistance    start s coordinate on the road
     //! \param range            range of search
     //! \return information about all junctions in range
@@ -604,13 +619,24 @@ public:
     //! driving direction of the lane is the same as the direction of the route. If the ego lane prematurely ends, then
     //! the further lane ids are relative to the middle of the road.
     //!
-    //! \param route            route of the agent
-    //! \param roadId           OpenDrive Id of the road
+    //! \param roadGraph        road network as viewed from agent
+    //! \param startNode        position on roadGraph of agent
     //! \param laneId           OpenDrive Id of the lane
     //! \param distance         start s coordinate on the road
     //! \param range            range of search
+    //! \param includeOncoming  indicating whether oncoming lanes should be included
     //! \return information about all lanes in range
-    virtual RouteQueryResult<RelativeWorldView::Lanes> GetRelativeLanes(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, double range) const = 0;
+    virtual RouteQueryResult<RelativeWorldView::Lanes> GetRelativeLanes(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, double range, bool includeOncoming = true) const = 0;
+
+    //! Returns the relative lane id of the located position of a point relative to the given position
+    //!
+    //! \param roadGraph        road network as viewed from agent
+    //! \param startNode        position on roadGraph of agent
+    //! \param laneId           OpenDrive Id of the lane
+    //! \param distance         own s coordinate
+    //! \param targetPosition   position of queried point
+    //! \return lane id relative to own position
+    virtual RouteQueryResult<std::optional<int>> GetRelativeLaneId(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, std::map<std::string, GlobalRoadPosition> targetPosition) const = 0;
 
     //! Returns all possible connections on the junction, that an agent has when coming from the specified road
     //!
@@ -649,6 +675,12 @@ public:
     virtual std::pair<RoadGraph, RoadGraphVertex> GetRoadGraph (const RouteElement& start, int maxDepth) const = 0;
 
     virtual std::map<RoadGraphEdge, double> GetEdgeWeights (const RoadGraph& roadGraph) const = 0;
+
+    //! Returns the RoadStream that is defined by the given route
+    //!
+    //! \param route    list of roads with direction
+    //! \return RoadStream along route
+    virtual std::unique_ptr<RoadStreamInterface> GetRoadStream(const std::vector<RouteElement>& route) const = 0;
 
     //-----------------------------------------------------------------------------
     //! Retrieves the friction

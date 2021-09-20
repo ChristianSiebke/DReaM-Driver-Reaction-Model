@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -17,11 +17,13 @@
 #include "common/log.h"
 #include "include/agentBlueprintProviderInterface.h"
 #include "include/observationNetworkInterface.h"
+#include "include/eventDetectorNetworkInterface.h"
+#include "include/manipulatorNetworkInterface.h"
 #include "agentFactory.h"
 #include "agentType.h"
 #include "channel.h"
 #include "component.h"
-#include "bindings/dataStore.h"
+#include "bindings/dataBuffer.h"
 #include "observationModule.h"
 #include "modelElements/parameters.h"
 #include "scheduler/runResult.h"
@@ -47,6 +49,7 @@ bool RunInstantiator::ExecuteRun()
     auto &scenario = *configurationContainer.GetScenario();
     auto &scenery = *configurationContainer.GetScenery();
     auto &slaveConfig = *configurationContainer.GetSlaveConfig();
+    auto &profiles = *configurationContainer.GetProfiles();
     auto &experimentConfig = slaveConfig.GetExperimentConfig();
     auto &environmentConfig = slaveConfig.GetEnvironmentConfig();
 
@@ -57,10 +60,10 @@ bool RunInstantiator::ExecuteRun()
         return false;
     }
 
-    dataStore.PutStatic("SceneryFile", scenario.GetSceneryPath(), true);
+    dataBuffer.PutStatic("SceneryFile", scenario.GetSceneryPath(), true);
     ThrowIfFalse(observationNetwork.InitAll(), "Failed to initialize ObservationNetwork");
 
-    openpass::scheduling::Scheduler scheduler(world, spawnPointNetwork, eventDetectorNetwork, manipulatorNetwork, observationNetwork);
+    openpass::scheduling::Scheduler scheduler(world, spawnPointNetwork, eventDetectorNetwork, manipulatorNetwork, observationNetwork, dataBuffer);
     bool scheduler_state{false};
 
     for (auto invocation = 0; invocation < experimentConfig.numberOfInvocations; invocation++)
@@ -70,7 +73,7 @@ bool RunInstantiator::ExecuteRun()
         LOG_INTERN(LogLevel::DebugCore) << std::endl
                                         << "### run number: " << invocation << " ###";
         auto seed = static_cast<std::uint32_t>(experimentConfig.randomSeed + invocation);
-        if (!InitRun(seed, environmentConfig, runResult))
+        if (!InitRun(seed, environmentConfig, profiles, runResult))
         {
             LOG_INTERN(LogLevel::DebugCore) << std::endl
                                             << "### run initialization failed ###";
@@ -105,7 +108,7 @@ bool RunInstantiator::InitPreRun(ScenarioInterface& scenario, SceneryInterface& 
     try
     {
         InitializeFrameworkModules(scenario);
-        world.CreateScenery(&scenery);
+        world.CreateScenery(&scenery, scenario.GetSceneryDynamics());
         return true;
     }
     catch (const std::exception &error)
@@ -122,8 +125,8 @@ bool RunInstantiator::InitPreRun(ScenarioInterface& scenario, SceneryInterface& 
 
 void RunInstantiator::InitializeFrameworkModules(ScenarioInterface& scenario)
 {
-    ThrowIfFalse(dataStore.Instantiate(),
-                 "Failed to instantiate DataStore");
+    ThrowIfFalse(dataBuffer.Instantiate(),
+                 "Failed to instantiate DataBuffer");
     ThrowIfFalse(stochastics.Instantiate(frameworkModules.stochasticsLibrary),
                  "Failed to instantiate Stochastics");
     ThrowIfFalse(world.Instantiate(),
@@ -132,7 +135,7 @@ void RunInstantiator::InitializeFrameworkModules(ScenarioInterface& scenario)
                  "Failed to instantiate EventDetectorNetwork");
     ThrowIfFalse(manipulatorNetwork.Instantiate(frameworkModules.manipulatorLibrary, &scenario, &eventNetwork),
                  "Failed to instantiate ManipulatorNetwork");
-    ThrowIfFalse(observationNetwork.Instantiate(frameworkModules.observationLibraries, &stochastics, &world, &eventNetwork, scenario.GetSceneryPath(), &dataStore),
+    ThrowIfFalse(observationNetwork.Instantiate(frameworkModules.observationLibraries, &stochastics, &world, &eventNetwork, scenario.GetSceneryPath(), &dataBuffer),
                  "Failed to instantiate ObservationNetwork");
 }
 
@@ -150,23 +153,27 @@ void RunInstantiator::InitializeSpawnPointNetwork()
                  "Failed to instantiate SpawnPointNetwork");
 }
 
-std::unique_ptr<ParameterInterface> RunInstantiator::SampleWorldParameters(const EnvironmentConfig& environmentConfig, StochasticsInterface* stochastics, const openpass::common::RuntimeInformation& runtimeInformation)
+std::unique_ptr<ParameterInterface> RunInstantiator::SampleWorldParameters(const EnvironmentConfig& environmentConfig, const ProfileGroup& trafficRules, StochasticsInterface* stochastics, const openpass::common::RuntimeInformation& runtimeInformation)
 {
-    return openpass::parameter::make<SimulationCommon::Parameters>(
-        runtimeInformation, openpass::parameter::ParameterSetLevel1 {
-            { "TimeOfDay", Sampler::Sample(environmentConfig.timeOfDays, stochastics) },
-            { "VisibilityDistance", Sampler::Sample(environmentConfig.visibilityDistances, stochastics) },
-            { "Friction", Sampler::Sample(environmentConfig.frictions, stochastics) },
-            { "Weather", Sampler::Sample(environmentConfig.weathers, stochastics) }}
-    );
+    auto trafficRule = helper::map::query(trafficRules, environmentConfig.trafficRules);
+    ThrowIfFalse(trafficRule.has_value(), "No traffic rule set with name " + environmentConfig.trafficRules + " defined in ProfilesCatalog");
+    auto parameters = trafficRule.value();
+    parameters.emplace_back("TimeOfDay", Sampler::Sample(environmentConfig.timeOfDays, stochastics));
+    parameters.emplace_back("VisibilityDistance", Sampler::Sample(environmentConfig.visibilityDistances, stochastics));
+    parameters.emplace_back("Friction", Sampler::Sample(environmentConfig.frictions, stochastics));
+    parameters.emplace_back("Weather", Sampler::Sample(environmentConfig.weathers, stochastics));
+
+    return openpass::parameter::make<SimulationCommon::Parameters>(runtimeInformation, parameters);
 }
-bool RunInstantiator::InitRun(std::uint32_t seed, const EnvironmentConfig &environmentConfig, RunResult &runResult)
+bool RunInstantiator::InitRun(std::uint32_t seed, const EnvironmentConfig &environmentConfig, ProfilesInterface& profiles, RunResult &runResult)
 {
     try
     {
         stochastics.InitGenerator(seed);
 
-        worldParameter = SampleWorldParameters(environmentConfig, &stochastics, configurationContainer.GetRuntimeInformation());
+        auto trafficRules = helper::map::query(profiles.GetProfileGroups(), "TrafficRules");
+        ThrowIfFalse(trafficRules.has_value(), "No traffic rules defined in ProfilesCatalog");
+        worldParameter = SampleWorldParameters(environmentConfig, trafficRules.value(), &stochastics, configurationContainer.GetRuntimeInformation());
         world.ExtractParameter(worldParameter.get());
 
         observationNetwork.InitRun();
@@ -194,7 +201,7 @@ void RunInstantiator::ClearRun()
     spawnPointNetwork.Clear();
     eventNetwork.Clear();
     eventDetectorNetwork.ResetAll();
-    dataStore.Clear();
+    dataBuffer.ClearRun();
 }
 
 } // namespace SimulationSlave

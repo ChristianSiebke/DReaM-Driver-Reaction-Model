@@ -26,7 +26,7 @@
 #include "fakeWorldData.h"
 #include "fakeConnection.h"
 #include "fakeJunction.h"
-#include "fakeDataStore.h"
+#include "fakeDataBuffer.h"
 
 #include "Generators/laneGeometryElementGenerator.h"
 
@@ -51,7 +51,7 @@ public:
 std::tuple<const OWL::Primitive::LaneGeometryJoint*, const OWL::Primitive::LaneGeometryJoint*> CreateSectionPartJointsRect(double length)
 {
     osi3::Lane osiLane;
-    OWL::Implementation::Lane lane(&osiLane, nullptr);
+    OWL::Implementation::Lane lane(&osiLane, nullptr, -1);
 
     auto laneGeometryElement =
         OWL::Testing::LaneGeometryElementGenerator::RectangularLaneGeometryElement(
@@ -74,49 +74,6 @@ std::tuple<const OWL::Primitive::LaneGeometryJoint*, const OWL::Primitive::LaneG
     lane.AddLaneGeometryJoint(leftPoint2, referencePoint2, rightPoint2, length, 0.0, 0.0);
 
     return lane.GetNeighbouringJoints(length * 0.5);
-}
-
-TEST(CalculateAbsolutCoordinates, Test1)
-{
-    const OWL::Primitive::LaneGeometryJoint* prevJoint;
-    const OWL::Primitive::LaneGeometryJoint* nextJoint;
-    std::tie(prevJoint, nextJoint) = CreateSectionPartJointsRect(10);
-
-    ASSERT_NE(prevJoint, nullptr);
-    ASSERT_NE(nextJoint, nullptr);
-
-    ASSERT_EQ(prevJoint->points.reference.x, 0.0);
-    ASSERT_EQ(nextJoint->points.reference.x, 10);
-}
-
-TEST(CalculateAbsolutCoordinates, Test2)
-{
-    FakeLaneManager laneManager(1, 1, 3.0, {100}, "TestRoadId");
-    FakeOdRoad fakeRoadInterface;
-    ON_CALL(fakeRoadInterface, GetId()).WillByDefault(Return("ArbitraryRoadOd"));
-
-    //add on call GetInterpolatedPoint in fakemanager
-
-    NiceMock<Fakes::WorldData> worldData;
-    ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(laneManager.GetRoads()));
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneManager.GetLaneIdMapping()));
-
-    NiceMock<FakeRoadObject> testRoadObject;
-    ON_CALL(testRoadObject, GetS()).WillByDefault(Return(5));
-    ON_CALL(testRoadObject, GetT()).WillByDefault(Return(0));
-    ON_CALL(testRoadObject, GetHdg()).WillByDefault(Return(0));
-    World::Localization::Localizer localizer{worldData};
-
-    NiceMock<FakeRepository> fakeRepository;
-    SceneryConverter converter(nullptr, fakeRepository, worldData, localizer, nullptr);
-
-    bool isInWorld;
-    double x, y, yaw;
-
-    for(auto it : laneManager.GetSections())
-    {
-        std::tie(isInWorld, x, y, yaw) = converter.CalculateAbsoluteCoordinates(&fakeRoadInterface, it.second, &testRoadObject);
-    }
 }
 
 class FakeScenery : public SceneryInterface

@@ -11,7 +11,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include "importer/slaveConfig.h"
 #include "importer/slaveConfigImporter.h"
@@ -24,8 +24,8 @@ using namespace Configuration;
 
 TEST(SlaveConfigImporter, ImportInvalidSpawnPoint_Fails)
 {
-    const boost::filesystem::path testSlaveConfigDir = boost::filesystem::initial_path() / "Resources" / "ImporterTest";
-    const boost::filesystem::path testSlaveConfigFile = "invalidSpawnPointSlaveConfig.xml";
+    const std::filesystem::path testSlaveConfigDir = std::filesystem::current_path() / "Resources" / "ImporterTest";
+    const std::filesystem::path testSlaveConfigFile = "invalidSpawnPointSlaveConfig.xml";
 
     SlaveConfig config;
     SlaveConfigImporter importer;
@@ -35,8 +35,8 @@ TEST(SlaveConfigImporter, ImportInvalidSpawnPoint_Fails)
 
 TEST(SlaveConfigImporter, ImportValidSpawnPoint_Succeeds)
 {
-    const boost::filesystem::path testSlaveConfigDir = boost::filesystem::initial_path() / "Resources" / "ImporterTest";
-    const boost::filesystem::path testSlaveConfigFile = testSlaveConfigDir / "validSpawnPointSlaveConfig.xml";
+    const std::filesystem::path testSlaveConfigDir = std::filesystem::current_path() / "Resources" / "ImporterTest";
+    const std::filesystem::path testSlaveConfigFile = testSlaveConfigDir / "validSpawnPointSlaveConfig.xml";
 
     SlaveConfig config;
     SlaveConfigImporter importer;

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2021 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -18,11 +18,11 @@ namespace SimulationSlave
 WorldBinding::WorldBinding(std::string libraryPath,
                            CallbackInterface *callbacks,
                            StochasticsInterface* stochastics,
-                           DataStoreWriteInterface* dataStore) :
+                           DataBufferWriteInterface* dataBuffer) :
         libraryPath{libraryPath},
         callbacks{callbacks},
         stochastics{stochastics},
-        dataStore{dataStore}
+        dataBuffer{dataBuffer}
 {}
 
 WorldBinding::~WorldBinding()
@@ -37,7 +37,7 @@ WorldInterface *WorldBinding::Instantiate()
         library = new (std::nothrow) WorldLibrary(libraryPath,
                                                   callbacks,
                                                   stochastics,
-                                                  dataStore);
+                                                  dataBuffer);
         if(!library)
         {
             return nullptr;

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
+* Copyright (c) 2019, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -36,7 +36,7 @@ TEST(GetNeighbouringJoints, DistanceBetweenTwoJoints_ReturnsJoints)
     const double length = 10.0;
 
     osi3::Lane osiLane;
-    OWL::Implementation::Lane lane(&osiLane, nullptr);
+    OWL::Implementation::Lane lane(&osiLane, nullptr, -1);
 
     auto laneGeometryElement =
         OWL::Testing::LaneGeometryElementGenerator::RectangularLaneGeometryElement(
@@ -75,7 +75,7 @@ TEST(GetNeighbouringJoints, DistanceAtPrevJoint_ReturnsJoints)
     const double length = 10.0;
 
     osi3::Lane osiLane;
-    OWL::Implementation::Lane lane(&osiLane, nullptr);
+    OWL::Implementation::Lane lane(&osiLane, nullptr, -1);
 
     auto laneGeometryElement =
         OWL::Testing::LaneGeometryElementGenerator::RectangularLaneGeometryElement(
@@ -114,7 +114,7 @@ TEST(GetNeighbouringJoints, DistanceAtNextJoint_ReturnsPrevJointOnly)
     const double length = 10.0;
 
     osi3::Lane osiLane;
-    OWL::Implementation::Lane lane(&osiLane, nullptr);
+    OWL::Implementation::Lane lane(&osiLane, nullptr, -1);
 
     auto laneGeometryElement =
         OWL::Testing::LaneGeometryElementGenerator::RectangularLaneGeometryElement(
@@ -152,7 +152,7 @@ TEST(GetNeighbouringJoints, DistanceAtMiddleJoint_ReturnsJoints)
     const double length = 10.0;
 
     osi3::Lane osiLane;
-    OWL::Implementation::Lane lane(&osiLane, nullptr);
+    OWL::Implementation::Lane lane(&osiLane, nullptr, -1);
 
     auto laneGeometryElement1 =
         OWL::Testing::LaneGeometryElementGenerator::RectangularLaneGeometryElement(
@@ -207,7 +207,7 @@ TEST(GetInterpolatedPointsAtDistance, DistanceAtPrevJoint_ReturnsPrevJoint)
     const double width = 3.75;
 
     osi3::Lane osiLane;
-    OWL::Implementation::Lane lane(&osiLane, nullptr);
+    OWL::Implementation::Lane lane(&osiLane, nullptr, -1);
 
     auto laneGeometryElement =
         OWL::Testing::LaneGeometryElementGenerator::RectangularLaneGeometryElement(
@@ -244,7 +244,7 @@ TEST(GetInterpolatedPointsAtDistance, DistanceAtNextJoint_ReturnsNextJoint)
     const double width = 3.75;
 
     osi3::Lane osiLane;
-    OWL::Implementation::Lane lane(&osiLane, nullptr);
+    OWL::Implementation::Lane lane(&osiLane, nullptr, -1);
 
     auto laneGeometryElement =
         OWL::Testing::LaneGeometryElementGenerator::RectangularLaneGeometryElement(
@@ -282,7 +282,7 @@ TEST(GetInterpolatedPointsAtDistance, DistanceBetweenJoints_ReturnsInterpolatedP
     const double distance = 5.0;
 
     osi3::Lane osiLane;
-    OWL::Implementation::Lane lane(&osiLane, nullptr);
+    OWL::Implementation::Lane lane(&osiLane, nullptr, -1);
 
     auto laneGeometryElement =
         OWL::Testing::LaneGeometryElementGenerator::RectangularLaneGeometryElement(
@@ -326,7 +326,7 @@ TEST(GetInterpolatedPointsAtDistance, DistanceBetweenJointsWithHeading_ReturnsIn
     const double distance = 5.0;
 
     osi3::Lane osiLane;
-    OWL::Implementation::Lane lane(&osiLane, nullptr);
+    OWL::Implementation::Lane lane(&osiLane, nullptr, -1);
 
     auto laneGeometryElement =
         OWL::Testing::LaneGeometryElementGenerator::RectangularLaneGeometryElement(
@@ -372,7 +372,7 @@ TEST(GetLaneWidth, LaneWidthQueryOnTriangularLane_ReturnsZeroWidthAtStartAndFull
     const double heading = 0.0;
 
     osi3::Lane osiLane;
-    OWL::Implementation::Lane lane(&osiLane, nullptr);
+    OWL::Implementation::Lane lane(&osiLane, nullptr, -1);
 
     auto elementUnderTest =
         OWL::Testing::LaneGeometryElementGenerator::TriangularLaneGeometryElement(
@@ -406,7 +406,7 @@ TEST(GetLaneWidth, LaneWidthQueryOnTriangularLane_ReturnsCorrectlyInterpolatedWi
     const double queryPosition = 3.0;
 
     osi3::Lane osiLane;
-    OWL::Implementation::Lane lane(&osiLane, nullptr);
+    OWL::Implementation::Lane lane(&osiLane, nullptr, -1);
 
     auto elementUnderTest =
         OWL::Testing::LaneGeometryElementGenerator::TriangularLaneGeometryElement(
@@ -439,7 +439,7 @@ TEST(GetLaneWidth, LaneWidthQueryOnRotatedTriangularLane_ReturnsCorrectlyInterpo
     const double queryPosition = 3.0;
 
     osi3::Lane osiLane;
-    OWL::Implementation::Lane lane(&osiLane, nullptr);
+    OWL::Implementation::Lane lane(&osiLane, nullptr, -1);
 
     auto elementUnderTest =
         OWL::Testing::LaneGeometryElementGenerator::TriangularLaneGeometryElement(
@@ -471,7 +471,7 @@ TEST(DISABLED_GetLaneWidth, LaneWidthQueryOnRectangularLane_ReturnsFullWidthAtSt
     const double heading = 0.0;
 
     osi3::Lane osiLane;
-    OWL::Implementation::Lane lane(&osiLane, nullptr);
+    OWL::Implementation::Lane lane(&osiLane, nullptr, -1);
 
     auto elementUnderTest =
         OWL::Testing::LaneGeometryElementGenerator::RectangularLaneGeometryElement(
@@ -508,7 +508,7 @@ TEST(GetLaneCurvature, LaneCurvatureQueryOnCurvedLane_ReturnsZeroCurvatureAtStar
     const double curvatureEnd = 0.5;
 
     osi3::Lane osiLane;
-    OWL::Implementation::Lane lane(&osiLane, nullptr);
+    OWL::Implementation::Lane lane(&osiLane, nullptr, -1);
 
     auto elementUnderTest =
         OWL::Testing::LaneGeometryElementGenerator::RectangularLaneGeometryElementWithCurvature(
@@ -549,7 +549,7 @@ TEST(GetLaneCurvature, LaneCurvatureQueryOnCurvedLane_ReturnsCorrectlyInterpolat
     const double curvatureEnd = 0.5;
 
     osi3::Lane osiLane;
-    OWL::Implementation::Lane lane(&osiLane, nullptr);
+    OWL::Implementation::Lane lane(&osiLane, nullptr, -1);
 
     auto elementUnderTest =
         OWL::Testing::LaneGeometryElementGenerator::RectangularLaneGeometryElementWithCurvature(
@@ -590,7 +590,7 @@ TEST(GetLaneCurvature, LaneCurvatureQueryOnRotatedCurvedLane_ReturnsCorrectlyInt
     const double curvatureEnd = 0.5;
 
     osi3::Lane osiLane;
-    OWL::Implementation::Lane lane(&osiLane, nullptr);
+    OWL::Implementation::Lane lane(&osiLane, nullptr, -1);
 
     auto elementUnderTest =
         OWL::Testing::LaneGeometryElementGenerator::RectangularLaneGeometryElementWithCurvature(
@@ -627,7 +627,7 @@ TEST(GetLaneCurvature, LaneCurvatureQueryOnStraightLane_ReturnsZeroCurvature)
     const double heading = 0.0;
 
     osi3::Lane osiLane;
-    OWL::Implementation::Lane lane(&osiLane, nullptr);
+    OWL::Implementation::Lane lane(&osiLane, nullptr, -1);
 
     auto elementUnderTest =
         OWL::Testing::LaneGeometryElementGenerator::RectangularLaneGeometryElement(
@@ -665,7 +665,7 @@ TEST(GetLaneDirection, LaneWidthQueryOnRotatedStraightLane_ReturnsCorrectDirecti
     const double heading = M_PI / 6.0;
 
     osi3::Lane osiLane;
-    OWL::Implementation::Lane lane(&osiLane, nullptr);
+    OWL::Implementation::Lane lane(&osiLane, nullptr, -1);
 
     auto elementUnderTest =
         OWL::Testing::LaneGeometryElementGenerator::RectangularLaneGeometryElement(
@@ -701,7 +701,7 @@ TEST(GetLaneDirection, LaneWidthQueryOnRotatedConstantlyCurvedLane_ReturnsCorrec
     const double curvatureEnd = 0.2;
 
     osi3::Lane osiLane;
-    OWL::Implementation::Lane lane(&osiLane, nullptr);
+    OWL::Implementation::Lane lane(&osiLane, nullptr, -1);
 
     auto elementUnderTest =
         OWL::Testing::LaneGeometryElementGenerator::RectangularLaneGeometryElementWithCurvature(
@@ -743,7 +743,7 @@ TEST(GetLaneDirection, LaneWidthQueryOnRotatedCurvedLane_ReturnsCorrectDirection
     const double curvatureEnd = 0.8;
 
     osi3::Lane osiLane;
-    OWL::Implementation::Lane lane(&osiLane, nullptr);
+    OWL::Implementation::Lane lane(&osiLane, nullptr, -1);
 
     auto elementUnderTest =
         OWL::Testing::LaneGeometryElementGenerator::RectangularLaneGeometryElementWithCurvature(

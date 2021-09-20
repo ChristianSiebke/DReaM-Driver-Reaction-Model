@@ -8,12 +8,10 @@ add_openpass_target(
   HEADERS
     algorithm_autonomousEmergencyBraking.h
     src/autonomousEmergencyBraking.h
-    src/boundingBoxCalculation.h
 
   SOURCES
     algorithm_autonomousEmergencyBraking.cpp
     src/autonomousEmergencyBraking.cpp
-    src/boundingBoxCalculation.cpp
 
   INCDIRS
     ${CMAKE_CURRENT_LIST_DIR}/core/slave/modules/World_OSI

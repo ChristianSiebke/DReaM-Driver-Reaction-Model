@@ -103,6 +103,8 @@ std::vector<std::string> ObservationCyclics::GetAgentSamplesLine(std::uint32_t t
         }
     }
 
+    agentSamplesLines.push_back(sampleLine);
+
     return agentSamplesLines;
 }
 

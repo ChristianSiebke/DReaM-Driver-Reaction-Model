@@ -22,7 +22,7 @@ SystemModel::SystemModel(ComponentInterface *const component,
     SystemInterface(parent), component(component), components(new SystemComponentManagerModel(component, this)), systems(new SystemMapModel(this))
 {
     // Load components
-    components->loadFromDirectory(QDir(QCoreApplication::applicationDirPath() + SUBDIR_LIB_COMPONENTS));
+    components->loadFromDirectory(QDir(QCoreApplication::applicationDirPath() + "/" + SUBDIR_XML_COMPONENTS));
 }
 
 bool SystemModel::clear()

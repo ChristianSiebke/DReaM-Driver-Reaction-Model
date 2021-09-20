@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -22,9 +22,10 @@
 
 #include "include/spawnPointNetworkInterface.h"
 #include "include/worldInterface.h"
-#include "eventDetectorNetwork.h"
-#include "manipulatorNetwork.h"
-#include "observationNetwork.h"
+#include "include/dataBufferInterface.h"
+#include "include/eventDetectorNetworkInterface.h"
+#include "include/manipulatorNetworkInterface.h"
+#include "include/observationNetworkInterface.h"
 #include "runResult.h"
 #include "tasks.h"
 
@@ -66,6 +67,7 @@ private:
     SimulationSlave::ObservationNetworkInterface *const observationNetwork;
     SimulationSlave::EventDetectorNetworkInterface *const eventDetectorNetwork;
     SimulationSlave::ManipulatorNetworkInterface *const manipulatorNetwork;
+    DataBufferInterface *const dataInterface;
 
     std::list<TaskItem> eventDetectorTasks;
     std::list<TaskItem> manipulatorTasks;
@@ -95,7 +97,8 @@ public:
                 SimulationSlave::SpawnPointNetworkInterface *const spawnPointNetwork,
                 SimulationSlave::ObservationNetworkInterface *const observationNetwork,
                 SimulationSlave::EventDetectorNetworkInterface *const eventDetectorNetwork,
-                SimulationSlave::ManipulatorNetworkInterface *const manipulatorNetwork);
+                SimulationSlave::ManipulatorNetworkInterface *const manipulatorNetwork,
+                DataBufferInterface *const dataInterface);
 
     virtual ~TaskBuilder() = default;
     /*!

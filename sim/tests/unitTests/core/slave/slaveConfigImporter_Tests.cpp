@@ -41,7 +41,7 @@ TEST(SlaveConfigImporter_UnitTests, ImportSpawnersSuccessfully)
                                        "</root>"
                                     );
 
-    SpawnPointLibraryInfoCollection spawnPointsConfig {};
+    SpawnPointLibraryInfoCollection spawnPointsConfig{};
 
     EXPECT_NO_THROW(SlaveConfigImporter::ImportSpawners(fakeDocumentRoot, spawnPointsConfig));
     EXPECT_THAT(spawnPointsConfig, SizeIs(2));
@@ -84,11 +84,11 @@ TEST(SlaveConfigImporter_UnitTests, ImportSpawnersUnsuccessfully)
                                            "</Spawner>"
                                        "</root>"
                                     );
-    SpawnPointLibraryInfoCollection spawnPointsConfig;
+    SpawnPointLibraryInfoCollection spawnPointConfig;
 
-    ASSERT_THROW(SlaveConfigImporter::ImportSpawners(fakeDocumentRootMissingLibrary, spawnPointsConfig), std::runtime_error);
-    ASSERT_THROW(SlaveConfigImporter::ImportSpawners(fakeDocumentRootMissingType, spawnPointsConfig), std::runtime_error);
-    ASSERT_THROW(SlaveConfigImporter::ImportSpawners(fakeDocumentRootMissingPriority, spawnPointsConfig), std::runtime_error);
+    ASSERT_THROW(SlaveConfigImporter::ImportSpawners(fakeDocumentRootMissingLibrary, spawnPointConfig), std::runtime_error);
+    ASSERT_THROW(SlaveConfigImporter::ImportSpawners(fakeDocumentRootMissingType, spawnPointConfig), std::runtime_error);
+    ASSERT_THROW(SlaveConfigImporter::ImportSpawners(fakeDocumentRootMissingPriority, spawnPointConfig), std::runtime_error);
 }
 
 TEST(SlaveConfigImporter_UnitTests, ImportObserversSuccessfully)
@@ -292,6 +292,7 @@ TEST(SlaveConfigImporter_UnitTests, ImportEnvironmentConfigSuccessfully)
                                        "<Weather Value=\"Rainy\" Probability=\"0.5\"/>"
                                        "<Weather Value=\"Snowy\" Probability=\"0.5\"/>"
                                        "</Weathers>"
+                                       "<TrafficRules>Country</TrafficRules>"
                                        "</root>"
                                    );
 
@@ -308,6 +309,7 @@ TEST(SlaveConfigImporter_UnitTests, ImportEnvironmentConfigSuccessfully)
                                                           Pair(0.7, 0.5)));
     ASSERT_THAT(environmentConfig.weathers, ElementsAre(Pair("Rainy", 0.5),
                                                           Pair("Snowy", 0.5)));
+    ASSERT_THAT(environmentConfig.trafficRules, Eq("Country"));
 }
 
 TEST(SlaveConfigImporter_UnitTests, ImportEnvironmentConfigUnsuccessfully)

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 in-tech GmbH
+* Copyright (c) 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -103,6 +103,13 @@ public:
     //! \return road id of the agent
     virtual const std::string& GetRoadId() const = 0;
 
+    //! Returns the velocity of the own agent taking the route into account
+    virtual double GetVelocity(VelocityScope velocityScope) const = 0;
+
+    //! Returns the velocity of another object taking the own route into account
+    //! This means that, if the other object is an agent driving in opposite direction the longitudinal velocity will be negative
+    virtual double GetVelocity(VelocityScope velocityScope, const WorldObjectInterface* object) const = 0;
+
     //! Return the distane to the end of the driving lane (i.e. as defined by the corresponding
     //! WorldInterface function) along the set route. Returns infinity if the end is father away than the range
     //!
@@ -118,7 +125,14 @@ public:
     //! \param range            maximum search range (calculated from MainLaneLocator)
     //! \param relativeLane     lane id relative to own lane (in driving direction)
     //! \return lanes relative to agent
-    virtual RelativeWorldView::Lanes GetRelativeLanes(double range, int relativeLane = 0) const = 0;
+    virtual RelativeWorldView::Lanes GetRelativeLanes(double range, int relativeLane = 0, bool includeOncoming = true) const = 0;
+
+    //! Returns the relative lane of the ReferencePoint or MainLocatePoint of another object
+    //!
+    //! \param object   other object
+    //! \param mp       either Front for MainLocatePoint or Reference (Rear not supported)
+    //! \return relative lane id
+    virtual std::optional<int> GetRelativeLaneId(const WorldObjectInterface* object, MeasurementPoint mp) const = 0;
 
     virtual RelativeWorldView::Junctions GetRelativeJunctions(double range) const = 0;
 
@@ -155,6 +169,14 @@ public:
     //! \param relativeLane     lane id relative to own lane (in driving direction)
     //! \return road markings in range
     virtual std::vector<CommonTrafficSign::Entity> GetRoadMarkingsInRange(double range, int relativeLane = 0) const = 0;
+
+    //! Returns all TrafficLights in front of the agent inside the specified range on the specified
+    //! lane along the route
+    //!
+    //! \param range            search range (calculated from MainLaneLocator)
+    //! \param relativeLane     lane id relative to own lane (in driving direction)
+    //! \return traffic lights in range
+    virtual std::vector<CommonTrafficLight::Entity> GetTrafficLightsInRange(double range, int relativeLane = 0) const = 0;
 
     //! Returns all LaneMarkings in front of the agent inside the specified range on the specified
     //! lane along the route

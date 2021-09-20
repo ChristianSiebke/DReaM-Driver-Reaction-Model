@@ -28,7 +28,7 @@ SpawnPointNetwork::SpawnPointNetwork(std::map<std::string, SpawnPointBinding>* s
 
 void SpawnPointNetwork::Clear()
 {
-    preRunSpawnPoints.clear();
+    preRunSpawnZones.clear();
     runtimeSpawnPoints.clear();
 }
 
@@ -82,7 +82,7 @@ bool SpawnPointNetwork::Instantiate(const SpawnPointLibraryInfoCollection& libra
         switch (libraryInfo.type)
         {
         case SpawnPointType::PreRun:
-            preRunSpawnPoints.emplace(libraryInfo.priority, std::move(spawnPoint));
+            preRunSpawnZones.emplace(libraryInfo.priority, std::move(spawnPoint));
             break;
         case SpawnPointType::Runtime:
             runtimeSpawnPoints.emplace(libraryInfo.priority, std::move(spawnPoint));
@@ -93,11 +93,12 @@ bool SpawnPointNetwork::Instantiate(const SpawnPointLibraryInfoCollection& libra
     return true;
 }
 
-bool SpawnPointNetwork::TriggerPreRunSpawnPoints()
+bool SpawnPointNetwork::TriggerPreRunSpawnZones()
 {
     try {
-        std::for_each(preRunSpawnPoints.crbegin(), preRunSpawnPoints.crend(),
+        std::for_each(preRunSpawnZones.crbegin(), preRunSpawnZones.crend(),
         [&](auto const& element)
+
         {
             const auto spawnedAgents = element.second->GetImplementation()->Trigger(0);
             newAgents.insert(newAgents.cend(), spawnedAgents.cbegin(), spawnedAgents.cend());

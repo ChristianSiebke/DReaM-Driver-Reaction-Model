@@ -35,13 +35,13 @@ Then the AgentType with the components and channels is build by the DynamicAgent
 
 ![AgentBlueprintProviderSequenceDiagram](AgentBlueprintProviderSequence.svg)
 
-\section dev_framework_modules_datastore DataStore
+\section dev_framework_modules_databuffer DataBuffer
 
-The DataStore accepts arbitrary values from different components (from framework as well as agents).
-The stored values if cyclic and acyclic type are associated with an timestamp, entity id and a key (topic).
-Static values are only associated with a key.
+The DataBuffer accepts arbitrary values from different components (from framework as well as agents).
+The stored values if cyclic and acyclic type are associated with an entity id and a key (topic) and stored for one timestep.
+Static values are only associated with a key but stored for the entire run.
 
-Typically, Observers are using the DataStore to retrieve information about the simulation.
+Typically, Observers are using the DataBuffer to retrieve information about the simulation.
 This can happen during the simulation run and/or at the end of a run.
 For the keys, a generic datatype is used (strings).
 For the values, a set of predefined datatypes is used (bool, char, int, size_t, float, double, string).
@@ -261,11 +261,11 @@ Generally, the position of an agent is stored with respect to [world coordinates
 As queries on the world operates in [road coordinates (s,t)](\ref dev_concepts_coordinatesystems_road), the position of the agent needs to be transformed.
 The transformation is performed by the [localization algorithm](\ref localization).
 
-\subsection dev_framework_modules_world_trafficsigns Traffic Signs and Road Markings
+\subsection dev_framework_modules_world_trafficsigns Traffic Signs, Road Markings and TrafficLights
 
-The world currently supports a variety of traffic signs and road markings.
-Both are defined in OpenDRIVE as "RoadSignal".
-At the moment it can only interpret traffic signs according to the German regulations "StVo".
+The world currently supports a variety of traffic signs, road markings and traffic lights.
+All of these are defined in OpenDRIVE as "RoadSignal".
+At the moment it can only interpret traffic signs and road markings according to the German regulations "StVo" and traffic lights according the the OpenDRIVE appendix.
 Traffic signs can contain optional supplementary traffic signs. Supplementary signs are dependent on a main traffic sign and contain additional information.
 The following traffic signs are supported:
 
@@ -312,6 +312,19 @@ The following road markings are supported:
 
 The pedestrian crossing can also be defined in OpenDRIVE as object with type "crosswalk".
 
+
+The following traffic lights are supported:
+
+| TrafficLight                                  | OpenDRIVE Type | Subtype     | Value and Units   |
+|-----------------------------------------------|----------------|-------------|-------------------|
+| Standard traffic light (red, yellow, green)   | 1.000.001      | -           | -                 |
+| Left arrows                                   | 1.000.011      | 10          | -                 |
+| Right arrows                                  | 1.000.011      | 20          | -                 |
+| Upwards arrows                                | 1.000.011      | 30          | -                 |
+| Left und upwards arrows                       | 1.000.011      | 40          | -                 |
+| Right und upwards arrows                      | 1.000.011      | 50          | -                 |
+
+These traffic lights are controlled by OpenScenario.
 \subsection dev_framework_modules_world_lanemarking Lane Markings
 
 The world also supports lane markings (i.e. printed lines between two lanes) according to the OpenDRIVE standard.

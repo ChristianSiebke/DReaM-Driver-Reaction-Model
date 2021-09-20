@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -107,6 +107,11 @@ public:
         return implementation->GetVisibilityDistance();
     }
 
+    const TrafficRules& GetTrafficRules() const override
+    {
+        return implementation->GetTrafficRules();
+    }
+
     double GetFriction() const override
     {
         return implementation->GetFriction();
@@ -137,14 +142,14 @@ public:
         return implementation->PublishGlobalData(timestamp);
     }
 
-    void SyncGlobalData() override
+    void SyncGlobalData(int timestamp) override
     {
-        return implementation->SyncGlobalData();
+        return implementation->SyncGlobalData(timestamp);
     }
 
-    bool CreateScenery(SceneryInterface* scenery) override
+    bool CreateScenery(SceneryInterface* scenery, const SceneryDynamicsInterface& sceneryDynamics) override
     {
-        return implementation->CreateScenery(scenery);
+        return implementation->CreateScenery(scenery, sceneryDynamics);
     }
 
     AgentInterface* CreateAgentAdapterForAgent() override
@@ -194,7 +199,7 @@ public:
         return implementation->LaneCoord2WorldCoord(distance, offset, roadId, laneId);
     }
 
-    std::map<const std::string, GlobalRoadPosition> WorldCoord2LaneCoord(double x, double y, double heading) const override
+    std::map<std::string, GlobalRoadPosition> WorldCoord2LaneCoord(double x, double y, double heading) const override
     {
         return implementation->WorldCoord2LaneCoord(x, y, heading);
     }
@@ -278,8 +283,6 @@ public:
 
     //-----------------------------------------------------------------------------
     //! Instantiate the world by creating a WorldInterface out of a world library
-    //! with given world parameters
-    //! @param[in]  worldParameter  parameters of world inclusive library path
     //!
     //! @return                true if successful
     //-----------------------------------------------------------------------------
@@ -323,6 +326,12 @@ public:
         return implementation->GetRoadMarkingsInRange(roadGraph, startNode, laneId, startDistance, searchRange);
     }
 
+    RouteQueryResult<std::vector<CommonTrafficLight::Entity>> GetTrafficLightsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId,
+                                                                                      double startDistance, double searchRange) const override
+    {
+        return implementation->GetTrafficLightsInRange(roadGraph, startNode, laneId, startDistance, searchRange);
+    }
+
     RouteQueryResult<std::vector<LaneMarking::Entity>> GetLaneMarkings(const RoadGraph& roadGraph, RoadGraphVertex startNode,
                                                                        int laneId, double startDistance, double range, Side side) const override
     {
@@ -334,9 +343,14 @@ public:
         return implementation->GetRelativeJunctions(roadGraph, startNode, startDistance, range);
     }
 
-    RouteQueryResult<RelativeWorldView::Lanes> GetRelativeLanes(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, double range) const override
+    RouteQueryResult<RelativeWorldView::Lanes> GetRelativeLanes(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, double range, bool includeOncoming = true) const override
     {
-        return implementation->GetRelativeLanes(roadGraph, startNode, laneId, distance, range);
+        return implementation->GetRelativeLanes(roadGraph, startNode, laneId, distance, range, includeOncoming);
+    }
+
+    RouteQueryResult<std::optional<int>> GetRelativeLaneId(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, std::map<std::string, GlobalRoadPosition> targetPosition) const override
+    {
+        return implementation->GetRelativeLaneId(roadGraph, startNode, laneId, distance, targetPosition);
     }
 
     std::vector<JunctionConnection> GetConnectionsOnJunction(std::string junctionId, std::string incomingRoadId) const override
@@ -374,6 +388,11 @@ public:
         return implementation->GetEdgeWeights(roadGraph);
     }
 
+    std::unique_ptr<RoadStreamInterface> GetRoadStream(const std::vector<RouteElement>& route) const override
+    {
+        return implementation->GetRoadStream(route);
+    }
+
     virtual RouteQueryResult<Obstruction> GetObstruction(const RoadGraph& roadGraph, RoadGraphVertex startNode, const GlobalRoadPosition& ownPosition,
                                                          const ObjectPosition& otherPosition, const std::vector<Common::Vector2d>& objectCorners, const Common::Vector2d& mainLaneLocator) const override
     {
@@ -399,10 +418,6 @@ public:
     virtual Weekday GetWeekday() const override
     {
         return implementation->GetWeekday();
-    }
-    virtual void SetParameter(WorldParameter *worldParameter) override
-    {
-        return implementation->SetParameter(worldParameter);
     }
     virtual bool CreateGlobalDrivingView() override
     {

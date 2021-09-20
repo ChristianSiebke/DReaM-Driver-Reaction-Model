@@ -29,6 +29,8 @@
 #include "common/opMath.h"
 #include "common/parametersVehicleSignal.h"
 #include "common/steeringSignal.h"
+#include "common/rollSignal.h"
+#include "components/common/vehicleProperties.h"
 #include "include/worldInterface.h"
 
 void DynamicsRegularDrivingImplementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time)
@@ -67,6 +69,21 @@ void DynamicsRegularDrivingImplementation::UpdateInput(int localLinkId, const st
                 throw std::runtime_error(msg);
             }
             in_steeringWheelAngle = signal->steeringWheelAngle;
+        }
+    }
+    else if (localLinkId == 2)
+    {
+        const std::shared_ptr<ComponentStateSignalInterface const> stateSignal = std::dynamic_pointer_cast<ComponentStateSignalInterface const>(data);
+        if(stateSignal->componentState == ComponentState::Acting)
+        {
+            const std::shared_ptr<RollSignal const> signal = std::dynamic_pointer_cast<RollSignal const>(data);
+            if (!signal)
+            {
+                const std::string msg = COMPONENTNAME + " invalid signaltype";
+                LOG(CbkLogLevel::Debug, msg);
+                throw std::runtime_error(msg);
+            }
+            dynamicsSignal.roll = signal->rollAngle;
         }
     }
     else if (localLinkId == 100)
@@ -116,7 +133,7 @@ void DynamicsRegularDrivingImplementation::UpdateOutput(int localLinkId, std::sh
 
 void DynamicsRegularDrivingImplementation::ApplyGearLimit()
 {
-    in_gear = std::min(std::max(in_gear, 0), static_cast<int>(vehicleModelParameters.numberOfGears));
+    in_gear = std::min(std::max(in_gear, 1), static_cast<int>(GetVehicleProperty(vehicle::properties::NumberOfGears)));
 }
 
 void DynamicsRegularDrivingImplementation::ApplyPedalPositionLimits()
@@ -127,37 +144,41 @@ void DynamicsRegularDrivingImplementation::ApplyPedalPositionLimits()
 
 double DynamicsRegularDrivingImplementation::GetEngineSpeedByVelocity(double xVel, int gear)
 {
-    return (xVel * vehicleModelParameters.axleRatio * vehicleModelParameters.gearRatios.at(gear) * 60.) /
-            (vehicleModelParameters.staticWheelRadius * _twoPi);  // an dynamic wheel radius rDyn must actually be used here
+    return (xVel * GetVehicleProperty(vehicle::properties::AxleRatio) * GetVehicleProperty(vehicle::properties::GearRatio+std::to_string(gear)) * 60.) /
+            (vehicleModelParameters.rearAxle.wheelDiameter * M_PI);  // an dynamic wheel radius rDyn must actually be used here
 }
 
 double DynamicsRegularDrivingImplementation::GetEngineMomentMax(double engineSpeed)
 {
-    double torqueMax = vehicleModelParameters.maximumEngineTorque; // initial value at max
+    const double maximumEngineTorque = GetVehicleProperty(vehicle::properties::MaximumEngineTorque);
+    const double maximumEngineSpeed = GetVehicleProperty(vehicle::properties::MaximumEngineSpeed);
+    const double minimumEngineSpeed = GetVehicleProperty(vehicle::properties::MinimumEngineSpeed);
+
+    double torqueMax = maximumEngineTorque; // initial value at max
     double speed = engineSpeed;
 
-    bool isLowerSection = engineSpeed < vehicleModelParameters.minimumEngineSpeed + 1000.;
-    bool isBeyondLowerSectionBorder = engineSpeed<vehicleModelParameters.minimumEngineSpeed;
-    bool isUpperSection = engineSpeed>vehicleModelParameters.maximumEngineSpeed - 1000.;
-    bool isBeyondUpperSectionBorder = engineSpeed>vehicleModelParameters.maximumEngineSpeed;
+    bool isLowerSection = engineSpeed < minimumEngineSpeed + 1000.;
+    bool isBeyondLowerSectionBorder = engineSpeed < minimumEngineSpeed;
+    bool isUpperSection = engineSpeed > maximumEngineSpeed - 1000.;
+    bool isBeyondUpperSectionBorder = engineSpeed > maximumEngineSpeed;
 
 
     if (isLowerSection)
     {
         if (isBeyondLowerSectionBorder) // not within limits
         {
-            speed = vehicleModelParameters.minimumEngineSpeed;
+            speed = minimumEngineSpeed;
         }
-        torqueMax = (1000 - (speed - vehicleModelParameters.minimumEngineSpeed)) * -0.1 + vehicleModelParameters.maximumEngineTorque;
+        torqueMax = (1000 - (speed - minimumEngineSpeed)) * -0.1 + maximumEngineTorque;
     }
     else if (isUpperSection)
     {
         if (isBeyondUpperSectionBorder)
         {
-            speed = vehicleModelParameters.maximumEngineSpeed;
+            speed = maximumEngineSpeed;
         }
 
-        torqueMax = (speed - vehicleModelParameters.maximumEngineSpeed + 1000) * -0.04 + vehicleModelParameters.maximumEngineTorque;
+        torqueMax = (speed - maximumEngineSpeed + 1000) * -0.04 + maximumEngineTorque;
     }
     return torqueMax;
 }
@@ -171,9 +192,9 @@ double DynamicsRegularDrivingImplementation::GetAccelerationFromRollingResistanc
 
 double DynamicsRegularDrivingImplementation::GetAccelerationFromAirResistance(double velocity)
 {
-    double forceAirResistance = -.5 * _rho * vehicleModelParameters.airDragCoefficient *
-            vehicleModelParameters.frontSurface * velocity * velocity;
-    double accDueToAirResistance = forceAirResistance / vehicleModelParameters.weight;
+    double forceAirResistance = -.5 * _rho * GetVehicleProperty(vehicle::properties::AirDragCoefficient) *
+            GetVehicleProperty(vehicle::properties::FrontSurface) * velocity * velocity;
+    double accDueToAirResistance = forceAirResistance / GetVehicleProperty(vehicle::properties::Mass);
     return accDueToAirResistance;
 }
 
@@ -184,7 +205,14 @@ double DynamicsRegularDrivingImplementation::GetEngineMomentMin(double engineSpe
 
 double DynamicsRegularDrivingImplementation::GetFrictionCoefficient()
 {
-    return GetWorld()->GetFriction() * vehicleModelParameters.frictionCoeff;
+    return GetWorld()->GetFriction() * GetVehicleProperty(vehicle::properties::FrictionCoefficient);
+}
+
+double DynamicsRegularDrivingImplementation::GetVehicleProperty(const std::string& propertyName)
+{
+    const auto property = helper::map::query(vehicleModelParameters.properties, propertyName);
+    THROWIFFALSE(property.has_value(), "Vehicle property \"" + propertyName + "\" was not set in the VehicleCatalog");
+    return property.value();
 }
 
 double DynamicsRegularDrivingImplementation::GetEngineMoment(double gasPedalPos, int gear)
@@ -210,11 +238,11 @@ double DynamicsRegularDrivingImplementation::GetAccFromEngineMoment(double xVel,
     Q_UNUSED(xVel);
     Q_UNUSED(cycleTime);
 
-    double wheelSetMoment = engineMoment * (vehicleModelParameters.axleRatio * vehicleModelParameters.gearRatios.at(chosenGear));
-    double wheelSetForce = wheelSetMoment / vehicleModelParameters.staticWheelRadius;
+    double wheelSetMoment = engineMoment * (GetVehicleProperty(vehicle::properties::AxleRatio) * GetVehicleProperty(vehicle::properties::GearRatio+std::to_string(chosenGear)));
+    double wheelSetForce = wheelSetMoment / (0.5 * vehicleModelParameters.rearAxle.wheelDiameter);
 
     double vehicleSetForce = wheelSetForce;
-    double acc = vehicleSetForce / (vehicleModelParameters.weight);
+    double acc = vehicleSetForce / GetVehicleProperty(vehicle::properties::Mass);
 
     return acc;
 }
@@ -295,15 +323,12 @@ void DynamicsRegularDrivingImplementation::Trigger(int time)
     dynamicsSignal.travelDistance = ds;
 
     // convert steering wheel angle to steering angle of front wheels [radian]
-    const auto steeringWheelAngle = std::clamp(in_steeringWheelAngle,
-                                               -vehicleModelParameters.maximumSteeringWheelAngleAmplitude,
-                                               vehicleModelParameters.maximumSteeringWheelAngleAmplitude);
-    dynamicsSignal.steeringWheelAngle = steeringWheelAngle;
-
-    const auto steering_angle = steeringWheelAngle / vehicleModelParameters.steeringRatio;
+    const auto steering_angle = std::clamp(in_steeringWheelAngle / GetVehicleProperty(vehicle::properties::SteeringRatio), -vehicleModelParameters.frontAxle.maxSteering, vehicleModelParameters.frontAxle.maxSteering);
+    dynamicsSignal.steeringWheelAngle = steering_angle * GetVehicleProperty(vehicle::properties::SteeringRatio) ;
     GetPublisher()->Publish("SteeringAngle", steering_angle);
+    const double wheelbase = vehicleModelParameters.frontAxle.positionX - vehicleModelParameters.rearAxle.positionX;
     // calculate curvature (Ackermann model; reference point of yawing = rear axle!) [radian]
-    double steeringCurvature = std::tan(steering_angle) / vehicleModelParameters.wheelbase;
+    double steeringCurvature = std::tan(steering_angle) / wheelbase;
     // change of yaw angle due to ds and curvature [radian]
     double dpsi = std::atan(steeringCurvature*ds);
     dynamicsSignal.yawRate = dpsi / (GetCycleTime() * 0.001);

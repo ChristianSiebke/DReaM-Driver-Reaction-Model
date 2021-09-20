@@ -32,6 +32,7 @@
 #include "TrafficObjectAdapter.h"
 #include "WorldData.h"
 #include "WorldDataQuery.h"
+#include "common/commonTools.h"
 #include "common/opMath.h"
 
 namespace Internal {
@@ -98,6 +99,20 @@ ConversionStatus ConnectJunction(const SceneryInterface *scenery, const Junction
     return {true};
 }
 } // namespace Internal
+
+Position SceneryConverter::RoadCoord2WorldCoord(const RoadInterface *road, double s, double t, double yaw)
+{
+    auto &geometries = road->GetGeometries();
+    auto geometry = std::find_if(geometries.cbegin(), geometries.cend(),
+                                 [&](const RoadGeometryInterface *geometry) { return (geometry->GetS() <= s) && (geometry->GetS() + geometry->GetLength() >= s); });
+    if (geometry == geometries.end())
+    {
+        throw std::runtime_error("GetPositionForRoadCoordinates: No matching geometry within given s-coordinate");
+    }
+    auto coordinates = (*geometry)->GetCoord(s - (*geometry)->GetS(), t);
+    auto absoluteYaw = CommonHelper::SetAngleToValidRange((*geometry)->GetDir(s - (*geometry)->GetS()) + yaw);
+    return {coordinates.x, coordinates.y, absoluteYaw, 0};
+}
 
 SceneryConverter::SceneryConverter(SceneryInterface *scenery,
                                    openpass::entity::RepositoryInterface &repository,
@@ -585,6 +600,18 @@ bool SceneryConverter::ConnectJunction(const JunctionInterface *junction)
     }
 }
 
+std::optional<int> GetOutgoingLaneId (const RoadLaneInterface& connectingLane, bool connectAtStart)
+{
+    if (connectAtStart ? connectingLane.GetSuccessor().empty() : connectingLane.GetPredecessor().empty())
+    {
+        return std::nullopt;
+    }
+    else
+    {
+        return connectAtStart ? connectingLane.GetSuccessor().front() : connectingLane.GetPredecessor().front();
+    }
+}
+
 void SceneryConverter::ConnectPathInJunction(const JunctionInterface *junction, const RoadInterface *incomingRoad, const RoadInterface *connectingRoad,
                                              const RoadInterface *outgoingRoad, ContactPointType incomingContactPoint, ContactPointType connectingContactPoint, ContactPointType outgoingContactPoint,
                                              std::map<int, int> laneIdMapping)
@@ -637,15 +664,15 @@ void SceneryConverter::ConnectPathInJunction(const JunctionInterface *junction, 
         ConnectLaneToLane(incomingLane, incomingContactPoint, connectingLane);
     }
 
-    for (auto connectingLane : connectingRoadLastSection->GetLanes())
+    for (auto [connectingLaneId, connectingLane] : connectingRoadLastSection->GetLanes())
     {
-        if (connectingLane.first == 0) //Do not try to connect the center lane
+        auto outgoingLaneId = GetOutgoingLaneId(*connectingLane, connectAtStart);
+        if (!outgoingLaneId.has_value() || connectingLaneId == 0)
         {
             continue;
         }
-        int outgoingLaneId = connectAtStart ? connectingLane.second->GetSuccessor().front() : connectingLane.second->GetPredecessor().front();
-        RoadLaneInterface *outgoingLane = outgoingRoadSection->GetLanes().at(outgoingLaneId);
-        ConnectLaneToLane(outgoingLane, outgoingContactPoint, connectingLane.second);
+        RoadLaneInterface *outgoingLane = outgoingRoadSection->GetLanes().at(outgoingLaneId.value());
+        ConnectLaneToLane(outgoingLane, outgoingContactPoint, connectingLane);
     }
 }
 
@@ -722,33 +749,75 @@ void SceneryConverter::CreateObjects()
                 continue;
             }
 
-            bool isOnRoad;
-            double x, y, yaw;
-            std::tie(isOnRoad, x, y, yaw) = CalculateAbsoluteCoordinates(road, section, object);
+            const auto position = RoadCoord2WorldCoord(road, object->GetS(), object->GetT(), object->GetHdg());
 
-            if (isOnRoad)
+            if (object->GetType() == RoadObjectType::crosswalk)
             {
-                if (object->GetType() == RoadObjectType::crosswalk)
-                {
-                    CreateRoadMarking(object ,Position{x,y,yaw,0}, section->GetLanes());
-                }
-                else
-                {
-                    OWL::Primitive::AbsPosition pos{x, y, 0};
-                    OWL::Primitive::Dimension dim{object->GetLength(), object->GetWidth(), object->GetHeight()};
-                    OWL::Primitive::AbsOrientation orientation{object->GetHdg(), object->GetPitch(), object->GetRoll()};
-                const auto id = repository.Register(openpass::entity::EntityType::StationaryObject, openpass::utils::GetEntityInfo(*object));
-
-                trafficObjects.emplace_back(std::make_unique<TrafficObjectAdapter>(
-                    id,
-                    worldData,
-                    localizer,
-                    pos,
-                    dim,
-                    orientation,
-                    object->GetId()));
-                }
+                CreateRoadMarking(object, position, section->GetLanes());
             }
+            else if(object->IsContinuous())
+            {
+                CreateContinuousObject(object, road);
+            }
+            else
+            {
+                CreateObject(object, position);
+            }
+        }
+    }
+}
+
+void SceneryConverter::CreateObject(const RoadObjectInterface *object, const Position& position)
+{
+    OWL::Primitive::AbsPosition absPos{position.xPos, position.yPos, 0};
+    OWL::Primitive::Dimension dim{object->GetLength(), object->GetWidth(), object->GetHeight()};
+    OWL::Primitive::AbsOrientation orientation{position.yawAngle, object->GetPitch(), object->GetRoll()};
+    const auto id = repository.Register(openpass::entity::EntityType::StationaryObject, openpass::utils::GetEntityInfo(*object));
+
+    trafficObjects.emplace_back(std::make_unique<TrafficObjectAdapter>(
+                                    id,
+                                    worldData,
+                                    localizer,
+                                    absPos,
+                                    dim,
+                                    orientation,
+                                    object->GetId()));
+}
+
+void SceneryConverter::CreateContinuousObject(const RoadObjectInterface *object, const RoadInterface *road)
+{
+    auto section = worldDataQuery.GetSectionByDistance(road->GetId(), object->GetS());
+    const double sStart = object->GetS();
+    const double sEnd = sStart + object->GetLength();
+    const auto laneElements = section->GetLanes().front()->GetLaneGeometryElements();
+    for (const auto& laneElement : laneElements)
+    {
+        const double elementStart = laneElement->joints.current.sOffset;
+        const double elementEnd = laneElement->joints.next.sOffset;
+        const double objectStart = std::max(sStart, elementStart);
+        const double objectEnd = std::min(sEnd, elementEnd);
+        if (objectStart < objectEnd)
+        {
+            const auto startPosition = RoadCoord2WorldCoord(road, objectStart, object->GetT(), 0);
+            const auto endPosition = RoadCoord2WorldCoord(road, objectEnd, object->GetT(), 0);
+            const double deltaX = endPosition.xPos - startPosition.xPos;
+            const double deltaY = endPosition.yPos - startPosition.yPos;
+            const double length = std::hypot(deltaX, deltaY);
+            double yaw = std::atan2(deltaY, deltaX);
+
+            OWL::Primitive::AbsPosition pos{(startPosition.xPos + endPosition.xPos) / 2.0, (startPosition.yPos + endPosition.yPos) / 2.0, 0};
+            OWL::Primitive::Dimension dim{length, object->GetWidth(), object->GetHeight()};
+            OWL::Primitive::AbsOrientation orientation{yaw, object->GetPitch(), object->GetRoll()};
+            const auto id = repository.Register(openpass::entity::EntityType::StationaryObject, openpass::utils::GetEntityInfo(*object));
+
+            trafficObjects.emplace_back(std::make_unique<TrafficObjectAdapter>(
+                                            id,
+                                            worldData,
+                                            localizer,
+                                            pos,
+                                            dim,
+                                            orientation,
+                                            object->GetId()));
         }
     }
 }
@@ -799,20 +868,6 @@ std::vector<OWL::Id> SceneryConverter::CreateLaneBoundaries(RoadLaneInterface &o
     return laneBoundaries;
 }
 
-Position GetPositionForRoadCoordinates(RoadInterface *road, double s, double t)
-{
-    auto &geometries = road->GetGeometries();
-    auto geometry = std::find_if(geometries.cbegin(), geometries.cend(),
-                                 [&](const RoadGeometryInterface *geometry) { return (geometry->GetS() <= s) && (geometry->GetS() + geometry->GetLength() >= s); });
-    if (geometry == geometries.end())
-    {
-        throw std::runtime_error("No valid geometry found");
-    }
-    auto coordinates = (*geometry)->GetCoord(s - (*geometry)->GetS(), t);
-    auto yaw = (*geometry)->GetDir(s - (*geometry)->GetS());
-    return {coordinates.x, coordinates.y, yaw, 0};
-}
-
 void SceneryConverter::CreateRoadSignals()
 {
     for (auto &item : scenery->GetRoads())
@@ -823,12 +878,6 @@ void SceneryConverter::CreateRoadSignals()
 
         for (RoadSignalInterface *signal : road->GetRoadSignals())
         {
-            if (signal->GetIsDynamic())
-            {
-                LOG(CbkLogLevel::Warning, std::string("Ignoring dynamic signal: ") + signal->GetId());
-                continue;
-            }
-
             // Gather all dependent signals
             if (!signal->GetDependencies().empty())
             {
@@ -844,12 +893,20 @@ void SceneryConverter::CreateRoadSignals()
                 continue;
             }
 
-            auto position = GetPositionForRoadCoordinates(road, signal->GetS(), signal->GetT());
+            double yaw = signal->GetHOffset() + (signal->GetOrientation() ? 0 : M_PI);
+            auto position = RoadCoord2WorldCoord(road, signal->GetS(), signal->GetT(), yaw);
             if (OpenDriveTypeMapper::roadMarkings.find(signal->GetType()) != OpenDriveTypeMapper::roadMarkings.end())
             {
                 CreateRoadMarking(signal, position, section->GetLanes());
             }
-
+            else if (OpenDriveTypeMapper::trafficLightsThreeLights.find(signal->GetType()) != OpenDriveTypeMapper::trafficLightsThreeLights.end())
+            {
+                CreateTrafficLight(signal, position, section->GetLanes(), true);
+            }
+            else if (OpenDriveTypeMapper::trafficLightsTwoLights.find(signal->GetType()) != OpenDriveTypeMapper::trafficLightsTwoLights.end())
+            {
+                CreateTrafficLight(signal, position, section->GetLanes(), false);
+            }
             else
             {
                 CreateTrafficSign(signal, position, section->GetLanes());
@@ -861,10 +918,26 @@ void SceneryConverter::CreateRoadSignals()
         {
             for (const auto &parentId : parentIds)
             {
-                auto parentSign = worldData.GetTrafficSigns().at(worldData.GetTrafficSignIdMapping().at(parentId));
+                auto mapEntry = worldData.GetTrafficSignIdMapping().find(parentId);
+                if (mapEntry == worldData.GetTrafficSignIdMapping().end())
+                {
+                    LOGWARN("Parent id '" + parentId + "' not found in world data's traffic sign id mapping for supplementary sign's id '" + supplementarySign->GetId() + "'");
+                    continue;
+                }
+                auto parentSign = worldData.GetTrafficSigns().find(mapEntry->second);
 
-                auto position = GetPositionForRoadCoordinates(road, supplementarySign->GetS(), supplementarySign->GetT());
-                parentSign->AddSupplementarySign(supplementarySign, position);
+                if (parentSign == worldData.GetTrafficSigns().cend())
+                {
+                    LOGWARN("Could not add supplementary sign \"" + supplementarySign->GetId() + "\" to sign \"" + parentId + "\"");
+                    continue;
+                }
+
+                double yaw = supplementarySign->GetHOffset() + (supplementarySign->GetOrientation() ? 0 : M_PI);
+                auto position = RoadCoord2WorldCoord(road, supplementarySign->GetS(), supplementarySign->GetT(), yaw);
+                if (!parentSign->second->AddSupplementarySign(supplementarySign, position))
+                {
+                    LOGWARN("Unsupported supplementary sign type " + supplementarySign->GetType() + " (id: " + supplementarySign->GetId() + ")");
+                }
             }
         }
     }
@@ -879,14 +952,13 @@ void SceneryConverter::CreateTrafficSign(RoadSignalInterface *signal, Position p
 
     if (!trafficSign.SetSpecification(signal, position))
     {
-        const std::string message = "Unsupported traffic sign type: " + signal->GetType() + (" (id: " + signal->GetId() + ")");
+        const std::string message = "Unsupported traffic sign type: " + signal->GetType() + "-" + signal->GetSubType() + " (id: " + signal->GetId() + ")";
         LOG(CbkLogLevel::Warning, message);
-        return;
     }
 
     for (auto lane : lanes)
     {
-        OWL::OdId odId = worldData.GetLaneIdMapping().at(lane->GetId());
+        OWL::OdId odId = lane->GetOdId();
         if (signal->IsValidForLane(odId))
         {
             worldData.AssignTrafficSignToLane(lane->GetId(), trafficSign);
@@ -910,7 +982,7 @@ void SceneryConverter::CreateRoadMarking(RoadSignalInterface *signal, Position p
 
     for (auto lane : lanes)
     {
-        OWL::OdId odId = worldData.GetLaneIdMapping().at(lane->GetId());
+        OWL::OdId odId = lane->GetOdId();
         if (signal->IsValidForLane(odId))
         {
             worldData.AssignRoadMarkingToLane(lane->GetId(), roadMarking);
@@ -934,7 +1006,7 @@ void SceneryConverter::CreateRoadMarking(RoadObjectInterface* object, Position p
 
     for (auto lane : lanes)
     {
-        OWL::OdId odId = worldData.GetLaneIdMapping().at(lane->GetId());
+        OWL::OdId odId = lane->GetOdId();
         if (object->IsValidForLane(odId))
         {
             worldData.AssignRoadMarkingToLane(lane->GetId(), roadMarking);
@@ -942,44 +1014,30 @@ void SceneryConverter::CreateRoadMarking(RoadObjectInterface* object, Position p
     }
 }
 
-std::tuple<bool, double, double, double> SceneryConverter::CalculateAbsoluteCoordinates(RoadInterface *road,
-                                                                                        OWL::CSection *section, const RoadObjectInterface *object) const
+void SceneryConverter::CreateTrafficLight(RoadSignalInterface* signal, Position position, const OWL::Interfaces::Lanes& lanes, bool withYellow)
 {
-    double absolutS = object->GetS();
-    double t = object->GetT();
-    double hdg = object->GetHdg();
+    const auto id = repository.Register(openpass::utils::GetEntityInfo(*signal));
+    OWL::Interfaces::TrafficLight& trafficLight = worldData.AddTrafficLight(id, signal->GetId(), withYellow);
 
-    //Note: only negative t supported so far
-    if (t > 0)
+    trafficLight.SetS(signal->GetS());
+
+    if (!trafficLight.SetSpecification(signal, position))
     {
-        return std::make_tuple(false, 0, 0, 0);
+        const std::string message = "Unsupported traffic sign type: " + signal->GetType() + (" (id: " + signal->GetId() + ")");
+        LOG(CbkLogLevel::Warning, message);
+        return;
     }
 
-    double absT = -t;
-    double leftBoundary = 0;
+    trafficLight.SetState(CommonTrafficLight::State::Red);
 
-    for (int i = -1; i >= -static_cast<int>(section->GetLanes().size()); i--)
+    for (auto lane : lanes)
     {
-        OWL::CLane &lane = worldDataQuery.GetLaneByOdId(road->GetId(), i, absolutS);
-        double rightBoundary = leftBoundary + lane.GetWidth(absolutS);
-
-        if (absT >= leftBoundary && absT <= rightBoundary)
+        OWL::OdId odId = lane->GetOdId();
+        if (signal->IsValidForLane(odId))
         {
-            auto interpolatedPoint = lane.GetInterpolatedPointsAtDistance(absolutS);
-            double dir = lane.GetDirection(absolutS);
-
-            double x = interpolatedPoint.left.x + (absT - leftBoundary) * sin(dir);
-            double y = interpolatedPoint.left.y + (absT - leftBoundary) * -cos(dir);
-            double yaw = dir + hdg;
-
-            return std::make_tuple(true, x, y, yaw);
+            worldData.AssignTrafficLightToLane(lane->GetId(), trafficLight);
         }
-
-        leftBoundary = rightBoundary;
     }
-
-    //Note: Only t <= roadWidth supported
-    return std::make_tuple(false, 0, 0, 0);
 }
 
 void SceneryConverter::CreateRoads()
@@ -1105,4 +1163,54 @@ std::pair<RoadGraph, RoadGraphVertexMapping> RoadNetworkBuilder::Build()
     }
 
     return {roadGraph, vertices};
+}
+
+const std::map<std::string, CommonTrafficLight::State> stateConversionMap
+{
+    {"off", CommonTrafficLight::State::Off},
+    {"red", CommonTrafficLight::State::Red},
+    {"yellow", CommonTrafficLight::State::Yellow},
+    {"green", CommonTrafficLight::State::Green},
+    {"red yellow", CommonTrafficLight::State::RedYellow},
+    {"yellow flashing", CommonTrafficLight::State::YellowFlashing}
+};
+
+namespace TrafficLightNetworkBuilder
+{
+TrafficLightNetwork Build(const std::vector<openScenario::TrafficSignalController>& controllers,
+                                                      const OWL::Interfaces::WorldData& worldData)
+{
+    TrafficLightNetwork network;
+    for(auto& controller : controllers)
+    {
+        std::vector<TrafficLightController::Phase> internalPhases;
+        for(auto& phase : controller.phases)
+        {
+            TrafficLightController::Phase internalPhase;
+            internalPhase.duration = phase.duration * 1000;
+            for(auto [signalId, stateString] : phase.states)
+            {
+                const auto owlId = helper::map::query(worldData.GetTrafficSignIdMapping(), signalId);
+                if (!owlId.has_value())
+                {
+                    throw std::runtime_error("No signal with id \""+signalId+"\" defined in Scenery");
+                }
+                const auto trafficLight = helper::map::query(worldData.GetTrafficLights(), owlId.value());
+                if (!trafficLight.has_value())
+                {
+                    throw std::runtime_error("Signal with id \""+signalId+"\" is not a traffic light");
+                }
+                const auto state = helper::map::query(stateConversionMap, stateString);
+                if (!state.has_value())
+                {
+                    throw std::runtime_error("Unknown state \""+stateString);
+                }
+                internalPhase.states.emplace_back(trafficLight.value(), state.value());
+            }
+            internalPhases.push_back(std::move(internalPhase));
+        }
+        network.AddController(TrafficLightController{std::move(internalPhases), controller.delay * 1000});
+    }
+    return network;
+}
 }

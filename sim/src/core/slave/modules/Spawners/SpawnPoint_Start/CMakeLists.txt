@@ -9,21 +9,21 @@
 #* SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************/
 
-set(COMPONENT_NAME SpawnPoint_Start)
+set(COMPONENT_NAME Spawner_Start)
 
-add_compile_definitions(SPAWNPOINT_START_LIBRARY)
+add_compile_definitions(SPAWNER_START_LIBRARY)
 
 add_openpass_target(
   NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
 
   HEADERS
-    spawnpoint_start.h
-    spawnpoint_start_global.h
-    spawnpoint_start_implementation.h
+        spawner_start.h
+        spawner_start_global.h
+        spawner_start_implementation.h
 
   SOURCES
-    spawnpoint_start.cpp
-    spawnpoint_start_implementation.cpp
+        spawner_start.cpp
+        spawner_start_implementation.cpp
 
   LIBRARIES
     Qt5::Core

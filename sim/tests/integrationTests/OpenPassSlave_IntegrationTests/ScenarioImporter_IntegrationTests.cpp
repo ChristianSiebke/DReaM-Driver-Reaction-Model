@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -11,7 +11,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include "importer/scenario.h"
 #include "importer/scenarioImporter.h"
@@ -26,7 +26,7 @@ using namespace Importer;
 
 TEST(ScenarioImporter_IntegrationTests, ImportScenario_WithWrongInternalVersion_Fails)
 {
-    const boost::filesystem::path testScenarioFile = boost::filesystem::initial_path() / "Resources" / "ImporterTest" / "WrongVersionScenario.xosc";
+    const std::filesystem::path testScenarioFile = std::filesystem::current_path() / "Resources" / "ImporterTest" / "WrongVersionScenario.xosc";
     Scenario scenario;
     ScenarioImporter importer;
 
@@ -35,7 +35,7 @@ TEST(ScenarioImporter_IntegrationTests, ImportScenario_WithWrongInternalVersion_
 
 TEST(ScenarioImporter_IntegrationTests, ImportScenario_WithoutInternalVersion_Fails)
 {
-    const boost::filesystem::path testScenarioFile = boost::filesystem::initial_path() / "Resources" / "ImporterTest" / "NoVersionScenario.xosc";
+    const std::filesystem::path testScenarioFile = std::filesystem::current_path() / "Resources" / "ImporterTest" / "NoVersionScenario.xosc";
     Scenario scenario;
     ScenarioImporter importer;
 
@@ -44,7 +44,7 @@ TEST(ScenarioImporter_IntegrationTests, ImportScenario_WithoutInternalVersion_Fa
 
 TEST(ScenarioImporter_IntegrationTests, ImportScenario_WithMinimalInfoForOpenPass_Succeeds)
 {
-    const boost::filesystem::path testScenarioFile = boost::filesystem::initial_path() / "Resources" / "ImporterTest" / "Scenario.xosc";
+    const std::filesystem::path testScenarioFile = std::filesystem::current_path() / "Resources" / "ImporterTest" / "Scenario.xosc";
     Scenario scenario;
 
     ScenarioImporter importer;
@@ -86,7 +86,7 @@ TEST(ScenarioImporter_IntegrationTests, ImportScenario_WithMinimalInfoForOpenPas
 
 TEST(ScenarioImporter_IntegrationTests, ImportScenario_SetsSceneryPath)
 {
-    const boost::filesystem::path testScenarioFile = boost::filesystem::initial_path() / "Resources" / "ImporterTest" / "Scenario.xosc";
+    const std::filesystem::path testScenarioFile = std::filesystem::current_path() / "Resources" / "ImporterTest" / "Scenario.xosc";
     NiceMock<FakeScenario> scenario;
 
     EXPECT_CALL(scenario, SetSceneryPath("testSceneryConfiguration.xodr")).Times(1);
@@ -97,7 +97,7 @@ TEST(ScenarioImporter_IntegrationTests, ImportScenario_SetsSceneryPath)
 
 TEST(ScenarioImporter_IntegrationTests, ImportScenario_SetsCatalogPaths)
 {
-    const boost::filesystem::path testScenarioFile = boost::filesystem::initial_path() / "Resources" / "ImporterTest" / "Scenario.xosc";
+    const std::filesystem::path testScenarioFile = std::filesystem::current_path() / "Resources" / "ImporterTest" / "Scenario.xosc";
     NiceMock<FakeScenario> scenario;
 
     EXPECT_CALL(scenario, SetVehicleCatalogPath("VehicleModelsCatalog.xosc")).Times(1);
@@ -109,7 +109,7 @@ TEST(ScenarioImporter_IntegrationTests, ImportScenario_SetsCatalogPaths)
 
 TEST(ScenarioImporter_IntegrationTests, ImportScenario_WithMissingRequiredParameters_ThrowsException)
 {
-    const boost::filesystem::path testScenarioFile = boost::filesystem::initial_path() / "Resources" / "ImporterTest" / "FailingScenario.xosc";
+    const std::filesystem::path testScenarioFile = std::filesystem::current_path() / "Resources" / "ImporterTest" / "FailingScenario.xosc";
     Scenario scenario;
 
     ASSERT_FALSE(ScenarioImporter::Import(testScenarioFile.string(), &scenario));
@@ -117,7 +117,7 @@ TEST(ScenarioImporter_IntegrationTests, ImportScenario_WithMissingRequiredParame
 
 TEST(ScenarioImporter_IntegrationTests, ImportScenario_WithReferencedButUndeclaredActorEntity_ThrowsException)
 {
-    const boost::filesystem::path testScenarioFile = boost::filesystem::initial_path() / "Resources" / "ImporterTest" / "FailingScenarioUndeclaredActorEntity.xosc";
+    const std::filesystem::path testScenarioFile = std::filesystem::current_path() / "Resources" / "ImporterTest" / "FailingScenarioUndeclaredActorEntity.xosc";
     Scenario scenario;
 
     ASSERT_FALSE(ScenarioImporter::Import(testScenarioFile.string(), &scenario));
@@ -125,7 +125,7 @@ TEST(ScenarioImporter_IntegrationTests, ImportScenario_WithReferencedButUndeclar
 
 TEST(ScenarioImporter_IntegrationTests, ImportScenario_WithReferencedButUndeclaredConditionEntity_ThrowsException)
 {
-    const boost::filesystem::path testScenarioFile = boost::filesystem::initial_path() / "Resources" / "ImporterTest" / "FailingScenarioUndeclaredConditionEntity.xosc";
+    const std::filesystem::path testScenarioFile = std::filesystem::current_path() / "Resources" / "ImporterTest" / "FailingScenarioUndeclaredConditionEntity.xosc";
     Scenario scenario;
 
     ASSERT_FALSE(ScenarioImporter::Import(testScenarioFile.string(), &scenario));
@@ -133,7 +133,7 @@ TEST(ScenarioImporter_IntegrationTests, ImportScenario_WithReferencedButUndeclar
 
 TEST(ScenarioImporter_IntegrationTests, ImportScenario_WithReferencedButUndeclaredInitPrivateEntity_ThrowsException)
 {
-    const boost::filesystem::path testScenarioFile = boost::filesystem::initial_path() / "Resources" / "ImporterTest" / "FailingScenarioUndeclaredInitPrivateEntity.xosc";
+    const std::filesystem::path testScenarioFile = std::filesystem::current_path() / "Resources" / "ImporterTest" / "FailingScenarioUndeclaredInitPrivateEntity.xosc";
     Scenario scenario;
 
     ASSERT_FALSE(ScenarioImporter::Import(testScenarioFile.string(), &scenario));
@@ -141,7 +141,7 @@ TEST(ScenarioImporter_IntegrationTests, ImportScenario_WithReferencedButUndeclar
 
 TEST(ScenarioImporter_IntegrationTests, ImportScenario_WithMultipleStories_Succeeds)
 {
-    const boost::filesystem::path testScenarioFile = boost::filesystem::initial_path() / "Resources" / "ImporterTest" / "MultipleStoriesScenario.xosc";
+    const std::filesystem::path testScenarioFile = std::filesystem::current_path() / "Resources" / "ImporterTest" / "MultipleStoriesScenario.xosc";
     Scenario scenario;
 
     ScenarioImporter importer;

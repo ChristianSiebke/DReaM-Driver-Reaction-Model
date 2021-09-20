@@ -1,5 +1,5 @@
 # /*********************************************************************
-# * Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+# * Copyright (c) 2017-2021 in-tech GmbH
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -33,11 +33,13 @@ INCLUDEPATH += \
     ../../../../..
 
 SOURCES += \
+    ../../../../common/commonTools.cpp \
     $$getFiles(SUBDIRS, cpp) \
     $$getFiles(SUBDIRS, cc) \
     $$getFiles(SUBDIRS, c)
 
 HEADERS += \
+    ../../../../common/commonTools.h \
     $$getFiles(SUBDIRS, hpp) \
     $$getFiles(SUBDIRS, h)
 

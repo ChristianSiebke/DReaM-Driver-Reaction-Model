@@ -18,6 +18,7 @@
 #include <set>
 #include "boost/graph/adjacency_list.hpp"
 
+//! Double values with difference lower than this should be considered equal
 constexpr double EQUALITY_BOUND = 1e-3;
 
 //! Type of element in RoadNetwork
@@ -99,7 +100,10 @@ enum class LaneType
     Entry,
     OnRamp,
     OffRamp,
-    ConnectingRamp
+    ConnectingRamp,
+    Tram,
+    RoadWorks,
+    Bidirectional
 };
 
 //! interval on a road over multiple lanes
@@ -217,8 +221,8 @@ struct RoadInterval
 //! Position of an object in the road network
 struct ObjectPosition
 {
-    std::map<const std::string, GlobalRoadPosition> referencePoint{};    //! position of the reference point mapped by roadId
-    std::map<const std::string, GlobalRoadPosition> mainLocatePoint{};   //! position of the mainLocatePoint (middle of agent front) mapped by roadId
+    std::map<std::string, GlobalRoadPosition> referencePoint{};    //! position of the reference point mapped by roadId
+    std::map<std::string, GlobalRoadPosition> mainLocatePoint{};   //! position of the mainLocatePoint (middle of agent front) mapped by roadId
     std::map<std::string, RoadInterval> touchedRoads{}; //! all roads the object is on (fully or partially), key is the roadId
 };
 
@@ -406,5 +410,43 @@ struct Entity
     Color color{Color::White};
     double relativeStartDistance{0.0};
     double width{0.0};
+};
+}
+
+namespace CommonTrafficLight
+{
+//! Type of a traffic light
+enum class Type
+{
+    Undefined,
+    ThreeLights,                //! Standard red, yellow, green without arrows or symbols
+    ThreeLightsLeft,            //! red, yellow, green with arrows pointing left
+    ThreeLightsRight,           //! red, yellow, green with arrows pointing right
+    ThreeLightsStraight,        //! red, yellow, green with arrows pointing upwards
+    ThreeLightsLeftStraight,    //! red, yellow, green with arrows pointing left and upwards
+    ThreeLightsRightStraight,   //! red, yellow, green with arrows pointing right and upwards
+    TwoLights,                  //! red, green without arrows or symbols
+    TwoLightsPedestrian,        //! red, green with pedestrian symbol
+    TwoLightsBicycle,           //! red, green with bicycle symbol
+    TwoLightsPedestrianBicycle  //! red, green with pedestrian and bicycle symbol
+};
+
+//! State of a traffic light
+enum class State
+{
+    Off,
+    Green,
+    Yellow,
+    Red,
+    RedYellow,
+    YellowFlashing
+};
+
+//! Represents a single traffic light as seen from an agent
+struct Entity
+{
+    Type type{Type::ThreeLights};
+    State state{State::Red};
+    double relativeDistance{0.0};
 };
 }

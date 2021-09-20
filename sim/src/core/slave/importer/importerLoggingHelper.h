@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019, 2020 in-tech GmbH
+* Copyright (c) 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -178,7 +178,7 @@ namespace openpass::importer::xml::scenarioImporter::tag
     constexpr char act[] {"Act"};
     constexpr char action[] {"Action"};
     constexpr char addEntityAction[] {"AddEntityAction"};
-    constexpr char privateAction[] {"PrivateAction"};
+    constexpr char assignRouteAction[] {"AssignRouteAction"};
     constexpr char actions[] {"Actions"};
     constexpr char actors[] {"Actors"};
     constexpr char byValueCondition[] {"ByValueCondition"};
@@ -190,13 +190,14 @@ namespace openpass::importer::xml::scenarioImporter::tag
     constexpr char customCommandAction[] {"CustomCommandAction"};
     constexpr char deleteEntityAction[] {"DeleteEntityAction"};
     constexpr char directory[] {"Directory"};
-    constexpr char followTrajectoryAction[] {"FollowTrajectoryAction"};
-    constexpr char speedActionDynamics[] {"SpeedActionDynamics"};
     constexpr char entities[] {"Entities"};
     constexpr char entityAction[] {"EntityAction"};
     constexpr char entityRef[] {"EntityRef"};
+    constexpr char environment[] {"Environment"};
+    constexpr char environmentAction[] {"EnvironmentAction"};
     constexpr char event[] {"Event"};
-    constexpr char assignRouteAction[] {"AssignRouteAction"};
+    constexpr char fog[] {"Fog"};
+    constexpr char followTrajectoryAction[] {"FollowTrajectoryAction"};
     constexpr char globalAction [] {"GlobalAction"};
     constexpr char init[] {"Init"};
     constexpr char laneChangeAction[] {"LaneChangeAction"};
@@ -216,9 +217,12 @@ namespace openpass::importer::xml::scenarioImporter::tag
     constexpr char parameterDeclaration[] {"ParameterDeclaration"};
     constexpr char parameterDeclarations[] {"ParameterDeclarations"};
     constexpr char pedestrianCatalog[] {"PedestrianCatalog"};
+    constexpr char phase[] {"Phase"};
     constexpr char polyline[] {"Polyline"};
     constexpr char position[] {"Position"};
+    constexpr char precipitation[] {"Precipitation"};
     constexpr char Private[] {"Private"};
+    constexpr char privateAction[] {"PrivateAction"};
     constexpr char relativeLanePosition[] {"RelativeLanePosition"};
     constexpr char relativeTargetLane[] {"RelativeTargetLane"};
     constexpr char relativeTargetSpeed[] {"RelativeTargetSpeed"};
@@ -229,14 +233,19 @@ namespace openpass::importer::xml::scenarioImporter::tag
     constexpr char entitySelection[] {"EntitySelection"};
     constexpr char shape[] {"Shape"};
     constexpr char speedAction[] {"SpeedAction"};
+    constexpr char speedActionDynamics[] {"SpeedActionDynamics"};
+    constexpr char speedActionTarget[] {"SpeedActionTarget"};
     constexpr char stochastics[] {"Stochastics"};
     constexpr char stopTrigger[] {"StopTrigger"};
     constexpr char story[] {"Story"};
     constexpr char storyboard[] {"Storyboard"};
-    constexpr char speedActionTarget[] {"SpeedActionTarget"};
+    constexpr char sun[] {"Sun"};
     constexpr char timeReference[] {"TimeReference"};
     constexpr char timing[] {"Timing"};
     constexpr char trajectory[] {"Trajectory"};
+    constexpr char trafficSignals[] {"TrafficSignals"};
+    constexpr char trafficSignalController[] {"TrafficSignalController"};
+    constexpr char trafficSignalState[] {"TrafficSignalState"};
     constexpr char trajectoryCatalog[] {"TrajectoryCatalog"};
     constexpr char teleportAction[] {"TeleportAction"};
     constexpr char userDefinedAction[] {"UserDefinedAction"};
@@ -244,6 +253,7 @@ namespace openpass::importer::xml::scenarioImporter::tag
     constexpr char visibilityAction[] {"VisibilityAction"};
     constexpr char vertex[] {"Vertex"};
     constexpr char waypoint[] {"Waypoint"};
+    constexpr char weather[] {"Weather"};
     constexpr char worldPosition[] {"WorldPosition"};
     constexpr char acquirePositionAction[] {"AcquirePositionAction"};
     constexpr char relativeWorldPosition[] {"RelativeWorldPosition"};
@@ -252,20 +262,25 @@ namespace openpass::importer::xml::scenarioImporter::tag
 
 namespace openpass::importer::xml::scenarioImporter::attribute
 {
+    constexpr char azimuth[] {"azimuth"};
     constexpr char catalogName[] {"catalogName"};
+    constexpr char conditionEdge[] {"conditionEdge"};
+    constexpr char continuous[] {"continuous"};
     constexpr char delay[] {"delay"};
     constexpr char dLane[] {"dLane"};
     constexpr char ds[] {"ds"};
-    constexpr char conditionEdge[] {"conditionEdge"};
-    constexpr char continuous[] {"continuous"};
+    constexpr char cloudState[] {"cloudState"};
+    constexpr char duration[] {"duration"};
     constexpr char domainAbsoluteRelative[] {"domainAbsoluteRelative"};
     constexpr char dynamicsDimension[] {"dynamicsDimension"};
     constexpr char dynamicsShape[] {"dynamicsShape"};
+    constexpr char elevation[] {"elevation"};
     constexpr char entityRef[] {"entityRef"};
     constexpr char entryName[] {"entryName"};
     constexpr char filepath[] {"filepath"};
     constexpr char graphics[] {"graphics"};
     constexpr char h[] {"h"};
+    constexpr char intensity[] {"intensity"};
     constexpr char laneId[] {"laneId"};
     constexpr char lowerBound[] {"lowerBound"};
     constexpr char maximumExecutionCount[] {"maximumExecutionCount"};
@@ -275,6 +290,7 @@ namespace openpass::importer::xml::scenarioImporter::attribute
     constexpr char parameterRef[] {"parameterRef"};
     constexpr char parameterType[] {"parameterType"};
     constexpr char path[] {"path"};
+    constexpr char precipitationType[] {"precipitationType"};
     constexpr char r[] {"r"};
     constexpr char rate[] {"rate"};
     constexpr char reference[] {"reference"};
@@ -285,13 +301,16 @@ namespace openpass::importer::xml::scenarioImporter::attribute
     constexpr char selectTriggeringEntities[] {"selectTriggeringEntities"};
     constexpr char sensors[] {"sensors"};
     constexpr char speedTargetValueType[] {"speedTargetValueType"};
+    constexpr char state[] {"state"};
     constexpr char stdDeviation[] {"stdDeviation"};
     constexpr char t[] {"t"};
     constexpr char time[] {"time"};
     constexpr char traffic[] {"traffic"};
+    constexpr char trafficSignalId[] {"trafficSignalId"};
     constexpr char type[] {"type"};
     constexpr char upperBound[] {"upperBound"};
     constexpr char value[] {"value"};
+    constexpr char visualRange[] {"visualRange"};
     constexpr char x[] {"x"};
     constexpr char y[] {"y"};
     constexpr char z[] {"z"};
@@ -427,6 +446,7 @@ namespace openpass::importer::xml::slaveConfigImporter::tag
     constexpr char spawners[] {"Spawners"};
     constexpr char timeOfDay[] {"TimeOfDay"};
     constexpr char timeOfDays[] {"TimeOfDays"};
+    constexpr char trafficRules[] {"TrafficRules"};
     constexpr char type[] {"Type"};
     constexpr char visibilityDistance[] {"VisibilityDistance"};
     constexpr char visibilityDistances[] {"VisibilityDistances"};
@@ -494,11 +514,14 @@ namespace openpass::importer::xml::vehicleModelsImporter::attribute
     constexpr char height[] {"height"};
     constexpr char length[] {"length"};
     constexpr char mass[] {"mass"};
+    constexpr char maxAcceleration[] {"maxAcceleration"};
+    constexpr char maxDeceleration[] {"maxDeceleration"};
     constexpr char maxSpeed[] {"maxSpeed"};
     constexpr char maxSteering[] {"maxSteering"};
     constexpr char name[] {"name"};
     constexpr char pedestrianCategory[] {"pedestrianCategory"};
     constexpr char positionX[] {"positionX"};
+    constexpr char positionZ[] {"positionZ"};
     constexpr char trackWidth[] {"trackWidth"};
     constexpr char value[] {"value"};
     constexpr char wheelDiameter[] {"wheelDiameter"};

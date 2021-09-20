@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2021 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -16,15 +16,18 @@
 
 #include "include/worldInterface.h"
 #include "schedulerTasks.h"
-#include "taskBuilder.h"
-#include "timeKeeper.h"
 
 namespace SimulationSlave {
+class Agent;
 class RunResult;
 class EventNetworkInterface;
+class EventDetectorNetworkInterface;
+class ManipulatorNetworkInterface;
+class ObservationNetworkInterface;
 class SchedulePolicy;
 class SpawnPointNetworkInterface;
 } // namespace SimulationSlave
+class DataBufferInterface;
 
 namespace openpass::scheduling {
 
@@ -48,7 +51,8 @@ public:
               SimulationSlave::SpawnPointNetworkInterface &spawnPointNetwork,
               SimulationSlave::EventDetectorNetworkInterface &eventDetectorNetwork,
               SimulationSlave::ManipulatorNetworkInterface &manipulatorNetwork,
-              SimulationSlave::ObservationNetworkInterface &observationNetwork);
+              SimulationSlave::ObservationNetworkInterface &observationNetwork,
+              DataBufferInterface& dataInterface);
 
     /*!
     * \brief Run
@@ -83,8 +87,9 @@ private:
     SimulationSlave::EventDetectorNetworkInterface &eventDetectorNetwork;
     SimulationSlave::ManipulatorNetworkInterface &manipulatorNetwork;
     SimulationSlave::ObservationNetworkInterface &observationNetwork;
+    DataBufferInterface& dataInterface;
 
-    int &currentTime{openpass::scheduling::TimeKeeper::time};
+    int currentTime;
 
     /*!
     * \brief UpdateAgents

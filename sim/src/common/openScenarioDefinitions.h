@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019, 2020 in-tech GmbH
+* Copyright (c) 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -158,6 +158,20 @@ using Position = std::variant<LanePosition,
                               RelativeObjectPosition,
                               RelativeWorldPosition>;
 
+struct TrafficSignalControllerPhase
+{
+    std::string name;
+    double duration;
+    std::map<std::string, std::string> states;
+};
+
+struct TrafficSignalController
+{
+    std::string name;
+    double delay;
+    std::vector<TrafficSignalControllerPhase> phases;
+};
+
 // Action
 // GlobalAction
 enum EntityActionType
@@ -172,7 +186,57 @@ struct EntityAction
     EntityActionType type{};
 };
 
-using GlobalAction = std::variant<EntityAction>;
+//! OpenSCENARIO Sun
+struct Sun
+{
+    double intensity{0.};
+    double azimuth{0.};
+    double elevation{0.};
+};
+
+//! OpenSCENARIO Fog
+struct Fog
+{
+    double visualRange{0.};
+};
+
+//! OpenSCENARIO Precipitation
+struct Precipitation
+{
+    enum Type
+    {
+        dry,
+        rain,
+        snow
+    } type;
+
+    double intensity;
+};
+
+//! OpenSCENARIO Weather
+struct Weather
+{
+    enum CloudState
+    {
+        skyOff,
+        free,
+        cloudy,
+        overcast,
+        rainy
+    } cloudState;
+
+    Sun sun;
+    Fog fog;
+    Precipitation precipitation;
+};
+
+//! OpenSCENARIO EnvironmentAction
+struct EnvironmentAction
+{
+    Weather weather;
+};
+
+using GlobalAction = std::variant<EntityAction, EnvironmentAction>;
 
 // PrivateAction
 struct TrajectoryPoint

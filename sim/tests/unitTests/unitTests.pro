@@ -1,5 +1,6 @@
 #/*******************************************************************************
-#* Copyright (c) 2019, 2020 in-tech GmbH
+#* Copyright (c) 2019, 2020, 2021 in-tech GmbH
+#* Copyright (c) 2021 ITK Engineering GmbH
 #*
 #* This program and the accompanying materials are made
 #* available under the terms of the Eclipse Public License 2.0
@@ -18,10 +19,15 @@ SUBDIRS = \
     algorithmFmuWrapper_Tests \
     algorithmLateral_Tests \
     algorithmLongitudinal_Tests \
-    basicDataStore_Tests \
+    Algorithm_ECU \
+    Algorithm_RouteControl \
+    Algorithm_Switch \
+    basicDataBuffer_Tests \
     componentController_Tests \
+    Dynamics_Chassis \
     dynamicsCollision_Tests \
     dynamicsTrajectoryFollower_Tests \
+    Dynamics_TwoTrack \
     eventDetector_Tests \
     limiterAccelerationVehiclecomponents_Tests \
     observationLog_Tests \
@@ -34,11 +40,15 @@ SUBDIRS = \
     sensorFusionErrorless_Tests \
     sensorOSI_Tests \
     signalPrioritizer_Tests \
-    spawnPointScenario_Tests \
-    spawnPointRuntimeCommon_Tests \
-    spawnPointWorldAnalyzer_Tests \
+    spawnerScenario_Tests \
+    spawnerPreRunCommon_Tests \
+    spawnerRuntimeCommon_Tests \
+    spawnerWorldAnalyzer_Tests \
     worldOSI_Tests \
     common_Tests
+
+Algorithm_ECU.file = \
+    $$PWD/components/Algorithm_ECU/Algorithm_ECU.pro
 
 algorithmAEB_Tests.file = \
     $$PWD/components/AlgorithmAEB/algorithmAEB_Tests.pro
@@ -55,8 +65,17 @@ algorithmLateral_Tests.file = \
 algorithmLongitudinal_Tests.file = \
     $$PWD/components/Algorithm_Longitudinal/algorithmLongitudinal_Tests.pro
 
-basicDataStore_Tests.file = \
-    $$PWD/core/slave/modules/BasicDataStore/basicDataStore_Tests.pro
+Algorithm_ECU.file = \
+    $$PWD/components/Algorithm_ECU/Algorithm_ECU.pro
+
+Algorithm_RouteControl.file = \
+    $$PWD/components/Algorithm_RouteControl/Algorithm_RouteControl.pro
+
+Algorithm_Switch.file = \
+    $$PWD/components/Algorithm_Switch/Algorithm_Switch.pro
+
+basicDataBuffer_Tests.file = \
+    $$PWD/core/slave/modules/BasicDataBuffer/basicDataBuffer_Tests.pro
 
 componentController_Tests.file = \
     $$PWD/components/ComponentController/componentController_Tests.pro
@@ -66,6 +85,12 @@ dynamicsCollision_Tests.file = \
 
 dynamicsTrajectoryFollower_Tests.file = \
     $$PWD/components/Dynamics_TF/dynamicsTF_Tests.pro
+
+Dynamics_Chassis.file = \
+    $$PWD/components/Dynamics_Chassis/Dynamics_Chassis.pro
+
+Dynamics_TwoTrack.file = \
+    $$PWD/components/Dynamics_TwoTrack/Dynamics_TwoTrack.pro
 
 eventDetector_Tests.file = \
     $$PWD/core/slave/modules/EventDetector/eventDetector_Tests.pro
@@ -100,14 +125,17 @@ sensorOSI_Tests.file = \
 signalPrioritizer_Tests.file = \
     $$PWD/components/SignalPrioritizer/signalPrioritizer_Tests.pro
 
-spawnPointScenario_Tests.file = \
-    $$PWD/core/slave/modules/SpawnPointScenario/spawnPointScenario_Tests.pro
+spawnerScenario_Tests.file = \
+    $$PWD/core/slave/modules/SpawnerScenario/spawnerScenario_Tests.pro
 
-spawnPointRuntimeCommon_Tests.file = \
-    $$PWD/core/slave/modules/SpawnPointRuntimeCommon/spawnPointRuntimeCommon_Tests.pro
+spawnerPreRunCommon_Tests.file = \
+    $$PWD/core/slave/modules/SpawnerPreRunCommon/spawnerPreRunCommon_Tests.pro
 
-spawnPointWorldAnalyzer_Tests.file = \
-    $$PWD/core/slave/modules/SpawnPointWorldAnalyzer/spawnPointWorldAnalyzer_Tests.pro
+spawnerRuntimeCommon_Tests.file = \
+    $$PWD/core/slave/modules/SpawnerRuntimeCommon/spawnerRuntimeCommon_Tests.pro
+
+spawnerWorldAnalyzer_Tests.file = \
+    $$PWD/core/slave/modules/SpawnerWorldAnalyzer/spawnerWorldAnalyzer_Tests.pro
 
 worldOSI_Tests.file = \
     $$PWD/core/slave/modules/World_OSI/worldOSI_Tests.pro

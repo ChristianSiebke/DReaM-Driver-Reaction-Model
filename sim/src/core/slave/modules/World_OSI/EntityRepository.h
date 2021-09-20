@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 in-tech GmbH
+* Copyright (c) 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -59,7 +59,7 @@ public:
 /// @brief Handles unique IDs and reports creation to the entityInfoPublisher
 class Repository final : public RepositoryInterface
 {
-    static constexpr size_t MAX_ENTITIES_PER_GROUP{100000};
+    static constexpr size_t MAX_ENTITIES_PER_GROUP{1000000};
 
     /// @brief Defines an index group for entities, such as "moving objects from 0 to 10000"
     class EntityGroup
@@ -115,8 +115,8 @@ class Repository final : public RepositoryInterface
 
 public:
     /// @brief Create a new repository
-    /// @param datastore Reference to a DataStoreWriteInterface
-    Repository(DataStoreWriteInterface *const datastore);
+    /// @param databuffer Reference to a DataBufferWriteInterface
+    Repository(DataBufferWriteInterface *const databuffer);
 
     ~Repository() override;
 

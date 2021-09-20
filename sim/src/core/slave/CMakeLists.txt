@@ -7,9 +7,9 @@ add_openpass_target(
 
   HEADERS
     OpenPassSlave.h
-    bindings/dataStore.h
-    bindings/dataStoreBinding.h
-    bindings/dataStoreLibrary.h
+    bindings/dataBuffer.h
+    bindings/dataBufferBinding.h
+    bindings/dataBufferLibrary.h
     bindings/eventDetectorBinding.h
     bindings/eventDetectorLibrary.h
     bindings/manipulatorBinding.h
@@ -65,6 +65,7 @@ add_openpass_target(
     importer/scenarioImporter.h
     importer/scenarioImporterHelper.h
     importer/scenery.h
+    importer/sceneryDynamics.h
     importer/sceneryImporter.h
     importer/slaveConfig.h
     importer/slaveConfigImporter.h
@@ -92,8 +93,8 @@ add_openpass_target(
     ../common/log.h
 
   SOURCES
-    bindings/dataStoreBinding.cpp
-    bindings/dataStoreLibrary.cpp
+    bindings/dataBufferBinding.cpp
+    bindings/dataBufferLibrary.cpp
     bindings/eventDetectorBinding.cpp
     bindings/eventDetectorLibrary.cpp
     bindings/manipulatorBinding.cpp
@@ -142,6 +143,7 @@ add_openpass_target(
     importer/scenarioImporter.cpp
     importer/scenarioImporterHelper.cpp
     importer/scenery.cpp
+    importer/sceneryDynamics.cpp
     importer/sceneryImporter.cpp
     importer/slaveConfig.cpp
     importer/slaveConfigImporter.cpp
@@ -157,7 +159,7 @@ add_openpass_target(
     modelElements/channel.cpp
     modelElements/component.cpp
     modelElements/componentType.cpp
-    modelElements/dataStore.cpp
+    modelElements/dataBuffer.cpp
     modelElements/eventDetectorNetwork.cpp
     modelElements/manipulatorNetwork.cpp
     modelElements/parameters.cpp

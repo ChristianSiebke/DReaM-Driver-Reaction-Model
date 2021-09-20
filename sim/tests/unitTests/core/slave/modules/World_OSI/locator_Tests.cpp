@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019, 2020 in-tech GmbH
+* Copyright (c) 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -44,10 +44,10 @@ public:
     LocateOnGeometryElement()
     {
         ON_CALL(lane, GetId()).WillByDefault(Return(idLane));
+        ON_CALL(lane, GetOdId()).WillByDefault(Return(-1));
         ON_CALL(lane, GetWidth(_)).WillByDefault(Return(4));
         ON_CALL(road, GetId()).WillByDefault(ReturnRef(idRoad));
         ON_CALL(lane, GetRoad()).WillByDefault(ReturnRef(road));
-        ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneIdMapping));
     }
 
     OWL::Fakes::WorldData worldData;
@@ -55,7 +55,6 @@ public:
     OWL::Id idLane{1};
     std::string idRoad{"Road"};
     OWL::Fakes::Road road;
-    const std::unordered_map<OWL::Id, OWL::OdId> laneIdMapping {{idLane, -1}};
     OWL::Primitive::LaneGeometryElement laneGeometryElement{OWL::Testing::LaneGeometryElementGenerator::RectangularLaneGeometryElement({0.0,0.0}, 4.0, 4.0, 0.0, &lane)};
     World::Localization::LocalizationElement localizationElement{laneGeometryElement};
     double yaw{0.0};
@@ -126,66 +125,29 @@ TEST_F(LocateOnGeometryElement, ObjectInsideGeometryElement_CorrectlyLocatesObje
     EXPECT_THAT(locatedObject.laneOverlaps.at(&lane).min_delta_right, DoubleEq(1.0));
 }
 
-struct GetIntersectionPoints_Data
-{
-    std::vector<Common::Vector2d> element;
-    std::vector<Common::Vector2d> object;
-    std::vector<Common::Vector2d> expectedIntersection;
-};
-
-class GetIntersectionPoints_Test : public testing::Test,
-        public ::testing::WithParamInterface<GetIntersectionPoints_Data>
-{
-};
-
-TEST_P(GetIntersectionPoints_Test, CorrectIntersectionPoints)
-{
-    auto data = GetParam();
-    const auto result = World::Localization::GetIntersectionPoints(data.element, data.object);
-    EXPECT_THAT(result, UnorderedElementsAreArray(data.expectedIntersection));
-}
-
-INSTANTIATE_TEST_CASE_P(ElementAndObjectRectangular, GetIntersectionPoints_Test,
-                        testing::Values(
-                         //Element corners                  Object corners                       Intersection points
-GetIntersectionPoints_Data{{{1,1},{1,3},{3,3},{3,1}},       {{2,4},{2,6},{4,6},{4,4}},           {}},
-GetIntersectionPoints_Data{{{1,1},{1,3},{3,3},{3,1}},       {{2,2},{2,6},{4,6},{4,2}},           {{2,2},{2,3},{3,2},{3,3}}},
-GetIntersectionPoints_Data{{{1,1},{1,3},{3,3},{3,1}},       {{0,0},{0,4},{4,4},{4,0}},           {{1,1},{1,3},{3,3},{3,1}}},
-GetIntersectionPoints_Data{{{1,1},{1,3},{3,3},{3,1}},       {{2,2},{2,2.5},{2.5,2.5},{2.5,2}},   {{2,2},{2,2.5},{2.5,2.5},{2.5,2}}},
-GetIntersectionPoints_Data{{{1,1},{1,3},{3,3},{3,1}},       {{1,4},{3,6},{6,3},{4,1}},           {{3,2},{2,3},{3,3}}},
-GetIntersectionPoints_Data{{{-1,0},{0,1},{1,0},{0,-1}},     {{0,0},{1,1},{2,0},{1,-1}},          {{0,0},{0.5,0.5},{1,0},{0.5,-0.5}}}));
-
-INSTANTIATE_TEST_CASE_P(ElementNotRectangular, GetIntersectionPoints_Test,
-                        testing::Values(
-                         //Element corners                  Object corners                       Intersection points
-GetIntersectionPoints_Data{{{1,1},{1,2},{3,4},{3,1}},       {{2,5},{2,6},{4,6},{4,5}},           {}},
-GetIntersectionPoints_Data{{{1,1},{1,2},{3,4},{3,1}},       {{2,2},{2,6},{4,6},{4,2}},           {{2,2},{2,3},{3,2},{3,4}}},
-GetIntersectionPoints_Data{{{1,1},{1,2},{3,4},{3,1}},       {{0,0},{0,5},{4,5},{4,0}},           {{1,1},{1,2},{3,4},{3,1}}},
-GetIntersectionPoints_Data{{{1,1},{1,2},{3,4},{3,1}},       {{2,2},{2,2.5},{2.5,2.5},{2.5,2}},   {{2,2},{2,2.5},{2.5,2.5},{2.5,2}}},
-GetIntersectionPoints_Data{{{1,1},{1,2},{3,4},{3,1}},       {{-2,0},{-2,2},{0,2},{0,0}},         {}}));
-
-
 class LocateTest : public ::testing::Test
 {
 public:
     LocateTest()
     {
         ON_CALL(lane1, GetId()).WillByDefault(Return(idLane1));
+        ON_CALL(lane1, GetOdId()).WillByDefault(Return(-1));
         ON_CALL(lane1, GetWidth(_)).WillByDefault(Return(4));
         ON_CALL(lane1, GetRoad()).WillByDefault(ReturnRef(road1));
         ON_CALL(lane1, GetLaneGeometryElements()).WillByDefault(ReturnRef(elements1));
         ON_CALL(lane2, GetId()).WillByDefault(Return(idLane2));
+        ON_CALL(lane2, GetOdId()).WillByDefault(Return(-2));
         ON_CALL(lane2, GetWidth(_)).WillByDefault(Return(4));
         ON_CALL(lane2, GetRoad()).WillByDefault(ReturnRef(road1));
         ON_CALL(lane2, GetLaneGeometryElements()).WillByDefault(ReturnRef(elements2));
         ON_CALL(lane3, GetId()).WillByDefault(Return(idLane3));
+        ON_CALL(lane3, GetOdId()).WillByDefault(Return(-3));
         ON_CALL(lane3, GetWidth(_)).WillByDefault(Return(4));
         ON_CALL(lane3, GetRoad()).WillByDefault(ReturnRef(road2));
         ON_CALL(lane3, GetLaneGeometryElements()).WillByDefault(ReturnRef(elements3));
         ON_CALL(road1, GetId()).WillByDefault(ReturnRef(idRoad1));
         ON_CALL(road2, GetId()).WillByDefault(ReturnRef(idRoad2));
         ON_CALL(worldData, GetLanes()).WillByDefault(ReturnRef(lanes));
-        ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneIdMapping));
         localizer.Init();
     }
 
@@ -195,7 +157,6 @@ public:
     std::unordered_map<OWL::Id, OWL::Interfaces::Lane*> lanes{{idLane1, &lane1}, {idLane2, &lane2}, {idLane3, &lane3}};
     OWL::Fakes::Road road1, road2;
     std::string idRoad1{"Road1"}, idRoad2{"Road2"};
-    const std::unordered_map<OWL::Id, OWL::OdId> laneIdMapping {{idLane1, -1},{idLane2, -2},{idLane3, -3}};
     OWL::Primitive::LaneGeometryElement laneGeometryElement1{OWL::Testing::LaneGeometryElementGenerator::RectangularLaneGeometryElement({0.0,0.0}, 4.0, 4.0, 0.0, &lane1)};
     OWL::Interfaces::LaneGeometryElements elements1{&laneGeometryElement1};
     OWL::Primitive::LaneGeometryElement laneGeometryElement2{OWL::Testing::LaneGeometryElementGenerator::RectangularLaneGeometryElement({0.0,-4.0}, 4.0, 4.0, 0.0, &lane2)};

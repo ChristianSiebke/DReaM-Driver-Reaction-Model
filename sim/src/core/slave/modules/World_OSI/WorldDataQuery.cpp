@@ -182,7 +182,7 @@ OWL::CLane& WorldDataQuery::GetLaneByOdId(std::string roadId, OWL::OdId odLaneId
     for (const OWL::Lane* lane : section->GetLanes())
     {
         // if a section covers a point the lanes also do
-        if (worldData.GetLaneIdMapping().at(lane->GetId()) == odLaneId)
+        if (lane->GetOdId() == odLaneId)
         {
             return *lane;
         }
@@ -263,6 +263,40 @@ RouteQueryResult<std::vector<CommonTrafficSign::Entity>> WorldDataQuery::GetRoad
             }
         }
         return foundRoadMarkings;
+    }},
+    {},
+    worldData);
+}
+
+RouteQueryResult<std::vector<CommonTrafficLight::Entity>> WorldDataQuery::GetTrafficLightsInRange(LaneMultiStream laneStream, double startDistance, double searchRange) const
+{
+    const bool backwardsSearch = searchRange < 0;
+    const double startPosition = backwardsSearch ? startDistance + searchRange : startDistance;
+    const double endPosition = backwardsSearch ? startDistance : startDistance + searchRange;
+    return laneStream.Traverse(LaneMultiStream::TraversedFunction<std::vector<CommonTrafficLight::Entity>>{[&](const auto& lane, const auto& previousTraffiLights)
+    {
+        std::vector<CommonTrafficLight::Entity> foundTrafficLights{previousTraffiLights};
+
+        if (lane.EndS() < startPosition)
+        {
+            return foundTrafficLights;
+        }
+        if (lane.StartS() > endPosition)
+        {
+            return foundTrafficLights;
+        }
+        auto sortedTrafficLights = lane().GetTrafficLights();
+        sortedTrafficLights.sort([lane](const auto first, const auto second)
+        {return lane.GetStreamPosition(first->GetS()) < lane.GetStreamPosition(second->GetS());});
+        for (const auto& trafficLight : sortedTrafficLights)
+        {
+            double trafficLightPosition = lane.GetStreamPosition(trafficLight->GetS() - lane().GetDistance(OWL::MeasurementPoint::RoadStart));
+            if (startPosition <= trafficLightPosition && trafficLightPosition <= endPosition)
+            {
+                foundTrafficLights.push_back(trafficLight->GetSpecification(trafficLightPosition - startDistance));
+            }
+        }
+        return foundTrafficLights;
     }},
     {},
     worldData);
@@ -438,16 +472,16 @@ RoadNetworkElement WorldDataQuery::GetRoadPredecessor(std::string roadId) const
 
 std::vector<const OWL::Interfaces::WorldObject*> WorldDataQuery::GetMovingObjectsInRangeOfJunctionConnection(std::string connectingRoadId, double range) const
 {
-    const auto route = GetRouteLeadingToConnector(connectingRoadId);
+    const auto [route, start, end] = GetRouteLeadingToConnector(connectingRoadId);
     const auto& lanes = GetLanesOfLaneTypeAtDistance(connectingRoadId, 0.0, {LaneType::Driving});
     std::vector<const OWL::Interfaces::WorldObject*> foundMovingObjects;
 
     for (const auto& lane : lanes)
     {
-        auto laneStream = CreateLaneStream(route, connectingRoadId, worldData.GetLaneIdMapping().at(lane->GetId()), 0.0);
-        double laneStreamEnd = laneStream->GetElements().back().EndS();
+        auto laneStream = CreateLaneMultiStream(route, start, lane->GetOdId(), 0.0);
+        double laneStreamEnd = laneStream->GetPositionByVertexAndS(end, GetRoadByOdId(connectingRoadId)->GetLength());
 
-        auto movingObjects = GetObjectsOfTypeInRange<OWL::Interfaces::MovingObject>(*laneStream, laneStreamEnd - range, laneStreamEnd);
+        auto movingObjects = GetObjectsOfTypeInRange<OWL::Interfaces::MovingObject>(*laneStream, laneStreamEnd - range, laneStreamEnd).at(end);
 
         for (auto movingObject : movingObjects)
         {
@@ -461,17 +495,22 @@ std::vector<const OWL::Interfaces::WorldObject*> WorldDataQuery::GetMovingObject
     return foundMovingObjects;
 }
 
-std::vector<RouteElement> WorldDataQuery::GetRouteLeadingToConnector (std::string connectingRoadId) const
+std::tuple<RoadGraph, RoadGraphVertex, RoadGraphVertex> WorldDataQuery::GetRouteLeadingToConnector (std::string connectingRoadId) const
 {
      auto incomingRoadId = GetRoadPredecessor(connectingRoadId).id;
      bool incomingRoadLeadsToJunction = GetRoadSuccessor(incomingRoadId).id == GetJunctionOfConnector(connectingRoadId)->GetId();
-     std::vector<RouteElement> route{{incomingRoadId, incomingRoadLeadsToJunction}};
+     RoadGraph route;
+     auto end = add_vertex(RouteElement{connectingRoadId, true}, route);
+     auto current = add_vertex(RouteElement{incomingRoadId, incomingRoadLeadsToJunction}, route);
+     add_edge(current, end, route);
      bool reachedEndOfRoadStream = false;
      auto emplace_element_if = [&](const RoadNetworkElement& element)
      {
          if (element.type == RoadNetworkElementType::Road)
          {
-             route.insert(route.cbegin(), {element.id, incomingRoadLeadsToJunction});
+             auto next = add_vertex(RouteElement{element.id, incomingRoadLeadsToJunction}, route);
+             add_edge(next, current, route);
+             current = next;
              incomingRoadId = element.id;
              return true;
          }
@@ -493,8 +532,7 @@ std::vector<RouteElement> WorldDataQuery::GetRouteLeadingToConnector (std::strin
          }
      }
 
-     route.push_back({connectingRoadId, true});
-     return route;
+     return {route, current, end};
 }
 
 double WorldDataQuery::GetDistanceUntilObjectEntersConnector(const ObjectPosition position, std::string intersectingConnectorId, int intersectingLaneId, std::string ownConnectorId) const
@@ -557,41 +595,6 @@ double WorldDataQuery::GetDistanceUntilObjectLeavesConnector(const ObjectPositio
     return 0;
 }
 
-std::shared_ptr<const LaneStream> WorldDataQuery::CreateLaneStream(const std::vector<RouteElement>& route, std::string startRoadId, OWL::OdId startLaneId, double startDistance) const
-{
-    std::vector<LaneStreamInfo> lanes;
-    OWL::CLane* currentLane = GetOriginatingRouteLane(route, startRoadId, startLaneId, startDistance);
-    auto currentRoadId = currentLane->GetRoad().GetId();
-    auto routeIterator = std::find_if(route.cbegin(), route.cend(),
-                                      [&](const auto& routeElement){return routeElement.roadId == currentRoadId;});
-    double currentS = 0.0;
-    auto currentRoad = worldData.GetRoads().at(currentRoadId);
-    while (currentLane)
-    {
-        bool inStreamDirection = (routeIterator->inOdDirection);
-        LaneStreamInfo laneStreamInfo;
-        laneStreamInfo.element = currentLane;
-        laneStreamInfo.sOffset = currentS + (inStreamDirection ? 0 : currentLane->GetLength());
-        laneStreamInfo.inStreamDirection = inStreamDirection;
-        lanes.push_back(laneStreamInfo);
-        currentS += currentLane->GetLength();
-        const auto& successorLanes = inStreamDirection ? currentLane->GetNext() : currentLane->GetPrevious();
-        currentLane = GetLaneOnRoad(currentRoad, successorLanes);
-        if (!currentLane) //If successor is not on this road, go to previous road in the route
-        {
-            ++routeIterator;
-            if (routeIterator == route.cend())
-            {
-                break;
-            }
-            currentRoadId = routeIterator->roadId;
-            currentRoad = worldData.GetRoads().at(currentRoadId);
-            currentLane = GetLaneOnRoad(currentRoad, successorLanes);
-        }
-    }
-    return std::make_shared<const LaneStream>(std::move(lanes));
-}
-
 std::shared_ptr<const LaneMultiStream> WorldDataQuery::CreateLaneMultiStream(const RoadGraph& roadGraph, RoadGraphVertex start, OWL::OdId startLaneId, double startDistance) const
 {
     const auto& routeElement = get(RouteElement(), roadGraph, start);
@@ -603,25 +606,25 @@ std::shared_ptr<const LaneMultiStream> WorldDataQuery::CreateLaneMultiStream(con
     return std::make_shared<const LaneMultiStream>(CreateLaneMultiStreamRecursive(roadGraph, start, 0.0, &startLane));
 }
 
-std::shared_ptr<const RoadStream> WorldDataQuery::CreateRoadStream(const std::vector<RouteElement>& route) const
+std::unique_ptr<RoadStream> WorldDataQuery::CreateRoadStream(const std::vector<RouteElement>& route) const
 {
     double currentS = 0.0;
 
-    std::vector<RoadStreamInfo> roads;
+    std::vector<RoadStreamElement> roads;
     std::transform(route.cbegin(),
                    route.cend(),
                    std::back_inserter(roads),
-                   [&](const auto& routeElement) -> RoadStreamInfo
+                   [&](const auto& routeElement) -> RoadStreamElement
     {
-        RoadStreamInfo roadStreamInfo;
-        roadStreamInfo.element = GetRoadByOdId(routeElement.roadId);
+        RoadStreamElement roadStreamInfo;
+        roadStreamInfo.road = GetRoadByOdId(routeElement.roadId);
         roadStreamInfo.inStreamDirection = routeElement.inOdDirection;
-        roadStreamInfo.sOffset = currentS + (routeElement.inOdDirection ? 0 : roadStreamInfo.element->GetLength());
+        roadStreamInfo.sOffset = currentS + (routeElement.inOdDirection ? 0 : roadStreamInfo.road->GetLength());
 
-        currentS += roadStreamInfo.element->GetLength();
+        currentS += roadStreamInfo.road->GetLength();
         return roadStreamInfo;
     });
-    return std::make_shared<const RoadStream>(std::move(roads));
+    return std::make_unique<RoadStream>(std::move(roads));
 }
 
 std::shared_ptr<const RoadMultiStream> WorldDataQuery::CreateRoadMultiStream(const RoadGraph& roadGraph, RoadGraphVertex start) const
@@ -860,24 +863,28 @@ int WorldDataQuery::FindNextEgoLaneId (const OWL::Interfaces::Lanes& lanesOnSect
         {
             if (predecessorRelativeId == 0)
             {
-                return worldData.GetLaneIdMapping().at(lane->GetId());
+                return lane->GetOdId();
             }
         }
     }
     return 0;
 }
 
-std::map<int, OWL::Id> WorldDataQuery::AddLanesOfSection(const OWL::Interfaces::Lanes& lanesOnSection, bool inStreamDirection, int currentOwnLaneId,
+std::map<int, OWL::Id> WorldDataQuery::AddLanesOfSection(const OWL::Interfaces::Lanes& lanesOnSection, bool inStreamDirection, int currentOwnLaneId, bool includeOncoming,
                                                          const std::map<int, OWL::Id>& previousSectionLaneIds, std::vector<RelativeWorldView::Lane>& previousSectionLanes,
                                                          RelativeWorldView::LanesInterval& laneInterval) const
 {
     std::map<int, OWL::Id> lanesOnSectionLaneIds{};
     for (const auto& lane : lanesOnSection)
     {
-        const auto& laneId = worldData.GetLaneIdMapping().at(lane->GetId());
+        const auto& laneId = lane->GetOdId();
         bool inDrivingDirection = inStreamDirection ? (laneId < 0) : (laneId > 0);
+        if(!includeOncoming && !inDrivingDirection)
+        {
+            continue;
+        }
         int relativeLaneId = inStreamDirection ? (laneId - currentOwnLaneId) : (currentOwnLaneId - laneId);
-        bool differentSigns = (currentOwnLaneId * laneId < 0) && currentOwnLaneId != 0;
+        bool differentSigns = currentOwnLaneId * laneId < 0;
         if (differentSigns)
         {
             relativeLaneId += (relativeLaneId > 0) ? -1 : 1;
@@ -896,7 +903,7 @@ std::map<int, OWL::Id> WorldDataQuery::AddLanesOfSection(const OWL::Interfaces::
     return lanesOnSectionLaneIds;
 }
 
-RouteQueryResult<RelativeWorldView::Lanes> WorldDataQuery::GetRelativeLanes(const RoadMultiStream& roadStream, double startPosition, int startLaneId, double range) const
+RouteQueryResult<RelativeWorldView::Lanes> WorldDataQuery::GetRelativeLanes(const RoadMultiStream& roadStream, double startPosition, int startLaneId, double range, bool includeOncoming) const
 {
     int currentOwnLaneId = startLaneId;
     return roadStream.Traverse<RelativeWorldView::Lanes, std::map<int, OWL::Id>>(
@@ -941,11 +948,102 @@ RouteQueryResult<RelativeWorldView::Lanes> WorldDataQuery::GetRelativeLanes(cons
             {
                 currentOwnLaneId = FindNextEgoLaneId(lanesOnSection, road.inStreamDirection, previousSectionLaneIds);
             }
-            auto lanesOnSectionLaneIds = AddLanesOfSection(lanesOnSection, road.inStreamDirection, currentOwnLaneId, previousSectionLaneIds, relativeLanes.back().lanes, laneInterval);
+            auto lanesOnSectionLaneIds = AddLanesOfSection(lanesOnSection, road.inStreamDirection, currentOwnLaneId, includeOncoming, previousSectionLaneIds, relativeLanes.back().lanes, laneInterval);
             previousSectionLaneIds = lanesOnSectionLaneIds;
             relativeLanes.push_back(laneInterval);
         }
         return std::make_tuple(relativeLanes, previousSectionLaneIds);
+    }},
+    {},
+    {},
+    worldData);
+}
+
+RouteQueryResult<std::optional<int>> WorldDataQuery::GetRelativeLaneId(const RoadMultiStream &roadStream, double ownPosition, int ownLaneId, std::map<std::string, GlobalRoadPosition> targetPosition) const
+{
+    std::optional<int> currentOwnLaneId;
+    std::optional<int> currentTargetLaneId;
+    return roadStream.Traverse<std::optional<int>, std::map<int, OWL::Id>>(
+     RoadMultiStream::TraversedFunction<std::optional<int>, std::map<int, OWL::Id>>{[&](const auto& road, const auto& previousResult, const auto& previousLaneIds)->std::tuple<std::optional<int>, std::map<int, OWL::Id>>
+    {
+        if (previousResult.has_value())
+        {
+            return std::make_tuple(previousResult, previousLaneIds);
+        }
+        const auto& roadId = road.element->GetId();
+        auto positionOnRoad = helper::map::query(targetPosition, roadId);
+        auto streamPosition = road.GetStreamPosition(positionOnRoad->roadPosition.s);
+        auto sections = road().GetSections();
+        if (!road.inStreamDirection)
+        {
+            sections.reverse();
+        }
+        std::map<int, OWL::Id> previousSectionLaneIds{previousLaneIds};
+        for (const auto& section : sections)
+        {
+            const double sectionStart = road.GetStreamPosition(section->GetSOffset() + (road.inStreamDirection ? 0 : section->GetLength()));
+            const double sectionEnd = road.GetStreamPosition(section->GetSOffset() + (road.inStreamDirection ? section->GetLength() : 0));
+            bool onSection = positionOnRoad.has_value() && sectionStart <= streamPosition && sectionEnd >= streamPosition;
+            const auto& lanesOnSection = section->GetLanes();
+            if (sectionStart <= ownPosition && sectionEnd >= ownPosition)
+            {
+                if (currentTargetLaneId.has_value())
+                {
+                    currentTargetLaneId = FindNextEgoLaneId(lanesOnSection, road.inStreamDirection, previousSectionLaneIds);
+                }
+                else
+                {
+                    currentOwnLaneId = ownLaneId;
+                }
+            }
+            else
+            {
+                if (onSection)
+                {
+                    currentTargetLaneId = positionOnRoad->laneId;
+                }
+                else if (currentTargetLaneId.has_value())
+                {
+                    currentTargetLaneId = FindNextEgoLaneId(lanesOnSection, road.inStreamDirection, previousSectionLaneIds);
+                }
+                if (currentOwnLaneId.has_value())
+                {
+                    currentOwnLaneId = FindNextEgoLaneId(lanesOnSection, road.inStreamDirection, previousSectionLaneIds);
+                }
+            }
+            if (!currentOwnLaneId && !currentTargetLaneId)
+            {
+                continue;
+            }
+            previousSectionLaneIds = {};
+            for (auto lane : section->GetLanes())
+            {
+                const auto& laneId = lane->GetOdId();
+                const auto currentId = currentOwnLaneId.has_value() ? currentOwnLaneId.value() : currentTargetLaneId.value();
+                int relativeLaneId = road.inStreamDirection ? (laneId - currentId) : (currentId - laneId);
+                bool differentSigns = currentId * laneId < 0;
+                if (differentSigns)
+                {
+                    relativeLaneId += (relativeLaneId > 0) ? -1 : 1;
+                }
+                if (currentOwnLaneId.has_value())
+                {
+                    if (onSection && positionOnRoad->laneId == laneId)
+                    {
+                        return std::make_tuple(relativeLaneId, previousLaneIds);
+                    }
+                }
+                else
+                {
+                    if (sectionStart <= ownPosition && sectionEnd >= ownPosition && ownLaneId == laneId)
+                    {
+                        return std::make_tuple(-relativeLaneId, previousLaneIds);
+                    }
+                }
+                previousSectionLaneIds.insert({relativeLaneId, lane->GetId()});
+            }
+         }
+         return std::make_tuple(std::nullopt, previousSectionLaneIds);
     }},
     {},
     {},

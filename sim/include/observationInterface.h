@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -30,7 +30,7 @@
 #include "include/runResultInterface.h"
 
 class CallbackInterface;
-class DataStoreReadInterface;
+class DataBufferReadInterface;
 class ParameterInterface;
 class StochasticsInterface;
 class WorldInterface;
@@ -44,7 +44,7 @@ public:
                          WorldInterface* world,
                          const ParameterInterface* parameters,
                          const CallbackInterface* callbacks,
-                         [[maybe_unused]] DataStoreReadInterface* dataStore) :
+                         [[maybe_unused]] DataBufferReadInterface* dataBuffer) :
         stochastics(stochastics),
         world(world),
         parameters(parameters),

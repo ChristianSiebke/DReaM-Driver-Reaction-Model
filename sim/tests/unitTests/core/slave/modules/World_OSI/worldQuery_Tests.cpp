@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2018, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -428,7 +428,6 @@ TEST(GetObjectsOfTypeInRange, ObjectsOutsideRange_ReturnsOnlyObjectsInRange)
 TEST(GetLanesOfLaneTypeAtDistance, NoLanesInWorld_ReturnsNoLanes)
 {
     std::list<const OWL::Interfaces::Section*> sections;
-    std::unordered_map<OWL::Id, OWL::OdId> laneIdMapping;
 
     Fakes::Road fakeRoad;
     std::string roadId = "TestRoadId";
@@ -439,7 +438,6 @@ TEST(GetLanesOfLaneTypeAtDistance, NoLanesInWorld_ReturnsNoLanes)
 
     Fakes::WorldData worldData;
     ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(roads));
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneIdMapping));
 
     WorldDataQuery wdQuery(worldData);
 
@@ -454,7 +452,6 @@ TEST(GetLanesOfLaneTypeAtDistance, ThreeLanesOneLongerThanTwo_ReturnsCorrectList
     Fakes::WorldData worldData;
 
     ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(flm.GetRoads()));
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(flm.GetLaneIdMapping()));
 
     ON_CALL(*flm.lanes[0][0], GetLaneType()).WillByDefault(Return(LaneType::Driving));
     ON_CALL(*flm.lanes[0][1], GetLaneType()).WillByDefault(Return(LaneType::Driving));
@@ -485,7 +482,6 @@ TEST(GetLanesOfLaneTypeAtDistance, ThreeLanesOneLongerThanTwo_ReturnsCorrectList
     Fakes::WorldData worldData;
 
     ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(flm.GetRoads()));
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(flm.GetLaneIdMapping()));
 
     ON_CALL(*flm.lanes[0][0], GetLaneType()).WillByDefault(Return(LaneType::Driving));
     ON_CALL(*flm.lanes[0][1], GetLaneType()).WillByDefault(Return(LaneType::Driving));
@@ -516,7 +512,6 @@ TEST(GetLanesOfLaneTypeAtDistance, ThreeLanesOneLongerThanTwo_ReturnsCorrectList
     Fakes::WorldData worldData;
 
     ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(flm.GetRoads()));
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(flm.GetLaneIdMapping()));
 
     ON_CALL(*flm.lanes[0][0], GetLaneType()).WillByDefault(Return(LaneType::Driving));
     ON_CALL(*flm.lanes[0][1], GetLaneType()).WillByDefault(Return(LaneType::Driving));
@@ -544,7 +539,6 @@ TEST(GetLaneByOdId, CheckFakeLaneManagerImplementation)
 
     Fakes::WorldData worldData;
     ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(flm.GetRoads()));
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(flm.GetLaneIdMapping()));
 
     WorldDataQuery wdQuery(worldData);
 
@@ -564,7 +558,6 @@ TEST(GetLaneByOdId, CheckFakeLaneManagerImplementation)
 TEST(GetLaneByOdId, TwoSectionsWithVariableLanes_ReturnsCorrectLanes)
 { 
     std::list<const OWL::Interfaces::Section*> sections;
-    std::unordered_map<OWL::Id, OWL::OdId> laneIdMapping = {{1, -1}, {2, -2}, {3, -2}};
 
     Fakes::Road fakeRoad;
     std::string roadId = "TestRoadId";
@@ -573,7 +566,6 @@ TEST(GetLaneByOdId, TwoSectionsWithVariableLanes_ReturnsCorrectLanes)
     ON_CALL(fakeRoad, GetId()).WillByDefault(ReturnRef(roadId));
 
     Fakes::WorldData worldData;
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneIdMapping));
     ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(roads));
 
     WorldDataQuery wdQuery(worldData);
@@ -587,6 +579,10 @@ TEST(GetLaneByOdId, TwoSectionsWithVariableLanes_ReturnsCorrectLanes)
     ON_CALL(lane1_minus1, GetId()).WillByDefault(Return(1));
     ON_CALL(lane1_minus2, GetId()).WillByDefault(Return(2));
     ON_CALL(lane2_minus2, GetId()).WillByDefault(Return(3));
+
+    ON_CALL(lane1_minus1, GetOdId()).WillByDefault(Return(-1));
+    ON_CALL(lane1_minus2, GetOdId()).WillByDefault(Return(-2));
+    ON_CALL(lane2_minus2, GetOdId()).WillByDefault(Return(-2));
 
     const std::list<const OWL::Interfaces::Lane*> lanesSection1 = {{&lane1_minus1, &lane1_minus2}} ;
     ON_CALL(section1, GetLanes()).WillByDefault(ReturnRef(lanesSection1));
@@ -614,7 +610,6 @@ TEST(GetValidSOnLane, CheckIfSIsValid_ReturnsTrue)
 
     Fakes::WorldData worldData;
     ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(laneManager.GetRoads()));
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneManager.GetLaneIdMapping()));
 
     WorldDataQuery wdQuery(worldData);
 
@@ -640,7 +635,6 @@ TEST(GetValidSOnLane, CheckIfSIsValid_ReturnsFalse)
 
     Fakes::WorldData worldData;
     ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(laneManager.GetRoads()));
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneManager.GetLaneIdMapping()));
 
     WorldDataQuery wdQuery(worldData);
     bool result = wdQuery.IsSValidOnLane("TestRoadId", -1, 100.1);
@@ -1131,7 +1125,7 @@ TEST(GetLaneMarkings, TwoLanesWithMultipleBoundaries)
     ASSERT_THAT(result2LaneMarking2.relativeStartDistance, DoubleEq(50.0));
     ASSERT_THAT(result2LaneMarking2.width, DoubleEq(0.8));
 }
-
+/*
 TEST(CreateLaneStream, OnlyUniqueConnectionsInStreamDirection)
 {
     FakeLaneManager fakelm1{2, 2, 3.0, {10.0, 11.0}, "Road1"};
@@ -1158,7 +1152,6 @@ TEST(CreateLaneStream, OnlyUniqueConnectionsInStreamDirection)
     std::unordered_map<std::string, OWL::Road*> roads {{road1Id, road1}, {road2Id, road2}};
     Fakes::WorldData worldData;
     ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(roads));
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(fakelm1.GetLaneIdMapping()));
     WorldDataQuery wdQuery(worldData);
 
     auto laneStream = wdQuery.CreateLaneStream(route, "Road1", -1, 0.0);
@@ -1204,7 +1197,6 @@ TEST(CreateLaneStream, SecondRoadAgainstStreamDirection)
     std::unordered_map<std::string, OWL::Road*> roads {{road1Id, road1}, {road2Id, road2}};
     Fakes::WorldData worldData;
     ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(roads));
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(fakelm1.GetLaneIdMapping()));
     WorldDataQuery wdQuery(worldData);
 
     auto laneStream = wdQuery.CreateLaneStream(route, "Road1", -1, 0.0);
@@ -1247,7 +1239,6 @@ TEST(CreateLaneStream, MultipleConnections)
     std::unordered_map<std::string, OWL::Road*> roads {{road1Id, road1}, {road2Id, road2}, {road3Id, road3}};
     Fakes::WorldData worldData;
     ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(roads));
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(fakelm1.GetLaneIdMapping()));
     WorldDataQuery wdQuery(worldData);
 
     auto laneStream = wdQuery.CreateLaneStream(route, "Road1", -1, 0.0);
@@ -1286,7 +1277,6 @@ TEST(CreateLaneStream, StartOnSecondLane)
     std::unordered_map<std::string, OWL::Road*> roads {{road1Id, road1}, {road2Id, road2}};
     Fakes::WorldData worldData;
     ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(roads));
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(fakelm1.GetLaneIdMapping()));
     std::unordered_map<OWL::Id, OWL::Interfaces::Lane*> lanes{ {fakelm1.GetLane(0, 0).GetId(), &fakelm1.GetLane(0, 0)} };
     ON_CALL(worldData, GetLanes()).WillByDefault(ReturnRef(lanes));
     WorldDataQuery wdQuery(worldData);
@@ -1336,7 +1326,6 @@ TEST(CreateLaneStream, StartOnSecondRoad)
     std::unordered_map<std::string, OWL::Road*> roads {{road1Id, road1}, {road2Id, road2}, {road3Id, road3}};
     Fakes::WorldData worldData;
     ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(roads));
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(fakelm2.GetLaneIdMapping()));
     std::unordered_map<OWL::Id, OWL::Interfaces::Lane*> lanes{ {fakelm1.GetLane(0, 0).GetId(), &fakelm1.GetLane(0, 0)},
                                                                {fakelm1.GetLane(1, 0).GetId(), &fakelm1.GetLane(1, 0)},
                                                                {fakelm3.GetLane(1, 0).GetId(), &fakelm3.GetLane(1, 0)}};
@@ -1391,7 +1380,6 @@ TEST(CreateLaneStream, ExcessRoudsInRoute)
     std::unordered_map<std::string, OWL::Road*> roads {{road0Id, &road0}, {road1Id, road1}, {road2Id, road2}, {road3Id, &road3}};
     Fakes::WorldData worldData;
     ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(roads));
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(fakelm1.GetLaneIdMapping()));
     WorldDataQuery wdQuery(worldData);
 
     auto laneStream = wdQuery.CreateLaneStream(route, "Road1", -1, 0.0);
@@ -1410,7 +1398,7 @@ TEST(CreateLaneStream, ExcessRoudsInRoute)
     ASSERT_THAT(lanesInStream.at(3).sOffset, DoubleEq(33.0));
     ASSERT_THAT(lanesInStream.at(3).inStreamDirection, Eq(true));
 }
-
+*/
 TEST(CreateLaneMultiStream, LinearGraphOneLanePerRoad)
 {
     Fakes::WorldData worldData;
@@ -1428,6 +1416,7 @@ TEST(CreateLaneMultiStream, LinearGraphOneLanePerRoad)
     OWL::Id idLaneA = 2;
     ON_CALL(roadA, GetId()).WillByDefault(ReturnRef(idRoadA));
     ON_CALL(laneA, GetId()).WillByDefault(Return(idLaneA));
+    ON_CALL(laneA, GetOdId()).WillByDefault(Return(-1));
     ON_CALL(laneA, GetRoad()).WillByDefault(ReturnRef(roadA));
     ON_CALL(laneA, GetLength()).WillByDefault(Return(100));
     ON_CALL(laneA, Exists()).WillByDefault(Return(true));
@@ -1442,6 +1431,7 @@ TEST(CreateLaneMultiStream, LinearGraphOneLanePerRoad)
     OWL::Id idLaneB = 4;
     ON_CALL(roadB, GetId()).WillByDefault(ReturnRef(idRoadB));
     ON_CALL(laneB, GetId()).WillByDefault(Return(idLaneB));
+    ON_CALL(laneB, GetOdId()).WillByDefault(Return(-1));
     ON_CALL(laneB, GetRoad()).WillByDefault(ReturnRef(roadB));
     ON_CALL(laneB, GetLength()).WillByDefault(Return(150));
     Fakes::Road roadC;
@@ -1450,6 +1440,7 @@ TEST(CreateLaneMultiStream, LinearGraphOneLanePerRoad)
     OWL::Id idLaneC = 6;
     ON_CALL(roadC, GetId()).WillByDefault(ReturnRef(idRoadC));
     ON_CALL(laneC, GetId()).WillByDefault(Return(idLaneC));
+    ON_CALL(laneC, GetOdId()).WillByDefault(Return(-1));
     ON_CALL(laneC, GetRoad()).WillByDefault(ReturnRef(roadC));
     ON_CALL(laneC, GetLength()).WillByDefault(Return(200));
 
@@ -1464,8 +1455,6 @@ TEST(CreateLaneMultiStream, LinearGraphOneLanePerRoad)
     ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(roads));
     std::unordered_map<OWL::Id, OWL::Lane*> lanes {{idLaneA, &laneA}, {idLaneB, &laneB}, {idLaneC, &laneC}};
     ON_CALL(worldData, GetLanes()).WillByDefault(ReturnRef(lanes));
-    std::unordered_map<OWL::Id, OWL::OdId> laneIdMapping { {idLaneA, -1}, {idLaneB, -1}, {idLaneC, -1}};
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneIdMapping));
     RoadGraphVertexMapping vertexMapping{{{"RoadA", true}, vertexA}};
     ON_CALL(worldData, GetRoadGraphVertexMapping()).WillByDefault(ReturnRef(vertexMapping));
     WorldDataQuery wdQuery(worldData);
@@ -1504,6 +1493,7 @@ TEST(CreateLaneMultiStream, LinearGraphOneRoadWithThreeLanes)
     OWL::Id idLaneA = 2;
     ON_CALL(roadA, GetId()).WillByDefault(ReturnRef(idRoadA));
     ON_CALL(laneA, GetId()).WillByDefault(Return(idLaneA));
+    ON_CALL(laneA, GetOdId()).WillByDefault(Return(-1));
     ON_CALL(laneA, GetRoad()).WillByDefault(ReturnRef(roadA));
     ON_CALL(laneA, GetLength()).WillByDefault(Return(100));
     ON_CALL(laneA, Exists()).WillByDefault(Return(true));
@@ -1515,11 +1505,13 @@ TEST(CreateLaneMultiStream, LinearGraphOneRoadWithThreeLanes)
     Fakes::Lane laneB;
     OWL::Id idLaneB = 4;
     ON_CALL(laneB, GetId()).WillByDefault(Return(idLaneB));
+    ON_CALL(laneB, GetOdId()).WillByDefault(Return(-1));
     ON_CALL(laneB, GetRoad()).WillByDefault(ReturnRef(roadA));
     ON_CALL(laneB, GetLength()).WillByDefault(Return(150));
     Fakes::Lane laneC;
     OWL::Id idLaneC = 6;
     ON_CALL(laneC, GetId()).WillByDefault(Return(idLaneC));
+    ON_CALL(laneC, GetOdId()).WillByDefault(Return(-1));
     ON_CALL(laneC, GetRoad()).WillByDefault(ReturnRef(roadA));
     ON_CALL(laneC, GetLength()).WillByDefault(Return(200));
 
@@ -1534,8 +1526,6 @@ TEST(CreateLaneMultiStream, LinearGraphOneRoadWithThreeLanes)
     ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(roads));
     std::unordered_map<OWL::Id, OWL::Lane*> lanes {{idLaneA, &laneA}, {idLaneB, &laneB}, {idLaneC, &laneC}};
     ON_CALL(worldData, GetLanes()).WillByDefault(ReturnRef(lanes));
-    std::unordered_map<OWL::Id, OWL::OdId> laneIdMapping { {idLaneA, -1}, {idLaneB, -1}, {idLaneC, -1}};
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneIdMapping));
     RoadGraphVertexMapping vertexMapping{{{"RoadA", true}, vertexA}};
     ON_CALL(worldData, GetRoadGraphVertexMapping()).WillByDefault(ReturnRef(vertexMapping));
     WorldDataQuery wdQuery(worldData);
@@ -1578,6 +1568,7 @@ TEST(CreateLaneMultiStream, LinearGraphLanesDontContinue)
     OWL::Id idLaneA = 2;
     ON_CALL(roadA, GetId()).WillByDefault(ReturnRef(idRoadA));
     ON_CALL(laneA, GetId()).WillByDefault(Return(idLaneA));
+    ON_CALL(laneA, GetOdId()).WillByDefault(Return(-1));
     ON_CALL(laneA, GetRoad()).WillByDefault(ReturnRef(roadA));
     ON_CALL(laneA, GetLength()).WillByDefault(Return(100));
     ON_CALL(laneA, Exists()).WillByDefault(Return(true));
@@ -1594,8 +1585,6 @@ TEST(CreateLaneMultiStream, LinearGraphLanesDontContinue)
     ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(roads));
     std::unordered_map<OWL::Id, OWL::Lane*> lanes {{idLaneA, &laneA}};
     ON_CALL(worldData, GetLanes()).WillByDefault(ReturnRef(lanes));
-    std::unordered_map<OWL::Id, OWL::OdId> laneIdMapping { {idLaneA, -1}};
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneIdMapping));
     RoadGraphVertexMapping vertexMapping{{{"RoadA", true}, vertexA}};
     ON_CALL(worldData, GetRoadGraphVertexMapping()).WillByDefault(ReturnRef(vertexMapping));
     WorldDataQuery wdQuery(worldData);
@@ -1634,6 +1623,7 @@ TEST(CreateLaneMultiStream, BranchingGraphOneLanePerRoad)
     OWL::Id idLaneA = 2;
     ON_CALL(roadA, GetId()).WillByDefault(ReturnRef(idRoadA));
     ON_CALL(laneA, GetId()).WillByDefault(Return(idLaneA));
+    ON_CALL(laneA, GetOdId()).WillByDefault(Return(-1));
     ON_CALL(laneA, GetRoad()).WillByDefault(ReturnRef(roadA));
     ON_CALL(laneA, GetLength()).WillByDefault(Return(100));
     ON_CALL(laneA, Exists()).WillByDefault(Return(true));
@@ -1648,6 +1638,7 @@ TEST(CreateLaneMultiStream, BranchingGraphOneLanePerRoad)
     OWL::Id idLaneB = 4;
     ON_CALL(roadB, GetId()).WillByDefault(ReturnRef(idRoadB));
     ON_CALL(laneB, GetId()).WillByDefault(Return(idLaneB));
+    ON_CALL(laneB, GetOdId()).WillByDefault(Return(-1));
     ON_CALL(laneB, GetRoad()).WillByDefault(ReturnRef(roadB));
     ON_CALL(laneB, GetLength()).WillByDefault(Return(150));
     Fakes::Road roadC;
@@ -1656,6 +1647,7 @@ TEST(CreateLaneMultiStream, BranchingGraphOneLanePerRoad)
     OWL::Id idLaneC = 6;
     ON_CALL(roadC, GetId()).WillByDefault(ReturnRef(idRoadC));
     ON_CALL(laneC, GetId()).WillByDefault(Return(idLaneC));
+    ON_CALL(laneC, GetOdId()).WillByDefault(Return(-1));
     ON_CALL(laneC, GetRoad()).WillByDefault(ReturnRef(roadC));
     ON_CALL(laneC, GetLength()).WillByDefault(Return(200));
 
@@ -1670,8 +1662,6 @@ TEST(CreateLaneMultiStream, BranchingGraphOneLanePerRoad)
     ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(roads));
     std::unordered_map<OWL::Id, OWL::Lane*> lanes {{idLaneA, &laneA}, {idLaneB, &laneB}, {idLaneC, &laneC}};
     ON_CALL(worldData, GetLanes()).WillByDefault(ReturnRef(lanes));
-    std::unordered_map<OWL::Id, OWL::OdId> laneIdMapping { {idLaneA, -1}, {idLaneB, -1}, {idLaneC, -1}};
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneIdMapping));
     RoadGraphVertexMapping vertexMapping{{{"RoadA", true}, vertexA}};
     ON_CALL(worldData, GetRoadGraphVertexMapping()).WillByDefault(ReturnRef(vertexMapping));
     WorldDataQuery wdQuery(worldData);
@@ -1832,21 +1822,31 @@ public:
         ON_CALL(connectingRoad, IsInStreamDirection()).WillByDefault(Return(true));
         ON_CALL(connectingRoad, GetPredecessor()).WillByDefault(ReturnRef(idIncomingRoad));
         ON_CALL(connectingRoad, GetSections()).WillByDefault(ReturnRef(connectingSections));
+        ON_CALL(connectingRoad, GetLength()).WillByDefault(Return(10.0));
         ON_CALL(connectingSection, GetLanes()).WillByDefault(ReturnRef(connectingLanes));
         ON_CALL(connectingSection, Covers(_)).WillByDefault(Return(true));
         ON_CALL(connectingLane1, GetId()).WillByDefault(Return(idConnectingLane1));
+        ON_CALL(connectingLane1, GetOdId()).WillByDefault(Return(-1));
         ON_CALL(connectingLane1, GetLaneType()).WillByDefault(Return(LaneType::Driving));
         ON_CALL(connectingLane1, GetRoad()).WillByDefault(ReturnRef(connectingRoad));
         ON_CALL(connectingLane1, GetLength()).WillByDefault(Return(10.0));
+        ON_CALL(connectingLane1, GetDistance(OWL::MeasurementPoint::RoadStart)).WillByDefault(Return(0.));
+        ON_CALL(connectingLane1, GetDistance(OWL::MeasurementPoint::RoadEnd)).WillByDefault(Return(10.));
+        ON_CALL(connectingLane1, Exists()).WillByDefault(Return(true));
         ON_CALL(connectingLane2, GetId()).WillByDefault(Return(idConnectingLane2));
+        ON_CALL(connectingLane2, GetOdId()).WillByDefault(Return(-2));
         ON_CALL(connectingLane2, GetLaneType()).WillByDefault(Return(LaneType::Driving));
         ON_CALL(connectingLane2, GetRoad()).WillByDefault(ReturnRef(connectingRoad));
         ON_CALL(connectingLane2, GetLength()).WillByDefault(Return(10.0));
+        ON_CALL(connectingLane2, GetDistance(OWL::MeasurementPoint::RoadStart)).WillByDefault(Return(0.));
+        ON_CALL(connectingLane2, GetDistance(OWL::MeasurementPoint::RoadEnd)).WillByDefault(Return(10.));
+        ON_CALL(connectingLane2, Exists()).WillByDefault(Return(true));
         ON_CALL(incomingRoad, GetSections()).WillByDefault(ReturnRef(incomingSections));
         ON_CALL(incomingRoad, IsInStreamDirection()).WillByDefault(Return(true));
         ON_CALL(incomingRoad, GetSuccessor()).WillByDefault(ReturnRef(idJunction));
         ON_CALL(incomingRoad, GetPredecessor()).WillByDefault(ReturnRef(idNoRoad));
         ON_CALL(incomingSection, GetLanes()).WillByDefault(ReturnRef(incomingLanes));
+        ON_CALL(incomingSection, Covers(_)).WillByDefault(Return(true));
         ON_CALL(incomingLane1, GetId()).WillByDefault(Return(idIncomingLane1));
         ON_CALL(connectingLane1, GetNext()).WillByDefault(ReturnRef(emptyIds));
         ON_CALL(connectingLane1, GetPrevious()).WillByDefault(ReturnRef(predecessorsConnectingLane1));
@@ -1854,6 +1854,10 @@ public:
         ON_CALL(incomingLane1, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
         ON_CALL(incomingLane1, GetRoad()).WillByDefault(ReturnRef(incomingRoad));
         ON_CALL(incomingLane1, GetLength()).WillByDefault(Return(1000.0));
+        ON_CALL(incomingLane1, GetDistance(OWL::MeasurementPoint::RoadStart)).WillByDefault(Return(0.));
+        ON_CALL(incomingLane1, GetDistance(OWL::MeasurementPoint::RoadEnd)).WillByDefault(Return(1000.));
+        ON_CALL(incomingLane1, GetOdId()).WillByDefault(Return(-1));
+        ON_CALL(incomingLane1, Exists()).WillByDefault(Return(true));
         ON_CALL(incomingLane2, GetId()).WillByDefault(Return(idIncomingLane2));
         ON_CALL(connectingLane2, GetNext()).WillByDefault(ReturnRef(emptyIds));
         ON_CALL(connectingLane2, GetPrevious()).WillByDefault(ReturnRef(predecessorsConnectingLane2));
@@ -1861,11 +1865,14 @@ public:
         ON_CALL(incomingLane2, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
         ON_CALL(incomingLane2, GetRoad()).WillByDefault(ReturnRef(incomingRoad));
         ON_CALL(incomingLane2, GetLength()).WillByDefault(Return(1000.0));
+        ON_CALL(incomingLane2, GetDistance(OWL::MeasurementPoint::RoadStart)).WillByDefault(Return(0.));
+        ON_CALL(incomingLane2, GetDistance(OWL::MeasurementPoint::RoadEnd)).WillByDefault(Return(1000.));
+        ON_CALL(incomingLane2, GetOdId()).WillByDefault(Return(-2));
+        ON_CALL(incomingLane2, Exists()).WillByDefault(Return(true));
 
         ON_CALL(worldData, GetRoads()).WillByDefault(ReturnRef(roads));
         ON_CALL(worldData, GetJunctions()).WillByDefault(ReturnRef(junctions));
         ON_CALL(worldData, GetLanes()).WillByDefault(ReturnRef(lanes));
-        ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneIdMapping));
     }
 
     Fakes::WorldData worldData;
@@ -1883,7 +1890,6 @@ public:
     std::unordered_map<std::string, Road*> roads{ {idConnectingRoad, &connectingRoad}, {idIncomingRoad, &incomingRoad} };
     std::map<std::string, Junction*> junctions { {idJunction, &junction} };
     std::unordered_map<Id, Lane*> lanes{ {idConnectingLane1, &connectingLane1}, {idConnectingLane2, &connectingLane2}, {idIncomingLane1, &incomingLane1}, {idIncomingLane2, &incomingLane2} };
-    std::unordered_map<Id, OdId> laneIdMapping{ {idConnectingLane1, -1}, {idConnectingLane2, -2} };
     std::vector<OWL::Id> predecessorsConnectingLane1{idIncomingLane1};
     std::vector<OWL::Id> successorsIncomingLane1{idConnectingLane1};
     std::vector<OWL::Id> predecessorsConnectingLane2{idIncomingLane2};
@@ -2042,6 +2048,7 @@ TEST(GetDistanceUntilMovingObjectEntersConnector, DISABLED_ObjectOnConnector_Ret
     ON_CALL(sectionA, GetLanes()).WillByDefault(ReturnRef(lanesA));
     ON_CALL(sectionA, Covers(_)).WillByDefault(Return(true));
     ON_CALL(laneA, GetId()).WillByDefault(Return(idLaneA));
+    ON_CALL(laneA, GetOdId()).WillByDefault(Return(-1));
     ON_CALL(laneA, GetRoad()).WillByDefault(ReturnRef(connectorA));
     ON_CALL(connectorB, IsInStreamDirection()).WillByDefault(Return(true));
     ON_CALL(connectorB, GetPredecessor()).WillByDefault(ReturnRef(idIncomingRoad));
@@ -2052,6 +2059,7 @@ TEST(GetDistanceUntilMovingObjectEntersConnector, DISABLED_ObjectOnConnector_Ret
     ON_CALL(sectionB, GetLanes()).WillByDefault(ReturnRef(lanesB));
     ON_CALL(sectionB, Covers(_)).WillByDefault(Return(true));
     ON_CALL(laneB, GetId()).WillByDefault(Return(idLaneB));
+    ON_CALL(laneB, GetOdId()).WillByDefault(Return(-1));
     ON_CALL(laneB, GetRoad()).WillByDefault(ReturnRef(connectorB));
     OWL::Interfaces::Roads connections{&connectorA, &connectorB};
     ON_CALL(junction, GetConnectingRoads()).WillByDefault(ReturnRef(connections));
@@ -2061,8 +2069,6 @@ TEST(GetDistanceUntilMovingObjectEntersConnector, DISABLED_ObjectOnConnector_Ret
     ON_CALL(worldData, GetJunctions()).WillByDefault(ReturnRef(junctions));
     std::unordered_map<OWL::Id, OWL::Interfaces::Lane*> lanes{ {idLaneA, &laneA}, {idLaneB, &laneB} };
     ON_CALL(worldData, GetLanes()).WillByDefault(ReturnRef(lanes));
-    std::unordered_map<OWL::Id, OWL::OdId> laneIdMapping{ {idLaneA, -1}, {idLaneB, -1} };
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneIdMapping));
     IntersectionInfo intersection{idConnectorB, IntersectingConnectionRank::Undefined, { { {idLaneA, idLaneB}, {10.0, 15.0} } } };
     std::map<std::string, std::vector<IntersectionInfo>> intersections{ {"ConnectorA", {intersection} } };
     ON_CALL(junction, GetIntersections()).WillByDefault(ReturnRef(intersections));
@@ -2099,6 +2105,7 @@ TEST(GetDistanceUntilMovingObjectEntersConnector, DISABLED_ObjectOnIncomingRoad_
     ON_CALL(sectionA, GetLanes()).WillByDefault(ReturnRef(lanesA));
     ON_CALL(sectionA, Covers(_)).WillByDefault(Return(true));
     ON_CALL(laneA, GetId()).WillByDefault(Return(idLaneA));
+    ON_CALL(laneA, GetOdId()).WillByDefault(Return(-1));
     ON_CALL(laneA, GetRoad()).WillByDefault(ReturnRef(connectorA));
     ON_CALL(connectorB, IsInStreamDirection()).WillByDefault(Return(true));
     ON_CALL(connectorB, GetPredecessor()).WillByDefault(ReturnRef(idIncomingRoad));
@@ -2109,6 +2116,7 @@ TEST(GetDistanceUntilMovingObjectEntersConnector, DISABLED_ObjectOnIncomingRoad_
     ON_CALL(sectionB, GetLanes()).WillByDefault(ReturnRef(lanesB));
     ON_CALL(sectionB, Covers(_)).WillByDefault(Return(true));
     ON_CALL(laneB, GetId()).WillByDefault(Return(idLaneB));
+    ON_CALL(laneB, GetOdId()).WillByDefault(Return(-1));
     ON_CALL(laneB, GetRoad()).WillByDefault(ReturnRef(connectorB));
     std::vector<OWL::Id> predecessorsLaneB{idIncomingLane};
     ON_CALL(laneB, GetPrevious()).WillByDefault(ReturnRef(predecessorsLaneB));
@@ -2119,6 +2127,7 @@ TEST(GetDistanceUntilMovingObjectEntersConnector, DISABLED_ObjectOnIncomingRoad_
     ON_CALL(incomingSection, GetLanes()).WillByDefault(ReturnRef(incomingLanes));
     ON_CALL(incomingSection, Covers(_)).WillByDefault(Return(true));
     ON_CALL(incomingLane, GetId()).WillByDefault(Return(idIncomingLane));
+    ON_CALL(incomingLane, GetOdId()).WillByDefault(Return(-1));
     ON_CALL(incomingLane, GetLength()).WillByDefault(Return(100.0));
     std::vector<OWL::Id> successorsIncomingLane{idLaneB};
     ON_CALL(incomingLane, GetNext()).WillByDefault(ReturnRef(successorsIncomingLane));
@@ -2133,8 +2142,6 @@ TEST(GetDistanceUntilMovingObjectEntersConnector, DISABLED_ObjectOnIncomingRoad_
     ON_CALL(worldData, GetJunctions()).WillByDefault(ReturnRef(junctions));
     std::unordered_map<OWL::Id, OWL::Interfaces::Lane*> lanes{ {idLaneA, &laneA}, {idLaneB, &laneB} };
     ON_CALL(worldData, GetLanes()).WillByDefault(ReturnRef(lanes));
-    std::unordered_map<OWL::Id, OWL::OdId> laneIdMapping{ {idLaneA, -1}, {idLaneB, -1}, {idIncomingLane, -1} };
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneIdMapping));
     IntersectionInfo intersection{idConnectorB, IntersectingConnectionRank::Undefined, { { {idLaneA, idLaneB}, {10.0, 15.0} } } };
     std::map<std::string, std::vector<IntersectionInfo>> intersections{ {"ConnectorA", {intersection} } };
     ON_CALL(junction, GetIntersections()).WillByDefault(ReturnRef(intersections));
@@ -2171,6 +2178,7 @@ TEST(GetDistanceUntilMovingObjectLeavesConnector, DISABLED_ObjectOnConnector_Ret
     ON_CALL(sectionA, GetLanes()).WillByDefault(ReturnRef(lanesA));
     ON_CALL(sectionA, Covers(_)).WillByDefault(Return(true));
     ON_CALL(laneA, GetId()).WillByDefault(Return(idLaneA));
+    ON_CALL(laneA, GetOdId()).WillByDefault(Return(-1));
     ON_CALL(laneA, GetRoad()).WillByDefault(ReturnRef(connectorA));
     ON_CALL(connectorB, IsInStreamDirection()).WillByDefault(Return(true));
     ON_CALL(connectorB, GetPredecessor()).WillByDefault(ReturnRef(idIncomingRoad));
@@ -2181,6 +2189,7 @@ TEST(GetDistanceUntilMovingObjectLeavesConnector, DISABLED_ObjectOnConnector_Ret
     ON_CALL(sectionB, GetLanes()).WillByDefault(ReturnRef(lanesB));
     ON_CALL(sectionB, Covers(_)).WillByDefault(Return(true));
     ON_CALL(laneB, GetId()).WillByDefault(Return(idLaneB));
+    ON_CALL(laneB, GetOdId()).WillByDefault(Return(-1));
     ON_CALL(laneB, GetRoad()).WillByDefault(ReturnRef(connectorB));
     OWL::Interfaces::Roads connections{&connectorA, &connectorB};
     ON_CALL(junction, GetConnectingRoads()).WillByDefault(ReturnRef(connections));
@@ -2190,8 +2199,6 @@ TEST(GetDistanceUntilMovingObjectLeavesConnector, DISABLED_ObjectOnConnector_Ret
     ON_CALL(worldData, GetJunctions()).WillByDefault(ReturnRef(junctions));
     std::unordered_map<OWL::Id, OWL::Interfaces::Lane*> lanes{ {idLaneA, &laneA}, {idLaneB, &laneB} };
     ON_CALL(worldData, GetLanes()).WillByDefault(ReturnRef(lanes));
-    std::unordered_map<OWL::Id, OWL::OdId> laneIdMapping{ {idLaneA, -1}, {idLaneB, -1} };
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneIdMapping));
     IntersectionInfo intersection{idConnectorB, IntersectingConnectionRank::Undefined, { { {idLaneA, idLaneB}, {10.0, 15.0} } } };
     std::map<std::string, std::vector<IntersectionInfo>> intersections{ {"ConnectorA", {intersection} } };
     ON_CALL(junction, GetIntersections()).WillByDefault(ReturnRef(intersections));
@@ -2228,6 +2235,7 @@ TEST(GetDistanceUntilMovingObjectLeavesConnector, DISABLED_ObjectOnIncomingRoad_
     ON_CALL(sectionA, GetLanes()).WillByDefault(ReturnRef(lanesA));
     ON_CALL(sectionA, Covers(_)).WillByDefault(Return(true));
     ON_CALL(laneA, GetId()).WillByDefault(Return(idLaneA));
+    ON_CALL(laneA, GetOdId()).WillByDefault(Return(-1));
     ON_CALL(laneA, GetRoad()).WillByDefault(ReturnRef(connectorA));
     ON_CALL(connectorB, IsInStreamDirection()).WillByDefault(Return(true));
     ON_CALL(connectorB, GetPredecessor()).WillByDefault(ReturnRef(idIncomingRoad));
@@ -2238,6 +2246,7 @@ TEST(GetDistanceUntilMovingObjectLeavesConnector, DISABLED_ObjectOnIncomingRoad_
     ON_CALL(sectionB, GetLanes()).WillByDefault(ReturnRef(lanesB));
     ON_CALL(sectionB, Covers(_)).WillByDefault(Return(true));
     ON_CALL(laneB, GetId()).WillByDefault(Return(idLaneB));
+    ON_CALL(laneB, GetOdId()).WillByDefault(Return(-1));
     ON_CALL(laneB, GetRoad()).WillByDefault(ReturnRef(connectorB));
     std::vector<OWL::Id> predecessorsLaneB{idIncomingLane};
     ON_CALL(laneB, GetPrevious()).WillByDefault(ReturnRef(predecessorsLaneB));
@@ -2248,6 +2257,7 @@ TEST(GetDistanceUntilMovingObjectLeavesConnector, DISABLED_ObjectOnIncomingRoad_
     ON_CALL(incomingSection, GetLanes()).WillByDefault(ReturnRef(incomingLanes));
     ON_CALL(incomingSection, Covers(_)).WillByDefault(Return(true));
     ON_CALL(incomingLane, GetId()).WillByDefault(Return(idIncomingLane));
+    ON_CALL(incomingLane, GetOdId()).WillByDefault(Return(-1));
     ON_CALL(incomingLane, GetLength()).WillByDefault(Return(100.0));
     std::vector<OWL::Id> successorsInComingLane{idLaneB};
     ON_CALL(incomingLane, GetNext()).WillByDefault(ReturnRef(successorsInComingLane));
@@ -2262,8 +2272,6 @@ TEST(GetDistanceUntilMovingObjectLeavesConnector, DISABLED_ObjectOnIncomingRoad_
     ON_CALL(worldData, GetJunctions()).WillByDefault(ReturnRef(junctions));
     std::unordered_map<OWL::Id, OWL::Interfaces::Lane*> lanes{ {idLaneA, &laneA}, {idLaneB, &laneB} };
     ON_CALL(worldData, GetLanes()).WillByDefault(ReturnRef(lanes));
-    std::unordered_map<OWL::Id, OWL::OdId> laneIdMapping{ {idLaneA, -1}, {idLaneB, -1}, {idIncomingLane, -1} };
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneIdMapping));
     IntersectionInfo intersection{idConnectorB, IntersectingConnectionRank::Undefined, { { {idLaneA, idLaneB}, {10.0, 15.0} } } };
     std::map<std::string, std::vector<IntersectionInfo>> intersections{ {"ConnectorA", {intersection} } };
     ON_CALL(junction, GetIntersections()).WillByDefault(ReturnRef(intersections));
@@ -2736,6 +2744,9 @@ TEST(GetRelativeLanes, OnlySectionInDrivingDirection_ReturnsLanesOfThisSection)
     ON_CALL(lane1, GetId()).WillByDefault(Return(idLane1));
     ON_CALL(lane2, GetId()).WillByDefault(Return(idLane2));
     ON_CALL(lane3, GetId()).WillByDefault(Return(idLane3));
+    ON_CALL(lane1, GetOdId()).WillByDefault(Return(-1));
+    ON_CALL(lane2, GetOdId()).WillByDefault(Return(-2));
+    ON_CALL(lane3, GetOdId()).WillByDefault(Return(1));
     std::vector<OWL::Id> emptyIds{};
     ON_CALL(lane1, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
     ON_CALL(lane2, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
@@ -2749,11 +2760,9 @@ TEST(GetRelativeLanes, OnlySectionInDrivingDirection_ReturnsLanesOfThisSection)
     ON_CALL(section, GetLength()).WillByDefault(Return(100.0));
     std::list<const OWL::Interfaces::Section*> sections{&section};
     ON_CALL(*road, GetSections()).WillByDefault(ReturnRef(sections));
-    std::unordered_map<OWL::Id, OWL::OdId> laneIdMapping{{idLane1, -1}, {idLane2, -2}, {idLane3, 1}};
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneIdMapping));
 
     WorldDataQuery wdQuery{worldData};
-    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 10.0, -1, 300.0).at(node->roadGraphVertex);
+    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 10.0, -1, 300.0, true).at(node->roadGraphVertex);
 
     ASSERT_THAT(result, SizeIs(1));
     EXPECT_THAT(result.at(0).startS, Eq(-10));
@@ -2776,6 +2785,55 @@ TEST(GetRelativeLanes, OnlySectionInDrivingDirection_ReturnsLanesOfThisSection)
     EXPECT_THAT(result.at(0).lanes.at(2).successor, Eq(std::nullopt));
 }
 
+TEST(GetRelativeLanes, IncludeOncomingFalse_IgnoresOncomingLanes)
+{
+    OWL::Fakes::WorldData worldData;
+    FakeRoadMultiStream roadStream;
+
+    auto [node, road] = roadStream.AddRoot(100.0, true);
+    OWL::Fakes::Lane lane1;
+    OWL::Fakes::Lane lane2;
+    OWL::Fakes::Lane lane3;
+    OWL::Id idLane1 = 1, idLane2 = 2, idLane3 = 3;
+    ON_CALL(lane1, GetId()).WillByDefault(Return(idLane1));
+    ON_CALL(lane2, GetId()).WillByDefault(Return(idLane2));
+    ON_CALL(lane3, GetId()).WillByDefault(Return(idLane3));
+    ON_CALL(lane1, GetOdId()).WillByDefault(Return(-1));
+    ON_CALL(lane2, GetOdId()).WillByDefault(Return(-2));
+    ON_CALL(lane3, GetOdId()).WillByDefault(Return(1));
+    std::vector<OWL::Id> emptyIds{};
+    ON_CALL(lane1, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
+    ON_CALL(lane2, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
+    ON_CALL(lane3, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
+    ON_CALL(lane1, GetLaneType()).WillByDefault(Return(LaneType::Driving));
+    ON_CALL(lane2, GetLaneType()).WillByDefault(Return(LaneType::Exit));
+    ON_CALL(lane3, GetLaneType()).WillByDefault(Return(LaneType::Stop));
+    OWL::Fakes::Section section;
+    OWL::Interfaces::Lanes lanes{{&lane1, &lane2, &lane3}};
+    ON_CALL(section, GetLanes()).WillByDefault(ReturnRef(lanes));
+    ON_CALL(section, GetLength()).WillByDefault(Return(100.0));
+    std::list<const OWL::Interfaces::Section*> sections{&section};
+    ON_CALL(*road, GetSections()).WillByDefault(ReturnRef(sections));
+
+    WorldDataQuery wdQuery{worldData};
+    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 10.0, -1, 300.0, false).at(node->roadGraphVertex);
+
+    ASSERT_THAT(result, SizeIs(1));
+    EXPECT_THAT(result.at(0).startS, Eq(-10));
+    EXPECT_THAT(result.at(0).endS, Eq(90));
+    ASSERT_THAT(result.at(0).lanes, SizeIs(2));
+    EXPECT_THAT(result.at(0).lanes.at(0).relativeId, Eq(0));
+    EXPECT_THAT(result.at(0).lanes.at(0).inDrivingDirection, Eq(true));
+    EXPECT_THAT(result.at(0).lanes.at(0).type, Eq(LaneType::Driving));
+    EXPECT_THAT(result.at(0).lanes.at(0).predecessor, Eq(std::nullopt));
+    EXPECT_THAT(result.at(0).lanes.at(0).successor, Eq(std::nullopt));
+    EXPECT_THAT(result.at(0).lanes.at(1).relativeId, Eq(-1));
+    EXPECT_THAT(result.at(0).lanes.at(1).inDrivingDirection, Eq(true));
+    EXPECT_THAT(result.at(0).lanes.at(1).type, Eq(LaneType::Exit));
+    EXPECT_THAT(result.at(0).lanes.at(1).predecessor, Eq(std::nullopt));
+    EXPECT_THAT(result.at(0).lanes.at(1).successor, Eq(std::nullopt));
+}
+
 TEST(GetRelativeLanes, OnlySectionAgainstDrivingDirection_ReturnsLanesOfThisSection)
 {
     OWL::Fakes::WorldData worldData;
@@ -2789,6 +2847,9 @@ TEST(GetRelativeLanes, OnlySectionAgainstDrivingDirection_ReturnsLanesOfThisSect
     ON_CALL(lane1, GetId()).WillByDefault(Return(idLane1));
     ON_CALL(lane2, GetId()).WillByDefault(Return(idLane2));
     ON_CALL(lane3, GetId()).WillByDefault(Return(idLane3));
+    ON_CALL(lane1, GetOdId()).WillByDefault(Return(-1));
+    ON_CALL(lane2, GetOdId()).WillByDefault(Return(-2));
+    ON_CALL(lane3, GetOdId()).WillByDefault(Return(1));
     std::vector<OWL::Id> emptyIds{};
     ON_CALL(lane1, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
     ON_CALL(lane2, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
@@ -2805,11 +2866,9 @@ TEST(GetRelativeLanes, OnlySectionAgainstDrivingDirection_ReturnsLanesOfThisSect
     ON_CALL(section, GetLength()).WillByDefault(Return(100.0));
     std::list<const OWL::Interfaces::Section*> sections{&section};
     ON_CALL(*road, GetSections()).WillByDefault(ReturnRef(sections));
-    std::unordered_map<OWL::Id, OWL::OdId> laneIdMapping{{idLane1, -1}, {idLane2, -2}, {idLane3, 1}};
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneIdMapping));
 
     WorldDataQuery wdQuery{worldData};
-    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 0.0, -1, 300.0).at(node->roadGraphVertex);
+    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 0.0, -1, 300.0, true).at(node->roadGraphVertex);
 
     ASSERT_THAT(result, SizeIs(1));
     EXPECT_THAT(result.at(0).startS, Eq(0));
@@ -2843,6 +2902,8 @@ TEST(GetRelativeLanes, TwoSectionsOnSameRoad_ReturnsLanesOfBothSections)
     OWL::Id idLane1_1 = 1, idLane1_2 = 2;
     ON_CALL(lane1_1, GetId()).WillByDefault(Return(idLane1_1));
     ON_CALL(lane1_2, GetId()).WillByDefault(Return(idLane1_2));
+    ON_CALL(lane1_1, GetOdId()).WillByDefault(Return(-1));
+    ON_CALL(lane1_2, GetOdId()).WillByDefault(Return(-2));
     std::vector<OWL::Id> emptyIds{};
     ON_CALL(lane1_1, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
     ON_CALL(lane1_2, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
@@ -2859,6 +2920,9 @@ TEST(GetRelativeLanes, TwoSectionsOnSameRoad_ReturnsLanesOfBothSections)
     ON_CALL(lane2_1, GetId()).WillByDefault(Return(idLane2_1));
     ON_CALL(lane2_2, GetId()).WillByDefault(Return(idLane2_2));
     ON_CALL(lane2_3, GetId()).WillByDefault(Return(idLane2_3));
+    ON_CALL(lane2_1, GetOdId()).WillByDefault(Return(-1));
+    ON_CALL(lane2_2, GetOdId()).WillByDefault(Return(-2));
+    ON_CALL(lane2_3, GetOdId()).WillByDefault(Return(-3));
     std::vector<OWL::Id> predecessors2_1{idLane1_1};
     std::vector<OWL::Id> predecessors2_2{idLane1_2};
     ON_CALL(lane2_1, GetPrevious()).WillByDefault(ReturnRef(predecessors2_1));
@@ -2874,11 +2938,9 @@ TEST(GetRelativeLanes, TwoSectionsOnSameRoad_ReturnsLanesOfBothSections)
     ON_CALL(section2, GetLength()).WillByDefault(Return(200.0));
     std::list<const OWL::Interfaces::Section*> sections{&section1, &section2};
     ON_CALL(*road, GetSections()).WillByDefault(ReturnRef(sections));
-    std::unordered_map<OWL::Id, OWL::OdId> laneIdMapping{{idLane1_1, -1}, {idLane1_2, -2}, {idLane2_1, -1}, {idLane2_2, -2}, {idLane2_3, -3}};
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneIdMapping));
 
     WorldDataQuery wdQuery{worldData};
-    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 0.0, -1, 300.0).at(node->roadGraphVertex);
+    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 0.0, -1, 300.0, true).at(node->roadGraphVertex);
 
     ASSERT_THAT(result, SizeIs(2));
     EXPECT_THAT(result.at(0).startS, Eq(0));
@@ -2925,6 +2987,8 @@ TEST(GetRelativeLanes, IdOfEgoLaneChanges_ReturnsLanesWithCorrectRelativeId)
     OWL::Id idLane1_1 = 1, idLane1_2 = 2;
     ON_CALL(lane1_1, GetId()).WillByDefault(Return(idLane1_1));
     ON_CALL(lane1_2, GetId()).WillByDefault(Return(idLane1_2));
+    ON_CALL(lane1_1, GetOdId()).WillByDefault(Return(-1));
+    ON_CALL(lane1_2, GetOdId()).WillByDefault(Return(-2));
     std::vector<OWL::Id> emptyIds{};
     ON_CALL(lane1_1, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
     ON_CALL(lane1_2, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
@@ -2941,6 +3005,9 @@ TEST(GetRelativeLanes, IdOfEgoLaneChanges_ReturnsLanesWithCorrectRelativeId)
     ON_CALL(lane2_1, GetId()).WillByDefault(Return(idLane2_1));
     ON_CALL(lane2_2, GetId()).WillByDefault(Return(idLane2_2));
     ON_CALL(lane2_3, GetId()).WillByDefault(Return(idLane2_3));
+    ON_CALL(lane2_1, GetOdId()).WillByDefault(Return(-1));
+    ON_CALL(lane2_2, GetOdId()).WillByDefault(Return(-2));
+    ON_CALL(lane2_3, GetOdId()).WillByDefault(Return(-3));
     std::vector<OWL::Id> predecessors2_2{idLane1_1};
     std::vector<OWL::Id> predecessors2_3{idLane1_2};
     ON_CALL(lane2_1, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
@@ -2956,11 +3023,9 @@ TEST(GetRelativeLanes, IdOfEgoLaneChanges_ReturnsLanesWithCorrectRelativeId)
     ON_CALL(section2, GetLength()).WillByDefault(Return(200.0));
     std::list<const OWL::Interfaces::Section*> sections{&section1, &section2};
     ON_CALL(*road, GetSections()).WillByDefault(ReturnRef(sections));
-    std::unordered_map<OWL::Id, OWL::OdId> laneIdMapping{{idLane1_1, -1}, {idLane1_2, -2}, {idLane2_1, -1}, {idLane2_2, -2}, {idLane2_3, -3}};
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneIdMapping));
 
     WorldDataQuery wdQuery{worldData};
-    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 0.0, -1, 300.0).at(node->roadGraphVertex);
+    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 0.0, -1, 300.0, true).at(node->roadGraphVertex);
 
     ASSERT_THAT(result, SizeIs(2));
     EXPECT_THAT(result.at(0).startS, Eq(0));
@@ -2996,7 +3061,7 @@ TEST(GetRelativeLanes, IdOfEgoLaneChanges_ReturnsLanesWithCorrectRelativeId)
     EXPECT_THAT(result.at(1).lanes.at(2).successor, Eq(std::nullopt));
 }
 
-TEST(GetRelativeLanes, BranchingTree_ReturnsLanesOfWayToNode)
+TEST(GetRelativeLane, BranchingTree_ReturnsLanesOfWayToNode)
 {
     OWL::Fakes::WorldData worldData;
     FakeRoadMultiStream roadStream;
@@ -3009,6 +3074,8 @@ TEST(GetRelativeLanes, BranchingTree_ReturnsLanesOfWayToNode)
     OWL::Id idLane1_1 = 1, idLane1_2 = 2;
     ON_CALL(lane1_1, GetId()).WillByDefault(Return(idLane1_1));
     ON_CALL(lane1_2, GetId()).WillByDefault(Return(idLane1_2));
+    ON_CALL(lane1_1, GetOdId()).WillByDefault(Return(-1));
+    ON_CALL(lane1_2, GetOdId()).WillByDefault(Return(-2));
     std::vector<OWL::Id> emptyIds{};
     ON_CALL(lane1_1, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
     ON_CALL(lane1_2, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
@@ -3023,6 +3090,8 @@ TEST(GetRelativeLanes, BranchingTree_ReturnsLanesOfWayToNode)
     OWL::Id idLane2_1 = 3, idLane2_2 = 4;
     ON_CALL(lane2_1, GetId()).WillByDefault(Return(idLane2_1));
     ON_CALL(lane2_2, GetId()).WillByDefault(Return(idLane2_2));
+    ON_CALL(lane2_1, GetOdId()).WillByDefault(Return(-1));
+    ON_CALL(lane2_2, GetOdId()).WillByDefault(Return(-2));
     std::vector<OWL::Id> predecessors2_1{idLane1_1};
     std::vector<OWL::Id> predecessors2_2{idLane1_2};
     ON_CALL(lane2_1, GetPrevious()).WillByDefault(ReturnRef(predecessors2_1));
@@ -3039,6 +3108,8 @@ TEST(GetRelativeLanes, BranchingTree_ReturnsLanesOfWayToNode)
     OWL::Id idLane3_1 = 5, idLane3_2 = 6;
     ON_CALL(lane3_1, GetId()).WillByDefault(Return(idLane3_1));
     ON_CALL(lane3_2, GetId()).WillByDefault(Return(idLane3_2));
+    ON_CALL(lane3_1, GetOdId()).WillByDefault(Return(1));
+    ON_CALL(lane3_2, GetOdId()).WillByDefault(Return(2));
     std::vector<OWL::Id> predecessors3_1{idLane1_1};
     std::vector<OWL::Id> predecessors3_2{idLane1_2};
     ON_CALL(lane3_1, GetNext()).WillByDefault(ReturnRef(predecessors3_1));
@@ -3056,11 +3127,9 @@ TEST(GetRelativeLanes, BranchingTree_ReturnsLanesOfWayToNode)
     ON_CALL(*road2, GetSections()).WillByDefault(ReturnRef(sections2));
     std::list<const OWL::Interfaces::Section*> sections3{&section3};
     ON_CALL(*road3, GetSections()).WillByDefault(ReturnRef(sections3));
-    std::unordered_map<OWL::Id, OWL::OdId> laneIdMapping{{idLane1_1, -1}, {idLane1_2, -2}, {idLane2_1, -1}, {idLane2_2, -2}, {idLane3_1, 1}, {idLane3_2, 2}};
-    ON_CALL(worldData, GetLaneIdMapping()).WillByDefault(ReturnRef(laneIdMapping));
 
     WorldDataQuery wdQuery{worldData};
-    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 0.0, -1, 300.0);
+    auto result = wdQuery.GetRelativeLanes(roadStream.Get(), 0.0, -1, 300.0, true);
     auto result2 = result.at(node2->roadGraphVertex);
     auto result3 = result.at(node3->roadGraphVertex);
 
@@ -3121,6 +3190,292 @@ TEST(GetRelativeLanes, BranchingTree_ReturnsLanesOfWayToNode)
     EXPECT_THAT(result3.at(1).lanes.at(1).successor, Eq(std::nullopt));
 }
 
+TEST(GetRelativeLaneId, OnlySectionInDrivingDirection_ReturnsCorrectRelativeId)
+{
+    OWL::Fakes::WorldData worldData;
+    FakeRoadMultiStream roadStream;
+
+    auto [node, road] = roadStream.AddRoot(100.0, true);
+    OWL::Fakes::Lane lane1;
+    OWL::Fakes::Lane lane2;
+    OWL::Fakes::Lane lane3;
+    OWL::Id idLane1 = 1, idLane2 = 2, idLane3 = 3;
+    ON_CALL(lane1, GetId()).WillByDefault(Return(idLane1));
+    ON_CALL(lane2, GetId()).WillByDefault(Return(idLane2));
+    ON_CALL(lane3, GetId()).WillByDefault(Return(idLane3));
+    ON_CALL(lane1, GetOdId()).WillByDefault(Return(-1));
+    ON_CALL(lane2, GetOdId()).WillByDefault(Return(-2));
+    ON_CALL(lane3, GetOdId()).WillByDefault(Return(1));
+    std::vector<OWL::Id> emptyIds{};
+    ON_CALL(lane1, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
+    ON_CALL(lane2, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
+    ON_CALL(lane3, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
+    OWL::Fakes::Section section;
+    OWL::Interfaces::Lanes lanes{{&lane1, &lane2, &lane3}};
+    ON_CALL(section, GetLanes()).WillByDefault(ReturnRef(lanes));
+    ON_CALL(section, GetLength()).WillByDefault(Return(100.0));
+    std::list<const OWL::Interfaces::Section*> sections{&section};
+    ON_CALL(*road, GetSections()).WillByDefault(ReturnRef(sections));
+    std::string idRoad = "RoadA";
+    ON_CALL(*road, GetId()).WillByDefault(ReturnRef(idRoad));
+
+    std::map<std::string, GlobalRoadPosition> targetPosition1{{idRoad, {idRoad, 1, 15., 0, 0}}};
+    std::map<std::string, GlobalRoadPosition> targetPosition2{{idRoad, {idRoad, -2, 15., 0, 0}}};
+
+    WorldDataQuery wdQuery{worldData};
+    auto result1 = wdQuery.GetRelativeLaneId(roadStream.Get(), 10.0, -1, targetPosition1).at(node->roadGraphVertex);
+    auto result2 = wdQuery.GetRelativeLaneId(roadStream.Get(), 10.0, -1, targetPosition2).at(node->roadGraphVertex);
+
+    EXPECT_THAT(result1, Eq(1));
+    EXPECT_THAT(result2, Eq(-1));
+}
+
+TEST(GetRelativeLaneId, IdOfEgoLaneChanges_ReturnsCorrectRelativeId)
+{
+    OWL::Fakes::WorldData worldData;
+    FakeRoadMultiStream roadStream;
+
+    auto [node, road] = roadStream.AddRoot(100.0, true);
+    OWL::Fakes::Lane lane1_1;
+    OWL::Fakes::Lane lane1_2;
+    OWL::Id idLane1_1 = 1, idLane1_2 = 2;
+    ON_CALL(lane1_1, GetId()).WillByDefault(Return(idLane1_1));
+    ON_CALL(lane1_2, GetId()).WillByDefault(Return(idLane1_2));
+    ON_CALL(lane1_1, GetOdId()).WillByDefault(Return(-1));
+    ON_CALL(lane1_2, GetOdId()).WillByDefault(Return(-2));
+    std::vector<OWL::Id> emptyIds{};
+    ON_CALL(lane1_1, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
+    ON_CALL(lane1_2, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
+    OWL::Fakes::Section section1;
+    OWL::Interfaces::Lanes lanes1{{&lane1_1, &lane1_2}};
+    ON_CALL(section1, GetLanes()).WillByDefault(ReturnRef(lanes1));
+    ON_CALL(section1, GetLength()).WillByDefault(Return(100.0));
+    OWL::Fakes::Lane lane2_1;
+    OWL::Fakes::Lane lane2_2;
+    OWL::Fakes::Lane lane2_3;
+    OWL::Id idLane2_1 = 3, idLane2_2 = 4, idLane2_3 = 5;
+    ON_CALL(lane2_1, GetId()).WillByDefault(Return(idLane2_1));
+    ON_CALL(lane2_2, GetId()).WillByDefault(Return(idLane2_2));
+    ON_CALL(lane2_3, GetId()).WillByDefault(Return(idLane2_3));
+    ON_CALL(lane2_1, GetOdId()).WillByDefault(Return(-1));
+    ON_CALL(lane2_2, GetOdId()).WillByDefault(Return(-2));
+    ON_CALL(lane2_3, GetOdId()).WillByDefault(Return(-3));
+    std::vector<OWL::Id> predecessors2_2{idLane1_1};
+    std::vector<OWL::Id> predecessors2_3{idLane1_2};
+    ON_CALL(lane2_1, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
+    ON_CALL(lane2_2, GetPrevious()).WillByDefault(ReturnRef(predecessors2_2));
+    ON_CALL(lane2_3, GetPrevious()).WillByDefault(ReturnRef(predecessors2_3));
+    OWL::Fakes::Section section2;
+    OWL::Interfaces::Lanes lanes2{{&lane2_1, &lane2_2, &lane2_3}};
+    ON_CALL(section2, GetLanes()).WillByDefault(ReturnRef(lanes2));
+    ON_CALL(section2, GetSOffset()).WillByDefault(Return(100.0));
+    ON_CALL(section2, GetLength()).WillByDefault(Return(200.0));
+    std::list<const OWL::Interfaces::Section*> sections{&section1, &section2};
+    ON_CALL(*road, GetSections()).WillByDefault(ReturnRef(sections));
+    std::string idRoad = "RoadA";
+    ON_CALL(*road, GetId()).WillByDefault(ReturnRef(idRoad));
+
+    std::map<std::string, GlobalRoadPosition> targetPosition1{{idRoad, {idRoad, -1, 115., 0, 0}}};
+    std::map<std::string, GlobalRoadPosition> targetPosition2{{idRoad, {idRoad, -2, 115., 0, 0}}};
+
+    WorldDataQuery wdQuery{worldData};
+    auto result1 = wdQuery.GetRelativeLaneId(roadStream.Get(), 10.0, -1, targetPosition1).at(node->roadGraphVertex);
+    auto result2 = wdQuery.GetRelativeLaneId(roadStream.Get(), 10.0, -1, targetPosition2).at(node->roadGraphVertex);
+
+    EXPECT_THAT(result1, Eq(1));
+    EXPECT_THAT(result2, Eq(0));
+}
+
+TEST(GetRelativeLaneId, BranchingTree_ReturnsCorrectRelativeId)
+{
+    OWL::Fakes::WorldData worldData;
+    FakeRoadMultiStream roadStream;
+
+    auto [node1, road1] = roadStream.AddRoot(100.0, true);
+    auto [node2, road2] = roadStream.AddRoad(150.0, true, *node1);
+    auto [node3, road3] = roadStream.AddRoad(200.0, false, *node1);
+    OWL::Fakes::Lane lane1_1;
+    OWL::Fakes::Lane lane1_2;
+    OWL::Id idLane1_1 = 1, idLane1_2 = 2;
+    ON_CALL(lane1_1, GetId()).WillByDefault(Return(idLane1_1));
+    ON_CALL(lane1_2, GetId()).WillByDefault(Return(idLane1_2));
+    ON_CALL(lane1_1, GetOdId()).WillByDefault(Return(-1));
+    ON_CALL(lane1_2, GetOdId()).WillByDefault(Return(-2));
+    std::vector<OWL::Id> emptyIds{};
+    ON_CALL(lane1_1, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
+    ON_CALL(lane1_2, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
+    OWL::Fakes::Section section1;
+    OWL::Interfaces::Lanes lanes1{{&lane1_1, &lane1_2}};
+    ON_CALL(section1, GetLanes()).WillByDefault(ReturnRef(lanes1));
+    ON_CALL(section1, GetLength()).WillByDefault(Return(100.0));
+    OWL::Fakes::Lane lane2_1;
+    OWL::Fakes::Lane lane2_2;
+    OWL::Id idLane2_1 = 3, idLane2_2 = 4;
+    ON_CALL(lane2_1, GetId()).WillByDefault(Return(idLane2_1));
+    ON_CALL(lane2_2, GetId()).WillByDefault(Return(idLane2_2));
+    ON_CALL(lane2_1, GetOdId()).WillByDefault(Return(-1));
+    ON_CALL(lane2_2, GetOdId()).WillByDefault(Return(-2));
+    std::vector<OWL::Id> predecessors2_1{idLane1_1};
+    std::vector<OWL::Id> predecessors2_2{idLane1_2};
+    ON_CALL(lane2_1, GetPrevious()).WillByDefault(ReturnRef(predecessors2_1));
+    ON_CALL(lane2_2, GetPrevious()).WillByDefault(ReturnRef(predecessors2_2));
+    OWL::Fakes::Section section2;
+    OWL::Interfaces::Lanes lanes2{{&lane2_1, &lane2_2}};
+    ON_CALL(section2, GetLanes()).WillByDefault(ReturnRef(lanes2));
+    ON_CALL(section2, GetSOffset()).WillByDefault(Return(0.0));
+    ON_CALL(section2, GetLength()).WillByDefault(Return(150.0));
+    OWL::Fakes::Lane lane3_1;
+    OWL::Fakes::Lane lane3_2;
+    OWL::Id idLane3_1 = 5, idLane3_2 = 6;
+    ON_CALL(lane3_1, GetId()).WillByDefault(Return(idLane3_1));
+    ON_CALL(lane3_2, GetId()).WillByDefault(Return(idLane3_2));
+    ON_CALL(lane3_1, GetOdId()).WillByDefault(Return(1));
+    ON_CALL(lane3_2, GetOdId()).WillByDefault(Return(2));
+    std::vector<OWL::Id> predecessors3_1{idLane1_1};
+    std::vector<OWL::Id> predecessors3_2{idLane1_2};
+    ON_CALL(lane3_1, GetNext()).WillByDefault(ReturnRef(predecessors3_1));
+    ON_CALL(lane3_2, GetNext()).WillByDefault(ReturnRef(predecessors3_2));
+    OWL::Fakes::Section section3;
+    OWL::Interfaces::Lanes lanes3{{&lane3_1, &lane3_2}};
+    ON_CALL(section3, GetLanes()).WillByDefault(ReturnRef(lanes3));
+    ON_CALL(section3, GetSOffset()).WillByDefault(Return(0.0));
+    ON_CALL(section3, GetLength()).WillByDefault(Return(200.0));
+    std::list<const OWL::Interfaces::Section*> sections1{&section1};
+    ON_CALL(*road1, GetSections()).WillByDefault(ReturnRef(sections1));
+    std::list<const OWL::Interfaces::Section*> sections2{&section2};
+    ON_CALL(*road2, GetSections()).WillByDefault(ReturnRef(sections2));
+    std::list<const OWL::Interfaces::Section*> sections3{&section3};
+    ON_CALL(*road3, GetSections()).WillByDefault(ReturnRef(sections3));
+
+    std::string idRoad1 = "RoadA";
+    std::string idRoad2 = "RoadB";
+    std::string idRoad3 = "RoadC";
+    ON_CALL(*road1, GetId()).WillByDefault(ReturnRef(idRoad1));
+    ON_CALL(*road2, GetId()).WillByDefault(ReturnRef(idRoad2));
+    ON_CALL(*road3, GetId()).WillByDefault(ReturnRef(idRoad3));
+
+    std::map<std::string, GlobalRoadPosition> targetPosition1{{idRoad2, {idRoad2, -1, 115., 0, 0}}, {idRoad3, {idRoad3, 1, 115., 0, 0}}};
+    std::map<std::string, GlobalRoadPosition> targetPosition2{{idRoad2, {idRoad2, -2, 115., 0, 0}}, {idRoad3, {idRoad3, 2, 115., 0, 0}}};
+
+    WorldDataQuery wdQuery{worldData};
+    auto result1 = wdQuery.GetRelativeLaneId(roadStream.Get(), 10.0, -1, targetPosition1).at(node3->roadGraphVertex);
+    auto result2 = wdQuery.GetRelativeLaneId(roadStream.Get(), 10.0, -1, targetPosition2).at(node3->roadGraphVertex);
+
+    EXPECT_THAT(result1, Eq(0));
+    EXPECT_THAT(result2, Eq(-1));
+}
+
+TEST(GetRelativeLaneId, TargetOnPreviousSection_ReturnsCorrectRelativeId)
+{
+    OWL::Fakes::WorldData worldData;
+    FakeRoadMultiStream roadStream;
+
+    auto [node, road] = roadStream.AddRoot(100.0, true);
+    OWL::Fakes::Lane lane1_1;
+    OWL::Fakes::Lane lane1_2;
+    OWL::Id idLane1_1 = 1, idLane1_2 = 2;
+    ON_CALL(lane1_1, GetId()).WillByDefault(Return(idLane1_1));
+    ON_CALL(lane1_2, GetId()).WillByDefault(Return(idLane1_2));
+    ON_CALL(lane1_1, GetOdId()).WillByDefault(Return(-1));
+    ON_CALL(lane1_2, GetOdId()).WillByDefault(Return(-2));
+    std::vector<OWL::Id> emptyIds{};
+    ON_CALL(lane1_1, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
+    ON_CALL(lane1_2, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
+    OWL::Fakes::Section section1;
+    OWL::Interfaces::Lanes lanes1{{&lane1_1, &lane1_2}};
+    ON_CALL(section1, GetLanes()).WillByDefault(ReturnRef(lanes1));
+    ON_CALL(section1, GetLength()).WillByDefault(Return(100.0));
+    OWL::Fakes::Lane lane2_1;
+    OWL::Fakes::Lane lane2_2;
+    OWL::Fakes::Lane lane2_3;
+    OWL::Id idLane2_1 = 3, idLane2_2 = 4, idLane2_3 = 5;
+    ON_CALL(lane2_1, GetId()).WillByDefault(Return(idLane2_1));
+    ON_CALL(lane2_2, GetId()).WillByDefault(Return(idLane2_2));
+    ON_CALL(lane2_3, GetId()).WillByDefault(Return(idLane2_3));
+    ON_CALL(lane2_1, GetOdId()).WillByDefault(Return(-1));
+    ON_CALL(lane2_2, GetOdId()).WillByDefault(Return(-2));
+    ON_CALL(lane2_3, GetOdId()).WillByDefault(Return(-3));
+    std::vector<OWL::Id> predecessors2_2{idLane1_1};
+    std::vector<OWL::Id> predecessors2_3{idLane1_2};
+    ON_CALL(lane2_1, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
+    ON_CALL(lane2_2, GetPrevious()).WillByDefault(ReturnRef(predecessors2_2));
+    ON_CALL(lane2_3, GetPrevious()).WillByDefault(ReturnRef(predecessors2_3));
+    OWL::Fakes::Section section2;
+    OWL::Interfaces::Lanes lanes2{{&lane2_1, &lane2_2, &lane2_3}};
+    ON_CALL(section2, GetLanes()).WillByDefault(ReturnRef(lanes2));
+    ON_CALL(section2, GetSOffset()).WillByDefault(Return(100.0));
+    ON_CALL(section2, GetLength()).WillByDefault(Return(200.0));
+    std::list<const OWL::Interfaces::Section*> sections{&section1, &section2};
+    ON_CALL(*road, GetSections()).WillByDefault(ReturnRef(sections));
+    std::string idRoad = "RoadA";
+    ON_CALL(*road, GetId()).WillByDefault(ReturnRef(idRoad));
+
+    std::map<std::string, GlobalRoadPosition> targetPosition1{{idRoad, {idRoad, -1, 15., 0, 0}}};
+    std::map<std::string, GlobalRoadPosition> targetPosition2{{idRoad, {idRoad, -2, 15., 0, 0}}};
+
+    WorldDataQuery wdQuery{worldData};
+    auto result1 = wdQuery.GetRelativeLaneId(roadStream.Get(), 110.0, -2, targetPosition1).at(node->roadGraphVertex);
+    auto result2 = wdQuery.GetRelativeLaneId(roadStream.Get(), 110.0, -2, targetPosition2).at(node->roadGraphVertex);
+
+    EXPECT_THAT(result1, Eq(0));
+    EXPECT_THAT(result2, Eq(-1));
+}
+
+
+TEST(GetRelativeLaneId, TargetOnPreviousRoad_ReturnsCorrectRelativeId)
+{
+    OWL::Fakes::WorldData worldData;
+    FakeRoadMultiStream roadStream;
+
+    auto [node1, road1] = roadStream.AddRoot(100.0, true);
+    auto [node2, road2] = roadStream.AddRoad(150.0, true, *node1);
+    OWL::Fakes::Lane lane1_1;
+    OWL::Fakes::Lane lane1_2;
+    OWL::Id idLane1_1 = 1, idLane1_2 = 2;
+    ON_CALL(lane1_1, GetId()).WillByDefault(Return(idLane1_1));
+    ON_CALL(lane1_2, GetId()).WillByDefault(Return(idLane1_2));
+    ON_CALL(lane1_1, GetOdId()).WillByDefault(Return(-1));
+    ON_CALL(lane1_2, GetOdId()).WillByDefault(Return(-2));
+    std::vector<OWL::Id> emptyIds{};
+    ON_CALL(lane1_1, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
+    ON_CALL(lane1_2, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
+    OWL::Fakes::Section section1;
+    OWL::Interfaces::Lanes lanes1{{&lane1_1, &lane1_2}};
+    ON_CALL(section1, GetLanes()).WillByDefault(ReturnRef(lanes1));
+    ON_CALL(section1, GetLength()).WillByDefault(Return(100.0));
+    OWL::Fakes::Lane lane2_1;
+    OWL::Fakes::Lane lane2_2;
+    OWL::Id idLane2_1 = 3, idLane2_2 = 4;
+    ON_CALL(lane2_1, GetId()).WillByDefault(Return(idLane2_1));
+    ON_CALL(lane2_2, GetId()).WillByDefault(Return(idLane2_2));
+    ON_CALL(lane2_1, GetOdId()).WillByDefault(Return(-1));
+    ON_CALL(lane2_2, GetOdId()).WillByDefault(Return(-2));
+    std::vector<OWL::Id> predecessors2_2{idLane1_1};
+    ON_CALL(lane2_1, GetPrevious()).WillByDefault(ReturnRef(emptyIds));
+    ON_CALL(lane2_2, GetPrevious()).WillByDefault(ReturnRef(predecessors2_2));
+    OWL::Fakes::Section section2;
+    OWL::Interfaces::Lanes lanes2{{&lane2_1, &lane2_2}};
+    ON_CALL(section2, GetLanes()).WillByDefault(ReturnRef(lanes2));
+    ON_CALL(section2, GetSOffset()).WillByDefault(Return(0.0));
+    ON_CALL(section2, GetLength()).WillByDefault(Return(150.0));
+    std::list<const OWL::Interfaces::Section*> sections1{&section1};
+    ON_CALL(*road1, GetSections()).WillByDefault(ReturnRef(sections1));
+    std::list<const OWL::Interfaces::Section*> sections2{&section2};
+    ON_CALL(*road2, GetSections()).WillByDefault(ReturnRef(sections2));
+
+    std::string idRoad1 = "RoadA";
+    std::string idRoad2 = "RoadB";
+    ON_CALL(*road1, GetId()).WillByDefault(ReturnRef(idRoad1));
+    ON_CALL(*road2, GetId()).WillByDefault(ReturnRef(idRoad2));
+
+    std::map<std::string, GlobalRoadPosition> targetPosition{{idRoad1, {idRoad1, -1, 15., 0, 0}}};
+
+    WorldDataQuery wdQuery{worldData};
+    auto result = wdQuery.GetRelativeLaneId(roadStream.Get(), 110.0, -2, targetPosition).at(node2->roadGraphVertex);
+
+    EXPECT_THAT(result, Eq(0));
+}
+
 TEST(GetLaneCurvature, OnLaneStreamReturnsCorrectCurvature)
 {
     OWL::Fakes::WorldData worldData;
@@ -3174,88 +3529,4 @@ TEST(GetLaneDirection, OnLaneStreamReturnsCorrectCurvature)
     EXPECT_THAT(result.at(node2->roadGraphVertex), Eq(0.1));
     EXPECT_THAT(result.at(node3->roadGraphVertex), Eq(0.2));
 }
-
-class LaneStreamTest_Data
-{
-public:
-    std::vector<std::tuple<double, double, bool>> elements;
-    std::vector<std::tuple<double, double, bool>> reversed_elements;
-};
-
-class LaneStreamTest : public::testing::TestWithParam<LaneStreamTest_Data>
-{
-public:
-    LaneStreamTest()
-    {
-        const auto& data = GetParam();
-
-        for (auto [sOffset, length, direction] : data.elements)
-        {
-            auto fakeLane = new NiceMock<OWL::Fakes::Lane>();
-            ON_CALL(*fakeLane, GetLength()).WillByDefault(Return(length));
-            fakeLanes.push_back(fakeLane);
-            laneStreamInfos.push_back({fakeLane, sOffset, direction});
-        }
-
-        laneStream = LaneStream{laneStreamInfos};
-    }
-
-    ~LaneStreamTest()
-    {
-        for (auto fakeLane : fakeLanes)
-        {
-            delete fakeLane;
-        }
-    }
-
-    LaneStream laneStream;
-    std::vector<const OWL::Fakes::Lane*> fakeLanes;
-    std::vector<LaneStreamInfo> laneStreamInfos;
-};
-
-TEST_P(LaneStreamTest, StreamReverse_CorrectlyReverses)
-{
-    const auto& data = GetParam();
-
-    auto reversedLaneStream = laneStream.Reverse();
-    auto reversedLaneElements = reversedLaneStream.GetElements();
-
-    std::vector<std::tuple<double, double, bool>> reversedResult;
-    for (const auto reversedLaneElement : reversedLaneElements)
-    {
-        reversedResult.push_back({reversedLaneElement.sOffset, reversedLaneElement.element->GetLength(), reversedLaneElement.inStreamDirection});
-    }
-
-    ASSERT_THAT(reversedLaneElements, SizeIs(laneStreamInfos.size()));
-    EXPECT_THAT(reversedResult, ElementsAreArray(data.reversed_elements));
-}
-
-INSTANTIATE_TEST_CASE_P(SimpleLaneStreams, LaneStreamTest, ::testing::Values(
-//                      | input lanes      |  expected reversed lanes |
-//                      |                  |                          |
-//                      |                  |                          |
-    LaneStreamTest_Data{{{   0, 100, true  }}, {{ 100, 100, false }}},
-    LaneStreamTest_Data{{{ 100, 100, false }}, {{   0, 100, true  }}},
-//                           |    |    |
-//                       sOffset  |   inStreamDirection
-//                            length
-
-    LaneStreamTest_Data{{{   0, 100, true  }, { 100, 100, true  }},     // two lanes
-                        {{ 100, 100, false }, { 200, 100, false }}},
-
-    LaneStreamTest_Data{{{   0, 100, true  }, { 100, 100, true  }, { 200, 100, true  }},      // three lanes
-                        {{ 100, 100, false }, { 200, 100, false }, { 300, 100, false }}},
-
-    LaneStreamTest_Data{{{ 100, 100, false }, { 100, 100, true  }, { 200, 100, true  }},
-                        {{ 100, 100, false }, { 200, 100, false }, { 200, 100, true  }}},
-
-    LaneStreamTest_Data{{{   0, 100, true  }, { 200, 100, false }, { 200, 100, true  }},
-                        {{ 100, 100, false }, { 100, 100, true  }, { 300, 100, false }}},
-
-    LaneStreamTest_Data{{{   0, 100, true  }, { 100, 100, true  }, { 300, 100, false }},
-                        {{   0, 100, true  }, { 200, 100, false }, { 300, 100, false }}},
-
-    LaneStreamTest_Data{{{ 100, 100, false }, { 100, 100, true  }, { 300, 100, false }},
-                        {{   0, 100, true  }, { 200, 100, false }, { 200, 100, true  }}}
-));
 

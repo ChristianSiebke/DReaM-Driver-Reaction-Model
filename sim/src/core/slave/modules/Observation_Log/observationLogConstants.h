@@ -32,6 +32,7 @@ struct OutputAttributes
     const QString DRIVERPROFILENAME = "DriverProfileName";
     const QString AGENTTYPEGROUPNAME = "AgentTypeGroupName";
     const QString AGENTTYPENAME = "AgentTypeName";
+    const QString AGENTTYPE = "AgentType";
     const QString TIME = "Time";
     const QString TYPE = "Type";
     const QString NAME = "Name";

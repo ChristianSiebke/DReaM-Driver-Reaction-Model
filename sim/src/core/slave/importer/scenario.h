@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -19,6 +19,7 @@
 #include "common/eventDetectorDefinitions.h"
 #include "common/opExport.h"
 #include "include/scenarioInterface.h"
+#include "sceneryDynamics.h"
 
 namespace Configuration {
 
@@ -88,6 +89,10 @@ public:
      */
     void SetSceneryPath(const std::string& sceneryPath) override;
 
+    const SceneryDynamicsInterface& GetSceneryDynamics() override;
+
+    void AddTrafficSignalController (const openScenario::TrafficSignalController& controller) override;
+
     void AddScenarioEntity(const ScenarioEntity& entity) override;
     void AddScenarioGroupsByEntityNames(const std::map<std::string, std::list<std::string>> &groupDefinitions) override;
 
@@ -107,6 +112,8 @@ public:
     int GetEndTime() const override;
     void SetEndTime(const double endTime) override;
 
+    void SetEnvironment(const openScenario::EnvironmentAction &environment) override;
+
 private:
     ScenarioEntity egoEntity;
     std::vector<ScenarioEntity> entities;
@@ -114,6 +121,7 @@ private:
 
     std::vector<openScenario::ConditionalEventDetectorInformation> eventDetectorInformations;
     std::vector<openScenario::ManipulatorInformation> actions;
+    SceneryDynamics sceneryDynamics;
 
     std::string vehicleCatalogPath;     //!< The path of the vehicle catalog (relative to Scenario.xosc)
     std::string pedestrianCatalogPath;  //!< The path of the pedestrian catalog (relative to Scenario.xosc)

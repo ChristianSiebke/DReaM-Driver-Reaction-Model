@@ -19,7 +19,7 @@ class MetaInfo:
     specialized = None
     parameterization = None
     configs_under_test = []
-
+    datatypes = {}
 
 class DEBUG:
     PRINT_CSV = True

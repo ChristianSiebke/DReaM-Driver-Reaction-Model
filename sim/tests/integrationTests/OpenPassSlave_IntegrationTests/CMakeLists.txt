@@ -20,6 +20,7 @@ add_openpass_target(
     ${COMPONENT_SOURCE_DIR}/importer/scenario.cpp
     ${COMPONENT_SOURCE_DIR}/importer/scenarioImporter.cpp
     ${COMPONENT_SOURCE_DIR}/importer/scenarioImporterHelper.cpp
+    ${COMPONENT_SOURCE_DIR}/importer/sceneryDynamics.cpp
 
     # Scenery
     SceneryImporter_IntegrationTests.cpp
@@ -58,8 +59,9 @@ add_openpass_target(
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/OWL/DataTypes.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/OWL/OpenDriveTypeMapper.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/AgentAdapter.cpp
+    ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/LaneStream.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/Localization.cpp
-    ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/PointQuery.cpp
+    ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/RoadStream.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/WorldData.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/WorldDataQuery.cpp
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/WorldDataException.cpp
@@ -79,6 +81,7 @@ add_openpass_target(
     ${COMPONENT_SOURCE_DIR}/importer/scenario.h
     ${COMPONENT_SOURCE_DIR}/importer/scenarioImporter.h
     ${COMPONENT_SOURCE_DIR}/importer/scenarioImporterHelper.h
+    ${COMPONENT_SOURCE_DIR}/importer/sceneryDynamics.h
 
     # Scenery
     ${COMPONENT_SOURCE_DIR}/importer/connection.h
@@ -114,7 +117,6 @@ add_openpass_target(
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/OWL/OpenDriveTypeMapper.h
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/AgentAdapter.h
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/Localization.h
-    ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/PointQuery.h
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/WorldData.h
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/WorldDataQuery.h
     ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI/WorldDataException.h
@@ -135,7 +137,6 @@ add_openpass_target(
   LIBRARIES
     Qt5::Core
     Qt5::Xml
-    Boost::filesystem
     Common
     CoreCommon
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2021 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -16,6 +16,7 @@
 #include "agentParser.h"
 #include "eventNetwork.h"
 #include "runResult.h"
+#include "taskBuilder.h"
 
 namespace openpass::scheduling {
 
@@ -25,12 +26,14 @@ Scheduler::Scheduler(WorldInterface &world,
                      SpawnPointNetworkInterface &spawnPointNetwork,
                      EventDetectorNetworkInterface &eventDetectorNetwork,
                      ManipulatorNetworkInterface &manipulatorNetwork,
-                     ObservationNetworkInterface &observationNetwork) :
+                     ObservationNetworkInterface &observationNetwork,
+                     DataBufferInterface &dataInterface) :
     world(world),
     spawnPointNetwork(spawnPointNetwork),
     eventDetectorNetwork(eventDetectorNetwork),
     manipulatorNetwork(manipulatorNetwork),
-    observationNetwork(observationNetwork)
+    observationNetwork(observationNetwork),
+    dataInterface(dataInterface)
 {
 }
 
@@ -55,7 +58,8 @@ bool Scheduler::Run(
                             &spawnPointNetwork,
                             &observationNetwork,
                             &eventDetectorNetwork,
-                            &manipulatorNetwork);
+                            &manipulatorNetwork,
+                            &dataInterface);
 
     auto bootstrapTasks = taskBuilder.CreateBootstrapTasks();
     auto spawningTasks = taskBuilder.CreateSpawningTasks();

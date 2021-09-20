@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020 in-tech GmbH
+* Copyright (c) 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -36,11 +36,17 @@ public:
 
     const std::string& GetRoadId() const override;
 
+    double GetVelocity(VelocityScope velocityScope) const override;
+
+    double GetVelocity(VelocityScope velocityScope, const WorldObjectInterface* object) const override;
+
     double GetDistanceToEndOfLane (double range, int relativeLane = 0) const override;
 
     double GetDistanceToEndOfLane(double range, int relativeLane, const LaneTypes &acceptableLaneTypes) const override;
 
-    RelativeWorldView::Lanes GetRelativeLanes(double range, int relativeLane = 0) const override;
+    RelativeWorldView::Lanes GetRelativeLanes(double range, int relativeLane = 0, bool includeOncoming = true) const override;
+
+    std::optional<int> GetRelativeLaneId(const WorldObjectInterface* object, MeasurementPoint mp) const override;
 
     RelativeWorldView::Junctions GetRelativeJunctions(double range) const override;
 
@@ -51,6 +57,8 @@ public:
     std::vector<CommonTrafficSign::Entity> GetTrafficSignsInRange(double range, int relativeLane = 0) const override;
 
     std::vector<CommonTrafficSign::Entity> GetRoadMarkingsInRange(double range, int relativeLane = 0) const override;
+
+    std::vector<CommonTrafficLight::Entity> GetTrafficLightsInRange(double range, int relativeLane = 0) const override;
 
     std::vector<LaneMarking::Entity> GetLaneMarkingsInRange(double range, Side side, int relativeLane = 0) const override;
 
@@ -87,6 +95,8 @@ public:
 private:
 
     std::optional<RouteElement> GetPreviousRoad(size_t steps = 1) const;
+
+    std::optional<GlobalRoadPosition> GetReferencePointPosition(const WorldObjectInterface *object) const;
 
     std::optional<RoadGraphVertex> GetReferencePointVertex() const;
 

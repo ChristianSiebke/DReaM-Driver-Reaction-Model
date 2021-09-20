@@ -46,7 +46,7 @@ def terminate_program(message):
 
 def get_file_or_default(config_under_test, file):
     """If avilable, returns the file from the current config path, else from the default path"""
-    in_config_folder = os.path.join(config_under_test.base_path, file)
+    in_config_folder = os.path.join(config_under_test.base_path, config_under_test.name, file)
     if os.path.isfile(in_config_folder):
         return in_config_folder
 

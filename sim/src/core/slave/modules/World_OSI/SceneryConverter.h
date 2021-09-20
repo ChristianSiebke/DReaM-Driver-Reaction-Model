@@ -24,6 +24,7 @@
 #include "WorldData.h"
 #include "WorldDataQuery.h"
 #include "Localization.h"
+#include "TrafficLightNetwork.h"
 #include "common/worldDefinitions.h"
 #include "TrafficObjectAdapter.h"
 
@@ -81,8 +82,7 @@ public:
     //! Places all static traffic objects and all traffic signs in the world
     void ConvertObjects();
 
-    std::tuple<bool, double, double, double> CalculateAbsoluteCoordinates(RoadInterface* road, OWL::CSection* section, const RoadObjectInterface *object) const;
-
+    static Position RoadCoord2WorldCoord(const RoadInterface *road, double s, double t, double yaw);
 protected:
     //-----------------------------------------------------------------------------
     //! Provides callback to LOG() macro
@@ -310,11 +310,22 @@ private:
     //! \param lanes        lanes for which this road marking is valid
     void CreateRoadMarking(RoadObjectInterface* object, Position position, const OWL::Interfaces::Lanes& lanes);
 
-    void CreateTrafficLight(RoadSignalInterface* signal, RoadInterface* road);
+    //! Creates a traffic light in OWL from an OpenDrive RoadSignal
+    //!
+    //! \param signal       OpenDrive specification of the traffic light
+    //! \param position     position of the traffic light in the world
+    //! \param lanes        lanes for which this traffic light is valid
+    //! \param withYellow   wether this traffic light has a yellow bulb
+    void CreateTrafficLight(RoadSignalInterface* signal, Position position, const OWL::Interfaces::Lanes& lanes, bool withYellow);
+
 
     std::list<RoadLaneInterface*> GetRoadLanesAtDistance(RoadInterface *road, double s);
 
     void CreateObjects();
+
+    void CreateObject(const RoadObjectInterface* object, const Position &position);
+
+    void CreateContinuousObject(const RoadObjectInterface* object, const RoadInterface* road);
 
     bool IsMovingObject(RoadObjectInterface* object);
 
@@ -368,4 +379,11 @@ public:
 
 private:
     SceneryInterface& scenery;
+};
+
+namespace TrafficLightNetworkBuilder
+{
+    //! Converts the traffic controller definitions of OpenDrive into the internal TrafficLightNetwork
+    TrafficLightNetwork Build(const std::vector<openScenario::TrafficSignalController>& controllers,
+                              const OWL::Interfaces::WorldData& worldData);
 };

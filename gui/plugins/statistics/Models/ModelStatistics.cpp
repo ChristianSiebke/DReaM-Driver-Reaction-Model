@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2019 ITK Engineering GmbH
+* Copyright (c) 2019, 2020 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -210,8 +210,8 @@ void ModelStatistics::CalculateHistograms(QString folderName, const TableModel &
 bool ModelStatistics::ContainsHighDFormat(const QString &fileName)
 {
     TableModel tableModel(this, fileName);
-    if (tableModel.headerData(0, Qt::Horizontal, Qt::DisplayRole).toString() == "frame" &&
-        tableModel.headerData(1, Qt::Horizontal, Qt::DisplayRole).toString() == "id")
+    if (tableModel.headerData(0, Qt::Horizontal, Qt::DisplayRole).toString() == "Timestep" &&
+        tableModel.headerData(1, Qt::Horizontal, Qt::DisplayRole).toString() == "AgentId")
     {
         return true;
     }

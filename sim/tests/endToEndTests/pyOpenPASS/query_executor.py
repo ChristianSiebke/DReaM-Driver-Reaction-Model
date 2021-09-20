@@ -12,7 +12,7 @@ import pandas as pd
 import re
 import config
 import event_parser
-
+from io import StringIO
 
 def execute_query(data: pd.DataFrame, qpd, run_id):
     result = ''
@@ -21,9 +21,9 @@ def execute_query(data: pd.DataFrame, qpd, run_id):
     print(f'run_id: {run_id}')
 
     print(f"  filter '{qpd.filter}'")
-    data.query(qpd.filter, inplace=True)
+    data.query(qpd.filter, inplace=True, engine='python')
 
-    lhs = f'data.{qpd.column}.{qpd.group}()'
+    lhs = f'data[["{qpd.column}"]].{qpd.group}().to_list()[0]'
 
     if qpd.operator == '~=':
         lower_value = float(qpd.value) * (1 - 1e-6)
@@ -106,8 +106,22 @@ def query_output(data, events, run_id, query):
     return execute_query(data, query.pd, run_id)
 
 
-def prepare_output(csv_file):
-    data = pd.read_csv(csv_file, skipinitialspace=True)
+def prepare_output(csv_file, datatypes={}):
+
+    datatypes_prefixed = {}
+
+    if len(datatypes.values()) > 0:
+        all_headers = pd.read_csv(csv_file, nrows=0, skipinitialspace=True).columns
+
+        for column, typestring in datatypes.items():
+            headers = all_headers[all_headers.str.match(f'\\d*:{column}')].to_list()
+            for header in headers:
+                datatypes_prefixed[header] = typestring
+
+        if isinstance(csv_file, StringIO):
+            csv_file.seek(0)
+
+    data = pd.read_csv(csv_file, skipinitialspace=True, dtype=datatypes_prefixed, keep_default_na=True)
 
     # reformat columns => '00:TheCol' => 'TheCol:00'
     data.columns = [':'.join(c.split(':')[::-1]) for c in data.columns]
@@ -120,4 +134,12 @@ def prepare_output(csv_file):
             agent_columns.add(c[0])
 
     # convert to long table, based on the indices (= AgentIds) after the separator
-    return pd.wide_to_long(data, i='Timestep', j='AgentId', stubnames=list(agent_columns), sep=':').reset_index()
+    data = pd.wide_to_long(data, i='Timestep', j='AgentId', stubnames=list(agent_columns), sep=':').reset_index()
+    data.dropna(how='all', subset=agent_columns, inplace=True)
+
+    # apply datatypes to long table (as wide_to_long might drop some types)
+    for column, type in datatypes.items():
+        if column in data:
+            data[[column]] = data[[column]].astype(type)
+
+    return data

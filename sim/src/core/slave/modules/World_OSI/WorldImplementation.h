@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2016, 2017 ITK Engineering GmbH
 *               2020 HLRS, University of Stuttgart.
 *
@@ -18,10 +18,11 @@
 #include "SceneryConverter.h"
 #include "include/parameterInterface.h"
 #include "Localization.h"
-#include "include/dataStoreInterface.h"
+#include "include/dataBufferInterface.h"
 #include "EntityRepository.h"
 #include "WorldData.h"
 #include "WorldDataQuery.h"
+#include "include/sceneryDynamicsInterface.h"
 
 namespace osi3
 {
@@ -43,6 +44,7 @@ struct WorldParameterOSI
     int visibilityDistance {0};
     double friction {0.0};
     std::string weather {""};
+    TrafficRules trafficRules{};
 };
 
 #include "osi3/osi_groundtruth.pb.h"
@@ -91,7 +93,7 @@ class WorldImplementation : public WorldInterface
 public:
     const std::string MODULENAME = "WORLD";
 
-    WorldImplementation(const CallbackInterface* callbacks, StochasticsInterface* stochastics, DataStoreWriteInterface* dataStore);
+    WorldImplementation(const CallbackInterface* callbacks, StochasticsInterface* stochastics, DataBufferWriteInterface* dataBuffer);
     WorldImplementation(const WorldImplementation&) = delete;
     WorldImplementation(WorldImplementation&&) = delete;
     WorldImplementation& operator=(const WorldImplementation&) = delete;
@@ -112,6 +114,7 @@ public:
     const std::list<const AgentInterface*> GetRemovedAgentsInPreviousTimestep() override;
 
     const std::vector<const TrafficObjectInterface*>& GetTrafficObjects() const override;
+    const TrafficRules& GetTrafficRules() const override;
 
     // framework internal methods to access members without restrictions
     void ExtractParameter(ParameterInterface* parameters) override;
@@ -130,9 +133,9 @@ public:
     void RemoveAgent(const AgentInterface* agent);
 
     void PublishGlobalData(int timestamp) override;
-    void SyncGlobalData() override;
+    void SyncGlobalData(int timestamp) override;
 
-    bool CreateScenery(SceneryInterface* scenery) override;
+    bool CreateScenery(SceneryInterface* scenery, const SceneryDynamicsInterface& sceneryDynamics) override;
 
     AgentInterface* CreateAgentAdapterForAgent() override
     {
@@ -158,7 +161,7 @@ public:
     Position LaneCoord2WorldCoord(double distanceOnLane, double offset, std::string roadId,
                                           int laneId) const override;
 
-    std::map<const std::string, GlobalRoadPosition> WorldCoord2LaneCoord(double x, double y, double heading) const override;
+    std::map<std::string, GlobalRoadPosition> WorldCoord2LaneCoord(double x, double y, double heading) const override;
 
     bool IsSValidOnLane(std::string roadId, int laneId, double distance) override;
 
@@ -202,12 +205,17 @@ public:
     RouteQueryResult<std::vector<CommonTrafficSign::Entity>> GetRoadMarkingsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId,
                                                                                     double startDistance, double searchRange) const override;
 
+    RouteQueryResult<std::vector<CommonTrafficLight::Entity>> GetTrafficLightsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId,
+                                                                                     double startDistance, double searchRange) const override;
+
     RouteQueryResult<std::vector<LaneMarking::Entity>> GetLaneMarkings(const RoadGraph& roadGraph, RoadGraphVertex startNode,
                                                                        int laneId, double startDistance, double range, Side side) const override;
 
     RouteQueryResult<RelativeWorldView::Junctions> GetRelativeJunctions (const RoadGraph& roadGraph, RoadGraphVertex startNode, double startDistance, double range) const override;
 
-    RouteQueryResult<RelativeWorldView::Lanes> GetRelativeLanes(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, double range) const override;
+    RouteQueryResult<RelativeWorldView::Lanes> GetRelativeLanes(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, double range, bool includeOncoming = true) const override;
+
+    RouteQueryResult<std::optional<int>> GetRelativeLaneId(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, std::map<std::string, GlobalRoadPosition> targetPosition) const override;
 
     std::vector<JunctionConnection> GetConnectionsOnJunction(std::string junctionId, std::string incomingRoadId) const override;
 
@@ -222,6 +230,8 @@ public:
     std::pair<RoadGraph, RoadGraphVertex> GetRoadGraph (const RouteElement& start, int maxDepth) const override;
 
     std::map<RoadGraphEdge, double> GetEdgeWeights (const RoadGraph& roadGraph) const override;
+
+    std::unique_ptr<RoadStreamInterface> GetRoadStream(const std::vector<RouteElement>& route) const override;
 
     double GetFriction() const override;
 
@@ -244,10 +254,6 @@ public:
     virtual Weekday GetWeekday() const override
     {
         throw std::runtime_error("WorldImplementation::GetWeekday not implemented");
-    }
-    virtual void SetParameter([[maybe_unused]]WorldParameter *worldParameter) override
-    {
-        throw std::runtime_error("WorldImplementation::SetParameter not implemented");
     }
     virtual bool CreateGlobalDrivingView() override
     {
@@ -314,6 +320,8 @@ private:
 
     AgentNetwork agentNetwork;
 
+    TrafficLightNetwork trafficLightNetwork;
+
     const CallbackInterface* callbacks;
 
     mutable std::vector<const WorldObjectInterface*> worldObjects;
@@ -324,7 +332,7 @@ private:
     std::unordered_map<const OWL::Interfaces::MovingObject*, AgentInterface*> movingObjectMapping{{nullptr, nullptr}};
     std::unordered_map<const OWL::Interfaces::MovingObject*, TrafficObjectInterface*> stationaryObjectMapping{{nullptr, nullptr}};
 
-    DataStoreWriteInterface* dataStore;
+    DataBufferWriteInterface* dataBuffer;
     openpass::entity::Repository repository;
     std::unique_ptr<SceneryConverter> sceneryConverter;
 };

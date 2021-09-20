@@ -47,6 +47,10 @@ public:
     /// \return yaw
     virtual double GetYaw() const = 0;
 
+    /// \brief Retrieves roll angle
+    /// \return roll
+    virtual double GetRoll() const = 0;
+
     /// \brief  Get unique id of an object
     /// \return id
     virtual int GetId() const = 0;

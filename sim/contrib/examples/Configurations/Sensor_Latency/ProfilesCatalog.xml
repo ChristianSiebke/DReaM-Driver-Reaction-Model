@@ -1,4 +1,4 @@
-<Profiles SchemaVersion="0.4.3">
+<Profiles SchemaVersion="0.4.6">
   <AgentProfiles>
     <AgentProfile Name="EgoAgent" Type="Dynamic">
       <DriverProfiles>
@@ -55,6 +55,29 @@
       <NormalDistribution Key="Latency" Max="1.0" Mean="1.0" Min="1.0" SD="0.0"/>
       <Double Key="OpeningAngleH" Value="6.2"/>
       <Double Key="RequiredPercentageOfVisibleArea" Value="0.001"/>
+    </Profile>
+  </ProfileGroup>
+  <ProfileGroup Type="TrafficRules">
+    <Profile Name="Germany">
+      <Double Key="OpenSpeedLimit" Value="infinity"/>
+      <Bool Key="KeepToOuterLanes" Value="true"/>
+      <Bool Key="DontOvertakeOnOuterLanes" Value="true"/>
+      <Bool Key="FormRescueLane" Value="true"/>
+      <Bool Key="ZipperMerge" Value="true"/>
+    </Profile>
+    <Profile Name="USA">
+      <Double Key="OpenSpeedLimit" Value="31.2928"/>
+      <Bool Key="KeepToOuterLanes" Value="false"/>
+      <Bool Key="DontOvertakeOnOuterLanes" Value="false"/>
+      <Bool Key="FormRescueLane" Value="true"/>
+      <Bool Key="ZipperMerge" Value="false"/>
+    </Profile>
+    <Profile Name="China">
+      <Double Key="OpenSpeedLimit" Value="33.3333"/>
+      <Bool Key="KeepToOuterLanes" Value="false"/>
+      <Bool Key="DontOvertakeOnOuterLanes" Value="true"/>
+      <Bool Key="FormRescueLane" Value="false"/>
+      <Bool Key="ZipperMerge" Value="true"/>
     </Profile>
   </ProfileGroup>
 </Profiles>

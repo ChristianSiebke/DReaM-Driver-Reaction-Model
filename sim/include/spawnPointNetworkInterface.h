@@ -48,7 +48,7 @@ public:
                              ScenarioInterface* scenario,
                              const std::optional<ProfileGroup>& spawnPointProfiles) = 0;
 
-    virtual bool TriggerPreRunSpawnPoints() = 0;
+    virtual bool TriggerPreRunSpawnZones() = 0;
 
     virtual bool TriggerRuntimeSpawnPoints(const int timestamp) = 0;
 

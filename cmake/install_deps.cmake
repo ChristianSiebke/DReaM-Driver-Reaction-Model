@@ -13,7 +13,7 @@ get_property(LIB_TARGET_LIST GLOBAL PROPERTY lib_target_list)
 
 message(STATUS "Collecting runtime library paths...")
 
-if(WIN32)
+if(WIN32 AND NOT MSVC)
   find_program(CYGPATH NAMES cygpath REQUIRED)
 endif()
 
@@ -27,7 +27,7 @@ endif()
 # build a list of library directory candidates
 foreach(SEARCH_DIR IN LISTS SEARCH_DIRS)
   message(DEBUG "processing ${SEARCH_DIR}")
-  if(WIN32)
+  if(WIN32 AND NOT MSVC)
     execute_process (
         WORKING_DIRECTORY ${SEARCH_DIR}
         COMMAND $ENV{SHELL} -c "for f in \$(find -iname \'*.dll\'); do cygpath -a -m \$(dirname \$f); done | sort -u"

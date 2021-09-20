@@ -1,6 +1,6 @@
 # /*********************************************************************
 # * Copyright (c) 2019 Volkswagen Group of America.
-# *
+# * Copyright (c) 2021 ITK Engineering GmbH.
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
 # * which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -19,7 +19,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_CXX_FLAGS "${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
 # add definitions: this needs to be in a certain gloabl file TODO
-add_definitions(-DAPPLICATION_NAME="openPASS" -DAPPLICATION_VERSION="0.6"  -DSUBDIR_LIB_GUI="/gui")
+add_definitions(-DAPPLICATION_NAME="openPASS" -DAPPLICATION_VERSION="0.7")
 add_definitions(${Qt5Widgets_DEFINITIONS})
 
 # include QtWidgets package
@@ -48,6 +48,5 @@ target_link_libraries(openPASS PRIVATE
                       ${PROJECT_NAME}_Models
                       ${PROJECT_NAME}_Interfaces)
 
-# target directories. Needs to be defined in some global file TODO
-set_target_properties(openPASS PROPERTIES
-                      RUNTIME_OUTPUT_DIRECTORY "C:/OpenPASS/bin")
+install(TARGETS openPASS
+        RUNTIME DESTINATION ${INSTALL_BIN_DIR})

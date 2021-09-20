@@ -12,6 +12,7 @@ from .common import Report
 from distutils import dir_util
 from datetime import datetime
 from enum import Enum
+from math import isnan
 
 class State(Enum):
      EXECUTED = "▶"
@@ -80,7 +81,7 @@ class HtmlReport(Report):
                             config_dir.name, scope.name, 
                             self.status(State.EXECUTED),
                             self.status(State.PASSED) if test_result.status else self.status(State.FAILED),
-                            f'{test_result.duration:.2f}&#8201;s', 
+                            'unknown' if isnan(test_result.duration) else f'{test_result.duration:.2f}&#8201;s', 
                             self.success_rates(test_rate))))
                 except KeyError:
                     pass

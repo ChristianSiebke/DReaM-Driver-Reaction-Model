@@ -24,7 +24,7 @@
 #include <unordered_map>
 #include <vector>
 #include <map>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 extern "C" {
 #include "fmilib.h"
@@ -32,8 +32,16 @@ extern "C" {
 }
 
 #include "include/fmuHandlerInterface.h"
+#include "include/fmuWrapperInterface.h"
 
-class AlgorithmFmuWrapperImplementation : public UnrestrictedModelInterface
+
+std::string log_prefix(const std::string &agentIdString, const std::string &componentName);
+
+static constexpr bool DEFAULT_LOGGING {true};
+static constexpr bool DEFAULT_CSV_OUTPUT {true};
+static constexpr bool DEFAULT_UNZIP_ONCE_PER_INSTANCE {true};
+
+class AlgorithmFmuWrapperImplementation : public UnrestrictedModelInterface, public FmuWrapperInterface
 {
 public:
     const std::string COMPONENTNAME = "AlgorithmFmuWrapper";
@@ -61,8 +69,15 @@ public:
     virtual void UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time);
     virtual void UpdateOutput(int localLinkId, std::shared_ptr<SignalInterface const> &data, int time);
     virtual void Trigger(int time);
+    void Init() override;
+
+    [[nodiscard]] const FmuHandlerInterface *GetFmuHandler() const override;
+    [[nodiscard]] const FmuVariables &GetFmuVariables() const override;
+    [[nodiscard]] const fmu_check_data_t &GetCData() const override;
+    [[nodiscard]] const FmuHandlerInterface::FmuValue& GetValue(fmi2_value_reference_t valueReference, VariableType variableType) const override;
 
 private:
+
     void ReadOutputValues();
 
     /*!
@@ -155,7 +170,7 @@ private:
      *
      * \throws      std::runtime_error
      */
-    void MkDirOrThrowError(const boost::filesystem::path& path);
+    void MkDirOrThrowError(const std::filesystem::path& path);
 
     struct fmu_check_data_t cdata;   //!< check data to be passed around between the FMIL functions
 
@@ -183,4 +198,5 @@ private:
     bool isInitialized{false};                                                              //!< Specifies, if the FMU has already be initialized
     FmuHandlerInterface* fmuHandler = nullptr;                                              //!< Points to the instance of the FMU type-specific implementation
     std::string fmuType;        //!< Type of the FMU
+    std::string componentName;
 };

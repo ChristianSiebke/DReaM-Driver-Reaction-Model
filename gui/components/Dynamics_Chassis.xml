@@ -1,0 +1,42 @@
+<component>
+  <type>Action</type>
+  <title>Dynamics_Chassis</title>
+  <schedule>
+    <offset>0</offset>
+    <cycle>10</cycle>
+    <response>0</response>
+  </schedule>
+  <parameters>
+    <parameter>
+      <id>0</id>
+      <type>double</type>
+      <title>Spring coefficient</title>
+      <unit></unit>
+      <value>1200000</value>
+    </parameter>
+    <parameter>
+      <id>1</id>
+      <type>double</type>
+      <title>Damper coefficient</title>
+      <unit></unit>
+      <value>12000</value>
+    </parameter>
+  </parameters>
+  <inputs>
+    <input>
+      <id>0</id>
+      <type>VectorDouble</type>
+      <title>InertiaForce</title>
+      <unit>N</unit>
+      <cardinality>1</cardinality>
+    </input>
+  </inputs>
+  <outputs>
+    <output>
+      <id>0</id>
+      <type>VectorDouble</type>
+      <title>VerticalForce</title>
+      <unit>N</unit>
+    </output>
+  </outputs>
+</component>

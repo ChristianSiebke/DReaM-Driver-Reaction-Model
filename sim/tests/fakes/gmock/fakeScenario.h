@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2019, 2020 in-tech
+* Copyright (c) 2019, 2020, 2021 in-tech
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -34,6 +34,10 @@ public:
                  const std::string & ());
     MOCK_METHOD1(SetSceneryPath,
                  void(const std::string&));
+    MOCK_METHOD0(GetSceneryDynamics,
+                 const SceneryDynamicsInterface& ());
+    MOCK_METHOD1(AddTrafficSignalController,
+                 void (const openScenario::TrafficSignalController& controller));
     MOCK_METHOD1(AddScenarioEntity,
                  void(const ScenarioEntity&));
     MOCK_METHOD1(AddScenarioGroupsByEntityNames,
@@ -54,4 +58,6 @@ public:
                  void(const double));
     MOCK_CONST_METHOD0(GetEntities,
                        const std::vector<ScenarioEntity>&());
+    MOCK_METHOD1(SetEnvironment,
+                 void (const openScenario::EnvironmentAction& ));
 };

@@ -49,7 +49,7 @@ const std::string validVehicleString{
             "<Center x=\"1.6\" y=\"1.7\" z=\"1.8\"/>"
             "<Dimensions width=\"1.9\" length=\"2.0\" height=\"2.1\"/>"
         "</BoundingBox>"
-        "<Performance maxSpeed=\"22.0\" maxDeceleration=\"23.0\"/>"
+        "<Performance maxSpeed=\"22.0\" maxAcceleration=\"10.0\" maxDeceleration=\"23.0\"/>"
         "<Axles>"
             "<FrontAxle maxSteering=\"1.1\" wheelDiameter=\"26.0\" trackWidth=\"27.0\" positionX=\"28.0\" positionZ=\"29.0\"/>"
             "<RearAxle maxSteering=\"0.0\" wheelDiameter=\"31.0\" trackWidth=\"32.0\" positionX=\"0.0\" positionZ=\"34.0\"/>"
@@ -93,7 +93,7 @@ const std::string parametrizedVehicleString{
             "<Center x=\"$CustomX\" y=\"1.7\" z=\"1.8\"/>"
             "<Dimensions width=\"1.9\" length=\"$CustomLength\" height=\"2.1\"/>"
         "</BoundingBox>"
-        "<Performance maxSpeed=\"$CustomSpeed\" maxDeceleration=\"23.0\"/>"
+        "<Performance maxSpeed=\"$CustomSpeed\" maxAcceleration=\"10.0\" maxDeceleration=\"23.0\"/>"
         "<Axles>"
             "<FrontAxle maxSteering=\"1.1\" wheelDiameter=\"26.0\" trackWidth=\"$CustomFrontTrackWidth\" positionX=\"28.0\" positionZ=\"29.0\"/>"
             "<RearAxle maxSteering=\"0.0\" wheelDiameter=\"31.0\" trackWidth=\"32.0\" positionX=\"0.0\" positionZ=\"34.0\"/>"
@@ -134,15 +134,24 @@ TEST(VehicleModelsImporter, GivenValidVehicle_ImportsCorrectGeometry)
     ASSERT_NO_THROW(VehicleModelsImporter::ImportVehicleModel(fakeVehicleRoot, vehicleModelMap));
     ASSERT_NO_THROW(vehicleModelParameters = vehicleModelMap.at("validCar").Get(EMPTY_PARAMETERS));
 
-    EXPECT_THAT(vehicleModelParameters.length, DoubleEq(2.0));
-    EXPECT_THAT(vehicleModelParameters.width, DoubleEq(1.9));
-    EXPECT_THAT(vehicleModelParameters.height, DoubleEq(2.1));
-    EXPECT_THAT(vehicleModelParameters.trackwidth, DoubleEq(32.0));
-    EXPECT_THAT(vehicleModelParameters.wheelbase, DoubleEq(28.0));
-    EXPECT_THAT(vehicleModelParameters.heightCOG, DoubleEq(0.0));
-    EXPECT_THAT(vehicleModelParameters.distanceReferencePointToFrontAxle, DoubleEq(28.0));
-    EXPECT_THAT(vehicleModelParameters.distanceReferencePointToLeadingEdge, DoubleEq(2.6));     // BB center x + length / 2
-    EXPECT_THAT(vehicleModelParameters.staticWheelRadius, DoubleEq(15.5));
+    EXPECT_THAT(vehicleModelParameters.boundingBoxDimensions.length, DoubleEq(2.0));
+    EXPECT_THAT(vehicleModelParameters.boundingBoxDimensions.width, DoubleEq(1.9));
+    EXPECT_THAT(vehicleModelParameters.boundingBoxDimensions.height, DoubleEq(2.1));
+    EXPECT_THAT(vehicleModelParameters.boundingBoxCenter.x, DoubleEq(1.6));
+    EXPECT_THAT(vehicleModelParameters.boundingBoxCenter.y, DoubleEq(1.7));
+    EXPECT_THAT(vehicleModelParameters.boundingBoxCenter.z, DoubleEq(1.8));
+    EXPECT_THAT(vehicleModelParameters.performance.maxSpeed, DoubleEq(22.0));
+    EXPECT_THAT(vehicleModelParameters.performance.maxDeceleration, DoubleEq(23.0));
+    EXPECT_THAT(vehicleModelParameters.frontAxle.maxSteering, DoubleEq(1.1));
+    EXPECT_THAT(vehicleModelParameters.frontAxle.wheelDiameter, DoubleEq(26.0));
+    EXPECT_THAT(vehicleModelParameters.frontAxle.trackWidth, DoubleEq(27.));
+    EXPECT_THAT(vehicleModelParameters.frontAxle.positionX, DoubleEq(28.));
+    EXPECT_THAT(vehicleModelParameters.frontAxle.positionZ, DoubleEq(29.));
+    EXPECT_THAT(vehicleModelParameters.rearAxle.maxSteering, DoubleEq(0.0));
+    EXPECT_THAT(vehicleModelParameters.rearAxle.wheelDiameter, DoubleEq(31.0));
+    EXPECT_THAT(vehicleModelParameters.rearAxle.trackWidth, DoubleEq(32.));
+    EXPECT_THAT(vehicleModelParameters.rearAxle.positionX, DoubleEq(0.));
+    EXPECT_THAT(vehicleModelParameters.rearAxle.positionZ, DoubleEq(34.));
 }
 
 TEST(VehicleModelsImporter, GivenValidVehicle_ImportsCorrectEngineParameters)
@@ -155,11 +164,11 @@ TEST(VehicleModelsImporter, GivenValidVehicle_ImportsCorrectEngineParameters)
     ASSERT_NO_THROW(VehicleModelsImporter::ImportVehicleModel(fakeVehicleRoot, vehicleModelMap));
     ASSERT_NO_THROW(vehicleModelParameters = vehicleModelMap.at("validCar").Get(EMPTY_PARAMETERS));
 
-    EXPECT_THAT(vehicleModelParameters.decelerationFromPowertrainDrag, DoubleEq(3.0));
-    EXPECT_THAT(vehicleModelParameters.minimumEngineTorque, DoubleEq(7.0));
-    EXPECT_THAT(vehicleModelParameters.maximumEngineTorque, DoubleEq(8.0));
-    EXPECT_THAT(vehicleModelParameters.minimumEngineSpeed, DoubleEq(9.0));
-    EXPECT_THAT(vehicleModelParameters.maximumEngineSpeed, DoubleEq(10.0));
+    EXPECT_THAT(vehicleModelParameters.properties.at("DecelerationFromPowertrainDrag"), DoubleEq(3.0));
+    EXPECT_THAT(vehicleModelParameters.properties.at("MinimumEngineTorque"), DoubleEq(7.0));
+    EXPECT_THAT(vehicleModelParameters.properties.at("MaximumEngineTorque"), DoubleEq(8.0));
+    EXPECT_THAT(vehicleModelParameters.properties.at("MinimumEngineSpeed"), DoubleEq(9.0));
+    EXPECT_THAT(vehicleModelParameters.properties.at("MaximumEngineSpeed"), DoubleEq(10.0));
 }
 
 TEST(VehicleModelsImporter, GivenValidGeometry_ImportsCorrectDynamics)
@@ -172,18 +181,15 @@ TEST(VehicleModelsImporter, GivenValidGeometry_ImportsCorrectDynamics)
     ASSERT_NO_THROW(VehicleModelsImporter::ImportVehicleModel(fakeVehicleRoot, vehicleModelMap));
     ASSERT_NO_THROW(vehicleModelParameters = vehicleModelMap.at("validCar").Get(EMPTY_PARAMETERS));
 
-    EXPECT_THAT(vehicleModelParameters.steeringRatio, DoubleEq(15.0));
-    EXPECT_THAT(vehicleModelParameters.axleRatio, DoubleEq(2.0));
-    EXPECT_THAT(vehicleModelParameters.airDragCoefficient, DoubleEq(1.0));
-    EXPECT_THAT(vehicleModelParameters.frictionCoeff, DoubleEq(4.0));
-    EXPECT_THAT(vehicleModelParameters.frontSurface, DoubleEq(5.0));
-    EXPECT_THAT(vehicleModelParameters.weight, DoubleEq(24.0));
-    EXPECT_THAT(vehicleModelParameters.maxVelocity, DoubleEq(22.0));
-    EXPECT_THAT(vehicleModelParameters.maximumSteeringWheelAngleAmplitude, DoubleEq(1.1 * 15.0));   // maxSteering front wheel * SteeringRatio
-    EXPECT_THAT(vehicleModelParameters.maxCurvature, DoubleEq(std::sin(1.1) / 28.0));   // sin(maxSteering fron wheel) / wheelbase
-    EXPECT_THAT(vehicleModelParameters.momentInertiaRoll, DoubleEq(11.0));
-    EXPECT_THAT(vehicleModelParameters.momentInertiaPitch, DoubleEq(12.0));
-    EXPECT_THAT(vehicleModelParameters.momentInertiaYaw, DoubleEq(13.0));
+    EXPECT_THAT(vehicleModelParameters.properties.at("SteeringRatio"), DoubleEq(15.0));
+    EXPECT_THAT(vehicleModelParameters.properties.at("AxleRatio"), DoubleEq(2.0));
+    EXPECT_THAT(vehicleModelParameters.properties.at("AirDragCoefficient"), DoubleEq(1.0));
+    EXPECT_THAT(vehicleModelParameters.properties.at("FrictionCoefficient"), DoubleEq(4.0));
+    EXPECT_THAT(vehicleModelParameters.properties.at("FrontSurface"), DoubleEq(5.0));
+    EXPECT_THAT(vehicleModelParameters.properties.at("Mass"), DoubleEq(24.0));
+    EXPECT_THAT(vehicleModelParameters.properties.at("MomentInertiaRoll"), DoubleEq(11.0));
+    EXPECT_THAT(vehicleModelParameters.properties.at("MomentInertiaPitch"), DoubleEq(12.0));
+    EXPECT_THAT(vehicleModelParameters.properties.at("MomentInertiaYaw"), DoubleEq(13.0));
 }
 
 TEST(VehicleModelsImporter, GivenValidVehicle_ImportsCorrectGearing)
@@ -196,8 +202,10 @@ TEST(VehicleModelsImporter, GivenValidVehicle_ImportsCorrectGearing)
     ASSERT_NO_THROW(VehicleModelsImporter::ImportVehicleModel(fakeVehicleRoot, vehicleModelMap));
     ASSERT_NO_THROW(vehicleModelParameters = vehicleModelMap.at("validCar").Get(EMPTY_PARAMETERS));
 
-    EXPECT_THAT(vehicleModelParameters.numberOfGears, Eq(3));
-    EXPECT_THAT(vehicleModelParameters.gearRatios, ElementsAre(0.0, 6.0, 6.1, 6.2));
+    EXPECT_THAT(vehicleModelParameters.properties.at("NumberOfGears"), DoubleEq(3));
+    EXPECT_THAT(vehicleModelParameters.properties.at("GearRatio1"), DoubleEq(6));
+    EXPECT_THAT(vehicleModelParameters.properties.at("GearRatio2"), DoubleEq(6.1));
+    EXPECT_THAT(vehicleModelParameters.properties.at("GearRatio3"), DoubleEq(6.2));
 }
 
 TEST(VehicleModelsImporter, GivenParametrizedVehicle_ImportsCorrectParameters)
@@ -210,10 +218,10 @@ TEST(VehicleModelsImporter, GivenParametrizedVehicle_ImportsCorrectParameters)
     ASSERT_NO_THROW(VehicleModelsImporter::ImportVehicleModel(fakeVehicleRoot, vehicleModelMap));
     ASSERT_NO_THROW(vehicleModelParameters = vehicleModelMap.at("validCar"));
 
-    EXPECT_THAT(vehicleModelParameters.length.name, Eq("CustomLength"));
-    EXPECT_THAT(vehicleModelParameters.length.defaultValue, DoubleEq(3.0));
-    EXPECT_THAT(vehicleModelParameters.maxVelocity.name, Eq("CustomSpeed"));
-    EXPECT_THAT(vehicleModelParameters.maxVelocity.defaultValue, DoubleEq(30.0));
+    EXPECT_THAT(vehicleModelParameters.boundingBoxDimensions.length.name, Eq("CustomLength"));
+    EXPECT_THAT(vehicleModelParameters.boundingBoxDimensions.length.defaultValue, DoubleEq(3.0));
+    EXPECT_THAT(vehicleModelParameters.performance.maxSpeed.name, Eq("CustomSpeed"));
+    EXPECT_THAT(vehicleModelParameters.performance.maxSpeed.defaultValue, DoubleEq(30.0));
     EXPECT_THAT(vehicleModelParameters.frontAxle.trackWidth.name, Eq("CustomFrontTrackWidth"));
     EXPECT_THAT(vehicleModelParameters.frontAxle.trackWidth.defaultValue, DoubleEq(1.9));
 }
@@ -253,8 +261,7 @@ TEST(VehicleModelsImporter, GivenValidPedestrian_ImportsCorrectValues)
     // workaround for ground truth not being able to handle pedestrians
     //EXPECT_THAT(vehicleModelParameters.vehicleType, Eq(AgentVehicleType::Pedestrian));
     EXPECT_THAT(vehicleModelParameters.vehicleType, Eq(AgentVehicleType::Car));
-    EXPECT_THAT(vehicleModelParameters.width, DoubleEq(4.0));
-    EXPECT_THAT(vehicleModelParameters.length, DoubleEq(5.0));
-    EXPECT_THAT(vehicleModelParameters.height, DoubleEq(6.0));
-    EXPECT_THAT(vehicleModelParameters.weight, DoubleEq(7.0));
+    EXPECT_THAT(vehicleModelParameters.boundingBoxDimensions.width, DoubleEq(4.0));
+    EXPECT_THAT(vehicleModelParameters.boundingBoxDimensions.length, DoubleEq(5.0));
+    EXPECT_THAT(vehicleModelParameters.boundingBoxDimensions.height, DoubleEq(6.0));
 }

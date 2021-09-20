@@ -182,7 +182,7 @@ void AlgorithmAgentFollowingDriverModelImplementation::Trigger(int time)
     if (frontAgent.exist)
     {
         auto vDelta = std::abs(ownVehicleInformation.absoluteVelocity - frontAgent.absoluteVelocity);
-        auto effectiveMinimumGap = minDistance + ownVehicleInformation.absoluteVelocity*tGapWish + (ownVehicleInformation.absoluteVelocity*vDelta)/2 * std::sqrt(maxAcceleration * decelerationWish);
+        auto effectiveMinimumGap = minDistance + ownVehicleInformation.absoluteVelocity * tGapWish + ownVehicleInformation.absoluteVelocity * vDelta / (2 * std::sqrt(maxAcceleration * decelerationWish));
         decelerationCoeff = std::pow(effectiveMinimumGap/frontAgent.relativeLongitudinalDistance, 2);
     }
 

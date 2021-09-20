@@ -33,18 +33,6 @@
 		</lanes>
     <objects>
       <object hdg="0" height="1.0" id="" length="0.80" name="Absperrung" orientation="-" pitch="0" roll="0" s="300.0" t="-2.0" type="obstacle" validLength="0" width="3.0" zOffset="0"/>
-      <object hdg="0" height="1.2" id="" length="0.12" name="RoadSideMarkerPost" orientation="+" pitch="0" roll="0" s="0" t="1" type="roadMark" validLength="0.12" width="0.12" zOffset="0">
-        <repeat distance="50" length="5139.7188686309819" s="0"/>
-      </object>
-      <object hdg="0" height="1.2" id="" length="0.12" name="RoadSideMarkerPost" orientation="-" pitch="0" roll="0" s="0" t="-4.5" type="roadMark" validLength="0.12" width="0.12" zOffset="0">
-        <repeat distance="50" length="5139.7188686309819" s="0"/>
-      </object>
-      <object hdg="0" height="0.9" id="" length="3" name="GuardRail" orientation="+" pitch="0" roll="0" s="0" t="0.5" type="railing" validLength="3" width="0.25" zOffset="0">
-        <repeat distance="0" length="5139.7188686309819" s="0"/>
-      </object>
-      <object hdg="0" height="0.9" id="" length="3" name="GuardRail" orientation="-" pitch="0" roll="0" s="0" t="-4.3" type="railing" validLength="3" width="0.25" zOffset="0">
-        <repeat distance="0" length="5139.7188686309819" s="0"/>
-      </object>
     </objects>
     <signals/>
   </road>

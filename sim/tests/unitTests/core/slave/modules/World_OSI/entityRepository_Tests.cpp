@@ -9,7 +9,7 @@
 *******************************************************************************/
 
 #include "EntityRepository.h"
-#include "fakeDataStore.h"
+#include "fakeDataBuffer.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -28,8 +28,8 @@ using namespace openpass::type;
  */
 struct REPOSITORY_TEST_WRAPPER
 {
-    NiceMock<FakeDataStore> datastore;
-    Repository repository{Repository(&datastore)};
+    NiceMock<FakeDataBuffer> databuffer;
+    Repository repository{Repository(&databuffer)};
 
     Repository *operator->()
     {
@@ -52,32 +52,32 @@ TEST(EntitityRepository, RegisterNextMovingObject_Returns1)
     ASSERT_THAT(nextEntityId, 1);
 }
 
-TEST(EntitityRepository, RegisterFirstStationaryObject_Returns100000)
+TEST(EntitityRepository, RegisterFirstStationaryObject_Returns1000000)
 {
     auto repo = REPOSITORY_TEST_WRAPPER();
     auto entityId = repo->Register(EntityType::StationaryObject, EntityInfo());
-    ASSERT_THAT(entityId, 100000);
+    ASSERT_THAT(entityId, 1000000);
 }
 
-TEST(EntitityRepository, RegisterNextStationaryObject_Returns100001)
+TEST(EntitityRepository, RegisterNextStationaryObject_Returns1000001)
 {
     auto repo = REPOSITORY_TEST_WRAPPER();
     auto entityId = repo->Register(EntityType::StationaryObject, EntityInfo());
     auto nextEntityId = repo->Register(EntityType::StationaryObject, EntityInfo());
-    ASSERT_THAT(nextEntityId, 100001);
+    ASSERT_THAT(nextEntityId, 1000001);
 }
 
-TEST(EntitityRepository, RegisterAnyObject_Returns200000)
+TEST(EntitityRepository, RegisterAnyObject_Returns2000000)
 {
     auto repo = REPOSITORY_TEST_WRAPPER();
     auto entityId = repo->Register(EntityInfo());
-    ASSERT_THAT(entityId, 200000);
+    ASSERT_THAT(entityId, 2000000);
 }
 
-TEST(EntitityRepository, RegisteredObject_IsAddedToDatastore)
+TEST(EntitityRepository, RegisteredObject_IsAddedToDatabuffer)
 {
     auto repo = REPOSITORY_TEST_WRAPPER();
-    EXPECT_CALL(repo.datastore, PutStatic(_, _, _));
+    EXPECT_CALL(repo.databuffer, PutStatic(_, _, _));
     auto entityId = repo->Register(EntityInfo());
 }
 

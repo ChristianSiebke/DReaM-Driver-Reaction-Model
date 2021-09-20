@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2019-2020 in-tech GmbH
+* Copyright (c) 2019, 2020, 2021 in-tech GmbH
 *               2017 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -22,9 +22,23 @@
 
 #include "include/eventNetworkInterface.h"
 #include "include/observationInterface.h"
+#include "include/dataBufferInterface.h"
 #include "observationCyclics.h"
 #include "observationLogConstants.h"
 #include "runStatistic.h"
+
+struct Event
+{
+    Event (const int& time, const openpass::databuffer::AcyclicRow& dataRow) :
+        time(time),
+        dataRow(dataRow)
+    {}
+
+    int time;
+    openpass::databuffer::AcyclicRow dataRow;
+};
+
+using Events = std::vector<Event>;
 
 //-----------------------------------------------------------------------------
 /** \brief Provides the basic logging and observer functionality.
@@ -41,7 +55,7 @@ class ObservationFileHandler
 public:
     const std::string COMPONENTNAME = "ObservationFileHandler";
 
-    ObservationFileHandler(const DataStoreReadInterface& dataStore);
+    ObservationFileHandler(const DataBufferReadInterface& dataBuffer);
     ObservationFileHandler(const ObservationFileHandler &) = delete;
     ObservationFileHandler(ObservationFileHandler &&) = delete;
     ObservationFileHandler &operator=(const ObservationFileHandler &) = delete;
@@ -81,18 +95,19 @@ public:
      * \param runResult
      * \param runStatistik
      * \param cyclics
-     * \param dataStore
+     * \param dataBuffer
+     * \param events
      */
-    void WriteRun(const RunResultInterface& runResult, RunStatistic runStatistik, ObservationCyclics& cyclics);
+    void WriteRun(const RunResultInterface& runResult, RunStatistic runStatistik, ObservationCyclics& cyclics, const Events& events);
 
     /*!
      * \brief Closes the xml tags flushes the output file, closes it and renames it to simulationOutput.xlm
      */
     void WriteEndOfFile();
 
-private:
+protected:
     std::unique_ptr<QXmlStreamWriter> xmlFileStream;
-    const DataStoreReadInterface& dataStore;
+    const DataBufferReadInterface& dataBuffer;
 
     int runNumber; //!< run number
     std::string sceneryFile;
@@ -108,7 +123,6 @@ private:
     QString tmpPath;
     QString finalPath;
     std::unique_ptr<QTemporaryFile> xmlFile;
-    std::unique_ptr<QFile> csvFile;
 
     //add infos to the file stream
     /*!
@@ -121,67 +135,61 @@ private:
     /*!
     * \brief Writes the sensor information into the simulation output.
     *
-    * @param[in]    fStream             Shared pointer of the stream writer.
-    * @param[in]    sensorParameter    Parameters of the sensor.
+    * @param[in]    agentId     id of the agent
+    * @param[in]    sensorId    id of the sensor
     */
     void AddSensor(const std::string& agentId, const std::string& sensorId);
 
     /*!
     * \brief Writes the sensor information into the simulation output.
     *
-    * @param[in]    fStream             Shared pointer of the stream writer.
-    * @param[in]    vehicleModelParameters      Parameters of the vehicle.
+    * @param[in]    agentId     id of the agent
     */
     void AddVehicleAttributes(const std::string& agentId);
 
     /*!
     * \brief Writes all sensor information of an agent into the simulation output.
     *
-    * @param[in]     fStream    Shared pointer of the stream writer.
-    * @param[in]     agent      Pointer to the agent.
+    * @param[in]    agentId     id of the agent
     */
     void AddSensors(const std::string& agentId);
 
     /*!
     * \brief Writes the content of an agent into the simulation output.
     *
-    * @param[in]     fStream    Shared pointer of the stream writer.
-    * @param[in]     agent      Pointer to the agent.
+    * @param[in]    agentId     id of the agent
     */
     void AddAgent(const std::string& agentId);
 
     /*!
     * \brief Writes the content of all agent into the simulation output.
-    *
-    * @param[in]     fStream    Shared pointer of the stream writer.
     */
     void AddAgents();
 
     /*!
     * \brief Writes all events into the simulation output.
     *
-    * @param[in]     fStream            Shared pointer of the stream writer.
+    * @param[in]     events     events of the run
     */
-    void AddEvents();
+    void AddEvents(const Events &events);
 
     /*!
     * \brief Writes the header into the simulation output during full logging.
     *
-    * @param[in]     fStream            Shared pointer of the stream writer.
+    * @param[in]     cyclics    cyclics of the run
     */
-    void AddHeader(ObservationCyclics& cyclics);
+    void AddHeader(const ObservationCyclics& cyclics);
 
     /*!
     * \brief Writes the samples into the simulation output during full logging.
     *
-    * @param[in]     fStream            Shared pointer of the stream writer.
+    * @param[in]     cyclics    cyclics of the run
     */
-    void AddSamples(ObservationCyclics& cyclics);
+    void AddSamples(const ObservationCyclics& cyclics);
 
     /*!
     * \brief Writes the filename for the cyclics file into the simulation output during full logging.
     *
-    * @param[in]     fStream            Shared pointer of the stream writer.
     * @param[in]     filename           Name of the file, where cyclics are written to.
     */
     void AddReference(QString filename);
@@ -196,10 +204,10 @@ private:
     /*!
     * \brief Writes the cyclics of one run to a csv.
     *
-    * @param[in]    filename            Filename for current run
+    * @param[in]    filepath            Filepath for current run
     * @param[in]    cyclics             Cyclics of the current run
     */
-    void WriteCsvCyclics(QString filename, ObservationCyclics &cyclics);
+    void WriteCsvCyclics(const QString &filepath, const ObservationCyclics &cyclics);
 
     /*!
     * \brief Write entities to XML
@@ -220,6 +228,5 @@ private:
     */
     void WriteParameter(const openpass::type::FlatParameter &parameters, bool mandatory = false);
 
-private:
-    const QString outputFileVersion = "0.3.0";
+    const QString outputFileVersion = "0.3.1";
 };

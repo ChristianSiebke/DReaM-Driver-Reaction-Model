@@ -1,5 +1,5 @@
 # /*********************************************************************
-# * Copyright (c) 2019, 2020 in-tech GmbH
+# * Copyright (c) 2019-2021 in-tech GmbH
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -19,8 +19,10 @@ UNIT_UNDER_TEST = $$OPEN_SRC/core/slave/modules/World_OSI
 
 # commons
 SRC_COMMONS = \
+              $$OPEN_SRC/common/commonTools.cpp \
               $$OPEN_SRC/core/common/log.cpp
-INC_COMMONS = $$OPEN_SRC/common/vector2d.h \
+INC_COMMONS = $$OPEN_SRC/common/commonTools.h \
+              $$OPEN_SRC/common/vector2d.h \
               $$OPEN_SRC/common/worldDefinitions.h \
               $$OPEN_SRC/../include/worldinterface.h
 
@@ -52,6 +54,8 @@ SRC_WORLD = \
             $$UNIT_UNDER_TEST/egoAgent.cpp \
             $$UNIT_UNDER_TEST/GeometryConverter.cpp \
             $$UNIT_UNDER_TEST/JointsBuilder.cpp \
+            $$UNIT_UNDER_TEST/LaneStream.cpp \
+            $$UNIT_UNDER_TEST/RoadStream.cpp \
             $$UNIT_UNDER_TEST/TrafficObjectAdapter.cpp \
             $$UNIT_UNDER_TEST/SceneryConverter.cpp \
             $$UNIT_UNDER_TEST/WorldData.cpp \
@@ -66,6 +70,8 @@ INC_WORLD = \
             $$UNIT_UNDER_TEST/egoAgent.h \
             $$UNIT_UNDER_TEST/GeometryConverter.h \
             $$UNIT_UNDER_TEST/JointsBuilder.h \
+            $$UNIT_UNDER_TEST/LaneStream.h \
+            $$UNIT_UNDER_TEST/RoadStream.h \
             $$UNIT_UNDER_TEST/TrafficObjectAdapter.h \
             $$UNIT_UNDER_TEST/SceneryConverter.h \
             $$UNIT_UNDER_TEST/WorldData.h \
@@ -85,12 +91,10 @@ INC_OTHER = \ #OLD_VERSION
 
 # localization
 SRC_LOCALIZATION = \
-            $$UNIT_UNDER_TEST/WorldToRoadCoordinateConverter.cpp \
-            $$UNIT_UNDER_TEST/PointQuery.cpp
+            $$UNIT_UNDER_TEST/WorldToRoadCoordinateConverter.cpp
 
 INC_LOCALIZATION = \
             $$UNIT_UNDER_TEST/WorldToRoadCoordinateConverter.h \
-            $$UNIT_UNDER_TEST/PointQuery.h \
             $$UNIT_UNDER_TEST/LocalizationElement.h
 
 # entity repository
@@ -127,15 +131,16 @@ SOURCES += \
             \ # UNIT-TESTS
             geometryConverter_Tests.cpp \
             locator_Tests.cpp \
-            pointQuery_Tests.cpp \
             sceneryConverter_Tests.cpp \
             \#RoadNetworkMapper_Tests.cpp \
             \ # AGENTADAPTER-TESTS:
             agentAdapter_Tests.cpp \
             fakeLaneManager_Tests.cpp \
+            worldData_Tests.cpp \
             worldQuery_Tests.cpp \
             lane_Tests.cpp \
             sensorView_Tests.cpp \
+            stream_Tests.cpp \
             datatypes_Tests.cpp \
             worldToRoadCoordinateConverter_Tests.cpp \
             egoAgent_Tests.cpp \

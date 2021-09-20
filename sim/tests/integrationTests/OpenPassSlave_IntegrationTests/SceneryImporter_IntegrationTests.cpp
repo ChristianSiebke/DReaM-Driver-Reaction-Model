@@ -14,18 +14,20 @@
 
 #include <algorithm>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include "core/slave/modules/Stochastics/stochastics_implementation.h"
 #include "importer/scenery.h"
 #include "importer/sceneryImporter.h"
 #include "modelElements/agentBlueprint.h"
 #include "bindings/world.h"
-#include "fakeDataStore.h"
+#include "fakeDataBuffer.h"
+#include "fakeSceneryDynamics.h"
 
 #include "AgentAdapter.h"
 #include "WorldData.h"
 
+using ::testing::Return;
 using ::testing::DoubleEq;
 using ::testing::DoubleNear;
 using ::testing::ElementsAre;
@@ -39,7 +41,6 @@ using ::testing::SizeIs;
 using ::testing::IsEmpty;
 using ::testing::NiceMock;
 
-using namespace boost::filesystem;
 using namespace Configuration;
 using namespace Importer;
 
@@ -47,22 +48,23 @@ struct TESTSCENERY_FACTORY
 {
     const std::string libraryName = "World_OSI";
 
-    NiceMock<FakeDataStore> fakeDataStore;
+    NiceMock<FakeDataBuffer> fakeDataBuffer;
     SimulationCommon::Callbacks callbacks;
     StochasticsImplementation stochastics{&callbacks};
     SimulationSlave::WorldBinding worldBinding;
     SimulationSlave::World world;
     Scenery scenery;
+    openScenario::EnvironmentAction environment;
 
     TESTSCENERY_FACTORY() :
-        worldBinding(libraryName, &callbacks, &stochastics, &fakeDataStore),
+        worldBinding(libraryName, &callbacks, &stochastics, &fakeDataBuffer),
         world(&worldBinding)
     {
     }
 
-    bool instantiate(const std::string& sceneryFile)
+    bool instantiate(const std::string& sceneryFile, const std::vector<openScenario::TrafficSignalController>&& trafficSignalControllers = {})
     {
-        path sceneryPath = initial_path() / "Resources" / "ImporterTest" / sceneryFile;
+        std::filesystem::path sceneryPath = std::filesystem::current_path() / "Resources" / "ImporterTest" / sceneryFile;
 
         if (!world.Instantiate())
         {
@@ -74,7 +76,11 @@ struct TESTSCENERY_FACTORY
             return false;
         }
 
-        if (!(world.CreateScenery(&scenery)))
+        FakeSceneryDynamics sceneryDynamics;
+        ON_CALL(sceneryDynamics, GetEnvironment()).WillByDefault(Return(environment));
+        ON_CALL(sceneryDynamics, GetTrafficSignalControllers()).WillByDefault(Return(trafficSignalControllers));
+
+        if (!(world.CreateScenery(&scenery, sceneryDynamics)))
         {
             return false;
         }
@@ -126,11 +132,11 @@ std::vector<const OWL::Interfaces::Section*> GetDistanceSortedSectionsForRoad(OW
 }
 
 //! Query lane by id for a given section
-const OWL::Interfaces::Lane* GetLaneById(OWL::Interfaces::WorldData* worldData, std::list<const OWL::Interfaces::Lane*> sectionLanes, int laneId)
+const OWL::Interfaces::Lane* GetLaneById(std::list<const OWL::Interfaces::Lane*> sectionLanes, int laneId)
 {
-    auto queriedLane = std::find_if(sectionLanes.begin(), sectionLanes.end(), [worldData, laneId](const OWL::Interfaces::Lane* lane)
+    auto queriedLane = std::find_if(sectionLanes.begin(), sectionLanes.end(), [laneId](const OWL::Interfaces::Lane* lane)
     {
-        return worldData->GetLaneIdMapping().at(lane->GetId()) == laneId;
+        return lane->GetOdId() == laneId;
     });
 
     return *queriedLane;
@@ -138,10 +144,10 @@ const OWL::Interfaces::Lane* GetLaneById(OWL::Interfaces::WorldData* worldData, 
 
 //! Check if lanes are connected according to openDrive definition.
 //! The connection (e.g. predecessor or succesor) can be specified for each lane.
-void CheckLaneConnections(OWL::Interfaces::WorldData* worldData, const std::list<const OWL::Interfaces::Lane*>& firstSectionLanes, std::list<const OWL::Interfaces::Lane*> secondSectionLanes, int firstLaneId, int secondLaneId, LaneConnectionType howIsConnection = LaneConnectionType::REGULAR, bool strict = true)
+void CheckLaneConnections(const std::list<const OWL::Interfaces::Lane*>& firstSectionLanes, std::list<const OWL::Interfaces::Lane*> secondSectionLanes, int firstLaneId, int secondLaneId, LaneConnectionType howIsConnection = LaneConnectionType::REGULAR, bool strict = true)
 {
-    auto firstLane = GetLaneById(worldData, firstSectionLanes, firstLaneId);
-    auto secondLane = GetLaneById(worldData, secondSectionLanes, secondLaneId);
+    auto firstLane = GetLaneById(firstSectionLanes, firstLaneId);
+    auto secondLane = GetLaneById(secondSectionLanes, secondLaneId);
 
     if (strict)
     {
@@ -210,8 +216,8 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectLanes)
     ASSERT_EQ(thirdSection.startS, 30.0);
     ASSERT_EQ(thirdSection.endS, 60.0);
     ASSERT_THAT(thirdSection.lanes, UnorderedElementsAre(RelativeWorldView::Lane{0, true, LaneType::Driving, 0, 0},
-                                                         RelativeWorldView::Lane{-1, true, LaneType::Stop, -1, -1},
-                                                         RelativeWorldView::Lane{-2, true, LaneType::Driving, std::nullopt, -2}));
+                                                         RelativeWorldView::Lane{-1, true, LaneType::Biking, -1, -1},
+                                                         RelativeWorldView::Lane{-2, true, LaneType::Sidewalk, std::nullopt, -2}));
 
     const auto forthSection = relativeLanes.at(3);
     ASSERT_EQ(forthSection.startS, 60.0);
@@ -228,8 +234,8 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectLanes)
 
     double maxSearchDistance = 1000.0;
     ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(roadGraph, root, -1, 0.0, maxSearchDistance, {LaneType::Driving, LaneType::Stop}).at(root), 100.0);
-    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(roadGraph, root, -2, 15.0, maxSearchDistance, {LaneType::Driving, LaneType::Stop}).at(root), 135.0);
-    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(roadGraph, root, -3, 35.0, maxSearchDistance, {LaneType::Driving, LaneType::Stop}).at(root), 115.0);
+    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(roadGraph, root, -2, 15.0, maxSearchDistance, {LaneType::Driving, LaneType::Biking}).at(root), 135.0);
+    ASSERT_DOUBLE_EQ(world.GetDistanceToEndOfLane(roadGraph, root, -3, 35.0, maxSearchDistance, {LaneType::Driving, LaneType::Stop, LaneType::Sidewalk}).at(root), 115.0);
 
     ASSERT_DOUBLE_EQ(world.GetLaneWidth("1", -1, 60.0), 3.0);
     ASSERT_DOUBLE_EQ(world.GetLaneWidth("1", -2, 60.0), 4.0);
@@ -520,7 +526,7 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_CheckForCorrectLaneConnections
             int secondLaneId = laneConnections.at(count).at(static_cast<unsigned>(laneNumber));
             if (secondLaneId != 0)
             {
-                CheckLaneConnections(worldData, firstSectionLanes, secondSectionLanes, -laneNumber - 1, secondLaneId);
+                CheckLaneConnections(firstSectionLanes, secondSectionLanes, -laneNumber - 1, secondLaneId);
             }
         }
     }
@@ -550,26 +556,26 @@ TEST(SceneryImporter_IntegrationTests, MultipleRoads_CheckForCorrectLaneConnecti
     const auto& lanesRoad3Section2 = sectionsRoad3.back()->GetLanes();
 
     //check connections inside road
-    CheckLaneConnections(worldData, lanesRoad1Section1, lanesRoad1Section2, -1, -1);
-    CheckLaneConnections(worldData, lanesRoad1Section1, lanesRoad1Section2, -2, -2);
-    CheckLaneConnections(worldData, lanesRoad1Section1, lanesRoad1Section2, -3, -3);
+    CheckLaneConnections(lanesRoad1Section1, lanesRoad1Section2, -1, -1);
+    CheckLaneConnections(lanesRoad1Section1, lanesRoad1Section2, -2, -2);
+    CheckLaneConnections(lanesRoad1Section1, lanesRoad1Section2, -3, -3);
 
-    CheckLaneConnections(worldData, lanesRoad2Section1, lanesRoad2Section2, 1, 1);
-    CheckLaneConnections(worldData, lanesRoad2Section1, lanesRoad2Section2, 2, 2);
-    CheckLaneConnections(worldData, lanesRoad2Section1, lanesRoad2Section2, 3, 3);
+    CheckLaneConnections(lanesRoad2Section1, lanesRoad2Section2, 1, 1);
+    CheckLaneConnections(lanesRoad2Section1, lanesRoad2Section2, 2, 2);
+    CheckLaneConnections(lanesRoad2Section1, lanesRoad2Section2, 3, 3);
 
-    CheckLaneConnections(worldData, lanesRoad3Section1, lanesRoad3Section2, -1, -1);
-    CheckLaneConnections(worldData, lanesRoad3Section1, lanesRoad3Section2, -2, -2);
-    CheckLaneConnections(worldData, lanesRoad3Section1, lanesRoad3Section2, -3, -3);
+    CheckLaneConnections(lanesRoad3Section1, lanesRoad3Section2, -1, -1);
+    CheckLaneConnections(lanesRoad3Section1, lanesRoad3Section2, -2, -2);
+    CheckLaneConnections(lanesRoad3Section1, lanesRoad3Section2, -3, -3);
 
     //check connections between roads
-    CheckLaneConnections(worldData, lanesRoad1Section2, lanesRoad2Section2, -1, 1, LaneConnectionType::NEXT);
-    CheckLaneConnections(worldData, lanesRoad1Section2, lanesRoad2Section2, -2, 2, LaneConnectionType::NEXT);
-    CheckLaneConnections(worldData, lanesRoad1Section2, lanesRoad2Section2, -3, 3, LaneConnectionType::NEXT);
+    CheckLaneConnections(lanesRoad1Section2, lanesRoad2Section2, -1, 1, LaneConnectionType::NEXT);
+    CheckLaneConnections(lanesRoad1Section2, lanesRoad2Section2, -2, 2, LaneConnectionType::NEXT);
+    CheckLaneConnections(lanesRoad1Section2, lanesRoad2Section2, -3, 3, LaneConnectionType::NEXT);
 
-    CheckLaneConnections(worldData, lanesRoad2Section1, lanesRoad3Section1, 1, -1, LaneConnectionType::PREVIOUS);
-    CheckLaneConnections(worldData, lanesRoad2Section1, lanesRoad3Section1, 2, -2, LaneConnectionType::PREVIOUS);
-    CheckLaneConnections(worldData, lanesRoad2Section1, lanesRoad3Section1, 3, -3, LaneConnectionType::PREVIOUS);
+    CheckLaneConnections(lanesRoad2Section1, lanesRoad3Section1, 1, -1, LaneConnectionType::PREVIOUS);
+    CheckLaneConnections(lanesRoad2Section1, lanesRoad3Section1, 2, -2, LaneConnectionType::PREVIOUS);
+    CheckLaneConnections(lanesRoad2Section1, lanesRoad3Section1, 3, -3, LaneConnectionType::PREVIOUS);
 }
 
 TEST(SceneryImporter_IntegrationTests, MultipleRoadsWithJunctions_CheckForCorrectLaneConnections)
@@ -595,18 +601,18 @@ TEST(SceneryImporter_IntegrationTests, MultipleRoadsWithJunctions_CheckForCorrec
 
 
     //check connections between incoming road and connecting roads
-    CheckLaneConnections(worldData, lanesIncomingRoad, lanesUpperConnectingRoad, -1, -1);
-    CheckLaneConnections(worldData, lanesIncomingRoad, lanesUpperConnectingRoad, -2, -2);
+    CheckLaneConnections(lanesIncomingRoad, lanesUpperConnectingRoad, -1, -1);
+    CheckLaneConnections(lanesIncomingRoad, lanesUpperConnectingRoad, -2, -2);
 
-    CheckLaneConnections(worldData, lanesIncomingRoad, lanesLowerConnectingRoad, -3, -1);
-    CheckLaneConnections(worldData, lanesIncomingRoad, lanesLowerConnectingRoad, -4, -2);
+    CheckLaneConnections(lanesIncomingRoad, lanesLowerConnectingRoad, -3, -1);
+    CheckLaneConnections(lanesIncomingRoad, lanesLowerConnectingRoad, -4, -2);
 
     //check connections between connecting roads and outgoing roads
-    CheckLaneConnections(worldData, lanesUpperConnectingRoad, lanesUpperOutgoingRoad, -1, -1);
-    CheckLaneConnections(worldData, lanesUpperConnectingRoad, lanesUpperOutgoingRoad, -2, -2);
+    CheckLaneConnections(lanesUpperConnectingRoad, lanesUpperOutgoingRoad, -1, -1);
+    CheckLaneConnections(lanesUpperConnectingRoad, lanesUpperOutgoingRoad, -2, -2);
 
-    CheckLaneConnections(worldData, lanesLowerConnectingRoad, lanesLowerOutgoingRoad, -1, -1);
-    CheckLaneConnections(worldData, lanesLowerConnectingRoad, lanesLowerOutgoingRoad, -2, -2);
+    CheckLaneConnections(lanesLowerConnectingRoad, lanesLowerOutgoingRoad, -1, -1);
+    CheckLaneConnections(lanesLowerConnectingRoad, lanesLowerOutgoingRoad, -2, -2);
 }
 
 TEST(SceneryImporter_IntegrationTests, TJunction_CheckForCorrectLaneConnections)
@@ -634,24 +640,24 @@ TEST(SceneryImporter_IntegrationTests, TJunction_CheckForCorrectLaneConnections)
 
 
     //check connections between incoming road and connecting roads
-    CheckLaneConnections(worldData, lanesRoad2, lanesRoad2_1second, -1, 1, LaneConnectionType::NEXT, false);
-    CheckLaneConnections(worldData, lanesRoad2, lanesRoad2_1second, -2, 2, LaneConnectionType::NEXT, false);
+    CheckLaneConnections(lanesRoad2, lanesRoad2_1second, -1, 1, LaneConnectionType::NEXT, false);
+    CheckLaneConnections(lanesRoad2, lanesRoad2_1second, -2, 2, LaneConnectionType::NEXT, false);
 
-    CheckLaneConnections(worldData, lanesRoad2, lanesRoad2_3first, -1, -1, LaneConnectionType::REGULAR, false);
-    CheckLaneConnections(worldData, lanesRoad2, lanesRoad2_3first, -2, -2, LaneConnectionType::REGULAR, false);
+    CheckLaneConnections(lanesRoad2, lanesRoad2_3first, -1, -1, LaneConnectionType::REGULAR, false);
+    CheckLaneConnections(lanesRoad2, lanesRoad2_3first, -2, -2, LaneConnectionType::REGULAR, false);
 
     //check connections between connecting roads and outgoing roads
-    CheckLaneConnections(worldData, lanesRoad1, lanesRoad2_1first, 1, 1, LaneConnectionType::REGULAR, false);
-    CheckLaneConnections(worldData, lanesRoad1, lanesRoad2_1first, 2, 2, LaneConnectionType::REGULAR, false);
+    CheckLaneConnections(lanesRoad1, lanesRoad2_1first, 1, 1, LaneConnectionType::REGULAR, false);
+    CheckLaneConnections(lanesRoad1, lanesRoad2_1first, 2, 2, LaneConnectionType::REGULAR, false);
 
-    CheckLaneConnections(worldData, lanesRoad2_3second, lanesRoad3, -1, 1, LaneConnectionType::NEXT, false);
-    CheckLaneConnections(worldData, lanesRoad2_3second, lanesRoad3, -2, 2, LaneConnectionType::NEXT, false);
+    CheckLaneConnections(lanesRoad2_3second, lanesRoad3, -1, 1, LaneConnectionType::NEXT, false);
+    CheckLaneConnections(lanesRoad2_3second, lanesRoad3, -2, 2, LaneConnectionType::NEXT, false);
 }
 
 void CheckLaneNeighbours(OWL::Interfaces::WorldData* worldData, const std::list<const OWL::Interfaces::Lane*>& lanes, int leftLaneId, int rightLaneId)
 {
-    auto leftLane = GetLaneById(worldData, lanes, leftLaneId);
-    auto rightLane = GetLaneById(worldData, lanes, rightLaneId);
+    auto leftLane = GetLaneById(lanes, leftLaneId);
+    auto rightLane = GetLaneById(lanes, rightLaneId);
 
     EXPECT_THAT(&leftLane->GetRightLane(), Eq(rightLane));
     EXPECT_THAT(&rightLane->GetLeftLane(), Eq(leftLane));
@@ -751,8 +757,8 @@ void CheckLaneNeighbours(OWL::Interfaces::WorldData* worldData, std::list<const 
     auto nrOfLanes = static_cast<int>(lanes.size());
     for (int laneId = -1; -laneId < nrOfLanes; --laneId)
     {
-        auto firstLane = GetLaneById(worldData, lanes, laneId);
-        auto secondLane = GetLaneById(worldData, lanes, laneId-1);
+        auto firstLane = GetLaneById(lanes, laneId);
+        auto secondLane = GetLaneById(lanes, laneId-1);
         auto firstLaneId = firstLane->GetId();
         auto secondLaneId = secondLane->GetId();
         EXPECT_THAT(GetOsiLane(firstLane).classification().right_adjacent_lane_id(0).value(), secondLaneId);
@@ -768,12 +774,23 @@ void CheckLaneType(OWL::Interfaces::WorldData* worldData, std::list<const OWL::I
     for (size_t i = 1; i < lanes.size(); ++i)
     {
         int laneId = -i;
-        auto lane = GetLaneById(worldData, lanes, laneId);
+        auto lane = GetLaneById(lanes, laneId);
         EXPECT_THAT(GetOsiLane(lane).classification().type(), expectedTypes.at(i));
     }
 }
 
-using OsiLaneType = osi3::Lane_Classification_Type;
+void CheckLaneSubtype(OWL::Interfaces::WorldData* worldData, std::list<const OWL::Interfaces::Lane*> lanes, std::vector<osi3::Lane_Classification_Subtype> expectedTypes)
+{
+    // Only negative lanes are checked and lane "0" is only a placeholder without internal representation.
+    // Calling GetLaneById with 0 would fail so start at 1.
+    // Yet, we expect expectedTypes to carry information about the 0th lane
+    for (size_t i = 1; i < lanes.size(); ++i)
+    {
+        int laneId = -i;
+        auto lane = GetLaneById(lanes, laneId);
+        EXPECT_THAT(GetOsiLane(lane).classification().subtype(), expectedTypes.at(i));
+    }
+}
 
 TEST(SceneryImporter_IntegrationTests, SingleRoad_CheckForCorrectOsiLaneClassification)
 {
@@ -793,17 +810,29 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_CheckForCorrectOsiLaneClassifi
         CheckLaneNeighbours(worldData, section->GetLanes());
     }
 
-    CheckLaneType(worldData, sections[0]->GetLanes(), {OsiLaneType::Lane_Classification_Type_TYPE_NONDRIVING,
-                                                       OsiLaneType::Lane_Classification_Type_TYPE_DRIVING});
+    CheckLaneType(worldData, sections[0]->GetLanes(), {osi3::Lane_Classification_Type_TYPE_NONDRIVING,
+                                                       osi3::Lane_Classification_Type_TYPE_DRIVING});
 
-    CheckLaneType(worldData, sections[1]->GetLanes(), {OsiLaneType::Lane_Classification_Type_TYPE_NONDRIVING,
-                                                       OsiLaneType::Lane_Classification_Type_TYPE_DRIVING,
-                                                       OsiLaneType::Lane_Classification_Type_TYPE_DRIVING});
+//    CheckLaneSubtype(worldData, sections[0]->GetLanes(), {osi3::Lane_Classification_Subtype_SUBTYPE_OTHER,
+//                                                          osi3::Lane_Classification_Subtype_SUBTYPE_NORMAL});
 
-    CheckLaneType(worldData, sections[2]->GetLanes(), {OsiLaneType::Lane_Classification_Type_TYPE_NONDRIVING,
-                                                       OsiLaneType::Lane_Classification_Type_TYPE_DRIVING,
-                                                       OsiLaneType::Lane_Classification_Type_TYPE_NONDRIVING,
-                                                       OsiLaneType::Lane_Classification_Type_TYPE_DRIVING});
+    CheckLaneType(worldData, sections[1]->GetLanes(), {osi3::Lane_Classification_Type_TYPE_NONDRIVING,
+                                                       osi3::Lane_Classification_Type_TYPE_DRIVING,
+                                                       osi3::Lane_Classification_Type_TYPE_DRIVING});
+
+//    CheckLaneSubtype(worldData, sections[1]->GetLanes(), {osi3::Lane_Classification_Subtype_SUBTYPE_OTHER,
+//                                                          osi3::Lane_Classification_Subtype_SUBTYPE_NORMAL,
+//                                                          osi3::Lane_Classification_Subtype_SUBTYPE_NORMAL});
+
+    CheckLaneType(worldData, sections[2]->GetLanes(), {osi3::Lane_Classification_Type_TYPE_NONDRIVING,
+                                                       osi3::Lane_Classification_Type_TYPE_DRIVING,
+                                                       osi3::Lane_Classification_Type_TYPE_NONDRIVING,
+                                                       osi3::Lane_Classification_Type_TYPE_NONDRIVING});
+
+//    CheckLaneSubtype(worldData, sections[2]->GetLanes(), {osi3::Lane_Classification_Subtype_SUBTYPE_OTHER,
+//                                                          osi3::Lane_Classification_Subtype_SUBTYPE_NORMAL,
+//                                                          osi3::Lane_Classification_Subtype_SUBTYPE_BIKING,
+//                                                          osi3::Lane_Classification_Subtype_SUBTYPE_SIDEWALK});
 }
 
 TEST(SceneryImporter_IntegrationTests, MultipleRoadsWithJunctions_CheckForCorrectOsiLaneClassification)
@@ -821,11 +850,11 @@ TEST(SceneryImporter_IntegrationTests, MultipleRoadsWithJunctions_CheckForCorrec
 
     CheckLaneNeighbours(worldData, sections1[0]->GetLanes());
 
-    CheckLaneType(worldData, sections1[0]->GetLanes(), {OsiLaneType::Lane_Classification_Type_TYPE_NONDRIVING,
-                                                       OsiLaneType::Lane_Classification_Type_TYPE_DRIVING,
-                                                       OsiLaneType::Lane_Classification_Type_TYPE_DRIVING,
-                                                       OsiLaneType::Lane_Classification_Type_TYPE_DRIVING,
-                                                       OsiLaneType::Lane_Classification_Type_TYPE_DRIVING});
+    CheckLaneType(worldData, sections1[0]->GetLanes(), {osi3::Lane_Classification_Type_TYPE_NONDRIVING,
+                                                       osi3::Lane_Classification_Type_TYPE_DRIVING,
+                                                       osi3::Lane_Classification_Type_TYPE_DRIVING,
+                                                       osi3::Lane_Classification_Type_TYPE_DRIVING,
+                                                       osi3::Lane_Classification_Type_TYPE_DRIVING});
 
     ASSERT_EQ(worldData->GetRoads().at("4")->GetSections().size(), 1);
 
@@ -833,9 +862,9 @@ TEST(SceneryImporter_IntegrationTests, MultipleRoadsWithJunctions_CheckForCorrec
 
     CheckLaneNeighbours(worldData, sections4[0]->GetLanes());
 
-    CheckLaneType(worldData, sections4[0]->GetLanes(), {OsiLaneType::Lane_Classification_Type_TYPE_NONDRIVING,
-                                                       OsiLaneType::Lane_Classification_Type_TYPE_INTERSECTION,
-                                                       OsiLaneType::Lane_Classification_Type_TYPE_INTERSECTION});
+    CheckLaneType(worldData, sections4[0]->GetLanes(), {osi3::Lane_Classification_Type_TYPE_NONDRIVING,
+                                                       osi3::Lane_Classification_Type_TYPE_INTERSECTION,
+                                                       osi3::Lane_Classification_Type_TYPE_INTERSECTION});
 }
 
 TEST(SceneryImporter_IntegrationTests, MultipleRoadsWithNonIntersectingJunctions_JunctionsHaveNoIntersectionInformation)
@@ -948,9 +977,9 @@ TEST(SceneryImporter_IntegrationTests, MultipleRoadsWithIntersectingJunctions_Ju
 {
     VehicleModelParameters vehicleParameter;
     vehicleParameter.vehicleType = AgentVehicleType::Car;
-    vehicleParameter.width = width;
-    vehicleParameter.length = length;
-    vehicleParameter.distanceReferencePointToLeadingEdge = length / 2.0;
+    vehicleParameter.boundingBoxDimensions.width = width;
+    vehicleParameter.boundingBoxDimensions.length = length;
+    vehicleParameter.boundingBoxCenter.x = 0.0;
 
     SpawnParameter spawnParameter;
     spawnParameter.positionX = x;
@@ -991,7 +1020,7 @@ TEST(GetObjectsInRange_IntegrationTests, OneObjectOnQueriedLane)
     auto agent0 = AddAgentToWorld(world, 10.0, 2.0);
     auto agent1 = AddAgentToWorld(world, 10.0, 5.0);
     auto agent2 = AddAgentToWorld(world, 10.0, 9.0);
-    world.SyncGlobalData();
+    world.SyncGlobalData(0);
 
     RoadGraph roadGraph;
     RoadGraphVertex root = add_vertex(RouteElement{"1", true}, roadGraph);
@@ -1008,7 +1037,7 @@ TEST(GetObjectsInRange_IntegrationTests, NoObjectOnQueriedLane)
     auto& world = tsf.world;
     auto agent0 = AddAgentToWorld(world, 10.0, 2.0);
     auto agent1 = AddAgentToWorld(world, 10.0, 9.0);
-    world.SyncGlobalData();
+    world.SyncGlobalData(0);
 
     RoadGraph roadGraph;
     RoadGraphVertex root = add_vertex(RouteElement{"1", true}, roadGraph);
@@ -1026,7 +1055,7 @@ TEST(GetObjectsInRange_IntegrationTests, TwoObjectsInDifferentSections)
     auto agent1 = AddAgentToWorld(world, 310.0, 5.0);
     auto agent2 = AddAgentToWorld(world, 10.0, 5.0);
     auto agent3 = AddAgentToWorld(world, 10.0, 9.0);
-    world.SyncGlobalData();
+    world.SyncGlobalData(0);
 
     RoadGraph roadGraph;
     RoadGraphVertex root = add_vertex(RouteElement{"1", true}, roadGraph);
@@ -1045,7 +1074,7 @@ TEST(GetObjectsInRange_IntegrationTests, OneObjectOnSectionBorder)
     auto agent0 = AddAgentToWorld(world, 300.0, 2.0);
     auto agent1 = AddAgentToWorld(world, 300.0, 5.0);
     auto agent2 = AddAgentToWorld(world, 300.0, 9.0);
-    world.SyncGlobalData();
+    world.SyncGlobalData(0);
 
     RoadGraph roadGraph;
     RoadGraphVertex root = add_vertex(RouteElement{"1", true}, roadGraph);
@@ -1064,7 +1093,7 @@ TEST(GetObjectsInRange_IntegrationTests, MultipleRoads)
     auto agent1 = AddAgentToWorld(world, 1300.0, 2.0);
     auto agent2 = AddAgentToWorld(world, 510.0, 2.0);
     auto agent3 = AddAgentToWorld(world, 510.0, -1.0);
-    world.SyncGlobalData();
+    world.SyncGlobalData(0);
 
     RoadGraph roadGraph;
     RoadGraphVertex node1 = add_vertex(RouteElement{"1", true}, roadGraph);
@@ -1086,7 +1115,7 @@ TEST(Locator_IntegrationTests, AgentOnStraightRoad_CalculatesCorrectLocateResult
     auto& world = tsf.world;
     const auto agent1 = AddAgentToWorld(world, 399.0, 1.0, 2.0, 5.0);
     const auto agent2 = AddAgentToWorld(world, 2500.0, 2.0, 2.0, 5.0);
-    world.SyncGlobalData();
+    world.SyncGlobalData(0);
 
     ASSERT_THAT(agent1->GetRoads(MeasurementPoint::Front), ElementsAre("1"));
     ASSERT_THAT(agent1->GetObjectPosition().mainLocatePoint.at("1").laneId, Eq(-2));
@@ -1109,7 +1138,7 @@ TEST(Locator_IntegrationTests, AgentOnJunction_CalculatesCorrectLocateResult)
 
     auto& world = tsf.world;
     auto agent = AddAgentToWorld(world, 208.0, -2.0, 2.0, 4.0);
-    world.SyncGlobalData();
+    world.SyncGlobalData(0);
 
     EXPECT_THAT(agent->GetDistanceToStartOfRoad(MeasurementPoint::Front, "R1-3"), DoubleNear(10.0, 0.01));
     EXPECT_THAT(agent->GetDistanceToStartOfRoad(MeasurementPoint::Rear, "R1-3"), DoubleNear(6.0, 0.01));
@@ -1190,8 +1219,11 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectLaneMarkings)
 
 TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectTrafficSigns)
 {
+    openScenario::TrafficSignalController trafficSignalController;
+    trafficSignalController.delay = 0.0;
+    trafficSignalController.phases.push_back(openScenario::TrafficSignalControllerPhase{"", 1, {{"8", "red yellow"}, {"9", "green"}}});
     TESTSCENERY_FACTORY tsf;
-    ASSERT_THAT(tsf.instantiate("IntegrationTestScenery.xodr"), IsTrue());
+    ASSERT_THAT(tsf.instantiate("IntegrationTestScenery.xodr", {trafficSignalController}), IsTrue());
 
     auto& world = tsf.world;
 
@@ -1249,6 +1281,21 @@ TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectTrafficSigns)
     ASSERT_THAT(roadMarkings, SizeIs(1));
     ASSERT_THAT(roadMarkings.at(0).relativeDistance, DoubleEq(30.0));
     ASSERT_THAT(roadMarkings.at(0).type, Eq(CommonTrafficSign::Type::Stop));
+
+    auto trafficLights = world.GetTrafficLightsInRange(roadGraph, root, -2, 11, 90).at(root);
+    ASSERT_THAT(trafficLights.size(), Eq(1));
+    ASSERT_THAT(trafficLights.at(0).relativeDistance, DoubleEq(49.0));
+    ASSERT_THAT(trafficLights.at(0).type, Eq(CommonTrafficLight::Type::ThreeLightsLeft));
+    ASSERT_THAT(trafficLights.at(0).state, Eq(CommonTrafficLight::State::RedYellow));
+
+    trafficLights = world.GetTrafficLightsInRange(roadGraph, root, -3, 31, 90).at(root);
+    ASSERT_THAT(trafficLights.size(), Eq(2));
+    ASSERT_THAT(trafficLights.at(0).relativeDistance, DoubleEq(29.0));
+    ASSERT_THAT(trafficLights.at(0).type, Eq(CommonTrafficLight::Type::ThreeLightsLeft));
+    ASSERT_THAT(trafficLights.at(0).state, Eq(CommonTrafficLight::State::RedYellow));
+    ASSERT_THAT(trafficLights.at(1).relativeDistance, DoubleEq(34.0));
+    ASSERT_THAT(trafficLights.at(1).type, Eq(CommonTrafficLight::Type::ThreeLights));
+    ASSERT_THAT(trafficLights.at(1).state, Eq(CommonTrafficLight::State::Green));
 }
 
 TEST(SceneryImporter_IntegrationTests, SingleRoad_ImportWithCorrectTrafficSignGeometriess)
@@ -1389,7 +1436,7 @@ TEST(GetObstruction_IntegrationTests, AgentsOnStraightRoad)
     auto& world = tsf.world;
     auto agent0 = AddAgentToWorld(world, 10.0, 2.0);
     auto agent1 = AddAgentToWorld(world, 100.0, 2.5, 2.0);
-    world.SyncGlobalData();
+    world.SyncGlobalData(0);
 
     auto& egoAgent = agent0->GetEgoAgent();
     RoadGraph roadGraph;
@@ -1408,7 +1455,7 @@ TEST(GetObstruction_IntegrationTests, AgentBehindJunction)
     auto& world = tsf.world;
     auto agent0 = AddAgentToWorld(world, 10.0, -3.0);
     auto agent1 = AddAgentToWorld(world, 203.5, -10.0, 1.0, 3.0);
-    world.SyncGlobalData();
+    world.SyncGlobalData(0);
 
     auto& egoAgent = agent0->GetEgoAgent();
     RoadGraph roadGraph;

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -24,19 +24,18 @@
 #include "common/openPassUtils.h"
 #include "include/parameterInterface.h"
 
-ObservationEntityRepositoryImplementation::ObservationEntityRepositoryImplementation(
-    SimulationSlave::EventNetworkInterface *eventNetwork,
+ObservationEntityRepositoryImplementation::ObservationEntityRepositoryImplementation(SimulationSlave::EventNetworkInterface *eventNetwork,
     StochasticsInterface *stochastics,
     WorldInterface *world,
     const ParameterInterface *parameters,
     const CallbackInterface *callbacks,
-    DataStoreReadInterface *dataStore) :
+    DataBufferReadInterface *dataBuffer) :
     ObservationInterface(stochastics,
                          world,
                          parameters,
                          callbacks,
-                         dataStore),
-    dataStore(dataStore)
+                         dataBuffer),
+    dataBuffer(dataBuffer)
 {
     directory = QString::fromStdString(parameters->GetRuntimeInformation().directories.output);
 
@@ -170,11 +169,11 @@ std::string ObservationEntityRepositoryImplementation::GetEntitySource(const std
 {
     try
     {
-        return std::get<std::string>(dataStore->GetStatic(source_key).at(0));
+        return std::get<std::string>(dataBuffer->GetStatic(source_key).at(0));
     }
     catch (const std::exception &e)
     {
-        LOGERROR("While parsing datastore key " + source_key + ": " + e.what());
+        LOGERROR("While parsing databuffer key " + source_key + ": " + e.what());
         return "<error>";
     }
 }
@@ -184,25 +183,25 @@ Metainfo ObservationEntityRepositoryImplementation::GetEntityMetainfo(const std:
     Metainfo metainfo;
     try
     {
-        const auto metainfoKeys = dataStore->GetKeys("Statics/" + metainfo_key);
+        const auto metainfoKeys = dataBuffer->GetKeys("Statics/" + metainfo_key);
         for (const auto &subkey : metainfoKeys)
         {
-            auto value = dataStore->GetStatic(metainfo_key + "/" + subkey);
+            auto value = dataBuffer->GetStatic(metainfo_key + "/" + subkey);
             metainfo.emplace(subkey, to_string(value));
         }
     }
     catch (const std::exception &e)
     {
-        LOGERROR("While parsing datastore key " + metainfo_key + ": " + e.what());
+        LOGERROR("While parsing databuffer key " + metainfo_key + ": " + e.what());
     }
     return metainfo;
 }
 
 std::vector<CsvRow> ObservationEntityRepositoryImplementation::GetEntities(const std::string &entityBaseKey)
 {
-    const auto entityIdStrings = dataStore->GetKeys("Statics/" + entityBaseKey);
+    const auto entityIdStrings = dataBuffer->GetKeys("Statics/" + entityBaseKey);
 
-    // entries in datastore are not sorted
+    // entries in databuffer are not sorted
     std::vector<uint64_t> entityIds;
     entityIds.reserve(entityIdStrings.size());
     std::transform(entityIdStrings.cbegin(), entityIdStrings.cend(),
@@ -246,17 +245,17 @@ void ObservationEntityRepositoryImplementation::WriteEntities(const std::vector<
     }
 }
 
-const std::string ObservationEntityRepositoryImplementation::to_string(const openpass::datastore::Values &values)
+const std::string ObservationEntityRepositoryImplementation::to_string(const openpass::databuffer::Values &values)
 {
     if (values.empty())
     {
-        LOGERROR("Retrieved value from datastore contains no element");
+        LOGERROR("Retrieved value from databuffer contains no element");
         return "<error>";
     }
 
     if (values.size() > 1)
     {
-        LOGWARN("Multiple values per datastore request currently not supported");
+        LOGWARN("Multiple values per databuffer request currently not supported");
     }
 
     return std::visit(openpass::utils::FlatParameter::to_string(), values.front());

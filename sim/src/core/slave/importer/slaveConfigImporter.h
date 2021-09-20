@@ -74,13 +74,13 @@ public:
                                         EnvironmentConfig& environmentConfig);
 
     /*!
-     * \brief ImportSpawnPointsConfig Imports the SpawnPointConfig section of the slave configuration
-     * \param spawnPointsConfigElement Element containing the information
+     * \brief ImportSpawnPointsConfig Imports the SpawnPointsConfig section of the slave configuration
+     * \param spawnersElement Element containing the information
      * \param spawnPointsInfo struct into which the values get saved
      * \return
      */
     static void ImportSpawners(const QDomElement& spawnersElement,
-                                        SpawnPointLibraryInfoCollection& spawnPointsInfo);
+                                        SpawnPointLibraryInfoCollection &spawnPointsInfo);
 
     static void ImportObservations(const QDomElement& observationsElement,
                                         ObservationInstanceCollection& observations);
@@ -88,7 +88,7 @@ public:
     //Overall import function
     /*!
     * \brief Imports the entire slave configuration
-    * \details Calls all sections specific methods and saves the result in the CombiantionConfig
+    * \details Calls all sections specific methods and saves the result in the CombinationConfig
     *
     * @param[in]     configurationDir   Path of the configuration files
     * @param[in]     slaveConfigFile    Name of the SlaveConfig file
@@ -101,13 +101,13 @@ public:
 
 private:
     static std::string GetLibrary(const QDomElement& root, const std::string& key, const std::string& tag);
-    static constexpr auto supportedConfigVersion = "0.8.1";
+    static constexpr auto supportedConfigVersion = "0.8.2";
 
     //! \brief Identifier with correspondiong default values for mandatory libraries
     //! \note: The identifier is identical to the XML tag
     inline static const ExperimentConfig::Libraries defaultLibraryMapping =
     {
-        {"DataStoreLibrary", "BasicDataStore"},
+        {"DataBufferLibrary", "BasicDataBuffer"},
         {"EventDetectorLibrary", "EventDetector"},
         {"ManipulatorLibrary", "Manipulator"},
         {"WorldLibrary", "World"},

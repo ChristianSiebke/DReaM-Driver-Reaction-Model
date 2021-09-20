@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2021 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -27,13 +27,13 @@ extern "C" WORLD_SHARED_EXPORT const std::string &OpenPASS_GetVersion()
 }
 
 extern "C" WORLD_SHARED_EXPORT WorldInterface *OpenPASS_CreateInstance(
-        CallbackInterface *callbacks, StochasticsInterface* stochastics, DataStoreWriteInterface* dataStore)
+        CallbackInterface *callbacks, StochasticsInterface* stochastics, DataBufferWriteInterface* dataBuffer)
 {
     Callbacks = callbacks;
 
     try
     {
-        return (WorldInterface*)(new (std::nothrow) WorldImplementation(callbacks, stochastics, dataStore));
+        return (WorldInterface*)(new (std::nothrow) WorldImplementation(callbacks, stochastics, dataBuffer));
     }
     catch(const std::runtime_error &ex)
     {

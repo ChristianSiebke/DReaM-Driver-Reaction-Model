@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -48,7 +48,7 @@ public:
                              WorldInterface* world,
                              EventNetworkInterface* eventNetwork,
                              const std::string& sceneryPath,
-                             DataStoreReadInterface* dataStore) override;
+                             DataBufferReadInterface* dataBuffer) override;
     virtual const std::map<int, ObservationModule*>& GetObservationModules() override;
 
     virtual bool InitAll() override;

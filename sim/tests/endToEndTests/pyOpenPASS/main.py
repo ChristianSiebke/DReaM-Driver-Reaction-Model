@@ -73,23 +73,24 @@ class Slave:
         copydir(self.configs, destination)
         copydir(self.results, destination)
         if os.path.exists(self.log_file):
-            head, tail = os.path.split(self.log_file)
+            _, tail = os.path.split(self.log_file)
             copyfile(self.log_file, os.path.join(destination, tail))
 
     def copy(self):
         return Slave(self.base_path, self.log_file, self.configs, self.results)
 
-    def print_log(self):
-        with open(self.log_file, 'r') as log:
-            return log.read()
 
-    def log_size(self):
-        return os.path.getsize(self.log_file)
+    def log_empty(self):
+        if os.path.exists(self.log_file):
+            return os.path.getsize(self.log_file) == 0
+        return True
 
-    def print_log(self):
-        if os.path.exists(self.log_file) and self.log_size() > 0:
-            with open(self.log_file, 'r') as log_file:
-                print(log_file.read())
+    def get_log(self):
+        if not self.log_empty():
+            with open(self.log_file, 'r') as l:
+                return l.read().strip()
+        else:
+            return ''
 
 
 def terminate_program(message):
@@ -100,16 +101,20 @@ def terminate_program(message):
 def parse_arguments():
     ap = argparse.ArgumentParser()
     ap.add_argument('-s', '--slave',
-                    help=r'path to the openPASS slave (e.g. /openPASS/bin/)')
+                    help=r'path to the openPASS slave (e.g. /openPASS/bin/)', 
+                    required=True)
     ap.add_argument('-m', '--mutual',
                     default=None,
                     help=r'path to mutual configurations')
     ap.add_argument('-r', '--resources',
-                    help=r'path to the resources (e.g. /openPASS/bin/examples/configs)')
+                    help=r'path to the resources (e.g. /openPASS/bin/examples/configs)', 
+                    required=True)
     ap.add_argument('-c', '--config',
-                    help=r'config file (e.g. end_to_end.json)')
+                    help=r'config file (e.g. end_to_end.json)', 
+                    required=True)
     ap.add_argument('--scope',
-                    help=r'scope (e.g. generic)')
+                    help=r'scope (e.g. generic)', 
+                    required=True)
     ap.add_argument('-d', '--debug',
                     help=r'activates csv output of some pandas dataframes to /tmp or C:\\temp',
                     action='store_true',
@@ -198,6 +203,7 @@ def main():
     config.MetaInfo.scope = args.scope
     config.MetaInfo.base_config = scope["baseConfig"]
     config.MetaInfo.configs_under_test = configs_under_test
+    config.MetaInfo.datatypes = the_config["datatypes"] if "datatypes" in the_config else {}
     
     if "parameterization" in scope.keys():
         config.MetaInfo.parameterization = scope["parameterization"]

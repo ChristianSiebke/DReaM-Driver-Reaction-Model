@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2019 ITK Engineering GmbH
+* Copyright (c) 2019, 2020 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -11,7 +11,6 @@
 #include "ResultDirItemModel.h"
 
 #include <QApplication>
-#include <QDebug>
 #include <QDir>
 #include <QDirIterator>
 #include <QStyle>
@@ -79,8 +78,8 @@ void ResultDirItemModel::SetTracks(const QString &fileName, QStandardItem *paren
     {
         TableModelPlot tableModel(this, fileName);
 
-        if (tableModel.headerData(0, Qt::Horizontal, Qt::DisplayRole).toString() == "frame" &&
-            tableModel.headerData(1, Qt::Horizontal, Qt::DisplayRole).toString() == "id")
+        if (tableModel.headerData(0, Qt::Horizontal, Qt::DisplayRole).toString() == "Timestep" &&
+            tableModel.headerData(1, Qt::Horizontal, Qt::DisplayRole).toString() == "AgentId")
         {
             if (!firstHeader.isEmpty() && firstHeader != tableModel.GetHeaderData())
             {

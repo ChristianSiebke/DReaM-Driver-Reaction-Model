@@ -1,5 +1,6 @@
 #/*******************************************************************************
-#* Copyright (c) 2019, 2020 in-tech GmbH
+#* Copyright (c) 2019, 2021 in-tech GmbH
+#* Copyright (c) 2021 ITK Engineering GmbH
 #*
 #* This program and the accompanying materials are made
 #* available under the terms of the Eclipse Public License 2.0
@@ -40,11 +41,13 @@ SRC_SCENARIO =  $$OPENPASS_SLAVE/importer/eventDetectorImporter.cpp \
                 $$OPENPASS_SLAVE/importer/scenario.cpp \
                 $$OPENPASS_SLAVE/importer/scenarioImporter.cpp \
                 $$OPENPASS_SLAVE/importer/scenarioImporterHelper.cpp \
+                $$OPENPASS_SLAVE/importer/sceneryDynamics.cpp \
                 $$OPENPASS_SLAVE/importer/oscImporterCommon.cpp
 
 INC_SCENARIO =  $$OPENPASS_SLAVE/importer/scenario.h \
                 $$OPENPASS_SLAVE/importer/scenarioImporter.h \
                 $$OPENPASS_SLAVE/importer/scenarioImporterHelper.h \
+                $$OPENPASS_SLAVE/importer/sceneryDynamics.h \
                 $$OPEN_SRC/common/openScenarioDefinitions.h \
                 $$OPENPASS_SLAVE/importer/oscImporterCommon.h
 
@@ -96,14 +99,14 @@ SRC_SLAVECONFIG = $$OPENPASS_SLAVE/importer/slaveConfig.cpp \
                   $$OPENPASS_SLAVE/importer/parameterImporter.cpp \
                   $$OPENPASS_SLAVE/framework/directories.cpp
 
-SRC_CORESHARE = $$OPEN_SRC/../../common/xmlParser.cpp \
+SRC_CORESHARE = $$OPEN_SRC/common/xmlParser.cpp \
                 $$CORE_SHARE/log.cpp \
                 $$CORE_SHARE/callbacks.cpp \
                 $$CORE_SHARE/cephes/fresnl.c \
                 $$CORE_SHARE/cephes/const.c \
                 $$CORE_SHARE/cephes/polevl.c
 
-INC_CORESHARE = $$OPEN_SRC/../../common/xmlParser.h \
+INC_CORESHARE = $$OPEN_SRC/common/xmlParser.h \
                 $$CORE_SHARE/log.h \
                 $$CORE_SHARE/callbacks.h
 
@@ -116,8 +119,9 @@ SRC_WORLD = $$WORLD_OSI/WorldData.cpp \
             $$WORLD_OSI/OWL/OpenDriveTypeMapper.cpp \
             $$WORLD_OSI/Localization.cpp \
             $$WORLD_OSI/WorldToRoadCoordinateConverter.cpp \
-            $$WORLD_OSI/PointQuery.cpp \
-            $$WORLD_OSI/egoAgent.cpp
+            $$WORLD_OSI/egoAgent.cpp \
+            $$WORLD_OSI/LaneStream.cpp \
+            $$WORLD_OSI/RoadStream.cpp
 
 INC_WORLD = $$WORLD_OSI/WorldData.h \
             $$WORLD_OSI/WorldDataQuery.h \
@@ -128,10 +132,12 @@ INC_WORLD = $$WORLD_OSI/WorldData.h \
             $$WORLD_OSI/OWL/OpenDriveTypeMapper.h \
             $$WORLD_OSI/Localization.h \
             $$WORLD_OSI/WorldToRoadCoordinateConverter.h \
-            $$WORLD_OSI/PointQuery.h \
-            $$WORLD_OSI/egoAgent.h
+            $$WORLD_OSI/egoAgent.h \
+            $$WORLD_OSI/LaneStream.h \
+            $$WORLD_OSI/RoadStream.h
 
 SOURCES += \
+    $$OPEN_SRC/common/commonTools.cpp \
     $$OPEN_SRC/common/eventDetectorDefinitions.cpp \
     $$OPENPASS_SLAVE/modelElements/agentBlueprint.cpp \
     $$OPENPASS_SLAVE/modelElements/parameters.cpp \
@@ -149,6 +155,7 @@ SOURCES += \
     $$SRC_SLAVECONFIG
 
 HEADERS += \
+    $$OPEN_SRC/common/commonTools.h \
     $$INC_SCENARIO \
     $$INC_SCENERY \
     $$INC_SYSTEMCONFIG \

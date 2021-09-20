@@ -132,6 +132,7 @@ class WorldObject;
 class StationaryObject;
 class MovingObject;
 class TrafficSign;
+class TrafficLight;
 class RoadMarking;
 
 using LaneGeometryElements = std::vector<Primitive::LaneGeometryElement*>;
@@ -143,6 +144,7 @@ using WorldObjects         = std::list<WorldObject*>;
 using MovingObjects        = std::list<MovingObject*>;
 using StationaryObjects    = std::list<StationaryObject*>;
 using TrafficSigns         = std::list<TrafficSign*>;
+using TrafficLights        = std::list<TrafficLight*>;
 using RoadMarkings         = std::list<RoadMarking*>;
 using LaneAssignment       = std::pair<LaneOverlap, const Interfaces::WorldObject*>;
 using LaneAssignments      = std::vector<LaneAssignment>;
@@ -162,6 +164,9 @@ public:
 
     //! Returns the OSI Id
     virtual Id GetId() const = 0;
+
+    //! Returns the OpenDrive Id
+    virtual OdId GetOdId() const = 0;
 
     //! Returns false of this lane is invalid, otherwise returns true
     virtual bool Exists() const = 0;
@@ -278,6 +283,9 @@ public:
     //!Returns a vector of all road markings that are assigned to this lane
     virtual const Interfaces::RoadMarkings& GetRoadMarkings() const = 0;
 
+    //!Returns a vector of all traffic lights that are assigned to this lane
+    virtual const Interfaces::TrafficLights& GetTrafficLights() const = 0;
+
     //!Adds a MovingObject to the list of objects currently in this lane
     virtual void AddMovingObject(OWL::Interfaces::MovingObject& movingObject, const LaneOverlap& laneOverlap) = 0;
 
@@ -292,6 +300,9 @@ public:
 
     //!Assigns a road marking to this lane
     virtual void AddRoadMarking (Interfaces::RoadMarking &roadMarking) = 0;
+
+    //!Assigns a traffic light to this lane
+    virtual void AddTrafficLight (Interfaces::TrafficLight &trafficLight) = 0;
 
     //!Removes all MovingObjects from the list of objects currently in this lane while keeping StationaryObjects
     virtual void ClearMovingObjects() = 0;
@@ -600,7 +611,7 @@ public:
     virtual void SetLength(const double newLength) = 0;
     virtual void SetWidth(const double newWidth) = 0;
     virtual void SetHeight(const double newHeight) = 0;
-    virtual void SetDistanceReferencPointToLeadingEdge(const double distance) = 0;
+    virtual void SetBoundingBoxCenterToRear(const double distance) = 0;
     virtual double GetDistanceReferencePointToLeadingEdge() const = 0;
 
     virtual void SetReferencePointPosition(const Primitive::AbsPosition& newPosition) = 0;
@@ -635,6 +646,8 @@ public:
     virtual bool GetHeadLight() const = 0;
     virtual void SetHighBeamLight(bool highbeamLight) = 0;
     virtual bool GetHighBeamLight() const = 0;
+
+    virtual void SetType(AgentVehicleType type) = 0;
 };
 
 //! This class represents a static traffic sign
@@ -674,14 +687,15 @@ public:
     //!
     //! \param signal       OpenDrive specification
     //! \param position     position in the world
-    //! \return     true if succesfull, false if the sign can not be converted
+    //! \return     true if succesful, false if the sign can not be converted
     virtual bool SetSpecification(RoadSignalInterface* signal, Position position) = 0;
 
     //! Adds a supplementary sign to this sign and converts its specifation from OpenDrive to OSI
     //!
     //! \param odSignal     OpenDrive specification of supplementary sign
     //! \param position     position of the supplementary sign
-    virtual void AddSupplementarySign(RoadSignalInterface* odSignal, Position position) = 0;
+    //! \return     true if succesful, false if the sign can not be converted
+    virtual bool AddSupplementarySign(RoadSignalInterface* odSignal, Position position) = 0;
 
     /*!
      * \brief Copies the underlying OSI object to the given GroundTruth
@@ -689,6 +703,54 @@ public:
      * \param[in]   target   The target OSI GroundTruth
      */
     virtual void CopyToGroundTruth(osi3::GroundTruth& target) const = 0;
+};
+
+//! This class represents a traffic light
+class TrafficLight
+{
+public:
+    virtual ~TrafficLight() = default;
+
+    //! Returns the OpenDrive ID
+    virtual std::string GetId() const = 0;
+
+    //! Returns the s coordinate
+    virtual double GetS() const = 0;
+
+    //! Returns wether the sign is valid for the specified lane
+    virtual bool IsValidForLane(OWL::Id laneId) const = 0;
+
+    //!Returns the position of the reference point of the object in absolute coordinates (i. e. world coordinates)
+    virtual Primitive::AbsPosition GetReferencePointPosition() const = 0;
+
+    //! Sets the s coordinate
+    virtual void SetS(double sPos) = 0;
+
+    //! Converts the specification imported from OpenDrive to OSI.
+    //!
+    //! \param signal       OpenDrive specification
+    //! \param position     position in the world
+    //! \return     true if succesfull, false if the sign can not be converted
+    virtual bool SetSpecification(RoadSignalInterface* signal, const Position& position) = 0;
+
+    //! Adds the specified lane to the list of valid lanes
+    virtual void SetValidForLane(OWL::Id laneId) = 0;
+
+    /*!
+     * \brief Copies the underlying OSI object to the given GroundTruth
+     *
+     * \param[in]   target   The target OSI GroundTruth
+     */
+    virtual void CopyToGroundTruth(osi3::GroundTruth& target) const = 0;
+
+    //! Sets the state
+    virtual void SetState(CommonTrafficLight::State newState) = 0;
+
+    //! Returns the specification of the light with the set relative distance
+    virtual CommonTrafficLight::Entity GetSpecification(const double relativeDistance) const = 0;
+
+    //!Returns the current state
+    virtual CommonTrafficLight::State GetState() const = 0;
 };
 
 //! This class represents a traffic sign that is painted on the road surface
@@ -756,12 +818,13 @@ public:
     //! @param[in] osiLane  representation of the road in OpenDrive
     //! @param[in] section  section that this lane is part of
     //! @param[in] isInStreamDirection  flag whether this lane is in the same direction as the LaneStream it belongs to
-    Lane(osi3::Lane* osiLane, const Interfaces::Section* section);
+    Lane(osi3::Lane* osiLane, const Interfaces::Section* section, OdId odId);
     ~Lane() override;
 
     void CopyToGroundTruth(osi3::GroundTruth& target) const override;
 
     Id GetId() const override;
+    OdId GetOdId() const override;
     bool Exists() const override;
     const Interfaces::Section& GetSection() const override;
     const Interfaces::Road& GetRoad() const override;
@@ -808,12 +871,14 @@ public:
     const Interfaces::LaneAssignments& GetWorldObjects(bool direction) const override;
     const Interfaces::TrafficSigns& GetTrafficSigns() const override;
     const Interfaces::RoadMarkings& GetRoadMarkings() const override;
+    const Interfaces::TrafficLights& GetTrafficLights() const override;
 
     void AddMovingObject(OWL::Interfaces::MovingObject& movingObject, const LaneOverlap& laneOverlap) override;
     void AddStationaryObject(OWL::Interfaces::StationaryObject& stationaryObject, const LaneOverlap& laneOverlap) override;
     void AddWorldObject(Interfaces::WorldObject& worldObject, const LaneOverlap& laneOverlap) override;
     void AddTrafficSign (Interfaces::TrafficSign &trafficSign) override;
     void AddRoadMarking (Interfaces::RoadMarking &roadMarking) override;
+    void AddTrafficLight (Interfaces::TrafficLight &trafficLight) override;
     void ClearMovingObjects() override;
 
     std::tuple<const Primitive::LaneGeometryJoint*, const Primitive::LaneGeometryJoint*> GetNeighbouringJoints(
@@ -867,11 +932,13 @@ protected:
     osi3::Lane* osiLane{nullptr};
 
 private:
-    LaneType laneType;
+    OdId odId;
+    LaneType laneType{LaneType::Undefined};
     LaneAssignmentCollector worldObjects;
     Interfaces::LaneAssignments stationaryObjects;
     Interfaces::TrafficSigns trafficSigns;
     Interfaces::RoadMarkings roadMarkings;
+    Interfaces::TrafficLights trafficLights;
     const Interfaces::Section* section;
     Interfaces::LaneGeometryJoints laneGeometryJoints;
     Interfaces::LaneGeometryElements laneGeometryElements;
@@ -879,15 +946,15 @@ private:
     std::vector<Id> previous;
     const Interfaces::Lane* leftLane;
     const Interfaces::Lane* rightLane;
-    double length;
-    bool leftLaneIsDummy{section == nullptr};
-    bool rightLaneIsDummy{section == nullptr};
+    double length{0.0};
+    bool leftLaneIsDummy{true};
+    bool rightLaneIsDummy{true};
 };
 
 class InvalidLane : public Lane
 {
 public:
-    InvalidLane() : Lane(new osi3::Lane(), nullptr)
+    InvalidLane() : Lane(new osi3::Lane(), nullptr, 0)
     {
         // set 'invalid' id
         osiLane->mutable_id()->set_value(InvalidId);
@@ -1162,7 +1229,7 @@ public:
     virtual void SetLength(const double newLength) override;
     virtual void SetWidth(const double newWidth) override;
     virtual void SetHeight(const double newHeight) override;
-    virtual void SetDistanceReferencPointToLeadingEdge(const double distance) override;
+    virtual void SetBoundingBoxCenterToRear(const double distance) override;
 
     virtual void SetReferencePointPosition(const Primitive::AbsPosition& newPosition) override;
     virtual void SetX(const double newX) override;
@@ -1196,6 +1263,8 @@ public:
     virtual bool GetHeadLight() const override;
     virtual void SetHighBeamLight(bool highbeamLight) override;
     virtual bool GetHighBeamLight() const override;
+
+    virtual void SetType(AgentVehicleType) override;
 
     void CopyToGroundTruth(osi3::GroundTruth& target) const override;
 private:
@@ -1255,7 +1324,7 @@ public:
 
     virtual bool SetSpecification(RoadSignalInterface* signal, Position position) override;
 
-    virtual void AddSupplementarySign(RoadSignalInterface* odSignal, Position position) override;
+    virtual bool AddSupplementarySign(RoadSignalInterface* odSignal, Position position) override;
 
     virtual bool IsValidForLane(OWL::Id laneId) const override;
 
@@ -1268,6 +1337,59 @@ private:
     osi3::TrafficSign* osiSign {nullptr};
 };
 
+class TrafficLight : public Interfaces::TrafficLight
+{
+public:
+    TrafficLight(osi3::TrafficLight* osiLightRed,
+                 osi3::TrafficLight* osiLightYellow,
+                 osi3::TrafficLight* osiLightGreen);
+
+    virtual ~TrafficLight() = default;
+
+    virtual std::string GetId() const override
+    {
+        return id;
+    }
+
+    virtual double GetS() const override
+    {
+        return s;
+    }
+
+    virtual bool IsValidForLane(OWL::Id laneId) const override;
+
+    virtual bool SetSpecification(RoadSignalInterface* signal, const Position& position) override;
+
+    virtual Primitive::AbsPosition GetReferencePointPosition() const override;
+
+    virtual void SetS(double sPos) override
+    {
+        s = sPos;
+    }
+
+    virtual void SetValidForLane(OWL::Id laneId) override
+    {
+        osiLightRed->mutable_classification()->add_assigned_lane_id()->set_value(laneId);
+        osiLightYellow->mutable_classification()->add_assigned_lane_id()->set_value(laneId);
+        osiLightGreen->mutable_classification()->add_assigned_lane_id()->set_value(laneId);
+    }
+
+    virtual void CopyToGroundTruth(osi3::GroundTruth& target) const;
+
+    virtual void SetState(CommonTrafficLight::State newState);
+
+    virtual CommonTrafficLight::Entity GetSpecification(const double relativeDistance) const override;
+
+    virtual CommonTrafficLight::State GetState() const;
+
+private:
+    std::string id {""};
+    double s {0.0};
+
+    osi3::TrafficLight* osiLightRed {nullptr};
+    osi3::TrafficLight* osiLightYellow {nullptr};
+    osi3::TrafficLight* osiLightGreen {nullptr};
+};
 class RoadMarking : public Interfaces::RoadMarking
 {
 public:

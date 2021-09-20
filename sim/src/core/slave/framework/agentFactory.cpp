@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+* Copyright (c) 2017, 2018, 2019, 2020, 2021 in-tech GmbH
 *               2016, 2017, 2018 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -37,7 +37,7 @@ const std::string AgentCategoryStrings[] =
     "Common"
 };
 
-class DataStoreInterface;
+class DataBufferInterface;
 
 namespace SimulationSlave
 {
@@ -47,13 +47,13 @@ AgentFactory::AgentFactory(ModelBinding *modelBinding,
                            Stochastics *stochastics,
                            ObservationNetworkInterface *observationNetwork,
                            EventNetworkInterface *eventNetwork,
-                           DataStoreWriteInterface* dataStore) :
+                           DataBufferWriteInterface* dataBuffer) :
     modelBinding(modelBinding),
     world(world),
     stochastics(stochastics),
     observationNetwork(observationNetwork),
     eventNetwork(eventNetwork),
-    dataStore(dataStore)
+    dataBuffer(dataBuffer)
 {
 }
 
@@ -100,7 +100,7 @@ std::unique_ptr<Agent> AgentFactory::CreateAgent(const AgentBlueprintInterface& 
                             stochastics,
                             observationNetwork,
                             eventNetwork,
-                            dataStore))
+                            dataBuffer))
     {
         LOG_INTERN(LogLevel::Error) << "agent could not be instantiated";
         return nullptr;
@@ -163,49 +163,49 @@ void AgentFactory::PublishProperties(const Agent& agent)
 {
     const auto adapter = agent.GetAgentAdapter();
     const std::string keyPrefix = "Agents/" + std::to_string(agent.GetId()) + "/";
-    dataStore->PutStatic(keyPrefix + "AgentTypeGroupName", AgentCategoryStrings[static_cast<int>(adapter->GetAgentCategory())]);
-    dataStore->PutStatic(keyPrefix + "AgentTypeName", adapter->GetAgentTypeName());
-    dataStore->PutStatic(keyPrefix + "VehicleModelType", adapter->GetVehicleModelType());
-    dataStore->PutStatic(keyPrefix + "DriverProfileName", adapter->GetDriverProfileName());
+    dataBuffer->PutStatic(keyPrefix + "AgentTypeGroupName", AgentCategoryStrings[static_cast<int>(adapter->GetAgentCategory())]);
+    dataBuffer->PutStatic(keyPrefix + "AgentTypeName", adapter->GetAgentTypeName());
+    dataBuffer->PutStatic(keyPrefix + "VehicleModelType", adapter->GetVehicleModelType());
+    dataBuffer->PutStatic(keyPrefix + "DriverProfileName", adapter->GetDriverProfileName());
+    dataBuffer->PutStatic(keyPrefix + "AgentType", std::string(openpass::utils::to_cstr(adapter->GetVehicleModelParameters().vehicleType)));   // std::string for compatibility with gcc-9 std::ariant
 
     const auto& vehicleModelParameters = adapter->GetVehicleModelParameters();
-    const double longitudinalPivotOffset = (vehicleModelParameters.length / 2.0) - vehicleModelParameters.distanceReferencePointToLeadingEdge;
-    dataStore->PutStatic(keyPrefix + "Vehicle/Width", vehicleModelParameters.width);
-    dataStore->PutStatic(keyPrefix + "Vehicle/Length", vehicleModelParameters.length);
-    dataStore->PutStatic(keyPrefix + "Vehicle/Height", vehicleModelParameters.height);
-    dataStore->PutStatic(keyPrefix + "Vehicle/LongitudinalPivotOffset", longitudinalPivotOffset);
+    dataBuffer->PutStatic(keyPrefix + "Vehicle/Width", vehicleModelParameters.boundingBoxDimensions.width);
+    dataBuffer->PutStatic(keyPrefix + "Vehicle/Length", vehicleModelParameters.boundingBoxDimensions.length);
+    dataBuffer->PutStatic(keyPrefix + "Vehicle/Height", vehicleModelParameters.boundingBoxDimensions.height);
+    dataBuffer->PutStatic(keyPrefix + "Vehicle/LongitudinalPivotOffset", -vehicleModelParameters.boundingBoxCenter.x);
 
     for (const auto& sensor : adapter->GetSensorParameters())
     {
         const std::string sensorKeyPrefix = keyPrefix + "Vehicle/Sensors/" + std::to_string(sensor.id) + "/";
-        dataStore->PutStatic(sensorKeyPrefix + "Type", sensor.profile.type);
-        dataStore->PutStatic(sensorKeyPrefix + "Mounting/Position/Longitudinal", sensor.position.longitudinal);
-        dataStore->PutStatic(sensorKeyPrefix + "Mounting/Position/Lateral", sensor.position.lateral);
-        dataStore->PutStatic(sensorKeyPrefix + "Mounting/Position/Height", sensor.position.height);
-        dataStore->PutStatic(sensorKeyPrefix + "Mounting/Orientation/Yaw", sensor.position.yaw);
-        dataStore->PutStatic(sensorKeyPrefix + "Mounting/Orientation/Pitch", sensor.position.pitch);
-        dataStore->PutStatic(sensorKeyPrefix + "Mounting/Orientation/Roll", sensor.position.roll);
+        dataBuffer->PutStatic(sensorKeyPrefix + "Type", sensor.profile.type);
+        dataBuffer->PutStatic(sensorKeyPrefix + "Mounting/Position/Longitudinal", sensor.position.longitudinal);
+        dataBuffer->PutStatic(sensorKeyPrefix + "Mounting/Position/Lateral", sensor.position.lateral);
+        dataBuffer->PutStatic(sensorKeyPrefix + "Mounting/Position/Height", sensor.position.height);
+        dataBuffer->PutStatic(sensorKeyPrefix + "Mounting/Orientation/Yaw", sensor.position.yaw);
+        dataBuffer->PutStatic(sensorKeyPrefix + "Mounting/Orientation/Pitch", sensor.position.pitch);
+        dataBuffer->PutStatic(sensorKeyPrefix + "Mounting/Orientation/Roll", sensor.position.roll);
 
         const auto& parameters = sensor.profile.parameter;
 
         if (auto latency = openpass::parameter::Get<double>(parameters, "Latency"))
         {
-            dataStore->PutStatic(sensorKeyPrefix + "Parameters/Latency", latency.value());
+            dataBuffer->PutStatic(sensorKeyPrefix + "Parameters/Latency", latency.value());
         }
 
         if (auto openingAngleH = openpass::parameter::Get<double>(parameters, "OpeningAngleH"))
         {
-            dataStore->PutStatic(sensorKeyPrefix + "Parameters/OpeningAngleH", openingAngleH.value());
+            dataBuffer->PutStatic(sensorKeyPrefix + "Parameters/OpeningAngleH", openingAngleH.value());
         }
 
         if (auto openingAngleV = openpass::parameter::Get<double>(parameters, "OpeningAngleV"))
         {
-            dataStore->PutStatic(sensorKeyPrefix + "Parameters/OpeningAngleV", openingAngleV.value());
+            dataBuffer->PutStatic(sensorKeyPrefix + "Parameters/OpeningAngleV", openingAngleV.value());
         }
 
         if (auto detectionRange = openpass::parameter::Get<double>(parameters, "DetectionRange"))
         {
-            dataStore->PutStatic(sensorKeyPrefix + "Parameters/Range", detectionRange.value());
+            dataBuffer->PutStatic(sensorKeyPrefix + "Parameters/Range", detectionRange.value());
         }
     }
 }

@@ -14,7 +14,6 @@
 #include <src/common/acquirePositionSignal.h>
 
 #include <QDir>
-#include <QFile>
 
 #include "common/dynamicsSignal.h"
 #include "common/osiUtils.h"
@@ -30,6 +29,11 @@ extern "C"
 {
 #include "fmilib.h"
 #include "fmuChecker.h"
+}
+
+std::string log_prefix(const std::string &agentIdString)
+{
+    return "Agent " + agentIdString + ": ";
 }
 
 void* decode_integer_to_pointer(fmi2_integer_t hi, fmi2_integer_t lo)
@@ -78,7 +82,9 @@ OsmpFmuHandler::OsmpFmuHandler(fmu_check_data_t *cdata, WorldInterface *world, A
     world(world),
     fmuVariableValues(fmuVariableValues),
     fmuVariables(fmuVariables),
-    previousPosition(agent->GetPositionX(), agent->GetPositionY())
+    previousPosition(agent->GetPositionX(), agent->GetPositionY()),
+    agentIdString(std::to_string(agent->GetId())),
+    bb_center_offset_x(agent->GetVehicleModelParameters().boundingBoxCenter.x)
 {
     for (const auto& [key, value] : parameters->GetParametersString())
     {
@@ -94,75 +100,147 @@ OsmpFmuHandler::OsmpFmuHandler(fmu_check_data_t *cdata, WorldInterface *world, A
             }
             else
             {
-                LOGERRORANDTHROW("Unkown FMU \""+type+"\" variable \""+value+"\"")
+                LOGERRORANDTHROW(log_prefix(agentIdString) + "Unkown FMU \""+type+"\" variable \""+value+"\"")
             }
         }
     }
 
-    auto writeSensorDataFlag = parameters->GetParametersBool().find("WriteSensorDataOutput");
+    auto writeSensorDataFlag = parameters->GetParametersBool().find("WriteJson_SensorData");
     if (writeSensorDataFlag != parameters->GetParametersBool().end())
     {
         writeSensorData = writeSensorDataFlag->second;
     }
-    auto writeSensorViewFlag = parameters->GetParametersBool().find("WriteSensorViewOutput");
+    auto writeTraceSensorDataFlag = parameters->GetParametersBool().find("WriteTrace_SensorData");
+    if (writeTraceSensorDataFlag != parameters->GetParametersBool().end())
+    {
+        writeTraceSensorData = writeTraceSensorDataFlag->second;
+    }
+    auto writeSensorViewFlag = parameters->GetParametersBool().find("WriteJson_SensorView");
     if (writeSensorViewFlag != parameters->GetParametersBool().end())
     {
         writeSensorView = writeSensorViewFlag->second;
     }
-    auto writeSensorViewConfigFlag = parameters->GetParametersBool().find("WriteSensorViewConfigOutput");
+    auto writeTraceSensorViewFlag = parameters->GetParametersBool().find("WriteTrace_SensorView");
+    if (writeTraceSensorViewFlag != parameters->GetParametersBool().end())
+    {
+        writeTraceSensorView = writeTraceSensorViewFlag->second;
+    }
+    auto writeSensorViewConfigFlag = parameters->GetParametersBool().find("WriteJson_SensorViewConfig");
     if (writeSensorViewConfigFlag != parameters->GetParametersBool().end())
     {
         writeSensorViewConfig = writeSensorViewConfigFlag->second;
     }
-    auto writeSensorViewConfigRequestFlag = parameters->GetParametersBool().find("WriteSensorViewConfigRequestOutput");
+    auto writeTraceSensorViewConfigFlag = parameters->GetParametersBool().find("WriteTrace_SensorViewConfig");
+    if (writeTraceSensorViewConfigFlag != parameters->GetParametersBool().end())
+    {
+        writeTraceSensorViewConfig = writeTraceSensorViewConfigFlag->second;
+    }
+    auto writeSensorViewConfigRequestFlag = parameters->GetParametersBool().find("WriteJson_SensorViewConfigRequest");
     if (writeSensorViewConfigRequestFlag != parameters->GetParametersBool().end())
     {
         writeSensorViewConfigRequest = writeSensorViewConfigRequestFlag->second;
     }
-    auto writeGroundTruthFlag = parameters->GetParametersBool().find("WriteGroundTruthOutput");
+    auto writeTraceSensorViewConfigRequestFlag = parameters->GetParametersBool().find("WriteTrace_SensorViewConfigRequest");
+    if (writeTraceSensorViewConfigRequestFlag != parameters->GetParametersBool().end())
+    {
+        writeTraceSensorViewConfigRequest = writeTraceSensorViewConfigRequestFlag->second;
+    }
+    auto writeGroundTruthFlag = parameters->GetParametersBool().find("WriteJson_GroundTruth");
     if (writeGroundTruthFlag != parameters->GetParametersBool().end())
     {
         writeGroundTruth = writeGroundTruthFlag->second;
     }
+    auto writeTraceGroundTruthFlag = parameters->GetParametersBool().find("WriteTrace_GroundTruth");
+    if (writeTraceGroundTruthFlag != parameters->GetParametersBool().end())
+    {
+        writeTraceGroundTruth = writeTraceGroundTruthFlag->second;
+    }
 #ifdef USE_EXTENDED_OSI
-    auto writeTrafficCommandFlag = parameters->GetParametersBool().find("WriteTrafficCommandOutput");
+    auto writeTrafficCommandFlag = parameters->GetParametersBool().find("WriteJson_TrafficCommand");
     if (writeTrafficCommandFlag != parameters->GetParametersBool().end())
     {
         writeTrafficCommand = writeTrafficCommandFlag->second;
     }
-    auto writeTrafficUpdateFlag = parameters->GetParametersBool().find("WriteTrafficUpdateOutput");
+    auto writeTraceTrafficCommandFlag = parameters->GetParametersBool().find("WriteTrace_TrafficCommand");
+    if (writeTraceTrafficCommandFlag != parameters->GetParametersBool().end())
+    {
+        writeTraceTrafficCommand = writeTraceTrafficCommandFlag->second;
+    }
+    auto writeTrafficUpdateFlag = parameters->GetParametersBool().find("WriteJson_TrafficUpdate");
     if (writeTrafficUpdateFlag != parameters->GetParametersBool().end())
     {
         writeTrafficUpdate = writeTrafficUpdateFlag->second;
     }
-    auto writeMotionCommandFlag = parameters->GetParametersBool().find("WriteMotionCommandOutput");
+    auto writeTraceTrafficUpdateFlag = parameters->GetParametersBool().find("WriteTrace_TrafficUpdate");
+    if (writeTraceTrafficUpdateFlag != parameters->GetParametersBool().end())
+    {
+        writeTraceTrafficUpdate = writeTraceTrafficUpdateFlag->second;
+    }
+    auto writeMotionCommandFlag = parameters->GetParametersBool().find("WriteJson_MotionCommand");
     if (writeMotionCommandFlag != parameters->GetParametersBool().end())
     {
         writeMotionCommand = writeMotionCommandFlag->second;
     }
-    auto writeVehicleCommunicationDataFlag = parameters->GetParametersBool().find("WriteVehicleCommunicationDataOutput");
+    auto writeTraceMotionCommandFlag = parameters->GetParametersBool().find("WriteTrace_MotionCommand");
+    if (writeTraceMotionCommandFlag != parameters->GetParametersBool().end())
+    {
+        writeTraceMotionCommand = writeTraceMotionCommandFlag->second;
+    }
+    auto writeVehicleCommunicationDataFlag = parameters->GetParametersBool().find("WriteJson_VehicleCommunicationData");
     if (writeVehicleCommunicationDataFlag != parameters->GetParametersBool().end())
     {
         writeVehicleCommunicationData = writeVehicleCommunicationDataFlag->second;
     }
+    auto writeTraceVehicleCommunicationDataFlag = parameters->GetParametersBool().find("WriteTrace_VehicleCommunicationData");
+    if (writeTraceVehicleCommunicationDataFlag != parameters->GetParametersBool().end())
+    {
+        writeTraceVehicleCommunicationData = writeTraceVehicleCommunicationDataFlag->second;
+    }
 
     bool writeJsonOutput = writeSensorData || writeSensorView || writeSensorViewConfig || writeSensorViewConfigRequest || writeTrafficCommand || writeTrafficUpdate || writeMotionCommand || writeVehicleCommunicationData || writeGroundTruth;
+    bool writeTraceOutput = writeTraceSensorData || writeTraceSensorView || writeTraceSensorViewConfig || writeTraceSensorViewConfigRequest || writeTraceTrafficCommand || writeTraceTrafficUpdate || writeTraceMotionCommand || writeTraceVehicleCommunicationData || writeTraceGroundTruth;
 #else
     bool writeJsonOutput = writeSensorData || writeSensorView || writeGroundTruth;
+     bool writeTraceOutput = writeTraceSensorData || writeTraceSensorView || writeTraceGroundTruth;
 #endif
 
     if (writeJsonOutput)
     {
+        std::stringstream ss;
+        ss << std::setw(4) << std::setfill('0');
+        ss << agent->GetId();
+
+        std::filesystem::path fmuPath = cdata->FMUPath;
+
         outputDir =
             QString::fromStdString(parameters->GetRuntimeInformation().directories.output) + QDir::separator() +
             "FmuWrapper" + QDir::separator() +
-            "Agent " + QString::number(agent->GetId()) + QDir::separator() +
-            cdata->modelName;
+            "Agent" +  QString::fromStdString(ss.str()) + QDir::separator() +
+            QString::fromStdString(fmuPath.filename().replace_extension().string()) + QDir::separator() + "JsonFiles";
 
         QDir directory{outputDir};
         if (!directory.exists())
         {
             directory.mkpath(outputDir);
+        }
+    }
+
+    if (writeTraceOutput)
+    {
+        std::stringstream ss;
+        ss << std::setw(4) << std::setfill('0');
+        ss << agent->GetId();
+
+        std::filesystem::path fmuPath = cdata->FMUPath;
+
+        traceOutputDir = QString::fromStdString(parameters->GetRuntimeInformation().directories.output) + QDir::separator() +
+                         "FmuWrapper" + QDir::separator() +
+                         "Agent" +  QString::fromStdString(ss.str()) + QDir::separator() +
+                         QString::fromStdString(fmuPath.filename().replace_extension().string()) + QDir::separator() + "BinaryTraceFiles";
+        QDir directory{traceOutputDir};
+        if (!directory.exists())
+        {
+            directory.mkpath(traceOutputDir);
         }
     }
 
@@ -175,17 +253,50 @@ OsmpFmuHandler::OsmpFmuHandler(fmu_check_data_t *cdata, WorldInterface *world, A
     ParseFmuParameters(parameters);
 }
 
-void OsmpFmuHandler::UpdateInput(int localLinkId, const std::shared_ptr<const SignalInterface>& data, [[maybe_unused]] int time)
+void OsmpFmuHandler::SetSensorViewConfigRequest() {
+
+    void *buffer = decode_integer_to_pointer(GetValue(fmuVariables.at(sensorViewConfigRequestVariable.value() + ".base.hi").first, VariableType::Int).intValue,
+                                             GetValue(fmuVariables.at(sensorViewConfigRequestVariable.value() + ".base.lo").first, VariableType::Int).intValue);
+    const auto size = static_cast<std::string::size_type>(GetValue(fmuVariables.at(sensorViewConfigRequestVariable.value() + ".size").first, VariableType::Int).intValue);
+
+    previousSerializedSensorViewConfigRequest = serializedSensorViewConfigRequest;
+
+    serializedSensorViewConfigRequest = {static_cast<char *>(buffer), size};
+    sensorViewConfigRequest.ParseFromString(serializedSensorViewConfigRequest);
+}
+
+void OsmpFmuHandler::SetSensorViewConfig()
 {
+    // Apply requested config structure from FMU to sensorViewConfig in OpenPASS, which will be sent back to FMU
+    serializedSensorViewConfig = serializedSensorViewConfigRequest;
+    sensorViewConfig.ParseFromString(serializedSensorViewConfig);
+
+    fmi2_integer_t fmuInputValues[3];
+    fmi2_value_reference_t valueReferences[3] = {fmuVariables.at(sensorViewConfigVariable.value() + ".base.lo").first,
+                                                 fmuVariables.at(sensorViewConfigVariable.value() + ".base.hi").first,
+                                                 fmuVariables.at(sensorViewConfigVariable.value() + ".size").first};
+
+    encode_pointer_to_integer(serializedSensorViewConfig.data(),
+                              fmuInputValues[1],
+                              fmuInputValues[0]);
+    fmuInputValues[2] = serializedSensorView.length();
+    fmi2_import_set_integer(cdata->fmu2,
+                            valueReferences, // array of value reference
+                            3,               // number of elements
+                            fmuInputValues); // array of values
+}
+
+void OsmpFmuHandler::UpdateInput(int localLinkId, const std::shared_ptr<const SignalInterface> &data, [[maybe_unused]] int time)
+{
+
+
     if (localLinkId == 2)
     {
         auto signal = std::dynamic_pointer_cast<SensorDataSignal const>(data);
 
         if (!signal)
         {
-            const std::string msg = "AlgorithmFmuHandler invalid signaltype";
-            LOG(CbkLogLevel::Debug, msg);
-            throw std::runtime_error(msg);
+            LOGERRORANDTHROW(log_prefix(agentIdString) + "AlgorithmFmuHandler invalid signaltype")
         }
 
         sensorData = signal->sensorData;
@@ -211,7 +322,7 @@ void OsmpFmuHandler::UpdateInput(int localLinkId, const std::shared_ptr<const Si
             AddTrafficCommandActionFromOpenScenarioPosition(trafficCommands[time]->add_action(),
                                                             signal->position,
                                                             this->world,
-                                                            [this](const std::string &message) { LOGERROR(message); });
+                                                            [this](const std::string &message) { LOGERRORANDTHROW(log_prefix(agentIdString) + message); });
         }
     }
     else if (localLinkId == 12)
@@ -232,6 +343,25 @@ void OsmpFmuHandler::UpdateInput(int localLinkId, const std::shared_ptr<const Si
     }
 
     trafficCommand = *trafficCommands[time];
+
+    if (sensorViewConfigRequestVariable.has_value())
+    {
+        SetSensorViewConfigRequest();
+
+        if (previousSerializedSensorViewConfigRequest != serializedSensorViewConfigRequest)
+        {
+            SetSensorViewConfig();
+
+            if (writeSensorViewConfig)
+            {
+                WriteJson(sensorViewConfig, "SensorViewConfig-" + QString::number(time) + ".json");
+            }
+            if (writeSensorViewConfigRequest)
+            {
+                WriteJson(sensorViewConfigRequest, "SensorViewConfigRequest-" + QString::number(time) + ".json");
+            }
+        }
+    }
 #endif
 }
 
@@ -239,6 +369,7 @@ constexpr double EPSILON = 0.001;
 
 void OsmpFmuHandler::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterface const>& data, int time)
 {
+
     if (localLinkId == 6)
     {
         data = std::make_shared<SensorDataSignal const>(sensorData);
@@ -252,6 +383,7 @@ void OsmpFmuHandler::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterfa
         double positionY{0.0};
         double yaw{0.0};
         double yawRate{0.0};
+        double roll{0.0};
         double steeringWheelAngle{0.0};
         double centripetalAcceleration{0.0};
         double travelDistance{0.0};
@@ -270,8 +402,8 @@ void OsmpFmuHandler::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterfa
 
             acceleration = dynamicState.acceleration();
             velocity = dynamicState.velocity();
-            positionX = dynamicState.position_x();
-            positionY = dynamicState.position_y();
+            positionX = dynamicState.position_x() - bb_center_offset_x * std::cos(yaw);
+            positionY = dynamicState.position_y() - bb_center_offset_x * std::sin(yaw);
             yaw = dynamicState.heading_angle();
         }
         else if (trafficUpdateVariable.has_value())
@@ -279,16 +411,16 @@ void OsmpFmuHandler::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterfa
             const auto& baseMoving = trafficUpdate.mutable_update()->mutable_base();
             velocity = std::sqrt(baseMoving->velocity().x() * baseMoving->velocity().x() + baseMoving->velocity().y() * baseMoving->velocity().y());
             yaw = baseMoving->orientation().yaw();
+            roll = baseMoving->orientation().roll();
             acceleration = baseMoving->acceleration().x() * std::cos(yaw) + baseMoving->acceleration().y() * std::sin(yaw);
             centripetalAcceleration = -baseMoving->acceleration().x() * std::sin(yaw) + baseMoving->acceleration().y() * std::cos(yaw);
-            positionX = baseMoving->position().x();
-            positionY = baseMoving->position().y();
+            positionX = baseMoving->position().x() - bb_center_offset_x * std::cos(yaw);
+            positionY = baseMoving->position().y() - bb_center_offset_x * std::sin(yaw);
             yawRate = baseMoving->orientation_rate().yaw();
-
         }
         else
         {
-            LOGERRORANDTHROW("Cannot provide DynamicsSignal, as neither TrafficUpdate nor MotionCommand are connected");
+            LOGERRORANDTHROW(log_prefix(agentIdString) + "Cannot provide DynamicsSignal, as neither TrafficUpdate nor MotionCommand are connected");
         }
 
         if (std::abs(positionX) < EPSILON && std::abs(positionY) < EPSILON)
@@ -309,6 +441,7 @@ void OsmpFmuHandler::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterfa
                                                       positionY,
                                                       yaw,
                                                       yawRate,
+                                                      roll,
                                                       steeringWheelAngle,
                                                       centripetalAcceleration,
                                                       travelDistance);
@@ -343,42 +476,34 @@ void OsmpFmuHandler::Init()
         {
             WriteJson(groundTruth, "GroundTruth.json");
         }
+        if (writeTraceGroundTruth)
+        {
+            AppendMessages(appendedSerializedGroundTruth, serializedGroundTruth);
+            WriteBinaryTrace(appendedSerializedGroundTruth, "GroundTruth", 1000/cycleTime);
+        }
     }
     if (sensorViewConfigRequestVariable.has_value())
     {
-        void* buffer = decode_integer_to_pointer(GetValue(fmuVariables.at(sensorViewConfigRequestVariable.value()+".base.hi").first, VariableType::Int).intValue,
-                                                 GetValue(fmuVariables.at(sensorViewConfigRequestVariable.value()+".base.lo").first, VariableType::Int).intValue);
-        const auto size = static_cast<std::string::size_type>(GetValue(fmuVariables.at(sensorViewConfigRequestVariable.value()+".size").first, VariableType::Int).intValue);
-
-        serializedSensorViewConfigRequest = {static_cast<char *>(buffer), size};
-        sensorViewConfigRequest.ParseFromString(serializedSensorViewConfigRequest);
-
-        // Apply requested config structure from FMU to sensorViewConfig in OpenPASS, which will be sent back to FMU
-        serializedSensorViewConfig = serializedSensorViewConfigRequest;
-        sensorViewConfig.ParseFromString(serializedSensorViewConfig);
-
-        fmi2_integer_t fmuInputValues[3];
-        fmi2_value_reference_t valueReferences[3] = {fmuVariables.at(sensorViewConfigVariable.value()+".base.lo").first,
-                                                     fmuVariables.at(sensorViewConfigVariable.value()+".base.hi").first,
-                                                     fmuVariables.at(sensorViewConfigVariable.value()+".size").first};
-
-        encode_pointer_to_integer(serializedSensorViewConfig.data(),
-                                  fmuInputValues[1],
-                                  fmuInputValues[0]);
-        fmuInputValues[2] = serializedSensorView.length();
-
-        fmi2_import_set_integer(cdata->fmu2,
-                                valueReferences,     // array of value reference
-                                3,                   // number of elements
-                                fmuInputValues);     // array of values
+        SetSensorViewConfigRequest();
+        SetSensorViewConfig();
 
         if (writeSensorViewConfig)
         {
             WriteJson(sensorViewConfig, "SensorViewConfig.json");
         }
+        if (writeTraceSensorViewConfig)
+        {
+            AppendMessages(appendedSerializedSensorViewConfig, serializedSensorViewConfig);
+            WriteBinaryTrace(appendedSerializedSensorViewConfig, "SensorViewConfig", 1000/cycleTime);
+        }
         if (writeSensorViewConfigRequest)
         {
             WriteJson(sensorViewConfigRequest, "SensorViewConfigRequest.json");
+        }
+        if (writeTraceSensorViewConfigRequest)
+        {
+            AppendMessages(appendedSerializedSensorViewConfigRequest, serializedSensorViewConfigRequest);
+            WriteBinaryTrace(appendedSerializedSensorViewConfigRequest, "SensorViewConfigRequest", 1000/cycleTime);
         }
     }
     else
@@ -399,6 +524,11 @@ void OsmpFmuHandler::PreStep(int time)
         {
             WriteJson(*sensorView, "SensorView-" + QString::number(time) + ".json");
         }
+        if (writeTraceSensorView)
+        {
+            AppendMessages(appendedSerializedSensorView, serializedSensorView);
+            WriteBinaryTrace(appendedSerializedSensorView, "SensorView", time);
+        }
     }
     if (sensorDataInVariable)
     {
@@ -406,6 +536,11 @@ void OsmpFmuHandler::PreStep(int time)
         if (writeSensorData)
         {
             WriteJson(sensorData, "SensorData-" + QString::number(time) + ".json");
+        }
+        if (writeTraceSensorData)
+        {
+            AppendMessages(appendedSerializedSensorData, serializedSensorData);
+            WriteBinaryTrace(appendedSerializedSensorData, "SensorData", time);
         }
     }
 #ifdef USE_EXTENDED_OSI
@@ -415,6 +550,11 @@ void OsmpFmuHandler::PreStep(int time)
         if (writeTrafficCommand)
         {
             WriteJson(trafficCommand, "TrafficCommand-" + QString::number(time) + ".json");
+        }
+        if (writeTraceTrafficCommand)
+        {
+            AppendMessages(appendedSerializedTrafficCommand, serializedTrafficCommand);
+            WriteBinaryTrace(appendedSerializedTrafficCommand, "TrafficCommand", time);
         }
     }
     if (vehicleCommunicationDataVariable)
@@ -428,6 +568,11 @@ void OsmpFmuHandler::PreStep(int time)
         {
             WriteJson(vehicleCommunicationData, "VehicleCommunicationData-" + QString::number(time) + ".json");
         }
+        if (writeTraceVehicleCommunicationData)
+        {
+            AppendMessages(appendedSerializedVehicleCommunicationData, serializedVehicleCommunicationData);
+            WriteBinaryTrace(appendedSerializedVehicleCommunicationData, "VehicleCommunicationData", time);
+        }
     }
 #endif
 }
@@ -440,6 +585,11 @@ void OsmpFmuHandler::PostStep(int time)
         if (writeSensorData)
         {
             WriteJson(sensorData, "SensorData-" + QString::number(time) + ".json");
+        }
+        if (writeTraceSensorData)
+        {
+            AppendMessages(appendedSerializedSensorData, serializedSensorData);
+            WriteBinaryTrace(appendedSerializedSensorData, "SensorData", time);
         }
     }
 #ifdef USE_EXTENDED_OSI
@@ -463,7 +613,7 @@ void OsmpFmuHandler::PostStep(int time)
 #endif
 }
 
-FmuHandlerInterface::FmuValue& OsmpFmuHandler::GetValue(fmi2_value_reference_t valueReference, VariableType variableType)
+FmuHandlerInterface::FmuValue& OsmpFmuHandler::GetValue(fmi2_value_reference_t valueReference, VariableType variableType) const
 {
     ValueReferenceAndType valueReferenceAndType;
     valueReferenceAndType.emplace<FMI2>(valueReference, variableType);
@@ -518,7 +668,7 @@ void OsmpFmuHandler::GetSensorData()
     if (enforceDoubleBuffering && buffer != nullptr && buffer == previousSensorData)
     {
         const std::string msg = "FMU has no double buffering";
-        LOGERROR(msg);
+        LOGERROR(log_prefix(agentIdString) + msg);
         throw std::runtime_error(msg);
     }
 
@@ -544,7 +694,7 @@ void OsmpFmuHandler::SetTrafficCommandInput(const osi3::TrafficCommand& data)
 
     if (length > std::numeric_limits<fmi2_integer_t>::max())
     {
-        LOGERRORANDTHROW("Serialized buffer length of osi::TrafficCommand exceeds fmi2 integer size");
+        LOGERRORANDTHROW(log_prefix(agentIdString) + "Serialized buffer length of osi::TrafficCommand exceeds fmi2 integer size");
     }
 
     fmuInputValues[2] = static_cast<fmi2_integer_t>(length);
@@ -628,7 +778,7 @@ void OsmpFmuHandler::AddTrafficCommandActionFromOpenScenarioPosition(osi3::Traff
                    [&worldInterface, &errorCallback, &acquireGlobalPositionAction](const openScenario::RelativeObjectPosition &relativeObjectPosition) {
                        const auto entityRef = relativeObjectPosition.entityRef;
                        const auto referencedAgentInterface = worldInterface->GetAgentByName(entityRef);
-                       if (!referencedAgentInterface) logAndThrow("Reference to agent '" + entityRef + "' could not be resolved", errorCallback);
+                       if (!referencedAgentInterface) errorCallback("Reference to agent '" + entityRef + "' could not be resolved");
 
                        acquireGlobalPositionAction->mutable_position()->set_x(referencedAgentInterface->GetPositionX() + relativeObjectPosition.dx);
                        acquireGlobalPositionAction->mutable_position()->set_y(referencedAgentInterface->GetPositionY() + relativeObjectPosition.dy);
@@ -644,82 +794,77 @@ void OsmpFmuHandler::AddTrafficCommandActionFromOpenScenarioPosition(osi3::Traff
                        }
                    },
                    [&errorCallback](auto &&other) {
-                       logAndThrow("Position variant not supported for 'openScenario::AcquirePositionAction'", errorCallback);
+                       errorCallback("Position variant not supported for 'openScenario::AcquirePositionAction'");
                    }},
                position);
 }
 #endif
 
-void OsmpFmuHandler::ParseFmuParameters(const ParameterInterface* parameters)
+template <typename GetParametersType, typename FmuTypeParameters, typename UnderlyingType>
+void OsmpFmuHandler::ParseFmuParametersByType(const GetParametersType getParametersType,
+                                              const ParameterInterface *parameterInterface,
+                                              const FmuTypeParameters fmuTypeParameters,
+                                              const TypeContainer<UnderlyingType> typeContainer)
 {
-    for(const auto& [key, value] : parameters->GetParametersInt())
+    for (const auto &[key, value] : std::invoke(getParametersType, parameterInterface))
     {
-        if (key.substr(0, 10) == "Parameter_")
+        if (key.substr(0, 10) != "Parameter_")
+            continue;
+        auto variableName = key.substr(10);
+        UnderlyingType val = value;
+        if (std::smatch transformationMatch; std::regex_search(variableName, transformationMatch, transformationRegex))
         {
-            const auto variableName = key.substr(10);
-            const auto foundVariable = fmuVariables.find(variableName);
-            if (foundVariable == fmuVariables.cend())
+            const std::string transformationType = transformationMatch[1];
+            if (parameterTransformations.find(transformationType) == end(parameterTransformations))
+                LOGERRORANDTHROW(log_prefix(agentIdString) + "Unknown transformation type: " + transformationType);
+            if (transformationType == "TransformList" && typeContainer.variableType != VariableType::String)
+                LOGERRORANDTHROW(log_prefix(agentIdString) + "'TransformList' is only applicable to strings");
+            const std::string transformationRule = transformationMatch[2];
+            auto mappingEntry = parameterTransformationMappings.find(transformationRule);
+            if (mappingEntry == end(parameterTransformationMappings))
+                LOGERRORANDTHROW(log_prefix(agentIdString) + "Unknown mapping rule: " + transformationRule);
+            variableName = transformationMatch[3];
+
+            //TODO: support mapping to different types
+            auto mapping = std::any_cast<std::function<UnderlyingType(const UnderlyingType &)>>(mappingEntry->second);
+            if (transformationType == "Transform")
             {
-                LOGERRORANDTHROW("No variable with name \"" + variableName + "\" found in the FMU");
+                val = mapping(value);
             }
-            else if (foundVariable->second.second != VariableType::Int)
+            if constexpr (std::is_same_v<UnderlyingType, std::string>)
             {
-                LOGERRORANDTHROW("Variable \"" + variableName + "\" has different type in FMU");
+                if (transformationType == "TransformList")
+                {
+                    std::string s = std::string(value);
+                    size_t pos = 0;
+                    std::string token;
+                    std::vector<UnderlyingType> transformedList;
+                    while ((pos = s.find(',')) != std::string::npos)
+                    {
+                        auto mappedValue = mapping(s.substr(0, pos));
+                        transformedList.emplace_back(mappedValue);
+                        s.erase(0, pos + 1);
+                    }
+                    transformedList.emplace_back(mapping(s));
+                    val = std::accumulate(++cbegin(transformedList), cend(transformedList), *cbegin(transformedList), [](const std::string &left, const std::string &right) { return left + "," + right; });
+                }
             }
-            fmuIntegerParameters.emplace_back(value, foundVariable->second.first);
         }
+        const auto foundVariable = fmuVariables.find(variableName);
+        if (foundVariable == fmuVariables.cend())
+            LOGERRORANDTHROW(log_prefix(agentIdString) + "No variable with name \"" + variableName + "\" found in the FMU");
+        if (foundVariable->second.second != typeContainer.variableType)
+            LOGERRORANDTHROW(log_prefix(agentIdString) + "Variable \"" + variableName + "\" has different type in FMU");
+        std::invoke(fmuTypeParameters, this).emplace_back(val, foundVariable->second.first);
     }
-    for(const auto& [key, value] : parameters->GetParametersBool())
-    {
-        if (key.substr(0, 10) == "Parameter_")
-        {
-            const auto variableName = key.substr(10);
-            const auto foundVariable = fmuVariables.find(variableName);
-            if (foundVariable == fmuVariables.cend())
-            {
-                LOGERRORANDTHROW("No variable with name \"" + variableName + "\" found in the FMU");
-            }
-            else if (foundVariable->second.second != VariableType::Bool)
-            {
-                LOGERRORANDTHROW("Variable \"" + variableName + "\" has different type in FMU");
-            }
-            fmuBoolParameters.emplace_back(value, foundVariable->second.first);
-        }
-    }
-    for(const auto& [key, value] : parameters->GetParametersDouble())
-    {
-        if (key.substr(0, 10) == "Parameter_")
-        {
-            const auto variableName = key.substr(10);
-            const auto foundVariable = fmuVariables.find(variableName);
-            if (foundVariable == fmuVariables.cend())
-            {
-                LOGERRORANDTHROW("No variable with name \"" + variableName + "\" found in the FMU");
-            }
-            else if (foundVariable->second.second != VariableType::Double)
-            {
-                LOGERRORANDTHROW("Variable \"" + variableName + "\" has different type in FMU");
-            }
-            fmuDoubleParameters.emplace_back(value, foundVariable->second.first);
-        }
-    }
-    for(const auto& [key, value] : parameters->GetParametersString())
-    {
-        if (key.substr(0, 10) == "Parameter_")
-        {
-            const auto variableName = key.substr(10);
-            const auto foundVariable = fmuVariables.find(variableName);
-            if (foundVariable == fmuVariables.cend())
-            {
-                LOGERRORANDTHROW("No variable with name \"" + variableName + "\" found in the FMU");
-            }
-            else if (foundVariable->second.second != VariableType::String)
-            {
-                LOGERRORANDTHROW("Variable \"" + variableName + "\" has different type in FMU");
-            }
-            fmuStringParameters.emplace_back(value, foundVariable->second.first);
-        }
-    }
+}
+
+void OsmpFmuHandler::ParseFmuParameters(const ParameterInterface *parameters)
+{
+    ParseFmuParametersByType(&ParameterInterface::GetParametersInt, parameters, &OsmpFmuHandler::fmuIntegerParameters, TypeContainer<int>{VariableType::Int});
+    ParseFmuParametersByType(&ParameterInterface::GetParametersBool, parameters, &OsmpFmuHandler::fmuBoolParameters, TypeContainer<bool>{VariableType::Bool});
+    ParseFmuParametersByType(&ParameterInterface::GetParametersDouble, parameters, &OsmpFmuHandler::fmuDoubleParameters, TypeContainer<double>{VariableType::Double});
+    ParseFmuParametersByType(&ParameterInterface::GetParametersString, parameters, &OsmpFmuHandler::fmuStringParameters, TypeContainer<std::string>{VariableType::String});
 }
 
 void OsmpFmuHandler::SetFmuParameters()
@@ -728,7 +873,7 @@ void OsmpFmuHandler::SetFmuParameters()
 
     fmi2_value_reference_t realvrs[1];
     fmi2_real_t realData[1];
-    for (const auto& fmuParameter : fmuDoubleParameters)
+    for (const auto &fmuParameter : fmuDoubleParameters)
     {
         realData[0] = fmuParameter.value;
         realvrs[0] = fmuParameter.valueReference;
@@ -740,11 +885,11 @@ void OsmpFmuHandler::SetFmuParameters()
 
     if (fmiStatus == fmi2_status_warning)
     {
-        LOG(CbkLogLevel::Warning, "setting FMI variables returned warning");
+        LOGWARN(log_prefix(agentIdString) + "setting FMI variables returned warning");
     }
     else if (fmiStatus == fmi2_status_error)
     {
-        LOG(CbkLogLevel::Error, "setting FMI variables returned error");
+        LOGERROR(log_prefix(agentIdString) + "setting FMI variables returned error");
         throw std::logic_error("Error setting FMI variables");
     }
 
@@ -762,11 +907,11 @@ void OsmpFmuHandler::SetFmuParameters()
 
     if (fmiStatus == fmi2_status_warning)
     {
-        LOG(CbkLogLevel::Warning, "setting FMI variables returned warning");
+        LOGWARN(log_prefix(agentIdString) + "setting FMI variables returned warning");
     }
     else if (fmiStatus == fmi2_status_error)
     {
-        LOG(CbkLogLevel::Error, "setting FMI variables returned error");
+        LOGERROR(log_prefix(agentIdString) + "setting FMI variables returned error");
         throw std::logic_error("Error setting FMI variables");
     }
 
@@ -784,11 +929,11 @@ void OsmpFmuHandler::SetFmuParameters()
 
     if (fmiStatus == fmi2_status_warning)
     {
-        LOG(CbkLogLevel::Warning, "setting FMI variables returned warning");
+        LOGWARN(log_prefix(agentIdString) + "setting FMI variables returned warning");
     }
     else if (fmiStatus == fmi2_status_error)
     {
-        LOG(CbkLogLevel::Error, "setting FMI variables returned error");
+        LOGERROR(log_prefix(agentIdString) + "setting FMI variables returned error");
         throw std::logic_error("Error setting FMI variables");
     }
 
@@ -806,11 +951,11 @@ void OsmpFmuHandler::SetFmuParameters()
 
     if (fmiStatus == fmi2_status_warning)
     {
-        LOG(CbkLogLevel::Warning, "setting FMI variables returned warning");
+        LOGWARN(log_prefix(agentIdString) + "setting FMI variables returned warning");
     }
     else if (fmiStatus == fmi2_status_error)
     {
-        LOG(CbkLogLevel::Error, "setting FMI variables returned error");
+        LOGERROR(log_prefix(agentIdString) + "setting FMI variables returned error");
         throw std::logic_error("Error setting FMI variables");
     }
 }
@@ -823,7 +968,7 @@ void OsmpFmuHandler::GetMotionCommand()
 
     if (enforceDoubleBuffering && buffer != nullptr && buffer == previousMotionCommand)
     {
-        LOGERRORANDTHROW("FMU has no double buffering");
+        LOGERRORANDTHROW(log_prefix(agentIdString) + "FMU has no double buffering");
     }
 
     previousMotionCommand = buffer;
@@ -837,7 +982,7 @@ void OsmpFmuHandler::GetTrafficUpdate()
 
     if (enforceDoubleBuffering && buffer != nullptr && buffer == previousTrafficUpdate)
     {
-        LOGERRORANDTHROW("FMU has no double buffering");
+        LOGERRORANDTHROW(log_prefix(agentIdString) + "FMU has no double buffering");
     }
 
     previousTrafficUpdate = buffer;
@@ -858,6 +1003,22 @@ void OsmpFmuHandler::WriteJson(const google::protobuf::Message& message, const Q
     file.close();
 }
 
+void OsmpFmuHandler::WriteBinaryTrace(std::string& message, const QString& fileName, int time)
+{
+    const auto currentInterfaceVersion = osi3::InterfaceVersion::descriptor()->file()->options().GetExtension(osi3::current_interface_version);
+    auto path = (traceOutputDir + QDir::separator() + fileName + "_" + QString::number(GOOGLE_PROTOBUF_VERSION) + "_"
+            + QString::number(currentInterfaceVersion.version_major()) + QString::number(currentInterfaceVersion.version_minor())
+            + QString::number(currentInterfaceVersion.version_patch()) + "_" + QString::number(time * cycleTime / 1000) + ".osi").toStdString();
+    rename(oldFileName.c_str(), path.c_str());
+    if (!traceOutputFile.is_open())
+        traceOutputFile.open(path, std::ios::out | std::ios::trunc);
+    traceOutputFile  << message;
+    traceOutputFile.flush();
+    traceOutputFile.close();
+
+    oldFileName = path;
+}
+
 osi3::SensorViewConfiguration OsmpFmuHandler::GenerateDefaultSensorViewConfiguration()
 {
     osi3::SensorViewConfiguration viewConfiguration;
@@ -876,4 +1037,18 @@ osi3::SensorViewConfiguration OsmpFmuHandler::GenerateDefaultSensorViewConfigura
     viewConfiguration.set_range(std::numeric_limits<double>::max());
 
     return viewConfiguration;
+}
+
+std::vector<unsigned char> intToBytes(int paramInt)
+{
+    std::vector<unsigned char> arrayOfByte(4);
+    for (int i = 0; i < 4; i++)
+        arrayOfByte[3 - i] = (paramInt >> (i * 8));
+    return arrayOfByte;
+}
+
+void OsmpFmuHandler::AppendMessages(std::string& appendedMessage, std::string& message) {
+    auto length = intToBytes(message.length());
+    std::string messageLength{length.begin(), length.end()};
+    appendedMessage = appendedMessage + messageLength + message;
 }

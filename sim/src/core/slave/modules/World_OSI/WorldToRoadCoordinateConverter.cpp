@@ -12,14 +12,17 @@
 #include "common/opMath.h"
 #include "common/commonTools.h"
 #include "WorldToRoadCoordinateConverter.h"
-#include "PointQuery.h"
 
 namespace World {
 namespace Localization {
 
 bool WorldToRoadCoordinateConverter::IsConvertible(const Common::Vector2d& point) const
 {
-    return PointQuery::IsWithin(element.laneGeometryElement, point);
+    return CommonHelper::IntersectionCalculation::IsWithin(element.laneGeometryElement.joints.current.points.left,
+                                                           element.laneGeometryElement.joints.next.points.left,
+                                                           element.laneGeometryElement.joints.current.points.right,
+                                                           element.laneGeometryElement.joints.next.points.right,
+                                                           point);
 }
 
 RoadPosition WorldToRoadCoordinateConverter::GetRoadCoordinate(const Common::Vector2d& point, double hdg) const

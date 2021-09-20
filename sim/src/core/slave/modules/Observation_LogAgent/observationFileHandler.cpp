@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
+* Copyright (c) 2018, 2019, 2021 in-tech GmbH
 *               2017, 2020 ITK Engineering GmbH
 *
 * This program and the accompanying materials are made
@@ -23,12 +23,12 @@
 #include "common/openPassTypes.h"
 #include "common/openPassUtils.h"
 #include "common/sensorDefinitions.h"
-#include "include/dataStoreInterface.h"
+#include "include/dataBufferInterface.h"
 #include "include/worldInterface.h"
 #include "observationFileHandler.h"
 
-ObservationFileHandler::ObservationFileHandler(const DataStoreReadInterface& dataStore) :
-    dataStore{dataStore}
+ObservationFileHandler::ObservationFileHandler(const DataBufferReadInterface& dataBuffer) :
+    dataBuffer{dataBuffer}
 {
 }
 
@@ -76,7 +76,7 @@ void ObservationFileHandler::WriteStartOfFile(const std::string& frameworkVersio
     xmlFileStream->writeStartElement(outputTags.RUNRESULTS);
 }
 
-void ObservationFileHandler::WriteRun([[maybe_unused]] const RunResultInterface& runResult, RunStatistic runStatistic, ObservationCyclics& cyclics)
+void ObservationFileHandler::WriteRun([[maybe_unused]] const RunResultInterface& runResult, RunStatistic runStatistic, ObservationCyclics& cyclics, Events& events)
 {
     std::stringstream ss;
     ss << COMPONENTNAME << " append log to file: " << tmpPath.toStdString();
@@ -89,27 +89,12 @@ void ObservationFileHandler::WriteRun([[maybe_unused]] const RunResultInterface&
     // write RunStatisticsTag
     xmlFileStream->writeStartElement(outputTags.RUNSTATISTICS);
 
-    const auto agentIds = dataStore.GetKeys("Statics/Agents");
-
-    for (const auto& agentId : agentIds)
-    {
-        const auto tdtResult = dataStore.GetCyclic(std::nullopt, std::stoi(agentId), "TotalDistanceTraveled");
-        const auto last_tdt_row = (*((*tdtResult).end() - 1)).get();
-
-        if (last_tdt_row.entityId == 0)
-        {
-            runStatistic.EgoDistanceTraveled = std::get<double>(last_tdt_row.value);
-        }
-
-        runStatistic.TotalDistanceTraveled += std::get<double>(last_tdt_row.value);
-    }
-
     runStatistic.WriteStatistics(xmlFileStream.get());
 
     // close RunStatisticsTag
     xmlFileStream->writeEndElement();
 
-    AddEvents();
+    AddEvents(events);
     AddAgents();
 
     // write CyclicsTag
@@ -163,22 +148,20 @@ void ObservationFileHandler::WriteEndOfFile()
     xmlFile->rename(finalPath);
 }
 
-void ObservationFileHandler::AddEvents()
+void ObservationFileHandler::AddEvents(Events& events)
 {
     xmlFileStream->writeStartElement(outputTags.EVENTS);
 
-    const auto events = dataStore.GetAcyclic(std::nullopt, std::nullopt, "*");
-
-    for (const AcyclicRow& event : *events)
+    for (const auto& event : events)
     {
         xmlFileStream->writeStartElement(outputTags.EVENT);
-        xmlFileStream->writeAttribute(outputAttributes.TIME, QString::number(event.timestamp));
-        xmlFileStream->writeAttribute(outputAttributes.SOURCE, QString::fromStdString(event.key));
-        xmlFileStream->writeAttribute(outputAttributes.NAME, QString::fromStdString(event.data.name));
+        xmlFileStream->writeAttribute(outputAttributes.TIME, QString::number(event.time));
+        xmlFileStream->writeAttribute(outputAttributes.SOURCE, QString::fromStdString(event.dataRow.key));
+        xmlFileStream->writeAttribute(outputAttributes.NAME, QString::fromStdString(event.dataRow.data.name));
 
-        WriteEntities(outputTags.TRIGGERINGENTITIES, event.data.triggeringEntities.entities, true);
-        WriteEntities(outputTags.AFFECTEDENTITIES, event.data.affectedEntities.entities, true);
-        WriteParameter(event.data.parameter, true);
+        WriteEntities(outputTags.TRIGGERINGENTITIES, event.dataRow.data.triggeringEntities.entities, true);
+        WriteEntities(outputTags.AFFECTEDENTITIES, event.dataRow.data.affectedEntities.entities, true);
+        WriteParameter(event.dataRow.data.parameter, true);
 
         xmlFileStream->writeEndElement(); // event
     }
@@ -190,7 +173,7 @@ void ObservationFileHandler::AddAgents()
 {
     xmlFileStream->writeStartElement(outputTags.AGENTS);
 
-    const auto agentIds = dataStore.GetKeys("Statics/Agents");
+    const auto agentIds = dataBuffer.GetKeys("Statics/Agents");
 
     for (const auto& agentId : agentIds)
     {
@@ -207,10 +190,10 @@ void ObservationFileHandler::AddAgent(const std::string& agentId)
     xmlFileStream->writeStartElement(outputTags.AGENT);
 
     xmlFileStream->writeAttribute(outputAttributes.ID, QString::fromStdString(agentId));
-    xmlFileStream->writeAttribute(outputAttributes.AGENTTYPEGROUPNAME, QString::fromStdString(std::get<std::string>(dataStore.GetStatic(keyPrefix + "AgentTypeGroupName").at(0))));
-    xmlFileStream->writeAttribute(outputAttributes.AGENTTYPENAME, QString::fromStdString(std::get<std::string>(dataStore.GetStatic(keyPrefix + "AgentTypeName").at(0))));
-    xmlFileStream->writeAttribute(outputAttributes.VEHICLEMODELTYPE, QString::fromStdString(std::get<std::string>(dataStore.GetStatic(keyPrefix + "VehicleModelType").at(0))));
-    xmlFileStream->writeAttribute(outputAttributes.DRIVERPROFILENAME, QString::fromStdString(std::get<std::string>(dataStore.GetStatic(keyPrefix + "DriverProfileName").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.AGENTTYPEGROUPNAME, QString::fromStdString(std::get<std::string>(dataBuffer.GetStatic(keyPrefix + "AgentTypeGroupName").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.AGENTTYPENAME, QString::fromStdString(std::get<std::string>(dataBuffer.GetStatic(keyPrefix + "AgentTypeName").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.VEHICLEMODELTYPE, QString::fromStdString(std::get<std::string>(dataBuffer.GetStatic(keyPrefix + "VehicleModelType").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.DRIVERPROFILENAME, QString::fromStdString(std::get<std::string>(dataBuffer.GetStatic(keyPrefix + "DriverProfileName").at(0))));
 
     AddVehicleAttributes(agentId);
     AddSensors(agentId);
@@ -224,10 +207,10 @@ void ObservationFileHandler::AddVehicleAttributes(const std::string& agentId)
 
     xmlFileStream->writeStartElement(outputTags.VEHICLEATTRIBUTES);
 
-    xmlFileStream->writeAttribute(outputAttributes.WIDTH, QString::number(std::get<double>(dataStore.GetStatic(keyPrefix + "Width").at(0))));
-    xmlFileStream->writeAttribute(outputAttributes.LENGTH, QString::number(std::get<double>(dataStore.GetStatic(keyPrefix + "Length").at(0))));
-    xmlFileStream->writeAttribute(outputAttributes.HEIGHT, QString::number(std::get<double>(dataStore.GetStatic(keyPrefix + "Height").at(0))));
-    xmlFileStream->writeAttribute(outputAttributes.LONGITUDINALPIVOTOFFSET, QString::number(std::get<double>(dataStore.GetStatic(keyPrefix + "LongitudinalPivotOffset").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.WIDTH, QString::number(std::get<double>(dataBuffer.GetStatic(keyPrefix + "Width").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.LENGTH, QString::number(std::get<double>(dataBuffer.GetStatic(keyPrefix + "Length").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.HEIGHT, QString::number(std::get<double>(dataBuffer.GetStatic(keyPrefix + "Height").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.LONGITUDINALPIVOTOFFSET, QString::number(std::get<double>(dataBuffer.GetStatic(keyPrefix + "LongitudinalPivotOffset").at(0))));
 
     xmlFileStream->writeEndElement();
 }
@@ -235,7 +218,7 @@ void ObservationFileHandler::AddVehicleAttributes(const std::string& agentId)
 void ObservationFileHandler::AddSensors(const std::string& agentId)
 {
     const std::string keyPrefix = "Statics/Agents/" + agentId + "/Vehicle/Sensors";
-    const auto& sensorIds = dataStore.GetKeys(keyPrefix);
+    const auto& sensorIds = dataBuffer.GetKeys(keyPrefix);
 
     if (sensorIds.empty())
     {
@@ -265,21 +248,21 @@ void ObservationFileHandler::AddSensor(const std::string& agentId, const::std::s
     xmlFileStream->writeStartElement(outputTags.SENSOR);
 
     xmlFileStream->writeAttribute(outputAttributes.ID, QString::fromStdString(sensorId));
-    xmlFileStream->writeAttribute(outputAttributes.TYPE, QString::fromStdString(std::get<std::string>(dataStore.GetStatic(sensorKeyPrefix + "Type").at(0))));
-    xmlFileStream->writeAttribute(outputAttributes.MOUNTINGPOSITIONLONGITUDINAL, QString::number(std::get<double>(dataStore.GetStatic(mountingKeyPrefix + "Position/Longitudinal").at(0))));
-    xmlFileStream->writeAttribute(outputAttributes.MOUNTINGPOSITIONLATERAL, QString::number(std::get<double>(dataStore.GetStatic(mountingKeyPrefix + "Position/Lateral").at(0))));
-    xmlFileStream->writeAttribute(outputAttributes.MOUNTINGPOSITIONHEIGHT, QString::number(std::get<double>(dataStore.GetStatic(mountingKeyPrefix + "Position/Height").at(0))));
-    xmlFileStream->writeAttribute(outputAttributes.ORIENTATIONYAW, QString::number(std::get<double>(dataStore.GetStatic(mountingKeyPrefix + "Orientation/Yaw").at(0))));
-    xmlFileStream->writeAttribute(outputAttributes.ORIENTATIONPITCH, QString::number(std::get<double>(dataStore.GetStatic(mountingKeyPrefix + "Orientation/Pitch").at(0))));
-    xmlFileStream->writeAttribute(outputAttributes.ORIENTATIONROLL, QString::number(std::get<double>(dataStore.GetStatic(mountingKeyPrefix + "Orientation/Roll").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.TYPE, QString::fromStdString(std::get<std::string>(dataBuffer.GetStatic(sensorKeyPrefix + "Type").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.MOUNTINGPOSITIONLONGITUDINAL, QString::number(std::get<double>(dataBuffer.GetStatic(mountingKeyPrefix + "Position/Longitudinal").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.MOUNTINGPOSITIONLATERAL, QString::number(std::get<double>(dataBuffer.GetStatic(mountingKeyPrefix + "Position/Lateral").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.MOUNTINGPOSITIONHEIGHT, QString::number(std::get<double>(dataBuffer.GetStatic(mountingKeyPrefix + "Position/Height").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.ORIENTATIONYAW, QString::number(std::get<double>(dataBuffer.GetStatic(mountingKeyPrefix + "Orientation/Yaw").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.ORIENTATIONPITCH, QString::number(std::get<double>(dataBuffer.GetStatic(mountingKeyPrefix + "Orientation/Pitch").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.ORIENTATIONROLL, QString::number(std::get<double>(dataBuffer.GetStatic(mountingKeyPrefix + "Orientation/Roll").at(0))));
 
-    xmlFileStream->writeAttribute(outputAttributes.LATENCY, QString::number(std::get<double>(dataStore.GetStatic(sensorKeyPrefix + "Parameters/Latency").at(0))));
-    xmlFileStream->writeAttribute(outputAttributes.OPENINGANGLEH, QString::number(std::get<double>(dataStore.GetStatic(sensorKeyPrefix + "Parameters/OpeningAngleH").at(0))));
-    xmlFileStream->writeAttribute(outputAttributes.DETECTIONRANGE, QString::number(std::get<double>(dataStore.GetStatic(sensorKeyPrefix + "Parameters/Range").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.LATENCY, QString::number(std::get<double>(dataBuffer.GetStatic(sensorKeyPrefix + "Parameters/Latency").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.OPENINGANGLEH, QString::number(std::get<double>(dataBuffer.GetStatic(sensorKeyPrefix + "Parameters/OpeningAngleH").at(0))));
+    xmlFileStream->writeAttribute(outputAttributes.DETECTIONRANGE, QString::number(std::get<double>(dataBuffer.GetStatic(sensorKeyPrefix + "Parameters/Range").at(0))));
 
     try
     {
-        xmlFileStream->writeAttribute(outputAttributes.OPENINGANGLEV, QString::number(std::get<double>(dataStore.GetStatic(sensorKeyPrefix + "Parameters/OpeningAngleV").at(0))));
+        xmlFileStream->writeAttribute(outputAttributes.OPENINGANGLEV, QString::number(std::get<double>(dataBuffer.GetStatic(sensorKeyPrefix + "Parameters/OpeningAngleV").at(0))));
     }
     catch (const std::out_of_range&)
     {
@@ -358,8 +341,8 @@ void ObservationFileHandler::WriteCsvCyclics(QString filename, ObservationCyclic
 
     QTextStream stream(csvFile.get());
 
-    stream << "frame,"
-           << "id,"
+    stream << "Timestep,"
+           << "AgentId,"
            << QString::fromStdString(cyclics.GetAgentHeader())
            << '\n';
 

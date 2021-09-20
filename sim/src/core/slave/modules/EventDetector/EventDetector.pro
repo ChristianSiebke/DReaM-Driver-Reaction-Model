@@ -1,5 +1,5 @@
 # /*********************************************************************
-# * Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
+# * Copyright (c) 2017-2021 in-tech GmbH
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -29,6 +29,7 @@ SOURCES += \
     ConditionalEventDetector.cpp \
     EventDetectorCommonBase.cpp \
     EventDetectorExport.cpp \
+    ../../../../common/commonTools.cpp \
     ../../../../common/eventDetectorDefinitions.cpp
 
 HEADERS += \
@@ -39,4 +40,5 @@ HEADERS += \
     Conditions/ConditionCommonBase.h \
     Conditions/ReachPositionCondition.h \
     Conditions/SimulationTimeCondition.h \
+    ../../../../common/commonTools.h \
     ../../../../common/eventDetectorDefinitions.h

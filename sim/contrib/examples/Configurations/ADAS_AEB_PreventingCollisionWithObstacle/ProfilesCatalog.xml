@@ -1,4 +1,4 @@
-<Profiles SchemaVersion="0.4.3">
+<Profiles SchemaVersion="0.4.6">
   <AgentProfiles>
     <AgentProfile Name="MiddleClassCarAgent" Type="Dynamic">
       <DriverProfiles>
@@ -32,13 +32,7 @@
       </Components>
       <Sensors>
         <Sensor Id="0">
-          <Position Height="0.5"
-            Lateral="0.0"
-            Longitudinal="0.0"
-            Name="Default"
-            Pitch="0.0"
-            Roll="0.0"
-            Yaw="0.0"/>
+          <Position Height="0.5" Lateral="0.0" Longitudinal="0.0" Name="Default" Pitch="0.0" Roll="0.0" Yaw="0.0"/>
           <Profile Name="Standard" Type="Geometric2D"/>
         </Sensor>
       </Sensors>
@@ -73,7 +67,7 @@
       <Double Key="MaxDeceleration" Value="2.0"/>
     </Profile>
   </ProfileGroup>
-    <ProfileGroup Type="AEB">
+  <ProfileGroup Type="AEB">
     <Profile Name="AEB1">
       <Double Key="CollisionDetectionLongitudinalBoundary" Value="4.0"/>
       <Double Key="CollisionDetectionLateralBoundary" Value="1.5"/>
@@ -86,13 +80,32 @@
       <Double Key="DetectionRange" Value="300"/>
       <Bool Key="EnableVisualObstruction" Value="false"/>
       <Double Key="FailureProbability" Value="0"/>
-      <NormalDistribution Key="Latency"
-        Max="0.0"
-        Mean="0.0"
-        Min="0.0"
-        SD="0.0"/>
+      <NormalDistribution Key="Latency" Max="0.0" Mean="0.0" Min="0.0" SD="0.0"/>
       <Double Key="OpeningAngleH" Value="0.35"/>
       <Double Key="RequiredPercentageOfVisibleArea" Value="0.001"/>
+    </Profile>
+  </ProfileGroup>
+  <ProfileGroup Type="TrafficRules">
+    <Profile Name="Germany">
+      <Double Key="OpenSpeedLimit" Value="infinity"/>
+      <Bool Key="KeepToOuterLanes" Value="true"/>
+      <Bool Key="DontOvertakeOnOuterLanes" Value="true"/>
+      <Bool Key="FormRescueLane" Value="true"/>
+      <Bool Key="ZipperMerge" Value="true"/>
+    </Profile>
+    <Profile Name="USA">
+      <Double Key="OpenSpeedLimit" Value="31.2928"/>
+      <Bool Key="KeepToOuterLanes" Value="false"/>
+      <Bool Key="DontOvertakeOnOuterLanes" Value="false"/>
+      <Bool Key="FormRescueLane" Value="true"/>
+      <Bool Key="ZipperMerge" Value="false"/>
+    </Profile>
+    <Profile Name="China">
+      <Double Key="OpenSpeedLimit" Value="33.3333"/>
+      <Bool Key="KeepToOuterLanes" Value="false"/>
+      <Bool Key="DontOvertakeOnOuterLanes" Value="true"/>
+      <Bool Key="FormRescueLane" Value="false"/>
+      <Bool Key="ZipperMerge" Value="true"/>
     </Profile>
   </ProfileGroup>
 </Profiles>

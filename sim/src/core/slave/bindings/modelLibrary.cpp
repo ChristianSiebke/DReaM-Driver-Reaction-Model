@@ -32,14 +32,15 @@ namespace SimulationSlave {
 
 bool ModelLibrary::Init()
 {
-    #if defined(unix)
+#if defined(unix)
     QString path = QString(modelLibraryPath.c_str()) + QString("/lib") + QString(modelLibraryName.c_str());
-    #elif defined (WIN32)
+#elif defined (WIN32)
     std::string suffix = DEBUG_POSTFIX;
     QString path = QString(modelLibraryPath.c_str()) + QString("/") + QString((modelLibraryName+suffix).c_str());
-    #else
-#error undefined target platform
-    #endif
+#else
+    #error Unsupported target platform. Either unix or WIN32 have to be set.
+#endif
+
     library = new (std::nothrow) QLibrary(path);
     if (!library)
     {
