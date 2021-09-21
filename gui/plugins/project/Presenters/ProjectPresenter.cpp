@@ -79,24 +79,24 @@ ProjectInterface::Result ProjectPresenter::getResultPath() const
     return _projectModel->getResultPath();
 }
 
-bool ProjectPresenter::setLogMaster(ProjectInterface::LogMaster const &logMaster)
+bool ProjectPresenter::setLogOpSimulationManager(ProjectInterface::LogOpSimulationManager const &logOpSimulationManager)
 {
-    return _projectModel->setLogMaster(logMaster);
+    return _projectModel->setLogOpSimulationManager(logOpSimulationManager);
 }
 
-ProjectInterface::LogMaster ProjectPresenter::getLogMaster() const
+ProjectInterface::LogOpSimulationManager ProjectPresenter::getLogOpSimulationManager() const
 {
-    return _projectModel->getLogMaster();
+    return _projectModel->getLogOpSimulationManager();
 }
 
-bool ProjectPresenter::setLogSlave(ProjectInterface::LogSlave const &logSlave)
+bool ProjectPresenter::setLogSimulation(ProjectInterface::LogSimulation const &logSimulation)
 {
-    return _projectModel->setLogSlave(logSlave);
+    return _projectModel->setLogSimulation(logSimulation);
 }
 
-ProjectInterface::LogSlave ProjectPresenter::getLogSlave() const
+ProjectInterface::LogSimulation ProjectPresenter::getLogSimulation() const
 {
-    return _projectModel->getLogSlave();
+    return _projectModel->getLogSimulation();
 }
 
 bool ProjectPresenter::setLogLevel(ProjectInterface::LogLevel const &logLevel)
@@ -109,12 +109,12 @@ ProjectInterface::LogLevel ProjectPresenter::getLogLevel() const
     return _projectModel->getLogLevel();
 }
 
-bool ProjectPresenter::setSlave(ProjectInterface::Slave const &slave)
+bool ProjectPresenter::setSimulation(ProjectInterface::Simulation const &simulation)
 {
-    return _projectModel->setSlaveExe(slave);
+    return _projectModel->setSimulationExe(simulation);
 }
 
-ProjectInterface::Slave ProjectPresenter::getSlave() const
+ProjectInterface::Simulation ProjectPresenter::getSimulation() const
 {
-    return _projectModel->getSlaveExe();
+    return _projectModel->getSimulationExe();
 }

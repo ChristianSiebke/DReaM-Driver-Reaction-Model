@@ -45,7 +45,7 @@ Following parameters are supported:
 
 **Example**
 
-.. literalinclude:: @OP_REL_SIM@/contrib/examples/Common/slaveConfig.xml
+.. literalinclude:: @OP_REL_SIM@/contrib/examples/Common/simulationConfig.xml
    :language: xml
    :start-at: <Library>Observation_EntityRepository</Library>
    :end-at: </Parameters>

@@ -84,35 +84,35 @@ def clean_and_create(folder):
 
     os.makedirs(folder)
 
-def print_slave_log():
-    return 'Slave execution failed'
+def print_simulation_log():
+    return 'Simulation execution failed'
 
-def run(testing_data: TestingData, slave_config, subdir):
+def run(testing_data: TestingData, simulation_config, subdir):
     assert(testing_data.config_under_test.exists()), f': Unable to find {testing_data.config_under_test}'
 
-    slave = config.MetaInfo.slave.copy()
-    slave.configs = os.path.join(config.MetaInfo.slave.configs, subdir)
-    slave.results = os.path.join(config.MetaInfo.slave.results, subdir)
-    slave.log_file = os.path.join(slave.results, 'test.log')
+    simulation = config.MetaInfo.simulation.copy()
+    simulation.configs = os.path.join(config.MetaInfo.simulation.configs, subdir)
+    simulation.results = os.path.join(config.MetaInfo.simulation.results, subdir)
+    simulation.log_file = os.path.join(simulation.results, 'test.log')
 
     # Copy Configurations
-    clean_and_create(slave.results)
-    testing_data.config_under_test.copy_to(slave.configs)
+    clean_and_create(simulation.results)
+    testing_data.config_under_test.copy_to(simulation.configs)
 
     # Update Configurations
-    XmlUtil.update(slave.configs, slave_config)
+    XmlUtil.update(simulation.configs, simulation_config)
     if testing_data.xml_setter is not None:
-        XmlUtil.custom_update(slave.configs, testing_data.xml_setter)
+        XmlUtil.custom_update(simulation.configs, testing_data.xml_setter)
 
-    # Execute Slave
-    slave_state = slave.execute()
+    # Execute Simulation
+    simulation_state = simulation.execute()
     
     # Collect Results
-    slave.copy_artifacts(os.path.join('artifacts', subdir))
+    simulation.copy_artifacts(os.path.join('artifacts', subdir))
 
-    assert(slave_state == 0), f'Slave execution failed\n{slave.get_log()}'
-    assert(slave.log_empty()), f'Slave log not empty\n{slave.get_log()}'
-    print(slave.get_log())
+    assert(simulation_state == 0), f'Simulation execution failed\n{simulation.get_log()}'
+    assert(simulation.log_empty()), f'Simulation log not empty\n{simulation.get_log()}'
+    print(simulation.get_log())
 
 
 class TestExecution:
@@ -129,17 +129,17 @@ class TestExecution:
     def test_determinism(self, testing_data: TestingData):
         invocations = 3
         subdir = f'{config.MetaInfo.scope}/{testing_data.identifier}/determinism'
-        slave_config = config.MetaInfo.base_config
-        slave_config["invocations"] = invocations
+        simulation_config = config.MetaInfo.base_config
+        simulation_config["invocations"] = invocations
         random_seed = self.init_random_seed(testing_data.config_under_test)
 
-        run(testing_data, slave_config, f'{subdir}_base')
+        run(testing_data, simulation_config, f'{subdir}_base')
 
         for i in range(0, invocations):
-            slave_config["invocations"] = 1
-            slave_config["randomSeed"] = random_seed + i
+            simulation_config["invocations"] = 1
+            simulation_config["randomSeed"] = random_seed + i
 
-            run(testing_data, slave_config, f'{subdir}_run{i}')
+            run(testing_data, simulation_config, f'{subdir}_run{i}')
 
             import os
             base_run = os.path.join(

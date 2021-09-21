@@ -11,7 +11,7 @@
 #-----------------------------------------------------------------------------
 # \file  openPASS-TrafficSimulation.pro
 # \brief This project file configures the Traffic Simulation plugin which can be
-#        used to edit the slaveConfig xml file for traffic flow simulations.
+#        used to edit the simulationConfig xml file for traffic flow simulations.
 #-----------------------------------------------------------------------------/
 
 CONFIG += OPENPASS_LIBRARY_GUI

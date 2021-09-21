@@ -69,7 +69,7 @@ public:
         ON_CALL(stochastics, GetUniformDistributed(0,DoubleEq(41))).WillByDefault(Return(7));
         ON_CALL(agentFactory, AddAgent(_)).WillByDefault([&](AgentBlueprintInterface* bluePrint)
         {
-            agents.push_back(new SimulationSlave::Agent(&world, *bluePrint));
+            agents.push_back(new core::Agent(&world, *bluePrint));
             auto laneId = -1 + static_cast<int>(bluePrint->GetSpawnParameter().positionY / 3.0);
             auto agent = new FakeAgent;
             agentsOnLane[laneId].insert(agentsOnLane[laneId].begin(), agent);
@@ -254,7 +254,7 @@ public:
     std::map<std::string, double> parametersDouble;
 
     FakeCallback callbacks;
-    std::vector<SimulationSlave::Agent*> agents;
+    std::vector<core::Agent*> agents;
     std::map<int, std::vector<FakeAgent*>> agentsOnLane;
 };
 

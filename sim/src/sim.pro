@@ -13,19 +13,19 @@ DEFINES += USE_PROTOBUF_ARENA
 TEMPLATE = subdirs
 SUBDIRS = \
     components \
-    master \
-    slave \
-    core/slave/modules/BasicDataBuffer \
-    core/slave/modules/EventDetector \
-    core/slave/modules/Manipulator \
-    core/slave/modules/Observation_EntityRepository \
-    core/slave/modules/Observation_Log \
-    core/slave/modules/Observation_LogAgent \
-    core/slave/modules/Spawners/Scenario \
-    core/slave/modules/Spawners/PreRunCommon \
-    core/slave/modules/Spawners/RuntimeCommon \
-    core/slave/modules/Stochastics \
-    core/slave/modules/World_OSI \
+    opsimulationmanager \
+    core/opSimulation \
+    core/opSimulation/modules/BasicDataBuffer \
+    core/opSimulation/modules/EventDetector \
+    core/opSimulation/modules/Manipulator \
+    core/opSimulation/modules/Observation_EntityRepository \
+    core/opSimulation/modules/Observation_Log \
+    core/opSimulation/modules/Observation_LogAgent \
+    core/opSimulation/modules/Spawners/Scenario \
+    core/opSimulation/modules/Spawners/PreRunCommon \
+    core/opSimulation/modules/Spawners/RuntimeCommon \
+    core/opSimulation/modules/Stochastics \
+    core/opSimulation/modules/World_OSI \
 
-slave.file = core/slave/OpenPassSlave.pro
-master.file = core/master/OpenPassMaster.pro
+opSimulation.file = core/opSimulation/opSimulation.pro
+opsimulationmanager.file = core/opsimulationmanager/opSimulationManager.pro

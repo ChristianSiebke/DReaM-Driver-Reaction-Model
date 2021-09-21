@@ -13,7 +13,7 @@
 #include "gmock/gmock.h"
 #include "include/agentTypeInterface.h"
 
-namespace SimulationSlave {
+namespace core {
 
 class FakeAgentType : public AgentTypeInterface {
  public:
@@ -27,4 +27,4 @@ class FakeAgentType : public AgentTypeInterface {
       const std::map<std::string, std::shared_ptr<ComponentType>>&());
 };
 
-}  // namespace SimulationSlave
+}  // namespace core

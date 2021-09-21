@@ -17,9 +17,9 @@ class FakeSystemConfig : public SystemConfigInterface
 {
 public:
     MOCK_METHOD0(GetSystems,
-                 std::map<int, std::shared_ptr< SimulationSlave::AgentTypeInterface>>& ());
+                 std::map<int, std::shared_ptr<core::AgentTypeInterface>>& ());
     MOCK_METHOD1(SetSystems,
-                 void (std::map<int, std::shared_ptr< SimulationSlave::AgentTypeInterface>> systems));
+                 void (std::map<int, std::shared_ptr<core::AgentTypeInterface>> systems));
     MOCK_METHOD1(AddModelParameters,
                  void (std::shared_ptr<ParameterInterface> modelParameters));
 };

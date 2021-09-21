@@ -14,5 +14,5 @@ set(FOLDER "core")
 include_directories(${CMAKE_CURRENT_LIST_DIR})
 
 add_subdirectory(common)
-add_subdirectory(master)
-add_subdirectory(slave)
+add_subdirectory(opsimulationmanager)
+add_subdirectory(opSimulation)

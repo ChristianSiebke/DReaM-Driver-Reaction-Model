@@ -46,7 +46,7 @@ bool ConfigGenerator::GenerateConfigs(const QString &pcmCase,
 
     QString caseOutputFolder = baseFolder + "/" + caseOutputFolderName;
     QString caseResultFolder = caseOutputFolder + "/" + DIRNAME_CASE_RESULTS;
-    QString caseConfigFolder = caseOutputFolder + "/" + FILENAME_OPENPASSSLAVE_CONFIGS;
+    QString caseConfigFolder = caseOutputFolder + "/" + FILENAME_OPENPASSSIMULATION_CONFIGS;
 
     if (!CheckDirs(caseResultFolder))
     {
@@ -67,7 +67,7 @@ bool ConfigGenerator::GenerateConfigs(const QString &pcmCase,
         return false;
     }
 
-    const QString runConfigFile = configWriter->CreateSlaveConfiguration(caseConfigFolder,
+    const QString runConfigFile = configWriter->CreateSimulationConfiguration(caseConfigFolder,
                                                                          simulationSet,
                                                                          caseResultFolder,
                                                                          pcmCase,
@@ -134,8 +134,8 @@ void ConfigGenerator::AddConfigSet(QString resultFolderName)
 {
     QMap<QString, QString> configSet;
 
-    configSet.insert("logFileSlave", resultFolderName + "/" + FILENAME_OPENPASSSLAVE_LOG);
-    configSet.insert("configurations", resultFolderName + "/" + FILENAME_OPENPASSSLAVE_CONFIGS);
+    configSet.insert("logFileSimulation", resultFolderName + "/" + FILENAME_OPENPASSSIMULATION_LOG);
+    configSet.insert("configurations", resultFolderName + "/" + FILENAME_OPENPASSSIMULATION_CONFIGS);
     configSet.insert("results", resultFolderName + "/" + DIRNAME_CASE_RESULTS);
 
     configSetList.append(configSet);

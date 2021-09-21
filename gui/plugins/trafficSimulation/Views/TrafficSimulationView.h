@@ -296,8 +296,8 @@ private:
 
 private:
     WindowInterface::Action *const actionMenuNew;     //!< The action menu object for the creating a new worksheet
-    WindowInterface::Action *const actionMenuLoad;    //!< The action menu object for loading a slaveConfig file
-    WindowInterface::Action *const actionMenuSave;    //!< The action menu object for saving a slaveConfig file
+    WindowInterface::Action *const actionMenuLoad;    //!< The action menu object for loading a simulationConfig file
+    WindowInterface::Action *const actionMenuSave;    //!< The action menu object for saving a simulationConfig file
     WindowInterface::Action *const actionMenuUndo;    //!< The action menu object for undoing actions
     WindowInterface::Action *const actionMenuRedo;    //!< The action menu object for redoing actions
     WindowInterface::Action *const actionMenuHistory; //!< The action menu object for showing the command history

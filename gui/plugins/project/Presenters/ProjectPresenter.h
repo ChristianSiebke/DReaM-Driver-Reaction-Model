@@ -44,20 +44,20 @@ public:
     virtual ProjectInterface::Result getResultPath() const;
 
 public:
-    virtual bool setLogMaster(ProjectInterface::LogMaster const &logMaster);
-    virtual ProjectInterface::LogMaster getLogMaster() const;
+    virtual bool setLogOpSimulationManager(ProjectInterface::LogOpSimulationManager const &logOpSimulationManager);
+    virtual ProjectInterface::LogOpSimulationManager getLogOpSimulationManager() const;
 
 public:
-    virtual bool setLogSlave(ProjectInterface::LogSlave const &logSlave);
-    virtual ProjectInterface::LogSlave getLogSlave() const;
+    virtual bool setLogSimulation(ProjectInterface::LogSimulation const &logSimulation);
+    virtual ProjectInterface::LogSimulation getLogSimulation() const;
 
 public:
     virtual bool setLogLevel(ProjectInterface::LogLevel const &logLevel);
     virtual ProjectInterface::LogLevel getLogLevel() const;
 
 public:
-    virtual bool setSlave(ProjectInterface::Slave const &slave);
-    virtual ProjectInterface::Slave getSlave() const;
+    virtual bool setSimulation(ProjectInterface::Simulation const &simulation);
+    virtual ProjectInterface::Simulation getSimulation() const;
 
 private:
     ProjectModel *_projectModel;

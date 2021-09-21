@@ -14,7 +14,7 @@
 #include "include/eventDetectorInterface.h"
 #include "include/eventDetectorNetworkInterface.h"
 
-using namespace SimulationSlave;
+using namespace core;
 
 class FakeEventDetectorNetwork : public EventDetectorNetworkInterface
 {
@@ -24,7 +24,7 @@ public:
     MOCK_METHOD0(Clear,
                  void());
     MOCK_METHOD0(GetEventDetectors,
-                 std::vector<const SimulationSlave::EventDetector*>());
+                 std::vector<const core::EventDetector*>());
     MOCK_METHOD0(ResetAll,
                  void());
 };

@@ -22,7 +22,7 @@
 using SharedEvent = std::shared_ptr<EventInterface>;
 using EventContainer = std::vector<SharedEvent>;
 
-namespace SimulationSlave {
+namespace core {
 
 //-----------------------------------------------------------------------------
 /** \brief This class provides the interface for the EventNetwork
@@ -43,4 +43,4 @@ public:
     virtual std::vector<EventInterface const *> GetTrigger(const std::string &identifier) const = 0;
 };
 
-} //namespace SimulationSlave
+} //namespace core

@@ -70,12 +70,12 @@ The above directory structure will be created by following the instructions of t
             cd ~
             git clone https://gitlab.eclipse.org/eclipse/simopenpass/simopenpass.git
 
-#. Navigate into repository and checkout master branch
+#. Navigate into repository and checkout main branch
 
    .. code-block:: 
 
       cd simopenpass
-      git checkout master
+      git checkout main
 
 #. Create directory structure
 

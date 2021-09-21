@@ -16,7 +16,7 @@
 #include "include/scenarioInterface.h"
 #include "common/spawnPointLibraryDefinitions.h"
 
-namespace SimulationSlave
+namespace core
 {
 class SpawnPoint;
 
@@ -60,4 +60,4 @@ public:
     virtual void Clear() = 0;
 };
 
-} //SimulationSlave
+} //core

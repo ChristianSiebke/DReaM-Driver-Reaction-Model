@@ -23,7 +23,7 @@ add_openpass_target(
   INCDIRS
     ${COMPONENT_SOURCE_DIR}
     ${COMPONENT_SOURCE_DIR}/FmiImporter/include
-    ${OPENPASS_SIMCORE_DIR}/core/slave/modules/World_OSI
+    ${OPENPASS_SIMCORE_DIR}/core/opSimulation/modules/World_OSI
     # FMILibrary internals
     ${FMILibrary_INCLUDE_DIR}
     ${FMILibrary_INCLUDE_DIR}/FMI

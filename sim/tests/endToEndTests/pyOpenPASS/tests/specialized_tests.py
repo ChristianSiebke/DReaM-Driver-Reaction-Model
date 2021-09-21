@@ -40,25 +40,25 @@ def clean_and_create(folder):
     os.makedirs(folder)
 
 
-def run(config_under_test, slave_config, subdir):
+def run(config_under_test, simulation_config, subdir):
     assert(config_under_test.exists()), f': Unable to find {config_under_test}'
 
-    slave = config.MetaInfo.slave.copy()
-    slave.configs = os.path.join(config.MetaInfo.slave.configs, subdir)
-    slave.results = os.path.join(config.MetaInfo.slave.results, subdir)
-    slave.log_file = os.path.join(slave.results, 'test.log')
+    simulation = config.MetaInfo.simulation.copy()
+    simulation.configs = os.path.join(config.MetaInfo.simulation.configs, subdir)
+    simulation.results = os.path.join(config.MetaInfo.simulation.results, subdir)
+    simulation.log_file = os.path.join(simulation.results, 'test.log')
 
-    clean_and_create(slave.results)
-    config_under_test.copy_to(slave.configs)
+    clean_and_create(simulation.results)
+    config_under_test.copy_to(simulation.configs)
 
-    XmlUtil.update(slave.configs, slave_config)
+    XmlUtil.update(simulation.configs, simulation_config)
 
-    slave_state = slave.execute()
-    slave.copy_artifacts(os.path.join('artifacts', subdir))
+    simulation_state = simulation.execute()
+    simulation.copy_artifacts(os.path.join('artifacts', subdir))
 
-    assert(slave_state == 0), f'Slave execution failed\n{slave.get_log()}'
-    assert(slave.log_empty()), f'Slave log not empty\n{slave.get_log()}'
-    print(slave.get_log())
+    assert(simulation_state == 0), f'Simulation execution failed\n{simulation.get_log()}'
+    assert(simulation.log_empty()), f'Simulation log not empty\n{simulation.get_log()}'
+    print(simulation.get_log())
 
 
 class TestSpecialized:
@@ -98,7 +98,7 @@ class TestSpecialized:
         actual_rate = (invocations - len(failed_runs)) / invocations
 
         # make sure file is in both folders!
-        rates_results_file = os.path.join(test_info.slave.results, subdir, 'rates.csv')
+        rates_results_file = os.path.join(test_info.simulation.results, subdir, 'rates.csv')
         rates_artifacts_file = os.path.join('artifacts', subdir, 'rates.csv')
         
         self.report_rates(rates_results_file, expected_rate, actual_rate, failed_runs)

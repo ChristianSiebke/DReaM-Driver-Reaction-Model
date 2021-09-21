@@ -80,7 +80,7 @@ void ModelPcm_Eval::OnSelectionChanged(const QItemSelection &selected,
                     }                 
                 }
             }
-            QString sceneryFile = caseSystemVarFolder + "/" + FILENAME_OPENPASSSLAVE_CONFIGS + "/" + FILENAME_SCENERY_CONFIG;
+            QString sceneryFile = caseSystemVarFolder + "/" + FILENAME_OPENPASSSIMULATION_CONFIGS + "/" + FILENAME_SCENERY_CONFIG;
             LoadSceneryData(sceneryFile);
         }
     }

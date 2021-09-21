@@ -166,7 +166,7 @@ struct fmu_check_data_t {
 	/** model variables */
 	fmi2_import_variable_list_t* vl2;
 
-    int          slave_initialized;         //!< Flag indicating slave was initialized
+    int          simulation_initialized;         //!< Flag indicating simulation was initialized
 } ;
 
 typedef struct fmu_check_data_t fmu_check_data_t;

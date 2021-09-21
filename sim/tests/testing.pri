@@ -74,7 +74,7 @@ DEFINES += SUBDIR_LIB_GUI=\\\"/gui\\\"
 ## Qt plugins sub-directory ##
 DEFINES += SUBDIR_LIB_PLUGIN=\\\"/plugin\\\"
 
-# prefer bundled libs in OpenPassSlave directory over system libraries
+# prefer bundled libs in opSimulation directory over system libraries
 QMAKE_LFLAGS += -Wl,-rpath=\'\$\$ORIGIN\'
 
 ##################################################################

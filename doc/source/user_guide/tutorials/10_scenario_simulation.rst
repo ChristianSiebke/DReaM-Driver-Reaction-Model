@@ -42,7 +42,7 @@ Thus, an existing simulation configuration is used and the simulation is started
         └── examples
         └── lib 
         │   ...
-        └── OpenPassSlave.exe
+        └── opSimulation.exe
 
 #. Create a new folder named "configs" for the configuration files within the |op| install directory 
 
@@ -78,7 +78,7 @@ Thus, an existing simulation configuration is used and the simulation is started
         ├── ProfilesCatalog.xml
         ├── Scenario.xosc
         ├── SceneryConfiguration.xodr
-        ├── slaveConfig.xml
+        ├── simulationConfig.xml
         ├── systemConfigBlueprint.xml
         └── VehicleModelsCatalog.xosc
 
@@ -97,17 +97,17 @@ Thus, an existing simulation configuration is used and the simulation is started
         * The trajectory that defines the cut-in maneuver of the scenario agent is defined and editable here.
         * The overall simulation time, which determines the end condition of the simulation in seconds, can be adjusted.
 
-    c. ``slaveConfig.xml``:
+    c. ``simulationConfig.xml``:
 
         * The number of invocations can be changed in case more than one run is desired to be simulated. This will incorporate stochastic variation (i.e. initial constellation of surrounding traffic)
         * If surrounding traffic is not desired in the experiment, the spawner libraries "SpawnPointPreRunCommon" and "SpawnPointRuntimeCommon" can be deactivated by removing the corresponding sections. Only the "SpawnPointScenario" is mandatory to spawn the ego and scenario agent. More information on the functionality of spawners can be found in :ref:`components_spawner`.
         * The output format can be modified by setting the parameter "LoggingCyclicsToCsv" to true.
 
-#. Start the simulation by double-clicking ``OpenPassSlave.exe`` or from the console by calling the executable. 
+#. Start the simulation by double-clicking ``opSimulation.exe`` or from the console by calling the executable.
 
 #. Once the simulation is successfully completed, the following results can be found in the directory ``results``:
 
-    * ``simulationOutput.xml``: Contains general information about the experiment and an overview on all agents from the simulation. Further, an event log is contained. If the csv-output is set to false in the ``slaveConfig.xml``, the ``simulationOutput.xml`` will also include the „cyclics” (state in each time step) of the simulation.
+    * ``simulationOutput.xml``: Contains general information about the experiment and an overview on all agents from the simulation. Further, an event log is contained. If the csv-output is set to false in the ``simulationConfig.xml``, the ``simulationOutput.xml`` will also include the „cyclics” (state in each time step) of the simulation.
     * ``Cyclics_Run_xxx.csv``: In case the csv-output is activated, the „cyclics” of each run in the simulation are logged to a separated csv-file. This file is missing, if "cyclics" are written directly to the ``simulationOutput.xml`` (i.e. when "LoggingCyclicsToCsv" is set to false).
     * ``Repository_Run_xxx.csv``: Overview of the agents and objects from the simulation as well as some details on scenery components like lane markings, guard rails, etc.
 

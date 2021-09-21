@@ -63,7 +63,7 @@ public:
     virtual void SetDriverProfileName(std::string driverProfileName) = 0;
     virtual void SetSpawnParameter(SpawnParameter spawnParameter) = 0;
     virtual void SetSpeedGoalMin(double speedGoalMin) = 0;
-    virtual void SetAgentType(std::shared_ptr<SimulationSlave::AgentTypeInterface> agentType) = 0;
+    virtual void SetAgentType(std::shared_ptr<core::AgentTypeInterface> agentType) = 0;
 
     virtual void AddSensor(openpass::sensors::Parameter parameters) = 0;
 
@@ -77,7 +77,7 @@ public:
     virtual VehicleModelParameters                  GetVehicleModelParameters() const = 0;
     virtual openpass::sensors::Parameters           GetSensorParameters() const = 0;
     virtual VehicleComponentProfileNames            GetVehicleComponentProfileNames() const = 0;
-    virtual SimulationSlave::AgentTypeInterface&    GetAgentType() const = 0;
+    virtual core::AgentTypeInterface&    GetAgentType() const = 0;
     virtual SpawnParameter&                         GetSpawnParameter() = 0;
     virtual const SpawnParameter&                   GetSpawnParameter() const = 0;
     virtual double                                  GetSpeedGoalMin() const = 0;

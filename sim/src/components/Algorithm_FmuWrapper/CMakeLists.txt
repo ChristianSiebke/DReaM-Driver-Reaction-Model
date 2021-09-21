@@ -30,7 +30,7 @@ add_openpass_target(
     ${FMILibrary_INCLUDE_DIR}/FMI2
     ${FMILibrary_INCLUDE_DIR}/JM
     src/FmiImporter/include
-    ../../core/slave/modules/World_OSI
+    ../../core/opSimulation/modules/World_OSI
 
   LIBRARIES
     Qt5::Core

@@ -32,7 +32,7 @@ SUBDIRS = \
     limiterAccelerationVehiclecomponents_Tests \
     observationLog_Tests \
     \ #observationLogNG_Tests \
-    openPassSlave_Tests \
+    opSimulation_Tests \
     openScenarioActions_Tests \
     scheduler_Tests \
     sensorDriver_Tests \
@@ -75,7 +75,7 @@ Algorithm_Switch.file = \
     $$PWD/components/Algorithm_Switch/Algorithm_Switch.pro
 
 basicDataBuffer_Tests.file = \
-    $$PWD/core/slave/modules/BasicDataBuffer/basicDataBuffer_Tests.pro
+    $$PWD/core/opsimulation/modules/BasicDataBuffer/basicDataBuffer_Tests.pro
 
 componentController_Tests.file = \
     $$PWD/components/ComponentController/componentController_Tests.pro
@@ -93,22 +93,22 @@ Dynamics_TwoTrack.file = \
     $$PWD/components/Dynamics_TwoTrack/Dynamics_TwoTrack.pro
 
 eventDetector_Tests.file = \
-    $$PWD/core/slave/modules/EventDetector/eventDetector_Tests.pro
+    $$PWD/core/opsimulation/modules/EventDetector/eventDetector_Tests.pro
 
 limiterAccelerationVehiclecomponents_Tests.file = \
     $$PWD/components/LimiterAccVehComp/limiterAccVehComp_Tests.pro
 
 observationLog_Tests.file = \
-    $$PWD/core/slave/modules/Observation_Log/observationLog_Tests.pro
+    $$PWD/core/opsimulation/modules/Observation_Log/observationLog_Tests.pro
 
-openPassSlave_Tests.file = \
-    $$PWD/core/slave/openPassSlave_Tests.pro
+opSimulation_Tests.file = \
+    $$PWD/core/opsimulation/opSimulation_Tests.pro
 
 openScenarioActions_Tests.file = \
     $$PWD/components/OpenScenarioActions/openScenarioActions_Tests.pro
 
 scheduler_Tests.file = \
-    $$PWD/core/slave/Scheduler/scheduler_Tests.pro
+    $$PWD/core/opsimulation/Scheduler/scheduler_Tests.pro
 
 sensorDriver_Tests.file = \
     $$PWD/components/Sensor_Driver/sensorDriver_Tests.pro
@@ -126,19 +126,19 @@ signalPrioritizer_Tests.file = \
     $$PWD/components/SignalPrioritizer/signalPrioritizer_Tests.pro
 
 spawnerScenario_Tests.file = \
-    $$PWD/core/slave/modules/SpawnerScenario/spawnerScenario_Tests.pro
+    $$PWD/core/opsimulation/modules/SpawnerScenario/spawnerScenario_Tests.pro
 
 spawnerPreRunCommon_Tests.file = \
-    $$PWD/core/slave/modules/SpawnerPreRunCommon/spawnerPreRunCommon_Tests.pro
+    $$PWD/core/opsimulation/modules/SpawnerPreRunCommon/spawnerPreRunCommon_Tests.pro
 
 spawnerRuntimeCommon_Tests.file = \
-    $$PWD/core/slave/modules/SpawnerRuntimeCommon/spawnerRuntimeCommon_Tests.pro
+    $$PWD/core/opsimulation/modules/SpawnerRuntimeCommon/spawnerRuntimeCommon_Tests.pro
 
 spawnerWorldAnalyzer_Tests.file = \
-    $$PWD/core/slave/modules/SpawnerWorldAnalyzer/spawnerWorldAnalyzer_Tests.pro
+    $$PWD/core/opsimulation/modules/SpawnerWorldAnalyzer/spawnerWorldAnalyzer_Tests.pro
 
 worldOSI_Tests.file = \
-    $$PWD/core/slave/modules/World_OSI/worldOSI_Tests.pro
+    $$PWD/core/opsimulation/modules/World_OSI/worldOSI_Tests.pro
 
 common_Tests.file = \
     $$PWD/common/Common_Tests.pro

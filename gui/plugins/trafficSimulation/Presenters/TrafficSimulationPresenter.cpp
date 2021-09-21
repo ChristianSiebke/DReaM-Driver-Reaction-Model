@@ -78,16 +78,16 @@ void TrafficSimulationPresenter::simulationFinished(int exitCode)
     QString text;
 
     if (exitCode == 0)
-        text = QString("Simulation slave has finished successfully! Results have been stored in %1").arg(project->getResultPath());
+        text = QString("simulation has finished successfully! Results have been stored in %1").arg(project->getResultPath());
     else
-        text = QString("Simulation slave has finished with exit code %1! See log file %2 for details.").arg(exitCode).arg(project->getLogSlave());
+        text = QString("simulation has finished with exit code %1! See log file %2 for details.").arg(exitCode).arg(project->getLogSimulation());
 
     message.setText(text);
     message.exec();
 
-    QProcess *slave = qobject_cast<QProcess *>(sender());
-    if (slave)
-        delete slave;
+    QProcess *simulation = qobject_cast<QProcess *>(sender());
+    if (simulation)
+        delete simulation;
 
     checkStatus();
 }
@@ -96,13 +96,13 @@ void TrafficSimulationPresenter::startSimulation()
 {
     QMessageBox warning;
     int ret;
-    QString slaveConfig(project->absoluteToConfigPath("slaveConfig.xml"));
+    QString simulationConfig(project->absoluteToConfigPath("simulationConfig.xml"));
 
-    // save the slaveConfig explicitly under the name "slave config"
-    if (QFileInfo::exists(slaveConfig))
+    // save the simulationConfig explicitly under the name "simulation config"
+    if (QFileInfo::exists(simulationConfig))
     {
         // spell out a warning that everything will be deleted
-        warning.setText("There already exists a file named 'slaveConfig.xml' in the current configuration directory (see Master Configuration)!");
+        warning.setText("There already exists a file named 'simulationConfig.xml' in the current configuration directory (see opSimulationManager.xml)!");
         warning.setInformativeText("Do you want to overwrite it with the current settings?");
         warning.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         ret = warning.exec();
@@ -111,31 +111,31 @@ void TrafficSimulationPresenter::startSimulation()
             return;
     }
 
-    TrafficSimulationXMLSaveModel::save(slaveConfig, trafficSimulation);
+    TrafficSimulationXMLSaveModel::save(simulationConfig, trafficSimulation);
 
-    // Prepare slave arguments
+    // Prepare simulation arguments
     QStringList arguments;
 
     arguments << QString("--logLevel") << QString::number(project->getLogLevel())
-              << QString("--logFile") << project->getLogSlave()
+              << QString("--logFile") << project->getLogSimulation()
               << QString("--lib") << project->getLibraryPath()
               << QString("--configs") << project->getConfigPath()
               << QString("--results") << project->getResultPath();
 
-    QProcess *slave = new QProcess;
-    connect(slave, static_cast<void (QProcess::*)(int)>(&QProcess::finished), this, &TrafficSimulationPresenter::simulationFinished);
+    QProcess *simulation = new QProcess;
+    connect(simulation, static_cast<void (QProcess::*)(int)>(&QProcess::finished), this, &TrafficSimulationPresenter::simulationFinished);
 
-    if (QFileInfo::exists(project->getSlaveExe()))
+    if (QFileInfo::exists(project->getSimulationExe()))
     {
-        slave->setProgram(project->getSlaveExe());
-        slave->setArguments(arguments);
-        slave->start();
+        simulation->setProgram(project->getSimulationExe());
+        simulation->setArguments(arguments);
+        simulation->start();
         trafficSimulationView->getExperimentView()->enableSimulation(false);
     }
     else
     {
-        // tell user that slave exe does not exist
-        warning.setText("Slave exe not found! Check slave path settings in Master Configuration!");
+        // tell user that simulation exe does not exist
+        warning.setText("Simulation exe not found! Check simulation path settings in opSimulationManager.xml!");
         warning.setInformativeText("");
         warning.setStandardButtons(QMessageBox::Ok);
         ret = warning.exec();
@@ -145,8 +145,8 @@ void TrafficSimulationPresenter::startSimulation()
 void TrafficSimulationPresenter::save()
 {
     QString const filepath = QFileDialog::getSaveFileName(
-        trafficSimulationView, QObject::tr("openPASS / Save slave config"),
-        project->getConfigPath(), QStringLiteral("slaveConfig (*.xml)"));
+        trafficSimulationView, QObject::tr("openPASS / Save simulation config"),
+        project->getConfigPath(), QStringLiteral("simulationConfig (*.xml)"));
 
     TrafficSimulationXMLSaveModel::save(filepath, trafficSimulation);
 }
@@ -192,15 +192,15 @@ void TrafficSimulationPresenter::load()
 {
     bool success;
     QString const filepath = QFileDialog::getOpenFileName(
-        trafficSimulationView, QObject::tr("openPASS / Load slave config"),
-        project->getConfigPath(), QStringLiteral("slaveConfig (*.xml)"));
+        trafficSimulationView, QObject::tr("openPASS / Load simulation config"),
+        project->getConfigPath(), QStringLiteral("simulationConfig (*.xml)"));
 
     TrafficSimulationInterface *loadedXML = new TrafficSimulationModel;
     success = TrafficSimulationXMLLoadModel::load(filepath, loadedXML);
 
     if (success)
     {
-        undoStack->beginMacro(QString("loaded slaveConfig %1").arg(filepath));
+        undoStack->beginMacro(QString("loaded simulationConfig %1").arg(filepath));
 
         // 0. clear everything first
         clearExperimentConfig();

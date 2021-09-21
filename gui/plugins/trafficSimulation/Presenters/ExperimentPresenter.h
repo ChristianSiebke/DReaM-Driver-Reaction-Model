@@ -47,7 +47,7 @@ Q_SIGNALS:
     //-----------------------------------------------------------------------------
     //! Signal, emitted when the start simulation button has been clicked. Will
     //! trigger a process (started in TrafficSimulationPresenter) executing the
-    //! simulation slave with the current simulation settings of this plugin.
+    //! simulation with the current simulation settings of this plugin.
     //-----------------------------------------------------------------------------
     void startSimulation();
 

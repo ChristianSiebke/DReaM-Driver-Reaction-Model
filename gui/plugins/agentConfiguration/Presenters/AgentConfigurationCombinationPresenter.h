@@ -13,7 +13,7 @@
 //! @ingroup agentConfigurationPlugin
 //! @brief This class defines a presenter object for exporting the model data
 //!        (AgentConfigurationInterface) of this plugin to the profiles catalogue
-//!        XML file needed by the simulation slave.
+//!        XML file needed by the simulation.
 //!
 //!        The only reason why this class exists is because, for a dynamic agent
 //!        profile, the profiles catalogue partly repeats information already
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 //! @brief This class defines a presenter object for exporting the model data
 //!        (AgentConfigurationInterface) of this plugin to the profiles catalogue
-//!        XML file needed by the simulation slave.
+//!        XML file needed by the simulation.
 //!
 //!        The only reason why this class exists is because, for a dynamic agent
 //!        profile, the profiles catalogue partly repeats information already

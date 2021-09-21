@@ -9,7 +9,7 @@
 # **********************************************************************/
 
 HEADERS += \
-    $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlSlaveConfig.h \
+    $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlSimulationConfig.h \
     $$PWD/ModelPcm.h \
     $$PWD/ConfigurationGeneratorPcm/ConfigGeneratorPcm.h \
     $$PWD/ConfigurationGeneratorPcm/DatabaseReaderPcm.h \
@@ -41,7 +41,7 @@ HEADERS += \
     $$PWD/ConfigurationGeneratorPcm/ConfigSetReaderPcm.h \
 
 SOURCES += \
-    $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlSlaveConfig.cpp \
+    $$PWD/ConfigurationGeneratorPcm/DataStructuresXml/XmlSimulationConfig.cpp \
     $$PWD/ModelPcm.cpp \
     $$PWD/ConfigurationGeneratorPcm/ConfigGeneratorPcm.cpp \
     $$PWD/ConfigurationGeneratorPcm/DatabaseReaderPcm.cpp \

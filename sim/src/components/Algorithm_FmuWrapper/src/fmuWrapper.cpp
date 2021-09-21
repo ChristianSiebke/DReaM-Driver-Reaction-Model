@@ -259,7 +259,7 @@ void AlgorithmFmuWrapperImplementation::UpdateOutput(int localLinkId,
 
     cdata_global_ptr = &cdata;      // reassign global pointer, required for FMI 1.0 logging
 
-    if (!cdata.slave_initialized)
+    if (!cdata.simulation_initialized)
     {
         throw std::logic_error("FMU has to be initialized before calling UpdateOutput");
     }

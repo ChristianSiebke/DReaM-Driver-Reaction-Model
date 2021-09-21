@@ -21,7 +21,7 @@ INCLUDEPATH += \
     $$relative_path($$EXTRA_INCLUDE_PATH)/FMILibrary/FMI1 \   #  - " -
     $$relative_path($$EXTRA_INCLUDE_PATH)/FMILibrary/FMI2 \   #  - " -
     $$relative_path($$EXTRA_INCLUDE_PATH)/FMILibrary/JM \     #  - " -
-    ../../core/slave/modules/World_OSI \
+    ../../core/opSimulation/modules/World_OSI \
     ../../.. \
     ../..
 

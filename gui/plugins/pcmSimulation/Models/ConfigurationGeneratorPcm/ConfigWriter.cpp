@@ -17,7 +17,7 @@ ConfigWriter::ConfigWriter(const QString &baseFolder)
     baseDirectory.setPath(baseFolder);
 }
 
-const QString ConfigWriter::CreateSlaveConfiguration(const QString &configPath,
+const QString ConfigWriter::CreateSimulationConfiguration(const QString &configPath,
                                                      const PCM_SimulationSet *simSet,
                                                      const QString &resultFolderName,
                                                      const QString &pcmCase,
@@ -34,7 +34,7 @@ const QString ConfigWriter::CreateSlaveConfiguration(const QString &configPath,
         endTime = QString::number(supposedCollisionTime.toInt() * 2); //set endTime twice as supposedCollisionTime in order to allow simulation after collision
     }
 
-    XmlSlaveConfig runConfig(0, endTime, 1, "undefined", -1, randomSeed);
+    XmlSimulationConfig runConfig(0, endTime, 1, "undefined", -1, randomSeed);
 
     const std::vector<PCM_ParticipantData *> &participants = simSet->GetParticipants();
     const std::vector<PCM_InitialValues *> &initials = simSet->GetInitials();
@@ -97,7 +97,7 @@ const QString ConfigWriter::CreateSlaveConfiguration(const QString &configPath,
     XmlObservation *observerScopeLogger = new XmlObservation(2, "Observation_ScopeLogger");
     runConfig.AddObservation(observerScopeLogger);
 
-    return WriteSlaveConfiguration(runConfig, configPath);
+    return WriteSimulationConfiguration(runConfig, configPath);
 }
 
 const QString ConfigWriter::CreateProfilesCatalog(const QString &configPath,
@@ -424,7 +424,7 @@ const QString ConfigWriter::CreateFrameworkConfiguration(const QString framework
     {
         // show error message if not able to open file
         std::cout << "Error (ConfigGenerator): "
-                  "could not open masterConfiguration.xml" << std::endl;
+                  "could not open opSimulationManager.xml" << std::endl;
         return "";
     }
 
@@ -435,29 +435,26 @@ const QString ConfigWriter::CreateFrameworkConfiguration(const QString framework
 
     xmlWriter.writeStartDocument();
 
-    xmlWriter.writeStartElement("masterConfig");
+    xmlWriter.writeStartElement("opSimulationManager");
     xmlWriter.writeTextElement("logLevel", QString::number(logLevel));
-    //    xmlWriter.writeTextElement("logFileMaster",
-    //                               baseDirectory.relativeFilePath(frameworkConfigPath + "/" + FILENAME_OPENPASSMASTER_LOG));
-    //    xmlWriter.writeTextElement("slave", "OpenPassSlave.exe");
     xmlWriter.writeTextElement("libraries", QString(SUBDIR_LIB_MODULES));
 
-    xmlWriter.writeStartElement("slaveConfigs");
+    xmlWriter.writeStartElement("simulationConfigs");
 
     for (QMap<QString, QString> configSet : configList)
     {
-        xmlWriter.writeStartElement("slaveConfig");
+        xmlWriter.writeStartElement("simulationConfig");
         QMapIterator<QString, QString> configSetIterator(configSet);
         while (configSetIterator.hasNext())
         {
             configSetIterator.next();
             xmlWriter.writeTextElement(configSetIterator.key(), configSetIterator.value());
         }
-        xmlWriter.writeEndElement(); // slaveConfig
+        xmlWriter.writeEndElement(); // simulationConfig
     }
 
-    xmlWriter.writeEndElement(); // slaveConfigs
-    xmlWriter.writeEndElement(); // masterConfig
+    xmlWriter.writeEndElement(); // simulationConfigs
+    xmlWriter.writeEndElement(); // opSimulationManager
 
     xmlWriter.writeEndDocument();
 
@@ -467,19 +464,19 @@ const QString ConfigWriter::CreateFrameworkConfiguration(const QString framework
     return frameworkConfigFile;
 }
 
-const QString ConfigWriter::WriteSlaveConfiguration(XmlSlaveConfig &slaveConfig,
+const QString ConfigWriter::WriteSimulationConfiguration(XmlSimulationConfig &simulationConfig,
                                                     const QString &configPath)
 {
     // Create the xml with the chosen cases
-    QString slaveConfigFile = configPath + "/" + FILENAME_SLAVE_CONFIG;
-    QFile file(slaveConfigFile);
+    QString simulationConfigFile = configPath + "/" + FILENAME_SIMULATION_CONFIG;
+    QFile file(simulationConfigFile);
 
     // open file
     if (!file.open(QIODevice::WriteOnly))
     {
         // show error message if not able to open file
         std::cout << "Error (ConfigGenerator): could not open "
-                  << FILENAME_SLAVE_CONFIG << std::endl;
+                  << FILENAME_SIMULATION_CONFIG << std::endl;
         return "";
     }
 
@@ -490,12 +487,12 @@ const QString ConfigWriter::WriteSlaveConfiguration(XmlSlaveConfig &slaveConfig,
 
     xmlWriter.writeStartDocument();
 
-    xmlWriter.writeStartElement("slaveConfig");
+    xmlWriter.writeStartElement("simulationConfig");
     xmlWriter.writeAttribute("SchemaVersion","0.8.2");
 
-    bool success = slaveConfig.WriteToXml(&xmlWriter);
+    bool success = simulationConfig.WriteToXml(&xmlWriter);
 
-    xmlWriter.writeEndElement(); //SlaveConfig
+    xmlWriter.writeEndElement(); //SimulationConfig
 
     xmlWriter.writeEndDocument();
 
@@ -504,7 +501,7 @@ const QString ConfigWriter::WriteSlaveConfiguration(XmlSlaveConfig &slaveConfig,
 
     if (success)
     {
-        return slaveConfigFile;
+        return simulationConfigFile;
     }
     else
     {

@@ -17,9 +17,9 @@ class FakeManipulatorNetwork : public ManipulatorNetworkInterface
 {
 public:
     MOCK_METHOD3(Instantiate,
-                 bool(std::string, ScenarioInterface *, SimulationSlave::EventNetworkInterface *));
+                 bool(std::string, ScenarioInterface *, core::EventNetworkInterface *));
     MOCK_METHOD0(Clear,
                  void());
     MOCK_METHOD0(GetManipulators,
-                 std::vector<const SimulationSlave::Manipulator*>());
+                 std::vector<const core::Manipulator*>());
 };

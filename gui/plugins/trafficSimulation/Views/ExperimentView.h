@@ -96,8 +96,8 @@ Q_SIGNALS:
 
     //-----------------------------------------------------------------------------
     //! Signal, emitted when the user clicks the Start Simulation Button. Will trigger
-    //! a status check of the slave Config settings (edited this plugin) and the
-    //! creation of the simulation slave process.
+    //! a status check of the simulation Config settings (edited this plugin) and the
+    //! creation of the simulation process.
     //-----------------------------------------------------------------------------
     void startSimulation();
 

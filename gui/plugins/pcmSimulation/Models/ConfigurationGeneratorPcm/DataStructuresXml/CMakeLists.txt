@@ -25,7 +25,7 @@ set(SOURCES
     XmlPoint.cpp
     XmlProfilesConfig.cpp
     XmlScenery.cpp
-    XmlSlaveConfig.cpp
+    XmlSimulationConfig.cpp
     XmlSpawnPoint.cpp
     XmlTrajectory.cpp
     XmlViewObject.cpp
@@ -47,7 +47,7 @@ set(HEADERS
     XmlPoint.h
     XmlProfilesConfig.h
     XmlScenery.h
-    XmlSlaveConfig.h
+    XmlSimulationConfig.h
     XmlSpawnPoint.h
     XmlTrajectory.h
     XmlViewObject.h

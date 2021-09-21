@@ -34,7 +34,7 @@ class ParameterInterface;
 class StochasticsInterface;
 class WorldInterface;
 
-namespace SimulationSlave {
+namespace core {
 class EventNetworkInterface;
 }
 
@@ -455,7 +455,7 @@ public:
                              int offsetTime,
                              int responseTime,
                              int cycleTime,
-                             SimulationSlave::EventNetworkInterface *eventNetwork,
+                             core::EventNetworkInterface *eventNetwork,
                              AgentInterface *agent,
                              const CallbackInterface *callbacks) :
         ModelInterface(isInit, priority, offsetTime, responseTime, cycleTime),
@@ -486,7 +486,7 @@ protected:
     //!
     //! @return                       EventNetwork functionality
     //-----------------------------------------------------------------------------
-    const SimulationSlave::EventNetworkInterface *GetEventNetwork() const
+    const core::EventNetworkInterface *GetEventNetwork() const
     {
         return eventNetwork;
     }
@@ -527,7 +527,7 @@ private:
     // Access to the following members is provided by the corresponding member
     // functions.
     std::string componentName;                      //!< Id of this component
-    const SimulationSlave::EventNetworkInterface *eventNetwork;   //!< Reference to framework eventNetwork
+    const core::EventNetworkInterface *eventNetwork;   //!< Reference to framework eventNetwork
     AgentInterface *agent;
     const CallbackInterface *callbacks;   //!< Reference to framework callbacks
 };
@@ -559,7 +559,7 @@ public:
                                     PublisherInterface * const publisher,
                                     const CallbackInterface *callbacks,
                                     AgentInterface *agent,
-                                    SimulationSlave::EventNetworkInterface * const eventNetwork):
+                                    core::EventNetworkInterface * const eventNetwork):
         UnrestrictedModelInterface(componentName,
                                    isInit,
                                    priority,
@@ -586,11 +586,11 @@ protected:
     //!
     //! @return                       EventNetwork
     //-----------------------------------------------------------------------------
-    SimulationSlave::EventNetworkInterface* GetEventNetwork() const
+    core::EventNetworkInterface* GetEventNetwork() const
     {
         return eventNetwork;
     }
 
 private:
-    SimulationSlave::EventNetworkInterface * const eventNetwork;
+    core::EventNetworkInterface * const eventNetwork;
 };

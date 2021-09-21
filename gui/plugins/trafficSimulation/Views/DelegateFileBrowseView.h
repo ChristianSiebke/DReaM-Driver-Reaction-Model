@@ -81,7 +81,7 @@ private
     Q_SLOT : void editData(QWidget *editor);
 
 private:
-    ProjectInterface const *const project; //!< a pointer to the project plugin (required to access the file structure of the master config)
+    ProjectInterface const *const project; //!< a pointer to the project plugin (required to access the file structure of the simulation manager config)
     QString const variableName;            //!< the name of the variable edited by this delegate
     QUndoStack *const undoStack;           //!< a pointer to the undo stack
 };

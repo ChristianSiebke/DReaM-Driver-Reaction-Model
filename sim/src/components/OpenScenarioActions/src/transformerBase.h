@@ -33,7 +33,7 @@ public:
     /// \param agent     Releayed to the actual transformer
     /// \param cycleTime Releayed to the actual transformer
     /// \return Transform result for the given triggering event
-    static TransformResult Transform(const SimulationSlave::EventNetworkInterface *eventNetwork,
+    static TransformResult Transform(const core::EventNetworkInterface *eventNetwork,
                                      WorldInterface *world,
                                      AgentInterface *agent,
                                      int cycleTime)

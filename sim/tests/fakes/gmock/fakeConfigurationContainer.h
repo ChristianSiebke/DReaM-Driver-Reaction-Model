@@ -20,8 +20,8 @@ public:
                  bool());
     MOCK_METHOD0(GetSystemConfigBlueprint,
                  std::shared_ptr<SystemConfigInterface> ());
-    MOCK_METHOD0(GetSlaveConfig,
-                 SlaveConfigInterface * ());
+    MOCK_METHOD0(GetSimulationConfig,
+                 SimulationConfigInterface * ());
     MOCK_METHOD0(GetScenery,
                  SceneryInterface * ());
     MOCK_METHOD0(GetScenario,

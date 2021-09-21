@@ -32,7 +32,7 @@ public:
 protected:
     static bool loadProject(QXmlStreamReader &xml,
                             ProjectModel *const project);
-    static bool loadSlaveConfig(QXmlStreamReader &xml,
+    static bool loadSimulationConfig(QXmlStreamReader &xml,
                                 ProjectModel *const project);
 };
 

@@ -20,13 +20,13 @@ INCLUDEPATH += \
     . \
     $$UNIT_UNDER_TEST \
     $$UNIT_UNDER_TEST/.. \
-    $$OPEN_SRC/core/slave/modules/World_OSI/RoutePlanning \
+    $$OPEN_SRC/core/opSimulation/modules/World_OSI/RoutePlanning \
     ../../../..
 
 HEADERS += \
     $$UNIT_UNDER_TEST/sensor_driverCalculations.h \
     $$UNIT_UNDER_TEST/sensor_driverImpl.h \
-    $$OPEN_SRC/core/slave/modules/World_OSI/RoutePlanning/RouteCalculation.h
+    $$OPEN_SRC/core/opSimulation/modules/World_OSI/RoutePlanning/RouteCalculation.h
 
 SOURCES += \
     $$UNIT_UNDER_TEST/sensor_driverCalculations.cpp \

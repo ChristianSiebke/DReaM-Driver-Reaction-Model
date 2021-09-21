@@ -25,7 +25,7 @@ SUBDIRS += .\
 INCLUDEPATH += \
     ../../.. \
     ../.. \
-    ../../core/slave/modules/World_OSI
+    ../../core/opSimulation/modules/World_OSI
 
 SOURCES += \
     src/objectDetectorBase.cpp \

@@ -44,15 +44,15 @@ bool ProjectXMLSaveModel::save(QIODevice *const device, const ProjectModel *cons
 void ProjectXMLSaveModel::saveProject(QXmlStreamWriter &xml, const ProjectModel *const project)
 {
     // Write the elements to the xml stream
-    xml.writeStartElement(KeyMasterConfig);
+    xml.writeStartElement(KeyOpSimulationManager);
     xml.writeTextElement(KeyLogLevel, QString::number(project->getLogLevel()));
-    xml.writeTextElement(KeyLogFileMaster, project->getLogMaster());
-    xml.writeTextElement(KeySlavePath, project->getSlaveExe());
+    xml.writeTextElement(KeyLogFileOpSimulationManager, project->getLogOpSimulationManager());
+    xml.writeTextElement(KeySimulationPath, project->getSimulationExe());
     xml.writeTextElement(KeyLibraryPath, project->getLibraryPath());
 
-    xml.writeStartElement(KeySlaveConfigs);
-    xml.writeStartElement(KeySlaveConfig);
-    xml.writeTextElement(KeyLogFileSlave, project->getLogSlave());
+    xml.writeStartElement(KeySimulationConfigs);
+    xml.writeStartElement(KeySimulationConfig);
+    xml.writeTextElement(KeyLogFileSimulation, project->getLogSimulation());
     xml.writeTextElement(KeyConfigPath, project->getConfigPath());
     xml.writeTextElement(KeyResultPath, project->getResultPath());
 

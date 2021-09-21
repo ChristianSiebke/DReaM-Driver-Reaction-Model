@@ -59,10 +59,10 @@ private Q_SLOTS: // Define actions for the Browse Buttons
     void on_libraryBrowseButton_clicked();
     void on_configBrowseButton_clicked();
     void on_logLevelSpinBox_valueChanged(int level);
-    void on_logMasterBrowseButton_clicked();
-    void on_logSlaveBrowseButton_clicked();
+    void on_logOpSimulationManagerBrowseButton_clicked();
+    void on_logSimulationBrowseButton_clicked();
     void on_outputBrowseButton_clicked();
-    void on_slaveBrowseButton_clicked();
+    void on_simulationBrowseButton_clicked();
 
 private Q_SLOTS: // Update actions from the Browser Buttons and also the load action
     void updateView();

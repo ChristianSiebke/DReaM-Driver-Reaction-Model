@@ -21,7 +21,7 @@
 #include "include/stochasticsInterface.h"
 #include "common/observationLibraryDefinitions.h"
 
-namespace SimulationSlave {
+namespace core {
 
 class ObservationBinding;
 class ObservationModule;
@@ -70,7 +70,7 @@ public:
     virtual const std::map<int, ObservationModule*>& GetObservationModules() = 0;
 
     //-----------------------------------------------------------------------------
-    //! Inits the observation network by calling the slavePreHook function pointer
+    //! Inits the observation network by calling the OpSimulationPreHook function pointer
     //! of the observation library with each observation module implementation as
     //! parameter.
     //!
@@ -79,7 +79,7 @@ public:
     virtual bool InitAll() = 0;
 
     //-----------------------------------------------------------------------------
-    //! Inits the network run by calling the slavePreRunHook function
+    //! Inits the network run by calling the OpSimulationPreRunHook function
     //! pointer of the observation library with each observation module instance.
     //!
     //! @return                             Flag if the run init was successful
@@ -87,7 +87,7 @@ public:
     virtual bool InitRun() = 0;
 
     //-----------------------------------------------------------------------------
-    //! Updates the time step by calling the SlaveUpdateHook function pointer of the
+    //! Updates the time step by calling the OpSimulationUpdateHook function pointer of the
     //! observation library with each observation module instance and the provided
     //! parameters.
     //!
@@ -98,7 +98,7 @@ public:
     virtual bool UpdateTimeStep(int time, RunResult& runResult) = 0;
 
     //-----------------------------------------------------------------------------
-    //! Finalizes the run by calling the SlaveUpdateHook function pointer of the
+    //! Finalizes the run by calling the OpSimulationUpdateHook function pointer of the
     //! observation library with each observation module instance and teh provided
     //! result parameter.
     //!
@@ -108,9 +108,9 @@ public:
     virtual bool FinalizeRun(const RunResult& result) = 0;
 
     //-----------------------------------------------------------------------------
-    //! Finalizes the observation network by calling the masterPostHook function
+    //! Finalizes the observation network by calling the OpSimulationManagerPostHook
     //! pointer of the observation library with each observation module instance
-    //! (and its ID) in each network slave.
+    //! (and its ID) in each network simulation.
     //!
     //! @return                             Flag if the finalize was successful
     //-----------------------------------------------------------------------------
@@ -124,4 +124,4 @@ public:
 
 };
 
-} //namespace SimulationSlave
+} //namespace core

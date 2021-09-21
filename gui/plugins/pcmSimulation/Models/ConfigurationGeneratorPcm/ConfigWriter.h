@@ -17,7 +17,7 @@
 #include "DataStructuresXml/XmlModelsConfig.h"
 #include "DataStructuresXml/XmlProfilesConfig.h"
 #include "DataStructuresXml/XmlScenery.h"
-#include "DataStructuresXml/XmlSlaveConfig.h"
+#include "DataStructuresXml/XmlSimulationConfig.h"
 #include "DataStructuresXosc/XoscScenario.h"
 #include "XmlMergeHelper.h"
 #include "pcm_initialValues.h"
@@ -48,7 +48,7 @@ public:
     virtual ~ConfigWriter() = default;
 
     //-----------------------------------------------------------------------------
-    //! Generate slave configuration file.
+    //! Generate simulation configuration file.
     //!
     //! @param[in]  configPath          folder name where the config shall be written
     //! @param[in]  simSet              simulation set of data which shall be used
@@ -59,7 +59,7 @@ public:
     //!
     //! @return     whole path and file name of the generated configuration file.
     //-----------------------------------------------------------------------------
-    const QString CreateSlaveConfiguration(const QString &configPath,
+    const QString CreateSimulationConfiguration(const QString &configPath,
                                            const PCM_SimulationSet *simSet,
                                            const QString &resultFolderName,
                                            const QString &pcmCase,
@@ -154,14 +154,14 @@ public:
 
 private:
     //-----------------------------------------------------------------------------
-    //! Write slave configuration file.
+    //! Write simulation configuration file.
     //!
-    //! @param[in]  slaveConfig     xml config of slave file
+    //! @param[in]  simulationConfig     xml config of simulation file
     //! @param[in]  configPath      path where the config file shall be written
     //!
     //! @return     whole path and file name of the written configuration file.
     //-----------------------------------------------------------------------------
-    const QString WriteSlaveConfiguration(XmlSlaveConfig &slaveConfig,
+    const QString WriteSimulationConfiguration(XmlSimulationConfig &simulationConfig,
                                           const QString &configPath);
 
     //-----------------------------------------------------------------------------

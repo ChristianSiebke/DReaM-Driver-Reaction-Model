@@ -111,7 +111,7 @@ void ProjectView::actionProjectStart()
     projectPresenter->simulate();
 }
 
-// Import the Component Library (load path for the Master)
+// Import the Component Library (load path for opSimulationManager)
 void ProjectView::on_libraryBrowseButton_clicked()
 {
     QDir const root = QDir(QCoreApplication::applicationDirPath());
@@ -124,35 +124,35 @@ void ProjectView::on_libraryBrowseButton_clicked()
     }
 }
 
-// Set a Log Level for the Master
+// Set a Log Level for opSimulationManager
 void ProjectView::on_logLevelSpinBox_valueChanged(int level)
 {
     projectPresenter->setLogLevel(static_cast<ProjectInterface::LogLevel>(level));
 }
 
-// Select path to save the Log Master File
-void ProjectView::on_logMasterBrowseButton_clicked()
+// Select path to save the Log opSimulationManager File
+void ProjectView::on_logOpSimulationManagerBrowseButton_clicked()
 {
     QDir const root = QDir(QCoreApplication::applicationDirPath());
     QString const filepath = QFileDialog::getSaveFileName(
-        this, tr("openPASS / Select a Master log file"), root.canonicalPath(),
-        QStringLiteral("Master log file (*.log);;All files (*)"));
+        this, tr("openPASS / Select a opSimulationManager log file"), root.canonicalPath(),
+        QStringLiteral("opSimulationManager log file (*.log);;All files (*)"));
     if (!filepath.isNull())
     {
-        projectPresenter->setLogMaster(filepath);
+        projectPresenter->setLogOpSimulationManager(filepath);
     }
 }
 
-// Select path to save the Log Slave File
-void ProjectView::on_logSlaveBrowseButton_clicked()
+// Select path to save the Log Simulation File
+void ProjectView::on_logSimulationBrowseButton_clicked()
 {
     QDir const root = QDir(QCoreApplication::applicationDirPath());
     QString const filepath = QFileDialog::getSaveFileName(
-        this, tr("openPASS / Select a Slave log file"), root.canonicalPath(),
-        QStringLiteral("Slave log file (*.log);;All files (*)"));
+        this, tr("openPASS / Select a Simulation log file"), root.canonicalPath(),
+        QStringLiteral("Simulation log file (*.log);;All files (*)"));
     if (!filepath.isNull())
     {
-        projectPresenter->setLogSlave(filepath);
+        projectPresenter->setLogSimulation(filepath);
     }
 }
 
@@ -169,16 +169,16 @@ void ProjectView::on_outputBrowseButton_clicked()
     }
 }
 
-// Select path to save the Log Slave File
-void ProjectView::on_slaveBrowseButton_clicked()
+// Select path to save the Log Simulation File
+void ProjectView::on_simulationBrowseButton_clicked()
 {
     QDir const root = QDir(QCoreApplication::applicationDirPath());
     QString const filepath = QFileDialog::getOpenFileName(
-        this, tr("openPASS / Select the openPASS slave"), root.canonicalPath(),
-        QStringLiteral("Slave (*.exe)"));
+        this, tr("openPASS / Select the openPASS simulation"), root.canonicalPath(),
+        QStringLiteral("Simulation (*.exe)"));
     if (!filepath.isNull())
     {
-        projectPresenter->setSlave(filepath);
+        projectPresenter->setSimulation(filepath);
     }
 }
 
@@ -199,9 +199,9 @@ void ProjectView::updateView()
 {
     ui->libraryPathEdit->setText(projectPresenter->getLibraryPath());
     ui->logLevelSpinBox->setValue(projectPresenter->getLogLevel());
-    ui->logMasterPathEdit->setText(projectPresenter->getLogMaster());
-    ui->logSlavePathEdit->setText(projectPresenter->getLogSlave());
+    ui->logOpSimulationManagerPathEdit->setText(projectPresenter->getLogOpSimulationManager());
+    ui->logSimulationPathEdit->setText(projectPresenter->getLogSimulation());
     ui->outputPathEdit->setText(projectPresenter->getResultPath());
-    ui->slaveEdit->setText(projectPresenter->getSlave());
+    ui->simulationEdit->setText(projectPresenter->getSimulation());
     ui->configPathEdit->setText(projectPresenter->getConfigPath());
 }

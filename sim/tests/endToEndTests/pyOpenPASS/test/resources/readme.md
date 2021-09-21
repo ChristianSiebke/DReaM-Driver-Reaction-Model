@@ -1,1 +1,1 @@
-files used by test_openpassslave.py - do not delete 
+files used by test_openpasssimulation.py - do not delete 

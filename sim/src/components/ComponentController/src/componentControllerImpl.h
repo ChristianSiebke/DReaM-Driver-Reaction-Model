@@ -45,7 +45,7 @@ public:
         PublisherInterface * const publisher,
         const CallbackInterface *callbacks,
         AgentInterface *agent,
-        SimulationSlave::EventNetworkInterface * const eventNetwork);
+        core::EventNetworkInterface * const eventNetwork);
     ComponentControllerImplementation(const ComponentControllerImplementation&) = delete;
     ComponentControllerImplementation(ComponentControllerImplementation&&) = delete;
     ComponentControllerImplementation& operator=(const ComponentControllerImplementation&) = delete;

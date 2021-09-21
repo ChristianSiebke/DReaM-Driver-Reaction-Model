@@ -234,22 +234,22 @@ void ModelPcm::StartSimulation()
         return;
     }
 
-    // execute the master process
-    QString masterPath = baseFolder + "/" + FILENAME_OPENPASSMASTER_EXE;
-    QProcess *masterProcess = new QProcess();
+    // execute the main process
+    QString mainPath = baseFolder + "/" + FILENAME_OPSIMULATIONMANAGER_EXE;
+    QProcess *mainProcess = new QProcess();
     QStringList arguments;
     arguments << "--config" << QDir(baseFolder).filePath(frameworkConfigFile);
 
-    masterProcess->start(masterPath, arguments);
-    masterProcess->waitForFinished(-1);
-    if (masterProcess->exitCode() != 0)
+    mainProcess->start(mainPath, arguments);
+    mainProcess->waitForFinished(-1);
+    if (mainProcess->exitCode() != 0)
     {
-        Q_EMIT ShowMessage("ERROR", "Simulation aborted. Master returned with -1");
+        Q_EMIT ShowMessage("ERROR", "Simulation aborted. opSimulationManager returned with -1");
         Q_EMIT SimulationFinished();
-        delete masterProcess;
+        delete mainProcess;
         return;
     }
-    delete masterProcess;
+    delete mainProcess;
 
     Q_EMIT SimulationProgressChanged(progress++);
 
@@ -439,7 +439,7 @@ PCM_SimulationSet *ModelPcm::ReadSimulationSetFromPrevCase(QString pcmCase)
         prevSystemName = QFileInfo(it.next()).baseName();          // get the base name of the subfolder without path prefix
         if (QRegExp(REGEX_CASE_SYSTEM).exactMatch(prevSystemName)) // check if the subfolder name matches the pattern like "0-0-0"
         {
-            prevCaseSystemVarFolder = prevCaseFolder + "/" + prevSystemName + "/" + DIR_NO_VARIATION + "/" + FILENAME_OPENPASSSLAVE_CONFIGS;
+            prevCaseSystemVarFolder = prevCaseFolder + "/" + prevSystemName + "/" + DIR_NO_VARIATION + "/" + FILENAME_OPENPASSSIMULATION_CONFIGS;
             QDir prevCaseSystemVarDir(prevCaseSystemVarFolder);
             if (prevCaseSystemVarDir.exists())
             {

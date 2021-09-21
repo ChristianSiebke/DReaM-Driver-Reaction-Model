@@ -15,10 +15,10 @@
 #include "include/agentFactoryInterface.h"
 
 
-class FakeAgentFactory : public SimulationSlave::AgentFactoryInterface
+class FakeAgentFactory : public core::AgentFactoryInterface
 {
 public:
     MOCK_METHOD0(ResetIds, void());
     MOCK_METHOD0(Clear, void());
-    MOCK_METHOD1(AddAgent, SimulationSlave::Agent*(AgentBlueprintInterface*));
+    MOCK_METHOD1(AddAgent, core::Agent*(AgentBlueprintInterface*));
 };

@@ -12,7 +12,7 @@
 #include "include/eventNetworkInterface.h"
 #include "gmock/gmock.h"
 
-class FakeEventNetwork : public SimulationSlave::EventNetworkInterface
+class FakeEventNetwork : public core::EventNetworkInterface
 {
 public:
     MOCK_METHOD1(GetEvents, EventContainer(const EventDefinitions::EventCategory));

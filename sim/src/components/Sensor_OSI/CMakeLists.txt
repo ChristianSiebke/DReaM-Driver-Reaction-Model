@@ -16,7 +16,7 @@ add_openpass_target(
     src/sensorGeometric2D.cpp
 
   INCDIRS
-    ../../core/slave/modules/World_OSI
+    ../../core/opSimulation/modules/World_OSI
 
   LIBRARIES
     Qt5::Core

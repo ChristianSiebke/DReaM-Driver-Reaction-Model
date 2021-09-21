@@ -151,7 +151,7 @@ USE_CCACHE
 WITH_SIMCORE
 ------------
 
-- Build OSI based scenario simulation, also know as openPASS core (slave).
+- Build OSI based scenario simulation, also know as openPASS simulation core (opSimulation).
 - Options: OFF | **ON**
 
 WITH_DOC
@@ -268,7 +268,7 @@ INSTALL_EXTRA_RUNTIME_DEPS
 Make Targets/Commands
 ---------------------
 
-|Op| defines build targets by major modules or components, such as ``OpenPassSlave`` or ``Algorithm_FmuWrapper``.
+|Op| defines build targets by major modules or components, such as ``opSimulation`` or ``Algorithm_FmuWrapper``.
 After calling CMake, simply build |op| by calling ``make``.
 
 .. admonition:: See also
@@ -298,4 +298,4 @@ Executing Tests
 ~~~~~~~~~~~~~~~
 
 - All tests: ``make test ARGS="--output-on-failure -j3"``
-- Single test: ``make test OpenPassSlave_Tests ARGS="--output-on-failure -j3"``
+- Single test: ``make test opSimulation_Tests ARGS="--output-on-failure -j3"``

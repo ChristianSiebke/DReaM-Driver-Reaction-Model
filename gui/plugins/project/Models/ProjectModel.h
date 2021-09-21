@@ -45,20 +45,20 @@ public:
     virtual ProjectInterface::Result getResultPath() const override;
 
 public:
-    virtual bool setLogMaster(ProjectInterface::LogMaster const &logMaster) override;
-    virtual ProjectInterface::LogMaster getLogMaster() const override;
+    virtual bool setLogOpSimulationManager(ProjectInterface::LogOpSimulationManager const &logOpSimulationManager) override;
+    virtual ProjectInterface::LogOpSimulationManager getLogOpSimulationManager() const override;
 
 public:
-    virtual bool setLogSlave(ProjectInterface::LogSlave const &logSlave) override;
-    virtual ProjectInterface::LogSlave getLogSlave() const override;
+    virtual bool setLogSimulation(ProjectInterface::LogSimulation const &logSimulation) override;
+    virtual ProjectInterface::LogSimulation getLogSimulation() const override;
 
 public:
     virtual bool setLogLevel(ProjectInterface::LogLevel const &logLevel) override;
     virtual ProjectInterface::LogLevel getLogLevel() const override;
 
 public:
-    virtual bool setSlaveExe(ProjectInterface::Slave const &slave) override;
-    virtual ProjectInterface::Slave getSlaveExe() const override;
+    virtual bool setSimulationExe(ProjectInterface::Simulation const &simulation) override;
+    virtual ProjectInterface::Simulation getSimulationExe() const override;
 
 public:
     virtual bool getProjectStatus() const override;
@@ -67,18 +67,18 @@ protected:
     static ProjectInterface::Config const DefaultConfig;
     static ProjectInterface::Library const DefaultLibrary;
     static ProjectInterface::Result const DefaultResult;
-    static ProjectInterface::LogMaster const DefaultLogMaster;
-    static ProjectInterface::LogSlave const DefaultLogSlave;
-    static ProjectInterface::LogSlave const DefaultSlave;
+    static ProjectInterface::LogOpSimulationManager const DefaultLogOpSimulationManager;
+    static ProjectInterface::LogSimulation const DefaultLogSimulation;
+    static ProjectInterface::LogSimulation const DefaultSimulation;
 
 protected:
     ProjectInterface::Config _config;
     ProjectInterface::Library _library;
     ProjectInterface::Result _result;
-    ProjectInterface::LogMaster _logMaster;
-    ProjectInterface::LogSlave _logSlave;
+    ProjectInterface::LogOpSimulationManager _logOpSimulationManager;
+    ProjectInterface::LogSimulation _logSimulation;
     ProjectInterface::LogLevel _logLevel;
-    ProjectInterface::Slave _slave;
+    ProjectInterface::Simulation _simulation;
 };
 
 #endif // PROJECTMODEL_H

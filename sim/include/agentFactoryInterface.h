@@ -27,7 +27,7 @@
 * \details This interface provides access to agent parameters, properties, attributes and dynamic states.
 */
 
-namespace SimulationSlave {
+namespace core {
 
 class Agent;
 
@@ -54,4 +54,4 @@ public:
     virtual Agent *AddAgent(AgentBlueprintInterface* agentBlueprint) = 0;
 };
 
-} //namespace SimulationSlave
+} //namespace core

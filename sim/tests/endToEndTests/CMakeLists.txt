@@ -67,7 +67,7 @@ add_custom_target(pyOpenPASS
 # This also adds a dependency on the main pyOpenPASS target specified above.
 foreach(SCOPE IN LISTS PYOPENPASS_GENERIC_TEST_SCOPES PYOPENPASS_SPECIALIZED_TEST_SCOPES)
   add_custom_target(pyOpenPASS_${SCOPE}
-    COMMAND ${Python3_EXECUTABLE} main.py --slave ${CMAKE_INSTALL_PREFIX} --mutual ${PYOPENPASS_DEFAULT_RESOURCES}/Common --resources ${PYOPENPASS_DEFAULT_RESOURCES}/Configurations --config ${PYOPENPASS_DEFAULT_CONFIG} --scope ${SCOPE}
+    COMMAND ${Python3_EXECUTABLE} main.py --simulation ${CMAKE_INSTALL_PREFIX} --mutual ${PYOPENPASS_DEFAULT_RESOURCES}/Common --resources ${PYOPENPASS_DEFAULT_RESOURCES}/Configurations --config ${PYOPENPASS_DEFAULT_CONFIG} --scope ${SCOPE}
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/pyOpenPASS
   )
   add_dependencies(pyOpenPASS pyOpenPASS_${SCOPE})
@@ -80,7 +80,7 @@ endforeach()
 # This also adds a dependency on the main pyOpenPASS target specified above.
 foreach(SCOPE IN LISTS PYOPENPASS_EXTRA_TEST_SCOPES)
   add_custom_target(pyOpenPASS_${SCOPE}
-    COMMAND ${Python3_EXECUTABLE} main.py --slave ${CMAKE_INSTALL_PREFIX} --mutual ${PYOPENPASS_EXTRA_RESOURCES}/Common --resources ${PYOPENPASS_EXTRA_RESOURCES}/Configurations --config ${PYOPENPASS_EXTRA_CONFIG} --scope ${SCOPE}
+    COMMAND ${Python3_EXECUTABLE} main.py --simulation ${CMAKE_INSTALL_PREFIX} --mutual ${PYOPENPASS_EXTRA_RESOURCES}/Common --resources ${PYOPENPASS_EXTRA_RESOURCES}/Configurations --config ${PYOPENPASS_EXTRA_CONFIG} --scope ${SCOPE}
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/pyOpenPASS
   )
   add_dependencies(pyOpenPASS pyOpenPASS_${SCOPE})

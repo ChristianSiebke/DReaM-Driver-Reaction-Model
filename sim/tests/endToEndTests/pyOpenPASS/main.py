@@ -22,9 +22,9 @@ import config
 import pytest
 from tests.default_tests import *
 
-class SLAVEINFO:
-    exe = 'OpenPassSlave' + ('.exe' if os.name == 'nt' else '')
-    log_file = 'OpenPassSlave.log'
+class SIMULATIONINFO:
+    exe = 'opSimulation' + ('.exe' if os.name == 'nt' else '')
+    log_file = 'opSimulation.log'
     configs = 'configs'
     results = 'results'
 
@@ -33,7 +33,7 @@ class CONFIGINFO:
     common = 'common'
 
 
-class Slave:
+class Simulation:
     base_path = None
     exe = None
     log_file = None
@@ -42,23 +42,23 @@ class Slave:
 
     def __init__(self, base_path, log_file=None, configs=None, results=None):
         self.base_path = base_path
-        exe = os.path.join(base_path, SLAVEINFO.exe)
+        exe = os.path.join(base_path, SIMULATIONINFO.exe)
         if not os.path.isfile(exe):
-            terminate_program(f'Cannot find slave ({exe})')
+            terminate_program(f'Cannot find simulation ({exe})')
         self.exe = exe
 
         if log_file is None:
-            self.log_file = os.path.join(base_path, SLAVEINFO.log_file)
+            self.log_file = os.path.join(base_path, SIMULATIONINFO.log_file)
         else:
             self.log_file = log_file
 
         if results is None:
-            self.results = os.path.join(base_path, SLAVEINFO.results)
+            self.results = os.path.join(base_path, SIMULATIONINFO.results)
         else:
             self.results = results
 
         if configs is None:
-            self.configs = os.path.join(base_path, SLAVEINFO.configs)
+            self.configs = os.path.join(base_path, SIMULATIONINFO.configs)
         else:
             self.configs = configs
 
@@ -77,7 +77,7 @@ class Slave:
             copyfile(self.log_file, os.path.join(destination, tail))
 
     def copy(self):
-        return Slave(self.base_path, self.log_file, self.configs, self.results)
+        return Simulation(self.base_path, self.log_file, self.configs, self.results)
 
 
     def log_empty(self):
@@ -100,8 +100,8 @@ def terminate_program(message):
 
 def parse_arguments():
     ap = argparse.ArgumentParser()
-    ap.add_argument('-s', '--slave',
-                    help=r'path to the openPASS slave (e.g. /openPASS/bin/)', 
+    ap.add_argument('-s', '--simulation',
+                    help=r'path to the openPASS simulation (e.g. /openPASS/bin/)',
                     required=True)
     ap.add_argument('-m', '--mutual',
                     default=None,
@@ -192,14 +192,14 @@ def main():
 
     config.DEBUG.PRINT_CSV = args.debug
 
-    slave = Slave(args.slave)
+    simulation = Simulation(args.simulation)
 
     the_config = load_test_config(args.config)
     scope = get_scope(the_config, args.scope)
     configs_under_test = [ConfigUnderTest(
         args.mutual, args.resources, c) for c in scope["configurations"]]
 
-    config.MetaInfo.slave = slave
+    config.MetaInfo.simulation = simulation
     config.MetaInfo.scope = args.scope
     config.MetaInfo.base_config = scope["baseConfig"]
     config.MetaInfo.configs_under_test = configs_under_test

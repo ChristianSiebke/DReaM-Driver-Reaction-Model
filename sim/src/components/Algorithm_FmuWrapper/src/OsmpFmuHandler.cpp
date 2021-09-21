@@ -21,7 +21,7 @@
 #include "common/speedActionSignal.h"
 #include "common/stringSignal.h"
 #include "common/trajectorySignal.h"
-#include "core/slave/modules/World_OSI/WorldData.h"
+#include "core/opSimulation/modules/World_OSI/WorldData.h"
 #include "google/protobuf/util/json_util.h"
 #include "variant_visitor.h"
 

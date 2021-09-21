@@ -30,10 +30,10 @@
 #endif
 
 
-#if defined(CoreSlave_EXPORTS)
-#define CORESLAVEEXPORT OPEXPORT
+#if defined(SimulationCore_EXPORTS)
+#define SIMULATIONCOREEXPORT OPEXPORT
 #else
-#define CORESLAVEEXPORT OPIMPORT
+#define SIMULATIONCOREEXPORT OPIMPORT
 #endif
 
 #if defined(Common_EXPORTS)

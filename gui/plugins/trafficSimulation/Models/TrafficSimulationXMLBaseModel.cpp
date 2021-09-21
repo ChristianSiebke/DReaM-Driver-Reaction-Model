@@ -10,7 +10,7 @@
 
 #include "TrafficSimulationXMLBaseModel.h"
 
-QString const TrafficSimulationXMLBaseModel::KeyRoot = QStringLiteral("slaveConfig");
+QString const TrafficSimulationXMLBaseModel::KeyRoot = QStringLiteral("simulationConfig");
 QString const TrafficSimulationXMLBaseModel::KeyProfilesCatalogue = QStringLiteral("ProfilesCatalog");
 
 QString const TrafficSimulationXMLBaseModel::KeyExperiment = QStringLiteral("ExperimentConfig");

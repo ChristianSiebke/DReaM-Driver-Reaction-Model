@@ -19,7 +19,7 @@ add_openpass_target(
 
   INCDIRS
     src
-    ../../core/slave/modules/World_OSI/RoutePlanning
+    ../../core/opSimulation/modules/World_OSI/RoutePlanning
 
   LIBRARIES
     Qt5::Core
