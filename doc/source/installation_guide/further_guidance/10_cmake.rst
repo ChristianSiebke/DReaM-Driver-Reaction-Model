@@ -198,6 +198,13 @@ WITH_TESTS
 - Build unit tests
 - Options: OFF | **ON**
 
+WITH_ENDTOEND_TESTS
+-------------------
+
+- Enables execution of end to end tests using :ref:`testing_endtoend`.
+- Tests can be ran by executing ``make install && make pyOpenPASS``
+- Options: **OFF** | ON
+
 OPENPASS_ADJUST_OUTPUT
 ----------------------
 
