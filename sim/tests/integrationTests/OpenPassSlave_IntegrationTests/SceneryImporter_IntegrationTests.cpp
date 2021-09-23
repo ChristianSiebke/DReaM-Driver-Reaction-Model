@@ -779,6 +779,7 @@ void CheckLaneType(OWL::Interfaces::WorldData* worldData, std::list<const OWL::I
     }
 }
 
+/*
 void CheckLaneSubtype(OWL::Interfaces::WorldData* worldData, std::list<const OWL::Interfaces::Lane*> lanes, std::vector<osi3::Lane_Classification_Subtype> expectedTypes)
 {
     // Only negative lanes are checked and lane "0" is only a placeholder without internal representation.
@@ -791,6 +792,7 @@ void CheckLaneSubtype(OWL::Interfaces::WorldData* worldData, std::list<const OWL
         EXPECT_THAT(GetOsiLane(lane).classification().subtype(), expectedTypes.at(i));
     }
 }
+*/
 
 TEST(SceneryImporter_IntegrationTests, SingleRoad_CheckForCorrectOsiLaneClassification)
 {
