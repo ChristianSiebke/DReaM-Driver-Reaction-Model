@@ -19,4 +19,3 @@ cd "$MYDIR/../../../../build" || exit 1
 
 make -j4 install
 
-exit 0
