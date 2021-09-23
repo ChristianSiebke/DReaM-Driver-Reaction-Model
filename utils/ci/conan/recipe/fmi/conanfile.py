@@ -42,8 +42,8 @@ class FmiConan(ConanFile):
                         defs={"FMILIB_INSTALL_PREFIX":"./temp-deploy",
                               "FMILIB_BUILD_STATIC_LIB":"OFF",
                               "FMILIB_BUILD_SHARED_LIB":"ON"})
-        if self.settings.os == "Linux":
-            tools.patch(patch_file="fmi-library-2.0.3-fixes.patch")
+        
+        tools.patch(patch_file="fmi-library-2.0.3-fixes.patch")
         cmake.build()
         cmake.install()
 
