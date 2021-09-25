@@ -18,6 +18,3 @@ MYDIR="$(dirname "$(readlink -f $0)")"
 cd "$MYDIR/../../../../build"
 
 make pyOpenPASS
-
-exit 0
-
