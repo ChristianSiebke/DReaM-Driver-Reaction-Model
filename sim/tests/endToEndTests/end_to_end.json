@@ -240,24 +240,6 @@
                 "OSCAction_FullSetParameterVariation"
             ]
         },
-        "Sensor_Latency":
-        {
-            "baseConfig":
-            {
-                "duration": 5,
-                "invocations": 20
-            },
-            "specialized":
-            {
-                "description": "Sensor detects scenario agent with 1 second delay.",
-                "query": "count(AgentId | AgentId == 0 and Timestep == 1000 and Sensor0_DetectedAgents-1 != Sensor0_DetectedAgents and Sensor0_DetectedAgents == 1) == 1",
-                "success_rate": 1
-            },
-            "configurations":
-            [
-                "Sensor_Latency"
-            ]
-        },
         "PCM":
         {
             "baseConfig":
@@ -274,6 +256,24 @@
             "configurations":
             [
                 "PCM"
+            ]
+        },
+        "Sensor_Latency":
+        {
+            "baseConfig":
+            {
+                "duration": 5,
+                "invocations": 20
+            },
+            "specialized":
+            {
+                "description": "Sensor detects scenario agent with 1 second delay.",
+                "query": "count(AgentId | AgentId == 0 and Timestep == 1000 and Sensor0_DetectedAgents-1 != Sensor0_DetectedAgents and Sensor0_DetectedAgents == 1) == 1",
+                "success_rate": 1
+            },
+            "configurations":
+            [
+                "Sensor_Latency"
             ]
         }
     }
