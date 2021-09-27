@@ -29,6 +29,7 @@ set(PYOPENPASS_SPECIALIZED_TEST_SCOPES
   OSCAction_StochasticVelocityEgo
   OSCAction_StochasticXPosition
   LocalizationOnJunction
+  PCM
   Sensor_Latency
 )
 
