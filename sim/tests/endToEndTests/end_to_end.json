@@ -12,7 +12,6 @@
                 "ADAS_AEB_CutIn",
                 "ADAS_AEB_PreventingCollisionWithObstacle",
                 "ADAS_AEB_PreventingCollisionWithObstacleInCurve",
-                "AEB",
                 "AFDM_TJunction",
                 "ByEntityCondition_RelativeLane",
                 "ByEntityCondition_RelativeSpeed",
@@ -26,17 +25,10 @@
                 "OSCAction_DoubleSinusoidalLaneChangeRight_Relative",
                 "OSCAction_FullSetParameterVariation",
                 "OSCAction_RemoveAgent",
-                "OSCAction_DoubleSinusoidalLaneChangeLeft_Absolute",
-                "OSCAction_DoubleSinusoidalLaneChangeRight_Absolute",
-                "OSCAction_DoubleSinusoidalLaneChangeLeft_Relative",
-                "OSCAction_DoubleSinusoidalLaneChangeRight_Relative",
                 "PCM",
-                "Pedestrian_AFDM",
                 "Pedestrian_Trajectory",
                 "Sensor_Latency",
-                "StaticAgentProfiles",
                 "StaticAgentCollision",
-                "StaticAgentProfileAFDM",
                 "SupplementaryTrafficSigns",
                 "TrafficJam",
                 "TrafficLight"
@@ -248,24 +240,6 @@
                 "OSCAction_FullSetParameterVariation"
             ]
         },
-        "Sensor_Latency":
-        {
-            "baseConfig":
-            {
-                "duration": 5,
-                "invocations": 20
-            },
-            "specialized":
-            {
-                "description": "Sensor detects scenario agent with 1 second delay.",
-                "query": "count(AgentId | Timestep==1000 and AgentId==0 and Sensor0_DetectedAgents-1=='nan' and Sensor0_DetectedAgents!='nan') == 1",
-                "success_rate": 1
-            },
-            "configurations":
-            [
-                "Sensor_Latency"
-            ]
-        },
         "PCM":
         {
             "baseConfig":
@@ -282,6 +256,24 @@
             "configurations":
             [
                 "PCM"
+            ]
+        },
+        "Sensor_Latency":
+        {
+            "baseConfig":
+            {
+                "duration": 5,
+                "invocations": 20
+            },
+            "specialized":
+            {
+                "description": "Sensor detects scenario agent with 1 second delay.",
+                "query": "count(AgentId | Timestep==1000 and AgentId==0 and Sensor0_DetectedAgents-1=='nan' and Sensor0_DetectedAgents!='nan') == 1",
+                "success_rate": 1
+            },
+            "configurations":
+            [
+                "Sensor_Latency"
             ]
         }
     }
