@@ -51,7 +51,7 @@ foreach(SEARCH_DIR IN LISTS SEARCH_DIRS)
   else()
     execute_process (
         WORKING_DIRECTORY ${SEARCH_DIR}
-        COMMAND $ENV{SHELL} -c "for f in \$(find -iname \'*.so\'); do realpath \$(dirname \$f); done | sort -u"
+        COMMAND $ENV{SHELL} -lc "for f in \$(find -iname \'*.so\'); do realpath \$(dirname \$f); done | sort -u"
         OUTPUT_VARIABLE DETECTED_LIBRARY_DIRS
     )
   endif()
