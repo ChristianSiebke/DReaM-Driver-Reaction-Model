@@ -19,4 +19,4 @@ set(HEADERS
     )
 
 add_library(${PROJECT_NAME}_Models STATIC ${SOURCES} ${HEADERS})
-target_link_libraries(${PROJECT_NAME}_Models PRIVATE Common_lib)
+target_link_libraries(${PROJECT_NAME}_Models PRIVATE Gui_Common)

@@ -27,4 +27,4 @@ set(UI
 )
 
 add_library(${PROJECT_NAME}_Views STATIC ${SOURCES} ${HEADERS} ${UI})
-target_link_libraries(${PROJECT_NAME}_Models PRIVATE Qt5::Widgets Common_lib)
+target_link_libraries(${PROJECT_NAME}_Models PRIVATE Qt5::Widgets Gui_Common)

@@ -32,4 +32,4 @@ set(HEADERS
 )
 
 add_library(ConfigurationGeneratorPcm STATIC ${SOURCES} ${HEADERS})
-target_link_libraries(ConfigurationGeneratorPcm Common_lib)
+target_link_libraries(ConfigurationGeneratorPcm Gui_Common)

@@ -21,4 +21,4 @@ set(HEADERS
 )
 
 add_library(${PROJECT_NAME}_Models STATIC ${SOURCES} ${HEADERS})
-target_link_libraries(${PROJECT_NAME}_Models PRIVATE Qt5::Xml Common_lib)
+target_link_libraries(${PROJECT_NAME}_Models PRIVATE Qt5::Xml Gui_Common)

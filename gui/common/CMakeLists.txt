@@ -99,9 +99,9 @@ include_directories(pcm/DataStructuresBase)
 include_directories(pcm/PCM_Data)
 include_directories(pcm/PCM_Importer)
 
-add_library(Common_lib STATIC ${SOURCES} ${HEADERS})
+add_library(Gui_Common STATIC ${SOURCES} ${HEADERS})
 
-target_link_libraries(Common_lib PRIVATE
+target_link_libraries(Gui_Common PRIVATE
                       Qt5::Widgets
                       Qt5::Core
                       Qt5::Xml
