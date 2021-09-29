@@ -10,12 +10,11 @@
 
 set(SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/WindowModel.cpp
-
-   )
+)
 
 set(HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/WindowModel.h
-    )
+)
 
 add_library(${PROJECT_NAME}_Models STATIC ${SOURCES} ${HEADERS})
 target_link_libraries(${PROJECT_NAME}_Models PRIVATE Qt5::Widgets)

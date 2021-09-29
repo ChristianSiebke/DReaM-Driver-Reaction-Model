@@ -10,25 +10,25 @@
 # **********************************************************************/
 
 set(SOURCES
-        SystemComponentInputItemModel.cpp
-        SystemComponentInputMapModel.cpp
-        SystemComponentItemModel.cpp
-        SystemComponentManagerModel.cpp
-        SystemComponentMapModel.cpp
-        SystemComponentOutputItemModel.cpp
-        SystemComponentOutputMapModel.cpp
-        SystemComponentParameterItemModel.cpp
-        SystemComponentParameterMapModel.cpp
-        SystemComponentScheduleModel.cpp
-        SystemConnectionItemModel.cpp
-        SystemConnectionMapModel.cpp
-        SystemItemModel.cpp
-        SystemMapModel.cpp
-        SystemModel.cpp
-        SystemXMLBaseModel.cpp
-        SystemXMLLoadModel.cpp
-        SystemXMLSaveModel.cpp
-   )
+    SystemComponentInputItemModel.cpp
+    SystemComponentInputMapModel.cpp
+    SystemComponentItemModel.cpp
+    SystemComponentManagerModel.cpp
+    SystemComponentMapModel.cpp
+    SystemComponentOutputItemModel.cpp
+    SystemComponentOutputMapModel.cpp
+    SystemComponentParameterItemModel.cpp
+    SystemComponentParameterMapModel.cpp
+    SystemComponentScheduleModel.cpp
+    SystemConnectionItemModel.cpp
+    SystemConnectionMapModel.cpp
+    SystemItemModel.cpp
+    SystemMapModel.cpp
+    SystemModel.cpp
+    SystemXMLBaseModel.cpp
+    SystemXMLLoadModel.cpp
+    SystemXMLSaveModel.cpp
+)
 
 set(HEADERS
     SystemComponentInputItemModel.h
@@ -49,6 +49,6 @@ set(HEADERS
     SystemXMLBaseModel.h
     SystemXMLLoadModel.h
     SystemXMLSaveModel.h
-    )
+)
 
 add_library(${PROJECT_NAME}_Models STATIC ${SOURCES} ${HEADERS})

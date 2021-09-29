@@ -13,14 +13,13 @@ set(SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/ProjectXMLBaseModel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ProjectXMLSaveModel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ProjectXMLLoadModel.cpp
-
-    )
+)
 
 set(HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/ProjectModel.h
     ${CMAKE_CURRENT_LIST_DIR}/ProjectXMLBaseModel.h
     ${CMAKE_CURRENT_LIST_DIR}/ProjectXMLSaveModel.h
     ${CMAKE_CURRENT_LIST_DIR}/ProjectXMLLoadModel.h
-    )
+)
 
 add_library(${PROJECT_NAME}_Models STATIC ${SOURCES} ${HEADERS})

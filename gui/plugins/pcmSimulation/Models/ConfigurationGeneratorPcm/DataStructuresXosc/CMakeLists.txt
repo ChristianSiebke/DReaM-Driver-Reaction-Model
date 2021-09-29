@@ -18,4 +18,4 @@ set(HEADERS
 		XoscTrajectory.h
     )
 
-target_sources(${PROJECT_NAME}_Models PRIVATE ${SOURCES} ${HEADERS})
+add_library(DataStructuresXosc STATIC ${SOURCES} ${HEADERS})

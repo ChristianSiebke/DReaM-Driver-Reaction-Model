@@ -24,8 +24,7 @@ set(SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/ComponentXMLSaveModel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ComponentTypedefMapModel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ComponentTypedefItemModel.cpp
-
-    )
+)
 
 set(HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/ComponentInputItemModel.h
@@ -43,7 +42,6 @@ set(HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/ComponentXMLSaveModel.h
     ${CMAKE_CURRENT_LIST_DIR}/ComponentTypedefMapModel.h
     ${CMAKE_CURRENT_LIST_DIR}/ComponentTypedefItemModel.h
-    )
+)
 
 add_library(${PROJECT_NAME}_Models STATIC ${SOURCES} ${HEADERS})
-target_link_libraries(${PROJECT_NAME}_Models PRIVATE Qt5::Widgets)

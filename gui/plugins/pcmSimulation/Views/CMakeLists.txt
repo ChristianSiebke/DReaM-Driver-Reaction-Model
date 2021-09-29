@@ -9,16 +9,16 @@
 # **********************************************************************/
 
 set(SOURCES
-        ViewPcm.cpp
-    )
+    ViewPcm.cpp
+)
 
 set(HEADERS
-        ViewPcm.h
-    )
+    ViewPcm.h
+)
 
 set(UI
-        ViewPcm.ui
-    )
+    ViewPcm.ui
+)
 
 add_library(${PROJECT_NAME}_Views STATIC ${SOURCES} ${HEADERS} ${UI})
 target_link_libraries(${PROJECT_NAME}_Models PRIVATE Qt5::Widgets)

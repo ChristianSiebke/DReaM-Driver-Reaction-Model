@@ -9,15 +9,16 @@
 # **********************************************************************/
 
 set(SOURCES
-        ModelTimePlot.cpp
-        ResultDirItemModel.cpp
-        TableModelPlot.cpp
-   )
+    ModelTimePlot.cpp
+    ResultDirItemModel.cpp
+    TableModelPlot.cpp
+)
 
 set(HEADERS
-        ModelTimePlot.h
-        ResultDirItemModel.h
-        TableModelPlot.h
-    )
+    ModelTimePlot.h
+    ResultDirItemModel.h
+    TableModelPlot.h
+)
 
 add_library(${PROJECT_NAME}_Models STATIC ${SOURCES} ${HEADERS})
+target_link_libraries(${PROJECT_NAME}_Models PRIVATE Qt5::Widgets)

@@ -10,11 +10,10 @@
 
 set(HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/PresenterPcm.h
-    )
+)
 
 set(SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/PresenterPcm.cpp
-    )
-
+)
 
 add_library(${PROJECT_NAME}_Presenters STATIC ${SOURCES} ${HEADERS})

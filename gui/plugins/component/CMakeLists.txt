@@ -27,26 +27,30 @@ include_directories(../../application/Interfaces)
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 
 # include interfaces, models and views
-add_subdirectory(Interfaces)
 add_subdirectory(Models)
 
-# include sources and headers
-set(SOURCES ComponentPlugin.cpp)
-set(HEADERS ComponentPlugin.h)
+add_openpass_target(
+    NAME Component TYPE library LINKAGE shared COMPONENT gui
 
-# declare target library
-add_library(Component SHARED ${SOURCES} ${HEADERS})
+    HEADERS
+        Interfaces/openPASS-Component/ComponentInputItemInterface.h
+        Interfaces/openPASS-Component/ComponentInputMapInterface.h
+        Interfaces/openPASS-Component/ComponentInterface.h
+        Interfaces/openPASS-Component/ComponentItemInterface.h
+        Interfaces/openPASS-Component/ComponentMapInterface.h
+        Interfaces/openPASS-Component/ComponentOutputItemInterface.h
+        Interfaces/openPASS-Component/ComponentOutputMapInterface.h
+        Interfaces/openPASS-Component/ComponentParameterItemInterface.h
+        Interfaces/openPASS-Component/ComponentParameterMapInterface.h
+        Interfaces/openPASS-Component/ComponentScheduleInterface.h
+        Interfaces/openPASS-Component/ComponentTypedefItemInterface.h
+        Interfaces/openPASS-Component/ComponentTypedefMapInterface.h
+        ComponentPlugin.h
 
-# link with Qt libraries, models, views and Interfaces
-target_link_libraries(Component PRIVATE
-                      Qt5::Widgets
-                      ${PROJECT_NAME}_Models
-                      ${PROJECT_NAME}_Interfaces)
+    SOURCES
+        ComponentPlugin.cpp
 
-if(WIN32)
-        install(TARGETS Component
-                RUNTIME DESTINATION ${SUBDIR_LIB_GUI}) 
-elseif(UNIX)
-        install(TARGETS Component
-                LIBRARY DESTINATION ${SUBDIR_LIB_GUI}) 
-endif()
+    LIBRARIES
+        Qt5::Widgets
+        ${PROJECT_NAME}_Models
+)

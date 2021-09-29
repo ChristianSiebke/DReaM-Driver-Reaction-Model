@@ -38,34 +38,56 @@ include_directories(${Qt5Xml_INCLUDE_DIRS})
 include_directories(${Qt5Sql_INCLUDE_DIRS})
 
 # include interfaces, models and views
-add_subdirectory(Interfaces)
+# add_subdirectory(Interfaces)
 add_subdirectory(Models)
 add_subdirectory(Presenters)
 add_subdirectory(Views)
 
 # include headers and sources of this plugin
-set(SOURCES PluginPcm.cpp)
-set(HEADERS PluginPcm.h)
+# set(SOURCES 
+#     PluginPcm.cpp)
+    
+# set(HEADERS 
+#     Interfaces/openPASS-PCM/PCMInterface.h
+#     PluginPcm.h)
 
 # declare target library
-add_library(Pcm_sim SHARED ${SOURCES} ${HEADERS} )
+# add_library(Pcm_sim SHARED ${SOURCES} ${HEADERS} )
 
-# link with Qt libraries, models, views and Interfaces
-target_link_libraries(Pcm_sim PRIVATE
-                      Qt5::Widgets
-                      Qt5::Core
-                      Qt5::Xml
-                      Qt5::Sql
-                      Window
-                      ${PROJECT_NAME}_Models
-                      ${PROJECT_NAME}_Views
-                      ${PROJECT_NAME}_Interfaces
-                      ${PROJECT_NAME}_Presenters)
+# # link with Qt libraries, models, views and Interfaces
+# target_link_libraries(Pcm_sim PRIVATE
+#                     #   Qt5::Widgets
+#                     #   Qt5::Core
+#                     #   Qt5::Xml
+#                     #   Qt5::Sql
+#                       Window
+#                       ${PROJECT_NAME}_Models
+#                       ${PROJECT_NAME}_Views
+#                       #${PROJECT_NAME}_Interfaces
+#                       ${PROJECT_NAME}_Presenters)
 
-if(WIN32)
-        install(TARGETS Pcm_sim
-                RUNTIME DESTINATION ${SUBDIR_LIB_GUI}) 
-elseif(UNIX)
-        install(TARGETS Pcm_sim
-                LIBRARY DESTINATION ${SUBDIR_LIB_GUI}) 
-endif()
+# if(WIN32)
+#         install(TARGETS Pcm_sim
+#                 RUNTIME DESTINATION ${SUBDIR_LIB_GUI}) 
+# elseif(UNIX)
+#         install(TARGETS Pcm_sim
+#                 LIBRARY DESTINATION ${SUBDIR_LIB_GUI}) 
+# endif()
+
+add_openpass_target(
+    NAME Pcm_sim TYPE library LINKAGE shared COMPONENT gui
+
+    HEADERS
+        Interfaces/openPASS-PCM/PCMInterface.h
+        PluginPcm.h
+
+    SOURCES
+        PluginPcm.cpp
+
+    LIBRARIES
+        Window
+        ${PROJECT_NAME}_Models
+        ${PROJECT_NAME}_Views
+        #${PROJECT_NAME}_Interfaces
+        ${PROJECT_NAME}_Presenters
+)

@@ -31,22 +31,26 @@ include_directories(Interfaces)
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 
 # include interfaces, models and views
-add_subdirectory(Interfaces)
 add_subdirectory(Models)
 
-# include sources and headers
-set(SOURCES openPASS.cpp)
 set(RC_ICONS openPASS.rc)
 
+add_openpass_target(
+    NAME openPASS TYPE executable COMPONENT gui
 
-# declare target library
-add_executable(openPASS WIN32 ${SOURCES} ${RC_ICONS})
+    HEADERS
+        Interfaces/openPASS/PluginInterface.h
+        Interfaces/openPASS/PluginManagerInterface.h
+        Interfaces/openPASS/RandomInterface.h
+        Interfaces/openPASS/ServiceInterface.h
+        Interfaces/openPASS/ServiceManagerInterface.h
+        Interfaces/openPASS/ioplugininterface.h
 
-# link with Qt libraries, models, views and Interfaces
-target_link_libraries(openPASS PRIVATE
-                      Qt5::Widgets
-                      ${PROJECT_NAME}_Models
-                      ${PROJECT_NAME}_Interfaces)
+    SOURCES
+        openPASS.cpp
+        ${RC_ICONS}
 
-install(TARGETS openPASS
-        RUNTIME DESTINATION ${INSTALL_BIN_DIR})
+    LIBRARIES
+        Qt5::Widgets
+        ${PROJECT_NAME}_Models
+)

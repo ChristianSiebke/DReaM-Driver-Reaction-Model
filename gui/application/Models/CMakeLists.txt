@@ -11,12 +11,12 @@
 set(SOURCES
     PluginManagerModel.cpp
     ServiceManagerModel.cpp
-   )
+)
 
 set(HEADERS
     PluginManagerModel.h
     ServiceManagerModel.h
-    )
+)
 
 add_library(${PROJECT_NAME}_Models STATIC ${SOURCES} ${HEADERS})
 

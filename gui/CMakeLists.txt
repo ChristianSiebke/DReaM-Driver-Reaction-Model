@@ -15,6 +15,7 @@ cmake_minimum_required(VERSION 3.14)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_subdirectory(application)
+add_subdirectory(common)
 #add_subdirectory(plugins/agentConfiguration)
 add_subdirectory(plugins/component)
 add_subdirectory(plugins/pcmEvaluation)

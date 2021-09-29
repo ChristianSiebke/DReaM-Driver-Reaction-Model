@@ -9,28 +9,16 @@
 # **********************************************************************/
 
 set(SOURCES
-        ViewTimePlot.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/Plot.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/RowHistograms.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/CenteredTextItem.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/PlotGraphicsItem.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/Graph.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/PlotAxes.cpp
-    )
+    ViewTimePlot.cpp
+)
 
 set(HEADERS
-        ViewTimePlot.h
-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/Plot.h
-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/RowHistograms.h
-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/CenteredTextItem.h
-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/PlotGraphicsItem.h
-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/Graph.h
-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/PlotAxes.h
-    )
+    ViewTimePlot.h
+)
 
 set(UI
-        ViewTimePlot.ui
-     )
+    ViewTimePlot.ui
+)
 
 add_library(${PROJECT_NAME}_Views STATIC ${SOURCES} ${HEADERS} ${UI})
-target_link_libraries(${PROJECT_NAME}_Models PRIVATE Qt5::Widgets)
+target_link_libraries(${PROJECT_NAME}_Models PRIVATE Common_lib Qt5::Widgets)

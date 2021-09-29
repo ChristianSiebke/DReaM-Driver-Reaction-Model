@@ -11,16 +11,16 @@
 set(SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/WindowView.cpp
     ${CMAKE_CURRENT_LIST_DIR}/LogoDelegate.cpp
-    )
+)
 
 set(HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/WindowView.h
     ${CMAKE_CURRENT_LIST_DIR}/LogoDelegate.h
-    )
+)
 
 set(UI
     ${CMAKE_CURRENT_LIST_DIR}/WindowView.ui
-    )
+)
 
 add_library(${PROJECT_NAME}_Views STATIC ${SOURCES} ${HEADERS} ${UI})
 target_link_libraries(${PROJECT_NAME}_Models PRIVATE Qt5::Widgets)

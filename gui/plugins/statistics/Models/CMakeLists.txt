@@ -12,16 +12,11 @@ include_directories(../../../common)
 
 set(SOURCES
         ModelStatistics.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/Histogram.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/RowHistograms.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/TableModel.cpp
    )
 
 set(HEADERS
         ModelStatistics.h
-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/Histogram.h
-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/RowHistograms.h
-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/TableModel.h
     )
 
 add_library(${PROJECT_NAME}_Models STATIC ${SOURCES} ${HEADERS})
+target_link_libraries(${PROJECT_NAME}_Models PRIVATE Common_lib)
