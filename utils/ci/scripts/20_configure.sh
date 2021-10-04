@@ -37,7 +37,7 @@ if [[ "${OSTYPE}" = "msys" ]]; then
 
   # set python command
   if [[ -n "${PYTHON_WINDOWS_EXE}" ]]; then
-    CMAKE_PYTHON_COMMAND_ARG="-DPYTHON_COMMAND=${PYTHON_WINDOWS_EXE}"
+    CMAKE_PYTHON_COMMAND_ARG="-DPython3_EXECUTABLE=${PYTHON_WINDOWS_EXE}"
   fi
 
   # prepare dependency paths
