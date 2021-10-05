@@ -250,7 +250,7 @@
             "specialized":
             {
                 "description": "Run a pcm case and check if the end state is as expected",
-                "query": "count(AgentId | XPosition == -6.177743 and AgentId == 0 and Timestep == 10000) == 1",
+                "query": "count(AgentId | (XPosition == -5.422331 and AgentId == 0 and Timestep == 10000)) == 1",
                 "success_rate": 1
             },
             "configurations":
