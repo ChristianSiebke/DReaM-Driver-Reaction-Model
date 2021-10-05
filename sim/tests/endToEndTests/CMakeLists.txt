@@ -31,6 +31,8 @@ set(PYOPENPASS_SPECIALIZED_TEST_SCOPES
   LocalizationOnJunction
   PCM
   Sensor_Latency
+  Sensor_Failure_Detected
+  Sensor_Failure_Undetected
 )
 
 # Generic test scopes
