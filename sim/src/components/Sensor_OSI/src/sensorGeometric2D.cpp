@@ -233,6 +233,8 @@ std::pair<point_t, polygon_t> SensorGeometric2D::CreateSensorDetectionField(cons
 SensorDetectionResults SensorGeometric2D::DetectObjects()
 {
     SensorDetectionResults results;
+    std::vector<osi3::MovingObject> detectedMovingObjectsWithoutFailure;
+    std::vector<osi3::StationaryObject> detectedStationaryObjectsWithoutFailure;
     osi3::SensorViewConfiguration sensorViewConfig = GenerateSensorViewConfiguration();
     auto sensorView = static_cast<OWL::Interfaces::WorldData*>(world->GetWorldData())->GetSensorView(sensorViewConfig, GetAgent()->GetId());
 
@@ -258,8 +260,8 @@ SensorDetectionResults SensorGeometric2D::DetectObjects()
                                               sensorPositionGlobal,
                                               stationaryObjectsInDetectionField);
 
-        std::tie(results.visibleMovingObjects, results.detectedMovingObjects) = CalcVisualObstruction(movingObjectsInDetectionField, brightArea);
-        std::tie(results.visibleStationaryObjects, results.detectedStationaryObjects) = CalcVisualObstruction(stationaryObjectsInDetectionField, brightArea);
+        std::tie(results.visibleMovingObjects, detectedMovingObjectsWithoutFailure) = CalcVisualObstruction(movingObjectsInDetectionField, brightArea);
+        std::tie(results.visibleStationaryObjects, detectedStationaryObjectsWithoutFailure) = CalcVisualObstruction(stationaryObjectsInDetectionField, brightArea);
     }
     else
     {
@@ -270,7 +272,7 @@ SensorDetectionResults SensorGeometric2D::DetectObjects()
         {
             return *movingObject;
         });
-        results.detectedMovingObjects = results.visibleMovingObjects;
+        detectedMovingObjectsWithoutFailure = results.visibleMovingObjects;
         std::transform(stationaryObjectsInDetectionField.begin(),
                        stationaryObjectsInDetectionField.end(),
                        std::back_inserter(results.visibleStationaryObjects),
@@ -278,7 +280,7 @@ SensorDetectionResults SensorGeometric2D::DetectObjects()
         {
             return *stationaryObject;
         });
-        results.detectedStationaryObjects = results.visibleStationaryObjects;
+        detectedStationaryObjectsWithoutFailure = results.visibleStationaryObjects;
     }
 
     const auto ownPosition = GetHostVehiclePosition(hostVehicle);
@@ -287,20 +289,22 @@ SensorDetectionResults SensorGeometric2D::DetectObjects()
     const point_t ownVelocity{hostVehicle->base().velocity().x(), hostVehicle->base().velocity().y()};
     const point_t ownAcceleration{hostVehicle->base().acceleration().x(), hostVehicle->base().acceleration().y()};
 
-    for (const auto& object : results.detectedMovingObjects)
+    for (const auto &object : detectedMovingObjectsWithoutFailure)
     {
         if(HasDetectionError())
         {
             continue;
         }
+        results.detectedMovingObjects.push_back(object);
         AddMovingObjectToSensorData(object, ownVelocity, ownAcceleration, ownPosition, yaw, yawRate);
     }
-    for (const auto& object : results.detectedStationaryObjects)
+    for (const auto &object : detectedStationaryObjectsWithoutFailure)
     {
         if(HasDetectionError())
         {
             continue;
         }
+        results.detectedStationaryObjects.push_back(object);
         AddStationaryObjectToSensorData(object, ownPosition, yaw);
     }
 
