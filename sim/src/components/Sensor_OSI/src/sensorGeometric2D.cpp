@@ -289,10 +289,18 @@ SensorDetectionResults SensorGeometric2D::DetectObjects()
 
     for (const auto& object : results.detectedMovingObjects)
     {
+        if(HasDetectionError())
+        {
+            continue;
+        }
         AddMovingObjectToSensorData(object, ownVelocity, ownAcceleration, ownPosition, yaw, yawRate);
     }
     for (const auto& object : results.detectedStationaryObjects)
     {
+        if(HasDetectionError())
+        {
+            continue;
+        }
         AddStationaryObjectToSensorData(object, ownPosition, yaw);
     }
 

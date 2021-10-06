@@ -80,8 +80,7 @@ void SensorAggregationImplementation::UpdateOutput(int localLinkId, std::shared_
         // to any ADAS
         try
         {
-            data = std::make_shared<SensorDataSignal const>(
-                        out_sensorData);
+            data = std::make_shared<SensorDataSignal const>(out_sensorData);
         }
         catch(const std::bad_alloc&)
         {

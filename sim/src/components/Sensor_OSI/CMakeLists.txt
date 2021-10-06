@@ -1,6 +1,6 @@
 set(COMPONENT_NAME Sensor_OSI)
 
-add_compile_definitions(SENSOR_OBJECT_DETECTOR_LIBRARY)
+add_compile_definitions(SENSOR_OSI_LIBRARY)
 
 add_openpass_target(
   NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
