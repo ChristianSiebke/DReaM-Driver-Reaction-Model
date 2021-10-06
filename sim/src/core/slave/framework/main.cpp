@@ -40,7 +40,7 @@ using namespace SimulationSlave;
 //! \param[in] logFile  name of the logfile
 //! \param[in] bufferedMessages messages recorded before creation of the logfile
 //-----------------------------------------------------------------------------
-static void SetupLogging(LogLevel logLevel, const std::string& logFile, const std::list<std::string>& bufferedMessages);
+static void SetupLogging(LogLevel logLevel, const std::string& logFile, const std::vector<std::string>& bufferedMessages);
 
 //-----------------------------------------------------------------------------
 //! \brief  Check several parameters of a readable directory
@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-void SetupLogging(LogLevel logLevel, const std::string& logFile, const std::list<std::string>& bufferedMessages)
+void SetupLogging(LogLevel logLevel, const std::string& logFile, const std::vector<std::string>& bufferedMessages)
 {
     QDir logFilePath(QString::fromStdString(logFile));
     QDir logFileDir = QFileInfo(QString::fromStdString(logFile)).absoluteDir();

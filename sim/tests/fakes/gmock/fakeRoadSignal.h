@@ -27,7 +27,7 @@ public:
     MOCK_CONST_METHOD0(GetValue, double ());
     MOCK_CONST_METHOD0(GetUnit, RoadSignalUnit ());
     MOCK_CONST_METHOD0(GetText, std::string ());
-    MOCK_CONST_METHOD0(GetDependencies, std::list<std::string> ());
+    MOCK_CONST_METHOD0(GetDependencies, std::vector<std::string> ());
     MOCK_CONST_METHOD0(GetIsDynamic, bool());
     MOCK_CONST_METHOD0(GetWidth, double ());
     MOCK_CONST_METHOD0(GetHeight, double ());

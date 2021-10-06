@@ -501,7 +501,7 @@ public:
     //! \param ownLaneId        id of own lane
     //! \param targetPosition   position of queried point
     //! \return lane id relative to own position
-    RouteQueryResult<std::optional<int>> GetRelativeLaneId(const RoadMultiStream& roadStream, double ownPosition, int ownLaneId, std::map<std::string, GlobalRoadPosition> targetPosition) const;
+    RouteQueryResult<std::optional<int>> GetRelativeLaneId(const RoadMultiStream& roadStream, double ownPosition, int ownLaneId, GlobalRoadPositions targetPosition) const;
 
     RouteQueryResult<std::optional<double>> GetLaneCurvature (const LaneMultiStream& laneStream, double position) const;
 

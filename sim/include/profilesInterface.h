@@ -51,13 +51,13 @@ struct VehicleComponent
 {
     std::string type {};
     StringProbabilities componentProfiles {};
-    std::list<SensorLink> sensorLinks {};
+    std::vector<SensorLink> sensorLinks {};
 };
 
 struct VehicleProfile
 {
     std::string vehicleModel {};
-    std::list<VehicleComponent> vehicleComponents {};
+    std::vector<VehicleComponent> vehicleComponents {};
     openpass::sensors::Parameters sensors {};
 };
 

@@ -65,7 +65,7 @@ TEST(AgentParser, RecurringComponent_IsParsed)
     auto nonRecurringTasks = agentParser.GetNonRecurringTasks();
     EXPECT_THAT(nonRecurringTasks, IsEmpty());
 
-    std::list<TaskItem> recurringTasks = agentParser.GetRecurringTasks();
+    std::vector<TaskItem> recurringTasks = agentParser.GetRecurringTasks();
     EXPECT_THAT(recurringTasks, Contains(Field(&TaskItem::cycletime, Eq(100)))) << "cycletime";
     EXPECT_THAT(recurringTasks, Contains(Field(&TaskItem::taskType, Eq(TaskType::Trigger)))) << "taskType Trigger";
     EXPECT_THAT(recurringTasks, Contains(Field(&TaskItem::taskType, Eq(TaskType::Update)))) << "taskType Update";
@@ -160,7 +160,7 @@ TEST(AgentParser, NonRecurringComponent_IsParsed)
     auto recurringTasks = agentParser.GetRecurringTasks();
     EXPECT_THAT(recurringTasks, IsEmpty());
 
-    std::list<TaskItem> nonRecurringTasks = agentParser.GetNonRecurringTasks();
+    std::vector<TaskItem> nonRecurringTasks = agentParser.GetNonRecurringTasks();
     EXPECT_THAT(nonRecurringTasks, Contains(Field(&TaskItem::cycletime, Eq(100)))) << "cycletime";
     EXPECT_THAT(nonRecurringTasks, Contains(Field(&TaskItem::taskType, Eq(TaskType::Trigger)))) << "taskType Trigger";
     EXPECT_THAT(nonRecurringTasks, Contains(Field(&TaskItem::taskType, Eq(TaskType::Update)))) << "taskType Update";

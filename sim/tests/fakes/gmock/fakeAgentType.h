@@ -22,7 +22,7 @@ class FakeAgentType : public AgentTypeInterface {
   MOCK_METHOD1(AddComponent,
       bool(std::shared_ptr<ComponentType> component));
   MOCK_CONST_METHOD0(GetChannels,
-      const std::list<int>&());
+      const std::vector<int>&());
   MOCK_CONST_METHOD0(GetComponents,
       const std::map<std::string, std::shared_ptr<ComponentType>>&());
 };

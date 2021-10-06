@@ -51,7 +51,7 @@ This example describes the Sensor_Driver module.
 Priorities
 ----------
 
-Please refer to the [Components and channel communication diagram]]\ref dev_concepts_modulecomposition) for assignment of a proper priority.
+Please refer to the :ref:`Components and channel communication diagram <component_channel_communication>` for assignment of a proper priority.
 Based on the signal flow, input relevant components like sensors need to be executed first. They provide data for consuming components (algorithms) like ADAS and drivers.
 Data is then handled by algorithms like Algorithm_Lateral.
 Output-relevant modules like dynamics and actions are executed last.
@@ -128,7 +128,7 @@ Channel-Ids
 -----------
 
 Channels allow components to communicate with each other.
-The signalflow is set explicitly via a channel-Id of 4 digits (see also [Components and channels communication diagram](/ref dev_concepts_modulecomposition)).
+The signal flow is set explicitly via a channel-Id of 4 digits (see also :ref:`Components and channels communication diagram <component_channel_communication>`).
 
 The first two numbers define the sending module (XX 00).
 The other two digits define the type of signal that is sent (00 XX).
@@ -242,7 +242,7 @@ With corresponding defined indices:
 Parameters
 ----------
 
-For more information on the type of parameters (escpecially stochastic distributions), please refer to the [ProfilesGroup section](\ref io_input_profilescatalog_profileGroups).
+For more information on the type of parameters (especially stochastic distributions), please refer to the :ref:`ProfilesGroup section <profilescatalog_profilegroups>`.
 
 **Important Note:** The syntax for defining parameters in the SystemConfigBlueprint file differs from the ProfilesCatalog syntax.
 See the following example:

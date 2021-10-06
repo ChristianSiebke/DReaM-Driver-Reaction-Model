@@ -578,3 +578,6 @@ struct CollisionAngles{
     double HCPA = 0.0; //!< transformed host collision point angle
     double OCPA = 0.0; //!< transformed opponent collision point angle
 };
+
+class AgentInterface;
+using AgentInterfaces = std::vector<const AgentInterface*>;

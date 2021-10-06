@@ -107,7 +107,7 @@ private:
     const std::string DllDestroyInstanceId = "OpenPASS_DestroyInstance";
 
     std::string libraryPath;
-    std::list<Manipulator*> manipulators;
+    std::vector<Manipulator*> manipulators;
     QLibrary *library = nullptr;
     CallbackInterface *callbacks;
     ManipulatorInterface_GetVersion getVersionFunc;

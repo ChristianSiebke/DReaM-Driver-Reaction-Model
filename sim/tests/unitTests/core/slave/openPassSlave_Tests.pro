@@ -69,6 +69,7 @@ SLAVECONFIGIMPORTER_TESTS = \
 PROFILESIMPORTER_TESTS = \
     $$UNIT_UNDER_TEST/importer/profiles.cpp \
     $$UNIT_UNDER_TEST/importer/profilesImporter.cpp \
+    $$UNIT_UNDER_TEST/importer/importerCommon.cpp \
     \
     profilesImporter_Tests.cpp
 

@@ -125,7 +125,7 @@ TEST(SceneryConverter, RefactoringSafeguard_DoNotDelete)
     ON_CALL(roadLink, GetType()).WillByDefault(Return(RoadLinkType::Successor));
     ON_CALL(roadLink, GetElementId()).WillByDefault(ReturnRef(outgoingRoadId));
 
-    std::list<RoadLinkInterface*> roadLinks = { {&roadLink} };
+    std::vector<RoadLinkInterface*> roadLinks = { {&roadLink} };
     ON_CALL(connectingRoad, GetRoadLinks()).WillByDefault(ReturnRef(roadLinks));
 
     FakeOdRoad outgoingRoad;

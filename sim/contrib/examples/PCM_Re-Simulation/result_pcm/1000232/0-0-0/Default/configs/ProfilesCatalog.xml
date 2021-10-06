@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Profiles SchemaVersion="0.4.3">
+<Profiles SchemaVersion="0.4.6">
     <AgentProfiles>
         <AgentProfile Name="Agent_0" Type="Static">
             <System>
@@ -17,18 +17,15 @@
         </AgentProfile>
     </AgentProfiles>
     <VehicleProfiles>
-        <VehicleProfile Name="Agent_0">
-            <Model Name="Agent_0"/>
-            <Components/>
-            <Sensors/>
-        </VehicleProfile>
-        <VehicleProfile Name="Agent_1">
-            <Model Name="Agent_1"/>
-            <Components/>
-            <Sensors/>
-        </VehicleProfile>
     </VehicleProfiles>
-    <ProfileGroup Type="Driver">
-        <Profile Name="Regular"/>
+    <ProfileGroup Type="Driver"/>
+    <ProfileGroup Type="TrafficRules">
+        <Profile Name="Germany">
+            <Double Key="OpenSpeedLimit" Value="INF"/>
+            <Bool Key="KeepToOuterLanes" Value="true"/>
+            <Bool Key="DontOvertakeOnOuterLanes" Value="true"/>
+            <Bool Key="FormRescueLane" Value="true"/>
+            <Bool Key="ZipperMerge" Value="true"/>
+        </Profile>
     </ProfileGroup>
 </Profiles>

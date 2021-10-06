@@ -138,7 +138,7 @@ void Scheduler::UpdateAgents(SchedulerTasks &taskList, WorldInterface &world)
         ScheduleAgentTasks(taskList, *agent);
     }
 
-    std::list<int> removedAgents;
+    std::vector<int> removedAgents;
     for (const auto &agent: world.GetRemovedAgentsInPreviousTimestep())
     {
         removedAgents.push_back(agent->GetId());

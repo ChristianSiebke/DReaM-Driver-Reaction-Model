@@ -12,10 +12,10 @@
 
 #include <QtCore/qglobal.h>
 
-#if defined(SENSOR_OBJECT_DETECTOR_LIBRARY)
-#  define SENSOR_OBJECT_DETECTOR_SHARED_EXPORT Q_DECL_EXPORT
+#if defined(SENSOR_OSI_LIBRARY)
+#  define SENSOR_OSI_SHARED_EXPORT Q_DECL_EXPORT
 #else
-#  define SENSOR_OBJECT_DETECTOR_SHARED_EXPORT Q_DECL_IMPORT
+#  define SENSOR_OSI_SHARED_EXPORT Q_DECL_IMPORT
 #endif
 
 #include "include/modelInterface.h"

@@ -34,7 +34,7 @@ using ::testing::UnorderedElementsAreArray;
 namespace
 {
 
-    static const auto NO_AGENTS_IN_RANGE = std::vector<const AgentInterface*>{};
+    static const auto NO_AGENTS_IN_RANGE = AgentInterfaces{};
     static const auto NO_OBJECTS_IN_RANGE = std::vector<const WorldObjectInterface*>{};
 
     static inline std::pair<RoadGraph, RoadGraphVertex> GetSingleVertexRoadGraph(const RouteElement& routeElement)
@@ -140,7 +140,7 @@ TEST_P(GetValidLaneSpawningRanges_OneAgent, GetValidLaneSpawningRanges)
 
     EXPECT_CALL(*laneStream, GetAgentsInRange(StreamPosition{data.sStart, 0},
                                             StreamPosition{data.sEnd, 0}))
-            .WillOnce(Return(std::vector<const AgentInterface*>{&fakeAgent}));
+            .WillOnce(Return(AgentInterfaces{&fakeAgent}));
 
     EXPECT_CALL(fakeAgent, GetAgentCategory())
             .WillRepeatedly(Return(data.agentCategory));
@@ -217,7 +217,7 @@ TEST_P(GetValidLaneSpawningRanges_TwoAgents, GetValidLaneSpawningRanges)
 
     EXPECT_CALL(*laneStream, GetAgentsInRange(StreamPosition{data.sStart, 0},
                                             StreamPosition{data.sEnd, 0}))
-            .WillOnce(Return(std::vector<const AgentInterface*>{&firstFakeAgent, &secondFakeAgent}));
+            .WillOnce(Return(AgentInterfaces{&firstFakeAgent, &secondFakeAgent}));
 
     EXPECT_CALL(firstFakeAgent, GetAgentCategory())
             .WillRepeatedly(Return(data.firstAgentCategory));

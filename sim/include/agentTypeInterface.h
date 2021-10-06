@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <list>
+#include <vector>
 #include <map>
 #include <memory>
 #include <string>
@@ -44,7 +44,7 @@ public:
     virtual bool AddComponent(std::shared_ptr<ComponentType> component) = 0;
 
     //Getter
-    virtual const std::list<int> &GetChannels() const = 0;
+    virtual const std::vector<int> &GetChannels() const = 0;
     virtual const std::map<std::string, std::shared_ptr<ComponentType>> &GetComponents() const = 0;
 };
 

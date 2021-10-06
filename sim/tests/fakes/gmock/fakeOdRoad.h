@@ -31,10 +31,10 @@ class FakeOdRoad : public RoadInterface
     MOCK_METHOD1(AddRoadSignal, void(const RoadSignalSpecification &signal));
     MOCK_METHOD1(AddRoadObject, void(const RoadObjectSpecification &object));
     MOCK_CONST_METHOD0(GetId, const std::string());
-    MOCK_CONST_METHOD0(GetElevations, std::list<RoadElevation *> &());
-    MOCK_CONST_METHOD0(GetLaneOffsets, const std::list<RoadLaneOffset *> &());
-    MOCK_CONST_METHOD0(GetGeometries, std::list<RoadGeometryInterface *> &());
-    MOCK_CONST_METHOD0(GetRoadLinks, std::list<RoadLinkInterface *> &());
+    MOCK_CONST_METHOD0(GetElevations, std::vector<RoadElevation *> &());
+    MOCK_CONST_METHOD0(GetLaneOffsets, const std::vector<RoadLaneOffset *> &());
+    MOCK_CONST_METHOD0(GetGeometries, std::vector<RoadGeometryInterface *> &());
+    MOCK_CONST_METHOD0(GetRoadLinks, std::vector<RoadLinkInterface *> &());
     MOCK_CONST_METHOD0(GetLaneSections, std::vector<RoadLaneSectionInterface *> &());
     MOCK_CONST_METHOD0(GetRoadSignals, std::vector<RoadSignalInterface *> &());
     MOCK_CONST_METHOD0(GetRoadObjects, std::vector<RoadObjectInterface *> &());

@@ -27,13 +27,15 @@ This config defines all available framework modules and agent modules and connec
 
 The next figure gives an exhaustive overview over the current superset:
 
+.. _component_channel_communication:
+
 .. figure:: ./images/ComponentsChannelCommunicationDiagram.svg
 
     Components and channel communication
     
 :download:`./images/ComponentsChannelCommunicationDiagram.svg`
 
-Modules that can be paramerized by the user are explained in the :ref:`Simulation User Guide <simuserguide_components>`.
+Modules that can be parametrized by the user are explained in the :ref:`Simulation User Guide <simuserguide_components>`.
 Therefor the following section only contains the components not listed in the user guide.
 
 Action_LongitudinalDriver
@@ -45,7 +47,7 @@ The input for this module is prepared by the AlgorithmLongitudinal Module.
 Action_SecondaryDriver
 -----------------------
 
-Updates the agents BrakingLight, Indicator, Horn and all Lightswitches (Headlight, HighBeam, Flasher).
+Updates the agents braking light, indicator, horn and all light switches (headlight, high beam, flasher).
 The input for this module is prepared by the driver module.
 
 AgentUpdater
@@ -56,7 +58,7 @@ The AgentUpdater executes all Set-Methods of the agent dynamics after the Dynami
 Algorithm_Lateral
 -----------------
 
-This module converts the lateral input of the driver module into a steeringwheel angle.
+This module converts the lateral input of the driver module into a steering wheel angle.
 
 Algorithm_Longitudinal
 ----------------------
@@ -66,7 +68,7 @@ This module converts the acceleration input of the driver module into pedal posi
 Dynamics_Collision
 ------------------
 
-If the number of collision partners of the agent is bigger than in the previous timestep, the DynamicsCollision module calculates the collision. 
+If the number of collision partners of the agent is bigger than in the previous time step, the DynamicsCollision module calculates the collision. 
 Currently the collision is implemented fully inelastic, i.e. all agents will have the same velocity after the collision, while the momentum is conserved. 
 After the collision the agents slow down with a fixed deceleration until fully stopped.
 
@@ -74,10 +76,10 @@ Dynamics_RegularDriving
 ------------------------
 
 The module takes care that the motion of the agent fit to the physical limitations, such as friction or maximum possible acceleration based on the current gear.
-This module uses both the world friction and the vehiclemodelparameter friction.
+This module uses both the world friction and the vehicle model parameter friction.
 Thereby it calculates the dynamics of the agents in every time step.
 The currently covered  dynamics are *Acceleration*, *Velocity*, and consequently *Position*, *Yaw angle* and *Yaw rate*.
-The input for this module is the steeringwheel angle and the new acceleration of the vehicle.
+The input for this module is the steering wheel angle and the new acceleration of the vehicle.
 
 LimiterAccelerationVehicleComponents
 -------------------------------------
@@ -87,7 +89,7 @@ This module limits the AccelerationSignal from the PrioritizerAccelerationVehicl
 The limit is calculated by :math:`a_{\text{lim}} = \frac {F_{\text{wheel}} - F_{\text{roll}} - F_{\text{air}}} {m_{\text{veh}}}`, where the symbols meanings are:
 
 ======================== ================================================
-Symbol                   Decription                                     
+Symbol                   Description                                     
 ======================== ================================================
 :math:`a_{\text{lim}}`   Resulting acceleration limit [m/s²] 
 :math:`F_{\text{wheel}}` Force at wheel (provided by drivetrain) [N]    
@@ -103,9 +105,9 @@ The components are calculated as follows:
 :math:`F_{\text{wheel}} = \frac {T_{\text{engine}} \cdot r_{\text{axle}}} {r_{\text{wheel}}}`
 
 ========================= ============================================================================================
-Symbol                    Decription                                                                                 
+Symbol                    Description                                                                                 
 ========================= ============================================================================================
-:math:`T_{\text{engine}}` Resulting torque from drivetrain at current velocity (assumung best gearing selected) [Nm] 
+:math:`T_{\text{engine}}` Resulting torque from drivetrain at current velocity (assuming best gearing selected) [Nm] 
 :math:`r_{\text{axle}}`   Axle transmission ratio [1]                                                                
 :math:`r_{\text{wheel}}`  Static radius of the wheels [m]                                                            
 ========================= ============================================================================================
@@ -119,7 +121,7 @@ From 5000 rpm up to maximum engine speed, the torque scales with 5000 / maxEngin
 :math:`F_{\text{roll}} = m_{\text{veh}} \cdot c_{\text{fric}} \cdot g`
 
 ========================= ============================================================================================
-Symbol                    Decription                                        
+Symbol                    Description                                        
 ========================= ============================================================================================
 :math:`m_{\text{veh}}`    Mass of the vehicle [kg]                          
 :math:`c_{\text{fric}}`   Rolling friction coefficient (constant 0.015) [1] 
@@ -131,9 +133,9 @@ Symbol                    Decription
 :math:`F_{\text{air}} = \frac {\rho_{\text{air}}} {2} \cdot A_{\text{front}} \cdot c_w \cdot v^2`
 
 ========================= ============================================================================================
-Symbol                    Decription                                 
+Symbol                    Description                                 
 ========================= ============================================================================================
-:math:`\rho_{\text{air}}` Densitiy of air [kg/m³]         
+:math:`\rho_{\text{air}}` Density of air [kg/m³]         
 :math:`A_{\text{front}}`  Vehicle front surface area [m²] 
 :math:`c_w`               Drag coefficient [1]                       
 :math:`v`                 Vehicle's current velocity [m/s]           
@@ -160,7 +162,7 @@ raises such an event for the specified agent, the module forwards it as signal t
 Parameters_Vehicle
 -------------------
 
-The ParametersVehicle module forwards the VehicleModelParamters to all other moduls that need them via the ParametersVehicleSignal
+The ParametersVehicle module forwards the VehicleModelParameters to all other modules that need them via the ParametersVehicleSignal
 
 Sensor_Driver
 --------------
@@ -236,7 +238,7 @@ Cases
 ~~~~~
 
 - For angles < 1.0 * pi a four-corner (kite) polygon can be constructed out of two radiuses and two tangents.
-- For angles > = 1.0 * pi and < 2.0 * pi a five-corner polygon can be constructed of two radiusas an three tangents.
+- For angles > = 1.0 * pi and < 2.0 * pi a five-corner polygon can be constructed of two radiuses an three tangents.
 - For opening-angle of exactly 2.0 * pi the distance information suffices. No polygon is needed.
 
 Visual Obstruction
@@ -258,12 +260,12 @@ Every object in the detection field of the sensor will therefore cast a shadow a
 If an object is shadowed too much, it is removed from the list of detected objects.
 After all shadows are removed, only the "real" detection field polygon (yellow area) remains.
 Objects in green and blue are detected.
-The red object is completly covered by shadows and therefore not detected.
+The red object is completely covered by shadows and therefore not detected.
 
 **Step by Step**
 
 Shadow casting is calculated as follows (see figure below):
-1. Approximate detection field as ciruclar sector (bright area).
+1. Approximate detection field as circular sector (bright area).
 2. Calculate the casted shadow of each object inside the detection field.
 3. Remove the casted shadow from the detection field.
 4. Check for each object if the remaining area is inside the remaining polygon.
@@ -271,14 +273,14 @@ Shadow casting is calculated as follows (see figure below):
 
 **Details**
 
-The approximation of the detection range is deliberatly calculated along its edge and not by means of a tangential approximation.
+The approximation of the detection range is deliberately calculated along its edge and not by means of a tangential approximation.
 The areal error along the edge is regarded as negligible w.r.t to the sizes of objects and commonly used detection ranges.
 
 .. figure:: ./images/shadowing1.png
 
     Shadow casting detail 1
     
-For the calcuation of the shadowing polygon, the confining vectors for the object of interest are calculated (see detail 1).
+For the calculation of the shadowing polygon, the confining vectors for the object of interest are calculated (see detail 1).
 
 .. figure:: ./images/shadowing2.png
 
@@ -292,14 +294,14 @@ Scaling the length of the vectors w.r.t. the detection range would only to reach
 
 A larger scale factor is necessary, but needs to be calculated dynamically, as a too small factor might not suffice for very close objects and a very large factor could lead to numerical issues.
 Hence, the scale is calculated dynamically as depicted in detail 3, by comparing two isosceles triangles, laying in between the two vectors.
-This is only an appoximation of the true triangles, but an upper bound, which allows faster processing.
-The final scale resolves to `detection_radius / projected_height`, where the projected heigth is taken from shorter vector.
+This is only an approximation of the true triangles, but an upper bound, which allows faster processing.
+The final scale resolves to `detection_radius / projected_height`, where the projected height is taken from shorter vector.
 
 .. figure:: ./images/shadowing4.png
 
     Shadow casting detail 4
     
-As shown in detail 4, the scale is just large enought to include the whole detection range, preventing potential numerical issues.
+As shown in detail 4, the scale is just large enough to include the whole detection range, preventing potential numerical issues.
 This only holds as long as the detection range is approximated as described above.
 
 SensorFusionOSI
@@ -309,12 +311,14 @@ The SensorFusionOSI module allows unsorted aggregation of any data provided by s
 
 It collects all SensorDataSignals and merges them into a single SensorDataSignal.
 
+.. _agentcomponents_signalprioritizer:
+
 SignalPrioritizer
 -----------------
 
 All channels can only have one source.
-If one modul can have the same input type from multiple sources a prioritizer modul is needed in between.
-All sources then get an output channel to the prioritizer modul and the prioritizer gets an output to the modul, which uses this signal.
+If one module can have the same input type from multiple sources a prioritizer module is needed in between.
+All sources then get an output channel to the prioritizer module and the prioritizer gets an output to the module, which uses this signal.
 If more than an component sends an active signal during the same timestep, the prioritizer forwards only the signal from the input channel with the highest priority.
 These priorities are set as parameters in the systemconfigblueprint.xml, where the key corresponds the the id of the input channel and the value is the priority (higher value is prioritized).
 In the following example the channel with id 102 has the highest priority (3) and the channel with id 100 has the lowest priority (1).
@@ -352,8 +356,8 @@ In the following example the channel with id 102 has the highest priority (3) an
      </parameters>
    </component>
 
-One prioritizer modul can only handle signals of the same type and the signal class must be derived from ComponentStateSignal.
-If there is no signal in one timestep, then the signal of the previos timestep is hold.
+One prioritizer module can only handle signals of the same type and the signal class must be derived from ComponentStateSignal.
+If there is no signal in one time step, then the signal of the previous time step is hold.
 
 **Existing prioritizer modules**
 
@@ -371,7 +375,7 @@ ComponentController
 Overview
 ~~~~~~~~~
 
-The ComponentControoler (CC) is used to configure and handle dependencies between other vehicle components.
+The ComponentController (CC) is used to configure and handle dependencies between other vehicle components.
 
 Example use cases could be:
 
@@ -383,7 +387,7 @@ Example use cases could be:
 - Lane keeping assistant:
 
   - cannot be activated by driver, if emergency braking is currently active
-  - stays active, when emergency braking occours (i. e. by other ADAS)
+  - stays active, when emergency braking occurs (i. e. by other ADAS)
 
 The responsibilies of the CC are:
 
@@ -391,7 +395,7 @@ The responsibilies of the CC are:
 - Make information about driver, *TrajectoryFollower* and other *VehicleComponents* available to each other
 - Determine the highest allowed activation state of a component and notify the affected component about this state
 
-To achieve this tasks, each component is assigned a maximum allowed state in each timestep. This state is of type ComponentState,
+To achieve this tasks, each component is assigned a maximum allowed state in each time step. This state is of type ComponentState,
 which defines *Disabled*, *Armed* or *Active* as allowed states.
 Drivers can be in a state of either *Active* or *Passive*.
 

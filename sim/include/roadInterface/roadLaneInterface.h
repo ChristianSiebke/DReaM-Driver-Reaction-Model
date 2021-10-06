@@ -25,6 +25,10 @@
 //-----------------------------------------------------------------------------
 class RoadLaneWidth;
 
+using LaneIds = std::vector<int>;
+using RoadLaneWidths = std::vector<RoadLaneWidth*>;
+using RoadLaneRoadMarks = std::vector<RoadLaneRoadMark*>;
+
 class RoadLaneInterface
 {
 public:
@@ -124,28 +128,28 @@ public:
     //!
     //! @return                         RoadLaneTypeType of the road lane
     //-----------------------------------------------------------------------------
-    virtual const std::list<RoadLaneWidth*> &GetWidths() const = 0;
+    virtual const RoadLaneWidths &GetWidths() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the widths of the road lane.
     //!
     //! @return                         RoadLaneTypeType of the road lane
     //-----------------------------------------------------------------------------
-    virtual const std::list<RoadLaneWidth*> &GetBorders() const = 0;
+    virtual const RoadLaneWidths &GetBorders() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the successors of a road lane, can have at most one element.
     //!
     //! @return                         Successors of the road lane
     //-----------------------------------------------------------------------------
-    virtual const std::list<int> &GetSuccessor() const = 0;
+    virtual const LaneIds &GetSuccessor() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the predecessors of a road lane, can have at most one element.
     //!
     //! @return                         Predecessors of the road lane
     //-----------------------------------------------------------------------------
-    virtual const std::list<int> &GetPredecessor() const = 0;
+    virtual const LaneIds &GetPredecessor() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Sets the flag, if the road lane is in the reference direction or not.
@@ -175,7 +179,7 @@ public:
     //! @return                         RoadLaneRoadMarkType
     //-----------------------------------------------------------------------------
 
-    virtual const std::list<RoadLaneRoadMark*> &GetRoadMarks() const = 0;
+    virtual const RoadLaneRoadMarks &GetRoadMarks() const = 0;
 
 };
 

@@ -40,7 +40,7 @@ std::vector<const AgentInterface *> TimeToCollisionCondition::IsMet(WorldInterfa
         throw std::runtime_error("Could not find reference agent for condition 'TimeToCollision'");
     }
 
-    std::vector<const AgentInterface*> conditionMetAgents{};
+    AgentInterfaces conditionMetAgents{};
     for (const auto triggeringAgent : GetTriggeringAgents(world))
     {
         double ttc;
@@ -66,7 +66,7 @@ std::vector<const AgentInterface *> TimeHeadwayCondition::IsMet(WorldInterface* 
         throw std::runtime_error("Could not find reference agent for condition 'TimeHeadway'");
     }
 
-    std::vector<const AgentInterface*> conditionMetAgents{};
+    AgentInterfaces conditionMetAgents{};
 
     for (auto triggeringAgent : GetTriggeringAgents(world))
     {
@@ -87,7 +87,7 @@ std::vector<const AgentInterface *> TimeHeadwayCondition::IsMet(WorldInterface* 
     return conditionMetAgents;
 }
 
-std::vector<const AgentInterface*> RelativeSpeedCondition::IsMet(WorldInterface * const world) const
+AgentInterfaces RelativeSpeedCondition::IsMet(WorldInterface * const world) const
 {
     const auto referenceAgent = world->GetAgentByName(referenceEntityName);
     if (!referenceAgent)
@@ -95,7 +95,7 @@ std::vector<const AgentInterface*> RelativeSpeedCondition::IsMet(WorldInterface 
         throw std::runtime_error("Reference Agent does not exist for RelativeSpeedCondition");
     }
 
-    std::vector<const AgentInterface*> conditionMetAgents{};
+    AgentInterfaces conditionMetAgents{};
     for (const auto triggeringAgent : GetTriggeringAgents(world))
     {
         const double relativeVelocityOfTriggeringAgent = triggeringAgent->GetVelocity() - referenceAgent->GetVelocity();
@@ -109,9 +109,9 @@ std::vector<const AgentInterface*> RelativeSpeedCondition::IsMet(WorldInterface 
     return conditionMetAgents;
 }
 
-std::vector<const AgentInterface*> ReachPositionCondition::IsMet(WorldInterface * const world) const
+AgentInterfaces ReachPositionCondition::IsMet(WorldInterface * const world) const
 {
-    std::vector<const AgentInterface*> conditionMetAgents{};
+    AgentInterfaces conditionMetAgents{};
 
     if (std::holds_alternative<openScenario::RoadPosition>(position))
     {

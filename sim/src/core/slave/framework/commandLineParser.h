@@ -42,12 +42,12 @@ class CORESLAVEEXPORT CommandLineParser
 {
 public:
     static CommandLineArguments Parse(const QStringList& arguments);
-    static std::list<std::string> GetParsingLog();
+    static std::vector<std::string> GetParsingLog();
 private:
     static QList<QCommandLineOption> GetOptions();
     static CommandLineArguments CompileCommandLineArguments(const QCommandLineParser& commandLineParser);
     static void EvaluateDefaultedValues(const QCommandLineParser& commandLineParser);
 
-    static std::list<std::string> parsingLog;
-    static const std::list<CommandLineOption> commandLineOptions;
+    static std::vector<std::string> parsingLog;
+    static const std::vector<CommandLineOption> commandLineOptions;
 };

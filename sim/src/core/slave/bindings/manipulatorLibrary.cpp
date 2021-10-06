@@ -113,7 +113,7 @@ bool ManipulatorLibrary::ReleaseManipulator(Manipulator *manipulator)
         return false;
     }
 
-    std::list<Manipulator*>::iterator findIter = std::find(manipulators.begin(), manipulators.end(), manipulator);
+    auto findIter = std::find(manipulators.begin(), manipulators.end(), manipulator);
     if(manipulators.end() == findIter)
     {
         LOG_INTERN(LogLevel::Warning) << "manipulator doesn't belong to library";
@@ -135,7 +135,7 @@ bool ManipulatorLibrary::ReleaseManipulator(Manipulator *manipulator)
         return false;
     }
 
-    manipulators.remove(manipulator);
+    manipulators.erase(findIter);
 
     return true;
 }

@@ -198,6 +198,10 @@ struct GlobalRoadPosition
     RoadPosition roadPosition {};
 };
 
+//! A single point in the world may have multiple RoadPositions (on intersecting roads), represented by this map
+//! The key is the id of the road and the value is the position on this road
+using GlobalRoadPositions = std::map<std::string, GlobalRoadPosition>;
+
 //! This struct describes how much space an agent has to next lane boundary on both sides
 struct Remainder
 {
@@ -221,8 +225,8 @@ struct RoadInterval
 //! Position of an object in the road network
 struct ObjectPosition
 {
-    std::map<std::string, GlobalRoadPosition> referencePoint{};    //! position of the reference point mapped by roadId
-    std::map<std::string, GlobalRoadPosition> mainLocatePoint{};   //! position of the mainLocatePoint (middle of agent front) mapped by roadId
+    GlobalRoadPositions referencePoint{};    //! position of the reference point mapped by roadId
+    GlobalRoadPositions mainLocatePoint{};   //! position of the mainLocatePoint (middle of agent front) mapped by roadId
     std::map<std::string, RoadInterval> touchedRoads{}; //! all roads the object is on (fully or partially), key is the roadId
 };
 
@@ -374,7 +378,7 @@ struct Entity
     double relativeDistance {0};
     double value {0};
     std::string text {""};
-    std::list<Entity> supplementarySigns{};
+    std::vector<Entity> supplementarySigns{};
 };
 }
 

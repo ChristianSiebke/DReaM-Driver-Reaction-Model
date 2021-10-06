@@ -220,7 +220,6 @@ bool SlaveConfigImporter::Import(const std::string& configurationDir,
 
         slaveConfig.SetProfilesCatalog(openpass::core::Directories::Concat(configurationDir, profilesCatalog));
 
-
         auto& experimentConfig = slaveConfig.GetExperimentConfig();
         QDomElement experimentConfigElement;
         ThrowIfFalse(GetFirstChildElement(documentRoot, TAG::experiment, experimentConfigElement),

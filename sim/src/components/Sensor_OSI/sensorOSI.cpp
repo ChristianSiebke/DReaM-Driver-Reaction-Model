@@ -9,7 +9,7 @@
 *******************************************************************************/
 
 //-----------------------------------------------------------------------------
-/** \brief SensorObjectDetectorFactory.cpp */
+/** \brief SensorOSI.cpp */
 //-----------------------------------------------------------------------------
 
 #include "include/parameterInterface.h"
@@ -19,12 +19,12 @@
 const std::string Version = "0.0.1";
 static const CallbackInterface *Callbacks = nullptr;
 
-extern "C" SENSOR_OBJECT_DETECTOR_SHARED_EXPORT const std::string &OpenPASS_GetVersion()
+extern "C" SENSOR_OSI_SHARED_EXPORT const std::string &OpenPASS_GetVersion()
 {
     return Version;
 }
 
-extern "C" SENSOR_OBJECT_DETECTOR_SHARED_EXPORT ModelInterface *OpenPASS_CreateInstance(
+extern "C" SENSOR_OSI_SHARED_EXPORT ModelInterface *OpenPASS_CreateInstance(
         std::string componentName,
         bool isInit,
         int priority,
@@ -90,12 +90,12 @@ extern "C" SENSOR_OBJECT_DETECTOR_SHARED_EXPORT ModelInterface *OpenPASS_CreateI
     }
 }
 
-extern "C" SENSOR_OBJECT_DETECTOR_SHARED_EXPORT void OpenPASS_DestroyInstance(ModelInterface *implementation)
+extern "C" SENSOR_OSI_SHARED_EXPORT void OpenPASS_DestroyInstance(ModelInterface *implementation)
 {
     delete implementation;
 }
 
-extern "C" SENSOR_OBJECT_DETECTOR_SHARED_EXPORT bool OpenPASS_UpdateInput(ModelInterface *implementation,
+extern "C" SENSOR_OSI_SHARED_EXPORT bool OpenPASS_UpdateInput(ModelInterface *implementation,
                                                                           int localLinkId,
                                                                           const std::shared_ptr<SignalInterface const> &data,
                                                                           int time)
@@ -126,7 +126,7 @@ extern "C" SENSOR_OBJECT_DETECTOR_SHARED_EXPORT bool OpenPASS_UpdateInput(ModelI
     return true;
 }
 
-extern "C" SENSOR_OBJECT_DETECTOR_SHARED_EXPORT bool OpenPASS_UpdateOutput(ModelInterface *implementation,
+extern "C" SENSOR_OSI_SHARED_EXPORT bool OpenPASS_UpdateOutput(ModelInterface *implementation,
                                                                            int localLinkId,
                                                                            std::shared_ptr<SignalInterface const> &data,
                                                                            int time)
@@ -157,7 +157,7 @@ extern "C" SENSOR_OBJECT_DETECTOR_SHARED_EXPORT bool OpenPASS_UpdateOutput(Model
     return true;
 }
 
-extern "C" SENSOR_OBJECT_DETECTOR_SHARED_EXPORT bool OpenPASS_Trigger(ModelInterface *implementation,
+extern "C" SENSOR_OSI_SHARED_EXPORT bool OpenPASS_Trigger(ModelInterface *implementation,
                                                                       int time)
 {
     try

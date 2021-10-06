@@ -31,7 +31,7 @@ public:
     ProcessManager& operator=(ProcessManager&&) = delete;
     virtual ~ProcessManager() { KillAll(); }
 
-    bool StartProcess(const std::string& processPath, const std::list<std::pair<std::string, std::string>>& arguments);
+    bool StartProcess(const std::string& processPath, const std::vector<std::pair<std::string, std::string>>& arguments);
     void WaitAndClear();
     void KillAll();
 

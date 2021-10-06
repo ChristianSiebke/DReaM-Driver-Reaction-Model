@@ -86,7 +86,7 @@ if(WITH_SIMCORE OR WITH_TESTS)
   set(Boost_USE_STATIC_LIBS OFF)
   find_package(Boost COMPONENTS filesystem REQUIRED)
 
-  find_package(Qt5 COMPONENTS Concurrent Core Widgets Xml)
+  find_package(Qt5 COMPONENTS Concurrent Core Widgets Xml XmlPatterns REQUIRED)
   find_package(FMILibrary)
 
   if(WITH_EXTENDED_OSI)

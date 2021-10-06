@@ -110,7 +110,7 @@ OPENPASS_LIBRARY {
 ##################################################################
 OPENPASS_EXECUTABLE {
     message("[$$TARGET] Building executable")
-    QT += core xml
+    QT += core xml xmlpatterns
     QT -= gui
     TEMPLATE = app
     CONFIG -= app_bundle
@@ -134,7 +134,7 @@ OPENPASS_EXECUTABLE {
 OPENPASS_TESTING {
     message("[$$TARGET] Building test")
 
-    QT += xml
+    QT += xml xmlpatterns
     TEMPLATE = app
     CONFIG += console
     CONFIG += testcase

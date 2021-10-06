@@ -80,7 +80,7 @@ public:
      * \return
      */
     static void ImportSensorLinksOfComponent(QDomElement sensorLinksElement,
-                                             std::list<SensorLink> &sensorLinks);
+                                             std::vector<SensorLink> &sensorLinks);
 
     /*!
      * \brief Imports all Sensor contained in one VehicleProfiles

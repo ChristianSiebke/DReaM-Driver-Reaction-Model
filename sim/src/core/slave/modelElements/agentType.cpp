@@ -35,7 +35,7 @@ bool AgentType::AddComponent(std::shared_ptr<ComponentType> component)
 
 bool AgentType::AddChannel(int id)
 {
-    std::list<int>::iterator findIter = std::find(channels.begin(), channels.end(), id);
+    auto findIter = std::find(channels.begin(), channels.end(), id);
     if(channels.end() != findIter)
     {
         LOG_INTERN(LogLevel::Warning) << "components must be unique (channel id " << std::to_string(*findIter) << ")";
@@ -46,7 +46,7 @@ bool AgentType::AddChannel(int id)
     return true;
 }
 
-const std::list<int> &AgentType::GetChannels() const
+const std::vector<int> &AgentType::GetChannels() const
 {
     return channels;
 }

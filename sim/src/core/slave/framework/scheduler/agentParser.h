@@ -37,8 +37,8 @@ namespace openpass::scheduling {
 class AgentParser
 {
 private:
-    std::list<TaskItem> nonRecurringTasks;
-    std::list<TaskItem> recurringTasks;
+    std::vector<TaskItem> nonRecurringTasks;
+    std::vector<TaskItem> recurringTasks;
 
     const int &currentTime;
 
@@ -55,8 +55,8 @@ public:
     */
     void Parse(const SimulationSlave::Agent &agent);
 
-    std::list<TaskItem> GetNonRecurringTasks();
-    std::list<TaskItem> GetRecurringTasks();
+    std::vector<TaskItem> GetNonRecurringTasks();
+    std::vector<TaskItem> GetRecurringTasks();
 };
 
 } // namespace openpass::scheduling

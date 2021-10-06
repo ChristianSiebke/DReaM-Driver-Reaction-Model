@@ -108,7 +108,7 @@ TEST(SpawnPointScenario, Trigger_SpawnsEgoAgentAccordingToScenarioWorldPosition)
         .WillByDefault(Return(actualAgentBlueprint));
     ON_CALL(fakeWorld, IntersectsWithAgent(_, _, _, _, _, _))
         .WillByDefault(Return(false));
-    std::map<std::string, GlobalRoadPosition> roadPositions{{"Road1",{"Road1",-1,0,0,0}}};
+    GlobalRoadPositions roadPositions{{"Road1",{"Road1",-1,0,0,0}}};
     ON_CALL(fakeWorld, WorldCoord2LaneCoord(x,y,heading)).WillByDefault(Return(roadPositions));
     RoadGraph roadGraph{};
     auto vertex = add_vertex(RouteElement{"Road1",true}, roadGraph);
@@ -199,7 +199,7 @@ TEST(SpawnerScenario, Trigger_SpawnsEgoAgentAccordingToScenarioLanePosition)
         .WillByDefault(Return(position));
     ON_CALL(fakeWorld, IntersectsWithAgent(_, _, _, _, _, _))
         .WillByDefault(Return(false));
-    std::map<std::string, GlobalRoadPosition> roadPositions{{"Road1",{"Road1",-1,0,0,0}}};
+    GlobalRoadPositions roadPositions{{"Road1",{"Road1",-1,0,0,0}}};
     ON_CALL(fakeWorld, WorldCoord2LaneCoord(expectedX,expectedY,expectedYaw)).WillByDefault(Return(roadPositions));
     RoadGraph roadGraph{};
     auto vertex = add_vertex(RouteElement{"Road1",true}, roadGraph);
@@ -273,7 +273,7 @@ TEST(SpawnerScenario, Trigger_SpawnsScenarioAgentAccordingToScenarioWorldPositio
         .WillByDefault(Return(actualAgentBlueprint));
     ON_CALL(fakeWorld, IntersectsWithAgent(_, _, _, _, _, _))
         .WillByDefault(Return(false));
-    std::map<std::string, GlobalRoadPosition> roadPositions{{"Road1",{"Road1",-1,0,0,0}}};
+    GlobalRoadPositions roadPositions{{"Road1",{"Road1",-1,0,0,0}}};
     ON_CALL(fakeWorld, WorldCoord2LaneCoord(x,y,heading)).WillByDefault(Return(roadPositions));
     RoadGraph roadGraph{};
     auto vertex = add_vertex(RouteElement{"Road1",true}, roadGraph);
@@ -365,7 +365,7 @@ TEST(SpawnerScenario, Trigger_SpawnsScenarioAgentAccordingToScenarioLanePosition
         .WillByDefault(Return(position));
     ON_CALL(fakeWorld, IntersectsWithAgent(_, _, _, _, _, _))
         .WillByDefault(Return(false));
-    std::map<std::string, GlobalRoadPosition> roadPositions{{"Road1",{"Road1",-1,0,0,0}}};
+    GlobalRoadPositions roadPositions{{"Road1",{"Road1",-1,0,0,0}}};
     ON_CALL(fakeWorld, WorldCoord2LaneCoord(expectedX,expectedY,expectedYaw)).WillByDefault(Return(roadPositions));
     RoadGraph roadGraph{};
     auto vertex = add_vertex(RouteElement{"Road1",true}, roadGraph);
