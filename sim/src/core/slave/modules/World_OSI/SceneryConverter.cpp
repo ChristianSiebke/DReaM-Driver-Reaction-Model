@@ -1128,7 +1128,7 @@ std::pair<RoadGraph, RoadGraphVertexMapping> RoadNetworkBuilder::Build()
                         }
                         if (hasLeftLanes)
                         {
-                            add_edge(vertices[{successorId, false}], vertices[{roadId, true}], roadGraph);
+                            add_edge(vertices[{successorId, true}], vertices[{roadId, false}], roadGraph);
                         }
                     }
                 }
@@ -1139,7 +1139,7 @@ std::pair<RoadGraph, RoadGraphVertexMapping> RoadNetworkBuilder::Build()
                     {
                         if (hasRightLanes)
                         {
-                            add_edge(vertices[{predecessorId, true}], vertices[{roadId, false}], roadGraph);
+                            add_edge(vertices[{predecessorId, false}], vertices[{roadId, true}], roadGraph);
                         }
                         if (hasLeftLanes)
                         {
