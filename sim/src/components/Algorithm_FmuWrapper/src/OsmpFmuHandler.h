@@ -155,13 +155,14 @@ private:
     FmuParameters<bool> fmuBoolParameters;
     FmuParameters<std::string> fmuStringParameters;
 
-    std::string serializedSensorData;
-    std::string appendedSerializedSensorData;
-    std::string previousSerializedSensorData;
+    std::string serializedSensorDataIn;
+    std::string appendedSerializedSensorDataIn;
+    std::string appendedSerializedSensorDataOut;
+    std::string previousSerializedSensorDataIn;
     std::string serializedSensorView;
     std::string previousSerializedSensorView;
     std::string appendedSerializedSensorView;
-    void* previousSensorData{nullptr};
+    void* previousSensorDataOut{nullptr};
     osi3::SensorViewConfiguration sensorViewConfig;
     osi3::SensorViewConfiguration sensorViewConfigRequest;
     std::string serializedSensorViewConfig;
@@ -169,7 +170,8 @@ private:
     std::string serializedSensorViewConfigRequest;
     std::string appendedSerializedSensorViewConfigRequest;
     std::string previousSerializedSensorViewConfigRequest;
-    osi3::SensorData sensorData;
+    osi3::SensorData sensorDataIn;
+    osi3::SensorData sensorDataOut;
     std::string serializedGroundTruth;
     std::string appendedSerializedGroundTruth;
 
