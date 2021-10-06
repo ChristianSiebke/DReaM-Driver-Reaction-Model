@@ -100,7 +100,7 @@ class FakeAgent : public FakeWorldObject, public AgentInterface
     MOCK_METHOD0(HasTwoRightLanes, bool());
     MOCK_METHOD1(EstimateLaneChangeState, LaneChangeState(double thresholdLooming));
     MOCK_METHOD4(GetAllAgentsInLane,
-                 std::list<AgentInterface *>(int laneID, double minDistance, double maxDistance, double AccSensDist));
+                 std::vector<AgentInterface *>(int laneID, double minDistance, double maxDistance, double AccSensDist));
     MOCK_CONST_METHOD0(IsBicycle, bool());
     MOCK_CONST_METHOD0(Unregister, void());
     MOCK_CONST_METHOD0(IsFirstCarInLane, bool());

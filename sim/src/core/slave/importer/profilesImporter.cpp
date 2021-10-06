@@ -130,7 +130,7 @@ void ProfilesImporter::ImportProfileGroups(ProfileGroups& profileGroups, QDomEle
     }
 }
 
-void ProfilesImporter::ImportSensorLinksOfComponent(QDomElement sensorLinksElement, std::list<SensorLink>& sensorLinks)
+void ProfilesImporter::ImportSensorLinksOfComponent(QDomElement sensorLinksElement, std::vector<SensorLink>& sensorLinks)
 {
     QDomElement sensorLinkElement;
     GetFirstChildElement(sensorLinksElement, TAG::sensorLink, sensorLinkElement);

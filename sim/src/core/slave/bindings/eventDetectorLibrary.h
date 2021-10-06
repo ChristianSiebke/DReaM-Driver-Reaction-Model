@@ -103,7 +103,7 @@ private:
     const std::string DllDestroyInstanceId = "OpenPASS_DestroyInstance";
 
     std::string libraryPath;
-    std::list<EventDetector*> eventDetectors;
+    std::vector<EventDetector*> eventDetectors;
     QLibrary *library = nullptr;
     CallbackInterface *callbacks;
     EventDetectorInterface_GetVersion getVersionFunc{nullptr};

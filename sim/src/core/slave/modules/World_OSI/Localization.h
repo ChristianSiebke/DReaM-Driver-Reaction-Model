@@ -52,8 +52,8 @@ public:
 struct LocatedObject
 {
     std::map<const OWL::Interfaces::Lane*, OWL::LaneOverlap> laneOverlaps;
-    std::map<std::string, GlobalRoadPosition> referencePoint;
-    std::map<std::string, GlobalRoadPosition> mainLaneLocator;
+    GlobalRoadPositions referencePoint;
+    GlobalRoadPositions mainLaneLocator;
 };
 
 //! Calculates the intersection of the object boundary with an GeometryElement and stores the min and max s coordinates
@@ -85,7 +85,7 @@ std::function<void (const RTreeElement&)> LocateOnGeometryElement(const OWL::Int
 std::function<void (const RTreeElement&)> LocateOnGeometryElement(const OWL::Interfaces::WorldData& worldData,
                                                              const Common::Vector2d& point,
                                                              const double& hdg,
-                                                             std::map<std::string, GlobalRoadPosition>& result);
+                                                             GlobalRoadPositions& result);
 
 polygon_t GetBoundingBox(double x, double y, double length, double width, double rotation, double center);
 
@@ -102,7 +102,7 @@ public:
 
     Result Locate(const polygon_t& boundingBox, OWL::Interfaces::WorldObject& object) const;
 
-    std::map<std::string, GlobalRoadPosition> Locate(const Common::Vector2d& point, const double& hdg) const;
+    GlobalRoadPositions Locate(const Common::Vector2d& point, const double& hdg) const;
 
     void Unlocate(OWL::Interfaces::WorldObject& object) const;
 

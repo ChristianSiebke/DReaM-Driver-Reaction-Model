@@ -31,7 +31,7 @@ ProcessManager& ProcessManager::getInstance()
 }
 
 bool ProcessManager::StartProcess(const std::string& processPath,
-                                  const std::list<std::pair<std::string, std::string>>& arguments)
+                                  const std::vector<std::pair<std::string, std::string>>& arguments)
 {
     auto qProcessPath = QString::fromStdString(processPath);
 

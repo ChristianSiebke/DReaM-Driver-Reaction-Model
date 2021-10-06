@@ -162,7 +162,7 @@ RelativeWorldView::Lanes EgoAgent::GetRelativeLanes(double range, int relativeLa
 
 std::optional<int> EgoAgent::GetRelativeLaneId(const WorldObjectInterface *object, MeasurementPoint mp) const
 {
-    std::map<std::string, GlobalRoadPosition> objectPosition;
+    GlobalRoadPositions objectPosition;
     if (mp == MeasurementPoint::Front)
     {
         objectPosition = object->GetObjectPosition().mainLocatePoint;
@@ -201,7 +201,7 @@ std::vector<const WorldObjectInterface*> EgoAgent::GetObjectsInRange(double back
     return objectsInRange;
 }
 
-std::vector<const AgentInterface*> EgoAgent::GetAgentsInRange(double backwardRange, double forwardRange, int relativeLane) const
+AgentInterfaces EgoAgent::GetAgentsInRange(double backwardRange, double forwardRange, int relativeLane) const
 {
     auto agentsInRange =  world->GetAgentsInRange(wayToTarget,
                                                   rootOfWayToTargetGraph,

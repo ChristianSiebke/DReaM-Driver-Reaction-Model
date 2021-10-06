@@ -288,7 +288,7 @@ public:
     //!
     //! @return Position on all lanes at specified world position
     //-----------------------------------------------------------------------------
-    virtual std::map<std::string, GlobalRoadPosition> WorldCoord2LaneCoord(double x, double y, double heading) const = 0;
+    virtual GlobalRoadPositions WorldCoord2LaneCoord(double x, double y, double heading) const = 0;
 
     //-----------------------------------------------------------------------------
     //! Tries to create an internal scenery from a given file.
@@ -317,7 +317,7 @@ public:
     //!
     //! @return All agents in specified range
     //-----------------------------------------------------------------------------
-    virtual RouteQueryResult<std::vector<const AgentInterface*>> GetAgentsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance,
+    virtual RouteQueryResult<AgentInterfaces> GetAgentsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance,
                                                                        double backwardRange, double forwardRange) const = 0;
 
     //-----------------------------------------------------------------------------
@@ -343,7 +343,7 @@ public:
     //! \param range            Distance of the search start to the end of connecting road
     //! 
     //! \return  All agents in specified range
-    virtual std::vector<const AgentInterface*> GetAgentsInRangeOfJunctionConnection(std::string connectingRoadId, double range) const = 0;
+    virtual AgentInterfaces GetAgentsInRangeOfJunctionConnection(std::string connectingRoadId, double range) const = 0;
 
     //! Returns the s coordinate distance from the front of the agent to the first point where his lane intersects another.
     //! As the agent may not yet be on the junction, it has to be specified which connecting road he will take in the junction
@@ -636,7 +636,7 @@ public:
     //! \param distance         own s coordinate
     //! \param targetPosition   position of queried point
     //! \return lane id relative to own position
-    virtual RouteQueryResult<std::optional<int>> GetRelativeLaneId(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, std::map<std::string, GlobalRoadPosition> targetPosition) const = 0;
+    virtual RouteQueryResult<std::optional<int>> GetRelativeLaneId(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, GlobalRoadPositions targetPosition) const = 0;
 
     //! Returns all possible connections on the junction, that an agent has when coming from the specified road
     //!
@@ -701,14 +701,14 @@ public:
     //!
     //! @return                List of agent references
     //-----------------------------------------------------------------------------
-    virtual const std::list<const AgentInterface*>& GetRemovedAgents() const = 0;
+    virtual const AgentInterfaces& GetRemovedAgents() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Retrieves agents that were removed from the world during the previous timestep and clears the list
     //!
     //! @return                List of agent references
     //-----------------------------------------------------------------------------
-    virtual const std::list<const AgentInterface*> GetRemovedAgentsInPreviousTimestep() = 0;
+    virtual const AgentInterfaces GetRemovedAgentsInPreviousTimestep() = 0;
 
     //-----------------------------------------------------------------------------
     //! Retrieves all traffic objects

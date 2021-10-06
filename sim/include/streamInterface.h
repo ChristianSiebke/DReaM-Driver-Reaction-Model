@@ -68,7 +68,7 @@ public:
     //! \param start  start of range (t is ignored)
     //! \param end    end of range (t is ignored)
     //! \return agents in range
-    virtual std::vector<const AgentInterface*> GetAgentsInRange(const StreamPosition& start, const StreamPosition& end) const = 0;
+    virtual AgentInterfaces GetAgentsInRange(const StreamPosition& start, const StreamPosition& end) const = 0;
 
     //! Returns all objects inside the given range on the stream
     //!

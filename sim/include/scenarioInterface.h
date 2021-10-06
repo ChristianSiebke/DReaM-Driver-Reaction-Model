@@ -167,7 +167,7 @@ public:
     //! Adds groups to the scenario as defined by groupDefinitions - a map of
     //! group names to a list of group member entity names.
     //-----------------------------------------------------------------------------
-    virtual void AddScenarioGroupsByEntityNames(const std::map<std::string, std::list<std::string>> &groupDefinitions) = 0;
+    virtual void AddScenarioGroupsByEntityNames(const std::map<std::string, std::vector<std::string>> &groupDefinitions) = 0;
 
     virtual const std::vector<ScenarioEntity>& GetEntities() const = 0;
 

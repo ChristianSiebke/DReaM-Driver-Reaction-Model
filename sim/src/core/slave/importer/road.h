@@ -179,7 +179,7 @@ class RoadLane : public RoadLaneInterface
     //!
     //! @return                         RoadLaneTypeType of the road lane
     //-----------------------------------------------------------------------------
-    const std::list<RoadLaneWidth *> &GetWidths() const override
+    const RoadLaneWidths &GetWidths() const override
     {
         return widths;
     }
@@ -189,7 +189,7 @@ class RoadLane : public RoadLaneInterface
     //!
     //! @return                         RoadLaneTypeType of the road lane
     //-----------------------------------------------------------------------------
-    const std::list<RoadLaneWidth *> &GetBorders() const override
+    const RoadLaneWidths &GetBorders() const override
     {
         return borders;
     }
@@ -199,7 +199,7 @@ class RoadLane : public RoadLaneInterface
     //!
     //! @return                         Successors of the road lane
     //-----------------------------------------------------------------------------
-    const std::list<int> &GetSuccessor() const override
+    const LaneIds &GetSuccessor() const override
     {
         return successor;
     }
@@ -209,7 +209,7 @@ class RoadLane : public RoadLaneInterface
     //!
     //! @return                         Predecessors of the road lane
     //-----------------------------------------------------------------------------
-    const std::list<int> &GetPredecessor() const override
+    const LaneIds &GetPredecessor() const override
     {
         return predecessor;
     }
@@ -267,7 +267,7 @@ class RoadLane : public RoadLaneInterface
     //!
     //! @return                         List of road marks
     //-----------------------------------------------------------------------------
-    const std::list<RoadLaneRoadMark *> &GetRoadMarks() const override
+    const std::vector<RoadLaneRoadMark *> &GetRoadMarks() const override
     {
         return roadMarks;
     }
@@ -277,16 +277,16 @@ class RoadLane : public RoadLaneInterface
     int id;
     RoadLaneType type;
     // using lists to indicate empty predecessor/successor
-    std::list<RoadLaneWidth *> widths;
-    std::list<RoadLaneWidth *> borders;
-    std::list<int> predecessor;
-    std::list<int> successor;
+    std::vector<RoadLaneWidth *> widths;
+    std::vector<RoadLaneWidth *> borders;
+    std::vector<int> predecessor;
+    std::vector<int> successor;
     bool inDirection = true;
 
     RoadLaneRoadMarkType roadMarkType = RoadLaneRoadMarkType::Undefined;
     double roadMarkTypeSOffset;
 
-    std::list<RoadLaneRoadMark *> roadMarks;
+    std::vector<RoadLaneRoadMark *> roadMarks;
 };
 
 //-----------------------------------------------------------------------------
@@ -933,7 +933,7 @@ class Road : public RoadInterface
     //!
     //! @return                         list of elevation profiles
     //-----------------------------------------------------------------------------
-    const std::list<RoadElevation *> &GetElevations() const override
+    const std::vector<RoadElevation *> &GetElevations() const override
     {
         return elevations;
     }
@@ -943,7 +943,7 @@ class Road : public RoadInterface
     //!
     //! @return                         list of lane offsets
     //-----------------------------------------------------------------------------
-    const std::list<RoadLaneOffset *> &GetLaneOffsets() const override
+    const std::vector<RoadLaneOffset *> &GetLaneOffsets() const override
     {
         return laneOffsets;
     }
@@ -953,7 +953,7 @@ class Road : public RoadInterface
     //!
     //! @return                         list of road geometries
     //-----------------------------------------------------------------------------
-    const std::list<RoadGeometryInterface *> &GetGeometries() const override
+    const std::vector<RoadGeometryInterface *> &GetGeometries() const override
     {
         return geometries;
     }
@@ -963,7 +963,7 @@ class Road : public RoadInterface
     //!
     //! @return                         list of road links
     //-----------------------------------------------------------------------------
-    const std::list<RoadLinkInterface *> &GetRoadLinks() const override
+    const std::vector<RoadLinkInterface *> &GetRoadLinks() const override
     {
         return links;
     }
@@ -1032,10 +1032,10 @@ class Road : public RoadInterface
 
   private:
     const std::string id;
-    std::list<RoadElevation *> elevations;
-    std::list<RoadLaneOffset *> laneOffsets;
-    std::list<RoadGeometryInterface *> geometries;
-    std::list<RoadLinkInterface *> links;
+    std::vector<RoadElevation *> elevations;
+    std::vector<RoadLaneOffset *> laneOffsets;
+    std::vector<RoadGeometryInterface *> geometries;
+    std::vector<RoadLinkInterface *> links;
     std::vector<RoadLaneSectionInterface *> laneSections;
     std::vector<RoadSignalInterface *> roadSignals;
     std::vector<RoadObjectInterface *> roadObjects;

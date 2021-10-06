@@ -46,7 +46,7 @@
 
 using namespace SimulationMaster;
 
-using Arguments = std::list<std::pair<std::string, std::string>>;
+using Arguments = std::vector<std::pair<std::string, std::string>>;
 
 //-----------------------------------------------------------------------------
 //! \brief Parses command line arguments for the masterConfig file.

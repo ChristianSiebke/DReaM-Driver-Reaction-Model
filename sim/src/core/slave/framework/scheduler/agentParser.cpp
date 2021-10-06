@@ -28,7 +28,7 @@ void AgentParser::Parse(const Agent &agent)
 {
     for (const auto &componentMap : agent.GetComponents())
     {
-        std::list<TaskItem> taskItems;
+        std::vector<TaskItem> taskItems;
 
         ComponentInterface *component = componentMap.second;
 
@@ -82,12 +82,12 @@ void AgentParser::Parse(const Agent &agent)
     }
 }
 
-std::list<TaskItem> AgentParser::GetNonRecurringTasks()
+std::vector<TaskItem> AgentParser::GetNonRecurringTasks()
 {
     return nonRecurringTasks;
 }
 
-std::list<TaskItem> AgentParser::GetRecurringTasks()
+std::vector<TaskItem> AgentParser::GetRecurringTasks()
 {
     return recurringTasks;
 }

@@ -120,7 +120,7 @@ public:
      *
      * \return              List of agent references
      */
-    virtual const std::list<const AgentInterface*> &GetRemovedAgents() const;
+    virtual const AgentInterfaces &GetRemovedAgents() const;
 
     /*!
      * \brief GetRemovedAgents
@@ -128,7 +128,7 @@ public:
      *
      * \return              List of agent references
      */
-    virtual const std::list<const AgentInterface*> GetRemovedAgentsInPreviousTimestep();
+    virtual const AgentInterfaces GetRemovedAgentsInPreviousTimestep();
 
 protected:
     //-----------------------------------------------------------------------------
@@ -156,10 +156,10 @@ protected:
 private:    
     WorldImplementation *world;
     std::map<int, AgentInterface*> agents;
-    std::list<const AgentInterface*> removedAgents;
-    std::list<std::function<void()>> updateQueue;
-    std::list<const AgentInterface*> removeQueue;
-    std::list<const AgentInterface*> removedAgentsPrevious;
+    AgentInterfaces removedAgents;
+    std::vector<std::function<void()>> updateQueue;
+    AgentInterfaces removeQueue;
+    AgentInterfaces removedAgentsPrevious;
 
     const CallbackInterface *callbacks;
 };

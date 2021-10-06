@@ -90,7 +90,7 @@ TEST(EgoAgent_Test, GetAgentsInRange)
     add_edge(root, target, roadGraph);
 
     FakeAgent otherAgent;
-    RouteQueryResult<std::vector<const AgentInterface*>> objects{{0, {&otherAgent}}};
+    RouteQueryResult<AgentInterfaces> objects{{0, {&otherAgent}}};
     ON_CALL(fakeWorld, GetAgentsInRange(_,_,-1,12,100, 100)).WillByDefault(Return(objects));
 
     EgoAgent egoAgent {&fakeAgent, &fakeWorld};

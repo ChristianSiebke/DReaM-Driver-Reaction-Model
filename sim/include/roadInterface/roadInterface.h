@@ -19,8 +19,8 @@
 #include <cassert>
 #include <cmath>
 #include <algorithm>
-#include <list>
 #include <map>
+#include <vector>
 
 #include "roadElementTypes.h"
 #include "roadLaneSectionInterface.h"
@@ -249,28 +249,28 @@ public:
     //!
     //! @return                         list of elevation profiles
     //-----------------------------------------------------------------------------
-    virtual const std::list<RoadElevation*> & GetElevations() const = 0;
+    virtual const std::vector<RoadElevation*> & GetElevations() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the stored list of lane offsets.
     //!
     //! @return                         list of lane offsets
     //-----------------------------------------------------------------------------
-    virtual const std::list<RoadLaneOffset*> & GetLaneOffsets() const = 0;
+    virtual const std::vector<RoadLaneOffset*> & GetLaneOffsets() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the stored list of road geometries.
     //!
     //! @return                         list of road geometries
     //-----------------------------------------------------------------------------
-    virtual const std::list<RoadGeometryInterface*> & GetGeometries() const = 0;
+    virtual const std::vector<RoadGeometryInterface*> & GetGeometries() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the stored list of road links.
     //!
     //! @return                         list of road links
     //-----------------------------------------------------------------------------
-    virtual const std::list<RoadLinkInterface*> & GetRoadLinks() const = 0;
+    virtual const std::vector<RoadLinkInterface*> & GetRoadLinks() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the stored list of lane sections.
