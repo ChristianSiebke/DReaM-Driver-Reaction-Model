@@ -78,3 +78,11 @@ install(CODE
        FOLLOW_SYMLINK_CHAIN)
   "
 )
+
+# install schema files into install directory
+file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/schemas/ SCHEMA_SRC)
+file(TO_NATIVE_PATH ${CMAKE_INSTALL_PREFIX}/schemas/ SCHEMA_DEST)
+  install(DIRECTORY ${SCHEMA_SRC}
+          DESTINATION ${SCHEMA_DEST})
+  message("schemas installed from ${SCHEMA_SRC} to ${SCHEMA_DEST}")
+

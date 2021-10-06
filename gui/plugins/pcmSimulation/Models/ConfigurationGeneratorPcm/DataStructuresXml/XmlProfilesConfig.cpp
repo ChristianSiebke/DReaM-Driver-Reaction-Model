@@ -97,7 +97,7 @@ bool XmlProfilesConfig::WriteToXml(QXmlStreamWriter *xmlWriter)
     xmlWriter->writeAttribute("Name","Germany");
     xmlWriter->writeStartElement("Double");
     xmlWriter->writeAttribute("Key", "OpenSpeedLimit");
-    xmlWriter->writeAttribute("Value", "infinity");
+    xmlWriter->writeAttribute("Value", "INF");
     xmlWriter->writeEndElement(); // Double
     xmlWriter->writeStartElement("Bool");
     xmlWriter->writeAttribute("Key", "KeepToOuterLanes");
