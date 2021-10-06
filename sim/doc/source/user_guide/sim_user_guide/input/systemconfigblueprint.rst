@@ -98,8 +98,11 @@ The table below can be used as orientation when a new module is introduced.
    SensorObjectDetector                      Sensor_OSI                              398       Sensor                      Gets instantiated multiple times (one time per sensor)         
    SensorAggregation                         SensorAggregation_OSI                   351       Sensor                                     
    SensorFusionErrorless                     SensorFusionErrorless_OSI               350       Sensor                                     
-   AlgorithmAgentFollowingDriverModel        AlgorithmAgentFollowingDriverModel      310       DriverModels                               
-   AEB                                       AlgorithmAutonomousEmergencyBraking     250       ADAS                                       
+   AlgorithmAgentFollowingDriverModel        AlgorithmAgentFollowingDriverModel      310       DriverModels
+   AEB                                       AlgorithmAutonomousEmergencyBraking     250       ADAS
+   FMU1                                      AlgorithmFmuWrapper                     250       ADAS
+   FMU2                                      AlgorithmFmuWrapper                     250       ADAS
+   FMU3                                      AlgorithmFmuWrapper                     250       ADAS
    ComponentController                       ComponentController                     200       ADAS                        Manages vehicle component states with regard to other vehicle component states and conditions and in response to events.         
    PrioritizerLaterDriver                    SignalPrioritizer                       150       Prioritizer                                
    PrioritizerAccelerationDriver             SignalPrioritizer                       150       Prioritizer                                
@@ -156,7 +159,7 @@ Index range for module groups:
    Algorithm         11...30 
    DriverTasks       31...40 
    Driver            41...50 
-   VehicleComponent  51...80 
+   VehicleComponent  51...70
    Special           81...89 
    Sensor            91...99 
    ================= ========== 
@@ -177,8 +180,8 @@ With corresponding defined indices:
    Algorithm_LongitudinalVehicleComponent    Algorithm         11 
    Algorithm_LongitudinalAfdm                Algorithm         12 
    Algorithm_SteeringVehicleComponent        Algorithm         14 
-   Algorithm_LateralVehicleAfdm              Algorithm         15 
-   LimiterVehicleLongitudinal                Algorithm         17 
+   Algorithm_LateralVehicleAfdm              Algorithm         15
+   LimiterAccelerationVehicleComponents      Algorithm         17
    PrioritizerLongitudinal                   Algorithm         21 
    PrioritizerSteering                       Algorithm         22 
    PrioritizerAccelerationVehicleComponents  Algorithm         23 
@@ -187,13 +190,17 @@ With corresponding defined indices:
    Action_SecondaryDriverTasks               DriverTasks       32 
    PrioritizerTurningIndicator               DriverTasks       33 
    AlgorithmAgentFollowingDriver             Driver            41 
-   AEB                                       VehicleComponent  52 
+   AEB                                       VehicleComponent  52
+   FMU1                                      VehicleComponent  71
+   FMU2                                      VehicleComponent  72
+   FMU3                                      VehicleComponent  73
    ComponentController                       Special           83 
    OpenScenarioActions                       Special           84 
    Parameter_Vehicle                         Sensor            92 
    SensorAggregation                         Sensor            93 
    SensorFusion                              Sensor            94 
-   Sensor_Driver                             Sensor            95 
+   Sensor_Driver                             Sensor            95
+   SensorObjectDetector                      Sensor            98
    ========================================= ================= =====
 
 **Ids for Signals (last two digits)**

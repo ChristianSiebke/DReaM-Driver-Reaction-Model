@@ -43,8 +43,9 @@ Based on these the simulation core calculates different simulation runs and comp
    :maxdepth: 1
 
    advanced_topics/*
-   
-.. include:: api.rst
+
+..   
+   .. include:: api.rst
 
 .. toctree::
    :caption: Developer Information
