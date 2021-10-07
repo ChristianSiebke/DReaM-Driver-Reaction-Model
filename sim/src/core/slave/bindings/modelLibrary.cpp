@@ -148,7 +148,7 @@ bool ModelLibrary::ReleaseComponent(ComponentInterface* component)
         return false;
     }
 
-    std::list<ComponentInterface*>::iterator findIter = std::find(components.begin(), components.end(), component);
+    auto findIter = std::find(components.begin(), components.end(), component);
     if (components.end() == findIter)
     {
         LOG_INTERN(LogLevel::Warning) << "model doesn't belong to library";
@@ -170,7 +170,7 @@ bool ModelLibrary::ReleaseComponent(ComponentInterface* component)
         return false;
     }
 
-    components.remove(component);
+    components.erase(findIter);
 
     // do not unload library here since shared_ptrs in other DLLs could still reference deleters within this DLL
 

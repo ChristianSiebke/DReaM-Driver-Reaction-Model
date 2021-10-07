@@ -148,7 +148,7 @@ private:
     const std::string DllSlaveResultFileId = "OpenPASS_SlaveResultFile";
 
     const std::string libraryPath;
-    std::list<ObservationModule*> observationModules;
+    std::vector<ObservationModule*> observationModules;
     QLibrary* library = nullptr;
     CallbackInterface* callbacks;
 

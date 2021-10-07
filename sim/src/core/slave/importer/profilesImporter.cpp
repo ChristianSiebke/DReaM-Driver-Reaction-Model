@@ -130,7 +130,7 @@ void ProfilesImporter::ImportProfileGroups(ProfileGroups& profileGroups, QDomEle
     }
 }
 
-void ProfilesImporter::ImportSensorLinksOfComponent(QDomElement sensorLinksElement, std::list<SensorLink>& sensorLinks)
+void ProfilesImporter::ImportSensorLinksOfComponent(QDomElement sensorLinksElement, std::vector<SensorLink>& sensorLinks)
 {
     QDomElement sensorLinkElement;
     GetFirstChildElement(sensorLinksElement, TAG::sensorLink, sensorLinkElement);
@@ -291,6 +291,8 @@ bool ProfilesImporter::Import(const std::string& filename, Profiles& profiles)
         QString errorMsg{};
         int errorLine{};
         ThrowIfFalse(document.setContent(xmlData, &errorMsg, &errorLine), "Invalid xml format (" + filename + ") in line " + std::to_string(errorLine) + ": " + errorMsg.toStdString());
+
+        ImporterCommon::validateProfilesCatalogXMLSchema(xmlFile.fileName(), xmlData);
 
         QDomElement documentRoot = document.documentElement();
         ThrowIfFalse(!documentRoot.isNull(), "invalid document root " + filename);

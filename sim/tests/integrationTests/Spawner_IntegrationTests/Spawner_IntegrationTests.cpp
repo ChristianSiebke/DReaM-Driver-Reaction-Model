@@ -105,7 +105,7 @@ public:
         ON_CALL(*laneStream1, GetAgentsInRange(_,_)).WillByDefault(
                     [&](StreamPosition start, StreamPosition end)
         {
-            std::vector<const AgentInterface*> agentsInRange;
+            AgentInterfaces agentsInRange;
             for (const auto agent : agentsOnLane[-1])
             {
                 auto agentS = agent->GetDistanceToStartOfRoad(MeasurementPoint::Reference, "");
@@ -129,7 +129,7 @@ public:
         ON_CALL(*laneStream2, GetAgentsInRange(_,_)).WillByDefault(
                     [&](StreamPosition start, StreamPosition end)
         {
-            std::vector<const AgentInterface*> agentsInRange;
+            AgentInterfaces agentsInRange;
             for (const auto agent : agentsOnLane[-2])
             {
                 auto agentS = agent->GetDistanceToStartOfRoad(MeasurementPoint::Reference, "");
@@ -152,7 +152,7 @@ public:
         ON_CALL(*laneStream3, GetAgentsInRange(_,_)).WillByDefault(
                     [&](StreamPosition start, StreamPosition end)
         {
-            std::vector<const AgentInterface*> agentsInRange;
+            AgentInterfaces agentsInRange;
             for (const auto agent : agentsOnLane[-3])
             {
                 auto agentS = agent->GetDistanceToStartOfRoad(MeasurementPoint::Reference, "");
@@ -335,6 +335,7 @@ TEST_F(SpawnerPreRun_IntegrationTests, ThreeContinuesLanes_SpawnWithCorrectTGapA
     });
     ON_CALL(world, IsSValidOnLane(ROADID, AllOf(Le(-1),Ge(-3)),AllOf(Ge(0),Le(2000)))).WillByDefault(Return(true));
     ON_CALL(world, GetLaneWidth(_,_,_)).WillByDefault(Return(3.0));
+    ON_CALL(world, GetRoadLength(_)).WillByDefault(Return(10000.));
 
     RouteQueryResult<std::vector<const WorldObjectInterface*>> noObjects{{0, {}}};
     ON_CALL(world, GetObjectsInRange(_,_,_,_,_,_)).WillByDefault(Return(noObjects));
@@ -382,6 +383,7 @@ TEST_F(SpawnerPreRun_IntegrationTests, IncreasingLaneNumber_SpawnWithCorrectTGap
     ON_CALL(world, IsSValidOnLane(ROADID, AllOf(Le(-1),Ge(-2)),AllOf(Ge(0),Le(2000)))).WillByDefault(Return(true));
     ON_CALL(world, IsSValidOnLane(ROADID, -3,AllOf(Ge(1400),Le(2000)))).WillByDefault(Return(true));
     ON_CALL(world, GetLaneWidth(_,_,_)).WillByDefault(Return(3.0));
+    ON_CALL(world, GetRoadLength(_)).WillByDefault(Return(10000.));
 
     RouteQueryResult<std::vector<const WorldObjectInterface*>> noObjects{{0, {}}};
     ON_CALL(world, GetObjectsInRange(_,_,_,_,_,_)).WillByDefault(Return(noObjects));
@@ -440,6 +442,7 @@ TEST_F(SpawnerPreRun_IntegrationTests, DecreasingLaneNumber_SpawnWithCorrectTGap
     ON_CALL(world, IsSValidOnLane(ROADID, AllOf(Le(-1),Ge(-2)),AllOf(Ge(0),Le(2000)))).WillByDefault(Return(true));
     ON_CALL(world, IsSValidOnLane(ROADID, -3,AllOf(Ge(0),Le(1200)))).WillByDefault(Return(true));
     ON_CALL(world, GetLaneWidth(_,_,_)).WillByDefault(Return(3.0));
+    ON_CALL(world, GetRoadLength(_)).WillByDefault(Return(10000.));
 
     RouteQueryResult<std::vector<const WorldObjectInterface*>> noObjects{{0, {}}};
     ON_CALL(world, GetObjectsInRange(_,_,_,_,_,_)).WillByDefault(Return(noObjects));
@@ -498,6 +501,7 @@ TEST_F(SpawnerPreRun_IntegrationTests, RightLaneStartsAndEndsWithinRange_SpawnWi
     ON_CALL(world, IsSValidOnLane(ROADID, AllOf(Le(-1),Ge(-2)),AllOf(Ge(0),Le(2000)))).WillByDefault(Return(true));
     ON_CALL(world, IsSValidOnLane(ROADID, -3,AllOf(Ge(1200),Le(1400)))).WillByDefault(Return(true));
     ON_CALL(world, GetLaneWidth(_,_,_)).WillByDefault(Return(3.0));
+    ON_CALL(world, GetRoadLength(_)).WillByDefault(Return(10000.));
 
     RouteQueryResult<std::vector<const WorldObjectInterface*>> noObjects{{0, {}}};
     ON_CALL(world, GetObjectsInRange(_,_,_,_,_,_)).WillByDefault(Return(noObjects));

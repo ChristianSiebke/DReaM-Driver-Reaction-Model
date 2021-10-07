@@ -53,7 +53,7 @@ INSTANTIATE_TEST_SUITE_P(CartesianNetDistanceTestCase, CartesianNetDistanceTest,
 
 struct GetRoadWithLowestHeading_Data
 {
-    const std::map<std::string, GlobalRoadPosition> roadPositions;
+    const GlobalRoadPositions roadPositions;
     RouteElement expectedResult;
 };
 

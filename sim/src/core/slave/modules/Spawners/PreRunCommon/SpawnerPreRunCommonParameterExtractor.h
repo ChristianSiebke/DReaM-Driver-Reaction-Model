@@ -179,30 +179,36 @@ static std::vector<SpawnArea> ExtractSpawnAreas(const ParameterInterface &parame
             {
                 if (sStartElement.has_value())
                 {
-                    sStartOnStream = roadStream->GetStreamPosition(GlobalRoadPosition{route.front().roadId, 0, sStartElement.value(), 0, 0}).s;
+                    double sStart = std::clamp(sStartElement.value(), 0.0, world.GetRoadLength(route.front().roadId));
+                    sStartOnStream = roadStream->GetStreamPosition(GlobalRoadPosition{route.front().roadId, 0, sStart, 0, 0}).s;
                 }
                 if (sEndElement.has_value())
                 {
-                    sEndOnStream = roadStream->GetStreamPosition(GlobalRoadPosition{route.back().roadId, 0, sEndElement.value(), 0, 0}).s;
+                    double sEnd = std::clamp(sEndElement.value(), 0.0, world.GetRoadLength(route.back().roadId));
+                    sEndOnStream = roadStream->GetStreamPosition(GlobalRoadPosition{route.back().roadId, 0, sEnd, 0, 0}).s;
                 }
                 else if (sLengthElement.has_value())
                 {
-                    sEndOnStream = sStartOnStream + sLengthElement.value();
+                    double sLength = std::clamp(sLengthElement.value(), 0.0, roadStream->GetLength() - sStartOnStream);
+                    sEndOnStream = sStartOnStream + sLength;
                 }
             }
             else
             {
                 if (sStartElement.has_value())
                 {
-                    sEndOnStream = roadStream->GetStreamPosition(GlobalRoadPosition{route.back().roadId, 0, sStartElement.value(), 0, 0}).s;
+                    double sStart = std::clamp(sStartElement.value(), 0.0, world.GetRoadLength(route.back().roadId));
+                    sEndOnStream = roadStream->GetStreamPosition(GlobalRoadPosition{route.back().roadId, 0, sStart, 0, 0}).s;
                 }
                 if (sEndElement.has_value())
                 {
-                    sStartOnStream = roadStream->GetStreamPosition(GlobalRoadPosition{route.front().roadId, 0, sEndElement.value(), 0, 0}).s;
+                    double sEnd = std::clamp(sEndElement.value(), 0.0, world.GetRoadLength(route.front().roadId));
+                    sStartOnStream = roadStream->GetStreamPosition(GlobalRoadPosition{route.front().roadId, 0, sEnd, 0, 0}).s;
                 }
                 else if (sLengthElement.has_value())
                 {
-                    sStartOnStream = sEndOnStream - sLengthElement.value();
+                    double sLength = std::clamp(sLengthElement.value(), 0.0, sEndOnStream);
+                    sStartOnStream = sEndOnStream - sLength;
                 }
             }
             SPAWNER_THROWIFFALSE(sStartOnStream < sEndOnStream, "Invalid range");

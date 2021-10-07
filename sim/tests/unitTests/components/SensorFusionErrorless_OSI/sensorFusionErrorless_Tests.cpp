@@ -16,10 +16,11 @@
 #include "sensorFusionImpl.h"
 
 using ::testing::Eq;
+using ::testing::NiceMock;
 
 TEST(SensorFusionErrorless_Tests, SensorDataWithMovingObjects_IsMergedAppropriately)
 {
-    FakeAgent fakeAgent;
+    NiceMock<FakeAgent> fakeAgent;
 
     auto sensorFusion = SensorFusionErrorlessImplementation("",
                                                             false,
@@ -94,7 +95,7 @@ TEST(SensorFusionErrorless_Tests, SensorDataWithMovingObjects_IsMergedAppropriat
 
 TEST(SensorFusionErrorless_Tests, SensorDataWithStationaryObjects_IsMergedAppropriately)
 {
-    FakeAgent fakeAgent;
+    NiceMock<FakeAgent> fakeAgent;
 
     auto sensorFusion = SensorFusionErrorlessImplementation("",
                                                             false,
@@ -165,4 +166,44 @@ TEST(SensorFusionErrorless_Tests, SensorDataWithStationaryObjects_IsMergedApprop
     ASSERT_THAT(outSensorData.stationary_object(2).header().sensor_id(0).value(), Eq(idSensor2));
     ASSERT_THAT(outSensorData.stationary_object(2).base().position().x(), Eq(30));
     ASSERT_THAT(outSensorData.stationary_object(2).base().position().y(), Eq(31));
+}
+
+TEST(SensorFusionErrorless_Tests, SensorDataWithSensorView_IsMergedAppropriately)
+{
+    NiceMock<FakeAgent> fakeAgent;
+
+    auto sensorFusion = SensorFusionErrorlessImplementation("",
+                                                            false,
+                                                            0,
+                                                            0,
+                                                            0,
+                                                            100,
+                                                            nullptr,
+                                                            nullptr,
+                                                            nullptr,
+                                                            nullptr,
+                                                            nullptr,
+                                                            &fakeAgent);
+    unsigned int idSensor1 = 101;
+    unsigned int idSensor2 = 102;
+
+    osi3::SensorData sensorData;
+    auto sensorView1 = sensorData.add_sensor_view();
+    auto sensorView2 = sensorData.add_sensor_view();
+    sensorView1->mutable_sensor_id()->set_value(idSensor1);
+    sensorView2->mutable_sensor_id()->set_value(idSensor2);
+
+    auto signal = std::make_shared<SensorDataSignal>(sensorData);
+    sensorFusion.UpdateInput(0, signal, 0);
+
+    sensorFusion.Trigger(0);
+
+    std::shared_ptr<const SignalInterface> output;
+    sensorFusion.UpdateOutput(0, output, 0);
+    auto outSensorDataSignal = std::dynamic_pointer_cast<const SensorDataSignal>(output);
+    auto outSensorData = outSensorDataSignal->sensorData;
+
+    ASSERT_THAT(outSensorData.sensor_view_size(), Eq(2));
+    ASSERT_THAT(outSensorData.sensor_view(0).sensor_id().value(), Eq(idSensor1));
+    ASSERT_THAT(outSensorData.sensor_view(1).sensor_id().value(), Eq(idSensor2));
 }

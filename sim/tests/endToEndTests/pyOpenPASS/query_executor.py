@@ -73,11 +73,11 @@ def join_events_and_fill(df: pd.DataFrame, events: pd.DataFrame, queried_events)
 
 def add_shifted_column(data, shifted_column):
     (new_column, column, shift) = shifted_column
-    data[new_column] = data[column].shift(-shift)
+    data[new_column] = data.groupby('AgentId')[column].shift(shift)
 
     # fill gaps due to shift (grouped by agend id)
     data[new_column] = data.groupby('AgentId')[new_column]. \
-        fillna(method='ffill')
+        fillna(method='bfill')
 
     # copy datatype, as shift might have made int to float (needs NaN for empty values)
     data[new_column] = data[new_column].astype(data[column].dtypes)

@@ -110,8 +110,8 @@ public:
     AgentInterface* GetAgent(int id) const override;
     const std::vector<const WorldObjectInterface*>& GetWorldObjects() const override;
     const std::map<int, AgentInterface *> &GetAgents() const override;
-    const std::list<const AgentInterface*>& GetRemovedAgents() const override;
-    const std::list<const AgentInterface*> GetRemovedAgentsInPreviousTimestep() override;
+    const AgentInterfaces& GetRemovedAgents() const override;
+    const AgentInterfaces GetRemovedAgentsInPreviousTimestep() override;
 
     const std::vector<const TrafficObjectInterface*>& GetTrafficObjects() const override;
     const TrafficRules& GetTrafficRules() const override;
@@ -148,12 +148,12 @@ public:
 
     AgentInterface* GetAgentByName(const std::string& scenarioName) override;
 
-    RouteQueryResult<std::vector<const AgentInterface*>> GetAgentsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance,
+    RouteQueryResult<AgentInterfaces> GetAgentsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance,
                                                                           double backwardRange, double forwardRange) const override;
 
     RouteQueryResult<std::vector<const WorldObjectInterface*>> GetObjectsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance,
                                                                                  double backwardRange, double forwardRange) const override;
-    std::vector<const AgentInterface*> GetAgentsInRangeOfJunctionConnection(std::string connectingRoadId, double range) const override;
+    AgentInterfaces GetAgentsInRangeOfJunctionConnection(std::string connectingRoadId, double range) const override;
 
     double GetDistanceToConnectorEntrance(const ObjectPosition position, std::string intersectingConnectorId, int intersectingLaneId, std::string ownConnectorId) const override;
     double GetDistanceToConnectorDeparture(const ObjectPosition position, std::string intersectingConnectorId, int intersectingLaneId, std::string ownConnectorId) const override;
@@ -161,7 +161,7 @@ public:
     Position LaneCoord2WorldCoord(double distanceOnLane, double offset, std::string roadId,
                                           int laneId) const override;
 
-    std::map<std::string, GlobalRoadPosition> WorldCoord2LaneCoord(double x, double y, double heading) const override;
+    GlobalRoadPositions WorldCoord2LaneCoord(double x, double y, double heading) const override;
 
     bool IsSValidOnLane(std::string roadId, int laneId, double distance) override;
 
@@ -215,7 +215,7 @@ public:
 
     RouteQueryResult<RelativeWorldView::Lanes> GetRelativeLanes(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, double range, bool includeOncoming = true) const override;
 
-    RouteQueryResult<std::optional<int>> GetRelativeLaneId(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, std::map<std::string, GlobalRoadPosition> targetPosition) const override;
+    RouteQueryResult<std::optional<int>> GetRelativeLaneId(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, GlobalRoadPositions targetPosition) const override;
 
     std::vector<JunctionConnection> GetConnectionsOnJunction(std::string junctionId, std::string incomingRoadId) const override;
 

@@ -86,8 +86,7 @@ void ObjectDetectorBase::UpdateOutput(int localLinkId, std::shared_ptr<SignalInt
         // to SensorFusion
         try
         {
-            data = std::make_shared<SensorDataSignal const>(
-                       sensorData);
+            data = std::make_shared<SensorDataSignal const>(sensorData);
         }
         catch (const std::bad_alloc&)
         {

@@ -235,7 +235,7 @@ const RoadElevation* GetRelevantRoadElevation(double sectionOffset, RoadInterfac
 //! @param[in] widthsOrBorders        container with all potential RoadLaneWidth pointers
 //! @return                     relevant RoadLaneWidth
 //-----------------------------------------------------------------------------
-const RoadLaneWidth* GetRelevantRoadLaneWidth(double sectionOffset, const std::list<RoadLaneWidth*> widthsOrBorders);
+const RoadLaneWidth* GetRelevantRoadLaneWidth(double sectionOffset, const std::vector<RoadLaneWidth *> widthsOrBorders);
 
 const RoadLaneOffset* GetRelevantRoadLaneOffset(double roadOffset, const RoadInterface* road);
 

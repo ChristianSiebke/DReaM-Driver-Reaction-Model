@@ -91,7 +91,7 @@ bool RoadSignal::GetIsDynamic() const
     return signal.dynamic == "yes";
 }
 
-std::list<std::string> RoadSignal::GetDependencies() const
+std::vector<std::string> RoadSignal::GetDependencies() const
 {
     return signal.dependencyIds;
 }

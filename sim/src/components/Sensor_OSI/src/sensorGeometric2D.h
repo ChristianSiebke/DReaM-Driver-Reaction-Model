@@ -42,7 +42,7 @@ struct SensorDetectionResults
 /** \brief This file models a sensor which only detects agents in a 2D area (x/y) in front of the agent
 * 	\details This sensor does not consider height.
 *
-* 	\ingroup SensorObjectDetector
+* 	\ingroup SensorOSI
 */
 //-----------------------------------------------------------------------------
 class SensorGeometric2D : public ObjectDetectorBase

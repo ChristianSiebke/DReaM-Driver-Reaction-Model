@@ -78,7 +78,7 @@ public:
 
     virtual GlobalRoadPosition GetRoadPosition(const StreamPosition& streamPosition) const override;
 
-    virtual std::vector<const AgentInterface*> GetAgentsInRange(const StreamPosition& start, const StreamPosition& end) const override;
+    virtual AgentInterfaces GetAgentsInRange(const StreamPosition& start, const StreamPosition& end) const override;
 
     virtual std::vector<const WorldObjectInterface*> GetObjectsInRange(const StreamPosition& start, const StreamPosition& end) const override;
 

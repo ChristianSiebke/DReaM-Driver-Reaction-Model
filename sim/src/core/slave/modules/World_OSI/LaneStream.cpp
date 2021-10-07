@@ -51,7 +51,7 @@ GlobalRoadPosition LaneStream::GetRoadPosition(const StreamPosition &streamPosit
 
 std::vector<const AgentInterface *> LaneStream::GetAgentsInRange(const StreamPosition &start, const StreamPosition &end) const
 {
-    std::vector<const AgentInterface*> foundObjects;
+    AgentInterfaces foundObjects;
     for (const auto& laneStreamElement : elements)
     {
         if (laneStreamElement.EndS() < start.s) //Ignore lanes ending before startDistance

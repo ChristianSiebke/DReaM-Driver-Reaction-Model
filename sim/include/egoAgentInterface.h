@@ -152,7 +152,7 @@ public:
     //! \param forwardRange     search range against driving direction (calculated from MainLaneLocator)
     //! \param relativeLane     lane id relative to own lane (in driving direction)
     //! \return agents in range
-    virtual std::vector<const AgentInterface*> GetAgentsInRange(double backwardRange, double forwardRange, int relativeLane = 0) const = 0;
+    virtual AgentInterfaces GetAgentsInRange(double backwardRange, double forwardRange, int relativeLane = 0) const = 0;
 
     //! Returns all TrafficSigns in front of the agent inside the specified range on the specified
     //! lane along the route

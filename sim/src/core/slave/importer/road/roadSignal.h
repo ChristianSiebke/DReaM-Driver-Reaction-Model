@@ -140,7 +140,7 @@ public:
     //-----------------------------------------------------------------------------
     virtual bool GetIsDynamic() const override;
 
-    virtual std::list<std::string> GetDependencies() const override;
+    virtual std::vector<std::string> GetDependencies() const override;
 
     virtual double GetZOffset() const override;
 

@@ -60,7 +60,7 @@ public:
         result |= maskEndCondition;
     }
 
-    virtual const std::list<int> *GetCollisionIds() const
+    virtual const std::vector<int> *GetCollisionIds() const
     {
         return &collisionIds;
     }
@@ -86,7 +86,7 @@ private:
     const std::uint32_t maskEndCondition = 0x4;
 
     std::uint32_t result = 0;
-    std::list<int> collisionIds;
+    std::vector<int> collisionIds;
 };
 
 } // namespace SimulationSlave

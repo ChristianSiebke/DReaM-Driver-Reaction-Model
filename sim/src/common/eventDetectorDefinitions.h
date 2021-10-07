@@ -96,7 +96,7 @@ public:
     TimeToCollisionCondition(const TimeToCollisionCondition&) = default;
     virtual ~TimeToCollisionCondition();
 
-    std::vector<const AgentInterface*> IsMet(WorldInterface * const world) const;
+    AgentInterfaces IsMet(WorldInterface * const world) const;
 
 private:
     const std::string referenceEntityName;
@@ -121,7 +121,7 @@ public:
     TimeHeadwayCondition(const TimeHeadwayCondition&) = default;
     virtual ~TimeHeadwayCondition();
 
-    std::vector<const AgentInterface*> IsMet(WorldInterface * const world) const;
+    AgentInterfaces IsMet(WorldInterface * const world) const;
 
 private:
     const std::string referenceEntityName;
@@ -159,7 +159,7 @@ public:
     ReachPositionCondition(const ReachPositionCondition&) = default;
     virtual ~ReachPositionCondition();
 
-    std::vector<const AgentInterface*> IsMet(WorldInterface * const world) const;
+    AgentInterfaces IsMet(WorldInterface * const world) const;
 
 private:
     const double tolerance{};
@@ -181,7 +181,7 @@ public:
     RelativeSpeedCondition(const RelativeSpeedCondition&) = default;
     virtual ~RelativeSpeedCondition();
 
-    std::vector<const AgentInterface*> IsMet(WorldInterface * const world) const;
+    AgentInterfaces IsMet(WorldInterface * const world) const;
 
 private:
     const std::string referenceEntityName{};

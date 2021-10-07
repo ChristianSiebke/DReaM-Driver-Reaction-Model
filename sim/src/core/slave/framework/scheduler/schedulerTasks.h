@@ -35,11 +35,11 @@ namespace openpass::scheduling {
 class SchedulerTasks
 {
 public:
-    SchedulerTasks(std::list<TaskItem> bootstrapTasks,
-                   std::list<TaskItem> spawningTasks,
-                   std::list<TaskItem> preAgentTasks,
-                   std::list<TaskItem> synchronizeTasks,
-                   std::list<TaskItem> finalizeTasks,
+    SchedulerTasks(std::vector<TaskItem> bootstrapTasks,
+                   std::vector<TaskItem> spawningTasks,
+                   std::vector<TaskItem> preAgentTasks,
+                   std::vector<TaskItem> synchronizeTasks,
+                   std::vector<TaskItem> finalizeTasks,
                    int scheduledTimestampsInterval);
 
     /*!
@@ -49,7 +49,7 @@ public:
     *
     * @param[in]     list of TaskItems      new tasks
     */
-    void ScheduleNewRecurringTasks(std::list<TaskItem> newTasks);
+    void ScheduleNewRecurringTasks(std::vector<TaskItem> newTasks);
 
     /*!
     * \brief ScheduleNewNonRecurringTasks
@@ -58,7 +58,7 @@ public:
     *
     * @param[in]     list of TaskItems      new tasks
     */
-    void ScheduleNewNonRecurringTasks(std::list<TaskItem> newTasks);
+    void ScheduleNewNonRecurringTasks(std::vector<TaskItem> newTasks);
 
     /*!
     * \brief DeleteAgentTasks
@@ -67,7 +67,7 @@ public:
     *
     * @param[in]     list of int    agent ids to remove from tasks
     */
-    void DeleteAgentTasks(std::list<int> &agents);
+    void DeleteAgentTasks(std::vector<int> &agents);
 
     /*!
     * \brief DeleteAgentTasks
@@ -94,7 +94,7 @@ public:
     * @param[in]     int                timestamp
     * @return    list of TaskItems  all tasks for given timestamp
     */
-    std::list<TaskItem> GetTasks(int timestamp);
+    std::vector<TaskItem> GetTasks(int timestamp);
 
     /*!
     * \brief GetCommonTasks
@@ -102,9 +102,9 @@ public:
     * @param[in]     int                timestamp
     * @return    list of TaskItems  all common tasks for given timestamp
     */
-    std::list<TaskItem> GetSpawningTasks(int timestamp);
+    std::vector<TaskItem> GetSpawningTasks(int timestamp);
 
-    std::list<TaskItem> GetPreAgentTasks(int timestamp);
+    std::vector<TaskItem> GetPreAgentTasks(int timestamp);
 
     /*!
     * \brief ConsumeNonRecurringTasks
@@ -114,7 +114,7 @@ public:
     * @param[in]     int                timestamp
     * @return    list of TaskItems  all init tasks for given timestamp
     */
-    std::list<TaskItem> ConsumeNonRecurringAgentTasks(int timestamp);
+    std::vector<TaskItem> ConsumeNonRecurringAgentTasks(int timestamp);
 
     /*!
     * \brief PullNonRecurringTasks
@@ -124,7 +124,7 @@ public:
     * @param[in]     int                timestamp
     * @param[out]    list of TaskItems  all init tasks for given timestamp
     */
-    void PullNonRecurringTasks(int timestamp, std::list<TaskItem> &currentTasks);
+    void PullNonRecurringTasks(int timestamp, std::vector<TaskItem> &currentTasks);
 
     /*!
     * \brief GetRecurringTasks
@@ -132,9 +132,9 @@ public:
     * @param[in]    int                timestamp
     * @return       list of TaskItems  all recurring tasks for given timestamp
     */
-    std::list<TaskItem> GetRecurringAgentTasks(int timestamp);
+    std::vector<TaskItem> GetRecurringAgentTasks(int timestamp);
 
-    std::list<TaskItem> GetSynchronizeTasks(int timestamp);
+    std::vector<TaskItem> GetSynchronizeTasks(int timestamp);
 
     /*!
     * \brief GetBootstrapTasks
@@ -177,7 +177,7 @@ private:
     * @param[in]     tasks              tasks to filter by current timestamp
     * @param[out]    list of TaskItems  filtered tasks
     */
-    void GetTasks(int timestamp, std::multiset<TaskItem> &tasks, std::list<TaskItem> &currentTasks);
+    void GetTasks(int timestamp, std::multiset<TaskItem> &tasks, std::vector<TaskItem> &currentTasks);
 
     /*!
     * \brief UpdateScheduledTimestamps
@@ -205,7 +205,7 @@ private:
     *
     * @param[out]     tasks     new scheduled tasks
     */
-    void ScheduleNewTasks(Tasks &tasks, std::list<TaskItem> newTasks);
+    void ScheduleNewTasks(Tasks &tasks, std::vector<TaskItem> newTasks);
 
     /*!
     * \brief ClearNonrecurringTasks

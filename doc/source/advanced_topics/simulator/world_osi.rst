@@ -14,13 +14,15 @@
 World_OSI
 ==========
 
-.. _world_coordinatesystems:
+.. _coordinatesystems:
 
 Coordinate Systems
 ------------------
 
 OpenPass uses 3 different coordinate systems.
 All systems rotate counterclockwise and use radian.
+
+.. _world_coordinatesystem:
 
 World Coordinate System
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -31,6 +33,8 @@ This system consists of *x*, *y* and *z* (*z* is currently unused).
 .. figure:: ./images/WorldCoordinateSystem.png
 
    World Coordinate System
+
+.. _road_coordinatesystem:
 
 Road Coordinate System
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -87,8 +91,8 @@ Each joint also holds the corresponding curvature of the road, so that the curva
 Localization
 ------------
 
-Generally, the position of an agent is stored with respect to [world coordinates (x,y)](\ref dev_concepts_coordinatesystems_world).
-As queries on the world operates in [road coordinates (s,t)](\ref dev_concepts_coordinatesystems_road), the position of the agent needs to be transformed.
+Generally, the position of an agent is stored with respect to :ref:`world coordinates (x,y) <world_coordinatesystem>`.
+As queries on the world operates in :ref:`road coordinates (s,t) <road_coordinatesystem>`, the position of the agent needs to be transformed.
 
 This section describes the translation of coordinates (x,y) of an agent into RoadCoordinate (s,t), whereas the notion of (s,t) comes from the `OpenDRIVE`_ standard.  
 

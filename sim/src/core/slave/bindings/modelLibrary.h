@@ -194,7 +194,7 @@ private:
 
     std::string modelLibraryPath;
     std::string modelLibraryName;
-    std::list<ComponentInterface*> components;
+    std::vector<ComponentInterface*> components;
     CallbackInterface *callbacks;
     QLibrary *library = nullptr;
     ModelInterface_GetVersion getVersionFunc{nullptr};

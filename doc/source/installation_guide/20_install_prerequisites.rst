@@ -10,6 +10,8 @@
   SPDX-License-Identifier: EPL-2.0
   ************************************************************
 
+.. |win_only| image:: /_static/win_only.png
+
 .. _prerequisites:
 
 Installing Prerequisites
@@ -81,9 +83,9 @@ Installing the Build Environment
    .. tab:: Linux
 
       On Linux, no special build environment is needed. |Op| is developed under Debian 64-Bit, 
-      which means that developing under a recent Ubuntu distribution also work.
+      which means that developing under a recent Ubuntu distribution will also work.
       Debian Bullseye or Ubuntu 20.10 is recommended. Debian uses ``apt`` (or ``apt-get``) as package managing system. 
-      Details will be given in :ref:`prerequisites`. 
+      Details will be given in :ref:`binary_packages` and :ref:`building_prerequisites`. 
 
 
 .. _binary_packages:
@@ -184,7 +186,34 @@ The first set of dependencies we need to install in order to successfully compil
             make install
 
 
-.. _building prerequisites:
+**EndToEnd Test Framework**
+
+If the :ref:`testing_endtoend` shall be used, additional requirements have to be considered.
+
+The test framework is based on Python and some additional Python modules.
+Installation of the required modules can be accomplished using ``pip``.
+Please refer to the file ``requirements.txt`` located in ``sim/tests/endToEndTests/pyOpenPASS`` for a list of dependencies.
+
+The requirements file can be directly passed to ``pip``:
+
+.. code-block::
+
+   pip install -r requirements.txt
+
+(executed from ``sim/src/tests/endToEndTests/pyOpenPASS``)
+
+.. warning::
+   |win_only|
+   ``pip install`` will try to fetch precompiled packages by default.
+   If it is unable to locate a binary package for the current environment, packages will be compiled from source.
+   This step fails for the ``numpy`` package when being built from the MSYS2 environment.
+   Thus, it is recommended to set up a native Windows Python environment and perform the installation there.
+   To force the usage of a specific Python environment, the variable ``Python3_EXECUTABLE`` can be set to the indended Python interpreter executable during cmake configuration (see :ref:`download_and_install_openpass`).
+
+Please refer to :ref:`testing_endtoend` for more details for using the framework.
+
+
+.. _building_prerequisites:
 
 Installing the Source Packages
 ------------------------------

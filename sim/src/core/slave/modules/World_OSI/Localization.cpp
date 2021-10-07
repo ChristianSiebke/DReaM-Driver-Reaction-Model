@@ -82,7 +82,7 @@ LocatedObject LocateOnGeometryElements(const bg_rTree& rTree, const OWL::Interfa
 }
 
 std::function<void (const RTreeElement&)> LocateOnGeometryElement(const OWL::Interfaces::WorldData& worldData, const Common::Vector2d& point,
-                                                                  const double& hdg, std::map<std::string, GlobalRoadPosition>& result)
+                                                                  const double& hdg, GlobalRoadPositions& result)
 {
     return  [&](auto const& value)
     {
@@ -108,10 +108,10 @@ std::function<void (const RTreeElement&)> LocateOnGeometryElement(const OWL::Int
     };
 }
 
-std::map<std::string, GlobalRoadPosition> LocateOnGeometryElements(const bg_rTree& rTree, const OWL::Interfaces::WorldData& worldData,
+GlobalRoadPositions LocateOnGeometryElements(const bg_rTree& rTree, const OWL::Interfaces::WorldData& worldData,
                            const Common::Vector2d point, double hdg)
 {
-    std::map<std::string, GlobalRoadPosition> result;
+    GlobalRoadPositions result;
     CoarseBoundingBox box = GetSearchBox({point});
     rTree.query(bgi::intersects(box),
                             boost::make_function_output_iterator(LocateOnGeometryElement(worldData, point, hdg, result)));
@@ -255,7 +255,7 @@ Result Localizer::Locate(const polygon_t& boundingBox, OWL::Interfaces::WorldObj
     return result;
 }
 
-std::map<std::string, GlobalRoadPosition> Localizer::Locate(const Common::Vector2d& point, const double& hdg) const
+GlobalRoadPositions Localizer::Locate(const Common::Vector2d& point, const double& hdg) const
 {
     return LocateOnGeometryElements(rTree,
                                     worldData,

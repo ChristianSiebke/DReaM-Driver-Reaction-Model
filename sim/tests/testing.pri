@@ -122,7 +122,7 @@ unix {
 OPENPASS_GTEST {
     message("[$$TARGET] Building test")
 
-    QT += xml
+    QT += xml xmlpatterns
     TEMPLATE = app
     CONFIG += console
     CONFIG += testcase
