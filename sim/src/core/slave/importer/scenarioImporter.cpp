@@ -72,7 +72,7 @@ bool ScenarioImporter::Import(const std::string& filename, ScenarioInterface* sc
         ImportCatalogs(documentRoot, scenario, path, parameters);
 
         std::vector<ScenarioEntity> entities;
-        std::map<std::string, std::list<std::string>> groups;
+        std::map<std::string, std::vector<std::string>> groups;
         ImportEntities(documentRoot, entities, groups, parameters);
 
         ImportStoryboard(documentRoot, entities, scenario, parameters);
@@ -561,7 +561,7 @@ std::string ScenarioImporter::ImportCatalog(const std::string& catalogName,
     return catalogPath;
 }
 
-void ScenarioImporter::ImportEntities(QDomElement& documentRoot, std::vector<ScenarioEntity>& entities, std::map<std::string, std::list<std::string>> &groups, openScenario::Parameters& parameters)
+void ScenarioImporter::ImportEntities(QDomElement& documentRoot, std::vector<ScenarioEntity>& entities, std::map<std::string, std::vector<std::string>> &groups, openScenario::Parameters& parameters)
 {
     QDomElement entitiesElement;
     ThrowIfFalse(SimulationCommon::GetFirstChildElement(documentRoot, TAG::entities, entitiesElement),
@@ -585,13 +585,13 @@ void ScenarioImporter::ImportEntities(QDomElement& documentRoot, std::vector<Sce
     ImportSelectionElements(entitiesElement, groups, parameters);
 }
 
-void ScenarioImporter::ImportSelectionElements(QDomElement &entitiesElement, std::map<std::string, std::list<std::string>> &groups, openScenario::Parameters& parameters)
+void ScenarioImporter::ImportSelectionElements(QDomElement &entitiesElement, std::map<std::string, std::vector<std::string>> &groups, openScenario::Parameters& parameters)
 {
     QDomElement selectionElement;
     if(SimulationCommon::GetFirstChildElement(entitiesElement, TAG::entitySelection, selectionElement))
     {
         QDomElement membersElement;
-        std::list<std::string> members;
+        std::vector<std::string> members;
         while (!selectionElement.isNull())
         {
             std::string selectionName = ParseAttribute<std::string>(selectionElement, ATTRIBUTE::name, parameters);
@@ -624,7 +624,7 @@ void ScenarioImporter::ImportEntity(QDomElement& entityElement, ScenarioEntity& 
     ImportEntityCatalogReference(catalogReferenceElement, entity, parameters);
 }
 
-void ScenarioImporter::ImportMembers(const QDomElement &membersElement, std::list<std::string> &members, openScenario::Parameters& parameters)
+void ScenarioImporter::ImportMembers(const QDomElement &membersElement, std::vector<std::string> &members, openScenario::Parameters& parameters)
 {
     QDomElement byEntityElement;
     if(SimulationCommon::GetFirstChildElement(membersElement, TAG::entityRef, byEntityElement))
@@ -679,7 +679,7 @@ ScenarioEntity* ScenarioImporter::GetEntityByName(std::vector<ScenarioEntity>& e
     return nullptr;
 }
 
-void ScenarioImporter::CategorizeEntities(const std::vector<ScenarioEntity>& entities, const std::map<std::string, std::list<std::string>> &groups, ScenarioInterface* scenario)
+void ScenarioImporter::CategorizeEntities(const std::vector<ScenarioEntity>& entities, const std::map<std::string, std::vector<std::string>> &groups, ScenarioInterface* scenario)
 {
     for (const auto& entity : entities)
     {

@@ -52,7 +52,7 @@ public:
 
     std::vector<const WorldObjectInterface*> GetObjectsInRange (double backwardRange, double forwardRange, int relativeLane = 0) const override;
 
-    std::vector<const AgentInterface*> GetAgentsInRange (double backwardRange, double forwardRange, int relativeLane = 0) const override;
+    AgentInterfaces GetAgentsInRange (double backwardRange, double forwardRange, int relativeLane = 0) const override;
 
     std::vector<CommonTrafficSign::Entity> GetTrafficSignsInRange(double range, int relativeLane = 0) const override;
 

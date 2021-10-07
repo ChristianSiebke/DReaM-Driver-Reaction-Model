@@ -45,7 +45,7 @@ public:
     //!
     //! @return                List of agents
     //-----------------------------------------------------------------------------
-    virtual const std::list<int> *GetCollisionIds() const
+    virtual const std::vector<int> *GetCollisionIds() const
     {
         return nullptr;
     }

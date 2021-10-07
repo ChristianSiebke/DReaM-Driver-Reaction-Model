@@ -131,7 +131,7 @@ Ranges WorldAnalyzer::GetValidLaneSpawningRanges(const std::unique_ptr<LaneStrea
     {
         const auto agentsInLane = laneStream->GetAgentsInRange({range.first, 0}, {range.second, 0});
 
-        std::vector<const AgentInterface*> scenarioAgents {};
+        AgentInterfaces scenarioAgents {};
         for (auto agent : agentsInLane)
         {
             if(agent->GetAgentCategory() == AgentCategory::Ego

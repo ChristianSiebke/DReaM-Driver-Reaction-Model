@@ -29,6 +29,9 @@ add_openpass_target(
     ${COMPONENT_SOURCE_DIR}/framework/eventNetwork.cpp
     ${COMPONENT_SOURCE_DIR}/importer/eventDetectorImporter.cpp
 
+    # ImporterCommon
+    ${COMPONENT_SOURCE_DIR}/importer/importerCommon.cpp
+
     # ManipulatorImporter
     manipulatorImporter_Tests.cpp
     ${COMPONENT_SOURCE_DIR}/importer/oscImporterCommon.cpp
@@ -104,6 +107,9 @@ add_openpass_target(
     ${COMPONENT_SOURCE_DIR}/framework/eventNetwork.h
     ${COMPONENT_SOURCE_DIR}/importer/eventDetectorImporter.h
 
+    # ImporterCommon
+    ${COMPONENT_SOURCE_DIR}/importer/importerCommon.h
+
     # ManipulatorImporter
     ${COMPONENT_SOURCE_DIR}/importer/oscImporterCommon.h
 
@@ -153,6 +159,7 @@ add_openpass_target(
 
   LIBRARIES
     Qt5::Core
+    Qt5::XmlPatterns
     Common
     CoreCommon
 )

@@ -635,7 +635,11 @@ std::shared_ptr<const RoadMultiStream> WorldDataQuery::CreateRoadMultiStream(con
 RoadMultiStream::Node WorldDataQuery::CreateRoadMultiStreamRecursive(const RoadGraph& roadGraph, const RoadGraphVertex& current, double sOffset) const
 {
     const auto routeElement = get(RouteElement(), roadGraph, current);
-    const auto& road = GetRoadByOdId(routeElement.roadId);
+    const auto road = GetRoadByOdId(routeElement.roadId);
+    if (!road)
+    {
+        throw std::runtime_error("Unknown road \"" + routeElement.roadId + "\"");
+    }
     auto roadLength = road->GetLength();
     std::vector<RoadMultiStream::Node> next{};
     for (auto [successor, successorsEnd] = adjacent_vertices(current, roadGraph); successor != successorsEnd; successor++)
@@ -959,7 +963,7 @@ RouteQueryResult<RelativeWorldView::Lanes> WorldDataQuery::GetRelativeLanes(cons
     worldData);
 }
 
-RouteQueryResult<std::optional<int>> WorldDataQuery::GetRelativeLaneId(const RoadMultiStream &roadStream, double ownPosition, int ownLaneId, std::map<std::string, GlobalRoadPosition> targetPosition) const
+RouteQueryResult<std::optional<int>> WorldDataQuery::GetRelativeLaneId(const RoadMultiStream &roadStream, double ownPosition, int ownLaneId, GlobalRoadPositions targetPosition) const
 {
     std::optional<int> currentOwnLaneId;
     std::optional<int> currentTargetLaneId;

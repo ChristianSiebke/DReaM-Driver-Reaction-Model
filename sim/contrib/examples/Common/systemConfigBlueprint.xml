@@ -37,6 +37,39 @@
                 <parameters/>
             </component>
             <component>
+                <id>FMU1</id>
+                <schedule>
+                    <priority>250</priority>
+                    <offset>0</offset>
+                    <cycle>100</cycle>
+                    <response>0</response>
+                </schedule>
+                <library>Algorithm_FmuWrapper</library>
+                <parameters/>
+            </component>
+            <component>
+                <id>FMU2</id>
+                <schedule>
+                    <priority>250</priority>
+                    <offset>0</offset>
+                    <cycle>100</cycle>
+                    <response>0</response>
+                </schedule>
+                <library>AlgorithmFmuWrapper</library>
+                <parameters/>
+            </component>
+            <component>
+                <id>FMU3</id>
+                <schedule>
+                    <priority>250</priority>
+                    <offset>0</offset>
+                    <cycle>100</cycle>
+                    <response>0</response>
+                </schedule>
+                <library>AlgorithmFmuWrapper</library>
+                <parameters/>
+            </component>
+            <component>
                 <id>SensorAggregation</id>
                 <schedule>
                     <priority>351</priority>
@@ -116,7 +149,25 @@
                         <id>0</id>
                         <type>int</type>
                         <unit/>
-                        <value>0</value>
+                        <value>1</value>
+                    </parameter>
+                    <parameter>
+                        <id>1</id>
+                        <type>int</type>
+                        <unit/>
+                        <value>2</value>
+                    </parameter>
+                    <parameter>
+                        <id>2</id>
+                        <type>int</type>
+                        <unit/>
+                        <value>3</value>
+                    </parameter>
+                    <parameter>
+                        <id>3</id>
+                        <type>int</type>
+                        <unit/>
+                        <value>4</value>
                     </parameter>
                 </parameters>
             </component>
@@ -130,6 +181,24 @@
                 </schedule>
                 <library>SignalPrioritizer</library>
                 <parameters>
+                    <parameter>
+                        <id>0</id>
+                        <type>int</type>
+                        <unit/>
+                        <value>3</value>
+                    </parameter>
+                    <parameter>
+                        <id>1</id>
+                        <type>int</type>
+                        <unit/>
+                        <value>2</value>
+                    </parameter>
+                    <parameter>
+                        <id>2</id>
+                        <type>int</type>
+                        <unit/>
+                        <value>1</value>
+                    </parameter>
                 </parameters>
             </component>
             <component>
@@ -286,22 +355,40 @@
                 <library>SignalPrioritizer</library>
                 <parameters>
                     <parameter>
+                        <id>0</id>
+                        <type>int</type>
+                        <unit/>
+                        <value>5</value>
+                    </parameter>
+                    <parameter>
                         <id>1</id>
                         <type>int</type>
                         <unit/>
-                        <value>3</value>
+                        <value>4</value>
                     </parameter>
                     <parameter>
                         <id>2</id>
                         <type>int</type>
                         <unit/>
+                        <value>3</value>
+                    </parameter>
+                    <parameter>
+                        <id>3</id>
+                        <type>int</type>
+                        <unit/>
                         <value>2</value>
                     </parameter>
                     <parameter>
-                        <id>0</id>
+                        <id>4</id>
                         <type>int</type>
                         <unit/>
                         <value>1</value>
+                    </parameter>
+                    <parameter>
+                        <id>5</id>
+                        <type>int</type>
+                        <unit/>
+                        <value>0</value>
                     </parameter>
                 </parameters>
             </component>
@@ -359,7 +446,7 @@
                 </source>
                 <target>
                     <component>PrioritizerDynamics</component>
-                    <input>2</input>
+                    <input>1</input>
                 </target>
             </connection>
             <connection>
@@ -370,7 +457,7 @@
                 </source>
                 <target>
                     <component>PrioritizerDynamics</component>
-                    <input>0</input>
+                    <input>5</input>
                 </target>
             </connection>
             <connection>
@@ -381,7 +468,7 @@
                 </source>
                 <target>
                     <component>PrioritizerDynamics</component>
-                    <input>1</input>
+                    <input>0</input>
                 </target>
             </connection>
             <connection>
@@ -426,6 +513,18 @@
                 <target>
                     <component>PrioritizerSteering</component>
                     <input>1</input>
+                </target>
+                <target>
+                    <component>FMU1</component>
+                    <input>0</input>
+                </target>
+                <target>
+                    <component>FMU2</component>
+                    <input>0</input>
+                </target>
+                <target>
+                    <component>FMU3</component>
+                    <input>0</input>
                 </target>
             </connection>
             <connection>
@@ -551,7 +650,106 @@
                 </target>
             </connection>
             <connection>
-                <id>8471</id>
+                <id>7101</id>
+                <source>
+                    <component>FMU1</component>
+                    <output>0</output>
+                </source>
+                <target>
+                    <component>PrioritizerDynamics</component>
+                    <input>2</input>
+                </target>
+            </connection>
+            <connection>
+                <id>7113</id>
+                <source>
+                    <component>FMU1</component>
+                    <output>1</output>
+                </source>
+                <target>
+                    <component>PrioritizerAccelerationVehicleComponents</component>
+                    <input>3</input>
+                </target>
+            </connection>
+            <connection>
+                <id>7114</id>
+                <source>
+                    <component>FMU1</component>
+                    <output>3</output>
+                </source>
+                <target>
+                    <component>PrioritizerSteeringVehicleComponents</component>
+                    <input>0</input>
+                </target>
+            </connection>
+            <connection>
+                <id>7201</id>
+                <source>
+                    <component>FMU2</component>
+                    <output>0</output>
+                </source>
+                <target>
+                    <component>PrioritizerDynamics</component>
+                    <input>3</input>
+                </target>
+            </connection>
+            <connection>
+                <id>7213</id>
+                <source>
+                    <component>FMU2</component>
+                    <output>1</output>
+                </source>
+                <target>
+                    <component>PrioritizerAccelerationVehicleComponents</component>
+                    <input>2</input>
+                </target>
+            </connection>
+            <connection>
+                <id>7214</id>
+                <source>
+                    <component>FMU2</component>
+                    <output>3</output>
+                </source>
+                <target>
+                    <component>PrioritizerSteeringVehicleComponents</component>
+                    <input>1</input>
+                </target>
+            </connection>
+            <connection>
+                <id>7301</id>
+                <source>
+                    <component>FMU3</component>
+                    <output>0</output>
+                </source>
+                <target>
+                    <component>PrioritizerDynamics</component>
+                    <input>4</input>
+                </target>
+            </connection>
+            <connection>
+                <id>7313</id>
+                <source>
+                    <component>FMU3</component>
+                    <output>1</output>
+                </source>
+                <target>
+                    <component>PrioritizerAccelerationVehicleComponents</component>
+                    <input>1</input>
+                </target>
+            </connection>
+            <connection>
+                <id>7314</id>
+                <source>
+                    <component>FMU3</component>
+                    <output>3</output>
+                </source>
+                <target>
+                    <component>PrioritizerSteeringVehicleComponents</component>
+                    <input>2</input>
+                </target>
+            </connection>
+            <connection>
+                <id>8401</id>
                 <source>
                     <component>OpenScenarioActions</component>
                     <output>0</output>
@@ -559,6 +757,75 @@
                 <target>
                     <component>Dynamics_TrajectoryFollower</component>
                     <input>2</input>
+                </target>
+                <target>
+                    <component>FMU1</component>
+                    <input>10</input>
+                </target>
+                <target>
+                    <component>FMU2</component>
+                    <input>10</input>
+                </target>
+                <target>
+                    <component>FMU3</component>
+                    <input>10</input>
+                </target>
+            </connection>
+            <connection>
+                <id>8481</id>
+                <source>
+                    <component>OpenScenarioActions</component>
+                    <output>4</output>
+                </source>
+                <target>
+                    <component>FMU1</component>
+                    <input>11</input>
+                </target>
+                <target>
+                    <component>FMU2</component>
+                    <input>11</input>
+                </target>
+                <target>
+                    <component>FMU3</component>
+                    <input>11</input>
+                </target>
+            </connection>
+            <connection>
+                <id>8482</id>
+                <source>
+                    <component>OpenScenarioActions</component>
+                    <output>5</output>
+                </source>
+                <target>
+                    <component>FMU1</component>
+                    <input>12</input>
+                </target>
+                <target>
+                    <component>FMU2</component>
+                    <input>12</input>
+                </target>
+                <target>
+                    <component>FMU3</component>
+                    <input>12</input>
+                </target>
+            </connection>
+            <connection>
+                <id>8483</id>
+                <source>
+                    <component>OpenScenarioActions</component>
+                    <output>3</output>
+                </source>
+                <target>
+                    <component>FMU1</component>
+                    <input>13</input>
+                </target>
+                <target>
+                    <component>FMU2</component>
+                    <input>13</input>
+                </target>
+                <target>
+                    <component>FMU3</component>
+                    <input>13</input>
                 </target>
             </connection>
             <connection>
@@ -609,6 +876,18 @@
                     <component>AEB</component>
                     <input>0</input>
                 </target>
+                <target>
+                    <component>FMU1</component>
+                    <input>2</input>
+                </target>
+                <target>
+                    <component>FMU2</component>
+                    <input>2</input>
+                </target>
+                <target>
+                    <component>FMU3</component>
+                    <input>2</input>
+                </target>
             </connection>
             <connection>
                 <id>9581</id>
@@ -634,7 +913,7 @@
                 </target>
             </connection>
             <connection>
-                <id>9900</id>
+                <id>9800</id>
                 <source>
                     <component>SensorObjectDetector</component>
                     <output>0</output>

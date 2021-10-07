@@ -3219,8 +3219,8 @@ TEST(GetRelativeLaneId, OnlySectionInDrivingDirection_ReturnsCorrectRelativeId)
     std::string idRoad = "RoadA";
     ON_CALL(*road, GetId()).WillByDefault(ReturnRef(idRoad));
 
-    std::map<std::string, GlobalRoadPosition> targetPosition1{{idRoad, {idRoad, 1, 15., 0, 0}}};
-    std::map<std::string, GlobalRoadPosition> targetPosition2{{idRoad, {idRoad, -2, 15., 0, 0}}};
+    GlobalRoadPositions targetPosition1{{idRoad, {idRoad, 1, 15., 0, 0}}};
+    GlobalRoadPositions targetPosition2{{idRoad, {idRoad, -2, 15., 0, 0}}};
 
     WorldDataQuery wdQuery{worldData};
     auto result1 = wdQuery.GetRelativeLaneId(roadStream.Get(), 10.0, -1, targetPosition1).at(node->roadGraphVertex);
@@ -3275,8 +3275,8 @@ TEST(GetRelativeLaneId, IdOfEgoLaneChanges_ReturnsCorrectRelativeId)
     std::string idRoad = "RoadA";
     ON_CALL(*road, GetId()).WillByDefault(ReturnRef(idRoad));
 
-    std::map<std::string, GlobalRoadPosition> targetPosition1{{idRoad, {idRoad, -1, 115., 0, 0}}};
-    std::map<std::string, GlobalRoadPosition> targetPosition2{{idRoad, {idRoad, -2, 115., 0, 0}}};
+    GlobalRoadPositions targetPosition1{{idRoad, {idRoad, -1, 115., 0, 0}}};
+    GlobalRoadPositions targetPosition2{{idRoad, {idRoad, -2, 115., 0, 0}}};
 
     WorldDataQuery wdQuery{worldData};
     auto result1 = wdQuery.GetRelativeLaneId(roadStream.Get(), 10.0, -1, targetPosition1).at(node->roadGraphVertex);
@@ -3354,8 +3354,8 @@ TEST(GetRelativeLaneId, BranchingTree_ReturnsCorrectRelativeId)
     ON_CALL(*road2, GetId()).WillByDefault(ReturnRef(idRoad2));
     ON_CALL(*road3, GetId()).WillByDefault(ReturnRef(idRoad3));
 
-    std::map<std::string, GlobalRoadPosition> targetPosition1{{idRoad2, {idRoad2, -1, 115., 0, 0}}, {idRoad3, {idRoad3, 1, 115., 0, 0}}};
-    std::map<std::string, GlobalRoadPosition> targetPosition2{{idRoad2, {idRoad2, -2, 115., 0, 0}}, {idRoad3, {idRoad3, 2, 115., 0, 0}}};
+    GlobalRoadPositions targetPosition1{{idRoad2, {idRoad2, -1, 115., 0, 0}}, {idRoad3, {idRoad3, 1, 115., 0, 0}}};
+    GlobalRoadPositions targetPosition2{{idRoad2, {idRoad2, -2, 115., 0, 0}}, {idRoad3, {idRoad3, 2, 115., 0, 0}}};
 
     WorldDataQuery wdQuery{worldData};
     auto result1 = wdQuery.GetRelativeLaneId(roadStream.Get(), 10.0, -1, targetPosition1).at(node3->roadGraphVertex);
@@ -3410,8 +3410,8 @@ TEST(GetRelativeLaneId, TargetOnPreviousSection_ReturnsCorrectRelativeId)
     std::string idRoad = "RoadA";
     ON_CALL(*road, GetId()).WillByDefault(ReturnRef(idRoad));
 
-    std::map<std::string, GlobalRoadPosition> targetPosition1{{idRoad, {idRoad, -1, 15., 0, 0}}};
-    std::map<std::string, GlobalRoadPosition> targetPosition2{{idRoad, {idRoad, -2, 15., 0, 0}}};
+    GlobalRoadPositions targetPosition1{{idRoad, {idRoad, -1, 15., 0, 0}}};
+    GlobalRoadPositions targetPosition2{{idRoad, {idRoad, -2, 15., 0, 0}}};
 
     WorldDataQuery wdQuery{worldData};
     auto result1 = wdQuery.GetRelativeLaneId(roadStream.Get(), 110.0, -2, targetPosition1).at(node->roadGraphVertex);
@@ -3468,7 +3468,7 @@ TEST(GetRelativeLaneId, TargetOnPreviousRoad_ReturnsCorrectRelativeId)
     ON_CALL(*road1, GetId()).WillByDefault(ReturnRef(idRoad1));
     ON_CALL(*road2, GetId()).WillByDefault(ReturnRef(idRoad2));
 
-    std::map<std::string, GlobalRoadPosition> targetPosition{{idRoad1, {idRoad1, -1, 15., 0, 0}}};
+    GlobalRoadPositions targetPosition{{idRoad1, {idRoad1, -1, 15., 0, 0}}};
 
     WorldDataQuery wdQuery{worldData};
     auto result = wdQuery.GetRelativeLaneId(roadStream.Get(), 110.0, -2, targetPosition).at(node2->roadGraphVertex);

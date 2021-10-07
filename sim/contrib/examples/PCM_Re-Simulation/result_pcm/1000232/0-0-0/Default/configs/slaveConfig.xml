@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<slaveConfig SchemaVersion="0.8.1">
+<slaveConfig SchemaVersion="0.8.2">
     <ProfilesCatalog>ProfilesCatalog.xml</ProfilesCatalog>
     <Experiment>
         <ExperimentID>0</ExperimentID>
@@ -25,10 +25,11 @@
         <Weathers>
             <Weather Probability="1" Value="Clear"/>
         </Weathers>
+        <TrafficRules>Germany</TrafficRules>
     </Environment>
     <Observations>
         <Observation>
-            <Library>Observation_LogAgent</Library>
+            <Library>Observation_Log</Library>
             <Parameters>
                 <String Key="OutputFilename" Value="simulationOutput.xml"/>
                 <Bool Key="LoggingCyclicsToCsv" Value="true"/>
@@ -44,7 +45,7 @@
     </Observations>
     <Spawners>
         <Spawner>
-            <Library>SpawnPointScenario</Library>
+            <Library>SpawnerScenario</Library>
             <Type>PreRun</Type>
             <Priority>1</Priority>
         </Spawner>

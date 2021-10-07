@@ -40,11 +40,11 @@ namespace openpass::scheduling {
 class TaskBuilderInterface
 {
 public:
-    virtual std::list<TaskItem> CreateBootstrapTasks() = 0;
-    virtual std::list<TaskItem> CreateSpawningTasks() = 0;
-    virtual std::list<TaskItem> CreateSynchronizeTasks() = 0;
-    virtual std::list<TaskItem> CreateFinalizeTasks() = 0;
-    virtual std::list<TaskItem> CreatePreAgentTasks() = 0;
+    virtual std::vector<TaskItem> CreateBootstrapTasks() = 0;
+    virtual std::vector<TaskItem> CreateSpawningTasks() = 0;
+    virtual std::vector<TaskItem> CreateSynchronizeTasks() = 0;
+    virtual std::vector<TaskItem> CreateFinalizeTasks() = 0;
+    virtual std::vector<TaskItem> CreatePreAgentTasks() = 0;
 };
 
 //-----------------------------------------------------------------------------
@@ -69,8 +69,8 @@ private:
     SimulationSlave::ManipulatorNetworkInterface *const manipulatorNetwork;
     DataBufferInterface *const dataInterface;
 
-    std::list<TaskItem> eventDetectorTasks;
-    std::list<TaskItem> manipulatorTasks;
+    std::vector<TaskItem> eventDetectorTasks;
+    std::vector<TaskItem> manipulatorTasks;
 
     /*!
     * \brief BuildEventDetectorTasks
@@ -109,7 +109,7 @@ public:
     *
     * @return	tasks   final tasks of bootstrap phase
     */
-    std::list<TaskItem> CreateBootstrapTasks() override;
+    std::vector<TaskItem> CreateBootstrapTasks() override;
 
     /*!
     * \brief CreateCommonTasks
@@ -119,9 +119,9 @@ public:
     *
     * @return	tasks   final tasks of common phase
     */
-    std::list<TaskItem> CreateSpawningTasks() override;
+    std::vector<TaskItem> CreateSpawningTasks() override;
 
-    std::list<TaskItem> CreatePreAgentTasks() override;
+    std::vector<TaskItem> CreatePreAgentTasks() override;
 
     /*!
     * \brief CreateFinalizeRecurringTasks
@@ -131,7 +131,7 @@ public:
     *
     * @return	tasks   final tasks of finalizeRecurring phase
     */
-    std::list<TaskItem> CreateSynchronizeTasks() override;
+    std::vector<TaskItem> CreateSynchronizeTasks() override;
 
     /*!
     * \brief CreateFinalizeTasks
@@ -141,7 +141,7 @@ public:
     *
     * @return	tasks   final tasks of finalize phase
     */
-    std::list<TaskItem> CreateFinalizeTasks() override;
+    std::vector<TaskItem> CreateFinalizeTasks() override;
 };
 
 } // namespace openpass::scheduling

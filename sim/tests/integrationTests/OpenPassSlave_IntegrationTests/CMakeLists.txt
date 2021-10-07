@@ -137,6 +137,7 @@ add_openpass_target(
   LIBRARIES
     Qt5::Core
     Qt5::Xml
+    Qt5::XmlPatterns
     Common
     CoreCommon
 

@@ -71,12 +71,12 @@ public:
         return implementation->GetTrafficObjects();
     }
 
-    const std::list<const AgentInterface*>& GetRemovedAgents() const override
+    const AgentInterfaces& GetRemovedAgents() const override
     {
         return implementation->GetRemovedAgents();
     }
 
-    const std::list<const AgentInterface*> GetRemovedAgentsInPreviousTimestep() override
+    const AgentInterfaces GetRemovedAgentsInPreviousTimestep() override
     {
         return implementation->GetRemovedAgentsInPreviousTimestep();
     }
@@ -167,7 +167,7 @@ public:
         return implementation->GetEgoAgent();
     }
 
-    RouteQueryResult<std::vector<const AgentInterface*>> GetAgentsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance,
+    RouteQueryResult<AgentInterfaces> GetAgentsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance,
                                                                        double backwardRange, double forwardRange) const override
     {
         return implementation->GetAgentsInRange(roadGraph, startNode, laneId, startDistance, backwardRange, forwardRange);
@@ -179,7 +179,7 @@ public:
         return implementation->GetObjectsInRange(roadGraph, startNode, laneId, startDistance, backwardRange, forwardRange);
     }
 
-    std::vector<const AgentInterface*> GetAgentsInRangeOfJunctionConnection(std::string connectingRoadId, double range) const override
+    AgentInterfaces GetAgentsInRangeOfJunctionConnection(std::string connectingRoadId, double range) const override
     {
         return implementation->GetAgentsInRangeOfJunctionConnection(connectingRoadId, range);
     }
@@ -199,7 +199,7 @@ public:
         return implementation->LaneCoord2WorldCoord(distance, offset, roadId, laneId);
     }
 
-    std::map<std::string, GlobalRoadPosition> WorldCoord2LaneCoord(double x, double y, double heading) const override
+    GlobalRoadPositions WorldCoord2LaneCoord(double x, double y, double heading) const override
     {
         return implementation->WorldCoord2LaneCoord(x, y, heading);
     }
@@ -348,7 +348,7 @@ public:
         return implementation->GetRelativeLanes(roadGraph, startNode, laneId, distance, range, includeOncoming);
     }
 
-    RouteQueryResult<std::optional<int>> GetRelativeLaneId(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, std::map<std::string, GlobalRoadPosition> targetPosition) const override
+    RouteQueryResult<std::optional<int>> GetRelativeLaneId(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, GlobalRoadPositions targetPosition) const override
     {
         return implementation->GetRelativeLaneId(roadGraph, startNode, laneId, distance, targetPosition);
     }

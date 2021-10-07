@@ -127,7 +127,7 @@ TEST(RunStatisticCalculation_Test, DetermineEgoCollisionWithEgoCollision_SetsEgo
 
     NiceMock<FakeRunResult> runResult;
 
-    std::list<int> collisionIds{ {0, 1} };
+    std::vector<int> collisionIds{ {0, 1} };
     ON_CALL(runResult, GetCollisionIds()).WillByDefault(Return(&collisionIds));
 
     RunStatistic runStatistic{0};
@@ -148,7 +148,7 @@ TEST(RunStatisticCalculation_Test, DetermineEgoCollisionWithoutEgoCollision_Sets
 
     NiceMock<FakeRunResult> runResult;
 
-    std::list<int> collisionIds{ {1, 2, 3} };
+    std::vector<int> collisionIds{ {1, 2, 3} };
     ON_CALL(runResult, GetCollisionIds()).WillByDefault(Return(&collisionIds));
 
     RunStatistic runStatistic{0};

@@ -6,7 +6,7 @@
 class FakeRunResult : public RunResultInterface {
  public:
     MOCK_METHOD0(SetEndCondition, void());
-    MOCK_CONST_METHOD0(GetCollisionIds, const std::list<int>*());
+    MOCK_CONST_METHOD0(GetCollisionIds, const std::vector<int>*());
     MOCK_CONST_METHOD0(GetPositions, const std::map<const AgentInterface*, std::tuple<double, double>>*());
     MOCK_CONST_METHOD0(GetVelocities, const std::map<const AgentInterface*, std::tuple<double, double>>*());
     MOCK_CONST_METHOD0(GetYaws, const std::map<const AgentInterface*, double>*());

@@ -35,17 +35,17 @@ TEST(GeometryConverter_UnitTests, CalculateJointOnlyRightLanes)
 
     FakeRoadLaneSection section;
     FakeOdRoad road;
-    std::list<RoadLaneOffset *> laneOffsets;
+    std::vector<RoadLaneOffset *> laneOffsets;
     ON_CALL(road, GetLaneOffsets()).WillByDefault(ReturnRef(laneOffsets));
 
     FakeRoadLane lane0;
     FakeRoadLane laneMinus1;
     FakeRoadLane laneMinus2;
     RoadLaneWidth widthMinus1{0, 3.0, 0.0, 0.0, 0.0};
-    std::list<RoadLaneWidth*> widthsMinus1{&widthMinus1};
+    RoadLaneWidths widthsMinus1{&widthMinus1};
     ON_CALL(laneMinus1, GetWidths()).WillByDefault(ReturnRef(widthsMinus1));
     RoadLaneWidth widthMinus2{0, 4.0, 0.0, 0.0, 0.0};
-    std::list<RoadLaneWidth*> widthsMinus2{&widthMinus2};
+    RoadLaneWidths widthsMinus2{&widthMinus2};
     ON_CALL(laneMinus2, GetWidths()).WillByDefault(ReturnRef(widthsMinus2));
     std::map<int, RoadLaneInterface*> lanes{{0, &lane0}, {-1, &laneMinus1}, {-2, &laneMinus2}};
     ON_CALL(section, GetLanes()).WillByDefault(ReturnRef(lanes));
@@ -73,21 +73,21 @@ TEST(GeometryConverter_UnitTests, CalculateJointOnlyRightLanesWithBorders)
 
     FakeRoadLaneSection section;
     FakeOdRoad road;
-    std::list<RoadLaneOffset *> laneOffsets;
+    std::vector<RoadLaneOffset *> laneOffsets;
     ON_CALL(road, GetLaneOffsets()).WillByDefault(ReturnRef(laneOffsets));
 
     FakeRoadLane lane0;
     FakeRoadLane laneMinus1;
     FakeRoadLane laneMinus2;
 
-    std::list<RoadLaneWidth*> emptyWidths {};
+    RoadLaneWidths emptyWidths {};
     RoadLaneWidth widthMinus1{0, 3.0, 0.0, 0.0, 0.0};
-    std::list<RoadLaneWidth*> widthsMinus1{&widthMinus1};
+    RoadLaneWidths widthsMinus1{&widthMinus1};
     ON_CALL(laneMinus1, GetWidths()).WillByDefault(ReturnRef(emptyWidths));
     ON_CALL(laneMinus1, GetBorders()).WillByDefault(ReturnRef(widthsMinus1));
     RoadLaneWidth widthMinus2{0, 7.0, 0.0, 0.0, 0.0};
 
-    std::list<RoadLaneWidth*> widthsMinus2{&widthMinus2};
+    RoadLaneWidths widthsMinus2{&widthMinus2};
     ON_CALL(laneMinus2, GetWidths()).WillByDefault(ReturnRef(emptyWidths));
     ON_CALL(laneMinus2, GetBorders()).WillByDefault(ReturnRef(widthsMinus2));
     std::map<int, RoadLaneInterface*> lanes{{0, &lane0}, {-1, &laneMinus1}, {-2, &laneMinus2}};
@@ -116,17 +116,17 @@ TEST(GeometryConverter_UnitTests, CalculateJointOnlyLeftLanes)
 
     FakeRoadLaneSection section;
     FakeOdRoad road;
-    std::list<RoadLaneOffset *> laneOffsets;
+    std::vector<RoadLaneOffset *> laneOffsets;
     ON_CALL(road, GetLaneOffsets()).WillByDefault(ReturnRef(laneOffsets));
 
     FakeRoadLane lane0;
     FakeRoadLane lanePlus1;
     FakeRoadLane lanePlus2;
     RoadLaneWidth widthPlus1{0, 3.0, 0.0, 0.0, 0.0};
-    std::list<RoadLaneWidth*> widthsPlus1{&widthPlus1};
+    RoadLaneWidths widthsPlus1{&widthPlus1};
     ON_CALL(lanePlus1, GetWidths()).WillByDefault(ReturnRef(widthsPlus1));
     RoadLaneWidth widthPlus2{0, 4.0, 0.0, 0.0, 0.0};
-    std::list<RoadLaneWidth*> widthsPlus2{&widthPlus2};
+    RoadLaneWidths widthsPlus2{&widthPlus2};
     ON_CALL(lanePlus2, GetWidths()).WillByDefault(ReturnRef(widthsPlus2));
     std::map<int, RoadLaneInterface*> lanes{{0, &lane0}, {1, &lanePlus1}, {2, &lanePlus2}};
     ON_CALL(section, GetLanes()).WillByDefault(ReturnRef(lanes));
@@ -154,17 +154,17 @@ TEST(GeometryConverter_UnitTests, CalculateJointLeftAndRightLanes)
 
     FakeRoadLaneSection section;
     FakeOdRoad road;
-    std::list<RoadLaneOffset *> laneOffsets;
+    std::vector<RoadLaneOffset *> laneOffsets;
     ON_CALL(road, GetLaneOffsets()).WillByDefault(ReturnRef(laneOffsets));
 
     FakeRoadLane lane0;
     FakeRoadLane lanePlus1;
     FakeRoadLane laneMinus1;
     RoadLaneWidth widthMinus1{0, 3.0, 0.0, 0.0, 0.0};
-    std::list<RoadLaneWidth*> widthsMinus1{&widthMinus1};
+    RoadLaneWidths widthsMinus1{&widthMinus1};
     ON_CALL(laneMinus1, GetWidths()).WillByDefault(ReturnRef(widthsMinus1));
     RoadLaneWidth widthPlus1{0, 4.0, 0.0, 0.0, 0.0};
-    std::list<RoadLaneWidth*> widthsPlus1{&widthPlus1};
+    RoadLaneWidths widthsPlus1{&widthPlus1};
     ON_CALL(lanePlus1, GetWidths()).WillByDefault(ReturnRef(widthsPlus1));
     std::map<int, RoadLaneInterface*> lanes{{0, &lane0}, {-1, &laneMinus1}, {1, &lanePlus1}};
     ON_CALL(section, GetLanes()).WillByDefault(ReturnRef(lanes));

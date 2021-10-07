@@ -499,7 +499,7 @@ bool SceneryConverter::ConnectExternalRoadSuccessor(const RoadInterface *current
     for (auto &laneEntry : currentSection->GetLanes())
     {
         RoadLaneInterface *lane = laneEntry.second;
-        std::list<int> successorLaneId = lane->GetSuccessor();
+        auto successorLaneId = lane->GetSuccessor();
         if (successorLaneId.size() == 1)
         {
             try
@@ -526,7 +526,7 @@ bool SceneryConverter::ConnectExternalRoadPredecessor(const RoadInterface *curre
     for (auto &laneEntry : currentSection->GetLanes())
     {
         RoadLaneInterface *lane = laneEntry.second;
-        std::list<int> predecessorLaneId = lane->GetPredecessor();
+        auto predecessorLaneId = lane->GetPredecessor();
         if (predecessorLaneId.size() == 1)
         {
             try
@@ -874,7 +874,7 @@ void SceneryConverter::CreateRoadSignals()
     {
         RoadInterface *road = item.second;
 
-        std::vector<std::pair<RoadSignalInterface *, std::list<std::string>>> dependentSignals;
+        std::vector<std::pair<RoadSignalInterface *, std::vector<std::string>>> dependentSignals;
 
         for (RoadSignalInterface *signal : road->GetRoadSignals())
         {
@@ -1128,7 +1128,7 @@ std::pair<RoadGraph, RoadGraphVertexMapping> RoadNetworkBuilder::Build()
                         }
                         if (hasLeftLanes)
                         {
-                            add_edge(vertices[{successorId, false}], vertices[{roadId, true}], roadGraph);
+                            add_edge(vertices[{successorId, true}], vertices[{roadId, false}], roadGraph);
                         }
                     }
                 }
@@ -1139,7 +1139,7 @@ std::pair<RoadGraph, RoadGraphVertexMapping> RoadNetworkBuilder::Build()
                     {
                         if (hasRightLanes)
                         {
-                            add_edge(vertices[{predecessorId, true}], vertices[{roadId, false}], roadGraph);
+                            add_edge(vertices[{predecessorId, false}], vertices[{roadId, true}], roadGraph);
                         }
                         if (hasLeftLanes)
                         {

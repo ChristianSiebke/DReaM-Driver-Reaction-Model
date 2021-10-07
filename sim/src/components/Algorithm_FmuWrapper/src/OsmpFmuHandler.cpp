@@ -299,7 +299,7 @@ void OsmpFmuHandler::UpdateInput(int localLinkId, const std::shared_ptr<const Si
             LOGERRORANDTHROW(log_prefix(agentIdString) + "AlgorithmFmuHandler invalid signaltype")
         }
 
-        sensorData = signal->sensorData;
+        sensorDataIn = signal->sensorData;
     }
 #ifdef USE_EXTENDED_OSI
     trafficCommands.try_emplace(time, std::make_unique<osi3::TrafficCommand>());
@@ -372,7 +372,7 @@ void OsmpFmuHandler::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterfa
 
     if (localLinkId == 6)
     {
-        data = std::make_shared<SensorDataSignal const>(sensorData);
+        data = std::make_shared<SensorDataSignal const>(sensorDataOut);
     }
 #ifdef USE_EXTENDED_OSI
     else if (localLinkId == 0)
@@ -532,15 +532,15 @@ void OsmpFmuHandler::PreStep(int time)
     }
     if (sensorDataInVariable)
     {
-        SetSensorDataInput(sensorData);
+        SetSensorDataInput(sensorDataIn);
         if (writeSensorData)
         {
-            WriteJson(sensorData, "SensorData-" + QString::number(time) + ".json");
+            WriteJson(sensorDataIn, "SensorDataIn-" + QString::number(time) + ".json");
         }
         if (writeTraceSensorData)
         {
-            AppendMessages(appendedSerializedSensorData, serializedSensorData);
-            WriteBinaryTrace(appendedSerializedSensorData, "SensorData", time);
+            AppendMessages(appendedSerializedSensorDataIn, serializedSensorDataIn);
+            WriteBinaryTrace(appendedSerializedSensorDataIn, "SensorDataIn", time);
         }
     }
 #ifdef USE_EXTENDED_OSI
@@ -560,8 +560,8 @@ void OsmpFmuHandler::PreStep(int time)
     if (vehicleCommunicationDataVariable)
     {
         auto hostVehicleData = vehicleCommunicationData.mutable_host_vehicle_data();
-        hostVehicleData->mutable_location()->CopyFrom(sensorData.host_vehicle_location());
-        hostVehicleData->mutable_location_rmse()->CopyFrom(sensorData.host_vehicle_location_rmse());
+        hostVehicleData->mutable_location()->CopyFrom(sensorDataIn.host_vehicle_location());
+        hostVehicleData->mutable_location_rmse()->CopyFrom(sensorDataIn.host_vehicle_location_rmse());
 
         SetVehicleCommunicationDataInput(vehicleCommunicationData);
         if (writeVehicleCommunicationData)
@@ -584,12 +584,13 @@ void OsmpFmuHandler::PostStep(int time)
         GetSensorData();
         if (writeSensorData)
         {
-            WriteJson(sensorData, "SensorData-" + QString::number(time) + ".json");
+            WriteJson(sensorDataOut, "SensorDataOut-" + QString::number(time) + ".json");
         }
         if (writeTraceSensorData)
         {
-            AppendMessages(appendedSerializedSensorData, serializedSensorData);
-            WriteBinaryTrace(appendedSerializedSensorData, "SensorData", time);
+            std::string serializedSensorDataOut{static_cast<const char*>(previousSensorDataOut), GetValue(fmuVariables.at(sensorDataOutVariable.value()+".size").first, VariableType::Int).intValue};
+            AppendMessages(appendedSerializedSensorDataOut, serializedSensorDataOut);
+            WriteBinaryTrace(appendedSerializedSensorDataOut, "SensorDataOut", time);
         }
     }
 #ifdef USE_EXTENDED_OSI
@@ -642,17 +643,17 @@ void OsmpFmuHandler::SetSensorViewInput(const osi3::SensorView& data)
 
 void OsmpFmuHandler::SetSensorDataInput(const osi3::SensorData& data)
 {
-    std::swap(serializedSensorData, previousSerializedSensorData);
+    std::swap(serializedSensorDataIn, previousSerializedSensorDataIn);
     fmi2_integer_t fmuInputValues[3];
     fmi2_value_reference_t valueReferences[3] = {fmuVariables.at(sensorDataInVariable.value()+".base.lo").first,
                                                  fmuVariables.at(sensorDataInVariable.value()+".base.hi").first,
                                                  fmuVariables.at(sensorDataInVariable.value()+".size").first};
 
-    data.SerializeToString(&serializedSensorData);
-    encode_pointer_to_integer(serializedSensorData.data(),
+    data.SerializeToString(&serializedSensorDataIn);
+    encode_pointer_to_integer(serializedSensorDataIn.data(),
                               fmuInputValues[1],
                               fmuInputValues[0]);
-    fmuInputValues[2] = serializedSensorData.length();
+    fmuInputValues[2] = serializedSensorDataIn.length();
 
     fmi2_import_set_integer(cdata->fmu2,
                             valueReferences,     // array of value reference
@@ -665,15 +666,15 @@ void OsmpFmuHandler::GetSensorData()
     void* buffer = decode_integer_to_pointer(GetValue(fmuVariables.at(sensorDataOutVariable.value()+".base.hi").first, VariableType::Int).intValue,
                                              GetValue(fmuVariables.at(sensorDataOutVariable.value()+".base.lo").first, VariableType::Int).intValue);
 
-    if (enforceDoubleBuffering && buffer != nullptr && buffer == previousSensorData)
+    if (enforceDoubleBuffering && buffer != nullptr && buffer == previousSensorDataOut)
     {
         const std::string msg = "FMU has no double buffering";
         LOGERROR(log_prefix(agentIdString) + msg);
         throw std::runtime_error(msg);
     }
 
-    previousSensorData = buffer;
-    sensorData.ParseFromArray(buffer, GetValue(fmuVariables.at(sensorDataOutVariable.value()+".size").first, VariableType::Int).intValue);
+    previousSensorDataOut = buffer;
+    sensorDataOut.ParseFromArray(buffer, GetValue(fmuVariables.at(sensorDataOutVariable.value()+".size").first, VariableType::Int).intValue);
 }
 
 #ifdef USE_EXTENDED_OSI

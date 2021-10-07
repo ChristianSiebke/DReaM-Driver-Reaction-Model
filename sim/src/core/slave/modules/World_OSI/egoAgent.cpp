@@ -49,17 +49,12 @@ void EgoAgent::UpdatePositionInGraph()
         return;
     }
     auto roadIds = GetAgent()->GetRoads(MeasurementPoint::Front);
-    if (std::find(roadIds.cbegin(), roadIds.cend(), GetRoadId()) == roadIds.end())
+    while (std::find(roadIds.cbegin(), roadIds.cend(), GetRoadId()) == roadIds.end())
     {
         if (rootOfWayToTargetGraph > 0)
         {
             rootOfWayToTargetGraph--;
             auto routeElement = get(RouteElement(), wayToTarget, rootOfWayToTargetGraph);
-            if (std::find(roadIds.cbegin(), roadIds.cend(), routeElement.roadId) == roadIds.end())
-            {
-                graphValid = false;
-                return;
-            }
             auto [successorBegin, successorsEnd] = adjacent_vertices(current, roadGraph);
                     auto successor = std::find_if(successorBegin, successorsEnd, [&](const auto& vertex){return get(RouteElement(), roadGraph, vertex) == routeElement;});
             if (successor == successorsEnd)
@@ -68,10 +63,15 @@ void EgoAgent::UpdatePositionInGraph()
                 return;
             }
             current = *successor;
+            if (std::find(roadIds.cbegin(), roadIds.cend(), routeElement.roadId) == roadIds.end())
+            {
+                continue;
+            }
         }
         else
         {
             graphValid = false;
+            return;
         }
     }
 }
@@ -162,7 +162,7 @@ RelativeWorldView::Lanes EgoAgent::GetRelativeLanes(double range, int relativeLa
 
 std::optional<int> EgoAgent::GetRelativeLaneId(const WorldObjectInterface *object, MeasurementPoint mp) const
 {
-    std::map<std::string, GlobalRoadPosition> objectPosition;
+    GlobalRoadPositions objectPosition;
     if (mp == MeasurementPoint::Front)
     {
         objectPosition = object->GetObjectPosition().mainLocatePoint;
@@ -201,7 +201,7 @@ std::vector<const WorldObjectInterface*> EgoAgent::GetObjectsInRange(double back
     return objectsInRange;
 }
 
-std::vector<const AgentInterface*> EgoAgent::GetAgentsInRange(double backwardRange, double forwardRange, int relativeLane) const
+AgentInterfaces EgoAgent::GetAgentsInRange(double backwardRange, double forwardRange, int relativeLane) const
 {
     auto agentsInRange =  world->GetAgentsInRange(wayToTarget,
                                                   rootOfWayToTargetGraph,
@@ -339,12 +339,12 @@ std::optional<double> EgoAgent::GetLaneCurvature(double distance, int relativeLa
 
 double EgoAgent::GetLaneDirection(int relativeLane) const
 {
-    return world->GetLaneWidth(GetRoadId(), GetLaneIdFromRelative(relativeLane), GetMainLocatePosition().roadPosition.s);
+    return world->GetLaneDirection(GetRoadId(), GetLaneIdFromRelative(relativeLane), GetMainLocatePosition().roadPosition.s);
 }
 
 std::optional<double> EgoAgent::GetLaneDirection(double distance, int relativeLane) const
 {
-    return world->GetLaneWidth(wayToTarget, rootOfWayToTargetGraph, GetLaneIdFromRelative(relativeLane), GetMainLocatePosition().roadPosition.s, distance).at(0);
+    return world->GetLaneDirection(wayToTarget, rootOfWayToTargetGraph, GetLaneIdFromRelative(relativeLane), GetMainLocatePosition().roadPosition.s, distance).at(0);
 }
 
 const GlobalRoadPosition& EgoAgent::GetMainLocatePosition() const

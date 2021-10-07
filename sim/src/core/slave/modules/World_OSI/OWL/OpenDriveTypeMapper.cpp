@@ -221,7 +221,7 @@ LaneMarking::Color OpenDriveTypeMapper::OsiToOdLaneMarkingColor(const osi3::Lane
     case osi3::LaneBoundary_Classification_Color::LaneBoundary_Classification_Color_COLOR_OTHER:
         return LaneMarking::Color::Other;
     default:
-        std::invalid_argument("Type of lane marking color not supported.");
+        throw std::invalid_argument("Type of lane marking color not supported.");
     }
 }
 

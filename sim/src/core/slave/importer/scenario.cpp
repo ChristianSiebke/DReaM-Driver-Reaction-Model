@@ -68,7 +68,7 @@ void Scenario::AddScenarioEntity(const ScenarioEntity& entity)
     entities.push_back(entity);
 }
 
-void Scenario::AddScenarioGroupsByEntityNames(const std::map<std::string, std::list<std::string>> &groupDefinitions)
+void Scenario::AddScenarioGroupsByEntityNames(const std::map<std::string, std::vector<std::string>> &groupDefinitions)
 {
     std::vector<ScenarioEntity*> groupEntities;
     for (auto groupDefinition : groupDefinitions)

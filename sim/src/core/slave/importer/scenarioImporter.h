@@ -169,7 +169,7 @@ private:
      * \param[out]  entities        Entity element data is imported into this container
      * \param[in]   parameters      declared parameters
      */
-    static void ImportEntities(QDomElement& documentRoot, std::vector<ScenarioEntity>& entities, std::map<std::string, std::list<std::string> > &groups, openScenario::Parameters& parameters);
+    static void ImportEntities(QDomElement& documentRoot, std::vector<ScenarioEntity>& entities, std::map<std::string, std::vector<std::string> > &groups, openScenario::Parameters& parameters);
 
     /*!
      * \brief Imports a group definition of a OpenSCENARIO Selection DOM
@@ -178,7 +178,7 @@ private:
      * \param[out]  groups 				Groups element data is imported into this container
      * \param[in]   parameters      declared parameters
      */
-    static void ImportSelectionElements(QDomElement &entitiesElement, std::map<std::string, std::list<std::string>> &groups, openScenario::Parameters& parameters);
+    static void ImportSelectionElements(QDomElement &entitiesElement, std::map<std::string, std::vector<std::string> > &groups, openScenario::Parameters& parameters);
 
     /*!
      * \brief Imports a list of members of a OpenSCENARIO Members DOM
@@ -186,7 +186,7 @@ private:
      * \param[in]   membersElement  The DOM root of the members element
      * \param[out]  members			Members element data is imported into this container
      */
-    static void ImportMembers(const QDomElement &membersElement, std::list<std::string> &members, openScenario::Parameters& parameters);
+    static void ImportMembers(const QDomElement &membersElement, std::vector<std::string> &members, openScenario::Parameters& parameters);
 
     /*!
      * \brief Imports a catalog reference of an entity of a OpenSCENARIO Entities DOM
@@ -300,7 +300,7 @@ private:
      * \param[in]   entities    Entities to check for being Ego or of other type
      * \param[out]  scenario    Ego and Scenario entities are added to this scenario
      */
-    static void CategorizeEntities(const std::vector<ScenarioEntity>& entities, const std::map<std::string, std::list<std::string> > &groups, ScenarioInterface* scenario);
+    static void CategorizeEntities(const std::vector<ScenarioEntity>& entities, const std::map<std::string, std::vector<std::string> > &groups, ScenarioInterface* scenario);
 
     /*!
      * \brief Imports an openScenario Lane-Position element
