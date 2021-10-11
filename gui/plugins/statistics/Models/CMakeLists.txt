@@ -1,5 +1,6 @@
 # /*********************************************************************
 # * Copyright (c) 2020 ITK Engineering GmbH
+# * Copyright (c) 2021 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -12,16 +13,11 @@ include_directories(../../../common)
 
 set(SOURCES
         ModelStatistics.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/Histogram.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/RowHistograms.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/TableModel.cpp
    )
 
 set(HEADERS
         ModelStatistics.h
-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/Histogram.h
-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/RowHistograms.h
-        ${CMAKE_CURRENT_LIST_DIR}/../../../common/TableModel.h
     )
 
 add_library(${PROJECT_NAME}_Models STATIC ${SOURCES} ${HEADERS})
+target_link_libraries(${PROJECT_NAME}_Models PRIVATE Gui_Common)

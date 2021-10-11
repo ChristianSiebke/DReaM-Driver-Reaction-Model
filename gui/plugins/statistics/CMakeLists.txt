@@ -1,5 +1,6 @@
 # /*********************************************************************
 # * Copyright (c) 2020 ITK Engineering GmbH
+# * Copyright (c) 2021 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -31,31 +32,24 @@ include_directories(../../common)
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 
 # include interfaces, models and views
-add_subdirectory(Interfaces)
 add_subdirectory(Models)
 add_subdirectory(Presenters)
 add_subdirectory(Views)
 
-# include headers and sources of this plugin
-set(SOURCES PluginStatistics.cpp)
-set(HEADERS PluginStatistics.h)
+add_openpass_target(
+    NAME Statistics TYPE library LINKAGE shared COMPONENT gui
 
-# declare target library
-add_library(Statistics SHARED ${SOURCES} ${HEADERS} )
+    HEADERS
+        PluginStatistics.h
 
-# link with Qt libraries, models, views and Interfaces
-target_link_libraries(Statistics PRIVATE
-                      Qt5::Widgets
-                      Window
-                      ${PROJECT_NAME}_Models
-                      ${PROJECT_NAME}_Views
-                      ${PROJECT_NAME}_Interfaces
-                      ${PROJECT_NAME}_Presenters)
+    SOURCES
+        PluginStatistics.cpp
 
-if(WIN32)
-        install(TARGETS Statistics
-                RUNTIME DESTINATION ${SUBDIR_LIB_GUI}) 
-elseif(UNIX)
-        install(TARGETS Statistics
-                LIBRARY DESTINATION ${SUBDIR_LIB_GUI}) 
-endif()
+    LIBRARIES
+        Qt5::Widgets
+        Window
+        ${PROJECT_NAME}_Models
+        ${PROJECT_NAME}_Views
+        #${PROJECT_NAME}_Interfaces
+        ${PROJECT_NAME}_Presenters
+)

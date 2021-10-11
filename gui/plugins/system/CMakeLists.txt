@@ -1,5 +1,6 @@
 # /*********************************************************************
 # * Copyright (c) 2019 Volkswagen Group of America.
+# * Copyright (c) 2021 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -32,32 +33,40 @@ include_directories(../../application/Interfaces)
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 
 # include interfaces, models and views
-add_subdirectory(Interfaces)
 add_subdirectory(Models)
 add_subdirectory(Views)
 
-# include headers and sources of this plugin
-set(SOURCES SystemPlugin.cpp)
-set(HEADERS SystemPlugin.h)
 qt5_add_resources(openPASS-System.qrc)
 
-# declare target library
-add_library(System SHARED ${SOURCES} ${HEADERS} )
+add_openpass_target(
+    NAME System TYPE library LINKAGE shared COMPONENT gui
 
-# link with Qt libraries, models, views and Interfaces
-target_link_libraries(System PRIVATE
-                      Qt5::Widgets
-                      Window
-                      Component
-                      Project
-                      ${PROJECT_NAME}_Models
-                      ${PROJECT_NAME}_Views
-                      ${PROJECT_NAME}_Interfaces)
+    HEADERS
+        Interfaces/openPASS-System/SystemComponentInputItemInterface.h
+        Interfaces/openPASS-System/SystemComponentInputMapInterface.h
+        Interfaces/openPASS-System/SystemComponentItemInterface.h
+        Interfaces/openPASS-System/SystemComponentManagerInterface.h
+        Interfaces/openPASS-System/SystemComponentMapInterface.h
+        Interfaces/openPASS-System/SystemComponentOutputItemInterface.h
+        Interfaces/openPASS-System/SystemComponentOutputMapInterface.h
+        Interfaces/openPASS-System/SystemComponentParameterItemInterface.h
+        Interfaces/openPASS-System/SystemComponentParameterMapInterface.h
+        Interfaces/openPASS-System/SystemComponentScheduleInterface.h
+        Interfaces/openPASS-System/SystemConnectionMapInterface.h
+        Interfaces/openPASS-System/SystemConnectionItemInterface.h
+        Interfaces/openPASS-System/SystemInterface.h
+        Interfaces/openPASS-System/SystemItemInterface.h
+        Interfaces/openPASS-System/SystemMapInterface.h 
+        SystemPlugin.h
 
-if(WIN32)
-        install(TARGETS System
-                RUNTIME DESTINATION ${SUBDIR_LIB_GUI}) 
-elseif(UNIX)
-        install(TARGETS System
-                LIBRARY DESTINATION ${SUBDIR_LIB_GUI}) 
-endif()
+    SOURCES
+        SystemPlugin.cpp
+
+    LIBRARIES
+        Qt5::Widgets
+        Window
+        Component
+        Project
+        ${PROJECT_NAME}_Models
+        ${PROJECT_NAME}_Views
+)
