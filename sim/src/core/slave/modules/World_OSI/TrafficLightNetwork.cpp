@@ -51,8 +51,8 @@ void TrafficLightController::UpdateStates(int time)
 TrafficLightController::TrafficLightController(std::vector<TrafficLightController::Phase> &&phases, double delay) :
     phases(phases),
     currentPhase(this->phases.begin()),
-    timeRemainingInCurrentPhase(currentPhase->duration),
-    lastTime(-delay)
+    timeRemainingInCurrentPhase(currentPhase->duration + delay),
+    lastTime(0)
 {
     for (auto [trafficLight, newState] : currentPhase->states)
     {
