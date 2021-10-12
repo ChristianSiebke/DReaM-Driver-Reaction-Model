@@ -1,5 +1,6 @@
 # /*********************************************************************
 # * Copyright (c) 2021 ITK Engineering GmbH
+# * Copyright (c) 2021 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -9,20 +10,19 @@
 # **********************************************************************/
 
 set(SOURCES
-        ViewPcm_Eval.cpp
-        TrajectoryGraphicsItem.cpp
-        TrafficScene.cpp
-    )
+    ViewPcm_Eval.cpp
+    TrajectoryGraphicsItem.cpp
+    TrafficScene.cpp
+)
 
 set(HEADERS
-        ViewPcm_Eval.h
-        TrajectoryGraphicsItem.h
-        TrafficScene.h
-    )
+    ViewPcm_Eval.h
+    TrajectoryGraphicsItem.h
+    TrafficScene.h
+)
 
 set(UI
-        ViewPcm_Eval.ui
-    )
+    ViewPcm_Eval.ui
+)
 
 add_library(${PROJECT_NAME}_Views STATIC ${SOURCES} ${HEADERS} ${UI})
-target_link_libraries(${PROJECT_NAME}_Models PRIVATE Qt5::Widgets)

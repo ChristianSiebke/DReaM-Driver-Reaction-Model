@@ -21,6 +21,7 @@ RUN apt-get -qq update && apt-get -qq dist-upgrade && apt-get install -qq -y --n
     libgmock-dev \
     libgtest-dev \
     libprotobuf-dev \
+    libqt5xmlpatterns5-dev \
     protobuf-compiler \
     python3 \
     python3-distutils \
