@@ -1,5 +1,6 @@
 # /*********************************************************************
 # * Copyright (c) 2021 ITK Engineering GmbH
+# * Copyright (c) 2021 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -18,4 +19,4 @@ set(HEADERS
 		XoscTrajectory.h
     )
 
-target_sources(${PROJECT_NAME}_Models PRIVATE ${SOURCES} ${HEADERS})
+add_library(DataStructuresXosc STATIC ${SOURCES} ${HEADERS})

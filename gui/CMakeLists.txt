@@ -1,6 +1,7 @@
 # /*********************************************************************
 # * Copyright (c) 2019 Volkswagen Group of America.
 # * Copyright (c) 2020, 2021 ITK Engineering GmbH.
+# * Copyright (c) 2021 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -15,6 +16,7 @@ cmake_minimum_required(VERSION 3.14)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_subdirectory(application)
+add_subdirectory(common)
 #add_subdirectory(plugins/agentConfiguration)
 add_subdirectory(plugins/component)
 add_subdirectory(plugins/pcmEvaluation)

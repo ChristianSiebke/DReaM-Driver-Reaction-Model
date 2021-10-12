@@ -1,6 +1,8 @@
 # /*********************************************************************
 # * Copyright (c) 2019 Volkswagen Group of America.
 # * Copyright (c) 2021 ITK Engineering GmbH.
+# * Copyright (c) 2021 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+# *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
 # * which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -31,22 +33,26 @@ include_directories(Interfaces)
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 
 # include interfaces, models and views
-add_subdirectory(Interfaces)
 add_subdirectory(Models)
 
-# include sources and headers
-set(SOURCES openPASS.cpp)
 set(RC_ICONS openPASS.rc)
 
+add_openpass_target(
+    NAME openPASS TYPE executable COMPONENT gui
 
-# declare target library
-add_executable(openPASS WIN32 ${SOURCES} ${RC_ICONS})
+    HEADERS
+        Interfaces/openPASS/PluginInterface.h
+        Interfaces/openPASS/PluginManagerInterface.h
+        Interfaces/openPASS/RandomInterface.h
+        Interfaces/openPASS/ServiceInterface.h
+        Interfaces/openPASS/ServiceManagerInterface.h
+        Interfaces/openPASS/ioplugininterface.h
 
-# link with Qt libraries, models, views and Interfaces
-target_link_libraries(openPASS PRIVATE
-                      Qt5::Widgets
-                      ${PROJECT_NAME}_Models
-                      ${PROJECT_NAME}_Interfaces)
+    SOURCES
+        openPASS.cpp
+        ${RC_ICONS}
 
-install(TARGETS openPASS
-        RUNTIME DESTINATION ${INSTALL_BIN_DIR})
+    LIBRARIES
+        Qt5::Widgets
+        ${PROJECT_NAME}_Models
+)

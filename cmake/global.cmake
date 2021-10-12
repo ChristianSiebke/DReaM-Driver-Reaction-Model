@@ -14,7 +14,7 @@
 #
 
 option(WITH_SIMCORE "Build OSI based scenario simulation" ON)
-option(WITH_GUI "Build GUI" OFF)
+option(WITH_GUI "Build GUI" ON)
 option(WITH_TESTS "Build unit tests" ON)
 option(WITH_DOC "Build documentation" ON)
 option(WITH_API_DOC "Build API documentation (takes pretty long)" OFF)
