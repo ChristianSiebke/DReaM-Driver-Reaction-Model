@@ -14,7 +14,7 @@
 #
 
 option(WITH_SIMCORE "Build OSI based scenario simulation" ON)
-option(WITH_GUI "Build GUI" OFF)
+option(WITH_GUI "Build GUI" ON)
 option(WITH_TESTS "Build unit tests" ON)
 option(WITH_ENDTOEND_TESTS "Create pyOpenPASS target for running end to end tests" OFF)
 option(WITH_COVERAGE "Generate test coverage report using gcov (needs fastcov)" OFF)

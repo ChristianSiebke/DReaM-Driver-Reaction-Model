@@ -1,5 +1,6 @@
 # /*********************************************************************
 # * Copyright (c) 2021 ITK Engineering GmbH
+# * Copyright (c) 2021 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 # *
 # * This program and the accompanying materials are made
 # * available under the terms of the Eclipse Public License 2.0
@@ -21,7 +22,6 @@ find_package(Qt5 COMPONENTS Core Widgets Xml REQUIRED)
 
 # set include directories
 include_directories(.)
-include_directories(Interfaces)
 include_directories(Models)
 include_directories(Presenters)
 include_directories(Views)
@@ -36,36 +36,26 @@ include_directories(${Qt5Widgets_INCLUDE_DIRS})
 include_directories(${Qt5Xml_INCLUDE_DIRS})
 
 # include interfaces, models and views
-add_subdirectory(Interfaces)
 add_subdirectory(Models)
 add_subdirectory(Presenters)
 add_subdirectory(Views)
 
-# include headers and sources of this plugin
-set(SOURCES PluginPcm_Eval.cpp)
-set(HEADERS PluginPcm_Eval.h)
+add_openpass_target(
+    NAME Pcm_eval TYPE library LINKAGE shared COMPONENT gui
 
-# declare target library
-add_library(Pcm_eval SHARED ${SOURCES} ${HEADERS} )
+    HEADERS
+        Interfaces/openPASS-PCM_Eval/PCM_Eval_Interface.h
+        PluginPcm_Eval.h
 
-# include directory of lib 'window'
-link_directories(${openPASS-Window_SOURCE_DIR})
+    SOURCES
+        PluginPcm_Eval.cpp
 
-# link with Qt libraries, models, views and Interfaces
-target_link_libraries(Pcm_eval PRIVATE
-                      Qt5::Widgets
-                      Qt5::Core
-                      Qt5::Xml
-                      Window
-                      ${PROJECT_NAME}_Models
-                      ${PROJECT_NAME}_Views
-                      ${PROJECT_NAME}_Interfaces
-                      ${PROJECT_NAME}_Presenters)
-
-if(WIN32)
-        install(TARGETS Pcm_eval
-                RUNTIME DESTINATION ${SUBDIR_LIB_GUI}) 
-elseif(UNIX)
-        install(TARGETS Pcm_eval
-                LIBRARY DESTINATION ${SUBDIR_LIB_GUI}) 
-endif()
+    LIBRARIES
+        Qt5::Widgets
+        Qt5::Core
+        Qt5::Xml
+        Window
+        ${PROJECT_NAME}_Models
+        ${PROJECT_NAME}_Views
+        ${PROJECT_NAME}_Presenters
+)
