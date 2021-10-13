@@ -440,7 +440,7 @@ const QString ConfigWriter::CreateFrameworkConfiguration(const QString framework
     //    xmlWriter.writeTextElement("logFileMaster",
     //                               baseDirectory.relativeFilePath(frameworkConfigPath + "/" + FILENAME_OPENPASSMASTER_LOG));
     //    xmlWriter.writeTextElement("slave", "OpenPassSlave.exe");
-    xmlWriter.writeTextElement("libraries", "../" + QString(SUBDIR_LIB_SIM));
+    xmlWriter.writeTextElement("libraries", QString(SUBDIR_LIB_MODULES));
 
     xmlWriter.writeStartElement("slaveConfigs");
 

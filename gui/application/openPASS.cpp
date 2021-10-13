@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
     application.setApplicationVersion(QStringLiteral(APPLICATION_VERSION));
 
     QString subdirLibGuiCmake = SUBDIR_LIB_GUI;
-    QDir subdirLibGui = QDir(QApplication::applicationDirPath()).filePath("../" + subdirLibGuiCmake);
+    QDir subdirLibGui = QDir(QApplication::applicationDirPath()).filePath(subdirLibGuiCmake);
     application.addLibraryPath(subdirLibGui.absolutePath());
 
     // Initialize models

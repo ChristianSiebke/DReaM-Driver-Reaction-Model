@@ -38,7 +38,7 @@ add_subdirectory(Models)
 set(RC_ICONS openPASS.rc)
 
 add_openpass_target(
-    NAME openPASS TYPE executable COMPONENT gui
+    NAME openPASS TYPE executable COMPONENT common
 
     HEADERS
         Interfaces/openPASS/PluginInterface.h
