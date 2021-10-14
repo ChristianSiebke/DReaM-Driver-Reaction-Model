@@ -128,7 +128,7 @@
     <xs:element name="Double">
         <xs:complexType>
             <xs:attribute name="Key" use="required" type="xs:NCName"/>
-            <xs:attribute name="Value" use="required" type="xs:decimal"/>
+            <xs:attribute name="Value" use="required" type="xs:double"/>
         </xs:complexType>
     </xs:element>
     <xs:element name="NormalDistribution">
