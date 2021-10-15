@@ -184,7 +184,7 @@
     <xs:element name="VehicleProfiles">
         <xs:complexType>
             <xs:sequence>
-                <xs:element maxOccurs="unbounded" ref="VehicleProfile"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="VehicleProfile"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
