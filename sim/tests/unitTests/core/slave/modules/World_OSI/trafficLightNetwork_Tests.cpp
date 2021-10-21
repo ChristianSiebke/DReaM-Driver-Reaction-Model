@@ -41,34 +41,6 @@ TEST(TrafficLightNetwork, TrafficLightControllerConstructor_SetsInitialState)
     TrafficLightController trafficLightController{{{phase1, phase2}}, 0};
 }
 
-TEST(TrafficLightNetwork, TrafficLightControllerConstructorWithDelay_SetsInitialState)
-{
-    OWL::Fakes::TrafficLight trafficLight1;
-    OWL::Fakes::TrafficLight trafficLight2;
-
-    TrafficLightController::Phase phase1 {10,
-                                          {{&trafficLight1, CommonTrafficLight::State::Red},
-                                           {&trafficLight2, CommonTrafficLight::State::Green}}};
-    TrafficLightController::Phase phase2 {10,
-                                          {{&trafficLight1, CommonTrafficLight::State::Green},
-                                           {&trafficLight2, CommonTrafficLight::State::Red}}};
-
-    {
-        InSequence s;
-
-        EXPECT_CALL(trafficLight1, SetState(_)).Times(AnyNumber());
-        EXPECT_CALL(trafficLight1, SetState(CommonTrafficLight::State::Green));
-    }
-    {
-        InSequence s;
-
-        EXPECT_CALL(trafficLight2, SetState(_)).Times(AnyNumber());
-        EXPECT_CALL(trafficLight2, SetState(CommonTrafficLight::State::Red));
-    }
-
-    TrafficLightController trafficLightController{{{phase1, phase2}}, 10};
-}
-
 TEST(TrafficLightNetwork, UpdateStates_SetsCorrectStates)
 {
     OWL::Fakes::TrafficLight trafficLight1;
@@ -84,14 +56,14 @@ TEST(TrafficLightNetwork, UpdateStates_SetsCorrectStates)
                                           {{&trafficLight1, CommonTrafficLight::State::Green},
                                            {&trafficLight2, CommonTrafficLight::State::Red}}};
 
-    TrafficLightController trafficLightController{{{phase1, phase2, phase3}}, 0};
-    TrafficLightNetwork network;
-    network.AddController(std::move(trafficLightController));
-
     CommonTrafficLight::State state1;
     CommonTrafficLight::State state2;
     ON_CALL(trafficLight1, SetState(_)).WillByDefault(SaveArg<0>(&state1));
     ON_CALL(trafficLight2, SetState(_)).WillByDefault(SaveArg<0>(&state2));
+
+    TrafficLightController trafficLightController{{{phase1, phase2, phase3}}, 0};
+    TrafficLightNetwork network;
+    network.AddController(std::move(trafficLightController));
 
     network.UpdateStates(1);
     EXPECT_THAT(state1, Eq(CommonTrafficLight::State::RedYellow));
@@ -106,6 +78,55 @@ TEST(TrafficLightNetwork, UpdateStates_SetsCorrectStates)
     EXPECT_THAT(state2, Eq(CommonTrafficLight::State::Red));
 
     network.UpdateStates(4);
+    EXPECT_THAT(state1, Eq(CommonTrafficLight::State::Red));
+    EXPECT_THAT(state2, Eq(CommonTrafficLight::State::Green));
+}
+
+TEST(TrafficLightNetwork, UpdateStatesWithDelay_SetsCorrectStates)
+{
+    OWL::Fakes::TrafficLight trafficLight1;
+    OWL::Fakes::TrafficLight trafficLight2;
+
+    TrafficLightController::Phase phase1 {1,
+                                          {{&trafficLight1, CommonTrafficLight::State::Red},
+                                           {&trafficLight2, CommonTrafficLight::State::Green}}};
+    TrafficLightController::Phase phase2 {2,
+                                          {{&trafficLight1, CommonTrafficLight::State::RedYellow},
+                                           {&trafficLight2, CommonTrafficLight::State::Yellow}}};
+    TrafficLightController::Phase phase3 {1,
+                                          {{&trafficLight1, CommonTrafficLight::State::Green},
+                                           {&trafficLight2, CommonTrafficLight::State::Red}}};
+
+    CommonTrafficLight::State state1;
+    CommonTrafficLight::State state2;
+    ON_CALL(trafficLight1, SetState(_)).WillByDefault(SaveArg<0>(&state1));
+    ON_CALL(trafficLight2, SetState(_)).WillByDefault(SaveArg<0>(&state2));
+
+    TrafficLightController trafficLightController{{{phase1, phase2, phase3}}, 2};
+    TrafficLightNetwork network;
+    network.AddController(std::move(trafficLightController));
+
+    network.UpdateStates(1);
+    EXPECT_THAT(state1, Eq(CommonTrafficLight::State::Red));
+    EXPECT_THAT(state2, Eq(CommonTrafficLight::State::Green));
+
+    network.UpdateStates(2);
+    EXPECT_THAT(state1, Eq(CommonTrafficLight::State::Red));
+    EXPECT_THAT(state2, Eq(CommonTrafficLight::State::Green));
+
+    network.UpdateStates(3);
+    EXPECT_THAT(state1, Eq(CommonTrafficLight::State::RedYellow));
+    EXPECT_THAT(state2, Eq(CommonTrafficLight::State::Yellow));
+
+    network.UpdateStates(4);
+    EXPECT_THAT(state1, Eq(CommonTrafficLight::State::RedYellow));
+    EXPECT_THAT(state2, Eq(CommonTrafficLight::State::Yellow));
+
+    network.UpdateStates(5);
+    EXPECT_THAT(state1, Eq(CommonTrafficLight::State::Green));
+    EXPECT_THAT(state2, Eq(CommonTrafficLight::State::Red));
+
+    network.UpdateStates(6);
     EXPECT_THAT(state1, Eq(CommonTrafficLight::State::Red));
     EXPECT_THAT(state2, Eq(CommonTrafficLight::State::Green));
 }
