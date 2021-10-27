@@ -13,7 +13,7 @@ set(COMPONENT_NAME SpawnerRuntimeCommon)
 add_compile_definitions(SPAWNER_COMMON_RUNTIME_LIBRARY)
 
 add_openpass_target(
-  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT module
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
 
   HEADERS
     ../../../framework/sampler.h

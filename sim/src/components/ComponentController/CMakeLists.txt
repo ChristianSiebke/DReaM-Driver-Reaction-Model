@@ -3,7 +3,7 @@ set(COMPONENT_NAME ComponentController)
 add_compile_definitions(COMPONENT_CONTROLLER_LIBRARY)
 
 add_openpass_target(
-  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT module
 
   HEADERS
     componentController.h

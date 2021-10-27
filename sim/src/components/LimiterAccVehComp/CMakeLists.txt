@@ -3,7 +3,7 @@ set(COMPONENT_NAME LimiterAccelerationVehicleComponents)
 add_compile_definitions(LIMITER_ACCELERATION_VEHICLE_COMPONENTS_LIBRARY)
 
 add_openpass_target(
-  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT module
 
   HEADERS
     limiterAccVehComp.h

@@ -3,7 +3,7 @@ set(COMPONENT_NAME Manipulator)
 add_compile_definitions(MANIPULATOR_LIBRARY)
 
 add_openpass_target(
-  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT module
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
 
   HEADERS
     CollisionManipulator.h

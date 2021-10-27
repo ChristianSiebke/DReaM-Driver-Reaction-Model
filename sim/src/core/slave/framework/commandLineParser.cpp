@@ -104,7 +104,7 @@ const std::vector<CommandLineOption> CommandLineParser::commandLineOptions
         "lib",
         "Root path of the libraries",
         "libraryPath",
-        "lib"
+        SUBDIR_LIB_MODULES
     },
     {
         "configs",

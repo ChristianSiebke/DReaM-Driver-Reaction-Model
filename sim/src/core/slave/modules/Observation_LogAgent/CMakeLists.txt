@@ -13,7 +13,7 @@ set(COMPONENT_NAME Observation_LogAgent)
 add_compile_definitions(OBSERVATION_LOGAGENT_LIBRARY)
 
 add_openpass_target(
-  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT module
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
 
   HEADERS
     observationCyclics.h

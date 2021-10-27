@@ -3,7 +3,7 @@ set(COMPONENT_NAME CoreSlave)
 add_subdirectory(modules)
 
 add_openpass_target(
-  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT bin
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT common
 
   HEADERS
     OpenPassSlave.h

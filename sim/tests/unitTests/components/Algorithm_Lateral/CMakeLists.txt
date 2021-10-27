@@ -2,7 +2,7 @@ set(COMPONENT_TEST_NAME AlgorithmLateral_Tests)
 set(COMPONENT_SOURCE_DIR ${OPENPASS_SIMCORE_DIR}/components/Algorithm_Lateral/src)
 
 add_openpass_target(
-  NAME ${COMPONENT_TEST_NAME} TYPE test COMPONENT core
+  NAME ${COMPONENT_TEST_NAME} TYPE test COMPONENT module
   DEFAULT_MAIN
 
   SOURCES

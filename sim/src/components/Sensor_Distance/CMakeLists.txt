@@ -3,7 +3,7 @@ set(COMPONENT_NAME Sensor_Distance)
 add_compile_definitions(SENSOR_DISTANCE_LIBRARY)
 
 add_openpass_target(
-  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT module
 
   HEADERS
     sensor_distance.h

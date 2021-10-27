@@ -67,7 +67,7 @@ TEST(CommandLineParser, GivenNoValues_SetDefaultsAndLogsEntryForEachDefaultedVal
 
     EXPECT_THAT(parsedArguments.logFile, "OpenPassSlave.log");
     EXPECT_THAT(parsedArguments.logLevel, 0);
-    EXPECT_THAT(parsedArguments.libPath, "lib");
+    EXPECT_THAT(parsedArguments.libPath, "modules");
     EXPECT_THAT(parsedArguments.configsPath, "configs");
     EXPECT_THAT(parsedArguments.resultsPath, "results");
 

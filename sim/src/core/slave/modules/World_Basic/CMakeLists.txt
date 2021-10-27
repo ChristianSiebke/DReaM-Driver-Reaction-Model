@@ -3,7 +3,7 @@ set(COMPONENT_NAME World_Basic)
 add_compile_definitions(WORLD_BASIC_LIBRARY)
 
 add_openpass_target(
-  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT module
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
 
   HEADERS
     agentAdapter.h

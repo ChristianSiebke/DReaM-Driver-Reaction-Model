@@ -16,15 +16,19 @@
 option(WITH_SIMCORE "Build OSI based scenario simulation" ON)
 option(WITH_GUI "Build GUI" ON)
 option(WITH_TESTS "Build unit tests" ON)
-option(WITH_DOC "Build documentation" ON)
-option(WITH_API_DOC "Build API documentation (takes pretty long)" OFF)
-option(WITH_EXTENDED_OSI "Assume an extended version of OSI is available" OFF)
-option(WITH_PROTOBUF_ARENA "Make use of protobuf arena allocation" ON)
-option(WITH_DEBUG_POSTFIX "Use 'd' binary postfix on Windows platform" ON)
-option(INSTALL_SYSTEM_RUNTIME_DEPS "Copy detected system runtime dependencies to install directory (i.e. MinGW system libraries)" OFF)
-option(INSTALL_EXTRA_RUNTIME_DEPS "Copy detected third party runtime dependencies to install directory (i.e. required shared libraries found in specified CMAKE_PREFIX_PATH)" OFF)
 option(WITH_ENDTOEND_TESTS "Create pyOpenPASS target for running end to end tests" OFF)
 option(WITH_COVERAGE "Generate test coverage report using gcov (needs fastcov)" OFF)
+
+option(WITH_DOC "Build documentation" ON)
+option(WITH_API_DOC "Build API documentation (takes pretty long)" OFF)
+
+option(WITH_EXTENDED_OSI "Assume an extended version of OSI is available" OFF)
+option(WITH_PROTOBUF_ARENA "Make use of protobuf arena allocation" ON)
+
+option(WITH_DEBUG_POSTFIX "Use 'd' binary postfix on Windows platform" ON)
+
+option(INSTALL_SYSTEM_RUNTIME_DEPS "Copy detected system runtime dependencies to install directory (i.e. MinGW system libraries)" OFF)
+option(INSTALL_EXTRA_RUNTIME_DEPS "Copy detected third party runtime dependencies to install directory (i.e. required shared libraries found in specified CMAKE_PREFIX_PATH)" OFF)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -51,6 +55,9 @@ if(USE_CCACHE)
   set(CMAKE_C_COMPILER_LAUNCHER ccache)
   set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
 endif()
+
+set(CMAKE_C_FLAGS_DEBUG "-g -ggdb3 -Og")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -ggdb3 -Og")
 
 if(MINGW)
   if(CMAKE_BUILD_TYPE STREQUAL Debug)
@@ -92,9 +99,9 @@ if(WITH_SIMCORE OR WITH_TESTS)
 endif()
 
 if(WITH_TESTS)
-  find_package(GTest)
-  # as GMock currently doesn't provide a find_package config, gmock file location is derived from gtest in HelperMacros.cmake
-  #find_package(GMock)
+  find_package(GTest REQUIRED CONFIG)   # force config mode for better lookup consistency with newer gtest versions
+  message(STATUS "Found GTest: ${GTest_DIR}")
+
   if(WITH_COVERAGE)
     find_package(Gcov REQUIRED)
     find_package(Fastcov REQUIRED)
@@ -116,41 +123,44 @@ if(WIN32)
 else()
   set(CMAKE_INSTALL_PREFIX "/OpenPASS" CACHE PATH "Destination directory")
   add_compile_definitions(unix)
-  add_link_options(LINKER:-z,defs)
+  add_link_options(LINKER:-z,defs)   # fail during link time on undefined references (instead of runtime)
   option(OPENPASS_ADJUST_OUTPUT "Adjust output directory" OFF)
 endif()
 
 add_compile_definitions($<IF:$<CONFIG:Debug>,DEBUG_POSTFIX="${CMAKE_DEBUG_POSTFIX}",DEBUG_POSTFIX=\"\">)
 
-set(CMAKE_BUILD_RPATH \$ORIGIN)
-
 include(HelperMacros)
 
 #######################################
 
-set(INSTALL_BIN_DIR "bin" CACHE PATH "Installation directory for executables")
-set(INSTALL_LIB_DIR "lib" CACHE PATH "Installation directory for libraries")
 set(SUBDIR_LIB_GUI "gui" CACHE PATH "Installation directory for GUI libraries")
-set(SUBDIR_LIB_SIM "lib" CACHE PATH "Installation directory for simulation libraries")
-set(SUBDIR_LIB_COMPONENTS "lib" CACHE PATH "Installation directory for core components")
+set(SUBDIR_LIB_MODULES "modules" CACHE PATH "Installation directory for component modules")
+set(SUBDIR_LIB_COMMON "${SUBDIR_LIB_MODULES}/common" CACHE PATH "Installation directory for common simulation libraries")
+set(SUBDIR_LIB_CORE "${SUBDIR_LIB_MODULES}" CACHE PATH "Installation directory for core simulation libraries")
 set(SUBDIR_XML_COMPONENTS "components" CACHE PATH "Installation directory for core components")
-set(INSTALL_INC_DIR "include" CACHE PATH "Installation directory for headers")
-set(INSTALL_CFG_DIR "cfg" CACHE PATH "Installation directory for config files")
-set(INSTALL_MAN_DIR "share/man" CACHE PATH "Installation directory for manual pages")
-set(INSTALL_PKGCONFIG_DIR "share/pkgconfig" CACHE PATH "Installation directory for pkgconfig (.pc) files")
+set(SUBDIR_LIB_EXTERNAL "lib" CACHE PATH "Installation directory for external simulation dependencies (libraries)")
 
-if(OPENPASS_ADJUST_OUTPUT)
-    set(OPENPASS_DESTDIR ${CMAKE_BINARY_DIR}/OpenPASS CACHE PATH "Destination directory")
-    file(MAKE_DIRECTORY ${OPENPASS_DESTDIR})
-    file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}/${SUBDIR_LIB_SIM})
-    file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}/${SUBDIR_LIB_GUI})
-    file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}/${SUBDIR_LIB_COMPONENTS})
-    file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}/${SUBDIR_LIB_COMPONENTS})
+if(WIN32)
+  # dlls have to reside in the directory of the executable loading them
+  # an empty string would be replaced by the default ("bin") when running install, thus "." is used here
+  set(SUBDIR_LIB_COMMON .)
+  set(SUBDIR_LIB_EXTERNAL .)
 endif()
 
-add_compile_definitions(SUBDIR_LIB_SIM="${SUBDIR_LIB_SIM}")
+if(OPENPASS_ADJUST_OUTPUT)
+  set(OPENPASS_DESTDIR ${CMAKE_BINARY_DIR}/OpenPASS CACHE PATH "Destination directory")
+  file(MAKE_DIRECTORY ${OPENPASS_DESTDIR})
+  file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}/${SUBDIR_LIB_GUI})
+  file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}/${SUBDIR_LIB_MODULES})
+  file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}/${SUBDIR_LIB_COMMON})
+  file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}/${SUBDIR_LIB_CORE})
+  file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}/${SUBDIR_XML_COMPONENTS})
+  file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}/${SUBDIR_LIB_EXTERNAL})
+endif()
+
+add_compile_definitions(SUBDIR_LIB_CORE="${SUBDIR_LIB_CORE}")
 add_compile_definitions(SUBDIR_LIB_GUI="${SUBDIR_LIB_GUI}")
-add_compile_definitions(SUBDIR_LIB_COMPONENTS="${SUBDIR_LIB_COMPONENTS}")
+add_compile_definitions(SUBDIR_LIB_MODULES="${SUBDIR_LIB_MODULES}")
 add_compile_definitions(SUBDIR_XML_COMPONENTS="${SUBDIR_XML_COMPONENTS}")
 
 if(MSVC)

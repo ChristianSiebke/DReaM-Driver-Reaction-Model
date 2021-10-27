@@ -106,9 +106,20 @@ public:
     explicit virtual operator std::string() const = 0;
 
 private:
-    friend std::ostream &operator<<(std::ostream &,
-                                    const SignalInterface &);
+    friend std::ostream& operator<<(std::ostream&, const SignalInterface&);
 };
+
+//-----------------------------------------------------------------------------
+//! Provides functionality to print information of signals
+//!
+//! @param[in]     stream  Output stream for printing information
+//! @param[in]     signal  Signal to be printed
+//! @return                Output stream for concatenation
+//-----------------------------------------------------------------------------
+inline std::ostream& operator<<(std::ostream& stream, const SignalInterface& signal)
+{
+    return stream << static_cast<std::string>(signal);
+}
 
 //-----------------------------------------------------------------------------
 //! This interface provides access to a component's state

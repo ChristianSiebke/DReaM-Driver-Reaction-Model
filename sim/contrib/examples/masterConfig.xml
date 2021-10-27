@@ -2,7 +2,7 @@
   <logLevel>0</logLevel>
   <logFileMaster>OpenPassMaster.log</logFileMaster>
   <slave>OpenPassSlave.exe</slave>
-  <libraries>lib</libraries>
+  <libraries>modules</libraries>
   <slaveConfigs>
     <slaveConfig>
       <logFileSlave>OpenPassSlave.log</logFileSlave>

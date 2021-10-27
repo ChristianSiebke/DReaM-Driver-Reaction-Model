@@ -1,7 +1,7 @@
 set(COMPONENT_NAME CoreCommon)
 
 add_openpass_target(
-  NAME ${COMPONENT_NAME} TYPE library LINKAGE static COMPONENT bin
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE static COMPONENT common
 
   HEADERS
     callbacks.h

@@ -1,5 +1,5 @@
 add_openpass_target(
-  NAME Common TYPE library LINKAGE shared COMPONENT bin
+  NAME Common TYPE library LINKAGE shared COMPONENT common
 
   HEADERS
     events/acquirePositionEvent.h

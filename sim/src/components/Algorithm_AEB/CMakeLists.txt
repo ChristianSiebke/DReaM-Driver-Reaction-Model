@@ -3,7 +3,7 @@ set(COMPONENT_NAME Algorithm_AEB)
 add_compile_definitions(ALGORITHM_AEB_LIBRARY)
 
 add_openpass_target(
-  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT core
+  NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT module
 
   HEADERS
     algorithm_autonomousEmergencyBraking.h
