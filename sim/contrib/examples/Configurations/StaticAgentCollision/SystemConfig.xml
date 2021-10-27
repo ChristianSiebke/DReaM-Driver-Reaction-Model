@@ -33,43 +33,37 @@
         </schedule>
         <parameters>
           <parameter>
-            <!--parameter's title: VelocityWish-->
-            <id>0</id>
+            <id>VelocityWish</id>
             <type>double</type>
             <unit>m/s</unit>
             <value>15</value>
           </parameter>
           <parameter>
-            <!--parameter's title: Delta-->
-            <id>1</id>
+            <id>Delta</id>
             <type>double</type>
             <unit></unit>
             <value>4</value>
           </parameter>
           <parameter>
-            <!--parameter's title: TGabWish-->
-            <id>2</id>
+            <id>TGapWish</id>
             <type>double</type>
             <unit>s</unit>
             <value>1.5</value>
           </parameter>
           <parameter>
-            <!--parameter's title: MinDistance-->
-            <id>3</id>
+            <id>MinDistance</id>
             <type>double</type>
             <unit>m</unit>
             <value>2</value>
           </parameter>
           <parameter>
-            <!--parameter's title: MaxAcceleration-->
-            <id>4</id>
+            <id>MaxAcceleration</id>
             <type>double</type>
             <unit>m/s^2</unit>
             <value>2</value>
           </parameter>
           <parameter>
-            <!--parameter's title: MaxDeceleration-->
-            <id>5</id>
+            <id>MaxDeceleration</id>
             <type>double</type>
             <unit>m/s^2</unit>
             <value>2</value>
