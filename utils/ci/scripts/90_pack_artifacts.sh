@@ -15,14 +15,14 @@
 ################################################################################
 
 MYDIR="$(dirname "$(readlink -f $0)")"
-cd "$MYDIR/../../../../dist/Slave" || exit 1
+cd "$MYDIR/../../../../dist/opSim" || exit 1
 
 mkdir -p ../../artifacts || exit 1
 
 if [[ "${OSTYPE}" = "msys" ]]; then
-  $MYDIR/util_zip.sh ../../artifacts/openPASS_SIM.zip lib OpenPassMaster.exe OpenPassSlave.exe *.dll
+  $MYDIR/util_zip.sh ../../artifacts/openPASS_SIM.zip doc modules schemas opSimulation.exe opSimulationManager.exe *.dll
   $MYDIR/util_zip.sh ../../artifacts/openPASS_EndToEndTests.zip artifacts
 else
-  $MYDIR/util_tar.sh ../../artifacts/openPASS_SIM.tar.gz lib OpenPassMaster OpenPassSlave *.so* --ignore-failed-read
+  $MYDIR/util_tar.sh ../../artifacts/openPASS_SIM.tar.gz doc lib modules schemas opSimulation opSimulationManager *.so* --ignore-failed-read
   $MYDIR/util_tar.sh ../../artifacts/openPASS_EndToEndTests.tar.gz artifacts --ignore-failed-read
 fi
