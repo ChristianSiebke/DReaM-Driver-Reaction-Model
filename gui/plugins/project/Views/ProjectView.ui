@@ -278,7 +278,7 @@
        <number>15</number>
       </property>
       <item row="7" column="5">
-       <widget class="QPushButton" name="logSimulationManagerBrowseButton">
+       <widget class="QPushButton" name="logOpSimulationManagerBrowseButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -354,7 +354,7 @@
        </widget>
       </item>
       <item row="7" column="2">
-       <widget class="QLineEdit" name="logSimulationManagerPathEdit">
+       <widget class="QLineEdit" name="logOpSimulationManagerPathEdit">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -501,8 +501,8 @@
   <tabstop>libraryPathEdit</tabstop>
   <tabstop>libraryBrowseButton</tabstop>
   <tabstop>logLevelSpinBox</tabstop>
-  <tabstop>logSimulationManagerPathEdit</tabstop>
-  <tabstop>logSimulationManagerBrowseButton</tabstop>
+  <tabstop>logOpSimulationManagerPathEdit</tabstop>
+  <tabstop>logOpSimulationManagerBrowseButton</tabstop>
   <tabstop>logSimulationPathEdit</tabstop>
   <tabstop>logSimulationBrowseButton</tabstop>
   <tabstop>outputPathEdit</tabstop>
