@@ -78,6 +78,6 @@ cmake \
   -D WITH_DOC=ON \
   -D WITH_ENDTOEND_TESTS=ON \
   -D WITH_EXTENDED_OSI=OFF \
-  -D WITH_GUI=OFF \
+  -D WITH_GUI=ON \
   ../repo
 
