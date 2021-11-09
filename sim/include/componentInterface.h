@@ -23,7 +23,7 @@ class PublisherInterface;
 
 class PublisherInterface;
 
-namespace SimulationSlave {
+namespace core {
 
 class Channel;
 class ModelLibrary;
@@ -247,6 +247,6 @@ public:
     virtual std::string GetName() const = 0;
 };
 
-} // namespace SimulationSlave
+} // namespace core
 
 

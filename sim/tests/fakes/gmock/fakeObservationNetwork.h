@@ -12,7 +12,7 @@
 #include "gmock/gmock.h"
 #include "include/observationNetworkInterface.h"
 
-class FakeObservationNetwork : public SimulationSlave::ObservationNetworkInterface
+class FakeObservationNetwork : public core::ObservationNetworkInterface
 {
 public:
     MOCK_METHOD6(Instantiate,

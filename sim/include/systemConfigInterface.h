@@ -20,8 +20,8 @@ public:
     SystemConfigInterface() = default;
     virtual ~SystemConfigInterface() = default;
 
-    virtual std::map<int, std::shared_ptr< SimulationSlave::AgentTypeInterface>>& GetSystems() = 0;
-    virtual void SetSystems(std::map<int, std::shared_ptr< SimulationSlave::AgentTypeInterface>> systems) = 0;
+    virtual std::map<int, std::shared_ptr< core::AgentTypeInterface>>& GetSystems() = 0;
+    virtual void SetSystems(std::map<int, std::shared_ptr< core::AgentTypeInterface>> systems) = 0;
     virtual void AddModelParameters(std::shared_ptr<ParameterInterface> modelParameters) = 0;
 };
 

@@ -14,7 +14,7 @@ include(ccache.pri)
 
 !isEmpty(INTERFACE_OVERRIDE_PATH) {
     INCLUDEPATH += $$INTERFACE_OVERRIDE_PATH
-    INCLUDEPATH += $$INTERFACE_OVERRIDE_PATH/CoreFramework/OpenPassSlave
+    INCLUDEPATH += $$INTERFACE_OVERRIDE_PATH/core/opSimulation
 }
 
 INCLUDEPATH += $$PWD/openPASS
@@ -43,8 +43,8 @@ DEFINES += SUBDIR_LIB_COMPONENTS=\\\"/components\\\"
 DEFINES += SUBDIR_LIB_PLUGIN=\\\"/plugin\\\"
 
 ## Export configuration ##
-#CONFIG += USEOPENPASSSLAVEASLIBRARY
-#CONFIG += USEOPENPASSMASTERASLIBRARY
+#CONFIG += USEOPENPASSSIMULATIONASLIBRARY
+#CONFIG += USEOPENPASSSIMULATIONMANAGERASLIBRARY
 
 # accumulate list of files for given directories (first parameter)
 # according to file name ending (second parameter)
@@ -58,7 +58,7 @@ defineReplace(getFiles) {
     return($$result)
 }
 
-# prefer bundled libs in OpenPassSlave directory over system libraries
+# prefer bundled libs in OpenPassSimulation directory over system libraries
 QMAKE_LFLAGS += -Wl,-rpath=\'\$\$ORIGIN\'
 
 win32:DEFINES+=_USE_MATH_DEFINES
@@ -96,10 +96,10 @@ OPENPASS_LIBRARY {
     QMAKE_LFLAGS += -L$$system_path($$EXTRA_LIB_PATH)
     QMAKE_CFLAGS += -isystem $$EXTRA_INCLUDE_PATH
     QMAKE_CXXFLAGS += -isystem $$EXTRA_INCLUDE_PATH
-    Debug:DESTDIR = $${DESTDIR_SLAVE}$${SUBDIR_LIB_SIMS}
-    Release:DESTDIR = $${DESTDIR_SLAVE}$${SUBDIR_LIB_SIMS}
+    Debug:DESTDIR = $${DESTDIR_SIMULATION}$${SUBDIR_LIB_SIMS}
+    Release:DESTDIR = $${DESTDIR_SIMULATION}$${SUBDIR_LIB_SIMS}
     #debug/release predicates are buggy on linux qmake
-    unix:DESTDIR=$${DESTDIR_SLAVE}$${SUBDIR_LIB_SIMS}
+    unix:DESTDIR=$${DESTDIR_SIMULATION}$${SUBDIR_LIB_SIMS}
     message("[$$TARGET] Build path set to $$DESTDIR")
 }
 
@@ -118,10 +118,10 @@ OPENPASS_EXECUTABLE {
     INCLUDEPATH += .
     QMAKE_CFLAGS += -isystem $$EXTRA_INCLUDE_PATH
     QMAKE_CXXFLAGS += -isystem $$EXTRA_INCLUDE_PATH
-    Debug:DESTDIR = $${DESTDIR_SLAVE}
-    Release:DESTDIR = $${DESTDIR_SLAVE}
+    Debug:DESTDIR = $${DESTDIR_SIMULATION}
+    Release:DESTDIR = $${DESTDIR_SIMULATION}
     #debug/release predicates are buggy on linux qmake
-    unix:DESTDIR=$${DESTDIR_SLAVE}
+    unix:DESTDIR=$${DESTDIR_SIMULATION}
     QMAKE_PRE_LINK += $$sprintf($$QMAKE_MKDIR_CMD, $$DESTDIR)
 }
 

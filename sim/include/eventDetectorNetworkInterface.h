@@ -14,7 +14,7 @@
 #include "include/scenarioInterface.h"
 #include "include/stochasticsInterface.h"
 
-namespace SimulationSlave
+namespace core
 {
 
 //Forward declarations
@@ -38,6 +38,6 @@ public:
     virtual void ResetAll() = 0;
 };
 
-}// namespace SimulationSlave
+}// namespace core
 
 

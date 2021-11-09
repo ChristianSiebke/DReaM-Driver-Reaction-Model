@@ -59,17 +59,17 @@ public:
 private Q_SLOTS:
     //-----------------------------------------------------------------------------
     //! Slot which is triggered after the user has clicked the save-button in the action menu.
-    //! Will open file dialog to select a filepath for the slaveConfig xml file to be saved.
+    //! Will open file dialog to select a filepath for the simulationConfig xml file to be saved.
     //! It calls the TrafficSimulationXMLSaveModel::save routine for saving the momentary
-    //! configuration to a slaveConfig XML file.
+    //! configuration to a simulationConfig XML file.
     //!
     //-----------------------------------------------------------------------------
     void save();
 
     //-----------------------------------------------------------------------------
     //! Slot which is triggered after the user has clicked the load-button in the action menu.
-    //! Will open file dialog to select a filepath for the slaveConfig xml file to be loaded.
-    //! It calls the TrafficSimulationXMLLoadModel::load routine for loading a slaveConfig XML
+    //! Will open file dialog to select a filepath for the simulationConfig xml file to be loaded.
+    //! It calls the TrafficSimulationXMLLoadModel::load routine for loading a simulationConfig XML
     //! file.
     //-----------------------------------------------------------------------------
     void load();
@@ -119,16 +119,16 @@ private Q_SLOTS:
 
     //-----------------------------------------------------------------------------
     //! Slot which is triggered when the simulation button is pressed. It creates
-    //! a process for executing the simulation slave defined in the corresponding
-    //! slave path (see ProjectInterface). Before, it saves the current settings
-    //! to the file 'slaveConfig.xml'. If such a file already exists, the user will
+    //! a process for executing the simulation defined in the corresponding
+    //! simulation path (see ProjectInterface). Before, it saves the current settings
+    //! to the file 'simulationConfig.xml'. If such a file already exists, the user will
     //! be asked whether to override it or not.
     //-----------------------------------------------------------------------------
     void startSimulation();
 
     //-----------------------------------------------------------------------------
-    //! Slot which is triggered when the simulation slave has terminated. It will
-    //! pop up an info window with the exit code the slave has terminated with as
+    //! Slot which is triggered when the simulation has terminated. It will
+    //! pop up an info window with the exit code the simulation has terminated with as
     //! well as the location of the log file.
     //-----------------------------------------------------------------------------
     void simulationFinished(int exitCode);

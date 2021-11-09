@@ -19,21 +19,21 @@
 
 static constexpr char DIRNAME_CASE_RESULTS[] = "results";
 
-static constexpr char FILENAME_SLAVE_CONFIG[] = "slaveConfig.xml";
+static constexpr char FILENAME_SIMULATION_CONFIG[] = "simulationConfig.xml";
 static constexpr char FILENAME_SYSTEM_CONFIG[] = "SystemConfig.xml";
 static constexpr char FILENAME_SCENERY_CONFIG[] = "sceneryConfiguration.xml";
 static constexpr char FILENAME_PARKING_CONFIG[] = "SceneryConfiguration.xodr";
 static constexpr char FILENAME_SCENARIO_CONFIG[] = "Scenario.xosc";
 static constexpr char FILENAME_PROFILES_CONFIG[] = "ProfilesCatalog.xml";
 static constexpr char FILENAME_MODELS_CONFIG[] = "VehicleModelsCatalog.xosc";
-static constexpr char FILENAME_FRAMEWORK_CONFIG[] = "masterConfig.xml";
+static constexpr char FILENAME_FRAMEWORK_CONFIG[] = "opSimulationManager.xml";
 
-static constexpr char FILENAME_OPENPASSSLAVE_EXE[] = "OpenPassSlave.exe";
-static constexpr char FILENAME_OPENPASSMASTER_EXE[] = "OpenPassMaster.exe";
+static constexpr char FILENAME_OPENPASSSIMULATION_EXE[] = "opSimulation.exe";
+static constexpr char FILENAME_OPSIMULATIONMANAGER_EXE[] = "opSimulationManager.exe";
 
-static constexpr char FILENAME_OPENPASSSLAVE_LOG[] = "OpenPassSlave.log";
-static constexpr char FILENAME_OPENPASSSLAVE_CONFIGS[] = "configs";
-static constexpr char ILENAME_OPENPASSMASTER_LOG[] = "OpenPassMaster.log";
+static constexpr char FILENAME_OPENPASSSIMULATION_LOG[] = "opSimulation.log";
+static constexpr char FILENAME_OPENPASSSIMULATION_CONFIGS[] = "configs";
+static constexpr char FILENAME_OPSIMULATIONMANAGER_LOG[] = "opSimulationManager.log";
 
 static constexpr char REGEX_CASE_NUMBER[] = "\\d*";
 static constexpr char REGEX_CASE_SYSTEM[] = "\\d\\-\\d\\-\\d";

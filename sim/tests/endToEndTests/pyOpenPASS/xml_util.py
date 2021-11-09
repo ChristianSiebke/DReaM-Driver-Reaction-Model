@@ -86,9 +86,9 @@ class XmlUtil:
     Utilily for xml manipulation w.r.t. openPASS configurations
     Also defines some manipulation presets starting with 'CONFIG_*'
     """
-    CONFIG_RANDOM_SEED = XmlInfo('slaveConfig.xml', '//Experiment/RandomSeed')
-    CONFIG_NUMBER_OF_INVOCATIONS = XmlInfo('slaveConfig.xml', '//Experiment/NumberOfInvocations')
-    CONFIG_LOGGING_TO_CSV = XmlInfo('slaveConfig.xml', "//Bool[@Key='LoggingCyclicsToCsv']/@Value")
+    CONFIG_RANDOM_SEED = XmlInfo('simulationConfig.xml', '//Experiment/RandomSeed')
+    CONFIG_NUMBER_OF_INVOCATIONS = XmlInfo('simulationConfig.xml', '//Experiment/NumberOfInvocations')
+    CONFIG_LOGGING_TO_CSV = XmlInfo('simulationConfig.xml', "//Bool[@Key='LoggingCyclicsToCsv']/@Value")
     CONFIG_DURATION = XmlInfo('Scenario.xosc', "//StopTrigger/ConditionGroup/Condition[@name='EndTime']/ByValueCondition/SimulationTimeCondition/@value")
 
     @staticmethod

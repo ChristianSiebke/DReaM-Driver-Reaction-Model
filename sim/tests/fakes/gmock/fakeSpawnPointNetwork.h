@@ -13,7 +13,7 @@
 #include "gmock/gmock.h"
 #include "include/spawnPointNetworkInterface.h"
 
-namespace SimulationSlave {
+namespace core {
 
 class FakeSpawnPointNetwork : public SpawnPointNetworkInterface
 {
@@ -35,4 +35,4 @@ public:
                  void());
 };
 
-}  // namespace SimulationSlave
+}  // namespace core

@@ -30,7 +30,7 @@ OpenScenarioActionsImplementation::OpenScenarioActionsImplementation(std::string
                                                                      PublisherInterface *const publisher,
                                                                      const CallbackInterface *callbacks,
                                                                      AgentInterface *agent,
-                                                                     SimulationSlave::EventNetworkInterface *const eventNetwork) :
+                                                                     core::EventNetworkInterface *const eventNetwork) :
     UnrestrictedEventModelInterface(
         componentName,
         isInit,

@@ -195,7 +195,7 @@ std::string Log<T>::ToString(LogLevel level)
 }
 
 //! Handles access of file
-class CORESLAVEEXPORT LogOutputPolicy
+class SIMULATIONCOREEXPORT LogOutputPolicy
 {
 public:
     ~LogOutputPolicy ()

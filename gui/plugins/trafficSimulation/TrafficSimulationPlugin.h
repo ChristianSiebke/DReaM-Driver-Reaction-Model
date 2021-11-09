@@ -21,12 +21,12 @@
 //! a traffic simulation, the user needs to specify the experiment settings,
 //! the scenario configuration (based on an OpenSCENARIO file), the environment
 //! and the surrounding traffic. The outcome of the whole plugin is the
-//! slaveConfig XML file, whose structure defines the structure of the
+//! simulationConfig XML file, whose structure defines the structure of the
 //! classes of this plugin.
 //!
 //! The plugin is implemented using a model-presenter-view architectual pattern.
 //! The model classes define the basic objects for containing the  values of
-//! the XML elements of the slaveConfig XML file. They also provide setter
+//! the XML elements of the simulationConfig XML file. They also provide setter
 //! and getter methods for editing its content. In all cases, the model classes
 //! do not know about the presenters and views. The view classes define the
 //! appearence and and UI objects the user can interact with. In this

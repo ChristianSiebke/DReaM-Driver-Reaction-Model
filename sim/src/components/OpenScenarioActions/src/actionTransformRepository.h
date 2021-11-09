@@ -44,7 +44,7 @@ using TransformResults = std::vector<TransformResult>;
 /// SomeOtherFile.cpp -> ActionTransformRepository::Register(customTransformer);
 class ActionTransformRepository final
 {
-    using TransformSignature = TransformResult (*)(const SimulationSlave::EventNetworkInterface *eventNetwork,
+    using TransformSignature = TransformResult (*)(const core::EventNetworkInterface *eventNetwork,
                                                    WorldInterface *world,
                                                    AgentInterface *agent,
                                                    int cycleTime);

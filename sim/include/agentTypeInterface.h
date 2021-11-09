@@ -23,7 +23,7 @@
 #include <memory>
 #include <string>
 
-namespace SimulationSlave
+namespace core
 {
 
 class ComponentType;
@@ -48,4 +48,4 @@ public:
     virtual const std::map<std::string, std::shared_ptr<ComponentType>> &GetComponents() const = 0;
 };
 
-} // namespace SimulationSlave
+} // namespace core

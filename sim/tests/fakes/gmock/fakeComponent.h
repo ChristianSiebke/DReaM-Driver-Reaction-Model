@@ -3,7 +3,7 @@
 #include "gmock/gmock.h"
 #include "include/componentInterface.h"
 
-namespace SimulationSlave {
+namespace core {
 
 class FakeComponent : public ComponentInterface {
  public:
@@ -58,4 +58,4 @@ class FakeComponent : public ComponentInterface {
       std::string());
 };
 
-}  // namespace SimulationSlave
+}  // namespace core

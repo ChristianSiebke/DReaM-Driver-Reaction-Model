@@ -13,7 +13,7 @@ import pandas as pd
 
 
 class MetaInfo:
-    slave = None
+    simulation = None
     scope = ''
     base_config = None
     specialized = None

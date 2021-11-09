@@ -20,7 +20,7 @@ This file is also a XML-file and specifies the components of an agent and system
 The editing of the System Configuration has two modes: the static and dynamic mode.
 
 The **static mode** requires the user to build a complete system which includes sensors, algorithms and actions. 
-As the actions directly manipulate the simulated vehicle’s parameters, which are the same no matter the system (i.e. gas pedal position, braking pedal position, steering wheel angle), there is no need to code the interaction between system and slave. 
+As the actions directly manipulate the simulated vehicle’s parameters, which are the same no matter the system (i.e. gas pedal position, braking pedal position, steering wheel angle), there is no need to code the interaction between system and simulation.
 
 At this point there is no support for supporting statistical inclusion of systems in the static mode. 
 The current demo only provides an example for the static mode (a System Configuration of an agent to follow a PCM trajectory), so make sure you have the static mode selected.

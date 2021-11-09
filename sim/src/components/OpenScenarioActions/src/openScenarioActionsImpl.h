@@ -55,7 +55,7 @@ public:
                                       PublisherInterface *const publisher,
                                       const CallbackInterface *callbacks,
                                       AgentInterface *agent,
-                                      SimulationSlave::EventNetworkInterface *const eventNetwork);
+                                      core::EventNetworkInterface *const eventNetwork);
 
     void UpdateInput(int, const std::shared_ptr<SignalInterface const> &, int) override;
     void UpdateOutput(int localLinkId, std::shared_ptr<SignalInterface const> &data, int time) override;

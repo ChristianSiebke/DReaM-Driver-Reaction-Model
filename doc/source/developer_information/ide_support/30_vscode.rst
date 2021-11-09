@@ -193,7 +193,7 @@ When using the debugging functionality, the according executable will be execute
 - This is acceptable for unit test, which do not require openPASS specific libraries.  
   The corresponding config is ``CMake Target``.
 
-- For the core, located at ``./build/sim/src/core/slave/OpenPassSlave``, this does not work, as no libraries and no configurations are available.  
+- For the core, located at ``./build/sim/src/core/opSimulation/opSimulation``, this does not work, as no libraries and no configurations are available.
   As a solution, a second debug target ``opsimulation`` points at the installed executable instead.
 
   .. warning:: Don't forget to run the target ``install`` before debugging .

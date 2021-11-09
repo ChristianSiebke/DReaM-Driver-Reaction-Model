@@ -50,7 +50,7 @@ class FakeAgentBlueprint : public AgentBlueprintInterface {
   MOCK_CONST_METHOD0(GetObjectName,
       std::string());
   MOCK_CONST_METHOD0(GetAgentType,
-      SimulationSlave::AgentTypeInterface&());
+      core::AgentTypeInterface&());
   MOCK_METHOD0(GetSpawnParameter,
       SpawnParameter&());
   MOCK_CONST_METHOD0(GetSpawnParameter,
@@ -64,5 +64,5 @@ class FakeAgentBlueprint : public AgentBlueprintInterface {
   MOCK_CONST_METHOD0(GetSensorParameters,
       openpass::sensors::Parameters());
   MOCK_METHOD1(SetAgentType,
-      void (std::shared_ptr<SimulationSlave::AgentTypeInterface> agentType));
+      void (std::shared_ptr<core::AgentTypeInterface> agentType));
 };

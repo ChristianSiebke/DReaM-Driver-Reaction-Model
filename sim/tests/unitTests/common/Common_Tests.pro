@@ -23,7 +23,7 @@ INCLUDEPATH += \
     $$UNIT_UNDER_TEST \
     $$OPEN_SRC \
     $$OPEN_SRC/.. \
-    $$OPEN_SRC/core/slave/modelElements
+    $$OPEN_SRC/core/opSimulation/modelElements
 
 HEADERS += \
     $$UNIT_UNDER_TEST/commonTools.h

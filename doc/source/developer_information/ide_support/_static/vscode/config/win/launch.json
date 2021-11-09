@@ -28,11 +28,11 @@
             ]
         },
         {
-            // FOR DEBUGGING OpenPassSlave (DON'T FORGET TO CALL make install)
+            // FOR DEBUGGING opSimulation (DON'T FORGET TO CALL make install)
             "name": "opsimulation",
             "type": "cppdbg",
             "request": "launch",
-            "program": "C:\\OpenPASS\\bin\\core\\OpenPassSlave.exe",
+            "program": "C:\\OpenPASS\\bin\\core\\opSimulation.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "C:\\OpenPASS\\bin\\core",

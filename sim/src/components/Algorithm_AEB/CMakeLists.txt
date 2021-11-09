@@ -14,7 +14,6 @@ add_openpass_target(
     src/autonomousEmergencyBraking.cpp
 
   INCDIRS
-    ${CMAKE_CURRENT_LIST_DIR}/core/slave/modules/World_OSI
 
   LIBRARIES
     Qt5::Core

@@ -19,7 +19,7 @@ class ScenarioInterface;
 class WorldInterface;
 class StochasticsInterface;
 class AgentBlueprintProviderInterface;
-namespace SimulationSlave
+namespace core
 {
     class AgentFactoryInterface;
 }
@@ -52,7 +52,7 @@ struct SpawnPointDependencies
     SpawnPointDependencies(SpawnPointDependencies&&) = default;
 
 
-    SpawnPointDependencies(SimulationSlave::AgentFactoryInterface* agentFactory,
+    SpawnPointDependencies(core::AgentFactoryInterface* agentFactory,
                            WorldInterface* world,
                            const AgentBlueprintProviderInterface* agentBlueprintProvider,
                            StochasticsInterface* stochastics) :
@@ -65,7 +65,7 @@ struct SpawnPointDependencies
     SpawnPointDependencies& operator=(const SpawnPointDependencies&) = default;
     SpawnPointDependencies& operator=(SpawnPointDependencies&&) = default;
 
-    SimulationSlave::AgentFactoryInterface* agentFactory {nullptr};
+    core::AgentFactoryInterface* agentFactory {nullptr};
     WorldInterface* world {nullptr};
     const AgentBlueprintProviderInterface* agentBlueprintProvider {nullptr};
     StochasticsInterface* stochastics {nullptr};

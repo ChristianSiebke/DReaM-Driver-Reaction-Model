@@ -64,7 +64,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Master Config:</string>
+         <string>Simulation Manager Config:</string>
         </property>
        </widget>
       </item>
@@ -203,7 +203,7 @@
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="slaveLabel">
+       <widget class="QLabel" name="simulationLabel">
         <property name="font">
          <font>
           <pointsize>10</pointsize>
@@ -212,19 +212,19 @@
          </font>
         </property>
         <property name="text">
-         <string>Slave Path:</string>
+         <string>Simulation Path:</string>
         </property>
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QLineEdit" name="slaveEdit">
+       <widget class="QLineEdit" name="simulationEdit">
         <property name="readOnly">
          <bool>true</bool>
         </property>
        </widget>
       </item>
       <item row="2" column="5">
-       <widget class="QPushButton" name="slaveBrowseButton">
+       <widget class="QPushButton" name="simulationBrowseButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -278,7 +278,7 @@
        <number>15</number>
       </property>
       <item row="7" column="5">
-       <widget class="QPushButton" name="logMasterBrowseButton">
+       <widget class="QPushButton" name="logOpSimulationManagerBrowseButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -324,7 +324,7 @@
        </widget>
       </item>
       <item row="8" column="0" colspan="2">
-       <widget class="QLabel" name="logSlaveLabel">
+       <widget class="QLabel" name="logSimulationLabel">
         <property name="font">
          <font>
           <pointsize>10</pointsize>
@@ -333,7 +333,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Log File Slave:</string>
+         <string>Log File Simulation:</string>
         </property>
        </widget>
       </item>
@@ -354,7 +354,7 @@
        </widget>
       </item>
       <item row="7" column="2">
-       <widget class="QLineEdit" name="logMasterPathEdit">
+       <widget class="QLineEdit" name="logOpSimulationManagerPathEdit">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -379,7 +379,7 @@
        </widget>
       </item>
       <item row="8" column="2">
-       <widget class="QLineEdit" name="logSlavePathEdit">
+       <widget class="QLineEdit" name="logSimulationPathEdit">
         <property name="minimumSize">
          <size>
           <width>400</width>
@@ -417,7 +417,7 @@
        </widget>
       </item>
       <item row="7" column="0">
-       <widget class="QLabel" name="logMasterLabel">
+       <widget class="QLabel" name="logSimulationManagerLabel">
         <property name="font">
          <font>
           <pointsize>10</pointsize>
@@ -426,7 +426,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Log File Master:</string>
+         <string>Log File Simulation Manager:</string>
         </property>
        </widget>
       </item>
@@ -459,7 +459,7 @@
        </widget>
       </item>
       <item row="8" column="5">
-       <widget class="QPushButton" name="logSlaveBrowseButton">
+       <widget class="QPushButton" name="logSimulationBrowseButton">
         <property name="minimumSize">
          <size>
           <width>0</width>
@@ -501,10 +501,10 @@
   <tabstop>libraryPathEdit</tabstop>
   <tabstop>libraryBrowseButton</tabstop>
   <tabstop>logLevelSpinBox</tabstop>
-  <tabstop>logMasterPathEdit</tabstop>
-  <tabstop>logMasterBrowseButton</tabstop>
-  <tabstop>logSlavePathEdit</tabstop>
-  <tabstop>logSlaveBrowseButton</tabstop>
+  <tabstop>logOpSimulationManagerPathEdit</tabstop>
+  <tabstop>logOpSimulationManagerBrowseButton</tabstop>
+  <tabstop>logSimulationPathEdit</tabstop>
+  <tabstop>logSimulationBrowseButton</tabstop>
   <tabstop>outputPathEdit</tabstop>
   <tabstop>outputBrowseButton</tabstop>
  </tabstops>

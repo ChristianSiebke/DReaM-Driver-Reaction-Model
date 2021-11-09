@@ -31,7 +31,7 @@ The sim@openpass source code can be found [here](https://gitlab.eclipse.org/ecli
 
 To build the project, follow the guide in "pathToRepo\sim\doc\OSI World Setup Guide.pdf".
 
-The branch 'servant' contains the contributions that will be included in the next release. The branch ‘master’ contains the latest stable release.
+The branch 'servant' contains the contributions that will be included in the next release. The 'main' branch contains the latest stable release.
 
 ### Committer contribution process
 

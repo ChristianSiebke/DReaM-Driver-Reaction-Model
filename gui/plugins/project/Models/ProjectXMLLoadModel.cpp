@@ -35,7 +35,7 @@ bool ProjectXMLLoadModel::load(QIODevice *const device, ProjectModel *const proj
     // Verify xml header
     if ((xml.readNext() == QXmlStreamReader::TokenType::StartDocument) &&
         (xml.readNext() == QXmlStreamReader::TokenType::StartElement) &&
-        (xml.name() == KeyMasterConfig))
+        (xml.name() == KeyOpSimulationManager))
     {
         // Load project from xml stream
         return loadProject(xml, project);
@@ -48,40 +48,40 @@ bool ProjectXMLLoadModel::loadProject(QXmlStreamReader &xml,
 {
     // Import the elements
     bool success = true;
-    QList<QString> keys = KeyListMasterConfig;
+    QList<QString> keys = KeyListOpSimulationManager;
     while (xml.readNextStartElement())
     {
         keys.removeAll(xml.name().toString());
         if (xml.name() == KeyLibraryPath)
             project->setLibraryPath(xml.readElementText());
-        else if (xml.name() == KeyLogFileMaster)
-            project->setLogMaster(xml.readElementText());
+        else if (xml.name() == KeyLogFileOpSimulationManager)
+            project->setLogOpSimulationManager(xml.readElementText());
         else if (xml.name() == KeyLogLevel)
             project->setLogLevel(xml.readElementText().toUInt());
-        else if (xml.name() == KeySlavePath)
-            project->setSlaveExe(xml.readElementText());
-        else if (xml.name() == KeySlaveConfigs)
-            success = loadSlaveConfig(xml, project) && success;
+        else if (xml.name() == KeySimulationPath)
+            project->setSimulationExe(xml.readElementText());
+        else if (xml.name() == KeySimulationConfigs)
+            success = loadSimulationConfig(xml, project) && success;
         else
             xml.skipCurrentElement();
     }
     return success && keys.isEmpty();
 }
 
-bool ProjectXMLLoadModel::loadSlaveConfig(QXmlStreamReader &xml, ProjectModel *const project)
+bool ProjectXMLLoadModel::loadSimulationConfig(QXmlStreamReader &xml, ProjectModel *const project)
 {
     bool success = true;
-    QList<QString> keys = KeyListSlaveConfig;
+    QList<QString> keys = KeyListSimulationConfig;
 
     xml.readNextStartElement();
-    if (xml.name() == KeySlaveConfig)
+    if (xml.name() == KeySimulationConfig)
     {
         while (xml.readNextStartElement())
         {
             keys.removeAll(xml.name().toString());
 
-            if (xml.name() == KeyLogFileSlave)
-                project->setLogSlave(xml.readElementText());
+            if (xml.name() == KeyLogFileSimulation)
+                project->setLogSimulation(xml.readElementText());
             else if (xml.name() == KeyConfigPath)
                 project->setConfigPath(xml.readElementText());
             else if (xml.name() == KeyResultPath)

@@ -13,7 +13,7 @@
 #include <unordered_map>
 
 #include "include/agentTypeInterface.h"
-#include "include/slaveConfigInterface.h"
+#include "include/simulationConfigInterface.h"
 #include "include/profilesInterface.h"
 #include "include/sceneryInterface.h"
 #include "include/scenarioInterface.h"
@@ -27,7 +27,7 @@ public:
 
     virtual bool ImportAllConfigurations() = 0;
     virtual std::shared_ptr<SystemConfigInterface> GetSystemConfigBlueprint() = 0;
-    virtual SlaveConfigInterface* GetSlaveConfig() = 0;
+    virtual SimulationConfigInterface* GetSimulationConfig() = 0;
     virtual ProfilesInterface* GetProfiles() = 0;
     virtual SceneryInterface* GetScenery() = 0;
     virtual ScenarioInterface* GetScenario() = 0;

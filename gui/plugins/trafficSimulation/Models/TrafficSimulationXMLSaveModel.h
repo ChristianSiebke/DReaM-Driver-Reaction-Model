@@ -11,7 +11,7 @@
 //-----------------------------------------------------------------------------
 //! @file  TrafficSimulationXMLLoadModel.h
 //! @ingroup trafficSimulationPlugin
-//! @brief This class provides routines for saving the slaveConfig XML file.
+//! @brief This class provides routines for saving the simulationConfig XML file.
 //!
 //!        The saving process and the corrsponding routines strictly follow the structure
 //!        of the corresponding combination XML file. In the general structure of such a saving
@@ -31,7 +31,7 @@
 #include "openPASS-TrafficSimulation/TrafficSimulationInterface.h"
 
 //-----------------------------------------------------------------------------
-//! @brief This class provides routines for saving the slaveConfig XML file.
+//! @brief This class provides routines for saving the simulationConfig XML file.
 //!
 //!        The saving process and the corrsponding routines strictly follow the structure
 //!        of the corresponding combination XML file. In the general structure of such a saving
@@ -72,7 +72,7 @@ public:
                                ExperimentInterface *experiment);
 
     //-----------------------------------------------------------------------------
-    //! This method writes all Libraries needed by the simulation slave, i.e. all XML elements
+    //! This method writes all Libraries needed by the simulation, i.e. all XML elements
     //! of <Libraries> occuring in <ExperimentConfig>.
     //!
     //! @param[in]      xml                 the instance of QXmlStreamWriter connected to the combination xml file

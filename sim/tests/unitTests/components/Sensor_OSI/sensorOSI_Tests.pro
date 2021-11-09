@@ -16,7 +16,7 @@ include(../../../testing.pri)
 win32:QMAKE_CXXFLAGS += -Wa,-mbig-obj
 
 UNIT_UNDER_TEST = $$OPEN_SRC/components/Sensor_OSI/src
-WORLD_OSI = $$OPEN_SRC/core/slave/modules/World_OSI
+WORLD_OSI = $$OPEN_SRC/core/opSimulation/modules/World_OSI
 
 INCLUDEPATH += \
     $$UNIT_UNDER_TEST \

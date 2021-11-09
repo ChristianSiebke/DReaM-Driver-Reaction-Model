@@ -142,7 +142,7 @@ void VehicleProfilesPresenter::refreshSystemConfig()
         vehicleProfilesView->setSystemProfileSelection(systemList.keys());
 
         if (!QFileInfo::exists(project->absoluteToConfigPath(filepath)))
-            vehicleProfilesView->setSystemConfigError("System Config not accessible! Check configuration path in Master Configuration.");
+            vehicleProfilesView->setSystemConfigError("System Config not accessible! Check configuration path in opSimulationManager.xml.");
 
         // check whether systems in current profile exist in systemConfig (systemList)
         if (!systemsConsistent())
@@ -274,7 +274,7 @@ void VehicleProfilesPresenter::refreshModelCatalogue()
 
         if (!QFileInfo::exists(project->absoluteToConfigPath(modelCatalogue)))
         {
-            vehicleProfilesView->setModelCatalogueError("Model catalogue not accessible! Check configuration path in Master Configuration.");
+            vehicleProfilesView->setModelCatalogueError("Model catalogue not accessible! Check configuration path in opSimulationManager.xml.");
             vehicleProfilesView->enableModelView(false);
             return;
         }

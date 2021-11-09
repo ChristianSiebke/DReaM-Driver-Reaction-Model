@@ -39,4 +39,4 @@ HEADERS += \
     src/sensor_driverImplementation.h \
     src/Signals/sensorDriverSignal.h \
     src/Signals/sensor_driverDefinitions.h \
-    ../../core/slave/modules/World_OSI/RoutePlanning/RouteCalculation.h
+    ../../core/opSimulation/modules/World_OSI/RoutePlanning/RouteCalculation.h

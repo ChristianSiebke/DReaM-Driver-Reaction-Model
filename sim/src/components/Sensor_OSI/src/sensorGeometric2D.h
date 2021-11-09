@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "core/slave/modules/World_OSI/WorldData.h"
+#include "core/opSimulation/modules/World_OSI/WorldData.h"
 #include "objectDetectorBase.h"
 #include "osi3/osi_sensorview.pb.h"
 #include "osi3/osi_sensordata.pb.h"

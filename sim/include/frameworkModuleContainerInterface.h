@@ -17,7 +17,7 @@ class AgentBlueprintProviderInterface;
 class DataBufferInterface;
 class WorldInterface;
 
-namespace SimulationSlave {
+namespace core {
 
 class AgentFactoryInterface;
 class EventDetectorNetworkInterface;
@@ -102,4 +102,4 @@ public:
     virtual WorldInterface* GetWorld() = 0;
 };
 
-} //namespace SimulationSlave
+} //namespace core

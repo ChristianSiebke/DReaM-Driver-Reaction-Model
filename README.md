@@ -6,7 +6,9 @@ The software suite of openPASS started as a set of stand-alone applications, whi
 
 # Where to get it
 
-As the program is still under development and is extended continuously, we advice you to use the latest sources from our [GitLab repository](https://gitlab.eclipse.org/eclipse/simopenpass/simopenpass). Please download from the master branch which contains the most stable and recent openPASS version. The servant branch contains current developments which are planned to be pushed to the master branch after a comprehensive review by the openPASS Working Group.
+As the program is still under development and is extended continuously, we advice you to use the latest sources from our [GitLab repository](https://gitlab.eclipse.org/eclipse/simopenpass/simopenpass).
+The `main` branch contains the most stable and recent openPASS version. 
+The `develop` branch contains current developments which are planned to be pushed to the main branch after a comprehensive review by the openPASS Working Group.
 
 # Installation
 An installation guide can be found [here](https://www.eclipse.org/simopenpass/content/html/index.html).
@@ -39,7 +41,7 @@ OpenPASS can calculate Time-To-Collision (TTC) and Time-To-Headway (THW). The ou
 
 6. __Which probability distributions for parameter variations can be used in openPASS?__
 
-Parameters can either be simple or stochastic. Simple parameters only have one value, while stochastic parameters have a minimum and maximum value as well as distribution specific parameters. If a parameter is stochastic, a distribution can be choosen from [this list](https://gitlab.eclipse.org/eclipse/simopenpass/simopenpass/-/blob/servant/sim/src/core/slave/modules/Stochastics/stochastics_implementation.h). In future (with OpenSCENARIO 1.1) the number of distributions will be extended.
+Parameters can either be simple or stochastic. Simple parameters only have one value, while stochastic parameters have a minimum and maximum value as well as distribution specific parameters. If a parameter is stochastic, a distribution can be choosen from [this list](https://gitlab.eclipse.org/eclipse/simopenpass/simopenpass/-/blob/servant/sim/src/core/opSimulation/modules/Stochastics/stochastics_implementation.h). In future (with OpenSCENARIO 1.1) the number of distributions will be extended.
 
 # Contact
 

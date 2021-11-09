@@ -67,7 +67,7 @@ cmake \
   "$CMAKE_PYTHON_COMMAND_ARG" \
   $CMAKE_VERSION_ARG \
   -D CMAKE_PREFIX_PATH="$(join_paths ${DEPS[@]})" \
-  -D CMAKE_INSTALL_PREFIX="$PWD/../dist/Slave" \
+  -D CMAKE_INSTALL_PREFIX="$PWD/../dist/opSim" \
   -D CMAKE_BUILD_TYPE=Release \
   -D INSTALL_BIN_DIR:STRING=. \
   -D INSTALL_EXTRA_RUNTIME_DEPS=ON \

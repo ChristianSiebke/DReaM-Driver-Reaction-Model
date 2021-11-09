@@ -17,20 +17,20 @@
 class ProjectXMLBaseModel
 {
 protected:
-    static QString const KeyMasterConfig;
-    static QString const KeySlaveConfigs;
-    static QString const KeySlaveConfig;
+    static QString const KeyOpSimulationManager;
+    static QString const KeySimulationConfigs;
+    static QString const KeySimulationConfig;
     static QString const KeyLibraryPath;
     static QString const KeyResultPath;
     static QString const KeyConfigPath;
-    static QString const KeyLogFileMaster;
-    static QString const KeyLogFileSlave;
+    static QString const KeyLogFileOpSimulationManager;
+    static QString const KeyLogFileSimulation;
     static QString const KeyLogLevel;
-    static QString const KeySlavePath;
+    static QString const KeySimulationPath;
 
 protected:
-    static QList<QString> const KeyListMasterConfig;
-    static QList<QString> const KeyListSlaveConfig;
+    static QList<QString> const KeyListOpSimulationManager;
+    static QList<QString> const KeyListSimulationConfig;
 };
 
 #endif // PROJECTXMLBASEMODEL_H

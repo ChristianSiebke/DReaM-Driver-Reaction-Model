@@ -293,7 +293,7 @@ For details on the indivual parameters see the :ref:`components reference <compo
 SpawnerProfile ProfileGroup
 ---------------------------
 
-This sections contains all parameters of the spawners referenced in the :ref:`slaveconfig`.
+This sections contains all parameters of the spawners referenced in the :ref:`simulationconfig`.
 For details on the indivual parameters see the :ref:`components reference <components_spawner>`.
 
 .. code-block:: xml
@@ -312,7 +312,7 @@ TrafficRules ProfileGroup
 -------------------------
 
 This sections contains the global traffic rules, that may vary depending on the country.
-The :ref:`slaveconfig_environment` section in the SlaveConfig defines which set is used.
+The :ref:`simulationconfig_environment` section in the SimulationConfig defines which set is used.
 Currently there are only rules regulating highway traffic. These are the following:
 
 +---------------------------+---------+---------------------------------------------------------------------------------------------------------------------+

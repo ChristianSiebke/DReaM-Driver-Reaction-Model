@@ -44,7 +44,7 @@ public:
     SpawnPointInterface& operator=(SpawnPointInterface&&) = delete;
     virtual ~SpawnPointInterface() = default;
 
-    using Agents = std::vector<SimulationSlave::Agent*>;
+    using Agents = std::vector<core::Agent*>;
     virtual Agents Trigger(int time) = 0;
 
 protected:

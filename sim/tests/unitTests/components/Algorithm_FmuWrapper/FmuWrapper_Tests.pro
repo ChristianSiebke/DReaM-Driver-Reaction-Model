@@ -20,7 +20,7 @@ INCLUDEPATH += \
     . \
     $$OPEN_SRC/components/Algorithm_FmuWrapper/src \
     $$OPEN_SRC/components/Algorithm_FmuWrapper/src/FmiImporter/include \
-    $$OPEN_SRC/core/slave/modules/World_OSI \
+    $$OPEN_SRC/core/opSimulation/modules/World_OSI \
     $$relative_path($$EXTRA_INCLUDE_PATH)/FMILibrary \
     FMI \    # third party
     FMI1 \

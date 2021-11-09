@@ -57,57 +57,57 @@ public:
     virtual ~ObservationInterface() = default;
 
     //-----------------------------------------------------------------------------
-    //! Called by framework in master before each simulation run starts
+    //! Called by framework in opSimulationManager before each simulation run starts
     //-----------------------------------------------------------------------------
-    virtual void MasterPreHook() = 0; // currently not implemented
+    virtual void OpSimulationManagerPreHook() = 0; // currently not implemented
 
     //-----------------------------------------------------------------------------
-    //! Called by framework in master after each simulation run ends
+    //! Called by framework in opSimulationManager after each simulation run ends
     //!
-    //! @param[in]     filename      Name of file containing the simulation run results from the slave
+    //! @param[in]     filename      Name of file containing the simulation run results from the simulation
     //-----------------------------------------------------------------------------
-    virtual void MasterPostHook(const std::string& filename) = 0; // currently not implemented
+    virtual void OpSimulationManagerPostHook(const std::string& filename) = 0; // currently not implemented
 
     //-----------------------------------------------------------------------------
-    //! Called by framework in slave before all simulation runs start
+    //! Called by framework in simulation before all simulation runs start
     //!
     //-----------------------------------------------------------------------------
-    virtual void SlavePreHook() = 0;
+    virtual void OpSimulationPreHook() = 0;
 
     //-----------------------------------------------------------------------------
-    //! Called by framework in slave before each simulation run starts be stored
+    //! Called by framework in simulation before each simulation run starts be stored
     //-----------------------------------------------------------------------------
-    virtual void SlavePreRunHook() = 0;
+    virtual void OpSimulationPreRunHook() = 0;
 
     //-----------------------------------------------------------------------------
-    //! Called by framework in slave at each time step.
+    //! Called by framework in simulation at each time step.
     //! Observation module can indicate end of simulation run here.
     //!
     //! @param[in]     time          Current scheduling time
     //! @param[in,out] runResult     Reference to run result
     //-----------------------------------------------------------------------------
-    virtual void SlaveUpdateHook(int time, RunResultInterface& runResult) = 0;
+    virtual void OpSimulationUpdateHook(int time, RunResultInterface& runResult) = 0;
 
     //-----------------------------------------------------------------------------
-    //! Called by framework in slave after each simulation run ends.
+    //! Called by framework in simulation after each simulation run ends.
     //! Observation module can observe the current simulation run here.
     //!
     //! @param[in]     runResult     Reference to run result
     //-----------------------------------------------------------------------------
-    virtual void SlavePostRunHook(const RunResultInterface& runResult) = 0;
+    virtual void OpSimulationPostRunHook(const RunResultInterface& runResult) = 0;
 
     //-----------------------------------------------------------------------------
-    //! Called by framework in slave after all simulation runs end.
+    //! Called by framework in simulation after all simulation runs end.
     //-----------------------------------------------------------------------------
-    virtual void SlavePostHook() = 0;
+    virtual void OpSimulationPostHook() = 0;
 
     //-----------------------------------------------------------------------------
-    //! Called by framework in slave after all simulation runs end to transfer the
-    //! observation module results to the master.
+    //! Called by framework in simulation after all simulation runs end to transfer
+    //! the observation module results to the opSimulationManager.
     //!
     //! @return                      File to be transferred
     //-----------------------------------------------------------------------------
-    virtual const std::string SlaveResultFile() = 0;
+    virtual const std::string OpSimulationResultFile() = 0;
 
 protected:
     //-----------------------------------------------------------------------------

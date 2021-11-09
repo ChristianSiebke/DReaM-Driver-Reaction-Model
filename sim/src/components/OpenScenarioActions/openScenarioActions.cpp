@@ -37,7 +37,7 @@ extern "C" OPENSCENARIO_ACTIONS_SHARED_EXPORT ModelInterface *OpenPASS_CreateIns
     PublisherInterface *const publisher,
     AgentInterface *agent,
     const CallbackInterface *callbacks,
-    SimulationSlave::EventNetworkInterface *const eventNetwork)
+    core::EventNetworkInterface *const eventNetwork)
 {
     Callbacks = callbacks;
 

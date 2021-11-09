@@ -26,12 +26,12 @@
 ProjectInterface::Library const ProjectModel::DefaultLibrary = QCoreApplication::applicationDirPath().append(QStringLiteral("/lib"));
 ProjectInterface::Config const ProjectModel::DefaultConfig = QCoreApplication::applicationDirPath().append("/configs");
 ProjectInterface::Result const ProjectModel::DefaultResult = QCoreApplication::applicationDirPath();
-ProjectInterface::LogMaster const ProjectModel::DefaultLogMaster = QCoreApplication::applicationDirPath().append(QStringLiteral("/OpenPassMaster.log"));
-ProjectInterface::LogSlave const ProjectModel::DefaultLogSlave = QCoreApplication::applicationDirPath().append(QStringLiteral("/OpenPassSlave.log"));
-ProjectInterface::Slave const ProjectModel::DefaultSlave = QCoreApplication::applicationDirPath().append(QStringLiteral("/OpenPassSlave.exe"));
+ProjectInterface::LogOpSimulationManager const ProjectModel::DefaultLogOpSimulationManager = QCoreApplication::applicationDirPath().append(QStringLiteral("/opSimulationManager.log"));
+ProjectInterface::LogSimulation const ProjectModel::DefaultLogSimulation = QCoreApplication::applicationDirPath().append(QStringLiteral("/opSimulation.log"));
+ProjectInterface::Simulation const ProjectModel::DefaultSimulation = QCoreApplication::applicationDirPath().append(QStringLiteral("/opSimulation.exe"));
 
 ProjectModel::ProjectModel(QObject *parent) :
-    ProjectInterface(parent), _config(DefaultConfig), _library(DefaultLibrary), _result(DefaultResult), _logMaster(DefaultLogMaster), _logSlave(DefaultLogSlave), _logLevel(0), _slave(DefaultSlave)
+    ProjectInterface(parent), _config(DefaultConfig), _library(DefaultLibrary), _result(DefaultResult), _logOpSimulationManager(DefaultLogOpSimulationManager), _logSimulation(DefaultLogSimulation), _logLevel(0), _simulation(DefaultSimulation)
 {
 }
 
@@ -40,9 +40,9 @@ bool ProjectModel::clear()
     setLibraryPath(DefaultLibrary);
     setConfigPath(DefaultConfig);
     setResultPath(DefaultResult);
-    setLogMaster(DefaultLogMaster);
-    setLogSlave(DefaultLogSlave);
-    setSlaveExe(DefaultSlave);
+    setLogOpSimulationManager(DefaultLogOpSimulationManager);
+    setLogSimulation(DefaultLogSimulation);
+    setSimulationExe(DefaultSimulation);
     setLogLevel(0);
     Q_EMIT cleared();
     return true;
@@ -73,28 +73,29 @@ bool ProjectModel::simulate()
 {
     int ret;
 
-    // Prepare slave arguments
+    // Prepare simulation arguments
     QStringList arguments;
 
     arguments << QString("--logLevel") << QString::number(getLogLevel())
-              << QString("--logFile") << getLogSlave()
+              << QString("--logFile") << getLogSimulation()
               << QString("--lib") << getLibraryPath()
               << QString("--configs") << getConfigPath()
               << QString("--results") << getResultPath();
 
-    QProcess *slave = new QProcess;
+    QProcess *simulation = new QProcess;
 
-    if (QFileInfo::exists(getSlaveExe()))
+    if (QFileInfo::exists(getSimulationExe()))
     {
-        slave->setProgram(getSlaveExe());
-        slave->setArguments(arguments);
-        slave->start();
+        simulation->setProgram(getSimulationExe());
+        simulation->setArguments(arguments);
+        simulation->start();
     }
     else
     {
-        // tell user that slave exe does not exist
+        // tell user that simulation exe does not exist
         QMessageBox warning;
-        warning.setText("Slave exe not found! Check slave path settings in Master Configuration!");
+        warning.setText("Simulation exe not found! Check simulation path settings in opSimulationManager.xml!");
+
         warning.setInformativeText("");
         warning.setStandardButtons(QMessageBox::Ok);
         ret = warning.exec();
@@ -162,32 +163,32 @@ ProjectInterface::Result ProjectModel::getResultPath() const
     return _result;
 }
 
-bool ProjectModel::setLogMaster(ProjectInterface::LogMaster const &logMaster)
+bool ProjectModel::setLogOpSimulationManager(ProjectInterface::LogOpSimulationManager const &logOpSimulationManager)
 {
-    // Update the path to the directory containing the Log File of the Master
-    _logMaster = logMaster;
+    // Update the path to the directory containing the Log File of opSimulationManager
+    _logOpSimulationManager = logOpSimulationManager;
     Q_EMIT update();
     return true;
 }
 
-ProjectInterface::LogMaster ProjectModel::getLogMaster() const
+ProjectInterface::LogOpSimulationManager ProjectModel::getLogOpSimulationManager() const
 {
-    // Get the path of the directory containing the Log File of the Master
-    return _logMaster;
+    // Get the path of the directory containing the Log File of opSimulationManager
+    return _logOpSimulationManager;
 }
 
-bool ProjectModel::setLogSlave(ProjectInterface::LogSlave const &logSlave)
+bool ProjectModel::setLogSimulation(ProjectInterface::LogSimulation const &logSimulation)
 {
-    // Update the path to the directory containing the Log File of the Slave
-    _logSlave = logSlave;
+    // Update the path to the directory containing the Log File of the Simulation
+    _logSimulation = logSimulation;
     Q_EMIT update();
     return true;
 }
 
-ProjectInterface::LogSlave ProjectModel::getLogSlave() const
+ProjectInterface::LogSimulation ProjectModel::getLogSimulation() const
 {
-    // Get the path of the directory containing the Log File of the Slave
-    return _logSlave;
+    // Get the path of the directory containing the Log File of the Simulation
+    return _logSimulation;
 }
 
 bool ProjectModel::setLogLevel(ProjectInterface::LogLevel const &logLevel)
@@ -204,22 +205,22 @@ ProjectInterface::LogLevel ProjectModel::getLogLevel() const
     return _logLevel;
 }
 
-bool ProjectModel::setSlaveExe(ProjectInterface::Slave const &slave)
+bool ProjectModel::setSimulationExe(ProjectInterface::Simulation const &simulation)
 {
-    _slave = slave;
+    _simulation = simulation;
     Q_EMIT update();
     return true;
 }
 
-ProjectInterface::Slave ProjectModel::getSlaveExe() const
+ProjectInterface::Simulation ProjectModel::getSimulationExe() const
 {
-    // Get the path of the application "OpenPassSlave"
-    return _slave;
+    // Get the path of the application "opSimulation"
+    return _simulation;
 }
 
 bool ProjectModel::getProjectStatus() const
 {
-    if ((!_logSlave.isEmpty()) && (!_logMaster.isEmpty()) && (!_result.isEmpty()) && (!_config.isEmpty()))
+    if ((!_logSimulation.isEmpty()) && (!_logOpSimulationManager.isEmpty()) && (!_result.isEmpty()) && (!_config.isEmpty()))
         return true;
 
     return false;

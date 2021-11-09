@@ -22,9 +22,9 @@ from math import nan, isnan
 from junitparser import JUnitXml, Failure
 from reports import HtmlReport
 
-class SLAVEINFO:
-    exe = 'OpenPassSlave' + ('.exe' if os.name == 'nt' else '')
-    log_file = 'OpenPassSlave.log'
+class SIMULATIONINFO:
+    exe = 'opSimulation' + ('.exe' if os.name == 'nt' else '')
+    log_file = 'opSimulation.log'
     configs = 'configs'
     results = 'results'
 

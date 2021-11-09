@@ -15,7 +15,7 @@
 
 class ScenarioInterface;
 
-namespace SimulationSlave {
+namespace core {
 
 class EventNetworkInterface;
 class Manipulator;
@@ -39,4 +39,4 @@ public:
     virtual std::vector<const Manipulator*> GetManipulators() = 0;
 };
 
-}// namespace SimulationSlave
+}// namespace core

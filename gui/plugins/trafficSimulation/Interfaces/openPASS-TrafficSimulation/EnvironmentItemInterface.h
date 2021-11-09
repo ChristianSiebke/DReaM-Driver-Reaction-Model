@@ -17,7 +17,7 @@
 //!        An environment parameter is generally described by a value and a selection
 //!        probability. The latter defines the probability to be selected as an
 //!        environment parameter in a simulation run. Environment parameters are stored
-//!        in the slaveConfig XML file under the <EnvironmentConfig> element.
+//!        in the simulationConfig XML file under the <EnvironmentConfig> element.
 //-----------------------------------------------------------------------------
 #ifndef ENVIRONMENTITEMINTERFACE_H
 #define ENVIRONMENTITEMINTERFACE_H
@@ -32,7 +32,7 @@
 //!        An environment parameter is generally described by a value and a selection
 //!        probability. The latter defines the probability to be selected as an
 //!        environment parameter in a simulation run. Environment parameters are stored
-//!        in the slaveConfig XML file under the <EnvironmentConfig> element.
+//!        in the simulationConfig XML file under the <EnvironmentConfig> element.
 //-----------------------------------------------------------------------------
 class EnvironmentItemInterface : public QObject
 {
