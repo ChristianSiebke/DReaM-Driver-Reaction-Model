@@ -588,20 +588,8 @@ const Interfaces::Lanes& Section::GetLanes() const
 
 double Section::GetLength() const
 {
-    double sum = 0.0;
-
-    if (lanes.empty())
-    {
-        return 0.0;
-    }
-
-    //return osiSection->length();
-    for (const auto& lane : lanes)
-    {
-        sum += lane->GetLength();
-    }
-
-    return sum / lanes.size();
+    //All lanes must have equal length, so we simple take the length of first lane
+    return lanes.empty() ? 0.0 : lanes.front()->GetLength();
 }
 
 void Section::SetCenterLaneBoundary(std::vector<Id> laneBoundaryId)
