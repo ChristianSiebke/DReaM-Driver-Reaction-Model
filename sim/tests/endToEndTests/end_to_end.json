@@ -275,6 +275,42 @@
             [
                 "Sensor_Latency"
             ]
+        },
+        "Sensor_Failure_Detected":
+        {
+            "baseConfig":
+            {
+                "duration": 5,
+                "invocations": 2
+            },
+            "specialized":
+            {
+                "description": "Sensor detects scenario agent in some timestep.",
+                "query": "count(AgentId | AgentId==0 and Sensor0_DetectedAgents=='1') > 0",
+                "success_rate": 1
+            },
+            "configurations":
+            [
+                "Sensor_Failure"
+            ]
+        },
+        "Sensor_Failure_Undetected":
+        {
+            "baseConfig":
+            {
+                "duration": 5,
+                "invocations": 2
+            },
+            "specialized":
+            {
+                "description": "Sensor does not detect scenario agent in some timestep.",
+                "query": "count(AgentId | AgentId==0 and Sensor0_DetectedAgents=='nan') > 0",
+                "success_rate": 1
+            },
+            "configurations":
+            [
+                "Sensor_Failure"
+            ]
         }
     }
 }
