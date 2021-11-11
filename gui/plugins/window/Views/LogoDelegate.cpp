@@ -6,6 +6,8 @@
  * SPDX-License-Identifier: EPL-2.0
  ********************************************************************************/
 
+#include "Views/LogoDelegate.h"
+
 #include <QPixmap>
 
 QPixmap LogoDelegate::logoRequest()
