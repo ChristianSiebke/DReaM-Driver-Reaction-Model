@@ -1,3 +1,12 @@
+################################################################################
+# Copyright (c) 2020-2021 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+#
+# This program and the accompanying materials are made available under the
+# terms of the Eclipse Public License 2.0 which is available at
+# http://www.eclipse.org/legal/epl-2.0.
+#
+# SPDX-License-Identifier: EPL-2.0
+################################################################################
 #-----------------------------------------------------------------------------
 # \file  AlgorithmFmuWrapper.pro
 # \brief This file contains the information for the QtCreator-project of the
@@ -21,7 +30,7 @@ INCLUDEPATH += \
     $$relative_path($$EXTRA_INCLUDE_PATH)/FMILibrary/FMI1 \   #  - " -
     $$relative_path($$EXTRA_INCLUDE_PATH)/FMILibrary/FMI2 \   #  - " -
     $$relative_path($$EXTRA_INCLUDE_PATH)/FMILibrary/JM \     #  - " -
-    ../../core/slave/modules/World_OSI \
+    ../../core/opSimulation/modules/World_OSI \
     ../../.. \
     ../..
 
@@ -41,14 +50,7 @@ HEADERS += \
     src/FmiImporter/include/fmuChecker.h \
     AlgorithmFmuWrapper.h \
     src/fmuWrapper.h \
-    src/OsmpFmuHandler.h
-
-win32: {
-    LIBS += -llibboost_filesystem-mgw81-mt-x64-1_72
-}
-
-unix: {
-    LIBS += -lboost_filesystem
-}
+    src/OsmpFmuHandler.h \
+    src/variant_visitor.h
 
 LIBS += -lfmilib_shared -lopen_simulation_interface -lprotobuf

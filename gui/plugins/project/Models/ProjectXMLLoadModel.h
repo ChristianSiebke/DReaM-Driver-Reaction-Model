@@ -1,12 +1,12 @@
-/****************************************************************************** 
-* Copyright (c) 2017 Volkswagen Group of America. 
-* 
-* This program and the accompanying materials are made 
-* available under the terms of the Eclipse Public License 2.0 
-* which is available at https://www.eclipse.org/legal/epl-2.0/ 
-* 
-* SPDX-License-Identifier: EPL-2.0 
-******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2017 Volkswagen Group of America
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 #ifndef PROJECTXMLLOADMODEL_H
 #define PROJECTXMLLOADMODEL_H
@@ -32,7 +32,7 @@ public:
 protected:
     static bool loadProject(QXmlStreamReader &xml,
                             ProjectModel *const project);
-    static bool loadSlaveConfig(QXmlStreamReader &xml,
+    static bool loadSimulationConfig(QXmlStreamReader &xml,
                                 ProjectModel *const project);
 };
 

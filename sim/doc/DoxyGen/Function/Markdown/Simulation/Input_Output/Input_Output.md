@@ -201,18 +201,21 @@ Index range for signal groups:
 
 With corresponding defined indices :
 
-| Signal                        | Group                 | Id      |
-|-------------------------------|-----------------------|---------|
-| Dynamics                      | Dynamics              | 01      | 
-| Longitudinal                  | Algorithm             | 11      | 
-| Steering                      | Algorithm             | 12      | 
-| Acceleration                  | Algorithm             | 13      | 
-| Lateral                       | Algorithm             | 14      |
-| SecondaryDriverTasks          | Algorithm             | 19      |
-| Trajectory                    | OpenScenarioActions   | 71      |
-| SensorDriver                  | Sensor                | 81      |
-| SensorData                    | Sensor                | 90      |
-| ParametersVehicle             | Parameters            | 92      |
+| Signal                                 | Group                 | Id      |
+|----------------------------------------|-----------------------|---------|
+| Dynamics                               | Dynamics              | 01      |
+| Longitudinal                           | Algorithm             | 11      |
+| Steering                               | Algorithm             | 12      |
+| Acceleration                           | Algorithm             | 13      |
+| Lateral                                | Algorithm             | 14      |
+| SecondaryDriverTasks                   | Algorithm             | 19      |
+| Trajectory                             | Special               | 71      |
+| AcquireGlobalPosition                  | Special               | 74      |
+| CustomParameters (CustomCommandAction) | Special               | 75      |
+| SpeedAction                            | Special               | 76      |
+| SensorDriver                           | Sensor                | 81      |
+| SensorData                             | Sensor                | 90      |
+| ParametersVehicle                      | Parameters            | 92      |
 
 \subsubsection io_input_systemconfigblueprint_paramters Parameters
 
@@ -383,6 +386,15 @@ In addition to specifying logging column names by stating their full names, it i
 The wildcard can be used at most one time in each column reference.
 
 For an example, please see the slaveConfig.xml snippet above.
+
+\paragraph io_input_slaveconfig_observations_observationentities Observation_EntityRepository
+
+This observation module writes the EntityRepository into a CSV file.  It has the following parameters:
+
+| Parameter               | Description                                                             |
+|-------------------------|-------------------------------------------------------------------------|
+| FilenamePrefix          | Prefix of the output files, e.g. `XY` will result in `XY_Run_000.csv`   |
+| WritePersistentEntities | Choose:<br>- Consolidated: Persistent entities are written together with non-persistent into one file per run.  <br>- Separate: Persistent entities are written once into a file `<prefix>_Persistent.csv`<br>- Skip: Persistent entities are not written |
 
 ---
 

@@ -1,13 +1,13 @@
-/*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
-* Copyright (c) 2020 HLRS, University of Stuttgart.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2020 HLRS, University of Stuttgart
+ *               2017-2020 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 /** \file  SensorGeometric2D.h
@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "core/slave/modules/World_OSI/WorldData.h"
+#include "core/opSimulation/modules/World_OSI/WorldData.h"
 #include "objectDetectorBase.h"
 #include "osi3/osi_sensorview.pb.h"
 #include "osi3/osi_sensordata.pb.h"
@@ -42,7 +42,7 @@ struct SensorDetectionResults
 /** \brief This file models a sensor which only detects agents in a 2D area (x/y) in front of the agent
 * 	\details This sensor does not consider height.
 *
-* 	\ingroup SensorObjectDetector
+* 	\ingroup SensorOSI
 */
 //-----------------------------------------------------------------------------
 class SensorGeometric2D : public ObjectDetectorBase
@@ -79,15 +79,12 @@ public:
     SensorDetectionResults DetectObjects();
 
 protected:
-
-
     /*!
     * \brief Generates the SensorViewConfiguration to send the world data for filtering of the SensorView
     *
     * @return SensorViewConfiguration for parametrization of Sensorview
     */
     osi3::SensorViewConfiguration GenerateSensorViewConfiguration() override;
-
 
 private:
     void Observe(const int time, const SensorDetectionResults& results);
@@ -119,7 +116,7 @@ private:
      * \param sensorPosition Position of the sensor (light source)
      * \returns shadow polygon
     */
-    static multi_polygon_t CalcObjectShadow(const polygon_t& boundingBox, point_t sensorPosition);
+    multi_polygon_t CalcObjectShadow(const polygon_t& boundingBox, point_t sensorPosition);
 
     /**
      * Calculate how many percent of an object are inside the bright area
@@ -150,10 +147,11 @@ private:
     polygon_t CreateFivePointDetectionField() const;
 
     std::pair<point_t, polygon_t> CreateSensorDetectionField(const osi3::MovingObject* hostVehicle) const;
+
     template<typename T>
-    static void ApplyVisualObstructionToDetectionArea(multi_polygon_t& brightArea,
-                                                      const point_t& sensorPositionGlobal,
-                                                      const std::vector<const T*>& objects);
+    void ApplyVisualObstructionToDetectionArea(multi_polygon_t& brightArea,
+                                               const point_t& sensorPositionGlobal,
+                                               const std::vector<const T*>& objects);
     template<typename T>
     bool ObjectIsInDetectionArea(const T& object,
                                  const point_t& sensorPositionGlobal,
@@ -163,7 +161,7 @@ private:
                                                                                                                                           const point_t& sensorPositionGlobal,
                                                                                                                                           const polygon_t& detectionField) const;
 
-    std::string CreateAgentIdListString(const std::vector<OWL::Id>& owlIds) const;
+    std::string CreateObjectIdListString(const std::set<OWL::Id>& owlIds) const;
 
     bool enableVisualObstruction = false;
     double requiredPercentageOfVisibleArea = 0.001;
@@ -172,5 +170,6 @@ private:
     std::map<int, SensorDetectionResults> latentSensorDetectionResultsBuffer;
 
     static constexpr double MIN_VISIBLE_UNOBSTRUCTED_PERCENTAGE = 0.0001;
+    static constexpr double WARNING_THRESHOLD_SCALE = 1e6;
 };
 

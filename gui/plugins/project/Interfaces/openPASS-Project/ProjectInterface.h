@@ -1,12 +1,12 @@
-/****************************************************************************** 
-* Copyright (c) 2017 Volkswagen Group of America. 
-* 
-* This program and the accompanying materials are made 
-* available under the terms of the Eclipse Public License 2.0 
-* which is available at https://www.eclipse.org/legal/epl-2.0/ 
-* 
-* SPDX-License-Identifier: EPL-2.0 
-******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2017 Volkswagen Group of America
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  ProjectInterface.h
@@ -36,12 +36,12 @@ static ServiceManagerInterface::ID const ProjectInterfaceID =
  *      - the agent configuration file
  *      - the run configuration file
  *      - the scenery configuration file
- *      - the log file for openPASS Master
- *      - the log file for openPASS Slave
+ *      - the log file for openPASS Simulation Manager
+ *      - the log file for openPASS Simulation
  *      - the level of information in log files [0...5]
- *      - the executable openPASS Slave (path)
+ *      - the executable openPASS Simulation (path)
  * These items are transmitted as the framework configuration of the simulation
- * for further process to openPASS Master.
+ * for further process to opSimulationManager.
  */
 class ProjectInterface : public QObject,
                          public ServiceInterface<ProjectInterface, ProjectInterfaceID>
@@ -52,10 +52,10 @@ public:
     using Config = QString;
     using Library = QString;
     using Result = QString;
-    using LogMaster = QString;
-    using LogSlave = QString;
+    using LogOpSimulationManager = QString;
+    using LogSimulation = QString;
     using LogLevel = unsigned int;
-    using Slave = QString;
+    using Simulation = QString;
 
 public:
     explicit ProjectInterface(QObject *const parent = nullptr) :
@@ -158,37 +158,37 @@ public:
 
 public:
     //-----------------------------------------------------------------------------
-    //! Sets the path of the directory containing the log file of the openPASS Master
-    //! (Log Master) \a logMaster.
+    //! Sets the path of the directory containing the log file of the opSimulationManager
+    //! (Log opSimulationManager) \a logOpSimulationManager.
     //!
-    //! @param[in]      logMaster       The path of the file Log Master.
+    //! @param[in]      logOpSimulationManager       The path of the file Log opSimulationManager.
     //! @return                         True if the path exists.
     //-----------------------------------------------------------------------------
-    virtual bool setLogMaster(ProjectInterface::LogMaster const &logMaster) = 0;
+    virtual bool setLogOpSimulationManager(ProjectInterface::LogOpSimulationManager const &logOpSimulationManager) = 0;
 
     //-----------------------------------------------------------------------------
-    //! Gets the path of the directory containing the log file of the openPASS Master.
+    //! Gets the path of the directory containing the log file of the opSimulationManager.
     //!
-    //! @return                         The path of the Log Master.
+    //! @return                         The path of the Log opSimulationManager.
     //-----------------------------------------------------------------------------
-    virtual ProjectInterface::LogMaster getLogMaster() const = 0;
+    virtual ProjectInterface::LogOpSimulationManager getLogOpSimulationManager() const = 0;
 
 public:
     //-----------------------------------------------------------------------------
-    //! Sets the path of the directory containing the log file of the openPASS Slave
-    //! (Log Slave) \a logSlave.
+    //! Sets the path of the directory containing the log file of the openPASS Simulation
+    //! (Log Simulation) \a logSimulation.
     //!
-    //! @param[in]      logSlave        The path of the file Log Slave.
+    //! @param[in]      logSimulation        The path of the file Log Simulation.
     //! @return                         True if the path exists.
     //-----------------------------------------------------------------------------
-    virtual bool setLogSlave(ProjectInterface::LogSlave const &logSlave) = 0;
+    virtual bool setLogSimulation(ProjectInterface::LogSimulation const &logSimulation) = 0;
 
     //-----------------------------------------------------------------------------
-    //! Gets the path of the directory containing the log file of the openPASS Slave.
+    //! Gets the path of the directory containing the log file of the openPASS Simulation.
     //!
-    //! @return                     The path of the Log Slave.
+    //! @return                     The path of the Log Simulation.
     //-----------------------------------------------------------------------------
-    virtual ProjectInterface::LogSlave getLogSlave() const = 0;
+    virtual ProjectInterface::LogSimulation getLogSimulation() const = 0;
 
 public:
     //-----------------------------------------------------------------------------
@@ -209,18 +209,18 @@ public:
 
 public:
     //-----------------------------------------------------------------------------
-    //! Sets the path of the executable openPASS slave.
+    //! Sets the path of the executable openPASS simulation.
     //!
     //! @return                     True if the path exists.
     //-----------------------------------------------------------------------------
-    virtual bool setSlaveExe(ProjectInterface::Slave const &slave) = 0;
+    virtual bool setSimulationExe(ProjectInterface::Simulation const &simulation) = 0;
 
     //-----------------------------------------------------------------------------
-    //! Gets the path of the executable openPASS slave.
+    //! Gets the path of the executable openPASS simulation.
     //!
     //! @return                     The path of the executable.
     //-----------------------------------------------------------------------------
-    virtual ProjectInterface::Slave getSlaveExe() const = 0;
+    virtual ProjectInterface::Simulation getSimulationExe() const = 0;
 
 public:
     //-----------------------------------------------------------------------------

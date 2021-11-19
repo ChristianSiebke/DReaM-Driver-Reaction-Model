@@ -1,12 +1,12 @@
-/*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2017-2021 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 #pragma once
 
@@ -14,10 +14,10 @@
 #include "include/stochasticsInterface.h"
 
 class AgentBlueprintProviderInterface;
-class DataStoreInterface;
+class DataBufferInterface;
 class WorldInterface;
 
-namespace SimulationSlave {
+namespace core {
 
 class AgentFactoryInterface;
 class EventDetectorNetworkInterface;
@@ -46,11 +46,11 @@ public:
     virtual AgentFactoryInterface* GetAgentFactory() = 0;
 
     /*!
-    * \brief Returns a pointer to the data store
+    * \brief Returns a pointer to the data buffer
     *
-    * @return   data store pointer
+    * @return   data buffer pointer
     */
-    virtual DataStoreInterface* GetDataStore() = 0;
+    virtual DataBufferInterface* GetDataBuffer() = 0;
 
     /*!
     * \brief Returns a pointer to the EventDetectorNetwork
@@ -102,4 +102,4 @@ public:
     virtual WorldInterface* GetWorld() = 0;
 };
 
-} //namespace SimulationSlave
+} //namespace core

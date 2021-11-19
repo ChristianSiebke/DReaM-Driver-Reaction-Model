@@ -1,13 +1,13 @@
-/*******************************************************************************
-* Copyright (c) 2019, 2020 in-tech GmbH
-*               2020 HLRS, University of Stuttgart.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2020 HLRS, University of Stuttgart
+ *               2019-2021 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 #pragma once
 
@@ -18,8 +18,10 @@
 #include <set>
 #include "boost/graph/adjacency_list.hpp"
 
+//! Double values with difference lower than this should be considered equal
 constexpr double EQUALITY_BOUND = 1e-3;
 
+//! Type of element in RoadNetwork
 enum class RoadNetworkElementType
 {
     Road,
@@ -27,6 +29,7 @@ enum class RoadNetworkElementType
     None
 };
 
+//! Element in RoadNetwork (as used as successor/predecessor of a road in OpenDRIVE)
 struct RoadNetworkElement
 {
     RoadNetworkElementType type;
@@ -39,6 +42,7 @@ struct RoadNetworkElement
     {}
 };
 
+//! Single connection of a junction
 struct JunctionConnection
 {
     std::string connectingRoadId;
@@ -46,14 +50,16 @@ struct JunctionConnection
     bool outgoingStreamDirection;
 };
 
+//! Priority defintion of two crossing connections on a junction
+//! (i.e. defines which vehicle has right of way)
 struct JunctionConnectorPriority
 {
     JunctionConnectorPriority(std::string high, std::string low) :
         high(high),
         low(low)
     {}
-    std::string high;
-    std::string low;
+    std::string high; //!id of connecting road with higher priority
+    std::string low; //!id of connecting road with lower priority
 };
 
 //!Rank of one junction connection w.r.t. another
@@ -75,33 +81,43 @@ struct IntersectingConnection
     }
 };
 
+//! Type of a lane
 enum class LaneType
 {
     Undefined = 0,
-    None,
+    Shoulder,
+    Border,
     Driving,
     Stop,
-    Shoulder,
-    Biking,
-    Sidewalk,
-    Border,
+    None,
     Restricted,
     Parking,
-    Bidirectional,
     Median,
-    Special1,
-    Special2,
-    Special3,
-    Roadworks,
-    Tram,
-    Rail,
-    Entry,
+    Biking,
+    Sidewalk,
+    Curb,
     Exit,
+    Entry,
+    OnRamp,
     OffRamp,
-    OnRamp
+    ConnectingRamp,
+    Tram,
+    RoadWorks,
+    Bidirectional
 };
 
+//! interval on a road over multiple lanes
+struct LaneSection
+{
+    double startS;
+    double endS;
+    std::vector<int> laneIds;
+};
+
+using LaneSections = std::vector<LaneSection>;
+
 namespace RelativeWorldView {
+//! Lane as viewed relative to a position / agent
 struct Lane
 {
     int relativeId;
@@ -120,6 +136,7 @@ struct Lane
     }
 };
 
+//! interval on a road over multiple lanes relative to a position / agent
 struct LanesInterval
 {
     double startS;
@@ -127,8 +144,11 @@ struct LanesInterval
     std::vector<Lane> lanes;
 };
 
+//! Relative view of a portion of the road network
+//! as viewed from a specific position / agent
 using Lanes = std::vector<LanesInterval>;
 
+//! Position of a junction relative to a agent
 struct Junction
 {
     double startS;
@@ -178,6 +198,10 @@ struct GlobalRoadPosition
     RoadPosition roadPosition {};
 };
 
+//! A single point in the world may have multiple RoadPositions (on intersecting roads), represented by this map
+//! The key is the id of the road and the value is the position on this road
+using GlobalRoadPositions = std::map<std::string, GlobalRoadPosition>;
+
 //! This struct describes how much space an agent has to next lane boundary on both sides
 struct Remainder
 {
@@ -201,8 +225,8 @@ struct RoadInterval
 //! Position of an object in the road network
 struct ObjectPosition
 {
-    std::map<const std::string, GlobalRoadPosition> referencePoint{};    //! position of the reference point mapped by roadId
-    std::map<const std::string, GlobalRoadPosition> mainLocatePoint{};   //! position of the mainLocatePoint (middle of agent front) mapped by roadId
+    GlobalRoadPositions referencePoint{};    //! position of the reference point mapped by roadId
+    GlobalRoadPositions mainLocatePoint{};   //! position of the mainLocatePoint (middle of agent front) mapped by roadId
     std::map<std::string, RoadInterval> touchedRoads{}; //! all roads the object is on (fully or partially), key is the roadId
 };
 
@@ -318,6 +342,7 @@ enum Type
     OvertakingBanEnd = 280,
     OvertakingBanTrucksEnd = 281,
     EndOffAllSpeedLimitsAndOvertakingRestrictions = 282,
+    PedestrianCrossing = 293,
     RightOfWayNextIntersection = 301,
     RightOfWayBegin = 306,
     RightOfWayEnd = 307,
@@ -353,7 +378,7 @@ struct Entity
     double relativeDistance {0};
     double value {0};
     std::string text {""};
-    std::list<Entity> supplementarySigns{};
+    std::vector<Entity> supplementarySigns{};
 };
 }
 
@@ -379,7 +404,8 @@ enum class Color
     Yellow,
     Red,
     Blue,
-    Green
+    Green,
+    Other
 };
 
 struct Entity
@@ -388,5 +414,43 @@ struct Entity
     Color color{Color::White};
     double relativeStartDistance{0.0};
     double width{0.0};
+};
+}
+
+namespace CommonTrafficLight
+{
+//! Type of a traffic light
+enum class Type
+{
+    Undefined,
+    ThreeLights,                //! Standard red, yellow, green without arrows or symbols
+    ThreeLightsLeft,            //! red, yellow, green with arrows pointing left
+    ThreeLightsRight,           //! red, yellow, green with arrows pointing right
+    ThreeLightsStraight,        //! red, yellow, green with arrows pointing upwards
+    ThreeLightsLeftStraight,    //! red, yellow, green with arrows pointing left and upwards
+    ThreeLightsRightStraight,   //! red, yellow, green with arrows pointing right and upwards
+    TwoLights,                  //! red, green without arrows or symbols
+    TwoLightsPedestrian,        //! red, green with pedestrian symbol
+    TwoLightsBicycle,           //! red, green with bicycle symbol
+    TwoLightsPedestrianBicycle  //! red, green with pedestrian and bicycle symbol
+};
+
+//! State of a traffic light
+enum class State
+{
+    Off,
+    Green,
+    Yellow,
+    Red,
+    RedYellow,
+    YellowFlashing
+};
+
+//! Represents a single traffic light as seen from an agent
+struct Entity
+{
+    Type type{Type::ThreeLights};
+    State state{State::Red};
+    double relativeDistance{0.0};
 };
 }

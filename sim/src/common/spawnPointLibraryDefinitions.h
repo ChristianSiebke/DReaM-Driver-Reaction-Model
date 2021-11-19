@@ -1,12 +1,12 @@
-/*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2019 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 #pragma once
 
 #include <unordered_map>
@@ -19,7 +19,7 @@ class ScenarioInterface;
 class WorldInterface;
 class StochasticsInterface;
 class AgentBlueprintProviderInterface;
-namespace SimulationSlave
+namespace core
 {
     class AgentFactoryInterface;
 }
@@ -52,7 +52,7 @@ struct SpawnPointDependencies
     SpawnPointDependencies(SpawnPointDependencies&&) = default;
 
 
-    SpawnPointDependencies(SimulationSlave::AgentFactoryInterface* agentFactory,
+    SpawnPointDependencies(core::AgentFactoryInterface* agentFactory,
                            WorldInterface* world,
                            const AgentBlueprintProviderInterface* agentBlueprintProvider,
                            StochasticsInterface* stochastics) :
@@ -65,7 +65,7 @@ struct SpawnPointDependencies
     SpawnPointDependencies& operator=(const SpawnPointDependencies&) = default;
     SpawnPointDependencies& operator=(SpawnPointDependencies&&) = default;
 
-    SimulationSlave::AgentFactoryInterface* agentFactory {nullptr};
+    core::AgentFactoryInterface* agentFactory {nullptr};
     WorldInterface* world {nullptr};
     const AgentBlueprintProviderInterface* agentBlueprintProvider {nullptr};
     StochasticsInterface* stochastics {nullptr};

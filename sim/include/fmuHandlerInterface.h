@@ -1,7 +1,12 @@
-/**********************************************
-* Copyright (c) 2018 in-tech GmbH             *
-* on behalf of BMW AG                         *
-***********************************************/
+/********************************************************************************
+ * Copyright (c) 2018 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 
 //-----------------------------------------------------------------------------
@@ -128,8 +133,9 @@ public:
         bool boolValue;
         int intValue;
         double realValue;
-        char* stringValue;
+        const char* stringValue;
     };
+
 
 protected:
     struct fmu_check_data_t* cdata;   //!< check data to be passed around between the FMIL functions

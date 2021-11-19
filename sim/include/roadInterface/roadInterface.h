@@ -1,13 +1,13 @@
-/*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
-*               2016, 2017, 2018 ITK Engineering GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2016-2018 ITK Engineering GmbH
+ *               2017-2020 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  RoadInterface.h
@@ -19,8 +19,8 @@
 #include <cassert>
 #include <cmath>
 #include <algorithm>
-#include <list>
 #include <map>
+#include <vector>
 
 #include "roadElementTypes.h"
 #include "roadLaneSectionInterface.h"
@@ -211,18 +211,12 @@ public:
     //! @param[in]  elementType         element type of the link
     //! @param[in]  elementId           ID of the linked element
     //! @param[in]  contactPoint        contact point type of link on the linked element
-    //! @param[in]  direction           orientation of the lanes to link; only relevant
-    //!                                 for a neighbor link type
-    //! @param[in]  side                at which side the neighboring road lies; only
-    //!                                 relevant for a neighbor link type
     //! @return                         false if an error has occurred, true otherwise
     //-----------------------------------------------------------------------------
     virtual bool AddLink(RoadLinkType type,
                  RoadLinkElementType elementType,
                  const std::string &elementId,
-                 ContactPointType contactPoint,
-                 RoadLinkDirectionType direction,
-                 RoadLinkSideType side) = 0;
+                 ContactPointType contactPoint) = 0;
 
     //-----------------------------------------------------------------------------
     //! Adds a new lane section to a road by creating a new RoadLaneSection object
@@ -255,28 +249,28 @@ public:
     //!
     //! @return                         list of elevation profiles
     //-----------------------------------------------------------------------------
-    virtual const std::list<RoadElevation*> & GetElevations() const = 0;
+    virtual const std::vector<RoadElevation*> & GetElevations() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the stored list of lane offsets.
     //!
     //! @return                         list of lane offsets
     //-----------------------------------------------------------------------------
-    virtual const std::list<RoadLaneOffset*> & GetLaneOffsets() const = 0;
+    virtual const std::vector<RoadLaneOffset*> & GetLaneOffsets() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the stored list of road geometries.
     //!
     //! @return                         list of road geometries
     //-----------------------------------------------------------------------------
-    virtual const std::list<RoadGeometryInterface*> & GetGeometries() const = 0;
+    virtual const std::vector<RoadGeometryInterface*> & GetGeometries() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the stored list of road links.
     //!
     //! @return                         list of road links
     //-----------------------------------------------------------------------------
-    virtual const std::list<RoadLinkInterface*> & GetRoadLinks() const = 0;
+    virtual const std::vector<RoadLinkInterface*> & GetRoadLinks() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the stored list of lane sections.

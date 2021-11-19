@@ -1,13 +1,13 @@
-/*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
-*               2019 AMFD GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2019 AMFD GmbH
+ *               2019 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -52,11 +52,12 @@ TEST_P(AlgorithmLongitudinalCalculationsGetEngineTorqueMax, AlgorithmLongitudina
 
     // Set up test
     VehicleModelParameters vehicleParameters;
-    vehicleParameters.maximumEngineTorque = 270.;
-    vehicleParameters.minimumEngineSpeed = 800.;
-    vehicleParameters.maximumEngineSpeed = 4000.;
+    vehicleParameters.properties = {{"MaximumEngineTorque", 270.},
+                                    {"MinimumEngineSpeed", 800.},
+                                    {"MaximumEngineSpeed", 4000.}};
 
-    AlgorithmLongitudinalCalculations calculation{0.0, 0.0, vehicleParameters};
+    std::function<void (CbkLogLevel, const char*, int, const std::string&)> Log;
+    AlgorithmLongitudinalCalculations calculation{0.0, 0.0, vehicleParameters, Log};
 
     // Call test
     double result = calculation.GetEngineTorqueMax(data.input_EngineSpeed);
@@ -114,12 +115,13 @@ TEST_P(AlgorithmLongitudinalCalculationsGetEngineTorqueMin, AlgorithmLongitudina
 
     // Set up test
     VehicleModelParameters vehicleParameters;
-    vehicleParameters.maximumEngineTorque = 270.;
-    vehicleParameters.minimumEngineTorque = 30.;
-    vehicleParameters.minimumEngineSpeed = 800.;
-    vehicleParameters.maximumEngineSpeed = 4000.;
+    vehicleParameters.properties = {{"MaximumEngineTorque", 270.},
+                                    {"MinimumEngineTorque", 30.},
+                                    {"MinimumEngineSpeed", 800.},
+                                    {"MaximumEngineSpeed", 4000.}};
 
-    AlgorithmLongitudinalCalculations calculation{0.0, 0.0, vehicleParameters};
+    std::function<void (CbkLogLevel, const char*, int, const std::string&)> Log;
+    AlgorithmLongitudinalCalculations calculation{0.0, 0.0, vehicleParameters, Log};
 
     // Call test
     double result = calculation.GetEngineTorqueMin(data.input_EngineSpeed);
@@ -177,13 +179,19 @@ TEST_P(AlgorithmLongitudinalCalculationsGetAccFromEngineTorque, AlgorithmLongitu
 
     // Set up test
     VehicleModelParameters vehicleParameters;
-    vehicleParameters.axleRatio = 2.8;
-    std::vector<double> gRatios = {0., 4.1, 2.5, 1.4, 1., .9, .7};
-    vehicleParameters.gearRatios = gRatios;
-    vehicleParameters.staticWheelRadius = .35;
-    vehicleParameters.weight = 800.;
+    vehicleParameters.properties = {{"AxleRatio", 2.8},
+                                    {"GearRatio0", 0},
+                                    {"GearRatio1", 4.1},
+                                    {"GearRatio2", 2.5},
+                                    {"GearRatio3", 1.4},
+                                    {"GearRatio4", 1.},
+                                    {"GearRatio5", .9},
+                                    {"GearRatio6", .7},
+                                    {"Mass", 800}};
+    vehicleParameters.rearAxle.wheelDiameter = 0.7;
 
-    AlgorithmLongitudinalCalculations calculation{0.0, 0.0, vehicleParameters};
+    std::function<void (CbkLogLevel, const char*, int, const std::string&)> Log;
+    AlgorithmLongitudinalCalculations calculation{0.0, 0.0, vehicleParameters, Log};
 
     // Call test
     double result = calculation.GetAccFromEngineTorque(data.input_EngineTorque, data.input_ChosenGear);
@@ -240,12 +248,18 @@ TEST_P(AlgorithmLongitudinalCalculationsGetEngineSpeedByVelocity, AlgorithmLongi
 
     // Set up tests
     VehicleModelParameters vehicleParameters;
-    vehicleParameters.axleRatio = 1.;
-    std::vector<double> gRatios = {0., 4.1, 2.5, 1.4, 1., .9, .7};
-    vehicleParameters.gearRatios = gRatios;
-    vehicleParameters.staticWheelRadius = .25;
+    vehicleParameters.properties = {{"AxleRatio", 1},
+                                    {"GearRatio1", 4.1},
+                                    {"GearRatio2", 2.5},
+                                    {"GearRatio3", 1.4},
+                                    {"GearRatio4", 1.},
+                                    {"GearRatio5", .9},
+                                    {"GearRatio6", .7},
+                                    {"Mass", 800}};
+    vehicleParameters.rearAxle.wheelDiameter = 0.5;
 
-    AlgorithmLongitudinalCalculations calculation{0.0, 0.0, vehicleParameters};
+    std::function<void (CbkLogLevel, const char*, int, const std::string&)> Log;
+    AlgorithmLongitudinalCalculations calculation{0.0, 0.0, vehicleParameters, Log};
 
     // Call test
     double result = calculation.GetEngineSpeedByVelocity(data.input_Velocity, 4) * 2 * M_PI;
@@ -302,14 +316,19 @@ TEST_P(AlgorithmLongitudinalCalculationsGetEngineTorqueAtGear, AlgorithmLongitud
 
     // Set up tests
     VehicleModelParameters vehicleParameters;
-    vehicleParameters.weight = 500.;
-    vehicleParameters.staticWheelRadius = .25;
-    vehicleParameters.numberOfGears = 6;
-    vehicleParameters.axleRatio = 1.;
-    std::vector<double> gRatios = {0., 4.1, 2.5, 1.4, 1., .9, .7};
-    vehicleParameters.gearRatios = gRatios;
+    vehicleParameters.properties = {{"AxleRatio", 1.},
+                                    {"GearRatio1", 4.1},
+                                    {"GearRatio2", 2.5},
+                                    {"GearRatio3", 1.4},
+                                    {"GearRatio4", 1.},
+                                    {"GearRatio5", .9},
+                                    {"GearRatio6", .7},
+                                    {"NumberOfGears", 6},
+                                    {"Mass", 500}};
+    vehicleParameters.rearAxle.wheelDiameter = 0.5;
 
-    AlgorithmLongitudinalCalculations calculation{0.0, 0.0, vehicleParameters};
+    std::function<void (CbkLogLevel, const char*, int, const std::string&)> Log;
+    AlgorithmLongitudinalCalculations calculation{0.0, 0.0, vehicleParameters, Log};
 
     // Call test
     double result = calculation.GetEngineTorqueAtGear(data.input_Gear, data.input_Acceleration);
@@ -370,16 +389,17 @@ TEST_P(AlgorithmLongitudinalCalculationsPedalPosition, AlgorithmLongitudinalCalc
 
     // Set up test
     VehicleModelParameters vehicleParameters;
-    vehicleParameters.maximumEngineTorque = data.engineTorqueMax;
-    vehicleParameters.numberOfGears = 1;
-    vehicleParameters.gearRatios = {1.0, 1.0};
-    vehicleParameters.axleRatio = 1.0;
-    vehicleParameters.staticWheelRadius = 1.0;
-    vehicleParameters.weight = 1000.0;
-    vehicleParameters.minimumEngineSpeed = -10000;
-    vehicleParameters.maximumEngineSpeed = 10000;
+    vehicleParameters.properties = {{"AxleRatio", 1},
+                                    {"GearRatio1", 1},
+                                    {"NumberOfGears", 1},
+                                    {"MaximumEngineTorque", data.engineTorqueMax},
+                                    {"MinimumEngineSpeed", -10000},
+                                    {"MaximumEngineSpeed", 10000},
+                                    {"Mass", 1000}};
+    vehicleParameters.rearAxle.wheelDiameter = 2.;
 
-    AlgorithmLongitudinalCalculations calculation{0.0, data.input_Acceleration, vehicleParameters};
+    std::function<void (CbkLogLevel, const char*, int, const std::string&)> Log;
+    AlgorithmLongitudinalCalculations calculation{0.0, data.input_Acceleration, vehicleParameters, Log};
 
     // Call test
     calculation.CalculatePedalPositions();

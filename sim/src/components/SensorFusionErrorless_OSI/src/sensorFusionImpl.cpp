@@ -1,12 +1,12 @@
-/*******************************************************************************
-* Copyright (c) 2020 in-tech GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2020 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 /** \brief sensorFusionImpl.cpp */
@@ -73,8 +73,7 @@ void SensorFusionErrorlessImplementation::UpdateOutput(int localLinkId, std::sha
         // to any ADAS
         try
         {
-            data = std::make_shared<SensorDataSignal const>(
-                        out_sensorData);
+            data = std::make_shared<SensorDataSignal const>(out_sensorData);
         }
         catch(const std::bad_alloc&)
         {
@@ -98,7 +97,10 @@ void SensorFusionErrorlessImplementation::Trigger(int)
 void SensorFusionErrorlessImplementation::MergeSensorData(const osi3::SensorData& in_SensorData)
 {
     out_sensorData = {};
-    for (auto& movingObject : in_SensorData.moving_object())
+
+    out_sensorData.mutable_sensor_view()->MergeFrom(in_SensorData.sensor_view());
+
+    for (const auto& movingObject : in_SensorData.moving_object())
     {
         auto existingObject = std::find_if(out_sensorData.mutable_moving_object()->begin(), out_sensorData.mutable_moving_object()->end(),
                                            [&](const auto& object){return movingObject.header().ground_truth_id(0).value() == object.header().ground_truth_id(0).value();});
@@ -111,7 +113,8 @@ void SensorFusionErrorlessImplementation::MergeSensorData(const osi3::SensorData
             out_sensorData.add_moving_object()->CopyFrom(movingObject);
         }
     }
-    for (auto& stationaryObject : in_SensorData.stationary_object())
+
+    for (const auto& stationaryObject : in_SensorData.stationary_object())
     {
         auto existingObject = std::find_if(out_sensorData.mutable_stationary_object()->begin(), out_sensorData.mutable_stationary_object()->end(),
                                            [&](const auto& object){return stationaryObject.header().ground_truth_id(0).value() == object.header().ground_truth_id(0).value();});

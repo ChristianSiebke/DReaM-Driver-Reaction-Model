@@ -1,17 +1,17 @@
-/******************************************************************************
-* Copyright (c) 2019 Volkswagen Group of America.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2019 Volkswagen Group of America
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  TrafficSimulationXMLLoadModel.h
 //! @ingroup trafficSimulationPlugin
-//! @brief This class provides routines for saving the slaveConfig XML file.
+//! @brief This class provides routines for saving the simulationConfig XML file.
 //!
 //!        The saving process and the corrsponding routines strictly follow the structure
 //!        of the corresponding combination XML file. In the general structure of such a saving
@@ -31,7 +31,7 @@
 #include "openPASS-TrafficSimulation/TrafficSimulationInterface.h"
 
 //-----------------------------------------------------------------------------
-//! @brief This class provides routines for saving the slaveConfig XML file.
+//! @brief This class provides routines for saving the simulationConfig XML file.
 //!
 //!        The saving process and the corrsponding routines strictly follow the structure
 //!        of the corresponding combination XML file. In the general structure of such a saving
@@ -72,7 +72,7 @@ public:
                                ExperimentInterface *experiment);
 
     //-----------------------------------------------------------------------------
-    //! This method writes all Libraries needed by the simulation slave, i.e. all XML elements
+    //! This method writes all Libraries needed by the simulation, i.e. all XML elements
     //! of <Libraries> occuring in <ExperimentConfig>.
     //!
     //! @param[in]      xml                 the instance of QXmlStreamWriter connected to the combination xml file

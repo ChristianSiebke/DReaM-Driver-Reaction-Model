@@ -1,12 +1,12 @@
-/*********************************************************************
-* Copyright (c) 2019, 2020 in-tech
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-**********************************************************************/
+/********************************************************************************
+ * Copyright (c) 2019-2021 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 #pragma once
 
@@ -34,10 +34,14 @@ public:
                  const std::string & ());
     MOCK_METHOD1(SetSceneryPath,
                  void(const std::string&));
+    MOCK_METHOD0(GetSceneryDynamics,
+                 const SceneryDynamicsInterface& ());
+    MOCK_METHOD1(AddTrafficSignalController,
+                 void (const openScenario::TrafficSignalController& controller));
     MOCK_METHOD1(AddScenarioEntity,
                  void(const ScenarioEntity&));
     MOCK_METHOD1(AddScenarioGroupsByEntityNames,
-                 void(const std::map<std::string, std::list<std::string>>&));
+                 void(const std::map<std::string, std::vector<std::string>>&));
     MOCK_METHOD1(AddConditionalEventDetector,
                  void(const openScenario::ConditionalEventDetectorInformation&));
     MOCK_METHOD2(AddAction,
@@ -54,4 +58,6 @@ public:
                  void(const double));
     MOCK_CONST_METHOD0(GetEntities,
                        const std::vector<ScenarioEntity>&());
+    MOCK_METHOD1(SetEnvironment,
+                 void (const openScenario::EnvironmentAction& ));
 };

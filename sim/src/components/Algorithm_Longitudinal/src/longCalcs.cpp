@@ -1,14 +1,14 @@
-/*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
-*               2016, 2017 ITK Engineering GmbH
-* Copyright (c) 2020 HLRS, University of Stuttgart.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2020 HLRS, University of Stuttgart
+ *               2016-2017 ITK Engineering GmbH
+ *               2019 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 /** @file  longCalcs.cpp */
@@ -20,10 +20,14 @@
 #include <map>
 #include <iostream>
 #include "longCalcs.h"
+#include "common/commonTools.h"
+#include "components/common/vehicleProperties.h"
 
 AlgorithmLongitudinalCalculations::AlgorithmLongitudinalCalculations(double xVel,
                                                                      double in_aVehicle,
-                                                                     const VehicleModelParameters &vehicleModelParameters) :
+                                                                     const VehicleModelParameters &vehicleModelParameters,
+                                                                     std::function<void (CbkLogLevel, const char*, int, const std::string&)> Log) :
+    Log(Log),
     velocity(xVel),
     accelerationWish(in_aVehicle),
     vehicleModelParameters(vehicleModelParameters)
@@ -57,20 +61,27 @@ double AlgorithmLongitudinalCalculations::GetEngineTorqueAtGear(int gear, double
         return 0;
     }
 
-    if (gear > vehicleModelParameters.numberOfGears || gear < 0)
+    if (gear > GetVehicleProperty(vehicle::properties::NumberOfGears) || gear < 0)
     {
         throw std::runtime_error("Gear in AlgorithmLongitudinal is invalid");
     }
 
-    double wheelSetTorque = vehicleModelParameters.weight * vehicleModelParameters.staticWheelRadius * acceleration;
-    double engineTorqueAtGear = wheelSetTorque / (vehicleModelParameters.axleRatio * vehicleModelParameters.gearRatios.at(gear));
+    double wheelSetTorque = GetVehicleProperty(vehicle::properties::Mass) * 0.5 * vehicleModelParameters.rearAxle.wheelDiameter * acceleration;
+    double engineTorqueAtGear = wheelSetTorque / (GetVehicleProperty(vehicle::properties::AxleRatio) * GetVehicleProperty(vehicle::properties::GearRatio+std::to_string(gear)));
 
     return engineTorqueAtGear;
 }
 
+double AlgorithmLongitudinalCalculations::GetVehicleProperty(const std::string& propertyName)
+{
+    const auto property = helper::map::query(vehicleModelParameters.properties, propertyName);
+    THROWIFFALSE(property.has_value(), "Vehicle property \"" + propertyName + "\" was not set in the VehicleCatalog");
+    return property.value();
+}
+
 double AlgorithmLongitudinalCalculations::GetEngineSpeedByVelocity(double xVel, int gear)
 {
-    return (xVel * vehicleModelParameters.axleRatio * vehicleModelParameters.gearRatios.at(gear) * 60) / (vehicleModelParameters.staticWheelRadius * 2.0 * M_PI); // an dynamic wheel radius rDyn must actually be used here
+    return (xVel * GetVehicleProperty(vehicle::properties::AxleRatio) * GetVehicleProperty(vehicle::properties::GearRatio+std::to_string(gear)) * 60) / (vehicleModelParameters.rearAxle.wheelDiameter * M_PI); // an dynamic wheel radius rDyn must actually be used here
 }
 
 void AlgorithmLongitudinalCalculations::CalculateGearAndEngineSpeed()
@@ -78,7 +89,8 @@ void AlgorithmLongitudinalCalculations::CalculateGearAndEngineSpeed()
     std::map<double, int> nEngineSet;
     std::map<double, std::tuple<int, double, double>> minDeltaAccWheelBased;
 
-    for (int gear = 1; gear <= vehicleModelParameters.numberOfGears; ++gear)
+    const auto numberOfGears = GetVehicleProperty(vehicle::properties::NumberOfGears);
+    for (int gear = 1; gear <= numberOfGears; ++gear)
     {
         double engineSpeed = GetEngineSpeedByVelocity(velocity, gear);
         double limitWheelAcc;
@@ -160,35 +172,39 @@ bool AlgorithmLongitudinalCalculations::isTorqueWithinEngineLimits(double torque
 
 inline bool AlgorithmLongitudinalCalculations::isEngineSpeedWithinEngineLimits(double engineSpeed)
 {
-    return (engineSpeed >= vehicleModelParameters.minimumEngineSpeed && engineSpeed <= vehicleModelParameters.maximumEngineSpeed);
+    return (engineSpeed >= GetVehicleProperty(vehicle::properties::MinimumEngineSpeed) && engineSpeed <= GetVehicleProperty(vehicle::properties::MaximumEngineSpeed));
 }
 
 double AlgorithmLongitudinalCalculations::GetEngineTorqueMax(double engineSpeed)
 {
-    double torqueMax = vehicleModelParameters.maximumEngineTorque; // initial value at max
+    const double maximumEngineTorque = GetVehicleProperty(vehicle::properties::MaximumEngineTorque);
+    const double maximumEngineSpeed = GetVehicleProperty(vehicle::properties::MaximumEngineSpeed);
+    const double minimumEngineSpeed = GetVehicleProperty(vehicle::properties::MinimumEngineSpeed);
+
+    double torqueMax = maximumEngineTorque; // initial value at max
     double speed = engineSpeed;
 
-    bool isLowerSection = engineSpeed < vehicleModelParameters.minimumEngineSpeed + 1000;
-    bool isBeyondLowerSectionBorder = engineSpeed < vehicleModelParameters.minimumEngineSpeed;
-    bool isUpperSection = engineSpeed > vehicleModelParameters.maximumEngineSpeed - 1000;
-    bool isBeyondUpperSectionBorder = engineSpeed > vehicleModelParameters.maximumEngineSpeed;
+    bool isLowerSection = engineSpeed < minimumEngineSpeed + 1000;
+    bool isBeyondLowerSectionBorder = engineSpeed < minimumEngineSpeed;
+    bool isUpperSection = engineSpeed > maximumEngineSpeed - 1000;
+    bool isBeyondUpperSectionBorder = engineSpeed > maximumEngineSpeed;
 
 
     if (isLowerSection)
     {
         if (isBeyondLowerSectionBorder) // not within limits
         {
-               speed = vehicleModelParameters.minimumEngineSpeed;
+               speed = minimumEngineSpeed;
          }
-        torqueMax = (1000 - (speed - vehicleModelParameters.minimumEngineSpeed)) * -0.1 + vehicleModelParameters.maximumEngineTorque;
+        torqueMax = (1000 - (speed - minimumEngineSpeed)) * -0.1 + maximumEngineTorque;
     }
     else if (isUpperSection)
     {
         if (isBeyondUpperSectionBorder)
         {
-            speed = vehicleModelParameters.maximumEngineSpeed;
+            speed = maximumEngineSpeed;
         }
-        torqueMax = (speed - vehicleModelParameters.maximumEngineSpeed + 1000) * -0.04 + vehicleModelParameters.maximumEngineTorque;
+        torqueMax = (speed - maximumEngineSpeed + 1000) * -0.04 + maximumEngineTorque;
     }
 
     return torqueMax;
@@ -201,9 +217,9 @@ double AlgorithmLongitudinalCalculations::GetEngineTorqueMin(double engineSpeed)
 
 double AlgorithmLongitudinalCalculations::GetAccFromEngineTorque(double engineTorque, int chosenGear)
 {
-    double wheelSetTorque = engineTorque * (vehicleModelParameters.axleRatio * vehicleModelParameters.gearRatios.at(chosenGear));
-    double wheelSetForce = wheelSetTorque / vehicleModelParameters.staticWheelRadius;
-    return wheelSetForce / vehicleModelParameters.weight;
+    double wheelSetTorque = engineTorque * (GetVehicleProperty(vehicle::properties::AxleRatio) * GetVehicleProperty(vehicle::properties::GearRatio+std::to_string(chosenGear)));
+    double wheelSetForce = wheelSetTorque / (0.5 * vehicleModelParameters.rearAxle.wheelDiameter);
+    return wheelSetForce / GetVehicleProperty(vehicle::properties::Mass);
 }
 
 void AlgorithmLongitudinalCalculations::CalculatePedalPositions()

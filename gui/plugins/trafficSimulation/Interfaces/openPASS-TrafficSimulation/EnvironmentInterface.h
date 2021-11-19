@@ -1,22 +1,22 @@
-/******************************************************************************
-* Copyright (c) 2019 Volkswagen Group of America.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2019 Volkswagen Group of America
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  EnvironmentInterface.h
 //! @ingroup trafficSimulationPlugin
 //! @brief The EnvironmentInterface class provides setter and getter methods for the maps of
-//!        environmental parameters, listed under <EnvironmentConfig> in the slaveConfig
+//!        environmental parameters, listed under <EnvironmentConfig> in the simulationConfig
 //!        XML file.
 //!
 //!        These comprise the time of day, visibility distance, friction coefficient
-//!        and the wheather. Different parameters of the same kind can be listed in the slaveConfig
+//!        and the wheather. Different parameters of the same kind can be listed in the simulationConfig
 //!        giving a probability to be selected in a simulation run. Environmental parameters
 //!        are instances of the EnvironmentItemInterface class. The container class for storing
 //!        environmental parameters is Qt't QMap class.
@@ -34,11 +34,11 @@
 
 //-----------------------------------------------------------------------------
 //! @brief The EnvironmentInterface class provides setter and getter methods for the maps of
-//!        environmental parameters, listed under <EnvironmentConfig> in the slaveConfig
+//!        environmental parameters, listed under <EnvironmentConfig> in the simulationConfig
 //!        XML file.
 //!
 //!        These comprise the time of day, visibility distance, friction coefficient
-//!        and the wheather. Different parameters of the same kind can be listed in the slaveConfig
+//!        and the wheather. Different parameters of the same kind can be listed in the simulationConfig
 //!        giving a probability to be selected in a simulation run. Environmental parameters
 //!        are instances of the EnvironmentItemInterface class. The container class for storing
 //!        environmental parameters is Qt't QMap class.

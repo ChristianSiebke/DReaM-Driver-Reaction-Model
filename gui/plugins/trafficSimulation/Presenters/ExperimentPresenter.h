@@ -1,12 +1,12 @@
-/******************************************************************************
-* Copyright (c) 2019 Volkswagen Group of America.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2019 Volkswagen Group of America
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  ExperimentPresenter.h
@@ -47,7 +47,7 @@ Q_SIGNALS:
     //-----------------------------------------------------------------------------
     //! Signal, emitted when the start simulation button has been clicked. Will
     //! trigger a process (started in TrafficSimulationPresenter) executing the
-    //! simulation slave with the current simulation settings of this plugin.
+    //! simulation with the current simulation settings of this plugin.
     //-----------------------------------------------------------------------------
     void startSimulation();
 

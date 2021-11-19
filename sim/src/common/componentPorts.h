@@ -1,12 +1,12 @@
-/*********************************************************************
-* Copyright (c) 2017, 2018 ITK Engineering GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-**********************************************************************/
+/********************************************************************************
+ * Copyright (c) 2017-2021 ITK Engineering GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 #ifndef COMPONENTPORTS_H
 #define COMPONENTPORTS_H
@@ -187,10 +187,10 @@ public:
     //! \param[in] id           Id of externalParameter
     //! \param[in,out] portMap  map of externalParameter this externalParameter shall be added
     externalParameter(int id,
-                      std::map<int, externalParameter<ValueType>*> *externalParameterMap):
+                      std::map<std::string, externalParameter<ValueType>*> *externalParameterMap):
         id(id)
     {
-        externalParameterMap->emplace(std::make_pair(id, this));
+        externalParameterMap->emplace(std::make_pair(std::to_string(id), this));
     }
 
     //! Destructor

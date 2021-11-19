@@ -1,12 +1,15 @@
-#/*******************************************************************************
-#* Copyright (c) 2019 in-tech GmbH
-#*
-#* This program and the accompanying materials are made
-#* available under the terms of the Eclipse Public License 2.0
-#* which is available at https://www.eclipse.org/legal/epl-2.0/
-#*
-#* SPDX-License-Identifier: EPL-2.0
-#*******************************************************************************/
+################################################################################
+# Copyright (c) 2021 ITK Engineering GmbH
+#               2019 in-tech GmbH
+#
+# This program and the accompanying materials are made available under the
+# terms of the Eclipse Public License 2.0 which is available at
+# http://www.eclipse.org/legal/epl-2.0.
+#
+# SPDX-License-Identifier: EPL-2.0
+################################################################################
+
+include($$PWD/../defaults.pri)
 
 isEmpty(OPEN_SRC) {
     OPEN_SRC=$$absolute_path($$system_path($$PWD/../src))
@@ -71,7 +74,7 @@ DEFINES += SUBDIR_LIB_GUI=\\\"/gui\\\"
 ## Qt plugins sub-directory ##
 DEFINES += SUBDIR_LIB_PLUGIN=\\\"/plugin\\\"
 
-# prefer bundled libs in OpenPassSlave directory over system libraries
+# prefer bundled libs in opSimulation directory over system libraries
 QMAKE_LFLAGS += -Wl,-rpath=\'\$\$ORIGIN\'
 
 ##################################################################
@@ -119,7 +122,7 @@ unix {
 OPENPASS_GTEST {
     message("[$$TARGET] Building test")
 
-    QT += xml
+    QT += xml xmlpatterns
     TEMPLATE = app
     CONFIG += console
     CONFIG += testcase

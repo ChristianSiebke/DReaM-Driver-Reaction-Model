@@ -1,13 +1,13 @@
-/*******************************************************************************
-* Copyright (c) 2019, 2020 in-tech GmbH
-*               2016, 2017 ITK Engineering GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2016-2017 ITK Engineering GmbH
+ *               2019-2020 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 #pragma once
 
@@ -47,7 +47,7 @@
 * maxCurvature                                        | The maximum curavture the vehicle is able to drive in 1/m
 * maximumEngineSpeed                                  | The maximum engine speed in 1/min
 * maximumEngineTorque                                 | The maximum torque of the engine in Nm
-* maximumSteeringWheelAngleAmplitude                  | The maximum amplitude of the steering wheel angle in degree
+* maximumSteeringWheelAngleAmplitude                  | The maximum amplitude of the steering wheel angle in radian
 * maxVelocity                                         | The maximum velocity of the vehicle in m/s
 * minimumEngineSpeed                                  | The idle speed of the engine in 1/min
 * minimumEngineTorque                                 | The drag torque of the engine in Nm

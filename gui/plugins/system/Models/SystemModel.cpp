@@ -1,12 +1,12 @@
-/****************************************************************************** 
-* Copyright (c) 2017 Volkswagen Group of America. 
-* 
-* This program and the accompanying materials are made 
-* available under the terms of the Eclipse Public License 2.0 
-* which is available at https://www.eclipse.org/legal/epl-2.0/ 
-* 
-* SPDX-License-Identifier: EPL-2.0 
-******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2017 Volkswagen Group of America
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 #include "Models/SystemModel.h"
 
@@ -22,7 +22,7 @@ SystemModel::SystemModel(ComponentInterface *const component,
     SystemInterface(parent), component(component), components(new SystemComponentManagerModel(component, this)), systems(new SystemMapModel(this))
 {
     // Load components
-    components->loadFromDirectory(QDir(QCoreApplication::applicationDirPath() + SUBDIR_LIB_COMPONENTS));
+    components->loadFromDirectory(QDir(QCoreApplication::applicationDirPath() + "/" + SUBDIR_XML_COMPONENTS));
 }
 
 bool SystemModel::clear()

@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xs:element name="Profiles">
+        <xs:complexType>
+            <xs:choice>
+                <xs:element ref="Profile"/>
+				<xs:choice>
+					<xs:sequence>
+						<xs:element minOccurs="0" maxOccurs="unbounded" ref="ProfileGroup"/>
+						<xs:element ref="AgentProfiles"/>
+						<xs:element minOccurs="0" maxOccurs="unbounded" ref="ProfileGroup"/>
+						<xs:element ref="VehicleProfiles"/>
+						<xs:element minOccurs="0" maxOccurs="unbounded" ref="ProfileGroup"/>
+					</xs:sequence>
+					<xs:sequence>
+						<xs:element minOccurs="0" maxOccurs="unbounded" ref="ProfileGroup"/>
+						<xs:element ref="VehicleProfiles"/>
+						<xs:element minOccurs="0" maxOccurs="unbounded" ref="ProfileGroup"/>
+						<xs:element ref="AgentProfiles"/>
+						<xs:element minOccurs="0" maxOccurs="unbounded" ref="ProfileGroup"/>
+					</xs:sequence>
+				</xs:choice>
+            </xs:choice>
+            <xs:attribute name="SchemaVersion" type="xs:NMTOKEN"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="ProfileGroup">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="Profile"/>
+            </xs:sequence>
+            <xs:attribute name="Type" use="required" type="xs:NCName"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="AgentProfiles">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" maxOccurs="unbounded" ref="AgentProfile"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="AgentProfile">
+        <xs:complexType>
+            <xs:choice>
+                <xs:sequence>
+                    <xs:element ref="DriverProfiles"/>
+                    <xs:element ref="VehicleProfiles"/>
+                </xs:sequence>
+				<xs:sequence>
+                    <xs:element ref="VehicleProfiles"/>
+                    <xs:element ref="DriverProfiles"/>
+                </xs:sequence>
+                <xs:sequence>
+                    <xs:element ref="System"/>
+                    <xs:element ref="VehicleModel"/>
+                </xs:sequence>
+				<xs:sequence>
+                    <xs:element ref="VehicleModel"/>
+                    <xs:element ref="System"/>
+                </xs:sequence>
+            </xs:choice>
+            <xs:attribute name="Name" type="xs:NCName"/>
+            <xs:attribute name="Type" type="xs:NCName"/>
+        </xs:complexType>
+    </xs:element>
+	<xs:element name="System">
+        <xs:complexType>
+			<xs:choice>
+				<xs:sequence>
+					<xs:element ref="File"/>
+					<xs:element ref="Id"/>
+				</xs:sequence>
+				<xs:sequence>
+					<xs:element ref="Id"/>
+					<xs:element ref="File"/>
+				</xs:sequence>
+			</xs:choice>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="File" type="xs:NCName"/>
+    <xs:element name="Id" type="xs:integer"/>
+    <xs:element name="VehicleModel" type="xs:NCName"/>
+    <xs:element name="DriverProfiles">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="1" maxOccurs="unbounded" ref="DriverProfile"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="DriverProfile">
+        <xs:complexType>
+            <xs:attribute name="Name" use="required" type="xs:NCName"/>
+            <xs:attribute name="Probability" use="required" type="xs:decimal"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="Profile">
+        <xs:complexType>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element maxOccurs="unbounded" ref="Bool"/>
+                <xs:element maxOccurs="unbounded" ref="Double"/>
+                <xs:element maxOccurs="unbounded" ref="NormalDistribution"/>
+                <xs:element maxOccurs="unbounded" ref="String"/>
+                <xs:element maxOccurs="unbounded" ref="Double"/>
+                <xs:element maxOccurs="unbounded" ref="List"/>
+                <xs:element maxOccurs="unbounded" ref="NormalDistribution"/>
+                <xs:element maxOccurs="unbounded" ref="LogNormalDistribution"/>
+                <xs:element maxOccurs="unbounded" ref="DoubleVector"/>
+				<xs:element ref="IntVector"/>
+				<xs:element ref="StringVector"/>
+			</xs:choice>
+            <xs:attribute name="Name" use="required" type="xs:NCName"/>
+            <xs:attribute name="Probability" type="xs:decimal"/>
+            <xs:attribute name="Type" type="xs:NCName"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="String">
+        <xs:complexType>
+            <xs:attribute name="Key" use="required" type="xs:NCName"/>
+            <xs:attribute name="Value" use="required" type="xs:NCName"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="Bool">
+        <xs:complexType>
+            <xs:attribute name="Key" use="required" type="xs:NCName"/>
+            <xs:attribute name="Value" use="required" type="xs:boolean"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="Double">
+        <xs:complexType>
+            <xs:attribute name="Key" use="required" type="xs:NCName"/>
+            <xs:attribute name="Value" use="required" type="xs:double"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="NormalDistribution">
+        <xs:complexType>
+            <xs:attribute name="Key" use="required" type="xs:NCName"/>
+            <xs:attribute name="Max" use="required" type="xs:decimal"/>
+            <xs:attribute name="Mean" use="required" type="xs:decimal"/>
+            <xs:attribute name="Min" use="required" type="xs:decimal"/>
+            <xs:attribute name="SD" use="required" type="xs:decimal"/>
+        </xs:complexType>
+    </xs:element>
+	<xs:element name="List">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="ListItem"/>
+            </xs:sequence>
+            <xs:attribute name="Name" use="required" type="xs:NCName"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="ListItem">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:choice minOccurs="0">
+                    <xs:element ref="String"/>
+                    <xs:sequence>
+                        <xs:element ref="StringVector"/>
+                        <xs:element ref="IntVector"/>
+                    </xs:sequence>
+                </xs:choice>
+                <xs:element maxOccurs="unbounded" ref="Double"/>
+                <xs:element minOccurs="0" ref="Reference"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+	    <xs:element name="Reference">
+        <xs:complexType>
+            <xs:attribute name="Name" use="required" type="xs:NCName"/>
+            <xs:attribute name="Type" use="required" type="xs:NCName"/>
+        </xs:complexType>
+    </xs:element>
+	    <xs:element name="StringVector">
+        <xs:complexType>
+            <xs:attribute name="Key" use="required" type="xs:NCName"/>
+            <xs:attribute name="Value" use="required" type="xs:integer"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="IntVector">
+        <xs:complexType>
+            <xs:attribute name="Key" use="required" type="xs:NCName"/>
+            <xs:attribute name="Value" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="VehicleProfiles">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="VehicleProfile"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+	    <xs:element name="LogNormalDistribution">
+        <xs:complexType>
+            <xs:attribute name="Key" use="required" type="xs:NCName"/>
+            <xs:attribute name="Max" use="required" type="xs:decimal"/>
+            <xs:attribute name="Min" use="required" type="xs:decimal"/>
+            <xs:attribute name="Mu" use="required" type="xs:decimal"/>
+            <xs:attribute name="Sigma" use="required" type="xs:decimal"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="VehicleProfile">
+        <xs:complexType>
+            <xs:all minOccurs="0">
+                <xs:element ref="Model"/>
+                <xs:element ref="Components"/>
+                <xs:element ref="Sensors"/>
+            </xs:all>
+            <xs:attribute name="Name" use="required"/>
+            <xs:attribute name="Probability" type="xs:decimal"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="Model">
+        <xs:complexType>
+            <xs:attribute name="Name" use="required" type="xs:NCName"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="Components">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" ref="Component"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="Component">
+        <xs:complexType>
+            <xs:all>
+                <xs:element ref="Profiles"/>
+                <xs:element minOccurs="0" ref="SensorLinks"/>
+            </xs:all>
+            <xs:attribute name="Type" use="required" type="xs:NCName"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="SensorLinks">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="SensorLink"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="SensorLink">
+        <xs:complexType>
+            <xs:attribute name="InputId" use="required" type="xs:NCName"/>
+            <xs:attribute name="SensorId" use="required" type="xs:integer"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="Sensors">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="Sensor"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="Sensor">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="Position"/>
+                <xs:element ref="Profile"/>
+            </xs:sequence>
+            <xs:attribute name="Id" use="required" type="xs:integer"/>
+        </xs:complexType>
+    </xs:element>
+	<xs:element name="DoubleVector">
+        <xs:complexType>
+            <xs:attribute name="Key" use="required" type="xs:NCName"/>
+            <xs:attribute name="Value" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="Position">
+        <xs:complexType>
+            <xs:attribute name="Height" use="required" type="xs:decimal"/>
+            <xs:attribute name="Lateral" use="required" type="xs:decimal"/>
+            <xs:attribute name="Longitudinal" use="required" type="xs:decimal"/>
+            <xs:attribute name="Name" use="required" type="xs:NCName"/>
+            <xs:attribute name="Pitch" use="required" type="xs:decimal"/>
+            <xs:attribute name="Roll" use="required" type="xs:decimal"/>
+            <xs:attribute name="Yaw" use="required" type="xs:decimal"/>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

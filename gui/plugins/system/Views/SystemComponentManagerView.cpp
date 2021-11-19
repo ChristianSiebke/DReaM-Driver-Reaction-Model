@@ -1,12 +1,12 @@
-/****************************************************************************** 
-* Copyright (c) 2017 Volkswagen Group of America. 
-* 
-* This program and the accompanying materials are made 
-* available under the terms of the Eclipse Public License 2.0 
-* which is available at https://www.eclipse.org/legal/epl-2.0/ 
-* 
-* SPDX-License-Identifier: EPL-2.0 
-******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2017 Volkswagen Group of America
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 #include "Views/SystemComponentManagerView.h"
 
@@ -57,7 +57,7 @@ void SystemComponentManagerView::updateManagerView()
     }
 
     // Load again the components
-    if (_components->loadFromDirectory(QDir(QCoreApplication::applicationDirPath() + SUBDIR_LIB_COMPONENTS)))
+    if (_components->loadFromDirectory(QDir(QCoreApplication::applicationDirPath() + "/" + SUBDIR_XML_COMPONENTS)))
     {
         for (unsigned char index = 0; index < ui->tree->topLevelItemCount(); ++index)
         {

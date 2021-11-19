@@ -1,20 +1,20 @@
-#/*******************************************************************************
-#* Copyright (c) 2019 in-tech GmbH
-#*
-#* This program and the accompanying materials are made
-#* available under the terms of the Eclipse Public License 2.0
-#* which is available at https://www.eclipse.org/legal/epl-2.0/
-#*
-#* SPDX-License-Identifier: EPL-2.0
-#*******************************************************************************/
+################################################################################
+# Copyright (c) 2019 in-tech GmbH
+#
+# This program and the accompanying materials are made available under the
+# terms of the Eclipse Public License 2.0 which is available at
+# http://www.eclipse.org/legal/epl-2.0.
+#
+# SPDX-License-Identifier: EPL-2.0
+################################################################################
 message("***** PARSING defaults.pri *****")
 
 win32 {
     isEmpty(DESTDIR) {
-        DESTDIR_SLAVE="C:\OpenPASS\bin"
+        DESTDIR_SIMULATION="C:\OpenPASS\bin"
         DESTDIR_TESTS="C:\OpenPASS\bin\tests"
     } else {
-        DESTDIR_SLAVE=$$DESTDIR
+        DESTDIR_SIMULATION=$$DESTDIR
         DESTDIR_TESTS=$$DESTDIR
     }
 
@@ -33,10 +33,10 @@ win32 {
 
 unix {
     isEmpty(DESTDIR) {
-        DESTDIR_SLAVE="/OpenPASS/bin"
+        DESTDIR_SIMULATION="/OpenPASS/bin"
         DESTDIR_TESTS="/OpenPASS/bin/tests"
     } else {
-        DESTDIR_SLAVE=$$DESTDIR
+        DESTDIR_SIMULATION=$$DESTDIR
         DESTDIR_TESTS=$$DESTDIR
     }
 

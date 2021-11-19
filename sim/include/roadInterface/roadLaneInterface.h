@@ -1,13 +1,13 @@
-/*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
-*               2016, 2017, 2018 ITK Engineering GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2016-2018 ITK Engineering GmbH
+ *               2017-2020 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  roadLaneInterface.h
@@ -24,6 +24,10 @@
 //! Class representing a road lane.
 //-----------------------------------------------------------------------------
 class RoadLaneWidth;
+
+using LaneIds = std::vector<int>;
+using RoadLaneWidths = std::vector<RoadLaneWidth*>;
+using RoadLaneRoadMarks = std::vector<RoadLaneRoadMark*>;
 
 class RoadLaneInterface
 {
@@ -124,28 +128,28 @@ public:
     //!
     //! @return                         RoadLaneTypeType of the road lane
     //-----------------------------------------------------------------------------
-    virtual const std::list<RoadLaneWidth*> &GetWidths() const = 0;
+    virtual const RoadLaneWidths &GetWidths() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the widths of the road lane.
     //!
     //! @return                         RoadLaneTypeType of the road lane
     //-----------------------------------------------------------------------------
-    virtual const std::list<RoadLaneWidth*> &GetBorders() const = 0;
+    virtual const RoadLaneWidths &GetBorders() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the successors of a road lane, can have at most one element.
     //!
     //! @return                         Successors of the road lane
     //-----------------------------------------------------------------------------
-    virtual const std::list<int> &GetSuccessor() const = 0;
+    virtual const LaneIds &GetSuccessor() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the predecessors of a road lane, can have at most one element.
     //!
     //! @return                         Predecessors of the road lane
     //-----------------------------------------------------------------------------
-    virtual const std::list<int> &GetPredecessor() const = 0;
+    virtual const LaneIds &GetPredecessor() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Sets the flag, if the road lane is in the reference direction or not.
@@ -175,7 +179,7 @@ public:
     //! @return                         RoadLaneRoadMarkType
     //-----------------------------------------------------------------------------
 
-    virtual const std::list<RoadLaneRoadMark*> &GetRoadMarks() const = 0;
+    virtual const RoadLaneRoadMarks &GetRoadMarks() const = 0;
 
 };
 

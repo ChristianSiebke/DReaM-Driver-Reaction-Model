@@ -1,12 +1,12 @@
-/*********************************************************************
-* Copyright (c) 2019 ITK Engineering GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-**********************************************************************/
+/********************************************************************************
+ * Copyright (c) 2019-2020 ITK Engineering GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 #include "ModelTimePlot.h"
 
@@ -40,7 +40,6 @@ void ModelTimePlot::LoadPathData(const QString &pathName)
     Q_EMIT Clear();
     selectedIndexList.clear();
 
-    qDebug("LoadPathData %s", qPrintable(rootPath));
     treeModelHighD->setRootResultDir(rootPath);
 }
 
@@ -148,8 +147,8 @@ void ModelTimePlot::CreateTabTables(const QString &fileName, int trackId, QStrin
 bool ModelTimePlot::ContainsHighDFormat(const QString &fileName)
 {
     TableModelPlot tableModel(this, fileName);
-    if (tableModel.headerData(0, Qt::Horizontal, Qt::DisplayRole).toString() == "frame" &&
-        tableModel.headerData(1, Qt::Horizontal, Qt::DisplayRole).toString() == "id")
+    if (tableModel.headerData(0, Qt::Horizontal, Qt::DisplayRole).toString() == "Timestep" &&
+        tableModel.headerData(1, Qt::Horizontal, Qt::DisplayRole).toString() == "AgentId")
     {
         if (!firstHeader.isEmpty() && firstHeader != tableModel.GetHeaderData())
         {

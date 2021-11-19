@@ -1,17 +1,17 @@
-# /*********************************************************************
-# * Copyright (c) 2019 Volkswagen Group of America.
-# *
-# * This program and the accompanying materials are made
-# * available under the terms of the Eclipse Public License 2.0
-# * which is available at https://www.eclipse.org/legal/epl-2.0/
-# *
-# * SPDX-License-Identifier: EPL-2.0
-# **********************************************************************/
+################################################################################
+# Copyright (c) 2019 Volkswagen Group of America
+#
+# This program and the accompanying materials are made available under the
+# terms of the Eclipse Public License 2.0 which is available at
+# http://www.eclipse.org/legal/epl-2.0.
+#
+# SPDX-License-Identifier: EPL-2.0
+################################################################################
 
 #-----------------------------------------------------------------------------
 # \file  openPASS-TrafficSimulation.pro
 # \brief This project file configures the Traffic Simulation plugin which can be
-#        used to edit the slaveConfig xml file for traffic flow simulations.
+#        used to edit the simulationConfig xml file for traffic flow simulations.
 #-----------------------------------------------------------------------------/
 
 CONFIG += OPENPASS_LIBRARY_GUI

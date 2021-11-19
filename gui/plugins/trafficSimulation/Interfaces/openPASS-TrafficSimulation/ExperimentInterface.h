@@ -1,21 +1,21 @@
-/******************************************************************************
-* Copyright (c) 2019 Volkswagen Group of America.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2019 Volkswagen Group of America
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  ExperimentInterface.h
 //! @ingroup trafficSimulationPlugin
 //! @brief The Experiment Interface provides setter and getter methods for the XML
-//!        elements listed under <ExperimentConfig> in the slaveConfig XML file.
+//!        elements listed under <ExperimentConfig> in the simulationConfig XML file.
 //!
 //!        These comprise the number of invocations, the random
-//!        seed, the libraries required by the simulation slave and the logging groups.
+//!        seed, the libraries required by the simulation and the logging groups.
 //!        See the documentation of the simulation framework for the
 //!        precise definition of these settings.
 //-----------------------------------------------------------------------------
@@ -29,10 +29,10 @@
 
 //-----------------------------------------------------------------------------
 //! @brief The Experiment Interface provides setter and getter methods for the XML
-//!        elements listed under <ExperimentConfig> in the slaveConfig XML file.
+//!        elements listed under <ExperimentConfig> in the simulationConfig XML file.
 //!
 //!        These comprise the number of invocations, the random
-//!        seed, the libraries required by the simulation slave and the logging groups.
+//!        seed, the libraries required by the simulation and the logging groups.
 //!        See the documentation of the simulation framework for the
 //!        precise definition of these settings.
 //-----------------------------------------------------------------------------
@@ -44,7 +44,7 @@ public:
     using ID = unsigned int;                  //!< The experiment's ID (not used so far)
     using NumberInvocations = int;            //!< The number of invocations
     using Seed = int;                         //!< The random seed used for random number generation
-    using Libraries = QMap<QString, QString>; //!< The map of libraries needed by the simulation slave
+    using Libraries = QMap<QString, QString>; //!< The map of libraries needed by the simulation
     using LoggingGroups = QStringList;        //!< The list of logging groups
 
 public:
@@ -60,7 +60,7 @@ public:
     //!
     //! @return                 The ID of the experiment
     //! @note                   The ID is not yet used since only one experiment is
-    //!                         configured in one slaveConfig XML file.
+    //!                         configured in one simulationConfig XML file.
     //-----------------------------------------------------------------------------
     virtual ID getID() const = 0;
 

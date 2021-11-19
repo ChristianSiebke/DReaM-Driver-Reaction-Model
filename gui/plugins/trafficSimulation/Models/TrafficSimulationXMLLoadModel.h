@@ -1,12 +1,12 @@
-/******************************************************************************
-* Copyright (c) 2019 Volkswagen Group of America.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2019 Volkswagen Group of America
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  TrafficSimulationXMLLoadModel.h
@@ -58,7 +58,7 @@ public:
 public:
     //-----------------------------------------------------------------------------
     //! This method manages the whole loading process and calls the subroutines for
-    //! loading the particular sections of the slaveConfig XML file. This routine opens
+    //! loading the particular sections of the simulationConfig XML file. This routine opens
     //! the submitted file and connects it to an QXmlStreamReader instance.
     //!
     //! @param[in]       filepath           the filepath of the combination xml file
@@ -78,7 +78,7 @@ public:
                                   QList<QString> &agents);
 
     //-----------------------------------------------------------------------------
-    //! This method reads all xml elements connected to <ExperimentConfig> from the slaveConfig
+    //! This method reads all xml elements connected to <ExperimentConfig> from the simulationConfig
     //! xml file and stores the corresponding values in in the given ExperimentInterface instance.
     //!
     //! @param[in]       xml            the xml stream reader object connected to the combination
@@ -93,7 +93,7 @@ public:
 
     //-----------------------------------------------------------------------------
     //! This method reads all xml elements of <Libraries> within the <ExperimentConfig> element.
-    //! These correspond to the libraries needed by the simulation slave.
+    //! These correspond to the libraries needed by the simulation.
     //!
     //! @param[in]       xml            the xml stream reader object connected to the combination
     //!                                 xml file

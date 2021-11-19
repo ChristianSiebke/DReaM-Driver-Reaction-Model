@@ -1,12 +1,13 @@
-#/*******************************************************************************
-#* Copyright (c) 2019, 2020 in-tech GmbH
-#*
-#* This program and the accompanying materials are made
-#* available under the terms of the Eclipse Public License 2.0
-#* which is available at https://www.eclipse.org/legal/epl-2.0/
-#*
-#* SPDX-License-Identifier: EPL-2.0
-#*******************************************************************************/
+################################################################################
+# Copyright (c) 2021 ITK Engineering GmbH
+#               2019-2021 in-tech GmbH
+#
+# This program and the accompanying materials are made available under the
+# terms of the Eclipse Public License 2.0 which is available at
+# http://www.eclipse.org/legal/epl-2.0.
+#
+# SPDX-License-Identifier: EPL-2.0
+################################################################################
 
 TEMPLATE = subdirs
 
@@ -18,15 +19,20 @@ SUBDIRS = \
     algorithmFmuWrapper_Tests \
     algorithmLateral_Tests \
     algorithmLongitudinal_Tests \
-    basicDataStore_Tests \
+    Algorithm_ECU \
+    Algorithm_RouteControl \
+    Algorithm_Switch \
+    basicDataBuffer_Tests \
     componentController_Tests \
+    Dynamics_Chassis \
     dynamicsCollision_Tests \
     dynamicsTrajectoryFollower_Tests \
+    Dynamics_TwoTrack \
     eventDetector_Tests \
     limiterAccelerationVehiclecomponents_Tests \
     observationLog_Tests \
     \ #observationLogNG_Tests \
-    openPassSlave_Tests \
+    opSimulation_Tests \
     openScenarioActions_Tests \
     scheduler_Tests \
     sensorDriver_Tests \
@@ -34,11 +40,15 @@ SUBDIRS = \
     sensorFusionErrorless_Tests \
     sensorOSI_Tests \
     signalPrioritizer_Tests \
-    spawnPointScenario_Tests \
-    spawnPointRuntimeCommon_Tests \
-    spawnPointWorldAnalyzer_Tests \
+    spawnerScenario_Tests \
+    spawnerPreRunCommon_Tests \
+    spawnerRuntimeCommon_Tests \
+    spawnerWorldAnalyzer_Tests \
     worldOSI_Tests \
     common_Tests
+
+Algorithm_ECU.file = \
+    $$PWD/components/Algorithm_ECU/Algorithm_ECU.pro
 
 algorithmAEB_Tests.file = \
     $$PWD/components/AlgorithmAEB/algorithmAEB_Tests.pro
@@ -55,8 +65,17 @@ algorithmLateral_Tests.file = \
 algorithmLongitudinal_Tests.file = \
     $$PWD/components/Algorithm_Longitudinal/algorithmLongitudinal_Tests.pro
 
-basicDataStore_Tests.file = \
-    $$PWD/core/slave/modules/BasicDataStore/basicDataStore_Tests.pro
+Algorithm_ECU.file = \
+    $$PWD/components/Algorithm_ECU/Algorithm_ECU.pro
+
+Algorithm_RouteControl.file = \
+    $$PWD/components/Algorithm_RouteControl/Algorithm_RouteControl.pro
+
+Algorithm_Switch.file = \
+    $$PWD/components/Algorithm_Switch/Algorithm_Switch.pro
+
+basicDataBuffer_Tests.file = \
+    $$PWD/core/opsimulation/modules/BasicDataBuffer/basicDataBuffer_Tests.pro
 
 componentController_Tests.file = \
     $$PWD/components/ComponentController/componentController_Tests.pro
@@ -67,23 +86,29 @@ dynamicsCollision_Tests.file = \
 dynamicsTrajectoryFollower_Tests.file = \
     $$PWD/components/Dynamics_TF/dynamicsTF_Tests.pro
 
+Dynamics_Chassis.file = \
+    $$PWD/components/Dynamics_Chassis/Dynamics_Chassis.pro
+
+Dynamics_TwoTrack.file = \
+    $$PWD/components/Dynamics_TwoTrack/Dynamics_TwoTrack.pro
+
 eventDetector_Tests.file = \
-    $$PWD/core/slave/modules/EventDetector/eventDetector_Tests.pro
+    $$PWD/core/opsimulation/modules/EventDetector/eventDetector_Tests.pro
 
 limiterAccelerationVehiclecomponents_Tests.file = \
     $$PWD/components/LimiterAccVehComp/limiterAccVehComp_Tests.pro
 
 observationLog_Tests.file = \
-    $$PWD/core/slave/modules/Observation_Log/observationLog_Tests.pro
+    $$PWD/core/opsimulation/modules/Observation_Log/observationLog_Tests.pro
 
-openPassSlave_Tests.file = \
-    $$PWD/core/slave/openPassSlave_Tests.pro
+opSimulation_Tests.file = \
+    $$PWD/core/opsimulation/opSimulation_Tests.pro
 
 openScenarioActions_Tests.file = \
     $$PWD/components/OpenScenarioActions/openScenarioActions_Tests.pro
 
 scheduler_Tests.file = \
-    $$PWD/core/slave/Scheduler/scheduler_Tests.pro
+    $$PWD/core/opsimulation/Scheduler/scheduler_Tests.pro
 
 sensorDriver_Tests.file = \
     $$PWD/components/Sensor_Driver/sensorDriver_Tests.pro
@@ -100,17 +125,20 @@ sensorOSI_Tests.file = \
 signalPrioritizer_Tests.file = \
     $$PWD/components/SignalPrioritizer/signalPrioritizer_Tests.pro
 
-spawnPointScenario_Tests.file = \
-    $$PWD/core/slave/modules/SpawnPointScenario/spawnPointScenario_Tests.pro
+spawnerScenario_Tests.file = \
+    $$PWD/core/opsimulation/modules/SpawnerScenario/spawnerScenario_Tests.pro
 
-spawnPointRuntimeCommon_Tests.file = \
-    $$PWD/core/slave/modules/SpawnPointRuntimeCommon/spawnPointRuntimeCommon_Tests.pro
+spawnerPreRunCommon_Tests.file = \
+    $$PWD/core/opsimulation/modules/SpawnerPreRunCommon/spawnerPreRunCommon_Tests.pro
 
-spawnPointWorldAnalyzer_Tests.file = \
-    $$PWD/core/slave/modules/SpawnPointWorldAnalyzer/spawnPointWorldAnalyzer_Tests.pro
+spawnerRuntimeCommon_Tests.file = \
+    $$PWD/core/opsimulation/modules/SpawnerRuntimeCommon/spawnerRuntimeCommon_Tests.pro
+
+spawnerWorldAnalyzer_Tests.file = \
+    $$PWD/core/opsimulation/modules/SpawnerWorldAnalyzer/spawnerWorldAnalyzer_Tests.pro
 
 worldOSI_Tests.file = \
-    $$PWD/core/slave/modules/World_OSI/worldOSI_Tests.pro
+    $$PWD/core/opsimulation/modules/World_OSI/worldOSI_Tests.pro
 
 common_Tests.file = \
     $$PWD/common/Common_Tests.pro

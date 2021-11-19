@@ -1,12 +1,12 @@
-/*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2017-2020 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  VehicleModelsInterface.h
@@ -21,7 +21,6 @@
 
 #include "common/globalDefinitions.h"
 #include "common/openScenarioDefinitions.h"
-#include "common/log.h"
 
 //! Resolves a parametrized attribute
 //!
@@ -51,11 +50,11 @@ T GetAttribute(openScenario::ParameterizedAttribute<T> attribute, const openScen
         }
         catch (const std::invalid_argument&)
         {
-            LogErrorAndThrow("Type of assigned parameter \"" + attribute.name + "\" in scenario does not match.");
+            throw std::runtime_error("Type of assigned parameter \"" + attribute.name + "\" in scenario does not match.");
         }
         catch (const std::out_of_range&)
         {
-            LogErrorAndThrow("Value of assigned parameter \"" + attribute.name + "\" is out of range.");
+            throw std::runtime_error("Value of assigned parameter \"" + attribute.name + "\" is out of range.");
         }
     }
     else
@@ -64,83 +63,91 @@ T GetAttribute(openScenario::ParameterizedAttribute<T> attribute, const openScen
     }
 }
 
-/*!
- * \brief Container for axle parameters in OpenSCENARIO vehicle model
- */
-struct VehicleAxle
-{
-    openScenario::ParameterizedAttribute<double> maxSteering;     //!< Maximum steering angle
-    openScenario::ParameterizedAttribute<double> wheelDiameter;   //!< Diameter of the wheels
-    openScenario::ParameterizedAttribute<double> trackWidth;      //!< Trackwidth of the axle
-    openScenario::ParameterizedAttribute<double> positionX;       //!< Longitudinal position offset (measured from reference point)
-    openScenario::ParameterizedAttribute<double> positionZ;       //!< Vertical position offset (measured from reference point)
-};
-
 //! Contains the VehicleModelParameters as defined in the VehicleModelCatalog.
 //! Certain values may be parametrized and can be overwriten in the Scenario via ParameterAssignment
 struct ParametrizedVehicleModelParameters
 {
-    AgentVehicleType vehicleType = AgentVehicleType::Undefined;
-    openScenario::ParameterizedAttribute<double> width = -999.0;
-    openScenario::ParameterizedAttribute<double> length = -999.0;
-    openScenario::ParameterizedAttribute<double> height = -999.0;
-    VehicleAxle frontAxle;
-    VehicleAxle rearAxle;
-    openScenario::ParameterizedAttribute<double> distanceReferencePointToLeadingEdge = -999.0;
-    openScenario::ParameterizedAttribute<double> maxVelocity = -999.0;
-    openScenario::ParameterizedAttribute<double> weight = -999.0;
-    openScenario::ParameterizedAttribute<double> heightCOG = -999.0;
-    openScenario::ParameterizedAttribute<double> momentInertiaRoll = -999.0;
-    openScenario::ParameterizedAttribute<double> momentInertiaPitch = -999.0;
-    openScenario::ParameterizedAttribute<double> momentInertiaYaw = -999.0;
-    openScenario::ParameterizedAttribute<double> frontSurface = -999.0;
-    openScenario::ParameterizedAttribute<double> airDragCoefficient = -999.0;
-    openScenario::ParameterizedAttribute<double> minimumEngineSpeed = -999.0;
-    openScenario::ParameterizedAttribute<double> maximumEngineSpeed = -999.0;
-    openScenario::ParameterizedAttribute<double> minimumEngineTorque = -999.0;
-    openScenario::ParameterizedAttribute<double> maximumEngineTorque = -999.0;
-    openScenario::ParameterizedAttribute<int> numberOfGears = -999;
-    std::vector<openScenario::ParameterizedAttribute<double>> gearRatios;
-    openScenario::ParameterizedAttribute<double> axleRatio = -999.0;
-    openScenario::ParameterizedAttribute<double> decelerationFromPowertrainDrag = -999.0;
-    openScenario::ParameterizedAttribute<double> steeringRatio = -999.0;
-    openScenario::ParameterizedAttribute<double> frictionCoeff = -999.0;
+    AgentVehicleType vehicleType;
+
+    struct BoundingBoxCenter
+    {
+        openScenario::ParameterizedAttribute<double> x;
+        openScenario::ParameterizedAttribute<double> y;
+        openScenario::ParameterizedAttribute<double> z;
+
+        VehicleModelParameters::BoundingBoxCenter Get(const openScenario::Parameters& assignedParameters) const
+        {
+            return {GetAttribute(x, assignedParameters),
+                    GetAttribute(y, assignedParameters),
+                    GetAttribute(z, assignedParameters)};
+        }
+    } boundingBoxCenter;
+
+    struct BoundingBoxDimensions
+    {
+        openScenario::ParameterizedAttribute<double> width;
+        openScenario::ParameterizedAttribute<double> length;
+        openScenario::ParameterizedAttribute<double> height;
+
+        VehicleModelParameters::BoundingBoxDimensions Get(const openScenario::Parameters& assignedParameters) const
+        {
+            return {GetAttribute(width, assignedParameters),
+                    GetAttribute(length, assignedParameters),
+                    GetAttribute(height, assignedParameters)};
+        }
+    } boundingBoxDimensions;
+
+    struct Performance
+    {
+        openScenario::ParameterizedAttribute<double> maxSpeed;
+        openScenario::ParameterizedAttribute<double> maxAcceleration;
+        openScenario::ParameterizedAttribute<double> maxDeceleration;
+
+        VehicleModelParameters::Performance Get(const openScenario::Parameters& assignedParameters) const
+        {
+            return {GetAttribute(maxSpeed, assignedParameters),
+                    GetAttribute(maxAcceleration, assignedParameters),
+                    GetAttribute(maxDeceleration, assignedParameters)};
+        }
+    } performance;
+
+    struct Axle
+    {
+        openScenario::ParameterizedAttribute<double> maxSteering;
+        openScenario::ParameterizedAttribute<double> wheelDiameter;
+        openScenario::ParameterizedAttribute<double> trackWidth;
+        openScenario::ParameterizedAttribute<double> positionX;
+        openScenario::ParameterizedAttribute<double> positionZ;
+
+        VehicleModelParameters::Axle Get(const openScenario::Parameters& assignedParameters) const
+        {
+            return {GetAttribute(maxSteering, assignedParameters),
+                    GetAttribute(wheelDiameter, assignedParameters),
+                    GetAttribute(trackWidth, assignedParameters),
+                    GetAttribute(positionX, assignedParameters),
+                    GetAttribute(positionZ, assignedParameters)};
+        }
+    };
+    Axle frontAxle;
+    Axle rearAxle;
+
+    std::map<std::string, openScenario::ParameterizedAttribute<double>> properties;
 
     VehicleModelParameters Get(const openScenario::Parameters& assignedParameters) const
     {
-        auto wheelbase = std::abs(frontAxle.positionX.defaultValue - rearAxle.positionX.defaultValue);
-        std::vector<double> transformedGearRatios;
-        std::transform(gearRatios.cbegin(), gearRatios.cend(), std::back_inserter(transformedGearRatios), [&](const auto& value){return GetAttribute(value, assignedParameters);});
-        return VehicleModelParameters{
-                    vehicleType,
-                    GetAttribute(width, assignedParameters),
-                    GetAttribute(length, assignedParameters),
-                    GetAttribute(height, assignedParameters),
-                    wheelbase,
-                    GetAttribute(rearAxle.trackWidth, assignedParameters),
-                    GetAttribute(distanceReferencePointToLeadingEdge, assignedParameters),
-                    GetAttribute(frontAxle.positionX, assignedParameters),
-                    GetAttribute(maxVelocity, assignedParameters),
-                    GetAttribute(weight, assignedParameters),
-                    GetAttribute(heightCOG, assignedParameters),
-                    GetAttribute(momentInertiaRoll, assignedParameters),
-                    GetAttribute(momentInertiaPitch, assignedParameters),
-                    GetAttribute(momentInertiaYaw, assignedParameters),
-                    GetAttribute(frontSurface, assignedParameters),
-                    GetAttribute(airDragCoefficient, assignedParameters),
-                    GetAttribute(minimumEngineSpeed, assignedParameters),
-                    GetAttribute(maximumEngineSpeed, assignedParameters),
-                    GetAttribute(minimumEngineTorque, assignedParameters),
-                    GetAttribute(maximumEngineTorque, assignedParameters),
-                    GetAttribute(numberOfGears, assignedParameters),
-                    transformedGearRatios,
-                    GetAttribute(axleRatio, assignedParameters),
-                    GetAttribute(decelerationFromPowertrainDrag, assignedParameters),
-                    GetAttribute(steeringRatio, assignedParameters),
-                    GetAttribute(frontAxle.maxSteering, assignedParameters) * GetAttribute(steeringRatio, assignedParameters) * 180.0 / M_PI,
-                    std::sin(GetAttribute(frontAxle.maxSteering, assignedParameters)) / wheelbase,
-                    rearAxle.wheelDiameter.defaultValue / 2.0,
-                    GetAttribute(frictionCoeff, assignedParameters)
+        std::map<std::string, double> assignedProperties;
+        for (const auto[key, value] : properties)
+        {
+            assignedProperties.insert({key, GetAttribute(value, assignedParameters)});
+        }
+
+        return {vehicleType,
+                boundingBoxCenter.Get(assignedParameters),
+                boundingBoxDimensions.Get(assignedParameters),
+                performance.Get(assignedParameters),
+                frontAxle.Get(assignedParameters),
+                rearAxle.Get(assignedParameters),
+                assignedProperties
         };
     }
 };

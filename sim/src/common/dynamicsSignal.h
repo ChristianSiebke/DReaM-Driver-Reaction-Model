@@ -1,13 +1,13 @@
-/*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
-*               2018 AMFD GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2018 AMFD GmbH
+ *               2017-2019 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  DynamicsSignal.h
@@ -39,6 +39,7 @@ public:
                   double positionY,
                   double yaw,
                   double yawRate,
+                  double roll,
                   double steeringWheelAngle,
                   double centripetalAcceleration,
                   double travelDistance) :
@@ -49,6 +50,7 @@ public:
         positionY(positionY),
         yaw(yaw),
         yawRate(yawRate),
+        roll(roll),
         steeringWheelAngle(steeringWheelAngle),
         centripetalAcceleration(centripetalAcceleration),
         travelDistance(travelDistance)
@@ -76,6 +78,7 @@ public:
         stream << "positionY: " << positionY << std::endl;
         stream << "yaw: " << yaw << std::endl;
         stream << "yawRate: " << yawRate << std::endl;
+        stream << "roll: " << roll << std::endl;
         stream << "steeringWheelAngle: " << steeringWheelAngle << std::endl;
         stream << "centripetalAcceleration: " << centripetalAcceleration << std::endl;
         stream << "travelDistance: " << travelDistance << std::endl;
@@ -88,6 +91,7 @@ public:
     double positionY = 0.0;
     double yaw = 0.0;
     double yawRate = 0.0;
+    double roll = 0.0;
     double steeringWheelAngle = 0.0;
     double centripetalAcceleration = 0.0;
     double travelDistance = 0.0;

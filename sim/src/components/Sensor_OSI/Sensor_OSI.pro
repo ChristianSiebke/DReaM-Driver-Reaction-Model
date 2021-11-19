@@ -1,12 +1,12 @@
-# /*********************************************************************
-# * Copyright (c) 2017, 2018, 2019 in-tech GmbH
-# *
-# * This program and the accompanying materials are made
-# * available under the terms of the Eclipse Public License 2.0
-# * which is available at https://www.eclipse.org/legal/epl-2.0/
-# *
-# * SPDX-License-Identifier: EPL-2.0
-# **********************************************************************/
+################################################################################
+# Copyright (c) 2017-2019 in-tech GmbH
+#
+# This program and the accompanying materials are made available under the
+# terms of the Eclipse Public License 2.0 which is available at
+# http://www.eclipse.org/legal/epl-2.0.
+#
+# SPDX-License-Identifier: EPL-2.0
+################################################################################
 
 #-----------------------------------------------------------------------------
 # \file  Sensor_OSI.pro
@@ -14,7 +14,7 @@
 # module Sensor_OSI
 #-----------------------------------------------------------------------------/
 
-DEFINES += SENSOR_OBJECT_DETECTOR_LIBRARY
+DEFINES += SENSOR_OSI_LIBRARY
 CONFIG += OPENPASS_LIBRARY
 include(../../../global.pri)
 
@@ -25,7 +25,7 @@ SUBDIRS += .\
 INCLUDEPATH += \
     ../../.. \
     ../.. \
-    ../../core/slave/modules/World_OSI
+    ../../core/opSimulation/modules/World_OSI
 
 SOURCES += \
     src/objectDetectorBase.cpp \

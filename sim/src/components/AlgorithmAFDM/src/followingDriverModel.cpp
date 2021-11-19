@@ -1,13 +1,13 @@
-/*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
-*               2018, 2019 AMFD GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2018-2019 AMFD GmbH
+ *               2018-2019 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 /**********************************************
 ***********************************************/
 #include <QtGlobal>
@@ -182,7 +182,7 @@ void AlgorithmAgentFollowingDriverModelImplementation::Trigger(int time)
     if (frontAgent.exist)
     {
         auto vDelta = std::abs(ownVehicleInformation.absoluteVelocity - frontAgent.absoluteVelocity);
-        auto effectiveMinimumGap = minDistance + ownVehicleInformation.absoluteVelocity*tGapWish + (ownVehicleInformation.absoluteVelocity*vDelta)/2 * std::sqrt(maxAcceleration * decelerationWish);
+        auto effectiveMinimumGap = minDistance + ownVehicleInformation.absoluteVelocity * tGapWish + ownVehicleInformation.absoluteVelocity * vDelta / (2 * std::sqrt(maxAcceleration * decelerationWish));
         decelerationCoeff = std::pow(effectiveMinimumGap/frontAgent.relativeLongitudinalDistance, 2);
     }
 

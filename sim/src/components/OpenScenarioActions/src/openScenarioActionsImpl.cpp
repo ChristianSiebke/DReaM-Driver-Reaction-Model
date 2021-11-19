@@ -1,13 +1,13 @@
-/*******************************************************************************
-* Copyright (c) 2020 in-tech GmbH
-*               2020 BMW AG
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2020 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+ *               2020 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  ComponentControllerImplementation.cpp
@@ -30,7 +30,7 @@ OpenScenarioActionsImplementation::OpenScenarioActionsImplementation(std::string
                                                                      PublisherInterface *const publisher,
                                                                      const CallbackInterface *callbacks,
                                                                      AgentInterface *agent,
-                                                                     SimulationSlave::EventNetworkInterface *const eventNetwork) :
+                                                                     core::EventNetworkInterface *const eventNetwork) :
     UnrestrictedEventModelInterface(
         componentName,
         isInit,
@@ -54,16 +54,6 @@ OpenScenarioActionsImplementation::OpenScenarioActionsImplementation(std::string
             linkIdMapping.emplace(key, value);
         }
     }
-
-    // check all identifiers, so we can faster access them in update output
-    const auto linkIdTest = ActionTransformRepository::Transform(GetEventNetwork(), GetWorld(), GetAgent(), GetCycleTime());
-    for (const auto &[identifier, update_for_current_agent, signal] : linkIdTest)
-    {
-        if (linkIdMapping.find(identifier) == linkIdMapping.end())
-        {
-            ThrowUnregisteredIdentifier(identifier);
-        }
-    }
 }
 
 void OpenScenarioActionsImplementation::UpdateInput(int, const std::shared_ptr<const SignalInterface> &, int)
@@ -78,7 +68,7 @@ void OpenScenarioActionsImplementation::UpdateOutput(LinkId localLinkId, std::sh
 
     // Transformers are allowed to write onto the same link ids
     // Yet, they are not allowed to write at the same time
-    // Furher, on every update, data needs to be sent, even if there is no action available
+    // Further, on every update, data needs to be sent, even if there is no action available
     // This data needs to carry the correct subtype of the SignalInterface (e.g TrajectorySignal)
     // So every transformer delivers also an empty type, if nothing is to
     // Case 1: Transformer1 and Transformer2 has nothing to do = 2 entries, each with an empty object => relay only one
@@ -86,7 +76,19 @@ void OpenScenarioActionsImplementation::UpdateOutput(LinkId localLinkId, std::sh
     // Case 3: Transformer1 and Transformer2 has something to do = 2 entries => report error
     for (auto [identifier, update_for_current_agent, signal] : pendingSignals)
     {
-        if (localLinkId != linkIdMapping[identifier]) // note that all identifiers were checked in the constructor
+        if (linkIdMapping.find(identifier) == linkIdMapping.end())
+        {
+            if (update_for_current_agent)
+            {
+                ThrowUnregisteredIdentifier(identifier);
+            }
+            else
+            {
+                continue;
+            }
+        }
+
+        if (localLinkId != linkIdMapping[identifier])
         {
             continue;
         }
@@ -125,9 +127,9 @@ void OpenScenarioActionsImplementation::Trigger([[maybe_unused]] int time)
     pendingSignals = ActionTransformRepository::Transform(GetEventNetwork(), GetWorld(), GetAgent(), GetCycleTime());
 }
 
-void OpenScenarioActionsImplementation::ThrowUnregisteredIdentifier(const std::string identifier)
+void OpenScenarioActionsImplementation::ThrowUnregisteredIdentifier(const std::string& identifier)
 {
-    const std::string msg = std::string(COMPONENTNAME) + " Cannot find linkId assignement for identifier " + identifier;
+    const std::string msg = std::string(COMPONENTNAME) + " Cannot find linkId assignment for identifier " + identifier;
     LOG(CbkLogLevel::Error, msg);
     throw std::runtime_error(msg);
 }

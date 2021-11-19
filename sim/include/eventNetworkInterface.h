@@ -1,12 +1,12 @@
-/*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2017-2019 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 /** \file  EventNetworkInterface.h
@@ -22,7 +22,7 @@
 using SharedEvent = std::shared_ptr<EventInterface>;
 using EventContainer = std::vector<SharedEvent>;
 
-namespace SimulationSlave {
+namespace core {
 
 //-----------------------------------------------------------------------------
 /** \brief This class provides the interface for the EventNetwork
@@ -43,4 +43,4 @@ public:
     virtual std::vector<EventInterface const *> GetTrigger(const std::string &identifier) const = 0;
 };
 
-} //namespace SimulationSlave
+} //namespace core

@@ -1,13 +1,13 @@
-/*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
-*               2016, 2017, 2018 ITK Engineering GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2016-2018 ITK Engineering GmbH
+ *               2017-2021 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  ScenarioInterface.h
@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 
+#include "include/sceneryDynamicsInterface.h"
 #include "common/worldDefinitions.h"
 #include "common/eventDetectorDefinitions.h"
 
@@ -41,14 +42,14 @@ public:
 
     bool spawning {true}; //!< Spawning flag, spawning agent if true
 
-    openScenario::Position position; //!< Initial position
+    openScenario::Position position{}; //!< Initial position
     std::optional<std::vector<RouteElement>> route {std::nullopt}; //!< Optional predfined route
 
-    double velocity; //!< Initial velocity
-    std::optional<openScenario::StochasticAttribute> stochasticVelocity; //!< optional stochastic initial velocity
+    double velocity{0.0}; //!< Initial velocity
+    std::optional<openScenario::StochasticAttribute> stochasticVelocity{}; //!< optional stochastic initial velocity
 
-    std::optional<double> acceleration; //!< Optional initial acceleration
-    std::optional<openScenario::StochasticAttribute> stochasticAcceleration; //!< optional stochastic initial acceleration
+    std::optional<double> acceleration{0.0}; //!< Optional initial acceleration
+    std::optional<openScenario::StochasticAttribute> stochasticAcceleration{}; //!< optional stochastic initial acceleration
 };
 
 /*!
@@ -146,6 +147,18 @@ public:
     virtual void SetSceneryPath(const std::string& sceneryPath) = 0;
 
     //-----------------------------------------------------------------------------
+    //! Retreives the dynamic scenery portions
+    //!
+    //! \return     scenery dynamics
+    //-----------------------------------------------------------------------------
+    virtual const SceneryDynamicsInterface& GetSceneryDynamics() = 0;
+
+    //-----------------------------------------------------------------------------
+    //! Adds one traffic signal controller
+    //----------------------------------------------------------------------------
+    virtual void AddTrafficSignalController (const openScenario::TrafficSignalController& controller) = 0;
+
+    //-----------------------------------------------------------------------------
     //! Adds one scenario entity to the scenery entities of the scenario.
     //-----------------------------------------------------------------------------
     virtual void AddScenarioEntity(const ScenarioEntity& entity) = 0;
@@ -154,7 +167,7 @@ public:
     //! Adds groups to the scenario as defined by groupDefinitions - a map of
     //! group names to a list of group member entity names.
     //-----------------------------------------------------------------------------
-    virtual void AddScenarioGroupsByEntityNames(const std::map<std::string, std::list<std::string>> &groupDefinitions) = 0;
+    virtual void AddScenarioGroupsByEntityNames(const std::map<std::string, std::vector<std::string>> &groupDefinitions) = 0;
 
     virtual const std::vector<ScenarioEntity>& GetEntities() const = 0;
 
@@ -210,4 +223,10 @@ public:
     //! \param[in] endTime The desired end time of the simulation.
     //-------------------------------------------------------------------------
     virtual void SetEndTime(const double endTime) = 0;
+
+    //-------------------------------------------------------------------------
+    //! \brief Sets the environment conditions of the simulation.
+    //! \param[in] endTime The environment conditions of the simulation.
+    //-------------------------------------------------------------------------
+    virtual void SetEnvironment(const openScenario::EnvironmentAction& environment) = 0;
 };

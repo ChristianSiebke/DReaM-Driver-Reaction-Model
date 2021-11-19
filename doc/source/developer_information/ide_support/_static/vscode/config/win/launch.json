@@ -1,0 +1,57 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            // FOR TESTMATE (SELECTED TEST) AND CMAKE (DEBUG CMAKE TARGET)
+            "name": "CMake Target",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${command:cmake.launchTargetPath}",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [
+                {
+                    "name": "PATH",
+                    "value": "$PATH:${command:msys2.root}\\bin;${command:mingw64.root}\\x86_64-w64-mingw32\\lib${command:cmake.buildkit.launch.path}"
+                }
+            ],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "${command:cmake.buildkit.gdb.exe}",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            // FOR DEBUGGING opSimulation (DON'T FORGET TO CALL make install)
+            "name": "opsimulation",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "C:\\OpenPASS\\bin\\core\\opSimulation.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "C:\\OpenPASS\\bin\\core",
+            "environment": [
+                {
+                    "name": "PATH",
+                    "value": "$PATH:${command:msys2.root}\\bin;${command:mingw64.root}\\x86_64-w64-mingw32\\lib${command:cmake.buildkit.launch.path}"
+                }
+            ],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "${command:cmake.buildkit.gdb.exe}",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+    ]
+}

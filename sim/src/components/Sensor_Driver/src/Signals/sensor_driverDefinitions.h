@@ -1,13 +1,13 @@
-/*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
-*               2019 AMFD GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2019 AMFD GmbH
+ *               2019-2021 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  sensor_driverDefinitions.h
@@ -50,6 +50,8 @@ struct LaneInformationTrafficRules
 {
     //! Vector of all traffic signs valid for this lane inside the visibility distance
     std::vector<CommonTrafficSign::Entity> trafficSigns;
+    //! Vector of all traffic lights valid for this lane inside the visibility distance
+    std::vector<CommonTrafficLight::Entity> trafficLights;
 };
 
 //! This struct is used to transport data of a lane concerning its geometric features as seen by the driver

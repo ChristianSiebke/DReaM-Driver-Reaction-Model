@@ -1,14 +1,14 @@
-/*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
-*               2018, 2019 AMFD GmbH
-*               2016, 2017, 2019, 2020 ITK Engineering GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2018-2019 AMFD GmbH
+ *               2016-2020 ITK Engineering GmbH
+ *               2017-2019 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 #pragma once
 
 #include <memory>
@@ -53,12 +53,12 @@
 * name                       | meaning
 * ---------------------------|------
 * acceleration               | Acceleration of the current agent coresponding to the pedalpositions [m/s²]
-* velocity                   | The driven curvature of the car coresponding to the steering wheel angle based on Ackermann [radiant]
+* velocity                   | The driven curvature of the car coresponding to the steering wheel angle based on Ackermann [radian]
 * positionX                  | new inertial x-position [m]
 * positionY                  | new inertial y-position [m]
-* yaw                        | new yaw angle in current time step [radiant]
-* yawRate                    | change of yaw angle due to ds and curvature [radiant]
-* steeringWheelAngle         | new angle of the steering wheel angle [degree]
+* yaw                        | new yaw angle in current time step [radian]
+* yawRate                    | change of yaw angle due to ds and curvature [radian]
+* steeringWheelAngle         | new angle of the steering wheel angle [radian]
 * travelDistance             | distance traveled by the agent during this timestep [m]
 *
 *
@@ -158,7 +158,7 @@ private:
     //! Output Signal
     DynamicsSignal dynamicsSignal;
 
-    std::map<int, externalParameter<double>*> parameterMapDouble;
+    std::map<std::string, externalParameter<double> *> parameterMapDouble;
     /** \name External Parameters
      *  Parameter which are set externally in configuration file.
      *  @{ */
@@ -212,6 +212,12 @@ private:
     std::unique_ptr<VehicleSimpleTT> vehicle;
     /**
      * @} */
+
+    //! Returns the wheelbase from the VehicleModelParameter
+    double GetWheelbase() const;
+
+    //! Returns the weight from the VehicleModelParameter
+    double GetWeight() const;
 
     //! Update data on agent's actual position, velocity and acceleration
     void ReadPreviousState();

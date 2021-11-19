@@ -1,12 +1,12 @@
-# /*********************************************************************
-# * Copyright (c) 2017, 2019, 2020 in-tech GmbH
-# *
-# * This program and the accompanying materials are made
-# * available under the terms of the Eclipse Public License 2.0
-# * which is available at https://www.eclipse.org/legal/epl-2.0/
-# *
-# * SPDX-License-Identifier: EPL-2.0
-# **********************************************************************/
+################################################################################
+# Copyright (c) 2017-2020 in-tech GmbH
+#
+# This program and the accompanying materials are made available under the
+# terms of the Eclipse Public License 2.0 which is available at
+# http://www.eclipse.org/legal/epl-2.0.
+#
+# SPDX-License-Identifier: EPL-2.0
+################################################################################
 
 CONFIG += OPENPASS_GTEST OPENPASS_GTEST_DEFAULT_MAIN
 DEFINES += USE_EXTENDED_OSI
@@ -20,7 +20,7 @@ INCLUDEPATH += \
     . \
     $$OPEN_SRC/components/Algorithm_FmuWrapper/src \
     $$OPEN_SRC/components/Algorithm_FmuWrapper/src/FmiImporter/include \
-    $$OPEN_SRC/core/slave/modules/World_OSI \
+    $$OPEN_SRC/core/opSimulation/modules/World_OSI \
     $$relative_path($$EXTRA_INCLUDE_PATH)/FMILibrary \
     FMI \    # third party
     FMI1 \
@@ -46,7 +46,7 @@ SOURCES += \
     $$OPEN_SRC/components/Algorithm_FmuWrapper/src/FmiImporter/src/FMI2/fmi2_me_sim.c
 
 win32 {
-    LIBS += -llibboost_filesystem-mgw81-mt-x64-1_72 -lshlwapi
+    LIBS += -lboost_filesystem-mt
 } else {
     LIBS += -lboost_filesystem
 }

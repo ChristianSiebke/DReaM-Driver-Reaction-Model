@@ -1,13 +1,13 @@
-/*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
-*               2018 AMFD GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2018 AMFD GmbH
+ *               2017-2019 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 /** \addtogroup Agent_Updater
 * @{
@@ -116,6 +116,11 @@ public:
     */
     virtual void Trigger(int time);
 
+    /*!
+    * \brief Checks that the given value is not Nan and logs an error otherwise
+    */
+    void Validate(double value, const std::string& description);
+
 private:
     double acceleration {0.0};
     double velocity {0.0};
@@ -123,6 +128,7 @@ private:
     double positionY {0.0};
     double yaw {0.0};
     double yawRate {0.0};
+    double roll {0.0};
     double steeringWheelAngle {0.0};
     double centripetalAcceleration {0.0};
     double travelDistance {0.0};

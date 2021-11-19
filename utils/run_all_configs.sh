@@ -41,19 +41,19 @@ if [ ! -d "$1" ]; then
   exit 1
 fi
 
-SLAVE_FOUND=0
-SLAVE_NAME="OpenPassSlave"
+SIMULATION_FOUND=0
+SIMULATION_NAME="opSimulation"
 
-if [ -e "$1/$SLAVE_NAME" ]; then
-  SLAVE_FOUND=1
+if [ -e "$1/$SIMULATION_NAME" ]; then
+  SIMULATION_FOUND=1
 else
-  SLAVE_NAME="${SLAVE_NAME}.exe"
-  if [ -e "$1/$SLAVE_NAME" ]; then
-    SLAVE_FOUND=1
+  SIMULATION_NAME="${SIMULATION_NAME}.exe"
+  if [ -e "$1/$SIMULATION_NAME" ]; then
+    SIMULATION_FOUND=1
   fi
 fi
 
-if [ $SLAVE_FOUND -eq 0 ]; then
+if [ $SIMULATION_FOUND -eq 0 ]; then
   echo "Simulator executable not found"
   echo
   showUsage
@@ -76,14 +76,14 @@ rm -rf results_*
 
 OVERALL_SUCCESS=1
 
-while read -r -d $'\0' CONFIG_FULL; do
+find "$CONFIG_DIR" -mindepth 1 -maxdepth 1 -type d -print0 | while IFS= read -r -d '' CONFIG_FULL; do
   CONFIG=$(basename "$CONFIG_FULL")
   echo Executing config: "$CONFIG"
 
   cp -r "$CONFIG_FULL"/* .
 
   SUCCESS=0
-  ./$SLAVE_NAME "$@" && SUCCESS=1
+  ./$SIMULATION_NAME "$@" && SUCCESS=1
 
   if [ $SUCCESS -eq 1 ]; then
     echo "Simulator result: SUCCESS"
@@ -92,18 +92,17 @@ while read -r -d $'\0' CONFIG_FULL; do
     OVERALL_SUCCESS=0
   fi
 
-  if [ -s OpenPassSlave.log ]; then
+  if [ -s opSimulation.log ]; then
     echo "Logfile not empty! FAILURE"
     OVERALL_SUCCESS=0
   fi
 
-  mv OpenPassSlave.log results
+  mv opSimulation.log results
   mv configs/* results
   mv results "results_$CONFIG"
 
   rm -rf configs
-
-done < <(find "$CONFIG_DIR" -mindepth 1 -maxdepth 1 -type d -print0)
+done
 
 [ $OVERALL_SUCCESS -eq 1 ] && exit 0 || exit 1
 

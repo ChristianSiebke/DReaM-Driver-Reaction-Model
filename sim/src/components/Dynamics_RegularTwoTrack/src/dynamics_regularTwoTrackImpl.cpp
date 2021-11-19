@@ -1,14 +1,14 @@
-/*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
-*               2018, 2019 AMFD GmbH
-*               2019, 2020 ITK Engineering GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2018-2019 AMFD GmbH
+ *               2019-2020 ITK Engineering GmbH
+ *               2018-2019 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 //-----------------------------------------------------------------------------
 //! @file  dynamics_regularTwoTrackImplementation.cpp
 //! @brief This file contains the implementation header file
@@ -43,6 +43,7 @@
 
 #include <memory>
 #include <qglobal.h>
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include "dynamics_regularTwoTrackImpl.h"
@@ -51,6 +52,8 @@
 #include "common/steeringSignal.h"
 #include "common/parametersVehicleSignal.h"
 #include "common/globalDefinitions.h"
+#include "common/commonTools.h"
+#include "components/common/vehicleProperties.h"
 
 DynamicsRegularTwoTrackImplementation::~DynamicsRegularTwoTrackImplementation()
 {
@@ -91,7 +94,7 @@ void DynamicsRegularTwoTrackImplementation::UpdateInput(int localLinkId, const s
                 LOG(CbkLogLevel::Debug, msg);
                 throw std::runtime_error(msg);
             }
-            angleTireFront.SetDefaultValue(signal->steeringWheelAngle * M_PI / 180);
+            angleTireFront.SetDefaultValue(signal->steeringWheelAngle);
         }
     }
     else if (localLinkId == 100)
@@ -227,6 +230,18 @@ void DynamicsRegularTwoTrackImplementation::Trigger(int time)
     NextStateSet();
 }
 
+double DynamicsRegularTwoTrackImplementation::GetWheelbase() const
+{
+    return GetAgent()->GetVehicleModelParameters().frontAxle.positionX - GetAgent()->GetVehicleModelParameters().rearAxle.positionX;
+}
+
+double DynamicsRegularTwoTrackImplementation::GetWeight() const
+{
+    const auto weight = helper::map::query(GetAgent()->GetVehicleModelParameters().properties, vehicle::properties::Mass);
+    THROWIFFALSE(weight.has_value(), "Mass was not defined in VehicleCatalog");
+    return weight.value();
+}
+
 void DynamicsRegularTwoTrackImplementation::Init()
 {
     std::map<std::string, double> parameterMapDoubleExternal = GetParameters()->GetParametersDouble();
@@ -248,7 +263,7 @@ void DynamicsRegularTwoTrackImplementation::Init()
      *  - power
      *  - maximum brake torque
     */
-    vehicle->InitSetEngine(GetAgent()->GetVehicleModelParameters().weight, powerEngineMax.GetValue(), torqueBrakeMin.GetValue());
+    vehicle->InitSetEngine(GetWeight(), powerEngineMax.GetValue(), torqueBrakeMin.GetValue());
 
     /** @addtogroup init_tt
      * Define vehicle's geometry:
@@ -257,8 +272,8 @@ void DynamicsRegularTwoTrackImplementation::Init()
      *  - set the wheelbase
      *  - set the track width
     */
-    vehicle->InitSetGeometry(GetAgent()->GetVehicleModelParameters().wheelbase, 0.0,
-                             GetAgent()->GetVehicleModelParameters().trackwidth, 0.0);
+    vehicle->InitSetGeometry(GetWheelbase(), 0.0,
+                             GetAgent()->GetVehicleModelParameters().rearAxle.trackWidth, 0.0);
 
     /** @addtogroup init_tt
      * Define vehicle's tire properties:
@@ -269,9 +284,13 @@ void DynamicsRegularTwoTrackImplementation::Init()
      *  - set the radius of the tire
      *  - set the road/tire friction coefficient
     */
+
+    const auto frictionCoeff = helper::map::query(GetAgent()->GetVehicleModelParameters().properties, vehicle::properties::FrictionCoefficient);
+    THROWIFFALSE(frictionCoeff.has_value(), "FrictionCoefficient was not defined in VehicleCatalog");
+
     vehicle->InitSetTire(GetAgent()->GetVelocity(VelocityScope::Longitudinal),
                          muTireMax.GetValue(), muTireSlide.GetValue(),
-                         slipTireMax.GetValue(), radiusTire.GetValue(), GetAgent()->GetVehicleModelParameters().frictionCoeff);
+                         slipTireMax.GetValue(), radiusTire.GetValue(), frictionCoeff.value());
 
     forceWheelVertical = {
         vehicle->forceTireVerticalStatic[0],
@@ -292,8 +311,9 @@ void DynamicsRegularTwoTrackImplementation::ReadPreviousState()
     double midRearAxleY = GetAgent()->GetPositionY(); // reference point (rear axle) in global CS
 
     yawAngle = GetAgent()->GetYaw(); // global CS
-    positionCar.x = midRearAxleX + std::cos(yawAngle) * GetAgent()->GetVehicleModelParameters().wheelbase / 2.0; // geometrical center of vehicle in global CS
-    positionCar.y = midRearAxleY + std::sin(yawAngle) * GetAgent()->GetVehicleModelParameters().wheelbase / 2.0; // geometrical center of vehicle in global CS
+    const double wheelbase = GetWheelbase();
+    positionCar.x = midRearAxleX + std::cos(yawAngle) * wheelbase / 2.0; // geometrical center of vehicle in global CS
+    positionCar.y = midRearAxleY + std::sin(yawAngle) * wheelbase / 2.0; // geometrical center of vehicle in global CS
 
     velocityCar.x = GetAgent()->GetVelocity(VelocityScope::Longitudinal); // car's CS
     velocityCar.y = GetAgent()->GetVelocity(VelocityScope::Lateral); // car's CS
@@ -315,8 +335,9 @@ void DynamicsRegularTwoTrackImplementation::NextStateTranslation()
     Common::Vector2d velocityCarNew = velocityCar + accelerationCar*timeStep;
 
     // update acceleration
-    if (GetAgent()->GetVehicleModelParameters().weight >= 1.0) {
-        accelerationCar = vehicle->forceTotalXY * (1 / GetAgent()->GetVehicleModelParameters().weight);
+    const double weight = GetWeight();
+    if (weight >= 1.0) {
+        accelerationCar = vehicle->forceTotalXY * (1 / weight);
     }
 
     // correct velocity and acceleration for zero-crossing
@@ -355,7 +376,7 @@ void DynamicsRegularTwoTrackImplementation::NextStateRotation()
     double yawVelocityNew = yawVelocity + yawAcceleration * timeStep;
 
     // update acceleration
-    double momentInertiaYaw = CommonHelper::CalculateMomentInertiaYaw(GetAgent()->GetVehicleModelParameters().weight,
+    double momentInertiaYaw = CommonHelper::CalculateMomentInertiaYaw(GetWeight(),
                                                                       GetAgent()->GetLength(),
                                                                       GetAgent()->GetWidth());
     if (momentInertiaYaw >= 1.0) {
@@ -380,8 +401,9 @@ void DynamicsRegularTwoTrackImplementation::NextStateRotation()
 
 void DynamicsRegularTwoTrackImplementation::NextStateSet()
 {
-    double midRearAxleX = positionCar.x - std::cos(yawAngle) * GetAgent()->GetVehicleModelParameters().wheelbase / 2.0; // reference point (rear axle) in global CS
-    double midRearAxleY = positionCar.y - std::sin(yawAngle) * GetAgent()->GetVehicleModelParameters().wheelbase / 2.0; // reference point (rear axle) in global CS
+    const double wheelbase = GetWheelbase();
+    double midRearAxleX = positionCar.x - std::cos(yawAngle) * wheelbase / 2.0; // reference point (rear axle) in global CS
+    double midRearAxleY = positionCar.y - std::sin(yawAngle) * wheelbase / 2.0; // reference point (rear axle) in global CS
 
     // update position (constant acceleration step)
     dynamicsSignal.acceleration = accelerationCar.x;
@@ -389,7 +411,7 @@ void DynamicsRegularTwoTrackImplementation::NextStateSet()
     dynamicsSignal.positionX = midRearAxleX;
     dynamicsSignal.positionY = midRearAxleY;
     dynamicsSignal.travelDistance = velocityCar.x * GetCycleTime() * 0.001;
-    dynamicsSignal.steeringWheelAngle = angleTireFront.GetValue() * 180 / M_PI;
+    dynamicsSignal.steeringWheelAngle = angleTireFront.GetValue();
     dynamicsSignal.yawRate = yawVelocity;
     dynamicsSignal.yaw = yawAngle;
 }

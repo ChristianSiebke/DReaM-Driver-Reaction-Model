@@ -1,16 +1,34 @@
 ################################################################################
 # Copyright (c) 2020 Uwe Woessner
-# Copyright (c) 2020 in-tech GmbH
+#               2020-2021 in-tech GmbH
+#               2021 ITK-Engineering GmbH
 #
-# This program and the accompanying materials are made
-# available under the terms of the Eclipse Public License 2.0
-# which is available at https://www.eclipse.org/legal/epl-2.0/
+# This program and the accompanying materials are made available under the
+# terms of the Eclipse Public License 2.0 which is available at
+# http://www.eclipse.org/legal/epl-2.0.
 #
 # SPDX-License-Identifier: EPL-2.0
 ################################################################################
 #
 # Global cmake file for the openPASS build process
 #
+
+option(WITH_SIMCORE "Build OSI based scenario simulation" ON)
+option(WITH_GUI "Build GUI" ON)
+option(WITH_TESTS "Build unit tests" ON)
+option(WITH_ENDTOEND_TESTS "Create pyOpenPASS target for running end to end tests" OFF)
+option(WITH_COVERAGE "Generate test coverage report using gcov (needs fastcov)" OFF)
+
+option(WITH_DOC "Build documentation" ON)
+option(WITH_API_DOC "Build API documentation (takes pretty long)" OFF)
+
+option(WITH_EXTENDED_OSI "Assume an extended version of OSI is available" OFF)
+option(WITH_PROTOBUF_ARENA "Make use of protobuf arena allocation" ON)
+
+option(WITH_DEBUG_POSTFIX "Use 'd' binary postfix on Windows platform" ON)
+
+option(INSTALL_SYSTEM_RUNTIME_DEPS "Copy detected system runtime dependencies to install directory (i.e. MinGW system libraries)" OFF)
+option(INSTALL_EXTRA_RUNTIME_DEPS "Copy detected third party runtime dependencies to install directory (i.e. required shared libraries found in specified CMAKE_PREFIX_PATH)" OFF)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -38,6 +56,9 @@ if(USE_CCACHE)
   set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
 endif()
 
+set(CMAKE_C_FLAGS_DEBUG "-g -ggdb3 -Og")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -ggdb3 -Og")
+
 if(MINGW)
   if(CMAKE_BUILD_TYPE STREQUAL Debug)
     # this avoids string table overflow errors during compilation
@@ -55,46 +76,39 @@ set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER "generated")
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-find_package(Protobuf 2.6.1 REQUIRED)
-add_compile_definitions(PROTOBUF_USE_DLLS)
+if(WITH_SIMCORE OR WITH_TESTS)
 
-find_package(OSI REQUIRED)
+  find_package(Protobuf REQUIRED)
+  add_compile_definitions(PROTOBUF_USE_DLLS)
 
-if(MINGW)
-  # Bug in boost-install 1.72.0
-  # setting boost mingw version manually
-  # https://github.com/boostorg/boost_install/issues/33
-  string(REGEX MATCHALL "[0-9]+" _CVER_COMPONENTS ${CMAKE_CXX_COMPILER_VERSION})
-  list(GET _CVER_COMPONENTS 0 _CVER_MAJOR)
-  list(GET _CVER_COMPONENTS 1 _CVER_MINOR)
-  set(Boost_COMPILER "mgw${_CVER_MAJOR}${_CVER_MINOR}")
+  find_package(OSI REQUIRED)
+
+  set(Boost_USE_STATIC_LIBS OFF)
+  find_package(Boost COMPONENTS filesystem REQUIRED)
+
+  find_package(Qt5 COMPONENTS Concurrent Core Widgets Xml XmlPatterns REQUIRED)
+  find_package(FMILibrary)
+
+  if(WITH_EXTENDED_OSI)
+    add_compile_definitions(USE_EXTENDED_OSI)
+  endif()
+
+  if(WITH_PROTOBUF_ARENA)
+    add_compile_definitions(USE_PROTOBUF_ARENA)
+  endif()
 endif()
-set(Boost_USE_STATIC_LIBS OFF)
-find_package(Boost COMPONENTS filesystem REQUIRED)
-
-find_package(Qt5 COMPONENTS Concurrent Core Widgets Xml)
-find_package(FMILibrary)
-
-option(WITH_SIMCORE "Build OSI based scenario simulation" ON)
-option(WITH_GUI "Build GUI" OFF)
-option(WITH_TESTS "Build unit tests" ON)
-option(WITH_EXTENDED_OSI "Assume an extended version of OSI is available" OFF)
-option(WITH_PROTOBUF_ARENA "Make use of protobuf arena allocation" ON)
-option(WITH_DEBUG_POSTFIX "Use 'd' binary postfix on Windows platform" ON)
 
 if(WITH_TESTS)
-  find_package(GTest)
-  # as GMock currently doesn't provide a find_package config, gmock file location is derived from gtest in HelperMacros.cmake
-  #find_package(GMock)
+  find_package(GTest REQUIRED CONFIG)   # force config mode for better lookup consistency with newer gtest versions
+  message(STATUS "Found GTest: ${GTest_DIR}")
+
+  if(WITH_COVERAGE)
+    find_package(Gcov REQUIRED)
+    find_package(Fastcov REQUIRED)
+    find_package(Genhtml REQUIRED)
+  endif()
 endif()
 
-if(WITH_EXTENDED_OSI)
-  add_compile_definitions(USE_EXTENDED_OSI)
-endif()
-
-if(WITH_PROTOBUF_ARENA)
-  add_compile_definitions(USE_PROTOBUF_ARENA)
-endif()
 
 if(WIN32)
   set(CMAKE_INSTALL_PREFIX "C:/OpenPASS" CACHE PATH "Destination directory")
@@ -109,47 +123,47 @@ if(WIN32)
 else()
   set(CMAKE_INSTALL_PREFIX "/OpenPASS" CACHE PATH "Destination directory")
   add_compile_definitions(unix)
-  add_link_options(LINKER:-z,defs)
+  add_link_options(LINKER:-z,defs)   # fail during link time on undefined references (instead of runtime)
   option(OPENPASS_ADJUST_OUTPUT "Adjust output directory" OFF)
 endif()
 
 add_compile_definitions($<IF:$<CONFIG:Debug>,DEBUG_POSTFIX="${CMAKE_DEBUG_POSTFIX}",DEBUG_POSTFIX=\"\">)
 
-set(CMAKE_BUILD_RPATH \$ORIGIN)
-
 include(HelperMacros)
 
 #######################################
 
-set(INSTALL_BIN_DIR "bin" CACHE PATH "Installation directory for executables")
-set(INSTALL_LIB_DIR "lib" CACHE PATH "Installation directory for libraries")
 set(SUBDIR_LIB_GUI "gui" CACHE PATH "Installation directory for GUI libraries")
-set(SUBDIR_LIB_SIM "lib" CACHE PATH "Installation directory for simulation libraries")
-set(SUBDIR_LIB_COMPONENTS "lib" CACHE PATH "Installation directory for core components")
+set(SUBDIR_LIB_MODULES "modules" CACHE PATH "Installation directory for component modules")
+set(SUBDIR_LIB_COMMON "${SUBDIR_LIB_MODULES}/common" CACHE PATH "Installation directory for common simulation libraries")
+set(SUBDIR_LIB_CORE "${SUBDIR_LIB_MODULES}" CACHE PATH "Installation directory for core simulation libraries")
 set(SUBDIR_XML_COMPONENTS "components" CACHE PATH "Installation directory for core components")
-set(INSTALL_INC_DIR "include" CACHE PATH "Installation directory for headers")
-set(INSTALL_CFG_DIR "cfg" CACHE PATH "Installation directory for config files")
-set(INSTALL_MAN_DIR "share/man" CACHE PATH "Installation directory for manual pages")
-set(INSTALL_PKGCONFIG_DIR "share/pkgconfig" CACHE PATH "Installation directory for pkgconfig (.pc) files")
+set(SUBDIR_LIB_EXTERNAL "lib" CACHE PATH "Installation directory for external simulation dependencies (libraries)")
 
-if(OPENPASS_ADJUST_OUTPUT)
-set(OPENPASS_DESTDIR ${CMAKE_BINARY_DIR}/OpenPASS CACHE PATH "Destination directory")
-file(MAKE_DIRECTORY ${OPENPASS_DESTDIR})
-file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}${SUBDIR_LIB_SIM})
-file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}${SUBDIR_LIB_GUI})
-file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}${SUBDIR_LIB_COMPONENTS})
-file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}${SUBDIR_LIB_COMPONENTS})
+if(WIN32)
+  # dlls have to reside in the directory of the executable loading them
+  # an empty string would be replaced by the default ("bin") when running install, thus "." is used here
+  set(SUBDIR_LIB_COMMON .)
+  set(SUBDIR_LIB_EXTERNAL .)
 endif()
 
-add_compile_definitions(SUBDIR_LIB_SIM="${SUBDIR_LIB_SIM}")
+if(OPENPASS_ADJUST_OUTPUT)
+  set(OPENPASS_DESTDIR ${CMAKE_BINARY_DIR}/OpenPASS CACHE PATH "Destination directory")
+  file(MAKE_DIRECTORY ${OPENPASS_DESTDIR})
+  file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}/${SUBDIR_LIB_GUI})
+  file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}/${SUBDIR_LIB_MODULES})
+  file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}/${SUBDIR_LIB_COMMON})
+  file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}/${SUBDIR_LIB_CORE})
+  file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}/${SUBDIR_XML_COMPONENTS})
+  file(MAKE_DIRECTORY ${OPENPASS_DESTDIR}/${SUBDIR_LIB_EXTERNAL})
+endif()
+
+add_compile_definitions(SUBDIR_LIB_CORE="${SUBDIR_LIB_CORE}")
 add_compile_definitions(SUBDIR_LIB_GUI="${SUBDIR_LIB_GUI}")
-add_compile_definitions(SUBDIR_LIB_COMPONENTS="${SUBDIR_LIB_COMPONENTS}")
+add_compile_definitions(SUBDIR_LIB_MODULES="${SUBDIR_LIB_MODULES}")
 add_compile_definitions(SUBDIR_XML_COMPONENTS="${SUBDIR_XML_COMPONENTS}")
 
 if(MSVC)
-  if(WITH_DEBUG_POSTFIX)
-    set(CMAKE_DEBUG_POSTFIX "d")
-  endif()
   add_compile_definitions(_CRT_SECURE_NO_DEPRECATE)
   add_compile_definitions(_CRT_NONSTDC_NO_DEPRECATE)
 
@@ -158,5 +172,18 @@ if(MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd4250")
 endif()
 
-set(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION .)
-include(InstallRequiredSystemLibraries)
+###############################################################################
+# Documentation
+###############################################################################
+
+if(WITH_API_DOC)
+  set(WITH_DOC ON)
+  find_package(Doxygen REQUIRED dot)
+endif()
+
+if(WITH_DOC)
+  find_package(Sphinx REQUIRED)
+endif()
+
+###############################################################################
+

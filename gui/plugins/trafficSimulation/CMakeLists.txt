@@ -1,12 +1,12 @@
-# /*********************************************************************
-# * Copyright (c) 2019 Volkswagen Group of America.
-# *
-# * This program and the accompanying materials are made
-# * available under the terms of the Eclipse Public License 2.0
-# * which is available at https://www.eclipse.org/legal/epl-2.0/
-# *
-# * SPDX-License-Identifier: EPL-2.0
-# **********************************************************************/
+################################################################################
+# Copyright (c) 2019 Volkswagen Group of America
+#
+# This program and the accompanying materials are made available under the
+# terms of the Eclipse Public License 2.0 which is available at
+# http://www.eclipse.org/legal/epl-2.0.
+#
+# SPDX-License-Identifier: EPL-2.0
+################################################################################
 
 project(openPASS-TrafficSimulation)
 
@@ -52,7 +52,10 @@ target_link_libraries(TrafficSimulation PRIVATE
                       ${PROJECT_NAME}_Presenters
                       ${PROJECT_NAME}_Interfaces)
 
-# target directories. Needs to be defined in some global file TODO
-set_target_properties(TrafficSimulation PROPERTIES
-                      RUNTIME_OUTPUT_DIRECTORY "C:/OpenPASS/bin/gui"
-                      PREFIX "")
+if(WIN32)
+    install(TARGETS TrafficSimulation
+        RUNTIME DESTINATION ${SUBDIR_LIB_GUI}) 
+elseif(UNIX)
+    install(TARGETS TrafficSimulation
+        LIBRARY DESTINATION ${SUBDIR_LIB_GUI}) 
+endif()

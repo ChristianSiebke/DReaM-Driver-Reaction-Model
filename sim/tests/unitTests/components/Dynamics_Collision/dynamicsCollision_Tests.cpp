@@ -1,12 +1,12 @@
-/*******************************************************************************
-* Copyright (c) 2019. 2020 in-tech GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2019-2021 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -19,14 +19,15 @@
 using ::testing::Return;
 using ::testing::ReturnPointee;
 using ::testing::NiceMock;
+using ::testing::DoubleNear;
 
 class DynamicsCollision_Test : public ::testing::Test
 {
 public:
     DynamicsCollision_Test()
     {
-        heavyVehicle.weight = 2000.0;
-        lightVehicle.weight = 1000.0;
+        heavyVehicle.properties = {{"Mass", 2000.0}};
+        lightVehicle.properties = {{"Mass", 1000.0}};
     }
 
 protected:
@@ -73,8 +74,8 @@ TEST_F(DynamicsCollision_Test, CollisionOfTwoAgentsOnlyInXDirection)
 
     dynamicsCollision.Trigger(0);
 
-    ASSERT_DOUBLE_EQ(dynamicsCollision.GetVelocity(), 30.0);
-    ASSERT_DOUBLE_EQ(dynamicsCollision.GetMovingDirection(), 0.0);
+    ASSERT_THAT(dynamicsCollision.GetVelocity(), DoubleNear(30.0, 1e-3));
+    ASSERT_THAT(dynamicsCollision.GetMovingDirection(), DoubleNear(0.0, 1e-3));
 }
 
 TEST_F(DynamicsCollision_Test, CollisionOfTwoAgentsOrthogonal)
@@ -117,8 +118,8 @@ TEST_F(DynamicsCollision_Test, CollisionOfTwoAgentsOrthogonal)
     dynamicsCollision.Trigger(0);
 
     double expectedVelocity = 20.0 * std::sqrt(2);
-    ASSERT_DOUBLE_EQ(dynamicsCollision.GetVelocity(), expectedVelocity);
-    ASSERT_DOUBLE_EQ(dynamicsCollision.GetMovingDirection(), 0.25 * M_PI);
+    ASSERT_THAT(dynamicsCollision.GetVelocity(), DoubleNear(expectedVelocity, 1e-3));
+    ASSERT_THAT(dynamicsCollision.GetMovingDirection(), DoubleNear(0.25 * M_PI, 1e-3));
 }
 
 TEST_F(DynamicsCollision_Test, CollisionOfTwoAgentsOpposingDirections)
@@ -211,8 +212,8 @@ TEST_F(DynamicsCollision_Test, CollisionOfThreeAgentsOnlyInXDirection)
 
     dynamicsCollision.Trigger(0);
 
-    ASSERT_DOUBLE_EQ(dynamicsCollision.GetVelocity(), 25.0);
-    ASSERT_DOUBLE_EQ(dynamicsCollision.GetMovingDirection(), 0.0);
+    ASSERT_THAT(dynamicsCollision.GetVelocity(), DoubleNear(25.0, 1e-3));
+    ASSERT_THAT(dynamicsCollision.GetMovingDirection(), DoubleNear(0.0, 1e-3));
 }
 
 TEST_F(DynamicsCollision_Test, CollisionOfThreeAgentsInDifferentDirections)
@@ -264,8 +265,8 @@ TEST_F(DynamicsCollision_Test, CollisionOfThreeAgentsInDifferentDirections)
     dynamicsCollision.Trigger(0);
 
     double expectedVelocity = 20.0 * std::sqrt(2);
-    ASSERT_DOUBLE_EQ(dynamicsCollision.GetVelocity(), expectedVelocity);
-    ASSERT_DOUBLE_EQ(dynamicsCollision.GetMovingDirection(), -0.25 * M_PI);
+    ASSERT_THAT(dynamicsCollision.GetVelocity(), DoubleNear(expectedVelocity, 1e-3));
+    ASSERT_THAT(dynamicsCollision.GetMovingDirection(), DoubleNear(-0.25 * M_PI, 1e-3));
 }
 
 TEST_F(DynamicsCollision_Test, CollisionOfAgentWithFixedObject)
@@ -298,7 +299,7 @@ TEST_F(DynamicsCollision_Test, CollisionOfAgentWithFixedObject)
 
     dynamicsCollision.Trigger(0);
 
-    ASSERT_DOUBLE_EQ(dynamicsCollision.GetVelocity(), 0.0);
+    ASSERT_THAT(dynamicsCollision.GetVelocity(), DoubleNear(0.0, 1e-3));
 }
 
 

@@ -1,12 +1,12 @@
-# /*********************************************************************
-# * Copyright (c) 2020 in-tech GmbH
-# *
-# * This program and the accompanying materials are made
-# * available under the terms of the Eclipse Public License 2.0
-# * which is available at https://www.eclipse.org/legal/epl-2.0/
-# *
-# * SPDX-License-Identifier: EPL-2.0
-# **********************************************************************/
+################################################################################
+# Copyright (c) 2020 in-tech GmbH
+#
+# This program and the accompanying materials are made available under the
+# terms of the Eclipse Public License 2.0 which is available at
+# http://www.eclipse.org/legal/epl-2.0.
+#
+# SPDX-License-Identifier: EPL-2.0
+################################################################################
 
 #-----------------------------------------------------------------------------
 # \file  OpenScenarioActions.pro
@@ -31,7 +31,9 @@ SOURCES += \
         src/openScenarioActionsImpl.cpp \
         src/oscActionsCalculation.cpp \
         src/transformLaneChange.cpp \
-        src/transformSpeedAction.cpp
+        src/transformSpeedAction.cpp \
+        src/transformAcquirePosition.cpp \
+        src/transformDefaultCustomCommandAction.cpp
 
 HEADERS += \
         openScenarioActions.h \
@@ -41,4 +43,6 @@ HEADERS += \
         src/transformerBase.h \
         src/transformTrajectory.h \
         src/transformLaneChange.h \
-        src/transformSpeedAction.h
+        src/transformSpeedAction.h \
+        src/transformAcquirePosition.h \
+        src/transformDefaultCustomCommandAction.h

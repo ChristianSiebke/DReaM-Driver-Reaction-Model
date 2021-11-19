@@ -1,12 +1,12 @@
-/*********************************************************************
-* Copyright (c) 2019 in-tech
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-**********************************************************************/
+/********************************************************************************
+ * Copyright (c) 2019 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 #pragma once
 
@@ -50,7 +50,7 @@ class FakeAgentBlueprint : public AgentBlueprintInterface {
   MOCK_CONST_METHOD0(GetObjectName,
       std::string());
   MOCK_CONST_METHOD0(GetAgentType,
-      SimulationSlave::AgentTypeInterface&());
+      core::AgentTypeInterface&());
   MOCK_METHOD0(GetSpawnParameter,
       SpawnParameter&());
   MOCK_CONST_METHOD0(GetSpawnParameter,
@@ -64,5 +64,5 @@ class FakeAgentBlueprint : public AgentBlueprintInterface {
   MOCK_CONST_METHOD0(GetSensorParameters,
       openpass::sensors::Parameters());
   MOCK_METHOD1(SetAgentType,
-      void (std::shared_ptr<SimulationSlave::AgentTypeInterface> agentType));
+      void (std::shared_ptr<core::AgentTypeInterface> agentType));
 };

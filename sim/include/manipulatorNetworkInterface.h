@@ -1,12 +1,12 @@
-/*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2017-2019 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 #pragma once
 
@@ -15,7 +15,7 @@
 
 class ScenarioInterface;
 
-namespace SimulationSlave {
+namespace core {
 
 class EventNetworkInterface;
 class Manipulator;
@@ -39,4 +39,4 @@ public:
     virtual std::vector<const Manipulator*> GetManipulators() = 0;
 };
 
-}// namespace SimulationSlave
+}// namespace core

@@ -217,34 +217,34 @@ If `UnzipOncePerInstance` is set to `true`, an integer number will be appended t
 \subsection dev_agent_modules_fmuwrapper_osmp OSMP FMU
 
 OSMP is currently the only supported type of FMU.
-It allows the pass input to the FMU as OSI messages as well as recieve output as OSI message.
+It allows to pass input to the FMU as OSI messages as well as receive output as OSI message.
 For more information on OSMP see https://github.com/OpenSimulationInterface/osi-sensor-model-packaging.
 
 The OsmpFmuHandler has the following additional (optional) parameters:
 
-| **Key**                   | **Type** | **Description**                                                                                 |
-|---------------------------|----------|-------------------------------------------------------------------------------------------------|
-| Input_SensorView          | string   | Name of the FMU variable to which the SensorView is sent                                        |
-| Input_TrafficCommand      | string   | Name of the FMU variable to which the TrafficCommand is sent                                    |
-| Init_Groundtruth          | string   | Name of the FMU variable to which the Groundtruth is sent during the initialization             |
-| Output_SensorData         | string   | Name of the FMU variable from where a SensorData should be recieved                             |
-| Output_TrafficUpdate      | string   | Name of the FMU variable from where a TrafficUpdate should be recieved                          |
-| WriteSensorViewOutput     | bool     | If true the SensorView is written into a JSON file                                              |
-| WriteTrafficCommandOutput | bool     | If true the TrafficCommand is written into a JSON file                                          |
-| WriteGroundtruthOutput    | bool     | If true the Groundtruth is written into a JSON file                                             |
-| WriteSensorDataOutput     | bool     | If true the SensorData is written into a JSON file                                              |
-| WriteTrafficUpdateOutput  | bool     | If true the TrafficUpdate is written into a JSON file                                           |
+| **Key**                   | **Type** | **Description**                                                                                                                                                             |
+|---------------------------|----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Init_&lt;var_name&gt;     | string   | var_name references a FMU variable (as defined in FMU's modelDescription.xml) to which a specific OSI message is sent during initialization. Allowed values: `GroundTruth`                                              |
+| Input_&lt;var_name&gt;    | string   | var_name references a FMU variable (as defined in FMU's modelDescription.xml) to which a specific OSI message is sent. Allowed values: `SensorView`, `SensorViewConfig`, `SensorData`, `TrafficCommand`                 |
+| Output_&lt;var_name&gt;   | string   | var_name references a FMU variable (as defined in FMU's modelDescription.xml) from which a specific OSI message is received. Allowed values: `SensorViewConfigRequest`, `SensorData`, `TrafficUpdate`, `MotionCommand`  |
+| Parameter_&lt;name&gt;    | any      | The value of the parameter is assigned to the FMU variable &lt;name&gt;                         |
+| Parameter_&lt;transformation&gt;[&lt;mapping&gt;]_&lt;name&gt;    | string/string/any&ast;      | Same as Parameter_&lt;name&gt; but with an preceding &lt;transformation&gt; according to a &lt;mapping&gt;.<br/>Currently, only mappings between the same types are supported.<br/>&ast;When using `TransformList` as &lt;transformation&gt;, the type of the data is expected to be a string and the string must be a comma separated list of values.<br/><br/>Allowed values:<br />&lt;transformation&gt;: `Transform`, `TransformList`<br />&lt;mapping&gt;: `ScenarioName>Id`<br/><br/>Example: `Parameter_TransformList[ScenarioName>Id]_<name>` |
+| WriteJson_&lt;var_name&gt;     | bool     | var_name references a FMU variable (as defined in FMU's modelDescription.xml). Allowed values: `SensorView`, `SensorViewConfig`, `SensorViewConfigRequest`, `SensorData`, `TrafficCommand`, `GroundTruth`, `TrafficUpdate`<br/>If true the var_name is written into a JSON file                  |
+| WriteTrace_&lt;var_name&gt;     | bool     | var_name references a FMU variable (as defined in FMU's modelDescription.xml). Allowed values: `SensorView`, `SensorViewConfig`, `SensorViewConfigRequest`, `SensorData`, `TrafficCommand`, `GroundTruth`, `TrafficUpdate`<br/>If true the binary trace of the var_name is written into an OSI trace file                                              |
 | EnforceDoubleBuffering    | bool     | If true the wrapper will throw an error if FMU doesn't use double buffering. Defaults to false. |
 
-The type of OSI messages the OsmpFmuHandler sends an recieves is defined by its parameters. Only messages for which a FMU variable is given in the configuration are sent/recieved.
-An additional parameter defines whether the message should be logged as JSON file for every agent and every timestep (see table above).
+The type of OSI messages the OsmpFmuHandler sends an receives is defined by its parameters. Only messages for which a FMU variable is given in the configuration are sent/received.
+There are two additional parameters.
+One parameter defines whether the message should be logged as JSON file for every agent and every timestep. The other one defines whether all messages of the same type should be logged as one OSI trace file for every agent (see table above).
 
 Currently these messages are supported:
 
-* SensorView: SensorView generated from the Groundtruth with this agent is host vehicle
-* TrafficCommand: Trajectory from openSCENARIO, that will be converted into a TrafficCommand
-* SensorData: Output of a sensor, that can be send to other modules as SensorDataSignal
-* TrafficUpdate: Will be converted to a DynamicsSignal
+* SensorView: SensorView generated from the GroundTruth with this agent is host vehicle.
+* SensorViewConfig, SensorViewConfigRequest: Configuration of a sensor according to OSMP.
+* TrafficCommand: Trajectory from openSCENARIO, that will be converted into a TrafficCommand.
+* SensorData: Output of a sensor. Can be input and/or output of a FMU. Received SensorData is forwarded to other components as SensorDataSignal.
+* TrafficUpdate: Will be converted to a DynamicsSignal.
+* MotionCommand: Will be converted to a DynamicsSignal. Has priority over TrafficUpdate.
 
 ---
 
@@ -305,14 +305,12 @@ F<SUB>air</SUB> = rho<SUB>air</SUB> / 2 * A<SUB>front</SUB> * c<SUB>w</SUB> * v<
 As defined by openSCENARIO, OpenScenarioActions is the relaying module for: 
 - Trajectory-actions
 - LaneChange-actions 
-- CustomLaneChange-actions 
 - UserDefined-actions.
   
 If a 
 - TrajectoryManipulator
 - LaneChangeManipulator
-- CustomLaneChangeManipulator or a
-- GazeFollowerManipulator 
+or a user defined manipulator
   
 raises such an event for the specified agent, the module forwards it as signal to all interested module of the corresponding agent. The modules can than react on the signals content without time delay.
 
@@ -392,27 +390,47 @@ Both polygons are constructed from corner-points consisting out of the intersect
 \subsection dev_agent_modules_geometric2d_obstruction Visual Obstruction
 
 Objects in front of others block the sensors line of sight. If an object is large enough it might visually obstruct others.
-
 To check if one or multiple objects in combination "shadow" other objects the EnableVisualObstruction - flag can be set.
-
 Also the minimum required percentage of the visible area of an object to be detected can be specified.
-
 The implemented algorithm uses the concept of shadow-casting.
 
-The sensor can be pictured as a light source. Every object in the detection field of the sensor will therefore cast a shadow and reduce the overall detection area behind it.
-
-If an object is shadowed too much (e.g. the visible area is below a specified threshold) it is removed from the list of DetectedObject's and considered undetected.
-
+**Basic**  
 ![Example of shadow-casting](ShadowCasting.svg)
 
-
-As depicted in the figure above, inside the initial bright area (approximated as ciruclar sector) the following steps are taken:
-1. calculate the shadow polygon of each object inside the detection field and remove the casted shadow from the bright area
-2. check for each object the remaining area inside the bright area polygon. If (covered object area / total object area) < threshold  - remove object from the list of detected objects.
-
-After all shadows are removed the "real" detection field polygon (yellow area) remains.
-Objects in green and blue are detected. 
+The sensor can be pictured as a light source.
+Every object in the detection field of the sensor will therefore cast a shadow and reduce the overall detection area behind it.
+If an object is shadowed too much, it is removed from the list of detected objects.
+After all shadows are removed, only the "real" detection field polygon (yellow area) remains.
+Objects in green and blue are detected.
 The red object is completly covered by shadows and therefore not detected.
+
+**Step by Step**  
+Shadow casting is calculated as follows (see figure below _Example of shadow-casting_):
+1. Approximate detection field as ciruclar sector (bright area).
+2. Calculate the casted shadow of each object inside the detection field.
+3. Remove the casted shadow from the detection field.
+4. Check for each object if the remaining area is inside the remaining polygon.
+5. Removed objects if the relation  `covered object area/total object area` is smaller than a parameterizable threshold.
+
+**Details**  
+The approximation of the detection range is deliberatly calculated along its edge and not by means of a tangential approximation.
+The areal error along the edge is regarded as negligible w.r.t to the sizes of objects and commonly used detection ranges.
+
+![Shadow casting detail 1](shadowing1.png)  
+For the calcuation of the shadowing polygon, the confining vectors for the object of interest are calculated (see _detail 1_).
+
+![Shadow casting detail 2](shadowing2.png)  
+Scaling the length of the vectors w.r.t. the detection range would only to reach the boundary and not suffice, as the resulting polygon is too small (red area in _detail 2_ not covered).
+
+![Shadow casting detail 3](shadowing3.png)  
+A larger scale factor is necessary, but needs to be calculated dynamically, as a too small factor might not suffice for very close objects and a very large factor could lead to numerical issues.
+Hence, the scale is calculated dynamically as depicted in _detail 3_, by comparing two isosceles triangles, laying in between the two vectors.
+This is only an appoximation of the true triangles, but an upper bound, which allows faster processing.
+The final scale resolves to `detection_radius / projected_height`, where the projected heigth is taken from shorter vector.
+
+![Shadow casting detail 4](shadowing4.png)  
+As shown in _detail 4_, the scale is just large enought to include the whole detection range, preventing potential numerical issues.
+This only holds as long as the detection range is approximated as described above.
 
 ---
 
@@ -536,4 +554,3 @@ Output to other components:
 | TrajectoryFollower | Current max. reachable state                                               | ComponentStateSignal        |
 | Driver             | List of all ADAS with names, stati and types                               | AdasStateSignal             |
 | VehicleComponent   | Current max. reachable state, list of all ADAS with names, stati and types | CompCtrlToVehicleCompSignal |
-

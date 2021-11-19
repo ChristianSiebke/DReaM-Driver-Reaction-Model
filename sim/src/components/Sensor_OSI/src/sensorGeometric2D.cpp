@@ -1,12 +1,12 @@
-/*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2019-2021 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 /** \brief SensorGeometric2D.cpp */
@@ -17,6 +17,7 @@
 #include <numeric>
 #include "common/boostGeometryCommon.h"
 #include "include/parameterInterface.h"
+#include "common/osiUtils.h"
 
 SensorGeometric2D::SensorGeometric2D(
         std::string componentName,
@@ -68,10 +69,11 @@ SensorGeometric2D::SensorGeometric2D(
 void SensorGeometric2D::Trigger(int time)
 {
     sensorData = {};
-    sensorData.mutable_timestamp()->set_seconds((time + latencyInMs) / 1000);
-    sensorData.mutable_timestamp()->set_nanos(((time + latencyInMs) % 1000) * 1e6);
+    osi3::utils::SetTimestamp(sensorData, time + latencyInMs);
+    osi3::utils::SetVersion(sensorData);
     SensorDetectionResults results = DetectObjects();
     sensorData = ApplyLatency(time, sensorData);
+    sensorData.mutable_moving_object_header()->set_data_qualifier(osi3::DetectedEntityHeader_DataQualifier_DATA_QUALIFIER_AVAILABLE);
 
     Observe(time, ApplyLatencyToResults(time, results));
 }
@@ -82,11 +84,11 @@ void SensorGeometric2D::UpdateInput(int, const std::shared_ptr<SignalInterface c
 
 void SensorGeometric2D::Observe(const int time, const SensorDetectionResults& results)
 {
-    std::vector<OWL::Id> visibleIds;
+    std::set<OWL::Id> visibleIds;
 
     std::transform(results.visibleMovingObjects.begin(),
                    results.visibleMovingObjects.end(),
-                   std::back_inserter(visibleIds),
+                   std::inserter(visibleIds, visibleIds.end()),
                    [](const auto object) -> OWL::Id
     {
         return object.id().value();
@@ -94,17 +96,17 @@ void SensorGeometric2D::Observe(const int time, const SensorDetectionResults& re
 
     std::transform(results.visibleStationaryObjects.begin(),
                    results.visibleStationaryObjects.end(),
-                   std::back_inserter(visibleIds),
+                   std::inserter(visibleIds, visibleIds.end()),
                    [](const auto object) -> OWL::Id
     {
         return object.id().value();
     });
 
-    std::vector<OWL::Id> detectedIds;
+    std::set<OWL::Id> detectedIds;
 
     std::transform(results.detectedMovingObjects.begin(),
                    results.detectedMovingObjects.end(),
-                   std::back_inserter(detectedIds),
+                   std::inserter(detectedIds, detectedIds.end()),
                    [](const auto object) -> OWL::Id
     {
         return object.id().value();
@@ -112,43 +114,24 @@ void SensorGeometric2D::Observe(const int time, const SensorDetectionResults& re
 
     std::transform(results.detectedStationaryObjects.begin(),
                    results.detectedStationaryObjects.end(),
-                   std::back_inserter(detectedIds),
+                   std::inserter(detectedIds, detectedIds.end()),
                    [](const auto object) -> OWL::Id
     {
         return object.id().value();
     });
 
-    GetPublisher()->Publish("Sensor" + std::to_string(id) + "_VisibleAgents", CreateAgentIdListString(visibleIds));
-    GetPublisher()->Publish("Sensor" + std::to_string(id) + "_DetectedAgents", CreateAgentIdListString(detectedIds));
+    GetPublisher()->Publish("Sensor" + std::to_string(id) + "_VisibleAgents", CreateObjectIdListString(visibleIds));
+    GetPublisher()->Publish("Sensor" + std::to_string(id) + "_DetectedAgents", CreateObjectIdListString(detectedIds));
 }
 
-std::string SensorGeometric2D::CreateAgentIdListString(const std::vector<OWL::Id>& owlIds) const
+std::string SensorGeometric2D::CreateObjectIdListString(const std::set<OWL::Id>& owlIds) const
 {
-    const auto worldData = static_cast<OWL::WorldData*>(world->GetWorldData());
-
-    std::vector<std::string> agentIds;
-    std::transform(owlIds.begin(),
-                   owlIds.end(),
-                   std::back_inserter(agentIds),
-                   [worldData](const auto owlId) -> std::string
-    {
-        try
-        {
-            return std::to_string(worldData->GetAgentId(owlId));
-        }
-        catch (const std::out_of_range&)
-        {
-            // agent id could not be resolved, maybe stationary object
-            return "x";
-        }
-    });
-
-    return std::accumulate(agentIds.begin(),
-                           agentIds.end(),
+    return std::accumulate(owlIds.begin(),
+                           owlIds.end(),
                            std::string(""),
                            [](const auto& first, const auto& second) -> std::string
     {
-        return first + ';' + second;
+        return first + ';' + std::to_string(second);
     }).erase(0,1);
 }
 
@@ -250,10 +233,15 @@ std::pair<point_t, polygon_t> SensorGeometric2D::CreateSensorDetectionField(cons
 SensorDetectionResults SensorGeometric2D::DetectObjects()
 {
     SensorDetectionResults results;
+    std::vector<osi3::MovingObject> detectedMovingObjectsWithoutFailure;
+    std::vector<osi3::StationaryObject> detectedStationaryObjectsWithoutFailure;
     osi3::SensorViewConfiguration sensorViewConfig = GenerateSensorViewConfiguration();
     auto sensorView = static_cast<OWL::Interfaces::WorldData*>(world->GetWorldData())->GetSensorView(sensorViewConfig, GetAgent()->GetId());
 
+    sensorData.add_sensor_view()->CopyFrom(*sensorView);
+
     const auto hostVehicle = FindHostVehicleInSensorView(*sensorView);
+    sensorData.mutable_host_vehicle_location()->CopyFrom(hostVehicle->base());
 
     const auto [sensorPositionGlobal, detectionField] = CreateSensorDetectionField(hostVehicle);
     const auto [movingObjectsInDetectionField, stationaryObjectsInDetectionField] = GetObjectsInDetectionAreaFromSensorView(*sensorView,
@@ -272,8 +260,8 @@ SensorDetectionResults SensorGeometric2D::DetectObjects()
                                               sensorPositionGlobal,
                                               stationaryObjectsInDetectionField);
 
-        std::tie(results.visibleMovingObjects, results.detectedMovingObjects) = CalcVisualObstruction(movingObjectsInDetectionField, brightArea);
-        std::tie(results.visibleStationaryObjects, results.detectedStationaryObjects) = CalcVisualObstruction(stationaryObjectsInDetectionField, brightArea);
+        std::tie(results.visibleMovingObjects, detectedMovingObjectsWithoutFailure) = CalcVisualObstruction(movingObjectsInDetectionField, brightArea);
+        std::tie(results.visibleStationaryObjects, detectedStationaryObjectsWithoutFailure) = CalcVisualObstruction(stationaryObjectsInDetectionField, brightArea);
     }
     else
     {
@@ -284,7 +272,7 @@ SensorDetectionResults SensorGeometric2D::DetectObjects()
         {
             return *movingObject;
         });
-        results.detectedMovingObjects = results.visibleMovingObjects;
+        detectedMovingObjectsWithoutFailure = results.visibleMovingObjects;
         std::transform(stationaryObjectsInDetectionField.begin(),
                        stationaryObjectsInDetectionField.end(),
                        std::back_inserter(results.visibleStationaryObjects),
@@ -292,7 +280,7 @@ SensorDetectionResults SensorGeometric2D::DetectObjects()
         {
             return *stationaryObject;
         });
-        results.detectedStationaryObjects = results.visibleStationaryObjects;
+        detectedStationaryObjectsWithoutFailure = results.visibleStationaryObjects;
     }
 
     const auto ownPosition = GetHostVehiclePosition(hostVehicle);
@@ -301,12 +289,22 @@ SensorDetectionResults SensorGeometric2D::DetectObjects()
     const point_t ownVelocity{hostVehicle->base().velocity().x(), hostVehicle->base().velocity().y()};
     const point_t ownAcceleration{hostVehicle->base().acceleration().x(), hostVehicle->base().acceleration().y()};
 
-    for (const auto& object : results.detectedMovingObjects)
+    for (const auto &object : detectedMovingObjectsWithoutFailure)
     {
+        if(HasDetectionError())
+        {
+            continue;
+        }
+        results.detectedMovingObjects.push_back(object);
         AddMovingObjectToSensorData(object, ownVelocity, ownAcceleration, ownPosition, yaw, yawRate);
     }
-    for (const auto& object : results.detectedStationaryObjects)
+    for (const auto &object : detectedStationaryObjectsWithoutFailure)
     {
+        if(HasDetectionError())
+        {
+            continue;
+        }
+        results.detectedStationaryObjects.push_back(object);
         AddStationaryObjectToSensorData(object, ownPosition, yaw);
     }
 
@@ -474,10 +472,21 @@ multi_polygon_t SensorGeometric2D::CalcObjectShadow(const polygon_t& boundingBox
         }
     }
 
-    //the outer points are obtained by stretching the leftVector and rightVector
-    double stretchFactor = 1e9;
-    point_t leftOuterPoint{sensorPosition.x() + stretchFactor * leftVector.x(), sensorPosition.y() + stretchFactor * leftVector.y()};
-    point_t rightOuterPoint{sensorPosition.x() + stretchFactor * rightVector.x(), sensorPosition.y() + stretchFactor * rightVector.y()};
+    // The outer points are obtained by scaling the leftVector and rightVector, 
+    // so that the calculated shadow just covers the detection range
+    // For a detailed description of the scaling factor please refer to the developer documentation.
+    const auto leftVectorLength = std::hypot(leftVector.x(), leftVector.y());
+    const auto rightVectorLength = std::hypot(rightVector.x(), rightVector.y());
+    const auto height = std::min(leftVectorLength, rightVectorLength) * std::cos(0.5 * (maxRightAngle + maxLeftAngle));
+    const auto scale = detectionRange / height;
+    
+    if(scale > WARNING_THRESHOLD_SCALE)
+    {
+       LOG(CbkLogLevel::Warning, "Scaling factor for shadow casting exceeds internal threshold: numeric issues could cause detection to fail.");
+    }
+
+    point_t leftOuterPoint{sensorPosition.x() + scale * leftVector.x(), sensorPosition.y() + scale * leftVector.y()};
+    point_t rightOuterPoint{sensorPosition.x() + scale * rightVector.x(), sensorPosition.y() + scale * rightVector.y()};
 
     //build the shadow polygon
     polygon_t shadow;

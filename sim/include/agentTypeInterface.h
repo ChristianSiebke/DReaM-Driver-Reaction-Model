@@ -1,14 +1,14 @@
-/*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
-*               2017, 2018 ITK Engineering GmbH
-* Copyright (c) 2020 HLRS, University of Stuttgart.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2020 HLRS, University of Stuttgart
+ *               2017-2018 ITK Engineering GmbH
+ *               2017-2019 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  AgentType.h
@@ -18,12 +18,12 @@
 
 #pragma once
 
-#include <list>
+#include <vector>
 #include <map>
 #include <memory>
 #include <string>
 
-namespace SimulationSlave
+namespace core
 {
 
 class ComponentType;
@@ -44,8 +44,8 @@ public:
     virtual bool AddComponent(std::shared_ptr<ComponentType> component) = 0;
 
     //Getter
-    virtual const std::list<int> &GetChannels() const = 0;
+    virtual const std::vector<int> &GetChannels() const = 0;
     virtual const std::map<std::string, std::shared_ptr<ComponentType>> &GetComponents() const = 0;
 };
 
-} // namespace SimulationSlave
+} // namespace core

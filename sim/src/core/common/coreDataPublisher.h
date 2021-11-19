@@ -1,12 +1,12 @@
-/*******************************************************************************
-* Copyright (c) 2020 in-tech GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2020-2021 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 #pragma once
 
@@ -40,19 +40,19 @@ public:
         return Acyclic(name, triggeringEntities, affectedEntities, parameter);
     }
 
-    openpass::datastore::Parameter parameter;
+    openpass::databuffer::Parameter parameter;
 };
 
 ///! Interface which has to be provided by observation modules
 class CoreDataPublisher : public PublisherInterface
 {
 public:
-    CoreDataPublisher(DataStoreWriteInterface *const dataStore) :
-        PublisherInterface(dataStore)
+    CoreDataPublisher(DataBufferWriteInterface *const dataBuffer) :
+        PublisherInterface(dataBuffer)
     {
     }
 
-    void Publish(const openpass::datastore::Key &key, const openpass::publisher::LogEntryBase &event) override;
+    void Publish(const openpass::databuffer::Key &key, const openpass::publisher::LogEntryBase &event) override;
 };
 
 } // namespace openpass::publisher

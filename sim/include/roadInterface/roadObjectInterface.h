@@ -1,12 +1,12 @@
-/*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2017-2021 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 #pragma once
 
 #include <string>
@@ -33,6 +33,8 @@ public:
     virtual double GetHeight() const = 0;
     virtual double GetPitch() const = 0;
     virtual double GetRoll() const = 0;
+    virtual bool IsContinuous() const = 0;
+    virtual std::string GetName() const = 0;
 };
 
 

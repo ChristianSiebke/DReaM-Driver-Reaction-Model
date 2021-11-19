@@ -1,12 +1,12 @@
-/******************************************************************************
-* Copyright (c) 2019 Volkswagen Group of America.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2019 Volkswagen Group of America
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 #include "Presenters/VehicleProfilesPresenter.h"
 
@@ -142,7 +142,7 @@ void VehicleProfilesPresenter::refreshSystemConfig()
         vehicleProfilesView->setSystemProfileSelection(systemList.keys());
 
         if (!QFileInfo::exists(project->absoluteToConfigPath(filepath)))
-            vehicleProfilesView->setSystemConfigError("System Config not accessible! Check configuration path in Master Configuration.");
+            vehicleProfilesView->setSystemConfigError("System Config not accessible! Check configuration path in opSimulationManager.xml.");
 
         // check whether systems in current profile exist in systemConfig (systemList)
         if (!systemsConsistent())
@@ -274,7 +274,7 @@ void VehicleProfilesPresenter::refreshModelCatalogue()
 
         if (!QFileInfo::exists(project->absoluteToConfigPath(modelCatalogue)))
         {
-            vehicleProfilesView->setModelCatalogueError("Model catalogue not accessible! Check configuration path in Master Configuration.");
+            vehicleProfilesView->setModelCatalogueError("Model catalogue not accessible! Check configuration path in opSimulationManager.xml.");
             vehicleProfilesView->enableModelView(false);
             return;
         }

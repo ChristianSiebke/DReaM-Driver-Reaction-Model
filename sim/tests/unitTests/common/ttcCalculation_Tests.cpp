@@ -1,13 +1,13 @@
-# /*********************************************************************
-# * Copyright (c) 2019 in-tech GmbH
-# *               2019 BMW AG
-# *
-# * This program and the accompanying materials are made
-# * available under the terms of the Eclipse Public License 2.0
-# * which is available at https://www.eclipse.org/legal/epl-2.0/
-# *
-# * SPDX-License-Identifier: EPL-2.0
-# **********************************************************************/
+/********************************************************************************
+ * Copyright (c) 2019 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+ *               2019 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 #include <cmath>
 
 #include "gtest/gtest.h"
@@ -66,6 +66,7 @@ TEST_P(TtcCalcualtionTest, CalculateObjectTTC_ReturnsCorrectTtc)
     ON_CALL(ego, GetPositionX()).WillByDefault(Return(data.egoX));
     ON_CALL(ego, GetPositionY()).WillByDefault(Return(data.egoY));
     ON_CALL(ego, GetYaw()).WillByDefault(Return(data.egoYaw));
+    ON_CALL(ego, GetRoll()).WillByDefault(Return(0.0));
     ON_CALL(ego, GetYawRate()).WillByDefault(Return(data.egoYawRate));
     ON_CALL(ego, GetYawAcceleration()).WillByDefault(Return(data.egoYawAcceleration));
     ON_CALL(ego, GetVelocity(VelocityScope::DirectionX)).WillByDefault(Return(data.egoVelocityX));
@@ -79,6 +80,7 @@ TEST_P(TtcCalcualtionTest, CalculateObjectTTC_ReturnsCorrectTtc)
     ON_CALL(opponent, GetPositionX()).WillByDefault(Return(data.opponentX));
     ON_CALL(opponent, GetPositionY()).WillByDefault(Return(data.opponentY));
     ON_CALL(opponent, GetYaw()).WillByDefault(Return(data.opponentYaw));
+    ON_CALL(opponent, GetRoll()).WillByDefault(Return(0.0));
     ON_CALL(opponent, GetYawRate()).WillByDefault(Return(data.opponentYawRate));
     ON_CALL(opponent, GetYawAcceleration()).WillByDefault(Return(data.opponentYawAcceleration));
     ON_CALL(opponent, GetVelocity(VelocityScope::DirectionX)).WillByDefault(Return(data.opponentVelocityX));

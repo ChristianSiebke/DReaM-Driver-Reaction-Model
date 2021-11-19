@@ -1,12 +1,12 @@
-/*********************************************************************
-* Copyright (c) 2019, 2020 in-tech
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-**********************************************************************/
+/********************************************************************************
+ * Copyright (c) 2019-2020 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 #include "gmock/gmock.h"
 
@@ -27,7 +27,7 @@ public:
     MOCK_CONST_METHOD0(GetValue, double ());
     MOCK_CONST_METHOD0(GetUnit, RoadSignalUnit ());
     MOCK_CONST_METHOD0(GetText, std::string ());
-    MOCK_CONST_METHOD0(GetDependencies, std::list<std::string> ());
+    MOCK_CONST_METHOD0(GetDependencies, std::vector<std::string> ());
     MOCK_CONST_METHOD0(GetIsDynamic, bool());
     MOCK_CONST_METHOD0(GetWidth, double ());
     MOCK_CONST_METHOD0(GetHeight, double ());

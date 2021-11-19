@@ -1,0 +1,49 @@
+<Profiles SchemaVersion="0.4.6">
+  <AgentProfiles>
+    <AgentProfile Name="LuxuryClassCarAgent" Type="Dynamic">
+      <DriverProfiles>
+        <DriverProfile Name="AgentFollowingDriver" Probability="1.0"/>
+      </DriverProfiles>
+      <VehicleProfiles>
+        <VehicleProfile Name="BMW 7 g12 2016" Probability="1.0"/>
+      </VehicleProfiles>
+    </AgentProfile>
+  </AgentProfiles>
+  <VehicleProfiles>
+    <VehicleProfile Name="BMW 7 g12 2016">
+      <Model Name="car_bmw_7_1"/>
+      <Components/>
+      <Sensors/>
+    </VehicleProfile>
+  </VehicleProfiles>
+  <ProfileGroup Type="Driver">
+    <Profile Name="AgentFollowingDriver">
+      <String Key="Type" Value="AlgorithmAgentFollowingDriverModel"/>
+      <String Key="AlgorithmLateralModule" Value="Algorithm_LateralAfdm"/>
+      <String Key="AlgorithmLongitudinalModule" Value="Algorithm_LongitudinalAfdm"/>
+    </Profile>
+  </ProfileGroup>
+  <ProfileGroup Type="TrafficRules">
+    <Profile Name="Germany">
+      <Double Key="OpenSpeedLimit" Value="INF"/>
+      <Bool Key="KeepToOuterLanes" Value="true"/>
+      <Bool Key="DontOvertakeOnOuterLanes" Value="true"/>
+      <Bool Key="FormRescueLane" Value="true"/>
+      <Bool Key="ZipperMerge" Value="true"/>
+    </Profile>
+    <Profile Name="USA">
+      <Double Key="OpenSpeedLimit" Value="31.2928"/>
+      <Bool Key="KeepToOuterLanes" Value="false"/>
+      <Bool Key="DontOvertakeOnOuterLanes" Value="false"/>
+      <Bool Key="FormRescueLane" Value="true"/>
+      <Bool Key="ZipperMerge" Value="false"/>
+    </Profile>
+    <Profile Name="China">
+      <Double Key="OpenSpeedLimit" Value="33.3333"/>
+      <Bool Key="KeepToOuterLanes" Value="false"/>
+      <Bool Key="DontOvertakeOnOuterLanes" Value="true"/>
+      <Bool Key="FormRescueLane" Value="false"/>
+      <Bool Key="ZipperMerge" Value="true"/>
+    </Profile>
+  </ProfileGroup>
+</Profiles>

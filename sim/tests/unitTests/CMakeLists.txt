@@ -1,3 +1,12 @@
+################################################################################
+# Copyright (c) 2020-2021 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+#
+# This program and the accompanying materials are made available under the
+# terms of the Eclipse Public License 2.0 which is available at
+# http://www.eclipse.org/legal/epl-2.0.
+#
+# SPDX-License-Identifier: EPL-2.0
+################################################################################
 add_subdirectory(common)
 
 add_subdirectory(components/AlgorithmAEB)
@@ -16,11 +25,13 @@ add_subdirectory(components/Sensor_Driver)
 add_subdirectory(components/Sensor_OSI)
 add_subdirectory(components/SignalPrioritizer)
 
-add_subdirectory(core/slave)
-add_subdirectory(core/slave/modules/BasicDataStore)
-add_subdirectory(core/slave/modules/EventDetector)
-add_subdirectory(core/slave/modules/Observation_Log)
-add_subdirectory(core/slave/modules/SpawnPointRuntimeCommon)
-add_subdirectory(core/slave/modules/SpawnPointScenario)
-add_subdirectory(core/slave/modules/SpawnPointWorldAnalyzer)
-add_subdirectory(core/slave/modules/World_OSI)
+add_subdirectory(core/opSimulation)
+add_subdirectory(core/opSimulation/modules/BasicDataBuffer)
+add_subdirectory(core/opSimulation/modules/EventDetector)
+add_subdirectory(core/opSimulation/modules/Observation_Log)
+add_subdirectory(core/opSimulation/modules/SpawnerPreRunCommon)
+add_subdirectory(core/opSimulation/modules/SpawnerRuntimeCommon)
+add_subdirectory(core/opSimulation/modules/SpawnerScenario)
+add_subdirectory(core/opSimulation/modules/SpawnerWorldAnalyzer)
+add_subdirectory(core/opSimulation/modules/World_OSI)
+add_subdirectory(core/opSimulation/Scheduler)

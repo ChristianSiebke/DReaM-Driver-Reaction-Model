@@ -1,13 +1,13 @@
-/*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
-*               2016, 2017, 2018 ITK Engineering GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2016-2021 ITK Engineering GmbH
+ *               2017-2019 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  primitiveSignals.h
@@ -26,7 +26,7 @@
 class DoubleSignal : public ComponentStateSignalInterface
 {
 public:
-    DoubleSignal(ComponentState state, double inValue) : value(inValue)
+    DoubleSignal(double inValue, ComponentState state = ComponentState::Undefined) : value(inValue)
     {
         componentState = state;
     }
@@ -53,7 +53,7 @@ public:
 class IntSignal : public ComponentStateSignalInterface
 {
 public:
-    IntSignal(int inValue, ComponentState state) : value(inValue)
+    IntSignal(int inValue, ComponentState state = ComponentState::Undefined) : value(inValue)
     {
         componentState = state;
     }
@@ -80,7 +80,7 @@ public:
 class BoolSignal : public ComponentStateSignalInterface
 {
 public:
-    BoolSignal(bool inValue, ComponentState state) : value(inValue)
+    BoolSignal(bool inValue, ComponentState state = ComponentState::Undefined) : value(inValue)
     {
         componentState = state;
     }

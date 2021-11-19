@@ -1,19 +1,20 @@
-/*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
-*               2019 AMFD GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2019 AMFD GmbH
+ *               2019-2020 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 #include "sensor_driverImpl.h"
 #include "Signals/sensorDriverSignal.h"
 
 #include "fakeAgent.h"
 #include "fakeEgoAgent.h"
+#include "fakePublisher.h"
 #include "fakeWorldObject.h"
 #include "fakeWorld.h"
 #include "fakeStochastics.h"
@@ -39,6 +40,7 @@ TEST(SensorDriver_UnitTests, CorrectInformationInSignal)
     NiceMock<FakeEgoAgent> fakeEgoAgent;
     NiceMock<FakeWorld> fakeWorld;
     NiceMock<FakeStochastics> fakeStochastics;
+    NiceMock<FakePublisher> fakePublisher;
 
     ON_CALL(fakeAgent, GetEgoAgent()).WillByDefault(ReturnRef(fakeEgoAgent));
     ON_CALL(fakeEgoAgent, GetAgent()).WillByDefault(Return(&fakeAgent));
@@ -48,7 +50,7 @@ TEST(SensorDriver_UnitTests, CorrectInformationInSignal)
     RoadGraphVertex target = add_vertex(roadGraph);
     RoadGraphEdge edge = add_edge(start, target, roadGraph).first;
 
-    ObjectPosition egoAgentPosition{{}, {{roadId, GlobalRoadPosition{roadId, -2, 50, 4.0, 5.0}}},{{roadId, RoadInterval{{-1}, 0, 0, {6.0, 7.0}}}}};
+    ObjectPosition egoAgentPosition{{}, {{roadId, GlobalRoadPosition{roadId, -2, 50, 4.0, 0.5}}},{{roadId, RoadInterval{{-1}, 0, 0, {6.0, 0.7}}}}};
     ON_CALL(fakeAgent, GetObjectPosition()).WillByDefault(ReturnRef(egoAgentPosition));
     ON_CALL(fakeAgent, GetVelocity(VelocityScope::Absolute)).WillByDefault(Return(2.0));
     ON_CALL(fakeAgent, GetAcceleration()).WillByDefault(Return(3.0));
@@ -81,9 +83,10 @@ TEST(SensorDriver_UnitTests, CorrectInformationInSignal)
             {{-1, true, LaneType::Driving, std::nullopt, std::nullopt},
             {0, true, LaneType::Driving, std::nullopt, std::nullopt},
             {1, true, LaneType::Driving, std::nullopt, std::nullopt}}}};
-    ON_CALL(fakeEgoAgent, GetRelativeLanes(_, _)).WillByDefault(Return(relativeLanes));
+    ON_CALL(fakeEgoAgent, GetRelativeLanes(_, _, _)).WillByDefault(Return(relativeLanes));
 
     ON_CALL(fakeWorld, GetRoadGraph(RouteElement{roadId, true}, _)).WillByDefault(Return(std::make_pair(roadGraph, start)));
+    ON_CALL(fakeWorld, IsDirectionalRoadExisting(roadId, true)).WillByDefault(Return(true));
     ON_CALL(fakeWorld, GetVisibilityDistance()).WillByDefault(Return(123.4));
     std::map<RoadGraphEdge, double> edgeWeights{{edge, 1.0}};
     ON_CALL(fakeWorld, GetEdgeWeights(_)).WillByDefault([&edgeWeights](const RoadGraph& graph){auto [firstEdge, edgeEnd] = edges(graph); return std::map<RoadGraphEdge, double>{{*firstEdge, 1.0}};} );
@@ -124,7 +127,7 @@ TEST(SensorDriver_UnitTests, CorrectInformationInSignal)
                                             &fakeStochastics,
                                             &fakeWorld,
                                             nullptr,
-                                            nullptr,
+                                            &fakePublisher,
                                             nullptr,
                                             &fakeAgent);
 

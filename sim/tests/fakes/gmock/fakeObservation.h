@@ -1,12 +1,12 @@
-/*********************************************************************
- * Copyright (c) 2018, 2019, 2020 in-tech
+/********************************************************************************
+ * Copyright (c) 2018-2020 in-tech GmbH
  *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
  *
  * SPDX-License-Identifier: EPL-2.0
- **********************************************************************/
+ ********************************************************************************/
 
 #pragma once
 
@@ -15,21 +15,21 @@
 class FakeObservation : public ObservationInterface
 {
 public:
-    MOCK_METHOD0(MasterPreHook,
+    MOCK_METHOD0(OpSimulationManagerPreHook,
                  void());
-    MOCK_METHOD1(MasterPostHook,
+    MOCK_METHOD1(OpSimulationManagerPostHook,
                  void(const std::string& filename));
-    MOCK_METHOD0(SlavePreHook,
+    MOCK_METHOD0(OpSimulationPreHook,
                  void());
-    MOCK_METHOD0(SlavePreRunHook,
+    MOCK_METHOD0(OpSimulationPreRunHook,
                  void());
-    MOCK_METHOD2(SlaveUpdateHook,
+    MOCK_METHOD2(OpSimulationUpdateHook,
                  void(int, RunResultInterface&));
-    MOCK_METHOD1(SlavePostRunHook,
+    MOCK_METHOD1(OpSimulationPostRunHook,
                  void(const RunResultInterface&));
-    MOCK_METHOD0(SlavePostHook,
+    MOCK_METHOD0(OpSimulationPostHook,
                  void());
-    MOCK_METHOD0(SlaveResultFile,
+    MOCK_METHOD0(OpSimulationResultFile,
                  const std::string());
     MOCK_METHOD5(Insert,
                  void(int, int, LoggingGroup, const std::string&, const std::string&));

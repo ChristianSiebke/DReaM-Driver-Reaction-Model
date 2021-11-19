@@ -1,13 +1,13 @@
-/*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
-*               2016, 2017, 2018 ITK Engineering GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2016-2018 ITK Engineering GmbH
+ *               2017-2021 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  worldInterface.h
@@ -23,12 +23,16 @@
 
 #include "common/boostGeometryCommon.h"
 #include "common/globalDefinitions.h"
-#include "common/worldDefinitions.h"
+#include "common/openPassTypes.h"
+#include "common/openScenarioDefinitions.h"
 #include "common/vector2d.h"
+#include "common/worldDefinitions.h"
+#include "include/streamInterface.h"
 
 class AgentInterface;
 class ParameterInterface;
 class SceneryInterface;
+class SceneryDynamicsInterface;
 class TrafficObjectInterface;
 class WorldObjectInterface;
 
@@ -46,7 +50,6 @@ public:
     WorldInterface &operator=(const WorldInterface &) = delete;
     WorldInterface &operator=(WorldInterface &&) = delete;
     virtual ~WorldInterface() = default;
-
 
     virtual bool Instantiate() {return false;}
 
@@ -94,7 +97,7 @@ public:
     //! @return                Pointer OSI world data structure
     //-----------------------------------------------------------------------------
     virtual void* GetWorldData() = 0;
-    
+
     //-----------------------------------------------------------------------------
     //! Retrieves time of day (hour)
     //!
@@ -117,12 +120,11 @@ public:
     virtual double GetVisibilityDistance() const = 0;
 
     //-----------------------------------------------------------------------------
-    //! Sets the world parameters like weekday, library
-    //! @param[in]     worldParamter  parameter to setup world
+    //! Retrieves traffic rules
     //!
-    //! @return
+    //! @return                traffic rules
     //-----------------------------------------------------------------------------
-    virtual void SetParameter(WorldParameter *worldParameter) = 0;
+    virtual const TrafficRules& GetTrafficRules() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Sets the world parameters like weekday, library
@@ -182,7 +184,13 @@ public:
     //!
     //! @return                true if successful
     //-----------------------------------------------------------------------------
-    virtual bool AddAgent(int id, AgentInterface *agent) = 0;
+    [[deprecated("Use RegisterAgent instead")]] virtual bool AddAgent(int id, AgentInterface *agent) = 0;
+
+    //-----------------------------------------------------------------------------
+    //! Add agent to world
+    //! @param[in]  agent      the agent, which shall be registered
+    //-----------------------------------------------------------------------------
+    virtual void RegisterAgent(AgentInterface* agent) = 0;
 
     //-----------------------------------------------------------------------------
     //! queue functions and values to update agent when SyncGlobalData is called
@@ -218,14 +226,14 @@ public:
     //!
     //! @return
     //-----------------------------------------------------------------------------
-    virtual void SyncGlobalData() = 0;
+    virtual void SyncGlobalData(int timestamp) = 0;
 
     //-----------------------------------------------------------------------------
     //! Create a scenery in world.
     //!
     //! @return
     //-----------------------------------------------------------------------------
-    virtual bool CreateScenery(SceneryInterface *scenery) = 0;
+    virtual bool CreateScenery(SceneryInterface *scenery, const SceneryDynamicsInterface& sceneryDynamics) = 0;
 
     //-----------------------------------------------------------------------------
     //! Create an agentAdapter for an agent to communicate between the agent of the
@@ -233,7 +241,17 @@ public:
     //!
     //! @return
     //-----------------------------------------------------------------------------
-    virtual AgentInterface *CreateAgentAdapterForAgent() = 0;
+    [[deprecated("Use CreateAgentAdapter instead")]] virtual AgentInterface *CreateAgentAdapterForAgent() = 0;
+
+    //------------------------------------------------------------------------------------
+    //! @brief Create an agentAdapter for an agent to communicate between the agent of the
+    //! framework and the world.
+    //!
+    //! @param parameter Used to communicate key/value pairs to the world, which might
+    //!                  be needed at creation of the AgentAdapter, e.g. type or source.
+    //! @return          Instance of the AgentAdapter (implementing AgentInterface)
+    //------------------------------------------------------------------------------------
+    [[nodiscard]] virtual std::unique_ptr<AgentInterface> CreateAgentAdapter(openpass::type::FlatParameter parameter) = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns one agent which is set to be special.
@@ -266,6 +284,13 @@ public:
             int laneId) const = 0;
 
     //-----------------------------------------------------------------------------
+    //! Retrieve all lane positions corresponding to the specified world position
+    //!
+    //! @return Position on all lanes at specified world position
+    //-----------------------------------------------------------------------------
+    virtual GlobalRoadPositions WorldCoord2LaneCoord(double x, double y, double heading) const = 0;
+
+    //-----------------------------------------------------------------------------
     //! Tries to create an internal scenery from a given file.
     //!
     //! @return
@@ -292,7 +317,7 @@ public:
     //!
     //! @return All agents in specified range
     //-----------------------------------------------------------------------------
-    virtual RouteQueryResult<std::vector<const AgentInterface*>> GetAgentsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance,
+    virtual RouteQueryResult<AgentInterfaces> GetAgentsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double startDistance,
                                                                        double backwardRange, double forwardRange) const = 0;
 
     //-----------------------------------------------------------------------------
@@ -318,7 +343,7 @@ public:
     //! \param range            Distance of the search start to the end of connecting road
     //! 
     //! \return  All agents in specified range
-    virtual std::vector<const AgentInterface*> GetAgentsInRangeOfJunctionConnection(std::string connectingRoadId, double range) const = 0;
+    virtual AgentInterfaces GetAgentsInRangeOfJunctionConnection(std::string connectingRoadId, double range) const = 0;
 
     //! Returns the s coordinate distance from the front of the agent to the first point where his lane intersects another.
     //! As the agent may not yet be on the junction, it has to be specified which connecting road he will take in the junction
@@ -360,7 +385,19 @@ public:
     //!
     //! @return true if road id exists
     //-----------------------------------------------------------------------------
-    virtual bool IsDirectionalRoadExisting(const std::string &, bool inOdDirection) = 0;
+    virtual bool IsDirectionalRoadExisting(const std::string &, bool inOdDirection) const = 0;
+
+    //-----------------------------------------------------------------------------
+    //! Return whether a LaneType is valid based on a range of valid LaneTypes
+    //!
+    //! @param[in] roadId  OpenDriveId of the road being evaluated
+    //! @param[in] laneId  OpenDriveId of the lane being evaluated
+    //! @param[in] distanceOnLane  distance in m along the road
+    //! @param[in] validLaneTypes  container of valid laneTypes
+    //!
+    //! @return true if the lane has a valid LaneType
+    //-----------------------------------------------------------------------------
+    virtual bool IsLaneTypeValid(const std::string &roadId, const int laneId, const double distanceOnLane, const LaneTypes& validLaneTypes) = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns interpolated value for the curvature of the lane at the given position.
@@ -485,6 +522,16 @@ public:
                                                                                             const ObjectPosition& objectPos,
                                                                                             const std::optional<double> objectReferenceS,
                                                                                             const ObjectPosition& targetObjectPos) const = 0;
+
+    //-----------------------------------------------------------------------------
+    //! \brief This method returns all LaneSections of a road
+    //!
+    //! \param roadId   Id of the road
+    //!
+    //! \return LaneSections
+    //-----------------------------------------------------------------------------
+    virtual LaneSections GetLaneSections(const std::string& roadId) const = 0;
+
     //-----------------------------------------------------------------------------
     //! Retrieve whether a new agent intersects with an existing agent
     //!
@@ -506,7 +553,8 @@ public:
     //! Calculates the obstruction of an agent with another object i.e. how far to left or the right the object is from my position
     //! For more information see the [markdown documentation](\ref dev_framework_modules_world_getobstruction)
     //!
-    //! \param route            route of the agent
+    //! \param roadGraph        road network as viewed from agent
+    //! \param startNode        position on roadGraph of agent
     //! \param ownPosition      position of the agent
     //! \param otherPosition    position of the other object
     //! \param objectCorners    corners of the other object
@@ -516,8 +564,8 @@ public:
 
     //! Returns all traffic signs valid for a lane inside the range
     //!
-    //! \param route            route to search along
-    //! \param roadId           OpenDrive Id of the road
+    //! \param roadGraph        road network as viewed from agent
+    //! \param startNode        position on roadGraph of agent
     //! \param laneId           OpenDrive Id of the lane
     //! \param startDistance    s coordinate
     //! \param searchRange      range of search (can also be negative)
@@ -527,8 +575,8 @@ public:
 
     //! Returns all road markings valid for a lane inside the range
     //!
-    //! \param route            route to search along
-    //! \param roadId           OpenDrive Id of the road
+    //! \param roadGraph        road network as viewed from agent
+    //! \param startNode        position on roadGraph of agent
     //! \param laneId           OpenDrive Id of the lane
     //! \param startDistance    s coordinate
     //! \param searchRange      range of search
@@ -536,9 +584,21 @@ public:
     virtual RouteQueryResult<std::vector<CommonTrafficSign::Entity>> GetRoadMarkingsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId,
                                                                                             double startDistance, double searchRange) const = 0;
 
+    //! Returns all traffic lights valid for a lane inside the range
+    //!
+    //! \param route            route to search along
+    //! \param roadId           OpenDrive Id of the road
+    //! \param laneId           OpenDrive Id of the lane
+    //! \param startDistance    s coordinate
+    //! \param searchRange      range of search (can also be negative)
+    //! \return traffic lights in range
+    virtual RouteQueryResult<std::vector<CommonTrafficLight::Entity>> GetTrafficLightsInRange(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId,
+                                                                                             double startDistance, double searchRange) const = 0;
+
     //! Retrieves all lane markings on the given position on the given side of the lane inside the range
     //!
-    //! \param roadId           OpenDrive Id of the road
+    //! \param roadGraph        road network as viewed from agent
+    //! \param startNode        position on roadGraph of agent
     //! \param laneId           OpenDrive Id of the lane
     //! \param startDistance    s coordinate
     //! \param range            search range
@@ -547,8 +607,8 @@ public:
 
     //! Returns the relative distances (start and end) and the connecting road id of all junctions on the route in range
     //!
-    //! \param route            route of the agent
-    //! \param roadId           OpenDrive Id of the road
+    //! \param roadGraph        road network as viewed from agent
+    //! \param startNode        position on roadGraph of agent
     //! \param startDistance    start s coordinate on the road
     //! \param range            range of search
     //! \return information about all junctions in range
@@ -559,13 +619,24 @@ public:
     //! driving direction of the lane is the same as the direction of the route. If the ego lane prematurely ends, then
     //! the further lane ids are relative to the middle of the road.
     //!
-    //! \param route            route of the agent
-    //! \param roadId           OpenDrive Id of the road
+    //! \param roadGraph        road network as viewed from agent
+    //! \param startNode        position on roadGraph of agent
     //! \param laneId           OpenDrive Id of the lane
     //! \param distance         start s coordinate on the road
     //! \param range            range of search
+    //! \param includeOncoming  indicating whether oncoming lanes should be included
     //! \return information about all lanes in range
-    virtual RouteQueryResult<RelativeWorldView::Lanes> GetRelativeLanes(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, double range) const = 0;
+    virtual RouteQueryResult<RelativeWorldView::Lanes> GetRelativeLanes(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, double range, bool includeOncoming = true) const = 0;
+
+    //! Returns the relative lane id of the located position of a point relative to the given position
+    //!
+    //! \param roadGraph        road network as viewed from agent
+    //! \param startNode        position on roadGraph of agent
+    //! \param laneId           OpenDrive Id of the lane
+    //! \param distance         own s coordinate
+    //! \param targetPosition   position of queried point
+    //! \return lane id relative to own position
+    virtual RouteQueryResult<std::optional<int>> GetRelativeLaneId(const RoadGraph& roadGraph, RoadGraphVertex startNode, int laneId, double distance, GlobalRoadPositions targetPosition) const = 0;
 
     //! Returns all possible connections on the junction, that an agent has when coming from the specified road
     //!
@@ -605,6 +676,12 @@ public:
 
     virtual std::map<RoadGraphEdge, double> GetEdgeWeights (const RoadGraph& roadGraph) const = 0;
 
+    //! Returns the RoadStream that is defined by the given route
+    //!
+    //! \param route    list of roads with direction
+    //! \return RoadStream along route
+    virtual std::unique_ptr<RoadStreamInterface> GetRoadStream(const std::vector<RouteElement>& route) const = 0;
+
     //-----------------------------------------------------------------------------
     //! Retrieves the friction
     //!
@@ -624,14 +701,14 @@ public:
     //!
     //! @return                List of agent references
     //-----------------------------------------------------------------------------
-    virtual const std::list<const AgentInterface*>& GetRemovedAgents() const = 0;
+    virtual const AgentInterfaces& GetRemovedAgents() const = 0;
 
     //-----------------------------------------------------------------------------
     //! Retrieves agents that were removed from the world during the previous timestep and clears the list
     //!
     //! @return                List of agent references
     //-----------------------------------------------------------------------------
-    virtual const std::list<const AgentInterface*> GetRemovedAgentsInPreviousTimestep() = 0;
+    virtual const AgentInterfaces GetRemovedAgentsInPreviousTimestep() = 0;
 
     //-----------------------------------------------------------------------------
     //! Retrieves all traffic objects

@@ -1,12 +1,12 @@
-/*******************************************************************************
-* Copyright (c) 2020 in-tech GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2020 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 #pragma once
 
@@ -63,8 +63,7 @@ namespace FlatParameter {
 /// \param[in] delimiter used for vector type (default = ",")
 [[maybe_unused]] static auto to_string(std::function<void(std::string)> writer, const std::string &delimiter = ",")
 {
-    return overload{
-        //[&](std::string &value) { writer(value); },
+    return overload {
         [&](const std::string &value) { writer(value); },
         [&](auto &value) {
             if constexpr (std::is_arithmetic_v<std::decay_t<decltype(value)>>)
@@ -78,10 +77,35 @@ namespace FlatParameter {
                     writer(vector::to_string(value, delimiter));
                 }
             }
-        },
-
+        }
     };
 }
+
+/// \brief visitor for parameter values of events
+/// Converts the visitor values into strings and returns the result.
+/// Values in vectors are converted and seperated by a delimiter.
+/// If value is 12.34 => writer("12.34");
+/// If value is {12.34, 23.45} => return value is "12.34,23.45"
+/// \see openpass::type::FlatParameterValue
+/// \see openpass::utils::vector::to_string
+/// \param[in] delimiter used for vector type (default = ",")
+[[maybe_unused]] static auto to_string(const std::string &delimiter = ",")
+{
+    return overload {
+        [&](const std::string &value) { return value; },
+        [&](auto &value) {
+            if constexpr (std::is_arithmetic_v<std::decay_t<decltype(value)>>)
+            {
+                return std::to_string(value);
+            }
+            else // path for std::vector types
+            {
+                return value.empty() ? "" : vector::to_string(value, delimiter);
+            }
+        }
+    };
+}
+
 
 } // namespace FlatParameter
 

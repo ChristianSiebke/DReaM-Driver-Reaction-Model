@@ -1,12 +1,12 @@
-/*******************************************************************************
-* Copyright (c) 2020 in-tech GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2020 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 #pragma once
 
@@ -33,7 +33,7 @@ public:
     /// \param agent     Releayed to the actual transformer
     /// \param cycleTime Releayed to the actual transformer
     /// \return Transform result for the given triggering event
-    static TransformResult Transform(const SimulationSlave::EventNetworkInterface *eventNetwork,
+    static TransformResult Transform(const core::EventNetworkInterface *eventNetwork,
                                      WorldInterface *world,
                                      AgentInterface *agent,
                                      int cycleTime)

@@ -1,0 +1,13 @@
+<opSimulationManager>
+  <logLevel>0</logLevel>
+  <logFileMaster>opSimulationManager.log</logFileMaster>
+  <slave>opSimulation.exe</slave>
+  <libraries>modules</libraries>
+  <slaveConfigs>
+    <slaveConfig>
+      <logFileSlave>opSimulation.log</logFileSlave>
+      <configurations>configs</configurations>
+      <results>results</results>
+    </slaveConfig>
+  </slaveConfigs>
+</opSimulationManager>

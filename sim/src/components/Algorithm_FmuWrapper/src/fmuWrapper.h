@@ -1,12 +1,12 @@
-/*******************************************************************************
-* Copyright (c) 2017, 2019, 2020 in-tech GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2017-2021 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 #pragma once
 
@@ -24,7 +24,7 @@
 #include <unordered_map>
 #include <vector>
 #include <map>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 extern "C" {
 #include "fmilib.h"
@@ -32,8 +32,16 @@ extern "C" {
 }
 
 #include "include/fmuHandlerInterface.h"
+#include "include/fmuWrapperInterface.h"
 
-class AlgorithmFmuWrapperImplementation : public UnrestrictedModelInterface
+
+std::string log_prefix(const std::string &agentIdString, const std::string &componentName);
+
+static constexpr bool DEFAULT_LOGGING {true};
+static constexpr bool DEFAULT_CSV_OUTPUT {true};
+static constexpr bool DEFAULT_UNZIP_ONCE_PER_INSTANCE {true};
+
+class AlgorithmFmuWrapperImplementation : public UnrestrictedModelInterface, public FmuWrapperInterface
 {
 public:
     const std::string COMPONENTNAME = "AlgorithmFmuWrapper";
@@ -61,9 +69,21 @@ public:
     virtual void UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time);
     virtual void UpdateOutput(int localLinkId, std::shared_ptr<SignalInterface const> &data, int time);
     virtual void Trigger(int time);
+    void Init() override;
+
+    [[nodiscard]] const FmuHandlerInterface *GetFmuHandler() const override;
+    [[nodiscard]] const FmuVariables &GetFmuVariables() const override;
+    [[nodiscard]] const fmu_check_data_t &GetCData() const override;
+    [[nodiscard]] const FmuHandlerInterface::FmuValue& GetValue(fmi2_value_reference_t valueReference, VariableType variableType) const override;
 
 private:
+
     void ReadOutputValues();
+
+    /*!
+     * \brief Constructs an output base path from the core results directory and agent id
+     */
+    void SetOutputPath();
 
     /*!
      * \brief Sets up filenames for FMU data output and logging.
@@ -150,7 +170,7 @@ private:
      *
      * \throws      std::runtime_error
      */
-    void MkDirOrThrowError(const boost::filesystem::path path);
+    void MkDirOrThrowError(const std::filesystem::path& path);
 
     struct fmu_check_data_t cdata;   //!< check data to be passed around between the FMIL functions
 
@@ -158,19 +178,14 @@ private:
 
     const CallbackInterface*  callbacks;     //!< callback interface
 
-    std::string folderUnzip;         //!< help for construction of unzip directory
-
-    std::string FMU_name;           //!< name of FMU file
-    std::string FMU_path;           //!< path of FMU file
-    std::string FMU_fullName;       //!< name of FMU file including absolute path
-    std::string logFileName;        //!< name of log file
-    std::string outputFileName;     //!< name of output file
-    std::string logFileFullName;    //!< name of log file including absolute path
-    std::string outputFileFullName; //!< name of output file including absolute path
-
-    std::string logFile;
-    std::string outputFile;
-    std::string unzipPath;
+    std::string FMU_absPath;        //!< Absolute path to the FMU file including
+    std::string FMU_configPath;     //!< Relative path to the FMU file (originating in core config directory)
+    std::string tmpPath;            //!< Temporary path used for unzipping the FMU archive
+    std::string outputPath;         //!< Output base directory (inside core results directory)
+    std::string logFileFullName;    //!< Absolute path to the log file
+    std::string logFileName;        //!< Name of the log file
+    std::string outputFileFullName; //!< Absolute path to the CSV output file
+    std::string outputFileName;     //!< Name of the CSV output file
 
     std::string agentIdString;    //!< agent identifier as string
 
@@ -183,4 +198,5 @@ private:
     bool isInitialized{false};                                                              //!< Specifies, if the FMU has already be initialized
     FmuHandlerInterface* fmuHandler = nullptr;                                              //!< Points to the instance of the FMU type-specific implementation
     std::string fmuType;        //!< Type of the FMU
+    std::string componentName;
 };

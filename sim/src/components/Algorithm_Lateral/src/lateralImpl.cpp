@@ -1,14 +1,14 @@
-/*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
-*               2018, 2019 AMFD GmbH
-*               2016, 2017 ITK Engineering GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2018-2019 AMFD GmbH
+ *               2016-2017 ITK Engineering GmbH
+ *               2017-2019 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 /** @file  algorithm_lateralImplementation.cpp */
@@ -22,6 +22,7 @@
 #include "common/lateralSignal.h"
 #include "common/commonTools.h"
 #include "common/globalDefinitions.h"
+#include "components/common/vehicleProperties.h"
 #include "components/Sensor_Driver/src/Signals/sensorDriverSignal.h"
 
 void AlgorithmLateralImplementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time)
@@ -60,10 +61,12 @@ void AlgorithmLateralImplementation::UpdateInput(int localLinkId, const std::sha
             LOG(CbkLogLevel::Debug, msg);
             throw std::runtime_error(msg);
         }
+        const auto steeringRatio = helper::map::query(signal->vehicleParameters.properties, vehicle::properties::SteeringRatio);
+        THROWIFFALSE(steeringRatio.has_value(), "SteeringRatio was not defined in VehicleCatalog");
 
-        steeringController.SetVehicleParameter(signal->vehicleParameters.steeringRatio,
-                                               signal->vehicleParameters.maximumSteeringWheelAngleAmplitude,
-                                               signal->vehicleParameters.wheelbase);
+        steeringController.SetVehicleParameter(steeringRatio.value(),
+                                               signal->vehicleParameters.frontAxle.maxSteering * steeringRatio.value(),
+                                               signal->vehicleParameters.frontAxle.positionX - signal->vehicleParameters.rearAxle.positionX);
     }
     else if (localLinkId == 101 || localLinkId == 102)
     {

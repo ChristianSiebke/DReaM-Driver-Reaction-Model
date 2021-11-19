@@ -1,13 +1,13 @@
-/*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
-*               2016 ITK Engineering GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2016 ITK Engineering GmbH
+ *               2018-2019 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  AgentFactoryInterface.h
@@ -27,7 +27,7 @@
 * \details This interface provides access to agent parameters, properties, attributes and dynamic states.
 */
 
-namespace SimulationSlave {
+namespace core {
 
 class Agent;
 
@@ -54,4 +54,4 @@ public:
     virtual Agent *AddAgent(AgentBlueprintInterface* agentBlueprint) = 0;
 };
 
-} //namespace SimulationSlave
+} //namespace core

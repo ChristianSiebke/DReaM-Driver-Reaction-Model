@@ -1,0 +1,113 @@
+<?xml version="1.0"?>
+<OpenSCENARIO>
+  <FileHeader revMajor="1" revMinor="0" date="2020-06-26T00:17:00" description="OSCAction_DoubleSinusoidalLaneChangeLeft_Absolute" author="BMW AG"/>
+  <ParameterDeclarations>
+    <ParameterDeclaration name="OP_OSC_SchemaVersion" parameterType="string" value="0.4.0"/>
+  </ParameterDeclarations>
+  <CatalogLocations>
+    <VehicleCatalog>
+      <Directory path="VehicleModelsCatalog.xosc"/>
+    </VehicleCatalog>
+    <PedestrianCatalog>
+      <Directory path="PedestrianModelsCatalog.xosc"/>
+    </PedestrianCatalog>
+    <ControllerCatalog>
+      <Directory path=""/>
+    </ControllerCatalog>
+    <ManeuverCatalog>
+      <Directory path=""/>
+    </ManeuverCatalog>
+    <MiscObjectCatalog>
+      <Directory path=""/>
+    </MiscObjectCatalog>
+    <EnvironmentCatalog>
+      <Directory path=""/>
+    </EnvironmentCatalog>
+    <TrajectoryCatalog>
+      <Directory path=""/>
+    </TrajectoryCatalog>
+    <RouteCatalog>
+      <Directory path=""/>
+    </RouteCatalog>
+  </CatalogLocations>
+  <RoadNetwork>
+    <LogicFile filepath="SceneryConfiguration.xodr"/>
+    <SceneGraphFile filepath=""/>
+  </RoadNetwork>
+  <Entities>
+    <ScenarioObject name="Ego">
+      <CatalogReference catalogName="ProfilesCatalog.xml" entryName="TFAgent"/>
+    </ScenarioObject>
+    <EntitySelection name="ScenarioAgents">
+      <Members/>
+    </EntitySelection>
+  </Entities>
+  <Storyboard>
+    <Init>
+      <Actions>
+        <Private entityRef="Ego">
+          <PrivateAction>
+            <TeleportAction>
+              <Position>
+                <LanePosition roadId="0" laneId="-5" offset="0.0" s="0.0"/>
+              </Position>
+            </TeleportAction>
+          </PrivateAction>
+          <PrivateAction>
+            <LongitudinalAction>
+              <SpeedAction>
+                <SpeedActionDynamics dynamicsShape="linear" value="0.0" dynamicsDimension="rate"/>
+                <SpeedActionTarget>
+                  <AbsoluteTargetSpeed value="35.0"/>
+                </SpeedActionTarget>
+              </SpeedAction>
+            </LongitudinalAction>
+          </PrivateAction>
+        </Private>
+      </Actions>
+    </Init>
+	<Story name="LaneChange">
+      <Act name="Act1">
+        <ManeuverGroup maximumExecutionCount="1" name="StateChangeSequenceA">
+          <Actors selectTriggeringEntities="false">
+            <EntityRef entityRef="Ego"/>
+          </Actors>
+          <Maneuver name="StateChangeManeuverA">
+            <Event name="StateChangeEventA" priority="overwrite">
+				<Action name="LaneChange">
+					<PrivateAction>
+						<LateralAction>
+							<LaneChangeAction>
+								<LaneChangeActionDynamics value="2.0" dynamicsShape="sinusoidal" dynamicsDimension="time"/>
+								<LaneChangeTarget>
+									<AbsoluteTargetLane value="-3"/>
+								</LaneChangeTarget>
+							</LaneChangeAction>
+						</LateralAction>
+					</PrivateAction>
+				</Action>
+              <StartTrigger>
+                <ConditionGroup>
+                  <Condition name="Conditional">
+                    <ByValueCondition>
+                      <SimulationTimeCondition value="3.0" rule="greaterThan"/>
+                    </ByValueCondition>
+                  </Condition>
+                </ConditionGroup>
+              </StartTrigger>
+            </Event>
+          </Maneuver>
+        </ManeuverGroup>
+      </Act>
+    </Story>					  
+    <StopTrigger>
+      <ConditionGroup>
+        <Condition name="EndTime" delay="0" conditionEdge="rising">
+          <ByValueCondition>
+            <SimulationTimeCondition value="15.0" rule="greaterThan"/>
+          </ByValueCondition>
+        </Condition>
+      </ConditionGroup>
+    </StopTrigger>
+  </Storyboard>
+</OpenSCENARIO>

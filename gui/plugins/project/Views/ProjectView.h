@@ -1,13 +1,13 @@
-/****************************************************************************** 
-* Copyright (c) 2017 Volkswagen Group of America. 
-* Copyright (c) 2020 ITK Engineering GmbH.
-*
-* This program and the accompanying materials are made 
-* available under the terms of the Eclipse Public License 2.0 
-* which is available at https://www.eclipse.org/legal/epl-2.0/ 
-* 
-* SPDX-License-Identifier: EPL-2.0 
-******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2020 ITK Engineering GmbH
+ *               2017 Volkswagen Group of America
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 #ifndef PROJECTVIEW_H
 #define PROJECTVIEW_H
@@ -59,10 +59,10 @@ private Q_SLOTS: // Define actions for the Browse Buttons
     void on_libraryBrowseButton_clicked();
     void on_configBrowseButton_clicked();
     void on_logLevelSpinBox_valueChanged(int level);
-    void on_logMasterBrowseButton_clicked();
-    void on_logSlaveBrowseButton_clicked();
+    void on_logOpSimulationManagerBrowseButton_clicked();
+    void on_logSimulationBrowseButton_clicked();
     void on_outputBrowseButton_clicked();
-    void on_slaveBrowseButton_clicked();
+    void on_simulationBrowseButton_clicked();
 
 private Q_SLOTS: // Update actions from the Browser Buttons and also the load action
     void updateView();

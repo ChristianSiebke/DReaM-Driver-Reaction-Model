@@ -1,12 +1,12 @@
-/*********************************************************************
- * Copyright (c) 2018, 2019, 2020 in-tech
+/********************************************************************************
+ * Copyright (c) 2018-2020 in-tech GmbH
  *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
  *
  * SPDX-License-Identifier: EPL-2.0
- **********************************************************************/
+ ********************************************************************************/
 
 #pragma once
 
@@ -26,16 +26,15 @@ class FakeOdRoad : public RoadInterface
                  bool(double s, double x, double y, double hdg, double length, ParamPoly3Parameters parameters));
     MOCK_METHOD5(AddElevation, bool(double s, double a, double b, double c, double d));
     MOCK_METHOD5(AddLaneOffset, bool(double s, double a, double b, double c, double d));
-    MOCK_METHOD6(AddLink, bool(RoadLinkType, RoadLinkElementType, const std::string &, ContactPointType,
-                               RoadLinkDirectionType, RoadLinkSideType));
+    MOCK_METHOD4(AddLink, bool(RoadLinkType, RoadLinkElementType, const std::string &, ContactPointType));
     MOCK_METHOD1(AddRoadLaneSection, RoadLaneSectionInterface *(double start));
     MOCK_METHOD1(AddRoadSignal, void(const RoadSignalSpecification &signal));
     MOCK_METHOD1(AddRoadObject, void(const RoadObjectSpecification &object));
     MOCK_CONST_METHOD0(GetId, const std::string());
-    MOCK_CONST_METHOD0(GetElevations, std::list<RoadElevation *> &());
-    MOCK_CONST_METHOD0(GetLaneOffsets, const std::list<RoadLaneOffset *> &());
-    MOCK_CONST_METHOD0(GetGeometries, std::list<RoadGeometryInterface *> &());
-    MOCK_CONST_METHOD0(GetRoadLinks, std::list<RoadLinkInterface *> &());
+    MOCK_CONST_METHOD0(GetElevations, std::vector<RoadElevation *> &());
+    MOCK_CONST_METHOD0(GetLaneOffsets, const std::vector<RoadLaneOffset *> &());
+    MOCK_CONST_METHOD0(GetGeometries, std::vector<RoadGeometryInterface *> &());
+    MOCK_CONST_METHOD0(GetRoadLinks, std::vector<RoadLinkInterface *> &());
     MOCK_CONST_METHOD0(GetLaneSections, std::vector<RoadLaneSectionInterface *> &());
     MOCK_CONST_METHOD0(GetRoadSignals, std::vector<RoadSignalInterface *> &());
     MOCK_CONST_METHOD0(GetRoadObjects, std::vector<RoadObjectInterface *> &());

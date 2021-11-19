@@ -1,13 +1,13 @@
-/*******************************************************************************
-* Copyright (c) 2019, 2020 in-tech GmbH
-*               2018, 2019 AMFD GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2018-2019 AMFD GmbH
+ *               2019-2021 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 /** \file  SensorDriverImplementation.cpp */
@@ -17,7 +17,7 @@
 #include <qglobal.h>
 
 #include "include/worldInterface.h"
-#include "core/slave/modules/World_OSI/RoutePlanning/RouteCalculation.h"
+#include "common/RoutePlanning/RouteCalculation.h"
 #include "sensor_driverImpl.h"
 #include "Signals/sensorDriverSignal.h"
 
@@ -108,7 +108,7 @@ void SensorDriverImplementation::GetNewRoute()
     {
         return;
     }
-    auto [roadGraph, root] = GetWorld()->GetRoadGraph({roadIds.front(), GetAgent()->GetObjectPosition().mainLocatePoint.at(roadIds.front()).laneId < 0}, maxDepth);
+    auto [roadGraph, root] = GetWorld()->GetRoadGraph(CommonHelper::GetRoadWithLowestHeading(GetAgent()->GetObjectPosition().mainLocatePoint, *GetWorld()), maxDepth);
     std::map<RoadGraph::edge_descriptor, double> weights = GetWorld()->GetEdgeWeights(roadGraph);
     auto target = RouteCalculation::SampleRoute(roadGraph, root, weights, *GetStochastics());
     egoAgent.SetRoadGraph(std::move(roadGraph), root, target);
@@ -169,6 +169,7 @@ LaneInformationTrafficRules SensorDriverImplementation::GetTrafficRuleLaneInform
     const double visibilityDistance = GetWorld()->GetVisibilityDistance();
 
     laneInformation.trafficSigns            = egoAgent.GetTrafficSignsInRange(visibilityDistance);
+    laneInformation.trafficLights           = egoAgent.GetTrafficLightsInRange(visibilityDistance);
 
     return laneInformation;
 }
@@ -180,6 +181,7 @@ LaneInformationTrafficRules SensorDriverImplementation::GetTrafficRuleLaneInform
     const double visibilityDistance = GetWorld()->GetVisibilityDistance();
 
     laneInformation.trafficSigns            = egoAgent.GetTrafficSignsInRange(visibilityDistance, relativeLaneId);
+    laneInformation.trafficLights           = egoAgent.GetTrafficLightsInRange(visibilityDistance, relativeLaneId);
 
     return laneInformation;
 }
@@ -191,6 +193,7 @@ LaneInformationTrafficRules SensorDriverImplementation::GetTrafficRuleLaneInform
     const double visibilityDistance = GetWorld()->GetVisibilityDistance();
 
     laneInformation.trafficSigns            = egoAgent.GetTrafficSignsInRange(visibilityDistance, relativeLaneId);
+    laneInformation.trafficLights           = egoAgent.GetTrafficLightsInRange(visibilityDistance, relativeLaneId);
 
     return laneInformation;
 }
@@ -255,6 +258,8 @@ void SensorDriverImplementation::GetSurroundingObjectsInformation()
     surroundingObjects.objectRearLeft = GetOtherObjectInformation(GetObject(visibilityDistance, 1, false));
     surroundingObjects.objectFrontRight = GetOtherObjectInformation(GetObject(visibilityDistance, -1, true));
     surroundingObjects.objectRearRight = GetOtherObjectInformation(GetObject(visibilityDistance, -1, false));
+
+    GetPublisher()->Publish("AgentInFront", surroundingObjects.objectFront.exist ? surroundingObjects.objectFront.id : -1);
 }
 
 const WorldObjectInterface* SensorDriverImplementation::GetObject(double visibilityDistance, int relativeLane, bool forwardSearch)

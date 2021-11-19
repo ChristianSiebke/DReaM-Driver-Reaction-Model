@@ -1,12 +1,12 @@
-/*******************************************************************************
-* Copyright (c) 2020 in-tech GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2020 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 /** @file  OpenScenarioActions.cpp */
@@ -37,7 +37,7 @@ extern "C" OPENSCENARIO_ACTIONS_SHARED_EXPORT ModelInterface *OpenPASS_CreateIns
     PublisherInterface *const publisher,
     AgentInterface *agent,
     const CallbackInterface *callbacks,
-    SimulationSlave::EventNetworkInterface *const eventNetwork)
+    core::EventNetworkInterface *const eventNetwork)
 {
     Callbacks = callbacks;
 

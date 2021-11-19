@@ -1,12 +1,12 @@
-/*******************************************************************************
-* Copyright (c) 2018, 2019, 2020 in-tech GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2018-2020 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 /** \brief sensorAggregationImpl.cpp */
@@ -80,8 +80,7 @@ void SensorAggregationImplementation::UpdateOutput(int localLinkId, std::shared_
         // to any ADAS
         try
         {
-            data = std::make_shared<SensorDataSignal const>(
-                        out_sensorData);
+            data = std::make_shared<SensorDataSignal const>(out_sensorData);
         }
         catch(const std::bad_alloc&)
         {

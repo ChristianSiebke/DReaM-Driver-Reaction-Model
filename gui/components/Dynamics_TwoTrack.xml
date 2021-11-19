@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component>
+  <type>Action</type>
+  <title>Dynamics_TwoTrack</title>
+  <schedule>
+    <offset>0</offset>
+    <cycle>10</cycle>
+    <response>0</response>
+  </schedule>
+  <parameters>
+    <parameter>
+      <id>0</id>
+      <type>double</type>
+      <title>Radius of the tires</title>
+      <unit>m</unit>
+      <value>0.3</value>
+    </parameter>
+    <parameter>
+      <id>1</id>
+      <type>double</type>
+      <title>Tire's max. mu</title>
+      <unit></unit>
+      <value>1</value>
+    </parameter>
+    <parameter>
+      <id>2</id>
+      <type>double</type>
+      <title>Tire's slide mu</title>
+      <unit></unit>
+      <value>0.8</value>
+    </parameter>
+	<parameter>
+      <id>3</id>
+      <type>double</type>
+      <title>Tire's slip at max. mu</title>
+      <unit></unit>
+      <value>0.1</value>
+    </parameter>
+	<parameter>
+      <id>4</id>
+      <type>double</type>
+      <title>Engine power</title>
+      <unit>W</unit>
+      <value>100000</value>
+    </parameter>
+	<parameter>
+      <id>5</id>
+      <type>double</type>
+      <title>Max. brake torque</title>
+      <unit>Nm</unit>
+      <value>-10000</value>
+    </parameter>
+  </parameters>
+  <inputs>
+    <input>
+      <id>0</id>
+      <type>ControlData</type>
+      <title>Control</title>
+      <unit></unit>
+      <cardinality>1</cardinality>
+    </input>
+	<input>
+      <id>1</id>
+      <type>VectorDouble</type>
+      <title>Vertical force on tires</title>
+      <unit></unit>
+      <cardinality>1</cardinality>
+    </input>
+  </inputs>
+  <outputs>
+    <output>
+      <id>0</id>
+      <type>VectorDouble</type>
+      <title>Inertia force vector</title>
+      <unit></unit>
+    </output>
+  </outputs>
+</component>

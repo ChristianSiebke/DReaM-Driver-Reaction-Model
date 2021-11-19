@@ -1,12 +1,12 @@
-/*********************************************************************
-* Copyright (c) 2018 - 2019 in-tech
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-**********************************************************************/
+/********************************************************************************
+ * Copyright (c) 2018 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 #pragma once
 
@@ -20,8 +20,8 @@ public:
                  bool());
     MOCK_METHOD0(GetSystemConfigBlueprint,
                  std::shared_ptr<SystemConfigInterface> ());
-    MOCK_METHOD0(GetSlaveConfig,
-                 SlaveConfigInterface * ());
+    MOCK_METHOD0(GetSimulationConfig,
+                 SimulationConfigInterface * ());
     MOCK_METHOD0(GetScenery,
                  SceneryInterface * ());
     MOCK_METHOD0(GetScenario,

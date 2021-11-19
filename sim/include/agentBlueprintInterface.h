@@ -1,13 +1,13 @@
-/*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
-*               2016 ITK Engineering GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2016 ITK Engineering GmbH
+ *               2017-2020 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  AgentBlueprintInterface.h
@@ -44,7 +44,7 @@ struct SpawnParameter
     double acceleration = -999;
     double gear = -999;
     double yawAngle = -999;
-    std::optional<Route> route{};
+    Route route{};
 };
 
 class AgentBlueprintInterface
@@ -63,7 +63,7 @@ public:
     virtual void SetDriverProfileName(std::string driverProfileName) = 0;
     virtual void SetSpawnParameter(SpawnParameter spawnParameter) = 0;
     virtual void SetSpeedGoalMin(double speedGoalMin) = 0;
-    virtual void SetAgentType(std::shared_ptr<SimulationSlave::AgentTypeInterface> agentType) = 0;
+    virtual void SetAgentType(std::shared_ptr<core::AgentTypeInterface> agentType) = 0;
 
     virtual void AddSensor(openpass::sensors::Parameter parameters) = 0;
 
@@ -77,7 +77,7 @@ public:
     virtual VehicleModelParameters                  GetVehicleModelParameters() const = 0;
     virtual openpass::sensors::Parameters           GetSensorParameters() const = 0;
     virtual VehicleComponentProfileNames            GetVehicleComponentProfileNames() const = 0;
-    virtual SimulationSlave::AgentTypeInterface&    GetAgentType() const = 0;
+    virtual core::AgentTypeInterface&    GetAgentType() const = 0;
     virtual SpawnParameter&                         GetSpawnParameter() = 0;
     virtual const SpawnParameter&                   GetSpawnParameter() const = 0;
     virtual double                                  GetSpeedGoalMin() const = 0;

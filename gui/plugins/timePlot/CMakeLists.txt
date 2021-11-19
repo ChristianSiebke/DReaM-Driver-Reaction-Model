@@ -1,12 +1,13 @@
-# /*********************************************************************
-# * Copyright (c) 2020 ITK Engineering GmbH
-# *
-# * This program and the accompanying materials are made
-# * available under the terms of the Eclipse Public License 2.0
-# * which is available at https://www.eclipse.org/legal/epl-2.0/
-# *
-# * SPDX-License-Identifier: EPL-2.0
-# **********************************************************************/
+################################################################################
+# Copyright (c) 2020 ITK Engineering GmbH
+#               2021 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+#
+# This program and the accompanying materials are made available under the
+# terms of the Eclipse Public License 2.0 which is available at
+# http://www.eclipse.org/legal/epl-2.0.
+#
+# SPDX-License-Identifier: EPL-2.0
+################################################################################
 
 project(openPASS-TimePlot)
 
@@ -21,7 +22,7 @@ find_package(Qt5Widgets REQUIRED)
 
 # set include directories
 include_directories(.)
-include_directories(Interfaces)
+#include_directories(Interfaces)
 include_directories(Models)
 include_directories(Presenters)
 include_directories(Views)
@@ -31,27 +32,23 @@ include_directories(../../common)
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 
 # include interfaces, models and views
-add_subdirectory(Interfaces)
 add_subdirectory(Models)
 add_subdirectory(Presenters)
 add_subdirectory(Views)
 
-# include headers and sources of this plugin
-set(SOURCES PluginTimePlot.cpp)
-set(HEADERS PluginTimePlot.h)
+add_openpass_target(
+    NAME TimePlot TYPE library LINKAGE shared COMPONENT gui
 
-# declare target library
-add_library(TimePlot SHARED ${SOURCES} ${HEADERS} )
+    HEADERS
+        PluginTimePlot.h
 
-# link with Qt libraries, models, views and Interfaces
-target_link_libraries(TimePlot PRIVATE
-                      Qt5::Widgets
-                      ${PROJECT_NAME}_Models
-                      ${PROJECT_NAME}_Views
-                      ${PROJECT_NAME}_Interfaces
-                      ${PROJECT_NAME}_Presenters)
+    SOURCES
+        PluginTimePlot.cpp
 
-# target directories. Needs to be defined in some global file TODO
-set_target_properties(TimePlot PROPERTIES
-                      RUNTIME_OUTPUT_DIRECTORY "C:/OpenPASS/bin/gui"
-                      PREFIX "")
+    LIBRARIES
+        Qt5::Widgets
+        Window
+        ${PROJECT_NAME}_Models
+        ${PROJECT_NAME}_Views
+        ${PROJECT_NAME}_Presenters
+)

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Profiles SchemaVersion="0.4.6">
+    <AgentProfiles>
+        <AgentProfile Name="Agent_0" Type="Static">
+            <System>
+                <File>SystemConfig.xml</File>
+                <Id>0</Id>
+            </System>
+            <VehicleModel>Agent_0</VehicleModel>
+        </AgentProfile>
+        <AgentProfile Name="Agent_1" Type="Static">
+            <System>
+                <File>SystemConfig.xml</File>
+                <Id>1</Id>
+            </System>
+            <VehicleModel>Agent_1</VehicleModel>
+        </AgentProfile>
+    </AgentProfiles>
+    <VehicleProfiles>
+    </VehicleProfiles>
+    <ProfileGroup Type="Driver"/>
+    <ProfileGroup Type="TrafficRules">
+        <Profile Name="Germany">
+            <Double Key="OpenSpeedLimit" Value="INF"/>
+            <Bool Key="KeepToOuterLanes" Value="true"/>
+            <Bool Key="DontOvertakeOnOuterLanes" Value="true"/>
+            <Bool Key="FormRescueLane" Value="true"/>
+            <Bool Key="ZipperMerge" Value="true"/>
+        </Profile>
+    </ProfileGroup>
+</Profiles>

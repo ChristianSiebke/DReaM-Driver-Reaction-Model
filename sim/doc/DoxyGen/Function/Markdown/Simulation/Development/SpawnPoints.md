@@ -64,13 +64,15 @@ It is only called once initially and is recommended for each simulation.
 This SpawnPoint should trigger before any other SpawnPoints.
 A position and velocity are required for each Ego and Scenario agent in the scenario file.
 The portion of the Scenario file relevant to this SpawnPoint can be found [here](\ref scenario_entities).
+If there is no route defined in the Scenario the Spawner will set a random route starting at the spawning position.
+If there are multiple lanes at this position (this is only possible on junctions) it will take the lane with the lowest relative heading.
 
 \section dev_framework_modules_spawnpoints_preruncommonspawnpoint PreRunSpawnPoint
-The PreRun Spawnpoint (included in library "SpawnPointPreRunCommon") is responsible for populating the scenery/world with Common-Agents before the simulator starts.
-This SpawnPoint only acts once before the simulator starts and not during the simulation run.
-A traffic config is required for each PreRun SpawnPoint.
+The PreRun SpawnZone (included in library "SpawnerPreRunCommon") is responsible for populating the scenery/world with Common-Agents before the simulator starts.
+This SpawnZone only acts once before the simulator starts and not during the simulation run.
+A traffic config is required for each PreRun SpawnZone. The name SpawnZone has been introduced in ProfilesCatalog version 0.4.6. .
 
-The PreRunCommon SpawnPoint requires a Spawner-Profile in the ProfilesCatalog. The SpawnerProfile contains information specifying the SpawnAreas and TrafficGroups
+The PreRunCommon SpawnZone requires a Spawner-Profile in the ProfilesCatalog. The SpawnerProfile contains information specifying the SpawnAreas and TrafficGroups
 
 ```xml
 <ProfileGroup Type="TrafficGroup">
@@ -97,7 +99,7 @@ The PreRunCommon SpawnPoint requires a Spawner-Profile in the ProfilesCatalog. T
 </ProfileGroup>
 <ProfileGroup Type="Spawner">
     <Profile Name="ExamplePreRunSpawner">
-      <List Name="SpawnPoints">
+      <List Name="SpawnZones">
         <ListItem>
           <StringVector Key="Roads" Value="1"/>
           <IntVector Key="Lanes" Value="-1,-2,-3,-4,-5"/>
@@ -134,12 +136,14 @@ The TrafficGroups are defined by the following parameter:
 | Homogeneity     | OPTIONAL: A vector describing the velocity increments for left lanes |
 | RightLaneOnly   | OPTIONAL: A flag determining whether this TrafficGroup can only be applied to the right most lane |
 
-The PreRunCommon SpawnPoint will spawn common agents on the specified Lanes of the specified Road from the s position S-Start to the s position S-End based on the parameters of the TrafficGroups.
+The PreRunCommon SpawnZone will spawn common agents on the specified Lanes of the specified Road from the s position S-Start to the s position S-End based on the parameters of the TrafficGroups.
 The following restrictions apply:
 
-- If the Scenario Spawn Point spawned Scenario Agents (including the Ego agent) before this Spawn Point is triggered (in the intended order of these Spawn Points), ranges between the Scenario Agents are invalid for spawning by this Spawn Point.
+- The PreRunCommon SpawnZone only spawns on the following OpenDRIVE lane types: Driving, OnRamp, OffRamp, ConnectingRamp
+
+- If the Scenario Spawn Zone spawned Scenario Agents (including the Ego agent) before this Spawn zone is triggered (in the intended order of these Spawn Zones), ranges between the Scenario Agents are invalid for spawning by this Spawn Point.
 The spawn ranges will only be augmented by Scenario Agents on the same Road and Lane.
-As such, there are 7 different potential scenarios that may arise in terms of how the spawn point's valid spawn ranges may be impacted:
+As such, there are 7 different potential scenarios that may arise in terms of how the spawn zone's valid spawn ranges may be impacted:
     1. Two Scenario Agents on the same Road and Lane - one before S-Start position and one after S-End position
         - This invalidates the entirety of the spawning range; no agents may be spawned here
     1. Two Scenario Agents on the same Road and Lane - one between S-Start position and S-End position and one either before S-Start or after S-End
@@ -158,16 +162,17 @@ As such, there are 7 different potential scenarios that may arise in terms of ho
 - If only non-existent lanes for an existent road are specified, no spawning will occur
 - If some specified lanes exist and some are non-existent for an existent road, spawning will occur for the lanes which do exist
 - If the specified S-Start and S-End positions are either beyond or before the S positions at which the specified Road and Lane combination exists, no spawning will occur
-- In the situation where a section of a Road adds a new lane to the left of the currently existing lanes, one should be aware that the laneId "-1" will shift to the newest left lane and should adjust SpawnPoint profiles with this in mind
+- In the situation where a section of a Road adds a new lane to the left of the currently existing lanes, one should be aware that the laneId "-1" will shift to the newest left lane and should adjust SpawnZones profiles with this in mind
 
-Once the spawning ranges are determined the PreRun SpawnPoint will spawn for each spawning area based on the following logic:
+Once the spawning ranges are determined the PreRun SpawnZones will spawn for each spawning area based on the following logic:
 
 - First the agentprofile needs to be determined. If the current spawn position evaluate to a right lane, the pool from which the agentprofile is drafted is extended by all traffic groups which contain the RightLaneOnly flag set to true.
 - Then the time gap between the new agent and the closest existing agent is sampled.
 - Afterwards the velocity of the new agent is being sampled under consideration of the homogeneity.
 - The gap and velocity are used to calculate the distance between the new agent and the next agent in this spawnarea. Here a minimum distance of 5m between agents is required.
+- A random route is sampled starting at the appropriate road
 - Based on the distance and the velocity the TTC (2s) conditions are evaluated.If the TTC is critical the spawn velocity is reduced to fullfill the TTC requriements. 
-- As a final step the spawnpoint evaluates the spawncoordinates. If they are valid the agent is created, else the spawnpoint moves on to the next spawning range. 
+- As a final step the spawnzones evaluates the spawncoordinates. If they are valid the agent is created, else the spawnzone moves on to the next spawning range. 
 
 \section dev_framework_modules_spawnpoints_runtimecommonspawnpoint RuntimeSpawnPoint
 The Runtime SpawnPoint (included in library "SpawnPointRuntimeCommon") is responsible for maintaining a populated scenery throughout the simulation runtime.
@@ -199,7 +204,7 @@ The RunTimeCommon SpawnPoint requires a Spawner-Profile to be defined in the Pro
     </Profile>
 </ProfileGroup>
 <ProfileGroup Type="Spawner">
-    <Profile Name="ExamplePreRunSpawner">
+    <Profile Name="ExampleRuntimeSpawner">
       <List Name="SpawnPoints">
         <ListItem>
           <StringVector Key="Roads" Value="1"/>
@@ -240,7 +245,10 @@ The RuntimeCommon SpawnPoint will spawn based on the following logic:
 - First the agentprofile needs to be determined. If the current spawn position evaluates to a right lane, the pool from which the agentprofile is drafted is extended by all traffic groups which contain the RightLaneOnly flag set to true.
 - Then the time gap between the new agent and the closest existing agent is sampled.
 - Afterwards the velocity of the new agent is being sampled under consideration of the homogeneity.
+- A random route is sampled starting at the appropriate road
 - Once the timely gap expires, the spawnpoint evaluate if the TTC (2s) conditions and a minimum required distance between agents (5m) are met. If the TTC is critical the spawn velocity is reduced to fullfill the TTC requriements. If the minimum distance is not fullfilled, the agent will be held back.
 - If all requirements were fullfilled the agent is spawned.
+
+The RunTime SpawnPoint only spawns on the following OpenDRIVE lane types: Driving, OnRamp
 
 ![SpawnLogic](SpawningFlowChart.png)

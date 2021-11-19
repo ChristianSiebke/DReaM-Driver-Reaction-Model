@@ -1,16 +1,16 @@
-/*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
-*               2018 AMFD GmbH
-*               2016, 2017, 2018, 2019, 2020 ITK Engineering GmbH
-*               2020 HLRS, University of Stuttgart.
-*               2020 BMW AG
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2018 AMFD GmbH
+ *               2020 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+ *               2020 HLRS, University of Stuttgart
+ *               2016-2020 ITK Engineering GmbH
+ *               2017-2021 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 #pragma once
 
@@ -24,11 +24,13 @@
 
 #include "common/globalDefinitions.h"
 #include "common/vector2d.h"
+#include "common/opExport.h"
 #include <optional>
 #include <algorithm>
 
 #include "include/agentInterface.h"
 #include "include/worldObjectInterface.h"
+#include "include/worldInterface.h"
 
 #include "common/boostGeometryCommon.h"
 
@@ -122,7 +124,7 @@ static double CalculateMomentInertiaYaw(double mass, double length, double width
 //! \param ownBoundingBox       first bounding box
 //! \param otherBoundingBox     second bounding box
 //! \return net distance x, net distance y
-[[maybe_unused]] static std::pair<double, double> GetCartesianNetDistance(polygon_t ownBoundingBox, polygon_t otherBoundingBox)
+[[maybe_unused]] static std::pair<double, double> GetCartesianNetDistance(const polygon_t& ownBoundingBox, const polygon_t& otherBoundingBox)
 {
     double ownMaxX{std::numeric_limits<double>::lowest()};
     double ownMinX{std::numeric_limits<double>::max()};
@@ -166,6 +168,76 @@ static double CalculateMomentInertiaYaw(double mass, double length, double width
     }
     return {netX, netY};
 }
+
+class IntersectionCalculation
+{
+public:
+
+    /**
+     * @brief Checks whether a point lies within or on the edges
+     *        of a convex quadrilateral.
+     *
+     * The quadrilateral must be convex and it points ordered clockwise:
+     *              A
+     *              #-------_______      B
+     *             /   P           ------#
+     *            /    #                  \
+     *           /                         \
+     *          #---------------------------#
+     *          C                           D
+     *
+     * @param[in] A First corner of quadrilateral
+     * @param[in] B Second corner of quadrilateral
+     * @param[in] C Third corner of quadrilateral
+     * @param[in] D Forth corner of quadrilateral
+     * @param[in] P Point to be queried
+     * @returns true if point is within on the edges of the quadrilateral
+     */
+    static OPENPASSCOMMONEXPORT bool IsWithin(const Common::Vector2d& A,
+                                                  const Common::Vector2d& B,
+                                                  const Common::Vector2d& C,
+                                                  const Common::Vector2d& D,
+                                                  const Common::Vector2d& P);
+
+    //! \brief Calculates the intersection polygon of two quadrangles.
+    //!
+    //! This method calculates all points of the intersection polygon of two quadrangles.
+    //! It is assumed, that both quadrangles are convex and that the points are given in clockwise order.
+    //! If one or both are rectangles then a faster calculation is used
+    //! Solve the linear equation "first point + lambda * first edge = second point + kappa * second edge" for each pair of edges to get the intersection of the edges.
+    //! If both lamda and kappa are between 0 and 1, then the intersection lies on both edges. If the determinat is 0, then the two egdes are parallel.
+    //!
+    //! \param firstPoints          corner points of the first quadrangle in clockwise order
+    //! \param secondPoints         corner points of the second quadrangle in clockwise order
+    //! \param firstIsRectangular   specify that first quadrangele is rectangular
+    //! \param secondIsRectangular  specify that second quadrangele is rectangular
+    //! \return points of the intersection polygon
+    static OPENPASSCOMMONEXPORT std::vector<Common::Vector2d> GetIntersectionPoints(const std::vector<Common::Vector2d>& firstPoints, const std::vector<Common::Vector2d>& secondPoints, bool firstIsRectangular = true, bool secondIsRectangular = true);
+
+    //! \brief Calculates the intersection polygon of two quadrangles.
+    //!
+    //! This method calculates all points of the intersection polygon of two quadrangles.
+    //! It is assumed, that both quadrangles are convex and that the points are given in clockwise order.
+    //! If one or both are rectangles then a faster calculation is used
+    //!
+    //! \param firstPolygon         first quadrangle
+    //! \param secondPolygon        second quadrangle
+    //! \param firstIsRectangular   specify that first quadrangele is rectangular
+    //! \param secondIsRectangular  specify that second quadrangele is rectangular
+    //! \return points of the intersection polygon
+    static OPENPASSCOMMONEXPORT std::vector<Common::Vector2d> GetIntersectionPoints(const polygon_t& firstPolygon, const polygon_t& secondPolygon, bool firstIsRectangular = true, bool secondIsRectangular = true);
+
+private:
+    static bool OnEdge(const Common::Vector2d& A,
+                       const Common::Vector2d& B,
+                       const Common::Vector2d& P);
+
+    static bool WithinBarycentricCoords(double dot00,
+                                        double dot02,
+                                        double dot01,
+                                        double dot11,
+                                        double dot12);
+};
 
 //-----------------------------------------------------------------------------
 //! @brief Tokenizes string by delimiter.
@@ -213,6 +285,33 @@ static double CalculateMomentInertiaYaw(double mass, double length, double width
 
     return tokens;
 }
+
+//! Returns the directional road for which the heading is the lowest for a given position
+//!
+//! \param roadPositions    all possible road positions as calculated by the localization
+//! \param world            world
+//! \return road and direction with lowest heading
+static RouteElement GetRoadWithLowestHeading(const GlobalRoadPositions& roadPositions, const WorldInterface& world)
+{
+    RouteElement bestFitting;
+    double minHeading = std::numeric_limits<double>::max();
+    for (const auto [roadId, position] : roadPositions)
+    {
+        const auto absHeadingInOdDirection = std::abs(position.roadPosition.hdg);
+        if (absHeadingInOdDirection < minHeading && world.IsDirectionalRoadExisting(roadId, true))
+        {
+            bestFitting = {roadId, true};
+            minHeading = absHeadingInOdDirection;
+        }
+        const auto absHeadingAgainstOdDirection = std::abs(SetAngleToValidRange(position.roadPosition.hdg + M_PI));
+        if (absHeadingAgainstOdDirection < minHeading && world.IsDirectionalRoadExisting(roadId, false))
+        {
+            bestFitting = {roadId, false};
+            minHeading = absHeadingAgainstOdDirection;
+        }
+    }
+    return bestFitting;
+}
 }; // namespace CommonHelper
 
 //-----------------------------------------------------------------------------
@@ -256,30 +355,6 @@ public:
         }
 
         return (netDistance <= 0.0) ? 0.0 : (vRear <= 1) ? netDistance : netDistance / vRear;
-    }
-
-
-    //-----------------------------------------------------------------------------
-    //! @brief Limits a value between a lower and an upper limit
-    //!
-    //! Returns
-    //! low | value < low
-    //! value  | low <= value < high
-    //! high | value >= high
-    //!
-    //! @param [in]   low       lower limit
-    //! @param [in]   value     the value to be bounded
-    //! @param [in]   high      higher limit
-    //!
-    //! @return bounded value
-    //-----------------------------------------------------------------------------
-    template <typename T>
-    static T ValueInBounds(
-        const T &low,
-        const T &value,
-        const T &high)
-    {
-        return (value < low) ? low : ((value < high) ? value : high);
     }
 
     //-----------------------------------------------------------------------------
@@ -404,6 +479,18 @@ public:
 
         return WillCrashDuringBrake(sFrontAtTtb - sEgoAtTtb, vEgo, assumedBrakeAccelerationEgo, vFrontAtTtb, aFrontAtTtb);
     }
+
+    //! Calculate the width left of the reference point of a leaning object
+    static double GetWidthLeft(double width, double height, double roll)
+    {
+        return 0.5 * width * std::cos(roll) + (roll < 0 ? height * std::sin(-roll) : 0);
+    }
+
+    //! Calculate the width right of the reference point of a leaning object
+    static double GetWidthRight(double width, double height, double roll)
+    {
+        return 0.5 * width * std::cos(roll) + (roll > 0 ? height * std::sin(roll) : 0);
+    }
 };
 
 namespace helper::vector {
@@ -470,7 +557,8 @@ public:
     //-----------------------------------------------------------------------------
     struct TtcParameters{
         double length;
-        double width;
+        double widthLeft;
+        double widthRight;
         double frontLength; // distance from reference point of object to leading edge of object
         double backLength;  // distance from reference point to back edge of object
         point_t position;
@@ -545,7 +633,8 @@ private:
 
         // Initial bounding box in local coordinate system
         parameters.length = object->GetLength() + collisionDetectionLongitudinalBoundary;
-        parameters.width  = object->GetWidth() + collisionDetectionLateralBoundary;
+        parameters.widthLeft = TrafficHelperFunctions::GetWidthLeft(object->GetWidth(), object->GetHeight(), object->GetRoll()) + 0.5 * collisionDetectionLateralBoundary;
+        parameters.widthRight = TrafficHelperFunctions::GetWidthRight(object->GetWidth(), object->GetHeight(), object->GetRoll()) + 0.5 * collisionDetectionLateralBoundary;
         parameters.frontLength = object->GetDistanceReferencePointToLeadingEdge() + 0.5 * collisionDetectionLongitudinalBoundary; //returns the distance from reference point of object to leading edge of object
         parameters.backLength = parameters.length - parameters.frontLength; // distance from reference point to back edge of object
 
@@ -583,11 +672,11 @@ private:
         // construct corner points from reference point position and current yaw angle
         polygon_t box;
 
-        bg::append(box, point_t{ parameters.position.get<0>() - std::cos(parameters.yaw) * parameters.backLength  + std::sin(parameters.yaw) * 0.5 * parameters.width		,		parameters.position.get<1>() - std::sin(parameters.yaw) * parameters.backLength  - std::cos(parameters.yaw) * 0.5 * parameters.width }); // back right corner
-        bg::append(box, point_t{ parameters.position.get<0>() - std::cos(parameters.yaw) * parameters.backLength  - std::sin(parameters.yaw) * 0.5 * parameters.width		,		parameters.position.get<1>() - std::sin(parameters.yaw) * parameters.backLength  + std::cos(parameters.yaw) * 0.5 * parameters.width }); // back left corner
-        bg::append(box, point_t{ parameters.position.get<0>() + std::cos(parameters.yaw) * parameters.frontLength - std::sin(parameters.yaw) * 0.5 * parameters.width		,		parameters.position.get<1>() + std::sin(parameters.yaw) * parameters.frontLength + std::cos(parameters.yaw) * 0.5 * parameters.width }); // front left corner
-        bg::append(box, point_t{ parameters.position.get<0>() + std::cos(parameters.yaw) * parameters.frontLength + std::sin(parameters.yaw) * 0.5 * parameters.width		,		parameters.position.get<1>() + std::sin(parameters.yaw) * parameters.frontLength - std::cos(parameters.yaw) * 0.5 * parameters.width }); // front right corner
-        bg::append(box, point_t{ parameters.position.get<0>() - std::cos(parameters.yaw) * parameters.backLength  + std::sin(parameters.yaw) * 0.5 * parameters.width		,		parameters.position.get<1>() - std::sin(parameters.yaw) * parameters.backLength  - std::cos(parameters.yaw) * 0.5 * parameters.width }); // back right corner
+        bg::append(box, point_t{ parameters.position.get<0>() - std::cos(parameters.yaw) * parameters.backLength  + std::sin(parameters.yaw) * parameters.widthRight	,		parameters.position.get<1>() - std::sin(parameters.yaw) * parameters.backLength  - std::cos(parameters.yaw) * parameters.widthRight }); // back right corner
+        bg::append(box, point_t{ parameters.position.get<0>() - std::cos(parameters.yaw) * parameters.backLength  - std::sin(parameters.yaw) * parameters.widthLeft		,		parameters.position.get<1>() - std::sin(parameters.yaw) * parameters.backLength  + std::cos(parameters.yaw) * parameters.widthLeft }); // back left corner
+        bg::append(box, point_t{ parameters.position.get<0>() + std::cos(parameters.yaw) * parameters.frontLength - std::sin(parameters.yaw) * parameters.widthLeft		,		parameters.position.get<1>() + std::sin(parameters.yaw) * parameters.frontLength + std::cos(parameters.yaw) * parameters.widthLeft }); // front left corner
+        bg::append(box, point_t{ parameters.position.get<0>() + std::cos(parameters.yaw) * parameters.frontLength + std::sin(parameters.yaw) * parameters.widthRight	,		parameters.position.get<1>() + std::sin(parameters.yaw) * parameters.frontLength - std::cos(parameters.yaw) * parameters.widthRight }); // front right corner
+        bg::append(box, point_t{ parameters.position.get<0>() - std::cos(parameters.yaw) * parameters.backLength  + std::sin(parameters.yaw) * parameters.widthRight	,		parameters.position.get<1>() - std::sin(parameters.yaw) * parameters.backLength  - std::cos(parameters.yaw) * parameters.widthRight }); // back right corner
         return box;
     }
     //-----------------------------------------------------------------------------

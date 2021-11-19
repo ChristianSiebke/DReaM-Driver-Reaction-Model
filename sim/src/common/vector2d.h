@@ -1,14 +1,14 @@
-/******************************************************************************
-* Copyright (c) 2017 ITK Engineering GmbH.
-*               2018, 2020 in-tech GmbH.
-*               2020 HLRS, University of Stuttgart.
-*
-* This program and the accompanying materials are made available under the
-* terms of the Eclipse Public License 2.0 which is available at
-* https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2020 HLRS, University of Stuttgart
+ *               2017-2021 ITK Engineering GmbH
+ *               2018-2020 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //! \brief This file implements a generic 2D vector.
 
@@ -150,6 +150,8 @@ public:
 
         if (std::abs(length) < EPSILON)
         {
+            x = 0.0;
+            y = 0.0;
             return false;
         }
 

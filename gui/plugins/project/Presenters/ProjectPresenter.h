@@ -1,12 +1,12 @@
-/****************************************************************************** 
-* Copyright (c) 2017 Volkswagen Group of America. 
-* 
-* This program and the accompanying materials are made 
-* available under the terms of the Eclipse Public License 2.0 
-* which is available at https://www.eclipse.org/legal/epl-2.0/ 
-* 
-* SPDX-License-Identifier: EPL-2.0 
-******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2017 Volkswagen Group of America
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 #ifndef PROJECTPRESENTER_H
 #define PROJECTPRESENTER_H
@@ -44,20 +44,20 @@ public:
     virtual ProjectInterface::Result getResultPath() const;
 
 public:
-    virtual bool setLogMaster(ProjectInterface::LogMaster const &logMaster);
-    virtual ProjectInterface::LogMaster getLogMaster() const;
+    virtual bool setLogOpSimulationManager(ProjectInterface::LogOpSimulationManager const &logOpSimulationManager);
+    virtual ProjectInterface::LogOpSimulationManager getLogOpSimulationManager() const;
 
 public:
-    virtual bool setLogSlave(ProjectInterface::LogSlave const &logSlave);
-    virtual ProjectInterface::LogSlave getLogSlave() const;
+    virtual bool setLogSimulation(ProjectInterface::LogSimulation const &logSimulation);
+    virtual ProjectInterface::LogSimulation getLogSimulation() const;
 
 public:
     virtual bool setLogLevel(ProjectInterface::LogLevel const &logLevel);
     virtual ProjectInterface::LogLevel getLogLevel() const;
 
 public:
-    virtual bool setSlave(ProjectInterface::Slave const &slave);
-    virtual ProjectInterface::Slave getSlave() const;
+    virtual bool setSimulation(ProjectInterface::Simulation const &simulation);
+    virtual ProjectInterface::Simulation getSimulation() const;
 
 private:
     ProjectModel *_projectModel;

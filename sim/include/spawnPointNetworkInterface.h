@@ -1,12 +1,12 @@
-/*******************************************************************************
-* Copyright (c) 2018, 2019 in-tech GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2018-2019 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 #pragma once
 
 #include <list>
@@ -16,7 +16,7 @@
 #include "include/scenarioInterface.h"
 #include "common/spawnPointLibraryDefinitions.h"
 
-namespace SimulationSlave
+namespace core
 {
 class SpawnPoint;
 
@@ -48,7 +48,7 @@ public:
                              ScenarioInterface* scenario,
                              const std::optional<ProfileGroup>& spawnPointProfiles) = 0;
 
-    virtual bool TriggerPreRunSpawnPoints() = 0;
+    virtual bool TriggerPreRunSpawnZones() = 0;
 
     virtual bool TriggerRuntimeSpawnPoints(const int timestamp) = 0;
 
@@ -60,4 +60,4 @@ public:
     virtual void Clear() = 0;
 };
 
-} //SimulationSlave
+} //core

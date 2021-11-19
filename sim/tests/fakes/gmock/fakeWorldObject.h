@@ -1,12 +1,12 @@
-/*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2019 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 #pragma once
 
 #include "gmock/gmock.h"
@@ -23,6 +23,7 @@ public:
     MOCK_CONST_METHOD0(GetLength, double());
     MOCK_CONST_METHOD0(GetHeight, double());
     MOCK_CONST_METHOD0(GetYaw, double());
+    MOCK_CONST_METHOD0(GetRoll, double());
     MOCK_CONST_METHOD0(GetId, int());
     MOCK_CONST_METHOD0(GetBoundingBox2D, const polygon_t& ());
     MOCK_CONST_METHOD2(GetDistanceToStartOfRoad, double(MeasurementPoint, std::string));

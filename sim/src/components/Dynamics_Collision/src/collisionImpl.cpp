@@ -1,13 +1,13 @@
-/*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
-*               2017, 2018 ITK Engineering GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2017-2018 ITK Engineering GmbH
+ *               2017-2020 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  dynamics_collisionImplementation.cpp
@@ -19,6 +19,7 @@
 #include "collisionImpl.h"
 
 #include "include/worldInterface.h"
+#include "components/common/vehicleProperties.h"
 
 DynamicsCollisionImplementation::DynamicsCollisionImplementation(std::string componentName,
                                                                  bool isInit,
@@ -93,10 +94,12 @@ void DynamicsCollisionImplementation::Trigger(int time)
         bool collisionWithFixedObject = false;
 
         //Calculate new velocity by inelastic collision
-        const double &agentWeight = GetAgent()->GetVehicleModelParameters().weight;
-        double sumOfWeights = agentWeight;
-        double sumOfImpulsesX = GetAgent()->GetVelocity() * agentWeight * std::cos(GetAgent()->GetYaw());
-        double sumOfImpulsesY = GetAgent()->GetVelocity() * agentWeight * std::sin(GetAgent()->GetYaw());
+        auto weight = helper::map::query(GetAgent()->GetVehicleModelParameters().properties, vehicle::properties::Mass);
+        THROWIFFALSE(weight.has_value(), "Mass was not defined in VehicleCatalog");
+
+        double sumOfWeights = weight.value();
+        double sumOfImpulsesX = GetAgent()->GetVelocity() * weight.value() * std::cos(GetAgent()->GetYaw());
+        double sumOfImpulsesY = GetAgent()->GetVelocity() * weight.value() * std::sin(GetAgent()->GetYaw());
 
         auto collisionPartners = GetAgent()->GetCollisionPartners();
         for (const auto &partner : collisionPartners)
@@ -109,11 +112,12 @@ void DynamicsCollisionImplementation::Trigger(int time)
             const AgentInterface* partnerAgent = GetWorld()->GetAgent(partner.second);
             if (partnerAgent != nullptr)
             {
-                const double &partnerAgentWeight = partnerAgent->GetVehicleModelParameters().weight;
+                weight = helper::map::query(partnerAgent->GetVehicleModelParameters().properties, vehicle::properties::Mass);
+                THROWIFFALSE(weight.has_value(), "Mass was not defined in VehicleCatalog");
 
-                sumOfWeights += partnerAgentWeight;
-                sumOfImpulsesX += partnerAgent->GetVelocity() * partnerAgentWeight * std::cos(partnerAgent->GetYaw());
-                sumOfImpulsesY += partnerAgent->GetVelocity() * partnerAgentWeight * std::sin(partnerAgent->GetYaw());
+                sumOfWeights += weight.value();
+                sumOfImpulsesX += partnerAgent->GetVelocity() * weight.value() * std::cos(partnerAgent->GetYaw());
+                sumOfImpulsesY += partnerAgent->GetVelocity() * weight.value() * std::sin(partnerAgent->GetYaw());
             }
         }
 

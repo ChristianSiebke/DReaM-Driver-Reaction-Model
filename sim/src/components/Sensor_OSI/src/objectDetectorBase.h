@@ -1,21 +1,21 @@
-/*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
-* Copyright (c) 2020 HLRS, University of Stuttgart.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2020 HLRS, University of Stuttgart
+ *               2017-2019 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
-/** \addtogroup SensorObjectDetector
+/** \addtogroup SensorOSI
 * @{
-* \brief This file models the SensorObjectDetectors.
+* \brief This file models the SensorOSI.
 *
-* \details This file models the SensorObjectDetectors which can be part of an agent.
-*          The SensorObjectDetectors represent sensor which can detect other WorldObjects around the agent.
-*          Those sensor have different approaches in detecting other WorldObjects.
+* \details This file models the Sensors which can be part of an agent.
+*          The SensorOSI represent sensors which can detect other WorldObjects around the agent.
+*          Those sensors have different approaches in detecting other WorldObjects.
 *          The detected Objects can then be sent to the corresponding ADAS which uses them.
 *
 * \section MODULENAME_Outputs Outputs
@@ -27,7 +27,7 @@
 * Output channel IDs:
 * Output Id | signal class | contained variables
 * ----------|--------------|-------------
-*  0        | SensorObjectDetectorToAdasSignal  | out_detectedObjects
+*  0        | SensorDataSignal  | out_detectedObjects
 *
 *
 * \section MODULENAME_ExternalParameters External parameters
@@ -50,11 +50,11 @@
 #include "osi3/osi_sensordata.pb.h"
 
 //-----------------------------------------------------------------------------
-/** \brief This class is the common base for all SensorObjectDetectors.
-*   \details This class is the common base for all SensorObjectDetectors.
-*            It provides the basic functionality for all object detectors.
+/** \brief This class is the common base for all OSI sensors.
+*   \details This class is the common base for all OSI sensors.
+*            It provides the basic functionality for all sensors.
 *
-*   \ingroup SensorObjectDetector
+*   \ingroup SensorOSI
 */
 //-----------------------------------------------------------------------------
 class ObjectDetectorBase : public SensorInterface

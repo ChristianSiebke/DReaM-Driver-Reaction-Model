@@ -1,13 +1,13 @@
-/*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
-*               2016, 2017, 2018 ITK Engineering GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2016-2018 ITK Engineering GmbH
+ *               2017-2020 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  ModelInterface.h
@@ -21,39 +21,21 @@
 
 #pragma once
 
-#include <string>
-#include <map>
-#include <sstream>
-#include <string>
-#include <iostream>
-#include <vector>
 #include <memory>
+#include <string>
 
 #include "include/agentInterface.h"
 #include "include/callbackInterface.h"
-#include "include/signalInterface.h"
-#include "include/publisherInterface.h"
 #include "include/observationInterface.h"
+#include "include/publisherInterface.h"
+#include "include/signalInterface.h"
 
 class ParameterInterface;
 class StochasticsInterface;
 class WorldInterface;
 
-namespace SimulationSlave {
+namespace core {
 class EventNetworkInterface;
-}
-
-//-----------------------------------------------------------------------------
-//! Provides functionality to print information of signals
-//!
-//! @param[in]     stream  Output stream for printing information
-//! @param[in]     signal  Signal to be printed
-//! @return                Output stream for concatenation
-//-----------------------------------------------------------------------------
-inline std::ostream& operator<<(std::ostream &stream,
-                                const SignalInterface &signal)
-{
-    return stream << static_cast<std::string>(signal);
 }
 
 //-----------------------------------------------------------------------------
@@ -473,7 +455,7 @@ public:
                              int offsetTime,
                              int responseTime,
                              int cycleTime,
-                             SimulationSlave::EventNetworkInterface *eventNetwork,
+                             core::EventNetworkInterface *eventNetwork,
                              AgentInterface *agent,
                              const CallbackInterface *callbacks) :
         ModelInterface(isInit, priority, offsetTime, responseTime, cycleTime),
@@ -504,7 +486,7 @@ protected:
     //!
     //! @return                       EventNetwork functionality
     //-----------------------------------------------------------------------------
-    const SimulationSlave::EventNetworkInterface *GetEventNetwork() const
+    const core::EventNetworkInterface *GetEventNetwork() const
     {
         return eventNetwork;
     }
@@ -545,7 +527,7 @@ private:
     // Access to the following members is provided by the corresponding member
     // functions.
     std::string componentName;                      //!< Id of this component
-    const SimulationSlave::EventNetworkInterface *eventNetwork;   //!< Reference to framework eventNetwork
+    const core::EventNetworkInterface *eventNetwork;   //!< Reference to framework eventNetwork
     AgentInterface *agent;
     const CallbackInterface *callbacks;   //!< Reference to framework callbacks
 };
@@ -577,7 +559,7 @@ public:
                                     PublisherInterface * const publisher,
                                     const CallbackInterface *callbacks,
                                     AgentInterface *agent,
-                                    SimulationSlave::EventNetworkInterface * const eventNetwork):
+                                    core::EventNetworkInterface * const eventNetwork):
         UnrestrictedModelInterface(componentName,
                                    isInit,
                                    priority,
@@ -604,11 +586,11 @@ protected:
     //!
     //! @return                       EventNetwork
     //-----------------------------------------------------------------------------
-    SimulationSlave::EventNetworkInterface* GetEventNetwork() const
+    core::EventNetworkInterface* GetEventNetwork() const
     {
         return eventNetwork;
     }
 
 private:
-    SimulationSlave::EventNetworkInterface * const eventNetwork;
+    core::EventNetworkInterface * const eventNetwork;
 };

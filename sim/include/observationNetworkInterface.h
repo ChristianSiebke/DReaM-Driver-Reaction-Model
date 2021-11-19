@@ -1,13 +1,13 @@
-/*******************************************************************************
-* Copyright (c) 2017, 2018, 2019, 2020 in-tech GmbH
-*               2016, 2017, 2018 ITK Engineering GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2016-2018 ITK Engineering GmbH
+ *               2017-2021 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 /** \file  ObservationNetworkInterface.h
@@ -21,7 +21,7 @@
 #include "include/stochasticsInterface.h"
 #include "common/observationLibraryDefinitions.h"
 
-namespace SimulationSlave {
+namespace core {
 
 class ObservationBinding;
 class ObservationModule;
@@ -60,7 +60,7 @@ public:
                              WorldInterface* world,
                              EventNetworkInterface* eventNetwork,
                              const std::string& sceneryPath,
-                             DataStoreReadInterface* dataStore) = 0;
+                             DataBufferReadInterface* dataBuffer) = 0;
 
     //-----------------------------------------------------------------------------
     //! Returns the observation module mapping.
@@ -70,7 +70,7 @@ public:
     virtual const std::map<int, ObservationModule*>& GetObservationModules() = 0;
 
     //-----------------------------------------------------------------------------
-    //! Inits the observation network by calling the slavePreHook function pointer
+    //! Inits the observation network by calling the OpSimulationPreHook function pointer
     //! of the observation library with each observation module implementation as
     //! parameter.
     //!
@@ -79,7 +79,7 @@ public:
     virtual bool InitAll() = 0;
 
     //-----------------------------------------------------------------------------
-    //! Inits the network run by calling the slavePreRunHook function
+    //! Inits the network run by calling the OpSimulationPreRunHook function
     //! pointer of the observation library with each observation module instance.
     //!
     //! @return                             Flag if the run init was successful
@@ -87,7 +87,7 @@ public:
     virtual bool InitRun() = 0;
 
     //-----------------------------------------------------------------------------
-    //! Updates the time step by calling the SlaveUpdateHook function pointer of the
+    //! Updates the time step by calling the OpSimulationUpdateHook function pointer of the
     //! observation library with each observation module instance and the provided
     //! parameters.
     //!
@@ -98,7 +98,7 @@ public:
     virtual bool UpdateTimeStep(int time, RunResult& runResult) = 0;
 
     //-----------------------------------------------------------------------------
-    //! Finalizes the run by calling the SlaveUpdateHook function pointer of the
+    //! Finalizes the run by calling the OpSimulationUpdateHook function pointer of the
     //! observation library with each observation module instance and teh provided
     //! result parameter.
     //!
@@ -108,9 +108,9 @@ public:
     virtual bool FinalizeRun(const RunResult& result) = 0;
 
     //-----------------------------------------------------------------------------
-    //! Finalizes the observation network by calling the masterPostHook function
+    //! Finalizes the observation network by calling the OpSimulationManagerPostHook
     //! pointer of the observation library with each observation module instance
-    //! (and its ID) in each network slave.
+    //! (and its ID) in each network simulation.
     //!
     //! @return                             Flag if the finalize was successful
     //-----------------------------------------------------------------------------
@@ -124,4 +124,4 @@ public:
 
 };
 
-} //namespace SimulationSlave
+} //namespace core

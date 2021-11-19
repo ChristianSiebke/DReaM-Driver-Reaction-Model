@@ -1,12 +1,13 @@
-# /*********************************************************************
-# * Copyright (c) 2019 Volkswagen Group of America.
-# *
-# * This program and the accompanying materials are made
-# * available under the terms of the Eclipse Public License 2.0
-# * which is available at https://www.eclipse.org/legal/epl-2.0/
-# *
-# * SPDX-License-Identifier: EPL-2.0
-# **********************************************************************/
+################################################################################
+# Copyright (c) 2019 Volkswagen Group of America
+#               2021 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+#
+# This program and the accompanying materials are made available under the
+# terms of the Eclipse Public License 2.0 which is available at
+# http://www.eclipse.org/legal/epl-2.0.
+#
+# SPDX-License-Identifier: EPL-2.0
+################################################################################
 
 project(openPASS-Project)
 
@@ -29,29 +30,25 @@ include_directories(../window/Interfaces)
 include_directories(../../application/Interfaces)
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 
-
 # include interfaces, models and views
-add_subdirectory(Interfaces)
 add_subdirectory(Models)
 add_subdirectory(Presenters)
 add_subdirectory(Views)
 
-# include headers and sources of this plugin
-set(SOURCES ProjectPlugin.cpp)
-set(HEADERS ProjectPlugin.h)
+add_openpass_target(
+    NAME Project TYPE library LINKAGE shared COMPONENT gui
 
-# declare target library
-add_library(Project SHARED ${SOURCES} ${HEADERS})
+    HEADERS
+        Interfaces/openPASS-Project/ProjectInterface.h
+        ProjectPlugin.h
 
-# link with Qt libraries, models, views and Interfaces
-target_link_libraries(Project PRIVATE
-                      Qt5::Widgets
-                      ${PROJECT_NAME}_Models
-                      ${PROJECT_NAME}_Views
-                      ${PROJECT_NAME}_Presenters
-                      ${PROJECT_NAME}_Interfaces)
+    SOURCES
+        ProjectPlugin.cpp
 
-# target directories. Needs to be defined in some global file TODO
-set_target_properties(Project PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "C:/OpenPASS/bin/gui"
-    PREFIX "")
+    LIBRARIES
+        Qt5::Widgets
+        Window
+        ${PROJECT_NAME}_Models
+        ${PROJECT_NAME}_Views
+        ${PROJECT_NAME}_Presenters
+)

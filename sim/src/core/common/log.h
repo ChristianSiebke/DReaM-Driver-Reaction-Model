@@ -1,34 +1,35 @@
-/*******************************************************************************
-* Copyright (c) 2017, 2018, 2019 in-tech GmbH
-*               2016, 2017, 2018 ITK Engineering GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2016-2018 ITK Engineering GmbH
+ *               2017-2021 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 //! @file  log.h
 //! @brief This file contains the implementation of the debug logging.
 //-----------------------------------------------------------------------------
 
-#ifndef LOG_H
-#define LOG_H
+#pragma once
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <iostream>
+#include <map>
 #include <sstream>
 #include <string>
-#include <stdio.h>
-#include <iostream>
+
 #include <QMutex>
 #include <QThread>
-#include <map>
+
+#include "common/opExport.h"
 
 #if defined(LOG_TIME_ENABLED)
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
+#ifdef WIN32
 #include <windows.h>
 
 inline std::string Log_NowTime()
@@ -194,7 +195,7 @@ std::string Log<T>::ToString(LogLevel level)
 }
 
 //! Handles access of file
-class LogOutputPolicy
+class SIMULATIONCOREEXPORT LogOutputPolicy
 {
 public:
     ~LogOutputPolicy ()
@@ -295,4 +296,3 @@ typedef Log<LogOutputPolicy> LogFile;
     }
 }
 
-#endif // LOG_H

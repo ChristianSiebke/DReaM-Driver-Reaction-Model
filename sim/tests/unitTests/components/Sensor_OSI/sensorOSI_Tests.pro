@@ -1,12 +1,12 @@
-# /*********************************************************************
-# * Copyright (c) 2019 in-tech GmbH
-# *
-# * This program and the accompanying materials are made
-# * available under the terms of the Eclipse Public License 2.0
-# * which is available at https://www.eclipse.org/legal/epl-2.0/
-# *
-# * SPDX-License-Identifier: EPL-2.0
-# **********************************************************************/
+################################################################################
+# Copyright (c) 2019 in-tech GmbH
+#
+# This program and the accompanying materials are made available under the
+# terms of the Eclipse Public License 2.0 which is available at
+# http://www.eclipse.org/legal/epl-2.0.
+#
+# SPDX-License-Identifier: EPL-2.0
+################################################################################
 
 CONFIG += OPENPASS_GTEST \
           OPENPASS_GTEST_DEFAULT_MAIN
@@ -16,7 +16,7 @@ include(../../../testing.pri)
 win32:QMAKE_CXXFLAGS += -Wa,-mbig-obj
 
 UNIT_UNDER_TEST = $$OPEN_SRC/components/Sensor_OSI/src
-WORLD_OSI = $$OPEN_SRC/core/slave/modules/World_OSI
+WORLD_OSI = $$OPEN_SRC/core/opSimulation/modules/World_OSI
 
 INCLUDEPATH += \
     $$UNIT_UNDER_TEST \

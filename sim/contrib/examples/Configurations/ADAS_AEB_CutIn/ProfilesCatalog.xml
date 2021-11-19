@@ -1,0 +1,258 @@
+<Profiles SchemaVersion="0.4.6">
+  <AgentProfiles>
+    <AgentProfile Name="EgoAgent" Type="Dynamic">
+      <DriverProfiles>
+        <DriverProfile Name="EgoDriver" Probability="1.0"/>
+      </DriverProfiles>
+      <VehicleProfiles>
+        <VehicleProfile Name="EgoVehicle" Probability="1.0"/>
+      </VehicleProfiles>
+    </AgentProfile>
+    <AgentProfile Name="TFAgent" Type="Dynamic">
+      <DriverProfiles>
+        <DriverProfile Name="Regular" Probability="1.0"/>
+      </DriverProfiles>
+      <VehicleProfiles>
+        <VehicleProfile Name="TFVehicle" Probability="1.0"/>
+      </VehicleProfiles>
+    </AgentProfile>
+    <AgentProfile Name="LuxuryClassCarAgent" Type="Dynamic">
+      <DriverProfiles>
+        <DriverProfile Name="Regular" Probability="1.0"/>
+      </DriverProfiles>
+      <VehicleProfiles>
+        <VehicleProfile Name="BMW 7 1" Probability="0.5"/>
+        <VehicleProfile Name="BMW 7 2" Probability="0.5"/>
+      </VehicleProfiles>
+    </AgentProfile>
+    <AgentProfile Name="MiddleClassCarAgent" Type="Dynamic">
+      <DriverProfiles>
+        <DriverProfile Name="Regular" Probability="1.0"/>
+      </DriverProfiles>
+      <VehicleProfiles>
+        <VehicleProfile Name="Mini Cooper" Probability="0.4"/>
+        <VehicleProfile Name="BMW i3" Probability="0.3"/>
+        <VehicleProfile Name="BMW 3" Probability="0.3"/>
+      </VehicleProfiles>
+    </AgentProfile>
+    <AgentProfile Name="TruckAgent" Type="Dynamic">
+      <DriverProfiles>
+        <DriverProfile Name="Regular" Probability="1.0"/>
+      </DriverProfiles>
+      <VehicleProfiles>
+        <VehicleProfile Name="Truck" Probability="0.5"/>
+        <VehicleProfile Name="Bus" Probability="0.5"/>
+      </VehicleProfiles>
+    </AgentProfile>
+  </AgentProfiles>
+  <VehicleProfiles>
+    <VehicleProfile Name="EgoVehicle">
+      <Model Name="car_bmw_7_1"/>
+      <Components>
+        <Component Type="AEB">
+          <Profiles>
+            <Profile Name="AebOSI" Probability="1.0"/>
+          </Profiles>
+          <SensorLinks>
+            <SensorLink SensorId="0" InputId="Camera"/>
+            <SensorLink SensorId="1" InputId="Camera"/>
+          </SensorLinks>
+        </Component>
+      </Components>
+      <Sensors>
+        <Sensor Id="0">
+          <Position Name="Default" Longitudinal="3.7" Lateral="1.09" Height="0.5" Pitch="0.0" Yaw="0.0" Roll="0.0"/>
+          <Profile Type="Geometric2D" Name="Standard"/>
+        </Sensor>
+        <Sensor Id="1">
+          <Position Name="Default" Longitudinal="3.7" Lateral="-1.09" Height="0.5" Pitch="0.0" Yaw="0.0" Roll="0.0"/>
+          <Profile Type="Geometric2D" Name="Standard"/>
+        </Sensor>
+      </Sensors>
+    </VehicleProfile>
+    <VehicleProfile Name="TFVehicle">
+      <Model Name="car_bmw_7_1"/>
+      <Components>
+        <Component Type="Dynamics_TrajectoryFollower">
+          <Profiles>
+            <Profile Name="BasicTrajectoryFollower" Probability="1.0"/>
+          </Profiles>
+        </Component>
+      </Components>
+      <Sensors/>
+    </VehicleProfile>
+    <VehicleProfile Name="BMW 7 1">
+      <Model Name="car_bmw_7_1"/>
+      <Components/>
+      <Sensors/>
+    </VehicleProfile>
+    <VehicleProfile Name="BMW 7 2">
+      <Model Name="car_bmw_7_2"/>
+      <Components/>
+      <Sensors/>
+    </VehicleProfile>
+    <VehicleProfile Name="Mini Cooper">
+      <Model Name="car_mini_cooper"/>
+      <Components/>
+      <Sensors/>
+    </VehicleProfile>
+    <VehicleProfile Name="BMW i3">
+      <Model Name="car_bmw_i3"/>
+      <Components/>
+      <Sensors/>
+    </VehicleProfile>
+    <VehicleProfile Name="BMW 3">
+      <Model Name="car_bmw_3"/>
+      <Components/>
+      <Sensors/>
+    </VehicleProfile>
+    <VehicleProfile Name="Truck">
+      <Model Name="truck"/>
+      <Components/>
+      <Sensors/>
+    </VehicleProfile>
+    <VehicleProfile Name="Bus">
+      <Model Name="bus"/>
+      <Components/>
+      <Sensors/>
+    </VehicleProfile>
+  </VehicleProfiles>
+  <ProfileGroup Type="Driver">
+    <Profile Name="EgoDriver">
+      <String Key="Type" Value="AlgorithmAgentFollowingDriverModel"/>
+      <String Key="AlgorithmLateralModule" Value="Algorithm_LateralAfdm"/>
+      <String Key="AlgorithmLongitudinalModule" Value="Algorithm_LongitudinalAfdm"/>
+      <Double Key="MaxDeceleration" Value="0.5"/>
+    </Profile>
+    <Profile Name="Regular">
+      <String Key="Type" Value="AlgorithmAgentFollowingDriverModel"/>
+      <String Key="AlgorithmLateralModule" Value="Algorithm_LateralAfdm"/>
+      <String Key="AlgorithmLongitudinalModule" Value="Algorithm_LongitudinalAfdm"/>
+      <Double Key="VelocityWish" Value="35.0"/>
+      <Double Key="Delta" Value="4.0"/>
+      <Double Key="TGapWish" Value="1.5"/>
+      <Double Key="MinDistance" Value="2.0"/>
+      <Double Key="MaxAcceleration" Value="1.4"/>
+      <Double Key="MaxDeceleration" Value="2.0"/>
+    </Profile>
+  </ProfileGroup>
+  <ProfileGroup Type="AEB">
+    <Profile Name="AebOSI">
+      <Double Key="CollisionDetectionLongitudinalBoundary" Value="4.0"/>
+      <Double Key="CollisionDetectionLateralBoundary" Value="1.5"/>
+      <Double Key="TTC" Value="2.0"/>
+      <Double Key="Acceleration" Value="-3.0"/>
+    </Profile>
+  </ProfileGroup>
+  <ProfileGroup Type="Dynamics_TrajectoryFollower">
+    <Profile Name="BasicTrajectoryFollower">
+      <Bool Key="AutomaticDeactivation" Value="true"/>
+      <Bool Key="EnforceTrajectory" Value="true"/>
+    </Profile>
+  </ProfileGroup>
+  <ProfileGroup Type="Geometric2D">
+    <Profile Name="Standard">
+      <Double Key="OpeningAngleH" Value="0.261799"/>
+      <Double Key="DetectionRange" Value="150"/>
+      <Double Key="FailureProbability" Value="0"/>
+      <NormalDistribution Key="Latency" Mean="0.0" SD="0.0" Min="0.0" Max="0.0"/>
+      <Bool Key="EnableVisualObstruction" Value="true"/>
+    </Profile>
+  </ProfileGroup>
+  <ProfileGroup Type="TrafficGroup">
+    <Profile Name="DefaultPreRunCommon">
+      <List Name="AgentProfiles">
+        <ListItem>
+          <String Key="Name" Value="LuxuryClassCarAgent"/>
+          <Double Key="Weight" Value="0.4"/>
+        </ListItem>
+        <ListItem>
+          <String Key="Name" Value="MiddleClassCarAgent"/>
+          <Double Key="Weight" Value="0.6"/>
+        </ListItem>
+        <ListItem>
+          <String Key="Name" Value="TruckAgent"/>
+          <Double Key="Weight" Value="0.0"/>
+        </ListItem>
+      </List>
+      <NormalDistribution Key="Velocity" Max="43.685" Mean="31.475" Min="19.265" SD="6.105"/>
+      <LogNormalDistribution Key="TGap" Max="34.467" Min="1.276" Mu="1.892" Sigma="0.824"/>
+      <DoubleVector Key="Homogeneity" Value="0.820, 1.0"/>
+    </Profile>
+    <Profile Name="DefaultRuntimeCommon">
+      <List Name="AgentProfiles">
+        <ListItem>
+          <String Key="Name" Value="LuxuryClassCarAgent"/>
+          <Double Key="Weight" Value="0.4"/>
+        </ListItem>
+        <ListItem>
+          <String Key="Name" Value="MiddleClassCarAgent"/>
+          <Double Key="Weight" Value="0.6"/>
+        </ListItem>
+        <ListItem>
+          <String Key="Name" Value="TruckAgent"/>
+          <Double Key="Weight" Value="0.0"/>
+        </ListItem>
+      </List>
+      <NormalDistribution Key="Velocity" Max="43.685" Mean="31.475" Min="19.265" SD="6.105"/>
+      <LogNormalDistribution Key="TGap" Max="34.467" Min="1.276" Mu="1.892" Sigma="0.824"/>
+      <DoubleVector Key="Homogeneity" Value="0.820, 1.0"/>
+    </Profile>
+  </ProfileGroup>
+  <ProfileGroup Type="Spawner">
+    <Profile Name="DefaultPreRunCommon">
+      <List Name="SpawnZones">
+        <ListItem>
+          <StringVector Key="Roads" Value="1"/>
+          <IntVector Key="Lanes" Value="-1,-2,-3,-4,-5"/>
+          <Double Key="SStart" Value="0.0"/>
+          <Double Key="SEnd" Value="1040.0"/>
+        </ListItem>
+      </List>
+      <List Name="TrafficGroups">
+        <ListItem>
+          <Double Key="Weight" Value="1"/>
+          <Reference Type="TrafficGroup" Name="DefaultPreRunCommon"/>
+        </ListItem>
+      </List>
+    </Profile>
+    <Profile Name="DefaultRuntimeCommon">
+      <List Name="SpawnPoints">
+        <ListItem>
+          <StringVector Key="Roads" Value="1"/>
+          <IntVector Key="Lanes" Value="-1,-2,-3,-4,-5"/>
+          <Double Key="SCoordinate" Value="0.0"/>
+        </ListItem>
+      </List>
+      <List Name="TrafficGroups">
+        <ListItem>
+          <Double Key="Weight" Value="1"/>
+          <Reference Type="TrafficGroup" Name="DefaultRuntimeCommon"/>
+        </ListItem>
+      </List>
+    </Profile>
+  </ProfileGroup>
+  <ProfileGroup Type="TrafficRules">
+    <Profile Name="Germany">
+      <Double Key="OpenSpeedLimit" Value="INF"/>
+      <Bool Key="KeepToOuterLanes" Value="true"/>
+      <Bool Key="DontOvertakeOnOuterLanes" Value="true"/>
+      <Bool Key="FormRescueLane" Value="true"/>
+      <Bool Key="ZipperMerge" Value="true"/>
+    </Profile>
+    <Profile Name="USA">
+      <Double Key="OpenSpeedLimit" Value="31.2928"/>
+      <Bool Key="KeepToOuterLanes" Value="false"/>
+      <Bool Key="DontOvertakeOnOuterLanes" Value="false"/>
+      <Bool Key="FormRescueLane" Value="true"/>
+      <Bool Key="ZipperMerge" Value="false"/>
+    </Profile>
+    <Profile Name="China">
+      <Double Key="OpenSpeedLimit" Value="33.3333"/>
+      <Bool Key="KeepToOuterLanes" Value="false"/>
+      <Bool Key="DontOvertakeOnOuterLanes" Value="true"/>
+      <Bool Key="FormRescueLane" Value="false"/>
+      <Bool Key="ZipperMerge" Value="true"/>
+    </Profile>
+  </ProfileGroup>
+</Profiles>

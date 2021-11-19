@@ -1,12 +1,12 @@
-/******************************************************************************
-* Copyright (c) 2019 Volkswagen Group of America.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2019 Volkswagen Group of America
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 #ifndef DELEGATEFILEBROWSEVIEW_H
 #define DELEGATEFILEBROWSEVIEW_H
@@ -81,7 +81,7 @@ private
     Q_SLOT : void editData(QWidget *editor);
 
 private:
-    ProjectInterface const *const project; //!< a pointer to the project plugin (required to access the file structure of the master config)
+    ProjectInterface const *const project; //!< a pointer to the project plugin (required to access the file structure of the simulation manager config)
     QString const variableName;            //!< the name of the variable edited by this delegate
     QUndoStack *const undoStack;           //!< a pointer to the undo stack
 };

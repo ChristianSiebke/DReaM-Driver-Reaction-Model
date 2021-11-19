@@ -1,12 +1,12 @@
-/*******************************************************************************
-* Copyright (c) 2019, 2020 in-tech GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2019-2020 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 //-----------------------------------------------------------------------------
 /** @file  AlgorithmAEBmplementation.cpp */
@@ -20,7 +20,6 @@
 #include "common/commonTools.h"
 #include "common/eventTypes.h"
 #include "common/sensorFusionQuery.h"
-#include "boundingBoxCalculation.h"
 
 AlgorithmAutonomousEmergencyBrakingImplementation::AlgorithmAutonomousEmergencyBrakingImplementation(
     std::string componentName,
@@ -175,22 +174,30 @@ bool AlgorithmAutonomousEmergencyBrakingImplementation::ShouldBeDeactivated(cons
 
 double AlgorithmAutonomousEmergencyBrakingImplementation::CalculateObjectTTC(const osi3::BaseMoving &baseMoving)
 {
-    TtcCalculations::TtcParameters own;
-    own.length = GetAgent()->GetLength() + collisionDetectionLongitudinalBoundary;
-    own.width = GetAgent()->GetWidth() + collisionDetectionLateralBoundary;
-    own.frontLength = GetAgent()->GetDistanceReferencePointToLeadingEdge() + 0.5 * collisionDetectionLongitudinalBoundary;
-    own.backLength = own.length - own.frontLength;
-    own.position = {0.0, 0.0};
-    own.velocityX = 0.0;
-    own.velocityY = 0.0;
-    own.accelerationX = 0.0;
-    own.accelerationY = 0.0;
-    own.yaw = 0.0;
-    own.yawRate = GetAgent()->GetYawRate();
-    own.yawAcceleration = 0.0; // GetAgent()->GetYawAcceleration() not implemented yet
+    TtcCalculations::TtcParameters ego;
+    ego.length = GetAgent()->GetLength() + collisionDetectionLongitudinalBoundary;
+    double width = GetAgent()->GetWidth();
+    double height = GetAgent()->GetHeight();
+    double roll = GetAgent()->GetRoll();
+    ego.widthLeft = TrafficHelperFunctions::GetWidthLeft(width, height, roll) + 0.5 * collisionDetectionLateralBoundary;
+    ego.widthRight = TrafficHelperFunctions::GetWidthRight(width, height, roll) + 0.5 * collisionDetectionLateralBoundary;
+    ego.frontLength = GetAgent()->GetDistanceReferencePointToLeadingEdge() + 0.5 * collisionDetectionLongitudinalBoundary;
+    ego.backLength = ego.length - ego.frontLength;
+    ego.position = {0.0, 0.0};
+    ego.velocityX = 0.0;
+    ego.velocityY = 0.0;
+    ego.accelerationX = 0.0;
+    ego.accelerationY = 0.0;
+    ego.yaw = 0.0;
+    ego.yawRate = GetAgent()->GetYawRate();
+    ego.yawAcceleration = 0.0; // GetAgent()->GetYawAcceleration() not implemented yet
     TtcCalculations::TtcParameters opponent;
     opponent.length = baseMoving.dimension().length() + collisionDetectionLongitudinalBoundary;
-    opponent.width = baseMoving.dimension().width() + collisionDetectionLateralBoundary;
+    width = baseMoving.dimension().width();
+    height = baseMoving.dimension().height();
+    roll = baseMoving.orientation().roll();
+    opponent.widthLeft = TrafficHelperFunctions::GetWidthLeft(width, height, roll) + 0.5 * collisionDetectionLateralBoundary;
+    opponent.widthRight = TrafficHelperFunctions::GetWidthRight(width, height, roll) + 0.5 * collisionDetectionLateralBoundary;
     opponent.frontLength = 0.5 * opponent.length;
     opponent.backLength = 0.5 * opponent.length;
     opponent.position = {baseMoving.position().x(), baseMoving.position().y()};
@@ -201,28 +208,36 @@ double AlgorithmAutonomousEmergencyBrakingImplementation::CalculateObjectTTC(con
     opponent.yaw = baseMoving.orientation().yaw();
     opponent.yawRate = baseMoving.orientation_rate().yaw();
     opponent.yawAcceleration = baseMoving.orientation_acceleration().yaw();
-    return TtcCalculations::CalculateObjectTTC(own, opponent, ttcBrake * 1.5, GetCycleTime());
+    return TtcCalculations::CalculateObjectTTC(ego, opponent, ttcBrake * 1.5, GetCycleTime());
 }
 
 double AlgorithmAutonomousEmergencyBrakingImplementation::CalculateObjectTTC(const osi3::BaseStationary &baseStationary)
 {
-    TtcCalculations::TtcParameters own;
-    own.length = GetAgent()->GetLength() + collisionDetectionLongitudinalBoundary;
-    own.width = GetAgent()->GetWidth() + collisionDetectionLateralBoundary;
-    own.frontLength = GetAgent()->GetDistanceReferencePointToLeadingEdge() + 0.5 * collisionDetectionLongitudinalBoundary;
-    own.backLength = own.length - own.frontLength;
-    own.position = {0.0, 0.0};
-    own.velocityX = 0.0;
-    own.velocityY = 0.0;
-    own.accelerationX = 0.0;
-    own.accelerationY = 0.0;
-    own.yaw = 0.0;
-    own.yawRate = GetAgent()->GetYawRate();
-    own.yawAcceleration = 0.0; // GetAgent()->GetYawAcceleration() not implemented yet
+    TtcCalculations::TtcParameters ego;
+    ego.length = GetAgent()->GetLength() + collisionDetectionLongitudinalBoundary;
+    double width = GetAgent()->GetWidth();
+    double height = GetAgent()->GetHeight();
+    double roll = GetAgent()->GetRoll();
+    ego.widthLeft = TrafficHelperFunctions::GetWidthLeft(width, height, roll) + 0.5 * collisionDetectionLateralBoundary;
+    ego.widthRight = TrafficHelperFunctions::GetWidthRight(width, height, roll) + 0.5 * collisionDetectionLateralBoundary;
+    ego.frontLength = GetAgent()->GetDistanceReferencePointToLeadingEdge() + 0.5 * collisionDetectionLongitudinalBoundary;
+    ego.backLength = ego.length - ego.frontLength;
+    ego.position = {0.0, 0.0};
+    ego.velocityX = 0.0;
+    ego.velocityY = 0.0;
+    ego.accelerationX = 0.0;
+    ego.accelerationY = 0.0;
+    ego.yaw = 0.0;
+    ego.yawRate = GetAgent()->GetYawRate();
+    ego.yawAcceleration = 0.0; // GetAgent()->GetYawAcceleration() not implemented yet
 
     TtcCalculations::TtcParameters opponent;
     opponent.length = baseStationary.dimension().length() + collisionDetectionLongitudinalBoundary;
-    opponent.width = baseStationary.dimension().width() + collisionDetectionLateralBoundary;
+    width = baseStationary.dimension().width();
+    height = baseStationary.dimension().height();
+    roll = baseStationary.orientation().roll();
+    opponent.widthLeft = TrafficHelperFunctions::GetWidthLeft(width, height, roll) + 0.5 * collisionDetectionLateralBoundary;
+    opponent.widthRight = TrafficHelperFunctions::GetWidthRight(width, height, roll) + 0.5 * collisionDetectionLateralBoundary;
     opponent.frontLength = 0.5 * opponent.length;
     opponent.backLength = 0.5 * opponent.length;
     opponent.position = {baseStationary.position().x(), baseStationary.position().y()};
@@ -234,7 +249,7 @@ double AlgorithmAutonomousEmergencyBrakingImplementation::CalculateObjectTTC(con
     opponent.yawRate = 0.0;
     opponent.yawAcceleration = 0.0;
 
-    return TtcCalculations::CalculateObjectTTC(own, opponent, ttcBrake * 1.5, GetCycleTime());
+    return TtcCalculations::CalculateObjectTTC(ego, opponent, ttcBrake * 1.5, GetCycleTime());
 }
 
 double AlgorithmAutonomousEmergencyBrakingImplementation::CalculateTTC()

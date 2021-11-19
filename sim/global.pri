@@ -1,20 +1,20 @@
-# /*********************************************************************
-# * Copyright (c) 2018, 2019 ITK Engineering GmbH
-# * Copyright (c) 2018 in-tech GmbH
-# *
-# * This program and the accompanying materials are made
-# * available under the terms of the Eclipse Public License 2.0
-# * which is available at https://www.eclipse.org/legal/epl-2.0/
-# *
-# * SPDX-License-Identifier: EPL-2.0
-# **********************************************************************/
+################################################################################
+# Copyright (c) 2018-2019 ITK Engineering GmbH
+#               2018 in-tech GmbH
+#
+# This program and the accompanying materials are made available under the
+# terms of the Eclipse Public License 2.0 which is available at
+# http://www.eclipse.org/legal/epl-2.0.
+#
+# SPDX-License-Identifier: EPL-2.0
+################################################################################
 
 include(defaults.pri)
 include(ccache.pri)
 
 !isEmpty(INTERFACE_OVERRIDE_PATH) {
     INCLUDEPATH += $$INTERFACE_OVERRIDE_PATH
-    INCLUDEPATH += $$INTERFACE_OVERRIDE_PATH/CoreFramework/OpenPassSlave
+    INCLUDEPATH += $$INTERFACE_OVERRIDE_PATH/core/opSimulation
 }
 
 INCLUDEPATH += $$PWD/openPASS
@@ -43,8 +43,8 @@ DEFINES += SUBDIR_LIB_COMPONENTS=\\\"/components\\\"
 DEFINES += SUBDIR_LIB_PLUGIN=\\\"/plugin\\\"
 
 ## Export configuration ##
-#CONFIG += USEOPENPASSSLAVEASLIBRARY
-#CONFIG += USEOPENPASSMASTERASLIBRARY
+#CONFIG += USEOPENPASSSIMULATIONASLIBRARY
+#CONFIG += USEOPENPASSSIMULATIONMANAGERASLIBRARY
 
 # accumulate list of files for given directories (first parameter)
 # according to file name ending (second parameter)
@@ -58,7 +58,7 @@ defineReplace(getFiles) {
     return($$result)
 }
 
-# prefer bundled libs in OpenPassSlave directory over system libraries
+# prefer bundled libs in OpenPassSimulation directory over system libraries
 QMAKE_LFLAGS += -Wl,-rpath=\'\$\$ORIGIN\'
 
 win32:DEFINES+=_USE_MATH_DEFINES
@@ -96,10 +96,10 @@ OPENPASS_LIBRARY {
     QMAKE_LFLAGS += -L$$system_path($$EXTRA_LIB_PATH)
     QMAKE_CFLAGS += -isystem $$EXTRA_INCLUDE_PATH
     QMAKE_CXXFLAGS += -isystem $$EXTRA_INCLUDE_PATH
-    Debug:DESTDIR = $${DESTDIR_SLAVE}$${SUBDIR_LIB_SIMS}
-    Release:DESTDIR = $${DESTDIR_SLAVE}$${SUBDIR_LIB_SIMS}
+    Debug:DESTDIR = $${DESTDIR_SIMULATION}$${SUBDIR_LIB_SIMS}
+    Release:DESTDIR = $${DESTDIR_SIMULATION}$${SUBDIR_LIB_SIMS}
     #debug/release predicates are buggy on linux qmake
-    unix:DESTDIR=$${DESTDIR_SLAVE}$${SUBDIR_LIB_SIMS}
+    unix:DESTDIR=$${DESTDIR_SIMULATION}$${SUBDIR_LIB_SIMS}
     message("[$$TARGET] Build path set to $$DESTDIR")
 }
 
@@ -110,7 +110,7 @@ OPENPASS_LIBRARY {
 ##################################################################
 OPENPASS_EXECUTABLE {
     message("[$$TARGET] Building executable")
-    QT += core xml
+    QT += core xml xmlpatterns
     QT -= gui
     TEMPLATE = app
     CONFIG -= app_bundle
@@ -118,10 +118,10 @@ OPENPASS_EXECUTABLE {
     INCLUDEPATH += .
     QMAKE_CFLAGS += -isystem $$EXTRA_INCLUDE_PATH
     QMAKE_CXXFLAGS += -isystem $$EXTRA_INCLUDE_PATH
-    Debug:DESTDIR = $${DESTDIR_SLAVE}
-    Release:DESTDIR = $${DESTDIR_SLAVE}
+    Debug:DESTDIR = $${DESTDIR_SIMULATION}
+    Release:DESTDIR = $${DESTDIR_SIMULATION}
     #debug/release predicates are buggy on linux qmake
-    unix:DESTDIR=$${DESTDIR_SLAVE}
+    unix:DESTDIR=$${DESTDIR_SIMULATION}
     QMAKE_PRE_LINK += $$sprintf($$QMAKE_MKDIR_CMD, $$DESTDIR)
 }
 
@@ -134,7 +134,7 @@ OPENPASS_EXECUTABLE {
 OPENPASS_TESTING {
     message("[$$TARGET] Building test")
 
-    QT += xml
+    QT += xml xmlpatterns
     TEMPLATE = app
     CONFIG += console
     CONFIG += testcase

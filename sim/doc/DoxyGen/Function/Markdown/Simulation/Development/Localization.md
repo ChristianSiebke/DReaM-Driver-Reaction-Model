@@ -2,7 +2,7 @@
 
 \tableofcontents
 
-This page describes the translation of coorindates (x,y) of an agent into RoadCoordinate (s,t), whereas the notion of (s,t) comes from the [OpenDRIVE](www.opendrive.org) standard.  
+This page describes the translation of coordinates (x,y) of an agent into RoadCoordinate (s,t), whereas the notion of (s,t) comes from the [OpenDRIVE](www.opendrive.org) standard.  
 For more information, please refer to the [OpenDRIVE Format Specification](http://www.opendrive.org/docs/OpenDRIVEFormatSpecRev1.4H.pdf).
 
 \section dev_localization_basics Basics

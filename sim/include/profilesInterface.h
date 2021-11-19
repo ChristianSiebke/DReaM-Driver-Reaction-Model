@@ -1,12 +1,12 @@
-/*******************************************************************************
-* Copyright (c) 2019 in-tech GmbH
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
+/********************************************************************************
+ * Copyright (c) 2019 in-tech GmbH
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ ********************************************************************************/
 
 #pragma once
 
@@ -51,13 +51,13 @@ struct VehicleComponent
 {
     std::string type {};
     StringProbabilities componentProfiles {};
-    std::list<SensorLink> sensorLinks {};
+    std::vector<SensorLink> sensorLinks {};
 };
 
 struct VehicleProfile
 {
     std::string vehicleModel {};
-    std::list<VehicleComponent> vehicleComponents {};
+    std::vector<VehicleComponent> vehicleComponents {};
     openpass::sensors::Parameters sensors {};
 };
 

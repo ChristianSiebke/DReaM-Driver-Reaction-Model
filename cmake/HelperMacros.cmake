@@ -1,112 +1,22 @@
+################################################################################
+# Copyright (c) 2020-2021 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+#               2020 HLRS, University of Stuttgart
+#
+# This program and the accompanying materials are made available under the
+# terms of the Eclipse Public License 2.0 which is available at
+# http://www.eclipse.org/legal/epl-2.0.
+#
+# SPDX-License-Identifier: EPL-2.0
+################################################################################
+
 # @file HelperMacros.cmake
 #
-# @author Blasius Czink
 # @author Reinhard Biegel, in-tech GmbH
+# @author René Paris, in-tech GmbH
+# @author Uwe Woessner, HLRS
 #
-# Provides helper macros for build control:
+# Provides helper macros for defining build targets in the openPASS build ecosystem
 #
-#  ADD_OPENPASS_LIBRARY(targetname [STATIC | SHARED | MODULE] [EXCLUDE_FROM_ALL]
-#              source1 source2 ... sourceN)
-#    - OPENPASS specific wrapper macro of add_library. Please use this macro for OPENPASS libraries.
-#
-#  ADD_OPENPASS_EXECUTABLE(targetname [WIN32] [MACOSX_BUNDLE] [EXCLUDE_FROM_ALL]
-#              source1 source2 ... sourceN)
-#    - OPENPASS specific wrapper macro of add_executable. Please use this macro for OPENPASS executables.
-#      Note: The variables SOURCES and HEADERS are added automatically.
-#
-#  ADD_OPENPASS_MODULE(targetname [WIN32] [MACOSX_BUNDLE] [EXCLUDE_FROM_ALL]
-#              source1 source2 ... sourceN)
-#    - OPENPASS specific wrapper macro of add_library. Please use this macro for OPENPASS modules.
-#      Note: The variables SOURCES and HEADERS are added automatically.
-#
-#  OPENPASS_INSTALL_TARGET(targetname)
-#    - OPENPASS specific wrapper macro of INSTALL(TARGETS ...) Please use this macro for installing OPENPASS targets.
-#      You should use the cmake INSTALL() command for anything else but OPENPASS-targets.
-#
-#  ADD_OPENPASS_COMPILE_FLAGS(targetname flags)
-#    - add additional compile_flags to the given target
-#      Example: ADD_OPENPASS_COMPILE_FLAGS(coJS "-fPIC;-fno-strict-aliasing")
-#
-#  REMOVE_OPENPASS_COMPILE_FLAGS(targetname flags)
-#    - remove compile flags from target
-#      Example: REMOVE_OPENPASS_COMPILE_FLAGS(coJS "-fPIC")
-#
-#  ADD_OPENPASS_LINK_FLAGS(targetname flags)
-#    - add additional link flags to the given target
-#
-#  REMOVE_OPENPASS_LINK_FLAGS(targetname flags)
-#    - remove link flags from target
-#
-#  --------------------------------------------------------------------------------------
-#
-#  OPENPASS_RESET (varname)
-#    - sets a variable to "not found"
-#
-#  OPENPASS_TEST_FEATURE (feature_dest_var feature_test_name my_output)
-#    - Compiles a small program given in "feature_test_name" and sets the variable "feature_dest_var"
-#      if the compile/link process was successful
-#      The full output from the compile/link process is returned in "my_output"
-#      This macro expects the "feature-test"-files in CM_FEATURE_TESTS_DIR which is preset to
-#      ${OPENPASSDIR}/cmake/FeatureTests
-#
-#      Example: OPENPASS_TEST_FEATURE(MPI_THREADED ft_mpi_threaded.c MY_OUTPUT)
-#
-#  OPENPASS_COPY_TARGET_PDB(target_name pdb_inst_prefix)
-#    - gets the targets .pdb file and deploys it to the given location ${pdb_inst_prefix}/lib or
-#      ${pdb_inst_prefix}/bin during install
-#    - only the pdb files for debug versions of a library are installed
-#      (this macro is windows specific)
-#
-#  OPENPASS_DUMP_LIB_SETUP (basename)
-#    - dumps the different library-variable contents to a file
-#
-#  USING(DEP1 DEP2 [optional])
-#    - add dependencies DEP1 and DEP2,
-#      all of them are optional, if 'optional' is present within the arguments
-#
-# @author Uwe Woessner
-#
-
-include(MSVC)
-
-# helper to dump the lib-values to a simple text-file
-MACRO(OPENPASS_DUMP_LIB_SETUP basename)
-  SET (dump_file "${CMAKE_BINARY_DIR}/${basename}_lib_setup.txt")
-  FILE(WRITE  ${dump_file} "${basename}_INCLUDE_DIR    = ${${basename}_INCLUDE_DIR}\n")
-  FILE(APPEND ${dump_file} "${basename}_LIBRARY        = ${${basename}_LIBRARY}\n")
-  FILE(APPEND ${dump_file} "${basename}_LIBRARY_RELESE = ${${basename}_LIBRARY_RELEASE}\n")
-  FILE(APPEND ${dump_file} "${basename}_LIBRARY_DEBUG  = ${${basename}_LIBRARY_DEBUG}\n")
-  FILE(APPEND ${dump_file} "${basename}_LIBRARIES      = ${${basename}_LIBRARIES}\n")
-ENDMACRO(OPENPASS_DUMP_LIB_SETUP)
-
-# helper to print the lib-values to a simple text-file
-MACRO(OPENPASS_PRINT_LIB_SETUP basename)
-  MESSAGE("${basename}_INCLUDE_DIR    = ${${basename}_INCLUDE_DIR}")
-  MESSAGE("${basename}_LIBRARY        = ${${basename}_LIBRARY}")
-  MESSAGE("${basename}_LIBRARY_RELESE = ${${basename}_LIBRARY_RELEASE}")
-  MESSAGE("${basename}_LIBRARY_DEBUG  = ${${basename}_LIBRARY_DEBUG}")
-  MESSAGE("${basename}_LIBRARIES      = ${${basename}_LIBRARIES}")
-ENDMACRO(OPENPASS_PRINT_LIB_SETUP)
-
-
-MACRO(OPENPASS_TEST_FEATURE feature_dest_var feature_test_name my_output)
-  MESSAGE (STATUS "Checking for ${feature_test_name}")
-  TRY_COMPILE (${feature_dest_var}
-               ${CMAKE_BINARY_DIR}/CMakeTemp
-               ${CM_FEATURE_TESTS_DIR}/${feature_test_name}
-               CMAKE_FLAGS
-               -DINCLUDE_DIRECTORIES=$ENV{OPENPASS_FT_INC}
-               -DLINK_LIBRARIES=$ENV{OPENPASS_FT_LIB}
-               OUTPUT_VARIABLE ${my_output}
-  )
-  # Feature test failed
-  IF (${feature_dest_var})
-     MESSAGE (STATUS "Checking for ${feature_test_name} - succeeded")
-  ELSE (${feature_dest_var})
-     MESSAGE (STATUS "Checking for ${feature_test_name} - feature not available")
-  ENDIF (${feature_dest_var})
-ENDMACRO(OPENPASS_TEST_FEATURE)
-
 
 # Macro to adjust the output directories of a target
 function(openpass_adjust_output_dir targetname)
@@ -141,7 +51,27 @@ function(openpass_adjust_output_dir targetname)
 endfunction(openpass_adjust_output_dir)
 
 ##
+# WITH_COVERAGE extension
+#
+# When set, add compiler flags and make additional test targets available
+#
+# @author René Paris, in-tech GmbH
+#
+if(WITH_COVERAGE)
+  if(CMAKE_COMPILER_IS_GNUCXX)
+    include(TestCoverage)
+    set_coverage_compiler_flags()
+  else()
+    message(FATAL_ERROR "Generating code coverage is only supported for GNU gcc")
+  endif()
+endif()
+
+
+##
 # Macro to add openPASS libraries, executables and tests
+#
+# @author Reinhard Biegel
+# @author René Paris
 #
 # Usages:
 #   For building executables:
@@ -157,7 +87,8 @@ endfunction(openpass_adjust_output_dir)
 #                         [COMPONENT <gui|sim|core|bin|module>])
 #
 #   For building libraries:
-#     add_openpass_target(NAME <target> TYPE libraries LINKAGE <static|shared>
+#     add_openpass_target(NAME <target> TYPE library
+#                         LINKAGE <static|shared>
 #                         SOURCES <sourcefiles>
 #                         [HEADERS <headerfiles>]
 #                         [INCDIRS <include-directories>]
@@ -222,15 +153,15 @@ function(add_openpass_target)
     if("${PARSED_ARG_COMPONENT}" STREQUAL "gui")
       set (DESTDIR ${SUBDIR_LIB_GUI})
     elseif("${PARSED_ARG_COMPONENT}" STREQUAL "core")
-      set (DESTDIR ${SUBDIR_LIB_COMPONENTS})
+      set (DESTDIR ${SUBDIR_LIB_CORE})
     elseif("${PARSED_ARG_COMPONENT}" STREQUAL "bin")
-      set (DESTDIR ${INSTALL_BIN_DIR})
-    elseif("${PARSED_ARG_COMPONENT}" STREQUAL "sim")
-      set (DESTDIR ${SUBDIR_LIB_SIM})
+      set (DESTDIR .)
+    elseif("${PARSED_ARG_COMPONENT}" STREQUAL "common")
+      set (DESTDIR ${SUBDIR_LIB_COMMON})
     elseif("${PARSED_ARG_COMPONENT}" STREQUAL "module")
-      set (DESTDIR ${SUBDIR_LIB_SIM})
+      set (DESTDIR ${SUBDIR_LIB_MODULES})
     else()
-      message(FATAL_ERROR "Unknown COMPONENT '${PARSED_ARG_COMPONENT}' please use any one of 'gui', 'core', 'bin', 'sim', or 'module'.")
+      message(FATAL_ERROR "Unknown COMPONENT '${PARSED_ARG_COMPONENT}' please use any one of 'gui', 'core', 'bin', 'common', or 'module'.")
     endif()
 
     if("${PARSED_ARG_TYPE}" STREQUAL "library")
@@ -244,9 +175,16 @@ function(add_openpass_target)
       endif()
 
       add_library(${PARSED_ARG_NAME} ${PARSED_ARG_LINKAGE} ${PARSED_ARG_HEADERS} ${PARSED_ARG_SOURCES} ${PARSED_ARG_UIS})
-      set_target_properties(${PARSED_ARG_NAME} PROPERTIES INSTALL_RPATH "\$ORIGIN;\$ORIGIN/..")
-      install(FILES $<TARGET_FILE:${PARSED_ARG_NAME}> DESTINATION "${DESTDIR}")
-      install(TARGETS ${PARSED_ARG_NAME} RUNTIME DESTINATION "${DESTDIR}")
+      set_target_properties(${PARSED_ARG_NAME} PROPERTIES INSTALL_RPATH "\$ORIGIN/../${SUBDIR_LIB_EXTERNAL}:\$ORIGIN/../../${SUBDIR_LIB_EXTERNAL}:\$ORIGIN/../${SUBDIR_LIB_COMMON}:\$ORIGIN/../../${SUBDIR_LIB_COMMON}")
+
+      if("${PARSED_ARG_LINKAGE}" STREQUAL "SHARED")
+        if(WIN32)
+          install(TARGETS ${PARSED_ARG_NAME} RUNTIME DESTINATION "${DESTDIR}")
+        else()
+          install(TARGETS ${PARSED_ARG_NAME} LIBRARY DESTINATION "${DESTDIR}")
+        endif()
+      endif()
+
       add_to_global_target_list(lib_target_list ${PARSED_ARG_NAME})
 
       if(OPENPASS_ADJUST_OUTPUT)
@@ -264,7 +202,7 @@ function(add_openpass_target)
       endif()
 
       add_executable(${PARSED_ARG_NAME} ${PARSED_ARG_HEADERS} ${PARSED_ARG_SOURCES} ${PARSED_ARG_UIS})
-      set_target_properties(${PARSED_ARG_NAME} PROPERTIES INSTALL_RPATH "\$ORIGIN;\$ORIGIN/lib")
+      set_target_properties(${PARSED_ARG_NAME} PROPERTIES INSTALL_RPATH "\$ORIGIN/${SUBDIR_LIB_EXTERNAL}:\$ORIGIN/${SUBDIR_LIB_COMMON}")
       install(TARGETS ${PARSED_ARG_NAME} RUNTIME DESTINATION "${DESTDIR}")
       add_to_global_target_list(exe_target_list ${PARSED_ARG_NAME})
 
@@ -295,18 +233,9 @@ function(add_openpass_target)
 
       add_executable(${PARSED_ARG_NAME} EXCLUDE_FROM_ALL ${PARSED_ARG_HEADERS} ${PARSED_ARG_SOURCES} ${PARSED_ARG_UIS})
 
-      target_include_directories(${PARSED_ARG_NAME}
-        SYSTEM PRIVATE
-        ${GTEST_INCLUDE_DIR}
-      )
-
-      # currently not provided by FindGTest
-      get_filename_component(GMOCK_LIBRARY_PATH ${GTEST_LIBRARY} DIRECTORY)
-      set(GMOCK_LIBRARY ${GMOCK_LIBRARY_PATH}/libgmock.a)
-
       target_link_libraries(${PARSED_ARG_NAME}
-        ${GTEST_LIBRARY}
-        ${GMOCK_LIBRARY}
+        GTest::gtest
+        GTest::gmock
         pthread
       )
 
@@ -314,10 +243,12 @@ function(add_openpass_target)
       add_test(NAME ${PARSED_ARG_NAME} COMMAND ${PARSED_ARG_NAME} ${ADDITIONAL_TEST_ARGS})
       set_tests_properties(${PARSED_ARG_NAME} PROPERTIES DEPENDS ${PARSED_ARG_NAME}_build)
 
+      if(WITH_COVERAGE)
+        add_test_coverage_fastcov(NAME ${PARSED_ARG_NAME})
+      endif()
+
     else()
-
-      message(FATAL_ERROR "Target type '${PARSED_TARGET_TYPE}' is not supported.")
-
+      message(FATAL_ERROR "Target type '${PARSED_ARG_TYPE}' is not supported.")
     endif()
 
     set_target_properties(${PARSED_ARG_NAME} PROPERTIES DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}")
@@ -503,88 +434,3 @@ function(add_to_global_target_list target_list target_name)
   set_property(GLOBAL PROPERTY ${target_list} ${tmp})
 endfunction()
 
-
-# Macro to add OPENPASS modules (executables with a module-category)
-#MACRO(ADD_OPENPASS_PLUGIN targetname component)
-#  ADD_LIBRARY(${targetname} SHARED ${ARGN} ${SOURCES} ${HEADERS} ${UIS})
-#  TARGET_LINK_LIBRARIES(${targetname} ${EXTRA_LIBS})
-#
-#  # SET_TARGET_PROPERTIES(${targetname} PROPERTIES PROJECT_LABEL "${targetname}")
-#  SET_TARGET_PROPERTIES(${targetname} PROPERTIES OUTPUT_NAME "${targetname}")
-#
-#  #openpass_adjust_output_dir(${targetname} ${component})
-#
-#  # set additional OPENPASS_COMPILE_FLAGS
-#  #SET_TARGET_PROPERTIES(${targetname} PROPERTIES COMPILE_FLAGS "${OPENPASS_COMPILE_FLAGS}")
-#  # set additional OPENPASS_LINK_FLAGS
-#  #SET_TARGET_PROPERTIES(${targetname} PROPERTIES LINK_FLAGS "${OPENPASS_LINK_FLAGS}")
-#
-#  # SET_TARGET_PROPERTIES(${targetname} PROPERTIES DEBUG_OUTPUT_NAME "${targetname}${CMAKE_DEBUG_POSTFIX}")
-#
-#  OPENPASS_INSTALL_TARGET(${targetname})
-#
-#  #UNSET(SOURCES)
-#  #UNSET(HEADERS)
-#  #UNSET(UIS)
-#ENDMACRO(ADD_OPENPASS_PLUGIN)
-
-#MACRO(OPENPASS_GUI_add_plugin targetname category)  
-#   ADD_OPENPASS_PLUGIN(${targetname} "lib/gui" ${ARGN})
-#   IF("${category}" STREQUAL "")
-#       set_target_properties(${targetname} PROPERTIES FOLDER "GUI")
-#   ELSE("${category}" STREQUAL "")
-#       set_target_properties(${targetname} PROPERTIES FOLDER "${category}/GUI")
-#   ENDIF("${category}" STREQUAL "")
-#   target_link_libraries(${targetname} Common)
-#   qt5_use_modules(${targetname} Core Gui Xml Widgets)
-#
-#ENDMACRO(OPENPASS_GUI_add_plugin)
-
-#MACRO(OPENPASS_add_module targetname category)
-#   ADD_OPENPASS_PLUGIN(${targetname} lib ${ARGN})
-#   IF("${category}" STREQUAL "")
-#       set_target_properties(${targetname} PROPERTIES FOLDER "CoreModules")
-#   ELSE("${category}" STREQUAL "")
-#       set_target_properties(${targetname} PROPERTIES FOLDER "${category}/CoreModules")
-#   ENDIF("${category}" STREQUAL "")
-#   target_link_libraries(${targetname} Common)
-#   qt5_use_modules(${targetname} Xml)
-#
-#ENDMACRO(OPENPASS_add_module)
-
-#MACRO(add_openpass_component targetname category)
-#   ADD_OPENPASS_PLUGIN(${targetname} "lib" ${ARGN})
-#   IF("${category}" STREQUAL "")
-#       set_target_properties(${targetname} PROPERTIES FOLDER "Component")
-#   ELSE("${category}" STREQUAL "")
-#       set_target_properties(${targetname} PROPERTIES FOLDER "${category}/Component")
-#   ENDIF("${category}" STREQUAL "")
-#   target_link_libraries(${targetname} Common)
-#   qt5_use_modules(${targetname} Xml)
-#
-#ENDMACRO(OPENPASS_add_component)
-
-# Macro to install and export
-macro(add_openpass_install_target targetname)
-  install(TARGETS ${targetname}
-          RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
-          ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
-          LIBRARY DESTINATION "${INSTALL_LIB_DIR}")
-
-  install(FILES ${HEADERS} DESTINATION "${INSTALL_INC_DIR}")
-endmacro()
-
-# Macro to install an OpenOPENPASS_GUI plugin
-#MACRO(OPENPASS_GUI_INSTALL_PLUGIN targetname)
-#  INSTALL(TARGETS ${ARGV} EXPORT OPENPASS-targets
-#          RUNTIME DESTINATION ${INSTALL_BIN_DIR}/bin/gui
-#          LIBRARY DESTINATION ${INSTALL_LIB_DIR}
-#          ARCHIVE DESTINATION ${INSTALL_LIB_DIR}
-#          COMPONENT guiplugins
-#  )
-#ENDMACRO(OPENPASS_GUI_INSTALL_PLUGIN)
-
-# Macro to install headers
-#MACRO(OPENPASS_INSTALL_HEADERS dirname)
-#  INSTALL(FILES ${ARGN} DESTINATION include/OPENPASS/${dirname})
-#ENDMACRO(OPENPASS_INSTALL_HEADERS)
