@@ -29,7 +29,7 @@
     </Environment>
     <Observations>
         <Observation>
-            <Library>Observation_Log</Library>
+            <Library>Observation_LogAgent</Library>
             <Parameters>
                 <String Key="OutputFilename" Value="simulationOutput.xml"/>
                 <Bool Key="LoggingCyclicsToCsv" Value="true"/>
