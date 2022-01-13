@@ -5,23 +5,22 @@
 
 #include "roadmap_graph.h"
 
+#include <string>
+
 #include "common/MentalInfrastructure/Lane.h"
 #include "common/MentalInfrastructure/Road.h"
 #include "common/MentalInfrastructure/Section.h"
 
 namespace RoadmapGraph {
 
-RoadmapGraph::RoadmapGraph(std::vector<std::shared_ptr<const MentalInfrastructure::Lane>> &lanes,
-                           const std::unordered_map<Id, int64_t> &LaneIdMapping, const std::unordered_map<Id, std::string> &RoadIdMapping) :
-    LaneIdMapping{LaneIdMapping}, RoadIdMapping{RoadIdMapping}
-{
+RoadmapGraph::RoadmapGraph(std::vector<std::shared_ptr<const MentalInfrastructure::Lane>> &lanes) {
     nodes.clear();
 
     for (auto lane : lanes)
     {
-        int64_t OdLaneId = lane->GetOpenDriveId();
-        std::string OdRoadId = lane->GetSection()->GetRoad()->GetOpenDriveId();
-        double length = lane->GetLength();
+        int64_t OdLaneId = std::stoi(lane->GetOpenDriveId());
+        auto OdRoadId = lane->GetSection()->GetRoad()->GetOpenDriveId();
+        auto length = lane->GetLength();
 
         std::shared_ptr<RoadmapNode> node = std::make_shared<RoadmapNode>(lane.get(), OdLaneId, OdRoadId, length);
         AddNode(std::move(node));

@@ -20,48 +20,39 @@
 constexpr double maxDouble = std::numeric_limits<double>::max();
 constexpr int maxInt = std::numeric_limits<int>::max();
 
-using Id = uint64_t;
-constexpr Id InvalidId = std::numeric_limits<uint64_t>::max();
+using OdId = std::string;
+using OwlId = uint64_t;
+constexpr OwlId OwlInvalidId = std::numeric_limits<uint64_t>::max();
 
 //-----------------------------------------------------------------------------
 //! @brief speed units as in OpenDrive v1.4 // TUD CG 26.06.2019
 //-----------------------------------------------------------------------------
-enum class SpeedUnit
-{
-    MetersPerSecond,
-    KilometersPerHour,
-    MilesPerHour
-};
+enum class SpeedUnit { MetersPerSecond, KilometersPerHour, MilesPerHour };
 
 //-----------------------------------------------------------------------------
 //! @brief speed units as in OpenDrive v1.4 // TUD CG 26.06.2019
 //-----------------------------------------------------------------------------
-enum class DistanceUnit
-{
+enum class DistanceUnit {
     Meter,
     Kilometer,
     Feet,
     Mile // land mile
 };
 
-struct SpeedLimit
-{
+struct SpeedLimit {
     double sOffset{0};
     double maxAllowedSpeed{0};
     SpeedUnit unit{SpeedUnit::MetersPerSecond};
 
-    void convert(SpeedUnit newUnit)
-    {
-        if (unit == newUnit)
-        {
+    void convert(SpeedUnit newUnit) {
+        if (unit == newUnit) {
             return;
         }
 
         double factor1; // from old unit to m/s
         double factor2; // from m/s to new unit
 
-        switch (unit)
-        {
+        switch (unit) {
         case SpeedUnit::MetersPerSecond:
             factor1 = 1;
             break;
@@ -73,8 +64,7 @@ struct SpeedLimit
             break;
         }
 
-        switch (newUnit)
-        {
+        switch (newUnit) {
         case SpeedUnit::MetersPerSecond:
             factor2 = 1;
             break;
@@ -99,21 +89,16 @@ class Lane;
 // the tolerance where two vectors/ angles are pointing in same direction (in degree)
 constexpr double parallelEpsilonDeg = 20;
 
-struct RightOfWay
-{
-    RightOfWay()
-    {
+struct RightOfWay {
+    RightOfWay() {
     }
-    RightOfWay(bool egoAgent, bool observedAgent) :
-        ego{egoAgent}, observed{observedAgent}
-    {
+    RightOfWay(bool egoAgent, bool observedAgent) : ego{egoAgent}, observed{observedAgent} {
     }
     bool ego;
     bool observed;
 };
 
-enum class CrossingPhase
-{
+enum class CrossingPhase {
     NONE = 0,
     Approach,
     Deceleration_ONE,
@@ -125,17 +110,9 @@ enum class CrossingPhase
     Exit
 };
 
-enum class CrossingType
-{
-    Random = -1,
-    NA,
-    Left,
-    Straight,
-    Right
-};
+enum class CrossingType { Random = -1, NA, Left, Straight, Right };
 
-enum class StoppingPointType
-{
+enum class StoppingPointType {
     NONE,
     Pedestrian_Right,
     Pedestrian_Left,
@@ -145,8 +122,7 @@ enum class StoppingPointType
     Vehicle_Crossroad,
 };
 
-struct StoppingPoint
-{
+struct StoppingPoint {
     StoppingPointType type;
 
     const MentalInfrastructure::Road *road = nullptr;
@@ -166,13 +142,12 @@ struct StoppingPoint
 
 using StoppingPointMap = std::map<StoppingPointType, StoppingPoint>;
 
-struct CrossingInfo
-{
+struct CrossingInfo {
     CrossingType type;
     CrossingPhase phase;
 
-    // the id of the intersection that the stopping point belongs to
-    std::string intersectionOdId;
+    // the id of the junction that the stopping point belongs to
+    OdId junctionOdId;
     StoppingPointMap egoStoppingPoints;
     std::map<int, StoppingPointMap> otherStoppingpoints;
 };
@@ -180,25 +155,16 @@ struct CrossingInfo
 /**
  * @brief Internal enum, describes what kind of conflict situations could happen.
  *
- * ------- Intersection (Junction) Conflicts ----------
- * INTERSECTION_A      ego agent and other agent are on the same intersection
- * INTERSECTION_B      ego agent is on an intersection and other agent moves towards it
- * INTERSECTION_C      other agent is on an intersection and ego agent moves towards it
- * INTERSECTION_D      both agents move towards the same intersection
-
+ * ------- Junction Conflicts ----------
+ * JUNCTION_A      ego agent and other agent are on the same junction
+ * JUNCTION_B      ego agent is on an junction and other agent moves towards it
+ * JUNCTION_C      other agent is on an junction and ego agent moves towards it
+ * JUNCTION_D      both agents move towards the same junction
  */
-enum class IntersectionSituation
-{
-    INTERSECTION_A = 0,
-    INTERSECTION_B,
-    INTERSECTION_C,
-    INTERSECTION_D
-};
+enum class JunctionSituation { JUNCTION_A = 0, JUNCTION_B, JUNCTION_C, JUNCTION_D };
 
-struct CollisionPoint
-{
-    CollisionPoint()
-    {
+struct CollisionPoint {
+    CollisionPoint() {
     }
     ~CollisionPoint() = default;
 
@@ -208,28 +174,7 @@ struct CollisionPoint
     double timeToCollision = maxDouble;
 };
 
-enum class GazeType
-{
-    NONE,
-    ScanGlance,
-    ObserveGlance,
-    ControlGlance
-};
+enum class GazeType { NONE, ScanGlance, ObserveGlance, ControlGlance };
 // fixation area of interests
-enum class ScanAOI
-{
-    NONE,
-    Right,
-    Straight,
-    Left,
-    Rear,
-    Dashboard,
-    Other
-};
-enum class ControlAOI
-{
-    NONE,
-    Right,
-    Left,
-    Oncoming
-};
+enum class ScanAOI { NONE, Right, Straight, Left, Rear, Dashboard, Other };
+enum class ControlAOI { NONE, Right, Left, Oncoming };

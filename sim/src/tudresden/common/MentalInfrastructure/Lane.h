@@ -56,35 +56,28 @@ struct ConflictArea
 class Lane : public Element
 {
 public:
-    Lane(Id id, int64_t odId, double length, LaneType type, bool inRoadDirection) :
-        Element(id), openDriveId(odId), length(length), type(type), inRoadDirection(inRoadDirection)
-    {
+    Lane(OdId openDriveId, OwlId owlId, double length, LaneType type, bool inRoadDirection) :
+        Element(openDriveId), owlId(owlId), length(length), type(type), inRoadDirection(inRoadDirection) {
     }
     ~Lane() override
     {
     }
 
-    ///
-    /// \brief Returns the OpenDriveId of the lane (unique in one section, non-unique globally).
-    ///
-    int64_t GetOpenDriveId() const
-    {
-        return openDriveId;
+    OwlId GetOwlId() const {
+        return owlId;
     }
 
     ///
     /// \brief Returns the length of the lane.
     ///
-    double GetLength() const
-    {
+    double GetLength() const {
         return length;
     }
 
     ///
     /// \brief Returns the width of the lane.
     ///
-    double GetWidth() const
-    {
+    double GetWidth() const {
         return width;
     }
 
@@ -93,8 +86,7 @@ public:
     /// TODO currently the width is only given by one value but lanes can have changing width along their runlength.
     /// \param the new width
     ///
-    void SetWidth(double w)
-    {
+    void SetWidth(double w) {
         width = w;
     }
 
@@ -280,7 +272,7 @@ public:
 private:
     bool SLaneCoordinateOutOfLane(double sLane_coordniate) const;
 
-    int64_t openDriveId;
+    OwlId owlId;
     double length;
     double width;
     LaneType type;

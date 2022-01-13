@@ -2,6 +2,8 @@
 
 namespace MentalInfrastructure {
 
-Id Element::GetId() const { return id; }
+OdId Element::GetOpenDriveId() const {
+    return openDriveId;
+}
 
 } // namespace MentalInfrastructure

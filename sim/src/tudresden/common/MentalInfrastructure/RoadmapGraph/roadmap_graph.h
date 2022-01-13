@@ -26,38 +26,30 @@ class Road;
 
 namespace RoadmapGraph {
 
-class RoadmapNode
-{
+class RoadmapNode {
 public:
-    RoadmapNode(const MentalInfrastructure::Lane *lane, int64_t OdLaneId, std::string OdRoadId, double length) :
-        lane{lane}, OdLaneId{OdLaneId}, OdRoadId{OdRoadId}, length{length}
-    {
+    RoadmapNode(const MentalInfrastructure::Lane *lane, int64_t OdLaneId, OdId OdRoadId, double length) :
+        lane{lane}, OdLaneId{OdLaneId}, OdRoadId{OdRoadId}, length{length} {
     }
 
     ~RoadmapNode() = default;
 
-    const std::list<const RoadmapNode *> &GetSuccessorNodes() const
-    {
+    const std::list<const RoadmapNode *> &GetSuccessorNodes() const {
         return successorNodes;
     }
-    const std::list<const RoadmapNode *> &GetPredecessorNodes() const
-    {
+    const std::list<const RoadmapNode *> &GetPredecessorNodes() const {
         return predecessorNodes;
     }
-    const MentalInfrastructure::Lane *GetNode() const
-    {
+    const MentalInfrastructure::Lane *GetNode() const {
         return lane;
     }
-    double GetLength() const
-    {
+    double GetLength() const {
         return length;
     }
-    int64_t GetOdLaneId() const
-    {
+    int64_t GetOdLaneId() const {
         return OdLaneId;
     }
-    const std::string GetOdRoadId() const
-    {
+    const std::string GetOdRoadId() const {
         return OdRoadId;
     }
     void AddSuccessor(RoadmapNode *);
@@ -73,22 +65,17 @@ private:
     double length;
 };
 
-class RoadmapGraph
-{
+class RoadmapGraph {
 public:
-    RoadmapGraph()
-    {
+    RoadmapGraph() {
     }
-    RoadmapGraph(std::vector<std::shared_ptr<const MentalInfrastructure::Lane>> &lanes,
-                 const std::unordered_map<Id, int64_t> &LaneIdMapping, const std::unordered_map<Id, std::string> &RoadIdMapping);
+    RoadmapGraph(std::vector<std::shared_ptr<const MentalInfrastructure::Lane>> &lanes);
 
-    const std::unordered_map<const MentalInfrastructure::Lane *, std::shared_ptr<RoadmapNode>> &GetNodes()
-    {
+    const std::unordered_map<const MentalInfrastructure::Lane *, std::shared_ptr<RoadmapNode>> &GetNodes() {
         return nodes;
     }
 
-    const RoadmapNode *NavigateToTargetNode(std::string targetRoadOdId, int64_t targetLaneOdId)
-    {
+    const RoadmapNode *NavigateToTargetNode(std::string targetRoadOdId, int64_t targetLaneOdId) {
         return OdMapping.at(targetRoadOdId).at(targetLaneOdId);
     }
 
@@ -109,8 +96,7 @@ public:
      * \return Map filled with default starting values
      */
 private:
-    void AddNode(std::shared_ptr<RoadmapNode> node)
-    {
+    void AddNode(std::shared_ptr<RoadmapNode> node) {
         nodes.insert(std::make_pair(node->GetNode(), std::move(node)));
     }
 
@@ -119,7 +105,5 @@ private:
 
     std::unordered_map<const MentalInfrastructure::Lane *, std::shared_ptr<RoadmapNode>> nodes;
     std::unordered_map<std::string, std::unordered_map<int64_t, const RoadmapNode *>> OdMapping;
-    std::unordered_map<Id, int64_t> LaneIdMapping;
-    std::unordered_map<Id, std::string> RoadIdMapping;
 };
 } // namespace RoadmapGraph

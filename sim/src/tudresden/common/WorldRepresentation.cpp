@@ -29,73 +29,79 @@ bool AgentRepresentation::ObservedVehicleCameFromRight(const AgentRepresentation
     const auto egoRoad = GetRoad();
     const auto oAgentRoad = oAgentPerceptionData.GetRoad();
     const auto& listOfPoints = laneEgoAgent->GetLanePoints();
-    auto msg = __FILE__ " Line: " + std::to_string(__LINE__) + " No Intersection Situation ";
+    auto msg = __FILE__ " Line: " + std::to_string(__LINE__) + " No junction situation ";
 
-    if (egoRoad->IsOnIntersection()) {
-        // Calculation of the referenceVec vector of the incoming intersection road of ego
+    if (egoRoad->IsOnJunction()) {
+        // Calculation of the referenceVec vector of the incoming junction road of ego
         auto secondPoint = std::next(listOfPoints.begin(), 1);
         referenceVec =
             Common::Vector2d(secondPoint->x - laneEgoAgent->GetFirstPoint()->x, secondPoint->y - laneEgoAgent->GetFirstPoint()->y);
 
         // Calculation of the direction vector to the examination point
-        if (oAgentRoad->IsOnIntersection()) {
+        if (oAgentRoad->IsOnJunction()) {
             directionVec = Common::Vector2d(laneOAgent->GetFirstPoint()->x - laneEgoAgent->GetFirstPoint()->x,
                                             laneOAgent->GetFirstPoint()->y - laneEgoAgent->GetFirstPoint()->y);
-        } else if (oAgentRoad->IsSuccessorIntersection() || oAgentRoad->IsPredecessorIntersection()) {
+        }
+        else if (oAgentRoad->IsSuccessorJunction() || oAgentRoad->IsPredecessorJunction()) {
             directionVec = Common::Vector2d(laneOAgent->GetLastPoint()->x - laneEgoAgent->GetFirstPoint()->x,
                                             laneOAgent->GetLastPoint()->y - laneEgoAgent->GetFirstPoint()->y);
-        } else {
+        }
+        else {
             throw std::logic_error(msg);
         }
-    } else if (egoRoad->IsSuccessorIntersection() || egoRoad->IsPredecessorIntersection()) {
-        // Calculation of the referenceVec vector of the incoming intersection road of ego
+    }
+    else if (egoRoad->IsSuccessorJunction() || egoRoad->IsPredecessorJunction()) {
+        // Calculation of the referenceVec vector of the incoming junction road of ego
         auto secondLastPoint = std::prev(listOfPoints.end(), 2);
         referenceVec =
             Common::Vector2d(laneEgoAgent->GetLastPoint()->x - secondLastPoint->x, laneEgoAgent->GetLastPoint()->y - secondLastPoint->y);
 
         // Calculation of the direction vector to the examination point
-        if (oAgentRoad->IsOnIntersection()) {
+        if (oAgentRoad->IsOnJunction()) {
             directionVec = Common::Vector2d(laneOAgent->GetFirstPoint()->x - laneEgoAgent->GetLastPoint()->x,
                                             laneOAgent->GetFirstPoint()->y - laneEgoAgent->GetLastPoint()->y);
-        } else if (oAgentRoad->IsSuccessorIntersection() || oAgentRoad->IsPredecessorIntersection()) {
+        }
+        else if (oAgentRoad->IsSuccessorJunction() || oAgentRoad->IsPredecessorJunction()) {
             directionVec = Common::Vector2d(laneOAgent->GetLastPoint()->x - laneEgoAgent->GetLastPoint()->x,
                                             laneOAgent->GetLastPoint()->y - laneEgoAgent->GetLastPoint()->y);
-        } else {
+        }
+        else {
             throw std::logic_error(msg);
         }
-    } else {
+    }
+    else {
         throw std::logic_error(msg);
     }
     return referenceVec.Cross(directionVec) < 0 ? true : false;
 }
 
-const MentalInfrastructure::Intersection* AgentRepresentation::NextIntersection() const {
+const MentalInfrastructure::Junction *AgentRepresentation::NextJunction() const {
     const auto& currentLane = GetLane();
     const auto& currentRoad = GetRoad();
-    const MentalInfrastructure::Intersection* nextIntersection = nullptr;
+    const MentalInfrastructure::Junction *nextJunction = nullptr;
 
     if (currentLane->IsInRoadDirection()) {
         if (IsMovingInLaneDirection()) {
-            if (currentRoad->IsSuccessorIntersection()) {
-                nextIntersection = dynamic_cast<const MentalInfrastructure::Intersection*>(currentRoad->GetSuccessor());
+            if (currentRoad->IsSuccessorJunction()) {
+                nextJunction = dynamic_cast<const MentalInfrastructure::Junction *>(currentRoad->GetSuccessor());
             }
         } else {
-            if (currentRoad->IsPredecessorIntersection()) {
-                nextIntersection = dynamic_cast<const MentalInfrastructure::Intersection*>(currentRoad->GetPredecessor());
+            if (currentRoad->IsPredecessorJunction()) {
+                nextJunction = dynamic_cast<const MentalInfrastructure::Junction *>(currentRoad->GetPredecessor());
             }
         }
     } else {
         if (IsMovingInLaneDirection()) {
-            if (currentRoad->IsPredecessorIntersection()) {
-                nextIntersection = dynamic_cast<const MentalInfrastructure::Intersection*>(currentRoad->GetPredecessor());
+            if (currentRoad->IsPredecessorJunction()) {
+                nextJunction = dynamic_cast<const MentalInfrastructure::Junction *>(currentRoad->GetPredecessor());
             }
         } else {
-            if (currentRoad->IsSuccessorIntersection()) {
-                nextIntersection = dynamic_cast<const MentalInfrastructure::Intersection*>(currentRoad->GetSuccessor());
+            if (currentRoad->IsSuccessorJunction()) {
+                nextJunction = dynamic_cast<const MentalInfrastructure::Junction *>(currentRoad->GetSuccessor());
             }
         }
     }
-    return nextIntersection;
+    return nextJunction;
 }
 
 std::optional<MentalInfrastructure::TrafficSign> AgentRepresentation::NextROWSign() const {
@@ -156,81 +162,83 @@ AgentRepresentation::FilterROWTrafficSigns(
     return result;
 }
 
-std::optional<IntersectionSituation> AgentRepresentation::IntersectionSituation(const AgentRepresentation& observedAgent) const {
+std::optional<JunctionSituation> AgentRepresentation::JunctionSituation(const AgentRepresentation &observedAgent) const {
     auto egoRoad = GetRoad();
     auto oAgentRoad = observedAgent.GetRoad();
 
-    if (egoRoad->IsOnIntersection() && oAgentRoad->IsOnIntersection()) {
-        if (egoRoad->GetIntersection() == oAgentRoad->GetIntersection()) {
-            return IntersectionSituation::INTERSECTION_A;
+    if (egoRoad->IsOnJunction() && oAgentRoad->IsOnJunction()) {
+        if (egoRoad->GetJunction() == oAgentRoad->GetJunction()) {
+            return JunctionSituation::JUNCTION_A;
         }
-    } else if (egoRoad->IsOnIntersection()) {
-        auto intersection = egoRoad->GetIntersection();
-        if (observedAgent.IsMovingTowardsIntersection(intersection)) {
-            return IntersectionSituation::INTERSECTION_B;
+    }
+    else if (egoRoad->IsOnJunction()) {
+        auto junction = egoRoad->GetJunction();
+        if (observedAgent.IsMovingTowardsJunction(junction)) {
+            return JunctionSituation::JUNCTION_B;
         }
-    } else if (oAgentRoad->IsOnIntersection()) {
-        auto intersection = oAgentRoad->GetIntersection();
-        if (IsMovingTowardsIntersection(intersection)) {
-            return IntersectionSituation::INTERSECTION_C;
+    }
+    else if (oAgentRoad->IsOnJunction()) {
+        auto junction = oAgentRoad->GetJunction();
+        if (IsMovingTowardsJunction(junction)) {
+            return JunctionSituation::JUNCTION_C;
         }
     }
 
     const auto& egoLane = GetLane();
     if (IsMovingInLaneDirection()) {
-        if (egoLane->IsInRoadDirection() && egoRoad->IsSuccessorIntersection()) {
-            auto intersection = dynamic_cast<const MentalInfrastructure::Intersection*>(oAgentRoad->GetSuccessor());
-            if (observedAgent.IsMovingTowardsIntersection(intersection)) {
-                return IntersectionSituation::INTERSECTION_D;
+        if (egoLane->IsInRoadDirection() && egoRoad->IsSuccessorJunction()) {
+            auto junction = dynamic_cast<const MentalInfrastructure::Junction *>(oAgentRoad->GetSuccessor());
+            if (observedAgent.IsMovingTowardsJunction(junction)) {
+                return JunctionSituation::JUNCTION_D;
             }
-
-        } else if (!egoLane->IsInRoadDirection() && egoRoad->IsPredecessorIntersection()) {
-            auto intersection = dynamic_cast<const MentalInfrastructure::Intersection*>(oAgentRoad->GetPredecessor());
-            if (observedAgent.IsMovingTowardsIntersection(intersection)) {
-                return IntersectionSituation::INTERSECTION_D;
+        }
+        else if (!egoLane->IsInRoadDirection() && egoRoad->IsPredecessorJunction()) {
+            auto junction = dynamic_cast<const MentalInfrastructure::Junction *>(oAgentRoad->GetPredecessor());
+            if (observedAgent.IsMovingTowardsJunction(junction)) {
+                return JunctionSituation::JUNCTION_D;
             }
         }
     } else {
-        if (egoLane->IsInRoadDirection() && egoRoad->IsPredecessorIntersection()) {
-            auto intersection = dynamic_cast<const MentalInfrastructure::Intersection*>(oAgentRoad->GetPredecessor());
-            if (observedAgent.IsMovingTowardsIntersection(intersection)) {
-                return IntersectionSituation::INTERSECTION_D;
+        if (egoLane->IsInRoadDirection() && egoRoad->IsPredecessorJunction()) {
+            auto junction = dynamic_cast<const MentalInfrastructure::Junction *>(oAgentRoad->GetPredecessor());
+            if (observedAgent.IsMovingTowardsJunction(junction)) {
+                return JunctionSituation::JUNCTION_D;
             }
-
-        } else if (!egoLane->IsInRoadDirection() && egoRoad->IsSuccessorIntersection()) {
-            auto intersection = dynamic_cast<const MentalInfrastructure::Intersection*>(oAgentRoad->GetSuccessor());
-            if (observedAgent.IsMovingTowardsIntersection(intersection)) {
-                return IntersectionSituation::INTERSECTION_D;
+        }
+        else if (!egoLane->IsInRoadDirection() && egoRoad->IsSuccessorJunction()) {
+            auto junction = dynamic_cast<const MentalInfrastructure::Junction *>(oAgentRoad->GetSuccessor());
+            if (observedAgent.IsMovingTowardsJunction(junction)) {
+                return JunctionSituation::JUNCTION_D;
             }
         }
     }
     return std::nullopt;
 }
 
-bool AgentRepresentation::IsMovingTowardsIntersection(const MentalInfrastructure::Intersection* intersection) const {
-    if (!intersection)
+bool AgentRepresentation::IsMovingTowardsJunction(const MentalInfrastructure::Junction *junction) const {
+    if (!junction)
         return false;
 
     auto roadOfAgent = GetRoad();
     const auto& currentLane = GetLane();
     if (currentLane->IsInRoadDirection()) {
         if (IsMovingInLaneDirection()) {
-            if (roadOfAgent->IsSuccessorIntersection()) {
-                return roadOfAgent->GetSuccessor()->GetId() == intersection->GetId();
+            if (roadOfAgent->IsSuccessorJunction()) {
+                return roadOfAgent->GetSuccessor()->GetOpenDriveId() == junction->GetOpenDriveId();
             }
         } else {
-            if (roadOfAgent->IsPredecessorIntersection()) {
-                return roadOfAgent->GetPredecessor()->GetId() == intersection->GetId();
+            if (roadOfAgent->IsPredecessorJunction()) {
+                return roadOfAgent->GetPredecessor()->GetOpenDriveId() == junction->GetOpenDriveId();
             }
         }
     } else {
         if (IsMovingInLaneDirection()) {
-            if (roadOfAgent->IsPredecessorIntersection()) {
-                return roadOfAgent->GetPredecessor()->GetId() == intersection->GetId();
+            if (roadOfAgent->IsPredecessorJunction()) {
+                return roadOfAgent->GetPredecessor()->GetOpenDriveId() == junction->GetOpenDriveId();
             }
         } else {
-            if (roadOfAgent->IsSuccessorIntersection()) {
-                return roadOfAgent->GetSuccessor()->GetId() == intersection->GetId();
+            if (roadOfAgent->IsSuccessorJunction()) {
+                return roadOfAgent->GetSuccessor()->GetOpenDriveId() == junction->GetOpenDriveId();
             }
         }
     }
@@ -258,22 +266,22 @@ std::optional<ConflictArea> AgentRepresentation::PossibleConflictAreaAlongLane(c
     if (egoLane->GetConflictAreaWithLane(observedLane) && observedLane->GetConflictAreaWithLane(egoLane)) {
         auto cAEgo = egoLane->GetConflictAreaWithLane(observedLane);
         auto cAObserved = observedLane->GetConflictAreaWithLane(egoLane);
-        return DistanceToConflictArea({*cAEgo, egoLane->GetId()}, {*cAObserved, observedLane->GetId()}, observedAgent);
-
-    } else if (egoNextLane && egoNextLane->GetConflictAreaWithLane(observedLane)) {
+        return DistanceToConflictArea({*cAEgo, egoLane->GetOwlId()}, {*cAObserved, observedLane->GetOwlId()}, observedAgent);
+    }
+    else if (egoNextLane && egoNextLane->GetConflictAreaWithLane(observedLane)) {
         auto cAEgo = egoNextLane->GetConflictAreaWithLane(observedLane);
         auto cAObserved = observedLane->GetConflictAreaWithLane(egoNextLane);
-        return DistanceToConflictArea({*cAEgo, egoNextLane->GetId()}, {*cAObserved, observedLane->GetId()}, observedAgent);
-
-    } else if (observedNextLane && egoLane->GetConflictAreaWithLane(observedNextLane)) {
+        return DistanceToConflictArea({*cAEgo, egoNextLane->GetOwlId()}, {*cAObserved, observedLane->GetOwlId()}, observedAgent);
+    }
+    else if (observedNextLane && egoLane->GetConflictAreaWithLane(observedNextLane)) {
         auto cAEgo = egoLane->GetConflictAreaWithLane(observedNextLane);
         auto cAObserved = observedNextLane->GetConflictAreaWithLane(egoLane);
-        return DistanceToConflictArea({*cAEgo, egoLane->GetId()}, {*cAObserved, observedNextLane->GetId()}, observedAgent);
-
-    } else if ((egoNextLane && observedNextLane) && egoNextLane->GetConflictAreaWithLane(observedNextLane)) {
+        return DistanceToConflictArea({*cAEgo, egoLane->GetOwlId()}, {*cAObserved, observedNextLane->GetOwlId()}, observedAgent);
+    }
+    else if ((egoNextLane && observedNextLane) && egoNextLane->GetConflictAreaWithLane(observedNextLane)) {
         auto cAEgo = egoNextLane->GetConflictAreaWithLane(observedNextLane);
         auto cAObserved = observedNextLane->GetConflictAreaWithLane(egoNextLane);
-        return DistanceToConflictArea({*cAEgo, egoNextLane->GetId()}, {*cAObserved, observedNextLane->GetId()}, observedAgent);
+        return DistanceToConflictArea({*cAEgo, egoNextLane->GetOwlId()}, {*cAObserved, observedNextLane->GetOwlId()}, observedAgent);
     }
 
     else {
@@ -281,9 +289,9 @@ std::optional<ConflictArea> AgentRepresentation::PossibleConflictAreaAlongLane(c
     }
 };
 
-ConflictArea AgentRepresentation::DistanceToConflictArea(std::pair<const MentalInfrastructure::ConflictArea&, Id> egoCA,
-                                                         std::pair<const MentalInfrastructure::ConflictArea&, Id> observedCA,
-                                                         const AgentRepresentation& observedAgent) const {
+ConflictArea AgentRepresentation::DistanceToConflictArea(std::pair<const MentalInfrastructure::ConflictArea &, OwlId> egoCA,
+                                                         std::pair<const MentalInfrastructure::ConflictArea &, OwlId> observedCA,
+                                                         const AgentRepresentation &observedAgent) const {
     ConflictArea result;
     result.opponentID = observedAgent.GetID();
     auto distanceEgoToStartCA = DistanceToConflictPoint(*this, egoCA.first.start, egoCA.second);
@@ -309,27 +317,29 @@ ConflictArea AgentRepresentation::DistanceToConflictArea(std::pair<const MentalI
     return result;
 }
 
-double AgentRepresentation::DistanceToConflictPoint(const AgentRepresentation& agent,
-                                                    const MentalInfrastructure::LanePoint& intersectionPoint, Id laneId) const {
+double AgentRepresentation::DistanceToConflictPoint(const AgentRepresentation &agent, const MentalInfrastructure::LanePoint &junctionPoint,
+                                                    OwlId laneId) const {
     double distanceToPoint;
-    if (laneId == agent.GetLane()->GetId()) {
-        distanceToPoint = intersectionPoint.sOffset - agent.GetSCoordinate();
+    if (laneId == agent.GetLane()->GetOwlId()) {
+        distanceToPoint = junctionPoint.sOffset - agent.GetSCoordinate();
         if (!agent.IsMovingInLaneDirection()) {
-            distanceToPoint = agent.GetSCoordinate() - intersectionPoint.sOffset;
+            distanceToPoint = agent.GetSCoordinate() - junctionPoint.sOffset;
         }
-    } else if (laneId == agent.GetNextLane()->GetId()) {
+    }
+    else if (laneId == agent.GetNextLane()->GetOwlId()) {
         const auto& currentLaneEgo = agent.GetLane();
         const auto& nextLaneEgo = agent.GetNextLane();
         auto distanceFromEgoToEndOfLane = currentLaneEgo->GetLastPoint()->sOffset - agent.GetSCoordinate();
-        auto distanceFromStartOfLaneToPoint = intersectionPoint.sOffset - nextLaneEgo->GetFirstPoint()->sOffset;
+        auto distanceFromStartOfLaneToPoint = junctionPoint.sOffset - nextLaneEgo->GetFirstPoint()->sOffset;
         if (!agent.IsMovingInLaneDirection()) {
             distanceFromEgoToEndOfLane = agent.GetSCoordinate() - currentLaneEgo->GetFirstPoint()->sOffset;
-            distanceFromStartOfLaneToPoint = nextLaneEgo->GetLastPoint()->sOffset - intersectionPoint.sOffset;
+            distanceFromStartOfLaneToPoint = nextLaneEgo->GetLastPoint()->sOffset - junctionPoint.sOffset;
         }
         distanceToPoint = distanceFromEgoToEndOfLane + distanceFromStartOfLaneToPoint;
-    } else {
+    }
+    else {
         std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " | " +
-                              "Distance to Intersection Point cannot be calculated ";
+                              "Distance to Junction Point cannot be calculated ";
         throw std::logic_error(message);
     }
     return distanceToPoint;

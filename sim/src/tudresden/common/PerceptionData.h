@@ -8,13 +8,14 @@
 //-----------------------------------------------------------------------------/
 #pragma once
 
+#include <unordered_map>
+
 #include "Common/vector2d.h"
-#include "MentalInfrastructure/Intersection.h"
+#include "MentalInfrastructure/Junction.h"
 #include "MentalInfrastructure/Lane.h"
 #include "MentalInfrastructure/Road.h"
 #include "MentalInfrastructure/RoadmapGraph/roadmap_graph.h"
 #include "MentalInfrastructure/Section.h"
-#include <unordered_map>
 
 struct InfrastructurePerception;
 struct DynamicInfrastructurePerception;
@@ -29,19 +30,19 @@ struct ObjectPerception {
 };
 
 struct PositionAlongRoad {
-    const MentalInfrastructure::Lane* newLane = nullptr;
+    const MentalInfrastructure::Lane *newLane = nullptr;
     double newSCoordinate = -999;
 };
 
-struct IntersectionDistance {
-    double distanceOnIntersection = -1;
-    double distanceToNextIntersection = -1;
+struct JunctionDistance {
+    double distanceOnJunction = -1;
+    double distanceToNextJunction = -1;
 };
 
 struct NextDirectionLanes {
-    std::vector<const MentalInfrastructure::Lane*> rightLanes;
-    std::vector<const MentalInfrastructure::Lane*> leftLanes;
-    std::vector<const MentalInfrastructure::Lane*> straightLanes;
+    std::vector<const MentalInfrastructure::Lane *> rightLanes;
+    std::vector<const MentalInfrastructure::Lane *> leftLanes;
+    std::vector<const MentalInfrastructure::Lane *> straightLanes;
 };
 
 struct AgentPerception : ObjectPerception {
@@ -62,17 +63,17 @@ struct AgentPerception : ObjectPerception {
      *
      * @return        true if agent is moving in lane direction
      */
-    static bool IsMovingInLaneDirection(const MentalInfrastructure::Lane* agentLane, double yawAngle, double sCoordinate, double velocitz);
+    static bool IsMovingInLaneDirection(const MentalInfrastructure::Lane *agentLane, double yawAngle, double sCoordinate, double velocitz);
 
     /*!
-     * \brief  calculates distance to next intersection
+     * \brief  calculates distance to next junction
      * @param[in]     agentRoad
      * @param[in]     agentLane
      *
-     * @return        distance on/to intersection
+     * @return        distance on/to junction
      */
-    IntersectionDistance CalculateIntersectionDistance(const MentalInfrastructure::Road* agentRoad,
-                                                       const MentalInfrastructure::Lane* agentLane) const;
+    JunctionDistance CalculateJunctionDistance(const MentalInfrastructure::Road *agentRoad,
+                                               const MentalInfrastructure::Lane *agentLane) const;
 
     AgentVehicleType vehicleType{AgentVehicleType::NONE};
 
@@ -88,12 +89,12 @@ struct AgentPerception : ObjectPerception {
     LaneType laneType{LaneType::Undefined};
     bool movingInLaneDirection{false};
 
-    const MentalInfrastructure::Road* road;
-    const MentalInfrastructure::Lane* lane;
-    const MentalInfrastructure::Lane* nextLane;
+    const MentalInfrastructure::Road *road;
+    const MentalInfrastructure::Lane *lane;
+    const MentalInfrastructure::Lane *nextLane;
 
-    double distanceToNextIntersection{-999};
-    double distanceOnIntersection{-999};
+    double distanceToNextJunction{-999};
+    double distanceOnJunction{-999};
 };
 
 struct EgoPerception : AgentPerception {
@@ -113,33 +114,30 @@ struct EgoPerception : AgentPerception {
 };
 
 struct LookupTableRoadNetwork {
-    std::unordered_map<Id, const MentalInfrastructure::Road*> roads;
-    std::unordered_map<Id, const MentalInfrastructure::Lane*> lanes;
-    std::unordered_map<Id, const MentalInfrastructure::TrafficSign*> trafficSigns;
+    std::unordered_map<OdId, const MentalInfrastructure::Road *> roads;
+    std::unordered_map<OwlId, const MentalInfrastructure::Lane *> lanes;
+    std::unordered_map<OdId, const MentalInfrastructure::TrafficSign *> trafficSigns;
 };
-
 
 struct StoppingPointData {
-    std::map<Id,std::map<Id,std::map<StoppingPointType, StoppingPoint>>> stoppingPoints;
+    std::map<OdId, std::map<OwlId, std::map<StoppingPointType, StoppingPoint>>> stoppingPoints;
 };
 
-
 struct ConflictPoints {
-    std::string currentOpenDriveRoadId;
+    OdId currentOpenDriveRoadId;
     int64_t currentOpenDriveLaneId;
-    std::string intersectionOpenDriveRoadId;
-    int64_t intersectionOpenDriveLaneId;
+    OdId junctionOpenDriveRoadId;
+    int64_t junctionOpenDriveLaneId;
     Common::Vector2d start;
     Common::Vector2d end;
 };
 struct InfrastructurePerception {
-
     /*!
      * \brief Return the next lane of given lane
      *
      */
-    static const MentalInfrastructure::Lane* NextLane(IndicatorState indicatorState, bool movingInLaneDirection,
-                                                      const MentalInfrastructure::Lane* lane);
+    static const MentalInfrastructure::Lane *NextLane(IndicatorState indicatorState, bool movingInLaneDirection,
+                                                      const MentalInfrastructure::Lane *lane);
     /*!
      * \brief return next lanes that follow on current lane (considering moving direction of agent)
      *
@@ -148,17 +146,17 @@ struct InfrastructurePerception {
      *
      * @return        next lanes
      */
-    static std::optional<NextDirectionLanes> NextLanes(bool movingInLaneDirection, const MentalInfrastructure::Lane* currentLane);
+    static std::optional<NextDirectionLanes> NextLanes(bool movingInLaneDirection, const MentalInfrastructure::Lane *currentLane);
 
-    const std::vector<ConflictPoints>& GetConflicPoints() {
+    const std::vector<ConflictPoints> &GetConflicPoints() {
         return conflictPoints;
     }
 
-    const std::map<StoppingPointType, StoppingPoint>& GetStoppingPoints(Id intersectionId, Id laneId) const {
-        return stoppingPointData.stoppingPoints.at(intersectionId).at(laneId);
+    const std::map<StoppingPointType, StoppingPoint> &GetStoppingPoints(std::string junctionId, OwlId laneId) const {
+        return stoppingPointData.stoppingPoints.at(junctionId).at(laneId);
     }
 
-    std::vector<std::shared_ptr<const MentalInfrastructure::Intersection>> intersections;
+    std::vector<std::shared_ptr<const MentalInfrastructure::Junction>> junctions;
     std::vector<std::shared_ptr<const MentalInfrastructure::Road>> roads;
     std::vector<std::shared_ptr<const MentalInfrastructure::Lane>> lanes;
     std::vector<std::shared_ptr<const MentalInfrastructure::Section>> sections;
@@ -178,18 +176,17 @@ struct DynamicInfrastructurePerception {
     /**
      * @brief This method should clear all internally stored data since it should be overwritten at each time interval.
      */
-    void Clear() { trafficSigns.clear(); }
+    void Clear() {
+        trafficSigns.clear();
+    }
 
     std::unordered_map<std::shared_ptr<MentalInfrastructure::Road>, MentalInfrastructure::TrafficSign> trafficSigns;
 };
 
 struct NavigationDecision {
-    std::string odRoadID{"-999"};
-    int odLaneID{-999};
+    OdId odRoadID{"-999"};
+    int64_t odLaneID{-999};
 
-    uint64_t roadID{InvalidId};
-    uint64_t laneID{InvalidId};
+    OwlId laneID{OwlInvalidId};
     IndicatorState indicator = IndicatorState::IndicatorState_Off;
 };
-
-

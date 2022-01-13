@@ -26,7 +26,7 @@ using AmbientAgentRepresentation = CognitiveMap::AmbientAgentRepresentation;
 using AmbientAgentRepresentations = std::vector<std::unique_ptr<AmbientAgentRepresentation>>;
 using EgoAgentRepresentation = CognitiveMap::EgoAgentRepresentation;
 using InfrastructureRepresentation = CognitiveMap::InfrastructureRepresentation;
-enum class IntersectionSituation;
+enum class JunctionSituation;
 
 struct DistanceToConflictArea {
     double start = maxDouble; // distance from the front of the vehicle to the begin of the conflict area
@@ -53,17 +53,18 @@ struct AgentInterpretation {
 };
 
 struct VisibleTrafficSigns {
-    std::unordered_map<
-        Id, std::unordered_map<MentalInfrastructure::TrafficSignType, std::unordered_map<Id, const MentalInfrastructure::TrafficSign*>>>
+    std::unordered_map<OdId, std::unordered_map<MentalInfrastructure::TrafficSignType,
+                                                std::unordered_map<OwlId, const MentalInfrastructure::TrafficSign *>>>
         trafficSigns;
 
-    std::unordered_map<MentalInfrastructure::TrafficSignType, std::unordered_map<Id, const MentalInfrastructure::TrafficSign*>>
-    GetSignsForRoad(Id roadId) {
+    std::unordered_map<MentalInfrastructure::TrafficSignType, std::unordered_map<OwlId, const MentalInfrastructure::TrafficSign *>>
+    GetSignsForRoad(OdId roadId) {
         auto findIter = trafficSigns.find(roadId);
         if (findIter != trafficSigns.end())
             return findIter->second;
 
-        std::unordered_map<MentalInfrastructure::TrafficSignType, std::unordered_map<Id, const MentalInfrastructure::TrafficSign*>> empty;
+        std::unordered_map<MentalInfrastructure::TrafficSignType, std::unordered_map<OwlId, const MentalInfrastructure::TrafficSign *>>
+            empty;
         return empty;
     }
 };
@@ -104,7 +105,7 @@ class AgentRepresentation {
 
     /*!
      * \brief Checks if the observed vehicle came from a road that is to the right of the ego agent
-     *        (vehicles are only allowed to drive in lane direction close to intersections)
+     *        (vehicles are only allowed to drive in lane direction close junctions)
      *
      * @param[in]     oAgentPerceptionData
      *
@@ -113,12 +114,12 @@ class AgentRepresentation {
     virtual bool ObservedVehicleCameFromRight(const AgentRepresentation& oAgentPerceptionData) const;
 
     /*!
-     * \brief  return next intersection
+     * \brief  return next junction
      * @param[in]     infrastructure
      *
-     * @return        intersection
+     * @return        junction
      */
-    const MentalInfrastructure::Intersection* NextIntersection() const;
+    const MentalInfrastructure::Junction *NextJunction() const;
 
     /*!
      * \brief  return next right of way sign
@@ -128,20 +129,20 @@ class AgentRepresentation {
     virtual std::optional<MentalInfrastructure::TrafficSign> NextROWSign() const;
 
     /*!
-     * \brief  return intersection situation --> Constellation of agents to each other at the intersection
+     * \brief  return junction situation --> Constellation of agents to each other at the junction
      * @param[in]     observedAgent
      *
      * @return        CollisionSituationType
      */
-    std::optional<IntersectionSituation> IntersectionSituation(const AgentRepresentation& observedAgent) const;
+    std::optional<JunctionSituation> JunctionSituation(const AgentRepresentation &observedAgent) const;
 
     /*!
-     * \brief  check if agent is moving towards specific intersection
-     * @param[in]     intersection
+     * \brief  check if agent is moving towards specific junction
+     * @param[in]     junction
      *
-     * @return        true if agent is moving towards intersection
+     * @return        true if agent is moving towards junction
      */
-    bool IsMovingTowardsIntersection(const MentalInfrastructure::Intersection* intersection) const;
+    bool IsMovingTowardsJunction(const MentalInfrastructure::Junction *junction) const;
     /*!
      * \brief  extrapolate distance (in lane direction distance >0 against lane direction distance <0)
      *
@@ -180,8 +181,12 @@ class AgentRepresentation {
     const MentalInfrastructure::Road* GetRoad() const { return internalData->road; }
     const MentalInfrastructure::Lane* GetLane() const { return internalData->lane; }
     const MentalInfrastructure::Lane* GetNextLane() const { return internalData->nextLane; }
-    double GetDistanceToNextIntersection() const { return internalData->distanceToNextIntersection; }
-    double GetDistanceOnIntersection() const { return internalData->distanceOnIntersection; }
+    double GetDistanceToNextJunction() const {
+        return internalData->distanceToNextJunction;
+    }
+    double GetDistanceOnJunction() const {
+        return internalData->distanceOnJunction;
+    }
     virtual bool IsMovingInLaneDirection() const { return internalData->movingInLaneDirection; }
 
   protected:
@@ -195,12 +200,12 @@ class AgentRepresentation {
         const std::unordered_map<MentalInfrastructure::TrafficSignType, std::vector<MentalInfrastructure::TrafficSign>>& trafficSignMap)
         const;
 
-    ConflictArea DistanceToConflictArea(std::pair<const MentalInfrastructure::ConflictArea&, Id> egoCA,
-                                        std::pair<const MentalInfrastructure::ConflictArea&, Id> observedCA,
-                                        const AgentRepresentation& observedAgent) const;
+    ConflictArea DistanceToConflictArea(std::pair<const MentalInfrastructure::ConflictArea &, OwlId> egoCA,
+                                        std::pair<const MentalInfrastructure::ConflictArea &, OwlId> observedCA,
+                                        const AgentRepresentation &observedAgent) const;
 
-    double DistanceToConflictPoint(const AgentRepresentation& agent, const MentalInfrastructure::LanePoint& intersectionPoint,
-                                   Id laneId) const;
+    double DistanceToConflictPoint(const AgentRepresentation &agent, const MentalInfrastructure::LanePoint &junctionPoint,
+                                   OwlId laneId) const;
 
     //! the internal information of the agent representation
     std::shared_ptr<AgentPerception> internalData;
@@ -276,8 +281,8 @@ class InfrastructureRepresentation {
      */
     static const std::optional<NextDirectionLanes> NextLanes(bool movingInLaneDirection, const MentalInfrastructure::Lane* currentLane);
 
-    const std::map<StoppingPointType, StoppingPoint>& GetStoppingPoints(Id intersectionId, Id laneId) const {
-        return infrastructure->GetStoppingPoints(intersectionId, laneId);
+    const std::map<StoppingPointType, StoppingPoint> &GetStoppingPoints(OdId junctionId, OwlId laneId) const {
+        return infrastructure->GetStoppingPoints(junctionId, laneId);
     }
 
     const std::list<const RoadmapGraph::RoadmapNode*> FindShortestPath(const MentalInfrastructure::Lane* start,

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2020 TU Dresden
+ * Copyright (c) 2021 TU Dresden
  * scientific assistant: Christian Siebke
  * student assistants:   Christian Gärber
  *                       Vincent   Adam
@@ -11,29 +11,29 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *****************************************************************************/
-#pragma once
-#include "common/Definitions.h"
+#ifndef OBSERVEDDYNAMICOBJECT_H
+#define OBSERVEDDYNAMICOBJECT_H
 
-namespace MentalInfrastructure {
+#include "observedworldobject.h"
 
 ///
-/// \brief Represents an element in the road network.
+/// \brief The ObservedDynamicObject struct
 ///
-class Element
-{
-public:
-    Element(const OdId openDriveId) : openDriveId(openDriveId) {
-    }
-    virtual ~Element()
-    {
-    }
+struct ObservedDynamicObject : ObservedWorldObject {
+    ///
+    /// \brief Distance of the current Driver to the reference point of this object.
+    ///
+    double distanceToReference;
 
     ///
-    /// \brief Returns the OpenDrive id of this element.
+    /// \brief The velocity of this object in m/s.
     ///
-    OdId GetOpenDriveId() const;
+    double velocity;
 
-protected:
-    const OdId openDriveId;
+    ///
+    /// \brief The acceleration of this object in m/s^2.
+    ///
+    double acceleration;
 };
-} // namespace MentalInfrastructure
+
+#endif // OBSERVEDDYNAMICOBJECT_H

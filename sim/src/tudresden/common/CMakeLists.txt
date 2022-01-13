@@ -3,7 +3,7 @@ add_openpass_target(
  
   HEADERS
     MentalInfrastructure/Element.h
-    MentalInfrastructure/Intersection.h
+    MentalInfrastructure/Junction.h
     MentalInfrastructure/Lane.h
     MentalInfrastructure/Road.h
     MentalInfrastructure/Section.h
@@ -14,10 +14,12 @@ add_openpass_target(
     PerceptionData.h
     threading/ThreadSafeContainer.h
     WorldRepresentation.h
+    RoadSegmentInterface.h
+    BehaviourData.h
  
   SOURCES
     MentalInfrastructure/Element.cpp
-    MentalInfrastructure/Intersection.cpp
+    MentalInfrastructure/Junction.cpp
     MentalInfrastructure/Lane.cpp
     MentalInfrastructure/Road.cpp
     MentalInfrastructure/Section.cpp
@@ -27,10 +29,12 @@ add_openpass_target(
     PerceptionData.cpp    
     WorldRepresentation.cpp
     libs/magic_enum.hpp
+    RoadSegmentInterface.cpp
  
   INCDIRS
     ${OPENPASS_SIMCORE_DIR}/core
     ${OPENPASS_SIMCORE_DIR}/common
+    ../../core/opSimulation/framework/
  
   LIBRARIES
     Common

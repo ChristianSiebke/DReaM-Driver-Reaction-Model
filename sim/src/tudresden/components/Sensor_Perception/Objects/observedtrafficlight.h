@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2020 TU Dresden
+ * Copyright (c) 2021 TU Dresden
  * scientific assistant: Christian Siebke
  * student assistants:   Christian Gärber
  *                       Vincent   Adam
@@ -11,29 +11,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *****************************************************************************/
-#pragma once
-#include "common/Definitions.h"
+#ifndef OBSERVEDTRAFFICLIGHT_H
+#define OBSERVEDTRAFFICLIGHT_H
 
-namespace MentalInfrastructure {
+#include "observedstaticobject.h"
 
 ///
-/// \brief Represents an element in the road network.
+/// \brief The ObservedTrafficLight struct
 ///
-class Element
-{
-public:
-    Element(const OdId openDriveId) : openDriveId(openDriveId) {
-    }
-    virtual ~Element()
-    {
-    }
+struct ObservedTrafficLight : ObservedStaticObject {};
 
-    ///
-    /// \brief Returns the OpenDrive id of this element.
-    ///
-    OdId GetOpenDriveId() const;
-
-protected:
-    const OdId openDriveId;
-};
-} // namespace MentalInfrastructure
+#endif // OBSERVEDTRAFFICLIGHT_H

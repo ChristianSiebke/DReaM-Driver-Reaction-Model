@@ -26,8 +26,9 @@ class Road;
 ///
 class Section : public Element {
   public:
-    Section(Id sectionId, const Road* road, const Section* predecessor, const Section* successor)
-        : Element(sectionId), road(road), predecessorSection(predecessor), successorSection(successor) {}
+      Section(OdId openDriveId, const Road *road, const Section *predecessor, const Section *successor) :
+          Element(openDriveId), road(road), predecessorSection(predecessor), successorSection(successor) {
+      }
     ~Section() override {}
 
     ///

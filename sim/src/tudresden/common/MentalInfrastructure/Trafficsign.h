@@ -19,8 +19,7 @@
 
 namespace MentalInfrastructure {
 
-enum class TrafficSignType
-{
+enum class TrafficSignType {
     // enum values do NOT represent any actual traffic sign catalog values
     // default value
     Undefined = 0,
@@ -45,70 +44,58 @@ enum class TrafficSignType
     TrafficCalmedDistrictEnd = 111,
 };
 
-class TrafficSign
-{
+class TrafficSign {
 public:
-    TrafficSign()
-    {
+    TrafficSign() {
     }
-    TrafficSign(Id id, std::string odId, const MentalInfrastructure::Road *road, double v, double t, double s, Common::Vector2d pos,
+    TrafficSign(OdId openDriveId, OwlId owlId, const MentalInfrastructure::Road *road, double v, double t, double s, Common::Vector2d pos,
                 CommonTrafficSign::Type commonType) :
-        id(id), odId(odId), road(road), value(v), t(t), s(s), position(pos)
-    {
+        odId(openDriveId), owlId(owlId), road(road), value(v), t(t), s(s), position(pos) {
         type = (trafficSignMapping.at(commonType));
         priority = Priority(type);
     }
     ~TrafficSign() = default;
 
-    Id GetId() const
-    {
-        return id;
+    OwlId GetOwlId() const {
+        return owlId;
     }
 
-    std::string GetOpenDriveId() const
-    {
+    OdId GetOpenDriveId() const {
         return odId;
     }
 
-    const Common::Vector2d GetPosition() const
-    {
+    const Common::Vector2d GetPosition() const {
         return position;
     }
 
-    double GetValue() const
-    {
+    double GetValue() const {
         return value;
     }
 
-    double GetT() const
-    {
+    double GetT() const {
         return t;
     }
 
-    double GetS() const
-    {
+    double GetS() const {
         return s;
     }
 
-    TrafficSignType GetType() const
-    {
+    TrafficSignType GetType() const {
         return type;
     }
-    int GetPriority() const
-    {
+    int GetPriority() const {
         return priority;
     }
 
-    const MentalInfrastructure::Road *GetRoad() const
-    {
+    const MentalInfrastructure::Road *GetRoad() const {
         return road;
     }
 
 private:
     int Priority(TrafficSignType sign);
 
-    Id id;
-    std::string odId;
+    OwlId owlId;
+    OdId odId;
     const MentalInfrastructure::Road *road;
     TrafficSignType type;
     int priority;

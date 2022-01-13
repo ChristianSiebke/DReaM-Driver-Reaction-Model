@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2020 TU Dresden
+ * Copyright (c) 2021 TU Dresden
  * scientific assistant: Christian Siebke
  * student assistants:   Christian Gärber
  *                       Vincent   Adam
@@ -11,29 +11,22 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *****************************************************************************/
-#pragma once
+#ifndef OBSERVEDTRAFFICSIGN_H
+#define OBSERVEDTRAFFICSIGN_H
+
 #include "common/Definitions.h"
-
-namespace MentalInfrastructure {
+#include "common/worldDefinitions.h"
+#include "observedstaticobject.h"
 
 ///
-/// \brief Represents an element in the road network.
+/// \brief The ObservedTrafficSign struct
 ///
-class Element
+struct ObservedTrafficSign : ObservedStaticObject
 {
-public:
-    Element(const OdId openDriveId) : openDriveId(openDriveId) {
-    }
-    virtual ~Element()
-    {
-    }
-
     ///
-    /// \brief Returns the OpenDrive id of this element.
+    /// \brief The type of sign
     ///
-    OdId GetOpenDriveId() const;
-
-protected:
-    const OdId openDriveId;
+    CommonTrafficSign::Type signType;
 };
-} // namespace MentalInfrastructure
+
+#endif // OBSERVEDTRAFFICSIGN_H

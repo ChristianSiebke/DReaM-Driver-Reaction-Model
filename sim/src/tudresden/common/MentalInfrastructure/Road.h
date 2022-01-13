@@ -13,10 +13,11 @@
  *****************************************************************************/
 #pragma once
 
-#include "Element.h"
-#include "Intersection.h"
-#include "Trafficsign.h"
 #include <unordered_map>
+
+#include "Element.h"
+#include "Junction.h"
+#include "Trafficsign.h"
 
 namespace MentalInfrastructure {
 
@@ -28,18 +29,14 @@ class TrafficSign;
 ///
 class Road : public Element {
   public:
-    Road(Id roadId, std::string odId, double posX, double posY, double hdg, double length)
-        : Element(roadId), openDriveId(odId), startPos(Common::Vector2d(posX, posY)), roadHdg(hdg), roadLength(length) {}
+      Road(std::string openDriveId, double posX, double posY, double hdg, double length) :
+          Element(openDriveId), startPos(Common::Vector2d(posX, posY)), roadHdg(hdg), roadLength(length) {
+      }
     ~Road() override {}
 
     ///
     /// Basic road data
     ///
-
-    ///
-    /// \brief Returns the OpenDriveId of the road (unique).
-    ///
-    std::string GetOpenDriveId() const;
 
     ///
     /// \brief Returns the start position of the road.
@@ -57,30 +54,30 @@ class Road : public Element {
     double GetStartHeading() const;
 
     ///
-    /// Intersection data
+    /// Junction data
     ///
 
     ///
-    /// \brief Returns whether the road is on an intersection.
+    /// \brief Returns whether the road is on a junction.
     ///
-    bool IsOnIntersection() const;
+    bool IsOnJunction() const;
 
     ///
-    /// \brief Sets the Intersection the road is on.
+    /// \brief Sets the Junction the road is on.
     ///
-    void SetOnIntersection(const Intersection* intersection);
+    void SetOnJunction(const Junction *junction);
 
     ///
-    /// \brief Returns the Intersection the road is on (can be nullptr).
+    /// \brief Returns the Junction the road is on (can be nullptr).
     ///
-    const Intersection* GetIntersection() const;
+    const Junction *GetJunction() const;
 
     ///
     /// Predecessor data
     ///
 
     ///
-    /// \brief Sets the predecessor of the road (must be an Intersection or Road!).
+    /// \brief Sets the predecessor of the road (must be an Junction or Road!).
     /// \param element the new predecessor
     ///
     void SetPredecessor(const Element* element);
@@ -96,16 +93,16 @@ class Road : public Element {
     const Element* GetPredecessor() const { return predecessor; }
 
     ///
-    /// \brief Returns whether the predecessor of this road is an Intersection.
+    /// \brief Returns whether the predecessor of this road is an Junction.
     ///
-    bool IsPredecessorIntersection() const;
+    bool IsPredecessorJunction() const;
 
     ///
     /// Successor data
     ///
 
     ///
-    /// \brief Sets the successor of the road (must be an Intersection or Road!).
+    /// \brief Sets the successor of the road (must be an Junction or Road!).
     /// \param element the new successor
     ///
     void SetSuccessor(const Element* element);
@@ -121,9 +118,9 @@ class Road : public Element {
     const Element* GetSuccessor() const { return successor; }
 
     ///
-    /// \brief Returns whether the successor of this road is an Intersection.
+    /// \brief Returns whether the successor of this road is an Junction.
     ///
-    bool IsSuccessorIntersection() const;
+    bool IsSuccessorJunction() const;
 
     ///
     /// Section data
@@ -156,25 +153,22 @@ class Road : public Element {
     void AddTrafficSign(const TrafficSign* sign);
 
   private:
-    ///
-    /// Basic information about this road.
-    ///
+      ///
+      /// Basic information about this road.
+      ///
+      Common::Vector2d startPos;
+      double roadHdg;
+      double roadLength;
 
-    std::string openDriveId;
-    Common::Vector2d startPos;
-    double roadHdg;
-    double roadLength;
+      ///
+      /// Pointers to other objects which are children / siblings of this road.
+      ///
+      const Element *successor = nullptr;
+      const Element *predecessor = nullptr;
+      const Junction *junctionPtr = nullptr;
 
-    ///
-    /// Pointers to other objects which are children / siblings of this road.
-    ///
-
-    const Element* successor = nullptr;
-    const Element* predecessor = nullptr;
-    const Intersection* intersectionPtr = nullptr;
-
-    std::vector<const Section*> sections;
-    std::vector<const TrafficSign*> trafficSigns;
+      std::vector<const Section *> sections;
+      std::vector<const TrafficSign *> trafficSigns;
 };
 
 } // namespace MentalInfrastructure
