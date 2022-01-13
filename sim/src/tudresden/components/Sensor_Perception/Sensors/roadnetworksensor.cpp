@@ -379,14 +379,11 @@ const MentalInfrastructure::Road *RoadNetworkSensor::ConvertRoad(const OWL::Inte
     double length = road->GetLength();
 
     auto sections = road->GetSections();
-    // std::sort(sections.begin(), sections.end(),
-    //           [](auto &sectionA, auto &sectionB) { return sectionA->GetSOffset() < sectionB->GetSOffset(); });
+    sections.sort([](auto sectionA, auto sectionB) { return sectionA->GetSOffset() < sectionB->GetSOffset(); });
     const auto lanes = sections.front()->GetLanes();
 
     for (const auto &lane : lanes) {
         auto openDriveIdLane = lane->GetOdId();
-
-        // auto tmp = worldData->GetLanes().at(lane->)
 
         if (openDriveIdLane == -1) {
             // Lane with OpenDrive Id = 0 is reference lane of road --> points of reference lane 0 are identical  with
