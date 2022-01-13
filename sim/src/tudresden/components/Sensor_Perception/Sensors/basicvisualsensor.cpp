@@ -55,11 +55,11 @@ void BasicVisualSensor::Trigger(int timestamp, double direction, double distance
 void BasicVisualSensor::Trigger(int timestamp) {
     // use threads for operations
     bool useThreads = true;
-    sensorDirection = egoAgent->GetCurrentGazeState().ufovAngle;
+    sensorDirection = 0; /*egoAgent->GetCurrentGazeState().ufovAngle;*/
     driverPos = Common::Vector2d(egoAgent->GetPositionX(), egoAgent->GetPositionY());
-    minViewAngle = -egoAgent->GetCurrentGazeState().openingAngle / 2.0;
-    maxViewAngle = egoAgent->GetCurrentGazeState().openingAngle / 2.0;
-    viewDistance = egoAgent->GetCurrentGazeState().viewDistance;
+    minViewAngle = -1.6; /*-egoAgent->GetCurrentGazeState().openingAngle / 2.0;*/
+    maxViewAngle = 1.6;  /*egoAgent->GetCurrentGazeState().openingAngle / 2.0;*/
+    viewDistance = 100;  /*egoAgent->GetCurrentGazeState().viewDistance;*/
 
 #if MEASURE_TIME
     using std::chrono::duration;
@@ -140,7 +140,7 @@ void BasicVisualSensor::AgentPerceptionThread(unsigned startIndex, unsigned endI
         }
 
         auto otherPosition = Common::Vector2d(agent->GetPositionX(), agent->GetPositionY());
-        if ((otherPosition - driverPos).Length() > 1.15 * egoAgent->GetCurrentGazeState().viewDistance)
+        if ((otherPosition - driverPos).Length() > 1.15 /* TODO switch to channel * egoAgent->GetCurrentGazeState().viewDistance*/)
             continue;
 
         auto points = obj->area.outer();

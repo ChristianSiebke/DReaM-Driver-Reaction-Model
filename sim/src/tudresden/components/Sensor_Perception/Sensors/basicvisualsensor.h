@@ -47,10 +47,6 @@ private:
 
         auto indicator = agent->GetIndicatorState();
 
-        agent->GetDistanceToStartOfRoad(MeasurementPoint::Reference, mainRoad->GetId());
-
-        agent->GetObjectPosition().referencePoint.at(mainRoad->GetId()).roadPosition.s;
-
         data.id = agent->GetId();
         data.refPosition = Common::Vector2d(agent->GetPositionX(), agent->GetPositionY());
         data.distanceReferencePointToLeadingEdge = agent->GetDistanceReferencePointToLeadingEdge();
@@ -69,12 +65,13 @@ private:
         // TODO von hier weiter machen, es braucht eine Lösung für IsInStreamDirection
         // ich habe noch keinen Weg gefunden herauszufinden in welche Richtung der Agent fährt
 
-        data.sCoordinate =
-            mainLane->IsInStreamDirection() ? agent->GetDistanceToStartOfRoad() : mainRoad->GetLength() - agent->GetDistanceToStartOfRoad();
+        auto dist = agent->GetDistanceToStartOfRoad(MeasurementPoint::Reference, mainRoad->GetId());
+
+        data.sCoordinate = mainLane->GetOdId() < 0 ? dist : mainRoad->GetLength() - dist;
         data.movingInLaneDirection = AgentPerception::IsMovingInLaneDirection(data.lane, data.yawAngle, data.sCoordinate, data.velocity);
-        auto intersectionDistance = data.CalculateIntersectionDistance(data.road, data.lane);
-        data.distanceOnIntersection = intersectionDistance.distanceOnIntersection;
-        data.distanceToNextIntersection = intersectionDistance.distanceToNextIntersection;
+        auto junctionDistance = data.CalculateJunctionDistance(data.road, data.lane);
+        data.distanceOnJunction = junctionDistance.distanceOnJunction;
+        data.distanceToNextJunction = junctionDistance.distanceToNextJunction;
         data.nextLane = InfrastructurePerception::NextLane(data.indicatorState, data.movingInLaneDirection, data.lane);
 
         perceived.InsertElement(std::make_shared<AgentPerception>(data));
