@@ -59,7 +59,8 @@ private:
 
     const MentalInfrastructure::Road *ConvertRoad(const OWL::Interfaces::Road *road);
 
-    const MentalInfrastructure::Section *ConvertSection(const OWL::Interfaces::Section *section);
+    const MentalInfrastructure::Section *ConvertSection(const OWL::Interfaces::Section *section,
+                                                        const MentalInfrastructure::Section **currentSection, const OdId sectionId);
 
     const MentalInfrastructure::Lane *ConvertLane(const OWL::Interfaces::Lane *lane);
 

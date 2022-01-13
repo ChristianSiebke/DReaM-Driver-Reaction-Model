@@ -338,39 +338,28 @@ ConflictAreaCalculator::CalculateChunkJunctionPoint(const std::list<MentalInfras
 //     addLastPoint(lastlaneGeometry, leftPointType, addLeftPoint);
 // }
 
-// const MentalInfrastructure::Section* RoadNetworkSensor::ConvertSection(const OWL::Section* section) {
-//     const Id sectionId = section->GetId();
-//     auto iter = std::find_if(perceptionData->sections.begin(), perceptionData->sections.end(),
-//                              [sectionId](auto element) { return element->GetId() == sectionId; });
-//     if (iter != perceptionData->sections.end()) {
-//         // if the section is already in the infrastructure result skip this
-//         return iter->get();
-//     }
+const MentalInfrastructure::Section *
+RoadNetworkSensor::ConvertSection(const OWL::Section *section, const MentalInfrastructure::Section **currentSection, const OdId sectionId) {
+    auto iter = std::find_if(perceptionData->sections.begin(), perceptionData->sections.end(),
+                             [sectionId](auto element) { return element->GetOpenDriveId() == sectionId; });
+    if (iter != perceptionData->sections.end()) {
+        // if the section is already in the infrastructure result skip this
+        return iter->get();
+    }
 
-//     auto nextSection = section->GetNext();
-//     auto prevSection = section->GetPrevious();
+    auto convertedParentRoad = ConvertRoad(&section->GetRoad());
 
-//     const MentalInfrastructure::Section* successorSectionConverted = nullptr;
-//     const MentalInfrastructure::Section* predecessorSectionConverted = nullptr;
+    auto newSection = std::make_shared<MentalInfrastructure::Section>(sectionId, convertedParentRoad);
+    perceptionData->sections.push_back(newSection);
 
-//     if (nextSection != nullptr)
-//         successorSectionConverted = ConvertSection(nextSection);
-//     if (prevSection != nullptr)
-//         predecessorSectionConverted = ConvertSection(prevSection);
+    auto lanes = section->GetLanes();
+    for (auto lane : lanes) {
+        newSection->AddLane(ConvertLane(const_cast<OWL::Lane *>(lane)));
+    }
 
-//     auto convertedParentRoad = ConvertRoad(&section->GetRoad());
-
-//     auto newSection = std::make_shared<MentalInfrastructure::Section>(sectionId, convertedParentRoad, predecessorSectionConverted,
-//                                                                       successorSectionConverted);
-//     perceptionData->sections.push_back(newSection);
-
-//     auto lanes = section->GetLanes();
-//     for (auto lane : lanes) {
-//         newSection->AddLane(ConvertLane(const_cast<OWL::Lane*>(lane)));
-//     }
-
-//     return newSection.get();
-// }
+    *currentSection = newSection.get();
+    return newSection.get();
+}
 
 const MentalInfrastructure::Road *RoadNetworkSensor::ConvertRoad(const OWL::Interfaces::Road *road) {
     const auto openDriveIdRoad = road->GetId();
@@ -390,8 +379,8 @@ const MentalInfrastructure::Road *RoadNetworkSensor::ConvertRoad(const OWL::Inte
     double length = road->GetLength();
 
     auto sections = road->GetSections();
-    std::sort(sections.begin(), sections.end(),
-              [](auto &sectionA, auto &sectionB) { return sectionA.GetSOffset() < sectionB.GetSOffset(); });
+    // std::sort(sections.begin(), sections.end(),
+    //           [](auto &sectionA, auto &sectionB) { return sectionA->GetSOffset() < sectionB->GetSOffset(); });
     const auto lanes = sections.front()->GetLanes();
 
     for (const auto &lane : lanes) {
@@ -442,8 +431,18 @@ const MentalInfrastructure::Road *RoadNetworkSensor::ConvertRoad(const OWL::Inte
     //     newRoad->AddTrafficSign(ConvertTrafficSign(newRoad.get(), value));
     // }
 
+    const MentalInfrastructure::Section *lastSectionPtr = nullptr;
+
+    int secCtr = 0;
     for (auto section : sections) {
-        newRoad->AddSection(ConvertSection(const_cast<OWL::Interfaces::Section *>(section)));
+        auto newSection = ConvertSection(const_cast<OWL::Interfaces::Section *>(section), &lastSectionPtr,
+                                         openDriveIdRoad + "_sec_" + std::to_string(secCtr));
+        newRoad->AddSection(newSection);
+        const_cast<MentalInfrastructure::Section *>(newSection)
+            ->SetPredecessor(const_cast<MentalInfrastructure::Section *>(lastSectionPtr));
+        const_cast<MentalInfrastructure::Section *>(lastSectionPtr)
+            ->SetPredecessor(const_cast<MentalInfrastructure::Section *>(newSection));
+        secCtr++;
     }
 
     auto isSuccJunction = worldData->GetJunctions().find(road->GetSuccessor()) != worldData->GetJunctions().end();

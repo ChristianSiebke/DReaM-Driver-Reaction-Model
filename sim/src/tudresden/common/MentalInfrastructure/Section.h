@@ -26,8 +26,7 @@ class Road;
 ///
 class Section : public Element {
   public:
-      Section(OdId openDriveId, const Road *road, const Section *predecessor, const Section *successor) :
-          Element(openDriveId), road(road), predecessorSection(predecessor), successorSection(successor) {
+      Section(OdId openDriveId, const Road *road) : Element(openDriveId), road(road) {
       }
     ~Section() override {}
 
@@ -49,6 +48,16 @@ class Section : public Element {
     /// \brief Returns the predecessor section (can be nullptr).
     ///
     const Section* GetPredecessor() const;
+
+    ///
+    /// \brief Sets the successor section (can be nullptr).
+    ///
+    void SetSuccessor(Section *succ);
+
+    ///
+    /// \brief Sets the predecessor section (can be nullptr).
+    ///
+    void SetPredecessor(Section *pred);
 
     ///
     /// Lane data
@@ -78,8 +87,8 @@ class Section : public Element {
   private:
     const Road* road;
 
-    const Section* predecessorSection;
-    const Section* successorSection;
+    Section *predecessorSection = nullptr;
+    Section *successorSection = nullptr;
 
     std::vector<const Lane*> lanes;
 };

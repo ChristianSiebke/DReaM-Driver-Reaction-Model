@@ -8,6 +8,14 @@ const Section* Section::GetSuccessor() const { return successorSection; }
 
 const Section* Section::GetPredecessor() const { return predecessorSection; }
 
+void Section::SetSuccessor(Section *succ) {
+    successorSection = succ;
+}
+
+void Section::SetPredecessor(Section *pred) {
+    predecessorSection = pred;
+}
+
 const std::vector<const Lane*>& Section::GetLanes() const { return lanes; }
 
 void Section::AddLane(const Lane* lane) {

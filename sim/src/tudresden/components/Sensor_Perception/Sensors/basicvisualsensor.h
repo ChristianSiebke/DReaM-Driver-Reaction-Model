@@ -42,8 +42,8 @@ private:
 
         auto mainRoad = worldData->GetRoads().at(agent->GetEgoAgent().GetRoadId());
         auto lanesOnRoad = mainRoad->GetSections().front()->GetLanes(); // TODO adapt for roads with >1 section
-        auto mainLane = *std::find(lanesOnRoad.begin(), lanesOnRoad.end(),
-                                   [agent](auto &obj) { return obj->GetOdId() == agent->GetEgoAgent().GetLaneIdFromRelative(0); });
+        auto mainLane = *std::find_if(lanesOnRoad.begin(), lanesOnRoad.end(),
+                                      [agent](auto &obj) { return obj->GetOdId() == agent->GetEgoAgent().GetLaneIdFromRelative(0); });
 
         auto indicator = agent->GetIndicatorState();
 
@@ -61,9 +61,6 @@ private:
         data.yawAngle = agent->GetYaw();
         data.width = agent->GetWidth();
         data.length = agent->GetLength();
-
-        // TODO von hier weiter machen, es braucht eine Lösung für IsInStreamDirection
-        // ich habe noch keinen Weg gefunden herauszufinden in welche Richtung der Agent fährt
 
         auto dist = agent->GetDistanceToStartOfRoad(MeasurementPoint::Reference, mainRoad->GetId());
 

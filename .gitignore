@@ -23,3 +23,7 @@ doc/source/api.rst
 
 # third party references
 deps/*
+
+# hotfix for <optional> needing to be included
+sim/src/common/spawnPointLibraryDefinitions.h
+sim/src/common/xmlParser.h
