@@ -9,9 +9,10 @@
  ********************************************************************************/
 #pragma once
 
-#include <unordered_map>
-#include <string>
 #include <memory>
+#include <optional>
+#include <string>
+#include <unordered_map>
 #include <vector>
 
 class ParameterInterface;

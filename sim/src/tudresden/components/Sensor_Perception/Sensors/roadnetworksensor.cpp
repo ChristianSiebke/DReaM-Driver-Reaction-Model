@@ -221,122 +221,123 @@ ConflictAreaCalculator::CalculateChunkJunctionPoint(const std::list<MentalInfras
     }
 }
 
-// const MentalInfrastructure::Intersection* RoadNetworkSensor::ConvertJunction(const OWL::Implementation::Junction* junction) {
-//     auto intersectionId = junction->GetId();
-//     auto iter = std::find_if(perceptionData->intersections.begin(), perceptionData->intersections.end(),
-//                              [intersectionId](auto element) { return element->GetId() == intersectionId; });
-//     if (iter != perceptionData->intersections.end()) {
-//         // if the intersection is already in the infrastructure result skip this
-//         return iter->get();
-//     }
+const MentalInfrastructure::Junction *RoadNetworkSensor::ConvertJunction(const OWL::Interfaces::Junction *junction) {
+    auto intersectionId = junction->GetId();
+    auto iter = std::find_if(perceptionData->junctions.begin(), perceptionData->junctions.end(),
+                             [intersectionId](auto element) { return element->GetOpenDriveId() == intersectionId; });
+    if (iter != perceptionData->junctions.end()) {
+        // if the intersection is already in the infrastructure result skip this
+        return iter->get();
+    }
 
-//     auto worldData = static_cast<OWL::WorldData*>(world->GetWorldData());
-//     auto openDriveId = worldData->GetIntersectionIdMapping().at(intersectionId);
+    auto worldData = static_cast<OWL::WorldData *>(world->GetWorldData());
+    auto newJunction = std::make_shared<MentalInfrastructure::Junction>(intersectionId);
+    perceptionData->junctions.push_back(newJunction);
 
-//     auto newIntersection = std::make_shared<MentalInfrastructure::Intersection>(intersectionId, openDriveId);
-//     perceptionData->intersections.push_back(newIntersection);
+    for (auto connectionRoad : junction->GetConnectingRoads()) {
+        auto from = ConvertRoad(const_cast<OWL::Road *>(worldData->GetRoads().at(connectionRoad->GetPredecessor())));
+        auto to = ConvertRoad(const_cast<OWL::Road *>(worldData->GetRoads().at(connectionRoad->GetSuccessor())));
+        auto with = ConvertRoad(const_cast<OWL::Road *>(connectionRoad));
 
-//     for (auto connection : junction->GetAllConnections()) {
-//         auto from = ConvertRoad(const_cast<OWL::Road*>(&worldData->GetRoadById(connection->GetFromId())));
-//         auto to = ConvertRoad(const_cast<OWL::Road*>(&worldData->GetRoadById(connection->GetToId())));
-//         auto with = ConvertRoad(const_cast<OWL::Road*>(&worldData->GetRoadById(connection->GetRoad())));
+        newJunction->AddConnection(from, with, to);
+    }
+    return newJunction.get();
+}
 
-//         newIntersection->AddConnection(from, with, to);
-//     }
-//     return newIntersection.get();
-// }
+const MentalInfrastructure::Lane *RoadNetworkSensor::ConvertLane(const OWL::Lane *lane) {
+    const OwlId laneId = lane->GetId();
+    auto iter = std::find_if(perceptionData->lanes.begin(), perceptionData->lanes.end(),
+                             [laneId](auto element) { return element->GetOwlId() == laneId; });
+    if (iter != perceptionData->lanes.end()) {
+        // if the lane is already in the infrastructure result skip this
+        return iter->get();
+    }
 
-// const MentalInfrastructure::Lane* RoadNetworkSensor::ConvertLane(const OWL::Lane* lane) {
-//     const Id laneId = lane->GetId();
-//     auto iter = std::find_if(perceptionData->lanes.begin(), perceptionData->lanes.end(),
-//                              [laneId](auto element) { return element->GetId() == laneId; });
-//     if (iter != perceptionData->lanes.end()) {
-//         // if the lane is already in the infrastructure result skip this
-//         return iter->get();
-//     }
+    // getting the OpenDrive id of the lane
+    auto openDriveId = lane->GetOdId();
 
-//     // getting the OpenDrive id of the lane
-//     auto openDriveId = static_cast<OWL::WorldData*>(world->GetWorldData())->GetLaneIdMapping().at(lane->GetId());
+    auto newLane =
+        std::make_shared<MentalInfrastructure::Lane>(laneId, openDriveId, lane->GetLength(), lane->GetLaneType(), lane->GetOdId() < 0);
+    perceptionData->lanes.push_back(newLane);
 
-//     auto newLane = std::make_shared<MentalInfrastructure::Lane>(laneId, openDriveId, lane->GetLength(), lane->GetLaneType(),
-//                                                                 lane->IsInStreamDirection());
-//     perceptionData->lanes.push_back(newLane);
+    double width = lane->GetWidth(0);
+    newLane->SetWidth(width);
 
-//     double width = lane->GetWidth(0);
-//     newLane->SetWidth(width);
+    auto worldData = static_cast<OWL::WorldData *>(world->GetWorldData());
 
-//     // adding any successors and predecessors
-//     if (lane->IsInStreamDirection()) {
-//         for (auto succLane : *lane->GetSuccessors()) {
-//             newLane->AddSuccessor(ConvertLane(const_cast<OWL::Lane*>(succLane)));
-//         }
-//         for (auto predLane : *lane->GetPredecessors()) {
-//             newLane->AddPredecessor(ConvertLane(const_cast<OWL::Lane*>(predLane)));
-//         }
+    // adding any successors and predecessors
+    if (lane->GetOdId() < 0) {
+        for (auto succLane : lane->GetNext()) {
+            newLane->AddSuccessor(ConvertLane(const_cast<OWL::Lane *>(worldData->GetLanes().at(succLane))));
+        }
+        for (auto predLane : lane->GetPrevious()) {
+            newLane->AddPredecessor(ConvertLane(const_cast<OWL::Lane *>(worldData->GetLanes().at(predLane))));
+        }
+    }
+    else {
+        for (auto succLane : lane->GetPrevious()) {
+            newLane->AddSuccessor(ConvertLane(const_cast<OWL::Lane *>(worldData->GetLanes().at(succLane))));
+        }
+        for (auto predLane : lane->GetNext()) {
+            newLane->AddPredecessor(ConvertLane(const_cast<OWL::Lane *>(worldData->GetLanes().at(predLane))));
+        }
+    }
 
-//     } else {
-//         for (auto succLane : *lane->GetPredecessors()) {
-//             newLane->AddSuccessor(ConvertLane(const_cast<OWL::Lane*>(succLane)));
-//         }
-//         for (auto predLane : *lane->GetSuccessors()) {
-//             newLane->AddPredecessor(ConvertLane(const_cast<OWL::Lane*>(predLane)));
-//         }
-//     }
+    AddLaneGeometry(newLane.get(), lane);
 
-//     AddLaneGeometry(newLane.get(), lane);
+    // setting the id of the road and the speed limit for this lane
+    const MentalInfrastructure::Section *SectionPtr = nullptr;
+    newLane->SetSection(ConvertSection(const_cast<OWL::Section *>(&lane->GetSection()), &SectionPtr, "fix this shit"));
+    // newLane->SetSpeedLimit(lane->GetLaneSpeedLimit()); //TODO fix: set speed limit somewhere
 
-//     // setting the id of the road and the speed limit for this lane
-//     newLane->SetSection(ConvertSection(const_cast<OWL::Section*>(&lane->GetSection())));
-//     newLane->SetSpeedLimit(lane->GetLaneSpeedLimit());
+    return newLane.get();
+}
 
-//     return newLane.get();
-// }
+void RoadNetworkSensor::AddLaneGeometry(MentalInfrastructure::Lane *newLane, const OWL::Interfaces::Lane *lane) const {
+    // adding all lane geometry
+    auto referencePointType = [](const OWL::Primitive::LaneGeometryJoint::Points points) { return points.reference; };
+    auto rightPointType = [](const OWL::Primitive::LaneGeometryJoint::Points points) { return points.right; };
+    auto leftPointType = [](const OWL::Primitive::LaneGeometryJoint::Points points) { return points.left; };
 
-// void RoadNetworkSensor::AddLaneGeometry(MentalInfrastructure::Lane* newLane, const OWL::Implementation::Lane* lane) const {
-//     // adding all lane geometry
-//     auto referencePointType = [](const OWL::Primitive::LaneGeometryJoint::Points points) { return points.reference; };
-//     auto rightPointType = [](const OWL::Primitive::LaneGeometryJoint::Points points) { return points.right; };
-//     auto leftPointType = [](const OWL::Primitive::LaneGeometryJoint::Points points) { return points.left; };
+    auto addRightPoint = [](MentalInfrastructure::Lane *newLane, double x, double y, double hdg, double so, bool inDirection) {
+        newLane->AddRightPoint(x, y, hdg, so, inDirection);
+    };
+    auto addLeftPoint = [](MentalInfrastructure::Lane *newLane, double x, double y, double hdg, double so, bool inDirection) {
+        newLane->AddLeftPoint(x, y, hdg, so, inDirection);
+    };
+    auto addReferencePoint = [](MentalInfrastructure::Lane *newLane, double x, double y, double hdg, double so, bool inDirection) {
+        newLane->AddReferencePoint(x, y, hdg, so, inDirection);
+    };
 
-//     auto addRightPoint = [](MentalInfrastructure::Lane* newLane, double x, double y, double hdg, double so, bool inDirection) {
-//         newLane->AddRightPoint(x, y, hdg, so, inDirection);
-//     };
-//     auto addLeftPoint = [](MentalInfrastructure::Lane* newLane, double x, double y, double hdg, double so, bool inDirection) {
-//         newLane->AddLeftPoint(x, y, hdg, so, inDirection);
-//     };
-//     auto addReferencePoint = [](MentalInfrastructure::Lane* newLane, double x, double y, double hdg, double so, bool inDirection) {
-//         newLane->AddReferencePoint(x, y, hdg, so, inDirection);
-//     };
+    auto addLaneGeometry = [=](auto pointType, auto addPoint) {
+        std::for_each(lane->GetLaneGeometryElements().begin(), lane->GetLaneGeometryElements().end(),
+                      [newLane, lane, pointType, addPoint](const OWL::Primitive::LaneGeometryElement *laneGeometry) {
+                          double x = pointType(laneGeometry->joints.current.points).x;
+                          double y = pointType(laneGeometry->joints.current.points).y;
+                          double h = laneGeometry->joints.current.sHdg;
+                          double s = laneGeometry->joints.current.sOffset;
 
-//     auto addLaneGeometry = [=](auto pointType, auto addPoint) {
-//         std::for_each(lane->GetLaneGeometryElements().begin(), lane->GetLaneGeometryElements().end(),
-//                       [newLane, lane, pointType, addPoint](const OWL::Primitive::LaneGeometryElement* laneGeometry) {
-//                           double x = pointType(laneGeometry->joints.current.points).x;
-//                           double y = pointType(laneGeometry->joints.current.points).y;
-//                           double h = laneGeometry->joints.current.projectionAxes.sHdg;
-//                           double s = laneGeometry->joints.current.projectionAxes.sOffset;
+                          addPoint(newLane, x, y, h, s, lane->GetOdId() < 0);
+                      });
+    };
+    addLaneGeometry(referencePointType, addReferencePoint);
+    addLaneGeometry(rightPointType, addRightPoint);
+    addLaneGeometry(leftPointType, addLeftPoint);
 
-//                           addPoint(newLane, x, y, h, s, lane->IsInStreamDirection());
-//                       });
-//     };
-//     addLaneGeometry(referencePointType, addReferencePoint);
-//     addLaneGeometry(rightPointType, addRightPoint);
-//     addLaneGeometry(leftPointType, addLeftPoint);
+    auto lastlaneGeometry = lane->GetLaneGeometryElements().back();
+    // adding last lane point
 
-//     auto lastlaneGeometry = lane->GetLaneGeometryElements().back();
-//     // adding last lane point
-
-//     auto addLastPoint = [newLane, lane](const OWL::Primitive::LaneGeometryElement* laneGeometry, auto pointType, auto addPoint) {
-//         double x = pointType(laneGeometry->joints.next.points).x;
-//         double y = pointType(laneGeometry->joints.next.points).y;
-//         double h = laneGeometry->joints.next.projectionAxes.sHdg;
-//         double s = laneGeometry->joints.next.projectionAxes.sOffset;
-//         addPoint(newLane, x, y, h, s, lane->IsInStreamDirection());
-//     };
-//     addLastPoint(lastlaneGeometry, referencePointType, addReferencePoint);
-//     addLastPoint(lastlaneGeometry, rightPointType, addRightPoint);
-//     addLastPoint(lastlaneGeometry, leftPointType, addLeftPoint);
-// }
+    auto addLastPoint = [newLane, lane](const OWL::Primitive::LaneGeometryElement *laneGeometry, auto pointType, auto addPoint) {
+        double x = pointType(laneGeometry->joints.next.points).x;
+        double y = pointType(laneGeometry->joints.next.points).y;
+        double h = laneGeometry->joints.next.sHdg;
+        double s = laneGeometry->joints.next.sOffset;
+        addPoint(newLane, x, y, h, s, lane->GetOdId() < 0);
+    };
+    addLastPoint(lastlaneGeometry, referencePointType, addReferencePoint);
+    addLastPoint(lastlaneGeometry, rightPointType, addRightPoint);
+    addLastPoint(lastlaneGeometry, leftPointType, addLeftPoint);
+}
 
 const MentalInfrastructure::Section *
 RoadNetworkSensor::ConvertSection(const OWL::Section *section, const MentalInfrastructure::Section **currentSection, const OdId sectionId) {
@@ -344,6 +345,7 @@ RoadNetworkSensor::ConvertSection(const OWL::Section *section, const MentalInfra
                              [sectionId](auto element) { return element->GetOpenDriveId() == sectionId; });
     if (iter != perceptionData->sections.end()) {
         // if the section is already in the infrastructure result skip this
+        *currentSection = iter->get();
         return iter->get();
     }
 
