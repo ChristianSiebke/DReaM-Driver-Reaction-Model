@@ -56,7 +56,7 @@ bool StoppingPointCalculation::CalcCrossingLines(const MentalInfrastructure::Lan
     const auto rightmostLane = lanes.front();
     const auto leftmostLane = lanes.back();
 
-    const MentalInfrastructure::Lane *lastLane = nullptr; // TODO: pointer or refernce?
+    const MentalInfrastructure::Lane *lastLane = nullptr; // TODO pointer or refernce?
 
     for (auto lane : lanes) {
         if (!lastLane) {
