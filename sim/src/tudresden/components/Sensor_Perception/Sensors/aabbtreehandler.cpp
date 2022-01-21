@@ -12,24 +12,25 @@ AABBTreeHandler::AABBTreeHandler(WorldInterface *world) :
 void AABBTreeHandler::FirstExecution()
 {
     auto worldData = static_cast<OWL::WorldData *>(world->GetWorldData());
-    auto stationaryObjects = worldData->GetStationaryObjects();
+    // TODO re-enable, currently GetStationaryObjects() cannot be called due to an error while linking...
+    // auto stationaryObjects = worldData->GetStationaryObjects();
     auto trafficSigns = worldData->GetTrafficSigns();
     auto agents = world->GetAgents();
 
     // initial tree generated (size = size of all objects in the world)
     aabbTree = std::make_shared<AABBTree>(stationaryObjects.size() + trafficSigns.size() + agents.size());
 
-    for (const auto &[_, stationaryObject] : stationaryObjects)
-    {
-        auto obj = std::make_shared<ObservedStaticObject>();
-        obj->area = ConstructPolygon(stationaryObject);
-        obj->RecalculateAABB();
-        obj->objectType = ObservedObjectType::Building;
-        obj->id = stationaryObject->GetId();
+    // for (const auto &[_, stationaryObject] : stationaryObjects)
+    // {
+    //     auto obj = std::make_shared<ObservedStaticObject>();
+    //     obj->area = ConstructPolygon(stationaryObject);
+    //     obj->RecalculateAABB();
+    //     obj->objectType = ObservedObjectType::Building;
+    //     obj->id = stationaryObject->GetId();
 
-        aabbTree->InsertObject(obj);
-        this->stationaryObjects.push_back(obj);
-    }
+    //     aabbTree->InsertObject(obj);
+    //     this->stationaryObjects.push_back(obj);
+    // }
 
     for (const auto &[_, trafficSign] : trafficSigns)
     {

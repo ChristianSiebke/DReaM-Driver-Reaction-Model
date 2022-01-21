@@ -7,28 +7,24 @@
 #include "Objects/observeddynamicobject.h"
 #include "Objects/observedstaticobject.h"
 #include "Objects/observedtrafficsign.h"
-#include "core/opSimulation/modules/World_OSI/WorldData.h"
+#include "core/opSimulation/modules/World_OSI/WorldImplementation.h"
 
-class AABBTreeHandler
-{
+class AABBTreeHandler {
 public:
-    static std::shared_ptr<AABBTreeHandler> GetInstance(WorldInterface *world)
-    {
+    static std::shared_ptr<AABBTreeHandler> GetInstance(WorldInterface *world) {
         if (!instance)
             instance = std::shared_ptr<AABBTreeHandler>(new AABBTreeHandler(world));
         return instance;
     }
     std::shared_ptr<AABBTree> GetCurrentAABBTree(int timestamp);
-    static void ResetAABBTreeHandler()
-    {
+    static void ResetAABBTreeHandler() {
         instance.reset();
     }
 
 public:
     AABBTreeHandler(const AABBTreeHandler &) = delete;
     AABBTreeHandler &operator=(const AABBTreeHandler &) = delete;
-    ~AABBTreeHandler()
-    {
+    ~AABBTreeHandler() {
     }
 
 public:
@@ -47,24 +43,21 @@ private:
 
     void FirstExecution();
 
-    static Common::Vector2d RotatePointAroundPoint(Common::Vector2d input, Common::Vector2d pivot, double angle)
-    {
+    static Common::Vector2d RotatePointAroundPoint(Common::Vector2d input, Common::Vector2d pivot, double angle) {
         auto outputX = std::cos(angle) * (input.x - pivot.x) - std::sin(angle) * (input.y - pivot.y) + pivot.x;
         auto outputY = std::sin(angle) * (input.x - pivot.x) + std::cos(angle) * (input.y - pivot.y) + pivot.y;
 
         return Common::Vector2d(outputX, outputY);
     }
 
-    static Polygon2d ConstructPolygon(Common::Vector2d a, Common::Vector2d b, Common::Vector2d c, Common::Vector2d d)
-    {
+    static Polygon2d ConstructPolygon(Common::Vector2d a, Common::Vector2d b, Common::Vector2d c, Common::Vector2d d) {
         Polygon2d polygon{{{a.x, a.y}, {b.x, b.y}, {c.x, c.y}, {d.x, d.y}, {a.x, a.y}}};
         // assert that a valid polygon was generated
         assert(boost::geometry::is_valid(polygon));
         return polygon;
     }
 
-    static Polygon2d ConstructPolygon(const AgentInterface *agent)
-    {
+    static Polygon2d ConstructPolygon(const AgentInterface *agent) {
         auto referencePoint = Common::Vector2d(agent->GetPositionX(), agent->GetPositionY());
 
         const auto length = agent->GetLength();
@@ -87,8 +80,7 @@ private:
         return polygon;
     }
 
-    static Polygon2d ConstructPolygon(const OWL::StationaryObject *object)
-    {
+    static Polygon2d ConstructPolygon(const OWL::StationaryObject *object) {
         auto referencePoint = Common::Vector2d(object->GetReferencePointPosition().x, object->GetReferencePointPosition().y);
 
         const auto length = object->GetDimension().length;
@@ -106,8 +98,7 @@ private:
         return polygon;
     }
 
-    static Polygon2d ConstructPolygon(const OWL::Interfaces::TrafficSign *trafficSign)
-    {
+    static Polygon2d ConstructPolygon(const OWL::Interfaces::TrafficSign *trafficSign) {
         auto referencePoint = Common::Vector2d(trafficSign->GetReferencePointPosition().x, trafficSign->GetReferencePointPosition().y);
 
         const auto length = 0.6;

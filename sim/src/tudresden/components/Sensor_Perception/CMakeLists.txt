@@ -29,6 +29,7 @@ add_openpass_target(
 #     Sensors/trafficsignvisualsensor.h
     Sensors/visualsensorinterface.h
     Sensors/stoppingpointcalculation.h
+    ../../../core/opSimulation/modules/World_OSI/OWL/DataTypes.h
  
   SOURCES
     # MAIN
@@ -55,6 +56,7 @@ add_openpass_target(
     Qt5::Core
     Common
     TUDresdenCommon
+    World_OSI
 
-  LINKOSI
+    LINKOSI
 )

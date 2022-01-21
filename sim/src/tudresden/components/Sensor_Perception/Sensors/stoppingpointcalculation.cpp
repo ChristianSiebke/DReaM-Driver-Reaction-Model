@@ -34,24 +34,16 @@ Line2d StoppingPointCalculation::CalcExtendedLine(const MentalInfrastructure::La
 
 bool StoppingPointCalculation::CalcCrossingLines(const MentalInfrastructure::Lane *succLane, ApproachDirection dir, CrossingLines &lines,
                                                  const MentalInfrastructure::Junction *junction) {
-    auto incomingRoad = succLane->GetSection()->GetRoad();
+    auto incomingRoad = succLane->GetRoad();
     bool roadIsPredJunction = incomingRoad->IsPredecessorJunction() && incomingRoad->GetPredecessor() == junction;
     bool roadIsSuccJunction = incomingRoad->IsSuccessorJunction() && incomingRoad->GetSuccessor() == junction;
 
     const MentalInfrastructure::Section *section = nullptr;
 
-    if (roadIsPredJunction) {
-        section = incomingRoad->GetSections().front(); // TODO distinguish front back?
-    }
-    else if (roadIsSuccJunction) {
-        section = incomingRoad->GetSections().front(); // TODO distinguish front back?
-    }
-    else {
+    if (!roadIsPredJunction && !roadIsSuccJunction)
         return false;
-    }
 
-    auto lanes = section->GetLanes();
-    // laneIds.sort(); TODO - should be obsolete?
+    auto lanes = incomingRoad->GetLanes(); // TODO destinguish front and back of road?
 
     const MentalInfrastructure::Lane *leftmostDrivingLane = nullptr;
     const MentalInfrastructure::Lane *rightmostDrivingLane = nullptr;
@@ -259,13 +251,13 @@ std::map<StoppingPointType, StoppingPoint> StoppingPointCalculation::DetermineSt
     if (rowData.calcPedCross1 && straightSuccLane && crossLineMap.at(ApproachDirection::Right).appDir != ApproachDirection::Invalid) {
         StoppingPointType type = StoppingPointType::Pedestrian_Crossing_ONE;
 
-        stoppingPoints.insert(std::make_pair(type, CalculateStoppingPoint(straightSuccLane->GetSection()->GetRoad(), straightSuccLane,
+        stoppingPoints.insert(std::make_pair(type, CalculateStoppingPoint(straightSuccLane->GetRoad(), straightSuccLane,
                                                                           crossLineMap.at(ApproachDirection::Right).outerLeftLine, type)));
     }
     else if (rowData.calcPedCross1 && straightSuccLane && crossLineMap.at(ApproachDirection::Left).appDir != ApproachDirection::Invalid) {
         StoppingPointType type = StoppingPointType::Pedestrian_Crossing_ONE;
 
-        stoppingPoints.insert(std::make_pair(type, CalculateStoppingPoint(straightSuccLane->GetSection()->GetRoad(), straightSuccLane,
+        stoppingPoints.insert(std::make_pair(type, CalculateStoppingPoint(straightSuccLane->GetRoad(), straightSuccLane,
                                                                           crossLineMap.at(ApproachDirection::Left).outerRightLine, type)));
     }
     else {
@@ -277,13 +269,13 @@ std::map<StoppingPointType, StoppingPoint> StoppingPointCalculation::DetermineSt
     if (rowData.calcPedCross2 && straightSuccLane && crossLineMap.at(ApproachDirection::Right).appDir != ApproachDirection::Invalid) {
         StoppingPointType type = StoppingPointType::Pedestrian_Crossing_TWO;
 
-        stoppingPoints.insert(std::make_pair(type, CalculateStoppingPoint(straightSuccLane->GetSection()->GetRoad(), straightSuccLane,
+        stoppingPoints.insert(std::make_pair(type, CalculateStoppingPoint(straightSuccLane->GetRoad(), straightSuccLane,
                                                                           crossLineMap.at(ApproachDirection::Right).innerRightLine, type)));
     }
     else if (rowData.calcPedCross2 && straightSuccLane && crossLineMap.at(ApproachDirection::Left).appDir != ApproachDirection::Invalid) {
         StoppingPointType type = StoppingPointType::Pedestrian_Crossing_TWO;
 
-        stoppingPoints.insert(std::make_pair(type, CalculateStoppingPoint(straightSuccLane->GetSection()->GetRoad(), straightSuccLane,
+        stoppingPoints.insert(std::make_pair(type, CalculateStoppingPoint(straightSuccLane->GetRoad(), straightSuccLane,
                                                                           crossLineMap.at(ApproachDirection::Left).innerLeftLine, type)));
     }
     else {
@@ -295,7 +287,7 @@ std::map<StoppingPointType, StoppingPoint> StoppingPointCalculation::DetermineSt
     if (rowData.calcPedLeft && leftSuccLane && crossLineMap.at(ApproachDirection::Ego).appDir != ApproachDirection::Invalid) {
         StoppingPointType type = StoppingPointType::Pedestrian_Left;
 
-        stoppingPoints.insert(std::make_pair(type, CalculateStoppingPoint(leftSuccLane->GetSection()->GetRoad(), leftSuccLane,
+        stoppingPoints.insert(std::make_pair(type, CalculateStoppingPoint(leftSuccLane->GetRoad(), leftSuccLane,
                                                                           crossLineMap.at(ApproachDirection::Ego).innerLeftLine, type)));
     }
     else {
@@ -307,7 +299,7 @@ std::map<StoppingPointType, StoppingPoint> StoppingPointCalculation::DetermineSt
     if (rowData.calcPedRight && rightSuccLane && crossLineMap.at(ApproachDirection::Ego).appDir != ApproachDirection::Invalid) {
         StoppingPointType type = StoppingPointType::Pedestrian_Right;
 
-        stoppingPoints.insert(std::make_pair(type, CalculateStoppingPoint(rightSuccLane->GetSection()->GetRoad(), rightSuccLane,
+        stoppingPoints.insert(std::make_pair(type, CalculateStoppingPoint(rightSuccLane->GetRoad(), rightSuccLane,
                                                                           crossLineMap.at(ApproachDirection::Ego).innerRightLine, type)));
     }
     else {
@@ -319,13 +311,13 @@ std::map<StoppingPointType, StoppingPoint> StoppingPointCalculation::DetermineSt
     if (rowData.calcVehicleCross && straightSuccLane && crossLineMap.at(ApproachDirection::Left).appDir != ApproachDirection::Invalid) {
         StoppingPointType type = StoppingPointType::Vehicle_Crossroad;
 
-        stoppingPoints.insert(std::make_pair(type, CalculateStoppingPoint(straightSuccLane->GetSection()->GetRoad(), straightSuccLane,
+        stoppingPoints.insert(std::make_pair(type, CalculateStoppingPoint(straightSuccLane->GetRoad(), straightSuccLane,
                                                                           crossLineMap.at(ApproachDirection::Left).innerRightLine, type)));
     }
     else if (rowData.calcVehicleLeft && straightSuccLane &&
              crossLineMap.at(ApproachDirection::Right).appDir != ApproachDirection::Invalid) {
         StoppingPointType type = StoppingPointType::Vehicle_Crossroad;
-        stoppingPoints.insert(std::make_pair(type, CalculateStoppingPoint(straightSuccLane->GetSection()->GetRoad(), straightSuccLane,
+        stoppingPoints.insert(std::make_pair(type, CalculateStoppingPoint(straightSuccLane->GetRoad(), straightSuccLane,
                                                                           crossLineMap.at(ApproachDirection::Right).innerRightLine, type)));
     }
     else {
@@ -338,7 +330,7 @@ std::map<StoppingPointType, StoppingPoint> StoppingPointCalculation::DetermineSt
         StoppingPointType type = StoppingPointType::Vehicle_Left;
 
         stoppingPoints.insert(
-            std::make_pair(type, CalculateStoppingPoint(leftSuccLane->GetSection()->GetRoad(), leftSuccLane,
+            std::make_pair(type, CalculateStoppingPoint(leftSuccLane->GetRoad(), leftSuccLane,
                                                         crossLineMap.at(ApproachDirection::StraightAhead).centerLine, type)));
     }
     else {
