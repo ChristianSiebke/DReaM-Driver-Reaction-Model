@@ -127,7 +127,7 @@ GazeState RoadSegmentInterface::ScanGlance(CrossingPhase phase) {
     AOIProbabilities aoiProbs = LookUpScanAOIProbability(phase);
     ScanAOI aoi;
     try {
-        // TODO re-add stochastic sampling
+        // FIXME re-add stochastic sampling
         // aoi = static_cast<ScanAOI>(sampler.SampleIntProbability(aoiProbs));
     }
     catch (std::logic_error e) {

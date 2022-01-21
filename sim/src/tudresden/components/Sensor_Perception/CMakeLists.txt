@@ -1,14 +1,16 @@
 set(COMPONENT_NAME Sensor_Perception)
+
+add_compile_definitions(SENSOR_PERCEPTION_LIBRARY)
  
 add_openpass_target(
   NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT module
  
   HEADERS
     # MAIN
-#     sensor_perception_global.h
-#     sensor_perception_implementation.h
-#     sensor_perception_logic.h
-#     sensor_perception.h
+    sensor_perception_global.h
+    sensor_perception.h
+    sensor_perception_implementation.h
+    sensor_perception_logic.h
     # AABBTREE
     AABBTree/aabb.h
     AABBTree/aabbInterface.h
@@ -23,27 +25,28 @@ add_openpass_target(
     # SENSORS
     Sensors/aabbtreehandler.h
     Sensors/basicvisualsensor.h
-#     Sensors/driverperception.h
+    Sensors/driverperception.h
     Sensors/roadnetworksensor.h
     Sensors/simplesensorinterface.h
-#     Sensors/trafficsignvisualsensor.h
+    Sensors/trafficsignvisualsensor.h
     Sensors/visualsensorinterface.h
     Sensors/stoppingpointcalculation.h
+    Sensors/agentperceptioninterface.h
     ../../../core/opSimulation/modules/World_OSI/OWL/DataTypes.h
  
   SOURCES
     # MAIN
-#     sensor_perception_implementation.cpp
-#     sensor_perception_logic.cpp
-#     sensor_perception.cpp
+    sensor_perception.cpp
+    sensor_perception_implementation.cpp
+    sensor_perception_logic.cpp
     # AABBTREE
      AABBTree/aabbtree.cpp
     # SENSORS
     Sensors/aabbtreehandler.cpp
     Sensors/basicvisualsensor.cpp
-#     Sensors/driverperception.cpp
+    Sensors/driverperception.cpp
     Sensors/roadnetworksensor.cpp
-#     Sensors/trafficsignvisualsensor.cpp
+    Sensors/trafficsignvisualsensor.cpp
     Sensors/stoppingpointcalculation.cpp
  
   INCDIRS

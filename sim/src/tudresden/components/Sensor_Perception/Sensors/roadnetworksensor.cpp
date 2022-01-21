@@ -290,7 +290,7 @@ const MentalInfrastructure::Lane *RoadNetworkSensor::ConvertLane(const OWL::Lane
 
     // setting the id of the road and the speed limit for this lane
     newLane->SetRoad(ConvertRoad(&lane->GetSection().GetRoad()));
-    // newLane->SetSpeedLimit(lane->GetLaneSpeedLimit()); //TODO fix: set speed limit somewhere
+    // newLane->SetSpeedLimit(lane->GetLaneSpeedLimit()); // FIXME set speed limit somewhere
 
     return newLane.get();
 }

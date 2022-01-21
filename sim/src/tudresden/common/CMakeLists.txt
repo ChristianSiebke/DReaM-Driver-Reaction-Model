@@ -15,6 +15,7 @@ add_openpass_target(
     WorldRepresentation.h
     RoadSegmentInterface.h
     BehaviourData.h
+    complexSignals.h
  
   SOURCES
     MentalInfrastructure/Element.cpp
@@ -33,6 +34,7 @@ add_openpass_target(
     ${OPENPASS_SIMCORE_DIR}/core
     ${OPENPASS_SIMCORE_DIR}/common
     ../../core/opSimulation/framework/
+    .
  
   LIBRARIES
     Common
