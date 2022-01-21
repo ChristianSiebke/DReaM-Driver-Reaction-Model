@@ -21,7 +21,7 @@
 
 namespace MentalInfrastructure {
 
-class Section;
+class Road;
 ///
 /// \brief Struct to encapsulate a sampled point along the length of a lane.
 ///
@@ -110,17 +110,15 @@ public:
     /// \brief Sets the section that this lane is on.
     /// \param s the new section
     ///
-    void SetSection(const Section *s)
-    {
-        section = s;
+    void SetRoad(const Road *s) {
+        road = s;
     }
 
     ///
-    /// \brief Returns the section this road is on. Used to access the road this lane is on.
+    /// \brief Returns the road this lane is on.
     ///
-    const Section *GetSection() const
-    {
-        return section;
+    const Road *GetRoad() const {
+        return road;
     }
 
     ///
@@ -278,7 +276,7 @@ private:
     LaneType type;
     bool inRoadDirection;
 
-    const Section *section;
+    const Road *road;
     std::list<LanePoint> lanePointsLeftSide;
     std::list<LanePoint> lanePointsReference;
     std::list<LanePoint> lanePointsRightSide;

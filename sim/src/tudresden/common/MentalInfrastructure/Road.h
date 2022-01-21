@@ -21,7 +21,7 @@
 
 namespace MentalInfrastructure {
 
-class Section;
+class Lane;
 class TrafficSign;
 
 ///
@@ -127,15 +127,15 @@ class Road : public Element {
     ///
 
     ///
-    /// \brief Returns all sections this road is made up of.
+    /// \brief Returns all lanes on this road.
     ///
-    const std::vector<const Section*>& GetSections() const;
+    const std::vector<const Lane *> &GetLanes() const;
 
     ///
-    /// \brief Adds a Section to the road.
-    /// \param section the Section to add
+    /// \brief Adds a lane to the road.
+    /// \param lane the Lane to add
     ///
-    void AddSection(const Section* section);
+    void AddLane(const Lane *lane);
 
     ///
     /// TrafficSign data
@@ -167,7 +167,7 @@ class Road : public Element {
       const Element *predecessor = nullptr;
       const Junction *junctionPtr = nullptr;
 
-      std::vector<const Section *> sections;
+      std::vector<const Lane *> lanes;
       std::vector<const TrafficSign *> trafficSigns;
 };
 

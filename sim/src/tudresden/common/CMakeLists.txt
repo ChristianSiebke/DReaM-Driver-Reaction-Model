@@ -6,7 +6,6 @@ add_openpass_target(
     MentalInfrastructure/Junction.h
     MentalInfrastructure/Lane.h
     MentalInfrastructure/Road.h
-    MentalInfrastructure/Section.h
     MentalInfrastructure/Trafficsign.h
     MentalInfrastructure/RoadmapGraph/roadmap_graph.h
     Definitions.h
@@ -22,7 +21,6 @@ add_openpass_target(
     MentalInfrastructure/Junction.cpp
     MentalInfrastructure/Lane.cpp
     MentalInfrastructure/Road.cpp
-    MentalInfrastructure/Section.cpp
     MentalInfrastructure/Trafficsign.cpp
     MentalInfrastructure/RoadmapGraph/roadmap_graph.cpp
     Helper.cpp
