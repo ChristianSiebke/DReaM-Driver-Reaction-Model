@@ -13,7 +13,7 @@
  *****************************************************************************/
 #pragma once
 #include "Common/Helper.h"
-#include "CoreFramework/OpenPassSlave/framework/sampler.h"
+#include "core/opSimulation/framework/sampler.h"
 #include "Common/Definitions.h"
 #include "Common/BehaviourData.h"
 
@@ -41,7 +41,7 @@ namespace RoadSegments {
 class RoadSegmentInterface {
   public:
     RoadSegmentInterface(const WorldRepresentation& worldRepresentation, StochasticsInterface* stochastics, const BehaviourData& behaviourData)
-        : worldRepresentation{worldRepresentation}, stochastics{stochastics}, sampler(*stochastics), behaviourData{behaviourData} {}
+        : worldRepresentation{worldRepresentation}, stochastics{stochastics}, behaviourData{behaviourData} {}
 
     virtual ~RoadSegmentInterface() = default;
 
@@ -85,7 +85,6 @@ class RoadSegmentInterface {
     std::vector<Common::Vector2d> controlFixationPoints;
     const WorldRepresentation& worldRepresentation;
     StochasticsInterface* stochastics;
-    const Sampler sampler;
     const BehaviourData& behaviourData;
 };
 
@@ -98,9 +97,9 @@ class Intersection : public RoadSegmentInterface {
 
   protected:
     std::vector<const MentalInfrastructure::Lane*>
-    CornerSidewalkLanesOfIntersection(const MentalInfrastructure::Intersection* currentIntersection);
+    CornerSidewalkLanesOfIntersection(const MentalInfrastructure::Junction* currentIntersection);
 
-    const MentalInfrastructure::Lane* OncomingStraightConnectionLane(const MentalInfrastructure::Intersection* currentIntersection);
+    const MentalInfrastructure::Lane* OncomingStraightConnectionLane(const MentalInfrastructure::Junction* currentIntersection);
     void SortControlFixPoints(std::vector<Common::Vector2d>& controlFixPointsOnXIntersection);
 };
 } // namespace Node

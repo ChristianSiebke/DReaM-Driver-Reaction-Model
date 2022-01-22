@@ -12,15 +12,15 @@
  * SPDX-License-Identifier: EPL-2.0
  *****************************************************************************/
 #pragma once
-#include "ActionDecision.h"
+#include "Components/ActionDecision/ActionDecision.h"
 #include "Components/ComponentInterface.h"
-#include "Helper.h"
-#include "Navigation.h"
-#include "PerceptionData.h"
-#include "StandardRoad.h"
-#include "XIntersection.h"
+#include "Common/Helper.h"
+#include "Components/Navigation.h"
+#include "Common/PerceptionData.h"
+#include "RoadSegments/StandardRoad.h"
+#include "RoadSegments/XIntersection.h"
 #include "qglobal.h"
-#include "sampler.h"
+#include "core/opSimulation/framework/sampler.h"
 #include <cmath>
 #include <tuple>
 

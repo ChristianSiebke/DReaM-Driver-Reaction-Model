@@ -13,19 +13,20 @@
  *****************************************************************************/
 
 #pragma once
-#include "BehaviourImporter.h"
-#include "CollisionInterpreter.h"
-#include "Common/ComplexSignals.h"
-#include "Components/ComponentInterface.h"
-#include "CrossingInfoInterpreter.h"
-#include "FollowingInterpreter.h"
-#include "Helper.h"
-#include "Memory.h"
-#include "RightOfWayInterpreter.h"
-#include "WorldInterpreter.h"
-#include "WorldRepresentation.h"
 #include <list>
 #include <memory>
+
+#include "Interpreter/CollisionInterpreter.h"
+#include "Common/BehaviourData.h"
+#include "Common/ComplexSignals.h"
+#include "Common/Helper.h"
+#include "Components/ComponentInterface.h"
+#include "Interpreter/CrossingInfoInterpreter.h"
+#include "Interpreter/FollowingInterpreter.h"
+#include "Memory.h"
+#include "Interpreter/RightOfWayInterpreter.h"
+#include "Interpreter/WorldInterpreter.h"
+#include "Common/WorldRepresentation.h"
 
 namespace CognitiveMap {
 class CognitiveMap : public Component::ComponentInterface {

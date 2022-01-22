@@ -13,8 +13,9 @@
  *****************************************************************************/
 
 #pragma once
-#include "InterpreterInterface.h"
 #include <memory>
+
+#include "Interpreter/InterpreterInterface.h"
 struct WorldInterpretation;
 struct WorldRepresentation;
 

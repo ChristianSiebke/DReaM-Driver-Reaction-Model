@@ -13,10 +13,10 @@
  *****************************************************************************/
 
 #pragma once
+#include "Common/Definitions.h"
+#include "Common/Helper.h"
+#include "Common/WorldRepresentation.h"
 #include "Components/ComponentInterface.h"
-#include "Definitions.h"
-#include "Helper.h"
-#include "WorldRepresentation.h"
 namespace ActionDecision {
 
 struct TimeToConflictArea {

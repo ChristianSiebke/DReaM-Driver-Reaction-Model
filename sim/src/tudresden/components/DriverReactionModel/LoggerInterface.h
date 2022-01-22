@@ -12,10 +12,11 @@
  * SPDX-License-Identifier: EPL-2.0
  *****************************************************************************/
 #pragma once
-#include "Logger.h"
-#include "TU_Dresden/Common/PerceptionData.h"
 #include <algorithm>
 #include <cstdint>
+
+#include "Common/PerceptionData.h"
+#include "Logger.h"
 
 class LoggerInterface {
   public:

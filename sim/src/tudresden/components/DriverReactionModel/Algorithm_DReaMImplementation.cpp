@@ -20,12 +20,12 @@
 #include "Common/accelerationSignal.h"
 #include "Common/lateralSignal.h"
 #include "Common/secondaryDriverTasksSignal.h"
-#include "primitiveSignals.h"
-#include "vectorSignals.h"
+#include "Common/primitiveSignals.h"
+#include "Common/vectorSignals.h"
 #include <cassert>
 #include <memory>
 #include <qglobal.h>
-#include <stringSignals.h>
+#include "Common/stringSignal.h"
 
 void AlgorithmDReaMImplementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const>& data, int time) {
     Q_UNUSED(time)
@@ -102,10 +102,10 @@ void AlgorithmDReaMImplementation::UpdateOutput(int localLinkId, std::shared_ptr
     Q_UNUSED(time)
     if (localLinkId == 0) {
         try {
-            data = std::make_shared<LateralSignal const>(out_laneWidth,
+            data = std::make_shared<LateralSignal const>(componentState, out_laneWidth,
                                                          out_lateral_displacement, // lateral deviation
                                                          out_lateral_gain_displacement, out_lateral_heading_error,
-                                                         out_lateral_gain_heading_error, out_curvature, componentState);
+                                                         out_lateral_gain_heading_error, out_curvature);
         } catch (const std::bad_alloc&) {
             const std::string msg = COMPONENTNAME + " could not instantiate signal";
             LOG(CbkLogLevel::Debug, msg);
@@ -113,8 +113,8 @@ void AlgorithmDReaMImplementation::UpdateOutput(int localLinkId, std::shared_ptr
         }
     } else if (localLinkId == 1) {
         try {
-            data = std::make_shared<SecondaryDriverTasksSignal const>(out_routeDecision, out_hornSwitch, out_headLight, out_highBeamLight,
-                                                                      out_flasher, componentState);
+            data = std::make_shared<SecondaryDriverTasksSignal const>(out_indicatorState, out_hornSwitch, out_headLight, out_highBeamLight,
+                                                                      out_flasher, componentState); //TODO do we need NavigationDecision again in here?
         } catch (const std::bad_alloc&) {
             const std::string msg = COMPONENTNAME + " could not instantiate signal";
             LOG(CbkLogLevel::Debug, msg);
@@ -138,7 +138,8 @@ void AlgorithmDReaMImplementation::Trigger(int time) {
         DReaM.UpdateInput(time, egoPerception, ambientAgents, infrastructurePerception, trafficSigns);
         DReaM.UpdateComponents();
 
-        out_routeDecision = DReaM.GetRouteDecision();
+        // out_routeDecision = DReaM.GetRouteDecision(); TODO check if still needed
+        out_indicatorState = static_cast<int>(DReaM.GetWorldRepresentation().egoAgent->GetIndicatorState());
         out_longitudinalaccelerationWish = DReaM.GetAcceleration();
         outGazeState = DReaM.GetGazeState();
         segmentControlFixPoints = DReaM.GetSegmentControlFixationPoints();
@@ -151,14 +152,14 @@ void AlgorithmDReaMImplementation::Trigger(int time) {
         //****************************************
 
         double intersectionDistance;
-        if (DReaM.GetWorldRepresentation().egoAgent->GetDistanceToNextIntersection() >= 0) {
+        if (DReaM.GetWorldRepresentation().egoAgent->GetDistanceToNextJunction() >= 0) {
 
-            intersectionDistance = DReaM.GetWorldRepresentation().egoAgent->GetDistanceToNextIntersection();
+            intersectionDistance = DReaM.GetWorldRepresentation().egoAgent->GetDistanceToNextJunction();
         } else {
-            intersectionDistance = -DReaM.GetWorldRepresentation().egoAgent->GetDistanceOnIntersection();
+            intersectionDistance = -DReaM.GetWorldRepresentation().egoAgent->GetDistanceOnJunction();
         }
-        observerInstance->Insert(time, GetAgent()->GetId(), LoggingGroup::Visualization, "DistanceToIntersection",
-                                 std::to_string(intersectionDistance));
+        // observerInstance->Insert(time, GetAgent()->GetId(), LoggingGroup::Visualization, "DistanceToJunction",
+        //                          std::to_string(intersectionDistance)); //TODO fix naming in visualization
 
     } catch (const char* error) {
         const std::string msg = COMPONENTNAME + " " + error;
@@ -186,10 +187,10 @@ void AlgorithmDReaMImplementation::Trigger(int time) {
     }
 
     // TODO pull out of algorithm modul! -->in action modul
-    GetAgent()->SetCrossingPhase(static_cast<int>(DReaM.GetWorldInterpretation().crossingInfo.phase));
-    GetAgent()->SetOtherAgents(otherAgents);
-    GetAgent()->SetCurrentGazeState(outGazeState);
-    GetAgent()->SetSegmentControlFixationPoints(segmentControlFixPoints);
+    // GetAgent()->SetCrossingPhase(static_cast<int>(DReaM.GetWorldInterpretation().crossingInfo.phase)); FIXME evaluate if still necessary
+    // GetAgent()->SetOtherAgents(otherAgents); FIXME evaluate if still necessary
+    // GetAgent()->SetCurrentGazeState(outGazeState); FIXME evaluate if still necessary
+    // GetAgent()->SetSegmentControlFixationPoints(segmentControlFixPoints); FIXME evaluate if still necessary
     agentStateRecorder->addGazeStates(time, GetAgent()->GetId(), outGazeState);
     agentStateRecorder->addOtherAgents(time, GetAgent()->GetId(), otherAgents);
     agentStateRecorder->addCrossingInfos(time, GetAgent()->GetId(), DReaM.GetWorldInterpretation().crossingInfo);
@@ -206,13 +207,14 @@ void AlgorithmDReaMImplementation::Trigger(int time) {
             DReaM.GetWorldRepresentation().egoAgent->GetVehicleType() == AgentVehicleType::Pedestrian ||
             DReaM.GetWorldRepresentation().egoAgent->GetVehicleType() == AgentVehicleType::Bicycle) {
             // TODO calcualte stopping points for als road users (not only cars)
-            GetAgent()->AddStoppingPoint(DReaM.GetWorldInterpretation().crossingInfo.intersectionOdId, stoppingPoint.second.posX,
-                                         stoppingPoint.second.posY);
+
+            // GetAgent()->AddStoppingPoint(DReaM.GetWorldInterpretation().crossingInfo.intersectionOdId, stoppingPoint.second.posX,
+            //                              stoppingPoint.second.posY); FIXME evaluate if still necessary
         }
     }
 
     if (time == 0) {
-        agentStateRecorder->addStoppingPoints(GetAgent()->GetId(), GetAgent()->GetStoppingPoints());
+        // agentStateRecorder->addStoppingPoints(GetAgent()->GetId(), GetAgent()->GetStoppingPoints()); FIXME
         agentStateRecorder->addConflictPoints(infrastructurePerception->GetConflicPoints());
     }
 }

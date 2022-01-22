@@ -14,10 +14,10 @@
 #ifndef VELOCITYCALCULATION_H
 #define VELOCITYCALCULATION_H
 
+#include "Common/Definitions.h"
+#include "Common/Helper.h"
 #include "Components/ComponentInterface.h"
-#include "Definitions.h"
-#include "TU_Dresden/Common/Helper.h"
-#include "stochasticsInterface.h"
+#include "include/stochasticsInterface.h"
 
 namespace ActionDecision {
 

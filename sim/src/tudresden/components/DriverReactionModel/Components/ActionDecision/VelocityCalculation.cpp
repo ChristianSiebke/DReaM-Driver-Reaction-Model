@@ -20,9 +20,9 @@ double VelocityCalculation::PrepareTargetVelocity() {
             targetVelocity = speedLimit.maxAllowedSpeed;
             // correction for misinterpretation
             if (targetVelocity <= 0.0) {
-                const auto& roadId = mmLane->GetSection()->GetRoad()->GetOpenDriveId();
+                const auto& roadId = mmLane->GetRoad()->GetOpenDriveId();
                 std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
-                                      " | SpeedLimit of Lane: " + std::to_string(mmLane->GetOpenDriveId()) + " on Road: " + roadId +
+                                      " | SpeedLimit of Lane: " + mmLane->GetOpenDriveId() + " on Road: " + roadId +
                                       " <=0 !";
                 throw std::logic_error(message);
             }

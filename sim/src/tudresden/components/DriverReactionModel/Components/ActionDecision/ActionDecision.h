@@ -13,15 +13,16 @@
  *****************************************************************************/
 #pragma once
 
-#include "ActionStateHandler.h"
-#include "Anticipation.h"
-#include "Components/ComponentInterface.h"
-#include "Definitions.h"
-#include "TU_Dresden/Common/Helper.h"
-#include "VelocityCalculation.h"
-#include "stochasticsInterface.h"
 #include <functional>
 #include <iostream>
+
+#include "ActionStateHandler.h"
+#include "Anticipation.h"
+#include "Common/Definitions.h"
+#include "Common/Helper.h"
+#include "Components/ComponentInterface.h"
+#include "VelocityCalculation.h"
+#include "include/stochasticsInterface.h"
 
 namespace ActionDecision {
 using emergencyState = bool;

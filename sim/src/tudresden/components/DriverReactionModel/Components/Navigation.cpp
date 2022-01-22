@@ -12,7 +12,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *****************************************************************************/
 #include "Navigation.h"
-#include "Helper.h"
+#include "Common/Helper.h"
 
 #include <iostream>
 namespace Navigation {
@@ -61,12 +61,10 @@ void Navigation::Update() {
                                                            worldRepresentation.egoAgent->IsMovingInLaneDirection(),
                                                            worldRepresentation.egoAgent->GetLane());
     if (nextLane != nullptr) {
-        const auto road = nextLane->GetSection()->GetRoad();
-        routeDecision.roadID = road->GetId();
+        const auto road = nextLane->GetRoad();
         routeDecision.odRoadID = road->GetOpenDriveId();
-        routeDecision.odLaneID = static_cast<int>(nextLane->GetOpenDriveId());
+        routeDecision.odLaneID = static_cast<int>(std::stoi(nextLane->GetOpenDriveId()));
     } else {
-        routeDecision.roadID = InvalidId;
         routeDecision.odRoadID = "-999";
         routeDecision.odLaneID = -999;
     }
@@ -75,7 +73,7 @@ void Navigation::Update() {
 bool Navigation::ArrivedAtTarget() const { return !targetIsPassed && driverRoutePlanning.ByTarget(); }
 
 bool Navigation::TurningDecisionAtIntersectionHaveToBeSelected() const {
-    return worldRepresentation.egoAgent->NextIntersection() != nullptr && !directionChosen &&
+    return worldRepresentation.egoAgent->NextJunction() != nullptr && !directionChosen &&
            worldInterpretation.crossingInfo.phase == CrossingPhase::Deceleration_TWO;
 }
 
@@ -113,7 +111,7 @@ CrossingType Navigation::DetermineCrossingType(std::list<const RoadmapGraph::Roa
         auto pointNL = std::prev((nextLanePoints).end(), 2);
         Common::Vector2d NextLaneDirection(nextLane->GetLastPoint()->x - pointNL->x, nextLane->GetLastPoint()->y - pointNL->y);
 
-        auto angleDeg = CurrentDirection.AngleBetween(NextLaneDirection) * (180 / M_PI);
+        auto angleDeg = AngleBetween2d(CurrentDirection, NextLaneDirection) * (180 / M_PI);
 
         if (10 >= angleDeg || std::fabs(angleDeg - 180) < 10) {
             return CrossingType::Straight;
@@ -171,7 +169,7 @@ IndicatorState Navigation::ConvertCrossingTypeToIndicator(CrossingType turningDe
     }
 }
 
-bool Navigation::ResetDirectionChosen() const { return worldRepresentation.egoAgent->GetRoad()->IsOnIntersection() && directionChosen; }
+bool Navigation::ResetDirectionChosen() const { return worldRepresentation.egoAgent->GetRoad()->IsOnJunction() && directionChosen; }
 
 bool Navigation::ResetIndicator() const { return worldInterpretation.crossingInfo.phase < CrossingPhase::Deceleration_TWO; }
 

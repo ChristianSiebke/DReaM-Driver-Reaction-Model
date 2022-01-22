@@ -56,18 +56,20 @@
 
 #pragma once
 
-#include "ActionDecision.h"
-#include "CognitiveMap/CognitiveMap.h"
-#include "ComplexSignals.h"
+#include "Common/ComplexSignals.h"
+#include "Components/ActionDecision/ActionDecision.h"
+#include "Components/CognitiveMap/CognitiveMap.h"
+#include "Components/Importer/BehaviourImporter.h"
 #include "DriverReactionModel.h"
-#include "GazeMovement.h"
-#include "Navigation.h"
-#include "TrafficSignMemory.h"
+#include "Components/GazeMovement/GazeMovement.h"
+#include "Components/Navigation.h"
+#include "Components/TrafficSignMemory/TrafficSignMemory.h"
 #include "agentstaterecorder.h"
-#include "modelInterface.h"
-#include "observationInterface.h"
-#include "primitiveSignals.h"
-#include "sampler.h"
+#include "include/modelInterface.h"
+#include "include/observationInterface.h"
+#include "include/publisherInterface.h"
+#include "Common/primitiveSignals.h"
+#include "core/opSimulation/framework/sampler.h"
 /*!
  * \brief models the behavior of the driver
  *
@@ -80,15 +82,14 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
     const std::string COMPONENTNAME = "Driver Reaction Model (DReaM)";
 
     AlgorithmDReaMImplementation(std::string componentName, bool isInit, int priority, int offsetTime, int responseTime, int cycleTime,
-                                 StochasticsInterface* stochastics, const ParameterInterface* parameters,
-                                 const std::map<int, ObservationInterface*>* observations, const CallbackInterface* callbacks,
-                                 AgentInterface* agent)
-        : AlgorithmInterface(componentName, isInit, priority, offsetTime, responseTime, cycleTime, stochastics, parameters, observations,
+                                 StochasticsInterface* stochastics, const ParameterInterface* parameters, PublisherInterface* publisher, 
+                                 const CallbackInterface* callbacks, AgentInterface* agent)
+        : AlgorithmInterface(componentName, isInit, priority, offsetTime, responseTime, cycleTime, stochastics, parameters, publisher, 
                              callbacks, agent),
           logger(agent->GetId()), loggerInterface(logger)
 
     {
-        observerInstance = GetObservations()->at(0);
+        // observerInstance = observations->at(0); FIXME
         BehaviourImporter importer(&loggerInterface);
         behaviourData = importer.GetBehaviourData();
 
@@ -198,7 +199,11 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
 
     // SecondaryDriverTasksSignal
     //*************************************************
-    NavigationDecision out_routeDecision;
+    
+    // NavigationDecision out_routeDecision; TODO evaluate if still needed
+
+    //! State of IndicatorSwitch [-].
+    int out_indicatorState = 0;
     //! Activation of HornSwitch [-].
     bool out_hornSwitch = false;
     //! Activation of Headlight [-].

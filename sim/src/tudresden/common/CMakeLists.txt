@@ -13,7 +13,6 @@ add_openpass_target(
     PerceptionData.h
     threading/ThreadSafeContainer.h
     WorldRepresentation.h
-    RoadSegmentInterface.h
     BehaviourData.h
     complexSignals.h
  
@@ -28,7 +27,6 @@ add_openpass_target(
     PerceptionData.cpp    
     WorldRepresentation.cpp
     libs/magic_enum.hpp
-    RoadSegmentInterface.cpp
  
   INCDIRS
     ${OPENPASS_SIMCORE_DIR}/core

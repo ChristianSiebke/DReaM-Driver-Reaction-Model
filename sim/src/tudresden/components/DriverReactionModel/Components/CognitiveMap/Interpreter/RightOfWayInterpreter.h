@@ -13,7 +13,7 @@
  *****************************************************************************/
 #pragma once
 #include "InterpreterInterface.h"
-#include "RightOfWayRegulationInterface.h"
+#include "RightOfWayRegulation/RightOfWayRegulationInterface.h"
 
 namespace Interpreter {
 

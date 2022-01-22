@@ -132,7 +132,7 @@ void agentStateRecorder::writeOutputFile(){
         conflictPointTree.put("ConflictPoint.<xmlattr>.currentOdRoadId",conflictPoint.currentOpenDriveRoadId);
         conflictPointTree.put("ConflictPoint.<xmlattr>.currentOdLaneId",conflictPoint.currentOpenDriveLaneId);
 
-        conflictPointTree.put("ConflictPoint.<xmlattr>.intersecOdRoadId",conflictPoint.intersectionOpenDriveRoadId);
+        conflictPointTree.put("ConflictPoint.<xmlattr>.intersecOdRoadId",conflictPoint.junctionOpenDriveRoadId);
         conflictPointTree.put("ConflictPoint.<xmlattr>.intersecOdLaneId",conflictPoint.currentOpenDriveLaneId);
 
         conflictPointTree.put("ConflictPoint.<xmlattr>.startX",conflictPoint.start.x);

@@ -81,7 +81,7 @@ std::unique_ptr<AmbientAgentRepresentation> Memory::ExtrapolateAmbientAgent(cons
     auto position = agent->FindNewPositionInDistance(agent->ExtrapolateDistanceAlongLane(cycletime / 1000));
     try {
         AgentPerception data = agent->GetInternalData();
-        const auto newRoad = position->newLane->GetSection()->GetRoad();
+        const auto newRoad = position->newLane->GetRoad();
         auto nextVelocity = data.velocity + data.acceleration * cycletime / 1000;
         if (data.velocity * nextVelocity <= 0.0 && data.velocity != 0.0) {
             // agent change moving direction -->stop
@@ -100,9 +100,9 @@ std::unique_ptr<AmbientAgentRepresentation> Memory::ExtrapolateAmbientAgent(cons
         data.road = newRoad;
         data.lane = position->newLane;
         data.nextLane = InfrastructureRepresentation::NextLane(data.indicatorState, data.movingInLaneDirection, data.lane);
-        auto intersectionDistance = data.CalculateIntersectionDistance(newRoad, position->newLane);
-        data.distanceOnIntersection = intersectionDistance.distanceOnIntersection;
-        data.distanceToNextIntersection = intersectionDistance.distanceToNextIntersection;
+        auto junctionDistance = data.CalculateJunctionDistance(newRoad, position->newLane);
+        data.distanceOnJunction = junctionDistance.distanceOnJunction;
+        data.distanceToNextJunction = junctionDistance.distanceToNextJunction;
 
         return std::make_unique<AmbientAgentRepresentation>(std::make_shared<AgentPerception>(data));
     } catch (std::out_of_range error) {

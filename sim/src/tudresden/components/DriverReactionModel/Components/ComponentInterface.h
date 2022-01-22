@@ -13,9 +13,9 @@
  *****************************************************************************/
 
 #pragma once
-#include "BehaviourData.h"
+#include "Common/BehaviourData.h"
 #include "LoggerInterface.h"
-#include "stochasticsInterface.h"
+#include "include/stochasticsInterface.h"
 
 struct WorldRepresentation;
 struct WorldInterpretation;

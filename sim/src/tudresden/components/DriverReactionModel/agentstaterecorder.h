@@ -1,16 +1,14 @@
 #ifndef AGENTSTATERECORDER_H
 #define AGENTSTATERECORDER_H
-#include <map>
-#include "RoadSegmentInterface.h"
-#include "Definitions.h"
-#include <iostream>
-#include "Common/libs/magic_enum.hpp"
-
-
 #include <boost/foreach.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
+#include <iostream>
+#include <map>
 
+#include "Common/Definitions.h"
+#include "Components/GazeMovement/RoadSegments/RoadSegmentInterface.h"
+#include "Common/libs/magic_enum.hpp"
 
 struct Record{
     std::map<int,std::map<std::string,std::list<std::tuple<double,double>>>> stoppingPoints;

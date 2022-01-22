@@ -14,7 +14,7 @@
 #ifndef ACTIONSTATE_H
 #define ACTIONSTATE_H
 
-#include "TU_Dresden/Common/Helper.h"
+#include "Common/Helper.h"
 
 enum class ActionState { Start = 0, Collision = 1, Following = 2, EgoRoW = 3, IntersectionSituation = 4, End = 5 };
 

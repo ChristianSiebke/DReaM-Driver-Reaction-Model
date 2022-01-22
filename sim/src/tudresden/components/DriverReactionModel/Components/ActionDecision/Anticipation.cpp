@@ -13,8 +13,8 @@
  *****************************************************************************/
 
 #include "Anticipation.h"
-#include "Definitions.h"
-#include "Helper.h"
+#include "Common/Definitions.h"
+#include "Common/Helper.h"
 
 namespace ActionDecision {
 
@@ -239,10 +239,10 @@ double Anticipation::MaximumAccelerationWish(double velTarget, double dv, double
 double Anticipation::CalculatePhaseAcceleration(double velTarget, double v) {
     double distance = std::numeric_limits<double>::infinity();
     if (worldInterpretation.crossingInfo.phase == CrossingPhase::Deceleration_ONE) {
-        distance = worldRepresentation.egoAgent->GetDistanceToNextIntersection() - 25;
+        distance = worldRepresentation.egoAgent->GetDistanceToNextJunction() - 25;
     } else if (worldInterpretation.crossingInfo.phase > CrossingPhase::Deceleration_TWO &&
                worldInterpretation.crossingInfo.phase < CrossingPhase::Exit) {
-        distance = worldRepresentation.egoAgent->GetLane()->GetLength() - worldRepresentation.egoAgent->GetDistanceOnIntersection();
+        distance = worldRepresentation.egoAgent->GetLane()->GetLength() - worldRepresentation.egoAgent->GetDistanceOnJunction();
     }
 
     if (distance < std::numeric_limits<double>::infinity()) {

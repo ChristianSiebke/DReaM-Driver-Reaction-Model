@@ -14,7 +14,7 @@
 #pragma once
 
 #include "InterpreterInterface.h"
-#include "WorldRepresentation.h"
+#include "Common/WorldRepresentation.h"
 #include "qglobal.h"
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/adapted/c_array.hpp>

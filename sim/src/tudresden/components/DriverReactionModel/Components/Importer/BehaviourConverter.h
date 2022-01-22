@@ -1,7 +1,7 @@
 #ifndef BEHAVIOURCONVERTER_H
 #define BEHAVIOURCONVERTER_H
 
-#include "BehaviourData.h"
+#include "Common/BehaviourData.h"
 #include "LoggerInterface.h"
 
 class BehaviourConverter {

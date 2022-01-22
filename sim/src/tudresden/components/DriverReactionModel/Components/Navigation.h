@@ -14,12 +14,12 @@
 
 #pragma once
 #include "ComponentInterface.h"
-#include "Definitions.h"
-#include "Helper.h"
+#include "Common/Definitions.h"
+#include "Common/Helper.h"
 #include "LoggerInterface.h"
-#include "PerceptionData.h"
-#include "RoadmapGraph/roadmap_graph.h"
-#include "stochasticsInterface.h"
+#include "Common/PerceptionData.h"
+#include "Common/MentalInfrastructure/RoadmapGraph/roadmap_graph.h"
+#include "include/stochasticsInterface.h"
 
 namespace Navigation {
 

@@ -12,7 +12,6 @@
  * SPDX-License-Identifier: EPL-2.0
  *****************************************************************************/
 #include "CognitiveMap.h"
-#include "Helper.h"
 namespace CognitiveMap {
 
 CognitiveMap::CognitiveMap(int cycleTime, StochasticsInterface* stochastics, LoggerInterface* loggerInterface,

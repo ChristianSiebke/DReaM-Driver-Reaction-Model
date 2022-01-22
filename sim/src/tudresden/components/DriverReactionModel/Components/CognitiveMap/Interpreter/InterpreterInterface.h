@@ -12,7 +12,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *****************************************************************************/
 #pragma once
-#include "BehaviourData.h"
+#include "Common/BehaviourData.h"
 #include "LoggerInterface.h"
 
 struct WorldInterpretation;

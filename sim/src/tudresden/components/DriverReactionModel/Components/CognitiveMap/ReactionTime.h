@@ -13,10 +13,11 @@
  *****************************************************************************/
 
 #pragma once
-#include "BehaviourData.h"
-#include "Helper.h"
-#include "Interfaces/stochasticsInterface.h"
 #include <deque>
+
+#include "Common/BehaviourData.h"
+#include "Common/Helper.h"
+#include "include/stochasticsInterface.h"
 
 namespace CognitiveMap {
 class ReactionTime {

@@ -154,8 +154,8 @@ bool ActionDecision::observedAgentIsbehindEgoAgent(const std::unique_ptr<AgentIn
 }
 
 bool ActionDecision::ObservedAgentIsInConlictArea(const AmbientAgentRepresentation* agent) const {
-    return agent->GetDistanceOnIntersection() > 0 ||
-           (agent->GetDistanceToNextIntersection() > -1 && agent->GetDistanceToNextIntersection() < 5);
+    return agent->GetDistanceOnJunction() > 0 ||
+           (agent->GetDistanceToNextJunction() > -1 && agent->GetDistanceToNextJunction() < 5);
 }
 
 } // namespace ActionDecision

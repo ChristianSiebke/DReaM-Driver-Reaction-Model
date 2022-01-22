@@ -13,12 +13,12 @@
  *****************************************************************************/
 #pragma once
 
-#include "CommandInterface.h"
+#include "Components/CognitiveMap/CommandInterface.h"
 #include "InterpreterInterface.h"
 #include <algorithm>
 #include <memory>
 #include <vector>
-#include <Definitions.h>
+#include "Common/Definitions.h"
 namespace Interpreter {
 class WorldInterpreter {
   public:

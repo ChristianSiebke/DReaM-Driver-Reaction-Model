@@ -13,11 +13,11 @@
  *****************************************************************************/
 
 #pragma once
-#include "BehaviourData.h"
-#include "Helper.h"
+#include "Common/BehaviourData.h"
+#include "Common/Helper.h"
+#include "Components/TrafficSignMemory/TrafficSignMemory.h"
 #include "ReactionTime.h"
-#include "TrafficSignMemory.h"
-#include "WorldRepresentation.h"
+#include "Common/WorldRepresentation.h"
 
 struct WorldRepresentation;
 

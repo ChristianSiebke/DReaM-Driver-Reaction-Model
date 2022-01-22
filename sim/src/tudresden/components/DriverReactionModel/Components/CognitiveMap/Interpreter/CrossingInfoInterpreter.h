@@ -12,13 +12,13 @@
  * SPDX-License-Identifier: EPL-2.0
  *****************************************************************************/
 #pragma once
-#include "Helper.h"
+#include "Common/Helper.h"
+#include "Common/MentalInfrastructure/Road.h"
+#include "Common/PerceptionData.h"
+#include "Common/vector2d.h"
 #include "InterpreterInterface.h"
-#include "MentalInfrastructure/Road.h"
-#include "PerceptionData.h"
 #include "math.h"
 #include "qglobal.h"
-#include "vector2d.h"
 
 namespace Interpreter {
 
@@ -38,7 +38,7 @@ class CrossingInfoInterpreter : public InterpreterInterface {
     void UpdateStoppingPoints(const WorldRepresentation& representation);
 
     void SetDistanceSP(const AgentRepresentation* representation, const MentalInfrastructure::Road* road,
-                       const MentalInfrastructure::Intersection* nextIntersection,
+                       const MentalInfrastructure::Junction* nextIntersection,
                        StoppingPointMap stoppingpoints);
 
     void DetermineCrossingType(const WorldRepresentation& representation);

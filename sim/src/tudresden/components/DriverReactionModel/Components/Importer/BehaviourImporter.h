@@ -3,7 +3,7 @@
 
 #include "BehaviourConverter.h"
 #include "LoggerInterface.h"
-#include "xmlParser.h"
+#include "Common/xmlParser.h"
 #include <QCoreApplication>
 #include <QDir>
 #include <QDomDocument>

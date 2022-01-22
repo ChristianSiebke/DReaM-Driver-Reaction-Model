@@ -1,14 +1,14 @@
 #ifndef TRAFFICSIGNMEMORY_H
 #define TRAFFICSIGNMEMORY_H
 
-#include "WorldRepresentation.h"
 #include <memory>
 #include <optional>
 #include <string>
 #include <unordered_map>
 
+#include "Common/MentalInfrastructure/Trafficsign.h"
+#include "Common/WorldRepresentation.h"
 #include "Components/ComponentInterface.h"
-#include "Trafficsign.h"
 
 namespace TrafficSignMemory {
 
@@ -29,7 +29,7 @@ class TrafficSignMemory {
     void InsertIntoVisibleTrafficSigns(const MentalInfrastructure::TrafficSign* sign);
 
   private:
-    std::unordered_map<Id, MemorizedTrafficSign> memory;
+    std::unordered_map<OwlId, MemorizedTrafficSign> memory;
     std::unique_ptr<VisibleTrafficSigns> visibleTrafficSigns;
 
     const unsigned int maximumElementsInMemory = 20;

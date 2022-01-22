@@ -13,13 +13,13 @@
  *****************************************************************************/
 
 #pragma once
-#include "ActionDecision.h"
-#include "CognitiveMap.h"
+#include "Components/ActionDecision/ActionDecision.h"
+#include "Components/CognitiveMap/CognitiveMap.h"
 #include "Components/ComponentInterface.h"
-#include "GazeMovement.h"
-#include "Navigation.h"
-#include "RoadSegmentInterface.h"
-#include "TrafficSignMemory.h"
+#include "Components/GazeMovement/GazeMovement.h"
+#include "Components/Navigation.h"
+#include "Components/GazeMovement/RoadSegments/RoadSegmentInterface.h"
+#include "Components/TrafficSignMemory/TrafficSignMemory.h"
 
 class DriverReactionModel {
   public:
