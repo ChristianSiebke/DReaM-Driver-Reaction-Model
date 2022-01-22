@@ -15,7 +15,6 @@
 #include "MentalInfrastructure/Lane.h"
 #include "MentalInfrastructure/Road.h"
 #include "MentalInfrastructure/RoadmapGraph/roadmap_graph.h"
-#include "MentalInfrastructure/Section.h"
 
 struct InfrastructurePerception;
 struct DynamicInfrastructurePerception;

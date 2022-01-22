@@ -6,7 +6,6 @@ add_openpass_target(
     MentalInfrastructure/Junction.h
     MentalInfrastructure/Lane.h
     MentalInfrastructure/Road.h
-    MentalInfrastructure/Section.h
     MentalInfrastructure/Trafficsign.h
     MentalInfrastructure/RoadmapGraph/roadmap_graph.h
     Definitions.h
@@ -16,13 +15,13 @@ add_openpass_target(
     WorldRepresentation.h
     RoadSegmentInterface.h
     BehaviourData.h
+    complexSignals.h
  
   SOURCES
     MentalInfrastructure/Element.cpp
     MentalInfrastructure/Junction.cpp
     MentalInfrastructure/Lane.cpp
     MentalInfrastructure/Road.cpp
-    MentalInfrastructure/Section.cpp
     MentalInfrastructure/Trafficsign.cpp
     MentalInfrastructure/RoadmapGraph/roadmap_graph.cpp
     Helper.cpp
@@ -35,6 +34,7 @@ add_openpass_target(
     ${OPENPASS_SIMCORE_DIR}/core
     ${OPENPASS_SIMCORE_DIR}/common
     ../../core/opSimulation/framework/
+    .
  
   LIBRARIES
     Common

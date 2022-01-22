@@ -127,7 +127,7 @@ GazeState RoadSegmentInterface::ScanGlance(CrossingPhase phase) {
     AOIProbabilities aoiProbs = LookUpScanAOIProbability(phase);
     ScanAOI aoi;
     try {
-        // TODO re-add stochastic sampling
+        // FIXME re-add stochastic sampling
         // aoi = static_cast<ScanAOI>(sampler.SampleIntProbability(aoiProbs));
     }
     catch (std::logic_error e) {
@@ -174,14 +174,12 @@ Junction::CornerSidewalkLanesOfJunction(const MentalInfrastructure::Junction *cu
 
     std::vector<const MentalInfrastructure::Lane *> cornerSidewalkLanes;
     for (const auto &junctionRoad : junctionRoads) {
-        for (auto section : junctionRoad->GetSections()) {
-            for (auto lane : section->GetLanes()) {
-                if (lane->GetType() == LaneType::Sidewalk) {
-                    double hdgFirstPoint = (lane->GetFirstPoint())->hdg;
-                    double hdgLastPoint = (lane->GetLastPoint())->hdg;
-                    if (std::fabs(hdgFirstPoint - hdgLastPoint) > 50 * M_PI / 180) {
-                        cornerSidewalkLanes.push_back(lane);
-                    }
+        for (auto lane : junctionRoad->GetLanes()) {
+            if (lane->GetType() == LaneType::Sidewalk) {
+                double hdgFirstPoint = (lane->GetFirstPoint())->hdg;
+                double hdgLastPoint = (lane->GetLastPoint())->hdg;
+                if (std::fabs(hdgFirstPoint - hdgLastPoint) > 50 * M_PI / 180) {
+                    cornerSidewalkLanes.push_back(lane);
                 }
             }
         }
@@ -193,8 +191,7 @@ const MentalInfrastructure::Lane *Junction::OncomingStraightConnectionLane(const
     // first straight oncoming junction connection lane
     auto conRoadsToCurrentRoad = currentJunctionn->PredecessorConnectionRoads(worldRepresentation.egoAgent->GetRoad());
     for (auto conRoad : conRoadsToCurrentRoad) {
-        auto section = conRoad->GetSections().front();
-        for (auto conLane : section->GetLanes()) {
+        for (auto conLane : conRoad->GetLanes()) {
             if (conLane->GetType() != LaneType::Sidewalk) {
                 Common::Vector2d directionVec = {(conLane->GetFirstPoint())->x, (conLane->GetFirstPoint())->y};
                 Common::Vector2d LaneEndPoint = {(conLane->GetLastPoint()->x), (conLane->GetLastPoint())->y};
@@ -210,8 +207,8 @@ const MentalInfrastructure::Lane *Junction::OncomingStraightConnectionLane(const
                 }
             }
         }
+        return nullptr;
     }
-    return nullptr;
 }
 
 void Junction::SortControlFixPoints(std::vector<Common::Vector2d> &controlFixPointsOnXJunction) {

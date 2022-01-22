@@ -1,6 +1,6 @@
 #include "Road.h"
 
-#include "Section.h"
+#include "Lane.h"
 
 namespace MentalInfrastructure {
 
@@ -67,13 +67,13 @@ void Road::SetSuccessor(const Element *element) {
     successor = element;
 }
 
-const std::vector<const Section *> &Road::GetSections() const {
-    return sections;
+const std::vector<const Lane *> &Road::GetLanes() const {
+    return lanes;
 }
 
-void Road::AddSection(const Section *section) {
-    if (std::find(sections.begin(), sections.end(), section) == sections.end()) {
-        sections.push_back(section);
+void Road::AddLane(const Lane *lane) {
+    if (std::find(lanes.begin(), lanes.end(), lane) == lanes.end()) {
+        lanes.push_back(lane);
     }
 }
 

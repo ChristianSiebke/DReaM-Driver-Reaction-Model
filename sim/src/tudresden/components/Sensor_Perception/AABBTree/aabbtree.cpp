@@ -193,8 +193,6 @@ std::list<std::pair<std::shared_ptr<AABBInterface>, double>> AABBTree::QueryRay(
         }
     }
 
-    // results.sort([](auto& pairA, auto& pairB) { return pairA.second < pairB.second; });  TODO: -->WHY is that out comment!!??? sort is
-    // essential! take in concern whether map would be faster
     return results;
 }
 
@@ -287,7 +285,7 @@ void AABBTree::RemoveLeaf(unsigned int leafNodeIndex)
     }
 
     auto &leafNode = nodes[leafNodeIndex];
-    unsigned parentNodeIndex = leafNode.parentNodeIndex; // TODO:  if parentNodeIndex  AABB_NULL_NODE in next line out-of-bounds
+    unsigned parentNodeIndex = leafNode.parentNodeIndex;
     const auto &parentNode = nodes[parentNodeIndex];
     unsigned grandParentNodeIndex = parentNode.parentNodeIndex;
     unsigned siblingNodeIndex = parentNode.leftNodeIndex == leafNodeIndex ? parentNode.rightNodeIndex : parentNode.leftNodeIndex;
