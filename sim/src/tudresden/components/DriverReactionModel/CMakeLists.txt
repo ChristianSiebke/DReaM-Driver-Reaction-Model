@@ -1,4 +1,4 @@
-set(COMPONENT_NAME Algorithm_DReaM)
+set(COMPONENT_NAME ALGORITHM_DReaM)
  
 add_compile_definitions(ALGORITHM_DReaM_LIBRARY)
 
@@ -36,7 +36,7 @@ add_openpass_target(
     Components/GazeMovement/GazeMovement.h
     Components/GazeMovement/RoadSegments/RoadSegmentInterface.h
     Components/GazeMovement/RoadSegments/StandardRoad.h
-    Components/GazeMovement/RoadSegments/XIntersection.h
+    Components/GazeMovement/RoadSegments/XJunction.h
     Components/Importer/BehaviourConverter.h
     Components/Importer/BehaviourImporter.h
     Components/TrafficSignMemory/TrafficSignMemory.h
@@ -67,14 +67,16 @@ add_openpass_target(
     Components/GazeMovement/GazeMovement.cpp
     Components/GazeMovement/RoadSegments/RoadSegmentInterface.cpp
     Components/GazeMovement/RoadSegments/StandardRoad.cpp
-    Components/GazeMovement/RoadSegments/XIntersection.cpp
+    Components/GazeMovement/RoadSegments/XJunction.cpp
     Components/Importer/BehaviourConverter.cpp
     Components/Importer/BehaviourImporter.cpp
     Components/TrafficSignMemory/TrafficSignMemory.cpp
+    ../../../common/xmlParser.cpp
 
   INCDIRS
     ${OPENPASS_SIMCORE_DIR}/core
     ${OPENPASS_SIMCORE_DIR}/common
+    ../../common
     .
  
   LIBRARIES

@@ -13,7 +13,8 @@
  *****************************************************************************/
 
 #include "FollowingInterpreter.h"
-#include "Helper.h"
+
+#include "common/Helper.h"
 namespace Interpreter {
 
 void FollowingInterpreter::Update(WorldInterpretation* interpretation, const WorldRepresentation& representation) {

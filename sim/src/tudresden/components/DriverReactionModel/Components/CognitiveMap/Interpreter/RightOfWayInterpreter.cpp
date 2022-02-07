@@ -12,9 +12,10 @@
  * SPDX-License-Identifier: EPL-2.0
  *****************************************************************************/
 #include "RightOfWayInterpreter.h"
-#include "Helper.h"
-#include "RightBeforeLeftRegulation.h"
-#include "TrafficSignRegulation.h"
+
+#include "RightOfWayRegulation/RightBeforeLeftRegulation.h"
+#include "RightOfWayRegulation/TrafficSignRegulation.h"
+#include "common/Helper.h"
 
 namespace Interpreter {
 
@@ -27,8 +28,8 @@ void RightOfWayInterpreter::Update(WorldInterpretation* interpretation, const Wo
             RightOfWay rightOfWay{true, true};
 
             auto conflictArea = representation.egoAgent->PossibleConflictAreaAlongLane(*observedAgent);
-            auto intersectionSituation = representation.egoAgent->IntersectionSituation(*observedAgent);
-            if (conflictArea && intersectionSituation) {
+            auto junctionSituation = representation.egoAgent->JunctionSituation(*observedAgent);
+            if (conflictArea && junctionSituation) {
                 rightOfWay = PerformRightOfWayDetermination(*observedAgent, representation);
             }
 

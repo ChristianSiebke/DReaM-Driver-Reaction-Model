@@ -17,7 +17,7 @@
 #include "Common/Definitions.h"
 #include "Common/BehaviourData.h"
 
-using AOIProbabilities = std::unordered_map<int, double>;
+using AOIProbabilities = std::vector<std::pair<int, double>>;
 
 using ObservationAOI = AgentVehicleType;
 
@@ -68,8 +68,7 @@ class RoadSegmentInterface {
     /****************************************
      * HELPER METHODS
      ****************************************/
-    virtual std::unordered_map<int, double>
-    ScaleProbabilitiesToOneAndEliminateNegativeProbabilities(std::unordered_map<int, double> aoiProbs);
+    virtual AOIProbabilities ScaleProbabilitiesToOneAndEliminateNegativeProbabilities(AOIProbabilities aoiProbs);
 
     virtual Common::Vector2d CalculateForesightVector(double foresightRange);
 
@@ -90,17 +89,16 @@ class RoadSegmentInterface {
 
 namespace Node {
 
-class Intersection : public RoadSegmentInterface {
-  public:
+class Junction : public RoadSegmentInterface {
+public:
     using RoadSegmentInterface::RoadSegmentInterface;
-    virtual ~Intersection() = default;
+    virtual ~Junction() = default;
 
-  protected:
-    std::vector<const MentalInfrastructure::Lane*>
-    CornerSidewalkLanesOfIntersection(const MentalInfrastructure::Junction* currentIntersection);
+protected:
+    std::vector<const MentalInfrastructure::Lane *> CornerSidewalkLanesOfJunction(const MentalInfrastructure::Junction *currentJunction);
 
-    const MentalInfrastructure::Lane* OncomingStraightConnectionLane(const MentalInfrastructure::Junction* currentIntersection);
-    void SortControlFixPoints(std::vector<Common::Vector2d>& controlFixPointsOnXIntersection);
+    const MentalInfrastructure::Lane *OncomingStraightConnectionLane(const MentalInfrastructure::Junction *currentJunction);
+    void SortControlFixPoints(std::vector<Common::Vector2d> &controlFixPointsOnXJunction);
 };
 } // namespace Node
 

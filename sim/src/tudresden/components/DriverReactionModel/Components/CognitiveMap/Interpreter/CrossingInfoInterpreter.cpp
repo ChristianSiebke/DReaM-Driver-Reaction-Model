@@ -26,33 +26,33 @@ void CrossingInfoInterpreter::Update(WorldInterpretation* interpretation, const 
 }
 
 void CrossingInfoInterpreter::UpdateStoppingPoints(const WorldRepresentation& representation) {
-    auto nextIntersection = representation.egoAgent->NextIntersection();
+    auto nextJunction = representation.egoAgent->NextJunction();
     auto road = representation.egoAgent->GetRoad();
     auto lane = representation.egoAgent->GetLane();
 
     // setting stopping points
     if (crossingInfo.phase != CrossingPhase::NONE && crossingInfo.egoStoppingPoints.empty()) {
-        crossingInfo.egoStoppingPoints = representation.infrastructure->GetStoppingPoints(nextIntersection->GetId(), lane->GetId());
-        crossingInfo.intersectionOdId = nextIntersection->GetOpenDriveId();
-
+        crossingInfo.egoStoppingPoints = representation.infrastructure->GetStoppingPoints(nextJunction->GetOpenDriveId(), lane->GetOwlId());
+        crossingInfo.junctionOdId = nextJunction->GetOpenDriveId();
     } else if (crossingInfo.phase == CrossingPhase::NONE && !crossingInfo.egoStoppingPoints.empty()) {
         crossingInfo.egoStoppingPoints.clear();
         crossingInfo.otherStoppingpoints.clear();
     }
 
-    SetDistanceSP(representation.egoAgent, road, nextIntersection, crossingInfo.egoStoppingPoints);
+    SetDistanceSP(representation.egoAgent, road, nextJunction, crossingInfo.egoStoppingPoints);
 
     for (auto& agent : *representation.agentMemory) {
-        auto a_nextIntersection = agent->NextIntersection();
+        auto a_nextJunction = agent->NextJunction();
         auto a_road = agent->GetRoad();
         auto a_lane = agent->GetLane();
 
-        if (a_nextIntersection && crossingInfo.phase != CrossingPhase::NONE) {
+        if (a_nextJunction && crossingInfo.phase != CrossingPhase::NONE) {
             if (crossingInfo.otherStoppingpoints.find(agent->GetID()) == crossingInfo.otherStoppingpoints.end()) {
-                auto& stoppingpoints = representation.infrastructure->GetStoppingPoints(a_nextIntersection->GetId(), a_lane->GetId());
+                auto &stoppingpoints =
+                    representation.infrastructure->GetStoppingPoints(a_nextJunction->GetOpenDriveId(), a_lane->GetOwlId());
                 crossingInfo.otherStoppingpoints.insert(std::make_pair(agent->GetID(), stoppingpoints));
             }
-            SetDistanceSP(agent.get(), a_road, a_nextIntersection, crossingInfo.otherStoppingpoints.at(agent->GetID()));
+            SetDistanceSP(agent.get(), a_road, a_nextJunction, crossingInfo.otherStoppingpoints.at(agent->GetID()));
         }
     }
 }
@@ -64,40 +64,41 @@ void CrossingInfoInterpreter::Localize(const WorldRepresentation& representation
 
 void CrossingInfoInterpreter::DetermineCrossingType(const WorldRepresentation& representation) {
     // assigning Crossing Type  until entrance intersecion
-    if (representation.egoAgent->NextIntersection() != nullptr) {
-
+    if (representation.egoAgent->NextJunction() != nullptr) {
         if (representation.egoAgent->GetVehicleType() == AgentVehicleType::Car) {
-
             if (representation.egoAgent->GetIndicatorState() == IndicatorState::IndicatorState_Left) {
                 crossingInfo.type = CrossingType::Left;
-            } else if (representation.egoAgent->GetIndicatorState() == IndicatorState::IndicatorState_Right) {
+            }
+            else if (representation.egoAgent->GetIndicatorState() == IndicatorState::IndicatorState_Right) {
                 crossingInfo.type = CrossingType::Right;
-            } else {
+            }
+            else {
                 crossingInfo.type = CrossingType::Straight;
             }
-        } else if (representation.egoAgent->GetVehicleType() == AgentVehicleType::Pedestrian ||
-                   representation.egoAgent->GetVehicleType() == AgentVehicleType::Bicycle) {
+        }
+        else if (representation.egoAgent->GetVehicleType() == AgentVehicleType::Pedestrian ||
+                 representation.egoAgent->GetVehicleType() == AgentVehicleType::Bicycle) {
             crossingInfo.type = CrossingType::Straight;
         }
     }
 }
 
-void CrossingInfoInterpreter::DetermineCrossingPhase(const WorldRepresentation& representation) {
+void CrossingInfoInterpreter::DetermineCrossingPhase(const WorldRepresentation &representation) {
     auto road = representation.egoAgent->GetRoad();
-    auto nextIntersection = representation.egoAgent->NextIntersection();
+    auto nextJunction = representation.egoAgent->NextJunction();
 
-    if (nextIntersection != nullptr && representation.egoAgent->GetDistanceToNextIntersection() < 75) {
-
-        if (representation.egoAgent->GetDistanceToNextIntersection() < 25) {
+    if (nextJunction != nullptr && representation.egoAgent->GetDistanceToNextJunction() < 75) {
+        if (representation.egoAgent->GetDistanceToNextJunction() < 25) {
             crossingInfo.phase = CrossingPhase::Deceleration_TWO;
-        } else if (representation.egoAgent->GetDistanceToNextIntersection() < 50) {
+        }
+        else if (representation.egoAgent->GetDistanceToNextJunction() < 50) {
             crossingInfo.phase = CrossingPhase::Deceleration_ONE;
-        } else {
+        }
+        else {
             crossingInfo.phase = CrossingPhase::Approach;
         }
-
-    } else if (road->IsOnIntersection()) {
-
+    }
+    else if (road->IsOnJunction()) {
         StoppingPoint entry = crossingInfo.egoStoppingPoints.at(StoppingPointType::Pedestrian_Crossing_ONE);
         StoppingPoint vehicle_oncoming_left = crossingInfo.egoStoppingPoints.at(StoppingPointType::Vehicle_Left);
         StoppingPoint exit;
@@ -113,36 +114,38 @@ void CrossingInfoInterpreter::DetermineCrossingPhase(const WorldRepresentation& 
             throw std::runtime_error(message);
         }
 
-        if (representation.egoAgent->GetDistanceOnIntersection() < entry.sOffset) {
+        if (representation.egoAgent->GetDistanceOnJunction() < entry.sOffset) {
             crossingInfo.phase = CrossingPhase::Deceleration_TWO;
-
-        } else if (crossingInfo.type == CrossingType::Left &&
-                   representation.egoAgent->GetDistanceOnIntersection() < vehicle_oncoming_left.sOffset) {
+        }
+        else if (crossingInfo.type == CrossingType::Left &&
+                 representation.egoAgent->GetDistanceOnJunction() < vehicle_oncoming_left.sOffset) {
             crossingInfo.phase = CrossingPhase::Crossing_Left_ONE;
-
-        } else if (representation.egoAgent->GetDistanceOnIntersection() > exit.sOffset) {
+        }
+        else if (representation.egoAgent->GetDistanceOnJunction() > exit.sOffset) {
             crossingInfo.phase = CrossingPhase::Exit;
-
-        } else if (crossingInfo.type == CrossingType::Left && representation.egoAgent->GetDistanceOnIntersection() < exit.sOffset) {
+        }
+        else if (crossingInfo.type == CrossingType::Left && representation.egoAgent->GetDistanceOnJunction() < exit.sOffset) {
             crossingInfo.phase = CrossingPhase::Crossing_Left_TWO;
-
-        } else if (crossingInfo.type == CrossingType::Right && representation.egoAgent->GetDistanceOnIntersection() < exit.sOffset) {
+        }
+        else if (crossingInfo.type == CrossingType::Right && representation.egoAgent->GetDistanceOnJunction() < exit.sOffset) {
             crossingInfo.phase = CrossingPhase::Crossing_Right;
-
-        } else if (crossingInfo.type == CrossingType::Straight && representation.egoAgent->GetDistanceOnIntersection() < exit.sOffset) {
+        }
+        else if (crossingInfo.type == CrossingType::Straight && representation.egoAgent->GetDistanceOnJunction() < exit.sOffset) {
             crossingInfo.phase = CrossingPhase::Crossing_Straight;
-        } else {
+        }
+        else {
             std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "can not determine CrossingPhase!";
             throw std::runtime_error(message);
         }
-    } else {
+    }
+    else {
         crossingInfo.phase = CrossingPhase::NONE;
         crossingInfo.type = CrossingType::NA;
     }
 }
 
-void CrossingInfoInterpreter::SetDistanceSP(const AgentRepresentation* representation, const MentalInfrastructure::Road* road,
-                                            const MentalInfrastructure::Intersection* nextIntersection, StoppingPointMap stoppingpoints) {
+void CrossingInfoInterpreter::SetDistanceSP(const AgentRepresentation *representation, const MentalInfrastructure::Road *road,
+                                            const MentalInfrastructure::Junction *nextJunction, StoppingPointMap stoppingpoints) {
     if (stoppingpoints.empty()) {
         return;
     }
@@ -152,11 +155,11 @@ void CrossingInfoInterpreter::SetDistanceSP(const AgentRepresentation* represent
             continue;
         }
 
-        if (nextIntersection) {
-            sp.second.distanceToEgo = sp.second.sOffset + representation->GetDistanceToNextIntersection() -
-                                      representation->GetDistanceReferencePointToLeadingEdge();
-
-        } else if (road->IsOnIntersection()) {
+        if (nextJunction) {
+            sp.second.distanceToEgo =
+                sp.second.sOffset + representation->GetDistanceToNextJunction() - representation->GetDistanceReferencePointToLeadingEdge();
+        }
+        else if (road->IsOnJunction()) {
             sp.second.distanceToEgo =
                 sp.second.sOffset - representation->GetSCoordinate() - representation->GetDistanceReferencePointToLeadingEdge();
         }

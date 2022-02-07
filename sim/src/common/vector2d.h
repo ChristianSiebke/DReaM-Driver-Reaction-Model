@@ -181,6 +181,22 @@ public:
         return atan2(y, x);
     }
 
+    /*!
+     * \brief AngleBetween
+     * returns the angle between two vectors
+     * \return angle between [rad]
+     */
+    double AngleBetween(const Vector2d &vectorB) {
+        auto cosAngle = this->Dot(vectorB) / (std::fabs(this->Length()) * std::fabs(vectorB.Length()));
+        if (cosAngle < -1.0) {
+            cosAngle = -1.0;
+        }
+        else if (cosAngle > 1.0) {
+            cosAngle = 1.0;
+        }
+        return std::acos(cosAngle);
+    }
+
     constexpr Vector2d operator-(const Vector2d &in) const noexcept
     {
         return Vector2d(x - in.x, y - in.y);

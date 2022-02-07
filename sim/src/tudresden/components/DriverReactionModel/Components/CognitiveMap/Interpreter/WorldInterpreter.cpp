@@ -13,7 +13,8 @@
  *****************************************************************************/
 
 #include "WorldInterpreter.h"
-#include "CognitiveMap.h"
+
+#include "Components/CognitiveMap/CognitiveMap.h"
 namespace Interpreter {
 void WorldInterpreter::SetCommand(std::unique_ptr<CognitiveMap::CommandInterface> command) { commands.push_back(std::move(command)); }
 

@@ -13,9 +13,11 @@
  *****************************************************************************/
 
 #include "CollisionInterpreter.h"
-#include "Helper.h"
+
 #include <future>
 #include <iostream>
+
+#include "common/Helper.h"
 
 namespace Interpreter {
 
@@ -32,11 +34,11 @@ const int CIRCLE_POLYGON_PRECISION = 8;
 // used for debug output
 const bool DEBUG_OUT = true;
 
-void CollisionInterpreter::Update(WorldInterpretation* interpretation, const WorldRepresentation& representation) {
+void CollisionInterpreter::Update(WorldInterpretation *interpretation, const WorldRepresentation &representation) {
     DetermineCollisionPoints(interpretation, representation);
 };
 
-void CollisionInterpreter::DetermineCollisionPoints(WorldInterpretation* interpretation, const WorldRepresentation& representation) {
+void CollisionInterpreter::DetermineCollisionPoints(WorldInterpretation *interpretation, const WorldRepresentation &representation) {
     try {
         Log("Calculating Collisionpoints");
         numberCollisionPoints = 0;
@@ -44,7 +46,7 @@ void CollisionInterpreter::DetermineCollisionPoints(WorldInterpretation* interpr
             Log("No surrounding agents... returning...", LogLevel_new::warning);
             return;
         }
-        for (const auto& agent : *representation.agentMemory) {
+        for (const auto &agent : *representation.agentMemory) {
             auto possibleCollisionPoint = CalculationCollisionPoint(representation, *agent);
             auto agentInterpretation = &interpretation->interpretedAgents.at(agent->GetID());
             (*agentInterpretation)->collisionPoint = possibleCollisionPoint;
@@ -52,23 +54,24 @@ void CollisionInterpreter::DetermineCollisionPoints(WorldInterpretation* interpr
             if (possibleCollisionPoint) {
                 if (DEBUG_OUT)
                     Log("No Collision with Agent:" + std::to_string(agent->GetID()) + " should occur.");
-            } else {
+            }
+            else {
                 if (DEBUG_OUT)
                     Log("Collision with Agent:" + std::to_string(agent->GetID()) + " might occur!");
                 numberCollisionPoints++;
             }
         }
         Log("Finished calculating collision points" + std::to_string(numberCollisionPoints) + " collision points, returning...");
-
-    } catch (...) {
+    }
+    catch (...) {
         std::string message =
             "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " Update collision points failed";
         Log(message, error);
     }
 }
 
-std::optional<CollisionPoint> CollisionInterpreter::CalculationCollisionPoint(const WorldRepresentation& representation,
-                                                                              const AgentRepresentation& observedAgent) const {
+std::optional<CollisionPoint> CollisionInterpreter::CalculationCollisionPoint(const WorldRepresentation &representation,
+                                                                              const AgentRepresentation &observedAgent) const {
     std::vector<std::future<std::optional<CollisionPoint>>> futures;
     std::vector<CollisionPoint> resultCP;
 
@@ -83,7 +86,7 @@ std::optional<CollisionPoint> CollisionInterpreter::CalculationCollisionPoint(co
                                      representation, observedAgent));
     }
 
-    for (auto& f : futures) {
+    for (auto &f : futures) {
         auto cp = f.get();
         if (cp) {
             resultCP.push_back(*cp);
@@ -98,8 +101,8 @@ std::optional<CollisionPoint> CollisionInterpreter::CalculationCollisionPoint(co
 }
 
 std::optional<CollisionPoint> CollisionInterpreter::PerformCollisionPointCalculation(double timeStart, double timeEnd,
-                                                                                     const WorldRepresentation& representation,
-                                                                                     const AgentRepresentation& observedAgent) const {
+                                                                                     const WorldRepresentation &representation,
+                                                                                     const AgentRepresentation &observedAgent) const {
     for (auto time = timeStart; time <= timeEnd; time += TIME_STEP) {
         double egoDistance = representation.egoAgent->ExtrapolateDistanceAlongLane(time);
         double observedDistance = observedAgent.ExtrapolateDistanceAlongLane(time);
@@ -138,7 +141,7 @@ std::optional<CollisionPoint> CollisionInterpreter::PerformCollisionPointCalcula
     return std::nullopt;
 }
 
-polygon_t CollisionInterpreter::ConstructAgentPolygonRepresentation(const AgentRepresentation& data, const Common::Vector2d pos,
+polygon_t CollisionInterpreter::ConstructAgentPolygonRepresentation(const AgentRepresentation &data, const Common::Vector2d pos,
                                                                     const double hdg) const {
     switch (data.GetVehicleType()) {
     case AgentVehicleType::Car:
@@ -154,7 +157,7 @@ polygon_t CollisionInterpreter::ConstructAgentPolygonRepresentation(const AgentR
     }
 }
 
-polygon_t CollisionInterpreter::ConstructPolygonRepresentation(const AgentRepresentation& agent, const Common::Vector2d pos,
+polygon_t CollisionInterpreter::ConstructPolygonRepresentation(const AgentRepresentation &agent, const Common::Vector2d pos,
                                                                const double hdg) const {
     // Initial bounding box in local coordinate system
     double safetyMargin = 0.05;

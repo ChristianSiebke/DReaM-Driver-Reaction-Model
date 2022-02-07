@@ -79,25 +79,28 @@ void GazeMovement::DetermineGazeState() {
 }
 
 void GazeMovement::UpdateRoadSegment() {
-    if ((worldRepresentation.egoAgent->GetDistanceToNextIntersection() <= 75 &&
-             worldRepresentation.egoAgent->GetDistanceToNextIntersection() >= 0) ||
-        worldRepresentation.egoAgent->GetDistanceOnIntersection() > 0) {
-        auto NextIntersection = worldRepresentation.egoAgent->NextIntersection();
-        if (NextIntersection != nullptr) {
-            if (NextIntersection->GetIncomingRoads().size() == 4) {
-                if (currentSegmentType != SegmentType::XIntersection) {
-                    roadSegment = std::make_unique<XIntersection>(worldRepresentation, GetStochastic(), GetBehaviourData());
-                    currentSegmentType = SegmentType::XIntersection;
+    if ((worldRepresentation.egoAgent->GetDistanceToNextJunction() <= 75 &&
+         worldRepresentation.egoAgent->GetDistanceToNextJunction() >= 0) ||
+        worldRepresentation.egoAgent->GetDistanceOnJunction() > 0) {
+        auto NextJunction = worldRepresentation.egoAgent->NextJunction();
+        if (NextJunction != nullptr) {
+            if (NextJunction->GetIncomingRoads().size() == 4) {
+                if (currentSegmentType != SegmentType::XJunction) {
+                    roadSegment = std::make_unique<XJunction>(worldRepresentation, GetStochastic(), GetBehaviourData());
+                    currentSegmentType = SegmentType::XJunction;
                 }
-            } else {
+            }
+            else {
                 std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "unknown node segment";
                 throw std::runtime_error(message);
             }
         }
-    } else if (currentSegmentType != SegmentType::StandardRoad) {
+    }
+    else if (currentSegmentType != SegmentType::StandardRoad) {
         roadSegment = std::make_unique<StandardRoad>(worldRepresentation, GetStochastic(), GetBehaviourData());
         currentSegmentType = SegmentType::StandardRoad;
-    } else {
+    }
+    else {
         // TODO default message --> more specific description for standardRoad needed
         // std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "unknown node segment";
         // throw std::runtime_error(message);

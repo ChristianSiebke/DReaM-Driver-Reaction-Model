@@ -30,7 +30,7 @@ AOIProbabilities StandardRoad::LookUpScanAOIProbability(CrossingPhase phase) {
             DistributionEntry* de = prob.second.get();
             double dist = stochastics->GetNormalDistributed(de->mean, de->std_deviation);
             double value = Common::ValueInBounds(de->min, dist, de->max);
-            aoiProbs.insert(std::make_pair(static_cast<int>(prob.first), value));
+            aoiProbs.push_back(std::make_pair(static_cast<int>(prob.first), value));
         }
 //        // gaze fixation for straight road or far away from intersection
 //        aoiProbs.insert(std::make_pair(static_cast<int>(ScanAOI::Dashboard),

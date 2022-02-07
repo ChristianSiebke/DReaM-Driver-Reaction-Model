@@ -12,34 +12,35 @@
  * SPDX-License-Identifier: EPL-2.0
  *****************************************************************************/
 #pragma once
-#include "Components/ActionDecision/ActionDecision.h"
-#include "Components/ComponentInterface.h"
-#include "Common/Helper.h"
-#include "Components/Navigation.h"
-#include "Common/PerceptionData.h"
-#include "RoadSegments/StandardRoad.h"
-#include "RoadSegments/XIntersection.h"
-#include "qglobal.h"
-#include "core/opSimulation/framework/sampler.h"
 #include <cmath>
 #include <tuple>
+
+#include "Common/Helper.h"
+#include "Common/PerceptionData.h"
+#include "Components/ActionDecision/ActionDecision.h"
+#include "Components/ComponentInterface.h"
+#include "Components/Navigation.h"
+#include "RoadSegments/StandardRoad.h"
+#include "RoadSegments/XJunction.h"
+#include "core/opSimulation/framework/sampler.h"
+#include "qglobal.h"
 
 namespace RoadSegments {
 class RoadSegmentInterface;
 namespace Node {
-class XIntersection;
+class XJunction;
 } // namespace Node
 namespace Edge {
 class StandardRoad;
 }
 } // namespace RoadSegments
 using RoadSegmentInterface = RoadSegments::RoadSegmentInterface;
-using XIntersection = RoadSegments::Node::XIntersection;
+using XJunction = RoadSegments::Node::XJunction;
 using StandardRoad = RoadSegments::Edge::StandardRoad;
 
 namespace GazeMovement {
 
-enum class SegmentType { NONE, XIntersection, StandardRoad };
+enum class SegmentType { NONE, XJunction, StandardRoad };
 
 class GazeMovement : public Component::ComponentInterface {
   public:
@@ -88,5 +89,5 @@ class GazeMovement : public Component::ComponentInterface {
 
     int durationCounter = 0;
 };
-//} // namespace RoadSegments
+// namespace RoadSegments
 } // namespace GazeMovement

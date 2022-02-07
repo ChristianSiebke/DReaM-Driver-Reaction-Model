@@ -3,7 +3,7 @@
 namespace TrafficSignMemory {
 
 struct VectorCompare {
-    bool operator()(std::pair<Id, MemorizedTrafficSign> const& left, std::pair<Id, MemorizedTrafficSign> const& right) const {
+    bool operator()(std::pair<OwlId, MemorizedTrafficSign> const &left, std::pair<OwlId, MemorizedTrafficSign> const &right) const {
         return left.second.lastTimeStamp < right.second.lastTimeStamp;
     }
 };
@@ -11,14 +11,14 @@ struct VectorCompare {
 VisibleTrafficSigns* TrafficSignMemory::Update(int timestamp, std::vector<const MentalInfrastructure::TrafficSign*> input) {
 
     for (const auto& trafficSign : input) {
-        if (memory.find(trafficSign->GetId()) == memory.end()) {
+        if (memory.find(trafficSign->GetOwlId()) == memory.end()) {
             // the sign has its first appearance
-            memory.insert(std::make_pair(trafficSign->GetId(), MemorizedTrafficSign{trafficSign, timestamp, timestamp}));
+            memory.insert(std::make_pair(trafficSign->GetOwlId(), MemorizedTrafficSign{trafficSign, timestamp, timestamp}));
             InsertIntoVisibleTrafficSigns(trafficSign);
             continue;
         }
 
-        memory.at(trafficSign->GetId()).lastTimeStamp = timestamp;
+        memory.at(trafficSign->GetOwlId()).lastTimeStamp = timestamp;
     }
 
     // in loop element removal based on https://stackoverflow.com/questions/8234779/how-to-remove-from-a-map-while-iterating-it
@@ -36,7 +36,7 @@ VisibleTrafficSigns* TrafficSignMemory::Update(int timestamp, std::vector<const 
     auto overhead = memory.size() - maximumTimeInMemoryMs;
     if (overhead > 0) {
         // sort signs based on their last appearance
-        std::vector<std::pair<Id, MemorizedTrafficSign>> toSort(memory.begin(), memory.end());
+        std::vector<std::pair<OwlId, MemorizedTrafficSign>> toSort(memory.begin(), memory.end());
         std::sort(toSort.begin(), toSort.end(), VectorCompare());
 
         for (auto i = toSort.size(); i >= overhead; i--) {
@@ -50,32 +50,32 @@ VisibleTrafficSigns* TrafficSignMemory::Update(int timestamp, std::vector<const 
 
 void TrafficSignMemory::InsertIntoVisibleTrafficSigns(const MentalInfrastructure::TrafficSign* sign) {
     // check if a sign on this road was already seen
-    auto foundRoadInVisibleTrafficSigns = visibleTrafficSigns->trafficSigns.find(sign->GetRoad()->GetId());
+    auto foundRoadInVisibleTrafficSigns = visibleTrafficSigns->trafficSigns.find(sign->GetRoad()->GetOpenDriveId());
 
     // if not add the road
     if (foundRoadInVisibleTrafficSigns == visibleTrafficSigns->trafficSigns.end()) {
-        std::unordered_map<MentalInfrastructure::TrafficSignType, std::unordered_map<Id, const MentalInfrastructure::TrafficSign*>> tmp;
-        visibleTrafficSigns->trafficSigns.insert(std::make_pair(sign->GetRoad()->GetId(), tmp));
+        std::unordered_map<MentalInfrastructure::TrafficSignType, std::unordered_map<OwlId, const MentalInfrastructure::TrafficSign *>> tmp;
+        visibleTrafficSigns->trafficSigns.insert(std::make_pair(sign->GetRoad()->GetOpenDriveId(), tmp));
     }
 
-    auto parentToEdit = &visibleTrafficSigns->trafficSigns.find(sign->GetRoad()->GetId())->second;
+    auto parentToEdit = &visibleTrafficSigns->trafficSigns.find(sign->GetRoad()->GetOpenDriveId())->second;
 
     // check if a sign of this type was already seen
     auto foundType = parentToEdit->find(sign->GetType());
 
     if (foundType == parentToEdit->end()) {
-        std::unordered_map<Id, const MentalInfrastructure::TrafficSign*> tmp;
-        tmp.insert(std::make_pair(sign->GetId(), sign));
+        std::unordered_map<OwlId, const MentalInfrastructure::TrafficSign *> tmp;
+        tmp.insert(std::make_pair(sign->GetOwlId(), sign));
         parentToEdit->insert(std::make_pair(sign->GetType(), tmp));
     } else {
-        foundType->second.insert(std::make_pair(sign->GetId(), sign));
+        foundType->second.insert(std::make_pair(sign->GetOwlId(), sign));
     }
 
     // hehe
 }
 
 void TrafficSignMemory::EraseFromVisibleTrafficSigns(const MentalInfrastructure::TrafficSign* sign) {
-    visibleTrafficSigns->trafficSigns.at(sign->GetRoad()->GetId()).at(sign->GetType()).erase(sign->GetId());
+    visibleTrafficSigns->trafficSigns.at(sign->GetRoad()->GetOpenDriveId()).at(sign->GetType()).erase(sign->GetOwlId());
 }
 
 } // namespace TrafficSignMemory

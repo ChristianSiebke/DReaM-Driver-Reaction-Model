@@ -13,7 +13,8 @@
  *****************************************************************************/
 
 #include "RightOfWayRegulationInterface.h"
-#include "Helper.h"
+
+#include "common/Helper.h"
 
 namespace RightOfWayRegulation {
 
@@ -65,22 +66,24 @@ bool RightOfWayRegulationInterface::PedestrianVsVehicleROW(const AgentRepresenta
         return false;
     }
     const auto vehicleLane = vehicleAgent.GetLane();
-    const auto vehicleRoad = vehicleLane->GetSection()->GetRoad();
+    const auto vehicleRoad = vehicleLane->GetRoad();
     const auto pedestrianLane = pedestrianAgent.GetLane();
-    const auto pedestrianRoad = pedestrianLane->GetSection()->GetRoad();
+    const auto pedestrianRoad = pedestrianLane->GetRoad();
     double vehicleLaneHDG;
     double pedestrianLaneHDG;
 
     // vehicles are not allowed to drive against lane direction near to intersection
-    if (vehicleRoad->IsOnIntersection()) {
+    if (vehicleRoad->IsOnJunction()) {
         vehicleLaneHDG = vehicleLane->GetFirstPoint()->hdg;
-    } else {
+    }
+    else {
         vehicleLaneHDG = vehicleLane->GetLastPoint()->hdg;
     }
 
-    if (pedestrianRoad->IsOnIntersection()) {
+    if (pedestrianRoad->IsOnJunction()) {
         pedestrianLaneHDG = pedestrianLane->GetFirstPoint()->hdg;
-    } else {
+    }
+    else {
         if (pedestrianAgent.IsMovingInLaneDirection()) {
             pedestrianLaneHDG = pedestrianLane->GetLastPoint()->hdg;
         } else {

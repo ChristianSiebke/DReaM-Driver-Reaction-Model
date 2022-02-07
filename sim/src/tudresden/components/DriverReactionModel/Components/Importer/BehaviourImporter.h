@@ -1,18 +1,20 @@
 #ifndef BEHAVIOURIMPORTER_H
 #define BEHAVIOURIMPORTER_H
 
-#include "BehaviourConverter.h"
-#include "LoggerInterface.h"
-#include "Common/xmlParser.h"
-#include <QCoreApplication>
-#include <QDir>
-#include <QDomDocument>
-#include <QFile>
 #include <iostream>
 #include <list>
 #include <map>
 #include <memory>
 #include <string>
+
+#include <QCoreApplication>
+#include <QDir>
+#include <QDomDocument>
+#include <QFile>
+
+#include "BehaviourConverter.h"
+#include "LoggerInterface.h"
+#include "common/xmlParser.h"
 
 class BehaviourImporter {
   public:

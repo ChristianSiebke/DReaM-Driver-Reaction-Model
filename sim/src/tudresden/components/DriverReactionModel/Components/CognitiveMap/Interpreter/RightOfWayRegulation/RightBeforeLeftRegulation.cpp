@@ -12,8 +12,9 @@
  * SPDX-License-Identifier: EPL-2.0
  *****************************************************************************/
 #include "RightBeforeLeftRegulation.h"
-#include "Definitions.h"
-#include "Helper.h"
+
+#include "common/Definitions.h"
+#include "common/Helper.h"
 
 namespace RightOfWayRegulation {
 

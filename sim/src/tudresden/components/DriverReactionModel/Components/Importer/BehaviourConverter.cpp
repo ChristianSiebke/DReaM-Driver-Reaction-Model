@@ -180,11 +180,11 @@ void BehaviourConverter::ConvertGazeMovementParameters(const StatisticsGroup& ma
     try {
         key = "Standard Road";
         StatisticsGroup standardRoad = main.groups.at(key);
-        key = "XIntersection";
-        StatisticsGroup XIntersection = main.groups.at(key);
+        key = "XJunction";
+        StatisticsGroup XJunction = main.groups.at(key);
         key = "BehaviourParameters";
         StatisticsSet std_params = standardRoad.sets.at(key);
-        StatisticsSet XInt_params = XIntersection.sets.at(key);
+        StatisticsSet XInt_params = XJunction.sets.at(key);
         key = "probabilityFixateLeadCar";
         behaviourData.get()->gmBehaviour.std_probabilityFixateLeadCar =
             static_cast<int>(std::static_pointer_cast<StandardDoubleEntry>(std_params.entries.at(key))->value);
@@ -193,7 +193,7 @@ void BehaviourConverter::ConvertGazeMovementParameters(const StatisticsGroup& ma
         behaviourData.get()->gmBehaviour.XInt_probabilityFixateLeadCar =
             static_cast<int>(std::static_pointer_cast<StandardDoubleEntry>(XInt_params.entries.at(key))->value);
         if (behaviourData->gmBehaviour.XInt_probabilityFixateLeadCar < 0)
-            throw std::logic_error(" XIntersection -> probabilityFixateLeadCar must be a positive value! ");
+            throw std::logic_error(" XJunction -> probabilityFixateLeadCar must be a positive value! ");
 
         key = "probabilityControlGlance";
         behaviourData.get()->gmBehaviour.std_probabilityControlGlance =
@@ -203,13 +203,13 @@ void BehaviourConverter::ConvertGazeMovementParameters(const StatisticsGroup& ma
         behaviourData.get()->gmBehaviour.XInt_probabilityControlGlance =
             static_cast<int>(std::static_pointer_cast<StandardDoubleEntry>(XInt_params.entries.at(key))->value);
         if (behaviourData->gmBehaviour.XInt_probabilityControlGlance < 0)
-            throw std::logic_error(" XIntersection -> probabilityControlGlance must be a positive value! ");
+            throw std::logic_error(" XJunction -> probabilityControlGlance must be a positive value! ");
 
         key = "viewingDepthIntoRoad";
         behaviourData.get()->gmBehaviour.XInt_viewingDepthIntoRoad =
             static_cast<int>(std::static_pointer_cast<StandardDoubleEntry>(XInt_params.entries.at(key))->value);
         if (behaviourData->gmBehaviour.XInt_viewingDepthIntoRoad < 0)
-            throw std::logic_error(" XIntersection -> viewingDepthIntoRoad must be a positive value! ");
+            throw std::logic_error(" XJunction -> viewingDepthIntoRoad must be a positive value! ");
 
         key = "ScanAOIProbabilities";
         StatisticsSet std_scan = standardRoad.sets.at(key);
@@ -241,7 +241,7 @@ void BehaviourConverter::ConvertGazeMovementParameters(const StatisticsGroup& ma
 
 
         key = "ControlAOIProbabilities";
-        StatisticsGroup XInt_control = XIntersection.groups.at(key);
+        StatisticsGroup XInt_control = XJunction.groups.at(key);
 
         for (auto& set : XInt_control.sets) {
             CrossingPhase cr;
@@ -277,7 +277,7 @@ void BehaviourConverter::ConvertGazeMovementParameters(const StatisticsGroup& ma
                 behaviourData->gmBehaviour.XInt_controlAOIProbabilities.at(cr).insert(
                     std::make_pair(con, std::static_pointer_cast<StandardDoubleEntry>(entry.second)->value));
                 if (std::static_pointer_cast<StandardDoubleEntry>(entry.second)->value < 0)
-                    throw std::logic_error(" XIntersection -> Control AOI probability must be a positive value! ");
+                    throw std::logic_error(" XJunction -> Control AOI probability must be a positive value! ");
             }
         }
 

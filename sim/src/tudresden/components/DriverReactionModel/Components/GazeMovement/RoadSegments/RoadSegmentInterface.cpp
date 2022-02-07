@@ -124,7 +124,7 @@ GazeState RoadSegmentInterface::ScanGlance(CrossingPhase phase) {
     AOIProbabilities aoiProbs = LookUpScanAOIProbability(phase);
     ScanAOI aoi;
     try {
-        aoi = static_cast<ScanAOI>(sampler.SampleIntProbability(aoiProbs));
+        aoi = static_cast<ScanAOI>(Sampler::Sample(aoiProbs, stochastics));
     } catch (std::logic_error e) {
         // If all AOIs have a probability of 0%
         aoi = ScanAOI::Other;
@@ -143,8 +143,7 @@ GazeState RoadSegmentInterface::ScanGlance(CrossingPhase phase) {
     return gazeState;
 }
 
-std::unordered_map<int, double>
-RoadSegmentInterface::ScaleProbabilitiesToOneAndEliminateNegativeProbabilities(std::unordered_map<int, double> aoiProbs) {
+AOIProbabilities RoadSegmentInterface::ScaleProbabilitiesToOneAndEliminateNegativeProbabilities(AOIProbabilities aoiProbs) {
     // scale probabilities to one
     double sum = 0;
     for (auto& element : aoiProbs) {
@@ -154,29 +153,24 @@ RoadSegmentInterface::ScaleProbabilitiesToOneAndEliminateNegativeProbabilities(s
         sum += element.second;
     }
 
-    std::for_each(aoiProbs.begin(), aoiProbs.end(), [sum](std::pair<const int, double>& element) {
-        element.second = element.second / sum;
-        return element;
-    });
+    std::for_each(aoiProbs.begin(), aoiProbs.end(), [sum](std::pair<int, double> &element) { element.second = element.second / sum; });
     return aoiProbs;
 }
 
 namespace Node {
 
-std::vector<const MentalInfrastructure::Lane*>
-Intersection::CornerSidewalkLanesOfIntersection(const MentalInfrastructure::Intersection* currentIntersection) {
-    auto intersectionRoads = currentIntersection->GetAllRoadsOnIntersection();
+std::vector<const MentalInfrastructure::Lane *>
+Junction::CornerSidewalkLanesOfJunction(const MentalInfrastructure::Junction *currentJunction) {
+    auto junctionRoads = currentJunction->GetAllRoadsOnJunction();
 
     std::vector<const MentalInfrastructure::Lane*> cornerSidewalkLanes;
-    for (const auto& intersectionRoad : intersectionRoads) {
-        for (auto section : intersectionRoad->GetSections()) {
-            for (auto lane : section->GetLanes()) {
-                if (lane->GetType() == LaneType::Sidewalk) {
-                    double hdgFirstPoint = (lane->GetFirstPoint())->hdg;
-                    double hdgLastPoint = (lane->GetLastPoint())->hdg;
-                    if (std::fabs(hdgFirstPoint - hdgLastPoint) > 50 * M_PI / 180) {
-                        cornerSidewalkLanes.push_back(lane);
-                    }
+    for (const auto &junctionRoad : junctionRoads) {
+        for (auto lane : junctionRoad->GetLanes()) {
+            if (lane->GetType() == LaneType::Sidewalk) {
+                double hdgFirstPoint = (lane->GetFirstPoint())->hdg;
+                double hdgLastPoint = (lane->GetLastPoint())->hdg;
+                if (std::fabs(hdgFirstPoint - hdgLastPoint) > 50 * M_PI / 180) {
+                    cornerSidewalkLanes.push_back(lane);
                 }
             }
         }
@@ -184,13 +178,11 @@ Intersection::CornerSidewalkLanesOfIntersection(const MentalInfrastructure::Inte
     return cornerSidewalkLanes;
 }
 
-const MentalInfrastructure::Lane*
-Intersection::OncomingStraightConnectionLane(const MentalInfrastructure::Intersection* currentIntersection) {
-    // first straight oncoming intersection connection lane
-    auto conRoadsToCurrentRoad = currentIntersection->PredecessorConnectionRoads(worldRepresentation.egoAgent->GetRoad());
+const MentalInfrastructure::Lane *Junction::OncomingStraightConnectionLane(const MentalInfrastructure::Junction *currentJunction) {
+    // first straight oncoming junction connection lane
+    auto conRoadsToCurrentRoad = currentJunction->PredecessorConnectionRoads(worldRepresentation.egoAgent->GetRoad());
     for (auto conRoad : conRoadsToCurrentRoad) {
-        auto section = conRoad->GetSections().front();
-        for (auto conLane : section->GetLanes()) {
+        for (auto conLane : conRoad->GetLanes()) {
             if (conLane->GetType() != LaneType::Sidewalk) {
                 Common::Vector2d directionVec = {(conLane->GetFirstPoint())->x, (conLane->GetFirstPoint())->y};
                 Common::Vector2d LaneEndPoint = {(conLane->GetLastPoint()->x), (conLane->GetLastPoint())->y};
@@ -210,9 +202,9 @@ Intersection::OncomingStraightConnectionLane(const MentalInfrastructure::Interse
     return nullptr;
 }
 
-void Intersection::SortControlFixPoints(std::vector<Common::Vector2d>& controlFixPointsOnXIntersection) {
+void Junction::SortControlFixPoints(std::vector<Common::Vector2d> &controlFixPointsOnXJunction) {
     std::vector<Common::Vector2d> unsortedViewVec;
-    std::transform(controlFixPointsOnXIntersection.begin(), controlFixPointsOnXIntersection.end(), std::back_inserter(unsortedViewVec),
+    std::transform(controlFixPointsOnXJunction.begin(), controlFixPointsOnXJunction.end(), std::back_inserter(unsortedViewVec),
                    [this](const Common::Vector2d element) {
                        auto result = element;
                        result.Sub(worldRepresentation.egoAgent->GetDriverPosition());
@@ -225,12 +217,12 @@ void Intersection::SortControlFixPoints(std::vector<Common::Vector2d>& controlFi
 
     std::map<double, Common::Vector2d> sortedFixationPointsByViewAngle;
     for (size_t i = 0; i < viewAngles.size(); ++i) {
-        if (!sortedFixationPointsByViewAngle.insert(std::make_pair(viewAngles[i], controlFixPointsOnXIntersection[i])).second) {
+        if (!sortedFixationPointsByViewAngle.insert(std::make_pair(viewAngles[i], controlFixPointsOnXJunction[i])).second) {
             std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "view Angle is not unique!";
             throw std::runtime_error(message);
         }
     }
-    std::transform(sortedFixationPointsByViewAngle.begin(), sortedFixationPointsByViewAngle.end(), controlFixPointsOnXIntersection.begin(),
+    std::transform(sortedFixationPointsByViewAngle.begin(), sortedFixationPointsByViewAngle.end(), controlFixPointsOnXJunction.begin(),
                    [](std::pair<double, Common::Vector2d> element) { return element.second; });
 }
 

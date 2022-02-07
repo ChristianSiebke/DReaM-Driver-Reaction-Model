@@ -21,7 +21,7 @@
 
 #include <QtCore/qglobal.h>
 
-#if defined(DReaM_LIBRARY)
+#if defined(ALGORITHM_DReaM_LIBRARY)
 #define ALGORITHM_DReaM_SHARED_EXPORT Q_DECL_EXPORT
 #else
 #define ALGORITHM_DReaM_SHARED_EXPORT Q_DECL_IMPORT

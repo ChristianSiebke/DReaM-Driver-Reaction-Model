@@ -13,9 +13,9 @@ get_property(LIB_TARGET_LIST GLOBAL PROPERTY lib_target_list)
 
 message(STATUS "Collecting runtime library paths...")
 
-if(WIN32 AND NOT MSVC)
-  find_program(CYGPATH NAMES cygpath REQUIRED)
-endif()
+# if(WIN32 AND NOT MSVC)
+#   find_program(CYGPATH NAMES sed REQUIRED)
+# endif()
 
 set(SEARCH_DIRS)
 set(RT_LIB_DIRS)
@@ -45,7 +45,7 @@ foreach(SEARCH_DIR IN LISTS SEARCH_DIRS)
 
     execute_process (
         WORKING_DIRECTORY ${SEARCH_DIR}
-        COMMAND ${SHELL} -c "for f in \$(find -iname \'*.dll\'); do cygpath -a -m \$(dirname \$f); done | sort -u"
+        COMMAND ${SHELL} -c "for f in \$(find -iname \'*.dll\'); do cygpath.exe -a -m \$(dirname \$f); done | sort -u"
         OUTPUT_VARIABLE DETECTED_LIBRARY_DIRS
     )
   else()
