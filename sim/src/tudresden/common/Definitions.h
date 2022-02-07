@@ -14,6 +14,7 @@
 
 #pragma once
 #include <unordered_map>
+#include <memory>
 
 #include "common/globalDefinitions.h"
 
@@ -178,3 +179,19 @@ enum class GazeType { NONE, ScanGlance, ObserveGlance, ControlGlance };
 // fixation area of interests
 enum class ScanAOI { NONE, Right, Straight, Left, Rear, Dashboard, Other };
 enum class ControlAOI { NONE, Right, Left, Oncoming };
+
+struct Target {
+    std::string targetRoad;
+    int targetLane;
+};
+
+struct DriverRoutePlanning {
+    bool ByTarget() const { return targetPtr != nullptr; }
+    bool ByTurningVector() const { return turningVectorPtr != nullptr; }
+    std::vector<int> GetVector() const { return *turningVectorPtr; }
+    std::string GetTargetRoad() const { return targetPtr->targetRoad; }
+    int GetTargetLane() const { return targetPtr->targetLane; }
+
+    std::shared_ptr<Target> targetPtr{nullptr};
+    std::shared_ptr<std::vector<int>> turningVectorPtr{nullptr};
+};

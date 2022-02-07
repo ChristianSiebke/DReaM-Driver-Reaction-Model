@@ -2,8 +2,6 @@
 
 #include <thread>
 
-#include "common/RoadSegmentInterface.h"
-
 #define MEASURE_TIME false
 
 #if MEASURE_TIME

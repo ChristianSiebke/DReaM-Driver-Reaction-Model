@@ -12,13 +12,12 @@
  * SPDX-License-Identifier: EPL-2.0
  *****************************************************************************/
 #pragma once
+#include "Common/Helper.h"
+#include "core/opSimulation/framework/sampler.h"
+#include "Common/Definitions.h"
+#include "Common/BehaviourData.h"
 
-#include "common/BehaviourData.h"
-#include "common/Definitions.h"
-#include "common/Helper.h"
-#include "include/stochasticsInterface.h"
-
-using AOIProbabilities = std::unordered_map<int, double>;
+using AOIProbabilities = std::vector<std::pair<int, double>>;
 
 using ObservationAOI = AgentVehicleType;
 
@@ -40,11 +39,9 @@ struct GazeState {
 namespace RoadSegments {
 
 class RoadSegmentInterface {
-public:
-    RoadSegmentInterface(const WorldRepresentation &worldRepresentation, StochasticsInterface *stochastics,
-                         const BehaviourData &behaviourData) :
-        worldRepresentation{worldRepresentation}, stochastics{stochastics}, /* TODO sampler(*stochastics), */ behaviourData{behaviourData} {
-    }
+  public:
+    RoadSegmentInterface(const WorldRepresentation& worldRepresentation, StochasticsInterface* stochastics, const BehaviourData& behaviourData)
+        : worldRepresentation{worldRepresentation}, stochastics{stochastics}, behaviourData{behaviourData} {}
 
     virtual ~RoadSegmentInterface() = default;
 
@@ -56,19 +53,13 @@ public:
 
     double UpdateUFOVAngle(GazeState currentGazeState);
 
-    virtual double GetProbabilityToFixateLeadCar() {
-        return probabilityFixateLeadCar;
-    }
+    virtual double GetProbabilityToFixateLeadCar() { return probabilityFixateLeadCar; }
 
-    virtual double GetProbabilityToPerformControlGlance() {
-        return probabilityControlGlance;
-    }
+    virtual double GetProbabilityToPerformControlGlance() { return probabilityControlGlance; }
 
-    virtual const std::vector<Common::Vector2d> &GetControlFixationPoints() {
-        return controlFixationPoints;
-    }
+    virtual const std::vector<Common::Vector2d>& GetControlFixationPoints() { return controlFixationPoints; }
 
-protected:
+  protected:
     virtual AOIProbabilities LookUpScanAOIProbability(CrossingPhase phase) = 0;
 
     virtual AOIProbabilities LookUpControlAOIProbability(CrossingPhase phase) = 0;
@@ -77,8 +68,7 @@ protected:
     /****************************************
      * HELPER METHODS
      ****************************************/
-    virtual std::unordered_map<int, double>
-    ScaleProbabilitiesToOneAndEliminateNegativeProbabilities(std::unordered_map<int, double> aoiProbs);
+    virtual AOIProbabilities ScaleProbabilitiesToOneAndEliminateNegativeProbabilities(AOIProbabilities aoiProbs);
 
     virtual Common::Vector2d CalculateForesightVector(double foresightRange);
 
@@ -92,10 +82,9 @@ protected:
     //!  all possible control points that could be fixated during the control
     //!  glance
     std::vector<Common::Vector2d> controlFixationPoints;
-    const WorldRepresentation &worldRepresentation;
-    StochasticsInterface *stochastics;
-    // TODO removed since there is no sampler anymore const Sampler sampler;
-    const BehaviourData &behaviourData;
+    const WorldRepresentation& worldRepresentation;
+    StochasticsInterface* stochastics;
+    const BehaviourData& behaviourData;
 };
 
 namespace Node {
@@ -109,14 +98,14 @@ protected:
     std::vector<const MentalInfrastructure::Lane *> CornerSidewalkLanesOfJunction(const MentalInfrastructure::Junction *currentJunction);
 
     const MentalInfrastructure::Lane *OncomingStraightConnectionLane(const MentalInfrastructure::Junction *currentJunction);
-    void SortControlFixPoints(std::vector<Common::Vector2d> &controlFixPointsOnXJunctionn);
+    void SortControlFixPoints(std::vector<Common::Vector2d> &controlFixPointsOnXJunction);
 };
 } // namespace Node
 
 namespace Edge {
 
 class Road : public RoadSegmentInterface {
-public:
+  public:
     using RoadSegmentInterface::RoadSegmentInterface;
     virtual ~Road() = default;
 };

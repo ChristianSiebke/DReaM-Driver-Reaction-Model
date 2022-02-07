@@ -25,8 +25,7 @@ double RoadSegmentInterface::UpdateUFOVAngle(GazeState currentGazeState) {
     case GazeType::ObserveGlance:
         if (auto oAgent = Common::FindAgentById(currentGazeState.target.fixationAgent, *worldRepresentation.agentMemory)) {
             ufovAngle = CalculateGlobalViewingAngle(oAgent->GetRefPosition() - worldRepresentation.egoAgent->GetDriverPosition());
-        }
-        else {
+        } else {
             ufovAngle = currentGazeState.ufovAngle;
         }
         break;
@@ -87,8 +86,7 @@ Common::Vector2d RoadSegmentInterface::CalculateForesightVector(double foresight
         MentalInfrastructure::LanePoint foresightPoint((*position).newLane->InterpolatePoint(position->newSCoordinate));
         headVector = {foresightPoint.x, foresightPoint.y};
         headVector.Sub(worldRepresentation.egoAgent->GetDriverPosition());
-    }
-    else {
+    } else {
         // look straight ahead when agent is at the end of the road network
         headVector.Rotate(worldRepresentation.egoAgent->GetYawAngle());
     }
@@ -101,12 +99,11 @@ double RoadSegmentInterface::CalculateGlobalViewingAngle(Common::Vector2d viewVe
     // Determine whether the agent view to the left or right
     double crossProduct = forwardVectorVehicle.Cross(viewVector);
     double viewAngle = worldRepresentation.egoAgent->GetYawAngle();
-    auto angle = Common::AngleBetween2d(forwardVectorVehicle, viewVector);
+    auto angle = forwardVectorVehicle.AngleBetween(viewVector);
 
     if (crossProduct > 0) {
         viewAngle += angle;
-    }
-    else {
+    } else {
         viewAngle -= angle;
     }
     return viewAngle;
@@ -127,10 +124,8 @@ GazeState RoadSegmentInterface::ScanGlance(CrossingPhase phase) {
     AOIProbabilities aoiProbs = LookUpScanAOIProbability(phase);
     ScanAOI aoi;
     try {
-        // FIXME re-add stochastic sampling
-        // aoi = static_cast<ScanAOI>(sampler.SampleIntProbability(aoiProbs));
-    }
-    catch (std::logic_error e) {
+        aoi = static_cast<ScanAOI>(Sampler::Sample(aoiProbs, stochastics));
+    } catch (std::logic_error e) {
         // If all AOIs have a probability of 0%
         aoi = ScanAOI::Other;
     }
@@ -148,21 +143,17 @@ GazeState RoadSegmentInterface::ScanGlance(CrossingPhase phase) {
     return gazeState;
 }
 
-std::unordered_map<int, double>
-RoadSegmentInterface::ScaleProbabilitiesToOneAndEliminateNegativeProbabilities(std::unordered_map<int, double> aoiProbs) {
+AOIProbabilities RoadSegmentInterface::ScaleProbabilitiesToOneAndEliminateNegativeProbabilities(AOIProbabilities aoiProbs) {
     // scale probabilities to one
     double sum = 0;
-    for (auto &element : aoiProbs) {
+    for (auto& element : aoiProbs) {
         if (element.second < 0) {
             element.second = 0;
         }
         sum += element.second;
     }
 
-    std::for_each(aoiProbs.begin(), aoiProbs.end(), [sum](std::pair<const int, double> &element) {
-        element.second = element.second / sum;
-        return element;
-    });
+    std::for_each(aoiProbs.begin(), aoiProbs.end(), [sum](std::pair<int, double> &element) { element.second = element.second / sum; });
     return aoiProbs;
 }
 
@@ -172,7 +163,7 @@ std::vector<const MentalInfrastructure::Lane *>
 Junction::CornerSidewalkLanesOfJunction(const MentalInfrastructure::Junction *currentJunction) {
     auto junctionRoads = currentJunction->GetAllRoadsOnJunction();
 
-    std::vector<const MentalInfrastructure::Lane *> cornerSidewalkLanes;
+    std::vector<const MentalInfrastructure::Lane*> cornerSidewalkLanes;
     for (const auto &junctionRoad : junctionRoads) {
         for (auto lane : junctionRoad->GetLanes()) {
             if (lane->GetType() == LaneType::Sidewalk) {
@@ -187,9 +178,9 @@ Junction::CornerSidewalkLanesOfJunction(const MentalInfrastructure::Junction *cu
     return cornerSidewalkLanes;
 }
 
-const MentalInfrastructure::Lane *Junction::OncomingStraightConnectionLane(const MentalInfrastructure::Junction *currentJunctionn) {
+const MentalInfrastructure::Lane *Junction::OncomingStraightConnectionLane(const MentalInfrastructure::Junction *currentJunction) {
     // first straight oncoming junction connection lane
-    auto conRoadsToCurrentRoad = currentJunctionn->PredecessorConnectionRoads(worldRepresentation.egoAgent->GetRoad());
+    auto conRoadsToCurrentRoad = currentJunction->PredecessorConnectionRoads(worldRepresentation.egoAgent->GetRoad());
     for (auto conRoad : conRoadsToCurrentRoad) {
         for (auto conLane : conRoad->GetLanes()) {
             if (conLane->GetType() != LaneType::Sidewalk) {
@@ -200,15 +191,15 @@ const MentalInfrastructure::Lane *Junction::OncomingStraightConnectionLane(const
                 Common::Vector2d straightVec = LaneEndPoint;
                 straightVec.Sub(pastLaneEndPoint);
 
-                auto cosAngle = Common::AngleBetween2d(straightVec, directionVec);
+                auto cosAngle = straightVec.AngleBetween(directionVec);
                 // find straight lane
                 if (15 > cosAngle * (180 / M_PI)) {
                     return conLane;
                 }
             }
         }
-        return nullptr;
     }
+    return nullptr;
 }
 
 void Junction::SortControlFixPoints(std::vector<Common::Vector2d> &controlFixPointsOnXJunction) {

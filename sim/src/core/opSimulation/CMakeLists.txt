@@ -187,10 +187,10 @@ add_openpass_target(
     modules
 
   LIBRARIES
+    Boost::headers
     Qt5::Core
     Qt5::Xml
     Qt5::XmlPatterns
-    Boost::headers
     Common
     CoreCommon
 )
