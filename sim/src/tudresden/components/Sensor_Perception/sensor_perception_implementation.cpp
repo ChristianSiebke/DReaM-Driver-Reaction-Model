@@ -67,6 +67,7 @@ void Sensor_Perception_Implementation::UpdateOutput(int localLinkId, std::shared
             throw std::runtime_error(msg);
         }
     }
+    // TODO Add link for gazestate
     else {
         const std::string msg = COMPONENTNAME + " invalid link";
         LOG(CbkLogLevel::Debug, msg);

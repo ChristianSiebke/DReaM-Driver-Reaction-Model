@@ -61,5 +61,5 @@ add_openpass_target(
     TUDresdenCommon
     World_OSI
 
-    LINKOSI
+  LINKOSI
 )
