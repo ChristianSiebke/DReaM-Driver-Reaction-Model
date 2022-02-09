@@ -65,6 +65,7 @@ bool AgentPerception::IsMovingInLaneDirection(const MentalInfrastructure::Lane *
     return velocity >= 0 ? direction : !direction;
 }
 
+// TODO move out of the agentperception class
 JunctionDistance AgentPerception::CalculateJunctionDistance(const MentalInfrastructure::Road *agentRoad,
                                                             const MentalInfrastructure::Lane *agentLane) const {
     JunctionDistance distance;
