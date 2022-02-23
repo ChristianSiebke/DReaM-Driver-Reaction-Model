@@ -118,8 +118,7 @@ void AlgorithmDReaMImplementation::UpdateOutput(int localLinkId, std::shared_ptr
     else if (localLinkId == 1) {
         try {
             data = std::make_shared<SecondaryDriverTasksSignal const>(out_indicatorState, out_hornSwitch, out_headLight, out_highBeamLight,
-                                                                      out_flasher,
-                                                                      componentState); // TODO do we need NavigationDecision again in here?
+                                                                      out_flasher, componentState);
         }
         catch (const std::bad_alloc &) {
             const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 1 = SecondaryDriverTask)";
@@ -155,7 +154,7 @@ void AlgorithmDReaMImplementation::Trigger(int time) {
         DReaM.UpdateInput(time, egoPerception, ambientAgents, infrastructurePerception, trafficSigns);
         DReaM.UpdateComponents();
 
-        // out_routeDecision = DReaM.GetRouteDecision(); TODO check if still needed
+        out_routeDecision = DReaM.GetRouteDecision();
         out_indicatorState = static_cast<int>(DReaM.GetWorldRepresentation().egoAgent->GetIndicatorState());
         out_longitudinalaccelerationWish = DReaM.GetAcceleration();
         outGazeState = DReaM.GetGazeState();

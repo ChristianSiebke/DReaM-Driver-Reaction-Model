@@ -82,14 +82,14 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
     const std::string COMPONENTNAME = "Driver Reaction Model (DReaM)";
 
     AlgorithmDReaMImplementation(std::string componentName, bool isInit, int priority, int offsetTime, int responseTime, int cycleTime,
-                                 StochasticsInterface* stochastics, const ParameterInterface* parameters, PublisherInterface* publisher, 
-                                 const CallbackInterface* callbacks, AgentInterface* agent)
-        : AlgorithmInterface(componentName, isInit, priority, offsetTime, responseTime, cycleTime, stochastics, parameters, publisher, 
-                             callbacks, agent),
-          logger(agent->GetId()), loggerInterface(logger)
+                                 StochasticsInterface *stochastics, const ParameterInterface *parameters, PublisherInterface *publisher,
+                                 const CallbackInterface *callbacks, AgentInterface *agent) :
+        AlgorithmInterface(componentName, isInit, priority, offsetTime, responseTime, cycleTime, stochastics, parameters, publisher,
+                           callbacks, agent),
+        logger(agent->GetId()),
+        loggerInterface(logger)
 
     {
-        // observerInstance = observations->at(0); FIXME
         BehaviourImporter importer(&loggerInterface);
         behaviourData = importer.GetBehaviourData();
 
@@ -199,8 +199,8 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
 
     // SecondaryDriverTasksSignal
     //*************************************************
-    
-    // NavigationDecision out_routeDecision; TODO evaluate if still needed
+
+    NavigationDecision out_routeDecision;
 
     //! State of IndicatorSwitch [-].
     int out_indicatorState = 0;
