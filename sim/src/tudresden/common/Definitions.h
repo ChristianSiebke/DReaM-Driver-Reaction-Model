@@ -61,8 +61,7 @@ struct GazeState {
     int fixationDuration{-999};
 };
 
-struct SpeedLimit {
-    double sOffset{0};
+[[deprecated]] struct SpeedLimit {
     double maxAllowedSpeed{0};
     SpeedUnit unit{SpeedUnit::MetersPerSecond};
 

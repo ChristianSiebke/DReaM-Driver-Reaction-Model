@@ -69,12 +69,17 @@ void BasicVisualSensor::AgentPerceptionThread(unsigned startIndex, unsigned endI
         if (worldData->GetRoads().find(agent->GetRoads(MeasurementPoint::Front).front()) == worldData->GetRoads().end())
             continue;
 
+        if (agent->GetRoads(MeasurementPoint::Front).size() > 1) {
+            std::cout << "The agent is currently locating on more than one road! This is NOT supported, using only first road."
+                      << std::endl;
+        }
+
         if (viewDistance == 0.0) {
             continue;
         }
 
         auto otherPosition = Common::Vector2d(agent->GetPositionX(), agent->GetPositionY());
-        if ((otherPosition - driverPos).Length() > 1.15 /* TODO switch to channel * egoAgent->GetCurrentGazeState().viewDistance*/)
+        if ((otherPosition - driverPos).Length() > viewDistance * 1.1)
             continue;
 
         auto points = obj->area.outer();
