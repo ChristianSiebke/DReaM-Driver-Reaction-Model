@@ -68,8 +68,7 @@ void AlgorithmDReaMImplementation::UpdateInput(int localLinkId, const std::share
 
     } else if (localLinkId == 3) {
         // from sensor driver perception
-        std::shared_ptr<structSignal<DriverRoutePlanning> const> signal =
-            std::dynamic_pointer_cast<structSignal<DriverRoutePlanning> const>(data);
+        std::shared_ptr<structSignal<RouteElement> const> signal = std::dynamic_pointer_cast<structSignal<RouteElement> const>(data);
 
         if (!signal) {
             const std::string msg = COMPONENTNAME + " invalid signaltype";
@@ -77,8 +76,8 @@ void AlgorithmDReaMImplementation::UpdateInput(int localLinkId, const std::share
             throw std::runtime_error(msg);
         }
 
-        driverRoutePlanning = signal->value;
-
+        // TODO hi
+        routeElement = signal->value;
     } else if (localLinkId == 4) {
         std::shared_ptr<ContainerSignal<std::vector<const MentalInfrastructure::TrafficSign*>> const> signal =
             std::dynamic_pointer_cast<ContainerSignal<std::vector<const MentalInfrastructure::TrafficSign*>> const>(data);

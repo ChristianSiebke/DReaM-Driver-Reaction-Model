@@ -180,11 +180,13 @@ enum class GazeType { NONE, ScanGlance, ObserveGlance, ControlGlance };
 enum class ScanAOI { NONE, Right, Straight, Left, Rear, Dashboard, Other };
 enum class ControlAOI { NONE, Right, Left, Oncoming };
 
+// deprecated
 struct Target {
     std::string targetRoad;
     int targetLane;
 };
 
+// deprecated
 struct DriverRoutePlanning {
     bool ByTarget() const { return targetPtr != nullptr; }
     bool ByTurningVector() const { return turningVectorPtr != nullptr; }

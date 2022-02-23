@@ -47,8 +47,8 @@ void Sensor_Perception_Implementation::UpdateOutput(int localLinkId, std::shared
     }
     else if (localLinkId == 3) {
         try {
-            // FIXME GetDriverRoutePlanning() not declared
-            // data = std::make_shared<structSignal<DriverRoutePlanning> const>(GetAgent()->GetDriverRoutePlanning());
+            // FIXME GetDriverRoutePlanning() deprecated, need route
+            // data = std::make_shared<structSignal<RouteElement> const>(GetAgent()->GetDriverRoutePlanning());
         }
         catch (const std::bad_alloc &) {
             const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 3)";
