@@ -21,21 +21,6 @@ using AOIProbabilities = std::vector<std::pair<int, double>>;
 
 using ObservationAOI = AgentVehicleType;
 
-struct FixationTarget {
-    Common::Vector2d fixationPoint{-999, -999};
-    int fixationAgent{-999};
-};
-
-struct GazeState {
-    // includes gaze type and fixated AOI
-    std::pair<GazeType, int> fixationState{GazeType::NONE, static_cast<int>(ScanAOI::NONE)};
-    FixationTarget target;
-    double ufovAngle{-999};
-    double openingAngle{-999};
-    double viewDistance{100}; // TODO calculate
-    int fixationDuration{-999};
-};
-
 namespace RoadSegments {
 
 class RoadSegmentInterface {

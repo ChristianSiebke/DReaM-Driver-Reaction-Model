@@ -13,10 +13,11 @@
  *****************************************************************************/
 
 #pragma once
-#include <unordered_map>
 #include <memory>
+#include <unordered_map>
 
 #include "common/globalDefinitions.h"
+#include "common/vector2d.h"
 
 constexpr double maxDouble = std::numeric_limits<double>::max();
 constexpr int maxInt = std::numeric_limits<int>::max();
@@ -38,6 +39,26 @@ enum class DistanceUnit {
     Kilometer,
     Feet,
     Mile // land mile
+};
+
+// fixation area of interests
+enum class ScanAOI { NONE, Right, Straight, Left, Rear, Dashboard, Other };
+enum class ControlAOI { NONE, Right, Left, Oncoming };
+enum class GazeType { NONE, ScanGlance, ObserveGlance, ControlGlance };
+
+struct FixationTarget {
+    Common::Vector2d fixationPoint{-999, -999};
+    int fixationAgent{-999};
+};
+
+struct GazeState {
+    // includes gaze type and fixated AOI
+    std::pair<GazeType, int> fixationState{GazeType::NONE, static_cast<int>(ScanAOI::NONE)};
+    FixationTarget target;
+    double ufovAngle{-999};
+    double openingAngle{-999};
+    double viewDistance{100}; // TODO calculate
+    int fixationDuration{-999};
 };
 
 struct SpeedLimit {
@@ -174,11 +195,6 @@ struct CollisionPoint {
     double distanceCP = maxDouble;
     double timeToCollision = maxDouble;
 };
-
-enum class GazeType { NONE, ScanGlance, ObserveGlance, ControlGlance };
-// fixation area of interests
-enum class ScanAOI { NONE, Right, Straight, Left, Rear, Dashboard, Other };
-enum class ControlAOI { NONE, Right, Left, Oncoming };
 
 struct Target {
     std::string targetRoad;

@@ -53,4 +53,5 @@ public:
 
 private:
     SensorPerceptionLogic sensorPerceptionLogic;
+    GazeState currentGazeState;
 };

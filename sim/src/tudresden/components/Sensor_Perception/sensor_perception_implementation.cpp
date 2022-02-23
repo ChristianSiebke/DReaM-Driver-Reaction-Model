@@ -6,8 +6,17 @@
 
 void Sensor_Perception_Implementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time) {
     Q_UNUSED(time);
-    Q_UNUSED(localLinkId);
-    Q_UNUSED(data)
+    if (localLinkId == 0) {
+        std::shared_ptr<structSignal<GazeState> const> signal = std::dynamic_pointer_cast<structSignal<GazeState> const>(data);
+
+        if (!signal) {
+            const std::string msg = COMPONENTNAME + " invalid signaltype (localLinkId 0 = GazeState)";
+            LOG(CbkLogLevel::Debug, msg);
+            throw std::runtime_error(msg);
+        }
+
+        currentGazeState = signal->value;
+    }
 }
 
 void Sensor_Perception_Implementation::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterface const> &data, int time) {
@@ -19,7 +28,7 @@ void Sensor_Perception_Implementation::UpdateOutput(int localLinkId, std::shared
                 sensorPerceptionLogic.GetAgentPerception());
         }
         catch (const std::bad_alloc &) {
-            const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 0)";
+            const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 0 = AgentPerception)";
             LOG(CbkLogLevel::Debug, msg);
             throw std::runtime_error(msg);
         }
@@ -29,7 +38,7 @@ void Sensor_Perception_Implementation::UpdateOutput(int localLinkId, std::shared
             data = std::make_shared<structSignal<std::shared_ptr<EgoPerception>> const>(sensorPerceptionLogic.GetEgoPerception());
         }
         catch (const std::bad_alloc &) {
-            const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 1)";
+            const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 1 = EgoPerception)";
             LOG(CbkLogLevel::Debug, msg);
             throw std::runtime_error(msg);
         }
@@ -40,7 +49,7 @@ void Sensor_Perception_Implementation::UpdateOutput(int localLinkId, std::shared
                 std::make_shared<structSignal<std::shared_ptr<InfrastructurePerception>> const>(sensorPerceptionLogic.GetInfrastructure());
         }
         catch (const std::bad_alloc &) {
-            const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 2)";
+            const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 2 = InfrastructurePerception)";
             LOG(CbkLogLevel::Debug, msg);
             throw std::runtime_error(msg);
         }
@@ -51,7 +60,7 @@ void Sensor_Perception_Implementation::UpdateOutput(int localLinkId, std::shared
             // data = std::make_shared<structSignal<DriverRoutePlanning> const>(GetAgent()->GetDriverRoutePlanning());
         }
         catch (const std::bad_alloc &) {
-            const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 3)";
+            const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 3 = DriverRoutePlanning)";
             LOG(CbkLogLevel::Debug, msg);
             throw std::runtime_error(msg);
         }
@@ -62,12 +71,11 @@ void Sensor_Perception_Implementation::UpdateOutput(int localLinkId, std::shared
                 sensorPerceptionLogic.GetTrafficSignPerception());
         }
         catch (const std::bad_alloc &) {
-            const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 4)";
+            const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 4 = TrafficSigns)";
             LOG(CbkLogLevel::Debug, msg);
             throw std::runtime_error(msg);
         }
     }
-    // TODO Add link for gazestate
     else {
         const std::string msg = COMPONENTNAME + " invalid link";
         LOG(CbkLogLevel::Debug, msg);
@@ -77,5 +85,5 @@ void Sensor_Perception_Implementation::UpdateOutput(int localLinkId, std::shared
 
 void Sensor_Perception_Implementation::Trigger(int time) {
     // delegating the trigger to the logic wrapper
-    sensorPerceptionLogic.Trigger(time);
+    sensorPerceptionLogic.Trigger(time, currentGazeState.ufovAngle, currentGazeState.viewDistance, currentGazeState.openingAngle);
 }

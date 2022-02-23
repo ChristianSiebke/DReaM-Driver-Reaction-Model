@@ -65,10 +65,13 @@ bool AgentPerception::IsMovingInLaneDirection(const MentalInfrastructure::Lane *
     return velocity >= 0 ? direction : !direction;
 }
 
-// TODO move out of the agentperception class
 JunctionDistance AgentPerception::CalculateJunctionDistance(const MentalInfrastructure::Road *agentRoad,
                                                             const MentalInfrastructure::Lane *agentLane) const {
     JunctionDistance distance;
+
+    if (agentRoad->IsOnJunction() && (agentRoad->IsPredecessorJunction() || agentRoad->IsSuccessorJunction())) {
+        throw std::logic_error(__FILE__ " Line: " + std::to_string(__LINE__) + " Junctions must be connected via roads ");
+    }
 
     if (movingInLaneDirection) {
         if (agentRoad->IsOnJunction()) {
@@ -99,9 +102,6 @@ JunctionDistance AgentPerception::CalculateJunctionDistance(const MentalInfrastr
                 distance.distanceToNextJunction = sCoordinate;
             }
         }
-    }
-    if (agentRoad->IsOnJunction() && (agentRoad->IsPredecessorJunction() || agentRoad->IsSuccessorJunction())) {
-        throw std::logic_error(__FILE__ " Line: " + std::to_string(__LINE__) + " Junctions must be connected via roads ");
     }
     return distance;
 }
