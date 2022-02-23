@@ -1,21 +1,9 @@
 #include "trafficsignvisualsensor.h"
 
-void TrafficSignVisualSensor::Trigger(int timestamp) {
+void TrafficSignVisualSensor::Trigger(int timestamp, double fovAngle, double distance, double opening) {
     driverPos = Common::Vector2d(egoAgent->GetPositionX(), egoAgent->GetPositionY());
-    // TODO retrieve gaze info from somewhere else
-    // sensorDirection = egoAgent->GetCurrentGazeState().ufovAngle;
-    // minViewAngle = -egoAgent->GetCurrentGazeState().openingAngle / 2.0;
-    // maxViewAngle = egoAgent->GetCurrentGazeState().openingAngle / 2.0;
-    // viewDistance = egoAgent->GetCurrentGazeState().viewDistance;
-
-    aabbTree = aabbTreeHandler->GetCurrentAABBTree(timestamp);
-    DynamicInfrastructurePerceptionMethod();
-}
-
-void TrafficSignVisualSensor::Trigger(int timestamp, double direction, double distance, double opening) {
-    driverPos = Common::Vector2d(egoAgent->GetPositionX(), egoAgent->GetPositionY());
-    minViewAngle = direction - opening / 2.0;
-    maxViewAngle = direction + opening / 2.0;
+    minViewAngle = -opening / 2.0;
+    maxViewAngle = opening / 2.0;
     viewDistance = distance;
 
     aabbTree = aabbTreeHandler->GetCurrentAABBTree(timestamp);

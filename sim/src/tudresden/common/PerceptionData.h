@@ -62,6 +62,9 @@ struct AgentPerception : ObjectPerception {
      *
      * @return        true if agent is moving in lane direction
      */
+    // REWORK move out of AgentPerception class
+    // see CalculateJunctionDistance
+    // could also be used to automatically set the corresponding bool --> then the metho would make sense at this point
     static bool IsMovingInLaneDirection(const MentalInfrastructure::Lane *agentLane, double yawAngle, double sCoordinate, double velocitz);
 
     /*!
@@ -71,6 +74,8 @@ struct AgentPerception : ObjectPerception {
      *
      * @return        distance on/to junction
      */
+    // REWORK move out of the AgentPerception class (maybe static)
+    // VA: this code is not tied to the AgentPerception and should therefor not be tied to this class, it is more of a helper function
     JunctionDistance CalculateJunctionDistance(const MentalInfrastructure::Road *agentRoad,
                                                const MentalInfrastructure::Lane *agentLane) const;
 
@@ -130,6 +135,7 @@ struct ConflictPoints {
     Common::Vector2d start;
     Common::Vector2d end;
 };
+
 struct InfrastructurePerception {
     /*!
      * \brief Return the next lane of given lane

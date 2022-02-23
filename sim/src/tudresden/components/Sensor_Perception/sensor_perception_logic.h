@@ -38,11 +38,6 @@ class SensorPerceptionLogic {
     ///
     /// \brief Starts the calculation of Infrastructure, DriverPerception and VisualPerception.
     ///
-    void Trigger(int timestamp);
-
-    ///
-    /// \brief Starts the calculation of Infrastructure, DriverPerception and VisualPerception.
-    ///
     void Trigger(int timestamp, double directionAngle, double sensorDistance, double sensorOpeningAngle);
 
     ///

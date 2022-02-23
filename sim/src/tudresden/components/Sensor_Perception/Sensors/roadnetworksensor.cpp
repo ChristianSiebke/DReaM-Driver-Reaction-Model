@@ -290,7 +290,6 @@ const MentalInfrastructure::Lane *RoadNetworkSensor::ConvertLane(const OWL::Lane
 
     // setting the id of the road and the speed limit for this lane
     newLane->SetRoad(ConvertRoad(&lane->GetSection().GetRoad()));
-    // newLane->SetSpeedLimit(lane->GetLaneSpeedLimit()); // FIXME set speed limit somewhere
 
     return newLane.get();
 }
@@ -391,7 +390,7 @@ const MentalInfrastructure::Road *RoadNetworkSensor::ConvertRoad(const OWL::Inte
     auto newRoad = std::make_shared<MentalInfrastructure::Road>(openDriveIdRoad, posXStart, posYStart, hdg, length);
     perceptionData->roads.push_back(newRoad);
 
-    // TODO re-implement Traffic Signs
+    // FIXME re-implement Traffic Signs
     // the framework does not provide a way of directly finding out what road a traffic sign belongs to
     // using isValidForLane(OwlId) it would be possible to check if the sign is valid for any lane of the road and then assign it
 
@@ -444,7 +443,7 @@ const MentalInfrastructure::Road *RoadNetworkSensor::ConvertRoad(const OWL::Inte
     return newRoad.get();
 }
 
-// TODO re-implement traffic signs
+// FIXME re-implement traffic signs
 // const MentalInfrastructure::TrafficSign* RoadNetworkSensor::ConvertTrafficSign(const MentalInfrastructure::Road* road,
 //                                                                                const OWL::Interfaces::TrafficSign* sign) {
 //     auto newSign = std::make_shared<MentalInfrastructure::TrafficSign>(

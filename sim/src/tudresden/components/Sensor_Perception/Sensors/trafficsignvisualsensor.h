@@ -20,8 +20,6 @@ public:
         }
     }
 
-    void Trigger(int timestamp) override;
-
     void Trigger(int timestamp, double direction, double distance, double opening) override;
 
     std::vector<const MentalInfrastructure::TrafficSign *> GetVisible() override {
