@@ -228,23 +228,6 @@ public:
     }
 
     ///
-    /// \brief Sets the Speed Limit of the lane.
-    /// \param speedLimit the new SpeedLimit
-    ///
-    void SetSpeedLimit(SpeedLimit sl)
-    {
-        speedLimit = sl;
-    }
-
-    ///
-    /// \brief Returns the SpeedLimit for this lane.
-    ///
-    SpeedLimit GetSpeedLimit() const
-    {
-        return speedLimit;
-    }
-
-    ///
     /// \brief Interpolates a LanePoint at the given s-coordinate.
     /// \param sLaneCoordinate the s-coordinate to interpolate the point at
     /// \return the resulting LanePoint
