@@ -69,7 +69,7 @@ bool StoppingPointCalculation::CalcCrossingLines(const MentalInfrastructure::Lan
         if (lastLane->GetType() == LaneType::Driving && lane->GetType() != LaneType::Driving) {
             leftmostDrivingLane = lastLane;
         }
-        if (std::stoi(lastLane->GetOpenDriveId()) < 0 && std::stoi(lane->GetOpenDriveId()) > 0) {
+        if (lastLane->GetOpenDriveId() < 0 && lane->GetOpenDriveId() > 0) {
             centerRightLane = lastLane;
         }
 

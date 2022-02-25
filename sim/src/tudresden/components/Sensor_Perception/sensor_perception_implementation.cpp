@@ -76,5 +76,6 @@ void Sensor_Perception_Implementation::UpdateOutput(int localLinkId, std::shared
 
 void Sensor_Perception_Implementation::Trigger(int time) {
     // delegating the trigger to the logic wrapper
+    std::cout << "Hello" << std::endl;
     sensorPerceptionLogic.Trigger(time);
 }

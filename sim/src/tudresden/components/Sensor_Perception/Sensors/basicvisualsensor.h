@@ -51,8 +51,8 @@ private:
         data.refPosition = Common::Vector2d(agent->GetPositionX(), agent->GetPositionY());
         data.distanceReferencePointToLeadingEdge = agent->GetDistanceReferencePointToLeadingEdge();
         data.laneType = mainLane->GetLaneType();
-        data.road = infrastructurePerception->lookupTableRoadNetwork.roads.at(mainRoad->GetId());
-        data.lane = infrastructurePerception->lookupTableRoadNetwork.lanes.at(mainLane->GetId());
+        data.road = infrastructurePerception->lookupTableRoadNetwork.roads.at(std::stoi(mainRoad->GetId()));
+        data.lane = infrastructurePerception->lookupTableRoadNetwork.lanes.at(mainLane->GetOdId());
         data.velocity = agent->GetVelocity(VelocityScope::Absolute);
         data.acceleration = agent->GetAcceleration();
         data.brakeLight = agent->GetBrakeLight();

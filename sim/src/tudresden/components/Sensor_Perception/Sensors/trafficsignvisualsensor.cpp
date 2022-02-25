@@ -73,7 +73,7 @@ void TrafficSignVisualSensor::DynamicInfrastructurePerceptionMethod() {
         const auto &tmp2 = std::dynamic_pointer_cast<ObservedTrafficSign>(closest);
         auto owlTrafficSign = aabbTreeHandler->trafficSignsMappingReversed.at(tmp2);
 
-        auto pointerIter = infrastructurePerception->lookupTableRoadNetwork.trafficSigns.find(owlTrafficSign->GetId());
+        auto pointerIter = infrastructurePerception->lookupTableRoadNetwork.trafficSigns.find(std::stoi(owlTrafficSign->GetId()));
         if (pointerIter != infrastructurePerception->lookupTableRoadNetwork.trafficSigns.end()) {
             perceived.push_back(pointerIter->second);
         }

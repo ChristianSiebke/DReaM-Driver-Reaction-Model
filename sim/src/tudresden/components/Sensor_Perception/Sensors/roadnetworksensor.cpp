@@ -23,18 +23,18 @@ void ConflictAreaCalculator::AssignPotentialConflictAreasToLanes(std::shared_ptr
                         ->AddConflictArea({currentLane.get(), conflictAreas->second});
                     ConflictPoints a;
                     a.junctionOpenDriveRoadId = currentLane->GetRoad()->GetOpenDriveId();
-                    a.junctionOpenDriveLaneId = std::stoi(currentLane->GetOpenDriveId());
+                    a.junctionOpenDriveLaneId = currentLane->GetOpenDriveId();
                     a.currentOpenDriveRoadId = junctionLane->GetRoad()->GetOpenDriveId();
-                    a.currentOpenDriveLaneId = std::stoi(junctionLane->GetOpenDriveId());
+                    a.currentOpenDriveLaneId = junctionLane->GetOpenDriveId();
                     a.start = {conflictAreas->first.start.x, conflictAreas->first.start.y};
                     a.end = {conflictAreas->first.end.x, conflictAreas->first.end.y};
                     perceptionData->conflictPoints.push_back(a);
 
                     ConflictPoints b;
                     b.junctionOpenDriveRoadId = junctionLane->GetRoad()->GetOpenDriveId();
-                    b.junctionOpenDriveLaneId = std::stoi(junctionLane->GetOpenDriveId());
+                    b.junctionOpenDriveLaneId = junctionLane->GetOpenDriveId();
                     b.currentOpenDriveRoadId = currentLane->GetRoad()->GetOpenDriveId();
-                    b.currentOpenDriveLaneId = std::stoi(currentLane->GetOpenDriveId());
+                    b.currentOpenDriveLaneId = currentLane->GetOpenDriveId();
                     b.start = {conflictAreas->second.start.x, conflictAreas->second.start.y};
                     b.end = {conflictAreas->second.end.x, conflictAreas->second.end.y};
                     perceptionData->conflictPoints.push_back(b);
@@ -222,7 +222,7 @@ ConflictAreaCalculator::CalculateChunkJunctionPoint(const std::list<MentalInfras
 }
 
 const MentalInfrastructure::Junction *RoadNetworkSensor::ConvertJunction(const OWL::Interfaces::Junction *junction) {
-    auto intersectionId = junction->GetId();
+    OdId intersectionId = std::stoi(junction->GetId());
     auto iter = std::find_if(perceptionData->junctions.begin(), perceptionData->junctions.end(),
                              [intersectionId](auto element) { return element->GetOpenDriveId() == intersectionId; });
     if (iter != perceptionData->junctions.end()) {
@@ -259,8 +259,8 @@ const MentalInfrastructure::Lane *RoadNetworkSensor::ConvertLane(const OWL::Lane
     // convert parent road
     ConvertRoad(&lane->GetSection().GetRoad());
 
-    auto newLane = std::make_shared<MentalInfrastructure::Lane>(std::to_string(laneId), openDriveId, lane->GetLength(), lane->GetLaneType(),
-                                                                lane->GetOdId() < 0);
+    auto newLane =
+        std::make_shared<MentalInfrastructure::Lane>(openDriveId, laneId, lane->GetLength(), lane->GetLaneType(), lane->GetOdId() < 0);
     perceptionData->lanes.push_back(newLane);
 
     double width = lane->GetWidth(0);
@@ -342,7 +342,7 @@ void RoadNetworkSensor::AddLaneGeometry(MentalInfrastructure::Lane *newLane, con
 }
 
 const MentalInfrastructure::Road *RoadNetworkSensor::ConvertRoad(const OWL::Interfaces::Road *road) {
-    const auto openDriveIdRoad = road->GetId();
+    OdId openDriveIdRoad = std::stoi(road->GetId());
 
     auto iter = std::find_if(perceptionData->roads.begin(), perceptionData->roads.end(),
                              [openDriveIdRoad](auto element) { return element->GetOpenDriveId() == openDriveIdRoad; });
@@ -383,8 +383,8 @@ const MentalInfrastructure::Road *RoadNetworkSensor::ConvertRoad(const OWL::Inte
         }
     }
     if (std::fabs(posXStart - maxDouble) < 0.001 || std::fabs(posYStart - maxDouble) < 0.001 || std::fabs(hdg - maxDouble) < 0.001) {
-        std::string message =
-            __FILE__ " Line: " + std::to_string(__LINE__) + "Road: " + openDriveIdRoad + " does not have a reference lane (laneid = 0)";
+        std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "Road: " + std::to_string(openDriveIdRoad) +
+                              " does not have a reference lane (laneid = 0)";
         throw std::runtime_error(message);
     }
 
@@ -502,13 +502,13 @@ StoppingPointData RoadNetworkSensor::CreateStoppingPoints(std::vector<std::share
 
     for (auto junction : junctions) {
         auto junctionId = junction->GetOpenDriveId();
-        std::map<OwlId, StoppingPointMap> tmp;
+        std::map<OdId, StoppingPointMap> tmp;
         spData.stoppingPoints.insert(std::make_pair(junctionId, tmp));
         for (auto road : junction->GetIncomingRoads()) {
             // TODO get last lanes of the road, not all of them (make method in road/lane)
             for (auto lane : road->GetLanes()) {
                 std::map<StoppingPointType, StoppingPoint> sps = stoppingPointCalculation.DetermineStoppingPoints(junction.get(), lane);
-                spData.stoppingPoints.at(junctionId).insert(std::make_pair(lane->GetOwlId(), sps));
+                spData.stoppingPoints.at(junctionId).insert(std::make_pair(lane->GetOpenDriveId(), sps));
             }
         }
     }

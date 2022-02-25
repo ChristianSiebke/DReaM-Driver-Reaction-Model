@@ -16,7 +16,7 @@ RoadmapGraph::RoadmapGraph(std::vector<std::shared_ptr<const MentalInfrastructur
     nodes.clear();
 
     for (auto lane : lanes) {
-        int64_t OdLaneId = std::stoi(lane->GetOpenDriveId());
+        auto OdLaneId = lane->GetOpenDriveId();
         auto OdRoadId = lane->GetRoad()->GetOpenDriveId();
         auto length = lane->GetLength();
 
@@ -36,7 +36,7 @@ RoadmapGraph::RoadmapGraph(std::vector<std::shared_ptr<const MentalInfrastructur
 
     for (const auto &[id, node] : nodes) {
         auto OdLaneId = node->GetOdLaneId();
-        std::string OdRoadId = node->GetOdRoadId();
+        auto OdRoadId = node->GetOdRoadId();
 
         if (OdMapping.find(OdRoadId) != OdMapping.end()) {
             OdMapping.at(OdRoadId).insert(std::make_pair(OdLaneId, node.get()));

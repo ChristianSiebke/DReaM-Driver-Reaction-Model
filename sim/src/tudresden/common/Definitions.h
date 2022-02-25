@@ -21,7 +21,7 @@
 constexpr double maxDouble = std::numeric_limits<double>::max();
 constexpr int maxInt = std::numeric_limits<int>::max();
 
-using OdId = std::string;
+using OdId = int64_t;
 using OwlId = uint64_t;
 constexpr OwlId OwlInvalidId = std::numeric_limits<uint64_t>::max();
 
@@ -181,16 +181,16 @@ enum class ScanAOI { NONE, Right, Straight, Left, Rear, Dashboard, Other };
 enum class ControlAOI { NONE, Right, Left, Oncoming };
 
 struct Target {
-    std::string targetRoad;
-    int targetLane;
+    OdId targetRoad;
+    OdId targetLane;
 };
 
 struct DriverRoutePlanning {
     bool ByTarget() const { return targetPtr != nullptr; }
     bool ByTurningVector() const { return turningVectorPtr != nullptr; }
     std::vector<int> GetVector() const { return *turningVectorPtr; }
-    std::string GetTargetRoad() const { return targetPtr->targetRoad; }
-    int GetTargetLane() const { return targetPtr->targetLane; }
+    OdId GetTargetRoad() const { return targetPtr->targetRoad; }
+    OdId GetTargetLane() const { return targetPtr->targetLane; }
 
     std::shared_ptr<Target> targetPtr{nullptr};
     std::shared_ptr<std::vector<int>> turningVectorPtr{nullptr};

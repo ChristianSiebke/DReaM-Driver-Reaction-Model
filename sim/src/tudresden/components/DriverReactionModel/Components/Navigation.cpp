@@ -63,9 +63,9 @@ void Navigation::Update() {
     if (nextLane != nullptr) {
         const auto road = nextLane->GetRoad();
         routeDecision.odRoadID = road->GetOpenDriveId();
-        routeDecision.odLaneID = static_cast<int>(std::stoi(nextLane->GetOpenDriveId()));
+        routeDecision.odLaneID = static_cast<int>(nextLane->GetOpenDriveId());
     } else {
-        routeDecision.odRoadID = "-999";
+        routeDecision.odRoadID = -999;
         routeDecision.odLaneID = -999;
     }
 }

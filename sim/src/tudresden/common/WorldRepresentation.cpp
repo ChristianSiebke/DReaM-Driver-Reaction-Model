@@ -355,8 +355,7 @@ const std::optional<NextDirectionLanes> InfrastructureRepresentation::NextLanes(
     return InfrastructurePerception::NextLanes(movingInLaneDirection, currentLane);
 }
 
-const RoadmapGraph::RoadmapNode* InfrastructureRepresentation::NavigateToTargetNode(std::string targetRoadOdId,
-                                                                                    int64_t targetLaneOdId) const {
+const RoadmapGraph::RoadmapNode *InfrastructureRepresentation::NavigateToTargetNode(OdId targetRoadOdId, OdId targetLaneOdId) const {
     return infrastructure->graph.NavigateToTargetNode(targetRoadOdId, targetLaneOdId);
 }
 } // namespace CognitiveMap
