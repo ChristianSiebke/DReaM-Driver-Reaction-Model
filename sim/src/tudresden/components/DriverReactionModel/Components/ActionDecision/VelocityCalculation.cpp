@@ -15,7 +15,7 @@ double VelocityCalculation::PrepareTargetVelocity() {
         if (worldInterpretation.crossingInfo.phase != CrossingPhase::NONE) {
             targetVelocity = phaseVelocity.at(worldInterpretation.crossingInfo.phase);
         } else {
-            SpeedLimit speedLimit = mmLane->GetSpeedLimit();
+            SpeedLimit speedLimit = {50, SpeedUnit::KilometersPerHour};
             speedLimit.convert(SpeedUnit::MetersPerSecond);
             targetVelocity = speedLimit.maxAllowedSpeed;
             // correction for misinterpretation

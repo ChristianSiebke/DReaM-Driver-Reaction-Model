@@ -8,84 +8,20 @@
 #include <chrono>
 #endif
 
-void BasicVisualSensor::Trigger(int timestamp, double direction, double distance, double opening) {
+void BasicVisualSensor::Trigger(int timestamp, double fovAngle, double distance, double opening) {
     // use threads for operations
     bool useThreads = true;
 
-    sensorDirection = egoAgent->GetYaw() + direction;
+    sensorDirection = fovAngle;
     driverPos = Common::Vector2d(egoAgent->GetPositionX(), egoAgent->GetPositionY());
     minViewAngle = -opening / 2.0;
     maxViewAngle = opening / 2.0;
     viewDistance = distance;
 
-    //#if MEASURE_TIME
-    //    using std::chrono::duration;
-    //    using std::chrono::duration_cast;
-    //    using std::chrono::high_resolution_clock;
-    //    using std::chrono::milliseconds;
-
-    //    auto t1 = high_resolution_clock::now();
-    //#endif
-
     aabbTree = aabbTreeHandler->GetCurrentAABBTree(timestamp); // this updates the aabb tree (if needed)
     perceived.Clear();
 
-    //#if MEASURE_TIME
-    //    auto t2 = high_resolution_clock::now();
-    //#endif
-
     ThreadedAgentPerception(useThreads);
-
-    //#if MEASURE_TIME
-    //    auto t3 = high_resolution_clock::now();
-    //    auto ms_int_1 = duration_cast<milliseconds>(t2 - t1).count();
-    //    auto ms_int_2 = duration_cast<milliseconds>(t3 - t2).count();
-
-    //    if (ms_int_2 < 30000)
-    //        return;
-
-    //    std::cout << "[MEASURE TIME] Execution of GetCurrentAABBTree() took " << ms_int_1 << "ms." << std::endl;
-    //    std::cout << "[MEASURE TIME] Execution of ThreadedAgentPerception() took " << ms_int_2 << "ms. Using threads: " << useThreads
-    //              << std::endl;
-    //#endif
-}
-
-void BasicVisualSensor::Trigger(int timestamp) {
-    // use threads for operations
-    bool useThreads = true;
-    sensorDirection = 0; /*egoAgent->GetCurrentGazeState().ufovAngle;*/
-    driverPos = Common::Vector2d(egoAgent->GetPositionX(), egoAgent->GetPositionY());
-    minViewAngle = -1.6; /*-egoAgent->GetCurrentGazeState().openingAngle / 2.0;*/
-    maxViewAngle = 1.6;  /*egoAgent->GetCurrentGazeState().openingAngle / 2.0;*/
-    viewDistance = 100;  /*egoAgent->GetCurrentGazeState().viewDistance;*/
-
-#if MEASURE_TIME
-    using std::chrono::duration;
-    using std::chrono::duration_cast;
-    using std::chrono::high_resolution_clock;
-    using std::chrono::milliseconds;
-
-    auto t1 = high_resolution_clock::now();
-#endif
-
-    aabbTree = aabbTreeHandler->GetCurrentAABBTree(timestamp); // this updates the aabb tree (if needed)
-    perceived.Clear();
-
-#if MEASURE_TIME
-    auto t2 = high_resolution_clock::now();
-#endif
-
-    ThreadedAgentPerception(useThreads);
-
-#if MEASURE_TIME
-    auto t3 = high_resolution_clock::now();
-    auto ms_int_1 = duration_cast<milliseconds>(t2 - t1).count();
-    auto ms_int_2 = duration_cast<milliseconds>(t3 - t2).count();
-
-    std::cout << "[MEASURE TIME] Execution of GetCurrentAABBTree() took " << ms_int_1 << "ms." << std::endl;
-    std::cout << "[MEASURE TIME] Execution of ThreadedAgentPerception() took " << ms_int_2 << "ms. Using threads: " << useThreads
-              << std::endl;
-#endif
 }
 
 void BasicVisualSensor::ThreadedAgentPerception(bool useThreads) {
@@ -133,12 +69,17 @@ void BasicVisualSensor::AgentPerceptionThread(unsigned startIndex, unsigned endI
         if (worldData->GetRoads().find(agent->GetRoads(MeasurementPoint::Front).front()) == worldData->GetRoads().end())
             continue;
 
+        if (agent->GetRoads(MeasurementPoint::Front).size() > 1) {
+            std::cout << "The agent is currently locating on more than one road! This is NOT supported, using only first road."
+                      << std::endl;
+        }
+
         if (viewDistance == 0.0) {
             continue;
         }
 
         auto otherPosition = Common::Vector2d(agent->GetPositionX(), agent->GetPositionY());
-        if ((otherPosition - driverPos).Length() > 1.15 /* TODO switch to channel * egoAgent->GetCurrentGazeState().viewDistance*/)
+        if ((otherPosition - driverPos).Length() > viewDistance * 1.1)
             continue;
 
         auto points = obj->area.outer();

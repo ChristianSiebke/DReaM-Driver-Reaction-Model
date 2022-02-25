@@ -21,8 +21,6 @@ public:
         }
     }
 
-    void Trigger(int timestamp) override;
-
     void Trigger(int timestamp, double direction, double distance, double opening) override;
 
     std::vector<std::shared_ptr<AgentPerception>> GetVisible() override {

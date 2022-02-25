@@ -75,7 +75,7 @@ double DriverPerception::DetermineRoadHeading(bool referenceLaneInDirection, con
 }
 
 double DriverPerception::DetermineDriverCurvature(bool laneInRoadDirection) {
-    // TODO rework & re-implement --> consider moving direction of agent
+    // TODO maybe rework & re-implement --> consider moving direction of agent
     double curvature = 0;
 
     auto worldData = static_cast<OWL::WorldData *>(world->GetWorldData());
@@ -150,25 +150,26 @@ void DriverPerception::CalculatePerception(const AgentInterface *driver) {
     data.length = driver->GetLength();
     data.laneWidth = actualEgoAgent->GetLaneWidth();
     data.steeringWheelAngle = driver->GetSteeringWheelAngle();
-    // FIXME data.sCoordinate =
-    //    mainLane->IsInStreamDirection() ? driver->GetDistanceToStartOfRoad() : mainRoad->GetLength() - driver->GetDistanceToStartOfRoad();
-    // FIXME data.movingInLaneDirection = AgentPerception::IsMovingInLaneDirection(data.lane, data.yawAngle, data.sCoordinate,
-    // data.velocity);
-    // FIXME auto intersectionDistance = data.CalculateIntersectionDistance(data.road, data.lane);
-    // FIXME data.distanceOnIntersection = intersectionDistance.distanceOnIntersection;
-    // FIXME data.distanceToNextIntersection = intersectionDistance.distanceToNextIntersection;
+
+    auto dist = driver->GetDistanceToStartOfRoad(MeasurementPoint::Reference, mainRoad->GetId());
+
+    data.sCoordinate = mainLane->GetOdId() < 0 ? dist : mainRoad->GetLength() - dist;
+    data.movingInLaneDirection = AgentPerception::IsMovingInLaneDirection(data.lane, data.yawAngle, data.sCoordinate, data.velocity);
+    auto junctionDistance = data.CalculateJunctionDistance(data.road, data.lane);
+    data.distanceOnJunction = junctionDistance.distanceOnJunction;
+    data.distanceToNextJunction = junctionDistance.distanceToNextJunction;
     data.nextLane = InfrastructurePerception::NextLane(data.indicatorState, data.movingInLaneDirection, data.lane);
     data.driverPosition = GetDriverPosition();
 
     // if the next lane is in the same direction as the current lane (they meet end to start or start to end)
-    // FIXME bool nextLaneInDirection = driver->GetFrontMiddlePointLaneId() != InvalidId
+    // bool nextLaneInDirection = driver->GetFrontMiddlePointLaneId() != InvalidId
     //                                ? worldData->GetLanes().at(driver->GetFrontMiddlePointLaneId())->IsInStreamDirection()
     //                                : true;
 
-    // FIXME data.lateralDisplacement = DetermineLateralDisplacement(nextLaneInDirection, &data);
-    // FIXME data.heading = DetermineRoadHeading(nextLaneInDirection, &data);
+    // TODO observe functionality for the following 3 statements
+    data.heading = actualEgoAgent->GetLaneDirection();               // DetermineRoadHeading(nextLaneInDirection, &data);
+    data.lateralDisplacement = actualEgoAgent->GetPositionLateral(); // DetermineLateralDisplacement(nextLaneInDirection, &data);
+    data.curvature = actualEgoAgent->GetLaneCurvature();             // DetermineDriverCurvature(mainLane->IsInStreamDirection());
 
-    // determine the curvature at the current position
-    // FIXME data.curvature = DetermineDriverCurvature(mainLane->IsInStreamDirection());
     egoPerception = std::make_shared<EgoPerception>(data);
 }

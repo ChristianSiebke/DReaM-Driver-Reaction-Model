@@ -82,14 +82,14 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
     const std::string COMPONENTNAME = "Driver Reaction Model (DReaM)";
 
     AlgorithmDReaMImplementation(std::string componentName, bool isInit, int priority, int offsetTime, int responseTime, int cycleTime,
-                                 StochasticsInterface* stochastics, const ParameterInterface* parameters, PublisherInterface* publisher, 
-                                 const CallbackInterface* callbacks, AgentInterface* agent)
-        : AlgorithmInterface(componentName, isInit, priority, offsetTime, responseTime, cycleTime, stochastics, parameters, publisher, 
-                             callbacks, agent),
-          logger(agent->GetId()), loggerInterface(logger)
+                                 StochasticsInterface *stochastics, const ParameterInterface *parameters, PublisherInterface *publisher,
+                                 const CallbackInterface *callbacks, AgentInterface *agent) :
+        AlgorithmInterface(componentName, isInit, priority, offsetTime, responseTime, cycleTime, stochastics, parameters, publisher,
+                           callbacks, agent),
+        logger(agent->GetId()),
+        loggerInterface(logger)
 
     {
-        // observerInstance = observations->at(0); FIXME
         BehaviourImporter importer(&loggerInterface);
         behaviourData = importer.GetBehaviourData();
 
@@ -98,7 +98,7 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
 
         std::unique_ptr<Component::ComponentInterface> navigation =
             std::make_unique<Navigation::Navigation>(cognitiveMap->GetWorldRepresentation(), cognitiveMap->GetWorldInterpretation(),
-                                                     driverRoutePlanning, cycleTime, stochastics, &loggerInterface, *behaviourData);
+                                                     routeElement, cycleTime, stochastics, &loggerInterface, *behaviourData);
         std::unique_ptr<Component::ComponentInterface> gazeMovement =
             std::make_unique<GazeMovement::GazeMovement>(cognitiveMap->GetWorldRepresentation(), cognitiveMap->GetWorldInterpretation(),
                                                          cycleTime, stochastics, &loggerInterface, *behaviourData);
@@ -155,8 +155,8 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
      */
     void Trigger(int time);
 
-    //! includes the turning decision at each intersection or a navigation target
-    DriverRoutePlanning driverRoutePlanning;
+    //! The route the agent has planned, consisting of one or multiple waypoints
+    RouteElement routeElement;
 
     //! All visual perception information of sensor_DriverPerception
     std::vector<std::shared_ptr<AgentPerception>> ambientAgents;
@@ -199,8 +199,8 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
 
     // SecondaryDriverTasksSignal
     //*************************************************
-    
-    // NavigationDecision out_routeDecision; TODO evaluate if still needed
+
+    NavigationDecision out_routeDecision;
 
     //! State of IndicatorSwitch [-].
     int out_indicatorState = 0;

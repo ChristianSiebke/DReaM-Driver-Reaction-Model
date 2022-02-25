@@ -23,35 +23,61 @@
 
 namespace Navigation {
 
+struct Waypoint {
+    std::string roadId;
+    int laneId;
+    double s;
+
+    std::string GetRoadId() const {
+        return roadId;
+    }
+    int GetLaneId() const {
+        return laneId;
+    }
+};
+
+struct Route {
+    std::vector<Waypoint> GetWaypoints() const {
+        return *waypoints;
+    }
+    std::shared_ptr<std::vector<Waypoint>> waypoints;
+};
+
+std::shared_ptr<std::vector<Waypoint>> waypoints;
+
 class Navigation : public Component::ComponentInterface {
-  public:
-    Navigation(const WorldRepresentation& worldRepresentation, const WorldInterpretation& worldInterpretation,
-               const DriverRoutePlanning& driverRoutePlanning, int cycleTime, StochasticsInterface* stochastics,
-               LoggerInterface* loggerInterface, const BehaviourData& behaviourData);
-    Navigation(const Navigation&) = delete;
-    Navigation(Navigation&&) = delete;
-    Navigation& operator=(const Navigation&) = delete;
-    Navigation& operator=(Navigation&&) = delete;
+public:
+    Navigation(const WorldRepresentation &worldRepresentation, const WorldInterpretation &worldInterpretation,
+               const RouteElement &routeElement, int cycleTime, StochasticsInterface *stochastics, LoggerInterface *loggerInterface,
+               const BehaviourData &behaviourData);
+    Navigation(const Navigation &) = delete;
+    Navigation(Navigation &&) = delete;
+    Navigation &operator=(const Navigation &) = delete;
+    Navigation &operator=(Navigation &&) = delete;
     ~Navigation() override = default;
     /*!
      * \brief DetermineNavigationDecision select next lane and indicator state
      */
     virtual void Update() override;
 
-    virtual const WorldRepresentation& GetWorldRepresentation() const override { return worldRepresentation; }
+    virtual const WorldRepresentation &GetWorldRepresentation() const override {
+        return worldRepresentation;
+    }
 
-    virtual const WorldInterpretation& GetWorldInterpretation() const override { return worldInterpretation; }
+    virtual const WorldInterpretation &GetWorldInterpretation() const override {
+        return worldInterpretation;
+    }
 
-    const NavigationDecision& GetRouteDecision() const { return routeDecision; }
+    const NavigationDecision &GetRouteDecision() const {
+        return routeDecision;
+    }
 
-  private:
-    bool ArrivedAtTarget() const;
-
+private:
     bool TurningDecisionAtIntersectionHaveToBeSelected() const;
     CrossingType DetermineCrossingType(std::vector<int>) const;
-    CrossingType DetermineCrossingType(std::list<const RoadmapGraph::RoadmapNode*> path) const;
+    CrossingType DetermineCrossingType(std::list<const RoadmapGraph::RoadmapNode *> path) const;
 
-    const MentalInfrastructure::Lane* GetTargetNode() const;
+    const MentalInfrastructure::Lane *GetTargetNode() const;
 
     IndicatorState ConvertCrossingTypeToIndicator(CrossingType decision) const;
 
@@ -63,11 +89,12 @@ class Navigation : public Component::ComponentInterface {
 
     unsigned int intersectionCounter = 0;
 
-    const WorldRepresentation& worldRepresentation;
-    const WorldInterpretation& worldInterpretation;
+    const WorldRepresentation &worldRepresentation;
+    const WorldInterpretation &worldInterpretation;
 
-    const DriverRoutePlanning& driverRoutePlanning;
-    bool targetIsPassed = false;
+    const RouteElement &routeElement;
+    Route route;
+    bool targetPassed = false;
     bool directionChosen = false;
     NavigationDecision routeDecision;
 };

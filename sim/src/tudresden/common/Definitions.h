@@ -15,8 +15,10 @@
 #pragma once
 #include <unordered_map>
 #include <memory>
+#include <unordered_map>
 
 #include "common/globalDefinitions.h"
+#include "common/vector2d.h"
 
 constexpr double maxDouble = std::numeric_limits<double>::max();
 constexpr int maxInt = std::numeric_limits<int>::max();
@@ -180,11 +182,13 @@ enum class GazeType { NONE, ScanGlance, ObserveGlance, ControlGlance };
 enum class ScanAOI { NONE, Right, Straight, Left, Rear, Dashboard, Other };
 enum class ControlAOI { NONE, Right, Left, Oncoming };
 
+// deprecated
 struct Target {
     OdId targetRoad;
     OdId targetLane;
 };
 
+// deprecated
 struct DriverRoutePlanning {
     bool ByTarget() const { return targetPtr != nullptr; }
     bool ByTurningVector() const { return turningVectorPtr != nullptr; }

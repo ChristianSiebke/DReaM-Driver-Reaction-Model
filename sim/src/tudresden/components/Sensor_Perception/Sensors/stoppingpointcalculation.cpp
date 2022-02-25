@@ -43,7 +43,7 @@ bool StoppingPointCalculation::CalcCrossingLines(const MentalInfrastructure::Lan
     if (!roadIsPredJunction && !roadIsSuccJunction)
         return false;
 
-    auto lanes = incomingRoad->GetLanes(); // TODO destinguish front and back of road?
+    auto lanes = incomingRoad->GetLanes();
 
     const MentalInfrastructure::Lane *leftmostDrivingLane = nullptr;
     const MentalInfrastructure::Lane *rightmostDrivingLane = nullptr;
@@ -56,7 +56,7 @@ bool StoppingPointCalculation::CalcCrossingLines(const MentalInfrastructure::Lan
     const auto rightmostLane = lanes.front();
     const auto leftmostLane = lanes.back();
 
-    const MentalInfrastructure::Lane *lastLane = nullptr; // TODO pointer or refernce?
+    const MentalInfrastructure::Lane *lastLane = nullptr;
 
     for (auto lane : lanes) {
         if (!lastLane) {
@@ -81,7 +81,6 @@ bool StoppingPointCalculation::CalcCrossingLines(const MentalInfrastructure::Lan
     }
 
     if (roadIsSuccJunction || roadIsPredJunction) {
-        // TODO encapsulate function
         lines.roadId = incomingRoad->GetOpenDriveId();
         lines.appDir = dir;
 
