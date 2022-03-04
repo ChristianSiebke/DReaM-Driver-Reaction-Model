@@ -119,12 +119,12 @@ struct EgoPerception : AgentPerception {
 
 struct LookupTableRoadNetwork {
     std::unordered_map<OdId, const MentalInfrastructure::Road *> roads;
-    std::unordered_map<OdId, const MentalInfrastructure::Lane *> lanes;
+    std::unordered_map<OwlId, const MentalInfrastructure::Lane *> lanes;
     std::unordered_map<OdId, const MentalInfrastructure::TrafficSign *> trafficSigns;
 };
 
 struct StoppingPointData {
-    std::map<OdId, std::map<OdId, std::map<StoppingPointType, StoppingPoint>>> stoppingPoints;
+    std::map<OdId, std::map<OwlId, std::map<StoppingPointType, StoppingPoint>>> stoppingPoints;
 };
 
 struct ConflictPoints {
@@ -157,7 +157,7 @@ struct InfrastructurePerception {
         return conflictPoints;
     }
 
-    const std::map<StoppingPointType, StoppingPoint> &GetStoppingPoints(OdId junctionId, OdId laneId) const {
+    const std::map<StoppingPointType, StoppingPoint> &GetStoppingPoints(OdId junctionId, OwlId laneId) const {
         return stoppingPointData.stoppingPoints.at(junctionId).at(laneId);
     }
 
@@ -189,8 +189,8 @@ struct DynamicInfrastructurePerception {
 };
 
 struct NavigationDecision {
-    OdId odRoadID{-999};
-    OdId odLaneID{-999};
+    OdId odRoadID{"-999"};
+    OdId odLaneID{"-999"};
 
     OwlId laneID{OwlInvalidId};
     IndicatorState indicator = IndicatorState::IndicatorState_Off;

@@ -290,7 +290,7 @@ class InfrastructureRepresentation {
         return infrastructure->graph.FindShortestPath(start, end);
     }
 
-    const RoadmapGraph::RoadmapNode *NavigateToTargetNode(OdId targetRoadOdId, OdId targetLaneOdId) const;
+    const RoadmapGraph::RoadmapNode *NavigateToTargetNode(OdId targetRoadOdId, OwlId targetLaneOdId) const;
 
     const std::vector<ConflictPoints>& GetConflicPoints() const { return infrastructure->GetConflicPoints(); }
 

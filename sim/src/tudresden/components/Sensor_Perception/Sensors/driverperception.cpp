@@ -137,7 +137,7 @@ void DriverPerception::CalculatePerception(const AgentInterface *driver) {
     data.id = driver->GetId();
     data.refPosition = Common::Vector2d(driver->GetPositionX(), driver->GetPositionY());
     data.distanceReferencePointToLeadingEdge = driver->GetDistanceReferencePointToLeadingEdge();
-    data.road = infrastructurePerception->lookupTableRoadNetwork.roads.at(std::stoi(mainRoad->GetId()));
+    data.road = infrastructurePerception->lookupTableRoadNetwork.roads.at(mainRoad->GetId());
     data.lane = infrastructurePerception->lookupTableRoadNetwork.lanes.at(mainLane->GetId());
     data.laneType = mainLane->GetLaneType();
     data.velocity = driver->GetVelocity(VelocityScope::Absolute);

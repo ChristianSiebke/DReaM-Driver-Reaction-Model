@@ -23,7 +23,7 @@
 constexpr double maxDouble = std::numeric_limits<double>::max();
 constexpr int maxInt = std::numeric_limits<int>::max();
 
-using OdId = int64_t;
+using OdId = std::string;
 using OwlId = uint64_t;
 constexpr OwlId OwlInvalidId = std::numeric_limits<uint64_t>::max();
 
@@ -42,8 +42,27 @@ enum class DistanceUnit {
     Mile // land mile
 };
 
-struct SpeedLimit {
-    double sOffset{0};
+// fixation area of interests
+enum class ScanAOI { NONE, Right, Straight, Left, Rear, Dashboard, Other };
+enum class ControlAOI { NONE, Right, Left, Oncoming };
+enum class GazeType { NONE, ScanGlance, ObserveGlance, ControlGlance };
+
+struct FixationTarget {
+    Common::Vector2d fixationPoint{-999, -999};
+    int fixationAgent{-999};
+};
+
+struct GazeState {
+    // includes gaze type and fixated AOI
+    std::pair<GazeType, int> fixationState{GazeType::NONE, static_cast<int>(ScanAOI::NONE)};
+    FixationTarget target;
+    double ufovAngle{-999};
+    double openingAngle{-999};
+    double viewDistance{100}; // TODO calculate
+    int fixationDuration{-999};
+};
+
+[[deprecated]] struct SpeedLimit {
     double maxAllowedSpeed{0};
     SpeedUnit unit{SpeedUnit::MetersPerSecond};
 
@@ -176,11 +195,6 @@ struct CollisionPoint {
     double distanceCP = maxDouble;
     double timeToCollision = maxDouble;
 };
-
-enum class GazeType { NONE, ScanGlance, ObserveGlance, ControlGlance };
-// fixation area of interests
-enum class ScanAOI { NONE, Right, Straight, Left, Rear, Dashboard, Other };
-enum class ControlAOI { NONE, Right, Left, Oncoming };
 
 // deprecated
 struct Target {

@@ -28,7 +28,7 @@ namespace RoadmapGraph {
 
 class RoadmapNode {
 public:
-    RoadmapNode(const MentalInfrastructure::Lane *lane, int64_t OdLaneId, OdId OdRoadId, double length) :
+    RoadmapNode(const MentalInfrastructure::Lane *lane, OdId OdLaneId, OdId OdRoadId, double length) :
         lane{lane}, OdLaneId{OdLaneId}, OdRoadId{OdRoadId}, length{length} {
     }
 
@@ -46,7 +46,7 @@ public:
     double GetLength() const {
         return length;
     }
-    int64_t GetOdLaneId() const {
+    OdId GetOdLaneId() const {
         return OdLaneId;
     }
     const OdId GetOdRoadId() const {
@@ -60,7 +60,7 @@ private:
     std::list<const RoadmapNode *> predecessorNodes;
 
     const MentalInfrastructure::Lane *lane;
-    const int64_t OdLaneId;
+    const OdId OdLaneId;
     const OdId OdRoadId;
     double length;
 };
@@ -75,7 +75,7 @@ public:
         return nodes;
     }
 
-    const RoadmapNode *NavigateToTargetNode(OdId targetRoadOdId, OdId targetLaneOdId) {
+    const RoadmapNode *NavigateToTargetNode(OdId targetRoadOdId, OwlId targetLaneOdId) {
         return OdMapping.at(targetRoadOdId).at(targetLaneOdId);
     }
 
@@ -104,6 +104,6 @@ private:
     InitializeDijkstra(const std::shared_ptr<RoadmapNode> &node) const;
 
     std::unordered_map<const MentalInfrastructure::Lane *, std::shared_ptr<RoadmapNode>> nodes;
-    std::unordered_map<OdId, std::unordered_map<OdId, const RoadmapNode *>> OdMapping;
+    std::unordered_map<OdId, std::unordered_map<OwlId, const RoadmapNode *>> OdMapping;
 };
 } // namespace RoadmapGraph

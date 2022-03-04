@@ -107,11 +107,11 @@ public:
     }
 
     ///
-    /// \brief Sets the section that this lane is on.
-    /// \param s the new section
+    /// \brief Sets the Road that this lane is on.
+    /// \param r the new section
     ///
-    void SetRoad(const Road *s) {
-        road = s;
+    void SetRoad(const Road *r) {
+        road = r;
     }
 
     ///

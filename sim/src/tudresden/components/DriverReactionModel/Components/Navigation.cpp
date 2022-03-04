@@ -30,12 +30,12 @@ void Navigation::Update() {
     // TODO: convert RouteElement to Route
 
     CrossingType turningDecision;
-    Waypoint currentWaypoint = *route.GetWaypoints().begin();
+    Waypoint currentWaypoint = route.GetWaypoints().front();
     auto currentPosition = worldRepresentation.egoAgent->GetLane();
 
     // FIXME change stoi to method
     if (currentWaypoint.GetRoadId() == currentPosition->GetRoad()->GetOpenDriveId() &&
-        currentWaypoint.GetLaneId() == std::stoi(currentPosition->GetOpenDriveId())) {
+        currentWaypoint.GetLaneId() == currentPosition->GetOwlId()) {
         route.GetWaypoints().erase(route.GetWaypoints().begin());
     }
     // Final Target reached or not correctly handled
@@ -50,27 +50,27 @@ void Navigation::Update() {
     }
         routeDecision.indicator = ConvertCrossingTypeToIndicator(turningDecision);
         directionChosen = true;
-    }
 
         if (ResetDirectionChosen()) {
             intersectionCounter++;
             directionChosen = false;
         }
 
-    if (ResetIndicator()) {
-        routeDecision.indicator = IndicatorState::IndicatorState_Off;
-    }
-    auto nextLane = InfrastructureRepresentation::NextLane(worldRepresentation.egoAgent->GetIndicatorState(),
-                                                           worldRepresentation.egoAgent->IsMovingInLaneDirection(),
-                                                           worldRepresentation.egoAgent->GetLane());
-    if (nextLane != nullptr) {
-        const auto road = nextLane->GetRoad();
-        routeDecision.odRoadID = road->GetOpenDriveId();
-        routeDecision.odLaneID = static_cast<int>(nextLane->GetOpenDriveId());
-    } else {
-        routeDecision.odRoadID = -999;
-        routeDecision.odLaneID = -999;
-    }
+        if (ResetIndicator()) {
+            routeDecision.indicator = IndicatorState::IndicatorState_Off;
+        }
+        auto nextLane = InfrastructureRepresentation::NextLane(worldRepresentation.egoAgent->GetIndicatorState(),
+                                                               worldRepresentation.egoAgent->IsMovingInLaneDirection(),
+                                                               worldRepresentation.egoAgent->GetLane());
+        if (nextLane != nullptr) {
+            const auto road = nextLane->GetRoad();
+            routeDecision.odRoadID = road->GetOpenDriveId();
+            routeDecision.odLaneID = static_cast<int>(std::stoi(nextLane->GetOpenDriveId()));
+        }
+        else {
+            routeDecision.odRoadID = "-999";
+            routeDecision.odLaneID = "-999";
+        }
 }
 
 bool Navigation::TurningDecisionAtIntersectionHaveToBeSelected() const {

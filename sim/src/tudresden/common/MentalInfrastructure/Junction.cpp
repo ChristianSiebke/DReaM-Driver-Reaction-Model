@@ -64,7 +64,7 @@ void Junction::AddConnection(const Road *from, const Road *with, const Road *to)
     connections.push_back(connection);
     roadsOnJunction.push_back(with);
 
-    if (std::find(incomingRoads.begin(), incomingRoads.end(), from) == incomingRoads.end()) {
+    if (std::none_of(incomingRoads.begin(), incomingRoads.end(), [from](auto element) { *element == from; })) {
         incomingRoads.push_back(from);
     }
 }
