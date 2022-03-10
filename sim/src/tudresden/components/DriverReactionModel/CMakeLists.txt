@@ -1,4 +1,4 @@
-set(COMPONENT_NAME ALGORITHM_DReaM)
+set(COMPONENT_NAME DriverReactionModel)
  
 add_compile_definitions(ALGORITHM_DReaM_LIBRARY)
 
