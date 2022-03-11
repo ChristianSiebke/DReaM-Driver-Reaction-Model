@@ -92,11 +92,7 @@ std::string agentStateRecorder::generateDataSet(int time){
     return outputLine;
 }
 
-
-void agentStateRecorder::writeOutputFile(){
-
-    std::cout <<"confictPoints: " << record.conflictPoints.size() << std::endl;
-
+void agentStateRecorder::writeOutputFile() {
     std::string path = "SimulationOutput.RunResults.RunResult.Cyclics";
     boost::property_tree::ptree valueTree;
     valueTree.put("SimulationOutput.<xmlattr>.SchemaVersion","0.3.0");
@@ -194,6 +190,4 @@ void agentStateRecorder::writeOutputFile(){
 
     boost::property_tree::xml_writer_settings<std::string> settings (' ',2);
     boost::property_tree::write_xml("jansoutput.xml", valueTree,std::locale(),settings);
-
 }
-

@@ -23,10 +23,10 @@ enum LogLevel_new { debug, warning, error, info };
 
 class Logger {
   public:
-    Logger(uint64_t agentId, LogLevel_new defaultLogLevel = info);
-    ~Logger();
-
-    void Log(const std::string& message, LogLevel_new level = info);
+      Logger(uint64_t agentId, LogLevel_new defaultLogLevel = info);
+      ~Logger();
+      void SetPath(std::string path);
+      void Log(const std::string &message, LogLevel_new level = info);
 
   private:
     std::string ToString(LogLevel_new level);

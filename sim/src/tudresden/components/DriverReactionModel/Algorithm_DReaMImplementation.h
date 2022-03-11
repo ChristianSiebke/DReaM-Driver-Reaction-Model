@@ -55,21 +55,24 @@
  *   @} */
 
 #pragma once
+#include <QCommandLineParser>
+#include <qcoreapplication.h>
 
 #include "Common/ComplexSignals.h"
+#include "Common/primitiveSignals.h"
 #include "Components/ActionDecision/ActionDecision.h"
 #include "Components/CognitiveMap/CognitiveMap.h"
-#include "Components/Importer/BehaviourImporter.h"
-#include "DriverReactionModel.h"
 #include "Components/GazeMovement/GazeMovement.h"
+#include "Components/Importer/BehaviourImporter.h"
 #include "Components/Navigation.h"
 #include "Components/TrafficSignMemory/TrafficSignMemory.h"
+#include "DriverReactionModel.h"
 #include "agentstaterecorder.h"
+#include "core/opSimulation/framework/commandLineParser.h"
+#include "core/opSimulation/framework/sampler.h"
 #include "include/modelInterface.h"
 #include "include/observationInterface.h"
 #include "include/publisherInterface.h"
-#include "Common/primitiveSignals.h"
-#include "core/opSimulation/framework/sampler.h"
 /*!
  * \brief models the behavior of the driver
  *
@@ -87,31 +90,35 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
         AlgorithmInterface(componentName, isInit, priority, offsetTime, responseTime, cycleTime, stochastics, parameters, publisher,
                            callbacks, agent),
         logger(agent->GetId()),
-        loggerInterface(logger)
+        loggerInterface(logger) {
+        auto arguments = QCoreApplication::arguments();
+        CommandLineArguments parsedArguments = CommandLineParser::Parse(arguments);
+        std::string logPath = QCoreApplication::applicationDirPath().toStdString() + "\\" + parsedArguments.resultsPath + "\\" + "agent" +
+                              std::to_string(agent->GetId()) + ".txt";
+        std::string ConfigPath =
+            QCoreApplication::applicationDirPath().toStdString() + "\\" + parsedArguments.configsPath + "\\" + "behaviour.xml";
+        logger.SetPath(logPath);
 
-    {
-        BehaviourImporter importer(&loggerInterface);
+        // TODO: wrap all in DReaM constructor ----
+        BehaviourImporter importer(ConfigPath, &loggerInterface);
         behaviourData = importer.GetBehaviourData();
-
         std::unique_ptr<Component::ComponentInterface> cognitiveMap =
             std::make_unique<CognitiveMap::CognitiveMap>(cycleTime, stochastics, &loggerInterface, *behaviourData);
-
         std::unique_ptr<Component::ComponentInterface> navigation =
             std::make_unique<Navigation::Navigation>(cognitiveMap->GetWorldRepresentation(), cognitiveMap->GetWorldInterpretation(),
                                                      routeElement, cycleTime, stochastics, &loggerInterface, *behaviourData);
         std::unique_ptr<Component::ComponentInterface> gazeMovement =
             std::make_unique<GazeMovement::GazeMovement>(cognitiveMap->GetWorldRepresentation(), cognitiveMap->GetWorldInterpretation(),
                                                          cycleTime, stochastics, &loggerInterface, *behaviourData);
-
         std::unique_ptr<Component::ComponentInterface> actionDecision =
             std::make_unique<ActionDecision::ActionDecision>(cognitiveMap->GetWorldRepresentation(), cognitiveMap->GetWorldInterpretation(),
                                                              cycleTime, stochastics, &loggerInterface, *behaviourData);
-
         DReaM.SetComponent(100, std::move(cognitiveMap));
         DReaM.SetComponent(90, std::move(navigation));
         DReaM.SetComponent(80, std::move(gazeMovement));
         DReaM.SetComponent(70, std::move(actionDecision));
         agentStateRecorder = &agentStateRecorder::getInstance();
+        //------------------------------------------------------
     }
 
     /*!

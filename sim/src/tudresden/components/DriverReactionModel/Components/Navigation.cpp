@@ -24,6 +24,7 @@ Navigation::Navigation(const WorldRepresentation &worldRepresentation, const Wor
     worldRepresentation{worldRepresentation},
     worldInterpretation{worldInterpretation},
     routeElement{routeElement} {
+
 }
 
 void Navigation::Update() {

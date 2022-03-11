@@ -49,14 +49,17 @@ class MinEmergencyBrakeDelay {
 
 class ActionDecision : public Component::ComponentInterface {
   public:
-    ActionDecision(const WorldRepresentation& worldRepresentation, const WorldInterpretation& worldInterpretation, int cycleTime,
-                   StochasticsInterface* stochastics, LoggerInterface* loggerInterface, const BehaviourData& behaviourData)
-        : ComponentInterface(cycleTime, stochastics, loggerInterface, behaviourData), worldRepresentation{worldRepresentation},
+      ActionDecision(const WorldRepresentation &worldRepresentation, const WorldInterpretation &worldInterpretation, int cycleTime,
+                     StochasticsInterface *stochastics, LoggerInterface *loggerInterface, const BehaviourData &behaviourData) :
+          ComponentInterface(cycleTime, stochastics, loggerInterface, behaviourData),
+          worldRepresentation{worldRepresentation},
           worldInterpretation{worldInterpretation},
           velocityCalculator(worldRepresentation, worldInterpretation, cycleTime, stochastics, loggerInterface, behaviourData),
           actionStateHandler(worldRepresentation, worldInterpretation),
           anticipation(worldRepresentation, worldInterpretation, stochastics, loggerInterface, behaviourData),
-          minEmergencyBrakeDelay(GetBehaviourData().adBehaviour.minTimeEmergencyBrakeIsActive, GetCycleTime()) {}
+          minEmergencyBrakeDelay(GetBehaviourData().adBehaviour.minTimeEmergencyBrakeIsActive, GetCycleTime()) {
+          std::cout << " hello ActionDecision" << std::endl;
+      }
     ActionDecision(const ActionDecision&) = delete;
     ActionDecision(ActionDecision&&) = delete;
     ActionDecision& operator=(const ActionDecision&) = delete;
