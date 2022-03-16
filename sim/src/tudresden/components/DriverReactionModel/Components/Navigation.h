@@ -38,6 +38,8 @@ struct Waypoint {
 
 struct Route {
     std::vector<Waypoint> GetWaypoints() const {
+        if (waypoints == nullptr)
+            return {};
         return *waypoints;
     }
     std::shared_ptr<std::vector<Waypoint>> waypoints;

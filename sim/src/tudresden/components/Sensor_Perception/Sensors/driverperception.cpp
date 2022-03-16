@@ -2,6 +2,7 @@
 
 #include <qglobal.h>
 
+#include "WorldDataQuery.h"
 #include "egoAgent.h"
 
 Common::Vector2d DriverPerception::GetDriverPosition() {
@@ -120,18 +121,13 @@ double DriverPerception::DetermineDriverCurvature(bool laneInRoadDirection) {
 }
 
 void DriverPerception::CalculatePerception(const AgentInterface *driver) {
-    auto actualEgoAgent = (const EgoAgent *)driver;
-
+    const auto &actualEgoAgent = const_cast<AgentInterface *>(driver)->GetEgoAgent();
     auto worldData = static_cast<OWL::WorldData *>(world->GetWorldData());
+    WorldDataQuery helper(*worldData);
+    auto mainRoad = worldData->GetRoads().at(actualEgoAgent.GetRoadId());
+    auto mainLane = &helper.GetLaneByOdId(actualEgoAgent.GetMainLocatePosition().roadId, actualEgoAgent.GetMainLocatePosition().laneId,
+                                          actualEgoAgent.GetMainLocatePosition().roadPosition.s);
 
-    auto mainRoad = worldData->GetRoads().at(actualEgoAgent->GetRoadId());
-    OWL::Interfaces::Lane *mainLane;
-    for (auto [owlId, lane] : worldData->GetLanes()) {
-        if (lane->GetOdId() == actualEgoAgent->GetLaneIdFromRelative(0) && lane->GetRoad().GetId() == mainRoad->GetId()) {
-            mainLane = lane;
-            break;
-        }
-    }
     auto indicator = driver->GetIndicatorState();
     EgoPerception data;
     data.id = driver->GetId();
@@ -148,7 +144,7 @@ void DriverPerception::CalculatePerception(const AgentInterface *driver) {
     data.yawAngle = driver->GetYaw();
     data.width = driver->GetWidth();
     data.length = driver->GetLength();
-    data.laneWidth = actualEgoAgent->GetLaneWidth();
+    data.laneWidth = actualEgoAgent.GetLaneWidth();
     data.steeringWheelAngle = driver->GetSteeringWheelAngle();
 
     auto dist = driver->GetDistanceToStartOfRoad(MeasurementPoint::Reference, mainRoad->GetId());
@@ -167,9 +163,9 @@ void DriverPerception::CalculatePerception(const AgentInterface *driver) {
     //                                : true;
 
     // TODO observe functionality for the following 3 statements
-    data.heading = actualEgoAgent->GetLaneDirection();               // DetermineRoadHeading(nextLaneInDirection, &data);
-    data.lateralDisplacement = actualEgoAgent->GetPositionLateral(); // DetermineLateralDisplacement(nextLaneInDirection, &data);
-    data.curvature = actualEgoAgent->GetLaneCurvature();             // DetermineDriverCurvature(mainLane->IsInStreamDirection());
+    data.heading = actualEgoAgent.GetLaneDirection();               // DetermineRoadHeading(nextLaneInDirection, &data);
+    data.lateralDisplacement = actualEgoAgent.GetPositionLateral(); // DetermineLateralDisplacement(nextLaneInDirection, &data);
+    data.curvature = actualEgoAgent.GetLaneCurvature();             // DetermineDriverCurvature(mainLane->IsInStreamDirection());
 
     egoPerception = std::make_shared<EgoPerception>(data);
 }

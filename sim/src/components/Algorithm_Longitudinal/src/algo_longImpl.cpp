@@ -13,14 +13,19 @@
 /** @file  algo_longImpl.cpp */
 //-----------------------------------------------------------------------------
 
-#include <memory>
-#include <qglobal.h>
-#include <cassert>
 #include "algo_longImpl.h"
-#include "common/longitudinalSignal.h"
+
+#include <cassert>
+#include <memory>
+
+#include <qglobal.h>
+
+#include "PerceptionData.h"
 #include "common/accelerationSignal.h"
-#include "common/parametersVehicleSignal.h"
 #include "common/globalDefinitions.h"
+#include "common/longitudinalSignal.h"
+#include "common/parametersVehicleSignal.h"
+#include "complexSignals.h"
 
 void AlgorithmLongitudinalImplementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time)
 {
@@ -69,16 +74,21 @@ void AlgorithmLongitudinalImplementation::UpdateInput(int localLinkId, const std
     else if (localLinkId == 3 || localLinkId == 4)
     {
         // from SensorDriver
-        const std::shared_ptr<SensorDriverSignal const> signal = std::dynamic_pointer_cast<SensorDriverSignal const>(data);
-        if (!signal)
-        {
+
+        if (const std::shared_ptr<SensorDriverSignal const> signal = std::dynamic_pointer_cast<SensorDriverSignal const>(data)) {
+            currentVelocity = signal->GetOwnVehicleInformation().absoluteVelocity;
+            initializedSensorDriverData = true;
+        }
+        else if (std::shared_ptr<structSignal<std::shared_ptr<EgoPerception>> const> signal =
+                     std::dynamic_pointer_cast<structSignal<std::shared_ptr<EgoPerception>> const>(data)) {
+            initializedSensorDriverData = true;
+            currentVelocity = signal->value->velocity;
+        }
+        else {
             const std::string msg = COMPONENTNAME + " invalid signaltype";
             LOG(CbkLogLevel::Debug, msg);
             throw std::runtime_error(msg);
         }
-
-        currentVelocity = signal->GetOwnVehicleInformation().absoluteVelocity;
-        initializedSensorDriverData = true;
     }
     else
     {

@@ -58,7 +58,6 @@ class ActionDecision : public Component::ComponentInterface {
           actionStateHandler(worldRepresentation, worldInterpretation),
           anticipation(worldRepresentation, worldInterpretation, stochastics, loggerInterface, behaviourData),
           minEmergencyBrakeDelay(GetBehaviourData().adBehaviour.minTimeEmergencyBrakeIsActive, GetCycleTime()) {
-          std::cout << " hello ActionDecision" << std::endl;
       }
     ActionDecision(const ActionDecision&) = delete;
     ActionDecision(ActionDecision&&) = delete;
