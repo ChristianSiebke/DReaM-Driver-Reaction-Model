@@ -93,8 +93,8 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
         loggerInterface(logger) {
         auto arguments = QCoreApplication::arguments();
         CommandLineArguments parsedArguments = CommandLineParser::Parse(arguments);
-        std::string logPath = QCoreApplication::applicationDirPath().toStdString() + "\\" + parsedArguments.resultsPath + "\\" + "agent" +
-                              std::to_string(agent->GetId()) + ".txt";
+        std::string resultPath = QCoreApplication::applicationDirPath().toStdString() + "\\" + parsedArguments.resultsPath + "\\";
+        std::string logPath = resultPath + "agent" + std::to_string(agent->GetId()) + ".txt";
         std::string ConfigPath =
             QCoreApplication::applicationDirPath().toStdString() + "\\" + parsedArguments.configsPath + "\\" + "behaviour.xml";
         logger.SetPath(logPath);
@@ -117,7 +117,7 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
         DReaM.SetComponent(90, std::move(navigation));
         DReaM.SetComponent(80, std::move(gazeMovement));
         DReaM.SetComponent(70, std::move(actionDecision));
-        agentStateRecorder = &agentStateRecorder::getInstance();
+        agentStateRecorder = &agentStateRecorder::getInstance(resultPath);
         //------------------------------------------------------
     }
 
@@ -190,18 +190,18 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
 
     // LateralSignal
     //*************************************************
-    //! The width of the lane containing the vehicle [m].
-    double out_laneWidth = 0;
     //! The relative lateral position of the vehicle [m].
     double out_lateral_displacement = 0;
     //! The gain for lateral displacement error controller [-].
-    double out_lateral_gain_displacement = 5.0;
+    double out_lateral_gain_displacement = 20.0;
     //! The heading angle error of the vehicle [rad].
     double out_lateral_heading_error = 0;
     //! The gain for heading error controller [-].
-    double out_lateral_gain_heading_error = 10.0;
+    double out_lateral_gain_heading_error = 7.5;
     //! The curvature of the lane at vehicle's position [1/m].
     double out_curvature = 0;
+    //! The width of the lane containing the vehicle [m].
+    double out_laneWidth = 0;
     //**************************************************
 
     // SecondaryDriverTasksSignal

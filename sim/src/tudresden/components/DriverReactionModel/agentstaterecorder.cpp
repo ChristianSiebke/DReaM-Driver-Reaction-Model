@@ -189,5 +189,5 @@ void agentStateRecorder::writeOutputFile() {
     valueTree.add_child(path,samplesTree);
 
     boost::property_tree::xml_writer_settings<std::string> settings (' ',2);
-    boost::property_tree::write_xml("jansoutput.xml", valueTree,std::locale(),settings);
+    boost::property_tree::write_xml(resultPath + "DReaMOutput.xml", valueTree, std::locale(), settings);
 }

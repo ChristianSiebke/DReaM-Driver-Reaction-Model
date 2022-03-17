@@ -152,9 +152,9 @@ void AlgorithmDReaMImplementation::Trigger(int time) {
 
         // LateralOutput**************************
         out_laneWidth = DReaM.GetWorldRepresentation().egoAgent->GetLaneWidth();
-        out_lateral_displacement = DReaM.GetWorldRepresentation().egoAgent->GetLateralDisplacement(); // lateral deviation
+        out_lateral_displacement = -DReaM.GetWorldRepresentation().egoAgent->GetLateralDisplacement(); // lateral deviation
+        out_lateral_heading_error = -DReaM.GetWorldRepresentation().egoAgent->GetHeading();
         out_curvature = DReaM.GetWorldRepresentation().egoAgent->GetCurvature();
-        out_lateral_heading_error = DReaM.GetWorldRepresentation().egoAgent->GetHeading();
         //****************************************
 
         double intersectionDistance;

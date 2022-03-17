@@ -29,14 +29,15 @@ struct Record{
 class agentStateRecorder
 {
 public:
-    static agentStateRecorder& getInstance(){
-
-        static agentStateRecorder instance;
+    static agentStateRecorder &getInstance(std::string resultPath) {
+        static agentStateRecorder instance(resultPath);
 
         return instance;
     }
+
 private:
-    agentStateRecorder(){}
+    agentStateRecorder(std::string resultPath) : resultPath(resultPath) {
+    }
 
     ~agentStateRecorder(){writeOutputFile();}
 
@@ -62,6 +63,7 @@ public:
 
 
 private:
+    std::string resultPath;
     Record record;
 
     void printAgentStates();
