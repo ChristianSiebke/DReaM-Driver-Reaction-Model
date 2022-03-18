@@ -5,75 +5,91 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <iostream>
 #include <map>
+#include <sstream>
+#include <thread>
 
 #include "Common/Definitions.h"
-#include "Components/GazeMovement/RoadSegments/RoadSegmentInterface.h"
 #include "Common/libs/magic_enum.hpp"
+#include "Components/GazeMovement/RoadSegments/RoadSegmentInterface.h"
 
-struct Record{
-    std::map<int,std::map<std::string,std::list<std::tuple<double,double>>>> stoppingPoints;
+//! Stores all collected data in the agentStateRecorder to be processed later
+struct Record {
+    //! Maps an agentId to a map containing intersections and their respective stoppingPoints on that intersection
+    std::map<int, std::map<std::string, std::list<std::tuple<double, double>>>> stoppingPoints;
 
-    std::map<int,std::map<int, GazeState>> gazeStates;
+    //! For each timestep, maps a map containing each agent's GazeState to the associated timestep
+    std::map<int, std::map<int, GazeState>> gazeStates;
 
-    std::map<int,std::map<int,std::vector<std::tuple<int, double, double, double>>>> otherAgents;
+    //! For each timestep, maps a map containing the Id and position of other known agents for each agent, to the associated timestep
+    std::map<int, std::map<int, std::vector<std::tuple<int, double, double, double>>>> otherAgents;
 
-    std::map<int,std::map<int, CrossingInfo>> crossingInfos;
+    //! For each timestep, maps a map containing each agent's CrossingInfo to the associated timestep
+    std::map<int, std::map<int, CrossingInfo>> crossingInfos;
 
-    std::map<int,std::map<int,std::vector<Common::Vector2d>>> segmentControlFixationPoints;
+    //! For each timestep, maps a map containing each agent's segmentControlFixationPoints to the associated timestep
+    std::map<int, std::map<int, std::vector<Common::Vector2d>>> segmentControlFixationPoints;
 
+    //! Contains all existant ConflictPoints;
     std::vector<ConflictPoints> conflictPoints;
-
 };
 
-
-class agentStateRecorder
-{
+/*!
+ * \brief Saves the states of each agent
+ *
+ * This singleton class saves and later outputs all neccessary data from map and agents
+ *
+ */
+class agentStateRecorder {
 public:
-    static agentStateRecorder& getInstance(){
-
+    static agentStateRecorder &getInstance() {
         static agentStateRecorder instance;
 
         return instance;
     }
-private:
-    agentStateRecorder(){}
 
-    ~agentStateRecorder(){writeOutputFile();}
+private:
+    agentStateRecorder() {
+    }
+
+    ~agentStateRecorder() {
+        writeOutputFile();
+    }
 
 public:
-    agentStateRecorder(agentStateRecorder const&) = delete;
+    agentStateRecorder(agentStateRecorder const &) = delete;
 
-    void operator=(agentStateRecorder const&)     = delete;
+    void operator=(agentStateRecorder const &) = delete;
 
-    void addStoppingPoints(int,std::map<std::string,std::list<std::tuple<double,double>>>);
+    void addStoppingPoints(int, std::map<std::string, std::list<std::tuple<double, double>>>);
 
-    void addGazeStates(int,int,GazeState);
+    void addGazeStates(int, int, GazeState);
 
-    void addOtherAgents(int,int,std::vector<std::tuple<int, double, double, double>>);
+    void addOtherAgents(int, int, std::vector<std::tuple<int, double, double, double>>);
 
-    void addCrossingInfos(int,int,CrossingInfo);
+    void addCrossingInfos(int, int, CrossingInfo);
 
-    void addFixationPoints(int,int,std::vector<Common::Vector2d>);
+    void addFixationPoints(int, int, std::vector<Common::Vector2d>);
 
     void addConflictPoints(std::vector<ConflictPoints>);
-
-    //TODO GAZEPOINTS!!11! (segmentfixationpoints)
-
-
 
 private:
     Record record;
 
-    void printAgentStates();
-
+    /*!
+     * \brief Generates a string containing all information for one timestep
+     *
+     * All data from record describing the same state (time) are collected into a
+     * single string with seperators.
+     *
+     * @param[in]     time           Requested simulation timestep
+     */
     std::string generateDataSet(int time);
 
-    std::string gazeStateOutput(GazeState gazeState);
+    //! Generates a header matching and discribing the recorded datasets
+    std::string generateHeader();
 
+    //! All information saved in the agentStateRecorder is written into an xml file
     void writeOutputFile();
-
 };
-
-
 
 #endif // AGENTSTATERECORDER_H
