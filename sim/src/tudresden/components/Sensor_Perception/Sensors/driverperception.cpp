@@ -21,8 +21,9 @@ void DriverPerception::CalculatePerception(const AgentInterface *driver) {
     auto worldData = static_cast<OWL::WorldData *>(world->GetWorldData());
     WorldDataQuery helper(*worldData);
     auto mainRoad = worldData->GetRoads().at(actualEgoAgent.GetRoadId());
-    auto mainLane = &helper.GetLaneByOdId(actualEgoAgent.GetMainLocatePosition().roadId, actualEgoAgent.GetMainLocatePosition().laneId,
-                                          actualEgoAgent.GetMainLocatePosition().roadPosition.s);
+    auto mainLane =
+        &helper.GetLaneByOdId(actualEgoAgent.GetReferencePointPosition()->roadId, actualEgoAgent.GetReferencePointPosition()->laneId,
+                              actualEgoAgent.GetReferencePointPosition()->roadPosition.s);
 
     auto indicator = driver->GetIndicatorState();
     EgoPerception data;
