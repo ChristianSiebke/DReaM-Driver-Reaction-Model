@@ -23,7 +23,9 @@ add_openpass_target(
     algorithm_lateral.cpp
     src/lateralImpl.cpp
     src/steeringController.cpp
-
+  INCDIRS
+   ../../tudresden/common/
+   ../../tudresden/
   LIBRARIES
     Qt5::Core
     Common

@@ -21,6 +21,7 @@
 class LoggerInterface {
   public:
     LoggerInterface(Logger& logger) : logger{logger} {}
+    LoggerInterface();
 
     void Log(const std::string& message, LogLevel_new level = info) const { logger.Log(message, level); }
 

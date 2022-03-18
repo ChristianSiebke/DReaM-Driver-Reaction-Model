@@ -16,15 +16,16 @@ private:
 
     bool LanesHavePotentialConfliceArea(const MentalInfrastructure::Lane *laneA, const MentalInfrastructure::Lane *laneB) const;
 
-    bool LanesPotentiallyIntersect(const MentalInfrastructure::LanePoint *p1, const MentalInfrastructure::LanePoint *p2,
-                                   const MentalInfrastructure::LanePoint *q1, const MentalInfrastructure::LanePoint *q2) const;
+    std::optional<std::pair<MentalInfrastructure::LanePoint, MentalInfrastructure::LanePoint>>
+    IntersectionPoints(const MentalInfrastructure::LanePoint *p1, const MentalInfrastructure::LanePoint *p2,
+                       const MentalInfrastructure::LanePoint *q1, const MentalInfrastructure::LanePoint *q2) const;
 
     std::optional<std::pair<MentalInfrastructure::ConflictArea, MentalInfrastructure::ConflictArea>>
     CalculateConflictAreas(const MentalInfrastructure::Lane *currentLane, const MentalInfrastructure::Lane *junctionLane) const;
 
     std::pair<std::vector<MentalInfrastructure::LanePoint>, std::vector<MentalInfrastructure::LanePoint>>
-    CalculateLaneJunctionPoints(const std::list<MentalInfrastructure::LanePoint> &lanePointsA,
-                                const std::list<MentalInfrastructure::LanePoint> &lanePointsB) const;
+    CalculateLaneIntersectionPoints(const std::list<MentalInfrastructure::LanePoint> &lanePointsA,
+                                    const std::list<MentalInfrastructure::LanePoint> &lanePointsB) const;
 
     std::vector<std::list<MentalInfrastructure::LanePoint>>
     SplitListIntoChunks(const std::list<MentalInfrastructure::LanePoint> &lanePoints, unsigned int segments) const;

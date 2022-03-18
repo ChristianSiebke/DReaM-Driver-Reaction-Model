@@ -34,15 +34,6 @@ class DriverPerception : public AgentPerceptionInterface {
   private:
     Common::Vector2d GetDriverPosition();
 
-    double DetermineLateralDisplacement(bool referenceLaneInDirection, const AgentPerception* agent);
-
-    double DetermineRoadHeading(bool referenceLaneInDirection, const AgentPerception* agent);
-
-    ///
-    /// \brief Helper method to set the value of the curvature of the road at the position of the driver.
-    ///
-    double DetermineDriverCurvature(bool laneInRoadDirection);
-
   private:
     std::shared_ptr<EgoPerception> egoPerception;
 };

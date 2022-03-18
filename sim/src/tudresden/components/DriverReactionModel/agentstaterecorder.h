@@ -41,14 +41,14 @@ struct Record {
  */
 class agentStateRecorder {
 public:
-    static agentStateRecorder &getInstance() {
-        static agentStateRecorder instance;
+    static agentStateRecorder &getInstance(std::string resultPath) {
+        static agentStateRecorder instance(resultPath);
 
         return instance;
     }
 
 private:
-    agentStateRecorder() {
+    agentStateRecorder(std::string resultPath) : resultPath(resultPath) {
     }
 
     ~agentStateRecorder() {
@@ -73,6 +73,7 @@ public:
     void addConflictPoints(std::vector<ConflictPoints>);
 
 private:
+    std::string resultPath;
     Record record;
 
     /*!

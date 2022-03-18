@@ -6,35 +6,35 @@ std::shared_ptr<RoadNetworkSensor> RoadNetworkSensor::instance = nullptr;
 
 void ConflictAreaCalculator::AssignPotentialConflictAreasToLanes(std::shared_ptr<InfrastructurePerception> perceptionData) const {
     for (const auto &currentLane : perceptionData->lanes) {
-        for (const auto &junctionLane : perceptionData->lanes) {
-            if (currentLane == junctionLane)
+        for (const auto &intersectionLane : perceptionData->lanes) {
+            if (currentLane == intersectionLane)
                 continue;
-            if (currentLane->GetConflictAreaWithLane(junctionLane.get()))
+            if (currentLane->GetConflictAreaWithLane(intersectionLane.get()))
                 continue;
-            if (currentLane->GetType() == LaneType::Shoulder || junctionLane->GetType() == LaneType::Shoulder)
+            if (currentLane->GetType() == LaneType::Shoulder || intersectionLane->GetType() == LaneType::Shoulder)
                 continue;
-            if (LanesDoNotIntersect(currentLane.get(), junctionLane.get()))
+            if (LanesDoNotIntersect(currentLane.get(), intersectionLane.get()))
                 continue;
-            if (LanesHavePotentialConfliceArea(currentLane.get(), junctionLane.get())) {
-                if (auto conflictAreas = CalculateConflictAreas(currentLane.get(), junctionLane.get())) {
+            if (LanesHavePotentialConfliceArea(currentLane.get(), intersectionLane.get())) {
+                if (auto conflictAreas = CalculateConflictAreas(currentLane.get(), intersectionLane.get())) {
                     const_cast<MentalInfrastructure::Lane *>(currentLane.get())
-                        ->AddConflictArea({junctionLane.get(), conflictAreas->first});
-                    const_cast<MentalInfrastructure::Lane *>(junctionLane.get())
+                        ->AddConflictArea({intersectionLane.get(), conflictAreas->first});
+                    const_cast<MentalInfrastructure::Lane *>(intersectionLane.get())
                         ->AddConflictArea({currentLane.get(), conflictAreas->second});
                     ConflictPoints a;
                     a.junctionOpenDriveRoadId = currentLane->GetRoad()->GetOpenDriveId();
-                    a.junctionOpenDriveLaneId = std::stoi(currentLane->GetOpenDriveId());
-                    a.currentOpenDriveRoadId = junctionLane->GetRoad()->GetOpenDriveId();
-                    a.currentOpenDriveLaneId = std::stoi(junctionLane->GetOpenDriveId());
+                    a.junctionOpenDriveLaneId = currentLane->GetOpenDriveId();
+                    a.currentOpenDriveRoadId = intersectionLane->GetRoad()->GetOpenDriveId();
+                    a.currentOpenDriveLaneId = intersectionLane->GetOpenDriveId();
                     a.start = {conflictAreas->first.start.x, conflictAreas->first.start.y};
                     a.end = {conflictAreas->first.end.x, conflictAreas->first.end.y};
                     perceptionData->conflictPoints.push_back(a);
 
                     ConflictPoints b;
-                    b.junctionOpenDriveRoadId = junctionLane->GetRoad()->GetOpenDriveId();
-                    b.junctionOpenDriveLaneId = std::stoi(junctionLane->GetOpenDriveId());
+                    b.junctionOpenDriveRoadId = intersectionLane->GetRoad()->GetOpenDriveId();
+                    b.junctionOpenDriveLaneId = intersectionLane->GetOpenDriveId();
                     b.currentOpenDriveRoadId = currentLane->GetRoad()->GetOpenDriveId();
-                    b.currentOpenDriveLaneId = std::stoi(currentLane->GetOpenDriveId());
+                    b.currentOpenDriveLaneId = currentLane->GetOpenDriveId();
                     b.start = {conflictAreas->second.start.x, conflictAreas->second.start.y};
                     b.end = {conflictAreas->second.end.x, conflictAreas->second.end.y};
                     perceptionData->conflictPoints.push_back(b);
@@ -82,48 +82,52 @@ bool ConflictAreaCalculator::LanesHavePotentialConfliceArea(const MentalInfrastr
         !(roadA->GetPredecessor() == roadB->GetPredecessor()))
         return true;
 
-    if (LanesPotentiallyIntersect(laneA->GetFirstPoint(), laneA->GetLastPoint(), laneB->GetFirstPoint(), laneB->GetLastPoint()))
+    if (IntersectionPoints(laneA->GetFirstPoint(), laneA->GetLastPoint(), laneB->GetFirstPoint(), laneB->GetLastPoint()))
         return true;
 
     return false;
 }
 
-bool ConflictAreaCalculator::LanesPotentiallyIntersect(const MentalInfrastructure::LanePoint *p1, const MentalInfrastructure::LanePoint *p2,
-                                                       const MentalInfrastructure::LanePoint *q1,
-                                                       const MentalInfrastructure::LanePoint *q2) const {
+std::optional<std::pair<MentalInfrastructure::LanePoint, MentalInfrastructure::LanePoint>>
+ConflictAreaCalculator::IntersectionPoints(const MentalInfrastructure::LanePoint *p1, const MentalInfrastructure::LanePoint *p2,
+                                           const MentalInfrastructure::LanePoint *q1, const MentalInfrastructure::LanePoint *q2) const {
+    double threshold = 0.3;
     double m1 = (p2->y - p1->y) / (p2->x - p1->x);
     double n1 = ((p1->y * p2->x) - (p2->y * p1->x)) / (p2->x - p1->x);
     double m2 = (q2->y - q1->y) / (q2->x - q1->x);
     double n2 = ((q1->y * q2->x) - (q2->y * q1->x)) / (q2->x - q1->x);
 
     if (m1 - m2 == 0.0)
-        return false;
+        return std::nullopt;
 
     double x = (n2 - n1) / (m1 - m2);
     double y = m1 * x + n1;
-    if (((std::min(p1->x, p2->x) <= x && std::max(p1->x, p2->x) >= x) && ((std::min(p1->y, p2->y) <= y && std::max(p1->y, p2->y) >= y))) &&
-        ((std::min(q1->x, q2->x) <= x && std::max(q1->x, q2->x) >= x) && ((std::min(q1->y, q2->y) <= y && std::max(q1->y, q2->y) >= y)))) {
-        return true;
+    if (((std::min(p1->x, p2->x) <= x + threshold && std::max(p1->x, p2->x) >= x - threshold) &&
+         ((std::min(p1->y, p2->y) <= y + threshold && std::max(p1->y, p2->y) >= y - threshold))) &&
+        ((std::min(q1->x, q2->x) <= x + threshold && std::max(q1->x, q2->x) >= x - threshold) &&
+         ((std::min(q1->y, q2->y) <= y + threshold && std::max(q1->y, q2->y) >= y - threshold)))) {
+        auto pS = std::sqrt((std::pow((x - p1->x), 2)) + (std::pow((y - p1->y), 2)));
+        auto qS = std::sqrt((std::pow((x - q1->x), 2)) + (std::pow((y - q1->y), 2)));
+        return {{{x, y, p1->hdg, p1->sOffset + pS}, {x, y, q1->hdg, q1->sOffset + qS}}};
     }
-    return false;
+    return std::nullopt;
 }
 
 std::optional<std::pair<MentalInfrastructure::ConflictArea, MentalInfrastructure::ConflictArea>>
 ConflictAreaCalculator::CalculateConflictAreas(const MentalInfrastructure::Lane *currentLane,
-                                               const MentalInfrastructure::Lane *junctionLane) const {
-    auto leftLeft = CalculateLaneJunctionPoints(currentLane->GetLeftSidePoints(), junctionLane->GetLeftSidePoints());
-    auto leftRight = CalculateLaneJunctionPoints(currentLane->GetLeftSidePoints(), junctionLane->GetRightSidePoints());
-    auto rightLeft = CalculateLaneJunctionPoints(currentLane->GetRightSidePoints(), junctionLane->GetLeftSidePoints());
-    auto rightRight = CalculateLaneJunctionPoints(currentLane->GetRightSidePoints(), junctionLane->GetRightSidePoints());
+                                               const MentalInfrastructure::Lane *intersectionLane) const {
+    auto leftLeft = CalculateLaneIntersectionPoints(currentLane->GetLeftSidePoints(), intersectionLane->GetLeftSidePoints());
+    auto leftRight = CalculateLaneIntersectionPoints(currentLane->GetLeftSidePoints(), intersectionLane->GetRightSidePoints());
+    auto rightLeft = CalculateLaneIntersectionPoints(currentLane->GetRightSidePoints(), intersectionLane->GetLeftSidePoints());
+    auto rightRight = CalculateLaneIntersectionPoints(currentLane->GetRightSidePoints(), intersectionLane->GetRightSidePoints());
 
-    int junctionPointNumber = !leftLeft.first.empty();
-    junctionPointNumber += !leftRight.first.empty();
-    junctionPointNumber += !rightLeft.first.empty();
-    junctionPointNumber += !rightRight.first.empty();
-    // at least three junction points have to exist to define conflict area
-    if (junctionPointNumber < 3)
+    int intersectionPointNumber = !leftLeft.first.empty();
+    intersectionPointNumber += !leftRight.first.empty();
+    intersectionPointNumber += !rightLeft.first.empty();
+    intersectionPointNumber += !rightRight.first.empty();
+    // at least three intersection points have to exist to define conflict area
+    if (intersectionPointNumber < 3)
         return std::nullopt;
-
     std::vector<MentalInfrastructure::LanePoint> conflictPointsCL;
     std::move(leftLeft.first.begin(), leftLeft.first.end(), std::back_inserter(conflictPointsCL));
     std::move(leftRight.first.begin(), leftRight.first.end(), std::back_inserter(conflictPointsCL));
@@ -147,82 +151,98 @@ ConflictAreaCalculator::CalculateConflictAreas(const MentalInfrastructure::Lane 
         *std::max_element(conflictPointsIL.begin(), conflictPointsIL.end(), [](auto a, auto b) { return a.sOffset < b.sOffset; });
 
     MentalInfrastructure::ConflictArea clConflictArea;
-    clConflictArea.start = currentLane->InterpolatePoint(minPointCL.sOffset);
-    clConflictArea.end = currentLane->InterpolatePoint(maxPointCL.sOffset);
-
+    clConflictArea.start = minPointCL.sOffset <= currentLane->GetFirstPoint()->sOffset ? *currentLane->GetFirstPoint()
+                                                                                       : currentLane->InterpolatePoint(minPointCL.sOffset);
+    clConflictArea.end = maxPointCL.sOffset >= currentLane->GetLastPoint()->sOffset ? *currentLane->GetLastPoint()
+                                                                                    : currentLane->InterpolatePoint(maxPointCL.sOffset);
     MentalInfrastructure::ConflictArea ilConflictArea;
-    ilConflictArea.start = junctionLane->InterpolatePoint(minPointIL.sOffset);
-    ilConflictArea.end = junctionLane->InterpolatePoint(maxPointIL.sOffset);
-    std::pair<MentalInfrastructure::ConflictArea, MentalInfrastructure::ConflictArea> a{clConflictArea, ilConflictArea};
+    ilConflictArea.start = minPointIL.sOffset <= intersectionLane->GetFirstPoint()->sOffset
+                               ? *intersectionLane->GetFirstPoint()
+                               : intersectionLane->InterpolatePoint(minPointIL.sOffset);
+    ilConflictArea.end = maxPointIL.sOffset >= intersectionLane->GetLastPoint()->sOffset
+                             ? *intersectionLane->GetLastPoint()
+                             : intersectionLane->InterpolatePoint(maxPointIL.sOffset);
     return {{clConflictArea, ilConflictArea}};
 }
 
 std::pair<std::vector<MentalInfrastructure::LanePoint>, std::vector<MentalInfrastructure::LanePoint>>
-ConflictAreaCalculator::CalculateLaneJunctionPoints(const std::list<MentalInfrastructure::LanePoint> &lanePointsA,
-                                                    const std::list<MentalInfrastructure::LanePoint> &lanePointsB) const {
-    auto chunksA = SplitListIntoChunks(lanePointsA, 8);
-    auto chunksB = SplitListIntoChunks(lanePointsB, 8);
-
-    std::vector<MentalInfrastructure::LanePoint> junctionPointA;
-    std::vector<MentalInfrastructure::LanePoint> junctionPointB;
-    for (auto a : chunksA) {
-        for (auto b : chunksB) {
-            if (auto result = CalculateChunkJunctionPoint(a, b, 0.5)) {
-                junctionPointA.push_back(result->first);
-                junctionPointB.push_back(result->second);
+ConflictAreaCalculator::CalculateLaneIntersectionPoints(const std::list<MentalInfrastructure::LanePoint> &lanePointsA,
+                                                        const std::list<MentalInfrastructure::LanePoint> &lanePointsB) const {
+    std::vector<MentalInfrastructure::LanePoint> intersectionPointA;
+    std::vector<MentalInfrastructure::LanePoint> intersectionPointB;
+    for (auto pA1 = lanePointsA.begin(), pA2 = std::next(pA1); pA2 != lanePointsA.end(); pA1++, pA2++) {
+        for (auto pB1 = lanePointsB.begin(), pB2 = std::next(pB1); pB2 != lanePointsB.end(); pB1++, pB2++) {
+            if (auto result = IntersectionPoints(&(*pA1), &(*pA2), &(*pB1), &(*pB2))) {
+                intersectionPointA.push_back(result->first);
+                intersectionPointB.push_back(result->second);
             }
         }
     }
-    return {junctionPointA, junctionPointB};
+    return {intersectionPointA, intersectionPointB};
+
+    // auto chunksA = SplitListIntoChunks(lanePointsA, 8);
+    // auto chunksB = SplitListIntoChunks(lanePointsB, 8);
+
+    // std::vector<MentalInfrastructure::LanePoint> intersectionPointA;
+    // std::vector<MentalInfrastructure::LanePoint> intersectionPointB;
+    // for (auto a : chunksA) {
+    //     for (auto b : chunksB) {
+    //         if (auto result = CalculateChunkIntersectionPoint(a, b, 0.5)) {
+    //             intersectionPointA.push_back(result->first);
+    //             intersectionPointB.push_back(result->second);
+    //         }
+    //     }
+    // }
+    //  return {intersectionPointA, intersectionPointB};
 }
 
-std::vector<std::list<MentalInfrastructure::LanePoint>>
-ConflictAreaCalculator::SplitListIntoChunks(const std::list<MentalInfrastructure::LanePoint> &lanePoints, unsigned int segments) const {
-    unsigned int stride = static_cast<unsigned int>(lanePoints.size() / segments);
-    auto rest = lanePoints.size() % segments;
-    std::vector<std::list<MentalInfrastructure::LanePoint>> chunkList;
-    for (auto start = lanePoints.begin(), end = std::next(lanePoints.begin(), stride); std::distance(start, lanePoints.end()) >= stride;
-         start = std::next(start, stride), end = std::next(end, stride)) {
-        chunkList.push_back({start, end});
-    }
-    if (rest) {
-        chunkList.push_back({std::next(lanePoints.begin(), stride * segments), lanePoints.end()});
-    }
-    return chunkList;
-}
+//  std::vector<std::list<MentalInfrastructure::LanePoint>>
+//  ConflictAreaCalculator::SplitListIntoChunks(const std::list<MentalInfrastructure::LanePoint> &lanePoints, unsigned int segments) const {
+//      unsigned int stride = static_cast<unsigned int>(lanePoints.size() / segments);
+//      auto rest = lanePoints.size() % segments;
+//      std::vector<std::list<MentalInfrastructure::LanePoint>> chunkList;
+//      for (auto start = lanePoints.begin(), end = std::next(lanePoints.begin(), stride); std::distance(start, lanePoints.end()) >= stride;
+//           start = std::next(start, stride), end = std::next(end, stride)) {
+//          chunkList.push_back({start, end});
+//      }
+//      if (rest) {
+//          chunkList.push_back({std::next(lanePoints.begin(), stride * segments), lanePoints.end()});
+//      }
+//      return chunkList;
+//  }
 
-std::optional<std::pair<MentalInfrastructure::LanePoint, MentalInfrastructure::LanePoint>>
-ConflictAreaCalculator::CalculateChunkJunctionPoint(const std::list<MentalInfrastructure::LanePoint> &chunkA,
-                                                    const std::list<MentalInfrastructure::LanePoint> &chunkB,
-                                                    double junctionCondition) const {
-    std::multimap<double, std::pair<MentalInfrastructure::LanePoint, MentalInfrastructure::LanePoint>> points;
-    auto minDistanceOfClosestPoints = [&points, chunkB, junctionCondition](MentalInfrastructure::LanePoint pointA) {
-        double minDistance = std::numeric_limits<double>::max();
-        MentalInfrastructure::LanePoint junctionPointB;
-        for (auto &pointB : chunkB) {
-            double distance = std::sqrt((std::pow((pointA.x - pointB.x), 2)) + (std::pow((pointA.y - pointB.y), 2)));
-            if (distance < minDistance) {
-                minDistance = distance;
-                junctionPointB = pointB;
-            }
-        }
-        if (minDistance <= junctionCondition) {
-            std::pair<MentalInfrastructure::LanePoint, MentalInfrastructure::LanePoint> closestPoints(pointA, junctionPointB);
-            points.insert(std::make_pair(minDistance, closestPoints));
-        }
-    };
-
-    std::for_each(chunkA.begin(), chunkA.end(), minDistanceOfClosestPoints);
-    if (!points.empty()) {
-        return points.begin()->second;
-    }
-    else {
-        return std::nullopt;
-    }
-}
+//  std::optional<std::pair<MentalInfrastructure::LanePoint, MentalInfrastructure::LanePoint>>
+//  ConflictAreaCalculator::CalculateChunkIntersectionPoint(const std::list<MentalInfrastructure::LanePoint> &chunkA,
+//                                                      const std::list<MentalInfrastructure::LanePoint> &chunkB,
+//                                                      double intersectionCondition) const {
+//      std::multimap<double, std::pair<MentalInfrastructure::LanePoint, MentalInfrastructure::LanePoint>> points;
+//      auto minDistanceOfClosestPoints = [&points, chunkB, intersectionCondition](MentalInfrastructure::LanePoint pointA) {
+//          double minDistance = std::numeric_limits<double>::max();
+//          MentalInfrastructure::LanePoint intersectionPointB;
+//          for (auto &pointB : chunkB) {
+//              double distance = std::sqrt((std::pow((pointA.x - pointB.x), 2)) + (std::pow((pointA.y - pointB.y), 2)));
+//              if (distance < minDistance) {
+//                  minDistance = distance;
+//                  intersectionPointB = pointB;
+//              }
+//          }
+//          if (minDistance <= intersectionCondition) {
+//              std::pair<MentalInfrastructure::LanePoint, MentalInfrastructure::LanePoint> closestPoints(pointA, intersectionPointB);
+//              points.insert(std::make_pair(minDistance, closestPoints));
+//          }
+//      };
+//
+//      std::for_each(chunkA.begin(), chunkA.end(), minDistanceOfClosestPoints);
+//      if (!points.empty()) {
+//          return points.begin()->second;
+//      }
+//      else {
+//          return std::nullopt;
+//      }
+//  }
 
 const MentalInfrastructure::Junction *RoadNetworkSensor::ConvertJunction(const OWL::Interfaces::Junction *junction) {
-    auto intersectionId = junction->GetId();
+    OdId intersectionId = junction->GetId();
     auto iter = std::find_if(perceptionData->junctions.begin(), perceptionData->junctions.end(),
                              [intersectionId](auto element) { return element->GetOpenDriveId() == intersectionId; });
     if (iter != perceptionData->junctions.end()) {
@@ -233,12 +253,10 @@ const MentalInfrastructure::Junction *RoadNetworkSensor::ConvertJunction(const O
     auto worldData = static_cast<OWL::WorldData *>(world->GetWorldData());
     auto newJunction = std::make_shared<MentalInfrastructure::Junction>(intersectionId);
     perceptionData->junctions.push_back(newJunction);
-
     for (auto connectionRoad : junction->GetConnectingRoads()) {
         auto from = ConvertRoad(const_cast<OWL::Road *>(worldData->GetRoads().at(connectionRoad->GetPredecessor())));
         auto to = ConvertRoad(const_cast<OWL::Road *>(worldData->GetRoads().at(connectionRoad->GetSuccessor())));
         auto with = ConvertRoad(const_cast<OWL::Road *>(connectionRoad));
-
         newJunction->AddConnection(from, with, to);
     }
     return newJunction.get();
@@ -254,18 +272,14 @@ const MentalInfrastructure::Lane *RoadNetworkSensor::ConvertLane(const OWL::Lane
     }
 
     // getting the OpenDrive id of the lane
-    auto openDriveId = lane->GetOdId();
+    auto openDriveId = std::to_string(lane->GetOdId());
 
-    // convert parent road
-    ConvertRoad(&lane->GetSection().GetRoad());
-
-    auto newLane = std::make_shared<MentalInfrastructure::Lane>(std::to_string(laneId), openDriveId, lane->GetLength(), lane->GetLaneType(),
-                                                                lane->GetOdId() < 0);
+    auto newLane =
+        std::make_shared<MentalInfrastructure::Lane>(openDriveId, laneId, lane->GetLength(), lane->GetLaneType(), lane->GetOdId() < 0);
     perceptionData->lanes.push_back(newLane);
 
     double width = lane->GetWidth(0);
     newLane->SetWidth(width);
-
     auto worldData = static_cast<OWL::WorldData *>(world->GetWorldData());
 
     // adding any successors and predecessors
@@ -287,10 +301,7 @@ const MentalInfrastructure::Lane *RoadNetworkSensor::ConvertLane(const OWL::Lane
     }
 
     AddLaneGeometry(newLane.get(), lane);
-
-    // setting the id of the road and the speed limit for this lane
     newLane->SetRoad(ConvertRoad(&lane->GetSection().GetRoad()));
-
     return newLane.get();
 }
 
@@ -341,7 +352,7 @@ void RoadNetworkSensor::AddLaneGeometry(MentalInfrastructure::Lane *newLane, con
 }
 
 const MentalInfrastructure::Road *RoadNetworkSensor::ConvertRoad(const OWL::Interfaces::Road *road) {
-    const auto openDriveIdRoad = road->GetId();
+    OdId openDriveIdRoad = road->GetId();
 
     auto iter = std::find_if(perceptionData->roads.begin(), perceptionData->roads.end(),
                              [openDriveIdRoad](auto element) { return element->GetOpenDriveId() == openDriveIdRoad; });

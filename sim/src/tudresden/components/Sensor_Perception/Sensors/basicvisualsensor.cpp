@@ -59,8 +59,8 @@ void BasicVisualSensor::ThreadedAgentPerception(bool useThreads) {
 
 void BasicVisualSensor::AgentPerceptionThread(unsigned startIndex, unsigned endIndex) {
     for (unsigned i = startIndex; i < endIndex; i++) {
-        const auto &obj = aabbTreeHandler->agentObjects[i];
-        const auto &agent = aabbTreeHandler->agents[i];
+        const auto obj = aabbTreeHandler->agentObjects[i];
+        const auto agent = aabbTreeHandler->agents[i];
 
         if (agent->GetId() == egoAgent->GetId())
             continue;

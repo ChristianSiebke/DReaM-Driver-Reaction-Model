@@ -1,4 +1,4 @@
-set(COMPONENT_NAME ALGORITHM_DReaM)
+set(COMPONENT_NAME DriverReactionModel)
  
 add_compile_definitions(ALGORITHM_DReaM_LIBRARY)
 
@@ -40,7 +40,6 @@ add_openpass_target(
     Components/Importer/BehaviourConverter.h
     Components/Importer/BehaviourImporter.h
     Components/TrafficSignMemory/TrafficSignMemory.h
-
   SOURCES
     agentstaterecorder.cpp
     Algorithm_DReaM.cpp
@@ -72,7 +71,6 @@ add_openpass_target(
     Components/Importer/BehaviourImporter.cpp
     Components/TrafficSignMemory/TrafficSignMemory.cpp
     ../../../common/xmlParser.cpp
-
   INCDIRS
     ${OPENPASS_SIMCORE_DIR}/core
     ${OPENPASS_SIMCORE_DIR}/common
@@ -84,4 +82,5 @@ add_openpass_target(
     Qt5::Xml
     Common
     TUDresdenCommon
+    SimulationCore
 )

@@ -48,7 +48,9 @@ add_openpass_target(
     Sensors/roadnetworksensor.cpp
     Sensors/trafficsignvisualsensor.cpp
     Sensors/stoppingpointcalculation.cpp
- 
+    ../../../core/opSimulation/modules/World_OSI/WorldDataQuery.cpp
+    ../../../core/opSimulation/modules/World_OSI/RoadStream.cpp
+   ../../../core/opSimulation/modules/World_OSI/LaneStream.cpp
   INCDIRS
     ${OPENPASS_SIMCORE_DIR}/core
     ${OPENPASS_SIMCORE_DIR}/common

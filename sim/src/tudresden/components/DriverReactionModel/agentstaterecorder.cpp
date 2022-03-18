@@ -1,54 +1,51 @@
 #include "agentstaterecorder.h"
 
-
-
-void agentStateRecorder::addStoppingPoints(int id, std::map<std::string,std::list<std::tuple<double, double>>> stoppingPointList){
-    record.stoppingPoints.insert(std::make_pair(id,stoppingPointList));
+void agentStateRecorder::addStoppingPoints(int id, std::map<std::string, std::list<std::tuple<double, double>>> stoppingPointList) {
+    record.stoppingPoints.insert(std::make_pair(id, stoppingPointList));
 }
 
-void agentStateRecorder::addGazeStates(int time, int id, GazeState gazeState){
-    if(record.gazeStates.find(time) == record.gazeStates.end()){
-        std::map <int,GazeState> idMap;
-        record.gazeStates.insert(std::make_pair(time,idMap));
+void agentStateRecorder::addGazeStates(int time, int id, GazeState gazeState) {
+    if (record.gazeStates.find(time) == record.gazeStates.end()) {
+        std::map<int, GazeState> idMap;
+        record.gazeStates.insert(std::make_pair(time, idMap));
     }
-    record.gazeStates.at(time).insert(std::make_pair(id,gazeState));
+    record.gazeStates.at(time).insert(std::make_pair(id, gazeState));
 }
 
-void agentStateRecorder::addCrossingInfos(int time, int id, CrossingInfo info){
-    if(record.crossingInfos.find(time) == record.crossingInfos.end()){
-        std::map <int,CrossingInfo> idMap;
-        record.crossingInfos.insert(std::make_pair(time,idMap));
+void agentStateRecorder::addCrossingInfos(int time, int id, CrossingInfo info) {
+    if (record.crossingInfos.find(time) == record.crossingInfos.end()) {
+        std::map<int, CrossingInfo> idMap;
+        record.crossingInfos.insert(std::make_pair(time, idMap));
     }
-    record.crossingInfos.at(time).insert(std::make_pair(id,info));
+    record.crossingInfos.at(time).insert(std::make_pair(id, info));
 }
 
-void agentStateRecorder::addOtherAgents(int time, int id, std::vector<std::tuple<int, double, double, double>> agents){
-    if(record.otherAgents.find(time) == record.otherAgents.end()){
-        std::map <int,std::vector<std::tuple<int, double, double, double>>> idMap;
-        record.otherAgents.insert(std::make_pair(time,idMap));
+void agentStateRecorder::addOtherAgents(int time, int id, std::vector<std::tuple<int, double, double, double>> agents) {
+    if (record.otherAgents.find(time) == record.otherAgents.end()) {
+        std::map<int, std::vector<std::tuple<int, double, double, double>>> idMap;
+        record.otherAgents.insert(std::make_pair(time, idMap));
     }
-    record.otherAgents.at(time).insert(std::make_pair(id,agents));
+    record.otherAgents.at(time).insert(std::make_pair(id, agents));
 }
-void agentStateRecorder::addFixationPoints(int time, int id, std::vector<Common::Vector2d> fixationPoints){
-    if(record.segmentControlFixationPoints.find(time) == record.segmentControlFixationPoints.end()){
-        std::map <int,std::vector<Common::Vector2d>> idMap;
-        record.segmentControlFixationPoints.insert(std::make_pair(time,idMap));
+void agentStateRecorder::addFixationPoints(int time, int id, std::vector<Common::Vector2d> fixationPoints) {
+    if (record.segmentControlFixationPoints.find(time) == record.segmentControlFixationPoints.end()) {
+        std::map<int, std::vector<Common::Vector2d>> idMap;
+        record.segmentControlFixationPoints.insert(std::make_pair(time, idMap));
     }
-    record.segmentControlFixationPoints.at(time).insert(std::make_pair(id,fixationPoints));
+    record.segmentControlFixationPoints.at(time).insert(std::make_pair(id, fixationPoints));
 }
-void agentStateRecorder::addConflictPoints(std::vector<ConflictPoints> conflictPoints){
+void agentStateRecorder::addConflictPoints(std::vector<ConflictPoints> conflictPoints) {
     record.conflictPoints = conflictPoints;
 }
 
-
-std::string agentStateRecorder::generateDataSet(int time){
+std::string agentStateRecorder::generateDataSet(int time) {
     std::string outputLine;
 
-    //list of all agent IDs
-    for (auto [agentId, values] : record.gazeStates.at(time)){
+    // list of all agent IDs
+    for (auto [agentId, values] : record.gazeStates.at(time)) {
         outputLine += "{";
 
-        //GazeType,Int,ufovAngle,openingAngle,viewDistance
+        // GazeType,Int,ufovAngle,openingAngle,viewDistance
         GazeState gazeState = record.gazeStates.at(time).at(agentId);
         std::string gazeType;
 
@@ -73,12 +70,11 @@ std::string agentStateRecorder::generateDataSet(int time){
         outputLine += std::to_string(gazeState.ufovAngle) += ",";
         outputLine += std::to_string(gazeState.openingAngle) += ",";
         outputLine += std::to_string(gazeState.viewDistance) += ",";
-            //TODO: catch for empty GazeType
+        // TODO: catch for empty GazeType
 
         //[otherAgentId,double,double,double]
-            outputLine += "[";
-        for (auto agent : record.otherAgents.at(time).at(agentId)){
-
+        outputLine += "[";
+        for (auto agent : record.otherAgents.at(time).at(agentId)) {
             outputLine += std::to_string(std::get<0>(agent)) += ",";
             outputLine += std::to_string(std::get<1>(agent)) += ",";
             outputLine += std::to_string(std::get<2>(agent)) += ",";
@@ -88,7 +84,7 @@ std::string agentStateRecorder::generateDataSet(int time){
 
         outputLine += "],";
 
-        //crossingType,crossingPhase
+        // crossingType,crossingPhase
         auto crossingInfo = record.crossingInfos.at(time).at(agentId);
         std::string crossingType;
         std::string crossingPhase;
@@ -151,15 +147,14 @@ std::string agentStateRecorder::generateDataSet(int time){
 
         //[FixationPointX,FixationPointY]
         outputLine += "[";
-        for(auto point : record.segmentControlFixationPoints.at(time).at(agentId)){
-
+        for (auto point : record.segmentControlFixationPoints.at(time).at(agentId)) {
             outputLine += std::to_string(point.x) += ",";
             outputLine += std::to_string(point.y) += "|";
-            //TODO: kein | falls letztes element
+            // TODO: kein | falls letztes element
         }
         outputLine += "]";
         outputLine += "}";
-    }    
+    }
     return outputLine;
 }
 
@@ -197,13 +192,12 @@ std::string agentStateRecorder::generateHeader() {
     return header;
 }
 
-void agentStateRecorder::writeOutputFile(){
-
-    std::cout <<"confictPoints: " << record.conflictPoints.size() << std::endl;
+void agentStateRecorder::writeOutputFile() {
+    std::cout << "confictPoints: " << record.conflictPoints.size() << std::endl;
 
     std::string path = "SimulationOutput.RunResults.RunResult.Cyclics";
     boost::property_tree::ptree valueTree;
-    valueTree.put("SimulationOutput.<xmlattr>.SchemaVersion","0.3.0");
+    valueTree.put("SimulationOutput.<xmlattr>.SchemaVersion", "0.3.0");
 
     // adds stopping points to the output ptree
     boost::property_tree::ptree agentTree;
@@ -211,23 +205,21 @@ void agentStateRecorder::writeOutputFile(){
         boost::property_tree::ptree intersectionTree;
         boost::property_tree::ptree positionTree;
 
-        agentTree.add("Agent.<xmlattr>.Id",std::to_string(agentId));
+        agentTree.add("Agent.<xmlattr>.Id", std::to_string(agentId));
 
-
-        for(auto [intersectionId,points]: pointMap){
+        for (auto [intersectionId, points] : pointMap) {
             intersectionTree.add("Intersection.<xmlattr>.Id", intersectionId);
             std::cout << intersectionId << std::endl;
 
-            for(auto point : points){
+            for (auto point : points) {
                 //         positionTree.put("Position.<xmlattr>.PosX",std::get<0>(point));
                 //       positionTree.put("Position.<xmlattr>.PosY",std::get<1>(point));
                 //       intersectionTree.add_child("Intersection",positionTree);
             }
 
-        agentTree.add_child("Agent.StoppingPoint",intersectionTree);
+            agentTree.add_child("Agent.StoppingPoint", intersectionTree);
 
-        valueTree.add_child("SimulationOutput.RunResults.RunResult.StoppingPoints",agentTree);
-
+            valueTree.add_child("SimulationOutput.RunResults.RunResult.StoppingPoints", agentTree);
         }
     }
     valueTree.add_child("SimulationOutput.RunResults.RunResult.StoppingPoints", agentTree);
@@ -264,12 +256,6 @@ void agentStateRecorder::writeOutputFile(){
     }
     valueTree.add_child("SimulationOutput.RunResults.RunResult.Cyclics.Samples", samplesTree);
 
-    std::thread::id threadId = std::this_thread::get_id();
-    std::stringstream ss;
-    ss << threadId;
-    std::string xmlPath = "results/jansoutput.xml";
-
-    boost::property_tree::xml_writer_settings<std::string> settings (' ',2);
-    boost::property_tree::write_xml(xmlPath, valueTree, std::locale(), settings);
+    boost::property_tree::xml_writer_settings<std::string> settings(' ', 2);
+    boost::property_tree::write_xml(resultPath + "DReaMOutput.xml", valueTree, std::locale(), settings);
 }
-
