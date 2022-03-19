@@ -80,7 +80,7 @@ private:
         return polygon;
     }
 
-    static Polygon2d ConstructPolygon(const OWL::StationaryObject *object) {
+    static Polygon2d ConstructPolygon(const OWL::Interfaces::StationaryObject *object) {
         auto referencePoint = Common::Vector2d(object->GetReferencePointPosition().x, object->GetReferencePointPosition().y);
 
         const auto length = object->GetDimension().length;

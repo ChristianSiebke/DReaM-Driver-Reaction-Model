@@ -195,11 +195,6 @@ struct CollisionPoint {
     double timeToCollision = maxDouble;
 };
 
-enum class GazeType { NONE, ScanGlance, ObserveGlance, ControlGlance };
-// fixation area of interests
-enum class ScanAOI { NONE, Right, Straight, Left, Rear, Dashboard, Other };
-enum class ControlAOI { NONE, Right, Left, Oncoming };
-
 // deprecated
 struct Target {
     std::string targetRoad;

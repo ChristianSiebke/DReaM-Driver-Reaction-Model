@@ -395,17 +395,15 @@ const MentalInfrastructure::Road *RoadNetworkSensor::ConvertRoad(const OWL::Inte
     // using isValidForLane(OwlId) it would be possible to check if the sign is valid for any lane of the road and then assign it
 
     // convert traffic signs
-    // for (auto &[key, value] : worldData->GetTrafficSigns()) {
-    //     for (auto &section : sections) {
-    //         for (auto &lane : section->GetLanes()) {
-    //             if (value.is)
-    //         }
-    //     }
-
-    //     if (value->GetRoadId() != roadId)
-    //         continue;
-    //     newRoad->AddTrafficSign(ConvertTrafficSign(newRoad.get(), value));
-    // }
+    for (auto &[key, value] : worldData->GetTrafficSigns()) {
+        for (auto &section : sections) {
+            for (auto &lane : section->GetLanes()) {
+                if (value->IsValidForLane(lane->GetId())) {
+                    newRoad->AddTrafficSign(ConvertTrafficSign(newRoad.get(), value));
+                }
+            }
+        } 
+    }
 
     const MentalInfrastructure::Section *lastSectionPtr = nullptr;
 
@@ -444,16 +442,20 @@ const MentalInfrastructure::Road *RoadNetworkSensor::ConvertRoad(const OWL::Inte
 }
 
 // FIXME re-implement traffic signs
-// const MentalInfrastructure::TrafficSign* RoadNetworkSensor::ConvertTrafficSign(const MentalInfrastructure::Road* road,
-//                                                                                const OWL::Interfaces::TrafficSign* sign) {
-//     auto newSign = std::make_shared<MentalInfrastructure::TrafficSign>(
-//         sign->GetId(), sign->GetOpenDriveId(), road, sign->GetValue(), sign->GetT(), sign->GetS(),
-//         Common::Vector2d(sign->GetReferencePointPosition().x, sign->GetReferencePointPosition().y), sign->GetType());
+const MentalInfrastructure::TrafficSign* RoadNetworkSensor::ConvertTrafficSign(const MentalInfrastructure::Road* road,
+                                                                               const OWL::Interfaces::TrafficSign* sign) {
+    auto value = sign->GetSpecification();                                                                            
 
-//     perceptionData->lookupTableRoadNetwork.trafficSigns.insert(std::make_pair(sign->GetId(), newSign.get()));
-//     perceptionData->trafficSigns.push_back(newSign);
-//     return newSign.get();
-// }
+    auto newSign = std::make_shared<MentalInfrastructure::TrafficSign>(
+        sign->GetId(), road, sign->GetValue(), sign->GetT(), sign->GetS(),
+        Common::Vector2d(sign->GetReferencePointPosition().x, sign->GetReferencePointPosition().y), sign->GetType());
+
+    
+
+    perceptionData->lookupTableRoadNetwork.trafficSigns.insert(std::make_pair(sign->GetId(), newSign.get()));
+    perceptionData->trafficSigns.push_back(newSign);
+    return newSign.get();
+}
 
 std::shared_ptr<InfrastructurePerception> RoadNetworkSensor::GetRoadNetwork() {
     if (infrastructureExists)
