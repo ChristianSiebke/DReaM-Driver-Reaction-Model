@@ -13,6 +13,7 @@
  *****************************************************************************/
 
 #pragma once
+#include <unordered_map>
 #include <memory>
 #include <unordered_map>
 
@@ -197,27 +198,17 @@ struct CollisionPoint {
 
 // deprecated
 struct Target {
-    std::string targetRoad;
-    int targetLane;
+    OdId targetRoad;
+    OdId targetLane;
 };
 
 // deprecated
 struct DriverRoutePlanning {
-    bool ByTarget() const {
-        return targetPtr != nullptr;
-    }
-    bool ByTurningVector() const {
-        return turningVectorPtr != nullptr;
-    }
-    std::vector<int> GetVector() const {
-        return *turningVectorPtr;
-    }
-    std::string GetTargetRoad() const {
-        return targetPtr->targetRoad;
-    }
-    int GetTargetLane() const {
-        return targetPtr->targetLane;
-    }
+    bool ByTarget() const { return targetPtr != nullptr; }
+    bool ByTurningVector() const { return turningVectorPtr != nullptr; }
+    std::vector<int> GetVector() const { return *turningVectorPtr; }
+    OdId GetTargetRoad() const { return targetPtr->targetRoad; }
+    OdId GetTargetLane() const { return targetPtr->targetLane; }
 
     std::shared_ptr<Target> targetPtr{nullptr};
     std::shared_ptr<std::vector<int>> turningVectorPtr{nullptr};

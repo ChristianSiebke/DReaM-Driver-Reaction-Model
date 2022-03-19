@@ -14,20 +14,25 @@
 /** @file  algorithm_lateralImplementation.cpp */
 //-----------------------------------------------------------------------------
 
-#include <memory>
-#include <qglobal.h>
 #include "lateralImpl.h"
-#include "common/steeringSignal.h"
-#include "common/parametersVehicleSignal.h"
-#include "common/lateralSignal.h"
+
+#include <memory>
+
+#include <qglobal.h>
+
+#include "PerceptionData.h"
 #include "common/commonTools.h"
 #include "common/globalDefinitions.h"
-#include "components/common/vehicleProperties.h"
+#include "common/lateralSignal.h"
+#include "common/parametersVehicleSignal.h"
+#include "common/steeringSignal.h"
+#include "complexSignals.h"
 #include "components/Sensor_Driver/src/Signals/sensorDriverSignal.h"
-
+#include "components/common/vehicleProperties.h"
 void AlgorithmLateralImplementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time)
 {
     Q_UNUSED(time);
+
 
     if (localLinkId == 0)
     {
@@ -71,17 +76,20 @@ void AlgorithmLateralImplementation::UpdateInput(int localLinkId, const std::sha
     else if (localLinkId == 101 || localLinkId == 102)
     {
         // from SensorDriver
-        const std::shared_ptr<SensorDriverSignal const> signal = std::dynamic_pointer_cast<SensorDriverSignal const>(data);
 
-        if (!signal)
-        {
+        if (const std::shared_ptr<SensorDriverSignal const> signal = std::dynamic_pointer_cast<SensorDriverSignal const>(data)) {
+            steeringController.SetVelocityAndSteeringWheelAngle(signal->GetOwnVehicleInformation().absoluteVelocity,
+                                                                signal->GetOwnVehicleInformation().steeringWheelAngle);
+        }
+        else if (std::shared_ptr<structSignal<std::shared_ptr<EgoPerception>> const> signal =
+                     std::dynamic_pointer_cast<structSignal<std::shared_ptr<EgoPerception>> const>(data)) {
+            steeringController.SetVelocityAndSteeringWheelAngle(signal->value->velocity, signal->value->steeringWheelAngle);
+        }
+        else {
             const std::string msg = COMPONENTNAME + " invalid signaltype";
             LOG(CbkLogLevel::Debug, msg);
             throw std::runtime_error(msg);
         }
-
-        steeringController.SetVelocityAndSteeringWheelAngle(signal->GetOwnVehicleInformation().absoluteVelocity,
-                                                            signal->GetOwnVehicleInformation().steeringWheelAngle);
     }
     else
     {

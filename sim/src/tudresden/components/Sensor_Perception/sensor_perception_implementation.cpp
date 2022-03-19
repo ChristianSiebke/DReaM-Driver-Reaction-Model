@@ -56,22 +56,11 @@ void Sensor_Perception_Implementation::UpdateOutput(int localLinkId, std::shared
     }
     else if (localLinkId == 3) {
         try {
-            // FIXME GetDriverRoutePlanning() deprecated, need route
-            // data = std::make_shared<structSignal<RouteElement> const>(GetAgent()->GetDriverRoutePlanning());
-        }
-        catch (const std::bad_alloc &) {
-            const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 3 = DriverRoutePlanning)";
-            LOG(CbkLogLevel::Debug, msg);
-            throw std::runtime_error(msg);
-        }
-    }
-    else if (localLinkId == 4) {
-        try {
             data = std::make_shared<ContainerSignal<std::vector<const MentalInfrastructure::TrafficSign *>> const>(
                 sensorPerceptionLogic.GetTrafficSignPerception());
         }
         catch (const std::bad_alloc &) {
-            const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 4 = TrafficSigns)";
+            const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 3 = TrafficSigns)";
             LOG(CbkLogLevel::Debug, msg);
             throw std::runtime_error(msg);
         }

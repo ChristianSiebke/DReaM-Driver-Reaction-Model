@@ -29,7 +29,7 @@ class TrafficSign;
 ///
 class Road : public Element {
   public:
-      Road(std::string openDriveId, double posX, double posY, double hdg, double length) :
+      Road(OdId openDriveId, double posX, double posY, double hdg, double length) :
           Element(openDriveId), startPos(Common::Vector2d(posX, posY)), roadHdg(hdg), roadLength(length) {
       }
     ~Road() override {}

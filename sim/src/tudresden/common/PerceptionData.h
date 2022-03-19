@@ -129,9 +129,9 @@ struct StoppingPointData {
 
 struct ConflictPoints {
     OdId currentOpenDriveRoadId;
-    int64_t currentOpenDriveLaneId;
+    OdId currentOpenDriveLaneId;
     OdId junctionOpenDriveRoadId;
-    int64_t junctionOpenDriveLaneId;
+    OdId junctionOpenDriveLaneId;
     Common::Vector2d start;
     Common::Vector2d end;
 };
@@ -157,7 +157,7 @@ struct InfrastructurePerception {
         return conflictPoints;
     }
 
-    const std::map<StoppingPointType, StoppingPoint> &GetStoppingPoints(std::string junctionId, OwlId laneId) const {
+    const std::map<StoppingPointType, StoppingPoint> &GetStoppingPoints(OdId junctionId, OwlId laneId) const {
         return stoppingPointData.stoppingPoints.at(junctionId).at(laneId);
     }
 
@@ -190,7 +190,7 @@ struct DynamicInfrastructurePerception {
 
 struct NavigationDecision {
     OdId odRoadID{"-999"};
-    int64_t odLaneID{-999};
+    OdId odLaneID{"-999"};
 
     OwlId laneID{OwlInvalidId};
     IndicatorState indicator = IndicatorState::IndicatorState_Off;

@@ -31,18 +31,15 @@ private:
     void ThreadedAgentPerception(bool useThreads = true);
     void AgentPerceptionThread(unsigned startIndex, unsigned endIndex);
 
-    void ConvertAgent(AgentInterface *agent) {
+    void ConvertAgent(const AgentInterface *agent) {
         AgentPerception data;
+        const auto &actualEgoAgent = const_cast<AgentInterface *>(agent)->GetEgoAgent();
         auto worldData = static_cast<OWL::WorldData *>(world->GetWorldData());
-
-        // auto agentRoadSearch = worldData->GetRoads().find(agent->GetRoads(MeasurementPoint::Front).front());
-        // auto agentRoadId = agentRoadSearch == worldData->GetRoads().end() ? "-999" : agentRoad->first;
-
-        auto mainRoad = worldData->GetRoads().at(agent->GetEgoAgent().GetRoadId());
-        auto lanesOnRoad = mainRoad->GetSections().front()->GetLanes(); // TODO adapt for roads with >1 section
-        auto mainLane = *std::find_if(lanesOnRoad.begin(), lanesOnRoad.end(),
-                                      [agent](auto &obj) { return obj->GetOdId() == agent->GetEgoAgent().GetLaneIdFromRelative(0); });
-
+        WorldDataQuery helper(*worldData);
+        auto mainRoad = worldData->GetRoads().at(actualEgoAgent.GetRoadId());
+        auto mainLane =
+            &helper.GetLaneByOdId(actualEgoAgent.GetReferencePointPosition()->roadId, actualEgoAgent.GetReferencePointPosition()->laneId,
+                                  actualEgoAgent.GetReferencePointPosition()->roadPosition.s);
         auto indicator = agent->GetIndicatorState();
 
         data.id = agent->GetId();
@@ -59,10 +56,7 @@ private:
         data.yawAngle = agent->GetYaw();
         data.width = agent->GetWidth();
         data.length = agent->GetLength();
-
-        auto dist = agent->GetDistanceToStartOfRoad(MeasurementPoint::Reference, mainRoad->GetId());
-
-        data.sCoordinate = mainLane->GetOdId() < 0 ? dist : mainRoad->GetLength() - dist;
+        data.sCoordinate = actualEgoAgent.GetReferencePointPosition()->roadPosition.s;
         data.movingInLaneDirection = AgentPerception::IsMovingInLaneDirection(data.lane, data.yawAngle, data.sCoordinate, data.velocity);
         auto junctionDistance = data.CalculateJunctionDistance(data.road, data.lane);
         data.distanceOnJunction = junctionDistance.distanceOnJunction;

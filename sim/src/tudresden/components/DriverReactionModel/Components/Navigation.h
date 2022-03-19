@@ -25,25 +25,25 @@ namespace Navigation {
 
 struct Waypoint {
     std::string roadId;
-    int laneId;
+    OwlId laneId;
     double s;
 
     std::string GetRoadId() const {
         return roadId;
     }
-    int GetLaneId() const {
+    OwlId GetLaneId() const {
         return laneId;
     }
 };
 
 struct Route {
     std::vector<Waypoint> GetWaypoints() const {
+        if (waypoints == nullptr)
+            return {};
         return *waypoints;
     }
     std::shared_ptr<std::vector<Waypoint>> waypoints;
 };
-
-std::shared_ptr<std::vector<Waypoint>> waypoints;
 
 class Navigation : public Component::ComponentInterface {
 public:

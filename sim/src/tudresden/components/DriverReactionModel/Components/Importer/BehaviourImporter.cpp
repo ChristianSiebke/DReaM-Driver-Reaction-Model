@@ -1,9 +1,6 @@
 #include "BehaviourImporter.h"
 
-BehaviourImporter::BehaviourImporter(LoggerInterface* loggerInterface) : loggerInterface{loggerInterface} {
-    QDir baseDir = QCoreApplication::applicationDirPath();
-    std::string path = baseDir.path().toStdString() + "\\configs\\" + "behaviour.xml";
-
+BehaviourImporter::BehaviourImporter(std::string path, LoggerInterface *loggerInterface) : loggerInterface{loggerInterface} {
     if (!Import(path)) {
         Log("Could not import Behaviour.xml ", LogLevel_new::error);
     }

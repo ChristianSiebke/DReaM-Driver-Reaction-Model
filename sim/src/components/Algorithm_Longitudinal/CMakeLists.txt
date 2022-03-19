@@ -18,12 +18,13 @@ add_openpass_target(
     algorithm_longitudinal.h
     src/longCalcs.h
     src/algo_longImpl.h
-
   SOURCES
     algorithm_longitudinal.cpp
     src/longCalcs.cpp
     src/algo_longImpl.cpp
-
+  INCDIRS
+   ../../tudresden/common/
+   ../../tudresden/
   LIBRARIES
     Qt5::Core
 )

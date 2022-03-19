@@ -70,18 +70,6 @@ void AlgorithmDReaMImplementation::UpdateInput(int localLinkId, const std::share
         infrastructurePerception = signal->value;
     }
     else if (localLinkId == 3) {
-        // from sensor driver perception
-        std::shared_ptr<structSignal<RouteElement> const> signal = std::dynamic_pointer_cast<structSignal<RouteElement> const>(data);
-
-        if (!signal) {
-            const std::string msg = COMPONENTNAME + " invalid signaltype (localLinkId 3 = DriverRoutePlanning)";
-            LOG(CbkLogLevel::Debug, msg);
-            throw std::runtime_error(msg);
-        }
-
-        // TODO MAybe Transform into needed route format here
-        routeElement = signal->value;
-    } else if (localLinkId == 4) {
         std::shared_ptr<ContainerSignal<std::vector<const MentalInfrastructure::TrafficSign*>> const> signal =
             std::dynamic_pointer_cast<ContainerSignal<std::vector<const MentalInfrastructure::TrafficSign*>> const>(data);
 
@@ -151,6 +139,8 @@ void AlgorithmDReaMImplementation::UpdateOutput(int localLinkId, std::shared_ptr
 void AlgorithmDReaMImplementation::Trigger(int time) {
     Q_UNUSED(time)
     try {
+
+
         DReaM.UpdateInput(time, egoPerception, ambientAgents, infrastructurePerception, trafficSigns);
         DReaM.UpdateComponents();
 
@@ -162,9 +152,9 @@ void AlgorithmDReaMImplementation::Trigger(int time) {
 
         // LateralOutput**************************
         out_laneWidth = DReaM.GetWorldRepresentation().egoAgent->GetLaneWidth();
-        out_lateral_displacement = DReaM.GetWorldRepresentation().egoAgent->GetLateralDisplacement(); // lateral deviation
+        out_lateral_displacement = -DReaM.GetWorldRepresentation().egoAgent->GetLateralDisplacement(); // lateral deviation
+        out_lateral_heading_error = -DReaM.GetWorldRepresentation().egoAgent->GetHeading();
         out_curvature = DReaM.GetWorldRepresentation().egoAgent->GetCurvature();
-        out_lateral_heading_error = DReaM.GetWorldRepresentation().egoAgent->GetHeading();
         //****************************************
 
         double intersectionDistance;

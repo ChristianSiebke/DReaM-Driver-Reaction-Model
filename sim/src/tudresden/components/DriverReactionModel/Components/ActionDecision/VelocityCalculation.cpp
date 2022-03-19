@@ -22,8 +22,7 @@ double VelocityCalculation::PrepareTargetVelocity() {
             if (targetVelocity <= 0.0) {
                 const auto& roadId = mmLane->GetRoad()->GetOpenDriveId();
                 std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
-                                      " | SpeedLimit of Lane: " + mmLane->GetOpenDriveId() + " on Road: " + roadId +
-                                      " <=0 !";
+                                      " | SpeedLimit of Lane: " + mmLane->GetOpenDriveId() + " on Road: " + roadId + " <=0 !";
                 throw std::logic_error(message);
             }
         }

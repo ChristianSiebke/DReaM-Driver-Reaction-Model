@@ -59,20 +59,11 @@ void BasicVisualSensor::ThreadedAgentPerception(bool useThreads) {
 
 void BasicVisualSensor::AgentPerceptionThread(unsigned startIndex, unsigned endIndex) {
     for (unsigned i = startIndex; i < endIndex; i++) {
-        const auto &obj = aabbTreeHandler->agentObjects[i];
-        const auto &agent = aabbTreeHandler->agents[i];
+        const auto obj = aabbTreeHandler->agentObjects[i];
+        const auto agent = aabbTreeHandler->agents[i];
 
         if (agent->GetId() == egoAgent->GetId())
             continue;
-
-        // TODO handle the agent being on more than one road
-        if (worldData->GetRoads().find(agent->GetRoads(MeasurementPoint::Front).front()) == worldData->GetRoads().end())
-            continue;
-
-        if (agent->GetRoads(MeasurementPoint::Front).size() > 1) {
-            std::cout << "The agent is currently locating on more than one road! This is NOT supported, using only first road."
-                      << std::endl;
-        }
 
         if (viewDistance == 0.0) {
             continue;

@@ -18,11 +18,11 @@
 
 class BehaviourImporter {
   public:
-    BehaviourImporter(LoggerInterface* loggerInterface);
-    ~BehaviourImporter() = default;
+      BehaviourImporter(std::string path, LoggerInterface *loggerInterface);
+      ~BehaviourImporter() = default;
 
-    bool Import(const std::string& filename);
-    std::unique_ptr<BehaviourData> GetBehaviourData();
+      bool Import(const std::string &filename);
+      std::unique_ptr<BehaviourData> GetBehaviourData();
 
   private:
     bool ImportGroup(QDomElement& groupElement, StatisticsGroup& group);
