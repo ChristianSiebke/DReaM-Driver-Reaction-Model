@@ -453,19 +453,17 @@ const MentalInfrastructure::Road *RoadNetworkSensor::ConvertRoad(const OWL::Inte
 }
 
 // FIXME re-implement traffic signs
-const MentalInfrastructure::TrafficSign* RoadNetworkSensor::ConvertTrafficSign(const MentalInfrastructure::Road* road,
-                                                                               const OWL::Interfaces::TrafficSign* sign) {
-    auto value = sign->GetSpecification();                                                                            
+const MentalInfrastructure::TrafficSign *RoadNetworkSensor::ConvertTrafficSign(const MentalInfrastructure::Road *road,
+                                                                               const OWL::Interfaces::TrafficSign *sign) {
+    // TODO fix t value being -42
+    // TODO re-implement (currently this method does absolutely nothing until the conversion to a DReaM-internal ID has been done)
+    // auto newSign = std::make_shared<MentalInfrastructure::TrafficSign>(
+    //     (OdId) sign->GetId(), road, sign->GetSpecification(0).value, -42, sign->GetS(),
+    //     Common::Vector2d(sign->GetReferencePointPosition().x, sign->GetReferencePointPosition().y), sign->GetSpecification(0).type);
 
-    auto newSign = std::make_shared<MentalInfrastructure::TrafficSign>(
-        sign->GetId(), road, sign->GetValue(), sign->GetT(), sign->GetS(),
-        Common::Vector2d(sign->GetReferencePointPosition().x, sign->GetReferencePointPosition().y), sign->GetType());
-
-    
-
-    perceptionData->lookupTableRoadNetwork.trafficSigns.insert(std::make_pair(sign->GetId(), newSign.get()));
-    perceptionData->trafficSigns.push_back(newSign);
-    return newSign.get();
+    // perceptionData->lookupTableRoadNetwork.trafficSigns.insert(std::make_pair(sign->GetId(), newSign.get()));
+    // perceptionData->trafficSigns.push_back(newSign);
+    // return newSign.get();
 }
 
 std::shared_ptr<InfrastructurePerception> RoadNetworkSensor::GetRoadNetwork() {
