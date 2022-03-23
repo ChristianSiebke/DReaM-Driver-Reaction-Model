@@ -64,6 +64,7 @@
 #include "Components/CognitiveMap/CognitiveMap.h"
 #include "Components/GazeMovement/GazeMovement.h"
 #include "Components/Importer/BehaviourImporter.h"
+#include "Components/Importer/RouteImporter.h"
 #include "Components/Navigation.h"
 #include "Components/TrafficSignMemory/TrafficSignMemory.h"
 #include "DriverReactionModel.h"
@@ -102,11 +103,15 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
         // TODO: wrap all in DReaM constructor ----
         BehaviourImporter importer(ConfigPath, &loggerInterface);
         behaviourData = importer.GetBehaviourData();
+        // TODO: complete constructor path
+        RouteImporter routeImporter(ConfigPath, &loggerInterface);
+        // where do i find the agent Id?
+        // route = routeImporter.GetDReaMRoute(agent->GetId());
         std::unique_ptr<Component::ComponentInterface> cognitiveMap =
             std::make_unique<CognitiveMap::CognitiveMap>(cycleTime, stochastics, &loggerInterface, *behaviourData);
         std::unique_ptr<Component::ComponentInterface> navigation =
-            std::make_unique<Navigation::Navigation>(cognitiveMap->GetWorldRepresentation(), cognitiveMap->GetWorldInterpretation(),
-                                                     routeElement, cycleTime, stochastics, &loggerInterface, *behaviourData);
+            std::make_unique<Navigation::Navigation>(cognitiveMap->GetWorldRepresentation(), cognitiveMap->GetWorldInterpretation(), route,
+                                                     cycleTime, stochastics, &loggerInterface, *behaviourData);
         std::unique_ptr<Component::ComponentInterface> gazeMovement =
             std::make_unique<GazeMovement::GazeMovement>(cognitiveMap->GetWorldRepresentation(), cognitiveMap->GetWorldInterpretation(),
                                                          cycleTime, stochastics, &loggerInterface, *behaviourData);
@@ -163,7 +168,7 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
     void Trigger(int time);
 
     //! The route the agent has planned, consisting of one or multiple waypoints
-    RouteElement routeElement;
+    DReaMRoute route;
 
     //! All visual perception information of sensor_DriverPerception
     std::vector<std::shared_ptr<AgentPerception>> ambientAgents;

@@ -13,7 +13,6 @@
  *****************************************************************************/
 
 #pragma once
-#include <unordered_map>
 #include <memory>
 #include <unordered_map>
 
@@ -204,12 +203,45 @@ struct Target {
 
 // deprecated
 struct DriverRoutePlanning {
-    bool ByTarget() const { return targetPtr != nullptr; }
-    bool ByTurningVector() const { return turningVectorPtr != nullptr; }
-    std::vector<int> GetVector() const { return *turningVectorPtr; }
-    OdId GetTargetRoad() const { return targetPtr->targetRoad; }
-    OdId GetTargetLane() const { return targetPtr->targetLane; }
+    bool ByTarget() const {
+        return targetPtr != nullptr;
+    }
+    bool ByTurningVector() const {
+        return turningVectorPtr != nullptr;
+    }
+    std::vector<int> GetVector() const {
+        return *turningVectorPtr;
+    }
+    OdId GetTargetRoad() const {
+        return targetPtr->targetRoad;
+    }
+    OdId GetTargetLane() const {
+        return targetPtr->targetLane;
+    }
 
     std::shared_ptr<Target> targetPtr{nullptr};
     std::shared_ptr<std::vector<int>> turningVectorPtr{nullptr};
+};
+
+//! A Representation of openSCENARIO waypoints as needed for DReaM navigation
+struct Waypoint {
+    std::string roadId;
+    OwlId laneId;
+    double s;
+
+    std::string GetRoadId() const {
+        return roadId;
+    }
+    OwlId GetLaneId() const {
+        return laneId;
+    }
+};
+
+struct DReaMRoute {
+    std::vector<Waypoint> GetWaypoints() const {
+        //        if (waypoints == nullptr)
+        //            return {};
+        return waypoints;
+    }
+    std::vector<Waypoint> waypoints;
 };

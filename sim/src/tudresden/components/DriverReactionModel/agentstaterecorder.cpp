@@ -1,7 +1,7 @@
 #include "agentstaterecorder.h"
 
-void agentStateRecorder::addStoppingPoints(int id, std::map<std::string, std::list<std::tuple<double, double>>> stoppingPointList) {
-    record.stoppingPoints.insert(std::make_pair(id, stoppingPointList));
+void agentStateRecorder::addStoppingPoints(int id, StoppingPointData stoppingPointData) {
+    record.stoppingPoints.insert(std::make_pair(id, stoppingPointData));
 }
 
 void agentStateRecorder::addGazeStates(int time, int id, GazeState gazeState) {
@@ -201,26 +201,38 @@ void agentStateRecorder::writeOutputFile() {
 
     // adds stopping points to the output ptree
     boost::property_tree::ptree agentTree;
+    std::cout << "stoppingPointsSize" << record.stoppingPoints.size() << std::endl;
+
     for (auto [agentId, pointMap] : record.stoppingPoints) {
+        boost::property_tree::ptree stoppingPointTree;
         boost::property_tree::ptree intersectionTree;
         boost::property_tree::ptree positionTree;
 
-        agentTree.add("Agent.<xmlattr>.Id", std::to_string(agentId));
-
-        for (auto [intersectionId, points] : pointMap) {
-            intersectionTree.add("Intersection.<xmlattr>.Id", intersectionId);
-            std::cout << intersectionId << std::endl;
-
+        for (auto [intersectionId, points] : pointMap.stoppingPoints) {
             for (auto point : points) {
-                //         positionTree.put("Position.<xmlattr>.PosX",std::get<0>(point));
-                //       positionTree.put("Position.<xmlattr>.PosY",std::get<1>(point));
-                //       intersectionTree.add_child("Intersection",positionTree);
+                // positionTree.put("Position.<xmlattr>.PosX", std::get<1>(point));
+                // positionTree.put("Position.<xmlattr>.PosY")
             }
-
-            agentTree.add_child("Agent.StoppingPoint", intersectionTree);
-
-            valueTree.add_child("SimulationOutput.RunResults.RunResult.StoppingPoints", agentTree);
         }
+
+        /*
+                agentTree.add("Agent.<xmlattr>.Id", std::to_string(agentId));
+
+                for (auto [intersectionId, points] : pointMap.stoppingPoints) {
+                    intersectionTree.add("Intersection.<xmlattr>.Id", intersectionId);
+                    std::cout << "test" << std::endl;
+                    std::cout << intersectionId << std::endl;
+
+                    for (auto point : points) {
+                        positionTree.put("Position.<xmlattr>.PosX", std::get<0>(point));
+                        positionTree.put("Position.<xmlattr>.PosY", std::get<1>(point));
+                        intersectionTree.add_child("Intersection", positionTree);
+                    }
+                    stoppingPointTree.add_child("StoppingPoint", intersectionTree);
+                }
+
+                */
+        agentTree.add_child("Agent", stoppingPointTree);
     }
     valueTree.add_child("SimulationOutput.RunResults.RunResult.StoppingPoints", agentTree);
 
