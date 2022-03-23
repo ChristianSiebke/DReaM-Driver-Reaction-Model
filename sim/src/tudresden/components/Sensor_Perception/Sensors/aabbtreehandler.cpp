@@ -12,25 +12,44 @@ AABBTreeHandler::AABBTreeHandler(WorldInterface *world) :
 void AABBTreeHandler::FirstExecution()
 {
     auto worldData = static_cast<OWL::WorldData *>(world->GetWorldData());
-    // TODO re-enable, currently GetStationaryObjects() cannot be called due to an error while linking...
-    // auto stationaryObjects = worldData->GetStationaryObjects();
+    // previously, these for loops could be skipped by using 'auto stationaryObjects = worldData->GetStationaryObjects();'
+    // but this method returns OWL::Implementations::StationaryObject instead of OWL::Interfaces::StationaryObject which results in
+    // faulty linking. Until this is fixed in OpenPass these loops will do since they are only called once.
+    std::list<const OWL::Interfaces::StationaryObject *> stationaryObjects;
+    for (const auto &road : worldData->GetRoads()) {
+        for (const auto &section : road.second->GetSections()) {
+            for (const auto &lane : section->GetLanes()) {
+                for (const auto &worldObject : lane->GetWorldObjects(true)) {
+                    auto stationaryObject = dynamic_cast<const OWL::Interfaces::StationaryObject *>(worldObject.second);
+                    if (stationaryObject != nullptr)
+                        stationaryObjects.push_back(stationaryObject);
+                }
+
+                for (const auto &worldObject : lane->GetWorldObjects(false)) {
+                    auto stationaryObject = dynamic_cast<const OWL::Interfaces::StationaryObject *>(worldObject.second);
+                    if (stationaryObject != nullptr)
+                        stationaryObjects.push_back(stationaryObject);
+                }
+            }
+        }
+    }
+
     auto trafficSigns = worldData->GetTrafficSigns();
     auto agents = world->GetAgents();
 
     // initial tree generated (size = size of all objects in the world)
     aabbTree = std::make_shared<AABBTree>(stationaryObjects.size() + trafficSigns.size() + agents.size());
 
-    // for (const auto &[_, stationaryObject] : stationaryObjects)
-    // {
-    //     auto obj = std::make_shared<ObservedStaticObject>();
-    //     obj->area = ConstructPolygon(stationaryObject);
-    //     obj->RecalculateAABB();
-    //     obj->objectType = ObservedObjectType::Building;
-    //     obj->id = stationaryObject->GetId();
+    for (const auto &stationaryObject : stationaryObjects) {
+        auto obj = std::make_shared<ObservedStaticObject>();
+        obj->area = ConstructPolygon(stationaryObject);
+        obj->RecalculateAABB();
+        obj->objectType = ObservedObjectType::Building;
+        obj->id = stationaryObject->GetId();
 
-    //     aabbTree->InsertObject(obj);
-    //     this->stationaryObjects.push_back(obj);
-    // }
+        aabbTree->InsertObject(obj);
+        this->stationaryObjects.push_back(obj);
+    }
 
     for (const auto &[_, trafficSign] : trafficSigns)
     {

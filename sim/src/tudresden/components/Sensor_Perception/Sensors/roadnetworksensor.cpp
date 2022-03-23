@@ -406,17 +406,15 @@ const MentalInfrastructure::Road *RoadNetworkSensor::ConvertRoad(const OWL::Inte
     // using isValidForLane(OwlId) it would be possible to check if the sign is valid for any lane of the road and then assign it
 
     // convert traffic signs
-    // for (auto &[key, value] : worldData->GetTrafficSigns()) {
-    //     for (auto &section : sections) {
-    //         for (auto &lane : section->GetLanes()) {
-    //             if (value.is)
-    //         }
-    //     }
-
-    //     if (value->GetRoadId() != roadId)
-    //         continue;
-    //     newRoad->AddTrafficSign(ConvertTrafficSign(newRoad.get(), value));
-    // }
+    for (auto &[key, value] : worldData->GetTrafficSigns()) {
+        for (auto &section : sections) {
+            for (auto &lane : section->GetLanes()) {
+                if (value->IsValidForLane(lane->GetId())) {
+                    newRoad->AddTrafficSign(ConvertTrafficSign(newRoad.get(), value));
+                }
+            }
+        } 
+    }
 
     const MentalInfrastructure::Section *lastSectionPtr = nullptr;
 
@@ -455,16 +453,18 @@ const MentalInfrastructure::Road *RoadNetworkSensor::ConvertRoad(const OWL::Inte
 }
 
 // FIXME re-implement traffic signs
-// const MentalInfrastructure::TrafficSign* RoadNetworkSensor::ConvertTrafficSign(const MentalInfrastructure::Road* road,
-//                                                                                const OWL::Interfaces::TrafficSign* sign) {
-//     auto newSign = std::make_shared<MentalInfrastructure::TrafficSign>(
-//         sign->GetId(), sign->GetOpenDriveId(), road, sign->GetValue(), sign->GetT(), sign->GetS(),
-//         Common::Vector2d(sign->GetReferencePointPosition().x, sign->GetReferencePointPosition().y), sign->GetType());
+const MentalInfrastructure::TrafficSign *RoadNetworkSensor::ConvertTrafficSign(const MentalInfrastructure::Road *road,
+                                                                               const OWL::Interfaces::TrafficSign *sign) {
+    // TODO fix t value being -42
+    // TODO re-implement (currently this method does absolutely nothing until the conversion to a DReaM-internal ID has been done)
+    // auto newSign = std::make_shared<MentalInfrastructure::TrafficSign>(
+    //     (OdId) sign->GetId(), road, sign->GetSpecification(0).value, -42, sign->GetS(),
+    //     Common::Vector2d(sign->GetReferencePointPosition().x, sign->GetReferencePointPosition().y), sign->GetSpecification(0).type);
 
-//     perceptionData->lookupTableRoadNetwork.trafficSigns.insert(std::make_pair(sign->GetId(), newSign.get()));
-//     perceptionData->trafficSigns.push_back(newSign);
-//     return newSign.get();
-// }
+    // perceptionData->lookupTableRoadNetwork.trafficSigns.insert(std::make_pair(sign->GetId(), newSign.get()));
+    // perceptionData->trafficSigns.push_back(newSign);
+    // return newSign.get();
+}
 
 std::shared_ptr<InfrastructurePerception> RoadNetworkSensor::GetRoadNetwork() {
     if (infrastructureExists)

@@ -56,7 +56,7 @@ private:
     void PrepareLookupTableRoadNetwork();
 
     const MentalInfrastructure::TrafficSign *ConvertTrafficSign(const MentalInfrastructure::Road *road,
-                                                                const OWL::Implementation::TrafficSign *sign);
+                                                                const OWL::Interfaces::TrafficSign *sign);
 
     const MentalInfrastructure::Road *ConvertRoad(const OWL::Interfaces::Road *road);
 

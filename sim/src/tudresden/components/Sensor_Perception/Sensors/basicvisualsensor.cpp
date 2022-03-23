@@ -74,7 +74,6 @@ void BasicVisualSensor::AgentPerceptionThread(unsigned startIndex, unsigned endI
             continue;
 
         auto points = obj->area.outer();
-
         bool hitAgent = false;
 
         for (unsigned i = 0; i < points.size() - 1; i++) {
