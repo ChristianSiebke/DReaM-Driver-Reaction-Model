@@ -44,25 +44,15 @@ enum class TrafficSignType {
     TrafficCalmedDistrictEnd = 111,
 };
 
-class TrafficSign {
+class TrafficSign : public Element {
 public:
-    TrafficSign() {
-    }
-    TrafficSign(OdId openDriveId, OwlId owlId, const MentalInfrastructure::Road *road, double v, double t, double s, Common::Vector2d pos,
-                CommonTrafficSign::Type commonType) :
-        odId(openDriveId), owlId(owlId), road(road), value(v), t(t), s(s), position(pos) {
+    TrafficSign(OdId openDriveId, DReaMId dreamId, const MentalInfrastructure::Road *road, double v, double t, double s,
+                Common::Vector2d pos, CommonTrafficSign::Type commonType) :
+        Element(openDriveId, dreamId), road(road), value(v), t(t), s(s), position(pos) {
         type = (trafficSignMapping.at(commonType));
         priority = Priority(type);
     }
     ~TrafficSign() = default;
-
-    OwlId GetOwlId() const {
-        return owlId;
-    }
-
-    OdId GetOpenDriveId() const {
-        return odId;
-    }
 
     const Common::Vector2d GetPosition() const {
         return position;
@@ -94,8 +84,6 @@ public:
 private:
     int Priority(TrafficSignType sign);
 
-    OwlId owlId;
-    OdId odId;
     const MentalInfrastructure::Road *road;
     TrafficSignType type;
     int priority;

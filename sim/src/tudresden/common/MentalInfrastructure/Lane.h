@@ -56,8 +56,8 @@ struct ConflictArea
 class Lane : public Element
 {
 public:
-    Lane(OdId openDriveId, OwlId owlId, double length, LaneType type, bool inRoadDirection) :
-        Element(openDriveId), owlId(owlId), length(length), type(type), inRoadDirection(inRoadDirection) {
+    Lane(OdId openDriveId, DReaMId dreamId, OwlId owlId, double length, LaneType type, bool inRoadDirection) :
+        Element(openDriveId, dreamId), owlId(owlId), length(length), type(type), inRoadDirection(inRoadDirection) {
     }
     ~Lane() override
     {

@@ -36,7 +36,7 @@ struct JunctionConnection {
 ///
 class Junction : public Element {
 public:
-    Junction(OdId openDriveId) : Element(openDriveId) {
+    Junction(OdId openDriveId, DReaMId dreamId) : Element(openDriveId, dreamId) {
     }
     ~Junction() override {
     }

@@ -29,7 +29,7 @@ class TrafficSignMemory {
     void InsertIntoVisibleTrafficSigns(const MentalInfrastructure::TrafficSign* sign);
 
   private:
-    std::unordered_map<OwlId, MemorizedTrafficSign> memory;
+    std::unordered_map<DReaMId, MemorizedTrafficSign> memory;
     std::unique_ptr<VisibleTrafficSigns> visibleTrafficSigns;
 
     const unsigned int maximumElementsInMemory = 20;
