@@ -70,8 +70,8 @@ void AlgorithmDReaMImplementation::UpdateInput(int localLinkId, const std::share
         infrastructurePerception = signal->value;
     }
     else if (localLinkId == 3) {
-        std::shared_ptr<ContainerSignal<std::vector<const MentalInfrastructure::TrafficSign*>> const> signal =
-            std::dynamic_pointer_cast<ContainerSignal<std::vector<const MentalInfrastructure::TrafficSign*>> const>(data);
+        std::shared_ptr<ContainerSignal<std::vector<const MentalInfrastructure::TrafficSign *>> const> signal =
+            std::dynamic_pointer_cast<ContainerSignal<std::vector<const MentalInfrastructure::TrafficSign *>> const>(data);
 
         if (!signal) {
             const std::string msg = COMPONENTNAME + " invalid signaltype (localLinkId 4 = TrafficSigns)";
@@ -94,8 +94,8 @@ void AlgorithmDReaMImplementation::UpdateOutput(int localLinkId, std::shared_ptr
         try {
             data = std::make_shared<LateralSignal const>(componentState, out_laneWidth,
                                                          out_lateral_displacement, // lateral deviation
-                                                         out_lateral_gain_displacement, out_lateral_heading_error,
-                                                         out_lateral_gain_heading_error, out_curvature);
+                                                         out_lateral_gain_displacement, out_heading_error, out_lateral_gain_heading_error,
+                                                         out_curvature);
         }
         catch (const std::bad_alloc &) {
             const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 0 = LateralSignal)";
@@ -138,13 +138,10 @@ void AlgorithmDReaMImplementation::UpdateOutput(int localLinkId, std::shared_ptr
 
 void AlgorithmDReaMImplementation::Trigger(int time) {
     Q_UNUSED(time)
+    std::cout << "time" << time << std::endl;
     try {
-
-
         DReaM.UpdateInput(time, egoPerception, ambientAgents, infrastructurePerception, trafficSigns);
         DReaM.UpdateComponents();
-
-        out_routeDecision = DReaM.GetRouteDecision();
         out_indicatorState = static_cast<int>(DReaM.GetWorldRepresentation().egoAgent->GetIndicatorState());
         out_longitudinalaccelerationWish = DReaM.GetAcceleration();
         outGazeState = DReaM.GetGazeState();
@@ -152,8 +149,8 @@ void AlgorithmDReaMImplementation::Trigger(int time) {
 
         // LateralOutput**************************
         out_laneWidth = DReaM.GetWorldRepresentation().egoAgent->GetLaneWidth();
-        out_lateral_displacement = -DReaM.GetWorldRepresentation().egoAgent->GetLateralDisplacement(); // lateral deviation
-        out_lateral_heading_error = -DReaM.GetWorldRepresentation().egoAgent->GetHeading();
+        out_lateral_displacement = DReaM.GetWorldRepresentation().egoAgent->GetLateralDisplacement(); // lateral deviation
+        out_heading_error = DReaM.GetWorldRepresentation().egoAgent->GetHeading();
         out_curvature = DReaM.GetWorldRepresentation().egoAgent->GetCurvature();
         //****************************************
 

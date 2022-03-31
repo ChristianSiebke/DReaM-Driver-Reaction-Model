@@ -17,6 +17,11 @@ void Sensor_Perception_Implementation::UpdateInput(int localLinkId, const std::s
 
         currentGazeState = signal->value;
     }
+    else {
+        const std::string msg = COMPONENTNAME + " invalid link";
+        LOG(CbkLogLevel::Debug, msg);
+        throw std::runtime_error(msg);
+    }
 }
 
 void Sensor_Perception_Implementation::UpdateOutput(int localLinkId, std::shared_ptr<SignalInterface const> &data, int time) {
@@ -74,5 +79,28 @@ void Sensor_Perception_Implementation::UpdateOutput(int localLinkId, std::shared
 
 void Sensor_Perception_Implementation::Trigger(int time) {
     // delegating the trigger to the logic wrapper
+    RouteElement target{"2", false}; // Waypoints openPASS
+    SetNewRoute(target);
     sensorPerceptionLogic.Trigger(time, currentGazeState.ufovAngle, currentGazeState.viewDistance, currentGazeState.openingAngle);
+}
+
+void Sensor_Perception_Implementation::SetNewRoute(RouteElement target) {
+    if (target == currentTarget)
+        return;
+    const auto &roadIds = GetAgent()->GetRoads(MeasurementPoint::Front);
+    if (roadIds.empty()) {
+        return;
+    }
+    auto rootRouteElement = CommonHelper::GetRoadWithLowestHeading(GetAgent()->GetObjectPosition().mainLocatePoint, *GetWorld());
+    auto [roadGraph, rootVertex] = GetWorld()->GetRoadGraph(rootRouteElement, 20);
+
+    auto vp = vertices(roadGraph);
+    auto targetVertex = std::find_if(vp.first, vp.second, [=](auto element) { return get(RouteElement(), roadGraph, element) == target; });
+    if (targetVertex == vp.second) {
+        const std::string msg = "target vertex does not exist in graph";
+        LOG(CbkLogLevel::Error, msg);
+        throw std::runtime_error(msg);
+    }
+    GetAgent()->GetEgoAgent().SetRoadGraph(std::move(roadGraph), rootVertex, *targetVertex);
+    currentTarget = target;
 }

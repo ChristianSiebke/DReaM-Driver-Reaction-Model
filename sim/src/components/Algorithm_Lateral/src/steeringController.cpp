@@ -118,3 +118,30 @@ double SteeringController::CalculateSteeringAngle(int time)
 
     return desiredSteeringWheelAngle;
 }
+
+double SteeringController::CalculateSteeringAngleTUDresden(int time) {
+    if (in_velocity == 0.0) {
+        timeLast = time;
+
+        return in_steeringWheelAngle * in_steeringRatio;
+    }
+
+    // Time step length
+    double dt{(time - timeLast) * 0.001};
+
+    ////stanley controller
+    double k = 1.5;
+    double deltaH =
+        (-1 * in_lateralSignal.headingError + std::atan((k * -1 * in_lateralSignal.lateralDeviation) / in_velocity)) * in_steeringRatio;
+
+    // Limit steering wheel velocity. Human limit set to 320°/s.
+    constexpr double HUMAN_LIMIT{320.0 * M_PI / 180.0};
+    const auto maxDeltaSteeringWheelAngle = HUMAN_LIMIT * dt;
+    const auto deltaSteeringWheelAngle = deltaH - in_steeringWheelAngle;
+    if (std::fabs(deltaSteeringWheelAngle) > maxDeltaSteeringWheelAngle) {
+        deltaH = std::copysign(maxDeltaSteeringWheelAngle, deltaSteeringWheelAngle) + in_steeringWheelAngle;
+    }
+
+    timeLast = time;
+    return std::clamp(deltaH, -in_steeringMax, in_steeringMax);
+}

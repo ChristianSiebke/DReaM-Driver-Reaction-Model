@@ -63,7 +63,7 @@ double RoadSegmentInterface::ScanUFOVAngle(ScanAOI aoi) {
         std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "can not set Gaze State!";
         throw std::runtime_error(message);
     }
-    // look  2 seconds ahead
+    // TODO: as input in BehaviourXML: look  2 seconds ahead
     double foresightDistance = worldRepresentation.egoAgent->GetVelocity() * 2;
     double minForesightDistance = 5;
     if (foresightDistance < minForesightDistance) {

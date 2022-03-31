@@ -32,6 +32,15 @@ public:
     double CalculateSteeringAngle(int time);
 
     /*!
+     * \brief Calculates the steering angle for a given timestep (especially for tight curves/ urban area)
+     *
+     * @param[in]     time           Current scheduling time
+     *
+     * return    steering angle
+     */
+    double CalculateSteeringAngleTUDresden(int time);
+
+    /*!
     * \brief Sets the lateral input, which contains the desired lateral position.
     *
     * @param[in]     lateralSignal           LateralSignal

@@ -14,8 +14,6 @@
 
 #pragma once
 
-#include "MentalInfrastructure/Road.h"
-#include "PerceptionData.h"
 #include "include/modelInterface.h"
 
 template <class T> class structSignal : public SignalInterface {

@@ -195,7 +195,7 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
     //! The gain for lateral displacement error controller [-].
     double out_lateral_gain_displacement = 20.0;
     //! The heading angle error of the vehicle [rad].
-    double out_lateral_heading_error = 0;
+    double out_heading_error = 0;
     //! The gain for heading error controller [-].
     double out_lateral_gain_heading_error = 7.5;
     //! The curvature of the lane at vehicle's position [1/m].
@@ -206,8 +206,6 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
 
     // SecondaryDriverTasksSignal
     //*************************************************
-
-    NavigationDecision out_routeDecision;
 
     //! State of IndicatorSwitch [-].
     int out_indicatorState = 0;
