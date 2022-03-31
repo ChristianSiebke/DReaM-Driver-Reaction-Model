@@ -197,7 +197,7 @@ void AlgorithmDReaMImplementation::Trigger(int time) {
     agentStateRecorder->addFixationPoints(time, GetAgent()->GetId(), segmentControlFixPoints);
 
     if (time == 0) {
-        // FIXME agentStateRecorder->addStoppingPoints(GetAgent()->GetId(), GetAgent()->GetStoppingPoints());
+        agentStateRecorder->addStoppingPoints(GetAgent()->GetId(), infrastructurePerception->GetStoppingPointData());
         agentStateRecorder->addConflictPoints(infrastructurePerception->GetConflicPoints());
     }
 }

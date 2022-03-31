@@ -39,7 +39,8 @@ add_openpass_target(
     Components/GazeMovement/RoadSegments/XJunction.h
     Components/Importer/BehaviourConverter.h
     Components/Importer/BehaviourImporter.h
-    Components/TrafficSignMemory/TrafficSignMemory.h
+    Components/Importer/RouteImporter.h
+    Components/TrafficSignMemory/TrafficSignMemory.h   
   SOURCES
     agentstaterecorder.cpp
     Algorithm_DReaM.cpp
@@ -69,6 +70,7 @@ add_openpass_target(
     Components/GazeMovement/RoadSegments/XJunction.cpp
     Components/Importer/BehaviourConverter.cpp
     Components/Importer/BehaviourImporter.cpp
+    Components/Importer/RouteImporter.cpp
     Components/TrafficSignMemory/TrafficSignMemory.cpp
     ../../../common/xmlParser.cpp
   INCDIRS

@@ -23,33 +23,10 @@
 
 namespace Navigation {
 
-struct Waypoint {
-    std::string roadId;
-    OwlId laneId;
-    double s;
-
-    std::string GetRoadId() const {
-        return roadId;
-    }
-    OwlId GetLaneId() const {
-        return laneId;
-    }
-};
-
-struct Route {
-    std::vector<Waypoint> GetWaypoints() const {
-        if (waypoints == nullptr)
-            return {};
-        return *waypoints;
-    }
-    std::shared_ptr<std::vector<Waypoint>> waypoints;
-};
-
 class Navigation : public Component::ComponentInterface {
 public:
-    Navigation(const WorldRepresentation &worldRepresentation, const WorldInterpretation &worldInterpretation,
-               const RouteElement &routeElement, int cycleTime, StochasticsInterface *stochastics, LoggerInterface *loggerInterface,
-               const BehaviourData &behaviourData);
+    Navigation(const WorldRepresentation &worldRepresentation, const WorldInterpretation &worldInterpretation, const DReaMRoute &route,
+               int cycleTime, StochasticsInterface *stochastics, LoggerInterface *loggerInterface, const BehaviourData &behaviourData);
     Navigation(const Navigation &) = delete;
     Navigation(Navigation &&) = delete;
     Navigation &operator=(const Navigation &) = delete;
@@ -92,8 +69,7 @@ private:
     const WorldRepresentation &worldRepresentation;
     const WorldInterpretation &worldInterpretation;
 
-    const RouteElement &routeElement;
-    Route route;
+    DReaMRoute route;
     bool targetPassed = false;
     bool directionChosen = false;
     NavigationDecision routeDecision;
