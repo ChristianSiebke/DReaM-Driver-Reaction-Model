@@ -161,6 +161,10 @@ struct InfrastructurePerception {
         return stoppingPointData.stoppingPoints.at(junctionId).at(laneId);
     }
 
+    const StoppingPointData &GetStoppingPointData() const {
+        return stoppingPointData;
+    }
+
     std::vector<std::shared_ptr<const MentalInfrastructure::Junction>> junctions;
     std::vector<std::shared_ptr<const MentalInfrastructure::Road>> roads;
     std::vector<std::shared_ptr<const MentalInfrastructure::Lane>> lanes;

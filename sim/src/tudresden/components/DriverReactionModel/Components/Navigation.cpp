@@ -18,17 +18,17 @@
 namespace Navigation {
 
 Navigation::Navigation(const WorldRepresentation &worldRepresentation, const WorldInterpretation &worldInterpretation,
-                       const RouteElement &routeElement, int cycleTime, StochasticsInterface *stochastics, LoggerInterface *loggerInterface,
+                       const DReaMRoute &route, int cycleTime, StochasticsInterface *stochastics, LoggerInterface *loggerInterface,
                        const BehaviourData &behaviourData) :
     ComponentInterface(cycleTime, stochastics, loggerInterface, behaviourData),
     worldRepresentation{worldRepresentation},
     worldInterpretation{worldInterpretation},
-    routeElement{routeElement} {
-
+    route{route} {
 }
 
 void Navigation::Update() {
     // TODO: convert RouteElement to Route
+
     CrossingType turningDecision;
     if (TurningDecisionAtIntersectionHaveToBeSelected()) {
         // Final Target reached or not correctly handled
@@ -40,7 +40,7 @@ void Navigation::Update() {
         else {
             Waypoint currentWaypoint = route.GetWaypoints().front();
             auto currentPosition = worldRepresentation.egoAgent->GetLane();
-            // FIXME change stoi to method
+
             if (currentWaypoint.GetRoadId() == currentPosition->GetRoad()->GetOpenDriveId() &&
                 currentWaypoint.GetLaneId() == currentPosition->GetOwlId()) {
                 route.GetWaypoints().erase(route.GetWaypoints().begin());
