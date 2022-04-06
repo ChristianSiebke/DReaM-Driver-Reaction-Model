@@ -8,6 +8,7 @@
 //-----------------------------------------------------------------------------/
 #pragma once
 
+#include <algorithm>
 #include <unordered_map>
 
 #include "Common/vector2d.h"
@@ -115,6 +116,7 @@ struct EgoPerception : AgentPerception {
     double lateralDisplacement{-999}; // lateral deviation
     double curvature{-999};
     double heading{-999};
+    DReaMRoute::Waypoints route{};
 };
 
 struct LookupTableRoadNetwork {
@@ -164,6 +166,54 @@ struct InfrastructurePerception {
     const StoppingPointData &GetStoppingPointData() const {
         return stoppingPointData;
     }
+    const MentalInfrastructure::Lane *GetLane(OdId roadId, int laneId, double s) const {
+        auto iter = std::find_if(roads.begin(), roads.end(), [roadId](auto element) { return element->GetOpenDriveId() == roadId; });
+        const auto &lanes = (*iter)->GetLanes();
+        auto result = std::find_if(lanes.begin(), lanes.end(), [s, laneId](auto element) {
+            return std ::stoi(element->GetOpenDriveId()) == laneId &&
+                   (element->GetFirstPoint()->sOffset < s && s < element->GetLastPoint()->sOffset);
+        });
+        if (result == lanes.end()) {
+            throw std::logic_error(__FILE__ " " + std::to_string(__LINE__) + " Waypoint does not match witch infrastructure");
+        }
+
+        return *result;
+    }
+
+    static bool negativeLaneSort(const MentalInfrastructure::Lane *a, const MentalInfrastructure::Lane *b) {
+        return std::stoi(a->GetOpenDriveId()) > std::stoi(b->GetOpenDriveId());
+    }
+    static bool positiveLaneSort(const MentalInfrastructure::Lane *a, const MentalInfrastructure::Lane *b) {
+        return std::stoi(a->GetOpenDriveId()) < std::stoi(b->GetOpenDriveId());
+    }
+
+    const MentalInfrastructure::Lane *GetLane(OdId roadId, double t, double s) const {
+        auto iter = std::find_if(roads.begin(), roads.end(), [roadId](auto element) { return element->GetOpenDriveId() == roadId; });
+        auto lanes = (*iter)->GetLanes();
+        std::vector<const MentalInfrastructure::Lane *> section;
+
+        if (t < 0) {
+            std::copy_if(lanes.begin(), lanes.end(), std::back_inserter(section), [s, t](auto element) {
+                return (element->GetFirstPoint()->sOffset <= s && s <= element->GetLastPoint()->sOffset) &&
+                       (std::stoi(element->GetOpenDriveId()) < 0);
+            });
+            std::sort(section.begin(), section.end(), negativeLaneSort);
+        }
+        else {
+            std::copy_if(lanes.begin(), lanes.end(), std::back_inserter(section), [s, t](auto element) {
+                return (element->GetFirstPoint()->sOffset <= s && s <= element->GetLastPoint()->sOffset) &&
+                       (std::stoi(element->GetOpenDriveId()) > 0);
+            });
+            std::sort(section.begin(), section.end(), positiveLaneSort);
+        }
+        double widthSum = 0;
+        for (auto lane : section) {
+            widthSum += lane->GetWidth();
+            if ((widthSum > t && t > 0) || (-widthSum < t && t < 0))
+                return lane;
+        }
+        throw std::logic_error(__FILE__ " " + std::to_string(__LINE__) + " Waypoint does not match witch infrastructure");
+    }
 
     std::vector<std::shared_ptr<const MentalInfrastructure::Junction>> junctions;
     std::vector<std::shared_ptr<const MentalInfrastructure::Road>> roads;
@@ -195,7 +245,5 @@ struct DynamicInfrastructurePerception {
 struct NavigationDecision {
     OdId odRoadID{"-999"};
     OdId odLaneID{"-999"};
-
-    OwlId laneID{OwlInvalidId};
     IndicatorState indicator = IndicatorState::IndicatorState_Off;
 };

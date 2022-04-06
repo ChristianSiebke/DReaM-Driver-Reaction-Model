@@ -12,40 +12,38 @@
  * SPDX-License-Identifier: EPL-2.0
  *****************************************************************************/
 #include "Navigation.h"
-#include "Common/Helper.h"
 
 #include <iostream>
+
+#include "Common/Helper.h"
 namespace Navigation {
 
-Navigation::Navigation(const WorldRepresentation &worldRepresentation, const WorldInterpretation &worldInterpretation,
-                       const DReaMRoute &route, int cycleTime, StochasticsInterface *stochastics, LoggerInterface *loggerInterface,
-                       const BehaviourData &behaviourData) :
+Navigation::Navigation(const WorldRepresentation &worldRepresentation, const WorldInterpretation &worldInterpretation, int cycleTime,
+                       StochasticsInterface *stochastics, LoggerInterface *loggerInterface, const BehaviourData &behaviourData) :
     ComponentInterface(cycleTime, stochastics, loggerInterface, behaviourData),
     worldRepresentation{worldRepresentation},
-    worldInterpretation{worldInterpretation},
-    route{route} {
+    worldInterpretation{worldInterpretation} {
 }
 
 void Navigation::Update() {
-    // TODO: convert RouteElement to Route
-
+    if (!routeInit)
+        route = worldRepresentation.egoAgent->GetRoute();
     CrossingType turningDecision;
     if (TurningDecisionAtIntersectionHaveToBeSelected()) {
         // Final Target reached or not correctly handled
-        if (route.GetWaypoints().empty()) {
-            // TODO: Can we exclude errors here?
-            Log("Agent has passed Largetlane: The successive route is chosen at random");
+        if (route.empty()) {
+            Log("Agent has passed Targetlane: The successive route is chosen at random");
             turningDecision = CrossingType::Random;
         }
         else {
-            Waypoint currentWaypoint = route.GetWaypoints().front();
-            auto currentPosition = worldRepresentation.egoAgent->GetLane();
-
-            if (currentWaypoint.GetRoadId() == currentPosition->GetRoad()->GetOpenDriveId() &&
-                currentWaypoint.GetLaneId() == currentPosition->GetOwlId()) {
-                route.GetWaypoints().erase(route.GetWaypoints().begin());
+            auto currentRoad = worldRepresentation.egoAgent->GetRoad()->GetOpenDriveId();
+            auto currentSCoordinate = worldRepresentation.egoAgent->GetSCoordinate();
+            auto &targetWP = route.front();
+            if (targetWP.roadId == currentRoad && targetWP.s <= currentSCoordinate) {
+                route.erase(route.begin());
             }
-            turningDecision = DetermineCrossingType(worldRepresentation.infrastructure->FindShortestPath(currentPosition, GetTargetNode()));
+            turningDecision = DetermineCrossingType(
+                worldRepresentation.infrastructure->FindShortestPath(worldRepresentation.egoAgent->GetLane(), targetWP.lane));
         }
         routeDecision.indicator = ConvertCrossingTypeToIndicator(turningDecision);
         directionChosen = true;
@@ -59,18 +57,6 @@ void Navigation::Update() {
     if (ResetIndicator()) {
         routeDecision.indicator = IndicatorState::IndicatorState_Off;
     }
-    auto nextLane = InfrastructureRepresentation::NextLane(worldRepresentation.egoAgent->GetIndicatorState(),
-                                                           worldRepresentation.egoAgent->IsMovingInLaneDirection(),
-                                                           worldRepresentation.egoAgent->GetLane());
-    if (nextLane != nullptr) {
-        const auto road = nextLane->GetRoad();
-        routeDecision.odRoadID = road->GetOpenDriveId();
-        routeDecision.odLaneID = static_cast<int>(std::stoi(nextLane->GetOpenDriveId()));
-    }
-    else {
-        routeDecision.odRoadID = "-999";
-        routeDecision.odLaneID = "-999";
-    }
 }
 
 bool Navigation::TurningDecisionAtIntersectionHaveToBeSelected() const {
@@ -83,15 +69,18 @@ bool Navigation::TurningDecisionAtIntersectionHaveToBeSelected() const {
 CrossingType Navigation::DetermineCrossingType(std::list<const RoadmapGraph::RoadmapNode*> path) const {
     try {
         Log("Routing by targetRoad and targetLane");
-        if (1 == path.size() && worldRepresentation.egoAgent->GetLane() != path.front()->GetNode()) {
+        if (1 == path.size() && worldRepresentation.egoAgent->GetLane() != path.front()->GetNode() &&
+            worldRepresentation.egoAgent->GetNextLane() != path.front()->GetNode()) {
             auto msg = "There exist no path to chosen TargetLane";
             Log(msg, error);
             throw std::runtime_error(msg);
         }
+
         if (worldRepresentation.egoAgent->GetLane() == path.front()->GetNode()) {
             path.erase(path.begin());
         }
         auto currentLane = worldRepresentation.egoAgent->GetLane();
+
         auto nextLane = path.front()->GetNode();
 
         auto currentLanePoints = currentLane->GetLanePoints();
@@ -127,22 +116,6 @@ CrossingType Navigation::DetermineCrossingType(std::list<const RoadmapGraph::Roa
             "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " error during route calculation";
         Log(msg, error);
         throw std::runtime_error(msg);
-    }
-}
-
-const MentalInfrastructure::Lane* Navigation::GetTargetNode() const {
-    Waypoint currentWaypoint = route.GetWaypoints().front();
-
-    try {
-        // TODO: corrcet LaneId
-        return worldRepresentation.infrastructure->NavigateToTargetNode(currentWaypoint.GetRoadId(), currentWaypoint.GetLaneId())
-            ->GetNode();
-    }
-    catch (std::out_of_range e) {
-        auto msg = static_cast<std::string>(e.what()) + "File: " + static_cast<std::string>(__FILE__) +
-                   " Line: " + std::to_string(__LINE__) + " Route target is not correct! Check whether the waypoints exist! ";
-        Log(msg, error);
-        throw std::out_of_range(msg);
     }
 }
 

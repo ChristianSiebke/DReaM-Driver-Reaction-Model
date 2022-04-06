@@ -142,7 +142,7 @@ void AlgorithmDReaMImplementation::Trigger(int time) {
     try {
         DReaM.UpdateInput(time, egoPerception, ambientAgents, infrastructurePerception, trafficSigns);
         DReaM.UpdateComponents();
-        out_indicatorState = static_cast<int>(DReaM.GetWorldRepresentation().egoAgent->GetIndicatorState());
+        out_indicatorState = static_cast<int>(DReaM.GetRouteDecision().indicator);
         out_longitudinalaccelerationWish = DReaM.GetAcceleration();
         outGazeState = DReaM.GetGazeState();
         segmentControlFixPoints = DReaM.GetSegmentControlFixationPoints();
@@ -153,14 +153,6 @@ void AlgorithmDReaMImplementation::Trigger(int time) {
         out_heading_error = DReaM.GetWorldRepresentation().egoAgent->GetHeading();
         out_curvature = DReaM.GetWorldRepresentation().egoAgent->GetCurvature();
         //****************************************
-
-        double intersectionDistance;
-        if (DReaM.GetWorldRepresentation().egoAgent->GetDistanceToNextJunction() >= 0) {
-            intersectionDistance = DReaM.GetWorldRepresentation().egoAgent->GetDistanceToNextJunction();
-        }
-        else {
-            intersectionDistance = -DReaM.GetWorldRepresentation().egoAgent->GetDistanceOnJunction();
-        }
     }
     catch (const char *error) {
         const std::string msg = COMPONENTNAME + " " + error;

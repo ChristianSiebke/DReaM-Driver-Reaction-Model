@@ -2,14 +2,12 @@
 
 RouteImporter::RouteImporter(std::string path, LoggerInterface *loggerInterface) : loggerInterface{loggerInterface} {
     if (!Import(path)) {
-        Log("Could not import Scenario.xosc in DReaM", LogLevel_new::error);
+        Log("Could not import: " + path, LogLevel_new::error);
     }
 }
 
 bool RouteImporter::Import(const std::string &filename) {
-    // what is this doing?
     std::locale::global(std::locale("C"));
-
     QFile xmlFile(filename.c_str());
     if (!xmlFile.open(QIODevice::ReadOnly)) {
         return false;
@@ -29,7 +27,7 @@ bool RouteImporter::Import(const std::string &filename) {
     }
 
     QDomElement storyboardElement;
-    if (!SimulationCommon::GetFirstChildElement(documentRoot, "storyboard", storyboardElement)) {
+    if (!SimulationCommon::GetFirstChildElement(documentRoot, "Storyboard", storyboardElement)) {
         return false;
     }
 
@@ -50,6 +48,7 @@ bool RouteImporter::Import(const std::string &filename) {
 
     while (!privateElement.isNull()) {
         std::string id;
+        std::vector<Import::Position> waypoints;
         if (!SimulationCommon::ParseAttributeString(privateElement, "entityRef", id)) {
             return false;
         }
@@ -60,7 +59,7 @@ bool RouteImporter::Import(const std::string &filename) {
             QDomElement routingActionElement;
             if (SimulationCommon::GetFirstChildElement(privateActionElement, "RoutingAction", routingActionElement)) {
                 QDomElement childOfRoutingActionElement;
-                if (SimulationCommon::GetFirstChildElement(privateActionElement, "AssignRouteAction", childOfRoutingActionElement)) {
+                if (SimulationCommon::GetFirstChildElement(routingActionElement, "AssignRouteAction", childOfRoutingActionElement)) {
                     QDomElement routeElement;
                     if (!SimulationCommon::GetFirstChildElement(childOfRoutingActionElement, "Route", routeElement)) {
                         return false;
@@ -70,31 +69,29 @@ bool RouteImporter::Import(const std::string &filename) {
                         return false;
                     }
                     else {
-                        // use ptr here?
-                        Waypoint waypoint;
+                        Import::Position position;
 
                         while (!waypointElement.isNull()) {
                             QDomElement positionElement;
+
                             if (!SimulationCommon::GetFirstChildElement(waypointElement, "Position", positionElement)) {
                                 return false;
                             }
+
                             QDomElement childOfPositionElement;
-                            if (!SimulationCommon::GetFirstChildElement(positionElement, "RoadPosition", childOfPositionElement)) {
-                                return false;
+                            if (SimulationCommon::GetFirstChildElement(positionElement, "RoadPosition", childOfPositionElement)) {
+                                position = ImportRoadPosition(childOfPositionElement);
+                            }
+                            else if (SimulationCommon::GetFirstChildElement(positionElement, "LanePosition", childOfPositionElement)) {
+                                position = ImportLanePosition(childOfPositionElement);
                             }
                             else {
-                                if (!SimulationCommon::ParseAttributeString(childOfPositionElement, "RoadId", waypoint.roadId)) {
-                                    return false;
-                                }
+                                std::string message = "Position type not supported. Currently supported are: lanePosition, roadPosition";
+                                throw std::logic_error(message);
                             }
-                            if (SimulationCommon::GetFirstChildElement(positionElement, "LanePosition", childOfPositionElement)) {
-                                int owlId;
-                                SimulationCommon::ParseAttribute(childOfPositionElement, "LaneId", owlId);
-                                waypoint.laneId = owlId;
-                            }
+                            waypoints.push_back(position);
                             waypointElement = waypointElement.nextSiblingElement("Waypoint");
                         }
-                        dReaMRoute.waypoints.push_back(waypoint);
                     }
                 }
                 else {
@@ -103,13 +100,46 @@ bool RouteImporter::Import(const std::string &filename) {
             }
             privateActionElement = privateActionElement.nextSiblingElement("PrivateAction");
         }
-        dReaMRouteMap.insert(std::make_pair(id, dReaMRoute));
-
+        waypointsMap.insert(std::make_pair(id, waypoints));
         privateElement = privateElement.nextSiblingElement("Private");
     }
     return true;
 }
 
-DReaMRoute RouteImporter::GetDReaMRoute(std::string id) {
-    return dReaMRouteMap.at(id);
+Import::LanePosition RouteImporter::ImportLanePosition(QDomElement positionElement) {
+    Import::LanePosition lanePosition;
+    if (!SimulationCommon::ParseAttributeDouble(positionElement, "s", lanePosition.s))
+        throw std::logic_error(__FILE__ " " + std::to_string(__LINE__) + " Can not parse s coordinate");
+    std::string laneIdString;
+    SimulationCommon::ParseAttributeString(positionElement, "laneId", laneIdString);
+    try {
+        lanePosition.laneId = std::stoi(laneIdString);
+    }
+    catch (std::invalid_argument) {
+        std::string message = "LaneId must be integer";
+        throw std::logic_error(message);
+    }
+    catch (std::out_of_range) {
+        std::string message = "LaneId is out of range";
+        throw std::logic_error(message);
+    }
+    if (!SimulationCommon::ParseAttributeString(positionElement, "roadId", lanePosition.roadId))
+        throw std::logic_error(__FILE__ " " + std::to_string(__LINE__) + " Can not parse roadId coordinate");
+
+    return lanePosition;
+}
+
+Import::RoadPosition RouteImporter::ImportRoadPosition(QDomElement positionElement) {
+    Import::RoadPosition roadPosition;
+    if (!SimulationCommon::ParseAttributeDouble(positionElement, "s", roadPosition.s))
+        throw std::logic_error(__FILE__ " " + std::to_string(__LINE__) + " Can not parse s coordinate");
+    if (!SimulationCommon::ParseAttributeDouble(positionElement, "t", roadPosition.t))
+        throw std::logic_error(__FILE__ " " + std::to_string(__LINE__) + " Can not parse t coordinate");
+    if (!SimulationCommon::ParseAttributeString(positionElement, "roadId", roadPosition.roadId))
+        throw std::logic_error(__FILE__ " " + std::to_string(__LINE__) + " Can not parse roadId coordinate");
+    return roadPosition;
+}
+
+std::vector<Import::Position> RouteImporter::GetDReaMRoute(std::string id) {
+    return waypointsMap.at(id);
 }

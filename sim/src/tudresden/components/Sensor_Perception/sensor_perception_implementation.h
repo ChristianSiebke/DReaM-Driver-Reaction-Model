@@ -52,8 +52,6 @@ public:
     virtual void Trigger(int time);
 
 private:
-    void SetNewRoute(RouteElement target);
-    RouteElement currentTarget;
     SensorPerceptionLogic sensorPerceptionLogic;
     GazeState currentGazeState;
 };

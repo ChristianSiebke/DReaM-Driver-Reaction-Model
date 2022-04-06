@@ -64,7 +64,6 @@
 #include "Components/CognitiveMap/CognitiveMap.h"
 #include "Components/GazeMovement/GazeMovement.h"
 #include "Components/Importer/BehaviourImporter.h"
-#include "Components/Importer/RouteImporter.h"
 #include "Components/Navigation.h"
 #include "Components/TrafficSignMemory/TrafficSignMemory.h"
 #include "DriverReactionModel.h"
@@ -96,21 +95,17 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
         CommandLineArguments parsedArguments = CommandLineParser::Parse(arguments);
         std::string resultPath = QCoreApplication::applicationDirPath().toStdString() + "\\" + parsedArguments.resultsPath + "\\";
         std::string logPath = resultPath + "agent" + std::to_string(agent->GetId()) + ".txt";
-        std::string ConfigPath =
+        std::string behaviourConfigPath =
             QCoreApplication::applicationDirPath().toStdString() + "\\" + parsedArguments.configsPath + "\\" + "behaviour.xml";
         logger.SetPath(logPath);
 
         // TODO: wrap all in DReaM constructor ----
-        BehaviourImporter importer(ConfigPath, &loggerInterface);
+        BehaviourImporter importer(behaviourConfigPath, &loggerInterface);
         behaviourData = importer.GetBehaviourData();
-        // TODO: complete constructor path
-        RouteImporter routeImporter(ConfigPath, &loggerInterface);
-        // where do i find the agent Id?
-        // route = routeImporter.GetDReaMRoute(agent->GetId());
         std::unique_ptr<Component::ComponentInterface> cognitiveMap =
             std::make_unique<CognitiveMap::CognitiveMap>(cycleTime, stochastics, &loggerInterface, *behaviourData);
         std::unique_ptr<Component::ComponentInterface> navigation =
-            std::make_unique<Navigation::Navigation>(cognitiveMap->GetWorldRepresentation(), cognitiveMap->GetWorldInterpretation(), route,
+            std::make_unique<Navigation::Navigation>(cognitiveMap->GetWorldRepresentation(), cognitiveMap->GetWorldInterpretation(),
                                                      cycleTime, stochastics, &loggerInterface, *behaviourData);
         std::unique_ptr<Component::ComponentInterface> gazeMovement =
             std::make_unique<GazeMovement::GazeMovement>(cognitiveMap->GetWorldRepresentation(), cognitiveMap->GetWorldInterpretation(),
@@ -166,9 +161,6 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
      * @param[in]     time           Current scheduling time
      */
     void Trigger(int time);
-
-    //! The route the agent has planned, consisting of one or multiple waypoints
-    DReaMRoute route;
 
     //! All visual perception information of sensor_DriverPerception
     std::vector<std::shared_ptr<AgentPerception>> ambientAgents;

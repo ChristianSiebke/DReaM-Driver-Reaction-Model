@@ -233,28 +233,32 @@ class EgoAgentRepresentation : public AgentRepresentation {
     void UpdateInternalData(std::shared_ptr<EgoPerception> perceptionData) { internalData = perceptionData; }
 
     Common::Vector2d GetDriverPosition() const {
-        std::shared_ptr<EgoPerception> egoInternalData = std::dynamic_pointer_cast<EgoPerception>(internalData);
+        auto egoInternalData = std::static_pointer_cast<EgoPerception>(internalData);
         return egoInternalData->driverPosition;
     }
     double GetSteeringWheelAngle() const {
-        std::shared_ptr<EgoPerception> egoInternalData = std::dynamic_pointer_cast<EgoPerception>(internalData);
+        auto egoInternalData = std::static_pointer_cast<EgoPerception>(internalData);
         return egoInternalData->steeringWheelAngle;
     }
     double GetLaneWidth() const {
-        std::shared_ptr<EgoPerception> egoInternalData = std::dynamic_pointer_cast<EgoPerception>(internalData);
+        auto egoInternalData = std::static_pointer_cast<EgoPerception>(internalData);
         return egoInternalData->laneWidth;
     }
     double GetLateralDisplacement() const {
-        std::shared_ptr<EgoPerception> egoInternalData = std::dynamic_pointer_cast<EgoPerception>(internalData);
+        auto egoInternalData = std::static_pointer_cast<EgoPerception>(internalData);
         return egoInternalData->lateralDisplacement;
     }
     double GetCurvature() const {
-        std::shared_ptr<EgoPerception> egoInternalData = std::dynamic_pointer_cast<EgoPerception>(internalData);
+        auto egoInternalData = std::static_pointer_cast<EgoPerception>(internalData);
         return egoInternalData->curvature;
     }
     double GetHeading() const {
-        std::shared_ptr<EgoPerception> egoInternalData = std::dynamic_pointer_cast<EgoPerception>(internalData);
+        auto egoInternalData = std::static_pointer_cast<EgoPerception>(internalData);
         return egoInternalData->heading;
+    }
+    DReaMRoute::Waypoints GetRoute() const {
+        auto egoInternalData = std::static_pointer_cast<EgoPerception>(internalData);
+        return egoInternalData->route;
     }
 };
 

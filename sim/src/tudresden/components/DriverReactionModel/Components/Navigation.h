@@ -25,8 +25,8 @@ namespace Navigation {
 
 class Navigation : public Component::ComponentInterface {
 public:
-    Navigation(const WorldRepresentation &worldRepresentation, const WorldInterpretation &worldInterpretation, const DReaMRoute &route,
-               int cycleTime, StochasticsInterface *stochastics, LoggerInterface *loggerInterface, const BehaviourData &behaviourData);
+    Navigation(const WorldRepresentation &worldRepresentation, const WorldInterpretation &worldInterpretation, int cycleTime,
+               StochasticsInterface *stochastics, LoggerInterface *loggerInterface, const BehaviourData &behaviourData);
     Navigation(const Navigation &) = delete;
     Navigation(Navigation &&) = delete;
     Navigation &operator=(const Navigation &) = delete;
@@ -54,8 +54,6 @@ private:
     CrossingType DetermineCrossingType(std::vector<int>) const;
     CrossingType DetermineCrossingType(std::list<const RoadmapGraph::RoadmapNode *> path) const;
 
-    const MentalInfrastructure::Lane *GetTargetNode() const;
-
     IndicatorState ConvertCrossingTypeToIndicator(CrossingType decision) const;
 
     bool ResetDirectionChosen() const;
@@ -69,9 +67,10 @@ private:
     const WorldRepresentation &worldRepresentation;
     const WorldInterpretation &worldInterpretation;
 
-    DReaMRoute route;
     bool targetPassed = false;
     bool directionChosen = false;
     NavigationDecision routeDecision;
+    DReaMRoute::Waypoints route;
+    bool routeInit = false;
 };
 } // namespace Navigation

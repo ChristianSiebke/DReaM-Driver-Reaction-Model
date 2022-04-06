@@ -24,9 +24,9 @@ void DriverPerception::CalculatePerception(const AgentInterface *driver) {
     auto mainLane =
         &helper.GetLaneByOdId(actualEgoAgent.GetReferencePointPosition()->roadId, actualEgoAgent.GetReferencePointPosition()->laneId,
                               actualEgoAgent.GetReferencePointPosition()->roadPosition.s);
-
     auto indicator = driver->GetIndicatorState();
     EgoPerception data;
+    data.route = route;
     data.id = driver->GetId();
     data.refPosition = Common::Vector2d(driver->GetPositionX(), driver->GetPositionY());
     data.distanceReferencePointToLeadingEdge = driver->GetDistanceReferencePointToLeadingEdge();
