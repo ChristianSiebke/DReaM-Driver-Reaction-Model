@@ -22,7 +22,7 @@ namespace MentalInfrastructure {
 class Element
 {
 public:
-    Element(const OdId openDriveId) : openDriveId(openDriveId) {
+    Element(const OdId openDriveId, const DReaMId dreamId) : openDriveId(openDriveId), dreamId(dreamId) {
     }
     virtual ~Element()
     {
@@ -33,7 +33,10 @@ public:
     ///
     OdId GetOpenDriveId() const;
 
+    DReaMId GetDReaMId() const;
+
 protected:
     const OdId openDriveId;
+    const DReaMId dreamId;
 };
 } // namespace MentalInfrastructure

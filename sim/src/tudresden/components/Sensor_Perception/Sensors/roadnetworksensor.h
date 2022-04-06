@@ -1,6 +1,8 @@
 #ifndef ROADNETWORKSENSOR_H
 #define ROADNETWORKSENSOR_H
 
+#include <atomic>
+
 #include "WorldData.h"
 #include "stoppingpointcalculation.h"
 
@@ -70,6 +72,13 @@ private:
 
     StoppingPointData CreateStoppingPoints(std::vector<std::shared_ptr<const MentalInfrastructure::Junction>> &junctions);
 
+    ///
+    /// Creates a unique Id by incrementing lastId and returning it (thread safe).
+    ///
+    DReaMId GenerateUniqueId() {
+        return lastId++;
+    }
+
     // public methods to handle correct deletion
 public:
     RoadNetworkSensor(RoadNetworkSensor const &) = delete;
@@ -93,6 +102,8 @@ private:
     ConflictAreaCalculator conflictAreaCalculator;
 
     StoppingPointCalculation stoppingPointCalculation;
+
+    std::atomic<DReaMId> lastId{0};
 };
 
 #endif // ROADNETWORKSENSOR_H

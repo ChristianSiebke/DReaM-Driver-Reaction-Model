@@ -24,6 +24,8 @@ constexpr int maxInt = std::numeric_limits<int>::max();
 
 using OdId = std::string;
 using OwlId = uint64_t;
+using DReaMId = uint64_t;
+
 constexpr OwlId OwlInvalidId = std::numeric_limits<uint64_t>::max();
 
 //-----------------------------------------------------------------------------
