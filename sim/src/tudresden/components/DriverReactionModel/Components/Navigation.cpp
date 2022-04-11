@@ -79,6 +79,9 @@ CrossingType Navigation::DetermineCrossingType(std::list<const RoadmapGraph::Roa
         if (worldRepresentation.egoAgent->GetLane() == path.front()->GetNode()) {
             path.erase(path.begin());
         }
+        if (path.empty()) {
+            return CrossingType::Straight;
+        }
         auto currentLane = worldRepresentation.egoAgent->GetLane();
 
         auto nextLane = path.front()->GetNode();

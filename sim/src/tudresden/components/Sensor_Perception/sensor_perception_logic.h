@@ -1,12 +1,13 @@
 #ifndef SENSORPERCEPTIONLOGIC_H
 #define SENSORPERCEPTIONLOGIC_H
 
-#include "include/agentInterface.h"
+#include "RouteConverter.h"
+#include "Sensors/aabbtreehandler.h"
 #include "Sensors/basicvisualsensor.h"
 #include "Sensors/driverperception.h"
 #include "Sensors/roadnetworksensor.h"
 #include "Sensors/trafficsignvisualsensor.h"
-#include "Sensors/aabbtreehandler.h"
+#include "include/agentInterface.h"
 
 struct GazeState;
 
@@ -18,13 +19,13 @@ typedef boost::geometry::model::polygon<BoostVector2d> Polygon2d;
 ///
 class SensorPerceptionLogic {
   public:
-    SensorPerceptionLogic(AgentInterface* agent, WorldInterface* world) : driver(agent), world(world) {
-        roadNetworkSensor = RoadNetworkSensor::GetInstance(world);
-        aabbTreeHandler = AABBTreeHandler::GetInstance(world);
-        driverPerception = std::make_shared<DriverPerception>(agent, world, roadNetworkSensor->GetRoadNetwork());
-        visualSensor = std::make_shared<BasicVisualSensor>(agent, world, roadNetworkSensor->GetRoadNetwork());
-        trafficSignVisualSensor = std::make_shared<TrafficSignVisualSensor>(agent, world, roadNetworkSensor->GetRoadNetwork());
-    }
+      SensorPerceptionLogic(AgentInterface *agent, WorldInterface *world) : driver(agent), world(world) {
+          roadNetworkSensor = RoadNetworkSensor::GetInstance(world);
+          aabbTreeHandler = AABBTreeHandler::GetInstance(world);
+          driverPerception = std::make_shared<DriverPerception>(agent, world, roadNetworkSensor->GetRoadNetwork());
+          visualSensor = std::make_shared<BasicVisualSensor>(agent, world, roadNetworkSensor->GetRoadNetwork());
+          trafficSignVisualSensor = std::make_shared<TrafficSignVisualSensor>(agent, world, roadNetworkSensor->GetRoadNetwork());
+      }
     ~SensorPerceptionLogic() {
         perceivedAgents.clear();
         if (roadNetworkSensor.use_count() == 2) {
@@ -38,7 +39,7 @@ class SensorPerceptionLogic {
     ///
     /// \brief Starts the calculation of Infrastructure, DriverPerception and VisualPerception.
     ///
-    void Trigger(int timestamp, double directionAngle, double sensorDistance, double sensorOpeningAngle);
+    void Trigger(int timestamp, double directionAngle, double sensorDistance, double sensorOpeningAngle, std::vector<InternWaypoint> route);
 
     ///
     /// \brief Returns a pointer to the visual sensor, no calculation is performed.

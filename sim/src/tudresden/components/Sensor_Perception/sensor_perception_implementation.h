@@ -1,10 +1,15 @@
 #pragma once
 
+#include <variant>
+
+#include "RouteConverter.h"
+#include "RouteImporter.h"
 #include "Sensors/driverperception.h"
 #include "WorldData.h"
 #include "common/complexSignals.h"
 #include "common/primitiveSignals.h"
 #include "common/vector2d.h"
+#include "core/opSimulation/framework/commandLineParser.h"
 #include "include/modelInterface.h"
 #include "include/observationInterface.h"
 #include "sensor_perception_logic.h"
@@ -18,7 +23,19 @@ public:
                                      PublisherInterface *const publisher, const CallbackInterface *callbacks, AgentInterface *agent) :
         SensorInterface(componentName, isInit, priority, offsetTime, responseTime, cycleTime, stochastics, world, parameters, publisher,
                         callbacks, agent),
-        sensorPerceptionLogic(agent, world) {
+        sensorPerceptionLogic(agent, world),
+        converter(world) {
+        // TODO: waypoints/Route must be passed via the openPASS framework.
+        // So far the openPASS framework (AgentInterface/egoAgent) has no
+        // function to get the waypoints/route  -->  redundante import
+        auto arguments = QCoreApplication::arguments();
+        CommandLineArguments parsedArguments = CommandLineParser::Parse(arguments);
+        std::string scenarioConfigPath =
+            QCoreApplication::applicationDirPath().toStdString() + "\\" + parsedArguments.configsPath + "\\" + "Scenario.xosc";
+        RouteImporter routeImporter(scenarioConfigPath, nullptr);
+        auto routeImport = routeImporter.GetDReaMRoute(GetAgent()->GetScenarioName());
+        route = converter.Convert(routeImport);
+        //-----
     }
     ~Sensor_Perception_Implementation() {
     }
@@ -52,6 +69,10 @@ public:
     virtual void Trigger(int time);
 
 private:
+    void UpdateGraphPosition();
+    void GetNewRoute();
     SensorPerceptionLogic sensorPerceptionLogic;
     GazeState currentGazeState;
+    std::vector<InternWaypoint> route;
+    RouteConverter converter;
 };

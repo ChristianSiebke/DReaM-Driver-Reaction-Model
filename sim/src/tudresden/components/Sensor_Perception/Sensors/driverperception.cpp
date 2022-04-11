@@ -16,17 +16,28 @@ Common::Vector2d DriverPerception::GetDriverPosition() {
     return driverPosition;
 }
 
-void DriverPerception::CalculatePerception(const AgentInterface *driver) {
+void DriverPerception::CalculatePerception(const AgentInterface *driver, std::vector<InternWaypoint> route) {
     const auto &actualEgoAgent = const_cast<AgentInterface *>(driver)->GetEgoAgent();
     auto worldData = static_cast<OWL::WorldData *>(world->GetWorldData());
     WorldDataQuery helper(*worldData);
+
     auto mainRoad = worldData->GetRoads().at(actualEgoAgent.GetRoadId());
     auto mainLane =
         &helper.GetLaneByOdId(actualEgoAgent.GetReferencePointPosition()->roadId, actualEgoAgent.GetReferencePointPosition()->laneId,
                               actualEgoAgent.GetReferencePointPosition()->roadPosition.s);
     auto indicator = driver->GetIndicatorState();
+    DReaMRoute::Waypoints dreamRoute;
+
+    std::transform(route.begin(), route.end(), std::back_inserter(dreamRoute), [this](auto element) {
+        DReaMRoute::Waypoint result;
+        result.roadId = element.roadId;
+        result.lane = this->infrastructurePerception->lookupTableRoadNetwork.lanes.at(element.lane);
+        result.s = element.s;
+        return result;
+    });
+
     EgoPerception data;
-    data.route = route;
+    data.route = dreamRoute;
     data.id = driver->GetId();
     data.refPosition = Common::Vector2d(driver->GetPositionX(), driver->GetPositionY());
     data.distanceReferencePointToLeadingEdge = driver->GetDistanceReferencePointToLeadingEdge();

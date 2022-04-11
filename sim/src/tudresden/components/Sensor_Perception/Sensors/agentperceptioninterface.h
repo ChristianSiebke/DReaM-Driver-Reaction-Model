@@ -35,7 +35,7 @@ public:
     ///
     /// \brief Calculates the ego perception and returns a pointer to the generated object.
     ///
-    virtual void CalculatePerception(const AgentInterface *agent) = 0;
+    virtual void CalculatePerception(const AgentInterface *agent, std::vector<InternWaypoint> route) = 0;
 
     ///
     /// \brief Returns a pointer to the ego perception, no calculation is performed.

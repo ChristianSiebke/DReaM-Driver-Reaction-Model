@@ -138,7 +138,6 @@ void AlgorithmDReaMImplementation::UpdateOutput(int localLinkId, std::shared_ptr
 
 void AlgorithmDReaMImplementation::Trigger(int time) {
     Q_UNUSED(time)
-    std::cout << "time" << time << std::endl;
     try {
         DReaM.UpdateInput(time, egoPerception, ambientAgents, infrastructurePerception, trafficSigns);
         DReaM.UpdateComponents();

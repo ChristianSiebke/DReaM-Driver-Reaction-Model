@@ -11,6 +11,7 @@ add_openpass_target(
     sensor_perception.h
     sensor_perception_implementation.h
     sensor_perception_logic.h
+    RouteConverter.h
     # AABBTREE
     AABBTree/aabb.h
     AABBTree/aabbInterface.h
@@ -38,6 +39,8 @@ add_openpass_target(
     sensor_perception.cpp
     sensor_perception_implementation.cpp
     sensor_perception_logic.cpp
+    RouteConverter.cpp
+    RouteImporter.cpp
     # AABBTREE
      AABBTree/aabbtree.cpp
     # SENSORS
@@ -50,15 +53,14 @@ add_openpass_target(
     ../../../core/opSimulation/modules/World_OSI/WorldDataQuery.cpp
     ../../../core/opSimulation/modules/World_OSI/RoadStream.cpp
     ../../../core/opSimulation/modules/World_OSI/LaneStream.cpp
-    ../DriverReactionModel/Components/Importer/RouteImporter.cpp
     ../DriverReactionModel/Logger.cpp
   INCDIRS
     ${OPENPASS_SIMCORE_DIR}/core
     ${OPENPASS_SIMCORE_DIR}/common
     .
     ../../../core/opSimulation/modules/World_OSI
-    ../DriverReactionModel/Components/Importer
     ../DriverReactionModel/
+    ../../../common/RoutePlanning
   LIBRARIES
     Qt5::Core
     Common
