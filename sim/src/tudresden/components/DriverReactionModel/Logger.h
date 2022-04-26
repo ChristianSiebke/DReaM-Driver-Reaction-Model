@@ -19,17 +19,17 @@
 #include <string>
 #include <windows.h>
 
-enum LogLevel_new { debug, warning, error, info };
+enum DReaMLogLevel { debug, warning, error, info };
 
 class Logger {
   public:
-      Logger(uint64_t agentId, LogLevel_new defaultLogLevel = info);
+      Logger(uint64_t agentId, DReaMLogLevel defaultLogLevel = info);
       ~Logger();
       void SetPath(std::string path);
-      void Log(const std::string &message, LogLevel_new level = info);
+      void Log(const std::string &message, DReaMLogLevel level = info);
 
   private:
-    std::string ToString(LogLevel_new level);
+    std::string ToString(DReaMLogLevel level);
 
     std::string NowTime() {
         const int MAX_LEN = 200;
@@ -44,6 +44,6 @@ class Logger {
     }
 
     std::ofstream stream;
-    LogLevel_new defaultLogLevel;
+    DReaMLogLevel defaultLogLevel;
     uint64_t agentId;
 };

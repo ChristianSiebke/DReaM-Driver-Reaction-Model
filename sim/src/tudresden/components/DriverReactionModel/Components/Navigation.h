@@ -50,27 +50,21 @@ public:
     }
 
 private:
-    bool TurningDecisionAtIntersectionHaveToBeSelected() const;
-    CrossingType DetermineCrossingType(std::vector<int>) const;
-    CrossingType DetermineCrossingType(std::list<const RoadmapGraph::RoadmapNode *> path) const;
+    bool NewLaneIsFree() const;
+    bool TurningAtJunction() const;
+    IndicatorState SetIndicatorAtJunction(std::list<const RoadmapGraph::RoadmapNode *> path) const;
 
-    IndicatorState ConvertCrossingTypeToIndicator(CrossingType decision) const;
-
-    bool ResetDirectionChosen() const;
-
-    bool ResetIndicator() const;
-
-    IndicatorState Randomize() const;
-
-    unsigned int intersectionCounter = 0;
+    bool AgentIsTurningOnJunction() const;
 
     const WorldRepresentation &worldRepresentation;
     const WorldInterpretation &worldInterpretation;
 
-    bool targetPassed = false;
-    bool directionChosen = false;
     NavigationDecision routeDecision;
-    DReaMRoute::Waypoints route;
-    bool routeInit = false;
+    DReaMRoute::Waypoints waypoints;
+    DReaMRoute::Waypoints::iterator targetWP;
+    DReaMRoute::Waypoints::iterator lastTimeStepWP;
+    const MentalInfrastructure::Lane *egoLane;
+    std::list<const RoadmapGraph::RoadmapNode *> path;
+    DReaMRoute::Waypoint oldWP;
 };
 } // namespace Navigation

@@ -2,7 +2,7 @@
 
 RouteImporter::RouteImporter(std::string path, LoggerInterface *loggerInterface) : loggerInterface{loggerInterface} {
     if (!Import(path)) {
-        Log("Could not import: " + path, LogLevel_new::error);
+        Log("Could not import: " + path, DReaMLogLevel::error);
     }
 }
 

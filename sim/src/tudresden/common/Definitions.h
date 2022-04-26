@@ -202,6 +202,12 @@ struct Waypoint {
     OdId roadId{};
     const MentalInfrastructure::Lane *lane;
     double s{};
+    bool operator==(const Waypoint &rhs) const {
+        return roadId == rhs.roadId && lane == rhs.lane && s == rhs.s;
+    }
+    bool operator!=(const Waypoint &rhs) const {
+        return roadId != rhs.roadId || lane != rhs.lane || s != rhs.s;
+    }
 };
 using Waypoints = std::vector<Waypoint>;
 

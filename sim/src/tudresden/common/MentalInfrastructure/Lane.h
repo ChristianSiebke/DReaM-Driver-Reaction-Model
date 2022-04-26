@@ -250,6 +250,34 @@ public:
         conflictAreas.insert(conflictArea);
     }
 
+    ///
+    /// \brief Adds left neighbor lane to lane
+    ///
+    void AddLeftLane(const Lane *inleftLane) {
+        leftLane = inleftLane;
+    }
+
+    ///
+    /// \brief Adds right neighbor lane to lane
+    ///
+    void AddRightLane(const Lane *inrightLane) {
+        rightLane = inrightLane;
+    }
+
+    ///
+    /// \brief Get left neighbor lane to lane
+    ///
+    const Lane *GetLeftLane() const {
+        return leftLane;
+    }
+
+    ///
+    /// \brief Get right neighbor lane to lane
+    ///
+    const Lane *GetRightLane() const {
+        return rightLane;
+    }
+
 private:
     bool SLaneCoordinateOutOfLane(double sLane_coordniate) const;
 
@@ -268,6 +296,8 @@ private:
 
     std::vector<const Lane *> predecessors;
     std::vector<const Lane *> successors;
+    const Lane *leftLane = nullptr;
+    const Lane *rightLane = nullptr;
 
     SpeedLimit speedLimit{maxDouble};
 };

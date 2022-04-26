@@ -21,10 +21,12 @@ void DriverPerception::CalculatePerception(const AgentInterface *driver, std::ve
     auto worldData = static_cast<OWL::WorldData *>(world->GetWorldData());
     WorldDataQuery helper(*worldData);
 
-    auto mainRoad = worldData->GetRoads().at(actualEgoAgent.GetRoadId());
-    auto mainLane =
+    auto referenceLane =
         &helper.GetLaneByOdId(actualEgoAgent.GetReferencePointPosition()->roadId, actualEgoAgent.GetReferencePointPosition()->laneId,
                               actualEgoAgent.GetReferencePointPosition()->roadPosition.s);
+    auto mainLocatorLane =
+        &helper.GetLaneByOdId(actualEgoAgent.GetMainLocatePosition().roadId, actualEgoAgent.GetMainLocatePosition().laneId,
+                              actualEgoAgent.GetMainLocatePosition().roadPosition.s);
     auto indicator = driver->GetIndicatorState();
     DReaMRoute::Waypoints dreamRoute;
 
@@ -41,9 +43,10 @@ void DriverPerception::CalculatePerception(const AgentInterface *driver, std::ve
     data.id = driver->GetId();
     data.refPosition = Common::Vector2d(driver->GetPositionX(), driver->GetPositionY());
     data.distanceReferencePointToLeadingEdge = driver->GetDistanceReferencePointToLeadingEdge();
-    data.road = infrastructurePerception->lookupTableRoadNetwork.roads.at(mainRoad->GetId());
-    data.lane = infrastructurePerception->lookupTableRoadNetwork.lanes.at(mainLane->GetId());
-    data.laneType = mainLane->GetLaneType();
+    data.lane = infrastructurePerception->lookupTableRoadNetwork.lanes.at(referenceLane->GetId());
+    data.road = data.lane->GetRoad();
+    data.mainLocatorLane = infrastructurePerception->lookupTableRoadNetwork.lanes.at(mainLocatorLane->GetId());
+    data.laneType = referenceLane->GetLaneType();
     data.velocity = driver->GetVelocity(VelocityScope::Absolute);
     data.acceleration = driver->GetAcceleration();
     data.brakeLight = driver->GetBrakeLight();

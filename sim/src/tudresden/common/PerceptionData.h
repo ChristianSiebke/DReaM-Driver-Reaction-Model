@@ -89,13 +89,15 @@ struct AgentPerception : ObjectPerception {
 
     bool brakeLight{true};
     IndicatorState indicatorState{IndicatorState::IndicatorState_Warn};
-
+    // measured at reference point
     double sCoordinate{-999};
     LaneType laneType{LaneType::Undefined};
     bool movingInLaneDirection{false};
-
+    // measured at reference point
     const MentalInfrastructure::Road *road;
+    // measured at reference point
     const MentalInfrastructure::Lane *lane;
+    // measured at reference point
     const MentalInfrastructure::Lane *nextLane;
 
     double distanceToNextJunction{-999};
@@ -113,7 +115,11 @@ struct EgoPerception : AgentPerception {
 
     //! additional road information
     double laneWidth{-999};
-    double lateralDisplacement{-999}; // lateral deviation
+
+    //! measured at mainLocaterPoint (vehicle front)
+    const MentalInfrastructure::Lane *mainLocatorLane;
+    // lateral deviation measured at mainLocaterPoint (vehicle front)
+    double lateralDisplacement{-999};
     double curvature{-999};
     double heading{-999};
     DReaMRoute::Waypoints route{};
@@ -198,4 +204,5 @@ struct NavigationDecision {
     OdId odRoadID{"-999"};
     OdId odLaneID{"-999"};
     IndicatorState indicator = IndicatorState::IndicatorState_Off;
+    double lateralDisplacement{0};
 };

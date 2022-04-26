@@ -28,7 +28,7 @@ class BehaviourImporter {
     bool ImportGroup(QDomElement& groupElement, StatisticsGroup& group);
     bool ImportSet(QDomElement& setElement, StatisticsSet& set);
     bool ImportEntry(QDomElement& entryElement, std::string id, StatisticsSet& set);
-    void Log(const std::string& message, LogLevel_new level = info) const { loggerInterface->Log(message, level); }
+    void Log(const std::string& message, DReaMLogLevel level = info) const { loggerInterface->Log(message, level); }
 
 
     std::unique_ptr<BehaviourData> behaviourData;

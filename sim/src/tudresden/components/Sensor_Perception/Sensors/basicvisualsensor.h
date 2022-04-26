@@ -36,8 +36,7 @@ private:
         const auto &actualEgoAgent = const_cast<AgentInterface *>(agent)->GetEgoAgent();
         auto worldData = static_cast<OWL::WorldData *>(world->GetWorldData());
         WorldDataQuery helper(*worldData);
-        auto mainRoad = worldData->GetRoads().at(actualEgoAgent.GetRoadId());
-        auto mainLane =
+        auto referenceLane =
             &helper.GetLaneByOdId(actualEgoAgent.GetReferencePointPosition()->roadId, actualEgoAgent.GetReferencePointPosition()->laneId,
                                   actualEgoAgent.GetReferencePointPosition()->roadPosition.s);
         auto indicator = agent->GetIndicatorState();
@@ -45,9 +44,9 @@ private:
         data.id = agent->GetId();
         data.refPosition = Common::Vector2d(agent->GetPositionX(), agent->GetPositionY());
         data.distanceReferencePointToLeadingEdge = agent->GetDistanceReferencePointToLeadingEdge();
-        data.laneType = mainLane->GetLaneType();
-        data.road = infrastructurePerception->lookupTableRoadNetwork.roads.at(mainRoad->GetId());
-        data.lane = infrastructurePerception->lookupTableRoadNetwork.lanes.at(mainLane->GetId());
+        data.laneType = referenceLane->GetLaneType();
+        data.lane = infrastructurePerception->lookupTableRoadNetwork.lanes.at(referenceLane->GetId());
+        data.road = data.lane->GetRoad();
         data.velocity = agent->GetVelocity(VelocityScope::Absolute);
         data.acceleration = agent->GetAcceleration();
         data.brakeLight = agent->GetBrakeLight();
