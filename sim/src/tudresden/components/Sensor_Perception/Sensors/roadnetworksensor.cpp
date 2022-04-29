@@ -254,8 +254,23 @@ const MentalInfrastructure::Junction *RoadNetworkSensor::ConvertJunction(const O
     auto newJunction = std::make_shared<MentalInfrastructure::Junction>(intersectionId, GenerateUniqueId());
     perceptionData->junctions.push_back(newJunction);
     for (auto connectionRoad : junction->GetConnectingRoads()) {
-        auto from = ConvertRoad(const_cast<OWL::Road *>(worldData->GetRoads().at(connectionRoad->GetPredecessor())));
-        auto to = ConvertRoad(const_cast<OWL::Road *>(worldData->GetRoads().at(connectionRoad->GetSuccessor())));
+        auto startLaneId = connectionRoad->GetSections().front()->GetLanes().front()->GetPrevious().front();
+        auto startLane = const_cast<OWL::Interfaces::Lane *>(worldData->GetLanes().at(startLaneId));
+        auto startRoad = &startLane->GetRoad();
+        while (startRoad == connectionRoad) {
+            startLane = const_cast<OWL::Interfaces::Lane *>(worldData->GetLanes().at(startLane->GetPrevious().front()));
+            startRoad = &startLane->GetRoad();
+        }
+        auto from = ConvertRoad(const_cast<OWL::Road *>(startRoad));
+
+        auto endLaneId = connectionRoad->GetSections().front()->GetLanes().front()->GetNext().front();
+        auto endLane = const_cast<OWL::Interfaces::Lane *>(worldData->GetLanes().at(endLaneId));
+        auto endRoad = &endLane->GetRoad();
+        while (endRoad == connectionRoad) {
+            endLane = const_cast<OWL::Interfaces::Lane *>(worldData->GetLanes().at(endLane->GetNext().front()));
+            endRoad = &endLane->GetRoad();
+        }
+        auto to = ConvertRoad(const_cast<OWL::Road *>(endRoad));
         auto with = const_cast<MentalInfrastructure::Road *>(ConvertRoad(const_cast<OWL::Road *>(connectionRoad)));
         with->SetOnJunction(newJunction.get());
         newJunction->AddConnection(from, with, to);

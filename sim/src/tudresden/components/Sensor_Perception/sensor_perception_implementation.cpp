@@ -124,25 +124,35 @@ void Sensor_Perception_Implementation::GetNewRoute() {
     WorldDataQuery helper(*worldData);
 
     auto [begin, end] = vertices(straightRouteGraph);
+    auto rbegin = std::make_reverse_iterator(end);
+    auto rend = std::make_reverse_iterator(begin);
+
     std::vector<InternWaypoint> newRoute;
-    std::transform(begin, end, std::back_inserter(newRoute), [&straightRouteGraph = straightRouteGraph, roads](auto element) {
-        InternWaypoint newRoute;
-        newRoute.roadId = get(RouteElement(), straightRouteGraph, element).roadId;
-        newRoute.s = 0;
-        auto road = roads.at(get(RouteElement(), straightRouteGraph, element).roadId);
-        auto section = road->GetSections().front();
-        if (get(RouteElement(), straightRouteGraph, element).inOdDirection) {
-            auto iter =
-                std::find_if(section->GetLanes().begin(), section->GetLanes().end(), [](auto element) { return element->GetOdId() == -1; });
-            newRoute.lane = (*iter)->GetId();
-        }
-        else {
-            auto iter =
-                std::find_if(section->GetLanes().begin(), section->GetLanes().end(), [](auto element) { return element->GetOdId() == 1; });
-            newRoute.lane = (*iter)->GetId();
-        }
-        return newRoute;
-    });
+    auto currentLaneId = GetAgent()->GetEgoAgent().GetReferencePointPosition()->laneId;
+
+    std::transform(rbegin, rend, std::back_inserter(newRoute),
+                   [&straightRouteGraph = straightRouteGraph, roads, &currentLaneId](auto element) {
+                       InternWaypoint newRoute;
+                       newRoute.roadId = get(RouteElement(), straightRouteGraph, element).roadId;
+                       newRoute.s = 0;
+                       auto road = roads.at(get(RouteElement(), straightRouteGraph, element).roadId);
+                       auto section = road->GetSections().front();
+                       auto laneId = 0;
+                       if (get(RouteElement(), straightRouteGraph, element).inOdDirection) {
+                           laneId = currentLaneId < 0 ? -1 : 1;
+                           auto iter = std::find_if(section->GetLanes().begin(), section->GetLanes().end(),
+                                                    [laneId](auto element) { return element->GetOdId() == laneId; });
+                           newRoute.lane = (*iter)->GetId();
+                       }
+                       else {
+                           laneId = currentLaneId < 0 ? 1 : -1;
+                           auto iter = std::find_if(section->GetLanes().begin(), section->GetLanes().end(),
+                                                    [laneId](auto element) { return element->GetOdId() == laneId; });
+                           newRoute.lane = (*iter)->GetId();
+                       }
+                       currentLaneId = laneId;
+                       return newRoute;
+                   });
     route = newRoute;
     GetAgent()->GetEgoAgent().SetRoadGraph(std::move(straightRouteGraph), newRoot, newTarget);
 }
