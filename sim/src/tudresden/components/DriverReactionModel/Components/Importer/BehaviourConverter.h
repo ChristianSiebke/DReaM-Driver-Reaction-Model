@@ -16,7 +16,9 @@ class BehaviourConverter {
     void ConvertActionDecisionParameters(const StatisticsGroup& main);
     void ConvertCognitiveMapParameters(const StatisticsGroup& main);
     void ConvertGazeMovementParameters(const StatisticsGroup& main);
-    void Log(const std::string& message, LogLevel_new level = info) const { loggerInterface->Log(message, level); }
+    void Log(const std::string &message, DReaMLogLevel level = info) const {
+        loggerInterface->Log(message, level);
+    }
 
     std::unique_ptr<BehaviourData> behaviourData;
     LoggerInterface* loggerInterface;

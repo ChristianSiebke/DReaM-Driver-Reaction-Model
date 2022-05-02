@@ -256,19 +256,22 @@ const MentalInfrastructure::Junction *RoadNetworkSensor::ConvertJunction(const O
     for (auto connectionRoad : junction->GetConnectingRoads()) {
         auto from = ConvertRoad(const_cast<OWL::Road *>(worldData->GetRoads().at(connectionRoad->GetPredecessor())));
         auto to = ConvertRoad(const_cast<OWL::Road *>(worldData->GetRoads().at(connectionRoad->GetSuccessor())));
-        auto with = ConvertRoad(const_cast<OWL::Road *>(connectionRoad));
+        auto with = const_cast<MentalInfrastructure::Road *>(ConvertRoad(const_cast<OWL::Road *>(connectionRoad)));
+        with->SetOnJunction(newJunction.get());
         newJunction->AddConnection(from, with, to);
     }
     return newJunction.get();
 }
 
-const MentalInfrastructure::Lane *RoadNetworkSensor::ConvertLane(const OWL::Lane *lane) {
+MentalInfrastructure::Lane *RoadNetworkSensor::ConvertLane(const OWL::Lane *lane) {
+    if (lane == nullptr)
+        return nullptr;
     const OwlId laneId = lane->GetId();
     auto iter = std::find_if(perceptionData->lanes.begin(), perceptionData->lanes.end(),
                              [laneId](auto element) { return element->GetOwlId() == laneId; });
     if (iter != perceptionData->lanes.end()) {
         // if the lane is already in the infrastructure result skip this
-        return iter->get();
+        return const_cast<MentalInfrastructure::Lane *>(iter->get());
     }
 
     // getting the OpenDrive id of the lane
@@ -353,7 +356,6 @@ void RoadNetworkSensor::AddLaneGeometry(MentalInfrastructure::Lane *newLane, con
 
 const MentalInfrastructure::Road *RoadNetworkSensor::ConvertRoad(const OWL::Interfaces::Road *road) {
     OdId openDriveIdRoad = road->GetId();
-
     auto iter = std::find_if(perceptionData->roads.begin(), perceptionData->roads.end(),
                              [openDriveIdRoad](auto element) { return element->GetOpenDriveId() == openDriveIdRoad; });
     if (iter != perceptionData->roads.end()) {
@@ -422,6 +424,21 @@ const MentalInfrastructure::Road *RoadNetworkSensor::ConvertRoad(const OWL::Inte
     for (auto section : sections) {
         for (auto lane : section->GetLanes()) {
             auto newLane = ConvertLane(lane);
+
+            // add neighbor lanes
+            auto leftLane = &lane->GetLeftLane();
+            if (auto leftLaneInvalid = dynamic_cast<const OWL::Implementation::InvalidLane *>(leftLane)) {
+                leftLane = nullptr;
+            }
+
+            auto rightLane = &lane->GetRightLane();
+            if (auto rightLaneInvalid = dynamic_cast<const OWL::Implementation::InvalidLane *>(rightLane)) {
+                rightLane = nullptr;
+            }
+            newLane->AddLeftLane(ConvertLane(leftLane));
+            newLane->AddRightLane(ConvertLane(rightLane));
+            //------------
+
             newRoad->AddLane(newLane);
         }
     }

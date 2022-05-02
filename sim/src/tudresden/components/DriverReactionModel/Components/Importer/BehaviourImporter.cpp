@@ -2,7 +2,7 @@
 
 BehaviourImporter::BehaviourImporter(std::string path, LoggerInterface *loggerInterface) : loggerInterface{loggerInterface} {
     if (!Import(path)) {
-        Log("Could not import Behaviour.xml ", LogLevel_new::error);
+        Log("Could not import Behaviour.xml ", DReaMLogLevel::error);
     }
     BehaviourConverter converter(loggerInterface);
     behaviourData = converter.Convert(mainGroup);

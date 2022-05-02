@@ -32,7 +32,7 @@ class InterpreterInterface {
 
     virtual void Update(WorldInterpretation* interpretation, const WorldRepresentation& representation) = 0;
 
-    void Log(const std::string& message, LogLevel_new level = info) const { loggerInterface->Log(message, level); }
+    void Log(const std::string& message, DReaMLogLevel level = info) const { loggerInterface->Log(message, level); }
 
     const BehaviourData& GetBehaviourData() const { return behaviourData; }
 
