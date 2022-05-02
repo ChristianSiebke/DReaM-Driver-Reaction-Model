@@ -1,7 +1,8 @@
 #include "agentstaterecorder.h"
 
-void agentStateRecorder::addStoppingPoints(int id, StoppingPointData stoppingPointData) {
-    record.stoppingPoints.insert(std::make_pair(id, stoppingPointData));
+void agentStateRecorder::addStoppingPoints(StoppingPointData stoppingPointData) {
+    // TODO if clause -> only do it if empty
+    record.stoppingPointData = stoppingPointData;
 }
 
 void agentStateRecorder::addGazeStates(int time, int id, GazeState gazeState) {
@@ -171,15 +172,13 @@ std::string agentStateRecorder::generateHeader() {
         header += idString;
         header += ":openingAngle, ";
         header += idString;
-        header += ":viewDistance, [";
+        header += ":viewDistance,";
         header += idString;
-        header += ":otherAgent, ";
-        header += idString;
-        header += ":double, ";
-        header += idString;
-        header += ":double, ";
-        header += idString;
-        header += ":double], ";
+        header += ":agents[";
+        header += "otherAgent, ";
+        header += ":posX, ";
+        header += ":posY, ";
+        header += "rotation], ";
         header += idString;
         header += ":crossingType, ";
         header += idString;
@@ -192,6 +191,36 @@ std::string agentStateRecorder::generateHeader() {
     return header;
 }
 
+std::string agentStateRecorder::stoppingTypeToString(StoppingPointType type) {
+    std::string typeString;
+    switch (type) {
+    case StoppingPointType::NONE:
+        typeString = "NONE";
+        break;
+    case StoppingPointType::Pedestrian_Crossing_ONE:
+        typeString = "Pedestrian_Crossing_ONE";
+        break;
+    case StoppingPointType::Pedestrian_Crossing_TWO:
+        typeString = "Pedestrian_Crossing_TWO";
+        break;
+    case StoppingPointType::Pedestrian_Left:
+        typeString = "Predestrian_Left";
+        break;
+    case StoppingPointType::Pedestrian_Right:
+        typeString = "Pedestrian_Right";
+        break;
+    case StoppingPointType::Vehicle_Crossroad:
+        typeString = "Vehicle_Crossroad";
+        break;
+    case StoppingPointType::Vehicle_Left:
+        typeString = "Vehicle_Left";
+        break;
+    default:
+        typeString = "";
+        break;
+    }
+}
+
 void agentStateRecorder::writeOutputFile() {
     std::cout << "confictPoints: " << record.conflictPoints.size() << std::endl;
 
@@ -200,41 +229,25 @@ void agentStateRecorder::writeOutputFile() {
     valueTree.put("SimulationOutput.<xmlattr>.SchemaVersion", "0.3.0");
 
     // adds stopping points to the output ptree
-    boost::property_tree::ptree agentTree;
-    std::cout << "stoppingPointsSize" << record.stoppingPoints.size() << std::endl;
+    std::cout << "stoppingPointsSize" << record.stoppingPointData.stoppingPoints.size() << std::endl;
+    boost::property_tree::ptree stoppingPointsTree;
+    boost::property_tree::ptree stoppingPointTree;
+    for (auto [roadId, lanemap] : record.stoppingPointData.stoppingPoints) {
+        for (auto [laneId, pointmap] : lanemap) {
+            for (auto [type, point] : pointmap) {
+                std::cout << "hello" << std::endl;
+                stoppingPointTree.put("<xmlattr>.posX", point.posX);
+                stoppingPointTree.put("<xmlattr>.posY", point.posY);
+                stoppingPointTree.put("<xmlattr>.OdRoadId", roadId);
+                stoppingPointTree.put("<xmlattr>.OdLaneId", point.lane->GetOpenDriveId());
 
-    for (auto [agentId, pointMap] : record.stoppingPoints) {
-        boost::property_tree::ptree stoppingPointTree;
-        boost::property_tree::ptree intersectionTree;
-        boost::property_tree::ptree positionTree;
+                stoppingPointTree.put("xmlattr>.Type", stoppingTypeToString(type));
 
-        for (auto [intersectionId, points] : pointMap.stoppingPoints) {
-            for (auto point : points) {
-                // positionTree.put("Position.<xmlattr>.PosX", std::get<1>(point));
-                // positionTree.put("Position.<xmlattr>.PosY")
+                stoppingPointsTree.add_child("StoppingPoint", stoppingPointTree);
             }
         }
-
-        /*
-                agentTree.add("Agent.<xmlattr>.Id", std::to_string(agentId));
-
-                for (auto [intersectionId, points] : pointMap.stoppingPoints) {
-                    intersectionTree.add("Intersection.<xmlattr>.Id", intersectionId);
-                    std::cout << "test" << std::endl;
-                    std::cout << intersectionId << std::endl;
-
-                    for (auto point : points) {
-                        positionTree.put("Position.<xmlattr>.PosX", std::get<0>(point));
-                        positionTree.put("Position.<xmlattr>.PosY", std::get<1>(point));
-                        intersectionTree.add_child("Intersection", positionTree);
-                    }
-                    stoppingPointTree.add_child("StoppingPoint", intersectionTree);
-                }
-
-                */
-        agentTree.add_child("Agent", stoppingPointTree);
     }
-    valueTree.add_child("SimulationOutput.RunResults.RunResult.StoppingPoints", agentTree);
+    valueTree.add_child("SimulationOutput.RunResults.RunResult.StoppingPoints", stoppingPointsTree);
 
     // Adds conflict points to the output ptree
     boost::property_tree::ptree conflictPointTree;

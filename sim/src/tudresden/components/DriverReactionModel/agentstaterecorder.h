@@ -14,9 +14,8 @@
 
 //! Stores all collected data in the agentStateRecorder to be processed later
 struct Record {
-    // OLD:: std::map<int, std::map<std::string, std::list<std::tuple<double, double>>>> stoppingPoints;
-    //! Maps an agentId to a map containing intersections and their respective stoppingPoints on that intersection
-    std::map<int, StoppingPointData> stoppingPoints;
+    //! Maps  intersections to their respective stoppingPoints on that intersection
+    StoppingPointData stoppingPointData;
 
     //! For each timestep, maps a map containing each agent's GazeState to the associated timestep
     std::map<int, std::map<int, GazeState>> gazeStates;
@@ -61,7 +60,7 @@ public:
 
     void operator=(agentStateRecorder const &) = delete;
 
-    void addStoppingPoints(int, StoppingPointData);
+    void addStoppingPoints(StoppingPointData);
 
     void addGazeStates(int, int, GazeState);
 
@@ -86,6 +85,8 @@ private:
      * @param[in]     time           Requested simulation timestep
      */
     std::string generateDataSet(int time);
+
+    std::string stoppingTypeToString(StoppingPointType);
 
     //! Generates a header matching and discribing the recorded datasets
     std::string generateHeader();
