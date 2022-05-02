@@ -160,6 +160,39 @@ StoppingPoint StoppingPointCalculation::CalculateStoppingPoint(const MentalInfra
         }
     }
 
+    auto it = std::find(lane->GetLanePoints().begin(), lane->GetLanePoints().end(), minEgoPoint);
+
+    if ((it++) != lane->GetLanePoints().end() && (it--) != lane->GetLanePoints().begin()) {
+        auto prev = *(it--);
+        auto next = *(it++);
+        Common::Vector2d origin{minEgoPoint.x, minEgoPoint.y};
+        Common::Vector2d dirF{next.x, next.y};
+        Common::Vector2d dirB{prev.x, prev.y};
+        dirF.Sub(origin);
+        dirB.Sub(origin);
+
+        Line2d forward;
+        Line2d backward;
+        forward.start = origin;
+        backward.start = origin;
+        forward.direction = dirF;
+        backward.direction = dirB;
+
+        double offsetF = line.intersect(forward);
+        double offsetB = line.intersect(backward);
+
+        if (offsetB > 0 && offsetB < 1) {
+            minEgoPoint.x = backward.start.x + offsetB * backward.direction.x;
+            minEgoPoint.y = backward.start.y + offsetB * backward.direction.y;
+            minEgoPoint.sOffset = minEgoPoint.sOffset + offsetB * (prev.sOffset - minEgoPoint.sOffset);
+        }
+        else if (offsetF > 0 && offsetF < 1) {
+            minEgoPoint.x = forward.start.x + offsetF * forward.direction.x;
+            minEgoPoint.y = forward.start.y + offsetF * forward.direction.y;
+            minEgoPoint.sOffset = minEgoPoint.sOffset + offsetF * (next.sOffset - minEgoPoint.sOffset);
+        }
+    }
+
     // setting the struct
     stoppingPoint.type = type;
     stoppingPoint.sOffset = minEgoPoint.sOffset;
