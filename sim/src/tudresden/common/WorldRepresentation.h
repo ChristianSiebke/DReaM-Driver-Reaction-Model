@@ -244,6 +244,10 @@ class EgoAgentRepresentation : public AgentRepresentation {
         auto egoInternalData = std::static_pointer_cast<EgoPerception>(internalData);
         return egoInternalData->laneWidth;
     }
+    const MentalInfrastructure::Lane *GetMainLocatorLane() const {
+        auto egoInternalData = std::static_pointer_cast<EgoPerception>(internalData);
+        return egoInternalData->mainLocatorLane;
+    }
     double GetLateralDisplacement() const {
         auto egoInternalData = std::static_pointer_cast<EgoPerception>(internalData);
         return egoInternalData->lateralDisplacement;

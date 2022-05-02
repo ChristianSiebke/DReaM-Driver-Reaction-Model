@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-Logger::Logger(uint64_t agentId, LogLevel_new defaultLevel) : agentId{agentId} {
+Logger::Logger(uint64_t agentId, DReaMLogLevel defaultLevel) : agentId{agentId} {
     defaultLogLevel = defaultLevel;
 }
 void Logger::SetPath(std::string path) {
@@ -10,12 +10,12 @@ void Logger::SetPath(std::string path) {
 }
 Logger::~Logger() { stream.close(); }
 
-void Logger::Log(const std::string& message, LogLevel_new level) {
+void Logger::Log(const std::string &message, DReaMLogLevel level) {
     stream <<"[" << NowTime() << "] [" << ToString(level) << "]:\t";
     stream <<" | Agent: "<<agentId<< " | "<< message << "\n";
 }
 
-std::string Logger::ToString(LogLevel_new level) {
+std::string Logger::ToString(DReaMLogLevel level) {
     static const char* const buffer[] = {"DEBUG", "WARN", "ERROR", "INFO"};
     return buffer[level];
 }

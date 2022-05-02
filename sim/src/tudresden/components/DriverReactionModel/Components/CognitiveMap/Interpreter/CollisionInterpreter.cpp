@@ -43,7 +43,7 @@ void CollisionInterpreter::DetermineCollisionPoints(WorldInterpretation *interpr
         Log("Calculating Collisionpoints");
         numberCollisionPoints = 0;
         if (representation.agentMemory->empty()) {
-            Log("No surrounding agents... returning...", LogLevel_new::warning);
+            Log("No surrounding agents... returning...", DReaMLogLevel::warning);
             return;
         }
         for (const auto &agent : *representation.agentMemory) {
@@ -152,7 +152,7 @@ polygon_t CollisionInterpreter::ConstructAgentPolygonRepresentation(const AgentR
         return ConstructPolygonRepresentation(data, pos, hdg);
     default:
         std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "AgentType does not exist";
-        Log(message, LogLevel_new::error);
+        Log(message, DReaMLogLevel::error);
         throw std::runtime_error(message);
     }
 }

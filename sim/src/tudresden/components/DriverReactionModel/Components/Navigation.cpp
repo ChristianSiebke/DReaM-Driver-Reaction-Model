@@ -26,66 +26,107 @@ Navigation::Navigation(const WorldRepresentation &worldRepresentation, const Wor
 }
 
 void Navigation::Update() {
-    if (!routeInit)
-        route = worldRepresentation.egoAgent->GetRoute();
-    CrossingType turningDecision;
-    if (TurningDecisionAtIntersectionHaveToBeSelected()) {
-        // Final Target reached or not correctly handled
-        if (route.empty()) {
-            Log("Agent has passed Targetlane: The successive route is chosen at random");
-            turningDecision = CrossingType::Random;
+    auto egoAgent = worldRepresentation.egoAgent;
+
+    if (waypoints != egoAgent->GetRoute()) {
+        waypoints = egoAgent->GetRoute();
+        targetWP = waypoints.begin();
+    }
+
+    if (waypoints.empty()) {
+        std::string msg = __FILE__ " " + std::to_string(__LINE__) + " Agent has no waypoints";
+        Log(msg, DReaMLogLevel::error);
+        throw std::logic_error(msg);
+    }
+
+    auto currentRoad = egoAgent->GetRoad()->GetOpenDriveId();
+    auto currentSCoordinate = egoAgent->GetSCoordinate();
+
+    if (targetWP->roadId == currentRoad && targetWP->s <= currentSCoordinate) {
+        targetWP = std::next(targetWP);
+    }
+
+    if (waypoints.end() == targetWP) {
+        // agent reach target
+        return;
+    }
+
+    if (lastTimeStepWP != targetWP || egoLane != egoAgent->GetMainLocatorLane())
+        path = worldRepresentation.infrastructure->FindShortestPath(egoAgent->GetMainLocatorLane(), targetWP->lane);
+    lastTimeStepWP = targetWP;
+    egoLane = egoAgent->GetMainLocatorLane();
+
+    // lane change needed to stay on path?
+    auto laneIter = path.begin();
+    std::advance(laneIter, 1);
+    if (path.end() == laneIter) {
+        routeDecision.lateralDisplacement = 0;
+        if (AgentIsTurningOnJunction()) {
+            return;
+        }
+        routeDecision.indicator = IndicatorState::IndicatorState_Off;
+        return;
+    }
+
+    auto targetLane = (*laneIter)->GetNode();
+    if (std::none_of(egoAgent->GetMainLocatorLane()->GetSuccessors().begin(), egoAgent->GetMainLocatorLane()->GetSuccessors().end(),
+                     [targetLane](auto element) { return element == targetLane; })) {
+        // New Lane free ?
+        // TODO: implement Algorithm -->new lane free?
+        // TODO: move to interpreter
+        if (NewLaneIsFree()) {
+            if (targetLane == egoAgent->GetMainLocatorLane()->GetLeftLane()) {
+                routeDecision.lateralDisplacement = ((egoAgent->GetMainLocatorLane()->GetWidth() / 2) + (targetLane->GetWidth() / 2));
+                routeDecision.indicator = IndicatorState::IndicatorState_Left;
+            }
+            else if (targetLane == egoAgent->GetMainLocatorLane()->GetRightLane()) {
+                routeDecision.lateralDisplacement = -((egoAgent->GetMainLocatorLane()->GetWidth() / 2) + (targetLane->GetWidth() / 2));
+                routeDecision.indicator = IndicatorState::IndicatorState_Right;
+            }
+            else {
+                const std::string msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
+                                        " next lane in path is not neighbor";
+                Log(msg, error);
+                throw std::logic_error(msg);
+            }
         }
         else {
-            auto currentRoad = worldRepresentation.egoAgent->GetRoad()->GetOpenDriveId();
-            auto currentSCoordinate = worldRepresentation.egoAgent->GetSCoordinate();
-            auto &targetWP = route.front();
-            if (targetWP.roadId == currentRoad && targetWP.s <= currentSCoordinate) {
-                route.erase(route.begin());
-            }
-            turningDecision = DetermineCrossingType(
-                worldRepresentation.infrastructure->FindShortestPath(worldRepresentation.egoAgent->GetLane(), targetWP.lane));
+            // TODO: slow down and wait at end of road/ after waiting a specific time choose new lane
+            // TODO acceleration calcualtion in longitudinalAction (ActionDecision)
+            // TODO: move to interpreter
         }
-        routeDecision.indicator = ConvertCrossingTypeToIndicator(turningDecision);
-        directionChosen = true;
     }
-
-    if (ResetDirectionChosen()) {
-        intersectionCounter++;
-        directionChosen = false;
-    }
-
-    if (ResetIndicator()) {
+    else {
+        routeDecision.lateralDisplacement = 0;
+        if (TurningAtJunction()) {
+            routeDecision.indicator = SetIndicatorAtJunction(path);
+            return;
+        }
+        if (AgentIsTurningOnJunction()) {
+            return;
+        }
         routeDecision.indicator = IndicatorState::IndicatorState_Off;
     }
 }
-
-bool Navigation::TurningDecisionAtIntersectionHaveToBeSelected() const {
-    return worldRepresentation.egoAgent->NextJunction() != nullptr && !directionChosen &&
+bool Navigation::NewLaneIsFree() const {
+    // TODO: implement
+    return true;
+}
+bool Navigation::TurningAtJunction() const {
+    return worldRepresentation.egoAgent->NextJunction() != nullptr &&
            worldInterpretation.crossingInfo.phase == CrossingPhase::Deceleration_TWO;
 }
+bool Navigation::AgentIsTurningOnJunction() const {
+    return worldInterpretation.crossingInfo.phase >= CrossingPhase::Deceleration_TWO;
+}
 
-
-
-CrossingType Navigation::DetermineCrossingType(std::list<const RoadmapGraph::RoadmapNode*> path) const {
+IndicatorState Navigation::SetIndicatorAtJunction(std::list<const RoadmapGraph::RoadmapNode *> path) const {
     try {
-        Log("Routing by targetRoad and targetLane");
-        if (1 == path.size() && worldRepresentation.egoAgent->GetLane() != path.front()->GetNode() &&
-            worldRepresentation.egoAgent->GetNextLane() != path.front()->GetNode()) {
-            auto msg = "There exist no path to chosen TargetLane";
-            Log(msg, error);
-            throw std::runtime_error(msg);
-        }
+        std::list<const RoadmapGraph::RoadmapNode *>::iterator laneIter = path.begin();
+        auto currentLane = (*laneIter)->GetNode();
+        std::advance(laneIter, 1);
 
-        if (worldRepresentation.egoAgent->GetLane() == path.front()->GetNode()) {
-            path.erase(path.begin());
-        }
-        if (path.empty()) {
-            return CrossingType::Straight;
-        }
-        auto currentLane = worldRepresentation.egoAgent->GetLane();
-
-        auto nextLane = path.front()->GetNode();
-
+        auto nextLane = (*laneIter)->GetNode();
         auto currentLanePoints = currentLane->GetLanePoints();
         auto secondLast = std::prev(currentLanePoints.end(), 2);
         Common::Vector2d CurrentDirection((currentLane->GetLastPoint()->x) - (secondLast->x),
@@ -97,24 +138,28 @@ CrossingType Navigation::DetermineCrossingType(std::list<const RoadmapGraph::Roa
         auto angleDeg = AngleBetween2d(CurrentDirection, NextLaneDirection) * (180 / M_PI);
 
         if (10 >= angleDeg || std::fabs(angleDeg - 180) < 10) {
-            return CrossingType::Straight;
-        } else if (10 < angleDeg && CurrentDirection.Cross(NextLaneDirection) > 0) {
-            return CrossingType::Left;
-
-        } else if (10 < angleDeg && CurrentDirection.Cross(NextLaneDirection) < 0) {
-            return CrossingType::Right;
-        } else {
+            return IndicatorState::IndicatorState_Off;
+        }
+        else if (10 < angleDeg && CurrentDirection.Cross(NextLaneDirection) > 0) {
+            return IndicatorState::IndicatorState_Left;
+        }
+        else if (10 < angleDeg && CurrentDirection.Cross(NextLaneDirection) < 0) {
+            return IndicatorState::IndicatorState_Right;
+        }
+        else {
             const std::string msg =
                 static_cast<std::string>(__FILE__) + std::to_string(__LINE__) + " error during route calculation: cannot set CrossingType";
             Log(msg, error);
             throw std::runtime_error(msg);
         }
-    } catch (std::runtime_error e) {
+    }
+    catch (std::runtime_error e) {
         const std::string msg =
             "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + static_cast<std::string>(e.what());
         Log(msg, error);
         throw std::runtime_error(msg);
-    } catch (...) {
+    }
+    catch (...) {
         const std::string msg =
             "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " error during route calculation";
         Log(msg, error);
@@ -122,40 +167,4 @@ CrossingType Navigation::DetermineCrossingType(std::list<const RoadmapGraph::Roa
     }
 }
 
-IndicatorState Navigation::ConvertCrossingTypeToIndicator(CrossingType turningDecision) const {
-    if (turningDecision == CrossingType::Right) {
-        return IndicatorState::IndicatorState_Right;
-    } else if (turningDecision == CrossingType::Left) {
-        return IndicatorState::IndicatorState_Left;
-    } else if (turningDecision == CrossingType::Straight) {
-        return IndicatorState::IndicatorState_Off;
-    } else if (turningDecision == CrossingType::Random) {
-        return Randomize();
-    } else {
-        const std::string msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
-                                " Indicator state cannot be set: TurningDecision  is invalid";
-        Log(msg, error);
-        throw std::out_of_range(msg);
-    }
-}
-
-bool Navigation::ResetDirectionChosen() const { return worldRepresentation.egoAgent->GetRoad()->IsOnJunction() && directionChosen; }
-
-bool Navigation::ResetIndicator() const { return worldInterpretation.crossingInfo.phase < CrossingPhase::Deceleration_TWO; }
-
-IndicatorState Navigation::Randomize() const {
-    auto connections = InfrastructureRepresentation::NextLanes(worldRepresentation.egoAgent->IsMovingInLaneDirection(),
-                                                               worldRepresentation.egoAgent->GetLane());
-    int totalNumberConnections =
-        static_cast<int>(connections->rightLanes.size() + connections->straightLanes.size() + connections->leftLanes.size());
-    double random_number = std::rand() / static_cast<double>(RAND_MAX);
-
-    if (random_number <= static_cast<double>(connections->rightLanes.size()) / totalNumberConnections) {
-        return IndicatorState::IndicatorState_Right;
-    } else if (random_number >= 1 - static_cast<double>(connections->leftLanes.size()) / totalNumberConnections) {
-        return IndicatorState::IndicatorState_Left;
-    } else {
-        return IndicatorState::IndicatorState_Off;
-    }
-}
 } // namespace Navigation

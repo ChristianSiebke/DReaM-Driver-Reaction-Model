@@ -37,7 +37,7 @@ public:
 private:
     Import::LanePosition ImportLanePosition(QDomElement positionElement);
     Import::RoadPosition ImportRoadPosition(QDomElement positionElement);
-    void Log(const std::string &message, LogLevel_new level = info) const {
+    void Log(const std::string &message, DReaMLogLevel level = info) const {
         if (loggerInterface == nullptr) {
             throw std::runtime_error(message);
         }

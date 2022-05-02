@@ -32,6 +32,20 @@ RoadmapGraph::RoadmapGraph(std::vector<std::shared_ptr<const MentalInfrastructur
         for (const auto &suc : successors) {
             node->AddSuccessor(nodes.at(suc).get());
         }
+
+        auto leftLane = lane->GetLeftLane();
+        if (leftLane != nullptr) {
+            node->AddSuccessor(nodes.at(leftLane).get());
+            auto leftLaneNode = nodes.at(leftLane).get();
+            leftLaneNode->AddPredecessor(node.get());
+        }
+
+        auto rightLane = lane->GetRightLane();
+        if (rightLane != nullptr) {
+            node->AddSuccessor(nodes.at(rightLane).get());
+            auto rightLaneNode = nodes.at(rightLane).get();
+            rightLaneNode->AddPredecessor(node.get());
+        }
     }
 
     for (const auto &[id, node] : nodes) {
@@ -94,6 +108,12 @@ const std::list<const RoadmapNode *> RoadmapGraph::FindShortestPath(const Mental
     while ((dijkstragraph.at(path.front())).second != nullptr) {
         const RoadmapNode *front = path.front();
         path.push_front((dijkstragraph.at(front)).second);
+    }
+
+    if (std::none_of(path.begin(), path.end(), [startNode](auto element) { return element == startNode.get(); }) ||
+        std::none_of(path.begin(), path.end(), [endNode](auto element) { return element == endNode; })) {
+        auto msg = __FILE__ " | " + std::to_string(__LINE__) + " | There exist no path to chosen TargetLane";
+        throw std::runtime_error(msg);
     }
     return path;
 }

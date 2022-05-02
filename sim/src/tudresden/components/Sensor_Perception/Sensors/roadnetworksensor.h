@@ -62,7 +62,7 @@ private:
 
     const MentalInfrastructure::Road *ConvertRoad(const OWL::Interfaces::Road *road);
 
-    const MentalInfrastructure::Lane *ConvertLane(const OWL::Interfaces::Lane *lane);
+    MentalInfrastructure::Lane *ConvertLane(const OWL::Interfaces::Lane *lane);
 
     void AddLaneGeometry(MentalInfrastructure::Lane *newLane, const OWL::Interfaces::Lane *lane) const;
 
