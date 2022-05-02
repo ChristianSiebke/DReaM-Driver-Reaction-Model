@@ -60,6 +60,16 @@ private:
     const MentalInfrastructure::TrafficSign *ConvertTrafficSign(const MentalInfrastructure::Road *road,
                                                                 const OWL::Interfaces::TrafficSign *sign);
 
+    /**
+     * @brief Converts an OWL traffic light into an internally usable one.
+     *
+     * @param road road that the traffic light is attached to
+     * @param trafficLight traffic light to be converted
+     * @return converted traffic light
+     */
+    const MentalInfrastructure::TrafficLight *ConvertTrafficLight(const MentalInfrastructure::Road *road,
+                                                                  const OWL::Interfaces::TrafficLight *trafficLight);
+
     const MentalInfrastructure::Road *ConvertRoad(const OWL::Interfaces::Road *road);
 
     const MentalInfrastructure::Lane *ConvertLane(const OWL::Interfaces::Lane *lane);
@@ -72,9 +82,16 @@ private:
 
     StoppingPointData CreateStoppingPoints(std::vector<std::shared_ptr<const MentalInfrastructure::Junction>> &junctions);
 
-    ///
-    /// Creates a unique Id by incrementing lastId and returning it (thread safe).
-    ///
+    /**
+     * @brief Updates all stored traffic lights with their current status.
+     */
+    void UpdateTrafficLights();
+
+    /**
+     * @brief Creates a unique ID by incrementing a locally stored variable and returning it.
+     *
+     * @return the newly incremented ID
+     */
     DReaMId GenerateUniqueId() {
         return lastId++;
     }

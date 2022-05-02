@@ -63,8 +63,8 @@ void Sensor_Perception_Implementation::UpdateOutput(int localLinkId, std::shared
     }
     else if (localLinkId == 3) {
         try {
-            data = std::make_shared<ContainerSignal<std::vector<const MentalInfrastructure::TrafficSign *>> const>(
-                sensorPerceptionLogic.GetTrafficSignPerception());
+            data = std::make_shared<ContainerSignal<std::vector<const MentalInfrastructure::TrafficSignal *>> const>(
+                sensorPerceptionLogic.GetTrafficSignalPerception());
         }
         catch (const std::bad_alloc &) {
             const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 3 = TrafficSigns)";

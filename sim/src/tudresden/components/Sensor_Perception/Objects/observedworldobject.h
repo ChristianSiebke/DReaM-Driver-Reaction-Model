@@ -22,12 +22,7 @@
 typedef boost::geometry::model::d2::point_xy<double> BoostVector2d;
 typedef boost::geometry::model::polygon<BoostVector2d> Polygon2d;
 
-enum ObservedObjectType
-{
-    TrafficSign,
-    Building,
-    MovingObject
-};
+enum ObservedObjectType { TrafficSign, TrafficLight, Building, MovingObject };
 
 ///
 /// \brief The ObservedWorldObject struct

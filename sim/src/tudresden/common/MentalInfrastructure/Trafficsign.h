@@ -13,8 +13,7 @@
  *****************************************************************************/
 #pragma once
 
-#include "Common/commonTools.h"
-#include "Road.h"
+#include "TrafficSignal.h"
 #include "unordered_map"
 
 namespace MentalInfrastructure {
@@ -44,11 +43,11 @@ enum class TrafficSignType {
     TrafficCalmedDistrictEnd = 111,
 };
 
-class TrafficSign : public Element {
+class TrafficSign : public TrafficSignal {
 public:
-    TrafficSign(OdId openDriveId, DReaMId dreamId, const MentalInfrastructure::Road *road, double v, double t, double s,
-                Common::Vector2d pos, CommonTrafficSign::Type commonType) :
-        Element(openDriveId, dreamId), road(road), value(v), t(t), s(s), position(pos) {
+    TrafficSign(OdId openDriveId, DReaMId dreamId, const MentalInfrastructure::Road *road, double s, Common::Vector2d pos, double v,
+                CommonTrafficSign::Type commonType) :
+        TrafficSignal(openDriveId, dreamId, road, s, pos), value(v) {
         type = (trafficSignMapping.at(commonType));
         priority = Priority(type);
     }
@@ -60,10 +59,6 @@ public:
 
     double GetValue() const {
         return value;
-    }
-
-    double GetT() const {
-        return t;
     }
 
     double GetS() const {
@@ -88,7 +83,6 @@ private:
     TrafficSignType type;
     int priority;
     double value;
-    double t;
     double s;
     Common::Vector2d position;
 
