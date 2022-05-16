@@ -143,11 +143,16 @@ StoppingPoint StoppingPointCalculation::CalculateStoppingPoint(const MentalInfra
                                                                StoppingPointType type) {
     StoppingPoint stoppingPoint = DummyStoppingPoint();
     MentalInfrastructure::LanePoint minEgoPoint(0.0, 0.0, 0.0, 0.0);
+    MentalInfrastructure::LanePoint prev(0.0, 0.0, 0.0, 0.0);
+    MentalInfrastructure::LanePoint next(0.0, 0.0, 0.0, 0.0);
     double minDistance = static_cast<double>(INFINITY);
+
+    bool minPointNotAtEnd = false;
 
     // loop over all points on ego lane and crossroad lane
     // determine pair with minimum distance
-    for (auto egoPoint : lane->GetLanePoints()) {
+    for (auto it = lane->GetLanePoints().begin(); it != lane->GetLanePoints().end(); it++) {
+        auto egoPoint = *it;
         double egoX = egoPoint.x;
         double egoY = egoPoint.y;
 
@@ -157,14 +162,16 @@ StoppingPoint StoppingPointCalculation::CalculateStoppingPoint(const MentalInfra
         if (distance < minDistance) {
             minDistance = distance;
             minEgoPoint = egoPoint;
+
+            if ((it++) != lane->GetLanePoints().end() && it != lane->GetLanePoints().begin()) {
+                prev = *(it--);
+                next = *(it++);
+                minPointNotAtEnd = true;
+            }
         }
     }
 
-    auto it = std::find(lane->GetLanePoints().begin(), lane->GetLanePoints().end(), minEgoPoint);
-
-    if ((it++) != lane->GetLanePoints().end() && (it--) != lane->GetLanePoints().begin()) {
-        auto prev = *(it--);
-        auto next = *(it++);
+    if (minPointNotAtEnd) {
         Common::Vector2d origin{minEgoPoint.x, minEgoPoint.y};
         Common::Vector2d dirF{next.x, next.y};
         Common::Vector2d dirB{prev.x, prev.y};
