@@ -20,6 +20,16 @@ struct Line2d {
 
         return distance;
     }
+
+    double intersect(Line2d otherLine) {
+        Common::Vector2d q = otherLine.start;
+        Common::Vector2d p = start;
+        Common::Vector2d s = otherLine.direction;
+        Common::Vector2d r = direction;
+
+        q.Sub(p);
+        return (q.Cross(s)) / r.Cross(s);
+    }
 };
 
 struct CrossingLines {
