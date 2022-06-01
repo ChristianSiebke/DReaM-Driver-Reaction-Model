@@ -84,7 +84,7 @@ JunctionDistance AgentPerception::CalculateJunctionDistance(const MentalInfrastr
         }
         else {
             if (agentRoad->IsPredecessorJunction()) {
-                distance.distanceToNextJunction = agentRoad->GetLength() - sCoordinate;
+                /*distance.distanceToNextJunction = agentRoad->GetLength() - */ sCoordinate; // TODO undo?
             }
         }
     }
@@ -99,7 +99,7 @@ JunctionDistance AgentPerception::CalculateJunctionDistance(const MentalInfrastr
         }
         else {
             if (agentRoad->IsSuccessorJunction()) {
-                distance.distanceToNextJunction = sCoordinate;
+                distance.distanceToNextJunction = sCoordinate; // TODO change?
             }
         }
     }
@@ -165,20 +165,20 @@ std::optional<NextDirectionLanes> InfrastructurePerception::NextLanes(bool movin
     auto pointsCurrentLane = currentLane->GetLanePoints();
     auto pointCL = std::prev((pointsCurrentLane).end(), 2);
     Common::Vector2d currentDirection(currentLane->GetLastPoint()->x - pointCL->x, currentLane->GetLastPoint()->y - pointCL->y);
-    if (!movingInLaneDirection) {
-        pointCL = std::next((pointsCurrentLane).begin(), 1);
-        currentDirection = {currentLane->GetFirstPoint()->x - pointCL->x, currentLane->GetFirstPoint()->y - pointCL->y};
-    }
+    // if (!movingInLaneDirection != !currentLane->IsInRoadDirection()) { // movingInLaneDirection XOR LaneInRoadDirection
+    //     pointCL = std::next((pointsCurrentLane).begin(), 1);
+    //     currentDirection = {currentLane->GetFirstPoint()->x - pointCL->x, currentLane->GetFirstPoint()->y - pointCL->y};
+    // }
 
     for (auto nextLane : nextLanePointers) {
         auto pointsNextLane = nextLane->GetLanePoints();
         // calculate direction vector of successor lane
         auto pointNL = std::prev(pointsNextLane.end(), 2);
         Common::Vector2d successorDirection(nextLane->GetLastPoint()->x - pointNL->x, nextLane->GetLastPoint()->y - pointNL->y);
-        if (!movingInLaneDirection) {
-            pointNL = std::next(pointsNextLane.begin(), 1);
-            successorDirection = {nextLane->GetFirstPoint()->x - pointNL->x, nextLane->GetFirstPoint()->y - pointNL->y};
-        }
+        // if (!nextLane->IsInRoadDirection()) { // TODO evaluate if there should be an XOR with "movingInLaneDirection" here too
+        //     pointNL = std::next(pointsNextLane.begin(), 1);
+        //     successorDirection = {nextLane->GetFirstPoint()->x - pointNL->x, nextLane->GetFirstPoint()->y - pointNL->y};
+        // }
 
         auto angleDeg = AngleBetween2d(currentDirection, successorDirection) * (180 / M_PI);
         if (parallelEpsilonDeg >= angleDeg || parallelEpsilonDeg >= std::fabs(180 - angleDeg)) {

@@ -257,8 +257,13 @@ std::map<StoppingPointType, StoppingPoint> StoppingPointCalculation::DetermineSt
 
     NextDirectionLanes nextLanes;
     // assumption movingInLaneDirection = true for now
-    if (auto nextLanesPtr = InfrastructurePerception::NextLanes(egoLane->IsInRoadDirection(), egoLane)) {
-        nextLanes = *nextLanesPtr;
+    if (auto nextLanesPtr = InfrastructurePerception::NextLanes(true, egoLane)) {
+        if (nextLanesPtr.has_value()) {
+            nextLanes = nextLanesPtr.value();
+        }
+        else {
+            return stoppingPoints;
+        }
     }
 
     const MentalInfrastructure::Lane *leftSuccLane = nullptr;
