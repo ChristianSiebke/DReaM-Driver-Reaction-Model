@@ -57,7 +57,8 @@ void DriverPerception::CalculatePerception(const AgentInterface *driver, std::ve
     data.length = driver->GetLength();
     data.laneWidth = actualEgoAgent.GetLaneWidth();
     data.steeringWheelAngle = driver->GetSteeringWheelAngle();
-    data.sCoordinate = actualEgoAgent.GetReferencePointPosition()->roadPosition.s;
+    data.sCoordinate = data.lane->IsInRoadDirection() ? actualEgoAgent.GetReferencePointPosition()->roadPosition.s
+                                                      : data.lane->GetLength() - actualEgoAgent.GetReferencePointPosition()->roadPosition.s;
     data.movingInLaneDirection = AgentPerception::IsMovingInLaneDirection(data.lane, data.yawAngle, data.sCoordinate, data.velocity);
     auto junctionDistance = data.CalculateJunctionDistance(data.road, data.lane);
     data.distanceOnJunction = junctionDistance.distanceOnJunction;

@@ -84,7 +84,7 @@ JunctionDistance AgentPerception::CalculateJunctionDistance(const MentalInfrastr
         }
         else {
             if (agentRoad->IsPredecessorJunction()) {
-                /*distance.distanceToNextJunction = agentRoad->GetLength() - */ sCoordinate; // TODO undo?
+                distance.distanceToNextJunction = agentRoad->GetLength() - sCoordinate;
             }
         }
     }
@@ -99,7 +99,7 @@ JunctionDistance AgentPerception::CalculateJunctionDistance(const MentalInfrastr
         }
         else {
             if (agentRoad->IsSuccessorJunction()) {
-                distance.distanceToNextJunction = sCoordinate; // TODO change?
+                distance.distanceToNextJunction = sCoordinate;
             }
         }
     }
