@@ -533,6 +533,7 @@ StoppingPointData RoadNetworkSensor::CreateStoppingPoints(std::vector<std::share
             // TODO get last lanes of the road, not all of them (make method in road/lane)
             for (auto lane : road->GetLanes()) {
                 std::map<StoppingPointType, StoppingPoint> sps = stoppingPointCalculation.DetermineStoppingPoints(junction.get(), lane);
+                // std::cout << "roadnetwork_sps: " << sps.begin()->second.road->GetOpenDriveId();
                 spData.stoppingPoints.at(junctionId).insert(std::make_pair(lane->GetOwlId(), sps));
             }
         }

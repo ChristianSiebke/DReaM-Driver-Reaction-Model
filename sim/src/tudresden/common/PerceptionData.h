@@ -142,6 +142,8 @@ struct ConflictPoints {
     OdId junctionOpenDriveLaneId;
     Common::Vector2d start;
     Common::Vector2d end;
+    double startS;
+    double endS;
 };
 
 struct InfrastructurePerception {

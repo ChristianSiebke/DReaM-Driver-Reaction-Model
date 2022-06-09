@@ -84,7 +84,7 @@ private:
      *
      * @param[in]     time           Requested simulation timestep
      */
-    std::string generateDataSet(int time);
+    std::string generateDataSet(int time, int agentId);
 
     std::string stoppingTypeToString(StoppingPointType);
 

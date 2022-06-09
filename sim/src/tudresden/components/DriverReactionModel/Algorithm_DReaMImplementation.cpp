@@ -190,6 +190,12 @@ void AlgorithmDReaMImplementation::Trigger(int time) {
     agentStateRecorder->addFixationPoints(time, GetAgent()->GetId(), segmentControlFixPoints);
 
     if (time == 0) {
+        auto test = infrastructurePerception->GetStoppingPointData();
+        auto test2 = test.stoppingPoints.begin();
+        std::cout << "out in dreamImpl: " << test2->first << std::endl;
+        // std::cout << "posX: " << test2->second.begin()->second.begin()->second.posX << std::endl;
+        // std::cout << "odid: " << test2->second.begin()->second.begin()->second.road->GetOpenDriveId() << std::endl;
+
         agentStateRecorder->addStoppingPoints(infrastructurePerception->GetStoppingPointData());
         agentStateRecorder->addConflictPoints(infrastructurePerception->GetConflicPoints());
     }

@@ -39,155 +39,139 @@ void agentStateRecorder::addConflictPoints(std::vector<ConflictPoints> conflictP
     record.conflictPoints = conflictPoints;
 }
 
-std::string agentStateRecorder::generateDataSet(int time) {
+std::string agentStateRecorder::generateDataSet(int time, int agentId) {
     std::string outputLine;
 
-    // list of all agent IDs
-    for (auto [agentId, values] : record.gazeStates.at(time)) {
-        outputLine += "{";
+    // GazeType,Int,ufovAngle,openingAngle,viewDistance
+    GazeState gazeState = record.gazeStates.at(time).at(agentId);
+    std::string gazeType;
 
-        // GazeType,Int,ufovAngle,openingAngle,viewDistance
-        GazeState gazeState = record.gazeStates.at(time).at(agentId);
-        std::string gazeType;
-
-        switch (gazeState.fixationState.first) {
-        case GazeType::NONE:
-            gazeType = "NONE";
-            break;
-        case GazeType::ScanGlance:
-            gazeType = "ScanGlance";
-            break;
-        case GazeType::ControlGlance:
-            gazeType = "ControlGlance";
-            break;
-        case GazeType::ObserveGlance:
-            gazeType = "ObserveGlance";
-        default:
-            break;
-        }
-        outputLine += gazeType;
-        outputLine += ",";
-        outputLine += std::to_string(gazeState.fixationState.second) += ",";
-        outputLine += std::to_string(gazeState.ufovAngle) += ",";
-        outputLine += std::to_string(gazeState.openingAngle) += ",";
-        outputLine += std::to_string(gazeState.viewDistance) += ",";
-        // TODO: catch for empty GazeType
-
-        //[otherAgentId,double,double,double]
-        outputLine += "[";
-        for (auto agent : record.otherAgents.at(time).at(agentId)) {
-            outputLine += std::to_string(std::get<0>(agent)) += ",";
-            outputLine += std::to_string(std::get<1>(agent)) += ",";
-            outputLine += std::to_string(std::get<2>(agent)) += ",";
-            outputLine += std::to_string(std::get<3>(agent)) += "|";
-            // TODO: kein | falls letztes element
-        }
-
-        outputLine += "],";
-
-        // crossingType,crossingPhase
-        auto crossingInfo = record.crossingInfos.at(time).at(agentId);
-        std::string crossingType;
-        std::string crossingPhase;
-
-        switch (crossingInfo.type) {
-        case CrossingType::NA:
-            crossingType = "NA";
-            break;
-        case CrossingType::Left:
-            crossingType = "Left";
-            break;
-        case CrossingType::Right:
-            crossingType = "Right";
-            break;
-        case CrossingType::Straight:
-            crossingType = "Straight";
-            break;
-        case CrossingType::Random:
-            crossingType = "Random";
-            break;
-        default:
-            break;
-        }
-        switch (crossingInfo.phase) {
-        case CrossingPhase::Exit:
-            crossingPhase = "Exit";
-            break;
-        case CrossingPhase::NONE:
-            crossingPhase = "Exit";
-            break;
-        case CrossingPhase::Approach:
-            crossingPhase = "Approach";
-            break;
-        case CrossingPhase::Crossing_Right:
-            crossingPhase = "Crossing_Right";
-            break;
-        case CrossingPhase::Deceleration_ONE:
-            crossingPhase = "Deceleration_ONE";
-            break;
-        case CrossingPhase::Deceleration_TWO:
-            crossingPhase = "Deceleration_TWO";
-            break;
-        case CrossingPhase::Crossing_Left_ONE:
-            crossingPhase = "Crossing_Left_ONE";
-            break;
-        case CrossingPhase::Crossing_Left_TWO:
-            crossingPhase = "Crossing_Left_TWO";
-            break;
-        case CrossingPhase::Crossing_Straight:
-            crossingPhase = "Crossing_Straight";
-            break;
-        default:
-            break;
-        }
-
-        outputLine += crossingType;
-        outputLine += ",";
-        outputLine += crossingPhase;
-        outputLine += ",";
-
-        //[FixationPointX,FixationPointY]
-        outputLine += "[";
-        for (auto point : record.segmentControlFixationPoints.at(time).at(agentId)) {
-            outputLine += std::to_string(point.x) += ",";
-            outputLine += std::to_string(point.y) += "|";
-            // TODO: kein | falls letztes element
-        }
-        outputLine += "]";
-        outputLine += "}";
+    switch (gazeState.fixationState.first) {
+    case GazeType::NONE:
+        gazeType = "NONE";
+        break;
+    case GazeType::ScanGlance:
+        gazeType = "ScanGlance";
+        break;
+    case GazeType::ControlGlance:
+        gazeType = "ControlGlance";
+        break;
+    case GazeType::ObserveGlance:
+        gazeType = "ObserveGlance";
+    default:
+        break;
     }
+    outputLine += gazeType;
+    outputLine += ",";
+    outputLine += std::to_string(gazeState.fixationState.second) += ",";
+    outputLine += std::to_string(gazeState.ufovAngle) += ",";
+    outputLine += std::to_string(gazeState.openingAngle) += ",";
+    outputLine += std::to_string(gazeState.viewDistance) += ",";
+    // TODO: catch for empty GazeType
+
+    //[otherAgentId,double,double,double]
+    outputLine += "[";
+    for (auto agent : record.otherAgents.at(time).at(agentId)) {
+        outputLine += "{";
+        outputLine += std::to_string(std::get<0>(agent)) += ",";
+        outputLine += std::to_string(std::get<1>(agent)) += ",";
+        outputLine += std::to_string(std::get<2>(agent)) += ",";
+        outputLine += std::to_string(std::get<3>(agent)) += "}";
+    }
+    outputLine += "],";
+
+    // crossingType,crossingPhase
+    auto crossingInfo = record.crossingInfos.at(time).at(agentId);
+    std::string crossingType;
+    std::string crossingPhase;
+
+    switch (crossingInfo.type) {
+    case CrossingType::NA:
+        crossingType = "NA";
+        break;
+    case CrossingType::Left:
+        crossingType = "Left";
+        break;
+    case CrossingType::Right:
+        crossingType = "Right";
+        break;
+    case CrossingType::Straight:
+        crossingType = "Straight";
+        break;
+    case CrossingType::Random:
+        crossingType = "Random";
+        break;
+    default:
+        break;
+    }
+    switch (crossingInfo.phase) {
+    case CrossingPhase::Exit:
+        crossingPhase = "Exit";
+        break;
+    case CrossingPhase::NONE:
+        crossingPhase = "Exit";
+        break;
+    case CrossingPhase::Approach:
+        crossingPhase = "Approach";
+        break;
+    case CrossingPhase::Crossing_Right:
+        crossingPhase = "Crossing_Right";
+        break;
+    case CrossingPhase::Deceleration_ONE:
+        crossingPhase = "Deceleration_ONE";
+        break;
+    case CrossingPhase::Deceleration_TWO:
+        crossingPhase = "Deceleration_TWO";
+        break;
+    case CrossingPhase::Crossing_Left_ONE:
+        crossingPhase = "Crossing_Left_ONE";
+        break;
+    case CrossingPhase::Crossing_Left_TWO:
+        crossingPhase = "Crossing_Left_TWO";
+        break;
+    case CrossingPhase::Crossing_Straight:
+        crossingPhase = "Crossing_Straight";
+        break;
+    default:
+        break;
+    }
+
+    outputLine += crossingType;
+    outputLine += ",";
+    outputLine += crossingPhase;
+    outputLine += ",";
+
+    //[FixationPointX,FixationPointY]
+    outputLine += "[";
+    for (auto point : record.segmentControlFixationPoints.at(time).at(agentId)) {
+        outputLine += ("{");
+        outputLine += std::to_string(point.x) += ",";
+        outputLine += std::to_string(point.y) += "}";
+    }
+    outputLine += "]";
+    outputLine += "}";
+
     return outputLine;
 }
 
 std::string agentStateRecorder::generateHeader() {
     std::string header;
-    for (auto [agentId, values] : record.gazeStates.at(0)) {
-        std::string idString = std::to_string(agentId);
-        header += idString;
-        header += ":GazeType, ";
-        header += idString;
-        header += ":Int, ";
-        header += idString;
-        header += ":ufovAngle, ";
-        header += idString;
-        header += ":openingAngle, ";
-        header += idString;
-        header += ":viewDistance,";
-        header += idString;
-        header += ":agents[";
-        header += "otherAgent, ";
-        header += ":posX, ";
-        header += ":posY, ";
-        header += "rotation], ";
-        header += idString;
-        header += ":crossingType, ";
-        header += idString;
-        header += ":crossingPhase, [";
-        header += idString;
-        header += ":FixationPointX, ";
-        header += idString;
-        header += ":FixationPointY] ";
-    }
+
+    header += "GazeType, ";
+    header += "ScanAOI, ";
+    header += "ufovAngle, ";
+    header += "openingAngle, ";
+    header += "viewDistance,";
+    header += "otherAgents[{";
+    header += "agentId, ";
+    header += "posX, ";
+    header += "posY, ";
+    header += "rotation}], ";
+    header += "crossingType, ";
+    header += "crossingPhase, [{";
+    header += "FixationPointX, ";
+    header += "FixationPointY}]";
+
     return header;
 }
 
@@ -222,7 +206,7 @@ std::string agentStateRecorder::stoppingTypeToString(StoppingPointType type) {
 }
 
 void agentStateRecorder::writeOutputFile() {
-    std::cout << "confictPoints: " << record.conflictPoints.size() << std::endl;
+    std::cout << "confictAreas: " << record.conflictPoints.size() << std::endl;
 
     std::string path = "SimulationOutput.RunResults.RunResult.Cyclics";
     boost::property_tree::ptree valueTree;
@@ -235,18 +219,24 @@ void agentStateRecorder::writeOutputFile() {
     for (auto [roadId, lanemap] : record.stoppingPointData.stoppingPoints) {
         for (auto [laneId, pointmap] : lanemap) {
             for (auto [type, point] : pointmap) {
-                std::cout << "hello" << std::endl;
+                /*
                 stoppingPointTree.put("<xmlattr>.posX", point.posX);
                 stoppingPointTree.put("<xmlattr>.posY", point.posY);
                 stoppingPointTree.put("<xmlattr>.OdRoadId", roadId);
                 stoppingPointTree.put("<xmlattr>.OdLaneId", point.lane->GetOpenDriveId());
-
                 stoppingPointTree.put("xmlattr>.Type", stoppingTypeToString(type));
-
+                stoppingPointsTree.add_child("StoppingPoint", stoppingPointTree);
+                */
+                stoppingPointTree.put("<xmlattr>.posX", "point.posX");
+                stoppingPointTree.put("<xmlattr>.posY", "point.posY");
+                stoppingPointTree.put("<xmlattr>.OdRoadId", "roadId");
+                stoppingPointTree.put("<xmlattr>.OdLaneId", "point.lane->GetOpenDriveId()");
+                stoppingPointTree.put("<xmlattr>.Type", "stoppingTypeToString(type)");
                 stoppingPointsTree.add_child("StoppingPoint", stoppingPointTree);
             }
         }
     }
+
     valueTree.add_child("SimulationOutput.RunResults.RunResult.StoppingPoints", stoppingPointsTree);
 
     // Adds conflict points to the output ptree
@@ -259,15 +249,14 @@ void agentStateRecorder::writeOutputFile() {
 
         parameterTree.put("<xmlattr>.intersecOdRoadId", conflictPoint.junctionOpenDriveRoadId);
         parameterTree.put("<xmlattr>.intersecOdLaneId", conflictPoint.currentOpenDriveLaneId);
-
-        parameterTree.put("<xmlattr>.startX", conflictPoint.start.x);
-        parameterTree.put("<xmlattr>.startY", conflictPoint.start.y);
-        parameterTree.put("<xmlattr>.endX", conflictPoint.end.x);
-        parameterTree.put("<xmlattr>.endY", conflictPoint.end.y);
-
-        conflictPointTree.add_child("ConflictPoint", parameterTree);
+        // TODO: change dummy code to real implementation
+        // parameterTree.put("<xmlattr>.startS", conflictPoint.startS);
+        parameterTree.put("<xmlattr>.startS", 5);
+        // parameterTree.put("<xmlattr>.endS", conflictPoint.endS);
+        parameterTree.put("<xmlattr>.endS", 5);
+        conflictPointTree.add_child("ConflictArea", parameterTree);
     }
-    valueTree.add_child("SimulationOutput.RunResults.RunResult.ConflictPoints", conflictPointTree);
+    valueTree.add_child("SimulationOutput.RunResults.RunResult.ConflictAreas", conflictPointTree);
 
     valueTree.add("SimulationOutput.RunResults.RunResult.Cyclics.Header", this->generateHeader());
 
@@ -275,11 +264,19 @@ void agentStateRecorder::writeOutputFile() {
     boost::property_tree::ptree samplesTree;
     for (auto [time, values] : record.gazeStates) {
         boost::property_tree::ptree sampleTree;
+        boost::property_tree::ptree agentTree;
         sampleTree.put("<xmlattr>.Time", std::to_string(time));
-        sampleTree.put_value(generateDataSet(time));
+        for (auto [agentId, values] : record.gazeStates.at(time)) {
+            boost::property_tree::ptree agentTree;
+            agentTree.put("<xmlattr>.ID", agentId);
+            agentTree.put_value(generateDataSet(time, agentId));
+            sampleTree.add_child("A", agentTree);
+        }
         samplesTree.add_child("Sample", sampleTree);
     }
     valueTree.add_child("SimulationOutput.RunResults.RunResult.Cyclics.Samples", samplesTree);
+
+    std::cout << "test" << std::endl;
 
     boost::property_tree::xml_writer_settings<std::string> settings(' ', 2);
     boost::property_tree::write_xml(resultPath + "DReaMOutput.xml", valueTree, std::locale(), settings);
