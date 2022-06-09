@@ -48,6 +48,7 @@ void Navigation::Update() {
 
     if (waypoints.end() == targetWP) {
         // agent reach target
+        routeDecision = ResetRouteDecision(egoAgent->GetIndicatorState());
         return;
     }
 
@@ -60,11 +61,7 @@ void Navigation::Update() {
     auto laneIter = path.begin();
     std::advance(laneIter, 1);
     if (path.end() == laneIter) {
-        routeDecision.lateralDisplacement = 0;
-        if (AgentIsTurningOnJunction()) {
-            return;
-        }
-        routeDecision.indicator = IndicatorState::IndicatorState_Off;
+        routeDecision = ResetRouteDecision(egoAgent->GetIndicatorState());
         return;
     }
 
@@ -76,12 +73,18 @@ void Navigation::Update() {
         // TODO: move to interpreter
         if (NewLaneIsFree()) {
             if (targetLane == egoAgent->GetMainLocatorLane()->GetLeftLane()) {
-                routeDecision.lateralDisplacement = ((egoAgent->GetMainLocatorLane()->GetWidth() / 2) + (targetLane->GetWidth() / 2));
-                routeDecision.indicator = IndicatorState::IndicatorState_Left;
+                auto lateralDisplacement = (egoAgent->GetMainLocatorLane()->GetWidth() / 2) + (targetLane->GetWidth() / 2);
+                routeDecision.lateralDisplacement =
+                    egoAgent->GetMainLocatorLane()->IsInRoadDirection() ? lateralDisplacement : -lateralDisplacement;
+                routeDecision.indicator = egoAgent->GetMainLocatorLane()->IsInRoadDirection() ? IndicatorState::IndicatorState_Left
+                                                                                              : IndicatorState::IndicatorState_Right;
             }
             else if (targetLane == egoAgent->GetMainLocatorLane()->GetRightLane()) {
-                routeDecision.lateralDisplacement = -((egoAgent->GetMainLocatorLane()->GetWidth() / 2) + (targetLane->GetWidth() / 2));
-                routeDecision.indicator = IndicatorState::IndicatorState_Right;
+                auto lateralDisplacement = -((egoAgent->GetMainLocatorLane()->GetWidth() / 2) + (targetLane->GetWidth() / 2));
+                routeDecision.lateralDisplacement =
+                    egoAgent->GetMainLocatorLane()->IsInRoadDirection() ? lateralDisplacement : -lateralDisplacement;
+                routeDecision.indicator = egoAgent->GetMainLocatorLane()->IsInRoadDirection() ? IndicatorState::IndicatorState_Right
+                                                                                              : IndicatorState::IndicatorState_Left;
             }
             else {
                 const std::string msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
@@ -97,16 +100,22 @@ void Navigation::Update() {
         }
     }
     else {
-        routeDecision.lateralDisplacement = 0;
+        routeDecision = ResetRouteDecision(egoAgent->GetIndicatorState());
         if (TurningAtJunction()) {
             routeDecision.indicator = SetIndicatorAtJunction(path);
             return;
         }
-        if (AgentIsTurningOnJunction()) {
-            return;
-        }
-        routeDecision.indicator = IndicatorState::IndicatorState_Off;
     }
+}
+NavigationDecision Navigation::ResetRouteDecision(IndicatorState currentIndicator) const {
+    NavigationDecision routeDecision;
+    routeDecision.lateralDisplacement = 0;
+    routeDecision.indicator = currentIndicator;
+    if (AgentIsTurningOnJunction()) {
+        return routeDecision;
+    }
+    routeDecision.indicator = IndicatorState::IndicatorState_Off;
+    return routeDecision;
 }
 bool Navigation::NewLaneIsFree() const {
     // TODO: implement

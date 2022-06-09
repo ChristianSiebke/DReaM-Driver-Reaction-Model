@@ -7,7 +7,7 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 ################################################################################
-set(COMPONENT_NAME Algorithm_Lateral)
+set(COMPONENT_NAME Algorithm_Lateral_TUDresden)
 
 add_compile_definitions(ALGORITHM_LATERAL_LIBRARY)
 

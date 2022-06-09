@@ -16,8 +16,6 @@
 namespace Interpreter {
 
 void CrossingInfoInterpreter::Update(WorldInterpretation* interpretation, const WorldRepresentation& representation) {
-
-    // TODO consider crossinginfo if agent is moving against lanedirection
     Localize(representation);
 
     UpdateStoppingPoints(representation);
@@ -60,6 +58,7 @@ void CrossingInfoInterpreter::UpdateStoppingPoints(const WorldRepresentation& re
 void CrossingInfoInterpreter::Localize(const WorldRepresentation& representation) {
     DetermineCrossingType(representation);
     DetermineCrossingPhase(representation);
+    int i = 0;
 }
 
 void CrossingInfoInterpreter::DetermineCrossingType(const WorldRepresentation& representation) {

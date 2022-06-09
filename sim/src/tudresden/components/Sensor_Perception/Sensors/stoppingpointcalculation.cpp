@@ -143,11 +143,16 @@ StoppingPoint StoppingPointCalculation::CalculateStoppingPoint(const MentalInfra
                                                                StoppingPointType type) {
     StoppingPoint stoppingPoint = DummyStoppingPoint();
     MentalInfrastructure::LanePoint minEgoPoint(0.0, 0.0, 0.0, 0.0);
+    MentalInfrastructure::LanePoint prev(0.0, 0.0, 0.0, 0.0);
+    MentalInfrastructure::LanePoint next(0.0, 0.0, 0.0, 0.0);
     double minDistance = static_cast<double>(INFINITY);
 
-    // loop over all points on ego lane and crossroad lane
-    // determine pair with minimum distance
-    for (auto egoPoint : lane->GetLanePoints()) {
+    bool minPointNotAtEnd = false;
+
+    // loop over all points on ego lane
+    // determine point with minimum distance
+    for (auto it = lane->GetLanePoints().begin(); it != lane->GetLanePoints().end(); it++) {
+        auto egoPoint = *it;
         double egoX = egoPoint.x;
         double egoY = egoPoint.y;
 
@@ -157,7 +162,50 @@ StoppingPoint StoppingPointCalculation::CalculateStoppingPoint(const MentalInfra
         if (distance < minDistance) {
             minDistance = distance;
             minEgoPoint = egoPoint;
+
+            if (std::next(it) != lane->GetLanePoints().end() && it != lane->GetLanePoints().begin()) {
+                prev = *std::prev(it);
+                next = *std::next(it);
+                minPointNotAtEnd = true;
+            }
+            else if (std::next(it) != lane->GetLanePoints().end()) {
+                prev = {0.0, 0.0, 0.0, 0.0};
+                next = *std::next(it);
+                minPointNotAtEnd = false;
+            }
+            else if (it != lane->GetLanePoints().begin()) {
+                prev = *std::prev(it);
+                next = {0.0, 0.0, 0.0, 0.0};
+                minPointNotAtEnd = false;
+            }
         }
+    }
+
+    Common::Vector2d origin{minEgoPoint.x, minEgoPoint.y};
+    Common::Vector2d dirF{next.x, next.y};
+    Common::Vector2d dirB{prev.x, prev.y};
+    dirF.Sub(origin);
+    dirB.Sub(origin);
+
+    Line2d forward;
+    Line2d backward;
+    forward.start = origin;
+    backward.start = origin;
+    forward.direction = dirF;
+    backward.direction = dirB;
+
+    double offsetF = line.intersect(forward);
+    double offsetB = line.intersect(backward);
+
+    if (offsetB >= 0 && offsetB <= 1) {
+        minEgoPoint.x = backward.start.x + offsetB * backward.direction.x;
+        minEgoPoint.y = backward.start.y + offsetB * backward.direction.y;
+        minEgoPoint.sOffset = minEgoPoint.sOffset + offsetB * (prev.sOffset - minEgoPoint.sOffset);
+    }
+    else if (offsetF >= 0 && offsetF <= 1) {
+        minEgoPoint.x = forward.start.x + offsetF * forward.direction.x;
+        minEgoPoint.y = forward.start.y + offsetF * forward.direction.y;
+        minEgoPoint.sOffset = minEgoPoint.sOffset + offsetF * (next.sOffset - minEgoPoint.sOffset);
     }
 
     // setting the struct
@@ -217,8 +265,13 @@ std::map<StoppingPointType, StoppingPoint> StoppingPointCalculation::DetermineSt
 
     NextDirectionLanes nextLanes;
     // assumption movingInLaneDirection = true for now
-    if (auto nextLanesPtr = InfrastructurePerception::NextLanes(egoLane->IsInRoadDirection(), egoLane)) {
-        nextLanes = *nextLanesPtr;
+    if (auto nextLanesPtr = InfrastructurePerception::NextLanes(true, egoLane)) {
+        if (nextLanesPtr.has_value()) {
+            nextLanes = nextLanesPtr.value();
+        }
+        else {
+            return stoppingPoints;
+        }
     }
 
     const MentalInfrastructure::Lane *leftSuccLane = nullptr;

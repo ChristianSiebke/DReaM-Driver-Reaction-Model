@@ -52,6 +52,7 @@ public:
 private:
     bool NewLaneIsFree() const;
     bool TurningAtJunction() const;
+    NavigationDecision ResetRouteDecision(IndicatorState currentIndicator) const;
     IndicatorState SetIndicatorAtJunction(std::list<const RoadmapGraph::RoadmapNode *> path) const;
 
     bool AgentIsTurningOnJunction() const;
