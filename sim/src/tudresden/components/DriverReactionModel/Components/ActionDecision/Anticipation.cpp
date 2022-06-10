@@ -239,9 +239,13 @@ double Anticipation::MaximumAccelerationWish(double velTarget, double dv, double
 double Anticipation::CalculatePhaseAcceleration(double velTarget, double v) {
     double distance = std::numeric_limits<double>::infinity();
     if (worldInterpretation.crossingInfo.phase == CrossingPhase::Deceleration_ONE) {
-        distance = worldRepresentation.egoAgent->GetDistanceToNextJunction() - 25;
-    } else if (worldInterpretation.crossingInfo.phase > CrossingPhase::Deceleration_TWO &&
-               worldInterpretation.crossingInfo.phase < CrossingPhase::Exit) {
+        distance = worldRepresentation.egoAgent->GetDistanceToNextJunction();
+    }
+    else if (worldInterpretation.crossingInfo.phase == CrossingPhase::Deceleration_TWO) {
+        distance = worldRepresentation.egoAgent->GetDistanceToNextJunction();
+    }
+    else if (CrossingPhase::Deceleration_TWO < worldInterpretation.crossingInfo.phase &&
+             worldInterpretation.crossingInfo.phase < CrossingPhase::Exit) {
         distance = worldRepresentation.egoAgent->GetLane()->GetLength() - worldRepresentation.egoAgent->GetDistanceOnJunction();
     }
 
@@ -249,7 +253,9 @@ double Anticipation::CalculatePhaseAcceleration(double velTarget, double v) {
         double a = (GetBehaviourData().adBehaviour.maxAcceleration * v * v * ((velTarget - v) * (velTarget - v))) /
                    (4 * GetBehaviourData().adBehaviour.maxAcceleration * std::abs(GetBehaviourData().adBehaviour.comfortDeceleration.mean) *
                     (distance * distance));
-        return velTarget - v < 0 ? -a : a;
+        a = velTarget - v < 0 ? -a : a;
+        return Common::ValueInBounds(GetBehaviourData().adBehaviour.comfortDeceleration.min, a,
+                                     GetBehaviourData().adBehaviour.maxAcceleration);
     } else {
         return ComfortAccelerationWish(velTarget, v - velTarget, std::numeric_limits<double>::infinity());
     }

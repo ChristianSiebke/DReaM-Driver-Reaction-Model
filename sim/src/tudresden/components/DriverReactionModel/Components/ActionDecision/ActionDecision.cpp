@@ -71,8 +71,8 @@ bool AccelerationSorting(double d1, double d2) { return d1 < d2; }
 
 void ActionDecision::Update() {
     try {
-        if (oldIndicatorState != worldRepresentation.egoAgent->GetIndicatorState()) {
-            oldIndicatorState = worldRepresentation.egoAgent->GetIndicatorState();
+        if (currentRoad != worldRepresentation.egoAgent->GetRoad()) {
+            currentRoad = worldRepresentation.egoAgent->GetRoad();
             velocityCalculator.Update();
         }
         accelerationResult = DetermineAccelerationWish();

@@ -84,8 +84,7 @@ class ActionDecision : public Component::ComponentInterface {
 
     double accelerationResult;
 
-    IndicatorState oldIndicatorState = IndicatorState::IndicatorState_Warn;
-
+    const MentalInfrastructure::Road *currentRoad = nullptr;
     const WorldRepresentation& worldRepresentation;
     const WorldInterpretation& worldInterpretation;
 
