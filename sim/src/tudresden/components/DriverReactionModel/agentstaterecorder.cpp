@@ -216,25 +216,38 @@ void agentStateRecorder::writeOutputFile() {
     std::cout << "stoppingPointsSize" << record.stoppingPointData.stoppingPoints.size() << std::endl;
     boost::property_tree::ptree stoppingPointsTree;
     boost::property_tree::ptree stoppingPointTree;
-    for (auto [roadId, lanemap] : record.stoppingPointData.stoppingPoints) {
+    for (auto [intersectionId, lanemap] : record.stoppingPointData.stoppingPoints) {
+        if (!&lanemap) {
+            std::cout << "alarm" << std::endl;
+        }
+        boost::property_tree::ptree intersectionTree;
+        intersectionTree.put("<xmlattr>.Id", intersectionId);
         for (auto [laneId, pointmap] : lanemap) {
+            if (!&pointmap) {
+                std::cout << "alaAAArm" << std::endl;
+            }
+            boost::property_tree::ptree laneTree;
+            laneTree.put("<xmlattr>.Id", laneId);
             for (auto [type, point] : pointmap) {
                 /*
-                stoppingPointTree.put("<xmlattr>.posX", point.posX);
-                stoppingPointTree.put("<xmlattr>.posY", point.posY);
-                stoppingPointTree.put("<xmlattr>.OdRoadId", roadId);
-                stoppingPointTree.put("<xmlattr>.OdLaneId", point.lane->GetOpenDriveId());
-                stoppingPointTree.put("xmlattr>.Type", stoppingTypeToString(type));
-                stoppingPointsTree.add_child("StoppingPoint", stoppingPointTree);
-                */
+                if (type != StoppingPointType::NONE) {
+                    stoppingPointTree.put("<xmlattr>.posX", point.posX);
+                    stoppingPointTree.put("<xmlattr>.posY", point.posY);
+                    stoppingPointTree.put("<xmlattr>.OdRoadId", intersectionId);
+                    stoppingPointTree.put("<xmlattr>.OdLaneId", point.lane->GetOpenDriveId());
+                    stoppingPointTree.put("<xmlattr>.Type", stoppingTypeToString(type));
+                    laneTree.add_child("Point", stoppingPointTree);
+                } */
                 stoppingPointTree.put("<xmlattr>.posX", "point.posX");
                 stoppingPointTree.put("<xmlattr>.posY", "point.posY");
                 stoppingPointTree.put("<xmlattr>.OdRoadId", "roadId");
                 stoppingPointTree.put("<xmlattr>.OdLaneId", "point.lane->GetOpenDriveId()");
                 stoppingPointTree.put("<xmlattr>.Type", "stoppingTypeToString(type)");
-                stoppingPointsTree.add_child("StoppingPoint", stoppingPointTree);
+                laneTree.add_child("Point", stoppingPointTree);
             }
+                 intersectionTree.add_child("Lane", laneTree);
         }
+        stoppingPointsTree.add_child("Intersection", intersectionTree);
     }
 
     valueTree.add_child("SimulationOutput.RunResults.RunResult.StoppingPoints", stoppingPointsTree);
