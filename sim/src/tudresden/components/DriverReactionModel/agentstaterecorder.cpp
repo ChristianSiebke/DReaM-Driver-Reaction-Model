@@ -35,7 +35,8 @@ void agentStateRecorder::addFixationPoints(int time, int id, std::vector<Common:
     }
     record.segmentControlFixationPoints.at(time).insert(std::make_pair(id, fixationPoints));
 }
-void agentStateRecorder::addConflictPoints(std::vector<ConflictPoints> conflictPoints) {
+
+void agentStateRecorder::addConflictPoints(std::vector<ConflictPoint> conflictPoints) {
     record.conflictPoints = conflictPoints;
 }
 
@@ -176,32 +177,23 @@ std::string agentStateRecorder::generateHeader() {
 }
 
 std::string agentStateRecorder::stoppingTypeToString(StoppingPointType type) {
-    std::string typeString;
     switch (type) {
     case StoppingPointType::NONE:
-        typeString = "NONE";
-        break;
+        return "NONE";
     case StoppingPointType::Pedestrian_Crossing_ONE:
-        typeString = "Pedestrian_Crossing_ONE";
-        break;
+        return "Pedestrian_Crossing_ONE";
     case StoppingPointType::Pedestrian_Crossing_TWO:
-        typeString = "Pedestrian_Crossing_TWO";
-        break;
+        return "Pedestrian_Crossing_TWO";
     case StoppingPointType::Pedestrian_Left:
-        typeString = "Predestrian_Left";
-        break;
+        return "Predestrian_Left";
     case StoppingPointType::Pedestrian_Right:
-        typeString = "Pedestrian_Right";
-        break;
+        return "Pedestrian_Right";
     case StoppingPointType::Vehicle_Crossroad:
-        typeString = "Vehicle_Crossroad";
-        break;
+        return "Vehicle_Crossroad";
     case StoppingPointType::Vehicle_Left:
-        typeString = "Vehicle_Left";
-        break;
+        return "Vehicle_Left";
     default:
-        typeString = "";
-        break;
+        return "";
     }
 }
 
@@ -213,40 +205,56 @@ void agentStateRecorder::writeOutputFile() {
     valueTree.put("SimulationOutput.<xmlattr>.SchemaVersion", "0.3.0");
 
     // adds stopping points to the output ptree
-    std::cout << "stoppingPointsSize" << record.stoppingPointData.stoppingPoints.size() << std::endl;
+    std::cout << "stoppingPointsSize " << record.stoppingPointData.stoppingPoints.size() << std::endl;
+    std::cout << "YEEE HAW" << std::endl;
     boost::property_tree::ptree stoppingPointsTree;
     boost::property_tree::ptree stoppingPointTree;
     for (auto [intersectionId, lanemap] : record.stoppingPointData.stoppingPoints) {
+        std::cout << "for 1: here 1" << std::endl;
+
         if (!&lanemap) {
             std::cout << "alarm" << std::endl;
         }
         boost::property_tree::ptree intersectionTree;
         intersectionTree.put("<xmlattr>.Id", intersectionId);
+
+        std::cout << "for 1: here 2" << std::endl;
+
         for (auto [laneId, pointmap] : lanemap) {
             if (!&pointmap) {
                 std::cout << "alaAAArm" << std::endl;
             }
+
+            std::cout << "for 2: here 1" << std::endl;
+
             boost::property_tree::ptree laneTree;
             laneTree.put("<xmlattr>.Id", laneId);
+
             for (auto [type, point] : pointmap) {
-                /*
-                if (type != StoppingPointType::NONE) {
+                if (point.type != StoppingPointType::NONE) {
                     stoppingPointTree.put("<xmlattr>.posX", point.posX);
                     stoppingPointTree.put("<xmlattr>.posY", point.posY);
-                    stoppingPointTree.put("<xmlattr>.OdRoadId", intersectionId);
-                    stoppingPointTree.put("<xmlattr>.OdLaneId", point.lane->GetOpenDriveId());
+                    stoppingPointTree.put("<xmlattr>.RoadId", point.road->GetOpenDriveId());
+                    stoppingPointTree.put("<xmlattr>.LaneId", point.lane->GetOpenDriveId());
                     stoppingPointTree.put("<xmlattr>.Type", stoppingTypeToString(type));
+
+                    std::cout << "for 3: here 1" << std::endl;
+
                     laneTree.add_child("Point", stoppingPointTree);
-                } */
-                stoppingPointTree.put("<xmlattr>.posX", "point.posX");
-                stoppingPointTree.put("<xmlattr>.posY", "point.posY");
-                stoppingPointTree.put("<xmlattr>.OdRoadId", "roadId");
-                stoppingPointTree.put("<xmlattr>.OdLaneId", "point.lane->GetOpenDriveId()");
-                stoppingPointTree.put("<xmlattr>.Type", "stoppingTypeToString(type)");
-                laneTree.add_child("Point", stoppingPointTree);
+
+                    std::cout << "for 3: here 2" << std::endl;
+                }
             }
-                 intersectionTree.add_child("Lane", laneTree);
+
+            std::cout << "for 2: here 2" << std::endl;
+
+            intersectionTree.add_child("Lane", laneTree);
+
+            std::cout << "for 2: here 3" << std::endl;
         }
+
+        std::cout << "for 1: here 3" << std::endl;
+
         stoppingPointsTree.add_child("Intersection", intersectionTree);
     }
 
@@ -254,7 +262,7 @@ void agentStateRecorder::writeOutputFile() {
 
     // Adds conflict points to the output ptree
     boost::property_tree::ptree conflictPointTree;
-    for (ConflictPoints conflictPoint : record.conflictPoints) {
+    for (ConflictPoint conflictPoint : record.conflictPoints) {
         boost::property_tree::ptree parameterTree;
 
         parameterTree.put("<xmlattr>.currentOdRoadId", conflictPoint.currentOpenDriveRoadId);
@@ -262,11 +270,9 @@ void agentStateRecorder::writeOutputFile() {
 
         parameterTree.put("<xmlattr>.intersecOdRoadId", conflictPoint.junctionOpenDriveRoadId);
         parameterTree.put("<xmlattr>.intersecOdLaneId", conflictPoint.currentOpenDriveLaneId);
-        // TODO: change dummy code to real implementation
-        // parameterTree.put("<xmlattr>.startS", conflictPoint.startS);
-        parameterTree.put("<xmlattr>.startS", 5);
-        // parameterTree.put("<xmlattr>.endS", conflictPoint.endS);
-        parameterTree.put("<xmlattr>.endS", 5);
+
+        parameterTree.put("<xmlattr>.startS", conflictPoint.startS);
+        parameterTree.put("<xmlattr>.endS", conflictPoint.endS);
         conflictPointTree.add_child("ConflictArea", parameterTree);
     }
     valueTree.add_child("SimulationOutput.RunResults.RunResult.ConflictAreas", conflictPointTree);
@@ -281,7 +287,7 @@ void agentStateRecorder::writeOutputFile() {
         sampleTree.put("<xmlattr>.Time", std::to_string(time));
         for (auto [agentId, values] : record.gazeStates.at(time)) {
             boost::property_tree::ptree agentTree;
-            agentTree.put("<xmlattr>.ID", agentId);
+            agentTree.put("<xmlattr>.Id", agentId);
             agentTree.put_value(generateDataSet(time, agentId));
             sampleTree.add_child("A", agentTree);
         }

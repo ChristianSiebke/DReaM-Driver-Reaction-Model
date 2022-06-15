@@ -135,13 +135,11 @@ struct StoppingPointData {
     std::map<OdId, std::map<OwlId, std::map<StoppingPointType, StoppingPoint>>> stoppingPoints;
 };
 
-struct ConflictPoints {
+struct ConflictPoint {
     OdId currentOpenDriveRoadId;
     OdId currentOpenDriveLaneId;
     OdId junctionOpenDriveRoadId;
     OdId junctionOpenDriveLaneId;
-    Common::Vector2d start;
-    Common::Vector2d end;
     double startS;
     double endS;
 };
@@ -163,7 +161,7 @@ struct InfrastructurePerception {
      */
     static std::optional<NextDirectionLanes> NextLanes(bool movingInLaneDirection, const MentalInfrastructure::Lane *currentLane);
 
-    const std::vector<ConflictPoints> &GetConflicPoints() {
+    const std::vector<ConflictPoint> &GetConflicPoints() {
         return conflictPoints;
     }
 
@@ -188,7 +186,7 @@ struct InfrastructurePerception {
      */
     LookupTableRoadNetwork lookupTableRoadNetwork;
 
-    std::vector<ConflictPoints> conflictPoints;
+    std::vector<ConflictPoint> conflictPoints;
 };
 
 struct DynamicInfrastructurePerception {

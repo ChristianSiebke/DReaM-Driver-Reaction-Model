@@ -21,22 +21,26 @@ void ConflictAreaCalculator::AssignPotentialConflictAreasToLanes(std::shared_ptr
                         ->AddConflictArea({intersectionLane.get(), conflictAreas->first});
                     const_cast<MentalInfrastructure::Lane *>(intersectionLane.get())
                         ->AddConflictArea({currentLane.get(), conflictAreas->second});
-                    ConflictPoints a;
+                    ConflictPoint a;
                     a.junctionOpenDriveRoadId = currentLane->GetRoad()->GetOpenDriveId();
                     a.junctionOpenDriveLaneId = currentLane->GetOpenDriveId();
                     a.currentOpenDriveRoadId = intersectionLane->GetRoad()->GetOpenDriveId();
                     a.currentOpenDriveLaneId = intersectionLane->GetOpenDriveId();
-                    a.start = {conflictAreas->first.start.x, conflictAreas->first.start.y};
-                    a.end = {conflictAreas->first.end.x, conflictAreas->first.end.y};
+                    a.startS = conflictAreas->first.start.sOffset;
+                    a.endS = conflictAreas->first.end.sOffset;
+                    // a.start = {conflictAreas->first.start.x, conflictAreas->first.start.y};
+                    // a.end = {conflictAreas->first.end.x, conflictAreas->first.end.y};
                     perceptionData->conflictPoints.push_back(a);
 
-                    ConflictPoints b;
+                    ConflictPoint b;
                     b.junctionOpenDriveRoadId = intersectionLane->GetRoad()->GetOpenDriveId();
                     b.junctionOpenDriveLaneId = intersectionLane->GetOpenDriveId();
                     b.currentOpenDriveRoadId = currentLane->GetRoad()->GetOpenDriveId();
                     b.currentOpenDriveLaneId = currentLane->GetOpenDriveId();
-                    b.start = {conflictAreas->second.start.x, conflictAreas->second.start.y};
-                    b.end = {conflictAreas->second.end.x, conflictAreas->second.end.y};
+                    b.startS = conflictAreas->second.start.sOffset;
+                    b.endS = conflictAreas->second.end.sOffset;
+                    // b.start = {conflictAreas->second.start.x, conflictAreas->second.start.y};
+                    // b.end = {conflictAreas->second.end.x, conflictAreas->second.end.y};
                     perceptionData->conflictPoints.push_back(b);
                 }
             }

@@ -30,7 +30,7 @@ struct Record {
     std::map<int, std::map<int, std::vector<Common::Vector2d>>> segmentControlFixationPoints;
 
     //! Contains all existant ConflictPoints;
-    std::vector<ConflictPoints> conflictPoints;
+    std::vector<ConflictPoint> conflictPoints;
 };
 
 /*!
@@ -70,7 +70,7 @@ public:
 
     void addFixationPoints(int, int, std::vector<Common::Vector2d>);
 
-    void addConflictPoints(std::vector<ConflictPoints>);
+    void addConflictPoints(std::vector<ConflictPoint>);
 
 private:
     std::string resultPath;

@@ -300,7 +300,9 @@ class InfrastructureRepresentation {
 
     const RoadmapGraph::RoadmapNode *NavigateToTargetNode(OdId targetRoadOdId, OwlId targetLaneOdId) const;
 
-    const std::vector<ConflictPoints>& GetConflicPoints() const { return infrastructure->GetConflicPoints(); }
+    const std::vector<ConflictPoint> &GetConflicPoints() const {
+        return infrastructure->GetConflicPoints();
+    }
 
   private:
     std::shared_ptr<InfrastructurePerception> infrastructure;
