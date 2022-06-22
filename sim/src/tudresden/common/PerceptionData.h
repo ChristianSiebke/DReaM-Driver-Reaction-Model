@@ -140,8 +140,10 @@ struct ConflictPoint {
     OdId currentOpenDriveLaneId;
     OdId junctionOpenDriveRoadId;
     OdId junctionOpenDriveLaneId;
-    double startS;
-    double endS;
+    double currentStartS;
+    double currentEndS;
+    double otherStartS;
+    double otherEndS;
 };
 
 struct InfrastructurePerception {
