@@ -163,7 +163,7 @@ struct StoppingPoint {
     double posY = maxDouble;
 };
 
-using StoppingPointMap = std::map<StoppingPointType, StoppingPoint>;
+using StoppingPointMap = std::unordered_map<StoppingPointType, StoppingPoint>;
 
 struct CrossingInfo {
     CrossingType type;

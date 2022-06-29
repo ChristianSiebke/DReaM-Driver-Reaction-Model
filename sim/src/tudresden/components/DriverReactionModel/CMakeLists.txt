@@ -1,12 +1,12 @@
+set(FOLDER "DriverReactionModel")
 set(COMPONENT_NAME DriverReactionModel)
- 
+
 add_compile_definitions(ALGORITHM_DReaM_LIBRARY)
 
 add_openpass_target(
   NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT module
   
   HEADERS
-    agentstaterecorder.h
     Algorithm_DReaM.h
     Algorithm_DReaMGlobal.h
     Algorithm_DReaMImplementation.h
@@ -41,7 +41,6 @@ add_openpass_target(
     Components/Importer/BehaviourImporter.h
     Components/TrafficSignMemory/TrafficSignMemory.h   
   SOURCES
-    agentstaterecorder.cpp
     Algorithm_DReaM.cpp
     Algorithm_DReaMImplementation.cpp
     DriverReactionModel.cpp
@@ -83,4 +82,6 @@ add_openpass_target(
     Common
     TUDresdenCommon
     SimulationCore
+    AgentStateRecorder
 )
+add_subdirectory(AgentStateRecorder) 

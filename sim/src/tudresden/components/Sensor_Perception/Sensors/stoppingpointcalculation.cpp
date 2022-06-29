@@ -257,9 +257,10 @@ SP_ROW_Data StoppingPointCalculation::DetermineROWData(LaneType type) {
     return rowData;
 }
 
-std::map<StoppingPointType, StoppingPoint> StoppingPointCalculation::DetermineStoppingPoints(const MentalInfrastructure::Junction *junction,
-                                                                                             const MentalInfrastructure::Lane *egoLane) {
-    std::map<StoppingPointType, StoppingPoint> stoppingPoints;
+std::unordered_map<StoppingPointType, StoppingPoint>
+StoppingPointCalculation::DetermineStoppingPoints(const MentalInfrastructure::Junction *junction,
+                                                  const MentalInfrastructure::Lane *egoLane) {
+    std::unordered_map<StoppingPointType, StoppingPoint> stoppingPoints;
 
     SP_ROW_Data rowData = DetermineROWData(egoLane->GetType());
 

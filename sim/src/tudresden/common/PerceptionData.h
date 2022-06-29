@@ -132,7 +132,7 @@ struct LookupTableRoadNetwork {
 };
 
 struct StoppingPointData {
-    std::map<OdId, std::map<OwlId, std::map<StoppingPointType, StoppingPoint>>> stoppingPoints;
+    std::unordered_map<OdId, std::unordered_map<OwlId, std::unordered_map<StoppingPointType, StoppingPoint>>> stoppingPoints;
 };
 
 struct ConflictPoint {
@@ -167,7 +167,7 @@ struct InfrastructurePerception {
         return conflictPoints;
     }
 
-    const std::map<StoppingPointType, StoppingPoint> &GetStoppingPoints(OdId junctionId, OwlId laneId) const {
+    const std::unordered_map<StoppingPointType, StoppingPoint> &GetStoppingPoints(OdId junctionId, OwlId laneId) const {
         return stoppingPointData.stoppingPoints.at(junctionId).at(laneId);
     }
 

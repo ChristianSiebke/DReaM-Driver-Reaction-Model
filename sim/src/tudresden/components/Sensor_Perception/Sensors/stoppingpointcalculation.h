@@ -127,7 +127,7 @@ public:
      * are to be determined
      * @return Map of stoping points
      */
-    std::map<StoppingPointType, StoppingPoint> DetermineStoppingPoints(const MentalInfrastructure::Junction *junction,
+    std::unordered_map<StoppingPointType, StoppingPoint> DetermineStoppingPoints(const MentalInfrastructure::Junction *junction,
                                                                        const MentalInfrastructure::Lane *egoLane);
 };
 

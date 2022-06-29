@@ -14,24 +14,25 @@
 #include <functional>
 #include <sstream>
 
-#include "common/log.h"
-#include "include/agentBlueprintProviderInterface.h"
-#include "include/observationNetworkInterface.h"
-#include "include/eventDetectorNetworkInterface.h"
-#include "include/manipulatorNetworkInterface.h"
+#include "../../../tudresden/components/DriverReactionModel/AgentStateRecorder/AgentStateRecorder.h" //DReaM
 #include "agentFactory.h"
 #include "agentType.h"
-#include "channel.h"
-#include "component.h"
 #include "bindings/dataBuffer.h"
-#include "observationModule.h"
+#include "bindings/stochastics.h"
+#include "channel.h"
+#include "common/log.h"
+#include "component.h"
+#include "include/agentBlueprintProviderInterface.h"
+#include "include/eventDetectorNetworkInterface.h"
+#include "include/manipulatorNetworkInterface.h"
+#include "include/observationNetworkInterface.h"
 #include "modelElements/parameters.h"
+#include "observationModule.h"
+#include "parameterbuilder.h"
+#include "sampler.h"
 #include "scheduler/runResult.h"
 #include "scheduler/scheduler.h"
 #include "spawnPointNetwork.h"
-#include "bindings/stochastics.h"
-#include "parameterbuilder.h"
-#include "sampler.h"
 
 constexpr char SPAWNER[] = {"Spawner"};
 
@@ -91,6 +92,8 @@ bool RunInstantiator::ExecuteRun()
         }
         LOG_INTERN(LogLevel::DebugCore) << std::endl
                                         << "### run successful ###";
+
+        AgentStateRecorder::ResetAgentStateRecorder(); // DReaM: start write output
 
         observationNetwork.FinalizeRun(runResult);
         ClearRun();

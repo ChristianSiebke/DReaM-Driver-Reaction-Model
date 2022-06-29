@@ -58,6 +58,7 @@
 #include <QCommandLineParser>
 #include <qcoreapplication.h>
 
+#include "AgentStateRecorder/AgentStateRecorder.h"
 #include "Common/ComplexSignals.h"
 #include "Common/primitiveSignals.h"
 #include "Components/ActionDecision/ActionDecision.h"
@@ -67,7 +68,6 @@
 #include "Components/Navigation.h"
 #include "Components/TrafficSignMemory/TrafficSignMemory.h"
 #include "DriverReactionModel.h"
-#include "agentstaterecorder.h"
 #include "core/opSimulation/framework/commandLineParser.h"
 #include "core/opSimulation/framework/sampler.h"
 #include "include/modelInterface.h"
@@ -117,7 +117,7 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
         DReaM.SetComponent(90, std::move(navigation));
         DReaM.SetComponent(80, std::move(gazeMovement));
         DReaM.SetComponent(70, std::move(actionDecision));
-        agentStateRecorder = &agentStateRecorder::getInstance(resultPath);
+        agentStateRecorder = AgentStateRecorder::GetInstance(resultPath);
         //------------------------------------------------------
     }
 
@@ -135,7 +135,7 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
      * component)
      * @param[in]     time           Current scheduling time
      */
-    void UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const>& data, int time);
+    void UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time);
 
     /*!
      * \brief Update outputs.
@@ -224,7 +224,8 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
     LoggerInterface loggerInterface;
     std::unique_ptr<BehaviourData> behaviourData;
 
-    agentStateRecorder* agentStateRecorder;
+    std::shared_ptr<AgentStateRecorder> agentStateRecorder;
+
     ObservationInterface* observerInstance{nullptr};
 
     //-END-reaction time--//

@@ -185,7 +185,7 @@ add_openpass_target(
     importer
     modelElements
     modules
-
+    ../../tudresden
   LIBRARIES
     Boost::headers
     Qt5::Core
@@ -193,6 +193,7 @@ add_openpass_target(
     Qt5::XmlPatterns
     Common
     CoreCommon
+    AgentStateRecorder
 )
 
 set(COMPONENT_NAME opSimulation)
@@ -207,7 +208,6 @@ add_openpass_target(
 
   LIBRARIES
     SimulationCore
-
   INCDIRS
     .
     ../../../..

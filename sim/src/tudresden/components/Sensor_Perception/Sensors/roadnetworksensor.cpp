@@ -550,7 +550,7 @@ StoppingPointData RoadNetworkSensor::CreateStoppingPoints(std::vector<std::share
 
     for (auto junction : junctions) {
         auto junctionId = junction->GetOpenDriveId();
-        std::map<OwlId, StoppingPointMap> tmp;
+        std::unordered_map<OwlId, StoppingPointMap> tmp;
         spData.stoppingPoints.insert(std::make_pair(junctionId, tmp));
         for (auto road : junction->GetIncomingRoads()) {
             // TODO get last lanes of the road, not all of them (make method in road/lane)
@@ -562,7 +562,8 @@ StoppingPointData RoadNetworkSensor::CreateStoppingPoints(std::vector<std::share
                 if (lane->GetType() != LaneType::Driving && lane->GetType() != LaneType::Sidewalk && lane->GetType() != LaneType::Biking) {
                     continue;
                 }
-                std::map<StoppingPointType, StoppingPoint> sps = stoppingPointCalculation.DetermineStoppingPoints(junction.get(), lane);
+                std::unordered_map<StoppingPointType, StoppingPoint> sps =
+                    stoppingPointCalculation.DetermineStoppingPoints(junction.get(), lane);
                 // std::cout << "roadnetwork_sps: " << sps.begin()->second.road->GetOpenDriveId();
                 spData.stoppingPoints.at(junctionId).insert(std::make_pair(lane->GetOwlId(), sps));
             }

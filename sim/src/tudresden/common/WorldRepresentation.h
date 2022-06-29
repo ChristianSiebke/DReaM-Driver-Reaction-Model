@@ -289,7 +289,7 @@ class InfrastructureRepresentation {
      */
     static const std::optional<NextDirectionLanes> NextLanes(bool movingInLaneDirection, const MentalInfrastructure::Lane* currentLane);
 
-    const std::map<StoppingPointType, StoppingPoint> &GetStoppingPoints(OdId junctionId, OwlId laneId) const {
+    const std::unordered_map<StoppingPointType, StoppingPoint> &GetStoppingPoints(OdId junctionId, OwlId laneId) const {
         return infrastructure->GetStoppingPoints(junctionId, laneId);
     }
 
