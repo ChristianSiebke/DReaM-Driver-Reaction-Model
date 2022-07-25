@@ -35,29 +35,24 @@ class DriverReactionModel {
       void UpdateDReaM(int time, std::shared_ptr<EgoPerception> egoAgent, std::vector<std::shared_ptr<AgentPerception>> ambientAgents,
                        std::shared_ptr<InfrastructurePerception> infrastructure,
                        std::vector<const MentalInfrastructure::TrafficSign *> trafficSigns);
-
       double GetAcceleration();
-
       const NavigationDecision GetRouteDecision();
-
       const GazeState GetGazeState();
-
       const std::vector<Common::Vector2d> GetSegmentControlFixationPoints();
-
       const WorldRepresentation &GetWorldRepresentation();
-
       const WorldInterpretation &GetWorldInterpretation();
 
   private:
-      void SetComponent(int priority, std::unique_ptr<Component::ComponentInterface> component);
       void UpdateInput(int time, std::shared_ptr<EgoPerception> egoAgent, std::vector<std::shared_ptr<AgentPerception>> ambientAgents,
                        std::shared_ptr<InfrastructurePerception> infrastructure,
                        std::vector<const MentalInfrastructure::TrafficSign *> trafficSigns);
-
       void UpdateComponents();
       void UpdateAgentStateRecorder(int time, int id, std::shared_ptr<InfrastructurePerception> infrastructure);
 
-      std::map<int, std::unique_ptr<Component::ComponentInterface>> components;
       std::shared_ptr<AgentStateRecorder::AgentStateRecorder> agentStateRecorder;
       std::unique_ptr<BehaviourData> behaviourData;
+      std::unique_ptr<CognitiveMap::CognitiveMap> cognitiveMap;
+      std::unique_ptr<Navigation::Navigation> navigation;
+      std::unique_ptr<GazeMovement::GazeMovement> gazeMovement;
+      std::unique_ptr<ActionDecision::ActionDecision> actionDecision;
 };

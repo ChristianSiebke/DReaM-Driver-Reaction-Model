@@ -33,9 +33,6 @@ void ConflictAreaCalculator::AssignPotentialConflictAreasToLanes(std::shared_ptr
                     a.otherEndS = conflictAreas->second.end.sOffset;
                     perceptionData->conflictPoints.push_back(a);
 
-                    std::cout << "Current Lane: " << currentLane->GetOpenDriveId()
-                              << " - Other Lane: " << intersectionLane->GetOpenDriveId() << std::endl;
-
                     ConflictPoint b;
                     b.junctionOpenDriveRoadId = intersectionLane->GetRoad()->GetOpenDriveId();
                     b.junctionOpenDriveLaneId = intersectionLane->GetOpenDriveId();

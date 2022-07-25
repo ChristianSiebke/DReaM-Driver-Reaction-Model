@@ -208,7 +208,7 @@ double Anticipation::IDMAcceleration(double velTarget, double dv, double sDiff) 
         aWish = maxEmergencyDeceleration;
     } else if (velTarget == 0.0) {
         double b = (velCurrent * velCurrent) / (2.0 * (sDiff - GetBehaviourData().adBehaviour.minDistanceStationaryTraffic));
-        aWish = -1 * ((b * b) / std::abs(GetBehaviourData().adBehaviour.comfortDeceleration.mean));
+        aWish = -1 * ((b * b) / std::abs(comfortDeceleration));
     } else {
         // free term
         double exponent = 4.0;
@@ -216,8 +216,8 @@ double Anticipation::IDMAcceleration(double velTarget, double dv, double sDiff) 
         // s*(v, dv) part of the differential equation
         double sWish =
             std::max(0.0, velCurrent * GetBehaviourData().adBehaviour.desiredFollowingTimeHeadway +
-                              ((velCurrent * dv) / (2.0 * std::sqrt(GetBehaviourData().adBehaviour.maxAcceleration *
-                                                                    std::abs(GetBehaviourData().adBehaviour.comfortDeceleration.mean)))));
+                              ((velCurrent * dv) /
+                               (2.0 * std::sqrt(GetBehaviourData().adBehaviour.maxAcceleration * std::abs(comfortDeceleration)))));
         sWish += GetBehaviourData().adBehaviour.minDistanceStationaryTraffic;
         // interaction term
         double aInt = std::pow((sWish / sDiff), 2.0);
@@ -251,8 +251,7 @@ double Anticipation::CalculatePhaseAcceleration(double velTarget, double v) {
 
     if (distance < std::numeric_limits<double>::infinity()) {
         double a = (GetBehaviourData().adBehaviour.maxAcceleration * v * v * ((velTarget - v) * (velTarget - v))) /
-                   (4 * GetBehaviourData().adBehaviour.maxAcceleration * std::abs(GetBehaviourData().adBehaviour.comfortDeceleration.mean) *
-                    (distance * distance));
+                   (4 * GetBehaviourData().adBehaviour.maxAcceleration * std::abs(comfortDeceleration) * (distance * distance));
         a = velTarget - v < 0 ? -a : a;
         return Common::ValueInBounds(GetBehaviourData().adBehaviour.comfortDeceleration.min, a,
                                      GetBehaviourData().adBehaviour.maxAcceleration);

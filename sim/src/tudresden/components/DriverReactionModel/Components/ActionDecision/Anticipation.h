@@ -31,10 +31,18 @@ class Anticipation {
         : worldRepresentation{worldRepresentation}, worldInterpretation{worldInterpretation}, stochastics{stochastics},
           loggerInterface{loggerInterface}, behaviourData{behaviourData} {
         DistributionEntry maxEmergencyDecelDistribution = GetBehaviourData().adBehaviour.maxEmergencyDeceleration;
-        double emergencyDec =
-            stochastics->GetNormalDistributed(maxEmergencyDecelDistribution.mean, maxEmergencyDecelDistribution.std_deviation);
+        double emergencyDec = -stochastics->GetLogNormalDistributed(std::abs(maxEmergencyDecelDistribution.mean),
+                                                                    maxEmergencyDecelDistribution.std_deviation);
+        std::cout << "emergencyDec: " << emergencyDec << std::endl;
         maxEmergencyDeceleration =
             Common::ValueInBounds(maxEmergencyDecelDistribution.min, emergencyDec, maxEmergencyDecelDistribution.max);
+
+        DistributionEntry comfortDecelerationDistribution = GetBehaviourData().adBehaviour.comfortDeceleration;
+        double drawnComfortDec = -stochastics->GetLogNormalDistributed(std::abs(comfortDecelerationDistribution.mean),
+                                                                       comfortDecelerationDistribution.std_deviation);
+        comfortDeceleration =
+            Common::ValueInBounds(comfortDecelerationDistribution.min, drawnComfortDec, comfortDecelerationDistribution.max);
+        std::cout << "comfortDeceleration: " << comfortDeceleration << std::endl;
     }
     double IntersectionGap(const std::unique_ptr<AgentInterpretation>& agent, double targetVelocity);
 
@@ -69,7 +77,7 @@ class Anticipation {
     const BehaviourData& GetBehaviourData() const { return behaviourData; }
 
     double maxEmergencyDeceleration;
-
+    double comfortDeceleration;
     std::vector<int> priorityAgents;
     std::vector<int> obstacles;
     const WorldRepresentation& worldRepresentation;
