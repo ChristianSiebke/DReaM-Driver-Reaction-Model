@@ -2,16 +2,16 @@
 
 #include <stdio.h>
 
-Logger::Logger(uint64_t agentId, DReaMLogLevel defaultLevel) : agentId{agentId} {
+Logger::Logger(uint64_t agentId, std::string logPath, DReaMLogLevel defaultLevel) : agentId{agentId} {
     defaultLogLevel = defaultLevel;
-}
-void Logger::SetPath(std::string path) {
+    std::string path = logPath + "\\" + "agent" + std::to_string(agentId) + ".txt";
     stream = std::ofstream(path, std::ofstream::out);
 }
+
 Logger::~Logger() { stream.close(); }
 
 void Logger::Log(const std::string &message, DReaMLogLevel level) {
-    stream <<"[" << NowTime() << "] [" << ToString(level) << "]:\t";
+    stream << "[" << NowTime() << "] [" << ToString(level) << "]:\t";
     stream <<" | Agent: "<<agentId<< " | "<< message << "\n";
 }
 

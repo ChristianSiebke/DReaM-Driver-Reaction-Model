@@ -13,43 +13,51 @@
  *****************************************************************************/
 
 #pragma once
+#include "AgentStateRecorder/AgentStateRecorder.h"
 #include "Components/ActionDecision/ActionDecision.h"
 #include "Components/CognitiveMap/CognitiveMap.h"
 #include "Components/ComponentInterface.h"
 #include "Components/GazeMovement/GazeMovement.h"
-#include "Components/Navigation.h"
 #include "Components/GazeMovement/RoadSegments/RoadSegmentInterface.h"
+#include "Components/Navigation.h"
 #include "Components/TrafficSignMemory/TrafficSignMemory.h"
 
 class DriverReactionModel {
   public:
-    DriverReactionModel() {}
-    DriverReactionModel(const DriverReactionModel&) = delete;
-    DriverReactionModel(DriverReactionModel&&) = delete;
-    DriverReactionModel& operator=(const DriverReactionModel&) = delete;
-    DriverReactionModel& operator=(DriverReactionModel&&) = delete;
-    ~DriverReactionModel() = default;
+      DriverReactionModel(std::string behaviourConfigPath, std::string resultPath, LoggerInterface &loggerInterface, int cycleTime,
+                          StochasticsInterface *stochastics);
+      DriverReactionModel(const DriverReactionModel &) = delete;
+      DriverReactionModel(DriverReactionModel &&) = delete;
+      DriverReactionModel &operator=(const DriverReactionModel &) = delete;
+      DriverReactionModel &operator=(DriverReactionModel &&) = delete;
+      ~DriverReactionModel() = default;
 
-    void UpdateInput(int time, std::shared_ptr<EgoPerception> egoAgent, std::vector<std::shared_ptr<AgentPerception>> ambientAgents,
-                     std::shared_ptr<InfrastructurePerception> infrastructure,
-                     std::vector<const MentalInfrastructure::TrafficSign*> trafficSigns);
+      void UpdateDReaM(int time, std::shared_ptr<EgoPerception> egoAgent, std::vector<std::shared_ptr<AgentPerception>> ambientAgents,
+                       std::shared_ptr<InfrastructurePerception> infrastructure,
+                       std::vector<const MentalInfrastructure::TrafficSign *> trafficSigns);
 
-    void UpdateComponents();
+      double GetAcceleration();
 
-    void SetComponent(int priority, std::unique_ptr<Component::ComponentInterface> component);
+      const NavigationDecision GetRouteDecision();
 
-    double GetAcceleration();
+      const GazeState GetGazeState();
 
-    const NavigationDecision GetRouteDecision();
+      const std::vector<Common::Vector2d> GetSegmentControlFixationPoints();
 
-    const GazeState GetGazeState();
+      const WorldRepresentation &GetWorldRepresentation();
 
-    const std::vector<Common::Vector2d> GetSegmentControlFixationPoints();
-
-    const WorldRepresentation& GetWorldRepresentation();
-
-    const WorldInterpretation& GetWorldInterpretation();
+      const WorldInterpretation &GetWorldInterpretation();
 
   private:
-    std::map<int, std::unique_ptr<Component::ComponentInterface>> components;
+      void SetComponent(int priority, std::unique_ptr<Component::ComponentInterface> component);
+      void UpdateInput(int time, std::shared_ptr<EgoPerception> egoAgent, std::vector<std::shared_ptr<AgentPerception>> ambientAgents,
+                       std::shared_ptr<InfrastructurePerception> infrastructure,
+                       std::vector<const MentalInfrastructure::TrafficSign *> trafficSigns);
+
+      void UpdateComponents();
+      void UpdateAgentStateRecorder(int time, int id, std::shared_ptr<InfrastructurePerception> infrastructure);
+
+      std::map<int, std::unique_ptr<Component::ComponentInterface>> components;
+      std::shared_ptr<AgentStateRecorder::AgentStateRecorder> agentStateRecorder;
+      std::unique_ptr<BehaviourData> behaviourData;
 };

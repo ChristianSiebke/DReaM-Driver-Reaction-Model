@@ -58,14 +58,8 @@
 #include <QCommandLineParser>
 #include <qcoreapplication.h>
 
-#include "AgentStateRecorder/AgentStateRecorder.h"
 #include "Common/ComplexSignals.h"
 #include "Common/primitiveSignals.h"
-#include "Components/ActionDecision/ActionDecision.h"
-#include "Components/CognitiveMap/CognitiveMap.h"
-#include "Components/GazeMovement/GazeMovement.h"
-#include "Components/Importer/BehaviourImporter.h"
-#include "Components/Navigation.h"
 #include "Components/TrafficSignMemory/TrafficSignMemory.h"
 #include "DriverReactionModel.h"
 #include "core/opSimulation/framework/commandLineParser.h"
@@ -89,36 +83,17 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
                                  const CallbackInterface *callbacks, AgentInterface *agent) :
         AlgorithmInterface(componentName, isInit, priority, offsetTime, responseTime, cycleTime, stochastics, parameters, publisher,
                            callbacks, agent),
-        logger(agent->GetId()),
-        loggerInterface(logger) {
-        auto arguments = QCoreApplication::arguments();
-        CommandLineArguments parsedArguments = CommandLineParser::Parse(arguments);
+        logger(agent->GetId(), QCoreApplication::applicationDirPath().toStdString() + "\\" +
+                                   CommandLineParser::Parse(QCoreApplication::arguments()).resultsPath),
+        loggerInterface(logger),
+        DReaM(QCoreApplication::applicationDirPath().toStdString() + "\\" +
+                  CommandLineParser::Parse(QCoreApplication::arguments()).configsPath + "\\" + "behaviour.xml",
+              QCoreApplication::applicationDirPath().toStdString() + "\\" +
+                  CommandLineParser::Parse(QCoreApplication::arguments()).resultsPath + "\\",
+              loggerInterface, cycleTime, stochastics) {
+        CommandLineArguments parsedArguments = CommandLineParser::Parse(QCoreApplication::arguments());
         std::string resultPath = QCoreApplication::applicationDirPath().toStdString() + "\\" + parsedArguments.resultsPath + "\\";
         std::string logPath = resultPath + "agent" + std::to_string(agent->GetId()) + ".txt";
-        std::string behaviourConfigPath =
-            QCoreApplication::applicationDirPath().toStdString() + "\\" + parsedArguments.configsPath + "\\" + "behaviour.xml";
-        logger.SetPath(logPath);
-
-        // TODO: wrap all in DReaM constructor ----
-        BehaviourImporter importer(behaviourConfigPath, &loggerInterface);
-        behaviourData = importer.GetBehaviourData();
-        std::unique_ptr<Component::ComponentInterface> cognitiveMap =
-            std::make_unique<CognitiveMap::CognitiveMap>(cycleTime, stochastics, &loggerInterface, *behaviourData);
-        std::unique_ptr<Component::ComponentInterface> navigation =
-            std::make_unique<Navigation::Navigation>(cognitiveMap->GetWorldRepresentation(), cognitiveMap->GetWorldInterpretation(),
-                                                     cycleTime, stochastics, &loggerInterface, *behaviourData);
-        std::unique_ptr<Component::ComponentInterface> gazeMovement =
-            std::make_unique<GazeMovement::GazeMovement>(cognitiveMap->GetWorldRepresentation(), cognitiveMap->GetWorldInterpretation(),
-                                                         cycleTime, stochastics, &loggerInterface, *behaviourData);
-        std::unique_ptr<Component::ComponentInterface> actionDecision =
-            std::make_unique<ActionDecision::ActionDecision>(cognitiveMap->GetWorldRepresentation(), cognitiveMap->GetWorldInterpretation(),
-                                                             cycleTime, stochastics, &loggerInterface, *behaviourData);
-        DReaM.SetComponent(100, std::move(cognitiveMap));
-        DReaM.SetComponent(90, std::move(navigation));
-        DReaM.SetComponent(80, std::move(gazeMovement));
-        DReaM.SetComponent(70, std::move(actionDecision));
-        agentStateRecorder = AgentStateRecorder::GetInstance(resultPath);
-        //------------------------------------------------------
     }
 
     /*!
@@ -216,17 +191,12 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
     bool out_flasher = false;
     //*************************************************
 
-    double out_longitudinalaccelerationWish = 0;
+    double out_longitudinalAccelerationWish = 0;
     GazeState outGazeState;
     std::vector<Common::Vector2d> segmentControlFixPoints;
 
     Logger logger;
     LoggerInterface loggerInterface;
-    std::unique_ptr<BehaviourData> behaviourData;
-
-    std::shared_ptr<AgentStateRecorder> agentStateRecorder;
-
-    ObservationInterface* observerInstance{nullptr};
-
+    ObservationInterface *observerInstance{nullptr};
     //-END-reaction time--//
 };

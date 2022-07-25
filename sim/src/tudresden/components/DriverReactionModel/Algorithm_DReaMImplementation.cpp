@@ -116,7 +116,7 @@ void AlgorithmDReaMImplementation::UpdateOutput(int localLinkId, std::shared_ptr
     }
     else if (localLinkId == 2) {
         try {
-            data = std::make_shared<AccelerationSignal const>(componentState, out_longitudinalaccelerationWish);
+            data = std::make_shared<AccelerationSignal const>(componentState, out_longitudinalAccelerationWish);
         }
         catch (const std::bad_alloc &) {
             const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 2 = AccelerationSignal)";
@@ -140,10 +140,9 @@ void AlgorithmDReaMImplementation::Trigger(int time) {
     Q_UNUSED(time)
     try {
         std::cout << "time: " << time << std::endl;
-        DReaM.UpdateInput(time, egoPerception, ambientAgents, infrastructurePerception, trafficSigns);
-        DReaM.UpdateComponents();
+        DReaM.UpdateDReaM(time, egoPerception, ambientAgents, infrastructurePerception, trafficSigns);
         out_indicatorState = static_cast<int>(DReaM.GetRouteDecision().indicator);
-        out_longitudinalaccelerationWish = DReaM.GetAcceleration();
+        out_longitudinalAccelerationWish = DReaM.GetAcceleration();
         outGazeState = DReaM.GetGazeState();
         segmentControlFixPoints = DReaM.GetSegmentControlFixationPoints();
 
@@ -176,17 +175,4 @@ void AlgorithmDReaMImplementation::Trigger(int time) {
         LOG(CbkLogLevel::Error, error.what());
         throw error;
     }
-
-    std::vector<std::tuple<int, double, double, double>> otherAgents;
-
-    for (auto &oAgent : *DReaM.GetWorldRepresentation().agentMemory) {
-        otherAgents.push_back(std::tuple<int, double, double, double>(oAgent->GetID(), oAgent->GetRefPosition().x,
-                                                                      oAgent->GetRefPosition().y, oAgent->GetYawAngle()));
-    }
-
-    agentStateRecorder->AddGazeStates(time, GetAgent()->GetId(), outGazeState);
-    agentStateRecorder->AddOtherAgents(time, GetAgent()->GetId(), otherAgents);
-    agentStateRecorder->AddCrossingInfos(time, GetAgent()->GetId(), DReaM.GetWorldInterpretation().crossingInfo);
-    agentStateRecorder->AddFixationPoints(time, GetAgent()->GetId(), segmentControlFixPoints);
-    agentStateRecorder->AddInfrastructurePerception(infrastructurePerception);
 }

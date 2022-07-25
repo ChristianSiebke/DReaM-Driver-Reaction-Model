@@ -14,11 +14,40 @@
 
 #include "DriverReactionModel.h"
 
-void DriverReactionModel::UpdateComponents() {
-    for (std::map<int, std::unique_ptr<Component::ComponentInterface>>::reverse_iterator iter = components.rbegin();
-         iter != components.rend(); ++iter) {
-        iter->second->Update();
-    }
+#include "Components/ActionDecision/ActionDecision.h"
+#include "Components/CognitiveMap/CognitiveMap.h"
+#include "Components/GazeMovement/GazeMovement.h"
+#include "Components/Importer/BehaviourImporter.h"
+
+DriverReactionModel::DriverReactionModel(std::string behaviourConfigPath, std::string resultPath, LoggerInterface &loggerInterface,
+                                         int cycleTime, StochasticsInterface *stochastics) {
+    BehaviourImporter importer(behaviourConfigPath, &loggerInterface);
+    behaviourData = importer.GetBehaviourData();
+    std::unique_ptr<Component::ComponentInterface> cognitiveMap =
+        std::make_unique<CognitiveMap::CognitiveMap>(cycleTime, stochastics, &loggerInterface, *behaviourData);
+    std::unique_ptr<Component::ComponentInterface> navigation =
+        std::make_unique<Navigation::Navigation>(cognitiveMap->GetWorldRepresentation(), cognitiveMap->GetWorldInterpretation(), cycleTime,
+                                                 stochastics, &loggerInterface, *behaviourData);
+    std::unique_ptr<Component::ComponentInterface> gazeMovement =
+        std::make_unique<GazeMovement::GazeMovement>(cognitiveMap->GetWorldRepresentation(), cognitiveMap->GetWorldInterpretation(),
+                                                     cycleTime, stochastics, &loggerInterface, *behaviourData);
+    std::unique_ptr<Component::ComponentInterface> actionDecision =
+        std::make_unique<ActionDecision::ActionDecision>(cognitiveMap->GetWorldRepresentation(), cognitiveMap->GetWorldInterpretation(),
+                                                         cycleTime, stochastics, &loggerInterface, *behaviourData);
+    SetComponent(100, std::move(cognitiveMap));
+    SetComponent(90, std::move(navigation));
+    SetComponent(80, std::move(gazeMovement));
+    SetComponent(70, std::move(actionDecision));
+    agentStateRecorder = AgentStateRecorder::AgentStateRecorder::GetInstance(resultPath);
+}
+
+void DriverReactionModel::UpdateDReaM(int time, std::shared_ptr<EgoPerception> egoAgent,
+                                      std::vector<std::shared_ptr<AgentPerception>> ambientAgents,
+                                      std::shared_ptr<InfrastructurePerception> infrastructure,
+                                      std::vector<const MentalInfrastructure::TrafficSign *> trafficSigns) {
+    UpdateInput(time, egoAgent, ambientAgents, infrastructure, trafficSigns);
+    UpdateComponents();
+    UpdateAgentStateRecorder(time, egoAgent->id, infrastructure);
 }
 
 void DriverReactionModel::UpdateInput(int time, std::shared_ptr<EgoPerception> egoAgent,
@@ -30,6 +59,25 @@ void DriverReactionModel::UpdateInput(int time, std::shared_ptr<EgoPerception> e
             cognitiveMap->UpdateInput(time, egoAgent, ambientAgents, infrastructure, trafficSigns);
         };
     });
+}
+
+void DriverReactionModel::UpdateComponents() {
+    for (std::map<int, std::unique_ptr<Component::ComponentInterface>>::reverse_iterator iter = components.rbegin();
+         iter != components.rend(); ++iter) {
+        iter->second->Update();
+    }
+}
+
+void DriverReactionModel::UpdateAgentStateRecorder(int time, int id, std::shared_ptr<InfrastructurePerception> infrastructure) {
+    std::vector<AgentPerception> observedAgents;
+    for (const auto &oAgent : *(GetWorldRepresentation().agentMemory)) {
+        observedAgents.push_back(oAgent->GetInternalData());
+    }
+    agentStateRecorder->AddOtherAgents(time, id, observedAgents);
+    agentStateRecorder->AddGazeStates(time, id, GetGazeState());
+    agentStateRecorder->AddCrossingInfos(time, id, GetWorldInterpretation().crossingInfo);
+    agentStateRecorder->AddFixationPoints(time, id, GetSegmentControlFixationPoints());
+    agentStateRecorder->AddInfrastructurePerception(infrastructure);
 }
 
 void DriverReactionModel::SetComponent(int priority, std::unique_ptr<Component::ComponentInterface> component) {

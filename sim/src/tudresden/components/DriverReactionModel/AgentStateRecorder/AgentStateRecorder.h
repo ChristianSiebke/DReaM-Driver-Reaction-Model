@@ -34,21 +34,24 @@
 #define EXPORT DReaMIMPORT
 #endif
 
+namespace AgentStateRecorder {
+using time = int;
+using agentID = int;
 //! Stores all collected data in the agentStateRecorder to be processed later
 struct Record {
     //! For each timestep, maps a map containing each agent's GazeState to the associated timestep
-    std::map<int, std::map<int, GazeState>> gazeStates;
-
-    //! For each timestep, maps a map containing the Id and position of other known agents for each agent, to the associated timestep
-    std::map<int, std::map<int, std::vector<std::tuple<int, double, double, double>>>> otherAgents;
+    std::map<time, std::map<agentID, GazeState>> gazeStates;
 
     //! For each timestep, maps a map containing each agent's CrossingInfo to the associated timestep
-    std::map<int, std::map<int, CrossingInfo>> crossingInfos;
+    std::map<time, std::map<agentID, CrossingInfo>> crossingInfos;
 
     //! For each timestep, maps a map containing each agent's segmentControlFixationPoints to the associated timestep
-    std::map<int, std::map<int, std::vector<Common::Vector2d>>> segmentControlFixationPoints;
+    std::map<time, std::map<agentID, std::vector<Common::Vector2d>>> segmentControlFixationPoints;
 
     std::shared_ptr<InfrastructurePerception> infrastructurePerception;
+
+    //! For each timestep, maps a map containing the Id and position of other known agents for each agent, to the associated timestep
+    std::map<time, std::map<agentID, std::vector<AgentPerception>>> observedAgents;
 };
 
 /*!
@@ -89,7 +92,7 @@ public:
 
     void AddGazeStates(int, int, GazeState);
 
-    void AddOtherAgents(int, int, std::vector<std::tuple<int, double, double, double>>);
+    void AddOtherAgents(int, int, std::vector<AgentPerception>);
 
     void AddCrossingInfos(int, int, CrossingInfo);
 
@@ -118,3 +121,4 @@ private:
     //! All information saved in the agentStateRecorder is written into an xml file
     void WriteOutputFile();
 };
+} // namespace agentRecordState

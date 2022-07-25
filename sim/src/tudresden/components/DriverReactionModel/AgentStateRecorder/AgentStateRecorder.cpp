@@ -1,5 +1,6 @@
 #include "AgentStateRecorder.h"
 
+namespace AgentStateRecorder {
 std::shared_ptr<AgentStateRecorder> AgentStateRecorder::instance = nullptr;
 
 // string representations of enum values, can easily be accessed using array[(int) enum_value]
@@ -19,7 +20,7 @@ void AgentStateRecorder::AddInfrastructurePerception(std::shared_ptr<Infrastruct
 
 void AgentStateRecorder::AddGazeStates(int time, int id, GazeState gazeState) {
     if (record.gazeStates.find(time) == record.gazeStates.end()) {
-        std::map<int, GazeState> idMap;
+        std::map<agentID, GazeState> idMap;
         record.gazeStates.insert(std::make_pair(time, idMap));
     }
     record.gazeStates.at(time).insert(std::make_pair(id, gazeState));
@@ -27,22 +28,22 @@ void AgentStateRecorder::AddGazeStates(int time, int id, GazeState gazeState) {
 
 void AgentStateRecorder::AddCrossingInfos(int time, int id, CrossingInfo info) {
     if (record.crossingInfos.find(time) == record.crossingInfos.end()) {
-        std::map<int, CrossingInfo> idMap;
+        std::map<agentID, CrossingInfo> idMap;
         record.crossingInfos.insert(std::make_pair(time, idMap));
     }
     record.crossingInfos.at(time).insert(std::make_pair(id, info));
 }
 
-void AgentStateRecorder::AddOtherAgents(int time, int id, std::vector<std::tuple<int, double, double, double>> agents) {
-    if (record.otherAgents.find(time) == record.otherAgents.end()) {
-        std::map<int, std::vector<std::tuple<int, double, double, double>>> idMap;
-        record.otherAgents.insert(std::make_pair(time, idMap));
+void AgentStateRecorder::AddOtherAgents(int time, int id, std::vector<AgentPerception> agents) {
+    if (record.observedAgents.find(time) == record.observedAgents.end()) {
+        std::map<agentID, std::vector<AgentPerception>> idMap;
+        record.observedAgents.insert(std::make_pair(time, idMap));
     }
-    record.otherAgents.at(time).insert(std::make_pair(id, agents));
+    record.observedAgents.at(time).insert(std::make_pair(id, agents));
 }
 void AgentStateRecorder::AddFixationPoints(int time, int id, std::vector<Common::Vector2d> fixationPoints) {
     if (record.segmentControlFixationPoints.find(time) == record.segmentControlFixationPoints.end()) {
-        std::map<int, std::vector<Common::Vector2d>> idMap;
+        std::map<agentID, std::vector<Common::Vector2d>> idMap;
         record.segmentControlFixationPoints.insert(std::make_pair(time, idMap));
     }
     record.segmentControlFixationPoints.at(time).insert(std::make_pair(id, fixationPoints));
@@ -63,12 +64,12 @@ std::string AgentStateRecorder::GenerateDataSet(int time, int agentId) {
 
     //[otherAgentId,double,double,double]
     outputLine += "[";
-    for (auto agent : record.otherAgents.at(time).at(agentId)) {
+    for (auto agent : record.observedAgents.at(time).at(agentId)) {
         outputLine += "{";
-        outputLine += std::to_string(std::get<0>(agent)) += " | ";
-        outputLine += std::to_string(std::get<1>(agent)) += " | ";
-        outputLine += std::to_string(std::get<2>(agent)) += " | ";
-        outputLine += std::to_string(std::get<3>(agent)) += "}";
+        outputLine += std::to_string(agent.id) += " | ";
+        outputLine += std::to_string(agent.refPosition.x) += " | ";
+        outputLine += std::to_string(agent.refPosition.y) += " | ";
+        outputLine += std::to_string(agent.yawAngle) += "}";
     }
     outputLine += "],";
 
@@ -186,3 +187,4 @@ void AgentStateRecorder::WriteOutputFile() {
     boost::property_tree::xml_writer_settings<std::string> settings(' ', 2);
     boost::property_tree::write_xml(resultPath + "DReaMOutput.xml", valueTree, std::locale(), settings);
 }
+} // namespace AgentStateRecorder
