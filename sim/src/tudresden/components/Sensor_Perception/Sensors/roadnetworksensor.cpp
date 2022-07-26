@@ -7,15 +7,7 @@ std::shared_ptr<RoadNetworkSensor> RoadNetworkSensor::instance = nullptr;
 void ConflictAreaCalculator::AssignPotentialConflictAreasToLanes(std::shared_ptr<InfrastructurePerception> perceptionData) const {
     for (const auto &currentLane : perceptionData->lanes) {
         for (const auto &intersectionLane : perceptionData->lanes) {
-            if (currentLane == intersectionLane)
-                continue;
-            if (currentLane->GetConflictAreaWithLane(intersectionLane.get()))
-                continue;
-            if (currentLane->GetType() == LaneType::Shoulder || intersectionLane->GetType() == LaneType::Shoulder)
-                continue;
-            if (LanesDoNotIntersect(currentLane.get(), intersectionLane.get()))
-                continue;
-            if (LanesHavePotentialConfliceArea(currentLane.get(), intersectionLane.get())) {
+            if (PotentialConflictAreaExist(currentLane, intersectionLane)) {
                 if (auto conflictAreas = CalculateConflictAreas(currentLane.get(), intersectionLane.get())) {
                     const_cast<MentalInfrastructure::Lane *>(currentLane.get())
                         ->AddConflictArea({intersectionLane.get(), conflictAreas->first});
@@ -47,6 +39,23 @@ void ConflictAreaCalculator::AssignPotentialConflictAreasToLanes(std::shared_ptr
             }
         }
     }
+}
+
+bool ConflictAreaCalculator::PotentialConflictAreaExist(const std::shared_ptr<const MentalInfrastructure::Lane> currentLane,
+                                                        const std::shared_ptr<const MentalInfrastructure::Lane> intersectionLane) const {
+    if (currentLane == intersectionLane)
+        return false;
+    if (currentLane->GetConflictAreaWithLane(intersectionLane.get()))
+        return false;
+    if ((currentLane->GetType() == LaneType::Shoulder || intersectionLane->GetType() == LaneType::Shoulder) ||
+        (currentLane->GetType() == LaneType::Border || intersectionLane->GetType() == LaneType::Border) ||
+        (currentLane->GetType() == LaneType::Parking || intersectionLane->GetType() == LaneType::Parking))
+        return false;
+    if (LanesDoNotIntersect(currentLane.get(), intersectionLane.get()))
+        return false;
+    if (LanesHavePotentialConfliceArea(currentLane.get(), intersectionLane.get()))
+        return true;
+    return false;
 }
 
 bool ConflictAreaCalculator::LanesDoNotIntersect(const MentalInfrastructure::Lane *laneA, const MentalInfrastructure::Lane *laneB) const {

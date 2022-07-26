@@ -58,12 +58,6 @@ void XJunction::CalculateControlFixPointsOnXJunction() {
     //         | |A |
     //
     SortControlFixPoints(controlFixPointsOnXJunction);
-
-    if (controlFixPointsOnXJunction.size() != 5) {
-        std::string message =
-            __FILE__ " Line: " + std::to_string(__LINE__) + "the number of control fixation points on X-Junction is incorrect";
-        throw std::runtime_error(message);
-    }
 };
 
 void XJunction::CalculateControlFixPointsOnRoads() {

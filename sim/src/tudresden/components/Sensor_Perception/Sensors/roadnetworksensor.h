@@ -14,6 +14,8 @@ public:
     void AssignPotentialConflictAreasToLanes(std::shared_ptr<InfrastructurePerception> perceptionData) const;
 
 private:
+    bool PotentialConflictAreaExist(const std::shared_ptr<const MentalInfrastructure::Lane> currentLane,
+                                    const std::shared_ptr<const MentalInfrastructure::Lane> intersectionLane) const;
     bool LanesDoNotIntersect(const MentalInfrastructure::Lane *laneA, const MentalInfrastructure::Lane *laneB) const;
 
     bool LanesHavePotentialConfliceArea(const MentalInfrastructure::Lane *laneA, const MentalInfrastructure::Lane *laneB) const;

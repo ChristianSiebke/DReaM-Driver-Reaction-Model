@@ -15,9 +15,6 @@
 #include <math.h>
 #include <string>
 
-using std::placeholders::_1;
-using std::placeholders::_2;
-
 namespace ActionDecision {
 
 MinEmergencyBrakeDelay::MinEmergencyBrakeDelay(double minTimeEmergencyBrakeIsActive, int cycleTime)
