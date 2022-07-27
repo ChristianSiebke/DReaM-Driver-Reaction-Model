@@ -46,6 +46,9 @@ struct LanePoint
 
 struct ConflictArea
 {
+    OdId junction;
+    OdId road;
+    OdId lane;
     LanePoint start;
     LanePoint end;
 };

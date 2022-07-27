@@ -20,8 +20,8 @@
 namespace ActionDecision {
 
 struct TimeToConflictArea {
-    double start; // time until the front of the vehicle reach conflict area
-    double end;   // time until the end of the vehicle leaves the conflict area
+    double vehicleFrontToCAStart; // time until the front of the vehicle reach conflict area
+    double vehicleBackToCAEnd;    // time until the end of the vehicle leaves the conflict area
 };
 
 class Anticipation {

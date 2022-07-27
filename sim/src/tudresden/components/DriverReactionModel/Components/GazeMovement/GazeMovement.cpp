@@ -33,7 +33,7 @@ void GazeMovement::DetermineGazeState() {
 
     if (auto collisionPoint = Common::ClosestCollisionPointByTime(worldInterpretation.interpretedAgents)) {
         if (collisionPoint->collisionImminent) {
-            currentGazeState = PerformAgentObserveGlance(collisionPoint->opponentID);
+            currentGazeState = PerformAgentObserveGlance(collisionPoint->oAgentID);
             return;
         }
     }

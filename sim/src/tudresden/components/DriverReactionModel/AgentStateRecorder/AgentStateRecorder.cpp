@@ -148,19 +148,19 @@ void AgentStateRecorder::WriteOutputFile() {
 
     // Adds conflict points to the output ptree
     boost::property_tree::ptree conflictPointTree;
-    for (ConflictPoint conflictPoint : record.infrastructurePerception->GetConflicPoints()) {
+    for (auto &conflictPoint : record.infrastructurePerception->GetConflictAreas()) {
         boost::property_tree::ptree parameterTree;
 
-        parameterTree.put("<xmlattr>.currentOdRoadId", conflictPoint.currentOpenDriveRoadId);
-        parameterTree.put("<xmlattr>.currentOdLaneId", conflictPoint.currentOpenDriveLaneId);
+        parameterTree.put("<xmlattr>.currentOdRoadId", conflictPoint.first.road);
+        parameterTree.put("<xmlattr>.currentOdLaneId", conflictPoint.first.lane);
 
-        parameterTree.put("<xmlattr>.intersectOdRoadId", conflictPoint.junctionOpenDriveRoadId);
-        parameterTree.put("<xmlattr>.intersectOdLaneId", conflictPoint.junctionOpenDriveLaneId);
+        parameterTree.put("<xmlattr>.intersectOdRoadId", conflictPoint.second.road);
+        parameterTree.put("<xmlattr>.intersectOdLaneId", conflictPoint.second.lane);
 
-        parameterTree.put("<xmlattr>.startSa", conflictPoint.currentStartS);
-        parameterTree.put("<xmlattr>.endSa", conflictPoint.currentEndS);
-        parameterTree.put("<xmlattr>.startSb", conflictPoint.otherStartS);
-        parameterTree.put("<xmlattr>.endSb", conflictPoint.otherEndS);
+        parameterTree.put("<xmlattr>.startSa", conflictPoint.first.start.sOffset);
+        parameterTree.put("<xmlattr>.endSa", conflictPoint.first.end.sOffset);
+        parameterTree.put("<xmlattr>.startSb", conflictPoint.second.start.sOffset);
+        parameterTree.put("<xmlattr>.endSb", conflictPoint.second.end.sOffset);
 
         conflictPointTree.add_child("ConflictArea", parameterTree);
     }

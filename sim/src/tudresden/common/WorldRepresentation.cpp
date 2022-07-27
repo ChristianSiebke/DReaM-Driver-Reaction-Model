@@ -257,7 +257,7 @@ double AgentRepresentation::ExtrapolateDistanceAlongLane(double timeStep) const 
     return IsMovingInLaneDirection() ? extrapolatedDistance : -extrapolatedDistance;
 }
 
-std::optional<ConflictArea> AgentRepresentation::PossibleConflictAreaAlongLane(const AgentRepresentation& observedAgent) const {
+std::optional<ConflictSituation> AgentRepresentation::PossibleConflictAreaAlongLane(const AgentRepresentation &observedAgent) const {
     auto egoLane = GetLane();
     auto egoNextLane = GetNextLane();
     auto observedLane = observedAgent.GetLane();
@@ -289,11 +289,11 @@ std::optional<ConflictArea> AgentRepresentation::PossibleConflictAreaAlongLane(c
     }
 };
 
-ConflictArea AgentRepresentation::DistanceToConflictArea(std::pair<const MentalInfrastructure::ConflictArea &, OwlId> egoCA,
-                                                         std::pair<const MentalInfrastructure::ConflictArea &, OwlId> observedCA,
-                                                         const AgentRepresentation &observedAgent) const {
-    ConflictArea result;
-    result.opponentID = observedAgent.GetID();
+ConflictSituation AgentRepresentation::DistanceToConflictArea(std::pair<const MentalInfrastructure::ConflictArea &, OwlId> egoCA,
+                                                              std::pair<const MentalInfrastructure::ConflictArea &, OwlId> observedCA,
+                                                              const AgentRepresentation &observedAgent) const {
+    ConflictSituation result;
+    result.oAgentID = observedAgent.GetID();
     auto distanceEgoToStartCA = DistanceToConflictPoint(*this, egoCA.first.start, egoCA.second);
     auto distanceEgoToEndCA = DistanceToConflictPoint(*this, egoCA.first.end, egoCA.second);
     if (!this->IsMovingInLaneDirection()) {
@@ -308,10 +308,10 @@ ConflictArea AgentRepresentation::DistanceToConflictArea(std::pair<const MentalI
         distanceObservedToStartCA = distanceObservedToEndCA;
         distanceObservedToEndCA = temp;
     }
-    result.distanceEgoToCA.start = distanceEgoToStartCA - GetDistanceReferencePointToLeadingEdge();
-    result.distanceEgoToCA.end = distanceEgoToEndCA + GetLength() - GetDistanceReferencePointToLeadingEdge();
-    result.distanceObservedToCA.start = distanceObservedToStartCA - observedAgent.GetDistanceReferencePointToLeadingEdge();
-    result.distanceObservedToCA.end =
+    result.egoDistance.vehicleFrontToCAStart = distanceEgoToStartCA - GetDistanceReferencePointToLeadingEdge();
+    result.egoDistance.vehicleBackToCAEnd = distanceEgoToEndCA + GetLength() - GetDistanceReferencePointToLeadingEdge();
+    result.oAgentDistance.vehicleFrontToCAStart = distanceObservedToStartCA - observedAgent.GetDistanceReferencePointToLeadingEdge();
+    result.oAgentDistance.vehicleBackToCAEnd =
         distanceObservedToEndCA + observedAgent.GetLength() - observedAgent.GetDistanceReferencePointToLeadingEdge();
 
     return result;

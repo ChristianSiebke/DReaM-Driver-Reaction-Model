@@ -70,8 +70,7 @@ ClosestCollisionPointByTime(const std::unordered_map<int, std::unique_ptr<AgentI
                 mostInteresting = *currentCP;
             }
         }
-        if (mostInteresting.opponentID != maxInt)
-        {
+        if (mostInteresting.oAgentID != maxInt) {
             return mostInteresting;
         }
     }
@@ -82,19 +81,17 @@ std::optional<int> AgentWithClosestConflictPoint(const std::unordered_map<int, s
 {
     if (interpretedAgents.size() > 0)
     {
-        ConflictArea mostInteresting;
+        ConflictSituation mostInteresting;
         for (const auto &agent : interpretedAgents)
         {
-            auto currentCP = agent.second->conflictArea;
-            if (currentCP && currentCP->distanceEgoToCA.start > 0 &&
-                currentCP->distanceEgoToCA.start < mostInteresting.distanceEgoToCA.start)
-            {
+            auto currentCP = agent.second->conflictSituation;
+            if (currentCP && currentCP->egoDistance.vehicleFrontToCAStart > 0 &&
+                currentCP->egoDistance.vehicleFrontToCAStart < mostInteresting.egoDistance.vehicleFrontToCAStart) {
                 mostInteresting = *currentCP;
             }
         }
-        if (mostInteresting.opponentID != maxInt)
-        {
-            return mostInteresting.opponentID;
+        if (mostInteresting.oAgentID != maxInt) {
+            return mostInteresting.oAgentID;
         }
     }
     return std::nullopt;

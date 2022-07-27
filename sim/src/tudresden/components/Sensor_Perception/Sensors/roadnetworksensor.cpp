@@ -14,27 +14,8 @@ void ConflictAreaCalculator::AssignPotentialConflictAreasToLanes(std::shared_ptr
                     const_cast<MentalInfrastructure::Lane *>(intersectionLane.get())
                         ->AddConflictArea({currentLane.get(), conflictAreas->second});
 
-                    ConflictPoint a;
-                    a.junctionOpenDriveRoadId = currentLane->GetRoad()->GetOpenDriveId();
-                    a.junctionOpenDriveLaneId = currentLane->GetOpenDriveId();
-                    a.currentOpenDriveRoadId = intersectionLane->GetRoad()->GetOpenDriveId();
-                    a.currentOpenDriveLaneId = intersectionLane->GetOpenDriveId();
-                    a.currentStartS = conflictAreas->first.start.sOffset;
-                    a.currentEndS = conflictAreas->first.end.sOffset;
-                    a.otherStartS = conflictAreas->second.start.sOffset;
-                    a.otherEndS = conflictAreas->second.end.sOffset;
-                    perceptionData->conflictPoints.push_back(a);
-
-                    ConflictPoint b;
-                    b.junctionOpenDriveRoadId = intersectionLane->GetRoad()->GetOpenDriveId();
-                    b.junctionOpenDriveLaneId = intersectionLane->GetOpenDriveId();
-                    b.currentOpenDriveRoadId = currentLane->GetRoad()->GetOpenDriveId();
-                    b.currentOpenDriveLaneId = currentLane->GetOpenDriveId();
-                    b.currentStartS = conflictAreas->second.start.sOffset;
-                    b.currentEndS = conflictAreas->second.end.sOffset;
-                    b.otherStartS = conflictAreas->first.start.sOffset;
-                    b.otherEndS = conflictAreas->first.end.sOffset;
-                    perceptionData->conflictPoints.push_back(b);
+                    perceptionData->conflictAreas.push_back(std::make_pair(conflictAreas->first, conflictAreas->second));
+                    perceptionData->conflictAreas.push_back(std::make_pair(conflictAreas->second, conflictAreas->first));
                 }
             }
         }
@@ -169,6 +150,11 @@ ConflictAreaCalculator::CalculateConflictAreas(const MentalInfrastructure::Lane 
                                                                                        : currentLane->InterpolatePoint(minPointCL.sOffset);
     clConflictArea.end = maxPointCL.sOffset >= currentLane->GetLastPoint()->sOffset ? *currentLane->GetLastPoint()
                                                                                     : currentLane->InterpolatePoint(maxPointCL.sOffset);
+    clConflictArea.junction =
+        currentLane->GetRoad()->IsOnJunction() ? currentLane->GetRoad()->GetJunction()->GetOpenDriveId() : "not on Junction";
+    clConflictArea.road = currentLane->GetRoad()->GetOpenDriveId();
+    clConflictArea.lane = currentLane->GetOpenDriveId();
+
     MentalInfrastructure::ConflictArea ilConflictArea;
     ilConflictArea.start = minPointIL.sOffset <= intersectionLane->GetFirstPoint()->sOffset
                                ? *intersectionLane->GetFirstPoint()
@@ -176,6 +162,10 @@ ConflictAreaCalculator::CalculateConflictAreas(const MentalInfrastructure::Lane 
     ilConflictArea.end = maxPointIL.sOffset >= intersectionLane->GetLastPoint()->sOffset
                              ? *intersectionLane->GetLastPoint()
                              : intersectionLane->InterpolatePoint(maxPointIL.sOffset);
+    ilConflictArea.junction =
+        intersectionLane->GetRoad()->IsOnJunction() ? intersectionLane->GetRoad()->GetJunction()->GetOpenDriveId() : "not on Junction";
+    ilConflictArea.road = intersectionLane->GetRoad()->GetOpenDriveId();
+    ilConflictArea.lane = intersectionLane->GetOpenDriveId();
     return {{clConflictArea, ilConflictArea}};
 }
 

@@ -135,17 +135,6 @@ struct StoppingPointData {
     std::unordered_map<OdId, std::unordered_map<OwlId, std::unordered_map<StoppingPointType, StoppingPoint>>> stoppingPoints;
 };
 
-struct ConflictPoint {
-    OdId currentOpenDriveRoadId;
-    OdId currentOpenDriveLaneId;
-    OdId junctionOpenDriveRoadId;
-    OdId junctionOpenDriveLaneId;
-    double currentStartS;
-    double currentEndS;
-    double otherStartS;
-    double otherEndS;
-};
-
 struct InfrastructurePerception {
     /*!
      * \brief Return the next lane of given lane
@@ -163,8 +152,8 @@ struct InfrastructurePerception {
      */
     static std::optional<NextDirectionLanes> NextLanes(bool movingInLaneDirection, const MentalInfrastructure::Lane *currentLane);
 
-    const std::vector<ConflictPoint> &GetConflicPoints() {
-        return conflictPoints;
+    const std::vector<std::pair<MentalInfrastructure::ConflictArea, MentalInfrastructure::ConflictArea>> &GetConflictAreas() {
+        return conflictAreas;
     }
 
     const std::unordered_map<StoppingPointType, StoppingPoint> &GetStoppingPoints(OdId junctionId, OwlId laneId) const {
@@ -188,7 +177,7 @@ struct InfrastructurePerception {
      */
     LookupTableRoadNetwork lookupTableRoadNetwork;
 
-    std::vector<ConflictPoint> conflictPoints;
+    std::vector<std::pair<MentalInfrastructure::ConflictArea, MentalInfrastructure::ConflictArea>> conflictAreas;
 };
 
 struct DynamicInfrastructurePerception {

@@ -129,7 +129,7 @@ std::optional<CollisionPoint> CollisionInterpreter::PerformCollisionPointCalcula
         if (boost::geometry::intersects(shapeEgo, shapeObserved)) {
             CollisionPoint possibleCollisionPoint;
             possibleCollisionPoint.distanceCP = egoDistance;
-            possibleCollisionPoint.opponentID = observedAgent.GetID();
+            possibleCollisionPoint.oAgentID = observedAgent.GetID();
             possibleCollisionPoint.timeToCollision = time;
             double decelTime = std::abs(representation.egoAgent->GetVelocity() / GetBehaviourData().adBehaviour.comfortDeceleration.mean);
             possibleCollisionPoint.collisionImminent =

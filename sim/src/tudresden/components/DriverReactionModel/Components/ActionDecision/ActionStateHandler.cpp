@@ -24,7 +24,7 @@ bool ActionStateHandler::DetermineNextState(const std::unique_ptr<AgentInterpret
         case ActionState::EgoRoW:
             return (agent->rightOfWay.ego && !agent->rightOfWay.observed);
         case ActionState::IntersectionSituation:
-            return  agent->conflictArea.has_value();
+            return agent->conflictSituation.has_value();
         case ActionState::End:
             return true;
         }

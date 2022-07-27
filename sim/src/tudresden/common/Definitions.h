@@ -191,7 +191,7 @@ struct CollisionPoint {
     }
     ~CollisionPoint() = default;
 
-    int opponentID = maxInt;
+    int oAgentID = maxInt;
     bool collisionImminent = false;
     double distanceCP = maxDouble;
     double timeToCollision = maxDouble;

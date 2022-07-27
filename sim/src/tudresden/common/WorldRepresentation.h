@@ -29,16 +29,17 @@ using InfrastructureRepresentation = CognitiveMap::InfrastructureRepresentation;
 enum class JunctionSituation;
 
 struct DistanceToConflictArea {
-    double start = maxDouble; // distance from the front of the vehicle to the begin of the conflict area
-    double end = maxDouble;   // distance from thhe end of the vehicle to the end of the conflict area
+    double vehicleFrontToCAStart = maxDouble; // distance from the front of the vehicle to the start of the conflict area
+    double vehicleBackToCAEnd = maxDouble;    // distance from the back of the vehicle to the end of the conflict area
 };
 
-struct ConflictArea : public MentalInfrastructure::ConflictArea {
-    ConflictArea() {}
-    ~ConflictArea() = default;
-    int opponentID = maxInt;
-    DistanceToConflictArea distanceEgoToCA;
-    DistanceToConflictArea distanceObservedToCA;
+struct ConflictSituation {
+    ConflictSituation() {
+    }
+    ~ConflictSituation() = default;
+    int oAgentID = maxInt;
+    DistanceToConflictArea egoDistance;
+    DistanceToConflictArea oAgentDistance;
 };
 
 struct AgentInterpretation {
@@ -47,7 +48,7 @@ struct AgentInterpretation {
 
     const AmbientAgentRepresentation* agent;
     std::optional<CollisionPoint> collisionPoint;
-    std::optional<ConflictArea> conflictArea;
+    std::optional<ConflictSituation> conflictSituation;
     RightOfWay rightOfWay;
     std::optional<double> followingDistanceToLeadingVehicle;
 };
@@ -158,7 +159,7 @@ class AgentRepresentation {
      *
      * @return        distance to conflict area
      */
-    std::optional<ConflictArea> PossibleConflictAreaAlongLane(const AgentRepresentation& observedAgent) const;
+    std::optional<ConflictSituation> PossibleConflictAreaAlongLane(const AgentRepresentation &observedAgent) const;
 
     //*********Get-functions****//
     virtual const AgentPerception& GetInternalData() const { return *internalData; }
@@ -200,9 +201,9 @@ class AgentRepresentation {
         const std::unordered_map<MentalInfrastructure::TrafficSignType, std::vector<MentalInfrastructure::TrafficSign>>& trafficSignMap)
         const;
 
-    ConflictArea DistanceToConflictArea(std::pair<const MentalInfrastructure::ConflictArea &, OwlId> egoCA,
-                                        std::pair<const MentalInfrastructure::ConflictArea &, OwlId> observedCA,
-                                        const AgentRepresentation &observedAgent) const;
+    ConflictSituation DistanceToConflictArea(std::pair<const MentalInfrastructure::ConflictArea &, OwlId> egoCA,
+                                             std::pair<const MentalInfrastructure::ConflictArea &, OwlId> observedCA,
+                                             const AgentRepresentation &observedAgent) const;
 
     double DistanceToConflictPoint(const AgentRepresentation &agent, const MentalInfrastructure::LanePoint &junctionPoint,
                                    OwlId laneId) const;
@@ -300,8 +301,8 @@ class InfrastructureRepresentation {
 
     const RoadmapGraph::RoadmapNode *NavigateToTargetNode(OdId targetRoadOdId, OwlId targetLaneOdId) const;
 
-    const std::vector<ConflictPoint> &GetConflicPoints() const {
-        return infrastructure->GetConflicPoints();
+    const std::vector<std::pair<MentalInfrastructure::ConflictArea, MentalInfrastructure::ConflictArea>> &GetConflictAreas() const {
+        return infrastructure->GetConflictAreas();
     }
 
   private:
