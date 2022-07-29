@@ -14,8 +14,18 @@ void ConflictAreaCalculator::AssignPotentialConflictAreasToLanes(std::shared_ptr
                     const_cast<MentalInfrastructure::Lane *>(intersectionLane.get())
                         ->AddConflictArea({currentLane.get(), conflictAreas->second});
 
-                    perceptionData->conflictAreas.push_back(std::make_pair(conflictAreas->first, conflictAreas->second));
-                    perceptionData->conflictAreas.push_back(std::make_pair(conflictAreas->second, conflictAreas->first));
+                    std::string junctionInvalid = "not on Junction";
+                    std::string junctionIdFirst = conflictAreas->first.road->IsOnJunction()
+                                                      ? conflictAreas->first.road->GetJunction()->GetOpenDriveId()
+                                                      : junctionInvalid;
+                    std::string junctionIdSecond = conflictAreas->second.road->IsOnJunction()
+                                                       ? conflictAreas->second.road->GetJunction()->GetOpenDriveId()
+                                                       : junctionInvalid;
+                    std::string junctionId = junctionIdFirst != junctionInvalid ? junctionIdFirst : junctionIdSecond;
+                    std::vector<std::pair<MentalInfrastructure::ConflictArea, MentalInfrastructure::ConflictArea>> vec{};
+
+                    perceptionData->conflictAreas.insert({junctionId, vec});
+                    perceptionData->conflictAreas.at(junctionId).push_back(std::make_pair(conflictAreas->first, conflictAreas->second));
                 }
             }
         }
@@ -150,10 +160,9 @@ ConflictAreaCalculator::CalculateConflictAreas(const MentalInfrastructure::Lane 
                                                                                        : currentLane->InterpolatePoint(minPointCL.sOffset);
     clConflictArea.end = maxPointCL.sOffset >= currentLane->GetLastPoint()->sOffset ? *currentLane->GetLastPoint()
                                                                                     : currentLane->InterpolatePoint(maxPointCL.sOffset);
-    clConflictArea.junction =
-        currentLane->GetRoad()->IsOnJunction() ? currentLane->GetRoad()->GetJunction()->GetOpenDriveId() : "not on Junction";
-    clConflictArea.road = currentLane->GetRoad()->GetOpenDriveId();
-    clConflictArea.lane = currentLane->GetOpenDriveId();
+    clConflictArea.junction = currentLane->GetRoad()->GetJunction();
+    clConflictArea.road = currentLane->GetRoad();
+    clConflictArea.lane = currentLane;
 
     MentalInfrastructure::ConflictArea ilConflictArea;
     ilConflictArea.start = minPointIL.sOffset <= intersectionLane->GetFirstPoint()->sOffset
@@ -162,10 +171,9 @@ ConflictAreaCalculator::CalculateConflictAreas(const MentalInfrastructure::Lane 
     ilConflictArea.end = maxPointIL.sOffset >= intersectionLane->GetLastPoint()->sOffset
                              ? *intersectionLane->GetLastPoint()
                              : intersectionLane->InterpolatePoint(maxPointIL.sOffset);
-    ilConflictArea.junction =
-        intersectionLane->GetRoad()->IsOnJunction() ? intersectionLane->GetRoad()->GetJunction()->GetOpenDriveId() : "not on Junction";
-    ilConflictArea.road = intersectionLane->GetRoad()->GetOpenDriveId();
-    ilConflictArea.lane = intersectionLane->GetOpenDriveId();
+    ilConflictArea.junction = intersectionLane->GetRoad()->GetJunction();
+    ilConflictArea.road = intersectionLane->GetRoad();
+    ilConflictArea.lane = intersectionLane;
     return {{clConflictArea, ilConflictArea}};
 }
 

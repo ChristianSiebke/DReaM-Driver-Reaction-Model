@@ -130,41 +130,55 @@ void AgentStateRecorder::WriteOutputFile() {
             laneTree.put("<xmlattr>.Id", laneId);
             for (auto [type, point] : pointmap) {
                 if (point.type != StoppingPointType::NONE) {
-                    auto stoppingPointTree = new boost::property_tree::ptree();
-                    stoppingPointTree->put("<xmlattr>.posX", point.posX);
-                    stoppingPointTree->put("<xmlattr>.posY", point.posY);
-                    stoppingPointTree->put("<xmlattr>.RoadId", point.road->GetOpenDriveId());
-                    stoppingPointTree->put("<xmlattr>.LaneId", point.lane->GetOpenDriveId());
-                    stoppingPointTree->put("<xmlattr>.Type", stoppingPointTypes[(int)type]);
-                    laneTree.add_child("Point", *stoppingPointTree);
+                    boost::property_tree::ptree stoppingPointTree;
+                    stoppingPointTree.put("<xmlattr>.posX", point.posX);
+                    stoppingPointTree.put("<xmlattr>.posY", point.posY);
+                    stoppingPointTree.put("<xmlattr>.RoadId", point.road->GetOpenDriveId());
+                    stoppingPointTree.put("<xmlattr>.LaneId", point.lane->GetOpenDriveId());
+                    stoppingPointTree.put("<xmlattr>.Type", stoppingPointTypes[(int)type]);
+                    laneTree.add_child("Point", stoppingPointTree);
                 }
             }
             intersectionTree.add_child("Lane", laneTree);
         }
-        stoppingPointsTree.add_child("Intersection", intersectionTree);
+        stoppingPointsTree.add_child("Junction", intersectionTree);
     }
 
     valueTree.add_child("SimulationOutput.RunResults.RunResult.StoppingPoints", stoppingPointsTree);
 
     // Adds conflict points to the output ptree
-    boost::property_tree::ptree conflictPointTree;
-    for (auto &conflictPoint : record.infrastructurePerception->GetConflictAreas()) {
-        boost::property_tree::ptree parameterTree;
+    boost::property_tree::ptree conflictAreaTree;
+    for (auto &conflictAreas : record.infrastructurePerception->GetConflictAreas()) {
+        boost::property_tree::ptree conflictAreaJunctionTree;
+        conflictAreaJunctionTree.put("<xmlattr>.Id", conflictAreas.first);
+        std::cout << "size CA vec: " << conflictAreas.second.size() << std::endl;
+        for (auto &conflictArea : conflictAreas.second) {
+            boost::property_tree::ptree parameterTree;
 
-        parameterTree.put("<xmlattr>.currentOdRoadId", conflictPoint.first.road);
-        parameterTree.put("<xmlattr>.currentOdLaneId", conflictPoint.first.lane);
+            parameterTree.put("<xmlattr>.odRoadId:A", conflictArea.first.road->GetOpenDriveId());
+            parameterTree.put("<xmlattr>.odLaneId:A", conflictArea.first.lane->GetOpenDriveId());
 
-        parameterTree.put("<xmlattr>.intersectOdRoadId", conflictPoint.second.road);
-        parameterTree.put("<xmlattr>.intersectOdLaneId", conflictPoint.second.lane);
+            parameterTree.put("<xmlattr>.odRoadId:B", conflictArea.second.road->GetOpenDriveId());
+            parameterTree.put("<xmlattr>.odLaneId:B", conflictArea.second.lane->GetOpenDriveId());
 
-        parameterTree.put("<xmlattr>.startSa", conflictPoint.first.start.sOffset);
-        parameterTree.put("<xmlattr>.endSa", conflictPoint.first.end.sOffset);
-        parameterTree.put("<xmlattr>.startSb", conflictPoint.second.start.sOffset);
-        parameterTree.put("<xmlattr>.endSb", conflictPoint.second.end.sOffset);
+            parameterTree.put("<xmlattr>.startCA:A", std::stoi(conflictArea.first.lane->GetOpenDriveId()) < 0
+                                                         ? conflictArea.first.start.sOffset
+                                                         : conflictArea.first.lane->GetLength() - conflictArea.first.end.sOffset);
+            parameterTree.put("<xmlattr>.endCA:A", std::stoi(conflictArea.first.lane->GetOpenDriveId()) < 0
+                                                       ? conflictArea.first.end.sOffset
+                                                       : conflictArea.first.lane->GetLength() - conflictArea.first.start.sOffset);
+            parameterTree.put("<xmlattr>.startCA:B", std::stoi(conflictArea.second.lane->GetOpenDriveId()) < 0
+                                                         ? conflictArea.second.start.sOffset
+                                                         : conflictArea.second.lane->GetLength() - conflictArea.second.end.sOffset);
+            parameterTree.put("<xmlattr>.endCA:B", std::stoi(conflictArea.second.lane->GetOpenDriveId()) < 0
+                                                       ? conflictArea.second.end.sOffset
+                                                       : conflictArea.second.lane->GetLength() - conflictArea.second.start.sOffset);
 
-        conflictPointTree.add_child("ConflictArea", parameterTree);
+            conflictAreaJunctionTree.add_child("ConflictArea", parameterTree);
+        }
+        conflictAreaTree.add_child("JunctionId", conflictAreaJunctionTree);
     }
-    valueTree.add_child("SimulationOutput.RunResults.RunResult.ConflictAreas", conflictPointTree);
+    valueTree.add_child("SimulationOutput.RunResults.RunResult.ConflictAreas", conflictAreaTree);
 
     valueTree.add("SimulationOutput.RunResults.RunResult.Cyclics.Header", this->GenerateHeader());
 

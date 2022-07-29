@@ -152,7 +152,8 @@ struct InfrastructurePerception {
      */
     static std::optional<NextDirectionLanes> NextLanes(bool movingInLaneDirection, const MentalInfrastructure::Lane *currentLane);
 
-    const std::vector<std::pair<MentalInfrastructure::ConflictArea, MentalInfrastructure::ConflictArea>> &GetConflictAreas() {
+    const std::unordered_map<OdId, std::vector<std::pair<MentalInfrastructure::ConflictArea, MentalInfrastructure::ConflictArea>>> &
+    GetConflictAreas() {
         return conflictAreas;
     }
 
@@ -176,8 +177,10 @@ struct InfrastructurePerception {
      * \brief map ids to infrastructure element
      */
     LookupTableRoadNetwork lookupTableRoadNetwork;
-
-    std::vector<std::pair<MentalInfrastructure::ConflictArea, MentalInfrastructure::ConflictArea>> conflictAreas;
+    /*!
+     * \brief map conflic area pairs to conflict position (junction id)
+     */
+    std::unordered_map<OdId, std::vector<std::pair<MentalInfrastructure::ConflictArea, MentalInfrastructure::ConflictArea>>> conflictAreas;
 };
 
 struct DynamicInfrastructurePerception {

@@ -301,7 +301,7 @@ class InfrastructureRepresentation {
 
     const RoadmapGraph::RoadmapNode *NavigateToTargetNode(OdId targetRoadOdId, OwlId targetLaneOdId) const;
 
-    const std::vector<std::pair<MentalInfrastructure::ConflictArea, MentalInfrastructure::ConflictArea>> &GetConflictAreas() const {
+    const std::unordered_map<OdId, std::vector<std::pair<MentalInfrastructure::ConflictArea, MentalInfrastructure::ConflictArea>>> &GetConflictAreas() const {
         return infrastructure->GetConflictAreas();
     }
 

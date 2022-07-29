@@ -22,6 +22,7 @@
 namespace MentalInfrastructure {
 
 class Road;
+class Junction;
 ///
 /// \brief Struct to encapsulate a sampled point along the length of a lane.
 ///
@@ -46,9 +47,9 @@ struct LanePoint
 
 struct ConflictArea
 {
-    OdId junction;
-    OdId road;
-    OdId lane;
+    const Junction *junction;
+    const Road *road;
+    const Lane *lane;
     LanePoint start;
     LanePoint end;
 };
