@@ -1,5 +1,7 @@
 #include "stoppingpointcalculation.h"
 
+#include <iostream>
+
 Line2d StoppingPointCalculation::CalcExtendedLine(const MentalInfrastructure::Lane *lane, double rotationAngle, bool roadIsPredJunction,
                                                   bool roadIsSuccJunction) {
     Common::Vector2d lineStart;
