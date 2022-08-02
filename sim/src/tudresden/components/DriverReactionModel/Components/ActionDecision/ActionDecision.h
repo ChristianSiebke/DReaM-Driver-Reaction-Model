@@ -37,7 +37,7 @@ class MinEmergencyBrakeDelay {
   public:
     MinEmergencyBrakeDelay(double minTimeEmergencyBrakeIsActive, int cycleTime);
     void ResetEmergencyState();
-    void InsertEmergencyBrakeEvent(const AmbientAgentRepresentation* agentData, double deceleration);
+    void InsertEmergencyBrakeEvent(int agentID, double deceleration);
 
     std::vector<double> ActivateIfNeeded(const std::unordered_map<int, std::unique_ptr<AgentInterpretation>>& agents);
 
@@ -80,7 +80,7 @@ class ActionDecision : public Component::ComponentInterface {
 
     double AgentCrashImminent(const std::unique_ptr<AgentInterpretation>& oAgent, double targetVelocity) const;
 
-    bool ObservedAgentIsInConlictArea(const AmbientAgentRepresentation* agent) const;
+    bool CloseToConlictArea() const;
 
     double accelerationResult;
 

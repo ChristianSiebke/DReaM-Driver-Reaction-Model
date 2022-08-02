@@ -27,12 +27,11 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation>&
 
     // ego is already in conflict area and observed agent not
     if (conflictSituation->egoDistance.vehicleFrontToCAStart <= 0 && conflictSituation->oAgentDistance.vehicleFrontToCAStart >= 0) {
-        return 0;
+        return freeAccelerationEgo;
     }
     // observed or ego agent has passed conflict area
     if (conflictSituation->oAgentDistance.vehicleBackToCAEnd <= 0 || conflictSituation->egoDistance.vehicleBackToCAEnd <= 0) {
         DeletePriorityAgent(oAgentID);
-        // TODO: delete also obstacle agent
         return freeAccelerationEgo;
     }
     // both agents in conflict area
@@ -43,20 +42,15 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation>&
     auto tObserved =
         CalculateTimeToConflictAreaObserved(conflictSituation->oAgentDistance, oAgent->GetAcceleration(), oAgent->GetVelocity());
 
-    // do not consider potential crash events that are more than X seconds in the future
-    if (tEgo.vehicleFrontToCAStart > 5) {
-        return freeAccelerationEgo;
-    }
     //  check whether ego (if he has right of way) can pass
     if ((oAgent->GetAcceleration() == 0.0 && oAgent->GetVelocity() == 0.0) && observedAgent->rightOfWay.ego) {
-        if (observedAgent->collisionPoint ||
-            std::any_of(obstacles.begin(), obstacles.end(), [oAgentID](int id) { return id == oAgentID; })) {
-            obstacles.push_back(oAgentID);
-            return CalculateDeceleration(conflictSituation->egoDistance.vehicleFrontToCAStart, tObserved.vehicleBackToCAEnd, observedAgent);
+        if (observedAgent->collisionPoint) {
+            return CalculateDeceleration(conflictSituation->egoDistance.vehicleFrontToCAStart, tObserved.vehicleBackToCAEnd,
+                                         observedAgent->rightOfWay.ego);
         }
         return freeAccelerationEgo;
     }
-    // observed agent will not reach conflict area
+    // observed agent stops
     if (!(tObserved.vehicleFrontToCAStart < std::numeric_limits<double>::infinity())) {
         DeletePriorityAgent(oAgentID);
     }
@@ -66,12 +60,13 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation>&
     }
 
     if (std::any_of(priorityAgents.begin(), priorityAgents.end(), [oAgentID](int id) { return id == oAgentID; })) {
-        return CalculateDeceleration(conflictSituation->egoDistance.vehicleFrontToCAStart, tObserved.vehicleBackToCAEnd, observedAgent);
+        return CalculateDeceleration(conflictSituation->egoDistance.vehicleFrontToCAStart, tObserved.vehicleBackToCAEnd,
+                                     observedAgent->rightOfWay.ego);
     }
-    // ego will not pass conflict area
-    if (!(tEgo.vehicleFrontToCAStart < std::numeric_limits<double>::infinity()) ||
-        !(tEgo.vehicleBackToCAEnd < std::numeric_limits<double>::infinity())) {
-        return CalculateDeceleration(conflictSituation->egoDistance.vehicleFrontToCAStart, tObserved.vehicleBackToCAEnd, observedAgent);
+    // ego stops
+    if (!(tEgo.vehicleBackToCAEnd < std::numeric_limits<double>::infinity())) {
+        return CalculateDeceleration(conflictSituation->egoDistance.vehicleFrontToCAStart, tObserved.vehicleBackToCAEnd,
+                                     observedAgent->rightOfWay.ego);
     }
 
     if (tEgo.vehicleFrontToCAStart - tObserved.vehicleBackToCAEnd >= 0 ||
@@ -80,7 +75,8 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation>&
     }
     else {
         priorityAgents.push_back(oAgentID);
-        return CalculateDeceleration(conflictSituation->egoDistance.vehicleFrontToCAStart, tObserved.vehicleBackToCAEnd, observedAgent);
+        return CalculateDeceleration(conflictSituation->egoDistance.vehicleFrontToCAStart, tObserved.vehicleBackToCAEnd,
+                                     observedAgent->rightOfWay.ego);
     }
 }
 
@@ -264,8 +260,7 @@ double Anticipation::CalculatePhaseAcceleration(double velTarget, double v) {
     }
 }
 
-double Anticipation::CalculateDeceleration(double sFrontEgo, double tEndObserved,
-                                           const std::unique_ptr<AgentInterpretation>& observedAgent) const {
+double Anticipation::CalculateDeceleration(double sFrontEgo, double tEndObserved, bool egoAgentRightOfWay) const {
     auto egoAgent = worldRepresentation.egoAgent;
     if (egoAgent->GetVelocity() == 0.0) {
         return 0;
@@ -277,7 +272,7 @@ double Anticipation::CalculateDeceleration(double sFrontEgo, double tEndObserved
     }
 
     double aIDM = MaximumAccelerationWish(0, egoAgent->GetVelocity(), s);
-    if (aIDM < behaviourData.adBehaviour.comfortDeceleration.min && observedAgent->rightOfWay.ego) {
+    if (aIDM < behaviourData.adBehaviour.comfortDeceleration.min && egoAgentRightOfWay) {
         if (0 < sFrontEgo - ((worldRepresentation.egoAgent->GetAcceleration() / 2 * (tEndObserved * tEndObserved)) +
                              worldRepresentation.egoAgent->GetVelocity() * tEndObserved)) {
             double a = (2 * (sFrontEgo - (worldRepresentation.egoAgent->GetVelocity() * tEndObserved))) / (tEndObserved * tEndObserved);

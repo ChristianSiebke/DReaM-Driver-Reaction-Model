@@ -24,13 +24,13 @@ void MinEmergencyBrakeDelay::ResetEmergencyState() {
     std::for_each(emergencyBrake.begin(), emergencyBrake.end(),
                   [](std::pair<const int, EmergencyBrakeInfo>& element) { element.second.emergencyState = false; });
 }
-void MinEmergencyBrakeDelay::InsertEmergencyBrakeEvent(const AmbientAgentRepresentation* agentData, double deceleration) {
+void MinEmergencyBrakeDelay::InsertEmergencyBrakeEvent(int agentID, double deceleration) {
     EmergencyBrakeInfo info;
     info.deceleration = deceleration;
     info.emergencyState = true;
     info.timeEmergencyBrakeActive = cycleTime;
 
-    auto insert = emergencyBrake.insert({agentData->GetID(), info});
+    auto insert = emergencyBrake.insert({agentID, info});
     if (!insert.second) {
         insert.first->second.emergencyState = true;
         insert.first->second.timeEmergencyBrakeActive += cycleTime;
@@ -90,8 +90,7 @@ double ActionDecision::DetermineAccelerationWish() {
     accelerations.push_back(anticipation.CalculatePhaseAcceleration(targetVelocity, worldRepresentation.egoAgent->GetVelocity()));
     minEmergencyBrakeDelay.ResetEmergencyState();
     for (auto& entry : worldInterpretation.interpretedAgents) {
-        auto& agent = entry.second;
-        auto& agentData = agent->agent;
+        const auto &agent = entry.second;
 
         switch (actionStateHandler.GetState(agent)) {
         case ActionState::Collision:
@@ -100,16 +99,16 @@ double ActionDecision::DetermineAccelerationWish() {
                 deceleration = anticipation.GetMaxEmergencyAcceleration();
             }
             deceleration = AgentCrashImminent(agent, targetVelocity);
-            minEmergencyBrakeDelay.InsertEmergencyBrakeEvent(agentData, deceleration);
+            minEmergencyBrakeDelay.InsertEmergencyBrakeEvent(agent->agent->GetID(), deceleration);
             accelerations.push_back(deceleration);
             break;
         case ActionState::Following:
-            accelerations.push_back(
-                anticipation.MaximumAccelerationWish(targetVelocity, worldRepresentation.egoAgent->GetVelocity() - agentData->GetVelocity(),
-                                                     *agent->followingDistanceToLeadingVehicle));
+            accelerations.push_back(anticipation.MaximumAccelerationWish(
+                targetVelocity, worldRepresentation.egoAgent->GetVelocity() - agent->agent->GetVelocity(),
+                *agent->followingDistanceToLeadingVehicle));
             break;
         case ActionState::EgoRoW:
-            if (ObservedAgentIsInConlictArea(agentData)) {
+            if (CloseToConlictArea()) {
                 accelerations.push_back(anticipation.IntersectionGap(agent, targetVelocity));
             }
             break;
@@ -150,9 +149,9 @@ bool ActionDecision::observedAgentIsbehindEgoAgent(const std::unique_ptr<AgentIn
              oAgent->agent->GetSCoordinate() > worldRepresentation.egoAgent->GetSCoordinate()));
 }
 
-bool ActionDecision::ObservedAgentIsInConlictArea(const AmbientAgentRepresentation* agent) const {
-    return agent->GetDistanceOnJunction() > 0 ||
-           (agent->GetDistanceToNextJunction() > -1 && agent->GetDistanceToNextJunction() < 5);
+bool ActionDecision::CloseToConlictArea() const {
+    return worldRepresentation.egoAgent->GetDistanceOnJunction() > 0 || (worldRepresentation.egoAgent->GetDistanceToNextJunction() > -1 &&
+                                                                         worldRepresentation.egoAgent->GetDistanceToNextJunction() < 5);
 }
 
 } // namespace ActionDecision

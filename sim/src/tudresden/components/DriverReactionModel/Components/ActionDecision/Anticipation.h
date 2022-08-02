@@ -72,14 +72,13 @@ class Anticipation {
     double TravelTimeEgo(double distance, double velocity, double vTarget) const;
     double TravelTimeObserved(double distance, double acceleration, double velocity) const;
 
-    double CalculateDeceleration(double sFrontEgo, double tEndObserved, const std::unique_ptr<AgentInterpretation>& observedAgent) const;
+    double CalculateDeceleration(double sFrontEgo, double tEndObserved, bool egoAgentRightOfWay) const;
 
     const BehaviourData& GetBehaviourData() const { return behaviourData; }
 
     double maxEmergencyDeceleration;
     double comfortDeceleration;
     std::vector<int> priorityAgents;
-    std::vector<int> obstacles;
     const WorldRepresentation& worldRepresentation;
     const WorldInterpretation& worldInterpretation;
     StochasticsInterface* stochastics;
