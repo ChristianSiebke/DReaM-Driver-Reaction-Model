@@ -161,25 +161,25 @@ void AgentStateRecorder::WriteOutputFile() {
         for (auto &conflictArea : conflictAreas.second) {
             boost::property_tree::ptree parameterTree;
 
-            parameterTree.put("<xmlattr>.road:A", conflictArea.first.road->GetOpenDriveId());
-            parameterTree.put("<xmlattr>.lane:A", conflictArea.first.lane->GetOpenDriveId());
+            parameterTree.put("<xmlattr>.roadA", conflictArea.first.road->GetOpenDriveId());
+            parameterTree.put("<xmlattr>.laneA", conflictArea.first.lane->GetOpenDriveId());
 
-            parameterTree.put("<xmlattr>.road:B", conflictArea.second.road->GetOpenDriveId());
-            parameterTree.put("<xmlattr>.lane:B", conflictArea.second.lane->GetOpenDriveId());
+            parameterTree.put("<xmlattr>.roadB", conflictArea.second.road->GetOpenDriveId());
+            parameterTree.put("<xmlattr>.laneB", conflictArea.second.lane->GetOpenDriveId());
 
-            parameterTree.put("<xmlattr>.startCA:A",
+            parameterTree.put("<xmlattr>.startA",
                               std::stoi(conflictArea.first.lane->GetOpenDriveId()) < 0
                                   ? doubleToString(conflictArea.first.start.sOffset)
                                   : doubleToString(conflictArea.first.lane->GetLength() - conflictArea.first.end.sOffset));
-            parameterTree.put("<xmlattr>.endCA:A",
+            parameterTree.put("<xmlattr>.endA",
                               std::stoi(conflictArea.first.lane->GetOpenDriveId()) < 0
                                   ? doubleToString(conflictArea.first.end.sOffset)
                                   : doubleToString(conflictArea.first.lane->GetLength() - conflictArea.first.start.sOffset));
-            parameterTree.put("<xmlattr>.startCA:B",
+            parameterTree.put("<xmlattr>.startB",
                               std::stoi(conflictArea.second.lane->GetOpenDriveId()) < 0
                                   ? doubleToString(conflictArea.second.start.sOffset)
                                   : doubleToString(conflictArea.second.lane->GetLength() - conflictArea.second.end.sOffset));
-            parameterTree.put("<xmlattr>.endCA:B",
+            parameterTree.put("<xmlattr>.endB",
                               std::stoi(conflictArea.second.lane->GetOpenDriveId()) < 0
                                   ? doubleToString(conflictArea.second.end.sOffset)
                                   : doubleToString(conflictArea.second.lane->GetLength() - conflictArea.second.start.sOffset));
