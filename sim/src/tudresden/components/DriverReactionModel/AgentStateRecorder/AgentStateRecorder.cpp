@@ -157,7 +157,6 @@ void AgentStateRecorder::WriteOutputFile() {
     for (auto &conflictAreas : record.infrastructurePerception->GetConflictAreas()) {
         boost::property_tree::ptree conflictAreaJunctionTree;
         conflictAreaJunctionTree.put("<xmlattr>.id", conflictAreas.first);
-        std::cout << "size CA vec: " << conflictAreas.second.size() << std::endl;
         for (auto &conflictArea : conflictAreas.second) {
             boost::property_tree::ptree parameterTree;
 

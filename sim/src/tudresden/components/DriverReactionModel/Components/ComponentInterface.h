@@ -19,8 +19,8 @@
 
 struct WorldRepresentation;
 struct WorldInterpretation;
-namespace Component {
 
+namespace Component {
 class ComponentInterface {
   public:
     ComponentInterface(int cycleTime, StochasticsInterface* stochastics, const LoggerInterface* loggerInterface,
@@ -36,10 +36,6 @@ class ComponentInterface {
 
     int GetCycleTime() const { return cycleTime; }
 
-    virtual const WorldRepresentation& GetWorldRepresentation() const = 0;
-
-    virtual const WorldInterpretation& GetWorldInterpretation() const = 0;
-
     StochasticsInterface* GetStochastic() const { return stochastics; }
 
     void Log(const std::string &message, DReaMLogLevel level = info) const {
@@ -48,8 +44,7 @@ class ComponentInterface {
 
     const BehaviourData& GetBehaviourData() const { return behaviourData; }
 
-  private:
-    //!  Component with highest priority is updated first
+private:
     int cycleTime;
     StochasticsInterface* stochastics;
     const LoggerInterface* loggerInterface;

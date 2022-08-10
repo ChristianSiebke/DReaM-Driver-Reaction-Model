@@ -68,16 +68,14 @@ bool AccelerationSorting(double d1, double d2) { return d1 < d2; }
 
 void ActionDecision::Update() {
     try {
-        if (currentRoad != worldRepresentation.egoAgent->GetRoad()) {
-            currentRoad = worldRepresentation.egoAgent->GetRoad();
-            velocityCalculator.Update();
-        }
         accelerationResult = DetermineAccelerationWish();
-    } catch (const std::logic_error& er) {
+    }
+    catch (const std::logic_error &er) {
         std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " | " + er.what();
         Log(message, error);
         throw std::runtime_error(message);
-    } catch (...) {
+    }
+    catch (...) {
         std::string message =
             "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + "unexpected exception ";
         throw std::runtime_error(message);
@@ -85,9 +83,8 @@ void ActionDecision::Update() {
 }
 
 double ActionDecision::DetermineAccelerationWish() {
-    double targetVelocity = velocityCalculator.PrepareTargetVelocity();
     std::vector<double> accelerations;
-    accelerations.push_back(anticipation.CalculatePhaseAcceleration(targetVelocity, worldRepresentation.egoAgent->GetVelocity()));
+    accelerations.push_back(anticipation.CalculatePhaseAcceleration());
     minEmergencyBrakeDelay.ResetEmergencyState();
     for (auto& entry : worldInterpretation.interpretedAgents) {
         const auto &agent = entry.second;
@@ -98,22 +95,19 @@ double ActionDecision::DetermineAccelerationWish() {
             if (agent->collisionPoint->collisionImminent) {
                 deceleration = anticipation.GetMaxEmergencyAcceleration();
             }
-            deceleration = AgentCrashImminent(agent, targetVelocity);
+            deceleration = AgentCrashImminent(agent);
             minEmergencyBrakeDelay.InsertEmergencyBrakeEvent(agent->agent->GetID(), deceleration);
             accelerations.push_back(deceleration);
             break;
         case ActionState::Following:
             accelerations.push_back(anticipation.MaximumAccelerationWish(
-                targetVelocity, worldRepresentation.egoAgent->GetVelocity() - agent->agent->GetVelocity(),
+                worldInterpretation.targetVelocity, worldRepresentation.egoAgent->GetVelocity() - agent->agent->GetVelocity(),
                 *agent->followingDistanceToLeadingVehicle));
             break;
-        case ActionState::EgoRoW:
-            if (CloseToConlictArea()) {
-                accelerations.push_back(anticipation.IntersectionGap(agent, targetVelocity));
-            }
-            break;
         case ActionState::IntersectionSituation:
-            accelerations.push_back(anticipation.IntersectionGap(agent, targetVelocity));
+            if (!EgoHasRightOfWay(agent) || CloseToConlictArea()) {
+                accelerations.push_back(anticipation.IntersectionGap(agent));
+            }
             break;
         case ActionState::End:
             break;
@@ -130,14 +124,20 @@ double ActionDecision::DetermineAccelerationWish() {
     return accelerations.front();
 }
 
-double ActionDecision::AgentCrashImminent(const std::unique_ptr<AgentInterpretation>& oAgent, double targetVelocity) const {
+double ActionDecision::AgentCrashImminent(const std::unique_ptr<AgentInterpretation> &oAgent) const {
     if (observedAgentIsbehindEgoAgent(oAgent)) {
-        return anticipation.MaximumAccelerationWish(targetVelocity, worldRepresentation.egoAgent->GetVelocity() - targetVelocity,
+        return anticipation.MaximumAccelerationWish(worldInterpretation.targetVelocity,
+                                                    worldRepresentation.egoAgent->GetVelocity() - worldInterpretation.targetVelocity,
                                                     std::numeric_limits<double>::infinity());
     } else {
         return anticipation.Deceleration(oAgent);
     }
 }
+
+bool ActionDecision::EgoHasRightOfWay(const std::unique_ptr<AgentInterpretation> &agent) const {
+    return (agent->rightOfWay.ego && !agent->rightOfWay.observed);
+}
+
 bool ActionDecision::observedAgentIsbehindEgoAgent(const std::unique_ptr<AgentInterpretation>& oAgent) const {
     return (oAgent->agent->GetNextLane() == worldRepresentation.egoAgent->GetLane() &&
             oAgent->agent->IsMovingInLaneDirection() == worldRepresentation.egoAgent->IsMovingInLaneDirection()) ||

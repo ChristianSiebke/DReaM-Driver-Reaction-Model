@@ -16,7 +16,9 @@
 
 #include "Components/CognitiveMap/CognitiveMap.h"
 namespace Interpreter {
-void WorldInterpreter::SetCommand(std::unique_ptr<CognitiveMap::CommandInterface> command) { commands.push_back(std::move(command)); }
+void WorldInterpreter::SetCommand(std::unique_ptr<CognitiveMap::CommandInterface> command) {
+    commands.push_back(std::move(command));
+}
 
 void WorldInterpreter::ExecuteCommands(WorldInterpretation* interpretation, const WorldRepresentation& representation) {
 
@@ -27,7 +29,7 @@ void WorldInterpreter::ExecuteCommands(WorldInterpretation* interpretation, cons
     }
     // update interpretation
     std::for_each(commands.begin(), commands.end(),
-                  [&interpretation, &representation](auto& command) { command->Execute(interpretation, representation); });
+                  [&interpretation, &representation](const auto &element) { element->Execute(interpretation, representation); });
 }
 
 } // namespace Interpreter

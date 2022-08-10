@@ -54,10 +54,6 @@ class GazeMovement : public Component::ComponentInterface {
 
     void Update() override;
 
-    virtual const WorldRepresentation& GetWorldRepresentation() const override { return worldRepresentation; }
-
-    virtual const WorldInterpretation& GetWorldInterpretation() const override { return worldInterpretation; }
-
     const GazeState& GetGazeState() { return currentGazeState; }
 
     const std::vector<Common::Vector2d>& GetSegmentControlFixationPoints() { return roadSegment->GetControlFixationPoints(); }

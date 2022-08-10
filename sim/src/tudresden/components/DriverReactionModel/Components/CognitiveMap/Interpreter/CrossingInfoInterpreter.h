@@ -17,6 +17,8 @@
 #include "Common/PerceptionData.h"
 #include "Common/vector2d.h"
 #include "InterpreterInterface.h"
+#include "TargetVelocityCalculation.h"
+#include "include/stochasticsInterface.h"
 #include "math.h"
 #include "qglobal.h"
 
@@ -24,7 +26,9 @@ namespace Interpreter {
 
 class CrossingInfoInterpreter : public InterpreterInterface {
   public:
-    CrossingInfoInterpreter(LoggerInterface* logger, const BehaviourData& behaviourData) : InterpreterInterface(logger, behaviourData) {}
+      CrossingInfoInterpreter(LoggerInterface *logger, const BehaviourData &behaviourData, StochasticsInterface *stochastics) :
+          InterpreterInterface(logger, behaviourData), targetVelocityCalculation(logger, behaviourData, stochastics) {
+      }
     CrossingInfoInterpreter(const CrossingInfoInterpreter&) = delete;
     CrossingInfoInterpreter(CrossingInfoInterpreter&&) = delete;
     CrossingInfoInterpreter& operator=(const CrossingInfoInterpreter&) = delete;
@@ -45,5 +49,6 @@ class CrossingInfoInterpreter : public InterpreterInterface {
     void DetermineCrossingPhase(const WorldRepresentation& representation);
 
     CrossingInfo crossingInfo;
+    TargetVelocityCalculation targetVelocityCalculation;
 };
 } // namespace Interpreter

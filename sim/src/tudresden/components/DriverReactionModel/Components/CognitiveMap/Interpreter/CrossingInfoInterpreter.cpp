@@ -21,6 +21,7 @@ void CrossingInfoInterpreter::Update(WorldInterpretation* interpretation, const 
     UpdateStoppingPoints(representation);
 
     interpretation->crossingInfo = crossingInfo;
+    interpretation->targetVelocity = targetVelocityCalculation.Update(representation, crossingInfo.phase);
 }
 
 void CrossingInfoInterpreter::UpdateStoppingPoints(const WorldRepresentation& representation) {

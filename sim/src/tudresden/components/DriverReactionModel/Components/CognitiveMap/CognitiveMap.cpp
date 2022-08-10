@@ -17,6 +17,10 @@ namespace CognitiveMap {
 CognitiveMap::CognitiveMap(int cycleTime, StochasticsInterface* stochastics, LoggerInterface* loggerInterface,
                            const BehaviourData& behaviourData)
     : ComponentInterface(cycleTime, stochastics, loggerInterface, behaviourData), memory(cycleTime, behaviourData, stochastics) {
+    std::unique_ptr<Interpreter::InterpreterInterface> crossingInfoInterpreter =
+        std::make_unique<Interpreter::CrossingInfoInterpreter>(loggerInterface, GetBehaviourData(), stochastics);
+    auto crossingInfoInterpreterCommand = std::make_unique<CommandInterface>(std::move(crossingInfoInterpreter));
+    worldInterpreter.SetCommand(std::move(crossingInfoInterpreterCommand));
 
     std::unique_ptr<Interpreter::InterpreterInterface> collisionInterpreter =
         std::make_unique<Interpreter::CollisionInterpreter>(loggerInterface, GetBehaviourData());
@@ -32,11 +36,6 @@ CognitiveMap::CognitiveMap(int cycleTime, StochasticsInterface* stochastics, Log
         std::make_unique<Interpreter::RightOfWayInterpreter>(loggerInterface, GetBehaviourData());
     auto rightOfWayInterpreterCommand = std::make_unique<CommandInterface>(std::move(rightOfWayInterpreter));
     worldInterpreter.SetCommand(std::move(rightOfWayInterpreterCommand));
-
-    std::unique_ptr<Interpreter::InterpreterInterface> crossingInfoInterpreter =
-        std::make_unique<Interpreter::CrossingInfoInterpreter>(loggerInterface, GetBehaviourData());
-    auto crossingInfoInterpreterCommand = std::make_unique<CommandInterface>(std::move(crossingInfoInterpreter));
-    worldInterpreter.SetCommand(std::move(crossingInfoInterpreterCommand));
 }
 
 void CognitiveMap::Update() {

@@ -27,7 +27,7 @@ void RightOfWayInterpreter::Update(WorldInterpretation* interpretation, const Wo
         for (const auto& observedAgent : *representation.agentMemory) {
             RightOfWay rightOfWay{true, true};
 
-            auto conflictSituation = representation.egoAgent->PossibleConflictAreaAlongLane(*observedAgent);
+            auto conflictSituation = representation.egoAgent->PossibleConflictSituationAlongLane(*observedAgent);
             auto junctionSituation = representation.egoAgent->JunctionSituation(*observedAgent);
             if (conflictSituation && junctionSituation) {
                 rightOfWay = PerformRightOfWayDetermination(*observedAgent, representation);

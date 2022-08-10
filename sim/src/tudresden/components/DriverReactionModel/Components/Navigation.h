@@ -37,14 +37,6 @@ public:
      */
     virtual void Update() override;
 
-    virtual const WorldRepresentation &GetWorldRepresentation() const override {
-        return worldRepresentation;
-    }
-
-    virtual const WorldInterpretation &GetWorldInterpretation() const override {
-        return worldInterpretation;
-    }
-
     const NavigationDecision &GetRouteDecision() const {
         return routeDecision;
     }

@@ -79,11 +79,12 @@ struct WorldRepresentation {
 
 struct WorldInterpretation {
     WorldInterpretation() {}
-    //! Interpretation of the observed agents from the point of view of the ego
+    //! Interpretation of the observed agents from the ego agent point of view
     std::unordered_map<int, std::unique_ptr<AgentInterpretation>> interpretedAgents;
     CrossingInfo crossingInfo;
     //! map holds right of way for observed agent
     std::unordered_map<int, RightOfWay> rightOfWayMap;
+    double targetVelocity;
 };
 
 namespace CognitiveMap {
@@ -153,13 +154,7 @@ class AgentRepresentation {
      */
     double ExtrapolateDistanceAlongLane(double timeStep) const;
 
-    /*!
-     * \brief  returns the distance to conflict area if current or next lane of the agents intersect
-     * @param[in]     observedAgent
-     *
-     * @return        distance to conflict area
-     */
-    std::optional<ConflictSituation> PossibleConflictAreaAlongLane(const AgentRepresentation &observedAgent) const;
+    std::optional<ConflictSituation> PossibleConflictSituationAlongLane(const AgentRepresentation &observedAgent) const;
 
     //*********Get-functions****//
     virtual const AgentPerception& GetInternalData() const { return *internalData; }
@@ -201,9 +196,9 @@ class AgentRepresentation {
         const std::unordered_map<MentalInfrastructure::TrafficSignType, std::vector<MentalInfrastructure::TrafficSign>>& trafficSignMap)
         const;
 
-    ConflictSituation DistanceToConflictArea(std::pair<const MentalInfrastructure::ConflictArea &, OwlId> egoCA,
-                                             std::pair<const MentalInfrastructure::ConflictArea &, OwlId> observedCA,
-                                             const AgentRepresentation &observedAgent) const;
+    ConflictSituation CalculateConflictSituation(std::pair<const MentalInfrastructure::ConflictArea &, OwlId> egoCA,
+                                                 std::pair<const MentalInfrastructure::ConflictArea &, OwlId> observedCA,
+                                                 const AgentRepresentation &observedAgent) const;
 
     double DistanceToConflictPoint(const AgentRepresentation &agent, const MentalInfrastructure::LanePoint &junctionPoint,
                                    OwlId laneId) const;

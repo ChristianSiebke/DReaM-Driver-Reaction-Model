@@ -18,7 +18,6 @@ add_openpass_target(
     Components/ActionDecision/ActionDecision.h
     Components/ActionDecision/ActionStateHandler.h
     Components/ActionDecision/Anticipation.h
-    Components/ActionDecision/VelocityCalculation.h
     Components/CognitiveMap/CognitiveMap.h
     Components/CognitiveMap/CommandInterface.h
     Components/CognitiveMap/Memory.h
@@ -29,6 +28,7 @@ add_openpass_target(
     Components/CognitiveMap/Interpreter/InterpreterInterface.h
     Components/CognitiveMap/Interpreter/RightOfWayInterpreter.h
     Components/CognitiveMap/Interpreter/WorldInterpreter.h
+    Components/CognitiveMap/Interpreter/TargetVelocityCalculation.h
     Components/CognitiveMap/Interpreter/RightOfWayRegulation/RightBeforeLeftRegulation.h
     Components/CognitiveMap/Interpreter/RightOfWayRegulation/RightOfWayRegulationInterface.h
     Components/CognitiveMap/Interpreter/RightOfWayRegulation/TrafficLightRegulation.h
@@ -49,7 +49,6 @@ add_openpass_target(
     Components/ActionDecision/ActionDecision.cpp
     Components/ActionDecision/ActionStateHandler.cpp
     Components/ActionDecision/Anticipation.cpp
-    Components/ActionDecision/VelocityCalculation.cpp
     Components/CognitiveMap/CognitiveMap.cpp
     Components/CognitiveMap/Memory.cpp
     Components/CognitiveMap/ReactionTime.cpp
@@ -57,6 +56,7 @@ add_openpass_target(
     Components/CognitiveMap/Interpreter/CrossingInfoInterpreter.cpp
     Components/CognitiveMap/Interpreter/FollowingInterpreter.cpp
     Components/CognitiveMap/Interpreter/RightOfWayInterpreter.cpp
+    Components/CognitiveMap/Interpreter/TargetVelocityCalculation.cpp
     Components/CognitiveMap/Interpreter/WorldInterpreter.cpp
     Components/CognitiveMap/Interpreter/RightOfWayRegulation/RightBeforeLeftRegulation.cpp
     Components/CognitiveMap/Interpreter/RightOfWayRegulation/RightOfWayRegulationInterface.cpp

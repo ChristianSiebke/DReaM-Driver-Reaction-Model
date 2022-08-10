@@ -34,7 +34,7 @@ void Navigation::Update() {
     }
 
     if (waypoints.empty()) {
-        std::string msg = __FILE__ " " + std::to_string(__LINE__) + " Agent has no waypoints";
+        std::string msg = __FILE__ " " + std::to_string(__LINE__) + " Agent has no route";
         Log(msg, DReaMLogLevel::error);
         throw std::logic_error(msg);
     }
@@ -88,7 +88,7 @@ void Navigation::Update() {
             }
             else {
                 const std::string msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
-                                        " next lane in path is not neighbor";
+                                        " next lane in path is not a neighbor";
                 Log(msg, error);
                 throw std::logic_error(msg);
             }

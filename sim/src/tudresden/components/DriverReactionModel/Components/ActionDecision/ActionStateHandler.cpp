@@ -21,8 +21,6 @@ bool ActionStateHandler::DetermineNextState(const std::unique_ptr<AgentInterpret
             return agent->collisionPoint.has_value();
         case ActionState::Following:
             return agent->followingDistanceToLeadingVehicle.has_value();
-        case ActionState::EgoRoW:
-            return (agent->rightOfWay.ego && !agent->rightOfWay.observed);
         case ActionState::IntersectionSituation:
             return agent->conflictSituation.has_value();
         case ActionState::End:
@@ -45,9 +43,6 @@ void ActionStateHandler::IncrementState() {
         currentState = ActionState::Following;
         break;
     case ActionState::Following:
-        currentState = ActionState::EgoRoW;
-        break;
-    case ActionState::EgoRoW:
         currentState = ActionState::IntersectionSituation;
         break;
     case ActionState::IntersectionSituation:
@@ -59,8 +54,3 @@ void ActionStateHandler::IncrementState() {
         throw std::logic_error("ActionState is not valid");
     }
 }
-
-
-
-
-

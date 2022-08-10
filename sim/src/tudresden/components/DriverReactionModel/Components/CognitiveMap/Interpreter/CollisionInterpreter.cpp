@@ -22,7 +22,7 @@
 namespace Interpreter {
 
 // max time for collision detection (s)
-const double MAX_TIME = 5;
+const double MAX_TIME = 3;
 // time step size for collision detection (s)
 const double TIME_STEP = 0.1;
 // maximum amounts of lanes an agent will look into

@@ -195,8 +195,6 @@ struct DynamicInfrastructurePerception {
 };
 
 struct NavigationDecision {
-    OdId odRoadID{"-999"};
-    OdId odLaneID{"-999"};
     IndicatorState indicator = IndicatorState::IndicatorState_Off;
     double lateralDisplacement{0};
 };

@@ -257,7 +257,7 @@ double AgentRepresentation::ExtrapolateDistanceAlongLane(double timeStep) const 
     return IsMovingInLaneDirection() ? extrapolatedDistance : -extrapolatedDistance;
 }
 
-std::optional<ConflictSituation> AgentRepresentation::PossibleConflictAreaAlongLane(const AgentRepresentation &observedAgent) const {
+std::optional<ConflictSituation> AgentRepresentation::PossibleConflictSituationAlongLane(const AgentRepresentation &observedAgent) const {
     auto egoLane = GetLane();
     auto egoNextLane = GetNextLane();
     auto observedLane = observedAgent.GetLane();
@@ -266,22 +266,22 @@ std::optional<ConflictSituation> AgentRepresentation::PossibleConflictAreaAlongL
     if (egoLane->GetConflictAreaWithLane(observedLane) && observedLane->GetConflictAreaWithLane(egoLane)) {
         auto cAEgo = egoLane->GetConflictAreaWithLane(observedLane);
         auto cAObserved = observedLane->GetConflictAreaWithLane(egoLane);
-        return DistanceToConflictArea({*cAEgo, egoLane->GetOwlId()}, {*cAObserved, observedLane->GetOwlId()}, observedAgent);
+        return CalculateConflictSituation({*cAEgo, egoLane->GetOwlId()}, {*cAObserved, observedLane->GetOwlId()}, observedAgent);
     }
     else if (egoNextLane && egoNextLane->GetConflictAreaWithLane(observedLane)) {
         auto cAEgo = egoNextLane->GetConflictAreaWithLane(observedLane);
         auto cAObserved = observedLane->GetConflictAreaWithLane(egoNextLane);
-        return DistanceToConflictArea({*cAEgo, egoNextLane->GetOwlId()}, {*cAObserved, observedLane->GetOwlId()}, observedAgent);
+        return CalculateConflictSituation({*cAEgo, egoNextLane->GetOwlId()}, {*cAObserved, observedLane->GetOwlId()}, observedAgent);
     }
     else if (observedNextLane && egoLane->GetConflictAreaWithLane(observedNextLane)) {
         auto cAEgo = egoLane->GetConflictAreaWithLane(observedNextLane);
         auto cAObserved = observedNextLane->GetConflictAreaWithLane(egoLane);
-        return DistanceToConflictArea({*cAEgo, egoLane->GetOwlId()}, {*cAObserved, observedNextLane->GetOwlId()}, observedAgent);
+        return CalculateConflictSituation({*cAEgo, egoLane->GetOwlId()}, {*cAObserved, observedNextLane->GetOwlId()}, observedAgent);
     }
     else if ((egoNextLane && observedNextLane) && egoNextLane->GetConflictAreaWithLane(observedNextLane)) {
         auto cAEgo = egoNextLane->GetConflictAreaWithLane(observedNextLane);
         auto cAObserved = observedNextLane->GetConflictAreaWithLane(egoNextLane);
-        return DistanceToConflictArea({*cAEgo, egoNextLane->GetOwlId()}, {*cAObserved, observedNextLane->GetOwlId()}, observedAgent);
+        return CalculateConflictSituation({*cAEgo, egoNextLane->GetOwlId()}, {*cAObserved, observedNextLane->GetOwlId()}, observedAgent);
     }
 
     else {
@@ -289,9 +289,9 @@ std::optional<ConflictSituation> AgentRepresentation::PossibleConflictAreaAlongL
     }
 };
 
-ConflictSituation AgentRepresentation::DistanceToConflictArea(std::pair<const MentalInfrastructure::ConflictArea &, OwlId> egoCA,
-                                                              std::pair<const MentalInfrastructure::ConflictArea &, OwlId> observedCA,
-                                                              const AgentRepresentation &observedAgent) const {
+ConflictSituation AgentRepresentation::CalculateConflictSituation(std::pair<const MentalInfrastructure::ConflictArea &, OwlId> egoCA,
+                                                                  std::pair<const MentalInfrastructure::ConflictArea &, OwlId> observedCA,
+                                                                  const AgentRepresentation &observedAgent) const {
     ConflictSituation result;
     result.oAgentID = observedAgent.GetID();
     auto distanceEgoToStartCA = DistanceToConflictPoint(*this, egoCA.first.start, egoCA.second);

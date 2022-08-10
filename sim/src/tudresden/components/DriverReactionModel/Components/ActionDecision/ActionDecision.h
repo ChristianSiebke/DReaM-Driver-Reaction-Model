@@ -21,7 +21,6 @@
 #include "Common/Definitions.h"
 #include "Common/Helper.h"
 #include "Components/ComponentInterface.h"
-#include "VelocityCalculation.h"
 #include "include/stochasticsInterface.h"
 
 namespace ActionDecision {
@@ -54,7 +53,6 @@ class ActionDecision : public Component::ComponentInterface {
           ComponentInterface(cycleTime, stochastics, loggerInterface, behaviourData),
           worldRepresentation{worldRepresentation},
           worldInterpretation{worldInterpretation},
-          velocityCalculator(worldRepresentation, worldInterpretation, cycleTime, stochastics, loggerInterface, behaviourData),
           actionStateHandler(worldRepresentation, worldInterpretation),
           anticipation(worldRepresentation, worldInterpretation, stochastics, loggerInterface, behaviourData),
           minEmergencyBrakeDelay(GetBehaviourData().adBehaviour.minTimeEmergencyBrakeIsActive, GetCycleTime()) {
@@ -67,10 +65,6 @@ class ActionDecision : public Component::ComponentInterface {
 
     void Update() override;
 
-    virtual const WorldRepresentation& GetWorldRepresentation() const override { return worldRepresentation; }
-
-    virtual const WorldInterpretation& GetWorldInterpretation() const override { return worldInterpretation; }
-
     double GetAcceleration() const { return accelerationResult; }
 
   private:
@@ -78,9 +72,11 @@ class ActionDecision : public Component::ComponentInterface {
 
     bool observedAgentIsbehindEgoAgent(const std::unique_ptr<AgentInterpretation>& oAgent) const;
 
-    double AgentCrashImminent(const std::unique_ptr<AgentInterpretation>& oAgent, double targetVelocity) const;
+    double AgentCrashImminent(const std::unique_ptr<AgentInterpretation> &oAgent) const;
 
     bool CloseToConlictArea() const;
+    bool EgoHasRightOfWay(const std::unique_ptr<AgentInterpretation>& agent) const;
+
 
     double accelerationResult;
 
@@ -88,7 +84,6 @@ class ActionDecision : public Component::ComponentInterface {
     const WorldRepresentation& worldRepresentation;
     const WorldInterpretation& worldInterpretation;
 
-    VelocityCalculation velocityCalculator;
     ActionStateHandler actionStateHandler;
     Anticipation anticipation;
     MinEmergencyBrakeDelay minEmergencyBrakeDelay;

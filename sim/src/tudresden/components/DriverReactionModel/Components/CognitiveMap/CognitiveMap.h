@@ -38,9 +38,9 @@ class CognitiveMap : public Component::ComponentInterface {
     CognitiveMap& operator=(CognitiveMap&&) = delete;
     ~CognitiveMap() override = default;
 
-    virtual const WorldRepresentation& GetWorldRepresentation() const override { return worldRepresentation; }
+    const WorldRepresentation& GetWorldRepresentation() const { return worldRepresentation; }
 
-    virtual const WorldInterpretation& GetWorldInterpretation() const override { return worldInterpretation; }
+    const WorldInterpretation& GetWorldInterpretation() const { return worldInterpretation; }
 
     virtual void Update() override;
     virtual void UpdateInput(int time, std::shared_ptr<EgoPerception> egoAgent, std::vector<std::shared_ptr<AgentPerception>> ambientAgents,

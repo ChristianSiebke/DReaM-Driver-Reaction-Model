@@ -44,7 +44,7 @@ class Anticipation {
             Common::ValueInBounds(comfortDecelerationDistribution.min, drawnComfortDec, comfortDecelerationDistribution.max);
         std::cout << "comfortDeceleration: " << comfortDeceleration << std::endl;
     }
-    double IntersectionGap(const std::unique_ptr<AgentInterpretation>& agent, double targetVelocity);
+    double IntersectionGap(const std::unique_ptr<AgentInterpretation> &agent);
 
     /*!
      * \brief calculate acceleration according intelligent driver model Martin Treiben
@@ -57,7 +57,7 @@ class Anticipation {
     double ComfortAccelerationWish(double velTarget, double dv, double sDiff) const;
 
     double MaximumAccelerationWish(double velTarget, double dv, double sDiff) const;
-    double CalculatePhaseAcceleration(double velTarget, double v);
+    double CalculatePhaseAcceleration() const;
 
     double Deceleration(const std::unique_ptr<AgentInterpretation>& observedAgent) const;
     double GetMaxEmergencyAcceleration() const { return maxEmergencyDeceleration; }
@@ -65,7 +65,7 @@ class Anticipation {
   private:
     void DeletePriorityAgent(int oAgentID);
 
-    TimeToConflictArea CalculateTimeToConflictAreaEgo(DistanceToConflictArea distance, double velocity, double vTarget) const;
+    TimeToConflictArea CalculateTimeToConflictAreaEgo(DistanceToConflictArea distance, double velocity) const;
 
     TimeToConflictArea CalculateTimeToConflictAreaObserved(DistanceToConflictArea distance, double acceleration, double velocity) const;
 

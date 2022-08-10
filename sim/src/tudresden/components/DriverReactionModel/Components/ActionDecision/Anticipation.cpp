@@ -18,12 +18,12 @@
 
 namespace ActionDecision {
 
-double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation>& observedAgent, double vTargetEgo) {
+double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> &observedAgent) {
     auto egoAgent = worldRepresentation.egoAgent;
     auto oAgent = observedAgent->agent;
     auto oAgentID = oAgent->GetID();
     auto conflictSituation = observedAgent->conflictSituation;
-    double freeAccelerationEgo = CalculatePhaseAcceleration(vTargetEgo, egoAgent->GetVelocity());
+    double freeAccelerationEgo = CalculatePhaseAcceleration();
 
     // ego is already in conflict area and observed agent not
     if (conflictSituation->egoDistance.vehicleFrontToCAStart <= 0 && conflictSituation->oAgentDistance.vehicleFrontToCAStart >= 0) {
@@ -38,7 +38,7 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation>&
     if (conflictSituation->egoDistance.vehicleFrontToCAStart < 0 && conflictSituation->oAgentDistance.vehicleFrontToCAStart < 0) {
         return maxEmergencyDeceleration;
     }
-    auto tEgo = CalculateTimeToConflictAreaEgo(conflictSituation->egoDistance, egoAgent->GetVelocity(), vTargetEgo);
+    auto tEgo = CalculateTimeToConflictAreaEgo(conflictSituation->egoDistance, egoAgent->GetVelocity());
     auto tObserved =
         CalculateTimeToConflictAreaObserved(conflictSituation->oAgentDistance, oAgent->GetAcceleration(), oAgent->GetVelocity());
 
@@ -99,17 +99,17 @@ double Anticipation::Deceleration(const std::unique_ptr<AgentInterpretation>& ob
     return MaximumAccelerationWish(0, egoAgent->GetVelocity(), s);
 }
 
-TimeToConflictArea Anticipation::CalculateTimeToConflictAreaEgo(DistanceToConflictArea distance, double velocity, double vTarget) const {
+TimeToConflictArea Anticipation::CalculateTimeToConflictAreaEgo(DistanceToConflictArea distance, double velocity) const {
     TimeToConflictArea result;
-    result.vehicleFrontToCAStart = TravelTimeEgo(distance.vehicleFrontToCAStart, velocity, vTarget);
-    result.vehicleBackToCAEnd = TravelTimeEgo(distance.vehicleBackToCAEnd, velocity, vTarget);
+    result.vehicleFrontToCAStart = TravelTimeEgo(distance.vehicleFrontToCAStart, velocity, worldInterpretation.targetVelocity);
+    result.vehicleBackToCAEnd = TravelTimeEgo(distance.vehicleBackToCAEnd, velocity, worldInterpretation.targetVelocity);
     return result;
 }
 
 double Anticipation::TravelTimeEgo(double distance, double velocity, double vTarget) const {
     double result;
     auto egoAgent = worldRepresentation.egoAgent;
-    double acceleration = ComfortAccelerationWish(vTarget, egoAgent->GetVelocity() - vTarget, std::numeric_limits<double>::infinity());
+    double acceleration = ComfortAccelerationWish(vTarget, velocity - vTarget, std::numeric_limits<double>::infinity());
     // distance to reach target velocity
     double sAcceleration = 0;
     if (acceleration != 0.0) {
@@ -236,8 +236,10 @@ double Anticipation::MaximumAccelerationWish(double velTarget, double dv, double
                                  GetBehaviourData().adBehaviour.maxAcceleration);
 }
 
-double Anticipation::CalculatePhaseAcceleration(double velTarget, double v) {
-    double distance = std::numeric_limits<double>::infinity();
+double Anticipation::CalculatePhaseAcceleration() const {
+    double v = worldRepresentation.egoAgent->GetVelocity();
+    double velTarget = worldInterpretation.targetVelocity;
+    double distance;
     if (worldInterpretation.crossingInfo.phase == CrossingPhase::Deceleration_ONE) {
         distance = worldRepresentation.egoAgent->GetDistanceToNextJunction();
     }
@@ -247,6 +249,9 @@ double Anticipation::CalculatePhaseAcceleration(double velTarget, double v) {
     else if (CrossingPhase::Deceleration_TWO < worldInterpretation.crossingInfo.phase &&
              worldInterpretation.crossingInfo.phase < CrossingPhase::Exit) {
         distance = worldRepresentation.egoAgent->GetLane()->GetLength() - worldRepresentation.egoAgent->GetDistanceOnJunction();
+    }
+    else {
+        distance = std::numeric_limits<double>::infinity();
     }
 
     if (distance < std::numeric_limits<double>::infinity()) {
