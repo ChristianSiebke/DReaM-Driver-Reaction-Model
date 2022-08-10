@@ -31,9 +31,11 @@ class WorldInterpreter {
 
     void ExecuteCommands(WorldInterpretation* interpretation, const WorldRepresentation& representation) ;
 
-    void SetCommand(std::unique_ptr<CognitiveMap::CommandInterface> command);
+    void SetPrimaryCommand(std::unique_ptr<CognitiveMap::CommandInterface> command);
+    void SetSecondaryCommand(std::unique_ptr<CognitiveMap::CommandInterface> command);
 
-  private:
-    std::vector<std::unique_ptr<CognitiveMap::CommandInterface>> commands;
+private:
+    std::vector<std::unique_ptr<CognitiveMap::CommandInterface>> primaryCommands;
+    std::vector<std::unique_ptr<CognitiveMap::CommandInterface>> secondaryCommands;
 };
 } // namespace Interpreter

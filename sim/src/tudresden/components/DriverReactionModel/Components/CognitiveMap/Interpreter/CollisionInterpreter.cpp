@@ -48,8 +48,8 @@ void CollisionInterpreter::DetermineCollisionPoints(WorldInterpretation *interpr
         }
         for (const auto &agent : *representation.agentMemory) {
             auto possibleCollisionPoint = CalculationCollisionPoint(representation, *agent);
-            auto agentInterpretation = &interpretation->interpretedAgents.at(agent->GetID());
-            (*agentInterpretation)->collisionPoint = possibleCollisionPoint;
+            auto &agentInterpretation = interpretation->interpretedAgents.at(agent->GetID());
+            agentInterpretation->collisionPoint = possibleCollisionPoint;
 
             if (possibleCollisionPoint) {
                 if (DEBUG_OUT)

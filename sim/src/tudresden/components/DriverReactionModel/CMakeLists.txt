@@ -22,6 +22,8 @@ add_openpass_target(
     Components/CognitiveMap/CommandInterface.h
     Components/CognitiveMap/Memory.h
     Components/CognitiveMap/ReactionTime.h
+    Components/CognitiveMap/Interpreter/TargetLaneInterpreter.h
+    Components/CognitiveMap/Interpreter/ConflictSituationInterpreter.h
     Components/CognitiveMap/Interpreter/CollisionInterpreter.h
     Components/CognitiveMap/Interpreter/CrossingInfoInterpreter.h
     Components/CognitiveMap/Interpreter/FollowingInterpreter.h
@@ -52,6 +54,8 @@ add_openpass_target(
     Components/CognitiveMap/CognitiveMap.cpp
     Components/CognitiveMap/Memory.cpp
     Components/CognitiveMap/ReactionTime.cpp
+    Components/CognitiveMap/Interpreter/TargetLaneInterpreter.cpp
+    Components/CognitiveMap/Interpreter/ConflictSituationInterpreter.cpp
     Components/CognitiveMap/Interpreter/CollisionInterpreter.cpp
     Components/CognitiveMap/Interpreter/CrossingInfoInterpreter.cpp
     Components/CognitiveMap/Interpreter/FollowingInterpreter.cpp

@@ -20,22 +20,22 @@ CognitiveMap::CognitiveMap(int cycleTime, StochasticsInterface* stochastics, Log
     std::unique_ptr<Interpreter::InterpreterInterface> crossingInfoInterpreter =
         std::make_unique<Interpreter::CrossingInfoInterpreter>(loggerInterface, GetBehaviourData(), stochastics);
     auto crossingInfoInterpreterCommand = std::make_unique<CommandInterface>(std::move(crossingInfoInterpreter));
-    worldInterpreter.SetCommand(std::move(crossingInfoInterpreterCommand));
+    worldInterpreter.SetPrimaryCommand(std::move(crossingInfoInterpreterCommand));
 
     std::unique_ptr<Interpreter::InterpreterInterface> collisionInterpreter =
         std::make_unique<Interpreter::CollisionInterpreter>(loggerInterface, GetBehaviourData());
     auto collisionInterpreterCommand = std::make_unique<CommandInterface>(std::move(collisionInterpreter));
-    worldInterpreter.SetCommand(std::move(collisionInterpreterCommand));
+    worldInterpreter.SetPrimaryCommand(std::move(collisionInterpreterCommand));
 
     std::unique_ptr<Interpreter::InterpreterInterface> followingInterpreter =
         std::make_unique<Interpreter::FollowingInterpreter>(loggerInterface, GetBehaviourData());
     auto followingInterpreterCommand = std::make_unique<CommandInterface>(std::move(followingInterpreter));
-    worldInterpreter.SetCommand(std::move(followingInterpreterCommand));
+    worldInterpreter.SetPrimaryCommand(std::move(followingInterpreterCommand));
 
     std::unique_ptr<Interpreter::InterpreterInterface> rightOfWayInterpreter =
         std::make_unique<Interpreter::RightOfWayInterpreter>(loggerInterface, GetBehaviourData());
     auto rightOfWayInterpreterCommand = std::make_unique<CommandInterface>(std::move(rightOfWayInterpreter));
-    worldInterpreter.SetCommand(std::move(rightOfWayInterpreterCommand));
+    worldInterpreter.SetSecondaryCommand(std::move(rightOfWayInterpreterCommand));
 }
 
 void CognitiveMap::Update() {

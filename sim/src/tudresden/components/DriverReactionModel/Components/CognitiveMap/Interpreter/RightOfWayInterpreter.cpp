@@ -27,17 +27,15 @@ void RightOfWayInterpreter::Update(WorldInterpretation* interpretation, const Wo
         for (const auto& observedAgent : *representation.agentMemory) {
             RightOfWay rightOfWay{true, true};
 
-            auto conflictSituation = representation.egoAgent->PossibleConflictSituationAlongLane(*observedAgent);
-            auto junctionSituation = representation.egoAgent->JunctionSituation(*observedAgent);
-            if (conflictSituation && junctionSituation) {
+            auto junctionSituation = JunctionSituation(representation.egoAgent, *observedAgent);
+            auto &agentInterpretation = interpretation->interpretedAgents.at(observedAgent->GetID());
+            if (agentInterpretation->conflictSituation && junctionSituation) {
                 rightOfWay = PerformRightOfWayDetermination(*observedAgent, representation);
             }
 
             interpretation->rightOfWayMap.insert({observedAgent->GetID(), rightOfWay});
-            auto agentInterpretation = &interpretation->interpretedAgents.at(observedAgent->GetID());
-            (*agentInterpretation)->rightOfWay.ego = rightOfWay.ego;
-            (*agentInterpretation)->rightOfWay.observed = rightOfWay.observed;
-            (*agentInterpretation)->conflictSituation = conflictSituation;
+            agentInterpretation->rightOfWay.ego = rightOfWay.ego;
+            agentInterpretation->rightOfWay.observed = rightOfWay.observed;
         }
 
         if (interpretation->rightOfWayMap.size() != representation.agentMemory->size()) {
@@ -68,6 +66,95 @@ void RightOfWayInterpreter::UpdateRightOfWayRegulation(const WorldRepresentation
 RightOfWay RightOfWayInterpreter::PerformRightOfWayDetermination(const AgentRepresentation& observedAgent,
                                                                  const WorldRepresentation& representation) {
     return rightOfWayRegulation->RightOfWayDetermination(observedAgent, representation);
+}
+
+std::optional<JunctionSituation> RightOfWayInterpreter::JunctionSituation(const EgoAgentRepresentation *ego,
+                                                                          const AgentRepresentation &observedAgent) const {
+    auto egoRoad = ego->GetRoad();
+    auto oAgentRoad = observedAgent.GetRoad();
+
+    if (egoRoad->IsOnJunction() && oAgentRoad->IsOnJunction()) {
+        if (egoRoad->GetJunction() == oAgentRoad->GetJunction()) {
+            return JunctionSituation::JUNCTION_A;
+        }
+    }
+    else if (egoRoad->IsOnJunction()) {
+        auto junction = egoRoad->GetJunction();
+        if (IsMovingTowardsJunction(observedAgent, junction)) {
+            return JunctionSituation::JUNCTION_B;
+        }
+    }
+    else if (oAgentRoad->IsOnJunction()) {
+        auto junction = oAgentRoad->GetJunction();
+        if (IsMovingTowardsJunction(*ego, junction)) {
+            return JunctionSituation::JUNCTION_C;
+        }
+    }
+
+    const auto &egoLane = ego->GetLane();
+    if (ego->IsMovingInLaneDirection()) {
+        if (egoLane->IsInRoadDirection() && egoRoad->IsSuccessorJunction()) {
+            auto junction = dynamic_cast<const MentalInfrastructure::Junction *>(egoRoad->GetSuccessor());
+            if (IsMovingTowardsJunction(observedAgent, junction)) {
+                return JunctionSituation::JUNCTION_D;
+            }
+        }
+        else if (!egoLane->IsInRoadDirection() && egoRoad->IsPredecessorJunction()) {
+            auto junction = dynamic_cast<const MentalInfrastructure::Junction *>(egoRoad->GetPredecessor());
+            if (IsMovingTowardsJunction(observedAgent, junction)) {
+                return JunctionSituation::JUNCTION_D;
+            }
+        }
+    }
+    else {
+        if (egoLane->IsInRoadDirection() && egoRoad->IsPredecessorJunction()) {
+            auto junction = dynamic_cast<const MentalInfrastructure::Junction *>(egoRoad->GetPredecessor());
+            if (IsMovingTowardsJunction(observedAgent, junction)) {
+                return JunctionSituation::JUNCTION_D;
+            }
+        }
+        else if (!egoLane->IsInRoadDirection() && egoRoad->IsSuccessorJunction()) {
+            auto junction = dynamic_cast<const MentalInfrastructure::Junction *>(egoRoad->GetSuccessor());
+            if (IsMovingTowardsJunction(observedAgent, junction)) {
+                return JunctionSituation::JUNCTION_D;
+            }
+        }
+    }
+    return std::nullopt;
+}
+
+bool RightOfWayInterpreter::IsMovingTowardsJunction(const AgentRepresentation &agent,
+                                                    const MentalInfrastructure::Junction *junction) const {
+    if (!junction)
+        return false;
+
+    auto roadOfAgent = agent.GetRoad();
+    const auto &currentLane = agent.GetLane();
+    if (currentLane->IsInRoadDirection()) {
+        if (agent.IsMovingInLaneDirection()) {
+            if (roadOfAgent->IsSuccessorJunction()) {
+                return roadOfAgent->GetSuccessor()->GetOpenDriveId() == junction->GetOpenDriveId();
+            }
+        }
+        else {
+            if (roadOfAgent->IsPredecessorJunction()) {
+                return roadOfAgent->GetPredecessor()->GetOpenDriveId() == junction->GetOpenDriveId();
+            }
+        }
+    }
+    else {
+        if (agent.IsMovingInLaneDirection()) {
+            if (roadOfAgent->IsPredecessorJunction()) {
+                return roadOfAgent->GetPredecessor()->GetOpenDriveId() == junction->GetOpenDriveId();
+            }
+        }
+        else {
+            if (roadOfAgent->IsSuccessorJunction()) {
+                return roadOfAgent->GetSuccessor()->GetOpenDriveId() == junction->GetOpenDriveId();
+            }
+        }
+    }
+    return false;
 }
 
 } // namespace Interpreter

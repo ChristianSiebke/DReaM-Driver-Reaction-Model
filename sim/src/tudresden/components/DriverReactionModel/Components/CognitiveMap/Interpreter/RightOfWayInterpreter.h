@@ -33,6 +33,9 @@ class RightOfWayInterpreter : public InterpreterInterface {
 
     RightOfWay PerformRightOfWayDetermination(const AgentRepresentation&, const WorldRepresentation& representation);
 
+    std::optional<JunctionSituation> JunctionSituation(const EgoAgentRepresentation *ego, const AgentRepresentation &observedAgent) const;
+    bool IsMovingTowardsJunction(const AgentRepresentation &agent, const MentalInfrastructure::Junction *junction) const;
+
     std::unique_ptr<RightOfWayRegulation::RightOfWayRegulationInterface> rightOfWayRegulation{nullptr};
 };
 } // namespace Interpreter

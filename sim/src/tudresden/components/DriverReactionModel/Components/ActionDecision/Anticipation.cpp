@@ -19,26 +19,16 @@
 namespace ActionDecision {
 
 double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> &observedAgent) {
-    auto egoAgent = worldRepresentation.egoAgent;
     auto oAgent = observedAgent->agent;
     auto oAgentID = oAgent->GetID();
     auto conflictSituation = observedAgent->conflictSituation;
     double freeAccelerationEgo = CalculatePhaseAcceleration();
-
-    // ego is already in conflict area and observed agent not
-    if (conflictSituation->egoDistance.vehicleFrontToCAStart <= 0 && conflictSituation->oAgentDistance.vehicleFrontToCAStart >= 0) {
-        return freeAccelerationEgo;
-    }
     // observed or ego agent has passed conflict area
     if (conflictSituation->oAgentDistance.vehicleBackToCAEnd <= 0 || conflictSituation->egoDistance.vehicleBackToCAEnd <= 0) {
         DeletePriorityAgent(oAgentID);
         return freeAccelerationEgo;
     }
-    // both agents in conflict area
-    if (conflictSituation->egoDistance.vehicleFrontToCAStart < 0 && conflictSituation->oAgentDistance.vehicleFrontToCAStart < 0) {
-        return maxEmergencyDeceleration;
-    }
-    auto tEgo = CalculateTimeToConflictAreaEgo(conflictSituation->egoDistance, egoAgent->GetVelocity());
+    auto tEgo = CalculateTimeToConflictAreaEgo(conflictSituation->egoDistance, worldRepresentation.egoAgent->GetVelocity());
     auto tObserved =
         CalculateTimeToConflictAreaObserved(conflictSituation->oAgentDistance, oAgent->GetAcceleration(), oAgent->GetVelocity());
 

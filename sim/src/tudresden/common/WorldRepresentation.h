@@ -37,7 +37,6 @@ struct ConflictSituation {
     ConflictSituation() {
     }
     ~ConflictSituation() = default;
-    int oAgentID = maxInt;
     DistanceToConflictArea egoDistance;
     DistanceToConflictArea oAgentDistance;
 };
@@ -84,6 +83,7 @@ struct WorldInterpretation {
     CrossingInfo crossingInfo;
     //! map holds right of way for observed agent
     std::unordered_map<int, RightOfWay> rightOfWayMap;
+    //! target velocity of ego agent
     double targetVelocity;
 };
 
@@ -131,21 +131,6 @@ class AgentRepresentation {
     virtual std::optional<MentalInfrastructure::TrafficSign> NextROWSign() const;
 
     /*!
-     * \brief  return junction situation --> Constellation of agents to each other at the junction
-     * @param[in]     observedAgent
-     *
-     * @return        CollisionSituationType
-     */
-    std::optional<JunctionSituation> JunctionSituation(const AgentRepresentation &observedAgent) const;
-
-    /*!
-     * \brief  check if agent is moving towards specific junction
-     * @param[in]     junction
-     *
-     * @return        true if agent is moving towards junction
-     */
-    bool IsMovingTowardsJunction(const MentalInfrastructure::Junction *junction) const;
-    /*!
      * \brief  extrapolate distance (in lane direction distance >0 against lane direction distance <0)
      *
      * @param[in]     timeStep
@@ -153,8 +138,6 @@ class AgentRepresentation {
      * @return        distance
      */
     double ExtrapolateDistanceAlongLane(double timeStep) const;
-
-    std::optional<ConflictSituation> PossibleConflictSituationAlongLane(const AgentRepresentation &observedAgent) const;
 
     //*********Get-functions****//
     virtual const AgentPerception& GetInternalData() const { return *internalData; }
@@ -195,13 +178,6 @@ class AgentRepresentation {
     const std::unordered_map<MentalInfrastructure::TrafficSignType, std::vector<MentalInfrastructure::TrafficSign>> FilterROWTrafficSigns(
         const std::unordered_map<MentalInfrastructure::TrafficSignType, std::vector<MentalInfrastructure::TrafficSign>>& trafficSignMap)
         const;
-
-    ConflictSituation CalculateConflictSituation(std::pair<const MentalInfrastructure::ConflictArea &, OwlId> egoCA,
-                                                 std::pair<const MentalInfrastructure::ConflictArea &, OwlId> observedCA,
-                                                 const AgentRepresentation &observedAgent) const;
-
-    double DistanceToConflictPoint(const AgentRepresentation &agent, const MentalInfrastructure::LanePoint &junctionPoint,
-                                   OwlId laneId) const;
 
     //! the internal information of the agent representation
     std::shared_ptr<AgentPerception> internalData;
