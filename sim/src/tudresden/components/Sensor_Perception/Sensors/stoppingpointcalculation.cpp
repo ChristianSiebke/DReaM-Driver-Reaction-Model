@@ -113,21 +113,6 @@ bool StoppingPointCalculation::CalcCrossingLines(const MentalInfrastructure::Lan
         lines.innerLeftLine = CalcExtendedLine(ill, M_PI_2, roadIsPredJunction, roadIsSuccJunction);
         lines.innerRightLine = CalcExtendedLine(irl, -M_PI_2, roadIsPredJunction, roadIsSuccJunction);
         lines.centerLine = CalcExtendedLine(centerRightLane, centerAngle, roadIsPredJunction, roadIsSuccJunction);
-
-        std::cout << "Road=" << incomingRoad->GetOpenDriveId() << "\t"
-                  << "AppDir=" << std::to_string((int)dir) << std::endl
-                  << "Outer Right: \t Ray((" << lines.outerRightLine.start.x << "," << lines.outerRightLine.start.y << "),("
-                  << lines.outerRightLine.direction.x << "," << lines.outerRightLine.direction.y << "))" << std::endl
-                  << "Inner Right: \t Ray((" << lines.innerRightLine.start.x << "," << lines.innerRightLine.start.y << "),("
-                  << lines.innerRightLine.direction.x << "," << lines.innerRightLine.direction.y << "))" << std::endl
-                  << "Center: \t Ray((" << lines.centerLine.start.x << "," << lines.centerLine.start.y << "),("
-                  << lines.centerLine.direction.x << "," << lines.centerLine.direction.y << "))" << std::endl
-                  << "Inner Left: \t Ray((" << lines.innerLeftLine.start.x << "," << lines.innerLeftLine.start.y << "),("
-                  << lines.innerLeftLine.direction.x << "," << lines.innerLeftLine.direction.y << "))" << std::endl
-                  << "Outer Left: \t Ray((" << lines.outerLeftLine.start.x << "," << lines.outerLeftLine.start.y << "),("
-                  << lines.outerLeftLine.direction.x << "," << lines.outerLeftLine.direction.y << "))" << std::endl
-                  << std::endl;
-
         return true;
     }
     else {
@@ -407,17 +392,6 @@ StoppingPointCalculation::DetermineStoppingPoints(const MentalInfrastructure::Ju
     InsertCrossLines(nextLanes.leftLanes, crossLineMap, junction, leftSuccLane, dummyCrossLines, ApproachDirection::Left);
     InsertCrossLines(nextLanes.straightLanes, crossLineMap, junction, straightSuccLane, dummyCrossLines, ApproachDirection::StraightAhead);
     InsertCrossLines(nextLanes.rightLanes, crossLineMap, junction, rightSuccLane, dummyCrossLines, ApproachDirection::Right);
-
-    // std::cout << "EGO: " << egoLane->GetRoad()->GetOpenDriveId() << std::endl;
-    // for (auto lane : nextLanes.leftLanes)
-    //     std::cout << "Left: " << lane->GetRoad()->GetOpenDriveId() << std::endl;
-    // for (auto lane : nextLanes.straightLanes)
-    //     std::cout << "Straight: " << lane->GetRoad()->GetOpenDriveId() << std::endl;
-    // for (auto lane : nextLanes.rightLanes)
-    //     std::cout << "Right: " << lane->GetRoad()->GetOpenDriveId() << std::endl;
-    // std::cout << std::endl;
-
-    std::cout << "---------------------------------------------------------------------" << std::endl << std::endl;
 
     // BEGIN inserting StoppingPoints
 

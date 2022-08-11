@@ -28,14 +28,10 @@ LateralDecision::LateralDecision(const WorldRepresentation &worldRepresentation,
 
 void LateralDecision::Update() {
     auto egoAgent = worldRepresentation.egoAgent;
-
-    std::cout << " target lane exist: " << worldInterpretation.targetLane.has_value() << std::endl;
-
     if (!worldInterpretation.targetLane) {
         lateralAction = ResetLateralAction(egoAgent->GetIndicatorState());
         return;
     }
-
     auto targetLane = *worldInterpretation.targetLane;
     if (std::none_of(egoAgent->GetMainLocatorLane()->GetSuccessors().begin(), egoAgent->GetMainLocatorLane()->GetSuccessors().end(),
                      [targetLane](auto element) { return element == targetLane; })) {
