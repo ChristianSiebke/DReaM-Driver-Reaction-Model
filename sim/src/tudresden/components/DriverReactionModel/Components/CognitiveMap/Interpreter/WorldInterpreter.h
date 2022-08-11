@@ -13,7 +13,6 @@
  *****************************************************************************/
 #pragma once
 
-#include "Components/CognitiveMap/CommandInterface.h"
 #include "InterpreterInterface.h"
 #include <algorithm>
 #include <memory>
@@ -29,13 +28,13 @@ class WorldInterpreter {
     WorldInterpreter& operator=(WorldInterpreter&&) = delete;
     ~WorldInterpreter() = default;
 
-    void ExecuteCommands(WorldInterpretation* interpretation, const WorldRepresentation& representation) ;
+    void ExecuteTasks(WorldInterpretation *interpretation, const WorldRepresentation &representation);
 
-    void SetPrimaryCommand(std::unique_ptr<CognitiveMap::CommandInterface> command);
-    void SetSecondaryCommand(std::unique_ptr<CognitiveMap::CommandInterface> command);
+    void SetPrimaryTask(std::unique_ptr<Interpreter::InterpreterInterface> task);
+    void SetSecondaryTask(std::unique_ptr<Interpreter::InterpreterInterface> task);
 
 private:
-    std::vector<std::unique_ptr<CognitiveMap::CommandInterface>> primaryCommands;
-    std::vector<std::unique_ptr<CognitiveMap::CommandInterface>> secondaryCommands;
+    std::vector<std::unique_ptr<Interpreter::InterpreterInterface>> primaryTasks;
+    std::vector<std::unique_ptr<Interpreter::InterpreterInterface>> secondaryTasks;
 };
 } // namespace Interpreter

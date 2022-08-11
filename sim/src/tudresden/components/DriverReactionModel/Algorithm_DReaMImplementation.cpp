@@ -141,7 +141,7 @@ void AlgorithmDReaMImplementation::Trigger(int time) {
     try {
         std::cout << "time: " << time << std::endl;
         DReaM.UpdateDReaM(time, egoPerception, ambientAgents, infrastructurePerception, trafficSigns);
-        out_indicatorState = static_cast<int>(DReaM.GetRouteDecision().indicator);
+        out_indicatorState = static_cast<int>(DReaM.GetLateralAction().indicator);
         out_longitudinalAccelerationWish = DReaM.GetAcceleration();
         outGazeState = DReaM.GetGazeState();
         segmentControlFixPoints = DReaM.GetSegmentControlFixationPoints();
@@ -149,7 +149,7 @@ void AlgorithmDReaMImplementation::Trigger(int time) {
         // LateralOutput**************************
         out_laneWidth = DReaM.GetWorldRepresentation().egoAgent->GetLaneWidth();
         out_lateral_displacement = DReaM.GetWorldRepresentation().egoAgent->GetLateralDisplacement() -
-                                   DReaM.GetRouteDecision().lateralDisplacement; // lateral deviation
+                                   DReaM.GetLateralAction().lateralDisplacement; // lateral deviation
         out_heading_error = DReaM.GetWorldRepresentation().egoAgent->GetHeading();
         out_curvature = DReaM.GetWorldRepresentation().egoAgent->GetCurvature();
         //****************************************

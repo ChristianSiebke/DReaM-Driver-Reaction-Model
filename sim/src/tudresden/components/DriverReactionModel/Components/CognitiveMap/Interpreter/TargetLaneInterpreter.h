@@ -12,6 +12,8 @@
  * SPDX-License-Identifier: EPL-2.0
  *****************************************************************************/
 #pragma once
+#include "Common/MentalInfrastructure/RoadmapGraph/roadmap_graph.h"
+#include "Common/WorldRepresentation.h"
 #include "InterpreterInterface.h"
 
 namespace Interpreter {
@@ -29,10 +31,12 @@ public:
     virtual void Update(WorldInterpretation *interpretation, const WorldRepresentation &representation) override;
 
 private:
+    std::optional<const MentalInfrastructure::Lane *> TargetLane(const WorldRepresentation &representation);
+   
     DReaMRoute::Waypoints waypoints;
     DReaMRoute::Waypoints::iterator targetWP;
     DReaMRoute::Waypoints::iterator lastTimeStepWP;
+    const MentalInfrastructure::Lane *egoLane;
     std::list<const RoadmapGraph::RoadmapNode *> path;
-    DReaMRoute::Waypoint oldWP;
 };
 } // namespace Interpreter

@@ -16,7 +16,7 @@
 #include "Common/Definitions.h"
 #include "Common/Helper.h"
 
-namespace ActionDecision {
+namespace LongitudinalDecision {
 
 double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> &observedAgent) {
     auto oAgent = observedAgent->agent;
@@ -280,4 +280,4 @@ double Anticipation::CalculateDeceleration(double sFrontEgo, double tEndObserved
     return aIDM;
 }
 
-} // namespace ActionDecision
+} // namespace LongitudinalDecision

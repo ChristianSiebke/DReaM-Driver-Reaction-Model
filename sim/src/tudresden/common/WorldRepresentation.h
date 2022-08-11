@@ -85,6 +85,8 @@ struct WorldInterpretation {
     std::unordered_map<int, RightOfWay> rightOfWayMap;
     //! target velocity of ego agent
     double targetVelocity;
+    //! next lane on route graph
+    std::optional<const MentalInfrastructure::Lane *> targetLane;
 };
 
 namespace CognitiveMap {

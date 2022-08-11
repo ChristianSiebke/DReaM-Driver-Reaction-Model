@@ -14,24 +14,25 @@
 
 #include "DriverReactionModel.h"
 
-#include "Components/ActionDecision/ActionDecision.h"
 #include "Components/CognitiveMap/CognitiveMap.h"
 #include "Components/GazeMovement/GazeMovement.h"
 #include "Components/Importer/BehaviourImporter.h"
+#include "Components/LongitudinalDecision/LongitudinalDecision.h"
 
 DriverReactionModel::DriverReactionModel(std::string behaviourConfigPath, std::string resultPath, LoggerInterface &loggerInterface,
                                          int cycleTime, StochasticsInterface *stochastics) {
     BehaviourImporter importer(behaviourConfigPath, &loggerInterface);
     behaviourData = importer.GetBehaviourData();
     cognitiveMap = std::make_unique<CognitiveMap::CognitiveMap>(cycleTime, stochastics, &loggerInterface, *behaviourData);
-    navigation = std::make_unique<Navigation::Navigation>(cognitiveMap->GetWorldRepresentation(), cognitiveMap->GetWorldInterpretation(),
-                                                          cycleTime, stochastics, &loggerInterface, *behaviourData);
+    lateralDecision =
+        std::make_unique<LateralDecision::LateralDecision>(cognitiveMap->GetWorldRepresentation(), cognitiveMap->GetWorldInterpretation(),
+                                                           cycleTime, stochastics, &loggerInterface, *behaviourData);
     gazeMovement =
         std::make_unique<GazeMovement::GazeMovement>(cognitiveMap->GetWorldRepresentation(), cognitiveMap->GetWorldInterpretation(),
                                                      cycleTime, stochastics, &loggerInterface, *behaviourData);
-    actionDecision =
-        std::make_unique<ActionDecision::ActionDecision>(cognitiveMap->GetWorldRepresentation(), cognitiveMap->GetWorldInterpretation(),
-                                                         cycleTime, stochastics, &loggerInterface, *behaviourData);
+    longitudinalDecision = std::make_unique<LongitudinalDecision::LongitudinalDecision>(cognitiveMap->GetWorldRepresentation(),
+                                                                                        cognitiveMap->GetWorldInterpretation(), cycleTime,
+                                                                                        stochastics, &loggerInterface, *behaviourData);
     agentStateRecorder = AgentStateRecorder::AgentStateRecorder::GetInstance(resultPath);
 }
 
@@ -53,9 +54,9 @@ void DriverReactionModel::UpdateInput(int time, std::shared_ptr<EgoPerception> e
 
 void DriverReactionModel::UpdateComponents() {
     cognitiveMap->Update();
-    navigation->Update();
+    lateralDecision->Update();
     gazeMovement->Update();
-    actionDecision->Update();
+    longitudinalDecision->Update();
 }
 
 void DriverReactionModel::UpdateAgentStateRecorder(int time, int id, std::shared_ptr<InfrastructurePerception> infrastructure) {
@@ -71,11 +72,11 @@ void DriverReactionModel::UpdateAgentStateRecorder(int time, int id, std::shared
 }
 
 double DriverReactionModel::GetAcceleration() {
-    return actionDecision->GetAcceleration();
+    return longitudinalDecision->GetAcceleration();
 }
 
-const NavigationDecision DriverReactionModel::GetRouteDecision() {
-    return navigation->GetRouteDecision();
+const LateralAction DriverReactionModel::GetLateralAction() {
+    return lateralDecision->GetLateralAction();
 }
 
 const GazeState DriverReactionModel::GetGazeState() {

@@ -16,17 +16,18 @@
 #include <list>
 #include <memory>
 
-#include "Interpreter/CollisionInterpreter.h"
 #include "Common/BehaviourData.h"
 #include "Common/ComplexSignals.h"
 #include "Common/Helper.h"
+#include "Common/WorldRepresentation.h"
 #include "Components/ComponentInterface.h"
+#include "Interpreter/CollisionInterpreter.h"
 #include "Interpreter/CrossingInfoInterpreter.h"
 #include "Interpreter/FollowingInterpreter.h"
-#include "Memory.h"
 #include "Interpreter/RightOfWayInterpreter.h"
+#include "Interpreter/TargetLaneInterpreter.h"
 #include "Interpreter/WorldInterpreter.h"
-#include "Common/WorldRepresentation.h"
+#include "Memory.h"
 
 namespace CognitiveMap {
 class CognitiveMap : public Component::ComponentInterface {

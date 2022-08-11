@@ -14,12 +14,12 @@
 
 #pragma once
 #include "AgentStateRecorder/AgentStateRecorder.h"
-#include "Components/ActionDecision/ActionDecision.h"
 #include "Components/CognitiveMap/CognitiveMap.h"
 #include "Components/ComponentInterface.h"
 #include "Components/GazeMovement/GazeMovement.h"
 #include "Components/GazeMovement/RoadSegments/RoadSegmentInterface.h"
-#include "Components/Navigation.h"
+#include "Components/LateralDecision.h"
+#include "Components/LongitudinalDecision/LongitudinalDecision.h"
 #include "Components/TrafficSignMemory/TrafficSignMemory.h"
 
 class DriverReactionModel {
@@ -36,7 +36,7 @@ class DriverReactionModel {
                        std::shared_ptr<InfrastructurePerception> infrastructure,
                        std::vector<const MentalInfrastructure::TrafficSign *> trafficSigns);
       double GetAcceleration();
-      const NavigationDecision GetRouteDecision();
+      const LateralAction GetLateralAction();
       const GazeState GetGazeState();
       const std::vector<Common::Vector2d> GetSegmentControlFixationPoints();
       const WorldRepresentation &GetWorldRepresentation();
@@ -52,7 +52,7 @@ class DriverReactionModel {
       std::shared_ptr<AgentStateRecorder::AgentStateRecorder> agentStateRecorder;
       std::unique_ptr<BehaviourData> behaviourData;
       std::unique_ptr<CognitiveMap::CognitiveMap> cognitiveMap;
-      std::unique_ptr<Navigation::Navigation> navigation;
+      std::unique_ptr<LateralDecision::LateralDecision> lateralDecision;
       std::unique_ptr<GazeMovement::GazeMovement> gazeMovement;
-      std::unique_ptr<ActionDecision::ActionDecision> actionDecision;
+      std::unique_ptr<LongitudinalDecision::LongitudinalDecision> longitudinalDecision;
 };

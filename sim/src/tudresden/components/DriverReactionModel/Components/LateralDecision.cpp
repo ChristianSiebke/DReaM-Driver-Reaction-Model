@@ -11,61 +11,32 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *****************************************************************************/
-#include "Navigation.h"
+#include "LateralDecision.h"
 
 #include <iostream>
 
 #include "Common/Helper.h"
-namespace Navigation {
+namespace LateralDecision {
 
-Navigation::Navigation(const WorldRepresentation &worldRepresentation, const WorldInterpretation &worldInterpretation, int cycleTime,
-                       StochasticsInterface *stochastics, LoggerInterface *loggerInterface, const BehaviourData &behaviourData) :
+LateralDecision::LateralDecision(const WorldRepresentation &worldRepresentation, const WorldInterpretation &worldInterpretation,
+                                 int cycleTime, StochasticsInterface *stochastics, LoggerInterface *loggerInterface,
+                                 const BehaviourData &behaviourData) :
     ComponentInterface(cycleTime, stochastics, loggerInterface, behaviourData),
     worldRepresentation{worldRepresentation},
     worldInterpretation{worldInterpretation} {
 }
 
-void Navigation::Update() {
+void LateralDecision::Update() {
     auto egoAgent = worldRepresentation.egoAgent;
 
-    if (waypoints != egoAgent->GetRoute()) {
-        waypoints = egoAgent->GetRoute();
-        targetWP = waypoints.begin();
-    }
+    std::cout << " target lane exist: " << worldInterpretation.targetLane.has_value() << std::endl;
 
-    if (waypoints.empty()) {
-        std::string msg = __FILE__ " " + std::to_string(__LINE__) + " Agent has no route";
-        Log(msg, DReaMLogLevel::error);
-        throw std::logic_error(msg);
-    }
-
-    auto currentRoad = egoAgent->GetRoad()->GetOpenDriveId();
-    auto currentSCoordinate = egoAgent->GetSCoordinate();
-
-    if (targetWP->roadId == currentRoad && targetWP->s <= currentSCoordinate) {
-        targetWP = std::next(targetWP);
-    }
-
-    if (waypoints.end() == targetWP) {
-        // agent reach target
-        routeDecision = ResetRouteDecision(egoAgent->GetIndicatorState());
+    if (!worldInterpretation.targetLane) {
+        lateralAction = ResetLateralAction(egoAgent->GetIndicatorState());
         return;
     }
 
-    if (lastTimeStepWP != targetWP || egoLane != egoAgent->GetMainLocatorLane())
-        path = worldRepresentation.infrastructure->FindShortestPath(egoAgent->GetMainLocatorLane(), targetWP->lane);
-    lastTimeStepWP = targetWP;
-    egoLane = egoAgent->GetMainLocatorLane();
-
-    // lane change needed to stay on path?
-    auto laneIter = path.begin();
-    std::advance(laneIter, 1);
-    if (path.end() == laneIter) {
-        routeDecision = ResetRouteDecision(egoAgent->GetIndicatorState());
-        return;
-    }
-
-    auto targetLane = (*laneIter)->GetNode();
+    auto targetLane = *worldInterpretation.targetLane;
     if (std::none_of(egoAgent->GetMainLocatorLane()->GetSuccessors().begin(), egoAgent->GetMainLocatorLane()->GetSuccessors().end(),
                      [targetLane](auto element) { return element == targetLane; })) {
         // New Lane free ?
@@ -74,16 +45,16 @@ void Navigation::Update() {
         if (NewLaneIsFree()) {
             if (targetLane == egoAgent->GetMainLocatorLane()->GetLeftLane()) {
                 auto lateralDisplacement = (egoAgent->GetMainLocatorLane()->GetWidth() / 2) + (targetLane->GetWidth() / 2);
-                routeDecision.lateralDisplacement =
+                lateralAction.lateralDisplacement =
                     egoAgent->GetMainLocatorLane()->IsInRoadDirection() ? lateralDisplacement : -lateralDisplacement;
-                routeDecision.indicator = egoAgent->GetMainLocatorLane()->IsInRoadDirection() ? IndicatorState::IndicatorState_Left
+                lateralAction.indicator = egoAgent->GetMainLocatorLane()->IsInRoadDirection() ? IndicatorState::IndicatorState_Left
                                                                                               : IndicatorState::IndicatorState_Right;
             }
             else if (targetLane == egoAgent->GetMainLocatorLane()->GetRightLane()) {
                 auto lateralDisplacement = -((egoAgent->GetMainLocatorLane()->GetWidth() / 2) + (targetLane->GetWidth() / 2));
-                routeDecision.lateralDisplacement =
+                lateralAction.lateralDisplacement =
                     egoAgent->GetMainLocatorLane()->IsInRoadDirection() ? lateralDisplacement : -lateralDisplacement;
-                routeDecision.indicator = egoAgent->GetMainLocatorLane()->IsInRoadDirection() ? IndicatorState::IndicatorState_Right
+                lateralAction.indicator = egoAgent->GetMainLocatorLane()->IsInRoadDirection() ? IndicatorState::IndicatorState_Right
                                                                                               : IndicatorState::IndicatorState_Left;
             }
             else {
@@ -95,54 +66,50 @@ void Navigation::Update() {
         }
         else {
             // TODO: slow down and wait at end of road/ after waiting a specific time choose new lane
-            // TODO acceleration calcualtion in longitudinalAction (ActionDecision)
+            // TODO acceleration calcualtion in longitudinalAction
             // TODO: move to interpreter
         }
     }
     else {
-        routeDecision = ResetRouteDecision(egoAgent->GetIndicatorState());
+        lateralAction = ResetLateralAction(egoAgent->GetIndicatorState());
         if (TurningAtJunction()) {
-            routeDecision.indicator = SetIndicatorAtJunction(path);
+            lateralAction.indicator = SetIndicatorAtJunction(targetLane);
             return;
         }
     }
 }
-NavigationDecision Navigation::ResetRouteDecision(IndicatorState currentIndicator) const {
-    NavigationDecision routeDecision;
-    routeDecision.lateralDisplacement = 0;
-    routeDecision.indicator = currentIndicator;
+LateralAction LateralDecision::ResetLateralAction(IndicatorState currentIndicator) const {
+    LateralAction lateralAction;
+    lateralAction.lateralDisplacement = 0;
+    lateralAction.indicator = currentIndicator;
     if (AgentIsTurningOnJunction()) {
-        return routeDecision;
+        return lateralAction;
     }
-    routeDecision.indicator = IndicatorState::IndicatorState_Off;
-    return routeDecision;
+    lateralAction.indicator = IndicatorState::IndicatorState_Off;
+    return lateralAction;
 }
-bool Navigation::NewLaneIsFree() const {
+bool LateralDecision::NewLaneIsFree() const {
     // TODO: implement
     return true;
 }
-bool Navigation::TurningAtJunction() const {
+bool LateralDecision::TurningAtJunction() const {
     return worldRepresentation.egoAgent->NextJunction() != nullptr &&
            worldInterpretation.crossingInfo.phase == CrossingPhase::Deceleration_TWO;
 }
-bool Navigation::AgentIsTurningOnJunction() const {
+bool LateralDecision::AgentIsTurningOnJunction() const {
     return worldInterpretation.crossingInfo.phase >= CrossingPhase::Deceleration_TWO;
 }
 
-IndicatorState Navigation::SetIndicatorAtJunction(std::list<const RoadmapGraph::RoadmapNode *> path) const {
+IndicatorState LateralDecision::SetIndicatorAtJunction(const MentalInfrastructure::Lane *targetLane) const {
     try {
-        std::list<const RoadmapGraph::RoadmapNode *>::iterator laneIter = path.begin();
-        auto currentLane = (*laneIter)->GetNode();
-        std::advance(laneIter, 1);
-
-        auto nextLane = (*laneIter)->GetNode();
+        auto currentLane = worldRepresentation.egoAgent->GetLane();
         auto currentLanePoints = currentLane->GetLanePoints();
         auto secondLast = std::prev(currentLanePoints.end(), 2);
         Common::Vector2d CurrentDirection((currentLane->GetLastPoint()->x) - (secondLast->x),
                                           (currentLane->GetLastPoint()->y) - (secondLast)->y);
-        auto nextLanePoints = nextLane->GetLanePoints();
+        auto nextLanePoints = targetLane->GetLanePoints();
         auto pointNL = std::prev((nextLanePoints).end(), 2);
-        Common::Vector2d NextLaneDirection(nextLane->GetLastPoint()->x - pointNL->x, nextLane->GetLastPoint()->y - pointNL->y);
+        Common::Vector2d NextLaneDirection(targetLane->GetLastPoint()->x - pointNL->x, targetLane->GetLastPoint()->y - pointNL->y);
 
         auto angleDeg = AngleBetween2d(CurrentDirection, NextLaneDirection) * (180 / M_PI);
 
@@ -176,4 +143,4 @@ IndicatorState Navigation::SetIndicatorAtJunction(std::list<const RoadmapGraph::
     }
 }
 
-} // namespace Navigation
+} // namespace LateralDecision

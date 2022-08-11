@@ -17,9 +17,9 @@
 
 #include "Common/Helper.h"
 #include "Common/PerceptionData.h"
-#include "Components/ActionDecision/ActionDecision.h"
 #include "Components/ComponentInterface.h"
-#include "Components/Navigation.h"
+#include "Components/LateralDecision.h"
+#include "Components/LongitudinalDecision/LongitudinalDecision.h"
 #include "RoadSegments/StandardRoad.h"
 #include "RoadSegments/XJunction.h"
 #include "core/opSimulation/framework/sampler.h"

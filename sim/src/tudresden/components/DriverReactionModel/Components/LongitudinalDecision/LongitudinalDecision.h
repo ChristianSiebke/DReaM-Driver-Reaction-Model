@@ -23,7 +23,7 @@
 #include "Components/ComponentInterface.h"
 #include "include/stochasticsInterface.h"
 
-namespace ActionDecision {
+namespace LongitudinalDecision {
 using emergencyState = bool;
 using timeEmergencyBrakeActive = int;
 struct EmergencyBrakeInfo {
@@ -33,60 +33,61 @@ struct EmergencyBrakeInfo {
 };
 
 class MinEmergencyBrakeDelay {
-  public:
+public:
     MinEmergencyBrakeDelay(double minTimeEmergencyBrakeIsActive, int cycleTime);
     void ResetEmergencyState();
     void InsertEmergencyBrakeEvent(int agentID, double deceleration);
 
-    std::vector<double> ActivateIfNeeded(const std::unordered_map<int, std::unique_ptr<AgentInterpretation>>& agents);
+    std::vector<double> ActivateIfNeeded(const std::unordered_map<int, std::unique_ptr<AgentInterpretation>> &agents);
 
-  private:
+private:
     std::unordered_map<int, EmergencyBrakeInfo> emergencyBrake;
     double minTimeEmergencyBrakeIsActive;
     int cycleTime;
 };
 
-class ActionDecision : public Component::ComponentInterface {
-  public:
-      ActionDecision(const WorldRepresentation &worldRepresentation, const WorldInterpretation &worldInterpretation, int cycleTime,
-                     StochasticsInterface *stochastics, LoggerInterface *loggerInterface, const BehaviourData &behaviourData) :
-          ComponentInterface(cycleTime, stochastics, loggerInterface, behaviourData),
-          worldRepresentation{worldRepresentation},
-          worldInterpretation{worldInterpretation},
-          actionStateHandler(worldRepresentation, worldInterpretation),
-          anticipation(worldRepresentation, worldInterpretation, stochastics, loggerInterface, behaviourData),
-          minEmergencyBrakeDelay(GetBehaviourData().adBehaviour.minTimeEmergencyBrakeIsActive, GetCycleTime()) {
-      }
-    ActionDecision(const ActionDecision&) = delete;
-    ActionDecision(ActionDecision&&) = delete;
-    ActionDecision& operator=(const ActionDecision&) = delete;
-    ActionDecision& operator=(ActionDecision&&) = delete;
-    ~ActionDecision() override = default;
+class LongitudinalDecision : public Component::ComponentInterface {
+public:
+    LongitudinalDecision(const WorldRepresentation &worldRepresentation, const WorldInterpretation &worldInterpretation, int cycleTime,
+                         StochasticsInterface *stochastics, LoggerInterface *loggerInterface, const BehaviourData &behaviourData) :
+        ComponentInterface(cycleTime, stochastics, loggerInterface, behaviourData),
+        worldRepresentation{worldRepresentation},
+        worldInterpretation{worldInterpretation},
+        actionStateHandler(worldRepresentation, worldInterpretation),
+        anticipation(worldRepresentation, worldInterpretation, stochastics, loggerInterface, behaviourData),
+        minEmergencyBrakeDelay(GetBehaviourData().adBehaviour.minTimeEmergencyBrakeIsActive, GetCycleTime()) {
+    }
+    LongitudinalDecision(const LongitudinalDecision &) = delete;
+    LongitudinalDecision(LongitudinalDecision &&) = delete;
+    LongitudinalDecision &operator=(const LongitudinalDecision &) = delete;
+    LongitudinalDecision &operator=(LongitudinalDecision &&) = delete;
+    ~LongitudinalDecision() override = default;
 
     void Update() override;
 
-    double GetAcceleration() const { return accelerationResult; }
+    double GetAcceleration() const {
+        return accelerationResult;
+    }
 
-  private:
+private:
     double DetermineAccelerationWish();
 
-    bool observedAgentIsbehindEgoAgent(const std::unique_ptr<AgentInterpretation>& oAgent) const;
+    bool observedAgentIsbehindEgoAgent(const std::unique_ptr<AgentInterpretation> &oAgent) const;
 
     double AgentCrashImminent(const std::unique_ptr<AgentInterpretation> &oAgent) const;
 
     bool CloseToConlictArea() const;
-    bool EgoHasRightOfWay(const std::unique_ptr<AgentInterpretation>& agent) const;
-
+    bool EgoHasRightOfWay(const std::unique_ptr<AgentInterpretation> &agent) const;
 
     double accelerationResult;
 
     const MentalInfrastructure::Road *currentRoad = nullptr;
-    const WorldRepresentation& worldRepresentation;
-    const WorldInterpretation& worldInterpretation;
+    const WorldRepresentation &worldRepresentation;
+    const WorldInterpretation &worldInterpretation;
 
     ActionStateHandler actionStateHandler;
     Anticipation anticipation;
     MinEmergencyBrakeDelay minEmergencyBrakeDelay;
 };
 
-} // namespace ActionDecision
+} // namespace LongitudinalDecision

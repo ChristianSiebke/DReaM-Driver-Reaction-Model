@@ -17,7 +17,7 @@
 #include "Common/Helper.h"
 #include "Common/WorldRepresentation.h"
 #include "Components/ComponentInterface.h"
-namespace ActionDecision {
+namespace LongitudinalDecision {
 
 struct TimeToConflictArea {
     double vehicleFrontToCAStart; // time until the front of the vehicle reach conflict area
@@ -85,4 +85,4 @@ class Anticipation {
     const LoggerInterface* loggerInterface;
     const BehaviourData& behaviourData;
 };
-} // namespace ActionDecision
+} // namespace LongitudinalDecision

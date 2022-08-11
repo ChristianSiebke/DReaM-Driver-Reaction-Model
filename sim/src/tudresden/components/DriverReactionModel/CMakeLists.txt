@@ -14,12 +14,11 @@ add_openpass_target(
     Logger.h
     LoggerInterface.h
     Components/ComponentInterface.h
-    Components/Navigation.h
-    Components/ActionDecision/ActionDecision.h
-    Components/ActionDecision/ActionStateHandler.h
-    Components/ActionDecision/Anticipation.h
+    Components/LateralDecision.h
+    Components/LongitudinalDecision/LongitudinalDecision.h
+    Components/LongitudinalDecision/ActionStateHandler.h
+    Components/LongitudinalDecision/Anticipation.h
     Components/CognitiveMap/CognitiveMap.h
-    Components/CognitiveMap/CommandInterface.h
     Components/CognitiveMap/Memory.h
     Components/CognitiveMap/ReactionTime.h
     Components/CognitiveMap/Interpreter/TargetLaneInterpreter.h
@@ -47,10 +46,10 @@ add_openpass_target(
     Algorithm_DReaMImplementation.cpp
     DriverReactionModel.cpp
     Logger.cpp
-    Components/Navigation.cpp
-    Components/ActionDecision/ActionDecision.cpp
-    Components/ActionDecision/ActionStateHandler.cpp
-    Components/ActionDecision/Anticipation.cpp
+    Components/LateralDecision.cpp
+    Components/LongitudinalDecision/LongitudinalDecision.cpp
+    Components/LongitudinalDecision/ActionStateHandler.cpp
+    Components/LongitudinalDecision/Anticipation.cpp
     Components/CognitiveMap/CognitiveMap.cpp
     Components/CognitiveMap/Memory.cpp
     Components/CognitiveMap/ReactionTime.cpp

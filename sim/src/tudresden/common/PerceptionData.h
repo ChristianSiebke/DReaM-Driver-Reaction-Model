@@ -194,7 +194,7 @@ struct DynamicInfrastructurePerception {
     std::unordered_map<std::shared_ptr<MentalInfrastructure::Road>, MentalInfrastructure::TrafficSign> trafficSigns;
 };
 
-struct NavigationDecision {
+struct LateralAction {
     IndicatorState indicator = IndicatorState::IndicatorState_Off;
     double lateralDisplacement{0};
 };

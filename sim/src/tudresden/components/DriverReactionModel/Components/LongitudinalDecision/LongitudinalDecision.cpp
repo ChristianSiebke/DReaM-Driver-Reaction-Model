@@ -11,18 +11,20 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *****************************************************************************/
-#include "ActionDecision.h"
+#include "LongitudinalDecision.h"
+
 #include <math.h>
 #include <string>
 
-namespace ActionDecision {
+namespace LongitudinalDecision {
 
-MinEmergencyBrakeDelay::MinEmergencyBrakeDelay(double minTimeEmergencyBrakeIsActive, int cycleTime)
-    : minTimeEmergencyBrakeIsActive{minTimeEmergencyBrakeIsActive}, cycleTime{cycleTime} {}
+MinEmergencyBrakeDelay::MinEmergencyBrakeDelay(double minTimeEmergencyBrakeIsActive, int cycleTime) :
+    minTimeEmergencyBrakeIsActive{minTimeEmergencyBrakeIsActive}, cycleTime{cycleTime} {
+}
 
 void MinEmergencyBrakeDelay::ResetEmergencyState() {
     std::for_each(emergencyBrake.begin(), emergencyBrake.end(),
-                  [](std::pair<const int, EmergencyBrakeInfo>& element) { element.second.emergencyState = false; });
+                  [](std::pair<const int, EmergencyBrakeInfo> &element) { element.second.emergencyState = false; });
 }
 void MinEmergencyBrakeDelay::InsertEmergencyBrakeEvent(int agentID, double deceleration) {
     EmergencyBrakeInfo info;
@@ -38,16 +40,17 @@ void MinEmergencyBrakeDelay::InsertEmergencyBrakeEvent(int agentID, double decel
     }
 }
 
-std::vector<double> MinEmergencyBrakeDelay::ActivateIfNeeded(const std::unordered_map<int, std::unique_ptr<AgentInterpretation>>& agents) {
+std::vector<double> MinEmergencyBrakeDelay::ActivateIfNeeded(const std::unordered_map<int, std::unique_ptr<AgentInterpretation>> &agents) {
     for (auto it = begin(emergencyBrake); it != end(emergencyBrake);) {
         if (agents.find(it->first) == agents.end()) {
             it = emergencyBrake.erase(it);
-        } else
+        }
+        else
             ++it;
     }
 
     std::vector<double> accelerations;
-    std::for_each(emergencyBrake.begin(), emergencyBrake.end(), [=, &accelerations](std::pair<const int, EmergencyBrakeInfo>& element) {
+    std::for_each(emergencyBrake.begin(), emergencyBrake.end(), [=, &accelerations](std::pair<const int, EmergencyBrakeInfo> &element) {
         if (!element.second.emergencyState && element.second.timeEmergencyBrakeActive < minTimeEmergencyBrakeIsActive) {
             accelerations.push_back(element.second.deceleration);
             element.second.timeEmergencyBrakeActive += cycleTime;
@@ -57,16 +60,19 @@ std::vector<double> MinEmergencyBrakeDelay::ActivateIfNeeded(const std::unordere
     for (auto it = begin(emergencyBrake); it != end(emergencyBrake);) {
         if (!it->second.emergencyState && it->second.timeEmergencyBrakeActive >= minTimeEmergencyBrakeIsActive) {
             it = emergencyBrake.erase(it);
-        } else
+        }
+        else
             ++it;
     }
 
     return accelerations;
 }
 
-bool AccelerationSorting(double d1, double d2) { return d1 < d2; }
+bool AccelerationSorting(double d1, double d2) {
+    return d1 < d2;
+}
 
-void ActionDecision::Update() {
+void LongitudinalDecision::Update() {
     try {
         accelerationResult = DetermineAccelerationWish();
     }
@@ -82,11 +88,11 @@ void ActionDecision::Update() {
     }
 }
 
-double ActionDecision::DetermineAccelerationWish() {
+double LongitudinalDecision::DetermineAccelerationWish() {
     std::vector<double> accelerations;
     accelerations.push_back(anticipation.CalculatePhaseAcceleration());
     minEmergencyBrakeDelay.ResetEmergencyState();
-    for (auto& entry : worldInterpretation.interpretedAgents) {
+    for (auto &entry : worldInterpretation.interpretedAgents) {
         const auto &agent = entry.second;
 
         switch (actionStateHandler.GetState(agent)) {
@@ -124,21 +130,22 @@ double ActionDecision::DetermineAccelerationWish() {
     return accelerations.front();
 }
 
-double ActionDecision::AgentCrashImminent(const std::unique_ptr<AgentInterpretation> &oAgent) const {
+double LongitudinalDecision::AgentCrashImminent(const std::unique_ptr<AgentInterpretation> &oAgent) const {
     if (observedAgentIsbehindEgoAgent(oAgent)) {
         return anticipation.MaximumAccelerationWish(worldInterpretation.targetVelocity,
                                                     worldRepresentation.egoAgent->GetVelocity() - worldInterpretation.targetVelocity,
                                                     std::numeric_limits<double>::infinity());
-    } else {
+    }
+    else {
         return anticipation.Deceleration(oAgent);
     }
 }
 
-bool ActionDecision::EgoHasRightOfWay(const std::unique_ptr<AgentInterpretation> &agent) const {
+bool LongitudinalDecision::EgoHasRightOfWay(const std::unique_ptr<AgentInterpretation> &agent) const {
     return (agent->rightOfWay.ego && !agent->rightOfWay.observed);
 }
 
-bool ActionDecision::observedAgentIsbehindEgoAgent(const std::unique_ptr<AgentInterpretation>& oAgent) const {
+bool LongitudinalDecision::observedAgentIsbehindEgoAgent(const std::unique_ptr<AgentInterpretation> &oAgent) const {
     return (oAgent->agent->GetNextLane() == worldRepresentation.egoAgent->GetLane() &&
             oAgent->agent->IsMovingInLaneDirection() == worldRepresentation.egoAgent->IsMovingInLaneDirection()) ||
            ((oAgent->agent->IsMovingInLaneDirection() == true && worldRepresentation.egoAgent->IsMovingInLaneDirection() == true) &&
@@ -149,9 +156,9 @@ bool ActionDecision::observedAgentIsbehindEgoAgent(const std::unique_ptr<AgentIn
              oAgent->agent->GetSCoordinate() > worldRepresentation.egoAgent->GetSCoordinate()));
 }
 
-bool ActionDecision::CloseToConlictArea() const {
+bool LongitudinalDecision::CloseToConlictArea() const {
     return worldRepresentation.egoAgent->GetDistanceOnJunction() > 0 || (worldRepresentation.egoAgent->GetDistanceToNextJunction() > -1 &&
                                                                          worldRepresentation.egoAgent->GetDistanceToNextJunction() < 5);
 }
 
-} // namespace ActionDecision
+} // namespace LongitudinalDecision
