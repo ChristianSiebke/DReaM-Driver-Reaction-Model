@@ -41,9 +41,8 @@ class CrossingInfoInterpreter : public InterpreterInterface {
     void Localize(const WorldRepresentation& representation);
     void UpdateStoppingPoints(const WorldRepresentation& representation);
 
-    void SetDistanceSP(const AgentRepresentation* representation, const MentalInfrastructure::Road* road,
-                       const MentalInfrastructure::Junction* nextIntersection,
-                       StoppingPointMap stoppingpoints);
+    void SetDistanceSP(const AgentRepresentation* representation,                   
+                       StoppingPointMap &stoppingpoints);
 
     void DetermineCrossingType(const WorldRepresentation& representation);
     void DetermineCrossingPhase(const WorldRepresentation& representation);

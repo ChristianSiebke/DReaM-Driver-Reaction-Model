@@ -22,6 +22,7 @@
 #include "Common/WorldRepresentation.h"
 #include "Components/ComponentInterface.h"
 #include "Interpreter/CollisionInterpreter.h"
+#include "Interpreter/ConflictSituationInterpreter.h"
 #include "Interpreter/CrossingInfoInterpreter.h"
 #include "Interpreter/FollowingInterpreter.h"
 #include "Interpreter/RightOfWayInterpreter.h"

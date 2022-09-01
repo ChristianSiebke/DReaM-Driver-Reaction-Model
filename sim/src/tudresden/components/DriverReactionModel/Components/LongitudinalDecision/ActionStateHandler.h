@@ -16,7 +16,7 @@
 
 #include "Common/Helper.h"
 
-enum class ActionState { Start = 0, Collision = 1, Following = 2, IntersectionSituation = 3, End = 4 };
+enum class ActionState { Start = 0, CollisionImminent = 1, Following = 2, IntersectionSituation = 3, End = 4 };
 
 class ActionStateHandler {
   public:

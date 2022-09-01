@@ -67,12 +67,13 @@ class Anticipation {
 
     TimeToConflictArea CalculateTimeToConflictAreaEgo(DistanceToConflictArea distance, double velocity) const;
 
-    TimeToConflictArea CalculateTimeToConflictAreaObserved(DistanceToConflictArea distance, double acceleration, double velocity) const;
+    TimeToConflictArea CalculateTimeToConflictAreaObserved(const ConflictSituation &situation,
+                                                           const AmbientAgentRepresentation *oAgent) const;
 
     double TravelTimeEgo(double distance, double velocity, double vTarget) const;
-    double TravelTimeObserved(double distance, double acceleration, double velocity) const;
+    double TravelTimeObserved(double distance, bool egoInsideConflictArea, const AmbientAgentRepresentation *oAgent) const;
 
-    double CalculateDeceleration(double sFrontEgo, double tEndObserved, bool egoAgentRightOfWay) const;
+    double CalculateDeceleration(double sFrontEgo, double tEndObserved, const AgentInterpretation *observedAgent) const;
 
     const BehaviourData& GetBehaviourData() const { return behaviourData; }
 

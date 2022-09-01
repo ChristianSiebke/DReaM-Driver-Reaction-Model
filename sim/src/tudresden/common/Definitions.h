@@ -155,7 +155,7 @@ struct StoppingPoint {
     double sOffset = maxDouble;
 
     // will be set to -1.0 if stopping point is irrelevant
-    double distanceToEgo = maxDouble;
+    double distanceToEgoFront = maxDouble;
 
     // VA 06.04.2020
     // nearest position on the road for the stopping point

@@ -79,9 +79,7 @@ void GazeMovement::DetermineGazeState() {
 }
 
 void GazeMovement::UpdateRoadSegment() {
-    if ((worldRepresentation.egoAgent->GetDistanceToNextJunction() <= 75 &&
-         worldRepresentation.egoAgent->GetDistanceToNextJunction() >= 0) ||
-        worldRepresentation.egoAgent->GetDistanceOnJunction() > 0) {
+    if (worldInterpretation.crossingInfo.phase >= CrossingPhase::Approach) {
         auto NextJunction = worldRepresentation.egoAgent->NextJunction();
         if (NextJunction != nullptr) {
             if (NextJunction->GetIncomingRoads().size() == 4) {

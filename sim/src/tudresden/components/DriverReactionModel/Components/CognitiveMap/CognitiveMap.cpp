@@ -33,6 +33,10 @@ CognitiveMap::CognitiveMap(int cycleTime, StochasticsInterface* stochastics, Log
         std::make_unique<Interpreter::TargetLaneInterpreter>(loggerInterface, GetBehaviourData());
     worldInterpreter.SetPrimaryTask(std::move(targetLaneInterpreter));
 
+    std::unique_ptr<Interpreter::InterpreterInterface> conflictSituationInterpreter =
+        std::make_unique<Interpreter::ConflictSituationInterpreter>(loggerInterface, GetBehaviourData());
+    worldInterpreter.SetPrimaryTask(std::move(conflictSituationInterpreter));
+
     std::unique_ptr<Interpreter::InterpreterInterface> rightOfWayInterpreter =
         std::make_unique<Interpreter::RightOfWayInterpreter>(loggerInterface, GetBehaviourData());
     worldInterpreter.SetSecondaryTask(std::move(rightOfWayInterpreter));

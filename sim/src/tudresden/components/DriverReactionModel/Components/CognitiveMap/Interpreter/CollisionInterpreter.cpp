@@ -132,9 +132,7 @@ std::optional<CollisionPoint> CollisionInterpreter::PerformCollisionPointCalcula
             possibleCollisionPoint.oAgentID = observedAgent.GetID();
             possibleCollisionPoint.timeToCollision = time;
             double decelTime = std::abs(representation.egoAgent->GetVelocity() / GetBehaviourData().adBehaviour.comfortDeceleration.mean);
-            possibleCollisionPoint.collisionImminent =
-                (possibleCollisionPoint.timeToCollision <= GetBehaviourData().adBehaviour.collisionImminentMargin ||
-                 decelTime > possibleCollisionPoint.timeToCollision);
+            possibleCollisionPoint.collisionImminent = time <= GetBehaviourData().adBehaviour.collisionImminentMargin;
             return possibleCollisionPoint;
         }
     }

@@ -88,22 +88,22 @@ ConflictSituationInterpreter::CalculateConflictSituation(std::pair<const MentalI
 }
 
 double ConflictSituationInterpreter::DistanceToConflictPoint(const AgentRepresentation *agent,
-                                                             const MentalInfrastructure::LanePoint &junctionPoint, OwlId laneId) const {
+                                                             const MentalInfrastructure::LanePoint &conflictAreaBorder, OwlId laneId) const {
     double distanceToPoint;
     if (laneId == agent->GetLane()->GetOwlId()) {
-        distanceToPoint = junctionPoint.sOffset - agent->GetSCoordinate();
+        distanceToPoint = conflictAreaBorder.sOffset - agent->GetSCoordinate();
         if (!agent->IsMovingInLaneDirection()) {
-            distanceToPoint = agent->GetSCoordinate() - junctionPoint.sOffset;
+            distanceToPoint = agent->GetSCoordinate() - conflictAreaBorder.sOffset;
         }
     }
     else if (laneId == agent->GetNextLane()->GetOwlId()) {
         const auto &currentLaneEgo = agent->GetLane();
         const auto &nextLaneEgo = agent->GetNextLane();
         auto distanceFromEgoToEndOfLane = currentLaneEgo->GetLastPoint()->sOffset - agent->GetSCoordinate();
-        auto distanceFromStartOfLaneToPoint = junctionPoint.sOffset - nextLaneEgo->GetFirstPoint()->sOffset;
+        auto distanceFromStartOfLaneToPoint = conflictAreaBorder.sOffset - nextLaneEgo->GetFirstPoint()->sOffset;
         if (!agent->IsMovingInLaneDirection()) {
             distanceFromEgoToEndOfLane = agent->GetSCoordinate() - currentLaneEgo->GetFirstPoint()->sOffset;
-            distanceFromStartOfLaneToPoint = nextLaneEgo->GetLastPoint()->sOffset - junctionPoint.sOffset;
+            distanceFromStartOfLaneToPoint = nextLaneEgo->GetLastPoint()->sOffset - conflictAreaBorder.sOffset;
         }
         distanceToPoint = distanceFromEgoToEndOfLane + distanceFromStartOfLaneToPoint;
     }

@@ -36,7 +36,7 @@ private:
     ConflictSituation CalculateConflictSituation(std::pair<const MentalInfrastructure::ConflictArea &, OwlId> egoCA,
                                                  std::pair<const MentalInfrastructure::ConflictArea &, OwlId> observedCA,
                                                  const EgoAgentRepresentation *ego, const AmbientAgentRepresentation &observedAgent) const;
-    double DistanceToConflictPoint(const AgentRepresentation *agent, const MentalInfrastructure::LanePoint &junctionPoint,
+    double DistanceToConflictPoint(const AgentRepresentation *agent, const MentalInfrastructure::LanePoint &conflictAreaBorder,
                                    OwlId laneId) const;
 };
 } // namespace Interpreter

@@ -107,12 +107,14 @@ std::optional<int> LeadingCarID(const std::unordered_map<int, std::unique_ptr<Ag
 
 /**
  * @brief GetDistanceStoppingPoint - returns Distance to nearest Stopping Point
- * @param type - vehicle type
+ * @param agent
  * @param worldInterpretation
  * @return Distance to nearest Stopping Point
  */
-double GetDistanceStoppingPoint(const AgentVehicleType type, const WorldInterpretation &worldInterpretation);
+double GetDistanceStoppingPoint(const AgentRepresentation *agent, const AgentInterpretation *observedAgent,
+                                const WorldInterpretation &worldInterpretation);
 
+bool IsVehicle(const AgentRepresentation *agent);
 double AngleBetween2d(const Vector2d &vectorA, const Vector2d &vectorB);
 
 } // namespace Common

@@ -89,28 +89,35 @@ void LongitudinalDecision::Update() {
 }
 
 double LongitudinalDecision::DetermineAccelerationWish() {
+    std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << "| START " << std::endl;
+
     std::vector<double> accelerations;
     accelerations.push_back(anticipation.CalculatePhaseAcceleration());
     minEmergencyBrakeDelay.ResetEmergencyState();
     for (auto &entry : worldInterpretation.interpretedAgents) {
         const auto &agent = entry.second;
-
         switch (actionStateHandler.GetState(agent)) {
-        case ActionState::Collision:
+        case ActionState::CollisionImminent:
             double deceleration;
-            if (agent->collisionPoint->collisionImminent) {
-                deceleration = anticipation.GetMaxEmergencyAcceleration();
-            }
+            //-----
+            std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << "| Collision " << std::endl;
+            //-----
             deceleration = AgentCrashImminent(agent);
             minEmergencyBrakeDelay.InsertEmergencyBrakeEvent(agent->agent->GetID(), deceleration);
             accelerations.push_back(deceleration);
             break;
         case ActionState::Following:
+            //-----
+            std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << "| Following " << std::endl;
+            //-----
             accelerations.push_back(anticipation.MaximumAccelerationWish(
                 worldInterpretation.targetVelocity, worldRepresentation.egoAgent->GetVelocity() - agent->agent->GetVelocity(),
                 *agent->followingDistanceToLeadingVehicle));
             break;
         case ActionState::IntersectionSituation:
+            //-----
+            std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << "| IntersectionSituation " << std::endl;
+            //-----
             if (!EgoHasRightOfWay(agent) || CloseToConlictArea()) {
                 accelerations.push_back(anticipation.IntersectionGap(agent));
             }
@@ -127,6 +134,7 @@ double LongitudinalDecision::DetermineAccelerationWish() {
 
     accelerations.insert(accelerations.end(), emergencyDelay.begin(), emergencyDelay.end());
     std::sort(accelerations.begin(), accelerations.end(), AccelerationSorting);
+    std::cout << " accelerations.front(): " << accelerations.front() << std::endl;
     return accelerations.front();
 }
 
@@ -135,6 +143,11 @@ double LongitudinalDecision::AgentCrashImminent(const std::unique_ptr<AgentInter
         return anticipation.MaximumAccelerationWish(worldInterpretation.targetVelocity,
                                                     worldRepresentation.egoAgent->GetVelocity() - worldInterpretation.targetVelocity,
                                                     std::numeric_limits<double>::infinity());
+    }
+    else if (oAgent->followingDistanceToLeadingVehicle.has_value()) {
+        return anticipation.MaximumAccelerationWish(worldInterpretation.targetVelocity,
+                                                    worldRepresentation.egoAgent->GetVelocity() - oAgent->agent->GetVelocity(),
+                                                    *oAgent->followingDistanceToLeadingVehicle);
     }
     else {
         return anticipation.Deceleration(oAgent);

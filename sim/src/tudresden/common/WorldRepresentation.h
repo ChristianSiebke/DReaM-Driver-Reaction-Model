@@ -187,7 +187,9 @@ class AgentRepresentation {
 
 class AmbientAgentRepresentation : public AgentRepresentation {
   public:
-    AmbientAgentRepresentation(std::shared_ptr<AgentPerception> perceptionData) : AgentRepresentation(perceptionData) { lifetime = 0; }
+      AmbientAgentRepresentation(std::shared_ptr<AgentPerception> perceptionData, double lifetime = 0) :
+          AgentRepresentation(perceptionData), lifetime{lifetime} {
+      }
     virtual ~AmbientAgentRepresentation() = default;
 
     //! increase the life time of the agent representation by one cycletime

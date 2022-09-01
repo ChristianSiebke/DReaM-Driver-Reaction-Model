@@ -132,64 +132,72 @@ std::optional<int> LeadingCarID(const std::unordered_map<int, std::unique_ptr<Ag
     }
     return std::nullopt;
 }
-double GetDistanceStoppingPoint(const AgentVehicleType type, const WorldInterpretation &worldInterpretation)
-{
+double GetDistanceStoppingPoint(const AgentRepresentation *ego, const AgentInterpretation *observedAgent,
+                                const WorldInterpretation &worldInterpretation) {
     StoppingPoint sp;
-    std::cout << "GDSP entry" << std::endl;
-    if (worldInterpretation.crossingInfo.egoStoppingPoints.empty())
-    {
-        std::cout << "well rip" << std::endl;
-        //        return std::numeric_limits<double>::infinity();
-    }
-
     if (worldInterpretation.crossingInfo.phase == CrossingPhase::Deceleration_TWO ||
-        worldInterpretation.crossingInfo.phase == CrossingPhase::Deceleration_ONE)
-    {
-        if (type == AgentVehicleType::Car || type == AgentVehicleType::Truck || type == AgentVehicleType::Motorbike)
-        {
-            sp = worldInterpretation.crossingInfo.egoStoppingPoints.at(StoppingPointType::Vehicle_Crossroad);
+        worldInterpretation.crossingInfo.phase == CrossingPhase::Deceleration_ONE) {
+        if (IsVehicle(ego) && IsVehicle(observedAgent->agent)) {
+            if (ego->GetIndicatorState() == IndicatorState::IndicatorState_Left) {
+                sp = worldInterpretation.crossingInfo.egoStoppingPoints.at(StoppingPointType::Vehicle_Left);
+            }
+            else if (ego->GetIndicatorState() == IndicatorState::IndicatorState_Right) {
+                sp = worldInterpretation.crossingInfo.egoStoppingPoints.at(StoppingPointType::Pedestrian_Right);
+            }
+            else if (ego->GetIndicatorState() == IndicatorState::IndicatorState_Off) {
+                sp = worldInterpretation.crossingInfo.egoStoppingPoints.at(StoppingPointType::Vehicle_Crossroad);
+            }
         }
-        else if (type == AgentVehicleType::Pedestrian)
-        {
+        else if ((IsVehicle(ego) && observedAgent->agent->GetVehicleType() == AgentVehicleType::Pedestrian) &&
+                 observedAgent->rightOfWay.ego) {
             sp = worldInterpretation.crossingInfo.egoStoppingPoints.at(StoppingPointType::Pedestrian_Crossing_ONE);
         }
-        else
-        {
+        else if ((IsVehicle(ego) && observedAgent->agent->GetVehicleType() == AgentVehicleType::Pedestrian) &&
+                 (observedAgent->rightOfWay.observed && ego->GetIndicatorState() == IndicatorState::IndicatorState_Left)) {
+            sp = worldInterpretation.crossingInfo.egoStoppingPoints.at(StoppingPointType::Pedestrian_Left);
+        }
+        else {
             auto msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " Agent type is unknown ";
             throw std::logic_error(msg);
         }
     }
-    else if (worldInterpretation.crossingInfo.phase == CrossingPhase::Crossing_Left_ONE)
-    {
-        sp = worldInterpretation.crossingInfo.egoStoppingPoints.at(StoppingPointType::Vehicle_Left);
+    else if (worldInterpretation.crossingInfo.phase == CrossingPhase::Crossing_Left_ONE) {
+        if (IsVehicle(ego) && IsVehicle(observedAgent->agent)) {
+            sp = worldInterpretation.crossingInfo.egoStoppingPoints.at(StoppingPointType::Vehicle_Left);
+        }
+        else if (IsVehicle(ego) &&
+                 (observedAgent->agent->GetVehicleType() == AgentVehicleType::Pedestrian && observedAgent->rightOfWay.observed)) {
+            sp = worldInterpretation.crossingInfo.egoStoppingPoints.at(StoppingPointType::Pedestrian_Left);
+        }
+        else {
+            auto msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " Agent type is unknown ";
+            throw std::logic_error(msg);
+        }
     }
-    else if (worldInterpretation.crossingInfo.phase == CrossingPhase::Crossing_Straight)
-    {
-        return static_cast<double>(INFINITY);
+    else if (worldInterpretation.crossingInfo.phase == CrossingPhase::Crossing_Straight) {
+        sp = worldInterpretation.crossingInfo.egoStoppingPoints.at(StoppingPointType::Vehicle_Crossroad);
     }
-    else if (worldInterpretation.crossingInfo.phase == CrossingPhase::Crossing_Right)
-    {
+    else if (worldInterpretation.crossingInfo.phase == CrossingPhase::Crossing_Right) {
         sp = worldInterpretation.crossingInfo.egoStoppingPoints.at(StoppingPointType::Pedestrian_Right);
     }
-    else if (worldInterpretation.crossingInfo.phase == CrossingPhase::Crossing_Left_TWO)
-    {
+    else if (worldInterpretation.crossingInfo.phase == CrossingPhase::Crossing_Left_TWO) {
         sp = worldInterpretation.crossingInfo.egoStoppingPoints.at(StoppingPointType::Pedestrian_Left);
     }
-    else
-    {
+    else {
         return std::numeric_limits<double>::infinity();
     }
 
-    std::cout << "GDSP 'exit'" << std::endl;
-
-    if (sp.type != StoppingPointType::NONE)
-    {
-        return sp.distanceToEgo;
+    if (sp.type != StoppingPointType::NONE) {
+        return sp.distanceToEgoFront;
     }
-    else
-    {
+    else {
         return std::numeric_limits<double>::infinity();
     }
+}
+
+bool IsVehicle(const AgentRepresentation *agent) {
+    return agent->GetVehicleType() == AgentVehicleType::Car || agent->GetVehicleType() == AgentVehicleType::Truck ||
+           agent->GetVehicleType() == AgentVehicleType::Motorbike;
 }
 
 double AngleBetween2d(const Vector2d &vectorA, const Vector2d &vectorB) {

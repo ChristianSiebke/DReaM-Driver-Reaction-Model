@@ -182,9 +182,8 @@ SampledGeometry GeometryConverter::CalculateGeometry(double roadSectionStart,
                                         roadGeometry,
                                         roadGeometryStart,
                                         roadSectionStart);
-
-    borderPoints = RamerDouglasPeucker::Simplify<BorderPoints>(borderPoints);
-
+    if (borderPoints.size() > 1) // TU Dresden
+        borderPoints = RamerDouglasPeucker::Simplify<BorderPoints>(borderPoints);
     return {borderPoints, roadGeometry->GetDir(geometryOffsetStart), roadGeometry->GetDir(geometryOffsetEnd)};
 }
 

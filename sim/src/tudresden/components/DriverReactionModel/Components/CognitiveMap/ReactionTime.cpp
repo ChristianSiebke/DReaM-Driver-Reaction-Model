@@ -33,21 +33,11 @@ std::vector<std::shared_ptr<AgentPerception>> ReactionTime::PerceivedAgents() {
     for (auto agent : processingAgentBuffer) {
         if (agent.second < initialPerceptionTime)
             continue;
-        for (; latencyElementPosition < perceivedAgentBuffer.size(); latencyElementPosition++) {
-            bool copy = false;
+        if (latencyElementPosition < perceivedAgentBuffer.size())
             std::copy_if(perceivedAgentBuffer.at(latencyElementPosition).begin(), perceivedAgentBuffer.at(latencyElementPosition).end(),
-                         std::back_inserter(result), [agent, &copy](std::shared_ptr<AgentPerception> element) {
-                             auto found = element->id == agent.first;
-                             if (found) {
-                                 copy = true;
-                             }
-                             return found;
-                         });
-            if (copy) {
-                break;
-            }
+                         std::back_inserter(result),
+                         [agent](std::shared_ptr<AgentPerception> element) { return element->id == agent.first; });
         }
-    }
     // update agents time since first perception
     for (auto& element : processingAgentBuffer) {
         element.second += cycleTime / 1000;
