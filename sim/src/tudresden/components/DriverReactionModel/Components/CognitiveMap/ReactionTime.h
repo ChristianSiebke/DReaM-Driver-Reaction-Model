@@ -24,10 +24,12 @@ class ReactionTime {
   public:
     ReactionTime(DistributionEntry inPercTime, DistributionEntry percLatency, double cycleTime, StochasticsInterface* stochastics)
         : cycleTime{cycleTime} {
-        double drawnInPercTime = stochastics->GetLogNormalDistributed(inPercTime.mean, inPercTime.std_deviation);
+        double drawnInPercTime = inPercTime.mean <= 0 ? 0 : stochastics->GetLogNormalDistributed(inPercTime.mean, inPercTime.std_deviation);
         initialPerceptionTime = Common::ValueInBounds(inPercTime.min, drawnInPercTime, inPercTime.max);
 
-        double drawnPercLatency = stochastics->GetLogNormalDistributed(percLatency.mean, percLatency.std_deviation);
+        double drawnPercLatency =
+            percLatency.mean <= 0 ? 0 : stochastics->GetLogNormalDistributed(percLatency.mean, percLatency.std_deviation);
+
         perceptionLatency = Common::ValueInBounds(percLatency.min, drawnPercLatency, percLatency.max);
 
         auto bufferTime = inPercTime.max > percLatency.max ? inPercTime.max : percLatency.max;

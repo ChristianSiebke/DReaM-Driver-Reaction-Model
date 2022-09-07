@@ -100,7 +100,8 @@ double LongitudinalDecision::DetermineAccelerationWish() {
         case ActionState::CollisionImminent:
             double deceleration;
             //-----
-            std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << "| Collision " << std::endl;
+            std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << "| Collision "
+                      << " | Collision agent :" << agent->agent->GetID() << std::endl;
             //-----
             deceleration = AgentCrashImminent(agent);
             minEmergencyBrakeDelay.InsertEmergencyBrakeEvent(agent->agent->GetID(), deceleration);

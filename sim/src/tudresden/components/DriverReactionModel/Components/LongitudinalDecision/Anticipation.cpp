@@ -49,7 +49,7 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> 
         return freeAccelerationEgo;
     }
     // observed agent stops
-    if (!(tObserved.vehicleFrontToCAStart < std::numeric_limits<double>::infinity())) {
+    if (!(tObserved.vehicleFrontToCAStart < std::numeric_limits<double>::infinity()) && observedAgent->rightOfWay.ego) {
         DeletePriorityAgent(oAgentID);
     }
     // observed agent pass conflict area until ego reaches conflict area
@@ -258,25 +258,38 @@ double Anticipation::CalculatePhaseAcceleration() const {
     double v = worldRepresentation.egoAgent->GetVelocity();
     double velTarget = worldInterpretation.targetVelocity;
     double distance;
-    if (worldInterpretation.crossingInfo.phase == CrossingPhase::Deceleration_ONE) {
-        distance = worldRepresentation.egoAgent->GetDistanceToNextJunction();
+    double distanceToIntersection =
+        worldRepresentation.egoAgent->GetDistanceToNextJunction() - worldRepresentation.egoAgent->GetDistanceReferencePointToLeadingEdge();
+    auto refToFront = worldRepresentation.egoAgent->GetDistanceReferencePointToLeadingEdge();
+    auto sPositionFront = worldRepresentation.egoAgent->GetSCoordinate() + refToFront;
+
+    bool frontExceedCurrentRoad = sPositionFront > worldRepresentation.egoAgent->GetRoad()->GetLength();
+
+    auto distanceRefPointToEndOfRoad =
+        frontExceedCurrentRoad && !worldRepresentation.egoAgent->GetRoad()->IsOnJunction()
+            ? worldRepresentation.egoAgent->GetRoad()->GetLength() - worldRepresentation.egoAgent->GetSCoordinate() +
+                  worldRepresentation.egoAgent->GetNextLane()->GetRoad()->GetLength()
+            : worldRepresentation.egoAgent->GetRoad()->GetLength() - worldRepresentation.egoAgent->GetSCoordinate();
+
+    if (CrossingPhase::Approach <= worldInterpretation.crossingInfo.phase && distanceToIntersection >= 0) {
+        std::cout << "jup" << std::endl;
+        distance = distanceToIntersection;
     }
-    else if (worldInterpretation.crossingInfo.phase == CrossingPhase::Deceleration_TWO) {
-        distance = worldRepresentation.egoAgent->GetDistanceToNextJunction();
-    }
-    else if (CrossingPhase::Deceleration_TWO < worldInterpretation.crossingInfo.phase &&
-             worldInterpretation.crossingInfo.phase < CrossingPhase::Exit) {
-        distance = worldRepresentation.egoAgent->GetLane()->GetLength() - worldRepresentation.egoAgent->GetDistanceOnJunction();
+    else if (CrossingPhase::Deceleration_TWO <= worldInterpretation.crossingInfo.phase &&
+             worldInterpretation.crossingInfo.phase <= CrossingPhase::Exit) {
+        distance = distanceRefPointToEndOfRoad;
     }
     else {
         distance = std::numeric_limits<double>::infinity();
     }
 
-    if (distance < std::numeric_limits<double>::infinity() && v > velTarget) {
+    if (distance < std::numeric_limits<double>::infinity() && v >= velTarget) {
         //  IDM brake strategy
-        double a = -(GetBehaviourData().adBehaviour.maxAcceleration * v * v * ((velTarget - v) * (velTarget - v))) /
-                   (4 * GetBehaviourData().adBehaviour.maxAcceleration * std::abs(comfortDeceleration) * (distance * distance));
+        auto s_star =
+            GetBehaviourData().adBehaviour.minDistanceStationaryTraffic + (v * GetBehaviourData().adBehaviour.desiredFollowingTimeHeadway) +
+            ((v * (v - velTarget)) / (2.0 * std::sqrt(GetBehaviourData().adBehaviour.maxAcceleration * std::abs(comfortDeceleration))));
 
+        auto a = -GetBehaviourData().adBehaviour.maxAcceleration * ((s_star * s_star) / (distance * distance));
         return Common::ValueInBounds(GetBehaviourData().adBehaviour.comfortDeceleration.min, a,
                                      GetBehaviourData().adBehaviour.maxAcceleration);
     }
