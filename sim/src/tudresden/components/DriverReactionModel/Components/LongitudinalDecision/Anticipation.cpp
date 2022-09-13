@@ -70,6 +70,10 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> 
                                      observedAgent.get());
     }
 
+    if (conflictSituation->egoDistance.vehicleFrontToCAStart < 0) {
+        return freeAccelerationEgo;
+    }
+
     if (tEgo.vehicleFrontToCAStart - tObserved.vehicleBackToCAEnd >= GetBehaviourData().adBehaviour.timeGapAcceptance ||
         tObserved.vehicleFrontToCAStart - tEgo.vehicleBackToCAEnd >= GetBehaviourData().adBehaviour.timeGapAcceptance) {
         std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << " | save to pass"

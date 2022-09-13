@@ -68,13 +68,11 @@ std::optional<double> FollowingInterpreter::CalculateFollowingDistance(const Age
     auto conflictAreaOL = observedLane->GetConflictAreaWithLane(egoLane);
     if (conflictAreaOL &&
         Common::anyElementOfCollectionIsElementOfOtherCollection(egoLane->GetSuccessors(), observedLane->GetSuccessors())) {
-        if (conflictAreaOL->start.sOffset - (observedS - oAgentDistanceBackToReference) < 0) {
-            // back of oAgent is in conflict area
-            auto distanceOAgentToEndCA = conflictAreaOL->end.sOffset - observedS;
-            auto conflictAreaEL = egoLane->GetConflictAreaWithLane(observedLane);
-            auto distanceEgoToEndCA = conflictAreaEL->end.sOffset - egoS;
-            return distanceEgoToEndCA - distanceOAgentToEndCA - distanceReferenceToEdges;
-        }
+        auto distanceOAgentToEndCA = conflictAreaOL->end.sOffset - observedS;
+        auto conflictAreaEL = egoLane->GetConflictAreaWithLane(observedLane);
+        auto distanceEgoToEndCA = conflictAreaEL->end.sOffset - egoS;
+        double followingDistance = distanceEgoToEndCA - distanceOAgentToEndCA - distanceReferenceToEdges;
+        return followingDistance > 0 ? std::optional<double>(followingDistance) : std::nullopt;
     }
 
     return std::nullopt;
