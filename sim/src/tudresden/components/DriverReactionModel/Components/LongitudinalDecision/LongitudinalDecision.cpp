@@ -99,29 +99,35 @@ double LongitudinalDecision::DetermineAccelerationWish() {
         switch (actionStateHandler.GetState(agent)) {
         case ActionState::CollisionImminent:
             double deceleration;
-            //-----
-            std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << "| Collision "
-                      << " | Collision agent :" << agent->agent->GetID() << std::endl;
-            //-----
+
             deceleration = AgentCrashImminent(agent);
             minEmergencyBrakeDelay.InsertEmergencyBrakeEvent(agent->agent->GetID(), deceleration);
             accelerations.push_back(deceleration);
+            //-----
+            std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << "| Collision acceleration: " << deceleration
+                      << " | Collision agent :" << agent->agent->GetID() << std::endl;
+            //-----
             break;
         case ActionState::Following:
-            //-----
-            std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << "| Following " << std::endl;
-            //-----
+
             accelerations.push_back(anticipation.MaximumAccelerationWish(
                 worldInterpretation.targetVelocity, worldRepresentation.egoAgent->GetVelocity() - agent->agent->GetVelocity(),
                 *agent->followingDistanceToLeadingVehicle));
+            //-----
+            std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << "| Following acceleration:" << accelerations.back()
+                      << std::endl;
+            //-----
             break;
         case ActionState::IntersectionSituation:
-            //-----
-            std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << "| IntersectionSituation " << std::endl;
-            //-----
+
             if (!EgoHasRightOfWay(agent) || CloseToConlictArea()) {
                 accelerations.push_back(anticipation.IntersectionGap(agent));
             }
+            //-----
+            std::cout << "Agent: " << worldRepresentation.egoAgent->GetID()
+                      << "| IntersectionSituation  acceleration: " << accelerations.back() << std::endl;
+            //-----
+
             break;
         case ActionState::End:
             break;

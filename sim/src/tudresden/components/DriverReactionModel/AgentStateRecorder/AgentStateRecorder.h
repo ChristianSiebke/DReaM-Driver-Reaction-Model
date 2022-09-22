@@ -73,9 +73,13 @@ public:
         instance.reset();
     }
 
+    static void SetRunId(int invocation) {
+        runId = invocation;
+    }
+
     ~AgentStateRecorder() {
         WriteOutputFile();
-        std::cout << " AgentStateRecorderdestroyed" << std::endl;
+        std::cout << " AgentStateRecorder destroyed" << std::endl;
     }
 
 private:
@@ -102,6 +106,7 @@ private:
     static std::shared_ptr<AgentStateRecorder> instance;
     std::string resultPath;
     Record record;
+    static int runId;
 
     /*!
      * \brief Generates a string containing all information for one timestep

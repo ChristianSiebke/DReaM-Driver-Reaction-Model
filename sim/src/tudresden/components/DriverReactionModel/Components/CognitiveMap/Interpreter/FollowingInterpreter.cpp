@@ -37,6 +37,8 @@ std::optional<double> FollowingInterpreter::CalculateFollowingDistance(const Age
     auto observedLane = agent.GetLane();
     double observedS = agent.GetSCoordinate();
 
+    std::cout << " !!!!!!!!!!!!!!!sCoordinate: " << egoS << std::endl;
+
     double oAgentDistanceBackToReference = agent.GetLength() - agent.GetDistanceReferencePointToLeadingEdge();
     double egoAgentDistanceReferenceToFront = representation.egoAgent->GetDistanceReferencePointToLeadingEdge();
     double distanceReferenceToEdges = oAgentDistanceBackToReference + egoAgentDistanceReferenceToFront;
@@ -66,10 +68,18 @@ std::optional<double> FollowingInterpreter::CalculateFollowingDistance(const Age
 
     // agents have conflict area and same successor --> merging manoeuvre
     auto conflictAreaOL = observedLane->GetConflictAreaWithLane(egoLane);
+    auto conflictAreaEL = egoLane->GetConflictAreaWithLane(observedLane);
+    egoS = conflictAreaEL ? egoS : -(egoLane->GetLength() - egoS);
+    auto nextEgoLane = representation.egoAgent->GetNextLane();
+    conflictAreaOL = conflictAreaOL ? conflictAreaOL : observedLane->GetConflictAreaWithLane(nextEgoLane);
+    if (nextEgoLane)
+        conflictAreaEL = conflictAreaEL ? conflictAreaEL : nextEgoLane->GetConflictAreaWithLane(observedLane);
+
     if (conflictAreaOL &&
-        Common::anyElementOfCollectionIsElementOfOtherCollection(egoLane->GetSuccessors(), observedLane->GetSuccessors())) {
+        (Common::anyElementOfCollectionIsElementOfOtherCollection(egoLane->GetSuccessors(), observedLane->GetSuccessors()) ||
+         Common::anyElementOfCollectionIsElementOfOtherCollection(representation.egoAgent->GetNextLane()->GetSuccessors(),
+                                                                  observedLane->GetSuccessors()))) {
         auto distanceOAgentToEndCA = conflictAreaOL->end.sOffset - observedS;
-        auto conflictAreaEL = egoLane->GetConflictAreaWithLane(observedLane);
         auto distanceEgoToEndCA = conflictAreaEL->end.sOffset - egoS;
         double followingDistance = distanceEgoToEndCA - distanceOAgentToEndCA - distanceReferenceToEdges;
         return followingDistance > 0 ? std::optional<double>(followingDistance) : std::nullopt;

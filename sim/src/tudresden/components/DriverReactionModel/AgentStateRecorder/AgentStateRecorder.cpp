@@ -2,6 +2,7 @@
 
 namespace AgentStateRecorder {
 std::shared_ptr<AgentStateRecorder> AgentStateRecorder::instance = nullptr;
+int AgentStateRecorder::runId = 0;
 
 // string representations of enum values, can easily be accessed using array[(int) enum_value]
 const std::string gazeTypes[] = {"NONE", "ScanGlance", "ControlGlance", "ObserveGlance"};
@@ -208,6 +209,6 @@ void AgentStateRecorder::WriteOutputFile() {
     valueTree.add_child("SimulationOutput.RunResults.RunResult.Cyclics.Samples", samplesTree);
 
     boost::property_tree::xml_writer_settings<std::string> settings(' ', 2);
-    boost::property_tree::write_xml(resultPath + "DReaMOutput.xml", valueTree, std::locale(), settings);
+    boost::property_tree::write_xml(resultPath + "DReaMOutput" + std::to_string(runId) + ".xml", valueTree, std::locale(), settings);
 }
 } // namespace AgentStateRecorder

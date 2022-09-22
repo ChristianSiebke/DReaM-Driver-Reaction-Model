@@ -170,6 +170,9 @@ bool Lane::SLaneCoordinateOutOfLane(double sLaneCoordniate) const
 
 std::optional<ConflictArea> Lane::GetConflictAreaWithLane(const Lane *lane) const
 {
+    if (!lane) {
+        return std::nullopt;
+    }
     auto iter = conflictAreas.find(lane);
     if (iter != conflictAreas.end())
     {
