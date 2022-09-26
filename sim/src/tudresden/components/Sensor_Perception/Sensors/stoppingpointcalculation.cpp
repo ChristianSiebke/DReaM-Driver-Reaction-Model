@@ -256,53 +256,6 @@ StoppingPoint StoppingPointCalculation::CalculateStoppingPoint(const MentalInfra
         }
     }
 
-    // Common::Vector2d dirF{next.x - minEgoPoint.x, next.y - minEgoPoint.y};
-    // Common::Vector2d dirB{prev.x - minEgoPoint.x, prev.y - minEgoPoint.y};
-
-    // Line2d forward;
-    // Line2d backward;
-    // forward.start = origin;
-    // backward.start = origin;
-    // forward.direction = dirF;
-    // backward.direction = dirB;
-
-    // if (minPointNotAtEnd) {
-    //     double offsetF = line.intersect(forward);
-    //     double offsetB = line.intersect(backward);
-
-    //     if (offsetB >= -1 && offsetB <= 1) {
-    //         minEgoPoint.x = origin.x + offsetB * dirB.x;
-    //         minEgoPoint.y = origin.y + offsetB * dirB.y;
-    //         minEgoPoint.sOffset = minEgoPoint.sOffset + offsetB * (prev.sOffset - minEgoPoint.sOffset);
-    //     }
-    //     else if (offsetF >= -1 && offsetF <= 1) {
-    //         minEgoPoint.x = origin.x + offsetF * dirF.x;
-    //         minEgoPoint.y = origin.y + offsetF * dirF.y;
-    //         minEgoPoint.sOffset = minEgoPoint.sOffset + offsetF * (next.sOffset - minEgoPoint.sOffset);
-    //     }
-    // }
-    // else {
-    //     double offset = 0;
-    //     Common::Vector2d dir;
-    //     double sOffset;
-    //     if (minPointAtNext) {
-    //         offset = line.intersect(backward);
-    //         dir = dirB;
-    //         sOffset = prev.sOffset;
-    //     }
-    //     else {
-    //         offset = line.intersect(forward);
-    //         dir = dirF;
-    //         sOffset = next.sOffset;
-    //     }
-
-    //     if (offset != 0) {
-    //         minEgoPoint.x = origin.x + offset * dir.x;
-    //         minEgoPoint.y = origin.y + offset * dir.y;
-    //         minEgoPoint.sOffset = minEgoPoint.sOffset + offset * (sOffset - minEgoPoint.sOffset);
-    //     }
-    // }
-
     // setting the struct
     stoppingPoint.type = type;
     stoppingPoint.sOffset = minEgoPoint.sOffset;

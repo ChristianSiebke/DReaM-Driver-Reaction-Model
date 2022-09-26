@@ -21,6 +21,7 @@
 #include "Components/LateralDecision.h"
 #include "Components/LongitudinalDecision/LongitudinalDecision.h"
 #include "RoadSegments/StandardRoad.h"
+#include "RoadSegments/TJunction.h"
 #include "RoadSegments/XJunction.h"
 #include "core/opSimulation/framework/sampler.h"
 #include "qglobal.h"
@@ -36,11 +37,12 @@ class StandardRoad;
 } // namespace RoadSegments
 using RoadSegmentInterface = RoadSegments::RoadSegmentInterface;
 using XJunction = RoadSegments::Node::XJunction;
+using TJunction = RoadSegments::Node::TJunction;
 using StandardRoad = RoadSegments::Edge::StandardRoad;
 
 namespace GazeMovement {
 
-enum class SegmentType { NONE, XJunction, StandardRoad };
+enum class SegmentType { NONE, XJunction, TJunction, StandardRoad };
 
 class GazeMovement : public Component::ComponentInterface {
   public:
