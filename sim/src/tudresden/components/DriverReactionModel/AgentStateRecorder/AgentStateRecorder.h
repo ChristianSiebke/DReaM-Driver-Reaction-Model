@@ -69,7 +69,6 @@ public:
     }
 
     static void ResetAgentStateRecorder() {
-        std::cout << "AgentStateRecorder count: " << instance.use_count() << std::endl;
         instance.reset();
     }
 
@@ -78,15 +77,10 @@ public:
     }
 
     ~AgentStateRecorder() {
-        WriteOutputFile();
+        BufferSimulationOutput();
         std::cout << " AgentStateRecorder destroyed" << std::endl;
     }
 
-private:
-    AgentStateRecorder(std::string resultPath) : resultPath(resultPath) {
-    }
-
-public:
     AgentStateRecorder(AgentStateRecorder const &) = delete;
     AgentStateRecorder &operator=(AgentStateRecorder const &) = delete;
 
@@ -102,11 +96,23 @@ public:
 
     void AddFixationPoints(int, int, std::vector<Common::Vector2d>);
 
+    //! All information saved in the agentStateRecorder is written into an xml file
+    static void WriteOutputFile();
+
 private:
+    AgentStateRecorder(std::string inResultPath) {
+        resultPath = inResultPath;
+    }
+
+    void BufferSimulationOutput();
+    boost::property_tree::ptree AddInfrastructureData() const;
+
     static std::shared_ptr<AgentStateRecorder> instance;
-    std::string resultPath;
+    static boost::property_tree::ptree simulationOutut;
+    static std::string resultPath;
     Record record;
     static int runId;
+    static bool infrastructureDataWritten;
 
     /*!
      * \brief Generates a string containing all information for one timestep
@@ -122,8 +128,5 @@ private:
 
     //! Generates a header matching and discribing the recorded datasets
     std::string GenerateHeader();
-
-    //! All information saved in the agentStateRecorder is written into an xml file
-    void WriteOutputFile();
 };
 } // namespace agentRecordState

@@ -85,7 +85,21 @@ void Sensor_Perception_Implementation::Trigger(int time) {
 }
 
 void Sensor_Perception_Implementation::UpdateGraphPosition() {
-    if (!GetAgent()->GetEgoAgent().HasValidRoute()) {
+    auto worldData = static_cast<OWL::WorldData *>(GetWorld()->GetWorldData());
+    WorldDataQuery helper(*worldData);
+
+    auto referenceLane = &helper.GetLaneByOdId(GetAgent()->GetEgoAgent().GetMainLocatePosition().roadId,
+                                               GetAgent()->GetEgoAgent().GetMainLocatePosition().laneId,
+                                               GetAgent()->GetEgoAgent().GetMainLocatePosition().roadPosition.s);
+
+    auto normRad = std::fabs(std::fmod(GetAgent()->GetYaw() - GetAgent()->GetEgoAgent().GetLaneDirection(), (2 * M_PI)));
+    auto absDiffDeg = std::min((2 * M_PI) - normRad, normRad);
+    bool direction = M_PI_2 >= absDiffDeg ? true : false;
+    direction = GetAgent()->GetVelocity() >= 0 ? direction : !direction;
+    auto nextLanes = direction ? referenceLane->GetNext() : referenceLane->GetPrevious();
+
+    if ((!GetAgent()->GetEgoAgent().HasValidRoute()) ||
+        (GetAgent()->GetEgoAgent().GetRootOfWayToTargetGraph() == 0 && nextLanes.size() > 0)) {
         GetNewRoute();
     }
 }

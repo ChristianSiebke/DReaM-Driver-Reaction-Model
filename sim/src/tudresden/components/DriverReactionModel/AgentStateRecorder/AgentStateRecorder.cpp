@@ -3,6 +3,9 @@
 namespace AgentStateRecorder {
 std::shared_ptr<AgentStateRecorder> AgentStateRecorder::instance = nullptr;
 int AgentStateRecorder::runId = 0;
+boost::property_tree::ptree AgentStateRecorder::simulationOutut = {};
+std::string AgentStateRecorder::resultPath = "";
+bool AgentStateRecorder::infrastructureDataWritten = false;
 
 // string representations of enum values, can easily be accessed using array[(int) enum_value]
 const std::string gazeTypes[] = {"NONE", "ScanGlance", "ControlGlance", "ObserveGlance"};
@@ -122,11 +125,40 @@ std::string doubleToString(double input, int precision = 5) {
 }
 
 void AgentStateRecorder::WriteOutputFile() {
-    std::string path = "SimulationOutput.RunResults.RunResult.Cyclics";
-    boost::property_tree::ptree valueTree;
-    valueTree.put("SimulationOutput.<xmlattr>.SchemaVersion", "0.3.0");
+    boost::property_tree::xml_writer_settings<std::string> settings(' ', 2);
+    boost::property_tree::write_xml(resultPath + "DReaMOutput.xml", simulationOutut, std::locale(), settings);
+}
 
-    // adds stopping points to the output ptree
+void AgentStateRecorder::BufferSimulationOutput() {
+    simulationOutut.put("SimulationOutput.<xmlattr>.SchemaVersion", "0.3.0");
+
+    if (!infrastructureDataWritten) {
+        simulationOutut.add_child("SimulationOutput.InfrastructureData", AddInfrastructureData());
+        infrastructureDataWritten = true;
+    }
+
+    simulationOutut.add("SimulationOutput.RunResults.RunResult id=\"" + std::to_string(runId) + "\".Cyclics.Header",
+                        this->GenerateHeader());
+
+    // Creates Samples for each timestep, each matching the structure given above
+    boost::property_tree::ptree samplesTree;
+    for (auto [time, values] : record.gazeStates) {
+        boost::property_tree::ptree sampleTree;
+        boost::property_tree::ptree agentTree;
+        sampleTree.put("<xmlattr>.time", std::to_string(time));
+        for (auto [agentId, values] : record.gazeStates.at(time)) {
+            boost::property_tree::ptree agentTree;
+            agentTree.put("<xmlattr>.id", agentId);
+            agentTree.put_value(GenerateDataSet(time, agentId));
+            sampleTree.add_child("Agent", agentTree);
+        }
+        samplesTree.add_child("Sample", sampleTree);
+    }
+    simulationOutut.add_child("SimulationOutput.RunResults.RunResult id=\"" + std::to_string(runId) + "\".Cyclics.Samples", samplesTree);
+}
+
+boost::property_tree::ptree AgentStateRecorder::AddInfrastructureData() const {
+    boost::property_tree::ptree infrastructureData;
     boost::property_tree::ptree stoppingPointsTree;
 
     for (auto [intersectionId, lanemap] : record.infrastructurePerception->GetStoppingPointData().stoppingPoints) {
@@ -151,7 +183,7 @@ void AgentStateRecorder::WriteOutputFile() {
         stoppingPointsTree.add_child("Junction", intersectionTree);
     }
 
-    valueTree.add_child("SimulationOutput.RunResults.RunResult.StoppingPoints", stoppingPointsTree);
+    infrastructureData.add_child("SimulationOutput.StoppingPoints", stoppingPointsTree);
 
     // Adds conflict points to the output ptree
     boost::property_tree::ptree conflictAreaTree;
@@ -188,27 +220,7 @@ void AgentStateRecorder::WriteOutputFile() {
         }
         conflictAreaTree.add_child("Junction", conflictAreaJunctionTree);
     }
-    valueTree.add_child("SimulationOutput.RunResults.RunResult.ConflictAreas", conflictAreaTree);
-
-    valueTree.add("SimulationOutput.RunResults.RunResult.Cyclics.Header", this->GenerateHeader());
-
-    // Creates Samples for each timestep, each matching the structure given above
-    boost::property_tree::ptree samplesTree;
-    for (auto [time, values] : record.gazeStates) {
-        boost::property_tree::ptree sampleTree;
-        boost::property_tree::ptree agentTree;
-        sampleTree.put("<xmlattr>.time", std::to_string(time));
-        for (auto [agentId, values] : record.gazeStates.at(time)) {
-            boost::property_tree::ptree agentTree;
-            agentTree.put("<xmlattr>.id", agentId);
-            agentTree.put_value(GenerateDataSet(time, agentId));
-            sampleTree.add_child("A", agentTree);
-        }
-        samplesTree.add_child("Sample", sampleTree);
-    }
-    valueTree.add_child("SimulationOutput.RunResults.RunResult.Cyclics.Samples", samplesTree);
-
-    boost::property_tree::xml_writer_settings<std::string> settings(' ', 2);
-    boost::property_tree::write_xml(resultPath + "DReaMOutput" + std::to_string(runId) + ".xml", valueTree, std::locale(), settings);
+    infrastructureData.add_child("SimulationOutput.ConflictAreas", conflictAreaTree);
+    return infrastructureData;
 }
 } // namespace AgentStateRecorder

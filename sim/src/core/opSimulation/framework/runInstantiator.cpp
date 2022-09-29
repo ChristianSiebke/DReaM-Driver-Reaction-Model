@@ -93,12 +93,12 @@ bool RunInstantiator::ExecuteRun()
         LOG_INTERN(LogLevel::DebugCore) << std::endl
                                         << "### run successful ###";
         AgentStateRecorder::AgentStateRecorder::SetRunId(invocation);      // DReaM: hand over run id
-        AgentStateRecorder::AgentStateRecorder::ResetAgentStateRecorder(); // DReaM: start write
-                                                                           // output
+        AgentStateRecorder::AgentStateRecorder::ResetAgentStateRecorder(); // DReaM agents record
 
         observationNetwork.FinalizeRun(runResult);
         ClearRun();
     }
+    AgentStateRecorder::AgentStateRecorder::WriteOutputFile(); // DReaM: write output file
 
     LOG_INTERN(LogLevel::DebugCore) << std::endl
                                     << "### end of all runs ###";
