@@ -1,10 +1,12 @@
-//-----------------------------------------------------------------------------/
-// Copyright (c) TU Dresden.
-// All rights reserved. This program and the accompanying materials
-// are made available under the terms of the Eclipse Public License v1.0
-// which accompanies this distribution, and is available at
-// http://www.eclipse.org/legal/epl-v10.html
-//-----------------------------------------------------------------------------/
+/******************************************************************************
+ * Copyright (c) 2019 TU Dresden
+ * scientific assistant: Christian Siebke
+ * student assistants:   Christian Gärber
+ *                       Vincent   Adam
+ *                       Jan       Sommer
+ *
+ * for further information please visit:  https://www.driver-model.de
+ *****************************************************************************/
 
 #ifndef SENSOR_PERCEPTION_H
 #define SENSOR_PERCEPTION_H

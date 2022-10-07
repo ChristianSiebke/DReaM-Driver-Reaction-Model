@@ -1,6 +1,17 @@
+/******************************************************************************
+ * Copyright (c) 2019 TU Dresden
+ * scientific assistant: Christian Siebke
+ * student assistants:   Christian Gärber
+ *                       Vincent   Adam
+ *                       Jan       Sommer
+ *
+ * for further information please visit:  https://www.driver-model.de
+ *****************************************************************************/
+
 #include "ActionStateHandler.h"
 
-ActionState ActionStateHandler::GetState(const std::unique_ptr<AgentInterpretation>& agent) {
+    ActionState
+    ActionStateHandler::GetState(const std::unique_ptr <AgentInterpretation> &agent) {
     currentState = ActionState::Start;
     while (currentState != ActionState::End) {
         if (DetermineNextState(agent)) {

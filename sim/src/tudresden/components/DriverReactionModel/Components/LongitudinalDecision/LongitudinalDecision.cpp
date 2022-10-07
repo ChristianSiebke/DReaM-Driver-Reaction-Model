@@ -5,11 +5,7 @@
  *                       Vincent   Adam
  *                       Jan       Sommer
  *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
+ * for further information please visit:  https://www.driver-model.de
  *****************************************************************************/
 #include "LongitudinalDecision.h"
 
@@ -120,7 +116,7 @@ double LongitudinalDecision::DetermineAccelerationWish() {
             break;
         case ActionState::IntersectionSituation:
 
-            if (!EgoHasRightOfWay(agent) || CloseToConlictArea()) {
+            if (!EgoHasRightOfWay(agent) || CloseToConlictArea(agent)) {
                 accelerations.push_back(anticipation.IntersectionGap(agent));
             }
             //-----
@@ -176,9 +172,9 @@ bool LongitudinalDecision::observedAgentIsbehindEgoAgent(const std::unique_ptr<A
              oAgent->agent->GetSCoordinate() > worldRepresentation.egoAgent->GetSCoordinate()));
 }
 
-bool LongitudinalDecision::CloseToConlictArea() const {
-    return worldRepresentation.egoAgent->GetDistanceOnJunction() > 0 || (worldRepresentation.egoAgent->GetDistanceToNextJunction() > -1 &&
-                                                                         worldRepresentation.egoAgent->GetDistanceToNextJunction() < 5);
+bool LongitudinalDecision::CloseToConlictArea(const std::unique_ptr<AgentInterpretation> &oAgent) const {
+    return oAgent->agent->GetDistanceOnJunction() > 0 ||
+           (oAgent->agent->GetDistanceToNextJunction() > -1 && oAgent->agent->GetDistanceToNextJunction() < 5);
 }
 
 } // namespace LongitudinalDecision
