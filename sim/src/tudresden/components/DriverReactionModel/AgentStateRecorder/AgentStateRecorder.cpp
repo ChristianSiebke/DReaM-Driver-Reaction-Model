@@ -146,9 +146,6 @@ void AgentStateRecorder::BufferSimulationOutput() {
         infrastructureDataWritten = true;
     }
 
-    simulationOutut.add("SimulationOutput.RunResults.RunResult id=\"" + std::to_string(runId) + "\".Cyclics.Header",
-                        this->GenerateHeader());
-
     // Creates Samples for each timestep, each matching the structure given above
     boost::property_tree::ptree samplesTree;
     for (auto [time, values] : record.gazeStates) {
@@ -163,7 +160,14 @@ void AgentStateRecorder::BufferSimulationOutput() {
         }
         samplesTree.add_child("Sample", sampleTree);
     }
-    simulationOutut.add_child("SimulationOutput.RunResults.RunResult id=\"" + std::to_string(runId) + "\".Cyclics.Samples", samplesTree);
+    boost::property_tree::ptree runResultTree;
+    boost::property_tree::ptree cyclesTree;
+
+    cyclesTree.add("Header", this->GenerateHeader());
+    cyclesTree.add_child("Samples", samplesTree);
+    runResultTree.add_child("Cyclics", cyclesTree);
+    runResultTree.put("<xmlattr>.RunId", std::to_string(runId));
+    simulationOutut.add_child("SimulationOutput.RunResults.RunResult", runResultTree);
 }
 
 boost::property_tree::ptree AgentStateRecorder::AddInfrastructureData() const {
@@ -192,7 +196,7 @@ boost::property_tree::ptree AgentStateRecorder::AddInfrastructureData() const {
         stoppingPointsTree.add_child("Junction", intersectionTree);
     }
 
-    infrastructureData.add_child("SimulationOutput.StoppingPoints", stoppingPointsTree);
+    infrastructureData.add_child("StoppingPoints", stoppingPointsTree);
 
     // Adds conflict points to the output ptree
     boost::property_tree::ptree conflictAreaTree;
@@ -229,7 +233,7 @@ boost::property_tree::ptree AgentStateRecorder::AddInfrastructureData() const {
         }
         conflictAreaTree.add_child("Junction", conflictAreaJunctionTree);
     }
-    infrastructureData.add_child("SimulationOutput.ConflictAreas", conflictAreaTree);
+    infrastructureData.add_child("ConflictAreas", conflictAreaTree);
     return infrastructureData;
 }
 } // namespace AgentStateRecorder
