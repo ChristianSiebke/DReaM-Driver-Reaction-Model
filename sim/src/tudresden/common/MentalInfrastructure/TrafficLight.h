@@ -13,15 +13,15 @@
  *****************************************************************************/
 #pragma once
 
+#include "Definitions.h"
 #include "TrafficSignal.h"
-#include "common/worldDefinitions.h"
 
 namespace MentalInfrastructure {
 
 class TrafficLight : public TrafficSignal {
 public:
     TrafficLight(OdId openDriveId, DReaMId dreamId, const MentalInfrastructure::Road *road, double s, Common::Vector2d pos,
-                 CommonTrafficLight::Type type) :
+                 TrafficLightType type) :
         TrafficSignal(openDriveId, dreamId, road, s, pos), type(type) {
     }
     ~TrafficLight() = default;
@@ -38,21 +38,21 @@ public:
         return road;
     }
 
-    void SetState(CommonTrafficLight::State newState) {
+    void SetState(TrafficLightState newState) {
         state = newState;
     }
 
-    CommonTrafficLight::State GetState() const {
+    TrafficLightState GetState() const {
         return state;
     }
 
-    CommonTrafficLight::Type GetType() const {
+    TrafficLightType GetType() const {
         return type;
     }
 
 private:
-    CommonTrafficLight::State state{CommonTrafficLight::State::Off};
-    CommonTrafficLight::Type type;
+    TrafficLightState state{TrafficLightState::Off};
+    TrafficLightType type;
 
     const MentalInfrastructure::Road *road;
     double s;

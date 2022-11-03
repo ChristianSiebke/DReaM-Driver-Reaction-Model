@@ -13,35 +13,11 @@
  *****************************************************************************/
 #pragma once
 
+#include "Definitions.h"
 #include "TrafficSignal.h"
 #include "unordered_map"
 
 namespace MentalInfrastructure {
-
-enum class TrafficSignType {
-    // enum values do NOT represent any actual traffic sign catalog values
-    // default value
-    Undefined = 0,
-    // values 1-100 for any signs with right of way information
-    Stop = 1,
-    GiveWay = 2,
-    RightOfWayBegin = 3,
-    RightOfWayEnd = 4,
-    RightOfWayNextIntersection = 5,
-    DoNotEnter = 6,
-    // values 101-200 for any signs with speed limits
-    MaximumSpeedLimit = 101,
-    MinimumSpeedLimit = 102,
-    EndOfMaximumSpeedLimit = 103,
-    EndOfMinimumSpeedLimit = 104,
-    EndOffAllSpeedLimitsAndOvertakingRestrictions = 105,
-    TownBegin = 106,
-    TownEnd = 107,
-    Zone30Begin = 108,
-    Zone30End = 109,
-    TrafficCalmedDistrictBegin = 110,
-    TrafficCalmedDistrictEnd = 111,
-};
 
 class TrafficSign : public TrafficSignal {
 public:
@@ -85,27 +61,5 @@ private:
     double value;
     double s;
     Common::Vector2d position;
-
-    std::unordered_map<CommonTrafficSign::Type, TrafficSignType> trafficSignMapping = {
-        {CommonTrafficSign::Type::Undefined, TrafficSignType::Undefined},
-        {CommonTrafficSign::Type::Stop, TrafficSignType::Stop},
-        {CommonTrafficSign::Type::GiveWay, TrafficSignType::GiveWay},
-        {CommonTrafficSign::Type::RightOfWayBegin, TrafficSignType::RightOfWayBegin},
-        {CommonTrafficSign::Type::RightOfWayEnd, TrafficSignType::RightOfWayEnd},
-        {CommonTrafficSign::Type::RightOfWayNextIntersection, TrafficSignType::RightOfWayNextIntersection},
-        {CommonTrafficSign::Type::DoNotEnter, TrafficSignType::DoNotEnter},
-        {CommonTrafficSign::Type::MaximumSpeedLimit, TrafficSignType::MaximumSpeedLimit},
-        {CommonTrafficSign::Type::MinimumSpeedLimit, TrafficSignType::MinimumSpeedLimit},
-        {CommonTrafficSign::Type::EndOfMaximumSpeedLimit, TrafficSignType::EndOfMaximumSpeedLimit},
-        {CommonTrafficSign::Type::EndOfMinimumSpeedLimit, TrafficSignType::EndOfMinimumSpeedLimit},
-        {CommonTrafficSign::Type::EndOffAllSpeedLimitsAndOvertakingRestrictions,
-         TrafficSignType::EndOffAllSpeedLimitsAndOvertakingRestrictions},
-        {CommonTrafficSign::Type::TownBegin, TrafficSignType::TownBegin},
-        {CommonTrafficSign::Type::TownEnd, TrafficSignType::TownEnd},
-        {CommonTrafficSign::Type::SpeedLimitZoneBegin, TrafficSignType::Zone30Begin},
-        {CommonTrafficSign::Type::SpeedLimitZoneEnd, TrafficSignType::Zone30End},
-        {CommonTrafficSign::Type::TrafficCalmedDistrictBegin, TrafficSignType::TrafficCalmedDistrictBegin},
-        {CommonTrafficSign::Type::TrafficCalmedDistrictEnd, TrafficSignType::TrafficCalmedDistrictEnd},
-    };
 };
 } // namespace MentalInfrastructure

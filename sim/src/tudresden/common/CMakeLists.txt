@@ -17,6 +17,7 @@ add_openpass_target(
     WorldRepresentation.h
     BehaviourData.h
     complexSignals.h
+    MentalInfrastructure/Definitions.h
  
   SOURCES
     MentalInfrastructure/Element.cpp

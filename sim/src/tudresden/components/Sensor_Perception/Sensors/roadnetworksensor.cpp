@@ -460,7 +460,7 @@ const MentalInfrastructure::TrafficLight *RoadNetworkSensor::ConvertTrafficLight
     auto newLight = std::make_shared<MentalInfrastructure::TrafficLight>(
         (OdId)trafficLight->GetId(), GenerateUniqueId(), road, trafficLight->GetS(),
         Common::Vector2d(trafficLight->GetReferencePointPosition().x, trafficLight->GetReferencePointPosition().y),
-        trafficLight->GetSpecification(0).type);
+        (MentalInfrastructure::TrafficLightType)trafficLight->GetSpecification(0).type);
 
     trafficLightLookup.insert(std::make_pair(trafficLight->GetId(), newLight.get()));
     perceptionData->trafficLights.push_back(newLight);
@@ -475,7 +475,7 @@ void RoadNetworkSensor::UpdateTrafficLights() {
     // should only be done if it is certain, that all traffic lights are converted correctly
     for (auto &[key, value] : worldData->GetTrafficLights()) {
         if (trafficLightLookup.find(value->GetId()) != trafficLightLookup.end()) {
-            trafficLightLookup.at(value->GetId())->SetState(value->GetState());
+            trafficLightLookup.at(value->GetId())->SetState((MentalInfrastructure::TrafficLightState)value->GetState());
         }
         else {
             // this case should not occur if all traffic lights are added correctly during scenery import
