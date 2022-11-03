@@ -20,8 +20,7 @@ add_openpass_target(
     # OBJECTS
     Objects/observeddynamicobject.h
     Objects/observedstaticobject.h
-    Objects/observedtrafficlight.h
-    Objects/observedtrafficsign.h
+    Objects/observedtrafficsignal.h
     Objects/observedworldobject.h
     # SENSORS
     Sensors/aabbtreehandler.h
@@ -29,7 +28,7 @@ add_openpass_target(
     Sensors/driverperception.h
     Sensors/roadnetworksensor.h
     Sensors/simplesensorinterface.h
-    Sensors/trafficsignvisualsensor.h
+    Sensors/trafficsignalvisualsensor.h
     Sensors/visualsensorinterface.h
     Sensors/stoppingpointcalculation.h
     Sensors/agentperceptioninterface.h
@@ -48,7 +47,7 @@ add_openpass_target(
     Sensors/basicvisualsensor.cpp
     Sensors/driverperception.cpp
     Sensors/roadnetworksensor.cpp
-    Sensors/trafficsignvisualsensor.cpp
+    Sensors/trafficsignalvisualsensor.cpp
     Sensors/stoppingpointcalculation.cpp
     ../../../core/opSimulation/modules/World_OSI/WorldDataQuery.cpp
     ../../../core/opSimulation/modules/World_OSI/RoadStream.cpp

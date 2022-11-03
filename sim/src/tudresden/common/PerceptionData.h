@@ -16,6 +16,7 @@
 #include "MentalInfrastructure/Lane.h"
 #include "MentalInfrastructure/Road.h"
 #include "MentalInfrastructure/RoadmapGraph/roadmap_graph.h"
+#include "MentalInfrastructure/TrafficLight.h"
 
 struct InfrastructurePerception;
 struct DynamicInfrastructurePerception;
@@ -129,6 +130,8 @@ struct LookupTableRoadNetwork {
     std::unordered_map<OdId, const MentalInfrastructure::Road *> roads;
     std::unordered_map<OwlId, const MentalInfrastructure::Lane *> lanes;
     std::unordered_map<OdId, const MentalInfrastructure::TrafficSign *> trafficSigns;
+    // not const since these need to be updated
+    std::unordered_map<OdId, MentalInfrastructure::TrafficLight *> trafficLights;
 };
 
 struct StoppingPointData {
@@ -170,6 +173,8 @@ struct InfrastructurePerception {
     std::vector<std::shared_ptr<const MentalInfrastructure::Lane>> lanes;
     std::vector<std::shared_ptr<const MentalInfrastructure::Section>> sections;
     std::vector<std::shared_ptr<const MentalInfrastructure::TrafficSign>> trafficSigns;
+    std::vector<std::shared_ptr<const MentalInfrastructure::TrafficLight>> trafficLights;
+
     RoadmapGraph::RoadmapGraph graph;
     StoppingPointData stoppingPointData;
 
