@@ -19,11 +19,11 @@ void Memory::UpdateWorldRepresentation(WorldRepresentation& worldRepresentation)
     worldRepresentation.egoAgent = UpdateEgoAgentRepresentation();
     worldRepresentation.infrastructure = UpdateInfrastructureRepresentation();
     worldRepresentation.agentMemory = UpdateAmbientAgentRepresentations();
-    worldRepresentation.trafficSignMemory = UpdateVisibleTrafficSignals();
+    worldRepresentation.trafficSignalMemory = UpdateVisibleTrafficSignals();
 }
 
 const VisibleTrafficSignals *Memory::UpdateVisibleTrafficSignals() {
-    return trafficSignMemory->Update(timestamp, lastSeenTrafficSignals, egoAgentPerception.get());
+    return trafficSignalMemory->Update(timestamp, lastSeenTrafficSignals, egoAgentPerception.get());
 }
 
 const EgoAgentRepresentation* Memory::UpdateEgoAgentRepresentation() {

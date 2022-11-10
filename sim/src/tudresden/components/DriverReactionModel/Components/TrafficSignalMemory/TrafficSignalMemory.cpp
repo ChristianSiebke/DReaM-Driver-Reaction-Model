@@ -94,6 +94,7 @@ VisibleTrafficSignals *TrafficSignalMemory::Update(int timestamp, std::vector<co
     }
 
     UpdateSpeedLimits(visibleTrafficSignals.get(), ego);
+    visibleTrafficSignals->memory = &memory;
 
     return visibleTrafficSignals.get();
 }

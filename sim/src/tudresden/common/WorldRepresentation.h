@@ -62,6 +62,9 @@ struct VisibleTrafficSignals {
     // lane DReaMId -> TrafficSignals on that lane
     std::unordered_map<DReaMId, std::list<const MentalInfrastructure::TrafficSignal *>> laneTrafficSignalMap;
 
+    // complete memory, signal DReaMId -> TrafficSignal
+    std::unordered_map<DReaMId, MemorizedTrafficSignal> *memory;
+
     // speed limit information
     const MentalInfrastructure::TrafficSign *upcomingSpeedLimitSign;
     const MentalInfrastructure::TrafficSign *currentSpeedLimitSign;
@@ -108,7 +111,7 @@ struct WorldRepresentation {
     const EgoAgentRepresentation* egoAgent;
     const InfrastructureRepresentation* infrastructure;
     const AmbientAgentRepresentations* agentMemory;
-    const VisibleTrafficSignals *trafficSignMemory;
+    const VisibleTrafficSignals *trafficSignalMemory;
 };
 
 struct WorldInterpretation {

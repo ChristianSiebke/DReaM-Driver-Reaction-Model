@@ -18,6 +18,7 @@ add_openpass_target(
     BehaviourData.h
     complexSignals.h
     MentalInfrastructure/Definitions.h
+    TimeMeasurement.hpp
  
   SOURCES
     MentalInfrastructure/Element.cpp

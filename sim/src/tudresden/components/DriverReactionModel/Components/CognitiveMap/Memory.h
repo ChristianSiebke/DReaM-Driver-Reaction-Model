@@ -28,7 +28,7 @@ class Memory {
         : cycletime{static_cast<double>(cycletime)}, behaviourData{behaviourData},
           reactionTime(behaviourData.cmBehaviour.initialPerceptionTime, behaviourData.cmBehaviour.perceptionLatency, cycletime,
                        stochastics) {
-        trafficSignMemory = std::make_unique<TrafficSignalMemory::TrafficSignalMemory>();
+        trafficSignalMemory = std::make_unique<TrafficSignalMemory::TrafficSignalMemory>();
     }
     Memory(const Memory&) = delete;
     Memory(Memory&&) = delete;
@@ -87,6 +87,6 @@ class Memory {
     ReactionTime reactionTime;
 
     // sub components
-    std::unique_ptr<TrafficSignalMemory::TrafficSignalMemory> trafficSignMemory;
+    std::unique_ptr<TrafficSignalMemory::TrafficSignalMemory> trafficSignalMemory;
 };
 } // namespace CognitiveMap
